@@ -15,8 +15,25 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
+#include <eigen2/Eigen/Core>
+
+// import most common Eigen types 
+USING_PART_OF_NAMESPACE_EIGEN
+
+class Foo : public VectorXd {
+  int xxx;
+public:
+  explicit Foo(int num) : VectorXd(num) { xxx = 4; }
+};
 
 int main() {
   printf("Hello world!\n");
+  VectorXd v(7);
+  v << 1,2,3,4,5,6,7;
+  std::cout << v << std::endl;
+  Foo myfoo(7);
+  // The following fails...
+  // myfoo = v;
+  std::cout << "myfoo is " << myfoo << std::endl;  
   return 0;
 }
