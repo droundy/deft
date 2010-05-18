@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -ev
+
+./autogen.sh
+
+./configure
+
+make
