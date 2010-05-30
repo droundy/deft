@@ -23,7 +23,7 @@ int main() {
   Relative middlerel = lat.toRelative(middle);
   Reciprocal recip(0.2,0,0);
   Grid foo(lat, 4, 4, 4), bar(lat, 4, 4, 4);
-  std::cout << "and here is the foo" << (foo + bar);
+  std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
   std::cout << "middle and middlerel are:\n"
             << middle << std::endl << middlerel << std::endl
             << lat.toCartesian(middlerel) << std::endl;
