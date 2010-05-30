@@ -15,7 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "lattice.h"
+#include "grid.h"
 
 int main() {
   Lattice lat(Cartesian(0,1,1), Cartesian(1,0,1), Cartesian(1,1,0));

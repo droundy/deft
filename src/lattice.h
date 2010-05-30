@@ -1,3 +1,5 @@
+#pragma once
+
 #include <eigen2/Eigen/Core>
 #include <eigen2/Eigen/LU>
 #include <assert.h>
@@ -44,6 +46,12 @@ public:
   };
   Relative toRelative(Cartesian x) const {
     return Relative(G*x);
+  };
+  Reciprocal toReciprocal(RelativeReciprocal x) const {
+    return Reciprocal(G.transpose()*x);
+  };
+  RelativeReciprocal toRelativeReciprocal(Reciprocal x) const {
+    return RelativeReciprocal(R.transpose()*x);
   };
   double volume() const { return vol; };
 };
