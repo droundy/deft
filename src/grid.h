@@ -109,7 +109,8 @@ public:
     newpath\n\
     moveto\n");
       fprintf(out, "    %g %g rmoveto\n",
-              (ddx+ddy).dot(xhat)*0.5, (ddx+ddy).dot(yhat)*0.5);
+              (-corner + (ddx+ddy)*0.5).dot(xhat),
+              (-corner + (ddx+ddy)*0.5).dot(yhat));
       fprintf(out, "    %g %g rlineto\n", -ddy.dot(xhat), -ddy.dot(yhat));
       fprintf(out, "    %g %g rlineto\n", -ddx.dot(xhat), -ddx.dot(yhat));
       fprintf(out, "    %g %g rlineto\n", ddy.dot(xhat), ddy.dot(yhat));
@@ -126,8 +127,10 @@ public:
         for (int y=0; y<=resolution; y++) {
           Cartesian here(corner + x*ddx + y*ddy);
           const double fhere = (*this)(here);
-          fprintf(out, "%% %g\t%g\t%g\n", here(0), here(1), here(2));
-          fprintf(out, "%g\t%g\t%g\tP\n", x*ddx.norm(), y*ddy.norm(), fhere);
+          //fprintf(out, "%% %g\t%g\t%g\n", here(0), here(1), here(2));
+          fprintf(out, "%g\t%g\t%g\tP\n",
+                  x*ddx.norm() + corner.dot(xhat),
+                  y*ddy.norm() + corner.dot(yhat), fhere);
         }
       }
 
