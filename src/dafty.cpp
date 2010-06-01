@@ -17,13 +17,25 @@
 #include <stdio.h>
 #include "grid.h"
 
+double gaussian(Cartesian r) {
+  const Cartesian center(0.5, 0.5, 0.5);
+  const Cartesian dr(r - center);
+  return exp(-16*(dr*dr));
+}
+
 int main() {
-  Lattice lat(Cartesian(0,1,1), Cartesian(1,0,1), Cartesian(1,1,0));
+  Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
   Cartesian middle(0.5,0.5,0.5);
   Relative middlerel = lat.toRelative(middle);
   Reciprocal recip(0.2,0,0);
-  Grid foo(lat, 4, 4, 4), bar(lat, 4, 4, 4);
-  std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
+  int resolution = 100;
+  Grid foo(lat, resolution, resolution, resolution),
+    bar(lat, resolution, resolution, resolution);
+  foo.Set(gaussian);
+  foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0),
+               Cartesian(-.5,-.5,.5));
+  
+  //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
   std::cout << "middle and middlerel are:\n"
             << middle << std::endl << middlerel << std::endl
             << lat.toCartesian(middlerel) << std::endl;
