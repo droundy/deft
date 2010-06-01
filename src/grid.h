@@ -73,9 +73,10 @@ public:
       // don't just abort?
     } else {
       fprintf(out, "%%!PS-Adobe-3.0 EPSF\n");
-      double size = xmax.norm() + ymax.norm();
-      Cartesian ddx(xmax/Nx);
-      Cartesian ddy(ymax/Ny);
+      const double size = xmax.norm() + ymax.norm();
+      const int resolution = 150; // This is hokey!!!
+      Cartesian ddx(xmax/resolution);
+      Cartesian ddy(ymax/resolution);
       Cartesian xhat(ddx), yhat(ddy);
       xhat /= xhat.norm();
       yhat -= xhat*yhat.dot(xhat);
@@ -107,26 +108,26 @@ public:
     setrgbcolor\n\
     newpath\n\
     moveto\n");
-      fprintf(out, "    %lg %lg rmoveto\n",
+      fprintf(out, "    %g %g rmoveto\n",
               (ddx+ddy).dot(xhat)*0.5, (ddx+ddy).dot(yhat)*0.5);
-      fprintf(out, "    %lg %lg rlineto\n", -ddy.dot(xhat), -ddy.dot(yhat));
-      fprintf(out, "    %lg %lg rlineto\n", -ddx.dot(xhat), -ddx.dot(yhat));
-      fprintf(out, "    %lg %lg rlineto\n", ddy.dot(xhat), ddy.dot(yhat));
-      fprintf(out, "    %lg %lg rlineto\n", ddx.dot(xhat), ddx.dot(yhat));
+      fprintf(out, "    %g %g rlineto\n", -ddy.dot(xhat), -ddy.dot(yhat));
+      fprintf(out, "    %g %g rlineto\n", -ddx.dot(xhat), -ddx.dot(yhat));
+      fprintf(out, "    %g %g rlineto\n", ddy.dot(xhat), ddy.dot(yhat));
+      fprintf(out, "    %g %g rlineto\n", ddx.dot(xhat), ddx.dot(yhat));
       fprintf(out, "    gsave\n\
     fill\n                     \
     grestore\n");
-      fprintf(out, "    %lg setlinewidth\n", 0.1*ddx.norm());
+      fprintf(out, "    %g setlinewidth\n", 0.1*ddx.norm());
       fprintf(out, "    stroke\n\
 } def\n");
 
       // We now just need to output the actual data!
-      for (int x=0; x<=Nx; x++) {
-        for (int y=0; y<=Ny; y++) {
+      for (int x=0; x<=resolution; x++) {
+        for (int y=0; y<=resolution; y++) {
           Cartesian here(corner + x*ddx + y*ddy);
           const double fhere = (*this)(here);
           fprintf(out, "%% %g\t%g\t%g\n", here(0), here(1), here(2));
-          fprintf(out, "%lg\t%lg\t%lg\tP\n", x*ddx.norm(), y*ddy.norm(), fhere);
+          fprintf(out, "%g\t%g\t%g\tP\n", x*ddx.norm(), y*ddy.norm(), fhere);
         }
       }
 
