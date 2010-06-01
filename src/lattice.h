@@ -3,6 +3,7 @@
 #include <eigen2/Eigen/Core>
 #include <eigen2/Eigen/LU>
 #include <assert.h>
+#include <math.h>
 
 // import most common Eigen types 
 USING_PART_OF_NAMESPACE_EIGEN
@@ -70,7 +71,7 @@ double operator*(Reciprocal k, Reciprocal k2) {
   return k.dot(k2);
 }
 double operator*(Relative r, RelativeReciprocal k) {
-  return r.dot(k);
+  return (2*M_PI)*r.dot(k);
 }
 double operator*(RelativeReciprocal k, Relative r) {
   return r.dot(k);

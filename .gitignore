@@ -17,3 +17,5 @@ configure
 *.log
 aclocal.m4
 config.*
+*.eps
+.nfs*
