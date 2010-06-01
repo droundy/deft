@@ -59,7 +59,7 @@ else
 fi
 
 dnl Checks for header files.
-AC_CHECK_HEADER(eigen2/Eigen/Core,,AC_MSG_ERROR([Cannot fine eigen2 header!]))
+AC_CHECK_HEADER(eigen2/Eigen/Core,,AC_MSG_ERROR([Cannot find eigen2 header!]))
 
 AC_ARG_ENABLE(debug,
 [  --enable-debug    Turn on debugging],
