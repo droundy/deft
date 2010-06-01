@@ -33,7 +33,7 @@ int main() {
     bar(lat, resolution, resolution, resolution);
   foo.Set(gaussian);
   foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-               Cartesian(-.5,-.5,.5));
+               Cartesian(-.5,-.5,.5), 150);
   
   //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
   std::cout << "middle and middlerel are:\n"
