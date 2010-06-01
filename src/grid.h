@@ -66,7 +66,8 @@ public:
     }
   }
   void epsSlice(const char *fname,
-                Cartesian xmax, Cartesian ymax, Cartesian corner) {
+                Cartesian xmax, Cartesian ymax, Cartesian corner,
+                int resolution) {
     FILE *out = fopen(fname, "w");
     if (!out) {
       fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -74,7 +75,6 @@ public:
     } else {
       fprintf(out, "%%!PS-Adobe-3.0 EPSF\n");
       const double size = xmax.norm() + ymax.norm();
-      const int resolution = 150; // This is hokey!!!
       Cartesian ddx(xmax/resolution);
       Cartesian ddy(ymax/resolution);
       Cartesian xhat(ddx), yhat(ddy);
