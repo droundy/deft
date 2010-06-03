@@ -208,15 +208,17 @@ public:
 } def\n");
 
       // We now just need to output the actual data!
-      for (int x=-1000; x<=1000; x++) {
-        for (int y=-1000; y<=1000; y++) {
+      const double small = ddx.norm() + ddy.norm();
+      const int nmax = 4*(ymax.norm() + xmax.norm())/small;
+      for (int x=-nmax; x<=nmax; x++) {
+        for (int y=-nmax; y<=nmax; y++) {
           Cartesian dr(x*ddx + y*ddy);
           Cartesian here(corner + x*ddx + y*ddy);
           const double fhere = (*this)(here);
-          if (dr.dot(xhat) > -0.1 &&
-              dr.dot(xhat) < xmax.dot(xhat) + 0.1 &&
-              dr.dot(yhat) > -0.1 &&
-              dr.dot(yhat) < ymax.dot(yhat) + 0.1) {
+          if (dr.dot(xhat) > -small &&
+              dr.dot(xhat) < xmax.dot(xhat) + small &&
+              dr.dot(yhat) > -small &&
+              dr.dot(yhat) < ymax.dot(yhat) + small) {
             //fprintf(out, "%% %g\t%g\t%g\n", here(0), here(1), here(2));
             fprintf(out, "%g\t%g\t%g\tP\n",
                     here.dot(xhat), here.dot(yhat), fhere);
