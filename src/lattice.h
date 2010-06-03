@@ -42,9 +42,60 @@ public:
     vol = R.determinant();
     assert(volume() > 0);
   };
+  Cartesian a1() const { return Cartesian(R.col(0)); }
+  Cartesian a2() const { return Cartesian(R.col(1)); }
+  Cartesian a3() const { return Cartesian(R.col(2)); }
   Cartesian toCartesian(Relative x) const {
     return Cartesian(R*x);
   };
+  Cartesian round(Cartesian x) const {
+    return toCartesian(round(toRelative(x)));
+  };
+  Relative round(Relative x) const {
+    return Relative(floor(x(0)+0.5), floor(x(1)+0.5), floor(x(2)+0.5));
+  };
+  void reorientBasis(Cartesian zdir) {
+    zdir = Cartesian(zdir / zdir.norm()); // FIXME: make this unneeded...
+    Cartesian a1new(1e10, 0, 0.3e9),
+              a2new(1.3e9, 1e10, 0.7e9),
+              a3new(1.23e9, 1e9, 0.73e9);
+    bool got1 = false, got2 = false;
+    for (int i=-3; i<=3; i++) {
+      for (int j=-3; j<=3; j++) {
+        for (int k=-3; k<=3; k++) {
+          Cartesian here(i*R.col(0) + j*R.col(1) + k*R.col(2));
+          double sin1 = here.cross(a1new).norm()/(here.norm()*a1new.norm());
+          double sin2 = here.cross(a2new).norm()/(here.norm()*a2new.norm());
+          double cosz = here.dot(zdir)/here.norm();
+          if (cosz <= 1e-7) {
+            if (!got1) {
+              a1new = here;
+              got1 = true;
+            } else if (!got2 && sin1 >= 1e-7) {
+              a2new = here;
+              got2 = true;
+            } else if (here.norm() < a1new.norm() && sin2 >= 1e-7) {
+              a1new = here;
+            } else if (here.norm() < a2new.norm() && sin1 >= 1e-7) {
+              a2new = here;
+            }
+          } else {
+            if (here.norm() > 0 &&
+                fabs(here.dot(zdir)) < fabs(a3new.dot(zdir)))
+              a3new = here;
+          }
+        }
+      }
+    }
+    // set up the new lattice...
+    double vol = volume();
+    R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
+    if (R.determinant() < 0) R.col(2) = Cartesian(-a3new);
+    G = R.inverse();
+    vol = R.determinant();
+    assert(volume() > 0);
+    assert(fabs(volume()-vol)/vol < 1e-7);
+  }
   Relative toRelative(Cartesian x) const {
     return Relative(G*x);
   };

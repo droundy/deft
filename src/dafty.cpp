@@ -19,8 +19,11 @@
 
 double gaussian(Cartesian r) {
   const Cartesian center(0.5, 0.5, 0.5);
-  const Cartesian dr(r - center);
-  return exp(-16*(dr*dr));
+  const Cartesian off(0.25, 0.25, 0.5);
+  const Cartesian off2(0.75, 0.75, 0.5);
+  const Cartesian dr(r - center), dr2(r-off), dr3(r-off2);
+  return exp(-16*(dr*dr)) - 1.5*exp(-50*(dr*dr))
+    - 0.5*exp(-60*(dr2*dr2)) - 0.5*exp(-60*(dr3*dr3));
 }
 
 int main() {
@@ -28,12 +31,14 @@ int main() {
   Cartesian middle(0.5,0.5,0.5);
   Relative middlerel = lat.toRelative(middle);
   Reciprocal recip(0.2,0,0);
-  int resolution = 100;
+  int resolution = 20;
   Grid foo(lat, resolution, resolution, resolution),
     bar(lat, resolution, resolution, resolution);
   foo.Set(gaussian);
   foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0),
                Cartesian(-.5,-.5,.5), 150);
+  foo.epsNativeSlice("native.eps", Cartesian(1,0,0), Cartesian(0,1,0),
+                     Cartesian(-.5,-.5,.5));
   
   //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
   std::cout << "middle and middlerel are:\n"
