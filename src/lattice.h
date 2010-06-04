@@ -67,7 +67,7 @@ public:
           double sin1 = here.cross(a1new).norm()/(here.norm()*a1new.norm());
           double sin2 = here.cross(a2new).norm()/(here.norm()*a2new.norm());
           double cosz = here.dot(zdir)/here.norm();
-          if (cosz <= 1e-7) {
+          if (fabs(cosz) <= 1e-7) {
             if (!got1) {
               a1new = here;
               got1 = true;
@@ -88,13 +88,13 @@ public:
       }
     }
     // set up the new lattice...
-    double vol = volume();
+    double vol0 = volume();
     R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
     if (R.determinant() < 0) R.col(2) = Cartesian(-a3new);
     G = R.inverse();
     vol = R.determinant();
     assert(volume() > 0);
-    assert(fabs(volume()-vol)/vol < 1e-7);
+    assert(fabs(volume()-vol0)/vol0 < 1e-7);
   }
   Relative toRelative(Cartesian x) const {
     return Relative(G*x);
