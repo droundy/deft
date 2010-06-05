@@ -22,6 +22,15 @@ public:
     NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
     dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
   }
+
+  // We need to define this for our object to work
+  typedef Eigen::VectorXd Base;
+  template<typename OtherDerived>
+  Grid &operator=(const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
+
   double operator()(int x, int y, int z) const {
     return (*this)[x*NyNz + y*Nz + z];
   }
