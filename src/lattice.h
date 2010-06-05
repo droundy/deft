@@ -10,26 +10,62 @@ USING_PART_OF_NAMESPACE_EIGEN
 
 class Relative : public Vector3d {
 public:
+  Relative(void) : Vector3d() {}
   explicit Relative(const Vector3d &x) : Vector3d(x) {}
   Relative(double x,double y,double z) : Vector3d(x,y,z) {}
+
+  // We need to define this for our object to work
+  typedef Eigen::Vector3d Base;
+  template<typename OtherDerived>
+  Relative &operator= (const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
 };
 
 class Cartesian : public Vector3d {
 public:
+  Cartesian(void) : Vector3d() {}
   explicit Cartesian(const Vector3d &x) : Vector3d(x) {}
   Cartesian(double x,double y,double z) : Vector3d(x,y,z) {}
+
+  // We need to define this for our object to work
+  typedef Eigen::Vector3d Base;
+  template<typename OtherDerived>
+  Cartesian &operator= (const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
 };
 
 class Reciprocal : public Vector3d {
 public:
+  Reciprocal(void) : Vector3d() {}
   explicit Reciprocal(const Vector3d &x) : Vector3d(x) {}
   Reciprocal(double x,double y,double z) : Vector3d(x,y,z) {}
+
+  // We need to define this for our object to work
+  typedef Eigen::Vector3d Base;
+  template<typename OtherDerived>
+  Reciprocal &operator= (const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
 };
 
 class RelativeReciprocal : public Vector3d {
 public:
+  RelativeReciprocal(void) : Vector3d() {}
   explicit RelativeReciprocal(const Vector3d &x) : Vector3d(x) {}
   RelativeReciprocal(double x,double y,double z) : Vector3d(x,y,z) {}
+
+  // We need to define this for our object to work
+  typedef Eigen::Vector3d Base;
+  template<typename OtherDerived>
+  RelativeReciprocal &operator= (const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
 };
 
 class Lattice {
@@ -55,7 +91,7 @@ public:
     return Relative(floor(x(0)+0.5), floor(x(1)+0.5), floor(x(2)+0.5));
   };
   void reorientBasis(Cartesian zdir) {
-    zdir = Cartesian(zdir / zdir.norm()); // FIXME: make this unneeded...
+    zdir = zdir / zdir.norm();
     Cartesian a1new(1e10, 0, 0.3e9),
               a2new(1.3e9, 1e10, 0.7e9),
               a3new(1.23e9, 1e9, 0.73e9);
@@ -90,7 +126,7 @@ public:
     // set up the new lattice...
     double vol0 = volume();
     R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
-    if (R.determinant() < 0) R.col(2) = Cartesian(-a3new);
+    if (R.determinant() < 0) R.col(2) = -a3new;
     G = R.inverse();
     vol = R.determinant();
     assert(volume() > 0);
