@@ -1,3 +1,5 @@
+// -*- mode: C++; -*-
+
 #pragma once
 
 #include "lattice.h"
