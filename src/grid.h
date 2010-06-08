@@ -8,18 +8,72 @@
 
 static const double default_eps_size = 1000.0;
 
+template<typename Scalar>
+struct any_op EIGEN_EMPTY_STRUCT {
+  EIGEN_STRONG_INLINE any_op(Lattice l, int nx, int ny, int nz,
+                             Scalar (*func)(Cartesian)) : lat(l), fun(func) {
+    Nx = nx; Ny = ny; Nz = nz;
+    NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
+    dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
+  }
+  EIGEN_STRONG_INLINE const Scalar operator() (int row, int col) const {
+    int n = row + col;
+    const int z = n % Nz;
+    n = (n-z)/Nz;
+    const int y = n % Ny;
+    const int x = (n-y)/Ny;
+    const Relative rvec(x*dx,y*dy,z*dz);
+    return fun(lat.wignerSeitz(lat.toCartesian(rvec)));
+  }
+  Lattice lat;
+  int Nx, Ny, Nz, NyNz, NxNyNz;
+  double dx, dy, dz;
+  Scalar (*fun)(Cartesian);
+};
+namespace Eigen {
+  template<typename Scalar>
+  struct ei_functor_traits<any_op<Scalar> > {
+    enum {
+      Cost = NumTraits<Scalar>::AddCost,
+      PacketAccess = false,
+      IsRepeatable = true 
+    };
+  };
+} // namespace Eigen
+
+static double cartSqr(Cartesian r) {
+  return r.squaredNorm();
+}
+static double xfunc(Cartesian r) {
+  return r(0);
+}
+static double yfunc(Cartesian r) {
+  return r(1);
+}
+static double zfunc(Cartesian r) {
+  return r(2);
+}
+
 class Grid : public VectorXd {
 public:
   explicit Grid(Lattice lat, int nx, int ny, int nz)
     : VectorXd(nx*ny*nz), Lat(lat),
       fineLat(Cartesian(lat.a1()/nx), Cartesian(lat.a2()/ny),
-              Cartesian(lat.a3()/nz)) {
+              Cartesian(lat.a3()/nz)),
+      r2_op(lat, nx, ny, nz, cartSqr),
+      x_op(lat, nx, ny, nz, xfunc),
+      y_op(lat, nx, ny, nz, yfunc),
+      z_op(lat, nx, ny, nz, zfunc) {
     Nx = nx; Ny = ny; Nz = nz;
     NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
     dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
   }
   Grid(const Grid &x) : VectorXd(x.Nx*x.Ny*x.Nz), Lat(x.Lat),
-                        fineLat(x.fineLat) {
+                        fineLat(x.fineLat),
+                        r2_op(x.Lat, x.Nx, x.Ny, x.Nz, cartSqr),
+                        x_op(x.Lat, x.Nx, x.Ny, x.Nz, xfunc),
+                        y_op(x.Lat, x.Nx, x.Ny, x.Nz, yfunc),
+                        z_op(x.Lat, x.Nx, x.Ny, x.Nz, zfunc) {
     Nx = x.Nx; Ny = x.Ny; Nz = x.Nz;
     NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
     dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
@@ -75,7 +129,8 @@ public:
     for (int x=0; x<Nx; x++) {
       for (int y=0; y<Ny; y++) { 
         for (int z=0; z<Nz; z++) {
-          (*this)(x,y,z) = f(Lat.toCartesian(Relative(x*dx,y*dy,z*dz)));
+          Cartesian h(Lat.wignerSeitz(Lat.toCartesian(Relative(x*dx,y*dy,z*dz))));
+          (*this)(x,y,z) = f(h);
         }
       }
     }
@@ -245,10 +300,23 @@ public:
       fclose(out);
     }
   }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> r2() const {
+    return NullaryExpr(NxNyNz, 1, r2_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> x() const {
+    return NullaryExpr(NxNyNz, 1, x_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> y() const {
+    return NullaryExpr(NxNyNz, 1, y_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> z() const {
+    return NullaryExpr(NxNyNz, 1, z_op);
+  }
 private:
   Lattice Lat, fineLat;
   int Nx, Ny, Nz, NyNz, NxNyNz;
   double dx, dy, dz;
+  any_op<double> r2_op, x_op, y_op, z_op;
 };
 
 class ReciprocalGrid : public VectorXd {
