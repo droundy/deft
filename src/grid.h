@@ -41,6 +41,16 @@ namespace Eigen {
   };
 } // namespace Eigen
 
+class GridDescription {
+public:
+  explicit GridDescription(Lattice lat, int nx, int ny, int nz);
+  GridDescription(const GridDescription &x);
+
+  Lattice Lat, fineLat;
+  int Nx, Ny, Nz, NyNz, NxNyNz;
+  double dx, dy, dz;
+};
+
 class Grid : public VectorXd {
 public:
   explicit Grid(Lattice lat, int nx, int ny, int nz);
@@ -55,13 +65,13 @@ public:
   }
 
   double operator()(int x, int y, int z) const {
-    return (*this)[x*NyNz + y*Nz + z];
+    return (*this)[x*gd.NyNz + y*gd.Nz + z];
   }
   double &operator()(int x, int y, int z) {
-    return (*this)[x*NyNz + y*Nz + z];
+    return (*this)[x*gd.NyNz + y*gd.Nz + z];
   }
   double operator()(const Cartesian &r) const {
-    return (*this)(Lat.toRelative(r));
+    return (*this)(gd.Lat.toRelative(r));
   }
   double operator()(const Relative &r) const;
   void Set(double f(Cartesian));
@@ -70,24 +80,71 @@ public:
   void epsNativeSlice(const char *fname,
                       Cartesian xmax, Cartesian ymax, Cartesian corner) const;
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> r2() const {
-    return NullaryExpr(NxNyNz, 1, r2_op);
+    return NullaryExpr(gd.NxNyNz, 1, r2_op);
   }
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> x() const {
-    return NullaryExpr(NxNyNz, 1, x_op);
+    return NullaryExpr(gd.NxNyNz, 1, x_op);
   }
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> y() const {
-    return NullaryExpr(NxNyNz, 1, y_op);
+    return NullaryExpr(gd.NxNyNz, 1, y_op);
   }
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> z() const {
-    return NullaryExpr(NxNyNz, 1, z_op);
+    return NullaryExpr(gd.NxNyNz, 1, z_op);
   }
 private:
-  Lattice Lat, fineLat;
-  int Nx, Ny, Nz, NyNz, NxNyNz;
-  double dx, dy, dz;
+  GridDescription gd;
   any_op<double> r2_op, x_op, y_op, z_op;
 };
 
+class ReciprocalGrid : public VectorXd {
+public:
+  explicit ReciprocalGrid(Lattice lat, int nx, int ny, int nz);
+  ReciprocalGrid(const ReciprocalGrid &x);
+
+  // We need to define this for our object to work
+  typedef Eigen::VectorXd Base;
+  template<typename OtherDerived>
+  ReciprocalGrid &operator=(const Eigen::MatrixBase <OtherDerived>& other) {
+    this->Base::operator=(other);
+    return *this;
+  }
+
+  double operator()(int x, int y, int z) const {
+    return (*this)[x*gd.NyNz + y*gd.Nz + z];
+  }
+  double &operator()(int x, int y, int z) {
+    return (*this)[x*gd.NyNz + y*gd.Nz + z];
+  }
+  double operator()(const Reciprocal &r) const {
+    return (*this)(gd.Lat.toRelativeReciprocal(r));
+  }
+  double operator()(const RelativeReciprocal &) const {
+    return 0;
+    //return interpolate(r(0), r(1), r(2));
+  }
+  //void Set(double f(Cartesian));
+  //void epsSlice(const char *fname, Cartesian xmax, Cartesian ymax,
+  //              Cartesian corner, int resolution) const;
+  //void epsNativeSlice(const char *fname,
+  //                    Cartesian xmax, Cartesian ymax, Cartesian corner) const;
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> k2() const {
+    return NullaryExpr(gd.NxNyNz, 1, r2_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> kx() const {
+    return NullaryExpr(gd.NxNyNz, 1, x_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> ky() const {
+    return NullaryExpr(gd.NxNyNz, 1, y_op);
+  }
+  Eigen::CwiseNullaryOp<any_op<double>, VectorXd> kz() const {
+    return NullaryExpr(gd.NxNyNz, 1, z_op);
+  }
+private:
+  GridDescription gd;
+  any_op<double> r2_op, x_op, y_op, z_op;
+};
+
+/*
 class ReciprocalGrid : public VectorXd {
 public:
   explicit ReciprocalGrid(Lattice lat, int nx, int ny, int nz)
@@ -127,3 +184,4 @@ private:
   Lattice Lat;
   int Nx, Ny, Nz, NyNz, NxNyNz;
 };
+*/

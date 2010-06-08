@@ -1,5 +1,50 @@
 #include "grid.h"
 
+GridDescription::GridDescription(Lattice lat, int nx, int ny, int nz)
+  : Lat(lat), fineLat(Cartesian(lat.a1()/nx), Cartesian(lat.a2()/ny),
+                      Cartesian(lat.a3()/nz)) {
+  Nx = nx; Ny = ny; Nz = nz;
+  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
+  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
+}
+
+GridDescription::GridDescription(const GridDescription &x)
+  : Lat(x.Lat), fineLat(x.fineLat) {
+  Nx = x.Nx; Ny = x.Ny; Nz = x.Nz;
+  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
+  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
+}
+
+double Grid::operator()(const Relative &r) const {
+  double rx = r(0)*gd.Nx, ry = r(1)*gd.Ny, rz = r(2)*gd.Nz;
+  int ix = floor(rx), iy = floor(ry), iz = floor(rz);
+  double wx = rx-ix, wy = ry-iy, wz = rz-iz;
+  while (ix < 0) ix += gd.Nx;
+  while (iy < 0) iy += gd.Ny;
+  while (iz < 0) iz += gd.Nz;
+  while (ix >= gd.Nx) ix -= gd.Nx;
+  while (iy >= gd.Ny) iy -= gd.Ny;
+  while (iz >= gd.Nz) iz -= gd.Nz;
+  int ixp1 = (ix+1)%gd.Nx, iyp1 = (iy+1)%gd.Ny, izp1 = (iz+1)%gd.Nz;
+  while (ixp1 < 0) ixp1 += gd.Nx;
+  while (iyp1 < 0) iyp1 += gd.Ny;
+  while (izp1 < 0) izp1 += gd.Nz;
+  while (ixp1 >= gd.Nx) ixp1 -= gd.Nx;
+  while (iyp1 >= gd.Ny) iyp1 -= gd.Ny;
+  while (izp1 >= gd.Nz) izp1 -= gd.Nz;
+  assert(wx>=0);
+  assert(wy>=0);
+  assert(wz>=0);
+  return (1-wx)*(1-wy)*(1-wz)*(*this)(ix,iy,iz)
+    + wx*(1-wy)*(1-wz)*(*this)(ixp1,iy,iz)
+    + (1-wx)*wy*(1-wz)*(*this)(ix,iyp1,iz)
+    + (1-wx)*(1-wy)*wz*(*this)(ix,iy,izp1)
+    + wx*(1-wy)*wz*(*this)(ixp1,iy,izp1)
+    + (1-wx)*wy*wz*(*this)(ix,iyp1,izp1)
+    + wx*wy*(1-wz)*(*this)(ixp1,iyp1,iz)
+    + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
+}
+
 static double cartSqr(Cartesian r) {
   return r.squaredNorm();
 }
@@ -14,64 +59,25 @@ static double zfunc(Cartesian r) {
 }
 
 Grid::Grid(Lattice lat, int nx, int ny, int nz)
-  : VectorXd(nx*ny*nz), Lat(lat),
-    fineLat(Cartesian(lat.a1()/nx), Cartesian(lat.a2()/ny),
-            Cartesian(lat.a3()/nz)),
+  : VectorXd(nx*ny*nz), gd(lat, nx, ny, nz),
     r2_op(lat, nx, ny, nz, cartSqr),
     x_op(lat, nx, ny, nz, xfunc),
     y_op(lat, nx, ny, nz, yfunc),
     z_op(lat, nx, ny, nz, zfunc) {
-  Nx = nx; Ny = ny; Nz = nz;
-  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
-  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
 }
 
-Grid::Grid(const Grid &x) : VectorXd(x.Nx*x.Ny*x.Nz), Lat(x.Lat),
-                            fineLat(x.fineLat),
-                            r2_op(x.Lat, x.Nx, x.Ny, x.Nz, cartSqr),
-                            x_op(x.Lat, x.Nx, x.Ny, x.Nz, xfunc),
-                            y_op(x.Lat, x.Nx, x.Ny, x.Nz, yfunc),
-                            z_op(x.Lat, x.Nx, x.Ny, x.Nz, zfunc) {
-  Nx = x.Nx; Ny = x.Ny; Nz = x.Nz;
-  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
-  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
-}
-
-double Grid::operator()(const Relative &r) const {
-  double rx = r(0)*Nx, ry = r(1)*Ny, rz = r(2)*Nz;
-  int ix = floor(rx), iy = floor(ry), iz = floor(rz);
-  double wx = rx-ix, wy = ry-iy, wz = rz-iz;
-  while (ix < 0) ix += Nx;
-  while (iy < 0) iy += Ny;
-  while (iz < 0) iz += Nz;
-  while (ix >= Nx) ix -= Nx;
-  while (iy >= Ny) iy -= Ny;
-  while (iz >= Nz) iz -= Nz;
-  int ixp1 = (ix+1)%Nx, iyp1 = (iy+1)%Ny, izp1 = (iz+1)%Nz;
-  while (ixp1 < 0) ixp1 += Nx;
-  while (iyp1 < 0) iyp1 += Ny;
-  while (izp1 < 0) izp1 += Nz;
-  while (ixp1 >= Nx) ixp1 -= Nx;
-  while (iyp1 >= Ny) iyp1 -= Ny;
-  while (izp1 >= Nz) izp1 -= Nz;
-  assert(wx>=0);
-  assert(wy>=0);
-  assert(wz>=0);
-  return (1-wx)*(1-wy)*(1-wz)*(*this)(ix,iy,iz)
-    + wx*(1-wy)*(1-wz)*(*this)(ixp1,iy,iz)
-    + (1-wx)*wy*(1-wz)*(*this)(ix,iyp1,iz)
-    + (1-wx)*(1-wy)*wz*(*this)(ix,iy,izp1)
-    + wx*(1-wy)*wz*(*this)(ixp1,iy,izp1)
-    + (1-wx)*wy*wz*(*this)(ix,iyp1,izp1)
-    + wx*wy*(1-wz)*(*this)(ixp1,iyp1,iz)
-    + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
+Grid::Grid(const Grid &x) : VectorXd(x), gd(x.gd),
+                            r2_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, cartSqr),
+                            x_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, xfunc),
+                            y_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, yfunc),
+                            z_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, zfunc) {
 }
 
 void Grid::Set(double f(Cartesian)) {
-  for (int x=0; x<Nx; x++) {
-    for (int y=0; y<Ny; y++) { 
-      for (int z=0; z<Nz; z++) {
-        Cartesian h(Lat.wignerSeitz(Lat.toCartesian(Relative(x*dx,y*dy,z*dz))));
+  for (int x=0; x<gd.Nx; x++) {
+    for (int y=0; y<gd.Ny; y++) { 
+      for (int z=0; z<gd.Nz; z++) {
+        Cartesian h(gd.Lat.wignerSeitz(gd.Lat.toCartesian(Relative(x*gd.dx,y*gd.dy,z*gd.dz))));
         (*this)(x,y,z) = f(h);
       }
     }
@@ -165,10 +171,10 @@ void Grid::epsNativeSlice(const char *fname,
     // don't just abort?
   } else {
     // put corner on the grid!
-    corner = fineLat.round(corner);
+    corner = gd.fineLat.round(corner);
     fprintf(out, "%%!PS-Adobe-3.0 EPSF\n");
     const double size = xmax.norm() + ymax.norm();
-    Lattice weelat(fineLat);
+    Lattice weelat(gd.fineLat);
     weelat.reorientBasis(Cartesian(ymax.cross(xmax)));
     Cartesian ddx(weelat.a1());
     Cartesian ddy(weelat.a2());
