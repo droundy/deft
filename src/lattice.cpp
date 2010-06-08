@@ -32,7 +32,7 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
                 < (minimalR.transpose()*minimalR).trace()) {
               change = true;
               minimalR = newR;
-              printf("newR.determinant() is %g\n", newR.determinant());
+              //printf("newR.determinant() is %g\n", newR.determinant());
             }
           }
       }
