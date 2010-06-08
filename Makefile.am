@@ -3,7 +3,7 @@ EXTRA_DIST = autogen.sh
 TESTS = tests/null.sh
 
 bin_PROGRAMS = dafty
-dafty_SOURCES = src/dafty.cpp src/lattice.cpp
+dafty_SOURCES = src/dafty.cpp src/lattice.cpp src/grid.cpp
 #noinst_PROGRAMS = optest
 #optest_SOURCES = optest.cpp $(GENERIC_CODE)
 
