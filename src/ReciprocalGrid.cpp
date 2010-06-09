@@ -1,4 +1,5 @@
 #include "ReciprocalGrid.h"
+#include <fftw3.h>
 
 complex ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
   double rx = r(0)*gd.Nx, ry = r(1)*gd.Ny, rz = r(2)*gd.Nz;
@@ -53,4 +54,13 @@ ReciprocalGrid::ReciprocalGrid(const GridDescription &gdin)
 ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x)
   : VectorXcd(x), gd(x.gd),
     g2_op(gd, cartSqr), gx_op(gd, xfunc), gy_op(gd, yfunc), gz_op(gd, zfunc) {
+}
+
+Grid ReciprocalGrid::ifft() const {
+  Grid out(gd);
+  const complex *mydata = data();
+  fftw_execute(fftw_plan_dft_c2r_3d(gd.Nx, gd.Ny, gd.Nz,
+                                    (fftw_complex *)mydata, out.data(),
+                                    FFTW_MEASURE));
+  return out;
 }

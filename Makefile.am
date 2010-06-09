@@ -1,10 +1,16 @@
 EXTRA_DIST = autogen.sh
 
-TESTS = tests/null.sh
+TESTS = tests/null.sh fftInverseTest
+
+GENERIC_CODE = src/lattice.cpp \
+	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
 
 bin_PROGRAMS = dafty
-dafty_SOURCES = src/dafty.cpp src/lattice.cpp \
-	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
+dafty_SOURCES = src/dafty.cpp $(GENERIC_CODE)
+
+noinst_PROGRAMS = fftInverseTest
+fftInverseTest_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
+
 #noinst_PROGRAMS = optest
 #optest_SOURCES = optest.cpp $(GENERIC_CODE)
 
