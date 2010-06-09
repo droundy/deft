@@ -7,7 +7,7 @@
 class GridDescription {
 public:
   explicit GridDescription(Lattice lat, int nx, int ny, int nz);
-  GridDescription(const GridDescription &x);
+  // Default copy constructor is just fine!
 
   Lattice Lat, fineLat;
   int Nx, Ny, Nz, NyNz, NxNyNz, NzOver2, NyNzOver2, NxNyNzOver2;

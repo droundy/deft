@@ -240,6 +240,7 @@ void Grid::epsNativeSlice(const char *fname,
 ReciprocalGrid Grid::fft() const {
   ReciprocalGrid out(gd);
   const double *mydata = data();
-  fftw_execute(fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_MEASURE));
+  fftw_execute(fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_ESTIMATE));
+  out /= gd.NxNyNz;
   return out;
 }

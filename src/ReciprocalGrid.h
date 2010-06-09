@@ -36,6 +36,7 @@ namespace Eigen {
   };
 } // namespace Eigen
 
+class Grid;
 
 class ReciprocalGrid : public VectorXcd {
 public:
@@ -50,6 +51,7 @@ public:
     return *this;
   }
 
+  Grid ifft() const;
   complex operator()(int x, int y, int z) const {
     if (z > gd.NzOver2) z = gd.Nz - z;
     return (*this)[x*gd.NyNz + y*gd.Nz + z];

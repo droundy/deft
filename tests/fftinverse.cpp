@@ -27,31 +27,24 @@ double gaussian(Cartesian r) {
     - 0.5*exp(-60*(dr2*dr2)) - 0.5*exp(-60*(dr3*dr3));
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  printf("Working on %s\n", argv[0]);
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
-  Cartesian middle(0.5,0.5,0.5);
-  Relative middlerel = lat.toRelative(middle);
-  Reciprocal recip(0.2,0,0);
-  int resolution = 20;
+  int resolution = 10;
   GridDescription gd(lat, resolution, resolution, resolution);
-  Grid foo(gd), bar(gd);
-  ReciprocalGrid rfoo(gd);
+  Grid foo(gd);
   foo.Set(gaussian);
   foo += 0.1*(-30*foo.r2()).cwise().exp();
-  //foo += 0.5*foo.x();
-  foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-               Cartesian(-.5,-.5,.5), 150);
-  foo.epsNativeSlice("native.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-                     Cartesian(-.5,-.5,.5));
-  foo.fft().ifft().epsNativeSlice("native-ffted.eps",
-                                  Cartesian(1,0,0), Cartesian(0,1,0),
-                                  Cartesian(-.5,-.5,.5));
-  
-  //std::cout << "and here is the foo" << foo << std::endl;
-  //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
-  std::cout << "middle and middlerel are:\n"
-            << middle << std::endl << middlerel << std::endl
-            << lat.toCartesian(middlerel) << std::endl;
-  std::cout << "middle dot recip: " << recip * middle << std::endl;
-  return 0;
+  Grid foo2(foo.fft().ifft());
+  int errorcode = 0;
+  for (int x=0; x<resolution; x++)
+    for (int y=0; y<resolution; y++)
+      for (int z=0; z<resolution; z++) {
+        double e = foo(x,y,z) - foo2(x,y,z);
+        if (fabs(e) > 1e-15) {
+          printf("Error of %g\n", e);
+          errorcode += 1;
+        }
+      }
+  return errorcode;
 }
