@@ -22,6 +22,7 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
         for (int i = -1; i <= 1; i++)
           for (int j = -1; j <= 1; j++) {
             Matrix3d d;
+            d.setZero();
             d(k1,k1) = 1.0;
             d(k2,k1) = i;
             d(k3,k1) = j;
