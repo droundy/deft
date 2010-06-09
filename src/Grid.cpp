@@ -1,4 +1,6 @@
 #include "Grid.h"
+#include "ReciprocalGrid.h"
+#include <fftw3.h>
 
 double Grid::operator()(const Relative &r) const {
   double rx = r(0)*gd.Nx, ry = r(1)*gd.Ny, rz = r(2)*gd.Nz;
@@ -233,4 +235,11 @@ void Grid::epsNativeSlice(const char *fname,
     fprintf(out, "%%%%EOF\n");
     fclose(out);
   }
+}
+
+ReciprocalGrid Grid::fft() const {
+  ReciprocalGrid out(gd);
+  const double *mydata = data();
+  fftw_execute(fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_MEASURE));
+  return out;
 }

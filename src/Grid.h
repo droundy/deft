@@ -36,6 +36,8 @@ namespace Eigen {
   };
 } // namespace Eigen
 
+class ReciprocalGrid;
+
 class Grid : public VectorXd {
 public:
   explicit Grid(const GridDescription &);
@@ -48,7 +50,7 @@ public:
     this->Base::operator=(other);
     return *this;
   }
-
+  ReciprocalGrid fft() const;
   double operator()(int x, int y, int z) const {
     return (*this)[x*gd.NyNz + y*gd.Nz + z];
   }
@@ -59,6 +61,7 @@ public:
     return (*this)(gd.Lat.toRelative(r));
   }
   double operator()(const Relative &r) const;
+  
   void Set(double f(Cartesian));
   void epsSlice(const char *fname, Cartesian xmax, Cartesian ymax,
                 Cartesian corner, int resolution) const;
