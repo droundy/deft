@@ -1,19 +1,4 @@
-#include "grid.h"
-
-GridDescription::GridDescription(Lattice lat, int nx, int ny, int nz)
-  : Lat(lat), fineLat(Cartesian(lat.a1()/nx), Cartesian(lat.a2()/ny),
-                      Cartesian(lat.a3()/nz)) {
-  Nx = nx; Ny = ny; Nz = nz;
-  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
-  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
-}
-
-GridDescription::GridDescription(const GridDescription &x)
-  : Lat(x.Lat), fineLat(x.fineLat) {
-  Nx = x.Nx; Ny = x.Ny; Nz = x.Nz;
-  NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
-  dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
-}
+#include "Grid.h"
 
 double Grid::operator()(const Relative &r) const {
   double rx = r(0)*gd.Nx, ry = r(1)*gd.Ny, rz = r(2)*gd.Nz;
@@ -58,19 +43,17 @@ static double zfunc(Cartesian r) {
   return r(2);
 }
 
-Grid::Grid(Lattice lat, int nx, int ny, int nz)
-  : VectorXd(nx*ny*nz), gd(lat, nx, ny, nz),
-    r2_op(lat, nx, ny, nz, cartSqr),
-    x_op(lat, nx, ny, nz, xfunc),
-    y_op(lat, nx, ny, nz, yfunc),
-    z_op(lat, nx, ny, nz, zfunc) {
+Grid::Grid(const GridDescription &gdin)
+  : VectorXd(gdin.NxNyNz), gd(gdin),
+    r2_op(gd, cartSqr),
+    x_op(gd, xfunc),
+    y_op(gd, yfunc),
+    z_op(gd, zfunc) {
 }
 
 Grid::Grid(const Grid &x) : VectorXd(x), gd(x.gd),
-                            r2_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, cartSqr),
-                            x_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, xfunc),
-                            y_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, yfunc),
-                            z_op(x.gd.Lat, x.gd.Nx, x.gd.Ny, x.gd.Nz, zfunc) {
+                            r2_op(gd, cartSqr),
+                            x_op(gd, xfunc), y_op(gd, yfunc), z_op(gd, zfunc) {
 }
 
 void Grid::Set(double f(Cartesian)) {

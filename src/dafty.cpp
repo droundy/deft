@@ -15,7 +15,8 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "grid.h"
+#include "Grid.h"
+#include "ReciprocalGrid.h"
 
 double gaussian(Cartesian r) {
   const Cartesian center(0, 0, 0);
@@ -32,8 +33,9 @@ int main() {
   Relative middlerel = lat.toRelative(middle);
   Reciprocal recip(0.2,0,0);
   int resolution = 20;
-  Grid foo(lat, resolution, resolution, resolution),
-    bar(lat, resolution, resolution, resolution);
+  GridDescription gd(lat, resolution, resolution, resolution);
+  Grid foo(gd), bar(gd);
+  ReciprocalGrid rfoo(gd);
   foo.Set(gaussian);
   foo += 0.1*(-30*foo.r2()).cwise().exp();
   //foo += 0.5*foo.x();
