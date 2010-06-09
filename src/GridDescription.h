@@ -10,6 +10,8 @@ public:
   GridDescription(const GridDescription &x);
 
   Lattice Lat, fineLat;
-  int Nx, Ny, Nz, NyNz, NxNyNz;
+  int Nx, Ny, Nz, NyNz, NxNyNz, NzOver2, NyNzOver2, NxNyNzOver2;
   double dx, dy, dz;
+private:
+  void initme();
 };

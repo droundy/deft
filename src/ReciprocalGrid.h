@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <eigen2/Eigen/Geometry>
 
+typedef std::complex<double> complex;
+
 template<typename Scalar>
 struct any_rop EIGEN_EMPTY_STRUCT {
   EIGEN_STRONG_INLINE any_rop(const GridDescription &gdin,
@@ -35,42 +37,44 @@ namespace Eigen {
 } // namespace Eigen
 
 
-class ReciprocalGrid : public VectorXd {
+class ReciprocalGrid : public VectorXcd {
 public:
   explicit ReciprocalGrid(const GridDescription &);
   ReciprocalGrid(const ReciprocalGrid &x);
 
   // We need to define this for our object to work
-  typedef Eigen::VectorXd Base;
+  typedef Eigen::VectorXcd Base;
   template<typename OtherDerived>
   ReciprocalGrid &operator=(const Eigen::MatrixBase <OtherDerived>& other) {
     this->Base::operator=(other);
     return *this;
   }
 
-  double operator()(int x, int y, int z) const {
+  complex operator()(int x, int y, int z) const {
+    if (z > gd.NzOver2) z = gd.Nz - z;
     return (*this)[x*gd.NyNz + y*gd.Nz + z];
   }
-  double &operator()(int x, int y, int z) {
+  complex &operator()(int x, int y, int z) {
+    if (z > gd.NzOver2) z = gd.Nz - z;
     return (*this)[x*gd.NyNz + y*gd.Nz + z];
   }
-  double operator()(const Reciprocal &r) const {
+  complex operator()(const Reciprocal &r) const {
     return (*this)(gd.Lat.toRelativeReciprocal(r));
   }
-  double operator()(const RelativeReciprocal &) const;
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXd> k2() const {
-    return NullaryExpr(gd.NxNyNz, 1, r2_op);
+  complex operator()(const RelativeReciprocal &) const;
+  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> g2() const {
+    return NullaryExpr(gd.NxNyNz, 1, g2_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXd> kx() const {
-    return NullaryExpr(gd.NxNyNz, 1, x_op);
+  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gx() const {
+    return NullaryExpr(gd.NxNyNz, 1, gx_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXd> ky() const {
-    return NullaryExpr(gd.NxNyNz, 1, y_op);
+  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gy() const {
+    return NullaryExpr(gd.NxNyNz, 1, gy_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXd> kz() const {
-    return NullaryExpr(gd.NxNyNz, 1, z_op);
+  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gz() const {
+    return NullaryExpr(gd.NxNyNz, 1, gz_op);
   }
 private:
   GridDescription gd;
-  any_rop<double> r2_op, x_op, y_op, z_op;
+  any_rop<double> g2_op, gx_op, gy_op, gz_op;
 };

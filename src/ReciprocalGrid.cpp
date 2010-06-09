@@ -1,6 +1,6 @@
 #include "ReciprocalGrid.h"
 
-double ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
+complex ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
   double rx = r(0)*gd.Nx, ry = r(1)*gd.Ny, rz = r(2)*gd.Nz;
   int ix = floor(rx), iy = floor(ry), iz = floor(rz);
   double wx = rx-ix, wy = ry-iy, wz = rz-iz;
@@ -17,6 +17,8 @@ double ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
   while (ixp1 >= gd.Nx) ixp1 -= gd.Nx;
   while (iyp1 >= gd.Ny) iyp1 -= gd.Ny;
   while (izp1 >= gd.Nz) izp1 -= gd.Nz;
+  if (iz > gd.NzOver2) iz = gd.Nz - iz;
+  if (izp1 > gd.NzOver2) izp1 = gd.Nz - izp1;
   assert(wx>=0);
   assert(wy>=0);
   assert(wz>=0);
@@ -44,11 +46,11 @@ static double zfunc(Reciprocal r) {
 }
 
 ReciprocalGrid::ReciprocalGrid(const GridDescription &gdin)
-  : VectorXd(gdin.NxNyNz), gd(gdin),
-    r2_op(gd, cartSqr), x_op(gd, xfunc), y_op(gd, yfunc), z_op(gd, zfunc) {
+  : VectorXcd(gdin.NxNyNzOver2), gd(gdin),
+    g2_op(gd, cartSqr), gx_op(gd, xfunc), gy_op(gd, yfunc), gz_op(gd, zfunc) {
 }
 
 ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x)
-  : VectorXd(x), gd(x.gd),
-    r2_op(gd, cartSqr), x_op(gd, xfunc), y_op(gd, yfunc), z_op(gd, zfunc) {
+  : VectorXcd(x), gd(x.gd),
+    g2_op(gd, cartSqr), gx_op(gd, xfunc), gy_op(gd, yfunc), gz_op(gd, zfunc) {
 }
