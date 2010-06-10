@@ -64,19 +64,19 @@ public:
     return (*this)(gd.Lat.toRelativeReciprocal(r));
   }
   complex operator()(const RelativeReciprocal &) const;
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> g2() const {
-    return NullaryExpr(gd.NxNyNz, 1, g2_op);
+  Eigen::CwiseNullaryOp<any_rop<complex>, VectorXcd> g2() const {
+    return NullaryExpr(gd.NxNyNzOver2, 1, g2_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gx() const {
-    return NullaryExpr(gd.NxNyNz, 1, gx_op);
+  Eigen::CwiseNullaryOp<any_rop<complex>, VectorXcd> gx() const {
+    return NullaryExpr(gd.NxNyNzOver2, 1, gx_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gy() const {
-    return NullaryExpr(gd.NxNyNz, 1, gy_op);
+  Eigen::CwiseNullaryOp<any_rop<complex>, VectorXcd> gy() const {
+    return NullaryExpr(gd.NxNyNzOver2, 1, gy_op);
   }
-  Eigen::CwiseNullaryOp<any_rop<double>, VectorXcd> gz() const {
-    return NullaryExpr(gd.NxNyNz, 1, gz_op);
+  Eigen::CwiseNullaryOp<any_rop<complex>, VectorXcd> gz() const {
+    return NullaryExpr(gd.NxNyNzOver2, 1, gz_op);
   }
 private:
   GridDescription gd;
-  any_rop<double> g2_op, gx_op, gy_op, gz_op;
+  any_rop<complex> g2_op, gx_op, gy_op, gz_op;
 };

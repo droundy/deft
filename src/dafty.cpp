@@ -19,12 +19,9 @@
 #include "ReciprocalGrid.h"
 
 double gaussian(Cartesian r) {
-  const Cartesian center(0, 0, 0);
-  const Cartesian off(0.5, 0, 0);
-  const Cartesian off2(-0.5, 0, 0);
-  const Cartesian dr(r - center), dr2(r-off), dr3(r-off2);
-  return exp(-16*(dr*dr)) - 1.5*exp(-50*(dr*dr))
-    - 0.5*exp(-60*(dr2*dr2)) - 0.5*exp(-60*(dr3*dr3));
+  const Cartesian center(0.125, 0.125, 0);
+  const Cartesian dr(r - center);
+  return -0*exp(-500*(dr*dr));
 }
 
 int main() {
@@ -37,7 +34,7 @@ int main() {
   Grid foo(gd), bar(gd);
   ReciprocalGrid rfoo(gd);
   foo.Set(gaussian);
-  foo += 0.1*(-30*foo.r2()).cwise().exp();
+  foo += 10*(-500*foo.r2()).cwise().exp();
   //foo += 0.5*foo.x();
   foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0),
                Cartesian(-.5,-.5,.5), 150);
@@ -46,6 +43,12 @@ int main() {
   foo.fft().ifft().epsNativeSlice("native-ffted.eps",
                                   Cartesian(1,0,0), Cartesian(0,1,0),
                                   Cartesian(-.5,-.5,.5));
+
+  rfoo = foo.fft();
+  rfoo.cwise() *= (-10.1*rfoo.g2()).cwise().exp();
+  foo = rfoo.ifft();
+  foo.epsNativeSlice("native-blurred.eps", Cartesian(1,0,0), Cartesian(0,1,0),
+                     Cartesian(-.5,-.5,.5));
   
   //std::cout << "and here is the foo" << foo << std::endl;
   //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);

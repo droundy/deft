@@ -33,16 +33,16 @@ complex ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
     + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
 }
 
-static double cartSqr(Reciprocal r) {
+static complex cartSqr(Reciprocal r) {
   return r.squaredNorm();
 }
-static double xfunc(Reciprocal r) {
+static complex xfunc(Reciprocal r) {
   return r(0);
 }
-static double yfunc(Reciprocal r) {
+static complex yfunc(Reciprocal r) {
   return r(1);
 }
-static double zfunc(Reciprocal r) {
+static complex zfunc(Reciprocal r) {
   return r(2);
 }
 
