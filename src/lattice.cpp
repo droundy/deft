@@ -161,5 +161,71 @@ Cartesian Lattice::wignerSeitz(Cartesian r) const {
 } // end wignerSeitz()
 
 Reciprocal Lattice::brillouinZone(Reciprocal k) const {
-  return k;
-}
+  // move_to_wigner_seitz_cell now can be called with a lattice that is not
+  // minimal, and with a r vector that is not in the lattice parallelogon.
+  // Note that r is input in cartesian coordinates, not lattice coordinates.
+  
+  // convert k to coefficients of minimized_lat vectors
+  RelativeReciprocal relk(minimalR.transpose()*k);
+  
+  // shift r to having components in [0, 1), so it is in the 
+  // minimized parallelogon (works even for negative input components!)
+  for (int i = 0; i < 3; ++i) relk(i) -= floor(relk(i)); 
+  
+  // convert back to cartesian coords
+  k = minimalG.transpose() * relk;
+
+  // For anyone wondering about the insane unrolling here, it's an
+  // optimization introduced because this code was (at one time)
+  // significantly slowing down the JDFT fluid calculations. -- DJR
+  // Note: If more optim is needed, cache what is subtracted from r. -- DHF
+  Reciprocal newk = k;
+  double k2 = k.squaredNorm(), newk2;
+  {
+    const Reciprocal ktry(k - minimalR.col(0)); // Reciprocal(1,0,0);
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR.col(1)); // Reciprocal(0,1,0);
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR.col(2)); // Reciprocal(0,0,1);
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR*Reciprocal(1,1,0));
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR*Reciprocal(0,1,1));
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR*Reciprocal(1,0,1));
+    if ((newk2 = ktry.squaredNorm()) < k2) {
+      newk = ktry;
+      k2 = newk2;
+    }
+  }
+  {
+    const Reciprocal ktry(k - minimalR*Reciprocal(1,1,1));
+    if (ktry.squaredNorm() < k2) newk = ktry;
+  }
+  return newk;
+} // end brillouinZone()

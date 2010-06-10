@@ -15,12 +15,16 @@ struct any_rop EIGEN_EMPTY_STRUCT {
     : gd(gdin), fun(func) {}
   EIGEN_STRONG_INLINE const Scalar operator() (int row, int col) const {
     int n = row + col;
-    const int z = n % gd.Nz;
-    n = (n-z)/gd.Nz;
+    const int z = n % gd.NzOver2;
+    n = (n-z)/gd.NzOver2;
     const int y = n % gd.Ny;
     const int x = (n-y)/gd.Ny;
-    const RelativeReciprocal rvec(x*gd.dx,y*gd.dy,z*gd.dz);
-    return fun(gd.Lat.brillouinZone(gd.Lat.toReciprocal(rvec)));
+    const RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x,
+                                  (y>gd.Ny/2) ? y - gd.Ny : y,
+                                  z);
+    // FIXME: it seems that brillouinZone is broken...  :(
+    //return fun(gd.fineLat.brillouinZone(gd.Lat.toReciprocal(rvec)));
+    return fun(gd.Lat.toReciprocal(rvec));
   }
   GridDescription gd;
   Scalar (*fun)(Reciprocal);
@@ -54,11 +58,11 @@ public:
   Grid ifft() const;
   complex operator()(int x, int y, int z) const {
     if (z > gd.NzOver2) z = gd.Nz - z;
-    return (*this)[x*gd.NyNz + y*gd.Nz + z];
+    return (*this)[x*gd.NyNzOver2 + y*gd.NzOver2 + z];
   }
   complex &operator()(int x, int y, int z) {
     if (z > gd.NzOver2) z = gd.Nz - z;
-    return (*this)[x*gd.NyNz + y*gd.Nz + z];
+    return (*this)[x*gd.NyNzOver2 + y*gd.NzOver2 + z];
   }
   complex operator()(const Reciprocal &r) const {
     return (*this)(gd.Lat.toRelativeReciprocal(r));
