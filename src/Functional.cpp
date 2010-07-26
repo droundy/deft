@@ -34,6 +34,7 @@ bool Functional::run_finite_difference_test(const char *testname,
 
   VectorXd my_grad(data());
   double Eold = energy();
+  my_grad.setZero();
   grad(&my_grad);
   VectorXd my_direction(my_grad);
   if (direction) my_direction = *direction;
@@ -47,6 +48,8 @@ bool Functional::run_finite_difference_test(const char *testname,
     // compare the gradient computed by the two functions grad() and
     // grad_and_pgrad()
     VectorXd my_pgrad(data());
+    my_grad.setZero();
+    my_pgrad.setZero();
     grad(&my_grad, &my_pgrad);
     const double lderiv_new = my_direction.dot(my_grad);
     if (fabs(lderiv_new/lderiv - 1) > 1e-12) {

@@ -44,10 +44,10 @@ void IdealGas::grad(VectorXd *g_ptr, VectorXd *pg_ptr) const {
 
   for (int i=0; i < n.description().NxNyNz; i++) {
     if (n[i] > min_log_arg) {
-      g[i] = T*log(n[i]);
+      g[i] += T*log(n[i]);
     } else {
-      g[i] = T*slope;
+      g[i] += T*slope;
     }
   }
-  if (pg_ptr) *pg_ptr = g;
+  if (pg_ptr) *pg_ptr += g;
 }

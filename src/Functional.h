@@ -18,7 +18,10 @@ public:
   // method and a gradient method.
   virtual double energy() const = 0;
   // If the second pointer is nonzero, you need to also output a
-  // preconditioned gradient.
+  // preconditioned gradient.  The two gradients should be
+  // accumulated, so that the resulting VectorXd will be the sum of
+  // the gradient plus any additional value.  This enables the
+  // easy combination of different functionals.
   virtual void grad(VectorXd *, VectorXd *pgrad = 0) const = 0;
 
   // You may optionally define a print_iteration_summary method, which
