@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(dafty, 0, roundyd@physics.oregonstate.edu, dafty)
-AC_CONFIG_SRCDIR(src/dafty.cpp)
+AC_INIT(deft, 0, roundyd@physics.oregonstate.edu, deft)
+AC_CONFIG_SRCDIR(src/deft.cpp)
 AM_INIT_AUTOMAKE
 # use c++ as a compiler in the tests
 AC_LANG(C++)

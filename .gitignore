@@ -9,6 +9,7 @@ config.h.in
 stamp-*
 *Test
 dafty
+deft
 install-sh
 depcomp
 missing

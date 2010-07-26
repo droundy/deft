@@ -5,8 +5,8 @@ TESTS = tests/null.sh fftInverseTest
 GENERIC_CODE = src/lattice.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
 
-bin_PROGRAMS = dafty
-dafty_SOURCES = src/dafty.cpp $(GENERIC_CODE)
+bin_PROGRAMS = deft
+deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 noinst_PROGRAMS = fftInverseTest
 fftInverseTest_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)

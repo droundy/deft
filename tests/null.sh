@@ -2,6 +2,6 @@
 
 set -ev
 
-./dafty
+./deft
 
 echo this test passes
