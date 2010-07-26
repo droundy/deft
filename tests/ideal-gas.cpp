@@ -25,12 +25,20 @@ int main() {
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
   IdealGas ig(&density, 300);
-  printf("This will be a DFT driver program someday.\n");
   if (ig.run_finite_difference_test("ideal gas")) {
     printf("Finite difference test passes.\n");
-    return 0;
   } else {
     printf("Finite difference test failed!!!\n");
     return 1;
   }
+
+  printf("\nNow let's verify it works with very low density!\n");
+  density *= 1e-5;
+  if (ig.run_finite_difference_test("ideal gas")) {
+    printf("Finite difference test passes.\n");
+  } else {
+    printf("Finite difference test failed!!!\n");
+    return 1;
+  }
+  return 0;
 }

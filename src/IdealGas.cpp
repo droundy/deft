@@ -22,7 +22,7 @@ void IdealGas::print_summary() const {
   printf("Ideal gas summary\n");
 }
 
-const double min_log_arg = 1e-16;
+const double min_log_arg = 1e-10;
 const double slope = log(min_log_arg);
 const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
