@@ -18,46 +18,7 @@
 #include "Grid.h"
 #include "ReciprocalGrid.h"
 
-double gaussian(Cartesian r) {
-  const Cartesian center(0.25, 0.25, .25);
-  const Cartesian dr(r - center);
-  return -10*exp(-500*(dr*dr));
-}
-
 int main() {
-  Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
-  //Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
-  Cartesian middle(0.5,0.5,0.5);
-  Cartesian plotcorner(-0.5, -0.5, 0.5);
-  Relative middlerel = lat.toRelative(middle);
-  Reciprocal recip(0.2,0,0);
-  int resolution = 20;
-  GridDescription gd(lat, resolution, resolution, resolution);
-  Grid foo(gd), bar(gd);
-  ReciprocalGrid rfoo(gd);
-  foo.Set(gaussian);
-  foo += 10*(-500*foo.r2()).cwise().exp();
-  //foo += 0.5*foo.x();
-  foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0), plotcorner, 150);
-  foo.epsNativeSlice("native.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-                     plotcorner);
-  foo.fft().ifft().epsNativeSlice("native-ffted.eps", Cartesian(1,0,0),
-                                  Cartesian(0,1,0), plotcorner);
-
-  rfoo = foo.fft();
-  rfoo.cwise() *= (-0.1*rfoo.g2()).cwise().exp();
-  foo = rfoo.ifft();
-  foo.epsNativeSlice("native-blurred.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-                     plotcorner);
-  rfoo = (-0.4*rfoo.g2()).cwise().exp();
-  rfoo.ifft().epsNativeSlice("gaussian.eps", Cartesian(1,0,0), Cartesian(0,1,0),
-                             plotcorner);
-
-  //std::cout << "and here is the foo" << foo << std::endl;
-  //std::cout << "and here is the foo" << (foo + 2*bar + foo.cwise()*bar);
-  std::cout << "middle and middlerel are:\n"
-            << middle << std::endl << middlerel << std::endl
-            << lat.toCartesian(middlerel) << std::endl;
-  std::cout << "middle dot recip: " << recip * middle << std::endl;
+  printf("This will be a DFT driver program someday.\n");
   return 0;
 }
