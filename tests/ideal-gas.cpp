@@ -26,5 +26,11 @@ int main() {
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
   IdealGas ig(&density, 300);
   printf("This will be a DFT driver program someday.\n");
-  return 0;
+  if (ig.run_finite_difference_test("ideal gas")) {
+    printf("Finite difference test passes.\n");
+    return 0;
+  } else {
+    printf("Finite difference test failed!!!\n");
+    return 1;
+  }
 }

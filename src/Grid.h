@@ -79,6 +79,7 @@ public:
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> z() const {
     return NullaryExpr(gd.NxNyNz, 1, z_op);
   }
+  GridDescription description() const { return gd; }
 private:
   GridDescription gd;
   any_op<double> r2_op, x_op, y_op, z_op;
