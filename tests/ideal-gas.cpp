@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include "IdealGas.h"
+#include "EffectivePotentialToDensity.h"
 
 int main() {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
@@ -33,6 +34,18 @@ int main() {
   }
 
   printf("\nNow let's verify it works with very low density!\n");
+  density *= 1e-5;
+  if (ig.run_finite_difference_test("ideal gas", density)) {
+    printf("Finite difference test passes.\n");
+  } else {
+    printf("Finite difference test failed!!!\n");
+    return 1;
+  }
+
+  printf("\nNow let's try this with an effective potential...\n");
+  FunctionalComposition ig2 =
+    *compose(counted_ptr<Functional>(new IdealGas(gd,300)),
+            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(300)));
   density *= 1e-5;
   if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test passes.\n");

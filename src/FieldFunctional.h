@@ -15,5 +15,5 @@ public:
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
   virtual void grad(const VectorXd &data, const VectorXd &ingrad,
-                    VectorXd *outgrad) const = 0;
+                    VectorXd *outgrad, VectorXd *outpgrad) const = 0;
 };

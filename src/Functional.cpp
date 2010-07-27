@@ -103,3 +103,29 @@ bool Functional::run_finite_difference_test(const char *testname,
   return (min < 1e-3) || (best_ratio_error < 1e-9);
 
 }
+
+counted_ptr<FunctionalComposition>
+    compose(const counted_ptr<Functional> a,
+            const counted_ptr<FieldFunctional> b) {
+  FunctionalComposition *fc = new FunctionalComposition(a, b);
+  return counted_ptr<FunctionalComposition>(fc);
+}
+
+double FunctionalComposition::operator()(const VectorXd &data) const {
+  return (*f1)((*f2)(data));
+}
+
+void FunctionalComposition::grad(const VectorXd &data,
+                                 VectorXd *g, VectorXd *pgrad) const {
+  VectorXd d1((*f2)(data)), g1(d1);
+  g1.setZero();
+  VectorXd pg1(g1);
+  // First compute the gradient of f1(d1)...
+  f1->grad(d1, &g1, &pg1);
+  // ... then use the chain rule to compute the gradient of f2(f1(data)).
+  f2->grad(data, g1, g, pgrad);
+}
+
+void FunctionalComposition::print_summary(const VectorXd &data) const {
+  f1->print_summary((*f2)(data));
+}
