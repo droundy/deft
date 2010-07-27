@@ -24,8 +24,8 @@ int main() {
   Grid density(gd);
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  IdealGas ig(&density, 300);
-  if (ig.run_finite_difference_test("ideal gas")) {
+  IdealGas ig(gd, 300);
+  if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test passes.\n");
   } else {
     printf("Finite difference test failed!!!\n");
@@ -34,7 +34,7 @@ int main() {
 
   printf("\nNow let's verify it works with very low density!\n");
   density *= 1e-5;
-  if (ig.run_finite_difference_test("ideal gas")) {
+  if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test passes.\n");
   } else {
     printf("Finite difference test failed!!!\n");

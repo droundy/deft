@@ -19,23 +19,24 @@
 #include <stdio.h>
 #include <math.h>
 
-void Functional::print_summary() const {
+void Functional::print_summary(const VectorXd &) const {
   printf("hello world\n");
 }
 
-void Functional::print_iteration(int iter) const {
+void Functional::print_iteration(const VectorXd &d, int iter) const {
   printf("Iteration number %d:\n", iter);
-  print_summary();
+  print_summary(d);
 }
 
 bool Functional::run_finite_difference_test(const char *testname,
+                                            const VectorXd &x,
                                             const VectorXd *direction) {
   printf("Running finite difference test on %s:\n", testname);
 
-  VectorXd my_grad(data());
-  double Eold = energy();
+  VectorXd my_grad(x);
+  double Eold = (*this)(x);
   my_grad.setZero();
-  grad(&my_grad);
+  grad(x, &my_grad);
   VectorXd my_direction(my_grad);
   if (direction) my_direction = *direction;
 
@@ -47,10 +48,10 @@ bool Functional::run_finite_difference_test(const char *testname,
   {
     // compare the gradient computed by the two functions grad() and
     // grad_and_pgrad()
-    VectorXd my_pgrad(data());
+    VectorXd my_pgrad(x);
     my_grad.setZero();
     my_pgrad.setZero();
-    grad(&my_grad, &my_pgrad);
+    grad(x, &my_grad, &my_pgrad);
     const double lderiv_new = my_direction.dot(my_grad);
     if (fabs(lderiv_new/lderiv - 1) > 1e-12) {
       printf("\n*** WARNING!!! INCONSISTENT GRADIENTS! ***\n");
@@ -75,11 +76,9 @@ bool Functional::run_finite_difference_test(const char *testname,
   for(int p=min_p; p <= max_p; p++) {
     const double eps_ratio = 10.0;
     const double epsilon = pow(eps_ratio, -p);
-    data() += epsilon*my_direction;
-    const double Eplus=energy();
-    data() += -2*epsilon*my_direction;
-    const double Eminus=energy();
-    data() += epsilon*my_direction;
+    // The following is a little wasteful of memory...
+    const double Eplus= (*this)(x + epsilon*my_direction);
+    const double Eminus=(*this)(x - epsilon*my_direction);
 
     grads[p-min_p] = (Eplus-Eminus)/(2*epsilon);
     printf("    eps^2 = %25.16f deltaE %.12g\n",

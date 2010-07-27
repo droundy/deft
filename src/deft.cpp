@@ -24,7 +24,7 @@ int main() {
   Grid density(gd);
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  IdealGas ig(&density, 300);
+  IdealGas ig(gd, 300);
   printf("This will be a DFT driver program someday.\n");
   return 0;
 }

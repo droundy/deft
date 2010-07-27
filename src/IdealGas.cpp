@@ -26,10 +26,10 @@ const double min_log_arg = 1e-10;
 const double slope = log(min_log_arg);
 const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-double IdealGas::energy() const {
+double IdealGas::operator()(const VectorXd &data) const {
   double e = 0;
-  for (int i=0; i < n.description().NxNyNz; i++) {
-    const double n = data()[i];
+  for (int i=0; i < gd.NxNyNz; i++) {
+    const double n = data[i];
     if (n > min_log_arg) {
       e += n*log(n) - n;
     } else {
@@ -39,10 +39,11 @@ double IdealGas::energy() const {
   return T*e;
 }
 
-void IdealGas::grad(VectorXd *g_ptr, VectorXd *pg_ptr) const {
+void IdealGas::grad(const VectorXd &n,
+                    VectorXd *g_ptr, VectorXd *pg_ptr) const {
   VectorXd &g = *g_ptr;
 
-  for (int i=0; i < n.description().NxNyNz; i++) {
+  for (int i=0; i < gd.NxNyNz; i++) {
     if (n[i] > min_log_arg) {
       g[i] += T*log(n[i]);
     } else {
