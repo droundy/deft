@@ -30,8 +30,10 @@ double IdealGas::operator()(const VectorXd &data) const {
   double e = 0;
   for (int i=0; i < gd.NxNyNz; i++) {
     const double n = data[i];
+    assert(n == n); // check for NaN
     if (n > min_log_arg) {
       e += n*log(n) - n;
+      assert(e == e); // check for NaN
     } else {
       e += (n-min_log_arg)*slope + min_e;
     }

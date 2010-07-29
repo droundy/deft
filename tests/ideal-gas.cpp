@@ -23,9 +23,10 @@ int main() {
   int resolution = 20;
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid density(gd);
+  const double kT = 1e-3; // room temperature in Hartree
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  IdealGas ig(gd, 300);
+  IdealGas ig(gd, kT);
   if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test passes.\n");
   } else {
@@ -43,11 +44,19 @@ int main() {
   }
 
   printf("\nNow let's try this with an effective potential...\n");
+  Grid potential(gd);
+  potential = 1e-2*((-50*density.r2()).cwise().exp())
+    + -2e-3*VectorXd::Ones(gd.NxNyNz);
+  //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
+  //                         Cartesian(0,1,0), Cartesian(0,0,0));
+  //density = EffectivePotentialToDensity(kT)(potential);
+  //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
+  //                         Cartesian(0,1,0), Cartesian(0,0,0));
   FunctionalComposition ig2 =
-    *compose(counted_ptr<Functional>(new IdealGas(gd,300)),
-            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(300)));
+    *compose(counted_ptr<Functional>(new IdealGas(gd,kT)),
+            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
   density *= 1e-5;
-  if (ig.run_finite_difference_test("ideal gas", density)) {
+  if (ig2.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test passes.\n");
   } else {
     printf("Finite difference test failed!!!\n");

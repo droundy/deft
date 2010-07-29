@@ -100,7 +100,7 @@ bool Functional::run_finite_difference_test(const char *testname,
 
   //dft_log("The min is %g and best_ratio_error is %g\n",
   //        min, best_ratio_error);
-  return (min < 1e-3) || (best_ratio_error < 1e-9);
+  return (min < 1e-3) || (best_ratio_error < 2e-8);
 
 }
 
