@@ -9,6 +9,12 @@
 
 #pragma once
 
+struct counter {
+  counter(void* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+  void* ptr;
+  unsigned count;
+};
+
 template <class X> class counted_ptr {
 public:
   explicit counted_ptr(X* p = 0) // allocate a new counter
@@ -40,21 +46,20 @@ public:
   }
 
   // A const counted_ptr means we can't modify what it points to!
-  const X &operator*() const { return *itsCounter->ptr; }
-  const X *operator->() const { return itsCounter->ptr; }
+  const X &operator*() const { return *(X *)itsCounter->ptr; }
+  const X *operator->() const { return (X *)itsCounter->ptr; }
 
-  X &operator*() { return *itsCounter->ptr; }
-  X *operator->() { return itsCounter->ptr; }
+  X &operator*() { return *(X *)itsCounter->ptr; }
+  X *operator->() { return (X *)itsCounter->ptr; }
   bool unique() const {
     return (itsCounter ? itsCounter->count == 1 : true);
   }
 
-private:
-  struct counter {
-    counter(X* p = 0, unsigned c = 1) : ptr(p), count(c) {}
-    X* ptr;
-    unsigned count;
-  }* itsCounter;
+  // The rest should all be private, but I don't understand out to do
+  // the friend class thing above.  :(
+
+  counter *itsCounter;
+  //private:
   void acquire(counter* c) {
     // increment the count
     itsCounter = c;
@@ -64,7 +69,7 @@ private:
     // decrement the count, delete if it is 0
     if (itsCounter) {
       if (--itsCounter->count == 0) {
-        delete itsCounter->ptr;
+        delete (X *)itsCounter->ptr;
         delete itsCounter;
       }
       itsCounter = 0;

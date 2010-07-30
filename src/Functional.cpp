@@ -98,10 +98,24 @@ bool Functional::run_finite_difference_test(const char *testname,
     }
   }
 
-  //dft_log("The min is %g and best_ratio_error is %g\n",
-  //        min, best_ratio_error);
-  return (min < 1e-3) || (best_ratio_error < 2e-8);
-
+  if (min < 1e-3 && best_ratio_error < 1e-7) {
+    printf("Passed on basis of reasonable scaling (%g) and accuracy (%g).\n",
+           min, best_ratio_error);
+    return true;
+  }
+  if (best_ratio_error < 1e-10) {
+    printf("Passed on basis of a gradient accuracy of (%g) (with scaling %g).\n",
+           best_ratio_error, min);
+    return true;
+  }
+  if (min < 1e-5 && best_ratio_error < 0.01) {
+    printf("Passed on basis of seriously nice scaling %g (and low accuracy %g).\n",
+           min, best_ratio_error);
+    return true;
+  }
+  printf("Failed with scaling ratio of %g and gradient accuracy of %g\n",
+         min, best_ratio_error);
+  return false;
 }
 
 counted_ptr<FunctionalComposition>
@@ -128,4 +142,29 @@ void FunctionalComposition::grad(const VectorXd &data,
 
 void FunctionalComposition::print_summary(const VectorXd &data) const {
   f1->print_summary((*f2)(data));
+}
+
+
+// The sum of two functionals...
+
+counted_ptr<FunctionalSum>
+    operator+(const counted_ptr<Functional> a,
+              const counted_ptr<Functional> b) {
+  FunctionalSum *fc = new FunctionalSum(a, b);
+  return counted_ptr<FunctionalSum>(fc);
+}
+
+double FunctionalSum::operator()(const VectorXd &data) const {
+  return (*f1)(data) + (*f2)(data);
+}
+
+void FunctionalSum::grad(const VectorXd &data,
+                         VectorXd *g, VectorXd *pgrad) const {
+  f1->grad(data, g, pgrad);
+  f2->grad(data, g, pgrad);
+}
+
+void FunctionalSum::print_summary(const VectorXd &data) const {
+  f1->print_summary(data);
+  f2->print_summary(data);
 }

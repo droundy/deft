@@ -35,6 +35,23 @@ public:
                                   const VectorXd *direction = 0);
 };
 
+class FunctionalSum : public Functional {
+public:
+  FunctionalSum(const counted_ptr<Functional> f,
+                const counted_ptr<Functional> g)
+    : f1(f), f2(g) {};
+
+  double operator()(const VectorXd &data) const;
+  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
+  void print_summary(const VectorXd &data) const;
+private:
+  const counted_ptr<Functional> f1, f2;
+};
+
+counted_ptr<FunctionalSum>
+    operator+(const counted_ptr<Functional> a,
+              const counted_ptr<Functional> b);
+
 class FunctionalComposition : public Functional {
 public:
   FunctionalComposition(const counted_ptr<Functional> f,
