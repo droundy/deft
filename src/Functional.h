@@ -24,8 +24,8 @@ public:
   virtual void grad(const VectorXd &data,
                     VectorXd *, VectorXd *pgrad = 0) const = 0;
 
-  // You may optionally define a print_iteration_summary method, which
-  // would print something interesting to the screen.
+  // You may optionally define a print_summary method, which would
+  // print something interesting to the screen.
   virtual void print_summary(const VectorXd &data) const;
 
   // The following utility methods do not need to be overridden.

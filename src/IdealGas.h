@@ -18,8 +18,8 @@ public:
   void grad(const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 
-  // You may optionally define a print_iteration_summary method, which
-  // would print something interesting to the screen.
+  // You may optionally define a print_summary method, which would
+  // print something interesting to the screen.
   void  print_summary() const;
 private:
   GridDescription gd;
