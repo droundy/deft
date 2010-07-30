@@ -38,18 +38,19 @@ double IdealGas::operator()(const VectorXd &data) const {
       e += (n-min_log_arg)*slope + min_e;
     }
   }
-  return T*e;
+  return T*e*gd.Lat.volume()/gd.NxNyNz;
 }
 
 void IdealGas::grad(const VectorXd &n,
                     VectorXd *g_ptr, VectorXd *pg_ptr) const {
   VectorXd &g = *g_ptr;
 
+  const double TdV = T*gd.Lat.volume()/gd.NxNyNz;
   for (int i=0; i < gd.NxNyNz; i++) {
     if (n[i] > min_log_arg) {
-      g[i] += T*log(n[i]);
+      g[i] += TdV*log(n[i]);
     } else {
-      g[i] += T*slope;
+      g[i] += TdV*slope;
     }
   }
   if (pg_ptr) *pg_ptr += g;
