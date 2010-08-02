@@ -1,7 +1,3 @@
-- Implement a minimizer of some sort (e.g. EOM).
-
-- Test minimizer on ideal gas with a given chemical potential.
-
 - Implement an external potential.
 
 - Test that the ideal gas has the appropriate (barometer formula)
