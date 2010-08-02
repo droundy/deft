@@ -20,11 +20,13 @@
 #include <math.h>
 
 void Functional::print_summary(const VectorXd &) const {
-  printf("hello world\n");
+  // Don't print anything at all by default!
 }
 
 void Functional::print_iteration(const VectorXd &d, int iter) const {
-  printf("Iteration number %d:\n", iter);
+  printf("==============\n");
+  printf("Iteration %4d\n", iter);
+  printf("==============\n");
   print_summary(d);
 }
 

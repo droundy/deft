@@ -18,17 +18,18 @@
 #include "IdealGas.h"
 #include "ChemicalPotential.h"
 #include "EffectivePotentialToDensity.h"
+#include "Downhill.h"
 
 int main() {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
-  int resolution = 20;
+  int resolution = 5;
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid potential(gd);
   const double kT = 1e-3; // room temperature in Hartree
   const double ngas = 1e-5; // vapor density of water
   const double mu = -kT*log(ngas);
-  potential = 1e-2*((-50*potential.r2()).cwise().exp())
-    + -2e-3*VectorXd::Ones(gd.NxNyNz);
+  potential = +1e-4*((-10*potential.r2()).cwise().exp())
+    + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
@@ -36,14 +37,25 @@ int main() {
   counted_ptr<FunctionalSum> ig_and_mu =
     counted_ptr<Functional>(new IdealGas(gd,kT)) +
     counted_ptr<Functional>(new ChemicalPotential(gd, mu));
-  FunctionalComposition f =
-    *compose(counted_ptr<Functional>(ig_and_mu),
-             counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
-  if (f.run_finite_difference_test("ideal gas", potential)) {
-    printf("Finite difference test passes.\n");
-  } else {
-    printf("Finite difference test failed!!!\n");
-    return 1;
+  counted_ptr<Functional> f =
+    compose(counted_ptr<Functional>(ig_and_mu),
+            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
+  Grid old_potential(potential);
+  Downhill min(f, &potential);
+  for (int i=0;i<500;i++) {
+    min.improve_energy();
+    min.print_info(i);
   }
-  return 0;
+  double err2 = 0;
+  for (int i=0;i<gd.NxNyNz;i++) {
+    err2 += (potential[i] - mu)*(potential[i] - mu);
+  }
+  err2 /= gd.NxNyNz;
+  printf("rms error = %g\n", sqrt(err2));
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if (fabs(potential[i] - mu) > fabs(1e-10*mu)) {
+      printf("Oh no, the error is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+      return 1;
+    }
+  }
 }

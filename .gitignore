@@ -8,6 +8,7 @@ config.h
 config.h.in
 stamp-*
 *Test
+*Optimization
 dafty
 deft
 install-sh

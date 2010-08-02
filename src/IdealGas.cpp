@@ -33,6 +33,7 @@ double IdealGas::operator()(const VectorXd &data) const {
     assert(n == n); // check for NaN
     if (n > min_log_arg) {
       e += n*log(n) - n;
+      if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
       assert(e == e); // check for NaN
     } else {
       e += (n-min_log_arg)*slope + min_e;
