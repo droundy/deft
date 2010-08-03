@@ -1,8 +1,3 @@
-- Implement an external potential.
-
-- Test that the ideal gas has the appropriate (barometer formula)
-  density in that external potential.
-
 - Implement huge repulsive external potential, to make sure we can
   look at a hard-surface cavity.
 
