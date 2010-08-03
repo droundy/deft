@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(deft, 0, roundyd@physics.oregonstate.edu, deft)
 AC_CONFIG_SRCDIR(src/deft.cpp)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 # use c++ as a compiler in the tests
 AC_LANG(C++)
 AM_CONFIG_HEADER(src/config.h)

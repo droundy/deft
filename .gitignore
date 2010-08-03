@@ -2,6 +2,7 @@
 *~
 *.Po
 .deps
+.dirstamp
 Makefile
 Makefile.in
 config.h

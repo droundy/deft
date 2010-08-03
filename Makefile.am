@@ -1,7 +1,9 @@
 EXTRA_DIST = autogen.sh
 
-TESTS = tests/null.sh fftInverseTest epsTest idealGasTest idealGasPressureTest \
+MY_BUILT_TESTS = fftInverseTest epsTest idealGasTest idealGasPressureTest \
 	idealGasOptimization
+
+TESTS = tests/null.sh $(MY_BUILT_TESTS)
 
 GENERIC_CODE = src/lattice.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
@@ -11,8 +13,7 @@ GENERIC_CODE = src/lattice.cpp \
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
-noinst_PROGRAMS = fftInverseTest epsTest idealGasTest idealGasPressureTest \
-	idealGasOptimization
+check_PROGRAMS = $(MY_BUILT_TESTS)
 fftInverseTest_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
 epsTest_SOURCES = tests/eps-test.cpp $(GENERIC_CODE)
 idealGasTest_SOURCES = tests/ideal-gas.cpp $(GENERIC_CODE)
