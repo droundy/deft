@@ -21,3 +21,5 @@ aclocal.m4
 config.*
 *.eps
 .nfs*
+.\#*
+\#*\#
