@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(deft, 0, roundyd@physics.oregonstate.edu, deft)
 AC_CONFIG_SRCDIR(src/deft.cpp)
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects parallel-tests color-tests])
 AM_SILENT_RULES([yes]) # disable this with make V=1
 # use c++ as a compiler in the tests
 AC_LANG(C++)
