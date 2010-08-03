@@ -17,7 +17,7 @@
 #include "Downhill.h"
 #include <stdio.h>
 
-bool Downhill::improve_energy(bool verbose) {
+bool Downhill::improve_energy(bool) {
   const VectorXd &g = grad();
   double old_energy = energy();
   *x -= nu*g;

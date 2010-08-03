@@ -23,8 +23,7 @@ double ChemicalPotential::operator()(const VectorXd &data) const {
   return mu*Ntot;
 }
 
-void ChemicalPotential::grad(const VectorXd &n,
-                             VectorXd *g_ptr, VectorXd *pg_ptr) const {
+void ChemicalPotential::grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
   VectorXd &g = *g_ptr;
 
   const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
