@@ -1,7 +1,11 @@
 EXTRA_DIST = autogen.sh
 
-MY_BUILT_TESTS = fftInverseTest epsTest idealGasTest idealGasPressureTest \
-	idealGasOptimization
+MY_BUILT_TESTS = \
+	tests/fftinverse.test \
+	tests/eps.test \
+	tests/ideal-gas.test \
+	tests/ideal-gas-at-pressure.test \
+	tests/ideal-gas-optimization.test
 
 TESTS = tests/null.sh $(MY_BUILT_TESTS)
 
@@ -14,11 +18,11 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = $(MY_BUILT_TESTS)
-fftInverseTest_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
-epsTest_SOURCES = tests/eps-test.cpp $(GENERIC_CODE)
-idealGasTest_SOURCES = tests/ideal-gas.cpp $(GENERIC_CODE)
-idealGasPressureTest_SOURCES = tests/ideal-gas-at-pressure.cpp $(GENERIC_CODE)
-idealGasOptimization_SOURCES = tests/ideal-gas-optimization.cpp $(GENERIC_CODE)
+tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
+tests_eps_test_SOURCES = tests/eps.cpp $(GENERIC_CODE)
+tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(GENERIC_CODE)
+tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(GENERIC_CODE)
+tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(GENERIC_CODE)
 
 #noinst_PROGRAMS = optest
 #optest_SOURCES = optest.cpp $(GENERIC_CODE)

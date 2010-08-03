@@ -8,9 +8,7 @@ Makefile.in
 config.h
 config.h.in
 stamp-*
-*Test
-*Optimization
-dafty
+*.test
 deft
 install-sh
 depcomp
