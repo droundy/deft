@@ -3,8 +3,8 @@
 - Test that the ideal gas has the appropriate (barometer formula)
   density in that external potential.
 
-- Implement huge repulsion, to make sure we can look at a hard-surface
-  cavity.
+- Implement huge repulsive external potential, to make sure we can
+  look at a hard-surface cavity.
 
 - Implement simple quadratic attraction functional.
 
