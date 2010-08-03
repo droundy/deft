@@ -2,13 +2,14 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(deft, 0, roundyd@physics.oregonstate.edu, deft)
 AC_CONFIG_SRCDIR(src/deft.cpp)
 AM_INIT_AUTOMAKE([subdir-objects])
+AM_SILENT_RULES([yes]) # disable this with make V=1
 # use c++ as a compiler in the tests
 AC_LANG(C++)
 AM_CONFIG_HEADER(src/config.h)
 
 dnl Set default CXX flags
 if test "x$CXXFLAGS" = "x"; then
-  CXXFLAGS='-ansi -g -pipe -W -Wall -O2'
+  CXXFLAGS='-ansi -pipe -W -Wall -O2'
 fi
 
 # check whether to enable profiling or coverage testing.
