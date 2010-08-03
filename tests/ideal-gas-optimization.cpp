@@ -34,12 +34,8 @@ int main() {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  counted_ptr<FunctionalSum> ig_and_mu =
-    counted_ptr<Functional>(new IdealGas(gd,kT)) +
-    counted_ptr<Functional>(new ChemicalPotential(gd, mu));
-  counted_ptr<Functional> f =
-    compose(counted_ptr<Functional>(ig_and_mu),
-            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
+  Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu);
+  Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
   Downhill min(f, &potential);
   for (int i=0;i<500;i++) {

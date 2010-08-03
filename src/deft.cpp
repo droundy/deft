@@ -15,16 +15,8 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "IdealGas.h"
 
 int main() {
-  Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
-  int resolution = 20;
-  GridDescription gd(lat, resolution, resolution, resolution);
-  Grid density(gd);
-  density = 10*(-500*density.r2()).cwise().exp()
-    + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  IdealGas ig(gd, 300);
   printf("This will be a DFT driver program someday.\n");
   return 0;
 }

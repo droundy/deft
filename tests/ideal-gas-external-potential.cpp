@@ -35,13 +35,8 @@ int main() {
     + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  counted_ptr<FunctionalSum> ig_and_mu =
-    counted_ptr<Functional>(new IdealGas(gd,kT)) +
-    counted_ptr<Functional>(new ChemicalPotential(gd, mu)) +
-    counted_ptr<Functional>(new ExternalPotential(external_potential));
-  counted_ptr<Functional> f =
-    compose(counted_ptr<Functional>(ig_and_mu),
-            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
+  Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + ExternalPotential(external_potential);
+  Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
   Downhill min(f, &potential);
   for (int i=0;i<30000;i++) { // using Downhill is *extremely* painful!

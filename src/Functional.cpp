@@ -19,20 +19,20 @@
 #include <stdio.h>
 #include <math.h>
 
-void Functional::print_summary(const VectorXd &) const {
+void FunctionalInterface::print_summary(const VectorXd &) const {
   // Don't print anything at all by default!
 }
 
-void Functional::print_iteration(const VectorXd &d, int iter) const {
+void FunctionalInterface::print_iteration(const VectorXd &d, int iter) const {
   printf("==============\n");
   printf("Iteration %4d\n", iter);
   printf("==============\n");
   print_summary(d);
 }
 
-bool Functional::run_finite_difference_test(const char *testname,
-                                            const VectorXd &x,
-                                            const VectorXd *direction) {
+bool FunctionalInterface::run_finite_difference_test(const char *testname,
+                                                     const VectorXd &x,
+                                                     const VectorXd *direction) const {
   printf("Running finite difference test on %s:\n", testname);
 
   VectorXd my_grad(x);
@@ -120,53 +120,71 @@ bool Functional::run_finite_difference_test(const char *testname,
   return false;
 }
 
-counted_ptr<FunctionalComposition>
-    compose(const counted_ptr<Functional> a,
-            const counted_ptr<FieldFunctional> b) {
-  FunctionalComposition *fc = new FunctionalComposition(a, b);
-  return counted_ptr<FunctionalComposition>(fc);
+class FunctionalComposition : public FunctionalInterface {
+public:
+  FunctionalComposition(const Functional &f, const FieldFunctional &g)
+    : f1(f), f2(g) {};
+
+  double operator()(const VectorXd &data) const;
+  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
+  void print_summary(const VectorXd &data) const;
+private:
+  const Functional f1;
+  const FieldFunctional f2;
+};
+
+Functional compose(const Functional &a, const FieldFunctional &b) {
+  return Functional(new FunctionalComposition(a, b));
 }
 
 double FunctionalComposition::operator()(const VectorXd &data) const {
-  return (*f1)((*f2)(data));
+  return f1(f2(data));
 }
 
 void FunctionalComposition::grad(const VectorXd &data,
                                  VectorXd *g, VectorXd *pgrad) const {
-  VectorXd d1((*f2)(data)), g1(d1);
+  VectorXd d1(f2(data)), g1(d1);
   g1.setZero();
   VectorXd pg1(g1);
   // First compute the gradient of f1(d1)...
-  f1->grad(d1, &g1, &pg1);
+  f1.grad(d1, &g1, &pg1);
   // ... then use the chain rule to compute the gradient of f2(f1(data)).
-  f2->grad(data, g1, g, pgrad);
+  f2.grad(data, g1, g, pgrad);
 }
 
 void FunctionalComposition::print_summary(const VectorXd &data) const {
-  f1->print_summary((*f2)(data));
+  f1.print_summary(f2(data));
 }
 
 
 // The sum of two functionals...
 
-counted_ptr<FunctionalSum>
-    operator+(const counted_ptr<Functional> a,
-              const counted_ptr<Functional> b) {
-  FunctionalSum *fc = new FunctionalSum(a, b);
-  return counted_ptr<FunctionalSum>(fc);
+class FunctionalSum : public FunctionalInterface {
+public:
+  FunctionalSum(const Functional &f, const Functional &g) : f1(f), f2(g) {};
+
+  double operator()(const VectorXd &data) const;
+  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
+  void print_summary(const VectorXd &data) const;
+private:
+  const Functional f1, f2;
+};
+
+Functional operator+(const Functional &a, const Functional &b) {
+  return Functional(new FunctionalSum(a, b));
 }
 
 double FunctionalSum::operator()(const VectorXd &data) const {
-  return (*f1)(data) + (*f2)(data);
+  return f1(data) + f2(data);
 }
 
 void FunctionalSum::grad(const VectorXd &data,
                          VectorXd *g, VectorXd *pgrad) const {
-  f1->grad(data, g, pgrad);
-  f2->grad(data, g, pgrad);
+  f1.grad(data, g, pgrad);
+  f2.grad(data, g, pgrad);
 }
 
 void FunctionalSum::print_summary(const VectorXd &data) const {
-  f1->print_summary(data);
-  f2->print_summary(data);
+  f1.print_summary(data);
+  f2.print_summary(data);
 }

@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 void Minimizer::print_info(int iter) const {
-  f->print_iteration(*x, iter);
+  f.print_iteration(*x, iter);
   printf("\tEnergy = %g\n", energy());
   printf("\tGradient = %g\n", grad().norm());
 }

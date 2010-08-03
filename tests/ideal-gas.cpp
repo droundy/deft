@@ -26,7 +26,7 @@ int main() {
   const double kT = 1e-3; // room temperature in Hartree
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  IdealGas ig(gd, kT);
+  Functional ig = IdealGas(gd, kT);
   if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test passes.\n");
   } else {
@@ -52,9 +52,7 @@ int main() {
   //density = EffectivePotentialToDensity(kT)(potential);
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  FunctionalComposition ig2 =
-    *compose(counted_ptr<Functional>(new IdealGas(gd,kT)),
-            counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
+  Functional ig2 = compose(IdealGas(gd,kT), EffectivePotentialToDensity(kT));
   density *= 1e-5;
   if (ig2.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test passes.\n");

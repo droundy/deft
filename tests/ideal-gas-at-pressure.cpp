@@ -33,12 +33,8 @@ int main() {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  counted_ptr<FunctionalSum> ig_and_mu =
-    counted_ptr<Functional>(new IdealGas(gd,kT)) +
-    counted_ptr<Functional>(new ChemicalPotential(gd, mu));
-  FunctionalComposition f =
-    *compose(counted_ptr<Functional>(ig_and_mu),
-             counted_ptr<FieldFunctional>(new EffectivePotentialToDensity(kT)));
+  Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu);
+  Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   if (f.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test passes.\n");
   } else {

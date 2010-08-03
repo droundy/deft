@@ -3,11 +3,10 @@
 #pragma once
 
 #include "FieldFunctional.h"
-#include "counted_ptr.h"
 
 class FunctionalComposition;
 
-class Functional {
+class FunctionalInterface {
 public:
   // To implement a functional, you need to provide both an energy
   // method and a gradient method.
@@ -32,40 +31,61 @@ public:
   void print_iteration(const VectorXd &data, int iter) const;
   bool run_finite_difference_test(const char *testname,
                                   const VectorXd &data,
-                                  const VectorXd *direction = 0);
+                                  const VectorXd *direction = 0) const;
 };
 
-class FunctionalSum : public Functional {
+class Functional : public FunctionalInterface {
 public:
-  FunctionalSum(const counted_ptr<Functional> f,
-                const counted_ptr<Functional> g)
-    : f1(f), f2(g) {};
+  // Handle reference counting so we can pass these things around freely...
+  explicit Functional(FunctionalInterface* p = 0) // allocate a new counter
+    : itsCounter(0) {
+    if (p) itsCounter = new counter(p);
+  }
+  ~Functional() { release(); }
+  Functional(const Functional& r) {
+    acquire(r.itsCounter);
+  }
+  Functional& operator=(const Functional& r) {
+    if (this != &r) {
+      release();
+      acquire(r.itsCounter);
+    }
+    return *this;
+  }
 
-  double operator()(const VectorXd &data) const;
-  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
-  void print_summary(const VectorXd &data) const;
+  double operator()(const VectorXd &data) const {
+    return (*itsCounter->ptr)(data);
+  }
+  void grad(const VectorXd &data,
+            VectorXd *g, VectorXd *pg = 0) const {
+    itsCounter->ptr->grad(data, g, pg);
+  }
+  void print_summary(const VectorXd &data) const {
+    itsCounter->ptr->print_summary(data);
+  }
 private:
-  const counted_ptr<Functional> f1, f2;
+  struct counter {
+    counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+    FunctionalInterface* ptr;
+    unsigned count;
+  };
+  counter *itsCounter;
+  void acquire(counter* c) {
+    // increment the count
+    itsCounter = c;
+    if (c) (c->count)++;
+  }
+  void release() {
+    // decrement the count, delete if it is 0
+    if (itsCounter) {
+      if (--itsCounter->count == 0) {
+        delete itsCounter->ptr;
+        delete itsCounter;
+      }
+      itsCounter = 0;
+    }
+  }
 };
 
-counted_ptr<FunctionalSum>
-    operator+(const counted_ptr<Functional> a,
-              const counted_ptr<Functional> b);
-
-class FunctionalComposition : public Functional {
-public:
-  FunctionalComposition(const counted_ptr<Functional> f,
-                        const counted_ptr<FieldFunctional> g)
-    : f1(f), f2(g) {};
-
-  double operator()(const VectorXd &data) const;
-  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
-  void print_summary(const VectorXd &data) const;
-private:
-  const counted_ptr<Functional> f1;
-  const counted_ptr<FieldFunctional> f2;
-};
-
-counted_ptr<FunctionalComposition>
-    compose(const counted_ptr<Functional> a,
-            const counted_ptr<FieldFunctional> b);
+Functional operator+(const Functional &, const Functional &);
+Functional compose(const Functional &a, const FieldFunctional &b);

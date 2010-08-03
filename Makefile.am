@@ -3,7 +3,8 @@ EXTRA_DIST = autogen.sh
 GENERIC_CODE = src/lattice.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/Functional.cpp src/IdealGas.cpp src/ChemicalPotential.cpp \
-	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp
+	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
+	src/EffectivePotentialToDensity.cpp
 
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)

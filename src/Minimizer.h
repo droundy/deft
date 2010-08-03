@@ -3,15 +3,14 @@
 #pragma once
 
 #include "Functional.h"
-#include "counted_ptr.h"
 
 class Minimizer {
 protected:
-  counted_ptr<Functional> f;
+  Functional f;
   VectorXd *x; // Note that we don't own this data!
   int iter;
 public:
-  Minimizer(counted_ptr<Functional> myf, VectorXd *data)
+  Minimizer(Functional myf, VectorXd *data)
     : f(myf), x(data), last_grad(*data) {
     iter = 0;
     energy_valid = grad_valid = false;
@@ -29,7 +28,7 @@ public:
   // energy returns the current energy.
   double energy() const {
     if (!energy_valid) {
-      last_energy = (*f)(*x);
+      last_energy = f(*x);
       energy_valid = true;
     }
     return last_energy;
@@ -37,7 +36,7 @@ public:
   const VectorXd &grad() const {
     if (!grad_valid) {
       last_grad.setZero(); // Have to remember to zero it out first!
-      f->grad(*x, &last_grad);
+      f.grad(*x, &last_grad);
       grad_valid = true;
     }
     return last_grad;

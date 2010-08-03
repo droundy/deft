@@ -16,18 +16,39 @@
 
 #include "ChemicalPotential.h"
 
-double ChemicalPotential::operator()(const VectorXd &data) const {
+class ChemicalPotentialType : public FunctionalInterface {
+public:
+  ChemicalPotentialType(const GridDescription &g, double chemical_potential)
+    : gd(g), mu(chemical_potential) {}
+
+  // To implement a functional, you need to provide both an energy
+  // method and a gradient method.
+  double operator()(const VectorXd &data) const;
+  // If the second pointer is nonzero, you need to also output a
+  // preconditioned gradient.
+  void grad(const VectorXd &data,
+            VectorXd *, VectorXd *pgrad = 0) const;
+private:
+  GridDescription gd;
+  double mu; // the chemical potential
+};
+
+double ChemicalPotentialType::operator()(const VectorXd &data) const {
   double Ntot = 0;
   for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
   Ntot *= gd.Lat.volume()/gd.NxNyNz;
   return mu*Ntot;
 }
 
-void ChemicalPotential::grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
+void ChemicalPotentialType::grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
   VectorXd &g = *g_ptr;
 
   const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
   for (int i=0; i < gd.NxNyNz; i++) g[i] += mudV;
   if (pg_ptr)
     for (int i=0; i < gd.NxNyNz; i++) (*pg_ptr)[i] += mudV;
+}
+
+Functional ChemicalPotential(const GridDescription &g, double chemical_potential) {
+  return Functional(new ChemicalPotentialType(g, chemical_potential));
 }
