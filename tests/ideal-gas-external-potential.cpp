@@ -20,47 +20,77 @@
 #include "EffectivePotentialToDensity.h"
 #include "ExternalPotential.h"
 #include "Downhill.h"
+#include "SteepestDescent.h"
 
-int main() {
+const double kT = 1e-3; // room temperature in Hartree
+const double ngas = 1e-5; // vapor density of water
+const double mu = -kT*log(ngas);
+
+int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_density, int numiters) {
+  printf("\n***************************\n");
+  printf("* Testing %15s *\n", name);
+  printf("***************************\n\n");
+
+  const double true_energy = -5.597856610022806e-11;
+
+  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
+  for (int i=0;i<numiters && min->improve_energy(true);i++) {
+    min->print_info(i);
+  }
+  min->print_info(137);
+  Grid density(*pot);
+  density = EffectivePotentialToDensity(kT)(*pot);
+  double err2 = 0;
+  for (int i=0;i<pot->description().NxNyNz;i++) {
+    err2 += (density[i]-expected_density[i])*(density[i]-expected_density[i]);
+  }
+  err2 /= pot->description().NxNyNz;
+  printf("rms error = %g\n", sqrt(err2));
+  printf("fractional energy error = %g\n", (min->energy() - true_energy)/fabs(true_energy));
+  if (fabs((min->energy() - true_energy)/true_energy) > 5e-3) {
+    printf("Error in the energy is too big!\n");
+    return 1;
+  }
+  for (int i=0;i<pot->description().NxNyNz;i++) {
+    if (fabs(density[i] - expected_density[i]) > fabs(1e-3*ngas)) {
+      printf("Oh no, the error in density is %g out of %g at %d (%g)!\n",
+             density[i] - expected_density[i], expected_density[i], i,
+             fabs(density[i] - expected_density[i])/ngas);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int main(int, char **argv) {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
   int resolution = 5;
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid external_potential(gd);
   external_potential = 1e-1*external_potential.r2(); // a harmonic trap...
   Grid potential(gd);
-  const double kT = 1e-3; // room temperature in Hartree
-  const double ngas = 1e-5; // vapor density of water
-  const double mu = -kT*log(ngas);
-  potential = +1e-4*((-10*potential.r2()).cwise().exp())
-    + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + ExternalPotential(external_potential);
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
-  Grid old_potential(potential);
-  Downhill min(f, &potential);
-  for (int i=0;i<30000 && min.improve_energy();i++) { // using Downhill is *extremely* painful!
-    min.print_info(i);
-  }
-  Grid density(gd);
-  density = EffectivePotentialToDensity(kT)(potential);
+
   Grid expected_density(gd);
   expected_density = EffectivePotentialToDensity(kT)(external_potential + mu*VectorXd::Ones(gd.NxNyNz));
-  double err2 = 0;
-  for (int i=0;i<gd.NxNyNz;i++) {
-    err2 += (density[i]-expected_density[i])*(density[i]-expected_density[i]);
-    //err2 += (potential[i] - external_potential[i] - mu)*(potential[i] - external_potential[i] - mu);
-  }
-  err2 /= gd.NxNyNz;
-  printf("rms error = %g\n", sqrt(err2));
-  for (int i=0;i<gd.NxNyNz;i++) {
-    //if (fabs(potential[i] - external_potential[i] - mu) > fabs(1e-7*(external_potential[i]+mu))) {
-    if (fabs(density[i] - expected_density[i]) > fabs(1e-4*ngas)) {
-      printf("Oh no, the error in potential is %g out of %g at %d!\n",
-             potential[i]-external_potential[i]-mu, external_potential[i]+mu, i);
-      printf("Oh no, the error in density is %g out of %g at %d!\n",
-             density[i] - expected_density[i], expected_density[i], i);
-      return 1;
-    }
+
+  int retval = 0;
+
+  Downhill downhill(f, &potential);
+  potential.setZero();
+  retval += test_minimizer("Downhill", &downhill, &potential, expected_density, 3000);
+
+  SteepestDescent steepest(f, &potential, QuadraticLineMinimizer, 1.0);
+  potential.setZero();
+  retval += test_minimizer("SteepestDescent", &steepest, &potential, expected_density, 2000);
+
+  if (retval == 0) {
+    printf("%s passes!\n", argv[0]);
+  } else {
+    printf("%s fails %d tests!\n", argv[0], retval);
+    return retval;
   }
 }

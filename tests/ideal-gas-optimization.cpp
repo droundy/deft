@@ -19,8 +19,9 @@
 #include "ChemicalPotential.h"
 #include "EffectivePotentialToDensity.h"
 #include "Downhill.h"
+#include "SteepestDescent.h"
 
-int main() {
+int main(int, char **argv) {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
   int resolution = 5;
   GridDescription gd(lat, resolution, resolution, resolution);
@@ -28,8 +29,6 @@ int main() {
   const double kT = 1e-3; // room temperature in Hartree
   const double ngas = 1e-5; // vapor density of water
   const double mu = -kT*log(ngas);
-  potential = +1e-4*((-10*potential.r2()).cwise().exp())
-    + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
@@ -37,20 +36,63 @@ int main() {
   Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu);
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
-  Downhill min(f, &potential);
-  for (int i=0;i<500 && min.improve_energy();i++) {
-    min.print_info(i);
-  }
-  double err2 = 0;
-  for (int i=0;i<gd.NxNyNz;i++) {
-    err2 += (potential[i] - mu)*(potential[i] - mu);
-  }
-  err2 /= gd.NxNyNz;
-  printf("rms error = %g\n", sqrt(err2));
-  for (int i=0;i<gd.NxNyNz;i++) {
-    if (fabs(potential[i] - mu) > fabs(1e-10*mu)) {
-      printf("Oh no, the error is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+
+  // First, let's test Downhill...
+  {
+    potential = +1e-4*((-10*potential.r2()).cwise().exp())
+      + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
+    Downhill min(f, &potential);
+    for (int i=0;i<140 && min.improve_energy();i++) {
+      min.print_info(i);
+    }
+    double err2 = 0;
+    for (int i=0;i<gd.NxNyNz;i++) {
+      err2 += (potential[i] - mu)*(potential[i] - mu);
+    }
+    err2 /= gd.NxNyNz;
+    printf("rms error = %g\n", sqrt(err2));
+    printf("fractional energy error = %g\n", (f(potential) + 2.5e-9)/2.5e-9);
+    if (fabs(f(potential) + 2.5e-9)/2.5e-9 > 2e-14) {
+      printf("Error in the energy is too big!\n");
       return 1;
     }
+    for (int i=0;i<gd.NxNyNz;i++) {
+      if (fabs(potential[i] - mu) > fabs(3e-9*mu)) {
+        printf("Oh no, the error for Downhill is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+        return 1;
+      }
+    }
   }
+
+  printf("\n*************************************\n");
+  printf("* Now we're testing SteepestDescent *\n");
+  printf("*************************************\n\n");
+  {
+    potential = +1e-4*((-10*potential.r2()).cwise().exp())
+      + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
+    SteepestDescent min(f, &potential, QuadraticLineMinimizer, 1.0);
+    for (int i=0;i<20 && min.improve_energy(true);i++) {
+      printf("hello bad foo\n");
+      min.print_info(i);
+    }
+    double err2 = 0;
+    for (int i=0;i<gd.NxNyNz;i++) {
+      err2 += (potential[i] - mu)*(potential[i] - mu);
+    }
+    err2 /= gd.NxNyNz;
+    printf("rms error = %g\n", sqrt(err2));
+    printf("fractional energy error = %g\n", (f(potential) + 2.5e-9)/2.5e-9);
+    if (fabs(f(potential) + 2.5e-9)/2.5e-9 > 2e-14) {
+      printf("Error in the energy is too big!\n");
+      return 1;
+    }
+    for (int i=0;i<gd.NxNyNz;i++) {
+      if (fabs(potential[i] - mu) > fabs(3e-9*mu)) {
+        printf("Oh no, the error is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+        return 1;
+      }
+    }
+  }
+
+  printf("%s passes!\n", argv[0]);
 }

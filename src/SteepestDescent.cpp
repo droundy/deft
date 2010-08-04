@@ -14,11 +14,25 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "Minimizer.h"
+#include "SteepestDescent.h"
 #include <stdio.h>
 
-void Minimizer::print_info(int iter) const {
-  f.print_iteration(*x, iter);
-  printf("\tEnergy = %.16g\n", energy());
-  printf("\tGradient = %g\n", grad().norm());
+bool SteepestDescent::improve_energy(bool verbose) {
+  //printf("I am running SteepestDescent::improve_energy\n");
+  const double E0 = energy();
+  const VectorXd d = -grad();
+  // Let's immediately free the cached gradient stored internally!
+  invalidate_cache();
+
+  Minimizer *lm = linmin(f, x, d, -d.dot(d), &step);
+  for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
+    if (verbose) lm->print_info(iter);
+  }
+  if (verbose) lm->print_info(iter);
+  return (energy() < E0);
+}
+
+void SteepestDescent::print_info(int iter) const {
+  Minimizer::print_info(iter);
+  printf("\tstep = %g\n", step);
 }
