@@ -27,7 +27,7 @@ double gaussian(Cartesian r) {
     - 0.5*exp(-60*(dr2*dr2)) - 0.5*exp(-60*(dr3*dr3));
 }
 
-int main(int argc, char *argv[]) {
+int main(int, char *argv[]) {
   printf("Working on %s\n", argv[0]);
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
   int resolution = 10;
