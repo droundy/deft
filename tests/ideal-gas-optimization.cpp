@@ -38,8 +38,7 @@ int main() {
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
   Downhill min(f, &potential);
-  for (int i=0;i<500;i++) {
-    min.improve_energy();
+  for (int i=0;i<500 && min.improve_energy();i++) {
     min.print_info(i);
   }
   double err2 = 0;
