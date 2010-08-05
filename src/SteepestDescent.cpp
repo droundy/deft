@@ -36,3 +36,23 @@ void SteepestDescent::print_info(int iter) const {
   Minimizer::print_info(iter);
   printf("\tstep = %g\n", step);
 }
+
+bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
+  //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
+  const double E0 = energy();
+  const VectorXd d = -pgrad();
+  // Let's immediately free the cached gradient stored internally!
+  invalidate_cache();
+
+  Minimizer *lm = linmin(f, x, d, -d.dot(d), &step);
+  for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
+    if (verbose) lm->print_info(iter);
+  }
+  if (verbose) lm->print_info(iter);
+  return (energy() < E0);
+}
+
+void PreconditionedSteepestDescent::print_info(int iter) const {
+  Minimizer::print_info(iter);
+  printf("\tstep = %g\n", step);
+}

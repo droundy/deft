@@ -125,9 +125,29 @@ public:
   FunctionalComposition(const Functional &f, const FieldFunctional &g)
     : f1(f), f2(g) {};
 
-  double operator()(const VectorXd &data) const;
-  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
-  void print_summary(const VectorXd &data) const;
+  double operator()(const VectorXd &data) const {
+    return f1(f2(data));
+  }
+  void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
+    VectorXd d1(f2(data)), g1(d1);
+    g1.setZero();
+    if (pgrad) {
+      VectorXd pg1(g1);
+      // First compute the gradient of f1(d1)...
+      f1.grad(d1, &g1, &pg1);
+      // ... then use the chain rule to compute the gradient of f2(f1(data)).
+      // FIXME:  I should be able to use pg1 here!!!
+      f2.grad(data, g1, g, pgrad);
+    } else {
+      // First compute the gradient of f1(d1)...
+      f1.grad(d1, &g1);
+      // ... then use the chain rule to compute the gradient of f2(f1(data)).
+      f2.grad(data, g1, g, pgrad);
+    }
+  }
+  void print_summary(const VectorXd &data) const {
+    f1.print_summary(f2(data));
+  }
 private:
   const Functional f1;
   const FieldFunctional f2;
@@ -136,26 +156,6 @@ private:
 Functional compose(const Functional &a, const FieldFunctional &b) {
   return Functional(new FunctionalComposition(a, b));
 }
-
-double FunctionalComposition::operator()(const VectorXd &data) const {
-  return f1(f2(data));
-}
-
-void FunctionalComposition::grad(const VectorXd &data,
-                                 VectorXd *g, VectorXd *pgrad) const {
-  VectorXd d1(f2(data)), g1(d1);
-  g1.setZero();
-  VectorXd pg1(g1);
-  // First compute the gradient of f1(d1)...
-  f1.grad(d1, &g1, &pg1);
-  // ... then use the chain rule to compute the gradient of f2(f1(data)).
-  f2.grad(data, g1, g, pgrad);
-}
-
-void FunctionalComposition::print_summary(const VectorXd &data) const {
-  f1.print_summary(f2(data));
-}
-
 
 // The sum of two functionals...
 

@@ -10,10 +10,6 @@
   fixing the density at vapor and liquid densities at two planes in
   space?
 
-- Implement line minimization.
-
-- Implement steepest-descent with line minimization.
-
 - Implement conjugate gradients minimization.
 
 - Implement smart stop condition for minimization as I did in DFT++.

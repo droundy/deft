@@ -27,15 +27,17 @@ const double ngas = 1e-5; // vapor density of water
 const double mu = -kT*log(ngas);
 
 int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_density, int numiters) {
-  printf("\n***************************\n");
-  printf("* Testing %15s *\n", name);
-  printf("***************************\n\n");
+  printf("\n************");
+  for (int i=0;i<strlen(name);i++) printf("*");
+  printf("\n* Testing %s *\n", name);
+  for (int i=0;i<strlen(name);i++) printf("*");
+  printf("************\n\n");
 
   const double true_energy = -5.597856610022806e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
-  for (int i=0;i<numiters && min->improve_energy(true);i++) {
-    min->print_info(i);
+  for (int i=0;i<numiters && min->improve_energy(false);i++) {
+    //min->print_info(i);
   }
   min->print_info(137);
   Grid density(*pot);
@@ -86,6 +88,10 @@ int main(int, char **argv) {
   SteepestDescent steepest(f, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
   retval += test_minimizer("SteepestDescent", &steepest, &potential, expected_density, 2000);
+
+  PreconditionedSteepestDescent psd(f, &potential, QuadraticLineMinimizer, 1.0);
+  potential.setZero();
+  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, expected_density, 20);
 
   if (retval == 0) {
     printf("%s passes!\n", argv[0]);

@@ -11,9 +11,13 @@ protected:
   int iter;
 public:
   Minimizer(Functional myf, VectorXd *data)
-    : f(myf), x(data), last_grad(0) {
+    : f(myf), x(data), last_grad(0), last_pgrad(0) {
     iter = 0;
     energy_valid = false;
+  }
+  ~Minimizer() {
+    delete last_grad;
+    delete last_pgrad;
   }
 
   // improve_energy returns false if the energy is fully converged
@@ -43,15 +47,29 @@ public:
     }
     return *last_grad;
   }
+  const VectorXd &pgrad() const {
+    if (!last_pgrad) {
+      last_pgrad = new VectorXd(*x); // hokey
+      last_pgrad->setZero(); // Have to remember to zero it out first!
+      if (!last_grad) {
+        last_grad = new VectorXd(*x); // hokey
+        last_grad->setZero(); // Have to remember to zero it out first!
+      }
+      f.grad(*x, last_grad, last_pgrad);
+    }
+    return *last_pgrad;
+  }
 
   // Note that we're changing the position x.
   void invalidate_cache() {
     energy_valid = false;
     delete last_grad;
     last_grad = 0;
+    delete last_pgrad;
+    last_pgrad = 0;
   }
 private:
   mutable double last_energy;
-  mutable VectorXd *last_grad;
+  mutable VectorXd *last_grad, *last_pgrad;
   mutable bool energy_valid;
 };
