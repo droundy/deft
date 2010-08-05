@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "ChemicalPotential.h"
+#include "Functionals.h"
 
 class ChemicalPotentialType : public FunctionalInterface {
 public:

@@ -15,8 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "IdealGas.h"
-#include "EffectivePotentialToDensity.h"
+#include "Functionals.h"
 
 int main() {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));

@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "IdealGas.h"
+#include "Functionals.h"
 #include <stdio.h>
 #include <math.h>
 

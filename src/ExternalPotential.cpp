@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "ExternalPotential.h"
+#include "Functionals.h"
 #include <stdio.h>
 
 class ExternalPotentialType : public FunctionalInterface {

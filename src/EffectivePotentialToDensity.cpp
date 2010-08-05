@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "EffectivePotentialToDensity.h"
+#include "Functionals.h"
 
 class EffectivePotentialToDensityType : public FieldFunctionalInterface {
 public:

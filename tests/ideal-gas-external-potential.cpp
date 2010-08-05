@@ -15,10 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "IdealGas.h"
-#include "ChemicalPotential.h"
-#include "EffectivePotentialToDensity.h"
-#include "ExternalPotential.h"
+#include "Functionals.h"
 #include "Downhill.h"
 #include "SteepestDescent.h"
 
