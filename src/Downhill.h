@@ -14,3 +14,14 @@ public:
   bool improve_energy(bool verbose = false);
   void print_info(int iter) const;
 };
+
+class PreconditionedDownhill : public Minimizer {
+private:
+  double nu;
+public:
+  PreconditionedDownhill(Functional f, VectorXd *data, double viscosity=0.1)
+    : Minimizer(f, data), nu(viscosity) {}
+
+  bool improve_energy(bool verbose = false);
+  void print_info(int iter) const;
+};

@@ -46,3 +46,33 @@ void Downhill::print_info(int iter) const {
   Minimizer::print_info(iter);
   printf("\tnu = %g\n", nu);
 }
+
+bool PreconditionedDownhill::improve_energy(bool) {
+  const VectorXd g = pgrad();
+  // Let's immediately free the cached gradient stored internally!
+  invalidate_cache();
+  // We waste some memory storing oldx, but avoids roundoff weirdness
+  // of trying to add nu*g back to *x, which won't always get us back
+  // to the same value.
+  const VectorXd oldx = *x;
+  double old_energy = energy();
+  *x -= nu*g;
+  invalidate_cache(); // Must always remember this!!!
+  int num_tries = 0;
+  while (energy() > old_energy) {
+    nu *= 0.5;
+    *x = oldx - nu*g;
+    invalidate_cache();
+    if (num_tries++ > 30) {
+      printf("PreconditionedDownhill giving up after %d tries...\n", num_tries);
+      return false; // It looks like we can't do any better with this algorithm.
+    }
+  }
+  nu *= 1.1;
+  return true;
+}
+
+void PreconditionedDownhill::print_info(int iter) const {
+  Minimizer::print_info(iter);
+  printf("\tnu = %g\n", nu);
+}

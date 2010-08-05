@@ -85,13 +85,17 @@ int main(int, char **argv) {
   potential.setZero();
   retval += test_minimizer("Downhill", &downhill, &potential, expected_density, 3000);
 
+  PreconditionedDownhill pd(f, &potential);
+  potential.setZero();
+  retval += test_minimizer("PreconditionedDownhill", &pd, &potential, expected_density, 15);
+
   SteepestDescent steepest(f, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
   retval += test_minimizer("SteepestDescent", &steepest, &potential, expected_density, 2000);
 
   PreconditionedSteepestDescent psd(f, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, expected_density, 20);
+  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, expected_density, 10);
 
   if (retval == 0) {
     printf("%s passes!\n", argv[0]);
