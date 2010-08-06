@@ -27,9 +27,9 @@ const double mu = -kT*log(ngas);
 int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters) {
   clock_t start = clock();
   printf("\n************");
-  for (int i=0;i<strlen(name);i++) printf("*");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
-  for (int i=0;i<strlen(name);i++) printf("*");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
   const double true_energy = -1325.205095995137;

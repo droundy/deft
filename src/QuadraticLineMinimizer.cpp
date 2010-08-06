@@ -10,7 +10,7 @@ private:
 public:
   QuadraticLineMinimizerType(Functional f, VectorXd *data, const VectorXd &dir,
                              double gradDotDirection, double *instep)
-    : Minimizer(f, data), direction(dir), slope(gradDotDirection), step(instep) {
+    : Minimizer(f, data), direction(dir), step(instep), slope(gradDotDirection) {
     if (step == 0) {
       // If the caller doesn't specify the stepsize, we'll just use an
       // internal one.

@@ -34,7 +34,7 @@ public:
     for (int i=0; i < gd.NxNyNz; i++) {
       const double nbari = nbar[i];
       if (nbari != nbari) {
-        printf("nbar[%d] == %g\n", nbari);
+        printf("nbar[%d] == %g\n", i, nbari);
         assert(nbari == nbari); // check for NaN
       }
       double ehere = A;

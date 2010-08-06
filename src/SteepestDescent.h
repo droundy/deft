@@ -10,7 +10,7 @@ private:
   LineMinimizer linmin;
 public:
   SteepestDescent(Functional f, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
-    : Minimizer(f, data), linmin(lm), step(stepsize) {}
+    : Minimizer(f, data), step(stepsize), linmin(lm) {}
 
   bool improve_energy(bool verbose = false);
   void print_info(int iter) const;
@@ -22,7 +22,7 @@ private:
   LineMinimizer linmin;
 public:
   PreconditionedSteepestDescent(Functional f, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
-    : Minimizer(f, data), linmin(lm), step(stepsize) {}
+    : Minimizer(f, data), step(stepsize), linmin(lm) {}
 
   bool improve_energy(bool verbose = false);
   void print_info(int iter) const;

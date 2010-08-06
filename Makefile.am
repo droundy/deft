@@ -11,12 +11,12 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/simple-liquid.test \
 	tests/fftinverse.test \
 	tests/ideal-gas.test \
 	tests/ideal-gas-at-pressure.test \
 	tests/ideal-gas-optimization.test \
 	tests/ideal-gas-external-potential.test \
-	tests/simple-liquid.test \
 	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)

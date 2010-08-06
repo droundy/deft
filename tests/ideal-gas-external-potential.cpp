@@ -25,9 +25,9 @@ const double mu = -kT*log(ngas);
 
 int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_density, int numiters) {
   printf("\n************");
-  for (int i=0;i<strlen(name);i++) printf("*");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
-  for (int i=0;i<strlen(name);i++) printf("*");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
   const double true_energy = -5.597856610022806e-11;
