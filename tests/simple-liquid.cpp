@@ -36,10 +36,9 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters) {
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
-  for (int i=0;i<numiters && min->improve_energy(false);i++) {
-    //min->print_info(i);
-  }
-  min->print_info(137);
+  for (int i=0;i<numiters && min->improve_energy(false);i++) {}
+
+  min->print_info(-1);
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("fractional energy error = %g\n", (min->energy() - true_energy)/fabs(true_energy));
   if (fabs((min->energy() - true_energy)/true_energy) > 1e-3) {

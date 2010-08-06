@@ -23,31 +23,23 @@ public:
   IdealGasType(const GridDescription &g, double temp)
     : gd(g), T(temp) {}
 
-  // To implement a functional, you need to provide both an energy
-  // method and a gradient method.
-  double operator()(const VectorXd &data) const;
-  // If the second pointer is nonzero, you need to also output a
-  // preconditioned gradient.
+  double energy(const VectorXd &data) const;
   void grad(const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 
-  // You may optionally define a print_summary method, which would
-  // print something interesting to the screen.
-  void  print_summary() const;
+  void  print_summary(const char *prefix, const VectorXd &data) const {
+    printf("%sIdealGas energy = %g\n", prefix, (*this)(data));
+  }
 private:
   GridDescription gd;
   double T; // temperature
 };
 
-void IdealGasType::print_summary() const {
-  printf("Ideal gas summary\n");
-}
-
 const double min_log_arg = 1e-10;
 const double slope = log(min_log_arg);
 const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-double IdealGasType::operator()(const VectorXd &data) const {
+double IdealGasType::energy(const VectorXd &data) const {
   double e = 0;
   for (int i=0; i < gd.NxNyNz; i++) {
     const double n = data[i];

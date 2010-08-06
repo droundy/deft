@@ -13,7 +13,7 @@ public:
     : Minimizer(f, data), step(stepsize), linmin(lm) {}
 
   bool improve_energy(bool verbose = false);
-  void print_info(int iter) const;
+  void print_info(int iter, const char *prefix="") const;
 };
 
 class PreconditionedSteepestDescent : public Minimizer {
@@ -25,5 +25,5 @@ public:
     : Minimizer(f, data), step(stepsize), linmin(lm) {}
 
   bool improve_energy(bool verbose = false);
-  void print_info(int iter) const;
+  void print_info(int iter, const char *prefix="") const;
 };

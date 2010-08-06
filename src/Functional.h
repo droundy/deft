@@ -3,6 +3,7 @@
 #pragma once
 
 #include "FieldFunctional.h"
+#include <stdint.h>
 
 class FunctionalComposition;
 
@@ -12,7 +13,14 @@ public:
   // method and a gradient method.
 
   // The energy method is operator()
-  virtual double operator()(const VectorXd &data) const = 0;
+  double operator()(const VectorXd &data) const {
+    uint32_t sum = compute_checksum(data);
+    if (sum != checksum) {
+      last_energy = energy(data);
+      checksum = sum;
+    }
+    return last_energy;
+  }
 
   // The gradient method, however, outputs its output in-place in two
   // VectorXd pointers.  If the second pointer is nonzero, you need to
@@ -25,14 +33,27 @@ public:
 
   // You may optionally define a print_summary method, which would
   // print something interesting to the screen.
-  virtual void print_summary(const VectorXd &data) const;
+  virtual void print_summary(const char *prefix, const VectorXd &data) const;
 
   // The following utility methods do not need to be overridden.
-  void print_iteration(const VectorXd &data, int iter) const;
+  void print_iteration(const char *prefix, const VectorXd &data, int iter) const;
   // run_finite_difference_test returns false when the test fails.
   bool run_finite_difference_test(const char *testname,
                                   const VectorXd &data,
                                   const VectorXd *direction = 0) const;
+protected:
+  mutable double last_energy;
+  // The energy method is operator()
+  virtual double energy(const VectorXd &data) const = 0;
+private:
+  mutable uint32_t checksum;
+  uint32_t compute_checksum(const VectorXd &m) const {
+    uint32_t *mints = (uint32_t *)m.data();
+    const int N = m.cols()*m.rows()*2;
+    uint32_t sum = 0;
+    for (int i=0; i<N; i++) sum ^= mints[i]+i; // FIXME: this is a really stupid checksum...
+    return sum;
+  }
 };
 
 class Functional : public FunctionalInterface {
@@ -54,15 +75,15 @@ public:
     return *this;
   }
 
-  double operator()(const VectorXd &data) const {
+  double energy(const VectorXd &data) const {
     return (*itsCounter->ptr)(data);
   }
   void grad(const VectorXd &data,
             VectorXd *g, VectorXd *pg = 0) const {
     itsCounter->ptr->grad(data, g, pg);
   }
-  void print_summary(const VectorXd &data) const {
-    itsCounter->ptr->print_summary(data);
+  void print_summary(const char *prefix, const VectorXd &data) const {
+    itsCounter->ptr->print_summary(prefix, data);
   }
 private:
   struct counter {

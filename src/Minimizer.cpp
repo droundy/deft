@@ -17,8 +17,8 @@
 #include "Minimizer.h"
 #include <stdio.h>
 
-void Minimizer::print_info(int iter) const {
-  f.print_iteration(*x, iter);
-  printf("\tEnergy = %.16g\n", energy());
-  printf("\tGradient = %g\n", grad().norm());
+void Minimizer::print_info(int iter, const char *prefix) const {
+  f.print_iteration(prefix, *x, iter);
+  printf("%sEnergy = %.16g\n", prefix, energy());
+  printf("%sGradient = %g\n", prefix, grad().norm());
 }

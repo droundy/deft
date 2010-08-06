@@ -19,15 +19,15 @@
 #include <stdio.h>
 #include <math.h>
 
-void FunctionalInterface::print_summary(const VectorXd &) const {
+void FunctionalInterface::print_summary(const char *, const VectorXd &) const {
   // Don't print anything at all by default!
 }
 
-void FunctionalInterface::print_iteration(const VectorXd &d, int iter) const {
-  printf("==============\n");
-  printf("Iteration %4d\n", iter);
-  printf("==============\n");
-  print_summary(d);
+void FunctionalInterface::print_iteration(const char *prefix, const VectorXd &d, int iter) const {
+  printf("%s==============\n", prefix);
+  printf("%sIteration %4d\n", prefix, iter);
+  printf("%s==============\n", prefix);
+  print_summary(prefix, d);
 }
 
 bool FunctionalInterface::run_finite_difference_test(const char *testname,
@@ -125,7 +125,7 @@ public:
   FunctionalComposition(const Functional &f, const FieldFunctional &g)
     : f1(f), f2(g) {};
 
-  double operator()(const VectorXd &data) const {
+  double energy(const VectorXd &data) const {
     return f1(f2(data));
   }
   void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
@@ -145,8 +145,8 @@ public:
       f2.grad(data, g1, g, pgrad);
     }
   }
-  void print_summary(const VectorXd &data) const {
-    f1.print_summary(f2(data));
+  void print_summary(const char *prefix, const VectorXd &data) const {
+    f1.print_summary(prefix, f2(data));
   }
 private:
   const Functional f1;
@@ -163,28 +163,21 @@ class FunctionalSum : public FunctionalInterface {
 public:
   FunctionalSum(const Functional &f, const Functional &g) : f1(f), f2(g) {};
 
-  double operator()(const VectorXd &data) const;
-  void grad(const VectorXd &data, VectorXd *, VectorXd *pgrad = 0) const;
-  void print_summary(const VectorXd &data) const;
+  double energy(const VectorXd &data) const {
+    return f1(data) + f2(data);
+  }
+  void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
+    f1.grad(data, g, pgrad);
+    f2.grad(data, g, pgrad);
+  }
+  void print_summary(const char *prefix, const VectorXd &data) const {
+    f1.print_summary(prefix, data);
+    f2.print_summary(prefix, data);
+  }
 private:
   const Functional f1, f2;
 };
 
 Functional operator+(const Functional &a, const Functional &b) {
   return Functional(new FunctionalSum(a, b));
-}
-
-double FunctionalSum::operator()(const VectorXd &data) const {
-  return f1(data) + f2(data);
-}
-
-void FunctionalSum::grad(const VectorXd &data,
-                         VectorXd *g, VectorXd *pgrad) const {
-  f1.grad(data, g, pgrad);
-  f2.grad(data, g, pgrad);
-}
-
-void FunctionalSum::print_summary(const VectorXd &data) const {
-  f1.print_summary(data);
-  f2.print_summary(data);
 }

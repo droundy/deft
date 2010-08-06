@@ -27,7 +27,7 @@ public:
     norm = 1.0/sig/sig/sig; // FIXME: get normalization right!
   }
 
-  double operator()(const VectorXd &data) const {
+  double energy(const VectorXd &data) const {
     Grid nbar(broaden(data));
     
     double e = 0;
@@ -67,10 +67,8 @@ public:
     if (pg_ptr) *pg_ptr += dFdn;
   }
 
-  // You may optionally define a print_summary method, which would
-  // print something interesting to the screen.
-  void  print_summary() const {
-    printf("GaussianPolynomial summary\n");
+  void  print_summary(const char *prefix, const VectorXd &data) const {
+    printf("%sGaussianPolynomial energy = %g\n", prefix, (*this)(data));
   }
 private:
   GridDescription gd;

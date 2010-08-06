@@ -22,26 +22,20 @@ public:
   ExternalPotentialType(const Grid &V)
     : Vdvolume(V*V.description().Lat.volume()/V.description().NxNyNz) {}
 
-  // To implement a functional, you need to provide both an energy
-  // method and a gradient method.
-  double operator()(const VectorXd &data) const;
-  // If the second pointer is nonzero, you need to also output a
-  // preconditioned gradient.
+  double energy(const VectorXd &data) const;
   void grad(const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 
-  // You may optionally define a print_summary method, which would
-  // print something interesting to the screen.
-  void print_summary() const;
+  void print_summary(const char *prefix, const VectorXd &data) const;
 private:
   VectorXd Vdvolume; // the potential times the differential volume element dV.
 };
 
-void ExternalPotentialType::print_summary() const {
-  printf("External potential summary\n");
+void ExternalPotentialType::print_summary(const char *prefix, const VectorXd &data) const {
+  printf("%sExternal potential energy = %g\n", prefix, (*this)(data));
 }
 
-double ExternalPotentialType::operator()(const VectorXd &data) const {
+double ExternalPotentialType::energy(const VectorXd &data) const {
   return Vdvolume.dot(data);
 }
 

@@ -29,7 +29,7 @@ public:
   // The print_info function should be called at each iteration,
   // unless verbose is set to false in improve_energy.  But you can
   // also call it manually.
-  virtual void print_info(int iter) const;
+  virtual void print_info(int iter, const char *prefix = "") const;
 
   // energy returns the current energy.
   double energy() const {
