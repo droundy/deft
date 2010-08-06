@@ -27,19 +27,19 @@ int main() {
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
   Functional ig = IdealGas(gd, kT);
   if (ig.run_finite_difference_test("ideal gas", density)) {
-    printf("Finite difference test passes.\n");
-  } else {
     printf("Finite difference test failed!!!\n");
     return 1;
+  } else {
+    printf("Finite difference test passes.\n");
   }
 
   printf("\nNow let's verify it works with very low density!\n");
   density *= 1e-5;
   if (ig.run_finite_difference_test("ideal gas", density)) {
-    printf("Finite difference test passes.\n");
-  } else {
     printf("Finite difference test failed!!!\n");
     return 1;
+  } else {
+    printf("Finite difference test passes.\n");
   }
 
   printf("\nNow let's try this with an effective potential...\n");
@@ -54,10 +54,10 @@ int main() {
   Functional ig2 = compose(IdealGas(gd,kT), EffectivePotentialToDensity(kT));
   density *= 1e-5;
   if (ig2.run_finite_difference_test("ideal gas", potential)) {
-    printf("Finite difference test passes.\n");
-  } else {
     printf("Finite difference test failed!!!\n");
     return 1;
+  } else {
+    printf("Finite difference test passes.\n");
   }
   return 0;
 }

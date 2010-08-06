@@ -33,7 +33,7 @@ void FunctionalInterface::print_iteration(const VectorXd &d, int iter) const {
 bool FunctionalInterface::run_finite_difference_test(const char *testname,
                                                      const VectorXd &x,
                                                      const VectorXd *direction) const {
-  printf("Running finite difference test on %s:\n", testname);
+  printf("\nRunning finite difference test on %s:\n", testname);
 
   VectorXd my_grad(x);
   double Eold = (*this)(x);
@@ -103,21 +103,21 @@ bool FunctionalInterface::run_finite_difference_test(const char *testname,
   if (min < 1e-3 && best_ratio_error < 1e-7) {
     printf("Passed on basis of reasonable scaling (%g) and accuracy (%g).\n",
            min, best_ratio_error);
-    return true;
+    return false;
   }
   if (best_ratio_error < 1e-10) {
     printf("Passed on basis of a gradient accuracy of (%g) (with scaling %g).\n",
            best_ratio_error, min);
-    return true;
+    return false;
   }
   if (min < 1e-5 && best_ratio_error < 0.01) {
     printf("Passed on basis of seriously nice scaling %g (and low accuracy %g).\n",
            min, best_ratio_error);
-    return true;
+    return false;
   }
   printf("Failed with scaling ratio of %g and gradient accuracy of %g\n",
          min, best_ratio_error);
-  return false;
+  return true;
 }
 
 class FunctionalComposition : public FunctionalInterface {

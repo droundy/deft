@@ -4,7 +4,7 @@ GENERIC_CODE = src/lattice.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/Functional.cpp src/IdealGas.cpp src/ChemicalPotential.cpp \
 	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
-	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp \
+	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
 	src/EffectivePotentialToDensity.cpp
 
 bin_PROGRAMS = deft
@@ -12,13 +12,15 @@ deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
 	tests/fftinverse.test \
-	tests/eps.test \
 	tests/ideal-gas.test \
 	tests/ideal-gas-at-pressure.test \
 	tests/ideal-gas-optimization.test \
-	tests/ideal-gas-external-potential.test
+	tests/ideal-gas-external-potential.test \
+	tests/simple-liquid.test \
+	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)
+tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(GENERIC_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(GENERIC_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(GENERIC_CODE)

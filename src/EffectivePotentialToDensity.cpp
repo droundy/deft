@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include <stdio.h>
 
 class EffectivePotentialToDensityType : public FieldFunctionalInterface {
 public:
@@ -26,7 +27,12 @@ public:
   VectorXd operator()(const VectorXd &data) const {
     VectorXd out(data);
     for (int i=0; i<out.rows(); i++) {
-      out[i] = exp(minusbeta*out[i]);
+      const double n = exp(minusbeta*out[i]);
+      if (n != n) {
+        printf("got NaN from out[%d] == %g\n", i, out[i]);
+        assert(n == n);
+      }
+      out[i] = n;
     }
     return out;
     //return (minusbeta*data).cwise().exp();

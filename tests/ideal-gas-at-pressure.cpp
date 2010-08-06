@@ -34,10 +34,10 @@ int main() {
   Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu);
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   if (f.run_finite_difference_test("ideal gas", potential)) {
-    printf("Finite difference test passes.\n");
-  } else {
     printf("Finite difference test failed!!!\n");
     return 1;
+  } else {
+    printf("Finite difference test passes.\n");
   }
   return 0;
 }

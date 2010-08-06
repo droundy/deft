@@ -29,6 +29,7 @@ public:
 
   // The following utility methods do not need to be overridden.
   void print_iteration(const VectorXd &data, int iter) const;
+  // run_finite_difference_test returns false when the test fails.
   bool run_finite_difference_test(const char *testname,
                                   const VectorXd &data,
                                   const VectorXd *direction = 0) const;

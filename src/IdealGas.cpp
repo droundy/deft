@@ -51,7 +51,10 @@ double IdealGasType::operator()(const VectorXd &data) const {
   double e = 0;
   for (int i=0; i < gd.NxNyNz; i++) {
     const double n = data[i];
-    assert(n == n); // check for NaN
+    if (n != n) {
+      printf("data[%d] == %g\n", i, n);
+      assert(n == n); // check for NaN
+    }
     if (n > min_log_arg) {
       e += n*log(n) - n;
       if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.

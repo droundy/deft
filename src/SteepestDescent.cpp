@@ -44,7 +44,7 @@ bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer *lm = linmin(f, x, d, -d.dot(d), &step);
+  Minimizer *lm = linmin(f, x, d, d.dot(grad()), &step);
   for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
     if (verbose) lm->print_info(iter);
   }

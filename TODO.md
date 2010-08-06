@@ -1,8 +1,6 @@
 - Implement huge repulsive external potential, to make sure we can
   look at a hard-surface cavity.
 
-- Implement simple quadratic attraction functional.
-
 - Write a program to do surface-tension calculations by putting an
   infinite barrier at one spot, and adjusting the chemical potential
   until we have a liquid-vapor interface and then setting the chemical
