@@ -38,14 +38,14 @@ tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-poten
 # Build static html docs suitable for being shipped in the software
 # package. This depends on ikiwiki being installed to build the docs.
 
-ifeq ($(shell which ikiwiki),)
-IKIWIKI=echo "** ikiwiki not found" >&2 ; echo ikiwiki
-else
-IKIWIKI=ikiwiki
-endif
+# ifeq ($(shell which ikiwiki),)
+# IKIWIKI=echo "** ikiwiki not found" >&2 ; echo ikiwiki
+# else
+# IKIWIKI=ikiwiki
+# endif
 
 html:
-	$(IKIWIKI) `pwd` html -v --wikiname Deft --plugin=goodstuff \
+	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
 		--exclude=html --exclude=Makefile.am
 
 local-clean:

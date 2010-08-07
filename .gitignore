@@ -7,6 +7,7 @@ Makefile
 Makefile.in
 config.h
 config.h.in
+html
 stamp-*
 *.test
 deft
