@@ -1,0 +1,7 @@
+To reach the authors of FooBar, join channel `#foobar` on the `examplenet`
+irc network.
+
+There's also a mailing list,
+[foobar-l](http://example.com/mailman/listinfo/foobar-l).
+
+Be sure to read the [[doc/FAQ]] first.

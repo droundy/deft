@@ -1,0 +1,10 @@
+Installing FooBar is pretty straightforward:
+
+	tar xzvf foobar.tar.gz
+	cd foobar
+	./configure
+	make
+	make install
+
+Note that you'll need `libfrobnicate` installed first. You might also want to
+edit `config.h`.

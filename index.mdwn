@@ -1,0 +1,13 @@
+FooBar is an amazing example program that does not exist. Use it for all
+your example program needs. This is its wiki.
+
+* **[[download]]**
+* [[news]]
+* [[documentation|doc]]
+* [[bugs]]
+* [[contact]]
+
+----
+
+This wiki is powered by [ikiwiki](http://ikiwiki.info).
+

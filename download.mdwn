@@ -1,0 +1,4 @@
+Deft tarballs cannot be downloaded from
+[anywhere](http://foobar.example.com/download/).
+
+You cat grep deft with `git clone git://github.com/droundy/deft.git`.

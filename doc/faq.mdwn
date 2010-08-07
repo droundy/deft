@@ -1,0 +1,11 @@
+FooBar frequently asked questions.
+
+[[!toc ]]
+
+## Is this a real program?
+
+No, it's just an example.
+
+## Really?
+
+Yes, really.
