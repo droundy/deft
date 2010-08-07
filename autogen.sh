@@ -1,7 +1,7 @@
 set -ev
 
 # automake wants a file called README.
-cp README.mdwn README
+cp README.md README
 
 aclocal
 autoheader

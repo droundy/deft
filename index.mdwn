@@ -6,8 +6,6 @@ Deft is a not-yet-released density-functional theory code. This is its wiki.
 * [[bugs]]
 * [[todo]]
 
-[[!inline pages=README]]
-
 ----
 
 This wiki is powered by [ikiwiki](http://ikiwiki.info).
