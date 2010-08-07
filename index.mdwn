@@ -4,7 +4,7 @@ Deft is a not-yet-released density-functional theory code. This is its wiki.
 * [[news]]
 * [[documentation|doc]]
 * [[bugs]]
-* [[contact]]
+* [[todo]]
 
 [[!inline pages=README]]
 
