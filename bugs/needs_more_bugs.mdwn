@@ -1,0 +1,3 @@
+FooBar does not have enough bugs, which suggests that it's not a real Free
+Software project. Please help create more bugs by adding code to FooBar!
+:-)
