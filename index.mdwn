@@ -7,6 +7,8 @@ your example program needs. This is its wiki.
 * [[bugs]]
 * [[contact]]
 
+[[!inline pages=README]]
+
 ----
 
 This wiki is powered by [ikiwiki](http://ikiwiki.info).
