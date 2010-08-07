@@ -1,4 +1,0 @@
-FooBar is configured via the config file `/etc/foobarrc`, and the per-user
-`~/.foobarrc`.
-
-The file format should be self-explanatory.

@@ -1,11 +1,7 @@
-FooBar frequently asked questions.
+Deft frequently asked questions.
 
 [[!toc ]]
 
-## Is this a real program?
+## Has anyone ever asked a question about Deft?
 
-No, it's just an example.
-
-## Really?
-
-Yes, really.
+No.
