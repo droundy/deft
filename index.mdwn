@@ -1,5 +1,4 @@
-FooBar is an amazing example program that does not exist. Use it for all
-your example program needs. This is its wiki.
+Deft is a not-yet-released density-functional theory code. This is its wiki.
 
 * **[[download]]**
 * [[news]]
