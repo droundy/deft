@@ -1,5 +1,4 @@
-FooBar tarballs can be downloaded from
-[here](http://foobar.example.com/download/).
+Deft tarballs cannot be downloaded from
+[anywhere](http://foobar.example.com/download/).
 
-There's also a Subversion repository, at
-`svn://foobar.example.com/foobar/trunk`.
+You cat grep deft with `git clone git://github.com/droundy/deft.git`.
