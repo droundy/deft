@@ -1,0 +1,3 @@
+Implement huge repulsive external potential, to make sure we can look
+at a hard-surface cavity.
+
