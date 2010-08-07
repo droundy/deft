@@ -1,5 +1,4 @@
 Documentation for deft.
 
 * First, you'll want to [[install]] it.
-* Then you'll want to [[setup]] the config files.
 * There's also a [[FAQ]].
