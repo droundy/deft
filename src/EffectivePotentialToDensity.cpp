@@ -37,6 +37,9 @@ public:
     return out;
     //return (minusbeta*data).cwise().exp();
   }
+  double operator()(double Veff) const {
+    return exp(minusbeta*Veff);
+  }
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).

@@ -23,6 +23,7 @@ public:
   IdealGasType(const GridDescription &g, double temp)
     : gd(g), T(temp) {}
 
+  double energy(double data) const;
   double energy(const VectorXd &data) const;
   void grad(const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
@@ -54,6 +55,22 @@ double IdealGasType::energy(const VectorXd &data) const {
     } else {
       e += (n-min_log_arg)*slope + min_e;
     }
+  }
+  return T*e*gd.Lat.volume()/gd.NxNyNz;
+}
+
+double IdealGasType::energy(double n) const {
+  double e;
+  if (n != n) {
+    printf("n == %g\n", n);
+    assert(n == n); // check for NaN
+  }
+  if (n > min_log_arg) {
+    e = n*log(n) - n;
+    if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
+    assert(e == e); // check for NaN
+  } else {
+    e = (n-min_log_arg)*slope + min_e;
   }
   return T*e*gd.Lat.volume()/gd.NxNyNz;
 }

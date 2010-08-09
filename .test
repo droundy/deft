@@ -2,4 +2,4 @@
 
 set -ev
 
-make -j2 check
+time make -j2 check

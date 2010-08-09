@@ -11,6 +11,7 @@ class FieldFunctionalInterface {
 public:
   // A functional mapping one field onto another...
   virtual VectorXd operator()(const VectorXd &data) const = 0;
+  virtual double operator()(double) const = 0;
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
@@ -38,6 +39,9 @@ public:
   }
 
   VectorXd operator()(const VectorXd &data) const {
+    return (*itsCounter->ptr)(data);
+  }
+  double operator()(double data) const {
     return (*itsCounter->ptr)(data);
   }
   void grad(const VectorXd &data, const VectorXd &ingrad,

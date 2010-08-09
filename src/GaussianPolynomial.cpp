@@ -24,7 +24,6 @@ public:
   GaussianPolynomialType(const GridDescription &g, double amplitude, double width, int pow)
     : gd(g), A(amplitude), sig(width), power(pow) {
     ksig = 1.0/sig; // FIXME: get width right in k space!
-    norm = 1.0/sig/sig/sig; // FIXME: get normalization right!
   }
 
   double energy(const VectorXd &data) const {
@@ -43,12 +42,17 @@ public:
     }
     return e;
   }
+  double energy(double n) const {
+    double e = A;
+    for (int j=0;j<power;j++) e *= n;
+    return e;
+  }
 
   Grid broaden(const VectorXd &x) const {
     Grid xbar(gd);
     xbar = x;
     ReciprocalGrid xg(xbar.fft());
-    xg = xg.cwise()*(norm*(-(0.5/ksig/ksig)*xg.g2()).cwise().exp());
+    xg = xg.cwise()*(-(0.5/ksig/ksig)*xg.g2()).cwise().exp();
     xbar = xg.ifft();
     return xbar;
   }
@@ -72,7 +76,7 @@ public:
   }
 private:
   GridDescription gd;
-  double A, sig, ksig, norm;
+  double A, sig, ksig;
   int power;
 };
 

@@ -32,6 +32,7 @@ bool SteepestDescent::improve_energy(bool verbose) {
     //lm->print_info(iter);
     print_info(iter++);
   }
+  delete lm;
   return (energy() < E0);
 }
 

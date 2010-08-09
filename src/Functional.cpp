@@ -88,6 +88,7 @@ bool FunctionalInterface::run_finite_difference_test(const char *testname,
     printf("FD   Ratio: %25.16f (grad ~ %g)\n", grads[p-min_p]/lderiv,
            grads[p-min_p]);
     printf("FD sigfigs: %25.16f\n", 1e-15*fabs(Eold/(Eplus-Eminus)));
+    fflush(stdout);
 
     if (fabs(grads[p-min_p]/lderiv - 1.0) < best_ratio_error)
       best_ratio_error = fabs(grads[p-min_p]/lderiv - 1.0);
@@ -128,6 +129,9 @@ public:
   double energy(const VectorXd &data) const {
     return f1(f2(data));
   }
+  double energy(double data) const {
+    return f1(f2(data));
+  }
   void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
     VectorXd d1(f2(data)), g1(d1);
     g1.setZero();
@@ -163,6 +167,9 @@ class FunctionalSum : public FunctionalInterface {
 public:
   FunctionalSum(const Functional &f, const Functional &g) : f1(f), f2(g) {};
 
+  double energy(double data) const {
+    return f1(data) + f2(data);
+  }
   double energy(const VectorXd &data) const {
     return f1(data) + f2(data);
   }

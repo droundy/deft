@@ -13,7 +13,6 @@ public:
   Minimizer(Functional myf, VectorXd *data)
     : f(myf), x(data), last_grad(0), last_pgrad(0) {
     iter = 0;
-    energy_valid = false;
   }
   ~Minimizer() {
     delete last_grad;
@@ -32,13 +31,7 @@ public:
   virtual void print_info(int iter, const char *prefix = "") const;
 
   // energy returns the current energy.
-  double energy() const {
-    if (!energy_valid) {
-      last_energy = f(*x);
-      energy_valid = true;
-    }
-    return last_energy;
-  }
+  double energy() const { return f(*x); }
   const VectorXd &grad() const {
     if (!last_grad) {
       last_grad = new VectorXd(*x); // hokey
@@ -62,14 +55,11 @@ public:
 
   // Note that we're changing the position x.
   void invalidate_cache() {
-    energy_valid = false;
     delete last_grad;
     last_grad = 0;
     delete last_pgrad;
     last_pgrad = 0;
   }
 private:
-  mutable double last_energy;
   mutable VectorXd *last_grad, *last_pgrad;
-  mutable bool energy_valid;
 };

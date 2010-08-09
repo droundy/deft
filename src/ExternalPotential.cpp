@@ -22,28 +22,23 @@ public:
   ExternalPotentialType(const Grid &V)
     : Vdvolume(V*V.description().Lat.volume()/V.description().NxNyNz) {}
 
-  double energy(const VectorXd &data) const;
-  void grad(const VectorXd &data,
-            VectorXd *, VectorXd *pgrad = 0) const;
+  double energy(const VectorXd &data) const {
+    return Vdvolume.dot(data);
+  }
+  double energy(double) const {
+    return Vdvolume.sum(); // FIXME: this is broken!
+  }
+  void grad(const VectorXd &,VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
+    *g_ptr += Vdvolume;
+    if (pg_ptr) *pg_ptr += Vdvolume;
+  }
 
-  void print_summary(const char *prefix, const VectorXd &data) const;
+  void print_summary(const char *prefix, const VectorXd &data) const {
+    printf("%sExternal potential energy = %g\n", prefix, (*this)(data));
+  }
 private:
   VectorXd Vdvolume; // the potential times the differential volume element dV.
 };
-
-void ExternalPotentialType::print_summary(const char *prefix, const VectorXd &data) const {
-  printf("%sExternal potential energy = %g\n", prefix, (*this)(data));
-}
-
-double ExternalPotentialType::energy(const VectorXd &data) const {
-  return Vdvolume.dot(data);
-}
-
-void ExternalPotentialType::grad(const VectorXd &,
-                                 VectorXd *g_ptr, VectorXd *pg_ptr) const {
-  *g_ptr += Vdvolume;
-  if (pg_ptr) *pg_ptr += Vdvolume;
-}
 
 Functional ExternalPotential(const Grid &V) {
   return Functional(new ExternalPotentialType(V));

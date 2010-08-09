@@ -21,11 +21,9 @@ public:
   ChemicalPotentialType(const GridDescription &g, double chemical_potential)
     : gd(g), mu(chemical_potential) {}
 
-  // To implement a functional, you need to provide both an energy
-  // method and a gradient method.
   double energy(const VectorXd &data) const;
-  // If the second pointer is nonzero, you need to also output a
-  // preconditioned gradient.
+  double energy(double data) const;
+
   void grad(const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 private:
@@ -38,6 +36,10 @@ double ChemicalPotentialType::energy(const VectorXd &data) const {
   for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
   Ntot *= gd.Lat.volume()/gd.NxNyNz;
   return mu*Ntot;
+}
+
+double ChemicalPotentialType::energy(double n) const {
+  return mu*n;
 }
 
 void ChemicalPotentialType::grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {

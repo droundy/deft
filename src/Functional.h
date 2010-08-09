@@ -21,6 +21,8 @@ public:
     }
     return last_energy;
   }
+  // The following method is for a homogeneous density.
+  double operator()(double data) const { return energy(data); }
 
   // The gradient method, however, outputs its output in-place in two
   // VectorXd pointers.  If the second pointer is nonzero, you need to
@@ -43,8 +45,8 @@ public:
                                   const VectorXd *direction = 0) const;
 protected:
   mutable double last_energy;
-  // The energy method is operator()
   virtual double energy(const VectorXd &data) const = 0;
+  virtual double energy(double data) const = 0;
 private:
   mutable uint32_t checksum;
   uint32_t compute_checksum(const VectorXd &m) const {
@@ -75,6 +77,9 @@ public:
     return *this;
   }
 
+  double energy(double data) const {
+    return (*itsCounter->ptr)(data);
+  }
   double energy(const VectorXd &data) const {
     return (*itsCounter->ptr)(data);
   }
