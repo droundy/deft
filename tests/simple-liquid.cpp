@@ -41,7 +41,7 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, do
     fflush(stdout);
   }
 
-  min->print_info(-1);
+  min->print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("fractional energy error = %g\n", (min->energy() - true_energy)/fabs(true_energy));
   if (fabs((min->energy() - true_energy)/true_energy) > fraccuracy) {

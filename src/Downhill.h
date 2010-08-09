@@ -12,7 +12,7 @@ public:
     : Minimizer(f, data), nu(viscosity) {}
 
   bool improve_energy(bool verbose = false);
-  void print_info(int iter, const char *prefix="") const;
+  void print_info(const char *prefix="") const;
 };
 
 class PreconditionedDownhill : public Minimizer {
@@ -23,5 +23,5 @@ public:
     : Minimizer(f, data), nu(viscosity) {}
 
   bool improve_energy(bool verbose = false);
-  void print_info(int iter, const char *prefix="") const;
+  void print_info(const char *prefix="") const;
 };

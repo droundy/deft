@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+# I use bask because I prefer its builtin time function over /usr/bin/time.
 
 set -ev
 

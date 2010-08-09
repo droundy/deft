@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 bool Downhill::improve_energy(bool verbose) {
+  iter++;
   const VectorXd g = grad();
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
@@ -40,18 +41,19 @@ bool Downhill::improve_energy(bool verbose) {
   }
   nu *= 1.1;
   if (verbose) {
-    //lm->print_info(iter);
-    print_info(iter++);
+    //lm->print_info();
+    print_info();
   }
   return true;
 }
 
-void Downhill::print_info(int iter, const char *prefix) const {
-  Minimizer::print_info(iter, prefix);
+void Downhill::print_info(const char *prefix) const {
+  Minimizer::print_info(prefix);
   printf("%snu = %g\n", prefix, nu);
 }
 
 bool PreconditionedDownhill::improve_energy(bool verbose) {
+  iter++;
   const VectorXd g = pgrad();
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
@@ -75,12 +77,12 @@ bool PreconditionedDownhill::improve_energy(bool verbose) {
   nu *= 1.1;
   if (verbose) {
     //lm->print_info(iter);
-    print_info(iter++);
+    print_info();
   }
   return true;
 }
 
-void PreconditionedDownhill::print_info(int iter, const char *prefix) const {
-  Minimizer::print_info(iter, prefix);
+void PreconditionedDownhill::print_info(const char *prefix) const {
+  Minimizer::print_info(prefix);
   printf("%snu = %g\n", prefix, nu);
 }

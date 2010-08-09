@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 bool SteepestDescent::improve_energy(bool verbose) {
+  iter++;
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
   const VectorXd d = -grad();
@@ -26,22 +27,23 @@ bool SteepestDescent::improve_energy(bool verbose) {
 
   Minimizer *lm = linmin(f, x, d, -d.dot(d), &step);
   for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
-    if (verbose) lm->print_info(iter, "\t");
+    if (verbose) lm->print_info("\t");
   }
   if (verbose) {
-    //lm->print_info(iter);
-    print_info(iter++);
+    //lm->print_info();
+    print_info();
   }
   delete lm;
   return (energy() < E0);
 }
 
-void SteepestDescent::print_info(int iter, const char *prefix) const {
-  Minimizer::print_info(iter, prefix);
+void SteepestDescent::print_info(const char *prefix) const {
+  Minimizer::print_info(prefix);
   printf("%sstep = %g\n", prefix, step);
 }
 
 bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
+  iter++;
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
   const VectorXd d = -pgrad();
@@ -50,16 +52,16 @@ bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
 
   Minimizer *lm = linmin(f, x, d, d.dot(grad()), &step);
   for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
-    if (verbose) lm->print_info(iter, "\t");
+    if (verbose) lm->print_info("\t");
   }
   if (verbose) {
-    //lm->print_info(iter);
-    print_info(iter++);
+    //lm->print_info();
+    print_info();
   }
   return (energy() < E0);
 }
 
-void PreconditionedSteepestDescent::print_info(int iter, const char *prefix) const {
-  Minimizer::print_info(iter, prefix);
+void PreconditionedSteepestDescent::print_info(const char *prefix) const {
+  Minimizer::print_info(prefix);
   printf("%sstep = %g\n", prefix, step);
 }

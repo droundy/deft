@@ -41,7 +41,7 @@ int main(int, char **argv) {
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
     Downhill min(f, &potential);
     for (int i=0;i<140 && min.improve_energy();i++) {
-      min.print_info(i);
+      fflush(stdout);
     }
     double err2 = 0;
     for (int i=0;i<gd.NxNyNz;i++) {
@@ -70,8 +70,7 @@ int main(int, char **argv) {
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
     SteepestDescent min(f, &potential, QuadraticLineMinimizer, 1.0);
     for (int i=0;i<20 && min.improve_energy(true);i++) {
-      printf("hello bad foo\n");
-      min.print_info(i);
+      fflush(stdout);
     }
     double err2 = 0;
     for (int i=0;i<gd.NxNyNz;i++) {

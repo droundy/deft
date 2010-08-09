@@ -34,9 +34,9 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_de
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
-    //min->print_info(i);
+    fflush(stdout);
   }
-  min->print_info(137);
+  min->print_info();
   Grid density(*pot);
   density = EffectivePotentialToDensity(kT)(*pot);
   double err2 = 0;
