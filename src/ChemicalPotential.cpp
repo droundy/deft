@@ -21,35 +21,28 @@ public:
   ChemicalPotentialType(const GridDescription &g, double chemical_potential)
     : gd(g), mu(chemical_potential) {}
 
-  double energy(const VectorXd &data) const;
-  double energy(double data) const;
+  double energy(const VectorXd &data) const {
+    double Ntot = 0;
+    for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
+    Ntot *= gd.Lat.volume()/gd.NxNyNz;
+    return mu*Ntot;
+  }
+  double energy(double n) const {
+    return mu*n;
+  }
 
-  void grad(const VectorXd &data,
-            VectorXd *, VectorXd *pgrad = 0) const;
+  void grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
+    VectorXd &g = *g_ptr;
+    
+    const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
+    for (int i=0; i < gd.NxNyNz; i++) g[i] += mudV;
+    if (pg_ptr)
+      for (int i=0; i < gd.NxNyNz; i++) (*pg_ptr)[i] += mudV;
+  }
 private:
   GridDescription gd;
   double mu; // the chemical potential
 };
-
-double ChemicalPotentialType::energy(const VectorXd &data) const {
-  double Ntot = 0;
-  for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
-  Ntot *= gd.Lat.volume()/gd.NxNyNz;
-  return mu*Ntot;
-}
-
-double ChemicalPotentialType::energy(double n) const {
-  return mu*n;
-}
-
-void ChemicalPotentialType::grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
-  VectorXd &g = *g_ptr;
-
-  const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
-  for (int i=0; i < gd.NxNyNz; i++) g[i] += mudV;
-  if (pg_ptr)
-    for (int i=0; i < gd.NxNyNz; i++) (*pg_ptr)[i] += mudV;
-}
 
 Functional ChemicalPotential(const GridDescription &g, double chemical_potential) {
   return Functional(new ChemicalPotentialType(g, chemical_potential));
