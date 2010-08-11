@@ -33,15 +33,6 @@ int main() {
     printf("Finite difference test passes.\n");
   }
 
-  printf("\nNow let's verify it works with very low density!\n");
-  density *= 1e-5;
-  if (ig.run_finite_difference_test("ideal gas", density)) {
-    printf("Finite difference test failed!!!\n");
-    return 1;
-  } else {
-    printf("Finite difference test passes.\n");
-  }
-
   printf("\nNow let's try this with an effective potential...\n");
   Grid potential(gd);
   potential = 1e-2*((-50*density.r2()).cwise().exp())

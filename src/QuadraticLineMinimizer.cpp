@@ -24,7 +24,8 @@ public:
 };
 
 bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
-  //printf("\t\tI am running QuadraticLineMinimizerType::improve_energy with verbose==%d\n", verbose);
+  //if (verbose) printf("\t\tI am running QuadraticLineMinimizerType::improve_energy with verbose==%d\n", verbose);
+  //fflush(stdout);
   // FIXME: The following probably double-computes the energy!
   const double E0 = energy();
 
@@ -33,10 +34,19 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   // reasonable starting guess.
   double step1 = *step;
   *x += step1*direction; // Step away a bit...
+  double Etried = -137;
   do {
     step1 *= 0.5;
     *x -= step1*direction; // and then step back a bit less...
     invalidate_cache();
+    if (energy() == Etried) {
+      if (verbose) {
+        printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g\n", step1);
+        fflush(stdout);
+      }
+      break;
+    }
+    Etried = energy();
   } while (energy() > E0);
   
   const double E1 = energy();
@@ -48,10 +58,14 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   if (verbose) {
     printf("\t\tQuad: E0 = %25.15g   E1 = %25.15g\n", E0, E1);
     printf("\t\tQuad: slope = %14.7g  curvature = %14.7g\n", slope, curvature);
+    fflush(stdout);
   }
  
   if (curvature <= 0.0) {
-    if (verbose) printf("\t\tCurvature has wrong sign... %g\n", curvature);
+    if (verbose) {
+      printf("\t\tCurvature has wrong sign... %g\n", curvature);
+      fflush(stdout);
+    }
     if (E0 < E1) {
       // It doesn't look to be working, so let's panic!
       invalidate_cache();
@@ -64,8 +78,11 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     *step = step2; // output the stepsize for later reuse.
     invalidate_cache();
     *x += (step2-step1)*direction; // and move to the expected minimum.
-    if (verbose) printf("\t\tQuad: step1 = %14.7g  step2 = %14.7g\n", step1, step2);
-    if (verbose) printf("\t\tQuad: E2 = %25.15g\n", energy());
+    if (verbose) {
+      printf("\t\tQuad: step1 = %14.7g  step2 = %14.7g\n", step1, step2);
+      printf("\t\tQuad: E2 = %25.15g\n", energy());
+      fflush(stdout);
+    }
 
     // Check that the energy did indeed drop!  FIXME: this may do
     // extra energy calculations, since it's not necessarily shared
@@ -76,7 +93,10 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       *x -= (step2-step1)*direction;
     } else if (energy() > E0) {
       *x -= step2*direction;
-      if (verbose) printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g)\n", energy());
+      if (verbose) {
+        printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g)\n", energy());
+        fflush(stdout);
+      }
       return false;
       //assert(!"Quadratic linmin not working well!!!\n");
     }

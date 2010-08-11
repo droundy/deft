@@ -18,6 +18,12 @@ public:
     delete last_grad;
     delete last_pgrad;
   }
+  virtual void minimize(Functional newf, VectorXd *newx = 0) {
+    f = newf;
+    iter = 0;
+    invalidate_cache();
+    if (newx) x = newx;
+  }
 
   // improve_energy returns false if the energy is fully converged
   // (i.e. it didn't improve), and there is no reason to call this

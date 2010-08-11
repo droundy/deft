@@ -10,6 +10,7 @@ GridDescription::GridDescription(Lattice lat, int nx, int ny, int nz)
   NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
   NzOver2 = Nz/2 + 1; NyNzOver2 = Ny*NzOver2; NxNyNzOver2 = Nx*NyNzOver2;
   dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
+  dvolume = fineLat.volume();
 
   // Make a couple of FFTW plans with FFTW_MEASURE, to speed things up
   // for later...
@@ -32,6 +33,7 @@ GridDescription::GridDescription(Lattice lat, double delta)
   NyNz = Ny*Nz; NxNyNz = Nx*NyNz;
   NzOver2 = Nz/2 + 1; NyNzOver2 = Ny*NzOver2; NxNyNzOver2 = Nx*NyNzOver2;
   dx = 1.0/Nx; dy = 1.0/Ny; dz = 1.0/Nz;
+  dvolume = fineLat.volume();
 
   // Make a couple of FFTW plans with FFTW_MEASURE, to speed things up
   // for later...

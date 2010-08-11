@@ -21,8 +21,27 @@
 #include "SteepestDescent.h"
 
 const double kT = 1e-3; // room temperature in Hartree
-const double ngas = 1e-5; // vapor density of water
+const double ngas = 1.14e-7; // vapor density of water
+const double nliquid = 4.9388942e-3; // density of liquid water
 const double mu = -kT*log(ngas);
+const double Veff_liquid = -kT*log(nliquid);
+
+// Here we set up the lattice.
+Lattice lat(Cartesian(5,0,0), Cartesian(0,5,0), Cartesian(0,0,5));
+double resolution = 0.2;
+GridDescription gd(lat, resolution);
+
+// And the functional...
+const double interaction_energy_scale = 0.01;
+Functional attraction = GaussianPolynomial(gd, -interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+Functional repulsion = GaussianPolynomial(gd, interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+Functional f0 = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + attraction + repulsion;
+Functional f = compose(f0, EffectivePotentialToDensity(kT));
+
+Grid external_potential(gd);
+Grid potential(gd);
+
+Functional ff;
 
 int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -32,10 +51,10 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, do
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -3.125598357241298;
+  const double true_energy = -0.2639209612386242;
   //const double gas_energy = -1.250000000000085e-11;
 
-  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
+  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
 
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
     fflush(stdout);
@@ -52,44 +71,39 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, do
 }
 
 int main(int, char **argv) {
-  Lattice lat(Cartesian(5,0,0), Cartesian(0,5,0), Cartesian(0,0,5));
-  double resolution = 0.2;
-  GridDescription gd(lat, resolution);
-  Grid external_potential(gd);
-  external_potential = 1000/ngas*(-0.2*external_potential.r2()).cwise().exp(); // repulsive bump
-  Grid potential(gd);
-  Functional attraction = GaussianPolynomial(gd, -1/ngas/ngas, 0.5, 2);
-  Functional repulsion = GaussianPolynomial(gd, 1/ngas/ngas/ngas/ngas, 0.5, 4);
-  Functional f0 = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + ExternalPotential(external_potential)
-    + attraction + repulsion;
-  Functional f = compose(f0, EffectivePotentialToDensity(kT));
+  external_potential = 1e-3/nliquid*(-0.2*external_potential.r2()).cwise().exp(); // repulsive bump
+  Functional f1 = f0 + ExternalPotential(external_potential);
+  ff = compose(f1, EffectivePotentialToDensity(kT));
 
-  Grid test_density(gd);
-  test_density = EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp() + mu*VectorXd::Ones(gd.NxNyNz));
 
   int retval = 0;
 
-  potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
-  retval += f.run_finite_difference_test("simple liquid", potential);
+  {
+    Grid test_density(gd);
+    test_density = EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
+                                                   + mu*VectorXd::Ones(gd.NxNyNz));
+    potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
+    retval += f.run_finite_difference_test("simple liquid", potential);
+    
+    retval += attraction.run_finite_difference_test("quadratic", test_density);
+    retval += repulsion.run_finite_difference_test("repulsive", test_density);
+  }
 
-  retval += attraction.run_finite_difference_test("quadratic", test_density);
-  retval += repulsion.run_finite_difference_test("repulsive", test_density);
-
-  Downhill downhill(f, &potential, 1e-3);
+  Downhill downhill(ff, &potential, 1e-11);
   potential.setZero();
-  retval += test_minimizer("Downhill", &downhill, &potential, 5000, 0.995);
+  retval += test_minimizer("Downhill", &downhill, &potential, 300, 1e-13);
 
-  PreconditionedDownhill pd(f, &potential, 1e-11);
+  PreconditionedDownhill pd(ff, &potential, 1e-11);
   potential.setZero();
-  retval += test_minimizer("PreconditionedDownhill", &pd, &potential, 300, 1e-14);
+  retval += test_minimizer("PreconditionedDownhill", &pd, &potential, 300, 1e-13);
 
-  SteepestDescent steepest(f, &potential, QuadraticLineMinimizer, 1e-3);
+  SteepestDescent steepest(ff, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", &steepest, &potential, 2000, 0.9);
+  retval += test_minimizer("SteepestDescent", &steepest, &potential, 200, 1e-13);
 
-  PreconditionedSteepestDescent psd(f, &potential, QuadraticLineMinimizer, 1e-11);
+  PreconditionedSteepestDescent psd(ff, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, 200, 1e-10);
+  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, 200, 1e-13);
 
   
   potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);

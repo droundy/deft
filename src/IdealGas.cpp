@@ -36,7 +36,7 @@ private:
   double T; // temperature
 };
 
-const double min_log_arg = 1e-10;
+const double min_log_arg = 1e-12;
 const double slope = log(min_log_arg);
 const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
@@ -56,7 +56,7 @@ double IdealGasType::energy(const VectorXd &data) const {
       e += (n-min_log_arg)*slope + min_e;
     }
   }
-  return T*e*gd.Lat.volume()/gd.NxNyNz;
+  return T*e*gd.dvolume;
 }
 
 double IdealGasType::energy(double n) const {
@@ -72,7 +72,7 @@ double IdealGasType::energy(double n) const {
   } else {
     e = (n-min_log_arg)*slope + min_e;
   }
-  return T*e*gd.Lat.volume()/gd.NxNyNz;
+  return T*e;
 }
 
 void IdealGasType::grad(const VectorXd &n,

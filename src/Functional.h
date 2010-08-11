@@ -9,13 +9,17 @@ class FunctionalComposition;
 
 class FunctionalInterface {
 public:
+  FunctionalInterface() {
+    checksum = -1;
+  }
+
   // To implement a functional, you need to provide both an energy
   // method and a gradient method.
 
   // The energy method is operator()
   double operator()(const VectorXd &data) const {
     uint32_t sum = compute_checksum(data);
-    if (sum != checksum) {
+    if (sum != checksum || checksum == -1) {
       last_energy = energy(data);
       checksum = sum;
     }

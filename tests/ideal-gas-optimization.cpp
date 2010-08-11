@@ -84,7 +84,7 @@ int main(int, char **argv) {
       return 1;
     }
     for (int i=0;i<gd.NxNyNz;i++) {
-      if (fabs(potential[i] - mu) > fabs(3e-9*mu)) {
+      if (fabs(potential[i] - mu) > fabs(1e-8*mu)) {
         printf("Oh no, the error is %g out of %g at %d!\n", potential[i]-mu, mu, i);
         return 1;
       }

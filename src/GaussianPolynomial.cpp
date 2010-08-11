@@ -40,11 +40,12 @@ public:
       for (int j=0;j<power;j++) ehere *= nbari;
       e += ehere;
     }
-    return e;
+    return e*gd.dvolume;
   }
   double energy(double n) const {
     double e = A;
     for (int j=0;j<power;j++) e *= n;
+    //printf("\tGaussian energy: %g (n = %g)\n", e, n);
     return e;
   }
 
@@ -63,7 +64,7 @@ public:
     Grid dFdnbar(gd);
     for (int i=0; i < gd.NxNyNz; i++) {
       const double nbari = nbar[i];
-      dFdnbar[i] = A*power;
+      dFdnbar[i] = A*power*gd.dvolume;
       for (int j=1; j<power;j++) dFdnbar[i] *= nbari;
     }
     Grid dFdn(broaden(dFdnbar));
