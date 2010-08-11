@@ -1,0 +1,8 @@
+[[!comment format=mdwn
+ username="droundy"
+ ip="65.110.159.185"
+ subject="test case done"
+ date="2010-08-11T17:22:23Z"
+ content="""
+I've written a test program that computes the surface tension, and just need to write a general-purpose utility program that does roughly the same thing, to be added to the library.
+"""]]
