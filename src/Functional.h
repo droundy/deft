@@ -19,7 +19,7 @@ public:
   // The energy method is operator()
   double operator()(const VectorXd &data) const {
     uint32_t sum = compute_checksum(data);
-    if (sum != checksum || checksum == -1) {
+    if (sum != checksum || int(checksum) == -1) {
       last_energy = energy(data);
       checksum = sum;
     }
