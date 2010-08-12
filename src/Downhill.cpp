@@ -14,10 +14,33 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "Downhill.h"
+#include "Minimizer.h"
 #include <stdio.h>
 
-bool Downhill::improve_energy(bool verbose) {
+class DownhillType : public MinimizerInterface {
+protected:
+  double nu, orig_nu;
+public:
+  DownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
+    : MinimizerInterface(f, gdin, data), nu(viscosity), orig_nu(viscosity) {}
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    nu = orig_nu;
+    MinimizerInterface::minimize(newf, gdnew, newx);
+  }
+
+  bool improve_energy(bool verbose = false);
+  void print_info(const char *prefix="") const;
+};
+
+class PreconditionedDownhillType : public DownhillType {
+public:
+  PreconditionedDownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
+    : DownhillType(f, gdin, data, viscosity) {}
+
+  bool improve_energy(bool verbose = false);
+};
+
+bool DownhillType::improve_energy(bool verbose) {
   iter++;
   const VectorXd g = grad();
   // Let's immediately free the cached gradient stored internally!
@@ -47,12 +70,12 @@ bool Downhill::improve_energy(bool verbose) {
   return true;
 }
 
-void Downhill::print_info(const char *prefix) const {
-  Minimizer::print_info(prefix);
+void DownhillType::print_info(const char *prefix) const {
+  MinimizerInterface::print_info(prefix);
   printf("%snu = %g\n", prefix, nu);
 }
 
-bool PreconditionedDownhill::improve_energy(bool verbose) {
+bool PreconditionedDownhillType::improve_energy(bool verbose) {
   iter++;
   const VectorXd g = pgrad();
   // Let's immediately free the cached gradient stored internally!
@@ -80,4 +103,12 @@ bool PreconditionedDownhill::improve_energy(bool verbose) {
     print_info();
   }
   return true;
+}
+
+Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
+  return Minimizer(new DownhillType(f, gdin, data, viscosity));
+}
+
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
+  return Minimizer(new PreconditionedDownhillType(f, gdin, data, viscosity));
 }

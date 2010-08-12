@@ -4,18 +4,23 @@
 
 #include "Functional.h"
 
-class Minimizer {
-protected:
+class Minimizer;
+
+Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+
+class MinimizerInterface {
+public: // yuck, this shouldn't be public!
   Functional f;
   VectorXd *x; // Note that we don't own this data!
   int iter;
   GridDescription gd;
 public:
-  Minimizer(Functional myf, const GridDescription &gdin, VectorXd *data)
+  MinimizerInterface(Functional myf, const GridDescription &gdin, VectorXd *data)
     : f(myf), x(data), last_grad(0), last_pgrad(0), gd(gdin) {
     iter = 0;
   }
-  ~Minimizer() {
+  ~MinimizerInterface() {
     delete last_grad;
     delete last_pgrad;
   }
@@ -70,4 +75,57 @@ public:
   }
 private:
   mutable VectorXd *last_grad, *last_pgrad;
+};
+
+class Minimizer : public MinimizerInterface {
+public:
+  // Handle reference counting so we can pass these things around freely...
+  explicit Minimizer(MinimizerInterface *p) // allocate a new counter
+    : MinimizerInterface(p->f, p->gd, p->x), itsCounter(0) {
+    itsCounter = new counter(p);
+  }
+  ~Minimizer() { release(); }
+  Minimizer(const Minimizer& r) : MinimizerInterface(r) {
+    acquire(r.itsCounter);
+  }
+  Minimizer& operator=(const Minimizer& r) {
+    if (this != &r) {
+      release();
+      acquire(r.itsCounter);
+    }
+    return *this;
+  }
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    MinimizerInterface::minimize(newf, gdnew, newx);
+    itsCounter->ptr->minimize(newf, gdnew, newx);
+  }
+  bool improve_energy(bool verbose = false) {
+    return itsCounter->ptr->improve_energy(verbose);
+  }
+  void print_info(const char *prefix = "") const {
+    return itsCounter->ptr->print_info(prefix);
+  }
+
+private:
+  struct counter {
+    counter(MinimizerInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+    MinimizerInterface* ptr;
+    unsigned count;
+  };
+  counter *itsCounter;
+  void acquire(counter* c) {
+    // increment the count
+    itsCounter = c;
+    if (c) (c->count)++;
+  }
+  void release() {
+    // decrement the count, delete if it is 0
+    if (itsCounter) {
+      if (--itsCounter->count == 0) {
+        delete itsCounter->ptr;
+        delete itsCounter;
+      }
+      itsCounter = 0;
+    }
+  }
 };

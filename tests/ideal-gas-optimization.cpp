@@ -16,8 +16,7 @@
 
 #include <stdio.h>
 #include "Functionals.h"
-#include "Downhill.h"
-#include "SteepestDescent.h"
+#include "LineMinimizer.h"
 
 int main(int, char **argv) {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
@@ -39,7 +38,7 @@ int main(int, char **argv) {
   {
     potential = +1e-4*((-10*potential.r2()).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
-    Downhill min(f, gd, &potential);
+    Minimizer min = Downhill(f, gd, &potential);
     for (int i=0;i<140 && min.improve_energy();i++) {
       fflush(stdout);
     }
@@ -68,7 +67,7 @@ int main(int, char **argv) {
   {
     potential = +1e-4*((-10*potential.r2()).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
-    SteepestDescent min(f, gd, &potential, QuadraticLineMinimizer, 1.0);
+    Minimizer min = SteepestDescent(f, gd, &potential, QuadraticLineMinimizer, 1.0);
     for (int i=0;i<20 && min.improve_energy(true);i++) {
       fflush(stdout);
     }

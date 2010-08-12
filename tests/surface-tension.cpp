@@ -17,8 +17,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "Functionals.h"
-#include "Downhill.h"
-#include "SteepestDescent.h"
+#include "LineMinimizer.h"
 
 const double kT = 1e-3; // room temperature in Hartree
 const double ngas = 1.14e-7; // vapor density of water
@@ -161,7 +160,7 @@ int main(int, char **argv) {
   fflush(stdout);
 
   {
-    PreconditionedDownhill pd(ff, gd, &potential, 1e-7);
+    Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-7);
     potential.setZero();
     retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
 
@@ -173,7 +172,7 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", density);
   }
 
-  PreconditionedSteepestDescent psd(ff, gd, &potential, QuadraticLineMinimizer, 1e-7);
+  Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-7);
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", &psd, 400, 1e-4);
 

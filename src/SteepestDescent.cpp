@@ -14,10 +14,35 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "SteepestDescent.h"
+#include "LineMinimizer.h"
 #include <stdio.h>
 
-bool SteepestDescent::improve_energy(bool verbose) {
+class SteepestDescentType : public MinimizerInterface {
+protected:
+  double step, orig_step;
+  LineMinimizer linmin;
+public:
+  SteepestDescentType(Functional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
+    : MinimizerInterface(f, gdin, data), step(stepsize), orig_step(step), linmin(lm) {}
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    step = orig_step;
+    MinimizerInterface::minimize(newf, gdnew, newx);
+  }
+
+  bool improve_energy(bool verbose = false);
+  void print_info(const char *prefix="") const;
+};
+
+class PreconditionedSteepestDescentType : public SteepestDescentType {
+public:
+  PreconditionedSteepestDescentType(Functional f, const GridDescription &gdin,
+                                    VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
+    : SteepestDescentType(f, gdin, data, lm, stepsize) {}
+
+  bool improve_energy(bool verbose = false);
+};
+
+bool SteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
@@ -25,24 +50,23 @@ bool SteepestDescent::improve_energy(bool verbose) {
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer *lm = linmin(f, gd, x, d, -d.dot(d), &step);
-  for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
-    if (verbose) lm->print_info("\t");
+  Minimizer lm = linmin(f, gd, x, d, -d.dot(d), &step);
+  for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
+    if (verbose) lm.print_info("\t");
   }
   if (verbose) {
     //lm->print_info();
     print_info();
   }
-  delete lm;
   return (energy() < E0);
 }
 
-void SteepestDescent::print_info(const char *prefix) const {
-  Minimizer::print_info(prefix);
+void SteepestDescentType::print_info(const char *prefix) const {
+  MinimizerInterface::print_info(prefix);
   printf("%sstep = %g\n", prefix, step);
 }
 
-bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
+bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
@@ -50,13 +74,24 @@ bool PreconditionedSteepestDescent::improve_energy(bool verbose) {
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer *lm = linmin(f, gd, x, d, d.dot(grad()), &step);
-  for (int i=0; i<100 && lm->improve_energy(verbose); i++) {
-    if (verbose) lm->print_info("\t");
+  Minimizer lm = linmin(f, gd, x, d, d.dot(grad()), &step);
+  for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
+    if (verbose) lm.print_info("\t");
   }
   if (verbose) {
     //lm->print_info();
     print_info();
   }
   return (energy() < E0);
+}
+
+
+Minimizer SteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
+                          LineMinimizer lm, double stepsize) {
+  return Minimizer(new SteepestDescentType(f, gdin, data, lm, stepsize));
+}
+
+Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
+                                        LineMinimizer lm, double stepsize) {
+  return Minimizer(new PreconditionedSteepestDescentType(f, gdin, data, lm, stepsize));
 }

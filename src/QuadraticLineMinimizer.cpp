@@ -3,14 +3,14 @@
 #include "LineMinimizer.h"
 #include <stdio.h>
 
-class QuadraticLineMinimizerType : public Minimizer {
+class QuadraticLineMinimizerType : public MinimizerInterface {
 private:
   const VectorXd direction;
   double *step, slope, alternatestep;
 public:
   QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, VectorXd *data, const VectorXd &dir,
                              double gradDotDirection, double *instep)
-    : Minimizer(f, gdin, data), direction(dir), step(instep), slope(gradDotDirection) {
+    : MinimizerInterface(f, gdin, data), direction(dir), step(instep), slope(gradDotDirection) {
     if (step == 0) {
       // If the caller doesn't specify the stepsize, we'll just use an
       // internal one.
@@ -114,7 +114,7 @@ void QuadraticLineMinimizerType::print_info(int iter) const {
 
 
 
-Minimizer *QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
+Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
                                   const VectorXd &direction, double gradDotDirection, double *step) {
-  return new QuadraticLineMinimizerType(f, gd, data, direction, gradDotDirection, step);
+  return Minimizer(new QuadraticLineMinimizerType(f, gd, data, direction, gradDotDirection, step));
 }

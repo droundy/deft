@@ -16,14 +16,13 @@
 
 #include <stdio.h>
 #include "Functionals.h"
-#include "Downhill.h"
-#include "SteepestDescent.h"
+#include "LineMinimizer.h"
 
 const double kT = 1e-3; // room temperature in Hartree
 const double ngas = 1e-5; // vapor density of water
 const double mu = -kT*log(ngas);
 
-int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_density, int numiters) {
+int test_minimizer(const char *name, Minimizer min, Grid *pot, Grid expected_density, int numiters) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
@@ -33,10 +32,10 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_de
   const double true_energy = -5.597856610022806e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
-  for (int i=0;i<numiters && min->improve_energy(false);i++) {
+  for (int i=0;i<numiters && min.improve_energy(false);i++) {
     fflush(stdout);
   }
-  min->print_info();
+  min.print_info();
   Grid density(pot->description(), EffectivePotentialToDensity(kT)(*pot));
   double err2 = 0;
   for (int i=0;i<pot->description().NxNyNz;i++) {
@@ -44,8 +43,8 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_de
   }
   err2 /= pot->description().NxNyNz;
   printf("rms error = %g\n", sqrt(err2));
-  printf("fractional energy error = %g\n", (min->energy() - true_energy)/fabs(true_energy));
-  if (fabs((min->energy() - true_energy)/true_energy) > 5e-3) {
+  printf("fractional energy error = %g\n", (min.energy() - true_energy)/fabs(true_energy));
+  if (fabs((min.energy() - true_energy)/true_energy) > 5e-3) {
     printf("Error in the energy is too big!\n");
     return 1;
   }
@@ -76,21 +75,21 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  Downhill downhill(f, gd, &potential);
+  Minimizer downhill = Downhill(f, gd, &potential);
   potential.setZero();
-  retval += test_minimizer("Downhill", &downhill, &potential, expected_density, 3000);
+  retval += test_minimizer("Downhill", downhill, &potential, expected_density, 3000);
 
-  PreconditionedDownhill pd(f, gd, &potential);
+  Minimizer pd = PreconditionedDownhill(f, gd, &potential);
   potential.setZero();
-  retval += test_minimizer("PreconditionedDownhill", &pd, &potential, expected_density, 15);
+  retval += test_minimizer("PreconditionedDownhill", pd, &potential, expected_density, 15);
 
-  SteepestDescent steepest(f, gd, &potential, QuadraticLineMinimizer, 1.0);
+  Minimizer steepest = SteepestDescent(f, gd, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", &steepest, &potential, expected_density, 2000);
+  retval += test_minimizer("SteepestDescent", steepest, &potential, expected_density, 2000);
 
-  PreconditionedSteepestDescent psd(f, gd, &potential, QuadraticLineMinimizer, 1.0);
+  Minimizer psd = PreconditionedSteepestDescent(f, gd, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, expected_density, 10);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, expected_density, 10);
 
   if (retval == 0) {
     printf("%s passes!\n", argv[0]);
