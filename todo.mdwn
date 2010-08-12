@@ -1,4 +1,4 @@
 This is deft's TODO list. Link items to [[todo/done]] when done.
 
-[[!inline pages="./todo/* and !./todo/done and !link(done) 
+[[!inline pages="./todo/* and !./todo/done* and !link(done) 
 and !*/Discussion" actions=yes postform=yes show=0]]
