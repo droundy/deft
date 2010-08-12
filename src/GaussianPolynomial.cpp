@@ -21,13 +21,13 @@
 
 class GaussianPolynomialType : public FunctionalInterface {
 public:
-  GaussianPolynomialType(const GridDescription &g, double amplitude, double width, int pow)
-    : gd(g), A(amplitude), sig(width), power(pow) {
+  GaussianPolynomialType(double amplitude, double width, int pow)
+    : A(amplitude), sig(width), power(pow) {
     ksig = 1.0/sig; // FIXME: get width right in k space!
   }
 
-  double energy(const VectorXd &data) const {
-    Grid nbar(broaden(data));
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    Grid nbar(broaden(gd, data));
     
     double e = 0;
     for (int i=0; i < gd.NxNyNz; i++) {
@@ -49,7 +49,7 @@ public:
     return e;
   }
 
-  Grid broaden(const VectorXd &x) const {
+  Grid broaden(const GridDescription &gd, const VectorXd &x) const {
     Grid xbar(gd);
     xbar = x;
     ReciprocalGrid xg(xbar.fft());
@@ -58,8 +58,8 @@ public:
     return xbar;
   }
 
-  void grad(const VectorXd &n, VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
-    Grid nbar(broaden(n));
+  void grad(const GridDescription &gd, const VectorXd &n, VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
+    Grid nbar(broaden(gd, n));
     
     Grid dFdnbar(gd);
     for (int i=0; i < gd.NxNyNz; i++) {
@@ -67,20 +67,19 @@ public:
       dFdnbar[i] = A*power*gd.dvolume;
       for (int j=1; j<power;j++) dFdnbar[i] *= nbari;
     }
-    Grid dFdn(broaden(dFdnbar));
+    Grid dFdn(broaden(gd, dFdnbar));
     *g_ptr += dFdn;
     if (pg_ptr) *pg_ptr += dFdn;
   }
 
-  void  print_summary(const char *prefix, const VectorXd &data) const {
-    printf("%sGaussianPolynomial energy = %g\n", prefix, (*this)(data));
+  void  print_summary(const char *prefix) const {
+    printf("%sGaussianPolynomial energy = %g\n", prefix, last_energy);
   }
 private:
-  GridDescription gd;
   double A, sig, ksig;
   int power;
 };
 
-Functional GaussianPolynomial(const GridDescription &g, double amplitude, double width, int power) {
-  return Functional(new GaussianPolynomialType(g, amplitude, width, power));
+Functional GaussianPolynomial(double amplitude, double width, int power) {
+  return Functional(new GaussianPolynomialType(amplitude, width, power));
 }

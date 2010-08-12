@@ -20,19 +20,17 @@
 
 class IdealGasType : public FunctionalInterface {
 public:
-  IdealGasType(const GridDescription &g, double temp)
-    : gd(g), T(temp) {}
+  IdealGasType(double temp) : T(temp) {}
 
   double energy(double data) const;
-  double energy(const VectorXd &data) const;
-  void grad(const VectorXd &data,
+  double energy(const GridDescription &gd, const VectorXd &data) const;
+  void grad(const GridDescription &gd, const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 
-  void  print_summary(const char *prefix, const VectorXd &data) const {
-    printf("%sIdealGas energy = %g\n", prefix, (*this)(data));
+  void  print_summary(const char *prefix) const {
+    printf("%sIdealGas energy = %g\n", prefix, last_energy);
   }
 private:
-  GridDescription gd;
   double T; // temperature
 };
 
@@ -40,7 +38,7 @@ const double min_log_arg = 1e-12;
 const double slope = log(min_log_arg);
 const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-double IdealGasType::energy(const VectorXd &data) const {
+double IdealGasType::energy(const GridDescription &gd, const VectorXd &data) const {
   double e = 0;
   for (int i=0; i < gd.NxNyNz; i++) {
     const double n = data[i];
@@ -75,8 +73,8 @@ double IdealGasType::energy(double n) const {
   return T*e;
 }
 
-void IdealGasType::grad(const VectorXd &n,
-                    VectorXd *g_ptr, VectorXd *pg_ptr) const {
+void IdealGasType::grad(const GridDescription &gd, const VectorXd &n,
+                        VectorXd *g_ptr, VectorXd *pg_ptr) const {
   VectorXd &g = *g_ptr;
 
   const double TdV = T*gd.Lat.volume()/gd.NxNyNz;
@@ -90,6 +88,6 @@ void IdealGasType::grad(const VectorXd &n,
   if (pg_ptr) *pg_ptr += g;
 }
 
-Functional IdealGas(const GridDescription &g, double temperature) {
-  return Functional(new IdealGasType(g, temperature));
+Functional IdealGas(double temperature) {
+  return Functional(new IdealGasType(temperature));
 }

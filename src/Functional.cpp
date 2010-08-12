@@ -19,21 +19,22 @@
 #include <stdio.h>
 #include <math.h>
 
-void FunctionalInterface::print_summary(const char *, const VectorXd &) const {
+void FunctionalInterface::print_summary(const char *) const {
   // Don't print anything at all by default!
 }
 
-void FunctionalInterface::print_iteration(const char *prefix, const VectorXd &d, int iter) const {
+void FunctionalInterface::print_iteration(const char *prefix, int iter) const {
   printf("%s==============\n", prefix);
   printf("%sIteration %4d\n", prefix, iter);
   printf("%s==============\n", prefix);
-  print_summary(prefix, d);
+  print_summary(prefix);
 }
 
 bool FunctionalInterface::run_finite_difference_test(const char *testname,
-                                                     const VectorXd &x,
+                                                     const Grid &x,
                                                      const VectorXd *direction) const {
   printf("\nRunning finite difference test on %s:\n", testname);
+  const GridDescription gd(x.description());
 
   VectorXd my_grad(x);
   double Eold = (*this)(x);
@@ -79,8 +80,8 @@ bool FunctionalInterface::run_finite_difference_test(const char *testname,
     const double eps_ratio = 10.0;
     const double epsilon = pow(eps_ratio, -p);
     // The following is a little wasteful of memory...
-    const double Eplus= (*this)(x + epsilon*my_direction);
-    const double Eminus=(*this)(x - epsilon*my_direction);
+    const double Eplus= (*this)(gd, x + epsilon*my_direction);
+    const double Eminus=(*this)(gd, x - epsilon*my_direction);
 
     grads[p-min_p] = (Eplus-Eminus)/(2*epsilon);
     printf("    eps^2 = %25.16f deltaE %.12g\n",
@@ -126,31 +127,31 @@ public:
   FunctionalComposition(const Functional &f, const FieldFunctional &g)
     : f1(f), f2(g) {};
 
-  double energy(const VectorXd &data) const {
-    return f1(f2(data));
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return f1(gd, f2(gd, data));
   }
   double energy(double data) const {
     return f1(f2(data));
   }
-  void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
-    VectorXd d1(f2(data)), g1(d1);
+  void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
+    VectorXd d1(f2(gd, data)), g1(d1);
     g1.setZero();
     if (pgrad) {
       VectorXd pg1(g1);
       // First compute the gradient of f1(d1)...
-      f1.grad(d1, &g1, &pg1);
+      f1.grad(gd, d1, &g1, &pg1);
       // ... then use the chain rule to compute the gradient of f2(f1(data)).
       // FIXME:  I should be able to use pg1 here!!!
-      f2.grad(data, g1, g, pgrad);
+      f2.grad(gd, data, g1, g, pgrad);
     } else {
       // First compute the gradient of f1(d1)...
-      f1.grad(d1, &g1);
+      f1.grad(gd, d1, &g1);
       // ... then use the chain rule to compute the gradient of f2(f1(data)).
-      f2.grad(data, g1, g, pgrad);
+      f2.grad(gd, data, g1, g, pgrad);
     }
   }
-  void print_summary(const char *prefix, const VectorXd &data) const {
-    f1.print_summary(prefix, f2(data));
+  void print_summary(const char *prefix) const {
+    f1.print_summary(prefix);
   }
 private:
   const Functional f1;
@@ -170,16 +171,16 @@ public:
   double energy(double data) const {
     return f1(data) + f2(data);
   }
-  double energy(const VectorXd &data) const {
-    return f1(data) + f2(data);
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return f1(gd, data) + f2(gd, data);
   }
-  void grad(const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
-    f1.grad(data, g, pgrad);
-    f2.grad(data, g, pgrad);
+  void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
+    f1.grad(gd, data, g, pgrad);
+    f2.grad(gd, data, g, pgrad);
   }
-  void print_summary(const char *prefix, const VectorXd &data) const {
-    f1.print_summary(prefix, data);
-    f2.print_summary(prefix, data);
+  void print_summary(const char *prefix) const {
+    f1.print_summary(prefix);
+    f2.print_summary(prefix);
   }
 private:
   const Functional f1, f2;

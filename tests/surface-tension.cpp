@@ -33,9 +33,9 @@ GridDescription gd(lat, resolution);
 
 // And the functional...
 const double interaction_energy_scale = 2e-4;
-Functional attraction = GaussianPolynomial(gd, -interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(gd, interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + attraction + repulsion;
+Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 Functional f = compose(f0, EffectivePotentialToDensity(kT));
 
 Grid external_potential(gd);
@@ -57,7 +57,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
     fflush(stdout);
   }
   min->print_info();
-  min->minimize(f);
+  min->minimize(f, gd);
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
     //printf("Without external potential...\n");
     fflush(stdout);
@@ -67,13 +67,13 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double Einterface = f(potential);
   double Ninterface = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity(kT)(potential));
+    Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) Ninterface += density[i]*gd.dvolume;
   }
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
   Grid gas(gd, mu*VectorXd::Ones(gd.NxNyNz));
-  min->minimize(f, &gas);
+  min->minimize(f, gd, &gas);
   // The following sometimes fails with NaNs if it's run too long, for
   // reasons I don't understand.
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
@@ -83,7 +83,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double Egas = f(gas);
   double Ngas = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity(kT)(gas));
+    Grid density(gd, EffectivePotentialToDensity(kT)(gd, gas));
     for (int i=0;i<gd.NxNyNz;i++) Ngas += density[i]*gd.dvolume;
   }
   min->print_info();
@@ -94,7 +94,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   for (int i=0;i<gd.NxNyNz;i++)
     if (potential[i] < minpot) minpot = potential[i];
   Grid liquid(gd, minpot*VectorXd::Ones(gd.NxNyNz));
-  min->minimize(f, &liquid);
+  min->minimize(f, gd, &liquid);
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
     //printf("LIQUID\n");
     fflush(stdout);
@@ -104,8 +104,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double Eliquid = f(liquid);
   double Nliquid = 0;
   {
-    Grid density(liquid);
-    density = EffectivePotentialToDensity(kT)(liquid);
+    Grid density(gd, EffectivePotentialToDensity(kT)(gd, liquid));
     for (int i=0;i<gd.NxNyNz;i++) Nliquid += density[i]*gd.dvolume;
   }
 
@@ -139,7 +138,7 @@ int main(int, char **argv) {
   Functional f1 = f0 + ExternalPotential(external_potential);
   ff = compose(f1, EffectivePotentialToDensity(kT));
 
-  Grid test_density(gd, EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
+  Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
                                                         + mu*VectorXd::Ones(gd.NxNyNz)));
 
   // The following is for debugging our simple liquid...
@@ -162,11 +161,11 @@ int main(int, char **argv) {
   fflush(stdout);
 
   {
-    PreconditionedDownhill pd(ff, &potential, 1e-7);
+    PreconditionedDownhill pd(ff, gd, &potential, 1e-7);
     potential.setZero();
     retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
 
-    Grid density(gd, EffectivePotentialToDensity(kT)(potential));
+    Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
                            Cartesian(0,0,0));
 
@@ -174,7 +173,7 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", density);
   }
 
-  PreconditionedSteepestDescent psd(ff, &potential, QuadraticLineMinimizer, 1e-7);
+  PreconditionedSteepestDescent psd(ff, gd, &potential, QuadraticLineMinimizer, 1e-7);
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", &psd, 400, 1e-4);
 

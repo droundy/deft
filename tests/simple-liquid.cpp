@@ -33,9 +33,9 @@ GridDescription gd(lat, resolution);
 
 // And the functional...
 const double interaction_energy_scale = 0.01;
-Functional attraction = GaussianPolynomial(gd, -interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(gd, interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + attraction + repulsion;
+Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 Functional f = compose(f0, EffectivePotentialToDensity(kT));
 
 Grid potential(gd);
@@ -75,7 +75,7 @@ int main(int, char **argv) {
   int retval = 0;
 
   {
-    Grid test_density(gd, EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
+    Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
                                                           + mu*VectorXd::Ones(gd.NxNyNz)));
     potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
     retval += f.run_finite_difference_test("simple liquid", potential);
@@ -84,19 +84,19 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", test_density);
   }
 
-  Downhill downhill(ff, &potential, 1e-11);
+  Downhill downhill(ff, gd, &potential, 1e-11);
   potential.setZero();
   retval += test_minimizer("Downhill", &downhill, &potential, 300, 1e-13);
 
-  PreconditionedDownhill pd(ff, &potential, 1e-11);
+  PreconditionedDownhill pd(ff, gd, &potential, 1e-11);
   potential.setZero();
   retval += test_minimizer("PreconditionedDownhill", &pd, &potential, 300, 1e-13);
 
-  SteepestDescent steepest(ff, &potential, QuadraticLineMinimizer, 1e-3);
+  SteepestDescent steepest(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
   retval += test_minimizer("SteepestDescent", &steepest, &potential, 200, 1e-13);
 
-  PreconditionedSteepestDescent psd(ff, &potential, QuadraticLineMinimizer, 1e-11);
+  PreconditionedSteepestDescent psd(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, 200, 1e-13);
 

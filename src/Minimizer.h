@@ -9,20 +9,22 @@ protected:
   Functional f;
   VectorXd *x; // Note that we don't own this data!
   int iter;
+  GridDescription gd;
 public:
-  Minimizer(Functional myf, VectorXd *data)
-    : f(myf), x(data), last_grad(0), last_pgrad(0) {
+  Minimizer(Functional myf, const GridDescription &gdin, VectorXd *data)
+    : f(myf), x(data), last_grad(0), last_pgrad(0), gd(gdin) {
     iter = 0;
   }
   ~Minimizer() {
     delete last_grad;
     delete last_pgrad;
   }
-  virtual void minimize(Functional newf, VectorXd *newx = 0) {
+  virtual void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     f = newf;
     iter = 0;
     invalidate_cache();
     if (newx) x = newx;
+    gd = gdnew;
   }
 
   // improve_energy returns false if the energy is fully converged
@@ -37,12 +39,12 @@ public:
   virtual void print_info(const char *prefix = "") const;
 
   // energy returns the current energy.
-  double energy() const { return f(*x); }
+  double energy() const { return f(gd, *x); }
   const VectorXd &grad() const {
     if (!last_grad) {
       last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      f.grad(*x, last_grad);
+      f.grad(gd, *x, last_grad);
     }
     return *last_grad;
   }
@@ -54,7 +56,7 @@ public:
         last_grad = new VectorXd(*x); // hokey
         last_grad->setZero(); // Have to remember to zero it out first!
       }
-      f.grad(*x, last_grad, last_pgrad);
+      f.grad(gd, *x, last_grad, last_pgrad);
     }
     return *last_pgrad;
   }

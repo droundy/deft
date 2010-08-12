@@ -3,6 +3,7 @@
 #pragma once
 
 #include "FieldFunctional.h"
+#include "Grid.h"
 #include <stdint.h>
 
 class FunctionalComposition;
@@ -17,10 +18,20 @@ public:
   // method and a gradient method.
 
   // The energy method is operator()
-  double operator()(const VectorXd &data) const {
+  double operator()(const GridDescription &gd, const VectorXd &data) const {
     uint32_t sum = compute_checksum(data);
+    // FIXME: should also check that gd hasn't changed!
     if (sum != checksum || int(checksum) == -1) {
-      last_energy = energy(data);
+      last_energy = energy(gd, data);
+      checksum = sum;
+    }
+    return last_energy;
+  }
+  double operator()(const Grid &g) const {
+    uint32_t sum = compute_checksum(g);
+    // FIXME: should also check that g.description() hasn't changed!
+    if (sum != checksum || int(checksum) == -1) {
+      last_energy = energy(g.description(), g);
       checksum = sum;
     }
     return last_energy;
@@ -34,22 +45,25 @@ public:
   // be accumulated, so that the resulting VectorXd will be the sum of
   // the gradient plus any additional value.  This enables the easy
   // combination of different functionals.
-  virtual void grad(const VectorXd &data,
+  virtual void grad(const GridDescription &gd, const VectorXd &data,
                     VectorXd *, VectorXd *pgrad = 0) const = 0;
+  void grad(const Grid &g, VectorXd *myg, VectorXd *mypg = 0) const {
+    grad(g.description(), g, myg, mypg); // Just pull out the description...
+  }
 
   // You may optionally define a print_summary method, which would
   // print something interesting to the screen.
-  virtual void print_summary(const char *prefix, const VectorXd &data) const;
+  virtual void print_summary(const char *prefix) const;
 
   // The following utility methods do not need to be overridden.
-  void print_iteration(const char *prefix, const VectorXd &data, int iter) const;
+  void print_iteration(const char *prefix, int iter) const;
   // run_finite_difference_test returns false when the test fails.
   bool run_finite_difference_test(const char *testname,
-                                  const VectorXd &data,
+                                  const Grid &data,
                                   const VectorXd *direction = 0) const;
 protected:
   mutable double last_energy;
-  virtual double energy(const VectorXd &data) const = 0;
+  virtual double energy(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double energy(double data) const = 0;
 private:
   mutable uint32_t checksum;
@@ -84,15 +98,15 @@ public:
   double energy(double data) const {
     return (*itsCounter->ptr)(data);
   }
-  double energy(const VectorXd &data) const {
-    return (*itsCounter->ptr)(data);
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return (*itsCounter->ptr)(gd, data);
   }
-  void grad(const VectorXd &data,
+  void grad(const GridDescription &gd, const VectorXd &data,
             VectorXd *g, VectorXd *pg = 0) const {
-    itsCounter->ptr->grad(data, g, pg);
+    itsCounter->ptr->grad(gd, data, g, pg);
   }
-  void print_summary(const char *prefix, const VectorXd &data) const {
-    itsCounter->ptr->print_summary(prefix, data);
+  void print_summary(const char *prefix) const {
+    itsCounter->ptr->print_summary(prefix);
   }
 private:
   struct counter {

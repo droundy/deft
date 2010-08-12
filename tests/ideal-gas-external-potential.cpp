@@ -37,8 +37,7 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, Grid expected_de
     fflush(stdout);
   }
   min->print_info();
-  Grid density(*pot);
-  density = EffectivePotentialToDensity(kT)(*pot);
+  Grid density(pot->description(), EffectivePotentialToDensity(kT)(*pot));
   double err2 = 0;
   for (int i=0;i<pot->description().NxNyNz;i++) {
     err2 += (density[i]-expected_density[i])*(density[i]-expected_density[i]);
@@ -70,27 +69,26 @@ int main(int, char **argv) {
   Grid potential(gd);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + ExternalPotential(external_potential);
+  Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu) + ExternalPotential(external_potential);
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
 
-  Grid expected_density(gd);
-  expected_density = EffectivePotentialToDensity(kT)(external_potential + mu*VectorXd::Ones(gd.NxNyNz));
+  Grid expected_density(gd, EffectivePotentialToDensity(kT)(gd, external_potential + mu*VectorXd::Ones(gd.NxNyNz)));
 
   int retval = 0;
 
-  Downhill downhill(f, &potential);
+  Downhill downhill(f, gd, &potential);
   potential.setZero();
   retval += test_minimizer("Downhill", &downhill, &potential, expected_density, 3000);
 
-  PreconditionedDownhill pd(f, &potential);
+  PreconditionedDownhill pd(f, gd, &potential);
   potential.setZero();
   retval += test_minimizer("PreconditionedDownhill", &pd, &potential, expected_density, 15);
 
-  SteepestDescent steepest(f, &potential, QuadraticLineMinimizer, 1.0);
+  SteepestDescent steepest(f, gd, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
   retval += test_minimizer("SteepestDescent", &steepest, &potential, expected_density, 2000);
 
-  PreconditionedSteepestDescent psd(f, &potential, QuadraticLineMinimizer, 1.0);
+  PreconditionedSteepestDescent psd(f, gd, &potential, QuadraticLineMinimizer, 1.0);
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", &psd, &potential, expected_density, 10);
 

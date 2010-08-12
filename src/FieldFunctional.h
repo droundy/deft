@@ -2,20 +2,17 @@
 
 #pragma once
 
-#include <eigen2/Eigen/Core>
-
-// import most common Eigen types 
-USING_PART_OF_NAMESPACE_EIGEN
+#include "Grid.h"
 
 class FieldFunctionalInterface {
 public:
   // A functional mapping one field onto another...
-  virtual VectorXd operator()(const VectorXd &data) const = 0;
+  virtual VectorXd operator()(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double operator()(double) const = 0;
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
-  virtual void grad(const VectorXd &data, const VectorXd &ingrad,
+  virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
 };
 
@@ -38,15 +35,18 @@ public:
     return *this;
   }
 
-  VectorXd operator()(const VectorXd &data) const {
-    return (*itsCounter->ptr)(data);
+  VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
+    return (*itsCounter->ptr)(gd, data);
+  }
+  VectorXd operator()(const Grid &g) const {
+    return (*this)(g.description(), g);
   }
   double operator()(double data) const {
     return (*itsCounter->ptr)(data);
   }
-  void grad(const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    itsCounter->ptr->grad(data, ingrad, outgrad, outpgrad);
+    itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
   }
 private:
   struct counter {

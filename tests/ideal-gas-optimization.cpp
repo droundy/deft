@@ -31,7 +31,7 @@ int main(int, char **argv) {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = IdealGas(gd,kT) + ChemicalPotential(gd, mu);
+  Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu);
   Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
 
@@ -39,7 +39,7 @@ int main(int, char **argv) {
   {
     potential = +1e-4*((-10*potential.r2()).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
-    Downhill min(f, &potential);
+    Downhill min(f, gd, &potential);
     for (int i=0;i<140 && min.improve_energy();i++) {
       fflush(stdout);
     }
@@ -68,7 +68,7 @@ int main(int, char **argv) {
   {
     potential = +1e-4*((-10*potential.r2()).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
-    SteepestDescent min(f, &potential, QuadraticLineMinimizer, 1.0);
+    SteepestDescent min(f, gd, &potential, QuadraticLineMinimizer, 1.0);
     for (int i=0;i<20 && min.improve_energy(true);i++) {
       fflush(stdout);
     }

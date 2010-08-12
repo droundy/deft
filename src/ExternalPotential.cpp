@@ -19,22 +19,22 @@
 
 class ExternalPotentialType : public FunctionalInterface {
 public:
-  ExternalPotentialType(const Grid &V)
+  explicit ExternalPotentialType(const Grid &V)
     : Vdvolume(V*V.description().Lat.volume()/V.description().NxNyNz) {}
 
-  double energy(const VectorXd &data) const {
+  double energy(const GridDescription &, const VectorXd &data) const {
     return Vdvolume.dot(data);
   }
   double energy(double) const {
     return Vdvolume.sum(); // FIXME: this is broken!
   }
-  void grad(const VectorXd &,VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
+  void grad(const GridDescription &, const VectorXd &,VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
     *g_ptr += Vdvolume;
     if (pg_ptr) *pg_ptr += Vdvolume;
   }
 
-  void print_summary(const char *prefix, const VectorXd &data) const {
-    printf("%sExternal potential energy = %g\n", prefix, (*this)(data));
+  void print_summary(const char *prefix) const {
+    printf("%sExternal potential energy = %g\n", prefix, last_energy);
   }
 private:
   VectorXd Vdvolume; // the potential times the differential volume element dV.

@@ -25,7 +25,7 @@ int main() {
   const double kT = 1e-3; // room temperature in Hartree
   density = 10*(-500*density.r2()).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  Functional ig = IdealGas(gd, kT);
+  Functional ig = IdealGas(kT);
   if (ig.run_finite_difference_test("ideal gas", density)) {
     printf("Finite difference test failed!!!\n");
     return 1;
@@ -34,15 +34,13 @@ int main() {
   }
 
   printf("\nNow let's try this with an effective potential...\n");
-  Grid potential(gd);
-  potential = 1e-2*((-50*density.r2()).cwise().exp())
-    + -2e-3*VectorXd::Ones(gd.NxNyNz);
+  Grid potential(gd, 1e-2*((-50*density.r2()).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density = EffectivePotentialToDensity(kT)(potential);
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig2 = compose(IdealGas(gd,kT), EffectivePotentialToDensity(kT));
+  Functional ig2 = compose(IdealGas(kT), EffectivePotentialToDensity(kT));
   density *= 1e-5;
   if (ig2.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test failed!!!\n");

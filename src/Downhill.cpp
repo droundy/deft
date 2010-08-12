@@ -81,8 +81,3 @@ bool PreconditionedDownhill::improve_energy(bool verbose) {
   }
   return true;
 }
-
-void PreconditionedDownhill::print_info(const char *prefix) const {
-  Minimizer::print_info(prefix);
-  printf("%snu = %g\n", prefix, nu);
-}

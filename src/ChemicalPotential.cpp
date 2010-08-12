@@ -18,10 +18,10 @@
 
 class ChemicalPotentialType : public FunctionalInterface {
 public:
-  ChemicalPotentialType(const GridDescription &g, double chemical_potential)
-    : gd(g), mu(chemical_potential) {}
+  ChemicalPotentialType(double chemical_potential)
+    : mu(chemical_potential) {}
 
-  double energy(const VectorXd &data) const {
+  double energy(const GridDescription &gd, const VectorXd &data) const {
     double Ntot = 0;
     for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
     Ntot *= gd.Lat.volume()/gd.NxNyNz;
@@ -31,7 +31,7 @@ public:
     return mu*n;
   }
 
-  void grad(const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
+  void grad(const GridDescription &gd, const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
     VectorXd &g = *g_ptr;
     
     const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
@@ -40,10 +40,9 @@ public:
       for (int i=0; i < gd.NxNyNz; i++) (*pg_ptr)[i] += mudV;
   }
 private:
-  GridDescription gd;
   double mu; // the chemical potential
 };
 
-Functional ChemicalPotential(const GridDescription &g, double chemical_potential) {
-  return Functional(new ChemicalPotentialType(g, chemical_potential));
+Functional ChemicalPotential(double chemical_potential) {
+  return Functional(new ChemicalPotentialType(chemical_potential));
 }
