@@ -18,10 +18,11 @@
 #include <time.h>
 #include "Functionals.h"
 #include "LineMinimizer.h"
+#include "utilities.h"
 
-const double kT = 1e-3; // room temperature in Hartree
-const double ngas = 1.14e-7; // vapor density of water
-const double nliquid = 4.9388942e-3; // density of liquid water
+const double kT = water_prop.kT; // room temperature in Hartree
+const double ngas = water_prop.vapor_density; // vapor density of water
+const double nliquid = water_prop.liquid_density; // density of liquid water
 const double mu = -kT*log(ngas);
 const double Veff_liquid = -kT*log(nliquid);
 
@@ -41,6 +42,8 @@ Grid external_potential(gd);
 Grid potential(gd);
 
 Functional ff;
+
+const double true_surface_tension = 1.93512e-06;
 
 int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -114,7 +117,6 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   printf("Ninterface/liquid/gas = %g/%g/%g\n", Ninterface, Nliquid, Ngas);
   const double X = Ninterface/Nliquid; // Fraction of volume effectively filled with liquid.
   printf("X is %g\n", X);
-  const double true_surface_tension = 1.93512e-06;
   const double surface_tension = (Einterface - Eliquid*X - Egas*(1-X))/2/0.2/0.2;
   printf("surface tension is %g\n", surface_tension);
 
@@ -149,6 +151,18 @@ int main(int, char **argv) {
   //}
 
   int retval = 0;
+
+  {
+    Minimizer pd = MaxIter(800, PreconditionedDownhill(f0, gd, &potential, 1e-7));
+    const double st = surface_tension(pd, f0, water_prop, true);
+    // The agreement with true_surface_tension isn't so great because
+    // the surface_tension function uses higher resolution for its calculation.
+    if (fabs(st - true_surface_tension)/true_surface_tension > 0.05) {
+      printf("XXXXXXX Funky discrepancy with surface_tension and true_surface_tension %g vs %g\n",
+             st, true_surface_tension);
+      retval += 1;
+    }
+  }
 
   potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
   retval += ff.run_finite_difference_test("simple liquid", potential);

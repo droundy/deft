@@ -37,6 +37,7 @@ public:
   }
 
   bool improve_energy(bool verbose = false) {
+    iter++;
     return min.improve_energy(verbose);
   }
   void print_info(const char *prefix="") const {

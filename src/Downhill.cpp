@@ -93,7 +93,7 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
     *x = oldx - nu*g;
     invalidate_cache();
     if (num_tries++ > 30) {
-      printf("PreconditionedDownhill giving up after %d tries...\n", num_tries);
+      printf("PreconditionedDownhill giving up after %d tries, with gradient %g...\n", num_tries, g.norm());
       return false; // It looks like we can't do any better with this algorithm.
     }
   }
