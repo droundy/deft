@@ -22,3 +22,50 @@ void MinimizerInterface::print_info(const char *prefix) const {
   printf("%sEnergy = %.16g\n", prefix, energy());
   printf("%sGradient = %g\n", prefix, grad().norm());
 }
+
+// A base class handling a bit of busy work dealing with modifiers of
+// minimizers.
+class MinimizerModifier : public MinimizerInterface {
+protected:
+  Minimizer min;
+public:
+  MinimizerModifier(Minimizer m)
+    : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    MinimizerInterface::minimize(newf, gdnew, newx);
+    min.minimize(newf, gdnew, newx);
+  }
+
+  bool improve_energy(bool verbose = false) {
+    return min.improve_energy(verbose);
+  }
+  void print_info(const char *prefix="") const {
+    return min.print_info(prefix);
+  }
+};
+
+
+// Impose a maximum number of iterations...
+class MaxIterType : public MinimizerModifier {
+protected:
+  int maxiter;
+public:
+  MaxIterType(Minimizer m, int max)
+    : MinimizerModifier(m), maxiter(max) {}
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    MinimizerModifier::minimize(newf, gdnew, newx);
+  }
+
+  bool improve_energy(bool verbose = false) {
+    if (iter > maxiter) {
+      if (verbose) printf("Maximum iteration limit exceeded:  %d\n", iter);
+      return false;
+    } else {
+      return MinimizerModifier::improve_energy(verbose);
+    }
+  }
+};
+
+Minimizer MaxIter(int maxiter, Minimizer m) {
+  return Minimizer(new MaxIterType(m, maxiter));
+}

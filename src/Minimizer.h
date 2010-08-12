@@ -8,6 +8,7 @@ class Minimizer;
 
 Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
 Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer MaxIter(int maxiter, Minimizer);
 
 class MinimizerInterface {
 public: // yuck, this shouldn't be public!

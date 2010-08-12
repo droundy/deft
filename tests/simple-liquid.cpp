@@ -43,7 +43,7 @@ Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); /
 Functional ff = compose(f0 + ExternalPotential(external_potential), EffectivePotentialToDensity(kT));
 
 
-int test_minimizer(const char *name, Minimizer min, Grid *pot, int numiters, double fraccuracy=1e-3) {
+int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
   clock_t start = clock();
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -56,9 +56,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, int numiters, dou
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
 
-  for (int i=0;i<numiters && min.improve_energy(false);i++) {
-    fflush(stdout);
-  }
+  while (min.improve_energy(false)) fflush(stdout);
 
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
@@ -83,21 +81,21 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", test_density);
   }
 
-  Minimizer downhill = Downhill(ff, gd, &potential, 1e-11);
+  Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential, 1e-11));
   potential.setZero();
-  retval += test_minimizer("Downhill", downhill, &potential, 300, 1e-13);
+  retval += test_minimizer("Downhill", downhill, &potential, 1e-13);
 
-  Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-11);
+  Minimizer pd = MaxIter(300, PreconditionedDownhill(ff, gd, &potential, 1e-11));
   potential.setZero();
-  retval += test_minimizer("PreconditionedDownhill", pd, &potential, 300, 1e-13);
+  retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-13);
 
-  Minimizer steepest = SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
+  Minimizer steepest = MaxIter(200, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3));
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", steepest, &potential, 200, 1e-13);
+  retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-13);
 
-  Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
+  Minimizer psd = MaxIter(200, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11));
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 200, 1e-13);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-13);
 
   
   potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
