@@ -32,19 +32,6 @@ double Grid::operator()(const Relative &r) const {
     + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
 }
 
-static double cartSqr(Cartesian r) {
-  return r.squaredNorm();
-}
-static double xfunc(Cartesian r) {
-  return r(0);
-}
-static double yfunc(Cartesian r) {
-  return r(1);
-}
-static double zfunc(Cartesian r) {
-  return r(2);
-}
-
 Grid::Grid(const GridDescription &gdin)
   : VectorXd(gdin.NxNyNz), gd(gdin),
     r2_op(gd, cartSqr),

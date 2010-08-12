@@ -38,10 +38,11 @@ Functional repulsion = GaussianPolynomial(gd, interaction_energy_scale/nliquid/n
 Functional f0 = IdealGas(gd,kT) + ChemicalPotential(gd, mu) + attraction + repulsion;
 Functional f = compose(f0, EffectivePotentialToDensity(kT));
 
-Grid external_potential(gd);
 Grid potential(gd);
+Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff;
+Functional ff = compose(f0 + ExternalPotential(external_potential), EffectivePotentialToDensity(kT));
+
 
 int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -71,17 +72,11 @@ int test_minimizer(const char *name, Minimizer *min, Grid *pot, int numiters, do
 }
 
 int main(int, char **argv) {
-  external_potential = 1e-3/nliquid*(-0.2*external_potential.r2()).cwise().exp(); // repulsive bump
-  Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = compose(f1, EffectivePotentialToDensity(kT));
-
-
   int retval = 0;
 
   {
-    Grid test_density(gd);
-    test_density = EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
-                                                   + mu*VectorXd::Ones(gd.NxNyNz));
+    Grid test_density(gd, EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
+                                                          + mu*VectorXd::Ones(gd.NxNyNz)));
     potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
     retval += f.run_finite_difference_test("simple liquid", potential);
     

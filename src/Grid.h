@@ -42,6 +42,8 @@ class Grid : public VectorXd {
 public:
   explicit Grid(const GridDescription &);
   Grid(const Grid &x);
+  template <typename OtherDerived>
+  explicit Grid(const GridDescription &gd, const Eigen::MatrixBase<OtherDerived> &x);
 
   // We need to define this for our object to work
   typedef Eigen::VectorXd Base;
@@ -84,3 +86,25 @@ private:
   GridDescription gd;
   any_op<double> r2_op, x_op, y_op, z_op;
 };
+
+static double cartSqr(Cartesian r) {
+  return r.squaredNorm();
+}
+static double xfunc(Cartesian r) {
+  return r(0);
+}
+static double yfunc(Cartesian r) {
+  return r(1);
+}
+static double zfunc(Cartesian r) {
+  return r(2);
+}
+
+template <typename OtherDerived> Grid::Grid(const GridDescription &gdin, const Eigen::MatrixBase<OtherDerived> &x)
+  : VectorXd(gdin.NxNyNz), gd(gdin),
+    r2_op(gd, cartSqr),
+    x_op(gd, xfunc),
+    y_op(gd, yfunc),
+    z_op(gd, zfunc) {
+  (*this) = x;
+}

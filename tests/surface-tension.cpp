@@ -67,14 +67,12 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double Einterface = f(potential);
   double Ninterface = 0;
   {
-    Grid density(potential);
-    density = EffectivePotentialToDensity(kT)(potential);
+    Grid density(gd, EffectivePotentialToDensity(kT)(potential));
     for (int i=0;i<gd.NxNyNz;i++) Ninterface += density[i]*gd.dvolume;
   }
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  Grid gas(potential);
-  for (int i=0;i<gd.NxNyNz;i++) gas[i] = mu;
+  Grid gas(gd, mu*VectorXd::Ones(gd.NxNyNz));
   min->minimize(f, &gas);
   // The following sometimes fails with NaNs if it's run too long, for
   // reasons I don't understand.
@@ -85,19 +83,17 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double Egas = f(gas);
   double Ngas = 0;
   {
-    Grid density(gas);
-    density = EffectivePotentialToDensity(kT)(gas);
+    Grid density(gd, EffectivePotentialToDensity(kT)(gas));
     for (int i=0;i<gd.NxNyNz;i++) Ngas += density[i]*gd.dvolume;
   }
   min->print_info();
   printf("gas energy is %g\n", f(gas));
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  Grid liquid(potential);
   double minpot = 1e100;
   for (int i=0;i<gd.NxNyNz;i++)
     if (potential[i] < minpot) minpot = potential[i];
-  for (int i=0;i<gd.NxNyNz;i++) liquid[i] = minpot;
+  Grid liquid(gd, minpot*VectorXd::Ones(gd.NxNyNz));
   min->minimize(f, &liquid);
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
     //printf("LIQUID\n");
@@ -143,9 +139,8 @@ int main(int, char **argv) {
   Functional f1 = f0 + ExternalPotential(external_potential);
   ff = compose(f1, EffectivePotentialToDensity(kT));
 
-  Grid test_density(gd);
-  test_density = EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
-                                                 + mu*VectorXd::Ones(gd.NxNyNz));
+  Grid test_density(gd, EffectivePotentialToDensity(kT)(-1e-4*(-2*external_potential.r2()).cwise().exp()
+                                                        + mu*VectorXd::Ones(gd.NxNyNz)));
 
   // The following is for debugging our simple liquid...
   //printf("mu is %g\n", mu);
@@ -171,8 +166,7 @@ int main(int, char **argv) {
     potential.setZero();
     retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
 
-    Grid density(gd);
-    density = EffectivePotentialToDensity(kT)(potential);
+    Grid density(gd, EffectivePotentialToDensity(kT)(potential));
     density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
                            Cartesian(0,0,0));
 
