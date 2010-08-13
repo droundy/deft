@@ -44,7 +44,7 @@ Grid potential(gd);
 
 Functional ff;
 
-const double true_surface_tension = 1.93512e-06;
+const double true_surface_tension = 1.95161e-06;
 
 int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -124,6 +124,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
   printf("fractional surface tension error = %g\n", (surface_tension - true_surface_tension)/fabs(true_surface_tension));
   if (fabs((surface_tension - true_surface_tension)/true_surface_tension) > fraccuracy) {
+    printf("FAIL:\n");
     printf("Error in the surface tension is too big!\n");
     return 1;
   }
@@ -158,8 +159,8 @@ int main(int, char **argv) {
     const double st = surface_tension(pd, f0, water_prop, true);
     // The agreement with true_surface_tension isn't so great because
     // the surface_tension function uses higher resolution for its calculation.
-    if (fabs(st - true_surface_tension)/true_surface_tension > 0.05) {
-      printf("XXXXXXX Funky discrepancy with surface_tension and true_surface_tension %g vs %g\n",
+    if (fabs(st - true_surface_tension)/true_surface_tension > 0.02) {
+      printf("FAIL: Funky discrepancy with surface_tension and true_surface_tension %g vs %g\n",
              st, true_surface_tension);
       retval += 1;
     }
@@ -177,7 +178,7 @@ int main(int, char **argv) {
   {
     Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-7);
     potential.setZero();
-    retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
+    retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-2);
 
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     //density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
@@ -189,7 +190,7 @@ int main(int, char **argv) {
 
   Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-7);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", &psd, 400, 1e-4);
+  retval += test_minimizer("PreconditionedSteepestDescent", &psd, 200, 1e-4);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

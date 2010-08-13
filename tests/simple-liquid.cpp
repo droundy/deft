@@ -90,11 +90,11 @@ int main(int, char **argv) {
   potential.setZero();
   retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-13);
 
-  Minimizer steepest = MaxIter(200, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3));
+  Minimizer steepest = MaxIter(20, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3));
   potential.setZero();
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-13);
 
-  Minimizer psd = MaxIter(200, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11));
+  Minimizer psd = MaxIter(20, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11));
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-13);
 

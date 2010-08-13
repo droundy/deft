@@ -73,6 +73,19 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       if (verbose) printf("\t\tQuadratic linmin not working properly!!!\n");
       //assert(!"Quadratic linmin not working well!!!\n");
       return false;
+    } else {
+      // It looks like we aren't moving far enough, so let's try
+      // progressively doubling how far we're going.
+      double Ebest = E0;
+      while (energy() <= Ebest) {
+        Ebest = energy();
+        *x += step1*direction;
+        invalidate_cache();
+        step1 *= 2;
+      }
+      step1 *= 0.5;
+      *x -= step1*direction;
+      *step = step1;
     }
   } else {
     *step = step2; // output the stepsize for later reuse.
@@ -89,6 +102,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     // with the driver routine!
     if (E1 < energy() && E1 < E0) {
       // The first try was better, so let's go with that one!
+      if (verbose) printf("Going back to the first try...\n");
       invalidate_cache();
       *x -= (step2-step1)*direction;
     } else if (energy() > E0) {

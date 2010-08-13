@@ -90,12 +90,14 @@ int main(int, char **argv) {
 
   Minimizer steepest = SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 100);
+  retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 20);
+  retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-3, 20);
 
   Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 200);
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 200);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 20);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
