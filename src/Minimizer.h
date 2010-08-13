@@ -18,7 +18,7 @@ public: // yuck, this shouldn't be public!
   GridDescription gd;
 public:
   MinimizerInterface(Functional myf, const GridDescription &gdin, VectorXd *data)
-    : f(myf), x(data), last_grad(0), last_pgrad(0), gd(gdin) {
+    : f(myf), x(data), gd(gdin), last_grad(0), last_pgrad(0) {
     iter = 0;
   }
   ~MinimizerInterface() {

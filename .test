@@ -4,4 +4,13 @@
 
 set -ev
 
+sh autogen.sh
+
+# First make sure there are no warnings...
+CXXFLAGS='-ansi -pipe -W -Wall -Werror' ./configure
+time make -j2 recheck
+make clean
+
+# And then make sure the thing compiles properly with the default flags.
+./configure
 time make -j2 check

@@ -43,7 +43,7 @@ public:
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     for (int i=0; i<data.rows(); i++)
       (*outgrad)[i] += minusbeta*ingrad[i]*exp(minusbeta*data[i]);
