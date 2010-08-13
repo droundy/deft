@@ -23,29 +23,6 @@ void MinimizerInterface::print_info(const char *prefix) const {
   printf("%sGradient = %g\n", prefix, grad().norm());
 }
 
-// A base class handling a bit of busy work dealing with modifiers of
-// minimizers.
-class MinimizerModifier : public MinimizerInterface {
-protected:
-  Minimizer min;
-public:
-  MinimizerModifier(Minimizer m)
-    : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
-  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
-    MinimizerInterface::minimize(newf, gdnew, newx);
-    min.minimize(newf, gdnew, newx);
-  }
-
-  bool improve_energy(bool verbose = false) {
-    iter++;
-    return min.improve_energy(verbose);
-  }
-  void print_info(const char *prefix="") const {
-    return min.print_info(prefix);
-  }
-};
-
-
 // Impose a maximum number of iterations...
 class MaxIterType : public MinimizerModifier {
 protected:

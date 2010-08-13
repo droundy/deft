@@ -9,6 +9,7 @@ class Minimizer;
 Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
 Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
 Minimizer MaxIter(int maxiter, Minimizer);
+Minimizer Precision(double err, Minimizer);
 
 class MinimizerInterface {
 public: // yuck, this shouldn't be public!
@@ -128,5 +129,27 @@ private:
       }
       itsCounter = 0;
     }
+  }
+};
+
+// A base class handling a bit of busy work dealing with modifiers of
+// minimizers.
+class MinimizerModifier : public MinimizerInterface {
+protected:
+  Minimizer min;
+public:
+  MinimizerModifier(Minimizer m)
+    : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+    MinimizerInterface::minimize(newf, gdnew, newx);
+    min.minimize(newf, gdnew, newx);
+  }
+
+  bool improve_energy(bool verbose = false) {
+    iter++;
+    return min.improve_energy(verbose);
+  }
+  void print_info(const char *prefix="") const {
+    return min.print_info(prefix);
   }
 };
