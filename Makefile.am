@@ -11,6 +11,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/functional-of-double.test \
 	tests/surface-tension.test \
 	tests/simple-liquid.test \
 	tests/fftinverse.test \
@@ -21,6 +22,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)
+tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(GENERIC_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(GENERIC_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
