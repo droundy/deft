@@ -179,8 +179,8 @@ int main(int, char **argv) {
     retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
 
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
-    density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
-                           Cartesian(0,0,0));
+    //density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
+    //                       Cartesian(0,0,0));
 
     retval += attraction.run_finite_difference_test("quadratic", density);
     retval += repulsion.run_finite_difference_test("repulsive", density);

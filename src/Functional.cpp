@@ -19,20 +19,12 @@
 #include <stdio.h>
 #include <math.h>
 
-void FunctionalInterface::print_summary(const char *) const {
+void FunctionalInterface::print_summary(const char *, double) const {
   // Don't print anything at all by default!
 }
 
-void FunctionalInterface::print_iteration(const char *prefix, int iter) const {
-  printf("%s==============\n", prefix);
-  printf("%sIteration %4d\n", prefix, iter);
-  printf("%s==============\n", prefix);
-  print_summary(prefix);
-}
-
-bool FunctionalInterface::run_finite_difference_test(const char *testname,
-                                                     const Grid &x,
-                                                     const VectorXd *direction) const {
+bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
+                                            const VectorXd *direction) const {
   printf("\nRunning finite difference test on %s:\n", testname);
   const GridDescription gd(x.description());
 
@@ -122,6 +114,13 @@ bool FunctionalInterface::run_finite_difference_test(const char *testname,
   return true;
 }
 
+void Functional::print_iteration(const char *prefix, int iter) const {
+  printf("%s==============\n", prefix);
+  printf("%sIteration %4d\n", prefix, iter);
+  printf("%s==============\n", prefix);
+  print_summary(prefix);
+}
+
 class FunctionalComposition : public FunctionalInterface {
 public:
   FunctionalComposition(const Functional &f, const FieldFunctional &g)
@@ -150,7 +149,7 @@ public:
       f2.grad(gd, data, g1, g, pgrad);
     }
   }
-  void print_summary(const char *prefix) const {
+  void print_summary(const char *prefix, double) const {
     f1.print_summary(prefix);
   }
 private:
@@ -160,6 +159,10 @@ private:
 
 Functional compose(const Functional &a, const FieldFunctional &b) {
   return Functional(new FunctionalComposition(a, b));
+}
+
+Functional Functional::operator()(const FieldFunctional &f) const {
+  return Functional(new FunctionalComposition(*this, f));
 }
 
 // The sum of two functionals...
@@ -178,7 +181,7 @@ public:
     f1.grad(gd, data, g, pgrad);
     f2.grad(gd, data, g, pgrad);
   }
-  void print_summary(const char *prefix) const {
+  void print_summary(const char *prefix, double) const {
     f1.print_summary(prefix);
     f2.print_summary(prefix);
   }

@@ -27,7 +27,7 @@ public:
   void grad(const GridDescription &gd, const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
 
-  void  print_summary(const char *prefix) const {
+  void  print_summary(const char *prefix, double last_energy) const {
     printf("%sIdealGas energy = %g\n", prefix, last_energy);
   }
 private:

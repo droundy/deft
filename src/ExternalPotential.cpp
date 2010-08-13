@@ -33,7 +33,7 @@ public:
     if (pg_ptr) *pg_ptr += Vdvolume;
   }
 
-  void print_summary(const char *prefix) const {
+  void print_summary(const char *prefix, double last_energy) const {
     printf("%sExternal potential energy = %g\n", prefix, last_energy);
   }
 private:
