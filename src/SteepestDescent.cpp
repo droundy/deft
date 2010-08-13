@@ -47,16 +47,18 @@ bool SteepestDescentType::improve_energy(bool verbose) {
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
   const VectorXd d = -grad();
+  const double d2 = -d.dot(d);
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer lm = linmin(f, gd, x, d, -d.dot(d), &step);
+  Minimizer lm = linmin(f, gd, x, d, d2, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
   if (verbose) {
     //lm->print_info();
     print_info();
+    printf("grad*oldgrad = %g\n", grad().dot(d)/d2);
   }
   return (energy() < E0);
 }
@@ -71,16 +73,18 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
   const VectorXd d = -pgrad();
+  const double gdotd = d.dot(grad());
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer lm = linmin(f, gd, x, d, d.dot(grad()), &step);
+  Minimizer lm = linmin(f, gd, x, d, gdotd, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
   if (verbose) {
     //lm->print_info();
     print_info();
+    printf("grad*direction = %g\n", grad().dot(d)/gdotd);
   }
   return (energy() < E0);
 }
