@@ -14,3 +14,8 @@ Minimizer SteepestDescent(Functional f, const GridDescription &gdin, VectorXd *d
                           LineMinimizer lm, double stepsize = 0.1);
 Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
                                         LineMinimizer lm, double stepsize = 0.1);
+
+Minimizer ConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
+                            LineMinimizer lm, double stepsize = 0.1);
+Minimizer PreconditionedConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
+                                          LineMinimizer lm, double stepsize = 0.1);

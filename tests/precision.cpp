@@ -99,6 +99,17 @@ int main(int, char **argv) {
   retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
   retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
 
+  Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
+  potential.setZero();
+  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-13, 20);
+  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-3, 20);
+
+  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
+  potential.setZero();
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-13, 20);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-5, 10);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-2, 10);
+
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {
