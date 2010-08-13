@@ -37,8 +37,10 @@ public:
   // Handle reference counting so we can pass these things around freely...
   explicit Functional(FunctionalInterface* p = 0) // allocate a new counter
     : itsCounter(0) {
-    if (p) itsCounter = new counter(p);
-    checksum = -1;
+    if (p) {
+      itsCounter = new counter(p);
+      itsCounter->checksum = -1;
+    }
   }
   ~Functional() { release(); }
   Functional(const Functional& r) {
@@ -56,20 +58,20 @@ public:
   double operator()(const GridDescription &gd, const VectorXd &data) const {
     uint32_t sum = compute_checksum(data);
     // FIXME: should also check that gd hasn't changed!
-    if (sum != checksum || int(checksum) == -1) {
-      last_energy = energy(gd, data);
-      checksum = sum;
+    if (sum != itsCounter->checksum || int(itsCounter->checksum) == -1) {
+      itsCounter->last_energy = energy(gd, data);
+      itsCounter->checksum = sum;
     }
-    return last_energy;
+    return itsCounter->last_energy;
   }
   double operator()(const Grid &g) const {
     uint32_t sum = compute_checksum(g);
     // FIXME: should also check that g.description() hasn't changed!
-    if (sum != checksum || int(checksum) == -1) {
-      last_energy = energy(g.description(), g);
-      checksum = sum;
+    if (sum != itsCounter->checksum || int(itsCounter->checksum) == -1) {
+      itsCounter->last_energy = energy(g.description(), g);
+      itsCounter->checksum = sum;
     }
-    return last_energy;
+    return itsCounter->last_energy;
   }
   // The following method is for a homogeneous density.
   double operator()(double data) const { return energy(data); }
@@ -97,12 +99,14 @@ public:
                                   const VectorXd *direction = 0) const;
 
   void print_summary(const char *prefix) const {
-    itsCounter->ptr->print_summary(prefix, last_energy);
+    itsCounter->ptr->print_summary(prefix, itsCounter->last_energy);
   }
 private:
   struct counter {
     counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
     FunctionalInterface* ptr;
+    mutable uint32_t checksum;
+    mutable double last_energy;
     unsigned count;
   };
   counter *itsCounter;
@@ -121,8 +125,6 @@ private:
       itsCounter = 0;
     }
   }
-  mutable uint32_t checksum;
-  mutable double last_energy;
   uint32_t compute_checksum(const VectorXd &m) const {
     uint32_t *mints = (uint32_t *)m.data();
     const int N = m.cols()*m.rows()*2;
