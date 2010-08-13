@@ -59,10 +59,8 @@ public:
     if (!last_pgrad) {
       last_pgrad = new VectorXd(*x); // hokey
       last_pgrad->setZero(); // Have to remember to zero it out first!
-      if (!last_grad) {
-        last_grad = new VectorXd(*x); // hokey
-        last_grad->setZero(); // Have to remember to zero it out first!
-      }
+      if (!last_grad) last_grad = new VectorXd(*x); // hokey
+      last_grad->setZero(); // Have to remember to zero it out first!
       f.grad(gd, *x, last_grad, last_pgrad);
     }
     return *last_pgrad;
