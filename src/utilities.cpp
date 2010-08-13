@@ -39,8 +39,8 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   for (int i=0; i<gd.NxNyNz/2; i++) potential[i] = Veff_gas;
   for (int i=gd.NxNyNz/2; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
-
-  Functional f0 = compose(f, EffectivePotentialToDensity(prop.kT));
+  FieldFunctional n = EffectivePotentialToDensity(prop.kT);
+  Functional f0 = f(n);
   f0.run_finite_difference_test("f0", potential);
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))

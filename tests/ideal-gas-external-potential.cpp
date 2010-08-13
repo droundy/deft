@@ -69,7 +69,7 @@ int main(int, char **argv) {
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu) + ExternalPotential(external_potential);
-  Functional f = compose(ig_and_mu, EffectivePotentialToDensity(kT));
+  Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
 
   Grid expected_density(gd, EffectivePotentialToDensity(kT)(gd, external_potential + mu*VectorXd::Ones(gd.NxNyNz)));
 

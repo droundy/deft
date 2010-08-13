@@ -36,7 +36,8 @@ const double interaction_energy_scale = 2e-4;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
 Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
-Functional f = compose(f0, EffectivePotentialToDensity(kT));
+FieldFunctional n = EffectivePotentialToDensity(kT);
+Functional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -137,7 +138,7 @@ double forcer(Cartesian r) {
 int main(int, char **argv) {
   external_potential.Set(forcer);
   Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = compose(f1, EffectivePotentialToDensity(kT));
+  ff = f1(n);
 
   Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
                                                         + mu*VectorXd::Ones(gd.NxNyNz)));

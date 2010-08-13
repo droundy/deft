@@ -40,7 +40,7 @@ int main() {
   //density = EffectivePotentialToDensity(kT)(potential);
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig2 = compose(IdealGas(kT), EffectivePotentialToDensity(kT));
+  Functional ig2 = IdealGas(kT)(EffectivePotentialToDensity(kT));
   density *= 1e-5;
   if (ig2.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test failed!!!\n");

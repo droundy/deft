@@ -135,4 +135,3 @@ private:
 };
 
 Functional operator+(const Functional &, const Functional &);
-Functional compose(const Functional &a, const FieldFunctional &b);
