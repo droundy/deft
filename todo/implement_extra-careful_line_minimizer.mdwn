@@ -1,0 +1,1 @@
+For when we've got functions like log(1-x) that can return NaNs.
