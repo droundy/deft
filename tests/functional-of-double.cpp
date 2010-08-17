@@ -30,9 +30,11 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   GridDescription gd(lat, resolution);
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
-  const double Edouble = f(n)*gd.Lat.volume();
-  const double Egrid = f(nr);
+  const double Edouble = f(n);
+  const double Egrid = f(nr)/gd.Lat.volume();
 
+  printf("Edouble = %g\n", Edouble);
+  printf("Egrid   = %g\n", Egrid);
   printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
   if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
     printf("Error in the energy is too big!\n");

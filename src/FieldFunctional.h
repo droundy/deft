@@ -9,8 +9,8 @@ public:
   virtual ~FieldFunctionalInterface() {}
 
   // A functional mapping one field onto another...
-  virtual VectorXd operator()(const GridDescription &gd, const VectorXd &data) const = 0;
-  virtual double operator()(double) const = 0;
+  virtual VectorXd transform(const GridDescription &gd, const VectorXd &data) const = 0;
+  virtual double transform(double) const = 0;
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
@@ -18,7 +18,7 @@ public:
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
 };
 
-class FieldFunctional : public FieldFunctionalInterface {
+class FieldFunctional {
 public:
   // Handle reference counting so we can pass these things around freely...
   explicit FieldFunctional(FieldFunctionalInterface* p = 0) // allocate a new counter
@@ -37,14 +37,17 @@ public:
     return *this;
   }
 
+  FieldFunctional operator()(const FieldFunctional &) const;
+  FieldFunctional operator*(const FieldFunctional &) const;
+  FieldFunctional operator*(double) const;
   VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
-    return (*itsCounter->ptr)(gd, data);
+    return itsCounter->ptr->transform(gd, data);
   }
   VectorXd operator()(const Grid &g) const {
-    return (*this)(g.description(), g);
+    return itsCounter->ptr->transform(g.description(), g);
   }
   double operator()(double data) const {
-    return (*itsCounter->ptr)(data);
+    return itsCounter->ptr->transform(data);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -73,3 +76,7 @@ private:
     }
   }
 };
+
+inline FieldFunctional operator*(double x, const FieldFunctional &f) {
+  return f*x;
+}

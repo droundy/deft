@@ -1,0 +1,2 @@
+There is a wrong-answer bug that is triggered when verbosity is
+disabled in the "liquid" portion of `tests/surface-tension.cpp`.

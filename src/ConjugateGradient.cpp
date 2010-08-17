@@ -60,6 +60,7 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy();
+  double gdotd;
   {
     const VectorXd g = -grad();
     // Let's immediately free the cached gradient stored internally!
@@ -76,9 +77,13 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
     if (beta < 0 || beta != beta || oldgradsqr == 0) beta = 0;
     oldgradsqr = oldgrad.dot(oldgrad);
     direction = g + beta*direction;
+    gdotd = oldgrad.dot(direction);
+    if (gdotd < 0) {
+      direction = oldgrad; // If our direction is uphill, reset to gradient.
+      if (verbose) printf("reset to gradient...\n");
+      gdotd = oldgrad.dot(direction);
+    }
   }
-
-  const double gdotd = oldgrad.dot(direction);
 
   Minimizer lm = linmin(f, gd, x, direction, -gdotd, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {

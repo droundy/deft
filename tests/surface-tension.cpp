@@ -28,8 +28,7 @@ const double Veff_liquid = -kT*log(nliquid);
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(0.2,0,0), Cartesian(0,0.2,0), Cartesian(0,0,20));
-double resolution = 0.2/2;
-GridDescription gd(lat, resolution);
+GridDescription gd(lat, 1, 1, 40);
 
 // And the functional...
 const double interaction_energy_scale = 2e-4;
@@ -44,7 +43,7 @@ Grid potential(gd);
 
 Functional ff;
 
-const double true_surface_tension = 1.95161e-06;
+const double true_surface_tension = 9.65902e-07;
 
 int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -55,18 +54,20 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   printf("************\n\n");
 
   potential = Veff_liquid*VectorXd::Ones(gd.NxNyNz);
+  for (int i=0;i<gd.NxNyNz/2;i++) potential[i] = mu;
 
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
     fflush(stdout);
   }
   min->print_info();
-  min->minimize(f, gd);
-  for (int i=0;i<numiters && min->improve_energy(false);i++) {
-    //printf("Without external potential...\n");
-    fflush(stdout);
-  }
-  min->print_info();  
+  //min->minimize(f, gd);
+  //for (int i=0;i<numiters && min->improve_energy(false);i++) {
+  //  //printf("Without external potential...\n");
+  //  fflush(stdout);
+  //}
+  //min->print_info();  
 
+  const double Einterface_with_external = ff(potential);
   const double Einterface = f(potential);
   double Ninterface = 0;
   {
@@ -74,6 +75,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
     for (int i=0;i<gd.NxNyNz;i++) Ninterface += density[i]*gd.dvolume;
   }
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  start = clock();
 
   Grid gas(gd, mu*VectorXd::Ones(gd.NxNyNz));
   min->minimize(f, gd, &gas);
@@ -92,13 +94,14 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   min->print_info();
   printf("gas energy is %g\n", f(gas));
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  start = clock();
 
   double minpot = 1e100;
   for (int i=0;i<gd.NxNyNz;i++)
     if (potential[i] < minpot) minpot = potential[i];
-  Grid liquid(gd, minpot*VectorXd::Ones(gd.NxNyNz));
+  Grid liquid(gd, Veff_liquid*VectorXd::Ones(gd.NxNyNz));
   min->minimize(f, gd, &liquid);
-  for (int i=0;i<numiters && min->improve_energy(false);i++) {
+  for (int i=0;i<numiters && min->improve_energy(true);i++) {
     //printf("LIQUID\n");
     fflush(stdout);
   }
@@ -112,7 +115,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
 
   printf("\n\n");
-  printf("interface energy is %.15g\n", Einterface);
+  printf("interface energy is %.15g (vs. %.15g)\n", Einterface, Einterface_with_external);
   printf("gas energy is %.15g\n", Egas);
   printf("liquid energy is %.15g\n", Eliquid);
   printf("Ninterface/liquid/gas = %g/%g/%g\n", Ninterface, Nliquid, Ngas);
@@ -133,7 +136,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
 double forcer(Cartesian r) {
   const double z = r.dot(Cartesian(0,0,1));
-  return 0.2/nliquid*(exp(-0.5*(z-5)*(z-5)) - exp(-(z-15)*(z-15)));
+  return 0.0001/nliquid*(exp(-0.5*(z-5)*(z-5)) - exp(-(z-15)*(z-15)));
 }
 
 int main(int, char **argv) {
@@ -154,9 +157,16 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  {
-    Minimizer pd = MaxIter(800, PreconditionedDownhill(f0, gd, &potential, 1e-7));
+  if (false) {
+    Minimizer pd = MaxIter(1000, PreconditionedSteepestDescent(f0, gd, &potential, QuadraticLineMinimizer));
     const double st = surface_tension(pd, f0, water_prop, true);
+    const double thissurfacetension = 1.963444045e-06; // 1.977986185e-06;
+
+    if (fabs(st - thissurfacetension)/thissurfacetension > 0.01) {
+      printf("FAIL: Funky discrepancy with surface_tension and thissurfacetension %g vs %g\n",
+             st, thissurfacetension);
+      retval += 1;
+    }
     // The agreement with true_surface_tension isn't so great because
     // the surface_tension function uses higher resolution for its calculation.
     if (fabs(st - true_surface_tension)/true_surface_tension > 0.02) {
@@ -176,9 +186,9 @@ int main(int, char **argv) {
   fflush(stdout);
 
   {
-    Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-7);
+    Minimizer pd = PreconditionedDownhill(ff, gd, &potential);
     potential.setZero();
-    retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-2);
+    retval += test_minimizer("PreconditionedDownhill", &pd, 200, 1e-4);
 
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     //density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
@@ -188,9 +198,17 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", density);
   }
 
-  Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-7);
+  Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", &psd, 200, 1e-4);
+  retval += test_minimizer("PreconditionedSteepestDescent", &psd, 400, 1e-4);
+
+  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);
+  potential.setZero();
+  retval += test_minimizer("PreconditionedConjugateGradient", &pcg, 400, 1e-5);
+
+  Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer);
+  potential.setZero();
+  retval += test_minimizer("ConjugateGradient", &cg, 1800, 1e-3);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

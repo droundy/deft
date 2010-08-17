@@ -170,6 +170,7 @@ Functional Functional::operator()(const FieldFunctional &f) const {
 class FunctionalSum : public FunctionalInterface {
 public:
   FunctionalSum(const Functional &f, const Functional &g) : f1(f), f2(g) {};
+  ~FunctionalSum() {}
 
   double energy(double data) const {
     return f1(data) + f2(data);
@@ -192,3 +193,116 @@ private:
 Functional operator+(const Functional &a, const Functional &b) {
   return Functional(new FunctionalSum(a, b));
 }
+
+
+// The product of two functionals...
+
+class FunctionalProduct : public FunctionalInterface {
+public:
+  FunctionalProduct(const Functional &f, const Functional &g) : f1(f), f2(g) {};
+
+  double energy(double data) const {
+    return f1(data)*f2(data);
+  }
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return f1(gd, data)*f2(gd, data);
+  }
+  void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
+    Grid tempgrad(gd);
+    tempgrad.setZero();
+    if (pgrad) {
+      Grid tempp(gd);
+      tempp.setZero();
+      f1.grad(gd, data, &tempgrad, &tempp);
+      double f2data = f2(gd, data);
+      *g += f2data*tempgrad;
+      *pgrad += f2data*tempp;
+      tempgrad.setZero();
+      tempp.setZero();
+      f2.grad(gd, data, &tempgrad, &tempp);
+      double f1data = f1(gd, data);
+      *g += f1data*tempgrad;
+      *pgrad += f1data*tempp;
+    } else {
+      f1.grad(gd, data, &tempgrad, 0);
+      *g += f2(gd, data)*tempgrad;
+      tempgrad.setZero();
+      f2.grad(gd, data, &tempgrad, 0);
+      *g += f1(gd, data)*tempgrad;
+    }
+  }
+  void print_summary(const char *prefix, double) const {
+    f1.print_summary(prefix);
+    f2.print_summary(prefix);
+  }
+private:
+  const Functional f1, f2;
+};
+
+Functional operator*(const Functional &a, const Functional &b) {
+  return Functional(new FunctionalProduct(a, b));
+}
+
+
+// The constant times a functional...
+
+class ScalarProduct : public FunctionalInterface {
+public:
+  ScalarProduct(double x, const Functional &y) : a(x), f(y) {};
+
+  double energy(double data) const {
+    return a*f(data);
+  }
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return a*f(gd, data);
+  }
+  void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
+    Grid tempgrad(gd);
+    tempgrad.setZero();
+    if (pgrad) {
+      Grid tempp(gd);
+      tempp.setZero();
+      f.grad(gd, data, &tempgrad, &tempp);
+      *g += a*tempgrad;
+      *pgrad += a*tempp;
+    } else {
+      f.grad(gd, data, &tempgrad, 0);
+      *g += a*tempgrad;
+    }
+  }
+  void print_summary(const char *prefix, double) const {
+    f.print_summary(prefix);
+  }
+private:
+  double a;
+  const Functional f;
+};
+
+Functional operator*(double a, const Functional &b) {
+  return Functional(new ScalarProduct(a, b));
+}
+
+
+// A simple integrating functional...
+
+class Integrate : public FunctionalInterface {
+public:
+  Integrate() {};
+
+  double energy(double data) const {
+    return data;
+  }
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return gd.dvolume*data.sum();
+  }
+  void grad(const GridDescription &gd, const VectorXd &, VectorXd *g, VectorXd *pgrad) const {
+    for (int i=0; i<gd.NxNyNz; i++) (*g)[i] += gd.dvolume;
+    if (pgrad) for (int i=0; i<gd.NxNyNz; i++) (*pgrad)[i] += gd.dvolume;
+  }
+  void print_summary(const char *, double) const {
+    // Nothing to print?
+  }
+};
+
+Functional integrate(new Integrate());
+

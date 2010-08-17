@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Functional.h"
+#include <stdio.h>
 
 class Minimizer;
 
@@ -123,7 +124,7 @@ private:
   void release() {
     // decrement the count, delete if it is 0
     if (itsCounter) {
-      if (--itsCounter->count == 0) {
+      if (--itsCounter->count <= 0) {
         delete itsCounter->ptr;
         delete itsCounter;
       }

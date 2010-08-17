@@ -93,7 +93,7 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
     printf("liquid energy is %.15g\n", Eliquid);
     printf("Ninterface/liquid/gas = %g/%g/%g\n", Ninterface, Nliquid, Ngas);
     printf("X is %g\n", X);
-    printf("surface tension is %g\n", surface_tension);
+    printf("surface tension is %.10g\n", surface_tension);
   }
   return surface_tension;
 }

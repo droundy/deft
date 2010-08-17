@@ -29,6 +29,10 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   // FIXME: The following probably double-computes the energy!
   const double E0 = energy();
 
+  if (slope*(*step) > 0) {
+    if (verbose) printf("Swapping sign of step with slope %g...\n", slope);
+    *step *= -1;
+  }
   // Here we're going to keep halving step1 until it's small enough
   // that the energy drops a tad.  This hopefully will give us a
   // reasonable starting guess.
@@ -41,7 +45,10 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     invalidate_cache();
     if (energy() == Etried) {
       if (verbose) {
-        printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g\n", step1);
+        printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g (%g vs %g)\n",
+               step1, energy(), Etried);
+        Grid foo(gd, *x);
+        f.run_finite_difference_test("In QuadraticLineMinimizerType", foo, &direction);
         fflush(stdout);
       }
       break;
@@ -106,9 +113,11 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       invalidate_cache();
       *x -= (step2-step1)*direction;
     } else if (energy() > E0) {
+      const double E2 = energy();
+      invalidate_cache();
       *x -= step2*direction;
       if (verbose) {
-        printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g)\n", energy());
+        printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g, E0 = %14.7g)\n", E2, energy());
         fflush(stdout);
       }
       return false;
@@ -130,5 +139,9 @@ void QuadraticLineMinimizerType::print_info(int iter) const {
 
 Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
                                   const VectorXd &direction, double gradDotDirection, double *step) {
+  //if (gradDotDirection > 0) {
+  //  printf("The slope is backwards!!!\n");
+  //  assert(gradDotDirection < 0);
+  //}
   return Minimizer(new QuadraticLineMinimizerType(f, gd, data, direction, gradDotDirection, step));
 }

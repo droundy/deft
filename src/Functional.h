@@ -136,3 +136,6 @@ private:
 };
 
 Functional operator+(const Functional &, const Functional &);
+Functional operator*(const Functional &, const Functional &);
+Functional operator*(double, const Functional &);
+extern Functional integrate;

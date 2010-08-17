@@ -61,9 +61,11 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   // First, let's reset the minimizer!
   min.minimize(f, pot->description(), pot);
   Minimizer foo = MaxIter(maxiter, Precision(precision, min));
-  while (foo.improve_energy(false)) {
-    //printf("Actual error is %g\n", foo.energy() - true_energy);
+  while (foo.improve_energy(true)) {
+    printf("Actual error is %g\n", foo.energy() - true_energy);
     fflush(stdout);
+    //VectorXd pg = foo.pgrad();
+    //ff.run_finite_difference_test("ff", *pot, &pg);
   }
 
   foo.print_info();
@@ -80,24 +82,25 @@ int main(int, char **argv) {
   int retval = 0;
 
   Minimizer downhill = Downhill(ff, gd, &potential, 1e-11);
+  
   potential.setZero();
-  retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-13, 300);
-  retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-10, 300);
+  //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-13, 300);
+  //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-10, 300);
 
   Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-11);
   potential.setZero();
-  retval += test_minimizer("PreconditionedDownhill", pd, ff, &potential, 1e-13, 300);
+  //retval += test_minimizer("PreconditionedDownhill", pd, ff, &potential, 1e-13, 300);
 
   Minimizer steepest = SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 20);
-  retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-3, 20);
+  //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 20);
+  //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-3, 20);
 
   Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 20);
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
+  //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 20);
+  //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
+  //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
 
   Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();

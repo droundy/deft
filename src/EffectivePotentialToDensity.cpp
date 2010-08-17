@@ -24,8 +24,7 @@ public:
   }
   ~EffectivePotentialToDensityType() {}
 
-  // A functional mapping one field onto another...
-  VectorXd operator()(const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
     VectorXd out(data);
     for (int i=0; i<out.rows(); i++) {
       const double n = exp(minusbeta*out[i]);
@@ -38,7 +37,7 @@ public:
     return out;
     //return (minusbeta*data).cwise().exp();
   }
-  double operator()(double Veff) const {
+  double transform(double Veff) const {
     return exp(minusbeta*Veff);
   }
 

@@ -13,3 +13,5 @@ Functional ExternalPotential(const Grid &V);
 Functional GaussianPolynomial(double amplitude, double width, int power);
 
 FieldFunctional EffectivePotentialToDensity(double temperature);
+FieldFunctional Gaussian(double width);
+FieldFunctional Pow(int power);
