@@ -47,7 +47,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       break;
     }
     Etried = energy();
-  } while (energy() > E0);
+  } while (energy() > E0 || isnan(energy()));
   
   const double E1 = energy();
 
