@@ -59,8 +59,8 @@ ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x)
 Grid ReciprocalGrid::ifft() const {
   Grid out(gd);
   const complex *mydata = data();
-  fftw_execute(fftw_plan_dft_c2r_3d(gd.Nx, gd.Ny, gd.Nz,
-                                    (fftw_complex *)mydata, out.data(),
-                                    FFTW_MEASURE));
+  fftw_plan p = fftw_plan_dft_c2r_3d(gd.Nx, gd.Ny, gd.Nz, (fftw_complex *)mydata, out.data(), FFTW_MEASURE);
+  fftw_execute(p);
+  fftw_destroy_plan(p);
   return out;
 }
