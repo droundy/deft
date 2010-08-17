@@ -44,26 +44,27 @@ public:
 
 bool DownhillType::improve_energy(bool verbose) {
   iter++;
+  const double old_energy = energy();
   const VectorXd g = grad();
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
-  // We waste some memory storing oldx, but avoids roundoff weirdness
-  // of trying to add nu*g back to *x, which won't always get us back
-  // to the same value.
-  const VectorXd oldx = *x;
-  double old_energy = energy();
-  *x -= nu*g;
-  invalidate_cache(); // Must always remember this!!!
+  // We waste some memory storing newx (besides *x itself), but this
+  // avoids roundoff weirdness of trying to add nu*g back to *x, which
+  // won't always get us back to the same value.
+  Grid newx(gd, *x - nu*g);
+  double newE = f(newx);
   int num_tries = 0;
-  while (energy() > old_energy) {
+  while (newE > old_energy || isnan(energy())) {
     nu *= 0.5;
-    *x = oldx - nu*g;
-    invalidate_cache();
-    if (num_tries++ > 30) {
+    newx = *x - nu*g;
+    newE = f(newx);
+    if (num_tries++ > 40) {
       printf("Downhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
     }
   }
+  *x = newx;
+  invalidate_cache();
   nu *= 1.1;
   if (verbose) {
     //lm->print_info();
@@ -79,29 +80,30 @@ void DownhillType::print_info(const char *prefix) const {
 
 bool PreconditionedDownhillType::improve_energy(bool verbose) {
   iter++;
+  const double old_energy = energy();
   const VectorXd g = pgrad();
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
-  // We waste some memory storing oldx, but avoids roundoff weirdness
-  // of trying to add nu*g back to *x, which won't always get us back
-  // to the same value.
-  const VectorXd oldx = *x;
-  double old_energy = energy();
-  *x -= nu*g;
-  invalidate_cache(); // Must always remember this!!!
+  // We waste some memory storing newx (besides *x itself), but this
+  // avoids roundoff weirdness of trying to add nu*g back to *x, which
+  // won't always get us back to the same value.
+  Grid newx(gd, *x - nu*g);
+  double newE = f(newx);
   int num_tries = 0;
-  while (energy() > old_energy) {
+  while (newE > old_energy || isnan(energy())) {
     nu *= 0.5;
-    *x = oldx - nu*g;
-    invalidate_cache();
-    if (num_tries++ > 30) {
-      printf("PreconditionedDownhill giving up after %d tries, with gradient %g...\n", num_tries, g.norm());
+    newx = *x - nu*g;
+    newE = f(newx);
+    if (num_tries++ > 40) {
+      printf("PreconditionedDownhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
     }
   }
+  *x = newx;
+  invalidate_cache();
   nu *= 1.1;
   if (verbose) {
-    //lm->print_info(iter);
+    //lm->print_info();
     print_info();
   }
   return true;
