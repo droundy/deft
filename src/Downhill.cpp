@@ -23,6 +23,7 @@ protected:
 public:
   DownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
     : MinimizerInterface(f, gdin, data), nu(viscosity), orig_nu(viscosity) {}
+  ~DownhillType() {}
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     nu = orig_nu;
     MinimizerInterface::minimize(newf, gdnew, newx);
@@ -36,6 +37,7 @@ class PreconditionedDownhillType : public DownhillType {
 public:
   PreconditionedDownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
     : DownhillType(f, gdin, data, viscosity) {}
+  ~PreconditionedDownhillType() {}
 
   bool improve_energy(bool verbose = false);
 };

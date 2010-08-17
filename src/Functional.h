@@ -11,6 +11,7 @@ class FunctionalComposition;
 class FunctionalInterface {
 public:
   FunctionalInterface() {}
+  virtual ~FunctionalInterface() {}
 
   // To implement a functional, you need to provide both an energy
   // method and a gradient method.

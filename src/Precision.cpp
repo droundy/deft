@@ -45,6 +45,7 @@ public:
     deltaE = 0.0;
     w = 0.1;
   }
+  ~PrecisionMinimizer() {}
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerModifier::minimize(newf, gdnew, newx);
   }

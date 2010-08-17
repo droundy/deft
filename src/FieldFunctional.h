@@ -6,6 +6,8 @@
 
 class FieldFunctionalInterface {
 public:
+  virtual ~FieldFunctionalInterface() {}
+
   // A functional mapping one field onto another...
   virtual VectorXd operator()(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double operator()(double) const = 0;

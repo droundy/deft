@@ -22,7 +22,7 @@ public:
     : f(myf), x(data), gd(gdin), last_grad(0), last_pgrad(0) {
     iter = 0;
   }
-  ~MinimizerInterface() {
+  virtual ~MinimizerInterface() {
     delete last_grad;
     delete last_pgrad;
   }
@@ -84,7 +84,9 @@ public:
     : MinimizerInterface(p->f, p->gd, p->x), itsCounter(0) {
     itsCounter = new counter(p);
   }
-  ~Minimizer() { release(); }
+  ~Minimizer() {
+    release();
+  }
   Minimizer(const Minimizer& r) : MinimizerInterface(r) {
     acquire(r.itsCounter);
   }
@@ -108,7 +110,7 @@ public:
 
 private:
   struct counter {
-    counter(MinimizerInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+    counter(MinimizerInterface* p) : ptr(p), count(1) {}
     MinimizerInterface* ptr;
     unsigned count;
   };
@@ -138,6 +140,7 @@ protected:
 public:
   MinimizerModifier(Minimizer m)
     : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
+  ~MinimizerModifier() { }
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);
     min.minimize(newf, gdnew, newx);

@@ -22,6 +22,7 @@ public:
   EffectivePotentialToDensityType(double temp) {
     minusbeta = -1.0/temp;
   }
+  ~EffectivePotentialToDensityType() {}
 
   // A functional mapping one field onto another...
   VectorXd operator()(const GridDescription &, const VectorXd &data) const {
