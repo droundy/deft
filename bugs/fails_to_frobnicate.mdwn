@@ -1,4 +1,0 @@
-FooBar, when used with the `--frob` option, fails to properly frobnicate
-output.
-
-> This is fixed in [[news/version_1.0]]; marking this bug [[done]].

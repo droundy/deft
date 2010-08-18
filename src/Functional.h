@@ -129,9 +129,12 @@ private:
   uint32_t compute_checksum(const VectorXd &m) const {
     uint32_t *mints = (uint32_t *)m.data();
     const int N = m.cols()*m.rows()*2;
-    uint32_t sum = 0;
-    for (int i=0; i<N; i++) sum ^= mints[i]+i; // FIXME: this is a really stupid checksum...
-    return sum;
+    uint32_t sum = 0, othersum = -1;
+    for (int i=0; i<N; i++) {
+      sum ^= mints[i]+i; // FIXME: this is a really stupid checksum...
+      othersum += (mints[i] << (i&7)) + (mints[i] >> (32-(i&7)));
+    }
+    return sum ^ othersum;
   }
 };
 

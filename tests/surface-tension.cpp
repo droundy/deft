@@ -101,7 +101,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
     if (potential[i] < minpot) minpot = potential[i];
   Grid liquid(gd, Veff_liquid*VectorXd::Ones(gd.NxNyNz));
   min->minimize(f, gd, &liquid);
-  for (int i=0;i<numiters && min->improve_energy(true);i++) {
+  for (int i=0;i<numiters && min->improve_energy(false);i++) {
     //printf("LIQUID\n");
     fflush(stdout);
   }
