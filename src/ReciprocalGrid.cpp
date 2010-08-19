@@ -64,3 +64,19 @@ Grid ReciprocalGrid::ifft() const {
   fftw_destroy_plan(p);
   return out;
 }
+
+void ReciprocalGrid::MultiplyBy(double f(Reciprocal)) {
+  for (int x=0; x<gd.Nx; x++) {
+    for (int y=0; y<gd.Ny; y++) {
+      for (int z=0; z<gd.NzOver2; z++) {
+        const RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x,
+                                      (y>gd.Ny/2) ? y - gd.Ny : y,
+                                      z);
+        // It looks like brillouinZone is broken at the moment!  :(
+        //Reciprocal h(gd.fineLat.brillouinZone(gd.Lat.toReciprocal(rvec)));
+        Reciprocal h(gd.Lat.toReciprocal(rvec));
+        (*this)(x,y,z) *= f(h);
+      }
+    }
+  }
+}

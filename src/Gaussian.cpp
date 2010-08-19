@@ -49,6 +49,62 @@ private:
   double kfac;
 };
 
-FieldFunctional Gaussian(double temp) {
-  return FieldFunctional(new GaussianType(temp));
+FieldFunctional Gaussian(double width) {
+  return FieldFunctional(new GaussianType(width));
+}
+
+static double myR;
+static double step(Reciprocal kvec) {
+  double k = kvec.norm();
+  double kR = k*myR;
+  if (kR > 1e-3) {
+    return (4*M_PI)*(sin(kR) - kR*cos(kR))/(k*k*k);
+  } else {
+    const double kR2 = kR*kR;
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).  I evaluate the smaller elements
+    // first in the hope of reducing roundoff error (but this is not
+    // yet tested).
+    return (4*M_PI)*(myR*myR*myR)*(kR2*kR2*kR2*(-1.0/45360) + kR2*kR2*(1.0/840) + kR2*(-1.0/30) + (1.0/3) );
+  }
+}
+
+class StepConvolveType : public FieldFunctionalInterface {
+public:
+  StepConvolveType(double radius) : R(radius) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    ReciprocalGrid recip(gd);
+    {
+      const Grid out(gd, data);
+      recip = out.fft();
+      // We want to free out immediately to save memory!
+    }
+    myR = R;
+    recip.MultiplyBy(step);
+    return recip.ifft();
+  }
+  double transform(double n) const {
+    return n*(4*M_PI)*R*R*R;
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid out(gd, ingrad);
+    ReciprocalGrid recip = out.fft();
+    myR = R;
+    recip.MultiplyBy(step);
+    out = recip.ifft();
+    *outgrad += out;
+
+    // FIXME: we will want to propogate preexisting preconditioning
+    if (outpgrad) *outpgrad += out;
+  }
+private:
+  double R;
+};
+
+FieldFunctional StepConvolve(double R) {
+  return FieldFunctional(new StepConvolveType(R));
 }

@@ -13,6 +13,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/convolve.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
@@ -26,6 +27,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)
+tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(GENERIC_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
