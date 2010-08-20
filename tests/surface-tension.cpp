@@ -43,7 +43,7 @@ Grid potential(gd);
 
 Functional ff;
 
-const double true_surface_tension = 1.85329287e-06;
+const double true_surface_tension = 1.214242268e-05;
 
 int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -116,7 +116,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
   double retval = 0;
   printf("\n\n");
-  const double Einterface_with_external_true = -3.50713686209856e-06;
+  const double Einterface_with_external_true = -2.616689049223754e-06;
   printf("interface energy is %.15g (vs. %.15g)\n", Einterface, Einterface_with_external);
   if (Einterface_with_external < Einterface_with_external_true) {
     printf("FAIL: Einterface_with_external is too low: %.16g\n", Einterface_with_external);
@@ -211,9 +211,12 @@ int main(int, char **argv) {
   fflush(stdout);
 
   {
-    Minimizer pd = PreconditionedDownhill(ff, gd, &potential);
+    // We need a small initial step for PreconditionedDownhill in
+    // order to avoid jumping over the barrier from the liquid global
+    // minimum to the vapor local minimum.
+    Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-9);
     potential.setZero();
-    retval += test_minimizer("PreconditionedDownhill", &pd, 3000, 0.01);
+    retval += test_minimizer("PreconditionedDownhill", &pd, 2000, 1e-5);
 
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     //density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
@@ -240,7 +243,7 @@ int main(int, char **argv) {
 
   Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer);
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", &cg, 4000, 1e-5);
+  retval += test_minimizer("ConjugateGradient", &cg, 3000, 1e-5);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

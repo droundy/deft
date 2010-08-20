@@ -70,7 +70,7 @@ public:
 };
 
 class Lattice {
-  Matrix3d R, G, minimalR, minimalG;
+  Matrix3d R, Rinv, minimalR, minimalRinv;
   double vol;
 public:
   Lattice(Cartesian a1, Cartesian a2, Cartesian a3);
@@ -93,13 +93,13 @@ public:
   Cartesian wignerSeitz(Cartesian) const;
   Reciprocal brillouinZone(Reciprocal) const;
   Relative toRelative(Cartesian x) const {
-    return Relative(G*x);
+    return Relative(Rinv*x);
   };
   Reciprocal toReciprocal(RelativeReciprocal x) const {
-    return Reciprocal(G.transpose()*x);
+    return Reciprocal(2*M_PI*Rinv.transpose()*x);
   };
   RelativeReciprocal toRelativeReciprocal(Reciprocal x) const {
-    return RelativeReciprocal(R.transpose()*x);
+    return RelativeReciprocal((1.0/2/M_PI)*R.transpose()*x);
   };
   double volume() const { return vol; };
 };

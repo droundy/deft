@@ -4,12 +4,12 @@
 
 Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
   R.col(0) = a1; R.col(1) = a2; R.col(2) = a3;
-  G = R.inverse();
+  Rinv = R.inverse();
   vol = R.determinant();
 
   // Find a "minimal" basis set, that cannot be overly-skewed.
   minimalR = R;
-  minimalG = G;
+  minimalRinv = Rinv;
   {
     bool change;
     const double MIN_SYMM_TOL = 1e-10;
@@ -39,7 +39,7 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
       }
     } while (change);
     // Now work on Brillouin zone...
-    minimalG = minimalR.inverse();
+    minimalRinv = minimalR.inverse();
   }
   //printf("R.determinant() is %g\n", R.determinant());
   //printf("minimalR.determinant() is %g\n", minimalR.determinant());
@@ -84,7 +84,7 @@ void Lattice::reorientBasis(Cartesian zdir) {
   double vol0 = volume();
   R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
   if (R.determinant() < 0) R.col(2) = -a3new;
-  G = R.inverse();
+  Rinv = R.inverse();
   vol = R.determinant();
   assert(volume() > 0);
   assert(fabs(volume()-vol0)/vol0 < 1e-7);
@@ -96,7 +96,7 @@ Cartesian Lattice::wignerSeitz(Cartesian r) const {
   // Note that r is input in cartesian coordinates, not lattice coordinates.
   
   // convert r to coefficients of minimized_lat vectors
-  Relative relr(minimalG*r);
+  Relative relr(minimalRinv*r);
   
   // shift r to having components in [0, 1), so it is in the 
   // minimized parallelogon (works even for negative input components!)
@@ -173,7 +173,7 @@ Reciprocal Lattice::brillouinZone(Reciprocal k) const {
   for (int i = 0; i < 3; ++i) relk(i) -= floor(relk(i)); 
   
   // convert back to cartesian coords
-  k = minimalG.transpose() * relk;
+  k = minimalRinv.transpose() * relk;
 
   // For anyone wondering about the insane unrolling here, it's an
   // optimization introduced because this code was (at one time)

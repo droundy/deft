@@ -18,12 +18,15 @@
 #include "Grid.h"
 #include "Functionals.h"
 
-const double themax = 4000;
-
 double gaussian(Cartesian r) {
-  const Cartesian center(0, 0, 0);
+  const Cartesian center(1, 0, 0);
   const Cartesian dr(r - center);
-  return themax*exp(-50000*(dr*dr));
+  // This is smooth so that we won't suffer from oscillations due to
+  // aliasing effects.  We might also evaluate the convolution
+  // function in real space and do a DFT on it to get the convolution
+  // in fourier space.  This would avoid the oscillations, but would
+  // require that we store the convolution function on a grid.
+  return 4000*exp(-50*(dr*dr));
 }
 
 int main(int, char **argv) {
@@ -34,15 +37,12 @@ int main(int, char **argv) {
   Grid foo(gd), bar(gd);
   printf("Running Set(gaussian)...\n");
   foo.Set(gaussian);
-  printf("Original integrates to %.15g\n", integrate(foo));
+  const double integrate_foo = integrate(foo);
+  printf("Original integrates to %.15g\n", integrate_foo);
   printf("Original Maximum is %g\n", foo.maxCoeff());
   int retval = 0;
-  if (fabs(integrate(foo)-1) > 1e-6) {
-    printf("Error in original is too large:  %g\n", integrate(foo)-1);
-    retval++;
-  }
-  if (fabs(foo.maxCoeff()-themax) > 1e-6) {
-    printf("Max of original is wrong:  %.15g\n", foo.maxCoeff()-themax);
+  if (integrate_foo < 0) {
+    printf("Integral of original is negative (which may throw off tests):  %g\n", integrate_foo);
     retval++;
   }
   foo.epsNativeSlice("unblurred.eps", plotx, ploty, plotcorner);
@@ -50,8 +50,8 @@ int main(int, char **argv) {
   printf("Running Gaussian(10)...\n");
   bar = Gaussian(10)(foo);
   printf("Gaussian(10) integrates to %.15g\n", integrate(bar));
-  if (fabs(integrate(bar)-1) > 1e-6) {
-    printf("Error in Gaussian(10) is too large:  %g\n", integrate(bar)-1);
+  if (fabs(integrate(bar)/integrate_foo-1) > 1e-6) {
+    printf("Error in Gaussian(10) is too large:  %g\n", integrate(bar)/integrate_foo-1);
     retval++;
   }
   bar.epsNativeSlice("gaussian-width-10.eps", plotx, ploty, plotcorner);
@@ -59,8 +59,8 @@ int main(int, char **argv) {
   printf("Gaussian(1) integrates to %g\n", integrate(bar));
   printf("Running Gaussian(1)...\n");
   bar = Gaussian(1)(foo);
-  if (fabs(integrate(bar)-1) > 1e-6) {
-    printf("Error in Gaussian(1) is too large:  %g\n", integrate(bar)-1);
+  if (fabs(integrate(bar)/integrate_foo-1) > 1e-6) {
+    printf("Error in Gaussian(1) is too large:  %g\n", integrate(bar)/integrate_foo-1);
     retval++;
   }
   bar.epsNativeSlice("gaussian-width-1.eps", plotx, ploty, plotcorner);
@@ -69,13 +69,14 @@ int main(int, char **argv) {
   bar = StepConvolve(1)(foo);
   printf("StepConvolve(1) integrates to %.15g\n", integrate(bar));
   printf("StepConvolve(1) Maximum is %g\n", bar.maxCoeff());
-  if (fabs((bar.maxCoeff()-themax)/themax) > 1e-6) {
-    printf("Max of StepConvolve(1) is wrong:  %g\n", (bar.maxCoeff()-themax)/themax);
-    //retval++;
+  if (fabs(bar.maxCoeff()/integrate_foo-1) > 1e-6) {
+    printf("Max of StepConvolve(1) is wrong:  %g\n", bar.maxCoeff()/integrate_foo - 1);
+    retval++;
   }
   const double fourpiover3 = 4*M_PI/3;
-  if (fabs((integrate(bar)-fourpiover3)/fourpiover3) > 1e-6) {
-    printf("Integral of StepConvolve(1) is wrong:  %g\n", (integrate(bar)-fourpiover3)/fourpiover3);
+  if (fabs((integrate(bar)/integrate_foo-fourpiover3)/fourpiover3) > 1e-6) {
+    printf("Integral of StepConvolve(1) is wrong:  %g\n",
+           (integrate(bar)/integrate_foo-fourpiover3)/fourpiover3);
     retval++;
   }
   bar.epsNativeSlice("step-1.eps", plotx, ploty, plotcorner);
@@ -84,13 +85,13 @@ int main(int, char **argv) {
   bar = StepConvolve(2)(foo);
   printf("StepConvolve(2) Maximum is %g\n", bar.maxCoeff());
   printf("StepConvolve(2) integrates to %.15g\n", integrate(bar));
-  if (fabs((integrate(bar)-fourpiover3*8)/fourpiover3/8) > 1e-6) {
-    printf("Integral of StepConvolve(2) is wrong:  %g\n", (integrate(bar)-fourpiover3*8)/fourpiover3/8);
+  if (fabs((integrate(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8) > 1e-6) {
+    printf("Integral of StepConvolve(2) is wrong:  %g\n", (integrate(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8);
     retval++;
   }
-  if (fabs((bar.maxCoeff()-themax)/themax) > 1e-6) {
-    printf("Max of StepConvolve(2) is wrong:  %g\n", (bar.maxCoeff()-themax)/themax);
-    //retval++;
+  if (fabs((bar.maxCoeff()-integrate_foo)/integrate_foo) > 1e-6) {
+    printf("Max of StepConvolve(2) is wrong:  %g\n", (bar.maxCoeff()-integrate_foo)/integrate_foo);
+    retval++;
   }
   bar.epsNativeSlice("step-2.eps", plotx, ploty, plotcorner);
 
@@ -98,13 +99,14 @@ int main(int, char **argv) {
   bar = StepConvolve(3)(foo);
   printf("StepConvolve(3) Maximum is %g\n", bar.maxCoeff());
   printf("StepConvolve(3) integrates to %.15g\n", integrate(bar));
-  if (fabs((integrate(bar)-fourpiover3*27)/fourpiover3/27) > 1e-6) {
-    printf("Integral of StepConvolve(2) is wrong:  %g\n", (integrate(bar)-fourpiover3*27)/fourpiover3/27);
+  if (fabs((integrate(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27) > 1e-6) {
+    printf("Integral of StepConvolve(3) is wrong:  %g\n",
+           (integrate(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27);
     retval++;
   }
-  if (fabs((bar.maxCoeff()-themax)/themax) > 1e-6) {
-    printf("Max of StepConvolve(3) is wrong:  %g\n", (bar.maxCoeff()-themax)/themax);
-    //retval++;
+  if (fabs((bar.maxCoeff()-integrate_foo)/integrate_foo) > 1e-6) {
+    printf("Max of StepConvolve(3) is wrong:  %g\n", (bar.maxCoeff()-integrate_foo)/integrate_foo);
+    retval++;
   }
   bar.epsNativeSlice("step-3.eps", plotx, ploty, plotcorner);
 

@@ -52,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.2639209612386242;
+  const double true_energy = -0.2639034579484159;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -64,6 +64,10 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   printf("fractional energy error = %g\n", (min.energy() - true_energy)/fabs(true_energy));
   if (fabs((min.energy() - true_energy)/true_energy) > fraccuracy) {
     printf("Error in the energy is too big!\n");
+    return 1;
+  }
+  if (min.energy() < true_energy) {
+    printf("Sign of error is wrong!!!\n");
     return 1;
   }
   return 0;
@@ -82,21 +86,29 @@ int main(int, char **argv) {
     retval += repulsion.run_finite_difference_test("repulsive", test_density);
   }
 
-  Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential, 1e-11));
+  Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential));
   potential.setZero();
-  retval += test_minimizer("Downhill", downhill, &potential, 1e-13);
+  retval += test_minimizer("Downhill", downhill, &potential, 1e-9);
 
-  Minimizer pd = MaxIter(300, PreconditionedDownhill(ff, gd, &potential, 1e-11));
+  Minimizer pd = MaxIter(300, PreconditionedDownhill(ff, gd, &potential));
   potential.setZero();
-  retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-13);
+  retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-9);
 
-  Minimizer steepest = MaxIter(20, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3));
+  Minimizer steepest = MaxIter(100, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-13);
+  retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-9);
 
-  Minimizer psd = MaxIter(20, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11));
+  Minimizer psd = MaxIter(100, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-13);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-9);
+
+  Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  potential.setZero();
+  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-15); // I used this to verify...
+
+  Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  potential.setZero();
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
 
   
   potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);

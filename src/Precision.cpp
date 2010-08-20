@@ -75,7 +75,7 @@ public:
       error_guess = convergence_criterion + fabs(new_energy);
     }
 
-    error_estimate = error_guess;
+    error_estimate = 2*error_guess; // Just a bit of paranoia...
 
     if (verbose) {
       printf("dEdn       average is %10g ...\n", dEdn);
