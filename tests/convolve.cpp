@@ -110,6 +110,29 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("step-3.eps", plotx, ploty, plotcorner);
 
+  const double fourpi = 4*M_PI;
+  printf("Running ShellConvolve(1)...\n");
+  bar = ShellConvolve(1)(foo);
+  printf("ShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("ShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  if (fabs((integrate(bar)/integrate_foo-fourpi)/fourpi) > 1e-6) {
+    printf("Integral of ShellConvolve(1) is wrong:  %g\n",
+           (integrate(bar)/integrate_foo-fourpi)/fourpi);
+    retval++;
+  }
+  bar.epsNativeSlice("shell-1.eps", plotx, ploty, plotcorner);
+
+  printf("Running ShellConvolve(3)...\n");
+  bar = ShellConvolve(3)(foo);
+  printf("ShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
+  printf("ShellConvolve(3) integrates to %.15g\n", integrate(bar));
+  if (fabs((integrate(bar)/integrate_foo-fourpi*9)/fourpi/9) > 1e-6) {
+    printf("Integral of ShellConvolve(3) is wrong:  %g\n",
+           (integrate(bar)/integrate_foo-fourpi*9)/fourpi/9);
+    retval++;
+  }
+  bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
+
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);
   return retval;

@@ -108,3 +108,58 @@ private:
 FieldFunctional StepConvolve(double R) {
   return FieldFunctional(new StepConvolveType(R));
 }
+
+static double delta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double kR = k*myR;
+  if (kR > 1e-3) {
+    return (4*M_PI)*myR*sin(kR)/k;
+  } else {
+    const double kR2 = kR*kR;
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).  I evaluate the smaller elements
+    // first in the hope of reducing roundoff error (but this is not
+    // yet tested).
+    return (4*M_PI)*(myR*myR)*(- kR2*kR2*kR2*(1.0/120/6/7) + kR2*kR2*(1.0/120) - kR2*(1.0/6) + 1);
+  }
+}
+
+class ShellConvolveType : public FieldFunctionalInterface {
+public:
+  ShellConvolveType(double radius) : R(radius) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    ReciprocalGrid recip(gd);
+    {
+      const Grid out(gd, data);
+      recip = out.fft();
+      // We want to free out immediately to save memory!
+    }
+    myR = R;
+    recip.MultiplyBy(delta);
+    return recip.ifft();
+  }
+  double transform(double n) const {
+    return n*(4*M_PI)*R*R*R;
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid out(gd, ingrad);
+    ReciprocalGrid recip = out.fft();
+    myR = R;
+    recip.MultiplyBy(delta);
+    out = recip.ifft();
+    *outgrad += out;
+
+    // FIXME: we will want to propogate preexisting preconditioning
+    if (outpgrad) *outpgrad += out;
+  }
+private:
+  double R;
+};
+
+FieldFunctional ShellConvolve(double R) {
+  return FieldFunctional(new ShellConvolveType(R));
+}
