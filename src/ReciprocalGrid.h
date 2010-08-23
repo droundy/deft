@@ -57,6 +57,7 @@ public:
 
   Grid ifft() const;
   void MultiplyBy(double f(Reciprocal));
+  void MultiplyBy(complex f(Reciprocal));
 
   complex operator()(int x, int y, int z) const {
     if (z > gd.NzOver2) z = gd.Nz - z;

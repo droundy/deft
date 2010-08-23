@@ -16,4 +16,7 @@ FieldFunctional EffectivePotentialToDensity(double temperature);
 FieldFunctional Gaussian(double width);
 FieldFunctional StepConvolve(double radius);
 FieldFunctional ShellConvolve(double radius);
+FieldFunctional xShellConvolve(double radius);
+FieldFunctional yShellConvolve(double radius);
+FieldFunctional zShellConvolve(double radius);
 FieldFunctional Pow(int power);

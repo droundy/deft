@@ -133,6 +133,28 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
 
+  printf("Running ShellConvolve(1)...\n");
+  bar = yShellConvolve(1)(foo);
+  printf("ShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("ShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+    printf("Integral of ShellConvolve(1) is wrong:  %g\n",
+           integrate(bar)/integrate_foo-fourpi);
+    retval++;
+  }
+  bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
+
+  printf("Running ShellConvolve(3)...\n");
+  bar = xShellConvolve(3)(foo);
+  printf("ShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
+  printf("ShellConvolve(3) integrates to %.15g\n", integrate(bar));
+  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+    printf("Integral of ShellConvolve(3) is wrong:  %g\n",
+           integrate(bar)/integrate_foo);
+    retval++;
+  }
+  bar.epsNativeSlice("x-shell-3.eps", plotx, ploty, plotcorner);
+
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);
   return retval;
