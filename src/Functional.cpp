@@ -157,10 +157,6 @@ private:
   const FieldFunctional f2;
 };
 
-Functional compose(const Functional &a, const FieldFunctional &b) {
-  return Functional(new FunctionalComposition(a, b));
-}
-
 Functional Functional::operator()(const FieldFunctional &f) const {
   return Functional(new FunctionalComposition(*this, f));
 }
