@@ -38,6 +38,9 @@ public:
   }
 
   FieldFunctional operator()(const FieldFunctional &) const;
+  FieldFunctional operator+(const FieldFunctional &) const;
+  FieldFunctional operator-(const FieldFunctional &) const;
+  FieldFunctional operator/(const FieldFunctional &) const;
   FieldFunctional operator*(const FieldFunctional &) const;
   FieldFunctional operator*(double) const;
   VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
@@ -80,3 +83,6 @@ private:
 inline FieldFunctional operator*(double x, const FieldFunctional &f) {
   return f*x;
 }
+FieldFunctional operator-(double x, const FieldFunctional &f);
+
+FieldFunctional log(const FieldFunctional &);

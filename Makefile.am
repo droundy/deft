@@ -3,6 +3,7 @@ EXTRA_DIST = autogen.sh
 GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/Functional.cpp src/IdealGas.cpp src/ChemicalPotential.cpp \
+	src/HardSpheres.cpp \
 	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
@@ -13,6 +14,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/hard-spheres.test \
 	tests/convolve.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
@@ -27,6 +29,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)
+tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(GENERIC_CODE)
 tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(GENERIC_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)

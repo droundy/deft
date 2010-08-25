@@ -94,7 +94,7 @@ bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
     }
   }
 
-  if (min < 1e-3 && best_ratio_error < 1e-7) {
+  if (min < 1e-3 && best_ratio_error < 1e-5) {
     printf("Passed on basis of reasonable scaling (%g) and accuracy (%g).\n",
            min, best_ratio_error);
     return false;

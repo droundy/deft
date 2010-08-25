@@ -17,6 +17,26 @@
 #include "Functionals.h"
 #include "Grid.h"
 
+class IdentityType : public FieldFunctionalInterface {
+public:
+  IdentityType() {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return data;
+  }
+  double transform(double n) const {
+    return n;
+  }
+
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    *outgrad += ingrad;
+    if (outpgrad) *outpgrad += ingrad; // FIXME: propogate preconditioning
+  }
+};
+
+FieldFunctional Identity() { return FieldFunctional(new IdentityType()); }
+
 class ChainRuleType : public FieldFunctionalInterface {
 public:
   ChainRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
@@ -41,6 +61,58 @@ private:
 
 FieldFunctional FieldFunctional::operator()(const FieldFunctional &f) const {
   return FieldFunctional(new ChainRuleType(*this, f));
+}
+
+class QuotientRuleType : public FieldFunctionalInterface {
+public:
+  QuotientRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f1(gd, data).cwise()/f2(gd, data);
+  }
+  double transform(double n) const {
+    return f1(n)/f2(n);
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    if (outpgrad) {
+      Grid outgrad1(gd);
+      Grid outgrad2(gd);
+      outgrad1.setZero();
+      outgrad2.setZero();
+      Grid outpgrad1(gd);
+      Grid outpgrad2(gd);
+      outpgrad1.setZero();
+      outpgrad2.setZero();
+      f1.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
+      f2.grad(gd, data, ingrad, &outgrad2, &outpgrad2);
+
+      VectorXd out2 = f2(gd, data);
+      VectorXd out1 = f1(gd, data);
+
+      *outgrad += outgrad1.cwise()/out2 - (out1.cwise()*outgrad2).cwise()/(out2.cwise()*out2);
+      *outpgrad += outpgrad1.cwise()/out2 - (out1.cwise()*outpgrad2).cwise()/(out2.cwise()*out2);
+    } else {
+      Grid outgrad1(gd);
+      Grid outgrad2(gd);
+      outgrad1.setZero();
+      outgrad2.setZero();
+      f1.grad(gd, data, ingrad, &outgrad1, 0);
+      f2.grad(gd, data, ingrad, &outgrad2, 0);
+
+      VectorXd out2 = f2(gd, data);
+      VectorXd out1 = f1(gd, data);
+
+      *outgrad += outgrad1.cwise()/out2 - (out1.cwise()*outgrad2).cwise()/(out2.cwise()*out2);
+    }
+  }
+private:
+  FieldFunctional f1, f2;
+};
+
+FieldFunctional FieldFunctional::operator/(const FieldFunctional &f) const {
+  return FieldFunctional(new QuotientRuleType(*this, f));
 }
 
 class ProductRuleType : public FieldFunctionalInterface {
@@ -74,7 +146,17 @@ public:
       *outpgrad += out2.cwise()*outpgrad1;
     } else {
       Grid outgrad1(gd);
+      Grid outgrad2(gd);
+      outgrad1.setZero();
+      outgrad2.setZero();
+      f1.grad(gd, data, ingrad, &outgrad1, 0);
+      f2.grad(gd, data, ingrad, &outgrad2, 0);
+
       VectorXd out2 = f2(gd, data);
+      VectorXd out1 = f1(gd, data);
+
+      *outgrad += out2.cwise()*outgrad1 + out1.cwise()*outgrad2;
+      /*
       outgrad1.setZero();
       f1.grad(gd, data, ingrad, &outgrad1, 0);
       *outgrad += out2.cwise()*outgrad1;
@@ -83,6 +165,7 @@ public:
       out2 = f1(gd, data);
       f2.grad(gd, data, ingrad, &outgrad1, 0);
       *outgrad += out2.cwise()*outgrad1;
+      */
     }
   }
 private:
@@ -128,4 +211,106 @@ private:
 
 FieldFunctional FieldFunctional::operator*(double x) const {
   return FieldFunctional(new ScalarRuleType(*this, x));
+}
+
+
+class ScalarMinusType : public FieldFunctionalInterface {
+public:
+  ScalarMinusType(const FieldFunctional &fa, double xx) : f(fa), x(xx) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, x*VectorXd::Ones(gd.NxNyNz) - data);
+  }
+  double transform(double n) const {
+    return f(x - n);
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    if (outpgrad) {
+      Grid outgrad1(gd);
+      Grid outpgrad1(gd);
+      outgrad1.setZero();
+      outpgrad1.setZero();
+      f.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
+      *outgrad -= outgrad1;
+      *outpgrad -= outpgrad1;
+    } else {
+      Grid outgrad1(gd);
+      outgrad1.setZero();
+      f.grad(gd, data, ingrad, &outgrad1, 0);
+      *outgrad -= outgrad1;
+    }
+  }
+private:
+  FieldFunctional f;
+  double x;
+};
+
+FieldFunctional operator-(double x, const FieldFunctional &f) {
+  return FieldFunctional(new ScalarMinusType(f, x));
+}
+
+
+class LogType : public FieldFunctionalInterface {
+public:
+  LogType(const FieldFunctional &fa) : f(fa) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, data.cwise().log());
+  }
+  double transform(double n) const {
+    return log(f(n));
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid outgrad1(gd);
+    outgrad1.setZero();
+    if (outpgrad) {
+      Grid outpgrad1(gd);
+      outpgrad1.setZero();
+      f.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
+      *outgrad += outgrad1.cwise()/data;
+      *outpgrad += outpgrad1.cwise()/data;
+    } else {
+      f.grad(gd, data, ingrad, &outgrad1, 0);
+      *outgrad += outgrad1.cwise()/data;
+    }
+  }
+private:
+  FieldFunctional f;
+};
+
+FieldFunctional log(const FieldFunctional &f) {
+  return FieldFunctional(new LogType(f));
+}
+
+
+class SumRuleType : public FieldFunctionalInterface {
+public:
+  SumRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f1(gd, data) + f2(gd, data);
+  }
+  double transform(double n) const {
+    return f1(n)+f2(n);
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    f1.grad(gd, data, ingrad, outgrad, outpgrad);
+    f2.grad(gd, data, ingrad, outgrad, outpgrad);
+  }
+private:
+  FieldFunctional f1, f2;
+};
+
+FieldFunctional FieldFunctional::operator+(const FieldFunctional &f) const {
+  return FieldFunctional(new SumRuleType(*this, f));
+}
+
+FieldFunctional FieldFunctional::operator-(const FieldFunctional &f) const {
+  return FieldFunctional(new SumRuleType(*this, -1*f));
 }

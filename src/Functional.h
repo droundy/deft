@@ -141,4 +141,7 @@ private:
 Functional operator+(const Functional &, const Functional &);
 Functional operator*(const Functional &, const Functional &);
 Functional operator*(double, const Functional &);
+inline Functional operator-(const Functional &f) {
+  return (-1)*f;
+}
 extern Functional integrate;
