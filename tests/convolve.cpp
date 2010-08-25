@@ -166,6 +166,17 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("xy-shell-1.eps", plotx, ploty, plotcorner);
 
+  printf("Running xxShellConvolve(2)...\n");
+  bar = xxShellConvolve(2)(foo);
+  printf("xxShellConvolve(2) integrates to %.15g\n", integrate(bar));
+  printf("xxShellConvolve(2) Maximum is %g\n", bar.maxCoeff());
+  if (fabs(integrate(bar)/integrate_foo + fourpi*4/3) > 1e-6) {
+    printf("Integral of xxShellConvolve(2) is wrong:  %g\n",
+           integrate(bar)/integrate_foo+fourpi*4/3);
+    retval++;
+  }
+  bar.epsNativeSlice("xx-shell-2.eps", plotx, ploty, plotcorner);
+
   printf("Running zxShellConvolve(3)...\n");
   bar = zxShellConvolve(3)(foo);
   printf("zxShellConvolve(3) Maximum is %g\n", bar.maxCoeff());

@@ -315,9 +315,55 @@ static complex zxdelta(Reciprocal kvec) {
   }
 }
 
+
+static double xxdelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double k2 = k*k;
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
+                        + cos(kR)*(1 - 3*kvec[0]*kvec[0]/k2));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*myR*myR*(kvec[0]*kvec[0]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+  }
+}
+
+static complex yydelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double k2 = k*k;
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[1]*kvec[1] - 1 - kR*kR/3)
+                        + cos(kR)*(1 - 3*kvec[1]*kvec[1]/k2));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*myR*myR*(kvec[1]*kvec[1]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+  }
+}
+
+static complex zzdelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double k2 = k*k;
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[2]*kvec[2] - 1 - kR*kR/3)
+                        + cos(kR)*(1 - 3*kvec[2]*kvec[2]/k2));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*myR*myR*(kvec[2]*kvec[2]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+  }
+}
+
 class TShellConvolveType : public FieldFunctionalInterface {
 public:
-  TShellConvolveType(double radius, int dir) : R(radius), direction(dir) {}
+  TShellConvolveType(double radius, int dir1, int dir2) : R(radius), d1(dir1), d2(dir2) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     ReciprocalGrid recip(gd);
@@ -327,12 +373,18 @@ public:
       // We want to free out immediately to save memory!
     }
     myR = R;
-    switch (direction) {
-    case 0: recip.MultiplyBy(xydelta);
+    switch (d1 + d2*3) {
+    case 0: recip.MultiplyBy(xxdelta);
       break;
-    case 1: recip.MultiplyBy(yzdelta);
+    case 1: case 3: recip.MultiplyBy(xydelta);
       break;
-    case 2: recip.MultiplyBy(zxdelta);
+    case 4: recip.MultiplyBy(yydelta);
+      break;
+    case 5: case 7: recip.MultiplyBy(yzdelta);
+      break;
+    case 8: recip.MultiplyBy(zzdelta);
+      break;
+    case 6: case 2: recip.MultiplyBy(zxdelta);
       break;
     }
     return recip.ifft();
@@ -346,12 +398,18 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     myR = R;
-    switch (direction) {
-    case 0: recip.MultiplyBy(xydelta);
+    switch (d1 + d2*3) {
+    case 0: recip.MultiplyBy(xxdelta);
       break;
-    case 1: recip.MultiplyBy(yzdelta);
+    case 1: case 3: recip.MultiplyBy(xydelta);
       break;
-    case 2: recip.MultiplyBy(zxdelta);
+    case 4: recip.MultiplyBy(yydelta);
+      break;
+    case 5: case 7: recip.MultiplyBy(yzdelta);
+      break;
+    case 8: recip.MultiplyBy(zzdelta);
+      break;
+    case 6: case 2: recip.MultiplyBy(zxdelta);
       break;
     }
     out = recip.ifft();
@@ -362,15 +420,25 @@ public:
   }
 private:
   double R;
-  int direction;
+  int d1, d2;
 };
 
 FieldFunctional xyShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 0));
+  return FieldFunctional(new TShellConvolveType(R, 0, 1));
 }
 FieldFunctional yzShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 1));
+  return FieldFunctional(new TShellConvolveType(R, 1, 2));
 }
 FieldFunctional zxShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 2));
+  return FieldFunctional(new TShellConvolveType(R, 2, 0));
+}
+
+FieldFunctional xxShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 0, 0));
+}
+FieldFunctional yyShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 1, 1));
+}
+FieldFunctional zzShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 2, 2));
 }
