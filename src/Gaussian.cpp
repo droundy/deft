@@ -274,3 +274,103 @@ FieldFunctional yShellConvolve(double R) {
 FieldFunctional zShellConvolve(double R) {
   return FieldFunctional(new VShellConvolveType(R, 2));
 }
+
+
+static double xydelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*kvec[0]*kvec[1]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+  }
+}
+
+static complex yzdelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*kvec[1]*kvec[2]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+  }
+}
+
+static complex zxdelta(Reciprocal kvec) {
+  double k = kvec.norm();
+  double kR = k*myR;
+  if (kR > 0) {
+    return (4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+  } else {
+    // The following is a simple power series expansion to the above
+    // function, to handle the case as k approaches zero with greater
+    // accuracy (and efficiency).
+    return (4*M_PI)*kvec[2]*kvec[0]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+  }
+}
+
+class TShellConvolveType : public FieldFunctionalInterface {
+public:
+  TShellConvolveType(double radius, int dir) : R(radius), direction(dir) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    ReciprocalGrid recip(gd);
+    {
+      const Grid out(gd, data);
+      recip = out.fft();
+      // We want to free out immediately to save memory!
+    }
+    myR = R;
+    switch (direction) {
+    case 0: recip.MultiplyBy(xydelta);
+      break;
+    case 1: recip.MultiplyBy(yzdelta);
+      break;
+    case 2: recip.MultiplyBy(zxdelta);
+      break;
+    }
+    return recip.ifft();
+  }
+  double transform(double) const {
+    return 0;
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid out(gd, ingrad);
+    ReciprocalGrid recip = out.fft();
+    myR = R;
+    switch (direction) {
+    case 0: recip.MultiplyBy(xydelta);
+      break;
+    case 1: recip.MultiplyBy(yzdelta);
+      break;
+    case 2: recip.MultiplyBy(zxdelta);
+      break;
+    }
+    out = recip.ifft();
+    *outgrad += out;
+
+    // FIXME: we will want to propogate preexisting preconditioning
+    if (outpgrad) *outpgrad += out;
+  }
+private:
+  double R;
+  int direction;
+};
+
+FieldFunctional xyShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 0));
+}
+FieldFunctional yzShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 1));
+}
+FieldFunctional zxShellConvolve(double R) {
+  return FieldFunctional(new TShellConvolveType(R, 2));
+}

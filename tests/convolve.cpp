@@ -133,27 +133,49 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
 
-  printf("Running ShellConvolve(1)...\n");
+  printf("Running yShellConvolve(1)...\n");
   bar = yShellConvolve(1)(foo);
-  printf("ShellConvolve(1) integrates to %.15g\n", integrate(bar));
-  printf("ShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  printf("yShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("yShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
   if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
-    printf("Integral of ShellConvolve(1) is wrong:  %g\n",
+    printf("Integral of yShellConvolve(1) is wrong:  %g\n",
            integrate(bar)/integrate_foo-fourpi);
     retval++;
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
 
-  printf("Running ShellConvolve(3)...\n");
+  printf("Running xShellConvolve(3)...\n");
   bar = xShellConvolve(3)(foo);
-  printf("ShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
-  printf("ShellConvolve(3) integrates to %.15g\n", integrate(bar));
+  printf("xShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
+  printf("xShellConvolve(3) integrates to %.15g\n", integrate(bar));
   if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
-    printf("Integral of ShellConvolve(3) is wrong:  %g\n",
+    printf("Integral of xShellConvolve(3) is wrong:  %g\n",
            integrate(bar)/integrate_foo);
     retval++;
   }
   bar.epsNativeSlice("x-shell-3.eps", plotx, ploty, plotcorner);
+
+  printf("Running xyShellConvolve(1)...\n");
+  bar = xyShellConvolve(1)(foo);
+  printf("xyShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("xyShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+    printf("Integral of xyShellConvolve(1) is wrong:  %g\n",
+           integrate(bar)/integrate_foo-fourpi);
+    retval++;
+  }
+  bar.epsNativeSlice("xy-shell-1.eps", plotx, ploty, plotcorner);
+
+  printf("Running zxShellConvolve(3)...\n");
+  bar = zxShellConvolve(3)(foo);
+  printf("zxShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
+  printf("zxShellConvolve(3) integrates to %.15g\n", integrate(bar));
+  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+    printf("Integral of zxShellConvolve(3) is wrong:  %g\n",
+           integrate(bar)/integrate_foo);
+    retval++;
+  }
+  bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);

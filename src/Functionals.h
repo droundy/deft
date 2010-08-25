@@ -14,9 +14,20 @@ Functional GaussianPolynomial(double amplitude, double width, int power);
 
 FieldFunctional EffectivePotentialToDensity(double temperature);
 FieldFunctional Gaussian(double width);
+
 FieldFunctional StepConvolve(double radius);
+
 FieldFunctional ShellConvolve(double radius);
+
 FieldFunctional xShellConvolve(double radius);
 FieldFunctional yShellConvolve(double radius);
 FieldFunctional zShellConvolve(double radius);
+
+FieldFunctional xxShellConvolve(double radius);
+FieldFunctional yyShellConvolve(double radius);
+FieldFunctional zzShellConvolve(double radius);
+FieldFunctional xyShellConvolve(double radius);
+FieldFunctional yzShellConvolve(double radius);
+FieldFunctional zxShellConvolve(double radius);
+
 FieldFunctional Pow(int power);
