@@ -86,3 +86,4 @@ inline FieldFunctional operator*(double x, const FieldFunctional &f) {
 FieldFunctional operator-(double x, const FieldFunctional &f);
 
 FieldFunctional log(const FieldFunctional &);
+FieldFunctional sqr(const FieldFunctional &);

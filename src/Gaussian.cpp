@@ -255,7 +255,7 @@ public:
       break;
     }
     out = recip.ifft();
-    *outgrad += out;
+    *outgrad -= out;
 
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;

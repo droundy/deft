@@ -128,45 +128,8 @@ public:
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    if (outpgrad) {
-      Grid outgrad1(gd);
-      Grid outpgrad1(gd);
-      VectorXd out2 = f2(gd, data);
-      outgrad1.setZero();
-      outpgrad1.setZero();
-      f1.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
-      *outgrad += out2.cwise()*outgrad1;
-      *outpgrad += out2.cwise()*outpgrad1;
-
-      outgrad1.setZero();
-      outpgrad1.setZero();
-      out2 = f1(gd, data);
-      f2.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
-      *outgrad += out2.cwise()*outgrad1;
-      *outpgrad += out2.cwise()*outpgrad1;
-    } else {
-      Grid outgrad1(gd);
-      Grid outgrad2(gd);
-      outgrad1.setZero();
-      outgrad2.setZero();
-      f1.grad(gd, data, ingrad, &outgrad1, 0);
-      f2.grad(gd, data, ingrad, &outgrad2, 0);
-
-      VectorXd out2 = f2(gd, data);
-      VectorXd out1 = f1(gd, data);
-
-      *outgrad += out2.cwise()*outgrad1 + out1.cwise()*outgrad2;
-      /*
-      outgrad1.setZero();
-      f1.grad(gd, data, ingrad, &outgrad1, 0);
-      *outgrad += out2.cwise()*outgrad1;
-
-      outgrad1.setZero();
-      out2 = f1(gd, data);
-      f2.grad(gd, data, ingrad, &outgrad1, 0);
-      *outgrad += out2.cwise()*outgrad1;
-      */
-    }
+    f1.grad(gd, data, ingrad.cwise()*f2(gd, data), outgrad, outpgrad);
+    f2.grad(gd, data, ingrad.cwise()*f1(gd, data), outgrad, outpgrad);
   }
 private:
   FieldFunctional f1, f2;
@@ -313,4 +276,28 @@ FieldFunctional FieldFunctional::operator+(const FieldFunctional &f) const {
 
 FieldFunctional FieldFunctional::operator-(const FieldFunctional &f) const {
   return FieldFunctional(new SumRuleType(*this, -1*f));
+}
+
+class SquareRuleType : public FieldFunctionalInterface {
+public:
+  SquareRuleType(const FieldFunctional &fa) : f(fa) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, data).cwise().square();
+  }
+  double transform(double n) const {
+    double x = f(n);
+    return x*x;
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
+  }
+private:
+  FieldFunctional f;
+};
+
+FieldFunctional sqr(const FieldFunctional &f) {
+  return FieldFunctional(new SquareRuleType(f));
 }

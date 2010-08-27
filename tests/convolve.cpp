@@ -80,6 +80,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("step-1.eps", plotx, ploty, plotcorner);
+  retval += integrate(StepConvolve(1)).run_finite_difference_test("integrate StepConvolve(1)", foo);
 
   printf("Running StepConvolve(2)...\n");
   bar = StepConvolve(2)(foo);
@@ -94,6 +95,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("step-2.eps", plotx, ploty, plotcorner);
+  retval += integrate(StepConvolve(2)).run_finite_difference_test("integrate StepConvolve(2)", foo);
 
   printf("Running StepConvolve(3)...\n");
   bar = StepConvolve(3)(foo);
@@ -109,6 +111,8 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("step-3.eps", plotx, ploty, plotcorner);
+  retval += integrate(StepConvolve(3)).run_finite_difference_test("integrate StepConvolve(3)", foo);
+
 
   const double fourpi = 4*M_PI;
   printf("Running ShellConvolve(1)...\n");
@@ -121,6 +125,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("shell-1.eps", plotx, ploty, plotcorner);
+  retval += integrate(ShellConvolve(1)).run_finite_difference_test("integrate ShellConvolve(1)", foo);
 
   printf("Running ShellConvolve(3)...\n");
   bar = ShellConvolve(3)(foo);
@@ -132,6 +137,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
+  retval += integrate(ShellConvolve(3)).run_finite_difference_test("integrate ShellConvolve(3)", foo);
 
   printf("Running yShellConvolve(1)...\n");
   bar = yShellConvolve(1)(foo);
@@ -143,6 +149,12 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
+  FieldFunctional ysh = yShellConvolve(1), sh = ShellConvolve(1);
+  retval += integrate(sqr(ysh)).run_finite_difference_test("integrate ysh^2", foo);
+  retval += integrate(ysh*ysh).run_finite_difference_test("integrate ysh*ysh", foo);
+  retval += integrate(ysh*ysh + sh).run_finite_difference_test("integrate ysh*ysh + sh", foo);
+  retval += integrate(-1*ysh*ysh).run_finite_difference_test("integrate -1*ysh*ysh", foo);
+  retval += (-1*integrate(ysh*ysh)).run_finite_difference_test("-1* integrate ysh*ysh", foo);
 
   printf("Running xShellConvolve(3)...\n");
   bar = xShellConvolve(3)(foo);
@@ -178,7 +190,8 @@ int main(int, char **argv) {
   bar.epsNativeSlice("xx-shell-2.eps", plotx, ploty, plotcorner);
 
   printf("Running zxShellConvolve(3)...\n");
-  bar = zxShellConvolve(3)(foo);
+  FieldFunctional zxsh = zxShellConvolve(3);
+  bar = zxsh(foo);
   printf("zxShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
   printf("zxShellConvolve(3) integrates to %.15g\n", integrate(bar));
   if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
@@ -187,6 +200,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
+  retval += integrate(sqr(sqr(zxsh))).run_finite_difference_test("integrate zxsh^2", foo);
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);
