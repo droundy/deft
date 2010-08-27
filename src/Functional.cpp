@@ -34,6 +34,7 @@ bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
   grad(x, &my_grad);
   VectorXd my_direction(my_grad);
   if (direction) my_direction = *direction;
+  my_direction /= my_direction.norm();
 
   const double lderiv = my_direction.dot(my_grad);
   if (lderiv == 0.0) {
@@ -62,7 +63,7 @@ bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
   const double epsilon_max = 1e-15*fabs(Eold)/fabs(lderiv)/sigfigs_best;
   const int min_p = (int) -floor(log10(epsilon_max) + 0.5);
   const int max_p = min_p + 7;
-  printf("choosing delta of grad*1e%d based on grad %g and energy %g\n",
+  printf("choosing delta of 1e%d based on directional grad %g and energy %g\n",
          -min_p, lderiv, Eold);
   double min = 1e300, best_ratio_error = 1.0;
   VectorXd grads(max_p + 1 - min_p);
@@ -94,7 +95,7 @@ bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
     }
   }
 
-  if (min < 1e-3 && best_ratio_error < 1e-5) {
+  if (min < 1e-3 && best_ratio_error < 1e-7) {
     printf("Passed on basis of reasonable scaling (%g) and accuracy (%g).\n",
            min, best_ratio_error);
     return false;
@@ -146,7 +147,7 @@ public:
       // First compute the gradient of f1(d1)...
       f1.grad(gd, d1, &g1);
       // ... then use the chain rule to compute the gradient of f2(f1(data)).
-      f2.grad(gd, data, g1, g, pgrad);
+      f2.grad(gd, data, g1, g, 0);
     }
   }
   void print_summary(const char *prefix, double) const {

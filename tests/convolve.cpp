@@ -201,6 +201,11 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
   retval += integrate(sqr(sqr(zxsh))).run_finite_difference_test("integrate zxsh^2", foo);
+  {
+    Grid foo2(foo);
+    foo2.cwise() -= 1; // so we don't divide by zero...
+    retval += integrate(sqr(zxsh)/sh).run_finite_difference_test("integrate zxsh^2/sh", foo2);
+  }
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);

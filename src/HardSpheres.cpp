@@ -18,79 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-/*
-class HardSpheresType : public FunctionalInterface {
-public:
-  HardSpheresType(double rad, double temp) : R(rad), T(temp) {}
-
-  double energy(double data) const;
-  double energy(const GridDescription &gd, const VectorXd &data) const;
-  void grad(const GridDescription &gd, const VectorXd &data,
-            VectorXd *, VectorXd *pgrad = 0) const;
-
-  void  print_summary(const char *prefix, double last_energy) const {
-    printf("%sHardSpheres energy = %g\n", prefix, last_energy);
-  }
-private:
-  double R, T; // temperature
-};
-
-const double min_log_arg = 1e-12;
-const double slope = log(min_log_arg);
-const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
-
-double HardSpheresType::energy(const GridDescription &gd, const VectorXd &data) const {
-  double e = 0;
-  for (int i=0; i < gd.NxNyNz; i++) {
-    const double n = data[i];
-    if (n != n) {
-      printf("data[%d] == %g\n", i, n);
-      assert(n == n); // check for NaN
-    }
-    if (n > min_log_arg) {
-      e += n*log(n) - n;
-      if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
-      assert(e == e); // check for NaN
-    } else {
-      e += (n-min_log_arg)*slope + min_e;
-    }
-  }
-  return T*e*gd.dvolume;
-}
-
-double HardSpheresType::energy(double n) const {
-  double e;
-  if (n != n) {
-    printf("n == %g\n", n);
-    assert(n == n); // check for NaN
-  }
-  if (n > min_log_arg) {
-    e = n*log(n) - n;
-    if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
-    assert(e == e); // check for NaN
-  } else {
-    e = (n-min_log_arg)*slope + min_e;
-  }
-  return T*e;
-}
-
-void HardSpheresType::grad(const GridDescription &gd, const VectorXd &n,
-                        VectorXd *g_ptr, VectorXd *pg_ptr) const {
-  VectorXd &g = *g_ptr;
-
-  const double TdV = T*gd.Lat.volume()/gd.NxNyNz;
-  for (int i=0; i < gd.NxNyNz; i++) {
-    if (n[i] > min_log_arg) {
-      g[i] += TdV*log(n[i]);
-    } else {
-      g[i] += TdV*slope;
-    }
-  }
-  if (pg_ptr) *pg_ptr += g;
-}
-*/
-
-Functional HardSpheres(double radius, double temperature) {
+Functional HardSpheresRF(double radius, double temperature) {
   FieldFunctional n0 = Identity();
   FieldFunctional n3 = StepConvolve(radius);
   FieldFunctional one_minus_n3 = 1 - StepConvolve(radius);
@@ -108,6 +36,61 @@ Functional HardSpheres(double radius, double temperature) {
   const double four_pi_r2 = (4*M_PI)*(radius*radius);
   // n1 is n2/(four_pi_r2)
   FieldFunctional phi2 = (n2*n2 - n2x*n2x - n2y*n2y - n2z*n2z)/(four_pi_r2*one_minus_n3);
-  return temperature*integrate(phi1 + phi2);
+  FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
+  return temperature*integrate(phi1 + phi2 + phi3);
     //integrate(phi2);
+    //integrate(phi3);
+}
+
+Functional HardSpheres(double radius, double temperature) {
+  FieldFunctional n0 = Identity();
+  FieldFunctional n3 = StepConvolve(radius);
+  FieldFunctional one_minus_n3 = 1 - n3;
+  FieldFunctional n2 = ShellConvolve(radius);
+  FieldFunctional n2x = xShellConvolve(radius);
+  FieldFunctional n2y = yShellConvolve(radius);
+  FieldFunctional n2z = zShellConvolve(radius);
+  FieldFunctional nTxx = xxShellConvolve(radius);
+  FieldFunctional nTyy = yyShellConvolve(radius);
+  FieldFunctional nTzz = zzShellConvolve(radius);
+  FieldFunctional nTxy = xyShellConvolve(radius);
+  FieldFunctional nTyz = yzShellConvolve(radius);
+  FieldFunctional nTzx = zxShellConvolve(radius*temperature);
+  FieldFunctional nTxz = nTzx, nTyx = nTxy, nTzy = nTyz;
+  /*
+  FieldFunctional trace_nT3 =
+    nTxx*nTxx*nTxx + nTxx*nTxy*nTyx + nTxx*nTxz*nTzx + // starting with nTxx
+    nTxy*nTyx*nTxx + nTxy*nTyy*nTyx + nTxy*nTyz*nTzx + // starting with nTxy
+    nTxz*nTzx*nTxx + nTxz*nTzy*nTyx + nTxz*nTzz*nTzx + // starting with nTxz
+
+    nTyx*nTxx*nTxy + nTyx*nTxy*nTyy + nTyx*nTxz*nTzy + // starting with nTyx
+    nTyy*nTyx*nTxy + nTyy*nTyy*nTyy + nTyy*nTyz*nTzy + // starting with nTyy
+    nTyz*nTzx*nTxy + nTyz*nTzy*nTyy + nTyz*nTzz*nTzy + // starting with nTyz
+
+    nTzx*nTxx*nTxz + nTzx*nTxy*nTyz + nTzx*nTxz*nTzz + // starting with nTzx
+    nTzy*nTyx*nTxz + nTzy*nTyy*nTyz + nTzy*nTyz*nTzz + // starting with nTzy
+    nTzz*nTzx*nTxz + nTzz*nTzy*nTyz + nTzz*nTzz*nTzz; // starting with nTzz
+  */
+  FieldFunctional trace_nT3 =
+    6*nTxy*nTyz*nTzx +
+    nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
+    nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
+    nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
+  // * /
+  FieldFunctional phi1 = -1*n0*log(one_minus_n3);
+  const double four_pi_r2 = (4*M_PI)*(radius*radius);
+  // n1 is n2/(four_pi_r2)
+  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r2*one_minus_n3);
+  FieldFunctional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))
+    /(36*M_PI*sqr(n3)*sqr(one_minus_n3))
+    *(n2*sqr(n2) - 3*n2*(sqr(n2x) + sqr(n2y) + sqr(n2z))
+      +
+      9*(sqr(n2x)*nTxx + sqr(n2y)*nTyy + sqr(n2z)*nTzz
+           + 2*(n2x*n2y*nTxy + n2y*n2z*nTyz + n2z*n2x*nTzx)
+           - 0.5*trace_nT3));
+  // The following is for the original Rosenfeld functional:
+  //FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
+  return temperature*integrate(phi1 + phi2 + phi3);
+    //integrate(phi2);
+   //integrate(sqr(n2x));
 }

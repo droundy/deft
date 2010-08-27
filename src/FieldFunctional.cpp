@@ -76,36 +76,9 @@ public:
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    if (outpgrad) {
-      Grid outgrad1(gd);
-      Grid outgrad2(gd);
-      outgrad1.setZero();
-      outgrad2.setZero();
-      Grid outpgrad1(gd);
-      Grid outpgrad2(gd);
-      outpgrad1.setZero();
-      outpgrad2.setZero();
-      f1.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
-      f2.grad(gd, data, ingrad, &outgrad2, &outpgrad2);
-
-      VectorXd out2 = f2(gd, data);
-      VectorXd out1 = f1(gd, data);
-
-      *outgrad += outgrad1.cwise()/out2 - (out1.cwise()*outgrad2).cwise()/(out2.cwise()*out2);
-      *outpgrad += outpgrad1.cwise()/out2 - (out1.cwise()*outpgrad2).cwise()/(out2.cwise()*out2);
-    } else {
-      Grid outgrad1(gd);
-      Grid outgrad2(gd);
-      outgrad1.setZero();
-      outgrad2.setZero();
-      f1.grad(gd, data, ingrad, &outgrad1, 0);
-      f2.grad(gd, data, ingrad, &outgrad2, 0);
-
-      VectorXd out2 = f2(gd, data);
-      VectorXd out1 = f1(gd, data);
-
-      *outgrad += outgrad1.cwise()/out2 - (out1.cwise()*outgrad2).cwise()/(out2.cwise()*out2);
-    }
+    VectorXd out2 = f2(gd, data);
+    f1.grad(gd, data, ingrad.cwise()/out2, outgrad, outpgrad);
+    f2.grad(gd, data, (ingrad.cwise()*f1(gd, data)).cwise()/((-out2).cwise()*out2), outgrad, outpgrad);
   }
 private:
   FieldFunctional f1, f2;
