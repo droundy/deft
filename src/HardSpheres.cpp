@@ -37,9 +37,23 @@ Functional HardSpheresRF(double radius, double temperature) {
   // n1 is n2/(four_pi_r2)
   FieldFunctional phi2 = (n2*n2 - n2x*n2x - n2y*n2y - n2z*n2z)/(four_pi_r2*one_minus_n3);
   FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
-  return temperature*integrate(phi1 + phi2 + phi3);
-    //integrate(phi2);
-    //integrate(phi3);
+  if (true) {
+    // Debugging version...
+    Functional e1 = temperature*integrate(phi1);
+    e1.set_name("phi 1");
+    Functional e2 = temperature*integrate(phi2);
+    e2.set_name("phi 2");
+    Functional e3 = temperature*integrate(phi3);
+    e3.set_name("Rosenfeld phi 3");
+    Functional total = e1 + e2 + e3;
+    total.set_name("hard sphere excess");
+    return total;
+  } else {
+    // Efficient version...
+    Functional total = temperature*integrate(phi1 + phi2 + phi3);
+    total.set_name("hard sphere excess");
+    return total;
+  }
 }
 
 Functional HardSpheres(double radius, double temperature) {
@@ -90,10 +104,21 @@ Functional HardSpheres(double radius, double temperature) {
            - 0.5*trace_nT3));
   // The following is for the original Rosenfeld functional:
   //FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
-  //phi1.set_name("phi 1");
-  //phi2.set_name("phi 2");
-  //phi3.set_name("phi 3");
-  Functional total = temperature*integrate(phi1 + phi2 + phi3);
-  total.set_name("hard sphere excess");
-  return total;
+  if (true) {
+    // Debugging version...
+    Functional e1 = temperature*integrate(phi1);
+    e1.set_name("phi 1");
+    Functional e2 = temperature*integrate(phi2);
+    e2.set_name("phi 2");
+    Functional e3 = temperature*integrate(phi3);
+    e3.set_name("white bear phi 3");
+    Functional total = e1 + e2 + e3;
+    total.set_name("white bear excess");
+    return total;
+  } else {
+    // Efficient version...
+    Functional total = temperature*integrate(phi1 + phi2 + phi3);
+    total.set_name("hard sphere excess");
+    return total;
+  }
 }

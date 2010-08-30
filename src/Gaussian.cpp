@@ -53,12 +53,14 @@ FieldFunctional Gaussian(double width) {
   return FieldFunctional(new GaussianType(width));
 }
 
-static double myR;
+static double myR, mydr;
+static const double spreading = 3.0;
 static double step(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
+  double kdr = k*mydr;
   if (kR > 1e-3) {
-    return (4*M_PI)*(sin(kR) - kR*cos(kR))/(k*k*k);
+    return exp(-spreading*kdr*kdr)*(4*M_PI)*(sin(kR) - kR*cos(kR))/(k*k*k);
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -82,6 +84,7 @@ public:
       // We want to free out immediately to save memory!
     }
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     recip.MultiplyBy(step);
     return recip.ifft();
   }
@@ -94,6 +97,7 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     recip.MultiplyBy(step);
     out = recip.ifft();
     *outgrad += out;
@@ -113,7 +117,7 @@ static double delta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return (4*M_PI)*myR*sin(kR)/k;
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*sin(kR)/k;
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -137,6 +141,7 @@ public:
       // We want to free out immediately to save memory!
     }
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     recip.MultiplyBy(delta);
     return recip.ifft();
   }
@@ -149,6 +154,7 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     recip.MultiplyBy(delta);
     out = recip.ifft();
     *outgrad += out;
@@ -168,7 +174,7 @@ static complex xdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[0]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[0]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -185,7 +191,7 @@ static complex ydelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[1]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[1]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -202,7 +208,7 @@ static complex zdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[2]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[2]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -227,6 +233,7 @@ public:
       // We want to free out immediately to save memory!
     }
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     switch (direction) {
     case 0: recip.MultiplyBy(xdelta);
       break;
@@ -246,6 +253,7 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     switch (direction) {
     case 0: recip.MultiplyBy(xdelta);
       break;
@@ -280,7 +288,7 @@ static double xydelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
     // The following is a simple power series expansion to the above
     // function, to handle the case as k approaches zero with greater
@@ -293,7 +301,7 @@ static complex yzdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
     // The following is a simple power series expansion to the above
     // function, to handle the case as k approaches zero with greater
@@ -306,7 +314,7 @@ static complex zxdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
     // The following is a simple power series expansion to the above
     // function, to handle the case as k approaches zero with greater
@@ -321,7 +329,7 @@ static double xxdelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
                         + cos(kR)*(1 - 3*kvec[0]*kvec[0]/k2));
   } else {
     // The following is a simple power series expansion to the above
@@ -336,7 +344,7 @@ static complex yydelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[1]*kvec[1] - 1 - kR*kR/3)
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[1]*kvec[1] - 1 - kR*kR/3)
                         + cos(kR)*(1 - 3*kvec[1]*kvec[1]/k2));
   } else {
     // The following is a simple power series expansion to the above
@@ -351,7 +359,7 @@ static complex zzdelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return (4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[2]*kvec[2] - 1 - kR*kR/3)
+    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[2]*kvec[2] - 1 - kR*kR/3)
                         + cos(kR)*(1 - 3*kvec[2]*kvec[2]/k2));
   } else {
     // The following is a simple power series expansion to the above
@@ -373,6 +381,7 @@ public:
       // We want to free out immediately to save memory!
     }
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     switch (d1 + d2*3) {
     case 0: recip.MultiplyBy(xxdelta);
       break;
@@ -398,6 +407,7 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     myR = R;
+    mydr = pow(gd.fineLat.volume(), 1.0/3);
     switch (d1 + d2*3) {
     case 0: recip.MultiplyBy(xxdelta);
       break;

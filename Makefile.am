@@ -16,6 +16,7 @@ deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 check_PROGRAMS = \
 	tests/hard-spheres.test \
 	tests/convolve.test \
+	tests/convolve-finite-difference.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
@@ -31,6 +32,7 @@ check_PROGRAMS = \
 TESTS = tests/null.sh $(check_PROGRAMS)
 tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(GENERIC_CODE)
 tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE)
+tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(GENERIC_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(GENERIC_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)

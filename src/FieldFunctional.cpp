@@ -193,7 +193,13 @@ public:
   LogType(const FieldFunctional &fa) : f(fa) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f(gd, data.cwise().log());
+    VectorXd out(data);
+    const int len = data.rows()*data.cols();
+    for (int i=0; i<len; i++) {
+      out[i] = log(f(data[i]));
+    }
+    return out;
+    return f(gd, data).cwise().log();
   }
   double transform(double n) const {
     return log(f(n));
@@ -201,18 +207,9 @@ public:
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid outgrad1(gd);
-    outgrad1.setZero();
-    if (outpgrad) {
-      Grid outpgrad1(gd);
-      outpgrad1.setZero();
-      f.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
-      *outgrad += outgrad1.cwise()/data;
-      *outpgrad += outpgrad1.cwise()/data;
-    } else {
-      f.grad(gd, data, ingrad, &outgrad1, 0);
-      *outgrad += outgrad1.cwise()/data;
-    }
+    Grid ingrad1(gd, ingrad);
+    ingrad1.cwise() /= f(gd, data);
+    f.grad(gd, data, ingrad1, outgrad, outpgrad);
   }
 private:
   FieldFunctional f;

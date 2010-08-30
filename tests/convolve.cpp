@@ -26,7 +26,11 @@ double gaussian(Cartesian r) {
   // function in real space and do a DFT on it to get the convolution
   // in fourier space.  This would avoid the oscillations, but would
   // require that we store the convolution function on a grid.
-  return 4000*exp(-50*(dr*dr));
+  //return 4000*exp(-50*(dr*dr));
+
+  // Actually, it's sharp, because we want to make sure the
+  // oscillations from aliasing are under controll.
+  return 4000*exp(-50*1000.0*(dr*dr));
 }
 
 int main(int, char **argv) {
@@ -73,6 +77,11 @@ int main(int, char **argv) {
     printf("Max of StepConvolve(1) is wrong:  %g\n", bar.maxCoeff()/integrate_foo - 1);
     retval++;
   }
+  printf("StepConvolve(1) Minimum is %g\n", bar.minCoeff());
+  if (bar.minCoeff()/integrate_foo < -1e-9) {
+    printf("Min of StepConvolve(1) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
+    retval++;
+  }
   const double fourpiover3 = 4*M_PI/3;
   if (fabs((integrate(bar)/integrate_foo-fourpiover3)/fourpiover3) > 1e-6) {
     printf("Integral of StepConvolve(1) is wrong:  %g\n",
@@ -80,7 +89,6 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("step-1.eps", plotx, ploty, plotcorner);
-  retval += integrate(StepConvolve(1)).run_finite_difference_test("integrate StepConvolve(1)", foo);
 
   printf("Running StepConvolve(2)...\n");
   bar = StepConvolve(2)(foo);
@@ -94,8 +102,12 @@ int main(int, char **argv) {
     printf("Max of StepConvolve(2) is wrong:  %g\n", (bar.maxCoeff()-integrate_foo)/integrate_foo);
     retval++;
   }
+  printf("StepConvolve(2) Minimum is %g\n", bar.minCoeff());
+  if (bar.minCoeff()/integrate_foo < -1e-9) {
+    printf("Min of StepConvolve(2) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
+    retval++;
+  }
   bar.epsNativeSlice("step-2.eps", plotx, ploty, plotcorner);
-  retval += integrate(StepConvolve(2)).run_finite_difference_test("integrate StepConvolve(2)", foo);
 
   printf("Running StepConvolve(3)...\n");
   bar = StepConvolve(3)(foo);
@@ -110,8 +122,12 @@ int main(int, char **argv) {
     printf("Max of StepConvolve(3) is wrong:  %g\n", (bar.maxCoeff()-integrate_foo)/integrate_foo);
     retval++;
   }
+  printf("StepConvolve(3) Minimum is %g\n", bar.minCoeff());
+  if (fabs(bar.minCoeff()/integrate_foo) < -1e-9) {
+    printf("Min of StepConvolve(3) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
+    retval++;
+  }
   bar.epsNativeSlice("step-3.eps", plotx, ploty, plotcorner);
-  retval += integrate(StepConvolve(3)).run_finite_difference_test("integrate StepConvolve(3)", foo);
 
 
   const double fourpi = 4*M_PI;
@@ -124,8 +140,12 @@ int main(int, char **argv) {
            (integrate(bar)/integrate_foo-fourpi)/fourpi);
     retval++;
   }
+  printf("ShellConvolve(1) Minimum is %g\n", bar.minCoeff());
+  if (bar.minCoeff()/integrate_foo < -1e-9) {
+    printf("Min of ShellConvolve(1) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
+    retval++;
+  }
   bar.epsNativeSlice("shell-1.eps", plotx, ploty, plotcorner);
-  retval += integrate(ShellConvolve(1)).run_finite_difference_test("integrate ShellConvolve(1)", foo);
 
   printf("Running ShellConvolve(3)...\n");
   bar = ShellConvolve(3)(foo);
@@ -136,8 +156,12 @@ int main(int, char **argv) {
            (integrate(bar)/integrate_foo-fourpi*9)/fourpi/9);
     retval++;
   }
+  printf("ShellConvolve(3) Minimum is %g\n", bar.minCoeff());
+  if (bar.minCoeff()/integrate_foo < -1e-9) {
+    printf("Min of ShellConvolve(3) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
+    retval++;
+  }
   bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
-  retval += integrate(ShellConvolve(3)).run_finite_difference_test("integrate ShellConvolve(3)", foo);
 
   printf("Running yShellConvolve(1)...\n");
   bar = yShellConvolve(1)(foo);
@@ -150,11 +174,6 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
   FieldFunctional ysh = yShellConvolve(1), sh = ShellConvolve(1);
-  retval += integrate(sqr(ysh)).run_finite_difference_test("integrate ysh^2", foo);
-  retval += integrate(ysh*ysh).run_finite_difference_test("integrate ysh*ysh", foo);
-  retval += integrate(ysh*ysh + sh).run_finite_difference_test("integrate ysh*ysh + sh", foo);
-  retval += integrate(-1*ysh*ysh).run_finite_difference_test("integrate -1*ysh*ysh", foo);
-  retval += (-1*integrate(ysh*ysh)).run_finite_difference_test("-1* integrate ysh*ysh", foo);
 
   printf("Running xShellConvolve(3)...\n");
   bar = xShellConvolve(3)(foo);
@@ -200,12 +219,6 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
-  retval += integrate(sqr(sqr(zxsh))).run_finite_difference_test("integrate zxsh^2", foo);
-  {
-    Grid foo2(foo);
-    foo2.cwise() -= 1; // so we don't divide by zero...
-    retval += integrate(sqr(zxsh)/sh).run_finite_difference_test("integrate zxsh^2/sh", foo2);
-  }
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);

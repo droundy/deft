@@ -80,9 +80,9 @@ int main(int, char **argv) {
     potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
-    const double expected_energy = 0.9438446700211881;
+    const double expected_energy = 0.002792960896652312;
     printf("hard sphere energy is %.16g\n", f(potential));
-    if (fabs(f(potential)/expected_energy - 1) > 1e-15) {
+    if (fabs(f(potential)/expected_energy - 1) > 1e-14) {
       printf("Error in hard sphere energy (of fixed potential) is too big: %g (from %.16g)\n",
              f(potential)/expected_energy - 1, f(potential));
       retval++;
@@ -107,13 +107,21 @@ int main(int, char **argv) {
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-9);
 
-  Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+
+  Minimizer cg = MaxIter(5, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
   retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-15); // I used this to verify...
 
-  Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-  potential.setZero();
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
+  Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
+  density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0),
+                         Cartesian(0,0,0));
+  printf("Energy is really %g\n", (f0 + ExternalPotential(external_potential))(density));
+  Grid n3(gd, StepConvolve(R)(density));
+  n3.epsNativeSlice("n3.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
+
+  //Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  //potential.setZero();
+  //retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
   */
 
   if (retval == 0) {
