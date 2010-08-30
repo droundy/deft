@@ -125,20 +125,7 @@ public:
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    if (outpgrad) {
-      Grid outgrad1(gd);
-      Grid outpgrad1(gd);
-      outgrad1.setZero();
-      outpgrad1.setZero();
-      f.grad(gd, data, ingrad, &outgrad1, &outpgrad1);
-      *outgrad += x*outgrad1;
-      *outpgrad += x*outpgrad1;
-    } else {
-      Grid outgrad1(gd);
-      outgrad1.setZero();
-      f.grad(gd, data, ingrad, &outgrad1, 0);
-      *outgrad += x*outgrad1;
-    }
+    f.grad(gd, data, x*ingrad, outgrad, outpgrad);
   }
 private:
   FieldFunctional f;
