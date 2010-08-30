@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 void MinimizerInterface::print_info(const char *prefix) const {
+  energy();
   f.print_iteration(prefix, iter);
   printf("%sEnergy = %.16g\n", prefix, energy());
   printf("%sGradient = %g\n", prefix, grad().norm());
