@@ -5,6 +5,7 @@
 #include "FieldFunctional.h"
 #include "Grid.h"
 #include <stdint.h>
+#include <stdio.h>
 
 class FunctionalComposition;
 
@@ -36,11 +37,12 @@ public:
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  explicit Functional(FunctionalInterface* p = 0) // allocate a new counter
+  explicit Functional(FunctionalInterface* p = 0, const char *n = 0) // allocate a new counter
     : itsCounter(0) {
     if (p) {
       itsCounter = new counter(p);
       itsCounter->checksum = -1;
+      itsCounter->name = n;
     }
   }
   ~Functional() { release(); }
@@ -99,16 +101,18 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
 
-  void print_summary(const char *prefix) const {
-    itsCounter->ptr->print_summary(prefix, itsCounter->last_energy);
-  }
+  void print_summary(const char *prefix) const;
+
+  void set_name(const char *n) { itsCounter->name = n; }
+  const char *get_name() const { return itsCounter->name; }
 private:
   struct counter {
-    counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+    counter(FunctionalInterface* p = 0, unsigned c = 1, const char *n = 0) : ptr(p), count(c), name(n) {}
     FunctionalInterface* ptr;
     mutable uint32_t checksum;
     mutable double last_energy;
     unsigned count;
+    const char *name;
   };
   counter *itsCounter;
   void acquire(counter* c) {

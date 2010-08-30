@@ -44,5 +44,5 @@ private:
 };
 
 Functional ChemicalPotential(double chemical_potential) {
-  return Functional(new ChemicalPotentialType(chemical_potential));
+  return Functional(new ChemicalPotentialType(chemical_potential), "chemical potential");
 }

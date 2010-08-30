@@ -90,7 +90,10 @@ Functional HardSpheres(double radius, double temperature) {
            - 0.5*trace_nT3));
   // The following is for the original Rosenfeld functional:
   //FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
-  return temperature*integrate(phi1 + phi2 + phi3);
-    //integrate(phi2);
-   //integrate(sqr(n2x));
+  //phi1.set_name("phi 1");
+  //phi2.set_name("phi 2");
+  //phi3.set_name("phi 3");
+  Functional total = temperature*integrate(phi1 + phi2 + phi3);
+  total.set_name("hard sphere excess");
+  return total;
 }

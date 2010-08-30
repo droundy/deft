@@ -16,11 +16,19 @@
 
 #include "Functional.h"
 #include "handymath.h"
-#include <stdio.h>
 #include <math.h>
 
 void FunctionalInterface::print_summary(const char *, double) const {
   // Don't print anything at all by default!
+}
+
+void Functional::print_summary(const char *prefix) const {
+  itsCounter->ptr->print_summary(prefix, itsCounter->last_energy);
+  if (itsCounter->name) {
+    printf("%s%25s =", prefix, itsCounter->name);
+    print_double("", itsCounter->last_energy);
+    printf("\n");
+  }
 }
 
 bool Functional::run_finite_difference_test(const char *testname, const Grid &x,

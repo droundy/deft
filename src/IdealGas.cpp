@@ -26,10 +26,6 @@ public:
   double energy(const GridDescription &gd, const VectorXd &data) const;
   void grad(const GridDescription &gd, const VectorXd &data,
             VectorXd *, VectorXd *pgrad = 0) const;
-
-  void  print_summary(const char *prefix, double last_energy) const {
-    printf("%sIdealGas energy = %g\n", prefix, last_energy);
-  }
 private:
   double T; // temperature
 };
@@ -89,5 +85,5 @@ void IdealGasType::grad(const GridDescription &gd, const VectorXd &n,
 }
 
 Functional IdealGas(double temperature) {
-  return Functional(new IdealGasType(temperature));
+  return Functional(new IdealGasType(temperature), "ideal gas energy");
 }
