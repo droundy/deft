@@ -109,7 +109,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     // with the driver routine!
     if (E1 < energy() && E1 < E0) {
       // The first try was better, so let's go with that one!
-      if (verbose) printf("Going back to the first try...\n");
+      if (verbose) printf("\t\tGoing back to the first try...\n");
       invalidate_cache();
       *x -= (step2-step1)*direction;
     } else if (energy() > E0) {

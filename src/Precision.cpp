@@ -78,10 +78,10 @@ public:
     error_estimate = 2*error_guess; // Just a bit of paranoia...
 
     if (verbose) {
-      printf("dEdn       average is %10g ...\n", dEdn);
-      printf("dEdn_ratio         is %10g ...\n", deltaE/old_deltaE);
-      printf("dEdn_ratio_average is %10g ...\n", dEdn_ratio_average);
-      printf("error_guess        is %10g ...\n", error_guess);
+      //printf("dEdn       average is %10g ...\n", dEdn);
+      //printf("dEdn_ratio         is %10g ...\n", deltaE/old_deltaE);
+      //printf("dEdn_ratio_average is %10g ...\n", dEdn_ratio_average);
+      //printf("error_guess        is %10g ...\n", error_guess);
     }
     if (deltaE == 0 && old_deltaE == 0) {
       if (verbose) printf("We got no change twice in a row, so we're done!\n");
@@ -135,7 +135,13 @@ public:
     if (not_done && !(error_estimate < convergence_criterion)) {
       if (dEdn_ratio_average < 1) {
         itersleft = log(convergence_criterion/error_guess)/log(dEdn_ratio_average);
-        if (verbose) printf("Error estimate is %10g ... %.1f iterations remaining.\n", error_estimate, itersleft);
+        if (verbose) {
+          if (convergence_criterion > 0) {
+            printf("Error estimate is %10g ... %.1f iterations remaining.\n", error_estimate, itersleft);
+          } else {
+            printf("Error estimate is %10g.\n", error_estimate);
+          }
+        }
       }
       return true;
     } else {
