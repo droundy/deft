@@ -26,7 +26,7 @@ double gaussian(Cartesian r) {
   // function in real space and do a DFT on it to get the convolution
   // in fourier space.  This would avoid the oscillations, but would
   // require that we store the convolution function on a grid.
-  return 4000*exp(-50*(dr*dr));
+  return 0.05*exp(-50*(dr*dr));
 }
 
 int main(int, char **argv) {
@@ -41,6 +41,7 @@ int main(int, char **argv) {
   printf("Original Maximum is %g\n", foo.maxCoeff());
 
   int retval = 0;
+  retval += integrate(log(1-StepConvolve(1))).run_finite_difference_test("integrate log(1-StepConvolve(1))", foo);
   retval += integrate(Gaussian(1)).run_finite_difference_test("integrate Gaussian(1)", foo);
   retval += integrate(StepConvolve(1)).run_finite_difference_test("integrate StepConvolve(1)", foo);
   retval += integrate(StepConvolve(3)).run_finite_difference_test("integrate StepConvolve(3)", foo);

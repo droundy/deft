@@ -91,6 +91,10 @@ int main(int, char **argv) {
   // The following tests scalar multiply rule...
   retval += test_functionals("Fourth power", 10*integrate(Pow(2)(Pow(2)(x))), integrate(10*x*x*x*x), 0.1, 1e-12);
 
+  // The following tests scalar subtraction rule...
+  retval += test_functionals("Subtraction",
+                             integrate(0 - Pow(2)(Pow(2)(x))), integrate(-1*Pow(2)(Pow(2)(x))), 0.1, 1e-12);
+
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {
