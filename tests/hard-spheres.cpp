@@ -20,8 +20,8 @@
 #include "LineMinimizer.h"
 
 const double kT = 1e-3; // room temperature in Hartree
-const double R = 3.0;
-const double ngas = 0.0005; // approximate density of interest
+const double R = 2.7;
+const double ngas = 0.005; // approximate density of interest
 const double mu = -kT*log(ngas);
 
 // Here we set up the lattice.
@@ -42,7 +42,7 @@ Grid external_potential(gd, 1e-3/ngas*(-0.2*potential.r2()).cwise().exp()); // r
 Functional ff = (f0 + ExternalPotential(external_potential))(n);
 
 
-int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
+int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1e-3) {
   clock_t start = clock();
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -50,22 +50,24 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.2639034579484159;
-  //const double gas_energy = -1.250000000000085e-11;
+  const double true_energy = -0.001342668652762535;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
-  while (min.improve_energy(true)) fflush(stdout);
+  while (min.improve_energy(true)) {
+    printf("Actual error is %g\n", min.energy() - true_energy);
+    fflush(stdout);
+  }
 
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
-  printf("fractional energy error = %g\n", (min.energy() - true_energy)/fabs(true_energy));
-  if (fabs((min.energy() - true_energy)/true_energy) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+  printf("energy error = %g\n", min.energy() - true_energy);
+  if (min.energy() - true_energy > accuracy) {
+    printf("FAIL: Error in the energy is too big!\n");
     return 1;
   }
   if (min.energy() < true_energy) {
-    printf("Sign of error is wrong!!!\n");
+    printf("FAIL: Sign of error is wrong!!!\n");
     return 1;
   }
   return 0;
@@ -81,7 +83,7 @@ int main(int, char **argv) {
     //                                                      + mu*VectorXd::Ones(gd.NxNyNz)));
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
-    const double expected_energy = -0.0003491035496068523;
+    const double expected_energy = -0.002675775426722322;
     printf("hard sphere energy is %.16g\n", f(potential));
     if (fabs(f(potential)/expected_energy - 1) > 1e-14) {
       printf("Error in hard sphere energy (of fixed potential) is too big: %g (from %.16g)\n",
@@ -99,39 +101,26 @@ int main(int, char **argv) {
   Minimizer pd = MaxIter(300, PreconditionedDownhill(ff, gd, &potential));
   potential.setZero();
   retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-9);
+  */
 
-  Minimizer steepest = MaxIter(100, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer steepest = Precision(1e-5, MaxIter(20, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-9);
+  retval += test_minimizer("SteepestDescent", steepest, &potential, 3e-5);
 
-  Minimizer psd = MaxIter(100, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer psd = Precision(1e-6, MaxIter(15, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-9);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 3e-6);
 
-
-  Minimizer cg = MaxIter(10, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-15); // I used this to verify...
+  retval += test_minimizer("ConjugateGradient", cg, &potential, 3e-6);
 
   Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
-  density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0),
-                         Cartesian(0,0,0));
-  printf("Energy is really %g\n", (f0 + ExternalPotential(external_potential))(density));
-  Grid n3(gd, StepConvolve(R)(density));
-  n3.epsNativeSlice("n3.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
-  printf("n3max = %g\n", n3.maxCoeff());
-  printf("n3min = %g\n", n3.minCoeff());
+  density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
 
-
-  Grid one_minus_n3(gd, (1 - StepConvolve(R))(density));
-  one_minus_n3.epsNativeSlice("one_minus_n3.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
-  printf("one_minus_n3 max = %g\n", one_minus_n3.maxCoeff());
-  printf("one_minus_n3 min = %g\n", one_minus_n3.minCoeff());
-
-  //Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-  //potential.setZero();
-  //retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
-  */
+  Minimizer pcg = Precision(1e-6, MaxIter(15, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  potential.setZero();
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 3e-6);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

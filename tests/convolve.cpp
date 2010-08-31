@@ -167,6 +167,7 @@ int main(int, char **argv) {
   bar = yShellConvolve(1)(foo);
   printf("yShellConvolve(1) integrates to %.15g\n", integrate(bar));
   printf("yShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  printf("yShellConvolve(1) Minimum is %g\n", bar.minCoeff());
   if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
     printf("Integral of yShellConvolve(1) is wrong:  %g\n",
            integrate(bar)/integrate_foo-fourpi);
@@ -174,6 +175,17 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
   FieldFunctional ysh = yShellConvolve(1), sh = ShellConvolve(1);
+  {
+    Grid scalarsh(gd, ShellConvolve(1)(foo));
+    if (bar.maxCoeff() > scalarsh.maxCoeff()) {
+      printf("FAIL: max of vector shell greater than scalar shell!\n");
+      retval++;
+    }
+    if (-bar.minCoeff() > scalarsh.maxCoeff()) {
+      printf("FAIL: min of vector shell greater in magnitude than scalar shell!\n");
+      retval++;
+    }
+  }
 
   printf("Running xShellConvolve(3)...\n");
   bar = xShellConvolve(3)(foo);

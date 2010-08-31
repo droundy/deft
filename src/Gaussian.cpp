@@ -174,7 +174,7 @@ static complex xdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[0]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -191,7 +191,7 @@ static complex ydelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[1]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
@@ -208,7 +208,7 @@ static complex zdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*myR*myR*myR*kvec[2]/(k*k)*(myR*cos(kR) - sin(kR)/k));
+    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]/(k*k)*(myR*cos(kR) - sin(kR)/k));
   } else {
     const double kR2 = kR*kR;
     // The following is a simple power series expansion to the above
