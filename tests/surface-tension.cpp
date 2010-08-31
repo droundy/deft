@@ -243,7 +243,7 @@ int main(int, char **argv) {
 
   Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer);
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", &cg, 3000, 1e-5);
+  retval += test_minimizer("ConjugateGradient", &cg, 3000, 3e-5);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
