@@ -251,7 +251,17 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const 
       Cartesian here(xmin + (xmax-xmin)*x);
       double fhere = (*this)(gd.fineLat.round(here));
       ymax = max(fhere, ymax);
-      ymin = min(fhere, ymax);
+      ymin = min(fhere, ymin);
+    }
+    // The following does some rudimentary tricks to scale things more
+    // nicely.
+    if (ymax-ymin > 0.3 && ymax - ymin < 100) {
+      ymax = ceil(ymax);
+      ymin = floor(ymin);
+    } else if (ymin > 0 && ymin < 0.5*ymax) {
+      ymin = 0;
+    } else if (ymax < 0 && fabs(ymax) < 0.5*fabs(ymin)) {
+      ymax = 0;
     }
 
     const double xbounds = 640, ybounds = 480;
@@ -259,10 +269,18 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const 
     fprintf(out, "gsave\n");
     fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
     fprintf(out, "newpath 240 450 moveto (%s) show\n", fname);
-    fprintf(out, "/M { exch %g mul exch %g mul moveto } def\n", xbounds/myxrange, ybounds/(ymax - ymin));
-    fprintf(out, "/L { exch %g mul exch %g mul lineto } def\n", xbounds/myxrange, ybounds/(ymax - ymin));
+    fprintf(out, "%% ymax is %g and ymin is %g\n", ymax, ymin);
+    fprintf(out, "/M { exch %g mul exch %g sub %g mul 5 add moveto } def\n",
+            xbounds/myxrange, ymin, (ybounds - 10)/(ymax - ymin));
+    fprintf(out, "/L { exch %g mul exch %g sub %g mul 5 add lineto } def\n",
+            xbounds/myxrange, ymin, (ybounds - 10)/(ymax - ymin));
 
-    fprintf(out, "0 0 M %g 0 L stroke\n", myxrange);
+    if (fabs(ymax) < 10 && fabs(ymin) < 10) {
+      for (double y = floor(ymin); y <= ceil(ymax); y++) {
+        fprintf(out, "0 1 0 setrgbcolor 0 %g M %g %g L stroke 0 setgray\n", y, myxrange, y);
+      }
+    }
+    fprintf(out, "1 0 0 setrgbcolor 0 0 M %g 0 L stroke 0 setgray\n", myxrange);
 
     fprintf(out, "0 %g M\n", (*this)(xmin));
     for (double x=0; x<=1; x += mydx/myxrange) {
