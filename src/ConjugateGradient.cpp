@@ -119,9 +119,9 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
     // it seems worth implementing that as an option for
     // memory-constrained problems (then we wouldn't need to store oldgrad).
     double beta = pg.dot(g - oldgrad)/oldgradsqr;
-    if (verbose) printf("beta = %g\n", beta);
     oldgrad = g;
     if (beta < 0 || beta != beta || oldgradsqr == 0) beta = 0;
+    if (verbose) printf("beta = %g\n", beta);
     oldgradsqr = pg.dot(oldgrad);
     direction = pg + beta*direction;
   } // free g and pg!
