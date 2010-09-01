@@ -57,8 +57,8 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -6.86466859623351e-09;
-  const double true_N = 4.41075362090339e-06;
+  const double true_energy = -9.26645847409725e-09;
+  const double true_N = 5.97358748120903e-06;
 
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
@@ -86,7 +86,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
 double walls(Cartesian r) {
   const double z = r.dot(Cartesian(0,0,1));
-  if (fabs(z) < 3*R) {
+  if (fabs(z) < 1.5*R) {
     return 1e9;
   } else {
     return 0;
