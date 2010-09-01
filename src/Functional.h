@@ -149,3 +149,4 @@ inline Functional operator-(const Functional &f) {
   return (-1)*f;
 }
 extern Functional integrate;
+Functional constrain(const Grid &, Functional);

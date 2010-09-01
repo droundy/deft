@@ -49,7 +49,6 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   printf("************\n\n");
 
   potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
-  for (int i=0;i<gd.NxNyNz/2;i++) potential[i] = mu;
 
   for (int i=0;i<numiters && min.improve_energy(true);i++) {
     fflush(stdout);
@@ -57,8 +56,8 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -9.26645847409725e-09;
-  const double true_N = 5.97358748120903e-06;
+  const double true_energy = -9.26646560514309e-09;
+  const double true_N = 5.97351547018021e-06;
 
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
@@ -93,9 +92,21 @@ double walls(Cartesian r) {
   }
 }
 
+double notinwall(Cartesian r) {
+  const double z = r.dot(Cartesian(0,0,1));
+  if (fabs(z) < 1.5*R) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
 int main(int, char **argv) {
   external_potential.Set(walls);
-  Functional f1 = f0 + ExternalPotential(external_potential);
+  Grid constraint(gd);
+  constraint.Set(notinwall);
+  //Functional f1 = f0 + ExternalPotential(external_potential);
+  Functional f1 = constrain(constraint, f0);
   ff = f1(n);
 
   int retval = 0;

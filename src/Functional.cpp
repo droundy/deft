@@ -311,3 +311,32 @@ public:
 
 Functional integrate(new Integrate());
 
+
+// The constant times a functional...
+
+class Constraint : public FunctionalInterface {
+public:
+  Constraint(const Grid &g, const Functional &y) : constraint(g), f(y) {};
+
+  double energy(double data) const {
+    return f(data);
+  }
+  double energy(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, data);
+  }
+  void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad) const {
+    f.grad(gd, data, g, pgrad);
+    g->cwise() *= constraint;
+    if (pgrad) pgrad->cwise() *= constraint;
+  }
+  void print_summary(const char *prefix, double) const {
+    f.print_summary(prefix);
+  }
+private:
+  const Grid constraint;
+  const Functional f;
+};
+
+Functional constrain(const Grid &g, Functional f) {
+  return Functional(new Constraint(g, f));
+}
