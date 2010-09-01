@@ -106,6 +106,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy();
+  double beta;
   {
     const VectorXd pg = -pgrad();
     const VectorXd g = -grad();
@@ -118,7 +119,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
     // Note that we could save some memory by using Fletcher-Reeves, and
     // it seems worth implementing that as an option for
     // memory-constrained problems (then we wouldn't need to store oldgrad).
-    double beta = pg.dot(g - oldgrad)/oldgradsqr;
+    beta = pg.dot(g - oldgrad)/oldgradsqr;
     oldgrad = g;
     if (beta < 0 || beta != beta || oldgradsqr == 0) beta = 0;
     if (verbose) printf("beta = %g\n", beta);
@@ -137,7 +138,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
     print_info();
     printf("grad*oldgrad = %g\n", grad().dot(direction)/gdotd);
   }
-  return (energy() < E0);
+  return (energy() < E0 || beta != 0);
 }
 
 

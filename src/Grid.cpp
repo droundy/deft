@@ -286,7 +286,11 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const 
     for (double x=0; x<=1; x += mydx/myxrange) {
       Cartesian here(xmin + (xmax-xmin)*x);
       double fhere = (*this)(gd.fineLat.round(here));
-      fprintf(out, "%g\t%g\tL\n", (here-xmin).norm(), fhere);
+      if (isnan(fhere)) {
+        fprintf(out, "%% %g\t%g\tL\n", (here-xmin).norm(), fhere);
+      } else {
+        fprintf(out, "%g\t%g\tL\n", (here-xmin).norm(), fhere);
+      }
     }
     fprintf(out, "stroke\n");
 

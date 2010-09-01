@@ -62,7 +62,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
   if (min.energy() < true_energy) {
-    printf("FAIL: Energy is less than the true energy!\n");
+    printf("FAIL: Energy is less than the true energy by %g!\n", true_energy - min.energy());
     retval++;
   }
   if (fabs(min.energy()/true_energy - 1) > fraccuracy) {

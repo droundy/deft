@@ -94,6 +94,23 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       *x -= step1*direction;
       *step = step1;
     }
+  } else if (E1 == E0) {
+    if (verbose) {
+      printf("\t\tNo change in energy...\n");
+      fflush(stdout);
+    }
+    do {
+      invalidate_cache();
+      *x += step1*direction;
+      step1 *= 2;
+      //printf("From step1 of %10g I get delta E of %g\n", step1, energy()-E0);
+    } while (energy() == E0);
+    if (energy() > E0) {
+      *x -= step1*direction;
+      invalidate_cache();
+      step1 = 0;
+      printf("\t\tQuad: failed to find any improvement!  :(\n");
+    }
   } else {
     *step = step2; // output the stepsize for later reuse.
     invalidate_cache();
