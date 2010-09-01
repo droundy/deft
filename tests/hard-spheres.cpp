@@ -30,7 +30,6 @@ double resolution = 0.5;
 GridDescription gd(lat, resolution);
 
 // And the functional...
-const double interaction_energy_scale = 0.01;
 Functional f00 = HardSpheres(R, kT);
 Functional f0 = IdealGas(kT) + f00 + ChemicalPotential(mu);
 FieldFunctional n = EffectivePotentialToDensity(kT);

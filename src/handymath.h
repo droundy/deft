@@ -24,7 +24,7 @@ inline double ipow(double x, int n) {
   else return 1.0/uipow(x,-n);
 }
 
-void print_double(const char *prefix, double x, int width=26, int digits = 14, int min_digits = 11) {
+inline void print_double(const char *prefix, double x, int width=26, int digits = 14, int min_digits = 11) {
   double max_f, min_f;
   if (min_digits == 0 || min_digits > digits) min_digits = digits;
   width -= strlen(prefix);

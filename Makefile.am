@@ -14,6 +14,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/hard-spheres-hard-wall.test \
 	tests/hard-spheres.test \
 	tests/convolve.test \
 	tests/convolve-finite-difference.test \
@@ -30,6 +31,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh $(check_PROGRAMS)
+tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(GENERIC_CODE)
 tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(GENERIC_CODE)
 tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE)
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(GENERIC_CODE)

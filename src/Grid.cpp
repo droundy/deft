@@ -1,5 +1,6 @@
 #include "Grid.h"
 #include "ReciprocalGrid.h"
+#include "handymath.h"
 #include <fftw3.h>
 
 double Grid::operator()(const Relative &r) const {
@@ -221,6 +222,61 @@ void Grid::epsNativeSlice(const char *fname,
     fprintf(out, "%%%%Trailer\n");
     fprintf(out, "%%%%EOF\n");
     fclose(out);
+  }
+}
+
+void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+  } else {
+    // put ends on the grid!
+    xmin = gd.fineLat.round(xmin);
+    xmax = xmin + gd.fineLat.round(Cartesian(xmax - xmin));
+    fprintf(out, "%%!PS-Adobe-3.0 EPSF\n");
+    Lattice weelat(gd.fineLat);
+    double mydx = 0.1*pow(weelat.volume(), 1.0/3);
+    {
+      Relative foo = weelat.round(weelat.toRelative(Cartesian(xmax - xmin)));
+      if (foo[1] == 0 && foo[2] == 0) mydx = weelat.a1().norm();
+      else if (foo[0] == 0 && foo[2] == 0) mydx = weelat.a2().norm();
+      else if (foo[0] == 0 && foo[1] == 0) mydx = weelat.a3().norm();
+    }
+
+    double ymax = (*this)[0];
+    double ymin = ymax;
+    const double myxrange = (xmax-xmin).norm();
+    for (double x=0; x<=1; x += mydx/myxrange) {
+      Cartesian here(xmin + (xmax-xmin)*x);
+      double fhere = (*this)(gd.fineLat.round(here));
+      ymax = max(fhere, ymax);
+      ymin = min(fhere, ymax);
+    }
+
+    const double xbounds = 640, ybounds = 480;
+    fprintf(out, "%%%%BoundingBox: 0 0 %g %g\n", xbounds, ybounds);
+    fprintf(out, "gsave\n");
+    fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
+    fprintf(out, "newpath 240 450 moveto (%s) show\n", fname);
+    fprintf(out, "/M { exch %g mul exch %g mul moveto } def\n", xbounds/myxrange, ybounds/(ymax - ymin));
+    fprintf(out, "/L { exch %g mul exch %g mul lineto } def\n", xbounds/myxrange, ybounds/(ymax - ymin));
+
+    fprintf(out, "0 0 M %g 0 L stroke\n", myxrange);
+
+    fprintf(out, "0 %g M\n", (*this)(xmin));
+    for (double x=0; x<=1; x += mydx/myxrange) {
+      Cartesian here(xmin + (xmax-xmin)*x);
+      double fhere = (*this)(gd.fineLat.round(here));
+      fprintf(out, "%g\t%g\tL\n", (here-xmin).norm(), fhere);
+    }
+    fprintf(out, "stroke\n");
+
+    // And now we can output the trailer!
+    fprintf(out, "grestore\n");
+    fprintf(out, "showpage\n");
+    fprintf(out, "%%%%Trailer\n");
+    fprintf(out, "%%%%EOF\n");
   }
 }
 
