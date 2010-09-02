@@ -225,7 +225,7 @@ void Grid::epsNativeSlice(const char *fname,
   }
 }
 
-void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const {
+void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale, double xscale) const {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -264,7 +264,7 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const 
       ymax = 0;
     }
 
-    const double xbounds = 640, ybounds = 480;
+    const double xbounds = 1640, ybounds = 480;
     fprintf(out, "%%%%BoundingBox: 0 0 %g %g\n", xbounds, ybounds);
     fprintf(out, "gsave\n");
     fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
@@ -275,12 +275,45 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax) const 
     fprintf(out, "/L { exch %g mul exch %g sub %g mul 5 add lineto } def\n",
             xbounds/myxrange, ymin, (ybounds - 10)/(ymax - ymin));
 
-    if (fabs(ymax) < 10 && fabs(ymin) < 10) {
-      for (double y = floor(ymin); y <= ceil(ymax); y++) {
-        fprintf(out, "0 1 0 setrgbcolor 0 %g M %g %g L stroke 0 setgray\n", y, myxrange, y);
-      }
+    if (myxrange < xscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 1 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(myxrange/xscale)*xscale; x += 0.01*xscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
     }
-    fprintf(out, "1 0 0 setrgbcolor 0 0 M %g 0 L stroke 0 setgray\n", myxrange);
+    if (myxrange < 20*xscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(myxrange/xscale)*xscale; x += 0.1*xscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
+    }
+    if (myxrange < 100*xscale) {
+      fprintf(out, "gsave 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(myxrange/xscale)*xscale; x += xscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
+    }
+
+    if (fabs(ymax) < 0.2*yscale && fabs(ymin) < 0.2*yscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 1 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += 0.01*yscale)
+        fprintf(out, "0 %g M %g %g L stroke\n", y, myxrange, y);
+      fprintf(out, "grestore\n");
+    }
+    if (fabs(ymax) < 3*yscale && fabs(ymin) < 3*yscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += 0.1*yscale)
+        fprintf(out, "0 %g M %g %g L stroke\n", y, myxrange, y);
+      fprintf(out, "grestore\n");
+    }
+    if (fabs(ymax) < 10*yscale && fabs(ymin) < 10*yscale) {
+      fprintf(out, "gsave 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += yscale) {
+        fprintf(out, "0 %g M %g %g L stroke\n", y, myxrange, y);
+      }
+      fprintf(out, "grestore\n");
+    }
+    fprintf(out, "gsave 1 0 0 setrgbcolor 0 0 M %g 0 L stroke grestore\n", myxrange);
 
     fprintf(out, "0 %g M\n", (*this)(xmin));
     for (double x=0; x<=1; x += mydx/myxrange) {
