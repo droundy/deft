@@ -73,7 +73,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       printf("\t\tCurvature has wrong sign... %g\n", curvature);
       fflush(stdout);
     }
-    if (E0 < E1) {
+    if (better(E0, E1)) {
       // It doesn't look to be working, so let's panic!
       invalidate_cache();
       *x -= step1*direction;
@@ -124,7 +124,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     // Check that the energy did indeed drop!  FIXME: this may do
     // extra energy calculations, since it's not necessarily shared
     // with the driver routine!
-    if (E1 < energy() && E1 < E0) {
+    if (better(E1, energy()) && better(E1, E0)) {
       // The first try was better, so let's go with that one!
       if (verbose) printf("\t\tGoing back to the first try...\n");
       invalidate_cache();

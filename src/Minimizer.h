@@ -4,6 +4,7 @@
 
 #include "Functional.h"
 #include <stdio.h>
+#include <math.h>
 
 class Minimizer;
 
@@ -155,3 +156,7 @@ public:
     return min.print_info(prefix);
   }
 };
+
+inline bool better(double a, double b) {
+  return a < b || isnan(b);
+}
