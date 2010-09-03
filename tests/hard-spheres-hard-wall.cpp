@@ -22,11 +22,14 @@
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
-const double nliquid = water_prop.liquid_density; // density of liquid water
+//const double nliquid = water_prop.liquid_density; // density of liquid water
+//const double nliquid = 2*water_prop.liquid_density; // density of liquid water
+const double nliquid = 1e6*3/(4*M_PI*R*R*R);
+const double eta_one = 3/(4*M_PI*R*R*R);
 const double mu = -kT*log(nliquid);
 
 // Here we set up the lattice.
-const double zmax = 40;
+const double zmax = 80;
 Lattice lat(Cartesian(0.01,0,0), Cartesian(0,0.01,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
@@ -48,7 +51,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
+  potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
 
   for (int i=0;i<numiters && min.improve_energy(true);i++) {
     fflush(stdout);
@@ -56,8 +59,8 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -9.26646560514309e-09;
-  const double true_N = 5.97351547018021e-06;
+  const double true_energy = -5.06194409731240e-07;
+  const double true_N = 4.34699318930958e-05;
 
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
@@ -85,7 +88,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
 double walls(Cartesian r) {
   const double z = r.dot(Cartesian(0,0,1));
-  if (fabs(z) < 1.5*R) {
+  if (fabs(z) < 2*R) {
     return 1e9;
   } else {
     return 0;
@@ -112,12 +115,23 @@ int main(int, char **argv) {
   int retval = 0;
   {
     Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    retval += test_minimizer("PreconditionedConjugateGradient", pd, 20, 1e-5);
+    //Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+    retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
 
+    //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
-    density.epsNativeSlice("PreconditionedConjugateGradient.eps", Cartesian(0,0,zmax), Cartesian(1,0,0),
-                           Cartesian(0,0,0));
-    density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax));
+    //density.epsNativeSlice("PreconditionedConjugateGradient.eps", Cartesian(0,0,zmax), Cartesian(1,0,0),
+    //                       Cartesian(0,0,0));
+    density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), eta_one, R);
+    potential.epsNative1d("hard-wall-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    Grid grad(gd), pgrad(gd);
+    grad.setZero();
+    pgrad.setZero();
+    ff.grad(potential, &grad, &pgrad);
+    grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    external_potential.epsNative1d("external-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    Grid(gd, StepConvolve(R)(density)).epsNative1d("n3.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
 
     //retval += f0.run_finite_difference_test("f0", density);
     //retval += f00.run_finite_difference_test("f00", density);

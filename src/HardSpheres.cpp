@@ -56,7 +56,7 @@ Functional HardSpheresRF(double radius, double temperature) {
   }
 }
 
-Functional HardSpheres(double radius, double temperature) {
+Functional HardSpheresWB(double radius, double temperature) {
   FieldFunctional n0 = Identity();
   FieldFunctional n3 = StepConvolve(radius);
   FieldFunctional one_minus_n3 = 1 - n3;
@@ -121,4 +121,8 @@ Functional HardSpheres(double radius, double temperature) {
     total.set_name("hard sphere excess");
     return total;
   }
+}
+
+Functional HardSpheres(double radius, double temperature) {
+  return HardSpheresWB(radius, temperature);
 }
