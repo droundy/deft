@@ -71,17 +71,27 @@ double IdealGasType::energy(double n) const {
 
 void IdealGasType::grad(const GridDescription &gd, const VectorXd &n,
                         VectorXd *g_ptr, VectorXd *pg_ptr) const {
-  VectorXd &g = *g_ptr;
-
   const double TdV = T*gd.Lat.volume()/gd.NxNyNz;
-  for (int i=0; i < gd.NxNyNz; i++) {
-    if (n[i] > min_log_arg) {
-      g[i] += TdV*log(n[i]);
-    } else {
-      g[i] += TdV*slope;
+  if (pg_ptr)
+    for (int i=0; i < gd.NxNyNz; i++) {
+      if (n[i] > min_log_arg) {
+        const double X = TdV*log(n[i]);
+        (*g_ptr)[i] += X;
+        (*pg_ptr)[i] += X;
+      } else {
+        const double X = TdV*slope;
+        (*g_ptr)[i] += X;
+        (*pg_ptr)[i] += X;
+      }
     }
-  }
-  if (pg_ptr) *pg_ptr += g;
+  else
+    for (int i=0; i < gd.NxNyNz; i++) {
+      if (n[i] > min_log_arg) {
+        (*g_ptr)[i] += TdV*log(n[i]);
+      } else {
+        (*g_ptr)[i] += TdV*slope;
+      }
+    }
 }
 
 Functional IdealGas(double temperature) {
