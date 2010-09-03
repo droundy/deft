@@ -6,7 +6,7 @@
 #include "Functional.h"
 #include "FieldFunctional.h"
 
-Functional IdealGas(double temperature);
+FieldFunctional IdealGas(double temperature);
 Functional HardSpheres(double radius, double temperature);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const Grid &V);

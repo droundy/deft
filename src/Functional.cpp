@@ -167,7 +167,7 @@ private:
 };
 
 Functional Functional::operator()(const FieldFunctional &f) const {
-  return Functional(new FunctionalComposition(*this, f));
+  return Functional(new FunctionalComposition(*this, f), f.get_name());
 }
 
 // The sum of two functionals...

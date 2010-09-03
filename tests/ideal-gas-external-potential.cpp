@@ -45,12 +45,12 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, Grid expected_den
   printf("rms error = %g\n", sqrt(err2));
   printf("fractional energy error = %g\n", (min.energy() - true_energy)/fabs(true_energy));
   if (fabs((min.energy() - true_energy)/true_energy) > 5e-3) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     return 1;
   }
   for (int i=0;i<pot->description().NxNyNz;i++) {
-    if (fabs(density[i] - expected_density[i]) > fabs(1e-3*ngas)) {
-      printf("Oh no, the error in density is %g out of %g at %d (%g)!\n",
+    if (fabs(density[i] - expected_density[i]) > fabs(2e-3*ngas)) {
+      printf("FAIL: Oh no, the error in density is %g out of %g at %d (%g)!\n",
              density[i] - expected_density[i], expected_density[i], i,
              fabs(density[i] - expected_density[i])/ngas);
       return 1;
@@ -68,7 +68,7 @@ int main(int, char **argv) {
   Grid potential(gd);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu) + ExternalPotential(external_potential);
+  Functional ig_and_mu = integrate(IdealGas(kT)) + ChemicalPotential(mu) + ExternalPotential(external_potential);
   Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
 
   Grid expected_density(gd, EffectivePotentialToDensity(kT)(gd, external_potential + mu*VectorXd::Ones(gd.NxNyNz)));

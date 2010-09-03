@@ -58,7 +58,7 @@ int main(int, char **argv) {
   }
 
   {
-    Functional f = IdealGas(kT);
+    Functional f = integrate(IdealGas(kT));
     retval += test_functional("Ideal gas", f, 1e-9, 1e-13);
     retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
     retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 1e-13);

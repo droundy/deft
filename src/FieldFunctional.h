@@ -21,9 +21,12 @@ public:
 class FieldFunctional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  explicit FieldFunctional(FieldFunctionalInterface* p = 0) // allocate a new counter
+  explicit FieldFunctional(FieldFunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
-    if (p) itsCounter = new counter(p);
+    if (p) {
+      itsCounter = new counter(p);
+      itsCounter->name = name;
+    }
   }
   ~FieldFunctional() { release(); }
   FieldFunctional(const FieldFunctional& r) {
@@ -56,11 +59,13 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
   }
+  const char *get_name() const { return itsCounter->name; }
 private:
   struct counter {
     counter(FieldFunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
     FieldFunctionalInterface* ptr;
     unsigned count;
+    const char *name;
   };
   counter *itsCounter;
   void acquire(counter* c) {

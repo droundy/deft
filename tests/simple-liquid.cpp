@@ -34,7 +34,7 @@ GridDescription gd(lat, resolution);
 const double interaction_energy_scale = 0.01;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
+Functional f0 = integrate(IdealGas(kT)) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 
@@ -52,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.2639034579484159;
+  const double true_energy = -0.263903457947764;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -63,11 +63,11 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("fractional energy error = %g\n", (min.energy() - true_energy)/fabs(true_energy));
   if (fabs((min.energy() - true_energy)/true_energy) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     return 1;
   }
   if (min.energy() < true_energy) {
-    printf("Sign of error is wrong!!!\n");
+    printf("FAIL: Sign of error is wrong!!!\n");
     return 1;
   }
   return 0;
@@ -104,7 +104,7 @@ int main(int, char **argv) {
 
   Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-15); // I used this to verify...
+  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-14);
 
   Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();

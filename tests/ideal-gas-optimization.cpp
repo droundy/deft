@@ -30,7 +30,7 @@ int main(int, char **argv) {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu);
+  Functional ig_and_mu = integrate(IdealGas(kT)) + ChemicalPotential(mu);
   Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
   Grid old_potential(potential);
 
@@ -50,12 +50,12 @@ int main(int, char **argv) {
     printf("rms error = %g\n", sqrt(err2));
     printf("fractional energy error = %g\n", (f(potential) + 2.5e-9)/2.5e-9);
     if (fabs(f(potential) + 2.5e-9)/2.5e-9 > 2e-14) {
-      printf("Error in the energy is too big!\n");
+      printf("FAIL: Error in the energy is too big!\n");
       return 1;
     }
     for (int i=0;i<gd.NxNyNz;i++) {
       if (fabs(potential[i] - mu) > fabs(3e-9*mu)) {
-        printf("Oh no, the error for Downhill is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+        printf("FAIL: Oh no, the error for Downhill is %g out of %g at %d!\n", potential[i]-mu, mu, i);
         return 1;
       }
     }
@@ -79,12 +79,12 @@ int main(int, char **argv) {
     printf("rms error = %g\n", sqrt(err2));
     printf("fractional energy error = %g\n", (f(potential) + 2.5e-9)/2.5e-9);
     if (fabs(f(potential) + 2.5e-9)/2.5e-9 > 2e-14) {
-      printf("Error in the energy is too big!\n");
+      printf("FAIL: Error in the energy is too big!\n");
       return 1;
     }
     for (int i=0;i<gd.NxNyNz;i++) {
-      if (fabs(potential[i] - mu) > fabs(1e-8*mu)) {
-        printf("Oh no, the error is %g out of %g at %d!\n", potential[i]-mu, mu, i);
+      if (fabs(potential[i]/mu - 1) > 2e-8) {
+        printf("FAIL: Oh no, the error is %g out of %g at %d!\n", potential[i]/mu-1, mu, i);
         return 1;
       }
     }

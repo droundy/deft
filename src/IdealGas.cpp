@@ -18,82 +18,75 @@
 #include <stdio.h>
 #include <math.h>
 
-class IdealGasType : public FunctionalInterface {
+static const double min_log_arg = 1e-12;
+static const double slope = log(min_log_arg);
+static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
+
+class IdealGasType : public FieldFunctionalInterface {
 public:
   IdealGasType(double temp) : T(temp) {}
 
-  double energy(double data) const;
-  double energy(const GridDescription &gd, const VectorXd &data) const;
-  void grad(const GridDescription &gd, const VectorXd &data,
-            VectorXd *, VectorXd *pgrad = 0) const;
+
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    const int N = data.cols()*data.rows();
+    VectorXd out(data);
+    for (int i=0; i<N; i++) {
+      const double n = out[i];
+      if (isnan(n)) {
+        printf("data[%d] == %g\n", i, n);
+        assert(!isnan(n));
+      }
+      if (n > min_log_arg) {
+        if (isinf(n)) {
+          out[i] = INFINITY; // Infinite density gives infinite energy.
+        } else {
+          out[i] = T*(n*log(n) - n);
+          assert(!isnan(log(n)));
+        }
+      } else {
+        out[i] = T*((n-min_log_arg)*slope + min_e);
+      }
+    }
+    return out;
+  }
+  double transform(double n) const {
+    assert(!isnan(n));
+    if (n > min_log_arg) {
+      if (isinf(n))
+        return INFINITY; // Infinite density gives infinite energy.
+      else
+        return T*(n*log(n) - n);
+    } else
+      return T*((n-min_log_arg)*slope + min_e);
+  }
+
+  void grad(const GridDescription &, const VectorXd &n, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    const int N = n.cols()*n.rows();
+    if (outpgrad)
+      for (int i=0; i<N; i++) {
+        if (n[i] > min_log_arg) {
+          const double X = T*ingrad[i]*log(n[i]);
+          (*outgrad)[i] += X;
+          (*outpgrad)[i] += X;
+        } else {
+          const double X = T*ingrad[i]*slope;
+          (*outgrad)[i] += X;
+          (*outpgrad)[i] += X;
+        }
+      }
+    else
+      for (int i=0; i<N; i++) {
+        if (n[i] > min_log_arg)
+          (*outgrad)[i] += T*ingrad[i]*log(n[i]);
+        else
+          (*outgrad)[i] += T*ingrad[i]*slope;
+      }
+  }
 private:
   double T; // temperature
 };
 
-const double min_log_arg = 1e-12;
-const double slope = log(min_log_arg);
-const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
-
-double IdealGasType::energy(const GridDescription &gd, const VectorXd &data) const {
-  double e = 0;
-  for (int i=0; i < gd.NxNyNz; i++) {
-    const double n = data[i];
-    if (n != n) {
-      printf("data[%d] == %g\n", i, n);
-      assert(n == n); // check for NaN
-    }
-    if (n > min_log_arg) {
-      e += n*log(n) - n;
-      if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
-      assert(e == e); // check for NaN
-    } else {
-      e += (n-min_log_arg)*slope + min_e;
-    }
-  }
-  return T*e*gd.dvolume;
-}
-
-double IdealGasType::energy(double n) const {
-  double e;
-  if (n != n) {
-    printf("n == %g\n", n);
-    assert(n == n); // check for NaN
-  }
-  if (n > min_log_arg) {
-    e = n*log(n) - n;
-    if (isinf(n)) return INFINITY; // Infinite density gives infinite energy.
-    assert(e == e); // check for NaN
-  } else {
-    e = (n-min_log_arg)*slope + min_e;
-  }
-  return T*e;
-}
-
-void IdealGasType::grad(const GridDescription &gd, const VectorXd &n,
-                        VectorXd *g_ptr, VectorXd *pg_ptr) const {
-  const double TdV = T*gd.Lat.volume()/gd.NxNyNz;
-  if (pg_ptr)
-    for (int i=0; i < gd.NxNyNz; i++) {
-      if (n[i] > min_log_arg) {
-        const double X = TdV*log(n[i]);
-        (*g_ptr)[i] += X;
-        (*pg_ptr)[i] += X;
-      } else {
-        const double X = TdV*slope;
-        (*g_ptr)[i] += X;
-        (*pg_ptr)[i] += X;
-      }
-    }
-  else
-    for (int i=0; i < gd.NxNyNz; i++) {
-      if (n[i] > min_log_arg) {
-        (*g_ptr)[i] += TdV*log(n[i]);
-      } else {
-        (*g_ptr)[i] += TdV*slope;
-      }
-    }
-}
-
-Functional IdealGas(double temperature) {
-  return Functional(new IdealGasType(temperature), "ideal gas energy");
+FieldFunctional IdealGas(double temperature) {
+  return FieldFunctional(new IdealGasType(temperature), "ideal gas energy");
 }
