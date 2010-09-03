@@ -41,7 +41,7 @@ int main(int, char **argv) {
   Grid foo(gd), bar(gd);
   printf("Running Set(gaussian)...\n");
   foo.Set(gaussian);
-  const double integrate_foo = integrate(foo);
+  const double integrate_foo = integrate(Identity())(foo);
   printf("Original integrates to %.15g\n", integrate_foo);
   printf("Original Maximum is %g\n", foo.maxCoeff());
   int retval = 0;
@@ -53,25 +53,25 @@ int main(int, char **argv) {
 
   printf("Running Gaussian(10)...\n");
   bar = Gaussian(10)(foo);
-  printf("Gaussian(10) integrates to %.15g\n", integrate(bar));
-  if (fabs(integrate(bar)/integrate_foo-1) > 1e-6) {
-    printf("Error in Gaussian(10) is too large:  %g\n", integrate(bar)/integrate_foo-1);
+  printf("Gaussian(10) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs(integrate(Identity())(bar)/integrate_foo-1) > 1e-6) {
+    printf("Error in Gaussian(10) is too large:  %g\n", integrate(Identity())(bar)/integrate_foo-1);
     retval++;
   }
   bar.epsNativeSlice("gaussian-width-10.eps", plotx, ploty, plotcorner);
 
-  printf("Gaussian(1) integrates to %g\n", integrate(bar));
+  printf("Gaussian(1) integrates to %g\n", integrate(Identity())(bar));
   printf("Running Gaussian(1)...\n");
   bar = Gaussian(1)(foo);
-  if (fabs(integrate(bar)/integrate_foo-1) > 1e-6) {
-    printf("Error in Gaussian(1) is too large:  %g\n", integrate(bar)/integrate_foo-1);
+  if (fabs(integrate(Identity())(bar)/integrate_foo-1) > 1e-6) {
+    printf("Error in Gaussian(1) is too large:  %g\n", integrate(Identity())(bar)/integrate_foo-1);
     retval++;
   }
   bar.epsNativeSlice("gaussian-width-1.eps", plotx, ploty, plotcorner);
 
   printf("Running StepConvolve(1)...\n");
   bar = StepConvolve(1)(foo);
-  printf("StepConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("StepConvolve(1) integrates to %.15g\n", integrate(Identity())(bar));
   printf("StepConvolve(1) Maximum is %g\n", bar.maxCoeff());
   if (fabs(bar.maxCoeff()/integrate_foo-1) > 1e-6) {
     printf("Max of StepConvolve(1) is wrong:  %g\n", bar.maxCoeff()/integrate_foo - 1);
@@ -83,9 +83,9 @@ int main(int, char **argv) {
     retval++;
   }
   const double fourpiover3 = 4*M_PI/3;
-  if (fabs((integrate(bar)/integrate_foo-fourpiover3)/fourpiover3) > 1e-6) {
+  if (fabs((integrate(Identity())(bar)/integrate_foo-fourpiover3)/fourpiover3) > 1e-6) {
     printf("Integral of StepConvolve(1) is wrong:  %g\n",
-           (integrate(bar)/integrate_foo-fourpiover3)/fourpiover3);
+           (integrate(Identity())(bar)/integrate_foo-fourpiover3)/fourpiover3);
     retval++;
   }
   bar.epsNativeSlice("step-1.eps", plotx, ploty, plotcorner);
@@ -93,9 +93,9 @@ int main(int, char **argv) {
   printf("Running StepConvolve(2)...\n");
   bar = StepConvolve(2)(foo);
   printf("StepConvolve(2) Maximum is %g\n", bar.maxCoeff());
-  printf("StepConvolve(2) integrates to %.15g\n", integrate(bar));
-  if (fabs((integrate(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8) > 1e-6) {
-    printf("Integral of StepConvolve(2) is wrong:  %g\n", (integrate(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8);
+  printf("StepConvolve(2) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs((integrate(Identity())(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8) > 1e-6) {
+    printf("Integral of StepConvolve(2) is wrong:  %g\n", (integrate(Identity())(bar)/integrate_foo-fourpiover3*8)/fourpiover3/8);
     retval++;
   }
   if (fabs((bar.maxCoeff()-integrate_foo)/integrate_foo) > 1e-6) {
@@ -112,10 +112,10 @@ int main(int, char **argv) {
   printf("Running StepConvolve(3)...\n");
   bar = StepConvolve(3)(foo);
   printf("StepConvolve(3) Maximum is %g\n", bar.maxCoeff());
-  printf("StepConvolve(3) integrates to %.15g\n", integrate(bar));
-  if (fabs((integrate(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27) > 1e-6) {
+  printf("StepConvolve(3) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs((integrate(Identity())(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27) > 1e-6) {
     printf("Integral of StepConvolve(3) is wrong:  %g\n",
-           (integrate(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27);
+           (integrate(Identity())(bar)/integrate_foo-fourpiover3*27)/fourpiover3/27);
     retval++;
   }
   if (fabs((bar.maxCoeff()-integrate_foo)/integrate_foo) > 1e-6) {
@@ -133,11 +133,11 @@ int main(int, char **argv) {
   const double fourpi = 4*M_PI;
   printf("Running ShellConvolve(1)...\n");
   bar = ShellConvolve(1)(foo);
-  printf("ShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("ShellConvolve(1) integrates to %.15g\n", integrate(Identity())(bar));
   printf("ShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
-  if (fabs((integrate(bar)/integrate_foo-fourpi)/fourpi) > 1e-6) {
+  if (fabs((integrate(Identity())(bar)/integrate_foo-fourpi)/fourpi) > 1e-6) {
     printf("Integral of ShellConvolve(1) is wrong:  %g\n",
-           (integrate(bar)/integrate_foo-fourpi)/fourpi);
+           (integrate(Identity())(bar)/integrate_foo-fourpi)/fourpi);
     retval++;
   }
   printf("ShellConvolve(1) Minimum is %g\n", bar.minCoeff());
@@ -150,10 +150,10 @@ int main(int, char **argv) {
   printf("Running ShellConvolve(3)...\n");
   bar = ShellConvolve(3)(foo);
   printf("ShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
-  printf("ShellConvolve(3) integrates to %.15g\n", integrate(bar));
-  if (fabs((integrate(bar)/integrate_foo-fourpi*9)/fourpi/9) > 1e-6) {
+  printf("ShellConvolve(3) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs((integrate(Identity())(bar)/integrate_foo-fourpi*9)/fourpi/9) > 1e-6) {
     printf("Integral of ShellConvolve(3) is wrong:  %g\n",
-           (integrate(bar)/integrate_foo-fourpi*9)/fourpi/9);
+           (integrate(Identity())(bar)/integrate_foo-fourpi*9)/fourpi/9);
     retval++;
   }
   printf("ShellConvolve(3) Minimum is %g\n", bar.minCoeff());
@@ -165,12 +165,12 @@ int main(int, char **argv) {
 
   printf("Running yShellConvolve(1)...\n");
   bar = yShellConvolve(1)(foo);
-  printf("yShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("yShellConvolve(1) integrates to %.15g\n", integrate(Identity())(bar));
   printf("yShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
   printf("yShellConvolve(1) Minimum is %g\n", bar.minCoeff());
-  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+  if (fabs(integrate(Identity())(bar)/integrate_foo) > 1e-6) {
     printf("Integral of yShellConvolve(1) is wrong:  %g\n",
-           integrate(bar)/integrate_foo-fourpi);
+           integrate(Identity())(bar)/integrate_foo-fourpi);
     retval++;
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
@@ -190,32 +190,32 @@ int main(int, char **argv) {
   printf("Running xShellConvolve(3)...\n");
   bar = xShellConvolve(3)(foo);
   printf("xShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
-  printf("xShellConvolve(3) integrates to %.15g\n", integrate(bar));
-  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+  printf("xShellConvolve(3) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs(integrate(Identity())(bar)/integrate_foo) > 1e-6) {
     printf("Integral of xShellConvolve(3) is wrong:  %g\n",
-           integrate(bar)/integrate_foo);
+           integrate(Identity())(bar)/integrate_foo);
     retval++;
   }
   bar.epsNativeSlice("x-shell-3.eps", plotx, ploty, plotcorner);
 
   printf("Running xyShellConvolve(1)...\n");
   bar = xyShellConvolve(1)(foo);
-  printf("xyShellConvolve(1) integrates to %.15g\n", integrate(bar));
+  printf("xyShellConvolve(1) integrates to %.15g\n", integrate(Identity())(bar));
   printf("xyShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
-  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+  if (fabs(integrate(Identity())(bar)/integrate_foo) > 1e-6) {
     printf("Integral of xyShellConvolve(1) is wrong:  %g\n",
-           integrate(bar)/integrate_foo-fourpi);
+           integrate(Identity())(bar)/integrate_foo-fourpi);
     retval++;
   }
   bar.epsNativeSlice("xy-shell-1.eps", plotx, ploty, plotcorner);
 
   printf("Running xxShellConvolve(2)...\n");
   bar = xxShellConvolve(2)(foo);
-  printf("xxShellConvolve(2) integrates to %.15g\n", integrate(bar));
+  printf("xxShellConvolve(2) integrates to %.15g\n", integrate(Identity())(bar));
   printf("xxShellConvolve(2) Maximum is %g\n", bar.maxCoeff());
-  if (fabs(integrate(bar)/integrate_foo + fourpi*4/3) > 1e-6) {
+  if (fabs(integrate(Identity())(bar)/integrate_foo + fourpi*4/3) > 1e-6) {
     printf("Integral of xxShellConvolve(2) is wrong:  %g\n",
-           integrate(bar)/integrate_foo+fourpi*4/3);
+           integrate(Identity())(bar)/integrate_foo+fourpi*4/3);
     retval++;
   }
   bar.epsNativeSlice("xx-shell-2.eps", plotx, ploty, plotcorner);
@@ -224,10 +224,10 @@ int main(int, char **argv) {
   FieldFunctional zxsh = zxShellConvolve(3);
   bar = zxsh(foo);
   printf("zxShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
-  printf("zxShellConvolve(3) integrates to %.15g\n", integrate(bar));
-  if (fabs(integrate(bar)/integrate_foo) > 1e-6) {
+  printf("zxShellConvolve(3) integrates to %.15g\n", integrate(Identity())(bar));
+  if (fabs(integrate(Identity())(bar)/integrate_foo) > 1e-6) {
     printf("Integral of zxShellConvolve(3) is wrong:  %g\n",
-           integrate(bar)/integrate_foo);
+           integrate(Identity())(bar)/integrate_foo);
     retval++;
   }
   bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));

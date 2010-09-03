@@ -27,45 +27,73 @@ public:
       itsCounter = new counter(p);
       itsCounter->name = name;
     }
+    mynext = 0;
   }
-  ~FieldFunctional() { release(); }
+  ~FieldFunctional() {
+    release();
+    delete mynext;
+  }
   FieldFunctional(const FieldFunctional& r) {
     acquire(r.itsCounter);
+    if (r.mynext) mynext = new FieldFunctional(*r.mynext);
+    else mynext = 0;
   }
   FieldFunctional& operator=(const FieldFunctional& r) {
     if (this != &r) {
       release();
       acquire(r.itsCounter);
     }
+    if (r.mynext) mynext = new FieldFunctional(*r.mynext);
     return *this;
   }
 
   FieldFunctional operator()(const FieldFunctional &) const;
-  FieldFunctional operator+(const FieldFunctional &) const;
+  FieldFunctional operator+(const FieldFunctional &x) const {
+    FieldFunctional out(*this);
+    return out += x;
+  }
+  FieldFunctional operator+=(const FieldFunctional &x) {
+    if (mynext) *mynext += x;
+    else mynext = new FieldFunctional(x);
+    return *this;
+  }
   FieldFunctional operator-(const FieldFunctional &) const;
   FieldFunctional operator/(const FieldFunctional &) const;
   FieldFunctional operator*(const FieldFunctional &) const;
   FieldFunctional operator*(double) const;
   VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
-    return itsCounter->ptr->transform(gd, data);
+    VectorXd out = itsCounter->ptr->transform(gd, data);
+    if (mynext) out += (*mynext)(gd, data);
+    return out;
   }
   VectorXd operator()(const Grid &g) const {
-    return itsCounter->ptr->transform(g.description(), g);
+    VectorXd out = itsCounter->ptr->transform(g.description(), g);
+    if (mynext) out += (*mynext)(g.description(), g);
+    return out;
   }
   double operator()(double data) const {
-    return itsCounter->ptr->transform(data);
+    double out = itsCounter->ptr->transform(data);
+    if (mynext) out += (*mynext)(data);
+    return out;
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
+    if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
   }
   const char *get_name() const { return itsCounter->name; }
+  void set_name(const char *n) { itsCounter->name = n; }
+  FieldFunctional *next() const {
+    return mynext;
+  }
 private:
+  FieldFunctional *mynext;
   struct counter {
     counter(FieldFunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
     FieldFunctionalInterface* ptr;
     unsigned count;
     const char *name;
+    FieldFunctional *next;
   };
   counter *itsCounter;
   void acquire(counter* c) {

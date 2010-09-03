@@ -292,25 +292,27 @@ Functional operator*(double a, const Functional &b) {
 
 class Integrate : public FunctionalInterface {
 public:
-  Integrate() {};
+  Integrate(const FieldFunctional &ff) : f(ff) {};
 
   double energy(double data) const {
-    return data;
+    return f(data);
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
-    return gd.dvolume*data.sum();
+    return gd.dvolume*f(gd, data).sum();
   }
-  void grad(const GridDescription &gd, const VectorXd &, VectorXd *g, VectorXd *pgrad) const {
-    for (int i=0; i<gd.NxNyNz; i++) (*g)[i] += gd.dvolume;
-    if (pgrad) for (int i=0; i<gd.NxNyNz; i++) (*pgrad)[i] += gd.dvolume;
+  void grad(const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pgrad) const {
+    f.grad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pgrad);
   }
   void print_summary(const char *, double) const {
     // Nothing to print?
   }
+private:
+  const FieldFunctional f;
 };
 
-Functional integrate(new Integrate());
-
+Functional integrate(const FieldFunctional &f) {
+  return Functional(new Integrate(f));
+}
 
 // The constant times a functional...
 

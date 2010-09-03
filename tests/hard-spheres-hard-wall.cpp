@@ -34,8 +34,8 @@ Lattice lat(Cartesian(0.01,0,0), Cartesian(0,0.01,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
 // And the functional...
-Functional f00 = HardSpheres(R, kT);
-Functional f0 = integrate(IdealGas(kT)) + f00 + ChemicalPotential(mu);
+Functional f00 = integrate(HardSpheres(R, kT));
+Functional f0 = integrate(HardSpheres(R, kT) + IdealGas(kT)) + ChemicalPotential(mu);
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 
@@ -59,7 +59,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -5.06194459477655e-07;
+  const double true_energy = -5.06194468587013e-07;
   const double true_N = 4.34699318930958e-05;
 
   int retval = 0;

@@ -187,33 +187,8 @@ FieldFunctional log(const FieldFunctional &f) {
   return FieldFunctional(new LogType(f));
 }
 
-
-class SumRuleType : public FieldFunctionalInterface {
-public:
-  SumRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f1(gd, data) + f2(gd, data);
-  }
-  double transform(double n) const {
-    return f1(n)+f2(n);
-  }
-
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    f1.grad(gd, data, ingrad, outgrad, outpgrad);
-    f2.grad(gd, data, ingrad, outgrad, outpgrad);
-  }
-private:
-  FieldFunctional f1, f2;
-};
-
-FieldFunctional FieldFunctional::operator+(const FieldFunctional &f) const {
-  return FieldFunctional(new SumRuleType(*this, f));
-}
-
 FieldFunctional FieldFunctional::operator-(const FieldFunctional &f) const {
-  return FieldFunctional(new SumRuleType(*this, -1*f));
+  return *this + -1*f;
 }
 
 class SquareRuleType : public FieldFunctionalInterface {
