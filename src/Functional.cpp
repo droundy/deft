@@ -298,13 +298,38 @@ public:
     return f(data);
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
-    return gd.dvolume*f(gd, data).sum();
+    // This does some extra work to save the energies of each term in
+    // the sum.
+    VectorXd fdata(f.justMe(gd, data));
+    double e = gd.dvolume*fdata.sum();
+    f.last_energy = e;
+    FieldFunctional *nxt = f.next();
+    while (nxt) {
+      fdata += nxt->justMe(gd, data);
+      double etot = gd.dvolume*fdata.sum();
+      nxt->last_energy = etot - e;
+      e = etot;
+      nxt = nxt->next();
+    }
+    return e;
   }
   void grad(const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pgrad) const {
     f.grad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pgrad);
   }
-  void print_summary(const char *, double) const {
-    // Nothing to print?
+  void print_summary(const char *prefix, double) const {
+    const FieldFunctional *nxt = &f;
+    while (nxt) {
+      if (nxt->get_name()) {
+        printf("%s%25s =", prefix, nxt->get_name());
+        print_double("", nxt->last_energy);
+        printf("\n");
+      } else {
+        printf("%s%25s =", prefix, "UNKNOWN");
+        print_double("", nxt->last_energy);
+        printf("\n");
+      }
+      nxt = nxt->next();
+    }
   }
 private:
   const FieldFunctional f;

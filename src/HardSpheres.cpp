@@ -94,8 +94,10 @@ FieldFunctional HardSpheresWB(double radius, double temperature) {
            + 2*(n2x*n2y*nTxy + n2y*n2z*nTyz + n2z*n2x*nTzx)
            - 0.5*trace_nT3));
   phi3.set_name("phi3");
-  FieldFunctional total = temperature*(phi1 + phi2 + phi3);
-  total.set_name("hard sphere excess");
+  //FieldFunctional total = temperature*(phi1 + phi2 + phi3);
+  //total.set_name("hard sphere excess");
+  FieldFunctional total = (temperature*phi1).set_name("phi1") +
+    (temperature*phi2).set_name("phi2") + (temperature*phi3).set_name("phi3");
   return total;
 }
 

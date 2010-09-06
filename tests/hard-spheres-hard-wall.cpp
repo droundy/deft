@@ -59,8 +59,8 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -5.06194468587013e-07;
-  const double true_N = 4.34699318930958e-05;
+  const double true_energy = -5.06194558305347e-07;
+  const double true_N = 4.34691017604459e-05;
 
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
@@ -79,7 +79,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
     for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
   }
   printf("N is %.15g\n", N);
-  if (fabs(N/true_N - 1) > fraccuracy) {
+  if (fabs(N/true_N - 1) > 10*fraccuracy) {
     printf("FAIL: Error in N is too big: %g\n", N/true_N - 1);
     retval++;
   }

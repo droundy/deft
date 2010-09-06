@@ -61,6 +61,9 @@ public:
   FieldFunctional operator/(const FieldFunctional &) const;
   FieldFunctional operator*(const FieldFunctional &) const;
   FieldFunctional operator*(double) const;
+  VectorXd justMe(const GridDescription &gd, const VectorXd &data) const {
+    return itsCounter->ptr->transform(gd, data);
+  }
   VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
     VectorXd out = itsCounter->ptr->transform(gd, data);
     if (mynext) out += (*mynext)(gd, data);
@@ -82,10 +85,11 @@ public:
     if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
   }
   const char *get_name() const { return itsCounter->name; }
-  void set_name(const char *n) { itsCounter->name = n; }
+  FieldFunctional set_name(const char *n) { itsCounter->name = n; return *this; }
   FieldFunctional *next() const {
     return mynext;
   }
+  mutable double last_energy;
 private:
   FieldFunctional *mynext;
   struct counter {
