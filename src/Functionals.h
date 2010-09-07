@@ -9,9 +9,9 @@
 FieldFunctional IdealGas(double temperature);
 FieldFunctional HardSpheres(double radius, double temperature);
 FieldFunctional ChemicalPotential(double chemical_potential);
-Functional ExternalPotential(const Grid &V);
+FieldFunctional ExternalPotential(const VectorXd &V);
 
-Functional GaussianPolynomial(double amplitude, double width, int power);
+FieldFunctional GaussianPolynomial(double amplitude, double width, int power);
 
 FieldFunctional Identity();
 

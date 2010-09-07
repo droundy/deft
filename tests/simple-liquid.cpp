@@ -32,16 +32,16 @@ GridDescription gd(lat, resolution);
 
 // And the functional...
 const double interaction_energy_scale = 0.01;
-Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = integrate(IdealGas(kT) + ChemicalPotential(mu)) + attraction + repulsion;
+FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+Functional f = integrate(f0)(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff = (f0 + ExternalPotential(external_potential))(n);
+Functional ff = integrate(f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
@@ -52,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.2639034579480511;
+  const double true_energy = -0.2639034579491347;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -84,8 +84,8 @@ int main(int, char **argv) {
     potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
     retval += f.run_finite_difference_test("simple liquid", potential);
     
-    retval += attraction.run_finite_difference_test("quadratic", test_density);
-    retval += repulsion.run_finite_difference_test("repulsive", test_density);
+    retval += integrate(attraction).run_finite_difference_test("quadratic", test_density);
+    retval += integrate(repulsion).run_finite_difference_test("repulsive", test_density);
   }
 
   Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential));
@@ -106,7 +106,7 @@ int main(int, char **argv) {
 
   Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-13);
+  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-11);
 
   Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();

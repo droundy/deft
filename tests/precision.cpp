@@ -32,16 +32,16 @@ GridDescription gd(lat, resolution);
 
 // And the functional...
 const double interaction_energy_scale = 0.01;
-Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = integrate(IdealGas(kT) + ChemicalPotential(mu)) + attraction + repulsion;
+FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+FieldFunctional f = f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff = (f0 + ExternalPotential(external_potential))(n);
+Functional ff = integrate(f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("**********************************\n\n");
 
-  const double true_energy = -0.2639034579471175;
+  const double true_energy = -0.2639034579492045;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -105,7 +105,7 @@ int main(int, char **argv) {
 
   Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-13, 140);
+  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-12, 90);
   retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-3, 20);
 
   Minimizer pcg = PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);

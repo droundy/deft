@@ -17,25 +17,26 @@
 #include "Functionals.h"
 #include <stdio.h>
 
-class ExternalPotentialType : public FunctionalInterface {
+class ExternalPotentialType : public FieldFunctionalInterface {
 public:
-  explicit ExternalPotentialType(const Grid &V)
-    : Vdvolume(V*V.description().Lat.volume()/V.description().NxNyNz) {}
+  explicit ExternalPotentialType(const VectorXd &Vin) : V(Vin) {}
 
-  double energy(const GridDescription &, const VectorXd &data) const {
-    return Vdvolume.dot(data);
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return V.cwise()*data;
   }
-  double energy(double) const {
-    return Vdvolume.sum(); // FIXME: this is broken!
+  double transform(double) const {
+    return 0;
   }
-  void grad(const GridDescription &, const VectorXd &,VectorXd *g_ptr, VectorXd *pg_ptr = 0) const {
-    *g_ptr += Vdvolume;
-    if (pg_ptr) *pg_ptr += Vdvolume;
+
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    *outgrad += V.cwise()*ingrad;
+    if (outpgrad) *outpgrad += V.cwise()*ingrad;
   }
 private:
-  VectorXd Vdvolume; // the potential times the differential volume element dV.
+  VectorXd V; // the potential times the differential volume element dV.
 };
 
-Functional ExternalPotential(const Grid &V) {
-  return Functional(new ExternalPotentialType(V), "external potential");
+FieldFunctional ExternalPotential(const VectorXd &V) {
+  return FieldFunctional(new ExternalPotentialType(V), "external potential");
 }

@@ -49,9 +49,9 @@ int main(int, char **argv) {
   const FieldFunctional n = EffectivePotentialToDensity(kT);
 
   {
-    Functional attr = GaussianPolynomial(-0.32, 0.5, 2);
+    Functional attr = integrate(GaussianPolynomial(-0.32, 0.5, 2));
     retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
-    Functional repul = GaussianPolynomial(0.32, 0.25, 4);
+    Functional repul = integrate(GaussianPolynomial(0.32, 0.25, 4));
     retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
     retval += test_functional("sum of gaussians", attr + repul, 0.1, 1e-13);
     retval += test_functional("other sum of gaussians", repul + attr, 0.1, 1e-13);

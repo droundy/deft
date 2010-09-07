@@ -32,11 +32,11 @@ GridDescription gd(lat, 1, 1, 200);
 
 // And the functional...
 const double interaction_energy_scale = 2e-4;
-Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = integrate(IdealGas(kT) + ChemicalPotential(mu)) + attraction + repulsion;
+FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+Functional f = integrate(f0)(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -166,7 +166,7 @@ double forcer(Cartesian r) {
 
 int main(int, char **argv) {
   external_potential.Set(forcer);
-  Functional f1 = f0 + ExternalPotential(external_potential);
+  Functional f1 = integrate(f0 + ExternalPotential(external_potential));
   ff = f1(n);
 
   Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
@@ -182,32 +182,13 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  if (false) {
-    Minimizer pd = MaxIter(1000, PreconditionedSteepestDescent(f0, gd, &potential, QuadraticLineMinimizer));
-    const double st = surface_tension(pd, f0, water_prop, true);
-    const double thissurfacetension = 1.963444045e-06; // 1.977986185e-06;
-
-    if (fabs(st - thissurfacetension)/thissurfacetension > 0.01) {
-      printf("FAIL: Funky discrepancy with surface_tension and thissurfacetension %g vs %g\n",
-             st, thissurfacetension);
-      retval += 1;
-    }
-    // The agreement with true_surface_tension isn't so great because
-    // the surface_tension function uses higher resolution for its calculation.
-    if (fabs(st - true_surface_tension)/true_surface_tension > 0.02) {
-      printf("FAIL: Funky discrepancy with surface_tension and true_surface_tension %g vs %g\n",
-             st, true_surface_tension);
-      retval += 1;
-    }
-  }
-
   potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
   retval += ff.run_finite_difference_test("simple liquid", potential);
   fflush(stdout);
 
-  retval += attraction.run_finite_difference_test("quadratic", test_density);
+  retval += integrate(attraction).run_finite_difference_test("quadratic", test_density);
   fflush(stdout);
-  retval += repulsion.run_finite_difference_test("repulsive", test_density);
+  retval += integrate(repulsion).run_finite_difference_test("repulsive", test_density);
   fflush(stdout);
 
   {
@@ -222,8 +203,8 @@ int main(int, char **argv) {
     //density.epsNativeSlice("PreconditionedDownhill.eps", Cartesian(0,0,20), Cartesian(0.1,0,0),
     //                       Cartesian(0,0,0));
 
-    retval += attraction.run_finite_difference_test("quadratic", density);
-    retval += repulsion.run_finite_difference_test("repulsive", density);
+    retval += integrate(attraction).run_finite_difference_test("quadratic", density);
+    retval += integrate(repulsion).run_finite_difference_test("repulsive", density);
   }
 
   Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);
