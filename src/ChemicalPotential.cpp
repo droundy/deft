@@ -16,33 +16,27 @@
 
 #include "Functionals.h"
 
-class ChemicalPotentialType : public FunctionalInterface {
+class ChemicalPotentialType : public FieldFunctionalInterface {
 public:
   ChemicalPotentialType(double chemical_potential)
     : mu(chemical_potential) {}
 
-  double energy(const GridDescription &gd, const VectorXd &data) const {
-    double Ntot = 0;
-    for (int i=0; i < gd.NxNyNz; i++) Ntot += data[i];
-    Ntot *= gd.Lat.volume()/gd.NxNyNz;
-    return mu*Ntot;
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return mu*data;
   }
-  double energy(double n) const {
+  double transform(double n) const {
     return mu*n;
   }
 
-  void grad(const GridDescription &gd, const VectorXd &, VectorXd *g_ptr, VectorXd *pg_ptr) const {
-    VectorXd &g = *g_ptr;
-    
-    const double mudV = mu*gd.Lat.volume()/gd.NxNyNz;
-    for (int i=0; i < gd.NxNyNz; i++) g[i] += mudV;
-    if (pg_ptr)
-      for (int i=0; i < gd.NxNyNz; i++) (*pg_ptr)[i] += mudV;
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    *outgrad += mu*ingrad;
+    if (outpgrad) *outpgrad += mu*ingrad;
   }
 private:
   double mu; // the chemical potential
 };
 
-Functional ChemicalPotential(double chemical_potential) {
-  return Functional(new ChemicalPotentialType(chemical_potential), "chemical potential");
+FieldFunctional ChemicalPotential(double chemical_potential) {
+  return FieldFunctional(new ChemicalPotentialType(chemical_potential), "chemical potential");
 }

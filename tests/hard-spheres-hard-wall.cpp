@@ -35,7 +35,7 @@ GridDescription gd(lat, 0.1);
 
 // And the functional...
 Functional f00 = integrate(HardSpheres(R, kT));
-Functional f0 = integrate(HardSpheres(R, kT) + IdealGas(kT)) + ChemicalPotential(mu);
+Functional f0 = integrate(HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu));
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 

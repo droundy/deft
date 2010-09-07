@@ -34,7 +34,7 @@ GridDescription gd(lat, resolution);
 const double interaction_energy_scale = 0.01;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = integrate(IdealGas(kT)) + ChemicalPotential(mu) + attraction + repulsion;
+Functional f0 = integrate(IdealGas(kT) + ChemicalPotential(mu)) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 
@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("**********************************\n\n");
 
-  const double true_energy = -0.2639034579475144;
+  const double true_energy = -0.2639034579471175;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -61,8 +61,8 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   // First, let's reset the minimizer!
   min.minimize(f, pot->description(), pot);
   Minimizer foo = MaxIter(maxiter, Precision(precision, min));
-  while (foo.improve_energy(true)) {
-    printf("Actual error is %g\n", foo.energy() - true_energy);
+  while (foo.improve_energy(false)) {
+    //printf("Actual error is %g\n", foo.energy() - true_energy);
     fflush(stdout);
     //VectorXd pg = foo.pgrad();
     //ff.run_finite_difference_test("ff", *pot, &pg);
@@ -72,7 +72,8 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("energy error = %g\n", foo.energy() - true_energy);
   if (fabs(foo.energy() - true_energy) > precision) {
-    printf("FAIL: Error in the energy is too big! (%.16g vs %.16g)\n", foo.energy(), true_energy);
+    printf("FAIL: Error in the energy is too big, should be %g! (%.16g vs %.16g)\n",
+           precision, foo.energy(), true_energy);
     return 1;
   }
   return 0;

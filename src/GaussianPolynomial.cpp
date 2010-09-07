@@ -17,5 +17,7 @@
 #include "Functionals.h"
 
 Functional GaussianPolynomial(double amplitude, double width, int power) {
-  return amplitude*integrate(Pow(power)(Gaussian(width)));
+  Functional out = amplitude*integrate(Pow(power)(Gaussian(width)));
+  out.set_name("gaussian polynomial");
+  return out;
 }

@@ -37,7 +37,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   printf("Egrid   = %g\n", Egrid);
   printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
   if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     return 1;
   }
   return 0;
@@ -66,10 +66,10 @@ int main(int, char **argv) {
   }
 
   {
-    Functional f = ChemicalPotential(0.1);
+    Functional f = integrate(ChemicalPotential(0.1));
     retval += test_functional("chemical potential", f, 1e-9, 1e-12);
     retval += test_functional("chemical potential", f, 1e9, 1e-14);
-    retval += test_functional("chemical potential", f, 1e-2, 1e-13);
+    retval += test_functional("chemical potential", f, 1e-2, 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-9), 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
   }

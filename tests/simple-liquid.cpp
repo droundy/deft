@@ -34,7 +34,7 @@ GridDescription gd(lat, resolution);
 const double interaction_energy_scale = 0.01;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = integrate(IdealGas(kT)) + ChemicalPotential(mu) + attraction + repulsion;
+Functional f0 = integrate(IdealGas(kT) + ChemicalPotential(mu)) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 
@@ -52,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.263903457947764;
+  const double true_energy = -0.2639034579480511;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -75,6 +75,8 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
 
 int main(int, char **argv) {
   int retval = 0;
+  attraction.set_name("attraction");
+  repulsion.set_name("repulsion");
 
   {
     Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
@@ -104,7 +106,7 @@ int main(int, char **argv) {
 
   Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-14);
+  retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-13);
 
   Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();

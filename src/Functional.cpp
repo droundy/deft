@@ -275,9 +275,6 @@ public:
       *g += a*tempgrad;
     }
   }
-  void print_summary(const char *prefix, double) const {
-    f.print_summary(prefix);
-  }
 private:
   double a;
   const Functional f;
