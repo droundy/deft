@@ -26,22 +26,17 @@ FieldFunctional HardSpheresRF(double radius, double temperature) {
   FieldFunctional n2x = xShellConvolve(radius);
   FieldFunctional n2y = yShellConvolve(radius);
   FieldFunctional n2z = zShellConvolve(radius);
-  FieldFunctional nTxx = xxShellConvolve(radius);
-  FieldFunctional nTyy = yyShellConvolve(radius);
-  FieldFunctional nTzz = zzShellConvolve(radius);
-  FieldFunctional nTxy = xyShellConvolve(radius);
-  FieldFunctional nTyz = yzShellConvolve(radius);
-  FieldFunctional nTzx = zxShellConvolve(radius*temperature);
   FieldFunctional phi1 = -1*n0*log(one_minus_n3);
   phi1.set_name("phi1");
   const double four_pi_r2 = (4*M_PI)*(radius*radius);
   // n1 is n2/(four_pi_r2)
-  FieldFunctional phi2 = (n2*n2 - n2x*n2x - n2y*n2y - n2z*n2z)/(four_pi_r2*one_minus_n3);
+  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r2*one_minus_n3);
   phi2.set_name("phi2");
-  FieldFunctional phi3 = n2*(n2*n2 - 3*(n2x*n2x + n2y*n2y + n2z*n2z))/(24*M_PI*one_minus_n3*one_minus_n3);
+  FieldFunctional phi3 = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   phi3.set_name("phi3");
-  FieldFunctional total = temperature*(phi1 + phi2 + phi3);
-  total.set_name("hard sphere excess");
+  //FieldFunctional total = temperature*(phi1 + phi2 + phi3);
+  FieldFunctional total = (temperature*phi1).set_name("phi1") +
+    (temperature*phi2).set_name("phi2") + (temperature*phi3).set_name("phi3");
   return total;
 }
 
@@ -79,7 +74,7 @@ FieldFunctional HardSpheresWB(double radius, double temperature) {
     nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
     nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
     nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
-  // * /
+  // */
   FieldFunctional phi1 = -1*n0*log(one_minus_n3);
   phi1.set_name("phi1");
   const double four_pi_r2 = (4*M_PI)*(radius*radius);
