@@ -49,7 +49,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.0013480883207912;
+  const double true_energy = -0.001359435896525161;
 
   *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
@@ -82,7 +82,7 @@ int main(int, char **argv) {
     //                                                      + mu*VectorXd::Ones(gd.NxNyNz)));
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
-    const double expected_energy = -0.002709673141096069;
+    const double expected_energy = -0.002777468569860563;
     printf("hard sphere energy is %.16g\n", f(potential));
     if (fabs(f(potential)/expected_energy - 1) > 1e-13) {
       printf("FAIL: Error in hard sphere energy (of fixed potential) is too big %g (from %.16g)\n",

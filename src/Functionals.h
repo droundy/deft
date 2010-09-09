@@ -8,6 +8,8 @@
 
 FieldFunctional IdealGas(double temperature);
 FieldFunctional HardSpheres(double radius, double temperature);
+FieldFunctional HardSpheresRF(double radius, double temperature);
+FieldFunctional HardSpheresWB(double radius, double temperature);
 FieldFunctional ChemicalPotential(double chemical_potential);
 FieldFunctional ExternalPotential(const VectorXd &V);
 

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-static const double min_log_arg = 1e-12;
+static const double min_log_arg = 1e-90;
 static const double slope = log(min_log_arg);
 static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 

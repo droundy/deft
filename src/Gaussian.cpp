@@ -288,12 +288,9 @@ static double xydelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*kvec[0]*kvec[1]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+    return 0;
   }
 }
 
@@ -301,12 +298,9 @@ static complex yzdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*kvec[1]*kvec[2]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+    return 0;
   }
 }
 
@@ -314,12 +308,9 @@ static complex zxdelta(Reciprocal kvec) {
   double k = kvec.norm();
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
+    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*kvec[2]*kvec[0]*(myR*myR)*(myR*myR)*((3./120 + 1./6 - 3./24) + kR*kR*(3./720-3./5040-1./120));
+    return 0;
   }
 }
 
@@ -333,8 +324,6 @@ static double xxdelta(Reciprocal kvec) {
     return exp(-spreading*k*k*mydr*mydr)*
       (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
                           cos(kR)/(kR*kR)*(-1 + 3*cos2));
-    //return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
-    //                    + cos(kR)*(1 - 3*kvec[0]*kvec[0]/k2));
   } else {
     return 0;
   }
@@ -345,13 +334,12 @@ static complex yydelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[1]*kvec[1] - 1 - kR*kR/3)
-                        + cos(kR)*(1 - 3*kvec[1]*kvec[1]/k2));
+    double cos2 = kvec[1]*kvec[1]/k2;
+    return exp(-spreading*k*k*mydr*mydr)*
+      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*myR*myR*(kvec[1]*kvec[1]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+    return 0;
   }
 }
 
@@ -360,13 +348,12 @@ static complex zzdelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[2]*kvec[2] - 1 - kR*kR/3)
-                        + cos(kR)*(1 - 3*kvec[2]*kvec[2]/k2));
+    double cos2 = kvec[2]*kvec[2]/k2;
+    return exp(-spreading*k*k*mydr*mydr)*
+      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*myR*myR*(kvec[2]*kvec[2]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+    return 0;
   }
 }
 

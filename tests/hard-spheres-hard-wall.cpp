@@ -22,8 +22,6 @@
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
-//const double nliquid = water_prop.liquid_density; // density of liquid water
-//const double nliquid = 2*water_prop.liquid_density; // density of liquid water
 const double nliquid = 1e6*3/(4*M_PI*R*R*R);
 const double eta_one = 3/(4*M_PI*R*R*R);
 const double mu = -kT*log(nliquid);
@@ -34,8 +32,9 @@ Lattice lat(Cartesian(0.01,0,0), Cartesian(0,0.01,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
 // And the functional...
-Functional f00 = integrate(HardSpheres(R, kT));
 Functional f0 = integrate(HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu));
+Functional f0wb = integrate(HardSpheresWB(R, kT));
+Functional f0rf = integrate(HardSpheresRF(R, kT));
 FieldFunctional n = EffectivePotentialToDensity(kT);
 Functional f = f0(n);
 
@@ -53,14 +52,14 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
   potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
 
-  for (int i=0;i<numiters && min.improve_energy(true);i++) {
+  for (int i=0;i<numiters && min.improve_energy(false);i++) {
     fflush(stdout);
   }
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -5.1889466656052e-07;
-  const double true_N = 4.45582118280828e-05;
+  const double true_energy = -5.46531816669618e-07;
+  const double true_N = 4.69415026364507e-05;
 
   int retval = 0;
   printf("Energy is %.15g\n", min.energy());
@@ -97,7 +96,7 @@ double walls(Cartesian r) {
 
 double notinwall(Cartesian r) {
   const double z = r.dot(Cartesian(0,0,1));
-  if (fabs(z) < 1.5*R) {
+  if (fabs(z) < 2*R) {
     return 0;
   } else {
     return 1;
@@ -113,6 +112,13 @@ int main(int, char **argv) {
   ff = f1(n);
 
   int retval = 0;
+
+  {
+    potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", potential);
+  }
+
   {
     Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
     //Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
@@ -130,11 +136,10 @@ int main(int, char **argv) {
     ff.grad(potential, &grad, &pgrad);
     grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
-    external_potential.epsNative1d("external-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid(gd, StepConvolve(R)(density)).epsNative1d("n3.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
-
-    //retval += f0.run_finite_difference_test("f0", density);
-    //retval += f00.run_finite_difference_test("f00", density);
+ 
+    retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional", density, &grad);
+    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);
   }
 
   //Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);
