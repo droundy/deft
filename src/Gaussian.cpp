@@ -329,13 +329,14 @@ static double xxdelta(Reciprocal kvec) {
   double k2 = k*k;
   double kR = k*myR;
   if (kR > 0) {
-    return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
-                        + cos(kR)*(1 - 3*kvec[0]*kvec[0]/k2));
+    double cos2 = kvec[0]*kvec[0]/k2;
+    return exp(-spreading*k*k*mydr*mydr)*
+      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
+    //return exp(-spreading*k*k*mydr*mydr)*(4*M_PI)/k2*(sin(kR)/kR*((3/k2 - myR*myR)*kvec[0]*kvec[0] - 1 - kR*kR/3)
+    //                    + cos(kR)*(1 - 3*kvec[0]*kvec[0]/k2));
   } else {
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).
-    return (4*M_PI)*myR*myR*(kvec[0]*kvec[0]*(-3./24+3./120+1./6) + kR*kR*(1./24-1./120+1./3/6) - 1./3);
+    return 0;
   }
 }
 

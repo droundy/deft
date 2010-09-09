@@ -38,7 +38,7 @@ int main(int, char **argv) {
   Cartesian plotcorner(-5, -5, 0), plotx(10,0,0), ploty(0,10,0);
   int resolution = 100;
   GridDescription gd(lat, resolution, resolution, resolution);
-  Grid foo(gd), bar(gd);
+  Grid foo(gd), bar(gd), ref(gd);
   printf("Running Set(gaussian)...\n");
   foo.Set(gaussian);
   const double integrate_foo = integrate(Identity())(foo);
@@ -188,6 +188,7 @@ int main(int, char **argv) {
   }
 
   printf("Running xShellConvolve(3)...\n");
+  ref = ShellConvolve(3)(foo);
   bar = xShellConvolve(3)(foo);
   printf("xShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
   printf("xShellConvolve(3) integrates to %.15g\n", integrate(Identity())(bar));
@@ -197,8 +198,17 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("x-shell-3.eps", plotx, ploty, plotcorner);
+  double mymax = ref.maxCoeff();
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
+      printf("FAIL: x shell is bigger in magnitude than shell by %g out of %g compared with %g!\n",
+             fabs(bar[i]) - fabs(ref[i]), fabs(ref[i]), mymax);
+      retval++;
+    }
+  }
 
   printf("Running xyShellConvolve(1)...\n");
+  ref = xShellConvolve(1)(foo);
   bar = xyShellConvolve(1)(foo);
   printf("xyShellConvolve(1) integrates to %.15g\n", integrate(Identity())(bar));
   printf("xyShellConvolve(1) Maximum is %g\n", bar.maxCoeff());
@@ -208,17 +218,35 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("xy-shell-1.eps", plotx, ploty, plotcorner);
+  mymax = ref.maxCoeff();
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
+      printf("FAIL: xy shell is bigger in magnitude than x shell by %g out of %g!\n",
+             fabs(bar[i]) - fabs(ref[i]), fabs(ref[i]));
+      retval++;
+    }
+  }
 
   printf("Running xxShellConvolve(2)...\n");
+  ref = xShellConvolve(2)(foo).cwise().abs() + 1./3*ShellConvolve(2)(foo);
   bar = xxShellConvolve(2)(foo);
   printf("xxShellConvolve(2) integrates to %.15g\n", integrate(Identity())(bar));
   printf("xxShellConvolve(2) Maximum is %g\n", bar.maxCoeff());
-  if (fabs(integrate(Identity())(bar)/integrate_foo + fourpi*4/3) > 1e-6) {
-    printf("Integral of xxShellConvolve(2) is wrong:  %g\n",
-           integrate(Identity())(bar)/integrate_foo+fourpi*4/3);
+  if (fabs(integrate(Identity())(bar)/integrate_foo) > 1e-14) {
+    printf("FAIL: Integral of xxShellConvolve(2) is wrong:  %g\n",
+           integrate(Identity())(bar)/integrate_foo);
     retval++;
   }
   bar.epsNativeSlice("xx-shell-2.eps", plotx, ploty, plotcorner);
+  //bar.epsNativeSlice("xx-shell-2.eps", Cartesian(0,10,0), Cartesian(0,0,10), Cartesian(0,0,0));
+  mymax = ref.maxCoeff();
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-12) {
+      printf("FAIL: xx shell is bigger in magnitude than x shell by %g out of %g compared with %g!\n",
+             fabs(bar[i]) - fabs(ref[i]), fabs(ref[i]), mymax);
+      retval++;
+    }
+  }
 
   printf("Running zxShellConvolve(3)...\n");
   FieldFunctional zxsh = zxShellConvolve(3);
