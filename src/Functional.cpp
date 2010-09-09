@@ -118,7 +118,7 @@ bool Functional::run_finite_difference_test(const char *testname, const Grid &x,
            min, best_ratio_error);
     return false;
   }
-  printf("Failed with scaling ratio of %g and gradient accuracy of %g\n",
+  printf("FAIL: Failed with scaling ratio of %g and gradient accuracy of %g\n",
          min, best_ratio_error);
   return true;
 }
