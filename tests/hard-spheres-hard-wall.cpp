@@ -28,7 +28,8 @@ const double mu = -kT*log(nliquid);
 
 // Here we set up the lattice.
 const double zmax = 80;
-Lattice lat(Cartesian(0.01,0,0), Cartesian(0,0.01,0), Cartesian(0,0,zmax));
+const double width = 0.0001;
+Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
 // And the functional...
@@ -58,17 +59,18 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -5.46531816669618e-07;
-  const double true_N = 4.69415026364507e-05;
+  const double true_energy = -0.00546519441213289;
+  const double true_N = 0.469400105429929;
 
   int retval = 0;
-  printf("Energy is %.15g\n", min.energy());
-  if (min.energy() < true_energy) {
-    printf("FAIL: Energy is less than the true energy by %g!\n", true_energy - min.energy());
+  double energy = min.energy()/width/width;
+  printf("Energy is %.15g\n", energy);
+  if (energy < true_energy) {
+    printf("FAIL: Energy is less than the true energy by %g!\n", true_energy - energy);
     retval++;
   }
-  if (fabs(min.energy()/true_energy - 1) > fraccuracy) {
-    printf("FAIL: Error in the energy is too big: %g\n", (min.energy() - true_energy)/fabs(true_energy));
+  if (fabs(energy/true_energy - 1) > fraccuracy) {
+    printf("FAIL: Error in the energy is too big: %g\n", (energy - true_energy)/fabs(true_energy));
     retval++;
   }
 
@@ -77,6 +79,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
   }
+  N = N/width/width;
   printf("N is %.15g\n", N);
   if (fabs(N/true_N - 1) > 10*fraccuracy) {
     printf("FAIL: Error in N is too big: %g\n", N/true_N - 1);
