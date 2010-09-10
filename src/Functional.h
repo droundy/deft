@@ -32,6 +32,7 @@ public:
 
   virtual double energy(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double energy(double data) const = 0;
+  virtual double grad(double data) const = 0;
 };
 
 class Functional {
@@ -85,6 +86,9 @@ public:
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     return itsCounter->ptr->energy(gd, data);
+  }
+  double grad(double data) const {
+    return itsCounter->ptr->grad(data);
   }
   void grad(const GridDescription &gd, const VectorXd &data,
             VectorXd *g, VectorXd *pg = 0) const {

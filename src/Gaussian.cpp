@@ -33,6 +33,9 @@ public:
   double transform(double n) const {
     return n;
   }
+  double grad(double) const {
+    return 1;
+  }
 
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -89,7 +92,10 @@ public:
     return recip.ifft();
   }
   double transform(double n) const {
-    return n*(4*M_PI)*R*R*R;
+    return n*(4*M_PI/3)*R*R*R;
+  }
+  double grad(double) const {
+    return (4*M_PI/3)*R*R*R;
   }
 
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -146,7 +152,10 @@ public:
     return recip.ifft();
   }
   double transform(double n) const {
-    return n*(4*M_PI)*R*R*R;
+    return n*(4*M_PI)*R*R;
+  }
+  double grad(double) const {
+    return (4*M_PI)*R*R;
   }
 
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -245,6 +254,9 @@ public:
     return recip.ifft();
   }
   double transform(double) const {
+    return 0;
+  }
+  double grad(double) const {
     return 0;
   }
 
@@ -387,6 +399,9 @@ public:
     return recip.ifft();
   }
   double transform(double) const {
+    return 0;
+  }
+  double grad(double) const {
     return 0;
   }
 

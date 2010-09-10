@@ -33,14 +33,47 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   const double Edouble = f(n);
   const double Egrid = f(nr)/gd.Lat.volume();
 
+  int retval = 0;
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
-  printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
-  if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
-    printf("FAIL: Error in the energy is too big!\n");
-    return 1;
+
+  const double deriv_double = f.grad(n);
+  Grid grad(nr);
+  grad.setZero();
+  f.grad(gd, nr, &grad);
+  const double deriv_grid = grad[0]/gd.dvolume;
+  printf("deriv double = %g\n", deriv_double);
+  printf("deriv grid   = %g\n", deriv_grid);
+  if (Edouble == 0) {
+    // If the true answer is zero, the Edouble should say so!
+    printf("absolute error = %g\n", Edouble - Egrid);
+    if (fabs(Edouble - Egrid) > fraccuracy) {
+      printf("FAIL: Error in the energy is too big!\n");
+      retval++;
+    }
+  } else {
+    printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
+    if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
+      printf("FAIL: Error in the energy is too big!\n");
+      retval++;
+    }
   }
-  return 0;
+
+  if (deriv_double == 0) {
+    printf("absolute error = %g\n", deriv_double - deriv_grid);
+    if (fabs(deriv_double - deriv_grid) > fraccuracy) {
+      printf("FAIL: Error in the gradient is too big!\n");
+      retval++;
+    }
+  } else {
+    printf("fractional error = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
+    if (fabs((deriv_double - deriv_grid)/deriv_double) > fraccuracy) {
+      printf("FAIL: Error in the gradient is too big!\n");
+      retval++;
+    }
+  }
+
+  return retval;
 }
 
 int main(int, char **argv) {
@@ -49,10 +82,38 @@ int main(int, char **argv) {
   const FieldFunctional n = EffectivePotentialToDensity(kT);
 
   {
+    FieldFunctional x = Identity();
+    retval += test_functional("integrate(sqr(yzShellConvolve(1)(x)))", integrate(sqr(yzShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(sqr(xyShellConvolve(1)(x)))", integrate(sqr(xyShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(zxShellConvolve(1)(x))", integrate(zxShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("integrate(sqr(zzShellConvolve(1)(x)))", integrate(sqr(zzShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(1-yyShellConvolve(1)(x))", integrate(1-yyShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("integrate(sqr(xxShellConvolve(1)(x)))", integrate(sqr(xxShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(sqr(xShellConvolve(1)(x)))", integrate(sqr(xShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(sqr(yShellConvolve(1)(x)))", integrate(sqr(yShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(sqr(zShellConvolve(1)(x)))", integrate(sqr(zShellConvolve(1)(x))), 1, 1e-13);
+    retval += test_functional("integrate(StepConvolve(1)(x)", integrate(StepConvolve(1)(x)), 1e-5, 1e-13);
+    retval += test_functional("integrate(ShellConvolve(1)(x))", integrate(ShellConvolve(1)(x)), 1e-5, 2e-13);
+
+    retval += test_functional("integrate(IdealGas(1e-3)(x))", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
+    retval += test_functional("integrate(HardSpheres(2,1e-3)(x))", integrate(HardSpheres(2,1e-3)(x)), 1e-5, 1e-13);
+    retval += test_functional("", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
+    retval += test_functional("", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
+
+    retval += test_functional("integrate(x*x)", integrate(x*x), 0.1, 1e-13);
+    retval += test_functional("3*integrate(x*x)", 3*integrate(x*x), 0.1, 1e-13); 
+    retval += test_functional("integrate(3*x*x)", integrate(3*x*x), 0.1, 1e-13);
+    retval += test_functional("integrate(3*sqr(4*x))", integrate(3*sqr(4*x)), 0.1, 1e-13);
+    retval += test_functional("integrate(Gaussian(2)(-3*sqr(4*x)))", integrate(Gaussian(2)(-3*sqr(4*x))), 0.1, 1e-13);
+    retval += test_functional("integrate(Pow(4)(x))", integrate(Pow(4)(x)), 0.1, 1e-13);
+  }
+
+  {
     Functional attr = integrate(GaussianPolynomial(-0.32, 0.5, 2));
     retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
     Functional repul = integrate(GaussianPolynomial(0.32, 0.25, 4));
     retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
+    retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
     retval += test_functional("sum of gaussians", attr + repul, 0.1, 1e-13);
     retval += test_functional("other sum of gaussians", repul + attr, 0.1, 1e-13);
   }

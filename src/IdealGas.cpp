@@ -59,6 +59,11 @@ public:
     } else
       return T*((n-min_log_arg)*slope + min_e);
   }
+  double grad(double n) const {
+    assert(!isnan(n));
+    if (n > min_log_arg) return T*log(n);
+    else return T*slope;
+  }
 
   void grad(const GridDescription &, const VectorXd &n, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

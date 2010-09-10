@@ -16,6 +16,7 @@ public:
   // its output field (i.e. it applies the chain rule).
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
+  virtual double grad(double data) const = 0;
 };
 
 class FieldFunctional {
@@ -83,6 +84,11 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
     if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
+  }
+  double grad(double data) const {
+    double out = itsCounter->ptr->grad(data);
+    if (mynext) out += mynext->grad(data);
+    return out;
   }
   const char *get_name() const { return itsCounter->name; }
   FieldFunctional set_name(const char *n) { itsCounter->name = n; return *this; }

@@ -27,6 +27,9 @@ public:
   double transform(double) const {
     return 0;
   }
+  double grad(double) const {
+    return 0;
+  }
 
   void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

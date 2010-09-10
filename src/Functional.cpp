@@ -141,6 +141,9 @@ public:
   double energy(double data) const {
     return f1(f2(data));
   }
+  double grad(double data) const {
+    return f1.grad(f2(data))*f2.grad(data);
+  }
   void grad(const GridDescription &gd, const VectorXd &data, VectorXd *g, VectorXd *pgrad = 0) const {
     VectorXd d1(f2(gd, data)), g1(d1);
     g1.setZero();
@@ -180,6 +183,9 @@ public:
   double energy(double data) const {
     return f1(data) + f2(data);
   }
+  double grad(double data) const {
+    return f1.grad(data) + f2.grad(data);
+  }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     return f1(gd, data) + f2(gd, data);
   }
@@ -208,6 +214,9 @@ public:
 
   double energy(double data) const {
     return f1(data)*f2(data);
+  }
+  double grad(double data) const {
+    return f1(data)*f2.grad(data) + f1.grad(data)*f2(data);
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     return f1(gd, data)*f2(gd, data);
@@ -258,6 +267,9 @@ public:
   double energy(double data) const {
     return a*f(data);
   }
+  double grad(double data) const {
+    return a*f.grad(data);
+  }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     return a*f(gd, data);
   }
@@ -293,6 +305,9 @@ public:
 
   double energy(double data) const {
     return f(data);
+  }
+  double grad(double data) const {
+    return f.grad(data);
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     // This does some extra work to save the energies of each term in
@@ -344,6 +359,9 @@ public:
 
   double energy(double data) const {
     return f(data);
+  }
+  double grad(double data) const {
+    return f.grad(data);
   }
   double energy(const GridDescription &gd, const VectorXd &data) const {
     return f(gd, data);

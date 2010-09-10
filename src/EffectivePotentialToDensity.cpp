@@ -40,6 +40,9 @@ public:
   double transform(double Veff) const {
     return exp(minusbeta*Veff);
   }
+  double grad(double Veff) const {
+    return minusbeta*exp(minusbeta*Veff);
+  }
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).

@@ -27,6 +27,9 @@ public:
   double transform(double n) const {
     return n;
   }
+  double grad(double) const {
+    return 1;
+  }
 
   void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -46,6 +49,9 @@ public:
   }
   double transform(double n) const {
     return f1(f2(n));
+  }
+  double grad(double n) const {
+    return f1.grad(f2(n))*f2.grad(n);
   }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -73,6 +79,9 @@ public:
   double transform(double n) const {
     return f1(n)/f2(n);
   }
+  double grad(double n) const {
+    return f1.grad(n)/f2(n) - f1(n)*f2.grad(n)/f2(n)/f2(n);
+  }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -98,6 +107,9 @@ public:
   double transform(double n) const {
     return f1(n)*f2(n);
   }
+  double grad(double n) const {
+    return f1(n)*f2.grad(n) + f1.grad(n)*f2(n);
+  }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -121,6 +133,9 @@ public:
   }
   double transform(double n) const {
     return x*f(n);
+  }
+  double grad(double n) const {
+    return x*f.grad(n);
   }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -147,6 +162,9 @@ public:
   double transform(double n) const {
     return x - f(n);
   }
+  double grad(double n) const {
+    return -f.grad(n);
+  }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -171,6 +189,9 @@ public:
   }
   double transform(double n) const {
     return log(f(n));
+  }
+  double grad(double n) const {
+    return f.grad(n)/f(n);
   }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -201,6 +222,9 @@ public:
   double transform(double n) const {
     double x = f(n);
     return x*x;
+  }
+  double grad(double n) const {
+    return 2*f(n)*f.grad(n);
   }
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,

@@ -27,6 +27,9 @@ public:
   double transform(double n) const {
     return mu*n;
   }
+  double grad(double) const {
+    return mu;
+  }
 
   void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
