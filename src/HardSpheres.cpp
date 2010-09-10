@@ -19,18 +19,18 @@
 #include <math.h>
 
 FieldFunctional HardSpheresRF(double radius, double temperature) {
-  FieldFunctional n0 = Identity();
+  const double four_pi_r = (4*M_PI)*radius;
+  const double four_pi_r2 = (4*M_PI)*(radius*radius);
   FieldFunctional n3 = StepConvolve(radius);
   FieldFunctional one_minus_n3 = 1 - StepConvolve(radius);
   FieldFunctional n2 = ShellConvolve(radius);
   FieldFunctional n2x = xShellConvolve(radius);
   FieldFunctional n2y = yShellConvolve(radius);
   FieldFunctional n2z = zShellConvolve(radius);
-  FieldFunctional phi1 = -1*n0*log(one_minus_n3);
+  FieldFunctional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1");
-  const double four_pi_r2 = (4*M_PI)*(radius*radius);
   // n1 is n2/(four_pi_r2)
-  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r2*one_minus_n3);
+  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   phi2.set_name("phi2");
   FieldFunctional phi3 = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   phi3.set_name("phi3");
@@ -41,7 +41,8 @@ FieldFunctional HardSpheresRF(double radius, double temperature) {
 }
 
 FieldFunctional HardSpheresWB(double radius, double temperature) {
-  FieldFunctional n0 = Identity();
+  const double four_pi_r = (4*M_PI)*radius;
+  const double four_pi_r2 = (4*M_PI)*(radius*radius);
   FieldFunctional n3 = StepConvolve(radius);
   FieldFunctional one_minus_n3 = 1 - n3;
   FieldFunctional n2 = ShellConvolve(radius);
@@ -75,11 +76,11 @@ FieldFunctional HardSpheresWB(double radius, double temperature) {
     nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
     nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
   // */
-  FieldFunctional phi1 = -1*n0*log(one_minus_n3);
+  // n0 is n2/(four_pi_r2)
+  FieldFunctional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1");
-  const double four_pi_r2 = (4*M_PI)*(radius*radius);
-  // n1 is n2/(four_pi_r2)
-  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r2*one_minus_n3);
+  // n1 is n2/(four_pi_r)
+  FieldFunctional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   phi2.set_name("phi2");
   FieldFunctional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))
     /(36*M_PI*sqr(n3)*sqr(one_minus_n3))

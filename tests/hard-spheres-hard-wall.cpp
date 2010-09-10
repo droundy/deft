@@ -22,9 +22,9 @@
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
-const double nliquid = 1e6*3/(4*M_PI*R*R*R);
-const double eta_one = 3/(4*M_PI*R*R*R);
-const double mu = -kT*log(nliquid);
+const double eta_one = 3.0/(4*M_PI*R*R*R);
+const double nliquid = 0.4257*eta_one;
+const double mu = -integrate(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
 
 // Here we set up the lattice.
 const double zmax = 80;
@@ -59,8 +59,8 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.00546519441213289;
-  const double true_N = 0.469400105429929;
+  const double true_energy = -0.0030120721577812;
+  const double true_N = 0.376241423570245;
 
   int retval = 0;
   double energy = min.energy()/width/width;
@@ -107,6 +107,7 @@ double notinwall(Cartesian r) {
 }
 
 int main(int, char **argv) {
+  printf("mu is %g\n", mu);
   external_potential.Set(walls);
   Grid constraint(gd);
   constraint.Set(notinwall);
