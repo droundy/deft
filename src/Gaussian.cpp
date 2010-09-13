@@ -71,7 +71,7 @@ static double step(Reciprocal kvec) {
     // accuracy (and efficiency).  I evaluate the smaller elements
     // first in the hope of reducing roundoff error (but this is not
     // yet tested).
-    return (4*M_PI)*(myR*myR*myR)*(kR2*kR2*kR2*(-1.0/45360) + kR2*kR2*(1.0/840) + kR2*(-1.0/30) + (1.0/3) );
+    return (4*M_PI/3)*(myR*myR*myR)*(kR2*kR2*kR2*(-1.0/15120) + kR2*kR2*(1.0/280) + kR2*(-1.0/10) + 1 );
   }
 }
 

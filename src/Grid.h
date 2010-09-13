@@ -69,7 +69,7 @@ public:
                 Cartesian corner, int resolution) const;
   void epsNativeSlice(const char *fname,
                       Cartesian xmax, Cartesian ymax, Cartesian corner) const;
-  void epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale = 1, double xscale = 1) const;
+  void epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale = 1, double xscale = 1, const char *comment = 0) const;
   Eigen::CwiseNullaryOp<any_op<double>, VectorXd> r2() const {
     return NullaryExpr(gd.NxNyNz, 1, r2_op);
   }

@@ -225,7 +225,7 @@ void Grid::epsNativeSlice(const char *fname,
   }
 }
 
-void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale, double xscale) const {
+void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale, double xscale, const char *comment) const {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -267,8 +267,6 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
     const double xbounds = 1640, ybounds = 480;
     fprintf(out, "%%%%BoundingBox: 0 0 %g %g\n", xbounds, ybounds);
     fprintf(out, "gsave\n");
-    fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
-    fprintf(out, "newpath 240 450 moveto (%s) show\n", fname);
     fprintf(out, "%% ymax is %g and ymin is %g\n", ymax, ymin);
     fprintf(out, "/M { exch %g mul exch %g sub %g mul 5 add moveto } def\n",
             xbounds/myxrange, ymin, (ybounds - 10)/(ymax - ymin));
@@ -306,13 +304,16 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
         fprintf(out, "0 %g M %g %g L stroke\n", y, myxrange, y);
       fprintf(out, "grestore\n");
     }
-    if (fabs(ymax) < 10*yscale && fabs(ymin) < 10*yscale) {
+    if (fabs(ymax) < 20*yscale && fabs(ymin) < 10*yscale) {
       fprintf(out, "gsave 0 setlinewidth 0 1 0 setrgbcolor\n");
       for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += yscale) {
         fprintf(out, "0 %g M %g %g L stroke\n", y, myxrange, y);
       }
       fprintf(out, "grestore\n");
     }
+    fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
+    if (comment) fprintf(out, "newpath 240 450 moveto (%s  -  %s) show\n", fname, comment);
+    else fprintf(out, "newpath 240 450 moveto (%s) show\n", fname);
     fprintf(out, "gsave 1 0 0 setrgbcolor 0 0 M %g 0 L stroke grestore\n", myxrange);
 
     fprintf(out, "0 %g M\n", (*this)(xmin));

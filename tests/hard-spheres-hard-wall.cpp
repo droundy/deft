@@ -23,6 +23,7 @@
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
+const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.4257*eta_one;
 const double mu = -integrate(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
 
@@ -132,7 +133,7 @@ int main(int, char **argv) {
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
     //density.epsNativeSlice("PreconditionedConjugateGradient.eps", Cartesian(0,0,zmax), Cartesian(1,0,0),
     //                       Cartesian(0,0,0));
-    density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), eta_one, R);
+    density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), diameter_cubed, R, "Y axis: n*8*R^3, x axis: R");
     potential.epsNative1d("hard-wall-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid grad(gd), pgrad(gd);
     grad.setZero();
