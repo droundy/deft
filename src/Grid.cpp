@@ -1,6 +1,7 @@
 #include "Grid.h"
 #include "ReciprocalGrid.h"
 #include "handymath.h"
+#include "Functionals.h"
 #include <fftw3.h>
 
 double Grid::operator()(const Relative &r) const {
@@ -333,6 +334,110 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
     fprintf(out, "showpage\n");
     fprintf(out, "%%%%Trailer\n");
     fprintf(out, "%%%%EOF\n");
+    fclose(out);
+  }
+}
+
+void Grid::epsRadial1d(const char *fname, double rmin, double rmax, double yscale, double rscale, const char *comment) const {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+  } else {
+    double mydr = 0.25*pow(gd.fineLat.volume(), 1.0/3);
+    if (rmax == 0) {
+      rmax = 2*pow(gd.Lat.volume(),1.0/3);
+    }
+    double rrange = rmax - rmin;
+    double ymax = maxCoeff();
+    double ymin = minCoeff();
+    // The following does some rudimentary tricks to scale things more
+    // nicely.
+    if (ymax-ymin > 0.3 && ymax - ymin < 100) {
+      ymax = ceil(ymax);
+      ymin = floor(ymin);
+    } else if (ymin > 0 && ymin < 0.5*ymax) {
+      ymin = 0;
+    } else if (ymax < 0 && fabs(ymax) < 0.5*fabs(ymin)) {
+      ymax = 0;
+    }
+
+    const double xbounds = 1640, ybounds = 480;
+    fprintf(out, "%%!PS-Adobe-3.0 EPSF\n");
+    fprintf(out, "%%%%BoundingBox: 0 0 %g %g\n", xbounds, ybounds);
+    fprintf(out, "gsave\n");
+    fprintf(out, "%% ymax is %g and ymin is %g\n", ymax, ymin);
+    fprintf(out, "/M { exch %g sub %g mul exch %g sub %g mul 5 add moveto } def\n",
+            rmin, xbounds/(rmax-rmin), ymin, (ybounds - 10)/(ymax - ymin));
+    fprintf(out, "/L { exch %g sub %g mul exch %g sub %g mul 5 add lineto } def\n",
+            rmin, xbounds/(rmax-rmin), ymin, (ybounds - 10)/(ymax - ymin));
+
+    if (rrange < rscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 1 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(rrange/rscale)*rscale; x += 0.01*rscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
+    }
+    if (rrange < 20*rscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(rrange/rscale)*rscale; x += 0.1*rscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
+    }
+    if (rrange < 100*rscale) {
+      fprintf(out, "gsave 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double x = 0; x <= ceil(rrange/rscale)*rscale; x += rscale)
+        fprintf(out, "%g %g M %g %g L stroke\n", x, ymin, x, ymax);
+      fprintf(out, "grestore\n");
+    }
+
+    if (fabs(ymax) < 0.2*yscale && fabs(ymin) < 0.2*yscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 1 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += 0.01*yscale)
+        fprintf(out, "0 %g M %g %g L stroke\n", y, rrange, y);
+      fprintf(out, "grestore\n");
+    }
+    if (fabs(ymax) < 3*yscale && fabs(ymin) < 3*yscale) {
+      fprintf(out, "gsave [1 4] 0 setdash 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += 0.1*yscale)
+        fprintf(out, "0 %g M %g %g L stroke\n", y, rrange, y);
+      fprintf(out, "grestore\n");
+    }
+    if (fabs(ymax) < 20*yscale && fabs(ymin) < 10*yscale) {
+      fprintf(out, "gsave 0 setlinewidth 0 1 0 setrgbcolor\n");
+      for (double y = floor(ymin/yscale)*yscale; y <= ceil(ymax/yscale)*yscale; y += yscale) {
+        fprintf(out, "0 %g M %g %g L stroke\n", y, rrange, y);
+      }
+      fprintf(out, "grestore\n");
+    }
+    fprintf(out, "/Times-Roman findfont 20 scalefont setfont\n");
+    if (comment) fprintf(out, "newpath 240 450 moveto (%s  -  %s) show\n", fname, comment);
+    else fprintf(out, "newpath 240 450 moveto (%s) show\n", fname);
+    fprintf(out, "gsave 1 0 0 setrgbcolor 0 0 M %g 0 L stroke grestore\n", rrange);
+
+    VectorXd Rs(int(rrange/mydr)+1);
+    VectorXd fRs(Rs);
+    for (int ir=0;ir<Rs.rows();ir++) {
+      Rs[ir] = rmin + ir*mydr;
+    }
+    ShellProjection(Rs, &fRs);
+    
+    fprintf(out, "%g %g M\n", rmin, fRs[0]);
+    for (int ir=1; ir<Rs.rows(); ir++) {
+      if (isnan(fRs[ir])) {
+        fprintf(out, "%% %g\t%g\tL\n", Rs[ir], fRs[ir]);
+      } else {
+        fprintf(out, "%g\t%g\tL\n", Rs[ir], fRs[ir]);
+      }
+    }
+    fprintf(out, "stroke\n");
+
+    // And now we can output the trailer!
+    fprintf(out, "grestore\n");
+    fprintf(out, "showpage\n");
+    fprintf(out, "%%%%Trailer\n");
+    fprintf(out, "%%%%EOF\n");
+    fclose(out);
   }
 }
 
@@ -344,4 +449,29 @@ ReciprocalGrid Grid::fft() const {
   fftw_destroy_plan(p);
   out /= gd.NxNyNz;
   return out;
+}
+
+
+void Grid::ShellProjection(const VectorXd &R, VectorXd *output) const {
+  output->setZero();
+  VectorXd norm(*output);
+  const double wid = 0.5*pow(gd.fineLat.volume(), 1.0/3);
+  const double oowid2 = 1/(wid*wid);
+  for (int x=0; x<gd.Nx; x++) {
+    for (int y=0; y<gd.Ny; y++) { 
+      for (int z=0; z<gd.Nz; z++) {
+        Cartesian h(gd.Lat.wignerSeitz(gd.Lat.toCartesian(Relative(x*gd.dx,y*gd.dy,z*gd.dz))));
+        double r = h.norm();
+        for (int ir=0;ir<R.rows();ir++) {
+          double dr = fabs(r-R[ir]);
+          if (dr < 3*wid) {
+            double w = exp(-oowid2*dr*dr);
+            norm[ir] += w;
+            (*output)[ir] += w*(*this)(x,y,z);
+          }
+        }
+      }
+    }
+  }
+  output->cwise() /= norm;
 }
