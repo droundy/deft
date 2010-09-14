@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <eigen2/Eigen/Core>
+#include <Eigen/Core>
 #include <assert.h>
 #include <math.h>
 

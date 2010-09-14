@@ -1,5 +1,5 @@
-#include <eigen2/Eigen/LU>
-#include <eigen2/Eigen/Geometry>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
 #include "lattice.h"
 
 Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {

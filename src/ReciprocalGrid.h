@@ -4,7 +4,7 @@
 
 #include "Grid.h"
 #include <stdio.h>
-#include <eigen2/Eigen/Geometry>
+#include <Eigen/Geometry>
 
 typedef std::complex<double> complex;
 

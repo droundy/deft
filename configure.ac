@@ -25,6 +25,7 @@ AC_ARG_ENABLE(coverage, [AC_HELP_STRING([--enable-coverage],
 if test "x$use_coverage" = "xyes"; then
    CXXFLAGS="$CXXFLAGS -fprofile-arcs -ftest-coverage"
 fi
+CPPFLAGS="$CPPFLAGS -Iinclude"
 
 dnl Checks for programs.
 AC_PROG_CXX
@@ -60,7 +61,7 @@ else
 fi
 
 dnl Checks for header files.
-AC_CHECK_HEADER(eigen2/Eigen/Core,,AC_MSG_ERROR([Cannot find eigen2 header!]))
+AC_CHECK_HEADER(Eigen/Core,,AC_MSG_ERROR([Cannot find eigen2 header!]))
 
 AC_ARG_ENABLE(debug,
 [  --enable-debug    Turn on debugging],
