@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Grid.h"
-#include "Functional.h"
 #include "FieldFunctional.h"
 
 FieldFunctional IdealGas(double temperature);
