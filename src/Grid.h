@@ -4,7 +4,7 @@
 
 #include "GridDescription.h"
 #include <stdio.h>
-#include <eigen2/Eigen/Geometry>
+#include <Eigen/Geometry>
 
 static const double default_eps_size = 1000.0;
 
