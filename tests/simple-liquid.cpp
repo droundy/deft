@@ -36,12 +36,12 @@ FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliqui
 FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
 FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = integrate(f0(n));
+FieldFunctional f = f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff = integrate((f0 + ExternalPotential(external_potential))(n));
+FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
@@ -84,8 +84,8 @@ int main(int, char **argv) {
     potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
     retval += f.run_finite_difference_test("simple liquid", potential);
     
-    retval += integrate(attraction).run_finite_difference_test("quadratic", test_density);
-    retval += integrate(repulsion).run_finite_difference_test("repulsive", test_density);
+    retval += attraction.run_finite_difference_test("quadratic", test_density);
+    retval += repulsion.run_finite_difference_test("repulsive", test_density);
   }
 
   Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential));

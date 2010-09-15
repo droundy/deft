@@ -8,19 +8,19 @@
 
 class Minimizer;
 
-Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
-Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer Downhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer PreconditionedDownhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
 Minimizer MaxIter(int maxiter, Minimizer);
 Minimizer Precision(double err, Minimizer);
 
 class MinimizerInterface {
 public: // yuck, this shouldn't be public!
-  Functional f;
+  FieldFunctional f;
   VectorXd *x; // Note that we don't own this data!
   int iter;
   GridDescription gd;
 public:
-  MinimizerInterface(Functional myf, const GridDescription &gdin, VectorXd *data)
+  MinimizerInterface(FieldFunctional myf, const GridDescription &gdin, VectorXd *data)
     : f(myf), x(data), gd(gdin), last_grad(0), last_pgrad(0) {
     iter = 0;
   }
@@ -28,7 +28,7 @@ public:
     delete last_grad;
     delete last_pgrad;
   }
-  virtual void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  virtual void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     f = newf;
     iter = 0;
     invalidate_cache();
@@ -48,12 +48,12 @@ public:
   virtual void print_info(const char *prefix = "") const;
 
   // energy returns the current energy.
-  double energy() const { return f(gd, *x); }
+  double energy() const { return integrate(f)(gd, *x); }
   const VectorXd &grad() const {
     if (!last_grad) {
       last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      f.grad(gd, *x, last_grad);
+      integrate(f).grad(gd, *x, last_grad);
     }
     return *last_grad;
   }
@@ -63,7 +63,7 @@ public:
       last_pgrad->setZero(); // Have to remember to zero it out first!
       if (!last_grad) last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      f.grad(gd, *x, last_grad, last_pgrad);
+      integrate(f).grad(gd, *x, last_grad, last_pgrad);
     }
     return *last_pgrad;
   }
@@ -99,7 +99,7 @@ public:
     }
     return *this;
   }
-  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);
     itsCounter->ptr->minimize(newf, gdnew, newx);
   }
@@ -143,7 +143,7 @@ public:
   MinimizerModifier(Minimizer m)
     : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
   ~MinimizerModifier() { }
-  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);
     min.minimize(newf, gdnew, newx);
   }

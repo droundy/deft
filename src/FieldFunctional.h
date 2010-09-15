@@ -96,6 +96,13 @@ public:
     return mynext;
   }
   mutable double last_energy;
+
+  // The following utility methods do not need to be overridden.
+  void print_iteration(const char *prefix, int iter) const;
+  // run_finite_difference_test returns false when the test fails.
+  bool run_finite_difference_test(const char *testname,
+                                  const Grid &data,
+                                  const VectorXd *direction = 0) const;
 private:
   FieldFunctional *mynext;
   struct counter {
@@ -130,3 +137,4 @@ FieldFunctional operator-(double x, const FieldFunctional &f);
 
 FieldFunctional log(const FieldFunctional &);
 FieldFunctional sqr(const FieldFunctional &);
+FieldFunctional constrain(const Grid &, FieldFunctional);

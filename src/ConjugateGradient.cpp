@@ -24,14 +24,14 @@ protected:
   LineMinimizer linmin;
   double oldgradsqr;
 public:
-  ConjugateGradientType(Functional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm,
+  ConjugateGradientType(FieldFunctional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm,
                         double stepsize = 0.1)
     : MinimizerInterface(f, gdin, data), step(stepsize), orig_step(step), direction(*data), oldgrad(*data), linmin(lm) {
     direction.setZero();
     oldgrad.setZero();
     oldgradsqr = 0;
   }
-  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     step = orig_step;
     MinimizerInterface::minimize(newf, gdnew, newx);
     if (newx) {
@@ -49,7 +49,7 @@ public:
 
 class PreconditionedConjugateGradientType : public ConjugateGradientType {
 public:
-  PreconditionedConjugateGradientType(Functional f, const GridDescription &gdin,
+  PreconditionedConjugateGradientType(FieldFunctional f, const GridDescription &gdin,
                                     VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
     : ConjugateGradientType(f, gdin, data, lm, stepsize) {}
 
@@ -142,12 +142,12 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
 }
 
 
-Minimizer ConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
+Minimizer ConjugateGradient(FieldFunctional f, const GridDescription &gdin, VectorXd *data,
                           LineMinimizer lm, double stepsize) {
   return Minimizer(new ConjugateGradientType(f, gdin, data, lm, stepsize));
 }
 
-Minimizer PreconditionedConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
+Minimizer PreconditionedConjugateGradient(FieldFunctional f, const GridDescription &gdin, VectorXd *data,
                                         LineMinimizer lm, double stepsize) {
   return Minimizer(new PreconditionedConjugateGradientType(f, gdin, data, lm, stepsize));
 }

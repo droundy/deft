@@ -26,10 +26,6 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data,
                     VectorXd *, VectorXd *pgrad = 0) const = 0;
 
-  // You may optionally define a print_summary method, which would
-  // print something interesting to the screen.
-  virtual void print_summary(const char *prefix, double energy) const;
-
   virtual double energy(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double energy(double data) const = 0;
   virtual double grad(double data) const = 0;
@@ -96,18 +92,6 @@ public:
   void grad(const Grid &g, VectorXd *myg, VectorXd *mypg = 0) const {
     grad(g.description(), g, myg, mypg); // Just pull out the description...
   }
-
-  // The following utility methods do not need to be overridden.
-  void print_iteration(const char *prefix, int iter) const;
-  // run_finite_difference_test returns false when the test fails.
-  bool run_finite_difference_test(const char *testname,
-                                  const Grid &data,
-                                  const VectorXd *direction = 0) const;
-
-  void print_summary(const char *prefix) const;
-
-  void set_name(const char *n) { itsCounter->name = n; }
-  const char *get_name() const { return itsCounter->name; }
 private:
   struct counter {
     counter(FunctionalInterface* p = 0, unsigned c = 1, const char *n = 0) : ptr(p), count(c), name(n) {}
@@ -146,4 +130,3 @@ private:
 };
 
 Functional integrate(const FieldFunctional &);
-Functional constrain(const Grid &, Functional);

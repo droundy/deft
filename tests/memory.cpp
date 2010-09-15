@@ -42,7 +42,7 @@ FieldFunctional n = EffectivePotentialToDensity(kT);
 
 Grid external_potential(gd);
 Grid potential(gd);
-Functional ff;
+FieldFunctional ff;
 
 double notincavity(Cartesian r) {
   const double rad2 = r.dot(r);
@@ -65,12 +65,12 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = constrain(constraint, integrate(f0(n)));
+  ff = constrain(constraint, f0(n));
   
   int retval = 0;
 
   potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-  printf("Energy is %g\n", ff(potential));
+  printf("Energy is %g\n", integrate(ff)(potential));
 
   double peak = peak_memory()/1024.0/1024;
   const double expected_peak = 70;

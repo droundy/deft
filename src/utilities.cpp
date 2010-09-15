@@ -41,8 +41,8 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
 
   FieldFunctional n = EffectivePotentialToDensity(prop.kT);
   FieldFunctional f0 = f(n);
-  integrate(f0).run_finite_difference_test("f0", potential);
-  min.minimize(integrate(f0), gd, &potential);
+  f0.run_finite_difference_test("f0", potential);
+  min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on liberated interface...\n");
@@ -57,7 +57,7 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
   if (verbose) printf("Got interface energy of %g.\n", Einterface);
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_gas;
-  min.minimize(integrate(f0), gd, &potential);
+  min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on gas...\n");
@@ -71,7 +71,7 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
   }
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
-  min.minimize(integrate(f0), gd, &potential);
+  min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on liquid...\n");

@@ -10,5 +10,6 @@ autoconf
 
 CXXFLAGS='-ansi -pipe -W -Wall -O2 -Werror' ./configure
 
+set +v
 echo If you are not a deft developer, you should now run ./configure
 echo to avoid overly-pedantic compiler errors!

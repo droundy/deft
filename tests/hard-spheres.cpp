@@ -33,12 +33,12 @@ GridDescription gd(lat, resolution);
 FieldFunctional f00 = HardSpheres(R, kT);
 FieldFunctional f0 = IdealGas(kT) + HardSpheres(R, kT) + ChemicalPotential(mu);
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = integrate(f0(n));
+FieldFunctional f = f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/ngas*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff = integrate((f0 + ExternalPotential(external_potential))(n));
+FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1e-3) {
@@ -83,10 +83,10 @@ int main(int, char **argv) {
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
     const double expected_energy = -0.001678597251376433;
-    printf("hard sphere energy is %.16g\n", f(potential));
-    if (fabs(f(potential)/expected_energy - 1) > 1e-13) {
+    printf("hard sphere energy is %.16g\n", integrate(f)(potential));
+    if (fabs(integrate(f)(potential)/expected_energy - 1) > 1e-13) {
       printf("FAIL: Error in hard sphere energy (of fixed potential) is too big %g (from %.16g)\n",
-             f(potential)/expected_energy - 1, f(potential));
+             integrate(f)(potential)/expected_energy - 1, integrate(f)(potential));
       retval++;
     }
     retval += f.run_finite_difference_test("hard spheres", potential);

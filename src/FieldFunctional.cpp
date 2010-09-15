@@ -15,7 +15,120 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "handymath.h"
 #include "Grid.h"
+
+bool FieldFunctional::run_finite_difference_test(const char *testname, const Grid &x,
+                                                 const VectorXd *direction) const {
+  printf("\nRunning finite difference test on %s:\n", testname);
+  const GridDescription gd(x.description());
+
+  VectorXd my_grad(x);
+  double Eold = integrate(*this)(x);
+  my_grad.setZero();
+  integrate(*this).grad(x, &my_grad);
+  VectorXd my_direction(my_grad);
+  if (direction) my_direction = *direction;
+  my_direction /= my_direction.norm();
+
+  const double lderiv = my_direction.dot(my_grad);
+  if (lderiv == 0.0) {
+    printf("Gradient is zero...\n");
+    return true;
+  }
+  {
+    // compare the gradient computed by the two functions grad() and
+    // grad_and_pgrad()
+    VectorXd my_pgrad(x);
+    my_grad.setZero();
+    my_pgrad.setZero();
+    integrate(*this).grad(x, &my_grad, &my_pgrad);
+    const double lderiv_new = my_direction.dot(my_grad);
+    if (fabs(lderiv_new/lderiv - 1) > 1e-12) {
+      printf("\n*** WARNING!!! INCONSISTENT GRADIENTS! ***\n");
+      printf("Different gradient in energy_and_grad() and grad_and_pgrad()\n");
+      printf("Fractional error is %g\n\n", lderiv_new/lderiv - 1);
+      return false;
+    }
+  }
+
+  // We try to choose as small values for epsilon as are consistent with
+  // getting meaningful results:
+  const double sigfigs_best = 1e-15;
+  const double epsilon_max = 1e-15*fabs(Eold)/fabs(lderiv)/sigfigs_best;
+  const int min_p = (int) -floor(log10(epsilon_max) + 0.5);
+  const int max_p = min_p + 7;
+  printf("choosing delta of 1e%d based on directional grad %g and energy %g\n",
+         -min_p, lderiv, Eold);
+  double min = 1e300, best_ratio_error = 1.0;
+  VectorXd grads(max_p + 1 - min_p);
+  VectorXd diff_grads(max_p - min_p);
+  // Take steps in the grad direction.
+  for(int p=min_p; p <= max_p; p++) {
+    const double eps_ratio = 10.0;
+    const double epsilon = pow(eps_ratio, -p);
+    // The following is a little wasteful of memory...
+    const double Eplus= integrate(*this)(gd, x + epsilon*my_direction);
+    const double Eminus=integrate(*this)(gd, x - epsilon*my_direction);
+
+    grads[p-min_p] = (Eplus-Eminus)/(2*epsilon);
+    printf("    eps^2 = %25.16f deltaE %.12g\n",
+           epsilon*epsilon*pow(eps_ratio, 2.0*min_p), Eplus-Eminus);
+    printf("FD   Ratio: %25.16f (grad ~ %g)\n", grads[p-min_p]/lderiv,
+           grads[p-min_p]);
+    printf("FD sigfigs: %25.16f\n", 1e-15*fabs(Eold/(Eplus-Eminus)));
+    fflush(stdout);
+
+    if (fabs(grads[p-min_p]/lderiv - 1.0) < best_ratio_error)
+      best_ratio_error = fabs(grads[p-min_p]/lderiv - 1.0);
+    if (p > min_p) {
+      diff_grads[p-min_p-1]=(grads[p-min_p]-grads[p-min_p-1]);
+      double diff = (grads[p-min_p-1]-lderiv)*
+        (-1+1./(eps_ratio*eps_ratio))/diff_grads[p-min_p-1];
+      if ( min > fabs(diff-1) ) min = fabs(diff-1);
+      //dft_log("FD diff: %25.16lf\n\n", diff);
+    }
+  }
+
+  if (min < 1e-3 && best_ratio_error < 1e-7) {
+    printf("Passed on basis of reasonable scaling (%g) and accuracy (%g).\n",
+           min, best_ratio_error);
+    return false;
+  }
+  if (best_ratio_error < 1e-10) {
+    printf("Passed on basis of a gradient accuracy of (%g) (with scaling %g).\n",
+           best_ratio_error, min);
+    return false;
+  }
+  if (min < 1e-5 && best_ratio_error < 0.01) {
+    printf("Passed on basis of seriously nice scaling %g (and low accuracy %g).\n",
+           min, best_ratio_error);
+    return false;
+  }
+  printf("FAIL: Failed with scaling ratio of %g and gradient accuracy of %g\n",
+         min, best_ratio_error);
+  return true;
+}
+
+void FieldFunctional::print_iteration(const char *prefix, int iter) const {
+  printf("%s==============\n", prefix);
+  printf("%sIteration %4d\n", prefix, iter);
+  printf("%s==============\n", prefix);
+
+  const FieldFunctional *nxt = this;
+  while (nxt) {
+    if (nxt->get_name()) {
+      printf("%s%25s =", prefix, nxt->get_name());
+      print_double("", nxt->last_energy);
+      printf("\n");
+    } else {
+      printf("%s%25s =", prefix, "UNKNOWN");
+      print_double("", nxt->last_energy);
+      printf("\n");
+    }
+    nxt = nxt->next();
+  }
+}
 
 class IdentityType : public FieldFunctionalInterface {
 public:
@@ -237,4 +350,44 @@ private:
 
 FieldFunctional sqr(const FieldFunctional &f) {
   return FieldFunctional(new SquareRuleType(f));
+}
+
+
+class Constraint : public FieldFunctionalInterface {
+public:
+  Constraint(const Grid &g, const FieldFunctional &y) : constraint(g), f(y) {};
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, data);
+  }
+  double transform(double n) const {
+    return f(n);
+  }
+  double grad(double n) const {
+    return f.grad(n);
+  }
+
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    if (outpgrad) {
+      VectorXd mygrad(data), mypgrad(data);
+      mygrad.setZero();
+      mypgrad.setZero();
+      f.grad(gd, data, ingrad, &mygrad, &mypgrad);
+      *outgrad += constraint.cwise() * mygrad;
+      *outpgrad += constraint.cwise() * mypgrad;
+    } else {
+      VectorXd mygrad(data);
+      mygrad.setZero();
+      f.grad(gd, data, ingrad, &mygrad, 0);
+      *outgrad += constraint.cwise() * mygrad;
+    }
+  }
+private:
+  const Grid constraint;
+  const FieldFunctional f;
+};
+
+FieldFunctional constrain(const Grid &g, FieldFunctional f) {
+  return FieldFunctional(new Constraint(g, f));
 }

@@ -42,7 +42,7 @@ FieldFunctional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
-Functional ff;
+FieldFunctional ff;
 
 int test_minimizer(const char *name, Minimizer min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -113,19 +113,22 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notinwall);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = constrain(constraint, integrate(f0(n)));
+  ff = constrain(constraint, f0(n));
 
   int retval = 0;
 
   {
     potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += integrate(f0wb(n)).run_finite_difference_test("white bear functional", potential);
-    retval += integrate(f0rf(n)).run_finite_difference_test("rosenfeld functional", potential);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", potential);
+
+    //retval += constrain(constraint, f0wb(n)).run_finite_difference_test("constrained white bear functional", potential);
+    //retval += constrain(constraint, f0rf(n)).run_finite_difference_test("constrained rosenfeld functional", potential);
   }
 
   {
     Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    //Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+
     retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
@@ -137,20 +140,14 @@ int main(int, char **argv) {
     Grid grad(gd), pgrad(gd);
     grad.setZero();
     pgrad.setZero();
-    ff.grad(potential, &grad, &pgrad);
+    integrate(ff).grad(potential, &grad, &pgrad);
     grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid(gd, StepConvolve(R)(density)).epsNative1d("n3.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
  
-    retval += constrain(constraint, integrate(f0wb)).run_finite_difference_test("white bear functional", density, &grad);
-    retval += constrain(constraint, integrate(f0rf)).run_finite_difference_test("rosenfeld functional", density, &grad);
+    retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional", density, &grad);
+    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);
   }
-
-  //Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);
-  //retval += test_minimizer("PreconditionedSteepestDescent", psd, 20, 1e-4);
-
-  //Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer);
-  //retval += test_minimizer("ConjugateGradient", cg, 3000, 3e-5);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

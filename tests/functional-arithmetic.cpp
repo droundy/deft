@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "Functionals.h"
 
-int test_functionals(const char *name, Functional f1, Functional f2, double n, double fraccuracy=1e-14) {
+int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, double n, double fraccuracy=1e-14) {
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -35,11 +35,11 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   printf("Working on f1 of double...\n");
   const double Edouble1 = f1(n);
   printf("Working on f1 of grid...\n");
-  const double Egrid1 = f1(nr)/gd.Lat.volume();
+  const double Egrid1 = integrate(f1)(nr)/gd.Lat.volume();
   printf("Working on f2 of double...\n");
   const double Edouble2 = f2(n);
   printf("Working on f2 of grid...\n");
-  const double Egrid2 = f2(nr)/gd.Lat.volume();
+  const double Egrid2 = integrate(f2)(nr)/gd.Lat.volume();
 
   printf("Edouble1 = %g\n", Edouble1);
   printf("Egrid1   = %g\n", Egrid1);
@@ -65,8 +65,8 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   retval += f2.run_finite_difference_test("f2", nr);
   mygrad1.setZero();
   mygrad2.setZero();
-  f1.grad(gd, nr, &mygrad1);
-  f2.grad(gd, nr, &mygrad2);
+  integrate(f1).grad(gd, nr, &mygrad1);
+  integrate(f2).grad(gd, nr, &mygrad2);
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
     printf("Error in the grad is too big!\n");
@@ -81,19 +81,19 @@ int main(int, char **argv) {
   const FieldFunctional n = EffectivePotentialToDensity(kT);
 
   FieldFunctional x = Gaussian(1);
-  retval += test_functionals("Square vs mul", integrate(Pow(2)(x)), integrate(x*x), 0.1, 1e-13);
-  retval += test_functionals("Cube vs mul", integrate(Pow(3)(x)), integrate(x*x*x), 0.1, 1e-12);
-  retval += test_functionals("Cube vs other mul", integrate(Pow(3)(x)), integrate(x*(x*x)), 0.1, 1e-12);
+  retval += test_functionals("Square vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
+  retval += test_functionals("Cube vs mul", Pow(3)(x), x*x*x, 0.1, 1e-12);
+  retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
 
   // The following tests the chain rule...
-  retval += test_functionals("Fourth power", integrate(Pow(2)(Pow(2)(x))), integrate(x*x*x*x), 0.1, 1e-12);
+  retval += test_functionals("Fourth power", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);
 
   // The following tests scalar multiply rule...
-  retval += test_functionals("Fourth power", integrate(10*Pow(2)(Pow(2)(x))), integrate(10*x*x*x*x), 0.1, 1e-12);
+  retval += test_functionals("Fourth power", 10*Pow(2)(Pow(2)(x)), 10*x*x*x*x, 0.1, 1e-12);
 
   // The following tests scalar subtraction rule...
   retval += test_functionals("Subtraction",
-                             integrate(0 - Pow(2)(Pow(2)(x))), integrate(-1*Pow(2)(Pow(2)(x))), 0.1, 1e-12);
+                             0 - Pow(2)(Pow(2)(x)), -1*Pow(2)(Pow(2)(x)), 0.1, 1e-12);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

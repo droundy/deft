@@ -43,7 +43,7 @@ FieldFunctional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
-Functional ff;
+FieldFunctional ff;
 
 int test_minimizer(const char *name, Minimizer min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
@@ -110,14 +110,14 @@ int main(int, char **argv) {
   external_potential.epsRadial1d("external-radial.eps", 0, rmax, 1, R, "Good fun!");
   Grid constraint(gd);
   constraint.Set(notincavity);
-  ff = constrain(constraint, integrate(f0(n)));
+  ff = constrain(constraint, f0(n));
 
   int retval = 0;
 
   {
     potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += integrate(f0wb(n)).run_finite_difference_test("white bear functional", potential);
-    retval += integrate(f0rf(n)).run_finite_difference_test("rosenfeld functional", potential);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", potential);
   }
 
   {
@@ -135,11 +135,11 @@ int main(int, char **argv) {
 
     Grid grad(gd);
     grad.setZero();
-    ff.grad(potential, &grad);
+    integrate(ff).grad(potential, &grad);
     //grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
  
-    retval += constrain(constraint, integrate(f0wb)).run_finite_difference_test("white bear functional", density, &grad);
-    retval += constrain(constraint, integrate(f0rf)).run_finite_difference_test("rosenfeld functional", density, &grad);
+    retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional", density, &grad);
+    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);
   }
 
   //Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-4);

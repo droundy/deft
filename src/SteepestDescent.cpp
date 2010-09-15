@@ -22,9 +22,9 @@ protected:
   double step, orig_step;
   LineMinimizer linmin;
 public:
-  SteepestDescentType(Functional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
+  SteepestDescentType(FieldFunctional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
     : MinimizerInterface(f, gdin, data), step(stepsize), orig_step(step), linmin(lm) {}
-  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     step = orig_step;
     MinimizerInterface::minimize(newf, gdnew, newx);
   }
@@ -35,7 +35,7 @@ public:
 
 class PreconditionedSteepestDescentType : public SteepestDescentType {
 public:
-  PreconditionedSteepestDescentType(Functional f, const GridDescription &gdin,
+  PreconditionedSteepestDescentType(FieldFunctional f, const GridDescription &gdin,
                                     VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
     : SteepestDescentType(f, gdin, data, lm, stepsize) {}
 
@@ -90,12 +90,12 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
 }
 
 
-Minimizer SteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
+Minimizer SteepestDescent(FieldFunctional f, const GridDescription &gdin, VectorXd *data,
                           LineMinimizer lm, double stepsize) {
   return Minimizer(new SteepestDescentType(f, gdin, data, lm, stepsize));
 }
 
-Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
+Minimizer PreconditionedSteepestDescent(FieldFunctional f, const GridDescription &gdin, VectorXd *data,
                                         LineMinimizer lm, double stepsize) {
   return Minimizer(new PreconditionedSteepestDescentType(f, gdin, data, lm, stepsize));
 }
