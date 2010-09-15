@@ -35,11 +35,10 @@ Lattice lat(Cartesian(0,rmax,rmax), Cartesian(rmax,0,rmax), Cartesian(rmax,rmax,
 GridDescription gd(lat, 0.2);
 
 // And the functional...
-Functional f0 = integrate(HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu));
-Functional f0wb = integrate(HardSpheresWB(R, kT));
-Functional f0rf = integrate(HardSpheresRF(R, kT));
+FieldFunctional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
+FieldFunctional f0wb = HardSpheresWB(R, kT);
+FieldFunctional f0rf = HardSpheresRF(R, kT);
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -66,8 +65,7 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  Functional f1 = constrain(constraint, f0);
-  ff = f1(n);
+  ff = constrain(constraint, integrate(f0(n)));
   
   int retval = 0;
 
