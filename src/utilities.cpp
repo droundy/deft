@@ -97,3 +97,10 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   }
   return surface_tension;
 }
+
+long Eigen::djr_memused = 0;
+long Eigen::djr_mempeak = 0;
+
+long peak_memory() {
+  return Eigen::djr_mempeak;
+}
