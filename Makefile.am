@@ -14,6 +14,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/print-iter.test \
 	tests/memory.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
@@ -32,7 +33,8 @@ check_PROGRAMS = \
 	tests/ideal-gas-external-potential.test \
 	tests/eps.test
 
-TESTS = tests/null.sh $(check_PROGRAMS)
+TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+tests_print_iter_test_SOURCES = tests/print-iter.cpp $(GENERIC_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(GENERIC_CODE)
 tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(GENERIC_CODE)
 tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(GENERIC_CODE)

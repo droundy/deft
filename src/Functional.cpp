@@ -35,12 +35,12 @@ public:
     // the sum.
     VectorXd fdata(f.justMe(gd, data));
     double e = gd.dvolume*fdata.sum();
-    f.last_energy = e;
+    f.set_last_energy(e);
     FieldFunctional *nxt = f.next();
     while (nxt) {
       fdata += nxt->justMe(gd, data);
       double etot = gd.dvolume*fdata.sum();
-      nxt->last_energy = etot - e;
+      nxt->set_last_energy(etot - e);
       e = etot;
       nxt = nxt->next();
     }

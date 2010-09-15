@@ -17,6 +17,8 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double grad(double data) const = 0;
+
+  virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
 
 class FieldFunctional {
@@ -95,10 +97,12 @@ public:
   FieldFunctional *next() const {
     return mynext;
   }
-  mutable double last_energy;
+  FieldFunctional set_last_energy(double e) const { itsCounter->last_energy = e; return *this; }
 
-  // The following utility methods do not need to be overridden.
-  void print_iteration(const char *prefix, int iter) const;
+  void print_summary(const char *prefix, double energy, const char *name=0) const;
+  // The following utility methods do not need to be overridden.  Its
+  // return value is the total energy that is printed.
+  double print_iteration(const char *prefix, int iter) const;
   // run_finite_difference_test returns false when the test fails.
   bool run_finite_difference_test(const char *testname,
                                   const Grid &data,
@@ -111,6 +115,7 @@ private:
     unsigned count;
     const char *name;
     FieldFunctional *next;
+    double last_energy;
   };
   counter *itsCounter;
   void acquire(counter* c) {

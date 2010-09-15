@@ -1,0 +1,49 @@
+
+***************
+* Testing sqr *
+***************
+
+Energy is 1
+	PREFIX:==============
+	PREFIX:Iteration    1
+	PREFIX:==============
+	PREFIX:                   foobar =        1.00000000000000000
+	PREFIX:             total energy =        1.00000000000000000
+
+*********************
+* Testing sqr + log *
+*********************
+
+Energy is 1
+	PREFIX:==============
+	PREFIX:Iteration    1
+	PREFIX:==============
+	PREFIX:                      sqr =        1.00000000000000000
+	PREFIX:                      log =        0.00000000000000000
+	PREFIX:             total energy =        1.00000000000000000
+
+****************************
+* Testing (sqr + log)(sqr) *
+****************************
+
+Energy is 1
+	PREFIX:==============
+	PREFIX:Iteration    1
+	PREFIX:==============
+	PREFIX:                      sqr =        1.00000000000000000
+	PREFIX:                      log =        0.00000000000000000
+	PREFIX:             total energy =        1.00000000000000000
+
+*****************************
+* Testing sqr(sqr(x)) + sqr *
+*****************************
+
+Energy is 2
+	PREFIX:==============
+	PREFIX:Iteration    1
+	PREFIX:==============
+	PREFIX:                   foobar =        1.00000000000000000
+	PREFIX:                   bazbar =        1.00000000000000000
+	PREFIX:             total energy =        2.00000000000000000
+
+tests/print-iter.test passes!

@@ -18,6 +18,13 @@
 #include "handymath.h"
 #include "Grid.h"
 
+void FieldFunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
+  if (name) printf("%s%25s =", prefix, name);
+  else printf("%s%25s =", prefix, "UNKNOWN");
+  print_double("", e);
+  printf("\n");
+}
+
 bool FieldFunctional::run_finite_difference_test(const char *testname, const Grid &x,
                                                  const VectorXd *direction) const {
   printf("\nRunning finite difference test on %s:\n", testname);
@@ -110,24 +117,41 @@ bool FieldFunctional::run_finite_difference_test(const char *testname, const Gri
   return true;
 }
 
-void FieldFunctional::print_iteration(const char *prefix, int iter) const {
+double FieldFunctional::print_iteration(const char *prefix, int iter) const {
   printf("%s==============\n", prefix);
   printf("%sIteration %4d\n", prefix, iter);
   printf("%s==============\n", prefix);
 
+  print_summary(prefix, itsCounter->last_energy, get_name());
   const FieldFunctional *nxt = this;
+  double etot = 0;
   while (nxt) {
-    if (nxt->get_name()) {
-      printf("%s%25s =", prefix, nxt->get_name());
-      print_double("", nxt->last_energy);
-      printf("\n");
-    } else {
-      printf("%s%25s =", prefix, "UNKNOWN");
-      print_double("", nxt->last_energy);
-      printf("\n");
-    }
+    etot += nxt->itsCounter->last_energy;
+    //printf("In print_iteration summarizing %p\n", nxt);
+    //nxt->print_summary(prefix, nxt->itsCounter->last_energy);
     nxt = nxt->next();
   }
+  printf("%s%25s =", prefix, "total energy");
+  print_double("", etot);
+  printf("\n");
+  return etot;
+}
+
+void FieldFunctional::print_summary(const char *prefix, double energy, const char *name) const {
+  if (get_name()) name = get_name();
+  if (!next()) {
+    itsCounter->ptr->print_summary(prefix, energy, name);
+    return;
+  }
+  const FieldFunctional *nxt = this;
+  double etot = 0;
+  while (nxt) {
+    if (nxt->get_name()) name = nxt->get_name();
+    etot += nxt->itsCounter->last_energy;
+    nxt->itsCounter->ptr->print_summary(prefix, nxt->itsCounter->last_energy, name);
+    nxt = nxt->next();
+  }
+  //assert(fabs(etot - energy) < 1e-6);
 }
 
 class IdentityType : public FieldFunctionalInterface {
@@ -158,7 +182,25 @@ public:
   ChainRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f1(gd, f2(gd, data));
+    if (!f1.next()) {
+      // This is the simple, efficient case!
+      return f1(gd, f2(gd, data));
+    }
+    // This does some extra work to save the energies of each term in
+    // the sum, just in case we want to print it!
+    VectorXd f2data(f2(gd,data));
+    VectorXd f1f2data(f1.justMe(gd, f2data));
+    double e = gd.dvolume*f1f2data.sum();
+    f1.set_last_energy(e);
+    FieldFunctional *nxt = f1.next();
+    while (nxt) {
+      f1f2data += nxt->justMe(gd, f2data);
+      double etot = gd.dvolume*f1f2data.sum();
+      nxt->set_last_energy(etot - e);
+      e = etot;
+      nxt = nxt->next();
+    }
+    return f1f2data;
   }
   double transform(double n) const {
     return f1(f2(n));
@@ -173,6 +215,9 @@ public:
     outgrad1.setZero();
     f1.grad(gd, f2(gd, data), ingrad, &outgrad1, 0);
     f2.grad(gd, data, outgrad1, outgrad, outpgrad);
+  }
+  void print_summary(const char *prefix, double e, const char *name) const {
+    f1.print_summary(prefix, e, name);
   }
 private:
   FieldFunctional f1, f2;
