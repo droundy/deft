@@ -31,6 +31,23 @@
 # define EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
 #endif
 
+// DJR added
+#include <iostream>
+
+extern long djr_memused;
+extern long djr_mempeak;
+
+#define TRACK_ALLOC_FOR_DJR  long mem = cols()*rows()*sizeof(Scalar); if (mem > 100) { djr_memused += mem; std::cout << "Alloc " << mem/1024.0/1024.0 << ", now using " << djr_memused/1024.0/1024.0 << std::endl; if (djr_memused > djr_mempeak) djr_mempeak = djr_memused; }
+
+#define TRACK_FREE_FOR_DJR  long mem = cols()*rows()*sizeof(Scalar); if (mem > 100) { djr_memused -= mem; std::cout << "Free " << mem/1024.0/1024.0 << ", now using " << djr_memused/1024.0/1024.0 << std::endl; }
+
+// To track memory use, comment out these two defines:
+#undef TRACK_ALLOC_FOR_DJR
+#undef TRACK_FREE_FOR_DJR
+#define TRACK_ALLOC_FOR_DJR
+#define TRACK_FREE_FOR_DJR
+// end DJR added.
+
 /** \class Matrix
   *
   * \brief The matrix class, also used for vectors and row-vectors
@@ -123,11 +140,13 @@ struct ei_traits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
   };
 };
 
+
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 class Matrix
   : public MatrixBase<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
   public:
+
     EIGEN_GENERIC_PUBLIC_INTERFACE(Matrix)
     enum { Options = _Options };
     friend class Eigen::Map<Matrix, Unaligned>;
@@ -310,13 +329,16 @@ class Matrix
     {
       _check_template_params();
       EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
+      TRACK_ALLOC_FOR_DJR
     }
 
 #ifndef EIGEN_PARSED_BY_DOXYGEN
     /** \internal */
     Matrix(ei_constructor_without_unaligned_array_assert)
       : m_storage(ei_constructor_without_unaligned_array_assert())
-    {EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED}
+    {EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
+      TRACK_ALLOC_FOR_DJR
+    }
 #endif
 
     /** Constructs a vector or row-vector with given dimension. \only_for_vectors
@@ -333,6 +355,7 @@ class Matrix
       ei_assert(dim > 0);
       ei_assert(SizeAtCompileTime == Dynamic || SizeAtCompileTime == dim);
       EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
+      TRACK_ALLOC_FOR_DJR
     }
 
     /** This constructor has two very different behaviors, depending on the type of *this.
@@ -360,6 +383,7 @@ class Matrix
                && y > 0 && (ColsAtCompileTime == Dynamic || ColsAtCompileTime == y));
         EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
       }
+      TRACK_ALLOC_FOR_DJR
     }
     /** constructs an initialized 2D vector with given coefficients */
     EIGEN_STRONG_INLINE Matrix(const float& x, const float& y)
@@ -368,6 +392,7 @@ class Matrix
       EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Matrix, 2)
       m_storage.data()[0] = x;
       m_storage.data()[1] = y;
+      TRACK_ALLOC_FOR_DJR
     }
     /** constructs an initialized 2D vector with given coefficients */
     EIGEN_STRONG_INLINE Matrix(const double& x, const double& y)
@@ -376,6 +401,7 @@ class Matrix
       EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Matrix, 2)
       m_storage.data()[0] = x;
       m_storage.data()[1] = y;
+      TRACK_ALLOC_FOR_DJR
     }
     /** constructs an initialized 3D vector with given coefficients */
     EIGEN_STRONG_INLINE Matrix(const Scalar& x, const Scalar& y, const Scalar& z)
@@ -385,6 +411,7 @@ class Matrix
       m_storage.data()[0] = x;
       m_storage.data()[1] = y;
       m_storage.data()[2] = z;
+      TRACK_ALLOC_FOR_DJR
     }
     /** constructs an initialized 4D vector with given coefficients */
     EIGEN_STRONG_INLINE Matrix(const Scalar& x, const Scalar& y, const Scalar& z, const Scalar& w)
@@ -395,6 +422,7 @@ class Matrix
       m_storage.data()[1] = y;
       m_storage.data()[2] = z;
       m_storage.data()[3] = w;
+      TRACK_ALLOC_FOR_DJR
     }
 
     explicit Matrix(const Scalar *data);
@@ -406,6 +434,7 @@ class Matrix
     {
       _check_template_params();
       _set_noalias(other);
+      TRACK_ALLOC_FOR_DJR
     }
     /** Copy constructor */
     EIGEN_STRONG_INLINE Matrix(const Matrix& other)
@@ -413,9 +442,12 @@ class Matrix
     {
       _check_template_params();
       _set_noalias(other);
+      TRACK_ALLOC_FOR_DJR
     }
     /** Destructor */
-    inline ~Matrix() {}
+    inline ~Matrix() {
+      TRACK_FREE_FOR_DJR
+    }
 
     /** Override MatrixBase::swap() since for dynamic-sized matrices of same type it is enough to swap the
       * data pointers.
@@ -556,12 +588,12 @@ class Matrix
 
     static EIGEN_STRONG_INLINE void _check_template_params()
     {
-        EIGEN_STATIC_ASSERT((_Rows > 0
-                        && _Cols > 0
-                        && _MaxRows <= _Rows
-                        && _MaxCols <= _Cols
-                        && (_Options & (AutoAlign|RowMajor)) == _Options),
-          INVALID_MATRIX_TEMPLATE_PARAMETERS)
+      EIGEN_STATIC_ASSERT((_Rows > 0
+                           && _Cols > 0
+                           && _MaxRows <= _Rows
+                           && _MaxCols <= _Cols
+                           && (_Options & (AutoAlign|RowMajor)) == _Options),
+                          INVALID_MATRIX_TEMPLATE_PARAMETERS)
     }
     
     template<typename MatrixType, typename OtherDerived, bool IsSameType, bool IsDynamicSize>
