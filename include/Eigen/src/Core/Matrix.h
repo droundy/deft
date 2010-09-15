@@ -40,6 +40,12 @@ extern long djr_mempeak;
 #define TRACK_ALLOC_FOR_DJR  long mem = cols()*rows()*sizeof(Scalar); if (mem > 100) { djr_memused += mem; std::cout << "Alloc " << mem/1024.0/1024.0 << ", now using " << djr_memused/1024.0/1024.0 << std::endl; if (djr_memused > djr_mempeak) djr_mempeak = djr_memused; }
 
 #define TRACK_FREE_FOR_DJR  long mem = cols()*rows()*sizeof(Scalar); if (mem > 100) { djr_memused -= mem; std::cout << "Free " << mem/1024.0/1024.0 << ", now using " << djr_memused/1024.0/1024.0 << std::endl; }
+
+// To track memory use, comment out these two defines:
+#undef TRACK_ALLOC_FOR_DJR
+#undef TRACK_FREE_FOR_DJR
+#define TRACK_ALLOC_FOR_DJR
+#define TRACK_FREE_FOR_DJR
 // end DJR added.
 
 /** \class Matrix
