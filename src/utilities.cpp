@@ -26,7 +26,7 @@ LiquidProperties water_prop = {
   1e-3 // room temperature in Hartree
 };
 
-double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose) {
+double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, bool verbose) {
   int numptspersize = 100;
   int size = 16;
   Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,size*prop.lengthscale));
@@ -40,15 +40,15 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   for (int i=gd.NxNyNz/2; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
   FieldFunctional n = EffectivePotentialToDensity(prop.kT);
-  Functional f0 = f(n);
-  f0.run_finite_difference_test("f0", potential);
-  min.minimize(f0, gd, &potential);
+  FieldFunctional f0 = f(n);
+  integrate(f0).run_finite_difference_test("f0", potential);
+  min.minimize(integrate(f0), gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on liberated interface...\n");
       fflush(stdout);
     }
-  const double Einterface = f0(potential);
+  const double Einterface = integrate(f0)(potential);
   double Ninterface = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
@@ -57,13 +57,13 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   if (verbose) printf("Got interface energy of %g.\n", Einterface);
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_gas;
-  min.minimize(f0, gd, &potential);
+  min.minimize(integrate(f0), gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on gas...\n");
       fflush(stdout);
     }
-  const double Egas = f0(potential);
+  const double Egas = integrate(f0)(potential);
   double Ngas = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
@@ -71,13 +71,13 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   }
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
-  min.minimize(f0, gd, &potential);
+  min.minimize(integrate(f0), gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on liquid...\n");
       fflush(stdout);
     }
-  const double Eliquid = f0(potential);
+  const double Eliquid = integrate(f0)(potential);
   double Nliquid = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));

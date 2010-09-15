@@ -36,7 +36,7 @@ FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliqui
 FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
 FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
 FieldFunctional n = EffectivePotentialToDensity(kT);
-Functional f = integrate(f0)(n);
+Functional f = integrate(f0(n));
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -166,8 +166,7 @@ double forcer(Cartesian r) {
 
 int main(int, char **argv) {
   external_potential.Set(forcer);
-  Functional f1 = integrate(f0 + ExternalPotential(external_potential));
-  ff = f1(n);
+  ff = integrate((f0 + ExternalPotential(external_potential))(n));
 
   Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
                                                         + mu*VectorXd::Ones(gd.NxNyNz)));

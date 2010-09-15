@@ -31,8 +31,8 @@ int main() {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = integrate(IdealGas(kT) + ChemicalPotential(mu));
-  Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
+  FieldFunctional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu);
+  Functional f = integrate(ig_and_mu(EffectivePotentialToDensity(kT)));
   if (f.run_finite_difference_test("ideal gas", potential)) {
     printf("Finite difference test failed!!!\n");
     return 1;

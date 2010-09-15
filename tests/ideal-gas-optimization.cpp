@@ -30,8 +30,8 @@ int main(int, char **argv) {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig_and_mu = integrate(IdealGas(kT) + ChemicalPotential(mu));
-  Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
+  FieldFunctional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu);
+  Functional f = integrate(ig_and_mu(EffectivePotentialToDensity(kT)));
   Grid old_potential(potential);
 
   // First, let's test Downhill...

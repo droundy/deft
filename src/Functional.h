@@ -79,7 +79,6 @@ public:
   }
   // The following method is for a homogeneous density.
   double operator()(double data) const { return energy(data); }
-  Functional operator()(const FieldFunctional &) const;
 
   double energy(double data) const {
     return itsCounter->ptr->energy(data);
@@ -146,11 +145,5 @@ private:
   }
 };
 
-Functional operator+(const Functional &, const Functional &);
-Functional operator*(const Functional &, const Functional &);
-Functional operator*(double, const Functional &);
-inline Functional operator-(const Functional &f) {
-  return (-1)*f;
-}
 Functional integrate(const FieldFunctional &);
 Functional constrain(const Grid &, Functional);

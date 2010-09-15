@@ -101,7 +101,7 @@ int main(int, char **argv) {
     retval += test_functional("", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
 
     retval += test_functional("integrate(x*x)", integrate(x*x), 0.1, 1e-13);
-    retval += test_functional("3*integrate(x*x)", 3*integrate(x*x), 0.1, 1e-13); 
+    retval += test_functional("integrate(3*x*x)", integrate(3*x*x), 0.1, 1e-13); 
     retval += test_functional("integrate(3*x*x)", integrate(3*x*x), 0.1, 1e-13);
     retval += test_functional("integrate(3*sqr(4*x))", integrate(3*sqr(4*x)), 0.1, 1e-13);
     retval += test_functional("integrate(Gaussian(2)(-3*sqr(4*x)))", integrate(Gaussian(2)(-3*sqr(4*x))), 0.1, 1e-13);
@@ -109,30 +109,30 @@ int main(int, char **argv) {
   }
 
   {
-    Functional attr = integrate(GaussianPolynomial(-0.32, 0.5, 2));
-    retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
-    Functional repul = integrate(GaussianPolynomial(0.32, 0.25, 4));
-    retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
-    retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
-    retval += test_functional("sum of gaussians", attr + repul, 0.1, 1e-13);
-    retval += test_functional("other sum of gaussians", repul + attr, 0.1, 1e-13);
+    FieldFunctional attr = GaussianPolynomial(-0.32, 0.5, 2);
+    retval += test_functional("Attractive Gaussian", integrate(attr), 0.1, 1e-13);
+    FieldFunctional repul = GaussianPolynomial(0.32, 0.25, 4);
+    retval += test_functional("Repulsive Gaussian", integrate(repul), 0.1, 1e-12);
+    retval += test_functional("Repulsive Gaussian", integrate(repul), 0.01, 1e-12);
+    retval += test_functional("sum of gaussians", integrate(attr + repul), 0.1, 2e-13);
+    retval += test_functional("other sum of gaussians", integrate(repul + attr), 0.1, 2e-13);
   }
 
   {
-    Functional f = integrate(IdealGas(kT));
-    retval += test_functional("Ideal gas", f, 1e-9, 1e-13);
-    retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 1e-13);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-3), 1e-12);
+    FieldFunctional f = IdealGas(kT);
+    retval += test_functional("Ideal gas", integrate(f), 1e-9, 1e-13);
+    retval += test_functional("Ideal gas", integrate(f), 1e-3, 1e-12);
+    retval += test_functional("Ideal gas of V", integrate(f(n)), -kT*log(1e-9), 1e-13);
+    retval += test_functional("Ideal gas of V", integrate(f(n)), -kT*log(1e-3), 1e-12);
   }
 
   {
-    Functional f = integrate(ChemicalPotential(0.1));
-    retval += test_functional("chemical potential", f, 1e-9, 1e-12);
-    retval += test_functional("chemical potential", f, 1e9, 1e-14);
-    retval += test_functional("chemical potential", f, 1e-2, 1e-12);
-    retval += test_functional("chemical potential of V", f(n), -kT*log(1e-9), 1e-12);
-    retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
+    FieldFunctional f = ChemicalPotential(0.1);
+    retval += test_functional("chemical potential", integrate(f), 1e-9, 1e-12);
+    retval += test_functional("chemical potential", integrate(f), 1e9, 1e-14);
+    retval += test_functional("chemical potential", integrate(f), 1e-2, 1e-12);
+    retval += test_functional("chemical potential of V", integrate(f(n)), -kT*log(1e-9), 1e-12);
+    retval += test_functional("chemical potential of V", integrate(f(n)), -kT*log(1e-3), 1e-12);
   }
 
   if (retval == 0) {

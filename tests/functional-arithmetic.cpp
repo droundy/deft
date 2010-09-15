@@ -89,7 +89,7 @@ int main(int, char **argv) {
   retval += test_functionals("Fourth power", integrate(Pow(2)(Pow(2)(x))), integrate(x*x*x*x), 0.1, 1e-12);
 
   // The following tests scalar multiply rule...
-  retval += test_functionals("Fourth power", 10*integrate(Pow(2)(Pow(2)(x))), integrate(10*x*x*x*x), 0.1, 1e-12);
+  retval += test_functionals("Fourth power", integrate(10*Pow(2)(Pow(2)(x))), integrate(10*x*x*x*x), 0.1, 1e-12);
 
   // The following tests scalar subtraction rule...
   retval += test_functionals("Subtraction",

@@ -41,7 +41,7 @@ FieldFunctional f = f0(n);
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
 
-Functional ff = integrate(f0 + ExternalPotential(external_potential))(n);
+Functional ff = integrate((f0 + ExternalPotential(external_potential))(n));
 
 
 int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,

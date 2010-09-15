@@ -41,25 +41,25 @@ int main(int, char **argv) {
   printf("Original Maximum is %g\n", foo.maxCoeff());
 
   int retval = 0;
-  retval += integrate(Identity())(log(1-StepConvolve(1))).run_finite_difference_test("integrate log(1-StepConvolve(1))", foo);
-  retval += integrate(Identity())(Gaussian(1)).run_finite_difference_test("integrate Gaussian(1)", foo);
-  retval += integrate(Identity())(StepConvolve(1)).run_finite_difference_test("integrate StepConvolve(1)", foo);
-  retval += integrate(Identity())(StepConvolve(3)).run_finite_difference_test("integrate StepConvolve(3)", foo);
-  retval += integrate(Identity())(ShellConvolve(1)).run_finite_difference_test("integrate ShellConvolve(1)", foo);
-  retval += integrate(Identity())(ShellConvolve(3)).run_finite_difference_test("integrate ShellConvolve(3)", foo);
+  retval += integrate(log(1-StepConvolve(1))).run_finite_difference_test("integrate log(1-StepConvolve(1))", foo);
+  retval += integrate(Gaussian(1)).run_finite_difference_test("integrate Gaussian(1)", foo);
+  retval += integrate(StepConvolve(1)).run_finite_difference_test("integrate StepConvolve(1)", foo);
+  retval += integrate(StepConvolve(3)).run_finite_difference_test("integrate StepConvolve(3)", foo);
+  retval += integrate(ShellConvolve(1)).run_finite_difference_test("integrate ShellConvolve(1)", foo);
+  retval += integrate(ShellConvolve(3)).run_finite_difference_test("integrate ShellConvolve(3)", foo);
   FieldFunctional ysh = yShellConvolve(1), sh = ShellConvolve(1);
-  retval += integrate(Identity())(sqr(ysh)).run_finite_difference_test("integrate ysh^2", foo);
-  retval += integrate(Identity())(ysh*ysh).run_finite_difference_test("integrate ysh*ysh", foo);
-  retval += integrate(Identity())(ysh*ysh + sh).run_finite_difference_test("integrate ysh*ysh + sh", foo);
-  retval += integrate(Identity())(-1*ysh*ysh).run_finite_difference_test("integrate -1*ysh*ysh", foo);
-  retval += (-1*integrate(Identity())(ysh*ysh)).run_finite_difference_test("-1* integrate ysh*ysh", foo);
+  retval += integrate(sqr(ysh)).run_finite_difference_test("integrate ysh^2", foo);
+  retval += integrate(ysh*ysh).run_finite_difference_test("integrate ysh*ysh", foo);
+  retval += integrate(ysh*ysh + sh).run_finite_difference_test("integrate ysh*ysh + sh", foo);
+  retval += integrate(-1*ysh*ysh).run_finite_difference_test("integrate -1*ysh*ysh", foo);
+  retval += integrate((-1)*ysh*ysh).run_finite_difference_test("-1* integrate ysh*ysh", foo);
 
   FieldFunctional zxsh = zxShellConvolve(3);
-  retval += integrate(Identity())(sqr(sqr(zxsh))).run_finite_difference_test("integrate zxsh^2", foo);
+  retval += integrate(sqr(sqr(zxsh))).run_finite_difference_test("integrate zxsh^2", foo);
   {
     Grid foo2(foo);
     foo2.cwise() -= 1; // so we don't divide by zero...
-    retval += integrate(Identity())(sqr(zxsh)/sh).run_finite_difference_test("integrate zxsh^2/sh", foo2);
+    retval += integrate(sqr(zxsh)/sh).run_finite_difference_test("integrate zxsh^2/sh", foo2);
   }
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
