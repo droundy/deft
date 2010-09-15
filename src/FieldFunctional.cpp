@@ -31,9 +31,9 @@ bool FieldFunctional::run_finite_difference_test(const char *testname, const Gri
   const GridDescription gd(x.description());
 
   VectorXd my_grad(x);
-  double Eold = integrate(*this)(x);
+  double Eold = integral(x);
   my_grad.setZero();
-  integrate(*this).grad(x, &my_grad);
+  integralgrad(x, &my_grad);
   VectorXd my_direction(my_grad);
   if (direction) my_direction = *direction;
   my_direction /= my_direction.norm();
@@ -49,7 +49,7 @@ bool FieldFunctional::run_finite_difference_test(const char *testname, const Gri
     VectorXd my_pgrad(x);
     my_grad.setZero();
     my_pgrad.setZero();
-    integrate(*this).grad(x, &my_grad, &my_pgrad);
+    integralgrad(x, &my_grad, &my_pgrad);
     const double lderiv_new = my_direction.dot(my_grad);
     if (fabs(lderiv_new/lderiv - 1) > 1e-12) {
       printf("\n*** WARNING!!! INCONSISTENT GRADIENTS! ***\n");
@@ -75,8 +75,8 @@ bool FieldFunctional::run_finite_difference_test(const char *testname, const Gri
     const double eps_ratio = 10.0;
     const double epsilon = pow(eps_ratio, -p);
     // The following is a little wasteful of memory...
-    const double Eplus= integrate(*this)(gd, x + epsilon*my_direction);
-    const double Eminus=integrate(*this)(gd, x - epsilon*my_direction);
+    const double Eplus= integral(gd, x + epsilon*my_direction);
+    const double Eminus=integral(gd, x - epsilon*my_direction);
 
     grads[p-min_p] = (Eplus-Eminus)/(2*epsilon);
     printf("    eps^2 = %25.16f deltaE %.12g\n",

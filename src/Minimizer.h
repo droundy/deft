@@ -48,12 +48,12 @@ public:
   virtual void print_info(const char *prefix = "") const;
 
   // energy returns the current energy.
-  double energy() const { return integrate(f)(gd, *x); }
+  double energy() const { return f.integral(gd, *x); }
   const VectorXd &grad() const {
     if (!last_grad) {
       last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      integrate(f).grad(gd, *x, last_grad);
+      f.integralgrad(gd, *x, last_grad);
     }
     return *last_grad;
   }
@@ -63,7 +63,7 @@ public:
       last_pgrad->setZero(); // Have to remember to zero it out first!
       if (!last_grad) last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      integrate(f).grad(gd, *x, last_grad, last_pgrad);
+      f.integralgrad(gd, *x, last_grad, last_pgrad);
     }
     return *last_pgrad;
   }

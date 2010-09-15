@@ -48,7 +48,7 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
       printf("Working on liberated interface...\n");
       fflush(stdout);
     }
-  const double Einterface = integrate(f0)(potential);
+  const double Einterface = f0.integral(potential);
   double Ninterface = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
@@ -63,7 +63,7 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
       printf("Working on gas...\n");
       fflush(stdout);
     }
-  const double Egas = integrate(f0)(potential);
+  const double Egas = f0.integral(potential);
   double Ngas = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
@@ -77,7 +77,7 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
       printf("Working on liquid...\n");
       fflush(stdout);
     }
-  const double Eliquid = integrate(f0)(potential);
+  const double Eliquid = f0.integral(potential);
   double Nliquid = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));

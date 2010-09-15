@@ -25,7 +25,7 @@ const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.4257*eta_one;
-const double mu = -integrate(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
+const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
 
 // Here we set up the lattice.
 const double zmax = 80;
@@ -140,7 +140,7 @@ int main(int, char **argv) {
     Grid grad(gd), pgrad(gd);
     grad.setZero();
     pgrad.setZero();
-    integrate(ff).grad(potential, &grad, &pgrad);
+    ff.integralgrad(potential, &grad, &pgrad);
     grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid(gd, StepConvolve(R)(density)).epsNative1d("n3.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);

@@ -77,6 +77,31 @@ public:
     if (mynext) out += (*mynext)(g.description(), g);
     return out;
   }
+  double integral(const Grid &g) const {
+    return integral(g.description(), g);
+  }
+  double integral(const GridDescription &gd, const VectorXd &data) const {
+    // This does some extra work to save the energies of each term in
+    // the sum.
+    VectorXd fdata(justMe(gd, data));
+    double e = gd.dvolume*fdata.sum();
+    set_last_energy(e);
+    FieldFunctional *nxt = next();
+    while (nxt) {
+      fdata += nxt->justMe(gd, data);
+      double etot = gd.dvolume*fdata.sum();
+      nxt->set_last_energy(etot - e);
+      e = etot;
+      nxt = nxt->next();
+    }
+    return e;
+  }
+  void integralgrad(const Grid &g, VectorXd *gr, VectorXd *pg=0) const {
+    grad(g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr, pg);
+  }
+  void integralgrad(const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pg=0) const {
+    grad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pg);
+  }
   double operator()(double data) const {
     double out = itsCounter->ptr->transform(data);
     if (mynext) out += (*mynext)(data);

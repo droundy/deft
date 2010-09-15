@@ -25,7 +25,7 @@ const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.324*eta_one;
-const double mu = -integrate(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
+const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
 
 // Here we set up the lattice.
 const double rcav = R+R; // 11.8*R+R;
@@ -129,7 +129,7 @@ int main(int, char **argv) {
 
     Grid grad(gd);
     grad.setZero();
-    integrate(ff).grad(potential, &grad);
+    ff.integralgrad(potential, &grad);
  
     retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional", density, &grad);
     retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);

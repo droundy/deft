@@ -35,11 +35,11 @@ int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, d
   printf("Working on f1 of double...\n");
   const double Edouble1 = f1(n);
   printf("Working on f1 of grid...\n");
-  const double Egrid1 = integrate(f1)(nr)/gd.Lat.volume();
+  const double Egrid1 = f1.integral(nr)/gd.Lat.volume();
   printf("Working on f2 of double...\n");
   const double Edouble2 = f2(n);
   printf("Working on f2 of grid...\n");
-  const double Egrid2 = integrate(f2)(nr)/gd.Lat.volume();
+  const double Egrid2 = f2.integral(nr)/gd.Lat.volume();
 
   printf("Edouble1 = %g\n", Edouble1);
   printf("Egrid1   = %g\n", Egrid1);
@@ -65,8 +65,8 @@ int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, d
   retval += f2.run_finite_difference_test("f2", nr);
   mygrad1.setZero();
   mygrad2.setZero();
-  integrate(f1).grad(gd, nr, &mygrad1);
-  integrate(f2).grad(gd, nr, &mygrad2);
+  f1.integralgrad(gd, nr, &mygrad1);
+  f2.integralgrad(gd, nr, &mygrad2);
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
     printf("Error in the grad is too big!\n");

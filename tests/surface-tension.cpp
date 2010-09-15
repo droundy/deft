@@ -67,8 +67,8 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   //}
   //min->print_info();  
 
-  const double Einterface_with_external = integrate(ff)(potential);
-  const double Einterface = integrate(f)(potential);
+  const double Einterface_with_external = ff.integral(potential);
+  const double Einterface = f.integral(potential);
   double Ninterface = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
@@ -85,14 +85,14 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
     //printf("GAS\n");
     fflush(stdout);
   }
-  const double Egas = integrate(f)(gas);
+  const double Egas = f.integral(gas);
   double Ngas = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, gas));
     for (int i=0;i<gd.NxNyNz;i++) Ngas += density[i]*gd.dvolume;
   }
   min->print_info();
-  printf("gas energy is %g\n", integrate(f)(gas));
+  printf("gas energy is %g\n", f.integral(gas));
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   start = clock();
 
@@ -107,7 +107,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
   min->print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
-  const double Eliquid = integrate(f)(liquid);
+  const double Eliquid = f.integral(liquid);
   double Nliquid = 0;
   {
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, liquid));

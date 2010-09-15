@@ -83,10 +83,10 @@ int main(int, char **argv) {
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
     const double expected_energy = -0.001678597251376433;
-    printf("hard sphere energy is %.16g\n", integrate(f)(potential));
-    if (fabs(integrate(f)(potential)/expected_energy - 1) > 1e-13) {
+    printf("hard sphere energy is %.16g\n", f.integral(potential));
+    if (fabs(f.integral(potential)/expected_energy - 1) > 1e-13) {
       printf("FAIL: Error in hard sphere energy (of fixed potential) is too big %g (from %.16g)\n",
-             integrate(f)(potential)/expected_energy - 1, integrate(f)(potential));
+             f.integral(potential)/expected_energy - 1, f.integral(potential));
       retval++;
     }
     retval += f.run_finite_difference_test("hard spheres", potential);

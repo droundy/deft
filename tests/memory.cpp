@@ -25,7 +25,7 @@ const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.324*eta_one;
-const double mu = -integrate(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
+const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
 
 // Here we set up the lattice.
 const double rcav = R+R; // 11.8*R+R;
@@ -70,7 +70,7 @@ int main(int, char **argv) {
   int retval = 0;
 
   potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-  printf("Energy is %g\n", integrate(ff)(potential));
+  printf("Energy is %g\n", ff.integral(potential));
 
   double peak = peak_memory()/1024.0/1024;
   const double expected_peak = 70;

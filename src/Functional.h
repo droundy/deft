@@ -128,5 +128,3 @@ private:
     return sum ^ othersum;
   }
 };
-
-Functional integrate(const FieldFunctional &);

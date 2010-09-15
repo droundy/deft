@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "Functionals.h"
 
-int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
+int test_functional(const char *name, FieldFunctional f, double n, double fraccuracy=1e-14) {
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -31,7 +31,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
   const double Edouble = f(n);
-  const double Egrid = f(nr)/gd.Lat.volume();
+  const double Egrid = f.integral(nr)/gd.Lat.volume();
 
   int retval = 0;
   printf("Edouble = %g\n", Edouble);
@@ -40,7 +40,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   const double deriv_double = f.grad(n);
   Grid grad(nr);
   grad.setZero();
-  f.grad(gd, nr, &grad);
+  f.integralgrad(gd, nr, &grad);
   const double deriv_grid = grad[0]/gd.dvolume;
   printf("deriv double = %g\n", deriv_double);
   printf("deriv grid   = %g\n", deriv_grid);
@@ -83,56 +83,56 @@ int main(int, char **argv) {
 
   {
     FieldFunctional x = Identity();
-    retval += test_functional("integrate(sqr(yzShellConvolve(1)(x)))", integrate(sqr(yzShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(sqr(xyShellConvolve(1)(x)))", integrate(sqr(xyShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(zxShellConvolve(1)(x))", integrate(zxShellConvolve(1)(x)), 1, 1e-13);
-    retval += test_functional("integrate(sqr(zzShellConvolve(1)(x)))", integrate(sqr(zzShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(1-yyShellConvolve(1)(x))", integrate(1-yyShellConvolve(1)(x)), 1, 1e-13);
-    retval += test_functional("integrate(sqr(xxShellConvolve(1)(x)))", integrate(sqr(xxShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(sqr(xShellConvolve(1)(x)))", integrate(sqr(xShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(sqr(yShellConvolve(1)(x)))", integrate(sqr(yShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(sqr(zShellConvolve(1)(x)))", integrate(sqr(zShellConvolve(1)(x))), 1, 1e-13);
-    retval += test_functional("integrate(StepConvolve(1)(x)", integrate(StepConvolve(1)(x)), 1e-5, 1e-13);
-    retval += test_functional("integrate(ShellConvolve(1)(x))", integrate(ShellConvolve(1)(x)), 1e-5, 2e-13);
+    retval += test_functional("sqr(yzShellConvolve(1)(x)))", sqr(yzShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("sqr(xyShellConvolve(1)(x)))", sqr(xyShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("zxShellConvolve(1)(x))", zxShellConvolve(1)(x), 1, 1e-13);
+    retval += test_functional("sqr(zzShellConvolve(1)(x)))", sqr(zzShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("1-yyShellConvolve(1)(x))", 1-yyShellConvolve(1)(x), 1, 1e-13);
+    retval += test_functional("sqr(xxShellConvolve(1)(x)))", sqr(xxShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("sqr(xShellConvolve(1)(x)))", sqr(xShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("sqr(yShellConvolve(1)(x)))", sqr(yShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("sqr(zShellConvolve(1)(x)))", sqr(zShellConvolve(1)(x)), 1, 1e-13);
+    retval += test_functional("StepConvolve(1)(x)", StepConvolve(1)(x), 1e-5, 1e-13);
+    retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
-    retval += test_functional("integrate(IdealGas(1e-3)(x))", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
-    retval += test_functional("integrate(HardSpheres(2,1e-3)(x))", integrate(HardSpheres(2,1e-3)(x)), 1e-5, 1e-13);
-    retval += test_functional("", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
-    retval += test_functional("", integrate(IdealGas(1e-3)(x)), 1e-5, 2e-13);
+    retval += test_functional("IdealGas(1e-3)(x))", IdealGas(1e-3)(x), 1e-5, 2e-13);
+    retval += test_functional("HardSpheres(2,1e-3)(x))", HardSpheres(2,1e-3)(x), 1e-5, 1e-13);
+    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
+    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
 
-    retval += test_functional("integrate(x*x)", integrate(x*x), 0.1, 1e-13);
-    retval += test_functional("integrate(3*x*x)", integrate(3*x*x), 0.1, 1e-13); 
-    retval += test_functional("integrate(3*x*x)", integrate(3*x*x), 0.1, 1e-13);
-    retval += test_functional("integrate(3*sqr(4*x))", integrate(3*sqr(4*x)), 0.1, 1e-13);
-    retval += test_functional("integrate(Gaussian(2)(-3*sqr(4*x)))", integrate(Gaussian(2)(-3*sqr(4*x))), 0.1, 1e-13);
-    retval += test_functional("integrate(Pow(4)(x))", integrate(Pow(4)(x)), 0.1, 1e-13);
+    retval += test_functional("x*x)", x*x, 0.1, 1e-13);
+    retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 
+    retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13);
+    retval += test_functional("3*sqr(4*x))", 3*sqr(4*x), 0.1, 1e-13);
+    retval += test_functional("Gaussian(2)(-3*sqr(4*x)))", Gaussian(2)(-3*sqr(4*x)), 0.1, 1e-13);
+    retval += test_functional("Pow(4)(x))", Pow(4)(x), 0.1, 1e-13);
   }
 
   {
     FieldFunctional attr = GaussianPolynomial(-0.32, 0.5, 2);
-    retval += test_functional("Attractive Gaussian", integrate(attr), 0.1, 1e-13);
+    retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
     FieldFunctional repul = GaussianPolynomial(0.32, 0.25, 4);
-    retval += test_functional("Repulsive Gaussian", integrate(repul), 0.1, 1e-12);
-    retval += test_functional("Repulsive Gaussian", integrate(repul), 0.01, 1e-12);
-    retval += test_functional("sum of gaussians", integrate(attr + repul), 0.1, 2e-13);
-    retval += test_functional("other sum of gaussians", integrate(repul + attr), 0.1, 2e-13);
+    retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
+    retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
+    retval += test_functional("sum of gaussians", attr + repul, 0.1, 2e-13);
+    retval += test_functional("other sum of gaussians", repul + attr, 0.1, 2e-13);
   }
 
   {
     FieldFunctional f = IdealGas(kT);
-    retval += test_functional("Ideal gas", integrate(f), 1e-9, 1e-13);
-    retval += test_functional("Ideal gas", integrate(f), 1e-3, 1e-12);
-    retval += test_functional("Ideal gas of V", integrate(f(n)), -kT*log(1e-9), 1e-13);
-    retval += test_functional("Ideal gas of V", integrate(f(n)), -kT*log(1e-3), 1e-12);
+    retval += test_functional("Ideal gas", f, 1e-9, 1e-13);
+    retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
+    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 1e-13);
+    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-3), 1e-12);
   }
 
   {
     FieldFunctional f = ChemicalPotential(0.1);
-    retval += test_functional("chemical potential", integrate(f), 1e-9, 1e-12);
-    retval += test_functional("chemical potential", integrate(f), 1e9, 1e-14);
-    retval += test_functional("chemical potential", integrate(f), 1e-2, 1e-12);
-    retval += test_functional("chemical potential of V", integrate(f(n)), -kT*log(1e-9), 1e-12);
-    retval += test_functional("chemical potential of V", integrate(f(n)), -kT*log(1e-3), 1e-12);
+    retval += test_functional("chemical potential", f, 1e-9, 1e-12);
+    retval += test_functional("chemical potential", f, 1e9, 1e-14);
+    retval += test_functional("chemical potential", f, 1e-2, 1e-12);
+    retval += test_functional("chemical potential of V", f(n), -kT*log(1e-9), 1e-12);
+    retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
   }
 
   if (retval == 0) {

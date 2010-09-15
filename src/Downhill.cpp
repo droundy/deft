@@ -52,12 +52,12 @@ bool DownhillType::improve_energy(bool verbose) {
   // avoids roundoff weirdness of trying to add nu*g back to *x, which
   // won't always get us back to the same value.
   Grid newx(gd, *x - nu*g);
-  double newE = integrate(f)(newx);
+  double newE = f.integral(newx);
   int num_tries = 0;
   while (newE > old_energy || isnan(newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
-    newE = integrate(f)(newx);
+    newE = f.integral(newx);
     if (num_tries++ > 40) {
       printf("Downhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
@@ -88,12 +88,12 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
   // avoids roundoff weirdness of trying to add nu*g back to *x, which
   // won't always get us back to the same value.
   Grid newx(gd, *x - nu*g);
-  double newE = integrate(f)(newx);
+  double newE = f.integral(newx);
   int num_tries = 0;
   while (newE > old_energy || isnan(newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
-    newE = integrate(f)(newx);
+    newE = f.integral(newx);
     if (num_tries++ > 40) {
       printf("PreconditionedDownhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
