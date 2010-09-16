@@ -104,3 +104,7 @@ long Eigen::djr_mempeak = 0;
 long peak_memory() {
   return Eigen::djr_mempeak;
 }
+
+void reset_peak_memory() {
+  Eigen::djr_mempeak = Eigen::djr_memused;
+}

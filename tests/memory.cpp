@@ -44,6 +44,29 @@ Grid external_potential(gd);
 Grid potential(gd);
 FieldFunctional ff;
 
+int check_peak(const char *name, double peakmin, double peakmax) {
+  int retval = 0;
+
+  printf("\n************");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
+  printf("\n* Testing %s *\n", name);
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
+  printf("************\n\n");
+  
+  double peak = peak_memory()/1024.0/1024;
+  printf("Peak memory use is %g M\n", peak);
+  if (peak < peakmin) {
+    printf("FAIL: Peak memory use should be at least %g!\n", peakmin);
+    retval++;
+  }
+  if (peak > peakmax) {
+    printf("FAIL: Peak memory use should be under %g!\n", peakmax);
+    retval++;
+  }
+  reset_peak_memory();
+  return retval;
+}
+
 double notincavity(Cartesian r) {
   const double rad2 = r.dot(r);
   if (rad2 < rcav*rcav) {
@@ -72,14 +95,7 @@ int main(int, char **argv) {
   potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
   printf("Energy is %g\n", ff.integral(potential));
 
-  double peak = peak_memory()/1024.0/1024;
-  const double expected_peak = 84;
-  printf("Peak memory use is %g M\n", peak);
-  if (peak > expected_peak) {
-    printf("FAIL: Peak memory use should be under %g!\n", expected_peak);
-    retval++;
-  }
-
+  check_peak("Energy of 3D cavity", 83, 84);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
