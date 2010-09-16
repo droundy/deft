@@ -82,9 +82,24 @@ int main(int, char **argv) {
   const FieldFunctional n = EffectivePotentialToDensity(kT);
 
   FieldFunctional x = Gaussian(1);
-  retval += test_functionals("Square vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
+  retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
+  retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
+
+  retval += test_functionals("derivative of x", x.grad(1) - x, 1 - x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(FieldFunctional(1)), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(FieldFunctional(1)), 2*x, 0.1, 2e-13);
+
+  retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
+  retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Cube vs mul", Pow(3)(x), x*x*x, 0.1, 1e-12);
   retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
+  retval += test_functionals("Fourth power vs mul", Pow(4)(x), x*x*x*x, 0.1, 1e-12);
+
+  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), x, 0.1, 1e-12);
+  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), 2*x, 0.9, 1e-12);
+
+  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), x, 0.1, 1e-12);
+  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), sqr(x), 0.9, 1e-12);
 
   // The following tests the chain rule...
   retval += test_functionals("Pow(2)(Pow(2))", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);

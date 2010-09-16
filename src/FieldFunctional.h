@@ -19,7 +19,8 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double grad(double data) const = 0;
-  //virtual FieldFunctional grad(const FieldFunctional &ingrad) const = 0;
+  virtual FieldFunctional grad(const FieldFunctional &ingrad) const = 0;
+  virtual FieldFunctional pgrad(const FieldFunctional &ingrad) const;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
@@ -143,9 +144,20 @@ public:
     if (mynext) out += (*mynext)(data);
     return out;
   }
-  //FieldFunctional grad(const FieldFunctional &ingrad) const {
-  //  return itsCounter->ptr->grad(ingrad);
-  //}
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    if (mynext) {
+      return itsCounter->ptr->grad(ingrad) + mynext->grad(ingrad);
+    } else {
+      return itsCounter->ptr->grad(ingrad);
+    }
+  }
+  FieldFunctional pgrad(const FieldFunctional &ingrad) const {
+    if (mynext) {
+      return itsCounter->ptr->pgrad(ingrad) + mynext->pgrad(ingrad);
+    } else {
+      return itsCounter->ptr->pgrad(ingrad);
+    }
+  }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
@@ -167,8 +179,8 @@ public:
   // The following utility methods do not need to be overridden.  Its
   // return value is the total energy that is printed.
   double print_iteration(const char *prefix, int iter) const;
-  // run_finite_difference_test returns false when the test fails.
-  bool run_finite_difference_test(const char *testname,
+  // run_finite_difference_test returns non-zero when the test fails.
+  int run_finite_difference_test(const char *testname,
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
 private:
@@ -209,7 +221,9 @@ private:
 inline FieldFunctional operator*(double x, const FieldFunctional &f) {
   return f*x;
 }
-FieldFunctional operator-(double x, const FieldFunctional &f);
+inline FieldFunctional operator-(double x, const FieldFunctional &f) {
+  return FieldFunctional(x) - f;
+}
 
 FieldFunctional log(const FieldFunctional &);
 FieldFunctional sqr(const FieldFunctional &);
@@ -218,3 +232,5 @@ FieldFunctional constrain(const Grid &, FieldFunctional);
 // choose combines two local functionals, with which one is applied
 // depending on the local value of the field.
 FieldFunctional choose(double, const FieldFunctional &lower, const FieldFunctional &higher);
+
+extern FieldFunctional dV;

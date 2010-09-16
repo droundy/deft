@@ -16,6 +16,7 @@ deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 check_PROGRAMS = \
 	tests/print-iter.test \
 	tests/memory.test \
+	tests/ideal-gas.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
 	tests/hard-spheres.test \
@@ -27,7 +28,6 @@ check_PROGRAMS = \
 	tests/surface-tension.test \
 	tests/simple-liquid.test \
 	tests/fftinverse.test \
-	tests/ideal-gas.test \
 	tests/ideal-gas-at-pressure.test \
 	tests/ideal-gas-optimization.test \
 	tests/ideal-gas-external-potential.test \

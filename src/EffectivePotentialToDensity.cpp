@@ -43,7 +43,12 @@ public:
   double grad(double Veff) const {
     return minusbeta*exp(minusbeta*Veff);
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return minusbeta*EffectivePotentialToDensity(-1/minusbeta)*ingrad;
+  }
+  FieldFunctional pgrad(const FieldFunctional &ingrad) const {
+    return minusbeta*ingrad;
+  }
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
   void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,

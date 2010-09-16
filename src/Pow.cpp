@@ -47,7 +47,14 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    switch (n) {
+    case 0: return 0;
+    case 1: return ingrad;
+    case 2: return 2*Identity()*ingrad;
+    }
+    return n*Pow(n-1)*ingrad;
+  }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     switch (n) {

@@ -20,7 +20,8 @@
 
 class GaussianType : public FieldFunctionalInterface {
 public:
-  GaussianType(double width) {
+  GaussianType(double w) {
+    width = w;
     kfac = -0.5*width*width; // FIXME: get width right in k space!
   }
 
@@ -36,7 +37,9 @@ public:
   double grad(double) const {
     return 1;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return Gaussian(width)(ingrad);
+  }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
@@ -49,7 +52,7 @@ public:
     if (outpgrad) *outpgrad += out;
   }
 private:
-  double kfac;
+  double width, kfac;
 };
 
 FieldFunctional Gaussian(double width) {
@@ -97,7 +100,9 @@ public:
   double grad(double) const {
     return (4*M_PI/3)*R*R*R;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return StepConvolve(R)(ingrad);
+  }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
@@ -157,7 +162,9 @@ public:
   double grad(double) const {
     return (4*M_PI)*R*R;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return ShellConvolve(R)(ingrad);
+  }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
@@ -259,7 +266,9 @@ public:
   double grad(double) const {
     return 0;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return FieldFunctional(new VShellConvolveType(R, direction))(ingrad);
+  }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
@@ -404,7 +413,9 @@ public:
   double grad(double) const {
     return 0;
   }
-
+  FieldFunctional grad(const FieldFunctional &ingrad) const {
+    return FieldFunctional(new TShellConvolveType(R, d1, d2))(ingrad);
+  }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
