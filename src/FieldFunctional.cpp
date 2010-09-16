@@ -154,28 +154,7 @@ void FieldFunctional::print_summary(const char *prefix, double energy, const cha
   //assert(fabs(etot - energy) < 1e-6);
 }
 
-class IdentityType : public FieldFunctionalInterface {
-public:
-  IdentityType() {}
-
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
-    return data;
-  }
-  double transform(double n) const {
-    return n;
-  }
-  double grad(double) const {
-    return 1;
-  }
-
-  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    *outgrad += ingrad;
-    if (outpgrad) *outpgrad += ingrad; // FIXME: propogate preconditioning
-  }
-};
-
-FieldFunctional Identity() { return FieldFunctional(new IdentityType()); }
+FieldFunctional Identity() { return Pow(1); }
 
 class Constant : public FieldFunctionalInterface {
 public:
