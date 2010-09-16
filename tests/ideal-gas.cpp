@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "Functionals.h"
 
-int main() {
+int main(int, char **argv) {
   Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
   int resolution = 20;
   GridDescription gd(lat, resolution, resolution, resolution);
@@ -25,13 +25,11 @@ int main() {
   const double kT = 1e-3; // room temperature in Hartree
   density = 10*(-500*r2(gd)).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
+
+  int retval = 0;
+
   FieldFunctional ig = IdealGas(kT);
-  if (ig.run_finite_difference_test("ideal gas", density)) {
-    printf("Finite difference test failed!!!\n");
-    return 1;
-  } else {
-    printf("Finite difference test passes.\n");
-  }
+  retval += ig.run_finite_difference_test("ideal gas", density);
 
   printf("\nNow let's try this with an effective potential...\n");
   Grid potential(gd, 1e-2*((-50*r2(gd)).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
@@ -42,11 +40,12 @@ int main() {
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   FieldFunctional ig2 = IdealGas(kT)(EffectivePotentialToDensity(kT));
   density *= 1e-5;
-  if (ig2.run_finite_difference_test("ideal gas", potential)) {
-    printf("Finite difference test failed!!!\n");
-    return 1;
+  retval += ig2.run_finite_difference_test("ideal gas", potential);
+
+  if (retval == 0) {
+    printf("\n%s passes!\n", argv[0]);
   } else {
-    printf("Finite difference test passes.\n");
+    printf("\n%s fails %d tests!\n", argv[0], retval);
+    return retval;
   }
-  return 0;
 }
