@@ -46,18 +46,19 @@ int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, d
   printf("Edouble2 = %g\n", Edouble2);
   printf("Egrid2   = %g\n", Egrid2);
   printf("fractional error = %g\n", (Edouble1 - Egrid1)/fabs(Edouble1));
-  printf("fractional error2 = %g\n", (Edouble2 - Egrid2)/fabs(Edouble2));
   int retval = 0;
   if (fabs((Edouble1 - Egrid1)/Edouble1) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     retval++;
   }
+  printf("fractional error3 = %g\n", (Edouble2 - Edouble1)/fabs(Edouble1));
   if (fabs((Edouble2 - Edouble1)/Edouble1) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     retval++;
   }
+  printf("fractional error2 = %g\n", (Edouble2 - Egrid2)/fabs(Edouble2));
   if (fabs((Edouble2 - Egrid2)/Edouble2) > fraccuracy) {
-    printf("Error in the energy is too big!\n");
+    printf("FAIL: Error in the energy is too big!\n");
     retval++;
   }
 
@@ -69,7 +70,7 @@ int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, d
   f2.integralgrad(gd, nr, &mygrad2);
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
-    printf("Error in the grad is too big!\n");
+    printf("FAIL: Error in the grad is too big!\n");
     retval++;
   }
   return retval;
@@ -86,7 +87,7 @@ int main(int, char **argv) {
   retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
 
   // The following tests the chain rule...
-  retval += test_functionals("Fourth power", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);
+  retval += test_functionals("Pow(2)(Pow(2))", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);
 
   // The following tests scalar multiply rule...
   retval += test_functionals("Fourth power", 10*Pow(2)(Pow(2)(x)), 10*x*x*x*x, 0.1, 1e-12);
@@ -94,6 +95,8 @@ int main(int, char **argv) {
   // The following tests scalar subtraction rule...
   retval += test_functionals("Subtraction",
                              0 - Pow(2)(Pow(2)(x)), -1*Pow(2)(Pow(2)(x)), 0.1, 1e-12);
+  retval += test_functionals("Simple subtraction",
+                             0 - x, -1*x, 0.1, 1e-12);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

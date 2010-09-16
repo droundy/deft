@@ -22,6 +22,10 @@ public:
   PowType(int nn) : n(nn) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    switch (n) {
+    case 0: return VectorXd::Ones(data.rows());
+    case 1: return data;
+    }
     VectorXd out(data);
     for (int i=0; i<gd.NxNyNz; i++)
       for (int p=1; p < n; p++)
@@ -29,6 +33,10 @@ public:
     return out;
   }
   double transform(double x) const {
+    switch (n) {
+    case 0: return 1;
+    case 1: return x;
+    }
     double v = x;
     for (int p=1; p < n; p++) v *= x;
     return v;
@@ -42,6 +50,13 @@ public:
 
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
+    switch (n) {
+    case 0: return; // zero gradient!
+    case 1:
+      *outgrad += ingrad;
+      if (outpgrad) *outpgrad += ingrad;
+      return;
+    }
     for (int i=0; i<gd.NxNyNz; i++) {
       double foo = n*ingrad[i];
       for (int p=1; p < n; p++) foo *= data[i];
@@ -52,7 +67,7 @@ public:
       for (int i=0; i<gd.NxNyNz; i++) {
         double foo = n*ingrad[i];
         for (int p=1; p < n; p++) foo *= data[i];
-        (*outgrad)[i] += foo;
+        (*outpgrad)[i] += foo;
       }
   }
 private:
