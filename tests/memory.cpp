@@ -73,7 +73,7 @@ int main(int, char **argv) {
   printf("Energy is %g\n", ff.integral(potential));
 
   double peak = peak_memory()/1024.0/1024;
-  const double expected_peak = 70;
+  const double expected_peak = 84;
   printf("Peak memory use is %g M\n", peak);
   if (peak > expected_peak) {
     printf("FAIL: Peak memory use should be under %g!\n", expected_peak);
