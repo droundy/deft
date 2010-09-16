@@ -110,6 +110,9 @@ public:
     if (mynext) out += (*mynext)(data);
     return out;
   }
+  //FieldFunctional grad(const FieldFunctional &ingrad) const {
+  //  return itsCounter->ptr->grad(ingrad);
+  //}
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);

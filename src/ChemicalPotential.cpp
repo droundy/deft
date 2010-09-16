@@ -16,30 +16,6 @@
 
 #include "Functionals.h"
 
-class ChemicalPotentialType : public FieldFunctionalInterface {
-public:
-  ChemicalPotentialType(double chemical_potential)
-    : mu(chemical_potential) {}
-
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
-    return mu*data;
-  }
-  double transform(double n) const {
-    return mu*n;
-  }
-  double grad(double) const {
-    return mu;
-  }
-
-  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    *outgrad += mu*ingrad;
-    if (outpgrad) *outpgrad += mu*ingrad;
-  }
-private:
-  double mu; // the chemical potential
-};
-
 FieldFunctional ChemicalPotential(double chemical_potential) {
-  return FieldFunctional(new ChemicalPotentialType(chemical_potential), "chemical potential");
+  return (chemical_potential*Identity()).set_name("chemical potential");
 }
