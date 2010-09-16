@@ -3,6 +3,9 @@
 #pragma once
 
 #include "lattice.h"
+#include "Eigen/Eigen"
+
+typedef std::complex<double> complex;
 
 class GridDescription {
 public:
@@ -16,3 +19,6 @@ public:
 private:
   void initme();
 };
+
+#include "ReciprocalOperators.h"
+#include "RealSpaceOperators.h"

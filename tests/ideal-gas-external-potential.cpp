@@ -22,6 +22,10 @@ const double kT = 1e-3; // room temperature in Hartree
 const double ngas = 1e-5; // vapor density of water
 const double mu = -kT*log(ngas);
 
+Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
+int resolution = 5;
+GridDescription gd(lat, resolution, resolution, resolution);
+
 int test_minimizer(const char *name, Minimizer min, Grid *pot, Grid expected_density, int numiters) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -31,7 +35,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, Grid expected_den
 
   const double true_energy = -5.597856610022806e-11;
 
-  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
+  *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.04*mu*VectorXd::Ones(pot->description().NxNyNz);
   for (int i=0;i<numiters && min.improve_energy(false);i++) {
     fflush(stdout);
   }
@@ -60,11 +64,8 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, Grid expected_den
 }
 
 int main(int, char **argv) {
-  Lattice lat(Cartesian(0,.5,.5), Cartesian(.5,0,.5), Cartesian(.5,.5,0));
-  int resolution = 5;
-  GridDescription gd(lat, resolution, resolution, resolution);
   Grid external_potential(gd);
-  external_potential = 1e-1*external_potential.r2(); // a harmonic trap...
+  external_potential = 1e-1*r2(gd); // a harmonic trap...
   Grid potential(gd);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));

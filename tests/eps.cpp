@@ -36,7 +36,7 @@ int main() {
   Grid foo(gd), bar(gd);
   ReciprocalGrid rfoo(gd);
   foo.Set(gaussian);
-  foo += 10*(-500*foo.r2()).cwise().exp();
+  foo += 10*(-500*r2(gd)).cwise().exp();
   //foo += 0.5*foo.x();
   foo.epsSlice("demo.eps", Cartesian(1,0,0), Cartesian(0,1,0), plotcorner, 150);
   foo.epsNativeSlice("native.eps", Cartesian(1,0,0), Cartesian(0,1,0),
@@ -45,11 +45,11 @@ int main() {
                                   Cartesian(0,1,0), plotcorner);
 
   rfoo = foo.fft();
-  rfoo.cwise() *= (-0.1*rfoo.g2()).cwise().exp();
+  rfoo.cwise() *= (-0.1*g2(gd)).cwise().exp();
   foo = rfoo.ifft();
   foo.epsNativeSlice("native-blurred.eps", Cartesian(1,0,0), Cartesian(0,1,0),
                      plotcorner);
-  rfoo = (-0.4*rfoo.g2()).cwise().exp();
+  rfoo = (-0.4*g2(gd)).cwise().exp();
   rfoo.ifft().epsNativeSlice("gaussian.eps", Cartesian(1,0,0), Cartesian(0,1,0),
                              plotcorner);
 

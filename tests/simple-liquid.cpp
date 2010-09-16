@@ -39,7 +39,7 @@ FieldFunctional n = EffectivePotentialToDensity(kT);
 FieldFunctional f = f0(n);
 
 Grid potential(gd);
-Grid external_potential(gd, 1e-3/nliquid*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
+Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
 FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
 
@@ -55,7 +55,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   const double true_energy = -0.2639034579494411;
   //const double gas_energy = -1.250000000000085e-11;
 
-  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
+  *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
 
   while (min.improve_energy(false)) fflush(stdout);
 
@@ -79,9 +79,9 @@ int main(int, char **argv) {
   repulsion.set_name("repulsion");
 
   {
-    Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
+    Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*r2(gd)).cwise().exp()
                                                           + mu*VectorXd::Ones(gd.NxNyNz)));
-    potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
+    potential = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(gd.NxNyNz);
     retval += f.run_finite_difference_test("simple liquid", potential);
     
     retval += attraction.run_finite_difference_test("quadratic", test_density);
@@ -113,7 +113,7 @@ int main(int, char **argv) {
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
 
   
-  potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
+  potential = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

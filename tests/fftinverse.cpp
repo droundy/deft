@@ -34,7 +34,7 @@ int main(int, char *argv[]) {
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid foo(gd);
   foo.Set(gaussian);
-  foo += 0.1*(-30*foo.r2()).cwise().exp();
+  foo += 0.1*(-30*r2(gd)).cwise().exp();
   Grid foo2(foo.fft().ifft());
   int errorcode = 0;
   for (int x=0; x<resolution; x++)

@@ -168,7 +168,7 @@ int main(int, char **argv) {
   external_potential.Set(forcer);
   ff = (f0 + ExternalPotential(external_potential))(n);
 
-  Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*external_potential.r2()).cwise().exp()
+  Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -1e-4*(-2*r2(gd)).cwise().exp()
                                                         + mu*VectorXd::Ones(gd.NxNyNz)));
 
   // The following is for debugging our simple liquid...
@@ -181,7 +181,7 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
+  potential = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
   retval += ff.run_finite_difference_test("simple liquid", potential);
   fflush(stdout);
 

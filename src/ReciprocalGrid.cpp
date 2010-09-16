@@ -33,27 +33,10 @@ complex ReciprocalGrid::operator()(const RelativeReciprocal &r) const {
     + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
 }
 
-static complex cartSqr(Reciprocal r) {
-  return r.squaredNorm();
-}
-static complex xfunc(Reciprocal r) {
-  return r(0);
-}
-static complex yfunc(Reciprocal r) {
-  return r(1);
-}
-static complex zfunc(Reciprocal r) {
-  return r(2);
+ReciprocalGrid::ReciprocalGrid(const GridDescription &gdin) : VectorXcd(gdin.NxNyNzOver2), gd(gdin) {
 }
 
-ReciprocalGrid::ReciprocalGrid(const GridDescription &gdin)
-  : VectorXcd(gdin.NxNyNzOver2), gd(gdin),
-    g2_op(gd, cartSqr), gx_op(gd, xfunc), gy_op(gd, yfunc), gz_op(gd, zfunc) {
-}
-
-ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x)
-  : VectorXcd(x), gd(x.gd),
-    g2_op(gd, cartSqr), gx_op(gd, xfunc), gy_op(gd, yfunc), gz_op(gd, zfunc) {
+ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x) : VectorXcd(x), gd(x.gd) {
 }
 
 Grid ReciprocalGrid::ifft() const {

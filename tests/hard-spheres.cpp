@@ -36,7 +36,7 @@ FieldFunctional n = EffectivePotentialToDensity(kT);
 FieldFunctional f = f0(n);
 
 Grid potential(gd);
-Grid external_potential(gd, 1e-3/ngas*(-0.2*potential.r2()).cwise().exp()); // repulsive bump
+Grid external_potential(gd, 1e-3/ngas*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
 FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
 
@@ -51,7 +51,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
 
   const double true_energy = -0.00121302232893198;
 
-  *pot = +1e-4*((-10*pot->r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
+  *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
   while (min.improve_energy(false)) {
     //printf("Actual error is %g\n", min.energy() - true_energy);
@@ -76,9 +76,9 @@ int main(int, char **argv) {
   int retval = 0;
 
   {
-    potential = +1e-4*((-10*potential.r2()).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
+    potential = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
     Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, potential));
-    //Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -0.04*(-2*external_potential.r2()).cwise().exp()
+    //Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -0.04*(-2*r2(gd)).cwise().exp()
     //                                                      + mu*VectorXd::Ones(gd.NxNyNz)));
     //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
     //retval += f0.run_finite_difference_test("hard spheres straight", test_density);

@@ -34,17 +34,10 @@ double Grid::operator()(const Relative &r) const {
     + wx*wy*wz*(*this)(ixp1,iyp1,izp1);
 }
 
-Grid::Grid(const GridDescription &gdin)
-  : VectorXd(gdin.NxNyNz), gd(gdin),
-    r2_op(gd, cartSqr),
-    x_op(gd, xfunc),
-    y_op(gd, yfunc),
-    z_op(gd, zfunc) {
+Grid::Grid(const GridDescription &gdin) : VectorXd(gdin.NxNyNz), gd(gdin) {
 }
 
-Grid::Grid(const Grid &x) : VectorXd(x), gd(x.gd),
-                            r2_op(gd, cartSqr),
-                            x_op(gd, xfunc), y_op(gd, yfunc), z_op(gd, zfunc) {
+Grid::Grid(const Grid &x) : VectorXd(x), gd(x.gd) {
 }
 
 void Grid::Set(double f(Cartesian)) {

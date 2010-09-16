@@ -27,7 +27,7 @@ public:
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     Grid out(gd, data);
     ReciprocalGrid recip = out.fft();
-    recip.cwise() *= (kfac*recip.g2()).cwise().exp();
+    recip.cwise() *= (kfac*g2(gd)).cwise().exp();
     return recip.ifft();
   }
   double transform(double n) const {
@@ -41,7 +41,7 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
-    recip.cwise() *= (kfac*recip.g2()).cwise().exp();
+    recip.cwise() *= (kfac*g2(gd)).cwise().exp();
     out = recip.ifft();
     *outgrad += out;
 

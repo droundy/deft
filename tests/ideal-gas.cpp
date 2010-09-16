@@ -23,7 +23,7 @@ int main() {
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid density(gd);
   const double kT = 1e-3; // room temperature in Hartree
-  density = 10*(-500*density.r2()).cwise().exp()
+  density = 10*(-500*r2(gd)).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
   FieldFunctional ig = IdealGas(kT);
   if (ig.run_finite_difference_test("ideal gas", density)) {
@@ -34,7 +34,7 @@ int main() {
   }
 
   printf("\nNow let's try this with an effective potential...\n");
-  Grid potential(gd, 1e-2*((-50*density.r2()).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
+  Grid potential(gd, 1e-2*((-50*r2(gd)).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
   //density = EffectivePotentialToDensity(kT)(potential);

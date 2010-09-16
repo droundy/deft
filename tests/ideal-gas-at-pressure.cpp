@@ -25,7 +25,7 @@ int main() {
   const double kT = 1e-3; // room temperature in Hartree
   const double ngas = 1e-5; // vapor density of water
   const double mu = -kT*log(ngas);
-  potential = 1e-2*((-50*potential.r2()).cwise().exp())
+  potential = 1e-2*((-50*r2(gd)).cwise().exp())
     + -2e-3*VectorXd::Ones(gd.NxNyNz);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));

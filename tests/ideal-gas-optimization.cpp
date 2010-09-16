@@ -36,7 +36,7 @@ int main(int, char **argv) {
 
   // First, let's test Downhill...
   {
-    potential = +1e-4*((-10*potential.r2()).cwise().exp())
+    potential = +1e-4*((-10*r2(gd)).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
     Minimizer min = Downhill(f, gd, &potential);
     for (int i=0;i<140 && min.improve_energy();i++) {
@@ -65,7 +65,7 @@ int main(int, char **argv) {
   printf("* Now we're testing SteepestDescent *\n");
   printf("*************************************\n\n");
   {
-    potential = +1e-4*((-10*potential.r2()).cwise().exp())
+    potential = +1e-4*((-10*r2(gd)).cwise().exp())
       + 1.04*mu*VectorXd::Ones(gd.NxNyNz);
     Minimizer min = SteepestDescent(f, gd, &potential, QuadraticLineMinimizer, 1.0);
     for (int i=0;i<20 && min.improve_energy(true);i++) {
