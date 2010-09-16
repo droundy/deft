@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Grid.h"
+#include "ReciprocalGrid.h"
 
 class FieldFunctional;
 
@@ -24,11 +24,47 @@ public:
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
 
+template<typename Derived>
+class ConvolveWith : public FieldFunctionalInterface {
+public:
+  ConvolveWith(const Eigen::MatrixBase<Derived> &x) : c(x) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    Grid out(gd, data);
+    ReciprocalGrid recip = out.fft();
+    recip.cwise() *= c;
+    return recip.ifft();
+  }
+  double transform(double n) const {
+    return n*c[0];
+  }
+  double grad(double) const {
+    return c[0];
+  }
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid out(gd, ingrad);
+    ReciprocalGrid recip = out.fft();
+    recip.cwise() *= c;
+    out = recip.ifft();
+    *outgrad += out;
+    // FIXME: we will want to propogate preexisting preconditioning
+    if (outpgrad) *outpgrad += out;
+  }
+private:
+  Derived c;
+};
+
 class FieldFunctional {
 public:
   // Handle reference counting so we can pass these things around freely...
   FieldFunctional(double); // This handles constants!
-  explicit FieldFunctional(const VectorXd &); // This handles constants fields!
+  explicit FieldFunctional(const VectorXd &); // This handles constant fields!
+  template<typename Derived>
+  explicit FieldFunctional(const MatrixBase<Derived> &x, const char *name) : itsCounter(0) {
+    // This handles constant ephemeral fields!
+    init(new ConvolveWith<Derived>(x), name);
+  }
   explicit FieldFunctional(FieldFunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
     init(p, name);
