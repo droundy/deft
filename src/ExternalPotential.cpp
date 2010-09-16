@@ -15,31 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
-#include <stdio.h>
-
-class ExternalPotentialType : public FieldFunctionalInterface {
-public:
-  explicit ExternalPotentialType(const VectorXd &Vin) : V(Vin) {}
-
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
-    return V.cwise()*data;
-  }
-  double transform(double) const {
-    return 0;
-  }
-  double grad(double) const {
-    return 0;
-  }
-
-  void grad(const GridDescription &, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    *outgrad += V.cwise()*ingrad;
-    if (outpgrad) *outpgrad += V.cwise()*ingrad;
-  }
-private:
-  VectorXd V; // the potential times the differential volume element dV.
-};
 
 FieldFunctional ExternalPotential(const VectorXd &V) {
-  return FieldFunctional(new ExternalPotentialType(V), "external potential");
+  return (FieldFunctional(V)*Identity()).set_name("external potential");
 }

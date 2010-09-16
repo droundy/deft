@@ -197,11 +197,32 @@ private:
   double c;
 };
 
-FieldFunctional::FieldFunctional(double x) // allocate a new counter
-  : itsCounter(0) {
-  itsCounter = new counter(new Constant(x));
-  itsCounter->name = "constant";
-  mynext = 0;
+FieldFunctional::FieldFunctional(double x) : itsCounter(0) {
+  init(new Constant(x), 0);
+}
+
+class ConstantField : public FieldFunctionalInterface {
+public:
+  ConstantField(const VectorXd &x) : c(x) {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &) const {
+    return c;
+  }
+  double transform(double) const {
+    return c.sum()/c.rows();
+  }
+  double grad(double) const {
+    return 0;
+  }
+
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  }
+private:
+  VectorXd c;
+};
+
+FieldFunctional::FieldFunctional(const VectorXd &x) : itsCounter(0) {
+  init(new ConstantField(x), 0);
 }
 
 class ChainRuleType : public FieldFunctionalInterface {

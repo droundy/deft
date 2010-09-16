@@ -28,13 +28,10 @@ class FieldFunctional {
 public:
   // Handle reference counting so we can pass these things around freely...
   FieldFunctional(double); // This handles constants!
+  explicit FieldFunctional(const VectorXd &); // This handles constants fields!
   explicit FieldFunctional(FieldFunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
-    if (p) {
-      itsCounter = new counter(p);
-      itsCounter->name = name;
-    }
-    mynext = 0;
+    init(p, name);
   }
   ~FieldFunctional() {
     release();
@@ -139,6 +136,13 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
 private:
+  void init(FieldFunctionalInterface *p, const char *name) {
+    if (p) {
+      itsCounter = new counter(p);
+      itsCounter->name = name;
+    }
+    mynext = 0;
+  }
   FieldFunctional *mynext;
   struct counter {
     counter(FieldFunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
