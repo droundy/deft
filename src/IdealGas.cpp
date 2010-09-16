@@ -18,80 +18,61 @@
 #include <stdio.h>
 #include <math.h>
 
+class Choose : public FieldFunctionalInterface {
+public:
+  Choose(double c, const FieldFunctional &fa, const FieldFunctional &fb) : cut(c), flow(fa), fhigh(fb) {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    VectorXd out(data);
+    const int N = data.cols()*data.rows();
+    for (int i=0; i<N; i++) {
+      double x = data[i];
+      out[i] = (x<cut) ? flow(x) : fhigh(x);
+    }
+    return out;
+  }
+  double transform(double x) const {
+    return (x<cut) ? flow(x) : fhigh(x);
+  }
+  double grad(double x) const {
+    return (x<cut) ? flow.grad(x) : fhigh.grad(x);
+  }
+
+  void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    const int N = data.cols()*data.rows();
+    if (outpgrad) {
+      for (int i=0; i<N; i++) {
+        double x = data[i];
+        if (x<cut) {
+          (*outgrad)[i] += ingrad[i]*flow.grad(x);
+          (*outpgrad)[i] += ingrad[i]*flow.grad(x);
+        } else {
+          (*outgrad)[i] += ingrad[i]*fhigh.grad(x);
+           (*outpgrad)[i] += ingrad[i]*fhigh.grad(x);
+        }
+      }
+    } else {
+      for (int i=0; i<N; i++) {
+        double x = data[i];
+        (*outgrad)[i] += ingrad[i] * ((x<cut) ? flow.grad(x) : fhigh.grad(x));
+      }
+    }
+  }
+private:
+  double cut;
+  FieldFunctional flow, fhigh;
+};
+
+FieldFunctional choose(double cut, const FieldFunctional &lower, const FieldFunctional &higher) {
+  return FieldFunctional(new Choose(cut, lower, higher));
+}
+
 static const double min_log_arg = 1e-90;
 static const double slope = log(min_log_arg);
 static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-class IdealGasType : public FieldFunctionalInterface {
-public:
-  IdealGasType(double temp) : T(temp) {}
-
-
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
-    const int N = data.cols()*data.rows();
-    VectorXd out(data);
-    for (int i=0; i<N; i++) {
-      const double n = out[i];
-      if (isnan(n)) {
-        printf("data[%d] == %g\n", i, n);
-        assert(!isnan(n));
-      }
-      if (n > min_log_arg) {
-        if (isinf(n)) {
-          out[i] = INFINITY; // Infinite density gives infinite energy.
-        } else {
-          out[i] = T*(n*log(n) - n);
-          assert(!isnan(log(n)));
-        }
-      } else {
-        out[i] = T*((n-min_log_arg)*slope + min_e);
-      }
-    }
-    return out;
-  }
-  double transform(double n) const {
-    assert(!isnan(n));
-    if (n > min_log_arg) {
-      if (isinf(n))
-        return INFINITY; // Infinite density gives infinite energy.
-      else
-        return T*(n*log(n) - n);
-    } else
-      return T*((n-min_log_arg)*slope + min_e);
-  }
-  double grad(double n) const {
-    assert(!isnan(n));
-    if (n > min_log_arg) return T*log(n);
-    else return T*slope;
-  }
-
-  void grad(const GridDescription &, const VectorXd &n, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    const int N = n.cols()*n.rows();
-    if (outpgrad)
-      for (int i=0; i<N; i++) {
-        if (n[i] > min_log_arg) {
-          const double X = T*ingrad[i]*log(n[i]);
-          (*outgrad)[i] += X;
-          (*outpgrad)[i] += X;
-        } else {
-          const double X = T*ingrad[i]*slope;
-          (*outgrad)[i] += X;
-          (*outpgrad)[i] += X;
-        }
-      }
-    else
-      for (int i=0; i<N; i++) {
-        if (n[i] > min_log_arg)
-          (*outgrad)[i] += T*ingrad[i]*log(n[i]);
-        else
-          (*outgrad)[i] += T*ingrad[i]*slope;
-      }
-  }
-private:
-  double T; // temperature
-};
-
-FieldFunctional IdealGas(double temperature) {
-  return FieldFunctional(new IdealGasType(temperature), "ideal gas energy");
+FieldFunctional IdealGas(double T) {
+  FieldFunctional n = Identity().set_name("n");
+  return choose(min_log_arg,  T*((n-min_log_arg)*slope + min_e), T*(n*log(n)-n)).set_name("ideal gas");
 }

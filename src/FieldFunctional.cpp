@@ -177,6 +177,33 @@ public:
 
 FieldFunctional Identity() { return FieldFunctional(new IdentityType()); }
 
+class Constant : public FieldFunctionalInterface {
+public:
+  Constant(double x) : c(x) {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return c*VectorXd::Ones(data.rows());
+  }
+  double transform(double) const {
+    return c;
+  }
+  double grad(double) const {
+    return 0;
+  }
+
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  }
+private:
+  double c;
+};
+
+FieldFunctional::FieldFunctional(double x) // allocate a new counter
+  : itsCounter(0) {
+  itsCounter = new counter(new Constant(x));
+  itsCounter->name = "constant";
+  mynext = 0;
+}
+
 class ChainRuleType : public FieldFunctionalInterface {
 public:
   ChainRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
@@ -280,33 +307,6 @@ private:
 
 FieldFunctional FieldFunctional::operator*(const FieldFunctional &f) const {
   return FieldFunctional(new ProductRuleType(*this, f));
-}
-
-class ScalarRuleType : public FieldFunctionalInterface {
-public:
-  ScalarRuleType(const FieldFunctional &fa, double xx) : f(fa), x(xx) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return x*f(gd, data);
-  }
-  double transform(double n) const {
-    return x*f(n);
-  }
-  double grad(double n) const {
-    return x*f.grad(n);
-  }
-
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    f.grad(gd, data, x*ingrad, outgrad, outpgrad);
-  }
-private:
-  FieldFunctional f;
-  double x;
-};
-
-FieldFunctional FieldFunctional::operator*(double x) const {
-  return FieldFunctional(new ScalarRuleType(*this, x));
 }
 
 

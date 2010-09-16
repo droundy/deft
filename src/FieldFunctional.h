@@ -4,6 +4,8 @@
 
 #include "Grid.h"
 
+class FieldFunctional;
+
 class FieldFunctionalInterface {
 public:
   virtual ~FieldFunctionalInterface() {}
@@ -17,6 +19,7 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double grad(double data) const = 0;
+  //virtual FieldFunctional grad(const FieldFunctional &ingrad) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
@@ -24,6 +27,7 @@ public:
 class FieldFunctional {
 public:
   // Handle reference counting so we can pass these things around freely...
+  FieldFunctional(double); // This handles constants!
   explicit FieldFunctional(FieldFunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
     if (p) {
@@ -63,7 +67,6 @@ public:
   FieldFunctional operator-(const FieldFunctional &) const;
   FieldFunctional operator/(const FieldFunctional &) const;
   FieldFunctional operator*(const FieldFunctional &) const;
-  FieldFunctional operator*(double) const;
   VectorXd justMe(const GridDescription &gd, const VectorXd &data) const {
     return itsCounter->ptr->transform(gd, data);
   }
@@ -168,3 +171,7 @@ FieldFunctional operator-(double x, const FieldFunctional &f);
 FieldFunctional log(const FieldFunctional &);
 FieldFunctional sqr(const FieldFunctional &);
 FieldFunctional constrain(const Grid &, FieldFunctional);
+
+// choose combines two local functionals, with which one is applied
+// depending on the local value of the field.
+FieldFunctional choose(double, const FieldFunctional &lower, const FieldFunctional &higher);

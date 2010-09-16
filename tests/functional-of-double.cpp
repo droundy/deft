@@ -120,9 +120,9 @@ int main(int, char **argv) {
 
   {
     FieldFunctional f = IdealGas(kT);
-    retval += test_functional("Ideal gas", f, 1e-9, 1e-13);
+    retval += test_functional("Ideal gas", f, 1e-9, 2e-13);
     retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 1e-13);
+    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 2e-13);
     retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-3), 1e-12);
   }
 
