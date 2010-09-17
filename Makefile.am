@@ -14,6 +14,7 @@ bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/timings.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
@@ -36,6 +37,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+tests_timings_test_SOURCES = tests/timings.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(GENERIC_CODE)

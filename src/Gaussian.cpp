@@ -63,71 +63,9 @@ Functional Gaussian(double width) {
 }
 
 static double myR, mydr;
-static const double spreading = 3.0;
-static double step(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  double kdr = k*mydr;
-  if (kR > 1e-3) {
-    return exp(-spreading*kdr*kdr)*(4*M_PI)*(sin(kR) - kR*cos(kR))/(k*k*k);
-  } else {
-    const double kR2 = kR*kR;
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).  I evaluate the smaller elements
-    // first in the hope of reducing roundoff error (but this is not
-    // yet tested).
-    return (4*M_PI/3)*(myR*myR*myR)*(kR2*kR2*kR2*(-1.0/15120) + kR2*kR2*(1.0/280) + kR2*(-1.0/10) + 1 );
-  }
-}
-
-class StepConvolveType : public FunctionalInterface {
-public:
-  StepConvolveType(double radius) : R(radius) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    ReciprocalGrid recip(gd);
-    {
-      const Grid out(gd, data);
-      recip = out.fft();
-      // We want to free out immediately to save memory!
-    }
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    recip.MultiplyBy(step);
-    return recip.ifft();
-  }
-  double transform(double n) const {
-    return n*(4*M_PI/3)*R*R*R;
-  }
-  double grad(double) const {
-    return (4*M_PI/3)*R*R*R;
-  }
-  Functional grad(const Functional &ingrad, bool) const {
-    return StepConvolve(R)(ingrad);
-  }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid out(gd, ingrad);
-    ReciprocalGrid recip = out.fft();
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    recip.MultiplyBy(step);
-    out = recip.ifft();
-    *outgrad += out;
-
-    // FIXME: we will want to propogate preexisting preconditioning
-    if (outpgrad) *outpgrad += out;
-  }
-  Expression printme(const Expression &x) const {
-    return funexpr("StepConvolve", Expression("R"))(x);
-  }
-private:
-  double R;
-};
 
 Functional StepConvolve(double R) {
-  return Functional(new StepConvolveType(R));
+  return Functional(stepper, R, "step");
 }
 
 static double delta(Reciprocal kvec) {

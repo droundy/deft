@@ -29,6 +29,9 @@ struct base_rop : private GridDescription {
     const RelativeReciprocal rvec((x>Nx/2) ? x - Nx : x,
                                   (y>Ny/2) ? y - Ny : y,
                                   z);
+    //const RelativeReciprocal rvec((x+Nx/2) % Nx - Nx/2,
+    //                              (y+Ny/2) % Ny - Ny/2,
+    //                              z);
     // FIXME: it seems that brillouinZone is broken...  :(
     //return func(fineLat.brillouinZone(Lat.toReciprocal(rvec)));
     return func(Lat.toReciprocal(rvec));
@@ -68,13 +71,40 @@ struct gz_op : public base_rop<Scalar> {
   }
 };
 
+static const double spreading = 3.0;
+
+template<typename Scalar>
+struct step_op : public base_rop<Scalar> {
+  step_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    R3 = R*R*R;
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kR = k*R;
+    double kdr = k*dr;
+    if (kR > 1e-3) {
+      return exp(-spreading*kdr*kdr)*(4*M_PI)*(sin(kR) - kR*cos(kR))/(k*k*k);
+    } else {
+      const double kR2 = kR*kR;
+      // The following is a simple power series expansion to the above
+      // function, to handle the case as k approaches zero with greater
+      // accuracy (and efficiency).  I evaluate the smaller elements
+      // first in the hope of reducing roundoff error (but this is not
+      // yet tested).
+      return (4*M_PI/3)*R3*(kR2*kR2*kR2*(-1.0/15120) + kR2*kR2*(1.0/280) + kR2*(-1.0/10) + 1 );
+    }
+  }
+  double R, R3, dr;
+};
+
 namespace Eigen {
   template<typename Scalar>
   struct ei_functor_traits<g2_op<Scalar> > {
     enum {
       Cost = NumTraits<Scalar>::AddCost,
       PacketAccess = false,
-      IsRepeatable = true 
+      IsRepeatable = true
     };
   };
   template<typename Scalar>
@@ -82,7 +112,7 @@ namespace Eigen {
     enum {
       Cost = NumTraits<Scalar>::AddCost,
       PacketAccess = false,
-      IsRepeatable = true 
+      IsRepeatable = true
     };
   };
   template<typename Scalar>
@@ -90,7 +120,7 @@ namespace Eigen {
     enum {
       Cost = NumTraits<Scalar>::AddCost,
       PacketAccess = false,
-      IsRepeatable = true 
+      IsRepeatable = true
     };
   };
   template<typename Scalar>
@@ -98,7 +128,15 @@ namespace Eigen {
     enum {
       Cost = NumTraits<Scalar>::AddCost,
       PacketAccess = false,
-      IsRepeatable = true 
+      IsRepeatable = true
+    };
+  };
+  template<typename Scalar>
+  struct ei_functor_traits<step_op<Scalar> > {
+    enum {
+      Cost = NumTraits<Scalar>::AddCost,
+      PacketAccess = false,
+      IsRepeatable = true
     };
   };
 } // namespace Eigen
@@ -117,4 +155,12 @@ EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<gy_op<complex>, VectorXcd> gy(const Gr
 
 EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<gz_op<complex>, VectorXcd> gz(const GridDescription &gd) {
   return Eigen::CwiseNullaryOp<gz_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, gz_op<complex>(gd));
+}
+
+EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<step_op<complex>, VectorXcd> step(const GridDescription &gd, double R) {
+  return Eigen::CwiseNullaryOp<step_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, step_op<complex>(gd,R));
+}
+
+EIGEN_STRONG_INLINE step_op<complex> stepper(const GridDescription &gd, double R) {
+  return step_op<complex>(gd,R);
 }

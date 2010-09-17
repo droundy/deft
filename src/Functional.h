@@ -26,46 +26,18 @@ public:
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
 
-template<typename Derived>
-class ConvolveWith : public FunctionalInterface {
-public:
-  ConvolveWith(const Eigen::MatrixBase<Derived> &x) : c(x) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    Grid out(gd, data);
-    ReciprocalGrid recip = out.fft();
-    recip.cwise() *= c;
-    return recip.ifft();
-  }
-  double transform(double n) const {
-    return n*c[0];
-  }
-  double grad(double) const {
-    return c[0];
-  }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid out(gd, ingrad);
-    ReciprocalGrid recip = out.fft();
-    recip.cwise() *= c;
-    out = recip.ifft();
-    *outgrad += out;
-    // FIXME: we will want to propogate preexisting preconditioning
-    if (outpgrad) *outpgrad += out;
-  }
-private:
-  Derived c;
-};
+template<typename Derived, typename extra> class ConvolveWith;
 
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
   Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
-  template<typename Derived>
-  explicit Functional(const MatrixBase<Derived> &x, const char *name) : itsCounter(0) {
+  template<typename Derived, typename extra>
+  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, const char *name)
+    : itsCounter(0) {
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived>(x), name);
+    init(new ConvolveWith<Derived,extra>(f,e), name);
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
@@ -232,3 +204,49 @@ Functional constrain(const Grid &, Functional);
 Functional choose(double, const Functional &lower, const Functional &higher);
 
 extern Functional dV;
+
+
+
+template<typename Derived, typename extra>
+class ConvolveWith : public FunctionalInterface {
+public:
+  ConvolveWith(Derived (*ff)(const GridDescription &, extra), extra e) : f(ff), data(e) {}
+  ConvolveWith(const ConvolveWith &cw) : f(cw.f), data(cw.data) {}
+
+  EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &x) const {
+    Grid out(gd, x);
+    ReciprocalGrid recip = out.fft();
+    recip.cwise() *= Eigen::CwiseNullaryOp<Derived, VectorXcd>(gd.NxNyNzOver2, 1, f(gd, data));
+    return recip.ifft();
+  }
+  double gzero() const {
+    Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
+    GridDescription gd(lat, 2, 2, 2);
+    return f(gd, data).func(Reciprocal(0,0,0)).real();
+  }
+  double transform(double n) const {
+    return n*gzero();
+  }
+  double grad(double) const {
+    return gzero();
+  }
+  Functional grad(const Functional &ingrad, bool) const {
+    return Functional(new ConvolveWith(f, data))(ingrad);
+  }
+  EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    Grid out(gd, ingrad);
+    ReciprocalGrid recip = out.fft();
+    recip.cwise() *= Eigen::CwiseNullaryOp<Derived, VectorXcd>(gd.NxNyNzOver2, 1, f(gd, data));
+    out = recip.ifft();
+    *outgrad += out;
+    // FIXME: we will want to propogate preexisting preconditioning
+    if (outpgrad) *outpgrad += out;
+  }
+  Expression printme(const Expression &x) const {
+    return funexpr("convolve?", x);
+  }
+private:
+  Derived (*f)(const GridDescription &, extra);
+  extra data;
+};
