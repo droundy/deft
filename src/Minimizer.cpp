@@ -32,7 +32,7 @@ public:
   MaxIterType(Minimizer m, int max)
     : MinimizerModifier(m), maxiter(max) {}
   ~MaxIterType() {}
-  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerModifier::minimize(newf, gdnew, newx);
   }
 

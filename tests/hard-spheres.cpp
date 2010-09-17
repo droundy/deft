@@ -30,15 +30,15 @@ double resolution = 0.5;
 GridDescription gd(lat, resolution);
 
 // And the functional...
-FieldFunctional f00 = HardSpheres(R, kT);
-FieldFunctional f0 = IdealGas(kT) + HardSpheres(R, kT) + ChemicalPotential(mu);
-FieldFunctional n = EffectivePotentialToDensity(kT);
-FieldFunctional f = f0(n);
+Functional f00 = HardSpheres(R, kT);
+Functional f0 = IdealGas(kT) + HardSpheres(R, kT) + ChemicalPotential(mu);
+Functional n = EffectivePotentialToDensity(kT);
+Functional f = f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/ngas*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
+Functional ff = (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1e-3) {

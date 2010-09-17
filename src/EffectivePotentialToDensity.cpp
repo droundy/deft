@@ -17,7 +17,7 @@
 #include "Functionals.h"
 #include <stdio.h>
 
-class EffectivePotentialToDensityType : public FieldFunctionalInterface {
+class EffectivePotentialToDensityType : public FunctionalInterface {
 public:
   EffectivePotentialToDensityType(double temp) {
     minusbeta = -1.0/temp;
@@ -43,10 +43,10 @@ public:
   double grad(double Veff) const {
     return minusbeta*exp(minusbeta*Veff);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return minusbeta*EffectivePotentialToDensity(-1/minusbeta)*ingrad;
   }
-  FieldFunctional pgrad(const FieldFunctional &ingrad) const {
+  Functional pgrad(const Functional &ingrad) const {
     return minusbeta*ingrad;
   }
   // This computes the gradient of the functional, given a gradient of
@@ -66,6 +66,6 @@ private:
   double minusbeta; // -1/kT
 };
 
-FieldFunctional EffectivePotentialToDensity(double temp) {
-  return FieldFunctional(new EffectivePotentialToDensityType(temp));
+Functional EffectivePotentialToDensity(double temp) {
+  return Functional(new EffectivePotentialToDensityType(temp));
 }

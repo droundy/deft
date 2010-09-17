@@ -28,7 +28,7 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  FieldFunctional ig = IdealGas(kT);
+  Functional ig = IdealGas(kT);
   retval += ig.run_finite_difference_test("ideal gas", density);
 
   printf("\nNow let's try this with an effective potential...\n");
@@ -38,7 +38,7 @@ int main(int, char **argv) {
   //density = EffectivePotentialToDensity(kT)(potential);
   //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  FieldFunctional ig2 = IdealGas(kT)(EffectivePotentialToDensity(kT));
+  Functional ig2 = IdealGas(kT)(EffectivePotentialToDensity(kT));
   density *= 1e-5;
   retval += ig2.run_finite_difference_test("ideal gas", potential);
 

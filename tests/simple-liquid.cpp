@@ -32,16 +32,16 @@ GridDescription gd(lat, resolution);
 
 // And the functional...
 const double interaction_energy_scale = 0.01;
-FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
-FieldFunctional n = EffectivePotentialToDensity(kT);
-FieldFunctional f = f0(n);
+Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
+Functional n = EffectivePotentialToDensity(kT);
+Functional f = f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-FieldFunctional ff = (f0 + ExternalPotential(external_potential))(n);
+Functional ff = (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {

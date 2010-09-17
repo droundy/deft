@@ -16,8 +16,8 @@
 
 #include "Functionals.h"
 
-FieldFunctional GaussianPolynomial(double amplitude, double width, int power) {
-  FieldFunctional out = amplitude*Pow(power)(Gaussian(width));
+Functional GaussianPolynomial(double amplitude, double width, int power) {
+  Functional out = amplitude*Pow(power)(Gaussian(width));
   out.set_name("gaussian polynomial");
   return out;
 }

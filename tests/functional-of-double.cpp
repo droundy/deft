@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "Functionals.h"
 
-int test_functional(const char *name, FieldFunctional f, double n, double fraccuracy=1e-14) {
+int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -79,10 +79,10 @@ int test_functional(const char *name, FieldFunctional f, double n, double fraccu
 int main(int, char **argv) {
   int retval = 0;
   const double kT = 1e-3;
-  const FieldFunctional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity(kT);
 
   {
-    FieldFunctional x = Identity();
+    Functional x = Identity();
     retval += test_functional("sqr(yzShellConvolve(1)(x)))", sqr(yzShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("sqr(xyShellConvolve(1)(x)))", sqr(xyShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("zxShellConvolve(1)(x))", zxShellConvolve(1)(x), 1, 1e-13);
@@ -109,9 +109,9 @@ int main(int, char **argv) {
   }
 
   {
-    FieldFunctional attr = GaussianPolynomial(-0.32, 0.5, 2);
+    Functional attr = GaussianPolynomial(-0.32, 0.5, 2);
     retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
-    FieldFunctional repul = GaussianPolynomial(0.32, 0.25, 4);
+    Functional repul = GaussianPolynomial(0.32, 0.25, 4);
     retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
     retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
     retval += test_functional("sum of gaussians", attr + repul, 0.1, 2e-13);
@@ -119,7 +119,7 @@ int main(int, char **argv) {
   }
 
   {
-    FieldFunctional f = IdealGas(kT);
+    Functional f = IdealGas(kT);
     retval += test_functional("Ideal gas", f, 1e-9, 2e-13);
     retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
     retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 2e-13);
@@ -127,7 +127,7 @@ int main(int, char **argv) {
   }
 
   {
-    FieldFunctional f = ChemicalPotential(0.1);
+    Functional f = ChemicalPotential(0.1);
     retval += test_functional("chemical potential", f, 1e-9, 1e-12);
     retval += test_functional("chemical potential", f, 1e9, 1e-14);
     retval += test_functional("chemical potential", f, 1e-2, 1e-12);

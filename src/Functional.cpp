@@ -18,18 +18,18 @@
 #include "handymath.h"
 #include "Grid.h"
 
-void FieldFunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
+void FunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
   if (name) printf("%s%25s =", prefix, name);
   else printf("%s%25s =", prefix, "UNKNOWN");
   print_double("", e);
   printf("\n");
 }
 
-FieldFunctional FieldFunctionalInterface::pgrad(const FieldFunctional &ingrad) const {
+Functional FunctionalInterface::pgrad(const Functional &ingrad) const {
   return grad(ingrad);
 }
 
-int FieldFunctional::run_finite_difference_test(const char *testname, const Grid &x,
+int Functional::run_finite_difference_test(const char *testname, const Grid &x,
                                                  const VectorXd *direction) const {
   printf("\nRunning finite difference test on %s:\n", testname);
   const GridDescription gd(x.description());
@@ -131,13 +131,13 @@ int FieldFunctional::run_finite_difference_test(const char *testname, const Grid
   return retval;
 }
 
-double FieldFunctional::print_iteration(const char *prefix, int iter) const {
+double Functional::print_iteration(const char *prefix, int iter) const {
   printf("%s==============\n", prefix);
   printf("%sIteration %4d\n", prefix, iter);
   printf("%s==============\n", prefix);
 
   print_summary(prefix, itsCounter->last_energy, get_name());
-  const FieldFunctional *nxt = this;
+  const Functional *nxt = this;
   double etot = 0;
   while (nxt) {
     etot += nxt->itsCounter->last_energy;
@@ -151,13 +151,13 @@ double FieldFunctional::print_iteration(const char *prefix, int iter) const {
   return etot;
 }
 
-void FieldFunctional::print_summary(const char *prefix, double energy, const char *name) const {
+void Functional::print_summary(const char *prefix, double energy, const char *name) const {
   if (get_name()) name = get_name();
   if (!next()) {
     itsCounter->ptr->print_summary(prefix, energy, name);
     return;
   }
-  const FieldFunctional *nxt = this;
+  const Functional *nxt = this;
   double etot = 0;
   while (nxt) {
     if (nxt->get_name()) name = nxt->get_name();
@@ -168,9 +168,9 @@ void FieldFunctional::print_summary(const char *prefix, double energy, const cha
   //assert(fabs(etot - energy) < 1e-6);
 }
 
-FieldFunctional Identity() { return Pow(1); }
+Functional Identity() { return Pow(1); }
 
-class dVType : public FieldFunctionalInterface {
+class dVType : public FunctionalInterface {
 public:
   dVType() {}
 
@@ -183,16 +183,16 @@ public:
   double grad(double) const {
     return 1; // hokey!
   }
-  FieldFunctional grad(const FieldFunctional &) const {
+  Functional grad(const Functional &) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
   }
 };
 
-FieldFunctional dV = FieldFunctional(new dVType());
+Functional dV = Functional(new dVType());
 
-class Constant : public FieldFunctionalInterface {
+class Constant : public FunctionalInterface {
 public:
   Constant(double x) : c(x) {}
 
@@ -205,7 +205,7 @@ public:
   double grad(double) const {
     return 0;
   }
-  FieldFunctional grad(const FieldFunctional &) const {
+  Functional grad(const Functional &) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -214,11 +214,11 @@ private:
   double c;
 };
 
-FieldFunctional::FieldFunctional(double x) : itsCounter(0) {
+Functional::Functional(double x) : itsCounter(0) {
   init(new Constant(x), 0);
 }
 
-class ConstantField : public FieldFunctionalInterface {
+class ConstantField : public FunctionalInterface {
 public:
   ConstantField(const VectorXd &x) : c(x) {}
 
@@ -231,7 +231,7 @@ public:
   double grad(double) const {
     return 0;
   }
-  FieldFunctional grad(const FieldFunctional &) const {
+  Functional grad(const Functional &) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -240,13 +240,13 @@ private:
   VectorXd c;
 };
 
-FieldFunctional::FieldFunctional(const VectorXd &x) : itsCounter(0) {
+Functional::Functional(const VectorXd &x) : itsCounter(0) {
   init(new ConstantField(x), 0);
 }
 
-class ChainRuleType : public FieldFunctionalInterface {
+class ChainRuleType : public FunctionalInterface {
 public:
-  ChainRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
+  ChainRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     if (!f1.next()) {
@@ -259,7 +259,7 @@ public:
     VectorXd f1f2data(f1.justMe(gd, f2data));
     double e = gd.dvolume*f1f2data.sum();
     f1.set_last_energy(e);
-    FieldFunctional *nxt = f1.next();
+    Functional *nxt = f1.next();
     while (nxt) {
       f1f2data += nxt->justMe(gd, f2data);
       double etot = gd.dvolume*f1f2data.sum();
@@ -275,7 +275,7 @@ public:
   double grad(double n) const {
     return f1.grad(f2(n))*f2.grad(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return f2.grad(f1.grad(ingrad)(f2));
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -289,16 +289,16 @@ public:
     f1.print_summary(prefix, e, name);
   }
 private:
-  FieldFunctional f1, f2;
+  Functional f1, f2;
 };
 
-FieldFunctional FieldFunctional::operator()(const FieldFunctional &f) const {
-  return FieldFunctional(new ChainRuleType(*this, f));
+Functional Functional::operator()(const Functional &f) const {
+  return Functional(new ChainRuleType(*this, f));
 }
 
-class QuotientRuleType : public FieldFunctionalInterface {
+class QuotientRuleType : public FunctionalInterface {
 public:
-  QuotientRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
+  QuotientRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f1(gd, data).cwise()/f2(gd, data);
@@ -309,7 +309,7 @@ public:
   double grad(double n) const {
     return f1.grad(n)/f2(n) - f1(n)*f2.grad(n)/f2(n)/f2(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return f1.grad(ingrad/f2) - f2.grad(f1*ingrad/sqr(f2));
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -319,16 +319,16 @@ public:
     f2.grad(gd, data, (ingrad.cwise()*f1(gd, data)).cwise()/((-out2).cwise()*out2), outgrad, outpgrad);
   }
 private:
-  FieldFunctional f1, f2;
+  Functional f1, f2;
 };
 
-FieldFunctional FieldFunctional::operator/(const FieldFunctional &f) const {
-  return FieldFunctional(new QuotientRuleType(*this, f));
+Functional Functional::operator/(const Functional &f) const {
+  return Functional(new QuotientRuleType(*this, f));
 }
 
-class ProductRuleType : public FieldFunctionalInterface {
+class ProductRuleType : public FunctionalInterface {
 public:
-  ProductRuleType(const FieldFunctional &fa, const FieldFunctional &fb) : f1(fa), f2(fb) {}
+  ProductRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f1(gd, data).cwise()*f2(gd, data);
@@ -339,7 +339,7 @@ public:
   double grad(double n) const {
     return f1(n)*f2.grad(n) + f1.grad(n)*f2(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return f2.grad(f1*ingrad) + f1.grad(f2*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -348,17 +348,17 @@ public:
     f2.grad(gd, data, ingrad.cwise()*f1(gd, data), outgrad, outpgrad);
   }
 private:
-  FieldFunctional f1, f2;
+  Functional f1, f2;
 };
 
-FieldFunctional FieldFunctional::operator*(const FieldFunctional &f) const {
-  return FieldFunctional(new ProductRuleType(*this, f));
+Functional Functional::operator*(const Functional &f) const {
+  return Functional(new ProductRuleType(*this, f));
 }
 
 
-class LogType : public FieldFunctionalInterface {
+class LogType : public FunctionalInterface {
 public:
-  LogType(const FieldFunctional &fa) : f(fa) {}
+  LogType(const Functional &fa) : f(fa) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f(gd, data).cwise().log();
@@ -369,7 +369,7 @@ public:
   double grad(double n) const {
     return f.grad(n)/f(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return f.grad(ingrad/f);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -379,20 +379,20 @@ public:
     f.grad(gd, data, ingrad1, outgrad, outpgrad);
   }
 private:
-  FieldFunctional f;
+  Functional f;
 };
 
-FieldFunctional log(const FieldFunctional &f) {
-  return FieldFunctional(new LogType(f));
+Functional log(const Functional &f) {
+  return Functional(new LogType(f));
 }
 
-FieldFunctional FieldFunctional::operator-(const FieldFunctional &f) const {
+Functional Functional::operator-(const Functional &f) const {
   return *this + -1*f;
 }
 
-class SquareRuleType : public FieldFunctionalInterface {
+class SquareRuleType : public FunctionalInterface {
 public:
-  SquareRuleType(const FieldFunctional &fa) : f(fa) {}
+  SquareRuleType(const Functional &fa) : f(fa) {}
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f(gd, data).cwise().square();
@@ -404,7 +404,7 @@ public:
   double grad(double n) const {
     return 2*f(n)*f.grad(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return 2*f.grad(f*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -412,17 +412,17 @@ public:
     f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
   }
 private:
-  FieldFunctional f;
+  Functional f;
 };
 
-FieldFunctional sqr(const FieldFunctional &f) {
-  return FieldFunctional(new SquareRuleType(f));
+Functional sqr(const Functional &f) {
+  return Functional(new SquareRuleType(f));
 }
 
 
-class Constraint : public FieldFunctionalInterface {
+class Constraint : public FunctionalInterface {
 public:
-  Constraint(const Grid &g, const FieldFunctional &y) : constraint(g), f(y) {};
+  Constraint(const Grid &g, const Functional &y) : constraint(g), f(y) {};
 
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f(gd, data);
@@ -433,8 +433,8 @@ public:
   double grad(double n) const {
     return f.grad(n);
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return FieldFunctional(constraint)*f.grad(ingrad);
+  Functional grad(const Functional &ingrad) const {
+    return Functional(constraint)*f.grad(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -454,9 +454,9 @@ public:
   }
 private:
   const Grid constraint;
-  const FieldFunctional f;
+  const Functional f;
 };
 
-FieldFunctional constrain(const Grid &g, FieldFunctional f) {
-  return FieldFunctional(new Constraint(g, f));
+Functional constrain(const Grid &g, Functional f) {
+  return Functional(new Constraint(g, f));
 }

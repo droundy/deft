@@ -8,7 +8,7 @@ private:
   const VectorXd direction;
   double *step, slope, alternatestep;
 public:
-  QuadraticLineMinimizerType(FieldFunctional f, const GridDescription &gdin, VectorXd *data, const VectorXd &dir,
+  QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, VectorXd *data, const VectorXd &dir,
                              double gradDotDirection, double *instep)
     : MinimizerInterface(f, gdin, data), direction(dir), step(instep), slope(gradDotDirection) {
     if (step == 0) {
@@ -154,7 +154,7 @@ void QuadraticLineMinimizerType::print_info(int iter) const {
 
 
 
-Minimizer QuadraticLineMinimizer(FieldFunctional f, const GridDescription &gd, VectorXd *data,
+Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
                                   const VectorXd &direction, double gradDotDirection, double *step) {
   //if (gradDotDirection > 0) {
   //  printf("The slope is backwards!!!\n");

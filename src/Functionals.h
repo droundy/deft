@@ -3,35 +3,35 @@
 #pragma once
 
 #include "Grid.h"
-#include "FieldFunctional.h"
+#include "Functional.h"
 
-FieldFunctional IdealGas(double temperature);
-FieldFunctional HardSpheres(double radius, double temperature);
-FieldFunctional HardSpheresRF(double radius, double temperature);
-FieldFunctional HardSpheresWB(double radius, double temperature);
-FieldFunctional ChemicalPotential(double chemical_potential);
-FieldFunctional ExternalPotential(const VectorXd &V);
+Functional IdealGas(double temperature);
+Functional HardSpheres(double radius, double temperature);
+Functional HardSpheresRF(double radius, double temperature);
+Functional HardSpheresWB(double radius, double temperature);
+Functional ChemicalPotential(double chemical_potential);
+Functional ExternalPotential(const VectorXd &V);
 
-FieldFunctional GaussianPolynomial(double amplitude, double width, int power);
+Functional GaussianPolynomial(double amplitude, double width, int power);
 
-FieldFunctional Identity();
+Functional Identity();
 
-FieldFunctional EffectivePotentialToDensity(double temperature);
-FieldFunctional Gaussian(double width);
+Functional EffectivePotentialToDensity(double temperature);
+Functional Gaussian(double width);
 
-FieldFunctional StepConvolve(double radius);
+Functional StepConvolve(double radius);
 
-FieldFunctional ShellConvolve(double radius);
+Functional ShellConvolve(double radius);
 
-FieldFunctional xShellConvolve(double radius);
-FieldFunctional yShellConvolve(double radius);
-FieldFunctional zShellConvolve(double radius);
+Functional xShellConvolve(double radius);
+Functional yShellConvolve(double radius);
+Functional zShellConvolve(double radius);
 
-FieldFunctional xxShellConvolve(double radius);
-FieldFunctional yyShellConvolve(double radius);
-FieldFunctional zzShellConvolve(double radius);
-FieldFunctional xyShellConvolve(double radius);
-FieldFunctional yzShellConvolve(double radius);
-FieldFunctional zxShellConvolve(double radius);
+Functional xxShellConvolve(double radius);
+Functional yyShellConvolve(double radius);
+Functional zzShellConvolve(double radius);
+Functional xyShellConvolve(double radius);
+Functional yzShellConvolve(double radius);
+Functional zxShellConvolve(double radius);
 
-FieldFunctional Pow(int power);
+Functional Pow(int power);

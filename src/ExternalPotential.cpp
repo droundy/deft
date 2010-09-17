@@ -16,6 +16,6 @@
 
 #include "Functionals.h"
 
-FieldFunctional ExternalPotential(const VectorXd &V) {
-  return (FieldFunctional(V)*Identity()).set_name("external potential");
+Functional ExternalPotential(const VectorXd &V) {
+  return (Functional(V)*Identity()).set_name("external potential");
 }

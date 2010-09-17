@@ -4,11 +4,11 @@
 
 #include "ReciprocalGrid.h"
 
-class FieldFunctional;
+class Functional;
 
-class FieldFunctionalInterface {
+class FunctionalInterface {
 public:
-  virtual ~FieldFunctionalInterface() {}
+  virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
   virtual VectorXd transform(const GridDescription &gd, const VectorXd &data) const = 0;
@@ -19,14 +19,14 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double grad(double data) const = 0;
-  virtual FieldFunctional grad(const FieldFunctional &ingrad) const = 0;
-  virtual FieldFunctional pgrad(const FieldFunctional &ingrad) const;
+  virtual Functional grad(const Functional &ingrad) const = 0;
+  virtual Functional pgrad(const Functional &ingrad) const;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
 
 template<typename Derived>
-class ConvolveWith : public FieldFunctionalInterface {
+class ConvolveWith : public FunctionalInterface {
 public:
   ConvolveWith(const Eigen::MatrixBase<Derived> &x) : c(x) {}
 
@@ -56,51 +56,51 @@ private:
   Derived c;
 };
 
-class FieldFunctional {
+class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  FieldFunctional(double); // This handles constants!
-  explicit FieldFunctional(const VectorXd &); // This handles constant fields!
+  Functional(double); // This handles constants!
+  explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived>
-  explicit FieldFunctional(const MatrixBase<Derived> &x, const char *name) : itsCounter(0) {
+  explicit Functional(const MatrixBase<Derived> &x, const char *name) : itsCounter(0) {
     // This handles constant ephemeral fields!
     init(new ConvolveWith<Derived>(x), name);
   }
-  explicit FieldFunctional(FieldFunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
+  explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
     init(p, name);
   }
-  ~FieldFunctional() {
+  ~Functional() {
     release();
     delete mynext;
   }
-  FieldFunctional(const FieldFunctional& r) {
+  Functional(const Functional& r) {
     acquire(r.itsCounter);
-    if (r.mynext) mynext = new FieldFunctional(*r.mynext);
+    if (r.mynext) mynext = new Functional(*r.mynext);
     else mynext = 0;
   }
-  FieldFunctional& operator=(const FieldFunctional& r) {
+  Functional& operator=(const Functional& r) {
     if (this != &r) {
       release();
       acquire(r.itsCounter);
     }
-    if (r.mynext) mynext = new FieldFunctional(*r.mynext);
+    if (r.mynext) mynext = new Functional(*r.mynext);
     return *this;
   }
 
-  FieldFunctional operator()(const FieldFunctional &) const;
-  FieldFunctional operator+(const FieldFunctional &x) const {
-    FieldFunctional out(*this);
+  Functional operator()(const Functional &) const;
+  Functional operator+(const Functional &x) const {
+    Functional out(*this);
     return out += x;
   }
-  FieldFunctional operator+=(const FieldFunctional &x) {
+  Functional operator+=(const Functional &x) {
     if (mynext) *mynext += x;
-    else mynext = new FieldFunctional(x);
+    else mynext = new Functional(x);
     return *this;
   }
-  FieldFunctional operator-(const FieldFunctional &) const;
-  FieldFunctional operator/(const FieldFunctional &) const;
-  FieldFunctional operator*(const FieldFunctional &) const;
+  Functional operator-(const Functional &) const;
+  Functional operator/(const Functional &) const;
+  Functional operator*(const Functional &) const;
   VectorXd justMe(const GridDescription &gd, const VectorXd &data) const {
     return itsCounter->ptr->transform(gd, data);
   }
@@ -123,7 +123,7 @@ public:
     VectorXd fdata(justMe(gd, data));
     double e = gd.dvolume*fdata.sum();
     set_last_energy(e);
-    FieldFunctional *nxt = next();
+    Functional *nxt = next();
     while (nxt) {
       fdata += nxt->justMe(gd, data);
       double etot = gd.dvolume*fdata.sum();
@@ -144,14 +144,14 @@ public:
     if (mynext) out += (*mynext)(data);
     return out;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     if (mynext) {
       return itsCounter->ptr->grad(ingrad) + mynext->grad(ingrad);
     } else {
       return itsCounter->ptr->grad(ingrad);
     }
   }
-  FieldFunctional pgrad(const FieldFunctional &ingrad) const {
+  Functional pgrad(const Functional &ingrad) const {
     if (mynext) {
       return itsCounter->ptr->pgrad(ingrad) + mynext->pgrad(ingrad);
     } else {
@@ -169,11 +169,11 @@ public:
     return out;
   }
   const char *get_name() const { return itsCounter->name; }
-  FieldFunctional set_name(const char *n) { itsCounter->name = n; return *this; }
-  FieldFunctional *next() const {
+  Functional set_name(const char *n) { itsCounter->name = n; return *this; }
+  Functional *next() const {
     return mynext;
   }
-  FieldFunctional set_last_energy(double e) const { itsCounter->last_energy = e; return *this; }
+  Functional set_last_energy(double e) const { itsCounter->last_energy = e; return *this; }
 
   void print_summary(const char *prefix, double energy, const char *name=0) const;
   // The following utility methods do not need to be overridden.  Its
@@ -184,20 +184,20 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
 private:
-  void init(FieldFunctionalInterface *p, const char *name) {
+  void init(FunctionalInterface *p, const char *name) {
     if (p) {
       itsCounter = new counter(p);
       itsCounter->name = name;
     }
     mynext = 0;
   }
-  FieldFunctional *mynext;
+  Functional *mynext;
   struct counter {
-    counter(FieldFunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
-    FieldFunctionalInterface* ptr;
+    counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
+    FunctionalInterface* ptr;
     unsigned count;
     const char *name;
-    FieldFunctional *next;
+    Functional *next;
     double last_energy;
   };
   counter *itsCounter;
@@ -218,19 +218,19 @@ private:
   }
 };
 
-inline FieldFunctional operator*(double x, const FieldFunctional &f) {
+inline Functional operator*(double x, const Functional &f) {
   return f*x;
 }
-inline FieldFunctional operator-(double x, const FieldFunctional &f) {
-  return FieldFunctional(x) - f;
+inline Functional operator-(double x, const Functional &f) {
+  return Functional(x) - f;
 }
 
-FieldFunctional log(const FieldFunctional &);
-FieldFunctional sqr(const FieldFunctional &);
-FieldFunctional constrain(const Grid &, FieldFunctional);
+Functional log(const Functional &);
+Functional sqr(const Functional &);
+Functional constrain(const Grid &, Functional);
 
 // choose combines two local functionals, with which one is applied
 // depending on the local value of the field.
-FieldFunctional choose(double, const FieldFunctional &lower, const FieldFunctional &higher);
+Functional choose(double, const Functional &lower, const Functional &higher);
 
-extern FieldFunctional dV;
+extern Functional dV;

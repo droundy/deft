@@ -20,7 +20,7 @@
 Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
 GridDescription gd(lat, 2, 2, 2);
 
-int test_print(const char *name, FieldFunctional f) {
+int test_print(const char *name, Functional f) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
@@ -38,12 +38,12 @@ int test_print(const char *name, FieldFunctional f) {
 int main(int, char **argv) {
   int retval = 0;
 
-  FieldFunctional x(Identity());
+  Functional x(Identity());
 
   retval += test_print("sqr", sqr(x).set_name("foobar"));
 
-  FieldFunctional sqrandlog = sqr(x).set_name("sqr") + log(x).set_name("log");
-  FieldFunctional sqronly = sqr(x).set_name("sqronly");
+  Functional sqrandlog = sqr(x).set_name("sqr") + log(x).set_name("log");
+  Functional sqronly = sqr(x).set_name("sqronly");
   retval += test_print("sqr + log", sqrandlog);
   retval += test_print("(sqr + log)(sqr)", sqrandlog(sqronly));
 

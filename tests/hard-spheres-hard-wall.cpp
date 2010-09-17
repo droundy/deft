@@ -34,15 +34,15 @@ Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
 // And the functional...
-FieldFunctional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
-FieldFunctional f0wb = HardSpheresWB(R, kT);
-FieldFunctional f0rf = HardSpheresRF(R, kT);
-FieldFunctional n = EffectivePotentialToDensity(kT);
-FieldFunctional f = f0(n);
+Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
+Functional f0wb = HardSpheresWB(R, kT);
+Functional f0rf = HardSpheresRF(R, kT);
+Functional n = EffectivePotentialToDensity(kT);
+Functional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
-FieldFunctional ff;
+Functional ff;
 
 int test_minimizer(const char *name, Minimizer min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();

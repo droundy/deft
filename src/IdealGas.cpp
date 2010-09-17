@@ -18,9 +18,9 @@
 #include <stdio.h>
 #include <math.h>
 
-class Choose : public FieldFunctionalInterface {
+class Choose : public FunctionalInterface {
 public:
-  Choose(double c, const FieldFunctional &fa, const FieldFunctional &fb) : cut(c), flow(fa), fhigh(fb) {}
+  Choose(double c, const Functional &fa, const Functional &fb) : cut(c), flow(fa), fhigh(fb) {}
 
   VectorXd transform(const GridDescription &, const VectorXd &data) const {
     VectorXd out(data);
@@ -38,8 +38,8 @@ public:
     return (x<cut) ? flow.grad(x) : fhigh.grad(x);
   }
 
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return ingrad*choose(cut, flow.grad(FieldFunctional(1)), fhigh.grad(FieldFunctional(1)));
+  Functional grad(const Functional &ingrad) const {
+    return ingrad*choose(cut, flow.grad(Functional(1)), fhigh.grad(Functional(1)));
   }
   void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -64,18 +64,18 @@ public:
   }
 private:
   double cut;
-  FieldFunctional flow, fhigh;
+  Functional flow, fhigh;
 };
 
-FieldFunctional choose(double cut, const FieldFunctional &lower, const FieldFunctional &higher) {
-  return FieldFunctional(new Choose(cut, lower, higher));
+Functional choose(double cut, const Functional &lower, const Functional &higher) {
+  return Functional(new Choose(cut, lower, higher));
 }
 
 static const double min_log_arg = 1e-90;
 static const double slope = log(min_log_arg);
 static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-FieldFunctional IdealGas(double T) {
-  FieldFunctional n = Identity().set_name("n");
+Functional IdealGas(double T) {
+  Functional n = Identity().set_name("n");
   return choose(min_log_arg,  T*((n-min_log_arg)*slope + min_e), T*(n*log(n)-n)).set_name("ideal gas");
 }

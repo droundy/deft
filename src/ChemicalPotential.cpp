@@ -16,6 +16,6 @@
 
 #include "Functionals.h"
 
-FieldFunctional ChemicalPotential(double chemical_potential) {
+Functional ChemicalPotential(double chemical_potential) {
   return (chemical_potential*Identity()).set_name("chemical potential");
 }

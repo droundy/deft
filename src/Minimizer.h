@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include "FieldFunctional.h"
+#include "Functional.h"
 #include <stdio.h>
 #include <math.h>
 
 class Minimizer;
 
-Minimizer Downhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
-Minimizer PreconditionedDownhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
 Minimizer MaxIter(int maxiter, Minimizer);
 Minimizer Precision(double err, Minimizer);
 
 class MinimizerInterface {
 public: // yuck, this shouldn't be public!
-  FieldFunctional f;
+  Functional f;
   VectorXd *x; // Note that we don't own this data!
   int iter;
   GridDescription gd;
 public:
-  MinimizerInterface(FieldFunctional myf, const GridDescription &gdin, VectorXd *data)
+  MinimizerInterface(Functional myf, const GridDescription &gdin, VectorXd *data)
     : f(myf), x(data), gd(gdin), last_grad(0), last_pgrad(0) {
     iter = 0;
   }
@@ -28,7 +28,7 @@ public:
     delete last_grad;
     delete last_pgrad;
   }
-  virtual void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  virtual void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     f = newf;
     iter = 0;
     invalidate_cache();
@@ -99,7 +99,7 @@ public:
     }
     return *this;
   }
-  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);
     itsCounter->ptr->minimize(newf, gdnew, newx);
   }
@@ -143,7 +143,7 @@ public:
   MinimizerModifier(Minimizer m)
     : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
   ~MinimizerModifier() { }
-  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);
     min.minimize(newf, gdnew, newx);
   }

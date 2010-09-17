@@ -32,16 +32,16 @@ GridDescription gd(lat, 1, 1, 200);
 
 // And the functional...
 const double interaction_energy_scale = 2e-4;
-FieldFunctional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-FieldFunctional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-FieldFunctional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
-FieldFunctional n = EffectivePotentialToDensity(kT);
-FieldFunctional f = f0(n);
+Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
+Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
+Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
+Functional n = EffectivePotentialToDensity(kT);
+Functional f = f0(n);
 
 Grid external_potential(gd);
 Grid potential(gd);
 
-FieldFunctional ff;
+Functional ff;
 
 const double true_surface_tension = 1.214242268e-05;
 

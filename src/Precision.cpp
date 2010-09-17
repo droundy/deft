@@ -46,7 +46,7 @@ public:
     w = 0.1;
   }
   ~PrecisionMinimizer() {}
-  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerModifier::minimize(newf, gdnew, newx);
   }
 

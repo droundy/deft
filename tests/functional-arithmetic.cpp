@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "Functionals.h"
 
-int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, double n, double fraccuracy=1e-14) {
+int test_functionals(const char *name, Functional f1, Functional f2, double n, double fraccuracy=1e-14) {
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -79,15 +79,15 @@ int test_functionals(const char *name, FieldFunctional f1, FieldFunctional f2, d
 int main(int, char **argv) {
   int retval = 0;
   const double kT = 1e-3;
-  const FieldFunctional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity(kT);
 
-  FieldFunctional x = Gaussian(1);
+  Functional x = Gaussian(1);
   retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
   retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
 
   retval += test_functionals("derivative of x", x.grad(1) - x, 1 - x, 0.1, 2e-13);
-  retval += test_functionals("derivative of x^3", Pow(3).grad(FieldFunctional(1)), 3*Pow(2), 0.1, 2e-13);
-  retval += test_functionals("derivative of x^2", sqr(x).grad(FieldFunctional(1)), 2*x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(Functional(1)), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(Functional(1)), 2*x, 0.1, 2e-13);
 
   retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);

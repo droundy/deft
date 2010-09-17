@@ -69,8 +69,8 @@ int main(int, char **argv) {
   Grid potential(gd);
   //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
   //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  FieldFunctional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu) + ExternalPotential(external_potential);
-  FieldFunctional f = ig_and_mu(EffectivePotentialToDensity(kT));
+  Functional ig_and_mu = IdealGas(kT) + ChemicalPotential(mu) + ExternalPotential(external_potential);
+  Functional f = ig_and_mu(EffectivePotentialToDensity(kT));
 
   Grid expected_density(gd, EffectivePotentialToDensity(kT)(gd, external_potential + mu*VectorXd::Ones(gd.NxNyNz)));
 

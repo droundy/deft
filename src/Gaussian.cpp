@@ -18,7 +18,7 @@
 #include "ReciprocalGrid.h"
 #include <stdio.h>
 
-class GaussianType : public FieldFunctionalInterface {
+class GaussianType : public FunctionalInterface {
 public:
   GaussianType(double w) {
     width = w;
@@ -37,7 +37,7 @@ public:
   double grad(double) const {
     return 1;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return Gaussian(width)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -55,8 +55,8 @@ private:
   double width, kfac;
 };
 
-FieldFunctional Gaussian(double width) {
-  return FieldFunctional(new GaussianType(width));
+Functional Gaussian(double width) {
+  return Functional(new GaussianType(width));
 }
 
 static double myR, mydr;
@@ -78,7 +78,7 @@ static double step(Reciprocal kvec) {
   }
 }
 
-class StepConvolveType : public FieldFunctionalInterface {
+class StepConvolveType : public FunctionalInterface {
 public:
   StepConvolveType(double radius) : R(radius) {}
 
@@ -100,7 +100,7 @@ public:
   double grad(double) const {
     return (4*M_PI/3)*R*R*R;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return StepConvolve(R)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -120,8 +120,8 @@ private:
   double R;
 };
 
-FieldFunctional StepConvolve(double R) {
-  return FieldFunctional(new StepConvolveType(R));
+Functional StepConvolve(double R) {
+  return Functional(new StepConvolveType(R));
 }
 
 static double delta(Reciprocal kvec) {
@@ -140,7 +140,7 @@ static double delta(Reciprocal kvec) {
   }
 }
 
-class ShellConvolveType : public FieldFunctionalInterface {
+class ShellConvolveType : public FunctionalInterface {
 public:
   ShellConvolveType(double radius) : R(radius) {}
 
@@ -162,7 +162,7 @@ public:
   double grad(double) const {
     return (4*M_PI)*R*R;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     return ShellConvolve(R)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -182,8 +182,8 @@ private:
   double R;
 };
 
-FieldFunctional ShellConvolve(double R) {
-  return FieldFunctional(new ShellConvolveType(R));
+Functional ShellConvolve(double R) {
+  return Functional(new ShellConvolveType(R));
 }
 
 static complex xdelta(Reciprocal kvec) {
@@ -237,7 +237,7 @@ static complex zdelta(Reciprocal kvec) {
   }
 }
 
-class VShellConvolveType : public FieldFunctionalInterface {
+class VShellConvolveType : public FunctionalInterface {
 public:
   VShellConvolveType(double radius, int dir) : R(radius), direction(dir) {}
 
@@ -266,8 +266,8 @@ public:
   double grad(double) const {
     return 0;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return FieldFunctional(new VShellConvolveType(R, direction))((-1)*ingrad);
+  Functional grad(const Functional &ingrad) const {
+    return Functional(new VShellConvolveType(R, direction))((-1)*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -294,14 +294,14 @@ private:
   int direction;
 };
 
-FieldFunctional xShellConvolve(double R) {
-  return FieldFunctional(new VShellConvolveType(R, 0));
+Functional xShellConvolve(double R) {
+  return Functional(new VShellConvolveType(R, 0));
 }
-FieldFunctional yShellConvolve(double R) {
-  return FieldFunctional(new VShellConvolveType(R, 1));
+Functional yShellConvolve(double R) {
+  return Functional(new VShellConvolveType(R, 1));
 }
-FieldFunctional zShellConvolve(double R) {
-  return FieldFunctional(new VShellConvolveType(R, 2));
+Functional zShellConvolve(double R) {
+  return Functional(new VShellConvolveType(R, 2));
 }
 
 
@@ -378,7 +378,7 @@ static complex zzdelta(Reciprocal kvec) {
   }
 }
 
-class TShellConvolveType : public FieldFunctionalInterface {
+class TShellConvolveType : public FunctionalInterface {
 public:
   TShellConvolveType(double radius, int dir1, int dir2) : R(radius), d1(dir1), d2(dir2) {}
 
@@ -413,8 +413,8 @@ public:
   double grad(double) const {
     return 0;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return FieldFunctional(new TShellConvolveType(R, d1, d2))(ingrad);
+  Functional grad(const Functional &ingrad) const {
+    return Functional(new TShellConvolveType(R, d1, d2))(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -447,22 +447,22 @@ private:
   int d1, d2;
 };
 
-FieldFunctional xyShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 0, 1));
+Functional xyShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 0, 1));
 }
-FieldFunctional yzShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 1, 2));
+Functional yzShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 1, 2));
 }
-FieldFunctional zxShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 2, 0));
+Functional zxShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 2, 0));
 }
 
-FieldFunctional xxShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 0, 0));
+Functional xxShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 0, 0));
 }
-FieldFunctional yyShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 1, 1));
+Functional yyShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 1, 1));
 }
-FieldFunctional zzShellConvolve(double R) {
-  return FieldFunctional(new TShellConvolveType(R, 2, 2));
+Functional zzShellConvolve(double R) {
+  return Functional(new TShellConvolveType(R, 2, 2));
 }

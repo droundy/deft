@@ -17,7 +17,7 @@
 #include "Functionals.h"
 #include <stdio.h>
 
-class PowType : public FieldFunctionalInterface {
+class PowType : public FunctionalInterface {
 public:
   PowType(int nn) : n(nn) {}
 
@@ -47,7 +47,7 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  FieldFunctional grad(const FieldFunctional &ingrad) const {
+  Functional grad(const Functional &ingrad) const {
     switch (n) {
     case 0: return 0;
     case 1: return ingrad;
@@ -81,7 +81,7 @@ private:
   int n;
 };
 
-FieldFunctional Pow(int n) {
+Functional Pow(int n) {
   assert(n > 0);
-  return FieldFunctional(new PowType(n));
+  return Functional(new PowType(n));
 }

@@ -21,10 +21,10 @@ class DownhillType : public MinimizerInterface {
 protected:
   double nu, orig_nu;
 public:
-  DownhillType(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
+  DownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
     : MinimizerInterface(f, gdin, data), nu(viscosity), orig_nu(viscosity) {}
   ~DownhillType() {}
-  void minimize(FieldFunctional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
+  void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     nu = orig_nu;
     MinimizerInterface::minimize(newf, gdnew, newx);
   }
@@ -35,7 +35,7 @@ public:
 
 class PreconditionedDownhillType : public DownhillType {
 public:
-  PreconditionedDownhillType(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
+  PreconditionedDownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
     : DownhillType(f, gdin, data, viscosity) {}
   ~PreconditionedDownhillType() {}
 
@@ -109,10 +109,10 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
   return true;
 }
 
-Minimizer Downhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
+Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
   return Minimizer(new DownhillType(f, gdin, data, viscosity));
 }
 
-Minimizer PreconditionedDownhill(FieldFunctional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
   return Minimizer(new PreconditionedDownhillType(f, gdin, data, viscosity));
 }

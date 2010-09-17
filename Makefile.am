@@ -7,7 +7,7 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
-	src/Gaussian.cpp src/Pow.cpp src/FieldFunctional.cpp \
+	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp \
 	src/EffectivePotentialToDensity.cpp
 
 bin_PROGRAMS = deft

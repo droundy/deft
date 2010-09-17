@@ -98,11 +98,11 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   // The functionals are...
-  FieldFunctional n = constrain(constraint, EffectivePotentialToDensity(kT));
-  FieldFunctional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
-  FieldFunctional f0wb = HardSpheresWB(R, kT);
-  FieldFunctional f0rf = HardSpheresRF(R, kT);
-  FieldFunctional ff = HardSpheres(R, kT)(n) + IdealGas(kT)(n) + ChemicalPotential(mu)(n);
+  Functional n = constrain(constraint, EffectivePotentialToDensity(kT));
+  Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
+  Functional f0wb = HardSpheresWB(R, kT);
+  Functional f0rf = HardSpheresRF(R, kT);
+  Functional ff = HardSpheres(R, kT)(n) + IdealGas(kT)(n) + ChemicalPotential(mu)(n);
 
   external_potential.Set(incavity);
   external_potential *= 1e9;

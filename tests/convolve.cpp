@@ -174,7 +174,7 @@ int main(int, char **argv) {
     retval++;
   }
   bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
-  FieldFunctional ysh = yShellConvolve(1), sh = ShellConvolve(1);
+  Functional ysh = yShellConvolve(1), sh = ShellConvolve(1);
   {
     Grid scalarsh(gd, ShellConvolve(1)(foo));
     if (bar.maxCoeff() > scalarsh.maxCoeff()) {
@@ -249,7 +249,7 @@ int main(int, char **argv) {
   }
 
   printf("Running zxShellConvolve(3)...\n");
-  FieldFunctional zxsh = zxShellConvolve(3);
+  Functional zxsh = zxShellConvolve(3);
   bar = zxsh(foo);
   printf("zxShellConvolve(3) Maximum is %g\n", bar.maxCoeff());
   printf("zxShellConvolve(3) integrates to %.15g\n", Identity().integral(bar));

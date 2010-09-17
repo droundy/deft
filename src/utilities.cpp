@@ -26,7 +26,7 @@ LiquidProperties water_prop = {
   1e-3 // room temperature in Hartree
 };
 
-double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, bool verbose) {
+double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose) {
   int numptspersize = 100;
   int size = 16;
   Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,size*prop.lengthscale));
@@ -39,8 +39,8 @@ double surface_tension(Minimizer min, FieldFunctional f, LiquidProperties prop, 
   for (int i=0; i<gd.NxNyNz/2; i++) potential[i] = Veff_gas;
   for (int i=gd.NxNyNz/2; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
-  FieldFunctional n = EffectivePotentialToDensity(prop.kT);
-  FieldFunctional f0 = f(n);
+  Functional n = EffectivePotentialToDensity(prop.kT);
+  Functional f0 = f(n);
   f0.run_finite_difference_test("f0", potential);
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
