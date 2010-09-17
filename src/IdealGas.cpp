@@ -79,7 +79,8 @@ static const double min_log_arg = 1e-90;
 static const double slope = log(min_log_arg);
 static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
-Functional IdealGas(double T) {
+Functional IdealGas(double Tin) {
   Functional n = Identity().set_name("n");
-  return choose(min_log_arg,  T*((n-min_log_arg)*slope + min_e), T*(n*log(n)-n)).set_name("ideal gas");
+  Functional T = Functional(Tin, "kT");
+  return (T*choose(min_log_arg,  ((n-min_log_arg)*slope + min_e), (n*log(n)-n))).set_name("ideal gas");
 }

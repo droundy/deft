@@ -60,7 +60,7 @@ private:
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  Functional(double); // This handles constants!
+  Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived>
   explicit Functional(const MatrixBase<Derived> &x, const char *name) : itsCounter(0) {

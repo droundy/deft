@@ -38,7 +38,7 @@ void test_expression(const Expression &e, const char *expected) {
 int main(int, char **argv) {
 
   test_expression(IdealGas(1e-3).printme(Expression("x")),
-                  "choose(1e-90, ((x + -1e-90)*-207.233 + -2.08233e-88)*0.001, (x*x.log() - x)*0.001)");
+                  "kT*choose(1e-90, (x + -1e-90)*-207.2326583694641 + -2.082326583694641e-88, x*x.log() - x)");
 
   test_expression(sqr(xShellConvolve(3)).printme(Expression("x")),
                   "VShellConvolve(R)(x).square()");

@@ -55,6 +55,7 @@ Expression::Expression(std::string n) {
 Expression::Expression(double c) {
   arg1 = arg2 = arg3 = 0;
   std::ostringstream oss;
+  oss.precision(16);
   oss << c;
   name = oss.str();
   type = "constant";

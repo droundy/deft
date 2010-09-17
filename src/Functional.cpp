@@ -206,7 +206,7 @@ Functional dV = Functional(new dVType());
 
 class Constant : public FunctionalInterface {
 public:
-  Constant(double x) : c(x) {}
+  Constant(double x, const char *n) : c(x), name(n) {}
 
   VectorXd transform(const GridDescription &, const VectorXd &data) const {
     return c*VectorXd::Ones(data.rows());
@@ -223,14 +223,16 @@ public:
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
   }
   Expression printme(const Expression &) const {
+    if (name) return Expression(name);
     return c;
   }
 private:
   double c;
+  const char *name;
 };
 
-Functional::Functional(double x) : itsCounter(0) {
-  init(new Constant(x), 0);
+Functional::Functional(double x, const char *n) : itsCounter(0) {
+  init(new Constant(x, n), 0);
 }
 
 class ConstantField : public FunctionalInterface {
