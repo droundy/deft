@@ -47,7 +47,7 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     switch (n) {
     case 0: return 0;
     case 1: return ingrad;

@@ -37,7 +37,7 @@ public:
   double grad(double) const {
     return 1;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     return Gaussian(width)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -100,7 +100,7 @@ public:
   double grad(double) const {
     return (4*M_PI/3)*R*R*R;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     return StepConvolve(R)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -162,7 +162,7 @@ public:
   double grad(double) const {
     return (4*M_PI)*R*R;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     return ShellConvolve(R)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -266,7 +266,7 @@ public:
   double grad(double) const {
     return 0;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     return Functional(new VShellConvolveType(R, direction))((-1)*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
@@ -413,7 +413,7 @@ public:
   double grad(double) const {
     return 0;
   }
-  Functional grad(const Functional &ingrad) const {
+  Functional grad(const Functional &ingrad, bool) const {
     return Functional(new TShellConvolveType(R, d1, d2))(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
