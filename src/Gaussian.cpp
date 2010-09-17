@@ -51,6 +51,9 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
+  Expression printme(const Expression &x) const {
+    return funexpr("Gaussian", Expression("width"))(x);
+  }
 private:
   double width, kfac;
 };
@@ -116,6 +119,9 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
+  Expression printme(const Expression &x) const {
+    return funexpr("StepConvolve", Expression("R"))(x);
+  }
 private:
   double R;
 };
@@ -177,6 +183,9 @@ public:
 
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
+  }
+  Expression printme(const Expression &x) const {
+    return funexpr("ShellConvolve", Expression("R"))(x);
   }
 private:
   double R;
@@ -288,6 +297,9 @@ public:
 
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
+  }
+  Expression printme(const Expression &x) const {
+    return funexpr("VShellConvolve", Expression("R"))(x);
   }
 private:
   double R;
@@ -441,6 +453,9 @@ public:
 
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
+  }
+  Expression printme(const Expression &x) const {
+    return funexpr("TShellConvolve", Expression("R"))(x);
   }
 private:
   double R;

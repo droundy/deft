@@ -77,6 +77,14 @@ public:
         (*outpgrad)[i] += foo;
       }
   }
+  Expression printme(const Expression &x) const {
+    switch (n) {
+    case 0: return 0;
+    case 1: return x;
+    case 2: return x.method("square");
+    }
+    return x.method("pow", n);
+  }
 private:
   int n;
 };

@@ -62,6 +62,10 @@ public:
       }
     }
   }
+
+  Expression printme(const Expression &x) const {
+    return funexpr("choose", cut, flow.printme(x), fhigh.printme(x));
+  }
 private:
   double cut;
   Functional flow, fhigh;

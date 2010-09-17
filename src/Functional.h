@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ReciprocalGrid.h"
+#include "Expression.h"
 
 class Functional;
 
@@ -20,6 +21,7 @@ public:
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double grad(double data) const = 0;
   virtual Functional grad(const Functional &ingrad, bool ispgrad) const = 0;
+  virtual Expression printme(const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 };
@@ -178,6 +180,7 @@ public:
   int run_finite_difference_test(const char *testname,
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
+  Expression printme(const Expression &) const;
 private:
   void init(FunctionalInterface *p, const char *name) {
     if (p) {

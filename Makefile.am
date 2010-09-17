@@ -7,13 +7,15 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
-	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp \
+	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp \
 	src/EffectivePotentialToDensity.cpp
 
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 
 check_PROGRAMS = \
+	tests/expression.test \
+	tests/functional-expressions.test \
 	tests/print-iter.test \
 	tests/memory.test \
 	tests/ideal-gas.test \
@@ -34,6 +36,8 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
+tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(GENERIC_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(GENERIC_CODE)
 tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(GENERIC_CODE)

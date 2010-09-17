@@ -25,6 +25,19 @@ void FunctionalInterface::print_summary(const char *prefix, double e, const char
   printf("\n");
 }
 
+Expression Functional::printme(const Expression &x) const {
+  if (next()) {
+    // Get associativity right...
+    if (next()->next()) {
+      return itsCounter->ptr->printme(x) + next()->itsCounter->ptr->printme(x) + next()->next()->printme(x);
+    } else {
+      return itsCounter->ptr->printme(x) + next()->printme(x);
+    }
+  } else {
+    return itsCounter->ptr->printme(x);
+  }
+}
+
 int Functional::run_finite_difference_test(const char *testname, const Grid &x,
                                                  const VectorXd *direction) const {
   printf("\nRunning finite difference test on %s:\n", testname);
@@ -184,6 +197,9 @@ public:
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
   }
+  Expression printme(const Expression &) const {
+    return Expression("gd.dvolume");
+  }
 };
 
 Functional dV = Functional(new dVType());
@@ -205,6 +221,9 @@ public:
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &) const {
+    return c;
   }
 private:
   double c;
@@ -231,6 +250,9 @@ public:
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &) const {
+    return Expression("an unknown field...");
   }
 private:
   VectorXd c;
@@ -284,6 +306,9 @@ public:
   void print_summary(const char *prefix, double e, const char *name) const {
     f1.print_summary(prefix, e, name);
   }
+  Expression printme(const Expression &x) const {
+    return f1.printme(f2.printme(x));
+  }
 private:
   Functional f1, f2;
 };
@@ -314,6 +339,9 @@ public:
     f1.grad(gd, data, ingrad.cwise()/out2, outgrad, outpgrad);
     f2.grad(gd, data, (ingrad.cwise()*f1(gd, data)).cwise()/((-out2).cwise()*out2), outgrad, outpgrad);
   }
+  Expression printme(const Expression &x) const {
+    return f1.printme(x).method("cwise") / f2.printme(x);
+  }
 private:
   Functional f1, f2;
 };
@@ -342,6 +370,9 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     f1.grad(gd, data, ingrad.cwise()*f2(gd, data), outgrad, outpgrad);
     f2.grad(gd, data, ingrad.cwise()*f1(gd, data), outgrad, outpgrad);
+  }
+  Expression printme(const Expression &x) const {
+    return f1.printme(x)*f2.printme(x);
   }
 private:
   Functional f1, f2;
@@ -373,6 +404,9 @@ public:
     Grid ingrad1(gd, ingrad);
     ingrad1.cwise() /= f(gd, data);
     f.grad(gd, data, ingrad1, outgrad, outpgrad);
+  }
+  Expression printme(const Expression &x) const {
+    return f.printme(x).method("log");
   }
 private:
   Functional f;
@@ -406,6 +440,9 @@ public:
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
+  }
+  Expression printme(const Expression &x) const {
+    return f.printme(x).method("square");
   }
 private:
   Functional f;
@@ -447,6 +484,9 @@ public:
       f.grad(gd, data, ingrad, &mygrad, 0);
       *outgrad += constraint.cwise() * mygrad;
     }
+  }
+  Expression printme(const Expression &x) const {
+    return f.printme(x);
   }
 private:
   const Grid constraint;

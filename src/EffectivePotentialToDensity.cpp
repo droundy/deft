@@ -60,6 +60,9 @@ public:
     // *outpgrad += (minusbeta*ingrad).cwise()*((minusbeta*data).cwise().exp());
     //}
   }
+  Expression printme(const Expression &x) const {
+    return (Expression("minusbeta") * x).method("exp");
+  }
 private:
   double minusbeta; // -1/kT
 };
