@@ -70,10 +70,9 @@ int FieldFunctional::run_finite_difference_test(const char *testname, const Grid
     if (maxgraderr/maxgrad > 1e-12) {
       printf("othergrad[0] = %g\n", othergrad[0]);
       printf("my_grad[0] = %g\n", my_grad[0]);
-      printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);      
-      //printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
-      // FIXME: FOOO!
-      //retval++;
+      printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
+      printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
+      retval++;
     }
   }
 
@@ -311,7 +310,7 @@ public:
     return f1.grad(n)/f2(n) - f1(n)*f2.grad(n)/f2(n)/f2(n);
   }
   FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return f1.grad(ingrad)/f2 - f1*f2.grad(ingrad)/sqr(f2);
+    return f1.grad(ingrad/f2) - f2.grad(f1*ingrad/sqr(f2));
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -341,33 +340,12 @@ public:
     return f1(n)*f2.grad(n) + f1.grad(n)*f2(n);
   }
   FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return f1*f2.grad(ingrad) + f1.grad(ingrad)*f2;
+    return f2.grad(f1*ingrad) + f1.grad(f2*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     f1.grad(gd, data, ingrad.cwise()*f2(gd, data), outgrad, outpgrad);
     f2.grad(gd, data, ingrad.cwise()*f1(gd, data), outgrad, outpgrad);
-    return;
-    // FIXME:  below is what I *think* it should be!
-    if (outpgrad) {
-      VectorXd g(data), pg(data);
-      g.setZero(); pg.setZero();
-      f1.grad(gd, data, ingrad, &g, &pg);
-      *outgrad += g.cwise() * f2(gd,data);
-      *outpgrad += pg.cwise() * f2(gd,data);
-      g.setZero(); pg.setZero();
-      f2.grad(gd, data, ingrad, &g, &pg);
-      *outgrad += g.cwise() * f1(gd,data);
-      *outpgrad += pg.cwise() * f1(gd,data);
-    } else {
-      VectorXd g(data);
-      g.setZero();
-      f1.grad(gd, data, ingrad, &g, 0);
-      *outgrad += g.cwise() * f2(gd,data);
-      g.setZero();
-      f2.grad(gd, data, ingrad, &g, 0);
-      *outgrad += g.cwise() * f1(gd,data);
-    }
   }
 private:
   FieldFunctional f1, f2;
@@ -392,7 +370,7 @@ public:
     return f.grad(n)/f(n);
   }
   FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return f.grad(ingrad)/f;
+    return f.grad(ingrad/f);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -427,7 +405,7 @@ public:
     return 2*f(n)*f.grad(n);
   }
   FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return 2*f*f.grad(ingrad);
+    return 2*f.grad(f*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

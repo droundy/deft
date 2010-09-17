@@ -267,7 +267,7 @@ public:
     return 0;
   }
   FieldFunctional grad(const FieldFunctional &ingrad) const {
-    return FieldFunctional(new VShellConvolveType(R, direction))(ingrad);
+    return FieldFunctional(new VShellConvolveType(R, direction))((-1)*ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
