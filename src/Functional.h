@@ -19,7 +19,7 @@ public:
   // its output field (i.e. it applies the chain rule).
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
-  virtual double grad(double data) const = 0;
+  virtual double derive(double data) const = 0;
   virtual Functional grad(const Functional &ingrad, bool ispgrad) const = 0;
   virtual Expression printme(const Expression &) const = 0;
 
@@ -132,9 +132,9 @@ public:
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
     if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
   }
-  double grad(double data) const {
-    double out = itsCounter->ptr->grad(data);
-    if (mynext) out += mynext->grad(data);
+  double derive(double data) const {
+    double out = itsCounter->ptr->derive(data);
+    if (mynext) out += mynext->derive(data);
     return out;
   }
   const char *get_name() const { return itsCounter->name; }
@@ -228,7 +228,7 @@ public:
   double transform(double n) const {
     return n*gzero();
   }
-  double grad(double) const {
+  double derive(double) const {
     return gzero();
   }
   Functional grad(const Functional &ingrad, bool) const {

@@ -40,7 +40,7 @@ public:
   double transform(double Veff) const {
     return exp(minusbeta*Veff);
   }
-  double grad(double Veff) const {
+  double derive(double Veff) const {
     return minusbeta*exp(minusbeta*Veff);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {

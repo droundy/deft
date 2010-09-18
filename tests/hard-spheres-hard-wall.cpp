@@ -25,7 +25,7 @@ const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.4257*eta_one;
-const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).grad(nliquid);
+const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).derive(nliquid);
 
 // Here we set up the lattice.
 const double zmax = 80;

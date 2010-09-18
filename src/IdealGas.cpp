@@ -34,8 +34,8 @@ public:
   double transform(double x) const {
     return (x<cut) ? flow(x) : fhigh(x);
   }
-  double grad(double x) const {
-    return (x<cut) ? flow.grad(x) : fhigh.grad(x);
+  double derive(double x) const {
+    return (x<cut) ? flow.derive(x) : fhigh.derive(x);
   }
 
   Functional grad(const Functional &ingrad, bool ispgrad) const {
@@ -48,17 +48,17 @@ public:
       for (int i=0; i<N; i++) {
         double x = data[i];
         if (x<cut) {
-          (*outgrad)[i] += ingrad[i]*flow.grad(x);
-          (*outpgrad)[i] += ingrad[i]*flow.grad(x);
+          (*outgrad)[i] += ingrad[i]*flow.derive(x);
+          (*outpgrad)[i] += ingrad[i]*flow.derive(x);
         } else {
-          (*outgrad)[i] += ingrad[i]*fhigh.grad(x);
-           (*outpgrad)[i] += ingrad[i]*fhigh.grad(x);
+          (*outgrad)[i] += ingrad[i]*fhigh.derive(x);
+           (*outpgrad)[i] += ingrad[i]*fhigh.derive(x);
         }
       }
     } else {
       for (int i=0; i<N; i++) {
         double x = data[i];
-        (*outgrad)[i] += ingrad[i] * ((x<cut) ? flow.grad(x) : fhigh.grad(x));
+        (*outgrad)[i] += ingrad[i] * ((x<cut) ? flow.derive(x) : fhigh.derive(x));
       }
     }
   }

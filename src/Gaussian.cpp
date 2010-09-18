@@ -34,7 +34,7 @@ public:
   double transform(double n) const {
     return n;
   }
-  double grad(double) const {
+  double derive(double) const {
     return 1;
   }
   Functional grad(const Functional &ingrad, bool) const {
@@ -149,7 +149,7 @@ public:
   double transform(double) const {
     return 0;
   }
-  double grad(double) const {
+  double derive(double) const {
     return 0;
   }
   Functional grad(const Functional &ingrad, bool) const {
@@ -299,7 +299,7 @@ public:
   double transform(double) const {
     return 0;
   }
-  double grad(double) const {
+  double derive(double) const {
     return 0;
   }
   Functional grad(const Functional &ingrad, bool) const {

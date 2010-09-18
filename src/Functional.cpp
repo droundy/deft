@@ -189,7 +189,7 @@ public:
   double transform(double) const {
     return 1;
   }
-  double grad(double) const {
+  double derive(double) const {
     return 1; // hokey!
   }
   Functional grad(const Functional &, bool) const {
@@ -214,7 +214,7 @@ public:
   double transform(double) const {
     return c;
   }
-  double grad(double) const {
+  double derive(double) const {
     return 0;
   }
   Functional grad(const Functional &, bool) const {
@@ -245,7 +245,7 @@ public:
   double transform(double) const {
     return c.sum()/c.rows();
   }
-  double grad(double) const {
+  double derive(double) const {
     return 0;
   }
   Functional grad(const Functional &, bool) const {
@@ -292,8 +292,8 @@ public:
   double transform(double n) const {
     return f1(f2(n));
   }
-  double grad(double n) const {
-    return f1.grad(f2(n))*f2.grad(n);
+  double derive(double n) const {
+    return f1.derive(f2(n))*f2.derive(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return f2.grad(f1.grad(ingrad, ispgrad)(f2), ispgrad);
@@ -329,8 +329,8 @@ public:
   double transform(double n) const {
     return f1(n)/f2(n);
   }
-  double grad(double n) const {
-    return f1.grad(n)/f2(n) - f1(n)*f2.grad(n)/f2(n)/f2(n);
+  double derive(double n) const {
+    return f1.derive(n)/f2(n) - f1(n)*f2.derive(n)/f2(n)/f2(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return f1.grad(ingrad/f2, ispgrad) - f2.grad(f1*ingrad/sqr(f2), ispgrad);
@@ -362,8 +362,8 @@ public:
   double transform(double n) const {
     return f1(n)*f2(n);
   }
-  double grad(double n) const {
-    return f1(n)*f2.grad(n) + f1.grad(n)*f2(n);
+  double derive(double n) const {
+    return f1(n)*f2.derive(n) + f1.derive(n)*f2(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return f2.grad(f1*ingrad, ispgrad) + f1.grad(f2*ingrad, ispgrad);
@@ -395,8 +395,8 @@ public:
   double transform(double n) const {
     return log(f(n));
   }
-  double grad(double n) const {
-    return f.grad(n)/f(n);
+  double derive(double n) const {
+    return f.derive(n)/f(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return f.grad(ingrad/f, ispgrad);
@@ -433,8 +433,8 @@ public:
     double x = f(n);
     return x*x;
   }
-  double grad(double n) const {
-    return 2*f(n)*f.grad(n);
+  double derive(double n) const {
+    return 2*f(n)*f.derive(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return 2*f.grad(f*ingrad, ispgrad);
@@ -465,8 +465,8 @@ public:
   double transform(double n) const {
     return f(n);
   }
-  double grad(double n) const {
-    return f.grad(n);
+  double derive(double n) const {
+    return f.derive(n);
   }
   Functional grad(const Functional &ingrad, bool ispgrad) const {
     return Functional(constraint)*f.grad(ingrad, ispgrad);

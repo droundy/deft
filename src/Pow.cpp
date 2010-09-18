@@ -41,7 +41,7 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  double grad(double x) const {
+  double derive(double x) const {
     if (n < 1) return 0;
     double v = n;
     for (int p=1; p < n; p++) v *= x;

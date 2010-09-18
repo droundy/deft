@@ -37,7 +37,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
 
-  const double deriv_double = f.grad(n);
+  const double deriv_double = f.derive(n);
   Grid grad(nr);
   grad.setZero();
   f.integralgrad(gd, nr, &grad);
