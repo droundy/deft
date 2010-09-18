@@ -34,10 +34,10 @@ public:
   Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
-  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, const char *name)
+  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, bool iseven, const char *name)
     : itsCounter(0) {
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived,extra>(f,e), name);
+    init(new ConvolveWith<Derived,extra>(f,e,iseven), name);
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
@@ -210,8 +210,9 @@ extern Functional dV;
 template<typename Derived, typename extra>
 class ConvolveWith : public FunctionalInterface {
 public:
-  ConvolveWith(Derived (*ff)(const GridDescription &, extra), extra e) : f(ff), data(e) {}
-  ConvolveWith(const ConvolveWith &cw) : f(cw.f), data(cw.data) {}
+  ConvolveWith(Derived (*ff)(const GridDescription &, extra), extra e, bool isev)
+    : f(ff), data(e), iseven(isev) {}
+  ConvolveWith(const ConvolveWith &cw) : f(cw.f), data(cw.data), iseven(cw.iseven) {}
 
   EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &x) const {
     Grid out(gd, x);
@@ -231,7 +232,10 @@ public:
     return gzero();
   }
   Functional grad(const Functional &ingrad, bool) const {
-    return Functional(new ConvolveWith(f, data))(ingrad);
+    if (iseven)
+      return Functional(new ConvolveWith(f, data, iseven))(ingrad);
+    else
+      return Functional(new ConvolveWith(f, data, iseven))(-1*ingrad);
   }
   EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -249,4 +253,5 @@ public:
 private:
   Derived (*f)(const GridDescription &, extra);
   extra data;
+  bool iseven;
 };
