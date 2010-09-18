@@ -5,3 +5,5 @@ operator()(const FieldFunctional &a, const FieldFunctional &b)
 operator()(const FieldFunctional &a, const FieldFunctional &b, const FieldFunctional &c)
 
 which is useful for implementing FMT
+
+> I implemented something that will work for this (but differently), so it is now [[done]].
