@@ -65,11 +65,11 @@ Functional Gaussian(double width) {
 static double myR, mydr;
 
 Functional StepConvolve(double R) {
-  return Functional(stepper, R, true, "step");
+  return Functional(function_for_convolve<step_op<complex> >, R, true, "step");
 }
 
 Functional ShellConvolve(double R) {
-  return Functional(sheller, R, true, "shell");
+  return Functional(function_for_convolve<shell_op<complex> >, R, true, "shell");
 }
 
 static complex xdelta(Reciprocal kvec) {
@@ -193,168 +193,22 @@ Functional zShellConvolve(double R) {
   return Functional(new VShellConvolveType(R, 2));
 }
 
-
-static double xydelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 0) {
-    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]*kvec[1]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
-  } else {
-    return 0;
-  }
-}
-
-static complex yzdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 0) {
-    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]*kvec[2]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
-  } else {
-    return 0;
-  }
-}
-
-static complex zxdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 0) {
-    return -exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]*kvec[0]/(k*k*k*k)*((3-kR*kR)*sin(kR)/kR - 3*cos(kR));
-  } else {
-    return 0;
-  }
-}
-
-
-static double xxdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double k2 = k*k;
-  double kR = k*myR;
-  if (kR > 0) {
-    double cos2 = kvec[0]*kvec[0]/k2;
-    return exp(-spreading*k*k*mydr*mydr)*
-      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
-                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
-  } else {
-    return 0;
-  }
-}
-
-static complex yydelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double k2 = k*k;
-  double kR = k*myR;
-  if (kR > 0) {
-    double cos2 = kvec[1]*kvec[1]/k2;
-    return exp(-spreading*k*k*mydr*mydr)*
-      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
-                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
-  } else {
-    return 0;
-  }
-}
-
-static complex zzdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double k2 = k*k;
-  double kR = k*myR;
-  if (kR > 0) {
-    double cos2 = kvec[2]*kvec[2]/k2;
-    return exp(-spreading*k*k*mydr*mydr)*
-      (4*M_PI*(myR*myR))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
-                          cos(kR)/(kR*kR)*(-1 + 3*cos2));
-  } else {
-    return 0;
-  }
-}
-
-class TShellConvolveType : public FunctionalInterface {
-public:
-  TShellConvolveType(double radius, int dir1, int dir2) : R(radius), d1(dir1), d2(dir2) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    ReciprocalGrid recip(gd);
-    {
-      const Grid out(gd, data);
-      recip = out.fft();
-      // We want to free out immediately to save memory!
-    }
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    switch (d1 + d2*3) {
-    case 0: recip.MultiplyBy(xxdelta);
-      break;
-    case 1: case 3: recip.MultiplyBy(xydelta);
-      break;
-    case 4: recip.MultiplyBy(yydelta);
-      break;
-    case 5: case 7: recip.MultiplyBy(yzdelta);
-      break;
-    case 8: recip.MultiplyBy(zzdelta);
-      break;
-    case 6: case 2: recip.MultiplyBy(zxdelta);
-      break;
-    }
-    return recip.ifft();
-  }
-  double transform(double) const {
-    return 0;
-  }
-  double derive(double) const {
-    return 0;
-  }
-  Functional grad(const Functional &ingrad, bool) const {
-    return Functional(new TShellConvolveType(R, d1, d2))(ingrad);
-  }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid out(gd, ingrad);
-    ReciprocalGrid recip = out.fft();
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    switch (d1 + d2*3) {
-    case 0: recip.MultiplyBy(xxdelta);
-      break;
-    case 1: case 3: recip.MultiplyBy(xydelta);
-      break;
-    case 4: recip.MultiplyBy(yydelta);
-      break;
-    case 5: case 7: recip.MultiplyBy(yzdelta);
-      break;
-    case 8: recip.MultiplyBy(zzdelta);
-      break;
-    case 6: case 2: recip.MultiplyBy(zxdelta);
-      break;
-    }
-    out = recip.ifft();
-    *outgrad += out;
-
-    // FIXME: we will want to propogate preexisting preconditioning
-    if (outpgrad) *outpgrad += out;
-  }
-  Expression printme(const Expression &x) const {
-    return funexpr("TShellConvolve", Expression("R"))(x);
-  }
-private:
-  double R;
-  int d1, d2;
-};
-
 Functional xyShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 0, 1));
+  return Functional(function_for_convolve<xyshell_op<complex> >, R, true, "zyshell");
 }
 Functional yzShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 1, 2));
+  return Functional(function_for_convolve<yzshell_op<complex> >, R, true, "yzshell");
 }
 Functional zxShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 2, 0));
+  return Functional(function_for_convolve<zxshell_op<complex> >, R, true, "zxshell");
 }
 
 Functional xxShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 0, 0));
+  return Functional(function_for_convolve<xxshell_op<complex> >, R, true, "xxshell");
 }
 Functional yyShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 1, 1));
+  return Functional(function_for_convolve<yyshell_op<complex> >, R, true, "yyshell");
 }
 Functional zzShellConvolve(double R) {
-  return Functional(new TShellConvolveType(R, 2, 2));
+  return Functional(function_for_convolve<zzshell_op<complex> >, R, true, "zzshell");
 }

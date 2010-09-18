@@ -241,181 +241,126 @@ struct zxshell_op : public base_rop<Scalar> {
   double R, dr;
 };
 
+template<typename Scalar>
+struct xxshell_op : public base_rop<Scalar> {
+  xxshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double k2 = k*k;
+    double kR = k*R;
+    if (kR > 0) {
+      double cos2 = kvec[0]*kvec[0]/k2;
+      return exp(-spreading*k*k*dr*dr)*
+        (4*M_PI*(R*R))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                        cos(kR)/(kR*kR)*(-1 + 3*cos2));
+    } else
+      return 0;
+  }
+  double R, dr;
+};
+
+template<typename Scalar>
+struct yyshell_op : public base_rop<Scalar> {
+  yyshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double k2 = k*k;
+    double kR = k*R;
+    if (kR > 0) {
+      double cos2 = kvec[1]*kvec[1]/k2;
+      return exp(-spreading*k*k*dr*dr)*
+        (4*M_PI*(R*R))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                        cos(kR)/(kR*kR)*(-1 + 3*cos2));
+    } else
+      return 0;
+  }
+  double R, dr;
+};
+
+template<typename Scalar>
+struct zzshell_op : public base_rop<Scalar> {
+  zzshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double k2 = k*k;
+    double kR = k*R;
+    if (kR > 0) {
+      double cos2 = kvec[2]*kvec[2]/k2;
+      return exp(-spreading*k*k*dr*dr)*
+        (4*M_PI*(R*R))*(sin(kR)/kR*(-1./3 + cos2 - 3*cos2/(kR*kR) + 1/(kR*kR)) +
+                        cos(kR)/(kR*kR)*(-1 + 3*cos2));
+    } else
+      return 0;
+  }
+  double R, dr;
+};
+
 namespace Eigen {
-  template<typename Scalar>
-  struct ei_functor_traits<g2_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<gx_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<gy_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<gz_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<step_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<shell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<xshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<yshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<zshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<xyshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<yzshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
-  template<typename Scalar>
-  struct ei_functor_traits<zxshell_op<Scalar> > {
-    enum {
-      Cost = NumTraits<Scalar>::AddCost,
-      PacketAccess = false,
-      IsRepeatable = true
-    };
-  };
+#define ADD_ONE_ROP(t) template<typename Scalar> \
+                       struct ei_functor_traits<t<Scalar> > { \
+                         enum { \
+                           Cost = NumTraits<Scalar>::AddCost, \
+                           PacketAccess = false,              \
+                           IsRepeatable = true                \
+                         }; \
+                       }
+  ADD_ONE_ROP(g2_op);
+  ADD_ONE_ROP(gx_op);
+  ADD_ONE_ROP(gy_op);
+  ADD_ONE_ROP(gz_op);
+  ADD_ONE_ROP(step_op);
+  ADD_ONE_ROP(shell_op);
+  ADD_ONE_ROP(xshell_op);
+  ADD_ONE_ROP(yshell_op);
+  ADD_ONE_ROP(zshell_op);
+
+  ADD_ONE_ROP(xyshell_op);
+  ADD_ONE_ROP(yzshell_op);
+  ADD_ONE_ROP(zxshell_op);
+
+  ADD_ONE_ROP(xxshell_op);
+  ADD_ONE_ROP(yyshell_op);
+  ADD_ONE_ROP(zzshell_op);
 } // namespace Eigen
 
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<g2_op<complex>, VectorXcd> g2(const GridDescription &gd) {
-  return Eigen::CwiseNullaryOp<g2_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, g2_op<complex>(gd));
+#define MAKE_FUNCTION_ROP(t,f) \
+EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<t<complex>, VectorXcd> f(const GridDescription &gd) { \
+  return Eigen::CwiseNullaryOp<t<complex>, VectorXcd>(gd.NxNyNzOver2, 1, t<complex>(gd)); \
 }
 
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<gx_op<complex>, VectorXcd> gx(const GridDescription &gd) {
-  return Eigen::CwiseNullaryOp<gx_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, gx_op<complex>(gd));
-}
+MAKE_FUNCTION_ROP(g2_op,g2)
 
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<gy_op<complex>, VectorXcd> gy(const GridDescription &gd) {
-  return Eigen::CwiseNullaryOp<gy_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, gy_op<complex>(gd));
-}
+MAKE_FUNCTION_ROP(gx_op,gx)
+MAKE_FUNCTION_ROP(gy_op,gy)
+MAKE_FUNCTION_ROP(gz_op,gz)
 
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<gz_op<complex>, VectorXcd> gz(const GridDescription &gd) {
-  return Eigen::CwiseNullaryOp<gz_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, gz_op<complex>(gd));
-}
+#define MAKE_FUNCTION_WITH_DOUBLE_ROP(t,f) \
+  EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<t<complex>, VectorXcd> f(const GridDescription &gd, double R) { \
+    return Eigen::CwiseNullaryOp<t<complex>, VectorXcd>(gd.NxNyNzOver2, 1, t<complex>(gd, R)); \
+  }
 
-// step
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<step_op<complex>, VectorXcd> step(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<step_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, step_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE step_op<complex> stepper(const GridDescription &gd, double R) {
-  return step_op<complex>(gd,R);
-}
+MAKE_FUNCTION_WITH_DOUBLE_ROP(step_op,step)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(shell_op,shell)
 
-// shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<shell_op<complex>, VectorXcd> shell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<shell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, shell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE shell_op<complex> sheller(const GridDescription &gd, double R) {
-  return shell_op<complex>(gd,R);
-}
+MAKE_FUNCTION_WITH_DOUBLE_ROP(xshell_op,xshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(yshell_op,yshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(zshell_op,zshell)
 
-// x shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<xshell_op<complex>, VectorXcd> xshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<xshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, xshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE xshell_op<complex> xsheller(const GridDescription &gd, double R) {
-  return xshell_op<complex>(gd,R);
-}
+MAKE_FUNCTION_WITH_DOUBLE_ROP(xyshell_op,xyshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(yzshell_op,yzshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(zxshell_op,zxshell)
 
-// y shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<yshell_op<complex>, VectorXcd> yshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<yshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, yshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE yshell_op<complex> ysheller(const GridDescription &gd, double R) {
-  return yshell_op<complex>(gd,R);
-}
+MAKE_FUNCTION_WITH_DOUBLE_ROP(xxshell_op,xxshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(yyshell_op,yyshell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(zzshell_op,zzshell)
 
-// z shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<zshell_op<complex>, VectorXcd> zshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<zshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, zshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE zshell_op<complex> zsheller(const GridDescription &gd, double R) {
-  return zshell_op<complex>(gd,R);
-}
-
-// xy shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<xyshell_op<complex>, VectorXcd> xyshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<xyshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, xyshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE xyshell_op<complex> xysheller(const GridDescription &gd, double R) {
-  return xyshell_op<complex>(gd,R);
-}
-
-// yz shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<yzshell_op<complex>, VectorXcd> yzshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<yzshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, yzshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE yzshell_op<complex> yzsheller(const GridDescription &gd, double R) {
-  return yzshell_op<complex>(gd,R);
-}
-
-// zx shell
-EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<zxshell_op<complex>, VectorXcd> zxshell(const GridDescription &gd, double R) {
-  return Eigen::CwiseNullaryOp<zxshell_op<complex>, VectorXcd>(gd.NxNyNzOver2, 1, zxshell_op<complex>(gd,R));
-}
-EIGEN_STRONG_INLINE zxshell_op<complex> zxsheller(const GridDescription &gd, double R) {
-  return zxshell_op<complex>(gd,R);
+template<typename T>
+EIGEN_STRONG_INLINE T function_for_convolve(const GridDescription &gd, double R) {
+  return T(gd,R);
 }
