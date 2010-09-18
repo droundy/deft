@@ -168,6 +168,16 @@ Expression Expression::operator*(const Expression &e) const {
 }
 
 Expression Expression::operator/(const Expression &e) const {
+  // First, let's make a few optimizations...
+  if (type == "constant" && value == 0) {
+    return *this;
+  } else if (e.type == "constant" && e.value == 1) {
+    return *this;
+  } else if (e.type == "constant" && e.value == -1) {
+    return - *this;
+  } else if (e.type == "constant" && type == "constant") {
+    return Expression(value/e.value);
+  }
   Expression out;
   out.name = "/";
   out.type = "*/";
@@ -212,7 +222,7 @@ std::string Expression::printme() const {
     // Multiplication
     std::string a1 = arg1->printme();
     if (arg1->type == "+-") a1 = "(" + a1 + ")";
-    std::string a2 = arg2->printme();
+    std::string a2 = arg2->printme() ;
     if (arg2->type == "+-" || arg2->type == "*/") a2 = "(" + a2 + ")";
     return a1 + name + a2;
   } else if (type == "unary" && name == "-") {
@@ -233,7 +243,7 @@ std::string Expression::printme() const {
     return out;
   } else if (type == "method") {
     std::string out = arg1->printme();
-    if (arg1->type == "binary") out = "(" + out + ")";
+    if (arg1->type == "+-" || arg1->type == "*/" || arg1->type == "unary") out = "(" + out + ")";
     out += name;
     if (arg2) {
       out += arg2->printme();

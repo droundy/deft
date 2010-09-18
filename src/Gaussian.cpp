@@ -65,11 +65,11 @@ Functional Gaussian(double width) {
 static double myR, mydr;
 
 Functional StepConvolve(double R) {
-  return Functional(function_for_convolve<step_op<complex> >, R, true, "step");
+  return Functional(function_for_convolve<step_op<complex> >, R, true);
 }
 
 Functional ShellConvolve(double R) {
-  return Functional(function_for_convolve<shell_op<complex> >, R, true, "shell");
+  return Functional(function_for_convolve<shell_op<complex> >, R, true);
 }
 
 static complex xdelta(Reciprocal kvec) {
@@ -184,31 +184,34 @@ private:
 };
 
 Functional xShellConvolve(double R) {
+  //return Functional(function_for_convolve<xshell_op<complex> >, R, false);
   return Functional(new VShellConvolveType(R, 0));
 }
 Functional yShellConvolve(double R) {
+  //return Functional(function_for_convolve<yshell_op<complex> >, R, false);
   return Functional(new VShellConvolveType(R, 1));
 }
 Functional zShellConvolve(double R) {
+  //return Functional(function_for_convolve<zshell_op<complex> >, R, false);
   return Functional(new VShellConvolveType(R, 2));
 }
 
 Functional xyShellConvolve(double R) {
-  return Functional(function_for_convolve<xyshell_op<complex> >, R, true, "zyshell");
+  return Functional(function_for_convolve<xyshell_op<complex> >, R, true);
 }
 Functional yzShellConvolve(double R) {
-  return Functional(function_for_convolve<yzshell_op<complex> >, R, true, "yzshell");
+  return Functional(function_for_convolve<yzshell_op<complex> >, R, true);
 }
 Functional zxShellConvolve(double R) {
-  return Functional(function_for_convolve<zxshell_op<complex> >, R, true, "zxshell");
+  return Functional(function_for_convolve<zxshell_op<complex> >, R, true);
 }
 
 Functional xxShellConvolve(double R) {
-  return Functional(function_for_convolve<xxshell_op<complex> >, R, true, "xxshell");
+  return Functional(function_for_convolve<xxshell_op<complex> >, R, true);
 }
 Functional yyShellConvolve(double R) {
-  return Functional(function_for_convolve<yyshell_op<complex> >, R, true, "yyshell");
+  return Functional(function_for_convolve<yyshell_op<complex> >, R, true);
 }
 Functional zzShellConvolve(double R) {
-  return Functional(function_for_convolve<zzshell_op<complex> >, R, true, "zzshell");
+  return Functional(function_for_convolve<zzshell_op<complex> >, R, true);
 }

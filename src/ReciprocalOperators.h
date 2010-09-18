@@ -37,6 +37,7 @@ struct base_rop : private GridDescription {
     return func(Lat.toReciprocal(rvec));
   }
   virtual Scalar func(Reciprocal) const = 0;
+  virtual const char *name() const = 0;
 };
 
 template<typename Scalar>
@@ -45,6 +46,7 @@ struct g2_op : public base_rop<Scalar> {
   Scalar func(Reciprocal g) const {
     return g.squaredNorm();
   }
+  const char *name() const { return "g2"; }
 };
 
 template<typename Scalar>
@@ -53,6 +55,7 @@ struct gx_op : public base_rop<Scalar> {
   Scalar func(Reciprocal g) const {
     return g(0);
   }
+  const char *name() const { return "gx"; }
 };
 
 template<typename Scalar>
@@ -61,6 +64,7 @@ struct gy_op : public base_rop<Scalar> {
   Scalar func(Reciprocal g) const {
     return g(1);
   }
+  const char *name() const { return "gy"; }
 };
 
 template<typename Scalar>
@@ -69,6 +73,7 @@ struct gz_op : public base_rop<Scalar> {
   Scalar func(Reciprocal g) const {
     return g(2);
   }
+  const char *name() const { return "gz"; }
 };
 
 static const double spreading = 3.0;
@@ -79,6 +84,7 @@ struct step_op : public base_rop<Scalar> {
     R3 = R*R*R;
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "step"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -103,6 +109,7 @@ struct shell_op : public base_rop<Scalar> {
   shell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "shell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -126,6 +133,7 @@ struct xshell_op : public base_rop<Scalar> {
   xshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "xshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -150,6 +158,7 @@ struct yshell_op : public base_rop<Scalar> {
   yshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "yshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -174,6 +183,7 @@ struct zshell_op : public base_rop<Scalar> {
   zshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "zshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -198,6 +208,7 @@ struct xyshell_op : public base_rop<Scalar> {
   xyshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "xyshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -214,6 +225,7 @@ struct yzshell_op : public base_rop<Scalar> {
   yzshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "yzshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -230,6 +242,7 @@ struct zxshell_op : public base_rop<Scalar> {
   zxshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "zxshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double kR = k*R;
@@ -246,6 +259,7 @@ struct xxshell_op : public base_rop<Scalar> {
   xxshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "xxshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double k2 = k*k;
@@ -266,6 +280,7 @@ struct yyshell_op : public base_rop<Scalar> {
   yyshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "yyshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double k2 = k*k;
@@ -286,6 +301,7 @@ struct zzshell_op : public base_rop<Scalar> {
   zzshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
   }
+  const char *name() const { return "zzshell"; }
   Scalar func(Reciprocal kvec) const {
     double k = kvec.norm();
     double k2 = k*k;

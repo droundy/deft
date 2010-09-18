@@ -1,0 +1,34 @@
+
+Running finite difference test on white bear functional:
+choosing delta of 1e-1 based on directional grad 1.21951 and energy 0.0528542
+    eps^2 =        1.0000000000000002 deltaE nan
+FD   Ratio:                       nan (grad ~ nan)
+FD sigfigs:                       nan
+    eps^2 =        0.0100000000000000 deltaE 0.0248965264752
+FD   Ratio:        1.0207576538733867 (grad ~ 1.24483)
+FD sigfigs:        0.0000000000000021
+    eps^2 =        0.0001000000000000 deltaE 0.00243952176943
+FD   Ratio:        1.0002039924813684 (grad ~ 1.21976)
+FD sigfigs:        0.0000000000000217
+    eps^2 =        0.0000010000000000 deltaE 0.00024390292014
+FD   Ratio:        1.0000020395731550 (grad ~ 1.21951)
+FD sigfigs:        0.0000000000002167
+    eps^2 =        0.0000000100000000 deltaE 2.43902427656e-05
+FD   Ratio:        1.0000000203886845 (grad ~ 1.21951)
+FD sigfigs:        0.0000000000021670
+    eps^2 =        0.0000000001000000 deltaE 2.43902422727e-06
+FD   Ratio:        1.0000000001796059 (grad ~ 1.21951)
+FD sigfigs:        0.0000000000216702
+    eps^2 =        0.0000000000010000 deltaE 2.43902422155e-07
+FD   Ratio:        0.9999999978353697 (grad ~ 1.21951)
+FD sigfigs:        0.0000000002167022
+    eps^2 =        0.0000000000000100 deltaE 2.43902421038e-08
+FD   Ratio:        0.9999999932550055 (grad ~ 1.21951)
+FD sigfigs:        0.0000000021670221
+Passed on basis of reasonable scaling (1.74129e-06) and accuracy (1.79606e-10).
+
+Running finite difference test on rosenfeld functional:
+choosing delta of 1e-1 based on directional grad 1.30725 and energy 0.0548744
+    eps^2 =        1.0000000000000002 deltaE nan
+FD   Ratio:                       nan (grad ~ nan)
+FD sigfigs:                       nan

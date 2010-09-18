@@ -26,7 +26,6 @@ void test_expression(const Expression &e, const char *expected) {
   printf("\n* Testing \"%s\" *\n", expected);
   for (unsigned i=0;i<strlen(expected);i++) printf("*");
   printf("**************\n");
-  int retval = 0;
 
   if (e.printme() != expected) {
     printf("FAIL: Got instead: \"%s\"\n", e.printme().c_str());
@@ -36,15 +35,30 @@ void test_expression(const Expression &e, const char *expected) {
 
 
 int main(int, char **argv) {
-
-  test_expression(IdealGas(1e-3).printme(Expression("x")),
+  const double kT = 1e3, R = 2.7;
+  const double four_pi_r2 = 4*M_PI*R*R;
+  Functional n2 = ShellConvolve(R);
+  Functional n3 = StepConvolve(R);
+  Functional one_minus_n3 = 1 - n3;
+  
+  test_expression(IdealGas(kT).printme(Expression("x")),
                   "kT*choose(1e-90, (x + -1e-90)*-207.2326583694641 + -2.082326583694641e-88, x*x.log() - x)");
 
-  test_expression(sqr(xShellConvolve(3)).printme(Expression("x")),
+  test_expression(sqr(xShellConvolve(R)).printme(Expression("x")),
                   "VShellConvolve(R)(x).square()");
 
-  test_expression(sqr(xShellConvolve(3)).grad(dV, false).printme(Expression("x")),
+  test_expression(sqr(xShellConvolve(R)).grad(dV, false).printme(Expression("x")),
                   "VShellConvolve(R)(-VShellConvolve(R)(x)*gd.dvolume)*2");
+
+  
+  test_expression(((-1/four_pi_r2)*n2).printme(Expression("n")),
+                  "ifft(gd, shell().cwise()*fft(gd, n))*-0.01091597689244824");
+
+  Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
+  test_expression(phi1.printme(Expression("n")), "ifft(gd, shell().cwise()*fft(gd, n))*-0.01091597689244824*(1 - ifft(gd, step().cwise()*fft(gd, n))).log()");
+
+  //  test_expression(HardSpheres(kT, R).printme(Expression("n")),
+  //                  "");
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

@@ -34,10 +34,12 @@ public:
   Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
-  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, bool iseven, const char *name)
+  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, bool iseven)
     : itsCounter(0) {
+    Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
+    GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived,extra>(f,e,iseven), name);
+    init(new ConvolveWith<Derived,extra>(f,e,iseven), f(gd, e).name());
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
@@ -248,7 +250,10 @@ public:
     if (outpgrad) *outpgrad += out;
   }
   Expression printme(const Expression &x) const {
-    return funexpr("convolve?", x);
+    Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
+    Derived c(GridDescription(lat, 2, 2, 2), data);
+    Expression gd("gd");
+    return funexpr("ifft", gd, funexpr(c.name()).method("cwise") * funexpr("fft", gd, x));
   }
 private:
   Derived (*f)(const GridDescription &, extra);
