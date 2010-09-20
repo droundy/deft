@@ -16,9 +16,13 @@ public:
     delete arg2;
   }
 
-  std::string name, type;
+  std::string name, kind, type;
   Expression *arg1, *arg2, *arg3;
   double value;
+  Expression set_type(const char *t) {
+    type = t;
+    return *this;
+  }
 
   Expression operator+(const Expression &) const;
   Expression operator-() const;
@@ -53,3 +57,6 @@ inline Expression operator*(double a, const Expression &b) {
 inline Expression operator/(double a, const Expression &b) {
   return Expression(a) / b;
 }
+
+Expression fft(const Expression &x);
+Expression ifft(const Expression &x);

@@ -198,7 +198,7 @@ public:
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
   }
   Expression printme(const Expression &) const {
-    return Expression("gd.dvolume");
+    return Expression("gd.dvolume").set_type("double");
   }
 };
 
@@ -223,7 +223,7 @@ public:
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
   }
   Expression printme(const Expression &) const {
-    if (name) return Expression(name);
+    if (name) return Expression(name).set_type("double");
     return c;
   }
 private:
@@ -342,7 +342,7 @@ public:
     f2.grad(gd, data, (ingrad.cwise()*f1(gd, data)).cwise()/((-out2).cwise()*out2), outgrad, outpgrad);
   }
   Expression printme(const Expression &x) const {
-    return f1.printme(x).method("cwise") / f2.printme(x);
+    return f1.printme(x) / f2.printme(x);
   }
 private:
   Functional f1, f2;

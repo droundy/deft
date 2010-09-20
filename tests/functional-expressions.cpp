@@ -42,7 +42,7 @@ int main(int, char **argv) {
   Functional one_minus_n3 = 1 - n3;
   
   test_expression(IdealGas(kT).printme(Expression("x")),
-                  "kT*choose(1e-90, (x + -1e-90)*-207.2326583694641 + -2.082326583694641e-88, x*x.log() - x)");
+                  "kT*choose(1e-90, (x + -1e-90)*-207.2326583694641 + -2.082326583694641e-88, x.cwise()*x.log() - x)");
 
   test_expression(sqr(xShellConvolve(R)).printme(Expression("x")),
                   "VShellConvolve(R)(x).square()");
@@ -55,7 +55,8 @@ int main(int, char **argv) {
                   "ifft(gd, shell().cwise()*fft(gd, n))*-0.01091597689244824");
 
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
-  test_expression(phi1.printme(Expression("n")), "ifft(gd, shell().cwise()*fft(gd, n))*-0.01091597689244824*(1 - ifft(gd, step().cwise()*fft(gd, n))).log()");
+  test_expression(phi1.printme(Expression("n")),
+                  "(ifft(gd, shell().cwise()*fft(gd, n))*-0.01091597689244824).cwise()*(1 - ifft(gd, step().cwise()*fft(gd, n))).log()");
 
   //  test_expression(HardSpheres(kT, R).printme(Expression("n")),
   //                  "");

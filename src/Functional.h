@@ -252,8 +252,7 @@ public:
   Expression printme(const Expression &x) const {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     Derived c(GridDescription(lat, 2, 2, 2), data);
-    Expression gd("gd");
-    return funexpr("ifft", gd, funexpr(c.name()).method("cwise") * funexpr("fft", gd, x));
+    return ifft(funexpr(c.name()).set_type("ReciprocalGrid") * fft(x));
   }
 private:
   Derived (*f)(const GridDescription &, extra);
