@@ -39,15 +39,15 @@ ReciprocalGrid::ReciprocalGrid(const GridDescription &gdin) : VectorXcd(gdin.NxN
 ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x) : VectorXcd(x), gd(x.gd) {
 }
 
-Grid ReciprocalGrid::ifft() const {
+Grid ifft(const GridDescription &gd, const VectorXcd &rg) {
   Grid out(gd);
-  const complex *mydata = data();
+  const complex *mydata = rg.data();
   fftw_plan p = fftw_plan_dft_c2r_3d(gd.Nx, gd.Ny, gd.Nz, (fftw_complex *)mydata, out.data(), FFTW_MEASURE);
   fftw_execute(p);
   fftw_destroy_plan(p);
   return out;
-}
 
+}
 void ReciprocalGrid::MultiplyBy(double f(Reciprocal)) {
   for (int x=0; x<gd.Nx; x++) {
     for (int y=0; y<gd.Ny; y++) {

@@ -8,6 +8,8 @@
 
 class Grid;
 
+Grid ifft(const GridDescription &gd, const VectorXcd &rg);
+
 class ReciprocalGrid : public VectorXcd {
 public:
   explicit ReciprocalGrid(const GridDescription &);
@@ -21,7 +23,10 @@ public:
     return *this;
   }
 
-  Grid ifft() const;
+  Grid ifft() const {
+    return ::ifft(gd, *this);
+  }
+
   void MultiplyBy(double f(Reciprocal));
   void MultiplyBy(complex f(Reciprocal));
 

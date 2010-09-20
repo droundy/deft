@@ -10,6 +10,8 @@ static const double default_eps_size = 1000.0;
 
 class ReciprocalGrid;
 
+ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g);
+
 class Grid : public VectorXd {
 public:
   explicit Grid(const GridDescription &);
