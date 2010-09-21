@@ -25,4 +25,6 @@ int main(int, char **) {
   (kT + x).create_header("tests/generated/sum.h", "Sum", "kT");
   log(x).create_header("tests/generated/log.h", "Log");
   log(1-x).create_header("tests/generated/log-one-minus-x.h", "LogOneMinusX");
+  log(1-StepConvolve(R)).create_header("tests/generated/log-one-minus-nbar.h", "LogOneMinusNbar", "R");
+  sqr(xShellConvolve(R)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", "R");
 }

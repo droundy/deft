@@ -100,6 +100,16 @@ Expression Expression::operator()(const Expression &e) const {
   return out;
 }
 
+Expression Expression::operator()(const Expression &e, const Expression &f) const {
+  Expression out;
+  out.name = "(";
+  out.kind = "method";
+  out.arg1 = new Expression(*this);
+  out.arg2 = new Expression(e);
+  out.arg3 = new Expression(f);
+  return out;
+}
+
 Expression Expression::operator+(const Expression &e) const {
   if (kind == "constant" && value == 0) {
     return e;

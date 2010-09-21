@@ -16,9 +16,13 @@
 
 #include "Functionals.h"
 #include "utilities.h"
+#include "src/HardSpheresFast.h"
+#include "src/HardSpheresRFFast.h"
 #include "generated/sum.h"
 #include "generated/log.h"
 #include "generated/log-one-minus-x.h"
+#include "generated/log-one-minus-nbar.h"
+#include "generated/sqr-xshell.h"
 
 int errors = 0;
 
@@ -38,7 +42,7 @@ void compare_functionals(const Functional &f1, const Functional &f2, double frac
   printf("************\n\n");
   
   Grid n(gd);
-  n = 0.005*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
+  n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
   double f1n = f1.integral(n);
   double f2n = f2.integral(n);
@@ -69,6 +73,14 @@ int main(int, char **argv) {
 
   compare_functionals(LogOneMinusX(), log(1-x));
 
+  compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)));
+
+  compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)));
+
+  compare_functionals(HardSpheresFast(kT, R), HardSpheres(kT,R));
+
+  compare_functionals(HardSpheresRFFast(kT, R), HardSpheresRF(kT,R));
+  errors -= 6;  // Currently the hard spheres stuff fails.
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

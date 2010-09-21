@@ -11,7 +11,7 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/EffectivePotentialToDensity.cpp
 
 bin_PROGRAMS = deft optimize-functionals
-deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
+deft_SOURCES = src/deft.cpp $(GENERIC_CODE) src/HardSpheresFast.h
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
 
 src/HardSpheresFast.h: optimize-functionals
@@ -21,6 +21,7 @@ tests/generated/sum.h: tests/generating-code.test
 	test -d tests/generated || mkdir tests/generated
 	tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
+tests/hard-spheres-fast.o: src/HardSpheresFast.h
 
 check_PROGRAMS = \
 	tests/generating-code.test \

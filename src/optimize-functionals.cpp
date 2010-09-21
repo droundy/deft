@@ -23,4 +23,5 @@ const double R = 2.7;
 int main(int, char **) {
   IdealGas(kT).create_header("src/IdealGasFast.h", "IdealGasFast", "kT");
   HardSpheres(kT, R).create_header("src/HardSpheresFast.h", "HardSpheresFast", "kT", "R");
+  HardSpheresRF(kT, R).create_header("src/HardSpheresRFFast.h", "HardSpheresRFFast", "kT", "R");
 }

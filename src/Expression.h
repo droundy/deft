@@ -30,6 +30,7 @@ public:
   Expression operator*(const Expression &) const;
   Expression operator/(const Expression &) const;
   Expression operator()(const Expression &) const;
+  Expression operator()(const Expression &, const Expression &) const;
   Expression method(const char *) const;
   Expression method(const char *, const Expression &) const;
   Expression method(const char *, const Expression &, const Expression &) const;

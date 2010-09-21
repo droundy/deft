@@ -52,7 +52,7 @@ public:
     if (outpgrad) *outpgrad += out;
   }
   Expression printme(const Expression &x) const {
-    return funexpr("Gaussian", Expression("width"))(x);
+    return funexpr("Gaussian", Expression("width"))(Expression("gd"), x);
   }
 private:
   double width, kfac;
@@ -177,10 +177,10 @@ public:
   }
   Expression printme(const Expression &x) const {
     switch (direction) {
-    case 0: return funexpr("xShellConvolve", Expression("R"))(x);
-    case 1: return funexpr("yShellConvolve", Expression("R"))(x);
+    case 0: return funexpr("xShellConvolve", Expression("R"))(Expression("gd"), x);
+    case 1: return funexpr("yShellConvolve", Expression("R"))(Expression("gd"), x);
     default:
-      return funexpr("xShellConvolve", Expression("R"))(x);
+      return funexpr("zShellConvolve", Expression("R"))(Expression("gd"), x);
     }
   }
 private:
