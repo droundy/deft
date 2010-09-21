@@ -17,11 +17,12 @@
 #include "Functionals.h"
 #include "utilities.h"
 
-const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
 
 int main(int, char **) {
-  Functional kT(1e-3);
+  Functional kT(water_prop.kT), x(Identity());
   kT.set_name("kT");
-  (kT + Identity()).create_header("tests/generated/sum.h", "Sum", "kT");
+  (kT + x).create_header("tests/generated/sum.h", "Sum", "kT");
+  log(x).create_header("tests/generated/log.h", "Log");
+  log(1-x).create_header("tests/generated/log-one-minus-x.h", "LogOneMinusX");
 }

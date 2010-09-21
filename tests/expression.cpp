@@ -26,7 +26,6 @@ void test_expression(const Expression &e, const char *expected) {
   printf("\n* Testing \"%s\" *\n", expected);
   for (unsigned i=0;i<strlen(expected);i++) printf("*");
   printf("**************\n");
-  int retval = 0;
 
   if (e.printme() != expected) {
     printf("FAIL: Got instead: \"%s\"\n", e.printme().c_str());
@@ -39,7 +38,7 @@ int main(int, char **argv) {
   Expression foobar("foobar"), foo("foo"), bar("bar");
   test_expression(foobar, "foobar");
   test_expression(0, "0");
-  test_expression(1 + foobar, "1 + foobar");
+  test_expression(1 + foobar, "VectorXd::Ones(gd.NxNyNz) + foobar");
   test_expression(2 * foobar, "2*foobar");
   test_expression(2 / foobar, "2/foobar");
   test_expression(1 * foobar, "foobar");
@@ -49,7 +48,7 @@ int main(int, char **argv) {
 
   // Test that functions work
   test_expression(funexpr("f", 3), "f(3)");
-  test_expression(funexpr("f", foobar + 3), "f(foobar + 3)");
+  test_expression(funexpr("f", foobar + 3), "f(foobar + 3*VectorXd::Ones(gd.NxNyNz))");
 
   // Test that methods work
   test_expression(foobar.method("foo"), "foobar.foo()");
@@ -58,13 +57,15 @@ int main(int, char **argv) {
   test_expression((foo + bar).method("foo", bar, bar + foo), "(foo + bar).foo(bar, bar + foo)");
 
   // Test associativity...
-  test_expression(1 + foo * bar, "1 + foo*bar");
-  test_expression((1 + foo) * bar, "(1 + foo)*bar");
-  test_expression((bar + 1) + foo, "bar + 1 + foo");
-  test_expression(bar + (1 + foo), "bar + (1 + foo)");
-  test_expression(1 + 1 + foo, "2 + foo");
+  test_expression(-(foo * bar), "-(foo.cwise()*bar)");
+  test_expression(-foo * bar, "(-foo).cwise()*bar");
+  test_expression(1 + foo * bar, "VectorXd::Ones(gd.NxNyNz) + foo.cwise()*bar");
+  test_expression((1 + foo) * bar, "(VectorXd::Ones(gd.NxNyNz) + foo).cwise()*bar");
+  test_expression((bar + 1) + foo, "bar + VectorXd::Ones(gd.NxNyNz) + foo");
+  test_expression(bar + (1 + foo), "bar + (VectorXd::Ones(gd.NxNyNz) + foo)");
+  test_expression(1 + 1 + foo, "2*VectorXd::Ones(gd.NxNyNz) + foo");
   test_expression(1 * (1 * foo), "foo");
-  test_expression(foobar * (bar * foo), "foobar*(bar*foo)");
+  test_expression(foobar * (bar * foo), "foobar.cwise()*(bar.cwise()*foo)");
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

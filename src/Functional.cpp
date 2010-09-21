@@ -76,7 +76,7 @@ void Functional::create_header(const std::string filename, const std::string cla
   fprintf(o, ") ");
   if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-  fprintf(o, " {}\n");
+  fprintf(o, " { have_analytic_grad = false; }\n");
   fprintf(o, "  double transform(double) const {\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n");
@@ -115,7 +115,7 @@ void Functional::create_header(const std::string filename, const std::string cla
   fprintf(o, "  return Functional(new %s_type(", classname.c_str());
   if (a1) fprintf(o, "%s", a1);
   if (a2) fprintf(o, ", %s", a2);
-  fprintf(o, "));\n");
+  fprintf(o, "), \"%s\");\n", classname.c_str());
   fprintf(o, "}\n");
   fclose(o);
 }
@@ -168,15 +168,19 @@ int Functional::run_finite_difference_test(const char *testname, const Grid &x,
       retval++;
     }
 
-    VectorXd othergrad(grad(dV, false)(x));
-    double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
-    double maxgrad = my_grad.cwise().abs().maxCoeff();
-    if (maxgraderr/maxgrad > 1e-12) {
-      printf("othergrad[0] = %g\n", othergrad[0]);
-      printf("my_grad[0] = %g\n", my_grad[0]);
-      printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
-      printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
-      retval++;
+    if (itsCounter->ptr->have_analytic_grad) {
+      // We have an analytic grad, so let's make sure it matches the
+      // other one...
+      VectorXd othergrad(grad(dV, false)(x));
+      double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
+      double maxgrad = my_grad.cwise().abs().maxCoeff();
+      if (maxgraderr/maxgrad > 1e-12) {
+        printf("othergrad[0] = %g\n", othergrad[0]);
+        printf("my_grad[0] = %g\n", my_grad[0]);
+        printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
+        printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
+        retval++;
+      }
     }
   }
 

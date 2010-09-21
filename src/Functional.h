@@ -9,6 +9,7 @@ class Functional;
 
 class FunctionalInterface {
 public:
+  FunctionalInterface() : have_analytic_grad(true) {}
   virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
@@ -24,6 +25,8 @@ public:
   virtual Expression printme(const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
+
+  bool have_analytic_grad;
 };
 
 template<typename Derived, typename extra> class ConvolveWith;

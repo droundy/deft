@@ -48,7 +48,7 @@ int main(int, char **argv) {
                   "xShellConvolve(R)(x).cwise().square()");
 
   test_expression(sqr(xShellConvolve(R)).grad(dV, false).printme(Expression("x")),
-                  "2*xShellConvolve(R)(-xShellConvolve(R)(x)*gd.dvolume)");
+                  "2*xShellConvolve(R)(-(xShellConvolve(R)(x)*gd.dvolume))");
 
   
   test_expression(((-1/four_pi_r2)*n2).printme(Expression("n")),

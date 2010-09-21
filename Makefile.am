@@ -10,7 +10,7 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp \
 	src/EffectivePotentialToDensity.cpp
 
-bin_PROGRAMS = deft optimize_functionals
+bin_PROGRAMS = deft optimize-functionals
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
 
@@ -37,11 +37,11 @@ check_PROGRAMS = \
 	tests/hard-spheres.test \
 	tests/convolve.test \
 	tests/convolve-finite-difference.test \
+	tests/simple-liquid.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
-	tests/simple-liquid.test \
 	tests/fftinverse.test \
 	tests/ideal-gas-at-pressure.test \
 	tests/ideal-gas-optimization.test \

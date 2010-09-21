@@ -241,11 +241,11 @@ Expression Expression::operator/(const Expression &e) const {
   }
   Expression out;
   if (type == "ReciprocalGrid") {
-    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise")*e;
+    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise")/e;
     assert(e.type != "Grid");
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
-    if (e.type == "Grid" && name != ".cwise(") return method("cwise")*e;
+    if (e.type == "Grid" && name != ".cwise(") return method("cwise")/e;
     assert(e.type != "ReciprocalGrid");
   }
   out.name = "/";
@@ -282,21 +282,22 @@ Expression funexpr(const char *n, const Expression &arg, const Expression &a2, c
 
 std::string Expression::printme() const {
   if (kind == "+-") {
-    // Addition
+    // Addition and subtraction
     std::string a1 = arg1->printme();
     std::string a2 = arg2->printme();
     if (arg2->kind == "+-") a2 = "(" + a2 + ")";
     return a1 + " " + name + " " + a2;
   } else if (kind == "*/") {
-    // Multiplication
+    // Multiplication and division
     std::string a1 = arg1->printme();
     if (arg1->kind == "+-") a1 = "(" + a1 + ")";
     std::string a2 = arg2->printme() ;
     if (arg2->kind == "+-" || arg2->kind == "*/") a2 = "(" + a2 + ")";
     return a1 + name + a2;
   } else if (kind == "unary" && name == "-") {
+    // Unary negation
     std::string arg = arg1->printme();
-    if (arg1->kind == "+-") arg = "(" + arg + ")";
+    if (arg1->kind == "+-" || arg1->kind == "*/") arg = "(" + arg + ")";
     return "-" + arg;
   } else if (kind == "function") {
     // Function calls
