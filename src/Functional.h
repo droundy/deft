@@ -155,6 +155,8 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
   Expression printme(const Expression &) const;
+  void create_header(const std::string filename, const std::string classname,
+                     const char *a1 = 0, const char *a2 = 0) const;
 private:
   void init(FunctionalInterface *p, const char *name) {
     if (p) {
@@ -252,7 +254,7 @@ public:
   Expression printme(const Expression &x) const {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     Derived c(GridDescription(lat, 2, 2, 2), data);
-    return ifft(funexpr(c.name()).set_type("ReciprocalGrid") * fft(x));
+    return ifft(funexpr(c.name(), Expression("gd"), Expression("R")).set_type("ReciprocalGrid") * fft(x));
   }
 private:
   Derived (*f)(const GridDescription &, extra);

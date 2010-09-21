@@ -27,3 +27,6 @@ config.*
 \#*\#
 /.ikiwiki
 /recentchanges
+tests/generated/*.h
+*-t
+optimize-functionals

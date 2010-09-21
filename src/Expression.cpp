@@ -105,6 +105,8 @@ Expression Expression::operator+(const Expression &e) const {
     return e;
   } else if (e.kind == "constant" && e.value == 0) {
     return *this;
+  } else if (e.kind == "constant" && e.value < 0) {
+    return *this - (-e);
   } else if (e.kind == "unary" && e.name == "-") {
     return *this - *e.arg1;
   } else if (kind == "unary" && name == "-") {
@@ -113,6 +115,22 @@ Expression Expression::operator+(const Expression &e) const {
     return Expression(value+e.value);
   }
   Expression out;
+  if (type == "ReciprocalGrid") {
+    assert(e.type != "Grid");
+    if (e.type == "double") return *this + e*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
+    out.type = "ReciprocalGrid";
+  } else if (type == "Grid") {
+    assert(e.type != "ReciprocalGrid");
+    if (e.type == "double") return *this + e*Expression("VectorXd::Ones(gd.NxNyNz)");
+  } else if (type == "double") {
+    if (e.type == "ReciprocalGrid") {
+      return (*this)*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid") + e;
+    } else if (e.type == "Grid") {
+      return (*this)*Expression("VectorXd::Ones(gd.NxNyNz)") + e;
+    }
+    assert(e.type == "double");
+    out.type = "double";
+  }
   out.name = "+";
   out.kind = "+-";
   out.arg1 = new Expression(*this);
@@ -129,6 +147,23 @@ Expression Expression::operator-(const Expression &e) const {
     return Expression(value+e.value);
   }
   Expression out;
+
+  if (type == "ReciprocalGrid") {
+    assert(e.type != "Grid");
+    if (e.type == "double") return *this - e*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
+    out.type = "ReciprocalGrid";
+  } else if (type == "Grid") {
+    assert(e.type != "ReciprocalGrid");
+    if (e.type == "double") return *this - e*Expression("VectorXd::Ones(gd.NxNyNz)");
+  } else if (type == "double") {
+    if (e.type == "ReciprocalGrid") {
+      return (*this)*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid") - e;
+    } else if (e.type == "Grid") {
+      return (*this)*Expression("VectorXd::Ones(gd.NxNyNz)") - e;
+    }
+    assert(e.type == "double");
+    out.type = "double";
+  }
   out.name = "-";
   out.kind = "+-";
   out.arg1 = new Expression(*this);
@@ -143,50 +178,52 @@ Expression Expression::operator-() const {
     return (-arg1->value) * *arg2;
   } else if (kind == "*/" && arg2->kind == "constant") {
     return *arg1 * (-arg2->value);
+  } else if (kind == "+/" && name == "+") {
+    return (-*arg1) + (-*arg2);
+  } else if (kind == "+/" && name == "-") {
+    return (-*arg1) - (-*arg2);
   }
   Expression out;
   out.name = "-";
   out.kind = "unary";
+  out.type = type;
   out.arg1 = new Expression(*this);
   return out;
 }
 
 Expression Expression::operator*(const Expression &e) const {
-  Expression larg = *this;
-  Expression rarg = e;
-  if (rarg.kind == "constant") {
+  if (e.kind == "constant" && kind != "constant") {
     // prefer to have scalar on left.
-    //rarg = e;
-    //larg = *this;
+    return e*(*this);
   }
   // First, let's make a few optimizations...
-  if (larg.kind == "constant" && larg.value == 1) {
-    return rarg;
-  } else if (rarg.kind == "constant" && rarg.value == 1) {
-    return larg;
-  } else if (larg.kind == "constant" && larg.value == -1) {
-    return -rarg;
-  } else if (rarg.kind == "constant" && rarg.value == -1) {
-    return -larg;
-  } else if (larg.kind == "constant" && larg.value == 0) {
-    return larg;
-  } else if (rarg.kind == "constant" && rarg.value == 0) {
-    return rarg;
-  } else if (rarg.kind == "constant" && larg.kind == "constant") {
-    return Expression(larg.value*rarg.value);
+  if (kind == "constant" && value == 1) {
+    return e;
+  } else if (e.kind == "constant" && e.value == 1) {
+    return *this;
+  } else if (kind == "constant" && value == -1) {
+    return -e;
+  } else if (e.kind == "constant" && e.value == -1) {
+    return -(*this);
+  } else if (kind == "constant" && value == 0) {
+    return *this;
+  } else if (e.kind == "constant" && e.value == 0) {
+    return e;
+  } else if (e.kind == "constant" && kind == "constant") {
+    return Expression(value*e.value);
   }
   Expression out;
-  if (larg.type == "ReciprocalGrid") {
-    if (rarg.type == "ReciprocalGrid") larg = larg.method("cwise");
-    assert(rarg.type != "Grid");
+  if (type == "ReciprocalGrid") {
+    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise") * e;
+    assert(e.type != "Grid");
     out.type = "ReciprocalGrid";
-  } else if (larg.type == "Grid") {
-    if (rarg.type == "Grid") larg = larg.method("cwise");
-    assert(rarg.type != "ReciprocalGrid");
+  } else if (type == "Grid") {
+    if (e.type == "Grid" && name != ".cwise(") return method("cwise")*e;
+    assert(e.type != "ReciprocalGrid");
   }
   out.name = "*";
   out.kind = "*/";
-  out.arg1 = new Expression(larg);
+  out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
   return out;
 }
@@ -202,16 +239,14 @@ Expression Expression::operator/(const Expression &e) const {
   } else if (e.kind == "constant" && kind == "constant") {
     return Expression(value/e.value);
   }
-  Expression larg = *this;
-  Expression rarg = e;
   Expression out;
-  if (larg.type == "ReciprocalGrid") {
-    if (rarg.type == "ReciprocalGrid") larg = larg.method("cwise");
-    assert(rarg.type != "Grid");
+  if (type == "ReciprocalGrid") {
+    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise")*e;
+    assert(e.type != "Grid");
     out.type = "ReciprocalGrid";
-  } else if (larg.type == "Grid") {
-    if (rarg.type == "Grid") larg = larg.method("cwise");
-    assert(rarg.type != "ReciprocalGrid");
+  } else if (type == "Grid") {
+    if (e.type == "Grid" && name != ".cwise(") return method("cwise")*e;
+    assert(e.type != "ReciprocalGrid");
   }
   out.name = "/";
   out.kind = "*/";

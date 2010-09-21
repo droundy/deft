@@ -10,16 +10,28 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp \
 	src/EffectivePotentialToDensity.cpp
 
-bin_PROGRAMS = deft
+bin_PROGRAMS = deft optimize_functionals
 deft_SOURCES = src/deft.cpp $(GENERIC_CODE)
+optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
+
+src/HardSpheresFast.h: optimize-functionals
+	./optimize-functionals
+
+tests/generated/sum.h: tests/generating-code.test
+	test -d tests/generated || mkdir tests/generated
+	tests/generating-code.test
+tests/generated-code.o: tests/generated/sum.h
 
 check_PROGRAMS = \
+	tests/generating-code.test \
+	tests/generated-code.test \
 	tests/timings.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
 	tests/memory.test \
 	tests/ideal-gas.test \
+	tests/hard-spheres-fast.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
 	tests/hard-spheres.test \
@@ -37,11 +49,14 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
+tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_timings_test_SOURCES = tests/timings.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(GENERIC_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(GENERIC_CODE)
+tests_hard_spheres_fast_test_SOURCES = tests/hard-spheres-fast.cpp $(GENERIC_CODE)
 tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(GENERIC_CODE)
 tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(GENERIC_CODE)
 tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(GENERIC_CODE)

@@ -176,7 +176,12 @@ public:
     if (outpgrad) *outpgrad += out;
   }
   Expression printme(const Expression &x) const {
-    return funexpr("VShellConvolve", Expression("R"))(x);
+    switch (direction) {
+    case 0: return funexpr("xShellConvolve", Expression("R"))(x);
+    case 1: return funexpr("yShellConvolve", Expression("R"))(x);
+    default:
+      return funexpr("xShellConvolve", Expression("R"))(x);
+    }
   }
 private:
   double R;

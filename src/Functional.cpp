@@ -25,6 +25,101 @@ void FunctionalInterface::print_summary(const char *prefix, double e, const char
   printf("\n");
 }
 
+// The following is a "fake" functional, used for dumping code to
+// generate the gradient.
+class PretendIngradType : public FunctionalInterface {
+public:
+  PretendIngradType() {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &x) const {
+    return x;
+  }
+  double transform(double) const {
+    return 1;
+  }
+  double derive(double) const {
+    return 1; // hokey!
+  }
+  Functional grad(const Functional &, bool) const {
+    return 0;
+  }
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &) const {
+    return Expression("ingrad");
+  }
+};
+
+/*
+double average(int count, ...)
+{
+    va_list ap;
+    int j;
+    double tot = 0;
+    va_start(ap, count); //Requires the last fixed parameter (to get the address)
+    for(j=0; j<count; j++)
+        tot+=va_arg(ap, double); //Requires the type to cast to. Increments ap to the next argument.
+    va_end(ap);
+    return tot/count;
+}
+*/
+void Functional::create_header(const std::string filename, const std::string classname,
+                               const char *a1, const char *a2) const {
+  FILE *o = fopen(filename.c_str(), "w");
+  fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"Functional.h\"\n\n");
+
+  fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
+  fprintf(o, "public:\n");
+  fprintf(o, "  %s_type(", classname.c_str());
+  if (a1) fprintf(o, "double %s_arg", a1);
+  if (a2) fprintf(o, ", double %s_arg", a2);
+  fprintf(o, ") ");
+  if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
+  if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
+  fprintf(o, " {}\n");
+  fprintf(o, "  double transform(double) const {\n");
+  fprintf(o, "    return 0;\n");
+  fprintf(o, "  }\n");
+  fprintf(o, "  double derive(double) const {\n");
+  fprintf(o, "    return 0;\n");
+  fprintf(o, "  }\n\n");
+  fprintf(o, "  VectorXd transform(const GridDescription &gd, const VectorXd &x) const {\n");
+  fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
+  fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
+  fprintf(o, "    return %s;\n", printme(Expression("x")).printme().c_str());
+  fprintf(o, "  }\n");
+  fprintf(o, "  Functional grad(const Functional &, bool) const {\n");
+  fprintf(o, "    assert(false);\n");
+  fprintf(o, "    return 0;\n");
+  fprintf(o, "  }\n\n");
+  fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
+  fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
+  fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
+  fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
+  fprintf(o, "    *outgrad += %s;\n",
+          grad(Functional(new PretendIngradType()), false).printme(Expression("x")).printme().c_str());
+  fprintf(o, "    if (outpgrad) *outpgrad += %s;\n",
+          grad(Functional(new PretendIngradType()), true).printme(Expression("x")).printme().c_str());
+  fprintf(o, "  }\n\n");
+  fprintf(o, "  Expression printme(const Expression &) const {\n");
+  fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");
+  fprintf(o, "  }\n");
+  fprintf(o, "private:\n");
+  if (a1) fprintf(o, "  double %s;\n", a1);
+  if (a2) fprintf(o, "  double %s;\n", a2);
+  fprintf(o, "};\n\n");
+  fprintf(o, "inline Functional %s(", classname.c_str());
+  if (a1) fprintf(o, "double %s", a1);
+  if (a2) fprintf(o, ", double %s", a2);
+  fprintf(o, ") {\n");
+  fprintf(o, "  return Functional(new %s_type(", classname.c_str());
+  if (a1) fprintf(o, "%s", a1);
+  if (a2) fprintf(o, ", %s", a2);
+  fprintf(o, "));\n");
+  fprintf(o, "}\n");
+  fclose(o);
+}
+
 Expression Functional::printme(const Expression &x) const {
   if (next()) {
     // Get associativity right...
@@ -408,7 +503,7 @@ public:
     f.grad(gd, data, ingrad1, outgrad, outpgrad);
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).method("log");
+    return f.printme(x).method("cwise").method("log");
   }
 private:
   Functional f;
@@ -444,7 +539,7 @@ public:
     f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).method("square");
+    return f.printme(x).method("cwise").method("square");
   }
 private:
   Functional f;
