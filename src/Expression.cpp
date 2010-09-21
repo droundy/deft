@@ -123,7 +123,7 @@ Expression Expression::operator+(const Expression &e) const {
   } else if (e.kind == "unary" && e.name == "-") {
     return *this - *e.arg1;
   } else if (kind == "unary" && name == "-") {
-    return *e.arg1 - *this;
+    return e - *arg1;
   } else if (e.kind == "constant" && kind == "constant") {
     return Expression(value+e.value);
   }
@@ -150,11 +150,15 @@ Expression Expression::operator+(const Expression &e) const {
 
 Expression Expression::operator-(const Expression &e) const {
   if (kind == "constant" && value == 0) {
-    return e;
+    return -e; // 0 - b = -b
   } else if (e.kind == "constant" && e.value == 0) {
-    return *this;
+    return *this; // a - 0 = a
+  } else if (e.kind == "constant" && e.value < 0) {
+    return *this + (-e.value); // a - -3.0 = a + 3.0
+  } else if (e.kind == "unary" && e.name == "-") {
+    return *this + *e.arg1; // a - -b = a + b
   } else if (e.kind == "constant" && kind == "constant") {
-    return Expression(value+e.value);
+    return Expression(value-e.value);
   }
   Expression out;
 
@@ -184,12 +188,16 @@ Expression Expression::operator-(const Expression &e) const {
 Expression Expression::operator-() const {
   if (kind == "constant") {
     return -value;
-  } else if (kind == "*/" && arg1->kind == "constant") {
+  } else if (kind == "*/" && name == "*" && arg1->kind == "constant") {
     return (-arg1->value) * *arg2;
-  } else if (kind == "*/" && arg2->kind == "constant") {
+  } else if (kind == "*/" && name == "/" && arg1->kind == "constant") {
+    return (-arg1->value) / *arg2;
+  } else if (kind == "*/" && name == "*" && arg2->kind == "constant") {
     return *arg1 * (-arg2->value);
+  } else if (kind == "*/" && name == "/" && arg2->kind == "constant") {
+    return *arg1 / (-arg2->value);
   } else if (kind == "+/" && name == "+") {
-    return (-*arg1) + (-*arg2);
+    return (-*arg1) - *arg2;
   } else if (kind == "+/" && name == "-") {
     return (-*arg1) - (-*arg2);
   }
@@ -209,17 +217,11 @@ Expression Expression::operator*(const Expression &e) const {
   // First, let's make a few optimizations...
   if (kind == "constant" && value == 1) {
     return e;
-  } else if (e.kind == "constant" && e.value == 1) {
-    return *this;
   } else if (kind == "constant" && value == -1) {
     return -e;
-  } else if (e.kind == "constant" && e.value == -1) {
-    return -(*this);
   } else if (kind == "constant" && value == 0) {
     return *this;
-  } else if (e.kind == "constant" && e.value == 0) {
-    return e;
-  } else if (e.kind == "constant" && kind == "constant") {
+  } else if (kind == "constant" && e.kind == "constant") {
     return Expression(value*e.value);
   }
   Expression out;
@@ -257,6 +259,9 @@ Expression Expression::operator/(const Expression &e) const {
   } else if (type == "Grid") {
     if (e.type == "Grid" && name != ".cwise(") return method("cwise")/e;
     assert(e.type != "ReciprocalGrid");
+  } else if (type == "double" && kind == "constant") {
+    if (e.type == "Grid") return (*this)*grid_ones/e;
+    if (e.type == "ReciprocalGrid") return (*this)*recip_ones/e;
   }
   out.name = "/";
   out.kind = "*/";

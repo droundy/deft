@@ -16,13 +16,19 @@
 
 #include "Functionals.h"
 #include "utilities.h"
-#include "src/HardSpheresFast.h"
-#include "src/HardSpheresRFFast.h"
+//#include "src/HardSpheresFast.h"
+//#include "src/HardSpheresRFFast.h"
 #include "generated/sum.h"
 #include "generated/log.h"
+#include "generated/log-and-sqr.h"
+#include "generated/log-and-sqr-and-inverse.h"
 #include "generated/log-one-minus-x.h"
 #include "generated/log-one-minus-nbar.h"
 #include "generated/sqr-xshell.h"
+#include "generated/phi1.h"
+#include "generated/phi2.h"
+#include "generated/phi3rf.h"
+#include "generated/almostrf.h"
 
 int errors = 0;
 
@@ -71,16 +77,38 @@ int main(int, char **argv) {
 
   compare_functionals(Log(), log(x));
 
+  compare_functionals(LogAndSqr(), log(x) + sqr(x));
+
+  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x);
+
   compare_functionals(LogOneMinusX(), log(1-x));
 
   compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)));
 
   compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)));
 
-  compare_functionals(HardSpheresFast(kT, R), HardSpheres(kT,R));
+  const double four_pi_r2 = 4*M_PI*R*R;
+  Functional n2 = ShellConvolve(R);
+  Functional n3 = StepConvolve(R);
+  Functional one_minus_n3 = 1 - n3;
+  Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
+  compare_functionals(Phi1(kT,R), phi1);
 
-  compare_functionals(HardSpheresRFFast(kT, R), HardSpheresRF(kT,R));
-  errors -= 6;  // Currently the hard spheres stuff fails.
+  const double four_pi_r = 4*M_PI*R;
+  Functional n2x = xShellConvolve(R);
+  Functional n2y = yShellConvolve(R);
+  Functional n2z = zShellConvolve(R);
+  Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
+  compare_functionals(Phi2(kT,R), phi2);
+
+  Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
+  compare_functionals(Phi3rf(kT,R), phi3rf);
+
+  compare_functionals(AlmostRF(kT,R), phi1 + phi2 + phi3rf);
+
+  //compare_functionals(HardSpheresFast(kT, R), HardSpheres(kT,R));
+
+  //compare_functionals(HardSpheresRFFast(kT, R), HardSpheresRF(kT,R));
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

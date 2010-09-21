@@ -20,11 +20,33 @@
 const double R = 2.7;
 
 int main(int, char **) {
-  Functional kT(water_prop.kT), x(Identity());
+  Functional kT(water_prop.kT), x(Identity()), One(1);
   kT.set_name("kT");
   (kT + x).create_header("tests/generated/sum.h", "Sum", "kT");
   log(x).create_header("tests/generated/log.h", "Log");
+  (log(x)+sqr(x)).create_header("tests/generated/log-and-sqr.h", "LogAndSqr");
+  (One + sqr(x) - Pow(3) + One/x).create_header("tests/generated/one-over-x.h", "OneOverX");
+  (log(x)+(sqr(x)-Pow(3))+One/x).create_header("tests/generated/log-and-sqr-and-inverse.h", "LogAndSqrAndInverse");
   log(1-x).create_header("tests/generated/log-one-minus-x.h", "LogOneMinusX");
   log(1-StepConvolve(R)).create_header("tests/generated/log-one-minus-nbar.h", "LogOneMinusNbar", "R");
   sqr(xShellConvolve(R)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", "R");
+
+  const double four_pi_r2 = 4*M_PI*R*R;
+  Functional n2 = ShellConvolve(R);
+  Functional n3 = StepConvolve(R);
+  Functional one_minus_n3 = 1 - n3;
+  Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
+  phi1.set_name("phi1").create_header("tests/generated/phi1.h", "Phi1", "kT", "R");
+
+  const double four_pi_r = 4*M_PI*R;
+  Functional n2x = xShellConvolve(R);
+  Functional n2y = yShellConvolve(R);
+  Functional n2z = zShellConvolve(R);
+  Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
+  phi2.set_name("phi2").create_header("tests/generated/phi2.h", "Phi2", "kT", "R");
+
+  Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
+  phi3rf.set_name("phi3rf").create_header("tests/generated/phi3rf.h", "Phi3rf", "kT", "R");
+
+  (phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "kT", "R");
 }

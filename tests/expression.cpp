@@ -40,7 +40,7 @@ int main(int, char **argv) {
   test_expression(0, "0");
   test_expression(1 + foobar, "VectorXd::Ones(gd.NxNyNz) + foobar");
   test_expression(2 * foobar, "2*foobar");
-  test_expression(2 / foobar, "2/foobar");
+  test_expression(2 / foobar, "(2*VectorXd::Ones(gd.NxNyNz)).cwise()/foobar");
   test_expression(1 * foobar, "foobar");
   test_expression(2 * Expression(3), "6");
   test_expression(2 + Expression(3), "5");
