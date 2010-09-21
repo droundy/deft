@@ -110,6 +110,9 @@ Expression Expression::operator()(const Expression &e, const Expression &f) cons
   return out;
 }
 
+Expression grid_ones = Expression("VectorXd::Ones(gd.NxNyNz)");
+Expression recip_ones = Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
+
 Expression Expression::operator+(const Expression &e) const {
   if (kind == "constant" && value == 0) {
     return e;
@@ -127,17 +130,14 @@ Expression Expression::operator+(const Expression &e) const {
   Expression out;
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
-    if (e.type == "double") return *this + e*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
+    if (e.type == "double") return *this + e*recip_ones;
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
     assert(e.type != "ReciprocalGrid");
-    if (e.type == "double") return *this + e*Expression("VectorXd::Ones(gd.NxNyNz)");
+    if (e.type == "double") return *this + e*grid_ones;
   } else if (type == "double") {
-    if (e.type == "ReciprocalGrid") {
-      return (*this)*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid") + e;
-    } else if (e.type == "Grid") {
-      return (*this)*Expression("VectorXd::Ones(gd.NxNyNz)") + e;
-    }
+    if (e.type == "ReciprocalGrid") return (*this)*recip_ones + e;
+    else if (e.type == "Grid") return (*this)*grid_ones + e;
     assert(e.type == "double");
     out.type = "double";
   }
@@ -160,16 +160,16 @@ Expression Expression::operator-(const Expression &e) const {
 
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
-    if (e.type == "double") return *this - e*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
+    if (e.type == "double") return *this - e*recip_ones;
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
     assert(e.type != "ReciprocalGrid");
-    if (e.type == "double") return *this - e*Expression("VectorXd::Ones(gd.NxNyNz)");
+    if (e.type == "double") return *this - e*grid_ones;
   } else if (type == "double") {
     if (e.type == "ReciprocalGrid") {
-      return (*this)*Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid") - e;
+      return (*this)*recip_ones - e;
     } else if (e.type == "Grid") {
-      return (*this)*Expression("VectorXd::Ones(gd.NxNyNz)") - e;
+      return (*this)*grid_ones - e;
     }
     assert(e.type == "double");
     out.type = "double";
