@@ -158,8 +158,12 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
   Expression printme(const Expression &) const;
+  void create_source(const std::string filename, const std::string classname,
+                     const char *a1 = 0, const char *a2 = 0, bool isheader=false) const;
   void create_header(const std::string filename, const std::string classname,
-                     const char *a1 = 0, const char *a2 = 0) const;
+                     const char *a1 = 0, const char *a2 = 0) const {
+    create_source(filename, classname, a1, a2, true);
+  }
 private:
   void init(FunctionalInterface *p, const char *name) {
     if (p) {

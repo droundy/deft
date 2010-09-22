@@ -16,12 +16,16 @@
 
 #include "Functionals.h"
 #include "utilities.h"
+#include <stdlib.h>
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
 
-int main(int, char **) {
-  IdealGas(kT).create_header("src/IdealGasFast.h", "IdealGasFast", "kT");
-  HardSpheres(kT, R).create_header("src/HardSpheresFast.h", "HardSpheresFast", "R", "kT");
-  HardSpheresRF(kT, R).create_header("src/HardSpheresRFFast.h", "HardSpheresRFFast", "R", "kT");
+int main(int, char **argv) {
+  if (strcmp(argv[1], "src/IdealGasFast.cpp") == 0)
+    IdealGas(kT).create_source("src/IdealGasFast.cpp", "IdealGasFast", "kT");
+  if (strcmp(argv[1], "src/HardSpheresFast.cpp") == 0)
+    HardSpheres(kT, R).create_source("src/HardSpheresFast.cpp", "HardSpheresFast", "R", "kT");
+  if (strcmp(argv[1], "src/HardSpheresRFFast.cpp") == 0)
+    HardSpheresRF(kT, R).create_source("src/HardSpheresRFFast.cpp", "HardSpheresRFFast", "R", "kT");
 }

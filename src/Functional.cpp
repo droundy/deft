@@ -63,10 +63,11 @@ double average(int count, ...)
     return tot/count;
 }
 */
-void Functional::create_header(const std::string filename, const std::string classname,
-                               const char *a1, const char *a2) const {
+void Functional::create_source(const std::string filename, const std::string classname,
+                               const char *a1, const char *a2, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
-  fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"Functional.h\"\n\n");
+  fprintf(o, "#include \"Functionals.h\"\n\n");
+  if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n");
 
   fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
   fprintf(o, "public:\n");
@@ -108,7 +109,8 @@ void Functional::create_header(const std::string filename, const std::string cla
   if (a1) fprintf(o, "  double %s;\n", a1);
   if (a2) fprintf(o, "  double %s;\n", a2);
   fprintf(o, "};\n\n");
-  fprintf(o, "inline Functional %s(", classname.c_str());
+  if (isheader) fprintf(o, "inline ");
+  fprintf(o, "Functional %s(", classname.c_str());
   if (a1) fprintf(o, "double %s", a1);
   if (a2) fprintf(o, ", double %s", a2);
   fprintf(o, ") {\n");

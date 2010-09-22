@@ -12,6 +12,9 @@ Functional HardSpheresWB(double radius, double temperature);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 
+Functional HardSpheresFast(double radius, double temperature);
+Functional HardSpheresRFFast(double radius, double temperature);
+
 Functional GaussianPolynomial(double amplitude, double width, int power);
 
 Functional Identity();

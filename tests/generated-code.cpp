@@ -16,8 +16,6 @@
 
 #include "Functionals.h"
 #include "utilities.h"
-#include "src/HardSpheresFast.h"
-#include "src/HardSpheresRFFast.h"
 #include "generated/sum.h"
 #include "generated/log.h"
 #include "generated/log-and-sqr.h"

@@ -10,18 +10,22 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp \
 	src/EffectivePotentialToDensity.cpp
 
-bin_PROGRAMS = deft optimize-functionals
-deft_SOURCES = src/deft.cpp $(GENERIC_CODE) src/HardSpheresFast.h
+OPTIMIZED_CODE = src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp
+
+ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
+
+bin_PROGRAMS = deft
+deft_SOURCES = src/deft.cpp $(ALL_CODE)
+noinst_PROGRAMS = optimize-functionals
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
 
-src/HardSpheresFast.h: optimize-functionals
-	./optimize-functionals
+src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp: optimize-functionals
+	./optimize-functionals $@
 
 tests/generated/sum.h: tests/generating-code.test
 	test -d tests/generated || mkdir tests/generated
 	tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
-tests/hard-spheres-fast.o: src/HardSpheresFast.h
 
 check_PROGRAMS = \
 	tests/generating-code.test \
@@ -50,33 +54,32 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
-tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
-tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
-tests_timings_test_SOURCES = tests/timings.cpp $(GENERIC_CODE)
-tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
-tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
-tests_print_iter_test_SOURCES = tests/print-iter.cpp $(GENERIC_CODE)
-tests_memory_test_SOURCES = tests/memory.cpp $(GENERIC_CODE)
-tests_hard_spheres_fast_test_SOURCES = tests/hard-spheres-fast.cpp $(GENERIC_CODE)
-tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(GENERIC_CODE)
-tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(GENERIC_CODE)
-tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(GENERIC_CODE)
-tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE)
-tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(GENERIC_CODE)
-tests_precision_test_SOURCES = tests/precision.cpp $(GENERIC_CODE)
-tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
-tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
-tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(GENERIC_CODE)
-tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(GENERIC_CODE)
-tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(GENERIC_CODE)
-tests_eps_test_SOURCES = tests/eps.cpp $(GENERIC_CODE)
-tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(GENERIC_CODE)
-tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(GENERIC_CODE)
-tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(GENERIC_CODE)
-tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-potential.cpp $(GENERIC_CODE)
+tests_generated_code_test_SOURCES = tests/generated-code.cpp $(ALL_CODE)
+tests_generating_code_test_SOURCES = tests/generating-code.cpp $(ALL_CODE)
+tests_timings_test_SOURCES = tests/timings.cpp $(ALL_CODE)
+tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(ALL_CODE)
+tests_expression_test_SOURCES = tests/expression.cpp $(ALL_CODE)
+tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
+tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CODE)
+tests_hard_spheres_fast_test_SOURCES = tests/hard-spheres-fast.cpp $(ALL_CODE)
+tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(ALL_CODE)
+tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(ALL_CODE)
+tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(ALL_CODE)
+tests_convolve_test_SOURCES = tests/convolve.cpp $(ALL_CODE)
+tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
+tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
+tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(ALL_CODE)
+tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CODE)
+tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
+tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
+tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
+tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
+tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
+tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL_CODE)
+tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(ALL_CODE)
+tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-potential.cpp $(ALL_CODE)
 
 #noinst_PROGRAMS = optest
-#optest_SOURCES = optest.cpp $(GENERIC_CODE)
 
 #BUILT_SOURCES = patchlevel.h
 

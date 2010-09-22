@@ -1,8 +1,4 @@
-// -*- mode: C++; -*-
-
-#pragma once
-
-#include "Functional.h"
+#include "Functionals.h"
 
 class HardSpheresRFFast_type : public FunctionalInterface {
 public:
@@ -39,6 +35,6 @@ private:
   double kT;
 };
 
-inline Functional HardSpheresRFFast(double R, double kT) {
+Functional HardSpheresRFFast(double R, double kT) {
   return Functional(new HardSpheresRFFast_type(R, kT), "HardSpheresRFFast");
 }
