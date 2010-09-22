@@ -20,33 +20,9 @@
 #include "LineMinimizer.h"
 #include "utilities.h"
 
-const double kT = water_prop.kT; // room temperature in Hartree
-const double R = 2.7;
-const double eta_one = 3.0/(4*M_PI*R*R*R);
-const double diameter_cubed = 1/(8*R*R*R);
-const double nliquid = 0.324*eta_one;
-const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).derive(nliquid);
+int retval = 0;
 
-// Here we set up the lattice.
-const double rcav = R+R; // 11.8*R+R;
-const double rmax = rcav*2;
-Lattice lat(Cartesian(0,rmax,rmax), Cartesian(rmax,0,rmax), Cartesian(rmax,rmax,0));
-//Lattice lat(Cartesian(1.4*rmax,0,0), Cartesian(0,1.4*rmax,0), Cartesian(0,0,1.4*rmax));
-GridDescription gd(lat, 0.2);
-
-// And the functional...
-Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
-Functional f0wb = HardSpheresWB(R, kT);
-Functional f0rf = HardSpheresRF(R, kT);
-Functional n = EffectivePotentialToDensity(kT);
-
-Grid external_potential(gd);
-Grid potential(gd);
-Functional ff;
-
-int check_peak(const char *name, double peakmin, double peakmax) {
-  int retval = 0;
-
+void check_peak(const char *name, double peakmin, double peakmax) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
@@ -64,8 +40,10 @@ int check_peak(const char *name, double peakmin, double peakmax) {
     retval++;
   }
   reset_peak_memory();
-  return retval;
 }
+
+const double R = 2.7;
+const double rcav = R+R; // 11.8*R+R;
 
 double notincavity(Cartesian r) {
   const double rad2 = r.dot(r);
@@ -81,6 +59,18 @@ double incavity(Cartesian r) {
 }
 
 int main(int, char **argv) {
+  const double kT = water_prop.kT; // room temperature in Hartree
+  const double eta_one = 3.0/(4*M_PI*R*R*R);
+  const double nliquid = 0.324*eta_one;
+  const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).derive(nliquid);
+
+  // Here we set up the lattice.
+  const double rmax = rcav*2;
+  Lattice lat(Cartesian(0,rmax,rmax), Cartesian(rmax,0,rmax), Cartesian(rmax,rmax,0));
+  //Lattice lat(Cartesian(1.4*rmax,0,0), Cartesian(0,1.4*rmax,0), Cartesian(0,0,1.4*rmax));
+  GridDescription gd(lat, 0.2);
+
+  Grid external_potential(gd);
   external_potential.Set(incavity);
   external_potential *= 1e9;
   external_potential.epsNativeSlice("external.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
@@ -88,14 +78,17 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = constrain(constraint, f0(n));
+  Functional n = EffectivePotentialToDensity(kT);
+  Functional ff = constrain(constraint, (HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   
-  int retval = 0;
-
-  potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
+  Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
   printf("Energy is %g\n", ff.integral(potential));
 
   check_peak("Energy of 3D cavity", 83, 84);
+
+  ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+
+  check_peak("Energy of 3D cavity (fast)", 17, 18);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
