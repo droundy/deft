@@ -23,6 +23,7 @@
 
 Expression::Expression() {
   name = "UNKNOWN";
+  alias = "";
   kind = "NOKIND";
   type = "Grid";
   arg1 = arg2 = arg3 = 0;
@@ -37,6 +38,7 @@ Expression::Expression(const Expression &e) {
 
 void Expression::operator=(const Expression &e) {
   name = e.name;
+  alias = e.alias;
   value = e.value;
   kind = e.kind;
   type = e.type;
@@ -55,6 +57,7 @@ Expression::Expression(std::string n) {
   arg2 = 0;
   arg3 = 0;
   name = n;
+  alias = "";
   type = "Grid";
   kind = "variable";
 }
@@ -65,6 +68,7 @@ Expression::Expression(double c) {
   oss.precision(16);
   oss << c;
   name = oss.str();
+  alias = "";
   kind = "constant";
   type = "double";
   value = c;
@@ -76,6 +80,10 @@ Expression Expression::method(const char *n) const {
   out.name = "." + std::string(n) + "(";
   out.arg1 = new Expression(*this);
   out.type = type; // default to methods not changing types
+  // check for special cases...
+  if (out.name == ".square(" && type == "double") {
+    return *this * *this;
+  }
   return out;
 }
 
@@ -108,6 +116,26 @@ Expression Expression::operator()(const Expression &e, const Expression &f) cons
   out.arg2 = new Expression(e);
   out.arg3 = new Expression(f);
   return out;
+}
+
+Expression Expression::set_alias(std::string a) {
+  if (kind == "constant") {
+    kind = "variable";
+    name = a;
+  }
+  alias = a;
+  return *this;
+}
+
+Expression Expression::cwise() const {
+  if (iscwise()) return *this;
+  if (type == "double") return *this;
+  if (name == ".cwise(") return *this;
+  return method("cwise");
+}
+
+bool Expression::iscwise() const {
+  return name == ".cwise(" || type == "double";
 }
 
 Expression grid_ones = Expression("VectorXd::Ones(gd.NxNyNz)");
@@ -225,13 +253,17 @@ Expression Expression::operator*(const Expression &e) const {
     return Expression(value*e.value);
   }
   Expression out;
-  if (type == "ReciprocalGrid") {
-    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise") * e;
-    assert(e.type != "Grid");
+  if (e.type == "ReciprocalGrid") {
+    if (!iscwise()) return cwise() * e;
+    assert(type != "Grid");
     out.type = "ReciprocalGrid";
-  } else if (type == "Grid") {
-    if (e.type == "Grid" && name != ".cwise(") return method("cwise")*e;
+  } else if (e.type == "Grid") {
+    if (!iscwise()) return cwise() * e;
     assert(e.type != "ReciprocalGrid");
+  } else if (type == "ReciprocalGrid") {
+    out.type = "ReciprocalGrid";
+  } else if (e.type == "double" && type == "double") {
+    out.type = "double";
   }
   out.name = "*";
   out.kind = "*/";
@@ -253,15 +285,20 @@ Expression Expression::operator/(const Expression &e) const {
   }
   Expression out;
   if (type == "ReciprocalGrid") {
-    if (e.type == "ReciprocalGrid" && name != ".cwise(") return method("cwise")/e;
+    if (e.type == "ReciprocalGrid" && !iscwise()) return cwise()/e;
     assert(e.type != "Grid");
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
-    if (e.type == "Grid" && name != ".cwise(") return method("cwise")/e;
+    if (e.type == "Grid" && !iscwise()) return cwise()/e;
     assert(e.type != "ReciprocalGrid");
   } else if (type == "double" && kind == "constant") {
     if (e.type == "Grid") return (*this)*grid_ones/e;
     if (e.type == "ReciprocalGrid") return (*this)*recip_ones/e;
+    if (e.type == "double") out.type = "double";
+  } else if (type == "ReciprocalGrid") {
+    out.type = "ReciprocalGrid";
+  } else if (e.type == "double" && type == "double") {
+    out.type = "double";
   }
   out.name = "/";
   out.kind = "*/";
@@ -292,6 +329,27 @@ Expression funexpr(const char *n, const Expression &arg, const Expression &a2) {
 Expression funexpr(const char *n, const Expression &arg, const Expression &a2, const Expression &a3) {
   Expression out = funexpr(n, arg, a2);
   out.arg3 = new Expression(a3);
+  return out;
+}
+
+Expression fft(const Expression &g) {
+  if (g.type != "Grid") {
+    printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
+    exit(1);
+  }
+  Expression out = funexpr("fft", Expression("gd"), g);
+  out.type = "ReciprocalGrid";
+  return out;
+}
+
+Expression ifft(const Expression &g) {
+  if (g.type != "ReciprocalGrid") {
+    printf("ifft: Expression '%s' should have type ReciprocalGrid but instead has type '%s'.\n",
+           g.printme().c_str(), g.type.c_str());
+    exit(1);
+  }
+  Expression out = funexpr("ifft", Expression("gd"), g);
+  out.type = "Grid";
   return out;
 }
 
@@ -336,27 +394,8 @@ std::string Expression::printme() const {
     }
     out += ")";
     return out;
+  } else if (kind == "constant" && alias != "") {
+    return alias;
   }
   return name;
-}
-
-Expression fft(const Expression &g) {
-  if (g.type != "Grid") {
-    printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
-    exit(1);
-  }
-  Expression out = funexpr("fft", Expression("gd"), g);
-  out.type = "ReciprocalGrid";
-  return out;
-}
-
-Expression ifft(const Expression &g) {
-  if (g.type != "ReciprocalGrid") {
-    printf("ifft: Expression '%s' should have type ReciprocalGrid but instead has type '%s'.\n",
-           g.printme().c_str(), g.type.c_str());
-    exit(1);
-  }
-  Expression out = funexpr("ifft", Expression("gd"), g);
-  out.type = "Grid";
-  return out;
 }

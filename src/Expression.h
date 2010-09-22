@@ -16,7 +16,7 @@ public:
     delete arg2;
   }
 
-  std::string name, kind, type;
+  std::string name, alias, kind, type;
   Expression *arg1, *arg2, *arg3;
   double value;
   Expression set_type(const char *t) {
@@ -31,9 +31,13 @@ public:
   Expression operator/(const Expression &) const;
   Expression operator()(const Expression &) const;
   Expression operator()(const Expression &, const Expression &) const;
+  Expression cwise() const; // creates a coefficient-wise version...
+  bool iscwise() const; // true if we're already coefficient-wise
   Expression method(const char *) const;
   Expression method(const char *, const Expression &) const;
   Expression method(const char *, const Expression &, const Expression &) const;
+
+  Expression set_alias(std::string a);
 
   std::string printme() const;
 };

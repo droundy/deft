@@ -121,15 +121,19 @@ void Functional::create_header(const std::string filename, const std::string cla
 }
 
 Expression Functional::printme(const Expression &x) const {
+  Expression myself = itsCounter->ptr->printme(x);
+  if (get_name()) myself.set_alias(get_name());
   if (next()) {
     // Get associativity right...
     if (next()->next()) {
-      return itsCounter->ptr->printme(x) + next()->itsCounter->ptr->printme(x) + next()->next()->printme(x);
+      Expression nextguy = next()->itsCounter->ptr->printme(x);
+      if (next()->get_name()) nextguy.set_alias(next()->get_name());
+      return myself + nextguy + next()->next()->printme(x);
     } else {
-      return itsCounter->ptr->printme(x) + next()->printme(x);
+      return myself + next()->printme(x);
     }
   } else {
-    return itsCounter->ptr->printme(x);
+    return myself;
   }
 }
 
@@ -507,7 +511,7 @@ public:
     f.grad(gd, data, ingrad1, outgrad, outpgrad);
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).method("cwise").method("log");
+    return f.printme(x).cwise().method("log");
   }
 private:
   Functional f;
@@ -543,7 +547,7 @@ public:
     f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).method("cwise").method("square");
+    return f.printme(x).cwise().method("square");
   }
 private:
   Functional f;

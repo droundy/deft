@@ -16,8 +16,8 @@
 
 #include "Functionals.h"
 #include "utilities.h"
-//#include "src/HardSpheresFast.h"
-//#include "src/HardSpheresRFFast.h"
+#include "src/HardSpheresFast.h"
+#include "src/HardSpheresRFFast.h"
 #include "generated/sum.h"
 #include "generated/log.h"
 #include "generated/log-and-sqr.h"
@@ -104,11 +104,11 @@ int main(int, char **argv) {
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(kT,R), phi3rf);
 
-  compare_functionals(AlmostRF(kT,R), phi1 + phi2 + phi3rf);
+  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf));
 
-  //compare_functionals(HardSpheresFast(kT, R), HardSpheres(kT,R));
+  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), 2e-15);
 
-  //compare_functionals(HardSpheresRFFast(kT, R), HardSpheresRF(kT,R));
+  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R,kT));
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

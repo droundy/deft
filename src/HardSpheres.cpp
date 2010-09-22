@@ -19,15 +19,19 @@
 #include <math.h>
 
 Functional HardSpheresRF(double radius, double temperature) {
-  const double four_pi_r = (4*M_PI)*radius;
-  const double four_pi_r2 = (4*M_PI)*(radius*radius);
+  Functional R(radius);
+  R.set_name("R");
+  const Functional four_pi_r = (4*M_PI)*R;
+  const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
   Functional one_minus_n3 = 1 - StepConvolve(radius);
   Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
-  Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
+  Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
+  Functional kT(temperature);
+  kT.set_name("kT");
   phi1.set_name("phi1");
   // n1 is n2/(four_pi_r2)
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
@@ -35,14 +39,16 @@ Functional HardSpheresRF(double radius, double temperature) {
   Functional phi3 = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   phi3.set_name("phi3");
   //Functional total = temperature*(phi1 + phi2 + phi3);
-  Functional total = (temperature*phi1).set_name("phi1") +
-    (temperature*phi2).set_name("phi2") + (temperature*phi3).set_name("phi3");
+  Functional total = (kT*phi1).set_name("phi1") +
+    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
   return total;
 }
 
 Functional HardSpheresWB(double radius, double temperature) {
-  const double four_pi_r = (4*M_PI)*radius;
-  const double four_pi_r2 = (4*M_PI)*(radius*radius);
+  Functional R(radius);
+  R.set_name("R");
+  const Functional four_pi_r = (4*M_PI)*R;
+  const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
   Functional one_minus_n3 = 1 - n3;
   Functional n2 = ShellConvolve(radius);
@@ -54,7 +60,7 @@ Functional HardSpheresWB(double radius, double temperature) {
   Functional nTzz = zzShellConvolve(radius);
   Functional nTxy = xyShellConvolve(radius);
   Functional nTyz = yzShellConvolve(radius);
-  Functional nTzx = zxShellConvolve(radius*temperature);
+  Functional nTzx = zxShellConvolve(radius);
   Functional nTxz = nTzx, nTyx = nTxy, nTzy = nTyz;
   /*
   Functional trace_nT3 =
@@ -70,6 +76,8 @@ Functional HardSpheresWB(double radius, double temperature) {
     nTzy*nTyx*nTxz + nTzy*nTyy*nTyz + nTzy*nTyz*nTzz + // starting with nTzy
     nTzz*nTzx*nTxz + nTzz*nTzy*nTyz + nTzz*nTzz*nTzz; // starting with nTzz
   */
+  Functional kT(temperature);
+  kT.set_name("kT");
   Functional trace_nT3 =
     6*nTxy*nTyz*nTzx +
     nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
@@ -77,7 +85,7 @@ Functional HardSpheresWB(double radius, double temperature) {
     nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
   // */
   // n0 is n2/(four_pi_r2)
-  Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
+  Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1");
   // n1 is n2/(four_pi_r)
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
@@ -90,10 +98,10 @@ Functional HardSpheresWB(double radius, double temperature) {
            + 2*(n2x*n2y*nTxy + n2y*n2z*nTyz + n2z*n2x*nTzx)
            - 0.5*trace_nT3));
   phi3.set_name("phi3");
-  //Functional total = temperature*(phi1 + phi2 + phi3);
+  //Functional total = kT*(phi1 + phi2 + phi3);
   //total.set_name("hard sphere excess");
-  Functional total = (temperature*phi1).set_name("phi1") +
-    (temperature*phi2).set_name("phi2") + (temperature*phi3).set_name("phi3");
+  Functional total = (kT*phi1).set_name("phi1") +
+    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
   return total;
 }
 
