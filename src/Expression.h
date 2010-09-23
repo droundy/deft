@@ -49,6 +49,7 @@ public:
   // the common subexpression.
   std::string EliminateCommonSubexpression();
   bool EliminateThisSubexpression(const Expression &, const std::string alias);
+  bool FindVariable(const std::string n) const;
 
   Expression FindCommonSubexpression() const;
   bool operator==(const Expression &) const;

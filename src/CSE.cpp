@@ -45,6 +45,17 @@ bool Expression::EliminateThisSubexpression(const Expression &c, const std::stri
   }
 }
 
+bool Expression::FindVariable(const std::string n) const {
+  if (name == n && kind == "variable") {
+    return true;
+  } else {
+    if (arg1 && arg1->FindVariable(n)) return true;
+    if (arg2 && arg2->FindVariable(n)) return true;
+    if (arg3 && arg3->FindVariable(n)) return true;
+  }
+  return false;
+}
+
 Expression Expression::FindCommonSubexpression() const {
   Expression cs;
   if (arg1) {
