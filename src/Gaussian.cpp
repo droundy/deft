@@ -52,7 +52,9 @@ public:
     if (outpgrad) *outpgrad += out;
   }
   Expression printme(const Expression &x) const {
-    return funexpr("Gaussian", Expression("width"))(Expression("gd"), x);
+    Expression out = funexpr("Gaussian", Expression("width"))(Expression("gd"), x);
+    out.unlazy = true;
+    return out;
   }
 private:
   double width, kfac;
@@ -176,12 +178,20 @@ public:
     if (outpgrad) *outpgrad += out;
   }
   Expression printme(const Expression &x) const {
+    Expression out;
     switch (direction) {
-    case 0: return funexpr("xShellConvolve", Expression("R"))(Expression("gd"), x);
-    case 1: return funexpr("yShellConvolve", Expression("R"))(Expression("gd"), x);
+    case 0: out = funexpr("xShellConvolve", Expression("R"))(Expression("gd"), x);
+      out.set_alias("xshell");
+      break;
+    case 1: out = funexpr("yShellConvolve", Expression("R"))(Expression("gd"), x);
+      out.set_alias("yshell");
+      break;
     default:
-      return funexpr("zShellConvolve", Expression("R"))(Expression("gd"), x);
+      out = funexpr("zShellConvolve", Expression("R"))(Expression("gd"), x);
+      out.set_alias("zshell");
     }
+    out.unlazy = true;
+    return out;
   }
 private:
   double R;

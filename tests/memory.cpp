@@ -96,13 +96,13 @@ int main(int, char **argv) {
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("Energy new way is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity (fast)", 110, 112);
+  check_peak("Energy of 3D cavity (fast)", 69, 70);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 457, 459);
+  check_peak("Gradient of 3D cavity (fast)", 363, 364);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
