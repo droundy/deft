@@ -33,6 +33,18 @@ void test_expression(const Expression &e, const char *expected) {
   }
 }
 
+void test_subexpression(const Expression &e, const char *expected) {
+  printf("\n******************");
+  for (unsigned i=0;i<strlen(expected);i++) printf("*");
+  printf("\n* Testing CSE \"%s\" *\n", expected);
+  for (unsigned i=0;i<strlen(expected);i++) printf("*");
+  printf("******************\n");
+
+  if (e.FindCommonSubexpression().printme() != expected) {
+    printf("FAIL: Got instead: \"%s\"\n", e.FindCommonSubexpression().printme().c_str());
+    retval++;
+  }
+}
 
 int main(int, char **argv) {
   const double kT = 1e-3, R = 2.7;
@@ -63,6 +75,20 @@ int main(int, char **argv) {
 
   //  test_expression(HardSpheres(kT, R).printme(Expression("n")),
   //                  "");
+
+  Expression n2sqr(sqr(n2).printme(Expression("x")));
+  test_subexpression(n2sqr, "fft(gd, x)");
+
+  Expression n2sqr_simple(n2sqr);
+  n2sqr_simple.EliminateThisSubexpression(n2sqr.FindCommonSubexpression(), "fftx");
+  test_expression(n2sqr_simple, "ifft(gd, shell(gd, R).cwise()*fftx).cwise().square()");
+
+  Expression n2sqr_simpler = n2sqr_simple;
+  test_subexpression(n2sqr_simpler, "ifft(gd, shell(gd, R).cwise()*fftx)");
+
+  n2sqr_simpler.EliminateThisSubexpression(n2sqr_simpler.FindCommonSubexpression(), "n2");
+  test_expression(n2sqr_simpler, "n2.cwise().square()");
+  
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

@@ -7,7 +7,7 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
-	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp \
+	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp src/CSE.cpp\
 	src/EffectivePotentialToDensity.cpp
 
 OPTIMIZED_CODE = src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp
@@ -57,8 +57,8 @@ TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(ALL_CODE)
 tests_timings_test_SOURCES = tests/timings.cpp $(ALL_CODE)
-tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(ALL_CODE)
-tests_expression_test_SOURCES = tests/expression.cpp $(ALL_CODE)
+tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
+tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CODE)
 tests_hard_spheres_fast_test_SOURCES = tests/hard-spheres-fast.cpp $(ALL_CODE)

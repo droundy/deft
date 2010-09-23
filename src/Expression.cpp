@@ -27,6 +27,7 @@ Expression::Expression() {
   kind = "NOKIND";
   type = "Grid";
   arg1 = arg2 = arg3 = 0;
+  unlazy = false;
 }
 
 Expression::Expression(const Expression &e) {
@@ -42,6 +43,7 @@ void Expression::operator=(const Expression &e) {
   value = e.value;
   kind = e.kind;
   type = e.type;
+  unlazy = e.unlazy;
   delete arg1;
   delete arg2;
   if (e.arg1) arg1 = new Expression(*e.arg1);
@@ -60,6 +62,7 @@ Expression::Expression(std::string n) {
   alias = "";
   type = "Grid";
   kind = "variable";
+  unlazy = false;
 }
 
 Expression::Expression(double c) {
@@ -72,6 +75,7 @@ Expression::Expression(double c) {
   kind = "constant";
   type = "double";
   value = c;
+  unlazy = false;
 }
 
 Expression Expression::method(const char *n) const {
@@ -339,6 +343,7 @@ Expression fft(const Expression &g) {
   }
   Expression out = funexpr("fft", Expression("gd"), g);
   out.type = "ReciprocalGrid";
+  out.unlazy = true;
   return out;
 }
 
@@ -350,6 +355,7 @@ Expression ifft(const Expression &g) {
   }
   Expression out = funexpr("ifft", Expression("gd"), g);
   out.type = "Grid";
+  out.unlazy = true;
   return out;
 }
 

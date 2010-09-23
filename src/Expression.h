@@ -19,6 +19,7 @@ public:
   std::string name, alias, kind, type;
   Expression *arg1, *arg2, *arg3;
   double value;
+  bool unlazy;
   Expression set_type(const char *t) {
     type = t;
     return *this;
@@ -38,6 +39,14 @@ public:
   Expression method(const char *, const Expression &, const Expression &) const;
 
   Expression set_alias(std::string a);
+
+  // Modifies this expression in-place, and returns a declaration of
+  // the common subexpression.
+  std::string EliminateCommonSubexpression();
+  void EliminateThisSubexpression(const Expression &, const std::string alias);
+
+  Expression FindCommonSubexpression() const;
+  bool operator==(const Expression &) const;
 
   std::string printme() const;
 };
