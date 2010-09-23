@@ -31,14 +31,17 @@ bool Expression::operator==(const Expression &e) const {
   return true;
 }
 
-void Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
+bool Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
   if (c == *this) {
     *this = Expression(name);
     type = c.type;
+    return true;
   } else {
-    if (arg1) arg1->EliminateThisSubexpression(c, name);
-    if (arg2) arg2->EliminateThisSubexpression(c, name);
-    if (arg3) arg3->EliminateThisSubexpression(c, name);
+    bool changed = false;
+    if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
+    if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
+    if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
+    return changed;
   }
 }
 

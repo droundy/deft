@@ -87,7 +87,21 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  VectorXd transform(const GridDescription &gd, const VectorXd &x) const {\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  fprintf(o, "    return %s;\n", printme(Expression("x")).printme().c_str());
+  Expression e = printme(Expression("x"));
+  Expression s = e.FindCommonSubexpression();
+  int varnum = 0;
+  while (s.unlazy) {
+    std::string a = s.alias;
+    if (a == "") a = "var";
+    std::ostringstream oss;
+    oss << varnum;
+    varnum++;
+    a += "_" + oss.str();
+    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
+    while (e.EliminateThisSubexpression(s, a));
+    s = e.FindCommonSubexpression();
+  }
+  fprintf(o, "    return %s;\n", e.printme().c_str());
   fprintf(o, "  }\n");
   fprintf(o, "  Functional grad(const Functional &, bool) const {\n");
   fprintf(o, "    assert(false);\n");
@@ -97,10 +111,24 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  fprintf(o, "    *outgrad += %s;\n",
-          grad(Functional(new PretendIngradType()), false).printme(Expression("x")).printme().c_str());
-  fprintf(o, "    if (outpgrad) *outpgrad += %s;\n",
-          grad(Functional(new PretendIngradType()), true).printme(Expression("x")).printme().c_str());
+  Expression eg = grad(Functional(new PretendIngradType()), false).printme(Expression("x"));
+  Expression epg = grad(Functional(new PretendIngradType()), true).printme(Expression("x"));
+  s = eg.FindCommonSubexpression();
+  varnum = 0;
+  while (s.unlazy) {
+    std::string a = s.alias;
+    if (a == "") a = "var";
+    std::ostringstream oss;
+    oss << varnum;
+    varnum++;
+    a += "_" + oss.str();
+    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
+    while (eg.EliminateThisSubexpression(s, a));
+    while (epg.EliminateThisSubexpression(s, a));
+    s = eg.FindCommonSubexpression();
+  }
+  fprintf(o, "    *outgrad += %s;\n", eg.printme().c_str());
+  fprintf(o, "    if (outpgrad) *outpgrad += %s;\n", epg.printme().c_str());
   fprintf(o, "  }\n\n");
   fprintf(o, "  Expression printme(const Expression &) const {\n");
   fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");

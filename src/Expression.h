@@ -24,6 +24,11 @@ public:
     type = t;
     return *this;
   }
+  const char *ctype() const {
+    if (type == "double") return "double";
+    if (type == "ReciprocalGrid") return "VectorXcd";
+    return "VectorXd";
+  }
 
   Expression operator+(const Expression &) const;
   Expression operator-() const;
@@ -43,7 +48,7 @@ public:
   // Modifies this expression in-place, and returns a declaration of
   // the common subexpression.
   std::string EliminateCommonSubexpression();
-  void EliminateThisSubexpression(const Expression &, const std::string alias);
+  bool EliminateThisSubexpression(const Expression &, const std::string alias);
 
   Expression FindCommonSubexpression() const;
   bool operator==(const Expression &) const;
