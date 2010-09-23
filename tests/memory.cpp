@@ -33,18 +33,18 @@ double check_peak(const char *name, double peakmin, double peakmax, double time_
   
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
   double peak = peak_memory()/1024.0/1024;
-  printf("Peak memory use is %g M\n", peak);
   printf("CPU time is %g s (or %gx)\n", cputime, cputime/reference_time);
+  if (time_limit > 0 && cputime/reference_time > time_limit) {
+    printf("FAIL: CPU time used should be under %gx!\n", time_limit);
+    retval++;
+  }
+  printf("Peak memory use is %g M\n", peak);
   if (peak < peakmin) {
     printf("FAIL: Peak memory use should be at least %g!\n", peakmin);
     retval++;
   }
   if (peak > peakmax) {
     printf("FAIL: Peak memory use should be under %g!\n", peakmax);
-    retval++;
-  }
-  if (time_limit > 0 && cputime/reference_time > time_limit) {
-    printf("FAIL: CPU time used should be under %gx!\n", time_limit);
     retval++;
   }
   reset_peak_memory();
@@ -84,9 +84,11 @@ int main(int, char **argv) {
   Grid external_potential(gd);
   // Do some pointless stuff so we can get some sort of gauge as to
   // how fast this CPU is, for comparison with other tests.
-  external_potential.Set(incavity);
+  external_potential = external_potential.Ones(gd.NxNyNz);
   external_potential = external_potential.cwise().exp();
-  external_potential = 13*external_potential.cwise().log() + 3*external_potential.cwise().square();
+  external_potential = 13*external_potential + 3*external_potential.cwise().square();
+  external_potential.fft(); // compute and toss the fft...
+  // And now let's set the external_potential up as we'd like it.
   external_potential.Set(incavity);
   external_potential *= 1e9;
   reference_time = check_peak("Setting external potential.", 7, 8, 0);
@@ -100,25 +102,25 @@ int main(int, char **argv) {
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
   printf("Energy is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity", 83, 84, 40);
+  check_peak("Energy of 3D cavity", 83, 84, 60);
 
   Grid mygrad(gd);
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity", 100, 105, 250);
+  check_peak("Gradient of 3D cavity", 100, 105, 400);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("Energy new way is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity (fast)", 69, 70, 10);
+  check_peak("Energy of 3D cavity (fast)", 69, 70, 13);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 363, 364, 60);
+  check_peak("Gradient of 3D cavity (fast)", 363, 364, 100);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

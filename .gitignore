@@ -30,3 +30,4 @@ config.*
 tests/generated/*.h
 *-t
 optimize-functionals
+src/*Fast.cpp
