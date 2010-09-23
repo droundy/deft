@@ -86,9 +86,23 @@ int main(int, char **argv) {
 
   check_peak("Energy of 3D cavity", 83, 84);
 
-  ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  Grid mygrad(gd);
+  mygrad.setZero();
+  ff.integralgrad(potential, &mygrad);
+  printf("Grad is: %g\n", mygrad.norm());
 
-  check_peak("Energy of 3D cavity (fast)", 17, 18);
+  check_peak("Gradient of 3D cavity", 100, 105);
+
+  ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  printf("Energy new way is %g\n", ff.integral(potential));
+
+  check_peak("Energy of 3D cavity (fast)", 420, 430);
+
+  mygrad.setZero();
+  ff.integralgrad(potential, &mygrad);
+  printf("Grad optimized is: %g\n", mygrad.norm());
+
+  check_peak("Gradient of 3D cavity (fast)", 4900, 5000);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
