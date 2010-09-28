@@ -88,10 +88,13 @@ int main(int, char **argv) {
   Grid external_potential(gd);
   // Do some pointless stuff so we can get some sort of gauge as to
   // how fast this CPU is, for comparison with other tests.
-  external_potential = external_potential.Ones(gd.NxNyNz);
-  external_potential = external_potential.cwise().exp();
-  external_potential = 13*external_potential + 3*external_potential.cwise().square();
-  external_potential.fft(); // compute and toss the fft...
+  for (int i=0; i<10; i++) {
+    // Do this more times, to get a more consistent result...
+    external_potential = external_potential.Ones(gd.NxNyNz);
+    external_potential = external_potential.cwise().exp();
+    external_potential = 13*external_potential + 3*external_potential.cwise().square();
+    external_potential.fft(); // compute and toss the fft...
+  }
   // And now let's set the external_potential up as we'd like it.
   external_potential.Set(incavity);
   external_potential *= 1e9;
@@ -106,25 +109,25 @@ int main(int, char **argv) {
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
   printf("Energy is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity", 83, 84, 52);
+  check_peak("Energy of 3D cavity", 83, 84, 10.5);
 
   Grid mygrad(gd);
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity", 100, 105, 320);
+  check_peak("Gradient of 3D cavity", 100, 105, 66);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("Energy new way is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity (fast)", 69, 70, 11);
+  check_peak("Energy of 3D cavity (fast)", 69, 70, 2.1);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 240, 241, 80);
+  check_peak("Gradient of 3D cavity (fast)", 240, 241, 16.5);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
