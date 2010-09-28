@@ -24,7 +24,7 @@ int retval = 0;
 clock_t last_time = clock();
 double reference_time = 1;
 
-double check_peak(const char *name, double peakmin, double peakmax, double time_limit) {
+double check_peak(const char *name, double peakmin, double peakmax, double time_limit, double fraccuracy=0.1) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
@@ -34,8 +34,12 @@ double check_peak(const char *name, double peakmin, double peakmax, double time_
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
   double peak = peak_memory()/1024.0/1024;
   printf("CPU time is %g s (or %gx)\n", cputime, cputime/reference_time);
-  if (time_limit > 0 && cputime/reference_time > time_limit) {
-    printf("FAIL: CPU time used should be under %gx!\n", time_limit);
+  if (time_limit > 0 && cputime/reference_time > time_limit*(1+fraccuracy)) {
+    printf("FAIL: CPU time used should be under %gx!\n", time_limit*(1+fraccuracy));
+    retval++;
+  }
+  if (cputime/reference_time < time_limit*(1-fraccuracy)) {
+    printf("FAIL: CPU time used should be at least %gx!\n", time_limit*(1-fraccuracy));
     retval++;
   }
   printf("Peak memory use is %g M\n", peak);
@@ -102,25 +106,25 @@ int main(int, char **argv) {
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
   printf("Energy is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity", 83, 84, 60);
+  check_peak("Energy of 3D cavity", 83, 84, 52);
 
   Grid mygrad(gd);
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity", 100, 105, 400);
+  check_peak("Gradient of 3D cavity", 100, 105, 320);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("Energy new way is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity (fast)", 69, 70, 12);
+  check_peak("Energy of 3D cavity (fast)", 69, 70, 11);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 240, 241, 90);
+  check_peak("Gradient of 3D cavity (fast)", 240, 241, 80);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
