@@ -37,29 +37,29 @@
 extern long djr_memused;
 extern long djr_mempeak;
 
-#define TRACK_ALLOC_FOR_DJR long mem = cols()*rows()*sizeof(Scalar); \
+#define TRACK_ALLOC_FOR_DJR {long mem = cols()*rows()*sizeof(Scalar); \
                              if (mem > 100) { \
                                djr_memused += mem; \
                                std::cout << "Alloc " << mem/1024.0/1024.0 << ", now using " \
                                          << djr_memused/1024.0/1024.0 << std::endl; \
                                if (djr_memused > djr_mempeak) djr_mempeak = djr_memused; \
-                             }
+                             }}
 
-#define TRACK_FREE_FOR_DJR  long mem = cols()*rows()*sizeof(Scalar); \
+#define TRACK_FREE_FOR_DJR(sz)  {long mem = sz*sizeof(Scalar); \
                             if (mem > 100) { \
                               djr_memused -= mem; \
                               std::cout << "Free " << mem/1024.0/1024.0 << ", now using " \
                                         << djr_memused/1024.0/1024.0 << std::endl; \
-                            }
+                            }}
 
 // To print memory tracking, comment out these two undefs and defines:
 #undef TRACK_ALLOC_FOR_DJR
 #undef TRACK_FREE_FOR_DJR
-#define TRACK_ALLOC_FOR_DJR long mem = cols()*rows()*sizeof(Scalar); \
+#define TRACK_ALLOC_FOR_DJR {long mem = cols()*rows()*sizeof(Scalar); \
                             if (mem > 100) djr_memused += mem; \
-                            if (djr_memused > djr_mempeak) djr_mempeak = djr_memused;
-#define TRACK_FREE_FOR_DJR long mem = cols()*rows()*sizeof(Scalar); \
-                           if (mem > 100) djr_memused -= mem;
+                            if (djr_memused > djr_mempeak) djr_mempeak = djr_memused;}
+#define TRACK_FREE_FOR_DJR(sz) {long mem = sz*sizeof(Scalar); \
+                            if (mem > 100) djr_memused -= mem;}
 // end DJR added.
 
 /** \class Matrix
@@ -271,13 +271,12 @@ class Matrix
              && (RowsAtCompileTime == Dynamic || RowsAtCompileTime == rows)
              && (MaxColsAtCompileTime == Dynamic || MaxColsAtCompileTime >= cols)
              && (ColsAtCompileTime == Dynamic || ColsAtCompileTime == cols));
+      int size = rows*cols;
+      bool size_changed = size != this->size();
+      if(size_changed) TRACK_FREE_FOR_DJR(this->size());
+      m_storage.resize(size, rows, cols);
       #ifdef EIGEN_INITIALIZE_MATRICES_BY_ZERO
-        int size = rows*cols;
-        bool size_changed = size != this->size();
-        m_storage.resize(size, rows, cols);
         if(size_changed) EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
-      #else
-        m_storage.resize(rows*cols, rows, cols);
       #endif
     }
 
@@ -288,17 +287,18 @@ class Matrix
     inline void resize(int size)
     {
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(Matrix)
+      bool size_changed = size != this->size();
       ei_assert(SizeAtCompileTime == Dynamic || SizeAtCompileTime == size);
-      #ifdef EIGEN_INITIALIZE_MATRICES_BY_ZERO
-        bool size_changed = size != this->size();
-      #endif
+      if (size_changed) {
+        TRACK_FREE_FOR_DJR(this->size());
+      }
       if(RowsAtCompileTime == 1)
         m_storage.resize(size, 1, size);
       else
         m_storage.resize(size, size, 1);
-      #ifdef EIGEN_INITIALIZE_MATRICES_BY_ZERO
-        if(size_changed) EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
-      #endif
+      if (size_changed) {
+        EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED;
+      }
     }
 
     /** Copies the value of the expression \a other into \c *this with automatic resizing.
@@ -460,7 +460,7 @@ class Matrix
     }
     /** Destructor */
     inline ~Matrix() {
-      TRACK_FREE_FOR_DJR
+      TRACK_FREE_FOR_DJR(rows()*cols());
     }
 
     /** Override MatrixBase::swap() since for dynamic-sized matrices of same type it is enough to swap the

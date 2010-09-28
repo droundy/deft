@@ -120,7 +120,7 @@ int main(int, char **argv) {
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 367, 368, 90);
+  check_peak("Gradient of 3D cavity (fast)", 240, 241, 90);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
