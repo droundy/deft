@@ -64,8 +64,6 @@ Functional Gaussian(double width) {
   return Functional(new GaussianType(width));
 }
 
-static double myR, mydr;
-
 Functional StepConvolve(double R) {
   return Functional(function_for_convolve<step_op<complex> >, R, true);
 }
@@ -74,141 +72,14 @@ Functional ShellConvolve(double R) {
   return Functional(function_for_convolve<shell_op<complex> >, R, true);
 }
 
-static complex xdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[0]/(k*k)*(myR*cos(kR) - sin(kR)/k));
-  } else {
-    const double kR2 = kR*kR;
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).  I evaluate the smaller elements
-    // first in the hope of reducing roundoff error (but this is not
-    // yet tested).
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[0]*
-                   (kR2*kR2*(1.0/5040-1.0/720)+kR2*(1.0/24-1.0/120)-1.0/3));
-  }
-}
-
-static complex ydelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[1]/(k*k)*(myR*cos(kR) - sin(kR)/k));
-  } else {
-    const double kR2 = kR*kR;
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).  I evaluate the smaller elements
-    // first in the hope of reducing roundoff error (but this is not
-    // yet tested).
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[1]*
-                   (kR2*kR2*(1.0/5040-1.0/720)+kR2*(1.0/24-1.0/120)-1.0/3));
-  }
-}
-
-static complex zdelta(Reciprocal kvec) {
-  double k = kvec.norm();
-  double kR = k*myR;
-  if (kR > 1e-3) {
-    return complex(0,exp(-spreading*k*k*mydr*mydr)*(4*M_PI)*kvec[2]/(k*k)*(myR*cos(kR) - sin(kR)/k));
-  } else {
-    const double kR2 = kR*kR;
-    // The following is a simple power series expansion to the above
-    // function, to handle the case as k approaches zero with greater
-    // accuracy (and efficiency).  I evaluate the smaller elements
-    // first in the hope of reducing roundoff error (but this is not
-    // yet tested).
-    return complex(0,(4*M_PI)*myR*myR*myR*kvec[2]*
-                   (kR2*kR2*(1.0/5040-1.0/720)+kR2*(1.0/24-1.0/120)-1.0/3));
-  }
-}
-
-class VShellConvolveType : public FunctionalInterface {
-public:
-  VShellConvolveType(double radius, int dir) : R(radius), direction(dir) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    ReciprocalGrid recip(gd);
-    {
-      const Grid out(gd, data);
-      recip = out.fft();
-      // We want to free out immediately to save memory!
-    }
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    switch (direction) {
-    case 0: recip.MultiplyBy(xdelta);
-      break;
-    case 1: recip.MultiplyBy(ydelta);
-      break;
-    case 2: recip.MultiplyBy(zdelta);
-      break;
-    }
-    return recip.ifft();
-  }
-  double transform(double) const {
-    return 0;
-  }
-  double derive(double) const {
-    return 0;
-  }
-  Functional grad(const Functional &ingrad, bool) const {
-    return Functional(new VShellConvolveType(R, direction))((-1)*ingrad);
-  }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid out(gd, ingrad);
-    ReciprocalGrid recip = out.fft();
-    myR = R;
-    mydr = pow(gd.fineLat.volume(), 1.0/3);
-    switch (direction) {
-    case 0: recip.MultiplyBy(xdelta);
-      break;
-    case 1: recip.MultiplyBy(ydelta);
-      break;
-    case 2: recip.MultiplyBy(zdelta);
-      break;
-    }
-    out = recip.ifft();
-    *outgrad -= out;
-
-    // FIXME: we will want to propogate preexisting preconditioning
-    if (outpgrad) *outpgrad += out;
-  }
-  Expression printme(const Expression &x) const {
-    Expression out;
-    switch (direction) {
-    case 0: out = funexpr("xShellConvolve", Expression("R"))(Expression("gd"), x);
-      out.set_alias("xshell");
-      break;
-    case 1: out = funexpr("yShellConvolve", Expression("R"))(Expression("gd"), x);
-      out.set_alias("yshell");
-      break;
-    default:
-      out = funexpr("zShellConvolve", Expression("R"))(Expression("gd"), x);
-      out.set_alias("zshell");
-    }
-    out.unlazy = true;
-    return out;
-  }
-private:
-  double R;
-  int direction;
-};
-
 Functional xShellConvolve(double R) {
-  //return Functional(function_for_convolve<xshell_op<complex> >, R, false);
-  return Functional(new VShellConvolveType(R, 0));
+  return Functional(function_for_convolve<xshell_op<complex> >, R, false);
 }
 Functional yShellConvolve(double R) {
-  //return Functional(function_for_convolve<yshell_op<complex> >, R, false);
-  return Functional(new VShellConvolveType(R, 1));
+  return Functional(function_for_convolve<yshell_op<complex> >, R, false);
 }
 Functional zShellConvolve(double R) {
-  //return Functional(function_for_convolve<zshell_op<complex> >, R, false);
-  return Functional(new VShellConvolveType(R, 2));
+  return Functional(function_for_convolve<zshell_op<complex> >, R, false);
 }
 
 Functional xyShellConvolve(double R) {

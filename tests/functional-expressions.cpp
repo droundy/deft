@@ -59,10 +59,10 @@ int main(int, char **argv) {
                   "kT*choose(1e-90, -207.2326583694641*(x - 1e-90*VectorXd::Ones(gd.NxNyNz)) - 2.082326583694641e-88*VectorXd::Ones(gd.NxNyNz), x.cwise()*x.cwise().log() - x)");
 
   test_expression((Functional(kT).set_name("kT")*sqr(xShellConvolve(R))).printme(Expression("x")),
-                  "kT*xShellConvolve(R)(gd, x).cwise().square()");
+                  "kT*ifft(gd, xshell(gd, R).cwise()*fft(gd, x)).cwise().square()");
 
   test_expression(sqr(xShellConvolve(R)).grad(dV, false).printme(Expression("x")),
-                  "2*xShellConvolve(R)(gd, -(xShellConvolve(R)(gd, x)*gd.dvolume))");
+                  "2*ifft(gd, xshell(gd, R).cwise()*fft(gd, -(ifft(gd, xshell(gd, R).cwise()*fft(gd, x))*gd.dvolume)))");
 
   test_expression((four_pi_r2*Identity()).printme(Expression("x")), "12.56637061435917*(R*R)*x");
   

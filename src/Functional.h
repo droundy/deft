@@ -253,7 +253,8 @@ public:
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
     recip.cwise() *= Eigen::CwiseNullaryOp<Derived, VectorXcd>(gd.NxNyNzOver2, 1, f(gd, data));
-    out = recip.ifft();
+    if (iseven) out = recip.ifft();
+    else out = -recip.ifft();
     *outgrad += out;
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
