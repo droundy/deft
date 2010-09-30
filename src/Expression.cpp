@@ -235,6 +235,8 @@ Expression Expression::operator-() const {
     return (-*arg1) - *arg2;
   } else if (kind == "+/" && name == "-") {
     return (-*arg1) - (-*arg2);
+  } else if (kind == "unary" && name == "-") {
+    return *arg1;
   }
   Expression out;
   out.name = "-";
@@ -246,7 +248,11 @@ Expression Expression::operator-() const {
 }
 
 Expression Expression::operator*(const Expression &e) const {
-  if (e.kind == "constant" && kind != "constant") {
+  checkWellFormed();
+  e.checkWellFormed();
+  if (kind == "constant" && e.kind == "constant") {
+    return Expression(value*e.value);
+  } else if (e.kind == "constant") {
     // prefer to have scalar on left.
     return e*(*this);
   }
@@ -262,14 +268,12 @@ Expression Expression::operator*(const Expression &e) const {
   }
   Expression out;
   if (e.type == "ReciprocalGrid") {
-    if (!iscwise()) return cwise() * e;
     assert(type != "Grid");
     out.type = "ReciprocalGrid";
-  } else if (e.type == "Grid") {
-    if (!iscwise()) return cwise() * e;
-    assert(e.type != "ReciprocalGrid");
   } else if (type == "ReciprocalGrid") {
     out.type = "ReciprocalGrid";
+  } else if (e.type == "Grid") {
+    assert(e.type != "ReciprocalGrid");
   } else if (e.type == "double" && type == "double") {
     out.type = "double";
   }
@@ -293,11 +297,9 @@ Expression Expression::operator/(const Expression &e) const {
   }
   Expression out;
   if (type == "ReciprocalGrid") {
-    if (e.type == "ReciprocalGrid" && !iscwise()) return cwise()/e;
     assert(e.type != "Grid");
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
-    if (e.type == "Grid" && !iscwise()) return cwise()/e;
     assert(e.type != "ReciprocalGrid");
   } else if (type == "double" && kind == "constant") {
     if (e.type == "Grid") return (*this)*grid_ones/e;
@@ -340,6 +342,45 @@ Expression funexpr(const char *n, const Expression &arg, const Expression &a2, c
   return out;
 }
 
+
+Expression linearfunexpr(const char *n, const Expression &arg) {
+  if (arg.kind == "*/") {
+    if (arg.arg1->type == "double" && arg.name == "*") {
+      return *arg.arg1 * linearfunexpr(n, *arg.arg2);
+    } else if (arg.arg2->type == "double" && arg.name == "*") {
+      return *arg.arg2 * linearfunexpr(n, *arg.arg1);
+    } else if (arg.arg2->type == "double" && arg.name == "/") {
+      return linearfunexpr(n, *arg.arg1) / *arg.arg2;
+    }
+  }
+  Expression out = funexpr(n, arg);
+  out.kind = "linear function";
+  return out;
+}
+
+Expression linearfunexprgd(const char *n, const char *type, const Expression &arg) {
+  if (arg.kind == "*/") {
+    if (arg.arg1->type == "double" && arg.name == "*") {
+      return *arg.arg1 * linearfunexprgd(n, type, *arg.arg2);
+    } else if (arg.arg2->type == "double" && arg.name == "*") {
+      return *arg.arg2 * linearfunexprgd(n, type, *arg.arg1);
+    } else if (arg.arg2->type == "double" && arg.name == "/") {
+      return linearfunexprgd(n, type, *arg.arg1) / *arg.arg2;
+    }
+  } else if (arg.kind == "unary" && arg.name == "-") {
+    return - linearfunexprgd(n, type, *arg.arg1);
+  }
+  Expression out = funexpr(n, arg);
+  out.kind = "linear function";
+  if (arg.arg1 && arg.arg2)
+    out.name = std::string(n) + "(gd, /* " + arg.arg1->type + "  " + arg.name + "  " + arg.arg2->type + " */";
+  else
+    out.name = std::string(n) + "(gd, /* " + arg.name + " */";
+  out.name = std::string(n) + "(gd, ";
+  out.type = type;
+  return out;
+}
+
 Expression fft(const Expression &g) {
   if (g.type != "Grid") {
     printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
@@ -372,8 +413,10 @@ std::string Expression::printme() const {
     return a1 + " " + name + " " + a2;
   } else if (kind == "*/") {
     // Multiplication and division
-    std::string a1 = arg1->printme();
-    if (arg1->kind == "+-") a1 = "(" + a1 + ")";
+    Expression myarg1 = *arg1;
+    if (arg2->type != "double" && !arg1->iscwise()) myarg1 = myarg1.cwise();
+    std::string a1 = myarg1.printme();
+    if (myarg1.kind == "+-") a1 = "(" + a1 + ")";
     std::string a2 = arg2->printme() ;
     if (arg2->kind == "+-" || arg2->kind == "*/") a2 = "(" + a2 + ")";
     return a1 + name + a2;
@@ -382,7 +425,7 @@ std::string Expression::printme() const {
     std::string arg = arg1->printme();
     if (arg1->kind == "+-" || arg1->kind == "*/") arg = "(" + arg + ")";
     return "-" + arg;
-  } else if (kind == "function") {
+  } else if (kind == "function" || kind == "linear function") {
     // Function calls
     std::string out = name;
     if (arg1) {

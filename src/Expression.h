@@ -65,6 +65,9 @@ Expression funexpr(const char *name, const Expression &);
 Expression funexpr(const char *name, const Expression &, const Expression &);
 Expression funexpr(const char *name, const Expression &, const Expression &, const Expression &);
 
+Expression linearfunexpr(const char *name, const Expression &);
+Expression linearfunexprgd(const char *name, const char *type, const Expression &);
+
 inline Expression operator+(double a, const Expression &b) {
   return Expression(a) + b;
 }
