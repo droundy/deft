@@ -96,17 +96,20 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,              "VectorXd *outpgrad) const {\n");
-  fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
-  fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  grad(Functional(new PretendIngradType()),
-       true).printme(Expression("x")).generate_code(o, "    (*outpgrad) += %s;\n");
+  Expression epg = grad(Functional(new PretendIngradType()), true).printme(Expression("x"));
+  Expression eg = grad(Functional(new PretendIngradType()), false).printme(Expression("x"));
+  if (eg == epg) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
+  else {
+    fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
+    fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
+    epg.generate_code(o, "    (*outpgrad) += %s;\n");
+  }
   fprintf(o, "  }\n");
 
   fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
   fprintf(o, "    if (outpgrad) pgrad(gd, x, ingrad, outpgrad);\n");
-  grad(Functional(new PretendIngradType()),
-       false).printme(Expression("x")).generate_code(o, "    (*outgrad) += %s;\n");
+  eg.generate_code(o, "    (*outgrad) += %s;\n");
   fprintf(o, "  }\n");
 
   fprintf(o, "  Expression printme(const Expression &) const {\n");
