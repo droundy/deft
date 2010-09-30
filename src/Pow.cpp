@@ -68,14 +68,8 @@ public:
       double foo = n*ingrad[i];
       for (int p=1; p < n; p++) foo *= data[i];
       (*outgrad)[i] += foo;
+      if (outpgrad) (*outpgrad)[i] += foo;
     }
-    // FIXME: we will want to propogate preexisting preconditioning eventually...
-    if (outpgrad)
-      for (int i=0; i<gd.NxNyNz; i++) {
-        double foo = n*ingrad[i];
-        for (int p=1; p < n; p++) foo *= data[i];
-        (*outpgrad)[i] += foo;
-      }
   }
   Expression printme(const Expression &x) const {
     switch (n) {
