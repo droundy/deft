@@ -17,7 +17,6 @@
 #include "Functionals.h"
 #include "handymath.h"
 #include "Grid.h"
-#include <set>
 
 void FunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
   if (name) printf("%s%25s =", prefix, name);
@@ -88,100 +87,28 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  VectorXd transform(const GridDescription &gd, const VectorXd &x) const {\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  Expression e = printme(Expression("x"));
-  Expression s = e.FindCommonSubexpression();
-  // Set of variables that need to be deleted.
-  std::set<std::string> vars, allvars;
-  while (s.unlazy) {
-    std::string a = s.alias + "_v";
-    if (a == "_v") a = "var";
-    if (allvars.count(a)) {
-      // need to make this thing unique...
-      for (int varnum=0; true; varnum++) {
-        std::ostringstream oss;
-        oss << varnum;
-        std::string newa = a + "_" + oss.str();
-        if (!allvars.count(newa)) {
-          a = newa;
-          break;
-        }
-      }
-    }
-    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
-    //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
-    //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
-    vars.insert(a);
-    allvars.insert(a);
-    while (e.EliminateThisSubexpression(s, a));
-    s = e.FindCommonSubexpression();
-    for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
-      if (!e.FindVariable(*i)) {
-        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-        fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
-        vars.erase(i);
-      }
-    }
-  }
-  fprintf(o, "    VectorXd out = %s;\n", e.printme().c_str());
-  for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
-    //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-    vars.erase(i);
-  }
-  fprintf(o, "    return out;\n");
+  printme(Expression("x")).generate_code(o, "    return %s;\n");
   fprintf(o, "  }\n");
   fprintf(o, "  Functional grad(const Functional &, bool) const {\n");
   fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n\n");
-  fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
-  fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
+
+  fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
+  fprintf(o,              "VectorXd *outpgrad) const {\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  Expression eg = grad(Functional(new PretendIngradType()), false).printme(Expression("x"));
-  Expression epg = grad(Functional(new PretendIngradType()), true).printme(Expression("x"));
-  s = eg.FindCommonSubexpression();
-  allvars.clear();
-  vars.clear();
-  while (s.unlazy) {
-    std::string a = s.alias + "_v";
-    if (a == "_v") a = "var";
-    if (allvars.count(a)) {
-      // need to make this thing unique...
-      for (int varnum=0; true; varnum++) {
-        std::ostringstream oss;
-        oss << varnum;
-        std::string newa = a + "_" + oss.str();
-        if (!allvars.count(newa)) {
-          a = newa;
-          break;
-        }
-      }
-    }
-    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
-    //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
-    //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
-    vars.insert(a);
-    allvars.insert(a);
-    while (eg.EliminateThisSubexpression(s, a));
-    while (epg.EliminateThisSubexpression(s, a));
-    s = eg.FindCommonSubexpression();
-    for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
-      if (!eg.FindVariable(*i) && !epg.FindVariable(*i)) {
-        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-        fprintf(o, "    %s.resize(0);\n", i->c_str());
-        vars.erase(i);
-      }
-    }
-  }
-  fprintf(o, "    *outgrad += %s;\n", eg.printme().c_str());
-  fprintf(o, "    if (outpgrad) *outpgrad += %s;\n", epg.printme().c_str());
-  for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
-    //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-    vars.erase(i);
-  }
-  fprintf(o, "  }\n\n");
+  grad(Functional(new PretendIngradType()),
+       true).printme(Expression("x")).generate_code(o, "    (*outpgrad) += %s;\n");
+  fprintf(o, "  }\n");
+
+  fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
+  fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
+  fprintf(o, "    if (outpgrad) pgrad(gd, x, ingrad, outpgrad);\n");
+  grad(Functional(new PretendIngradType()),
+       false).printme(Expression("x")).generate_code(o, "    (*outgrad) += %s;\n");
+  fprintf(o, "  }\n");
+
   fprintf(o, "  Expression printme(const Expression &) const {\n");
   fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");
   fprintf(o, "  }\n");

@@ -513,3 +513,43 @@ Expression Expression::simplify() const {
   if (arg3) out.arg3 = new Expression(arg3->simplify());
   return *this;
 }
+
+void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> allvars) const {
+  // Set of variables that need to be deleted.
+  std::set<std::string> vars;
+
+  Expression e = *this;
+  Expression s = e.FindCommonSubexpression();
+  while (s.unlazy) {
+    std::string a = s.alias + "_v";
+    if (a == "_v") a = "var";
+    if (allvars.count(a)) {
+      // need to make this thing unique...
+      for (int varnum=0; true; varnum++) {
+        std::ostringstream oss;
+        oss << varnum;
+        std::string newa = a + "_" + oss.str();
+        if (!allvars.count(newa)) {
+          a = newa;
+          break;
+        }
+      }
+    }
+    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
+    //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
+    //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
+    vars.insert(a);
+    allvars.insert(a);
+    while (e.EliminateThisSubexpression(s, a));
+    s = e.FindCommonSubexpression();
+    for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
+      if (!e.FindVariable(*i)) {
+        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
+        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
+        fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+        vars.erase(i);
+      }
+    }
+  }
+  fprintf(o, fmt, e.printme().c_str());
+}

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <set>
 
 class Expression {
 public:
@@ -58,6 +59,7 @@ public:
   int checkWellFormed() const;
 
   Expression simplify() const;
+  void generate_code(FILE *outfile, const char *fmt, std::set<std::string> scopevars = std::set<std::string>()) const;
 };
 
 Expression funexpr(const char *name);
