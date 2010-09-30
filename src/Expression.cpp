@@ -46,6 +46,7 @@ void Expression::operator=(const Expression &e) {
   unlazy = e.unlazy;
   delete arg1;
   delete arg2;
+  delete arg3;
   if (e.arg1) arg1 = new Expression(*e.arg1);
   else arg1 = 0;
   if (e.arg2) arg2 = new Expression(*e.arg2);
@@ -214,10 +215,12 @@ Expression Expression::operator-(const Expression &e) const {
   out.kind = "+-";
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
+  out.checkWellFormed();
   return out;
 }
 
 Expression Expression::operator-() const {
+  checkWellFormed();
   if (kind == "constant") {
     return -value;
   } else if (kind == "*/" && name == "*" && arg1->kind == "constant") {
@@ -238,6 +241,7 @@ Expression Expression::operator-() const {
   out.kind = "unary";
   out.type = type;
   out.arg1 = new Expression(*this);
+  out.checkWellFormed();
   return out;
 }
 
@@ -404,4 +408,65 @@ std::string Expression::printme() const {
     return alias;
   }
   return name;
+}
+
+int Expression::checkWellFormed() const {
+  int retval = 0;
+  if (kind == "+-") {
+    if (arg1->type != type || arg2->type != type) {
+      printf("Types don't match on addition/subtraction!\n");
+      retval++;
+    }
+  } else if (kind == "*/") {
+    if (arg1->type != type && arg1->type != "double") {
+      printf("Types don't match on multiplication!\n");
+      retval++;
+    }
+    if (arg2->type != type && arg2->type != "double") {
+      printf("Types don't match on multiplication!\n");
+      retval++;
+    }
+  } else if (kind == "unary" && name == "-") {
+    if (arg1->type != type) {
+      printf("Types don't match on unary minus: %s\n", printme().c_str());
+      printf("Type of %s is %s\n", arg1->printme().c_str(), arg1->type.c_str());
+      printf("\n\n");
+      retval++;
+    }
+  }
+  if (arg1) retval += arg1->checkWellFormed();
+  if (arg2) retval += arg2->checkWellFormed();
+  if (arg3) retval += arg3->checkWellFormed();
+  return retval;
+}
+
+Expression Expression::simplify() const {
+  if (name == "*" && arg2->name == "*") {
+    if (arg2->arg1->kind == "constant")
+      return (*arg2->arg1 * *arg1 * *arg2->arg2).simplify();
+    if (arg2->arg2->kind == "constant")
+      return (*arg2->arg2 * *arg1 * *arg2->arg1).simplify();
+    return (*arg1 * *arg2->arg1 * *arg2->arg2).simplify();
+  }
+  if (kind == "unary" && name == "-") {
+    Expression minusthis = arg1->simplify();
+    if (minusthis.kind == "*/" && minusthis.arg1->kind == "constant") {
+      minusthis.arg1 = new Expression(-minusthis.arg1->value);
+      return minusthis;
+    }
+    if (minusthis.kind == "*/" && minusthis.arg1->kind == "*/" && minusthis.arg1->arg1->kind == "constant") {
+      minusthis.arg1->arg1 = new Expression(-minusthis.arg1->arg1->value);
+      return minusthis;
+    }
+    return -minusthis;
+  }
+  Expression out;
+  out.name = name;
+  out.type = type;
+  out.kind = kind;
+  out.alias = alias;
+  if (arg1) out.arg1 = new Expression(arg1->simplify());
+  if (arg2) out.arg2 = new Expression(arg2->simplify());
+  if (arg3) out.arg3 = new Expression(arg3->simplify());
+  return *this;
 }

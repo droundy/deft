@@ -55,6 +55,9 @@ public:
   bool operator==(const Expression &) const;
 
   std::string printme() const;
+  int checkWellFormed() const;
+
+  Expression simplify() const;
 };
 
 Expression funexpr(const char *name);
