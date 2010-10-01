@@ -129,6 +129,26 @@ int main(int, char **argv) {
 
   check_peak("Gradient of 3D cavity (fast)", 240, 241, 16.5);
 
+  ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+
+  printf("RF energy is %g\n", ff.integral(potential));
+  check_peak("RF energy of 3D cavity", 59, 60, 3.1);
+
+  mygrad.setZero();
+  ff.integralgrad(potential, &mygrad);
+  printf("RF grad is: %g\n", mygrad.norm());
+  check_peak("RF gradient of 3D cavity", 83, 84, 15);
+
+  ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  printf("RF energy new way is %g\n", ff.integral(potential));
+  check_peak("RF energy of 3D cavity (fast)", 48, 49, 1.1);
+
+  mygrad.setZero();
+  ff.integralgrad(potential, &mygrad);
+  printf("RF grad optimized is: %g\n", mygrad.norm());
+  check_peak("RF gradient of 3D cavity (fast)", 101, 102, 3.9);
+
+
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {
