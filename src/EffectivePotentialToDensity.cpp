@@ -63,7 +63,7 @@ public:
     //}
   }
   Expression printme(const Expression &x) const {
-    return (Expression("minusbeta") * x).method("exp");
+    return (Expression("minusbeta").set_type("double") * x).cwise().method("exp");
   }
 private:
   double minusbeta; // -1/kT
