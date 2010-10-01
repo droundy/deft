@@ -191,7 +191,10 @@ int Functional::run_finite_difference_test(const char *testname, const Grid &x,
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
       if (maxgraderr/maxgrad > 1e-12) {
+        printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
+        printf("othergrad itself is %s\n",
+               grad(dV, Identity(), false).printme(Expression("x")).printme().c_str());
         printf("my_grad[0] = %g\n", my_grad[0]);
         printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
         printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
@@ -538,36 +541,8 @@ Functional Functional::operator-(const Functional &f) const {
   return *this + -1*f;
 }
 
-class SquareRuleType : public FunctionalInterface {
-public:
-  SquareRuleType(const Functional &fa) : f(fa) {}
-
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f(gd, data).cwise().square();
-  }
-  double transform(double n) const {
-    double x = f(n);
-    return x*x;
-  }
-  double derive(double n) const {
-    return 2*f(n)*f.derive(n);
-  }
-  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
-    return f.grad(2*f(x)*ingrad, x, ispgrad);
-  }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    f.grad(gd, data, ingrad.cwise()*(2*f(gd, data)), outgrad, outpgrad);
-  }
-  Expression printme(const Expression &x) const {
-    return f.printme(x).cwise().method("square");
-  }
-private:
-  Functional f;
-};
-
 Functional sqr(const Functional &f) {
-  return Functional(new SquareRuleType(f));
+  return Pow(2)(f);
 }
 
 

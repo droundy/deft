@@ -121,13 +121,13 @@ int main(int, char **argv) {
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("Energy new way is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity (fast)", 69, 70, 2.1);
+  check_peak("Energy of 3D cavity (fast)", 69, 70, 2.0);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
   printf("Grad optimized is: %g\n", mygrad.norm());
 
-  check_peak("Gradient of 3D cavity (fast)", 240, 241, 16.5);
+  check_peak("Gradient of 3D cavity (fast)", 240, 241, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
 
@@ -141,7 +141,7 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   printf("RF energy new way is %g\n", ff.integral(potential));
-  check_peak("RF energy of 3D cavity (fast)", 48, 49, 1.1);
+  check_peak("RF energy of 3D cavity (fast)", 48, 49, 1.0);
 
   mygrad.setZero();
   ff.integralgrad(potential, &mygrad);
