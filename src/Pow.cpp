@@ -47,13 +47,12 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  Functional grad(const Functional &ingrad, bool) const {
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     switch (n) {
     case 0: return 0;
     case 1: return ingrad;
-    case 2: return 2*Identity()*ingrad;
     }
-    return n*Pow(n-1)*ingrad;
+    return Pow(n-1)(x)*n*ingrad;
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

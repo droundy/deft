@@ -40,7 +40,7 @@ public:
   double derive(double) const {
     return 1; // hokey!
   }
-  Functional grad(const Functional &, bool) const {
+  Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -89,15 +89,15 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   printme(Expression("x")).generate_code(o, "    return %s;\n");
   fprintf(o, "  }\n");
-  fprintf(o, "  Functional grad(const Functional &, bool) const {\n");
+  fprintf(o, "  Functional grad(const Functional &, const Functional &, bool) const {\n");
   fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n\n");
 
   fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,              "VectorXd *outpgrad) const {\n");
-  Expression epg = grad(Functional(new PretendIngradType()), true).printme(Expression("x"));
-  Expression eg = grad(Functional(new PretendIngradType()), false).printme(Expression("x"));
+  Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
+  Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
   if (eg == epg) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
@@ -187,7 +187,7 @@ int Functional::run_finite_difference_test(const char *testname, const Grid &x,
     if (itsCounter->ptr->have_analytic_grad) {
       // We have an analytic grad, so let's make sure it matches the
       // other one...
-      VectorXd othergrad(grad(dV, false)(x));
+      VectorXd othergrad(grad(dV, Identity(), false)(x));
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
       if (maxgraderr/maxgrad > 1e-12) {
@@ -307,7 +307,7 @@ public:
   double derive(double) const {
     return 1; // hokey!
   }
-  Functional grad(const Functional &, bool) const {
+  Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -332,7 +332,7 @@ public:
   double derive(double) const {
     return 0;
   }
-  Functional grad(const Functional &, bool) const {
+  Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -363,7 +363,7 @@ public:
   double derive(double) const {
     return 0;
   }
-  Functional grad(const Functional &, bool) const {
+  Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
@@ -410,8 +410,9 @@ public:
   double derive(double n) const {
     return f1.derive(f2(n))*f2.derive(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return f2.grad(f1.grad(ingrad, ispgrad)(f2), ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return f2.grad(f1.grad(ingrad, f2(x), ispgrad), x, ispgrad);
+    return f1.grad(f2.grad(ingrad, x, ispgrad), f2, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -447,8 +448,8 @@ public:
   double derive(double n) const {
     return f1.derive(n)/f2(n) - f1(n)*f2.derive(n)/f2(n)/f2(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return f1.grad(ingrad/f2, ispgrad) - f2.grad(f1*ingrad/sqr(f2), ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return f1.grad(ingrad/f2(x), x, ispgrad) - f2.grad(f1(x)*ingrad/sqr(f2(x)), x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -480,8 +481,8 @@ public:
   double derive(double n) const {
     return f1(n)*f2.derive(n) + f1.derive(n)*f2(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return f2.grad(f1*ingrad, ispgrad) + f1.grad(f2*ingrad, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return f2.grad(f1(x)*ingrad, x, ispgrad) + f1.grad(f2(x)*ingrad, x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -513,8 +514,8 @@ public:
   double derive(double n) const {
     return f.derive(n)/f(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return f.grad(ingrad/f, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return f.grad(ingrad/f(x), x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -551,8 +552,8 @@ public:
   double derive(double n) const {
     return 2*f(n)*f.derive(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return 2*f.grad(f*ingrad, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return f.grad(2*f(x)*ingrad, x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -583,8 +584,8 @@ public:
   double derive(double n) const {
     return f.derive(n);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return Functional(constraint)*f.grad(ingrad, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return Functional(constraint)*f.grad(ingrad, x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

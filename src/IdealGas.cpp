@@ -38,8 +38,9 @@ public:
     return (x<cut) ? flow.derive(x) : fhigh.derive(x);
   }
 
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    return ingrad*choose(cut, flow.grad(Functional(1), ispgrad), fhigh.grad(Functional(1), ispgrad));
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    return ingrad*choose(cut, flow.grad(Functional(1), Identity(), ispgrad),
+                         fhigh.grad(Functional(1), Identity(), ispgrad))(x);
   }
   void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

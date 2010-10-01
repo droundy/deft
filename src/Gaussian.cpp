@@ -37,7 +37,7 @@ public:
   double derive(double) const {
     return 1;
   }
-  Functional grad(const Functional &ingrad, bool) const {
+  Functional grad(const Functional &ingrad, const Functional &, bool) const {
     return Gaussian(width)(ingrad);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,

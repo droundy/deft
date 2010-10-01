@@ -21,7 +21,7 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double derive(double data) const = 0;
-  virtual Functional grad(const Functional &ingrad, bool ispgrad) const = 0;
+  virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Expression printme(const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
@@ -122,15 +122,15 @@ public:
     if (mynext) out += (*mynext)(data);
     return out;
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
     if (mynext) {
-      return itsCounter->ptr->grad(ingrad, ispgrad) + mynext->grad(ingrad, ispgrad);
+      return itsCounter->ptr->grad(ingrad, x, ispgrad) + mynext->grad(ingrad, x, ispgrad);
     } else {
-      return itsCounter->ptr->grad(ingrad, ispgrad);
+      return itsCounter->ptr->grad(ingrad, x, ispgrad);
     }
   }
-  Functional pgrad(const Functional &ingrad) const {
-    return grad(ingrad, true);
+  Functional pgrad(const Functional &ingrad, const Functional &x) const {
+    return grad(ingrad, x, true);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -242,7 +242,7 @@ public:
   double derive(double) const {
     return gzero();
   }
-  Functional grad(const Functional &ingrad, bool) const {
+  Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
       return Functional(new ConvolveWith(f, data, iseven))(ingrad);
     else

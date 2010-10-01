@@ -85,15 +85,20 @@ int main(int, char **argv) {
   retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
   retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
 
-  retval += test_functionals("derivative of x", x.grad(1,false) - x, 1 - x, 0.1, 2e-13);
-  retval += test_functionals("derivative of x^3", Pow(3).grad(1,false), 3*Pow(2), 0.1, 2e-13);
-  retval += test_functionals("derivative of x^2", sqr(x).grad(1,false), 2*x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x", x.grad(1,Identity(),false) - x, 1 - x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(1,Identity(),false), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(1,Identity(),false), 2*x, 0.1, 2e-13);
 
   retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Cube vs mul", Pow(3)(x), x*x*x, 0.1, 1e-12);
   retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
   retval += test_functionals("Fourth power vs mul", Pow(4)(x), x*x*x*x, 0.1, 1e-12);
+
+  retval += test_functionals("sqr(log(x))*x", sqr(log(x))*x, Pow(2)(log(x))*x, 0.1, 1e-12);
+  retval += test_functionals("sqr(log(x))*x no Pow", sqr(log(x))*x, (x*x)(log(x))*x, 0.1, 1e-12);
+  retval += test_functionals("sqr(log(x))/x", sqr(log(x))/x, Pow(2)(log(x))/x, 0.1, 1e-12);
+  retval += test_functionals("log(x)*log(x)/x", sqr(log(x))/x, log(x)*log(x)/x, 0.1, 1e-12);
 
   retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), x, 0.1, 1e-12);
   retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), 2*x, 0.9, 1e-12);

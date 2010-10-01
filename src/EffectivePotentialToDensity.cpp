@@ -43,9 +43,11 @@ public:
   double derive(double Veff) const {
     return minusbeta*exp(minusbeta*Veff);
   }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    if (ispgrad) return minusbeta*ingrad;
-    else return minusbeta*EffectivePotentialToDensity(-1/minusbeta)*ingrad;
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    Functional mb(minusbeta);
+    mb.set_name("minusbeta");
+    if (ispgrad) return mb*ingrad;
+    else return mb*EffectivePotentialToDensity(-1/minusbeta)(x)*ingrad;
   }
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).

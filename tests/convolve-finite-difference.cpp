@@ -51,6 +51,15 @@ int main(int, char **argv) {
   Functional ysh = yShellConvolve(1), sh = ShellConvolve(1);
   Functional xsh = xShellConvolve(1), st = StepConvolve(1);
 
+  retval += Pow(2)(ysh).run_finite_difference_test("Pow(ysh,2)", foo);
+  retval += sqr(ysh).run_finite_difference_test("ysh^2", foo);
+
+  retval += (Pow(2)(ysh)*Identity()).run_finite_difference_test("Pow(ysh,2)*x", foo);
+  retval += (sqr(ysh)*Identity()).run_finite_difference_test("sqr(ysh)*x", foo);
+  retval += ((Identity()*Identity())(ysh)*Identity()).run_finite_difference_test("(id*di)(ysh)*x", foo);
+
+  retval += (Pow(4)(ysh)*st).run_finite_difference_test("Pow(ysh,4)*sh", foo);
+  retval += (Pow(2)(ysh)*st).run_finite_difference_test("Pow(ysh,2)*sh", foo);
   retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*sh", foo);
   retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*xsh^4", foo);
 
