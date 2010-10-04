@@ -8,7 +8,9 @@
 Functional IdealGas(double temperature);
 Functional HardSpheres(double radius, double temperature);
 Functional HardSpheresRF(double radius, double temperature);
+Functional HardSpheresTarazona(double radius, double temperature);
 Functional HardSpheresWB(double radius, double temperature);
+Functional HardSpheresWBnotensor(double radius, double temperature);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 

@@ -28,4 +28,8 @@ int main(int, char **argv) {
     HardSpheres(kT, R).create_source("src/HardSpheresFast.cpp", "HardSpheresFast", "R", "kT");
   if (strcmp(argv[1], "src/HardSpheresRFFast.cpp") == 0)
     HardSpheresRF(kT, R).create_source("src/HardSpheresRFFast.cpp", "HardSpheresRFFast", "R", "kT");
+  if (strcmp(argv[1], "src/HardSpheresTarazonaFast.cpp") == 0)
+    HardSpheresRF(kT, R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R", "kT");
+  if (strcmp(argv[1], "src/HardSpheresNoTensor.cpp") == 0)
+    HardSpheresRF(kT, R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R", "kT");
 }

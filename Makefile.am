@@ -10,7 +10,8 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp src/CSE.cpp\
 	src/EffectivePotentialToDensity.cpp
 
-OPTIMIZED_CODE = src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp
+OPTIMIZED_CODE = src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
+	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
@@ -19,7 +20,7 @@ deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
 
-src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp: optimize-functionals
+src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp: optimize-functionals
 	./optimize-functionals $@
 
 tests/generated/sum.h: tests/generating-code.test
