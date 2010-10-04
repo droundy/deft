@@ -231,7 +231,7 @@ Expression Expression::operator-() const {
     return *arg1 * (-arg2->value);
   } else if (kind == "*/" && name == "/" && arg2->kind == "constant") {
     return *arg1 / (-arg2->value);
-  } else if (kind == "+/" && name == "+") {
+  } else if (kind == "+-" && name == "+") {
     return (-*arg1) - *arg2;
   } else if (kind == "+/" && name == "-") {
     return (-*arg1) - (-*arg2);
