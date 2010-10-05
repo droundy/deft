@@ -263,8 +263,8 @@ Expression Expression::operator*(const Expression &e) const {
     return -e;
   } else if (kind == "constant" && value == 0) {
     return *this;
-  } else if (kind == "constant" && e.kind == "constant") {
-    return Expression(value*e.value);
+  } else if (e.kind == "unary" && e.name == "-") {
+    return - (*this * *e.arg1);
   }
   Expression out;
   if (e.type == "ReciprocalGrid") {
