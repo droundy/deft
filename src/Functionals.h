@@ -16,6 +16,8 @@ Functional ExternalPotential(const VectorXd &V);
 
 Functional HardSpheresFast(double radius, double temperature);
 Functional HardSpheresRFFast(double radius, double temperature);
+Functional HardSpheresTarazonaFast(double radius, double temperature);
+Functional HardSpheresNoTensor(double radius, double temperature);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 

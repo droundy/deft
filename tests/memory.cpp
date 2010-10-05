@@ -24,31 +24,31 @@ int retval = 0;
 clock_t last_time = clock();
 double reference_time = 1;
 
-double check_peak(const char *name, double peakmin, double peakmax, double time_limit, double fraccuracy=0.1) {
+double check_peak(const char *name, const char *name2, double peakmin, double peakmax, double time_limit, double fraccuracy=0.2) {
   printf("\n************");
-  for (unsigned i=0;i<strlen(name);i++) printf("*");
-  printf("\n* Testing %s *\n", name);
-  for (unsigned i=0;i<strlen(name);i++) printf("*");
+  for (unsigned i=0;i<strlen(name) + 4 + strlen(name2);i++) printf("*");
+  printf("\n* Testing %s of %s *\n", name, name2);
+  for (unsigned i=0;i<strlen(name) + 4 + strlen(name2);i++) printf("*");
   printf("************\n\n");
   
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
   double peak = peak_memory()/1024.0/1024;
   printf("CPU time is %g s (or %gx)\n", cputime, cputime/reference_time);
   if (time_limit > 0 && cputime/reference_time > time_limit*(1+fraccuracy)) {
-    printf("FAIL: CPU time used should be under %gx!\n", time_limit*(1+fraccuracy));
+    printf("FAIL: CPU time used by %s %s should be under %gx!\n", name, name2, time_limit*(1+fraccuracy));
     retval++;
   }
   if (cputime/reference_time < time_limit*(1-fraccuracy)) {
-    printf("FAIL: CPU time used should be at least %gx!\n", time_limit*(1-fraccuracy));
+    printf("FAIL: CPU time used by %s %s should be at least %gx!\n", name, name2, time_limit*(1-fraccuracy));
     retval++;
   }
   printf("Peak memory use is %g M\n", peak);
   if (peak < peakmin) {
-    printf("FAIL: Peak memory use should be at least %g!\n", peakmin);
+    printf("FAIL: Peak memory use of %s %s should be at least %g!\n", name, name2, peakmin);
     retval++;
   }
   if (peak > peakmax) {
-    printf("FAIL: Peak memory use should be under %g!\n", peakmax);
+    printf("FAIL: Peak memory use of %s %s should be under %g!\n", name, name2, peakmax);
     retval++;
   }
   reset_peak_memory();
@@ -70,6 +70,22 @@ double notincavity(Cartesian r) {
 
 double incavity(Cartesian r) {
   return 1 - notincavity(r);
+}
+
+void check_a_functional(const char *name, Functional f, const Grid &x, double memE, double timE, double memG, double timG) {
+
+  f.integral(x);
+  //printf("\n\nEnergy of %s is %g\n", name, f.integral(x));
+
+  check_peak("Energy", name, memE, memE + 1, timE);
+
+  Grid mygrad(x);
+  mygrad.setZero();
+  f.integralgrad(x, &mygrad);
+  //printf("Grad of %s is: %g\n", name, mygrad.norm());
+
+  check_peak("Gradient", name, memG, memG+1, timG);
+  
 }
 
 int main(int, char **argv) {
@@ -98,7 +114,7 @@ int main(int, char **argv) {
   // And now let's set the external_potential up as we'd like it.
   external_potential.Set(incavity);
   external_potential *= 1e9;
-  reference_time = check_peak("Setting external potential.", 7, 8, 0);
+  reference_time = check_peak("Setting", "external potential", 7, 8, 0);
 
   Grid constraint(gd);
   constraint.Set(notincavity);
@@ -107,47 +123,29 @@ int main(int, char **argv) {
   Functional ff = constrain(constraint, (HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
-  printf("Energy is %g\n", ff.integral(potential));
 
-  check_peak("Energy of 3D cavity", 83, 84, 10.5);
-
-  Grid mygrad(gd);
-  mygrad.setZero();
-  ff.integralgrad(potential, &mygrad);
-  printf("Grad is: %g\n", mygrad.norm());
-
-  check_peak("Gradient of 3D cavity", 100, 105, 66);
+  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 66);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  printf("Energy new way is %g\n", ff.integral(potential));
-
-  check_peak("Energy of 3D cavity (fast)", 69, 70, 2.0);
-
-  mygrad.setZero();
-  ff.integralgrad(potential, &mygrad);
-  printf("Grad optimized is: %g\n", mygrad.norm());
-
-  check_peak("Gradient of 3D cavity (fast)", 240, 241, 15);
+  check_a_functional("HardSphereFast", ff, potential, 66, 2.0, 240, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-
-  printf("RF energy is %g\n", ff.integral(potential));
-  check_peak("RF energy of 3D cavity", 59, 60, 3.1);
-
-  mygrad.setZero();
-  ff.integralgrad(potential, &mygrad);
-  printf("RF grad is: %g\n", mygrad.norm());
-  check_peak("RF gradient of 3D cavity", 83, 84, 15);
+  check_a_functional("HardSphereRF", ff, potential, 55, 3.1, 83, 15);
 
   ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  printf("RF energy new way is %g\n", ff.integral(potential));
-  check_peak("RF energy of 3D cavity (fast)", 48, 49, 1.0);
+  check_a_functional("HardSphereRFFast", ff, potential, 45, 1.0, 101, 3.9);
 
-  mygrad.setZero();
-  ff.integralgrad(potential, &mygrad);
-  printf("RF grad optimized is: %g\n", mygrad.norm());
-  check_peak("RF gradient of 3D cavity (fast)", 101, 102, 3.9);
+  ff = constrain(constraint, (HardSpheresTarazona(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  check_a_functional("HardSphereTarazona", ff, potential, 87, 10.0, 104, 62.1);
 
+  ff = constrain(constraint, (HardSpheresTarazonaFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 45, 1.1, 101, 3.9);
+
+  ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  check_a_functional("HardSphereWBnotensor", ff, potential, 55, 4.2, 87, 21.2);
+
+  ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  check_a_functional("HardSphereNoTensor", ff, potential, 45, 1.1, 101, 3.9);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
