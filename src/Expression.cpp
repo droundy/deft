@@ -317,6 +317,36 @@ Expression Expression::operator/(const Expression &e) const {
   return out;
 }
 
+Expression Expression::ScalarFactor() {
+  if (kind == "constant") {
+    Expression out(value);
+    value = 1;
+    return out;
+  }
+  if (kind == "*/" && name == "*") {
+    Expression sf1 = arg1->ScalarFactor();
+    Expression sf2 = arg2->ScalarFactor();
+    *this = *arg1 * *arg2; // to handle cases where arg1 or arg2 becomes 1.
+    return sf1*sf2;
+  }
+  if (kind == "*/" && name == "/") {
+    Expression sf1 = arg1->ScalarFactor();
+    Expression sf2 = arg2->ScalarFactor();
+    *this = *arg1 / *arg2; // to handle cases where arg1 or arg2 becomes 1.
+    return sf1/sf2;
+  }
+  if (kind == "linear function") {
+    return arg1->ScalarFactor();
+  }
+  if (kind == "unary" && name == "-") {
+    Expression postfactor = *arg1;
+    Expression prefactor = postfactor.ScalarFactor();
+    *this = postfactor;
+    return -prefactor;
+  }
+  return Expression(1);
+}
+
 Expression funexpr(const char *n) {
   Expression out;
   out.name = std::string(n) + "("; // slightly weird...
@@ -342,43 +372,18 @@ Expression funexpr(const char *n, const Expression &arg, const Expression &a2, c
   return out;
 }
 
-
-Expression linearfunexpr(const char *n, const Expression &arg) {
-  if (arg.kind == "*/") {
-    if (arg.arg1->type == "double" && arg.name == "*") {
-      return *arg.arg1 * linearfunexpr(n, *arg.arg2);
-    } else if (arg.arg2->type == "double" && arg.name == "*") {
-      return *arg.arg2 * linearfunexpr(n, *arg.arg1);
-    } else if (arg.arg2->type == "double" && arg.name == "/") {
-      return linearfunexpr(n, *arg.arg1) / *arg.arg2;
-    }
-  }
-  Expression out = funexpr(n, arg);
-  out.kind = "linear function";
-  return out;
-}
-
 Expression linearfunexprgd(const char *n, const char *type, const Expression &arg) {
-  if (arg.kind == "*/") {
-    if (arg.arg1->type == "double" && arg.name == "*") {
-      return *arg.arg1 * linearfunexprgd(n, type, *arg.arg2);
-    } else if (arg.arg2->type == "double" && arg.name == "*") {
-      return *arg.arg2 * linearfunexprgd(n, type, *arg.arg1);
-    } else if (arg.arg2->type == "double" && arg.name == "/") {
-      return linearfunexprgd(n, type, *arg.arg1) / *arg.arg2;
-    }
-  } else if (arg.kind == "unary" && arg.name == "-") {
-    return - linearfunexprgd(n, type, *arg.arg1);
-  }
-  Expression out = funexpr(n, arg);
+  if (arg.kind == "constant" && arg.value == 0)
+    return Expression(0); // Nice optimization!  :)
+  Expression newarg(arg);
+  Expression prefactor = newarg.ScalarFactor();
+
+  Expression out = funexpr(n, newarg);
   out.kind = "linear function";
-  if (arg.arg1 && arg.arg2)
-    out.name = std::string(n) + "(gd, /* " + arg.arg1->type + "  " + arg.name + "  " + arg.arg2->type + " */";
-  else
-    out.name = std::string(n) + "(gd, /* " + arg.name + " */";
   out.name = std::string(n) + "(gd, ";
+  out.unlazy = true;
   out.type = type;
-  return out;
+  return prefactor*out;
 }
 
 Expression fft(const Expression &g) {
@@ -542,6 +547,7 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
       }
     }
     fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
+    fflush(o);
     //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
     //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
     vars.insert(a);
@@ -553,9 +559,11 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
         //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
         //fprintf(o, "    delete %s_ptr;\n", i->c_str());
         fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+        fflush(o);
         vars.erase(i);
       }
     }
   }
   fprintf(o, fmt, e.printme().c_str());
+  fflush(o);
 }

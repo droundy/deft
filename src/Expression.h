@@ -54,6 +54,11 @@ public:
 
   Expression FindCommonSubexpression() const;
   bool operator==(const Expression &) const;
+  bool operator!=(const Expression &e) const {
+    return !(*this == e);
+  }
+
+  Expression ScalarFactor(); // Removes any scalar factors from *this
 
   std::string printme() const;
   int checkWellFormed() const;
@@ -67,7 +72,6 @@ Expression funexpr(const char *name, const Expression &);
 Expression funexpr(const char *name, const Expression &, const Expression &);
 Expression funexpr(const char *name, const Expression &, const Expression &, const Expression &);
 
-Expression linearfunexpr(const char *name, const Expression &);
 Expression linearfunexprgd(const char *name, const char *type, const Expression &);
 
 inline Expression operator+(double a, const Expression &b) {
