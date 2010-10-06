@@ -32,17 +32,44 @@ bool Expression::operator==(const Expression &e) const {
 }
 
 bool Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
-  if (c == *this) {
-    *this = Expression(name);
-    type = c.type;
-    return true;
-  } else {
-    bool changed = false;
-    if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
-    if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
-    if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
-    return changed;
+  if (c.type == type) {
+    // If the type is right, then it's possible that we *are* the subexpression.
+    Expression n(name);
+    n.type = c.type;
+    // First check if we are the same as the subexpression we're trying to eliminate.
+    if (c == *this) {
+      *this = n;
+      return true;
+    }
+    // Now check if perhaps we're the same thing up to a scalar prefactor.
+    Expression tmp(*this);
+    Expression sca = tmp.ScalarFactor();
+    if (c == tmp) {
+      *this = sca * n;
+      return true;
+    }
   }
+  // Try to recursively eliminate this subexpression in our children.
+  bool changed = false;
+  if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
+  if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
+  if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
+  return changed;
+}
+
+int Expression::CountThisSubexpression(const Expression &c) const {
+  // First check if we are the same as the subexpression we're trying to eliminate.
+  if (c == *this) return 1;
+  // Now check if perhaps we're the same thing up to a scalar prefactor.
+  Expression tmp(*this);
+  tmp.ScalarFactor();
+  if (c == tmp) return 1;
+  // Try to recursively eliminate this subexpression in our children.
+  int num = 0;
+  if (arg1) num += arg1->CountThisSubexpression(c);
+  if (arg2) num += arg2->CountThisSubexpression(c);
+  if (arg3) num += arg3->CountThisSubexpression(c);
+  return num;
 }
 
 bool Expression::FindVariable(const std::string n) const {

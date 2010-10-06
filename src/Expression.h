@@ -53,6 +53,7 @@ public:
   bool FindVariable(const std::string n) const;
 
   Expression FindCommonSubexpression() const;
+  int CountThisSubexpression(const Expression &) const;
   bool operator==(const Expression &) const;
   bool operator!=(const Expression &e) const {
     return !(*this == e);
