@@ -160,6 +160,15 @@ Expression Expression::operator+(const Expression &e) const {
   } else if (e.kind == "constant" && kind == "constant") {
     return Expression(value+e.value);
   }
+  Expression thispost(*this), epost(e);
+  Expression thispre = thispost.ScalarFactor(), epre = epost.ScalarFactor();
+  if (thispost.kind == "linear function" && epost.kind == "linear function" &&
+      thispost.name == epost.name) {
+    Expression out = linearfunexprgd("oops", thispost.type.c_str(),
+                                     thispre * *thispost.arg1 + epre * *epost.arg1);
+    out.name = thispost.name;
+    return out;
+  }
   Expression out;
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
@@ -194,7 +203,6 @@ Expression Expression::operator-(const Expression &e) const {
     return Expression(value-e.value);
   }
   Expression out;
-
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
     if (e.type == "double") return *this - e*recip_ones;
@@ -323,6 +331,12 @@ Expression Expression::ScalarFactor() {
     value = 1;
     return out;
   }
+  if (type == "double") {
+    // If we have type "double" then we *are* a scalar!
+    Expression out(*this);
+    *this = Expression(1);
+    return out;
+  }
   if (kind == "*/" && name == "*") {
     Expression sf1 = arg1->ScalarFactor();
     Expression sf2 = arg2->ScalarFactor();
@@ -397,10 +411,7 @@ Expression fft(const Expression &g) {
     printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
     exit(1);
   }
-  Expression out = funexpr("fft", Expression("gd"), g);
-  out.type = "ReciprocalGrid";
-  out.unlazy = true;
-  return out;
+  return linearfunexprgd("fft", "ReciprocalGrid", g);
 }
 
 Expression ifft(const Expression &g) {
@@ -409,10 +420,7 @@ Expression ifft(const Expression &g) {
            g.printme().c_str(), g.type.c_str());
     exit(1);
   }
-  Expression out = funexpr("ifft", Expression("gd"), g);
-  out.type = "Grid";
-  out.unlazy = true;
-  return out;
+  return linearfunexprgd("ifft", "Grid", g);
 }
 
 std::string Expression::printme() const {

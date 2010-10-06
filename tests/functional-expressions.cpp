@@ -72,7 +72,7 @@ int main(int, char **argv) {
 
   test_expression("sqr(n1)",
                   sqr(xShellConvolve(R)).grad(dV, Identity(), false).printme(Expression("x")),
-                  "ifft(gd, xshell(gd, R).cwise()*fft(gd, -(2*ifft(gd, xshell(gd, R).cwise()*fft(gd, x))*gd.dvolume)))");
+                  "-2*gd.dvolume*ifft(gd, xshell(gd, R).cwise()*fft(gd, ifft(gd, xshell(gd, R).cwise()*fft(gd, x))))");
 
   test_expression("foobar",
                   (four_pi_r2*Identity()).printme(Expression("x")), "12.56637061435917*(R*R)*x");
