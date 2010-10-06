@@ -383,6 +383,12 @@ Expression linearfunexprgd(const char *n, const char *type, const Expression &ar
 
 Expression fft(const Expression &g) {
   if (g.type != "Grid") {
+    if (g.type == "double") {
+      // The fft of a constant is a delta function in G space!
+      printf("fft: Expression should have type Grid, but accepting double anyhow.\n");
+      // FIXME: W shouldn't need to do an actual FFT here!
+      return fft(g * grid_ones);
+    }
     printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
     exit(1);
   }
