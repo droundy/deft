@@ -56,7 +56,7 @@ check_PROGRAMS = \
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(ALL_CODE)
-tests_generating_code_test_SOURCES = tests/generating-code.cpp $(ALL_CODE)
+tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_timings_test_SOURCES = tests/timings.cpp $(ALL_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)

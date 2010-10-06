@@ -159,35 +159,8 @@ Functional HardSpheresWBnotensor(double radius, double temperature) {
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
-  Functional nTxx = xxShellConvolve(radius);
-  Functional nTyy = yyShellConvolve(radius);
-  Functional nTzz = zzShellConvolve(radius);
-  Functional nTxy = xyShellConvolve(radius);
-  Functional nTyz = yzShellConvolve(radius);
-  Functional nTzx = zxShellConvolve(radius);
-  Functional nTxz = nTzx, nTyx = nTxy, nTzy = nTyz;
-  /*
-  Functional trace_nT3 =
-    nTxx*nTxx*nTxx + nTxx*nTxy*nTyx + nTxx*nTxz*nTzx + // starting with nTxx
-    nTxy*nTyx*nTxx + nTxy*nTyy*nTyx + nTxy*nTyz*nTzx + // starting with nTxy
-    nTxz*nTzx*nTxx + nTxz*nTzy*nTyx + nTxz*nTzz*nTzx + // starting with nTxz
-
-    nTyx*nTxx*nTxy + nTyx*nTxy*nTyy + nTyx*nTxz*nTzy + // starting with nTyx
-    nTyy*nTyx*nTxy + nTyy*nTyy*nTyy + nTyy*nTyz*nTzy + // starting with nTyy
-    nTyz*nTzx*nTxy + nTyz*nTzy*nTyy + nTyz*nTzz*nTzy + // starting with nTyz
-
-    nTzx*nTxx*nTxz + nTzx*nTxy*nTyz + nTzx*nTxz*nTzz + // starting with nTzx
-    nTzy*nTyx*nTxz + nTzy*nTyy*nTyz + nTzy*nTyz*nTzz + // starting with nTzy
-    nTzz*nTzx*nTxz + nTzz*nTzy*nTyz + nTzz*nTzz*nTzz; // starting with nTzz
-  */
   Functional kT(temperature);
   kT.set_name("kT");
-  Functional trace_nT3 =
-    6*nTxy*nTyz*nTzx +
-    nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
-    nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
-    nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
-  // */
   // n0 is n2/(four_pi_r2)
   Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1");
