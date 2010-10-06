@@ -536,6 +536,10 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
 
   Expression e = *this;
   Expression s = e.FindCommonSubexpression();
+  Expression ssmaller = s;
+  ssmaller.ScalarFactor(); // This is s without any prefactor.
+  // Use the smaller expression if it is more common.
+  if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
   while (s.unlazy) {
     std::string a = s.alias + "_v";
     if (a == "_v") a = "var";
@@ -559,6 +563,10 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
     allvars.insert(a);
     while (e.EliminateThisSubexpression(s, a));
     s = e.FindCommonSubexpression();
+    Expression ssmaller = s;
+    ssmaller.ScalarFactor(); // This is s without any prefactor.
+    // Use the smaller expression if it is more common.
+    if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
     for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
       if (!e.FindVariable(*i)) {
         //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
