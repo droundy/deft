@@ -495,6 +495,11 @@ int Expression::checkWellFormed() const {
 }
 
 Expression Expression::simplify() const {
+  Expression postfactor = *this;
+  Expression prefactor = postfactor.ScalarFactor();
+  if (prefactor != Expression(1)) {
+    return prefactor * postfactor.simplify();
+  }
   if (name == "*" && arg2->name == "*") {
     if (arg2->arg1->kind == "constant")
       return (*arg2->arg1 * *arg1 * *arg2->arg2).simplify();
