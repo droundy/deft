@@ -124,7 +124,7 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 87, 10.5, 108, 66);
+  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 66);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereFast", ff, potential, 66, 2.0, 195, 15);

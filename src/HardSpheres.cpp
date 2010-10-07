@@ -139,7 +139,7 @@ Functional HardSpheresWB(double radius, double temperature) {
   // n1 is n2/(four_pi_r)
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   phi2.set_name("phi2");
-  Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))*TensorThirdTerm(radius)/(36*M_PI*sqr(n3)*sqr(one_minus_n3));
+  Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))/(36*M_PI*sqr(n3)*sqr(one_minus_n3))*TensorThirdTerm(radius);
   phi3.set_name("phi3");
   //Functional total = kT*(phi1 + phi2 + phi3);
   //total.set_name("hard sphere excess");
