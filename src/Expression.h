@@ -50,14 +50,18 @@ public:
   // the common subexpression.
   std::string EliminateCommonSubexpression();
   bool EliminateThisSubexpression(const Expression &, const std::string alias);
+  Expression EasyParentOfThisSubexpression(const Expression &) const;
   bool FindVariable(const std::string n) const;
 
   Expression FindCommonSubexpression() const;
   int CountThisSubexpression(const Expression &) const;
+  int Depth() const;
   bool operator==(const Expression &) const;
   bool operator!=(const Expression &e) const {
     return !(*this == e);
   }
+  bool IsUnlazy() const;
+  bool IsUnlazyApartFrom(const Expression &) const;
 
   Expression ScalarFactor(); // Removes any scalar factors from *this
 

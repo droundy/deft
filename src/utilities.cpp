@@ -105,6 +105,10 @@ long peak_memory() {
   return Eigen::djr_mempeak;
 }
 
+long current_memory() {
+  return Eigen::djr_memused;
+}
+
 void reset_peak_memory() {
   Eigen::djr_mempeak = Eigen::djr_memused;
 }

@@ -4,8 +4,4 @@
 
 set -ev
 
-make clean
-
-# And then make sure the thing compiles properly with the default flags.
-./configure
 time make -j2 check

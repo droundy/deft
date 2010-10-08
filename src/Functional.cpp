@@ -67,7 +67,8 @@ void Functional::create_source(const std::string filename, const std::string cla
                                const char *a1, const char *a2, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
-  fprintf(o, "#include \"Functionals.h\"\n\n");
+  fprintf(o, "#include \"Functionals.h\"\n");
+  fprintf(o, "#include \"utilities.h\"\n\n");
 
   fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
   fprintf(o, "public:\n");

@@ -164,6 +164,16 @@ Expression Expression::operator+(const Expression &e) const {
   Expression thispre = thispost.ScalarFactor(), epre = epost.ScalarFactor();
   if (thispost.kind == "linear function" && epost.kind == "linear function" &&
       thispost.name == epost.name) {
+    if (thispre == epre) {
+      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 + *epost.arg1);
+      out.name = thispost.name;
+      return epre*out;
+    }
+    if (thispre == -epre) {
+      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 - *epost.arg1);
+      out.name = thispost.name;
+      return thispre*out;
+    }
     Expression out = linearfunexprgd("oops", thispost.type.c_str(),
                                      thispre * *thispost.arg1 + epre * *epost.arg1);
     out.name = thispost.name;
@@ -202,6 +212,28 @@ Expression Expression::operator-(const Expression &e) const {
   } else if (e.kind == "constant" && kind == "constant") {
     return Expression(value-e.value);
   }
+
+  Expression thispost(*this), epost(e);
+  Expression thispre = thispost.ScalarFactor(), epre = epost.ScalarFactor();
+  // for some reason the following makes memory use worse!!!
+  if (thispost.kind == "linear function" && epost.kind == "linear function" &&
+      thispost.name == epost.name) {
+    if (thispre == epre) {
+      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 - *epost.arg1);
+      out.name = thispost.name;
+      return epre*out;
+    }
+    if (thispre == -epre) {
+      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 + *epost.arg1);
+      out.name = thispost.name;
+      return thispre*out;
+    }
+    Expression out = linearfunexprgd("oops", thispost.type.c_str(),
+                                     thispre * *thispost.arg1 - epre * *epost.arg1);
+    out.name = thispost.name;
+    return out;
+  }
+
   Expression out;
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
@@ -540,17 +572,25 @@ Expression Expression::simplify() const {
 
 void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> allvars) const {
   // Set of variables that need to be deleted.
-  std::set<std::string> vars;
+  std::set<std::string> gridvars;
+  std::set<std::string> recipvars;
 
   Expression e = *this;
   Expression s = e.FindCommonSubexpression();
-  Expression ssmaller = s;
-  ssmaller.ScalarFactor(); // This is s without any prefactor.
+  //Expression ssmaller = s;
+  //ssmaller.ScalarFactor(); // This is s without any prefactor.
   // Use the smaller expression if it is more common.
-  if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
-  while (s.unlazy) {
+  //if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
+  // Let's lump in any "cheap" calculations we can get done at the same time!
+  //if (e.CountThisSubexpression(e.EasyParentOfThisSubexpression(s)) >= e.CountThisSubexpression(s))
+  //  s = e.EasyParentOfThisSubexpression(s);
+  int counter = 0;
+  while (s != e) {
     std::string a = s.alias + "_v";
-    if (a == "_v") a = "var";
+    if (a == "_v") {
+      if (s.type == "ReciprocalGrid") a = "recip";
+      else a = "var";
+    }
     if (allvars.count(a)) {
       // need to make this thing unique...
       for (int varnum=0; true; varnum++) {
@@ -563,27 +603,105 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
         }
       }
     }
-    fprintf(o, "    %s %s(%s);\n", s.ctype(), a.c_str(), s.printme().c_str());
-    fflush(o);
     //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
     //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
-    vars.insert(a);
+    if (s.type == "Grid") gridvars.insert(a);
+    if (s.type == "ReciprocalGrid") recipvars.insert(a);
     allvars.insert(a);
     while (e.EliminateThisSubexpression(s, a));
-    s = e.FindCommonSubexpression();
-    Expression ssmaller = s;
-    ssmaller.ScalarFactor(); // This is s without any prefactor.
-    // Use the smaller expression if it is more common.
-    if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
-    for (std::set<std::string>::iterator i = vars.begin(); i != vars.end(); ++i) {
+    fprintf(o, "    %s %s = %s;\n", s.ctype(), a.c_str(), s.printme().c_str());
+    fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+    //fprintf(o, "    // expr = %s\n", e.printme().c_str());
+    fflush(o);
+
+    // Free unused variables...
+    for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
       if (!e.FindVariable(*i)) {
         //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
         //fprintf(o, "    delete %s_ptr;\n", i->c_str());
         fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
         fflush(o);
-        vars.erase(i);
+        gridvars.erase(i);
       }
     }
+    for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
+      if (!e.FindVariable(*i)) {
+        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
+        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
+        fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+        fflush(o);
+        recipvars.erase(i);
+      }
+    }
+    
+    bool have_changed = true;
+    while (have_changed) {
+      have_changed = false;
+      // Now we look for a variable that could be simplified a bit...
+      for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
+        Expression easy = e.EasyParentOfThisSubexpression(Expression(*i));
+        if (easy != Expression(*i)) {
+          if (easy.type != "Grid") easy = e.EasyParentOfThisSubexpression(easy);
+          if (easy.type == "Grid") {
+            //printf("I am reusing Grid variable %s!!!\n", i->c_str());
+            while (e.EliminateThisSubexpression(easy, "THIS IS A UNIQUE NAME"));
+            while (e.EliminateThisSubexpression(Expression("THIS IS A UNIQUE NAME"), *i));
+            fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
+            fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+            //fprintf(o, "    // expr = %s\n", e.printme().c_str());
+            fflush(o);
+            have_changed = true;
+          }
+        }
+      }
+      for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
+        Expression expi = Expression(*i).set_type("ReciprocalGrid");
+        Expression easy = e.EasyParentOfThisSubexpression(expi);
+        if (easy != expi) {
+          if (easy.type != "ReciprocalGrid") easy = e.EasyParentOfThisSubexpression(easy);
+          if (easy.type == "ReciprocalGrid") {
+            //printf("I am reusing ReciprocalGrid variable %s!!!\n", i->c_str());
+            while (e.EliminateThisSubexpression(easy, "THIS IS A UNIQUE NAME"));
+            while (e.EliminateThisSubexpression(Expression("THIS IS A UNIQUE NAME").set_type("ReciprocalGrid"), *i));
+            fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
+            fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+            //fprintf(o, "    // expr = %s\n", e.printme().c_str());
+            fflush(o);
+            have_changed = true;
+          }
+        }
+      }
+
+      // Free any newly unused variables...
+      for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
+        if (!e.FindVariable(*i)) {
+          //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
+          //fprintf(o, "    delete %s_ptr;\n", i->c_str());
+          fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+          fflush(o);
+          gridvars.erase(i);
+        }
+      }
+      for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
+        if (!e.FindVariable(*i)) {
+          //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
+          //fprintf(o, "    delete %s_ptr;\n", i->c_str());
+          fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+          fflush(o);
+          recipvars.erase(i);
+        }
+      }
+    }
+
+    // Now pick our next subexpression!
+    s = e.FindCommonSubexpression();
+    //Expression ssmaller = s;
+    //ssmaller.ScalarFactor(); // This is s without any prefactor.
+    // Use the smaller expression if it is more common.
+    //if (e.CountThisSubexpression(ssmaller) > e.CountThisSubexpression(s)) s = ssmaller;
+    // Let's lump in any "cheap" calculations we can get done at the same time!
+    //if (e.CountThisSubexpression(e.EasyParentOfThisSubexpression(s)) >= e.CountThisSubexpression(s))
+    //  s = e.EasyParentOfThisSubexpression(s);
   }
   fprintf(o, fmt, e.printme().c_str());
   fflush(o);

@@ -1,7 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+
+# I use bash because I prefer its builtin time function over /usr/bin/time.
 
 set -ev
 
 ./autogen.sh
 
-make -j2 recheck
+# First make the code generator, so we can get started generating code
+# soonest.
+time make -j2 optimize-functionals
+
+time make -j2 recheck

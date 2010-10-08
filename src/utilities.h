@@ -16,4 +16,5 @@ extern LiquidProperties water_prop;
 double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose);
 
 long peak_memory();
+long current_memory();
 void reset_peak_memory();
