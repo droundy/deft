@@ -76,6 +76,7 @@ public:
     else mynext = new Functional(x);
     return *this;
   }
+  Functional operator-() const;
   Functional operator-(const Functional &) const;
   Functional operator/(const Functional &) const;
   Functional operator*(const Functional &) const;

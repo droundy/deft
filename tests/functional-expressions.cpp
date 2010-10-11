@@ -66,6 +66,10 @@ int main(int, char **argv) {
                   IdealGas(kT).printme(Expression("x")),
                   "kT*choose(1e-90, -207.2326583694641*(x + -1e-90*VectorXd::Ones(gd.NxNyNz)) + -2.082326583694641e-88*VectorXd::Ones(gd.NxNyNz), x.cwise()*x.cwise().log() + -x)");
 
+  test_expression("IdealGasOfVeff",
+                  IdealGasOfVeff(kT).printme(Expression("x")),
+                  "(-(x + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
+
   test_expression("kT*xxx",
                   (Functional(kT).set_name("kT")*sqr(xShellConvolve(R))).printme(Expression("x")),
                   "kT*ifft(gd, xshell(gd, R).cwise()*fft(gd, x)).cwise().square()");

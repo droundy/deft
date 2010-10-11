@@ -106,9 +106,9 @@ int main(int, char **argv) {
   potential.setZero();
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-4);
 
-  Minimizer psd = Precision(1e-6, MaxIter(15, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer psd = Precision(1e-5, MaxIter(20, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 3e-6);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-4);
 
   Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
@@ -117,7 +117,7 @@ int main(int, char **argv) {
   Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
   density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
 
-  Minimizer pcg = Precision(1e-6, MaxIter(15, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer pcg = Precision(1e-6, MaxIter(25, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 3e-6);
 

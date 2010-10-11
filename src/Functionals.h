@@ -6,6 +6,7 @@
 #include "Functional.h"
 
 Functional IdealGas(double temperature);
+Functional IdealGasOfVeff(double temperature);
 Functional HardSpheres(double radius, double temperature);
 Functional HardSpheresRF(double radius, double temperature);
 Functional HardSpheresTarazona(double radius, double temperature);

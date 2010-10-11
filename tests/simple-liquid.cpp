@@ -34,14 +34,14 @@ GridDescription gd(lat, resolution);
 const double interaction_energy_scale = 0.01;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = IdealGas(kT) + ChemicalPotential(mu) + attraction + repulsion;
+Functional f0 = ChemicalPotential(mu) + attraction + repulsion;
 Functional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+Functional f = IdealGasOfVeff(kT) + f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-Functional ff = (f0 + ExternalPotential(external_potential))(n);
+Functional ff = IdealGasOfVeff(kT) + (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
@@ -52,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.2639034579494411;
+  const double true_energy = -0.2639034579492096;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
@@ -96,19 +96,19 @@ int main(int, char **argv) {
   potential.setZero();
   retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-9);
 
-  Minimizer steepest = MaxIter(100, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer steepest = MaxIter(150, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-9);
 
-  Minimizer psd = MaxIter(100, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer psd = MaxIter(150, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-9);
 
-  Minimizer cg = MaxIter(100, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer cg = MaxIter(150, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
   retval += test_minimizer("ConjugateGradient", cg, &potential, 1e-11);
 
-  Minimizer pcg = MaxIter(100, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+  Minimizer pcg = MaxIter(150, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
   potential.setZero();
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-11);
 

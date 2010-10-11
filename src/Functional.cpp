@@ -553,16 +553,16 @@ public:
     return exp(f(n))*f.derive(n);
   }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
-    if (ispgrad)
+    if (ispgrad && false)
       return f.grad(ingrad, x, true); // Precondition by leaving out exponential
     else
-      return f.grad(ingrad*exp(f(x)), x, false);
+      return f.grad(ingrad*exp(f(x)), x, ispgrad);
   }
   void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    f.grad(gd, data, f(gd, data).cwise().exp().cwise()*ingrad, outgrad, 0);
-    Grid myg(gd);
-    f.grad(gd, data, ingrad, &myg, outpgrad); // This is pretty wasteful...
+    f.grad(gd, data, f(gd, data).cwise().exp().cwise()*ingrad, outgrad, outpgrad);
+    //Grid myg(gd);
+    //f.grad(gd, data, ingrad, &myg, outpgrad); // This is pretty wasteful...
   }
   Expression printme(const Expression &x) const {
     return f.printme(x).cwise().method("exp");
@@ -576,7 +576,11 @@ Functional exp(const Functional &f) {
 }
 
 Functional Functional::operator-(const Functional &f) const {
-  return *this + -1*f;
+  return *this + -f;
+}
+
+Functional Functional::operator-() const {
+  return -1* *this;
 }
 
 Functional sqr(const Functional &f) {

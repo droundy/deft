@@ -85,3 +85,10 @@ Functional IdealGas(double Tin) {
   Functional T = Functional(Tin, "kT");
   return (T*choose(min_log_arg,  ((n-min_log_arg)*slope + min_e), (n*log(n)-n))).set_name("ideal gas");
 }
+
+Functional IdealGasOfVeff(double Tin) {
+  Functional Veff = Identity().set_name("Veff");
+  Functional kT = Functional(Tin, "kT");
+  Functional n = exp(-Veff/kT);
+  return (-(Veff + kT)*n).set_name("ideal gas");
+}

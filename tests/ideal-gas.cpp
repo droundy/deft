@@ -42,6 +42,8 @@ int main(int, char **argv) {
   density *= 1e-5;
   retval += ig2.run_finite_difference_test("ideal gas", potential);
 
+  retval += IdealGasOfVeff(kT).run_finite_difference_test("ideal gas of Veff", potential);
+
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {
