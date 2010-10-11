@@ -207,6 +207,7 @@ inline Functional operator-(double x, const Functional &f) {
 }
 
 Functional log(const Functional &);
+Functional exp(const Functional &);
 Functional sqr(const Functional &);
 Functional constrain(const Grid &, Functional);
 

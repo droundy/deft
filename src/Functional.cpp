@@ -538,6 +538,43 @@ Functional log(const Functional &f) {
   return Functional(new LogType(f));
 }
 
+
+class ExpType : public FunctionalInterface {
+public:
+  ExpType(const Functional &fa) : f(fa) {}
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+    return f(gd, data).cwise().exp();
+  }
+  double transform(double n) const {
+    return exp(f(n));
+  }
+  double derive(double n) const {
+    return exp(f(n))*f.derive(n);
+  }
+  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
+    if (ispgrad)
+      return f.grad(ingrad, x, true); // Precondition by leaving out exponential
+    else
+      return f.grad(ingrad*exp(f(x)), x, false);
+  }
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    f.grad(gd, data, f(gd, data).cwise().exp().cwise()*ingrad, outgrad, 0);
+    Grid myg(gd);
+    f.grad(gd, data, ingrad, &myg, outpgrad); // This is pretty wasteful...
+  }
+  Expression printme(const Expression &x) const {
+    return f.printme(x).cwise().method("exp");
+  }
+private:
+  Functional f;
+};
+
+Functional exp(const Functional &f) {
+  return Functional(new ExpType(f));
+}
+
 Functional Functional::operator-(const Functional &f) const {
   return *this + -1*f;
 }

@@ -95,6 +95,9 @@ int main(int, char **argv) {
   retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
   retval += test_functionals("Fourth power vs mul", Pow(4)(x), x*x*x*x, 0.1, 1e-12);
 
+  retval += test_functionals("exp(log(x))", exp(log(x)), x, 0.1, 1e-12);
+  retval += test_functionals("exp(2*x)", exp(2*x), sqr(exp(x)), 0.1, 1e-12);
+
   retval += test_functionals("sqr(log(x))*x", sqr(log(x))*x, Pow(2)(log(x))*x, 0.1, 1e-12);
   retval += test_functionals("sqr(log(x))*x no Pow", sqr(log(x))*x, (x*x)(log(x))*x, 0.1, 1e-12);
   retval += test_functionals("sqr(log(x))/x", sqr(log(x))/x, Pow(2)(log(x))/x, 0.1, 1e-12);

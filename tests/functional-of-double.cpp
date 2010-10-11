@@ -106,6 +106,9 @@ int main(int, char **argv) {
     retval += test_functional("3*sqr(4*x))", 3*sqr(4*x), 0.1, 1e-13);
     retval += test_functional("Gaussian(2)(-3*sqr(4*x)))", Gaussian(2)(-3*sqr(4*x)), 0.1, 1e-13);
     retval += test_functional("Pow(4)(x))", Pow(4)(x), 0.1, 1e-13);
+
+    retval += test_functional("log(x)", log(x), 0.1, 1e-13);
+    retval += test_functional("exp(x)", exp(x), 0.1, 1e-13);
   }
 
   {
