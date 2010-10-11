@@ -151,12 +151,6 @@ Expression Expression::operator+(const Expression &e) const {
     return e;
   } else if (e.kind == "constant" && e.value == 0) {
     return *this;
-  } else if (e.kind == "constant" && e.value < 0) {
-    return *this - (-e);
-  } else if (e.kind == "unary" && e.name == "-") {
-    return *this - *e.arg1;
-  } else if (kind == "unary" && name == "-") {
-    return e - *arg1;
   } else if (e.kind == "constant" && kind == "constant") {
     return Expression(value+e.value);
   }
@@ -169,7 +163,7 @@ Expression Expression::operator+(const Expression &e) const {
       out.name = thispost.name;
       return epre*out;
     }
-    if (thispre == -epre) {
+    if (thispre == -epre && thispre != Expression(1)) {
       Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 - *epost.arg1);
       out.name = thispost.name;
       return thispre*out;
@@ -201,62 +195,7 @@ Expression Expression::operator+(const Expression &e) const {
 }
 
 Expression Expression::operator-(const Expression &e) const {
-  if (kind == "constant" && value == 0) {
-    return -e; // 0 - b = -b
-  } else if (e.kind == "constant" && e.value == 0) {
-    return *this; // a - 0 = a
-  } else if (e.kind == "constant" && e.value < 0) {
-    return *this + (-e.value); // a - -3.0 = a + 3.0
-  } else if (e.kind == "unary" && e.name == "-") {
-    return *this + *e.arg1; // a - -b = a + b
-  } else if (e.kind == "constant" && kind == "constant") {
-    return Expression(value-e.value);
-  }
-
-  Expression thispost(*this), epost(e);
-  Expression thispre = thispost.ScalarFactor(), epre = epost.ScalarFactor();
-  // for some reason the following makes memory use worse!!!
-  if (thispost.kind == "linear function" && epost.kind == "linear function" &&
-      thispost.name == epost.name) {
-    if (thispre == epre) {
-      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 - *epost.arg1);
-      out.name = thispost.name;
-      return epre*out;
-    }
-    if (thispre == -epre) {
-      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 + *epost.arg1);
-      out.name = thispost.name;
-      return thispre*out;
-    }
-    Expression out = linearfunexprgd("oops", thispost.type.c_str(),
-                                     thispre * *thispost.arg1 - epre * *epost.arg1);
-    out.name = thispost.name;
-    return out;
-  }
-
-  Expression out;
-  if (type == "ReciprocalGrid") {
-    assert(e.type != "Grid");
-    if (e.type == "double") return *this - e*recip_ones;
-    out.type = "ReciprocalGrid";
-  } else if (type == "Grid") {
-    assert(e.type != "ReciprocalGrid");
-    if (e.type == "double") return *this - e*grid_ones;
-  } else if (type == "double") {
-    if (e.type == "ReciprocalGrid") {
-      return (*this)*recip_ones - e;
-    } else if (e.type == "Grid") {
-      return (*this)*grid_ones - e;
-    }
-    assert(e.type == "double");
-    out.type = "double";
-  }
-  out.name = "-";
-  out.kind = "+-";
-  out.arg1 = new Expression(*this);
-  out.arg2 = new Expression(e);
-  out.checkWellFormed();
-  return out;
+  return *this + (-e);
 }
 
 Expression Expression::operator-() const {
@@ -271,10 +210,8 @@ Expression Expression::operator-() const {
     return *arg1 * (-arg2->value);
   } else if (kind == "*/" && name == "/" && arg2->kind == "constant") {
     return *arg1 / (-arg2->value);
-  } else if (kind == "+-" && name == "+") {
-    return (-*arg1) - *arg2;
-  } else if (kind == "+/" && name == "-") {
-    return (-*arg1) - (-*arg2);
+  //} else if (kind == "+-" && name == "+") {
+  //  return (-*arg1) + (-*arg2);
   } else if (kind == "unary" && name == "-") {
     return *arg1;
   }
@@ -508,7 +445,7 @@ int Expression::checkWellFormed() const {
   int retval = 0;
   if (kind == "+-") {
     if (arg1->type != type || arg2->type != type) {
-      printf("Types don't match on addition/subtraction!\n");
+      printf("Types don't match on addition!\n");
       retval++;
     }
   } else if (kind == "*/") {

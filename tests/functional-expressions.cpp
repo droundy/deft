@@ -64,7 +64,7 @@ int main(int, char **argv) {
   
   test_expression("IdealGas",
                   IdealGas(kT).printme(Expression("x")),
-                  "kT*choose(1e-90, -207.2326583694641*(x - 1e-90*VectorXd::Ones(gd.NxNyNz)) - 2.082326583694641e-88*VectorXd::Ones(gd.NxNyNz), x.cwise()*x.cwise().log() - x)");
+                  "kT*choose(1e-90, -207.2326583694641*(x + -1e-90*VectorXd::Ones(gd.NxNyNz)) + -2.082326583694641e-88*VectorXd::Ones(gd.NxNyNz), x.cwise()*x.cwise().log() + -x)");
 
   test_expression("kT*xxx",
                   (Functional(kT).set_name("kT")*sqr(xShellConvolve(R))).printme(Expression("x")),
@@ -84,7 +84,7 @@ int main(int, char **argv) {
   Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
   test_expression("phi1",
                   phi1.printme(Expression("n")),
-                  "(-1/(12.56637061435917*(R*R))*ifft(gd, shell(gd, R).cwise()*fft(gd, n))).cwise()*(VectorXd::Ones(gd.NxNyNz) - ifft(gd, step(gd, R).cwise()*fft(gd, n))).cwise().log()");
+                  "(-1/(12.56637061435917*(R*R))*ifft(gd, shell(gd, R).cwise()*fft(gd, n))).cwise()*(VectorXd::Ones(gd.NxNyNz) + -ifft(gd, step(gd, R).cwise()*fft(gd, n))).cwise().log()");
 
   //  test_expression(HardSpheres(kT, R).printme(Expression("n")),
   //                  "");
