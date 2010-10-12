@@ -507,72 +507,63 @@ Functional Functional::operator*(const Functional &f) const {
 
 class LogType : public FunctionalInterface {
 public:
-  LogType(const Functional &fa) : f(fa) {}
+  LogType() {}
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f(gd, data).cwise().log();
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return data.cwise().log();
   }
   double transform(double n) const {
-    return log(f(n));
+    return log(n);
   }
   double derive(double n) const {
-    return f.derive(n)/f(n);
+    return 1/n;
   }
-  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
-    return f.grad(ingrad/f(x), x, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
+    return ingrad/x;
   }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    Grid ingrad1(gd, ingrad);
-    ingrad1.cwise() /= f(gd, data);
-    f.grad(gd, data, ingrad1, outgrad, outpgrad);
+    *outgrad += ingrad.cwise()/data;
+    if (outpgrad) *outpgrad += ingrad.cwise()/data;
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).cwise().method("log");
+    return x.cwise().method("log");
   }
-private:
-  Functional f;
 };
 
 Functional log(const Functional &f) {
-  return Functional(new LogType(f));
+  return Functional(new LogType())(f);
 }
 
 
 class ExpType : public FunctionalInterface {
 public:
-  ExpType(const Functional &fa) : f(fa) {}
+  ExpType() {}
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
-    return f(gd, data).cwise().exp();
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    return data.cwise().exp();
   }
   double transform(double n) const {
-    return exp(f(n));
+    return exp(n);
   }
   double derive(double n) const {
-    return exp(f(n))*f.derive(n);
+    return exp(n);
   }
-  Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
-    if (ispgrad && false)
-      return f.grad(ingrad, x, true); // Precondition by leaving out exponential
-    else
-      return f.grad(ingrad*exp(f(x)), x, ispgrad);
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
+    return ingrad*Functional(new ExpType())(x);
   }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    f.grad(gd, data, f(gd, data).cwise().exp().cwise()*ingrad, outgrad, outpgrad);
-    //Grid myg(gd);
-    //f.grad(gd, data, ingrad, &myg, outpgrad); // This is pretty wasteful...
+    *outgrad += ingrad.cwise() * data.cwise().exp();
+    if (outpgrad) *outpgrad += ingrad.cwise() * data.cwise().exp();
   }
   Expression printme(const Expression &x) const {
-    return f.printme(x).cwise().method("exp");
+    return x.cwise().method("exp");
   }
-private:
-  Functional f;
 };
 
 Functional exp(const Functional &f) {
-  return Functional(new ExpType(f));
+  return Functional(new ExpType())(f);
 }
 
 Functional Functional::operator-(const Functional &f) const {

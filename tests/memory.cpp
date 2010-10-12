@@ -124,13 +124,13 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 66);
+  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 81);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 104, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereRF", ff, potential, 55, 3.1, 83, 15);
+  check_a_functional("HardSphereRF", ff, potential, 55, 3.1, 83, 19);
 
   ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereRFFast", ff, potential, 41, 1.0, 66, 3.9);
@@ -142,7 +142,7 @@ int main(int, char **argv) {
   check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 94, 10.2);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 4.2, 87, 21.2);
+  check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 4.2, 87, 25.8);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.1, 66, 5.0);
