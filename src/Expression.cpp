@@ -176,16 +176,13 @@ Expression Expression::operator+(const Expression &e) const {
   Expression out;
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
-    if (e.type == "double") return *this + e*recip_ones;
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
     assert(e.type != "ReciprocalGrid");
-    if (e.type == "double") return *this + e*grid_ones;
-  } else if (type == "double") {
-    if (e.type == "ReciprocalGrid") return (*this)*recip_ones + e;
-    else if (e.type == "Grid") return (*this)*grid_ones + e;
-    assert(e.type == "double");
+  } else if (e.type == "double") {
     out.type = "double";
+  } else if (e.type == "ReciprocalGrid") {
+    out.type = "ReciprocalGrid";
   }
   out.name = "+";
   out.kind = "+-";
@@ -278,14 +275,12 @@ Expression Expression::operator/(const Expression &e) const {
     out.type = "ReciprocalGrid";
   } else if (type == "Grid") {
     assert(e.type != "ReciprocalGrid");
-  } else if (type == "double" && kind == "constant") {
-    if (e.type == "Grid") return (*this)*grid_ones/e;
-    if (e.type == "ReciprocalGrid") return (*this)*recip_ones/e;
-    if (e.type == "double") out.type = "double";
   } else if (type == "ReciprocalGrid") {
     out.type = "ReciprocalGrid";
   } else if (e.type == "double" && type == "double") {
     out.type = "double";
+  } else if (e.type == "ReciprocalGrid") {
+    out.type = "ReciprocalGrid";
   }
   out.name = "/";
   out.kind = "*/";
@@ -397,12 +392,24 @@ std::string Expression::printme() const {
     // Addition and subtraction
     std::string a1 = arg1->printme();
     std::string a2 = arg2->printme();
+    if (arg1->type == "double" && arg2->type == "Grid")
+      a1 = (*arg1 * grid_ones).printme();
+    if (arg1->type == "double" && arg2->type == "ReciprocalGrid")
+      a1 = (*arg1 * recip_ones).printme();
+    if (arg2->type == "double" && arg1->type == "Grid")
+      a2 = (*arg2 * grid_ones).printme();
+    if (arg2->type == "double" && arg1->type == "ReciprocalGrid")
+      a2 = (*arg2 * recip_ones).printme();
     if (arg2->kind == "+-") a2 = "(" + a2 + ")";
     return a1 + " " + name + " " + a2;
   } else if (kind == "*/") {
     // Multiplication and division
     Expression myarg1 = *arg1;
-    if (arg2->type != "double" && !arg1->iscwise()) myarg1 = myarg1.cwise();
+    if (myarg1.type == "double" && arg2->type == "Grid" && name == "/")
+      myarg1 = myarg1*grid_ones;
+    if (myarg1.type == "double" && arg2->type == "ReciprocalGrid" && name == "/")
+      myarg1 = myarg1*recip_ones;
+    if (arg2->type != "double" && !myarg1.iscwise()) myarg1 = myarg1.cwise();
     std::string a1 = myarg1.printme();
     if (myarg1.kind == "+-") a1 = "(" + a1 + ")";
     std::string a2 = arg2->printme() ;
@@ -444,7 +451,8 @@ std::string Expression::printme() const {
 int Expression::checkWellFormed() const {
   int retval = 0;
   if (kind == "+-") {
-    if (arg1->type != type || arg2->type != type) {
+    if ((arg1->type != type && arg1->type != "double") ||
+        (arg2->type != type && arg2->type != "double")) {
       printf("Types don't match on addition!\n");
       retval++;
     }
