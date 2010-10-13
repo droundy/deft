@@ -124,13 +124,13 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 81);
+  check_a_functional("HardSpheres", ff, potential, 83, 10.5, 101, 70);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 104, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereRF", ff, potential, 55, 3.1, 83, 19);
+  check_a_functional("HardSphereRF", ff, potential, 55, 3.1, 83, 15);
 
   ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereRFFast", ff, potential, 41, 1.0, 66, 3.9);

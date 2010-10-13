@@ -18,6 +18,10 @@
 #include "handymath.h"
 #include "Grid.h"
 
+Expression FunctionalInterface::cwiseprintme(const Expression &x) const {
+  return printme(x);
+}
+
 void FunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
   if (name) printf("%s%25s =", prefix, name);
   else printf("%s%25s =", prefix, "UNKNOWN");
@@ -97,8 +101,17 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,              "VectorXd *outpgrad) const {\n");
-  Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
+  // The following requires that "R" always be defined!
+  Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI);
+  Expression curvature =
+    abs(grad(dV, Identity(),
+             false).grad(dV, Identity(),
+                         false).cwiseprintme(smoothed.printme(Expression("x"))));
+  //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
   Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
+  Expression epg = eg / curvature;
+  if (curvature == Expression(0)) epg = eg;
+  fprintf(o, "    // curvature is %s\n", curvature.printme().c_str());
   if (eg == epg) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
@@ -119,6 +132,8 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "private:\n");
   if (a1) fprintf(o, "  double %s;\n", a1);
   if (a2) fprintf(o, "  double %s;\n", a2);
+  if ((!a1 || std::string(a1) != "R") && (!a2 || std::string(a2) != "R"))
+    fprintf(o, "  double R;\n");
   fprintf(o, "};\n\n");
   if (isheader) fprintf(o, "inline ");
   fprintf(o, "Functional %s(", classname.c_str());
@@ -135,15 +150,34 @@ void Functional::create_source(const std::string filename, const std::string cla
 
 Expression Functional::printme(const Expression &x) const {
   Expression myself = itsCounter->ptr->printme(x);
-  if (get_name()) myself.set_alias(get_name());
+  if (get_name() && myself.get_alias() != "literal") myself.set_alias(get_name());
   if (next()) {
     // Get associativity right...
     if (next()->next()) {
       Expression nextguy = next()->itsCounter->ptr->printme(x);
-      if (next()->get_name()) nextguy.set_alias(next()->get_name());
+      if (next()->get_name() && nextguy.get_alias() != "literal")
+        nextguy.set_alias(next()->get_name());
       return myself + nextguy + next()->next()->printme(x);
     } else {
       return myself + next()->printme(x);
+    }
+  } else {
+    return myself;
+  }
+}
+
+Expression Functional::cwiseprintme(const Expression &x) const {
+  Expression myself = itsCounter->ptr->cwiseprintme(x);
+  if (get_name() && myself.get_alias() != "literal") myself.set_alias(get_name());
+  if (next()) {
+    // Get associativity right...
+    if (next()->next()) {
+      Expression nextguy = next()->itsCounter->ptr->cwiseprintme(x);
+      if (next()->get_name() && nextguy.get_alias() != "literal")
+        nextguy.set_alias(next()->get_name());
+      return myself + nextguy + next()->next()->cwiseprintme(x);
+    } else {
+      return myself + next()->cwiseprintme(x);
     }
   } else {
     return myself;
@@ -431,6 +465,9 @@ public:
   Expression printme(const Expression &x) const {
     return f1.printme(f2.printme(x));
   }
+  Expression cwiseprintme(const Expression &x) const {
+    return f1.cwiseprintme(f2.cwiseprintme(x));
+  }
 private:
   Functional f1, f2;
 };
@@ -464,6 +501,9 @@ public:
   Expression printme(const Expression &x) const {
     return f1.printme(x) / f2.printme(x);
   }
+  Expression cwiseprintme(const Expression &x) const {
+    return f1.cwiseprintme(x) / f2.cwiseprintme(x);
+  }
 private:
   Functional f1, f2;
 };
@@ -496,6 +536,9 @@ public:
   Expression printme(const Expression &x) const {
     return f1.printme(x)*f2.printme(x);
   }
+  Expression cwiseprintme(const Expression &x) const {
+    return f1.cwiseprintme(x)*f2.cwiseprintme(x);
+  }
 private:
   Functional f1, f2;
 };
@@ -527,7 +570,7 @@ public:
     if (outpgrad) *outpgrad += ingrad.cwise()/data;
   }
   Expression printme(const Expression &x) const {
-    return x.cwise().method("log");
+    return log(x);
   }
 };
 
@@ -558,7 +601,7 @@ public:
     if (outpgrad) *outpgrad += ingrad.cwise() * data.cwise().exp();
   }
   Expression printme(const Expression &x) const {
-    return x.cwise().method("exp");
+    return exp(x);
   }
 };
 

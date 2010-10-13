@@ -70,6 +70,10 @@ int main(int, char **argv) {
                   IdealGasOfVeff(kT).printme(Expression("x")),
                   "(-(x + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
+  test_expression("cwise IdealGasOfVeff",
+                  IdealGasOfVeff(kT).cwiseprintme(Expression("x")),
+                  "(-(x + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
+
   test_expression("kT*xxx",
                   (Functional(kT).set_name("kT")*sqr(xShellConvolve(R))).printme(Expression("x")),
                   "kT*ifft(gd, xshell(gd, R).cwise()*fft(gd, x)).cwise().square()");
@@ -77,6 +81,14 @@ int main(int, char **argv) {
   test_expression("sqr(n1)",
                   sqr(xShellConvolve(R)).grad(dV, Identity(), false).printme(Expression("x")),
                   "-2*gd.dvolume*ifft(gd, xshell(gd, R).cwise()*fft(gd, ifft(gd, xshell(gd, R).cwise()*fft(gd, x))))");
+
+  test_expression("cwise sqr(xshell)",
+                  sqr(xShellConvolve(R)).grad(dV, Identity(), false).cwiseprintme(Expression("x")),
+                  "0");
+
+  test_expression("cwise sqr(n2)",
+                  sqr(StepConvolve(R)).grad(dV, Identity(), false).cwiseprintme(Expression("x")),
+                  "4.188790204786391*(R*R*R)*(2*(4.188790204786391*(R*R*R)*x)*gd.dvolume)");
 
   test_expression("foobar",
                   (four_pi_r2*Identity()).printme(Expression("x")), "12.56637061435917*(R*R)*x");

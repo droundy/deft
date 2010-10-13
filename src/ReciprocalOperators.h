@@ -356,7 +356,7 @@ MAKE_FUNCTION_ROP(gx_op,gx)
 MAKE_FUNCTION_ROP(gy_op,gy)
 MAKE_FUNCTION_ROP(gz_op,gz)
 
-#define MAKE_FUNCTION_WITH_DOUBLE_ROP(t,f) \
+#define MAKE_FUNCTION_WITH_DOUBLE_ROP(t,f)                             \
   EIGEN_STRONG_INLINE Eigen::CwiseNullaryOp<t<complex>, VectorXcd> f(const GridDescription &gd, double R) { \
     return Eigen::CwiseNullaryOp<t<complex>, VectorXcd>(gd.NxNyNzOver2, 1, t<complex>(gd, R)); \
   }
