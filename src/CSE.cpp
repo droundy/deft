@@ -42,12 +42,12 @@ bool Expression::EliminateThisSubexpression(const Expression &c, const std::stri
       return true;
     }
     // Now check if perhaps we're the same thing up to a scalar prefactor.
-    Expression tmp(*this);
-    Expression sca = tmp.ScalarFactor();
-    if (c == tmp) {
-      *this = sca * n;
-      return true;
-    }
+    //Expression tmp(*this);
+    //Expression sca = tmp.ScalarFactor();
+    //if (c == tmp) {
+    //  *this = sca * n;
+    //  return true;
+    //}
   }
   // Try to recursively eliminate this subexpression in our children.
   bool changed = false;
@@ -66,9 +66,9 @@ int Expression::CountThisSubexpression(const Expression &c) const {
     // First check if we are the same as the subexpression we're trying to eliminate.
     if (c == *this) return 1;
     // Now check if perhaps we're the same thing up to a scalar prefactor.
-    Expression tmp(*this);
-    tmp.ScalarFactor();
-    if (c == tmp) return 1;
+    //Expression tmp(*this);
+    //tmp.ScalarFactor();
+    //if (c == tmp) return 1;
   }
   // Recursively count this subexpression in all our children.
   int num = 0;
