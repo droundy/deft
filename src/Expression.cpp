@@ -271,6 +271,11 @@ Expression Expression::operator/(const Expression &e) const {
   } else if (e.kind == "*/" && e.name == "/") {
     return *this * *e.arg2 / *e.arg1; // inverse of inverse
   }
+  //Expression postfactor = e;
+  //Expression prefactor = postfactor.ScalarFactor();
+  //if (postfactor.kind == "*/" && postfactor.name == "/") {
+  //  return (*this / prefactor) * *postfactor.arg2 / *postfactor.arg1;
+  //}
   Expression out;
   if (type == "ReciprocalGrid") {
     assert(e.type != "Grid");
