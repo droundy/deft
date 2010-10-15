@@ -25,6 +25,10 @@ void FunctionalInterface::print_summary(const char *prefix, double e, const char
   printf("\n");
 }
 
+double FunctionalInterface::integral(const GridDescription &gd, const VectorXd &x) const {
+  return transform(gd, x).sum()*gd.dvolume;
+}
+
 // The following is a "fake" functional, used for dumping code to
 // generate the gradient.
 class PretendIngradType : public FunctionalInterface {
@@ -67,8 +71,10 @@ void Functional::create_source(const std::string filename, const std::string cla
                                const char *a1, const char *a2, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
+  //printf("Generating %s\n", classname.c_str());
   fprintf(o, "#include \"Functionals.h\"\n");
-  fprintf(o, "#include \"utilities.h\"\n\n");
+  fprintf(o, "#include \"utilities.h\"\n");
+  fprintf(o, "#include \"handymath.h\"\n\n");
 
   fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
   fprintf(o, "public:\n");
@@ -78,7 +84,43 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, ") ");
   if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-  fprintf(o, " { have_analytic_grad = false; }\n");
+  fprintf(o, " {\n");
+  fprintf(o, "    have_analytic_grad = false;\n");
+  fprintf(o, "    have_integral = true;\n");
+  fprintf(o, "  }\n");
+  fprintf(o, "  double integral(const GridDescription &gd, const VectorXd &x) const {\n");
+  fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
+  fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
+  std::set<std::string> allvars;
+  if (a1) allvars.insert(a1);
+  if (a2) allvars.insert(a2);
+  Expression myself = printme(Expression("x"));
+  std::set<std::string> toplevel = myself.top_level_vars(&allvars);
+  std::set<std::string> myvars;
+  for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+    fprintf(o, "  // examining %s\n", i->c_str());
+    Expression thisguy = myself.FindNamedSubexpression(*i);
+    if (thisguy.alias != *i) {
+      printf("I am erasing variable %s\n", i->c_str());
+      printf("It actually has alias %s\n", thisguy.alias.c_str());
+      toplevel.erase(i);
+      continue;
+    }
+    char *buf = new char[300];
+    if (thisguy.type == "double")
+      snprintf(buf, 300, "    %s = %%s*gd.Lat.volume();\n", i->c_str());
+    else
+      snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
+    myself.generate_code(o, buf, *i, toplevel, &allvars, &myvars);
+    delete[] buf;
+  }
+  myself.method("sum").generate_code(o, "    return %s*gd.dvolume;\n", "", toplevel, &allvars, &myvars);
+  //fprintf(o, "    return 0");
+  //for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+  //  fprintf(o, " + %s", i->c_str());
+  //}
+  //fprintf(o, ";\n");
+  fprintf(o, "  }\n");
   fprintf(o, "  double transform(double) const {\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n");
@@ -116,9 +158,22 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  Expression printme(const Expression &) const {\n");
   fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");
   fprintf(o, "  }\n");
+  fprintf(o, "  void print_summary(const char *prefix, double energy, const char *name=0) const {\n");
+  if (toplevel.size() > 1) {
+    for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+      fprintf(o, "    printf(\"%%s%25s =\", prefix);\n", i->c_str());
+      fprintf(o, "    print_double(\"\", %s);\n", i->c_str());
+      fprintf(o, "    printf(\"\\n\");\n");
+    }
+  }
+  fprintf(o, "    FunctionalInterface::print_summary(prefix, energy, name);\n");
+  fprintf(o, "  }\n");
   fprintf(o, "private:\n");
   if (a1) fprintf(o, "  double %s;\n", a1);
   if (a2) fprintf(o, "  double %s;\n", a2);
+  for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+    fprintf(o, "  mutable double %s;\n", i->c_str());
+  }
   fprintf(o, "};\n\n");
   if (isheader) fprintf(o, "inline ");
   fprintf(o, "Functional %s(", classname.c_str());

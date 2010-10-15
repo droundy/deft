@@ -522,12 +522,71 @@ Expression Expression::simplify() const {
   return *this;
 }
 
-void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> allvars) const {
+std::set<std::string> Expression::top_level_vars(std::set<std::string> *allvars) {
+  std::set<std::string> out;
+  //printf("Looking for toplevel vars in %s\n", alias.c_str());
+  if (alias == "") alias = "toplevel";
+  if (kind == "+-" && name == "+") {
+    std::set<std::string> out1 = arg1->top_level_vars(allvars);
+    for (std::set<std::string>::iterator i = out1.begin(); i != out1.end(); ++i) {
+      //printf("First side has %s\n", i->c_str());
+      out.insert(*i);
+    }
+    std::set<std::string> out2 = arg2->top_level_vars(allvars);
+    for (std::set<std::string>::iterator i = out2.begin(); i != out2.end(); ++i) {
+      //printf("Second side has %s\n", i->c_str());
+      out.insert(*i);
+    }
+    return out;
+  }
+  if (allvars->count(alias)) {
+    // need to make this thing unique...
+    for (int varnum=0; true; varnum++) {
+      std::ostringstream oss;
+      oss << varnum;
+      std::string newa = alias + "_" + oss.str();
+      if (!allvars->count(newa)) {
+        alias = newa;
+        break;
+      }
+    }
+  }
+  //printf("Adding %s as %s\n", printme().c_str(), alias.c_str());
+  out.insert(alias);
+  allvars->insert(alias);
+  return out;
+}
+
+Expression Expression::FindNamedSubexpression(const std::string n) const {
+  Expression e;
+  if (alias == n) return *this;
+  if (arg1) {
+    e = arg1->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  if (arg2) {
+    e = arg2->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  if (arg3) {
+    e = arg3->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  return *this;
+}
+
+void Expression::generate_code(FILE *o, const char *fmt, const std::string thisvar,
+                               std::set<std::string> important,
+                               std::set<std::string> *allvars, std::set<std::string> *myvars) {
+  std::set<std::string> otherallvars, othermyvars;
+  if (!allvars) allvars = &otherallvars;
+  if (!myvars) myvars = &othermyvars;
   // Set of variables that need to be deleted.
   std::set<std::string> gridvars;
   std::set<std::string> recipvars;
 
   Expression e = *this;
+  if (thisvar != "") e = FindNamedSubexpression(thisvar);
   Expression s = e.FindCommonSubexpression();
   //Expression ssmaller = s;
   //ssmaller.ScalarFactor(); // This is s without any prefactor.
@@ -543,13 +602,13 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
       if (s.type == "ReciprocalGrid") a = "recip";
       else a = "var";
     }
-    if (allvars.count(a)) {
+    if (allvars->count(a)) {
       // need to make this thing unique...
       for (int varnum=0; true; varnum++) {
         std::ostringstream oss;
         oss << varnum;
         std::string newa = a + "_" + oss.str();
-        if (!allvars.count(newa)) {
+        if (!allvars->count(newa)) {
           a = newa;
           break;
         }
@@ -559,16 +618,18 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
     //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
     if (s.type == "Grid") gridvars.insert(a);
     if (s.type == "ReciprocalGrid") recipvars.insert(a);
-    allvars.insert(a);
+    myvars->insert(a);
+    allvars->insert(a);
     while (e.EliminateThisSubexpression(s, a));
+    while (EliminateThisSubexpression(s, a));
     fprintf(o, "    %s %s = %s;\n", s.ctype(), a.c_str(), s.printme().c_str());
-    fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+    fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
     //fprintf(o, "    // expr = %s\n", e.printme().c_str());
     fflush(o);
 
     // Free unused variables...
     for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
-      if (!e.FindVariable(*i)) {
+      if (!FindVariable(*i)) {
         //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
         //fprintf(o, "    delete %s_ptr;\n", i->c_str());
         fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
@@ -577,12 +638,17 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
       }
     }
     for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
-      if (!e.FindVariable(*i)) {
+      if (!FindVariable(*i)) {
         //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
         //fprintf(o, "    delete %s_ptr;\n", i->c_str());
         fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
         fflush(o);
         recipvars.erase(i);
+      }
+    }
+    for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
+      if (!FindVariable(*i)) {
+        myvars->erase(i);
       }
     }
     
@@ -591,15 +657,19 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
       have_changed = false;
       // Now we look for a variable that could be simplified a bit...
       for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
-        Expression easy = e.EasyParentOfThisSubexpression(Expression(*i));
+        Expression easy = EasyParentOfThisSubexpression(Expression(*i), important);
         if (easy != Expression(*i)) {
-          if (easy.type != "Grid") easy = e.EasyParentOfThisSubexpression(easy);
+          if (easy.type != "Grid") easy = EasyParentOfThisSubexpression(easy, important);
           if (easy.type == "Grid") {
             //printf("I am reusing Grid variable %s!!!\n", i->c_str());
-            while (e.EliminateThisSubexpression(easy, "THIS IS A UNIQUE NAME"));
-            while (e.EliminateThisSubexpression(Expression("THIS IS A UNIQUE NAME"), *i));
+            Expression unique("THIS IS A UNIQUE NAME");
+            unique.alias = easy.alias;
+            while (e.EliminateThisSubexpression(easy, unique.name));
+            while (e.EliminateThisSubexpression(unique, *i));
+            while (EliminateThisSubexpression(easy, unique.name));
+            while (EliminateThisSubexpression(unique, *i));
             fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
-            fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+            fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
             //fprintf(o, "    // expr = %s\n", e.printme().c_str());
             fflush(o);
             have_changed = true;
@@ -608,15 +678,20 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
       }
       for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
         Expression expi = Expression(*i).set_type("ReciprocalGrid");
-        Expression easy = e.EasyParentOfThisSubexpression(expi);
+        Expression easy = EasyParentOfThisSubexpression(expi, important);
         if (easy != expi) {
-          if (easy.type != "ReciprocalGrid") easy = e.EasyParentOfThisSubexpression(easy);
+          if (easy.type != "ReciprocalGrid") easy = EasyParentOfThisSubexpression(easy, important);
           if (easy.type == "ReciprocalGrid") {
             //printf("I am reusing ReciprocalGrid variable %s!!!\n", i->c_str());
-            while (e.EliminateThisSubexpression(easy, "THIS IS A UNIQUE NAME"));
-            while (e.EliminateThisSubexpression(Expression("THIS IS A UNIQUE NAME").set_type("ReciprocalGrid"), *i));
+            Expression unique("THIS IS A UNIQUE NAME");
+            unique.alias = easy.alias;
+            unique.type = "ReciprocalGrid";
+            while (e.EliminateThisSubexpression(easy, unique.name));
+            while (e.EliminateThisSubexpression(unique, *i));
+            while (EliminateThisSubexpression(easy, unique.name));
+            while (EliminateThisSubexpression(unique, *i));
             fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
-            fprintf(o, "    printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
+            fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
             //fprintf(o, "    // expr = %s\n", e.printme().c_str());
             fflush(o);
             have_changed = true;
@@ -626,7 +701,7 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
 
       // Free any newly unused variables...
       for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
-        if (!e.FindVariable(*i)) {
+        if (!FindVariable(*i)) {
           //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
           //fprintf(o, "    delete %s_ptr;\n", i->c_str());
           fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
@@ -635,12 +710,17 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> a
         }
       }
       for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
-        if (!e.FindVariable(*i)) {
+        if (!FindVariable(*i)) {
           //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
           //fprintf(o, "    delete %s_ptr;\n", i->c_str());
           fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
           fflush(o);
           recipvars.erase(i);
+        }
+      }
+      for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
+        if (!FindVariable(*i)) {
+          myvars->erase(i);
         }
       }
     }

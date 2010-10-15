@@ -27,6 +27,9 @@
 #include "generated/phi2.h"
 #include "generated/phi3rf.h"
 #include "generated/almostrf.h"
+#include "generated/almostrfnokt.h"
+
+#include "handymath.h"
 
 int errors = 0;
 
@@ -48,8 +51,16 @@ void compare_functionals(const Functional &f1, const Functional &f2, double frac
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
+  printf("First energy:\n");
   double f1n = f1.integral(n);
+  print_double("first energy is:               ", f1n);
+  printf("\n");
+  f1.print_summary("", f1n, f1.get_name());
+  printf("Second energy:\n");
   double f2n = f2.integral(n);
+  print_double("second energy is:              ", f2n);
+  printf("\n");
+  f2.print_summary("", f2n, f2.get_name());
   if (fabs(f1n/f2n - 1) > fraccuracy) {
     printf("FAIL: Error in f(n) is %g\n", f1n/f2n - 1);
     errors++;
@@ -73,13 +84,13 @@ int main(int, char **argv) {
   Functional x(Identity());
   compare_functionals(Sum(kT), x + kT);
 
-  compare_functionals(Log(), log(x));
+  compare_functionals(Log(), log(x), 3e-14);
 
-  compare_functionals(LogAndSqr(), log(x) + sqr(x));
+  compare_functionals(LogAndSqr(), log(x) + sqr(x), 1e-12);
 
-  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x);
+  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, 3e-14);
 
-  compare_functionals(LogOneMinusX(), log(1-x));
+  compare_functionals(LogOneMinusX(), log(1-x), 1e-12);
 
   compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)));
 
@@ -102,15 +113,18 @@ int main(int, char **argv) {
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(kT,R), phi3rf, 2e-15);
 
-  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), 2e-15);
+  compare_functionals(AlmostRFnokT(kT,R), phi1 + phi2 + phi3rf, 3e-14);
 
-  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), 3e-15);
+  compare_functionals(AlmostRF(kT,R),
+                      (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2") + (kT*phi3rf).set_name("phi3"), 4e-14);
 
-  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R,kT), 2e-15);
+  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), 6e-15);
 
-  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R,kT), 3e-15);
+  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R,kT), 2e-14);
 
-  compare_functionals(HardSpheresWBnotensor(R, kT), HardSpheresNoTensor(R,kT), 2e-15);
+  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R,kT), 4e-14);
+
+  compare_functionals(HardSpheresNoTensor(R,kT), HardSpheresWBnotensor(R, kT), 2e-14);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

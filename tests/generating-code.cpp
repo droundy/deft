@@ -52,4 +52,6 @@ int main(int, char **) {
   //(phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "kT", "R");
 
   ((kT*phi1).set_name("phi1")+(kT*phi2).set_name("phi2")+(kT*phi3rf).set_name("phi3")).create_header("tests/generated/almostrf.h", "AlmostRF", "kT", "R");
+
+  (phi1+phi2+phi3rf).create_header("tests/generated/almostrfnokt.h", "AlmostRFnokT", "kT", "R");
 }
