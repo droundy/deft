@@ -32,9 +32,11 @@ int main(int, char **) {
   log(1-StepConvolve(Rval)).create_header("tests/generated/log-one-minus-nbar.h", "LogOneMinusNbar", "R");
   sqr(xShellConvolve(Rval)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", "R");
 
-  Functional four_pi_r2 = 4*M_PI*sqr(R);
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
+  (sqr(n2)+sqr(n3)).set_name("n2_and_n3").create_header("tests/generated/n2_and_n3.h", "n2_and_n3", "R");
+
+  Functional four_pi_r2 = 4*M_PI*sqr(R);
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1").create_header("tests/generated/phi1.h", "Phi1", "kT", "R");

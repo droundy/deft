@@ -23,6 +23,7 @@
 #include "generated/log-one-minus-x.h"
 #include "generated/log-one-minus-nbar.h"
 #include "generated/sqr-xshell.h"
+#include "generated/n2_and_n3.h"
 #include "generated/phi1.h"
 #include "generated/phi2.h"
 #include "generated/phi3rf.h"
@@ -82,13 +83,13 @@ void compare_functionals(const Functional &f1, const Functional &f2, double frac
 
 int main(int, char **argv) {
   Functional x(Identity());
-  compare_functionals(Sum(kT), x + kT);
+  compare_functionals(Sum(kT), x + kT, 1e-13);
 
   compare_functionals(Log(), log(x), 3e-14);
 
   compare_functionals(LogAndSqr(), log(x) + sqr(x), 1e-12);
 
-  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, 3e-14);
+  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, 3e-13);
 
   compare_functionals(LogOneMinusX(), log(1-x), 1e-12);
 
@@ -96,9 +97,11 @@ int main(int, char **argv) {
 
   compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)));
 
-  const double four_pi_r2 = 4*M_PI*R*R;
   Functional n2 = ShellConvolve(R);
   Functional n3 = StepConvolve(R);
+  compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), 1e-14);
+
+  const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   compare_functionals(Phi1(kT,R), phi1);
