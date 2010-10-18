@@ -142,7 +142,7 @@ int main(int, char **argv) {
   check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 94, 10.2);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 4.2, 87, 25.8);
+  check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 4.2, 87, 21);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.1, 66, 5.0);

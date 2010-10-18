@@ -71,8 +71,10 @@ void Functional::create_source(const std::string filename, const std::string cla
                                const char *a1, const char *a2, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
+  //printf("Generating %s\n", classname.c_str());
   fprintf(o, "#include \"Functionals.h\"\n");
-  fprintf(o, "#include \"utilities.h\"\n\n");
+  fprintf(o, "#include \"utilities.h\"\n");
+  fprintf(o, "#include \"handymath.h\"\n\n");
 
   fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
   fprintf(o, "public:\n");
@@ -82,7 +84,9 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, ") ");
   if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-  fprintf(o, " { have_analytic_grad = false; }\n");
+  fprintf(o, " {\n");
+  fprintf(o, "    have_analytic_grad = false;\n");
+  fprintf(o, "  }\n");
   fprintf(o, "  double transform(double) const {\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n");
@@ -128,6 +132,9 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  Expression printme(const Expression &) const {\n");
   fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");
+  fprintf(o, "  }\n");
+  fprintf(o, "  void print_summary(const char *prefix, double energy, const char *name=0) const {\n");
+  fprintf(o, "    FunctionalInterface::print_summary(prefix, energy, name);\n");
   fprintf(o, "  }\n");
   fprintf(o, "private:\n");
   if (a1) fprintf(o, "  double %s;\n", a1);

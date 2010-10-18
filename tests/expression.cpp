@@ -69,10 +69,10 @@ int main(int, char **argv) {
   test_expression(1 * (1 * foo), "foo");
   test_expression(foobar * (bar * foo), "foobar.cwise()*(bar.cwise()*foo)");
 
-  test_expression((foobar * (bar * foo) + bar*foo).EasyParentOfThisSubexpression(foo),
+  test_expression((foobar * (bar * foo) + bar*foo).EasyParentOfThisSubexpression(foo, std::set<std::string>()),
                   "foobar.cwise()*(bar.cwise()*foo) + bar.cwise()*foo");
   // The following really ought to be "bar.cwise()*foo
-  test_expression((ifft(fft(bar) * fft(bar * foo)) + bar*foo).EasyParentOfThisSubexpression(foo),
+  test_expression((ifft(fft(bar) * fft(bar * foo)) + bar*foo).EasyParentOfThisSubexpression(foo, std::set<std::string>()),
                   "bar.cwise()*foo");
 
   if (retval == 0) {

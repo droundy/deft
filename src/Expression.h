@@ -53,7 +53,7 @@ public:
   // the common subexpression.
   std::string EliminateCommonSubexpression();
   bool EliminateThisSubexpression(const Expression &, const std::string alias);
-  Expression EasyParentOfThisSubexpression(const Expression &) const;
+  Expression EasyParentOfThisSubexpression(const Expression &, std::set<std::string> important) const;
   bool FindVariable(const std::string n) const;
 
   Expression FindCommonSubexpression() const;
@@ -64,7 +64,7 @@ public:
     return !(*this == e);
   }
   bool IsUnlazy() const;
-  bool IsUnlazyApartFrom(const Expression &) const;
+  bool IsUnlazyApartFrom(const Expression &, std::set<std::string> important) const;
 
   Expression ScalarFactor(); // Removes any scalar factors from *this
 
@@ -72,7 +72,8 @@ public:
   int checkWellFormed() const;
 
   Expression simplify() const;
-  void generate_code(FILE *outfile, const char *fmt, std::set<std::string> scopevars = std::set<std::string>()) const;
+  void generate_code(FILE *outfile, const char *fmt, std::set<std::string> important = std::set<std::string>(),
+                     std::set<std::string> *scopevars = 0, std::set<std::string> *myvars = 0);
 };
 
 Expression funexpr(const char *name);

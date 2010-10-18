@@ -36,6 +36,7 @@ bool Expression::EliminateThisSubexpression(const Expression &c, const std::stri
     // If the type is right, then it's possible that we *are* the subexpression.
     Expression n(name);
     n.type = c.type;
+    n.alias = c.alias;
     // First check if we are the same as the subexpression we're trying to eliminate.
     if (c == *this) {
       *this = n;
@@ -138,26 +139,27 @@ bool Expression::IsUnlazy() const {
   return false;
 }
 
-bool Expression::IsUnlazyApartFrom(const Expression &c) const {
+bool Expression::IsUnlazyApartFrom(const Expression &c, std::set<std::string> important) const {
+  if (important.count(alias)) return true; // This isn't technically unlazy...
   if (*this == c) return false;
   if (unlazy) return true;
-  if (arg1 && arg1->IsUnlazyApartFrom(c)) return true;
-  if (arg2 && arg2->IsUnlazyApartFrom(c)) return true;
-  if (arg3 && arg3->IsUnlazyApartFrom(c)) return true;
+  if (arg1 && arg1->IsUnlazyApartFrom(c, important)) return true;
+  if (arg2 && arg2->IsUnlazyApartFrom(c, important)) return true;
+  if (arg3 && arg3->IsUnlazyApartFrom(c, important)) return true;
   return false;
 }
 
-Expression Expression::EasyParentOfThisSubexpression(const Expression &e) const {
+Expression Expression::EasyParentOfThisSubexpression(const Expression &e, std::set<std::string> important) const {
   const int ncount = CountThisSubexpression(e);
   if (ncount == 0 || e == *this) return e;
   if (!unlazy && (type == e.type || e.kind != "variable")) {
     bool unlazychildren = false;
-    if (arg1 && arg1->IsUnlazyApartFrom(e)) {
+    if (arg1 && arg1->IsUnlazyApartFrom(e, important)) {
       //printf("My child %s is unlazy.\n", arg1->printme().c_str());
       unlazychildren = true;
     }
-    if (arg2 && arg2->IsUnlazyApartFrom(e)) unlazychildren = true;
-    if (arg3 && arg3->IsUnlazyApartFrom(e)) unlazychildren = true;
+    if (arg2 && arg2->IsUnlazyApartFrom(e, important)) unlazychildren = true;
+    if (arg3 && arg3->IsUnlazyApartFrom(e, important)) unlazychildren = true;
     if (!unlazychildren) {
       //printf("Found one!!! %s\n", printme().c_str());
       return *this;
@@ -168,7 +170,7 @@ Expression Expression::EasyParentOfThisSubexpression(const Expression &e) const 
   // If we ourselves aren't the easy parent, let's see if our children
   // have such a possibility...
   if (arg1) {
-    Expression easyparent = arg1->EasyParentOfThisSubexpression(e);
+    Expression easyparent = arg1->EasyParentOfThisSubexpression(e, important);
     // The following is a bit too all-or-nothing: we ought to look for
     // a less "agressive" easy parent (which is a child of this
     // parent), but that'd be more work to code...
@@ -176,12 +178,12 @@ Expression Expression::EasyParentOfThisSubexpression(const Expression &e) const 
       return easyparent;
     }
     if (arg2) {
-      easyparent = arg2->EasyParentOfThisSubexpression(e);
+      easyparent = arg2->EasyParentOfThisSubexpression(e, important);
       if (easyparent != e && CountThisSubexpression(easyparent) == ncount) {
         return easyparent;
       }
       if (arg3) {
-        easyparent = arg3->EasyParentOfThisSubexpression(e);
+        easyparent = arg3->EasyParentOfThisSubexpression(e, important);
         if (easyparent != e && CountThisSubexpression(easyparent) == ncount) {
           return easyparent;
         }
