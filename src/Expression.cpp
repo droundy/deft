@@ -538,7 +538,61 @@ Expression Expression::simplify() const {
   return *this;
 }
 
-void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> important,
+std::set<std::string> Expression::top_level_vars(std::set<std::string> *allvars) {
+  std::set<std::string> out;
+  //printf("Looking for toplevel vars in %s\n", alias.c_str());
+  if (alias == "") alias = "toplevel";
+  if (kind == "+-" && name == "+") {
+    std::set<std::string> out1 = arg1->top_level_vars(allvars);
+    for (std::set<std::string>::iterator i = out1.begin(); i != out1.end(); ++i) {
+      //printf("First side has %s\n", i->c_str());
+      out.insert(*i);
+    }
+    std::set<std::string> out2 = arg2->top_level_vars(allvars);
+    for (std::set<std::string>::iterator i = out2.begin(); i != out2.end(); ++i) {
+      //printf("Second side has %s\n", i->c_str());
+      out.insert(*i);
+    }
+    return out;
+  }
+  if (allvars->count(alias)) {
+    // need to make this thing unique...
+    for (int varnum=0; true; varnum++) {
+      std::ostringstream oss;
+      oss << varnum;
+      std::string newa = alias + "_" + oss.str();
+      if (!allvars->count(newa)) {
+        alias = newa;
+        break;
+      }
+    }
+  }
+  //printf("Adding %s as %s\n", printme().c_str(), alias.c_str());
+  out.insert(alias);
+  allvars->insert(alias);
+  return out;
+}
+
+Expression Expression::FindNamedSubexpression(const std::string n) const {
+  Expression e;
+  if (alias == n) return *this;
+  if (arg1) {
+    e = arg1->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  if (arg2) {
+    e = arg2->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  if (arg3) {
+    e = arg3->FindNamedSubexpression(n);
+    if (e.alias == n) return e;
+  }
+  return *this;
+}
+
+void Expression::generate_code(FILE *o, const char *fmt, const std::string thisvar,
+                               std::set<std::string> important,
                                std::set<std::string> *allvars, std::set<std::string> *myvars) {
   std::set<std::string> otherallvars, othermyvars;
   if (!allvars) allvars = &otherallvars;
@@ -548,6 +602,7 @@ void Expression::generate_code(FILE *o, const char *fmt, std::set<std::string> i
   std::set<std::string> recipvars;
 
   Expression e = *this;
+  if (thisvar != "") e = FindNamedSubexpression(thisvar);
   Expression s = e.FindCommonSubexpression();
   //Expression ssmaller = s;
   //ssmaller.ScalarFactor(); // This is s without any prefactor.

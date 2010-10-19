@@ -9,10 +9,11 @@ class Functional;
 
 class FunctionalInterface {
 public:
-  FunctionalInterface() : have_analytic_grad(true) {}
+  FunctionalInterface() : have_analytic_grad(true), have_integral(false) {}
   virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
+  virtual double integral(const GridDescription &gd, const VectorXd &data) const;
   virtual VectorXd transform(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double transform(double) const = 0;
 
@@ -27,7 +28,7 @@ public:
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 
-  bool have_analytic_grad;
+  bool have_analytic_grad, have_integral;
 };
 
 template<typename Derived, typename extra> class ConvolveWith;
@@ -99,6 +100,9 @@ public:
     return integral(g.description(), g);
   }
   double integral(const GridDescription &gd, const VectorXd &data) const {
+    if (itsCounter->ptr->have_integral && !next()) {
+      return itsCounter->ptr->integral(gd, data);
+    }
     // This does some extra work to save the energies of each term in
     // the sum.
     VectorXd fdata(justMe(gd, data));

@@ -113,7 +113,7 @@ int main(int, char **argv) {
   // Oddly enough with PreconditionedConjugateGradient we can't get
   // better than 1e-11 precision, and even that requires setting the
   // Precision requirement extra high.
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-11, 70);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-11, 60);
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-5, 10);
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-2, 10);
 
