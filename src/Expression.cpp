@@ -86,10 +86,6 @@ Expression Expression::method(const char *n) const {
   out.name = "." + std::string(n) + "(";
   out.arg1 = new Expression(*this);
   out.type = type; // default to methods not changing types
-  // check for special cases...
-  if (out.name == ".square(" && type == "double") {
-    return *this * *this;
-  }
   return out;
 }
 
@@ -107,17 +103,22 @@ Expression Expression::method(const char *n, const Expression &a, const Expressi
 
 Expression abs(const Expression &x) {
   if (x.type == "double") return funexpr("fabs", x).set_type("double");
-  return x.cwise().method("abs");
+  return x.method("cwise().abs");
 }
 
 Expression log(const Expression &x) {
   if (x.type == "double") return funexpr("log", x).set_type("double");
-  return x.cwise().method("log");
+  return x.method("cwise().log");
 }
 
 Expression exp(const Expression &x) {
   if (x.type == "double") return funexpr("exp", x).set_type("double");
-  return x.cwise().method("exp");
+  return x.method("cwise().exp");
+}
+
+Expression sqr(const Expression &x) {
+  if (x.type == "double") return x*x;
+  return x.method("cwise().square");
 }
 
 Expression Expression::operator()(const Expression &e) const {

@@ -110,3 +110,4 @@ Expression ifft(const Expression &x);
 Expression abs(const Expression &);
 Expression log(const Expression &);
 Expression exp(const Expression &);
+Expression sqr(const Expression &);

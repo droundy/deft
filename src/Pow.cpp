@@ -74,11 +74,11 @@ public:
     switch (n) {
     case 0: return 0;
     case 1: return x;
-    case 2: return x.cwise().method("square");
+    case 2: return sqr(x);
     }
     // This is more than a little hokey...
     if (n & 1) return x*Pow(n-1).printme(x);
-    return Pow(n/2).printme(x.cwise().method("square"));
+    return Pow(n/2).printme(sqr(x));
   }
 private:
   int n;
