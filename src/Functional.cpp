@@ -102,8 +102,9 @@ void Functional::create_source(const std::string filename, const std::string cla
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
   std::set<std::string> myvars;
   for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
-    fprintf(o, "  // examining %s\n", i->c_str());
+    fprintf(o, "    // examining %s\n", i->c_str());
     Expression thisguy = myself.FindNamedSubexpression(*i);
+    //fprintf(o, "    // It actually has expression %s\n", thisguy.printme().c_str());
     if (thisguy.alias != *i) {
       printf("I am erasing variable %s\n", i->c_str());
       printf("It actually has alias %s\n", thisguy.alias.c_str());
@@ -116,14 +117,27 @@ void Functional::create_source(const std::string filename, const std::string cla
     else
       snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
     myself.generate_code(o, buf, *i, toplevel, &allvars, &myvars);
+    fprintf(o, "    // Myself starts as %s\n", myself.printme().c_str());
+    fprintf(o, "    // Substituting %s\n", thisguy.printme().c_str());
+    myself.EliminateThisDouble(myself.FindNamedSubexpression(*i), *i);
+    fprintf(o, "    // Myself is now %s\n", myself.printme().c_str());
     delete[] buf;
+    myself.generate_free_code(o, &myvars);
   }
-  myself.method("sum").generate_code(o, "    return %s*gd.dvolume;\n", "", toplevel, &allvars, &myvars);
-  //fprintf(o, "    return 0");
-  //for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
-  //  fprintf(o, " + %s", i->c_str());
-  //}
-  //fprintf(o, ";\n");
+  //myself.method("sum").generate_code(o, "    return %s*gd.dvolume;\n", "", toplevel, &allvars, &myvars);
+  {
+    bool amfirst = true;
+    fprintf(o, "    return ");
+    for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+      if (amfirst) {
+        fprintf(o, "%s", i->c_str());
+        amfirst = false;
+      } else {
+        fprintf(o, " + %s", i->c_str());
+      }
+    }
+    fprintf(o, ";\n");
+  }
   fprintf(o, "  }\n");
   fprintf(o, "  double transform(double) const {\n");
   fprintf(o, "    return 0;\n");

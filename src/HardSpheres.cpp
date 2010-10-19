@@ -89,8 +89,7 @@ Functional HardSpheresRF(double radius, double temperature) {
   Functional phi3 = VectorThirdTerm(radius)/(24*M_PI*sqr(one_minus_n3));
   phi3.set_name("phi3");
   //Functional total = temperature*(phi1 + phi2 + phi3);
-  Functional total = (kT*phi1).set_name("phi1") +
-    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
+  Functional total = (kT*phi3).set_name("phi3") + (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2");
   return total;
 }
 
@@ -115,8 +114,7 @@ Functional HardSpheresTarazona(double radius, double temperature) {
   Functional phi3 = TensorThirdTerm(radius)/(24*M_PI*sqr(one_minus_n3));
   phi3.set_name("phi3");
   //Functional total = temperature*(phi1 + phi2 + phi3);
-  Functional total = (kT*phi1).set_name("phi1") +
-    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
+  Functional total = (kT*phi3).set_name("phi3") + (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2");
   return total;
 }
 
@@ -143,8 +141,7 @@ Functional HardSpheresWB(double radius, double temperature) {
   phi3.set_name("phi3");
   //Functional total = kT*(phi1 + phi2 + phi3);
   //total.set_name("hard sphere excess");
-  Functional total = (kT*phi1).set_name("phi1") +
-    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
+  Functional total = (kT*phi3).set_name("phi3") + (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2");
   return total;
 }
 
@@ -171,8 +168,7 @@ Functional HardSpheresWBnotensor(double radius, double temperature) {
   phi3.set_name("phi3");
   //Functional total = kT*(phi1 + phi2 + phi3);
   //total.set_name("hard sphere excess");
-  Functional total = (kT*phi1).set_name("phi1") +
-    (kT*phi2).set_name("phi2") + (kT*phi3).set_name("phi3");
+  Functional total = (kT*phi3).set_name("phi3") + (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2");
   return total;
 }
 

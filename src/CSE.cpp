@@ -31,6 +31,33 @@ bool Expression::operator==(const Expression &e) const {
   return true;
 }
 
+bool Expression::EliminateThisDouble(const Expression &c, const std::string name) {
+  if (c.type == type) {
+    // If the type is right, then it's possible that we *are* the subexpression.
+    // First check if we are the same as the subexpression we're trying to eliminate.
+    if (c == *this) {
+      Expression n(name);
+      n.type = "double";
+      n.alias = c.alias;
+      *this = n;
+      return true;
+    }
+    // Now check if perhaps we're the same thing up to a scalar prefactor.
+    //Expression tmp(*this);
+    //Expression sca = tmp.ScalarFactor();
+    //if (c == tmp) {
+    //  *this = sca * n;
+    //  return true;
+    //}
+  }
+  // Try to recursively eliminate this subexpression in our children.
+  bool changed = false;
+  if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
+  if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
+  if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
+  return changed;
+}
+
 bool Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
   if (c.type == type) {
     // If the type is right, then it's possible that we *are* the subexpression.

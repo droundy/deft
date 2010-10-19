@@ -541,7 +541,6 @@ Expression Expression::simplify() const {
 std::set<std::string> Expression::top_level_vars(std::set<std::string> *allvars) {
   std::set<std::string> out;
   //printf("Looking for toplevel vars in %s\n", alias.c_str());
-  if (alias == "") alias = "toplevel";
   if (kind == "+-" && name == "+") {
     std::set<std::string> out1 = arg1->top_level_vars(allvars);
     for (std::set<std::string>::iterator i = out1.begin(); i != out1.end(); ++i) {
@@ -555,6 +554,7 @@ std::set<std::string> Expression::top_level_vars(std::set<std::string> *allvars)
     }
     return out;
   }
+  if (alias == "") alias = "toplevel";
   if (allvars->count(alias)) {
     // need to make this thing unique...
     for (int varnum=0; true; varnum++) {
@@ -589,6 +589,19 @@ Expression Expression::FindNamedSubexpression(const std::string n) const {
     if (e.alias == n) return e;
   }
   return *this;
+}
+
+void Expression::generate_free_code(FILE *o,  std::set<std::string> *myvars) const {
+  // Free any newly unused variables...
+  for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
+    if (!FindVariable(*i)) {
+      //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
+      //fprintf(o, "    delete %s_ptr;\n", i->c_str());
+      fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
+      fflush(o);
+      myvars->erase(i);
+    }
+  }
 }
 
 void Expression::generate_code(FILE *o, const char *fmt, const std::string thisvar,
@@ -644,29 +657,11 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     fflush(o);
 
     // Free unused variables...
-    for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
-      if (!FindVariable(*i)) {
-        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-        fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
-        fflush(o);
-        gridvars.erase(i);
-      }
-    }
-    for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
-      if (!FindVariable(*i)) {
-        //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-        //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-        fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
-        fflush(o);
-        recipvars.erase(i);
-      }
-    }
-    for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
-      if (!FindVariable(*i)) {
-        myvars->erase(i);
-      }
-    }
+    generate_free_code(o, myvars);
+    for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i)
+      if (!FindVariable(*i)) gridvars.erase(i);
+    for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i)
+      if (!FindVariable(*i)) recipvars.erase(i);
     
     bool have_changed = true;
     while (have_changed) {
@@ -716,29 +711,11 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
       }
 
       // Free any newly unused variables...
-      for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
-        if (!FindVariable(*i)) {
-          //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-          //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-          fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
-          fflush(o);
-          gridvars.erase(i);
-        }
-      }
-      for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i) {
-        if (!FindVariable(*i)) {
-          //fprintf(o, "    // Couldn't find %s in:  %s\n", i->c_str(), e.printme().c_str());
-          //fprintf(o, "    delete %s_ptr;\n", i->c_str());
-          fprintf(o, "    %s.resize(0); // We're done with this...\n", i->c_str());
-          fflush(o);
-          recipvars.erase(i);
-        }
-      }
-      for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
-        if (!FindVariable(*i)) {
-          myvars->erase(i);
-        }
-      }
+      generate_free_code(o, myvars);
+      for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i)
+        if (!FindVariable(*i)) gridvars.erase(i);
+      for (std::set<std::string>::iterator i = recipvars.begin(); i != recipvars.end(); ++i)
+        if (!FindVariable(*i)) recipvars.erase(i);
     }
 
     // Now pick our next subexpression!
