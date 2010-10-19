@@ -198,11 +198,11 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "private:\n");
   if (a1) fprintf(o, "  double %s;\n", a1);
   if (a2) fprintf(o, "  double %s;\n", a2);
-  if ((!a1 || std::string(a1) != "R") && (!a2 || std::string(a2) != "R"))
-    fprintf(o, "  double R;\n");
   for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
     fprintf(o, "  mutable double %s;\n", i->c_str());
   }
+  if ((!a1 || std::string(a1) != "R") && (!a2 || std::string(a2) != "R"))
+    fprintf(o, "  double R;\n");
   fprintf(o, "};\n\n");
   if (isheader) fprintf(o, "inline ");
   fprintf(o, "Functional %s(", classname.c_str());
