@@ -56,6 +56,9 @@ public:
     out.unlazy = true;
     return out;
   }
+  Expression cwiseprintme(const Expression &x) const {
+    return x;
+  }
 private:
   double width, kfac;
 };
@@ -65,39 +68,45 @@ Functional Gaussian(double width) {
 }
 
 Functional StepConvolve(double R) {
-  return Functional(function_for_convolve<step_op<complex> >, R, true);
+  Expression r("R");
+  r.set_type("double");
+  return Functional(function_for_convolve<step_op<complex> >, R,
+                    Expression(4*M_PI/3)*(r*r*r), true);
 }
 
 Functional ShellConvolve(double R) {
-  return Functional(function_for_convolve<shell_op<complex> >, R, true);
+  Expression r("R");
+  r.set_type("double");
+  return Functional(function_for_convolve<shell_op<complex> >, R,
+                    Expression(4*M_PI)*(r*r), true);
 }
 
 Functional xShellConvolve(double R) {
-  return Functional(function_for_convolve<xshell_op<complex> >, R, false);
+  return Functional(function_for_convolve<xshell_op<complex> >, R, Expression(0), false);
 }
 Functional yShellConvolve(double R) {
-  return Functional(function_for_convolve<yshell_op<complex> >, R, false);
+  return Functional(function_for_convolve<yshell_op<complex> >, R, Expression(0), false);
 }
 Functional zShellConvolve(double R) {
-  return Functional(function_for_convolve<zshell_op<complex> >, R, false);
+  return Functional(function_for_convolve<zshell_op<complex> >, R, Expression(0), false);
 }
 
 Functional xyShellConvolve(double R) {
-  return Functional(function_for_convolve<xyshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<xyshell_op<complex> >, R, Expression(0), true);
 }
 Functional yzShellConvolve(double R) {
-  return Functional(function_for_convolve<yzshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<yzshell_op<complex> >, R, Expression(0), true);
 }
 Functional zxShellConvolve(double R) {
-  return Functional(function_for_convolve<zxshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<zxshell_op<complex> >, R, Expression(0), true);
 }
 
 Functional xxShellConvolve(double R) {
-  return Functional(function_for_convolve<xxshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<xxshell_op<complex> >, R, Expression(0), true);
 }
 Functional yyShellConvolve(double R) {
-  return Functional(function_for_convolve<yyshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<yyshell_op<complex> >, R, Expression(0), true);
 }
 Functional zzShellConvolve(double R) {
-  return Functional(function_for_convolve<zzshell_op<complex> >, R, true);
+  return Functional(function_for_convolve<zzshell_op<complex> >, R, Expression(0), true);
 }

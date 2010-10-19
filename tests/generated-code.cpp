@@ -121,14 +121,6 @@ int main(int, char **argv) {
   compare_functionals(AlmostRF(kT,R),
                       (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2") + (kT*phi3rf).set_name("phi3"), 4e-14);
 
-  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), 6e-15);
-
-  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R,kT), 2e-14);
-
-  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R,kT), 4e-14);
-
-  compare_functionals(HardSpheresNoTensor(R,kT), HardSpheresWBnotensor(R, kT), 2e-14);
-
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);
   return errors;

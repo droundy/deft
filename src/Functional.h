@@ -24,6 +24,7 @@ public:
   virtual double derive(double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Expression printme(const Expression &) const = 0;
+  virtual Expression cwiseprintme(const Expression &) const;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
 
@@ -38,12 +39,13 @@ public:
   Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
-  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e, bool iseven)
+  explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
+                      const Expression &gzero, bool iseven)
     : itsCounter(0) {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived,extra>(f,e,iseven), f(gd, e).name());
+    init(new ConvolveWith<Derived,extra>(f,e,gzero,iseven), f(gd, e).name());
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
@@ -163,6 +165,7 @@ public:
                                   const Grid &data,
                                   const VectorXd *direction = 0) const;
   Expression printme(const Expression &) const;
+  virtual Expression cwiseprintme(const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
                      const char *a1 = 0, const char *a2 = 0, bool isheader=false) const;
   void create_header(const std::string filename, const std::string classname,
@@ -227,9 +230,11 @@ extern Functional dV;
 template<typename Derived, typename extra>
 class ConvolveWith : public FunctionalInterface {
 public:
-  ConvolveWith(Derived (*ff)(const GridDescription &, extra), extra e, bool isev)
-    : f(ff), data(e), iseven(isev) {}
-  ConvolveWith(const ConvolveWith &cw) : f(cw.f), data(cw.data), iseven(cw.iseven) {}
+  ConvolveWith(Derived (*ff)(const GridDescription &, extra),
+               extra e, const Expression &gzerovv, bool isev)
+    : f(ff), gzerov(gzerovv), data(e), iseven(isev) {}
+  ConvolveWith(const ConvolveWith &cw)
+    : f(cw.f), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
 
   EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &x) const {
     Grid out(gd, x);
@@ -250,9 +255,9 @@ public:
   }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
-      return Functional(new ConvolveWith(f, data, iseven))(ingrad);
+      return Functional(new ConvolveWith(f, data, gzerov, iseven))(ingrad);
     else
-      return Functional(new ConvolveWith(f, data, iseven))(-1*ingrad);
+      return Functional(new ConvolveWith(f, data, gzerov, iseven))(-1*ingrad);
   }
   EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -270,8 +275,12 @@ public:
     Derived c(GridDescription(lat, 2, 2, 2), data);
     return ifft(funexpr(c.name(), Expression("gd"), Expression("R")).set_type("ReciprocalGrid") * fft(x));
   }
+  Expression cwiseprintme(const Expression &x) const {
+    return (gzerov*x).set_alias("literal");
+  }
 private:
   Derived (*f)(const GridDescription &, extra);
+  Expression gzerov;
   extra data;
   bool iseven;
 };

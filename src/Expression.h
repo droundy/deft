@@ -45,6 +45,9 @@ public:
   Expression method(const char *, const Expression &, const Expression &) const;
 
   Expression set_alias(std::string a);
+  std::string get_alias() const {
+    return alias;
+  }
 
   // Modifies this expression in-place, and returns a declaration of
   // the common subexpression.
@@ -103,3 +106,7 @@ inline Expression operator/(double a, const Expression &b) {
 
 Expression fft(const Expression &x);
 Expression ifft(const Expression &x);
+
+Expression abs(const Expression &);
+Expression log(const Expression &);
+Expression exp(const Expression &);

@@ -76,6 +76,7 @@ Expression::Expression(double c) {
   kind = "constant";
   type = "double";
   value = c;
+  if (c == -0) value = 0; // I don't want to bother with minus zero...
   unlazy = false;
 }
 
@@ -104,6 +105,21 @@ Expression Expression::method(const char *n, const Expression &a, const Expressi
   return out;
 }
 
+Expression abs(const Expression &x) {
+  if (x.type == "double") return funexpr("fabs", x).set_type("double");
+  return x.cwise().method("abs");
+}
+
+Expression log(const Expression &x) {
+  if (x.type == "double") return funexpr("log", x).set_type("double");
+  return x.cwise().method("log");
+}
+
+Expression exp(const Expression &x) {
+  if (x.type == "double") return funexpr("exp", x).set_type("double");
+  return x.cwise().method("exp");
+}
+
 Expression Expression::operator()(const Expression &e) const {
   Expression out;
   out.name = "(";
@@ -124,7 +140,7 @@ Expression Expression::operator()(const Expression &e, const Expression &f) cons
 }
 
 Expression Expression::set_alias(std::string a) {
-  if (kind == "constant") {
+  if (kind == "constant" && a != "literal") {
     kind = "variable";
     name = a;
   }
@@ -449,8 +465,8 @@ std::string Expression::printme() const {
     }
     out += ")";
     return out;
-  } else if (kind == "constant" && alias != "") {
-    return alias;
+  } else if (kind == "constant" && alias != "" && alias != "literal") {
+    return alias + "xxx";
   }
   return name;
 }
