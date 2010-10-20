@@ -117,10 +117,10 @@ void Functional::create_source(const std::string filename, const std::string cla
     else
       snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
     myself.generate_code(o, buf, *i, toplevel, &allvars, &myvars);
-    fprintf(o, "    // Myself starts as %s\n", myself.printme().c_str());
-    fprintf(o, "    // Substituting %s\n", thisguy.printme().c_str());
+    //fprintf(o, "    // Myself starts as %s\n", myself.printme().c_str());
+    //fprintf(o, "    // Substituting %s\n", thisguy.printme().c_str());
     myself.EliminateThisDouble(myself.FindNamedSubexpression(*i), *i);
-    fprintf(o, "    // Myself is now %s\n", myself.printme().c_str());
+    //fprintf(o, "    // Myself is now %s\n", myself.printme().c_str());
     delete[] buf;
     myself.generate_free_code(o, &myvars);
   }
