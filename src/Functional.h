@@ -100,20 +100,14 @@ public:
     return integral(g.description(), g);
   }
   double integral(const GridDescription &gd, const VectorXd &data) const {
-    if (itsCounter->ptr->have_integral && !next()) {
-      return itsCounter->ptr->integral(gd, data);
-    }
-    // This does some extra work to save the energies of each term in
-    // the sum.
-    VectorXd fdata(justMe(gd, data));
-    double e = gd.dvolume*fdata.sum();
+    // This takes care to save the energies of each term in the sum.
+    double e = itsCounter->ptr->integral(gd, data);
     set_last_energy(e);
     Functional *nxt = next();
     while (nxt) {
-      fdata += nxt->justMe(gd, data);
-      double etot = gd.dvolume*fdata.sum();
-      nxt->set_last_energy(etot - e);
-      e = etot;
+      double enext = nxt->itsCounter->ptr->integral(gd, data);
+      nxt->set_last_energy(enext);
+      e += enext;
       nxt = nxt->next();
     }
     return e;

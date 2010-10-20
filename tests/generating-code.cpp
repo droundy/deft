@@ -39,7 +39,6 @@ int main(int, char **) {
 
   IdealGasOfVeff(kTval).create_header("tests/generated/ideal-gas.h", "IdealGasFast", "kT");
 
-  Functional four_pi_r2 = 4*M_PI*sqr(R);
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
   (sqr(n2)+sqr(n3)).set_name("n2_and_n3").create_header("tests/generated/n2_and_n3.h", "n2_and_n3", "R");

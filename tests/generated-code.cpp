@@ -92,15 +92,15 @@ int main(int, char **argv) {
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(Sum(kT), x + kT, n);
+  compare_functionals(Sum(kT), x + kT, n, 2e-13);
 
-  compare_functionals(Log(), log(x), n);
+  compare_functionals(Log(), log(x), n, 3e-14);
 
-  compare_functionals(LogAndSqr(), log(x) + sqr(x), n);
+  compare_functionals(LogAndSqr(), log(x) + sqr(x), n, 3e-14);
 
   compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, n);
 
-  compare_functionals(LogOneMinusX(), log(1-x), n);
+  compare_functionals(LogOneMinusX(), log(1-x), n, 1e-12);
 
   compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)), n);
 
@@ -108,7 +108,7 @@ int main(int, char **argv) {
 
   Functional n2 = ShellConvolve(R);
   Functional n3 = StepConvolve(R);
-  compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), 1e-14);
+  compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), n, 1e-14);
 
   const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
@@ -125,10 +125,10 @@ int main(int, char **argv) {
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(kT,R), phi3rf, n, 2e-15);
 
-  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), n, 2e-15);
+  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), n, 5e-15);
 
   Functional veff = EffectivePotentialToDensity(kT);
-  compare_functionals(SquareVeff(kT, R), sqr(veff), Grid(gd, -kT*n.cwise().log()));
+  compare_functionals(SquareVeff(kT, R), sqr(veff), Grid(gd, -kT*n.cwise().log()), 1e-12);
 
   compare_functionals(AlmostRFnokT(kT,R), phi1 + phi2 + phi3rf, n, 3e-14);
 
@@ -142,12 +142,12 @@ int main(int, char **argv) {
 
   compare_functionals(Phi3rfVeff(kT, R), phi3rf(veff), Grid(gd, -kT*n.cwise().log()));
 
-  compare_functionals(IdealGasFast(kT), IdealGasOfVeff(kT), Grid(gd, -kT*n.cwise().log()));
+  compare_functionals(IdealGasFast(kT), IdealGasOfVeff(kT), Grid(gd, -kT*n.cwise().log()), 1e-13);
 
   double mu = -1;
   compare_functionals(Phi1plus(R, kT, mu),
                       phi1(veff) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(veff),
-                      Grid(gd, -kT*n.cwise().log()));
+                      Grid(gd, -kT*n.cwise().log()), 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);
