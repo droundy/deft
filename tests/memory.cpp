@@ -25,11 +25,7 @@ clock_t last_time = clock();
 double reference_time = 1;
 
 double check_peak(const char *name, const char *name2, double peakmin, double peakmax, double time_limit, double fraccuracy=0.2) {
-  printf("\n************");
-  for (unsigned i=0;i<strlen(name) + 4 + strlen(name2);i++) printf("*");
-  printf("\n* Testing %s of %s *\n", name, name2);
-  for (unsigned i=0;i<strlen(name) + 4 + strlen(name2);i++) printf("*");
-  printf("************\n\n");
+  printf("\n===> Testing %s of %s <===\n", name, name2);
   
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
   double peak = peak_memory()/1024.0/1024;
@@ -72,7 +68,19 @@ double incavity(Cartesian r) {
   return 1 - notincavity(r);
 }
 
-void check_a_functional(const char *name, Functional f, const Grid &x, double memE, double timE, double memG, double timG) {
+void check_a_functional(const char *name, Functional f, const Grid &x,
+                        double memE, double timE,
+                        double memG, double timG,
+                        double memP, double timP) {
+
+  printf("\n************");
+  for (unsigned i=0;i<strlen(name) + 4;i++) printf("*");
+  printf("\n* Working on %s *\n", name);
+  for (unsigned i=0;i<strlen(name) + 4;i++) printf("*");
+  printf("************\n\n");
+  fflush(stdout);
+  reset_peak_memory();
+  last_time = clock();
 
   f.integral(x);
   //printf("\n\nEnergy of %s is %g\n", name, f.integral(x));
@@ -86,6 +94,12 @@ void check_a_functional(const char *name, Functional f, const Grid &x, double me
 
   check_peak("Gradient", name, memG, memG+1, timG);
   
+  Grid mypgrad(x);
+  mygrad.setZero();
+  mypgrad.setZero();
+  f.integralgrad(x, &mygrad, &mypgrad);
+
+  check_peak("Gradient and preconditioned gradient", name, memP, memP+1, timP);
 }
 
 int main(int, char **argv) {
@@ -124,32 +138,32 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 80, 10.5, 101, 70);
+  check_a_functional("HardSpheres", ff, potential, 80, 10.5, 101, 70, 108, 70);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 104, 15);
+  check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 104, 15, 111, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereRF", ff, potential, 52, 3.5, 83, 17);
+  check_a_functional("HardSphereRF", ff, potential, 52, 3.5, 83, 17, 90, 17);
 
   ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereRFFast", ff, potential, 41, 1.2, 66, 3.8);
+  check_a_functional("HardSphereRFFast", ff, potential, 41, 1.2, 66, 3.8, 73, 3.8);
 
   ff = constrain(constraint, (HardSpheresTarazona(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereTarazona", ff, potential, 83, 10.0, 104, 62.1);
+  check_a_functional("HardSphereTarazona", ff, potential, 83, 10.0, 104, 62.1, 111, 62);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 94, 10.2);
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 94, 10.2, 101, 10);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 4.2, 87, 22);
+  check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 4.2, 87, 22, 94, 22);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   //check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 66, 5.0);
-  check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 80, 5.0);
+  check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 80, 5.0, 87, 5);
 
   ff = constrain(constraint, HardSphereGas(R, kT, mu));
-  check_a_functional("HardSphereGas", ff, potential, 41, 1.0, 59, 3.1);  
+  check_a_functional("HardSphereGas", ff, potential, 41, 1.0, 59, 3.1, 69, 10.0);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
