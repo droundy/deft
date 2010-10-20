@@ -17,6 +17,9 @@ public:
   virtual VectorXd transform(const GridDescription &gd, const VectorXd &data) const = 0;
   virtual double transform(double) const = 0;
 
+  virtual void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
+                     VectorXd *outpgrad) const;
+
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
   virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
@@ -118,6 +121,12 @@ public:
   void integralgrad(const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pg=0) const {
     grad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pg);
   }
+  void integralpgrad(const Grid &g, VectorXd *gr) const {
+    pgrad(g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr);
+  }
+  void integralpgrad(const GridDescription &gd, const VectorXd &x, VectorXd *g) const {
+    pgrad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g);
+  }
   double operator()(double data) const {
     double out = itsCounter->ptr->transform(data);
     if (mynext) out += (*mynext)(data);
@@ -137,6 +146,11 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
     if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
+  }
+  void pgrad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+             VectorXd *outpgrad) const {
+    itsCounter->ptr->pgrad(gd, data, ingrad, outpgrad);
+    if (mynext) mynext->pgrad(gd, data, ingrad, outpgrad);
   }
   double derive(double data) const {
     double out = itsCounter->ptr->derive(data);

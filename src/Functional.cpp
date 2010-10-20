@@ -22,6 +22,12 @@ Expression FunctionalInterface::cwiseprintme(const Expression &x) const {
   return printme(x);
 }
 
+void FunctionalInterface::pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
+                                VectorXd *outpgrad) const {
+  Grid trash(gd);
+  grad(gd, x, ingrad, &trash, outpgrad);
+}
+
 void FunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
   if (name) printf("%s%25s =", prefix, name);
   else printf("%s%25s =", prefix, "UNKNOWN");
