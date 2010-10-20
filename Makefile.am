@@ -10,7 +10,8 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp src/CSE.cpp\
 	src/EffectivePotentialToDensity.cpp
 
-OPTIMIZED_CODE = src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
+OPTIMIZED_CODE = src/HardSphereGasFast.cpp \
+	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
@@ -20,7 +21,7 @@ deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
 
-src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp: optimize-functionals
+$(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
 
 tests/generated/sum.h: tests/generating-code.test
@@ -57,7 +58,7 @@ check_PROGRAMS = \
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
-tests_optimized_code_test_SOURCES = tests/generated-code.cpp $(ALL_CODE)
+tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_timings_test_SOURCES = tests/timings.cpp $(ALL_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)

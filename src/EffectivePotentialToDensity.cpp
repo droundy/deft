@@ -19,5 +19,5 @@
 Functional EffectivePotentialToDensity(double temp) {
   Functional Veff = Identity().set_name("Veff");
   Functional kT = Functional(temp, "kT");
-  return exp(Veff/(-1*kT));
+  return exp(Veff/(-kT));
 }

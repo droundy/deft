@@ -20,6 +20,7 @@
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
+const double mu = 0;
 
 int main(int, char **argv) {
   if (strcmp(argv[1], "src/IdealGasFast.cpp") == 0)
@@ -32,4 +33,11 @@ int main(int, char **argv) {
     HardSpheresTarazona(kT, R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R", "kT");
   if (strcmp(argv[1], "src/HardSpheresNoTensor.cpp") == 0)
     HardSpheresWBnotensor(kT, R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R", "kT");
+  if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
+    Functional n = EffectivePotentialToDensity(kT);
+    Functional f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
+    f = HardSpheresRF(R, kT)(n) /* + IdealGasOfVeff(kT) */ + ChemicalPotential(mu)(n);
+    f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
+    f.create_source("src/HardSphereGasFast.cpp", "HardSphereGas", "R", "kT", "mu");
+  }
 }

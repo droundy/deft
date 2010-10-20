@@ -18,7 +18,8 @@
 #include "utilities.h"
 
 int main(int, char **) {
-  Functional kT(1e-2), x(Identity()), One(1);
+  double kTval = 1e-2;
+  Functional kT(kTval), x(Identity()), One(1);
   kT.set_name("kT");
   const double Rval = 4;
   Functional R(Rval);
@@ -32,6 +33,13 @@ int main(int, char **) {
   log(1-StepConvolve(Rval)).create_header("tests/generated/log-one-minus-nbar.h", "LogOneMinusNbar", "R");
   sqr(xShellConvolve(Rval)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", "R");
 
+  Functional veff = EffectivePotentialToDensity(kTval);
+
+  sqr(veff).create_header("tests/generated/sqr-Veff.h", "SquareVeff", "kT", "R");
+
+  IdealGasOfVeff(kTval).create_header("tests/generated/ideal-gas.h", "IdealGasFast", "kT");
+
+  Functional four_pi_r2 = 4*M_PI*sqr(R);
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
   (sqr(n2)+sqr(n3)).set_name("n2_and_n3").create_header("tests/generated/n2_and_n3.h", "n2_and_n3", "R");
@@ -41,6 +49,8 @@ int main(int, char **) {
   Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
   phi1.set_name("phi1").create_header("tests/generated/phi1.h", "Phi1", "kT", "R");
 
+  phi1(veff).create_header("tests/generated/phi1-Veff.h", "Phi1Veff", "kT", "R");
+
   const Functional four_pi_r = 4*M_PI*R;
   Functional n2x = xShellConvolve(Rval);
   Functional n2y = yShellConvolve(Rval);
@@ -48,8 +58,15 @@ int main(int, char **) {
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   phi2.set_name("phi2").create_header("tests/generated/phi2.h", "Phi2", "kT", "R");
 
+  phi2(veff).create_header("tests/generated/phi2-Veff.h", "Phi2Veff", "kT", "R");
+
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   phi3rf.set_name("phi3rf").create_header("tests/generated/phi3rf.h", "Phi3rf", "kT", "R");
+
+  phi3rf(veff).create_header("tests/generated/phi3rf-Veff.h", "Phi3rfVeff", "kT", "R");
+
+  (phi1(veff) + IdealGasOfVeff(kTval) + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
+                                                                                  "Phi1plus", "R", "kT", "mu");
 
   //(phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "kT", "R");
 

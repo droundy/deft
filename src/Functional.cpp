@@ -72,7 +72,7 @@ double average(int count, ...)
 }
 */
 void Functional::create_source(const std::string filename, const std::string classname,
-                               const char *a1, const char *a2, bool isheader) const {
+                               const char *a1, const char *a2, const char *a3, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
   //printf("Generating %s\n", classname.c_str());
@@ -85,9 +85,11 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  %s_type(", classname.c_str());
   if (a1) fprintf(o, "double %s_arg", a1);
   if (a2) fprintf(o, ", double %s_arg", a2);
+  if (a3) fprintf(o, ", double %s_arg", a3);
   fprintf(o, ") ");
   if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
+  if (a3) fprintf(o, ", %s(%s_arg)", a3, a3);
   fprintf(o, " {\n");
   fprintf(o, "    have_analytic_grad = false;\n");
   fprintf(o, "    have_integral = true;\n");
@@ -98,6 +100,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   std::set<std::string> allvars;
   if (a1) allvars.insert(a1);
   if (a2) allvars.insert(a2);
+  if (a3) allvars.insert(a3);
   Expression myself = printme(Expression("x"));
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
   std::set<std::string> myvars;
@@ -198,20 +201,25 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "private:\n");
   if (a1) fprintf(o, "  double %s;\n", a1);
   if (a2) fprintf(o, "  double %s;\n", a2);
+  if (a3) fprintf(o, "  double %s;\n", a3);
   for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
     fprintf(o, "  mutable double %s;\n", i->c_str());
   }
-  if ((!a1 || std::string(a1) != "R") && (!a2 || std::string(a2) != "R"))
+  if ((!a1 || std::string(a1) != "R") &&
+      (!a2 || std::string(a2) != "R") &&
+      (!a3 || std::string(a3) != "R"))
     fprintf(o, "  double R;\n");
   fprintf(o, "};\n\n");
   if (isheader) fprintf(o, "inline ");
   fprintf(o, "Functional %s(", classname.c_str());
   if (a1) fprintf(o, "double %s", a1);
   if (a2) fprintf(o, ", double %s", a2);
+  if (a3) fprintf(o, ", double %s", a3);
   fprintf(o, ") {\n");
   fprintf(o, "  return Functional(new %s_type(", classname.c_str());
   if (a1) fprintf(o, "%s", a1);
   if (a2) fprintf(o, ", %s", a2);
+  if (a3) fprintf(o, ", %s", a3);
   fprintf(o, "), \"%s\");\n", classname.c_str());
   fprintf(o, "}\n");
   fclose(o);

@@ -90,5 +90,5 @@ Functional IdealGasOfVeff(double Tin) {
   Functional Veff = Identity().set_name("Veff");
   Functional kT = Functional(Tin, "kT");
   Functional n = exp(-Veff/kT);
-  return (-(Veff + kT)*n).set_name("ideal gas");
+  return (-(Veff + kT)*n).set_name("ideal_gas");
 }

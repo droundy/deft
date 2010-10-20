@@ -80,10 +80,10 @@ Expression::Expression(double c) {
   unlazy = false;
 }
 
-Expression Expression::method(const char *n) const {
+Expression Expression::method(const std::string n) const {
   Expression out;
   out.kind = "method";
-  out.name = "." + std::string(n) + "(";
+  out.name = "." + n + "(";
   out.arg1 = new Expression(*this);
   out.type = type; // default to methods not changing types
   return out;
@@ -103,22 +103,22 @@ Expression Expression::method(const char *n, const Expression &a, const Expressi
 
 Expression abs(const Expression &x) {
   if (x.type == "double") return funexpr("fabs", x).set_type("double");
-  return x.method("cwise().abs");
+  return x.cwisemethod("abs");
 }
 
 Expression log(const Expression &x) {
   if (x.type == "double") return funexpr("log", x).set_type("double");
-  return x.method("cwise().log");
+  return x.cwisemethod("log");
 }
 
 Expression exp(const Expression &x) {
   if (x.type == "double") return funexpr("exp", x).set_type("double");
-  return x.method("cwise().exp");
+  return x.cwisemethod("exp");
 }
 
 Expression sqr(const Expression &x) {
   if (x.type == "double") return x*x;
-  return x.method("cwise().square");
+  return x.cwisemethod("square");
 }
 
 Expression Expression::operator()(const Expression &e) const {
@@ -154,6 +154,10 @@ Expression Expression::cwise() const {
   if (type == "double") return *this;
   if (name == ".cwise(") return *this;
   return method("cwise");
+}
+
+Expression Expression::cwisemethod(const char *m) const {
+  return method("cwise()." + std::string(m));
 }
 
 bool Expression::iscwise() const {
@@ -213,7 +217,7 @@ Expression Expression::operator-(const Expression &e) const {
 }
 
 Expression Expression::operator-() const {
-  checkWellFormed();
+  // checkWellFormed();
   if (kind == "constant") {
     return -value;
   } else if (kind == "*/" && name == "*" && arg1->kind == "constant") {
@@ -234,13 +238,13 @@ Expression Expression::operator-() const {
   out.kind = "unary";
   out.type = type;
   out.arg1 = new Expression(*this);
-  out.checkWellFormed();
+  // out.checkWellFormed();
   return out;
 }
 
 Expression Expression::operator*(const Expression &e) const {
-  checkWellFormed();
-  e.checkWellFormed();
+  // checkWellFormed();
+  // e.checkWellFormed();
   if (kind == "constant" && e.kind == "constant") {
     return Expression(value*e.value);
   } else if (e.kind == "constant") {

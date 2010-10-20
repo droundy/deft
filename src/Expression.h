@@ -39,8 +39,9 @@ public:
   Expression operator()(const Expression &) const;
   Expression operator()(const Expression &, const Expression &) const;
   Expression cwise() const; // creates a coefficient-wise version...
+  Expression cwisemethod(const char *) const; // creates a coefficient-wise method...
   bool iscwise() const; // true if we're already coefficient-wise
-  Expression method(const char *) const;
+  Expression method(const std::string) const;
   Expression method(const char *, const Expression &) const;
   Expression method(const char *, const Expression &, const Expression &) const;
 
