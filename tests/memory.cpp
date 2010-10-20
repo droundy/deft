@@ -149,7 +149,7 @@ int main(int, char **argv) {
   check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 80, 5.0);
 
   ff = constrain(constraint, HardSphereGas(R, kT, mu));
-  check_a_functional("HardSphereGas", ff, potential, 38, 1.0, 59, 3.1);  
+  check_a_functional("HardSphereGas", ff, potential, 41, 1.0, 59, 3.1);  
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

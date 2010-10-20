@@ -703,6 +703,9 @@ class Constraint : public FunctionalInterface {
 public:
   Constraint(const Grid &g, const Functional &y) : constraint(g), f(y) {};
 
+  double integral(const GridDescription &gd, const VectorXd &x) const {
+    return f.integral(gd, x);
+  }
   VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
     return f(gd, data);
   }
