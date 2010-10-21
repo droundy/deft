@@ -10,7 +10,7 @@ GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp src/CSE.cpp\
 	src/EffectivePotentialToDensity.cpp
 
-OPTIMIZED_CODE = src/HardSphereGasFast.cpp \
+OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
 

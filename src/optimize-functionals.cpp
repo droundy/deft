@@ -36,8 +36,9 @@ int main(int, char **argv) {
   if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
     Functional n = EffectivePotentialToDensity(kT);
     Functional f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
-    f = HardSpheresRF(R, kT)(n) /* + IdealGasOfVeff(kT) */ + ChemicalPotential(mu)(n);
-    f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
+    f.create_source("src/HardSphereGasRFFast.cpp", "HardSphereGasRF", "R", "kT", "mu");
+
+    f = HardSpheres(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
     f.create_source("src/HardSphereGasFast.cpp", "HardSphereGas", "R", "kT", "mu");
   }
 }

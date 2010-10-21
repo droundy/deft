@@ -75,9 +75,12 @@ int main(int, char **argv) {
   Functional nn = EffectivePotentialToDensity(kT);
   Functional f = HardSpheres(R, kT) + IdealGas(kT);
   double mu = -f.derive(water_prop.liquid_density);
-  mu = 0;
   f = HardSpheresRFFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
-  compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 1e-13);
+  compare_functionals(HardSphereGasRF(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
+ 
+  mu = -(HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT)).derive(water_prop.liquid_density);
+  f = HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
+  compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

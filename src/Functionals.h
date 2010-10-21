@@ -8,6 +8,7 @@
 Functional IdealGas(double temperature);
 Functional IdealGasOfVeff(double temperature);
 Functional HardSphereGas(double radius, double temperature, double mu);
+Functional HardSphereGasRF(double radius, double temperature, double mu);
 Functional HardSpheres(double radius, double temperature);
 Functional HardSpheresRF(double radius, double temperature);
 Functional HardSpheresTarazona(double radius, double temperature);
