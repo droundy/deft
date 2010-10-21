@@ -75,6 +75,8 @@ public:
   int checkWellFormed() const;
 
   Expression simplify() const;
+  void multiplyOut();
+  void multiplyOutHelper();
   void generate_code(FILE *outfile, const char *fmt, const std::string thisvar = "",
                      std::set<std::string> important = std::set<std::string>(),
                      std::set<std::string> *scopevars = 0, std::set<std::string> *myvars = 0);

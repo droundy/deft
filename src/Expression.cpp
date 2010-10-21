@@ -507,6 +507,44 @@ int Expression::checkWellFormed() const {
   return retval;
 }
 
+void Expression::multiplyOut() {
+  //if (!IsUnlazy()) return;
+  if (kind == "+-") {
+    arg1->multiplyOut();
+    arg2->multiplyOut();
+  } else {
+    multiplyOutHelper();
+  }
+}
+
+void Expression::multiplyOutHelper() {
+  if (kind == "*/" && name == "*") {
+    arg1->multiplyOutHelper();
+    arg2->multiplyOutHelper();
+    if (arg1->name == "+") {
+      *this = (*arg1->arg1 * *arg2) + (*arg1->arg2 * *arg2);
+      multiplyOut();
+    } else if (arg2->name == "+") {
+      *this = (*arg2->arg1 * *arg1) + (*arg2->arg2 * *arg1);
+      multiplyOut();
+    }
+    return;
+  } else if (name == "-" && kind == "unary") {
+    arg1->multiplyOutHelper();
+    if (arg1->name == "+") {
+      *this = (- *arg1->arg1) + (- *arg1->arg2);
+      multiplyOut();
+    }
+  } else if (kind == "linearfunexprgd") {
+    arg1->multiplyOutHelper();
+    if (arg1->name == "+") {
+      *this = linearfunexprgd(name.c_str(), type.c_str(), *arg1->arg1)
+        + linearfunexprgd(name.c_str(), type.c_str(), *arg1->arg2);
+      multiplyOut();
+    }
+  }
+}
+
 Expression Expression::simplify() const {
   Expression postfactor = *this;
   Expression prefactor = postfactor.ScalarFactor();
