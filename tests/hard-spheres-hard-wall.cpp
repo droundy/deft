@@ -34,11 +34,12 @@ Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,zmax));
 GridDescription gd(lat, 0.1);
 
 // And the functional...
-Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
 Functional f0wb = HardSpheresWB(R, kT);
 Functional f0rf = HardSpheresRF(R, kT);
 Functional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu); 
+//Functional f = f0(n);
+Functional f = HardSphereGas(R, kT, mu);
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -113,7 +114,7 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notinwall);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  ff = constrain(constraint, f0(n));
+  ff = constrain(constraint, f);
 
   int retval = 0;
 
@@ -127,9 +128,14 @@ int main(int, char **argv) {
   }
 
   {
-    Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+    Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+    retval += test_minimizer("ConjugateGradient", pd, 120, 1e-5);
+  }
 
-    retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
+  {
+    Minimizer pd =
+      Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+    //retval += test_minimizer("PreconditionedConjugateGradient", pd, 120, 1e-5);
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
