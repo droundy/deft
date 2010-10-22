@@ -167,21 +167,28 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,              "VectorXd *outpgrad) const {\n");
   // The following requires that "R" always be defined!
-  Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI);
+  Functional r(1.0);
+  r.set_name("R");
+  Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI*r*r*r);
   Expression curvature =
     abs(grad(dV, Identity(),
              false).grad(dV, Identity(),
                          false).cwiseprintme(smoothed.printme(Expression("x"))));
   //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
   Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
-  Expression epg = eg / curvature;
-  if (curvature == Expression(0)) epg = eg;
-  fprintf(o, "    // curvature is %s\n", curvature.printme().c_str());
-  if (eg == epg) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
+  Expression epg = eg * Expression("invcurvature");
+  if (curvature.type == "double") fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
     fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-    epg.generate_code(o, "    (*outpgrad) += %s;\n");
+    fprintf(o, "    // curvature is %s\n", curvature.printme().c_str());
+    std::set<std::string> allvars, myvars;
+    (Expression(1)/curvature).generate_code(o, "    VectorXd invcurvature = %s;\n", "",
+                                            std::set<std::string>(), &allvars, &myvars);
+    fprintf(o, "    invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
+    fprintf(o, "    invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
+    fprintf(o, "    printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
+    epg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "  }\n");
 

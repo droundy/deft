@@ -47,13 +47,13 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
   potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
 
-  for (int i=0;i<numiters && min.improve_energy(true);i++) {
+  for (int i=0;i<numiters && min.improve_energy(false);i++) {
     fflush(stdout);
   }
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.039358505404074;
+  const double true_energy = -0.0393585054040916;
   //const double true_N = 0.376241423570245;
 
   int retval = 0;
@@ -102,7 +102,7 @@ int main(int, char **argv) {
   Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
   Functional f0wb = HardSpheresWB(R, kT);
   Functional f0rf = HardSpheresRF(R, kT);
-  Functional ff = HardSpheres(R, kT)(n) + IdealGas(kT)(n) + ChemicalPotential(mu)(n);
+  Functional ff = HardSphereGas(R, kT, mu);
 
   external_potential.Set(incavity);
   external_potential *= 1e9;
@@ -118,9 +118,14 @@ int main(int, char **argv) {
   }
 
   {
-    Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    //Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    retval += test_minimizer("PreconditionedConjugateGradient", pd, 10, 1e-5);
+    {
+      Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+      retval += test_minimizer("ConjugateGradient", pd, 10, 1e-5);
+    }
+    {
+      Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+      retval += test_minimizer("PreconditionedConjugateGradient", pd, 10, 1e-5);
+    }
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
@@ -135,6 +140,12 @@ int main(int, char **argv) {
     retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);
   }
 
+  double peak = peak_memory()/1024.0/1024;
+  printf("Peak memory use was %g\n", peak);
+  if (peak > 22 || peak < 21) {
+    printf("FAIL: Peak memory use was not as expected...\n");
+    retval++;
+  }
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
