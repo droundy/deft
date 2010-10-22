@@ -1,14 +1,16 @@
 EXTRA_DIST = autogen.sh
 
-GENERIC_CODE = src/lattice.cpp src/utilities.cpp \
+FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
-	src/IdealGas.cpp src/ChemicalPotential.cpp \
-	src/HardSpheres.cpp \
-	src/Minimizer.cpp src/Downhill.cpp src/ExternalPotential.cpp \
+	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
+	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
+	src/EffectivePotentialToDensity.cpp \
+	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
+
+GENERIC_CODE = $(FUNCTIONAL_CODE) \
+	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
-	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp src/GaussianPolynomial.cpp \
-	src/Gaussian.cpp src/Pow.cpp src/Functional.cpp src/Expression.cpp src/CSE.cpp\
-	src/EffectivePotentialToDensity.cpp
+	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
@@ -19,7 +21,7 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals
-optimize_functionals_SOURCES = src/optimize-functionals.cpp $(GENERIC_CODE)
+optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
