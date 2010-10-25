@@ -129,13 +129,12 @@ int main(int, char **argv) {
 
   {
     Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    retval += test_minimizer("ConjugateGradient", pd, 120, 1e-5);
+    retval += test_minimizer("ConjugateGradient", pd, 120, 1e-7);
   }
-
   {
     Minimizer pd =
       Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-    //retval += test_minimizer("PreconditionedConjugateGradient", pd, 120, 1e-5);
+    retval += test_minimizer("PreconditionedConjugateGradient", pd, 95, 1e-7);
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
     Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
