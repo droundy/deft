@@ -17,6 +17,7 @@
 #include "Functionals.h"
 #include "utilities.h"
 #include "generated/sum.h"
+#include "generated/quadratic.h"
 #include "generated/log.h"
 #include "generated/log-and-sqr.h"
 #include "generated/log-and-sqr-and-inverse.h"
@@ -93,6 +94,8 @@ int main(int, char **argv) {
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
   compare_functionals(Sum(kT), x + kT, n, 2e-13);
+
+  compare_functionals(Quadratic(kT), sqr(x + kT) - x + 2*kT, n, 3e-14);
 
   compare_functionals(Log(), log(x), n, 3e-14);
 
