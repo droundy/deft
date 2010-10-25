@@ -187,7 +187,7 @@ void Functional::create_source(const std::string filename, const std::string cla
                                             std::set<std::string>(), &allvars, &myvars);
     fprintf(o, "    invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
     fprintf(o, "    invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
-    fprintf(o, "    printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
+    //fprintf(o, "    printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
     epg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "  }\n");
