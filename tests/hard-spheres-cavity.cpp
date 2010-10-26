@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.0393585054040916;
+  const double true_energy = -0.039358551308083;
   //const double true_N = 0.376241423570245;
 
   int retval = 0;
@@ -118,13 +118,30 @@ int main(int, char **argv) {
   }
 
   {
+    reset_peak_memory();
     {
       Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-      retval += test_minimizer("ConjugateGradient", pd, 10, 1e-5);
+      retval += test_minimizer("ConjugateGradient", pd, 100, 1e-5);
+
+      double peak = peak_memory()/1024.0/1024;
+      reset_peak_memory();
+      printf("Peak memory use was %g\n", peak);
+      if (peak > 7 || peak < 6) {
+        printf("FAIL: Peak memory use was not as expected...\n");
+        retval++;
+      }
     }
     {
       Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
-      retval += test_minimizer("PreconditionedConjugateGradient", pd, 10, 1e-5);
+      retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
+
+      double peak = peak_memory()/1024.0/1024;
+      reset_peak_memory();
+      printf("Peak memory use was %g\n", peak);
+      if (peak > 8 || peak < 7) {
+        printf("FAIL: Peak memory use was not as expected...\n");
+        retval++;
+      }
     }
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
