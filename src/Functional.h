@@ -9,7 +9,7 @@ class Functional;
 
 class FunctionalInterface {
 public:
-  FunctionalInterface() : have_analytic_grad(true), have_integral(false) {}
+  FunctionalInterface() : have_integral(false) {}
   virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
@@ -30,8 +30,9 @@ public:
   virtual Expression cwiseprintme(const Expression &) const;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
+  virtual bool I_have_analytic_grad() const;
 
-  bool have_analytic_grad, have_integral;
+  bool have_integral;
 };
 
 template<typename Derived, typename extra> class ConvolveWith;
@@ -179,6 +180,14 @@ public:
   void create_header(const std::string filename, const std::string classname,
                      const char *a1 = 0, const char *a2 = 0, const char *a3 = 0) const {
     create_source(filename, classname, a1, a2, a3, true);
+  }
+  bool I_have_analytic_grad() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_have_analytic_grad()) return false;
+      nxt = nxt->next();
+    }
+    return true;
   }
 private:
   void init(FunctionalInterface *p, const char *name) {

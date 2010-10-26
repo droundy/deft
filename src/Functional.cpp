@@ -22,6 +22,10 @@ Expression FunctionalInterface::cwiseprintme(const Expression &x) const {
   return printme(x);
 }
 
+bool FunctionalInterface::I_have_analytic_grad() const {
+  return true;
+}
+
 void FunctionalInterface::pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
                                 VectorXd *outpgrad) const {
   Grid trash(gd);
@@ -97,8 +101,10 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
   if (a3) fprintf(o, ", %s(%s_arg)", a3, a3);
   fprintf(o, " {\n");
-  fprintf(o, "    have_analytic_grad = false;\n");
   fprintf(o, "    have_integral = true;\n");
+  fprintf(o, "  }\n");
+  fprintf(o, "  bool I_have_analytic_grad() const {\n");
+  fprintf(o, "    return false;\n");
   fprintf(o, "  }\n");
   fprintf(o, "  double integral(const GridDescription &gd, const VectorXd &x) const {\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
@@ -307,7 +313,7 @@ int Functional::run_finite_difference_test(const char *testname, const Grid &x,
       retval++;
     }
 
-    if (itsCounter->ptr->have_analytic_grad) {
+    if (I_have_analytic_grad()) {
       // We have an analytic grad, so let's make sure it matches the
       // other one...
       VectorXd othergrad(grad(dV, Identity(), false)(x));
@@ -556,6 +562,9 @@ public:
   Expression cwiseprintme(const Expression &x) const {
     return f1.cwiseprintme(f2.cwiseprintme(x));
   }
+  bool I_have_analytic_grad() const {
+    return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
+  }
 private:
   Functional f1, f2;
 };
@@ -592,6 +601,9 @@ public:
   Expression cwiseprintme(const Expression &x) const {
     return f1.cwiseprintme(x) / f2.cwiseprintme(x);
   }
+  bool I_have_analytic_grad() const {
+    return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
+  }
 private:
   Functional f1, f2;
 };
@@ -626,6 +638,9 @@ public:
   }
   Expression cwiseprintme(const Expression &x) const {
     return f1.cwiseprintme(x)*f2.cwiseprintme(x);
+  }
+  bool I_have_analytic_grad() const {
+    return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
   }
 private:
   Functional f1, f2;
@@ -754,6 +769,9 @@ public:
   }
   Expression printme(const Expression &x) const {
     return f.printme(x);
+  }
+  bool I_have_analytic_grad() const {
+    return f.I_have_analytic_grad();
   }
 private:
   const Grid constraint;

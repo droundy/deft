@@ -99,9 +99,9 @@ int main(int, char **argv) {
   constraint.Set(notincavity);
   // The functionals are...
   Functional n = constrain(constraint, EffectivePotentialToDensity(kT));
-  Functional f0 = HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
+  Functional f0 = HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
   Functional f0wb = HardSpheresWB(R, kT);
-  Functional f0rf = HardSpheresRF(R, kT);
+  Functional f0rf = HardSpheresRFFast(R, kT);
   Functional ff = HardSphereGas(R, kT, mu);
 
   external_potential.Set(incavity);
