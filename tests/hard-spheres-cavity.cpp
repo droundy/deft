@@ -94,12 +94,20 @@ double incavity(Cartesian r) {
   return 1 - notincavity(r);
 }
 
+void this_took() {
+  static clock_t start = 0;
+  clock_t end = clock();
+  if (start)
+    printf("    This took %g seconds.\n", (end - double(start))/CLOCKS_PER_SEC);
+  start = end;
+}
+
 int main(int, char **argv) {
   Grid constraint(gd);
-  clock_t start = clock();
+  this_took();
   printf("I am about to set the constraint...\n"); 
   constraint.Set(notincavity);
-  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  this_took();
   printf("I have set the constraint...\n");
   // The functionals are...
   Functional n = constrain(constraint, EffectivePotentialToDensity(kT));
@@ -111,14 +119,14 @@ int main(int, char **argv) {
   printf("I am about to set the initial cavity...\n"); 
   external_potential.Set(incavity);
   external_potential *= 1e9;
-  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("I have set the initial cavity...\n");
+  this_took();
   external_potential.epsNativeSlice("external.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
-  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("I have output a native slice of the external potential...\n");
+  this_took();
   external_potential.epsRadial1d("external-radial.eps", 0, rmax, 1, R, "Good fun!");
-  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("I have output a radial slice of the external potential...\n");
+  this_took();
 
   int retval = 0;
 

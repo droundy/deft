@@ -198,8 +198,29 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
-  fprintf(o, "    if (outpgrad) pgrad(gd, x, ingrad, outpgrad);\n");
-  eg.generate_code(o, "    (*outgrad) += %s;\n");
+  fprintf(o, "    if (outpgrad) {\n");
+  if (curvature.type == "double") {
+    std::set<std::string> allvars, myvars;
+    eg.generate_code(o, "    (*outgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
+    eg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
+  } else {
+    fprintf(o, "      assert(&gd); // to avoid an unused parameter error\n");
+    fprintf(o, "      assert(&x); // to avoid an unused parameter error\n");
+    fprintf(o, "      // curvature is %s\n", curvature.printme().c_str());
+    std::set<std::string> allvars, myvars;
+    (Expression(1)/curvature).generate_code(o, "    VectorXd invcurvature = %s;\n", "",
+                                            std::set<std::string>(), &allvars, &myvars);
+    fprintf(o, "      invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
+    fprintf(o, "      invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
+    //fprintf(o, "      printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
+    eg.generate_code(o, "      (*outgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
+    eg.generate_code(o, "      (*outpgrad) += (%s).cwise() * invcurvature;\n", "",
+                     std::set<std::string>(), &allvars, &myvars);
+  }
+  fprintf(o, "    } else {\n");
+  eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
+  eg.generate_code(o, "      (*outgrad) += %s;\n");
+  fprintf(o, "    }\n");
   fprintf(o, "  }\n");
 
   fprintf(o, "  Expression printme(const Expression &) const {\n");
