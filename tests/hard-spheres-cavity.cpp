@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.039358551308083;
+  const double true_energy = -0.0393585513087;
   //const double true_N = 0.376241423570245;
 
   int retval = 0;
@@ -96,7 +96,11 @@ double incavity(Cartesian r) {
 
 int main(int, char **argv) {
   Grid constraint(gd);
+  clock_t start = clock();
+  printf("I am about to set the constraint...\n"); 
   constraint.Set(notincavity);
+  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  printf("I have set the constraint...\n");
   // The functionals are...
   Functional n = constrain(constraint, EffectivePotentialToDensity(kT));
   Functional f0 = HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
@@ -104,17 +108,29 @@ int main(int, char **argv) {
   Functional f0rf = HardSpheresRFFast(R, kT);
   Functional ff = HardSphereGas(R, kT, mu);
 
+  printf("I am about to set the initial cavity...\n"); 
   external_potential.Set(incavity);
   external_potential *= 1e9;
+  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  printf("I have set the initial cavity...\n");
   external_potential.epsNativeSlice("external.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
+  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  printf("I have output a native slice of the external potential...\n");
   external_potential.epsRadial1d("external-radial.eps", 0, rmax, 1, R, "Good fun!");
+  printf("Am at %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
+  printf("I have output a radial slice of the external potential...\n");
 
   int retval = 0;
 
   {
-    potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += f0wb(n).run_finite_difference_test("white bear functional", potential);
-    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", potential);
+    GridDescription gd(lat, 0.5);
+    Grid small_potential(gd);
+    Functional n = EffectivePotentialToDensity(kT);
+    small_potential.Set(incavity);
+    small_potential *= 1e9;
+    small_potential = small_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", small_potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", small_potential);
   }
 
   {
