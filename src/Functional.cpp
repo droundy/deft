@@ -198,6 +198,8 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
+  fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
+  fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   fprintf(o, "    if (outpgrad) {\n");
   if (curvature.type == "double") {
     std::set<std::string> allvars, myvars;

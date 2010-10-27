@@ -108,23 +108,21 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
   const double E0 = energy();
   double beta;
   {
-    const VectorXd pg = -pgrad();
-    const VectorXd g = -grad();
-    // Let's immediately free the cached gradient stored internally!
-    invalidate_cache();
-
     // Note: my notation vaguely follows that of
     // [wikipedia](http://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method).
     // I use the Polak-Ribiere method, with automatic direction reset.
     // Note that we could save some memory by using Fletcher-Reeves, and
     // it seems worth implementing that as an option for
     // memory-constrained problems (then we wouldn't need to store oldgrad).
-    beta = pg.dot(g - oldgrad)/oldgradsqr;
-    oldgrad = g;
+    pgrad(); // compute pgrad first, since that computes both.
+    beta = -pgrad().dot(-grad() - oldgrad)/oldgradsqr;
+    oldgrad = -grad();
     if (beta < 0 || beta != beta || oldgradsqr == 0) beta = 0;
     if (verbose) printf("beta = %g\n", beta);
-    oldgradsqr = pg.dot(oldgrad);
-    direction = pg + beta*direction;
+    oldgradsqr = -pgrad().dot(oldgrad);
+    direction = -pgrad() + beta*direction;
+    // Let's immediately free the cached gradient stored internally!
+    invalidate_cache();
   } // free g and pg!
 
   const double gdotd = oldgrad.dot(direction);
