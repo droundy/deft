@@ -41,7 +41,6 @@ check_PROGRAMS = \
 	tests/print-iter.test \
 	tests/memory.test \
 	tests/ideal-gas.test \
-	tests/hard-spheres-fast.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
 	tests/hard-spheres.test \
@@ -67,7 +66,6 @@ tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(G
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CODE)
-tests_hard_spheres_fast_test_SOURCES = tests/hard-spheres-fast.cpp $(ALL_CODE)
 tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(ALL_CODE)
 tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(ALL_CODE)
 tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(ALL_CODE)
