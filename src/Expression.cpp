@@ -102,22 +102,27 @@ Expression Expression::method(const char *n, const Expression &a, const Expressi
 }
 
 Expression abs(const Expression &x) {
-  if (x.type == "double") return funexpr("fabs", x).set_type("double");
+  if (x.typeIs("double")) return funexpr("fabs", x).set_type("double");
   return x.cwisemethod("abs");
 }
 
 Expression log(const Expression &x) {
-  if (x.type == "double") return funexpr("log", x).set_type("double");
+  if (x.typeIs("double")) return funexpr("log", x).set_type("double");
   return x.cwisemethod("log");
 }
 
 Expression exp(const Expression &x) {
-  if (x.type == "double") return funexpr("exp", x).set_type("double");
+  if (x.typeIs("double")) return funexpr("exp", x).set_type("double");
   return x.cwisemethod("exp");
 }
 
+Expression sqrt(const Expression &x) {
+  if (x.typeIs("double")) return funexpr("sqrt", x).set_type("double");
+  return x.cwisemethod("sqrt");
+}
+
 Expression sqr(const Expression &x) {
-  if (x.type == "double") return x*x;
+  if (x.typeIs("double")) return x*x;
   return x.cwisemethod("square");
 }
 
@@ -141,7 +146,7 @@ Expression Expression::operator()(const Expression &e, const Expression &f) cons
 }
 
 Expression Expression::set_alias(std::string a) {
-  if (kind == "constant" && a != "literal") {
+  if (kindIs("constant") && a != "literal") {
     kind = "variable";
     name = a;
   }
@@ -151,7 +156,7 @@ Expression Expression::set_alias(std::string a) {
 
 Expression Expression::cwise() const {
   if (iscwise()) return *this;
-  if (type == "double") return *this;
+  if (typeIs("double")) return *this;
   if (name == ".cwise(") return *this;
   return method("cwise");
 }
@@ -161,48 +166,48 @@ Expression Expression::cwisemethod(const char *m) const {
 }
 
 bool Expression::iscwise() const {
-  return name == ".cwise(" || type == "double";
+  return name == ".cwise(" || typeIs("double");
 }
 
 Expression grid_ones = Expression("VectorXd::Ones(gd.NxNyNz)");
 Expression recip_ones = Expression("VectorXcd::Ones(gd.NxNyNzOver2)").set_type("ReciprocalGrid");
 
 Expression Expression::operator+(const Expression &e) const {
-  if (kind == "constant" && value == 0) {
+  if (kindIs("constant") && value == 0) {
     return e;
-  } else if (e.kind == "constant" && e.value == 0) {
+  } else if (e.kindIs("constant") && e.value == 0) {
     return *this;
-  } else if (e.kind == "constant" && kind == "constant") {
+  } else if (e.kindIs("constant") && kindIs("constant")) {
     return Expression(value+e.value);
   }
   Expression thispost(*this), epost(e);
   Expression thispre = thispost.ScalarFactor(), epre = epost.ScalarFactor();
-  if (thispost.kind == "linear function" && epost.kind == "linear function" &&
+  if (thispost.kindIs("linear function") && epost.kindIs("linear function") &&
       thispost.name == epost.name) {
     if (thispre == epre) {
-      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 + *epost.arg1);
+      Expression out = linearfunexprgd("oops", thispost.type, *thispost.arg1 + *epost.arg1);
       out.name = thispost.name;
       return epre*out;
     }
     if (thispre == -epre && thispre != Expression(1)) {
-      Expression out = linearfunexprgd("oops", thispost.type.c_str(), *thispost.arg1 - *epost.arg1);
+      Expression out = linearfunexprgd("oops", thispost.type, *thispost.arg1 - *epost.arg1);
       out.name = thispost.name;
       return thispre*out;
     }
-    Expression out = linearfunexprgd("oops", thispost.type.c_str(),
+    Expression out = linearfunexprgd("oops", thispost.type,
                                      thispre * *thispost.arg1 + epre * *epost.arg1);
     out.name = thispost.name;
     return out;
   }
   Expression out;
-  if (type == "ReciprocalGrid") {
-    assert(e.type != "Grid");
+  if (typeIs("ReciprocalGrid")) {
+    assert(!e.typeIs("Grid"));
     out.type = "ReciprocalGrid";
-  } else if (type == "Grid") {
-    assert(e.type != "ReciprocalGrid");
-  } else if (e.type == "double") {
+  } else if (typeIs("Grid")) {
+    assert(!e.typeIs("ReciprocalGrid"));
+  } else if (e.typeIs("double")) {
     out.type = "double";
-  } else if (e.type == "ReciprocalGrid") {
+  } else if (e.typeIs("ReciprocalGrid")) {
     out.type = "ReciprocalGrid";
   }
   out.name = "+";
@@ -218,19 +223,19 @@ Expression Expression::operator-(const Expression &e) const {
 
 Expression Expression::operator-() const {
   // checkWellFormed();
-  if (kind == "constant") {
+  if (kindIs("constant")) {
     return -value;
-  } else if (kind == "*/" && name == "*" && arg1->kind == "constant") {
+  } else if (kindIs("*/") && name == "*" && arg1->kindIs("constant")) {
     return (-arg1->value) * *arg2;
-  } else if (kind == "*/" && name == "/" && arg1->kind == "constant") {
+  } else if (kindIs("*/") && name == "/" && arg1->kindIs("constant")) {
     return (-arg1->value) / *arg2;
-  } else if (kind == "*/" && name == "*" && arg2->kind == "constant") {
+  } else if (kindIs("*/") && name == "*" && arg2->kindIs("constant")) {
     return *arg1 * (-arg2->value);
-  } else if (kind == "*/" && name == "/" && arg2->kind == "constant") {
+  } else if (kindIs("*/") && name == "/" && arg2->kindIs("constant")) {
     return *arg1 / (-arg2->value);
-  //} else if (kind == "+-" && name == "+") {
+  //} else if (kindIs("+-") && name == "+") {
   //  return (-*arg1) + (-*arg2);
-  } else if (kind == "unary" && name == "-") {
+  } else if (kindIs("unary") && name == "-") {
     return *arg1;
   }
   Expression out;
@@ -245,31 +250,31 @@ Expression Expression::operator-() const {
 Expression Expression::operator*(const Expression &e) const {
   // checkWellFormed();
   // e.checkWellFormed();
-  if (kind == "constant" && e.kind == "constant") {
+  if (kindIs("constant") && e.kindIs("constant")) {
     return Expression(value*e.value);
-  } else if (e.kind == "constant") {
+  } else if (e.kindIs("constant")) {
     // prefer to have scalar on left.
     return e*(*this);
   }
   // First, let's make a few optimizations...
-  if (kind == "constant" && value == 1) {
+  if (kindIs("constant") && value == 1) {
     return e;
-  } else if (kind == "constant" && value == -1) {
+  } else if (kindIs("constant") && value == -1) {
     return -e;
-  } else if (kind == "constant" && value == 0) {
+  } else if (kindIs("constant") && value == 0) {
     return *this;
-  } else if (e.kind == "unary" && e.name == "-") {
+  } else if (e.kindIs("unary") && e.name == "-") {
     return - (*this * *e.arg1);
   }
   Expression out;
-  if (e.type == "ReciprocalGrid") {
-    assert(type != "Grid");
+  if (e.typeIs("ReciprocalGrid")) {
+    assert(!typeIs("Grid"));
     out.type = "ReciprocalGrid";
-  } else if (type == "ReciprocalGrid") {
+  } else if (typeIs("ReciprocalGrid")) {
     out.type = "ReciprocalGrid";
-  } else if (e.type == "Grid") {
-    assert(e.type != "ReciprocalGrid");
-  } else if (e.type == "double" && type == "double") {
+  } else if (e.typeIs("Grid")) {
+    assert(!e.typeIs("ReciprocalGrid"));
+  } else if (e.typeIs("double") && typeIs("double")) {
     out.type = "double";
   }
   out.name = "*";
@@ -281,33 +286,33 @@ Expression Expression::operator*(const Expression &e) const {
 
 Expression Expression::operator/(const Expression &e) const {
   // First, let's make a few optimizations...
-  if (kind == "constant" && value == 0) {
+  if (kindIs("constant") && value == 0) {
     return *this;
-  } else if (e.kind == "constant" && e.value == 1) {
+  } else if (e.kindIs("constant") && e.value == 1) {
     return *this;
-  } else if (e.kind == "constant" && e.value == -1) {
+  } else if (e.kindIs("constant") && e.value == -1) {
     return - *this;
-  } else if (e.kind == "constant" && kind == "constant") {
+  } else if (e.kindIs("constant") && kindIs("constant")) {
     return Expression(value/e.value);
-  } else if (e.kind == "*/" && e.name == "/") {
+  } else if (e.kindIs("*/") && e.name == "/") {
     return *this * *e.arg2 / *e.arg1; // inverse of inverse
   }
   //Expression postfactor = e;
   //Expression prefactor = postfactor.ScalarFactor();
-  //if (postfactor.kind == "*/" && postfactor.name == "/") {
+  //if (postfactor.kindIs("*/") && postfactor.name == "/") {
   //  return (*this / prefactor) * *postfactor.arg2 / *postfactor.arg1;
   //}
   Expression out;
-  if (type == "ReciprocalGrid") {
-    assert(e.type != "Grid");
+  if (typeIs("ReciprocalGrid")) {
+    assert(!e.typeIs("Grid"));
     out.type = "ReciprocalGrid";
-  } else if (type == "Grid") {
-    assert(e.type != "ReciprocalGrid");
-  } else if (type == "ReciprocalGrid") {
+  } else if (typeIs("Grid")) {
+    assert(!e.typeIs("ReciprocalGrid"));
+  } else if (typeIs("ReciprocalGrid")) {
     out.type = "ReciprocalGrid";
-  } else if (e.type == "double" && type == "double") {
+  } else if (e.typeIs("double") && typeIs("double")) {
     out.type = "double";
-  } else if (e.type == "ReciprocalGrid") {
+  } else if (e.typeIs("ReciprocalGrid")) {
     out.type = "ReciprocalGrid";
   }
   out.name = "/";
@@ -318,33 +323,33 @@ Expression Expression::operator/(const Expression &e) const {
 }
 
 Expression Expression::ScalarFactor() {
-  if (kind == "constant") {
+  if (kindIs("constant")) {
     Expression out(value);
     value = 1;
     return out;
   }
-  if (type == "double") {
+  if (typeIs("double")) {
     // If we have type "double" then we *are* a scalar!
     Expression out(*this);
     *this = Expression(1);
     return out;
   }
-  if (kind == "*/" && name == "*") {
+  if (kindIs("*/") && name == "*") {
     Expression sf1 = arg1->ScalarFactor();
     Expression sf2 = arg2->ScalarFactor();
     *this = *arg1 * *arg2; // to handle cases where arg1 or arg2 becomes 1.
     return sf1*sf2;
   }
-  if (kind == "*/" && name == "/") {
+  if (kindIs("*/") && name == "/") {
     Expression sf1 = arg1->ScalarFactor();
     Expression sf2 = arg2->ScalarFactor();
     *this = *arg1 / *arg2; // to handle cases where arg1 or arg2 becomes 1.
     return sf1/sf2;
   }
-  if (kind == "linear function") {
+  if (kindIs("linear function")) {
     return arg1->ScalarFactor();
   }
-  if (kind == "unary" && name == "-") {
+  if (kindIs("unary") && name == "-") {
     Expression postfactor = *arg1;
     Expression prefactor = postfactor.ScalarFactor();
     *this = postfactor;
@@ -379,7 +384,7 @@ Expression funexpr(const char *n, const Expression &arg, const Expression &a2, c
 }
 
 Expression linearfunexprgd(const char *n, const char *type, const Expression &arg) {
-  if (arg.kind == "constant" && arg.value == 0)
+  if (arg.kindIs("constant") && arg.value == 0)
     return Expression(0); // Nice optimization!  :)
   Expression newarg(arg);
   Expression prefactor = newarg.ScalarFactor();
@@ -393,8 +398,8 @@ Expression linearfunexprgd(const char *n, const char *type, const Expression &ar
 }
 
 Expression fft(const Expression &g) {
-  if (g.type != "Grid") {
-    if (g.type == "double") {
+  if (!g.typeIs("Grid")) {
+    if (g.typeIs("double")) {
       // The fft of a constant is a delta function in G space!
       printf("fft: Expression should have type Grid, but accepting double anyhow.\n");
       // FIXME: W shouldn't need to do an actual FFT here!
@@ -407,48 +412,48 @@ Expression fft(const Expression &g) {
 }
 
 Expression ifft(const Expression &g) {
-  if (g.type != "ReciprocalGrid") {
+  if (!g.typeIs("ReciprocalGrid")) {
     printf("ifft: Expression '%s' should have type ReciprocalGrid but instead has type '%s'.\n",
-           g.printme().c_str(), g.type.c_str());
+           g.printme().c_str(), g.type);
     exit(1);
   }
   return linearfunexprgd("ifft", "Grid", g);
 }
 
 std::string Expression::printme() const {
-  if (kind == "+-") {
+  if (kindIs("+-")) {
     // Addition and subtraction
     std::string a1 = arg1->printme();
     std::string a2 = arg2->printme();
-    if (arg1->type == "double" && arg2->type == "Grid")
+    if (arg1->typeIs("double") && arg2->typeIs("Grid"))
       a1 = (*arg1 * grid_ones).printme();
-    if (arg1->type == "double" && arg2->type == "ReciprocalGrid")
+    if (arg1->typeIs("double") && arg2->typeIs("ReciprocalGrid"))
       a1 = (*arg1 * recip_ones).printme();
-    if (arg2->type == "double" && arg1->type == "Grid")
+    if (arg2->typeIs("double") && arg1->typeIs("Grid"))
       a2 = (*arg2 * grid_ones).printme();
-    if (arg2->type == "double" && arg1->type == "ReciprocalGrid")
+    if (arg2->typeIs("double") && arg1->typeIs("ReciprocalGrid"))
       a2 = (*arg2 * recip_ones).printme();
-    if (arg2->kind == "+-") a2 = "(" + a2 + ")";
+    if (arg2->kindIs("+-")) a2 = "(" + a2 + ")";
     return a1 + " " + name + " " + a2;
-  } else if (kind == "*/") {
+  } else if (kindIs("*/")) {
     // Multiplication and division
     Expression myarg1 = *arg1;
-    if (myarg1.type == "double" && arg2->type == "Grid" && name == "/")
+    if (myarg1.typeIs("double") && arg2->typeIs("Grid") && name == "/")
       myarg1 = myarg1*grid_ones;
-    if (myarg1.type == "double" && arg2->type == "ReciprocalGrid" && name == "/")
+    if (myarg1.typeIs("double") && arg2->typeIs("ReciprocalGrid") && name == "/")
       myarg1 = myarg1*recip_ones;
-    if (arg2->type != "double" && !myarg1.iscwise()) myarg1 = myarg1.cwise();
+    if (!arg2->typeIs("double") && !myarg1.iscwise()) myarg1 = myarg1.cwise();
     std::string a1 = myarg1.printme();
-    if (myarg1.kind == "+-") a1 = "(" + a1 + ")";
+    if (myarg1.kindIs("+-")) a1 = "(" + a1 + ")";
     std::string a2 = arg2->printme() ;
-    if (arg2->kind == "+-" || arg2->kind == "*/") a2 = "(" + a2 + ")";
+    if (arg2->kindIs("+-") || arg2->kindIs("*/")) a2 = "(" + a2 + ")";
     return a1 + name + a2;
-  } else if (kind == "unary" && name == "-") {
+  } else if (kindIs("unary") && name == "-") {
     // Unary negation
     std::string arg = arg1->printme();
-    if (arg1->kind == "+-" || arg1->kind == "*/") arg = "(" + arg + ")";
+    if (arg1->kindIs("+-") || arg1->kindIs("*/")) arg = "(" + arg + ")";
     return "-" + arg;
-  } else if (kind == "function" || kind == "linear function") {
+  } else if (kindIs("function") || kindIs("linear function")) {
     // Function calls
     std::string out = name;
     if (arg1) {
@@ -460,9 +465,9 @@ std::string Expression::printme() const {
     }
     out += ")";
     return out;
-  } else if (kind == "method") {
+  } else if (kindIs("method")) {
     std::string out = arg1->printme();
-    if (arg1->kind == "+-" || arg1->kind == "*/" || arg1->kind == "unary") out = "(" + out + ")";
+    if (arg1->kindIs("+-") || arg1->kindIs("*/") || arg1->kindIs("unary")) out = "(" + out + ")";
     out += name;
     if (arg2) {
       out += arg2->printme();
@@ -470,7 +475,7 @@ std::string Expression::printme() const {
     }
     out += ")";
     return out;
-  } else if (kind == "constant" && alias != "" && alias != "literal") {
+  } else if (kindIs("constant") && alias != "" && alias != "literal") {
     return alias + "xxx";
   }
   return name;
@@ -478,25 +483,25 @@ std::string Expression::printme() const {
 
 int Expression::checkWellFormed() const {
   int retval = 0;
-  if (kind == "+-") {
-    if ((arg1->type != type && arg1->type != "double") ||
-        (arg2->type != type && arg2->type != "double")) {
+  if (kindIs("+-")) {
+    if ((!arg1->typeIs(type) && !arg1->typeIs("double")) ||
+        (!arg2->typeIs(type) && !arg2->typeIs("double"))) {
       printf("Types don't match on addition!\n");
       retval++;
     }
-  } else if (kind == "*/") {
-    if (arg1->type != type && arg1->type != "double") {
+  } else if (kindIs("*/")) {
+    if (!arg1->typeIs(type) && !arg1->typeIs("double")) {
       printf("Types don't match on multiplication!\n");
       retval++;
     }
-    if (arg2->type != type && arg2->type != "double") {
+    if (!arg2->typeIs(type) && !arg2->typeIs("double")) {
       printf("Types don't match on multiplication!\n");
       retval++;
     }
-  } else if (kind == "unary" && name == "-") {
+  } else if (kindIs("unary") && name == "-") {
     if (arg1->type != type) {
       printf("Types don't match on unary minus: %s\n", printme().c_str());
-      printf("Type of %s is %s\n", arg1->printme().c_str(), arg1->type.c_str());
+      printf("Type of %s is %s\n", arg1->printme().c_str(), arg1->type);
       printf("\n\n");
       retval++;
     }
@@ -509,7 +514,7 @@ int Expression::checkWellFormed() const {
 
 void Expression::multiplyOut() {
   //if (!IsUnlazy()) return;
-  if (kind == "+-") {
+  if (kindIs("+-")) {
     arg1->multiplyOut();
     arg2->multiplyOut();
   } else {
@@ -518,7 +523,7 @@ void Expression::multiplyOut() {
 }
 
 void Expression::multiplyOutHelper() {
-  if (kind == "*/" && name == "*") {
+  if (kindIs("*/") && name == "*") {
     arg1->multiplyOutHelper();
     arg2->multiplyOutHelper();
     if (arg1->name == "+") {
@@ -529,17 +534,17 @@ void Expression::multiplyOutHelper() {
       multiplyOut();
     }
     return;
-  } else if (name == "-" && kind == "unary") {
+  } else if (name == "-" && kindIs("unary")) {
     arg1->multiplyOutHelper();
     if (arg1->name == "+") {
       *this = (- *arg1->arg1) + (- *arg1->arg2);
       multiplyOut();
     }
-  } else if (kind == "linearfunexprgd") {
+  } else if (kindIs("linearfunexprgd")) {
     arg1->multiplyOutHelper();
     if (arg1->name == "+") {
-      *this = linearfunexprgd(name.c_str(), type.c_str(), *arg1->arg1)
-        + linearfunexprgd(name.c_str(), type.c_str(), *arg1->arg2);
+      *this = linearfunexprgd(name.c_str(), type, *arg1->arg1)
+        + linearfunexprgd(name.c_str(), type, *arg1->arg2);
       multiplyOut();
     }
   }
@@ -552,19 +557,19 @@ Expression Expression::simplify() const {
     return prefactor * postfactor.simplify();
   }
   if (name == "*" && arg2->name == "*") {
-    if (arg2->arg1->kind == "constant")
+    if (arg2->arg1->kindIs("constant"))
       return (*arg2->arg1 * *arg1 * *arg2->arg2).simplify();
-    if (arg2->arg2->kind == "constant")
+    if (arg2->arg2->kindIs("constant"))
       return (*arg2->arg2 * *arg1 * *arg2->arg1).simplify();
     return (*arg1 * *arg2->arg1 * *arg2->arg2).simplify();
   }
-  if (kind == "unary" && name == "-") {
+  if (kindIs("unary") && name == "-") {
     Expression minusthis = arg1->simplify();
-    if (minusthis.kind == "*/" && minusthis.arg1->kind == "constant") {
+    if (minusthis.kindIs("*/") && minusthis.arg1->kindIs("constant")) {
       minusthis.arg1 = new Expression(-minusthis.arg1->value);
       return minusthis;
     }
-    if (minusthis.kind == "*/" && minusthis.arg1->kind == "*/" && minusthis.arg1->arg1->kind == "constant") {
+    if (minusthis.kindIs("*/") && minusthis.arg1->kindIs("*/") && minusthis.arg1->arg1->kindIs("constant")) {
       minusthis.arg1->arg1 = new Expression(-minusthis.arg1->arg1->value);
       return minusthis;
     }
@@ -584,7 +589,7 @@ Expression Expression::simplify() const {
 std::set<std::string> Expression::top_level_vars(std::set<std::string> *allvars) {
   std::set<std::string> out;
   //printf("Looking for toplevel vars in %s\n", alias.c_str());
-  if (kind == "+-" && name == "+") {
+  if (kindIs("+-") && name == "+") {
     std::set<std::string> out1 = arg1->top_level_vars(allvars);
     for (std::set<std::string>::iterator i = out1.begin(); i != out1.end(); ++i) {
       //printf("First side has %s\n", i->c_str());
@@ -671,7 +676,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
   while (s != e) {
     std::string a = s.alias + "_v";
     if (a == "_v") {
-      if (s.type == "ReciprocalGrid") a = "recip";
+      if (s.typeIs("ReciprocalGrid")) a = "recip";
       else a = "var";
     }
     if (allvars->count(a)) {
@@ -688,8 +693,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     }
     //fprintf(o, "    %s *%s_ptr = new %s(%s);\n", s.ctype(), a.c_str(), s.ctype(), s.printme().c_str());
     //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
-    if (s.type == "Grid") gridvars.insert(a);
-    if (s.type == "ReciprocalGrid") recipvars.insert(a);
+    if (s.typeIs("Grid")) gridvars.insert(a);
+    if (s.typeIs("ReciprocalGrid")) recipvars.insert(a);
     myvars->insert(a);
     allvars->insert(a);
     while (e.EliminateThisSubexpression(s, a));
@@ -713,8 +718,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
       for (std::set<std::string>::iterator i = gridvars.begin(); i != gridvars.end(); ++i) {
         Expression easy = EasyParentOfThisSubexpression(Expression(*i), important);
         if (easy != Expression(*i)) {
-          if (easy.type != "Grid") easy = EasyParentOfThisSubexpression(easy, important);
-          if (easy.type == "Grid") {
+          if (!easy.typeIs("Grid")) easy = EasyParentOfThisSubexpression(easy, important);
+          if (easy.typeIs("Grid")) {
             //printf("I am reusing Grid variable %s!!!\n", i->c_str());
             Expression unique("THIS IS A UNIQUE NAME");
             unique.alias = easy.alias;
@@ -734,8 +739,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
         Expression expi = Expression(*i).set_type("ReciprocalGrid");
         Expression easy = EasyParentOfThisSubexpression(expi, important);
         if (easy != expi) {
-          if (easy.type != "ReciprocalGrid") easy = EasyParentOfThisSubexpression(easy, important);
-          if (easy.type == "ReciprocalGrid") {
+          if (!easy.typeIs("ReciprocalGrid")) easy = EasyParentOfThisSubexpression(easy, important);
+          if (easy.typeIs("ReciprocalGrid")) {
             //printf("I am reusing ReciprocalGrid variable %s!!!\n", i->c_str());
             Expression unique("THIS IS A UNIQUE NAME");
             unique.alias = easy.alias;

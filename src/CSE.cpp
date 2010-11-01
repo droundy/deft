@@ -107,7 +107,7 @@ int Expression::CountThisSubexpression(const Expression &c) const {
 }
 
 bool Expression::FindVariable(const std::string n) const {
-  if (name == n && kind == "variable") {
+  if (name == n && kindIs("variable")) {
     return true;
   } else {
     if (arg1 && arg1->FindVariable(n)) return true;
@@ -179,7 +179,7 @@ bool Expression::IsUnlazyApartFrom(const Expression &c, std::set<std::string> im
 Expression Expression::EasyParentOfThisSubexpression(const Expression &e, std::set<std::string> important) const {
   const int ncount = CountThisSubexpression(e);
   if (ncount == 0 || e == *this) return e;
-  if (!unlazy && (type == e.type || e.kind != "variable")) {
+  if (!unlazy && (typeIs(e.type) || !e.kindIs("variable"))) {
     bool unlazychildren = false;
     if (arg1 && arg1->IsUnlazyApartFrom(e, important)) {
       //printf("My child %s is unlazy.\n", arg1->printme().c_str());

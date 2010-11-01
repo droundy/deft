@@ -4,6 +4,7 @@
 
 #include <string>
 #include <set>
+#include <string.h>
 
 class Expression {
 public:
@@ -15,9 +16,11 @@ public:
   ~Expression() {
     delete arg1;
     delete arg2;
+    delete arg3;
   }
 
-  std::string name, alias, kind, type;
+  std::string name, alias;
+  const char *kind, *type;
   Expression *arg1, *arg2, *arg3;
   double value;
   bool unlazy;
@@ -25,9 +28,15 @@ public:
     type = t;
     return *this;
   }
+  bool kindIs(const char *k) const {
+    return strcmp(kind, k) == 0;
+  }
+  bool typeIs(const char *t) const {
+    return strcmp(type, t) == 0;
+  }
   const char *ctype() const {
-    if (type == "double") return "double";
-    if (type == "ReciprocalGrid") return "VectorXcd";
+    if (strcmp(type, "double") == 0) return "double";
+    if (strcmp(type, "ReciprocalGrid") == 0) return "VectorXcd";
     return "VectorXd";
   }
 
@@ -114,3 +123,4 @@ Expression abs(const Expression &);
 Expression log(const Expression &);
 Expression exp(const Expression &);
 Expression sqr(const Expression &);
+Expression sqrt(const Expression &);

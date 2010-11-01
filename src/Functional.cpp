@@ -127,7 +127,7 @@ void Functional::create_source(const std::string filename, const std::string cla
       continue;
     }
     char *buf = new char[300];
-    if (thisguy.type == "double")
+    if (thisguy.typeIs("double"))
       snprintf(buf, 300, "    %s = %%s*gd.Lat.volume();\n", i->c_str());
     else
       snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
@@ -181,7 +181,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
   Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
   Expression epg = eg * Expression("invcurvature");
-  if (curvature.type == "double") fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
+  if (curvature.typeIs("double")) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
     fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
@@ -201,7 +201,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   fprintf(o, "    if (outpgrad) {\n");
-  if (curvature.type == "double") {
+  if (curvature.typeIs("double")) {
     std::set<std::string> allvars, myvars;
     eg.generate_code(o, "    (*outgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
     eg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
