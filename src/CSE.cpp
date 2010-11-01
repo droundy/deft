@@ -22,9 +22,11 @@
 #include <stdlib.h>
 
 bool Expression::operator==(const Expression &e) const {
-  if (type != e.type) return false;
+  if (type != e.type) return false; // pointer comparison for speed!
+  if (kind != e.kind) return false; // pointer comparison for speed!
+  //if (!typeIs(e.type)) return false;
+  //if (!kindIs(e.kind)) return false;
   if (name != e.name) return false;
-  if (kind != e.kind) return false;
   if (arg3) return *arg1 == *e.arg1 && *arg2 == *e.arg2 && *arg3 == *e.arg3;
   if (arg2) return *arg1 == *e.arg1 && *arg2 == *e.arg2;
   if (arg1) return *arg1 == *e.arg1;
@@ -32,7 +34,7 @@ bool Expression::operator==(const Expression &e) const {
 }
 
 bool Expression::EliminateThisDouble(const Expression &c, const std::string name) {
-  if (c.type == type) {
+  if (c.typeIs(type)) {
     // If the type is right, then it's possible that we *are* the subexpression.
     // First check if we are the same as the subexpression we're trying to eliminate.
     if (c == *this) {
@@ -52,20 +54,20 @@ bool Expression::EliminateThisDouble(const Expression &c, const std::string name
   }
   // Try to recursively eliminate this subexpression in our children.
   bool changed = false;
-  if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
-  if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
-  if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
+  if (arg1) changed = changed || arg1->EliminateThisDouble(c, name);
+  if (arg2) changed = changed || arg2->EliminateThisDouble(c, name);
+  if (arg3) changed = changed || arg3->EliminateThisDouble(c, name);
   return changed;
 }
 
 bool Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
-  if (c.type == type) {
+  if (c.typeIs(type)) {
     // If the type is right, then it's possible that we *are* the subexpression.
-    Expression n(name);
-    n.type = c.type;
-    n.alias = c.alias;
     // First check if we are the same as the subexpression we're trying to eliminate.
     if (c == *this) {
+      Expression n(name);
+      n.type = c.type;
+      n.alias = c.alias;
       *this = n;
       return true;
     }
@@ -79,15 +81,15 @@ bool Expression::EliminateThisSubexpression(const Expression &c, const std::stri
   }
   // Try to recursively eliminate this subexpression in our children.
   bool changed = false;
-  if (arg1) changed = changed || arg1->EliminateThisSubexpression(c, name);
-  if (arg2) changed = changed || arg2->EliminateThisSubexpression(c, name);
-  if (arg3) changed = changed || arg3->EliminateThisSubexpression(c, name);
+  if (arg1) changed = arg1->EliminateThisSubexpression(c, name) || changed;
+  if (arg2) changed = arg2->EliminateThisSubexpression(c, name) || changed;
+  if (arg3) changed = arg3->EliminateThisSubexpression(c, name) || changed;
   return changed;
 }
 
 int Expression::CountThisSubexpression(const Expression &c) const {
   // First check if we are the same as the subexpression we're trying to eliminate.
-  if (c.type == type) {
+  if (typeIs(c.type)) {
     // If the type is right, then it's possible that we *are* the subexpression.
     Expression n(name);
     n.type = c.type;
@@ -155,6 +157,14 @@ int Expression::Depth() const {
     int d3 = 1 + arg3->Depth();
     if (d3 > depth) depth = d3;
   }
+  return depth;
+}
+
+int Expression::Size() const {
+  int depth = 1;
+  if (arg1) depth += arg1->Size();
+  if (arg2) depth += arg2->Size();
+  if (arg3) depth += arg3->Size();
   return depth;
 }
 

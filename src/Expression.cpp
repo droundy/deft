@@ -499,7 +499,7 @@ int Expression::checkWellFormed() const {
       retval++;
     }
   } else if (kindIs("unary") && name == "-") {
-    if (arg1->type != type) {
+    if (!arg1->typeIs(type)) {
       printf("Types don't match on unary minus: %s\n", printme().c_str());
       printf("Type of %s is %s\n", arg1->printme().c_str(), arg1->type);
       printf("\n\n");
