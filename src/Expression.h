@@ -62,7 +62,7 @@ public:
   // Modifies this expression in-place, and returns a declaration of
   // the common subexpression.
   std::string EliminateCommonSubexpression();
-  bool EliminateThisSubexpression(const Expression &, const std::string alias);
+  void EliminateThisSubexpression(const Expression &, const std::string alias);
   bool EliminateThisDouble(const Expression &, const std::string alias);
   Expression EasyParentOfThisSubexpression(const Expression &, std::set<std::string> important) const;
   bool FindVariable(const std::string n) const;

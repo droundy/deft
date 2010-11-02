@@ -697,8 +697,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     if (s.typeIs("ReciprocalGrid")) recipvars.insert(a);
     myvars->insert(a);
     allvars->insert(a);
-    while (e.EliminateThisSubexpression(s, a));
-    while (EliminateThisSubexpression(s, a));
+    e.EliminateThisSubexpression(s, a);
+    EliminateThisSubexpression(s, a);
     fprintf(o, "    %s %s = %s;\n", s.ctype(), a.c_str(), s.printme().c_str());
     fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
     //fprintf(o, "    // expr = %s\n", e.printme().c_str());
@@ -721,12 +721,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
           if (!easy.typeIs("Grid")) easy = EasyParentOfThisSubexpression(easy, important);
           if (easy.typeIs("Grid")) {
             //printf("I am reusing Grid variable %s!!!\n", i->c_str());
-            Expression unique("THIS IS A UNIQUE NAME");
-            unique.alias = easy.alias;
-            while (e.EliminateThisSubexpression(easy, unique.name));
-            while (e.EliminateThisSubexpression(unique, *i));
-            while (EliminateThisSubexpression(easy, unique.name));
-            while (EliminateThisSubexpression(unique, *i));
+            e.EliminateThisSubexpression(easy, *i);
+            EliminateThisSubexpression(easy, *i);
             fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
             fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
             //fprintf(o, "    // expr = %s\n", e.printme().c_str());
@@ -742,13 +738,8 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
           if (!easy.typeIs("ReciprocalGrid")) easy = EasyParentOfThisSubexpression(easy, important);
           if (easy.typeIs("ReciprocalGrid")) {
             //printf("I am reusing ReciprocalGrid variable %s!!!\n", i->c_str());
-            Expression unique("THIS IS A UNIQUE NAME");
-            unique.alias = easy.alias;
-            unique.type = "ReciprocalGrid";
-            while (e.EliminateThisSubexpression(easy, unique.name));
-            while (e.EliminateThisSubexpression(unique, *i));
-            while (EliminateThisSubexpression(easy, unique.name));
-            while (EliminateThisSubexpression(unique, *i));
+            e.EliminateThisSubexpression(easy, *i);
+            EliminateThisSubexpression(easy, *i);
             fprintf(o, "    %s = %s; // We can reuse this variable\n", i->c_str(), easy.printme().c_str());
             fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
             //fprintf(o, "    // expr = %s\n", e.printme().c_str());
