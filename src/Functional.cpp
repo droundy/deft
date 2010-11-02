@@ -115,29 +115,31 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a3) allvars.insert(a3);
   Expression myself = printme(Expression("x"));
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
-  std::set<std::string> myvars;
-  for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
-    fprintf(o, "    // examining %s\n", i->c_str());
-    Expression thisguy = myself.FindNamedSubexpression(*i);
-    //fprintf(o, "    // It actually has expression %s\n", thisguy.printme().c_str());
-    if (thisguy.alias != *i) {
-      printf("I am erasing variable %s\n", i->c_str());
-      printf("It actually has alias %s\n", thisguy.alias.c_str());
-      toplevel.erase(i);
-      continue;
+  {
+    std::set<std::string> myvars;
+    for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
+      fprintf(o, "    // examining %s\n", i->c_str());
+      Expression thisguy = myself.FindNamedSubexpression(*i);
+      //fprintf(o, "    // It actually has expression %s\n", thisguy.printme().c_str());
+      if (thisguy.alias != *i) {
+        printf("I am erasing variable %s\n", i->c_str());
+        printf("It actually has alias %s\n", thisguy.alias.c_str());
+        toplevel.erase(i);
+        continue;
+      }
+      char *buf = new char[300];
+      if (thisguy.typeIs("double"))
+        snprintf(buf, 300, "    %s = %%s*gd.Lat.volume();\n", i->c_str());
+      else
+        snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
+      myself.generate_code(o, buf, *i, toplevel, &allvars, &myvars);
+      //fprintf(o, "    // Myself starts as %s\n", myself.printme().c_str());
+      //fprintf(o, "    // Substituting %s\n", thisguy.printme().c_str());
+      myself.EliminateThisDouble(myself.FindNamedSubexpression(*i), *i);
+      //fprintf(o, "    // Myself is now %s\n", myself.printme().c_str());
+      delete[] buf;
+      myself.generate_free_code(o, &myvars);
     }
-    char *buf = new char[300];
-    if (thisguy.typeIs("double"))
-      snprintf(buf, 300, "    %s = %%s*gd.Lat.volume();\n", i->c_str());
-    else
-      snprintf(buf, 300, "    %s = (%%s).sum()*gd.dvolume;\n", i->c_str());
-    myself.generate_code(o, buf, *i, toplevel, &allvars, &myvars);
-    //fprintf(o, "    // Myself starts as %s\n", myself.printme().c_str());
-    //fprintf(o, "    // Substituting %s\n", thisguy.printme().c_str());
-    myself.EliminateThisDouble(myself.FindNamedSubexpression(*i), *i);
-    //fprintf(o, "    // Myself is now %s\n", myself.printme().c_str());
-    delete[] buf;
-    myself.generate_free_code(o, &myvars);
   }
   //myself.method("sum").generate_code(o, "    return %s*gd.dvolume;\n", "", toplevel, &allvars, &myvars);
   {
@@ -202,9 +204,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   fprintf(o, "    if (outpgrad) {\n");
   if (curvature.typeIs("double")) {
-    std::set<std::string> allvars, myvars;
-    eg.generate_code(o, "    (*outgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
-    eg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
+    eg.generate_code(o, "    (*outgrad) += %s;\n    (*outpgrad) += %s;\n");
   } else {
     fprintf(o, "      assert(&gd); // to avoid an unused parameter error\n");
     fprintf(o, "      assert(&x); // to avoid an unused parameter error\n");
@@ -215,9 +215,8 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, "      invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
     fprintf(o, "      invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
     //fprintf(o, "      printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
-    eg.generate_code(o, "      (*outgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
-    eg.generate_code(o, "      (*outpgrad) += (%s).cwise() * invcurvature;\n", "",
-                     std::set<std::string>(), &allvars, &myvars);
+    eg.generate_code(o, "    (*outgrad) += %s;\n      (*outpgrad) += (%s).cwise() * invcurvature;\n",
+                     "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "    } else {\n");
   eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));

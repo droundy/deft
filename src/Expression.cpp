@@ -795,6 +795,15 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     //if (e.CountThisSubexpression(e.EasyParentOfThisSubexpression(s)) >= e.CountThisSubexpression(s))
     //  s = e.EasyParentOfThisSubexpression(s);
   }
-  fprintf(o, fmt, e.printme().c_str());
+  int numvars = 0;
+  for (int i=0; fmt[i]; i++) {
+    if (fmt[i] == '%') numvars++;
+  }
+  if (numvars == 1) fprintf(o, fmt, e.printme().c_str());
+  else if (numvars == 2) fprintf(o, fmt, e.printme().c_str(), e.printme().c_str());
+  else {
+    fprintf(o, "Looks like there is trouble here!\n");
+    fprintf(o, fmt, e.printme().c_str());
+  }
   fflush(o);
 }
