@@ -59,7 +59,7 @@ void Expression::EliminateThisDouble(const Expression &c, const std::string name
 }
 
 void Expression::EliminateThisSubexpression(const Expression &c, const std::string name) {
-  if (c.typeIs(type)) {
+  if (c.typeIs(type) && c.depth == depth) {
     // If the type is right, then it's possible that we *are* the subexpression.
     // First check if we are the same as the subexpression we're trying to eliminate.
     if (c.kindIs(kind) && c == *this) {
@@ -77,6 +77,7 @@ void Expression::EliminateThisSubexpression(const Expression &c, const std::stri
     //  return true;
     //}
   }
+  if (c.depth >= depth) return; // It can't be here!
   // Try to recursively eliminate this subexpression in our children.
   if (arg1) arg1->EliminateThisSubexpression(c, name);
   if (arg2) arg2->EliminateThisSubexpression(c, name);
