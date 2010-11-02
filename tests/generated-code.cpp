@@ -101,7 +101,7 @@ int main(int, char **argv) {
 
   compare_functionals(LogAndSqr(), log(x) + sqr(x), n, 3e-14);
 
-  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, n);
+  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, n, 3e-10);
 
   compare_functionals(LogOneMinusX(), log(1-x), n, 1e-12);
 
