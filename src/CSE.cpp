@@ -118,8 +118,8 @@ bool Expression::FindVariable(const std::string n) const {
 Expression Expression::FindCommonSubexpression() const {
   Expression cs;
   if (arg2) {
-    int d1 = arg1->Depth();
-    int d2 = arg2->Depth();
+    int d1 = arg1->depth;
+    int d2 = arg2->depth;
     if (d1 > d2) {
       cs = arg1->FindCommonSubexpression();
       if (cs.unlazy) return cs;
@@ -140,20 +140,6 @@ Expression Expression::FindCommonSubexpression() const {
     if (cs.unlazy) return cs;
   }
   return *this;
-}
-
-int Expression::Depth() const {
-  int depth = 1;
-  if (arg1) depth = 1 + arg1->Depth();
-  if (arg2) {
-    int d2 = 1 + arg2->Depth();
-    if (d2 > depth) depth = d2;
-  }
-  if (arg3) {
-    int d3 = 1 + arg3->Depth();
-    if (d3 > depth) depth = d3;
-  }
-  return depth;
 }
 
 int Expression::Size() const {

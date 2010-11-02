@@ -28,6 +28,7 @@ Expression::Expression() {
   type = "Grid";
   arg1 = arg2 = arg3 = 0;
   unlazy = false;
+  depth = 1;
 }
 
 Expression::Expression(const Expression &e) {
@@ -44,6 +45,7 @@ void Expression::operator=(const Expression &e) {
   kind = e.kind;
   type = e.type;
   unlazy = e.unlazy;
+  depth = e.depth;
   delete arg1;
   delete arg2;
   delete arg3;
@@ -64,6 +66,7 @@ Expression::Expression(std::string n) {
   type = "Grid";
   kind = "variable";
   unlazy = false;
+  depth = 1;
 }
 
 Expression::Expression(double c) {
@@ -78,6 +81,7 @@ Expression::Expression(double c) {
   value = c;
   if (c == -0) value = 0; // I don't want to bother with minus zero...
   unlazy = false;
+  depth = 1;
 }
 
 Expression Expression::method(const std::string n) const {
@@ -86,18 +90,21 @@ Expression Expression::method(const std::string n) const {
   out.name = "." + n + "(";
   out.arg1 = new Expression(*this);
   out.type = type; // default to methods not changing types
+  out.SetDepth();
   return out;
 }
 
 Expression Expression::method(const char *n, const Expression &a) const {
   Expression out = method(n);
   out.arg2 = new Expression(a);
+  out.SetDepth();
   return out;
 }
 
 Expression Expression::method(const char *n, const Expression &a, const Expression &b) const {
   Expression out = method(n, a);
   out.arg3 = new Expression(b);
+  out.SetDepth();
   return out;
 }
 
@@ -126,12 +133,24 @@ Expression sqr(const Expression &x) {
   return x.cwisemethod("square");
 }
 
+static inline int max(int a, int b) {
+  return (a>b) ? a : b;
+}
+
+void Expression::SetDepth() {
+  depth = 1;
+  if (arg1) depth = max(depth, 1 + arg1->depth);
+  if (arg2) depth = max(depth, 1 + arg2->depth);
+  if (arg3) depth = max(depth, 1 + arg3->depth);
+}
+
 Expression Expression::operator()(const Expression &e) const {
   Expression out;
   out.name = "(";
   out.kind = "method";
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
+  out.SetDepth();
   return out;
 }
 
@@ -142,6 +161,7 @@ Expression Expression::operator()(const Expression &e, const Expression &f) cons
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
   out.arg3 = new Expression(f);
+  out.SetDepth();
   return out;
 }
 
@@ -214,6 +234,7 @@ Expression Expression::operator+(const Expression &e) const {
   out.kind = "+-";
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
+  out.SetDepth();
   return out;
 }
 
@@ -243,6 +264,7 @@ Expression Expression::operator-() const {
   out.kind = "unary";
   out.type = type;
   out.arg1 = new Expression(*this);
+  out.SetDepth();
   // out.checkWellFormed();
   return out;
 }
@@ -281,6 +303,7 @@ Expression Expression::operator*(const Expression &e) const {
   out.kind = "*/";
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
+  out.SetDepth();
   return out;
 }
 
@@ -319,6 +342,7 @@ Expression Expression::operator/(const Expression &e) const {
   out.kind = "*/";
   out.arg1 = new Expression(*this);
   out.arg2 = new Expression(e);
+  out.SetDepth();
   return out;
 }
 
@@ -368,18 +392,21 @@ Expression funexpr(const char *n) {
 Expression funexpr(const char *n, const Expression &arg) {
   Expression out = funexpr(n);
   out.arg1 = new Expression(arg);
+  out.SetDepth();
   return out;
 }
 
 Expression funexpr(const char *n, const Expression &arg, const Expression &a2) {
   Expression out = funexpr(n, arg);
   out.arg2 = new Expression(a2);
+  out.SetDepth();
   return out;
 }
 
 Expression funexpr(const char *n, const Expression &arg, const Expression &a2, const Expression &a3) {
   Expression out = funexpr(n, arg, a2);
   out.arg3 = new Expression(a3);
+  out.SetDepth();
   return out;
 }
 
@@ -394,6 +421,7 @@ Expression linearfunexprgd(const char *n, const char *type, const Expression &ar
   out.name = std::string(n) + "(gd, ";
   out.unlazy = true;
   out.type = type;
+  out.SetDepth();
   return prefactor*out;
 }
 

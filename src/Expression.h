@@ -24,6 +24,8 @@ public:
   Expression *arg1, *arg2, *arg3;
   double value;
   bool unlazy;
+  int depth;
+  void SetDepth();
   Expression set_type(const char *t) {
     type = t;
     return *this;
@@ -70,7 +72,6 @@ public:
 
   Expression FindCommonSubexpression() const;
   int CountThisSubexpression(const Expression &) const;
-  int Depth() const;
   int Size() const;
   bool operator==(const Expression &) const;
   bool operator!=(const Expression &e) const {

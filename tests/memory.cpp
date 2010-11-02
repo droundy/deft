@@ -147,7 +147,7 @@ int main(int, char **argv) {
   check_a_functional("HardSpheres", ff, potential, 80, 10.5, 101, 70, 108, 70, 104, 70);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 104, 15, 111, 15, 108, 15);
+  check_a_functional("HardSphereFast", ff, potential, 62, 2.0, 90, 15, 97, 15, 94, 15);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereRF", ff, potential, 52, 3.5, 83, 17, 90, 17, 87, 17);
@@ -159,17 +159,17 @@ int main(int, char **argv) {
   check_a_functional("HardSphereTarazona", ff, potential, 83, 10.0, 104, 62.1, 111, 62, 108, 62);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 94, 10.2, 101, 10, 97, 10);
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 2.0, 87, 10.2, 94, 10, 90, 10);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 4.2, 87, 22, 94, 22, 90, 22);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   //check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 66, 5.0);
-  check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 80, 5.0, 87, 5, 83, 5);
+  check_a_functional("HardSphereNoTensor", ff, potential, 41, 1.2, 69, 5.0, 76, 5, 73, 5);
 
   ff = constrain(constraint, HardSphereGas(R, kT, mu));
-  check_a_functional("HardSphereGas", ff, potential, 62, 2.0, 97, 13.8, 108, 40.0, 101, 39.1);
+  check_a_functional("HardSphereGas", ff, potential, 62, 2.0, 83, 13.8, 94, 40.0, 87, 39.1);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
