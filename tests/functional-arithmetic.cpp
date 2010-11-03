@@ -98,6 +98,12 @@ int main(int, char **argv) {
   retval += test_functionals("exp(log(x))", exp(log(x)), x, 0.1, 1e-12);
   retval += test_functionals("exp(2*x)", exp(2*x), sqr(exp(x)), 0.1, 1e-12);
 
+  retval += test_functionals("sqrt(x)", sqrt(x), x/sqrt(x), 0.1, 1e-12);
+
+  retval += test_functionals("PowAndHalf(-1)", PowAndHalf(-1), Functional(1)/sqrt(x), 0.1, 1e-12);
+
+  retval += test_functionals("log(sqrt(x))", log(sqrt(x)), 0.5*log(x), 0.1, 1e-12);
+
   retval += test_functionals("sqr(log(x))*x", sqr(log(x))*x, Pow(2)(log(x))*x, 0.1, 1e-12);
   retval += test_functionals("sqr(log(x))*x no Pow", sqr(log(x))*x, (x*x)(log(x))*x, 0.1, 1e-12);
   retval += test_functionals("sqr(log(x))/x", sqr(log(x))/x, Pow(2)(log(x))/x, 0.1, 1e-12);

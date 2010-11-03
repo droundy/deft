@@ -26,6 +26,8 @@ int main(int, char **) {
   R.set_name("R");
   (kT + x).create_header("tests/generated/sum.h", "Sum", "kT");
   (sqr(kT + x) - x + 2*kT).create_header("tests/generated/quadratic.h", "Quadratic", "kT");
+  sqrt(x).create_header("tests/generated/sqrt.h", "Sqrt");
+  (sqrt(kT + x) - x + 2*kT).create_header("tests/generated/sqrt-and-more.h", "SqrtAndMore", "kT");
   log(x).create_header("tests/generated/log.h", "Log");
   (log(x)+sqr(x)).create_header("tests/generated/log-and-sqr.h", "LogAndSqr");
   (One + sqr(x) - Pow(3) + One/x).create_header("tests/generated/one-over-x.h", "OneOverX");

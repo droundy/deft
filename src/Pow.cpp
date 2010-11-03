@@ -128,7 +128,7 @@ public:
             VectorXd *outgrad, VectorXd *outpgrad) const {
     if (n > 0) {
       for (int i=0; i<gd.NxNyNz; i++) {
-        double foo = (n-0.5)*ingrad[i]/sqrt(data[i]);
+        double foo = (n+0.5)*ingrad[i]/sqrt(data[i]);
         for (int p=1; p < n; p++) foo *= data[i];
         (*outgrad)[i] += foo;
         if (outpgrad) (*outpgrad)[i] += foo;
@@ -137,7 +137,7 @@ public:
       for (int i=0; i<gd.NxNyNz; i++) {
         double di = data[i];
         double oodi = 1.0/di; // one over d_i
-        double foo = (n-0.5)*ingrad[i]/sqrt(di);
+        double foo = (n+0.5)*ingrad[i]/sqrt(di);
         for (int p=0; p > n; p--) foo *= oodi;
         (*outgrad)[i] += foo;
         if (outpgrad) (*outpgrad)[i] += foo;
@@ -150,7 +150,7 @@ public:
     } else if (n >= 0) {
       return Pow(n).printme(x)*sqrt(x);
     } else {
-      return sqrt(x) / PowAndHalf(-n).printme(x);
+      return sqrt(x) / Pow(-n).printme(x);
     }
   }
 private:
