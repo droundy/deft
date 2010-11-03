@@ -45,3 +45,4 @@ Functional yzShellConvolve(double radius);
 Functional zxShellConvolve(double radius);
 
 Functional Pow(int power);
+Functional PowAndHalf(int powerMinusHalf);

@@ -88,3 +88,79 @@ Functional Pow(int n) {
   assert(n > 0);
   return Functional(new PowType(n));
 }
+
+
+class PowAndHalfType : public FunctionalInterface {
+public:
+  PowAndHalfType(int nn) : n(nn) {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+    VectorXd out(data.cwise().sqrt());
+    if (n < 0) {
+      for (int p=0; p > n; p--) out = out.cwise() / data;
+    } else {
+      for (int p=0; p < n; p++) out = out.cwise() * data;
+    }
+    return out;
+  }
+  double transform(double x) const {
+    double out = sqrt(x);
+    if (n < 0) {
+      for (int p=0; p > n; p--) out /= x;
+    } else {
+      for (int p=0; p < n; p++) out *= x;
+    }
+    return out;
+  }
+  double derive(double x) const {
+    double out = (n+0.5)/sqrt(x);
+    if (n < 0) {
+      for (int p=0; p > n; p--) out /= x;
+    } else {
+      for (int p=0; p < n; p++) out *= x;
+    }
+    return out;
+  }
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
+    return PowAndHalf(n-1)(x)*(n+0.5)*ingrad;
+  }
+  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+            VectorXd *outgrad, VectorXd *outpgrad) const {
+    if (n > 0) {
+      for (int i=0; i<gd.NxNyNz; i++) {
+        double foo = (n-0.5)*ingrad[i]/sqrt(data[i]);
+        for (int p=1; p < n; p++) foo *= data[i];
+        (*outgrad)[i] += foo;
+        if (outpgrad) (*outpgrad)[i] += foo;
+      }
+    } else {
+      for (int i=0; i<gd.NxNyNz; i++) {
+        double di = data[i];
+        double oodi = 1.0/di; // one over d_i
+        double foo = (n-0.5)*ingrad[i]/sqrt(di);
+        for (int p=0; p > n; p--) foo *= oodi;
+        (*outgrad)[i] += foo;
+        if (outpgrad) (*outpgrad)[i] += foo;
+      }
+    }
+  }
+  Expression printme(const Expression &x) const {
+    if (n == 0) {
+      return sqrt(x);
+    } else if (n >= 0) {
+      return Pow(n).printme(x)*sqrt(x);
+    } else {
+      return sqrt(x) / PowAndHalf(-n).printme(x);
+    }
+  }
+private:
+  int n;
+};
+
+Functional PowAndHalf(int n) {
+  return Functional(new PowAndHalfType(n));
+}
+
+Functional sqrt(const Functional &f) {
+  return PowAndHalf(0)(f);
+}
