@@ -16,6 +16,9 @@ extern LiquidProperties water_prop;
 // converged value.  Or maybe just a second function to do that?
 double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose);
 
+double find_density(Functional f, double nmin, double nmax);
+double pressure(Functional f, double density);
+
 long peak_memory();
 long current_memory();
 void reset_peak_memory();

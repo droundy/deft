@@ -9,6 +9,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
+	src/equation-of-state.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
@@ -57,6 +58,7 @@ check_PROGRAMS = \
 	tests/ideal-gas-at-pressure.test \
 	tests/ideal-gas-optimization.test \
 	tests/ideal-gas-external-potential.test \
+	tests/eos.test \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
@@ -80,6 +82,7 @@ tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
+tests_eos_test_SOURCES = tests/eos.cpp $(GENERIC_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL_CODE)
 tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(ALL_CODE)
