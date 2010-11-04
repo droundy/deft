@@ -82,6 +82,11 @@ int main(int, char **argv) {
   f = HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
   compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
 
+  double eps = water_prop.epsilonAB;
+  double kappa = water_prop.kappaAB;
+  compare_functionals(SaftFluid(R, kT, eps, kappa, mu),
+                      SaftFluidSlow(R, kT, eps, kappa, mu), Grid(gd, -kT*n.cwise().log()), 4e-13);
+
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);
   return errors;

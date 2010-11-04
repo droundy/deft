@@ -730,7 +730,6 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     fprintf(o, "    %s %s = %s;\n", s.ctype(), a.c_str(), s.printme().c_str());
     fprintf(o, "    //printf(\"Memory use %x is %%g with peak %%g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n", counter++);
     //fprintf(o, "    // expr = %s\n", e.printme().c_str());
-    fflush(o);
 
     // Free unused variables...
     generate_free_code(o, myvars);

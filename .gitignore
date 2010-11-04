@@ -1,4 +1,5 @@
 *.[oa]
+*.prof
 *~
 *.Po
 .deps

@@ -7,6 +7,7 @@
 
 struct LiquidProperties {
   double lengthscale, liquid_density, vapor_density, kT;
+  double epsilon_dispersion, epsilonAB, kappaAB;
 };
 
 extern LiquidProperties water_prop;

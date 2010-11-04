@@ -19,11 +19,16 @@
 #include "Functionals.h"
 #include <stdio.h>
 
+static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
+
 LiquidProperties water_prop = {
-  3, // approx size of water in bohr
+  2.93, // hard sphere radius of water in bohr
   4.9388942e-3, // density of liquid water
   1.14e-7, // vapor density of water
-  1e-3 // room temperature in Hartree
+  1e-3, // room temperature in Hartree
+  290.1*kB, // epsilon_dispersion
+  2859*kB, // epsilonAB
+  0.023, // kappaAB
 };
 
 double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose) {
