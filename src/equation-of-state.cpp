@@ -15,10 +15,10 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "utilities.h"
-#include "Functional.h"
+#include "Functionals.h"
 #include <stdio.h>
 
-double find_density(Functional f, double nmin, double nmax) {
+double find_minimum(Functional f, double nmin, double nmax) {
   double nbest = nmin;
   double ebest = f(nmin);
   const double factor = 1.1;
@@ -54,4 +54,27 @@ double find_density(Functional f, double nmin, double nmax) {
     }
   }
   return nbest;
+}
+
+double pressure(Functional f, double kT, double density) {
+  double V = -kT*log(density);
+  return -kT*f.derive(V) - f(V);
+}
+
+double find_density(Functional f, double kT, double nmin, double nmax) {
+  double Vmax = -kT*log(nmin);
+  double Vmin = -kT*log(nmax);
+  double V = find_minimum(f, Vmin, Vmax);
+  return EffectivePotentialToDensity(kT)(V);
+}
+
+void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {
+  const double factor = 1.01;
+  Functional n = EffectivePotentialToDensity(kT);
+  for (double ngoal=nmin; ngoal<nmax; ngoal *= factor) {
+    double mu = -f.derive(ngoal);
+    Functional ff = f + ChemicalPotential(mu)(n);
+    double p = pressure(ff, kT, ngoal);
+    fprintf(o, "%g\t%g\n", ngoal, p);
+  }
 }

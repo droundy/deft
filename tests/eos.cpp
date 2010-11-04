@@ -20,8 +20,9 @@
 #include "utilities.h"
 
 int retval = 0;
+double kT = 1e-3;
 
-void test_eos(const char *name, Functional f, double ntrue, double fraccuracy=1e-6) {
+void test_eos(const char *name, Functional f, double ntrue, double ptrue, double fraccuracy=1e-6) {
   clock_t start = clock();
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -29,28 +30,44 @@ void test_eos(const char *name, Functional f, double ntrue, double fraccuracy=1e
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  double nfound = find_density(f, ntrue*3.123e-7, ntrue*12345);
-  printf("Found density of %g (versus %g) in %g seconds.\n", nfound, ntrue,
+  double nfound = find_density(f, kT, ntrue*3.123e-7, ntrue*12345);
+  printf("Found density of %.15g (versus %g) in %g seconds.\n", nfound, ntrue,
          (clock() - double(start))/CLOCKS_PER_SEC);
   double nerr = nfound/ntrue - 1;
   if (fabs(nerr) > fraccuracy) {
     printf("FAIL: nerr too big: %g\n", nerr);
     retval++;
   }
+
+  double pfound = pressure(f, kT, nfound);
+  printf("Found pressure of %.15g (versus %g) in %g seconds.\n", pfound, ptrue,
+         (clock() - double(start))/CLOCKS_PER_SEC);
+  double perr = pfound/ptrue - 1;
+  if (fabs(perr) > fraccuracy) {
+    printf("FAIL: pnerr too big: %g\n", perr);
+    retval++;
+  }
 }
 
 int main(int, char **argv) {
-  double kT = 1e-3;
   Functional n = EffectivePotentialToDensity(kT);
-  double ngas = 2e-5;
-  double mu = -kT*log(ngas);
 
-  test_eos("ideal gas", IdealGasOfVeff(kT) + ChemicalPotential(mu)(n), -kT*log(ngas));
+  {
+    double ngas = 2e-5;
+    double mu = -kT*log(ngas);
+    test_eos("ideal gas", IdealGasOfVeff(kT) + ChemicalPotential(mu)(n), ngas, ngas*kT);
+  }
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {
     printf("\n%s fails %d tests!\n", argv[0], retval);
     return retval;
+  }
+
+  {
+    FILE *o = fopen("ideal-gas.dat", "w");
+    equation_of_state(o, IdealGasOfVeff(kT), kT, 1e-7, 1e-3);
+    fclose(o);
   }
 }
