@@ -53,7 +53,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
     }
   } else {
     printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
-    if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
+    if (!(fabs((Edouble - Egrid)/Edouble) < fraccuracy)) {
       printf("FAIL: Error in the energy is too big!\n");
       retval++;
     }
@@ -67,7 +67,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
     }
   } else {
     printf("fractional error = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
-    if (fabs((deriv_double - deriv_grid)/deriv_double) > fraccuracy) {
+    if (!(fabs((deriv_double - deriv_grid)/deriv_double) < fraccuracy)) {
       printf("FAIL: Error in the gradient is too big!\n");
       retval++;
     }
@@ -96,7 +96,15 @@ int main(int, char **argv) {
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
     retval += test_functional("IdealGas(1e-3)(x))", IdealGas(1e-3)(x), 1e-5, 2e-13);
-    retval += test_functional("HardSpheres(2,1e-3)(x))", HardSpheres(2,1e-3)(x), 1e-5, 1e-13);
+    retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2,1e-3), 1e-5, 1e-13);
+    Functional n = EffectivePotentialToDensity(1e-3);
+    double Veff = -1e-3*log(1e-5);
+    retval += test_functional("HardSpheresWBnotensor(...)",
+                              HardSpheresWBnotensor(2,1e-3)(n), Veff, 1e-13);
+    retval += test_functional("IdealGasOfVeff(...)", IdealGasOfVeff(1e-3), Veff, 2e-13);
+    retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-3,1e-2,0.02), Veff, 2e-13);
+    retval += test_functional("SaftFluidSlow(...)",
+                              SaftFluidSlow(2,1e-3,1e-2,0.02,0), Veff, 2e-13);
     retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
     retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
 
