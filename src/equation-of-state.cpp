@@ -21,16 +21,19 @@
 double find_minimum(Functional f, double nmin, double nmax) {
   double nbest = nmin;
   double ebest = f(nmin);
-  const double factor = 1.1;
-  for (double n = nmin; n<=nmax; n *= factor) {
+  //printf("Limits are %g and %g\n", nmin, nmax);
+  const double dn = (nmax - nmin)*1e-6;
+  for (double n = nmin; n<=nmax; n += dn) {
     double en = f(n);
+    // printf("Considering %g with energy %g\n", n, en);
     if (en < ebest) {
       ebest = en;
       nbest = n;
     }
   }
-  double nlo = nbest/factor, nhi = nbest*factor;
-  while ((nhi - nlo)/nbest > 1e-7) {
+  //printf("nbest is %g\n", nbest);
+  double nlo = nbest - dn, nhi = nbest + dn;
+  while ((nhi - nlo)/nbest > 1e-15) {
     if (nbest < 0.5*(nhi+nlo)) {
       double ntry = 0.3*nlo + 0.7*nhi;
       double etry = f(ntry);
@@ -58,7 +61,10 @@ double find_minimum(Functional f, double nmin, double nmax) {
 
 double pressure(Functional f, double kT, double density) {
   double V = -kT*log(density);
-  return -kT*f.derive(V) - f(V);
+  //printf("density is %g\n", density);
+  //printf("f(V) is %g\n", f(V));
+  //printf("-f.derive(V)*kT is %g\n", -f.derive(V)*kT);
+  return -f.derive(V)*kT - f(V);
 }
 
 double find_density(Functional f, double kT, double nmin, double nmax) {
@@ -69,12 +75,13 @@ double find_density(Functional f, double kT, double nmin, double nmax) {
 }
 
 void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {
-  const double factor = 1.01;
-  Functional n = EffectivePotentialToDensity(kT);
+  const double factor = 1.04;
   for (double ngoal=nmin; ngoal<nmax; ngoal *= factor) {
-    double mu = -f.derive(ngoal);
-    Functional ff = f + ChemicalPotential(mu)(n);
-    double p = pressure(ff, kT, ngoal);
-    fprintf(o, "%g\t%g\n", ngoal, p);
+    double V = -kT*log(ngoal);
+    double p = pressure(f, kT, ngoal);
+    double der = -f.derive(V)*kT/ngoal;
+    //printf("Got ngoal of %g but mu is %g\n", ngoal, mu);
+    double e = f(V);
+    fprintf(o, "%g\t%g\t%g\t%g\n", ngoal, p, e, der);
   }
 }

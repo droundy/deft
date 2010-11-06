@@ -20,7 +20,7 @@
 #include "utilities.h"
 
 int retval = 0;
-double kT = 1e-3;
+double kT = water_prop.kT;
 
 void test_eos(const char *name, Functional f, double ntrue, double ptrue, double fraccuracy=1e-6) {
   clock_t start = clock();
@@ -30,6 +30,7 @@ void test_eos(const char *name, Functional f, double ntrue, double ptrue, double
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
+  printf("Looking for density between %g and %g...\n", ntrue*3.123e-7, ntrue*12345);
   double nfound = find_density(f, kT, ntrue*3.123e-7, ntrue*12345);
   printf("Found density of %.15g (versus %g) in %g seconds.\n", nfound, ntrue,
          (clock() - double(start))/CLOCKS_PER_SEC);
@@ -49,8 +50,25 @@ void test_eos(const char *name, Functional f, double ntrue, double ptrue, double
   }
 }
 
+void test_pressure(const char *name, Functional f, double n, double ptrue, double fraccuracy=1e-6) {
+  printf("\n************");
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
+  printf("\n* Testing %s *\n", name);
+  for (unsigned i=0;i<strlen(name);i++) printf("*");
+  printf("************\n\n");
+
+  double pfound = pressure(f, kT, n);
+  printf("Found pressure of %.15g (versus %g).\n", pfound, ptrue);
+  double perr = pfound/ptrue - 1;
+  if (fabs(perr) > fraccuracy) {
+    printf("FAIL: pnerr too big: %g\n", perr);
+    retval++;
+  }
+}
+
 int main(int, char **argv) {
   Functional n = EffectivePotentialToDensity(kT);
+  double Veff = -kT*log(water_prop.liquid_density);
 
   {
     double ngas = 2e-5;
@@ -58,16 +76,38 @@ int main(int, char **argv) {
     test_eos("ideal gas", IdealGasOfVeff(kT) + ChemicalPotential(mu)(n), ngas, ngas*kT);
   }
 
-  if (retval == 0) {
-    printf("\n%s passes!\n", argv[0]);
-  } else {
-    printf("\n%s fails %d tests!\n", argv[0], retval);
-    return retval;
-  }
+  test_eos("quadratic", 0.5*sqr(n) - n, 1.0, 0.5, 2e-6);
+  test_pressure("quadratic(2)", 0.5*sqr(n) - n, 2, 2);
+  test_pressure("quadratic(3)", 0.5*sqr(n) - n, 3, 4.5);
 
   {
     FILE *o = fopen("ideal-gas.dat", "w");
     equation_of_state(o, IdealGasOfVeff(kT), kT, 1e-7, 1e-3);
     fclose(o);
+  }
+
+  {
+    FILE *o = fopen("saft-fluid.dat", "w");
+    Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
+                                 water_prop.epsilonAB, water_prop.kappaAB, 0);
+    double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
+    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 8e-3);
+    fclose(o);
+  }
+
+  {
+    FILE *o = fopen("hard-sphere-fluid.dat", "w");
+    Functional f = HardSpheresWBnotensor(water_prop.lengthscale, kT)(n)
+      + IdealGasOfVeff(kT);
+    double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
+    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    fclose(o);
+  }
+
+  if (retval == 0) {
+    printf("\n%s passes!\n", argv[0]);
+  } else {
+    printf("\n%s fails %d tests!\n", argv[0], retval);
+    return retval;
   }
 }

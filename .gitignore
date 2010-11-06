@@ -1,6 +1,7 @@
 *.[oa]
 *.prof
 *~
+*.dat
 *.Po
 .deps
 .dirstamp
