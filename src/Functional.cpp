@@ -83,7 +83,8 @@ double average(int count, ...)
 */
 void Functional::create_source(const std::string filename, const std::string classname,
                                const char *a1, const char *a2, const char *a3,
-                               const char *a4, const char *a5, const char *a6, bool isheader) const {
+                               const char *a4, const char *a5, const char *a6,
+                               const char *a7, bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
   //printf("Generating %s\n", classname.c_str());
@@ -100,6 +101,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) fprintf(o, ", double %s_arg", a4);
   if (a5) fprintf(o, ", double %s_arg", a5);
   if (a6) fprintf(o, ", double %s_arg", a6);
+  if (a7) fprintf(o, ", double %s_arg", a7);
   fprintf(o, ") ");
   if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
   if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
@@ -107,6 +109,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) fprintf(o, ", %s(%s_arg)", a4, a4);
   if (a5) fprintf(o, ", %s(%s_arg)", a5, a5);
   if (a6) fprintf(o, ", %s(%s_arg)", a6, a6);
+  if (a7) fprintf(o, ", %s(%s_arg)", a7, a7);
   fprintf(o, " {\n");
   fprintf(o, "    have_integral = true;\n");
   fprintf(o, "  }\n");
@@ -123,6 +126,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) allvars.insert(a4);
   if (a5) allvars.insert(a5);
   if (a6) allvars.insert(a6);
+  if (a7) allvars.insert(a7);
   Expression myself = printme(Expression("x"));
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
   {
@@ -255,6 +259,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) fprintf(o, "  double %s;\n", a4);
   if (a5) fprintf(o, "  double %s;\n", a5);
   if (a6) fprintf(o, "  double %s;\n", a6);
+  if (a7) fprintf(o, "  double %s;\n", a7);
   for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
     fprintf(o, "  mutable double %s;\n", i->c_str());
   }
@@ -263,7 +268,8 @@ void Functional::create_source(const std::string filename, const std::string cla
       (!a3 || std::string(a3) != "R") &&
       (!a4 || std::string(a4) != "R") &&
       (!a5 || std::string(a5) != "R") &&
-      (!a6 || std::string(a6) != "R"))
+      (!a6 || std::string(a6) != "R") &&
+      (!a7 || std::string(a7) != "R"))
     fprintf(o, "  double R;\n");
   fprintf(o, "};\n\n");
   if (isheader) fprintf(o, "inline ");
@@ -274,6 +280,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) fprintf(o, ", double %s", a4);
   if (a5) fprintf(o, ", double %s", a5);
   if (a6) fprintf(o, ", double %s", a6);
+  if (a7) fprintf(o, ", double %s", a7);
   fprintf(o, ") {\n");
   fprintf(o, "  return Functional(new %s_type(", classname.c_str());
   if (a1) fprintf(o, "%s", a1);
@@ -282,6 +289,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a4) fprintf(o, ", %s", a4);
   if (a5) fprintf(o, ", %s", a5);
   if (a6) fprintf(o, ", %s", a6);
+  if (a7) fprintf(o, ", %s", a7);
   fprintf(o, "), \"%s\");\n", classname.c_str());
   fprintf(o, "}\n");
   fclose(o);
