@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-static Functional geteta(double radius) {
+static Functional getzeta(double radius) {
   Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
@@ -41,37 +41,69 @@ Functional xi3(double radius) {
   return ((M_PI*4/3)*Pow(3)(R)*n3).set_name("xi3");
 }
 
-Functional gHS(double R) {
-  Functional n3 = StepConvolve(R);
-  Functional eta = geteta(R);
+Functional gHS(Functional n3, double R) {
+  // n3 is the "packing fraction" convolved functional.  It may be an
+  // "effective packing fraction", in the case of SAFT-VR.
+  Functional zeta = getzeta(R);
   Functional n2 = ShellConvolve(R);
   Functional invdiff = Functional(1)/(1-n3);
-  return (invdiff*(Functional(1) +
-                   invdiff*n2*eta*(Functional(1.0/4) +
-                                   invdiff*(1.0/18/4)*n2))).set_name("gHS");
+  return invdiff*(Functional(1) +
+                  invdiff*n2*zeta*(Functional(1.0/4) +
+                                   invdiff*(1.0/18/4)*n2));
 }
 
-Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa) {
-  Functional g = gHS(radius);
+Functional gHScarnahan(Functional n3, double R) {
+  // n3 is the "packing fraction" convolved functional.  It may be an
+  // "effective packing fraction", in the case of SAFT-VR.
+  Functional zeta = getzeta(R);
+  // The zeta I'm adding here is pretty arbitrary... :(
+  return (1 - 0.5*n3)/Pow(3)(1 - n3);
+  return zeta*(1 - 0.5*n3)/Pow(3)(1 - n3);
+}
+
+Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa) {
+  Functional n3 = StepConvolve(radius);
+  Functional g = gHS(n3, radius);
   Functional R(radius);
   R.set_name("R");
-  Functional n2 = ShellConvolve(radius);
-  Functional n0 = (4*M_PI*sqr(R))*n2;
   Functional T(temperature);
   T.set_name("kT");
   Functional eps(epsilon);
   eps.set_name("epsilonAB");
   Functional K(kappa);
   K.set_name("kappaAB");
-  Functional delta = g*((exp(eps/T) - 1)*8*Pow(3)(R)*K);
+  Functional delta = g*(exp(eps/T) - 1)*8*Pow(3)(R)*K;
   delta.set_name("delta");
-
-  Functional X = (Functional(1) + sqrt(Functional(1) + 8*n0*delta))/(4*n0*delta);
-  X.set_name("X");
-  return (4*n0*geteta(radius)*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+  return delta;
 }
 
-Functional SaftFluidSlow(double R, double kT, double epsilon, double kappa, double mu) {
+Functional Xassociation(double radius, double temperature, double epsilon, double kappa) {
+  Functional R(radius);
+  R.set_name("R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional delta = DeltaSAFT(radius, temperature, epsilon, kappa);
+
+  Functional zeta = getzeta(radius);
+  Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - 1) / (4* n0 * zeta*delta);
+  X.set_name("X");
+  return X;
+}
+
+Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa) {
+  Functional R(radius);
+  R.set_name("R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional T(temperature);
+  T.set_name("kT");
+  Functional zeta = getzeta(radius);
+  Functional X = Xassociation(radius, temperature, epsilon, kappa);
+  return (T*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+}
+
+Functional SaftFluidSlow(double R, double kT,
+                         double epsilon, double kappa, double mu) {
   Functional n = EffectivePotentialToDensity(kT);
   return HardSpheresWBnotensor(R, kT)(n) + IdealGasOfVeff(kT) +
     ChemicalPotential(mu)(n) +
