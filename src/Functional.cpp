@@ -171,9 +171,11 @@ void Functional::create_source(const std::string filename, const std::string cla
   }
   fprintf(o, "  }\n");
   fprintf(o, "  double transform(double) const {\n");
+  fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n");
   fprintf(o, "  double derive(double) const {\n");
+  fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n\n");
   fprintf(o, "  VectorXd transform(const GridDescription &gd, const VectorXd &x) const {\n");
