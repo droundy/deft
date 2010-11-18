@@ -43,8 +43,6 @@ Grid potential(gd);
 
 Functional ff;
 
-const double true_surface_tension = 1.214242268e-05;
-
 int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccuracy=1e-3) {
   clock_t start = clock();
   printf("\n************");
@@ -116,7 +114,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
   double retval = 0;
   printf("\n\n");
-  const double Einterface_with_external_true = -2.616689049223754e-06;
+  const double Einterface_with_external_true = -3.94799994080178e-06;
   printf("interface energy is %.15g (vs. %.15g)\n", Einterface, Einterface_with_external);
   if (Einterface_with_external < Einterface_with_external_true) {
     printf("FAIL: Einterface_with_external is too low: %.16g\n", Einterface_with_external);
@@ -137,7 +135,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
 
   printf("liquid energy is %.15g\n", Eliquid);
-  const double Eliquid_true = -5.006565560764954e-06;
+  const double Eliquid_true = -6.756883755682858e-06;
   if (Eliquid < Eliquid_true) {
     printf("FAIL: Eliquid is too low: %.16g\n", Eliquid);
     retval++;
@@ -145,6 +143,9 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   printf("Ninterface/liquid/gas = %g/%g/%g\n", Ninterface, Nliquid, Ngas);
   const double X = Ninterface/Nliquid; // Fraction of volume effectively filled with liquid.
   printf("X is %g\n", X);
+  
+  const double true_surface_tension = 1.222512493e-05;
+
   const double surface_tension = (Einterface - Eliquid*X - Egas*(1-X))/2/0.2/0.2;
   printf("surface tension is %.10g\n", surface_tension);
 

@@ -63,13 +63,13 @@ int main(int, char **argv) {
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), n, 3e-15);
+  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), n, 1e-14);
 
-  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R, kT), n, 2e-15);
+  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R, kT), n, 1e-14);
 
-  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R, kT), n, 3e-15);
+  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R, kT), n, 1e-14);
 
-  compare_functionals(HardSpheresWBnotensor(R, kT), HardSpheresNoTensor(R, kT), n, 2e-15);
+  compare_functionals(HardSpheresWBnotensor(R, kT), HardSpheresNoTensor(R, kT), n, 1e-14);
 
   
   Functional nn = EffectivePotentialToDensity(kT);
@@ -80,12 +80,13 @@ int main(int, char **argv) {
  
   mu = -(HardSpheres(R, kT)(nn) + IdealGasOfVeff(kT)).derive(water_prop.liquid_density);
   f = HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
-  compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
+  compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 1e-12);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   compare_functionals(SaftFluid(R, kT, eps, kappa, mu),
-                      SaftFluidSlow(R, kT, eps, kappa, mu), Grid(gd, -kT*n.cwise().log()), 4e-13);
+                      SaftFluidSlow(R, kT, eps, kappa, mu), Grid(gd, -kT*n.cwise().log()),
+                      1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

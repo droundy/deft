@@ -18,7 +18,7 @@
 #include "utilities.h"
 #include <stdlib.h>
 
-const double kT = water_prop.kT; // room temperature in Hartree
+const double kT = 1.0/137; // this isn't actually the room temperature in Hartree
 const double R = 2.7;
 const double mu = 0;
 

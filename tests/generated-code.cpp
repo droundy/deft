@@ -97,7 +97,7 @@ int main(int, char **argv) {
 
   compare_functionals(Sum(kT), x + kT, n, 2e-13);
 
-  compare_functionals(Quadratic(kT), sqr(x + kT) - x + 2*kT, n, 3e-14);
+  compare_functionals(Quadratic(kT), sqr(x + kT) - x + 2*kT, n, 2e-12);
 
   compare_functionals(Sqrt(), sqrt(x), n, 1e-12);
 
@@ -134,7 +134,7 @@ int main(int, char **argv) {
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(kT,R), phi3rf, n, 2e-15);
 
-  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), n, 5e-15);
+  compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), n, 2e-14);
 
   Functional veff = EffectivePotentialToDensity(kT);
   compare_functionals(SquareVeff(kT, R), sqr(veff), Grid(gd, -kT*n.cwise().log()), 1e-12);
@@ -151,7 +151,8 @@ int main(int, char **argv) {
 
   compare_functionals(Phi3rfVeff(kT, R), phi3rf(veff), Grid(gd, -kT*n.cwise().log()));
 
-  compare_functionals(IdealGasFast(kT), IdealGasOfVeff(kT), Grid(gd, -kT*n.cwise().log()), 1e-13);
+  compare_functionals(IdealGasFast(kT), IdealGasOfVeff(kT), Grid(gd, -kT*n.cwise().log()),
+                      1e-12);
 
   double mu = -1;
   compare_functionals(Phi1plus(R, kT, mu),
