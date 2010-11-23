@@ -427,10 +427,13 @@ Expression linearfunexprgd(const char *n, const char *type, const Expression &ar
 
 Expression fft(const Expression &g) {
   if (!g.typeIs("Grid")) {
-    if (g.typeIs("double")) {
+    if (g.typeIs("double") && g.kindIs("constant") && g.value == 0) {
+      return g;
+    } else if (g.typeIs("double")) {
       // The fft of a constant is a delta function in G space!
       printf("fft: Expression should have type Grid, but accepting double anyhow.\n");
-      // FIXME: W shouldn't need to do an actual FFT here!
+      printf("fft: Expression is:  %s\n", g.printme().c_str());
+      // FIXME: We shouldn't need to do an actual FFT here!
       return fft(g * grid_ones);
     }
     printf("fft: Expression %s should have type Grid.\n", g.printme().c_str());
@@ -441,9 +444,13 @@ Expression fft(const Expression &g) {
 
 Expression ifft(const Expression &g) {
   if (!g.typeIs("ReciprocalGrid")) {
-    printf("ifft: Expression '%s' should have type ReciprocalGrid but instead has type '%s'.\n",
-           g.printme().c_str(), g.type);
-    exit(1);
+    if (g.typeIs("double") && g.kindIs("constant") && g.value == 0) {
+      return g;
+    } else {
+      printf("ifft: Expression '%s' should have type ReciprocalGrid but instead has type '%s'.\n",
+             g.printme().c_str(), g.type);
+      exit(1);
+    }
   }
   return linearfunexprgd("ifft", "Grid", g);
 }
