@@ -116,6 +116,25 @@ bool Expression::FindVariable(const std::string n) const {
   return false;
 }
 
+Expression Expression::FindDoubleSubexpression() const {
+  if (arg1) {
+    Expression s = arg1->FindDoubleSubexpression();
+    if (!s.kindIs("constant")) return s;
+  }
+  if (arg2) {
+    Expression s = arg2->FindDoubleSubexpression();
+    if (!s.kindIs("constant")) return s;
+  }
+  if (arg3) {
+    Expression s = arg3->FindDoubleSubexpression();
+    if (!s.kindIs("constant")) return s;
+  }
+  if (typeIs("double") && !kindIs("constant") && !kindIs("variable")) {
+    return *this;
+  }
+  return 0;
+}
+
 Expression Expression::FindCommonSubexpression() const {
   Expression cs;
   if (arg2) {

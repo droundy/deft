@@ -692,6 +692,35 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
 
   Expression e = *this;
   if (thisvar != "") e = FindNamedSubexpression(thisvar);
+
+  {
+    // First, let's see what double expressions we can simplify...
+    std::set<std::string> doublevars;
+    Expression s = e.FindDoubleSubexpression();
+    while (!s.kindIs("constant")) {
+      std::string a = s.alias + "_v";
+      if (a == "_v") a = "d";
+      if (allvars->count(a)) {
+        // need to make this thing unique...
+        for (int varnum=0; true; varnum++) {
+          std::ostringstream oss;
+          oss << varnum;
+          std::string newa = a + "_" + oss.str();
+          if (!allvars->count(newa)) {
+            a = newa;
+            break;
+          }
+        }
+      }
+      doublevars.insert(a);
+      allvars->insert(a);
+      e.EliminateThisSubexpression(s, a);
+      EliminateThisSubexpression(s, a);
+      fprintf(o, "    const double %s = %s;\n", a.c_str(), s.printme().c_str());
+      s = e.FindDoubleSubexpression();
+    }
+  } // Done simplifying double-valued expressions.
+
   Expression s = e.FindCommonSubexpression();
   //Expression ssmaller = s;
   //ssmaller.ScalarFactor(); // This is s without any prefactor.

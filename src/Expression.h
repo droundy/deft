@@ -70,6 +70,7 @@ public:
   bool FindVariable(const std::string n) const;
   Expression FindNamedSubexpression(const std::string n) const;
 
+  Expression FindDoubleSubexpression() const;
   Expression FindCommonSubexpression() const;
   int CountThisSubexpression(const Expression &) const;
   int Size() const;
