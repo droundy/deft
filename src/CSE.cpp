@@ -189,9 +189,8 @@ bool Expression::IsUnlazyApartFrom(const Expression &c, std::set<std::string> im
 }
 
 Expression Expression::EasyParentOfThisSubexpression(const Expression &e, std::set<std::string> important) const {
-  const int ncount = CountThisSubexpression(e);
-  if (ncount == 0 || e == *this) return e;
-  if (!unlazy && (typeIs(e.type) || !e.kindIs("variable"))) {
+  if (!unlazy && (typeIs(e.type) || !e.kindIs("variable")) &&
+      ((arg1 && *arg1 == e) || (arg2 && *arg2 == e) || (arg3 && *arg3 == e))) {
     bool unlazychildren = false;
     if (arg1 && arg1->IsUnlazyApartFrom(e, important)) {
       //printf("My child %s is unlazy.\n", arg1->printme().c_str());
@@ -204,7 +203,8 @@ Expression Expression::EasyParentOfThisSubexpression(const Expression &e, std::s
       return *this;
     }
   }
-  //printf("Looking in my children, says %s\n", printme().c_str());
+  const int ncount = CountThisSubexpression(e);
+  if (ncount == 0 || e == *this) return e;
 
   // If we ourselves aren't the easy parent, let's see if our children
   // have such a possibility...
