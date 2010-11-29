@@ -31,9 +31,9 @@ double find_minimum(Functional f, double nmin, double nmax) {
       nbest = n;
     }
   }
-  //printf("nbest is %g\n", nbest);
+  //printf("best Veff is %g\n", nbest);
   double nlo = nbest - dn, nhi = nbest + dn;
-  while ((nhi - nlo)/nbest > 1e-15) {
+  while ((nhi - nlo)/fabs(nbest) > 1e-15) {
     if (nbest < 0.5*(nhi+nlo)) {
       double ntry = 0.3*nlo + 0.7*nhi;
       double etry = f(ntry);
