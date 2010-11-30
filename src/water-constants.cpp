@@ -17,13 +17,16 @@
 #include "utilities.h"
 
 static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
+static const double angstrom = 1.8897261; // An angstrom in atomic units
 
 LiquidProperties water_prop = {
-  2.93, // hard sphere radius of water in bohr
+  //2.93, // hard sphere radius of water in bohr
+  3.03420*angstrom/2, // hard sphere radius of water in bohr
   4.9388942e-3, // density of liquid water
   1.14e-7, // vapor density of water
   298.15*kB, // room temperature in Hartree
-  290.1*kB, // epsilon_dispersion
-  2859*kB, // epsilonAB
-  0.023, // kappaAB
+  250.0*kB, // epsilon_dispersion
+  1.78890, // lambda_dispersion
+  1400.00*kB, // epsilonAB
+  1.06673*angstrom*angstrom*angstrom, // kappaAB from Clark et al
 };

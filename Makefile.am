@@ -36,6 +36,7 @@ tests/generated-code.o: tests/generated/sum.h
 
 check_PROGRAMS = \
 	tests/generated-code.test \
+	tests/saft-dispersion.test \
 	tests/optimized-code.test \
 	tests/timings.test \
 	tests/expression.test \
@@ -61,6 +62,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)

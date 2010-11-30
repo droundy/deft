@@ -22,7 +22,7 @@ double find_minimum(Functional f, double nmin, double nmax) {
   double nbest = nmin;
   double ebest = f(nmin);
   //printf("Limits are %g and %g\n", nmin, nmax);
-  const double dn = (nmax - nmin)*1e-6;
+  const double dn = (nmax - nmin)*1e-2;
   for (double n = nmin; n<=nmax; n += dn) {
     double en = f(n);
     // printf("Considering %g with energy %g\n", n, en);
@@ -55,6 +55,7 @@ double find_minimum(Functional f, double nmin, double nmax) {
         nlo = ntry;
       }
     }
+    //printf("improved Veff is %g\n", nbest);
   }
   return nbest;
 }
@@ -72,6 +73,30 @@ double find_density(Functional f, double kT, double nmin, double nmax) {
   double Vmin = -kT*log(nmax);
   double V = find_minimum(f, Vmin, Vmax);
   return EffectivePotentialToDensity(kT)(V);
+}
+
+double find_chemical_potential(Functional f, double kT, double n) {
+  const double V = -kT*log(n);
+  return -f.derive(V)*kT/n;
+}
+
+void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {
+  Functional n = EffectivePotentialToDensity(kT);
+  const double mumin = find_chemical_potential(f, kT, nmin);
+  const double mumax = find_chemical_potential(f, kT, nmax);
+  const double dmu = (mumax - mumin)/2000;
+  printf("mumin is %g and mumax is %g\n", mumin, mumax);
+  for (double mu=mumin; mu<=mumax; mu += dmu) {
+    printf("Working on mu = %g\n", mu);
+    Functional fmu = f + ChemicalPotential(mu)(n);
+    double n = find_density(fmu, kT, nmin, nmax);
+    printf("Got density = %g\n", n);
+    double V = -kT*log(n);
+    double p = pressure(fmu, kT, n);
+    //printf("Got ngoal of %g but mu is %g\n", ngoal, mu);
+    double e = f(V);
+    fprintf(o, "%g\t%g\t%g\n", n, p, e);
+  }
 }
 
 void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {

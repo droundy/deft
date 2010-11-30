@@ -17,9 +17,19 @@ Functional HardSpheresWBnotensor(double radius, double temperature);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 
+Functional gHS(Functional n, double radius);
+Functional gHScarnahan(Functional n, double radius);
+Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa);
+Functional Xassociation(double radius, double temperature, double epsilon, double kappa);
 Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa);
-Functional SaftFluidSlow(double radius, double temperature, double epsilon, double kappa, double mu);
-Functional SaftFluid(double radius, double temperature, double epsilon, double kappa, double mu);
+Functional SaftFluidSlow(double radius, double temperature, double epsilon, double kappa,
+                         double epsdis, double lambda, double mu);
+Functional SaftFluid(double radius, double temperature,
+                     double epsilon, double kappa,
+                     double epsdis, double lambda, double mu);
+Functional DispersionSAFTa1(double radius, double temperature, double epsdis, double lambda);
+Functional DispersionSAFTa2(double radius, double temperature, double epsdis, double lambda);
+Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
 
 Functional HardSpheresFast(double radius, double temperature);
 Functional HardSpheresRFFast(double radius, double temperature);

@@ -30,6 +30,7 @@ void test_eos(const char *name, Functional f, double ntrue, double ptrue, double
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
+  printf("Expect Veff of %g\n", -kT*log(ntrue));
   printf("Looking for density between %g and %g...\n", ntrue*3.123e-7, ntrue*12345);
   double nfound = find_density(f, kT, ntrue*3.123e-7, ntrue*12345);
   printf("Found density of %.15g (versus %g) in %g seconds.\n", nfound, ntrue,
@@ -89,9 +90,29 @@ int main(int, char **argv) {
   {
     FILE *o = fopen("saft-fluid.dat", "w");
     Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
-                                 water_prop.epsilonAB, water_prop.kappaAB, 0);
+                                 water_prop.epsilonAB, water_prop.kappaAB,
+                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion, 0);
     double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
-    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 8e-3);
+    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    fclose(o);
+
+    o = fopen("saft-fluid-other.dat", "w");
+    //other_equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    fclose(o);
+
+    Functional X = Xassociation(water_prop.lengthscale, kT,
+                                water_prop.epsilonAB, water_prop.kappaAB);
+    printf("X is %g\n", X(water_prop.liquid_density));
+    o = fopen("association.dat", "w");
+    equation_of_state(o, AssociationSAFT(water_prop.lengthscale, kT,
+                                         water_prop.epsilonAB, water_prop.kappaAB)(n),
+                      kT, 1e-7, 0.0095);
+    fclose(o);
+    o = fopen("dispersion.dat", "w");
+    equation_of_state(o, DispersionSAFT(water_prop.lengthscale, kT,
+                                        water_prop.epsilon_dispersion,
+                                        water_prop.lambda_dispersion)(n),
+                      kT, 1e-7, 0.0095);
     fclose(o);
   }
 

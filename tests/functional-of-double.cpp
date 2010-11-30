@@ -104,7 +104,7 @@ int main(int, char **argv) {
     retval += test_functional("IdealGasOfVeff(...)", IdealGasOfVeff(1e-3), Veff, 2e-13);
     retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-3,1e-2,0.02), Veff, 2e-13);
     retval += test_functional("SaftFluidSlow(...)",
-                              SaftFluidSlow(2,1e-3,1e-2,0.02,0), Veff, 2e-13);
+                              SaftFluidSlow(2,1e-3,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
     retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
     retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
 

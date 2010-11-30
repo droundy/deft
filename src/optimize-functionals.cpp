@@ -42,7 +42,9 @@ int main(int, char **argv) {
     f.create_source("src/HardSphereGasFast.cpp", "HardSphereGas", "R", "kT", "mu");
   }
   if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0) {
-    SaftFluidSlow(R, kT, 0, 0, mu).create_source("src/SaftFluidFast.cpp", "SaftFluid",
-                                                 "R", "kT", "epsilonAB", "kappaAB", "mu");
+    SaftFluidSlow(R, kT, 0, 0, 0, 0, mu).create_source("src/SaftFluidFast.cpp", "SaftFluid",
+                                                       "R", "kT", "epsilonAB", "kappaAB",
+                                                       "epsilon_dispersion", "lambda_dispersion",
+                                                       "mu");
   }
 }
