@@ -23,7 +23,7 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
-noinst_PROGRAMS = optimize-functionals
+noinst_PROGRAMS = optimize-functionals tests/generating-code.test
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
@@ -35,7 +35,6 @@ tests/generated/sum.h: tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
 
 check_PROGRAMS = \
-	tests/generating-code.test \
 	tests/generated-code.test \
 	tests/optimized-code.test \
 	tests/timings.test \
