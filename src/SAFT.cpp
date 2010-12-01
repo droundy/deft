@@ -110,6 +110,17 @@ Functional HardSphereCompressibility(double radius, double temperature) {
   return kT;
 }
 
+Functional eta_effective(Functional eta, double lambdainput) {
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  // The following constants are from equation 37 in Gil-Villegas 1997 paper.
+  Functional c1 = Functional(2.25855) - 1.50349*lambda + 0.249434*lambda*lambda;
+  Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
+  Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
+  // The following equation is equation 36 in Gil-Villegas 1997 paper.
+  return c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
+}
+
 Functional DispersionSAFTa1(double radius, double temperature, double epsdis, double lambdainput) {
   Functional R(radius);
   R.set_name("R");
@@ -123,13 +134,7 @@ Functional DispersionSAFTa1(double radius, double temperature, double epsdis, do
   eta.set_name("eta");
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
-  // The following constants are from equation 37 in Gil-Villegas 1997 paper.
-  Functional c1 = Functional(2.25855) - 1.50349*lambda + 0.249434*lambda*lambda;
-  Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
-  Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
-  // The following equation is equation 36 in Gil-Villegas 1997 paper.
-  Functional eta_effective = c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
-  eta_effective.set_name("eta_effective");
+  Functional eta_eff = eta_effective(eta, lambdainput);
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   // Actually, it's slightly modified, since the n0 below cancels out
   // the packing fraction by giving us a per-volume rather than
@@ -142,8 +147,7 @@ Functional DispersionSAFTa1(double radius, double temperature, double epsdis, do
   // I chose to use n0 here because it's the density that measures
   // "how many monomers are neighboring this point, which is what is
   // more relevant in working out interactions.
-  Functional a1 = (n0*a1vdw*gHS(eta_effective, radius)).set_name("a1");
-  a1 = (gHScarnahan(eta_effective, radius)).set_name("a1");
+  Functional a1 = (n0*a1vdw*gHS(eta_eff, radius)).set_name("a1");
   return a1.set_name("A1");
 }
 
@@ -160,14 +164,8 @@ Functional DispersionSAFTa2(double radius, double temperature, double epsdis, do
   eta.set_name("eta");
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
-  // The following constants are from equation 37 in Gil-Villegas 1997 paper.
-  Functional c1 = Functional(2.25855) - 1.50349*lambda + 0.249434*lambda*lambda;
-  Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
-  Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
-  // The following equation is equation 36 in Gil-Villegas 1997 paper.
-  Functional eta_effective = c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
-  eta_effective.set_name("eta_effective");
-  Functional simple_eta_effective = c1*Identity() + c2*Pow(2) + c3*Pow(3);
+  Functional eta_eff = eta_effective(eta, lambdainput);
+  Functional simple_eta_effective = eta_effective(Identity(), lambdainput);
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   // Actually, it's slightly modified, since the n0 below cancels out
   // the packing fraction by giving us a per-volume rather than
@@ -180,7 +178,7 @@ Functional DispersionSAFTa2(double radius, double temperature, double epsdis, do
   // I chose to use n0 here because it's the density that measures
   // "how many monomers are neighboring this point, which is what is
   // more relevant in working out interactions.
-  Functional a1 = (n0*a1vdw*gHScarnahan(eta_effective, radius)).set_name("a1");
+  Functional a1 = (n0*a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
   Functional gHSprime = gHScarnahan(simple_eta_effective, radius).grad(Identity(), eta, false);
   // FIXME: for some reason, setting the name of gHSprime causes a problem...  :(
   //gHSprime.set_name("gHSprime");
@@ -207,14 +205,8 @@ Functional DispersionSAFT(double radius, double temperature, double epsdis, doub
   eta.set_name("eta");
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
-  // The following constants are from equation 37 in Gil-Villegas 1997 paper.
-  Functional c1 = Functional(2.25855) - 1.50349*lambda + 0.249434*lambda*lambda;
-  Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
-  Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
-  // The following equation is equation 36 in Gil-Villegas 1997 paper.
-  Functional eta_effective = c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
-  eta_effective.set_name("eta_effective");
-  Functional simple_eta_effective = c1*Identity() + c2*Pow(2) + c3*Pow(3);
+  Functional eta_eff = eta_effective(eta, lambdainput);
+  Functional simple_eta_effective = eta_effective(Identity(), lambdainput);
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   // Actually, it's slightly modified, since the n0 below cancels out
   // the packing fraction by giving us a per-volume rather than
@@ -227,7 +219,7 @@ Functional DispersionSAFT(double radius, double temperature, double epsdis, doub
   // I chose to use n0 here because it's the density that measures
   // "how many monomers are neighboring this point, which is what is
   // more relevant in working out interactions.
-  Functional a1 = (a1vdw*gHScarnahan(eta_effective, radius)).set_name("a1");
+  Functional a1 = (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
   Functional gHSprime = gHScarnahan(simple_eta_effective, radius).grad(Identity(), eta, false);
   // FIXME: for some reason, setting the name of gHSprime causes a problem...  :(
   //gHSprime.set_name("gHSprime");

@@ -83,7 +83,6 @@ int main(int, char **argv) {
 
   {
     double R = 2.2;
-    double epsdis = 100;
     double lambda = 1.8;
     const double n = 5e-3;
     const double sphere_volume = 4*M_PI*R*R*R/3;
@@ -97,9 +96,6 @@ int main(int, char **argv) {
     printf("eta_effective is %g\n", eta_effective);
     //const double a1vdw = -4*eta*epsdis*(lambda*lambda*lambda-1);
     const double gHShere = (1-eta_effective/2)/(1-eta_effective)/(1-eta_effective)/(1-eta_effective);
-    test_functional("A1", DispersionSAFTa1(R, kT, epsdis, lambda), n,
-                    //n*a1vdw*
-                    gHShere);
 
     test_functional("gHScarnahan", gHScarnahan(Identity()*sphere_volume, R), n*eta_effective/eta,
                     gHShere);

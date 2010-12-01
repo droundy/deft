@@ -55,11 +55,23 @@ int main(int, char **argv) {
               AssociationSAFT(water_prop.lengthscale, kT,
                               water_prop.epsilonAB, water_prop.kappaAB)(n),
               -3.5474667542423e-10);
+  const double dispersion_energy = -1.092099264896821e-08;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale, kT,
                              water_prop.epsilon_dispersion,
                              water_prop.lambda_dispersion)(n),
-              -1.092099264896821e-08);
+              dispersion_energy);
+  // The following should work, once I properly split up the
+  // dispersion energy...
+
+  //test_energy("dispersion by parts",
+  //            DispersionSAFTa1(water_prop.lengthscale, kT,
+  //                             water_prop.epsilon_dispersion,
+  //                             water_prop.lambda_dispersion)(n) +
+  //            DispersionSAFTa2(water_prop.lengthscale, kT,
+  //                             water_prop.epsilon_dispersion,
+  //                             water_prop.lambda_dispersion)(n),
+  //            dispersion_energy);
   test_energy("SAFT slow",
               SaftFluidSlow(water_prop.lengthscale, kT,
                             water_prop.epsilonAB, water_prop.kappaAB,
