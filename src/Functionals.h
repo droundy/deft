@@ -27,8 +27,8 @@ Functional SaftFluidSlow(double radius, double temperature, double epsilon, doub
 Functional SaftFluid(double radius, double temperature,
                      double epsilon, double kappa,
                      double epsdis, double lambda, double mu);
-Functional DispersionSAFTa1(double radius, double temperature, double epsdis, double lambda);
-Functional DispersionSAFTa2(double radius, double temperature, double epsdis, double lambda);
+Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
+Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
 
 Functional HardSpheresFast(double radius, double temperature);
