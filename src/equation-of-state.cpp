@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "utilities.h"
+#include "equation-of-state.h"
 #include "Functionals.h"
 #include <stdio.h>
 
@@ -66,6 +66,16 @@ double pressure(Functional f, double kT, double density) {
   //printf("f(V) is %g\n", f(V));
   //printf("-f.derive(V)*kT is %g\n", -f.derive(V)*kT);
   return -f.derive(V)*kT - f(V);
+}
+
+double pressure_to_density(Functional f, double kT, double p, double nmin, double nmax) {
+  while (nmax/nmin > 1 + 1e-14) {
+    double ntry = sqrt(nmax*nmin);
+    double ptry = pressure(f, kT, ntry);
+    if (ptry < p) nmin = ntry;
+    else nmax = ntry;
+  }
+  return sqrt(nmax*nmin);
 }
 
 double find_density(Functional f, double kT, double nmin, double nmax) {

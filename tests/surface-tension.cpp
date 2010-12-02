@@ -18,7 +18,7 @@
 #include <time.h>
 #include "Functionals.h"
 #include "LineMinimizer.h"
-#include "utilities.h"
+#include "equation-of-state.h"
 
 const double kT = water_prop.kT; // room temperature in Hartree
 const double ngas = water_prop.vapor_density; // vapor density of water

@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "Functionals.h"
-#include "utilities.h"
+#include "equation-of-state.h"
 
 int retval = 0;
 double kT = water_prop.kT;
@@ -71,6 +71,8 @@ int main(int, char **argv) {
   Functional n = EffectivePotentialToDensity(kT);
   double Veff = -kT*log(water_prop.liquid_density);
 
+  const double nmin = 1e-7, nmax = 0.007;
+
   {
     double ngas = 2e-5;
     double mu = -kT*log(ngas);
@@ -83,19 +85,36 @@ int main(int, char **argv) {
 
   {
     FILE *o = fopen("ideal-gas.dat", "w");
-    equation_of_state(o, IdealGasOfVeff(kT), kT, 1e-7, 1e-3);
+    equation_of_state(o, IdealGasOfVeff(kT), kT, nmin, nmax);
     fclose(o);
   }
 
   {
-    FILE *o = fopen("saft-fluid.dat", "w");
+    FILE *o = fopen("dispersion.dat", "w");
+    equation_of_state(o, DispersionSAFT(water_prop.lengthscale, kT,
+                                        water_prop.epsilon_dispersion,
+                                        water_prop.lambda_dispersion)(n),
+                      kT, nmin, nmax);
+    fclose(o);
+    printf("Got dispersion!\n");
+
+    o = fopen("saft-fluid.dat", "w");
     Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
                                  water_prop.epsilonAB, water_prop.kappaAB,
                                  water_prop.epsilon_dispersion, water_prop.lambda_dispersion, 0);
     double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
-    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, nmax);
     fclose(o);
 
+    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure);
+    printf("density at 1 atmosphere is %g\n", n_1atm);
+    if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.1) {
+      printf("FAIL: error in water density is too big! %g\n",
+             n_1atm/water_prop.liquid_density - 1);
+      retval++;
+    }
+
+    /*
     o = fopen("saft-fluid-other.dat", "w");
     //other_equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
     fclose(o);
@@ -103,16 +122,11 @@ int main(int, char **argv) {
     Functional X = Xassociation(water_prop.lengthscale, kT,
                                 water_prop.epsilonAB, water_prop.kappaAB);
     printf("X is %g\n", X(water_prop.liquid_density));
+    */
     o = fopen("association.dat", "w");
     equation_of_state(o, AssociationSAFT(water_prop.lengthscale, kT,
                                          water_prop.epsilonAB, water_prop.kappaAB)(n),
-                      kT, 1e-7, 0.0095);
-    fclose(o);
-    o = fopen("dispersion.dat", "w");
-    equation_of_state(o, DispersionSAFT(water_prop.lengthscale, kT,
-                                        water_prop.epsilon_dispersion,
-                                        water_prop.lambda_dispersion)(n),
-                      kT, 1e-7, 0.0095);
+                      kT, nmin, nmax);
     fclose(o);
   }
 
@@ -121,7 +135,7 @@ int main(int, char **argv) {
     Functional f = HardSpheresWBnotensor(water_prop.lengthscale, kT)(n)
       + IdealGasOfVeff(kT);
     double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
-    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, nmax);
     fclose(o);
   }
 

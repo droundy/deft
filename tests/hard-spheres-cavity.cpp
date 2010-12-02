@@ -18,6 +18,7 @@
 #include <time.h>
 #include "Functionals.h"
 #include "LineMinimizer.h"
+#include "equation-of-state.h"
 #include "utilities.h"
 
 const double kT = water_prop.kT; // room temperature in Hartree

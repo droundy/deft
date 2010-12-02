@@ -137,8 +137,9 @@ Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
   Functional simple_eta_effective = eta_effective(Identity(), lambdainput);
   Functional epsilon_dispersion(epsdis);
   epsilon_dispersion.set_name("epsilon_dispersion");
-  Functional a1vdw = -4*(lambda*lambda*lambda - 1)*epsilon_dispersion;
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
+  Functional a1vdw = -4*(lambda*lambda*lambda - 1)*epsilon_dispersion*eta;
+  // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
 }
 

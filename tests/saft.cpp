@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include "Functionals.h"
-#include "utilities.h"
+#include "equation-of-state.h"
 
 int retval = 0;
 
@@ -55,7 +55,7 @@ int main(int, char **argv) {
               AssociationSAFT(water_prop.lengthscale, kT,
                               water_prop.epsilonAB, water_prop.kappaAB)(n),
               -3.5474667542423e-10);
-  const double dispersion_energy = -1.092099264896821e-08;
+  const double dispersion_energy = -2.255328520636343e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale, kT,
                              water_prop.epsilon_dispersion,
@@ -81,7 +81,7 @@ int main(int, char **argv) {
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, 0),
-              -1.63833795808733e-08);
+              -5.464642260425733e-09);
   //test_energy("SAFT",
   //            SaftFluid(water_prop.lengthscale, kT,
   //                      water_prop.epsilonAB, water_prop.kappaAB,

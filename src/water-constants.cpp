@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "utilities.h"
+#include "equation-of-state.h"
 
 static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 static const double angstrom = 1.8897261; // An angstrom in atomic units

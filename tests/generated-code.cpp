@@ -15,7 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
-#include "utilities.h"
+#include "equation-of-state.h"
 #include "generated/sum.h"
 #include "generated/quadratic.h"
 #include "generated/sqrt.h"

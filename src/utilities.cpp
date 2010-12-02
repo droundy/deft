@@ -15,7 +15,8 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "utilities.h"
-#include "Grid.h"
+#include "equation-of-state.h"
+#include "Minimizer.h"
 #include "Functionals.h"
 #include <stdio.h>
 
