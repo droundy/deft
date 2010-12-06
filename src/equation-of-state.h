@@ -21,6 +21,13 @@ double find_density(Functional f, double kT, double nmin, double nmax);
 double pressure(Functional f, double kT, double density);
 double pressure_to_density(Functional f, double kT, double p,
                            double nmin = 1e-10, double nmax = 1e-2);
+double find_chemical_potential(Functional f, double kT, double n);
+
+double chemical_potential_to_density(Functional f, double kT, double mu,
+                                     double nmin = 1e-10, double nmax = 1e-2);
+double saturated_liquid(Functional f, double kT,
+                        double nmin = 1e-10, double nmax = 1e-2);
+double coexisting_vapor_density(Functional f, double kT, double liquid_density);
 
 void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax);
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax);

@@ -33,7 +33,8 @@ double find_minimum(Functional f, double nmin, double nmax) {
   }
   //printf("best Veff is %g\n", nbest);
   double nlo = nbest - dn, nhi = nbest + dn;
-  while ((nhi - nlo)/fabs(nbest) > 1e-15) {
+  const double fraccuracy = 1e-15;
+  while ((nhi - nlo)/fabs(nbest) > fraccuracy) {
     if (nbest < 0.5*(nhi+nlo)) {
       double ntry = 0.3*nlo + 0.7*nhi;
       double etry = f(ntry);
@@ -87,7 +88,63 @@ double find_density(Functional f, double kT, double nmin, double nmax) {
 
 double find_chemical_potential(Functional f, double kT, double n) {
   const double V = -kT*log(n);
-  return -f.derive(V)*kT/n;
+  return f.derive(V)*kT/n;
+}
+
+double chemical_potential_to_density(Functional f, double kT, double mu,
+                                     double nmin, double nmax) {
+  Functional n = EffectivePotentialToDensity(kT);
+  Functional fmu = f + ChemicalPotential(mu)(n);
+  return find_density(fmu, kT, nmin, nmax);
+}
+
+double coexisting_vapor_density(Functional f, double kT, double liquid_density) {
+  const double mu = find_chemical_potential(f, kT, liquid_density);
+  double nmax = liquid_density;
+  Functional n = EffectivePotentialToDensity(kT);
+  Functional fmu = f + ChemicalPotential(mu)(n);
+  double deriv;
+  do {
+    nmax *= 0.5;
+    deriv = -find_chemical_potential(fmu, kT, nmax);
+  } while (deriv < 0);
+  return find_density(fmu, kT, 1e-14, nmax);
+}
+
+double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
+  Functional n = EffectivePotentialToDensity(kT);
+  double n2 = nmax;
+  double n1 = nmin;
+  double ftry = 0;
+  double ngtry = 0;
+  double ntry = 0;
+  double ptry = 0;
+  double pgtry = 0;
+  do {
+    ntry = 0.5*(n1+n2);
+    ftry = f(-kT*log(ntry));
+    ptry = pressure(f, kT, ntry);
+    if (isnan(ftry) || isnan(ptry)) {
+      n2 = ntry;
+    } else if (ptry < 0) {
+      // If it's got a negative pressure, it's definitely got too low
+      // a density, so it should be the new lower bound.
+      n1 = ntry;
+    } else {
+      //const double mutry = find_chemical_potential(f, kT, ntry);
+      ngtry = coexisting_vapor_density(f, kT, ntry);
+      pgtry = pressure(f, kT, ngtry);
+      printf("nl = %g\tng = %g,\t pl = %g\t pv = %g\n", ntry, ngtry,
+             ptry, pgtry);
+      if (pgtry > ptry) {
+        n1 = ntry;
+      } else {
+        n2 = ntry;
+      }
+    }
+  } while (fabs(n2-n1)/n2 > 1e-12 || isnan(ftry));
+  printf("pl = %g\tpv = %g\n", pressure(f, kT, (n2+n1)*0.5), pressure(f, kT, ngtry));
+  return (n2+n1)*0.5;
 }
 
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {
