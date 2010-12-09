@@ -1,0 +1,12 @@
+*~
+*.toc
+*.pdf
+*.out
+*.aux
+*.eps
+*.snm
+*.nav
+*.log
+*.blg
+*.bbl
+figs/equation-of-state

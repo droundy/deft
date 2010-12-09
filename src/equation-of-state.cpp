@@ -134,8 +134,8 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
       //const double mutry = find_chemical_potential(f, kT, ntry);
       ngtry = coexisting_vapor_density(f, kT, ntry);
       pgtry = pressure(f, kT, ngtry);
-      printf("nl = %g\tng = %g,\t pl = %g\t pv = %g\n", ntry, ngtry,
-             ptry, pgtry);
+      //printf("nl = %g\tng = %g,\t pl = %g\t pv = %g\n", ntry, ngtry,
+      //       ptry, pgtry);
       if (pgtry > ptry) {
         n1 = ntry;
       } else {
@@ -143,7 +143,7 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
       }
     }
   } while (fabs(n2-n1)/n2 > 1e-12 || isnan(ftry));
-  printf("pl = %g\tpv = %g\n", pressure(f, kT, (n2+n1)*0.5), pressure(f, kT, ngtry));
+  //printf("pl = %g\tpv = %g\n", pressure(f, kT, (n2+n1)*0.5), pressure(f, kT, ngtry));
   return (n2+n1)*0.5;
 }
 

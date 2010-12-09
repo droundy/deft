@@ -18,7 +18,6 @@
 #include <time.h>
 #include "Functionals.h"
 #include "equation-of-state.h"
-#include "steam-table.h"
 
 int retval = 0;
 double kT = water_prop.kT;
@@ -125,10 +124,22 @@ int main(int, char **argv) {
                nl/water_prop.liquid_density - 1);
         retval++;
       }
+
+      double nv = coexisting_vapor_density(f, water_prop.kT, nl);
+      printf("predicted saturated vapor density: %g\n", nv);
+      printf("actual vapor density:    %g\n", water_prop.vapor_density);
       //double mu = f.derive(-kT*log(nl))*kT/nl; // convert from derivative w.r.t. V
       //o = fopen("saft-fluid-saturated.dat", "w");
       //equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, 1.1*nl);
       //fclose(o);
+
+      double pv = pressure(f, water_prop.kT, nv);
+      printf("vapor pressure is %g\n", pv);
+      if (fabs(pv/water_prop.kT/nv - 1) > 1e-4) {
+        printf("FAIL: error in vapor pressure, steam isn't ideal gas? %g\n",
+               pv/water_prop.kT/nv - 1);
+        retval++;
+      }
     }
 
     {
@@ -156,36 +167,6 @@ int main(int, char **argv) {
       }
       fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
-    }
-
-    {
-      o = fopen("equation-of-state.dat", "w");
-      FILE *experiment = fopen("experimental-equation-of-state.dat", "w");
-      for (int i=0; temperatures_kelvin[i]; i++) {
-        clock_t start = clock();
-        const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
-        double kT = kB*temperatures_kelvin[i];
-        Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
-                                     water_prop.epsilonAB, water_prop.kappaAB,
-                                     water_prop.epsilon_dispersion,
-                                     water_prop.lambda_dispersion, 0);
-        double nl = saturated_liquid(f, kT);
-        double nv = coexisting_vapor_density(f, kT, nl);
-        double p = pressure(f, kT, nl);
-        double pv = pressure(f, kT, nv);
-        printf("EOS:  %g\t%g\t%g\t%g\t%g\t(%g seconds)\n",
-               temperatures_kelvin[i], p, pv, nl, nv,
-               (clock() - double(start))/CLOCKS_PER_SEC);
-
-        fprintf(o, "%g\t%g\t%g\t%g\n",
-                temperatures_kelvin[i], pv, nl, nv);
-        fprintf(experiment, "%g\t%g\t%g\t%g\t%g\n",
-                temperatures_kelvin[i], water_vapor_pressure[i],
-                water_saturation_liquid[i], water_vapor_density[i],
-                water_saturated_surface_tension[i]);
-      }
-      fclose(o);
-      fclose(experiment);
     }
 
     const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure);

@@ -10,4 +10,6 @@ set -ev
 # soonest.
 time make -j2 optimize-functionals
 
+time make -j2 paper
+
 time make -j2 recheck

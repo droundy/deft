@@ -1,3 +1,5 @@
+.PHONY: paper
+
 EXTRA_DIST = autogen.sh
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
@@ -23,7 +25,8 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
-noinst_PROGRAMS = optimize-functionals tests/generating-code.test
+noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
+	paper/figs/equation-of-state
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
@@ -91,6 +94,9 @@ tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL
 tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(ALL_CODE)
 tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-potential.cpp $(ALL_CODE)
 
+paper_figs_equation_of_state_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
+
+
 #noinst_PROGRAMS = optest
 
 #BUILT_SOURCES = patchlevel.h
@@ -110,5 +116,12 @@ html:
 	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
 		--exclude=html --exclude=Makefile.am
 
-local-clean:
+clean-local:
 	rm -rf .ikiwiki html
+	cd paper && $(MAKE) clean
+
+paper: paper/figs/equation-of-state.dat
+	cd paper && $(MAKE)
+
+paper/figs/equation-of-state.dat: paper/figs/equation-of-state
+	paper/figs/equation-of-state
