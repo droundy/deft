@@ -1,4 +1,4 @@
-.PHONY: paper
+.PHONY: paper comparison
 
 EXTRA_DIST = autogen.sh
 
@@ -26,13 +26,18 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
-	paper/figs/equation-of-state
+	paper/figs/equation-of-state \
+	comparisons/eta_effective_deft.test \
+	comparisons/gHSetaeff_deft.test \
+	comparisons/a1_sw_deft.test
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
 
-tests/generated/sum.h: tests/generating-code.test
+# The $(COMPARISONDATA) below is a fake dependency in order to ensure
+# that the comparisons are run prior to the tests.
+tests/generated/sum.h: tests/generating-code.test $(COMPARISONDATA)
 	test -d tests/generated || mkdir tests/generated
 	tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
@@ -65,7 +70,7 @@ check_PROGRAMS = \
 	tests/eos.test \
 	tests/eps.test
 
-TESTS = tests/null.sh tests/print-iter.sh $(check_PROGRAMS)
+TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh $(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
@@ -96,6 +101,9 @@ tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-poten
 
 paper_figs_equation_of_state_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
 
+comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
+comparisons_a1_sw_deft_test_SOURCES = comparisons/a1_sw_deft.cpp $(GENERIC_CODE)
+comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENERIC_CODE)
 
 #noinst_PROGRAMS = optest
 
@@ -125,3 +133,19 @@ paper: paper/figs/equation-of-state.dat
 
 paper/figs/equation-of-state.dat: paper/figs/equation-of-state
 	paper/figs/equation-of-state
+
+COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat
+
+comparisons/eta_effective_vrpack.test: comparisons/eta_effective_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+# The following rule works with any of the comparisons...
+comparisons/%.dat: comparisons/%.test
+	$< > $@
+
+comparisons/a1_sw_vrpack.test: comparisons/a1_sw_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/gHSetaeff_vrpack.test: comparisons/gHSetaeff_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+
+comparison: $(COMPARISONDATA)
+	tests/comparisons.sh
