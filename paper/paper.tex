@@ -281,17 +281,6 @@ dispersion term based on the SAFT-VR approach, which has two free
 parameters, an interaction energy $\epsilon_\textit{disp}$ and a
 length scale $\lambda_\textit{disp}$.
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/finding-vapor-pressure}
-\end{center}
-\caption{By plotting the free energy vs. density it is possible to
-  determine a liquid or vapor state by the energy minima.  We can adjust the
-  available free parameters to ensure that liquid and vapor coexist with
-  the same minimum free energy.  }
-\label{fig:homogeneous}
-\end{figure}
-
 
 \begin{figure}
 \begin{center}
@@ -313,6 +302,22 @@ length scale $\lambda_\textit{disp}$.
 \end{figure}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
+
+In order to ensure that the empirical parameters are correct, we test
+the vapor pressure (see Figure~\ref{fig:equation-of-state}) and
+saturated liquid density (see
+Figure~\ref{fig:saturated-liquid-density}) against experimental
+values.  To find these densities, we use the ``common tangent'' rule,
+as illustrated in Figure~\ref{fig:homogeneous}.
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/finding-vapor-pressure}
+\end{center}
+\caption{By plotting the free energy vs. density it is possible to
+  determine a saturated liquid or vapor state by the common tangent
+  method.  }
+\label{fig:homogeneous}
+\end{figure}
 
 \begin{table}
 \begin{tabular}{ccc}
