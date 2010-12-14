@@ -2,10 +2,10 @@
 
 set -ev
 
-diff -u comparisons/eta_effective*.dat
-
-tests/print-iter.test > tests/print-iter.sh.log.log
-
-diff -u tests/print-iter.sh.correct tests/print-iter.sh.log.log
+for i in eta_effective gHSetaeff a1_sw a2_sw; do
+    echo working on $i
+    echo diff --side-by-side comparisons/${i}_vrpack.dat comparisons/${i}_deft.dat
+    diff --side-by-side comparisons/${i}_deft.dat comparisons/${i}_vrpack.dat
+done
 
 echo this test passes

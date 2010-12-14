@@ -36,6 +36,7 @@ ALL_FIGURES=\
 	figs/correlation.gp \
 	figs/equation-of-state.gp\
 	figs/saturated-liquid-density.gp\
+	figs/finding-vapor-pressure.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \

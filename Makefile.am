@@ -26,9 +26,11 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
-	paper/figs/equation-of-state \
+	paper/figs/equation-of-state.mkdat \
+	paper/figs/finding-vapor-pressure.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
+	comparisons/a2_sw_deft.test \
 	comparisons/a1_sw_deft.test
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
@@ -99,10 +101,12 @@ tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL
 tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(ALL_CODE)
 tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-potential.cpp $(ALL_CODE)
 
-paper_figs_equation_of_state_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
+paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
+paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_a1_sw_deft_test_SOURCES = comparisons/a1_sw_deft.cpp $(GENERIC_CODE)
+comparisons_a2_sw_deft_test_SOURCES = comparisons/a2_sw_deft.cpp $(GENERIC_CODE)
 comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENERIC_CODE)
 
 #noinst_PROGRAMS = optest
@@ -128,13 +132,16 @@ clean-local:
 	rm -rf .ikiwiki html
 	cd paper && $(MAKE) clean
 
-paper: paper/figs/equation-of-state.dat
+paper: paper/figs/equation-of-state.dat paper/figs/finding-vapor-pressure.dat
 	cd paper && $(MAKE)
 
-paper/figs/equation-of-state.dat: paper/figs/equation-of-state
-	paper/figs/equation-of-state
+paper/figs/%.dat: paper/figs/%.mkdat
+	$<
 
-COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat
+COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
+	comparisons/gHSetaeff_vrpack.dat comparisons/gHSetaeff_deft.dat \
+	comparisons/a1_sw_vrpack.dat comparisons/a1_sw_deft.dat \
+	comparisons/a2_sw_vrpack.dat comparisons/a2_sw_deft.dat
 
 comparisons/eta_effective_vrpack.test: comparisons/eta_effective_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
@@ -143,6 +150,8 @@ comparisons/%.dat: comparisons/%.test
 	$< > $@
 
 comparisons/a1_sw_vrpack.test: comparisons/a1_sw_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/a2_sw_vrpack.test: comparisons/a2_sw_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 comparisons/gHSetaeff_vrpack.test: comparisons/gHSetaeff_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<

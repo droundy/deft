@@ -9,4 +9,4 @@
 *.log
 *.blg
 *.bbl
-figs/equation-of-state
+figs/*.mkdat
