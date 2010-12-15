@@ -18,6 +18,10 @@
 #include "Functionals.h"
 #include <stdio.h>
 
+static inline double sqr(double x) {
+  return x*x;
+}
+
 double find_minimum(Functional f, double nmin, double nmax) {
   double nbest = nmin;
   double ebest = f(nmin);
@@ -33,30 +37,67 @@ double find_minimum(Functional f, double nmin, double nmax) {
   }
   //printf("best Veff is %g\n", nbest);
   double nlo = nbest - dn, nhi = nbest + dn;
+  double elo = f(nlo);
+  double ehi = f(nhi);
   const double fraccuracy = 1e-15;
   while ((nhi - nlo)/fabs(nbest) > fraccuracy) {
+    // First we'll do a golden-section search...
     if (nbest < 0.5*(nhi+nlo)) {
-      double ntry = 0.3*nlo + 0.7*nhi;
+      double ntry = 0.38*nlo + 0.62*nhi;
       double etry = f(ntry);
       if (etry < ebest) {
         nlo = nbest;
+        elo = ebest;
         nbest = ntry;
         ebest = etry;
       } else {
         nhi = ntry;
+        ehi = etry;
       }
     } else {
-      double ntry = 0.7*nlo + 0.3*nhi;
+      double ntry = 0.62*nlo + 0.38*nhi;
       double etry = f(ntry);
       if (etry < ebest) {
         nhi = nbest;
+        ehi = ebest;
         nbest = ntry;
         ebest = etry;
       } else {
         nlo = ntry;
+        elo = etry;
       }
     }
-    //printf("improved Veff is %g\n", nbest);
+
+    // Now let's try something a bit more bold...
+    
+    double ntry = nbest - 0.5*(sqr(nbest-nlo)*(ebest-elo) - sqr(nbest-nhi)*(ebest-ehi))/
+      ((nbest-nlo)*(ebest-elo) - (nbest-nhi)*(ebest-ehi));
+    if (ntry > nlo && ntry < nhi && ntry != nbest) {
+      double etry = f(ntry);
+      if (ntry < nbest) {
+        if (etry < ebest) {
+          nhi = nbest;
+          ehi = ebest;
+          nbest = ntry;
+          ebest = etry;
+        } else {
+          nlo = ntry;
+          elo = etry;
+        }
+      } else {
+        if (etry < ebest) {
+          nlo = nbest;
+          elo = ebest;
+          nbest = ntry;
+          ebest = etry;
+        } else {
+          nhi = ntry;
+          ehi = etry;
+        }
+      }
+    }
+    
+    //printf("improved Veff is %g +/- %g\n", nbest, (nhi-nlo));
   }
   return nbest;
 }
@@ -108,7 +149,10 @@ double coexisting_vapor_density(Functional f, double kT, double liquid_density) 
     nmax *= 0.5;
     deriv = -find_chemical_potential(fmu, kT, nmax);
   } while (deriv < 0);
-  return find_density(fmu, kT, 1e-14, nmax);
+  //clock_t my_time = clock();
+  double d = find_density(fmu, kT, 1e-14, nmax);
+  //printf("find_density took %g seconds\n", (clock()-my_time)/double(CLOCKS_PER_SEC));
+  return d;
 }
 
 double saturated_liquid(Functional f, double kT, double nmin, double nmax) {

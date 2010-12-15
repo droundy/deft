@@ -19,9 +19,12 @@ Functional ExternalPotential(const VectorXd &V);
 
 Functional gHS(Functional n, double radius);
 Functional gHScarnahan(Functional n, double radius);
-Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa);
-Functional Xassociation(double radius, double temperature, double epsilon, double kappa);
-Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa);
+Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa,
+                     double epsdis, double lambdadis);
+Functional Xassociation(double radius, double temperature, double epsilon, double kappa,
+                        double epsdis, double lambdadis);
+Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa,
+                           double epsdis, double lambdadis);
 Functional SaftFluidSlow(double radius, double temperature, double epsilon, double kappa,
                          double epsdis, double lambda, double mu);
 Functional SaftFluid(double radius, double temperature,

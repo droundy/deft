@@ -53,8 +53,10 @@ int main(int, char **argv) {
   Functional n = EffectivePotentialToDensity(kT);
   test_energy("association",
               AssociationSAFT(water_prop.lengthscale, kT,
-                              water_prop.epsilonAB, water_prop.kappaAB)(n),
-              -3.5474667542423e-10);
+                              water_prop.epsilonAB, water_prop.kappaAB,
+                              water_prop.epsilon_dispersion,
+                              water_prop.lambda_dispersion)(n),
+              -2.601921194056033e-12);
   const double dispersion_energy = -2.255449528744535e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale, kT,
@@ -81,7 +83,7 @@ int main(int, char **argv) {
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, 0),
-              -5.464642381433841e-09);
+              -5.112497627203667e-09);
   //test_energy("SAFT",
   //            SaftFluid(water_prop.lengthscale, kT,
   //                      water_prop.epsilonAB, water_prop.kappaAB,

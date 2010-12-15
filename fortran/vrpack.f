@@ -198,26 +198,26 @@ c******************************************************************************
       return
       end    
 c******************************************************************************
-      real*8 function g_sw(eta,lambda,epsilon)
+      real*8 function g_sw(eta,temp,lambda,epsilon)
 ******************************************************************************
 c
 c     calculates the square well g at contact using the saft vr model
       implicit none
       real*8 eta,lambda,da1_deta,da1_dlam
       real*8 term1,beta,epsilon,g_hs
-      real*8 rho_l,rho_v,temp,pressure,cp_bulk
-      common/thermo/rho_l,rho_v,temp,pressure,cp_bulk
+      real*8 temp
       beta=1d0/temp
 c
       term1=da1_deta(eta,lambda,epsilon)-lambda/3.0d0/eta*
      &       da1_dlam(eta,lambda,epsilon)
 c
       g_sw=g_hs(eta)+0.25d0*beta*term1
+      g_sw = g_hs(eta)
 c
       return
       end
 c******************************************************************************
-      real*8 function dg_sw_dn(eta,lambda,epsilon)
+      real*8 function dg_sw_dn(eta,temp,lambda,epsilon)
 c******************************************************************************
       implicit none
       real*8 eta,lambda,epsilon
@@ -225,7 +225,6 @@ c******************************************************************************
       real*8 beta,term1,term2,term3
       real*8 da1_dlam,d2a1_dlamdn,d2a1_dn2,dg_hs_dn
 c
-      common/thermo/rho_l,rho_v,temp,pressure,cp_bulk
       beta=1.d0/temp
 c
       term1=d2a1_dn2(eta,lambda,epsilon)

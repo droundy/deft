@@ -28,5 +28,11 @@ LiquidProperties water_prop = {
   250.0*kB, // epsilon_dispersion from Clark et al, table 6
   1.78890, // lambda_dispersion from Clark et al, table 6
   1400.00*kB, // epsilonAB from Clark et al, table 6
-  1.06673*angstrom*angstrom*angstrom, // kappaAB from Clark et al, table 6
+
+  // The following two are almost the same, but differ ever so
+  // slightly.  Using the decimal rounded value from the paper gives
+  // ever so small differences from the value actually used (which is
+  // a round decimal relative to \sigma^3.
+  0.0381876*(3.03420*angstrom*3.03420*angstrom*3.03420*angstrom), // kappaAB from Clark et al code
+  //1.06673*angstrom*angstrom*angstrom, // kappaAB from Clark et al, table 6
 };

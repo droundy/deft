@@ -42,17 +42,17 @@ plot [:] [:] \
 'figs/finding-vapor-pressure.dat' u 1:3 notitle with lines ls 2
 
 set size 0.38,0.4        # The second one (inset)
-set origin 0.6,0.5
+set origin 0.58,0.5
 
 #set logscale x          # New command to change x-axis to log-scale
 
 #set xlabel "x (logarithmic scale)" font "Helvetica,16" 0,0.8
 unset xlabel
 unset ylabel
-set xtics 5e-11 font "Helvetica,16"
-set ytics 1e-13 font "Helvetica,16"
+set xtics 1e-7 font "Helvetica,16"
+set ytics 1e-10 font "Helvetica,16"
 
-plot [:1e-10] [:] \
+plot [:3e-7] [:] \
 'figs/finding-vapor-pressure.dat' u 1:2 notitle with lines ls 1, \
 'figs/finding-vapor-pressure.dat' u 1:3 notitle with lines ls 2
 

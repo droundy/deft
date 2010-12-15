@@ -52,6 +52,27 @@ Functional gHS(Functional n3, double R) {
                                    invdiff*(1.0/18/4)*n2));
 }
 
+Functional da1_deta(double radius, double epsdis, double lambdainput);
+Functional da1_dlam(double radius, double epsdis, double lambdainput);
+
+Functional gSW(double temp, double R, double epsdis0, double lambda) {
+  // This is the approximate *contact* density of a square-well fluid.
+  // The formula for this is:
+  //      gSW = gHS + 0.25/kT*(da1_deta - lambda/(3*eta)*da1_dlambda)
+
+  // First let's give names to a few constants...
+  Functional lam = Functional(lambda).set_name("lambda_dispersion");
+  Functional epsdis = Functional(epsdis0).set_name("epsilon_dispersion");
+  Functional kT = Functional(temp).set_name("kT");
+  Functional n3 = StepConvolve(R);
+
+  Functional ghs = gHS(n3, R);
+  ghs = gHScarnahan(n3, R);
+  Functional da1deta = da1_deta(R, epsdis0, lambda);
+  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
+  return ghs; // + (Functional(0.25)/kT)*(da1deta - lam/(3*n3)*da1dlam);
+}
+
 Functional gHScarnahan_simple(Functional n3) {
   // n3 is the "packing fraction" convolved functional.  It may be an
   // "effective packing fraction", in the case of SAFT-VR.
@@ -76,9 +97,9 @@ Functional dgHScarnahan_dn(Functional n3, double R) {
   return zeta*(2.5-n3)/Pow(4)(1-n3);
 }
 
-Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa) {
-  Functional n3 = StepConvolve(radius);
-  Functional g = gHS(n3, radius);
+Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa,
+                     double epsdis, double lambdadis) {
+  Functional g = gSW(temperature, radius, epsdis, lambdadis);
   Functional R(radius);
   R.set_name("R");
   Functional T(temperature);
@@ -87,17 +108,18 @@ Functional DeltaSAFT(double radius, double temperature, double epsilon, double k
   eps.set_name("epsilonAB");
   Functional K(kappa);
   K.set_name("kappaAB");
-  Functional delta = g*(exp(eps/T) - 1)*8*Pow(3)(R)*K;
+  Functional delta = g*(exp(eps/T) - 1)*K;
   delta.set_name("delta");
   return delta;
 }
 
-Functional Xassociation(double radius, double temperature, double epsilon, double kappa) {
+Functional Xassociation(double radius, double temperature, double epsilon, double kappa,
+                        double epsdis, double lambdadis) {
   Functional R(radius);
   R.set_name("R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
-  Functional delta = DeltaSAFT(radius, temperature, epsilon, kappa);
+  Functional delta = DeltaSAFT(radius, temperature, epsilon, kappa, epsdis, lambdadis);
 
   Functional zeta = getzeta(radius);
   Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - 1) / (4* n0 * zeta*delta);
@@ -105,7 +127,8 @@ Functional Xassociation(double radius, double temperature, double epsilon, doubl
   return X;
 }
 
-Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa) {
+Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa,
+                           double epsdis, double lambdadis) {
   Functional R(radius);
   R.set_name("R");
   Functional n2 = ShellConvolve(radius);
@@ -113,7 +136,7 @@ Functional AssociationSAFT(double radius, double temperature, double epsilon, do
   Functional T(temperature);
   T.set_name("kT");
   Functional zeta = getzeta(radius);
-  Functional X = Xassociation(radius, temperature, epsilon, kappa);
+  Functional X = Xassociation(radius, temperature, epsilon, kappa, epsdis, lambdadis);
   return (T*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
 }
 
@@ -132,6 +155,17 @@ Functional eta_effective(Functional eta, double lambdainput) {
   Functional c1 = Functional(2.25855) - 1.50349*lambda + 0.249434*lambda*lambda;
   Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
   Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
+  // The following equation is equation 36 in Gil-Villegas 1997 paper.
+  return c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
+}
+
+Functional detaeff_dlam(Functional eta, double lambdainput) {
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  // The following constants are from equation 37 in Gil-Villegas 1997 paper.
+  Functional c1 = Functional(-1.50349) + 0.249434*2*lambda;
+  Functional c2 = Functional(1.40049) - 0.827739*2*lambda;
+  Functional c3 = Functional(-15.0427) + 5.30827*2*lambda;
   // The following equation is equation 36 in Gil-Villegas 1997 paper.
   return c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
 }
@@ -165,6 +199,29 @@ Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
   Functional a1vdw = -4*(lambda*lambda*lambda - 1)*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
+}
+
+Functional da1_dlam(double radius, double epsdis, double lambdainput) {
+  Functional R(radius);
+  R.set_name("R");
+  Functional n3 = StepConvolve(radius);
+  // FIXME: I think maybe I actually want to compute eta with a larger
+  // radius, so as to effectively give the interaction a larger
+  // radius? Maybe lambda*radius?
+  Functional eta = n3; // In Gil-Villegas 1997 paper, packing fraction is called eta...
+  eta.set_name("eta");
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  Functional eta_eff = eta_effective(eta, lambdainput);
+  Functional epsilon_dispersion(epsdis);
+  epsilon_dispersion.set_name("epsilon_dispersion");
+  // The following equation is equation 35 in Gil-Villegas 1997 paper.
+  Functional a1vdw_nolam = -4*epsilon_dispersion*eta;
+  // The following equation is equation 34 in Gil-Villegas 1997 paper.
+  return a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
+                      (lambda*lambda*lambda - 1)*dgHScarnahan_dn(eta_eff, radius)*
+                      detaeff_dlam(eta, lambdainput));
+  
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput) {
@@ -240,6 +297,6 @@ Functional SaftFluidSlow(double R, double kT,
   Functional n = EffectivePotentialToDensity(kT);
   return HardSpheresWBnotensor(R, kT)(n) + IdealGasOfVeff(kT) +
     ChemicalPotential(mu)(n) +
-    AssociationSAFT(R, kT, epsilon, kappa)(n) +
+    AssociationSAFT(R, kT, epsilon, kappa, epsdis, lambda)(n) +
     DispersionSAFT(R, kT, epsdis, lambda)(n);
 }

@@ -30,6 +30,11 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/finding-vapor-pressure.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
+	comparisons/assoc_deft.test \
+	comparisons/delta_deft.test \
+	comparisons/x_deft.test \
+	comparisons/gsw_deft.test \
+	comparisons/da1dlam_deft.test \
 	comparisons/a2_sw_deft.test \
 	comparisons/a1_sw_deft.test
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
@@ -105,6 +110,11 @@ paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
+comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
+comparisons_delta_deft_test_SOURCES = comparisons/delta_deft.cpp $(GENERIC_CODE)
+comparisons_x_deft_test_SOURCES = comparisons/x_deft.cpp $(GENERIC_CODE)
+comparisons_gsw_deft_test_SOURCES = comparisons/gsw_deft.cpp $(GENERIC_CODE)
+comparisons_da1dlam_deft_test_SOURCES = comparisons/da1dlam_deft.cpp $(GENERIC_CODE)
 comparisons_a1_sw_deft_test_SOURCES = comparisons/a1_sw_deft.cpp $(GENERIC_CODE)
 comparisons_a2_sw_deft_test_SOURCES = comparisons/a2_sw_deft.cpp $(GENERIC_CODE)
 comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENERIC_CODE)
@@ -131,6 +141,7 @@ html:
 clean-local:
 	rm -rf .ikiwiki html
 	cd paper && $(MAKE) clean
+	rm -f comparisons/*.o comparisons/*.mkdat
 
 paper: paper/figs/equation-of-state.dat paper/figs/finding-vapor-pressure.dat
 	cd paper && $(MAKE)
@@ -140,6 +151,11 @@ paper/figs/%.dat: paper/figs/%.mkdat
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
 	comparisons/gHSetaeff_vrpack.dat comparisons/gHSetaeff_deft.dat \
+	comparisons/assoc_vrpack.dat comparisons/assoc_deft.dat \
+	comparisons/delta_vrpack.dat comparisons/delta_deft.dat \
+	comparisons/x_vrpack.dat comparisons/x_deft.dat \
+	comparisons/gsw_vrpack.dat comparisons/gsw_deft.dat \
+	comparisons/da1dlam_vrpack.dat comparisons/da1dlam_deft.dat \
 	comparisons/a1_sw_vrpack.dat comparisons/a1_sw_deft.dat \
 	comparisons/a2_sw_vrpack.dat comparisons/a2_sw_deft.dat
 
@@ -154,6 +170,16 @@ comparisons/a1_sw_vrpack.test: comparisons/a1_sw_vrpack.f fortran/vrpack.f
 comparisons/a2_sw_vrpack.test: comparisons/a2_sw_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 comparisons/gHSetaeff_vrpack.test: comparisons/gHSetaeff_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/assoc_vrpack.test: comparisons/assoc_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/delta_vrpack.test: comparisons/delta_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/x_vrpack.test: comparisons/x_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/gsw_vrpack.test: comparisons/gsw_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/da1dlam_vrpack.test: comparisons/da1dlam_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 
 comparison: $(COMPARISONDATA)
