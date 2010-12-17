@@ -22,6 +22,64 @@ static inline double sqr(double x) {
   return x*x;
 }
 
+double find_minimum_slow(Functional f, double xmin, double xmax) {
+  double dmin = f.derive(xmin);
+  double dmax = f.derive(xmax);
+  if (dmax < 0) {
+    printf("Oh no, xmax has negative slope!\n");
+    exit(1);
+  }
+  if (dmin > 0) {
+    printf("Oh no, xmin has positive slope!\n");
+    exit(1);
+  }
+  const double fraccuracy = 1e-15;
+  do {
+    // First let's do a bisection (to guarantee we converge eventually).
+    double xtry = 0.5*(xmax + xmin);
+    double dtry = f.derive(xtry);
+    if (dtry > 0) {
+      dmax = dtry;
+      xmax = xtry;
+    } else if (dtry == 0) {
+      return xtry;
+    } else {
+      xmin = xtry;
+      dmin = dtry;
+    }
+    // Now let's do a secant method (so maybe we'll converge really quickly)...
+    xtry = (xmin*dmax - xmax*dmin)/(dmax - dmin);
+    dtry = f.derive(xtry);
+    if (dtry > 0) {
+      dmax = dtry;
+      xmax = xtry;
+    } else if (dtry == 0) {
+      return xtry;
+    } else {
+      xmin = xtry;
+      dmin = dtry;
+    }
+    // Now let's use a secant approach to "bracket" the minimum hopefully.
+    xtry = (xmin*dmax - xmax*dmin)/(dmax - dmin);
+    if (xtry - xmin > xmax - xtry) {
+      xtry -= xmax - xtry;
+    } else {
+      xtry += xtry - xmin;
+    }
+    dtry = f.derive(xtry);
+    if (dtry > 0) {
+      dmax = dtry;
+      xmax = xtry;
+    } else if (dtry == 0) {
+      return xtry;
+    } else {
+      xmin = xtry;
+      dmin = dtry;
+    }
+  } while (fabs((xmax-xmin)/xmax) > fraccuracy);
+  return 0.5*(xmax+xmin);
+}
+
 double find_minimum(Functional f, double nmin, double nmax) {
   double nbest = nmin;
   double ebest = f(nmin);
@@ -142,6 +200,8 @@ double chemical_potential_to_density(Functional f, double kT, double mu,
 double coexisting_vapor_density(Functional f, double kT, double liquid_density) {
   const double mu = find_chemical_potential(f, kT, liquid_density);
   double nmax = liquid_density;
+  // Here I assume that the vapor density is at least a hundredth of a
+  // percent smaller than the liquid density.
   Functional n = EffectivePotentialToDensity(kT);
   Functional fmu = f + ChemicalPotential(mu)(n);
   double deriv;
@@ -189,6 +249,11 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
   } while (fabs(n2-n1)/n2 > 1e-12 || isnan(ftry));
   //printf("pl = %g\tpv = %g\n", pressure(f, kT, (n2+n1)*0.5), pressure(f, kT, ngtry));
   return (n2+n1)*0.5;
+}
+
+void saturated_liquid_properties(Functional f, LiquidProperties *prop) {
+  prop->liquid_density = saturated_liquid(f, prop->kT);
+  prop->vapor_density = coexisting_vapor_density(f, prop->kT, prop->liquid_density);
 }
 
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {

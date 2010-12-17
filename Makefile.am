@@ -26,6 +26,7 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 bin_PROGRAMS = deft
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
+	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
 	paper/figs/finding-vapor-pressure.mkdat \
 	comparisons/eta_effective_deft.test \
@@ -106,6 +107,7 @@ tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL
 tests_ideal_gas_optimization_test_SOURCES = tests/ideal-gas-optimization.cpp $(ALL_CODE)
 tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-potential.cpp $(ALL_CODE)
 
+paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(GENERIC_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
 
@@ -143,7 +145,7 @@ clean-local:
 	cd paper && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
-paper: paper/figs/equation-of-state.dat paper/figs/finding-vapor-pressure.dat
+paper: paper/figs/equation-of-state.dat paper/figs/finding-vapor-pressure.dat paper/figs/surface-tension.dat
 	cd paper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat

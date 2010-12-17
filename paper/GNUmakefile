@@ -37,6 +37,9 @@ ALL_FIGURES=\
 	figs/equation-of-state.gp\
 	figs/saturated-liquid-density.gp\
 	figs/finding-vapor-pressure.gp\
+	figs/temperature-versus-density.gp\
+	figs/surface-tension.gp\
+	figs/surface-298.eps\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -57,3 +60,8 @@ figs/equation-of-state.eps: figs/equation-of-state.gp figs/equation-of-state.dat
 figs/saturated-liquid-density.eps: figs/saturated-liquid-density.gp \
 	figs/equation-of-state.dat \
 	figs/experimental-equation-of-state.dat
+figs/temperature-versus-density.eps: figs/saturated-liquid-density.gp \
+	figs/equation-of-state.dat \
+	figs/experimental-equation-of-state.dat
+figs/surface-tension.eps: figs/surface-tension.gp \
+	figs/surface-tension.dat

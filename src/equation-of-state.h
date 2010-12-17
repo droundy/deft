@@ -15,7 +15,8 @@ static const double atmospheric_pressure = 101325*3.3989316e-14; // in Hartree/b
 
 // Ultimately, I'd like surface_tension to be smart about finding a
 // converged value.  Or maybe just a second function to do that?
-double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose);
+double surface_tension(Minimizer min, Functional f, LiquidProperties prop,
+                       bool verbose, const char *plotname=0);
 
 double find_density(Functional f, double kT, double nmin, double nmax);
 double pressure(Functional f, double kT, double density);
@@ -28,6 +29,8 @@ double chemical_potential_to_density(Functional f, double kT, double mu,
 double saturated_liquid(Functional f, double kT,
                         double nmin = 1e-10, double nmax = 1e-2);
 double coexisting_vapor_density(Functional f, double kT, double liquid_density);
+
+void saturated_liquid_properties(Functional f, LiquidProperties *prop);
 
 void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax);
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax);

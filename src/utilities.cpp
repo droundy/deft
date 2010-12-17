@@ -20,7 +20,8 @@
 #include "Functionals.h"
 #include <stdio.h>
 
-double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool verbose) {
+double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
+                       bool verbose, const char *plotname) {
   int numptspersize = 100;
   int size = 16;
   Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,size*prop.lengthscale));
@@ -33,8 +34,6 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
   for (int i=0; i<gd.NxNyNz/2; i++) potential[i] = Veff_gas;
   for (int i=gd.NxNyNz/2; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
-  Functional n = EffectivePotentialToDensity(prop.kT);
-  Functional f0 = f(n);
   f0.run_finite_difference_test("f0", potential);
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
@@ -44,10 +43,8 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
     }
   const double Einterface = f0.integral(potential);
   double Ninterface = 0;
-  {
-    Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
-    for (int i=0;i<gd.NxNyNz;i++) Ninterface += density[i]*gd.dvolume;
-  }
+  Grid interface_density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
+  for (int i=0;i<gd.NxNyNz;i++) Ninterface += interface_density[i]*gd.dvolume;
   if (verbose) printf("Got interface energy of %g.\n", Einterface);
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_gas;
@@ -88,6 +85,13 @@ double surface_tension(Minimizer min, Functional f, LiquidProperties prop, bool 
     printf("Ninterface/liquid/gas = %g/%g/%g\n", Ninterface, Nliquid, Ngas);
     printf("X is %g\n", X);
     printf("surface tension is %.10g\n", surface_tension);
+  }
+  if (plotname) {
+    char *estr = (char *)malloc(1024);
+    sprintf(estr, "Surface tension = %g", surface_tension);
+    interface_density.epsNative1d(plotname, Cartesian(0,0,0),
+                                  Cartesian(0,0,size*prop.lengthscale), 1, 1, estr);
+    free(estr);
   }
   return surface_tension;
 }

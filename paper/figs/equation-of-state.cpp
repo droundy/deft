@@ -33,14 +33,14 @@ int main(int, char **) {
   int imax=0;
   while (temperatures_kelvin[imax]) imax++;
   for (int i=0; i<imax; i+=3) {
-    printf("Working on %g Kelvin...\n", temperatures_kelvin[i]);
+    printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     double kT = kB*temperatures_kelvin[i];
     Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
                                  water_prop.epsilonAB, water_prop.kappaAB,
                                  water_prop.epsilon_dispersion,
                                  water_prop.lambda_dispersion, 0);
-    double nl = saturated_liquid(f, kT, 0.0035, 0.005);
+    double nl = saturated_liquid(f, kT, 0.0015, 0.005);
     took("Finding saturated liquid density");
     double nv = coexisting_vapor_density(f, kT, nl);
     took("Finding coesisting vapor density");
