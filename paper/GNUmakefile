@@ -39,7 +39,7 @@ ALL_FIGURES=\
 	figs/finding-vapor-pressure.gp\
 	figs/temperature-versus-density.gp\
 	figs/surface-tension.gp\
-	figs/surface-298.eps\
+	figs/surface-298.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \

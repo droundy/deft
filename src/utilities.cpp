@@ -86,13 +86,9 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
     printf("X is %g\n", X);
     printf("surface tension is %.10g\n", surface_tension);
   }
-  if (plotname) {
-    char *estr = (char *)malloc(1024);
-    sprintf(estr, "Surface tension = %g", surface_tension);
-    interface_density.epsNative1d(plotname, Cartesian(0,0,0),
-                                  Cartesian(0,0,size*prop.lengthscale), 1, 1, estr);
-    free(estr);
-  }
+  if (plotname)
+    interface_density.Dump1D(plotname, Cartesian(0,0,0),
+                             Cartesian(0,0,size*prop.lengthscale));
   return surface_tension;
 }
 

@@ -331,6 +331,35 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
   }
 }
 
+
+void Grid::Dump1D(const char *fname, Cartesian xmin, Cartesian xmax) const {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+  } else {
+    // put ends on the grid!
+    xmin = gd.fineLat.round(xmin);
+    xmax = xmin + gd.fineLat.round(Cartesian(xmax - xmin));
+    const double myxrange = (xmax-xmin).norm();
+    Lattice weelat(gd.fineLat);
+    double mydx = 0.1*pow(weelat.volume(), 1.0/3);
+    {
+      Relative foo = weelat.round(weelat.toRelative(Cartesian(xmax - xmin)));
+      if (foo[1] == 0 && foo[2] == 0) mydx = weelat.a1().norm();
+      else if (foo[0] == 0 && foo[2] == 0) mydx = weelat.a2().norm();
+      else if (foo[0] == 0 && foo[1] == 0) mydx = weelat.a3().norm();
+    }
+
+    for (double x=0; x<=1; x += mydx/myxrange) {
+      Cartesian here(xmin + (xmax-xmin)*x);
+      double fhere = (*this)(gd.fineLat.round(here));
+      fprintf(out, "%g\t%g\n", (here-xmin).norm(), fhere);
+    }
+    fclose(out);
+  }
+}
+
 void Grid::epsRadial1d(const char *fname, double rmin, double rmax, double yscale, double rscale, const char *comment) const {
   FILE *out = fopen(fname, "w");
   if (!out) {

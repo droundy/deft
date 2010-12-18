@@ -47,7 +47,7 @@ int main(int, char **) {
                                  prop.epsilon_dispersion,
                                  prop.lambda_dispersion, mu);
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/surface-%03g.eps", T);
+    sprintf(plotname, "paper/figs/surface-%03g.dat", T);
     // Here we set up an unused lattice.
     Lattice lat(Cartesian(0.2,0,0), Cartesian(0,0.2,0), Cartesian(0,0,20));
     GridDescription gd(lat, 1, 1, 200);
