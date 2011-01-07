@@ -42,10 +42,10 @@ int main(int, char **) {
     saturated_liquid_properties(fslow, &prop);
     took("Finding bulk densities");
     double mu = find_chemical_potential(fslow, prop.kT, prop.liquid_density);
-    Functional f = SaftFluidSlow(prop.lengthscale, prop.kT,
-                                 prop.epsilonAB, prop.kappaAB,
-                                 prop.epsilon_dispersion,
-                                 prop.lambda_dispersion, mu);
+    Functional f = SaftFluid(prop.lengthscale, prop.kT,
+                             prop.epsilonAB, prop.kappaAB,
+                             prop.epsilon_dispersion,
+                             prop.lambda_dispersion, mu);
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/surface-%03g.dat", T);
     // Here we set up an unused lattice.
