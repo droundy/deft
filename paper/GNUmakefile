@@ -65,3 +65,4 @@ figs/temperature-versus-density.eps: figs/saturated-liquid-density.gp \
 	figs/experimental-equation-of-state.dat
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
+figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat

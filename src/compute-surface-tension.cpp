@@ -23,7 +23,8 @@
 double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
                        bool verbose, const char *plotname) {
   int numptspersize = 100;
-  int size = 32;
+  int size = 64;
+  const int gas_size = 10;
   Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,size*prop.lengthscale));
   GridDescription gd(lat, 1, 1, numptspersize*size);
   Grid potential(gd);
@@ -31,8 +32,8 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
   // Set the density to range from vapor to liquid
   const double Veff_liquid = -prop.kT*log(prop.liquid_density);
   const double Veff_gas = -prop.kT*log(prop.vapor_density);
-  for (int i=0; i<gd.NxNyNz/3; i++) potential[i] = Veff_gas;
-  for (int i=gd.NxNyNz/3; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
+  for (int i=0; i<gd.NxNyNz*gas_size/size; i++) potential[i] = Veff_gas;
+  for (int i=gd.NxNyNz*gas_size/size; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
   f0.run_finite_difference_test("f0", potential);
   min.minimize(f0, gd, &potential);
