@@ -68,8 +68,6 @@ Functional gSW(double temp, double R, double epsdis0, double lambda) {
 
   Functional ghs = gHS(n3, R);
   ghs = gHScarnahan(n3, R);
-  Functional da1deta = da1_deta(R, epsdis0, lambda);
-  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
   return ghs; // + (Functional(0.25)/kT)*(da1deta - lam/(3*n3)*da1dlam);
 }
 
@@ -182,8 +180,6 @@ Functional detaeff_deta(Functional eta, double lambdainput) {
 }
 
 Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
-  Functional R(radius);
-  R.set_name("R");
   Functional n3 = StepConvolve(radius);
   // FIXME: I think maybe I actually want to compute eta with a larger
   // radius, so as to effectively give the interaction a larger
@@ -202,8 +198,6 @@ Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
 }
 
 Functional da1_dlam(double radius, double epsdis, double lambdainput) {
-  Functional R(radius);
-  R.set_name("R");
   Functional n3 = StepConvolve(radius);
   // FIXME: I think maybe I actually want to compute eta with a larger
   // radius, so as to effectively give the interaction a larger
@@ -225,8 +219,6 @@ Functional da1_dlam(double radius, double epsdis, double lambdainput) {
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput) {
-  Functional R(radius);
-  R.set_name("R");
   Functional n3 = StepConvolve(radius);
   // FIXME: I think maybe I actually want to compute eta with a larger
   // radius, so as to effectively give the interaction a larger
