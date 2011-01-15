@@ -44,12 +44,12 @@ public:
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
   explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
-                      const Expression &gzero, bool iseven)
+                      const Expression &R, const Expression &gzero, bool iseven)
     : itsCounter(0) {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived,extra>(f,e,gzero,iseven), f(gd, e).name());
+    init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), f(gd, e).name());
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
@@ -253,10 +253,10 @@ template<typename Derived, typename extra>
 class ConvolveWith : public FunctionalInterface {
 public:
   ConvolveWith(Derived (*ff)(const GridDescription &, extra),
-               extra e, const Expression &gzerovv, bool isev)
-    : f(ff), gzerov(gzerovv), data(e), iseven(isev) {}
+               extra e, const Expression &R, const Expression &gzerovv, bool isev)
+    : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
-    : f(cw.f), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
+    : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
 
   EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &x) const {
     Grid out(gd, x);
@@ -277,9 +277,9 @@ public:
   }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
-      return Functional(new ConvolveWith(f, data, gzerov, iseven))(ingrad);
+      return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(ingrad);
     else
-      return Functional(new ConvolveWith(f, data, gzerov, iseven))(-1*ingrad);
+      return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(-1*ingrad);
   }
   EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -295,14 +295,14 @@ public:
   Expression printme(const Expression &x) const {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     Derived c(GridDescription(lat, 2, 2, 2), data);
-    return ifft(funexpr(c.name(), Expression("gd"), Expression("R")).set_type("ReciprocalGrid") * fft(x));
+    return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
   }
   Expression cwiseprintme(const Expression &x) const {
     return (gzerov*x).set_alias("literal");
   }
 private:
   Derived (*f)(const GridDescription &, extra);
-  Expression gzerov;
+  Expression radexpr, gzerov;
   extra data;
   bool iseven;
 };

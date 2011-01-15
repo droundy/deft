@@ -27,6 +27,7 @@
 #include "generated/log-one-minus-nbar.h"
 #include "generated/sqr-xshell.h"
 #include "generated/n2_and_n3.h"
+#include "generated/n2foosqr.h"
 #include "generated/sqr-Veff.h"
 #include "generated/ideal-gas.h"
 
@@ -158,6 +159,10 @@ int main(int, char **argv) {
   compare_functionals(Phi1plus(R, kT, mu),
                       phi1(veff) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(veff),
                       Grid(gd, -kT*n.cwise().log()), 1e-12);
+
+  Functional n2foo = ShellConvolve(1.75,Expression("foo"));
+  Functional myn2foosqr = sqr(n2foo);
+  compare_functionals(n2foosqr(1.75), myn2foosqr, n, 1e-15);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

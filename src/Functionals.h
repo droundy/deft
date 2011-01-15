@@ -46,20 +46,20 @@ Functional Identity();
 Functional EffectivePotentialToDensity(double temperature);
 Functional Gaussian(double width);
 
-Functional StepConvolve(double radius);
+Functional StepConvolve(double radius, Expression r = Expression("R"));
 
-Functional ShellConvolve(double radius);
+Functional ShellConvolve(double radius, Expression r = Expression("R"));
 
-Functional xShellConvolve(double radius);
-Functional yShellConvolve(double radius);
-Functional zShellConvolve(double radius);
+Functional xShellConvolve(double radius, Expression r = Expression("R"));
+Functional yShellConvolve(double radius, Expression r = Expression("R"));
+Functional zShellConvolve(double radius, Expression r = Expression("R"));
 
-Functional xxShellConvolve(double radius);
-Functional yyShellConvolve(double radius);
-Functional zzShellConvolve(double radius);
-Functional xyShellConvolve(double radius);
-Functional yzShellConvolve(double radius);
-Functional zxShellConvolve(double radius);
+Functional xxShellConvolve(double radius, Expression r = Expression("R"));
+Functional yyShellConvolve(double radius, Expression r = Expression("R"));
+Functional zzShellConvolve(double radius, Expression r = Expression("R"));
+Functional xyShellConvolve(double radius, Expression r = Expression("R"));
+Functional yzShellConvolve(double radius, Expression r = Expression("R"));
+Functional zxShellConvolve(double radius, Expression r = Expression("R"));
 
 Functional Pow(int power);
 Functional PowAndHalf(int powerMinusHalf);
