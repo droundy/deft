@@ -179,33 +179,40 @@ Functional detaeff_deta(Functional eta, double lambdainput) {
   return c1 + 2*c2*eta + 3*c3*sqr(eta);
 }
 
-Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
-  Functional n3 = StepConvolve(radius);
+Functional eta_for_dispersion(double radius, double lambdainput) {
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  Expression lambdaE("lambda_dispersion");
+  lambdaE.set_type("double");
+  Expression R("R");
+  R.set_type("double");
+  return (StepConvolve(lambdainput*radius,lambdaE*R)/Pow(3)(lambda)).set_name("eta_dispersion");
   // FIXME: I think maybe I actually want to compute eta with a larger
   // radius, so as to effectively give the interaction a larger
   // radius? Maybe lambda*radius?
-  Functional eta = n3; // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  eta.set_name("eta");
+}
+
+Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
+  // In Gil-Villegas 1997 paper, packing fraction is called eta...
+  Functional eta = eta_for_dispersion(radius, lambdainput);
+  eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis);
   epsilon_dispersion.set_name("epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw = -4*(lambda*lambda*lambda - 1)*epsilon_dispersion*eta;
+  Functional a1vdw = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
 }
 
 Functional da1_dlam(double radius, double epsdis, double lambdainput) {
-  Functional n3 = StepConvolve(radius);
-  // FIXME: I think maybe I actually want to compute eta with a larger
-  // radius, so as to effectively give the interaction a larger
-  // radius? Maybe lambda*radius?
-  Functional eta = n3; // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  eta.set_name("eta");
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
+  // In Gil-Villegas 1997 paper, packing fraction is called eta...
+  Functional eta = eta_for_dispersion(radius, lambdainput);
+  eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis);
   epsilon_dispersion.set_name("epsilon_dispersion");
@@ -213,25 +220,22 @@ Functional da1_dlam(double radius, double epsdis, double lambdainput) {
   Functional a1vdw_nolam = -4*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
-                      (lambda*lambda*lambda - 1)*dgHScarnahan_dn(eta_eff, radius)*
+                      (Pow(3)(lambda) - 1)*dgHScarnahan_dn(eta_eff, radius)*
                       detaeff_dlam(eta, lambdainput));
   
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput) {
-  Functional n3 = StepConvolve(radius);
-  // FIXME: I think maybe I actually want to compute eta with a larger
-  // radius, so as to effectively give the interaction a larger
-  // radius? Maybe lambda*radius?
-  Functional eta = n3; // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  eta.set_name("eta");
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
+  // In Gil-Villegas 1997 paper, packing fraction is called eta...
+  Functional eta = eta_for_dispersion(radius, lambdainput);
+  eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis);
   epsilon_dispersion.set_name("epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw_over_eta = -4*(lambda*lambda*lambda - 1)*epsilon_dispersion;
+  Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return a1vdw_over_eta*(gHScarnahan(eta_eff, radius) +
                          eta*dgHScarnahan_dn(eta_eff, radius)*
@@ -240,14 +244,8 @@ Functional da1_deta(double radius, double epsdis, double lambdainput) {
 }
 
 Functional DispersionSAFTa2(double radius, double epsdis, double lambdainput) {
-  Functional n3 = StepConvolve(radius);
-  // FIXME: I think maybe I actually want to compute eta with a larger
-  // radius, so as to effectively give the interaction a larger
-  // radius? Maybe lambda*radius?
-  Functional eta = n3; // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  eta.set_name("eta");
-  Functional lambda(lambdainput);
-  lambda.set_name("lambda_dispersion");
+  // In Gil-Villegas 1997 paper, packing fraction is called eta...
+  Functional eta = eta_for_dispersion(radius, lambdainput);
   Functional simple_eta_effective = eta_effective(Identity(), lambdainput);
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   // Actually, it's slightly modified, since the n0 below cancels out
@@ -267,18 +265,35 @@ Functional DispersionSAFTa2(double radius, double epsdis, double lambdainput) {
 
 
 Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambdainput) {
-  Functional R(radius);
-  R.set_name("R");
   Functional kT(temperature);
   kT.set_name("kT");
+
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  Expression lambdaE("lambda_dispersion");
+  lambdaE.set_type("double");
+  Expression RE("R");
+  RE.set_type("double");
+  Functional R(radius);
+  R.set_name("R");
+  // ndisp is the density of molecules that are within dispersion
+  // interaction range of this point.
+  Functional ndisp =
+    (StepConvolve(lambdainput*radius,lambdaE*RE) - StepConvolve(radius))
+    / ((Pow(3)(lambda) - 1)*((4*M_PI/3)*Pow(3)(R)));
+
+  /*
+  Functional R(radius);
+  R.set_name("R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
   // I chose to use n0 here because it's the density that measures
   // "how many monomers are neighboring this point, which is what is
   // more relevant in working out interactions.
+  */
   Functional a1 = DispersionSAFTa1(radius, epsdis, lambdainput);
   Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput);
-  return (n0*(a1 + a2/kT)).set_name("dispersion");
+  return (ndisp*(a1 + a2/kT)).set_name("dispersion");
 }
 
 Functional SaftFluidSlow(double R, double kT,
