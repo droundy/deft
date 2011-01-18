@@ -34,3 +34,4 @@ tests/generated/*.h
 optimize-functionals
 src/*Fast.cpp
 src/HardSpheresNoTensor.cpp
+cited-papers
