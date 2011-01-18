@@ -278,9 +278,14 @@ Functional DispersionSAFT(double radius, double temperature, double epsdis, doub
   R.set_name("R");
   // ndisp is the density of molecules that are within dispersion
   // interaction range of this point.
+
+  /*
   Functional ndisp =
     (StepConvolve(lambdainput*radius,lambdaE*RE) - StepConvolve(radius))
     / ((Pow(3)(lambda) - 1)*((4*M_PI/3)*Pow(3)(R)));
+  */
+  Functional ndisp =
+    StepConvolve(lambdainput*radius,lambdaE*RE)/(Pow(3)(lambda)*(4*M_PI/3)*Pow(3)(R));
 
   /*
   Functional R(radius);
