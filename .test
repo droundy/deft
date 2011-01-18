@@ -4,4 +4,4 @@
 
 set -ev
 
-time make -j2 check
+time make -j4 check
