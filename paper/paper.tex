@@ -275,12 +275,31 @@ volume of this interaction is $\kappa_\textit{assoc}$.  Thus the
 association term in the free energy has two free parameters that must
 be fit based on experimental data.
 
+The association free energy has the form
+\begin{align}
+  F_\text{assoc} &=
+\end{align}
+\textcolor{red}{Look up paper where I got the association functional!}
+
 \subsection{Dispersion free energy}
 The final term in the free energy is the dispersion term.  We use a
 dispersion term based on the SAFT-VR approach, which has two free
 parameters, an interaction energy $\epsilon_\textit{disp}$ and a
 length scale $\lambda_\textit{disp}$.
 
+We use a free square-well dispersion function, which has been
+demonstrated (CITE) to give a reasonable fit to the equation of
+state.  Thus our model interaction has the form:
+\begin{equation}
+  V(r) = \Theta(r-2 \lambda_\textit{disp} R)
+\end{equation}
+where $\Theta$ is the Heaviside step function.
+
+The association free energy has the form
+\begin{align}
+  F_\text{disp} &=
+\end{align}
+\textcolor{red}{Cite the paper where I got the dispersion function!}
 
 \begin{figure}
 \begin{center}
@@ -328,6 +347,50 @@ length scale $\lambda_\textit{disp}$.
 \caption{Liquid-vapor interface profile at room temperature.  }
 \label{fig:liquid-vapor-profile}
 \end{figure}
+
+\subsection{Other thermodynamic functions}
+
+From the Helmholtz free energy functional, we may obtain any other
+thermodynamic functions we should choose.  The grand free energy
+$\Phi$, which we ordinarily use in our computations, is obtained by
+simply adding a chemical potential term:
+\begin{equation}
+  \Phi[n] = F[n] + \mu \int n(\xx) d\xx
+\end{equation}
+
+The pressure would naturally be obtained by taking a partial
+derivative with respect to volume at fixed temperature.  Since
+\emph{volume} isn't a parameter in density-functional theory, we
+consider the \emph{free energy per unit volume}.
+\begin{align}
+  F[n] &= f[n]V \\
+  p[n] &= -\left(\frac{\partial F[n]}{\partial V}\right)_{T} \\
+  &= -\left(\frac{\partial f[n]V}{\partial V}\right)_{T} \\
+  &= -V\left(\frac{\partial f[n]}{\partial V}\right)_{T}
+   - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
+  &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n]
+\end{align}
+
+The entropy is naturally obtained by taking a partial derivative with
+respect to temperature:
+\begin{align}
+  S[n] &= \left(\frac{\partial F[n]}{\partial T}\right)_{V}
+\end{align}
+This derivative is trivial for the ideal gas and hard sphere free
+energies, which are simply proportional to the temperature.  For the
+association and dispersion free energies, it is a little more work,
+but still not hard.
+
+Once we have the entropy, finding the internal energy is a simple
+matter of subtraction:
+\begin{align}
+  U[n] &= F[n] + TS[n]
+\end{align}
+and the enthalpy is not much more work:
+\begin{align}
+  H[n] &= F[n] + TS[n] - pV
+\end{align}
+
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
