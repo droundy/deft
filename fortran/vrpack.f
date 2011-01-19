@@ -212,7 +212,6 @@ c
      &       da1_dlam(eta,lambda,epsilon)
 c
       g_sw=g_hs(eta)+0.25d0*beta*term1
-      g_sw = g_hs(eta)
 c
       return
       end

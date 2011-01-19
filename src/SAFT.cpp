@@ -48,8 +48,8 @@ Functional gHS(Functional n3, double R) {
   Functional n2 = ShellConvolve(R);
   Functional invdiff = Functional(1)/(1-n3);
   return invdiff*(Functional(1) +
-                  invdiff*n2*zeta*(Functional(1.0/4) +
-                                   invdiff*(1.0/18/4)*n2));
+                  (0.5*invdiff*R*n2)*zeta*(Functional(1) +
+                                           (0.5*invdiff*R*n2)*(1.0/18)));
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput);
@@ -66,9 +66,12 @@ Functional gSW(double temp, double R, double epsdis0, double lambda) {
   Functional kT = Functional(temp).set_name("kT");
   Functional n3 = StepConvolve(R);
 
-  Functional ghs = gHS(n3, R);
-  ghs = gHScarnahan(n3, R);
-  return ghs; // + (Functional(0.25)/kT)*(da1deta - lam/(3*n3)*da1dlam);
+  Functional da1deta = da1_deta(R, epsdis0, lambda);
+  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
+
+  //Functional ghs = gHS(n3, R);
+  Functional ghs = gHScarnahan(n3, R);
+  return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*n3)*da1dlam);
 }
 
 Functional gHScarnahan_simple(Functional n3) {
