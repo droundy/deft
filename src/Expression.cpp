@@ -674,6 +674,23 @@ Expression Expression::FindNamedSubexpression(const std::string n) const {
   return *this;
 }
 
+std::string Expression::FindASubexpressionName() const {
+  if (arg1) {
+    std::string n = arg1->FindASubexpressionName();
+    if (n != "") return n;
+  }
+  if (arg2) {
+    std::string n = arg2->FindASubexpressionName();
+    if (n != "") return n;
+  }
+  if (arg3) {
+    std::string n = arg3->FindASubexpressionName();
+    if (n != "") return n;
+  }
+  if (arg1) return alias;
+  return "";
+}
+
 void Expression::generate_free_code(FILE *o,  std::set<std::string> *myvars) const {
   // Free any newly unused variables...
   for (std::set<std::string>::iterator i = myvars->begin(); i != myvars->end(); ++i) {
@@ -720,7 +737,62 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
   if (thisvar != "") e = FindNamedSubexpression(thisvar);
 
   {
-    // First, let's see what double expressions we can simplify...
+    // First, let's work out any "explicitly-named" subexpressions, common or not...
+    std::string n = e.FindASubexpressionName();
+    Expression s = e.FindNamedSubexpression(n);
+    while (s.alias == n && n != "" && n != e.alias) {
+      if (FindNamedSubexpression(n) != s) {
+        printf("Nasty situation with %s.  The two options are:\n", n.c_str());
+        printf("a = %s\n", s.printme().c_str());
+        printf("b = %s\n", FindNamedSubexpression(n).printme().c_str());
+        exit(1);
+      }
+      std::string a = "my_" + n;
+      if (allvars->count(a)) {
+        // need to make this thing unique...
+        for (int varnum=0; true; varnum++) {
+          std::ostringstream oss;
+          oss << varnum;
+          a = n + "_" + oss.str();
+          if (!allvars->count(a)) break;
+        }
+      }
+      std::string myfmt = "\t\t" +
+        (s.ctype() + (" " + a + " = %s; // explicitly-named\n"));
+      //printf("I am having fun with %s", myfmt.c_str());
+      //printf("I am %s\n", e.printme().c_str());
+      //printf("%s is %s\n", a.c_str(), s.printme().c_str());
+
+      generate_code(o, myfmt.c_str(), n, important, allvars, myvars);
+      fflush(o);
+
+      if (s.typeIs("Grid")) gridvars.insert(a);
+      if (s.typeIs("ReciprocalGrid")) recipvars.insert(a);
+      myvars->insert(a);
+      allvars->insert(a);
+      s = FindNamedSubexpression(n); // Find out if the expression has since changed...
+      //fprintf(o, "// expression was %s\n", printme().c_str());
+      //fprintf(o, "// I eliminated %s\n", s.printme().c_str());
+      EliminateThisSubexpression(s, a);
+      //fprintf(o, "// expression is now %s\n", printme().c_str());
+      
+      // We need the following in order to update e with any changes
+      // that generate_code might have made...
+      if (thisvar != "") e = FindNamedSubexpression(thisvar);
+      else e = *this;
+      n = e.FindASubexpressionName();
+      s = e.FindNamedSubexpression(n);
+
+      // Free unused variables...
+      generate_free_code(o, myvars);
+    }
+  }
+
+  // I don't perform the following simplification, since it makes the
+  // generated code harder to read, and also takes a fair amount of
+  // time to perform...
+  if (false) {
+    // Second, let's see what double expressions we can simplify...
     std::set<std::string> doublevars;
     Expression s = e.FindDoubleSubexpression();
     while (!s.kindIs("constant")) {

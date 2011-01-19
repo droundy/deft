@@ -69,6 +69,7 @@ public:
   Expression EasyParentOfThisSubexpression(const Expression &, std::set<std::string> important) const;
   bool FindVariable(const std::string n) const;
   Expression FindNamedSubexpression(const std::string n) const;
+  std::string FindASubexpressionName() const;
 
   Expression FindDoubleSubexpression() const;
   Expression FindCommonSubexpression() const;

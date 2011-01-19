@@ -138,14 +138,6 @@ Functional AssociationSAFT(double radius, double temperature, double epsilon, do
   return (T*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
 }
 
-Functional HardSphereCompressibility(double radius, double temperature) {
-  Functional R(radius);
-  R.set_name("R");
-  Functional kT(temperature);
-  kT.set_name("kT");
-  return kT;
-}
-
 Functional eta_effective(Functional eta, double lambdainput) {
   Functional lambda(lambdainput);
   lambda.set_name("lambda_dispersion");
@@ -154,7 +146,7 @@ Functional eta_effective(Functional eta, double lambdainput) {
   Functional c2 = Functional(-0.669270) + 1.40049*lambda - 0.827739*lambda*lambda;
   Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
   // The following equation is equation 36 in Gil-Villegas 1997 paper.
-  return c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
+  return ((c1 + c2*eta + c3*sqr(eta))*eta).set_name("eta_effective");
 }
 
 Functional detaeff_dlam(Functional eta, double lambdainput) {
@@ -165,7 +157,7 @@ Functional detaeff_dlam(Functional eta, double lambdainput) {
   Functional c2 = Functional(1.40049) - 0.827739*2*lambda;
   Functional c3 = Functional(-15.0427) + 5.30827*2*lambda;
   // The following equation is equation 36 in Gil-Villegas 1997 paper.
-  return c1*eta + c2*sqr(eta) + c3*Pow(3)(eta);
+  return ((c1 + c2*eta + c3*sqr(eta))*eta).set_name("detaeff_dlam");
 }
 
 Functional detaeff_deta(Functional eta, double lambdainput) {
@@ -219,9 +211,9 @@ Functional da1_dlam(double radius, double epsdis, double lambdainput) {
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   Functional a1vdw_nolam = -4*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
-  return a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
-                      (Pow(3)(lambda) - 1)*dgHScarnahan_dn(eta_eff, radius)*
-                      detaeff_dlam(eta, lambdainput));
+  return (a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
+                       (Pow(3)(lambda) - 1)*dgHScarnahan_dn(eta_eff, radius)*
+                       detaeff_dlam(eta, lambdainput))).set_name("da1_dlam");
   
 }
 
@@ -237,9 +229,9 @@ Functional da1_deta(double radius, double epsdis, double lambdainput) {
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
-  return a1vdw_over_eta*(gHScarnahan(eta_eff, radius) +
-                         eta*dgHScarnahan_dn(eta_eff, radius)*
-                         detaeff_deta(eta, lambdainput));
+  return (a1vdw_over_eta*(gHScarnahan(eta_eff, radius) +
+                          eta*dgHScarnahan_dn(eta_eff, radius)*
+                          detaeff_deta(eta, lambdainput))).set_name("da1_deta");
   
 }
 

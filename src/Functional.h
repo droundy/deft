@@ -49,7 +49,9 @@ public:
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), f(gd, e).name());
+    const char *n = f(gd, e).name();
+    if (R != Expression("R")) n = "";
+    init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), n);
   }
   explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
     : itsCounter(0) {
