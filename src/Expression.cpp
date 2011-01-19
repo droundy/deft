@@ -674,20 +674,20 @@ Expression Expression::FindNamedSubexpression(const std::string n) const {
   return *this;
 }
 
-std::string Expression::FindASubexpressionName() const {
+std::string Expression::FindASubexpressionName(const std::string not_this) const {
+  if (arg1 && alias != not_this) return alias;
   if (arg1) {
-    std::string n = arg1->FindASubexpressionName();
+    std::string n = arg1->FindASubexpressionName(not_this);
     if (n != "") return n;
   }
   if (arg2) {
-    std::string n = arg2->FindASubexpressionName();
+    std::string n = arg2->FindASubexpressionName(not_this);
     if (n != "") return n;
   }
   if (arg3) {
-    std::string n = arg3->FindASubexpressionName();
+    std::string n = arg3->FindASubexpressionName(not_this);
     if (n != "") return n;
   }
-  if (arg1) return alias;
   return "";
 }
 
@@ -738,7 +738,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
 
   {
     // First, let's work out any "explicitly-named" subexpressions, common or not...
-    std::string n = e.FindASubexpressionName();
+    std::string n = e.FindASubexpressionName(e.alias);
     Expression s = e.FindNamedSubexpression(n);
     while (s.alias == n && n != "" && n != e.alias) {
       if (FindNamedSubexpression(n) != s) {
@@ -780,7 +780,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
       // that generate_code might have made...
       if (thisvar != "") e = FindNamedSubexpression(thisvar);
       else e = *this;
-      n = e.FindASubexpressionName();
+      n = e.FindASubexpressionName(e.alias);
       s = e.FindNamedSubexpression(n);
 
       // Free unused variables...
