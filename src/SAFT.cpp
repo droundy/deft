@@ -186,10 +186,23 @@ Functional eta_for_dispersion(double radius, double lambdainput) {
   lambdaE.set_type("double");
   Expression R("R");
   R.set_type("double");
+
+  return
+    (StepConvolve(2*lambdainput*radius, 2*lambdaE*R)
+     /(8*Pow(3)(lambda))).set_name("eta_dispersion");
+
+  /*
+  return
+    ((StepConvolve(2*lambdainput*radius, 2*lambdaE*R) - StepConvolve(radius))
+     /(8*Pow(3)(lambda) - 1)).set_name("eta_dispersion");
+  */
+  
+  /*
   return (StepConvolve(lambdainput*radius,lambdaE*R)/Pow(3)(lambda)).set_name("eta_dispersion");
   // FIXME: I think maybe I actually want to compute eta with a larger
   // radius, so as to effectively give the interaction a larger
   // radius? Maybe lambda*radius?
+  */
 }
 
 Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
@@ -284,8 +297,11 @@ Functional DispersionSAFT(double radius, double temperature, double epsdis, doub
     (StepConvolve(lambdainput*radius,lambdaE*RE) - StepConvolve(radius))
     / ((Pow(3)(lambda) - 1)*((4*M_PI/3)*Pow(3)(R)));
   */
+  /*
   Functional ndisp =
     StepConvolve(lambdainput*radius,lambdaE*RE)/(Pow(3)(lambda)*(4*M_PI/3)*Pow(3)(R));
+  */
+  Functional ndisp = Identity();
 
   /*
   Functional R(radius);

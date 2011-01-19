@@ -258,9 +258,15 @@ w_2(\xx) &= \frac{1}{4\pi R^2}\delta(R-|\xx|)\\
 \mathbf{w}_3(\xx) &= \frac{-1}{4\pi R^2}\vec{\nabla}\Theta(R-|\xx|) \; .
 \end{align}
 
-\needsworknow{Think about the HS functional in
-  Reference~\cite{tarazona2000}, which claims to have fixed nasty
-  singularities!}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\end{center}
+\caption{The theoretical versus experimental phase diagram, vapor
+  pressure versus temperature.  }
+\label{fig:equation-of-state}
+\end{figure}
 
 \subsection{Association free energy}
 To the purely repulsive hard-sphere free energy, we add two attractive
@@ -279,37 +285,27 @@ The association free energy has the form
 \begin{align}
   F_\text{assoc} &=
 \end{align}
-\textcolor{red}{Look up paper where I got the association functional!}
 
-\subsection{Dispersion free energy}
-The final term in the free energy is the dispersion term.  We use a
-dispersion term based on the SAFT-VR approach, which has two free
-parameters, an interaction energy $\epsilon_\textit{disp}$ and a
-length scale $\lambda_\textit{disp}$.
-
-We use a free square-well dispersion function, which has been
-demonstrated (CITE) to give a reasonable fit to the equation of
-state.  Thus our model interaction has the form:
-\begin{equation}
-  V(r) = \Theta(r-2 \lambda_\textit{disp} R)
-\end{equation}
-where $\Theta$ is the Heaviside step function.
-
-The association free energy has the form
+The following contact density for the hard-sphere fluid is in the code
+called \texttt{gHS}, and comes
+from\cite{yu2002fmt-dft-inhomogeneous-associating,
+  fu2005vapor-liquid-dft}, but I don't use it.
 \begin{align}
-  F_\text{disp} &=
+  \Delta &= 4\pi \kappa_\textit{assoc} g^\textit{HS}(\sigma)e^{-\beta
+    \epsilon_\textit{assoc}} \\
+  g^\textit{HS}(\sigma) &= \frac1{1-n_3}\left(1+\frac14\frac{\zeta n_2}{1-n_3}
+  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right)
 \end{align}
-\textcolor{red}{Cite the paper where I got the dispersion function!}
+\textcolor{red}{Here is paper where I got the association functional:}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/equation-of-state}
-\end{center}
-\caption{The theoretical versus experimental phase diagram, vapor
-  pressure versus temperature.  }
-\label{fig:equation-of-state}
-\end{figure}
-
+Instead, I use
+\begin{align}
+  g^\textit{SW}(\sigma) &= g^\textit{HS}_\textit{Carnahan}(\sigma) +
+  \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial n_3} -
+  \frac{lambda}{3 n3}\frac{\partial a_1}{\partial \lambda}\right)
+\end{align}
+% This is equation 77 of gil-villegas-1997-SAFT-VR
+which I got from reference\cite{gil-villegas-1997-SAFT-VR}.
 
 \begin{figure}
 \begin{center}
@@ -319,6 +315,40 @@ The association free energy has the form
   versus temperature.  }
 \label{fig:saturated-liquid-density}
 \end{figure}
+
+\subsection{Dispersion free energy}
+The final term in the free energy is the dispersion term.  We use a
+dispersion term based on the SAFT-VR
+approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
+parameters, an interaction energy $\epsilon_\textit{disp}$ and a
+length scale $\lambda_\textit{disp}$.
+
+The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+\begin{align}
+  F_\text{disp} &= A_1 + \beta A_2
+\end{align}
+where $A_1$ and $A_2$ are the first two terms in a high-temperature
+perturbation expansion.  $A_1$ is the mean-field dispersion
+interaction, which for a homogeneous fluid is given by
+\begin{align}
+  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
+  g_{HS}(\left|\xx\right|) d\xx
+\end{align}
+The second dispersion term in the free energy $A_2$ describes the
+effect of fluctuations resulting from the compression of the fluid due
+to the dispersion interaction itself, and is commonly approximated
+using the local compressibility approximation (LCA).
+
+We use a free square-well function for the dispersion $\varphi$, which
+has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
+to the equation of state.  Thus our model interaction has the form:
+\begin{equation}
+  \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
+\end{equation}
+where $\Theta$ is the Heaviside step function.
+
+\textcolor{red}{TODO:  Add the actual functions that we use and the
+  actual form.  The above is really just an introduction.}
 
 
 \begin{figure}
@@ -330,23 +360,6 @@ The association free energy has the form
 \label{fig:saturated-liquid-density}
 \end{figure}
 
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/surface-tension}
-\end{center}
-\caption{The theoretical versus experimental surface tension
-  versus temperature.  }
-\label{fig:surface-tension}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/surface-298}
-\end{center}
-\caption{Liquid-vapor interface profile at room temperature.  }
-\label{fig:liquid-vapor-profile}
-\end{figure}
 
 \subsection{Other thermodynamic functions}
 
@@ -392,6 +405,23 @@ and the enthalpy is not much more work:
 \end{align}
 
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-tension}
+\end{center}
+\caption{The theoretical versus experimental surface tension
+  versus temperature.  }
+\label{fig:surface-tension}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-298}
+\end{center}
+\caption{Liquid-vapor interface profile at room temperature.  }
+\label{fig:liquid-vapor-profile}
+\end{figure}
+
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
 In order to ensure that the empirical parameters are correct, we test
@@ -400,6 +430,7 @@ saturated liquid density (see
 Figure~\ref{fig:saturated-liquid-density}) against experimental
 values.  To find these densities, we use the ``common tangent'' rule,
 as illustrated in Figure~\ref{fig:homogeneous}.
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/finding-vapor-pressure}

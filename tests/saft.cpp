@@ -57,7 +57,7 @@ int main(int, char **argv) {
                               water_prop.epsilon_dispersion,
                               water_prop.lambda_dispersion)(n),
               -2.601921194056033e-12);
-  const double dispersion_energy = -2.255351705456564e-12;
+  const double dispersion_energy = -2.255139236942726e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale, kT,
                              water_prop.epsilon_dispersion,
@@ -84,7 +84,7 @@ int main(int, char **argv) {
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, 0),
-             -5.112497529380379e-09);
+             -5.112497316911865e-09);
   //test_energy("SAFT",
   //            SaftFluid(water_prop.lengthscale, kT,
   //                      water_prop.epsilonAB, water_prop.kappaAB,
