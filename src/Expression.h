@@ -92,6 +92,10 @@ public:
   void generate_code(FILE *outfile, const char *fmt, const std::string thisvar = "",
                      std::set<std::string> important = std::set<std::string>(),
                      std::set<std::string> *scopevars = 0, std::set<std::string> *myvars = 0);
+  void generate_increment_code(FILE *outfile, const char *fmt, const std::string thisvar = "",
+                               std::set<std::string> important = std::set<std::string>(),
+                               std::set<std::string> *scopevars = 0,
+                               std::set<std::string> *myvars = 0);
   void generate_free_code(FILE *o,  std::set<std::string> *myvars) const;
   std::set<std::string> top_level_vars(std::set<std::string> *allvars);
 };

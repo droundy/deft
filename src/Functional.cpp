@@ -211,7 +211,7 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, "    invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
     fprintf(o, "    invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
     //fprintf(o, "    printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
-    epg.generate_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
+    epg.generate_increment_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "  }\n");
 
@@ -221,7 +221,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   fprintf(o, "    if (outpgrad) {\n");
   if (true || curvature.typeIs("double")) {
-    eg.generate_code(o, "    (*outgrad) += %s;\n    (*outpgrad) += %s;\n");
+    eg.generate_increment_code(o, "    (*outgrad) += %s;\n    (*outpgrad) += %s;\n");
   } else {
     fprintf(o, "      assert(&gd); // to avoid an unused parameter error\n");
     fprintf(o, "      assert(&x); // to avoid an unused parameter error\n");
@@ -232,12 +232,12 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, "      invcurvature = (invcurvature.cwise() > 0).select(invcurvature, 1);\n");
     fprintf(o, "      invcurvature = (invcurvature.cwise() < 1e30).select(invcurvature, 1);\n");
     //fprintf(o, "      printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
-    eg.generate_code(o, "    (*outgrad) += %s;\n      (*outpgrad) += (%s).cwise() * invcurvature;\n",
+    eg.generate_increment_code(o, "    (*outgrad) += %s;\n      (*outpgrad) += (%s).cwise() * invcurvature;\n",
                      "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "    } else {\n");
   eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
-  eg.generate_code(o, "      (*outgrad) += %s;\n");
+  eg.generate_increment_code(o, "      (*outgrad) += %s;\n");
   fprintf(o, "    }\n");
   fprintf(o, "  }\n");
 

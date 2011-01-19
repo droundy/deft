@@ -687,6 +687,25 @@ void Expression::generate_free_code(FILE *o,  std::set<std::string> *myvars) con
   }
 }
 
+void Expression::generate_increment_code(FILE *o, const char *fmt, const std::string thisvar,
+                                         std::set<std::string> important,
+                                         std::set<std::string> *allvars,
+                                         std::set<std::string> *myvars) {
+
+  Expression e = *this;
+  if (thisvar != "") e = FindNamedSubexpression(thisvar);
+
+  if (e.kindIs("+-")) {
+    arg1->generate_increment_code(o, fmt, "", important, allvars, myvars);
+    arg2->generate_increment_code(o, fmt, "", important, allvars, myvars);
+  } else {
+    fprintf(o, "\t{\n");
+    generate_code(o, fmt, thisvar, important, allvars, myvars);
+    fprintf(o, "\t}\n\n");
+  }
+}
+
+
 void Expression::generate_code(FILE *o, const char *fmt, const std::string thisvar,
                                std::set<std::string> important,
                                std::set<std::string> *allvars, std::set<std::string> *myvars) {
