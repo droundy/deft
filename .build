@@ -6,10 +6,4 @@ set -ev
 
 ./autogen.sh
 
-# First make the code generator, so we can get started generating code
-# soonest.
-time make -j2 optimize-functionals
-
-time make -j2 paper
-
-time make -j2 recheck
+time make -j4 paper recheck
