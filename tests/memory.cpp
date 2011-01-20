@@ -137,7 +137,7 @@ int main(int, char **argv) {
   check_a_functional("HardSpheres", ff, potential, 80, 101, 108, 104);
 
   ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereFast", ff, potential, 62, 90, 97, 94);
+  check_a_functional("HardSphereFast", ff, potential, 66, 90, 97, 94);
 
   ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSphereRF", ff, potential, 52, 83, 90, 87);
@@ -149,7 +149,7 @@ int main(int, char **argv) {
   check_a_functional("HardSphereTarazona", ff, potential, 83, 104, 111, 108);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 62, 87, 94, 90);
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 66, 87, 94, 90);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
   check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 87, 94, 90);
@@ -163,7 +163,7 @@ int main(int, char **argv) {
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   ff = SaftFluid(R, kT, eps, kappa, water_prop.epsilon_dispersion, water_prop.lambda_dispersion, mu);
-  check_a_functional("SaftFluid", ff, potential, 38, 59, 62, 59);
+  check_a_functional("SaftFluid", ff, potential, 41, 59, 62, 59);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

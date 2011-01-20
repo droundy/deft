@@ -112,7 +112,7 @@ int main(int, char **argv) {
 
   compare_functionals(LogOneMinusX(), log(1-x), n, 1e-12);
 
-  compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)), n);
+  compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)), n, 1e-13);
 
   compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)), n);
 
@@ -123,17 +123,17 @@ int main(int, char **argv) {
   const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
-  compare_functionals(Phi1(kT,R), phi1, n);
+  compare_functionals(Phi1(kT,R), phi1, n, 1e-13);
 
   const double four_pi_r = 4*M_PI*R;
   Functional n2x = xShellConvolve(R);
   Functional n2y = yShellConvolve(R);
   Functional n2z = zShellConvolve(R);
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
-  compare_functionals(Phi2(kT,R), phi2, n, 2e-15);
+  compare_functionals(Phi2(kT,R), phi2, n, 1e-14);
 
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
-  compare_functionals(Phi3rf(kT,R), phi3rf, n, 2e-15);
+  compare_functionals(Phi3rf(kT,R), phi3rf, n, 1e-13);
 
   compare_functionals(AlmostRF(kT,R), kT*(phi1 + phi2 + phi3rf), n, 2e-14);
 
@@ -146,11 +146,11 @@ int main(int, char **argv) {
                       (kT*phi1).set_name("phi1") + (kT*phi2).set_name("phi2") + (kT*phi3rf).set_name("phi3"),
                       n, 4e-14);
 
-  compare_functionals(Phi1Veff(kT, R), phi1(veff), Grid(gd, -kT*n.cwise().log()));
+  compare_functionals(Phi1Veff(kT, R), phi1(veff), Grid(gd, -kT*n.cwise().log()), 1e-13);
 
-  compare_functionals(Phi2Veff(kT, R), phi2(veff), Grid(gd, -kT*n.cwise().log()));
+  compare_functionals(Phi2Veff(kT, R), phi2(veff), Grid(gd, -kT*n.cwise().log()), 1e-14);
 
-  compare_functionals(Phi3rfVeff(kT, R), phi3rf(veff), Grid(gd, -kT*n.cwise().log()));
+  compare_functionals(Phi3rfVeff(kT, R), phi3rf(veff), Grid(gd, -kT*n.cwise().log()), 1e-13);
 
   compare_functionals(IdealGasFast(kT), IdealGasOfVeff(kT), Grid(gd, -kT*n.cwise().log()),
                       1e-12);
