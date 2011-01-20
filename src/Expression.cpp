@@ -675,7 +675,7 @@ Expression Expression::FindNamedSubexpression(const std::string n) const {
 }
 
 std::string Expression::FindASubexpressionName(const std::string not_this) const {
-  if (arg1 && alias != not_this) return alias;
+  if (arg1 && alias != "" && alias != not_this) return alias;
   if (arg1) {
     std::string n = arg1->FindASubexpressionName(not_this);
     if (n != "") return n;
@@ -736,10 +736,12 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
   Expression e = *this;
   if (thisvar != "") e = FindNamedSubexpression(thisvar);
 
+  //printf("Starting %s...\n", thisvar.c_str());
   {
     // First, let's work out any "explicitly-named" subexpressions, common or not...
     std::string n = e.FindASubexpressionName(e.alias);
     Expression s = e.FindNamedSubexpression(n);
+    //fprintf(o, "\t\t// Next to consider is %s (for %s)\n", n.c_str(), thisvar.c_str());
     while (s.alias == n && n != "" && n != e.alias) {
       if (FindNamedSubexpression(n) != s) {
         printf("Nasty situation with %s.  The two options are:\n", n.c_str());
@@ -787,6 +789,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
       generate_free_code(o, myvars);
     }
   }
+  //printf("All done with this one %s!\n", thisvar.c_str());
 
   // I don't perform the following simplification, since it makes the
   // generated code harder to read, and also takes a fair amount of

@@ -194,12 +194,15 @@ void Functional::create_source(const std::string filename, const std::string cla
   Functional r(1.0);
   r.set_name("R");
   Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI*r*r*r);
-  Expression curvature =
-    grad(dV, Identity(), false).grad(dV, Identity(), false).cwiseprintme(smoothed.printme(Expression("x")));
+  Expression curvature = Expression(1);
+  //grad(dV, Identity(), false).grad(dV, Identity(), false).cwiseprintme(smoothed.printme(Expression("x")));
+
   //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
   Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
-  Expression epg = eg * Expression("invcurvature");
-  if (true || curvature.typeIs("double")) fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
+  //Expression epg = eg * Expression("invcurvature");
+  //if (true || curvature.typeIs("double")) 
+  fprintf(o, "    grad(gd, x, ingrad, outpgrad, 0);\n");
+    /*
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
     fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
@@ -213,6 +216,7 @@ void Functional::create_source(const std::string filename, const std::string cla
     //fprintf(o, "    printf(\"Our invcurvature is %%g\\n\", invcurvature.sum());\n");
     epg.generate_increment_code(o, "    (*outpgrad) += %s;\n", "", std::set<std::string>(), &allvars, &myvars);
   }
+    */
   fprintf(o, "  }\n");
 
   fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
