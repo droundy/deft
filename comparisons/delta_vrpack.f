@@ -27,7 +27,6 @@ c
        implicit none
        real*8 sigma,epsilon_mf,m,epsilon_hb,k_hb,epsilon,lambda
        real*8 rho_l,rho_v,temp,pressure,cp_bulk
-       real*8 zmin,zmax,deltaz
        real*8 pi
        real*8 rho_old,rho_new
        real*8 xcsfit
@@ -52,7 +51,6 @@ c
        common/parameters1/sigma,epsilon_mf,m
        common/parameters2/epsilon_hb,k_hb,epsilon,lambda
        common/thermo/rho_l,rho_v,temp,pressure,cp_bulk
-       common/prof_param/zmin,zmax,deltaz
        common/pidata/pi
        common/profiles/rho_old,rho_new
        common/csfit/xcsfit
@@ -72,7 +70,8 @@ c
        do i=1,16
           eta = i/32d0
 c     Temperature is 1.2
-          write(*,"(2F17.12)") eta, delta(epsilon_hb, k_hb, eta,1.2d0)
+          write(*,"(2F17.12)") eta, delta(epsilon_hb, k_hb, epsilon_mf,
+     $         lambda, eta, 1.2d0)
        end do
        stop
        end

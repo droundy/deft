@@ -1,6 +1,7 @@
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-      real*8 function  f_assoc(epsilon_hb, k_hb,eta, radius, temp)
+      real*8 function  f_assoc(epsilon_hb, k_hb, epsilon_mf, lambda, eta
+     $     , radius, temp)
 c
 c       Calculate the contribution due to the association term in the
 c       Euler-Lagrange equation for the equilibrium density profile and
@@ -41,7 +42,8 @@ c
 c       Calculate the fraction of non-bonded water molecules associated
 c       at a given site
 c
-       x_frac=x_assoc(epsilon_hb, k_hb,eta, radius, temp)
+       x_frac=x_assoc(epsilon_hb, k_hb, epsilon_mf, lambda, eta, radius,
+     $      temp)
 c
 c       Calculate the excess Helmholtz free energy due to the association
 c
@@ -53,7 +55,8 @@ c       f_assoc=rho*f_assoc
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-      real*8 function  x_assoc(epsilon_hb, k_hb,eta, radius, temp)
+      real*8 function  x_assoc(epsilon_hb, k_hb, epsilon_mf, lambda, eta
+     $     , radius, temp)
 c
 c       Calculate the contribution due to the association term in the
 c       Euler-Lagrange equation for the equilibrium density profile and
@@ -71,7 +74,7 @@ c
 c
        real*8 rho, radius
        real*8 pi
-       real*8 sigma,epsilon_mf,epsilon_hb,k_hb,epsilon,lambda
+       real*8 sigma,epsilon_mf,epsilon_hb,k_hb,lambda
        real*8 temp
        real*8 eta,eta2,eta3,cte2,cte3
        real*8 numerator,denominator
@@ -100,7 +103,7 @@ c
 c
 c       Calculate the delta integral for association
 c
-       del=k_hb*f_hb*g_sw(eta,lambda,epsilon)
+       del=k_hb*f_hb*g_sw(eta,temp,lambda,epsilon_mf)
 c     Work out the actual density in ordinary units
        rho = eta/(4d0*pi*radius**3d0/3d0)
 c
@@ -116,7 +119,8 @@ c
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
-      real*8 function  delta(epsilon_hb, k_hb,eta, temp)
+      real*8 function  delta(epsilon_hb, k_hb, epsilon_mf, lambda, eta,
+     $     temp)
 c
 c       Calculate the contribution due to the association term in the
 c       Euler-Lagrange equation for the equilibrium density profile and
@@ -128,22 +132,21 @@ c
        implicit none
 c
        real*8 f_hb
-       real*8 sigma,epsilon_mf,m,epsilon_hb,k_hb,epsilon,lambda
+       real*8 epsilon_mf,m,epsilon_hb,k_hb,lambda
        real*8 rho_l,rho_v,temp,pressure,cp_bulk
-       real*8 eta,eta2,eta3,cte2,cte3
+       real*8 eta
        real*8 numerator,denominator
        real*8 term1,term2
        real*8 fraction
        real*8 g_sw,dg_sw_dn 
 c
        integer ndata,nzinv
-       integer i
        integer type,n_sites,att 
 c
        f_hb=exp(epsilon_hb/temp)-1.0d0
 c
 c       Calculate the delta integral for association
 c
-       delta=k_hb*f_hb*g_sw(eta,temp,lambda,epsilon)
+       delta=k_hb*f_hb*g_sw(eta,temp,lambda,epsilon_mf)
        return
        end

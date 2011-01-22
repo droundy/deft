@@ -44,7 +44,7 @@ c
        integer i
 
 c Here I define the types of some functions...
-       real*8 a1_sw, eta_eff_sw, g_sw, xx
+       real*8 da1_deta
 c
 c
 c       COMMONS
@@ -72,8 +72,7 @@ c
        do i=1,16
           eta = i/32d0
 c     I set the temperature here to 1.2*epsilon_mf, somewhat arbitrarily
-          xx = epsilon_mf
-          write(*,"(2F15.10)") eta, g_sw(eta, xx*1.2d0, lambda, xx)
+          write(*,"(2F15.10)") eta, da1_deta(eta, lambda, epsilon_mf)
        end do
        stop
        end

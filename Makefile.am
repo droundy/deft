@@ -37,6 +37,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	comparisons/x_deft.test \
 	comparisons/gsw_deft.test \
 	comparisons/da1dlam_deft.test \
+	comparisons/da1deta_deft.test \
 	comparisons/a2_sw_deft.test \
 	comparisons/a1_sw_deft.test
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
@@ -116,6 +117,7 @@ comparisons_delta_deft_test_SOURCES = comparisons/delta_deft.cpp $(GENERIC_CODE)
 comparisons_x_deft_test_SOURCES = comparisons/x_deft.cpp $(GENERIC_CODE)
 comparisons_gsw_deft_test_SOURCES = comparisons/gsw_deft.cpp $(GENERIC_CODE)
 comparisons_da1dlam_deft_test_SOURCES = comparisons/da1dlam_deft.cpp $(GENERIC_CODE)
+comparisons_da1deta_deft_test_SOURCES = comparisons/da1deta_deft.cpp $(GENERIC_CODE)
 comparisons_a1_sw_deft_test_SOURCES = comparisons/a1_sw_deft.cpp $(GENERIC_CODE)
 comparisons_a2_sw_deft_test_SOURCES = comparisons/a2_sw_deft.cpp $(GENERIC_CODE)
 comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENERIC_CODE)
@@ -157,6 +159,7 @@ COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_
 	comparisons/x_vrpack.dat comparisons/x_deft.dat \
 	comparisons/gsw_vrpack.dat comparisons/gsw_deft.dat \
 	comparisons/da1dlam_vrpack.dat comparisons/da1dlam_deft.dat \
+	comparisons/da1deta_vrpack.dat comparisons/da1deta_deft.dat \
 	comparisons/a1_sw_vrpack.dat comparisons/a1_sw_deft.dat \
 	comparisons/a2_sw_vrpack.dat comparisons/a2_sw_deft.dat
 
@@ -172,15 +175,17 @@ comparisons/a2_sw_vrpack.test: comparisons/a2_sw_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 comparisons/gHSetaeff_vrpack.test: comparisons/gHSetaeff_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
-comparisons/assoc_vrpack.test: comparisons/assoc_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+comparisons/assoc_vrpack.test: comparisons/assoc_vrpack.f fortran/saft_assoc.f fortran/vrpack.f fortran/saft_assoc.f
 	gfortran -o $@ $<
-comparisons/delta_vrpack.test: comparisons/delta_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+comparisons/delta_vrpack.test: comparisons/delta_vrpack.f fortran/saft_assoc.f fortran/vrpack.f fortran/saft_assoc.f
 	gfortran -o $@ $<
-comparisons/x_vrpack.test: comparisons/x_vrpack.f fortran/saft_assoc.f fortran/vrpack.f
+comparisons/x_vrpack.test: comparisons/x_vrpack.f fortran/saft_assoc.f fortran/vrpack.f fortran/saft_assoc.f
 	gfortran -o $@ $<
 comparisons/gsw_vrpack.test: comparisons/gsw_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 comparisons/da1dlam_vrpack.test: comparisons/da1dlam_vrpack.f fortran/vrpack.f
+	gfortran -o $@ $<
+comparisons/da1deta_vrpack.test: comparisons/da1deta_vrpack.f fortran/vrpack.f
 	gfortran -o $@ $<
 
 comparison: $(COMPARISONDATA)

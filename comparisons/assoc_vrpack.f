@@ -62,7 +62,8 @@ c
           r = sigma*0.5d0
           t = 1.2d0
 c     Note that epsilon_mf is 1 here, because it is our unit of energy.
-          write(*,"(2F17.12)") eta, f_assoc(epsilon_hb, k_hb, eta,r,t)
+          write(*,"(2F17.12)") eta, f_assoc(epsilon_hb, k_hb, epsilon_mf
+     $         , lambda, eta, r, t)
        end do
        stop
        end
