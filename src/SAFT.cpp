@@ -55,6 +55,32 @@ Functional gHS(Functional n3, double R) {
 Functional da1_deta(double radius, double epsdis, double lambdainput);
 Functional da1_dlam(double radius, double epsdis, double lambdainput);
 
+Functional eta_for_dispersion(double radius, double lambdainput) {
+  Functional lambda(lambdainput);
+  lambda.set_name("lambda_dispersion");
+  Expression lambdaE("lambda_dispersion");
+  lambdaE.set_type("double");
+  Expression R("R");
+  R.set_type("double");
+
+  return
+    (StepConvolve(2*lambdainput*radius, 2*lambdaE*R)
+     /(8*Pow(3)(lambda))).set_name("eta_dispersion");
+
+  /*
+  return
+    ((StepConvolve(2*lambdainput*radius, 2*lambdaE*R) - StepConvolve(radius))
+     /(8*Pow(3)(lambda) - 1)).set_name("eta_dispersion");
+  */
+  
+  /*
+  return (StepConvolve(lambdainput*radius,lambdaE*R)/Pow(3)(lambda)).set_name("eta_dispersion");
+  // FIXME: I think maybe I actually want to compute eta with a larger
+  // radius, so as to effectively give the interaction a larger
+  // radius? Maybe lambda*radius?
+  */
+}
+
 Functional gSW(double temp, double R, double epsdis0, double lambda) {
   // This is the approximate *contact* density of a square-well fluid.
   // The formula for this is:
@@ -64,14 +90,15 @@ Functional gSW(double temp, double R, double epsdis0, double lambda) {
   Functional lam = Functional(lambda).set_name("lambda_dispersion");
   Functional epsdis = Functional(epsdis0).set_name("epsilon_dispersion");
   Functional kT = Functional(temp).set_name("kT");
-  Functional n3 = StepConvolve(R);
+  //Functional eta = StepConvolve(R);
+  Functional eta = eta_for_dispersion(R, lambda);
 
   Functional da1deta = da1_deta(R, epsdis0, lambda);
   Functional da1dlam = da1_dlam(R, epsdis0, lambda);
 
   //Functional ghs = gHS(n3, R);
-  Functional ghs = gHScarnahan(n3, R);
-  return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*n3)*da1dlam);
+  Functional ghs = gHScarnahan(eta, R);
+  return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*eta)*da1dlam);
 }
 
 Functional gHScarnahan_simple(Functional n3) {
@@ -172,32 +199,6 @@ Functional detaeff_deta(Functional eta, double lambdainput) {
   Functional c3 = Functional(10.1576) - 15.0427*lambda + 5.30827*lambda*lambda;
   // The following equation is equation 36 in Gil-Villegas 1997 paper.
   return c1 + 2*c2*eta + 3*c3*sqr(eta);
-}
-
-Functional eta_for_dispersion(double radius, double lambdainput) {
-  Functional lambda(lambdainput);
-  lambda.set_name("lambda_dispersion");
-  Expression lambdaE("lambda_dispersion");
-  lambdaE.set_type("double");
-  Expression R("R");
-  R.set_type("double");
-
-  return
-    (StepConvolve(2*lambdainput*radius, 2*lambdaE*R)
-     /(8*Pow(3)(lambda))).set_name("eta_dispersion");
-
-  /*
-  return
-    ((StepConvolve(2*lambdainput*radius, 2*lambdaE*R) - StepConvolve(radius))
-     /(8*Pow(3)(lambda) - 1)).set_name("eta_dispersion");
-  */
-  
-  /*
-  return (StepConvolve(lambdainput*radius,lambdaE*R)/Pow(3)(lambda)).set_name("eta_dispersion");
-  // FIXME: I think maybe I actually want to compute eta with a larger
-  // radius, so as to effectively give the interaction a larger
-  // radius? Maybe lambda*radius?
-  */
 }
 
 Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
