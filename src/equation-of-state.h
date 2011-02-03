@@ -27,8 +27,10 @@ double find_chemical_potential(Functional f, double kT, double n);
 double chemical_potential_to_density(Functional f, double kT, double mu,
                                      double nmin = 1e-10, double nmax = 1e-2);
 double saturated_liquid(Functional f, double kT,
-                        double nmin = 1e-10, double nmax = 1e-2);
-double coexisting_vapor_density(Functional f, double kT, double liquid_density);
+                        double nmin = 1e-10, double nmax = 1e-2,
+                        double vapor_liquid_ratio = 0.5);
+double coexisting_vapor_density(Functional f, double kT, double liquid_density,
+                                double vapor_liquid_ratio = 0.5);
 
 void saturated_liquid_properties(Functional f, LiquidProperties *prop);
 

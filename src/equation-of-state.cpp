@@ -197,25 +197,47 @@ double chemical_potential_to_density(Functional f, double kT, double mu,
   return find_density(fmu, kT, nmin, nmax);
 }
 
-double coexisting_vapor_density(Functional f, double kT, double liquid_density) {
+double coexisting_vapor_density(Functional f, double kT, double liquid_density,
+                                double vapor_liquid_ratio) {
   const double mu = find_chemical_potential(f, kT, liquid_density);
   double nmax = liquid_density;
   // Here I assume that the vapor density is at least a hundredth of a
   // percent smaller than the liquid density.
   Functional n = EffectivePotentialToDensity(kT);
   Functional fmu = f + ChemicalPotential(mu)(n);
-  double deriv;
-  do {
-    nmax *= 0.5;
-    deriv = -find_chemical_potential(fmu, kT, nmax);
-  } while (deriv < 0);
+
+  // The following is a very rough guess as to the density of the
+  // vapor based on the idea that it is an ideal gas with pressure
+  // equal to the pressure of the liquid.  We look at twice this
+  // density and see if this is higher than the liquid density.
+  const double ng_simple = pressure(f, kT, liquid_density)/kT;
+  if (-find_chemical_potential(fmu, kT, ng_simple*2) > 0 &&
+      ng_simple < 0.5*liquid_density && false) {
+    nmax = ng_simple*2;
+  } else {
+    nmax = liquid_density;
+    const double root_vapor_liquid_ratio = sqrt(vapor_liquid_ratio);
+    double deriv;
+    do {
+      // This is a cautious approach which should work up to the point
+      // where the liquid density and vapor density are within something
+      // like vapor_liquid_ratio of each other.  Thus as you approach
+      // the critical point you need to adjust vapor_liquid_ratio.  We
+      // use root_vapor_liquid_ratio which is closer to 1 so that we've
+      // still got some wiggle room.
+      nmax *= root_vapor_liquid_ratio;
+      deriv = -find_chemical_potential(fmu, kT, nmax);
+    } while (deriv < 0 && nmax > 0.0001);
+  }
+
   //clock_t my_time = clock();
   double d = find_density(fmu, kT, 1e-14, nmax);
   //printf("find_density took %g seconds\n", (clock()-my_time)/double(CLOCKS_PER_SEC));
   return d;
 }
 
-double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
+double saturated_liquid(Functional f, double kT, double nmin, double nmax,
+                        double vapor_liquid_ratio) {
   Functional n = EffectivePotentialToDensity(kT);
   double n2 = nmax;
   double n1 = nmin;
@@ -236,7 +258,7 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax) {
       n1 = ntry;
     } else {
       //const double mutry = find_chemical_potential(f, kT, ntry);
-      ngtry = coexisting_vapor_density(f, kT, ntry);
+      ngtry = coexisting_vapor_density(f, kT, ntry, vapor_liquid_ratio);
       pgtry = pressure(f, kT, ngtry);
       //printf("nl = %g\tng = %g,\t pl = %g\t pv = %g\n", ntry, ngtry,
       //       ptry, pgtry);
