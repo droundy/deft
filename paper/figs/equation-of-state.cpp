@@ -58,7 +58,7 @@ int main(int, char **) {
             water_saturated_surface_tension[i]);
   }
 
-  for (double T=660; T<710; T += 5) {
+  for (double T=660; T<700; T += 5) {
     printf("Working on bonus equation of state at %g Kelvin...\n", T);
     double kT = kB*T;
     Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
