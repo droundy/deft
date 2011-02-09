@@ -273,6 +273,110 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax,
   return (n2+n1)*0.5;
 }
 
+
+void saturated_liquid_vapor(Functional f, double kT,
+                            const double nmin, const double ncrit, const double nmax,
+                            double *nl_ptr, double *nv_ptr, double *mu_ptr,
+                            const double fraccuracy) {
+  if (isnan(*nl_ptr) || *nl_ptr < ncrit || *nl_ptr > nmax) *nl_ptr = 0.5*(nmax + ncrit);
+  if (isnan(*nv_ptr) || *nv_ptr < nmin || *nv_ptr > ncrit) *nv_ptr = 0.5*(nmin + ncrit);
+  // Our starting guess for mu is chosen such that there should always
+  // be two minima, one on each side of ncrit, provided ncrit is
+  // between the two inflection points which themselves are between
+  // the two minima.
+  double nl_old, nv_old, mu_old, mu = find_chemical_potential(f, kT, ncrit);
+
+  // Here I compute a start value for "closeness" that yields a stop
+  // point very close to fraccuracy, to minimize the number of
+  // bisections that we need to do in the best-case scenario (which
+  // should happen sometimes due to our good starting guesses on late
+  // minimizations.
+  double closest = 0.4*fraccuracy;
+  while (closest < 0.5) closest = sqrt(closest);
+  int i = 0;
+  do {
+    nl_old = *nl_ptr;
+    nv_old = *nv_ptr;
+    mu_old = mu;
+
+    // First solve for the optimal liquid density
+    double nlmin = ncrit, nlmax = nmax;
+    // First we'll see if our last guess maybe was pretty good, by
+    // checking progressively closer about it.
+    double nl = *nl_ptr;
+    for (double closeness = closest; closeness >= fraccuracy*0.25; closeness *= closeness) {
+      if (*nl_ptr*(1+closeness) > nmax || *nl_ptr*(1-closeness) < ncrit) continue;
+      nl = *nl_ptr * (1.0 + closeness);
+      if (find_chemical_potential(f, kT, nl) > mu) {
+        // Oh well, looks like the minimum isn't in this small interval.
+        nlmin = nl;
+        break;
+      }
+      // We know the liquid density is under our "high" guess, so now
+      // let's try a "low" guess just under our last solution!
+      nlmax = nl;
+      nl = *nl_ptr * (1.0 - closeness);
+      if (find_chemical_potential(f, kT, nl) < mu) {
+        // Oh well, looks like the minimum isn't in this small interval.
+        nlmax = nl;
+        break;
+      }
+      nlmin = nl;
+    }
+    // Now we'll just use an ordinary bisection approach.
+    while (nlmax - nlmin > 0.5*fraccuracy*nlmax) {
+      nl = nlmin + 0.5*(nlmax - nlmin);
+      if (find_chemical_potential(f, kT, nl) > mu) nlmin = nl;
+      else nlmax = nl;
+    }
+
+    // First solve for the optimal vapor density
+    double nvmin = nmin, nvmax = ncrit;
+    // First we'll see if our last guess maybe was pretty good, by
+    // checking progressively closer about it.
+    double nv = *nv_ptr;
+    for (double closeness = closest; closeness > fraccuracy*0.25; closeness *= closeness) {
+      if (*nv_ptr*(1+closeness) > ncrit || *nv_ptr*(1-closeness) < nmin) continue;
+      nv = *nv_ptr * (1.0 + closeness);
+      if (find_chemical_potential(f, kT, nv) > mu) {
+        // Oh well, looks like the minimum isn't in this small interval.
+        nvmin = nv;
+        break;
+      }
+      // We know the liquid density is under our "high" guess, so now
+      // let's try a "low" guess just under our last solution!
+      nvmax = nv;
+      nv = *nv_ptr * (1.0 - closeness);
+      if (find_chemical_potential(f, kT, nv) < mu) {
+        // Oh well, looks like the minimum isn't in this small interval.
+        nvmax = nv;
+        break;
+      }
+      nvmin = nv;
+    }
+    // Now we'll just use an ordinary bisection approach for the vapor density.
+    while (nvmax - nvmin > 0.5*fraccuracy*nvmax) {
+      nv = nvmin + 0.5*(nvmax - nvmin);
+      if (find_chemical_potential(f, kT, nv) > mu) nvmin = nv;
+      else nvmax = nv;
+    }
+    // Now find the slope between the two points.
+    double fl = f(-kT*log(nl)), fv = f(-kT*log(nv));
+    mu = -(fl - fv)/(nl - nv);
+    *nl_ptr = nl;
+    *nv_ptr = nv;
+    *mu_ptr = mu;
+    //printf("nl = %20.15g\tnv = %20.15g\n", nl, nv);
+    //printf("Iteration %d,\tmu = %g,\tdelta mu = %g\tfrac dnv = %g\t frac dnl = %g\n",
+    //       i, mu, mu - mu_old, (*nv_ptr - nv_old)/ *nv_ptr, (*nl_ptr - nl_old)/ *nl_ptr);
+    if (i++ > 15) {
+      printf("PANICKING in saturated_liquid_vapor!\n");
+      break;
+    }
+  } while (fabs(*nl_ptr - nl_old) > fraccuracy*nl_old ||
+           fabs(*nv_ptr - nv_old) > fraccuracy*nv_old);
+}
+
 void saturated_liquid_properties(Functional f, LiquidProperties *prop) {
   prop->liquid_density = saturated_liquid(f, prop->kT);
   prop->vapor_density = coexisting_vapor_density(f, prop->kT, prop->liquid_density);

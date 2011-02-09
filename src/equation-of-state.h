@@ -31,6 +31,9 @@ double saturated_liquid(Functional f, double kT,
                         double vapor_liquid_ratio = 0.5);
 double coexisting_vapor_density(Functional f, double kT, double liquid_density,
                                 double vapor_liquid_ratio = 0.5);
+void saturated_liquid_vapor(Functional f, double kT, double nmin, double ncrit, double nmax,
+                            double *nl_ptr, double *nv_ptr, double *mu_ptr,
+                            const double fraccuracy = 1e-13);
 
 void saturated_liquid_properties(Functional f, LiquidProperties *prop);
 
