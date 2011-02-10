@@ -378,8 +378,12 @@ void saturated_liquid_vapor(Functional f, double kT,
 }
 
 void saturated_liquid_properties(Functional f, LiquidProperties *prop) {
-  prop->liquid_density = saturated_liquid(f, prop->kT);
-  prop->vapor_density = coexisting_vapor_density(f, prop->kT, prop->liquid_density);
+  double mu;
+  saturated_liquid_vapor(f, prop->kT,
+                         prop->vapor_density*0.1,
+                         prop->critical_density,
+                         prop->liquid_density*1.2,
+                         &prop->liquid_density, &prop->vapor_density, &mu, 1e-12);
 }
 
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {

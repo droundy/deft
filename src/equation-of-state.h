@@ -6,7 +6,7 @@
 #include "GridDescription.h"
 
 struct LiquidProperties {
-  double lengthscale, liquid_density, vapor_density, kT;
+  double lengthscale, liquid_density, critical_density, vapor_density, kT;
   double epsilon_dispersion, lambda_dispersion, epsilonAB, kappaAB;
 };
 

@@ -71,7 +71,6 @@ int main(int, char **) {
       fprintf(o, "\t%g\t%g", fs[t](V), fs[t](Vl) - (dens-nl[t])*mu[t]);
     }
     fprintf(o, "\n");
-    printf("\n");
     fflush(o);
   }
   fclose(o);
