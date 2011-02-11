@@ -30,6 +30,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
 	paper/figs/finding-vapor-pressure.mkdat \
+	paper/figs/entropy.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -110,6 +111,7 @@ tests_ideal_gas_external_potential_test_SOURCES = tests/ideal-gas-external-poten
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
+paper_figs_entropy_mkdat_SOURCES = paper/figs/entropy.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -146,7 +148,10 @@ clean-local:
 	cd paper && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
-paper: paper/figs/equation-of-state.dat paper/figs/finding-vapor-pressure.dat paper/figs/surface-tension.dat
+paper: paper/figs/equation-of-state.dat \
+	paper/figs/finding-vapor-pressure.dat \
+	paper/figs/surface-tension.dat \
+	paper/figs/entropy.dat
 	cd paper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat

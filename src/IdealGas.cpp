@@ -80,15 +80,44 @@ static const double min_log_arg = 1e-90;
 static const double slope = log(min_log_arg);
 static const double min_e = min_log_arg*log(min_log_arg) - min_log_arg;
 
+Functional find_nQ(double Tin) {
+  Functional kT = Functional(Tin, "kT");
+  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  // Note:  hbar is one in atomic units, yay!
+  // nQ = (m*kT/(2 pi hbar^2))^3/2
+  return PowAndHalf(3)(mass*kT/(2*M_PI));
+}
+
+Functional find_dnQ_dT(double Tin) {
+  Functional kT = Functional(Tin, "kT");
+  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  // Note:  hbar is one in atomic units, yay!
+  // nQ = (m*kT/(2 pi hbar^2))^3/2
+  return 1.5*PowAndHalf(3)(mass/(2*M_PI))*sqrt(kT);
+}
+
 Functional IdealGas(double Tin) {
   Functional n = Identity().set_name("n");
+  Functional nQ = find_nQ(Tin);
   Functional T = Functional(Tin, "kT");
-  return (T*choose(min_log_arg,  ((n-min_log_arg)*slope + min_e), (n*log(n)-n))).set_name("ideal gas");
+  return (T*choose(min_log_arg,  ((n-min_log_arg)*slope + min_e), (n*log(n/nQ)-n))).set_name("ideal gas");
 }
+
 
 Functional IdealGasOfVeff(double Tin) {
   Functional Veff = Identity().set_name("Veff");
   Functional kT = Functional(Tin, "kT");
   Functional n = exp(-Veff/kT);
-  return (-(Veff + kT)*n).set_name("ideal_gas");
+  Functional nQ = find_nQ(Tin);
+  return (-(Veff + kT*log(nQ) + kT)*n).set_name("ideal_gas");
+}
+
+Functional EntropyOfIdealGasOfVeff(double Tin) {
+  Functional Veff = Identity().set_name("Veff");
+  Functional kT = Functional(Tin, "kT");
+  Functional n = exp(-Veff/kT);
+  Functional nQ = find_nQ(Tin);
+  Functional dnQ_dT = find_dnQ_dT(Tin);
+  // The following is also known as the Sackur-Tetrode equation
+  return (-(Veff/kT + log(nQ) + 2.5)*n).set_name("dideal_gas_dT");
 }
