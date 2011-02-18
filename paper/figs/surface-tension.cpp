@@ -30,7 +30,7 @@ static void took(const char *name) {
 
 int main(int, char **) {
   FILE *o = fopen("paper/figs/surface-tension.dat", "w");
-  for (double T=273; T<600; T+=25) {
+  for (double T=273; T<=693; T+=25) {
     printf("Working on surface tension at %g Kelvin...\n", T);
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     LiquidProperties prop = water_prop;
@@ -56,6 +56,7 @@ int main(int, char **) {
     double st = surface_tension(min, f, prop, true, plotname);
     free(plotname);
     fprintf(o, "%g\t%g\n", T, st);
+    if (T > 373 && T < 600) T += 25; // Use higher interval at higher temperatures
   }
   fclose(o);
 }

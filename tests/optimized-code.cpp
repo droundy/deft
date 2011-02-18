@@ -76,7 +76,7 @@ int main(int, char **argv) {
   Functional f = HardSpheres(R, kT) + IdealGas(kT);
   double mu = -f.derive(water_prop.liquid_density);
   f = HardSpheresRFFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
-  compare_functionals(HardSphereGasRF(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
+  compare_functionals(HardSphereGasRF(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 1e-12);
  
   mu = -(HardSpheres(R, kT)(nn) + IdealGasOfVeff(kT)).derive(water_prop.liquid_density);
   f = HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);

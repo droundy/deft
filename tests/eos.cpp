@@ -75,7 +75,7 @@ int main(int, char **argv) {
 
   {
     double ngas = 2e-5;
-    double mu = -kT*log(ngas);
+    double mu = find_chemical_potential(IdealGasOfVeff(kT), kT, ngas);
     test_eos("ideal gas", IdealGasOfVeff(kT) + ChemicalPotential(mu)(n), ngas, ngas*kT);
   }
 
@@ -84,9 +84,9 @@ int main(int, char **argv) {
   test_pressure("quadratic(3)", 0.5*sqr(n) - n, 3, 4.5);
 
   {
-    FILE *o = fopen("ideal-gas.dat", "w");
+    //FILE *o = fopen("ideal-gas.dat", "w");
     //equation_of_state(o, IdealGasOfVeff(kT), kT, nmin, nmax);
-    fclose(o);
+    //fclose(o);
   }
 
   {

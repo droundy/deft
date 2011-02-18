@@ -84,7 +84,7 @@ int main(int, char **argv) {
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, 0),
-             -5.114543775221813e-09);
+             -8.140476801563833e-09);
   //test_energy("SAFT",
   //            SaftFluid(water_prop.lengthscale, kT,
   //                      water_prop.epsilonAB, water_prop.kappaAB,
