@@ -20,7 +20,7 @@
 
 const double kT = 1.0/137; // this isn't actually the room temperature in Hartree
 const double R = 2.7;
-const double mu = 0;
+const double mu = 0.01;
 
 int main(int, char **argv) {
   if (strcmp(argv[1], "src/IdealGasFast.cpp") == 0)
@@ -33,18 +33,29 @@ int main(int, char **argv) {
     HardSpheresTarazona(kT, R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R", "kT");
   if (strcmp(argv[1], "src/HardSpheresNoTensor.cpp") == 0)
     HardSpheresWBnotensor(kT, R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R", "kT");
-  if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
+  if (strcmp(argv[1], "src/HardSphereGasRFFast.cpp") == 0) {
     Functional n = EffectivePotentialToDensity(kT);
     Functional f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
-    f.create_source("src/HardSphereGasRFFast.cpp", "HardSphereGasRF", "R", "kT", "mu");
-
-    f = HardSpheres(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
-    f.create_source("src/HardSphereGasFast.cpp", "HardSphereGas", "R", "kT", "mu");
+    f.create_source(argv[1], "HardSphereGasRF", "R", "kT", "mu");
+  }
+  if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
+    Functional n = EffectivePotentialToDensity(kT);
+    Functional f = HardSpheres(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
+    f.create_source(argv[1], "HardSphereGas", "R", "kT", "mu");
   }
   if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0) {
-    SaftFluidSlow(R, kT, 0, 0, 0, 0, mu).create_source("src/SaftFluidFast.cpp", "SaftFluid",
-                                                       "R", "kT", "epsilonAB", "kappaAB",
-                                                       "epsilon_dispersion", "lambda_dispersion",
-                                                       "mu");
+    SaftFluidSlow(R, kT, 0.01, 0.01, 0.01, 0.01, mu).create_source(argv[1], "SaftFluid", "R", "kT",
+                                                                   "epsilonAB", "kappaAB",
+                                                                   "epsilon_dispersion", "lambda_dispersion",
+                                                                   "mu");
+  }
+  if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
+    DispersionSAFT(R, kT, 0.01, 0.01).create_source(argv[1], "Dispersion", "R", "kT",
+                                                    "epsilon_dispersion", "lambda_dispersion");
+  }
+  if (strcmp(argv[1], "src/AssociationFast.cpp") == 0) {
+    AssociationSAFT(R, kT, 0.01, 0.01, 0.01, 0.01).create_source(argv[1], "Association",
+                                                                 "R", "kT", "epsilonAB", "kappaAB",
+                                                                 "epsilon_dispersion", "lambda_dispersion");
   }
 }
