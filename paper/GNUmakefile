@@ -37,6 +37,7 @@ ALL_FIGURES=\
 	figs/equation-of-state.gp\
 	figs/saturated-liquid-density.gp\
 	figs/finding-vapor-pressure.gp\
+	figs/near-critical-point.gp\
 	figs/temperature-versus-density.gp\
 	figs/surface-tension.gp\
 	figs/surface-298.gp\
@@ -66,3 +67,6 @@ figs/temperature-versus-density.eps: figs/saturated-liquid-density.gp \
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
+
+figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
+figs/near-critical-point.eps: figs/finding-vapor-pressure.dat

@@ -23,6 +23,7 @@ LiquidProperties water_prop = {
   //2.93, // hard sphere radius of water in bohr
   3.03420*angstrom/2, // hard sphere radius of water in bohr from Clark et al, table 6
   4.9388942e-3, // density of liquid water
+  0.0017, // approximate critical density of water
   1.14e-7, // vapor density of water
   298.15*kB, // room temperature in Hartree
   250.0*kB, // epsilon_dispersion from Clark et al, table 6
