@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("**********************************\n\n");
 
-  const double true_energy = -0.2639034579489924;
+  const double true_energy = -0.2674037773854946;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
