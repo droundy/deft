@@ -8,8 +8,8 @@
 
 class Minimizer;
 
-Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
-Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1);
+Minimizer Downhill(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity=0.1);
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity=0.1);
 Minimizer MaxIter(int maxiter, Minimizer);
 Minimizer Precision(double err, Minimizer);
 
@@ -19,9 +19,10 @@ public: // yuck, this shouldn't be public!
   VectorXd *x; // Note that we don't own this data!
   int iter;
   GridDescription gd;
+  double kT;
 public:
-  MinimizerInterface(Functional myf, const GridDescription &gdin, VectorXd *data)
-    : f(myf), x(data), gd(gdin), last_grad(0), last_pgrad(0) {
+  MinimizerInterface(Functional myf, const GridDescription &gdin, double kT_in, VectorXd *data)
+    : f(myf), x(data), gd(gdin), kT(kT_in), last_grad(0), last_pgrad(0) {
     iter = 0;
   }
   virtual ~MinimizerInterface() {
@@ -48,12 +49,12 @@ public:
   virtual void print_info(const char *prefix = "") const;
 
   // energy returns the current energy.
-  double energy() const { return f.integral(gd, *x); }
+  double energy() const { return f.integral(kT, gd, *x); }
   const VectorXd &grad() const {
     if (!last_grad) {
       last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      f.integralgrad(gd, *x, last_grad);
+      f.integralgrad(kT, gd, *x, last_grad);
     }
     return *last_grad;
   }
@@ -63,7 +64,7 @@ public:
       last_pgrad->setZero(); // Have to remember to zero it out first!
       if (!last_grad) last_grad = new VectorXd(*x); // hokey
       last_grad->setZero(); // Have to remember to zero it out first!
-      f.integralgrad(gd, *x, last_grad, last_pgrad);
+      f.integralgrad(kT, gd, *x, last_grad, last_pgrad);
     }
     return *last_pgrad;
   }
@@ -83,7 +84,7 @@ class Minimizer : public MinimizerInterface {
 public:
   // Handle reference counting so we can pass these things around freely...
   explicit Minimizer(MinimizerInterface *p) // allocate a new counter
-    : MinimizerInterface(p->f, p->gd, p->x), itsCounter(0) {
+    : MinimizerInterface(p->f, p->gd, p->kT, p->x), itsCounter(0) {
     itsCounter = new counter(p);
   }
   ~Minimizer() {
@@ -141,7 +142,7 @@ protected:
   Minimizer min;
 public:
   MinimizerModifier(Minimizer m)
-    : MinimizerInterface(m.f, m.gd, m.x), min(m) {}
+    : MinimizerInterface(m.f, m.gd, m.kT, m.x), min(m) {}
   ~MinimizerModifier() { }
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     MinimizerInterface::minimize(newf, gdnew, newx);

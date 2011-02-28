@@ -21,7 +21,7 @@ class PowType : public FunctionalInterface {
 public:
   PowType(int nn) : n(nn) {}
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+  VectorXd transform(double, const GridDescription &gd, const VectorXd &data) const {
     switch (n) {
     case 0: return VectorXd::Ones(data.rows());
     case 1: return data;
@@ -32,7 +32,7 @@ public:
         out[i] *= data[i];
     return out;
   }
-  double transform(double x) const {
+  double transform(double, double x) const {
     switch (n) {
     case 0: return 1;
     case 1: return x;
@@ -41,7 +41,7 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  double derive(double x) const {
+  double derive(double, double x) const {
     if (n < 1) return 0;
     double v = n;
     for (int p=1; p < n; p++) v *= x;
@@ -54,7 +54,7 @@ public:
     }
     return Pow(n-1)(x)*n*ingrad;
   }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(double, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     switch (n) {
     case 0: return; // zero gradient!
@@ -94,7 +94,7 @@ class PowAndHalfType : public FunctionalInterface {
 public:
   PowAndHalfType(int nn) : n(nn) {}
 
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(double, const GridDescription &, const VectorXd &data) const {
     VectorXd out(data.cwise().sqrt());
     if (n < 0) {
       for (int p=0; p > n; p--) out = out.cwise() / data;
@@ -103,7 +103,7 @@ public:
     }
     return out;
   }
-  double transform(double x) const {
+  double transform(double, double x) const {
     double out = sqrt(x);
     if (n < 0) {
       for (int p=0; p > n; p--) out /= x;
@@ -112,7 +112,7 @@ public:
     }
     return out;
   }
-  double derive(double x) const {
+  double derive(double, double x) const {
     double out = (n+0.5)/sqrt(x);
     if (n < 0) {
       for (int p=0; p > n; p--) out /= x;
@@ -124,7 +124,7 @@ public:
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     return PowAndHalf(n-1)(x)*(n+0.5)*ingrad;
   }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(double, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     if (n > 0) {
       for (int i=0; i<gd.NxNyNz; i++) {

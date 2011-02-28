@@ -22,9 +22,9 @@ static inline double sqr(double x) {
   return x*x;
 }
 
-double find_minimum_slow(Functional f, double xmin, double xmax) {
-  double dmin = f.derive(xmin);
-  double dmax = f.derive(xmax);
+double find_minimum_slow(Functional f, double kT, double xmin, double xmax) {
+  double dmin = f.derive(kT, xmin);
+  double dmax = f.derive(kT, xmax);
   if (dmax < 0) {
     printf("Oh no, xmax has negative slope!\n");
     exit(1);
@@ -37,7 +37,7 @@ double find_minimum_slow(Functional f, double xmin, double xmax) {
   do {
     // First let's do a bisection (to guarantee we converge eventually).
     double xtry = 0.5*(xmax + xmin);
-    double dtry = f.derive(xtry);
+    double dtry = f.derive(kT, xtry);
     if (dtry > 0) {
       dmax = dtry;
       xmax = xtry;
@@ -49,7 +49,7 @@ double find_minimum_slow(Functional f, double xmin, double xmax) {
     }
     // Now let's do a secant method (so maybe we'll converge really quickly)...
     xtry = (xmin*dmax - xmax*dmin)/(dmax - dmin);
-    dtry = f.derive(xtry);
+    dtry = f.derive(kT, xtry);
     if (dtry > 0) {
       dmax = dtry;
       xmax = xtry;
@@ -66,7 +66,7 @@ double find_minimum_slow(Functional f, double xmin, double xmax) {
     } else {
       xtry += xtry - xmin;
     }
-    dtry = f.derive(xtry);
+    dtry = f.derive(kT, xtry);
     if (dtry > 0) {
       dmax = dtry;
       xmax = xtry;
@@ -80,13 +80,13 @@ double find_minimum_slow(Functional f, double xmin, double xmax) {
   return 0.5*(xmax+xmin);
 }
 
-double find_minimum(Functional f, double nmin, double nmax) {
+double find_minimum(Functional f, double kT, double nmin, double nmax) {
   double nbest = nmin;
-  double ebest = f(nmin);
+  double ebest = f(kT, nmin);
   //printf("Limits are %g and %g\n", nmin, nmax);
   const double dn = (nmax - nmin)*1e-2;
   for (double n = nmin; n<=nmax; n += dn) {
-    double en = f(n);
+    double en = f(kT, n);
     // printf("Considering %g with energy %g\n", n, en);
     if (en < ebest) {
       ebest = en;
@@ -95,14 +95,14 @@ double find_minimum(Functional f, double nmin, double nmax) {
   }
   //printf("best Veff is %g\n", nbest);
   double nlo = nbest - dn, nhi = nbest + dn;
-  double elo = f(nlo);
-  double ehi = f(nhi);
+  double elo = f(kT, nlo);
+  double ehi = f(kT, nhi);
   const double fraccuracy = 1e-15;
   while ((nhi - nlo)/fabs(nbest) > fraccuracy) {
     // First we'll do a golden-section search...
     if (nbest < 0.5*(nhi+nlo)) {
       double ntry = 0.38*nlo + 0.62*nhi;
-      double etry = f(ntry);
+      double etry = f(kT, ntry);
       if (etry < ebest) {
         nlo = nbest;
         elo = ebest;
@@ -114,7 +114,7 @@ double find_minimum(Functional f, double nmin, double nmax) {
       }
     } else {
       double ntry = 0.62*nlo + 0.38*nhi;
-      double etry = f(ntry);
+      double etry = f(kT, ntry);
       if (etry < ebest) {
         nhi = nbest;
         ehi = ebest;
@@ -131,7 +131,7 @@ double find_minimum(Functional f, double nmin, double nmax) {
     double ntry = nbest - 0.5*(sqr(nbest-nlo)*(ebest-elo) - sqr(nbest-nhi)*(ebest-ehi))/
       ((nbest-nlo)*(ebest-elo) - (nbest-nhi)*(ebest-ehi));
     if (ntry > nlo && ntry < nhi && ntry != nbest) {
-      double etry = f(ntry);
+      double etry = f(kT, ntry);
       if (ntry < nbest) {
         if (etry < ebest) {
           nhi = nbest;
@@ -165,7 +165,7 @@ double pressure(Functional f, double kT, double density) {
   //printf("density is %g\n", density);
   //printf("f(V) is %g\n", f(V));
   //printf("-f.derive(V)*kT is %g\n", -f.derive(V)*kT);
-  return -f.derive(V)*kT - f(V);
+  return -f.derive(kT, V)*kT - f(kT, V);
 }
 
 double pressure_to_density(Functional f, double kT, double p, double nmin, double nmax) {
@@ -181,18 +181,18 @@ double pressure_to_density(Functional f, double kT, double p, double nmin, doubl
 double find_density(Functional f, double kT, double nmin, double nmax) {
   double Vmax = -kT*log(nmin);
   double Vmin = -kT*log(nmax);
-  double V = find_minimum(f, Vmin, Vmax);
-  return EffectivePotentialToDensity(kT)(V);
+  double V = find_minimum(f, kT, Vmin, Vmax);
+  return EffectivePotentialToDensity()(kT, V);
 }
 
 double find_chemical_potential(Functional f, double kT, double n) {
   const double V = -kT*log(n);
-  return f.derive(V)*kT/n;
+  return f.derive(kT, V)*kT/n;
 }
 
 double chemical_potential_to_density(Functional f, double kT, double mu,
                                      double nmin, double nmax) {
-  Functional n = EffectivePotentialToDensity(kT);
+  Functional n = EffectivePotentialToDensity();
   Functional fmu = f + ChemicalPotential(mu)(n);
   return find_density(fmu, kT, nmin, nmax);
 }
@@ -203,7 +203,7 @@ double coexisting_vapor_density(Functional f, double kT, double liquid_density,
   double nmax = liquid_density;
   // Here I assume that the vapor density is at least a hundredth of a
   // percent smaller than the liquid density.
-  Functional n = EffectivePotentialToDensity(kT);
+  Functional n = EffectivePotentialToDensity();
   Functional fmu = f + ChemicalPotential(mu)(n);
 
   // The following is a very rough guess as to the density of the
@@ -238,7 +238,7 @@ double coexisting_vapor_density(Functional f, double kT, double liquid_density,
 
 double saturated_liquid(Functional f, double kT, double nmin, double nmax,
                         double vapor_liquid_ratio) {
-  Functional n = EffectivePotentialToDensity(kT);
+  Functional n = EffectivePotentialToDensity();
   double n2 = nmax;
   double n1 = nmin;
   double ftry = 0;
@@ -248,7 +248,7 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax,
   double pgtry = 0;
   do {
     ntry = 0.5*(n1+n2);
-    ftry = f(-kT*log(ntry));
+    ftry = f(kT, -kT*log(ntry));
     ptry = pressure(f, kT, ntry);
     if (isnan(ftry) || isnan(ptry)) {
       n2 = ntry;
@@ -279,7 +279,7 @@ void saturated_liquid_properties(Functional f, LiquidProperties *prop) {
 }
 
 void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, double nmax) {
-  Functional n = EffectivePotentialToDensity(kT);
+  Functional n = EffectivePotentialToDensity();
   const double mumin = find_chemical_potential(f, kT, nmin);
   const double mumax = find_chemical_potential(f, kT, nmax);
   const double dmu = (mumax - mumin)/2000;
@@ -292,7 +292,7 @@ void other_equation_of_state(FILE *o, Functional f, double kT, double nmin, doub
     double V = -kT*log(n);
     double p = pressure(fmu, kT, n);
     //printf("Got ngoal of %g but mu is %g\n", ngoal, mu);
-    double e = f(V);
+    double e = f(kT, V);
     fprintf(o, "%g\t%g\t%g\n", n, p, e);
   }
 }
@@ -302,9 +302,9 @@ void equation_of_state(FILE *o, Functional f, double kT, double nmin, double nma
   for (double ngoal=nmin; ngoal<nmax; ngoal *= factor) {
     double V = -kT*log(ngoal);
     double p = pressure(f, kT, ngoal);
-    double der = -f.derive(V)*kT/ngoal;
+    double der = -f.derive(kT, V)*kT/ngoal;
     //printf("Got ngoal of %g but mu is %g\n", ngoal, mu);
-    double e = f(V);
+    double e = f(kT, V);
     fprintf(o, "%g\t%g\t%g\t%g\n", ngoal, p, e, der);
   }
 }

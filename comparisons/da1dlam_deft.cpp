@@ -25,6 +25,6 @@ int main(int, char **) {
     // Note that epsilon_dispersion is set to 1 in vrpack.
     double n = eta/(4*M_PI*R*R*R/3);
     printf("%15.10f%15.10f\n", eta, da1_dlam(R, 1.0,
-                                             water_prop.lambda_dispersion)(n));
+                                             water_prop.lambda_dispersion)(0, n));
   }
 }

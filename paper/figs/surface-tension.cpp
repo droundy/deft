@@ -35,14 +35,14 @@ int main(int, char **) {
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     LiquidProperties prop = water_prop;
     prop.kT = kB*T;
-    Functional fslow = SaftFluidSlow(prop.lengthscale, prop.kT,
+    Functional fslow = SaftFluidSlow(prop.lengthscale,
                                      prop.epsilonAB, prop.kappaAB,
                                      prop.epsilon_dispersion,
                                      prop.lambda_dispersion, 0);
     saturated_liquid_properties(fslow, &prop);
     took("Finding bulk densities");
     double mu = find_chemical_potential(fslow, prop.kT, prop.liquid_density);
-    Functional f = SaftFluid(prop.lengthscale, prop.kT,
+    Functional f = SaftFluid(prop.lengthscale,
                              prop.epsilonAB, prop.kappaAB,
                              prop.epsilon_dispersion,
                              prop.lambda_dispersion, mu);
@@ -52,7 +52,7 @@ int main(int, char **) {
     Lattice lat(Cartesian(0.2,0,0), Cartesian(0,0.2,0), Cartesian(0,0,20));
     GridDescription gd(lat, 1, 1, 200);
     Grid foo(gd);
-    Minimizer min = Precision(1e-7, ConjugateGradient(f, gd, &foo, QuadraticLineMinimizer));
+    Minimizer min = Precision(1e-7, ConjugateGradient(f, gd, prop.kT, &foo, QuadraticLineMinimizer));
     double st = surface_tension(min, f, prop, true, plotname);
     free(plotname);
     fprintf(o, "%g\t%g\n", T, st);

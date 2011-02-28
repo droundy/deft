@@ -19,20 +19,20 @@
 #include "Functionals.h"
 #include "equation-of-state.h"
 
-//const double kT = water_prop.kT;
-const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
-const double kT = kB*695;
-
 int main(int, char **) {
+  //const double kT = water_prop.kT;
+  const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
+  const double kT = kB*695;
+
   FILE *o = fopen("paper/figs/finding-vapor-pressure.dat", "w");
 
-  Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
+  Functional f = SaftFluidSlow(water_prop.lengthscale,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
                                water_prop.lambda_dispersion, 0);
   double mu_satp = find_chemical_potential(f, kT,
                                            water_prop.liquid_density);
-  f = SaftFluidSlow(water_prop.lengthscale, kT,
+  f = SaftFluidSlow(water_prop.lengthscale,
                     water_prop.epsilonAB, water_prop.kappaAB,
                     water_prop.epsilon_dispersion,
                     water_prop.lambda_dispersion, mu_satp);
@@ -45,7 +45,7 @@ int main(int, char **) {
   for (double dens=0.01*nv; dens<=1.2*nl; dens *= 1.01) {
     double V = -kT*log(dens);
     double Vl = -kT*log(nl);
-    fprintf(o, "%g\t%g\t%g\n", dens, f(V), f(Vl) - (dens-nl)*mu);
+    fprintf(o, "%g\t%g\t%g\n", dens, f(kT, V), f(kT, Vl) - (dens-nl)*mu);
   }
   fclose(o);
 }

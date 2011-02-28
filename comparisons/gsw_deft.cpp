@@ -25,8 +25,7 @@ int main(int, char **) {
     // I somewhat arbitrarily set the temperature to 1.2 times the
     // dispersion energy scale.
     double n = eta/(4*M_PI*R*R*R/3);
-    printf("%15.10f%15.10f\n", eta, gSW(water_prop.epsilon_dispersion*1.2, R,
-                                        water_prop.epsilon_dispersion,
-                                        water_prop.lambda_dispersion)(n));
+    printf("%15.10f%15.10f\n", eta, gSW(R, water_prop.epsilon_dispersion,
+                                        water_prop.lambda_dispersion)(water_prop.epsilon_dispersion*1.2, n));
   }
 }

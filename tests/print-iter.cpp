@@ -29,7 +29,7 @@ int test_print(const char *name, Functional f) {
 
   int retval = 0;
 
-  printf("Energy is %g\n", f.integral(gd, VectorXd::Ones(gd.NxNyNz)));
+  printf("Energy is %g\n", f.integral(0, gd, VectorXd::Ones(gd.NxNyNz)));
   f.print_iteration("\tPREFIX:", 1);
 
   return retval;

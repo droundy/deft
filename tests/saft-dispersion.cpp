@@ -19,7 +19,7 @@
 
 int retval = 0;
 
-void test_functional(const char *name, Functional f, double n, double etrue,
+void test_functional(const char *name, Functional f, double kT, double n, double etrue,
                      double fraccuracy=1e-14) {
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -34,18 +34,18 @@ void test_functional(const char *name, Functional f, double n, double etrue,
   GridDescription gd(lat, resolution);
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
-  const double Edouble = f(n);
-  const double Egrid = f.integral(nr)/gd.Lat.volume();
+  const double Edouble = f(kT, n);
+  const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
   f.print_summary("", Egrid);
 
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
   printf("Etrue   = %g\n", etrue);
 
-  const double deriv_double = f.derive(n);
+  const double deriv_double = f.derive(kT, n);
   Grid grad(nr);
   grad.setZero();
-  f.integralgrad(gd, nr, &grad);
+  f.integralgrad(kT, gd, nr, &grad);
   const double deriv_grid = grad[0]/gd.dvolume;
   printf("deriv double = %g\n", deriv_double);
   printf("deriv grid   = %g\n", deriv_grid);
@@ -79,7 +79,7 @@ void test_functional(const char *name, Functional f, double n, double etrue,
 
 int main(int, char **argv) {
   const double kT = 1e-3;
-  const Functional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity();
 
   {
     double R = 2.2;
@@ -97,7 +97,7 @@ int main(int, char **argv) {
     //const double a1vdw = -4*eta*epsdis*(lambda*lambda*lambda-1);
     const double gHShere = (1-eta_effective/2)/(1-eta_effective)/(1-eta_effective)/(1-eta_effective);
 
-    test_functional("gHScarnahan", gHScarnahan(Identity()*sphere_volume, R), n*eta_effective/eta,
+    test_functional("gHScarnahan", gHScarnahan(Identity()*sphere_volume, R), kT, n*eta_effective/eta,
                     gHShere);
     //test_functional("gHS", gHS(Identity()*sphere_volume, R), n, gHShere);
   }

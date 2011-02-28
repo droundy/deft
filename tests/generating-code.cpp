@@ -18,9 +18,7 @@
 #include "utilities.h"
 
 int main(int, char **) {
-  double kTval = 1e-2;
-  Functional kT(kTval), x(Identity()), One(1);
-  kT.set_name("kT");
+  Functional x(Identity()), One(1);
   const double Rval = 4;
   Functional R(Rval);
   R.set_name("R");
@@ -36,11 +34,11 @@ int main(int, char **) {
   log(1-StepConvolve(Rval)).create_header("tests/generated/log-one-minus-nbar.h", "LogOneMinusNbar", "R");
   sqr(xShellConvolve(Rval)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", "R");
 
-  Functional veff = EffectivePotentialToDensity(kTval);
+  Functional veff = EffectivePotentialToDensity();
 
   sqr(veff).create_header("tests/generated/sqr-Veff.h", "SquareVeff", "kT", "R");
 
-  IdealGasOfVeff(kTval).create_header("tests/generated/ideal-gas.h", "IdealGasFast", "kT");
+  IdealGasOfVeff.create_header("tests/generated/ideal-gas.h", "IdealGasFast");
 
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
@@ -67,8 +65,8 @@ int main(int, char **) {
 
   phi3rf(veff).create_header("tests/generated/phi3rf-Veff.h", "Phi3rfVeff", "kT", "R");
 
-  (phi1(veff) + IdealGasOfVeff(kTval) + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
-                                                                                  "Phi1plus", "R", "kT", "mu");
+  (phi1(veff) + IdealGasOfVeff + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
+                                                                           "Phi1plus", "R", "kT", "mu");
 
   //(phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "kT", "R");
 

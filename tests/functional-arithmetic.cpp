@@ -31,15 +31,16 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad1(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad2(gd, n*VectorXd::Ones(gd.NxNyNz));
+  const double kT = 1e-3;
 
   printf("Working on f1 of double...\n");
-  const double Edouble1 = f1(n);
+  const double Edouble1 = f1(kT, n);
   printf("Working on f1 of grid...\n");
-  const double Egrid1 = f1.integral(nr)/gd.Lat.volume();
+  const double Egrid1 = f1.integral(kT, nr)/gd.Lat.volume();
   printf("Working on f2 of double...\n");
-  const double Edouble2 = f2(n);
+  const double Edouble2 = f2(kT, n);
   printf("Working on f2 of grid...\n");
-  const double Egrid2 = f2.integral(nr)/gd.Lat.volume();
+  const double Egrid2 = f2.integral(kT, nr)/gd.Lat.volume();
 
   printf("Edouble1 = %g\n", Edouble1);
   printf("Egrid1   = %g\n", Egrid1);
@@ -62,12 +63,12 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
     retval++;
   }
 
-  retval += f1.run_finite_difference_test("f1", nr);
-  retval += f2.run_finite_difference_test("f2", nr);
+  retval += f1.run_finite_difference_test("f1", kT, nr);
+  retval += f2.run_finite_difference_test("f2", kT, nr);
   mygrad1.setZero();
   mygrad2.setZero();
-  f1.integralgrad(gd, nr, &mygrad1);
-  f2.integralgrad(gd, nr, &mygrad2);
+  f1.integralgrad(kT, gd, nr, &mygrad1);
+  f2.integralgrad(kT, gd, nr, &mygrad2);
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
     printf("FAIL: Error in the grad is too big!\n");
@@ -78,8 +79,7 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
 
 int main(int, char **argv) {
   int retval = 0;
-  const double kT = 1e-3;
-  const Functional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity();
 
   Functional x = Gaussian(1);
   retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
@@ -108,12 +108,6 @@ int main(int, char **argv) {
   retval += test_functionals("sqr(log(x))*x no Pow", sqr(log(x))*x, (x*x)(log(x))*x, 0.1, 1e-12);
   retval += test_functionals("sqr(log(x))/x", sqr(log(x))/x, Pow(2)(log(x))/x, 0.1, 1e-12);
   retval += test_functionals("log(x)*log(x)/x", sqr(log(x))/x, log(x)*log(x)/x, 0.1, 1e-12);
-
-  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), x, 0.1, 1e-12);
-  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), 2*x, 0.9, 1e-12);
-
-  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), x, 0.1, 1e-12);
-  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), sqr(x), 0.9, 1e-12);
 
   // The following tests the chain rule...
   retval += test_functionals("Pow(2)(Pow(2))", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);

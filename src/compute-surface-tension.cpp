@@ -35,16 +35,16 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
   for (int i=0; i<gd.NxNyNz*gas_size/size; i++) potential[i] = Veff_gas;
   for (int i=gd.NxNyNz*gas_size/size; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
-  f0.run_finite_difference_test("f0", potential);
+  f0.run_finite_difference_test("f0", prop.kT, potential);
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
       printf("Working on liberated interface...\n");
       fflush(stdout);
     }
-  const double Einterface = f0.integral(potential);
+  const double Einterface = f0.integral(prop.kT, potential);
   double Ninterface = 0;
-  Grid interface_density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
+  Grid interface_density(gd, EffectivePotentialToDensity()(prop.kT, gd, potential));
   for (int i=0;i<gd.NxNyNz;i++) Ninterface += interface_density[i]*gd.dvolume;
   if (verbose) printf("Got interface energy of %g.\n", Einterface);
   
@@ -55,10 +55,10 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
       printf("Working on gas...\n");
       fflush(stdout);
     }
-  const double Egas = f0.integral(potential);
+  const double Egas = f0.integral(prop.kT, potential);
   double Ngas = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
+    Grid density(gd, EffectivePotentialToDensity()(prop.kT, gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) Ngas += density[i]*gd.dvolume;
   }
   
@@ -69,10 +69,10 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
       printf("Working on liquid...\n");
       fflush(stdout);
     }
-  const double Eliquid = f0.integral(potential);
+  const double Eliquid = f0.integral(prop.kT, potential);
   double Nliquid = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity(prop.kT)(gd, potential));
+    Grid density(gd, EffectivePotentialToDensity()(prop.kT, gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) Nliquid += density[i]*gd.dvolume;
   }
   

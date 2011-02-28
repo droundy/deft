@@ -15,9 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "utilities.h"
-#include "Minimizer.h"
-#include "Functionals.h"
-#include <stdio.h>
+#include <Eigen/Core>
 
 long Eigen::djr_memused = 0;
 long Eigen::djr_mempeak = 0;

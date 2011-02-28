@@ -25,22 +25,22 @@ public:
     kfac = -0.5*width*width; // FIXME: get width right in k space!
   }
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &data) const {
+  VectorXd transform(double, const GridDescription &gd, const VectorXd &data) const {
     Grid out(gd, data);
     ReciprocalGrid recip = out.fft();
     recip.cwise() *= (kfac*g2(gd)).cwise().exp();
     return recip.ifft();
   }
-  double transform(double n) const {
+  double transform(double, double n) const {
     return n;
   }
-  double derive(double) const {
+  double derive(double, double) const {
     return 1;
   }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     return Gaussian(width)(ingrad);
   }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+  void grad(double, const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();

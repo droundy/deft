@@ -30,6 +30,7 @@ double gaussian(Cartesian r) {
 }
 
 int main(int, char **argv) {
+  const double kT = 1e-3;
   Lattice lat(Cartesian(0,5,5), Cartesian(5,0,5), Cartesian(5,5,0));
   Cartesian plotcorner(-5, -5, 0), plotx(10,0,0), ploty(0,10,0);
   int resolution = 100;
@@ -37,44 +38,44 @@ int main(int, char **argv) {
   Grid foo(gd), bar(gd);
   printf("Running Set(gaussian)...\n");
   foo.Set(gaussian);
-  printf("Original integrates to %.15g\n", Identity().integral(foo));
+  printf("Original integrates to %.15g\n", Identity().integral(kT, foo));
   printf("Original Maximum is %g\n", foo.maxCoeff());
 
   int retval = 0;
 
-  retval += log(1-StepConvolve(1)).run_finite_difference_test("log(1-StepConvolve(1))", foo);
-  retval += Gaussian(1).run_finite_difference_test("Gaussian(1)", foo);
-  retval += StepConvolve(1).run_finite_difference_test("StepConvolve(1)", foo);
-  retval += StepConvolve(3).run_finite_difference_test("StepConvolve(3)", foo);
-  retval += ShellConvolve(1).run_finite_difference_test("ShellConvolve(1)", foo);
-  retval += ShellConvolve(3).run_finite_difference_test("ShellConvolve(3)", foo);
+  retval += log(1-StepConvolve(1)).run_finite_difference_test("log(1-StepConvolve(1))", kT, foo);
+  retval += Gaussian(1).run_finite_difference_test("Gaussian(1)", kT, foo);
+  retval += StepConvolve(1).run_finite_difference_test("StepConvolve(1)", kT, foo);
+  retval += StepConvolve(3).run_finite_difference_test("StepConvolve(3)", kT, foo);
+  retval += ShellConvolve(1).run_finite_difference_test("ShellConvolve(1)", kT, foo);
+  retval += ShellConvolve(3).run_finite_difference_test("ShellConvolve(3)", kT, foo);
   Functional ysh = yShellConvolve(1), sh = ShellConvolve(1);
   Functional xsh = xShellConvolve(1), st = StepConvolve(1);
 
-  retval += Pow(2)(ysh).run_finite_difference_test("Pow(ysh,2)", foo);
-  retval += sqr(ysh).run_finite_difference_test("ysh^2", foo);
+  retval += Pow(2)(ysh).run_finite_difference_test("Pow(ysh,2)", kT, foo);
+  retval += sqr(ysh).run_finite_difference_test("ysh^2", kT, foo);
 
-  retval += (Pow(2)(ysh)*Identity()).run_finite_difference_test("Pow(ysh,2)*x", foo);
-  retval += (sqr(ysh)*Identity()).run_finite_difference_test("sqr(ysh)*x", foo);
-  retval += ((Identity()*Identity())(ysh)*Identity()).run_finite_difference_test("(id*di)(ysh)*x", foo);
+  retval += (Pow(2)(ysh)*Identity()).run_finite_difference_test("Pow(ysh,2)*x", kT, foo);
+  retval += (sqr(ysh)*Identity()).run_finite_difference_test("sqr(ysh)*x", kT, foo);
+  retval += ((Identity()*Identity())(ysh)*Identity()).run_finite_difference_test("(id*di)(ysh)*x", kT, foo);
 
-  retval += (Pow(4)(ysh)*st).run_finite_difference_test("Pow(ysh,4)*sh", foo);
-  retval += (Pow(2)(ysh)*st).run_finite_difference_test("Pow(ysh,2)*sh", foo);
-  retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*sh", foo);
-  retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*xsh^4", foo);
+  retval += (Pow(4)(ysh)*st).run_finite_difference_test("Pow(ysh,4)*sh", kT, foo);
+  retval += (Pow(2)(ysh)*st).run_finite_difference_test("Pow(ysh,2)*sh", kT, foo);
+  retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*sh", kT, foo);
+  retval += (sqr(ysh)*st).run_finite_difference_test("ysh^2*xsh^4", kT, foo);
 
-  retval += (sqr(ysh)).run_finite_difference_test("ysh^2", foo);
-  retval += (ysh*ysh).run_finite_difference_test("ysh*ysh", foo);
-  retval += (ysh*ysh + sh).run_finite_difference_test("ysh*ysh + sh", foo);
-  retval += (-1*ysh*ysh).run_finite_difference_test("-1*ysh*ysh", foo);
+  retval += (sqr(ysh)).run_finite_difference_test("ysh^2", kT, foo);
+  retval += (ysh*ysh).run_finite_difference_test("ysh*ysh", kT, foo);
+  retval += (ysh*ysh + sh).run_finite_difference_test("ysh*ysh + sh", kT, foo);
+  retval += (-1*ysh*ysh).run_finite_difference_test("-1*ysh*ysh", kT, foo);
 
   Functional zxsh = zxShellConvolve(3);
-  retval += sqr(sqr(zxsh)).run_finite_difference_test("zxsh^2^2", foo);
+  retval += sqr(sqr(zxsh)).run_finite_difference_test("zxsh^2^2", kT, foo);
   {
     Grid foo2(foo);
     foo2.cwise() -= 0.001; // so we don't divide by zero...
-    retval += (sqr(zxsh)/sh).run_finite_difference_test("zxsh^2/sh", foo2);
-    retval += (sqr(StepConvolve(1))/sh).run_finite_difference_test("st^2/sh", foo2);
+    retval += (sqr(zxsh)/sh).run_finite_difference_test("zxsh^2/sh", kT, foo2);
+    retval += (sqr(StepConvolve(1))/sh).run_finite_difference_test("st^2/sh", kT, foo2);
   }
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);

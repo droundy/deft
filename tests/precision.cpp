@@ -19,11 +19,11 @@
 #include "Functionals.h"
 #include "LineMinimizer.h"
 
-const double kT = 1e-3; // room temperature in Hartree
+const double my_kT = 1e-3; // room temperature in Hartree
 const double ngas = 1.14e-7; // vapor density of water
 const double nliquid = 4.9388942e-3; // density of liquid water
-const double mu = -kT*log(ngas);
-const double Veff_liquid = -kT*log(nliquid);
+const double mu = -my_kT*log(ngas);
+const double Veff_liquid = -my_kT*log(nliquid);
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(5,0,0), Cartesian(0,5,0), Cartesian(0,0,5));
@@ -35,13 +35,13 @@ const double interaction_energy_scale = 0.01;
 Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
 Functional f0 = ChemicalPotential(mu) + attraction + repulsion;
-Functional n = EffectivePotentialToDensity(kT);
-Functional f = IdealGasOfVeff(kT) + f0(n);
+Functional n = EffectivePotentialToDensity();
+Functional f = IdealGasOfVeff + f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-Functional ff = IdealGasOfVeff(kT) + (f0 + ExternalPotential(external_potential))(n);
+Functional ff = IdealGasOfVeff + (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
@@ -82,33 +82,33 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
 int main(int, char **argv) {
   int retval = 0;
 
-  Minimizer downhill = Downhill(ff, gd, &potential, 1e-11);
+  Minimizer downhill = Downhill(ff, gd, my_kT, &potential, 1e-11);
   
   potential.setZero();
   //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-13, 300);
   //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-10, 300);
 
-  Minimizer pd = PreconditionedDownhill(ff, gd, &potential, 1e-11);
+  Minimizer pd = PreconditionedDownhill(ff, gd, my_kT, &potential, 1e-11);
   potential.setZero();
   //retval += test_minimizer("PreconditionedDownhill", pd, ff, &potential, 1e-13, 300);
 
-  Minimizer steepest = SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
+  Minimizer steepest = SteepestDescent(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
   //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 20);
   //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-3, 20);
 
-  Minimizer psd = PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
+  Minimizer psd = PreconditionedSteepestDescent(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 20);
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
 
-  Minimizer cg = ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-3);
+  Minimizer cg = ConjugateGradient(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-3);
   potential.setZero();
   retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-12, 90);
   retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-3, 20);
 
-  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer, 1e-11);
+  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
   // Oddly enough with PreconditionedConjugateGradient we can't get
   // better than 1e-11 precision, and even that requires setting the

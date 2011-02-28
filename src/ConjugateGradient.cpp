@@ -24,9 +24,9 @@ protected:
   LineMinimizer linmin;
   double oldgradsqr;
 public:
-  ConjugateGradientType(Functional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm,
+  ConjugateGradientType(Functional f, const GridDescription &gdin, double kT, VectorXd *data, LineMinimizer lm,
                         double stepsize = 0.1)
-    : MinimizerInterface(f, gdin, data), step(stepsize), orig_step(step), direction(*data), oldgrad(*data), linmin(lm) {
+    : MinimizerInterface(f, gdin, kT, data), step(stepsize), orig_step(step), direction(*data), oldgrad(*data), linmin(lm) {
     direction.setZero();
     oldgrad.setZero();
     oldgradsqr = 0;
@@ -50,8 +50,8 @@ public:
 class PreconditionedConjugateGradientType : public ConjugateGradientType {
 public:
   PreconditionedConjugateGradientType(Functional f, const GridDescription &gdin,
-                                    VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
-    : ConjugateGradientType(f, gdin, data, lm, stepsize) {}
+                                      double kT, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
+    : ConjugateGradientType(f, gdin, kT, data, lm, stepsize) {}
 
   bool improve_energy(bool verbose = false);
 };
@@ -85,7 +85,7 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
     }
   }
 
-  Minimizer lm = linmin(f, gd, x, direction, -gdotd, &step);
+  Minimizer lm = linmin(f, gd, kT, x, direction, -gdotd, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
@@ -127,7 +127,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
 
   const double gdotd = oldgrad.dot(direction);
 
-  Minimizer lm = linmin(f, gd, x, direction, -gdotd, &step);
+  Minimizer lm = linmin(f, gd, kT, x, direction, -gdotd, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
@@ -140,12 +140,12 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
 }
 
 
-Minimizer ConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
-                          LineMinimizer lm, double stepsize) {
-  return Minimizer(new ConjugateGradientType(f, gdin, data, lm, stepsize));
+Minimizer ConjugateGradient(Functional f, const GridDescription &gdin, double kT,
+                            VectorXd *data, LineMinimizer lm, double stepsize) {
+  return Minimizer(new ConjugateGradientType(f, gdin, kT, data, lm, stepsize));
 }
 
-Minimizer PreconditionedConjugateGradient(Functional f, const GridDescription &gdin, VectorXd *data,
-                                        LineMinimizer lm, double stepsize) {
-  return Minimizer(new PreconditionedConjugateGradientType(f, gdin, data, lm, stepsize));
+Minimizer PreconditionedConjugateGradient(Functional f, const GridDescription &gdin, double kT,
+                                          VectorXd *data, LineMinimizer lm, double stepsize) {
+  return Minimizer(new PreconditionedConjugateGradientType(f, gdin, kT, data, lm, stepsize));
 }

@@ -8,9 +8,10 @@ private:
   const VectorXd direction;
   double *step, slope, alternatestep;
 public:
-  QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, VectorXd *data, const VectorXd &dir,
+  QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, double kT,
+                             VectorXd *data, const VectorXd &dir,
                              double gradDotDirection, double *instep)
-    : MinimizerInterface(f, gdin, data), direction(dir), step(instep), slope(gradDotDirection) {
+    : MinimizerInterface(f, gdin, kT, data), direction(dir), step(instep), slope(gradDotDirection) {
     if (step == 0) {
       // If the caller doesn't specify the stepsize, we'll just use an
       // internal one.
@@ -48,7 +49,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
         printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g (%g vs %g)\n",
                step1, energy(), Etried);
         Grid foo(gd, *x);
-        f.run_finite_difference_test("In QuadraticLineMinimizerType", foo, &direction);
+        f.run_finite_difference_test("In QuadraticLineMinimizerType", kT, foo, &direction);
         fflush(stdout);
       }
       break;
@@ -154,11 +155,11 @@ void QuadraticLineMinimizerType::print_info(int iter) const {
 
 
 
-Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
+Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, double kT, VectorXd *data,
                                   const VectorXd &direction, double gradDotDirection, double *step) {
   //if (gradDotDirection > 0) {
   //  printf("The slope is backwards!!!\n");
   //  assert(gradDotDirection < 0);
   //}
-  return Minimizer(new QuadraticLineMinimizerType(f, gd, data, direction, gradDotDirection, step));
+  return Minimizer(new QuadraticLineMinimizerType(f, gd, kT, data, direction, gradDotDirection, step));
 }

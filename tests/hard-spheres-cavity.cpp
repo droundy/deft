@@ -21,12 +21,12 @@
 #include "equation-of-state.h"
 #include "utilities.h"
 
-const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.324*eta_one;
-const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).derive(nliquid);
+Functional n = EffectivePotentialToDensity();
+const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff, water_prop.kT, nliquid);
 
 // Here we set up the lattice.
 const double rcav = R+R; // 11.8*R+R;
@@ -71,7 +71,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
   double N = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
+    Grid density(gd, n(water_prop.kT, gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
   }
   printf("N is %.15g\n", N);
@@ -111,11 +111,10 @@ int main(int, char **argv) {
   this_took();
   printf("I have set the constraint...\n");
   // The functionals are...
-  Functional n = constrain(constraint, EffectivePotentialToDensity(kT));
-  Functional f0 = HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu);
-  Functional f0wb = HardSpheresWB(R, kT);
-  Functional f0rf = HardSpheresRFFast(R, kT);
-  Functional ff = HardSphereGas(R, kT, mu);
+  Functional n = constrain(constraint, EffectivePotentialToDensity());
+  Functional f0wb = HardSpheresWB(R);
+  Functional f0rf = HardSpheresRFFast(R);
+  Functional ff = HardSphereGas(R, mu);
 
   printf("I am about to set the initial cavity...\n"); 
   external_potential.Set(incavity);
@@ -134,18 +133,18 @@ int main(int, char **argv) {
   {
     GridDescription gd(lat, 0.5);
     Grid small_potential(gd);
-    Functional n = EffectivePotentialToDensity(kT);
+    Functional n = EffectivePotentialToDensity();
     small_potential.Set(incavity);
     small_potential *= 1e9;
     small_potential = small_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += f0wb(n).run_finite_difference_test("white bear functional", small_potential);
-    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", small_potential);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", water_prop.kT, small_potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", water_prop.kT, small_potential);
   }
 
   {
     reset_peak_memory();
     {
-      Minimizer pd = Precision(0, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+      Minimizer pd = Precision(0, ConjugateGradient(ff, gd, water_prop.kT, &potential, QuadraticLineMinimizer));
       retval += test_minimizer("ConjugateGradient", pd, 100, 1e-5);
 
       double peak = peak_memory()/1024.0/1024;
@@ -157,7 +156,7 @@ int main(int, char **argv) {
       }
     }
     {
-      Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer));
+      Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, water_prop.kT, &potential, QuadraticLineMinimizer));
       retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
 
       double peak = peak_memory()/1024.0/1024;
@@ -170,16 +169,18 @@ int main(int, char **argv) {
     }
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
-    Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
+    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     density.epsNativeSlice("cavity-density.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
     density.epsRadial1d("cavity-radial-density.eps", 0, rmax, nliquid, R, "Density scaled by nliquid");
 
     Grid grad(gd);
     grad.setZero();
-    ff.integralgrad(potential, &grad);
+    ff.integralgrad(water_prop.kT, potential, &grad);
  
-    retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional", density, &grad);
-    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional", density, &grad);
+    retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional",
+                                                                     water_prop.kT, density, &grad);
+    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional",
+                                                                     water_prop.kT, density, &grad);
   }
 
   double peak = peak_memory()/1024.0/1024;

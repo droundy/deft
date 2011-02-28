@@ -35,13 +35,13 @@ int main(int, char **) {
   int imax=0;
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");
+  Functional f = SaftFluidSlow(water_prop.lengthscale,
+                               water_prop.epsilonAB, water_prop.kappaAB,
+                               water_prop.epsilon_dispersion,
+                               water_prop.lambda_dispersion, 0);
   for (int i=0; i<imax; i+=3) {
     printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
     double kT = kB*temperatures_kelvin[i];
-    Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
     double nl = saturated_liquid(f, kT, 0.0015, 0.0055);
     took("Finding saturated liquid density");
     double nv = coexisting_vapor_density(f, kT, nl);
@@ -61,10 +61,6 @@ int main(int, char **) {
   for (double T=660; T<700; T += 5) {
     printf("Working on bonus equation of state at %g Kelvin...\n", T);
     double kT = kB*T;
-    Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
     const double vapor_liquid_ratio = 0.95;
     double nl = saturated_liquid(f, kT, 0.001, 0.005, vapor_liquid_ratio);
     took("Finding saturated liquid density");

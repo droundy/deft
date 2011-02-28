@@ -19,7 +19,6 @@
 
 int errors = 0;
 
-const double kT = water_prop.kT; // room temperature in Hartree
 const double R = 2.7;
 
 double a = 5;
@@ -34,8 +33,8 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   for (unsigned i=0;i<strlen(f1.get_name());i++) printf("*");
   printf("************\n\n");
 
-  double f1n = f1.integral(n);
-  double f2n = f2.integral(n);
+  double f1n = f1.integral(water_prop.kT, n);
+  double f2n = f2.integral(water_prop.kT, n);
   if (fabs(f1n/f2n - 1) > fraccuracy) {
     printf("E1 = %g\n", f1n);
     printf("E2 = %g\n", f2n);
@@ -45,15 +44,15 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   Grid gr1(gd), gr2(gd);
   gr1.setZero();
   gr2.setZero();
-  f1.integralgrad(n, &gr1);
-  f2.integralgrad(n, &gr2);
+  f1.integralgrad(water_prop.kT, n, &gr1);
+  f2.integralgrad(water_prop.kT, n, &gr2);
   double err = (gr1-gr2).cwise().abs().maxCoeff();
   double mag = gr1.cwise().abs().maxCoeff();
   if (err/mag > fraccuracy) {
     printf("FAIL: Error in grad %s is %g as a fraction of %g\n", f1.get_name(), err/mag, mag);
     errors++;
   }
-  errors += f1.run_finite_difference_test(f1.get_name(), n);
+  errors += f1.run_finite_difference_test(f1.get_name(), water_prop.kT, n);
   //errors += f2.run_finite_difference_test("other version", n);
 }
 
@@ -63,32 +62,31 @@ int main(int, char **argv) {
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(HardSpheresFast(R, kT), HardSpheres(R, kT), n, 1e-14);
+  compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 1e-14);
 
-  compare_functionals(HardSpheresRFFast(R, kT), HardSpheresRF(R, kT), n, 1e-14);
+  compare_functionals(HardSpheresRFFast(R), HardSpheresRF(R), n, 1e-14);
 
-  compare_functionals(HardSpheresTarazonaFast(R, kT), HardSpheresTarazona(R, kT), n, 1e-14);
+  compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 1e-14);
 
-  compare_functionals(HardSpheresWBnotensor(R, kT), HardSpheresNoTensor(R, kT), n, 1e-14);
+  compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 1e-14);
 
   
-  Functional nn = EffectivePotentialToDensity(kT);
-  Functional f = HardSpheres(R, kT) + IdealGas(kT);
-  double mu = -f.derive(water_prop.liquid_density);
-  f = HardSpheresRFFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
-  compare_functionals(HardSphereGasRF(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 4e-13);
+  Functional nn = EffectivePotentialToDensity();
+  double mu = find_chemical_potential(HardSpheres(R)(nn) + IdealGasOfVeff, water_prop.kT,
+                                      water_prop.liquid_density);
+  Functional f = HardSpheresRFFast(R)(nn) + IdealGasOfVeff + ChemicalPotential(mu)(nn);
+  compare_functionals(HardSphereGasRF(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 4e-13);
  
-  mu = -(HardSpheres(R, kT)(nn) + IdealGasOfVeff(kT)).derive(water_prop.liquid_density);
-  f = HardSpheresFast(R, kT)(nn) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(nn);
-  compare_functionals(HardSphereGas(R, kT, mu), f, Grid(gd, -kT*n.cwise().log()), 1e-12);
+  f = HardSpheresFast(R)(nn) + IdealGasOfVeff + ChemicalPotential(mu)(nn);
+  compare_functionals(HardSphereGas(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   double epsdis = 1e-5;
   double lambda = 1.8;
-  compare_functionals(SaftFluid(R, kT, eps, kappa, epsdis, lambda, mu),
-                      SaftFluidSlow(R, kT, eps, kappa, epsdis, lambda, mu),
-                      Grid(gd, -kT*n.cwise().log()), 1e-12);
+  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, mu),
+                      SaftFluidSlow(R, eps, kappa, epsdis, lambda, mu),
+                      Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);
