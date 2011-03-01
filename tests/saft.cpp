@@ -62,34 +62,12 @@ int main(int, char **argv) {
                              water_prop.epsilon_dispersion,
                              water_prop.lambda_dispersion)(n),
               kT, dispersion_energy);
-  {
-    // The following should work, once I properly split up the
-    // dispersion energy...
-    Functional R(water_prop.lengthscale);
-    R.set_name("R");
-    Functional n2 = ShellConvolve(water_prop.lengthscale);
-    Functional n0 = n2/(4*M_PI*sqr(R));
-    Functional a1 = DispersionSAFTa1(water_prop.lengthscale,
-                                     water_prop.epsilon_dispersion,
-                                     water_prop.lambda_dispersion);
-    Functional a2 = DispersionSAFTa2(water_prop.lengthscale,
-                                     water_prop.epsilon_dispersion,
-                                     water_prop.lambda_dispersion);
-    // The following is bogus because I no longer scale by n0...
-    //test_energy("dispersion by parts", (n0*(a1 + a2/kT))(n), dispersion_energy);
-  }
   test_energy("SAFT slow",
               SaftFluidSlow(water_prop.lengthscale,
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, 0),
-              kT, -5.114543775221813e-09);
-  //test_energy("SAFT",
-  //            SaftFluid(water_prop.lengthscale, kT,
-  //                      water_prop.epsilonAB, water_prop.kappaAB,
-  //                      water_prop.epsilon_dispersion,
-  //                      water_prop.lambda_dispersion, 0),
-  //            1.0);
+              kT, -8.140476801563833e-09);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

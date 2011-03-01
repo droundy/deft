@@ -64,11 +64,11 @@ int main(int, char **argv) {
   
   test_expression("IdealGasOfVeff",
                   IdealGasOfVeff.printme(Expression("x")),
-                  "(-(x + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
+                  "(-(x + kT*log(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586))*sqrt(32811.993*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("cwise IdealGasOfVeff",
                   IdealGasOfVeff.cwiseprintme(Expression("x")),
-                  "(-(x + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
+                  "(-(x + kT*log(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586))*sqrt(32811.993*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("kT*xxx",
                   (Functional(kT).set_name("kT")*sqr(xShellConvolve(R))).printme(Expression("x")),

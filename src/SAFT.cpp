@@ -1,6 +1,5 @@
 // Deft is a density functional package developed by the research
-// group of Professor David Roundy
-//
+// group of Professor David Roundy//
 // Copyright 2010 The Deft Authors
 //
 // Deft is free software; you can redistribute it and/or modify it
@@ -100,6 +99,19 @@ Functional gSW(double R, double epsdis0, double lambda) {
   return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*eta)*da1dlam);
 }
 
+Functional dgSW_dT(double R, double epsdis0, double lambda) { 
+  // First let's give names to a few constants...
+  Functional lam = Functional(lambda).set_name("lambda_dispersion");
+  Functional epsdis = Functional(epsdis0).set_name("epsilon_dispersion");
+  //Functional eta = StepConvolve(R);
+  Functional eta = eta_for_dispersion(R, lambda);
+
+  Functional da1deta = da1_deta(R, epsdis0, lambda);
+  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
+
+  return (Functional(0.25)/sqr(kT))*(lam/(3*eta)*da1dlam - da1deta);
+}
+
 Functional gHScarnahan_simple(Functional n3) {
   // n3 is the "packing fraction" convolved functional.  It may be an
   // "effective packing fraction", in the case of SAFT-VR.
@@ -127,8 +139,6 @@ Functional dgHScarnahan_dn(Functional n3, double R) {
 Functional DeltaSAFT(double radius, double epsilon, double kappa,
                      double epsdis, double lambdadis) {
   Functional g = gSW(radius, epsdis, lambdadis);
-  Functional R(radius);
-  R.set_name("R");
   Functional eps(epsilon);
   eps.set_name("epsilonAB");
   Functional K(kappa);
@@ -136,6 +146,19 @@ Functional DeltaSAFT(double radius, double epsilon, double kappa,
   Functional delta = g*(exp(eps/kT) - 1)*K;
   delta.set_name("delta");
   return delta;
+}
+
+Functional dDelta_dT(double radius, double epsilon, double kappa,
+                     double epsdis, double lambdadis) {
+  Functional g = gSW(radius, epsdis, lambdadis);
+  Functional dgSWdT = dgSW_dT(radius, epsdis, lambdadis);
+  Functional eps(epsilon);
+  eps.set_name("epsilonAB");
+  Functional K(kappa);
+  K.set_name("kappaAB");
+  Functional delta = g*(exp(eps/kT) - 1)*K;
+  delta.set_name("delta");
+  return dgSWdT*K*(exp(eps/kT) - 1) - g*K*eps*exp(eps/kT)/sqr(kT);
 }
 
 Functional Xassociation(double radius, double epsilon, double kappa,
@@ -152,6 +175,19 @@ Functional Xassociation(double radius, double epsilon, double kappa,
   return X;
 }
 
+Functional dXassoc_dT(double radius, double epsilon, double kappa,
+                      double epsdis, double lambdadis) {
+  Functional R(radius);
+  R.set_name("R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional dDeltadT = dDelta_dT(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional zeta = getzeta(radius);
+  Functional root_stuff = sqrt(Functional(1)+8*n0*zeta*delta);
+  return dDeltadT*((Functional(1)/(delta*root_stuff)) - root_stuff/(4*n0*zeta*sqr(delta)));
+}
+
 Functional AssociationSAFT(double radius, double epsilon, double kappa,
                            double epsdis, double lambdadis) {
   Functional R(radius);
@@ -161,6 +197,18 @@ Functional AssociationSAFT(double radius, double epsilon, double kappa,
   Functional zeta = getzeta(radius);
   Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis);
   return (kT*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+}
+
+Functional dFassoc_dT(double radius, double epsilon, double kappa,
+                      double epsdis, double lambdadis) {
+  Functional R(radius);
+  R.set_name("R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional zeta = getzeta(radius);
+  Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional dXdT = dXassoc_dT(radius, epsilon, kappa, epsdis, lambdadis);
+  return 4*n0*zeta*(Functional(0.5) - 0.5*X + log(X) + kT*dXdT*(Functional(1)/X-Functional(0.5)));
 }
 
 Functional eta_effective(Functional eta, double lambdainput) {
@@ -277,32 +325,20 @@ Functional DispersionSAFT(double radius, double epsdis, double lambdainput) {
   RE.set_type("double");
   Functional R(radius);
   R.set_name("R");
-  // ndisp is the density of molecules that are within dispersion
-  // interaction range of this point.
-
-  /*
-  Functional ndisp =
-    (StepConvolve(lambdainput*radius,lambdaE*RE) - StepConvolve(radius))
-    / ((Pow(3)(lambda) - 1)*((4*M_PI/3)*Pow(3)(R)));
-  */
-  /*
-  Functional ndisp =
-    StepConvolve(lambdainput*radius,lambdaE*RE)/(Pow(3)(lambda)*(4*M_PI/3)*Pow(3)(R));
-  */
+  // ndisp is the density of molecules that are at this point.
   Functional ndisp = Identity();
 
-  /*
-  Functional R(radius);
-  R.set_name("R");
-  Functional n2 = ShellConvolve(radius);
-  Functional n0 = n2/(4*M_PI*sqr(R));
-  // I chose to use n0 here because it's the density that measures
-  // "how many monomers are neighboring this point, which is what is
-  // more relevant in working out interactions.
-  */
   Functional a1 = DispersionSAFTa1(radius, epsdis, lambdainput);
   Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput);
   return (ndisp*(a1 + a2/kT)).set_name("dispersion");
+}
+
+Functional dFdisp_dT(double radius, double epsdis, double lambdainput) {
+  // ndisp is the density of molecules that are at this point.
+  Functional ndisp = Identity();
+
+  Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput);
+  return (-ndisp*a2/sqr(kT)).set_name("dFdisp_dT");
 }
 
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
@@ -313,4 +349,12 @@ Functional SaftFluidSlow(double R, double epsilon, double kappa,
   return HardSpheresWBnotensor(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n) +
     AssociationSAFT(R, epsilon, kappa, epsdis, lambda)(n) +
     DispersionSAFT(R, epsdis, lambda)(n);
+}
+
+Functional SaftEntropy(double R,
+                       double epsilon, double kappa,
+                       double epsdis, double lambda) {
+  Functional n = EffectivePotentialToDensity();
+  return HardSpheresWBnotensor(R)(n)/(-kT) - EntropyOfIdealGasOfVeff()
+    -dFassoc_dT(R, epsilon, kappa, epsdis, lambda)(n) - dFdisp_dT(R, epsdis, lambda)(n);
 }

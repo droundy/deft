@@ -7,6 +7,7 @@
 
 extern Functional kT;
 extern Functional IdealGasOfVeff;
+Functional EntropyOfIdealGasOfVeff();
 
 Functional HardSphereGas(double radius, double mu);
 Functional HardSphereGasRF(double radius, double mu);
@@ -33,6 +34,10 @@ Functional SaftFluid(double radius, double epsilon, double kappa,
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double epsdis, double lambda);
+Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
+Functional SaftEntropy(double R,
+		       double epsilon, double kappa,
+		       double epsdis, double lambda);
 
 Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);

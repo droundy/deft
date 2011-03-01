@@ -28,8 +28,8 @@ int main(int, char **argv) {
 
   int retval = 0;
 
+  printf("\nLet's test the ideal gas of an effective potential (IdealGasOfVeff)...\n");
   Grid potential(gd, 1e-2*((-50*r2(gd)).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
-  density *= 1e-5;
 
   retval += IdealGasOfVeff.run_finite_difference_test("ideal gas of Veff", kT, potential);
 

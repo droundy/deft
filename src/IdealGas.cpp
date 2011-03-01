@@ -42,10 +42,35 @@ public:
 
 Functional kT = Functional(new Temperature(), "kT");
 
+
+Functional find_nQ() {
+  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  // Note:  hbar is one in atomic units, yay!
+  // nQ = (m*kT/(2 pi hbar^2))^3/2
+  return PowAndHalf(3)(mass*kT/(2*M_PI));
+}
+
+Functional find_dnQ_dT() {
+  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  // Note:  hbar is one in atomic units, yay!
+  // nQ = (m*kT/(2 pi hbar^2))^3/2
+  return 1.5*PowAndHalf(3)(mass/(2*M_PI))*sqrt(kT);
+}
+
 static Functional CreateIdealGasOfVeff() {
   Functional Veff = Identity().set_name("Veff");
   Functional n = exp(-Veff /kT);
-  return (-(Veff + kT)*n).set_name("ideal_gas");
+  Functional nQ = find_nQ();
+  return (-(Veff + kT*log(nQ) + kT)*n).set_name("ideal_gas");
 }
 
 Functional IdealGasOfVeff = CreateIdealGasOfVeff();
+
+Functional EntropyOfIdealGasOfVeff() {
+  Functional Veff = Identity().set_name("Veff");
+  Functional n = exp(-Veff/kT);
+  Functional nQ = find_nQ();
+  Functional dnQ_dT = find_dnQ_dT();
+  // The following is also known as the Sackur-Tetrode equation
+  return (-(Veff/kT + log(nQ) + 2.5)*n).set_name("dideal_gas_dT");
+}

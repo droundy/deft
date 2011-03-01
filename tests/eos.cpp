@@ -74,7 +74,7 @@ int main(int, char **argv) {
 
   {
     double ngas = 2e-5;
-    double mu = -water_prop.kT*log(ngas);
+    double mu = find_chemical_potential(IdealGasOfVeff, water_prop.kT, ngas);
     test_eos("ideal gas", IdealGasOfVeff + ChemicalPotential(mu)(n), ngas, ngas*water_prop.kT);
   }
 
@@ -83,9 +83,9 @@ int main(int, char **argv) {
   test_pressure("quadratic(3)", 0.5*sqr(n) - n, 3, 4.5);
 
   {
-    FILE *o = fopen("ideal-gas.dat", "w");
+    //FILE *o = fopen("ideal-gas.dat", "w");
     //equation_of_state(o, IdealGasOfVeff, water_prop.kT, nmin, nmax);
-    fclose(o);
+    //fclose(o);
   }
 
   {
@@ -116,7 +116,8 @@ int main(int, char **argv) {
     }
 
     {
-      const double nl = saturated_liquid(f, water_prop.kT);
+      double nl, nv, mu;
+      saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       printf("saturated water density is %g\n", nl);
       if (fabs(nl/water_prop.liquid_density - 1) > 0.1) {
         printf("FAIL: error in saturated water density is too big! %g\n",
@@ -124,7 +125,6 @@ int main(int, char **argv) {
         retval++;
       }
 
-      double nv = coexisting_vapor_density(f, water_prop.kT, nl);
       printf("predicted saturated vapor density: %g\n", nv);
       printf("actual vapor density:    %g\n", water_prop.vapor_density);
       //double mu = f.derive(-water_prop.kT*log(nl))*water_prop.kT/nl; // convert from derivative w.r.t. V
@@ -154,10 +154,8 @@ int main(int, char **argv) {
                         water_prop.epsilon_dispersion,
                         water_prop.lambda_dispersion, mufoo);
       printf("moofoo is %g\n", mufoo);
-      double nl = saturated_liquid(f, water_prop.kT);
-      double nv = coexisting_vapor_density(f, water_prop.kT, nl);
-      //double p = pressure(f, water_prop.kT, nl);
-      double mu = find_chemical_potential(f, water_prop.kT, nl);
+      double nl, nv, mu;
+      saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       for (double dens=0.1*nv; dens<=1.2*nl; dens *= 1.01) {
         double V = -water_prop.kT*log(dens);
         double Vl = -water_prop.kT*log(nl);
