@@ -160,6 +160,7 @@ double find_minimum(Functional f, double nmin, double nmax) {
   return nbest;
 }
 
+// p = n df/dn - f = -kT df/dVeff - f
 double pressure(Functional f, double kT, double density) {
   double V = -kT*log(density);
   //printf("density is %g\n", density);

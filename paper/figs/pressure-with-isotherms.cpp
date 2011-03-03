@@ -21,33 +21,36 @@
 
 //const double kT = water_prop.kT;
 const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
-const double kT = kB*293; // Room temperature
+//const double kT = kB*293; // Temperature
 
 int main(int, char **) {
-  FILE *o = fopen("paper/figs/entropy.dat", "w");
+  
+  FILE *o = fopen("paper/figs/pressure-with-isotherms.dat", "w");
+  
+  for (double dens=0.00001; dens<=0.0055; dens *= 1.1) {
+    fprintf(o, "%g", dens);
 
-  Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
+    for (double kT=kB*293; kT<=kB*690; kT+=100*kB) {
+      //printf ("kT = %g\n", kT);
+    
+      Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
                                water_prop.lambda_dispersion, 0);
-  double mu_satp = find_chemical_potential(f, kT,
-                                           water_prop.liquid_density);
-  f = SaftFluidSlow(water_prop.lengthscale, kT,
-                    water_prop.epsilonAB, water_prop.kappaAB,
-                    water_prop.epsilon_dispersion,
-                    water_prop.lambda_dispersion, mu_satp);
-
-  Functional S = SaftEntropy(water_prop.lengthscale, kT, water_prop.epsilonAB, water_prop.kappaAB,
-			       water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
-  //double mu = find_chemical_potential(f, kT, nl);
-  for (double dens=1e-8; dens<=0.006; dens *= 1.01) {
-    double V = -kT*log(dens);
-    //double Vl = -kT*log(nl);
-    double ff = f(V);
-    double SS = S(V);
-    //printf("n = %g\tS/n = %g\n", dens, S(V)/dens);
-    fprintf(o, "%g\t%g\t%g\t%g\t%g\n", dens, ff, SS, ff + kT*SS, kT*SS); //Prints n, F, S, U, TS to data file
-    fflush(o);
+      // double mu_satp = find_chemical_potential(f, kT,
+      //                                      water_prop.liquid_density);
+      // f = SaftFluidSlow(water_prop.lengthscale, kT,
+      //               water_prop.epsilonAB, water_prop.kappaAB,
+      //               water_prop.epsilon_dispersion,
+      //               water_prop.lambda_dispersion, mu_satp);
+  
+      // double V = -kT*log(dens);
+      double p = pressure(f, kT, dens);
+      //printf("Pressure = %g\n", p); //DEBUGGING
+      fprintf(o, "\t%g\t%g", kT, p); //Prints kT, pressure, to data file
+      //fflush(o);
   }
-  fclose(o);
+    fprintf(o, "\n");
+  }
+    fclose(o);
 }
