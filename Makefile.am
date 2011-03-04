@@ -15,6 +15,7 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
+	src/Crossover.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \

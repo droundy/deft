@@ -445,6 +445,19 @@ and the enthalpy is not much more work:
 \label{fig:liquid-vapor-profile}
 \end{figure}
 
+\subsection{Crossover formalism for handling critical behavior}
+
+I am currently working on implementing the crossover approach of
+Kiselev and Ely which is designed to make the critical behavior come
+out right\cite{kiselev2006new}.  This method works by defining a
+\emph{classical} free energy $f_0$---which where classical really is
+closer to \emph{mean field} in meaning, and indicates a theory that
+doesn't include long-range fluctuations.  This free energy is then
+used to construct a corrected free energy by feeding portions of it a
+``fake'' density and temperature that are constructed so as to
+reconstruct the correct universal scaling laws near the critical
+point.
+
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
 In order to ensure that the empirical parameters are correct, we test

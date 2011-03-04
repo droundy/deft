@@ -21,7 +21,7 @@ class PowType : public FunctionalInterface {
 public:
   PowType(int nn) : n(nn) {}
 
-  VectorXd transform(double, const GridDescription &gd, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &data) const {
     switch (n) {
     case 0: return VectorXd::Ones(data.rows());
     case 1: return data;
@@ -47,6 +47,9 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     switch (n) {
     case 0: return 0;
@@ -54,7 +57,10 @@ public:
     }
     return Pow(n-1)(x)*n*ingrad;
   }
-  void grad(double, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     switch (n) {
     case 0: return; // zero gradient!
@@ -94,7 +100,7 @@ class PowAndHalfType : public FunctionalInterface {
 public:
   PowAndHalfType(int nn) : n(nn) {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
     VectorXd out(data.cwise().sqrt());
     if (n < 0) {
       for (int p=0; p > n; p--) out = out.cwise() / data;
@@ -121,10 +127,16 @@ public:
     }
     return out;
   }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     return PowAndHalf(n-1)(x)*(n+0.5)*ingrad;
   }
-  void grad(double, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     if (n > 0) {
       for (int i=0; i<gd.NxNyNz; i++) {

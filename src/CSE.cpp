@@ -84,6 +84,18 @@ void Expression::EliminateThisSubexpression(const Expression &c, const std::stri
   if (arg3) arg3->EliminateThisSubexpression(c, name);
 }
 
+void Expression::ReplaceThisSubexpression(const Expression &oldE, const Expression &newE) {
+  if (oldE.typeIs(type) && oldE.depth == depth && oldE.kindIs(kind) && oldE == *this) {
+    *this = newE;
+    return;
+  }
+  if (oldE.depth >= depth) return; // It can't be here!
+  // Try to recursively replace this subexpression in our children.
+  if (arg1) arg1->ReplaceThisSubexpression(oldE, newE);
+  if (arg2) arg2->ReplaceThisSubexpression(oldE, newE);
+  if (arg3) arg3->ReplaceThisSubexpression(oldE, newE);
+}
+
 int Expression::CountThisSubexpression(const Expression &c) const {
   // First check if we are the same as the subexpression we're trying to eliminate.
   if (typeIs(c.type)) {

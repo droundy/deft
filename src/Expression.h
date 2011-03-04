@@ -65,6 +65,7 @@ public:
   // the common subexpression.
   std::string EliminateCommonSubexpression();
   void EliminateThisSubexpression(const Expression &, const std::string alias);
+  void ReplaceThisSubexpression(const Expression &oldE, const Expression &newE);
   void EliminateThisDouble(const Expression &, const std::string alias);
   Expression EasyParentOfThisSubexpression(const Expression &, std::set<std::string> important) const;
   bool FindVariable(const std::string n) const;
