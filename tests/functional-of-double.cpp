@@ -14,8 +14,16 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
+#include <time.h>
 #include <stdio.h>
 #include "Functionals.h"
+
+void took(const char *action) {
+  static clock_t start = 0;
+  clock_t end = clock();
+  printf("    %s took %g seconds.\n", action, (end - double(start))/CLOCKS_PER_SEC);
+  start = end;
+}
 
 int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
   const double kT = 1e-3;
@@ -33,16 +41,20 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
   const double Edouble = f(kT, n);
+  took("Evaluating functional of a double");
   const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
+  took("Evaluating functional of a 20x20x20 grid");
 
   int retval = 0;
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
 
   const double deriv_double = f.derive(kT, n);
+  took("Evaluating derivative of a double");
   Grid grad(nr);
   grad.setZero();
   f.integralgrad(kT, gd, nr, &grad);
+  took("Evaluating gradient of a 20x20x20 grid");
   const double deriv_grid = grad[0]/gd.dvolume;
   printf("deriv double = %g\n", deriv_double);
   printf("deriv grid   = %g\n", deriv_grid);
