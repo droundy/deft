@@ -27,16 +27,16 @@ int main(int, char **) {
   
   FILE *o = fopen("paper/figs/pressure-with-isotherms.dat", "w");
   
+  Functional f = SaftFluidSlow(water_prop.lengthscale,
+                               water_prop.epsilonAB, water_prop.kappaAB,
+                               water_prop.epsilon_dispersion,
+                               water_prop.lambda_dispersion, 0);
   for (double dens=0.00001; dens<=0.0055; dens *= 1.1) {
     fprintf(o, "%g", dens);
 
     for (double kT=kB*293; kT<=kB*690; kT+=100*kB) {
       //printf ("kT = %g\n", kT);
     
-      Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
       // double mu_satp = find_chemical_potential(f, kT,
       //                                      water_prop.liquid_density);
       // f = SaftFluidSlow(water_prop.lengthscale, kT,

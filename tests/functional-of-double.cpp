@@ -18,6 +18,8 @@
 #include "Functionals.h"
 
 int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
+  const double kT = 1e-3;
+
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -30,17 +32,17 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   GridDescription gd(lat, resolution);
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
-  const double Edouble = f(n);
-  const double Egrid = f.integral(nr)/gd.Lat.volume();
+  const double Edouble = f(kT, n);
+  const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
 
   int retval = 0;
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
 
-  const double deriv_double = f.derive(n);
+  const double deriv_double = f.derive(kT, n);
   Grid grad(nr);
   grad.setZero();
-  f.integralgrad(gd, nr, &grad);
+  f.integralgrad(kT, gd, nr, &grad);
   const double deriv_grid = grad[0]/gd.dvolume;
   printf("deriv double = %g\n", deriv_double);
   printf("deriv grid   = %g\n", deriv_grid);
@@ -79,7 +81,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
 int main(int, char **argv) {
   int retval = 0;
   const double kT = 1e-3;
-  const Functional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity();
 
   {
     Functional x = Identity();
@@ -95,18 +97,14 @@ int main(int, char **argv) {
     retval += test_functional("StepConvolve(1)(x)", StepConvolve(1)(x), 1e-5, 1e-13);
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
-    retval += test_functional("IdealGas(1e-3)(x))", IdealGas(1e-3)(x), 1e-5, 2e-13);
-    retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2,1e-3), 1e-5, 1e-13);
-    Functional n = EffectivePotentialToDensity(1e-3);
+    retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
     double Veff = -1e-3*log(1e-5);
     retval += test_functional("HardSpheresWBnotensor(...)",
-                              HardSpheresWBnotensor(2,1e-3)(n), Veff, 1e-13);
+                              HardSpheresWBnotensor(2)(n), Veff, 1e-13);
     retval += test_functional("IdealGasOfVeff(...)", IdealGasOfVeff(1e-3), Veff, 2e-13);
-    retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-3,1e-2,0.02,1.2e-2, 1.7), Veff, 2e-13);
+    retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7), Veff, 2e-13);
     retval += test_functional("SaftFluidSlow(...)",
-                              SaftFluidSlow(2,1e-3,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
-    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
-    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
+                              SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 
@@ -127,14 +125,6 @@ int main(int, char **argv) {
     retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
     retval += test_functional("sum of gaussians", attr + repul, 0.1, 2e-13);
     retval += test_functional("other sum of gaussians", repul + attr, 0.1, 2e-13);
-  }
-
-  {
-    Functional f = IdealGas(kT);
-    retval += test_functional("Ideal gas", f, 1e-9, 2e-13);
-    retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 2e-13);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-3), 1e-12);
   }
 
   {

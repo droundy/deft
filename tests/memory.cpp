@@ -63,6 +63,7 @@ double incavity(Cartesian r) {
 
 void check_a_functional(const char *name, Functional f, const Grid &x,
                         double memE, double memG, double memP, double memPonly) {
+  const double kT = water_prop.kT; // room temperature in Hartree
 
   printf("\n************");
   for (unsigned i=0;i<strlen(name) + 4;i++) printf("*");
@@ -73,14 +74,14 @@ void check_a_functional(const char *name, Functional f, const Grid &x,
   reset_peak_memory();
   last_time = clock();
 
-  f.integral(x);
+  f.integral(kT, x);
   //printf("\n\nEnergy of %s is %g\n", name, f.integral(x));
 
   check_peak("Energy", name, memE, memE + 1);
 
   Grid mygrad(x);
   mygrad.setZero();
-  f.integralgrad(x, &mygrad);
+  f.integralgrad(kT, x, &mygrad);
   //printf("Grad of %s is: %g\n", name, mygrad.norm());
 
   check_peak("Gradient", name, memG, memG+1);
@@ -89,11 +90,11 @@ void check_a_functional(const char *name, Functional f, const Grid &x,
     Grid mypgrad(x);
     mygrad.setZero();
     mypgrad.setZero();
-    f.integralgrad(x, &mygrad, &mypgrad);
+    f.integralgrad(kT, x, &mygrad, &mypgrad);
   }
   check_peak("Gradient and preconditioned gradient", name, memP, memP+1);
 
-  f.integralpgrad(x, &mygrad);
+  f.integralpgrad(kT, x, &mygrad);
   check_peak("Preconditioned gradient", name, memPonly, memPonly+1);
 
 }
@@ -102,7 +103,8 @@ int main(int, char **argv) {
   const double kT = water_prop.kT; // room temperature in Hartree
   const double eta_one = 3.0/(4*M_PI*R*R*R);
   const double nliquid = 0.324*eta_one;
-  const double mu = -(HardSpheres(R, kT) + IdealGas(kT)).derive(nliquid);
+  Functional n = EffectivePotentialToDensity();
+  const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff, kT, nliquid);
 
   // Here we set up the lattice.
   const double rmax = rcav*2;
@@ -129,40 +131,39 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  Functional n = EffectivePotentialToDensity(kT);
-  Functional ff = constrain(constraint, (HardSpheres(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  Functional ff = constrain(constraint, IdealGasOfVeff + (HardSpheres(R) + ChemicalPotential(mu))(n));
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
   check_a_functional("HardSpheres", ff, potential, 80, 101, 108, 104);
 
-  ff = constrain(constraint, (HardSpheresFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereFast", ff, potential, 66, 90, 97, 94);
 
-  ff = constrain(constraint, (HardSpheresRF(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresRF(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereRF", ff, potential, 52, 83, 90, 87);
 
-  ff = constrain(constraint, (HardSpheresRFFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresRFFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereRFFast", ff, potential, 45, 66, 73, 69);
 
-  ff = constrain(constraint, (HardSpheresTarazona(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresTarazona(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereTarazona", ff, potential, 83, 104, 111, 108);
 
-  ff = constrain(constraint, (HardSpheresTarazonaFast(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereTarazonaFast", ff, potential, 66, 87, 94, 90);
 
-  ff = constrain(constraint, (HardSpheresWBnotensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 87, 94, 90);
 
-  ff = constrain(constraint, (HardSpheresNoTensor(R, kT) + IdealGas(kT) + ChemicalPotential(mu))(n));
+  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereNoTensor", ff, potential, 45, 69, 76, 73);
 
-  ff = constrain(constraint, HardSphereGas(R, kT, mu));
+  ff = constrain(constraint, HardSphereGas(R, mu));
   check_a_functional("HardSphereGas", ff, potential, 62, 83, 90, 83);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
-  ff = SaftFluid(R, kT, eps, kappa, water_prop.epsilon_dispersion, water_prop.lambda_dispersion, mu);
+  ff = SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion, water_prop.lambda_dispersion, mu);
   check_a_functional("SaftFluid", ff, potential, 48, 80, 83, 80);
 
   if (retval == 0) {

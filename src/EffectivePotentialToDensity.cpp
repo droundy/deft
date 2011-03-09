@@ -16,8 +16,7 @@
 
 #include "Functionals.h"
 
-Functional EffectivePotentialToDensity(double temp) {
+Functional EffectivePotentialToDensity() {
   Functional Veff = Identity().set_name("Veff");
-  Functional kT = Functional(temp, "kT");
   return exp(Veff/(-kT));
 }

@@ -18,33 +18,47 @@
 #include "utilities.h"
 #include <stdlib.h>
 
-const double kT = 1.0/137; // this isn't actually the room temperature in Hartree
 const double R = 2.7;
-const double mu = 0;
+const double mu = 0.01;
 
-int main(int, char **argv) {
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("Please provide a filename\n");
+    exit(1);
+  }
   if (strcmp(argv[1], "src/IdealGasFast.cpp") == 0)
-    IdealGas(kT).create_source("src/IdealGasFast.cpp", "IdealGasFast", "kT");
+    IdealGasOfVeff.create_source("src/IdealGasFast.cpp", "IdealGasFast");
   if (strcmp(argv[1], "src/HardSpheresFast.cpp") == 0)
-    HardSpheres(kT, R).create_source("src/HardSpheresFast.cpp", "HardSpheresFast", "R", "kT");
+    HardSpheres(R).create_source("src/HardSpheresFast.cpp", "HardSpheresFast", "R");
   if (strcmp(argv[1], "src/HardSpheresRFFast.cpp") == 0)
-    HardSpheresRF(kT, R).create_source("src/HardSpheresRFFast.cpp", "HardSpheresRFFast", "R", "kT");
+    HardSpheresRF(R).create_source("src/HardSpheresRFFast.cpp", "HardSpheresRFFast", "R");
   if (strcmp(argv[1], "src/HardSpheresTarazonaFast.cpp") == 0)
-    HardSpheresTarazona(kT, R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R", "kT");
+    HardSpheresTarazona(R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R");
   if (strcmp(argv[1], "src/HardSpheresNoTensor.cpp") == 0)
-    HardSpheresWBnotensor(kT, R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R", "kT");
+    HardSpheresWBnotensor(R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R");
+  if (strcmp(argv[1], "src/HardSphereGasRFFast.cpp") == 0) {
+    Functional n = EffectivePotentialToDensity();
+    Functional f = HardSpheresRF(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);
+    f.create_source(argv[1], "HardSphereGasRF", "R", "mu");
+  }
   if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
-    Functional n = EffectivePotentialToDensity(kT);
-    Functional f = HardSpheresRF(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
-    f.create_source("src/HardSphereGasRFFast.cpp", "HardSphereGasRF", "R", "kT", "mu");
-
-    f = HardSpheres(R, kT)(n) + IdealGasOfVeff(kT) + ChemicalPotential(mu)(n);
-    f.create_source("src/HardSphereGasFast.cpp", "HardSphereGas", "R", "kT", "mu");
+    Functional n = EffectivePotentialToDensity();
+    Functional f = HardSpheres(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);
+    f.create_source(argv[1], "HardSphereGas", "R", "mu");
   }
   if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0) {
-    SaftFluidSlow(R, kT, 0, 0, 0, 0, mu).create_source("src/SaftFluidFast.cpp", "SaftFluid",
-                                                       "R", "kT", "epsilonAB", "kappaAB",
-                                                       "epsilon_dispersion", "lambda_dispersion",
-                                                       "mu");
+    SaftFluidSlow(R, 0.01, 0.01, 0.01, 0.01, mu).create_source(argv[1], "SaftFluid", "R",
+                                                               "epsilonAB", "kappaAB",
+                                                               "epsilon_dispersion", "lambda_dispersion",
+                                                               "mu");
+  }
+  if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
+    DispersionSAFT(R, 0.01, 0.01).create_source(argv[1], "Dispersion", "R",
+                                                "epsilon_dispersion", "lambda_dispersion");
+  }
+  if (strcmp(argv[1], "src/AssociationFast.cpp") == 0) {
+    AssociationSAFT(R, 0.01, 0.01, 0.01, 0.01).create_source(argv[1], "Association",
+                                                             "R", "epsilonAB", "kappaAB",
+                                                             "epsilon_dispersion", "lambda_dispersion");
   }
 }

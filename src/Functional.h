@@ -13,18 +13,18 @@ public:
   virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
-  virtual double integral(const GridDescription &gd, const VectorXd &data) const;
-  virtual VectorXd transform(const GridDescription &gd, const VectorXd &data) const = 0;
-  virtual double transform(double) const = 0;
+  virtual double integral(double kT, const GridDescription &gd, const VectorXd &data) const;
+  virtual VectorXd transform(double kT, const GridDescription &gd, const VectorXd &data) const = 0;
+  virtual double transform(double kT, double x) const = 0;
 
-  virtual void pgrad(const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
+  virtual void pgrad(double kT, const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
                      VectorXd *outpgrad) const;
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
-  virtual void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  virtual void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
                     VectorXd *outgrad, VectorXd *outpgrad) const = 0;
-  virtual double derive(double data) const = 0;
+  virtual double derive(double kT, double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Expression printme(const Expression &) const = 0;
   virtual Expression cwiseprintme(const Expression &) const;
@@ -89,50 +89,50 @@ public:
   Functional operator-(const Functional &) const;
   Functional operator/(const Functional &) const;
   Functional operator*(const Functional &) const;
-  VectorXd justMe(const GridDescription &gd, const VectorXd &data) const {
-    return itsCounter->ptr->transform(gd, data);
+  VectorXd justMe(double kT, const GridDescription &gd, const VectorXd &data) const {
+    return itsCounter->ptr->transform(kT, gd, data);
   }
-  VectorXd operator()(const GridDescription &gd, const VectorXd &data) const {
-    VectorXd out = itsCounter->ptr->transform(gd, data);
-    if (mynext) out += (*mynext)(gd, data);
+  VectorXd operator()(double kT, const GridDescription &gd, const VectorXd &data) const {
+    VectorXd out = itsCounter->ptr->transform(kT, gd, data);
+    if (mynext) out += (*mynext)(kT, gd, data);
     return out;
   }
-  VectorXd operator()(const Grid &g) const {
-    VectorXd out = itsCounter->ptr->transform(g.description(), g);
-    if (mynext) out += (*mynext)(g.description(), g);
+  VectorXd operator()(double kT, const Grid &g) const {
+    VectorXd out = itsCounter->ptr->transform(kT, g.description(), g);
+    if (mynext) out += (*mynext)(kT, g.description(), g);
     return out;
   }
-  double integral(const Grid &g) const {
-    return integral(g.description(), g);
+  double integral(double kT, const Grid &g) const {
+    return integral(kT, g.description(), g);
   }
-  double integral(const GridDescription &gd, const VectorXd &data) const {
+  double integral(double kT, const GridDescription &gd, const VectorXd &data) const {
     // This takes care to save the energies of each term in the sum.
-    double e = itsCounter->ptr->integral(gd, data);
+    double e = itsCounter->ptr->integral(kT, gd, data);
     set_last_energy(e);
     Functional *nxt = next();
     while (nxt) {
-      double enext = nxt->itsCounter->ptr->integral(gd, data);
+      double enext = nxt->itsCounter->ptr->integral(kT, gd, data);
       nxt->set_last_energy(enext);
       e += enext;
       nxt = nxt->next();
     }
     return e;
   }
-  void integralgrad(const Grid &g, VectorXd *gr, VectorXd *pg=0) const {
-    grad(g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr, pg);
+  void integralgrad(double kT, const Grid &g, VectorXd *gr, VectorXd *pg=0) const {
+    grad(kT, g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr, pg);
   }
-  void integralgrad(const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pg=0) const {
-    grad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pg);
+  void integralgrad(double kT, const GridDescription &gd, const VectorXd &x, VectorXd *g, VectorXd *pg=0) const {
+    grad(kT, gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g, pg);
   }
-  void integralpgrad(const Grid &g, VectorXd *gr) const {
-    pgrad(g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr);
+  void integralpgrad(double kT, const Grid &g, VectorXd *gr) const {
+    pgrad(kT, g.description(), g, g.description().dvolume*VectorXd::Ones(g.description().NxNyNz), gr);
   }
-  void integralpgrad(const GridDescription &gd, const VectorXd &x, VectorXd *g) const {
-    pgrad(gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g);
+  void integralpgrad(double kT, const GridDescription &gd, const VectorXd &x, VectorXd *g) const {
+    pgrad(kT, gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g);
   }
-  double operator()(double data) const {
-    double out = itsCounter->ptr->transform(data);
-    if (mynext) out += (*mynext)(data);
+  double operator()(double kT, double data) const {
+    double out = itsCounter->ptr->transform(kT, data);
+    if (mynext) out += (*mynext)(kT, data);
     return out;
   }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
@@ -145,19 +145,19 @@ public:
   Functional pgrad(const Functional &ingrad, const Functional &x) const {
     return grad(ingrad, x, true);
   }
-  void grad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    itsCounter->ptr->grad(gd, data, ingrad, outgrad, outpgrad);
-    if (mynext) mynext->grad(gd, data, ingrad, outgrad, outpgrad);
+    itsCounter->ptr->grad(kT, gd, data, ingrad, outgrad, outpgrad);
+    if (mynext) mynext->grad(kT, gd, data, ingrad, outgrad, outpgrad);
   }
-  void pgrad(const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
+  void pgrad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
              VectorXd *outpgrad) const {
-    itsCounter->ptr->pgrad(gd, data, ingrad, outpgrad);
-    if (mynext) mynext->pgrad(gd, data, ingrad, outpgrad);
+    itsCounter->ptr->pgrad(kT, gd, data, ingrad, outpgrad);
+    if (mynext) mynext->pgrad(kT, gd, data, ingrad, outpgrad);
   }
-  double derive(double data) const {
-    double out = itsCounter->ptr->derive(data);
-    if (mynext) out += mynext->derive(data);
+  double derive(double kT, double data) const {
+    double out = itsCounter->ptr->derive(kT, data);
+    if (mynext) out += mynext->derive(kT, data);
     return out;
   }
   const char *get_name() const { return itsCounter->name; }
@@ -173,8 +173,8 @@ public:
   double print_iteration(const char *prefix, int iter) const;
   // run_finite_difference_test returns non-zero when the test fails.
   int run_finite_difference_test(const char *testname,
-                                  const Grid &data,
-                                  const VectorXd *direction = 0) const;
+                                 double kT, const Grid &data,
+                                 const VectorXd *direction = 0) const;
   Expression printme(const Expression &) const;
   virtual Expression cwiseprintme(const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
@@ -243,10 +243,6 @@ Functional sqr(const Functional &);
 Functional sqrt(const Functional &);
 Functional constrain(const Grid &, Functional);
 
-// choose combines two local functionals, with which one is applied
-// depending on the local value of the field.
-Functional choose(double, const Functional &lower, const Functional &higher);
-
 extern Functional dV;
 
 
@@ -260,7 +256,7 @@ public:
   ConvolveWith(const ConvolveWith &cw)
     : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
 
-  EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &x) const {
+  EIGEN_STRONG_INLINE VectorXd transform(double, const GridDescription &gd, const VectorXd &x) const {
     Grid out(gd, x);
     ReciprocalGrid recip = out.fft();
     recip.cwise() *= Eigen::CwiseNullaryOp<Derived, VectorXcd>(gd.NxNyNzOver2, 1, f(gd, data));
@@ -271,10 +267,10 @@ public:
     GridDescription gd(lat, 2, 2, 2);
     return f(gd, data).func(Reciprocal(0,0,0)).real();
   }
-  double transform(double n) const {
+  double transform(double, double n) const {
     return n*gzero();
   }
-  double derive(double) const {
+  double derive(double, double) const {
     return gzero();
   }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
@@ -283,7 +279,7 @@ public:
     else
       return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(-1*ingrad);
   }
-  EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
+  EIGEN_STRONG_INLINE void grad(double, const GridDescription &gd, const VectorXd &, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();

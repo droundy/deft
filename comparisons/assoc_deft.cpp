@@ -22,13 +22,12 @@
 int main(int, char **) {
   double R = water_prop.lengthscale;
   double kT = water_prop.epsilon_dispersion*1.2;
-  Functional f = AssociationSAFT(R, kT,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
+  Functional f = AssociationSAFT(R, water_prop.epsilonAB, water_prop.kappaAB,
                                  water_prop.epsilon_dispersion,
                                  water_prop.lambda_dispersion);
   for (double eta=0.03125; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
     // Energy units in the vrpack code are water_prop.epsilon_dispersion
-    printf("%17.12f%17.12f\n", eta, f(n)/kT/n);
+    printf("%17.12f%17.12f\n", eta, f(kT, n)/kT/n);
   }
 }

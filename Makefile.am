@@ -76,7 +76,6 @@ check_PROGRAMS = \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
 	tests/fftinverse.test \
-	tests/ideal-gas-at-pressure.test \
 	tests/eos.test \
 	tests/eps.test
 
@@ -104,7 +103,6 @@ tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
 tests_eos_test_SOURCES = tests/eos.cpp $(GENERIC_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
-tests_ideal_gas_at_pressure_test_SOURCES = tests/ideal-gas-at-pressure.cpp $(ALL_CODE)
 
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)

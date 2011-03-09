@@ -21,8 +21,8 @@ class DownhillType : public MinimizerInterface {
 protected:
   double nu, orig_nu;
 public:
-  DownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
-    : MinimizerInterface(f, gdin, data), nu(viscosity), orig_nu(viscosity) {}
+  DownhillType(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity=0.1)
+    : MinimizerInterface(f, gdin, kT, data), nu(viscosity), orig_nu(viscosity) {}
   ~DownhillType() {}
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     nu = orig_nu;
@@ -35,8 +35,8 @@ public:
 
 class PreconditionedDownhillType : public DownhillType {
 public:
-  PreconditionedDownhillType(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity=0.1)
-    : DownhillType(f, gdin, data, viscosity) {}
+  PreconditionedDownhillType(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity=0.1)
+    : DownhillType(f, gdin, kT, data, viscosity) {}
   ~PreconditionedDownhillType() {}
 
   bool improve_energy(bool verbose = false);
@@ -52,12 +52,12 @@ bool DownhillType::improve_energy(bool verbose) {
   // avoids roundoff weirdness of trying to add nu*g back to *x, which
   // won't always get us back to the same value.
   Grid newx(gd, *x - nu*g);
-  double newE = f.integral(newx);
+  double newE = f.integral(kT, newx);
   int num_tries = 0;
   while (newE > old_energy || isnan(newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
-    newE = f.integral(newx);
+    newE = f.integral(kT, newx);
     if (num_tries++ > 40) {
       printf("Downhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
@@ -88,12 +88,12 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
   // avoids roundoff weirdness of trying to add nu*g back to *x, which
   // won't always get us back to the same value.
   Grid newx(gd, *x - nu*g);
-  double newE = f.integral(newx);
+  double newE = f.integral(kT, newx);
   int num_tries = 0;
   while (newE > old_energy || isnan(newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
-    newE = f.integral(newx);
+    newE = f.integral(kT, newx);
     if (num_tries++ > 40) {
       printf("PreconditionedDownhill giving up after %d tries...\n", num_tries);
       return false; // It looks like we can't do any better with this algorithm.
@@ -109,10 +109,10 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
   return true;
 }
 
-Minimizer Downhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
-  return Minimizer(new DownhillType(f, gdin, data, viscosity));
+Minimizer Downhill(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity) {
+  return Minimizer(new DownhillType(f, gdin, kT, data, viscosity));
 }
 
-Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, VectorXd *data, double viscosity) {
-  return Minimizer(new PreconditionedDownhillType(f, gdin, data, viscosity));
+Minimizer PreconditionedDownhill(Functional f, const GridDescription &gdin, double kT, VectorXd *data, double viscosity) {
+  return Minimizer(new PreconditionedDownhillType(f, gdin, kT, data, viscosity));
 }

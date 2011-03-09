@@ -19,10 +19,9 @@
 #include "Functionals.h"
 #include "LineMinimizer.h"
 
-const double kT = 1e-3; // room temperature in Hartree
 const double R = 2.7;
 const double ngas = 0.005; // approximate density of interest
-const double mu = -kT*log(ngas);
+const double mu = -1e-3*log(ngas);
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,10));
@@ -30,8 +29,8 @@ double resolution = 0.5;
 GridDescription gd(lat, resolution);
 
 // And the functional...
-Functional n = EffectivePotentialToDensity(kT);
-Functional f = HardSphereGas(R, kT, 0);
+Functional n = EffectivePotentialToDensity();
+Functional f = HardSphereGas(R, 0);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/ngas*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
@@ -70,6 +69,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
 }
 
 int main(int, char **argv) {
+  const double kT = 1e-3; // room temperature in Hartree
   int retval = 0;
 
   /*
@@ -88,18 +88,19 @@ int main(int, char **argv) {
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-4);
 
   Minimizer psd = Precision(1e-5, MaxIter(50, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
+>>>>>>> 68c8f0cb8ae3cbbfe0ee7abd1a7a79ab31a082e5
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-4);
 
-  Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, kT, &potential, QuadraticLineMinimizer)));
   potential.setZero();
   retval += test_minimizer("ConjugateGradient", cg, &potential, 3e-6);
 
-  Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
+  Grid density(gd, EffectivePotentialToDensity()(kT, gd, potential));
   density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
   */
 
-  Minimizer pcg = Precision(1e-6, MaxIter(60, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer pcg = Precision(1e-6, MaxIter(60, PreconditionedConjugateGradient(ff, gd, kT, &potential, QuadraticLineMinimizer)));
   potential.setZero();
   retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-5);
 

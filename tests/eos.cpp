@@ -20,7 +20,6 @@
 #include "equation-of-state.h"
 
 int retval = 0;
-double kT = water_prop.kT;
 
 void test_eos(const char *name, Functional f, double ntrue, double ptrue, double fraccuracy=1e-6) {
   clock_t start = clock();
@@ -30,9 +29,9 @@ void test_eos(const char *name, Functional f, double ntrue, double ptrue, double
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  printf("Expect Veff of %g\n", -kT*log(ntrue));
+  printf("Expect Veff of %g\n", -water_prop.kT*log(ntrue));
   printf("Looking for density between %g and %g...\n", ntrue*3.123e-7, ntrue*12345);
-  double nfound = find_density(f, kT, ntrue*3.123e-7, ntrue*12345);
+  double nfound = find_density(f, water_prop.kT, ntrue*3.123e-7, ntrue*12345);
   printf("Found density of %.15g (versus %g) in %g seconds.\n", nfound, ntrue,
          (clock() - double(start))/CLOCKS_PER_SEC);
   double nerr = nfound/ntrue - 1;
@@ -41,7 +40,7 @@ void test_eos(const char *name, Functional f, double ntrue, double ptrue, double
     retval++;
   }
 
-  double pfound = pressure(f, kT, nfound);
+  double pfound = pressure(f, water_prop.kT, nfound);
   printf("Found pressure of %.15g (versus %g) in %g seconds.\n", pfound, ptrue,
          (clock() - double(start))/CLOCKS_PER_SEC);
   double perr = pfound/ptrue - 1;
@@ -58,7 +57,7 @@ void test_pressure(const char *name, Functional f, double n, double ptrue, doubl
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  double pfound = pressure(f, kT, n);
+  double pfound = pressure(f, water_prop.kT, n);
   printf("Found pressure of %.15g (versus %g).\n", pfound, ptrue);
   double perr = pfound/ptrue - 1;
   if (fabs(perr) > fraccuracy) {
@@ -68,15 +67,15 @@ void test_pressure(const char *name, Functional f, double n, double ptrue, doubl
 }
 
 int main(int, char **argv) {
-  Functional n = EffectivePotentialToDensity(kT);
-  double Veff = -kT*log(water_prop.liquid_density);
+  Functional n = EffectivePotentialToDensity();
+  double Veff = -water_prop.kT*log(water_prop.liquid_density);
 
   const double nmin = 1e-11, nmax = 0.007;
 
   {
     double ngas = 2e-5;
-    double mu = find_chemical_potential(IdealGasOfVeff(kT), kT, ngas);
-    test_eos("ideal gas", IdealGasOfVeff(kT) + ChemicalPotential(mu)(n), ngas, ngas*kT);
+    double mu = find_chemical_potential(IdealGasOfVeff, water_prop.kT, ngas);
+    test_eos("ideal gas", IdealGasOfVeff + ChemicalPotential(mu)(n), ngas, ngas*water_prop.kT);
   }
 
   test_eos("quadratic", 0.5*sqr(n) - n, 1.0, 0.5, 2e-6);
@@ -85,20 +84,20 @@ int main(int, char **argv) {
 
   {
     //FILE *o = fopen("ideal-gas.dat", "w");
-    //equation_of_state(o, IdealGasOfVeff(kT), kT, nmin, nmax);
+    //equation_of_state(o, IdealGasOfVeff, water_prop.kT, nmin, nmax);
     //fclose(o);
   }
 
   {
     FILE *o = fopen("dispersion.dat", "w");
-    //equation_of_state(o, DispersionSAFT(water_prop.lengthscale, kT,
+    //equation_of_state(o, DispersionSAFT(water_prop.lengthscale, water_prop.kT,
     //                                    water_prop.epsilon_dispersion,
     //                                    water_prop.lambda_dispersion)(n),
-    //                  kT, nmin, nmax);
+    //                  water_prop.kT, nmin, nmax);
     fclose(o);
     printf("Got dispersion!\n");
 
-    Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
+    Functional f = SaftFluidSlow(water_prop.lengthscale,
                                  water_prop.epsilonAB, water_prop.kappaAB,
                                  water_prop.epsilon_dispersion,
                                  water_prop.lambda_dispersion, 0);
@@ -111,13 +110,14 @@ int main(int, char **argv) {
 
     if (0) {
       o = fopen("saft-fluid.dat", "w");
-      double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
-      equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, nmax);
+      double mu = f.derive(water_prop.kT, Veff)*water_prop.kT/water_prop.liquid_density; // convert from derivative w.r.t. V
+      equation_of_state(o, f + ChemicalPotential(mu)(n), water_prop.kT, nmin, nmax);
       fclose(o);
     }
 
     {
-      const double nl = saturated_liquid(f, water_prop.kT);
+      double nl, nv, mu;
+      saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       printf("saturated water density is %g\n", nl);
       if (fabs(nl/water_prop.liquid_density - 1) > 0.1) {
         printf("FAIL: error in saturated water density is too big! %g\n",
@@ -125,12 +125,11 @@ int main(int, char **argv) {
         retval++;
       }
 
-      double nv = coexisting_vapor_density(f, water_prop.kT, nl);
       printf("predicted saturated vapor density: %g\n", nv);
       printf("actual vapor density:    %g\n", water_prop.vapor_density);
-      //double mu = f.derive(-kT*log(nl))*kT/nl; // convert from derivative w.r.t. V
+      //double mu = f.derive(-water_prop.kT*log(nl))*water_prop.kT/nl; // convert from derivative w.r.t. V
       //o = fopen("saft-fluid-saturated.dat", "w");
-      //equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, 1.1*nl);
+      //equation_of_state(o, f + ChemicalPotential(mu)(n), water_prop.kT, nmin, 1.1*nl);
       //fclose(o);
 
       double pv = pressure(f, water_prop.kT, nv);
@@ -144,26 +143,24 @@ int main(int, char **argv) {
 
     {
       o = fopen("room-temperature.dat", "w");
-      Functional f = SaftFluidSlow(water_prop.lengthscale, water_prop.kT,
+      Functional f = SaftFluidSlow(water_prop.lengthscale,
                                    water_prop.epsilonAB, water_prop.kappaAB,
                                    water_prop.epsilon_dispersion,
                                    water_prop.lambda_dispersion, 0);
       double mufoo = find_chemical_potential(f, water_prop.kT,
                                              water_prop.liquid_density);
-      f = SaftFluidSlow(water_prop.lengthscale, kT,
+      f = SaftFluidSlow(water_prop.lengthscale,
                         water_prop.epsilonAB, water_prop.kappaAB,
                         water_prop.epsilon_dispersion,
                         water_prop.lambda_dispersion, mufoo);
       printf("moofoo is %g\n", mufoo);
-      double nl = saturated_liquid(f, water_prop.kT);
-      double nv = coexisting_vapor_density(f, water_prop.kT, nl);
-      //double p = pressure(f, water_prop.kT, nl);
-      double mu = find_chemical_potential(f, water_prop.kT, nl);
+      double nl, nv, mu;
+      saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       for (double dens=0.1*nv; dens<=1.2*nl; dens *= 1.01) {
         double V = -water_prop.kT*log(dens);
         double Vl = -water_prop.kT*log(nl);
         fprintf(o, "%g\t%g\t%g\n",
-                dens, f(V), f(Vl) - (dens-nl)*mu);
+                dens, f(water_prop.kT, V), f(water_prop.kT, Vl) - (dens-nl)*mu);
       }
       fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
@@ -179,28 +176,27 @@ int main(int, char **argv) {
 
     /*
     o = fopen("saft-fluid-other.dat", "w");
-    //other_equation_of_state(o, f + ChemicalPotential(mu)(n), kT, 1e-7, 7e-3);
+    //other_equation_of_state(o, f + ChemicalPotential(mu)(n), water_prop.kT, 1e-7, 7e-3);
     fclose(o);
 
-    Functional X = Xassociation(water_prop.lengthscale, kT,
+    Functional X = Xassociation(water_prop.lengthscale, water_prop.kT,
                                 water_prop.epsilonAB, water_prop.kappaAB);
     printf("X is %g\n", X(water_prop.liquid_density));
     */
     o = fopen("association.dat", "w");
-    equation_of_state(o, AssociationSAFT(water_prop.lengthscale, kT,
+    equation_of_state(o, AssociationSAFT(water_prop.lengthscale,
                                          water_prop.epsilonAB, water_prop.kappaAB,
                                          water_prop.epsilon_dispersion,
                                          water_prop.lambda_dispersion)(n),
-                      kT, nmin, nmax);
+                      water_prop.kT, nmin, nmax);
     fclose(o);
   }
 
   {
     FILE *o = fopen("hard-sphere-fluid.dat", "w");
-    Functional f = HardSpheresWBnotensor(water_prop.lengthscale, kT)(n)
-      + IdealGasOfVeff(kT);
-    double mu = f.derive(Veff)*kT/water_prop.liquid_density; // convert from derivative w.r.t. V
-    equation_of_state(o, f + ChemicalPotential(mu)(n), kT, nmin, nmax);
+    Functional f = HardSpheresWBnotensor(water_prop.lengthscale)(n) + IdealGasOfVeff;
+    double mu = f.derive(water_prop.kT, Veff)*water_prop.kT/water_prop.liquid_density; // convert from derivative w.r.t. V
+    equation_of_state(o, f + ChemicalPotential(mu)(n), water_prop.kT, nmin, nmax);
     fclose(o);
   }
 

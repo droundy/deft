@@ -19,32 +19,31 @@
 #include "Functionals.h"
 #include "equation-of-state.h"
 
-//const double kT = water_prop.kT;
-const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
-const double kT = kB*293; // Room temperature
 
-int main(int, char **) {
+int main(int, char **) { 
+  const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
+  const double kT = kB*293; // Room temperature
   FILE *o = fopen("paper/figs/entropy.dat", "w");
 
-  Functional f = SaftFluidSlow(water_prop.lengthscale, kT,
+  Functional f = SaftFluidSlow(water_prop.lengthscale,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
                                water_prop.lambda_dispersion, 0);
   double mu_satp = find_chemical_potential(f, kT,
                                            water_prop.liquid_density);
-  f = SaftFluidSlow(water_prop.lengthscale, kT,
+  f = SaftFluidSlow(water_prop.lengthscale,
                     water_prop.epsilonAB, water_prop.kappaAB,
                     water_prop.epsilon_dispersion,
                     water_prop.lambda_dispersion, mu_satp);
 
-  Functional S = SaftEntropy(water_prop.lengthscale, kT, water_prop.epsilonAB, water_prop.kappaAB,
+  Functional S = SaftEntropy(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
 			       water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
   //double mu = find_chemical_potential(f, kT, nl);
   for (double dens=1e-8; dens<=0.006; dens *= 1.01) {
     double V = -kT*log(dens);
     //double Vl = -kT*log(nl);
-    double ff = f(V);
-    double SS = S(V);
+    double ff = f(kT, V);
+    double SS = S(kT, V);
     //printf("n = %g\tS/n = %g\n", dens, S(V)/dens);
     fprintf(o, "%g\t%g\t%g\t%g\t%g\n", dens, ff, SS, ff + kT*SS, kT*SS); //Prints n, F, S, U, TS to data file
     fflush(o);

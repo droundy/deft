@@ -63,11 +63,11 @@ int main(int, char **argv) {
                   "ifft(gd, shell(gd, R).cwise()*fft(gd, x)).cwise().square()");
   
   test_expression("IdealGasOfVeff",
-                  IdealGasOfVeff(kT).printme(Expression("x")),
+                  IdealGasOfVeff.printme(Expression("x")),
                   "(-(x + kT*log(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586))*sqrt(32811.993*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("cwise IdealGasOfVeff",
-                  IdealGasOfVeff(kT).cwiseprintme(Expression("x")),
+                  IdealGasOfVeff.cwiseprintme(Expression("x")),
                   "(-(x + kT*log(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586))*sqrt(32811.993*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("kT*xxx",

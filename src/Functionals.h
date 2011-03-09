@@ -5,49 +5,50 @@
 #include "Grid.h"
 #include "Functional.h"
 
-Functional IdealGas(double temperature);
-Functional IdealGasOfVeff(double temperature);
-Functional EntropyOfIdealGasOfVeff(double T);
-Functional HardSphereGas(double radius, double temperature, double mu);
-Functional HardSphereGasRF(double radius, double temperature, double mu);
-Functional HardSpheres(double radius, double temperature);
-Functional HardSpheresRF(double radius, double temperature);
-Functional HardSpheresTarazona(double radius, double temperature);
-Functional HardSpheresWB(double radius, double temperature);
-Functional HardSpheresWBnotensor(double radius, double temperature);
+extern Functional kT;
+extern Functional IdealGasOfVeff;
+Functional EntropyOfIdealGasOfVeff();
+
+Functional HardSphereGas(double radius, double mu);
+Functional HardSphereGasRF(double radius, double mu);
+Functional HardSpheres(double radius);
+Functional HardSpheresRF(double radius);
+Functional HardSpheresTarazona(double radius);
+Functional HardSpheresWB(double radius);
+Functional HardSpheresWBnotensor(double radius);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 
 Functional gHS(Functional n, double radius);
 Functional gHScarnahan(Functional n, double radius);
-Functional DeltaSAFT(double radius, double temperature, double epsilon, double kappa,
+Functional DeltaSAFT(double radius, double epsilon, double kappa,
                      double epsdis, double lambdadis);
-Functional Xassociation(double radius, double temperature, double epsilon, double kappa,
+Functional Xassociation(double radius, double epsilon, double kappa,
                         double epsdis, double lambdadis);
-Functional AssociationSAFT(double radius, double temperature, double epsilon, double kappa,
+Functional AssociationSAFT(double radius, double epsilon, double kappa,
                            double epsdis, double lambdadis);
-Functional SaftFluidSlow(double radius, double temperature, double epsilon, double kappa,
+Functional SaftFluidSlow(double radius, double epsilon, double kappa,
                          double epsdis, double lambda, double mu);
-Functional SaftFluid(double radius, double temperature,
-                     double epsilon, double kappa,
+Functional SaftFluid(double radius, double epsilon, double kappa,
                      double epsdis, double lambda, double mu);
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
+Functional DispersionSAFT(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
-Functional SaftEntropy(double R, double temp,
+Functional SaftEntropy(double R,
 		       double epsilon, double kappa,
 		       double epsdis, double lambda);
 
-Functional HardSpheresFast(double radius, double temperature);
-Functional HardSpheresRFFast(double radius, double temperature);
-Functional HardSpheresTarazonaFast(double radius, double temperature);
-Functional HardSpheresNoTensor(double radius, double temperature);
+Functional HardSpheresFast(double radius);
+Functional HardSpheresRFFast(double radius);
+Functional HardSpheresTarazonaFast(double radius);
+Functional HardSpheresNoTensor(double radius);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 
 Functional Identity();
 
-Functional EffectivePotentialToDensity(double temperature);
+Functional EffectivePotentialToDensity();
 Functional Gaussian(double width);
 
 Functional StepConvolve(double radius, Expression r = Expression("R"));
