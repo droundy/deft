@@ -62,9 +62,6 @@ public:
     out.unlazy = true;
     return out;
   }
-  Expression cwiseprintme(const Expression &x) const {
-    return x;
-  }
 private:
   double width, kfac;
 };

@@ -18,10 +18,6 @@
 #include "handymath.h"
 #include "Grid.h"
 
-Expression FunctionalInterface::cwiseprintme(const Expression &x) const {
-  return printme(x);
-}
-
 bool FunctionalInterface::I_have_analytic_grad() const {
   return true;
 }
@@ -213,7 +209,6 @@ void Functional::create_source(const std::string filename, const std::string cla
   r.set_name("R");
   Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI*r*r*r);
   Expression curvature = Expression(1);
-  //grad(dV, Identity(), false).grad(dV, Identity(), false).cwiseprintme(smoothed.printme(Expression("x")));
 
   //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
   Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
@@ -330,24 +325,6 @@ Expression Functional::printme(const Expression &x) const {
       return myself + nextguy + next()->next()->printme(x);
     } else {
       return myself + next()->printme(x);
-    }
-  } else {
-    return myself;
-  }
-}
-
-Expression Functional::cwiseprintme(const Expression &x) const {
-  Expression myself = itsCounter->ptr->cwiseprintme(x);
-  if (get_name() && myself.get_alias() != "literal") myself.set_alias(get_name());
-  if (next()) {
-    // Get associativity right...
-    if (next()->next()) {
-      Expression nextguy = next()->itsCounter->ptr->cwiseprintme(x);
-      if (next()->get_name() && nextguy.get_alias() != "literal")
-        nextguy.set_alias(next()->get_name());
-      return myself + nextguy + next()->next()->cwiseprintme(x);
-    } else {
-      return myself + next()->cwiseprintme(x);
     }
   } else {
     return myself;
@@ -669,9 +646,6 @@ public:
   Expression printme(const Expression &x) const {
     return f1.printme(f2.printme(x));
   }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(f2.cwiseprintme(x));
-  }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
   }
@@ -717,9 +691,6 @@ public:
   Expression printme(const Expression &x) const {
     return f1.printme(x) / f2.printme(x);
   }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(x) / f2.cwiseprintme(x);
-  }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
   }
@@ -760,9 +731,6 @@ public:
   }
   Expression printme(const Expression &x) const {
     return f1.printme(x)*f2.printme(x);
-  }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(x)*f2.cwiseprintme(x);
   }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
@@ -847,6 +815,43 @@ public:
 
 Functional exp(const Functional &f) {
   return Functional(new ExpType())(f);
+}
+
+
+class AbsType : public FunctionalInterface {
+public:
+  AbsType() {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
+    return data.cwise().abs();
+  }
+  double transform(double, double n) const {
+    return fabs(n);
+  }
+  double derive(double, double n) const {
+    return n/fabs(n);
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
+    return ingrad*x/abs(x);
+  }
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    *outgrad += ingrad.cwise() * (data.cwise() / data.cwise().abs());
+    if (outpgrad) *outpgrad += ingrad.cwise() * (data.cwise() / data.cwise().abs());
+  }
+  Expression printme(const Expression &x) const {
+    return abs(x);
+  }
+};
+
+Functional abs(const Functional &f) {
+  return Functional(new AbsType())(f);
 }
 
 
