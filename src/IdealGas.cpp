@@ -133,5 +133,5 @@ Functional EntropyOfIdealGasOfVeff() {
   Functional nQ = find_nQ();
   Functional dnQ_dT = find_dnQ_dT();
   // The following is also known as the Sackur-Tetrode equation
-  return (-(Veff/kT + log(nQ) + 2.5)*n).set_name("dideal_gas_dT");
+  return ((Veff/kT + log(nQ) + 2.5)*n).set_name("ideal_gas_entropy");
 }

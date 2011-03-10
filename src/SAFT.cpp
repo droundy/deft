@@ -185,7 +185,7 @@ Functional dXassoc_dT(double radius, double epsilon, double kappa,
   Functional dDeltadT = dDelta_dT(radius, epsilon, kappa, epsdis, lambdadis);
   Functional zeta = getzeta(radius);
   Functional root_stuff = sqrt(Functional(1)+8*n0*zeta*delta);
-  return dDeltadT*((Functional(1)/(delta*root_stuff)) - root_stuff/(4*n0*zeta*sqr(delta)));
+  return dDeltadT*((Functional(1)/(delta*root_stuff)) - (root_stuff - Functional(1))/(4*n0*zeta*sqr(delta)));
 }
 
 Functional AssociationSAFT(double radius, double epsilon, double kappa,
@@ -355,6 +355,6 @@ Functional SaftEntropy(double R,
                        double epsilon, double kappa,
                        double epsdis, double lambda) {
   Functional n = EffectivePotentialToDensity();
-  return HardSpheresWBnotensor(R)(n)/(-kT) - EntropyOfIdealGasOfVeff()
+  return HardSpheresWBnotensor(R)(n)/(-kT) + EntropyOfIdealGasOfVeff()
     -dFassoc_dT(R, epsilon, kappa, epsdis, lambda)(n) - dFdisp_dT(R, epsdis, lambda)(n);
 }
