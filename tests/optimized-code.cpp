@@ -54,6 +54,23 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   }
   errors += f1.run_finite_difference_test(f1.get_name(), water_prop.kT, n);
   //errors += f2.run_finite_difference_test("other version", n);
+  
+  const double x = 0.001;
+  double f1x = f1(1.2*water_prop.kT, x);
+  double f2x = f2(1.2*water_prop.kT, x);
+  if (1 - fabs(f1x/f2x) > fraccuracy) {
+    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1x/f2x), f2x);
+    errors++;
+  }
+  
+  double f1p = f1.derive(1.2*water_prop.kT, x);
+  double f2p = f2.derive(1.2*water_prop.kT, x);
+  if (1 - fabs(f1p/f2p) > fraccuracy) {
+    printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1p/f2p), f2p);
+    errors++;
+  }
 }
 
 int main(int, char **argv) {

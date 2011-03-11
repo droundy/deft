@@ -25,10 +25,11 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
                     const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double derive(double kT, double data) const = 0;
+  virtual Expression derive_homogeneous(const Expression &kT, const Expression &x) const = 0;
   virtual double d_by_dT(double kT, double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Functional grad_T(const Functional &ingradT) const = 0;
-  virtual Expression printme(const Expression &) const = 0;
+  virtual Expression printme(const Expression &, const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
   virtual bool I_have_analytic_grad() const;
@@ -159,6 +160,11 @@ public:
       return itsCounter->ptr->grad(ingrad, x, ispgrad);
     }
   }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    if (mynext)
+      return itsCounter->ptr->derive_homogeneous(kT, x) + mynext->derive_homogeneous(kT, x);
+    else return itsCounter->ptr->derive_homogeneous(kT, x);
+  }
   Functional pgrad(const Functional &ingrad, const Functional &x) const {
     return grad(ingrad, x, true);
   }
@@ -205,7 +211,7 @@ public:
   int run_finite_difference_test(const char *testname,
                                  double kT, const Grid &data,
                                  const VectorXd *direction = 0) const;
-  Expression printme(const Expression &) const;
+  Expression printme(const Expression &, const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
                      const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
                      const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
@@ -306,6 +312,9 @@ public:
   double d_by_dT(double, double) const {
     return 0;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return gzerov;
+  }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
       return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(ingrad);
@@ -328,7 +337,7 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &x) const {
+  Expression printme(const Expression &, const Expression &x) const {
     if (x.typeIs("double")) {
       return gzerov*x;
     } else {

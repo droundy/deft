@@ -770,7 +770,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
 
       if (s.typeIs("Grid")) gridvars.insert(a);
       if (s.typeIs("ReciprocalGrid")) recipvars.insert(a);
-      myvars->insert(a);
+      if (!s.typeIs("double")) myvars->insert(a);
       allvars->insert(a);
       s = FindNamedSubexpression(n); // Find out if the expression has since changed...
       //fprintf(o, "// expression was %s\n", printme().c_str());
@@ -853,7 +853,7 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     //fprintf(o, "    %s %s = *%s_ptr;\n", s.ctype(), a.c_str(), a.c_str());
     if (s.typeIs("Grid")) gridvars.insert(a);
     if (s.typeIs("ReciprocalGrid")) recipvars.insert(a);
-    myvars->insert(a);
+    if (!s.typeIs("double")) myvars->insert(a);
     allvars->insert(a);
     e.EliminateThisSubexpression(s, a);
     EliminateThisSubexpression(s, a);

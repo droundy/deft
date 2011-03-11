@@ -37,6 +37,9 @@ public:
   double derive(double, double) const {
     return 1;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(1).set_type("double");
+  }
   double d_by_dT(double, double) const {
     return 0;
   }
@@ -57,7 +60,7 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &x) const {
+  Expression printme(const Expression &, const Expression &x) const {
     Expression out = funexpr("Gaussian", Expression("width"))(Expression("gd"), x);
     out.unlazy = true;
     return out;
@@ -82,32 +85,34 @@ Functional ShellConvolve(double R, Expression r) {
                     r, Expression(4*M_PI)*(r*r), true);
 }
 
+static Expression zero = Expression(0).set_alias("literal");
+
 Functional xShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<xshell_op<complex> >, R, r, Expression(0), false);
+  return Functional(function_for_convolve<xshell_op<complex> >, R, r, zero, false);
 }
 Functional yShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<yshell_op<complex> >, R, r, Expression(0), false);
+  return Functional(function_for_convolve<yshell_op<complex> >, R, r, zero, false);
 }
 Functional zShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<zshell_op<complex> >, R, r, Expression(0), false);
+  return Functional(function_for_convolve<zshell_op<complex> >, R, r, zero, false);
 }
 
 Functional xyShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<xyshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<xyshell_op<complex> >, R, r, zero, true);
 }
 Functional yzShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<yzshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<yzshell_op<complex> >, R, r, zero, true);
 }
 Functional zxShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<zxshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<zxshell_op<complex> >, R, r, zero, true);
 }
 
 Functional xxShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<xxshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<xxshell_op<complex> >, R, r, zero, true);
 }
 Functional yyShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<yyshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<yyshell_op<complex> >, R, r, zero, true);
 }
 Functional zzShellConvolve(double R, Expression r) {
-  return Functional(function_for_convolve<zzshell_op<complex> >, R, r, Expression(0), true);
+  return Functional(function_for_convolve<zzshell_op<complex> >, R, r, zero, true);
 }
