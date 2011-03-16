@@ -51,7 +51,8 @@ Lattice lat(Cartesian(0,a,a), Cartesian(a,0,a), Cartesian(a,a,0));
 GridDescription gd(lat, 0.2);
 
 void compare_functionals(const Functional &f1, const Functional &f2,
-                         double kT, const Grid &n, double fraccuracy = 1e-15) {
+                         double kT, const Grid &n, double fraccuracy = 1e-15,
+                         double x = 0.001, double fraccuracydoub = 1e-15) {
   printf("\n************");
   for (unsigned i=0;i<strlen(f1.get_name());i++) printf("*");
   printf("\n* Testing %s *\n", f1.get_name());
@@ -86,6 +87,23 @@ void compare_functionals(const Functional &f1, const Functional &f2,
     errors++;
   }
   errors += f1.run_finite_difference_test(f1.get_name(), kT, n);
+
+  double f1x = f1(kT, x);
+  double f2x = f2(kT, x);
+  if (1 - fabs(f1x/f2x) > fraccuracydoub) {
+    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1x/f2x), f2x);
+    errors++;
+  }
+  
+  double f1p = f1.derive(kT, x);
+  double f2p = f2.derive(kT, x);
+  if (1 - fabs(f1p/f2p) > fraccuracydoub) {
+    printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1p/f2p), f2p);
+    errors++;
+  }
+  
   //errors += f2.run_finite_difference_test("other version", n);
 }
 

@@ -151,7 +151,7 @@ int main(int, char **argv) {
       reset_peak_memory();
       printf("Peak memory use was %g\n", peak);
       if (peak > 6 || peak < 5) {
-        printf("FAIL: Peak memory use was not as expected...\n");
+        printf("FAIL: Peak memory use was not as expected in ConjugateGradient...\n");
         retval++;
       }
     }
@@ -163,7 +163,7 @@ int main(int, char **argv) {
       reset_peak_memory();
       printf("Peak memory use was %g\n", peak);
       if (peak > 7 || peak < 6) {
-        printf("FAIL: Peak memory use was not as expected...\n");
+        printf("FAIL: Peak memory use was not as expected PreconditionedConjugateGradient...\n");
         retval++;
       }
     }

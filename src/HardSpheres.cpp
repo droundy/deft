@@ -19,8 +19,7 @@
 #include <math.h>
 
 Functional VectorThirdTerm(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
@@ -29,8 +28,7 @@ Functional VectorThirdTerm(double radius) {
 }
 
 Functional TensorThirdTerm(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
@@ -69,8 +67,7 @@ Functional TensorThirdTerm(double radius) {
 }
 
 Functional HardSpheresRF(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   const Functional four_pi_r = (4*M_PI)*R;
   const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
@@ -92,8 +89,7 @@ Functional HardSpheresRF(double radius) {
 }
 
 Functional HardSpheresTarazona(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   const Functional four_pi_r = (4*M_PI)*R;
   const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
@@ -115,8 +111,7 @@ Functional HardSpheresTarazona(double radius) {
 }
 
 Functional HardSpheresWB(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   const Functional four_pi_r = (4*M_PI)*R;
   const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
@@ -140,8 +135,7 @@ Functional HardSpheresWB(double radius) {
 }
 
 Functional HardSpheresWBnotensor(double radius) {
-  Functional R(radius);
-  R.set_name("R");
+  Functional R(radius, "R");
   const Functional four_pi_r = (4*M_PI)*R;
   const Functional four_pi_r2 = (4*M_PI)*sqr(R);
   Functional n3 = StepConvolve(radius);
