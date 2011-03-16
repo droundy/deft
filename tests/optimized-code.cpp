@@ -60,15 +60,15 @@ int main(int, char **argv) {
   Functional x(Identity());
 
   Grid n(gd);
-  n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
+  n = 0.00001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 1e-14);
+  compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 2e-14);
 
-  compare_functionals(HardSpheresRFFast(R), HardSpheresRF(R), n, 1e-14);
+  compare_functionals(HardSpheresRFFast(R), HardSpheresRF(R), n, 2e-14);
 
-  compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 1e-14);
+  compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 2e-14);
 
-  compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 1e-14);
+  compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 2e-14);
 
   
   Functional nn = EffectivePotentialToDensity();

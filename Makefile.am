@@ -61,6 +61,7 @@ check_PROGRAMS = \
 	tests/saft.test \
 	tests/saft-dispersion.test \
 	tests/optimized-code.test \
+	tests/constrained-water-fast-slow.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
@@ -85,6 +86,7 @@ tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
+tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)

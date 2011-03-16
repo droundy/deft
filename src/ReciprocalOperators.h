@@ -76,7 +76,7 @@ struct gz_op : public base_rop<Scalar> {
   const char *name() const { return "gz"; }
 };
 
-static const double spreading = 3.0;
+static const double spreading = 6.0;
 
 template<typename Scalar>
 struct step_op : public base_rop<Scalar> {
