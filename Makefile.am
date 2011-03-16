@@ -32,6 +32,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/equation-of-state.mkdat \
 	paper/figs/finding-vapor-pressure.mkdat \
 	paper/figs/entropy.mkdat \
+	paper/figs/entropy-at-690K.mkdat \
+	paper/figs/pressure-with-isotherms.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -59,6 +61,7 @@ check_PROGRAMS = \
 	tests/saft.test \
 	tests/saft-dispersion.test \
 	tests/optimized-code.test \
+	tests/constrained-water-fast-slow.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
@@ -83,6 +86,7 @@ tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
+tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
@@ -107,6 +111,8 @@ paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
 paper_figs_entropy_mkdat_SOURCES = paper/figs/entropy.cpp $(GENERIC_CODE)
+paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENERIC_CODE)
+paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -146,7 +152,9 @@ clean-local:
 paper: paper/figs/equation-of-state.dat \
 	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
-	paper/figs/entropy.dat
+	paper/figs/entropy.dat \
+	paper/figs/entropy-at-690K.dat \
+	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat

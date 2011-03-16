@@ -37,7 +37,7 @@ int main(int, char **argv) {
   const double kT = 1e-3;
   Lattice lat(Cartesian(0,5,5), Cartesian(5,0,5), Cartesian(5,5,0));
   Cartesian plotcorner(-5, -5, 0), plotx(10,0,0), ploty(0,10,0);
-  int resolution = 100;
+  int resolution = 200;
   GridDescription gd(lat, resolution, resolution, resolution);
   Grid foo(gd), bar(gd), ref(gd);
   printf("Running Set(gaussian)...\n");
@@ -75,7 +75,7 @@ int main(int, char **argv) {
   printf("StepConvolve(1) integrates to %.15g\n", Identity().integral(kT, bar));
   printf("StepConvolve(1) Maximum is %g\n", bar.maxCoeff());
   if (fabs(bar.maxCoeff()/integrate_foo-1) > 1e-6) {
-    printf("Max of StepConvolve(1) is wrong:  %g\n", bar.maxCoeff()/integrate_foo - 1);
+    printf("FAIL: Max of StepConvolve(1) is wrong:  %g\n", bar.maxCoeff()/integrate_foo - 1);
     retval++;
   }
   printf("StepConvolve(1) Minimum is %g\n", bar.minCoeff());

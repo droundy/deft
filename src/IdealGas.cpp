@@ -33,6 +33,9 @@ public:
   double d_by_dT(double, double) const {
     return 1;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(0).set_type("double");
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
@@ -42,8 +45,8 @@ public:
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
   }
-  Expression printme(const Expression &) const {
-    return Expression("kT");
+  Expression printme(const Expression &kT, const Expression &) const {
+    return kT;
   }
 };
 
@@ -63,6 +66,11 @@ public:
     double kTnew = mykT(kT, n);
     // d/dn = d/dn + d/dT * dTnew/dn
     return f.derive(kTnew, n) + f.d_by_dT(kTnew, n)*mykT.derive(kT, n);
+  }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    Expression kTnew = mykT.printme(kT, x);
+    return f.derive_homogeneous(kTnew, x)
+      + f.grad_T(Functional(1)).printme(kTnew, x)*mykT.derive_homogeneous(kT, x);
   }
   double d_by_dT(double kT, double n) const {
     double kTnew = mykT(kT, n);
@@ -84,11 +92,8 @@ public:
     // temperature:
     mykT.grad(gd, kT, data, f.grad_T(1)(gd, kTnew, data).cwise()*ingrad, outgrad, outpgrad);
   }
-  Expression printme(const Expression &x) const {
-    Expression kTnew = mykT.printme(x);
-    Expression fnew = f.printme(x);
-    fnew.ReplaceThisSubexpression(Expression("kT").set_type("double"), kTnew);
-    return fnew;
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f.printme(mykT.printme(kT, x), x);
   }
 private:
   Functional mykT, f;
@@ -133,5 +138,5 @@ Functional EntropyOfIdealGasOfVeff() {
   Functional nQ = find_nQ();
   Functional dnQ_dT = find_dnQ_dT();
   // The following is also known as the Sackur-Tetrode equation
-  return (-(Veff/kT + log(nQ) + 2.5)*n).set_name("dideal_gas_dT");
+  return ((Veff/kT + log(nQ) + 2.5)*n).set_name("ideal_gas_entropy");
 }

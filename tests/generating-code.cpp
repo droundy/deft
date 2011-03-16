@@ -20,8 +20,7 @@
 int main(int, char **) {
   Functional x(Identity()), One(1);
   const double Rval = 4;
-  Functional R(Rval);
-  R.set_name("R");
+  Functional R(Rval, "R");
   (kT + x).create_header("tests/generated/sum.h", "Sum", "kT");
   (sqr(kT + x) - x + 2*kT).create_header("tests/generated/quadratic.h", "Quadratic", "kT");
   sqrt(x).create_header("tests/generated/sqrt.h", "Sqrt");
@@ -47,6 +46,9 @@ int main(int, char **) {
   Functional four_pi_r2 = 4*M_PI*sqr(R);
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (Functional(-1)/four_pi_r2)*n2*log(one_minus_n3);
+  //phi1 = n2*log(one_minus_n3);
+  //phi1 = (Functional(-1)/four_pi_r2)*n2;
+  //phi1 = (Functional(-1)/four_pi_r2);
   phi1.set_name("phi1").create_header("tests/generated/phi1.h", "Phi1", "kT", "R");
 
   phi1(veff).create_header("tests/generated/phi1-Veff.h", "Phi1Veff", "kT", "R");

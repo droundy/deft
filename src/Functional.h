@@ -25,11 +25,11 @@ public:
   virtual void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
                     const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double derive(double kT, double data) const = 0;
+  virtual Expression derive_homogeneous(const Expression &kT, const Expression &x) const = 0;
   virtual double d_by_dT(double kT, double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Functional grad_T(const Functional &ingradT) const = 0;
-  virtual Expression printme(const Expression &) const = 0;
-  virtual Expression cwiseprintme(const Expression &) const;
+  virtual Expression printme(const Expression &, const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, const char *name) const;
   virtual bool I_have_analytic_grad() const;
@@ -140,6 +140,8 @@ public:
     pgrad(kT, gd, x, gd.dvolume*VectorXd::Ones(gd.NxNyNz), g);
   }
   double operator()(double kT, double data) const {
+    assert(itsCounter);
+    assert(itsCounter->ptr);
     double out = itsCounter->ptr->transform(kT, data);
     if (mynext) out += (*mynext)(kT, data);
     return out;
@@ -157,6 +159,11 @@ public:
     } else {
       return itsCounter->ptr->grad(ingrad, x, ispgrad);
     }
+  }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    if (mynext)
+      return itsCounter->ptr->derive_homogeneous(kT, x) + mynext->derive_homogeneous(kT, x);
+    else return itsCounter->ptr->derive_homogeneous(kT, x);
   }
   Functional pgrad(const Functional &ingrad, const Functional &x) const {
     return grad(ingrad, x, true);
@@ -204,8 +211,7 @@ public:
   int run_finite_difference_test(const char *testname,
                                  double kT, const Grid &data,
                                  const VectorXd *direction = 0) const;
-  Expression printme(const Expression &) const;
-  virtual Expression cwiseprintme(const Expression &) const;
+  Expression printme(const Expression &, const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
                      const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
                      const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
@@ -268,6 +274,7 @@ inline Functional operator-(double x, const Functional &f) {
 
 Functional log(const Functional &);
 Functional exp(const Functional &);
+Functional abs(const Functional &);
 Functional sqr(const Functional &);
 Functional sqrt(const Functional &);
 Functional constrain(const Grid &, Functional);
@@ -305,6 +312,9 @@ public:
   double d_by_dT(double, double) const {
     return 0;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return gzerov;
+  }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
       return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(ingrad);
@@ -327,13 +337,14 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &x) const {
-    Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
-    Derived c(GridDescription(lat, 2, 2, 2), data);
-    return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
-  }
-  Expression cwiseprintme(const Expression &x) const {
-    return (gzerov*x).set_alias("literal");
+  Expression printme(const Expression &, const Expression &x) const {
+    if (x.typeIs("double")) {
+      return gzerov*x;
+    } else {
+      Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
+      Derived c(GridDescription(lat, 2, 2, 2), data);
+      return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
+    }
   }
 private:
   Derived (*f)(const GridDescription &, extra);
