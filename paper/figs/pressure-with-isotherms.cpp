@@ -31,10 +31,10 @@ int main(int, char **) {
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
                                water_prop.lambda_dispersion, 0);
-  for (double dens=0.00001; dens<=0.0055; dens *= 1.1) {
+  for (double dens=0.00001; dens<=0.0055; dens *= 1.02) {
     fprintf(o, "%g", dens);
 
-    for (double kT=kB*293; kT<=kB*690; kT+=100*kB) {
+    for (double kT=kB*298; kT<=kB*798; kT+=50*kB) {
       //printf ("kT = %g\n", kT);
     
       // double mu_satp = find_chemical_potential(f, kT,
