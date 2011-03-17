@@ -21,8 +21,8 @@ public:
   Temperature() {
   }
 
-  VectorXd transform(double kT, const GridDescription &, const VectorXd &data) const {
-    return kT*VectorXd::Ones(data.rows());
+  VectorXd transform(const GridDescription &, const VectorXd &kT, const VectorXd &) const {
+    return kT;
   }
   double transform(double kT, double) const {
     return kT;
@@ -30,18 +30,78 @@ public:
   double derive(double, double) const {
     return 0;
   }
+  double d_by_dT(double, double) const {
+    return 1;
+  }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(0).set_type("double");
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
-  void grad(double, const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  Functional grad_T(const Functional &ingrad) const {
+    return ingrad;
   }
-  Expression printme(const Expression &) const {
-    return Expression("kT").set_type("double");
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+            VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &kT, const Expression &) const {
+    return kT;
   }
 };
 
 Functional kT = Functional(new Temperature(), "kT");
 
+class WithTemperatureClass : public FunctionalInterface {
+public:
+  WithTemperatureClass(const Functional &newkT, const Functional &myf) : mykT(newkT), f(myf) {};
+
+  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+    return f(gd, mykT(gd, kT, data), data);
+  }
+  double transform(double kT, double n) const {
+    return f(mykT(kT, n), n);
+  }
+  double derive(double kT, double n) const {
+    double kTnew = mykT(kT, n);
+    // d/dn = d/dn + d/dT * dTnew/dn
+    return f.derive(kTnew, n) + f.d_by_dT(kTnew, n)*mykT.derive(kT, n);
+  }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    Expression kTnew = mykT.printme(kT, x);
+    return f.derive_homogeneous(kTnew, x)
+      + f.grad_T(Functional(1)).printme(kTnew, x)*mykT.derive_homogeneous(kT, x);
+  }
+  double d_by_dT(double kT, double n) const {
+    double kTnew = mykT(kT, n);
+    // d/dn = d/dn + d/dT * dTnew/dn
+    return f.d_by_dT(kTnew, n)*mykT.d_by_dT(kT, n);
+  }
+  Functional grad(const Functional &ingrad, const Functional &n, bool ispgrad) const {
+    return WithTemperature(mykT, f.grad(ingrad, n, ispgrad))
+      + mykT.grad(f.grad_T(ingrad), n, ispgrad);
+  }
+  Functional grad_T(const Functional &ingradT) const {
+    return mykT.grad_T(WithTemperature(mykT, f.grad_T(ingradT)));
+  }
+  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    VectorXd kTnew = mykT(gd, kT, data);
+    f.grad(gd, kTnew, data, ingrad, outgrad, outpgrad);
+    // Now include gradient of any density-dependence in the effective
+    // temperature:
+    mykT.grad(gd, kT, data, f.grad_T(1)(gd, kTnew, data).cwise()*ingrad, outgrad, outpgrad);
+  }
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f.printme(mykT.printme(kT, x), x);
+  }
+private:
+  Functional mykT, f;
+  };
+
+Functional WithTemperature(const Functional &newkT, const Functional &f) {
+  return Functional(new WithTemperatureClass(newkT, f));
+}
 
 Functional find_nQ() {
   Functional mass = 18*1822.8885; // FIXME: molecular weight of water
@@ -57,7 +117,13 @@ Functional find_dnQ_dT() {
   return 1.5*PowAndHalf(3)(mass/(2*M_PI))*sqrt(kT);
 }
 
-static Functional CreateIdealGasOfVeff() {
+Functional IdealGas() {
+  Functional n = Identity();
+  Functional nQ = find_nQ();
+  return (kT*n*(log(n/nQ) - 1)).set_name("ideal_gas");
+}
+
+Functional CreateIdealGasOfVeff() {
   Functional Veff = Identity().set_name("Veff");
   Functional n = exp(-Veff /kT);
   Functional nQ = find_nQ();

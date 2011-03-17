@@ -135,36 +135,36 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 80, 101, 108, 104);
+  check_a_functional("HardSpheres", ff, potential, 83, 104, 111, 108);
 
   ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereFast", ff, potential, 66, 90, 97, 94);
+  check_a_functional("HardSphereFast", ff, potential, 69, 94, 101, 97);
 
   ff = constrain(constraint, (HardSpheresRF(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRF", ff, potential, 52, 83, 90, 87);
+  check_a_functional("HardSphereRF", ff, potential, 55, 87, 94, 90);
 
   ff = constrain(constraint, (HardSpheresRFFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRFFast", ff, potential, 45, 66, 73, 69);
+  check_a_functional("HardSphereRFFast", ff, potential, 48, 69, 76, 73);
 
   ff = constrain(constraint, (HardSpheresTarazona(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazona", ff, potential, 83, 104, 111, 108);
+  check_a_functional("HardSphereTarazona", ff, potential, 87, 108, 114, 111);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 66, 87, 94, 90);
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 69, 90, 97, 94);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 87, 94, 90);
+  check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 90, 97, 94);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereNoTensor", ff, potential, 45, 69, 76, 73);
+  check_a_functional("HardSphereNoTensor", ff, potential, 48, 73, 80, 76);
 
   ff = constrain(constraint, HardSphereGas(R, mu));
-  check_a_functional("HardSphereGas", ff, potential, 62, 83, 90, 83);
+  check_a_functional("HardSphereGas", ff, potential, 66, 87, 94, 87);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   ff = SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion, water_prop.lambda_dispersion, mu);
-  check_a_functional("SaftFluid", ff, potential, 48, 80, 83, 80);
+  check_a_functional("SaftFluid", ff, potential, 52, 83, 87, 83);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

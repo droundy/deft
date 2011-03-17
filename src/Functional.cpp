@@ -18,18 +18,15 @@
 #include "handymath.h"
 #include "Grid.h"
 
-Expression FunctionalInterface::cwiseprintme(const Expression &x) const {
-  return printme(x);
-}
-
 bool FunctionalInterface::I_have_analytic_grad() const {
   return true;
 }
 
-void FunctionalInterface::pgrad(double kT, const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad,
+void FunctionalInterface::pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x,
+                                const VectorXd &ingrad,
                                 VectorXd *outpgrad) const {
   Grid trash(gd);
-  grad(kT, gd, x, ingrad, &trash, outpgrad);
+  grad(gd, kT, x, ingrad, &trash, outpgrad);
 }
 
 void FunctionalInterface::print_summary(const char *prefix, double e, const char *name) const {
@@ -39,8 +36,8 @@ void FunctionalInterface::print_summary(const char *prefix, double e, const char
   printf("\n");
 }
 
-double FunctionalInterface::integral(double kT, const GridDescription &gd, const VectorXd &x) const {
-  return transform(kT, gd, x).sum()*gd.dvolume;
+double FunctionalInterface::integral(const GridDescription &gd, const VectorXd &kT, const VectorXd &x) const {
+  return transform(gd, kT, x).sum()*gd.dvolume;
 }
 
 // The following is a "fake" functional, used for dumping code to
@@ -49,7 +46,7 @@ class PretendIngradType : public FunctionalInterface {
 public:
   PretendIngradType() {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &x) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &x) const {
     return x;
   }
   double transform(double, double) const {
@@ -58,12 +55,22 @@ public:
   double derive(double, double) const {
     return 1; // hokey!
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(1);
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
-  void grad(double, const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
   }
-  Expression printme(const Expression &) const {
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+            VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &, const Expression &) const {
     return Expression("ingrad");
   }
 };
@@ -116,8 +123,8 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  bool I_have_analytic_grad() const {\n");
   fprintf(o, "    return false;\n");
   fprintf(o, "  }\n");
-  fprintf(o, "  double integral(double kT, const GridDescription &gd, const VectorXd &x) const {\n");
-  fprintf(o, "    assert(kT == kT); // to avoid an unused parameter error\n");
+  fprintf(o, "  double integral(const GridDescription &gd, const VectorXd &kT, const VectorXd &x) const {\n");
+  fprintf(o, "    assert(&kT); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   std::set<std::string> allvars;
@@ -128,7 +135,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   if (a5) allvars.insert(a5);
   if (a6) allvars.insert(a6);
   if (a7) allvars.insert(a7);
-  Expression myself = printme(Expression("x"));
+  Expression myself = printme(Expression("kT"), Expression("x"));
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
   {
     std::set<std::string> myvars;
@@ -171,39 +178,58 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, ";\n");
   }
   fprintf(o, "  }\n");
-  fprintf(o, "  double transform(double, double) const {\n");
-  fprintf(o, "    assert(false);\n");
-  fprintf(o, "    return 0;\n");
-  fprintf(o, "  }\n");
-  fprintf(o, "  double derive(double, double) const {\n");
+  {
+    fprintf(o, "  double transform(double kT, double x) const {\n");
+    fprintf(o, "    assert(kT == kT); assert(x == x);\n");
+    Expression myself = printme(Expression("kT").set_type("double"),
+                                Expression("x").set_type("double"));
+    myself.generate_code(o, "    return %s;\n");
+    fprintf(o, "  } // end of transform(double,double)\n");
+  }
+  {
+    fprintf(o, "  double derive(double kT, double x) const {\n");
+    fprintf(o, "    assert(kT == kT); assert(x == x);\n");
+    Expression myself = derive_homogeneous(Expression("kT").set_type("double"),
+                                           Expression("x").set_type("double"));
+    myself.generate_code(o, "    return %s;\n");
+    fprintf(o, "  }\n\n");
+  }
+  fprintf(o, "  double d_by_dT(double, double) const {\n");
   fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n\n");
-  fprintf(o, "  VectorXd transform(double kT, const GridDescription &gd, const VectorXd &x) const {\n");
-  fprintf(o, "    assert(kT == kT); // to avoid an unused parameter error\n");
+  fprintf(o, "  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &x) const {\n");
+  fprintf(o, "    assert(&kT); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
-  printme(Expression("x")).generate_code(o, "    return %s;\n");
+  printme(Expression("kT"), Expression("x")).generate_code(o, "    return %s;\n");
   fprintf(o, "  }\n");
+  fprintf(o, "  Expression derive_homogeneous(const Expression &, const Expression &) const {\n");
+  fprintf(o, "    assert(false);\n");
+  fprintf(o, "    return Expression(0);\n");
+  fprintf(o, "  }\n\n");
   fprintf(o, "  Functional grad(const Functional &, const Functional &, bool) const {\n");
   fprintf(o, "    assert(false);\n");
   fprintf(o, "    return 0;\n");
   fprintf(o, "  }\n\n");
+  fprintf(o, "  Functional grad_T(const Functional &) const {\n");
+  fprintf(o, "    assert(false);\n");
+  fprintf(o, "    return 0;\n");
+  fprintf(o, "  }\n\n");
 
-  fprintf(o, "  void pgrad(double kT, const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
+  fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,              "VectorXd *outpgrad) const {\n");
   // The following requires that "R" always be defined!
-  Functional r(1.0);
-  r.set_name("R");
+  Functional r(1.0, "R");
   Functional smoothed = StepConvolve(1.0)/Functional(4*M_PI*r*r*r);
   Expression curvature = Expression(1);
-  //grad(dV, Identity(), false).grad(dV, Identity(), false).cwiseprintme(smoothed.printme(Expression("x")));
 
   //Expression epg = grad(Functional(new PretendIngradType()), Identity(), true).printme(Expression("x"));
-  Expression eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
+  Expression eg = grad(Functional(new PretendIngradType()), Identity(),
+                       false).printme(Expression("kT"), Expression("x"));
   //Expression epg = eg * Expression("invcurvature");
   //if (true || curvature.typeIs("double")) 
-  fprintf(o, "    grad(kT, gd, x, ingrad, outpgrad, 0);\n");
+  fprintf(o, "    grad(gd, kT, x, ingrad, outpgrad, 0);\n");
     /*
   else {
     fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
@@ -221,18 +247,15 @@ void Functional::create_source(const std::string filename, const std::string cla
     */
   fprintf(o, "  }\n");
 
-  fprintf(o, "  void grad(double kT, const GridDescription &gd, const VectorXd &x, const VectorXd &ingrad, ");
+  fprintf(o, "  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x, const VectorXd &ingrad, ");
   fprintf(o,                                         "VectorXd *outgrad, VectorXd *outpgrad) const {\n");
-  fprintf(o, "    assert(kT == kT); // to avoid an unused parameter error\n");
+  fprintf(o, "    assert(&kT); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   fprintf(o, "    if (outpgrad) {\n");
   if (true || curvature.typeIs("double")) {
     eg.generate_increment_code(o, "    (*outgrad) += %s;\n    (*outpgrad) += %s;\n");
   } else {
-    fprintf(o, "      assert(kT == kT); // to avoid an unused parameter error\n");
-    fprintf(o, "      assert(&gd); // to avoid an unused parameter error\n");
-    fprintf(o, "      assert(&x); // to avoid an unused parameter error\n");
     fprintf(o, "      // curvature is %s\n", curvature.printme().c_str());
     std::set<std::string> allvars, myvars;
     (Expression(1)/curvature).generate_code(o, "    VectorXd invcurvature = %s;\n", "",
@@ -244,12 +267,13 @@ void Functional::create_source(const std::string filename, const std::string cla
                      "", std::set<std::string>(), &allvars, &myvars);
   }
   fprintf(o, "    } else {\n");
-  eg = grad(Functional(new PretendIngradType()), Identity(), false).printme(Expression("x"));
+  eg = grad(Functional(new PretendIngradType()), Identity(),
+            false).printme(Expression("kT"), Expression("x"));
   eg.generate_increment_code(o, "      (*outgrad) += %s;\n");
   fprintf(o, "    }\n");
   fprintf(o, "  }\n");
 
-  fprintf(o, "  Expression printme(const Expression &) const {\n");
+  fprintf(o, "  Expression printme(const Expression &, const Expression &) const {\n");
   fprintf(o, "    return Expression(\"Can't print optimized Functionals\");\n");
   fprintf(o, "  }\n");
   fprintf(o, "  void print_summary(const char *prefix, double energy, const char *name=0) const {\n");
@@ -305,36 +329,18 @@ void Functional::create_source(const std::string filename, const std::string cla
   fclose(o);
 }
 
-Expression Functional::printme(const Expression &x) const {
-  Expression myself = itsCounter->ptr->printme(x);
+Expression Functional::printme(const Expression &kT, const Expression &x) const {
+  Expression myself = itsCounter->ptr->printme(kT, x);
   if (get_name() && myself.get_alias() != "literal") myself.set_alias(get_name());
   if (next()) {
     // Get associativity right...
     if (next()->next()) {
-      Expression nextguy = next()->itsCounter->ptr->printme(x);
+      Expression nextguy = next()->itsCounter->ptr->printme(kT, x);
       if (next()->get_name() && nextguy.get_alias() != "literal")
         nextguy.set_alias(next()->get_name());
-      return myself + nextguy + next()->next()->printme(x);
+      return myself + nextguy + next()->next()->printme(kT, x);
     } else {
-      return myself + next()->printme(x);
-    }
-  } else {
-    return myself;
-  }
-}
-
-Expression Functional::cwiseprintme(const Expression &x) const {
-  Expression myself = itsCounter->ptr->cwiseprintme(x);
-  if (get_name() && myself.get_alias() != "literal") myself.set_alias(get_name());
-  if (next()) {
-    // Get associativity right...
-    if (next()->next()) {
-      Expression nextguy = next()->itsCounter->ptr->cwiseprintme(x);
-      if (next()->get_name() && nextguy.get_alias() != "literal")
-        nextguy.set_alias(next()->get_name());
-      return myself + nextguy + next()->next()->cwiseprintme(x);
-    } else {
-      return myself + next()->cwiseprintme(x);
+      return myself + next()->printme(kT, x);
     }
   } else {
     return myself;
@@ -352,6 +358,10 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
   double Eold = integral(temp, x);
   my_grad.setZero();
   integralgrad(temp, x, &my_grad);
+  if (my_grad.norm() == 0.0) {
+    printf("FAIL: Gradient is zero...\n");
+    return 1;
+  }
   VectorXd my_direction(my_grad);
   if (direction) my_direction = *direction;
   my_direction /= my_direction.norm();
@@ -383,10 +393,12 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
       if (maxgraderr/maxgrad > 1e-12) {
-        printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
+        printf("func itself is %s\n", printme(Expression("kT"),
+                                              Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
         printf("othergrad itself is %s\n",
-               grad(dV, Identity(), false).printme(Expression("x")).printme().c_str());
+               grad(dV, Identity(), false).printme(Expression("kT"),
+                                                   Expression("x")).printme().c_str());
         printf("my_grad[0] = %g\n", my_grad[0]);
         printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
         printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
@@ -493,7 +505,7 @@ class dVType : public FunctionalInterface {
 public:
   dVType() {}
 
-  VectorXd transform(double, const GridDescription &gd, const VectorXd &) const {
+  VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &) const {
     return gd.dvolume*VectorXd::Ones(gd.NxNyNz);
   }
   double transform(double, double) const {
@@ -502,12 +514,22 @@ public:
   double derive(double, double) const {
     return 1; // hokey!
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(1).set_type("double");
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
-  void grad(double, const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
   }
-  Expression printme(const Expression &) const {
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+            VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &, const Expression &) const {
     return Expression("gd.dvolume").set_type("double");
   }
 };
@@ -518,7 +540,7 @@ class Constant : public FunctionalInterface {
 public:
   Constant(double x, const char *n) : c(x), name(n) {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
     return c*VectorXd::Ones(data.rows());
   }
   double transform(double, double) const {
@@ -527,14 +549,24 @@ public:
   double derive(double, double) const {
     return 0;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(0).set_type("double");
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
-  void grad(double, const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
   }
-  Expression printme(const Expression &) const {
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+            VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &, const Expression &) const {
     if (name) return Expression(name).set_type("double");
-    return c;
+    return Expression(c).set_type("double").set_alias("literal");
   }
 private:
   double c;
@@ -549,7 +581,7 @@ class ConstantField : public FunctionalInterface {
 public:
   ConstantField(const VectorXd &x) : c(x) {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &) const {
     return c;
   }
   double transform(double, double) const {
@@ -558,12 +590,22 @@ public:
   double derive(double, double) const {
     return 0;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &) const {
+    return Expression(0).set_type("double");
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return 0;
   }
-  void grad(double, const GridDescription &, const VectorXd &, const VectorXd &, VectorXd *, VectorXd *) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
   }
-  Expression printme(const Expression &) const {
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+            VectorXd *, VectorXd *) const {
+  }
+  Expression printme(const Expression &, const Expression &) const {
     return Expression("an unknown field...");
   }
 private:
@@ -578,20 +620,20 @@ class ChainRuleType : public FunctionalInterface {
 public:
   ChainRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
-  VectorXd transform(double kT, const GridDescription &gd, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
     if (!f1.next()) {
       // This is the simple, efficient case!
-      return f1(kT, gd, f2(kT, gd, data));
+      return f1(gd, kT, f2(gd, kT, data));
     }
     // This does some extra work to save the energies of each term in
     // the sum, just in case we want to print it!
-    VectorXd f2data(f2(kT, gd,data));
-    VectorXd f1f2data(f1.justMe(kT, gd, f2data));
+    VectorXd f2data(f2(gd, kT, data));
+    VectorXd f1f2data(f1.justMe(gd, kT, f2data));
     double e = gd.dvolume*f1f2data.sum();
     f1.set_last_energy(e);
     Functional *nxt = f1.next();
     while (nxt) {
-      f1f2data += nxt->justMe(kT, gd, f2data);
+      f1f2data += nxt->justMe(gd, kT, f2data);
       double etot = gd.dvolume*f1f2data.sum();
       nxt->set_last_energy(etot - e);
       e = etot;
@@ -605,25 +647,34 @@ public:
   double derive(double kT, double n) const {
     return f1.derive(kT, f2(kT, n))*f2.derive(kT, n);
   }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    return f1.derive_homogeneous(kT, f2.printme(kT,x))*f2.derive_homogeneous(kT,x);
+  }
+  double d_by_dT(double kT, double n) const {
+    double f2n = f2(kT, n);
+    return f1.d_by_dT(kT, f2n) + f2.d_by_dT(kT,n)*f1.derive(kT, f2n);
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
     return f2.grad(f1.grad(ingrad, f2(x), ispgrad), x, ispgrad);
-    return f1.grad(f2.grad(ingrad, x, ispgrad), f2, ispgrad);
   }
-  void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
+  Functional grad_T(const Functional &ingrad) const {
+    // FIXME: The following isn't correct if f2 changes the size of
+    // the vector.  But would that even be potentially correct when
+    // we're talking about temperature?
+    return f1.grad(f2.grad_T(ingrad), f2, false) + f1.grad_T(ingrad)(f2);
+  }
+  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid outgrad1(gd);
     outgrad1.setZero();
-    f1.grad(kT, gd, f2(kT, gd, data), ingrad, &outgrad1, 0);
-    f2.grad(kT, gd, data, outgrad1, outgrad, outpgrad);
+    f1.grad(gd, kT, f2(gd, kT, data), ingrad, &outgrad1, 0);
+    f2.grad(gd, kT, data, outgrad1, outgrad, outpgrad);
   }
   void print_summary(const char *prefix, double e, const char *name) const {
     f1.print_summary(prefix, e, name);
   }
-  Expression printme(const Expression &x) const {
-    return f1.printme(f2.printme(x));
-  }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(f2.cwiseprintme(x));
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f1.printme(kT, f2.printme(kT, x));
   }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
@@ -640,29 +691,39 @@ class QuotientRuleType : public FunctionalInterface {
 public:
   QuotientRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
-  VectorXd transform(double kT, const GridDescription &gd, const VectorXd &data) const {
-    return f1(kT, gd, data).cwise()/f2(kT, gd, data);
+  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+    return f1(gd, kT, data).cwise()/f2(gd, kT, data);
   }
   double transform(double kT, double n) const {
     return f1(kT, n)/f2(kT, n);
   }
   double derive(double kT, double n) const {
-    return f1.derive(kT, n)/f2(kT, n) - f1(kT, n)*f2.derive(kT, n)/f2(kT, n)/f2(kT, n);
+    double f2n = f2(kT, n);
+    return f1.derive(kT, n)/f2n - f1(kT, n)*f2.derive(kT, n)/f2n/f2n;
+  }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    Expression f2x = f2.printme(kT,x);
+    return f1.derive_homogeneous(kT,x)/f2x - f1.printme(kT,x)*f2.derive_homogeneous(kT,x)/sqr(f2x);
+  }
+  double d_by_dT(double kT, double n) const {
+    double f2n = f2(kT, n);
+    return f1.d_by_dT(kT, n)/f2n - f1(kT, n)*f2.d_by_dT(kT, n)/(f2n*f2n);
   }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
     return f1.grad(ingrad/f2(x), x, ispgrad) - f2.grad(f1(x)*ingrad/sqr(f2(x)), x, ispgrad);
   }
-  void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    VectorXd out2 = f2(kT, gd, data);
-    f1.grad(kT, gd, data, ingrad.cwise()/out2, outgrad, outpgrad);
-    f2.grad(kT, gd, data, (ingrad.cwise()*f1(kT, gd, data)).cwise()/((-out2).cwise()*out2), outgrad, outpgrad);
+  Functional grad_T(const Functional &ingrad) const {
+    return f1.grad_T(ingrad)/f2 - f1/sqr(f2)*f2.grad_T(ingrad);
   }
-  Expression printme(const Expression &x) const {
-    return f1.printme(x) / f2.printme(x);
+  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    VectorXd out2 = f2(gd, kT, data);
+    f1.grad(gd, kT, data, ingrad.cwise()/out2, outgrad, outpgrad);
+    f2.grad(gd, kT, data, (ingrad.cwise()*f1(gd, kT, data)).cwise()/((-out2).cwise()*out2),
+            outgrad, outpgrad);
   }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(x) / f2.cwiseprintme(x);
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f1.printme(kT, x) / f2.printme(kT, x);
   }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
@@ -679,8 +740,8 @@ class ProductRuleType : public FunctionalInterface {
 public:
   ProductRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
 
-  VectorXd transform(double kT, const GridDescription &gd, const VectorXd &data) const {
-    return f1(kT, gd, data).cwise()*f2(kT, gd, data);
+  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+    return f1(gd, kT, data).cwise()*f2(gd, kT, data);
   }
   double transform(double kT, double n) const {
     return f1(kT, n)*f2(kT, n);
@@ -688,19 +749,26 @@ public:
   double derive(double kT, double n) const {
     return f1(kT, n)*f2.derive(kT, n) + f1.derive(kT, n)*f2(kT, n);
   }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    return f1.printme(kT,x)*f2.derive_homogeneous(kT,x)
+      + f1.derive_homogeneous(kT,x)*f2.printme(kT,x);
+  }
+  double d_by_dT(double kT, double n) const {
+    return f1(kT, n)*f2.d_by_dT(kT, n) + f1.d_by_dT(kT, n)*f2(kT, n);
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
     return f2.grad(f1(x)*ingrad, x, ispgrad) + f1.grad(f2(x)*ingrad, x, ispgrad);
   }
-  void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    f1.grad(kT, gd, data, ingrad.cwise()*f2(kT, gd, data), outgrad, outpgrad);
-    f2.grad(kT, gd, data, ingrad.cwise()*f1(kT, gd, data), outgrad, outpgrad);
+  Functional grad_T(const Functional &ingrad) const {
+    return f1.grad_T(ingrad)*f2 - f1*f2.grad_T(ingrad);
   }
-  Expression printme(const Expression &x) const {
-    return f1.printme(x)*f2.printme(x);
+  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    f1.grad(gd, kT, data, ingrad.cwise()*f2(gd, kT, data), outgrad, outpgrad);
+    f2.grad(gd, kT, data, ingrad.cwise()*f1(gd, kT, data), outgrad, outpgrad);
   }
-  Expression cwiseprintme(const Expression &x) const {
-    return f1.cwiseprintme(x)*f2.cwiseprintme(x);
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f1.printme(kT, x)*f2.printme(kT, x);
   }
   bool I_have_analytic_grad() const {
     return f1.I_have_analytic_grad() && f2.I_have_analytic_grad();
@@ -718,7 +786,7 @@ class LogType : public FunctionalInterface {
 public:
   LogType() {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
     return data.cwise().log();
   }
   double transform(double, double n) const {
@@ -727,15 +795,24 @@ public:
   double derive(double, double n) const {
     return 1/n;
   }
+  Expression derive_homogeneous(const Expression &, const Expression &x) const {
+    return 1/x;
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     return ingrad/x;
   }
-  void grad(double, const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     *outgrad += ingrad.cwise()/data;
     if (outpgrad) *outpgrad += ingrad.cwise()/data;
   }
-  Expression printme(const Expression &x) const {
+  Expression printme(const Expression &, const Expression &x) const {
     return log(x);
   }
 };
@@ -749,7 +826,7 @@ class ExpType : public FunctionalInterface {
 public:
   ExpType() {}
 
-  VectorXd transform(double, const GridDescription &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
     return data.cwise().exp();
   }
   double transform(double, double n) const {
@@ -758,21 +835,70 @@ public:
   double derive(double, double n) const {
     return exp(n);
   }
+  Expression derive_homogeneous(const Expression &, const Expression &x) const {
+    return exp(x);
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     return ingrad*Functional(new ExpType())(x);
   }
-  void grad(double, const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     *outgrad += ingrad.cwise() * data.cwise().exp();
     if (outpgrad) *outpgrad += ingrad.cwise() * data.cwise().exp();
   }
-  Expression printme(const Expression &x) const {
+  Expression printme(const Expression &, const Expression &x) const {
     return exp(x);
   }
 };
 
 Functional exp(const Functional &f) {
   return Functional(new ExpType())(f);
+}
+
+
+class AbsType : public FunctionalInterface {
+public:
+  AbsType() {}
+
+  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
+    return data.cwise().abs();
+  }
+  double transform(double, double n) const {
+    return fabs(n);
+  }
+  double derive(double, double n) const {
+    return n/fabs(n);
+  }
+  Expression derive_homogeneous(const Expression &, const Expression &x) const {
+    return x/abs(x);
+  }
+  double d_by_dT(double, double) const {
+    return 0;
+  }
+  Functional grad(const Functional &ingrad, const Functional &x, bool) const {
+    return ingrad*x/abs(x);
+  }
+  Functional grad_T(const Functional &) const {
+    return 0;
+  }
+  void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    *outgrad += ingrad.cwise() * (data.cwise() / data.cwise().abs());
+    if (outpgrad) *outpgrad += ingrad.cwise() * (data.cwise() / data.cwise().abs());
+  }
+  Expression printme(const Expression &, const Expression &x) const {
+    return abs(x);
+  }
+};
+
+Functional abs(const Functional &f) {
+  return Functional(new AbsType())(f);
 }
 
 
@@ -793,11 +919,11 @@ class Constraint : public FunctionalInterface {
 public:
   Constraint(const Grid &g, const Functional &y) : constraint(g), f(y) {};
 
-  double integral(double kT, const GridDescription &gd, const VectorXd &x) const {
-    return f.integral(kT, gd, x);
+  double integral(const GridDescription &gd, const VectorXd &kT, const VectorXd &x) const {
+    return f.integral(gd, kT, x);
   }
-  VectorXd transform(double kT, const GridDescription &gd, const VectorXd &data) const {
-    return f(kT, gd, data);
+  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+    return f(gd, kT, data);
   }
   double transform(double kT, double n) const {
     return f(kT, n);
@@ -805,34 +931,43 @@ public:
   double derive(double kT, double n) const {
     return f.derive(kT, n);
   }
+  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+    return f.derive_homogeneous(kT, x);
+  }
+  double d_by_dT(double kT, double n) const {
+    return f.d_by_dT(kT, n);
+  }
   Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const {
     return Functional(constraint)*f.grad(ingrad, x, ispgrad);
   }
-  void pgrad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-             VectorXd *outpgrad) const {
+  Functional grad_T(const Functional &ingrad) const {
+    return Functional(constraint)*f.grad_T(ingrad);
+  }
+  void pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+             const VectorXd &ingrad, VectorXd *outpgrad) const {
     VectorXd mypgrad(data);
     mypgrad.setZero();
-    f.pgrad(kT, gd, data, ingrad, &mypgrad);
+    f.pgrad(gd, kT, data, ingrad, &mypgrad);
     *outpgrad += constraint.cwise() * mypgrad;
   }
-  void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
+  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     if (outpgrad) {
       VectorXd mygrad(data), mypgrad(data);
       mygrad.setZero();
       mypgrad.setZero();
-      f.grad(kT, gd, data, ingrad, &mygrad, &mypgrad);
+      f.grad(gd, kT, data, ingrad, &mygrad, &mypgrad);
       *outgrad += constraint.cwise() * mygrad;
       *outpgrad += constraint.cwise() * mypgrad;
     } else {
       VectorXd mygrad(data);
       mygrad.setZero();
-      f.grad(kT, gd, data, ingrad, &mygrad, 0);
+      f.grad(gd, kT, data, ingrad, &mygrad, 0);
       *outgrad += constraint.cwise() * mygrad;
     }
   }
-  Expression printme(const Expression &x) const {
-    return f.printme(x);
+  Expression printme(const Expression &kT, const Expression &x) const {
+    return f.printme(kT, x);
   }
   bool I_have_analytic_grad() const {
     return f.I_have_analytic_grad();

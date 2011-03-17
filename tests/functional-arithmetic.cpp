@@ -68,7 +68,9 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   mygrad1.setZero();
   mygrad2.setZero();
   f1.integralgrad(kT, gd, nr, &mygrad1);
+  printf("mygrad1 is %g\n", mygrad1.sum());
   f2.integralgrad(kT, gd, nr, &mygrad2);
+  printf("mygrad2 is %g\n", mygrad2.sum());
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
     printf("FAIL: Error in the grad is too big!\n");
@@ -120,6 +122,16 @@ int main(int, char **argv) {
                              0 - Pow(2)(Pow(2)(x)), -1*Pow(2)(Pow(2)(x)), 0.1, 1e-12);
   retval += test_functionals("Simple subtraction",
                              0 - x, -1*x, 0.1, 1e-12);
+
+  // The following are tests that WithTemperature works as expected...
+
+  retval += test_functionals("WithTemperature(kT)", WithTemperature(kT, kT) + x, kT + x, 0.1, 1e-12);
+
+  retval += test_functionals("WithTemperature(kT)", WithTemperature(x, kT), x, 0.1, 1e-12);
+
+  retval += test_functionals("WithTemperature(kT)", WithTemperature(kT*sqr(x), kT*x), kT*x*sqr(x), 0.1, 1e-12);
+
+  retval += test_functionals("WithTemperature(x)", WithTemperature(kT, x), x, 0.1, 1e-12);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

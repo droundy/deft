@@ -54,21 +54,38 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   }
   errors += f1.run_finite_difference_test(f1.get_name(), water_prop.kT, n);
   //errors += f2.run_finite_difference_test("other version", n);
+  
+  const double x = 0.001;
+  double f1x = f1(1.2*water_prop.kT, x);
+  double f2x = f2(1.2*water_prop.kT, x);
+  if (1 - fabs(f1x/f2x) > fraccuracy) {
+    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1x/f2x), f2x);
+    errors++;
+  }
+  
+  double f1p = f1.derive(1.2*water_prop.kT, x);
+  double f2p = f2.derive(1.2*water_prop.kT, x);
+  if (1 - fabs(f1p/f2p) > fraccuracy) {
+    printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name(),
+           1 - fabs(f1p/f2p), f2p);
+    errors++;
+  }
 }
 
 int main(int, char **argv) {
   Functional x(Identity());
 
   Grid n(gd);
-  n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
+  n = 0.00001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 1e-14);
+  compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 2e-14);
 
-  compare_functionals(HardSpheresRFFast(R), HardSpheresRF(R), n, 1e-14);
+  compare_functionals(HardSpheresRFFast(R), HardSpheresRF(R), n, 2e-14);
 
-  compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 1e-14);
+  compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 2e-14);
 
-  compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 1e-14);
+  compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 2e-14);
 
   
   Functional nn = EffectivePotentialToDensity();
