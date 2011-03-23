@@ -38,15 +38,16 @@ Functional xi3(double radius) {
   return ((M_PI*4/3)*Pow(3)(R)*n3).set_name("xi3");
 }
 
-Functional gHS(Functional n3, double R) {
+Functional gHS(Functional n3, double Rval) {
   // n3 is the "packing fraction" convolved functional.  It may be an
   // "effective packing fraction", in the case of SAFT-VR.
-  Functional zeta = getzeta(R);
-  Functional n2 = ShellConvolve(R);
+  Functional zeta = getzeta(Rval);
+  Functional n2 = ShellConvolve(Rval);
   Functional invdiff = Functional(1)/(1-n3);
+  Functional R(Rval, "R");
   return invdiff*(Functional(1) +
                   (0.5*invdiff*R*n2)*zeta*(Functional(1) +
-                                           (0.5*invdiff*R*n2)*(1.0/18)));
+                                           (0.5*invdiff*R*n2)*Functional(1.0/18)));
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput);
@@ -138,7 +139,7 @@ Functional DeltaSAFT(double radius, double epsilon, double kappa,
   Functional g = gSW(radius, epsdis, lambdadis);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - 1)*K;
+  Functional delta = g*(exp(eps/kT) - Functional(1))*K;
   delta.set_name("delta");
   return delta;
 }
@@ -149,9 +150,9 @@ Functional dDelta_dT(double radius, double epsilon, double kappa,
   Functional dgSWdT = dgSW_dT(radius, epsdis, lambdadis);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - 1)*K;
+  Functional delta = g*(exp(eps/kT) - Functional(1))*K;
   delta.set_name("delta");
-  return dgSWdT*K*(exp(eps/kT) - 1) - g*K*eps*exp(eps/kT)/sqr(kT);
+  return dgSWdT*K*(exp(eps/kT) - Functional(double(1))) - g*K*eps*exp(eps/kT)/sqr(kT);
 }
 
 Functional Xassociation(double radius, double epsilon, double kappa,
@@ -162,7 +163,7 @@ Functional Xassociation(double radius, double epsilon, double kappa,
   Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis);
 
   Functional zeta = getzeta(radius);
-  Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - 1) / (4* n0 * zeta*delta);
+  Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - Functional(double(1))) / (4* n0 * zeta*delta);
   X.set_name("X");
   return X;
 }
@@ -186,7 +187,7 @@ Functional AssociationSAFT(double radius, double epsilon, double kappa,
   Functional n0 = n2/(4*M_PI*sqr(R));
   Functional zeta = getzeta(radius);
   Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis);
-  return (kT*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+  return (kT*Functional(double(4))*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
 }
 
 Functional dFassoc_dT(double radius, double epsilon, double kappa,
@@ -238,7 +239,7 @@ Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion*eta;
+  Functional a1vdw = -4*(Pow(3)(lambda) - Functional(double(1)))*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
 }
@@ -254,7 +255,7 @@ Functional da1_dlam(double radius, double epsdis, double lambdainput) {
   Functional a1vdw_nolam = -4*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
-                       (Pow(3)(lambda) - 1)*dgHScarnahan_dn(eta_eff, radius)*
+                       (Pow(3)(lambda) - Functional(double(1)))*dgHScarnahan_dn(eta_eff, radius)*
                        detaeff_dlam(eta, lambdainput))).set_name("da1_dlam");
   
 }
@@ -267,7 +268,7 @@ Functional da1_deta(double radius, double epsdis, double lambdainput) {
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion;
+  Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - Functional(1.0))*epsilon_dispersion;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw_over_eta*(gHScarnahan(eta_eff, radius) +
                           eta*dgHScarnahan_dn(eta_eff, radius)*

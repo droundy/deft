@@ -47,7 +47,7 @@ public:
     return Gaussian(width)(ingrad);
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {

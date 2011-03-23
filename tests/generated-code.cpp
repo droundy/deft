@@ -115,13 +115,15 @@ int main(int, char **argv) {
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
-  compare_functionals(Sum(kT), x + kT, kT, n, 2e-13);
+  compare_functionals(Sum(kT), x + Functional(kT), kT, n, 2e-13);
 
-  compare_functionals(Quadratic(kT), sqr(x + kT) - x + 2*kT, kT, n, 2e-12);
+  compare_functionals(Quadratic(kT), sqr(x + Functional(kT)) 
+  - x + Functional(2*kT), kT, n, 2e-12);
 
   compare_functionals(Sqrt(), sqrt(x), kT, n, 1e-12);
 
-  compare_functionals(SqrtAndMore(kT), sqrt(x + kT) - x + 2*kT, kT, n, 1e-12);
+  compare_functionals(SqrtAndMore(kT), sqrt(x + Functional(kT)) 
+  - x + Functional(2*kT), kT, n, 1e-12);
 
   compare_functionals(Log(), log(x), kT, n, 3e-14);
 
