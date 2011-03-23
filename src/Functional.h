@@ -31,8 +31,10 @@ public:
   virtual Functional grad_T(const Functional &ingradT) const = 0;
   virtual Expression printme(const Expression &, const Expression &) const = 0;
 
-  virtual void print_summary(const char *prefix, double energy, const char *name) const;
+  virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
+  virtual bool I_am_homogeneous() const;
+  virtual bool I_am_local() const; // WARNING:  this defaults to true!
 
   bool have_integral;
 };
@@ -51,11 +53,11 @@ public:
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    const char *n = f(gd, e).name();
+    std::string n = f(gd, e).name();
     if (R != Expression("R")) n = "";
     init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), n);
   }
-  explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
+  explicit Functional(FunctionalInterface* p = 0, const std::string name = "") // allocate a new counter
     : itsCounter(0) {
     init(p, name);
   }
@@ -196,14 +198,24 @@ public:
     if (mynext) out += mynext->d_by_dT(kT, data);
     return out;
   }
-  const char *get_name() const { return itsCounter->name; }
-  Functional set_name(const char *n) { itsCounter->name = n; return *this; }
+  const std::string get_name() const { return itsCounter->name; }
+  Functional set_name_stdstring(const std::string &n) { itsCounter->name = n; return *this; }
+  Functional set_name(const char *n) {
+    try {
+      if (n) itsCounter->name = n;
+      else itsCounter->name = "";
+    }
+    catch (...) {
+      assert(0);
+    }
+    return *this;
+  }
   Functional *next() const {
     return mynext;
   }
   Functional set_last_energy(double e) const { itsCounter->last_energy = e; return *this; }
 
-  void print_summary(const char *prefix, double energy, const char *name=0) const;
+  void print_summary(const char *prefix, double energy, std::string name="") const;
   // The following utility methods do not need to be overridden.  Its
   // return value is the total energy that is printed.
   double print_iteration(const char *prefix, int iter) const;
@@ -230,8 +242,24 @@ public:
     }
     return true;
   }
+  bool I_am_homogeneous() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_homogeneous()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_local() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_local()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
 private:
-  void init(FunctionalInterface *p, const char *name) {
+  void init(FunctionalInterface *p, const std::string &name) {
     if (p) {
       itsCounter = new counter(p);
       itsCounter->name = name;
@@ -243,7 +271,7 @@ private:
     counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
     FunctionalInterface* ptr;
     unsigned count;
-    const char *name;
+    std::string name;
     Functional *next;
     double last_energy;
   };
@@ -292,6 +320,9 @@ public:
     : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
     : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
+  bool I_am_local() const {
+    return false;
+  }
 
   EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &x) const {
     Grid out(gd, x);

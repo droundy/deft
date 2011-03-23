@@ -29,6 +29,16 @@ Functional Xassociation(double radius, double epsilon, double kappa,
                         double epsdis, double lambdadis);
 Functional AssociationSAFT(double radius, double epsilon, double kappa,
                            double epsdis, double lambdadis);
+  Functional AssociationSAFTGrad(double radius, double epsilon, double kappa,
+                                 double epsdis, double lambdadis);
+  Functional AssociationSAFT_by_dT(double radius, double epsilon, double kappa,
+                                   double epsdis, double lambdadis);
+Functional Association(double radius, double epsilon, double kappa,
+                       double epsdis, double lambdadis);
+  Functional AssociationGrad(double radius, double epsilon, double kappa,
+                             double epsdis, double lambdadis);
+  Functional Association_by_dT(double radius, double epsilon, double kappa,
+                               double epsdis, double lambdadis);
 Functional SaftFluidSlow(double radius, double epsilon, double kappa,
                          double epsdis, double lambda, double mu);
 Functional SaftFluid(double radius, double epsilon, double kappa,
@@ -36,7 +46,9 @@ Functional SaftFluid(double radius, double epsilon, double kappa,
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double epsdis, double lambda);
-Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
+Functional Dispersion(double radius, double epsdis, double lambda);
+  Functional DispersionGrad(double radius, double epsdis, double lambda);
+  Functional Dispersion_by_dT(double radius, double epsdis, double lambda);
 Functional SaftEntropy(double R,
 		       double epsilon, double kappa,
 		       double epsdis, double lambda);
@@ -45,6 +57,8 @@ Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);
 Functional HardSpheresNoTensor(double radius);
+  Functional HardSpheresNoTensorGrad(double radius);
+  Functional HardSpheresNoTensor_by_dT(double radius);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 
