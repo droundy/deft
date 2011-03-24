@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "Crossover.h"
 #include "utilities.h"
 #include <stdlib.h>
 
@@ -46,11 +47,27 @@ int main(int argc, char **argv) {
     Functional f = HardSpheres(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);
     f.create_source(argv[1], "HardSphereGas", "R", "mu");
   }
+  Functional n = EffectivePotentialToDensity();
+  // const double kB = 3.16681539628059e-6;
+  // if (strcmp(argv[1], "src/CrossoverSaftFast.cpp") == 0)
+  //   (Crossover(SaftExcessEnergySlow(R, 0.01, 0.01, 0.01, 0.01, mu), 0.1,
+  //              647*kB, 0.0017,
+  //              700*kB, 0.0017)(n)
+  //    + IdealGasOfVeff).create_source(argv[1], "CrossoverSaft", "R",
+  //                                    "epsilonAB", "kappaAB",
+  //                                    "epsilon_dispersion", "lambda_dispersion", "mu");
   if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0) {
     SaftFluidSlow(R, 0.01, 0.01, 0.01, 0.01, mu).create_source(argv[1], "SaftFluid", "R",
                                                                "epsilonAB", "kappaAB",
                                                                "epsilon_dispersion", "lambda_dispersion",
                                                                "mu");
+  }
+  if (strcmp(argv[1], "src/SaftExcessEnergyFast.cpp") == 0) {
+    SaftExcessEnergySlow(R, 0.01, 0.01, 0.01, 0.01,
+                         mu).create_source(argv[1], "SaftExcessEnergy", "R",
+                                           "epsilonAB", "kappaAB",
+                                           "epsilon_dispersion", "lambda_dispersion",
+                                           "mu");
   }
   if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
     DispersionSAFT(R, 0.01, 0.01).create_source(argv[1], "Dispersion", "R",

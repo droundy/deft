@@ -33,6 +33,20 @@ Functional SaftFluidSlow(double radius, double epsilon, double kappa,
                          double epsdis, double lambda, double mu);
 Functional SaftFluid(double radius, double epsilon, double kappa,
                      double epsdis, double lambda, double mu);
+// SaftExcessEnergy is a functional of density, not effective
+// potential.
+Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
+                                double epsdis, double lambda,
+                                double mu);
+Functional SaftExcessEnergy(double R, double epsilon, double kappa,
+                            double epsdis, double lambda,
+                            double mu);
+  Functional SaftExcessEnergyGrad(double R, double epsilon, double kappa,
+                                  double epsdis, double lambda,
+                                  double mu);
+  Functional SaftExcessEnergy_dT(double R, double epsilon, double kappa,
+                                 double epsdis, double lambda,
+                                 double mu);
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double epsdis, double lambda);

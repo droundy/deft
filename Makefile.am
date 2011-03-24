@@ -7,19 +7,20 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
 	src/SAFT.cpp \
+	src/RenameAppending.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
+	src/Crossover.cpp src/WithTemperature.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
-	src/Crossover.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
-	src/SaftFluidFast.cpp \
+	src/SaftFluidFast.cpp src/SaftExcessEnergyFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
 
@@ -99,7 +100,8 @@ tests_convolve_test_SOURCES = tests/convolve.cpp $(ALL_CODE)
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
-tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
+tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp \
+	$(GENERIC_CODE) # src/SaftExcessEnergyFast.cpp
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)

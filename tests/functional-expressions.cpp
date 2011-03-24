@@ -62,7 +62,7 @@ void test_subexpression(const Expression &e, const char *expected) {
 }
 
 int main(int, char **argv) {
-  const double kT = 1e-3, R = 2.7;
+  const double R = 2.7;
   Functional RR(R, "R");
   const Functional four_pi_r2 = 4*M_PI*sqr(RR);
   Functional x = Identity();
@@ -80,9 +80,9 @@ int main(int, char **argv) {
                   IdealGasOfVeff.printme(Expression("kT"), Expression("x")),
                   "(-(x + kT.cwise()*(((32811.993*kT/6.283185307179586).cwise()*(32811.993*kT/6.283185307179586).cwise().square()).cwise()*(32811.993*kT/6.283185307179586).cwise().sqrt()).cwise().log() + kT)).cwise()*((-x).cwise()/kT).cwise().exp()");
 
-
   test_expression("kT*xxx",
-                  (Functional(kT, "kT")*sqr(xShellConvolve(R))).printme(Expression("kT"), Expression("x")),
+                  (kT*sqr(xShellConvolve(R))).printme(Expression("kT").set_type("double"),
+                                                      Expression("x")),
                   "kT*ifft(gd, xshell(gd, R).cwise()*fft(gd, x)).cwise().square()");
 
   test_expression("sqr(n1)",
@@ -133,6 +133,28 @@ int main(int, char **argv) {
                   "12.56637061435917*(R*R)*x");
   test_expression("xshell(double)", n2x.printme(Expression("kT"), Expression("x").set_type("double")),
                   "0");
+
+  test_expression("WithTemperature(x,kT)",
+                  WithTemperature(x,kT).printme(Expression("kT"),
+                                                Expression("x").set_type("double")),
+                  "x");
+
+  test_expression("WithTemperature(x,kT).grad",
+                  WithTemperature(x,kT*x).grad(Functional(1),
+                                               Identity(),
+                                               false).printme(Expression("kT"),
+                                                              Expression("x").set_type("double")),
+                  "x + x");
+
+  test_expression("WithTemperature(sqr(x),kT)",
+                  WithTemperature(sqr(x),kT).printme(Expression("kT"),
+                                                     Expression("x").set_type("double")),
+                  "x*x");
+
+  test_expression("WithTemperature(kT,sqr(x))",
+                  WithTemperature(kT,sqr(x)).printme(Expression("kT"),
+                                                     Expression("x").set_type("double")),
+                  "x*x");
 
   test_expression_type("exp(x/(-kT))", exp(x/-kT).printme(Expression("kT"), Expression("x")),
                        "Grid");

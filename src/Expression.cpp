@@ -174,6 +174,16 @@ Expression Expression::set_alias(std::string a) {
   return *this;
 }
 
+Expression Expression::append_to_alias(const std::string a) {
+  if (alias != "" && !kindIs("variable")) {
+    alias = alias + a;
+  }
+  if (arg1) arg1->append_to_alias(a);
+  if (arg2) arg2->append_to_alias(a);
+  if (arg3) arg3->append_to_alias(a);
+  return *this;
+}
+
 Expression Expression::cwise() const {
   if (iscwise()) return *this;
   if (typeIs("double")) return *this;
@@ -743,11 +753,16 @@ void Expression::generate_code(FILE *o, const char *fmt, const std::string thisv
     Expression s = e.FindNamedSubexpression(n);
     //fprintf(o, "\t\t// Next to consider is %s (for %s)\n", n.c_str(), thisvar.c_str());
     while (s.alias == n && n != "" && n != e.alias) {
-      if (FindNamedSubexpression(n) != s) {
-        printf("Nasty situation with %s.  The two options are:\n", n.c_str());
-        printf("a = %s\n", s.printme().c_str());
-        printf("b = %s\n", FindNamedSubexpression(n).printme().c_str());
-        exit(1);
+      {
+        Expression mysube = FindNamedSubexpression(n);
+        if (mysube != s) {
+          printf("Nasty situation with %s.  The two options are:\n", n.c_str());
+          printf("a = %s\n", s.printme().c_str());
+          printf("b = %s\n", mysube.printme().c_str());
+          printf("alias of b is %s, and its name is %s compared with %s\n",
+                 mysube.alias.c_str(), mysube.name.c_str(), n.c_str());
+          exit(1);
+        }
       }
       std::string a = "my_" + n;
       if (allvars->count(a)) {

@@ -60,6 +60,7 @@ public:
   std::string get_alias() const {
     return alias;
   }
+  Expression append_to_alias(const std::string a);
 
   // Modifies this expression in-place, and returns a declaration of
   // the common subexpression.

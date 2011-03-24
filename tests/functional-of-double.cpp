@@ -16,6 +16,9 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <signal.h>
+#include <setjmp.h>
+#include "Crossover.h"
 #include "Functionals.h"
 
 void took(const char *action) {
@@ -42,6 +45,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
 
   const double Edouble = f(kT, n);
   took("Evaluating functional of a double");
+  printf("Edouble = %g\n", Edouble);
   const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
   took("Evaluating functional of a 20x20x20 grid");
 
@@ -90,13 +94,28 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   return retval;
 }
 
-int main(int, char **argv) {
+jmp_buf sig_int_response;
+
+void dieplease(int) {
+  longjmp(sig_int_response, 1);
+}
+
+int main(int, char *argv[]) {
+  if (setjmp(sig_int_response)) {
+    printf("I was interrupted by control-C...\n");
+    printf("I will exit now!\n");
+    exit(1);
+  }
+  signal(SIGINT, dieplease);
   int retval = 0;
   const double kT = 1e-3;
+  const double kB = 3.16681539628059e-6;
   const Functional n = EffectivePotentialToDensity();
 
   {
+    double Veff = -1e-3*log(1e-5);
     Functional x = Identity();
+
     retval += test_functional("sqr(yzShellConvolve(1)(x)))", sqr(yzShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("sqr(xyShellConvolve(1)(x)))", sqr(xyShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("zxShellConvolve(1)(x))", zxShellConvolve(1)(x), 1, 1e-13);
@@ -110,13 +129,24 @@ int main(int, char **argv) {
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
     retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
-    double Veff = -1e-3*log(1e-5);
     retval += test_functional("HardSpheresWBnotensor(...)",
                               HardSpheresWBnotensor(2)(n), Veff, 1e-13);
     retval += test_functional("IdealGasOfVeff(...)", IdealGasOfVeff(1e-3), Veff, 2e-13);
     retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7), Veff, 2e-13);
     retval += test_functional("SaftFluidSlow(...)",
                               SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
+    if (false) { // This is way too slow...
+      // It appears that either the crossover approach as currently
+      // implemented is prohibitively slow, or perhaps there is a bug
+      // hiding out somewhere.  It manifests it in a call to
+      // Delta_a(n_effective).grad_T(Functional(1)) that never seems
+      // to finish.
+      Functional f = Crossover(SaftExcessEnergySlow(2,1e-2,0.02, 1e-4, 1.8,0), 0.1,
+                               647*kB, 0.0017,
+                               700*kB, 0.0017);
+      took("Constructing the crossover functional");
+      retval += test_functional("Crossover(SaftExcess(...),...)", f, 0.002, 2e-13);
+    }
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 

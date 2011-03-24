@@ -318,6 +318,14 @@ Functional dFdisp_dT(double radius, double epsdis, double lambdainput) {
   return (-ndisp*a2/sqr(kT)).set_name("dFdisp_dT");
 }
 
+Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
+                                double epsdis, double lambda,
+                                double mu) {
+  return HardSpheresWBnotensor(R) + ChemicalPotential(mu) +
+    AssociationSAFT(R, epsilon, kappa, epsdis, lambda) +
+    DispersionSAFT(R, epsdis, lambda);
+}
+
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
                          double epsdis, double lambda,
                          double mu
