@@ -14,6 +14,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "CallMe.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -109,12 +110,6 @@ Functional dgSW_dT(double R, double epsdis0, double lambda) {
   return (Functional(0.25)/sqr(kT))*(lam/(3*eta)*da1dlam - da1deta);
 }
 
-Functional gHScarnahan_simple(Functional n3) {
-  // n3 is the "packing fraction" convolved functional.  It may be an
-  // "effective packing fraction", in the case of SAFT-VR.
-  return (1 - 0.5*n3)/Pow(3)(1 - n3);
-}
-
 Functional gHScarnahan(Functional n3, double R) {
   // n3 is the "packing fraction" convolved functional.  It may be an
   // "effective packing fraction", in the case of SAFT-VR.
@@ -138,7 +133,7 @@ Functional DeltaSAFT(double radius, double epsilon, double kappa,
   Functional g = gSW(radius, epsdis, lambdadis);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - 1)*K;
+  Functional delta = ((exp(eps/kT) - 1)*K)*g;
   delta.set_name("delta");
   return delta;
 }
@@ -321,9 +316,12 @@ Functional dFdisp_dT(double radius, double epsdis, double lambdainput) {
 Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
                                 double epsdis, double lambda,
                                 double mu) {
-  return HardSpheresWBnotensor(R) + ChemicalPotential(mu) +
-    AssociationSAFT(R, epsilon, kappa, epsdis, lambda) +
-    DispersionSAFT(R, epsdis, lambda);
+  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)") +
+    ChemicalPotential(mu) +
+    CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda), "Association",
+           "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion)") +
+    CallMe(DispersionSAFT(R, epsdis, lambda), "Dispersion",
+           "(R, epsilon_dispersion, lambda_dispersion)");
 }
 
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
@@ -331,9 +329,10 @@ Functional SaftFluidSlow(double R, double epsilon, double kappa,
                          double mu
                          ) {
   Functional n = EffectivePotentialToDensity();
-  return HardSpheresWBnotensor(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n) +
-    AssociationSAFT(R, epsilon, kappa, epsdis, lambda)(n) +
-    DispersionSAFT(R, epsdis, lambda)(n);
+  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)")(n) +
+    IdealGasOfVeff + ChemicalPotential(mu)(n) +
+    CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda), "Association", "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion)")(n) +
+    CallMe(DispersionSAFT(R, epsdis, lambda), "Dispersion", "(R, epsilon_dispersion, lambda_dispersion)")(n);
 }
 
 Functional SaftEntropy(double R,

@@ -6,8 +6,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
-	src/SAFT.cpp \
-	src/RenameAppending.cpp \
+	src/SAFT.cpp src/RenameAppending.cpp src/CallMe.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
@@ -21,8 +20,9 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/SaftFluidFast.cpp src/SaftExcessEnergyFast.cpp \
+	src/AssociationFast.cpp src/DispersionFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
-	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
+	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 

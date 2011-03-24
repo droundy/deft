@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
     HardSpheresRF(R).create_source("src/HardSpheresRFFast.cpp", "HardSpheresRFFast", "R");
   if (strcmp(argv[1], "src/HardSpheresTarazonaFast.cpp") == 0)
     HardSpheresTarazona(R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", "R");
-  if (strcmp(argv[1], "src/HardSpheresNoTensor.cpp") == 0)
-    HardSpheresWBnotensor(R).create_source("src/HardSpheresNoTensor.cpp", "HardSpheresNoTensor", "R");
+  if (strcmp(argv[1], "src/HardSpheresNoTensorFast.cpp") == 0)
+    HardSpheresWBnotensor(R).create_source(argv[1], "HardSpheresNoTensor", "R");
   if (strcmp(argv[1], "src/HardSphereGasRFFast.cpp") == 0) {
     Functional n = EffectivePotentialToDensity();
     Functional f = HardSpheresRF(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);

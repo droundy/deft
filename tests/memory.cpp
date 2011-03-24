@@ -164,7 +164,7 @@ int main(int, char **argv) {
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   ff = SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion, water_prop.lambda_dispersion, mu);
-  check_a_functional("SaftFluid", ff, potential, 52, 83, 87, 83);
+  check_a_functional("SaftFluid", ff, potential, 48, 87, 90, 87);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

@@ -24,6 +24,9 @@ public:
     width = w;
     kfac = -0.5*width*width; // FIXME: get width right in k space!
   }
+  bool I_am_local() const {
+    return false;
+  }
 
   VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &data) const {
     Grid out(gd, data);

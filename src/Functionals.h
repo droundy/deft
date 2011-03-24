@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Grid.h"
 #include "Functional.h"
+
+#include "MinimalFunctionals.h"
 
 extern Functional kT;
 Functional WithTemperature(const Functional &kTnew, const Functional &f);
@@ -38,19 +39,9 @@ Functional SaftFluid(double radius, double epsilon, double kappa,
 Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
                                 double epsdis, double lambda,
                                 double mu);
-Functional SaftExcessEnergy(double R, double epsilon, double kappa,
-                            double epsdis, double lambda,
-                            double mu);
-  Functional SaftExcessEnergyGrad(double R, double epsilon, double kappa,
-                                  double epsdis, double lambda,
-                                  double mu);
-  Functional SaftExcessEnergy_dT(double R, double epsilon, double kappa,
-                                 double epsdis, double lambda,
-                                 double mu);
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
 Functional DispersionSAFT(double radius, double epsdis, double lambda);
-Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
 Functional SaftEntropy(double R,
 		       double epsilon, double kappa,
 		       double epsdis, double lambda);
@@ -58,7 +49,6 @@ Functional SaftEntropy(double R,
 Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);
-Functional HardSpheresNoTensor(double radius);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 
