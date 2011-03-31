@@ -34,6 +34,9 @@ public:
   virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
   virtual bool I_am_homogeneous() const;
+  virtual bool I_am_zero() const;
+  virtual bool I_am_one() const;
+  virtual bool I_give_zero_for_zero() const;
   virtual bool I_am_local() const; // WARNING:  this defaults to true!
 
   bool have_integral;
@@ -85,6 +88,13 @@ public:
     return out += x;
   }
   Functional operator+=(const Functional &x) {
+    if (I_am_zero()) {
+      *this = x;
+      return *this;
+    }
+    if (x.I_am_zero()) {
+      return *this;
+    }
     if (mynext) *mynext += x;
     else mynext = new Functional(x);
     return *this;
@@ -250,6 +260,27 @@ public:
     }
     return true;
   }
+  bool I_give_zero_for_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_give_zero_for_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_one() const {
+    const Functional *nxt = this;
+    if (!itsCounter->ptr->I_am_one() || nxt) return false;
+    return true;
+  }
   bool I_am_local() const {
     const Functional *nxt = this;
     while (nxt) {
@@ -376,6 +407,9 @@ public:
       Derived c(GridDescription(lat, 2, 2, 2), data);
       return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
     }
+  }
+  bool I_give_zero_for_zero() const {
+    return true;
   }
 private:
   Derived (*f)(const GridDescription &, extra);

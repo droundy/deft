@@ -30,6 +30,18 @@ bool FunctionalInterface::I_am_local() const {
   return true;
 }
 
+bool FunctionalInterface::I_am_zero() const {
+  return false;
+}
+
+bool FunctionalInterface::I_am_one() const {
+  return false;
+}
+
+bool FunctionalInterface::I_give_zero_for_zero() const {
+  return false;
+}
+
 void FunctionalInterface::pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x,
                                 const VectorXd &ingrad,
                                 VectorXd *outpgrad) const {
@@ -839,6 +851,12 @@ public:
   bool I_am_homogeneous() const {
     return true;
   }
+  bool I_am_zero() const {
+    return c == 0 && !name;
+  }
+  bool I_am_one() const {
+    return c == 1 && !name;
+  }
   Expression printme(const Expression &, const Expression &) const {
     if (name) return Expression(name).set_type("double");
     return Expression(c).set_type("double").set_alias("literal");
@@ -968,6 +986,7 @@ private:
 };
 
 Functional Functional::operator()(const Functional &f) const {
+  if (f.I_am_zero() && I_give_zero_for_zero()) return f;
   return Functional(new ChainRuleType(*this, f));
 }
 
@@ -1020,6 +1039,8 @@ private:
 };
 
 Functional Functional::operator/(const Functional &f) const {
+  if (I_am_zero()) return *this;
+  if (f.I_am_one()) return *this;
   return Functional(new QuotientRuleType(*this, f));
 }
 
@@ -1068,6 +1089,10 @@ private:
 };
 
 Functional Functional::operator*(const Functional &f) const {
+  if (I_am_one()) return f;
+  if (f.I_am_one()) return *this;
+  if (I_am_zero()) return *this;
+  if (f.I_am_zero()) return f;
   return Functional(new ProductRuleType(*this, f));
 }
 

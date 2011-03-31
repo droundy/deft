@@ -83,13 +83,16 @@ public:
   }
   Expression printme(const Expression &kT, const Expression &x) const {
     switch (n) {
-    case 0: return 0;
+    case 0: return 1;
     case 1: return x;
     case 2: return sqr(x);
     }
     // This is more than a little hokey...
     if (n & 1) return x*Pow(n-1).printme(kT, x);
     return Pow(n/2).printme(kT, sqr(x));
+  }
+  bool I_give_zero_for_zero() const {
+    return n > 0;
   }
 private:
   int n;
@@ -172,6 +175,9 @@ public:
     } else {
       return sqrt(x) / Pow(-n).printme(kT, x);
     }
+  }
+  bool I_give_zero_for_zero() const {
+    return n >= 0;
   }
 private:
   int n;
