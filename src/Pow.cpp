@@ -57,13 +57,13 @@ public:
   }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
     switch (n) {
-    case 0: return 0;
+    case 0: return Functional(0.0);
     case 1: return ingrad;
     }
-    return Pow(n-1)(x)*n*ingrad;
+    return Pow(n-1)(x)*Functional(n)*ingrad;
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -142,10 +142,10 @@ public:
     return 0;
   }
   Functional grad(const Functional &ingrad, const Functional &x, bool) const {
-    return PowAndHalf(n-1)(x)*(n+0.5)*ingrad;
+    return PowAndHalf(n-1)(x)*Functional(n+0.5)*ingrad;
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {

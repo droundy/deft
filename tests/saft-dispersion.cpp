@@ -97,7 +97,7 @@ int main(int, char **argv) {
     //const double a1vdw = -4*eta*epsdis*(lambda*lambda*lambda-1);
     const double gHShere = (1-eta_effective/2)/(1-eta_effective)/(1-eta_effective)/(1-eta_effective);
 
-    test_functional("gHScarnahan", gHScarnahan(Identity()*sphere_volume, R), kT, n*eta_effective/eta,
+    test_functional("gHScarnahan", gHScarnahan(Identity()*Functional(sphere_volume), R), kT, n*eta_effective/eta,
                     gHShere);
     //test_functional("gHS", gHS(Identity()*sphere_volume, R), n, gHShere);
   }

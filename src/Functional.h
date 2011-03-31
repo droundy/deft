@@ -47,7 +47,7 @@ template<typename Derived, typename extra> class ConvolveWith;
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  Functional(double, const char *name=0); // This handles constants!
+  explicit Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
   explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
@@ -325,7 +325,8 @@ private:
 };
 
 inline Functional operator*(double x, const Functional &f) {
-  return f*x;
+//  return f*x;  modified 3/14
+  return f*Functional(x);
 }
 inline Functional operator-(double x, const Functional &f) {
   return Functional(x) - f;
@@ -386,7 +387,7 @@ public:
   Functional grad_T(const Functional &) const {
     // FIXME: I assume here that the convolution kernel itself doesn't
     // depend on temperature, which may not be the case.
-    return 0;
+    return Functional(0.0);
   }
   EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &,
                                 const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {

@@ -82,10 +82,10 @@ public:
     return 0;
   }
   Functional grad(const Functional &, const Functional &, bool) const {
-    return 0;
+    return Functional(double(0));
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
@@ -447,7 +447,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "}\n");
   fprintf(o, "  Functional grad_T(const Functional &) const {\n");
   fprintf(o, "    assert(false);\n");
-  fprintf(o, "    return 0;\n");
+  fprintf(o, "    return Functional(0.0);\n");
   fprintf(o, "  }\n\n");
 
   fprintf(o, "  void pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x, const VectorXd &ingrad, ");
@@ -802,10 +802,10 @@ public:
     return 0;
   }
   Functional grad(const Functional &, const Functional &, bool) const {
-    return 0;
+    return Functional(0.0);
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
@@ -840,10 +840,10 @@ public:
     return 0;
   }
   Functional grad(const Functional &, const Functional &, bool) const {
-    return 0;
+    return Functional(0.0);
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
@@ -890,10 +890,10 @@ public:
     return 0;
   }
   Functional grad(const Functional &, const Functional &, bool) const {
-    return 0;
+    return Functional(double(0));
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
@@ -1120,7 +1120,7 @@ public:
     return ingrad/x;
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -1160,7 +1160,7 @@ public:
     return ingrad*Functional(new ExpType())(x);
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -1200,7 +1200,7 @@ public:
     return ingrad*x/abs(x);
   }
   Functional grad_T(const Functional &) const {
-    return 0;
+    return Functional(0.0);
   }
   void grad(const GridDescription &, const VectorXd &, const VectorXd &data,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
