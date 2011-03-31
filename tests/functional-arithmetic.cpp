@@ -84,12 +84,12 @@ int main(int, char **argv) {
   const Functional n = EffectivePotentialToDensity();
 
   Functional x = Gaussian(1);
-  retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
+  retval += test_functionals("twice x", x*Functional(2.0), 2*x, 0.1, 2e-13);
   retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
 
-  retval += test_functionals("derivative of x", x.grad(1,Identity(),false) - x, 1 - x, 0.1, 2e-13);
-  retval += test_functionals("derivative of x^3", Pow(3).grad(1,Identity(),false), 3*Pow(2), 0.1, 2e-13);
-  retval += test_functionals("derivative of x^2", sqr(x).grad(1,Identity(),false), 2*x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x", x.grad(Functional(1.0),Identity(),false) - x, 1 - x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(Functional(1.0),Identity(),false), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(Functional(1.0),Identity(),false), 2*x, 0.1, 2e-13);
 
   retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);

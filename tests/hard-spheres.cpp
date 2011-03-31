@@ -88,7 +88,6 @@ int main(int, char **argv) {
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-4);
 
   Minimizer psd = Precision(1e-5, MaxIter(50, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
->>>>>>> 68c8f0cb8ae3cbbfe0ee7abd1a7a79ab31a082e5
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-4);
 

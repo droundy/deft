@@ -35,17 +35,17 @@ int main(int, char **) {
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     LiquidProperties prop = water_prop;
     prop.kT = kB*T;
-    Functional fslow = SaftFluidSlow(prop.lengthscale,
-                                     prop.epsilonAB, prop.kappaAB,
-                                     prop.epsilon_dispersion,
-                                     prop.lambda_dispersion, 0);
-    saturated_liquid_properties(fslow, &prop);
-    took("Finding bulk densities");
-    double mu = find_chemical_potential(fslow, prop.kT, prop.liquid_density);
     Functional f = SaftFluid(prop.lengthscale,
                              prop.epsilonAB, prop.kappaAB,
                              prop.epsilon_dispersion,
-                             prop.lambda_dispersion, mu);
+                             prop.lambda_dispersion, 0);
+    saturated_liquid_properties(f, &prop);
+    took("Finding bulk densities");
+    double mu = find_chemical_potential(f, prop.kT, prop.liquid_density);
+    f = SaftFluid(prop.lengthscale,
+                  prop.epsilonAB, prop.kappaAB,
+                  prop.epsilon_dispersion,
+                  prop.lambda_dispersion, mu);
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/surface-%03g.dat", T);
     // Here we set up an unused lattice.

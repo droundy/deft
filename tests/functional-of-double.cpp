@@ -131,7 +131,7 @@ int main(int, char *argv[]) {
     retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
     retval += test_functional("HardSpheresWBnotensor(...)",
                               HardSpheresWBnotensor(2)(n), Veff, 1e-13);
-    retval += test_functional("IdealGasOfVeff(...)", IdealGasOfVeff(1e-3), Veff, 2e-13);
+    retval += test_functional("IdealGasOfVeff", IdealGasOfVeff, Veff, 2e-13);
     retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7), Veff, 2e-13);
     retval += test_functional("SaftFluidSlow(...)",
                               SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);

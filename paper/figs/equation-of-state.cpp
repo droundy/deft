@@ -23,7 +23,8 @@
 static void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
-  printf("%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
+  assert(name); // so it'll count as being used...
+  //printf("%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
   last_time = t;
 }
 
@@ -36,13 +37,13 @@ int main(int, char **) {
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");
   double mu = 0, nl = 0, nv = 0;
+  Functional f = SaftFluid(water_prop.lengthscale,
+                           water_prop.epsilonAB, water_prop.kappaAB,
+                           water_prop.epsilon_dispersion,
+                           water_prop.lambda_dispersion, 0);
   for (int i=0; i<imax; i+=3) {
-    printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
+    //printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
     double kT = kB*temperatures_kelvin[i];
-    Functional f = SaftFluidSlow(water_prop.lengthscale,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
     saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-6);
     took("Finding coesisting liquid and vapor densities");
     double pv = pressure(f, kT, nv);
@@ -58,12 +59,8 @@ int main(int, char **) {
   }
 
   for (double T=660; T<=693; T += 5) {
-    printf("Working on bonus equation of state at %g Kelvin...\n", T);
+    //printf("Working on bonus equation of state at %g Kelvin...\n", T);
     double kT = kB*T;
-    Functional f = SaftFluidSlow(water_prop.lengthscale,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
     saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-6);
     took("Finding coesisting liquid and vapor densities");
     double pv = pressure(f, kT, nv);

@@ -144,13 +144,13 @@ int main(int, char **argv) {
   check_a_functional("HardSphereRF", ff, potential, 55, 87, 94, 90);
 
   ff = constrain(constraint, (HardSpheresRFFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRFFast", ff, potential, 48, 69, 76, 73);
+  check_a_functional("HardSphereRFFast", ff, potential, 48, 73, 80, 76);
 
   ff = constrain(constraint, (HardSpheresTarazona(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereTarazona", ff, potential, 87, 108, 114, 111);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 69, 90, 97, 94);
+  check_a_functional("HardSphereTarazonaFast", ff, potential, 69, 94, 101, 97);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresWBnotensor", ff, potential, 55, 90, 97, 94);

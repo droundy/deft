@@ -159,17 +159,17 @@ int main(int, char **argv) {
   test_expression_type("exp(x/(-kT))", exp(x/-kT).printme(Expression("kT"), Expression("x")),
                        "Grid");
 
-  test_expression_type("exp(x/(-kT))", exp(x/-kT).printme(Expression("kT").set_type("double"),
+  test_expression_type("exp(x/(-kT))", exp(x/Functional(-kT)).printme(Expression("kT").set_type("double"),
                                                           Expression("x").set_type("double")),
                        "double");
 
   test_expression_type("Step(exp(x/(-kT)))",
-                       (StepConvolve(R)(exp(x/-kT))).printme(Expression("kT").set_type("double"),
+                       (StepConvolve(R)(exp(x/Functional(-kT)))).printme(Expression("kT").set_type("double"),
                                                              Expression("x").set_type("double")),
                        "double");
 
   test_expression_type("Step(exp(x/(-kT)))",
-                       (StepConvolve(R)(exp(x/-kT))).printme(Expression("kT"), Expression("x")),
+                       (StepConvolve(R)(exp(x/Functional(-kT)))).printme(Expression("kT"), Expression("x")),
                        "Grid");
 
   if (retval == 0) {

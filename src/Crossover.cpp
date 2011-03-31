@@ -33,12 +33,12 @@ Functional Crossover(Functional a_res, double Gi_in,
   Functional T0c(T0c_in, "T0c");
 
   // The following definitions follow kiselev2006new equation 5:
-  Functional tau = (kT/Tc - 1).set_name("tau"); // the reduced temperature
+  Functional tau = (kT/Tc - Functional(1)).set_name("tau"); // the reduced temperature
   //tau = ReportOn(tau, "tau");
-  Functional eta = (nc/n - 1).set_name("eta"); // the reduced molar volume
+  Functional eta = (nc/n - Functional(1)).set_name("eta"); // the reduced molar volume
   //eta = ReportOn(eta, "eta");
-  Functional DeltaTc = (Tc/T0c - 1).set_name("DeltaTc"); // dimensionless shift of critical temperature
-  Functional Delta_vc = (n0c/nc - 1).set_name("Delta_vc"); // dimensionless shift of molar volume
+  Functional DeltaTc = (Tc/T0c - Functional(1)).set_name("DeltaTc"); // dimensionless shift of critical temperature
+  Functional Delta_vc = (n0c/nc - Functional(1)).set_name("Delta_vc"); // dimensionless shift of molar volume
 
   Functional v1(1.0, "v1");
   Functional d1(1.0, "d1");
@@ -71,19 +71,19 @@ Functional Crossover(Functional a_res, double Gi_in,
   //Functional q = sqrt(q2);
 
   // kiselev2006new equation 6:
-  Functional Y = exp(log_2_Delta1*q/(q+1));
+  Functional Y = exp(log_2_Delta1*q/(q+Functional(1.0)));
 
   // kiselev2006new equation 4:
-  Functional tau_bar = tau*exp(-Y*log(alpha/Delta1))
-    + (tau + 1)*DeltaTc*exp(Y*log(2*(2-alpha)/(3*Delta1)));
+  Functional tau_bar = tau*exp(-Y*Functional(log(alpha/Delta1)))
+    + (tau + Functional(1.0))*DeltaTc*exp(Y*Functional(log(2*(2-alpha)/(3*Delta1))));
   // kiselev2006new equation 5:
-  Functional eta_bar = eta*exp(Y*log((gamma-2*beta)/(4*Delta1)))
-    + (eta + 1)*Delta_vc*exp(Y*log((2-alpha)/(2*Delta1)));
+  Functional eta_bar = eta*exp(Y*Functional(log((gamma-2*beta)/(4*Delta1))))
+    + (eta + Functional(1.0))*Delta_vc*exp(Y*Functional(log((2-alpha)/(2*Delta1))));
 
   // Here we compute an effective density and effective temperature
   // using the crossover approach.
-  Functional n_effective = n0c*(eta_bar + 1);
-  Functional T_effective = T0c*(tau_bar + 1);
+  Functional n_effective = n0c*(eta_bar + Functional(1.0));
+  Functional T_effective = T0c*(tau_bar + Functional(1.0));
   
   // p0 is the pressure of the "classical" system
   Functional p0 = n*kT - n*a_res.grad(Identity(), n, false);
@@ -91,7 +91,7 @@ Functional Crossover(Functional a_res, double Gi_in,
   Functional p0bar = p0*n0c/kT;
 
   // In kiselev2006new, \Delta v really ought to be called \eta_0...  :(
-  Functional Delta_v = (n0c/n - 1).set_name("Delta_v");
+  Functional Delta_v = (n0c/n - Functional(1.0)).set_name("Delta_v");
 
   // kiselev2006new equation 3
   Functional a_bg = RenameAppending(a_res(n0c), "_of_n0c")
@@ -100,7 +100,7 @@ Functional Crossover(Functional a_res, double Gi_in,
   // kiselev2006new equation 2
   Functional Delta_a = a_res
     - RenameAppending(a_res(n0c), "_of_n0c")
-    + n*p0*Delta_v - n*log(Delta_v + 1);
+    + n*p0*Delta_v - n*log(Delta_v + Functional(1));
   // Here we substitute eta_bar and tau_bar into equation 2, as instructed.
   //printf("I am about to RenameAppending and WithTemperature\n");
   //Delta_a = RenameAppending(WithTemperature(T_effective, Delta_a(n_effective)),

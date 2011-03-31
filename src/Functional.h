@@ -34,6 +34,9 @@ public:
   virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
   virtual bool I_am_homogeneous() const;
+  virtual bool I_am_zero() const;
+  virtual bool I_am_one() const;
+  virtual bool I_give_zero_for_zero() const;
   virtual bool I_am_local() const; // WARNING:  this defaults to true!
 
   bool have_integral;
@@ -44,7 +47,7 @@ template<typename Derived, typename extra> class ConvolveWith;
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  Functional(double, const char *name=0); // This handles constants!
+  explicit Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
   explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
@@ -85,6 +88,13 @@ public:
     return out += x;
   }
   Functional operator+=(const Functional &x) {
+    if (I_am_zero()) {
+      *this = x;
+      return *this;
+    }
+    if (x.I_am_zero()) {
+      return *this;
+    }
     if (mynext) *mynext += x;
     else mynext = new Functional(x);
     return *this;
@@ -250,6 +260,27 @@ public:
     }
     return true;
   }
+  bool I_give_zero_for_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_give_zero_for_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_one() const {
+    const Functional *nxt = this;
+    if (!itsCounter->ptr->I_am_one() || nxt) return false;
+    return true;
+  }
   bool I_am_local() const {
     const Functional *nxt = this;
     while (nxt) {
@@ -294,7 +325,8 @@ private:
 };
 
 inline Functional operator*(double x, const Functional &f) {
-  return f*x;
+//  return f*x;  modified 3/14
+  return f*Functional(x);
 }
 inline Functional operator-(double x, const Functional &f) {
   return Functional(x) - f;
@@ -355,7 +387,7 @@ public:
   Functional grad_T(const Functional &) const {
     // FIXME: I assume here that the convolution kernel itself doesn't
     // depend on temperature, which may not be the case.
-    return 0;
+    return Functional(0.0);
   }
   EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &,
                                 const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
@@ -376,6 +408,9 @@ public:
       Derived c(GridDescription(lat, 2, 2, 2), data);
       return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
     }
+  }
+  bool I_give_zero_for_zero() const {
+    return true;
   }
 private:
   Derived (*f)(const GridDescription &, extra);

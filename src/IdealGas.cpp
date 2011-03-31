@@ -37,7 +37,7 @@ public:
     return Expression(0).set_type("double");
   }
   Functional grad(const Functional &, const Functional &, bool) const {
-    return 0;
+    return Functional(0.0);
   }
   Functional grad_T(const Functional &ingrad) const {
     return ingrad;
@@ -53,23 +53,23 @@ public:
 Functional kT = Functional(new Temperature(), "kT");
 
 Functional find_nQ() {
-  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  Functional mass = Functional(18*1822.8885); // modified 3/14 FIXME: molecular weight of water
   // Note:  hbar is one in atomic units, yay!
   // nQ = (m*kT/(2 pi hbar^2))^3/2
-  return PowAndHalf(3)(mass*kT/(2*M_PI));
+  return PowAndHalf(3)(mass*kT/Functional(2*M_PI));
 }
 
 Functional find_dnQ_dT() {
-  Functional mass = 18*1822.8885; // FIXME: molecular weight of water
+  Functional mass = Functional(18*1822.8885); // FIXME: molecular weight of water
   // Note:  hbar is one in atomic units, yay!
   // nQ = (m*kT/(2 pi hbar^2))^3/2
-  return 1.5*PowAndHalf(3)(mass/(2*M_PI))*sqrt(kT);
+  return 1.5*PowAndHalf(3)(mass/Functional(2*M_PI))*sqrt(kT);
 }
 
 Functional IdealGas() {
   Functional n = Identity();
   Functional nQ = find_nQ();
-  return (kT*n*(log(n/nQ) - 1)).set_name("ideal_gas");
+  return (kT*n*(log(n/nQ) - Functional(1))).set_name("ideal_gas");
 }
 
 Functional CreateIdealGasOfVeff() {
@@ -87,5 +87,5 @@ Functional EntropyOfIdealGasOfVeff() {
   Functional nQ = find_nQ();
   Functional dnQ_dT = find_dnQ_dT();
   // The following is also known as the Sackur-Tetrode equation
-  return ((Veff/kT + log(nQ) + 2.5)*n).set_name("ideal_gas_entropy");
+  return ((Veff/kT + log(nQ) + Functional(2.5))*n).set_name("ideal_gas_entropy");
 }
