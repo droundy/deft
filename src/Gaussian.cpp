@@ -24,6 +24,9 @@ public:
     width = w;
     kfac = -0.5*width*width; // FIXME: get width right in k space!
   }
+  bool append_to_name(const std::string) {
+    return true;
+  }
   bool I_am_local() const {
     return false;
   }

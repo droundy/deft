@@ -33,11 +33,15 @@ public:
 
   virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
+  virtual bool I_am_constant_wrt_x() const;
+  virtual bool I_preserve_homogeneous() const;
   virtual bool I_am_homogeneous() const;
   virtual bool I_am_zero() const;
   virtual bool I_am_one() const;
   virtual bool I_give_zero_for_zero() const;
   virtual bool I_am_local() const; // WARNING:  this defaults to true!
+
+  virtual bool append_to_name(const std::string) = 0; // returns true if this object wants its name changed.
 
   bool have_integral;
 };
@@ -209,6 +213,11 @@ public:
     return out;
   }
   const std::string get_name() const { return itsCounter->name; }
+  Functional append_to_name(const std::string x) {
+    bool appendme = itsCounter->ptr->append_to_name(x);
+    if (appendme && itsCounter->name != "") itsCounter->name = itsCounter->name + x;
+    return *this;
+  }
   Functional set_name_stdstring(const std::string &n) { itsCounter->name = n; return *this; }
   Functional set_name(const char *n) {
     try {
@@ -256,6 +265,23 @@ public:
     const Functional *nxt = this;
     while (nxt) {
       if (!nxt->itsCounter->ptr->I_am_homogeneous()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_preserve_homogeneous() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_homogeneous() &&
+          !nxt->itsCounter->ptr->I_preserve_homogeneous()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_constant_wrt_x() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_constant_wrt_x()) return false;
       nxt = nxt->next();
     }
     return true;
@@ -351,8 +377,17 @@ public:
     : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
     : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
   bool I_am_local() const {
     return false;
+  }
+  bool I_preserve_homogeneous() const {
+    return true;
+  }
+  bool I_give_zero_for_zero() const {
+    return true;
   }
 
   EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &x) const {
@@ -408,9 +443,6 @@ public:
       Derived c(GridDescription(lat, 2, 2, 2), data);
       return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
     }
-  }
-  bool I_give_zero_for_zero() const {
-    return true;
   }
 private:
   Derived (*f)(const GridDescription &, extra);

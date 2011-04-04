@@ -23,6 +23,11 @@ public:
     : mykT(newkT), f(myf), f_grad_T_1(myf.grad_T(Functional(1))) {
     printf("I am in WithTemperatureClass constructor\n");
   }
+  bool append_to_name(const std::string x) {
+    mykT.append_to_name(x);
+    f.append_to_name(x);
+    return true;
+  }
 
   VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
     return f(gd, mykT(gd, kT, data), data);

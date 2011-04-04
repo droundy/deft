@@ -6,7 +6,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
-	src/SAFT.cpp src/RenameAppending.cpp src/CallMe.cpp \
+	src/SAFT.cpp src/CallMe.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 

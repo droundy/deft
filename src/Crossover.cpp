@@ -16,7 +16,6 @@
 
 #include "Functionals.h"
 #include "Crossover.h"
-#include "RenameAppending.h"
 
 extern Functional kT;
 
@@ -94,12 +93,13 @@ Functional Crossover(Functional a_res, double Gi_in,
   Functional Delta_v = (n0c/n - Functional(1.0)).set_name("Delta_v");
 
   // kiselev2006new equation 3
-  Functional a_bg = RenameAppending(a_res(n0c), "_of_n0c")
-    + p0*Delta_v; // This omits the ideal gas free energy!
+  Functional a_res_of_n0c = a_res;
+  a_res_of_n0c = a_res_of_n0c.append_to_name("_of_n0c")(n0c); // This is awkward.
+  Functional a_bg = a_res_of_n0c + p0*Delta_v; // This omits the ideal gas free energy!
   printf("I am about to create Delta_a\n");
   // kiselev2006new equation 2
   Functional Delta_a = a_res
-    - RenameAppending(a_res(n0c), "_of_n0c")
+    - a_res_of_n0c
     + n*p0*Delta_v - n*log(Delta_v + Functional(1));
   // Here we substitute eta_bar and tau_bar into equation 2, as instructed.
   //printf("I am about to RenameAppending and WithTemperature\n");
@@ -110,9 +110,9 @@ Functional Crossover(Functional a_res, double Gi_in,
   Delta_a(n_effective).grad_T(Functional(1));
 
   printf("I am actually about to WithTemperature...\n");
-  Delta_a = WithTemperature(T_effective, Delta_a(n_effective));
+  Delta_a = WithTemperature(T_effective, Delta_a.append_to_name("_of_neff")(n_effective));
   printf("And now I am actually about to RenameAppending...\n");
-  Delta_a = RenameAppending(Delta_a, "_of_Teff").set_name("Delta_a");
+  Delta_a = Delta_a.append_to_name("_of_Teff").set_name("Delta_a");
 
   //Delta_a = ReportOn(Delta_a, "Delta_a");
 
@@ -125,6 +125,10 @@ class ReportOnClass : public FunctionalInterface {
 public:
   ReportOnClass(const Functional &myf, const char *myname)
     : f(myf), name(myname) {};
+  bool append_to_name(const std::string x) {
+    f.append_to_name(x);
+    return true;
+  }
 
   VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
     return f(gd, kT, data);

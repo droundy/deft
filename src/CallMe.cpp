@@ -23,6 +23,9 @@ class CallMeClass : public FunctionalInterface {
 public:
   CallMeClass(const Functional &myf, const std::string mypattern, const std::string myargs)
     : f(myf), pattern(mypattern), args(myargs) {};
+  bool append_to_name(const std::string) {
+    return false;
+  }
 
   VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
     return f(gd, kT, data);

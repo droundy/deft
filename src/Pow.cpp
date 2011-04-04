@@ -20,6 +20,9 @@
 class PowType : public FunctionalInterface {
 public:
   PowType(int nn) : n(nn) {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &data) const {
     switch (n) {
@@ -107,6 +110,9 @@ Functional Pow(int n) {
 class PowAndHalfType : public FunctionalInterface {
 public:
   PowAndHalfType(int nn) : n(nn) {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
     VectorXd out(data.cwise().sqrt());

@@ -48,6 +48,9 @@ public:
   Expression printme(const Expression &kT, const Expression &) const {
     return kT;
   }
+  bool append_to_name(const std::string) {
+    return false;
+  }
 };
 
 Functional kT = Functional(new Temperature(), "kT");

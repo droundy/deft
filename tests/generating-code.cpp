@@ -77,6 +77,9 @@ int main(int, char **) {
 
   (CallMe(phi1, "Phi1", "(R)")+phi2+phi3rf).create_header("tests/generated/almostrfnokt.h", "AlmostRFnokT", "R");
 
+  Functional xsqr = sqr(x).set_name("xsqr");
+  (exp(x).set_name("foobar") + x).append_to_name("_of_xsqr")(xsqr).create_header("tests/generated/renamed.h", "phi1OfFoo", "R");
+
   Functional n2foo = ShellConvolve(3*Rval,Expression("foo"));
   Functional n2foosqr = sqr(n2foo);
   n2foosqr.set_name("n2foosqr").create_header("tests/generated/n2foosqr.h", "n2foosqr", "foo");
