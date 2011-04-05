@@ -97,12 +97,13 @@ int main(int, char **argv) {
     fclose(o);
     printf("Got dispersion!\n");
 
-    Functional f = SaftFluidSlow(water_prop.lengthscale,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
+    Functional f = SaftFluid(water_prop.lengthscale,
+                             water_prop.epsilonAB, water_prop.kappaAB,
+                             water_prop.epsilon_dispersion,
+                             water_prop.lambda_dispersion, 0);
 
     {
+      printf("working onfoo\n");
       double nv = coexisting_vapor_density(f, water_prop.kT, water_prop.liquid_density);
       printf("predicted vapor density: %g\n", nv);
       printf("actual vapor density:    %g\n", water_prop.vapor_density);
@@ -143,17 +144,16 @@ int main(int, char **argv) {
 
     {
       o = fopen("room-temperature.dat", "w");
-      Functional f = SaftFluidSlow(water_prop.lengthscale,
-                                   water_prop.epsilonAB, water_prop.kappaAB,
-                                   water_prop.epsilon_dispersion,
-                                   water_prop.lambda_dispersion, 0);
+      Functional f = SaftFluid(water_prop.lengthscale,
+                               water_prop.epsilonAB, water_prop.kappaAB,
+                               water_prop.epsilon_dispersion,
+                               water_prop.lambda_dispersion, 0);
       double mufoo = find_chemical_potential(f, water_prop.kT,
                                              water_prop.liquid_density);
-      f = SaftFluidSlow(water_prop.lengthscale,
-                        water_prop.epsilonAB, water_prop.kappaAB,
-                        water_prop.epsilon_dispersion,
-                        water_prop.lambda_dispersion, mufoo);
-      printf("moofoo is %g\n", mufoo);
+      f = SaftFluid(water_prop.lengthscale,
+                    water_prop.epsilonAB, water_prop.kappaAB,
+                    water_prop.epsilon_dispersion,
+                    water_prop.lambda_dispersion, mufoo);
       double nl, nv, mu;
       saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       for (double dens=0.1*nv; dens<=1.2*nl; dens *= 1.01) {
@@ -166,7 +166,9 @@ int main(int, char **argv) {
       printf("Finished plotting room-temperature.dat...\n");
     }
 
-    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure);
+    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+                                              water_prop.liquid_density/10.1,
+                                              water_prop.liquid_density*3.14);
     printf("density at 1 atmosphere is %g\n", n_1atm);
     if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.1) {
       printf("FAIL? error in water density is too big! %g\n",

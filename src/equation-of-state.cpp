@@ -211,7 +211,8 @@ double coexisting_vapor_density(Functional f, double kT, double liquid_density,
   // vapor based on the idea that it is an ideal gas with pressure
   // equal to the pressure of the liquid.  We look at twice this
   // density and see if this is higher than the liquid density.
-  const double ng_simple = pressure(f, kT, liquid_density)/kT;
+  double ng_simple = pressure(f, kT, liquid_density)/kT;
+  if (ng_simple <= 0) ng_simple = liquid_density*1e-6;
   if (-find_chemical_potential(fmu, kT, ng_simple*2) > 0 &&
       ng_simple < 0.5*liquid_density && false) {
     nmax = ng_simple*2;
