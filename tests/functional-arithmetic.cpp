@@ -123,19 +123,6 @@ int main(int, char **argv) {
   retval += test_functionals("Simple subtraction",
                              0 - x, -1*x, 0.1, 1e-12);
 
-  // The following are tests that WithTemperature works as expected...
-
-  retval += test_functionals("WithTemperature(kT,kT)",
-                             WithTemperature(kT, kT) + x, kT + x, 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(x,kT)",
-                             WithTemperature(x, kT), x, 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(kT*sqr(x), kT*x)",
-                             WithTemperature(kT*sqr(x), kT*x), kT*x*sqr(x), 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(kT,x)", WithTemperature(kT, x), x, 0.1, 1e-12);
-
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {

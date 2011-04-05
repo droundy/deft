@@ -11,7 +11,6 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
-	src/Crossover.cpp src/WithTemperature.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \

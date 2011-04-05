@@ -21,8 +21,8 @@ public:
   Temperature() {
   }
 
-  VectorXd transform(const GridDescription &, const VectorXd &kT, const VectorXd &) const {
-    return kT;
+  VectorXd transform(const GridDescription &gd, double kT, const VectorXd &) const {
+    return kT*VectorXd::Ones(gd.NxNyNz);
   }
   double transform(double kT, double) const {
     return kT;
@@ -33,7 +33,7 @@ public:
   double d_by_dT(double, double) const {
     return 1;
   }
-  Expression derive_homogeneous(const Expression &, const Expression &) const {
+  Expression derive_homogeneous(const Expression &) const {
     return Expression(0).set_type("double");
   }
   Functional grad(const Functional &, const Functional &, bool) const {
@@ -42,11 +42,11 @@ public:
   Functional grad_T(const Functional &ingrad) const {
     return ingrad;
   }
-  void grad(const GridDescription &, const VectorXd &, const VectorXd &, const VectorXd &,
+  void grad(const GridDescription &, double, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
   }
-  Expression printme(const Expression &kT, const Expression &) const {
-    return kT;
+  Expression printme(const Expression &) const {
+    return Expression("kT").set_type("double");
   }
   bool append_to_name(const std::string) {
     return false;

@@ -27,7 +27,7 @@ public:
     return false;
   }
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
     return f(gd, kT, data);
   }
   double transform(double kT, double n) const {
@@ -36,8 +36,8 @@ public:
   double derive(double kT, double n) const {
     return f.derive(kT, n);
   }
-  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
-    return f.derive_homogeneous(kT, x);
+  Expression derive_homogeneous(const Expression &x) const {
+    return f.derive_homogeneous(x);
   }
   double d_by_dT(double kT, double n) const {
     return f.d_by_dT(kT, n);
@@ -52,11 +52,12 @@ public:
   Functional grad_T(const Functional &ingradT) const {
     return ingradT*CallMe(f.grad_T(Functional(1)), pattern + "_by_dT", args);
   }
-  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+  void grad(const GridDescription &gd, double kT, const VectorXd &data,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     f.grad(gd, kT, data, ingrad, outgrad, outpgrad);
   }
-  Expression printme(const Expression &kT, const Expression &x) const {
+  Expression printme(const Expression &x) const {
+    Expression kT = Expression("kT").set_type("double");
     if (x.typeIs("double")) return funexpr((pattern + args).c_str(), kT, x).set_type("double");
     return funexpr((pattern + args).c_str(), Expression("gd"), kT, x);
   }
