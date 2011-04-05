@@ -21,7 +21,7 @@ class PowType : public FunctionalInterface {
 public:
   PowType(int nn) : n(nn) {}
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &gd, double, const VectorXd &data) const {
     switch (n) {
     case 0: return VectorXd::Ones(data.rows());
     case 1: return data;
@@ -47,10 +47,10 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+  Expression derive_homogeneous(const Expression &x) const {
     if (n == 0) return Expression(0).set_type("double");
     if (n == 1) return Expression(1).set_type("double");
-    return Expression(n).set_type("double")*Pow(n-1).printme(kT, x);
+    return Expression(n).set_type("double")*Pow(n-1).printme(x);
   }
   double d_by_dT(double, double) const {
     return 0;
@@ -65,7 +65,7 @@ public:
   Functional grad_T(const Functional &) const {
     return Functional(0.0);
   }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &gd, double, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     switch (n) {
     case 0: return; // zero gradient!
@@ -81,15 +81,15 @@ public:
       if (outpgrad) (*outpgrad)[i] += foo;
     }
   }
-  Expression printme(const Expression &kT, const Expression &x) const {
+  Expression printme(const Expression &x) const {
     switch (n) {
     case 0: return 1;
     case 1: return x;
     case 2: return sqr(x);
     }
     // This is more than a little hokey...
-    if (n & 1) return x*Pow(n-1).printme(kT, x);
-    return Pow(n/2).printme(kT, sqr(x));
+    if (n & 1) return x*Pow(n-1).printme(x);
+    return Pow(n/2).printme(sqr(x));
   }
   bool I_give_zero_for_zero() const {
     return n > 0;
@@ -108,7 +108,7 @@ class PowAndHalfType : public FunctionalInterface {
 public:
   PowAndHalfType(int nn) : n(nn) {}
 
-  VectorXd transform(const GridDescription &, const VectorXd &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     VectorXd out(data.cwise().sqrt());
     if (n < 0) {
       for (int p=0; p > n; p--) out = out.cwise() / data;
@@ -135,8 +135,8 @@ public:
     }
     return out;
   }
-  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
-    return Expression(n+0.5).set_type("double")*PowAndHalf(n-1).printme(kT, x);
+  Expression derive_homogeneous(const Expression &x) const {
+    return Expression(n+0.5).set_type("double")*PowAndHalf(n-1).printme(x);
   }
   double d_by_dT(double, double) const {
     return 0;
@@ -147,7 +147,7 @@ public:
   Functional grad_T(const Functional &) const {
     return Functional(0.0);
   }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &data, const VectorXd &ingrad,
+  void grad(const GridDescription &gd, double, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
     if (n > 0) {
       for (int i=0; i<gd.NxNyNz; i++) {
@@ -167,13 +167,13 @@ public:
       }
     }
   }
-  Expression printme(const Expression &kT, const Expression &x) const {
+  Expression printme(const Expression &x) const {
     if (n == 0) {
       return sqrt(x);
     } else if (n >= 0) {
-      return Pow(n).printme(kT, x)*sqrt(x);
+      return Pow(n).printme(x)*sqrt(x);
     } else {
-      return sqrt(x) / Pow(-n).printme(kT, x);
+      return sqrt(x) / Pow(-n).printme(x);
     }
   }
   bool I_give_zero_for_zero() const {

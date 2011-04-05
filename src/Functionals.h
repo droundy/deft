@@ -7,7 +7,6 @@
 #include "MinimalFunctionals.h"
 
 extern Functional kT;
-Functional WithTemperature(const Functional &kTnew, const Functional &f);
 extern Functional IdealGasOfVeff;
 Functional IdealGas();
 Functional EntropyOfIdealGasOfVeff();
