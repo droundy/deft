@@ -103,7 +103,7 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
     double gdiscrepancy = (gfast - gslow).cwise().abs().maxCoeff()
       / gfast.cwise().abs().maxCoeff();
     printf("Gradient discrepancy is %g\n", gdiscrepancy);
-    if (fabs(gdiscrepancy) > 3e-12) {
+    if (fabs(gdiscrepancy) > 1e-9) {
       printf("FAIL: discrepancy in gradients is too large!\n");
       errors++;
     }

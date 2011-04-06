@@ -6,12 +6,11 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
-	src/SAFT.cpp src/RenameAppending.cpp src/CallMe.cpp \
+	src/SAFT.cpp src/CallMe.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
-	src/Crossover.cpp src/WithTemperature.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
@@ -54,6 +53,7 @@ $(OPTIMIZED_CODE): optimize-functionals
 # that the comparisons are run prior to the tests.
 tests/generated/sum.h: tests/generating-code.test $(COMPARISONDATA)
 	test -d tests/generated || mkdir tests/generated
+	rm -f tests/generated/*
 	tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
 

@@ -24,11 +24,14 @@ public:
     width = w;
     kfac = -0.5*width*width; // FIXME: get width right in k space!
   }
+  bool append_to_name(const std::string) {
+    return true;
+  }
   bool I_am_local() const {
     return false;
   }
 
-  VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &data) const {
+  VectorXd transform(const GridDescription &gd, double, const VectorXd &data) const {
     Grid out(gd, data);
     ReciprocalGrid recip = out.fft();
     recip.cwise() *= (kfac*g2(gd)).cwise().exp();
@@ -40,7 +43,7 @@ public:
   double derive(double, double) const {
     return 1;
   }
-  Expression derive_homogeneous(const Expression &, const Expression &) const {
+  Expression derive_homogeneous(const Expression &) const {
     return Expression(1).set_type("double");
   }
   double d_by_dT(double, double) const {
@@ -52,7 +55,7 @@ public:
   Functional grad_T(const Functional &) const {
     return Functional(0.0);
   }
-  void grad(const GridDescription &gd, const VectorXd &, const VectorXd &,
+  void grad(const GridDescription &gd, double, const VectorXd &,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
@@ -63,7 +66,7 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &, const Expression &x) const {
+  Expression printme(const Expression &x) const {
     Expression out = funexpr("Gaussian", Expression("width"))(Expression("gd"), x);
     out.unlazy = true;
     return out;

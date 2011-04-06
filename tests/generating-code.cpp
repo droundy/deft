@@ -82,5 +82,4 @@ int main(int, char **) {
   ((kT*phi1).set_name("phi1")+(kT*phi2).set_name("phi2")+(kT*phi3rf).set_name("phi3")).create_header("tests/generated/almostrf.h", "AlmostRF", R_arg);
 
   (CallMe(phi1, "Phi1", "(R)")+phi2+phi3rf).create_header("tests/generated/almostrfnokt.h", "AlmostRFnokT", R_arg);
-
 }

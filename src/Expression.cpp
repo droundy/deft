@@ -174,16 +174,6 @@ Expression Expression::set_alias(std::string a) {
   return *this;
 }
 
-Expression Expression::append_to_alias(const std::string a) {
-  if (alias != "" && !kindIs("variable")) {
-    alias = alias + a;
-  }
-  if (arg1) arg1->append_to_alias(a);
-  if (arg2) arg2->append_to_alias(a);
-  if (arg3) arg3->append_to_alias(a);
-  return *this;
-}
-
 Expression Expression::cwise() const {
   if (iscwise()) return *this;
   if (typeIs("double")) return *this;
