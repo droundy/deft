@@ -127,9 +127,11 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   const int numiters = 40;
 
   Functional myX = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
+                                water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
+                                water_prop.length_scaling);
   Functional myDelta = DeltaSAFT(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
+                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
+                                 water_prop.length_scaling);
   printf("\n\nAbout to start improving fast free energy...\n\n");
   for (int i=0;i<numiters && minfast.improve_energy(true);i++) {
     fflush(stdout);
@@ -211,20 +213,20 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
 }
 
 int main(int, char **argv) {
-  Functional f = SaftFluidSlow(water_prop.lengthscale,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
+  Functional f = SaftFluid(water_prop.lengthscale,
+                           water_prop.epsilonAB, water_prop.kappaAB,
+                           water_prop.epsilon_dispersion,
+                           water_prop.lambda_dispersion, water_prop.length_scaling, 0);
   double mu = find_chemical_potential(f, water_prop.kT,
                                       1.01*water_prop.liquid_density);
   Functional fslow = SaftFluidSlow(water_prop.lengthscale,
                                    water_prop.epsilonAB, water_prop.kappaAB,
                                    water_prop.epsilon_dispersion,
-                                   water_prop.lambda_dispersion, mu);
+                                   water_prop.lambda_dispersion, water_prop.length_scaling, mu);
   Functional ffast = SaftFluid(water_prop.lengthscale,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, mu);
+                               water_prop.lambda_dispersion, water_prop.length_scaling, mu);
   took("Creating functionals");
 
   test_fast_vs_slow("Saft", ffast, fslow);

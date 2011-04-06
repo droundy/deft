@@ -235,14 +235,10 @@ public:
                                  const VectorXd *direction = 0) const;
   Expression printme(const Expression &, const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
-                     const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
-                     const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
-                     const char *a7 = 0, bool isheader=false) const;
+                     const char *args[], bool isheader=false) const;
   void create_header(const std::string filename, const std::string classname,
-                     const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
-                     const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
-                     const char *a7 = 0) const {
-    create_source(filename, classname, a1, a2, a3, a4, a5, a6, a7, true);
+                     const char *args[]) const {
+    create_source(filename, classname, args, true);
   }
   bool I_have_analytic_grad() const {
     const Functional *nxt = this;

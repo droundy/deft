@@ -101,8 +101,9 @@ int main(int, char **argv) {
   double kappa = water_prop.kappaAB;
   double epsdis = 1e-5;
   double lambda = 1.8;
-  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, mu),
-                      SaftFluidSlow(R, eps, kappa, epsdis, lambda, mu),
+  double lscale = 0.7;
+  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
+                      SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
                       Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);

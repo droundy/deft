@@ -134,28 +134,6 @@ int main(int, char **argv) {
   test_expression("xshell(double)", n2x.printme(Expression("kT"), Expression("x").set_type("double")),
                   "0");
 
-  test_expression("WithTemperature(x,kT)",
-                  WithTemperature(x,kT).printme(Expression("kT"),
-                                                Expression("x").set_type("double")),
-                  "x");
-
-  test_expression("WithTemperature(x,kT).grad",
-                  WithTemperature(x,kT*x).grad(Functional(1),
-                                               Identity(),
-                                               false).printme(Expression("kT"),
-                                                              Expression("x").set_type("double")),
-                  "x + x");
-
-  test_expression("WithTemperature(sqr(x),kT)",
-                  WithTemperature(sqr(x),kT).printme(Expression("kT"),
-                                                     Expression("x").set_type("double")),
-                  "x*x");
-
-  test_expression("WithTemperature(kT,sqr(x))",
-                  WithTemperature(kT,sqr(x)).printme(Expression("kT"),
-                                                     Expression("x").set_type("double")),
-                  "x*x");
-
   test_expression_type("exp(x/(-kT))", exp(x/-kT).printme(Expression("kT"), Expression("x")),
                        "Grid");
 
