@@ -45,7 +45,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.03618399661853683;
+  const double true_energy = -0.03618525285736127;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
@@ -88,7 +88,6 @@ int main(int, char **argv) {
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-4);
 
   Minimizer psd = Precision(1e-5, MaxIter(50, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
->>>>>>> 68c8f0cb8ae3cbbfe0ee7abd1a7a79ab31a082e5
   potential.setZero();
   retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-4);
 

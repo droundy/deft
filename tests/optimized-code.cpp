@@ -28,9 +28,9 @@ GridDescription gd(lat, 0.2);
 
 void compare_functionals(const Functional &f1, const Functional &f2, const Grid &n, double fraccuracy = 1e-15) {
   printf("\n************");
-  for (unsigned i=0;i<strlen(f1.get_name());i++) printf("*");
-  printf("\n* Testing %s *\n", f1.get_name());
-  for (unsigned i=0;i<strlen(f1.get_name());i++) printf("*");
+  for (unsigned i=0;i<f1.get_name().size();i++) printf("*");
+  printf("\n* Testing %s *\n", f1.get_name().c_str());
+  for (unsigned i=0;i<f1.get_name().size();i++) printf("*");
   printf("************\n\n");
 
   double f1n = f1.integral(water_prop.kT, n);
@@ -49,17 +49,17 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   double err = (gr1-gr2).cwise().abs().maxCoeff();
   double mag = gr1.cwise().abs().maxCoeff();
   if (err/mag > fraccuracy) {
-    printf("FAIL: Error in grad %s is %g as a fraction of %g\n", f1.get_name(), err/mag, mag);
+    printf("FAIL: Error in grad %s is %g as a fraction of %g\n", f1.get_name().c_str(), err/mag, mag);
     errors++;
   }
-  errors += f1.run_finite_difference_test(f1.get_name(), water_prop.kT, n);
+  errors += f1.run_finite_difference_test(f1.get_name().c_str(), water_prop.kT, n);
   //errors += f2.run_finite_difference_test("other version", n);
   
   const double x = 0.001;
   double f1x = f1(1.2*water_prop.kT, x);
   double f2x = f2(1.2*water_prop.kT, x);
   if (1 - fabs(f1x/f2x) > fraccuracy) {
-    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name(),
+    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name().c_str(),
            1 - fabs(f1x/f2x), f2x);
     errors++;
   }
@@ -67,7 +67,7 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   double f1p = f1.derive(1.2*water_prop.kT, x);
   double f2p = f2.derive(1.2*water_prop.kT, x);
   if (1 - fabs(f1p/f2p) > fraccuracy) {
-    printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name(),
+    printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name().c_str(),
            1 - fabs(f1p/f2p), f2p);
     errors++;
   }
@@ -101,8 +101,9 @@ int main(int, char **argv) {
   double kappa = water_prop.kappaAB;
   double epsdis = 1e-5;
   double lambda = 1.8;
-  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, mu),
-                      SaftFluidSlow(R, eps, kappa, epsdis, lambda, mu),
+  double lscale = 0.7;
+  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
+                      SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
                       Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);

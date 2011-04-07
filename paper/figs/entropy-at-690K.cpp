@@ -29,16 +29,17 @@ int main(int, char **) {
   Functional f = SaftFluidSlow(water_prop.lengthscale,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
+                               water_prop.lambda_dispersion, water_prop.length_scaling, 0);
   double mu_satp = find_chemical_potential(f, kT,
                                            water_prop.liquid_density);
   f = SaftFluidSlow(water_prop.lengthscale,
                     water_prop.epsilonAB, water_prop.kappaAB,
                     water_prop.epsilon_dispersion,
-                    water_prop.lambda_dispersion, mu_satp);
+                    water_prop.lambda_dispersion, water_prop.length_scaling, mu_satp);
   
   Functional S = SaftEntropy(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-			       water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
+                             water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
+                             water_prop.length_scaling);
   for (double dens=0.0001; dens<=0.0055; dens *= 1.01) {
     double V = -kT*log(dens);
     //double Vl = -kT*log(nl);

@@ -162,7 +162,7 @@ int main(int, char **argv) {
       double peak = peak_memory()/1024.0/1024;
       reset_peak_memory();
       printf("Peak memory use was %g\n", peak);
-      if (peak > 7 || peak < 6) {
+      if (peak > 6 || peak < 5) {
         printf("FAIL: Peak memory use was not as expected PreconditionedConjugateGradient...\n");
         retval++;
       }
@@ -185,7 +185,7 @@ int main(int, char **argv) {
 
   double peak = peak_memory()/1024.0/1024;
   printf("Peak memory use was %g\n", peak);
-  if (peak > 22 || peak < 21) {
+  if (peak > 17 || peak < 16) {
     printf("FAIL: Peak memory use was not as expected...\n");
     retval++;
   }

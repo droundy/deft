@@ -13,26 +13,35 @@ public:
   virtual ~FunctionalInterface() {}
 
   // A functional mapping one field onto another...
-  virtual double integral(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const;
-  virtual VectorXd transform(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const = 0;
+  virtual double integral(const GridDescription &gd, double kT, const VectorXd &data) const;
+  virtual VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const = 0;
   virtual double transform(double kT, double x) const = 0;
 
-  virtual void pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &x,
+  virtual void pgrad(const GridDescription &gd, double kT, const VectorXd &x,
                      const VectorXd &ingrad, VectorXd *outpgrad) const;
 
   // This computes the gradient of the functional, given a gradient of
   // its output field (i.e. it applies the chain rule).
-  virtual void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+  virtual void grad(const GridDescription &gd, double kT, const VectorXd &data,
                     const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double derive(double kT, double data) const = 0;
-  virtual Expression derive_homogeneous(const Expression &kT, const Expression &x) const = 0;
+  virtual Expression derive_homogeneous(const Expression &x) const = 0;
   virtual double d_by_dT(double kT, double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Functional grad_T(const Functional &ingradT) const = 0;
-  virtual Expression printme(const Expression &, const Expression &) const = 0;
+  virtual Expression printme(const Expression &) const = 0;
 
-  virtual void print_summary(const char *prefix, double energy, const char *name) const;
+  virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
+  virtual bool I_am_constant_wrt_x() const;
+  virtual bool I_preserve_homogeneous() const;
+  virtual bool I_am_homogeneous() const;
+  virtual bool I_am_zero() const;
+  virtual bool I_am_one() const;
+  virtual bool I_give_zero_for_zero() const;
+  virtual bool I_am_local() const; // WARNING:  this defaults to true!
+
+  virtual bool append_to_name(const std::string) = 0; // returns true if this object wants its name changed.
 
   bool have_integral;
 };
@@ -42,7 +51,7 @@ template<typename Derived, typename extra> class ConvolveWith;
 class Functional {
 public:
   // Handle reference counting so we can pass these things around freely...
-  Functional(double, const char *name=0); // This handles constants!
+  explicit Functional(double, const char *name=0); // This handles constants!
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
   explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
@@ -51,11 +60,11 @@ public:
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
-    const char *n = f(gd, e).name();
+    std::string n = f(gd, e).name();
     if (R != Expression("R")) n = "";
     init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), n);
   }
-  explicit Functional(FunctionalInterface* p = 0, const char *name = 0) // allocate a new counter
+  explicit Functional(FunctionalInterface* p = 0, const std::string name = "") // allocate a new counter
     : itsCounter(0) {
     init(p, name);
   }
@@ -83,6 +92,13 @@ public:
     return out += x;
   }
   Functional operator+=(const Functional &x) {
+    if (I_am_zero()) {
+      *this = x;
+      return *this;
+    }
+    if (x.I_am_zero()) {
+      return *this;
+    }
     if (mynext) *mynext += x;
     else mynext = new Functional(x);
     return *this;
@@ -91,13 +107,13 @@ public:
   Functional operator-(const Functional &) const;
   Functional operator/(const Functional &) const;
   Functional operator*(const Functional &) const;
-  VectorXd justMe(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+  VectorXd justMe(const GridDescription &gd, double kT, const VectorXd &data) const {
     return itsCounter->ptr->transform(gd, kT, data);
   }
   VectorXd operator()(double kT, const GridDescription &gd, const VectorXd &data) const {
-    return (*this)(gd, kT*VectorXd::Ones(gd.NxNyNz), data);
+    return (*this)(gd, kT, data);
   }
-  VectorXd operator()(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+  VectorXd operator()(const GridDescription &gd, double kT, const VectorXd &data) const {
     VectorXd out = itsCounter->ptr->transform(gd, kT, data);
     if (mynext) out += (*mynext)(gd, kT, data);
     return out;
@@ -106,15 +122,12 @@ public:
     return (*this)(kT, g.description(), g);
   }
   double integral(double kT, const Grid &g) const {
-    return integral(g.description(), kT*VectorXd::Ones(g.description().NxNyNz), g);
-  }
-  double integral(const VectorXd &kT, const Grid &g) const {
     return integral(g.description(), kT, g);
   }
   double integral(double kT, const GridDescription &gd, const VectorXd &data) const {
-    return integral(gd, kT*VectorXd::Ones(gd.NxNyNz), data);
+    return integral(gd, kT, data);
   }
-  double integral(const GridDescription &gd, const VectorXd &kT, const VectorXd &data) const {
+  double integral(const GridDescription &gd, double kT, const VectorXd &data) const {
     // This takes care to save the energies of each term in the sum.
     double e = itsCounter->ptr->integral(gd, kT, data);
     set_last_energy(e);
@@ -160,28 +173,28 @@ public:
       return itsCounter->ptr->grad(ingrad, x, ispgrad);
     }
   }
-  Expression derive_homogeneous(const Expression &kT, const Expression &x) const {
+  Expression derive_homogeneous(const Expression &x) const {
     if (mynext)
-      return itsCounter->ptr->derive_homogeneous(kT, x) + mynext->derive_homogeneous(kT, x);
-    else return itsCounter->ptr->derive_homogeneous(kT, x);
+      return itsCounter->ptr->derive_homogeneous(x) + mynext->derive_homogeneous(x);
+    else return itsCounter->ptr->derive_homogeneous(x);
   }
   Functional pgrad(const Functional &ingrad, const Functional &x) const {
     return grad(ingrad, x, true);
   }
   void grad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
             VectorXd *outgrad, VectorXd *outpgrad) const {
-    grad(gd, kT*VectorXd::Ones(gd.NxNyNz), data, ingrad, outgrad, outpgrad);
+    grad(gd, kT, data, ingrad, outgrad, outpgrad);
   }
-  void grad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+  void grad(const GridDescription &gd, double kT, const VectorXd &data,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     itsCounter->ptr->grad(gd, kT, data, ingrad, outgrad, outpgrad);
     if (mynext) mynext->grad(gd, kT, data, ingrad, outgrad, outpgrad);
   }
   void pgrad(double kT, const GridDescription &gd, const VectorXd &data, const VectorXd &ingrad,
              VectorXd *outpgrad) const {
-    pgrad(gd, kT*VectorXd::Ones(gd.NxNyNz), data, ingrad, outpgrad);
+    pgrad(gd, kT, data, ingrad, outpgrad);
   }
-  void pgrad(const GridDescription &gd, const VectorXd &kT, const VectorXd &data,
+  void pgrad(const GridDescription &gd, double kT, const VectorXd &data,
              const VectorXd &ingrad, VectorXd *outpgrad) const {
     itsCounter->ptr->pgrad(gd, kT, data, ingrad, outpgrad);
     if (mynext) mynext->pgrad(gd, kT, data, ingrad, outpgrad);
@@ -196,14 +209,29 @@ public:
     if (mynext) out += mynext->d_by_dT(kT, data);
     return out;
   }
-  const char *get_name() const { return itsCounter->name; }
-  Functional set_name(const char *n) { itsCounter->name = n; return *this; }
+  const std::string get_name() const { return itsCounter->name; }
+  Functional append_to_name(const std::string x) {
+    bool appendme = itsCounter->ptr->append_to_name(x);
+    if (appendme && itsCounter->name != "") itsCounter->name = itsCounter->name + x;
+    return *this;
+  }
+  Functional set_name_stdstring(const std::string &n) { itsCounter->name = n; return *this; }
+  Functional set_name(const char *n) {
+    try {
+      if (n) itsCounter->name = n;
+      else itsCounter->name = "";
+    }
+    catch (...) {
+      assert(0);
+    }
+    return *this;
+  }
   Functional *next() const {
     return mynext;
   }
   Functional set_last_energy(double e) const { itsCounter->last_energy = e; return *this; }
 
-  void print_summary(const char *prefix, double energy, const char *name=0) const;
+  void print_summary(const char *prefix, double energy, std::string name="") const;
   // The following utility methods do not need to be overridden.  Its
   // return value is the total energy that is printed.
   double print_iteration(const char *prefix, int iter) const;
@@ -211,16 +239,12 @@ public:
   int run_finite_difference_test(const char *testname,
                                  double kT, const Grid &data,
                                  const VectorXd *direction = 0) const;
-  Expression printme(const Expression &, const Expression &) const;
+  Expression printme(const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
-                     const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
-                     const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
-                     const char *a7 = 0, bool isheader=false) const;
+                     const char *args[], bool isheader=false) const;
   void create_header(const std::string filename, const std::string classname,
-                     const char *a1 = 0, const char *a2 = 0, const char *a3 = 0,
-                     const char *a4 = 0, const char *a5 = 0, const char *a6 = 0,
-                     const char *a7 = 0) const {
-    create_source(filename, classname, a1, a2, a3, a4, a5, a6, a7, true);
+                     const char *args[]) const {
+    create_source(filename, classname, args, true);
   }
   bool I_have_analytic_grad() const {
     const Functional *nxt = this;
@@ -230,8 +254,62 @@ public:
     }
     return true;
   }
+  bool I_am_homogeneous() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_homogeneous()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_preserve_homogeneous() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_homogeneous() &&
+          !nxt->itsCounter->ptr->I_preserve_homogeneous()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_constant_wrt_x() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_constant_wrt_x()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_give_zero_for_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_give_zero_for_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_zero() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_zero()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
+  bool I_am_one() const {
+    const Functional *nxt = this;
+    if (!itsCounter->ptr->I_am_one() || nxt) return false;
+    return true;
+  }
+  bool I_am_local() const {
+    const Functional *nxt = this;
+    while (nxt) {
+      if (!nxt->itsCounter->ptr->I_am_local()) return false;
+      nxt = nxt->next();
+    }
+    return true;
+  }
 private:
-  void init(FunctionalInterface *p, const char *name) {
+  void init(FunctionalInterface *p, const std::string &name) {
     if (p) {
       itsCounter = new counter(p);
       itsCounter->name = name;
@@ -243,7 +321,7 @@ private:
     counter(FunctionalInterface* p = 0, unsigned c = 1) : ptr(p), count(c) {}
     FunctionalInterface* ptr;
     unsigned count;
-    const char *name;
+    std::string name;
     Functional *next;
     double last_energy;
   };
@@ -266,7 +344,8 @@ private:
 };
 
 inline Functional operator*(double x, const Functional &f) {
-  return f*x;
+//  return f*x;  modified 3/14
+  return f*Functional(x);
 }
 inline Functional operator-(double x, const Functional &f) {
   return Functional(x) - f;
@@ -291,8 +370,20 @@ public:
     : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
     : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
+  bool I_am_local() const {
+    return false;
+  }
+  bool I_preserve_homogeneous() const {
+    return true;
+  }
+  bool I_give_zero_for_zero() const {
+    return true;
+  }
 
-  EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, const VectorXd &, const VectorXd &x) const {
+  EIGEN_STRONG_INLINE VectorXd transform(const GridDescription &gd, double, const VectorXd &x) const {
     Grid out(gd, x);
     ReciprocalGrid recip = out.fft();
     recip.cwise() *= Eigen::CwiseNullaryOp<Derived, VectorXcd>(gd.NxNyNzOver2, 1, f(gd, data));
@@ -312,7 +403,7 @@ public:
   double d_by_dT(double, double) const {
     return 0;
   }
-  Expression derive_homogeneous(const Expression &, const Expression &) const {
+  Expression derive_homogeneous(const Expression &) const {
     return gzerov;
   }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
@@ -324,9 +415,9 @@ public:
   Functional grad_T(const Functional &) const {
     // FIXME: I assume here that the convolution kernel itself doesn't
     // depend on temperature, which may not be the case.
-    return 0;
+    return Functional(0.0);
   }
-  EIGEN_STRONG_INLINE void grad(const GridDescription &gd, const VectorXd &, const VectorXd &,
+  EIGEN_STRONG_INLINE void grad(const GridDescription &gd, double, const VectorXd &,
                                 const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     Grid out(gd, ingrad);
     ReciprocalGrid recip = out.fft();
@@ -337,7 +428,7 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &, const Expression &x) const {
+  Expression printme(const Expression &x) const {
     if (x.typeIs("double")) {
       return gzerov*x;
     } else {

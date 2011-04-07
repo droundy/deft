@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "Grid.h"
 #include "Functional.h"
 
+#include "MinimalFunctionals.h"
+
 extern Functional kT;
-Functional WithTemperature(const Functional &kTnew, const Functional &f);
 extern Functional IdealGasOfVeff;
 Functional IdealGas();
 Functional EntropyOfIdealGasOfVeff();
@@ -24,27 +24,30 @@ Functional ExternalPotential(const VectorXd &V);
 Functional gHS(Functional n, double radius);
 Functional gHScarnahan(Functional n, double radius);
 Functional DeltaSAFT(double radius, double epsilon, double kappa,
-                     double epsdis, double lambdadis);
+                     double epsdis, double lambdadis, double lscale);
 Functional Xassociation(double radius, double epsilon, double kappa,
-                        double epsdis, double lambdadis);
+                        double epsdis, double lambdadis, double lscale);
 Functional AssociationSAFT(double radius, double epsilon, double kappa,
-                           double epsdis, double lambdadis);
+                           double epsdis, double lambdadis, double lscale);
 Functional SaftFluidSlow(double radius, double epsilon, double kappa,
-                         double epsdis, double lambda, double mu);
+                         double epsdis, double lambda, double lscale, double mu);
 Functional SaftFluid(double radius, double epsilon, double kappa,
-                     double epsdis, double lambda, double mu);
-Functional DispersionSAFTa1(double radius, double epsdis, double lambda);
-Functional DispersionSAFTa2(double radius, double epsdis, double lambda);
-Functional DispersionSAFT(double radius, double epsdis, double lambda);
-Functional DispersionSAFT(double radius, double temperature, double epsdis, double lambda);
+                     double epsdis, double lambda, double lscale, double mu);
+// SaftExcessEnergy is a functional of density, not effective
+// potential.
+Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
+                                double epsdis, double lambda, double lscale,
+                                double mu);
+Functional DispersionSAFTa1(double radius, double epsdis, double lambda, double lscale);
+Functional DispersionSAFTa2(double radius, double epsdis, double lambda, double lscale);
+Functional DispersionSAFT(double radius, double epsdis, double lambda, double lscale);
 Functional SaftEntropy(double R,
 		       double epsilon, double kappa,
-		       double epsdis, double lambda);
+		       double epsdis, double lambda, double lscale);
 
 Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);
-Functional HardSpheresNoTensor(double radius);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 

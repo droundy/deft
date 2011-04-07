@@ -14,6 +14,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "CallMe.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -38,21 +39,24 @@ Functional xi3(double radius) {
   return ((M_PI*4/3)*Pow(3)(R)*n3).set_name("xi3");
 }
 
-Functional gHS(Functional n3, double R) {
+Functional gHS(Functional n3, double Rval) {
   // n3 is the "packing fraction" convolved functional.  It may be an
   // "effective packing fraction", in the case of SAFT-VR.
-  Functional zeta = getzeta(R);
-  Functional n2 = ShellConvolve(R);
+  Functional zeta = getzeta(Rval);
+  Functional n2 = ShellConvolve(Rval);
   Functional invdiff = Functional(1)/(1-n3);
+  Functional R(Rval, "R");
   return invdiff*(Functional(1) +
                   (0.5*invdiff*R*n2)*zeta*(Functional(1) +
-                                           (0.5*invdiff*R*n2)*(1.0/18)));
+                                           (0.5*invdiff*R*n2)*Functional(1.0/18)));
 }
 
-Functional da1_deta(double radius, double epsdis, double lambdainput);
-Functional da1_dlam(double radius, double epsdis, double lambdainput);
+Functional da1_deta(double radius, double epsdis, double lambdainput, double lscale);
+Functional da1_dlam(double radius, double epsdis, double lambdainput, double lscale);
 
-Functional eta_for_dispersion(double radius, double lambdainput) {
+Functional eta_for_dispersion(double radius, double lambdainput, double lscale) {
+  Functional length_scaling(lscale, "length_scaling");
+  Expression length_scalingE("length_scaling");
   Functional lambda(lambdainput, "lambda_dispersion");
   Expression lambdaE("lambda_dispersion");
   lambdaE.set_type("double");
@@ -60,8 +64,8 @@ Functional eta_for_dispersion(double radius, double lambdainput) {
   R.set_type("double");
 
   return
-    (StepConvolve(2*lambdainput*radius, 2*lambdaE*R)
-     /(8*Pow(3)(lambda))).set_name("eta_dispersion");
+    (StepConvolve(2*lambdainput*lscale*radius, 2*lambdaE*length_scalingE*R)
+     /Pow(3)(2*lambda*length_scaling)).set_name("eta_dispersion");
 
   /*
   return
@@ -77,7 +81,7 @@ Functional eta_for_dispersion(double radius, double lambdainput) {
   */
 }
 
-Functional gSW(double R, double epsdis0, double lambda) {
+Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   // This is the approximate *contact* density of a square-well fluid.
   // The formula for this is:
   //      gSW = gHS + 0.25/kT*(da1_deta - lambda/(3*eta)*da1_dlambda)
@@ -86,33 +90,27 @@ Functional gSW(double R, double epsdis0, double lambda) {
   Functional lam = Functional(lambda, "lambda_dispersion");
   Functional epsdis = Functional(epsdis0, "epsilon_dispersion");
   //Functional eta = StepConvolve(R);
-  Functional eta = eta_for_dispersion(R, lambda);
+  Functional eta = eta_for_dispersion(R, lambda, lscale);
 
-  Functional da1deta = da1_deta(R, epsdis0, lambda);
-  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
+  Functional da1deta = da1_deta(R, epsdis0, lambda, lscale);
+  Functional da1dlam = da1_dlam(R, epsdis0, lambda, lscale);
 
   //Functional ghs = gHS(n3, R);
   Functional ghs = gHScarnahan(eta, R);
   return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*eta)*da1dlam);
 }
 
-Functional dgSW_dT(double R, double epsdis0, double lambda) { 
+Functional dgSW_dT(double R, double epsdis0, double lambda, double lscale) { 
   // First let's give names to a few constants...
   Functional lam = Functional(lambda, "lambda_dispersion");
   Functional epsdis = Functional(epsdis0, "epsilon_dispersion");
   //Functional eta = StepConvolve(R);
-  Functional eta = eta_for_dispersion(R, lambda);
+  Functional eta = eta_for_dispersion(R, lambda, lscale);
 
-  Functional da1deta = da1_deta(R, epsdis0, lambda);
-  Functional da1dlam = da1_dlam(R, epsdis0, lambda);
+  Functional da1deta = da1_deta(R, epsdis0, lambda, lscale);
+  Functional da1dlam = da1_dlam(R, epsdis0, lambda, lscale);
 
   return (Functional(0.25)/sqr(kT))*(lam/(3*eta)*da1dlam - da1deta);
-}
-
-Functional gHScarnahan_simple(Functional n3) {
-  // n3 is the "packing fraction" convolved functional.  It may be an
-  // "effective packing fraction", in the case of SAFT-VR.
-  return (1 - 0.5*n3)/Pow(3)(1 - n3);
 }
 
 Functional gHScarnahan(Functional n3, double R) {
@@ -134,69 +132,69 @@ Functional dgHScarnahan_dn(Functional n3, double R) {
 }
 
 Functional DeltaSAFT(double radius, double epsilon, double kappa,
-                     double epsdis, double lambdadis) {
-  Functional g = gSW(radius, epsdis, lambdadis);
+                     double epsdis, double lambdadis, double lscale) {
+  Functional g = gSW(radius, epsdis, lambdadis, lscale);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - 1)*K;
+  Functional delta = ((exp(eps/kT) - Functional(1))*K)*g;
   delta.set_name("delta");
   return delta;
 }
 
 Functional dDelta_dT(double radius, double epsilon, double kappa,
-                     double epsdis, double lambdadis) {
-  Functional g = gSW(radius, epsdis, lambdadis);
-  Functional dgSWdT = dgSW_dT(radius, epsdis, lambdadis);
+                     double epsdis, double lambdadis, double lscale) {
+  Functional g = gSW(radius, epsdis, lambdadis, lscale);
+  Functional dgSWdT = dgSW_dT(radius, epsdis, lambdadis, lscale);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - 1)*K;
+  Functional delta = g*(exp(eps/kT) - Functional(1))*K;
   delta.set_name("delta");
-  return dgSWdT*K*(exp(eps/kT) - 1) - g*K*eps*exp(eps/kT)/sqr(kT);
+  return dgSWdT*K*(exp(eps/kT) - Functional(double(1))) - g*K*eps*exp(eps/kT)/sqr(kT);
 }
 
 Functional Xassociation(double radius, double epsilon, double kappa,
-                        double epsdis, double lambdadis) {
+                        double epsdis, double lambdadis, double lscale) {
   Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
-  Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis, lscale);
 
   Functional zeta = getzeta(radius);
-  Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - 1) / (4* n0 * zeta*delta);
+  Functional X = (sqrt(Functional(1) + 8*n0*zeta*delta) - Functional(double(1))) / (4* n0 * zeta*delta);
   X.set_name("X");
   return X;
 }
 
 Functional dXassoc_dT(double radius, double epsilon, double kappa,
-                      double epsdis, double lambdadis) {
+                      double epsdis, double lambdadis, double lscale) {
   Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
-  Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis);
-  Functional dDeltadT = dDelta_dT(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional delta = DeltaSAFT(radius, epsilon, kappa, epsdis, lambdadis, lscale);
+  Functional dDeltadT = dDelta_dT(radius, epsilon, kappa, epsdis, lambdadis, lscale);
   Functional zeta = getzeta(radius);
   Functional root_stuff = sqrt(Functional(1)+8*n0*zeta*delta);
   return dDeltadT*((Functional(1)/(delta*root_stuff)) - (root_stuff - Functional(1))/(4*n0*zeta*sqr(delta)));
 }
 
 Functional AssociationSAFT(double radius, double epsilon, double kappa,
-                           double epsdis, double lambdadis) {
+                           double epsdis, double lambdadis, double lscale) {
   Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
   Functional zeta = getzeta(radius);
-  Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis);
-  return (kT*4*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+  Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis, lscale);
+  return (kT*Functional(double(4))*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
 }
 
 Functional dFassoc_dT(double radius, double epsilon, double kappa,
-                      double epsdis, double lambdadis) {
+                      double epsdis, double lambdadis, double lscale) {
   Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
   Functional n0 = n2/(4*M_PI*sqr(R));
   Functional zeta = getzeta(radius);
-  Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis);
-  Functional dXdT = dXassoc_dT(radius, epsilon, kappa, epsdis, lambdadis);
+  Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis, lscale);
+  Functional dXdT = dXassoc_dT(radius, epsilon, kappa, epsdis, lambdadis, lscale);
   return 4*n0*zeta*(Functional(0.5) - 0.5*X + log(X) + kT*dXdT*(Functional(1)/X-Functional(0.5)));
 }
 
@@ -230,23 +228,23 @@ Functional detaeff_deta(Functional eta, double lambdainput) {
   return c1 + 2*c2*eta + 3*c3*sqr(eta);
 }
 
-Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput) {
+Functional DispersionSAFTa1(double radius, double epsdis, double lambdainput, double lscale) {
   Functional lambda(lambdainput, "lambda_dispersion");
   // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  Functional eta = eta_for_dispersion(radius, lambdainput);
+  Functional eta = eta_for_dispersion(radius, lambdainput, lscale);
   eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion*eta;
+  Functional a1vdw = -4*(Pow(3)(lambda) - Functional(double(1)))*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw*gHScarnahan(eta_eff, radius)).set_name("a1");
 }
 
-Functional da1_dlam(double radius, double epsdis, double lambdainput) {
+Functional da1_dlam(double radius, double epsdis, double lambdainput, double lscale) {
   Functional lambda(lambdainput, "lambda_dispersion");
   // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  Functional eta = eta_for_dispersion(radius, lambdainput);
+  Functional eta = eta_for_dispersion(radius, lambdainput, lscale);
   eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
@@ -254,20 +252,20 @@ Functional da1_dlam(double radius, double epsdis, double lambdainput) {
   Functional a1vdw_nolam = -4*epsilon_dispersion*eta;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw_nolam*(3*sqr(lambda)*gHScarnahan(eta_eff, radius) +
-                       (Pow(3)(lambda) - 1)*dgHScarnahan_dn(eta_eff, radius)*
+                       (Pow(3)(lambda) - Functional(double(1)))*dgHScarnahan_dn(eta_eff, radius)*
                        detaeff_dlam(eta, lambdainput))).set_name("da1_dlam");
   
 }
 
-Functional da1_deta(double radius, double epsdis, double lambdainput) {
+Functional da1_deta(double radius, double epsdis, double lambdainput, double lscale) {
   Functional lambda(lambdainput, "lambda_dispersion");
   // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  Functional eta = eta_for_dispersion(radius, lambdainput);
+  Functional eta = eta_for_dispersion(radius, lambdainput, lscale);
   eta.set_name("eta");
   Functional eta_eff = eta_effective(eta, lambdainput);
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
-  Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - 1)*epsilon_dispersion;
+  Functional a1vdw_over_eta = -4*(Pow(3)(lambda) - Functional(1.0))*epsilon_dispersion;
   // The following equation is equation 34 in Gil-Villegas 1997 paper.
   return (a1vdw_over_eta*(gHScarnahan(eta_eff, radius) +
                           eta*dgHScarnahan_dn(eta_eff, radius)*
@@ -275,16 +273,15 @@ Functional da1_deta(double radius, double epsdis, double lambdainput) {
   
 }
 
-Functional DispersionSAFTa2(double radius, double epsdis, double lambdainput) {
+Functional DispersionSAFTa2(double radius, double epsdis, double lambdainput, double lscale) {
   // In Gil-Villegas 1997 paper, packing fraction is called eta...
-  Functional eta = eta_for_dispersion(radius, lambdainput);
-  Functional simple_eta_effective = eta_effective(Identity(), lambdainput);
+  Functional eta = eta_for_dispersion(radius, lambdainput, lscale);
   // The following equation is equation 35 in Gil-Villegas 1997 paper.
   // Actually, it's slightly modified, since the n0 below cancels out
   // the packing fraction by giving us a per-volume rather than
   // per-monomer energy.
   Functional epsilon_dispersion(epsdis, "epsilon_dispersion");
-  Functional a1prime = da1_deta(radius, epsdis, lambdainput);
+  Functional a1prime = da1_deta(radius, epsdis, lambdainput, lscale);
 
   Functional one_minus_eta = Functional(1) - eta;
   // The following is the Percus-Yevick hard-sphere compressibility
@@ -295,7 +292,7 @@ Functional DispersionSAFTa2(double radius, double epsdis, double lambdainput) {
 }
 
 
-Functional DispersionSAFT(double radius, double epsdis, double lambdainput) {
+Functional DispersionSAFT(double radius, double epsdis, double lambdainput, double lscale) {
   Functional lambda(lambdainput, "lambda_dispersion");
   Expression lambdaE("lambda_dispersion");
   lambdaE.set_type("double");
@@ -305,33 +302,48 @@ Functional DispersionSAFT(double radius, double epsdis, double lambdainput) {
   // ndisp is the density of molecules that are at this point.
   Functional ndisp = Identity();
 
-  Functional a1 = DispersionSAFTa1(radius, epsdis, lambdainput);
-  Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput);
+  Functional a1 = DispersionSAFTa1(radius, epsdis, lambdainput, lscale);
+  Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput, lscale);
   return (ndisp*(a1 + a2/kT)).set_name("dispersion");
 }
 
-Functional dFdisp_dT(double radius, double epsdis, double lambdainput) {
+Functional dFdisp_dT(double radius, double epsdis, double lambdainput, double lscale) {
   // ndisp is the density of molecules that are at this point.
   Functional ndisp = Identity();
 
-  Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput);
+  Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput, lscale);
   return (-ndisp*a2/sqr(kT)).set_name("dFdisp_dT");
 }
 
+Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
+                                double epsdis, double lambda, double lscale,
+                                double mu) {
+  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)") +
+    ChemicalPotential(mu) +
+    CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda, lscale), "Association",
+           "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion, length_scaling)") +
+    CallMe(DispersionSAFT(R, epsdis, lambda, lscale), "Dispersion",
+           "(R, epsilon_dispersion, lambda_dispersion, length_scaling)");
+}
+
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
-                         double epsdis, double lambda,
+                         double epsdis, double lambda, double lscale,
                          double mu
                          ) {
   Functional n = EffectivePotentialToDensity();
-  return HardSpheresWBnotensor(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n) +
-    AssociationSAFT(R, epsilon, kappa, epsdis, lambda)(n) +
-    DispersionSAFT(R, epsdis, lambda)(n);
+  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)")(n) +
+    IdealGasOfVeff + ChemicalPotential(mu)(n) +
+    CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda, lscale),
+           "Association", "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion, length_scaling)")(n) +
+    CallMe(DispersionSAFT(R, epsdis, lambda, lscale),
+           "Dispersion", "(R, epsilon_dispersion, lambda_dispersion, length_scaling)")(n);
 }
 
 Functional SaftEntropy(double R,
                        double epsilon, double kappa,
-                       double epsdis, double lambda) {
+                       double epsdis, double lambda, double lscale) {
   Functional n = EffectivePotentialToDensity();
   return HardSpheresWBnotensor(R)(n)/(-kT) + EntropyOfIdealGasOfVeff()
-    -dFassoc_dT(R, epsilon, kappa, epsdis, lambda)(n) - dFdisp_dT(R, epsdis, lambda)(n);
+    -dFassoc_dT(R, epsilon, kappa, epsdis, lambda, lscale)(n)
+    - dFdisp_dT(R, epsdis, lambda, lscale)(n);
 }

@@ -29,18 +29,18 @@ int main(int, char **) {
 
   double mu_satp;
   {
-    Functional f = SaftFluidSlow(water_prop.lengthscale,
-                                 water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion,
-                                 water_prop.lambda_dispersion, 0);
+    Functional f = SaftFluid(water_prop.lengthscale,
+                             water_prop.epsilonAB, water_prop.kappaAB,
+                             water_prop.epsilon_dispersion,
+                             water_prop.lambda_dispersion, water_prop.length_scaling, 0);
     mu_satp = find_chemical_potential(f, water_prop.kT,
                                       water_prop.liquid_density);
   }
 
-  Functional f = SaftFluidSlow(water_prop.lengthscale,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, mu_satp);
+  Functional f = SaftFluid(water_prop.lengthscale,
+                           water_prop.epsilonAB, water_prop.kappaAB,
+                           water_prop.epsilon_dispersion,
+                           water_prop.lambda_dispersion, water_prop.length_scaling, mu_satp);
 
   //double Temperatures[NUMT] = { water_prop.kT/kB };
   double Temperatures[NUMT] = { water_prop.kT/kB, 693 };
@@ -53,11 +53,11 @@ int main(int, char **) {
 
     mu[t] = 0; //find_chemical_potential(fs[t], kT, water_prop.vapor_density);
     saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl[t], &nv[t], &mu[t], 1e-5);
-    printf("Saturated liquid density at %gK turns out to be: %g\n", Temperatures[t], nl[t]);
-    printf("Vapor density turns out to be: %g\n", nv[t]);
+    //printf("Saturated liquid density at %gK turns out to be: %g\n", Temperatures[t], nl[t]);
+    //printf("Vapor density turns out to be: %g\n", nv[t]);
 
-    double mu2 = find_chemical_potential(f, kT, nl[t]);
-    printf("Chemical potential comparison: %g vs %g differ by %g\n", mu[t], mu2, mu[t] - mu2);
+    //double mu2 = find_chemical_potential(f, kT, nl[t]);
+    //printf("Chemical potential comparison: %g vs %g differ by %g\n", mu[t], mu2, mu[t] - mu2);
 
     if (nv[t] < nvmin) nvmin = nv[t];
     if (nl[t] > nlmax) nlmax = nl[t];

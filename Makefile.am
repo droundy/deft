@@ -6,7 +6,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
-	src/SAFT.cpp \
+	src/SAFT.cpp src/CallMe.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
@@ -15,13 +15,13 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
-	src/Crossover.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
-	src/SaftFluidFast.cpp \
+	src/SaftFluidFast.cpp src/SaftExcessEnergyFast.cpp \
+	src/AssociationFast.cpp src/DispersionFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
-	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensor.cpp
+	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
@@ -54,6 +54,7 @@ $(OPTIMIZED_CODE): optimize-functionals
 # that the comparisons are run prior to the tests.
 tests/generated/sum.h: tests/generating-code.test $(COMPARISONDATA)
 	test -d tests/generated || mkdir tests/generated
+	rm -f tests/generated/*
 	tests/generating-code.test
 tests/generated-code.o: tests/generated/sum.h
 
@@ -100,7 +101,8 @@ tests_convolve_test_SOURCES = tests/convolve.cpp $(ALL_CODE)
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
-tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
+tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp \
+	$(GENERIC_CODE) # src/SaftExcessEnergyFast.cpp
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
@@ -109,12 +111,12 @@ tests_eos_test_SOURCES = tests/eos.cpp $(GENERIC_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
-paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(GENERIC_CODE)
-paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(GENERIC_CODE)
+paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
+paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
 paper_figs_entropy_mkdat_SOURCES = paper/figs/entropy.cpp $(GENERIC_CODE)
 paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENERIC_CODE)
 paper_figs_constrained_water_mkdat_SOURCES = paper/figs/constrained-water.cpp $(ALL_CODE)
-paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(GENERIC_CODE)
+paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)

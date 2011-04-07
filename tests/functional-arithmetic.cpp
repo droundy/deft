@@ -31,16 +31,16 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad1(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad2(gd, n*VectorXd::Ones(gd.NxNyNz));
-  const double kT = 1e-3;
+  const double roomT = 1e-3;
 
   printf("Working on f1 of double...\n");
-  const double Edouble1 = f1(kT, n);
+  const double Edouble1 = f1(roomT, n);
   printf("Working on f1 of grid...\n");
-  const double Egrid1 = f1.integral(kT, nr)/gd.Lat.volume();
+  const double Egrid1 = f1.integral(roomT, nr)/gd.Lat.volume();
   printf("Working on f2 of double...\n");
-  const double Edouble2 = f2(kT, n);
+  const double Edouble2 = f2(roomT, n);
   printf("Working on f2 of grid...\n");
-  const double Egrid2 = f2.integral(kT, nr)/gd.Lat.volume();
+  const double Egrid2 = f2.integral(roomT, nr)/gd.Lat.volume();
 
   printf("Edouble1 = %g\n", Edouble1);
   printf("Egrid1   = %g\n", Egrid1);
@@ -63,13 +63,13 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
     retval++;
   }
 
-  retval += f1.run_finite_difference_test("f1", kT, nr);
-  retval += f2.run_finite_difference_test("f2", kT, nr);
+  retval += f1.run_finite_difference_test("f1", roomT, nr);
+  retval += f2.run_finite_difference_test("f2", roomT, nr);
   mygrad1.setZero();
   mygrad2.setZero();
-  f1.integralgrad(kT, gd, nr, &mygrad1);
+  f1.integralgrad(roomT, gd, nr, &mygrad1);
   printf("mygrad1 is %g\n", mygrad1.sum());
-  f2.integralgrad(kT, gd, nr, &mygrad2);
+  f2.integralgrad(roomT, gd, nr, &mygrad2);
   printf("mygrad2 is %g\n", mygrad2.sum());
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
@@ -84,12 +84,12 @@ int main(int, char **argv) {
   const Functional n = EffectivePotentialToDensity();
 
   Functional x = Gaussian(1);
-  retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
+  retval += test_functionals("twice x", x*Functional(2.0), 2*x, 0.1, 2e-13);
   retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
 
-  retval += test_functionals("derivative of x", x.grad(1,Identity(),false) - x, 1 - x, 0.1, 2e-13);
-  retval += test_functionals("derivative of x^3", Pow(3).grad(1,Identity(),false), 3*Pow(2), 0.1, 2e-13);
-  retval += test_functionals("derivative of x^2", sqr(x).grad(1,Identity(),false), 2*x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x", x.grad(Functional(1.0),Identity(),false) - x, 1 - x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(Functional(1.0),Identity(),false), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(Functional(1.0),Identity(),false), 2*x, 0.1, 2e-13);
 
   retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
@@ -122,16 +122,6 @@ int main(int, char **argv) {
                              0 - Pow(2)(Pow(2)(x)), -1*Pow(2)(Pow(2)(x)), 0.1, 1e-12);
   retval += test_functionals("Simple subtraction",
                              0 - x, -1*x, 0.1, 1e-12);
-
-  // The following are tests that WithTemperature works as expected...
-
-  retval += test_functionals("WithTemperature(kT)", WithTemperature(kT, kT) + x, kT + x, 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(kT)", WithTemperature(x, kT), x, 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(kT)", WithTemperature(kT*sqr(x), kT*x), kT*x*sqr(x), 0.1, 1e-12);
-
-  retval += test_functionals("WithTemperature(x)", WithTemperature(kT, x), x, 0.1, 1e-12);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

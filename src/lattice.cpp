@@ -1,6 +1,7 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 #include "lattice.h"
+#include <stdio.h>
 
 Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
   R.col(0) = a1; R.col(1) = a2; R.col(2) = a3;

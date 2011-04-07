@@ -22,7 +22,7 @@
 int main(int, char **) {
   double R = water_prop.lengthscale;
   Functional a2 = DispersionSAFTa2(R, water_prop.epsilon_dispersion,
-                                   water_prop.lambda_dispersion);
+                                   water_prop.lambda_dispersion, water_prop.length_scaling);
   for (double eta=0.0; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
     // Energy units in the vrpack code are water_prop.epsilon_dispersion?

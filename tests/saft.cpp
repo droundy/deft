@@ -41,6 +41,10 @@ void test_energy(const char *name, Functional f, double kT,
   double e = f.integral(kT, eff_potential);
   printf("Energy = %.16g\n", e);
   printf("Fractional error = %g\n", (e - true_energy)/fabs(true_energy));
+  if (e < true_energy) {
+    printf("FAIL: the energy is too low! (it is %.16g)\n", e);
+    retval++;
+  }
   if (!(fabs((e - true_energy)/true_energy) < fraccuracy)) {
     printf("FAIL: Error in the energy is too big!\n");
     retval++;
@@ -54,19 +58,19 @@ int main(int, char **argv) {
               AssociationSAFT(water_prop.lengthscale,
                               water_prop.epsilonAB, water_prop.kappaAB,
                               water_prop.epsilon_dispersion,
-                              water_prop.lambda_dispersion)(n),
-              kT, -4.66373704296128e-12);
+                              water_prop.lambda_dispersion, water_prop.length_scaling)(n),
+              kT, -4.66373704296135e-12);
   const double dispersion_energy = -2.25551876171605e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale,
                              water_prop.epsilon_dispersion,
-                             water_prop.lambda_dispersion)(n),
+                             water_prop.lambda_dispersion, water_prop.length_scaling)(n),
               kT, dispersion_energy);
   test_energy("SAFT slow",
               SaftFluidSlow(water_prop.lengthscale,
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
-                            water_prop.lambda_dispersion, 0),
+                            water_prop.lambda_dispersion, water_prop.length_scaling, 0),
               kT, -8.140492183697745e-09);
 
   if (retval == 0) {
