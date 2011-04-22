@@ -59,7 +59,7 @@ int main(int, char **argv) {
                               water_prop.epsilonAB, water_prop.kappaAB,
                               water_prop.epsilon_dispersion,
                               water_prop.lambda_dispersion, water_prop.length_scaling)(n),
-              kT, -4.66373704296135e-12);
+              kT, -4.663737042961203e-12);
   const double dispersion_energy = -2.25551876171605e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale,

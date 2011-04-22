@@ -473,7 +473,7 @@ ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g) {
   fftw_plan p = fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_ESTIMATE);
   fftw_execute(p);
   fftw_destroy_plan(p);
-  out /= gd.NxNyNz;
+  out *= gd.dvolume;
   return out;
 }
 

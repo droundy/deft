@@ -54,7 +54,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.037595406926488;
+  const double true_energy = -0.03759540692649;
   //const double true_N = 0.376241423570245;
 
   int retval = 0;
