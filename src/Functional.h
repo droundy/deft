@@ -83,6 +83,10 @@ public:
       acquire(r.itsCounter);
     }
     if (r.mynext) mynext = new Functional(*r.mynext);
+    else {
+      if (mynext) mynext->release();
+      mynext = 0;
+    }
     return *this;
   }
 
