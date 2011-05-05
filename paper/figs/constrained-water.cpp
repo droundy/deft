@@ -42,13 +42,13 @@ int main(int, char **) {
   Functional f = SaftFluidSlow(water_prop.lengthscale,
                                water_prop.epsilonAB, water_prop.kappaAB,
                                water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
+                               water_prop.lambda_dispersion, water_prop.length_scaling, 0);
   double mu_satp = find_chemical_potential(f, water_prop.kT,
                                            water_prop.liquid_density);
   f = SaftFluidSlow(water_prop.lengthscale,
                     water_prop.epsilonAB, water_prop.kappaAB,
                     water_prop.epsilon_dispersion,
-                    water_prop.lambda_dispersion, mu_satp);
+                    water_prop.lambda_dispersion, water_prop.length_scaling, mu_satp);
 
   Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, 0.1);

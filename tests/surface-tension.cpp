@@ -128,7 +128,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
 
   printf("gas energy is %.15g\n", Egas);
-  const double Egas_true = -2.72389740017382e-08;
+  const double Egas_true = -2.72389740017384e-08;
   if (Egas < Egas_true) {
     printf("FAIL: Egas is too low: %.16g\n", Egas);
     retval++;

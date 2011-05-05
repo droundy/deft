@@ -8,6 +8,11 @@
 
 class Grid;
 
+// The ifft is defined by:
+
+// f(r) = 1/(2pi)^3 \int f(k) exp(-i k*r) d3r
+
+Grid ifft(const GridDescription &gd, VectorXcd *rg);
 Grid ifft(const GridDescription &gd, const VectorXcd &rg);
 
 class ReciprocalGrid : public VectorXcd {
@@ -42,6 +47,7 @@ public:
     return (*this)(gd.Lat.toRelativeReciprocal(r));
   }
   complex operator()(const RelativeReciprocal &) const;
+  GridDescription description() const { return gd; }
 private:
   GridDescription gd;
 };

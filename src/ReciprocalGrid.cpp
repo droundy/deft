@@ -40,14 +40,31 @@ ReciprocalGrid::ReciprocalGrid(const ReciprocalGrid &x) : VectorXcd(x), gd(x.gd)
 }
 
 Grid ifft(const GridDescription &gd, const VectorXcd &rg) {
+  VectorXcd in(rg); // Make a copy, since the c2r transform is
+                    // destructive.  This is a little stupid, because
+                    // usually we don't want to keep the rg, but it
+                    // seems better to not risk it being used after
+                    // being messed up.
+  return ifft(gd, &in);
+}
+
+// This one is destructive, and has a type to match...
+Grid ifft(const GridDescription &gd, VectorXcd *rg) {
   Grid out(gd);
-  const complex *mydata = rg.data();
+  const complex *mydata = rg->data();
   fftw_plan p = fftw_plan_dft_c2r_3d(gd.Nx, gd.Ny, gd.Nz, (fftw_complex *)mydata, out.data(), FFTW_MEASURE);
   fftw_execute(p);
+  // FFTW overwrites the input on a c2r transform, so let's throw it
+  // away so we don't accidentally try to reuse an invalid array! An
+  // alternative approach would be to copy it first into a scratch
+  // array.  If we saved that scratch array, we could even keep
+  // reusing the same plan.
+  rg->resize(0);
   fftw_destroy_plan(p);
+  out *= 1.0/gd.Lat.volume();
   return out;
-
 }
+
 void ReciprocalGrid::MultiplyBy(double f(Reciprocal)) {
   for (int x=0; x<gd.Nx; x++) {
     for (int y=0; y<gd.Ny; y++) {
