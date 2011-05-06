@@ -33,6 +33,24 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     printf("\t\tQuad: E0 = %25.15g", E0);
     fflush(stdout);
   }
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(" which is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
+  if (isnan(slope)) {
+    // The slope here is a NaN, so there is no point continuing!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(", but the slope is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
 
   if (slope*(*step) > 0) {
     if (verbose) printf("Swapping sign of step with slope %g...\n", slope);
