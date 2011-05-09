@@ -88,13 +88,11 @@ int main(int, char **argv) {
   compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 2e-14);
 
   
-  Functional nn = EffectivePotentialToDensity();
-  double mu = find_chemical_potential(HardSpheres(R)(nn) + IdealGasOfVeff, water_prop.kT,
-                                      water_prop.liquid_density);
-  Functional f = HardSpheresRFFast(R)(nn) + IdealGasOfVeff + ChemicalPotential(mu)(nn);
+  const double mu = 1e-5;
+  Functional f = HardSpheresRFFast(R) + IdealGas() + ChemicalPotential(mu);
   compare_functionals(HardSphereGasRF(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
  
-  f = HardSpheresFast(R)(nn) + IdealGasOfVeff + ChemicalPotential(mu)(nn);
+  f = HardSpheresFast(R) + IdealGas() + ChemicalPotential(mu);
   compare_functionals(HardSphereGas(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
 
   double eps = water_prop.epsilonAB;
@@ -104,7 +102,7 @@ int main(int, char **argv) {
   double lscale = 0.7;
   compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
                       SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
-                      Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
+                      n, 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

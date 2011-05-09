@@ -10,6 +10,7 @@ extern Functional kT;
 extern Functional IdealGasOfVeff;
 Functional IdealGas();
 Functional EntropyOfIdealGasOfVeff();
+Functional EntropyOfIdealGas();
 
 Functional HardSphereGas(double radius, double mu);
 Functional HardSphereGasRF(double radius, double mu);
@@ -33,11 +34,7 @@ Functional SaftFluidSlow(double radius, double epsilon, double kappa,
                          double epsdis, double lambda, double lscale, double mu);
 Functional SaftFluid(double radius, double epsilon, double kappa,
                      double epsdis, double lambda, double lscale, double mu);
-// SaftExcessEnergy is a functional of density, not effective
-// potential.
-Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
-                                double epsdis, double lambda, double lscale,
-                                double mu);
+
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda, double lscale);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda, double lscale);
 Functional DispersionSAFT(double radius, double epsdis, double lambda, double lscale);
@@ -54,6 +51,7 @@ Functional GaussianPolynomial(double amplitude, double width, int power);
 Functional Identity();
 
 Functional EffectivePotentialToDensity();
+Functional OfEffectivePotential(const Functional &f);
 Functional Gaussian(double width);
 
 Functional StepConvolve(double radius, Expression r = Expression("R"));

@@ -159,13 +159,13 @@ int main(int, char **argv) {
   check_a_functional("HardSphereNoTensor", ff, potential, 45, 69, 76, 73);
 
   ff = constrain(constraint, HardSphereGas(R, mu));
-  check_a_functional("HardSphereGas", ff, potential, 62, 83, 90, 83);
+  check_a_functional("HardSphereGas", ff, potential, 62, 76, 83, 76);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
-  ff = SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
-                 water_prop.lambda_dispersion, water_prop.length_scaling, mu);
-  check_a_functional("SaftFluid", ff, potential, 45, 83, 87, 83);
+  ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
+                                      water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  check_a_functional("SaftFluid", ff, potential, 55, 87, 90, 90);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

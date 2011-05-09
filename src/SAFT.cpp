@@ -315,35 +315,22 @@ Functional dFdisp_dT(double radius, double epsdis, double lambdainput, double ls
   return (-ndisp*a2/sqr(kT)).set_name("dFdisp_dT");
 }
 
-Functional SaftExcessEnergySlow(double R, double epsilon, double kappa,
-                                double epsdis, double lambda, double lscale,
-                                double mu) {
-  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)") +
-    ChemicalPotential(mu) +
-    CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda, lscale), "Association",
-           "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion, length_scaling)") +
-    CallMe(DispersionSAFT(R, epsdis, lambda, lscale), "Dispersion",
-           "(R, epsilon_dispersion, lambda_dispersion, length_scaling)");
-}
-
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
                          double epsdis, double lambda, double lscale,
-                         double mu
-                         ) {
-  Functional n = EffectivePotentialToDensity();
-  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)")(n) +
-    IdealGasOfVeff + ChemicalPotential(mu)(n) +
+                         double mu) {
+  return CallMe(HardSpheresWBnotensor(R), "HardSpheresNoTensor", "(R)") +
+    IdealGas() + ChemicalPotential(mu) +
     CallMe(AssociationSAFT(R, epsilon, kappa, epsdis, lambda, lscale),
-           "Association", "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion, length_scaling)")(n) +
+           "Association",
+           "(R, epsilonAB, kappaAB, epsilon_dispersion, lambda_dispersion, length_scaling)") +
     CallMe(DispersionSAFT(R, epsdis, lambda, lscale),
-           "Dispersion", "(R, epsilon_dispersion, lambda_dispersion, length_scaling)")(n);
+           "Dispersion", "(R, epsilon_dispersion, lambda_dispersion, length_scaling)");
 }
 
 Functional SaftEntropy(double R,
                        double epsilon, double kappa,
                        double epsdis, double lambda, double lscale) {
-  Functional n = EffectivePotentialToDensity();
-  return HardSpheresWBnotensor(R)(n)/(-kT) + EntropyOfIdealGasOfVeff()
-    -dFassoc_dT(R, epsilon, kappa, epsdis, lambda, lscale)(n)
-    - dFdisp_dT(R, epsdis, lambda, lscale)(n);
+  return HardSpheresWBnotensor(R)/(-kT) + EntropyOfIdealGas()
+    - dFassoc_dT(R, epsilon, kappa, epsdis, lambda, lscale)
+    - dFdisp_dT(R, epsdis, lambda, lscale);
 }
