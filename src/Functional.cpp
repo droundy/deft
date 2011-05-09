@@ -1253,6 +1253,9 @@ public:
   Expression printme(const Expression &x) const {
     return f.printme(x);
   }
+  void print_summary(const char *prefix, double e, std::string name) const {
+    f.print_summary(prefix, e, name);
+  }
   bool I_have_analytic_grad() const {
     return f.I_have_analytic_grad();
   }
