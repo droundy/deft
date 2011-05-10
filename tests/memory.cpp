@@ -165,7 +165,7 @@ int main(int, char **argv) {
   double kappa = water_prop.kappaAB;
   ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
-  check_a_functional("SaftFluid", ff, potential, 55, 87, 90, 90);
+  check_a_functional("SaftFluid", ff, potential, 45, 87, 90, 90);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

@@ -35,6 +35,9 @@ public:
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
     return f(gd, kT, (data/(-kT)).cwise().exp());
   }
+  double integral(const GridDescription &gd, double kT, const VectorXd &x) const {
+    return f.integral(gd, kT, (x/(-kT)).cwise().exp());
+  }
   double transform(double kT, double n) const {
     return f(kT, exp(-n/kT));
   }

@@ -562,7 +562,7 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
       VectorXd othergrad(grad(dV, Identity(), false)(temp, x));
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
-      if (maxgraderr/maxgrad > 1e-10) {
+      if (maxgraderr/maxgrad > 1e-9) {
         printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
         printf("othergrad itself is %s\n",
@@ -644,9 +644,6 @@ double Functional::print_iteration(const char *prefix, int iter) const {
     //nxt->print_summary(prefix, nxt->itsCounter->last_energy);
     nxt = nxt->next();
   }
-  printf("%s%25s =", prefix, "total energy");
-  print_double("", etot);
-  printf("\n");
   return etot;
 }
 
@@ -664,6 +661,9 @@ void Functional::print_summary(const char *prefix, double energy, std::string na
     nxt->itsCounter->ptr->print_summary(prefix, nxt->itsCounter->last_energy, name);
     nxt = nxt->next();
   }
+  printf("%s%25s =", prefix, "total energy");
+  print_double("", etot);
+  printf("\n");
   //assert(fabs(etot - energy) < 1e-6);
 }
 
