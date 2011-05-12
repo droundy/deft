@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-static Functional getzeta(double radius) {
+Functional getzeta(double radius) {
   Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);

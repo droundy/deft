@@ -33,7 +33,9 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/finding-vapor-pressure.mkdat \
 	paper/figs/entropy.mkdat \
 	paper/figs/entropy-at-690K.mkdat \
-	paper/figs/constrained-water.mkdat \
+	paper/figs/constrained-water-1D.mkdat \
+	paper/figs/constrained-water-2D.mkdat \
+	paper/figs/rods-in-water.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
@@ -115,7 +117,9 @@ paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
 paper_figs_entropy_mkdat_SOURCES = paper/figs/entropy.cpp $(GENERIC_CODE)
 paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENERIC_CODE)
-paper_figs_constrained_water_mkdat_SOURCES = paper/figs/constrained-water.cpp $(ALL_CODE)
+paper_figs_constrained_water_1D_mkdat_SOURCES = paper/figs/constrained-water-1D.cpp $(ALL_CODE)
+paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
+paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
@@ -158,7 +162,9 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/entropy.dat \
 	paper/figs/entropy-at-690K.dat \
-	paper/figs/constrained-water.dat \
+	paper/figs/constrained-water-1D.dat \
+	paper/figs/constrained-water-2D.dat \
+	paper/figs/rods-in-water.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
