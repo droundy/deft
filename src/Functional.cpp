@@ -542,8 +542,8 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
     retval++;
   }
   {
-    // compare the gradient computed by the two functions grad() and
-    // grad_and_pgrad()
+    // compare the gradient computed by integralgrad() with and
+    // without a non-null pgrad argument
     VectorXd my_pgrad(x);
     my_grad.setZero();
     my_pgrad.setZero();
@@ -551,7 +551,7 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
     const double lderiv_new = my_direction.dot(my_grad);
     if (fabs(lderiv_new/lderiv - 1) > 1e-12) {
       printf("\n*** WARNING!!! INCONSISTENT GRADIENTS! ***\n");
-      printf("Different gradient in energy_and_grad() and grad_and_pgrad()\n");
+      printf("Different gradient in integralgrad() with and without pgradout\n");
       printf("FAIL: Fractional error is %g\n\n", lderiv_new/lderiv - 1);
       retval++;
     }
@@ -562,14 +562,14 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
       VectorXd othergrad(grad(dV, Identity(), false)(temp, x));
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
-      if (maxgraderr/maxgrad > 1e-12) {
+      if (maxgraderr/maxgrad > 1e-9) {
         printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
         printf("othergrad itself is %s\n",
                grad(dV, Identity(), false).printme(Expression("x")).printme().c_str());
         printf("my_grad[0] = %g\n", my_grad[0]);
         printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
-        printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
+        printf("FAIL: Discrepancy in my gradient is too big: %g\n\n", maxgraderr/maxgrad);
         retval++;
       }
     }
@@ -644,9 +644,6 @@ double Functional::print_iteration(const char *prefix, int iter) const {
     //nxt->print_summary(prefix, nxt->itsCounter->last_energy);
     nxt = nxt->next();
   }
-  printf("%s%25s =", prefix, "total energy");
-  print_double("", etot);
-  printf("\n");
   return etot;
 }
 
@@ -664,6 +661,9 @@ void Functional::print_summary(const char *prefix, double energy, std::string na
     nxt->itsCounter->ptr->print_summary(prefix, nxt->itsCounter->last_energy, name);
     nxt = nxt->next();
   }
+  printf("%s%25s =", prefix, "total energy");
+  print_double("", etot);
+  printf("\n");
   //assert(fabs(etot - energy) < 1e-6);
 }
 
@@ -1252,6 +1252,9 @@ public:
   }
   Expression printme(const Expression &x) const {
     return f.printme(x);
+  }
+  void print_summary(const char *prefix, double e, std::string name) const {
+    f.print_summary(prefix, e, name);
   }
   bool I_have_analytic_grad() const {
     return f.I_have_analytic_grad();

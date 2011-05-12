@@ -40,16 +40,13 @@ int main(int argc, char **argv) {
   if (strcmp(argv[1], "src/HardSpheresNoTensorFast.cpp") == 0)
     HardSpheresWBnotensor(R).create_source(argv[1], "HardSpheresNoTensor", R_arg);
   if (strcmp(argv[1], "src/HardSphereGasRFFast.cpp") == 0) {
-    Functional n = EffectivePotentialToDensity();
-    Functional f = HardSpheresRF(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);
+    Functional f = HardSpheresRF(R) + IdealGas() + ChemicalPotential(mu);
     f.create_source(argv[1], "HardSphereGasRF", R_mu_arg);
   }
   if (strcmp(argv[1], "src/HardSphereGasFast.cpp") == 0) {
-    Functional n = EffectivePotentialToDensity();
-    Functional f = HardSpheres(R)(n) + IdealGasOfVeff + ChemicalPotential(mu)(n);
+    Functional f = HardSpheres(R) + IdealGas() + ChemicalPotential(mu);
     f.create_source(argv[1], "HardSphereGas", R_mu_arg);
   }
-  Functional n = EffectivePotentialToDensity();
   const char *saft_args[] = {
     "R",
     "epsilonAB", "kappaAB",
@@ -59,9 +56,6 @@ int main(int argc, char **argv) {
   if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0)
     SaftFluidSlow(R, 0.01, 0.01, 0.01, 0.01, 0.01,
                   mu).create_source(argv[1], "SaftFluid", saft_args);
-  if (strcmp(argv[1], "src/SaftExcessEnergyFast.cpp") == 0)
-    SaftExcessEnergySlow(R, 0.01, 0.01, 0.01, 0.01, 0.01,
-                         mu).create_source(argv[1], "SaftExcessEnergy", saft_args);
   const char *dispersion_args[] = { "R", "epsilon_dispersion", "lambda_dispersion",
                                     "length_scaling", 0 };
   if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
