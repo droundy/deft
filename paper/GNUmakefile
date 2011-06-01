@@ -45,6 +45,13 @@ ALL_FIGURES=\
 	figs/entropy-at-690K.gp\
 	figs/entropy-per-molecule.gp\
 	figs/pressure-with-isotherms.gp\
+	figs/cavitysize-060.gp\
+	figs/cavitysize-vs-energy-1D.gp\
+	figs/xassoc-1D.gp\
+	figs/entropy-1D.gp\
+	figs/energy-1D.gp\
+	figs/density-1D.gp\
+	figs/density-rods-in-water.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -77,4 +84,10 @@ figs/surface-tension.eps: figs/surface-tension.gp \
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
-
+figs/cavitysize-060.eps: figs/cavitysize-060.dat
+figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
+figs/xassoc-1D.eps: figs/cavitysize-060.dat 
+figs/entropy-1D.eps: figs/cavitysize-060.dat 
+figs/energy-1D.eps: figs/cavitysize-060.dat
+figs/density-1D.eps: figs/cavitysize-060.dat
+figs/density-rods-in-water.eps: figs/rods-in-water.dat
