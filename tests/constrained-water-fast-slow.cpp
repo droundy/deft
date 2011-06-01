@@ -65,7 +65,7 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   Grid potential(gd);
 
   potential = water_prop.liquid_density*constraint
-    + water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
   //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
 
   // Change from density to effective potential...
@@ -239,7 +239,7 @@ int main(int, char **argv) {
   ffast = OfEffectivePotential(HardSpheresNoTensor(water_prop.lengthscale)
                                + ChemicalPotential(mu));
 
-  test_fast_vs_slow("HardSpheresNoTensor", ffast, fslow);
+  //test_fast_vs_slow("HardSpheresNoTensor", ffast, fslow);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

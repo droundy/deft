@@ -44,11 +44,20 @@ Functional gHS(Functional n3, double Rval) {
   // "effective packing fraction", in the case of SAFT-VR.
   Functional zeta = getzeta(Rval);
   Functional n2 = ShellConvolve(Rval);
-  Functional invdiff = Functional(1)/(1-n3);
   Functional R(Rval, "R");
+  // zeta2 is defined right after equation 13 in Fu and Wu 2005.  But
+  // it has a typo in it, and should really be the following, which is
+  // the packing fraction, and also happens to be the same thing as
+  // zeta3:
+  Functional zeta2 = (R/Functional(3))*n2;
+  Functional invdiff = Functional(1)/(1-n3);
+  // This is equation 13 in Fu and Wu 2005:
+  //return invdiff + 1.5*n3*zeta*sqr(invdiff) + 0.5*sqr(n3)*zeta*Pow(3)(invdiff);
+
+  // This is equation 13 in Fu and Wu 2005, but written to be slightly
+  // more efficient:
   return invdiff*(Functional(1) +
-                  (0.5*invdiff*R*n2)*zeta*(Functional(1) +
-                                           (0.5*invdiff*R*n2)*Functional(1.0/18)));
+                  0.5*(invdiff*zeta2)*zeta*(Functional(3) + invdiff*zeta2));
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput, double lscale);
@@ -95,8 +104,33 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   Functional da1deta = da1_deta(R, epsdis0, lambda, lscale);
   Functional da1dlam = da1_dlam(R, epsdis0, lambda, lscale);
 
-  //Functional ghs = gHS(n3, R);
-  Functional ghs = gHScarnahan(eta, R);
+  Functional n2 = ShellConvolve(R);
+  // The following is from equation 13 of Fu and Wu 2005, which I have
+  // translated in terms of n2.  zeta3 is a version of the packing
+  // fraction (usually called eta in our code) that is computed using
+  // the shell convolution, so it is using the weighted density that
+  // is more direcly relevant to the association free energy.
+  Functional zeta3 = (Functional(R,"R")/Functional(3))*n2;
+
+  // This gHS (called simply gHS) is the gHS that is used in Fu and
+  // Wu's 2005 paper, in equation 13.  It seems ideal, since it
+  // includes spatial dependence and is published and tested in
+  // various ways.
+
+  Functional ghs = gHS(zeta3, R); // This should be correct!!!
+
+  // The following ghs, called gHScarnahan, is the one that is used by
+  // Gloor et al, and is in the fortran code that I compare with to
+  // make sure I reproduce Clark et al's water functional.
+
+  //Functional ghs = gHScarnahan(eta, R); // This is what we used to do...
+
+  // The following is another version of gHScarnahan that should match
+  // Clark et al, but uses zeta3 as in Fu and Wu, which may give
+  // better behavior in terms of its spatial dependence?
+
+  // Functional ghs = gHScarnahan(zeta3, R);
+
   return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*eta)*da1dlam);
 }
 
