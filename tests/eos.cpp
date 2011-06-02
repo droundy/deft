@@ -103,6 +103,19 @@ int main(int, char **argv) {
                                                       water_prop.lambda_dispersion,
                                                       water_prop.length_scaling, 0));
 
+
+    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+					      0.001, 0.01);
+    printf("density at 1 atmosphere is %g\n", n_1atm);
+    printf("error in density at 1 atmosphere is %g\n", n_1atm/water_prop.liquid_density - 1);
+    if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.01) {
+      printf("FAIL! error in water density is too big! %g\n",
+             n_1atm/water_prop.liquid_density - 1);
+      retval++;
+    }
+
+    test_pressure("saft at 1 atm", f, n_1atm, atmospheric_pressure);
+
     {
       double nv = coexisting_vapor_density(f, water_prop.kT, water_prop.liquid_density);
       printf("predicted vapor density: %g\n", nv);
@@ -120,6 +133,7 @@ int main(int, char **argv) {
       double nl, nv, mu;
       saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       printf("saturated water density is %g\n", nl);
+      printf("1 atm water density ? is %g\n", water_prop.liquid_density);
       if (fabs(nl/water_prop.liquid_density - 1) > 0.1) {
         printf("FAIL: error in saturated water density is too big! %g\n",
                nl/water_prop.liquid_density - 1);
@@ -167,14 +181,6 @@ int main(int, char **argv) {
       }
       fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
-    }
-
-    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure);
-    printf("density at 1 atmosphere is %g\n", n_1atm);
-    if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.1) {
-      printf("FAIL? error in water density is too big! %g\n",
-             n_1atm/water_prop.liquid_density - 1);
-      //retval++;
     }
 
     /*
