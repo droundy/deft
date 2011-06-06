@@ -60,28 +60,34 @@ void plot_grids_z_direction(const char *fname, const Grid &a, const Grid &b, con
 int main(int, char **) {
   FILE *o = fopen("paper/figs/constrained-water-1D.dat", "w");
 
-  Functional f = SaftFluid(water_prop.lengthscale,
-			   water_prop.epsilonAB, water_prop.kappaAB,
-			   water_prop.epsilon_dispersion,
-			   water_prop.lambda_dispersion,
-			   water_prop.length_scaling, 0);
-  double mu_satp = find_chemical_potential(f, water_prop.kT,
-                                           water_prop.liquid_density);
-  f = SaftFluid(water_prop.lengthscale,
-		water_prop.epsilonAB, water_prop.kappaAB,
-		water_prop.epsilon_dispersion,
-		water_prop.lambda_dispersion,
-		water_prop.length_scaling, mu_satp);
-    
+  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+						water_prop.epsilonAB, water_prop.kappaAB,
+						water_prop.epsilon_dispersion,
+						water_prop.lambda_dispersion,
+						water_prop.length_scaling, 0));
+  double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+					      0.001, 0.01);
+
+  double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
+
+  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+				     water_prop.epsilonAB, water_prop.kappaAB,
+				     water_prop.epsilon_dispersion,
+				     water_prop.lambda_dispersion,
+				     water_prop.length_scaling, mu_satp));
+  double Htrperbohr3topsi =1.602176487e-19*27.2117*0.000145037738/1.4818471e-31; //Converts Hartree/bohr^3 to psi
+  double p = pressure(f, water_prop.kT, n_1atm);
+  printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
+  
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
   			    water_prop.lambda_dispersion,
   			    water_prop.length_scaling);
   
-  Functional S = SaftEntropy(water_prop.lengthscale, water_prop.epsilonAB, 
-				   water_prop.kappaAB, water_prop.epsilon_dispersion,
-				   water_prop.lambda_dispersion,
-				   water_prop.length_scaling);
+  Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, water_prop.epsilonAB, 
+						  water_prop.kappaAB, water_prop.epsilon_dispersion,
+						  water_prop.lambda_dispersion,
+						  water_prop.length_scaling));
   
   for (cavitysize = 5; cavitysize<zmax; cavitysize+=5) {
 
@@ -93,7 +99,7 @@ int main(int, char **) {
     Grid potential(gd);
     Grid constraint(gd);
     constraint.Set(notinwall);
-    //f = constrain(constraint, f);
+    f = constrain(constraint, f);
     
     potential = water_prop.liquid_density*constraint
       + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
@@ -106,13 +112,13 @@ int main(int, char **) {
 							      QuadraticLineMinimizer));
     printf("Cavity size is %g bohr\n", cavitysize);
 
-    const int numiters = 100;
+    const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
       Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-      // density.epsNative1d("paper/figs/constrained-water-1D.eps",
-      // 			  Cartesian(0,0,0), Cartesian(0,0,zmax),
-      // 			  water_prop.liquid_density, 1, " ");
+      density.epsNative1d("paper/figs/constrained-water-1D.eps",
+      			  Cartesian(0,0,0), Cartesian(0,0,zmax),
+       			  water_prop.liquid_density, 1, " ");
       //sleep(1);
     }
     //min.print_info();
@@ -120,8 +126,11 @@ int main(int, char **) {
     double energy = min.energy()/width/width;
     //printf("Energy is %.15g\n", energy);
 
-    fprintf(o, "\t%g\t%.15g\n", cavitysize, energy);
+    fprintf(o, "%g\t%.15g\n", cavitysize, energy);
 
+    p = pressure(f, water_prop.kT, n_1atm);
+    printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
+    
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/cavitysize-%03g.dat", cavitysize);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));

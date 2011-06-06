@@ -29,17 +29,21 @@ set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
+set title 'Entropy per molecule?'
 set xlabel 'density (bohr^{-3})'
-set ylabel 'entropy ()'
-
+set ylabel 'Entropy (J/K)?'
 set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 
 JpermolK = 1.3806503e-23*6.0221e23
 
+HperKtoJperK = 27.2117*1.6e-19 # Converts Hartree/K to J/K
+
+molperltobohr = 6.02214179e23*1e-24/(18.8972613*18.8972613*18.8972613)  # Converts mole/liter to bohr^-3
+
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
-plot [:] [:2e-4] \
-'figs/entropy.dat' u 1:($3/$1*JpermolK) title 'T=293K' with lines ls 1, \
-'figs/entropy-at-690K.dat' u 1:($3/$1*JpermolK) title 'T=690K' with lines ls 2, \
-'figs/experimental-entropy-293.dat' u 1:2 title 'expt T=293K' with lines
+plot [:] [:] \
+'figs/entropy.dat' u 1:($3/$1*HperKtoJperK) title 'T=298K' with lines ls 1, \
+'figs/entropy-at-690K.dat' u 1:($3/$1*HperKtoJperK) title 'T=690K' with lines ls 2, \
+'figs/pressure-298K.dat' u ($3*molperltobohr):($7/($3*molperltobohr)/ 6.02214179e23) title 'expt T=298K' with points

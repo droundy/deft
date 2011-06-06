@@ -8,6 +8,6 @@ set -ev
 hostname
 date
 
-time nice -19 paper/figs/constrained-water-1D.mkdat -o constrained-water-1D.out
+time nice -19 paper/figs/constrained-water-1D.mkdat
 
 date

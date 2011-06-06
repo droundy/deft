@@ -22,7 +22,7 @@
 
 int main(int, char **) { 
   const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
-  const double kT = kB*293; // Room temperature
+  const double kT = kB*298; // Room temperature
   FILE *o = fopen("paper/figs/entropy.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,

@@ -1,8 +1,4 @@
-% TODO:
 
-% Write ``Liquid-vapor interface'' section A.
-
-% Look up question-mark references (citations).
 
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
@@ -37,9 +33,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\title{A Classical Density-Functional Theory for Describing Water Interfaces}
+\title{A Classical Density-Functional Theory for Describing Confined Water in One, Two and Three(?) Dimensions}
 
-\author{Dennis L. Jackson}
+\author{Jessica Gallagher}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 \author{David Roundy}
@@ -64,127 +60,11 @@
 
 \subsection{Water---the universal solvent}
 
-A large fraction of interesting chemistry---including all of molecular
-biology---takes place in aqueous solution.  However, while quantum
-chemistry now enables us to calculate the ground state energies of
-large molecules in vacuum, prediction of the free energy of even the
-smallest molecules in the presence of a solvent poses a continuing
-challenge due to the complex structure of a liquid and the
-computational cost of \emph{ab initio} molecular
-dynamics~\cite{car1985, grossman2004}.  The current state-of-the art
-in \emph{ab initio} molecular dynamics is limited to around 64 water
-molecules per unit cell, which places the minimum solute concentration
-at 0.84 molar and allows contact between the second solvation shell of
-neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
-\emph{ab initio} approaches using classical molecular dynamics have
-\textcolor{red}{vague problems}\cite{weber2010ab-initio-water}.  A
-more efficient approach is needed in order to study nanoscale and
-hydrophobic solutes.
-
-Water stands out among liquids for its extraordinary properties.  Water is
-the only natural substance that is found in solid, liquid and gaseous
-states at temperatures and pressures normally found on Earth.  Water has a
-density maximum at 4$^\circ$C, and expands upon freezing.  The heat
-capacity of water is the highest of any liquid, and its latent heat of
-fusion and vaporization are also the highest.  Water's thermal conductivity
-and surface tensions are the highest of any non-metallic liquid.  Water has
-an unusually high dielectric constant.
-Much of the unusual behavior of water is explained by the ability of each
-water molecule to form \emph{four} strong, directional hydrogen bonds---two
-acceptors and two donors.  This directional bonding dictates the open
-structure of ice, leading to thermal expansion upon freezing.
-
-Due to its large dielectric constant, small molecular size and strong
-hydrogen-bonding network, water as ``the universal solvent'' are as
-interesting as its anomalous thermodynamic properties.
-
-\begin{figure}
-\includegraphics[width=6cm, angle=270]{figs/correlation}
-\caption{ Experimental atom-atom radial distribution functions for water at
-room temperature and pressure from reference~\cite{Soper2000}.  }
-\label{correlation}
-\end{figure}
-
 \subsection{Classical density-functional theory}
-
-Numerous approaches have been developed to approximate the effect of water
-as a solvent in atomistic calculations.  Each of these approaches gives
-adequate description of some aspect of interactions with water, but none of
-them is adequate for describing \emph{all} these interactions with an
-accuracy close to that attained by \emph{ab initio} calculations.  The
-theory of Lum, Chandler and Weeks (LCW)~\cite{LCW}, for instance, can
-accurately describe the free energy cost of creating a cavity by placing a
-solute in water, but does not lend itself to extensions treating the strong
-interaction of water with hydrophilic solutes.  Treatment of water as a
-continuum dielectric with a cavity surrounding each solute can give
-accurate predictions of the energy of solvation of ions~\cite{latimer1939,
-rashin1985, zhan1998, hsu1999, hildebrandt2004, hildebrandt2007}, but
-provides no information about the size of this cavity.  In a physically
-correct approach, the size of the cavity will naturally arise from a
-balance between the free energy required to create the cavity, the
-attraction between the water and the solute, and the steric repulsion which
-opens up the cavity in the first place.
-
-A very promising approach for an efficient continuum description of water
-is that of classical density-functional theory (DFT), which is an approach
-for evaluating the free energy and thermally averaged density of fluids in
-an arbitrary external potential~\cite{ebner1976}.  Classical DFT is a
-natural framework for creating a more flexible theory of hydrophobicity
-that can describe interaction of water with arbitrary external
-potentials---including potentials describing a \emph{strong} interaction
-with a solute.
-
-A number of exact properties are easily achieved in the density-functional
-framework, such as the relationship between the pressure on a hard wall and
-the contact density---which ensures a correct solvation free energy for
-small hard solutes.  Much of the research on classical density-functional
-theory has focussed on the hard-sphere fluid~\cite{curtin1985,
-rosenfeld1989, rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.
-This has led to a large number of very sophisticated functionals, such as
-the fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
-rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.  This functional
-\needsworklater{has many nice properties}.
-
-Several classical density functionals have already been developed for
-water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
-qualitative behavior of water.  However, many of these are less
-sophisticated than those describing the hard-sphere fluid, and a
-quantitatively accurate functional describing water---which reproduces both
-the macroscopic surface tension and its decrease as curvature
-increases---has not yet been published.  For instance, Jaqaman \emph{et al}
-developed a classical density-functional for water including orientational
-effects, but their functional resulted in a surface tension twice the
-experimental value, with the result that it can really only be used to make
-very qualitative predictions~\cite{Jaqaman2004}.
-
-\needsworknow{Add discussion and citations for more recent papers}
-
-One of the most interesting functionals for water is that of Ding \emph{et
-al}, which was developed in order to explain the freezing of
-water~\cite{ding1987}.  This functional uses the approach of Chandler
-\emph{et al}, which uses separate atomic densities for the constituent
-atoms of a molecular fluid~\cite{chandler1986a, chandler1986b}.  Although
-this is a compelling approach, the actual functional developed cannot
-describe the vapor state or liquid-vapor interface, both of which are
-crucial to correct predictions of hydrophobic behavior at large length
-scales.  In addition, the functional of Ding \emph{et al} also fails to
-rigorously enforce intramolecular correlations, which casts doubt on its
-suitability for describing interactions with ionic solutes.
-
-\needsworklater{
-Density-Functional Theory is most commonly used for calculating the
-densities of electrons in quantum mechanical systems.  We take the
-classical limit of this theory to construct a functional that will predict
-the density of water molecules in a classical system.  The model used here
-starts with a treatment of each individual water molecule as a purely
-classical hard sphere.  The only constraint in this model is
-the minimum distance between any two molecules is twice the hard sphere
-radius.}
-
-\needsworklater{ I still need to rewrite the entire introduction... }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
+
 We introduce a new classical density functional for water that
 \needsworklater{predicts the vapor density, liquid density, bulk
   modulus, and bulk surface tension, as well as allows for
@@ -291,7 +171,7 @@ The association free energy has the form
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
 where the value of $4$ comes from the four association sites per
-molecule, and the functional $X$ is the fraction of assotiation sites
+molecule, and the functional $X$ is the fraction of association sites
 \emph{not} hydrogen-bonded.  The fraction $X$ is determined by the
 quadratic equation
 \begin{align}
@@ -468,19 +348,6 @@ and the enthalpy is not much more work:
 \label{fig:liquid-vapor-profile}
 \end{figure}
 
-\subsection{Crossover formalism for handling critical behavior}
-
-I am currently working on implementing the crossover approach of
-Kiselev and Ely which is designed to make the critical behavior come
-out right\cite{kiselev2006new}.  This method works by defining a
-\emph{classical} free energy $f_0$---which where classical really is
-closer to \emph{mean field} in meaning, and indicates a theory that
-doesn't include long-range fluctuations.  This free energy is then
-used to construct a corrected free energy by feeding portions of it a
-``fake'' density and temperature that are constructed so as to
-reconstruct the correct universal scaling laws near the critical
-point.
-
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
 In order to ensure that the empirical parameters are correct, we test
@@ -556,139 +423,9 @@ density-functional theory (although the \emph{exact}
 density-functionaly theory \emph{would} include them), with the result
 that the density profile will be smoothed out by CW effects.
 
-\fixme{It'd be worth another search for water intrinsic profile
-  papers... but the review I cite is pretty thorough.}
-
-\subsection{Test-particle approach}
-
-More interesting applications are possible when we move into three
-dimensions using spherical coordinates.  The first (but not simplest)
-thing to try is looking at the response of liquid water to a single
-fixed water molecule.  This is referred to as the \emph{test particle}
-method\cite{FIXME}, and is as simple as constraining the density to
-include a delta function at the origin---meaning that a single
-molecule is fixed in location.  The free energy is then minimized
-under this constraint, giving a density profile and an associated free
-energy.  The density profile is just the self-correlation function
-multiplied by the bulk liquid density.  \fixme{We should be
-  distinguishing between the properties of the \emph{exact functional}
-  and those of an approximate functional...}  Thus, a test-particle
-calculation provides a stringent test of the correctness of any
-approximate functional.
-
-In order to perform the test-particle test, we introduce a sharp
-gaussian density spike at the origin and relax the density under a
-constraint that this spike remain.  Figure~\ref{fig:test-particle}
-shows the resulting density profile, compared with the experimental
-$g_{\textrm{OO}}$.  Note that this data was \emph{not} used in the
-fitting of the empirical parameters of the functional.  The agreement
-between experiment and theory is both qualitatively and quantitatively
-poor.  The integral of the difference between this density profile
-(excluding the delta function) and the bulk liquid density should be
-0.06~molecules \fixme{look up and show derivation... or cut this},
-but we find instead to be $-0.15$~molecules.  In addition, the associated
-free energy should be positive: there is an entropic cost in fixing
-one molecule in position, but for our functional the free energy of
-this density configuration is in fact negative, with a value of
--3.5~eV, meaning that the homogeneous fluid is unstable.  This is a
-serious flaw that must be addressed in future work.
-
-\subsection{Hydration energy of hard-sphere solutes}
-
-A more widely studied system that is simpler in many ways than the
-test-particle problem is that of a \emph{hard sphere solute} dissolved
-in water.  This is a common model for hydrophobic interactions.  The
-effect of this solute is merely to create a cavity within which the
-water may not penetrate.  This is the simples possible solute, and
-will serve as a test case, which if passed could lead to the ability
-to insert different chemicals into aqueous solution, instead of a
-vapor cavity, in order to observe biologically and chemically
-important aqueous solvation interactions.
-
-The most obvious output of such a calculation is the free energy of
-solvation.  In Figure~\ref{fig:surfaceTension} we plot the ratio of the
-energy of the cavity system to the surface area of the cavity.  This
-is an \emph{effective surface tension}, which approaches the bulk
-surface tension as the cavity radius increases.  On the same plot, we
-include the result from an SPC/E molecular dynamics
-simulation\cite{huang2001shs}, showing very good agreement.  At very
-small solute radius the effective surface tension is linear, meaning
-that the free energy is proportional to the volume---this limiting
-case is an exact result, which is exactly reproduced by any functional
-that reduces to the ideal gas functional at small distances.
-
-\begin{figure}
-\begin{center}
-%\includegraphics[width=\columnwidth]{radial-plots/surface-tension}
-\end{center}
-\caption{Free energy per surface area as a function of cavity
-  radius. SPC/E results from~\cite{huang2001shs}}
-\label{fig:surfaceTension}
-\end{figure}
-
-This exact result for small radius solutes relates to a general property of
-fluids interacting with hard surfaces, which is that the pressure on a hard
-surface is determined by the contact density of the fluid at the surface.
-Thus, a functional that correctly predicts the free energy as a function of
-radius will also give the proper contact density.
-Figure~\ref{fig:cavities} shows the density profile for several hard sphere
-radii, plotted together with with the results of the same SPC/E molecular
-dynamics simulation shown in
-Figure~\ref{fig:surfaceTension}\cite{huang2001shs}.  As expected---since
-the free energies agree so well---the contact densities show good
-agreement.  For small spheres the entire curve shows reasonable agreement,
-with the agreement becoming worse for larger radii.
-
-\begin{figure}[b]
-\begin{center}
-%\includegraphics[width=\columnwidth]{radial-plots/cavity-density}
-\end{center}
-\caption{Density profiles for multiple sizes of hard sphere solute.
-  Results from a simulation of SPC/E water~\cite{huang2001shs} are
-  shown as a dotted lines.}
-\label{fig:cavities}
-\end{figure}
-
-In order to understand the worsening agreement in the density profile
-for larger solutes in Figure~\ref{fig:cavities}, it is instructive to
-consider the limit as the radius becomes very large.  In this limit,
-the surface becomes essentially flat, and the liquid should develop a
-\emph{vapor layer}, so that as the effective surface tension
-approaches the bulk surface tension, the density profile should
-approach the profile of the liquid-vapor interface as plotted in
-Figure~\ref{fig:cartesianDensity}.  We demonstrate this effect in
-Figure~\ref{fig:LargeR_RadialDensity}, which shows superimposed the
-density profiles for several large solutes with that of the
-liquid-vapor interface.  It is clear that as the radius is increased,
-the profile is approaching that of the liquid-vapor interface.  Thus
-we can understand the deviations from the molecular dynamics
-simulations in Figure~\ref{fig:cavities} at larger radii as a direct
-result of the oscillations observed in the planar liquid-vapor
-interface.
-
-\fixme{Not sure if we want to keep this paragraph or work it into the
-  discussion somewhere?} For \emph{very} small cavities \fixme{not
-  shown... should we add one?}, the contact density is equal to the
-bulk liquid density, as the solute is too small to really perturb the
-water (see the blue curve in Fig.~\ref{fig:cavities}).  As the cavity
-size increases, the contact density (and pressure) first rise, and
-then fall again, as seen in Figure~\ref{fig:cavities}.  This is due to
-short range attractive interactions that are able to pass through the
-cavities of small radii.  For larger radii, these interactions are
-less prominent and there is less attraction to molecules across the
-cavity.  Thus, the contact density is decreased.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
-By adding an attractive term to the fundamental-measure theory
-functional, we developed a classical density functional for water
-which is able reproduce expected results for hydrophobic
-interactions.  We hope to extend this functional to allow for
-hydrophilic interactions by coupling with electrostatic fields.
-
-This method is computationally efficient, which will be useful when
-introducing new functionals that include intramolecular and electromagnetic
-interactions, that are not yet included in this model.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

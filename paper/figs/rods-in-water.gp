@@ -24,17 +24,17 @@ set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/rods-in-water.eps'
 
 set key noauto inside top
-set title 'Two hydrophobic rods - Density'
+set title 'Two hydrophobic rods - Energy vs Distance Apart'
 
 # set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'z (bohr)'
-#set ylabel 'pressure (Hartree/bohr^{3})'
+set xlabel 'Distance between rods (nm)'
+set ylabel 'energy (Hartree?)'
 
 set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
-plot [:120] [:] \
-'figs/rods-in-water.dat' u 3:4 title 'Diameter of rods = 1 nm' with lines ls 1 
+plot [:] [:] \
+'figs/rods-in-water.dat' u 1:2 title 'Diameter of rods = 1 nm' with lines ls 1 

@@ -52,6 +52,7 @@ ALL_FIGURES=\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
 	figs/density-rods-in-water.gp\
+	figs/rods-energy-vs-distance.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -78,7 +79,8 @@ figs/entropy.eps: figs/entropy.dat
 figs/entropy-at-690K.eps: figs/entropy-at-690K.dat
 figs/entropy-per-molecule.eps: figs/entropy-per-molecule.gp figs/entropy.dat \
 	figs/entropy-at-690K.dat 
-figs/pressure-with-isotherms.eps: figs/pressure-with-isotherms.dat 
+figs/pressure-with-isotherms.eps: figs/pressure-with-isotherms.dat \
+	figs/equation-of-state.dat
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
@@ -90,4 +92,5 @@ figs/xassoc-1D.eps: figs/cavitysize-060.dat
 figs/entropy-1D.eps: figs/cavitysize-060.dat 
 figs/energy-1D.eps: figs/cavitysize-060.dat
 figs/density-1D.eps: figs/cavitysize-060.dat
-figs/density-rods-in-water.eps: figs/rods-in-water.dat
+figs/density-rods-in-water.eps: figs/rods-slice-1nm-01.0.dat
+figs/rods-energy-vs-distance.eps: figs/rods-in-water.dat

@@ -23,13 +23,13 @@
 #include "handymath.h"
 
 const double nmtobohr = 18.8972613; // Converts nm to bohr
-
+const double nm = 18.8972613;
 // Here we set up the lattice.
-const double zmax = 30;
-const double ymax = 60;
+const double zmax = 3*nm;
+const double ymax = 5.5*nm;
 const double width = 0.0001;
-const double cavitysize = 1*nmtobohr;
-const double distance = 0.5*nmtobohr;
+const double cavitysize = 1*nm;
+double distance = 1;
 
 double notinwall(Cartesian r) {
   const double z = r.z();
@@ -41,6 +41,27 @@ double notinwall(Cartesian r) {
       return 0;
   }
   return 1;
+}
+
+void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+    return;
+  }
+  const GridDescription gd = a.description();
+  const int x = gd.Nx/2;
+  const int z = 0;
+  for (int y=0; y<gd.Ny; y++) {
+    Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
+    double ahere = a(x,y,z);
+    double bhere = b(x,y,z);
+    double chere = c(x,y,z);
+    double dhere = d(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere, chere, dhere);
+  }
+  fclose(out);
 }
 
 void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
@@ -71,98 +92,120 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 int main(int, char **) {
   FILE *o = fopen("paper/figs/rods-in-water.dat", "w");
 
-  Functional f = SaftFluid(water_prop.lengthscale,
-			       water_prop.epsilonAB, water_prop.kappaAB,
-			       water_prop.epsilon_dispersion,
-			       water_prop.lambda_dispersion,
-			       water_prop.length_scaling, 0);
+  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+						water_prop.epsilonAB, water_prop.kappaAB,
+						water_prop.epsilon_dispersion,
+						water_prop.lambda_dispersion,
+						water_prop.length_scaling, 0));
   double mu_satp = find_chemical_potential(f, water_prop.kT,
                                            water_prop.liquid_density);
-  f = SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 		water_prop.epsilonAB, water_prop.kappaAB,
 		water_prop.epsilon_dispersion,
 		water_prop.lambda_dispersion,
-		water_prop.length_scaling, mu_satp);
+				     water_prop.length_scaling, mu_satp));
   
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
   			    water_prop.lambda_dispersion,
   			    water_prop.length_scaling);
   
-  Functional S = SaftEntropy(water_prop.lengthscale, water_prop.epsilonAB, 
-  				   water_prop.kappaAB, water_prop.epsilon_dispersion,
-  				   water_prop.lambda_dispersion,
-  				   water_prop.length_scaling);
-  
-  Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.2);
+  Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, 
+						  water_prop.epsilonAB, 
+						  water_prop.kappaAB, 
+						  water_prop.epsilon_dispersion,
+						  water_prop.lambda_dispersion,
+						  water_prop.length_scaling));
+  for (distance=0*nm; distance<2*nm; distance += .1*nm) {
+    Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
+    GridDescription gd(lat, 0.2);
+    
+    Grid potential(gd);
+    Grid constraint(gd);
+    constraint.Set(notinwall);
+    constraint.epsNativeSlice("paper/figs/rods-in-water-constraint.eps",
+			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+			      Cartesian(0,ymax/2,zmax/2));
+    //printf("Constraint has become a graph!\n");
+    f = constrain(constraint, f);
 
-  Grid potential(gd);
-  Grid constraint(gd);
-  constraint.Set(notinwall);
-  constraint.epsNativeSlice("paper/figs/rods-in-water-constraint.eps",
-			    Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-			    Cartesian(0,ymax/2,zmax/2));
-  printf("Constraint has become a graph!\n");
-  //f = constrain(constraint, f);
+    //plot_grids_y_direction("paper/figs/rods-constraint-test.dat", constraint, constraint, cons    //                       traint, constraint);
+    
+    potential = water_prop.liquid_density*constraint
+      + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+    potential = -water_prop.kT*potential.cwise().log();
+    
+    // {
+    //    fflush(stdout);
+    //    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    //    //density.epsNative1d("paper/figs/constrained-water-1D.eps",
+    //    //			Cartesian(0,0,0), Cartesian(0,0,zmax),
+    //    //			water_prop.liquid_density, 1, " ");
+    
+    //    density.epsNativeSlice("paper/figs/rods-in-water.eps", 
+    //    			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+    //    			   Cartesian(0,ymax/2,zmax/2));
+    //  printf("Constraint has become a graph!\n");
+    
+    //    //sleep(3);
+    //  }
+    
+    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT, 
+								 &potential,
+								 QuadraticLineMinimizer));
+    
+    printf("\nDistance between rods = %g bohr (%g nm)\n", distance, distance/nm);
+    
+    const int numiters = 100;
+    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+      fflush(stdout);
+      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      //density.epsNative1d("paper/figs/constrained-water-1D.eps",
+      //			Cartesian(0,0,0), Cartesian(0,0,zmax),
+      //			water_prop.liquid_density, 1, " ");
+      
+      //density.epsNativeSlice("paper/figs/rods-in-water.eps", 
+      //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+      //		     Cartesian(0,ymax/2,zmax/2));
+      
+      //sleep(3);
+    }
+    //min.print_info();
 
-  potential = water_prop.liquid_density*constraint
-    + 1000*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-  //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-  potential = -water_prop.kT*potential.cwise().log();
+    // char *plotnamedens = (char *)malloc(1024);
+    // sprintf(plotnamedens, "paper/figs/rods-density-1nm-%04.1f.dat", distance/nm);
+    // density.epsNativeSlice(plotnamedens, Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+    // 			   Cartesian(0,ymax/2,zmax/2));
+    // free(plotnamedens);
 
- // {
- //    fflush(stdout);
- //    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
- //    //density.epsNative1d("paper/figs/constrained-water-1D.eps",
- //    //			Cartesian(0,0,0), Cartesian(0,0,zmax),
- //    //			water_prop.liquid_density, 1, " ");
+    double energy = min.energy()/width;
+    printf("Energy is %.15g\n", energy);
 
- //    density.epsNativeSlice("paper/figs/rods-in-water.eps", 
- //    			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
- //    			   Cartesian(0,ymax/2,zmax/2));
- //  printf("Constraint has become a graph!\n");
+    fprintf(o, "%g\t%.15g\n", distance/nm, energy);
 
- //    //sleep(3);
- //  }
-
-  Minimizer min = Precision(0, ConjugateGradient(f, gd, water_prop.kT, &potential,
-						 QuadraticLineMinimizer));
-
-  const int numiters = 100;
-  for (int i=0;i<numiters && min.improve_energy(true);i++) {
-    fflush(stdout);
+    char *plotnameslice = (char *)malloc(1024);
+    sprintf(plotnameslice, "paper/figs/rods-slice-1nm-%04.1f.dat", distance/nm);
+    char *plotname = (char *)malloc(1024);
+    sprintf(plotname, "paper/figs/rods-1nm-%04.1f.dat", distance/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    //density.epsNative1d("paper/figs/constrained-water-1D.eps",
-    //			Cartesian(0,0,0), Cartesian(0,0,zmax),
-    //			water_prop.liquid_density, 1, " ");
+    Grid energy_density(gd, f(water_prop.kT, gd, potential));
+    Grid entropy(gd, S(water_prop.kT, potential));
+    Grid Xassoc(gd, X(water_prop.kT, density));
+    plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
+    plot_grids_yz_directions(plotname, density, 
+			     energy_density, entropy, Xassoc);
+    free(plotnameslice);
+    free(plotname);
 
-    density.epsNativeSlice("paper/figs/rods-in-water.eps", 
-    			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-    			   Cartesian(0,ymax/2,zmax/2));
-
-    //sleep(3);
+    // double N = 0;
+    // {
+    //   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    //   for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
+    // }
+    
+    //N = N/width;
+    //printf("N is %.15g\n", N);
   }
-  //min.print_info();
-
-  Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-  Grid energy_density(gd, f(water_prop.kT, gd, potential));
-  Grid entropy(gd, S(water_prop.kT, potential));
-  Grid Xassoc(gd, X(water_prop.kT, density));
-  plot_grids_yz_directions("paper/figs/rods-in-water.dat", density, 
-  			   energy_density, entropy, Xassoc);
- 
-  double energy = min.energy()/width;
-  printf("Energy is %.15g\n", energy);
-
-  // double N = 0;
-  // {
-  //   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-  //   for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
-  // }
-  
-  //N = N/width/width;
-  //printf("N is %.15g\n", N);
-
-    fclose(o);
+  fclose(o);
 }

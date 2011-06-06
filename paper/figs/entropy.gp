@@ -29,6 +29,7 @@ set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
+set title 'Water at 298K'
 set xlabel 'density (bohr^{-3})'
 set ylabel 'energy density (Hartree/bohr^3)'
 
@@ -43,8 +44,8 @@ kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 plot [:] [-0.01:] \
 'figs/entropy.dat' u 1:($2/$1) title 'free energy' with lines ls 1, \
 'figs/entropy.dat' u 1:($4/$1) title 'internal energy' with lines ls 2, \
-'figs/entropy.dat' u 1:($5/$1) title 'temperature*entropy' with lines ls 3, \
-'figs/entropy.dat' u 1:(293*kB*3/2) title 'temperature*kB*3/2' with lines
+'figs/entropy.dat' u 1:($5/$1) title 'temperature*entropy' with lines ls 3
+#'figs/entropy.dat' u 1:(293*kB*3/2) title 'temperature*kB*3/2' with lines
 
 #set size 0.38,0.4        # The second one (inset)
 #set origin 0.58,0.5
