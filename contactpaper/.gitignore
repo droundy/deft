@@ -1,0 +1,13 @@
+*~
+*.toc
+*.pdf
+*.out
+*.aux
+*.eps
+*.snm
+*.nav
+*.log
+*.blg
+*.bbl
+figs/*.mkdat
+paperNotes.bib
