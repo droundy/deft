@@ -51,8 +51,10 @@ ALL_FIGURES=\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
-	figs/density-rods-in-water.gp\
-	figs/rods-energy-vs-distance.gp\
+
+
+#	figs/rods-energy-vs-distance.gp
+#	figs/density-rods-in-water.gp
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \

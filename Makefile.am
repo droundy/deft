@@ -1,4 +1,4 @@
-.PHONY: paper comparison
+.PHONY: paper comparison slowfigs
 
 EXTRA_DIST = autogen.sh
 
@@ -163,9 +163,10 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/entropy-at-690K.dat \
 	paper/figs/constrained-water-1D.dat \
 	paper/figs/constrained-water-2D.dat \
-	paper/figs/rods-in-water.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
+
+slowfigs: paper/figs/rods-in-water.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<

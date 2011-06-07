@@ -47,8 +47,9 @@ Functional gHS(Functional n3, double Rval) {
   Functional R(Rval, "R");
   // zeta2 is defined right after equation 13 in Fu and Wu 2005.  But
   // it has a typo in it, and should really be the following, which is
-  // the packing fraction, and also happens to be the same thing as
-  // zeta3:
+  // the packing fraction (and is dimensionless).  Note that this
+  // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
+  // 2005.
   Functional zeta2 = (R/Functional(3))*n2;
   Functional invdiff = Functional(1)/(1-n3);
   // This is equation 13 in Fu and Wu 2005:
@@ -105,6 +106,7 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   Functional da1dlam = da1_dlam(R, epsdis0, lambda, lscale);
 
   Functional n2 = ShellConvolve(R);
+  Functional n3 = StepConvolve(R);
   // The following is from equation 13 of Fu and Wu 2005, which I have
   // translated in terms of n2.  zeta3 is a version of the packing
   // fraction (usually called eta in our code) that is computed using
@@ -117,7 +119,8 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   // includes spatial dependence and is published and tested in
   // various ways.
 
-  Functional ghs = gHS(zeta3, R); // This should be correct!!!
+  // Functional ghs = gHS(zeta3, R);
+  Functional ghs = gHS(n3, R); // This should be correct!!!
 
   // The following ghs, called gHScarnahan, is the one that is used by
   // Gloor et al, and is in the fortran code that I compare with to
