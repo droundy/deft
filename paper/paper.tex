@@ -240,16 +240,16 @@ reference~\cite{roth2002whitebear}.  \needsworklater{The FMT
   exactly determines the excess free energy in the zero dimensional
   limit.}
 \begin{equation}
-F_{hs}[n] = k_B T \int (\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)) d\xx \; ,
+F_\textit{hs}[n] = k_B T \int \left(\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)\right) d\xx \; ,
 \end{equation}
 with integrands
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
-\Phi_3 &= \frac{
-  \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
+\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+  n_3 + (1-n_3)^2 \ln(1-n_3)
 }{
-  8\pi \left( 1 - n_3 \right)^2
+  36\pi n_3^2\left( 1 - n_3 \right)^2
 } ,
 \end{align}
 using the weighted densities
