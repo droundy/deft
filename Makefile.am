@@ -1,4 +1,4 @@
-.PHONY: paper comparison slowfigs
+.PHONY: paper contactpaper comparison slowfigs
 
 EXTRA_DIST = autogen.sh
 
@@ -167,6 +167,9 @@ paper: paper/figs/equation-of-state.dat \
 	cd paper && $(MAKE)
 
 slowfigs: paper/figs/rods-in-water.dat
+
+contactpaper: contactpaper/paper.tex
+	cd contactpaper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<
