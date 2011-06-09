@@ -311,12 +311,24 @@ The function $\Delta$ is given... below?
 The following contact density for the hard-sphere fluid is in the code
 called \texttt{gHS}, and comes
 from\cite{yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft}, but I don't use it.
+  fu2005vapor-liquid-dft}.  Actually,
+reference~\cite{fu2005vapor-liquid-dft} has what appear to be a number
+of mistakes in this formula, so
+reference~\cite{yu2002fmt-dft-inhomogeneous-associating} is more
+useful.  In particular, the former has an incorrect formula for
+$\zeta_2$ (wrong dimensions) and the formula for $\zeta_3$ disagrees
+with the latter, which it cites.  Its formula for $\zeta_3$ also
+doesn't match how they use it in ordinary FMT.
 \begin{align}
   \Delta &= 4\pi \kappa_\textit{assoc} g^\textit{HS}(\sigma)e^{-\beta
     \epsilon_\textit{assoc}} \\
   g^\textit{HS}(\sigma) &= \frac1{1-n_3}\left(1+\frac14\frac{\zeta n_2}{1-n_3}
-  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right)
+  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right) \\
+  &= \frac1{1 - \zeta_3}
+  + \frac32 \frac{\zeta \zeta_2}{\left(1-\zeta_3\right)^2}
+  + \frac12 \frac{\zeta \zeta_2^2}{\left(1-\zeta_3\right)^3} \\
+  \zeta_2 &= \frac{n_2 R}{3} \\
+  \zeta_3 &= n_3
 \end{align}
 \textcolor{red}{Here is paper where I got the association functional:}
 
