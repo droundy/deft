@@ -300,43 +300,51 @@ There are \emph{many} such terms, and this could get expensive.
   First, let's rewrite the free energy in terms of a smaller set of
   weighted densities:
   \begin{align}
-    A_{HS} &= \int \left\{ -n_0 \ln\left( 1 - n_3\right)
-    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + \frac{
-      \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
-    }{
-      8\pi \left( 1 - n_3 \right)^2
-    }\right\}
+    A_{HS} &= \int \left\{
+      -n_0 \ln\left( 1 - n_3\right)
+      + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+      + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+        n_3 + (1-n_3)^2 \ln(1-n_3)
+      }{
+        36\pi n_3^2(1-n_3)^2
+      }
+    \right\}
     \\
-    &= \int \left\{ -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
-    + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + \frac{
-      \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
-    }{
-      8\pi \left( 1 - n_3 \right)^2
-    }\right\}
+    &= \int \left\{
+      -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
+      + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
+      + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+        n_3 + (1-n_3)^2 \ln(1-n_3)
+      }{
+        36\pi n_3^2(1-n_3)^2
+      }
+    \right\}
 \end{align}
 
 \begin{align}
     \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
-    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    -\frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
     + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
       n_3(\mathbf{r}'))^2}
-    + \frac{1}{4\pi}\frac{
-      \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
-    }{
-      (1-n_3(\mathbf{r}'))^3
-    }
+    + \frac{n_2^3 -
+      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
+      \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
+    \right)
     \\
     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
     -\frac{1}{4\pi R^2} \ln\left( 1 - n_3\right)
     +  \frac{2n_1}{1-n_3}
-    + \frac{n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}}{8\pi \left( 1 - n_3 \right)^2}
+    + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
+      (1-n_3)^2\ln(1-n_3)}{
+      36\pi n_3^2(1-n_3)^2
+    }
     \\
     \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
     \frac{2\mathbf{n}_{V1}}{1-n_3}
-    + \frac{n_2 \mathbf{n}_{V2}}{4\pi \left( 1 - n_3 \right)^2}
-    \\
+    - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
+      (1-n_3)^2\ln(1-n_3)}{
+      36\pi n_3^2(1-n_3)^2
+    }    \\
     \frac{\delta A_{HS}}{\delta R(\mathbf{r}')} &=
     \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
     - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
@@ -411,13 +419,28 @@ the point $\mathbf{r}$ extended by a distance $dR$.}
 
 So we need to find the small change in free energy that is caused by
 these small changes in the shape and size of the hard spheres that are
-in contact with this point.  This changes the weighted densities in
-the following way---assuming that our point of interest is
-$\mathbf{r}$.
+in contact with this point.  In the following section, we will work
+out the changes in the weighted densities at position $\mathbf{r}'$
+when point of contact we are considering is $\mathbf{r}$.
+
+The packing fraction $n_3$ is changed at the point where the sphere is
+extended, since a few more spheres will overlap this point.
 \begin{align}
   \Delta n_3(\mathbf{r}') &= n(\mathbf{r})\Delta A \Delta R
   \delta(|\mathbf{r}-\mathbf{r}'| - R)
-   \\
+\end{align}
+The density $n_0$ is the average density, averaged over a spherical
+shell.  As such, shifting the position of a shell just shifts which
+location we are averaging over.
+\begin{align}
+  \Delta n_0(\mathbf{r}') &=
+    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
+      \mathbf{\nabla}n(\mathbf{r}) \Delta A \Delta R
+    \delta(|\mathbf{r}-\mathbf{r}'|-R)
+\end{align}
+The change in $n_2$ comes from two terms: a change in the density value, as
+we saw in $n_0$, and a change in the area of the segment.
+\begin{align}
   \Delta n_2(\mathbf{r}') &=
   \left(n\left(\mathbf{r} + \Delta R
   \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
@@ -427,7 +450,12 @@ $\mathbf{r}$.
   \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
     \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
     \right) \Delta A \Delta R
-  \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
+  \delta(|\mathbf{r}-\mathbf{r}'|-R)
+\end{align}
+The vector density $\mathbf{n}_{V2}$ is similar to the density
+$n_2$: both changes in the density value and changes in the surface
+area play a role.
+\begin{align}
   \Delta \mathbf{n}_{V2}(\mathbf{r}') &=
   \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
   \left(n\left(\mathbf{r} + \Delta R
@@ -441,11 +469,93 @@ $\mathbf{r}$.
     \right) \Delta A \Delta R
   \delta(|\mathbf{r}-\mathbf{r}'|-R) 
 \end{align}
+The density $n_1$ (and similarly $\mathbf{n}_{V1}$) can be roughly
+interpreted as the density weighted by the area-averaged mean
+curvature~\cite{oversteegen2005general, roth2010review}.  When we
+extend the sphere at the contact point, we will introduce regions of
+both positive and negative mean curvature.  In principle, we can do
+this in such a way that the two portions cancel, and hence we will
+assume that
+\begin{align}
+  \Delta n_1(\mathbf{r}') &= 0 \\
+  \Delta \mathbf{n}_{V1}(\mathbf{r}') &= 0
+\end{align}
+In fact, the negative and positive portions are spatially separated,
+so these terms should probably include a derivative term, which I
+should work out.  Particularly as it may even happen to cancel a
+different derivative term that we then won't have to drop!
+
+We need to then find the change in Helmholtz free energy due to this
+change at position $\mathbf{r}$:
+\begin{align}
+  \Delta A_{HS} &= \int \mathbf{dr}'
+  \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}\Delta n_3(\mathbf{r}')
+  +
+  \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}\Delta n_2(\mathbf{r}')
+  +
+  \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} \cdot \Delta \mathbf{n}_{V2}(\mathbf{r}')
+\end{align}
+
 \end{widetext}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 We get a nice spatial dependence for SAFT.
+
+\begin{widetext}
+  \appendix
+
+  \section{Partial derivatives of the White Bear free energy functional}
+
+  Here is the White Bear free energy functional for the hard-sphere
+  fluid:~\cite{roth2002whitebear}
+  \begin{align}
+    A_{HS} &= \int \left\{
+    -n_0 \ln\left( 1 - n_3\right)
+    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2(1-n_3)^2
+    }
+    \right\}
+\end{align}
+
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
+    -\frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+      n_3(\mathbf{r}'))^2}
+    + \frac{n_2^3 -
+      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
+      \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
+    \right)
+\end{align}
+\end{widetext}
+
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &= -\ln(1-n_3)
+    \\
+    \beta\frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+    \\
+    \beta\frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
+      \frac{n_1}{1-n_3}
+      + (n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
+        (1-n_3)^2\ln(1-n_3)}{
+        12\pi n_3^2(1-n_3)^2
+      }
+\end{align}
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+      \frac{\mathbf{n}_{V2}}{1-n_3}
+    \\
+    \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
+      \frac{\mathbf{n}_{V1}}{1-n_3}
+      - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
+        (1-n_3)^2\ln(1-n_3)}{
+        36\pi n_3^2(1-n_3)^2
+      }
+  \end{align}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
