@@ -13,6 +13,7 @@ html
 stamp-*
 *.test
 deft
+monte-carlo
 install-sh
 depcomp
 missing
