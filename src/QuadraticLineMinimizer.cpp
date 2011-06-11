@@ -29,6 +29,28 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   //fflush(stdout);
   // FIXME: The following probably double-computes the energy!
   const double E0 = energy();
+  if (verbose) {
+    printf("\t\tQuad: E0 = %25.15g", E0);
+    fflush(stdout);
+  }
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(" which is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
+  if (isnan(slope)) {
+    // The slope here is a NaN, so there is no point continuing!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(", but the slope is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
 
   if (slope*(*step) > 0) {
     if (verbose) printf("Swapping sign of step with slope %g...\n", slope);
@@ -64,7 +86,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   const double curvature = 2.0*(E1-E0-step1*slope)/(step1*step1);
   double step2 = -slope/curvature;
   if (verbose) {
-    printf("\t\tQuad: E0 = %25.15g   E1 = %25.15g\n", E0, E1);
+    printf("   E1 = %25.15g\n", E1);
     printf("\t\tQuad: slope = %14.7g  curvature = %14.7g\n", slope, curvature);
     fflush(stdout);
   }

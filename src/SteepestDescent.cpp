@@ -47,6 +47,15 @@ bool SteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf("The initial energy is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
   const VectorXd d = -grad();
   const double d2 = -d.dot(d);
   // Let's immediately free the cached gradient stored internally!
@@ -73,6 +82,15 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf("The initial energy is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
   const VectorXd d = -pgrad();
   const double gdotd = d.dot(grad());
   // Let's immediately free the cached gradient stored internally!

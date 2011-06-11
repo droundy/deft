@@ -48,6 +48,9 @@ public:
   Expression printme(const Expression &) const {
     return Expression("kT").set_type("double");
   }
+  bool append_to_name(const std::string) {
+    return false;
+  }
 };
 
 Functional kT = Functional(new Temperature(), "kT");
@@ -84,6 +87,15 @@ Functional IdealGasOfVeff = CreateIdealGasOfVeff();
 Functional EntropyOfIdealGasOfVeff() {
   Functional Veff = Identity().set_name("Veff");
   Functional n = exp(-Veff/kT);
+  Functional nQ = find_nQ();
+  Functional dnQ_dT = find_dnQ_dT();
+  // The following is also known as the Sackur-Tetrode equation
+  return ((Veff/kT + log(nQ) + Functional(2.5))*n).set_name("ideal_gas_entropy");
+}
+
+Functional EntropyOfIdealGas() {
+  Functional n = Identity();
+  Functional Veff = -kT*log(n);
   Functional nQ = find_nQ();
   Functional dnQ_dT = find_dnQ_dT();
   // The following is also known as the Sackur-Tetrode equation

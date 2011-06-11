@@ -69,7 +69,7 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
       retval++;
     }
   } else {
-    printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
+    printf("fractional error in energy = %g\n", (Edouble - Egrid)/fabs(Edouble));
     if (!(fabs((Edouble - Egrid)/Edouble) < fraccuracy)) {
       printf("FAIL: Error in the energy is too big!\n");
       retval++;
@@ -83,12 +83,15 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
       retval++;
     }
   } else {
-    printf("fractional error = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
+    printf("fractional error in gradient = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
     if (!(fabs((deriv_double - deriv_grid)/deriv_double) < fraccuracy)) {
-      printf("FAIL: Error in the gradient is too big!\n");
+      printf("FAIL: Error in the gradient is just too darn big!\n");
       retval++;
     }
   }
+
+  if (fabs(deriv_double) > 1e-30)
+    retval += f.run_finite_difference_test(name, kT, nr);
 
   return retval;
 }
@@ -126,13 +129,25 @@ int main(int, char *argv[]) {
     retval += test_functional("StepConvolve(1)(x)", StepConvolve(1)(x), 1e-5, 1e-13);
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), -0.01, 2e-13);
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), 0.2, 2e-13);
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), 0, 3e-14);
+
     retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
     retval += test_functional("HardSpheresWBnotensor(...)",
                               HardSpheresWBnotensor(2)(n), Veff, 1e-13);
     retval += test_functional("IdealGasOfVeff", IdealGasOfVeff, Veff, 2e-13);
-    retval += test_functional("AssociationSAFT(...)", AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7), Veff, 2e-13);
+    retval += test_functional("AssociationSAFT(...)",
+                              AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7, 0.7), 1e-4, 2e-13);
+    // retval += test_functional("SaftFluid(...)",
+    //                           SaftFluid(2,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
     retval += test_functional("SaftFluidSlow(...)",
-                              SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8,0), Veff, 2e-13);
+                              SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 2e-13);
+    retval += test_functional("OfEffectivePotential(SaftFluidSlow(...))",
+                              OfEffectivePotential(SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 2e-13);
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 

@@ -26,8 +26,8 @@ const double R = 2.7;
 const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.4257*eta_one;
-Functional n = EffectivePotentialToDensity();
-const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff, water_prop.kT, nliquid);
+const double mu = find_chemical_potential(OfEffectivePotential(HardSpheres(R) + IdealGas()),
+                                          water_prop.kT, nliquid);
 
 // Here we set up the lattice.
 const double zmax = 80;
@@ -38,7 +38,13 @@ GridDescription gd(lat, 0.1);
 // And the functional...
 Functional f0wb = HardSpheresWB(R);
 Functional f0rf = HardSpheresRF(R);
-Functional f = HardSphereGas(R, mu);
+Functional f = OfEffectivePotential(HardSphereGas(R, mu));
+//Functional fslow = OfEffectivePotential(HardSpheres(R) + IdealGas() + ChemicalPotential(mu));
+Functional fslow = HardSpheres(R)(EffectivePotentialToDensity())
+  + IdealGas()(EffectivePotentialToDensity()) + ChemicalPotential(mu)(EffectivePotentialToDensity());
+//Functional ig = IdealGas()(EffectivePotentialToDensity());
+Functional ig = OfEffectivePotential(IdealGas());
+Functional igveff = IdealGasOfVeff;
 
 Grid external_potential(gd);
 Grid potential(gd);
@@ -60,7 +66,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.0028439564619176;
+  const double true_energy = -0.0028439564619177;
   const double true_N = 0.376241423570245;
 
   int retval = 0;
@@ -92,7 +98,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 double walls(Cartesian r) {
   const double z = r.dot(Cartesian(0,0,1));
   if (fabs(z) < 2*R) {
-    return 1e9;
+    return 0.1;
   } else {
     return 0;
   }
@@ -119,15 +125,20 @@ int main(int, char **argv) {
 
   {
     potential = external_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += f0wb(n).run_finite_difference_test("white bear functional", water_prop.kT, potential);
-    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", water_prop.kT, potential);
-
-    //retval += constrain(constraint, f0wb(n)).run_finite_difference_test("constrained white bear functional", potential);
-    //retval += constrain(constraint, f0rf(n)).run_finite_difference_test("constrained rosenfeld functional", potential);
+    retval += OfEffectivePotential(f0wb).run_finite_difference_test("white bear functional",
+                                                                    water_prop.kT, potential);
+    retval += OfEffectivePotential(f0rf).run_finite_difference_test("rosenfeld functional",
+                                                                    water_prop.kT, potential);
+    retval += ff.run_finite_difference_test("full functional", water_prop.kT, potential);
+    if (retval > 0) {
+      printf("quitting early with a failure in %d finite difference tests.\n", retval);
+      return retval;
+    }
   }
 
   {
-    Minimizer pd = Precision(0, ConjugateGradient(ff, gd, water_prop.kT, &potential, QuadraticLineMinimizer));
+    Minimizer pd = Precision(0, ConjugateGradient(ff, gd, water_prop.kT, &potential,
+                                                  QuadraticLineMinimizer));
     retval += test_minimizer("ConjugateGradient", pd, 120, 1e-7);
   }
   {

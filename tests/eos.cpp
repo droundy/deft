@@ -97,10 +97,24 @@ int main(int, char **argv) {
     fclose(o);
     printf("Got dispersion!\n");
 
-    Functional f = SaftFluid(water_prop.lengthscale,
-                             water_prop.epsilonAB, water_prop.kappaAB,
-                             water_prop.epsilon_dispersion,
-                             water_prop.lambda_dispersion, 0);
+    Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                  water_prop.epsilonAB, water_prop.kappaAB,
+                                                  water_prop.epsilon_dispersion,
+                                                  water_prop.lambda_dispersion,
+                                                  water_prop.length_scaling, 0));
+
+
+    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+					      0.001, 0.01);
+    printf("density at 1 atmosphere is %g\n", n_1atm);
+    printf("error in density at 1 atmosphere is %g\n", n_1atm/water_prop.liquid_density - 1);
+    if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.01) {
+      printf("FAIL! error in water density is too big! %g\n",
+             n_1atm/water_prop.liquid_density - 1);
+      retval++;
+    }
+
+    test_pressure("saft at 1 atm", f, n_1atm, atmospheric_pressure);
 
     {
       printf("working onfoo\n");
@@ -120,6 +134,7 @@ int main(int, char **argv) {
       double nl, nv, mu;
       saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       printf("saturated water density is %g\n", nl);
+      printf("1 atm water density ? is %g\n", water_prop.liquid_density);
       if (fabs(nl/water_prop.liquid_density - 1) > 0.1) {
         printf("FAIL: error in saturated water density is too big! %g\n",
                nl/water_prop.liquid_density - 1);
@@ -144,16 +159,18 @@ int main(int, char **argv) {
 
     {
       o = fopen("room-temperature.dat", "w");
-      Functional f = SaftFluid(water_prop.lengthscale,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
+      Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                        water_prop.epsilonAB, water_prop.kappaAB,
+                                                        water_prop.epsilon_dispersion,
+                                                        water_prop.lambda_dispersion,
+                                                        water_prop.length_scaling, 0));
       double mufoo = find_chemical_potential(f, water_prop.kT,
                                              water_prop.liquid_density);
-      f = SaftFluid(water_prop.lengthscale,
-                    water_prop.epsilonAB, water_prop.kappaAB,
-                    water_prop.epsilon_dispersion,
-                    water_prop.lambda_dispersion, mufoo);
+      f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                             water_prop.epsilonAB, water_prop.kappaAB,
+                                             water_prop.epsilon_dispersion,
+                                             water_prop.lambda_dispersion,
+                                             water_prop.length_scaling, mufoo));
       double nl, nv, mu;
       saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       for (double dens=0.1*nv; dens<=1.2*nl; dens *= 1.01) {
@@ -164,16 +181,6 @@ int main(int, char **argv) {
       }
       fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
-    }
-
-    const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
-                                              water_prop.liquid_density/10.1,
-                                              water_prop.liquid_density*3.14);
-    printf("density at 1 atmosphere is %g\n", n_1atm);
-    if (fabs(n_1atm/water_prop.liquid_density - 1) > 0.1) {
-      printf("FAIL? error in water density is too big! %g\n",
-             n_1atm/water_prop.liquid_density - 1);
-      //retval++;
     }
 
     /*
@@ -189,7 +196,8 @@ int main(int, char **argv) {
     equation_of_state(o, AssociationSAFT(water_prop.lengthscale,
                                          water_prop.epsilonAB, water_prop.kappaAB,
                                          water_prop.epsilon_dispersion,
-                                         water_prop.lambda_dispersion)(n),
+                                         water_prop.lambda_dispersion,
+                                         water_prop.length_scaling)(n),
                       water_prop.kT, nmin, nmax);
     fclose(o);
   }

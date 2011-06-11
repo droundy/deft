@@ -48,11 +48,11 @@ int errors = 0;
 
 void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   
-  printf("\n*******************");
+  printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
   for (unsigned i=0;i<strlen(name);i++) printf("*");
-  printf("*****************\n\n");
+  printf("************\n\n");
 
 
   Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,zmax));
@@ -65,7 +65,7 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   Grid potential(gd);
 
   potential = water_prop.liquid_density*constraint
-    + water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
   //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
 
   // Change from density to effective potential...
@@ -127,9 +127,11 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   const int numiters = 40;
 
   Functional myX = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
+                                water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
+                                water_prop.length_scaling);
   Functional myDelta = DeltaSAFT(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion);
+                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
+                                 water_prop.length_scaling);
   printf("\n\nAbout to start improving fast free energy...\n\n");
   for (int i=0;i<numiters && minfast.improve_energy(true);i++) {
     fflush(stdout);
@@ -206,25 +208,25 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
     errors++;
   }
 
-  //errors += ffast.run_finite_difference_test("ffast", water_prop.kT, fastpotential);
-  //errors += fslow.run_finite_difference_test("fslow", water_prop.kT, fastpotential);
+  errors += ffast.run_finite_difference_test("ffast", water_prop.kT, fastpotential);
+  errors += fslow.run_finite_difference_test("fslow", water_prop.kT, fastpotential);
 }
 
 int main(int, char **argv) {
-  Functional f = SaftFluidSlow(water_prop.lengthscale,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, 0);
+  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                water_prop.epsilonAB, water_prop.kappaAB,
+                                                water_prop.epsilon_dispersion,
+                                                water_prop.lambda_dispersion, water_prop.length_scaling, 0));
   double mu = find_chemical_potential(f, water_prop.kT,
                                       1.01*water_prop.liquid_density);
-  Functional fslow = SaftFluidSlow(water_prop.lengthscale,
-                                   water_prop.epsilonAB, water_prop.kappaAB,
-                                   water_prop.epsilon_dispersion,
-                                   water_prop.lambda_dispersion, mu);
-  Functional ffast = SaftFluid(water_prop.lengthscale,
-                               water_prop.epsilonAB, water_prop.kappaAB,
-                               water_prop.epsilon_dispersion,
-                               water_prop.lambda_dispersion, mu);
+  Functional fslow = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
+                                                        water_prop.epsilonAB, water_prop.kappaAB,
+                                                        water_prop.epsilon_dispersion,
+                                                        water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  Functional ffast = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                    water_prop.epsilonAB, water_prop.kappaAB,
+                                                    water_prop.epsilon_dispersion,
+                                                    water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   took("Creating functionals");
 
   test_fast_vs_slow("Saft", ffast, fslow);
@@ -232,10 +234,12 @@ int main(int, char **argv) {
   Functional n = EffectivePotentialToDensity();
   f = HardSpheresWBnotensor(water_prop.lengthscale)(n);
   mu = find_chemical_potential(f, water_prop.kT, 1.3*water_prop.liquid_density);
-  fslow = HardSpheresWBnotensor(water_prop.lengthscale)(n) + ChemicalPotential(mu)(n);
-  ffast = HardSpheresNoTensor(water_prop.lengthscale)(n) + ChemicalPotential(mu)(n);
+  fslow = OfEffectivePotential(HardSpheresWBnotensor(water_prop.lengthscale)
+                               + ChemicalPotential(mu));
+  ffast = OfEffectivePotential(HardSpheresNoTensor(water_prop.lengthscale)
+                               + ChemicalPotential(mu));
 
-  test_fast_vs_slow("HardSpheresNoTensor", ffast, fslow);
+  //test_fast_vs_slow("HardSpheresNoTensor", ffast, fslow);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

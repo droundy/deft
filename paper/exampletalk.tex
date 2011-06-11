@@ -1,0 +1,161 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{verbatim}
+\usetheme{Frankfurt}
+
+\title{Energy and Entropy and More}
+
+\author{David Roundy}
+\institute{Oregon State University}
+\date{}
+
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%\section*{Outline}
+% \begin{frame}
+%   \frametitle{Outline}
+%   \tableofcontents
+% \end{frame}
+
+\section{Energy and Entropy}
+\subsection*{}
+
+\begin{frame}
+  \frametitle{Energy and Entropy paradigm}
+  \begin{block}{The course}
+    \begin{itemize}
+    \item Originally developed by Allen Wassermann.
+    \item I cotaught Energy and Entropy in 2009.
+    \item I taught it on my own in 2010.
+    \end{itemize}
+  \end{block}
+  \vfill
+  \begin{block}{Course challenges}
+    \begin{itemize}
+    \item Introduce students to thermodynamics for the first time.
+    \item Tricky thermodynamic differentials.
+    \item Information-theory approach to the statistical approach.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\newcommand\myderiv[3]{%
+  \ensuremath{\left(\frac{\partial #1}{\partial #2}\right)_{#3}}}
+
+\begin{frame}
+  \frametitle{Energy and Entropy paradigm}
+  \begin{block}{Thermodynamic derivatives $\longrightarrow$ experiments}
+    \emph{``Name the experiment!''} For each of the derivatives I
+    write on the board, describe the experiment that you would perform
+    in order to measure it.
+    \begin{align}
+      \myderiv{p}{V}{T} \quad
+      \myderiv{p}{V}{S} \quad
+      \myderiv{p}{S}{V}
+    \end{align}
+    \begin{itemize}
+    \item Maxwell relations help for confusing cases
+    \item We have labs so students get to measure thermodynamic
+      quantities themselves
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Energy and Entropy paradigm}
+  \begin{block}{Rubber band experiment and measuring entropy}
+    Measuring tension versus temperature and length gives $\Delta U$,
+    $\Delta F$ and $\Delta S$ for an isothermal stretch.
+
+    \begin{columns}
+      \begin{column}{2.4in}
+        \begin{center}
+          %\includegraphics[height=2in]{figs/hot-rubber}
+        \end{center}
+      \end{column}
+      \begin{column}{2in}
+        \begin{center}
+          %\includegraphics[height=2in]{figs/ice-rubber}
+        \end{center}
+      \end{column}
+    \end{columns}
+  \end{block}
+\end{frame}
+
+\newcommand\fairness{\ensuremath{\mathcal{F}}}
+
+\begin{frame}
+  \frametitle{Energy and Entropy paradigm}
+  \begin{block}{Information theory approach}
+    \begin{itemize}
+    \item Maximizing the (constrained) fairness gives the Boltzmann
+      factor.
+      \[
+      \fairness = -k_B\sum_i^\text{all states} P_i \ln P_i
+      \]
+    \item Entropy is thus $\fairness_\text{max}$ rather than
+      \[
+      S = k_B \ln \Omega
+      \]
+    \item The Second Law is obvious, given this derivation of
+      probabilities.
+    \item Is it better?
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\section{Joining the Paradigms team}
+\subsection*{}
+
+
+\begin{frame}
+  \frametitle{Teaching a new Paradigm for the first time}
+  \begin{block}{}
+    \begin{itemize}
+    \item I taught \emph{Symmetries and Idealizations} in Fall 2009
+    \item This is the \emph{first} paradigm
+      \begin{itemize}
+      \item Electrostatic potential
+      \item Physics integrals
+      \item Taylor expansions
+      \item Working in groups
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Teaching a new Paradigm for the first time}
+  \begin{block}{The Paradigms Portfolios wiki}
+    \begin{itemize}
+    \item \verb!http://physics.oregonstate.edu/portfolioswiki!
+    \item Homework
+    \item Descriptions of activities and discussions
+    \item Time estimates---shockingly accurate!
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Teaching a new Paradigm for the first time}
+  \begin{block}{Class every day, and how that changes things}
+    \begin{itemize}
+    \item It's easy to pick things up the next day: \\this changes how
+      you think about ``finishing'' an activity
+    \item Students who get behind are very behind
+    \item Homework \emph{needs} to be very well synchronized
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}

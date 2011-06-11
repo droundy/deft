@@ -37,11 +37,12 @@ int main(int, char **) {
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");
   double mu = 0, nl = 0, nv = 0;
-  Functional f = SaftFluid(water_prop.lengthscale,
-                           water_prop.epsilonAB, water_prop.kappaAB,
-                           water_prop.epsilon_dispersion,
-                           water_prop.lambda_dispersion, 0);
-  for (int i=0; i<imax; i+=3) {
+  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                water_prop.epsilonAB, water_prop.kappaAB,
+                                                water_prop.epsilon_dispersion,
+                                                water_prop.lambda_dispersion,
+                                                water_prop.length_scaling, 0));
+  for (int i=0; i<imax; i+=1) {
     //printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
     double kT = kB*temperatures_kelvin[i];
     saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-6);
@@ -58,10 +59,10 @@ int main(int, char **) {
             water_saturated_surface_tension[i]);
   }
 
-  for (double T=660; T<=693; T += 5) {
+  for (double T=650; T<=695; T += 1) {
     //printf("Working on bonus equation of state at %g Kelvin...\n", T);
     double kT = kB*T;
-    saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-6);
+    saturated_liquid_vapor(f, kT, 0.0005, 0.0019, 0.003, &nl, &nv, &mu, 1e-6);
     took("Finding coesisting liquid and vapor densities");
     double pv = pressure(f, kT, nv);
     took("Finding pressure");

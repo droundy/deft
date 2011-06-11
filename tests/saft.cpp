@@ -34,11 +34,10 @@ void test_energy(const char *name, Functional f, double kT,
   Grid density(gd);
   density = 1e-3*(-500*r2(gd)).cwise().exp()
     + 1e-7*VectorXd::Ones(gd.NxNyNz);
-  Grid eff_potential(gd, -kT*density.cwise().log());
 
-  retval += f.run_finite_difference_test(name, kT, eff_potential);
+  retval += f.run_finite_difference_test(name, kT, density);
 
-  double e = f.integral(kT, eff_potential);
+  double e = f.integral(kT, density);
   printf("Energy = %.16g\n", e);
   printf("Fractional error = %g\n", (e - true_energy)/fabs(true_energy));
   if (e < true_energy) {
@@ -53,25 +52,24 @@ void test_energy(const char *name, Functional f, double kT,
 
 int main(int, char **argv) {
   const double kT = 1e-3; // room temperature in Hartree, approximately
-  Functional n = EffectivePotentialToDensity();
   test_energy("association",
               AssociationSAFT(water_prop.lengthscale,
                               water_prop.epsilonAB, water_prop.kappaAB,
                               water_prop.epsilon_dispersion,
-                              water_prop.lambda_dispersion)(n),
-              kT, -4.66373704296135e-12);
-  const double dispersion_energy = -2.25551876171605e-12;
+                              water_prop.lambda_dispersion, water_prop.length_scaling),
+              kT, -4.663736884023144e-12);
+  const double dispersion_energy = -2.25958836428434e-12;
   test_energy("dispersion",
               DispersionSAFT(water_prop.lengthscale,
                              water_prop.epsilon_dispersion,
-                             water_prop.lambda_dispersion)(n),
+                             water_prop.lambda_dispersion, water_prop.length_scaling),
               kT, dispersion_energy);
   test_energy("SAFT slow",
               SaftFluidSlow(water_prop.lengthscale,
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
-                            water_prop.lambda_dispersion, 0),
-              kT, -8.140492183697745e-09);
+                            water_prop.lambda_dispersion, water_prop.length_scaling, 0),
+              kT, -8.140496253141373e-09);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

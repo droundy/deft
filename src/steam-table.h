@@ -86,6 +86,7 @@ static double temperatures_kelvin[] = {
   640,
   643,
   646,
+  647.096,
   0 // the zero temperature marks the end of the data!
 };
 
@@ -159,7 +160,8 @@ static double water_saturation_liquid[] = {
   0.0024955994,
   0.0023852479,
   0.0022446572,
-  0.0019960588
+  0.0019960588,
+  0.00159503241883728
 };
 
 static double water_vapor_density[] = {
@@ -232,7 +234,8 @@ static double water_vapor_density[] = {
   0.0007948539,
   0.000877493,
   0.0009925767,
-  0.0012059924
+  0.0012059924,
+  0.00159503241883728
 };
 
 static double water_saturated_surface_tension[] = {
@@ -305,7 +308,8 @@ static double water_saturated_surface_tension[] = {
   8.06611215717945E-007,
   5.19510947846267E-007,
   2.61282872845247E-007,
-  0.00000005
+  0.00000005,
+  0
 };
 
 static double water_vapor_pressure[] = {
@@ -378,5 +382,6 @@ static double water_vapor_pressure[] = {
   6.64493E-007,
   6.88801E-007,
   7.13973E-007,
-  7.40114E-007
+  7.40114E-007,
+  7.49931530650755e-07
 };

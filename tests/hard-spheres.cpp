@@ -29,13 +29,12 @@ double resolution = 0.5;
 GridDescription gd(lat, resolution);
 
 // And the functional...
-Functional n = EffectivePotentialToDensity();
 Functional f = HardSphereGas(R, 0);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/ngas*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-Functional ff = f + ExternalPotential(external_potential)(n);
+Functional ff = OfEffectivePotential(f + ExternalPotential(external_potential));
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1e-3) {
   clock_t start = clock();
@@ -45,7 +44,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.03618522429810991;
+  const double true_energy = -0.0361899833470829;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 

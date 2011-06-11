@@ -38,6 +38,14 @@ bool FunctionalInterface::I_am_one() const {
   return false;
 }
 
+bool FunctionalInterface::I_am_constant_wrt_x() const {
+  return false;
+}
+
+bool FunctionalInterface::I_preserve_homogeneous() const {
+  return true;
+}
+
 bool FunctionalInterface::I_give_zero_for_zero() const {
   return false;
 }
@@ -65,6 +73,9 @@ double FunctionalInterface::integral(const GridDescription &gd, double kT, const
 class PretendIngradType : public FunctionalInterface {
 public:
   PretendIngradType() {}
+  bool append_to_name(const std::string) {
+    return false;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &x) const {
     return x;
@@ -112,9 +123,7 @@ double average(int count, ...)
 }
 */
 void Functional::create_source(const std::string filename, const std::string classname,
-                               const char *a1, const char *a2, const char *a3,
-                               const char *a4, const char *a5, const char *a6,
-                               const char *a7, bool isheader) const {
+                               const char *args[], bool isheader) const {
   FILE *o = fopen(filename.c_str(), "w");
   if (isheader) fprintf(o, "// -*- mode: C++; -*-\n\n#pragma once\n\n");
   //printf("Generating %s\n", classname.c_str());
@@ -128,21 +137,11 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, "class %s_grad : public FunctionalInterface {\n", classname.c_str());
     fprintf(o, "public:\n");
     fprintf(o, "  %s_grad(", classname.c_str());
-    if (a1) fprintf(o, "double %s_arg", a1);
-    if (a2) fprintf(o, ", double %s_arg", a2);
-    if (a3) fprintf(o, ", double %s_arg", a3);
-    if (a4) fprintf(o, ", double %s_arg", a4);
-    if (a5) fprintf(o, ", double %s_arg", a5);
-    if (a6) fprintf(o, ", double %s_arg", a6);
-    if (a7) fprintf(o, ", double %s_arg", a7);
+    if (args[0]) fprintf(o, "double %s_arg", args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", double %s_arg", args[i]);
     fprintf(o, ") ");
-    if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
-    if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-    if (a3) fprintf(o, ", %s(%s_arg)", a3, a3);
-    if (a4) fprintf(o, ", %s(%s_arg)", a4, a4);
-    if (a5) fprintf(o, ", %s(%s_arg)", a5, a5);
-    if (a6) fprintf(o, ", %s(%s_arg)", a6, a6);
-    if (a7) fprintf(o, ", %s(%s_arg)", a7, a7);
+    if (args[0]) fprintf(o, ": %s(%s_arg)", args[0], args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", %s(%s_arg)", args[i], args[i]);
     fprintf(o, " {}\n");
     // We don't have an analytic gradient for the gradient itself...
     fprintf(o, "  bool I_have_analytic_grad() const {\n");
@@ -167,6 +166,9 @@ void Functional::create_source(const std::string filename, const std::string cla
     eg.generate_code(o, "    return %s;\n");
     fprintf(o, "  }\n");
 
+    fprintf(o, "  bool append_to_name(const std::string) {\n");
+    fprintf(o, "    return false;\n");
+    fprintf(o, "  }\n"); 
     // Don't define the gradient:
     fprintf(o, "  double derive(double, double) const {\n");
     fprintf(o, "    assert(0); // fail\n");
@@ -190,33 +192,14 @@ void Functional::create_source(const std::string filename, const std::string cla
 
     fprintf(o, "  Expression printme(const Expression &x) const {\n");
     fprintf(o, "    return funexpr(\"%sGrad(", classname.c_str());
-    if (a1) fprintf(o, "%s", a1);
-    if (a2) fprintf(o, ", %s", a2);
-    if (a3) fprintf(o, ", %s", a3);
-    if (a4) fprintf(o, ", %s", a4);
-    if (a5) fprintf(o, ", %s", a5);
-    if (a6) fprintf(o, ", %s", a6);
-    if (a7) fprintf(o, ", %s", a7);
+    if (args[0]) fprintf(o, "%s", args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
     fprintf(o, ")\")(x);\n");
     fprintf(o, "  }\n");
 
     // Data members follow...
     fprintf(o, "private:\n");
-    if (a1) fprintf(o, "  double %s;\n", a1);
-    if (a2) fprintf(o, "  double %s;\n", a2);
-    if (a3) fprintf(o, "  double %s;\n", a3);
-    if (a4) fprintf(o, "  double %s;\n", a4);
-    if (a5) fprintf(o, "  double %s;\n", a5);
-    if (a6) fprintf(o, "  double %s;\n", a6);
-    if (a7) fprintf(o, "  double %s;\n", a7);
-    if ((!a1 || std::string(a1) != "R") &&
-        (!a2 || std::string(a2) != "R") &&
-        (!a3 || std::string(a3) != "R") &&
-        (!a4 || std::string(a4) != "R") &&
-        (!a5 || std::string(a5) != "R") &&
-        (!a6 || std::string(a6) != "R") &&
-        (!a7 || std::string(a7) != "R"))
-      fprintf(o, "  double R;\n");
+    for (int i=0; args[i]; i++) fprintf(o, "  double %s;\n", args[i]);
     fprintf(o, "}; // End of %s_grad class\n\n", classname.c_str());
   }
 
@@ -227,21 +210,11 @@ void Functional::create_source(const std::string filename, const std::string cla
     fprintf(o, "class %s_dT : public FunctionalInterface {\n", classname.c_str());
     fprintf(o, "public:\n");
     fprintf(o, "  %s_dT(", classname.c_str());
-    if (a1) fprintf(o, "double %s_arg", a1);
-    if (a2) fprintf(o, ", double %s_arg", a2);
-    if (a3) fprintf(o, ", double %s_arg", a3);
-    if (a4) fprintf(o, ", double %s_arg", a4);
-    if (a5) fprintf(o, ", double %s_arg", a5);
-    if (a6) fprintf(o, ", double %s_arg", a6);
-    if (a7) fprintf(o, ", double %s_arg", a7);
+    if (args[0]) fprintf(o, "double %s_arg", args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", double %s_arg", args[i]);
     fprintf(o, ") ");
-    if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
-    if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-    if (a3) fprintf(o, ", %s(%s_arg)", a3, a3);
-    if (a4) fprintf(o, ", %s(%s_arg)", a4, a4);
-    if (a5) fprintf(o, ", %s(%s_arg)", a5, a5);
-    if (a6) fprintf(o, ", %s(%s_arg)", a6, a6);
-    if (a7) fprintf(o, ", %s(%s_arg)", a7, a7);
+    if (args[0]) fprintf(o, ": %s(%s_arg)", args[0], args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", %s(%s_arg)", args[i], args[i]);
     fprintf(o, " {}\n");
     // We don't have an analytic gradient for the temperature derivative...
     fprintf(o, "  bool I_have_analytic_grad() const {\n");
@@ -266,6 +239,9 @@ void Functional::create_source(const std::string filename, const std::string cla
     eg.generate_code(o, "    return %s;\n");
     fprintf(o, "  }\n");
 
+    fprintf(o, "  bool append_to_name(const std::string) {\n");
+    fprintf(o, "    return false;\n");
+    fprintf(o, "  }\n");
     // Don't define the gradient:
     fprintf(o, "  double derive(double, double) const {\n");
     fprintf(o, "    assert(0); // fail\n");
@@ -289,54 +265,25 @@ void Functional::create_source(const std::string filename, const std::string cla
 
     fprintf(o, "  Expression printme(const Expression &x) const {\n");
     fprintf(o, "    return funexpr(\"%s_by_dT(", classname.c_str());
-    if (a1) fprintf(o, "%s", a1);
-    if (a2) fprintf(o, ", %s", a2);
-    if (a3) fprintf(o, ", %s", a3);
-    if (a4) fprintf(o, ", %s", a4);
-    if (a5) fprintf(o, ", %s", a5);
-    if (a6) fprintf(o, ", %s", a6);
-    if (a7) fprintf(o, ", %s", a7);
+    if (args[0]) fprintf(o, "%s", args[0]);
+    for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
     fprintf(o, ")\")(x);\n");
     fprintf(o, "  }\n");
 
     // Data members follow...
     fprintf(o, "private:\n");
-    if (a1) fprintf(o, "  double %s;\n", a1);
-    if (a2) fprintf(o, "  double %s;\n", a2);
-    if (a3) fprintf(o, "  double %s;\n", a3);
-    if (a4) fprintf(o, "  double %s;\n", a4);
-    if (a5) fprintf(o, "  double %s;\n", a5);
-    if (a6) fprintf(o, "  double %s;\n", a6);
-    if (a7) fprintf(o, "  double %s;\n", a7);
-    if ((!a1 || std::string(a1) != "R") &&
-        (!a2 || std::string(a2) != "R") &&
-        (!a3 || std::string(a3) != "R") &&
-        (!a4 || std::string(a4) != "R") &&
-        (!a5 || std::string(a5) != "R") &&
-        (!a6 || std::string(a6) != "R") &&
-        (!a7 || std::string(a7) != "R"))
-      fprintf(o, "  double R;\n");
+    for (int i=0; args[i]; i++) fprintf(o, "  double %s;\n", args[i]);
     fprintf(o, "}; // End of %s_dT class\n\n", classname.c_str());
   }
 
   fprintf(o, "class %s_type : public FunctionalInterface {\n", classname.c_str());
   fprintf(o, "public:\n");
   fprintf(o, "  %s_type(", classname.c_str());
-  if (a1) fprintf(o, "double %s_arg", a1);
-  if (a2) fprintf(o, ", double %s_arg", a2);
-  if (a3) fprintf(o, ", double %s_arg", a3);
-  if (a4) fprintf(o, ", double %s_arg", a4);
-  if (a5) fprintf(o, ", double %s_arg", a5);
-  if (a6) fprintf(o, ", double %s_arg", a6);
-  if (a7) fprintf(o, ", double %s_arg", a7);
+  if (args[0]) fprintf(o, "double %s_arg", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", double %s_arg", args[i]);
   fprintf(o, ") ");
-  if (a1) fprintf(o, ": %s(%s_arg)", a1, a1);
-  if (a2) fprintf(o, ", %s(%s_arg)", a2, a2);
-  if (a3) fprintf(o, ", %s(%s_arg)", a3, a3);
-  if (a4) fprintf(o, ", %s(%s_arg)", a4, a4);
-  if (a5) fprintf(o, ", %s(%s_arg)", a5, a5);
-  if (a6) fprintf(o, ", %s(%s_arg)", a6, a6);
-  if (a7) fprintf(o, ", %s(%s_arg)", a7, a7);
+  if (args[0]) fprintf(o, ": %s(%s_arg)", args[0], args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s(%s_arg)", args[i], args[i]);
   fprintf(o, " {\n");
   fprintf(o, "    have_integral = true;\n");
   fprintf(o, "  }\n");
@@ -348,13 +295,7 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    assert(&gd); // to avoid an unused parameter error\n");
   fprintf(o, "    assert(&x); // to avoid an unused parameter error\n");
   std::set<std::string> allvars;
-  if (a1) allvars.insert(a1);
-  if (a2) allvars.insert(a2);
-  if (a3) allvars.insert(a3);
-  if (a4) allvars.insert(a4);
-  if (a5) allvars.insert(a5);
-  if (a6) allvars.insert(a6);
-  if (a7) allvars.insert(a7);
+  for (int i=0; args[i]; i++) allvars.insert(args[i]);
   Expression myself = printme(Expression("x"));
   std::set<std::string> toplevel = myself.top_level_vars(&allvars);
   {
@@ -364,9 +305,10 @@ void Functional::create_source(const std::string filename, const std::string cla
       Expression thisguy = myself.FindNamedSubexpression(*i);
       //fprintf(o, "    // It actually has expression %s\n", thisguy.printme().c_str());
       if (thisguy.alias != *i) {
-        printf("I am erasing variable %s\n", i->c_str());
+        printf("I am *NOT* erasing variable %s\n", i->c_str());
         printf("It actually has alias %s\n", thisguy.alias.c_str());
-        toplevel.erase(i);
+        // FIXME: I should figure out why erasing these variables is wrong! DJR
+        //toplevel.erase(i);
         continue;
       }
       char *buf = new char[300];
@@ -405,6 +347,9 @@ void Functional::create_source(const std::string filename, const std::string cla
     myself.generate_code(o, "    return %s;\n");
     fprintf(o, "  } // end of transform(double,double)\n");
   }
+  fprintf(o, "  bool append_to_name(const std::string) {\n");
+  fprintf(o, "    return false;\n");
+  fprintf(o, "  }\n");
   {
     fprintf(o, "  double derive(double kT, double x) const {\n");
     fprintf(o, "    assert(kT == kT); assert(x == x);\n");
@@ -432,18 +377,15 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "  }\n\n");
   fprintf(o, "  Functional grad(const Functional &ingrad, const Functional &x, bool) const {\n");
   fprintf(o, "    return ingrad*Functional(new %s_grad(", classname.c_str());
-  if (a1) fprintf(o, "%s", a1);
-  if (a2) fprintf(o, ", %s", a2);
-  if (a3) fprintf(o, ", %s", a3);
-  if (a4) fprintf(o, ", %s", a4);
-  if (a5) fprintf(o, ", %s", a5);
-  if (a6) fprintf(o, ", %s", a6);
-  if (a7) fprintf(o, ", %s", a7);
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
   fprintf(o, "))(x);\n");
   fprintf(o, "}\n");
-  fprintf(o, "  Functional grad_T(const Functional &) const {\n");
-  fprintf(o, "    assert(false);\n");
-  fprintf(o, "    return Functional(0.0);\n");
+  fprintf(o, "  Functional grad_T(const Functional &ingradT) const {\n");
+  fprintf(o, "    return ingradT*Functional(new %s_dT(", classname.c_str());
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
+  fprintf(o, "));\n");
   fprintf(o, "  }\n\n");
 
   fprintf(o, "  void pgrad(const GridDescription &gd, double kT, const VectorXd &x, const VectorXd &ingrad, ");
@@ -504,13 +446,8 @@ void Functional::create_source(const std::string filename, const std::string cla
 
   fprintf(o, "  Expression printme(const Expression &x) const {\n");
   fprintf(o, "    return funexpr(\"%s(", classname.c_str());
-  if (a1) fprintf(o, "%s", a1);
-  if (a2) fprintf(o, ", %s", a2);
-  if (a3) fprintf(o, ", %s", a3);
-  if (a4) fprintf(o, ", %s", a4);
-  if (a5) fprintf(o, ", %s", a5);
-  if (a6) fprintf(o, ", %s", a6);
-  if (a7) fprintf(o, ", %s", a7);
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
   fprintf(o, ")\")(x);\n");
   fprintf(o, "  }\n");
   fprintf(o, "  void print_summary(const char *prefix, double energy, std::string name) const {\n");
@@ -524,83 +461,39 @@ void Functional::create_source(const std::string filename, const std::string cla
   fprintf(o, "    FunctionalInterface::print_summary(prefix, energy, name);\n");
   fprintf(o, "  }\n");
   fprintf(o, "private:\n");
-  if (a1) fprintf(o, "  double %s;\n", a1);
-  if (a2) fprintf(o, "  double %s;\n", a2);
-  if (a3) fprintf(o, "  double %s;\n", a3);
-  if (a4) fprintf(o, "  double %s;\n", a4);
-  if (a5) fprintf(o, "  double %s;\n", a5);
-  if (a6) fprintf(o, "  double %s;\n", a6);
-  if (a7) fprintf(o, "  double %s;\n", a7);
+  for (int i=0; args[i]; i++) fprintf(o, "  double %s;\n", args[i]);
   for (std::set<std::string>::iterator i = toplevel.begin(); i != toplevel.end(); ++i) {
     fprintf(o, "  mutable double %s;\n", i->c_str());
   }
-  if ((!a1 || std::string(a1) != "R") &&
-      (!a2 || std::string(a2) != "R") &&
-      (!a3 || std::string(a3) != "R") &&
-      (!a4 || std::string(a4) != "R") &&
-      (!a5 || std::string(a5) != "R") &&
-      (!a6 || std::string(a6) != "R") &&
-      (!a7 || std::string(a7) != "R"))
-    fprintf(o, "  double R;\n");
   fprintf(o, "}; // End of %s_type class declaration\n\n", classname.c_str());
   if (isheader) fprintf(o, "inline ");
   fprintf(o, "Functional %s(", classname.c_str());
-  if (a1) fprintf(o, "double %s", a1);
-  if (a2) fprintf(o, ", double %s", a2);
-  if (a3) fprintf(o, ", double %s", a3);
-  if (a4) fprintf(o, ", double %s", a4);
-  if (a5) fprintf(o, ", double %s", a5);
-  if (a6) fprintf(o, ", double %s", a6);
-  if (a7) fprintf(o, ", double %s", a7);
+  if (args[0]) fprintf(o, "double %s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", double %s", args[i]);
   fprintf(o, ") {\n");
   fprintf(o, "  return Functional(new %s_type(", classname.c_str());
-  if (a1) fprintf(o, "%s", a1);
-  if (a2) fprintf(o, ", %s", a2);
-  if (a3) fprintf(o, ", %s", a3);
-  if (a4) fprintf(o, ", %s", a4);
-  if (a5) fprintf(o, ", %s", a5);
-  if (a6) fprintf(o, ", %s", a6);
-  if (a7) fprintf(o, ", %s", a7);
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
   fprintf(o, "), \"%s\");\n", classname.c_str());
   fprintf(o, "}\n");
 
   fprintf(o, "Functional %sGrad(", classname.c_str());
-  if (a1) fprintf(o, "double %s", a1);
-  if (a2) fprintf(o, ", double %s", a2);
-  if (a3) fprintf(o, ", double %s", a3);
-  if (a4) fprintf(o, ", double %s", a4);
-  if (a5) fprintf(o, ", double %s", a5);
-  if (a6) fprintf(o, ", double %s", a6);
-  if (a7) fprintf(o, ", double %s", a7);
+  if (args[0]) fprintf(o, "double %s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", double %s", args[i]);
   fprintf(o, ") {\n");
   fprintf(o, "  return Functional(new %s_grad(", classname.c_str());
-  if (a1) fprintf(o, "%s", a1);
-  if (a2) fprintf(o, ", %s", a2);
-  if (a3) fprintf(o, ", %s", a3);
-  if (a4) fprintf(o, ", %s", a4);
-  if (a5) fprintf(o, ", %s", a5);
-  if (a6) fprintf(o, ", %s", a6);
-  if (a7) fprintf(o, ", %s", a7);
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
   fprintf(o, "), \"%sGrad\");\n", classname.c_str());
   fprintf(o, "}\n");
 
   fprintf(o, "Functional %s_by_dT(", classname.c_str());
-  if (a1) fprintf(o, "double %s", a1);
-  if (a2) fprintf(o, ", double %s", a2);
-  if (a3) fprintf(o, ", double %s", a3);
-  if (a4) fprintf(o, ", double %s", a4);
-  if (a5) fprintf(o, ", double %s", a5);
-  if (a6) fprintf(o, ", double %s", a6);
-  if (a7) fprintf(o, ", double %s", a7);
+  if (args[0]) fprintf(o, "double %s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", double %s", args[i]);
   fprintf(o, ") {\n");
   fprintf(o, "  return Functional(new %s_dT(", classname.c_str());
-  if (a1) fprintf(o, "%s", a1);
-  if (a2) fprintf(o, ", %s", a2);
-  if (a3) fprintf(o, ", %s", a3);
-  if (a4) fprintf(o, ", %s", a4);
-  if (a5) fprintf(o, ", %s", a5);
-  if (a6) fprintf(o, ", %s", a6);
-  if (a7) fprintf(o, ", %s", a7);
+  if (args[0]) fprintf(o, "%s", args[0]);
+  for (int i=1; args[i]; i++) fprintf(o, ", %s", args[i]);
   fprintf(o, "), \"%s_by_dT\");\n", classname.c_str());
   fprintf(o, "}\n");
   fclose(o);
@@ -649,8 +542,8 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
     retval++;
   }
   {
-    // compare the gradient computed by the two functions grad() and
-    // grad_and_pgrad()
+    // compare the gradient computed by integralgrad() with and
+    // without a non-null pgrad argument
     VectorXd my_pgrad(x);
     my_grad.setZero();
     my_pgrad.setZero();
@@ -658,7 +551,7 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
     const double lderiv_new = my_direction.dot(my_grad);
     if (fabs(lderiv_new/lderiv - 1) > 1e-12) {
       printf("\n*** WARNING!!! INCONSISTENT GRADIENTS! ***\n");
-      printf("Different gradient in energy_and_grad() and grad_and_pgrad()\n");
+      printf("Different gradient in integralgrad() with and without pgradout\n");
       printf("FAIL: Fractional error is %g\n\n", lderiv_new/lderiv - 1);
       retval++;
     }
@@ -669,14 +562,14 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
       VectorXd othergrad(grad(dV, Identity(), false)(temp, x));
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
-      if (maxgraderr/maxgrad > 1e-12) {
+      if (maxgraderr/maxgrad > 1e-9) {
         printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
         printf("othergrad itself is %s\n",
                grad(dV, Identity(), false).printme(Expression("x")).printme().c_str());
         printf("my_grad[0] = %g\n", my_grad[0]);
         printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
-        printf("FAIL: Discrepancy in the gradient is too big: %g\n\n", maxgraderr/maxgrad);      
+        printf("FAIL: Discrepancy in my gradient is too big: %g\n\n", maxgraderr/maxgrad);
         retval++;
       }
     }
@@ -751,9 +644,6 @@ double Functional::print_iteration(const char *prefix, int iter) const {
     //nxt->print_summary(prefix, nxt->itsCounter->last_energy);
     nxt = nxt->next();
   }
-  printf("%s%25s =", prefix, "total energy");
-  print_double("", etot);
-  printf("\n");
   return etot;
 }
 
@@ -771,6 +661,9 @@ void Functional::print_summary(const char *prefix, double energy, std::string na
     nxt->itsCounter->ptr->print_summary(prefix, nxt->itsCounter->last_energy, name);
     nxt = nxt->next();
   }
+  printf("%s%25s =", prefix, "total energy");
+  print_double("", etot);
+  printf("\n");
   //assert(fabs(etot - energy) < 1e-6);
 }
 
@@ -779,6 +672,9 @@ Functional Identity() { return Pow(1); }
 class dVType : public FunctionalInterface {
 public:
   dVType() {}
+  bool append_to_name(const std::string) {
+    return false;
+  }
 
   VectorXd transform(const GridDescription &gd, double, const VectorXd &) const {
     return gd.dvolume*VectorXd::Ones(gd.NxNyNz);
@@ -817,6 +713,9 @@ Functional dV = Functional(new dVType());
 class Constant : public FunctionalInterface {
 public:
   Constant(double x, const char *n) : c(x), name(n) {}
+  bool append_to_name(const std::string) {
+    return false;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return c*VectorXd::Ones(data.rows());
@@ -851,6 +750,9 @@ public:
   bool I_am_one() const {
     return c == 1 && !name;
   }
+  bool I_am_constant_wrt_x() const {
+    return true;
+  }
   Expression printme(const Expression &) const {
     if (name) return Expression(name).set_type("double");
     return Expression(c).set_type("double").set_alias("literal");
@@ -867,6 +769,15 @@ Functional::Functional(double x, const char *n) : itsCounter(0) {
 class ConstantField : public FunctionalInterface {
 public:
   ConstantField(const VectorXd &x) : c(x) {}
+  bool append_to_name(const std::string) {
+    return false;
+  }
+  bool I_preserve_homogeneous() const {
+    return false;
+  }
+  bool I_am_constant_wrt_x() const {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &) const {
     return c;
@@ -906,8 +817,19 @@ Functional::Functional(const VectorXd &x) : itsCounter(0) {
 class ChainRuleType : public FunctionalInterface {
 public:
   ChainRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
+  bool append_to_name(const std::string x) {
+    f1.append_to_name(x);
+    f2.append_to_name(x);
+    return true;
+  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
+  }
+  bool I_preserve_homogeneous() const {
+    return f1.I_preserve_homogeneous() && f2.I_preserve_homogeneous();
+  }
+  bool I_am_constant_wrt_x() const {
+    return f1.I_preserve_homogeneous() && f2.I_am_constant_wrt_x();
   }
 
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
@@ -987,8 +909,19 @@ Functional Functional::operator()(const Functional &f) const {
 class QuotientRuleType : public FunctionalInterface {
 public:
   QuotientRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
+  bool append_to_name(const std::string x) {
+    f1.append_to_name(x);
+    f2.append_to_name(x);
+    return true;
+  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
+  }
+  bool I_preserve_homogeneous() const {
+    return f1.I_preserve_homogeneous() && f2.I_preserve_homogeneous();
+  }
+  bool I_am_constant_wrt_x() const {
+    return f1.I_am_constant_wrt_x() && f2.I_am_constant_wrt_x();
   }
 
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
@@ -1041,8 +974,19 @@ Functional Functional::operator/(const Functional &f) const {
 class ProductRuleType : public FunctionalInterface {
 public:
   ProductRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
+  bool append_to_name(const std::string x) {
+    f1.append_to_name(x);
+    f2.append_to_name(x);
+    return true;
+  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
+  }
+  bool I_preserve_homogeneous() const {
+    return f1.I_preserve_homogeneous() && f2.I_preserve_homogeneous();
+  }
+  bool I_am_constant_wrt_x() const {
+    return f1.I_am_constant_wrt_x() && f2.I_am_constant_wrt_x();
   }
 
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
@@ -1094,6 +1038,9 @@ Functional Functional::operator*(const Functional &f) const {
 class LogType : public FunctionalInterface {
 public:
   LogType() {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().log();
@@ -1134,6 +1081,9 @@ Functional log(const Functional &f) {
 class ExpType : public FunctionalInterface {
 public:
   ExpType() {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().exp();
@@ -1174,6 +1124,9 @@ Functional exp(const Functional &f) {
 class AbsType : public FunctionalInterface {
 public:
   AbsType() {}
+  bool append_to_name(const std::string) {
+    return true;
+  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().abs();
@@ -1230,6 +1183,25 @@ public:
   bool I_am_local() const {
     return f.I_am_local();
   }
+  bool I_am_constant_wrt_x() const {
+    return f.I_am_constant_wrt_x();
+  }
+  bool I_preserve_homogeneous() const {
+    return f.I_preserve_homogeneous();
+  }
+  bool I_am_homogeneous() const {
+    return f.I_am_homogeneous();
+  }
+  bool I_am_zero() const {
+    return f.I_am_zero();
+  }
+  bool I_am_one() const {
+    return f.I_am_one();
+  }
+  bool append_to_name(const std::string x) {
+    f.append_to_name(x);
+    return true;
+  }
 
   double integral(const GridDescription &gd, double kT, const VectorXd &x) const {
     return f.integral(gd, kT, x);
@@ -1281,12 +1253,15 @@ public:
   Expression printme(const Expression &x) const {
     return f.printme(x);
   }
+  void print_summary(const char *prefix, double e, std::string name) const {
+    f.print_summary(prefix, e, name);
+  }
   bool I_have_analytic_grad() const {
     return f.I_have_analytic_grad();
   }
 private:
   const Grid constraint;
-  const Functional f;
+  Functional f;
 };
 
 Functional constrain(const Grid &g, Functional f) {

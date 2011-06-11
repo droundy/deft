@@ -1,0 +1,433 @@
+
+
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Definitions
+\def\re{\text{Re}}
+\def\im{\text{Im}}
+\def\ket#1{\vert #1 \rangle}
+\def\cU{{\cal{U}}}
+\def\cD{{\cal{D}}}
+\def\re{\text{Re}}
+\def\im{\text{Im}}
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\xx}{\textbf{x}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\title{A Classical Density-Functional Theory for Describing Confined Water in One, Two and Three(?) Dimensions}
+
+\author{Jessica Gallagher}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+\needsworklater{ We develop a classical density functional theory for
+  water by combining the fundamental-measure theory functional--which
+  describes hard sphere fluids--with attractive interactions.  Using
+  this approximation, we are able to describe various properties of
+  water near liquid-vapor and liquid-solid interfaces.  We plan to use
+  this functional as the foundation for a efficient method for
+  predicting the interactions of chemicals in aqueous solution on an
+  atomic level.}
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+\subsection{Water---the universal solvent}
+
+\subsection{Classical density-functional theory}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Theory and Methods}
+
+We introduce a new classical density functional for water that
+\needsworklater{predicts the vapor density, liquid density, bulk
+  modulus, and bulk surface tension, as well as allows for
+  liquid-vapor coexistence}.  The Helmholtz free energy functional is
+based on SAFT, and is composed of the usual terms:
+\begin{equation}
+  F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] + F_\textit{disp},
+\end{equation}
+where $F_\textit{id}$ is the ideal gas free energy, $F_\textit{hs}$ is
+a hard-sphere free energy, $F_\textit{assoc}$ is the free energy of
+association, and $F_\textit{disp}$ is the dispersion energy.  In
+addition, a chemical potential term is used, so we actually work in
+the grand canonical ensemble.  In the following sections, we will
+introduce the terms of this functional.
+
+\subsection{Ideal gas functional}
+The first term is the ideal gas free energy functional,
+which incorporates effects of kinetic energy.  The ideal gas
+functional is given by
+\begin{equation}\label{idealgas}
+  F_{id}[n] = k_B T \int n(\xx)\left( \ln{n(\xx)} - 1\right) d\xx
+\end{equation}
+where n(\xx) is the density of water molecules.  The ideal gas free
+energy functional has the property that the contact density at a hard
+surface $n_c$ is proportional to the pressure on that surface,
+according to the equation
+\begin{equation}
+  p = n_c k_BT \:,
+\end{equation}
+which also leads to the property that the free energy of solvation of
+a hard solute is proportional to its volume in the limit of small
+solutes.  These properties are retained by the total functional,
+provided the remaining terms are \emph{purely
+  nonlocal}~\cite{ashcroft?}.
+
+\subsection{Hard-sphere repulsion}
+The repulsive intermolecular interactions are modeled using a
+Fundamental\nobreakdash-Measure Theory~\cite{rosenfeld1997}(FMT) functional,
+which combines scaled-particle theory and the Percus-Yevick theory,
+and an attractive interaction.  The FMT functional treats
+each water molecule as a hard sphere with a radius approximately that of
+a water molecule $(R~=~2.3~bohr)$.\\
+
+
+We model the repulsive interactions using the White Bear version of
+the Fundamental-Measure Theory~(FMT) functional published in
+reference~\cite{roth2002whitebear}.  \needsworklater{The FMT
+  functional describes the excess free energy of a hard-sphere
+  fluid. Fundamental-Measure Theory has several advantages over other
+  approaches, one of the most important being the simplicity of
+  calculations.  This particular FMT also reliably predicts bulk
+  properties of fluids in one, two and three dimensions, as well as
+  exactly determines the excess free energy in the zero dimensional
+  limit.}
+
+The hard sphere functional is adapted from that of
+Rosenfeld~\cite{rosenfeld1997},
+and is given by
+\begin{equation}
+F_{hs}[n] = k_B T \int (\Phi_1 + \Phi_2 + \Phi_3) d\xx \; ,
+\end{equation}
+with integrands
+\begin{align}
+\Phi_1 &= -n\circ w_2 \ln\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)\\
+\Phi_2 &= \frac{4\pi R^3 \lbrack (n\circ w_2)^2 - (n\circ \mathbf{w}_3)^2\rbrack}
+          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)}\\
+\Phi_3 &= \frac{8\pi^2 R^6\lbrack \frac{1}{3}(n\circ w_2)^3 - (n\circ
+          w_2)(n\circ \mathbf{w}_3)^2\rbrack}
+          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)} \; ,
+\end{align}
+using the normalized weighting functions 
+\begin{align}
+w_1(\xx) &= \frac{3}{4\pi R^3}\Theta(R-|\xx|)\\
+w_2(\xx) &= \frac{1}{4\pi R^2}\delta(R-|\xx|)\\
+\mathbf{w}_3(\xx) &= \frac{-1}{4\pi R^2}\vec{\nabla}\Theta(R-|\xx|) \; .
+\end{align}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\end{center}
+\caption{The theoretical versus experimental phase diagram, vapor
+  pressure versus temperature.  }
+\label{fig:equation-of-state}
+\end{figure}
+
+\subsection{Association free energy}
+To the purely repulsive hard-sphere free energy, we add two attractive
+energy terms.  The first is the free energy of \emph{association},
+which describes the effects of hydrogen bonds.  These are modeled as
+four attractive patches (``association sites'') on the surface of the
+hard sphere.  These four sites represent the two hydrogens and two
+electron lone pairs.  There is an attractive energy
+$\epsilon_\textit{assoc}$ when two molecules are arranged such that
+the hydrogen of one interacts with the lone pair of the other.  The
+volume of this interaction is $\kappa_\textit{assoc}$.  Thus the
+association term in the free energy has two free parameters that must
+be fit based on experimental data.
+
+The association free energy has the form
+\begin{align}
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx)
+  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
+\end{align}
+where the value of $4$ comes from the four association sites per
+molecule, and the functional $X$ is the fraction of association sites
+\emph{not} hydrogen-bonded.  The fraction $X$ is determined by the
+quadratic equation
+\begin{align}
+  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)\Delta(\xx)} - 1}
+  {4 n_0(\xx)\zeta(\xx)\Delta(\xx)}
+\end{align}
+where $\zeta$ comes from
+reference\cite{yu2002fmt-dft-inhomogeneous-associating,
+  fu2005vapor-liquid-dft} and describes the inhomogeneity of the fluid
+density:
+\begin{align}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
+\end{align}
+The function $\Delta$ is given... below?
+
+The following contact density for the hard-sphere fluid is in the code
+called \texttt{gHS}, and comes
+from\cite{yu2002fmt-dft-inhomogeneous-associating,
+  fu2005vapor-liquid-dft}, but I don't use it.
+\begin{align}
+  \Delta &= 4\pi \kappa_\textit{assoc} g^\textit{HS}(\sigma)e^{-\beta
+    \epsilon_\textit{assoc}} \\
+  g^\textit{HS}(\sigma) &= \frac1{1-n_3}\left(1+\frac14\frac{\zeta n_2}{1-n_3}
+  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right)
+\end{align}
+\textcolor{red}{Here is paper where I got the association functional:}
+
+Instead, I use
+\begin{align}
+  \Delta(\xx) &= \kappa_\textit{assoc}
+  e^{-\beta\epsilon_\textit{assoc}} g^\textit{SW}_\sigma(\xx) \\
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
+  \frac{1}{4}\beta\left(\frac{\partial a_1(\xx)}{\partial n_3(\xx)} -
+  \frac{lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
+\end{align}
+% This is equation 77 of gil-villegas-1997-SAFT-VR
+which I got from reference\cite{gil-villegas-1997-SAFT-VR}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/saturated-liquid-density}
+\end{center}
+\caption{The theoretical versus experimental saturated liquid density
+  versus temperature.  }
+\label{fig:saturated-liquid-density}
+\end{figure}
+
+\subsection{Dispersion free energy}
+The final term in the free energy is the dispersion term.  We use a
+dispersion term based on the SAFT-VR
+approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
+parameters, an interaction energy $\epsilon_\textit{disp}$ and a
+length scale $\lambda_\textit{disp}$.
+
+The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+\begin{align}
+  F_\text{disp} &= A_1 + \beta A_2
+\end{align}
+where $A_1$ and $A_2$ are the first two terms in a high-temperature
+perturbation expansion.  $A_1$ is the mean-field dispersion
+interaction, which for a homogeneous fluid is given by
+\begin{align}
+  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
+  g_{HS}(\left|\xx\right|) d\xx
+\end{align}
+The second dispersion term in the free energy $A_2$ describes the
+effect of fluctuations resulting from the compression of the fluid due
+to the dispersion interaction itself, and is commonly approximated
+using the local compressibility approximation (LCA).
+
+We use a free square-well function for the dispersion $\varphi$, which
+has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
+to the equation of state.  Thus our model interaction has the form:
+\begin{equation}
+  \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
+\end{equation}
+where $\Theta$ is the Heaviside step function.
+
+\textcolor{red}{TODO:  Add the actual functions that we use and the
+  actual form.  The above is really just an introduction.}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
+\end{center}
+\caption{The theoretical versus experimental saturated liquid density
+  versus temperature.  }
+\label{fig:saturated-liquid-density}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy}
+\end{center}
+\caption{The free energy, internal energy, and temperature*entropy versus density at room temperature.  }
+\label{fig:energy-room-temp}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy-at-690K}
+\end{center}
+\caption{The free energy, internal energy, and temperature*entropy versus density near the critical temperature.  }
+\label{fig:energy-near-critical-temp}
+\end{figure}
+
+\subsection{Other thermodynamic functions}
+
+From the Helmholtz free energy functional, we may obtain any other
+thermodynamic functions we should choose.  The grand free energy
+$\Phi$, which we ordinarily use in our computations, is obtained by
+simply adding a chemical potential term:
+\begin{equation}
+  \Phi[n] = F[n] + \mu \int n(\xx) d\xx
+\end{equation}
+
+The pressure would naturally be obtained by taking a partial
+derivative with respect to volume at fixed temperature.  Since
+\emph{volume} isn't a parameter in density-functional theory, we
+consider the \emph{free energy per unit volume}.
+\begin{align}
+  F[n] &= f[n]V \\
+  p[n] &= -\left(\frac{\partial F[n]}{\partial V}\right)_{T} \\
+  &= -\left(\frac{\partial f[n]V}{\partial V}\right)_{T} \\
+  &= -V\left(\frac{\partial f[n]}{\partial V}\right)_{T}
+   - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
+  &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n]
+\end{align}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+\end{center}
+\caption{The pressure versus density for various temperatures, including experimental pressure data from NIST.  }
+\label{fig:pressure-with-isotherms}
+\end{figure}
+
+The entropy is naturally obtained by taking a partial derivative with
+respect to temperature:
+\begin{align}
+  S[n] &= \left(\frac{\partial F[n]}{\partial T}\right)_{V}
+\end{align}
+This derivative is trivial for the ideal gas and hard sphere free
+energies, which are simply proportional to the temperature.  For the
+association and dispersion free energies, it is a little more work,
+but still not hard.
+
+Once we have the entropy, finding the internal energy is a simple
+matter of subtraction:
+\begin{align}
+  U[n] &= F[n] + TS[n]
+\end{align}
+and the enthalpy is not much more work:
+\begin{align}
+  H[n] &= F[n] + TS[n] - pV
+\end{align}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-tension}
+\end{center}
+\caption{The theoretical versus experimental surface tension
+  versus temperature.  }
+\label{fig:surface-tension}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-298}
+\end{center}
+\caption{Liquid-vapor interface profile at room temperature.  }
+\label{fig:liquid-vapor-profile}
+\end{figure}
+
+\subsection{Determining the empirical parameters}\label{sec:empirical}
+
+In order to ensure that the empirical parameters are correct, we test
+the vapor pressure (see Figure~\ref{fig:equation-of-state}) and
+saturated liquid density (see
+Figure~\ref{fig:saturated-liquid-density}) against experimental
+values.  To find these densities, we use the ``common tangent'' rule,
+as illustrated in Figure~\ref{fig:homogeneous}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/finding-vapor-pressure}\\
+\includegraphics[width=\columnwidth]{figs/near-critical-point}
+\end{center}
+\caption{By plotting the free energy vs. density it is possible to
+  determine a saturated liquid or vapor state by the common tangent
+  method.  }
+\label{fig:homogeneous}
+\end{figure}
+
+\begin{table}
+\begin{tabular}{ccc}
+  Fitting Parameters& \hspace{2em} & Experimental Values\\
+\begin{tabular}{cc}
+  $R$ & 2.3 $a_o$ \\
+  $A$ & -0.0100909 Hartree \\
+  $\gamma$ & 5\\
+  $V$ & 515.792 $a_o^3$  \\
+  $b$ & 0.75 $a_o$ \\
+  $\mu$ & -0.014063 Hartree 
+\end{tabular}
+&& 
+\begin{tabular}{cc}
+ $n_l$ & 4.939 $\times 10^{-3} a_o^{-3}$\\
+ $n_v$ & 1.141 $\times 10^{-7} a_o^{-3}$\\
+ $\sigma$ & ??? \\
+ $B$ & $7.435\times 10^{-5}$ Hartree$/a_o^3$\\
+ $T$ & 298.15 K \\
+\end{tabular}
+\end{tabular}
+
+\caption{Empirical parameters of optimized functional and experimental
+  values matched, where $a_o$ is the Bohr radius, and $\sigma$ is the
+  surface tension.  This table is not yet complete, but it should
+  be soon...  We'll also need to think about the best units to use
+  here.  Atom units might be best, but it also might be better to
+  consistently use eV and angstrom or something.  I'm not sure about
+  putting $k_BT$ data in the table.  Maybe it belongs in the caption?}
+\label{tab:parameters}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and discussion}
+\subsection{Liquid-vapor interface}
+
+We compute the density profile and surface tension by relaxing a slab
+of water in a periodic unit cell.  This slab has two surfaces, so the
+surface tension is just half the free energy of the cell, divided by
+its cross-sectional area.  As mentioned in
+section~\ref{sec:empirical}, the $b$ parameter is determined by
+setting this surface tension to match the experimental value.  The
+associated density profile is plotted in
+Figure~\ref{fig:cartesianDensity}, which displays two peaks in
+density.
+
+The fluid density at a liquid-solid interface commonly displays
+oscillatory behavior, but the presence of density oscillations at
+liquid-vapor interfaces is more debated\cite{penfold2001structure}.
+In fact, the \emph{meaning} of the density profile at a liquid-vapor
+interface is clouded by the existence of long-wavelength perturbations
+known as \emph{capillary waves}.  These waves are not accounted for in
+density-functional theory (although the \emph{exact}
+density-functionaly theory \emph{would} include them), with the result
+that the density profile will be smoothed out by CW effects.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
+

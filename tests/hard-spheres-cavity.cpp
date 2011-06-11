@@ -54,8 +54,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.037595406926488;
-  //const double true_N = 0.376241423570245;
+  const double true_energy = -0.0375954069264862;
 
   int retval = 0;
   double energy = min.energy();
@@ -114,11 +113,11 @@ int main(int, char **argv) {
   Functional n = constrain(constraint, EffectivePotentialToDensity());
   Functional f0wb = HardSpheresWB(R);
   Functional f0rf = HardSpheresRFFast(R);
-  Functional ff = HardSphereGas(R, mu);
+  Functional ff = constrain(constraint, OfEffectivePotential(HardSphereGas(R, mu)));
 
   printf("I am about to set the initial cavity...\n"); 
   external_potential.Set(incavity);
-  external_potential *= 1e9;
+  external_potential *= 0.1;
   printf("I have set the initial cavity...\n");
   this_took();
   external_potential.epsNativeSlice("external.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
@@ -139,6 +138,7 @@ int main(int, char **argv) {
     small_potential = small_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
     retval += f0wb(n).run_finite_difference_test("white bear functional", water_prop.kT, small_potential);
     retval += f0rf(n).run_finite_difference_test("rosenfeld functional", water_prop.kT, small_potential);
+    printf("Done with both finite difference tests!\n");
   }
 
   {
@@ -150,7 +150,7 @@ int main(int, char **argv) {
       double peak = peak_memory()/1024.0/1024;
       reset_peak_memory();
       printf("Peak memory use was %g\n", peak);
-      if (peak > 6 || peak < 5) {
+      if (peak > 7 || peak < 6) {
         printf("FAIL: Peak memory use was not as expected in ConjugateGradient...\n");
         retval++;
       }
@@ -162,7 +162,7 @@ int main(int, char **argv) {
       double peak = peak_memory()/1024.0/1024;
       reset_peak_memory();
       printf("Peak memory use was %g\n", peak);
-      if (peak > 6 || peak < 5) {
+      if (peak > 7 || peak < 6) {
         printf("FAIL: Peak memory use was not as expected PreconditionedConjugateGradient...\n");
         retval++;
       }

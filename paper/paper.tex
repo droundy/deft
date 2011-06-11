@@ -239,27 +239,28 @@ reference~\cite{roth2002whitebear}.  \needsworklater{The FMT
   properties of fluids in one, two and three dimensions, as well as
   exactly determines the excess free energy in the zero dimensional
   limit.}
-
-The hard sphere functional is adapted from that of
-Rosenfeld~\cite{rosenfeld1997},
-and is given by
 \begin{equation}
-F_{hs}[n] = k_B T \int (\Phi_1 + \Phi_2 + \Phi_3) d\xx \; ,
+F_\textit{hs}[n] = k_B T \int \left(\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)\right) d\xx \; ,
 \end{equation}
 with integrands
 \begin{align}
-\Phi_1 &= -n\circ w_2 \ln\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)\\
-\Phi_2 &= \frac{4\pi R^3 \lbrack (n\circ w_2)^2 - (n\circ \mathbf{w}_3)^2\rbrack}
-          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)}\\
-\Phi_3 &= \frac{8\pi^2 R^6\lbrack \frac{1}{3}(n\circ w_2)^3 - (n\circ
-          w_2)(n\circ \mathbf{w}_3)^2\rbrack}
-          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)} \; ,
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+  n_3 + (1-n_3)^2 \ln(1-n_3)
+}{
+  36\pi n_3^2\left( 1 - n_3 \right)^2
+} ,
 \end{align}
-using the normalized weighting functions 
+using the weighted densities
 \begin{align}
-w_1(\xx) &= \frac{3}{4\pi R^3}\Theta(R-|\xx|)\\
-w_2(\xx) &= \frac{1}{4\pi R^2}\delta(R-|\xx|)\\
-\mathbf{w}_3(\xx) &= \frac{-1}{4\pi R^2}\vec{\nabla}\Theta(R-|\xx|) \; .
+  n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
+  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+  \\
+  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 \\
+  n_1 &= \frac{n_2}{4\pi R}\\
+  \mathbf{n}_{V1} &= \frac{\mathbf{n}_{V2}}{4\pi R}\\
+  n_0 &= \frac{n_2}{4\pi R^2}
 \end{align}
 
 
@@ -310,12 +311,24 @@ The function $\Delta$ is given... below?
 The following contact density for the hard-sphere fluid is in the code
 called \texttt{gHS}, and comes
 from\cite{yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft}, but I don't use it.
+  fu2005vapor-liquid-dft}.  Actually,
+reference~\cite{fu2005vapor-liquid-dft} has what appear to be a number
+of mistakes in this formula, so
+reference~\cite{yu2002fmt-dft-inhomogeneous-associating} is more
+useful.  In particular, the former has an incorrect formula for
+$\zeta_2$ (wrong dimensions) and the formula for $\zeta_3$ disagrees
+with the latter, which it cites.  Its formula for $\zeta_3$ also
+doesn't match how they use it in ordinary FMT.
 \begin{align}
   \Delta &= 4\pi \kappa_\textit{assoc} g^\textit{HS}(\sigma)e^{-\beta
     \epsilon_\textit{assoc}} \\
   g^\textit{HS}(\sigma) &= \frac1{1-n_3}\left(1+\frac14\frac{\zeta n_2}{1-n_3}
-  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right)
+  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right) \\
+  &= \frac1{1 - \zeta_3}
+  + \frac32 \frac{\zeta \zeta_2}{\left(1-\zeta_3\right)^2}
+  + \frac12 \frac{\zeta \zeta_2^2}{\left(1-\zeta_3\right)^3} \\
+  \zeta_2 &= \frac{n_2 R}{3} \\
+  \zeta_3 &= n_3
 \end{align}
 \textcolor{red}{Here is paper where I got the association functional:}
 
@@ -383,6 +396,21 @@ where $\Theta$ is the Heaviside step function.
 \label{fig:saturated-liquid-density}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy}
+\end{center}
+\caption{The free energy, internal energy, and temperature*entropy versus density at room temperature.  }
+\label{fig:energy-room-temp}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy-at-690K}
+\end{center}
+\caption{The free energy, internal energy, and temperature*entropy versus density near the critical temperature.  }
+\label{fig:energy-near-critical-temp}
+\end{figure}
 
 \subsection{Other thermodynamic functions}
 
@@ -406,6 +434,14 @@ consider the \emph{free energy per unit volume}.
    - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
   &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n]
 \end{align}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+\end{center}
+\caption{The pressure versus density for various temperatures, including experimental pressure data from NIST.  }
+\label{fig:pressure-with-isotherms}
+\end{figure}
 
 The entropy is naturally obtained by taking a partial derivative with
 respect to temperature:

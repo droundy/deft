@@ -169,10 +169,10 @@ void Grid::epsNativeSlice(const char *fname,
     max div\n\
     dup 0 lt {\n\
         1 add\n\
-        dup 1\n\
+        dup 1 3 1 roll\n\
     }{\n\
         neg 1 add\n\
-        dup 1 3 1 roll\n\
+        dup 1\n\
     } ifelse\n\
     setrgbcolor\n\
     newpath\n\
@@ -473,7 +473,7 @@ ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g) {
   fftw_plan p = fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_ESTIMATE);
   fftw_execute(p);
   fftw_destroy_plan(p);
-  out /= gd.NxNyNz;
+  out *= gd.dvolume;
   return out;
 }
 

@@ -29,18 +29,18 @@ int main(int, char **) {
 
   double mu_satp;
   {
-    Functional f = SaftFluid(water_prop.lengthscale,
-                             water_prop.epsilonAB, water_prop.kappaAB,
-                             water_prop.epsilon_dispersion,
-                             water_prop.lambda_dispersion, 0);
+    Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                  water_prop.epsilonAB, water_prop.kappaAB,
+                                                  water_prop.epsilon_dispersion,
+                                                  water_prop.lambda_dispersion, water_prop.length_scaling, 0));
     mu_satp = find_chemical_potential(f, water_prop.kT,
                                       water_prop.liquid_density);
   }
 
-  Functional f = SaftFluid(water_prop.lengthscale,
-                           water_prop.epsilonAB, water_prop.kappaAB,
-                           water_prop.epsilon_dispersion,
-                           water_prop.lambda_dispersion, mu_satp);
+  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                water_prop.epsilonAB, water_prop.kappaAB,
+                                                water_prop.epsilon_dispersion,
+                                                water_prop.lambda_dispersion, water_prop.length_scaling, mu_satp));
 
   //double Temperatures[NUMT] = { water_prop.kT/kB };
   double Temperatures[NUMT] = { water_prop.kT/kB, 693 };

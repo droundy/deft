@@ -25,7 +25,7 @@ int main(int, char **) {
   Functional f = Xassociation(R,
                               water_prop.epsilonAB, water_prop.kappaAB,
                               water_prop.epsilon_dispersion,
-                              water_prop.lambda_dispersion);
+                              water_prop.lambda_dispersion, water_prop.length_scaling);
   for (double eta=0.03125; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
     // Energy units in the vrpack code are water_prop.epsilon_dispersion
