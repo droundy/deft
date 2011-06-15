@@ -42,6 +42,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+
+\begin{figure}
+\includegraphics[width=5cm]{figs/gHS-vs-n}
+\caption{A comparison of the various approximations to the contact
+  density.}
+\label{fig:gHS-vs-n}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=5cm]{figs/free-energy}
+\caption{A comparison of the various approximations to the free energy.}
+\label{fig:free-energy}
+\end{figure}
+
 The hard-sphere contact density---which we will define as the density
 of hard spheres touching a given hard sphere---is important for the
 association term in Statistical Associating Fluid Theory (SAFT).  For
@@ -168,6 +182,10 @@ So to compute this we need
   \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
   \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
   \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+  \frac{dn_1(\mathbf{r})}{dR} &=
+    \frac1{4\pi R}\frac{dn_2(\mathbf{r})}{dR} - n_0(\mathbf{r}) \\
+    &= n_0(\mathbf{r}) + \frac{1}{4\pi R^2} \int 
+    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
   \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
 \end{align}
 
@@ -523,13 +541,17 @@ We get a nice spatial dependence for SAFT.
 
 \begin{align}
     \beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
-    -\frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
     + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
       n_3(\mathbf{r}'))^2}
     + \frac{n_2^3 -
-      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
-      \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
-    \right)
+      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}
+    %\left(
+    %  \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
+    %\right)
+    \\
+    & \times \left(\frac{1}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
+      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right)
 \end{align}
 \end{widetext}
 

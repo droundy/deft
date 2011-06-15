@@ -35,6 +35,8 @@ clean:
 ALL_FIGURES=\
 	figs/n0.svg\
 	figs/contact.svg\
+	figs/free-energy.gp\
+	figs/gHS-vs-n.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -47,3 +49,7 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+
+figs/gHS-vs-n.eps: figs/gHS-vs-n.dat
+
+figs/free-energy.eps: figs/free-energy.dat

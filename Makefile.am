@@ -10,6 +10,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
+	src/ContactDensity.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
@@ -37,6 +38,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
+	contactpaper/figs/gHS-vs-n.mkdat \
+	contactpaper/figs/free-energy.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -121,6 +124,9 @@ paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
+contactpaper_figs_gHS_vs_n_mkdat_SOURCES = contactpaper/figs/gHS-vs-n.cpp $(GENERIC_CODE)
+contactpaper_figs_free_energy_mkdat_SOURCES = contactpaper/figs/free-energy.cpp $(GENERIC_CODE)
+
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
 comparisons_delta_deft_test_SOURCES = comparisons/delta_deft.cpp $(GENERIC_CODE)
@@ -168,10 +174,14 @@ paper: paper/figs/equation-of-state.dat \
 
 slowfigs: paper/figs/rods-in-water.dat
 
-contactpaper: contactpaper/paper.tex
+contactpaper: contactpaper/paper.tex \
+		contactpaper/figs/gHS-vs-n.dat \
+		contactpaper/figs/free-energy.dat
 	cd contactpaper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat
+	$<
+contactpaper/figs/%.dat: contactpaper/figs/%.mkdat
 	$<
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
