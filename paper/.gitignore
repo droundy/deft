@@ -1,5 +1,8 @@
 *~
+*.backup
+*.vrb
 *.toc
+*.dvi
 *.pdf
 *.out
 *.aux
@@ -10,5 +13,6 @@
 *.log
 *.blg
 *.bbl
+*Notes.bib
 figs/*.mkdat
 paperNotes.bib

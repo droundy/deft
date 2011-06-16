@@ -25,16 +25,31 @@
 
 double zmax = 150;
 const double width = 0.0001;
-double cavitysize = 60;
+double cavitysize = 5;
 
-double notinwall(Cartesian r) {
-  const double z = r.z();
-  if (fabs(z) > (zmax-cavitysize)/2) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
+ double notinwall(Cartesian r) {
+   const double z = r.z();
+   if (fabs(z) > (zmax-cavitysize)/2) {
+     return 1;
+   } else {
+     return 0;
+   }
+ }
+
+// Below is a constraint corresponding to making the very edges 
+// (~2bohr) constrained to vapor density (constraint = 0) and the 
+// very center (~2bohr) constrained to saturated liquid density 
+// (constraint = 1).
+
+ // double notinwall2(Cartesian r) {
+ //   const double z = r.z();
+ //   if (fabs(z) > (zmax-4)/2) {
+ //     return 0;
+ //   }
+ //   if (fabs(z) < 2) {
+ //     return 1;
+ //   }
+ // }
 
 void plot_grids_z_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
   FILE *out = fopen(fname, "w");
@@ -99,27 +114,34 @@ int main(int, char **) {
     Grid potential(gd);
     Grid constraint(gd);
     constraint.Set(notinwall);
-    f = constrain(constraint, f);
+
+    f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+				       water_prop.epsilonAB, water_prop.kappaAB,
+				       water_prop.epsilon_dispersion,
+				       water_prop.lambda_dispersion,
+				       water_prop.length_scaling, mu_satp));
+    f = constrain(constraint, f); 
     
     potential = water_prop.liquid_density*constraint
       + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(0, 
+    Minimizer min = Precision(1e-17, 
 			      PreconditionedConjugateGradient(f, gd, water_prop.kT, 
 							      &potential,
 							      QuadraticLineMinimizer));
+    
     printf("Cavity size is %g bohr\n", cavitysize);
 
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
-      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-      density.epsNative1d("paper/figs/constrained-water-1D.eps",
-      			  Cartesian(0,0,0), Cartesian(0,0,zmax),
-       			  water_prop.liquid_density, 1, " ");
-      //sleep(1);
+      // Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      // density.epsNative1d("paper/figs/constrained-water-1D.eps",
+      // 			  Cartesian(0,0,0), Cartesian(0,0,zmax),
+      // 			  n_1atm, 1, " ");
+      // sleep(1);
     }
     //min.print_info();
     
@@ -153,7 +175,7 @@ int main(int, char **) {
     plot_grids_z_direction(plotname, density, energy_density, entropy, Xassoc);
     //plot_grids_z_direction(plotname, density, energy_density, foobar, Xassoc);
     free(plotname);
-    
+   
     //double N = 0;
     //{
     // Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
@@ -165,7 +187,7 @@ int main(int, char **) {
     //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     density.epsNative1d("paper/figs/constrained-water-1D.eps", 
     			Cartesian(0,0,0), Cartesian(0,0,zmax), 
-    			water_prop.liquid_density, 1, " ");
+    			n_1atm, 1, " ");
     //potential.epsNative1d("hard-wall-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, 1);
    
   }

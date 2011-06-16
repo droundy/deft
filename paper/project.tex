@@ -33,9 +33,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\title{A Classical Density-Functional Theory for Describing Confined Water in One, Two and Three(?) Dimensions}
+\title{A Classical Density-Functional Theory for Describing Water Interfaces}
 
-\author{Jessica Gallagher}
+\author{Jessica Hughes}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 \author{David Roundy}
@@ -45,12 +45,16 @@
 \begin{abstract}
 \needsworklater{ We develop a classical density functional theory for
   water by combining the fundamental-measure theory functional--which
-  describes hard sphere fluids--with attractive interactions.  Using
+  describes hard sphere fluids--with attractive interactions based on the 
+  Statistical Associating Fluid Theory (SAFT).  Using
   this approximation, we are able to describe various properties of
-  water near liquid-vapor and liquid-solid interfaces.  We plan to use
-  this functional as the foundation for a efficient method for
+  water near liquid-vapor and liquid-solid interfaces including water confined 
+  to a slit and two hydrophobic rods immersed in water.  This functional will be the 
+  foundation for a efficient method for future work
   predicting the interactions of chemicals in aqueous solution on an
   atomic level.}
+
+\tableofcontents
 \end{abstract}
 
 \maketitle
@@ -64,7 +68,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
-
 We introduce a new classical density functional for water that
 \needsworklater{predicts the vapor density, liquid density, bulk
   modulus, and bulk surface tension, as well as allows for
@@ -119,27 +122,28 @@ reference~\cite{roth2002whitebear}.  \needsworklater{The FMT
   properties of fluids in one, two and three dimensions, as well as
   exactly determines the excess free energy in the zero dimensional
   limit.}
-
-The hard sphere functional is adapted from that of
-Rosenfeld~\cite{rosenfeld1997},
-and is given by
 \begin{equation}
-F_{hs}[n] = k_B T \int (\Phi_1 + \Phi_2 + \Phi_3) d\xx \; ,
+F_{hs}[n] = k_B T \int (\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)) d\xx \; ,
 \end{equation}
 with integrands
 \begin{align}
-\Phi_1 &= -n\circ w_2 \ln\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)\\
-\Phi_2 &= \frac{4\pi R^3 \lbrack (n\circ w_2)^2 - (n\circ \mathbf{w}_3)^2\rbrack}
-          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)}\\
-\Phi_3 &= \frac{8\pi^2 R^6\lbrack \frac{1}{3}(n\circ w_2)^3 - (n\circ
-          w_2)(n\circ \mathbf{w}_3)^2\rbrack}
-          {\left( 1-\frac{4}{3}\pi R^3 n\circ w_1\right)} \; ,
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= \frac{
+  \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
+}{
+  8\pi \left( 1 - n_3 \right)^2
+} ,
 \end{align}
-using the normalized weighting functions 
+using the weighted densities
 \begin{align}
-w_1(\xx) &= \frac{3}{4\pi R^3}\Theta(R-|\xx|)\\
-w_2(\xx) &= \frac{1}{4\pi R^2}\delta(R-|\xx|)\\
-\mathbf{w}_3(\xx) &= \frac{-1}{4\pi R^2}\vec{\nabla}\Theta(R-|\xx|) \; .
+  n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
+  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+  \\
+  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 \\
+  n_1 &= \frac{n_2}{4\pi R}\\
+  \mathbf{n}_{V1} &= \frac{\mathbf{n}_{V2}}{4\pi R}\\
+  n_0 &= \frac{n_2}{4\pi R^2}
 \end{align}
 
 
@@ -171,7 +175,7 @@ The association free energy has the form
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
 where the value of $4$ comes from the four association sites per
-molecule, and the functional $X$ is the fraction of association sites
+molecule, and the functional $X$ is the fraction of assotiation sites
 \emph{not} hydrogen-bonded.  The fraction $X$ is determined by the
 quadratic equation
 \begin{align}
@@ -205,7 +209,7 @@ Instead, I use
   e^{-\beta\epsilon_\textit{assoc}} g^\textit{SW}_\sigma(\xx) \\
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1(\xx)}{\partial n_3(\xx)} -
-  \frac{lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
+  \frac{\lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 which I got from reference\cite{gil-villegas-1997-SAFT-VR}.
@@ -348,7 +352,7 @@ and the enthalpy is not much more work:
 \label{fig:liquid-vapor-profile}
 \end{figure}
 
-\subsection{Determining the empirical parameters}\label{sec:empirical}
+\subsection{Determining the empirical parameters (?)}\label{sec:empirical}
 
 In order to ensure that the empirical parameters are correct, we test
 the vapor pressure (see Figure~\ref{fig:equation-of-state}) and
@@ -413,6 +417,41 @@ associated density profile is plotted in
 Figure~\ref{fig:cartesianDensity}, which displays two peaks in
 density.
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-1D}
+\end{center}
+\caption{ Density profile for a slab of water with molecules constrained to move in one dimension. }
+\label{fig:density-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-1D}
+\end{center}
+\caption{ Energy density profile for a slab of water with molecules constrained to move in one dimension. }
+\label{fig:energy-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy-1D}
+\end{center}
+\caption{ Entropy for a slab of water with molecules constrained to move in one 
+dimension. \textcolor{red}{FIX UNITS}}
+\label{fig:entropy-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D}
+\end{center}
+\caption{ Xassociation value (fraction of association sites
+\emph{not} hydrogen-bonded) for a slab of water with molecules constrained to move in one 
+dimension. }
+\label{fig:xassoc-1D}
+\end{figure}
+
 The fluid density at a liquid-solid interface commonly displays
 oscillatory behavior, but the presence of density oscillations at
 liquid-vapor interfaces is more debated\cite{penfold2001structure}.
@@ -423,6 +462,23 @@ density-functional theory (although the \emph{exact}
 density-functionaly theory \emph{would} include them), with the result
 that the density profile will be smoothed out by CW effects.
 
+\subsection{Hydrophobic rods}
+
+\subsubsection{Resolution and convergence tests}
+
+\subsubsection{One rod - diameter effects}
+
+\subsubsection{Two rods - interaction effects}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\end{center}
+\caption{ Density profile for two hydrophobic rods.}
+\label{fig:density-rods}
+\end{figure}
+
+\subsection{Hard Sphere}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
