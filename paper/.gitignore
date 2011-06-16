@@ -4,6 +4,7 @@
 *.out
 *.aux
 *.eps
+*.ps
 *.snm
 *.nav
 *.log

@@ -1,0 +1,247 @@
+\documentclass[landscape,a0paper,final,showframe]{baposter}
+
+\usepackage{times}
+\usepackage{calc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{relsize}
+\usepackage{multirow}
+\usepackage{bm}
+
+\usepackage{graphicx}
+\usepackage{multicol}
+
+\usepackage{pgfbaselayers}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\usepackage{helvet}
+%\usepackage{bookman}
+\usepackage{palatino}
+
+\newcommand{\captionfont}{\footnotesize}
+
+\selectcolormodel{cmyk}
+
+\graphicspath{{images/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Some math symbols used in the text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Format 
+\newcommand{\Matrix}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\Vector}[1]{\Matrix{#1}}
+\newcommand*{\SET}[1]  {\ensuremath{\mathcal{#1}}}
+\newcommand*{\MAT}[1]  {\ensuremath{\mathbf{#1}}}
+\newcommand*{\VEC}[1]  {\ensuremath{\bm{#1}}}
+\newcommand*{\CONST}[1]{\ensuremath{\mathit{#1}}}
+\newcommand*{\norm}[1]{\mathopen\| #1 \mathclose\|}% use instead of $\|x\|$
+\newcommand*{\abs}[1]{\mathopen| #1 \mathclose|}% use instead of $\|x\|$
+\newcommand*{\absLR}[1]{\left| #1 \right|}% use instead of $\|x\|$
+
+\def\norm#1{\mathopen\| #1 \mathclose\|}% use instead of $\|x\|$
+\newcommand{\normLR}[1]{\left\| #1 \right\|}% use instead of $\|x\|$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Multicol Settings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\columnsep}{0.7em}
+\setlength{\columnseprule}{0mm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Save space in lists. Use this after the opening of the list
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\compresslist}{%
+\setlength{\itemsep}{1pt}%
+\setlength{\parskip}{0pt}%
+\setlength{\parsep}{0pt}%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Begin of Document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Here starts the poster
+%%%---------------------------------------------------------------------------
+%%% Format it to your taste with the options
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\typeout{Poster Starts}
+\definecolor{silver}{cmyk}{0,0,0,0.3}
+\definecolor{yellow}{cmyk}{0,0,0.9,0.0}
+\definecolor{reddishyellow}{cmyk}{0,0.22,1.0,0.0}
+\definecolor{black}{cmyk}{0,0,0.0,1.0}
+\definecolor{darkYellow}{cmyk}{0,0,1.0,0.5}
+\definecolor{darkSilver}{cmyk}{0,0,0,0.1}
+
+\definecolor{lightyellow}{cmyk}{0,0,0.3,0.0}
+\definecolor{lighteryellow}{cmyk}{0,0,0.1,0.0}
+\definecolor{lighteryellow}{cmyk}{0,0,0.1,0.0}
+\definecolor{lightestyellow}{cmyk}{0,0,0.05,0.0}
+\begin{poster}{
+  % Show grid to help with alignment
+  grid=yes,
+  % Column spacing
+  colspacing=1em,
+  % Color style
+  bgColorOne=lighteryellow,
+  bgColorTwo=lightestyellow,
+  borderColor=reddishyellow,
+  headerColorOne=yellow,
+  headerColorTwo=reddishyellow,
+  headerFontColor=black,
+  boxColorOne=lightyellow,
+  boxColorTwo=lighteryellow,
+  % Format of textbox
+  textborder=roundedleft,
+  % Format of text header
+  eyecatcher=yes,
+  headerborder=open,
+  headerheight=0.08\textheight,
+  headershape=roundedright,
+  headershade=plain,
+  headerfont=\Large\textsf, %Sans Serif
+  boxshade=plain,
+%  background=shade-tb,
+  background=plain,
+  linewidth=2pt
+  }
+  % Eye Catcher
+  { % No eye catcher for this poster. If an eye catcher is present,
+    % the title is centered between eye-catcher and logo.
+    \includegraphics[height=5.5em]{figs/osu-logo}
+  }
+  % Title
+  {\sf %Sans Serif
+  %\bf% Serif
+  A Classical Density Functional for Water}
+  % Authors
+  {\sf %Sans Serif
+  % Serif
+  David Roundy\hspace{3em}
+  Jessica Hughes\hspace{3em}
+  Oregon State University, USA
+  }
+  % University logo
+  {
+    \includegraphics[height=5.5em]{figs/osu-logo}
+  }
+
+  \tikzstyle{light shaded}=[top color=baposterBGtwo!30!white,bottom color=baposterBGone!30!white,shading=axis,shading angle=30]
+
+  % Width of left inset image
+     \newlength{\leftimgwidth}
+     \setlength{\leftimgwidth}{0.78em+8.0em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Now define the boxes that make up the poster
+%%%---------------------------------------------------------------------------
+%%% Each box has a name and can be placed absolutely or relatively.
+%%% The only inconvenience is that you can only specify a relative position 
+%%% towards an already declared box. So if you have a box attached to the 
+%%% bottom, one to the top and a third one which should be in between, you 
+%%% have to specify the top and bottom boxes before you specify the middle 
+%%% box.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % A coloured circle useful as a bullet with an adjustably strong filling
+    \newcommand{\colouredcircle}[1]{%
+      \tikz{\useasboundingbox (-0.2em,-0.32em) rectangle(0.2em,0.32em); \draw[draw=black,fill=baposterBGone!80!black!#1!white,line width=0.03em] (0,0) circle(0.18em);}}
+
+  \headerbox{Classical DFT}{name=cdft,column=0,row=0}{
+    We will present preliminary results for a classical density
+   functional for water based on the Statistical Associating Fluid
+   Theory (SAFT), designed to be suitable for treatment of either
+   solutes or the solid-liquid interface.  The functional is based on
+   a combination of the Fundamental Measure Theory functional
+   describing hard-sphere fluids with the SAFT-VR equation of state.
+   We will present bulk thermodynamic results together with results on
+   the hydrophobic interaction of planes, rods and spheres.  }
+
+  \headerbox{Statistical Associating Fluid Teory}{name=saft,column=0,below=cdft}{
+    Hello world
+  }
+
+  \headerbox{The
+    Functional}{name=fitting,column=0,below=saft,above=bottom}{ We
+    introduce a new classical density functional for water.  The
+    Helmholtz free energy functional is based on SAFT, and is composed
+    of the usual terms:
+    \begin{equation}
+      F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] + F_\textit{disp},
+    \end{equation}
+    We model the repulsive interactions using the White Bear version of
+    the Fundamental-Measure Theory~(FMT) functional published in
+    reference~\cite{roth2002whitebear}.
+  }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \headerbox{Water Confined in a Slit}{name=1D,column=1,row=0}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+  }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \headerbox{A Cylinder in Water}{name=rod,column=1,below=1D,span=1,above=bottom}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+  }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \headerbox{Two Cylinders in Water}{name=two rods,column=2,span=2,row=0}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \begin{multicols}{2}
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+        This text will be in two separate columns.
+      \end{multicols}\vspace{-1em}
+      \mbox{\hspace{0.3\linewidth}\rule{0.4\linewidth}{1pt}\hspace{0.3\linewidth}}\\
+      
+%      \begin{multicols}{2}
+        {
+          This text will span the whole box.
+          This text will span the whole box.
+          This text will span the whole box.
+          This text will span the whole box.
+          This text will span the whole box.
+          This text will span the whole box.
+        %Note the different scales for the two graphs.
+        %Our approach has a high accuracy on the neutral (UND) dataset.
+        }
+%      \end{multicols}\vspace{-1em}
+  }%
+  \headerbox{Future Work}{name=future work,column=2,span=1,above=bottom,below=two rods}{
+
+  }
+  \headerbox{References}{name=references,column=3,above=bottom,below=two
+  rods}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \bibliographystyle{plain}	% (uses file "plain.bst")
+    \bibliography{paper}
+    %% \smaller
+    %% \vspace{-0.4em}
+    %% \bibliographystyle{ieee}
+    %% \renewcommand{\section}[2]{\vskip 0.05em}
+    %%   \begin{thebibliography}{1}\itemsep=-0.01em
+    %%   \setlength{\baselineskip}{0.4em}
+    %%   \bibitem{amberg07:nonrigid}
+    %%     B.~Amberg, S.~Romdhani, T. Vetter.
+    %%     \newblock {O}ptimal {S}tep {N}onrigid {ICP} {A}lgorithms for {S}urface {R}egistration
+    %%     \newblock In {\em CVPR 2007}
+    %%   \bibitem{amberg08:recognition}
+    %%     B.~Amberg, R.~Knothe, T. Vetter.
+    %%     \newblock Expression Invariant Face Recognition with a 3D Morphable Model
+    %%     \newblock In {\em AFGR 2008}
+    %%   \end{thebibliography}
+  }%
+\end{poster}%
+%
+\end{document}

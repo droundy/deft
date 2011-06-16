@@ -27,7 +27,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf
+all :  paper.pdf poster.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -51,6 +51,7 @@ ALL_FIGURES=\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
+	figs/osu-logo.svg\
 
 
 #	figs/rods-energy-vs-distance.gp
@@ -66,6 +67,9 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+
+poster.pdf: poster.tex paper.bib $(PDF_FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
