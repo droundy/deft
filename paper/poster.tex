@@ -115,7 +115,7 @@
   % Eye Catcher
   { % No eye catcher for this poster. If an eye catcher is present,
     % the title is centered between eye-catcher and logo.
-    \includegraphics[height=5.5em]{figs/osu-logo}
+    \includegraphics[height=5.5em]{figs/cavitysize-060}
   }
   % Title
   {\sf %Sans Serif
@@ -154,18 +154,26 @@
     \newcommand{\colouredcircle}[1]{%
       \tikz{\useasboundingbox (-0.2em,-0.32em) rectangle(0.2em,0.32em); \draw[draw=black,fill=baposterBGone!80!black!#1!white,line width=0.03em] (0,0) circle(0.18em);}}
 
-  \headerbox{Classical DFT}{name=cdft,column=0,row=0}{
-    We will present preliminary results for a classical density
-   functional for water based on the Statistical Associating Fluid
-   Theory (SAFT), designed to be suitable for treatment of either
-   solutes or the solid-liquid interface.  The functional is based on
-   a combination of the Fundamental Measure Theory functional
-   describing hard-sphere fluids with the SAFT-VR equation of state.
-   We will present bulk thermodynamic results together with results on
-   the hydrophobic interaction of planes, rods and spheres.  }
+  \headerbox{Classical DFT}{name=cdft,column=0,row=0}{ Classical
+    Density-Functional Theory is a continuum empirical approach to
+    modelling fluid behavior when the density is inhomogeneous---as is
+    the case at interfaces.  We have developed a classical density
+    functional for water, which provides a description of hydrophobic
+    interactions.  }
 
-  \headerbox{Statistical Associating Fluid Teory}{name=saft,column=0,below=cdft}{
-    Hello world
+  \headerbox{Statistical Associating Fluid
+    Teory}{name=saft,column=0,below=cdft}{ The statistical associating
+    fluid theory (SAFT) is a well-established approach for the
+    description of the thermodynamics and phase equilibria of fluid
+    systems, with particular applicability to hydrogen-bonding fluids.
+    Our functional reduces in the homogeneous limit to the SAFT model
+    for water developed in reference~\cite{clark2006developing}.
+    \begin{center}
+      \includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+    \end{center}
+    This functional accurately describes the liquid-vapor phase
+    diagram away from the critical point, but gives a poor description
+    of the compressibility.
   }
 
   \headerbox{The
@@ -176,47 +184,53 @@
     \begin{equation}
       F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] + F_\textit{disp},
     \end{equation}
-    We model the repulsive interactions using the White Bear version of
-    the Fundamental-Measure Theory~(FMT) functional published in
-    reference~\cite{roth2002whitebear}.
+    We model the repulsive interactions using the White Bear version
+    of the Fundamental-Measure Theory~(FMT)
+    functional~\cite{roth2002whitebear}.  The association term is
+    taken from~\cite{yu2002fmt-dft-inhomogeneous-associating}, and we
+    used a simple and efficient functional for the dispersion
+    interaction with a single tunable parameter.
   }
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \headerbox{Water Confined in a Slit}{name=1D,column=1,row=0}{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \headerbox{Surface Tension}{name=1D,column=1,row=0}{
     
   }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \headerbox{A Cylinder in Water}{name=rod,column=1,below=1D,span=1,above=bottom}{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    \begin{center}
+      \includegraphics[width=\columnwidth]{figs/density-vs-radius}
+    \end{center}
+    \begin{center}
+      \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
+    \end{center}
   }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \headerbox{Two Cylinders in Water}{name=two rods,column=2,span=2,row=0}{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \begin{multicols}{2}
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-        This text will be in two separate columns.
-      \end{multicols}\vspace{-1em}
-      \mbox{\hspace{0.3\linewidth}\rule{0.4\linewidth}{1pt}\hspace{0.3\linewidth}}\\
-      
-%      \begin{multicols}{2}
-        {
-          This text will span the whole box.
-          This text will span the whole box.
-          This text will span the whole box.
-          This text will span the whole box.
-          This text will span the whole box.
-          This text will span the whole box.
-        %Note the different scales for the two graphs.
-        %Our approach has a high accuracy on the neutral (UND) dataset.
-        }
-%      \end{multicols}\vspace{-1em}
+    \begin{multicols}{2}
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+      This text will be in two separate columns.
+    \end{multicols}\vspace{-1em}
+    \begin{center}
+      \includegraphics[width=0.45\columnwidth]{figs/density-rods-in-water}
+      \hspace{1em}
+      \includegraphics[width=0.45\columnwidth]{figs/density-rods-in-water}
+    \end{center}
+    
+    %      \begin{multicols}{2}
+    {
+      This text will span the whole box.
+      This text will span the whole box.
+      This text will span the whole box.
+      This text will span the whole box.
+      This text will span the whole box.
+      This text will span the whole box.
+      %Note the different scales for the two graphs.
+      %Our approach has a high accuracy on the neutral (UND) dataset.
+    }
+    %      \end{multicols}\vspace{-1em}
   }%
   \headerbox{Future Work}{name=future work,column=2,span=1,above=bottom,below=two rods}{
 

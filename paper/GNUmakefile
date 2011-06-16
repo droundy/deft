@@ -72,7 +72,7 @@ paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
 poster.pdf: poster.tex paper.bib $(PDF_FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
 
@@ -100,7 +100,7 @@ figs/xassoc-1D.eps: figs/cavitysize-060.dat
 figs/entropy-1D.eps: figs/cavitysize-060.dat 
 figs/energy-1D.eps: figs/cavitysize-060.dat
 figs/density-1D.eps: figs/cavitysize-060.dat
-figs/density-rods-in-water.eps: figs/rods-slice-1nm-01.0.dat
+figs/density-rods-in-water.eps: figs/rods-1nm-01.0.dat
 figs/density-single-rod.eps: figs/single-rod-01.0.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
