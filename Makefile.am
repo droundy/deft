@@ -1,4 +1,4 @@
-.PHONY: paper comparison slowfigs
+.PHONY: paper project comparison slowfigs
 
 EXTRA_DIST = autogen.sh
 
@@ -36,6 +36,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/constrained-water-1D.mkdat \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
+	paper/figs/single-rod-in-water.mkdat \
+	paper/figs/sphere.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
@@ -119,6 +121,8 @@ paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENE
 paper_figs_constrained_water_1D_mkdat_SOURCES = paper/figs/constrained-water-1D.cpp $(ALL_CODE)
 paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
+paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
+paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
@@ -166,7 +170,12 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
-slowfigs: paper/figs/rods-in-water.dat
+project: paper
+	cd paper && $(MAKE) project.pdf
+
+slowfigs: paper/figs/rods-in-water.dat \
+	paper/figs/single-rod-in-water.dat \
+	paper/figs/sphere.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<

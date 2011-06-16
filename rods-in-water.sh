@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH --mem-per-cpu=1000
 #SBATCH --mail-type ALL
-#SBATCH --mail-user jrbgallagher@gmail.com
+#SBATCH --mail-user jrbhughes@gmail.com
 
 set -ev
 

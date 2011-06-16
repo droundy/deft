@@ -23,22 +23,30 @@
 set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/density-rods-in-water.eps'
 
+reset
+unset arrow
+set view map
+
 set key inside bottom
-set title 'Two hydrophobic rods - Density Slice'
+set title 'Two hydrophobic rods - Density'
 
 # set multiplot
 #set pm3d map
 #set palette color positive
 #set ticslevel 0
 #set samples 50; set isosamples 50
+set palette rgbformulae 22,13,-31
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'y (nm)'
-set ylabel 'density (bohr^{-3})'
+set ylabel 'z (nm)'
 
 set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
-plot [:] [:] \
-'figs/rods-slice-1nm-01.0.dat' u ($2/18.8972613):4 title 'diameter = 1nm, distance apart = 1nm' with lines  
+splot [:] [:] [:] \
+'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
+#'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613):4 notitle with pm3d , \
+#'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613-3):4 notitle with pm3d , \
+#'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613-3):4 notitle with pm3d

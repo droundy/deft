@@ -326,7 +326,7 @@ Instead, I use
   e^{-\beta\epsilon_\textit{assoc}} g^\textit{SW}_\sigma(\xx) \\
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1(\xx)}{\partial n_3(\xx)} -
-  \frac{lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
+  \frac{\lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 which I got from reference\cite{gil-villegas-1997-SAFT-VR}.
@@ -560,6 +560,41 @@ that the density profile will be smoothed out by CW effects.
 \fixme{It'd be worth another search for water intrinsic profile
   papers... but the review I cite is pretty thorough.}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-1D}
+\end{center}
+\caption{ Density profile for a slab of water with molecules constrained to move in one dimension. }
+\label{fig:density-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-1D}
+\end{center}
+\caption{ Energy density profile for a slab of water with molecules constrained to move in one dimension. }
+\label{fig:energy-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/entropy-1D}
+\end{center}
+\caption{ Entropy for a slab of water with molecules constrained to move in one 
+dimension. \textcolor{red}{FIX UNITS}}
+\label{fig:entropy-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D}
+\end{center}
+\caption{ Xassociation value (fraction of association sites
+\emph{not} hydrogen-bonded) for a slab of water with molecules constrained to move in one 
+dimension. }
+\label{fig:xassoc-1D}
+\end{figure}
+
 \subsection{Test-particle approach}
 
 More interesting applications are possible when we move into three
@@ -678,6 +713,16 @@ short range attractive interactions that are able to pass through the
 cavities of small radii.  For larger radii, these interactions are
 less prominent and there is less attraction to molecules across the
 cavity.  Thus, the contact density is decreased.
+
+\subsection{Two Hydrophobic Rods}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\end{center}
+\caption{ Density profile for two hydrophobic rods.}
+\label{fig:density-rods}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}

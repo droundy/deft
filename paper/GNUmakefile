@@ -51,21 +51,22 @@ ALL_FIGURES=\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
-
-
-#	figs/rods-energy-vs-distance.gp
-#	figs/density-rods-in-water.gp
+	figs/energy-vs-diameter.gp\
+	figs/density-rods-in-water.gp\
+	figs/density-single-rod.gp\
+	figs/rods-energy-vs-distance.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
 						$(patsubst %.xgr,%.eps, \
 						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
-FIGURES=$(patsubst %.jpg,%.eps, \
-		$(patsubst %.png,%.eps,$(LESS_CANONICAL_FIGURES)))
-PDF_FIGURES=$(patsubst %.eps,%.pdf, \
+FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
-paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
+project.pdf: project.tex paper.bib $(FIGURES)
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+
+paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
@@ -95,4 +96,6 @@ figs/entropy-1D.eps: figs/cavitysize-060.dat
 figs/energy-1D.eps: figs/cavitysize-060.dat
 figs/density-1D.eps: figs/cavitysize-060.dat
 figs/density-rods-in-water.eps: figs/rods-slice-1nm-01.0.dat
+figs/density-single-rod.eps: figs/single-rod-01.0.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water.dat
+figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
