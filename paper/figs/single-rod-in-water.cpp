@@ -105,6 +105,10 @@ int main(int, char **) {
 				     water_prop.lambda_dispersion,
 				     water_prop.length_scaling, mu_satp));
   
+  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperCell = EperVolume*zmax*ymax*width;
+  printf("The bulk energy per cell should be %g\n", EperCell);
+
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
   			    water_prop.lambda_dispersion,
@@ -116,9 +120,9 @@ int main(int, char **) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (cavitysize=1.0*nm; cavitysize<3.0*nm; cavitysize += 1.0*nm) {
+  for (cavitysize=0.1*nm; cavitysize<=3.0*nm; cavitysize *= 1.58489319246111) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-    GridDescription gd(lat, 0.02);
+    GridDescription gd(lat, 0.2);
     
     Grid potential(gd);
     Grid constraint(gd);
@@ -140,16 +144,16 @@ int main(int, char **) {
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT, 
-								 &potential,
-								 QuadraticLineMinimizer));
+    Minimizer min = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+                                                                     &potential,
+                                                                     QuadraticLineMinimizer));
     
     printf("\nDiameter of rod = %g bohr (%g nm)\n", cavitysize, cavitysize/nm);
     
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
-      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
      
       //density.epsNativeSlice("paper/figs/single-rod-in-water.eps", 
       //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -158,13 +162,13 @@ int main(int, char **) {
       // sleep(3);
     }
 
-    double energy = min.energy()/width;
+    double energy = (min.energy() - EperCell)/width;
     printf("Energy is %.15g\n", energy);
 
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-res0.02-%04.1f.dat", cavitysize/nm);
+    sprintf(plotname, "paper/figs/single-rod-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));
