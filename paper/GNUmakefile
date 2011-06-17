@@ -46,6 +46,7 @@ ALL_FIGURES=\
 	figs/entropy-per-molecule.gp\
 	figs/pressure-with-isotherms.gp\
 	figs/cavitysize-060.gp\
+	figs/cavity-cartoon.gp\
 	figs/cavitysize-vs-energy-1D.gp\
 	figs/xassoc-1D.gp\
 	figs/entropy-1D.gp\
@@ -97,6 +98,7 @@ figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
 figs/cavitysize-060.eps: figs/cavitysize-060.dat
+figs/cavity-cartoon.eps: figs/cavitysize-060.dat
 figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
 figs/xassoc-1D.eps: figs/cavitysize-060.dat 
 figs/entropy-1D.eps: figs/cavitysize-060.dat 
