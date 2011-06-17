@@ -56,6 +56,7 @@ ALL_FIGURES=\
 	figs/density-single-rod.gp\
 	figs/rods-energy-vs-distance.gp\
 	figs/osu-logo.svg\
+	figs/xassoc-rods-in-water.gp\
 
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -71,7 +72,7 @@ project.pdf: project.tex paper.bib $(FIGURES)
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
-poster.pdf: poster.tex paper.bib $(PDF_FIGURES)
+poster.pdf: poster.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
@@ -101,6 +102,7 @@ figs/entropy-1D.eps: figs/cavitysize-060.dat
 figs/energy-1D.eps: figs/cavitysize-060.dat
 figs/density-1D.eps: figs/cavitysize-060.dat
 figs/density-rods-in-water.eps: figs/rods-1nm-01.0.dat
+figs/xassoc-rods-in-water.gp: figs/rods-1nm-01.0.dat
 figs/density-single-rod.eps: figs/single-rod-01.0.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
