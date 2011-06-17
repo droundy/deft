@@ -84,20 +84,28 @@
 \definecolor{lighteryellow}{cmyk}{0,0,0.1,0.0}
 \definecolor{lighteryellow}{cmyk}{0,0,0.1,0.0}
 \definecolor{lightestyellow}{cmyk}{0,0,0.05,0.0}
+
+\definecolor{lightblue}{rgb}{0.8,0.8,1}
+\definecolor{lighterblue}{rgb}{0.9,0.9,1}
+\definecolor{lightestblue}{rgb}{0.98,0.98,1}
+
+\definecolor{cyan}{cmyk}{0.4,0,0.3,0}
+\definecolor{greenblue}{rgb}{0.7,1,.7}
+\definecolor{mediumblue}{rgb}{0.7,0.7,1}
 \begin{poster}{
   % Show grid to help with alignment
   grid=no,
   % Column spacing
   colspacing=1em,
   % Color style
-  bgColorOne=lighteryellow,
+  bgColorOne=lightyellow,
   bgColorTwo=lightestyellow,
-  borderColor=reddishyellow,
-  headerColorOne=yellow,
-  headerColorTwo=reddishyellow,
+  borderColor=mediumblue,
+  headerColorOne=lighterblue,
+  headerColorTwo=mediumblue,
   headerFontColor=black,
-  boxColorOne=lightyellow,
-  boxColorTwo=lighteryellow,
+  boxColorOne=lighterblue,
+  boxColorTwo=lightblue,
   % Format of textbox
   textborder=roundedleft,
   % Format of text header
@@ -105,16 +113,15 @@
   headerborder=open,
   headerheight=0.08\textheight,
   headershape=roundedright,
-  headershade=plain,
+  headershade=shade-tb,
   headerfont=\Large\textsf, %Sans Serif
   boxshade=plain,
 %  background=shade-tb,
-  background=plain,
+  background=shade-tb,
   linewidth=2pt
   }
   % Eye Catcher
-  { % No eye catcher for this poster. If an eye catcher is present,
-    % the title is centered between eye-catcher and logo.
+  { % The title is centered between eye-catcher and logo.
     \includegraphics[height=5.5em]{figs/cavitysize-060}
   }
   % Title
@@ -193,7 +200,9 @@
   }
 
   \headerbox{Surface Tension}{name=1D,column=1,row=0}{
-    
+    \begin{center}
+      \includegraphics[width=\columnwidth]{figs/surface-tension}
+    \end{center}
   }
   \headerbox{A Cylinder in Water}{name=rod,column=1,below=1D,span=1,above=bottom}{
     \begin{center}
