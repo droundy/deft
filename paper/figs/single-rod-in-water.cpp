@@ -106,8 +106,6 @@ int main(int, char **) {
 				     water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
-  const double EperCell = EperVolume*zmax*ymax*width;
-  printf("The bulk energy per cell should be %g\n", EperCell);
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
@@ -162,6 +160,8 @@ int main(int, char **) {
       // sleep(3);
     }
 
+    const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*cavitysize*cavitysize)*width;
+    printf("The bulk energy per cell should be %g\n", EperCell);
     double energy = (min.energy() - EperCell)/width;
     printf("Energy is %.15g\n", energy);
 
