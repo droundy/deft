@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 20
+set terminal postscript eps enhanced color solid "Helvetica" 20
 set output 'figs/density-vs-radius.eps'
 
 reset
@@ -28,7 +28,7 @@ unset arrow
 set view map
 
 set key inside bottom
-set title 'One hydrophobic rod - Density'
+#set title 'One hydrophobic rod - Density'
 
 # set multiplot
 #set pm3d map
@@ -39,13 +39,13 @@ set palette rgbformulae 22,13,-31
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'z (nm)'
-set ylabel 'density (bohr^{-3})'
-
-set style line 1 lt 1 lw 1
+set xlabel 'r (nm)'
+set ylabel 'Density (g/mL)'
+set style line 1 lt 1 lw 3
 #set style line 2 lt 1 lc 7 lw 1
 
 nm = 18.8972613
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
-plot [:] [:] \
-'figs/single-rod-slice-01.0.dat' u ($3/nm):4 notitle with lines
+plot [:2] [:] \
+'figs/single-rod-slice-01.0.dat' u ($3/nm):($4/gpermL) notitle with lines

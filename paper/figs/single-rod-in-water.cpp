@@ -166,6 +166,7 @@ int main(int, char **) {
     printf("Energy is %.15g\n", energy);
 
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
+    fflush(o); // For the impatient!
 
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/single-rod-%04.1f.dat", cavitysize/nm);
