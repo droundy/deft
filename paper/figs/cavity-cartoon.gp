@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced solid color "Helvetica" 20 size 3,1
+set terminal postscript eps enhanced color solid lw 3 "Helvetica" 20 size 3,1
 set output 'figs/cavity-cartoon.eps'
 
 set key noauto inside top
@@ -36,7 +36,6 @@ unset xtics
 unset ytics
 
 set style line 1 lt 3 lw 2
-set style line 2 lt 1 lc 7 lw 1
 
 # In cavitysize-xxx.dat columns are 1:x, 2:y, 3:z, 4:density, 5:energy density, 6:entropy, 7:xassoc
 
