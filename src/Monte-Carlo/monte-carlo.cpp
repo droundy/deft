@@ -18,6 +18,10 @@ int main(){
     printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
     printf("Distance from origin = %g\n", distance(spheres[i]));
   } 
+  FILE *o = fopen("Spheres.dat", "w");
+  writeSpheres(spheres, N, o);
+  writeSpheres(spheres, N, o);
+  fclose(o);
   delete[] spheres;
 }
 
