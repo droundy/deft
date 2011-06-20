@@ -2,7 +2,7 @@
 
 EXTRA_DIST = autogen.sh
 
-MONTECARLO_CODE = src/monte-carlo/monte-carlo.cpp \
+MONTECARLO_CODE = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \

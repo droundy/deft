@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "monte-carlo/monte-carlo.h"
+#include "Monte-Carlo/monte-carlo.h"
 
 
 int main(){
