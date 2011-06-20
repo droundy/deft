@@ -97,11 +97,11 @@ int main(int, char **argv) {
     fclose(o);
     printf("Got dispersion!\n");
 
-    Functional f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
-                                                      water_prop.epsilonAB, water_prop.kappaAB,
-                                                      water_prop.epsilon_dispersion,
-                                                      water_prop.lambda_dispersion,
-                                                      water_prop.length_scaling, 0));
+    Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+                                                  water_prop.epsilonAB, water_prop.kappaAB,
+                                                  water_prop.epsilon_dispersion,
+                                                  water_prop.lambda_dispersion,
+                                                  water_prop.length_scaling, 0));
 
 
     const double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
@@ -117,6 +117,7 @@ int main(int, char **argv) {
     test_pressure("saft at 1 atm", f, n_1atm, atmospheric_pressure);
 
     {
+      printf("working onfoo\n");
       double nv = coexisting_vapor_density(f, water_prop.kT, water_prop.liquid_density);
       printf("predicted vapor density: %g\n", nv);
       printf("actual vapor density:    %g\n", water_prop.vapor_density);
@@ -158,19 +159,18 @@ int main(int, char **argv) {
 
     {
       o = fopen("room-temperature.dat", "w");
-      Functional f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
+      Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
                                                         water_prop.epsilonAB, water_prop.kappaAB,
                                                         water_prop.epsilon_dispersion,
                                                         water_prop.lambda_dispersion,
                                                         water_prop.length_scaling, 0));
       double mufoo = find_chemical_potential(f, water_prop.kT,
                                              water_prop.liquid_density);
-      f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
+      f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
                                              water_prop.epsilonAB, water_prop.kappaAB,
                                              water_prop.epsilon_dispersion,
                                              water_prop.lambda_dispersion,
                                              water_prop.length_scaling, mufoo));
-      printf("moofoo is %g\n", mufoo);
       double nl, nv, mu;
       saturated_liquid_vapor(f, water_prop.kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-5);
       for (double dens=0.1*nv; dens<=1.2*nl; dens *= 1.01) {

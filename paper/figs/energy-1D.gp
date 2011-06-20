@@ -24,7 +24,7 @@ set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/energy-1D.eps'
 
 set key noauto inside top
-set title 'Energy density'
+#set title 'Energy density'
 
 # set multiplot
 
@@ -37,6 +37,6 @@ set style line 1 lt 1 lw 1
 set style line 2 lt 1 lc 7 lw 1
 
 plot [:150] [:] \
-'figs/cavitysize-120.dat' u 3:5 title 'cavity size = 120 bohr' with lines ls 1 , \
-'figs/cavitysize-120.dat' u (15):5 notitle with lines ls 2 , \
-'figs/cavitysize-120.dat' u (135):5 notitle with lines ls 2
+'figs/cavitysize-060.dat' u 3:5 title 'cavity size = 60 bohr' with lines ls 1 , \
+'figs/cavitysize-060.dat' u (45):5 notitle with lines ls 2 , \
+'figs/cavitysize-060.dat' u (105):5 notitle with lines ls 2

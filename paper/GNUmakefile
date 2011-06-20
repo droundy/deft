@@ -27,7 +27,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf
+all :  paper.pdf poster.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -46,27 +46,36 @@ ALL_FIGURES=\
 	figs/entropy-per-molecule.gp\
 	figs/pressure-with-isotherms.gp\
 	figs/cavitysize-060.gp\
+	figs/cavity-cartoon.gp\
 	figs/cavitysize-vs-energy-1D.gp\
 	figs/xassoc-1D.gp\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
+	figs/energy-vs-diameter.gp\
+	figs/density-rods-in-water.gp\
+	figs/density-single-rod.gp\
+	figs/density-vs-radius.gp\
+	figs/rods-energy-vs-distance.gp\
+	figs/osu-logo.svg\
+	figs/xassoc-rods-in-water.gp\
 
-
-#	figs/rods-energy-vs-distance.gp
-#	figs/density-rods-in-water.gp
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
 						$(patsubst %.xgr,%.eps, \
 						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
-FIGURES=$(patsubst %.jpg,%.eps, \
-		$(patsubst %.png,%.eps,$(LESS_CANONICAL_FIGURES)))
-PDF_FIGURES=$(patsubst %.eps,%.pdf, \
+FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
-paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
+project.pdf: project.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+
+paper.pdf: paper.tex paper.bib $(FIGURES)
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+
+poster.pdf: poster.tex paper.bib $(FIGURES)
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
 
@@ -89,10 +98,15 @@ figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
 figs/cavitysize-060.eps: figs/cavitysize-060.dat
+figs/cavity-cartoon.eps: figs/cavitysize-060.dat
 figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
 figs/xassoc-1D.eps: figs/cavitysize-060.dat 
 figs/entropy-1D.eps: figs/cavitysize-060.dat 
 figs/energy-1D.eps: figs/cavitysize-060.dat
 figs/density-1D.eps: figs/cavitysize-060.dat
-figs/density-rods-in-water.eps: figs/rods-slice-1nm-01.0.dat
+figs/density-rods-in-water.eps: figs/rods-1nm-01.0.dat
+figs/xassoc-rods-in-water.gp: figs/rods-1nm-01.0.dat
+figs/density-single-rod.eps: figs/single-rod-01.0.dat
+figs/density-vs-radius.eps: figs/single-rod-slice-01.0.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water.dat
+figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat

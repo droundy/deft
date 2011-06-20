@@ -1,4 +1,4 @@
-.PHONY: paper contactpaper comparison slowfigs
+.PHONY: paper project poster contactpaper comparison slowfigs
 
 EXTRA_DIST = autogen.sh
 
@@ -13,6 +13,7 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
+	src/ContactDensity.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
@@ -40,7 +41,11 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/constrained-water-1D.mkdat \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
+	paper/figs/single-rod-in-water.mkdat \
+	paper/figs/sphere.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
+	contactpaper/figs/gHS-vs-n.mkdat \
+	contactpaper/figs/free-energy.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -112,7 +117,7 @@ tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
-tests_eos_test_SOURCES = tests/eos.cpp $(GENERIC_CODE)
+tests_eos_test_SOURCES = tests/eos.cpp $(ALL_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
@@ -123,7 +128,12 @@ paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENE
 paper_figs_constrained_water_1D_mkdat_SOURCES = paper/figs/constrained-water-1D.cpp $(ALL_CODE)
 paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
+paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
+paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
+
+contactpaper_figs_gHS_vs_n_mkdat_SOURCES = contactpaper/figs/gHS-vs-n.cpp $(GENERIC_CODE)
+contactpaper_figs_free_energy_mkdat_SOURCES = contactpaper/figs/free-energy.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -170,12 +180,24 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
-slowfigs: paper/figs/rods-in-water.dat
+project: paper
+	cd paper && $(MAKE) project.pdf
 
-contactpaper: contactpaper/paper.tex
+poster: paper
+	cd paper && $(MAKE) poster.pdf
+
+slowfigs: paper/figs/rods-in-water.dat \
+	paper/figs/single-rod-in-water.dat \
+	paper/figs/sphere.dat
+
+contactpaper: contactpaper/paper.tex \
+		contactpaper/figs/gHS-vs-n.dat \
+		contactpaper/figs/free-energy.dat
 	cd contactpaper && $(MAKE)
 
 paper/figs/%.dat: paper/figs/%.mkdat
+	$<
+contactpaper/figs/%.dat: contactpaper/figs/%.mkdat
 	$<
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
