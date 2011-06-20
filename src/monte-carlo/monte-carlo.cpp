@@ -16,12 +16,17 @@ int main(){
   }
   for(int i = 0; i<N; i++){
     printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+    printf("Distance from origin = %g\n", distance(spheres[i]));
   } 
   delete[] spheres;
 }
 
 double ran(){
   return rand()/double(RAND_MAX);
+}
+
+double distance(Vector3d v){
+  return sqrt((v[0]*v[0]+v[1]*v[1]+v[2]*v[2]));
 }
 
 Vector3d ran3(){
