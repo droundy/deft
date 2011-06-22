@@ -28,13 +28,22 @@ set key noauto inside top
 
 # set multiplot
 
+set encoding iso_8859_1
+
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'Distance (nm)'
-set ylabel 'Energy (Hartree)'
+set xlabel 'd (nm)'
+set ylabel 'Energy per length (kJ/mol {\305})'
 
-set style line 1 lt 1 lw 1
-#set style line 2 lt 1 lc 7 lw 1
+set style line 1 lt 1 pt 7 ps 2 lw 2
+
+mNpermeter = 6.4230498e-07 # in atomic units
+nm = 18.8972613 # in atomic units
+eV = 0.036749326 # Hartree
+kJpermol = 1.04e-2*eV # in atomic units
+angstrom = 0.1*nm
 
 plot [:] [:] \
-'figs/rods-in-water.dat' u 1:2 notitle with lines ls 1 
+'figs/rods-in-water.dat' u 1:($2/(kJpermol/angstrom) - 59.06) notitle with p ls 1
+
+#'figs/rods-in-water.dat' u 1:($2/(2*pi*1*nm)/mNpermeter/2) notitle with lines ls 1 

@@ -26,22 +26,24 @@ set output 'figs/surface-tension.eps'
 set title ''
 
 #set format y "%3.00g"
-set ylabel 'surface tension (hartree/bohr^2)'
+set ylabel 'Surface Tension (mN/m)'
 #set ytics 1.0
 
 #set ticscale 2 1
 set samples 10000
 
-set xlabel 'temperature (K)'
+set xlabel 'Temperature (^{o}C)'
 #set xtics 10.0
+
+mNpermeter = 6.4230498e-07 # in atomic units
 
 nl=4.93889420e-03
 
 set style line 1 lt 1 lw 3
-set style line 2 lt 2 lw 3
+set style line 2 lt 3 lw 3
 set style line 3 lt 3 lw 3
 
 
-plot [:] [:] \
-'figs/surface-tension.dat' u 1:2 title 'theory' with lines ls 1, \
-'figs/experimental-surface-tension.csv' u 1:2 title 'experiment' with lines ls 2
+plot [0:] [:] \
+'figs/surface-tension.dat' u ($1-273.15):($2/mNpermeter) title 'theory' with lines ls 1, \
+'figs/experimental-surface-tension.csv' u ($1-273.15):($2/mNpermeter) title 'experiment' with lines ls 2
