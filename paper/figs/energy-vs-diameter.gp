@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 20
+set terminal postscript eps enhanced color solid "Helvetica" 20
 set output 'figs/energy-vs-diameter.eps'
 
 set key noauto outside top
@@ -29,10 +29,13 @@ set key noauto outside top
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'diameter (nm)'
-set ylabel 'energy (Hartree/bohr)'
+set xlabel 'Diameter (nm)'
+set ylabel 'Energy/Area (mN/m)'
 
-set style line 1 lt 3 lw 3
+set style line 1 lt 3 lw 3 pt 7 ps 3
 
-plot [0.6:] [:] \
-'figs/single-rod-in-water.dat' u 1:2 notitle with points ls 1
+mNpermeter = 6.4230498e-07 # in atomic units
+nm = 18.8972613 # in atomic units
+
+plot [0:] [0:] \
+'figs/single-rod-in-water.dat' u 1:($2/(pi*$1*nm)/mNpermeter) notitle with lp ls 1

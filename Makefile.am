@@ -2,6 +2,10 @@
 
 EXTRA_DIST = autogen.sh
 
+MONTECARLO_CODE = src/Monte-Carlo/monte-carlo.cpp \
+	src/utilities.cpp \
+	src/Monte-Carlo/fileio.cpp
+
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
@@ -26,8 +30,9 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
-bin_PROGRAMS = deft
-deft_SOURCES = src/deft.cpp $(ALL_CODE)
+bin_PROGRAMS = deft monte-carlo
+deft_SOURCES = src/deft.cpp $(ALL_CODE) 
+monte_carlo_SOURCES = $(MONTECARLO_CODE)
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \

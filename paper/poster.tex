@@ -166,107 +166,150 @@
     modelling fluid behavior when the density is inhomogeneous---as is
     the case at interfaces.  We have developed a classical density
     functional for water, which provides a description of hydrophobic
-    interactions.  }
+    interactions.
+
+    \vspace{1em}
+  }
 
   \headerbox{Statistical Associating Fluid
-    Teory}{name=saft,column=0,below=cdft}{ The statistical associating
-    fluid theory (SAFT) is a well-established approach for the
+    Teory}{name=saft,column=0,below=cdft}{ Statistical Associating
+    Fluid Theory (SAFT) is a well-established approach for the
     description of the thermodynamics and phase equilibria of fluid
     systems, with particular applicability to hydrogen-bonding fluids.
-    Our functional reduces in the homogeneous limit to the SAFT model
-    for water developed in reference~\cite{clark2006developing}.
+    Our functional is constructed so as to reduce in the homogeneous
+    limit to the 4-site SAFT model for water developed in
+    reference~\cite{clark2006developing}.
     \begin{center}
       \includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
     \end{center}
     This functional accurately describes the liquid-vapor phase
-    diagram away from the critical point, but gives a poor description
-    of the compressibility.
+    diagram away from the critical point, but gives less accurately
+    describes the compressibility.
+
+    \vspace{1em}
   }
 
-  \headerbox{The
-    Functional}{name=fitting,column=0,below=saft,above=bottom}{ We
-    introduce a new classical density functional for water.  The
-    Helmholtz free energy functional is based on SAFT, and is composed
-    of the usual terms:
-    \begin{equation}
-      F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] + F_\textit{disp},
-    \end{equation}
+  \headerbox{The Functional}{name=functional,column=1,row=0}{
+    The Helmholtz free energy of the new functional is based on SAFT,
+    and is composed of the usual terms:
+    \begin{equation*}
+      F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] + F_\textit{disp}[n],
+    \end{equation*}
     We model the repulsive interactions using the White Bear version
     of the Fundamental-Measure Theory~(FMT)
-    functional~\cite{roth2002whitebear}.  The association term is
-    taken from~\cite{yu2002fmt-dft-inhomogeneous-associating}, and we
-    used a simple and efficient functional for the dispersion
-    interaction with a single tunable parameter.
+    functional~\cite{roth2002whitebear} for the hard sphere fluid,
+    which is expressed in terms of efficiently-computable
+    convolutions.
+    \vspace{0.5em}
+
+    The SAFT free energy of association for a 4-site model of water
+    has the form
+    \begin{align*}
+      f_\text{assoc} &= 4 k_BT n \left(\ln X - \frac{X}{2} + \frac12\right)
+    \end{align*}
+    where $X$ is the fraction of hydrogens \emph{not} hydrogen bonded,
+    and is found using a mass action equation involving the density of
+    hard spheres in contact with one another.  We extend this to the
+    inhomogeneous case using the approach described by Yu and
+    Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, which expresses
+    $X$ in terms of the same weighted densities used in FMT.
+    \vspace{0.5em}
+
+    Finally, we add a simple and efficient functional for the
+    dispersion interaction based on
+    SAFT-VR~\cite{gil-villegas-1997-SAFT-VR}, with an additional
+    tunable parameter to adjust the surface tension.
+
+    \vspace{0.8em}
   }
 
-  \headerbox{Surface Tension}{name=1D,column=1,row=0}{
+  \headerbox{Surface
+    Tension}{name=surfacetension,column=1,below=functional,above=bottom}{
+    We compute the surface tension by finding the free energy of a
+    liquid-vapor interface.  The surface tension is fit to experiment
+    by adjusting a length-scale parameter in the dispersion term of
+    the free energy.
     \begin{center}
       \includegraphics[width=\columnwidth]{figs/surface-tension}
     \end{center}
   }
-  \headerbox{A Cylinder in Water}{name=rod,column=1,below=1D,span=1,above=bottom}{
-    \begin{center}
-      \includegraphics[width=\columnwidth]{figs/density-vs-radius}
-    \end{center}
-    \begin{center}
-      \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
-    \end{center}
-  }
-  \headerbox{Two Cylinders in Water}{name=two rods,column=2,span=2,row=0}{
+  \headerbox{A Single Cylinder in Water}{name=rod,column=2,span=2,row=0}{
     \begin{multicols}{2}
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-      This text will be in two separate columns.
-    \end{multicols}\vspace{-1em}
-    \begin{center}
-      \includegraphics[width=0.45\columnwidth]{figs/density-rods-in-water}
-      \hspace{1em}
-      \includegraphics[width=0.45\columnwidth]{figs/xassoc-rods-in-water}
-    \end{center}
-    
-    %      \begin{multicols}{2}
-    {
-      This text will span the whole box.
-      This text will span the whole box.
-      This text will span the whole box.
-      This text will span the whole box.
-      This text will span the whole box.
-      This text will span the whole box.
-      %Note the different scales for the two graphs.
-      %Our approach has a high accuracy on the neutral (UND) dataset.
-    }
-    %      \end{multicols}\vspace{-1em}
-    \begin{center}
-      \includegraphics[width=0.45\columnwidth]{figs/rods-energy-vs-distance}
-    \end{center}
-  }%
-  \headerbox{Future Work}{name=future work,column=2,span=1,above=bottom,below=two rods}{
+      One of the simplest multi-dimensional inhomogeneous systems is a
+      hard cylinder in water.
+      \begin{center}
+        \includegraphics[width=0.9\columnwidth]{figs/density-vs-radius}
+      \end{center}
+      \begin{quote}
+        The density of water around a
+        hard-walled cylinder with 1~nm diameter.
+      \end{quote}
 
+      \begin{center}
+        \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
+      \end{center}
+      \begin{quote}
+        The hydration energy per unit area of a hard
+        cylinder.  As expected, this asymptotes to the same value as
+        the surface tension.
+      \end{quote}
+    \end{multicols}
   }
-  \headerbox{References}{name=references,column=3,above=bottom,below=two
-  rods}{
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \bibliographystyle{plain}	% (uses file "plain.bst")
+  \headerbox{Two Cylinders in Water}{name=two rods,column=2,span=2,below=rod,above=bottom}{
+    %% \begin{multicols}{2}
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %%   This text will be in two separate columns.
+    %% \end{multicols}\vspace{-1em}
+    \begin{multicols}{2}
+      \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+
+      \vspace{-1em}
+      \begin{quote}
+        The density of water in the vicinity of two hard-walled
+        cylinders, each 1~nm in diameter, and separated by 1~nm.
+      \end{quote}
+
+      \includegraphics[width=\columnwidth]{figs/xassoc-rods-in-water}
+
+      \vspace{-1em}
+      \begin{quote}
+      Here we plot the number of hydrogen bonds per molecule for the
+      same system of two hard-walled cylinders.
+      \end{quote}
+    \end{multicols}
+    
+    \begin{multicols}{2}
+      One application of our model is the hydrophobic attraction
+      between two cylindrical molecules in water, such as two
+      nanotubes.  We study the interactions between two hard cylinders
+      with 1~nm diameter.
+      \begin{center}
+        \includegraphics[width=0.95\columnwidth]{figs/two-rods-diagram}
+      \end{center}
+      \begin{center}
+        \includegraphics[width=0.9\columnwidth]{figs/rods-energy-vs-distance}
+      \end{center}
+    \end{multicols}
+  }%
+  %% \headerbox{Future Work}{name=future work,column=3,span=1,above=two rods,row=0}{
+  %%   \begin{itemize}
+  %%   \item Extend functional to depend on hydrogen and oxygen densities
+  %%     separately, including intramolecular interactions in the
+  %%     harmonic approximation.
+  %%   \item Introduce elecrtrostatic interactions.
+  %%   \item Couple with.
+  %%   \end{itemize}
+  %% }
+  \headerbox{References}{name=references,column=0,above=bottom,below=saft}{
+    \renewcommand\refname{}
+    \bibliographystyle{unsrt}
+    \tiny
     \bibliography{paper}
-    %% \smaller
-    %% \vspace{-0.4em}
-    %% \bibliographystyle{ieee}
-    %% \renewcommand{\section}[2]{\vskip 0.05em}
-    %%   \begin{thebibliography}{1}\itemsep=-0.01em
-    %%   \setlength{\baselineskip}{0.4em}
-    %%   \bibitem{amberg07:nonrigid}
-    %%     B.~Amberg, S.~Romdhani, T. Vetter.
-    %%     \newblock {O}ptimal {S}tep {N}onrigid {ICP} {A}lgorithms for {S}urface {R}egistration
-    %%     \newblock In {\em CVPR 2007}
-    %%   \bibitem{amberg08:recognition}
-    %%     B.~Amberg, R.~Knothe, T. Vetter.
-    %%     \newblock Expression Invariant Face Recognition with a 3D Morphable Model
-    %%     \newblock In {\em AFGR 2008}
-    %%   \end{thebibliography}
   }%
 \end{poster}%
 %
