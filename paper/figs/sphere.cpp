@@ -24,10 +24,11 @@
 
 const double nm = 18.8972613;
 // Here we set up the lattice.
-const double zmax = 4*nm;
-const double ymax = 4*nm;
-const double xmax = 4*nm;
-double diameter = 2*nm;
+const double zmax = 2.5*nm;
+const double ymax = 2.5*nm;
+const double xmax = 2.5*nm;
+double diameter = 1*nm;
+bool using_default_diameter = true;
 
 double notinwall(Cartesian r) {
   const double z = r.z();
@@ -69,15 +70,15 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
     return;
   }
   const GridDescription gd = a.description();
-  const int x = gd.Nx/2;
+  const int x = 0;
   //const int y = gd.Ny/2;
-  for (int y=0; y<gd.Ny; y++) {
-    for (int z=0; z<gd.Nz; z++) {
+  for (int y=-gd.Ny/2; y<=gd.Ny/2; y++) {
+    for (int z=-gd.Nz/2; z<=gd.Nz/2; z++) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double ahere = a(x,y,z);
-      double bhere = b(x,y,z);
-      double chere = c(x,y,z);
-      double dhere = d(x,y,z);
+      double ahere = a(here);
+      double bhere = b(here);
+      double chere = c(here);
+      double dhere = d(here);
       fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
 	      ahere, bhere, chere, dhere);
     }
@@ -86,8 +87,21 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   fclose(out);
 }
 
-int main(int, char **) {
-  FILE *o = fopen("paper/figs/sphere.dat", "w");
+int main(int argc, char *argv[]) {
+  if (argc > 1) {
+    if (sscanf(argv[1], "%lg", &diameter) != 1) {
+      printf("Got bad argument: %s\n", argv[1]);
+      return 1;
+    }
+    diameter *= nm;
+    using_default_diameter = false;
+    printf("Diameter is %g bohr\n", diameter);
+  }
+
+  char *datname = (char *)malloc(1024);
+  sprintf(datname, "paper/figs/sphere-%04.1fnm-energy.dat", diameter/nm);
+  
+  FILE *o = fopen(datname, "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -131,17 +145,17 @@ int main(int, char **) {
 				       water_prop.lambda_dispersion,
 				       water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
-    constraint.epsNativeSlice("paper/figs/sphere-constraint.eps",
-     			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-     			      Cartesian(0,ymax/2,zmax/2));
-    printf("Constraint has become a graph!\n");
+    //constraint.epsNativeSlice("paper/figs/sphere-constraint.eps",
+    // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+    // 			      Cartesian(0,ymax/2,zmax/2));
+    //printf("Constraint has become a graph!\n");
    
     potential = water_prop.liquid_density*constraint
       + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(1e-14, 
+    Minimizer min = Precision(1e-6, 
 			      PreconditionedConjugateGradient(f, gd, water_prop.kT, 
 							      &potential,
 							      QuadraticLineMinimizer));
@@ -177,7 +191,10 @@ int main(int, char **) {
     density.epsNativeSlice("paper/figs/sphere.eps", 
 			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
 			   Cartesian(0,ymax/2,zmax/2));
-      
+    
+    double peak = peak_memory()/1024.0/1024;
+    printf("Peak memory use is %g M\n", peak);
+  
   // }
   fclose(o);
 }

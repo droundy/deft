@@ -87,7 +87,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 }
 
 int main(int, char **) {
-  FILE *o = fopen("paper/figs/single-rod-in-water.dat", "w");
+  FILE *o = fopen("paper/figs/single-rod-in-water-high-res.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -118,9 +118,9 @@ int main(int, char **) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (cavitysize=0.0*nm; cavitysize<=3.0*nm; cavitysize += 0.1*nm) {
+  for (cavitysize=0.5*nm; cavitysize<=3.0*nm; cavitysize += 0.5*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-    GridDescription gd(lat, 0.2);
+    GridDescription gd(lat, 0.05);
     
     Grid potential(gd);
     Grid constraint(gd);
@@ -168,7 +168,7 @@ int main(int, char **) {
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-%04.1f.dat", cavitysize/nm);
+    sprintf(plotname, "paper/figs/single-rod-res0.05-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));

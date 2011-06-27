@@ -35,17 +35,20 @@ set title 'One hydrophobic rod - Density'
 #set palette color positive
 #set ticslevel 0
 #set samples 50; set isosamples 50
-set palette rgbformulae 22,13,-31
+#set palette rgbformulae 22,13,-31
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'z (nm)'
 set ylabel 'density (bohr^{-3})'
 
-set style line 1 lt 1 lw 1
+set style line 1 lt 7 lw 1
 #set style line 2 lt 1 lc 7 lw 1
+set style line 2 pt 6
+set style line 3 pt 0 lc 4 lw 2
 
 nm = 18.8972613
 
-plot [:] [:] \
-'figs/single-rod-slice-01.0.dat' u ($3/nm):4 notitle with lines
+plot [:2.5] [:] \
+'figs/single-rod-slice-01.0.dat' u ($3/nm):4 notitle with points ls 2 , \
+'figs/single-rod-res0.05-slice-01.0.dat' u ($3/nm):4 notitle with points ls 3

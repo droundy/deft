@@ -21,14 +21,14 @@
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20
-set output 'figs/density-rods-in-water.eps'
+set output 'figs/density-sphere.eps'
 
 reset
 unset arrow
 set view map
 
 set key inside bottom
-set title 'Two hydrophobic rods - Density'
+set title 'Sphere - Density slice'
 
 # set multiplot
 #set pm3d map
@@ -46,7 +46,7 @@ set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
 splot [:] [:] [:] \
-'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
+'figs/sphere-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
 #'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613):4 notitle with pm3d , \
 #'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613-3):4 notitle with pm3d , \
 #'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613-3):4 notitle with pm3d
