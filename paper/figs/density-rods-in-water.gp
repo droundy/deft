@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 20
+set terminal postscript eps enhanced color "Helvetica" 20 size 5,3
 set output 'figs/density-rods-in-water.eps'
 
 reset

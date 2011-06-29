@@ -59,6 +59,7 @@ ALL_FIGURES=\
 	figs/rods-energy-vs-distance.gp\
 	figs/osu-logo.svg\
 	figs/xassoc-rods-in-water.gp\
+	figs/two-rods-diagram.svg\
 
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \

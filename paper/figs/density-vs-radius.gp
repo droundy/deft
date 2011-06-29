@@ -48,4 +48,4 @@ nm = 18.8972613
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:2] [:] \
-'figs/single-rod-slice-01.0.dat' u ($3/nm):($4/gpermL) notitle with lines
+'figs/single-rod-slice-01.0.dat' u ($3/nm):($4/gpermL) notitle with lines ls 1

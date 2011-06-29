@@ -119,20 +119,28 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
   } else if (E1 == E0) {
     if (verbose) {
-      printf("\t\tNo change in energy...\n");
+      printf("\t\tNo change in energy... step1 is %g, direction has mag %g pos is %g\n",
+             step1, direction.norm(), x->norm());
       fflush(stdout);
     }
     do {
       invalidate_cache();
-      *x += step1*direction;
+      *x -= step1*direction;
       step1 *= 2;
-      //printf("From step1 of %10g I get delta E of %g\n", step1, energy()-E0);
+      *x += step1*direction;
+      // printf("From step1 of %10g I get delta E of %g\n", step1, energy()-E0);
     } while (energy() == E0);
     if (energy() > E0) {
       *x -= step1*direction;
       invalidate_cache();
       step1 = 0;
       printf("\t\tQuad: failed to find any improvement!  :(\n");
+    } else if (isnan(energy())) {
+      printf("\t\tQuad: found NaN with smallest possible step!!!\n");
+      *x -= step1*direction;
+      invalidate_cache();
+      step1 = 0;
+      //printf("\t\tQuad: put energy back to %g...\n", energy());
     }
   } else {
     *step = step2; // output the stepsize for later reuse.
