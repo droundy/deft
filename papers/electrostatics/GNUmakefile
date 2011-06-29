@@ -1,0 +1,47 @@
+.SUFFIXES: .tex .dvi .ps .bib .bbl .pdf .fig .eps .aux .jpg .png .svg \
+		.gp .mf .2602gf .pl .xgr
+.tex.pdf:
+	pdflatex $<
+.ps.pdf:
+	ps2pdf $<
+.jpg.eps:
+	convert $< $@
+.pl.eps:
+	perl $<
+.png.eps:
+	convert $< $@
+.eps.pdf:
+	epstopdf $<
+.svg.eps:
+	inkscape --export-eps $@ $<
+.dvi.ps:
+	dvips -t letter -Ppdf -o $@ $<
+.bib.bbl:
+	bibtex $*
+.fig.eps:
+	fig2dev -L eps $< $@
+
+.gp.eps:
+	gnuplot $<
+.xgr.eps:
+	gracebat -printfile $@ -hdevice EPS $<
+.mf.2602gf:
+	mf $<
+all :  paper.pdf
+
+clean:
+	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
+
+ALL_FIGURES=\
+
+LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
+						$(patsubst %.gp,%.eps, \
+						$(patsubst %.xgr,%.eps, \
+						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
+FIGURES=$(patsubst %.jpg,%.eps, \
+		$(patsubst %.png,%.eps,$(LESS_CANONICAL_FIGURES)))
+PDF_FIGURES=$(patsubst %.eps,%.pdf, \
+			$(LESS_CANONICAL_FIGURES))
+
+paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
