@@ -182,7 +182,8 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
-papers:
+papers: papers/contact/figs/gHS-vs-n.dat \
+	papers/contact/figs/free-energy.dat
 	cd papers && $(MAKE)
 
 project: paper

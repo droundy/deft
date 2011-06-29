@@ -16,11 +16,13 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <cassert>
 #include "ContactDensity.h"
 
 
 int main(int, char **) { 
-  FILE *o = fopen("contactpaper/figs/gHS-vs-n.dat", "w");
+  FILE *o = fopen("papers/contact/figs/gHS-vs-n.dat", "w");
+  assert(o);
 
   Functional cd = ContactDensitySimplest(1.0);
   Functional ghs = gHS(Identity(), 1.0);

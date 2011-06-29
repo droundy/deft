@@ -20,11 +20,12 @@
 
 
 int main(int, char **) { 
-  FILE *o = fopen("contactpaper/figs/free-energy.dat", "w");
+  FILE *o = fopen("papers/contact/figs/free-energy.dat", "w");
+  assert(o);
 
   Functional f = HardSpheresWBnotensor(1.0);
   Functional eta = Identity();
-  Functional fcar = (4*eta - 3*Pow(3)(eta))/sqr(1-eta);
+  Functional fcar = (4*eta - 3*sqr(eta))/sqr(1-eta);
   double mykT = 1.0; // so we needn't divide by kT
 
   for (double eta=0.0001; eta<=0.3; eta *= 1.01) {
