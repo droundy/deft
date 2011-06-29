@@ -13,10 +13,10 @@ void run(){
   spheres[5] = Vector3d(-R,-R*sqrt(3),0);
   spheres[6] = Vector3d(R,-R*sqrt(3),0);
   spheres[7] = Vector3d(R,-R*.5,R*sqrt(3));
-  spheres[8] = Vector3d(0,R+.22*R,R*sqrt(3));
+  spheres[8] = Vector3d(0,sqrt(3)-.5*R,R*sqrt(3));
   spheres[9] = Vector3d(-R,-.5*R,R*sqrt(3));
   spheres[10] = Vector3d(R,-.5*R,-R*sqrt(3));
-  spheres[11] = Vector3d(0,R+.22*R,-R*sqrt(3));
+  spheres[11] = Vector3d(0,sqrt(3)-.5*R,-R*sqrt(3));
   spheres[12] = Vector3d(-R,-.5*R,-R*sqrt(3)); 
   for(int i = 0; i<N; i++){
     printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
@@ -24,22 +24,22 @@ void run(){
   }
   FILE *o = fopen("Spheres.dat", "w");
   writeSpheres(spheres, N, o);
-  int i = 0;
-  int j = 0;
-  while(j<100){
-    Vector3d temp = move(spheres[i%N], 3, 3, 3);
-    if(i%20==0){
+   int i = 0;
+   int j = 0;
+   while(j<100){
+   Vector3d temp = move(spheres[i%N], 3, 3, 3);
+   if(i%20==0){
       printf("i = %d\n",i);
-    }
-    if(overlap(spheres, temp, N, R)){
-        i++;
-	continue;
-    }
-    spheres[i] = temp;
-    writeSpheres(spheres, N, o);
-    j++;
+   }
+   if(overlap(spheres, temp, N, R)){
+      i++;
+  	continue;
+  }
+  spheres[i] = temp;
+  writeSpheres(spheres, N, o);
+  j++;
   }   
-  //  spheres[0] = move(spheres[0], 1, 1, 1);
+    spheres[0] = move(spheres[0], 1, 1, 1);
   fclose(o);
   delete[] spheres;
 }
