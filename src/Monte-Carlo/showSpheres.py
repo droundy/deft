@@ -9,8 +9,12 @@ print(allSpheres)
 container = box(opacity=.1, color=color.red)
 container.size=(6,6,6)
 for spheres in allSpheres:
+   balls = []
    spheres = reshape(spheres, (-1, 3))
    for s in spheres:
-        sphere(pos = s)
-        rate(10)
+        balls.append(sphere(pos = s))
+   rate(1)
+   for i in balls:
+       i.visible = False
+   del balls
    print(spheres)

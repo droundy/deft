@@ -31,9 +31,9 @@ void run(){
    if(i%20==0){
       printf("i = %d\n",i);
    }
-   if(overlap(spheres, temp, N, R)){
+   if(overlap(spheres, temp, N, R, i%N)){
       i++;
-  	continue;
+      continue;
   }
   spheres[i] = temp;
   writeSpheres(spheres, N, o);
@@ -44,17 +44,20 @@ void run(){
   delete[] spheres;
 }
 
-bool overlap(Vector3d *spheres, Vector3d v, int n, double R){
+bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s){
   for(int i = 0; i < n; i++){
+    if(i==s){
+      continue;
+    }
     if(distance(spheres[n],v)<2*R){
       return true;
     }
   }
-    return false;
+  return false;
 }
 
 Vector3d move(Vector3d v, double x, double y, double z){
-  const double scale =.05;
+  const double scale =.5;
   Vector3d temp;
   while(true){
     temp = ran3()*scale;
@@ -64,4 +67,16 @@ Vector3d move(Vector3d v, double x, double y, double z){
   }
   // return Vector3d(1,1,1);
   return temp + v;
+}
+
+bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s){
+  for(int i = 0; i < n; i++){
+    if(i==s){
+      continue;
+    }
+    if(distance(spheres[n],v)>=R && distance(spheres[n],v)<=R+delta){
+      return true;
+    }
+  }
+  return false;
 }
