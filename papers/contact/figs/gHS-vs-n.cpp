@@ -18,21 +18,22 @@
 #include <time.h>
 #include <cassert>
 #include "ContactDensity.h"
-
+#include "handymath.h"
 
 int main(int, char **) { 
   FILE *o = fopen("papers/contact/figs/gHS-vs-n.dat", "w");
   assert(o);
 
   Functional cd = ContactDensitySimplest(1.0);
-  Functional ghs = gHS(Identity(), 1.0);
+  Functional ghs = gHS(Identity(), pow(3.0/(4*M_PI), 1.0/3));
   double mykT = 1.0e-30; // has no effect here!
 
-  for (double eta=0.0001; eta<=0.3; eta *= 1.01) {
+  for (double eta=0.0001; eta<=0.6; eta *= 1.01) {
     double gg = ghs(mykT, eta);
     double n = eta/(4*M_PI/3);
     double nice = cd(mykT, n)/n;
-    fprintf(o, "%g\t%g\t%g\n", eta, gg, nice);
+    double carnghs = (1-eta/2)/uipow(1-eta,3);
+    fprintf(o, "%g\t%g\t%g\t%g\n", eta, gg, nice, carnghs);
     fflush(o);
   }
   fclose(o);

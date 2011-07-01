@@ -37,6 +37,7 @@ set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 set style line 3 lt 3 lw 3
 
-plot [:] [0:] \
+plot [:.3] [0:] \
 'figs/gHS-vs-n.dat' u 1:2 title 'gHS' with lines ls 1, \
-'figs/gHS-vs-n.dat' u 1:3 title 'gHS simple' with lines ls 2
+'figs/gHS-vs-n.dat' u 1:4 title 'gHS carnahan' with lines ls 3, \
+'figs/gHS-vs-n.dat' u 1:3 title 'gHS simple carnahan' with lines ls 2

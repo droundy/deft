@@ -90,7 +90,7 @@ Since $\eta \equiv \frac{4\pi}{3} R^3$, we can work out that
   \\
   &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{d\eta}{dR}
   \\
-  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R}
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R} \label{eq:dAhsdR}
 \end{align}
 This derivative gives us the force on \emph{all} the hard
 spheres---since we're changing all their radii at once.  To compute
@@ -530,7 +530,7 @@ We get a nice spatial dependence for SAFT.
   Here is the White Bear free energy functional for the hard-sphere
   fluid:~\cite{roth2002whitebear}
   \begin{align}
-    A_{HS} &= \int \left\{
+    \beta A_{HS} &= \int \left\{
     -n_0 \ln\left( 1 - n_3\right)
     + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
     + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
@@ -552,8 +552,28 @@ We get a nice spatial dependence for SAFT.
     %  \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
     %\right)
     \\
-    & \times \left(\frac{1}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
-      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right)
+    & \times \left(\frac{2}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
+      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right) \\
+    \beta\frac{\partial A_{HS}}{\partial n_3}
+    &\sim \frac{n}{1-\eta} + \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      \frac{n}{1-\eta} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= n\left(
+      \frac{3\eta - 3 \eta^2}{(1-\eta)^3} +
+      \frac{2\eta}{(1-\eta)^3} -
+      \frac{1 - \eta}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right) \\
+    &= n\left(
+      \frac{6\eta - 3 \eta^2 - 1}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right)
 \end{align}
 \end{widetext}
 
@@ -562,12 +582,34 @@ We get a nice spatial dependence for SAFT.
     \\
     \beta\frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
     \\
+    \beta\frac{\partial A_{HS}}{\partial n_1}
+    &\sim n \frac{4\pi R^2}{1-\eta}
+\end{align}
+\begin{align}
     \beta\frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
       \frac{n_1}{1-n_3}
       + (n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
         (1-n_3)^2\ln(1-n_3)}{
         12\pi n_3^2(1-n_3)^2
       }
+\end{align}
+\begin{align}
+    \beta\frac{\partial A_{HS}}{\partial n_2}
+    &\sim n\frac{R}{1-\eta} +
+    \frac{4\pi}{3} R^4 n^2 \frac{\eta + (1-\eta)^2\ln(1-\eta)}{\eta^2(1-\eta)^2}
+    \\
+    &= n\frac{R}{1-\eta} +
+    \frac{R n}{(1-\eta)^2}
+    + Rn \frac{\ln(1-\eta)}{\eta}
+    \\
+    &= nR\left( \frac{1 + \eta^2  - 2\eta}{(1-\eta)^3} +
+      \frac{1 - \eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
+    \\
+    &= nR\left( \frac{2 + \eta^2  - 3\eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
 \end{align}
 \begin{align}
     \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
@@ -580,6 +622,40 @@ We get a nice spatial dependence for SAFT.
         36\pi n_3^2(1-n_3)^2
       }
   \end{align}
+
+\begin{widetext}
+\begin{align}
+  \beta \frac{\partial A_{HS}}{\partial R} &\sim
+    \beta \frac{\partial A_{HS}}{\partial n_3} n_2 +
+    \beta \frac{\partial A_{HS}}{\partial n_2} 2 \frac{n_2}{R} +
+    \beta \frac{\partial A_{HS}}{\partial n_1} n
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} -
+      2\frac{\ln(1-\eta)}{\eta}
+    \right) +
+    n_2n \left( \frac{4+2\eta^2-6\eta}{(1-\eta)^3} + 2\frac{\ln(1-\eta)}{\eta} \right) +
+    n_2n\frac{1}{1-\eta}
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} +
+    \frac{4+2\eta^2-6\eta}{(1-\eta)^3} +
+    \frac{1 - 2\eta + \eta^2}{(1-\eta)^3}
+  \right)
+  \\
+  &=
+    n_2n \frac{4 - 2\eta}{(1-\eta)^3}
+\end{align}
+\end{widetext}
+Recall from Equation~\ref{eq:dAhsdR}, the standard Carnahan result is
+\begin{align}
+  \frac{dA_{HS}}{dR}
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R}
+  \\ &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} n_2
+\end{align}
+which means that we miraculously come out with a correct answer!
 
 \begin{widetext}
 \section{The White Bear free energy for homogeneous systems}
