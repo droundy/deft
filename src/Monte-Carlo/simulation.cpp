@@ -28,20 +28,21 @@ void run(){
   int j = 0;
   int count = -1;
   while(j<100){
-     count++;
-     printf("Count = %d\n",count);
-     printf("j = %d\n",j);
+    count++;
+    //printf("Count = %d\n",count);
+    // printf("j = %d\n",j);
      i++;
      Vector3d temp = move(spheres[i%N], 3, 3, 3);
-     printf("Past move\n");
+     // printf("Past move\n");
      if(overlap(spheres, temp, N, R, i%N)){
        continue;
      }
-     printf("Past overlap\n");
+     //printf("Past overlap\n");
      spheres[i%N] = temp;
      writeSpheres(spheres, N, o);
      j++;
-  }  
+  }
+  printf("Total number of attempted moves = %d\n",count);
   fclose(o);
   delete[] spheres;
 }
@@ -68,6 +69,18 @@ Vector3d move(Vector3d v, double x, double y, double z){
    }
   }
  return temp + v;
+}
+
+Vector3d move(Vector3d v, double R){
+  const double scale = .5;
+  Vector3d temp;
+  while(true){
+    temp = ran3()*scale;
+    if(distance(temp,Vector3d(0,0,0))<=R){
+      break;
+    }
+  }
+  return temp + v;
 }
 
 bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s){

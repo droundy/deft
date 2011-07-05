@@ -12,3 +12,4 @@ Vector3d move(Vector3d v, double x, double y, double z);
 void run();
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s);
 bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s);
+Vector3d move(Vector3d v, double R);
