@@ -1,4 +1,4 @@
-.PHONY: paper project poster contactpaper comparison slowfigs
+.PHONY: paper project poster papers comparison slowfigs
 
 EXTRA_DIST = autogen.sh
 
@@ -46,8 +46,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/single-rod-in-water.mkdat \
 	paper/figs/sphere.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
-	contactpaper/figs/gHS-vs-n.mkdat \
-	contactpaper/figs/free-energy.mkdat \
+	papers/contact/figs/gHS-vs-n.mkdat \
+	papers/contact/figs/free-energy.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -134,8 +134,8 @@ paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cp
 paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
-contactpaper_figs_gHS_vs_n_mkdat_SOURCES = contactpaper/figs/gHS-vs-n.cpp $(GENERIC_CODE)
-contactpaper_figs_free_energy_mkdat_SOURCES = contactpaper/figs/free-energy.cpp $(GENERIC_CODE)
+papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
+papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -170,6 +170,7 @@ html:
 clean-local:
 	rm -rf .ikiwiki html
 	cd paper && $(MAKE) clean
+	cd papers && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
 paper: paper/figs/equation-of-state.dat \
@@ -182,6 +183,10 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/pressure-with-isotherms.dat
 	cd paper && $(MAKE)
 
+papers: papers/contact/figs/gHS-vs-n.dat \
+	papers/contact/figs/free-energy.dat
+	cd papers && $(MAKE)
+
 project: paper
 	cd paper && $(MAKE) project.pdf
 
@@ -192,14 +197,9 @@ slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/single-rod-in-water.dat \
 	paper/figs/sphere.dat
 
-contactpaper: contactpaper/paper.tex \
-		contactpaper/figs/gHS-vs-n.dat \
-		contactpaper/figs/free-energy.dat
-	cd contactpaper && $(MAKE)
-
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<
-contactpaper/figs/%.dat: contactpaper/figs/%.mkdat
+papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
 	$<
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \

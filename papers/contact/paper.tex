@@ -52,7 +52,9 @@
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/free-energy}
-\caption{A comparison of the various approximations to the free energy.}
+\caption{A comparison of the various approximations to the free
+  energy.  Note that the White Bear functional uses a modified form of
+  the Carnahan equation of state.}
 \label{fig:free-energy}
 \end{figure}
 
@@ -88,7 +90,7 @@ Since $\eta \equiv \frac{4\pi}{3} R^3$, we can work out that
   \\
   &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{d\eta}{dR}
   \\
-  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R}
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R} \label{eq:dAhsdR}
 \end{align}
 This derivative gives us the force on \emph{all} the hard
 spheres---since we're changing all their radii at once.  To compute
@@ -167,7 +169,7 @@ So to compute this we need
 \end{align}
 
 \begin{align}
-  \frac{dn_3(\mathbf{r})}{dR} &= -n_2(\mathbf{r})\\
+  \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
   \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
   \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
   &= \int n(\mathbf{r}+\mathbf{r}')
@@ -192,7 +194,7 @@ So to compute this we need
 The total force due to $\Phi_1$ is actually very easy to work out:
 \begin{align}
   \frac{d A_{HS}^{(1)}}{d R} &=
-  \int \mathbf{dr}' \left(-\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
+  \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
 \end{align}
 where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
 homogeneous system, and small for reasonably smooth density
@@ -200,28 +202,28 @@ distributions.  The next term from $\Phi_2$ is as follows:
 \begin{align}
   \frac{d A_{HS}^{(2)}}{d R} &=
   \int \mathbf{dr}' \left(
-    -\frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2} - 2 n_1
       \frac{dn_2}{dR} + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot
     }{1-n_3}
   \right) \\
   &= \int \mathbf{dr}' \left(
-    -\frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       - 2 n_1 \left(\frac2{R}n_2 \frac{dn_0}{dR}\right)
       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
   \right) \\
   &= \int \mathbf{dr}' \left(
-    -\frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       - 4 n_0n_2 - 2 n_1\frac{dn_0}{dR}
       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
   \right) \\
   &= \int \mathbf{dr}' \left(
-    -\frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     + \frac{3n_0n_2 + \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       + 2 n_1\frac{dn_0}{dR}
@@ -256,7 +258,7 @@ seriously localized density distributions.
      }
    \\
   &+
-     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) (-n_2)
+     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
      \frac{
        (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
        -
@@ -278,7 +280,7 @@ seriously localized density distributions.
        3 n_3^2\left( 1 - n_3 \right)^2
      }
    \\
-  &-
+  &+
      \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
    \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
 \end{align}
@@ -528,7 +530,7 @@ We get a nice spatial dependence for SAFT.
   Here is the White Bear free energy functional for the hard-sphere
   fluid:~\cite{roth2002whitebear}
   \begin{align}
-    A_{HS} &= \int \left\{
+    \beta A_{HS} &= \int \left\{
     -n_0 \ln\left( 1 - n_3\right)
     + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
     + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
@@ -550,8 +552,28 @@ We get a nice spatial dependence for SAFT.
     %  \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
     %\right)
     \\
-    & \times \left(\frac{1}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
-      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right)
+    & \times \left(\frac{2}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
+      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right) \\
+    \beta\frac{\partial A_{HS}}{\partial n_3}
+    &\sim \frac{n}{1-\eta} + \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      \frac{n}{1-\eta} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= n\left(
+      \frac{3\eta - 3 \eta^2}{(1-\eta)^3} +
+      \frac{2\eta}{(1-\eta)^3} -
+      \frac{1 - \eta}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right) \\
+    &= n\left(
+      \frac{6\eta - 3 \eta^2 - 1}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right)
 \end{align}
 \end{widetext}
 
@@ -560,12 +582,34 @@ We get a nice spatial dependence for SAFT.
     \\
     \beta\frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
     \\
+    \beta\frac{\partial A_{HS}}{\partial n_1}
+    &\sim n \frac{4\pi R^2}{1-\eta}
+\end{align}
+\begin{align}
     \beta\frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
       \frac{n_1}{1-n_3}
       + (n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
         (1-n_3)^2\ln(1-n_3)}{
         12\pi n_3^2(1-n_3)^2
       }
+\end{align}
+\begin{align}
+    \beta\frac{\partial A_{HS}}{\partial n_2}
+    &\sim n\frac{R}{1-\eta} +
+    \frac{4\pi}{3} R^4 n^2 \frac{\eta + (1-\eta)^2\ln(1-\eta)}{\eta^2(1-\eta)^2}
+    \\
+    &= n\frac{R}{1-\eta} +
+    \frac{R n}{(1-\eta)^2}
+    + Rn \frac{\ln(1-\eta)}{\eta}
+    \\
+    &= nR\left( \frac{1 + \eta^2  - 2\eta}{(1-\eta)^3} +
+      \frac{1 - \eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
+    \\
+    &= nR\left( \frac{2 + \eta^2  - 3\eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
 \end{align}
 \begin{align}
     \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
@@ -578,6 +622,133 @@ We get a nice spatial dependence for SAFT.
         36\pi n_3^2(1-n_3)^2
       }
   \end{align}
+
+\begin{widetext}
+\begin{align}
+  \beta \frac{\partial A_{HS}}{\partial R} &\sim
+    \beta \frac{\partial A_{HS}}{\partial n_3} n_2 +
+    \beta \frac{\partial A_{HS}}{\partial n_2} 2 \frac{n_2}{R} +
+    \beta \frac{\partial A_{HS}}{\partial n_1} n
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} -
+      2\frac{\ln(1-\eta)}{\eta}
+    \right) +
+    n_2n \left( \frac{4+2\eta^2-6\eta}{(1-\eta)^3} + 2\frac{\ln(1-\eta)}{\eta} \right) +
+    n_2n\frac{1}{1-\eta}
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} +
+    \frac{4+2\eta^2-6\eta}{(1-\eta)^3} +
+    \frac{1 - 2\eta + \eta^2}{(1-\eta)^3}
+  \right)
+  \\
+  &=
+    n_2n \frac{4 - 2\eta}{(1-\eta)^3}
+\end{align}
+\end{widetext}
+Recall from Equation~\ref{eq:dAhsdR}, the standard Carnahan result is
+\begin{align}
+  \frac{dA_{HS}}{dR}
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R}
+  \\ &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} n_2
+\end{align}
+which means that we miraculously come out with a correct answer!
+
+\begin{widetext}
+\section{The White Bear free energy for homogeneous systems}
+
+Here is the White Bear free energy functional for the hard-sphere
+fluid:~\cite{roth2002whitebear}
+\begin{align}
+  \frac{A_{HS}}{k_BT} &= \int \left\{
+  -n_0 \ln\left( 1 - n_3\right)
+  + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+  + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+    n_3 + (1-n_3)^2 \ln(1-n_3)
+  }{
+    36\pi n_3^2(1-n_3)^2
+  }
+  \right\} \\
+  &= \int \left\{
+  -n \ln\left( 1 - \eta\right)
+  + \frac{n^2 (4\pi R^2)  (R)}{1-\eta}
+  + n^3 (4\pi R^2)^3 \frac{
+    \eta + (1-\eta)^2 \ln(1-\eta)
+  }{
+    36\pi \eta^2(1-\eta)^2
+  }
+  \right\} \\
+  &= \int \left\{
+  -n \ln\left( 1 - \eta\right)
+  + \frac{3 n \eta}{1-\eta}
+  + n^3 (4\pi R^2)^3 \frac{
+    \eta + (1-\eta)^2 \ln(1-\eta)
+  }{
+    36\pi \eta^2(1-\eta)^2
+  }
+  \right\} \\
+  &= \int \left\{
+  -n \ln\left( 1 - \eta\right)
+  + \frac{3 n \eta}{1-\eta}
+  + n^3 4\pi (4\pi R^3)^2 \frac{
+    \eta + (1-\eta)^2 \ln(1-\eta)
+  }{
+    36\pi \eta^2(1-\eta)^2
+  }
+  \right\} \\
+  &= \int \left\{
+  -n \ln\left( 1 - \eta\right)
+  + \frac{3 n \eta}{1-\eta}
+  + n\eta^2 4\pi 9 \frac{
+    \eta + (1-\eta)^2 \ln(1-\eta)
+  }{
+    36\pi \eta^2(1-\eta)^2
+  }
+  \right\} \\
+  &= N \left\{
+  -\ln\left( 1 - \eta\right)
+  + \frac{3 \eta}{1-\eta}
+  + \frac{
+    \eta + (1-\eta)^2 \ln(1-\eta)
+  }{
+    (1-\eta)^2
+  }
+  \right\} \\
+  &= N \left\{
+  -\ln\left( 1 - \eta\right)
+  + \frac{3 \eta}{1-\eta}
+  + \frac{
+    \eta
+  }{
+    (1-\eta)^2
+  }
+  + \ln(1-\eta)
+  \right\} \\
+  &= N \left\{
+  \frac{3\eta}{1-\eta}
+  + \frac{
+    \eta
+  }{
+    (1-\eta)^2
+  }
+  \right\} \\
+  &= N
+  \frac{3\eta(1-\eta) + \eta
+  }{
+    (1-\eta)^2
+  } \\
+  &= N
+  \frac{4\eta -3\eta^2}{(1-\eta)^2}
+\end{align}
+This matches the usual expression for the Carnahan-Starling equation
+of state the excess free energy, which is
+\begin{align}
+  A = Nk_BT\frac{4\eta -3\eta^2}{(1-\eta)^2}
+\end{align}
+\end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

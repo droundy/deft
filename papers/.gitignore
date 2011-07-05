@@ -14,5 +14,5 @@
 *.blg
 *.bbl
 *Notes.bib
-figs/*.mkdat
+*/figs/*.mkdat
 paperNotes.bib
