@@ -32,7 +32,8 @@ void run(){
     //printf("Count = %d\n",count);
     // printf("j = %d\n",j);
      i++;
-     Vector3d temp = move(spheres[i%N], 3, 3, 3);
+     //Vector3d temp = move(spheres[i%N], 3, 3, 3);
+     Vector3d temp = move(spheres[i%N],3);
      // printf("Past move\n");
      if(overlap(spheres, temp, N, R, i%N)){
        continue;
@@ -76,7 +77,7 @@ Vector3d move(Vector3d v, double R){
   Vector3d temp;
   while(true){
     temp = ran3()*scale;
-    if(distance(temp,Vector3d(0,0,0))<=R){
+    if(distance(v+temp,Vector3d(0,0,0))<=R){
       break;
     }
   }
