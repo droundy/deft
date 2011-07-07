@@ -83,7 +83,7 @@ static Functional n0(double radius) {
 }
 
 Functional dWBNT_dn0(double radius) {
-  return log(1-n3(radius));
+  return -log(1-n3(radius));
 }
 
 Functional dWBNT_dn1(double radius) {
@@ -95,8 +95,9 @@ Functional dWBNT_dn2(double radius) {
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
   return n1(radius)/(1-n3(radius)) +
-    (sqr(n2(radius)) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))*
-    (n3(radius) + sqr(1-n3(radius))*log(1-n3(radius)))/(12*M_PI*sqr(n3(radius))*sqr(1-n3(radius)));
+    (sqr(n2(radius)) - (sqr(n2x) + sqr(n2y) + sqr(n2z)))*
+    (n3(radius) + sqr(1-n3(radius))*log(1-n3(radius)))/
+    (12*M_PI*sqr(n3(radius))*sqr(1-n3(radius)));
 }
 
 Functional dWBNT_dn3(double radius) {
@@ -109,6 +110,12 @@ Functional dWBNT_dn3(double radius) {
   Functional n2z = zShellConvolve(radius);
   Functional nV22 = sqr(n2x) + sqr(n2y) + sqr(n2z);
   Functional n22mnV22 = sqr(n2(radius)) - nV22;
+  return n0(radius)/omn3 +
+    n22mnV22/sqr(omn3)/(4*M_PI*R) +
+    (1/(36*M_PI))*vtt*(Functional(2)/(n3_*Pow(3)(omn3))
+         - Functional(1)/(sqr(n3_)*sqr(omn3))
+         - Functional(1)/(sqr(n3_)*omn3)
+         - 2*log(omn3)/Pow(3)(n3_));
   return n0(radius)/omn3 +
     R*n22mnV22/sqr(omn3) +
     // vtt*(Functional(1)/(n3_*Pow(3)(omn3))

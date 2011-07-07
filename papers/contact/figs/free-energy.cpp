@@ -20,17 +20,19 @@
 
 
 int main(int, char **) { 
-  FILE *o = fopen("contactpaper/figs/gHS-vs-n.dat", "w");
+  FILE *o = fopen("papers/contact/figs/free-energy.dat", "w");
+  assert(o);
 
-  Functional cd = ContactDensitySimplest(1.0);
-  Functional ghs = gHS(Identity(), 1.0);
-  double mykT = 1.0e-30; // has no effect here!
+  Functional f = HardSpheresWBnotensor(1.0);
+  Functional eta = Identity();
+  Functional fcar = (4*eta - 3*sqr(eta))/sqr(1-eta);
+  double mykT = 1.0; // so we needn't divide by kT
 
   for (double eta=0.0001; eta<=0.3; eta *= 1.01) {
-    double gg = ghs(mykT, eta);
+    double fc = fcar(mykT, eta);
     double n = eta/(4*M_PI/3);
-    double nice = cd(mykT, n)/n;
-    fprintf(o, "%g\t%g\t%g\n", eta, gg, nice);
+    double nice = f(mykT, n)/n;
+    fprintf(o, "%g\t%g\t%g\n", eta, fc, nice);
     fflush(o);
   }
   fclose(o);

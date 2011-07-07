@@ -5,32 +5,35 @@
 
 
 int main(){
-  printf("Hello World\n");
-  const int N = 14;
-  Vector3d *spheres = new Vector3d[N];
-  for(int i = 0; i < N; i++){
+  run();
+  //  printf("Hello World\n");
+  // const int N = 14;
+  //Vector3d *spheres = new Vector3d[N];
+  //for(int i = 0; i < N; i++){
     //  for(int j = 0; j < 3; j++){
     //  spheres[i][j] = ran();
     // }
-    spheres[i] = ran3();
-  }
-  for(int i = 0; i<N; i++){
-    printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-    printf("Distance from origin = %g\n", distance(spheres[i]));
-  } 
-  FILE *o = fopen("Spheres.dat", "w");
-  writeSpheres(spheres, N, o);
-  writeSpheres(spheres, N, o);
-  fclose(o);
-  delete[] spheres;
+  // spheres[i] = ran3();
+  //}
+  // for(int i = 0; i<N; i++){
+  // printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+  // printf("Distance from origin = %g\n", distance(spheres[i]));
+  //} 
+  // FILE *o = fopen("Spheres.dat", "w");
+  // writeSpheres(spheres, N, o);
+  //Need to be able to send in spheres
+  //spheres[0] = move(spheres[0], 1, 1, 1);
+  //writeSpheres(spheres, N, o);
+  //fclose(o);
+  //delete[] spheres;
 }
 
 double ran(){
   return rand()/double(RAND_MAX);
 }
 
-double distance(Vector3d v){
-  return sqrt((v[0]*v[0]+v[1]*v[1]+v[2]*v[2]));
+double distance(Vector3d v1, Vector3d v2){
+  return sqrt((v1[0]-v2[0])*(v1[0]-v2[0])+(v1[1]-v2[1])*(v1[1]-v2[1])+(v1[2]-v2[2])*(v1[2]-v2[2]));
 }
 
 Vector3d ran3(){

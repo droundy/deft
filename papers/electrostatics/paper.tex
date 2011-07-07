@@ -1,0 +1,67 @@
+% TODO:
+
+% Write ``Liquid-vapor interface'' section A.
+
+% Look up question-mark references (citations).
+
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\xx}{\textbf{x}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+\begin{document}
+\title{A Classical Density Functional Electrostatic Interactions in Water }
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+\needsworklater{ We develop a functional based on FMT~\cite{roth2002whitebear}
+ to ... for SAFT}
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+We would like to create a classical density functional for water that
+correctly describes its interaction with charged systems.  There are a
+couple of effects that seem particularly important to get accurately
+in order to provide a reasonable description for the solvation of
+ions.
+
+First, we should include the nonlocality of the dielectric response:
+water is unable to polarize at length scales small compared to its
+molecular diameter.  This is important because many ions are in fact
+of approximately the same size as water.
+
+Secondly, the polarization of water saturates.  There are only so many
+water molecules in a given volume, which means the polarization will
+slowly asymptote at large electric fields.  This is relevant because
+the  first solvation shell is likely to be close to fully polarized
+around a small ion.
+
+Either of these two  effects could be fudged using the other, but a
+correct description should include both effects.
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
+
