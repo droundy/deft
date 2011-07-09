@@ -29,7 +29,10 @@ int main(){
 }
 
 double ran(){
-  return rand()/double(RAND_MAX);
+  MTRand random;
+  random.seed();
+  return random.rand();
+  // return rand()/double(RAND_MAX);
 }
 
 double distance(Vector3d v1, Vector3d v2){

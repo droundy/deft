@@ -5,7 +5,8 @@ EXTRA_DIST = autogen.sh
 MONTECARLO_CODE = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp \
 	src/Monte-Carlo/fileio.cpp \
-	src/Monte-Carlo/simulation.cpp
+	src/Monte-Carlo/simulation.cpp \
+	src/Monte-Carlo/RandomNumberGenerator.cpp
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
