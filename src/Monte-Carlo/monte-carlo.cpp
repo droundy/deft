@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "Monte-Carlo/monte-carlo.h"
-
+#include "MersenneTwister.h"
 
 int main(){
   run();
@@ -29,7 +29,8 @@ int main(){
 }
 
 double ran(){
-  return rand()/double(RAND_MAX);
+  static MTRand my_mtrand;
+  return my_mtrand.randExc(); // which is the range of [0,1)
 }
 
 double distance(Vector3d v1, Vector3d v2){
