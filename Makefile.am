@@ -47,6 +47,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/pressure-with-isotherms.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
+	papers/contact/figs/sphere.mkdat \
+	papers/contact/figs/box.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -135,6 +137,8 @@ paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isot
 
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
+papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CODE)
+papers_contact_figs_box_mkdat_SOURCES = papers/contact/figs/box.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -194,7 +198,9 @@ poster: paper
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/single-rod-in-water.dat \
-	paper/figs/sphere.dat
+	paper/figs/sphere.dat \
+	papers/contact/figs/sphere.dat
+	papers/contact/figs/box.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<
