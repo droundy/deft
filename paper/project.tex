@@ -104,24 +104,16 @@ provided the remaining terms are \emph{purely
   nonlocal}~\cite{ashcroft?}.
 
 \subsection{Hard-sphere repulsion}
-The repulsive intermolecular interactions are modeled using a
-Fundamental\nobreakdash-Measure Theory~\cite{rosenfeld1997}(FMT) functional,
-which combines scaled-particle theory and the Percus-Yevick theory,
-and an attractive interaction.  The FMT functional treats
-each water molecule as a hard sphere with a radius approximately that of
-a water molecule $(R~=~2.3~bohr)$.\\
-
 
 We model the repulsive interactions using the White Bear version of
-the Fundamental-Measure Theory~(FMT) functional published in
-reference~\cite{roth2002whitebear}.  \needsworklater{The FMT
-  functional describes the excess free energy of a hard-sphere
-  fluid. Fundamental-Measure Theory has several advantages over other
-  approaches, one of the most important being the simplicity of
-  calculations.  This particular FMT also reliably predicts bulk
-  properties of fluids in one, two and three dimensions, as well as
-  exactly determines the excess free energy in the zero dimensional
-  limit.}
+the Fundamental-Measure Theory~(FMT) functional for the hard-sphere
+fluid~\cite{roth2002whitebear}.  In the homogeneous limit, the White
+Bear functional reduces to the Mansoori-Carnahan-Starling-Leland
+equation of state.  FMT functionals are expressed as the integral of
+the \emph{fundamental measures} of a fluid, which provide local
+measures of quantities such as the packing fraction, density of
+spheres touching a given point and mean curvature.  The excess free
+energy is written as:
 \begin{equation}
 F_{hs}[n] = k_B T \int (\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)) d\xx \; ,
 \end{equation}
@@ -129,13 +121,14 @@ with integrands
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
-\Phi_3 &= \frac{
-  \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
-}{
-  8\pi \left( 1 - n_3 \right)^2
-} ,
+\Phi_3 &= (n_2^3 - 3n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+  \frac{
+    n_3 + (1-n_3)^2\ln(1-n_3)
+  }{
+    36\pi n_3^2\left( 1 - n_3 \right)^2
+  } ,
 \end{align}
-using the weighted densities
+where the fundamental measure densities are given by:
 \begin{align}
   n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
   n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
@@ -145,7 +138,9 @@ using the weighted densities
   \mathbf{n}_{V1} &= \frac{\mathbf{n}_{V2}}{4\pi R}\\
   n_0 &= \frac{n_2}{4\pi R^2}
 \end{align}
-
+For our water functional, we use the hard-sphere radius of
+3.03420~\AA, which was found to be optimal by Clark
+\emph{et al}.\cite{clark2006developing}
 
 \begin{figure}
 \begin{center}
