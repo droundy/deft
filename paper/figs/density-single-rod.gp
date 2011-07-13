@@ -46,4 +46,4 @@ set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
 splot [:] [:] [:] \
-'figs/single-rod-res0.05-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
+'figs/single-rod-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
