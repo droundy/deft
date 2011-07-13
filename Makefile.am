@@ -185,7 +185,7 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/constrained-water-1D.dat \
 	paper/figs/constrained-water-2D.dat \
 	paper/figs/pressure-with-isotherms.dat \
-	paper/figs/single-rod-in-water-low-res.dat \
+	paper/figs/single-rod-in-water-low-res.dat
 	cd paper && $(MAKE)
 
 papers: papers/contact/figs/gHS-vs-n.dat \

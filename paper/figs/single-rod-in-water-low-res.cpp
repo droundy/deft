@@ -118,7 +118,7 @@ int main(int, char **) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (cavitysize=0.0*nm; cavitysize<=3.0*nm; cavitysize += 0.1*nm) {
+  for (cavitysize=0.5*nm; cavitysize<=1.5*nm; cavitysize += 0.5*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.4);
     
@@ -138,17 +138,17 @@ int main(int, char **) {
     //printf("Constraint has become a graph!\n");
    
     potential = water_prop.liquid_density*constraint
-      + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+      + 1000*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(1e-11, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     
     printf("\nDiameter of rod = %g bohr (%g nm)\n", cavitysize, cavitysize/nm);
     
-    const int numiters = 200;
+    const int numiters = 100;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
       //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
@@ -167,15 +167,15 @@ int main(int, char **) {
 
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
-    char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-res0.4-%04.1f.dat", cavitysize/nm);
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    Grid energy_density(gd, f(water_prop.kT, gd, potential));
-    Grid entropy(gd, S(water_prop.kT, potential));
-    Grid Xassoc(gd, X(water_prop.kT, density));
-    plot_grids_yz_directions(plotname, density, 
-			     energy_density, entropy, Xassoc);
-    free(plotname);
+    //char *plotname = (char *)malloc(1024);
+    //sprintf(plotname, "paper/figs/single-rod-res0.4-%04.1f.dat", cavitysize/nm);
+    //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    //Grid energy_density(gd, f(water_prop.kT, gd, potential));
+    //Grid entropy(gd, S(water_prop.kT, potential));
+    //Grid Xassoc(gd, X(water_prop.kT, density));
+    //plot_grids_yz_directions(plotname, density, 
+    //		     energy_density, entropy, Xassoc);
+    //free(plotname);
 
   }
   fclose(o);

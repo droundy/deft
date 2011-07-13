@@ -404,11 +404,35 @@ as illustrated in Figure~\ref{fig:homogeneous}.
 
 \subsection{Water confined to a slit}
 
+One of the most computationally simple ways to study confined water is by
+constraining it to a slit where the water molecules can only move in one
+dimension. We apply a constraining potential of the form
+
+\begin{align}
+V = n_l*constraint + 100*n_v (FIXME)
+\end{align}
+
+such that the density is 100 times the vapor density outside the slit 
+and approximately equal to the saturated liquid density inside. The slits
+range in size from 5 bohrs to 150 bohrs (FIX - redo in nm?). We 
+minimize the energy and calculate density, energy, and $X$ on a lattice
+with a spacing of 0.2 bohrs between data points.
+
+The density profile for a slit of size 60 bohrs is shown in Figure 
+\ref{fig:density-1D}. Near the interface, there are oscillations around the 
+liquid density which decrease near the center of the slit. We expect the
+center of the slit to act approximately like bulk water, and the absence 
+of oscillations supports this. For larger slits (~120 bohrs or more) the
+majority of the water molecules in the slit act like the bulk. We also 
+determine the smallest slit that can contain liquid water, approximately 
+30 bohrs. For smaller slits, the initial liquid water inside will vaporize.
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-1D}
 \end{center}
-\caption{ Density profile for a slab of water with molecules constrained to move in one dimension. }
+\caption{ Density profile for a slab of water with molecules constrained 
+to move in one dimension. }
 \label{fig:density-1D}
 \end{figure}
 
@@ -416,26 +440,24 @@ as illustrated in Figure~\ref{fig:homogeneous}.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/energy-1D}
 \end{center}
-\caption{ Energy density profile for a slab of water with molecules constrained to move in one dimension. }
+\caption{ Energy density profile for a slab of water with molecules 
+constrained to move in one dimension. }
 \label{fig:energy-1D}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/entropy-1D}
-\end{center}
-\caption{ Entropy for a slab of water with molecules constrained to move in one 
-dimension. \textcolor{red}{FIX UNITS}}
-\label{fig:entropy-1D}
-\end{figure}
+The value of $X$ behaves as expected for water constrained to a slit. We
+show in Figure \ref{fig:xassoc-1D} the plot of $X$ for a slit of 60 bohrs.
+Outside the slit, there is no hydrogen bonding, and inside $X$ is 
+approximately equal to
+that of saturated liquid water.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/xassoc-1D}
 \end{center}
 \caption{ Xassociation value (fraction of association sites
-\emph{not} hydrogen-bonded) for a slab of water with molecules constrained to move in one 
-dimension. }
+\emph{not} hydrogen-bonded) for a slab of water with molecules constrained 
+to move in one dimension. }
 \label{fig:xassoc-1D}
 \end{figure}
 
@@ -455,9 +477,15 @@ that the density profile will be smoothed out by CW effects.
 
 \subsection{Hydrophobic rods}
 
+\subsubsection{One rod - diameter effects}
+
+We move into two dimensions by studying a single hydrophobic rod
+immersed in water. 
+
 \subsubsection{Resolution and convergence tests}
 
-\subsubsection{One rod - diameter effects}
+(Plot with low (0.4 bohrs), regular (0.2), and high (0.05) resolution 
+for single rod.)
 
 \subsubsection{Two rods - hydrophobic interaction}
 
