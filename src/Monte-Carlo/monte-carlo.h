@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Core>
-#include "RandomNumberGenerator.cpp"
+#include "MersenneTwister.h"
 USING_PART_OF_NAMESPACE_EIGEN
 
 double ran();
@@ -16,3 +16,4 @@ Vector3d move(Vector3d v, double R);
 Vector3d move(Vector3d v);
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s);
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s, double x, double y, double z);
+int shell(Vector3d v, int div, double R);

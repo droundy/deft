@@ -27,8 +27,11 @@ void run(){
   writeSpheres(spheres, N, o);
   int i = 0;
   int j = 0;
-  int count = -1;
-  while(j<100000){
+  int count = 0;
+
+  // int layer [5];
+
+  while(j<10000){
     count++;
     //printf("Count = %d\n",count);
     // printf("j = %d\n",j);
@@ -46,6 +49,9 @@ void run(){
      }
      //printf("Past overlap\n");
      spheres[i%N] = temp;
+     
+     //layer[shell(spheres[i%N],5,R)]++;
+
      writeSpheres(spheres, N, o);
      j++;
   }
@@ -140,3 +146,23 @@ bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s){
   }
   return false;
 }
+
+int shell(Vector3d v, int div, double R){
+  double temp = distance(v,Vector3d(0,0,0));
+  int count = 1;
+  for(int i = R/div; i <= div; i+=R/div){
+    if(count==1){
+      if(temp <= i){
+	return count;
+      }
+      count++;
+      continue;
+    }
+    if(temp > i && temp <= (i+R/div)){
+      return count;
+    }
+    count++;
+  }
+  return 0;
+}
+
