@@ -136,3 +136,28 @@ Functional dAdR_simplest(double radius) {
 Functional ContactDensitySimplest(double radius) {
   return Functional(0.25)*dAdR_simplest(radius)/n2(radius);
 }
+
+Functional FuWuContactDensity(double radius) {
+  Functional R(radius, "R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional n3 = StepConvolve(radius);
+  // The following is from equation 13 of Fu and Wu 2005, which I have
+  // translated in terms of n2.  zeta3 is a version of the packing
+  // fraction (usually called eta in our code) that is computed using
+  // the shell convolution, so it is using the weighted density that
+  // is more direcly relevant to the association free energy.
+  Functional zeta3 = (R/Functional(3))*n2;
+
+  // This gHS (called simply gHS) is the gHS that is used in Fu and
+  // Wu's 2005 paper, in equation 13.  It seems ideal, since it
+  // includes spatial dependence and is published and tested in
+  // various ways.
+
+  Functional ghs = gHS(zeta3, radius);
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+  Functional zeta = 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
+  return n0*zeta*ghs;
+}

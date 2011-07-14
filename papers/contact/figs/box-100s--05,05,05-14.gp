@@ -20,33 +20,31 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 20
-set output 'figs/density-sphere.eps'
+set terminal postscript eps enhanced color "Helvetica" 20 size 4,4
+set output 'figs/box-100s--05,05,05-14.eps'
 
 reset
 unset arrow
 set view map
 
 set key inside bottom
-set title 'Sphere - Density slice'
+#set title 'Two hydrophobic rods - Density'
 
 # set multiplot
 #set pm3d map
 #set palette color positive
 #set ticslevel 0
 #set samples 50; set isosamples 50
-set palette rgbformulae 22,13,-31
+#set palette rgbformulae 22,13,-31
+set palette defined ( 0 "white", 0.5 "#ddddff", 1 "blue", 1.2 "black" )
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'y (nm)'
-set ylabel 'z (nm)'
+set xlabel 'y/R'
+set ylabel 'z/R'
 
 set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
 splot [:] [:] [:] \
-'figs/sphere-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
-#'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613):4 notitle with pm3d , \
-#'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613-3):4 notitle with pm3d , \
-#'figs/rods-1nm-01.0.dat' u ($2/18.8972613-5.5):($3/18.8972613-3):4 notitle with pm3d
+'figs/box-100s--05,05,05-14.dat' u 2:3:4 notitle with pm3d
