@@ -152,19 +152,32 @@ For our water functional, we use the hard-sphere radius of
 \end{figure}
 
 \subsection{Association free energy}
-To the purely repulsive hard-sphere free energy, we add two attractive
-energy terms.  The first is the free energy of \emph{association},
-which describes the effects of hydrogen bonds.  These are modeled as
-four attractive patches (``association sites'') on the surface of the
-hard sphere.  These four sites represent the two hydrogens and two
-electron lone pairs.  There is an attractive energy
-$\epsilon_\textit{assoc}$ when two molecules are arranged such that
-the hydrogen of one interacts with the lone pair of the other.  The
-volume of this interaction is $\kappa_\textit{assoc}$.  Thus the
-association term in the free energy has two free parameters that must
-be fit based on experimental data.
+The first attractive energy term is the association term, which
+accounts for hydrogen bonding.  Hydrogen bonds are modeled as four
+attractive patches (``association sites'') on the surface of the hard
+sphere.  These four sites represent two protons and two electron lone
+pairs.  There is an attractive energy $\epsilon_\textit{assoc}$ when
+two molecules are arranged such that the proton of one overlaps
+with the lone pair of the other.  The volume over which this
+interaction occurs is $\kappa_\textit{assoc}$, giving the association
+term in the free energy has two empirical parameters that are fit to
+experimental data.
 
-The association free energy has the form
+The association functional we use is a modified version of that of Yu
+and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
+  should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
+  the same functional, but their paper contains errors in the
+  association term and is not useful as a reference.}  The functional
+of Fu and We includes the effects of density inhomogeneities on the
+\emph{contact density} of hard spheres, which conventionally appears
+in the form of the density multiplied by the contact value of the
+correlation function $g^{HS}_\sigma$, but is based on the SAFT-HS
+equation of state\cite{FIXME}, rather than the SAFT-VR equation of
+state\cite{gil-villegas-1997-SAFT-VR} which is used in the optimal
+SAFT parametrization for water found by Clark \emph{et
+  al}\cite{clark2006developing}.
+
+The association free energy for our four-site model has the form
 \begin{align}
   F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
@@ -177,37 +190,35 @@ quadratic equation
   X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)\Delta(\xx)} - 1}
   {4 n_0(\xx)\zeta(\xx)\Delta(\xx)}
 \end{align}
-where $\zeta$ comes from
-reference\cite{yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft} and describes the inhomogeneity of the fluid
-density:
+where the factor $\zeta$ from
+Yu and We\cite{yu2002fmt-dft-inhomogeneous-associating,
+  fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
+density, and reduces to unity in the homogeneous limit.
 \begin{align}
   \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
 \end{align}
-The function $\Delta$ is given... below?
-
-The following contact density for the hard-sphere fluid is in the code
-called \texttt{gHS}, and comes
-from\cite{yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft}, but I don't use it.
+The functional $\Delta$ is a measure of the hydrogen-bonding
+probability.  In the SAFT-VR model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
 \begin{align}
-  \Delta &= 4\pi \kappa_\textit{assoc} g^\textit{HS}(\sigma)e^{-\beta
-    \epsilon_\textit{assoc}} \\
-  g^\textit{HS}(\sigma) &= \frac1{1-n_3}\left(1+\frac14\frac{\zeta n_2}{1-n_3}
-  \left(1 + \frac{n_2}{14 (1-n_3)}\right)\right)
-\end{align}
-\textcolor{red}{Here is paper where I got the association functional:}
-
-Instead, I use
-\begin{align}
-  \Delta(\xx) &= \kappa_\textit{assoc}
-  e^{-\beta\epsilon_\textit{assoc}} g^\textit{SW}_\sigma(\xx) \\
-  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
-  \frac{1}{4}\beta\left(\frac{\partial a_1(\xx)}{\partial n_3(\xx)} -
-  \frac{\lambda}{3 n3(\xx)}\frac{\partial a_1(\xx)}{\partial \lambda}\right)
+  \Delta &= \kappa_\textit{assoc} g^\textit{SW}_\sigma
+  \left(e^{-\beta\epsilon_\textit{assoc}} - 1\right) \\
+  g^\textit{SW}_\sigma &= g^\textit{HS}_\sigma +
+  \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial n_3} -
+  \frac{\lambda}{3 n3}\frac{\partial a_1}{\partial \lambda}\right)
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
-which I got from reference\cite{gil-villegas-1997-SAFT-VR}.
+where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
+contact for a hard-sphere fluid with a square-well attractive
+potential, and $a_1$ and $a_2$ are two terms in the dispersive term of
+the free energy.  The correlation function $g^\textit{SW}_\sigma$ is
+written as a perturbative correction to the hard-sphere correlation
+function, for which we use the functional of Yu and
+Wu.\cite{yu2002fmt-dft-inhomogeneous-associating}
+\begin{align}
+  g_\sigma^{HS} &= \frac{1}{1-n_3}
+  +\frac32\frac{\zeta}{(1-n_3)^2}
+  + \frac12\frac{n_3^2\zeta}{(1-n_3)^3}
+\end{align}
 
 \begin{figure}
 \begin{center}
