@@ -71,13 +71,13 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
   //const int y = gd.Ny/2;
-  for (int y=0; y<gd.Ny; y++) {
-    for (int z=0; z<gd.Nz; z++) {
+  for (int y=-gd.Ny/2; y<=gd.Ny/2; y++) {
+    for (int z=-gd.Nz/2; z<=gd.Nz/2; z++) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double ahere = a(x,y,z);
-      double bhere = b(x,y,z);
-      double chere = c(x,y,z);
-      double dhere = d(x,y,z);
+      double ahere = a(here);
+      double bhere = b(here);
+      double chere = c(here);
+      double dhere = d(here);
       fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
 	      ahere, bhere, chere, dhere);
     }
@@ -118,7 +118,7 @@ int main(int, char **) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (cavitysize=0.1*nm; cavitysize<=3.0*nm; cavitysize *= 1.58489319246111) {
+  for (cavitysize=0.0*nm; cavitysize<=3.0*nm; cavitysize += 0.1*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     
@@ -142,7 +142,7 @@ int main(int, char **) {
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     
