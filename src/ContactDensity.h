@@ -13,5 +13,6 @@ Functional dWBNT_dnV1(double radius);
 Functional dWBNT_dnV2(double radius);
 
 Functional ContactDensitySimplest(double radius);
+Functional ContactDensitySphere(double radius);
 
 Functional FuWuContactDensity(double radius);

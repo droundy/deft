@@ -2,7 +2,7 @@
 
 set -ev
 
-for N in `seq 8 2 14`; do
+for N in `seq 9 2 13`; do
     minD=`echo "printf(\"%g\", ceil(1 + ($N/0.3)**(1/3)))" | octave -q`
     echo minD is $minD for N $N
     for D in `seq $minD 6`; do
