@@ -29,31 +29,21 @@ void run(){
   int j = 0;
   int count = 0;
 
-  // int layer [5];
+  int times = 1000;
 
-  while(j<10000){
+  while(j<times){
     count++;
-    //printf("Count = %d\n",count);
-    // printf("j = %d\n",j);
-     i++;
-     //Vector3d temp = move(spheres[i%N], 3, 3, 3);
-     // Vector3d temp = move(spheres[i%N],3);
-     Vector3d temp = move(spheres[i%N]);
-     // printf("Past move\n");
-     //if(overlap(spheres, temp, N, R, i%N)){
-     //  continue;
-     // 
-     //}
-     if(overlap(spheres, temp, N, R, rad, i%N)){
-       continue;
-     }
-     //printf("Past overlap\n");
-     spheres[i%N] = temp;
-     
-     //layer[shell(spheres[i%N],5,R)]++;
-
-     writeSpheres(spheres, N, o);
-     j++;
+    i++;
+    Vector3d temp = move(spheres[i%N]);
+    if(overlap(spheres, temp, N, R, rad, i%N)){
+      continue;
+    }
+    spheres[i%N] = temp;
+    writeSpheres(spheres, N, o);
+    if(j % (times/10)==0){
+      printf("%g%% complete...\n",j/(times*1.0)*100);
+    }
+    j++;
   }
   printf("Total number of attempted moves = %d\n",count);
   fclose(o);
@@ -146,23 +136,3 @@ bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s){
   }
   return false;
 }
-
-int shell(Vector3d v, int div, double R){
-  double temp = distance(v,Vector3d(0,0,0));
-  int count = 1;
-  for(int i = R/div; i <= div; i+=R/div){
-    if(count==1){
-      if(temp <= i){
-	return count;
-      }
-      count++;
-      continue;
-    }
-    if(temp > i && temp <= (i+R/div)){
-      return count;
-    }
-    count++;
-  }
-  return 0;
-}
-

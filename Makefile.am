@@ -34,7 +34,8 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 bin_PROGRAMS = deft monte-carlo analyze-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE) 
 monte_carlo_SOURCES = $(MONTECARLO_CODE)
-analyze_monte_carlo_SOURCES = src/Monte-Carlo/analyze-monte-carlo.cpp
+analyze_monte_carlo_SOURCES = src/Monte-Carlo/analyze-monte-carlo.cpp \
+	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
