@@ -6,6 +6,8 @@ set -ev
 
 ./autogen.sh
 
-time make -j4 paper
+time make -j4 paper project
+
+time make -j4 papers
 
 time make -j4 recheck

@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH --mem-per-cpu=2000
-#SBATCH --mail-type ALL
-#SBATCH --mail-user daveroundy@gmail.com
+# #SBATCH --mail-type ALL
+# #SBATCH --mail-user daveroundy@gmail.com
 #SBATCH --output box-%j.out
 
 set -ev

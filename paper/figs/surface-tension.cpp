@@ -53,7 +53,8 @@ int main(int, char **) {
     GridDescription gd(lat, 1, 1, 200);
     Grid foo(gd);
     Minimizer min = Precision(1e-7, ConjugateGradient(f, gd, prop.kT, &foo, QuadraticLineMinimizer));
-    double st = surface_tension(min, f, prop, true, plotname);
+    const bool amverbose = false;
+    double st = surface_tension(min, f, prop, amverbose, plotname);
     free(plotname);
     fprintf(o, "%g\t%g\n", T, st);
     if (T > 373 && T < 600) T += 25; // Use higher interval at higher temperatures

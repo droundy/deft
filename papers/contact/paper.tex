@@ -529,12 +529,19 @@ change at position $\mathbf{r}$:
   \label{fig:sphere-density}
 \end{figure}
 
+\begin{figure}
+  \includegraphics[height=5cm]{figs/sphere-radial-08-13}
+  \caption{Density and contact densities of fourteen hard spheres in a
+    spherical cavity with radius 8.}
+  \label{fig:sphere-density2}
+\end{figure}
+
 \subsection{Hard spheres confined in a cubical cavity}
 
 \begin{figure*}
-\includegraphics[height=5cm]{figs/box-100c--05,05,05-14}
-\includegraphics[height=5cm]{figs/box-100s--05,05,05-14}
-\includegraphics[height=5cm]{figs/box-110c--05,05,05-14}
+\includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
+\includegraphics[height=5cm]{figs/box-100s--05,05,05-13}
+\includegraphics[height=5cm]{figs/box-110c--05,05,05-13}
 \caption{Density of hard spheres in a $5\times5\times5$ box.}
 \label{fig:box-density}
 \end{figure*}
@@ -678,6 +685,122 @@ Recall from Equation~\ref{eq:dAhsdR}, the standard Carnahan result is
   \\ &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} n_2
 \end{align}
 which means that we miraculously come out with a correct answer!
+
+\section{Derivatives of the fundamental-measure weighted densities}
+
+The derivative of the filling fraction is very easy:
+\begin{align}
+  n_3(\mathbf{r}) &= \int \mathbf{dr'} n(\mathbf{r'})
+  \Theta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'})) \\
+  \frac{\delta n_3(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= n(\mathbf{r'})\delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+\end{align}
+
+The derivative of the density of surface is harder:
+\begin{align}
+  n_2(\mathbf{r}) &= \int \mathbf{dr'} n(\mathbf{r'})
+  \delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'})) \\
+  \frac{\delta n_2(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= n(\mathbf{r'})\delta'(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+\end{align}
+where the trouble here is that the derivative of the delta function,
+$\delta'$, isn't something we really like to deal with.  Particularly
+as we're looking  at a 3D integral involving a 1D delta function,
+which means there are Jacobian factors to be considered.  On the other
+hand, there's no reason why we couldn't convolve with this kernel as
+efficiently as we do with any other kernel.
+
+The derivatives of the remaining scalar densities can be reduced to
+sums of the terms above:
+\begin{align}
+  n_1(\mathbf{r}) &= \int \mathbf{dr'} \frac{n(\mathbf{r'})}{4\pi R(\mathbf{r'})}
+  \delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'})) \\
+  \frac{\delta n_1(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= \frac{n(\mathbf{r'})}{4\pi
+    R(\mathbf{r'})}\delta'(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+  -
+  \frac{n(\mathbf{r'})}{4\pi
+    R(\mathbf{r'})^2}\delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+\end{align}
+\begin{align}
+  n_0(\mathbf{r}) &= \int \mathbf{dr'} \frac{n(\mathbf{r'})}{4\pi R(\mathbf{r'})^2}
+  \delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'})) \\
+  \frac{\delta n_0(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= \frac{n(\mathbf{r'})}{4\pi
+    R(\mathbf{r'})^2}\delta'(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+  -2
+  \frac{n(\mathbf{r'})}{4\pi
+    R(\mathbf{r'})^3}\delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+\end{align}
+
+Since the vector-weighted densities have no additional occurrences of
+$R$, their derivatives come out similarly.
+\begin{align}
+  \mathbf{n}_{V2}(\mathbf{r}) &= \int \mathbf{dr'} n(\mathbf{r'})
+  \delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))\frac{\mathbf{r}-\mathbf{r'}}{|\mathbf{r}-\mathbf{r'}|} \\
+  \frac{\delta \mathbf{n}_{V2}(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= n(\mathbf{r'})\delta'(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+  \frac{\mathbf{r}-\mathbf{r'}}{|\mathbf{r}-\mathbf{r'}|}
+\end{align}
+and analogously for $\mathbf{n}_{V1}$.
+\begin{align}
+  \mathbf{n}_{V1}(\mathbf{r}) &= \int \mathbf{dr'}
+  \frac{n(\mathbf{r'})}{4\pi R(\mathbf{r'})}
+  \delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))\frac{\mathbf{r}-\mathbf{r'}}{|\mathbf{r}-\mathbf{r'}|} \\
+  \frac{\delta \mathbf{n}_{V1}(\mathbf{r})}{\delta R(\mathbf{r}')}
+  &= \frac{n(\mathbf{r'})}{4\pi R(\mathbf{r'})}\delta'(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+  \frac{\mathbf{r}-\mathbf{r'}}{|\mathbf{r}-\mathbf{r'}|} -
+  \frac{n(\mathbf{r'})}{4\pi R(\mathbf{r'})^2}\delta(|\mathbf{r}-\mathbf{r'}| - R(\mathbf{r'}))
+  \frac{\mathbf{r}-\mathbf{r'}}{|\mathbf{r}-\mathbf{r'}|}
+\end{align}
+
+So, what is this convolution with a $\delta'$? Let's look at the
+scalar version:
+\begin{align}
+  \bar{f}(\mathbf{r})
+  &= \int f(\mathbf{r'}) \delta'(|\mathbf{r}-\mathbf{r'}| - R)
+  \\
+  &= \int
+        f(\mathbf{r'})
+        \lim_{\Delta R \rightarrow 0}
+          \frac{\delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
+            -
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+      }{\Delta R}
+  \\
+  &= \lim_{\Delta R \rightarrow 0}
+          \frac{\int
+            f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
+            -
+            \int
+            f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+      }{\Delta R}
+  \\
+  &\approx\lim_{\Delta R \rightarrow 0}
+          \frac{\int
+            \frac{(R+\Delta R)^2}{R^2}f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+            -
+            \int
+            f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+      }{\Delta R}
+  \\
+  &\approx\lim_{\Delta R \rightarrow 0}
+          \frac{2\frac{\Delta R}{R} \int
+            f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+      }{\Delta R}
+  \\
+  &= \frac{2}{R} \int
+            f(\mathbf{r'})
+            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+\end{align}
+There is a sign ambiguity here with regard to whether we are asking
+about the derivative of this delta function with regard to $R$ or
+something else.  We just need to get it right.
 
 \begin{widetext}
 \section{The White Bear free energy for homogeneous systems}

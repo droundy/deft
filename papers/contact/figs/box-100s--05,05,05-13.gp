@@ -16,12 +16,12 @@
 # 11 (2)              full  down triangle
 # 12 (3)              empty diamond
 # 13 (4)              full  diamond
-# 14 (5)              empty pentagon
+# 13 (5)              empty pentagon
 # 15 (6)              full  pentagon
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20 size 4,4
-set output 'figs/box-100c--05,05,05-14.eps'
+set output 'figs/box-100s--05,05,05-13.eps'
 
 reset
 unset arrow
@@ -47,4 +47,4 @@ set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
 splot [:] [:] [:] \
-'figs/box-100c--05,05,05-14.dat' u 2:3:4 notitle with pm3d
+'figs/box-100s--05,05,05-13.dat' u 2:3:4 notitle with pm3d

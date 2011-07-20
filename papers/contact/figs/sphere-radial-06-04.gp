@@ -36,17 +36,22 @@ set ylabel 'filling fraction'
 set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 set style line 3 lt 3 lw 3
+set style line 4 lt 4 lw 3
 
 plot [:] [:] \
 'figs/sphere-radial-06.0-02.dat' u 1:($2*4*pi/3) title 'density' with lines ls 1, \
 'figs/sphere-radial-06.0-02.dat' u 1:($4*4*pi/3) title 'contact density' with lines ls 2, \
 'figs/sphere-radial-06.0-02.dat' u 1:($5*4*pi/3) title 'Fu and Wu contact density' with l ls 3, \
+'figs/sphere-radial-06.0-02.dat' u 1:($5*6*pi/3) title 'contact density at sphere' with l ls 4, \
 'figs/sphere-radial-06.0-06.dat' u 1:($2*4*pi/3) notitle with lines ls 1, \
 'figs/sphere-radial-06.0-06.dat' u 1:($4*4*pi/3) notitle with lines ls 2, \
 'figs/sphere-radial-06.0-06.dat' u 1:($5*4*pi/3) notitle with l ls 3, \
+'figs/sphere-radial-06.0-06.dat' u 1:($6*4*pi/3) notitle with l ls 4, \
 'figs/sphere-radial-08.0-02.dat' u 1:($2*4*pi/3) notitle with lines ls 1, \
 'figs/sphere-radial-08.0-02.dat' u 1:($4*4*pi/3) notitle with lines ls 2, \
 'figs/sphere-radial-08.0-02.dat' u 1:($5*4*pi/3) notitle with l ls 3, \
+'figs/sphere-radial-08.0-02.dat' u 1:($6*4*pi/3) notitle with l ls 4, \
 'figs/sphere-radial-08.0-08.dat' u 1:($2*4*pi/3) notitle with lines ls 1, \
 'figs/sphere-radial-08.0-08.dat' u 1:($4*4*pi/3) notitle with lines ls 2, \
-'figs/sphere-radial-08.0-08.dat' u 1:($5*4*pi/3) notitle with l ls 3
+'figs/sphere-radial-08.0-08.dat' u 1:($5*4*pi/3) notitle with l ls 3, \
+'figs/sphere-radial-08.0-08.dat' u 1:($6*4*pi/3) notitle with l ls 4
