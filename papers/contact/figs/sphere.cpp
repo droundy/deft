@@ -43,11 +43,36 @@ static void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
   assert(name); // so it'll count as being used...
-  printf("\t\t%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
+  double peak = peak_memory()/1024.0/1024;
+  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
   last_time = t;
 }
 
-void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
+//Functional HS = HardSpheresNoTensor(1.0);
+Functional HS = HardSpheresFast(1.0);
+
+const int numiters = 25;
+
+double N_from_mu(Minimizer *min, Grid *potential, const Grid &constraint, double mu) {
+  Functional f = constrain(constraint, OfEffectivePotential(HS + IdealGas()
+                                                            + ChemicalPotential(mu)));
+  double Nnow = 0;
+  min->minimize(f, potential->description());
+  for (int i=0;i<numiters && min->improve_energy(false);i++) {
+    Grid density(potential->description(), EffectivePotentialToDensity()(1, potential->description(), *potential));
+    Nnow = density.sum()*potential->description().dvolume;
+    //printf("Nnow is %g vs %g\n", Nnow, N);
+    fflush(stdout);
+    
+    //density.epsNativeSlice("papers/contact/figs/sphere.eps", 
+    //                       Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
+    //                       Cartesian(0,xmax/2,xmax/2));
+    //sleep(3);
+  }
+  return Nnow;
+}
+
+void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -63,7 +88,8 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double bhere = b(x,y,z);
     double chere = c(x,y,z);
     double dhere = d(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere, dhere);
+    double ehere = e(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere, dhere, ehere);
   }
   fclose(out);
 }
@@ -112,7 +138,7 @@ int main(int argc, char *argv[]) {
   
   FILE *o = fopen(datname, "w");
 
-  const double myvolume = M_PI*diameter*diameter*diameter/6;
+  const double myvolume = M_PI*(diameter+1)*(diameter+1)*(diameter+1)/6;
   const double meandensity = N/myvolume;
 
   Functional f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas());
@@ -142,60 +168,63 @@ int main(int argc, char *argv[]) {
                             PreconditionedConjugateGradient(f, gd, 1, 
                                                             &potential,
                                                             QuadraticLineMinimizer));
-  Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-    
-  const int numiters = 25;
-
-  double mumax = mu, mumin = mu, Nnow = 0, dmu = 4.0/N;
-  while (Nnow < N) {
-    mumax = mumin;
-    if (mumin > dmu) {
-      mumin -= dmu;
+  double mumax = mu, mumin = mu, dmu = 4.0/N;
+  double Nnow = N_from_mu(&min, &potential, constraint, mu);
+  if (Nnow > N) {
+    while (Nnow > N) {
+      mumin = mumax;
+      mumax += dmu;
       dmu *= 2;
-    } else if (mumin > 0) {
-      mumin = -mumin;
-    } else {
-      mumin *= 2;
-    }
 
-    f = constrain(constraint, OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas()
-                                                   + ChemicalPotential(mumin)));
-    min.minimize(f, gd);
-    for (int i=0;i<numiters && min.improve_energy(false);i++) {
-      density = EffectivePotentialToDensity()(1, gd, potential);
-      Nnow = density.sum()*gd.dvolume;
-      //printf("Nnow is %g vs %g\n", Nnow, N);
-      fflush(stdout);
-      
-      //density.epsNativeSlice("papers/contact/figs/sphere.eps", 
-      //                       Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
-      //                       Cartesian(0,xmax/2,xmax/2));
-      
-      //sleep(3);
+      Nnow = N_from_mu(&min, &potential, constraint, mumax);
+      // Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
+      // density = EffectivePotentialToDensity()(1, gd, potential);
+      // density.epsNativeSlice("papers/contact/figs/box.eps", 
+      //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+      //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+      // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+      //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+      //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
+      printf("mumax %g gives N %g\n", mumax, Nnow);
+      took("Finding N from mu");
     }
-    printf("mu %g gives N %g\n", mumin, Nnow);
-    took("Finding N from mu");
+    printf("mu is between %g and %g\n", mumin, mumax);
+  } else {
+    while (Nnow < N) {
+      mumax = mumin;
+      if (mumin > dmu) {
+        mumin -= dmu;
+        dmu *= 2;
+      } else if (mumin > 0) {
+        mumin = -mumin;
+      } else {
+        mumin *= 2;
+      }
+
+      Nnow = N_from_mu(&min, &potential, constraint, mumin);
+      // density = EffectivePotentialToDensity()(1, gd, potential);
+      // density.epsNativeSlice("papers/contact/figs/box.eps", 
+      //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+      //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+      // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+      //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+      //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
+      printf("mumin %g gives N %g\n", mumin, Nnow);
+      took("Finding N from mu");
+    }
+    printf("mu is between %g and %g\n", mumin, mumax);
   }
-  printf("mu is between %g and %g\n", mumin, mumax);
 
   while (fabs(N/Nnow-1) > 1e-3) {
     mu = 0.5*(mumin + mumax);
-
-    f = constrain(constraint, OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas()
-                                                   + ChemicalPotential(mu)));
-    min.minimize(f, gd);
-    for (int i=0;i<numiters && min.improve_energy(false);i++) {
-      density = EffectivePotentialToDensity()(1, gd, potential);
-      Nnow = density.sum()*gd.dvolume;
-      //printf("Nnow is %g vs %g\n", Nnow, N);
-      fflush(stdout);
-      
-      //density.epsNativeSlice("papers/contact/figs/sphere.eps", 
-      //                       Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
-      //                       Cartesian(0,xmax/2,xmax/2));
-      
-      //sleep(3);
-    }
+    Nnow = N_from_mu(&min, &potential, constraint, mu);
+    // density = EffectivePotentialToDensity()(1, gd, potential);
+    // density.epsNativeSlice("papers/contact/figs/box.eps", 
+    //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+    //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+    // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+    //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+    //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
     printf("Nnow is %g vs %g with mu %g\n", Nnow, N, mu);
     took("Finding N from mu");
     if (Nnow > N) {
@@ -209,6 +238,7 @@ int main(int argc, char *argv[]) {
   double energy = min.energy();
   printf("Energy is %.15g\n", energy);
 
+  Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   double mean_contact_density = ContactDensitySimplest(1.0).integral(1, density)/myvolume;
   
   fprintf(o, "%g\t%.15g\t%.15g\n", diameter, energy, mean_contact_density);
@@ -217,18 +247,17 @@ int main(int argc, char *argv[]) {
   sprintf(plotname, "papers/contact/figs/sphere-%04.1f-%02.0f.dat", diameter, N);
   Grid energy_density(gd, f(1, gd, potential));
   Grid contact_density(gd, ContactDensitySimplest(1.0)(1, gd, density));
+  Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density));
   Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
   plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/sphere-radial-%04.1f-%02.0f.dat", diameter, N);
-  radial_plot(plotname, density, energy_density, contact_density, wu_contact_density);
+  radial_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere);
   free(plotname);
   density.epsNativeSlice("papers/contact/figs/sphere.eps", 
                          Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
                          Cartesian(0,xmax/2,xmax/2));
   
-  double peak = peak_memory()/1024.0/1024;
-  printf("Peak memory use is %g M\n", peak);
   took("Plotting stuff");
   
   fclose(o);

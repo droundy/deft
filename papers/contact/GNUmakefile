@@ -38,9 +38,10 @@ ALL_FIGURES=\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
 	figs/sphere-radial-06-04.gp\
-	figs/box-100c--05,05,05-14.gp\
-	figs/box-100s--05,05,05-14.gp\
-	figs/box-110c--05,05,05-14.gp\
+	figs/sphere-radial-08-13.gp\
+	figs/box-100c--05,05,05-13.gp\
+	figs/box-100s--05,05,05-13.gp\
+	figs/box-110c--05,05,05-13.gp\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -59,5 +60,6 @@ figs/gHS-vs-n.eps: figs/gHS-vs-n.dat
 figs/free-energy.eps: figs/free-energy.dat
 
 figs/sphere-radial-06-04.eps: figs/sphere-radial-06.0-04.dat
+figs/sphere-radial-08-13.eps: figs/sphere-radial-08.0-13.dat figs/sphere-radial-12.0-112.dat
 
 figs/box-%.eps: figs/box-%.dat

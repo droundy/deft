@@ -193,6 +193,7 @@ paper: paper/figs/equation-of-state.dat \
 	cd paper && $(MAKE)
 
 papers: papers/contact/figs/gHS-vs-n.dat \
+	papers/contact/figs/sphere.mkdat papers/contact/figs/box.mkdat \
 	papers/contact/figs/free-energy.dat
 	cd papers && $(MAKE)
 

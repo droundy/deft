@@ -1,7 +1,7 @@
 #!/bin/sh
-#SBATCH --mem-per-cpu=2000
+#SBATCH --mem-per-cpu=1000
 #SBATCH --mail-type ALL
-#SBATCH --mail-user daveroundy@gmail.com
+# #SBATCH --mail-user daveroundy@gmail.com
 #SBATCH --output sphere-%j.out
 
 set -ev

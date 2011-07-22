@@ -133,8 +133,22 @@ Functional dAdR_simplest(double radius) {
     dWBNT_dn1(radius)*n0(radius);
 }
 
+Functional dAdR_sphere_over_n(double radius) {
+  Functional R(radius, "R");
+  Functional two_over_R = Functional(2)/R;
+  Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
+  return ShellConvolve(radius)(dWBNT_dn3(radius)
+                               + two_over_R*dWBNT_dn2(radius)
+                               + one_over_4piRsqr*dWBNT_dn1(radius));
+}
+
 Functional ContactDensitySimplest(double radius) {
   return Functional(0.25)*dAdR_simplest(radius)/n2(radius);
+}
+
+Functional ContactDensitySphere(double radius) {
+  Functional R(radius, "R");
+  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n(radius);
 }
 
 Functional FuWuContactDensity(double radius) {

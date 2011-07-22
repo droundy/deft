@@ -134,9 +134,10 @@ int main(int, char **) {
 							      QuadraticLineMinimizer));
     
     printf("Cavity size is %g nm (%g bohr) \n", cavitysize/nm, cavitysize);
+    //printf("Cavity size is %g bohr\n", cavitysize);
 
     const int numiters = 200;
-    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min.improve_energy(false);i++) {
       fflush(stdout);
       // Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
       // density.epsNative1d("paper/figs/constrained-water-1D.eps",
@@ -152,7 +153,7 @@ int main(int, char **) {
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     p = pressure(f, water_prop.kT, n_1atm);
-    printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
+    //printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
     
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/cavitysize-%04.1f.dat", cavitysize/nm);

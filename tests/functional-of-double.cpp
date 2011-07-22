@@ -129,6 +129,10 @@ int main(int, char *argv[]) {
     retval += test_functional("StepConvolve(1)(x)", StepConvolve(1)(x), 1e-5, 1e-13);
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
+    Functional stepped = StepConvolve(1);
+    retval += test_functional("StepConvolve(1)(sqr(StepConvolve(x)))", ShellConvolve(1)(sqr(stepped)), 1e-5, 2e-13);
+
+
     retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
                               OfEffectivePotential(sqr(StepConvolve(1))), -0.01, 2e-13);
     retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
