@@ -23,9 +23,10 @@
 
 #include "utilities.h"
 
-double zmax = 150;
+const double nm = 18.8972613;
+double zmax = 8*nm;
 const double width = 0.0001;
-double cavitysize = 5;
+double cavitysize = 0.5*nm;
 
  double notinwall(Cartesian r) {
    const double z = r.z();
@@ -104,7 +105,7 @@ int main(int, char **) {
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
   
-  for (cavitysize = 5; cavitysize<zmax; cavitysize+=5) {
+  for (cavitysize = 0.0*nm; cavitysize<zmax; cavitysize+=0.1*nm) {
 
     //printf("Cavity size is %g bohr\n", cavitysize);
     
@@ -127,12 +128,12 @@ int main(int, char **) {
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(1e-17, 
+    Minimizer min = Precision(0, 
 			      PreconditionedConjugateGradient(f, gd, water_prop.kT, 
 							      &potential,
 							      QuadraticLineMinimizer));
     
-    printf("Cavity size is %g bohr\n", cavitysize);
+    printf("Cavity size is %g nm (%g bohr) \n", cavitysize/nm, cavitysize);
 
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
@@ -148,13 +149,13 @@ int main(int, char **) {
     double energy = min.energy()/width/width;
     //printf("Energy is %.15g\n", energy);
 
-    fprintf(o, "%g\t%.15g\n", cavitysize, energy);
+    fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     p = pressure(f, water_prop.kT, n_1atm);
     printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
     
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/cavitysize-%03g.dat", cavitysize);
+    sprintf(plotname, "paper/figs/cavitysize-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));

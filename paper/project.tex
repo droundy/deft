@@ -273,21 +273,21 @@ where $\Theta$ is the Heaviside step function.
 \label{fig:saturated-liquid-density}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/entropy}
-\end{center}
-\caption{The free energy, internal energy, and temperature*entropy versus density at room temperature.  }
-\label{fig:energy-room-temp}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/entropy-at-690K}
-\end{center}
-\caption{The free energy, internal energy, and temperature*entropy versus density near the critical temperature.  }
-\label{fig:energy-near-critical-temp}
-\end{figure}
+% \begin{figure}
+% \begin{center}
+% \includegraphics[width=\columnwidth]{figs/entropy}
+% \end{center}
+% \caption{The free energy, internal energy, and temperature*entropy versus density at room temperature.  }
+% \label{fig:energy-room-temp}
+% \end{figure}
+% 
+% \begin{figure}
+% \begin{center}
+% \includegraphics[width=\columnwidth]{figs/entropy-at-690K}
+% \end{center}
+% \caption{The free energy, internal energy, and temperature*entropy versus density near the critical temperature.  }
+% \label{fig:energy-near-critical-temp}
+% \end{figure}
 
 \subsection{Other thermodynamic functions}
 
@@ -413,65 +413,6 @@ as illustrated in Figure~\ref{fig:homogeneous}.
 \section{Results and discussion}
 \subsection{Liquid-vapor interface}
 
-\subsection{Water confined to a slit}
-
-One of the most computationally simple ways to study confined water is by
-constraining it to a slit where the water molecules can only move in one
-dimension. We apply a constraining potential of the form
-
-\begin{align}
-V = n_l*constraint + 100*n_v (FIXME)
-\end{align}
-
-such that the density is 100 times the vapor density outside the slit 
-and approximately equal to the saturated liquid density inside. The slits
-range in size from 5 bohrs to 150 bohrs (FIX - redo in nm?). We 
-minimize the energy and calculate density, energy, and $X$ on a lattice
-with a spacing of 0.2 bohrs between data points.
-
-The density profile for a slit of size 60 bohrs is shown in Figure 
-\ref{fig:density-1D}. Near the interface, there are oscillations around the 
-liquid density which decrease near the center of the slit. We expect the
-center of the slit to act approximately like bulk water, and the absence 
-of oscillations supports this. For larger slits (~120 bohrs or more) the
-majority of the water molecules in the slit act like the bulk. We also 
-determine the smallest slit that can contain liquid water, approximately 
-30 bohrs. For smaller slits, the initial liquid water inside will vaporize.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/density-1D}
-\end{center}
-\caption{ Density profile for a slab of water with molecules constrained 
-to move in one dimension. }
-\label{fig:density-1D}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/energy-1D}
-\end{center}
-\caption{ Energy density profile for a slab of water with molecules 
-constrained to move in one dimension. }
-\label{fig:energy-1D}
-\end{figure}
-
-The value of $X$ behaves as expected for water constrained to a slit. We
-show in Figure \ref{fig:xassoc-1D} the plot of $X$ for a slit of 60 bohrs.
-Outside the slit, there is no hydrogen bonding, and inside $X$ is 
-approximately equal to
-that of saturated liquid water.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/xassoc-1D}
-\end{center}
-\caption{ Xassociation value (fraction of association sites
-\emph{not} hydrogen-bonded) for a slab of water with molecules constrained 
-to move in one dimension. }
-\label{fig:xassoc-1D}
-\end{figure}
-
 The fluid density at a liquid-solid interface commonly displays
 oscillatory behavior, but the presence of density oscillations at
 liquid-vapor interfaces is more debated\cite{penfold2001structure}.
@@ -486,12 +427,93 @@ that the density profile will be smoothed out by CW effects.
   problem... actually a couple of papers that address
   it~\cite{forsman1996computer, lum1999hydrophobicity}}
 
+\subsection{Water confined to a slit}
+
+One of the most computationally simple ways to study confined water is by
+constraining it to a slit where the water molecules can only move in one
+dimension. Experimentally, this could represent two different situations.
+The first, water between two perfectly aligned and smooth planes, is not common 
+in experiment due to the difficulty of creating such an ideal situation. The second
+possibility is a large sphere brought close to a plane, which eliminates the 
+need for perfect alignment.
+
+We choose a chemical potential corresponding to a pressure of 1 atm and we apply 
+a constraining potential where the density is equal to the saturated 
+liquid density inside the slit. Outside the slit, we choose a small non-zero
+density for numerical reasons. The slits studied range in size from 0.1 nm to 
+8.0 nm. We minimize the energy and calculate density, energy, and $X$ on a lattice
+with a spacing of approximately 0.01 nm (0.2 bohrs) between lattice points.
+
+The density profile for a slit of size 4.0 nm is shown in Figure 
+\ref{fig:density-1D}. Near the interface, there are oscillations around the 
+liquid density which decrease near the center of the slit. We expect the
+center of the slit to act approximately like bulk water, and the absence 
+of oscillations supports this. For larger slits (6.0 nm or more) the
+majority of the water molecules in the slit act like the bulk. We also 
+determine the smallest slit that can contain liquid water, approximately 
+0.6 nm (\textcolor{red}{Check this again}. For smaller slits, the initial 
+liquid water inside will vaporize.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-1D}
+\end{center}
+\caption{ Density profile for a slab of water with molecules constrained 
+to move in one dimension. }
+\label{fig:density-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-1D}
+\end{center}
+\caption{ Energy densities for a slab of water with molecules 
+constrained to move in one dimension. \textcolor{red}{FIXME}}
+\label{fig:energy-1D}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/cavitysize-vs-energy-1D}
+\end{center}
+\caption{ Free energy versus slit size for a slab of water with molecules 
+constrained to move in one dimension. \textcolor{red}{Not sure if this needs
+to have a bulk energy amount removed to be accurate.}}
+\label{fig:cavitysize-vs-energy-1D}
+\end{figure}
+
+The value of $X$ behaves as expected for water constrained to a slit. We
+show in Figure \ref{fig:xassoc-1D} the plot of $X$ for a slit of 4.0 nm.
+Outside the slit, there is no hydrogen bonding ($X$ = 1), and inside $X$ is 
+approximately equal to 0.13, or that of saturated liquid water.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D}
+\end{center}
+\caption{ Xassociation value (fraction of association sites
+\emph{not} hydrogen-bonded) for a slab of water with molecules constrained 
+to move in one dimension. }
+\label{fig:xassoc-1D}
+\end{figure}
+
+
 \subsection{Hydrophobic rods}
 
 \subsubsection{One rod - diameter effects}
 
 We move into two dimensions by studying a single hydrophobic rod
 immersed in water. 
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
+\end{center}
+\caption{ Energy versus diameter for a single hydrophobic rod
+immersed in water. This should have an asymptote equal to the surface
+tension. (FIXME - Data points are not correct yet) }
+\label{fig:energy-vs-diameter}
+\end{figure}
 
 \subsubsection{Resolution and convergence tests}
 
