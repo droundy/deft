@@ -111,8 +111,8 @@ int main(int, char *argv[]) {
   }
   signal(SIGINT, dieplease);
   int retval = 0;
-  const double kT = 1e-3;
   const Functional n = EffectivePotentialToDensity();
+  const double kT = 1e-3;
 
   {
     double Veff = -1e-3*log(1e-5);
@@ -185,6 +185,7 @@ int main(int, char *argv[]) {
 
   {
     Functional f = ContactDensitySimplest(2.0);
+    retval += test_functional("contact density simplest", f, 0.01, 1e-12);
     retval += test_functional("contact density simplest", f, 0.02, 1e-12);
   }
 
