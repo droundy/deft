@@ -61,6 +61,6 @@ figs/free-energy.eps: figs/free-energy.dat
 
 figs/sphere-radial-06-04.eps: figs/sphere-radial-06.0-04.dat
 figs/sphere-radial-08-13.eps: figs/sphere-radial-08.0-13.dat figs/sphere-radial-12.0-112.dat \
-	figs/sphere-radial-17.0-265.dat
+	figs/sphere-radial-16.0-265.dat
 
 figs/box-%.eps: figs/box-%.dat
