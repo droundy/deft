@@ -33,13 +33,19 @@ set origin 0,0
 set xlabel 'z (nm)'
 set ylabel 'energy density (Hartree/bohr^{3})'
 
-set style line 1 lt 1 lw 1
+set style line 1 lt 1 lc 3 lw 2
 set style line 2 lt 1 lc 7 lw 1
+set style line 3 lt 1 lc 2 lw 2
+set style line 4 lt 1 lc 1 lw 2
 
 nm = 18.8972613       # 1 nm equals this many bohrs
+kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
-plot [:] [:] \
-'figs/cavitysize-04.0.dat' u ($3/nm):5 title 'free energy densty' with lines ls 1 , \
+plot [:] [:1.1e-5] \
+'figs/cavitysize-04.0.dat' u ($3/nm):5 title 'F' with lines ls 1 , \
 'figs/cavitysize-04.0.dat' u (2):5 notitle with lines ls 2 , \
-'figs/cavitysize-04.0.dat' u (8):5 notitle with lines ls 2 , \
-'figs/cavitysize-04.0.dat' u ($3/nm):($5-298*$6) title 'internal energy density' with lines 
+'figs/cavitysize-04.0.dat' u (6):5 notitle with lines ls 2 , \
+'figs/cavitysize-04.0.dat' u (2):(-kB*298*$6) notitle with lines ls 2 , \
+'figs/cavitysize-04.0.dat' u (6):(-kB*298*$6) notitle with lines ls 2 , \
+'figs/cavitysize-04.0.dat' u ($3/nm):($5-kB*298*$6) title 'U' with lines ls 4 , \
+'figs/cavitysize-04.0.dat' u ($3/nm):(-kB*298*$6) title '-TS' with lines ls 3 

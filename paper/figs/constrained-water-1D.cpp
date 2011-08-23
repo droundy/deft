@@ -153,8 +153,12 @@ int main(int, char **) {
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     p = pressure(f, water_prop.kT, n_1atm);
-    //printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
-    
+    printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
+
+    double work = p*cavitysize;
+    printf("Work to pull apart walls = %g Hartree/Area (energy = %g Hartree/Area)\n", 
+	   work, energy);
+
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "paper/figs/cavitysize-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
