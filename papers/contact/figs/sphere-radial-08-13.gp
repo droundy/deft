@@ -47,6 +47,10 @@ plot [:] [:] \
 'figs/sphere-radial-12.0-112.dat' u 1:($4*4*pi/3) notitle with lines ls 2, \
 'figs/sphere-radial-12.0-112.dat' u 1:($5*4*pi/3) notitle with l ls 3, \
 'figs/sphere-radial-12.0-112.dat' u 1:($5*6*pi/3) notitle with l ls 4, \
+'figs/sphere-radial-16.0-265.dat' u 1:($2*4*pi/3) notitle with lines ls 1, \
+'figs/sphere-radial-16.0-265.dat' u 1:($4*4*pi/3) notitle with lines ls 2, \
+'figs/sphere-radial-16.0-265.dat' u 1:($5*4*pi/3) notitle with l ls 3, \
+'figs/sphere-radial-16.0-265.dat' u 1:($5*6*pi/3) notitle with l ls 4, \
 'figs/sphere-radial-08.0-13.dat' u 1:($2*4*pi/3) title 'density' with lines ls 1, \
 'figs/sphere-radial-08.0-13.dat' u 1:($4*4*pi/3) title 'contact density' with lines ls 2, \
 'figs/sphere-radial-08.0-13.dat' u 1:($5*4*pi/3) title 'Fu and Wu contact density' with l ls 3, \

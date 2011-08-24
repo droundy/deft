@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <setjmp.h>
 #include "Functionals.h"
+#include "ContactDensity.h"
 
 void took(const char *action) {
   static clock_t start = 0;
@@ -110,8 +111,8 @@ int main(int, char *argv[]) {
   }
   signal(SIGINT, dieplease);
   int retval = 0;
-  const double kT = 1e-3;
   const Functional n = EffectivePotentialToDensity();
+  const double kT = 1e-3;
 
   {
     double Veff = -1e-3*log(1e-5);
@@ -131,7 +132,6 @@ int main(int, char *argv[]) {
 
     Functional stepped = StepConvolve(1);
     retval += test_functional("StepConvolve(1)(sqr(StepConvolve(x)))", ShellConvolve(1)(sqr(stepped)), 1e-5, 2e-13);
-
 
     retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
                               OfEffectivePotential(sqr(StepConvolve(1))), -0.01, 2e-13);
@@ -181,6 +181,18 @@ int main(int, char *argv[]) {
     retval += test_functional("chemical potential", f, 1e-2, 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-9), 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
+  }
+
+  {
+    Functional f = ContactDensitySimplest(2.0);
+    retval += test_functional("contact density simplest", f, 0.01, 1e-12);
+    retval += test_functional("contact density simplest", f, 0.02, 1e-12);
+  }
+
+  {
+    Functional f = ContactDensitySphere(2.0);
+    retval += test_functional("contact density sphere", f, 0.02, 1e-12);
+    retval += test_functional("contact density sphere", f, 0.01, 1e-12);
   }
 
   if (retval == 0) {

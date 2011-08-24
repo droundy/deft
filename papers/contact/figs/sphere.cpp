@@ -163,77 +163,81 @@ int main(int argc, char *argv[]) {
   
   potential = meandensity*constraint + 1e-4*meandensity*VectorXd::Ones(gd.NxNyNz);
   potential = -potential.cwise().log();
-    
+  f.run_finite_difference_test("foobar", 1, potential);
+
   Minimizer min = Precision(1e-6, 
                             PreconditionedConjugateGradient(f, gd, 1, 
                                                             &potential,
                                                             QuadraticLineMinimizer));
   double mumax = mu, mumin = mu, dmu = 4.0/N;
   double Nnow = N_from_mu(&min, &potential, constraint, mu);
-  if (Nnow > N) {
-    while (Nnow > N) {
-      mumin = mumax;
-      mumax += dmu;
-      dmu *= 2;
-
-      Nnow = N_from_mu(&min, &potential, constraint, mumax);
-      // Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-      // density = EffectivePotentialToDensity()(1, gd, potential);
-      // density.epsNativeSlice("papers/contact/figs/box.eps", 
-      //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
-      //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
-      // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
-      //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
-      //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
-      printf("mumax %g gives N %g\n", mumax, Nnow);
-      took("Finding N from mu");
-    }
-    printf("mu is between %g and %g\n", mumin, mumax);
-  } else {
-    while (Nnow < N) {
-      mumax = mumin;
-      if (mumin > dmu) {
-        mumin -= dmu;
-        dmu *= 2;
-      } else if (mumin > 0) {
-        mumin = -mumin;
-      } else {
-        mumin *= 2;
-      }
-
-      Nnow = N_from_mu(&min, &potential, constraint, mumin);
-      // density = EffectivePotentialToDensity()(1, gd, potential);
-      // density.epsNativeSlice("papers/contact/figs/box.eps", 
-      //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
-      //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
-      // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
-      //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
-      //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
-      printf("mumin %g gives N %g\n", mumin, Nnow);
-      took("Finding N from mu");
-    }
-    printf("mu is between %g and %g\n", mumin, mumax);
-  }
-
-  while (fabs(N/Nnow-1) > 1e-3) {
-    mu = 0.5*(mumin + mumax);
-    Nnow = N_from_mu(&min, &potential, constraint, mu);
-    // density = EffectivePotentialToDensity()(1, gd, potential);
-    // density.epsNativeSlice("papers/contact/figs/box.eps", 
-    //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
-    //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
-    // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
-    //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
-    //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
-    printf("Nnow is %g vs %g with mu %g\n", Nnow, N, mu);
-    took("Finding N from mu");
+  const double fraccuracy = 1e-3;
+  if (fabs(Nnow/N - 1) > fraccuracy) {
     if (Nnow > N) {
-      mumin = mu;
+      while (Nnow > N) {
+        mumin = mumax;
+        mumax += dmu;
+        dmu *= 2;
+        
+        Nnow = N_from_mu(&min, &potential, constraint, mumax);
+        // Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
+        // density = EffectivePotentialToDensity()(1, gd, potential);
+        // density.epsNativeSlice("papers/contact/figs/box.eps", 
+        //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+        //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+        // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+        //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+        //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
+        printf("mumax %g gives N %g\n", mumax, Nnow);
+        took("Finding N from mu");
+      }
+      printf("mu is between %g and %g\n", mumin, mumax);
     } else {
-      mumax = mu;
+      while (Nnow < N) {
+        mumax = mumin;
+        if (mumin > dmu) {
+          mumin -= dmu;
+          dmu *= 2;
+        } else if (mumin > 0) {
+          mumin = -mumin;
+        } else {
+          mumin *= 2;
+        }
+        
+        Nnow = N_from_mu(&min, &potential, constraint, mumin);
+        // density = EffectivePotentialToDensity()(1, gd, potential);
+        // density.epsNativeSlice("papers/contact/figs/box.eps", 
+        //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+        //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+        // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+        //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+        //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
+        printf("mumin %g gives N %g\n", mumin, Nnow);
+        took("Finding N from mu");
+      }
+      printf("mu is between %g and %g\n", mumin, mumax);
     }
+    
+    while (fabs(N/Nnow-1) > fraccuracy) {
+      mu = 0.5*(mumin + mumax);
+      Nnow = N_from_mu(&min, &potential, constraint, mu);
+      // density = EffectivePotentialToDensity()(1, gd, potential);
+      // density.epsNativeSlice("papers/contact/figs/box.eps", 
+      //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
+      //                        Cartesian(0,-ymax/2-1,-zmax/2-1));
+      // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
+      //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
+      //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
+      printf("Nnow is %g vs %g with mu %g\n", Nnow, N, mu);
+      took("Finding N from mu");
+      if (Nnow > N) {
+        mumin = mu;
+      } else {
+        mumax = mu;
+      }
+    }
+    printf("N final is %g (vs %g) with mu = %g\n", Nnow, N, mu);
   }
-  printf("N final is %g (vs %g) with mu = %g\n", Nnow, N, mu);
 
   double energy = min.energy();
   printf("Energy is %.15g\n", energy);
