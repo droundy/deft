@@ -29,7 +29,7 @@ void run(){
   int j = 0;
   int count = 0;
 
-  int times = 1000;
+  int times = 10000;
 
   while(j<times){
     count++;
