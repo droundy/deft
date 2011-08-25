@@ -91,6 +91,9 @@ int main(int, char **) {
 				     water_prop.epsilon_dispersion,
 				     water_prop.lambda_dispersion,
 				     water_prop.length_scaling, mu_satp));
+   
+  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+
   double Htrperbohr3topsi =1.602176487e-19*27.2117*0.000145037738/1.4818471e-31; //Converts Hartree/bohr^3 to psi
   double p = pressure(f, water_prop.kT, n_1atm);
   printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
@@ -149,8 +152,11 @@ int main(int, char **) {
     
     double energy = min.energy()/width/width;
     //printf("Energy is %.15g\n", energy);
-
-    fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
+    
+    const double bulkEperArea = EperVolume*cavitysize;
+    printf("The bulk energy per area should be %g\n", bulkEperArea);
+    
+    fprintf(o, "%g\t%.15g\t%.15g\n", cavitysize/nm, energy, bulkEperArea);
 
     p = pressure(f, water_prop.kT, n_1atm);
     printf("Pressure = %g psi (%g Hartree/bohr^3)\n", p*Htrperbohr3topsi, p);
@@ -169,7 +175,7 @@ int main(int, char **) {
     // double radius = water_prop.lengthscale;
     // Functional R(radius, "R");
     // Functional n2 = ShellConvolve(radius);
-    // Functional n0 = n2/(4*M_PI*sqr(R));
+    // Functional n0 = n2/(4*M_PI*sqr(
     // Functional delta = DeltaSAFT(water_prop.lengthscale, water_prop.epsilonAB,
     // 				 water_prop.kappaAB,
     // 				 water_prop.epsilon_dispersion,

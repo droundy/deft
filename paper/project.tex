@@ -72,21 +72,31 @@ substances for life and industry. The structure and geometry of the
 water molecule leads to a strong polarity and complex intermolecular
 forces. The hydrogen bonds formed by water are very strong, creating
 tetragonal clusters (CITE?) that lead to many of water's unusual properties,
-such as the comparatively high melting, boiling, and critical temperatures.
+such as the high melting, boiling, and critical temperatures.
 The large dielectric constant (D$\sim$80) (CITE) is partially responsible for
 water as a universal solvent, along with the ease of availability and use.
+
+\subsection{Classical density-functional theory}
 
 It is challenging to describe all the relevant properties of water using
 a model, especially if a low computational cost is also desired.
 
-(Types and models of water summary/review)
+Some models, including SAFT, are designed for use with
+homogeneous systems only. Although these models are useful, much of the interesting
+chemistry that occurs in water cannot be described with a homogeneous only model. To
+describe solvation and other processes in aqueous solution, a more robust theory is 
+needed.
 
-\subsection{Classical density-functional theory}
+Classical density-functional theory (DFT) provides an efficient way to evaluate the
+free energy using the density of the fluid. The free energy is a functional of the 
+density function and is independent of any external potentials\cite{ebner1976}. DFT 
+can be used with a variety of external potentials, from the simple interaction with a 
+hydrophobic wall to the complex strong interaction with hydrophilic solutes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
 We introduce a new classical density functional for water that
-\needsworklater{predicts the vapor density, liquid density, bulk
+predicts the \needsworklater{vapor density, liquid density, bulk
   modulus, and bulk surface tension, as well as allows for
   liquid-vapor coexistence}.  The Helmholtz free energy functional is
 based on SAFT, and is composed of the usual terms:
@@ -287,8 +297,7 @@ where $\Theta$ is the Heaviside step function.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/temperature-versus-density}
 \end{center}
-\caption{The theoretical versus experimental saturated liquid density
-  versus temperature.  }
+\caption{The theoretical versus experimental temperature versus density. }
 \label{fig:saturated-liquid-density}
 \end{figure}
 
@@ -329,9 +338,21 @@ consider the \emph{free energy per unit volume}.
 \includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
 \end{center}
 \caption{The pressure versus density for various temperatures, including
-experimental pressure data from NIST.  }
+experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
+indicate the computationally calculated pressure and the open circles are 
+NIST data points, plotted for every other isotherm. The solid and dotted lines
+represent the theoretical and experimental coexistence curves.}
 \label{fig:pressure-with-isotherms}
 \end{figure}
+
+Figure \ref{fig:pressure-with-isotherms} shows the calculated pressures for
+isotherms ranging from room temperature to past the critical temperature. The solid 
+line is the theoretical coexistence curve calculated from the SAFT functional. 
+For a given isotherm, the pressure curve should intersect this coexistence curve 
+twice, at the values of the vapor and liquid densities. The functional matches well with
+the experimental data from NIST away from the critical point. The slope of the pressure
+versus density curve is proportional to the compressibility, which is close but slightly too
+large at room temperature. 
 
 The entropy is naturally obtained by taking a partial derivative with
 respect to temperature:
@@ -350,8 +371,14 @@ matter of subtraction:
 \end{align}
 and the enthalpy is not much more work:
 \begin{align}
-  H[n] &= F[n] + TS[n] - pV
+  H[n] &= F[n] + TS[n] + pV
 \end{align}
+
+The calculated heat of vaporization at atmospheric pressure is
+$\Delta H_{vap}$= 39.41 kJ/mol at the normal boiling point of water,
+373 K. This compares very well to the experimental
+value measured by NIST ($\Delta H_{vap}$= 40.65 kJ/mol\cite{nistwater}), with 
+an error of only a few percent.
 
 \begin{figure}
 \begin{center}
@@ -423,7 +450,21 @@ as illustrated in Figure~\ref{fig:homogeneous}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
-\subsection{Liquid-vapor interface}
+
+\subsection{Water confined to a slit}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-1D}
+\includegraphics[width=\columnwidth]{figs/energy-1D}
+\end{center}
+\caption{ Density profile (top) and 
+energy densities (bottom) for a slab of water with molecules 
+constrained to move in one dimension. The free energy, internal energy
+and entropic energy densities are shown for a slit size of 4.0 nm. The dashed
+line in the top figure represents the saturated liquid density.}
+\label{fig:energy-1D}
+\end{figure}
 
 The fluid density at a liquid-solid interface commonly displays
 oscillatory behavior, but the presence of density oscillations at
@@ -433,18 +474,9 @@ interface is clouded by the existence of long-wavelength perturbations
 known as \emph{capillary waves}.  These waves are not accounted for in
 density-functional theory (although the \emph{exact}
 density-functional theory \emph{would} include them), with the result
-that the density profile will be smoothed out by CW effects.
-
-\subsection{Water confined to a slit}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/density-1D}
-\end{center}
-\caption{ Density profile for a slab of water with molecules constrained 
-to move in one dimension. }
-\label{fig:density-1D}
-\end{figure}
+that the density profile will be smoothed out by CW effects. The liquid-vapor
+interface is plotted in Figure \ref{fig:liquid-vapor-profile} and shows
+some small oscillations.
 
 One of the most computationally simple ways to study confined water is by
 constraining it to a slit where the water molecules can only move in one
@@ -464,7 +496,7 @@ lattice
 with a spacing of approximately 0.01 nm (0.2 bohrs) between lattice points.
 
 The density profile for a slit of size 4.0 nm is shown in Figure
-\ref{fig:density-1D}. Near the interface, there are oscillations around the
+\ref{fig:energy-1D}. Near the interface, there are oscillations around the
 liquid density which decrease near the center of the slit. We expect the center
 of the slit to act approximately like bulk water, and the absence of
 oscillations supports this. For larger slits (6.0 nm or more) the majority of
@@ -475,7 +507,7 @@ vaporize. The results for larger liquid-filled slits are only metastable,
 however,as a vapor-filled slit is thermodynamically favorable. Based on our
 calculations for a pressure of 1 atm, the work needed to pull apart
 the two hard walls comprising the slit is one to two orders of magnitude less
-thanthe free energy of the liquid-filled slit. For the range of slit sizes we
+than the free energy of the liquid-filled slit. For the range of slit sizes we
 studied (0.1 to 8.0 nm), all the computational results of liquid-filled are
 metastable. Lum, Chandler and Weeks \cite{lum1999hydrophobicity} discuss the
 stability of water between large hydrophobic plates and the critical separation
@@ -491,44 +523,22 @@ energy barrier to reach the stable vapor phase.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figs/energy-1D}
-\end{center}
-\caption{ Energy densities for a slab of water with molecules 
-constrained to move in one dimension. The free energy, internal energy
-and entropic energy densities are shown for a slit size of 4.0 nm.}
-\label{fig:energy-1D}
-\end{figure}
-
-The value of $X$ behaves as expected for water constrained to a slit. We
-show in Figure \ref{fig:xassoc-1D} the plot of $X$ for a slit of 4.0 nm.
-Outside the slit, there is no hydrogen bonding ($X$ = 1), and inside $X$ is 
-approximately equal to 0.13, or that of saturated liquid water.
-
-\begin{figure}
-\begin{center}
 \includegraphics[width=\columnwidth]{figs/xassoc-1D}
 \end{center}
-\caption{ Xassociation value (fraction of association sites
-\emph{not} hydrogen-bonded) for a slab of water with molecules constrained 
-to move in one dimension. }
+\caption{The number of hydrogen bonds per molecule for a slab of water 
+with molecules constrained to move in one dimension. Each molecule may contribute to
+four bonds, although each bond involves two molecules so to calculate the actual 
+number of bonds there would be another factor of 2.}
 \label{fig:xassoc-1D}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/cavitysize-vs-energy-1D}
-\end{center}
-\caption{ Energy per length versus slit size for a slab of water with molecules 
-constrained to move in one dimension. The last few data points are likely inaccurate
-due to the slit separation being very close to the size of the system. \textcolor{red}{
-Not sure if this needs to have a bulk energy amount removed to be accurate.}}
-\label{fig:cavitysize-vs-energy-1D}
-\end{figure}
+The value of $X$ behaves as expected for water constrained to a slit. We
+show in Figure \ref{fig:xassoc-1D} the number of hydrogen bonds per water 
+molecule, equal to $4(1-X)$, for a slit of 4.0 nm.
+Outside the slit, there is no hydrogen bonding and inside the number of hydrogen
+bonds is approximately equal to 3.5, which is expected for saturated liquid water.
 
-
-\subsection{Hydrophobic rods}
-
-\subsubsection{One rod - diameter effects}
+\subsection{One hydrophobic rod}
 
 We move into two dimensions by studying a single hydrophobic rod
 immersed in water. 
@@ -539,16 +549,24 @@ immersed in water.
 \end{center}
 \caption{ Energy versus diameter for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
-tension. (FIXME - Data points are not correct yet) }
+tension. (FIX - 0.4 nm?) }
 \label{fig:energy-vs-diameter}
 \end{figure}
 
 \subsubsection{Resolution and convergence tests}
 
-(Plot with low (0.4 bohrs), regular (0.2), and high (0.05) resolution 
-for single rod.)
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-vs-radius}
+\end{center}
+\caption{ Density profiles for 
+a single hydrophobic rod with a radius of 0.5 nm using several different 
+lattice spacing resolutions. high = 0.05 bohrs, 
+med = 0.2 bohrs, low = 0.5 bohrs }
+\label{fig:densityresolution}
+\end{figure}
 
-\subsubsection{Two rods - hydrophobic interaction}
+\subsection{Hydrophobic interaction of two rods}
 
 Here we will want to cite~\cite{walther2004hydrodynamic}, which gives
 simulations for two interacting nanotubes in water.  It's not
@@ -563,10 +581,10 @@ would be worth citing.
 \label{fig:density-rods}
 \end{figure}
 
-\subsection{Hard Sphere}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
+
+[conclusion text]
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

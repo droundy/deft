@@ -22,18 +22,18 @@
 
 int main(int, char **) { 
   const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
-  const double kT = kB*298; // Room temperature
-  FILE *o = fopen("paper/figs/entropy.dat", "w");
+  const double kT = kB*373; // Room temperature
+  FILE *o = fopen("paper/figs/enthalpy.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
                                                     water_prop.epsilonAB, water_prop.kappaAB,
                                                     water_prop.epsilon_dispersion,
                                                     water_prop.lambda_dispersion,
                                                     water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+  double n_1atm = pressure_to_density(f, kT, atmospheric_pressure,
 				      0.001, 0.01);
   
-  double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, kT, n_1atm);
   
   f = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
                                          water_prop.epsilonAB, water_prop.kappaAB,
@@ -47,17 +47,32 @@ int main(int, char **) {
 						  water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
   
-  double nl=0.004938863;        // liquid density in bohr^-3   
-  double nv=1.141e-7;         //vapor density in bohr^-3
+  double nl=0.004938863;      // liquid density in bohr^-3   
+  double nv=1.141e-7;         // vapor density in bohr^-3
 
-  for (double dens=1e-8; dens<=0.006; dens *= 1.01) {
-    double V = -kT*log(dens);
-    //double Vl = -kT*log(nl);
-    double ff = f(kT, V);
-    double SS = S(kT, V);
-    //printf("n = %g\tS/n = %g\n", dens, S(V)/dens);
-    fprintf(o, "%g\t%g\t%g\t%g\t%g\n", dens, ff, SS, ff + kT*SS, kT*SS); //Prints n, F, S, U, TS to data file
-    fflush(o);
-  }
-  fclose(o);
+  double Vnl = -kT*log(nl);
+  double Vnv = -kT*log(nv);
+
+  double fnl = f(kT, Vnl);
+  double fnv = f(kT, Vnv);
+  double Snl = S(kT, Vnl);
+  double Snv = S(kT, Vnv);
+
+  double Unl = (fnl + kT*Snl)/nl;
+  double Unv = (fnv + kT*Snv)/nv;
+
+  double H = -(Unl - Unv);
+  double p_1atm = atmospheric_pressure;
+  double pV = atmospheric_pressure*(1/nv-1/nl);
+  
+  double NA = 6.02214179e23;               // Avogadros number, molecules to moles
+  double HtoJ = 27.2117*1.602176487e-19;        // Hartrees to Joules
+
+  printf("H = %g J/mol, p = %g, pV = %g J/mol\n", H*HtoJ*NA, p_1atm, pV*NA*HtoJ);
+
+  //fprintf(o, "%g\t%g\t%g\t%g\t%g\n", dens, ff, SS, ff + kT*SS, kT*SS); 
+  //Prints n, F, S, U, TS to data file
+    //fflush(o);
+
+fclose(o);
 }

@@ -30,13 +30,14 @@ set multiplot
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set ylabel 'density/liquid density'
-set xlabel 'position (bohr)'
+set xlabel 'position (nm)'
 
 nl=0.004938863
+nm = 18.8972613       # 1 nm equals this many bohrs
 
 set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 
-plot [:] [:] \
-'figs/surface-298.dat' u 1:($2/nl) notitle with lines ls 1, \
+plot [:4] [:] \
+'figs/surface-298.dat' u ($1/nm):($2/nl) notitle with lines ls 1, \
 'figs/surface-298.dat' u 1:(1) notitle with lines ls 2

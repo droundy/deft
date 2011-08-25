@@ -48,6 +48,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/single-rod-in-water-low-res.mkdat \
 	paper/figs/sphere.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
+	paper/figs/enthalpy.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
@@ -139,6 +140,7 @@ paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-
 paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
 paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
+paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
 
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
@@ -184,6 +186,7 @@ clean-local:
 paper: paper/figs/equation-of-state.dat \
 	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
+	paper/figs/enthalpy.dat \
 	paper/figs/entropy.dat \
 	paper/figs/entropy-at-690K.dat \
 	paper/figs/constrained-water-1D.dat \

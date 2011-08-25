@@ -29,11 +29,11 @@ set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set title 'Water at 298K'
+#set title 'Water at 298K'
 set xlabel 'density (bohr^{-3})'
-set ylabel 'energy density (Hartree/bohr^3)'
+set ylabel 'energy/molecule (Hartree/molecule)'
 
-nl=4.93889420e-03
+nl=4.93889420e-03 # Saturated liquid density
 
 set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
@@ -41,50 +41,8 @@ set style line 3 lt 3 lw 3
 
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
-plot [:] [-0.01:] \
-'figs/entropy.dat' u 1:($2/$1) title 'free energy' with lines ls 1, \
-'figs/entropy.dat' u 1:($4/$1) title 'internal energy' with lines ls 2, \
-'figs/entropy.dat' u 1:($5/$1) title 'temperature*entropy' with lines ls 3
+plot [:] [:] \
+'figs/entropy.dat' u 1:($4/$1) title 'U' with lines ls 2
+#'figs/entropy.dat' u 1:($2/$1) title 'free energy' with lines ls 1, \
+#'figs/entropy.dat' u 1:($5/$1) title 'temperature*entropy' with lines ls 3
 #'figs/entropy.dat' u 1:(293*kB*3/2) title 'temperature*kB*3/2' with lines
-
-#set size 0.38,0.4        # The second one (inset)
-#set origin 0.58,0.5
-
-#set logscale x          # New command to change x-axis to log-scale
-
-#set xlabel "x (logarithmic scale)" font "Helvetica,16" 0,0.8
-#unset xlabel
-#unset ylabel
-#set xtics 1e-7 font "Helvetica,16"
-#set ytics 1e-10 font "Helvetica,16"
-
-#plot [:3e-07] [:] \
-#'figs/entropy.dat' u 1:2 notitle with lines ls 1, \
-#'figs/entropy.dat' u 1:4 notitle with lines ls 2
-
-
-
-
-
-# set title ''
-
-# #set format y "%3.00g"
-# set ylabel 'pressure (Hartree/bohr^3)'
-# #set ytics 1.0
-
-# #set ticscale 2 1
-# set samples 10000
-
-# set xlabel 'temperature (K)'
-# #set xtics 50.0
-
-# nl=4.93889420e-03
-
-# set style line 1 lt 1 lw 3
-# set style line 2 lt 2 lw 3
-# set style line 3 lt 3 lw 3
-
-
-# plot [:] [:] \
-# 'figs/finding-vapor-pressure.dat' u 1:2 notitle with lines ls 1, \
-# 'figs/finding-vapor-pressure.dat' u 1:3 notitle with lines ls 2

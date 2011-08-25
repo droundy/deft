@@ -118,9 +118,9 @@ int main(int, char **) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (cavitysize=0.5*nm; cavitysize<=1.5*nm; cavitysize += 0.5*nm) {
+  for (cavitysize=1.0*nm; cavitysize<=1.1*nm; cavitysize += 0.5*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-    GridDescription gd(lat, 0.4);
+    GridDescription gd(lat, 0.5);
     
     Grid potential(gd);
     Grid constraint(gd);
@@ -148,7 +148,7 @@ int main(int, char **) {
     
     printf("\nDiameter of rod = %g bohr (%g nm)\n", cavitysize, cavitysize/nm);
     
-    const int numiters = 100;
+    const int numiters = 50;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
       //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
@@ -167,15 +167,16 @@ int main(int, char **) {
 
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
-    //char *plotname = (char *)malloc(1024);
-    //sprintf(plotname, "paper/figs/single-rod-res0.4-%04.1f.dat", cavitysize/nm);
-    //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    //Grid energy_density(gd, f(water_prop.kT, gd, potential));
-    //Grid entropy(gd, S(water_prop.kT, potential));
-    //Grid Xassoc(gd, X(water_prop.kT, density));
+    char *plotname = (char *)malloc(1024);
+    sprintf(plotname, "paper/figs/single-rod-res0.5-slice-%04.1f.dat", cavitysize/nm);
+    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    Grid energy_density(gd, f(water_prop.kT, gd, potential));
+    Grid entropy(gd, S(water_prop.kT, potential));
+    Grid Xassoc(gd, X(water_prop.kT, density));
     //plot_grids_yz_directions(plotname, density, 
     //		     energy_density, entropy, Xassoc);
-    //free(plotname);
+    plot_grids_y_direction(plotname, density, energy_density, entropy, Xassoc);
+    free(plotname);
 
   }
   fclose(o);
