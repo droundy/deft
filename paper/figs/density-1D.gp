@@ -30,13 +30,15 @@ set key noauto inside top
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'z (bohr)'
-set ylabel 'density (bohr^{-3})'
+set xlabel 'z (nm)'
+set ylabel 'density (nm^{-3})'
 
 set style line 1 lt 1 lw 1
 set style line 2 lt 1 lc 7 lw 1
 
-plot [:150] [:] \
-'figs/cavitysize-060.dat' u 3:4 title 'cavity size = 60 bohr' with lines ls 1 , \
-'figs/cavitysize-060.dat' u (45):4 notitle with lines ls 2 , \
-'figs/cavitysize-060.dat' u (105):4 notitle with lines ls 2
+nm = 18.8972613       # 1 nm equals this many bohrs
+
+plot [:] [:] \
+'figs/cavitysize-04.0.dat' u ($3/nm):4 title 'cavity size = 4.0 nm' with lines ls 1 , \
+'figs/cavitysize-04.0.dat' u (2):4 notitle with lines ls 2 , \
+'figs/cavitysize-04.0.dat' u (6):4 notitle with lines ls 2

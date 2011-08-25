@@ -29,10 +29,10 @@ set key noauto outside top
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'cavity size (bohr)'
-set ylabel 'energy (Hartree)'
+set xlabel 'slit separation (nm)'
+set ylabel 'energy/length (Hartree/bohr)'
 
-set style line 1 lt 1 lw 3
+set style line 1 lt 1 pt 7 lw 2
 
-plot [:150] [:] \
-'figs/constrained-water-1D.dat' u 1:2 notitle with lines ls 1
+plot [:] [:] \
+'figs/constrained-water-1D.dat' u 1:($2/$1) notitle with linespoints ls 1
