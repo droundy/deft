@@ -37,6 +37,6 @@ set style line 1 lt 1 lw 1
 set style line 2 lt 1 lc 7 lw 1
 
 plot [:150] [:] \
-'figs/cavitysize-060.dat' u 3:($6/$4) title 'cavity size = 60 bohr' with lines ls 1 , \
-'figs/cavitysize-060.dat' u (45):($6/$4) notitle with lines ls 2 , \
-'figs/cavitysize-060.dat' u (105):($6/$4) notitle with lines ls 2
+'figs/cavitysize-06.0.dat' u 3:($6/$4) title 'cavity size = 60 bohr' with lines ls 1 , \
+'figs/cavitysize-06.0.dat' u (45):($6/$4) notitle with lines ls 2 , \
+'figs/cavitysize-06.0.dat' u (105):($6/$4) notitle with lines ls 2

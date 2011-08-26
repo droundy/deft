@@ -38,6 +38,6 @@ set style line 2 lt 1 lc 7 lw 1
 # In cavitysize-xxx.dat columns are 1:x, 2:y, 3:z, 4:density, 5:energy density, 6:entropy, 7:xassoc
 
 plot [:150] [:] \
-'figs/cavitysize-060.dat' u 3:6 title 'cavity size = 60 bohr' with lines ls 1 , \
-'figs/cavitysize-060.dat' u (45):6 notitle with lines ls 2 , \
-'figs/cavitysize-060.dat' u (105):6 notitle with lines ls 2
+'figs/cavitysize-06.0.dat' u 3:6 title 'cavity size = 60 bohr' with lines ls 1 , \
+'figs/cavitysize-06.0.dat' u (45):6 notitle with lines ls 2 , \
+'figs/cavitysize-06.0.dat' u (105):6 notitle with lines ls 2
