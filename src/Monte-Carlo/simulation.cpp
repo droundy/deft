@@ -4,6 +4,7 @@
 void run(){
   const int N = 13;
   const double R = 1;
+  const double rad = 3;
   Vector3d *spheres = new Vector3d[N];
   spheres[0] = Vector3d(0,0,0);
   spheres[1] = Vector3d(2*R,0,0);
@@ -26,28 +27,30 @@ void run(){
   writeSpheres(spheres, N, o);
   int i = 0;
   int j = 0;
-  int count = -1;
-  while(j<100){
+  int count = 0;
+
+  int times = 10000;
+
+  while(j<times){
     count++;
-    //printf("Count = %d\n",count);
-    // printf("j = %d\n",j);
-     i++;
-     //Vector3d temp = move(spheres[i%N], 3, 3, 3);
-     Vector3d temp = move(spheres[i%N],3);
-     // printf("Past move\n");
-     if(overlap(spheres, temp, N, R, i%N)){
-       continue;
-     }
-     //printf("Past overlap\n");
-     spheres[i%N] = temp;
-     writeSpheres(spheres, N, o);
-     j++;
+    i++;
+    Vector3d temp = move(spheres[i%N]);
+    if(overlap(spheres, temp, N, R, rad, i%N)){
+      continue;
+    }
+    spheres[i%N] = temp;
+    writeSpheres(spheres, N, o);
+    if(j % (times/10)==0){
+      printf("%g%% complete...\n",j/(times*1.0)*100);
+    }
+    j++;
   }
   printf("Total number of attempted moves = %d\n",count);
   fclose(o);
   delete[] spheres;
 }
 
+//To be deleted... cvh
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s){
   for(int i = 0; i < n; i++){
     if(i==s){
@@ -60,6 +63,43 @@ bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s){
   return false;
 }
 
+bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s){
+  if(distance(v,Vector3d(0,0,0))>rad){
+      return true;
+  }
+  for(int i = 0; i < n; i++){
+    if(i==s){
+      continue;
+    }
+    if(distance(spheres[i],v)<2*R){
+      return true;
+    }
+  }
+  return false;
+}
+
+bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s, double x, double y, double z){
+  if((fabs((v)[0]) > x) || (fabs((v)[1]) > y) || (fabs((v)[2]) > z)){
+      return true;
+  }
+  for(int i = 0; i < n; i++){
+    if(i==s){
+     continue;
+    }
+    if(distance(spheres[i],v)<2*R){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+Vector3d move(Vector3d v){
+  double scale = .5;
+  return v+scale*ran3();
+}
+ 
+//To be deleted... cvh 
 Vector3d move(Vector3d v, double x, double y, double z){
   const double scale =.5;
   Vector3d temp;
@@ -72,8 +112,9 @@ Vector3d move(Vector3d v, double x, double y, double z){
  return temp + v;
 }
 
+//To be deleted... cvh
 Vector3d move(Vector3d v, double R){
-  const double scale = .5;
+  const double scale = .05;
   Vector3d temp;
   while(true){
     temp = ran3()*scale;
