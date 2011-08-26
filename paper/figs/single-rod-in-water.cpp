@@ -55,7 +55,8 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
     double bhere = b(x,y,z);
     double chere = c(x,y,z);
     double dhere = d(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere, chere, dhere);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
+	    ahere, bhere, chere, dhere);
   }
   fclose(out);
 }
@@ -169,12 +170,12 @@ int main(int, char **) {
     fflush(o); // For the impatient!
 
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-%04.1f.dat", cavitysize/nm);
+    sprintf(plotname, "paper/figs/single-rod-slice-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));
     Grid Xassoc(gd, X(water_prop.kT, density));
-    plot_grids_yz_directions(plotname, density, 
+    plot_grids_y_direction(plotname, density, 
 			     energy_density, entropy, Xassoc);
     free(plotname);
 

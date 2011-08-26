@@ -28,7 +28,7 @@ unset arrow
 set view map
 
 set key inside bottom
-set title 'One hydrophobic rod - Density'
+#set title 'One hydrophobic rod - Density'
 
 # set multiplot
 #set pm3d map
@@ -45,5 +45,7 @@ set ylabel 'z (nm)'
 set style line 1 lt 1 lw 1
 #set style line 2 lt 1 lc 7 lw 1
 
+nm = 18.8972613     # 1 nm equals this many bohrs
+
 splot [:] [:] [:] \
-'figs/single-rod-01.0.dat' u ($2/18.8972613):($3/18.8972613):4 notitle with pm3d 
+'figs/single-rod-01.0.dat' u ($2/nm):($3/nm):4 notitle with pm3d 
