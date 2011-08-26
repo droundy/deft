@@ -40,4 +40,4 @@ set style line 1 lt 3 lw 2
 # In cavitysize-xxx.dat columns are 1:x, 2:y, 3:z, 4:density, 5:energy density, 6:entropy, 7:xassoc
 
 plot [45:105] [:0.045] \
-'figs/cavitysize-060.dat' u 3:6 notitle with lines ls 1
+'figs/cavitysize-06.0.dat' u 3:6 notitle with lines ls 1

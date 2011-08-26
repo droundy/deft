@@ -409,8 +409,33 @@ an error of only a few percent.
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
-In order to ensure that the empirical parameters are correct, we test
-the vapor pressure (see Figure~\ref{fig:equation-of-state}) and
+The majority of the empirical parameters used in our functional are
+taken from the paper of Clark \emph{et al} on developing an optimal
+SAFT model for water\cite{clark2006developing}.  This SAFT model
+contains five empirical parameters: the hard-sphere radius, an energy
+and length scale for the dispersion interaction, and an energy and
+length scale for the association interaction.  In addition to the five
+empirical parameters of Clark \emph{et al}, we add a single additional
+parameter defining the length scale over which the density is averaged
+when computing the dispersion free energy.  We use this final
+parameter to fit the surface tension, with the result shown in
+Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
+\emph{et al} in overestimates the critical temperature---which is a
+common feature of models which do not explicitly treat the critical
+point---we cannot correctly describe the surface tension at all
+temperatures, and chose to fit it for the temperature range at which
+water is liquid at one atmosphere of pressure.
+
+\fixme{I'm not sure if this paragraph belongs here.  Somewhere I think
+  it's worth discussing any of these homogeneous plots we include, and
+  this might be the right place.  We also might want to include one or
+  more of them earlier in the text.  A general rule is that any figure
+  that is included should be referenced in the text.  If there's
+  nowhere in the text that it fits, then it probably doesn't belong in
+  the paper....  So I'm not removing the follwoing bits since it's up
+  to you, Jess, whether to remove the figures.  We should
+  \emph{definitely} remove some of them.}  For reference, we plot the
+predicted vapor pressure (see Figure~\ref{fig:equation-of-state}) and
 saturated liquid density (see
 Figure~\ref{fig:saturated-liquid-density}) against experimental
 values.  To find these densities, we use the ``common tangent'' rule,

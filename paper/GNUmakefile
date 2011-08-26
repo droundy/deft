@@ -98,13 +98,13 @@ figs/surface-tension.eps: figs/surface-tension.gp \
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
-figs/cavitysize-060.eps: figs/cavitysize-060.dat
-figs/cavity-cartoon.eps: figs/cavitysize-060.dat
+figs/cavitysize-060.eps: figs/cavitysize-06.0.dat
+figs/cavity-cartoon.eps: figs/cavitysize-06.0.dat
 figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
-figs/xassoc-1D.eps: figs/cavitysize-060.dat 
-figs/entropy-1D.eps: figs/cavitysize-060.dat 
-figs/energy-1D.eps: figs/cavitysize-060.dat
-figs/density-1D.eps: figs/cavitysize-060.dat
+figs/xassoc-1D.eps: figs/cavitysize-06.0.dat 
+figs/entropy-1D.eps: figs/cavitysize-06.0.dat 
+figs/energy-1D.eps: figs/cavitysize-06.0.dat
+figs/density-1D.eps: figs/cavitysize-06.0.dat
 figs/density-rods-in-water.eps: figs/rods-1nm-01.0.dat
 figs/xassoc-rods-in-water.gp: figs/rods-1nm-01.0.dat
 figs/density-single-rod.eps: figs/single-rod-01.0.dat
