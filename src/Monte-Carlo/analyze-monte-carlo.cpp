@@ -29,6 +29,7 @@ int main(){
   fclose(data);
 
   double *conDensity = new double[div];
+  double *cenConDensity = new double[div];
   int *conShells = new int[div];
   int *cenConShells = new int[div];
   for(int i=0; i<div; i++){
@@ -38,7 +39,6 @@ int main(){
   double oShell =rad+.01*rad;
   FILE *cData;
   cData = fopen("Spheres.dat","r");
-  int count = 0;
   Vector3d *vecs = new Vector3d[13];
   int dump=0;
   for(int i=0; i<(iterations/13); i++){
@@ -47,7 +47,7 @@ int main(){
       vecs[j] = Vector3d(x,y,z);
     }
     for(int j=0; j<13; j++){
-      while(count < 13){
+      for(int count = 0; count<13; count++){
 	if(j==count){
 	  count++;
 	  continue;
@@ -56,14 +56,12 @@ int main(){
 	  conShells[shell(vecs[j],div,R)]++;
 	  cenConShells[shell((vecs[count]+vecs[j])/2,div,R)]++;
 	}
-	count++;
       }
-      count=0;
     }
   }
   printf("%d\n",dump);
   for(int i=0; i<div; i++){
-    printf("Number of spheres in division %d = %d.\n", i+1, shells[i]);
+    printf("Number of spheres in division %d = %d\n", i+1, shells[i]);
   }
   for(int i=0; i<div; i++){
     double rmax = ((i+1)*R/div);
@@ -73,7 +71,8 @@ int main(){
   for(int i=0; i<div; i++){
     double rmax = ((i+1)*R/div);
     double rmin = (i*R/div);
-    conDensity[i]=((conShells[i]+0.0)/shells[i])/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin))*4/3.*M_PI*oShell*oShell*oShell);
+    conDensity[i]=((conShells[i]+0.0)/shells[i])/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin))*(4/3.*M_PI*oShell*oShell*oShell-4/3.*M_PI*rad*rad*rad));
+    cenConDensity[i]=((cenConShells[i]+0.0)/shells[i])/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin))*(4/3.*M_PI*oShell*oShell*oShell-4/3.*M_PI*rad*rad*rad));
   }
   for(int i=0; i<div; i++){
     printf("Number of contacts in division %d = %d\n", i+1, conShells[i]);
@@ -81,6 +80,7 @@ int main(){
   }
   for(int i=0; i<div; i++){
     printf("Contact density in division %d = %g \n", i+1, conDensity[i]);
+    printf("Contact density (center) in division %d = %g \n", i+1, cenConDensity[i]);
     printf("Density in division %d = %g \n", i+1, density[i]);
     printf("Filling fraction in division %d = %g \n", i+1, density[i]*(4/3.*M_PI));
   }
@@ -88,11 +88,20 @@ int main(){
   for(int i=0; i<div; i++){
     fprintf(out, "%g\t%g\n",(i+.5)*R/div, density[i]);
   }
+  for(int i=0; i<div; i++){
+    fprintf(out, "%g\t%g\n",(i+.5)*R/div, conDensity[i]);
+  }
+  for(int i=0; i<div; i++){
+    fprintf(out, "%g\t%g\n",(i+.5)*R/div, cenConDensity[i]);
+  }
+
   fclose(out);
   fclose(cData);
   delete[] shells;
   delete[] density;
   delete[] conShells;
+  delete[] conDensity;
+  delete[] cenConDensity;
   delete[] cenConShells;
   return 0;
 }
