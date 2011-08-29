@@ -51,6 +51,17 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
     return false;
   }
+  if (slope == 0) {
+    // When the slope is precisely zero, there's no point continuing,
+    // as the gradient doesn't have any information about how to
+    // improve things.  Or possibly we're at the minimum to numerical
+    // precision.
+    if (verbose) {
+      printf(" which means we've arrived at the minimum!\n");
+      fflush(stdout);
+    }
+    return false;
+  }
 
   if (slope*(*step) > 0) {
     if (verbose) printf("Swapping sign of step with slope %g...\n", slope);

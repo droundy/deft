@@ -35,7 +35,8 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
   for (int i=0; i<gd.NxNyNz*gas_size/size; i++) potential[i] = Veff_gas;
   for (int i=gd.NxNyNz*gas_size/size; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
 
-  f0.run_finite_difference_test("f0", prop.kT, potential);
+  // Enable the following line for debugging...
+  //f0.run_finite_difference_test("f0", prop.kT, potential);
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
@@ -63,6 +64,10 @@ double surface_tension(Minimizer min, Functional f0, LiquidProperties prop,
   }
   
   for (int i=0; i<gd.NxNyNz; i++) potential[i] = Veff_liquid;
+  if (verbose) {
+    printf("\n\n\nWorking on liquid...\n");
+    fflush(stdout);
+  }
   min.minimize(f0, gd, &potential);
   while (min.improve_energy(verbose))
     if (verbose) {
