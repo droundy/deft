@@ -88,8 +88,14 @@ needed.
 
 Classical density-functional theory (DFT) provides an efficient way to evaluate the
 free energy using the density of the fluid. The free energy is a functional of the 
-density function and is independent of any external potentials\cite{ebner1976}. DFT 
-can be used with a variety of external potentials, from the simple interaction with a 
+density function and is independent of any external potentials\cite{ebner1976}. 
+Mermin\cite{Mermin} gives a theorem extending that of Hohenberg and Kohn\cite{HK} 
+to nonzero temperatures:
+\begin{equation}
+  A(T) = \underset{n(r)}{min}\left\{ F[n(r),T] + \int V_{ext}(r) n(r) d^3r\right\}
+\end{equation}
+This is the basis for classical DFT, which can be used with a variety of external potentials, 
+from the simple interaction with a 
 hydrophobic wall to the complex strong interaction with hydrophilic solutes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -565,7 +571,20 @@ bonds is approximately equal to 3.5, which is expected for saturated liquid wate
 \subsection{One hydrophobic rod}
 
 We move into two dimensions by studying a single hydrophobic rod
-immersed in water. 
+immersed in water. Figure \ref{fig:density-single-rod} shows density
+profiles for three different radii, 0.3 nm, 0.5 nm, and 1 nm. There are the
+expected oscillations outside the rod and as the distance away from the rod increases
+the density approaches that of the bulk saturated liquid density. The small radius
+rod has comparatively larger oscillations and a higher contact density.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-single-rod}
+\end{center}
+\caption{ Density profiles for a single rod of different radii. The dotted line
+represents the saturated liquid density.  }
+\label{fig:density-single-rod}
+\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -580,13 +599,14 @@ tension. (FIX - 0.4 nm?) }
 \subsubsection{Resolution and convergence tests}
 
 Figure \ref{fig:densityresolution} shows the density profiles for three different
-values of the lattice spacing resolution. The density oscillations outside a single
+values of the lattice spacing resolution. The density oscillations around a single
 rod of radius 0.5 nm look nearly identical for all resolutions except for the first peak. 
 This contact density is important to get correct as it \fixme{relates to energy}. The 
-contact density calculated using the medium resolution is within 3.5\% of the value at
-high resolution, while the low resolution contact density is only within 5.1\%. The total
+contact density calculated using the medium resolution is within less than 4\% of the value at
+high resolution, while the low resolution contact density is off by about 5\%. There is some
+uncertainty in the value of contact density due to the different lattice spacings. The total
 free energy calculations compare much more favorably. The medium resolution is within 
-0.5\% and the low resolution is within 1.0\% of the high resolution free energy.
+0.5\% and the low resolution is within 1\% of the high resolution free energy.
 
 
 \begin{figure}
@@ -611,7 +631,8 @@ would be worth citing.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
 \end{center}
-\caption{ Density profile for two hydrophobic rods.}
+\caption{ Density profile for two hydrophobic rods (diameter 1.0 nm) at a 
+separation of 0.8 nm. The scale on the right is density in g/mL.}
 \label{fig:density-rods}
 \end{figure}
 
@@ -620,7 +641,7 @@ would be worth citing.
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
 \caption{ Energy versus separation for two identical hydrophobic rods with diameters
-of 1 nm. }
+of 1.0 nm. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 

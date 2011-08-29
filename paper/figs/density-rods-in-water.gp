@@ -27,7 +27,7 @@ reset
 unset arrow
 set view map
 
-set key inside bottom
+#set key inside bottom
 #set title 'Two hydrophobic rods - Density'
 
 # set multiplot
@@ -49,7 +49,7 @@ set style line 1 lt 1 lw 1
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 splot [-3:3] [-1.5:1.5] [:] \
-'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-1nm-01.0.dat' u ($2/18.8972613-6):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-1nm-01.0.dat' u ($2/18.8972613):($3/18.8972613-3):($4/gpermL) notitle with pm3d , \
-'figs/rods-1nm-01.0.dat' u ($2/18.8972613-6):($3/18.8972613-3):($4/gpermL) notitle with pm3d
+'figs/rods-1nm-00.8.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d , \
+'figs/rods-1nm-00.8.dat' u ($2/18.8972613-6):($3/18.8972613):($4/gpermL) notitle with pm3d , \
+'figs/rods-1nm-00.8.dat' u ($2/18.8972613):($3/18.8972613-3):($4/gpermL) notitle with pm3d , \
+'figs/rods-1nm-00.8.dat' u ($2/18.8972613-6):($3/18.8972613-3):($4/gpermL) notitle with pm3d

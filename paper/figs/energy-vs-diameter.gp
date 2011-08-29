@@ -32,7 +32,7 @@ set origin 0,0
 set xlabel 'Diameter (nm)'
 set ylabel 'Energy/Area (mN/m)'
 
-set style line 1 lt 3 lw 3 pt 7 ps 3
+set style line 1 lt 3 lw 3 pt 7 ps 2
 
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units

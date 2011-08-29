@@ -21,29 +21,38 @@
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20
-set output 'figs/rods-energy-vs-distance.eps'
+set output 'figs/density-single-rod-r1.0.eps'
 
-set key noauto inside top
-#set title 'Energy of 2 rods vs distance between them'
+reset
+unset arrow
+set view map
+
+set key inside bottom
+#set title 'One hydrophobic rod - Density'
 
 # set multiplot
+#set pm3d map
+#set palette color positive
+#set ticslevel 0
+#set samples 50; set isosamples 50
+#set palette rgbformulae 22,13,-31
 
-set encoding iso_8859_1
+#set size 1,1          # The first plot (host plot)
+#set origin 0,0
+#set xlabel 'y (nm)'
+#set ylabel 'z (nm)'
 
-set size 1,1          # The first plot (host plot)
-set origin 0,0
-set xlabel 'd (nm)'
-set ylabel 'Energy per length (kJ/mol {\305})'
+set style line 1 lt 1 lw 3
+#set style line 2 lt 1 lc 7 lw 1
 
-set style line 1 lt 1 pt 7 ps 2 lw 2
+nm = 18.8972613     # 1 nm equals this many bohrs
 
-mNpermeter = 6.4230498e-07 # in atomic units
-nm = 18.8972613 # in atomic units
-eV = 0.036749326 # Hartree
-kJpermol = 1.04e-2*eV # in atomic units
-angstrom = 0.1*nm
+#splot [:] [:] [:] \
+#'figs/single-rod-01.0.dat' u ($2/nm):($3/nm):4 notitle with pm3d 
 
-plot [:] [:] \
-'figs/rods-in-water.dat' u 1:($2/(kJpermol/angstrom) - 59.06) notitle with lp ls 1
+set xlabel 'radius (nm)'
+set ylabel 'density (bohrs^{-3})'
 
-#'figs/rods-in-water.dat' u 1:($2/(2*pi*1*nm)/mNpermeter/2) notitle with lines ls 1 
+
+plot [:2.5] [:] \
+'figs/single-rod-slice-02.0.dat' u ($2/nm):4 notitle with lines ls 1
