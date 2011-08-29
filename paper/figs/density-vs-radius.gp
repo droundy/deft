@@ -34,7 +34,7 @@ set ylabel 'density (bohr^{-3})'
 set ytics 0.0005
 set style line 1 lt 7 lw 1
 
-set style line 2 pt 6
+set style line 2 pt 6 lc 7
 set style line 3 lt 1 lw 2
 set style line 4 pt 1 lc 3
 
@@ -46,5 +46,5 @@ gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass densit
 
 plot [0.5:1.5] [0.004:] \
 'figs/single-rod-res0.05-slice-01.0.dat' u ($3/nm):4 title 'high resolution' with lines ls 3 , \
-'figs/single-rod-slice-01.0.dat' u ($3/nm):4 title 'medium resolution' with points ls 2 , \
+'figs/single-rod-slice-01.0.dat' u ($2/nm):4 title 'medium resolution' with points ls 2 , \
 'figs/single-rod-res0.5-slice-01.0.dat' u ($2/nm):4 title 'low resolution' with points ls 4

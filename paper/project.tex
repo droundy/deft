@@ -420,7 +420,7 @@ parameter defining the length scale over which the density is averaged
 when computing the dispersion free energy.  We use this final
 parameter to fit the surface tension, with the result shown in
 Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
-\emph{et al} in overestimates the critical temperature---which is a
+\emph{et al} overestimates the critical temperature---which is a
 common feature of models which do not explicitly treat the critical
 point---we cannot correctly describe the surface tension at all
 temperatures, and chose to fit it for the temperature range at which
@@ -579,14 +579,24 @@ tension. (FIX - 0.4 nm?) }
 
 \subsubsection{Resolution and convergence tests}
 
+Figure \ref{fig:densityresolution} shows the density profiles for three different
+values of the lattice spacing resolution. The density oscillations outside a single
+rod of radius 0.5 nm look nearly identical for all resolutions except for the first peak. 
+This contact density is important to get correct as it \fixme{relates to energy}. The 
+contact density calculated using the medium resolution is within 3.5\% of the value at
+high resolution, while the low resolution contact density is only within 5.1\%. The total
+free energy calculations compare much more favorably. The medium resolution is within 
+0.5\% and the low resolution is within 1.0\% of the high resolution free energy.
+
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-vs-radius}
 \end{center}
 \caption{ Density profiles for 
 a single hydrophobic rod with a radius of 0.5 nm using several different 
-lattice spacing resolutions. high = 0.05 bohrs, 
-med = 0.2 bohrs, low = 0.5 bohrs }
+lattice spacing resolutions. We used a high resolution of 0.05 bohrs ($\approx$ 0.003 nm), 
+medium 0.2 bohrs ($\approx$ 0.001 nm), and low 0.5 bohrs ($\approx$ 0.03 nm).}
 \label{fig:densityresolution}
 \end{figure}
 
