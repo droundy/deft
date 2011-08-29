@@ -28,7 +28,7 @@ LiquidProperties water_prop = {
   298.15*kB, // room temperature in Hartree
   250.0*kB, // epsilon_dispersion from Clark et al, table 6
   1.78890, // lambda_dispersion from Clark et al, table 6
-  0.7, // length-scaling parameter that DJR added to fix surface tension
+  0.72, // length-scaling parameter that DJR added to fix surface tension
   1400.00*kB, // epsilonAB from Clark et al, table 6
 
   // The following two are almost the same, but differ ever so

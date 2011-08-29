@@ -43,7 +43,18 @@ set style line 1 lt 1 lw 3
 set style line 2 lt 3 lw 3
 set style line 3 lt 3 lw 3
 
+set multiplot
 
+set size 1,1          # The first plot (host plot)
 plot [0:] [:] \
 'figs/surface-tension.dat' u ($1-273.15):($2/mNpermeter) title 'theory' with lines ls 1, \
 'figs/experimental-surface-tension.csv' u ($1-273.15):($2/mNpermeter) title 'experiment' with lines ls 2
+
+set size 0.45,0.35        # The second one (inset)
+set origin 0.12,0.2
+set xlabel
+set ylabel
+set ytics 2.0
+plot [0:50] [68:76] \
+'figs/surface-tension.dat' u ($1-273.15):($2/mNpermeter) notitle with lines ls 1, \
+'figs/experimental-surface-tension.csv' u ($1-273.15):($2/mNpermeter) notitle with lines ls 2
