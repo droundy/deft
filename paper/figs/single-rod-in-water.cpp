@@ -139,11 +139,11 @@ int main(int, char **) {
     //printf("Constraint has become a graph!\n");
    
     potential = water_prop.liquid_density*constraint
-      + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+      + 200*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(1e-16, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     

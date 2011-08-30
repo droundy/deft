@@ -47,18 +47,18 @@ set style line 2 lt 1 lc 3 lw 3
 set style line 3 lt 1 lc 7 lw 3
 set style line 4 lt 3 lc 3 lw 3
 
-nm = 18.8972613     # 1 nm equals this many bohrs
-
 #splot [:] [:] [:] \
 #'figs/single-rod-01.0.dat' u ($2/nm):($3/nm):4 notitle with pm3d 
 
-set xlabel 'radius (nm)'
-set ylabel 'density (bohrs^{-3})'
+set xlabel 'Radius (nm)'
+set ylabel 'Density (g/mL)'
 
 nl=0.004938863
+nm = 18.8972613     # 1 nm equals this many bohrs
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:2.5] [:] \
-'figs/single-rod-slice-02.0.dat' u ($2/nm):4 notitle with lines ls 1 , \
-'figs/single-rod-slice-01.0.dat' u ($2/nm):4 notitle with lines ls 2 , \
-'figs/single-rod-slice-00.6.dat' u ($2/nm):4 notitle with lines ls 3 , \
-'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl) notitle with lines ls 4
+'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
+'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
+'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
+'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4

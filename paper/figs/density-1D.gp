@@ -31,7 +31,7 @@ set key noauto inside top
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'z (nm)'
-set ylabel 'density (nm^{-3})'
+set ylabel 'Density (g/mL)'
 
 set style line 1 lt 1 lw 3
 set style line 2 lt 1 lc 7 lw 2
@@ -43,7 +43,9 @@ set arrow from 4,0 to 4,0.006 nohead lw 2
 
 nl=0.004938863        # liquid density    
 nm = 18.8972613       # 1 nm equals this many bohrs
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
+
 
 plot [:] [:] \
-'figs/cavitysize-04.0.dat' u ($3/nm-2):4 notitle with lines ls 1 , \
-'figs/cavitysize-04.0.dat' u ($3/nm-2):(nl) notitle with lines ls 3
+'figs/cavitysize-04.0.dat' u ($3/nm-2):($4/gpermL) notitle with lines ls 1 , \
+'figs/cavitysize-04.0.dat' u ($3/nm-2):(nl/gpermL) notitle with lines ls 3

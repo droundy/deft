@@ -20,20 +20,20 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 26
+set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/temperature-versus-density.eps'
 
 set title ''
 
 #set format y "%3.00g"
-set ylabel 'T/K'
+set ylabel 'T (K)'
 #set ytics 1.0
 
 #set ticscale 2 1
 set samples 10000
 
-set xlabel 'density (1/bohr^3)'
-set xtics 0.001
+set xlabel 'Density (g/mL)'
+set xtics 0.1
 
 nl=4.93889420e-03
 
@@ -43,8 +43,10 @@ set style line 3 lt 3 lw 3
 
 #set logscale x
 
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
+
 plot [:] [:] \
-'figs/equation-of-state.dat' u 3:1 title 'theory' with lines ls 1, \
-'figs/equation-of-state.dat' u 4:1 notitle with lines ls 1, \
-'figs/experimental-equation-of-state.dat' u 3:1 title 'experiment' with lines ls 2, \
-'figs/experimental-equation-of-state.dat' u 4:1 notitle with lines ls 2
+'figs/equation-of-state.dat' u ($3/gpermL):1 title 'theory' with lines ls 1, \
+'figs/equation-of-state.dat' u ($4/gpermL):1 notitle with lines ls 1, \
+'figs/experimental-equation-of-state.dat' u ($3/gpermL):1 title 'experiment' with lines ls 2, \
+'figs/experimental-equation-of-state.dat' u ($4/gpermL):1 notitle with lines ls 2

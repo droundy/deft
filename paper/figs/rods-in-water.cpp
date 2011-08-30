@@ -28,16 +28,18 @@ const double nm = 18.8972613;
 const double zmax = 3*nm;
 const double ymax = 6*nm;
 const double width = 0.0001;
-const double cavitysize = 1*nm;
+double diameter = 1*nm;
 double distance = 1;
+bool using_default_diameter = true;
+
 
 double notinwall(Cartesian r) {
   const double z = r.z();
   const double y = r.y();
-  if (sqrt(sqr(z)+sqr(y+(cavitysize+distance)/2)) < cavitysize/2) {
+  if (sqrt(sqr(z)+sqr(y+(diameter+distance)/2)) < diameter/2) {
       return 0; 
   } 
-  if (sqrt(sqr(z)+sqr(y-(cavitysize+distance)/2)) < cavitysize/2) {
+  if (sqrt(sqr(z)+sqr(y-(diameter+distance)/2)) < diameter/2) {
       return 0;
   }
   return 1;
@@ -90,8 +92,22 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   fclose(out);
 }
 
-int main(int, char **) {
-  FILE *o = fopen("paper/figs/rods-in-water.dat", "w");
+int main(int argc, char *argv[]) {
+  if (argc > 1) {
+    if (sscanf(argv[1], "%lg", &diameter) != 1) {
+      printf("Got bad argument: %s\n", argv[1]);
+      return 1;
+    }
+    diameter *= nm;
+    using_default_diameter = false;
+    printf("Diameter is %g bohr\n", diameter);
+  }
+  
+  char *datname = (char *)malloc(1024);
+  sprintf(datname, "paper/figs/rods-in-water-%04.1fnm.dat", diameter/nm);
+  
+  FILE *o = fopen(datname, "w");
+  //FILE *o = fopen("paper/figs/rods-in-water.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -109,6 +125,8 @@ int main(int, char **) {
 		water_prop.lambda_dispersion,
 				     water_prop.length_scaling, mu_satp));
   
+  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
   			    water_prop.lambda_dispersion,
@@ -155,16 +173,16 @@ int main(int, char **) {
     //    //sleep(3);
     //  }
     
-    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT, 
+    Minimizer min = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT, 
 								 &potential,
 								 QuadraticLineMinimizer));
-    
+    printf("Diameter is %g bohr (%g nm)\n", diameter, diameter/nm);
     printf("\nDistance between rods = %g bohr (%g nm)\n", distance, distance/nm);
     
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
-      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
       //density.epsNative1d("paper/figs/constrained-water-1D.eps",
       //			Cartesian(0,0,0), Cartesian(0,0,zmax),
       //			water_prop.liquid_density, 1, " ");
@@ -183,24 +201,28 @@ int main(int, char **) {
     // 			   Cartesian(0,ymax/2,zmax/2));
     // free(plotnamedens);
 
-    double energy = min.energy()/width;
+    const double EperCell = EperVolume*(zmax*ymax - 2*0.25*M_PI*diameter*diameter)*width;
+    printf("The bulk energy per cell should be %g\n", EperCell);
+    double energy = (min.energy() - EperCell)/width;
     printf("Energy is %.15g\n", energy);
 
-    fprintf(o, "%g\t%.15g\n", distance/nm, energy);
+    //double totalentropy = S(water_prop.kT, potential);
+    double totalentropy = 0; //FIXME - converting functional to double?
+
+    fprintf(o, "%g\t%.15g\t%.15g\n", distance/nm, energy, totalentropy);
 
     char *plotnameslice = (char *)malloc(1024);
-    sprintf(plotnameslice, "paper/figs/rods-slice-1nm-%04.1f.dat", distance/nm);
-    char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/rods-1nm-%04.1f.dat", distance/nm);
+    sprintf(plotnameslice, "paper/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+    // char *plotname = (char *)malloc(1024);
+    // sprintf(plotname, "paper/figs/rods-1nm-%04.1f.dat", distance/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));
     Grid Xassoc(gd, X(water_prop.kT, density));
     plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
-    plot_grids_yz_directions(plotname, density, 
-			     energy_density, entropy, Xassoc);
+    //plot_grids_yz_directions(plotname, density, energy_density, entropy, Xassoc);
     free(plotnameslice);
-    free(plotname);
+    //free(plotname);
 
     // double N = 0;
     // {

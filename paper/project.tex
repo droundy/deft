@@ -89,8 +89,8 @@ needed.
 Classical density-functional theory (DFT) provides an efficient way to evaluate the
 free energy using the density of the fluid. The free energy is a functional of the 
 density function and is independent of any external potentials\cite{ebner1976}. 
-Mermin\cite{Mermin} gives a theorem extending that of Hohenberg and Kohn\cite{HK} 
-to nonzero temperatures:
+Mermin\cite{mermin1965thermal} gives a theorem extending that of Hohenberg and 
+Kohn\cite{hohenberg1964inhomogeneous} to nonzero temperatures:
 \begin{equation}
   A(T) = \underset{n(r)}{min}\left\{ F[n(r),T] + \int V_{ext}(r) n(r) d^3r\right\}
 \end{equation}
@@ -106,8 +106,8 @@ predicts the \needsworklater{vapor density, liquid density, bulk
   liquid-vapor coexistence}.  The Helmholtz free energy functional is
 based on SAFT, and is composed of the usual terms:
 \begin{equation}
-  F[n] = F_\textit{id}[n] + F_\textit{hs}[n] + F_\textit{assoc}[n] +
-F_\textit{disp},
+  F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
+F_\textit{disp}[n]+ F_\textit{assoc}[n],
 \end{equation}
 where $F_\textit{id}$ is the ideal gas free energy, $F_\textit{hs}$ is
 a hard-sphere free energy, $F_\textit{assoc}$ is the free energy of
@@ -126,8 +126,8 @@ functional is given by
 where n(\xx) is the density of water molecules.  The ideal gas free
 energy functional has the property that the contact density at a hard
 surface $n_c$ is proportional to the pressure on that surface,
-according to the equation
-\begin{equation}
+according to the contact value theorem
+\begin{equation}\label{contactvaluethm}
   p = n_c k_BT \:,
 \end{equation}
 which also leads to the property that the free energy of solvation of
@@ -254,14 +254,14 @@ Wu.\cite{yu2002fmt-dft-inhomogeneous-associating}
   + \frac12\frac{n_3^2\zeta}{(1-n_3)^3}
 \end{align}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/saturated-liquid-density}
-\end{center}
-\caption{The theoretical versus experimental saturated liquid density
-  versus temperature.  }
-\label{fig:saturated-liquid-density}
-\end{figure}
+% \begin{figure}
+% \begin{center}
+% \includegraphics[width=\columnwidth]{figs/saturated-liquid-density}
+% \end{center}
+% \caption{The theoretical versus experimental saturated liquid density
+%   versus temperature.  }
+% \label{fig:saturated-liquid-density}
+% \end{figure}
 
 \subsection{Dispersion free energy}
 The final term in the free energy is the dispersion term.  We use a
@@ -303,7 +303,7 @@ where $\Theta$ is the Heaviside step function.
 \includegraphics[width=\columnwidth]{figs/temperature-versus-density}
 \end{center}
 \caption{The theoretical versus experimental temperature versus density. }
-\label{fig:saturated-liquid-density}
+\label{fig:temperature-vs-density}
 \end{figure}
 
 % \begin{figure}
@@ -381,7 +381,7 @@ and the enthalpy is not much more work:
 
 The calculated heat of vaporization at atmospheric pressure is
 $\Delta H_{vap}$= 39.41 kJ/mol at the normal boiling point of water,
-373 K. This compares very well to the experimental
+373 K. This compares well to the experimental
 value measured by NIST ($\Delta H_{vap}$= 40.65 kJ/mol\cite{nistwater}), with 
 an error of only a few percent.
 
@@ -401,7 +401,7 @@ an error of only a few percent.
 \includegraphics[width=\columnwidth]{figs/surface-tension}
 \end{center}
 \caption{The theoretical versus experimental surface tension
-  versus temperature.  }
+  versus temperature. The experimental data is taken from NIST.\cite{nistwater} }
 \label{fig:surface-tension}
 \end{figure}
 
@@ -442,41 +442,41 @@ water is liquid at one atmosphere of pressure.
   to you, Jess, whether to remove the figures.  We should
   \emph{definitely} remove some of them.}  For reference, we plot the
 predicted vapor pressure (see Figure~\ref{fig:equation-of-state}) and
-saturated liquid density (see
-Figure~\ref{fig:saturated-liquid-density}) against experimental
-values.  To find these densities, we use the ``common tangent'' rule,
+coexistence curve (see
+Figure~\ref{fig:temperature-vs-density}) against experimental
+values.  To find the densities, we use the ``common tangent'' rule,
 as illustrated in Figure~\ref{fig:homogeneous}.
 
-\begin{table}
-\begin{tabular}{ccc}
-  Fitting Parameters& \hspace{2em} & Experimental Values\\
-\begin{tabular}{cc}
-  $R$ & 2.3 $a_o$ \\
-  $A$ & -0.0100909 Hartree \\
-  $\gamma$ & 5\\
-  $V$ & 515.792 $a_o^3$  \\
-  $b$ & 0.75 $a_o$ \\
-  $\mu$ & -0.014063 Hartree 
-\end{tabular}
-&& 
-\begin{tabular}{cc}
- $n_l$ & 4.939 $\times 10^{-3} a_o^{-3}$\\
- $n_v$ & 1.141 $\times 10^{-7} a_o^{-3}$\\
- $\sigma$ & ??? \\
- $B$ & $7.435\times 10^{-5}$ Hartree$/a_o^3$\\
- $T$ & 298.15 K \\
-\end{tabular}
-\end{tabular}
-
-\caption{Empirical parameters of optimized functional and experimental
-  values matched, where $a_o$ is the Bohr radius, and $\sigma$ is the
-  surface tension.  This table is not yet complete, but it should
-  be soon...  We'll also need to think about the best units to use
-  here.  Atom units might be best, but it also might be better to
-  consistently use eV and angstrom or something.  I'm not sure about
-  putting $k_BT$ data in the table.  Maybe it belongs in the caption?}
-\label{tab:parameters}
-\end{table}
+% \begin{table}
+% \begin{tabular}{ccc}
+%   Fitting Parameters& \hspace{2em} & Experimental Values\\
+% \begin{tabular}{cc}
+%   $R$ & 2.3 $a_o$ \\
+%   $A$ & -0.0100909 Hartree \\
+%   $\gamma$ & 5\\
+%   $V$ & 515.792 $a_o^3$  \\
+%   $b$ & 0.75 $a_o$ \\
+%   $\mu$ & -0.014063 Hartree 
+% \end{tabular}
+% && 
+% \begin{tabular}{cc}
+%  $n_l$ & 4.939 $\times 10^{-3} a_o^{-3}$\\
+%  $n_v$ & 1.141 $\times 10^{-7} a_o^{-3}$\\
+%  $\sigma$ & ??? \\
+%  $B$ & $7.435\times 10^{-5}$ Hartree$/a_o^3$\\
+%  $T$ & 298.15 K \\
+% \end{tabular}
+% \end{tabular}
+% 
+% \caption{Empirical parameters of optimized functional and experimental
+%   values matched, where $a_o$ is the Bohr radius, and $\sigma$ is the
+%   surface tension.  This table is not yet complete, but it should
+%   be soon...  We'll also need to think about the best units to use
+%   here.  Atom units might be best, but it also might be better to
+%   consistently use eV and angstrom or something.  I'm not sure about
+%   putting $k_BT$ data in the table.  Maybe it belongs in the caption?}
+% \label{tab:parameters}
+% \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
@@ -592,7 +592,8 @@ represents the saturated liquid density.  }
 \end{center}
 \caption{ Energy versus diameter for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
-tension. (FIX - 0.4 nm?) }
+tension at room temperature, and it agrees well with the surface tension in Figure 
+\ref{fig:surface-tension}. (FIX - 0.4 nm?) }
 \label{fig:energy-vs-diameter}
 \end{figure}
 
@@ -601,7 +602,8 @@ tension. (FIX - 0.4 nm?) }
 Figure \ref{fig:densityresolution} shows the density profiles for three different
 values of the lattice spacing resolution. The density oscillations around a single
 rod of radius 0.5 nm look nearly identical for all resolutions except for the first peak. 
-This contact density is important to get correct as it \fixme{relates to energy}. The 
+This contact density is important as it will be proportional to the pressure on the 
+rod\ref{contactvaluethm}. The 
 contact density calculated using the medium resolution is within less than 4\% of the value at
 high resolution, while the low resolution contact density is off by about 5\%. There is some
 uncertainty in the value of contact density due to the different lattice spacings. The total
@@ -627,13 +629,22 @@ simulations for two interacting nanotubes in water.  It's not
 precisely the same, but if we can't find something more similar, this
 would be worth citing.
 
+% \begin{figure}
+% \begin{center}
+% \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+% \end{center}
+% \caption{ Density profile for two hydrophobic rods (diameter 1.0 nm) at a 
+% separation of 0.8 nm. The scale on the right is density in g/mL.}
+% \label{fig:density-rods}
+% \end{figure}
+
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\includegraphics[width=\columnwidth]{figs/rods-diagram}
 \end{center}
-\caption{ Density profile for two hydrophobic rods (diameter 1.0 nm) at a 
-separation of 0.8 nm. The scale on the right is density in g/mL.}
-\label{fig:density-rods}
+\caption{ Cross section schematic for two hydrophobic rods immersed in water.
+The radius and separation are shown.}
+\label{fig:rods}
 \end{figure}
 
 \begin{figure}

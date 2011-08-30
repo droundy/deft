@@ -29,17 +29,19 @@ set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'density (bohr^{-3})'
-set ylabel 'energy density (Hartree/bohr^3)'
+set xlabel 'Density (g/mL)'
+set ylabel 'Energy Density (Hartree/bohr^3)'
 
 nl=4.93889420e-03
+nm = 18.8972613     # 1 nm equals this many bohrs
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 
 plot [:] [:] \
-'figs/finding-vapor-pressure.dat' u 1:2 notitle with lines ls 1, \
-'figs/finding-vapor-pressure.dat' u 1:3 notitle with lines ls 2
+'figs/finding-vapor-pressure.dat' u ($1/gpermL):2 notitle with lines ls 1, \
+'figs/finding-vapor-pressure.dat' u ($1/gpermL):3 notitle with lines ls 2
 
 set size 0.38,0.4        # The second one (inset)
 set origin 0.58,0.5
@@ -49,12 +51,12 @@ set origin 0.58,0.5
 #set xlabel "x (logarithmic scale)" font "Helvetica,16" 0,0.8
 unset xlabel
 unset ylabel
-set xtics 1e-7 font "Helvetica,16"
+set xtics 2e-5 font "Helvetica,16"
 set ytics 1e-10 font "Helvetica,16"
 
-plot [:3e-7] [:] \
-'figs/finding-vapor-pressure.dat' u 1:2 notitle with lines ls 1, \
-'figs/finding-vapor-pressure.dat' u 1:3 notitle with lines ls 2
+plot [:5e-5] [:] \
+'figs/finding-vapor-pressure.dat' u ($1/gpermL):2 notitle with lines ls 1, \
+'figs/finding-vapor-pressure.dat' u ($1/gpermL):3 notitle with lines ls 2
 
 
 

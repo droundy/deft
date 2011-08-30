@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 26
+set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/equation-of-state.eps'
 
 set title ''
@@ -33,13 +33,13 @@ set size 1,1          # The first plot (host plot)
 set origin 0,0
 
 #set format y "%3.00g"
-set ylabel 'vapor pressure (atm)'
+set ylabel 'Vapor Pressure (atm)'
 #set ytics 1.0
 
 #set ticscale 2 1
 #set samples 10000
 
-set xlabel 'temperature (K)'
+set xlabel 'Temperature (K)'
 #set xtics 50.0
 set xtics 100
 set ytics 25

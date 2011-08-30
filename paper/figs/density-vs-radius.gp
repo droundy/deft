@@ -29,9 +29,9 @@ set view map
 
 set key inside top
 
-set xlabel 'radius (nm)'
-set ylabel 'density (bohr^{-3})'
-set ytics 0.0005
+set xlabel 'Radius (nm)'
+set ylabel 'Density (g/mL)'
+#set ytics 0.1
 set style line 1 lt 7 lw 1
 
 set style line 2 pt 6 lc 7
@@ -44,7 +44,7 @@ nl=0.004938863
 nm = 18.8972613
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
-plot [0.5:1.5] [0.004:] \
-'figs/single-rod-res0.05-slice-01.0.dat' u ($3/nm):4 title 'high resolution' with lines ls 3 , \
-'figs/single-rod-slice-01.0.dat' u ($2/nm):4 title 'medium resolution' with points ls 2 , \
-'figs/single-rod-res0.5-slice-01.0.dat' u ($2/nm):4 title 'low resolution' with points ls 4
+plot [0.5:1.5] [0.85:] \
+'figs/single-rod-res0.05-slice-01.0.dat' u ($3/nm):($4/gpermL) title 'high resolution' with lines ls 3 , \
+'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) title 'medium resolution' with points ls 2 , \
+'figs/single-rod-res0.5-slice-01.0.dat' u ($2/nm):($4/gpermL) title 'low resolution' with points ls 4

@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 26
+set terminal postscript eps enhanced color "Helvetica" 20
 set output 'figs/saturated-liquid-density.eps'
 
 set title ''
