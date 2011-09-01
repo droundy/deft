@@ -51,7 +51,8 @@
   Statistical Associating Fluid Theory (SAFT).  Using
   this approximation, we are able to describe various properties of
   water near liquid-vapor and liquid-solid interfaces, including water confined 
-  to a hard-walled slit and hydrophobic rods immersed in water.  This functional 
+  to a hard-walled slit and hydrophobic rods immersed in water.  This
+functional 
   will be the foundation for a efficient method for future work
   predicting the interactions of chemicals in aqueous solution on an
   atomic level.}
@@ -70,48 +71,75 @@ The simple yet complex water molecule is one of the most important
 substances for life and industry. The structure and geometry of the 
 water molecule leads to a strong polarity and complex intermolecular
 forces. The hydrogen bonds formed by water are very strong, creating
-tetragonal clusters (CITE?) that lead to many of water's unusual properties,
-such as the high melting, boiling, and critical temperatures.
-The large dielectric constant (D$\sim$80) (CITE) is partially responsible for
-water as a universal solvent, along with the ease of availability and use.
+tetragonal clusters that lead to many of water's unusual properties,
+such as the high melting, boiling, and critical temperatures as well as the
+density maximum above the melting point.
+The large dielectric constant is partially responsible for
+water acting as a universal solvent, along with the ease of availability and
+use.
+There are many models used to describe water since so many different
+processes occur in aqueous solution. It is challenging to describe all the 
+relevant properties of water at once, especially if a low computational cost is
+also desired.
+
+Some models are primarily designed for use with homogeneous systems. Although
+these 
+models are useful in predicting some bulk properties, the interesting
+chemistry that occurs in water cannot be described with a homogeneous only
+model. To
+describe solvation and other processes in aqueous solution, a more robust theory
+that 
+can handle varying densities is needed.
 
 \subsection{Classical density-functional theory}
 
-It is challenging to describe all the relevant properties of water using
-a model, especially if a low computational cost is also desired.
-
-Some models, including SAFT, are designed for use with
-homogeneous systems only. Although these models are useful, much of the interesting
-chemistry that occurs in water cannot be described with a homogeneous only model. To
-describe solvation and other processes in aqueous solution, a more robust theory is 
-needed.
-
-Classical density-functional theory (DFT) provides an efficient way to evaluate the
-free energy using the density of the fluid. The free energy is a functional of the 
-density function and is independent of any external potentials\cite{ebner1976}. 
-Mermin\cite{mermin1965thermal} gives a theorem extending that of Hohenberg and 
-Kohn\cite{hohenberg1964inhomogeneous} to nonzero temperatures:
+Classical density-functional theory (DFT) provides an efficient way to evaluate
+the free energy using the density of the fluid. The free energy is a functional
+of the density function and is independent of any external
+potentials\cite{ebner1976}. The most common use of DFT is calculating ground
+state electron densities in quantum mechanical systems. The Hohenberg-Kohn
+theorem\cite{hohenberg1964inhomogeneous} uses DFT to write the ground state
+energy in terms of a universal functional of the electron density and a separate
+term including the external potential. Mermin\cite{mermin1965thermal} gives a
+theorem extending that of Hohenberg and Kohn to nonzero temperatures:
 \begin{equation}
-  A(T) = \underset{n(r)}{min}\left\{ F[n(r),T] + \int V_{ext}(r) n(r) d^3r\right\}
+  A(T) = \underset{n(r)}{min}\left\{ F[n(r),T] + \int V_{ext}(r) n(r)
+d^3r\right\}
 \end{equation}
-This is the basis for classical DFT, which can be used with a variety of external potentials, 
-from the simple interaction with a 
-hydrophobic wall to the complex strong interaction with hydrophilic solutes.
+This is the basis for classical DFT, where the relevant density is not the
+electron density,
+but the density of molecules. This can be used with a variety of 
+external potentials, from the simple interaction with a 
+hydrophobic wall to the more complex, stronger interaction with hydrophilic
+solutes.
+
+\subsection{Statistical Associating Fluid Theory}
+
+The high hydrogen bonding and strong polar interactions in water characterize it
+as an associating fluid, and thus it requires a different treatment than simple
+fluids which are mainly defined by van der Waals forces and weak electrostatic
+interations. The Statistical Associating Fluid Theory (SAFT) was designed for
+use with fluids such as water, to account for the important association forces
+(like hydrogen bonds) as well as any effects due to clusters or chains forming
+in the liquid\cite{muller2001molecular}. It is based on Wertheim's first-order
+thermodynamic perturbation theory (TPT1)
+\cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
+wertheim1986fluidsIV} which provides a useful way to account for strong
+associative interations between molecules.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
 We introduce a new classical density functional for water that
-predicts the \needsworklater{vapor density, liquid density, bulk
-  modulus, and bulk surface tension, as well as allows for
-  liquid-vapor coexistence}.  The Helmholtz free energy functional is
+predicts the vapor density, liquid density, and bulk surface tension, as well 
+as allows for liquid-vapor coexistence.  The Helmholtz free energy functional is
 based on SAFT, and is composed of the usual terms:
 \begin{equation}
   F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
 F_\textit{disp}[n]+ F_\textit{assoc}[n],
 \end{equation}
 where $F_\textit{id}$ is the ideal gas free energy, $F_\textit{hs}$ is
-a hard-sphere free energy, $F_\textit{assoc}$ is the free energy of
-association, and $F_\textit{disp}$ is the dispersion energy.  In
+a hard-sphere free energy, $F_\textit{disp}$ is the dispersion energy,
+and $F_\textit{assoc}$ is the free energy of association.  In
 addition, a chemical potential term is used, so we actually work in
 the grand canonical ensemble.  In the following sections, we will
 introduce the terms of this functional.
@@ -134,7 +162,7 @@ which also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes.  These properties are retained by the total functional,
 provided the remaining terms are \emph{purely
-  nonlocal}~\cite{ashcroft?}.
+  nonlocal}~\cite{ashcroft?}\needsworknow{I can't find this citation anywhere!}.
 
 \subsection{Hard-sphere repulsion}
 
@@ -175,17 +203,52 @@ For our water functional, we use the hard-sphere radius of
 3.03420~\AA, which was found to be optimal by Clark
 \emph{et al}.\cite{clark2006developing}
 
+\subsection{Dispersion free energy}
+The first term in the attractive energy is the dispersion term.  We use a
+dispersion term based on the SAFT-VR
+approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
+parameters, an interaction energy $\epsilon_\textit{disp}$ and a
+length scale $\lambda_\textit{disp}$.
+
+The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+\begin{align}
+  F_\text{disp} &= A_1 + \beta A_2
+\end{align}
+where $A_1$ and $A_2$ are the first two terms in a high-temperature
+perturbation expansion.  $A_1$ is the mean-field dispersion
+interaction, which for a homogeneous fluid is given by
+\begin{align}
+  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
+  g_{HS}(\left|\xx\right|) d\xx
+\end{align}
+The second dispersion term in the free energy $A_2$ describes the
+effect of fluctuations resulting from the compression of the fluid due
+to the dispersion interaction itself, and is commonly approximated
+using the local compressibility approximation (LCA).
+
+We use a free square-well function for the dispersion $\varphi$, which
+has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
+to the equation of state.  Thus our model interaction has the form:
+\begin{equation}
+  \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
+\end{equation}
+where $\Theta$ is the Heaviside step function.
+
+\textcolor{red}{TODO:  Add the actual functions that we use and the
+  actual form.  The above is really just an introduction.}
+
+
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
 \end{center}
-\caption{The theoretical versus experimental phase diagram, vapor
-  pressure versus temperature.  }
-\label{fig:equation-of-state}
+\caption{The theoretical versus experimental coexistence curve. Away from
+the critical temperature, the agreement is good. }
+\label{fig:temperature-vs-density}
 \end{figure}
 
 \subsection{Association free energy}
-The first attractive energy term is the association term, which
+The final attractive energy term is the association term, which
 accounts for hydrogen bonding.  Hydrogen bonds are modeled as four
 attractive patches (``association sites'') on the surface of the hard
 sphere.  These four sites represent two protons and two electron lone
@@ -195,6 +258,15 @@ with the lone pair of the other.  The volume over which this
 interaction occurs is $\kappa_\textit{assoc}$, giving the association
 term in the free energy has two empirical parameters that are fit to
 experimental data.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\end{center}
+\caption{The theoretical versus experimental phase diagram, vapor
+  pressure versus temperature.  }
+\label{fig:equation-of-state}
+\end{figure}
 
 The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
@@ -254,67 +326,6 @@ Wu.\cite{yu2002fmt-dft-inhomogeneous-associating}
   + \frac12\frac{n_3^2\zeta}{(1-n_3)^3}
 \end{align}
 
-% \begin{figure}
-% \begin{center}
-% \includegraphics[width=\columnwidth]{figs/saturated-liquid-density}
-% \end{center}
-% \caption{The theoretical versus experimental saturated liquid density
-%   versus temperature.  }
-% \label{fig:saturated-liquid-density}
-% \end{figure}
-
-\subsection{Dispersion free energy}
-The final term in the free energy is the dispersion term.  We use a
-dispersion term based on the SAFT-VR
-approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters, an interaction energy $\epsilon_\textit{disp}$ and a
-length scale $\lambda_\textit{disp}$.
-
-The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
-\begin{align}
-  F_\text{disp} &= A_1 + \beta A_2
-\end{align}
-where $A_1$ and $A_2$ are the first two terms in a high-temperature
-perturbation expansion.  $A_1$ is the mean-field dispersion
-interaction, which for a homogeneous fluid is given by
-\begin{align}
-  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
-  g_{HS}(\left|\xx\right|) d\xx
-\end{align}
-The second dispersion term in the free energy $A_2$ describes the
-effect of fluctuations resulting from the compression of the fluid due
-to the dispersion interaction itself, and is commonly approximated
-using the local compressibility approximation (LCA).
-
-We use a free square-well function for the dispersion $\varphi$, which
-has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
-to the equation of state.  Thus our model interaction has the form:
-\begin{equation}
-  \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
-\end{equation}
-where $\Theta$ is the Heaviside step function.
-
-\textcolor{red}{TODO:  Add the actual functions that we use and the
-  actual form.  The above is really just an introduction.}
-
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
-\end{center}
-\caption{The theoretical versus experimental temperature versus density. }
-\label{fig:temperature-vs-density}
-\end{figure}
-
-% \begin{figure}
-% \begin{center}
-% \includegraphics[width=\columnwidth]{figs/entropy}
-% \end{center}
-% \caption{The free energy, internal energy, and temperature*entropy 
-% versus density at room temperature.  }
-% \label{fig:energy-room-temp}
-% \end{figure}
-
 \subsection{Other thermodynamic functions}
 
 From the Helmholtz free energy functional, we may obtain any other
@@ -351,13 +362,14 @@ represent the theoretical and experimental coexistence curves.}
 \end{figure}
 
 Figure \ref{fig:pressure-with-isotherms} shows the calculated pressures for
-isotherms ranging from room temperature to past the critical temperature. The solid 
-line is the theoretical coexistence curve calculated from the SAFT functional. 
-For a given isotherm, the pressure curve should intersect this coexistence curve 
-twice, at the values of the vapor and liquid densities. The functional matches well with
-the experimental data from NIST away from the critical point. The slope of the pressure
-versus density curve is proportional to the compressibility, which is close but slightly too
-large at room temperature. 
+isotherms ranging from room temperature to past the critical temperature. The
+solid line is the theoretical coexistence curve calculated from the SAFT
+functional. For a given isotherm, the pressure curve should intersect this
+coexistence curve twice, at the values of the vapor and liquid densities. The
+functional matches well with the experimental data from NIST away from the
+critical point. The slope of the pressure versus density curve is proportional
+to the compressibility, which is close but slightly too large at room
+temperature. 
 
 The entropy is naturally obtained by taking a partial derivative with
 respect to temperature:
@@ -401,7 +413,8 @@ an error of only a few percent.
 \includegraphics[width=\columnwidth]{figs/surface-tension}
 \end{center}
 \caption{The theoretical versus experimental surface tension
-  versus temperature. The experimental data is taken from NIST.\cite{nistwater} }
+  versus temperature. The experimental data is taken from NIST.\cite{nistwater}
+}
 \label{fig:surface-tension}
 \end{figure}
 
@@ -432,51 +445,12 @@ point---we cannot correctly describe the surface tension at all
 temperatures, and chose to fit it for the temperature range at which
 water is liquid at one atmosphere of pressure.
 
-\fixme{I'm not sure if this paragraph belongs here.  Somewhere I think
-  it's worth discussing any of these homogeneous plots we include, and
-  this might be the right place.  We also might want to include one or
-  more of them earlier in the text.  A general rule is that any figure
-  that is included should be referenced in the text.  If there's
-  nowhere in the text that it fits, then it probably doesn't belong in
-  the paper....  So I'm not removing the follwoing bits since it's up
-  to you, Jess, whether to remove the figures.  We should
-  \emph{definitely} remove some of them.}  For reference, we plot the
-predicted vapor pressure (see Figure~\ref{fig:equation-of-state}) and
-coexistence curve (see
-Figure~\ref{fig:temperature-vs-density}) against experimental
-values.  To find the densities, we use the ``common tangent'' rule,
-as illustrated in Figure~\ref{fig:homogeneous}.
-
-% \begin{table}
-% \begin{tabular}{ccc}
-%   Fitting Parameters& \hspace{2em} & Experimental Values\\
-% \begin{tabular}{cc}
-%   $R$ & 2.3 $a_o$ \\
-%   $A$ & -0.0100909 Hartree \\
-%   $\gamma$ & 5\\
-%   $V$ & 515.792 $a_o^3$  \\
-%   $b$ & 0.75 $a_o$ \\
-%   $\mu$ & -0.014063 Hartree 
-% \end{tabular}
-% && 
-% \begin{tabular}{cc}
-%  $n_l$ & 4.939 $\times 10^{-3} a_o^{-3}$\\
-%  $n_v$ & 1.141 $\times 10^{-7} a_o^{-3}$\\
-%  $\sigma$ & ??? \\
-%  $B$ & $7.435\times 10^{-5}$ Hartree$/a_o^3$\\
-%  $T$ & 298.15 K \\
-% \end{tabular}
-% \end{tabular}
-% 
-% \caption{Empirical parameters of optimized functional and experimental
-%   values matched, where $a_o$ is the Bohr radius, and $\sigma$ is the
-%   surface tension.  This table is not yet complete, but it should
-%   be soon...  We'll also need to think about the best units to use
-%   here.  Atom units might be best, but it also might be better to
-%   consistently use eV and angstrom or something.  I'm not sure about
-%   putting $k_BT$ data in the table.  Maybe it belongs in the caption?}
-% \label{tab:parameters}
-% \end{table}
+For reference, we plot the predicted vapor pressure (see
+Figure~\ref{fig:equation-of-state}) and coexistence curve (see
+Figure~\ref{fig:temperature-vs-density}) against experimental values.  These
+match those calculated by Clark \emph{et al}. To find the densities, we use the
+``common tangent'' rule, as illustrated in Figure~\ref{fig:homogeneous}.
+\needsworknow{Expand the previous paragraph}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
@@ -556,26 +530,13 @@ energy barrier to reach the stable vapor phase.
 \includegraphics[width=\columnwidth]{figs/xassoc-1D}
 \end{center}
 \caption{The number of hydrogen bonds per molecule for a slab of water 
-with molecules constrained to move in one dimension. Each molecule may contribute to
-four bonds, although each bond involves two molecules so to calculate the actual 
+with molecules constrained to move in one dimension. Each molecule may
+contribute to
+four bonds, although each bond involves two molecules so to calculate the
+actual 
 number of bonds there would be another factor of 2.}
 \label{fig:xassoc-1D}
 \end{figure}
-
-The value of $X$ behaves as expected for water constrained to a slit. We
-show in Figure \ref{fig:xassoc-1D} the number of hydrogen bonds per water 
-molecule, equal to $4(1-X)$, for a slit of 4.0 nm.
-Outside the slit, there is no hydrogen bonding and inside the number of hydrogen
-bonds is approximately equal to 3.5, which is expected for saturated liquid water.
-
-\subsection{One hydrophobic rod}
-
-We move into two dimensions by studying a single hydrophobic rod
-immersed in water. Figure \ref{fig:density-single-rod} shows density
-profiles for three different radii, 0.3 nm, 0.5 nm, and 1 nm. There are the
-expected oscillations outside the rod and as the distance away from the rod increases
-the density approaches that of the bulk saturated liquid density. The small radius
-rod has comparatively larger oscillations and a higher contact density.
 
 \begin{figure}
 \begin{center}
@@ -586,30 +547,23 @@ represents the saturated liquid density.  }
 \label{fig:density-single-rod}
 \end{figure}
 
+The value of $X$ behaves as expected for water constrained to a slit. We
+show in Figure \ref{fig:xassoc-1D} the number of hydrogen bonds per water 
+molecule, equal to $4(1-X)$, for a slit of 4.0 nm.
+Outside the slit, there is no hydrogen bonding and inside the number of hydrogen
+bonds is approximately equal to 3.5, which is expected for saturated liquid
+water.
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
 \end{center}
 \caption{ Energy versus diameter for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
-tension at room temperature, and it agrees well with the surface tension in Figure 
-\ref{fig:surface-tension}. (FIX - 0.4 nm?) }
+tension at room temperature, and it agrees well with the surface tension in
+Figure \ref{fig:surface-tension}. }
 \label{fig:energy-vs-diameter}
 \end{figure}
-
-\subsubsection{Resolution and convergence tests}
-
-Figure \ref{fig:densityresolution} shows the density profiles for three different
-values of the lattice spacing resolution. The density oscillations around a single
-rod of radius 0.5 nm look nearly identical for all resolutions except for the first peak. 
-This contact density is important as it will be proportional to the pressure on the 
-rod\ref{contactvaluethm}. The 
-contact density calculated using the medium resolution is within less than 4\% of the value at
-high resolution, while the low resolution contact density is off by about 5\%. There is some
-uncertainty in the value of contact density due to the different lattice spacings. The total
-free energy calculations compare much more favorably. The medium resolution is within 
-0.5\% and the low resolution is within 1\% of the high resolution free energy.
-
 
 \begin{figure}
 \begin{center}
@@ -617,17 +571,53 @@ free energy calculations compare much more favorably. The medium resolution is w
 \end{center}
 \caption{ Density profiles for 
 a single hydrophobic rod with a radius of 0.5 nm using several different 
-lattice spacing resolutions. We used a high resolution of 0.05 bohrs ($\approx$ 0.003 nm), 
+lattice spacing resolutions. We used a high resolution of 0.05 bohrs ($\approx$
+0.003 nm), 
 medium 0.2 bohrs ($\approx$ 0.001 nm), and low 0.5 bohrs ($\approx$ 0.03 nm).}
 \label{fig:densityresolution}
 \end{figure}
 
+\subsection{One hydrophobic rod}
+We move into two dimensions by studying a single hydrophobic rod
+immersed in water. Figure \ref{fig:density-single-rod} shows density
+profiles for three different radii, 0.3 nm, 0.5 nm, and 1 nm. There are the
+expected oscillations outside the rod and as the distance away from the rod
+increases
+the density approaches that of the bulk saturated liquid density. The small
+radius
+rod has comparatively larger oscillations and a higher contact density.
+
+Figure \ref{fig:energy-vs-diameter} shows the free energy per area versus
+radius for the range of rods studied, with radii from 0.05 nm to 1.5 nm. After 
+about 0.5 nm or so, this reaches
+an asymptote equal to the surface tension. From the inset in Figure 
+\ref{fig:surface-tension}, it is clear that the surface tension at room 
+temperature is approximately 72 mN/m. This is very close to the value from
+the larger diameter single rod energy per area, which is about 75~mN/m. 
+\needsworknow{Here it will be beneficial to add some discussion of any
+relevant experimental work or other simulations that deal with one rod-like 
+thing in water. Do we have anything currently matching this?}
+
+\subsubsection{Resolution and convergence tests}
+Figure \ref{fig:densityresolution} shows the density profiles for three
+different values of the lattice spacing resolution. The density oscillations
+around a single rod of radius 0.5 nm look nearly identical for all resolutions
+except for the first peak. This contact density is important as it will be
+proportional to the pressure on the rod (see equation \ref{contactvaluethm}). The contact
+density calculated using the medium resolution is within less than 4\% of the
+value at high resolution, while the low resolution contact density is off by
+about 5\%. There is some uncertainty in the value of contact density due to the
+different lattice spacings. The total free energy calculations compare much more
+favorably. The medium resolution is within 0.5\% and the low resolution is
+within 1\% of the high resolution free energy.
+
 \subsection{Hydrophobic interaction of two rods}
 
-Here we will want to cite~\cite{walther2004hydrodynamic}, which gives
-simulations for two interacting nanotubes in water.  It's not
-precisely the same, but if we can't find something more similar, this
-would be worth citing.
+Here we will want to cite~\cite{walther2004hydrodynamic}, which gives simulations for 
+two interacting
+nanotubes in water.  It's not precisely the same, but if we can't find something
+more similar, this would be worth citing - they use CNTS with diameter 1.25 nm
+and find drying occurs for separations less than 0.9-1nm.
 
 % \begin{figure}
 % \begin{center}
@@ -651,8 +641,8 @@ The radius and separation are shown.}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
-\caption{ Energy versus separation for two identical hydrophobic rods with diameters
-of 1.0 nm. }
+\caption{ Energy versus separation for two hydrophobic rods. Radii 0.3nm, 0.5nm, 1.0nm
+ }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 

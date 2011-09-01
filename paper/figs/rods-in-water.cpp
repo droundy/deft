@@ -25,8 +25,8 @@
 const double nmtobohr = 18.8972613; // Converts nm to bohr
 const double nm = 18.8972613;
 // Here we set up the lattice.
-const double zmax = 3*nm;
-const double ymax = 6*nm;
+//const double zmax = 3*nm;
+//const double ymax = 6*nm;
 const double width = 0.0001;
 double diameter = 1*nm;
 double distance = 1;
@@ -103,6 +103,9 @@ int main(int argc, char *argv[]) {
     printf("Diameter is %g bohr\n", diameter);
   }
   
+  double zmax = 2*diameter+1*nm;
+  double ymax = 3*diameter+2*nm;
+
   char *datname = (char *)malloc(1024);
   sprintf(datname, "paper/figs/rods-in-water-%04.1fnm.dat", diameter/nm);
   
@@ -159,7 +162,7 @@ int main(int argc, char *argv[]) {
     //printf("Constraint has become a graph!\n");
    
     potential = water_prop.liquid_density*constraint
-      + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+      + 400*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
@@ -177,7 +180,7 @@ int main(int argc, char *argv[]) {
 								 &potential,
 								 QuadraticLineMinimizer));
     printf("Diameter is %g bohr (%g nm)\n", diameter, diameter/nm);
-    printf("\nDistance between rods = %g bohr (%g nm)\n", distance, distance/nm);
+    printf("Distance between rods = %g bohr (%g nm)\n", distance, distance/nm);
     
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {

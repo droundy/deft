@@ -29,7 +29,7 @@ set key noauto outside top
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set xlabel 'Diameter (nm)'
+set xlabel 'Radius (nm)'
 set ylabel 'Energy/Area (mN/m)'
 
 set style line 1 lt 3 lw 3 pt 7 ps 2
@@ -37,5 +37,5 @@ set style line 1 lt 3 lw 3 pt 7 ps 2
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units
 
-plot [0:] [0:] \
-'figs/single-rod-in-water.dat' u 1:($2/(pi*$1*nm)/mNpermeter) notitle with lp ls 1
+plot [0:1.5] [0:] \
+'figs/single-rod-in-water.dat' u ($1/2):($2/(pi*$1*nm)/mNpermeter) notitle with lp ls 1

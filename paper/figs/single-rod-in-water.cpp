@@ -143,7 +143,7 @@ int main(int, char **) {
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(1e-16, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     

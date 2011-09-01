@@ -47,8 +47,8 @@ int main(int, char **) {
 						  water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
   
-  double nl=0.004938863;        // liquid density in bohr^-3   
-  double nv=1.141e-7;         //vapor density in bohr^-3
+  //double nl=0.004938863;        // liquid density in bohr^-3   
+  //double nv=1.141e-7;         //vapor density in bohr^-3
 
   for (double dens=1e-8; dens<=0.006; dens *= 1.01) {
     double V = -kT*log(dens);
