@@ -79,6 +79,12 @@ Functional Gaussian(double width) {
   return Functional(new GaussianType(width));
 }
 
+Functional GaussianConvolve(double R, Expression r) {
+  r.set_type("double");
+  return Functional(function_for_convolve<gaussian_op<complex> >, R,
+                    r, Expression(1.0), true);
+}
+
 Functional StepConvolve(double R, Expression r) {
   r.set_type("double");
   return Functional(function_for_convolve<step_op<complex> >, R,

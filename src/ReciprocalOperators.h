@@ -76,6 +76,19 @@ struct gz_op : public base_rop<Scalar> {
   const char *name() const { return "gz"; }
 };
 
+template<typename Scalar>
+struct gaussian_op : public base_rop<Scalar> {
+  gaussian_op(const GridDescription &gd, double width) : base_rop<Scalar>(gd), w(width) {
+  }
+  const char *name() const { return "gaussian"; }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kw = k*w;
+    return exp(-0.5*kw*kw);
+  }
+  double w;
+};
+
 static const double spreading = 6.0;
 
 template<typename Scalar>
@@ -330,6 +343,7 @@ namespace Eigen {
   ADD_ONE_ROP(gx_op);
   ADD_ONE_ROP(gy_op);
   ADD_ONE_ROP(gz_op);
+  ADD_ONE_ROP(gaussian_op);
   ADD_ONE_ROP(step_op);
   ADD_ONE_ROP(shell_op);
   ADD_ONE_ROP(xshell_op);
@@ -361,6 +375,7 @@ MAKE_FUNCTION_ROP(gz_op,gz)
     return Eigen::CwiseNullaryOp<t<complex>, VectorXcd>(gd.NxNyNzOver2, 1, t<complex>(gd, R)); \
   }
 
+MAKE_FUNCTION_WITH_DOUBLE_ROP(gaussian_op,gaussian)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(step_op,step)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(shell_op,shell)
 

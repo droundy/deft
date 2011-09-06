@@ -54,6 +54,7 @@ Functional EffectivePotentialToDensity();
 Functional OfEffectivePotential(const Functional &f);
 Functional Gaussian(double width);
 
+Functional GaussianConvolve(double width, Expression r);
 Functional StepConvolve(double radius, Expression r = Expression("R"));
 
 Functional ShellConvolve(double radius, Expression r = Expression("R"));
