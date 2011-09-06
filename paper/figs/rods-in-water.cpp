@@ -209,9 +209,8 @@ int main(int argc, char *argv[]) {
     double energy = (min.energy() - EperCell)/width;
     printf("Energy is %.15g\n", energy);
 
-    //double totalentropy = S(water_prop.kT, potential);
-    double totalentropy = 0; //FIXME - converting functional to double?
-
+    double totalentropy = S.integral(water_prop.kT, potential);
+    
     fprintf(o, "%g\t%.15g\t%.15g\n", distance/nm, energy, totalentropy);
 
     char *plotnameslice = (char *)malloc(1024);
