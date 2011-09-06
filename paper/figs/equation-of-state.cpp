@@ -57,6 +57,7 @@ int main(int, char **) {
             temperatures_kelvin[i], water_vapor_pressure[i],
             water_saturation_liquid[i], water_vapor_density[i],
             water_saturated_surface_tension[i]);
+    fflush(experiment);
   }
 
   for (double T=650; T<=695; T += 1) {
