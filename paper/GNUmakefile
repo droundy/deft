@@ -60,6 +60,7 @@ ALL_FIGURES=\
 	figs/osu-logo.svg\
 	figs/xassoc-rods-in-water.gp\
 	figs/two-rods-diagram.svg\
+	figs/rods-diagram.svg\
 
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
