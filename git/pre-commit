@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -ev
+
+
+# Make sure we can run git add from out of tree:
+export GIT_DIR=`pwd`/.git
+export GIT_INDEX_FILE=`pwd`/$GIT_INDEX_FILE
+
+# Create a clean temp directory for running tests:
+TEMPDIR=`mktemp -d -t testing-XXXXXXXXX`
+git checkout-index --prefix=$TEMPDIR/ -af
+cd $TEMPDIR
+
+if [ "$TEST" == "none" ]; then
+    echo Skipping all tests.
+elif [ "$TEST" == "compile" ]; then
+    echo Testing build only.
+
+    time bash .build
+
+    echo Compile successful!
+elif [ "$TEST" == "build" ]; then
+    echo Testing build only.
+
+    time bash .build
+
+    echo Compile successful!
+else
+    echo Running full tests.
+
+    time bash .build
+
+    echo Compile successful!
+
+    time bash .papers
+    echo Papers successfully built!
+
+    time bash .test
+
+    echo All tests passed!
+fi
+
+cd /tmp
+rm -rf $TEMPDIR

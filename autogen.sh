@@ -1,4 +1,16 @@
+#!/bin/sh
+
 set -ev
+
+# Here we will set up git hooks to do nice things...
+if test -d git && test -d .git/hooks; then
+    for i in `ls git | grep -v '~'`; do
+        echo Setting up $i hook...
+        ln -sf ../../git/$i .git/hooks/$i
+    done
+else
+    echo We do not seem to be in a git repository.
+fi
 
 # automake wants a file called README.
 cp README.md README
