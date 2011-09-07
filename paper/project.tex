@@ -216,9 +216,9 @@ The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \end{align}
 where $A_1$ and $A_2$ are the first two terms in a high-temperature
 perturbation expansion.  $A_1$ is the mean-field dispersion
-interaction, which for a homogeneous fluid is given by
+interaction, which reduces in the homogeneous limit to
 \begin{align}
-  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
+  \frac{A_1}{V} &= \frac12 n_b \int \varphi(\left|\xx\right|)
   g_{HS}(\left|\xx\right|) d\xx
 \end{align}
 The second dispersion term in the free energy $A_2$ describes the
@@ -227,16 +227,52 @@ to the dispersion interaction itself, and is commonly approximated
 using the local compressibility approximation (LCA).
 
 We use a free square-well function for the dispersion $\varphi$, which
-has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
-to the equation of state.  Thus our model interaction has the form:
+is the choice used by Clark \emph{et al}~\cite{clark2006developing},
+and allows a reasonable fit to the equation of state.  Thus our model
+interaction has the form:
 \begin{equation}
   \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
 \end{equation}
 where $\Theta$ is the Heaviside step function.
 
-\textcolor{red}{TODO:  Add the actual functions that we use and the
-  actual form.  The above is really just an introduction.}
+The form of $A_1$ is given in
+reference~\cite{gil-villegas-1997-SAFT-VR}, but is expressed in terms
+of the filling fraction.  In order to apply this form to an
+inhomogeneous density distribution, we construct an effective local
+filling fraction $\eta{\textit{eff}}$, given by
+\begin{align}
+  \eta_{\textit{eff}}(\mathbf{r}) &= \frac{4\pi R^3}{3}
+  \int \left(\frac{\pi}{\sigma}\right)^{\frac32}
+  e^{-\frac{|\mathbf{r}-\mathbf{r}'|^2}{2\sigma^2}} n(\mathbf{r}') d\mathbf{r}'
+\end{align}
+This effective filling fraction is used throughout the dispersion
+calculations.  This functional introduces an additional empirical
+parameter $\sigma$ \fixme{(The above formula still needs fixing)}
+which adjusts the length scale over which the dispersion interaction
+is correlated.
 
+\fixme{Do we want to include all the gory details? It's pretty
+  complicated, which could be used to argue in either direction.  On
+  the one hand, a complete summary that doesn't require users to look
+  up the 1997 paper would be helpful.  On the other hand, these
+  precise details are lengthy and a pain to write, and aren't all that
+  interesting for most readers to read.}
+
+The second term, $A_2$, which describes the contribution to the free
+energy associated with fluctuations is given by
+\begin{align}
+  A_2 &= \int \frac12 \epsilon_\textit{disp}
+              K_{HS}(\eta_{\textit{eff}}(\mathbf{r}))
+              \eta_{\textit{eff}}(\mathbf{r})
+              \frac{\delta A_1}{\delta \eta_\textit{eff}(\mathbf{r})}
+                d\mathbf{r}
+\end{align}
+where $K_{HS}$ is the Percus-Yevick hard-sphere compressibility, given
+by
+\begin{align}
+  K_{HS} &=
+    \frac{(1 - \eta_\textit{eff})^4}{1 + 4(\eta_\textit{eff} + \eta_\textit{eff}^2)}
+\end{align}
 
 \begin{figure}
 \begin{center}
