@@ -2,6 +2,7 @@
 
 set -ev
 
+env
 
 # Make sure we can run git add from out of tree:
 export GIT_DIR=`pwd`/.git
@@ -12,34 +13,40 @@ TEMPDIR=`mktemp -d -t testing-XXXXXXXXX`
 git checkout-index --prefix=$TEMPDIR/ -af
 cd $TEMPDIR
 
-if [ "$TEST" == "none" ]; then
-    echo Skipping all tests.
-elif [ "$TEST" == "compile" ]; then
-    echo Testing build only.
 
-    time bash .build
+case "$TEST" in
+    none)
+        echo Skipping all tests.
+        ;;
+    compile)
+        echo Testing compile and papers.
+        
+        time bash .build
+        echo Compile successful!
+        
+        ;;
+    build)
+        echo Testing build only.
+        
+        time bash .build
+        echo Compile successful!
+        
+        time bash .papers
+        echo Papers successfully built!
+        ;;
+    *)
+        echo Testing everything!
+        
+        time bash .build
+        echo Compile successful!
+        
+        time bash .papers
+        echo Papers successfully built!
 
-    echo Compile successful!
-elif [ "$TEST" == "build" ]; then
-    echo Testing build only.
-
-    time bash .build
-
-    echo Compile successful!
-else
-    echo Running full tests.
-
-    time bash .build
-
-    echo Compile successful!
-
-    time bash .papers
-    echo Papers successfully built!
-
-    time bash .test
-
-    echo All tests passed!
-fi
+        time bash .test
+        echo All tests passed!
+        ;;
+esac
 
 cd /tmp
 rm -rf $TEMPDIR
