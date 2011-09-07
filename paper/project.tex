@@ -161,8 +161,15 @@ according to the contact value theorem
 which also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes.  These properties are retained by the total functional,
-provided the remaining terms are \emph{purely
-  nonlocal}~\cite{ashcroft?}\needsworknow{I can't find this citation anywhere!}.
+provided the remaining terms are \emph{purely nonlocal}. This requires
+that
+\begin{equation}
+ \frac{\delta^2F_{\textit{excess}}[n]}{\delta n(\xx_1)~\delta n(\xx_1)}\neq\infty
+\end{equation}
+where $F_{\textit{excess}}[n]$ describes all the remaining terms in the functional.
+This ensures that any higher order terms in the Taylor expansion
+of $F[n+\Delta n]$ are very small.
+
 
 \subsection{Hard-sphere repulsion}
 
@@ -623,6 +630,15 @@ the density approaches that of the bulk saturated liquid density. The small
 radius
 rod has comparatively larger oscillations and a higher contact density.
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-single-rod}
+\end{center}
+\caption{ Number of bonds per molecule near the interface with a single
+hydrophobic rod. Compare with Walther\cite{walther2001carbon} fig 9. }
+\label{fig:xassoc-single-rod}
+\end{figure}
+
 Figure \ref{fig:energy-vs-diameter} shows the free energy per area versus
 radius for the range of rods studied, with radii from 0.05 nm to 1.5 nm. After 
 about 0.5 nm or so, this reaches
@@ -630,9 +646,8 @@ an asymptote equal to the surface tension. From the inset in Figure
 \ref{fig:surface-tension}, it is clear that the surface tension at room 
 temperature is approximately 72 mN/m. This is very close to the value from
 the larger diameter single rod energy per area, which is about 75~mN/m. 
-\needsworknow{Here it will be beneficial to add some discussion of any
-relevant experimental work or other simulations that deal with one rod-like 
-thing in water. Do we have anything currently matching this?}
+\needsworknow{Discussion of Walther 2001 paper\cite{walther2001carbon}}
+
 
 \subsubsection{Resolution and convergence tests}
 Figure \ref{fig:densityresolution} shows the density profiles for three
@@ -688,6 +703,7 @@ The radius and separation are shown.}
 
 [conclusion text]
 
+\bibliographystyle{unsrt}
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}

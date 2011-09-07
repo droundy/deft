@@ -59,6 +59,7 @@ ALL_FIGURES=\
 	figs/rods-energy-vs-distance.gp\
 	figs/osu-logo.svg\
 	figs/xassoc-rods-in-water.gp\
+	figs/xassoc-single-rod.gp\
 	figs/two-rods-diagram.svg\
 	figs/rods-diagram.svg\
 
@@ -107,6 +108,7 @@ figs/entropy-1D.eps: figs/cavitysize-06.0.dat
 figs/energy-1D.eps: figs/cavitysize-06.0.dat
 figs/density-1D.eps: figs/cavitysize-06.0.dat
 figs/density-rods-in-water.eps: figs/rods-1nm-01.0.dat
+figs/xassoc-single-rod.gp: figs/single-rod-slice-00.6.dat
 figs/xassoc-rods-in-water.gp: figs/rods-1nm-01.0.dat
 figs/density-single-rod.eps: figs/single-rod-01.0.dat
 figs/density-vs-radius.eps: figs/single-rod-slice-01.0.dat \
