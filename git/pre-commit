@@ -2,11 +2,10 @@
 
 set -ev
 
-env
-
 # Make sure we can run git add from out of tree:
 export GIT_DIR=`pwd`/.git
 export GIT_INDEX_FILE=`pwd`/$GIT_INDEX_FILE
+export AM_RUNNING_PRECOMMIT=yes
 
 # Create a clean temp directory for running tests:
 TEMPDIR=`mktemp -d -t testing-XXXXXXXXX`

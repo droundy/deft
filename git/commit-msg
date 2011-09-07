@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -ev
+
+case "$TEST" in
+    none)
+        echo Tests skipped! >> "$1"
+        ;;
+    compile)
+        echo Tested compile only! >> "$1"
+        ;;
+    build)
+        echo Tested only compile and papers. >> "$1"
+        ;;
+    *)
+        echo Tested everything. >> "$1"
+        ;;
+esac
