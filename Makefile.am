@@ -48,7 +48,6 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/single-rod-in-water.mkdat \
 	paper/figs/single-rod-in-water-high-res.mkdat \
 	paper/figs/single-rod-in-water-low-res.mkdat \
-	paper/figs/single-rod-test-00.4.mkdat \
 	paper/figs/sphere.mkdat \
 	paper/figs/pressure-with-isotherms.mkdat \
 	paper/figs/enthalpy.mkdat \
@@ -141,7 +140,6 @@ paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
-paper_figs_single_rod_test_00_4_mkdat_SOURCES = paper/figs/single-rod-test-00.4.cpp $(ALL_CODE)
 paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
