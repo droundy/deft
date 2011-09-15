@@ -209,8 +209,6 @@ poster: paper
 	cd paper && $(MAKE) poster.pdf
 
 slowfigs: paper/figs/rods-in-water.dat \
-	paper/figs/rods-picture-01.0-00.2.dat \
-	paper/figs/rods-picture-01.0-00.4.dat \
 	paper/figs/single-rod-in-water.dat \
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
