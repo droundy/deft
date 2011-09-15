@@ -19,7 +19,7 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
-\newcommand{\xx}{\textbf{x}}
+\newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
@@ -45,7 +45,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\needsworklater{ We develop a classical density functional theory for
+ {We develop a classical density functional theory for
   water by combining the fundamental-measure theory functional--which
   describes hard sphere fluids--with attractive interactions based on the 
   Statistical Associating Fluid Theory (SAFT).  Using
@@ -85,7 +85,7 @@ also desired.
 Some models are primarily designed for use with homogeneous systems. Although
 these 
 models are useful in predicting some bulk properties, the interesting
-chemistry that occurs in water cannot be described with a homogeneous only
+chemistry that occurs in water cannot be described with a homogeneous-only
 model. To
 describe solvation and other processes in aqueous solution, a more robust theory
 that 
@@ -94,11 +94,12 @@ can handle varying densities is needed.
 \subsection{Classical density-functional theory}
 
 Classical density-functional theory (DFT) provides an efficient way to evaluate
-the free energy using the density of the fluid. The free energy is a functional
+the free energy using the probability distribution of the fluid. The free energy 
+is a functional
 of the density function and is independent of any external
 potentials\cite{ebner1976}. The most common use of DFT is calculating ground
 state electron densities in quantum mechanical systems. The Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} uses DFT to write the ground state
+theorem\cite{hohenberg1964inhomogeneous} allows us to write the ground state
 energy in terms of a universal functional of the electron density and a separate
 term including the external potential. Mermin\cite{mermin1965thermal} gives a
 theorem extending that of Hohenberg and Kohn to nonzero temperatures:
@@ -365,7 +366,7 @@ Yu and We\cite{yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
 density, and reduces to unity in the homogeneous limit:
 \begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}
 \end{align}
 The functional $\Delta$ which appears in the formula for $X$ is a
 measure of hydrogen-bonding probability.  In the SAFT-VR
@@ -623,7 +624,7 @@ water.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
 \end{center}
-\caption{ Energy versus diameter for a single hydrophobic rod
+\caption{ Energy versus radius for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
 tension at room temperature, and it agrees well with the surface tension in
 Figure \ref{fig:surface-tension}. }
@@ -686,21 +687,6 @@ within 1\% of the high resolution free energy.
 
 \subsection{Hydrophobic interaction of two rods}
 
-Here we will want to cite~\cite{walther2004hydrodynamic}, which gives simulations for 
-two interacting
-nanotubes in water.  It's not precisely the same, but if we can't find something
-more similar, this would be worth citing - they use CNTS with diameter 1.25 nm
-and find drying occurs for separations less than 0.9-1nm.
-
-% \begin{figure}
-% \begin{center}
-% \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
-% \end{center}
-% \caption{ Density profile for two hydrophobic rods (diameter 1.0 nm) at a 
-% separation of 0.8 nm. The scale on the right is density in g/mL.}
-% \label{fig:density-rods}
-% \end{figure}
-
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-diagram}
@@ -712,13 +698,71 @@ The radius and separation are shown.}
 
 \begin{figure}
 \begin{center}
+\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\end{center}
+\caption{ Density profiles illustrating the transition from vacuum 
+to liquid water between the rods. The top figure is at a separation of 0.2nm and the
+bottom is 0.4nm. }
+\label{fig:density-rods}
+\end{figure}
+
+\begin{figure}
+\begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
-\caption{ Energy versus separation for two hydrophobic rods. Radii 0.3nm, 0.5nm, 1.0nm
- }
+\caption{ Energy versus separation for two hydrophobic rods ranging in radius from
+0.3nm to 1.2nm. All were arbitrarily set to go to zero at large separations. The
+discontinuous transition corresponds to the phase change from
+vacuum to liquid between the rods. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-rods}
+\end{center}
+\caption{ Free energy, internal energy, and the entropic energy contribution versus
+separation for two hydrophobic rods of radii 0.5nm. All energies are arbitrarily
+set to go to zero at large separations. }
+\label{fig:energy-rods}
+\end{figure}
+
+We now look at the more interesting problem of two rods in water. We continue to
+use hydrophobic rods of various radii at separation $d$ (see Figure
+\ref{fig:rods}), ranging from $d=0$ (touching rods) to about 1nm. At small
+separations ($d<$2nm-4nm) there is only vacuum between the rods. As the rods are
+pulled apart, the vacuum region expands until some critical separation is
+reached and liquid water fills the region between the rods. Figure
+\ref{fig:density-rods} shows density profiles before and after this transition
+for rods of radius 0.5nm. Since we are looking at only hard-walled
+non-interacting rods, the critical separation for this transition will be
+smaller than any system where there is an attractive force between rods. Walther
+\emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
+carbon nanotubes. They use molecular dynamics with Lennard-Jones potentials for
+nanotubes of diameter 1.25nm and separations ranging from about 0.3nm to 1.5nm.
+They also find a drying transition occurs, and find it to be at separations less
+than 0.9-1.0nm\cite{walther2004hydrodynamic}. This is several times larger than
+what we find for hydrophobic rods, as expected due to the carbon-carbon
+interations between two nanotubes. The density oscillations are very similar to
+those for the single hydrophobic rod in water, as seen in Figure
+\ref{fig:density-single-rod}.
+
+The free energy per length is calculated for several different radii and is plotted
+in Figure \ref{fig:rods-energy-vs-distance}. Each data set is adjusted such that the
+free energy per length goes to zero at large separations. Once a certain separation is
+reached, the rods will simply act like the single rod in water and the energy will
+reach an asymptote proportional to the surface tension (as in Figure \ref{fig:energy-vs-diameter}).
+
+
+For one set of rods (radii of 0.5nm) the free energy is plotted with the internal energy
+and the entropic energy contribution, where all are in units of energy per length (see Figure
+\ref{fig:energy-rods}). 
+
+Here we will want to cite~\cite{walther2004hydrodynamic}, which gives simulations for 
+two interacting
+nanotubes in water.  It's not precisely the same, but if we can't find something
+more similar, this would be worth citing - they use CNTS with diameter 1.25 nm
+and find drying occurs for separations less than 0.9-1nm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}

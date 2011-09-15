@@ -66,8 +66,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
   fclose(out);
 }
 
-void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
-			    const Grid &c, const Grid &d) {
+void plot_grids_yz_directions(const char *fname, const Grid &a) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -77,19 +76,19 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
   //const int y = gd.Ny/2;
-  for (int y=0; y<gd.Ny; y++) {
-    for (int z=0; z<gd.Nz; z++) {
+  for (int y=0; y<gd.Ny; y+=10) {
+    for (int z=0; z<gd.Nz; z+=10) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
       double ahere = a(x,y,z);
-      double bhere = b(x,y,z);
-      double chere = c(x,y,z);
-      double dhere = d(x,y,z);
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	      ahere, bhere, chere, dhere);
+      fprintf(out, "%g\t%g\t%g\t%.3g\n", here[0], here[1], here[2], ahere);
     }
     fprintf(out,"\n");
  }  
   fclose(out);
+}
+
+bool close(double a, double b) {
+  return fabs(a-b)/fabs(a+b) < 1e-6;
 }
 
 int main(int argc, char *argv[]) {
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (distance=0*nm; distance<2.0*nm; distance += .1*nm) {
+  for (distance=0*nm; distance<0.5*nm; distance +=0.02*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     
@@ -162,7 +161,7 @@ int main(int argc, char *argv[]) {
     //printf("Constraint has become a graph!\n");
    
     potential = water_prop.liquid_density*constraint
-      + 400*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+      + 500*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
@@ -209,22 +208,24 @@ int main(int argc, char *argv[]) {
     double energy = (min.energy() - EperCell)/width;
     printf("Energy is %.15g\n", energy);
 
-    double totalentropy = S.integral(water_prop.kT, potential);
+    double totalentropy = S.integral(water_prop.kT, potential)/width;
     
     fprintf(o, "%g\t%.15g\t%.15g\n", distance/nm, energy, totalentropy);
 
     char *plotnameslice = (char *)malloc(1024);
     sprintf(plotnameslice, "paper/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
-    // char *plotname = (char *)malloc(1024);
-    // sprintf(plotname, "paper/figs/rods-1nm-%04.1f.dat", distance/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));
     Grid Xassoc(gd, X(water_prop.kT, density));
     plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
-    //plot_grids_yz_directions(plotname, density, energy_density, entropy, Xassoc);
+    if ((close(distance, 0.2*nm) || close(distance, 0.4*nm)) && close(diameter, 1*nm)) {
+      char *plotname = (char *)malloc(1024);
+      sprintf(plotname, "paper/figs/rods-picture-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+      plot_grids_yz_directions(plotname, density);
+      free(plotname);
+    }
     free(plotnameslice);
-    //free(plotname);
 
     // double N = 0;
     // {
