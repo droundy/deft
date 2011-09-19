@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "Monte-Carlo/monte-carlo.h"
+#include <cassert>
 
 int main(){
-  const int div = 10;
+  const int div = 40;
   const double R = 1;
   int *shells = new int[div];
   double *density = new double[div];
@@ -115,22 +116,30 @@ int main(){
 
 int shell(Vector3d v, int div, double rad){
   double temp = distance(v,Vector3d(0,0,0));
-  int count = 1;
-  for(double i = rad/div; i <= div; i+=rad/div){
-    if(count==1){
+  for(int count = 0; count<div; count++){
+    if(temp<(count+1)*rad/div){
+      return count;
+    }
+  }
+  return div-1;
+}
+  /*  int count = 0;
+  for(double i = rad/div; i <= rad; i+=rad/div){
+    if(count==0){
       if(temp <= i){
 	return count;
       }
       count++;
       continue;
     }
-    if(temp > i && temp <= (i+rad/div)){
+    if(temp > i-rad/div && temp <= i){
       return count;
     }
     count++;
   }
+  assert(false);
   return 0;
-}
+}*/
 
 double distance(Vector3d v1, Vector3d v2){
   return sqrt((v1[0]-v2[0])*(v1[0]-v2[0])+(v1[1]-v2[1])*(v1[1]-v2[1])+(v1[2]-v2[2])*(v1[2]-v2[2]));
