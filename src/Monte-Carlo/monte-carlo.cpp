@@ -4,28 +4,12 @@
 #include "Monte-Carlo/monte-carlo.h"
 #include "MersenneTwister.h"
 
-int main(){
-  run();
-  //  printf("Hello World\n");
-  // const int N = 14;
-  //Vector3d *spheres = new Vector3d[N];
-  //for(int i = 0; i < N; i++){
-    //  for(int j = 0; j < 3; j++){
-    //  spheres[i][j] = ran();
-    // }
-  // spheres[i] = ran3();
-  //}
-  // for(int i = 0; i<N; i++){
-  // printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-  // printf("Distance from origin = %g\n", distance(spheres[i]));
-  //} 
-  // FILE *o = fopen("Spheres.dat", "w");
-  // writeSpheres(spheres, N, o);
-  //Need to be able to send in spheres
-  //spheres[0] = move(spheres[0], 1, 1, 1);
-  //writeSpheres(spheres, N, o);
-  //fclose(o);
-  //delete[] spheres;
+int main(int argc, char *argv[]){
+  if(argc!=4){
+    printf("Incorrect number of args: radius, # of spheres, iterations\n");
+    return 1;
+  }
+  run(atof(argv[1]),atoi(argv[2]),atoi(argv[3]));
 }
 
 double ran(){

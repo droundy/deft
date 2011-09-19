@@ -1,11 +1,30 @@
 #include <stdio.h>
 #include "Monte-Carlo/monte-carlo.h"
 
-void run(){
-  const int N = 13;
-  const double R = 1;
-  const double rad = 3;
+void run(const double rad, const int N, const int times){
+  const double R = 1; 
   Vector3d *spheres = new Vector3d[N];
+ 
+  for(int i=0; i<N; i++){
+    spheres[i]=rad*ran3();
+  }
+  int i = 0;
+  for(double numOverLaps=countOverLaps(spheres, N, R, rad); numOverLaps>0;){
+    Vector3d old =spheres[i%N];
+    spheres[i%N]=move(spheres[i%N]);
+    double newOverLaps=countOverLaps(spheres, N, R, rad);
+    if(newOverLaps>numOverLaps){
+      spheres[i%N]=old;
+    }
+    else{
+      numOverLaps=newOverLaps;
+    }
+    i++;
+    printf("numOverLaps=%g\r",numOverLaps);
+    fflush(stdout);
+  }
+
+  /*
   spheres[0] = Vector3d(0,0,0);
   spheres[1] = Vector3d(2*R,0,0);
   spheres[2] = Vector3d(R,R*sqrt(3),0);
@@ -22,14 +41,14 @@ void run(){
   for(int i = 0; i<N; i++){
     printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
     printf("Distance from origin = %g\n", distance(spheres[i], Vector3d(0,0,0)));
-  }
-  FILE *o = fopen("Spheres.dat", "w");
+    }*/
+  FILE *o = fopen("Spheres(120-in-6).dat", "w");
+  fprintf(o,"Radius=%g\n",rad);
+  fprintf(o,"Number of Spheres=%d\n", N);
   writeSpheres(spheres, N, o);
-  int i = 0;
+  i = 0;
   int j = 0;
   int count = 0;
-
-  int times = 10000;
 
   while(j<times){
     count++;
@@ -40,8 +59,9 @@ void run(){
     }
     spheres[i%N] = temp;
     writeSpheres(spheres, N, o);
-    if(j % (times/10)==0){
-      printf("%g%% complete...\n",j/(times*1.0)*100);
+    if(j % (times/100)==0){
+      printf("%g%% complete...\r",j/(times*1.0)*100);
+      fflush(stdout);
     }
     j++;
   }
@@ -50,18 +70,22 @@ void run(){
   delete[] spheres;
 }
 
-//To be deleted... cvh
-bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s){
-  for(int i = 0; i < n; i++){
-    if(i==s){
-      continue;
+
+double countOverLaps(Vector3d *spheres, int n, double R, double rad){
+  double num = 0;
+  for(int j = 0; j<n; j++){
+    if(distance(spheres[j],Vector3d(0,0,0))>rad){
+      num+=distance(spheres[j],Vector3d(0,0,0))-rad;
     }
-    if(distance(spheres[i],v)<2*R){
-      return true;
+    for(int i = j+1; i < n; i++){
+      if(distance(spheres[i],spheres[j])<2*R){
+	num+=2*R-distance(spheres[i],spheres[j]);
+      }
     }
   }
-  return false;
+  return num;
 }
+
 
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s){
   if(distance(v,Vector3d(0,0,0))>rad){
