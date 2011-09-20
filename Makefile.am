@@ -10,8 +10,8 @@ MONTECARLO_CODE = src/Monte-Carlo/monte-carlo.cpp \
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
-	src/HardSpheres.cpp src/ExternalPotential.cpp src/Functional.cpp \
-	src/SAFT.cpp src/CallMe.cpp \
+	src/HardSpheres.cpp src/ExternalPotential.cpp \
+	src/Functional.cpp src/SAFT.cpp src/CallMe.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
@@ -45,6 +45,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/constrained-water-1D.mkdat \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
+	paper/figs/four-rods-in-water.mkdat \
 	paper/figs/single-rod-in-water.mkdat \
 	paper/figs/single-rod-in-water-high-res.mkdat \
 	paper/figs/single-rod-in-water-low-res.mkdat \
@@ -138,6 +139,7 @@ paper_figs_entropy_at_690K_mkdat_SOURCES = paper/figs/entropy-at-690K.cpp $(GENE
 paper_figs_constrained_water_1D_mkdat_SOURCES = paper/figs/constrained-water-1D.cpp $(ALL_CODE)
 paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
+paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
@@ -211,6 +213,7 @@ poster: paper
 	cd paper && $(MAKE) poster.pdf
 
 slowfigs: paper/figs/rods-in-water.dat \
+	paper/figs/four-rods-in-water.dat\
 	paper/figs/single-rod-in-water.dat \
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
