@@ -19,7 +19,7 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
-\newcommand{\xx}{\textbf{x}}
+\newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
@@ -45,7 +45,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\needsworklater{ We develop a classical density functional theory for
+ {We develop a classical density functional theory for
   water by combining the fundamental-measure theory functional--which
   describes hard sphere fluids--with attractive interactions based on the 
   Statistical Associating Fluid Theory (SAFT).  Using
@@ -85,7 +85,7 @@ also desired.
 Some models are primarily designed for use with homogeneous systems. Although
 these 
 models are useful in predicting some bulk properties, the interesting
-chemistry that occurs in water cannot be described with a homogeneous only
+chemistry that occurs in water cannot be described with a homogeneous-only
 model. To
 describe solvation and other processes in aqueous solution, a more robust theory
 that 
@@ -94,11 +94,12 @@ can handle varying densities is needed.
 \subsection{Classical density-functional theory}
 
 Classical density-functional theory (DFT) provides an efficient way to evaluate
-the free energy using the density of the fluid. The free energy is a functional
+the free energy using the probability distribution of the fluid. The free energy 
+is a functional
 of the density function and is independent of any external
 potentials\cite{ebner1976}. The most common use of DFT is calculating ground
 state electron densities in quantum mechanical systems. The Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} uses DFT to write the ground state
+theorem\cite{hohenberg1964inhomogeneous} allows us to write the ground state
 energy in terms of a universal functional of the electron density and a separate
 term including the external potential. Mermin\cite{mermin1965thermal} gives a
 theorem extending that of Hohenberg and Kohn to nonzero temperatures:
@@ -161,8 +162,15 @@ according to the contact value theorem
 which also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes.  These properties are retained by the total functional,
-provided the remaining terms are \emph{purely
-  nonlocal}~\cite{ashcroft?}\needsworknow{I can't find this citation anywhere!}.
+provided the remaining terms are \emph{purely nonlocal}. This requires
+that
+\begin{equation}
+ \frac{\delta^2F_{\textit{excess}}[n]}{\delta n(\xx_1)~\delta n(\xx_1)}\neq\infty
+\end{equation}
+where $F_{\textit{excess}}[n]$ describes all the remaining terms in the functional.
+This ensures that any higher order terms in the Taylor expansion
+of $F[n+\Delta n]$ are very small.
+
 
 \subsection{Hard-sphere repulsion}
 
@@ -203,12 +211,17 @@ For our water functional, we use the hard-sphere radius of
 3.03420~\AA, which was found to be optimal by Clark
 \emph{et al}.\cite{clark2006developing}
 
+\newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
+\newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
+\newcommand\epsilonassoc{\ensuremath{\epsilon_\textit{a}}}
+\newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
+\newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
 The first term in the attractive energy is the dispersion term.  We use a
 dispersion term based on the SAFT-VR
 approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters, an interaction energy $\epsilon_\textit{disp}$ and a
-length scale $\lambda_\textit{disp}$.
+parameters, an interaction energy $\epsilondisp$ and a
+length scale $\lambdadisp$.
 
 The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
@@ -216,9 +229,9 @@ The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \end{align}
 where $A_1$ and $A_2$ are the first two terms in a high-temperature
 perturbation expansion.  $A_1$ is the mean-field dispersion
-interaction, which for a homogeneous fluid is given by
-\begin{align}
-  A_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
+interaction, which reduces in the homogeneous limit to
+\begin{align}\label{eq:A1-simple}
+  \frac{A_1}{V} &= \frac12 n_b \int \varphi(\left|\xx\right|)
   g_{HS}(\left|\xx\right|) d\xx
 \end{align}
 The second dispersion term in the free energy $A_2$ describes the
@@ -227,16 +240,68 @@ to the dispersion interaction itself, and is commonly approximated
 using the local compressibility approximation (LCA).
 
 We use a free square-well function for the dispersion $\varphi$, which
-has been demonstrated \textcolor{red}{(CITE)} to give a reasonable fit
-to the equation of state.  Thus our model interaction has the form:
+is the choice used by Clark \emph{et al}~\cite{clark2006developing},
+and allows a reasonable fit to the equation of state.  Thus our model
+interaction has the form:
 \begin{equation}
-  \varphi(r) = \Theta(r-2 \lambda_\textit{disp} R)
+  \varphi(r) = \Theta(r-2 \lambdadisp R)
 \end{equation}
 where $\Theta$ is the Heaviside step function.
 
-\textcolor{red}{TODO:  Add the actual functions that we use and the
-  actual form.  The above is really just an introduction.}
+The form of $A_1$ is given in
+reference~\cite{gil-villegas-1997-SAFT-VR}, but is expressed in terms
+of the filling fraction.  In order to apply this form to an
+inhomogeneous density distribution, we construct an effective local
+filling fraction for dispersion $\etadisp$, given by
+\begin{align}
+  \etadisp(\xx) &=
+  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
+             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'
+\end{align}
+This effective filling fraction is used throughout the dispersion
+calculations, and represents a filling fraction averaged over the
+effective range of the dispersive interaction.  This functional
+introduces an additional empirical parameter $\lscale$ which adjusts
+the length scale over which the dispersion interaction is correlated.
 
+The first term in the dispersion functional $A_1$ when written using
+the above filling fraction for dispersion has the form
+\begin{align}
+  A_1 &= \int
+   -4*(\lambdadisp^3 - 1)*\epsilondisp \etadisp(\xx)
+    g^{HS}_\sigma(\eta_\textit{eff}(\xx))
+  d\xx \\
+  \eta_\textit{eff}(\xx) &= \sum_{ij=0}^3 C_{ij}  \etadisp^i(\xx)
+  \lambdadisp^j
+  \\
+  g_\sigma^{HS}(\eta) &= \frac{1}{1-\eta}
+  +\frac32\frac{\zeta(\xx)}{(1-\eta)^2}
+  + \frac12\frac{\eta^2\zeta(\xx)}{(1-\eta)^3}
+  \\
+  \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
+\end{align}
+where $C_{ij}$ are numerical constants taken from
+reference\cite{gil-villegas-1997-SAFT-VR}, which come from a numerical
+fit to the integral in Equation~\ref{eq:A1-simple} over a range of
+values for $\lambdadisp$ and filling fractions.  The $\zeta$ factor
+(also seen in the association energy, below) is a dimensionless
+measure of the local density inhomogeneity.
+
+The second term, $A_2$, which describes the contribution to the free
+energy associated with fluctuations is given by
+\begin{align}
+  A_2 &= \int \frac12 \epsilondisp
+              K_{HS}(\etadisp(\xx))
+              \etadisp(\xx)
+              \frac{\delta A_1}{\delta \etadisp(\xx)}
+                d\xx
+\end{align}
+where $K_{HS}$ is the Percus-Yevick hard-sphere compressibility, given
+by
+\begin{align}
+  K_{HS} &=
+    \frac{(1 - \etadisp)^4}{1 + 4(\etadisp + \etadisp^2)}
+\end{align}
 
 \begin{figure}
 \begin{center}
@@ -252,8 +317,8 @@ The final attractive energy term is the association term, which
 accounts for hydrogen bonding.  Hydrogen bonds are modeled as four
 attractive patches (``association sites'') on the surface of the hard
 sphere.  These four sites represent two protons and two electron lone
-pairs.  There is an attractive energy $\epsilon_\textit{assoc}$ when
-two molecules are arranged such that the proton of one overlaps
+pairs.  There is an attractive energy $\epsilonassoc$ when
+two molecules are oriented such that the proton of one overlaps
 with the lone pair of the other.  The volume over which this
 interaction occurs is $\kappa_\textit{assoc}$, giving the association
 term in the free energy has two empirical parameters that are fit to
@@ -272,25 +337,26 @@ The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
   the same functional, but their paper contains errors in the
-  association term and is not useful as a reference.}  The functional
-of Fu and We includes the effects of density inhomogeneities on the
-\emph{contact density} of hard spheres, which conventionally appears
-in the form of the density multiplied by the contact value of the
-correlation function $g^{HS}_\sigma$, but is based on the SAFT-HS
-equation of state\cite{FIXME}, rather than the SAFT-VR equation of
-state\cite{gil-villegas-1997-SAFT-VR} which is used in the optimal
-SAFT parametrization for water found by Clark \emph{et
+  association term and is not useful as a reference.}  The association
+functional of Fu and Wu includes the effects of density
+inhomogeneities on the \emph{contact density} of hard spheres, which
+conventionally appears in the form of the density multiplied by the
+contact value of the correlation function $g^{HS}_\sigma$, but is
+based on the SAFT-HS equation of state, rather than the SAFT-VR
+equation of state\cite{gil-villegas-1997-SAFT-VR} which is used in the
+optimal SAFT parametrization for water found by Clark \emph{et
   al}\cite{clark2006developing}.
 
 The association free energy for our four-site model has the form
 \begin{align}
-  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx)
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx)\zeta(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
 where the value of $4$ comes from the four association sites per
 molecule, and the functional $X$ is the fraction of assotiation sites
-\emph{not} hydrogen-bonded.  The fraction $X$ is determined by the
-quadratic equation
+\emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
+measure of the density inhomogeneity.  The fraction $X$ is determined
+by the quadratic equation
 \begin{align}
   X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)\Delta(\xx)} - 1}
   {4 n_0(\xx)\zeta(\xx)\Delta(\xx)}
@@ -298,19 +364,19 @@ quadratic equation
 where the factor $\zeta$ from
 Yu and We\cite{yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
-density, and reduces to unity in the homogeneous limit.
+density, and reduces to unity in the homogeneous limit:
 \begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}
 \end{align}
-The functional $\Delta$ is a measure of the hydrogen-bonding
-probability.  In the SAFT-VR model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is
-given by
+The functional $\Delta$ which appears in the formula for $X$ is a
+measure of hydrogen-bonding probability.  In the SAFT-VR
+model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
 \begin{align}
-  \Delta &= \kappa_\textit{assoc} g^\textit{SW}_\sigma
-  \left(e^{-\beta\epsilon_\textit{assoc}} - 1\right) \\
-  g^\textit{SW}_\sigma &= g^\textit{HS}_\sigma +
-  \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial n_3} -
-  \frac{\lambda}{3 n3}\frac{\partial a_1}{\partial \lambda}\right)
+  \Delta(\xx) &= \kappa_\textit{assoc} g^\textit{SW}_\sigma(\xx)
+  \left(e^{-\beta\epsilonassoc} - 1\right) \\
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\etadisp(\xx)) +
+  \frac{1}{4}\beta\left(\frac{\delta A_1}{\delta \etadisp(\xx)} -
+  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
@@ -321,9 +387,9 @@ written as a perturbative correction to the hard-sphere correlation
 function, for which we use the functional of Yu and
 Wu.\cite{yu2002fmt-dft-inhomogeneous-associating}
 \begin{align}
-  g_\sigma^{HS} &= \frac{1}{1-n_3}
-  +\frac32\frac{\zeta}{(1-n_3)^2}
-  + \frac12\frac{n_3^2\zeta}{(1-n_3)^3}
+  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
+  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
+  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}
 \end{align}
 
 \subsection{Other thermodynamic functions}
@@ -435,9 +501,10 @@ contains five empirical parameters: the hard-sphere radius, an energy
 and length scale for the dispersion interaction, and an energy and
 length scale for the association interaction.  In addition to the five
 empirical parameters of Clark \emph{et al}, we add a single additional
-parameter defining the length scale over which the density is averaged
-when computing the dispersion free energy.  We use this final
-parameter to fit the surface tension, with the result shown in
+parameter $\lscale$---with a fitted value of 0.72---which determines
+the length scale over which the density is averaged when computing the
+dispersion free energy.  We use this final parameter to fit the
+surface tension, with the result shown in
 Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
 \emph{et al} overestimates the critical temperature---which is a
 common feature of models which do not explicitly treat the critical
@@ -558,7 +625,7 @@ water.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
 \end{center}
-\caption{ Energy versus diameter for a single hydrophobic rod
+\caption{ Energy versus radius for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
 tension at room temperature, and it agrees well with the surface tension in
 Figure \ref{fig:surface-tension}. }
@@ -587,6 +654,15 @@ the density approaches that of the bulk saturated liquid density. The small
 radius
 rod has comparatively larger oscillations and a higher contact density.
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-single-rod}
+\end{center}
+\caption{ Number of bonds per molecule near the interface with a single
+hydrophobic rod. Compare with Walther\cite{walther2001carbon} fig 9. }
+\label{fig:xassoc-single-rod}
+\end{figure}
+
 Figure \ref{fig:energy-vs-diameter} shows the free energy per area versus
 radius for the range of rods studied, with radii from 0.05 nm to 1.5 nm. After 
 about 0.5 nm or so, this reaches
@@ -594,9 +670,8 @@ an asymptote equal to the surface tension. From the inset in Figure
 \ref{fig:surface-tension}, it is clear that the surface tension at room 
 temperature is approximately 72 mN/m. This is very close to the value from
 the larger diameter single rod energy per area, which is about 75~mN/m. 
-\needsworknow{Here it will be beneficial to add some discussion of any
-relevant experimental work or other simulations that deal with one rod-like 
-thing in water. Do we have anything currently matching this?}
+\needsworknow{Discussion of Walther 2001 paper\cite{walther2001carbon}}
+
 
 \subsubsection{Resolution and convergence tests}
 Figure \ref{fig:densityresolution} shows the density profiles for three
@@ -613,21 +688,6 @@ within 1\% of the high resolution free energy.
 
 \subsection{Hydrophobic interaction of two rods}
 
-Here we will want to cite~\cite{walther2004hydrodynamic}, which gives simulations for 
-two interacting
-nanotubes in water.  It's not precisely the same, but if we can't find something
-more similar, this would be worth citing - they use CNTS with diameter 1.25 nm
-and find drying occurs for separations less than 0.9-1nm.
-
-% \begin{figure}
-% \begin{center}
-% \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
-% \end{center}
-% \caption{ Density profile for two hydrophobic rods (diameter 1.0 nm) at a 
-% separation of 0.8 nm. The scale on the right is density in g/mL.}
-% \label{fig:density-rods}
-% \end{figure}
-
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-diagram}
@@ -639,19 +699,78 @@ The radius and separation are shown.}
 
 \begin{figure}
 \begin{center}
+\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\end{center}
+\caption{ Density profiles illustrating the transition from vacuum 
+to liquid water between the rods. The top figure is at a separation of 0.2nm and the
+bottom is 0.4nm. }
+\label{fig:density-rods}
+\end{figure}
+
+\begin{figure}
+\begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
-\caption{ Energy versus separation for two hydrophobic rods. Radii 0.3nm, 0.5nm, 1.0nm
- }
+\caption{ Energy versus separation for two hydrophobic rods ranging in radius from
+0.3nm to 1.2nm. All were arbitrarily set to go to zero at large separations. The
+discontinuous transition corresponds to the phase change from
+vacuum to liquid between the rods. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-rods}
+\end{center}
+\caption{ Free energy, internal energy, and the entropic energy contribution versus
+separation for two hydrophobic rods of radii 0.5nm. All energies are arbitrarily
+set to go to zero at large separations. }
+\label{fig:energy-rods}
+\end{figure}
+
+We now look at the more interesting problem of two rods in water. We continue to
+use hydrophobic rods of various radii at separation $d$ (see Figure
+\ref{fig:rods}), ranging from $d=0$ (touching rods) to about 1nm. At small
+separations ($d<$2nm-4nm) there is only vacuum between the rods. As the rods are
+pulled apart, the vacuum region expands until some critical separation is
+reached and liquid water fills the region between the rods. Figure
+\ref{fig:density-rods} shows density profiles before and after this transition
+for rods of radius 0.5nm. Since we are looking at only hard-walled
+non-interacting rods, the critical separation for this transition will be
+smaller than any system where there is an attractive force between rods. Walther
+\emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
+carbon nanotubes. They use molecular dynamics with Lennard-Jones potentials for
+nanotubes of diameter 1.25nm and separations ranging from about 0.3nm to 1.5nm.
+They also find a drying transition occurs, and find it to be at separations less
+than 0.9-1.0nm\cite{walther2004hydrodynamic}. This is several times larger than
+what we find for hydrophobic rods, as expected due to the carbon-carbon
+interations between two nanotubes. The density oscillations are very similar to
+those for the single hydrophobic rod in water, as seen in Figure
+\ref{fig:density-single-rod}.
+
+The free energy per length is calculated for several different radii and is plotted
+in Figure \ref{fig:rods-energy-vs-distance}. Each data set is adjusted such that the
+free energy per length goes to zero at large separations. Once a certain separation is
+reached, the rods will simply act like the single rod in water and the energy will
+reach an asymptote proportional to the surface tension (as in Figure \ref{fig:energy-vs-diameter}).
+
+
+For one set of rods (radii of 0.5nm) the free energy is plotted with the internal energy
+and the entropic energy contribution, where all are in units of energy per length (see Figure
+\ref{fig:energy-rods}). 
+
+Here we will want to cite~\cite{walther2004hydrodynamic}, which gives simulations for 
+two interacting
+nanotubes in water.  It's not precisely the same, but if we can't find something
+more similar, this would be worth citing - they use CNTS with diameter 1.25 nm
+and find drying occurs for separations less than 0.9-1nm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
 [conclusion text]
 
+\bibliographystyle{unsrt}
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}

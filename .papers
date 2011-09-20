@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# I use bash because I prefer its builtin time function over /usr/bin/time.
+
+set -ev
+
+time make -j4 paper project
+
+time make -j4 papers
