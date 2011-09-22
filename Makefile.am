@@ -212,6 +212,7 @@ slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/single-rod-in-water.dat \
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
+	papers/contact/figs/mc-06-112.dat \
 	papers/contact/figs/box.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
@@ -257,3 +258,12 @@ comparisons/da1deta_vrpack.test: comparisons/da1deta_vrpack.f fortran/vrpack.f
 
 comparison: $(COMPARISONDATA)
 	tests/comparisons.sh
+
+MCITERATIONS = 1000000
+papers/contact/figs/mc-06-112.dat: monte-carlo
+	time ./monte-carlo 6 112 $(MCITERATIONS) $@
+
+
+papers/contact/figs/mc-density-%.dat: papers/contact/figs/mc-%.dat \
+		analyze-monte-carlo
+	time ./analyze-monte-carlo $@ $<
