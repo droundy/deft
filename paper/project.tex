@@ -496,7 +496,8 @@ an error of only a few percent.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/surface-298}
 \end{center}
-\caption{Liquid-vapor interface profile at room temperature.  }
+\caption{The liquid-vapor density profile at room temperature shows
+some small oscillations close to the interface.  }
 \label{fig:liquid-vapor-profile}
 \end{figure}
 
@@ -519,12 +520,17 @@ point---we cannot correctly describe the surface tension at all
 temperatures, and chose to fit it for the temperature range at which
 water is liquid at one atmosphere of pressure.
 
-For reference, we plot the predicted vapor pressure (see
-Figure~\ref{fig:equation-of-state}) and coexistence curve (see
-Figure~\ref{fig:temperature-vs-density}) against experimental values.  These
-match those calculated by Clark \emph{et al}. To find the densities, we use the
+For reference, we plot the coexistence curve (see
+Figure~\ref{fig:temperature-vs-density}) and the predicted vapor pressure (see
+Figure~\ref{fig:equation-of-state}) against experimental values.  These
+match those calculated by Clark \emph{et al}. The functional provides a good description of
+the vapor pressure, which has an error of less than 
+1\% of the experimental data. The coexistence curve is calculated by 
+\fixme{explanation of coexistence curve calculation?}. Near the critical temperature,
+the agreement is off, and the theoretical prediction  of the temperature is quite a bit higher than
+experiment. To find the densities, we use the
 ``common tangent'' rule, as illustrated in Figure~\ref{fig:homogeneous}.
-\needsworknow{Expand the previous paragraph}
+\needsworknow{Expand the previous sentence - common tangent rule}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
@@ -544,18 +550,6 @@ line in the top figure represents the saturated liquid density.}
 \label{fig:energy-1D}
 \end{figure}
 
-The fluid density at a liquid-solid interface commonly displays
-oscillatory behavior, but the presence of density oscillations at
-liquid-vapor interfaces is more debated\cite{penfold2001structure}.
-In fact, the \emph{meaning} of the density profile at a liquid-vapor
-interface is clouded by the existence of long-wavelength perturbations
-known as \emph{capillary waves}.  These waves are not accounted for in
-density-functional theory (although the \emph{exact}
-density-functional theory \emph{would} include them), with the result
-that the density profile will be smoothed out by CW effects. The liquid-vapor
-interface is plotted in Figure~\ref{fig:liquid-vapor-profile} and shows
-some small oscillations.
-
 One of the most computationally simple ways to study confined water is by
 constraining it to a slit where the water molecules can only move in one
 dimension. Experimentally, this could represent two different situations.
@@ -565,6 +559,18 @@ second
 possibility is a large sphere brought close to a plane, which eliminates the 
 need for perfect alignment.
 
+The fluid density at a liquid-solid interface commonly displays
+oscillatory behavior, but the presence of density oscillations at
+liquid-vapor interfaces is more debated\cite{penfold2001structure}.
+In fact, the \emph{meaning} of the density profile at a liquid-vapor
+interface is clouded by the existence of long-wavelength perturbations
+known as \emph{capillary waves}.  These waves are not accounted for in
+density-functional theory (although the exact
+density-functional theory would include them), with the result
+that the density profile will be smoothed out by CW effects. The liquid-vapor
+interface is plotted in Figure~\ref{fig:liquid-vapor-profile} and shows
+some small oscillations.
+
 We choose a chemical potential corresponding to a pressure of 1~atm and set the
 temperature to a typical room temperature of 298~K. We apply 
 a constraining potential outside the slit, where we choose a small non-zero
@@ -573,7 +579,8 @@ density for numerical reasons. The slits studied range in size from 0.1~nm to
 lattice
 with a spacing of approximately 0.01~nm (0.2~bohrs) between lattice points.
 
-The density profile for a slit of size 4.0~nm is shown in Figure~\ref{fig:energy-1D}. Near the interface, there are oscillations around the
+The density profile for a slit of size 4.0~nm is shown in Figure~\ref{fig:energy-1D}. 
+Near the interface, there are oscillations around the
 liquid density which decrease near the center of the slit. We expect the center
 of the slit to act approximately like bulk water, and the absence of
 oscillations supports this. For larger slits (6.0~nm or more) the majority of
@@ -719,19 +726,9 @@ The radius and separation are shown.}
 \end{center}
 \caption{ Density profiles illustrating the transition from vapor 
 to liquid water between the rods. The radius is 0.5~nm, the top figure is at a separation of 0.2~nm and the
-bottom is 0.4~nm. }
+bottom is 0.4~nm. Figures~\ref{fig:rods-energy-vs-distance}~and~\ref{fig:energy-rods} show
+the energy for these and other separations.}
 \label{fig:density-rods}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
-\end{center}
-\caption{ Energy versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 0.9~nm. All were arbitrarily set to go to zero at large separations. The
-discontinuous transition corresponds to the phase change from
-vapor to liquid between the rods. }
-\label{fig:rods-energy-vs-distance}
 \end{figure}
 
 \begin{figure}
@@ -744,6 +741,18 @@ set to go to zero at large separations. }
 \label{fig:energy-rods}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
+\end{center}
+\caption{ Energy versus separation for two hydrophobic rods ranging in radius from
+0.3~nm to 0.9~nm. All were arbitrarily set to go to zero at large separations. The
+transition corresponds to the phase change from
+vapor to liquid between the rods as pictured in the density profiles in 
+Figure~\ref{fig:density-rods}. }
+\label{fig:rods-energy-vs-distance}
+\end{figure}
+
 We now look at the more interesting problem of two rods in water. We continue to
 use hydrophobic rods of various radii at separation $d$ (see Figure~\ref{fig:rods}), ranging from $d=0$ 
 (touching rods) to about 1~nm. At small
@@ -751,36 +760,56 @@ separations ($d<2$~-~4~nm) there is only vapor between the rods. As the rods are
 pulled apart, the vapor region expands until some critical separation is
 reached and liquid water fills the region between the rods. Figure~\ref{fig:density-rods} 
 shows density profiles before and after this transition
-for rods of radius 0.5~nm. Since we are looking at only hard-walled
+for rods of radius 0.5~nm. This critical separation for the transition to liquid depends
+somewhat on the radii of the rods, and is about 0.25~nm for the rods in Figure~\ref{fig:density-rods}.
+Since we are looking at only hard-walled
 non-interacting rods, the critical separation for this transition will be
 different than any system where there is an appreciable force between rods. 
-
-The free energy per length is calculated for several different radii and is plotted
-in Figure~\ref{fig:rods-energy-vs-distance}. Each data set is adjusted such that the
-free energy per length goes to zero at large separations. Once a certain separation is
-reached, the rods will simply act like the single rod in water and the energy will
-reach an asymptote proportional to the surface tension (as in Figure~\ref{fig:energy-vs-diameter}).
+The density oscillations  around the rods are very similar to
+those for the single hydrophobic rod in water, as seen in Figure~\ref{fig:density-single-rod}.
+The oscillations around the two rods at small separation looks as if the two rods were one
+solid object shaped \fixme{racetrack shaped?}.
 
 For one set of rods (radii of 0.5~nm) the free energy is plotted with the internal energy
 and the entropic energy contribution, where all are in units of energy per length 
-(see Figure~\ref{fig:energy-rods}). \needsworknow{More discussion of Figure~\ref{fig:energy-rods}}
+(see Figure~\ref{fig:energy-rods}). The free energy slightly increases as the separation
+goes from 0 to the critical separation (0.25~nm) and then is approximately constant at
+larger separations. Since there is no repulsive interaction between the rods, there is no
+large energy increase when the rods touch. The entropy has a minimum just before the rods
+transition to let liquid between them. As the rods separate starting from zero, the area 
+between them containing vapor increases and there is less overall volume for the 
+surrounding liquid water to occupy and thus the entropy decreases. 
+\needsworknow{More discussion of Figure~\ref{fig:energy-rods}, internal energy, how they add
+together, etc.}
 
-Walther
-\emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
-carbon nanotubes. They use molecular dynamics with Lennard-Jones potentials for
+The free energy per length is compared for rods of several different radii
+in Figure~\ref{fig:rods-energy-vs-distance}. For comparison, we arbitrarily adjust each data set such that the
+free energy per length goes to zero at large separations. At large separations, the rods will 
+simply act like two separate single rods in water and the total energy will
+reach an asymptote proportional to the surface tension (similar to that shown in 
+Figure~\ref{fig:energy-vs-diameter}).
+The change in free energy per length at the point of transition increases as the radii of
+the rods increases. The smallest radius we show is 0.3~nm, which shows only a slight increase in
+free energy at the critical separation, while the largest radius has a more significant jump in free energy. 
+We see that all the rods studied have the same behavior, with a positive linear relation between free energy
+per length and the separation during the initial state where the rods have vapor between them. 
+The slope of this line is equal to the force per length on the rods, which we calculate to be 144~mN/m, 
+or twice the surface tension
+found by the functional (see Figure~\ref{fig:surface-tension}).
+
+Walther \emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
+carbon nanotubes, which are very geometrically similar to our hydrophobic rods. 
+They use molecular dynamics with Lennard-Jones potentials for
 nanotubes of diameter 1.25~nm and separations ranging from about 0.3~nm to 1.5~nm.
-They also find a drying transition occurs, and find it to be at separations less
-than 0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is several times larger than
+They also find a drying transition occurs, and find it to be at separations near
+0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is several times larger than
 what we find for hydrophobic rods, as expected due to the carbon-carbon
 interations between two nanotubes. 
-
-The density oscillations are very similar to
-those for the single hydrophobic rod in water, as seen in Figure~\ref{fig:density-single-rod}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
-[conclusion text]
+\needsworknow{Conclusions about slit, single rod, two hydrophobic rods (mostly). future uses}
 
 \bibliographystyle{unsrt}
 \bibliography{paper}% Produces the bibliography via BibTeX.

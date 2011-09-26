@@ -37,7 +37,7 @@ nm = 18.8972613       # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 set style line 1 lt 1 lw 3
-set style line 2 lt 2 lw 3
+set style line 2 lt 3 lc 3 lw 3
 
 plot [:4] [:] \
 'figs/surface-298.dat' u ($1/nm):($2/gpermL) notitle with lines ls 1, \
