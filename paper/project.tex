@@ -45,10 +45,20 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-{We develop a classical density functional theory for water by combining the fundamental-measure theory functional--which describes hard sphere fluids--with attractive interactions based on the Statistical Associating Fluid Theory (SAFT). Using this approximation, we are able to describe the density, free energy, and
-entropy of water, as well as the number of hydrogen bonds formed near liquid-vapor and liquid-solid interfaces. These interfaces include water confined to a hard-walled slit, a single hydrophobic rod immersed in water, and two hydrophobic rods 
-at various separations. We found \needsworknow{conclusion-like stuff about two rods, vapor-liquid transition between rods, constant force of twice surface tension, more?}.
-This functional provides a foundation for future work predicting the interactions of chemicals in aqueous solution on an
+{We develop a classical density functional theory for water by combining the
+fundamental-measure theory functional--which describes hard sphere fluids--with
+attractive interactions based on the Statistical Associating Fluid Theory
+(SAFT). Using this approximation, we are able to describe the vapor pressure, 
+various densities, surface tension, enthalpy and
+entropy of water, as well as the number of hydrogen bonds formed near
+liquid-vapor and liquid-solid interfaces. These interfaces include water
+confined to a hard-walled slit, a single hydrophobic rod immersed in water, and
+two hydrophobic rods 
+at various separations. We found \needsworknow{conclusion-like stuff about two
+rods, vapor-liquid transition between rods, constant force of twice surface
+tension, more?}.
+This functional provides a foundation for future work predicting the
+interactions of chemicals in aqueous solution on an
 atomic level.}
 
 %\tableofcontents
@@ -91,7 +101,7 @@ Classical density-functional theory (DFT) provides an efficient way to evaluate
 the free energy using the probability distribution of the fluid. The free energy 
 is a functional
 of the density function and is independent of any external
-potentials\cite{ebner1976}. The most common use of DFT is calculating ground
+potentials\cite{ebner1976density}. The most common use of DFT is calculating ground
 state electron densities in quantum mechanical systems. The Hohenberg-Kohn
 theorem\cite{hohenberg1964inhomogeneous} allows us to write the ground state
 energy in terms of a universal functional of the electron density and a separate
@@ -525,12 +535,14 @@ Figure~\ref{fig:temperature-vs-density}) and the predicted vapor pressure (see
 Figure~\ref{fig:equation-of-state}) against experimental values.  These
 match those calculated by Clark \emph{et al}. The functional provides a good description of
 the vapor pressure, which has an error of less than 
-1\% of the experimental data. The coexistence curve is calculated by 
-\fixme{explanation of coexistence curve calculation?}. Near the critical temperature,
+1\% of the experimental data. Near the critical temperature,
 the agreement is off, and the theoretical prediction  of the temperature is quite a bit higher than
-experiment. To find the densities, we use the
-``common tangent'' rule, as illustrated in Figure~\ref{fig:homogeneous}.
-\needsworknow{Expand the previous sentence - common tangent rule}
+experiment. To find the densities for the coexistence curve, we use the
+``common tangent'' rule. The two densities 
+will be on the same tangent line to the free energy as illustrated in the top of Figure~\ref{fig:homogeneous}.
+As the critical point approaches, the vapor and liquid coexistence densities get closer and closer together 
+(see the bottom of Figure~\ref{fig:homogeneous}. 
+\needsworknow{Expand the previous common tangent rule stuff?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
@@ -661,9 +673,8 @@ of the rod, as expected at the interface of any hydrophobic wall. }
 \end{center}
 \caption{ Density profiles for 
 a single hydrophobic rod with a radius of 0.5~nm using several different 
-lattice spacing resolutions. We used a high resolution of 0.05~bohrs ($\approx$
-0.003~nm), 
-medium 0.2~bohrs ($\approx$ 0.001~nm), and low 0.5~bohrs ($\approx$ 0.03~nm).}
+lattice spacing resolutions. We used a high resolution of 0.05~bohrs ($\approx$~0.003~nm), 
+medium 0.2~bohrs ($\approx$~0.001~nm), and low 0.5~bohrs ($\approx$~0.03~nm).}
 \label{fig:densityresolution}
 \end{figure}
 
