@@ -34,6 +34,7 @@ set key inside top
 #set origin 0,0
 set xlabel 'd (nm)'
 set ylabel 'Energy per length (kJ/mol nm)'
+set mxtics 2
 
 set style line 1 lt 5 lc 1 pt 7 ps 1.5 lw 3
 set style line 2 lt 1 lc 3 pt 7 ps 1.5 lw 3
@@ -52,10 +53,17 @@ kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 #'figs/rods-in-water.dat' u 1:($2/(2*pi*1*nm)/mNpermeter/2) notitle with lines ls 1 
 #'figs/rods-in-water.dat' u 1:($2/(kJpermol/angstrom) - 59.06) notitle with lp ls 1
 
+set label "Before transition" at 0.035,0.25 rotate by 0 font 'Helvetica,20'
+set label "(FIG. 14 top)" at 0.05,0.15 rotate by 0 font 'Helvetica,20' 
+set arrow from 0.155,0.2 to 0.193,-0.038 lw 2
+set label "After transition" at 0.288,0.42 rotate by 0 font 'Helvetica,20' 
+set label "(FIG. 14 bottom)" at 0.28,0.32 rotate by 0 font 'Helvetica,20'
+set arrow from 0.38,0.265 to 0.395,0.05 lw 2
+
 plot [:0.5] [:] \
 'figs/rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-0.749) title 'F' with lp ls 2 , \
-'figs/rods-in-water-01.0nm.dat' u 1:(20.89-$3*kB*298/kJpermol/nm) title '-TS' with lp ls 1, \
-'figs/rods-in-water-01.0nm.dat' u 1:(-21.615+($2+$3*kB*298)/kJpermol/nm) title 'U' with lp ls 3
+'figs/rods-in-water-01.0nm.dat' u 1:(20.94-$3*kB*298/kJpermol/nm) title '-TS' with lp ls 1, \
+'figs/rods-in-water-01.0nm.dat' u 1:(-21.69+($2+$3*kB*298)/kJpermol/nm) title 'U' with lp ls 3
 #'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.09) title 'r=0.7 nm' with lp ls 3 , \
 #'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.426) title 'r=0.9 nm' with lp ls 5 , \
 #'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.595) title 'r=1.0 nm' with lp ls 4 

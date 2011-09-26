@@ -78,7 +78,7 @@ int main(int, char **argv) {
   
   test_expression("IdealGasOfVeff",
                   IdealGasOfVeff.printme(Expression("x")),
-                  "(-(x + kT*log(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586*(32811.993*kT/6.283185307179586))*sqrt(32811.993*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
+                  "(-(x + kT*log(32839.84673628*kT/6.283185307179586*(32839.84673628*kT/6.283185307179586*(32839.84673628*kT/6.283185307179586))*sqrt(32839.84673628*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("kT*xxx",
                   (kT*sqr(xShellConvolve(R))).printme(

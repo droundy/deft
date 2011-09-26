@@ -31,7 +31,7 @@ set key noauto inside top
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'z (nm)'
-set ylabel 'bonds per molecule'
+set ylabel 'Bonds per Molecule'
 
 set style line 1 lt 1 lw 3
 set style line 2 lt 1 lc 7 lw 2
