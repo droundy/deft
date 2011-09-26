@@ -1,15 +1,35 @@
 #include <stdio.h>
+#include <time.h>
 #include "Monte-Carlo/monte-carlo.h"
 
-void run(const double rad, const int N, const int times){
+
+
+void run(const double rad, const int N, const long times, const char *filename){
   const double R = 1; 
   Vector3d *spheres = new Vector3d[N];
- 
+
+  // We start with randomly-placed spheres, and then gradually wiggle
+  // them around until they are all within bounds and are not
+  // overlapping.  We do this by creating an "overlap" value which we
+  // constrain to never increase.  Note that this may not work at all
+  // for high filling fractions, since we could get stuck in a local
+  // minimum.
   for(int i=0; i<N; i++){
     spheres[i]=rad*ran3();
   }
   int i = 0;
+  clock_t start = clock();
+  int num_to_time = 1000;
+  int num_timed = 0;
+
   for(double numOverLaps=countOverLaps(spheres, N, R, rad); numOverLaps>0;){
+    if (num_timed++ > num_to_time) {
+      clock_t now = clock();
+      printf("took %g seconds per initialising iteration\n",
+             (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      num_timed = 0;
+      start = now;
+    }
     Vector3d old =spheres[i%N];
     spheres[i%N]=move(spheres[i%N]);
     double newOverLaps=countOverLaps(spheres, N, R, rad);
@@ -20,52 +40,53 @@ void run(const double rad, const int N, const int times){
       numOverLaps=newOverLaps;
     }
     i++;
-    printf("numOverLaps=%g\r",numOverLaps);
-    fflush(stdout);
+    if (i%N == 0) {
+      printf("numOverLaps=%g\n",numOverLaps);
+      //printf("numOverLaps=%g\r",numOverLaps);
+      fflush(stdout);
+    }
   }
+  printf("\nFound initial state!\n");
 
-  /*
-  spheres[0] = Vector3d(0,0,0);
-  spheres[1] = Vector3d(2*R,0,0);
-  spheres[2] = Vector3d(R,R*sqrt(3),0);
-  spheres[3] = Vector3d(-R,R*sqrt(3),0);
-  spheres[4] = Vector3d(-2*R,0,0);
-  spheres[5] = Vector3d(-R,-R*sqrt(3),0);
-  spheres[6] = Vector3d(R,-R*sqrt(3),0);
-  spheres[7] = Vector3d(R,-R*.5,R*sqrt(3));
-  spheres[8] = Vector3d(0,sqrt(3)-.5*R,R*sqrt(3));
-  spheres[9] = Vector3d(-R,-.5*R,R*sqrt(3));
-  spheres[10] = Vector3d(R,-.5*R,-R*sqrt(3));
-  spheres[11] = Vector3d(0,sqrt(3)-.5*R,-R*sqrt(3));
-  spheres[12] = Vector3d(-R,-.5*R,-R*sqrt(3)); 
-  for(int i = 0; i<N; i++){
-    printf("%g  %g  %g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-    printf("Distance from origin = %g\n", distance(spheres[i], Vector3d(0,0,0)));
-    }*/
-  FILE *o = fopen("Spheres(120-in-6).dat", "w");
+  FILE *o = fopen(filename, "w");
   fprintf(o,"Radius=%g\n",rad);
   fprintf(o,"Number of Spheres=%d\n", N);
-  writeSpheres(spheres, N, o);
   i = 0;
-  int j = 0;
-  int count = 0;
+  long count = 0, workingmoves = 0;
 
-  while(j<times){
+  start = clock();
+  num_timed = 0;
+  for (long j=0; j<times; j++){
+    if (num_timed++ > num_to_time) {
+      clock_t now = clock();
+      printf("took %g seconds per iteration\n",
+             (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      num_timed = 0;
+      start = now;
+      // after the first timing, just time things once per percent (as
+      // often as we print the % complete messages)
+      if (times/100 > num_to_time) num_to_time = times/100;
+    }
     count++;
     i++;
+    // only write out the sphere positions after they've all had a
+    // chance to move, to save on file size.
+    if (i%N == 0) writeSpheres(spheres, N, o);
+    if(j % (times/100)==0){
+      printf("%g%% complete...\n",j/(times*1.0)*100);
+      //printf("%g%% complete...\r",j/(times*1.0)*100);
+      fflush(stdout);
+    }
     Vector3d temp = move(spheres[i%N]);
     if(overlap(spheres, temp, N, R, rad, i%N)){
       continue;
     }
     spheres[i%N] = temp;
-    writeSpheres(spheres, N, o);
-    if(j % (times/100)==0){
-      printf("%g%% complete...\r",j/(times*1.0)*100);
-      fflush(stdout);
-    }
-    j++;
+    workingmoves++;
   }
-  printf("Total number of attempted moves = %d\n",count);
+  printf("Total number of attempted moves = %ld\n",count);
+  printf("Total number of successful moves = %ld\n",workingmoves);
+  printf("Acceptance rate = %g\n", workingmoves/double(count));
   fclose(o);
   delete[] spheres;
 }
@@ -79,7 +100,7 @@ double countOverLaps(Vector3d *spheres, int n, double R, double rad){
     }
     for(int i = j+1; i < n; i++){
       if(distance(spheres[i],spheres[j])<2*R){
-	num+=2*R-distance(spheres[i],spheres[j]);
+        num+=2*R-distance(spheres[i],spheres[j]);
       }
     }
   }

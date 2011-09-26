@@ -42,6 +42,7 @@ ALL_FIGURES=\
 	figs/box-100c--05,05,05-13.gp\
 	figs/box-100s--05,05,05-13.gp\
 	figs/box-110c--05,05,05-13.gp\
+	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -64,3 +65,12 @@ figs/sphere-radial-08-13.eps: figs/sphere-radial-08.0-13.dat figs/sphere-radial-
 	figs/sphere-radial-16.0-265.dat
 
 figs/box-%.eps: figs/box-%.dat
+
+figs/contact-08-013.pdf: figs/mc-04-013.dat figs/sphere-radial-08.0-13.dat figs/contact-density.py
+	python figs/contact-density.py figs/mc-04-013.dat figs/sphere-radial-08.0-13.dat $@
+
+figs/contact-12-112.pdf: figs/mc-06-112.dat figs/sphere-radial-12.0-112.dat figs/contact-density.py
+	python figs/contact-density.py figs/mc-06-112.dat figs/sphere-radial-12.0-112.dat $@
+
+figs/contact-16-265.pdf: figs/mc-08-265.dat figs/sphere-radial-16.0-265.dat figs/contact-density.py
+	python figs/contact-density.py figs/mc-08-265.dat figs/sphere-radial-16.0-265.dat $@

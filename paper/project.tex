@@ -225,6 +225,7 @@ For our water functional, we use the hard-sphere radius of
 \newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
 \newcommand\epsilonassoc{\ensuremath{\epsilon_\textit{a}}}
 \newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
+\newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
 The first term in the attractive energy is the dispersion term.  We use a
 dispersion term based on the SAFT-VR
@@ -263,16 +264,15 @@ of the filling fraction.  In order to apply this form to an
 inhomogeneous density distribution, we construct an effective local
 filling fraction for dispersion $\etadisp$, given by
 \begin{align}
-  \etadisp(\xx) &= \frac{4\pi R^3}{3}
-  \int \left(\frac{\pi}{\sigma}\right)^{\frac32}
-  e^{-\frac{|\xx-\xx'|^2}{2\sigma^2}} n(\xx') d\xx'
+  \etadisp(\xx) &=
+  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
+             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'
 \end{align}
 This effective filling fraction is used throughout the dispersion
-calculations.  This functional introduces an additional empirical
-parameter $\sigma$ \fixme{(The above formula still needs fixing, and
-  is affected by one of Eric's recent changes.)}
-which adjusts the length scale over which the dispersion interaction
-is correlated.
+calculations, and represents a filling fraction averaged over the
+effective range of the dispersive interaction.  This functional
+introduces an additional empirical parameter $\lscale$ which adjusts
+the length scale over which the dispersion interaction is correlated.
 
 The first term in the dispersion functional $A_1$ when written using
 the above filling fraction for dispersion has the form
@@ -520,9 +520,11 @@ contains five empirical parameters: the hard-sphere radius, an energy
 and length scale for the dispersion interaction, and an energy and
 length scale for the association interaction.  In addition to the five
 empirical parameters of Clark \emph{et al}, we add a single additional
-parameter $\sigma$ defining the length scale over which the density is averaged
-when computing the dispersion free energy.  We use this final
-parameter to fit the surface tension, with the result shown in
+parameter $\lscale$---with a fitted value of 0.72---which determines
+the length scale over which the density is averaged when computing the
+dispersion free energy.  We use this final parameter to fit the
+surface tension, with the result shown in
+>>>>>>> 92fcd98014a991adc9e2804a16040e70e2b2bfcb
 Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
 \emph{et al} overestimates the critical temperature---which is a
 common feature of models which do not explicitly treat the critical
