@@ -49,16 +49,19 @@
 fundamental-measure theory functional--which describes hard sphere fluids--with
 attractive interactions based on the Statistical Associating Fluid Theory
 (SAFT). Using this approximation, we are able to describe the vapor pressure, 
-various densities, surface tension, enthalpy and
-entropy of water, as well as the number of hydrogen bonds formed near
+vapor density, liquid density, surface tension, enthalpy and
+entropy of water, as well as the number of hydrogen bonds and density oscillations
+formed near
 liquid-vapor and liquid-solid interfaces. These interfaces include water
 confined to a hard-walled slit, a single hydrophobic rod immersed in water, and
 two hydrophobic rods 
-at various separations. We found \needsworknow{conclusion-like stuff about two
-rods, vapor-liquid transition between rods, constant force of twice surface
-tension, more?}.
-This functional provides a foundation for future work predicting the
-interactions of chemicals in aqueous solution on an
+at various separations. For two rods being pulled apart, a transition occurs 
+\fixme{at $(\pi-2)r$?} from a vapor state to a liquid state in the area between
+the rods. Even for rods of a small radius (0.3~-~0.9~nm), we find that for the
+vapor state, the force can be approximated
+classically and is equal to 144~mN/m, or twice the bulk surface tension.
+This functional is computationally efficient and provides a foundation for 
+future work describing interactions in aqueous solution on an
 atomic level.}
 
 %\tableofcontents
@@ -135,7 +138,8 @@ associative interations between molecules.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
 We introduce a new classical density functional for water that
-predicts the vapor density, liquid density, and bulk surface tension, as well 
+predicts the vapor pressure, vapor density, liquid density, bulk surface tension, 
+and enthalpy, as well 
 as allows for liquid-vapor coexistence.  The Helmholtz free energy functional is
 based on SAFT, and is composed of the usual terms:
 \begin{equation}
@@ -143,7 +147,7 @@ based on SAFT, and is composed of the usual terms:
 F_\textit{disp}[n]+ F_\textit{assoc}[n],
 \end{equation}
 where $F_\textit{id}$ is the ideal gas free energy, $F_\textit{hs}$ is
-a hard-sphere free energy, $F_\textit{disp}$ is the dispersion energy,
+the hard-sphere free energy, $F_\textit{disp}$ is the dispersion energy,
 and $F_\textit{assoc}$ is the free energy of association.  In
 addition, a chemical potential term is used, so we actually work in
 the grand canonical ensemble.  In the following sections, we will
@@ -179,7 +183,8 @@ that
 \end{equation}
 where $F_{\textit{excess}}[n]$ describes all the remaining terms in the functional.
 This ensures that any higher order terms in the Taylor expansion
-of $F[n+\Delta n]$ are very small.
+of $F[n+\Delta n]$ are small and do not contribute to the small
+solute free energy of solvation.
 
 
 \subsection{Hard-sphere repulsion}
@@ -215,7 +220,7 @@ where the fundamental measure densities are given by:
   \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 \\
   n_1 &= \frac{n_2}{4\pi R}\\
   \mathbf{n}_{V1} &= \frac{\mathbf{n}_{V2}}{4\pi R}\\
-  n_0 &= \frac{n_2}{4\pi R^2}
+  n_0 &= \frac{n_2}{4\pi R^2}.
 \end{align}
 For our water functional, we use the hard-sphere radius of
 3.03420~\AA, which was found to be optimal by Clark
@@ -227,7 +232,8 @@ For our water functional, we use the hard-sphere radius of
 \newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
 \newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
-The first term in the attractive energy is the dispersion term.  We use a
+The first term in the attractive energy is the dispersion term.  This
+will include van der Waals and other non-associative interations. We use a
 dispersion term based on the SAFT-VR
 approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
 parameters, an interaction energy $\epsilondisp$ and a
@@ -237,17 +243,22 @@ The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
   F_\text{disp} &= A_1 + \beta A_2
 \end{align}
-where $A_1$ and $A_2$ are the first two terms in a high-temperature
-perturbation expansion.  $A_1$ is the mean-field dispersion
+where $A_1$ and $A_2$ \fixme{change all to $a_1$ and $a_2$} are the first 
+two terms in a high-temperature
+perturbation expansion and $\beta=\frac{1}{k_BT}$.  $A_1$ is the mean-field dispersion
 interaction, which reduces in the homogeneous limit to
 \begin{align}\label{eq:A1-simple}
   \frac{A_1}{V} &= \frac12 n_b \int \varphi(\left|\xx\right|)
   g_{HS}(\left|\xx\right|) d\xx
 \end{align}
+where $n_b$ is the bulk density and $g_{HS}$ is the homogeneous
+hard-sphere fluid correlation function.
 The second dispersion term in the free energy $A_2$ describes the
 effect of fluctuations resulting from the compression of the fluid due
 to the dispersion interaction itself, and is commonly approximated
-using the local compressibility approximation (LCA).
+using the local compressibility approximation (LCA). In the LCA,
+we assume the energy fluctuation is directly related to the
+compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
 We use a free square-well function for the dispersion $\varphi$, which
 is the choice used by Clark \emph{et al}~\cite{clark2006developing},
@@ -266,7 +277,7 @@ filling fraction for dispersion $\etadisp$, given by
 \begin{align}
   \etadisp(\xx) &=
   \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
-             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'
+             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
 \end{align}
 This effective filling fraction is used throughout the dispersion
 calculations, and represents a filling fraction averaged over the
@@ -278,7 +289,7 @@ The first term in the dispersion functional $A_1$ when written using
 the above filling fraction for dispersion has the form
 \begin{align}
   A_1 &= \int
-   -4*(\lambdadisp^3 - 1)*\epsilondisp \etadisp(\xx)
+   -4(\lambdadisp^3 - 1)\epsilondisp \etadisp(\xx)
     g^{HS}_\sigma(\eta_\textit{eff}(\xx))
   d\xx \\
   \eta_\textit{eff}(\xx) &= \sum_{ij=0}^3 C_{ij}  \etadisp^i(\xx)
@@ -288,12 +299,15 @@ the above filling fraction for dispersion has the form
   +\frac32\frac{\zeta(\xx)}{(1-\eta)^2}
   + \frac12\frac{\eta^2\zeta(\xx)}{(1-\eta)^3}
   \\
-  \zeta(\xx) &= 1 - \frac{\mathbf{n_{2V}}\cdot\mathbf{n_{2V}}}{n_2^2}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}
 \end{align}
 where $C_{ij}$ are numerical constants taken from
 reference\cite{gil-villegas-1997-SAFT-VR}, which come from a numerical
 fit to the integral in Equation~\ref{eq:A1-simple} over a range of
-values for $\lambdadisp$ and filling fractions.  The $\zeta$ factor
+values for $\lambdadisp$ and filling fractions.  Here $g_\sigma^{HS}$
+is the hard-sphere fluid correlation function evaluated at contact and uses the
+effective filling fraction for inhomogeneous density distributions.
+The $\zeta$ factor
 (also seen in the association energy, below) is a dimensionless
 measure of the local density inhomogeneity.
 
@@ -310,17 +324,8 @@ where $K_{HS}$ is the Percus-Yevick hard-sphere compressibility, given
 by
 \begin{align}
   K_{HS} &=
-    \frac{(1 - \etadisp)^4}{1 + 4(\etadisp + \etadisp^2)}
+    \frac{(1 - \etadisp)^4}{1 + 4(\etadisp + \etadisp^2)}.
 \end{align}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
-\end{center}
-\caption{The theoretical versus experimental coexistence curve. Away from
-the critical temperature, the agreement is good. }
-\label{fig:temperature-vs-density}
-\end{figure}
 
 \subsection{Association free energy}
 The final attractive energy term is the association term, which
@@ -333,15 +338,6 @@ with the lone pair of the other.  The volume over which this
 interaction occurs is $\kappa_\textit{assoc}$, giving the association
 term in the free energy has two empirical parameters that are fit to
 experimental data.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/equation-of-state}
-\end{center}
-\caption{The theoretical versus experimental phase diagram, vapor
-  pressure versus temperature.  }
-\label{fig:equation-of-state}
-\end{figure}
 
 The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
@@ -376,7 +372,7 @@ Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
 density, and reduces to unity in the homogeneous limit:
 \begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
 \end{align}
 The functional $\Delta$ which appears in the formula for $X$ is a
 measure of hydrogen-bonding probability.  In the SAFT-VR
@@ -393,36 +389,13 @@ where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well attractive
 potential, and $a_1$ and $a_2$ are two terms in the dispersive term of
 the free energy.  The correlation function $g^\textit{SW}_\sigma$ is
-written as a perturbative correction to the hard-sphere correlation
-function, for which we use the functional of Yu and
-Wu.\cite{yu2002fmt-dft-inhomogeneous-associating}
+written as a perturbative correction to the hard-sphere fluid correlation
+function $g^\textit{HS}_\sigma$, for which we use the functional of Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 \begin{align}
   g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
   +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
-  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}
-\end{align}
-
-\subsection{Other thermodynamic functions}
-
-From the Helmholtz free energy functional, we may obtain any other
-thermodynamic functions we should choose.  The grand free energy
-$\Phi$, which we ordinarily use in our computations, is obtained by
-simply adding a chemical potential term:
-\begin{equation}
-  \Phi[n] = F[n] + \mu \int n(\xx) d\xx
-\end{equation}
-
-The pressure would naturally be obtained by taking a partial
-derivative with respect to volume at fixed temperature.  Since
-\emph{volume} isn't a parameter in density-functional theory, we
-consider the \emph{free energy per unit volume}.
-\begin{align}
-  F[n] &= f[n]V \\
-  p[n] &= -\left(\frac{\partial F[n]}{\partial V}\right)_{T} \\
-  &= -\left(\frac{\partial f[n]V}{\partial V}\right)_{T} \\
-  &= -V\left(\frac{\partial f[n]}{\partial V}\right)_{T}
-   - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
-  &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n]
+  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
 \end{align}
 
 \begin{figure}
@@ -437,16 +410,67 @@ represent the theoretical and experimental coexistence curves.}
 \label{fig:pressure-with-isotherms}
 \end{figure}
 
-Figure \ref{fig:pressure-with-isotherms} shows the calculated pressures for
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-tension}
+\end{center}
+\caption{The theoretical versus experimental surface tension
+  versus temperature. The experimental data is taken from NIST.\cite{nistwater}
+  The length-scaling parameter $\lscale$ is fit so that the theoretical surface tension
+  will match the experimental surface tension near room temperature.
+}
+\label{fig:surface-tension}
+\end{figure}
+
+\subsection{Other thermodynamic functions}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\end{center}
+\caption{The theoretical versus experimental phase diagram, vapor
+  pressure versus temperature.  }
+\label{fig:equation-of-state}
+\end{figure}
+
+From the Helmholtz free energy functional, we may obtain any other
+thermodynamic functions we should choose.  The grand free energy
+$\Phi$, which we ordinarily use in our computations, is obtained by
+simply adding a chemical potential term:
+\begin{equation}
+  \Phi[n] = F[n] + \mu \int n(\xx) d\xx.
+\end{equation}
+
+The pressure would naturally be obtained by taking a partial
+derivative with respect to volume at fixed temperature.  Since
+\emph{volume} isn't a parameter in density-functional theory, we
+consider the \emph{free energy per unit volume}:
+\begin{align}
+  F[n] &= f[n]V \\
+  p[n] &= -\left(\frac{\partial F[n]}{\partial V}\right)_{T} \\
+  &= -\left(\frac{\partial f[n]V}{\partial V}\right)_{T} \\
+  &= -V\left(\frac{\partial f[n]}{\partial V}\right)_{T}
+   - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
+  &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n].
+\end{align}
+
+Figure~\ref{fig:pressure-with-isotherms} shows the calculated pressures for
 isotherms ranging from room temperature to past the critical temperature. The
 solid line is the theoretical coexistence curve calculated from the SAFT
 functional. For a given isotherm, the pressure curve should intersect this
-coexistence curve twice, at the values of the vapor and liquid densities. Even
+coexistence curve twice, at the vapor and liquid coexistence 
+pressure corresponding to the vapor and liquid densities. Even
 though the theoretical pressure isotherms drop below the coexistence curve,
 this is non-physical and will not actually occur. The experimental data shows
-how the pressure will jump to the other side of the coexistence curve (for
+how the actual density value will ``jump'' to the other side of 
+the coexistence curve at that pressure value (for
 temperatures less than the critical temperature), corresponding to a phase 
-change in the material. The
+change in the material. For example, follow the room temperature isotherm
+starting from high pressure and high density (top right of 
+Figure~\ref{fig:pressure-with-isotherms}).
+As the pressure decreases, the density decreases \emph{slightly} until reaching
+the coexistence curve, at which point a phase change from liquid to vapor
+will occur. The
 functional matches well with the experimental data from NIST away from the
 critical point. The slope of the pressure versus density curve is proportional
 to the compressibility, which is close but slightly too large at room
@@ -468,14 +492,22 @@ Once we have the entropy, finding the internal energy is simple:
 \end{align}
 and the enthalpy is not much more work:
 \begin{align}
-  H[n] &= F[n] + TS[n] + pV
+  H[n] &= F[n] + TS[n] + pV.
 \end{align}
-
 The calculated heat of vaporization at atmospheric pressure is
 $\Delta H_{vap}$= 39.41~kJ/mol at the normal boiling point of water,
 373 K. This compares well to the experimental
 value measured by NIST ($\Delta H_{vap}$= 40.65~kJ/mol\cite{nistwater}), with 
 an error of only a few percent.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
+\end{center}
+\caption{The theoretical versus experimental coexistence curve. Away from
+the critical temperature, the agreement is good. }
+\label{fig:temperature-vs-density}
+\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -488,18 +520,6 @@ an error of only a few percent.
   temperature, while the bottom plot shows the same thing close to the 
   critical temperature. }
 \label{fig:homogeneous}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/surface-tension}
-\end{center}
-\caption{The theoretical versus experimental surface tension
-  versus temperature. The experimental data is taken from NIST.\cite{nistwater}
-  The length-scaling parameter $\sigma$ is fit so that the theoretical surface tension
-  will match the experimental surface tension near room temperature.
-}
-\label{fig:surface-tension}
 \end{figure}
 
 \begin{figure}
@@ -531,25 +551,6 @@ point---we cannot correctly describe the surface tension at all
 temperatures, and chose to fit it for the temperature range at which
 water is liquid at one atmosphere of pressure.
 
-For reference, we plot the coexistence curve (see
-Figure~\ref{fig:temperature-vs-density}) and the predicted vapor pressure (see
-Figure~\ref{fig:equation-of-state}) against experimental values.  These
-match those calculated by Clark \emph{et al}. The functional provides a good description of
-the vapor pressure, which has an error of less than 
-1\% of the experimental data. Near the critical temperature,
-the agreement is off, and the theoretical prediction  of the temperature is quite a bit higher than
-experiment. To find the densities for the coexistence curve, we use the
-``common tangent'' rule. The two densities 
-will be on the same tangent line to the free energy as illustrated in the top of Figure~\ref{fig:homogeneous}.
-As the critical point approaches, the vapor and liquid coexistence densities get closer and closer together 
-(see the bottom of Figure~\ref{fig:homogeneous}. 
-\needsworknow{Expand the previous common tangent rule stuff?}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results and discussion}
-
-\subsection{Water confined to a slit}
-
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-1D}
@@ -563,6 +564,47 @@ line in the top figure represents the saturated liquid density.}
 \label{fig:energy-1D}
 \end{figure}
 
+For reference, we plot the predicted vapor pressure (see
+Figure~\ref{fig:equation-of-state}) and the coexistence curve (see
+Figure~\ref{fig:temperature-vs-density}) against experimental values.  These
+match those calculated by Clark \emph{et al}. The functional provides a good description of
+the vapor pressure, which has an error of less than 
+1\% compared with the experimental data. The coexistence curve in 
+Figure~\ref{fig:temperature-vs-density} is similar to the pressure coexistence
+curve in Figure~\ref{fig:pressure-with-isotherms} (solid line) but gives 
+temperature coexistence values.
+Near the critical temperature,
+the agreement is off, and the theoretical prediction  of the temperature is quite a bit higher than
+experiment. 
+To find the densities for the coexistence curve, we use the
+``common tangent'' rule. The two densities 
+will be on the same tangent line to the free energy as illustrated in the top of Figure~\ref{fig:homogeneous}.
+As the critical point approaches, the vapor and liquid coexistence densities get closer and closer together 
+(see the bottom of Figure~\ref{fig:homogeneous}. This illustrates the difficulty
+in correctly treating the critical temperature. As the vapor and liquid densities approach
+each other, the free energy barrier between the two states gets smaller and it becomes
+challenging to computationally find the correct minimum. This is the reason 
+why the coexistence curves
+in Figures~\ref{fig:pressure-with-isotherms}~and~\ref{fig:temperature-vs-density}
+are not smooth around the critical point.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and discussion}
+
+\subsection{Water confined to a slit}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D}
+\end{center}
+\caption{The number of hydrogen bonds per molecule for a slab of water 
+with molecules constrained to move in one dimension. Each molecule may
+contribute to
+four bonds, although each bond involves two molecules so the
+actual number of bonds would be halved.}
+\label{fig:xassoc-1D}
+\end{figure}
+
 One of the most computationally simple ways to study confined water is by
 constraining it to a slit where the water molecules can only move in one
 dimension. Experimentally, this could represent two different situations.
@@ -572,6 +614,8 @@ second
 possibility is a large sphere brought close to a plane, which eliminates the 
 need for perfect alignment.
 
+Before looking at the liquid-solid one-dimensional slit, we set up a liquid-vapor
+interface and plot the density profile.
 The fluid density at a liquid-solid interface commonly displays
 oscillatory behavior, but the presence of density oscillations at
 liquid-vapor interfaces is more debated\cite{penfold2001structure}.
@@ -580,17 +624,38 @@ interface is clouded by the existence of long-wavelength perturbations
 known as \emph{capillary waves}.  These waves are not accounted for in
 density-functional theory (although the exact
 density-functional theory would include them), with the result
-that the density profile will be smoothed out by CW effects. The liquid-vapor
+that the density profile will be smoothed out by capillary wave effects. The liquid-vapor
 interface is plotted in Figure~\ref{fig:liquid-vapor-profile} and shows
 some small oscillations.
 
-We choose a chemical potential corresponding to a pressure of 1~atm and set the
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-single-rod}
+\end{center}
+\caption{ Density profiles for a single rod of different radii. The dotted line
+represents the saturated liquid density.  }
+\label{fig:density-single-rod}
+\end{figure}
+
+To set up the calculations for the slit, we choose a chemical potential 
+corresponding to a pressure of 1~atm and set the
 temperature to a typical room temperature of 298~K. We apply 
 a constraining potential outside the slit, where we choose a small non-zero
 density for numerical reasons. The slits studied range in size from 0.1~nm to 
 8.0~nm. We minimize the energy and calculate density, energy, and $X$ on a
 lattice
 with a spacing of approximately 0.01~nm (0.2~bohrs) between lattice points.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
+\end{center}
+\caption{ Energy versus radius for a single hydrophobic rod
+immersed in water. This should have an asymptote equal to the surface
+tension at room temperature, and it agrees well with the surface tension in
+Figure~\ref{fig:surface-tension}. }
+\label{fig:energy-vs-diameter}
+\end{figure}
 
 The density profile for a slit of size 4.0~nm is shown in Figure~\ref{fig:energy-1D}. 
 Near the interface, there are oscillations around the
@@ -601,11 +666,11 @@ the water molecules in the slit act like the bulk. Based on our computations, we
 also determine the smallest slit that can contain liquid water. This result is
 approximately 0.6~nm. For smaller slits, the initial liquid water inside will
 vaporize. The results for larger liquid-filled slits are only metastable,
-however,as a vapor-filled slit is thermodynamically favorable. Based on our
+however, as a vapor-filled slit is thermodynamically favorable. Based on our
 calculations for a pressure of 1~atm, the work needed to pull apart
 the two hard walls comprising the slit is one to two orders of magnitude less
 than the free energy of the liquid-filled slit. For the range of slit sizes we
-studied (0.1 to 8.0~nm), all the computational results of liquid-filled are
+studied, all the computational results of liquid-filled slits are
 metastable. Lum, Chandler and Weeks \cite{lum1999hydrophobicity} discuss the
 stability of water between large hydrophobic plates and the critical separation
 necessary for stability. For water at room temperature and atmospheric pressure,
@@ -618,45 +683,12 @@ also study water between two hard walls at constant chemical potential. They
 also conclude that the liquid state is likely metastable, and there is a free
 energy barrier to reach the stable vapor phase. 
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/xassoc-1D}
-\end{center}
-\caption{The number of hydrogen bonds per molecule for a slab of water 
-with molecules constrained to move in one dimension. Each molecule may
-contribute to
-four bonds, although each bond involves two molecules so to calculate the
-actual 
-number of bonds there would be another factor of 2.}
-\label{fig:xassoc-1D}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/density-single-rod}
-\end{center}
-\caption{ Density profiles for a single rod of different radii. The dotted line
-represents the saturated liquid density.  }
-\label{fig:density-single-rod}
-\end{figure}
-
 The value of $X$ behaves as expected for water constrained to a slit. We
 show in Figure~\ref{fig:xassoc-1D} the number of hydrogen bonds per water 
 molecule, equal to $4(1-X)$, for a slit of 4.0~nm.
-Outside the slit, there is no hydrogen bonding and inside the number of hydrogen
+Outside the slit, there is almost no hydrogen bonding and inside the number of hydrogen
 bonds is approximately equal to 3.5, which is expected for saturated liquid
 water.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
-\end{center}
-\caption{ Energy versus radius for a single hydrophobic rod
-immersed in water. This should have an asymptote equal to the surface
-tension at room temperature, and it agrees well with the surface tension in
-Figure~\ref{fig:surface-tension}. }
-\label{fig:energy-vs-diameter}
-\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -692,21 +724,21 @@ rod has comparatively larger oscillations and a higher contact density.
 Figure~\ref{fig:energy-vs-diameter} shows the free energy per area versus
 radius for the range of rods studied, with radii from 0.05~nm to 1.5~nm. After 
 about 0.5~nm or so, this reaches
-an asymptote equal to the surface tension. From the inset in Figure~\ref{fig:surface-tension}, the surface tension at room 
-temperature is approximately 72~mN/m. This is very close to the value from
-the larger diameter single rod energy per area, which is about 75~mN/m. 
+an asymptote equal to the surface tension. From the inset in 
+Figure~\ref{fig:surface-tension}, the surface tension at room 
+temperature is approximately 72~mN/m. This is very close to the 
+asymptote in Figure~\ref{fig:energy-vs-diameter}, which is about 75~mN/m. 
 
 The value of $X$ is calculated and converted to number of bonds per molecule and 
 shown for a rod with radius 0.2~nm in Figure~\ref{fig:xassoc-single-rod}. Inside the
 rod (less than 0.2~nm) there are no molecules to form hydrogen bonds although the value
-of $X$ is still calculated there. Walther \emph{et al.}\cite{walther2001carbon} 
+of $X$ is still calculated there. The number of bonds decreases from a bulk value of 3.5 
+to about 3.25 at the interface. Walther \emph{et al.}\cite{walther2001carbon} 
 calculate the number of hydrogen bonds for a carbon nanotube immersed in water.
 They show a decrease in the bonding from a bulk value of 3.75 to 2.89 near the 
-interface with the nanotube. This is a much larger change than for our hydrophobic
-rod of a similar radius, where the number of bonds decreases from a bulk value of 3.5 
-to about 3.25 at the interface (see Figure~\ref{fig:xassoc-single-rod}).
-
-
+interface with the nanotube. This is a much larger change than for our 
+rod of a similar radius, indicating that carbon nanotubes disrupt hydrogen
+bonds in water more than hydrophobic rods.
 
 \subsubsection{Resolution and convergence tests}
 Figure~\ref{fig:densityresolution} shows the density profiles for three
@@ -717,7 +749,8 @@ proportional to the pressure on the rod (see Equation~\ref{contactvaluethm}). Th
 density calculated using the medium resolution is within less than 4\% of the
 value at high resolution, while the low resolution contact density is off by
 about 5\%. There is some uncertainty in the value of contact density due to the
-different lattice spacings. The total free energy calculations compare much more
+different lattice spacings which cause the contact density to be calculated
+at a slightly different position. The total free energy calculations compare much more
 favorably. The medium resolution is within 0.5\% and the low resolution is
 within 1\% of the high resolution free energy.
 
@@ -737,11 +770,33 @@ The radius and separation are shown.}
 \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
 \end{center}
 \caption{ Density profiles illustrating the transition from vapor 
-to liquid water between the rods. The radius is 0.5~nm, the top figure is at a separation of 0.2~nm and the
-bottom is 0.4~nm. Figures~\ref{fig:rods-energy-vs-distance}~and~\ref{fig:energy-rods} show
+to liquid water between the rods. The radius is 0.5~nm, the top figure is 
+at a separation of 0.2~nm and the
+bottom is 0.6~nm. Figures~\ref{fig:rods-energy-vs-distance}~and~\ref{fig:energy-rods} show
 the energy for these and other separations.}
 \label{fig:density-rods}
 \end{figure}
+
+We now look at the more interesting problem of two rods in water. We continue to
+use hydrophobic rods of various radii at separation $d$ (see Figure~\ref{fig:rods}), ranging from $d=0$ 
+(touching rods) to $d=1$~nm. At small
+separations there is only vapor between the rods. As the rods are
+pulled apart, the vapor region expands until some critical separation is
+reached and liquid water fills the region between the rods. Figure~\ref{fig:density-rods} 
+shows density profiles before and after this transition
+for rods of radius 0.5~nm. This critical separation for the transition to liquid depends
+on the radii of the rods, and is about 0.55~nm for the rods shown in 
+Figure~\ref{fig:density-rods}.
+\fixme{add analysis of circumferences of stadium shape vs two rods and
+calculating the expected critical separation}
+Since we are looking at only hard-walled
+non-interacting rods, the critical separation will be
+different for any system where there is an appreciable force between rods. 
+The density oscillations seen around the rods in Figure~\ref{fig:density-rods} 
+are very similar to
+those for the single hydrophobic rod in water (see Figure~\ref{fig:density-single-rod}).
+The oscillations around the two rods at small separation looks as if the two rods were one
+solid stadium shaped object (approximately like a rectangle with semi-circles on the ends).
 
 \begin{figure}
 \begin{center}
@@ -753,75 +808,61 @@ set to go to zero at large separations. }
 \label{fig:energy-rods}
 \end{figure}
 
+For one set of rods (radii of 0.5~nm) the free energy is plotted with the internal energy
+and the entropic energy contribution, where all are in units of energy per length 
+(see Figure~\ref{fig:energy-rods}). The free energy slightly increases as the separation
+goes from zero to the critical separation and then is approximately constant at
+larger separations. The entropy has a minimum just before the rods
+transition to allow liquid between them. As the rods separate starting from zero, the area 
+between them containing vapor increases and there is less overall space for the 
+surrounding liquid water to occupy and thus the entropy decreases. When that area fills suddenly
+with liquid, the entropy increases due to the increased space for the water molecules. The
+internal energy also has a minimum just before the transition to the liquid filled state.
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
 \caption{ Energy versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 0.9~nm. All were arbitrarily set to go to zero at large separations. The
+0.3~nm to 0.9~nm. \fixme{r=0.9 to be added when it finishes!}
+All were arbitrarily set to go to zero at large separations. The
 transition corresponds to the phase change from
 vapor to liquid between the rods as pictured in the density profiles in 
 Figure~\ref{fig:density-rods}. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 
-We now look at the more interesting problem of two rods in water. We continue to
-use hydrophobic rods of various radii at separation $d$ (see Figure~\ref{fig:rods}), ranging from $d=0$ 
-(touching rods) to about 1~nm. At small
-separations ($d<2$~-~4~nm) there is only vapor between the rods. As the rods are
-pulled apart, the vapor region expands until some critical separation is
-reached and liquid water fills the region between the rods. Figure~\ref{fig:density-rods} 
-shows density profiles before and after this transition
-for rods of radius 0.5~nm. This critical separation for the transition to liquid depends
-somewhat on the radii of the rods, and is about 0.25~nm for the rods in Figure~\ref{fig:density-rods}.
-Since we are looking at only hard-walled
-non-interacting rods, the critical separation for this transition will be
-different than any system where there is an appreciable force between rods. 
-The density oscillations  around the rods are very similar to
-those for the single hydrophobic rod in water, as seen in Figure~\ref{fig:density-single-rod}.
-The oscillations around the two rods at small separation looks as if the two rods were one
-solid object shaped \fixme{racetrack shaped?}.
-
-For one set of rods (radii of 0.5~nm) the free energy is plotted with the internal energy
-and the entropic energy contribution, where all are in units of energy per length 
-(see Figure~\ref{fig:energy-rods}). The free energy slightly increases as the separation
-goes from 0 to the critical separation (0.25~nm) and then is approximately constant at
-larger separations. Since there is no repulsive interaction between the rods, there is no
-large energy increase when the rods touch. The entropy has a minimum just before the rods
-transition to let liquid between them. As the rods separate starting from zero, the area 
-between them containing vapor increases and there is less overall volume for the 
-surrounding liquid water to occupy and thus the entropy decreases. 
-\needsworknow{More discussion of Figure~\ref{fig:energy-rods}, internal energy, how they add
-together, etc.}
-
 The free energy per length is compared for rods of several different radii
-in Figure~\ref{fig:rods-energy-vs-distance}. For comparison, we arbitrarily adjust each data set such that the
+in Figure~\ref{fig:rods-energy-vs-distance}. In this figure, the energy for a radius 0.5~nm
+is the same as the free energy shown in Figure~\ref{fig:energy-rods}.
+For comparison, we arbitrarily adjust each data set such that the
 free energy per length goes to zero at large separations. At large separations, the rods will 
 simply act like two separate single rods in water and the total energy will
 reach an asymptote proportional to the surface tension (similar to that shown in 
 Figure~\ref{fig:energy-vs-diameter}).
-The change in free energy per length at the point of transition increases as the radii of
-the rods increases. The smallest radius we show is 0.3~nm, which shows only a slight increase in
-free energy at the critical separation, while the largest radius has a more significant jump in free energy. 
-We see that all the rods studied have the same behavior, with a positive linear relation between free energy
-per length and the separation during the initial state where the rods have vapor between them. 
-The slope of this line is equal to the force per length on the rods, which we calculate to be 144~mN/m, 
-or twice the surface tension
-found by the functional (see Figure~\ref{fig:surface-tension}).
+We see that all the rods studied have the same behavior, with a positive linear relation 
+between free energy
+per length and separation during the initial state where the rods have vapor between them. 
+The slope of this line is equal to the force per length on the rods, which we calculate to 
+be 144~mN/m, or twice the surface tension
+found by the functional (see Figure~\ref{fig:surface-tension}). This indicates that
+even though the rods are nanoscale, to the water molecules they can be treated classically
+\fixme{reference above equations/explanation with circumference, critical separation, etc.}
 
 Walther \emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
 carbon nanotubes, which are very geometrically similar to our hydrophobic rods. 
 They use molecular dynamics with Lennard-Jones potentials for
 nanotubes of diameter 1.25~nm and separations ranging from about 0.3~nm to 1.5~nm.
 They also find a drying transition occurs, and find it to be at separations near
-0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is several times larger than
-what we find for hydrophobic rods, as expected due to the carbon-carbon
+0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is larger than
+what we find for hydrophobic rods of a similar size, as expected due to the carbon-carbon
 interations between two nanotubes. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
-\needsworknow{Conclusions about slit, single rod, two hydrophobic rods (mostly). future uses}
+\needsworknow{Conclusions about slit, single rod, two hydrophobic rods (mostly). 
+computationally efficient. future uses}
 
 \bibliographystyle{unsrt}
 \bibliography{paper}% Produces the bibliography via BibTeX.
