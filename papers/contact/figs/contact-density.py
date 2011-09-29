@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+# We need the following two lines in order for matplotlib to work
+# without access to an X server.
+import matplotlib
+matplotlib.use('Agg')
+
 import pylab, numpy, sys
 
 if len(sys.argv) != 4:
@@ -21,6 +26,6 @@ pylab.plot(dftdata[:,0],dftdata[:,5]*4*numpy.pi/3,"ro--",label="DFT at sphere")
 
 pylab.xlabel("radius")
 pylab.ylabel("filling fraction")
-pylab.legend(loc='upper left', ncol=2)
+pylab.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)
 
 pylab.savefig(sys.argv[3])
