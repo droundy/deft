@@ -49,15 +49,16 @@
 fundamental-measure theory functional--which describes hard sphere fluids--with
 attractive interactions based on the Statistical Associating Fluid Theory
 (SAFT). Using this approximation, we are able to describe the vapor pressure, 
-vapor density, liquid density, surface tension, enthalpy and
+saturated liquid density, surface tension, enthalpy and
 entropy of water, as well as the number of hydrogen bonds and density oscillations
 formed near
 liquid-vapor and liquid-solid interfaces. These interfaces include water
 confined to a hard-walled slit, a single hydrophobic rod immersed in water, and
 two hydrophobic rods 
 at various separations. For two rods being pulled apart, a transition occurs 
-\fixme{at $(\pi-2)r$?} from a vapor state to a liquid state in the area between
-the rods. Even for rods of a small radius (0.3~-~0.9~nm), we find that for the
+from a vapor state to a liquid state in the area between
+the rods at approximately $(\pi-2)$ multipled by the radius. Even 
+for these nanoscale rods (0.3~-~1.0~nm), we find that in the
 vapor state, the force can be approximated
 classically and is equal to 144~mN/m, or twice the bulk surface tension.
 This functional is computationally efficient and provides a foundation for 
@@ -243,9 +244,10 @@ The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
   F_\text{disp} &= A_1 + \beta A_2
 \end{align}
-where $A_1$ and $A_2$ \fixme{change all to $a_1$ and $a_2$} are the first 
+where $a_1$ and $a_2$ \fixme{change all to $a_1$ and $a_2$} are the first 
 two terms in a high-temperature
-perturbation expansion and $\beta=\frac{1}{k_BT}$.  $A_1$ is the mean-field dispersion
+perturbation expansion and $\beta=1/k_BT$.  The first term $a_1$ is 
+the mean-field dispersion
 interaction, which reduces in the homogeneous limit to
 \begin{align}\label{eq:A1-simple}
   \frac{A_1}{V} &= \frac12 n_b \int \varphi(\left|\xx\right|)
@@ -253,7 +255,7 @@ interaction, which reduces in the homogeneous limit to
 \end{align}
 where $n_b$ is the bulk density and $g_{HS}$ is the homogeneous
 hard-sphere fluid correlation function.
-The second dispersion term in the free energy $A_2$ describes the
+The second dispersion term in the free energy $a_2$ describes the
 effect of fluctuations resulting from the compression of the fluid due
 to the dispersion interaction itself, and is commonly approximated
 using the local compressibility approximation (LCA). In the LCA,
@@ -269,7 +271,7 @@ interaction has the form:
 \end{equation}
 where $\Theta$ is the Heaviside step function.
 
-The form of $A_1$ is given in
+The form of $a_1$ is given in
 reference~\cite{gil-villegas-1997-SAFT-VR}, but is expressed in terms
 of the filling fraction.  In order to apply this form to an
 inhomogeneous density distribution, we construct an effective local
@@ -285,7 +287,7 @@ effective range of the dispersive interaction.  This functional
 introduces an additional empirical parameter $\lscale$ which adjusts
 the length scale over which the dispersion interaction is correlated.
 
-The first term in the dispersion functional $A_1$ when written using
+The first term in the dispersion functional $a_1$ when written using
 the above filling fraction for dispersion has the form
 \begin{align}
   A_1 &= \int
@@ -311,7 +313,7 @@ The $\zeta$ factor
 (also seen in the association energy, below) is a dimensionless
 measure of the local density inhomogeneity.
 
-The second term, $A_2$, which describes the contribution to the free
+The second term, $a_2$, which describes the contribution to the free
 energy associated with fluctuations is given by
 \begin{align}
   A_2 &= \int \frac12 \epsilondisp
@@ -662,7 +664,9 @@ Near the interface, there are oscillations around the
 liquid density which decrease near the center of the slit. We expect the center
 of the slit to act approximately like bulk water, and the absence of
 oscillations supports this. For larger slits (6.0~nm or more) the majority of
-the water molecules in the slit act like the bulk. Based on our computations, we
+the water molecules in the slit act like the bulk. \fixme{Either add brief
+description of bottom half of Figure~\ref{fig:energy-1D} or delete it}
+Based on our computations, we
 also determine the smallest slit that can contain liquid water. This result is
 approximately 0.6~nm. For smaller slits, the initial liquid water inside will
 vaporize. The results for larger liquid-filled slits are only metastable,
@@ -778,7 +782,7 @@ the energy for these and other separations.}
 \end{figure}
 
 We now look at the more interesting problem of two rods in water. We continue to
-use hydrophobic rods of various radii at separation $d$ (see Figure~\ref{fig:rods}), ranging from $d=0$ 
+use hydrophobic rods of radii 0.3~-~1.0~nm at separation $d$ (see Figure~\ref{fig:rods}), ranging from $d=0$ 
 (touching rods) to $d=1$~nm. At small
 separations there is only vapor between the rods. As the rods are
 pulled apart, the vapor region expands until some critical separation is
@@ -786,9 +790,7 @@ reached and liquid water fills the region between the rods. Figure~\ref{fig:dens
 shows density profiles before and after this transition
 for rods of radius 0.5~nm. This critical separation for the transition to liquid depends
 on the radii of the rods, and is about 0.55~nm for the rods shown in 
-Figure~\ref{fig:density-rods}.
-\fixme{add analysis of circumferences of stadium shape vs two rods and
-calculating the expected critical separation}
+Figure~\ref{fig:density-rods}. 
 Since we are looking at only hard-walled
 non-interacting rods, the critical separation will be
 different for any system where there is an appreciable force between rods. 
@@ -824,7 +826,7 @@ internal energy also has a minimum just before the transition to the liquid fill
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
 \caption{ Energy versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 0.9~nm. \fixme{r=0.9 to be added when it finishes!}
+0.3~nm to 1.0~nm.
 All were arbitrarily set to go to zero at large separations. The
 transition corresponds to the phase change from
 vapor to liquid between the rods as pictured in the density profiles in 
@@ -846,8 +848,50 @@ per length and separation during the initial state where the rods have vapor bet
 The slope of this line is equal to the force per length on the rods, which we calculate to 
 be 144~mN/m, or twice the surface tension
 found by the functional (see Figure~\ref{fig:surface-tension}). This indicates that
-even though the rods are nanoscale, to the water molecules they can be treated classically
-\fixme{reference above equations/explanation with circumference, critical separation, etc.}
+even though the rods are nanoscale, to the water molecules they can be seen classically.
+To estimate how the critical transition depends on the radius,
+we assume a classical approximation where the energy on the rod is equal to the
+surface area multiplied by the bulk surface tension. The surface area is just the
+circumference multiplied by the width, and this width has the same value for both the
+vapor-filled stadium shape and the liquid-filled separate rods. We propose that 
+the critical separation
+for the transition, $d_c$, will occur when the circumference of the stadium shape (see 
+top of Figure~\ref{fig:density-rods}) and the circumference of the two rods (see bottom
+of Figure~\ref{fig:density-rods}) are equal:
+\begin{align}
+C_{stadium} &= C_{rods} \\
+2\pi r+4r+2d_c &= 4\pi r \\
+d_c &= (\pi-2)r.\label{criticalseparation}
+\end{align}
+
+\begin{table}
+\begin{tabular} {|c|c|c|c|}
+\hline
+$r$ (nm) & $d_c$ prediction (nm) & $d_c$ result (nm) & \% error \\
+\hline
+0.3 & 0.34 & 0.25 & 26\% \\
+\hline
+0.5 & 0.57 & 0.55 & 3.5\% \\
+\hline
+0.7 & 0.80 & 0.83 & 3.8\% \\
+\hline
+0.9 & 1.02 & 1.07 & 4.9\% \\
+\hline
+1.0 & 1.14 & 1.18 & 3.5\% \\
+\hline
+\end{tabular}
+\caption{Calculations of the critical separation (see Equation~\ref{criticalseparation})
+for the transition
+from liquid to vapor between two hydrophobic rods.}
+\label{criticalseparationtable}
+\end{table}
+The predicted and actual computed values for $d_c$ are shown in 
+Table~\ref{criticalseparationtable},
+and they match fairly well for the 0.5~-~1.0~nm rods. We hypothesize that
+larger radii rods
+would also follow this trend, but smaller rods are likely to have a different
+relationship with the surrounding water molecules. This may explain why the critical
+separation result for a radius of 0.3~nm does not match the prediction well.
 
 Walther \emph{et al.}\cite{walther2004hydrodynamic} study the interactions between two
 carbon nanotubes, which are very geometrically similar to our hydrophobic rods. 
@@ -859,10 +903,32 @@ what we find for hydrophobic rods of a similar size, as expected due to the carb
 interations between two nanotubes. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Conclusion}
 
-\needsworknow{Conclusions about slit, single rod, two hydrophobic rods (mostly). 
-computationally efficient. future uses}
+The classical density functional we developed by combining fundamental-measure 
+theory with SAFT is able to produce accurate results for hydrophobic interations.
+\fixme{decribe any results for slit?}
+We added the parameter \lscale to the functional and fit it to the surface tension
+at room temperature, which we find to be consistent with results for hydrophobic
+rods. The free energy per area for water surrounding a hydrophobic rod shows the
+expected behavior with an asymptote equal to the surface tension.
+Based on this result, we expect to be
+able to describe classically rods with a radius of about 0.5~nm or larger. Even
+though this is still nanoscale, from the perspective of the water molecules
+the interaction with a hydrophobic rod is easily approximated classically.
+For the interactions between water and two hydrophobic rods, we see that a
+classical treatment of the phase transition critical separation works well
+for rods larger than 0.5~nm, within 5\%. This transition from a vapor-filled
+stadium shape to two rods with liquid between them (see Figure~\ref{fig:density-rods})
+is commonly seen for objects of a similar geometry. Further evidence for the
+accuracy of this classical treatment is the calculation of the force on the
+stadium shape. The force per length is constant and equal to twice the surface tension.
+
+This functional produces many of the results of \emph{ab initio} calculations
+while being much more computationally efficient. This allows for future work
+involving hydrophilic interactions with more complex electrostatic potentials.
+\fixme{more about efficiency or future work?}
 
 \bibliographystyle{unsrt}
 \bibliography{paper}% Produces the bibliography via BibTeX.

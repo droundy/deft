@@ -61,12 +61,12 @@ set label "After transition" at 0.75,0.03 rotate by 0 font 'Helvetica,20'
 set arrow from 0.74,0.03 to 0.61,0.0075 lw 2
 
 
-plot [:1.1] [:0.05] \
+plot [:1.3] [:0.05] \
 'figs/rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.414) title 'r=0.3 nm' with lp ls 1 , \
 'figs/rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-0.756) title 'r=0.5 nm' with lp ls 2 , \
-'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.085) title 'r=0.7 nm' with lp ls 3 
-#'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.46) title 'r=0.9 nm' with lp ls 5 
-#'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.595) title 'r=1.0 nm' with lp ls 4 , \
+'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.085) title 'r=0.7 nm' with lp ls 3 , \
+'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.409) title 'r=0.9 nm' with lp ls 4 , \
+'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.57) title 'r=1.0 nm' with lp ls 6
 #'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-1.939) title 'r=1.2 nm' with lp ls 6 
 #'figs/rods-in-water-02.0nm.dat' u 1:(52.18-$3*kB*298/.0001/kJpermol/nm) title '-TS, r=0.3 nm' with l ls 1, \
 #'figs/rods-in-water-02.0nm.dat' u 1:(-52.18+($2+$3*kB*298/.0001)/kJpermol/nm) title 'U, r=0.3 nm' with l ls 2
