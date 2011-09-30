@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
     HardSpheresTarazona(R).create_source("src/HardSpheresTarazonaFast.cpp", "HardSpheresTarazonaFast", R_arg);
   if (strcmp(argv[1], "src/HardSpheresNoTensorFast.cpp") == 0)
     HardSpheresWBnotensor(R).create_source(argv[1], "HardSpheresNoTensor", R_arg);
+  if (strcmp(argv[1], "src/HardSpheresWBFast.cpp") == 0)
+    HardSpheresWB(R).create_source(argv[1], "HardSpheresWBFast", R_arg);
   if (strcmp(argv[1], "src/HardSphereGasRFFast.cpp") == 0) {
     Functional f = HardSpheresRF(R) + IdealGas() + ChemicalPotential(mu);
     f.create_source(argv[1], "HardSphereGasRF", R_mu_arg);

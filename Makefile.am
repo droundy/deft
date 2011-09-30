@@ -27,6 +27,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/SaftFluidFast.cpp \
 	src/AssociationFast.cpp src/DispersionFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
+	src/HardSpheresWBFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
