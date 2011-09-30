@@ -36,7 +36,7 @@ set ylabel 'Bonds per Molecule'
 set style line 1 lt 1 lw 3 pt 7
 set style line 2 pt 6 ps 2 lc 7
 
-set arrow from 0.2,0 to 0.2,4 nohead lt 3 lc 7 lw 2
+set arrow from 0.2,0 to 0.2,4 nohead lt 3 lc 7 lw 1
 #set arrow from 4,0 to 4,4 nohead lw 2
 
 nm = 18.8972613       # 1 nm equals this many bohrs

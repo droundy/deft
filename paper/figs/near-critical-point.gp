@@ -26,7 +26,7 @@ set output 'figs/near-critical-point.eps'
 set key noauto
 
 set xlabel 'Density (g/mL)'
-set ylabel 'Energy Density (Hartree/bohr^3)'
+set ylabel 'Energy Density (kJ/mol nm^3)'
 
 nl=4.93889420e-03
 nm = 18.8972613     # 1 nm equals this many bohrs
@@ -39,4 +39,4 @@ set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 
 plot [0.1:0.6] [:] \
-'figs/finding-vapor-pressure.dat' u ($1/gpermL):($4-$5) notitle with lines ls 1
+'figs/finding-vapor-pressure.dat' u ($1/gpermL):(($4-$5)/kJpermol*nm**3) notitle with lines ls 1

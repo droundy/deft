@@ -31,21 +31,26 @@ set key noauto inside top
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'z (nm)'
-set ylabel 'energy density (Hartree/bohr^{3})'
+set ylabel 'Energy Density (kJ/mol nm^{3})'
 
-set style line 1 lt 1 lc 3 lw 2
+set style line 1 lt 1 lc 3 lw 3
 set style line 2 lt 1 lc 7 lw 1
-set style line 3 lt 1 lc 2 lw 2
-set style line 4 lt 1 lc 1 lw 2
+set style line 3 lt 1 lc 7 lw 3
+set style line 4 lt 1 lc 1 lw 3
 
 
-set arrow from 0,-4e-5 to 0,1.1e-5 nohead lw 2
-set arrow from 4,-4e-5 to 4,1.1e-5 nohead lw 2
+set arrow from 0,-700 to 0,200 nohead lw 1
+set arrow from 4,-700 to 4,200 nohead lw 1
 
-nm = 18.8972613       # 1 nm equals this many bohrs
+mNpermeter = 6.4230498e-07 # in atomic units
+nm = 18.8972613 # in atomic units
+eV = 0.036749326 # Hartree
+kJpermol = 1.04e-2*eV # in atomic units
+angstrom = 0.1*nm
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
-plot [:] [:1.1e-5] \
-'figs/cavitysize-04.0.dat' u ($3/nm-2):5 title 'F' with lines ls 1 , \
-'figs/cavitysize-04.0.dat' u ($3/nm-2):($5-kB*298*$6) title 'U' with lines ls 4 , \
-'figs/cavitysize-04.0.dat' u ($3/nm-2):(-kB*298*$6) title '-TS' with lines ls 3 
+plot [:] [:] \
+'figs/cavitysize-04.0.dat' u ($3/nm-2):($5/kJpermol*nm**3) title 'F' with lines ls 1 , \
+'figs/cavitysize-04.0.dat' u ($3/nm-2):((-kB*298*$6)/kJpermol*nm**3) title '-TS' with lines ls 4 , \
+'figs/cavitysize-04.0.dat' u ($3/nm-2):(($5-kB*298*$6)/kJpermol*nm**3) title 'U' with lines ls 3 
+ 
