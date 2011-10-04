@@ -1,0 +1,273 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{bm}
+\usetheme{Frankfurt}
+
+\title{A Classical Density-Functional Theory for Describing Water Interfaces}
+\author{Jessica Hughes}
+\date{October 11, 2011}
+
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Theory}
+\subsection*{}
+
+\begin{frame}{Why Water is Cool}
+\end{frame}
+
+\begin{frame}{Density Functional Theory}
+\end{frame}
+
+\begin{frame}{Statistical Associating Fluid Theory}
+\end{frame}
+
+\begin{frame}[fragile]{The Functional Terms}
+The Helmholtz free energy functional is
+based on SAFT, and is composed of:
+\begin{equation}
+  F[n] = F_\text{id}[n] + F_\text{hs}[n] + F_\text{assoc}[n] + F_\text{disp}
+\end{equation}
+where $F_\text{id}$ is the ideal gas free energy, $F_\text{hs}$ is
+a hard-sphere free energy, $F_\text{assoc}$ is the free energy of
+association, and $F_\text{disp}$ is the dispersion energy. 
+\end{frame}
+
+\begin{frame}[fragile]{Ideal Gas Free Energy}
+The ideal gas functional is given by
+\begin{equation}
+  F_\text{id}[n] = k_B T \int n(\textbf{r})\left( \ln{n(\textbf{r})} - 1\right) d\textbf{r}
+\end{equation}
+where $n(\textbf{x})$ is the density of water molecules.  
+\end{frame}
+
+\begin{frame}[fragile]{Hard-Sphere Free Energy}
+Uses a Fundamental\nobreakdash-Measure Theory (FMT) functional,
+which combines scaled-particle theory and the Percus-Yevick theory,
+and an attractive interaction.  
+
+The FMT functional treats
+each water molecule as a hard sphere with a radius approximately that of
+a water molecule $(R~=~3~\AA)$.
+\end{frame}
+ 
+\begin{frame}[fragile]{Dispersion Energy}
+The dispersion free energy is based on the SAFT-VR
+approach, which has two free
+parameters, an interaction energy $\epsilon_\text{disp}$ and a
+length scale $\lambda_\text{disp}$. It has the form
+\begin{align}
+  F_\text{disp} &= 
+\end{align}
+where $a_1$ and $a_2$ are the first two terms in a high-temperature
+perturbation expansion.  $a_1$ is the mean-field dispersion
+interaction and $a_2$ describes the
+effect of fluctuations resulting from the compression of the fluid due
+to the dispersion interaction itself, and is commonly approximated
+using the local compressibility approximation (LCA).
+\end{frame}
+
+\begin{frame}[fragile]{Free Energy of Association}
+The free energy of association describes the effects of hydrogen bonds. These are modeled as
+four association sites on the surface of the
+hard sphere. There is an attractive energy
+$\epsilon_\text{assoc}$ when two molecules are arranged such that
+the hydrogen of one interacts with the lone pair of the other.  The
+volume of this interaction is $\kappa_\text{assoc}$ and the free energy is given by
+\begin{align}
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\textbf{r})
+  \left(\ln X(\textbf{r}) - \frac{X(\textbf{r})}{2} + \frac12\right) d\textbf{r}
+\end{align}
+where the value of $4$ comes from the four association sites per
+molecule, and the functional $X$ is the fraction of association sites
+\emph{not} hydrogen-bonded. 
+\end{frame}
+
+\begin{frame}[fragile]{Other Thermodynamic Functions}
+\begin{itemize}
+ \item Grand free energy
+ \item Pressure
+ \item Internal energy
+ \item Entropy
+ \item Enthalpy
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Pressure Calculation}
+The pressure is obtained by taking a partial
+derivative with respect to volume at fixed temperature.  Since
+\emph{volume} isn't a parameter in density-functional theory, we
+consider the \emph{free energy per unit volume}.
+\begin{align}
+  F[n] &= f[n]V \\
+  p[n] &= -\left(\frac{\partial F[n]}{\partial V}\right)_{T} \\
+  &= -\left(\frac{\partial f[n]V}{\partial V}\right)_{T} \\
+  &= -V\left(\frac{\partial f[n]}{\partial V}\right)_{T}
+   - f[n]\left(\frac{\partial V}{\partial V}\right)_{T} \\
+  &= n \left(\frac{\partial f[n]}{\partial n}\right)_{T} - f[n]
+\end{align}
+\end{frame}
+
+\section{Testing the Functional}
+\subsection*{}
+
+\begin{frame}[fragile]{Pressure - Water with no Constraints}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Surface Tension}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surace-tension}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Vapor Pressure}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/equation-of-state}
+\end{center}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Entropy, Internal Energy, Enthalpy}
+[Add equations, calculations?]
+\end{frame}
+
+\begin{frame}[fragile]{Temperature Coexistence Curve}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{Determining Densities - Common Tangent Rule}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/finding-vapor-pressure}
+%\includegraphics[width=\columnwidth]{figs/near-critical-point}
+\end{center}
+\end{figure}
+\end{frame}
+
+\section{Results}
+\subsection*{}
+
+\begin{frame}[fragile]{Liquid-Vapor Interface}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/surface-298}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Water Constrained to a Slit (1D)}
+Initial constraint: density equal to saturated liquid density inside cavity, 1000 times vapor density outside
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-1D}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Water Constrained to a Slit (1D)}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-1D}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Water Constrained to a Slit (1D)}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Water Constrained to a Slit (1D)}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-1D-060}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-single-rod}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/xassoc-single-rod}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+Resolution and Convergence Tests
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-vs-radius}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-rods-in-water}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/energy-rods}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
+\end{center}
+\end{figure} 
+\end{frame}
+
+\begin{frame}[fragile]{Hydrophobic Rods in Water}
+The critical transition
+\end{frame}
+
+\end{document}
