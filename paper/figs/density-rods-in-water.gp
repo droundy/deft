@@ -52,12 +52,13 @@ set cbrange [0:1.2]
 set cbtics 0.1
 
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
+nm=18.8972613 # 1 nm in atomic units
 
 splot [-3:3] [-1.5:1.5] [:] \
-'figs/rods-picture-01.0-00.4.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/18.8972613-5):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/18.8972613):($3/18.8972613-3):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/18.8972613-5):($3/18.8972613-3):($4/gpermL) notitle with pm3d
+'figs/rods-picture-01.0-00.4.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.4.dat' u ($2/nm-5):($3/nm):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.4.dat' u ($2/nm):($3/nm-3):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.4.dat' u ($2/nm-5):($3/nm-3):($4/gpermL) notitle with pm3d
 
 set size 0.95,0.53          # The top plot
 set origin 0,0.48
@@ -71,7 +72,7 @@ set bmargin 0
 unset colorbox
 
 splot [-3:3] [-1.5:1.5] [:] \
-'figs/rods-picture-01.0-00.2.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/18.8972613-5):($3/18.8972613):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/18.8972613):($3/18.8972613-3):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/18.8972613-5):($3/18.8972613-3):($4/gpermL) notitle with pm3d
+'figs/rods-picture-01.0-00.2.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.2.dat' u ($2/nm-5):($3/nm):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.2.dat' u ($2/nm):($3/nm-3):($4/gpermL) notitle with pm3d , \
+'figs/rods-picture-01.0-00.2.dat' u ($2/nm-5):($3/nm-3):($4/gpermL) notitle with pm3d
