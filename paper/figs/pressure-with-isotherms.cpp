@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
 //const double kT = water_prop.kT;

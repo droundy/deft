@@ -26,11 +26,8 @@ int main(int argc, char **argv) {
     printf("Please provide a filename\n");
     exit(1);
   }
-  const char *no_arg[] = { 0, 0 };
   const char *R_arg[] = { "R", 0 };
   const char *R_mu_arg[] = { "R", "mu", 0 };
-  if (strcmp(argv[1], "src/IdealGasFast.cpp") == 0)
-    IdealGasOfVeff.create_source("src/IdealGasFast.cpp", "IdealGasFast", no_arg);
   if (strcmp(argv[1], "src/HardSpheresFast.cpp") == 0)
     HardSpheres(R).create_source("src/HardSpheresFast.cpp", "HardSpheresFast", R_arg);
   if (strcmp(argv[1], "src/HardSpheresRFFast.cpp") == 0)

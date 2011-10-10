@@ -32,8 +32,6 @@ Functional AssociationSAFT(double radius, double epsilon, double kappa,
                            double epsdis, double lambdadis, double lscale);
 Functional SaftFluidSlow(double radius, double epsilon, double kappa,
                          double epsdis, double lambda, double lscale, double mu);
-Functional SaftFluid(double radius, double epsilon, double kappa,
-                     double epsdis, double lambda, double lscale, double mu);
 
 Functional DispersionSAFTa1(double radius, double epsdis, double lambda, double lscale);
 Functional DispersionSAFTa2(double radius, double epsdis, double lambda, double lscale);
@@ -41,10 +39,6 @@ Functional DispersionSAFT(double radius, double epsdis, double lambda, double ls
 Functional SaftEntropy(double R,
 		       double epsilon, double kappa,
 		       double epsdis, double lambda, double lscale);
-
-Functional HardSpheresFast(double radius);
-Functional HardSpheresRFFast(double radius);
-Functional HardSpheresTarazonaFast(double radius);
 
 Functional GaussianPolynomial(double amplitude, double width, int power);
 

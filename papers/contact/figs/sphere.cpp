@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
 #include "ContactDensity.h"
@@ -25,9 +25,7 @@
 
 const double nm = 18.8972613;
 // Here we set up the lattice.
-double diameter = 6;
-double N = 4;
-bool using_default_diameter = true;
+double diameter;
 
 double notinwall(Cartesian r) {
   const double z = r.z();
@@ -48,13 +46,14 @@ static void took(const char *name) {
   last_time = t;
 }
 
-//Functional HS = HardSpheresNoTensor(1.0);
-Functional HS = HardSpheresFast(1.0);
+Functional WB = HardSpheresNoTensor(1.0);
+Functional WBT = HardSpheresWBFast(1.0);
 
 const int numiters = 25;
 
-double N_from_mu(Minimizer *min, Grid *potential, const Grid &constraint, double mu) {
-  Functional f = constrain(constraint, OfEffectivePotential(HS + IdealGas()
+double N_from_mu(Functional fhs, Minimizer *min, Grid *potential,
+                 const Grid &constraint, double mu) {
+  Functional f = constrain(constraint, OfEffectivePotential(fhs + IdealGas()
                                                             + ChemicalPotential(mu)));
   double Nnow = 0;
   min->minimize(f, potential->description());
@@ -119,22 +118,13 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   fclose(out);
 }
 
-int main(int argc, char *argv[]) {
-  if (argc == 3) {
-    if (sscanf(argv[1], "%lg", &diameter) != 1) {
-      printf("Got bad diameter argument: %s\n", argv[1]);
-      return 1;
-    }
-    if (sscanf(argv[2], "%lg", &N) != 1) {
-      printf("Got bad N argument: %s\n", argv[2]);
-      return 1;
-    }
-    using_default_diameter = false;
-    printf("Diameter is %g hard spheres, and it holds %g of them\n", diameter, N);
-  }
+
+void run_spherical_cavity(double diam, int N, const char *name, Functional fhs) {
+  diameter = diam;
+  printf("Diameter is %g hard spheres, and it holds %d of them\n", diameter, N);
 
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "papers/contact/figs/sphere-%04.1f-%02.0f-energy.dat", diameter, N);
+  sprintf(datname, "papers/contact/figs/sphere%s-%04.1f-%02d-energy.dat", name, diameter, N);
   
   FILE *o = fopen(datname, "w");
 
@@ -170,7 +160,7 @@ int main(int argc, char *argv[]) {
                                                             &potential,
                                                             QuadraticLineMinimizer));
   double mumax = mu, mumin = mu, dmu = 4.0/N;
-  double Nnow = N_from_mu(&min, &potential, constraint, mu);
+  double Nnow = N_from_mu(fhs, &min, &potential, constraint, mu);
   const double fraccuracy = 1e-3;
   if (fabs(Nnow/N - 1) > fraccuracy) {
     if (Nnow > N) {
@@ -179,7 +169,7 @@ int main(int argc, char *argv[]) {
         mumax += dmu;
         dmu *= 2;
         
-        Nnow = N_from_mu(&min, &potential, constraint, mumax);
+        Nnow = N_from_mu(fhs, &min, &potential, constraint, mumax);
         // Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
         // density = EffectivePotentialToDensity()(1, gd, potential);
         // density.epsNativeSlice("papers/contact/figs/box.eps", 
@@ -204,7 +194,7 @@ int main(int argc, char *argv[]) {
           mumin *= 2;
         }
         
-        Nnow = N_from_mu(&min, &potential, constraint, mumin);
+        Nnow = N_from_mu(fhs, &min, &potential, constraint, mumin);
         // density = EffectivePotentialToDensity()(1, gd, potential);
         // density.epsNativeSlice("papers/contact/figs/box.eps", 
         //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
@@ -220,7 +210,7 @@ int main(int argc, char *argv[]) {
     
     while (fabs(N/Nnow-1) > fraccuracy) {
       mu = 0.5*(mumin + mumax);
-      Nnow = N_from_mu(&min, &potential, constraint, mu);
+      Nnow = N_from_mu(fhs, &min, &potential, constraint, mu);
       // density = EffectivePotentialToDensity()(1, gd, potential);
       // density.epsNativeSlice("papers/contact/figs/box.eps", 
       //                        Cartesian(0,ymax+2,0), Cartesian(0,0,zmax+2), 
@@ -228,7 +218,7 @@ int main(int argc, char *argv[]) {
       // density.epsNativeSlice("papers/contact/figs/box-diagonal.eps", 
       //                        Cartesian(xmax+2,0,zmax+2),  Cartesian(0,ymax+2,0),
       //                        Cartesian(-xmax/2-1,-ymax/2-1,-zmax/2-1));
-      printf("Nnow is %g vs %g with mu %g\n", Nnow, N, mu);
+      printf("Nnow is %g vs %d with mu %g\n", Nnow, N, mu);
       took("Finding N from mu");
       if (Nnow > N) {
         mumin = mu;
@@ -236,7 +226,7 @@ int main(int argc, char *argv[]) {
         mumax = mu;
       }
     }
-    printf("N final is %g (vs %g) with mu = %g\n", Nnow, N, mu);
+    printf("N final is %g (vs %d) with mu = %g\n", Nnow, N, mu);
   }
 
   double energy = min.energy();
@@ -248,14 +238,14 @@ int main(int argc, char *argv[]) {
   fprintf(o, "%g\t%.15g\t%.15g\n", diameter, energy, mean_contact_density);
   
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/contact/figs/sphere-%04.1f-%02.0f.dat", diameter, N);
+  sprintf(plotname, "papers/contact/figs/sphere%s-%04.1f-%02d.dat", name, diameter, N);
   Grid energy_density(gd, f(1, gd, potential));
   Grid contact_density(gd, ContactDensitySimplest(1.0)(1, gd, density));
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density));
   Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
   plot_grids_yz_directions(plotname, density, energy_density, contact_density);
-  sprintf(plotname, "papers/contact/figs/sphere-radial-%04.1f-%02.0f.dat", diameter, N);
+  sprintf(plotname, "papers/contact/figs/sphere%s-radial-%04.1f-%02d.dat", name, diameter, N);
   radial_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere);
   free(plotname);
   density.epsNativeSlice("papers/contact/figs/sphere.eps", 
@@ -265,4 +255,31 @@ int main(int argc, char *argv[]) {
   took("Plotting stuff");
   
   fclose(o);
+}
+
+int main(int argc, char *argv[]) {
+  int N;
+  if (argc != 4) {
+    printf("got argc %d\n", argc);
+    printf("usage: %s diameter N (WB|WBT)\n", argv[0]);
+    return 1;
+  }
+  if (sscanf(argv[1], "%lg", &diameter) != 1) {
+    printf("Got bad diameter argument: %s\n", argv[1]);
+    return 1;
+  }
+  if (sscanf(argv[2], "%d", &N) != 1) {
+    printf("Got bad N argument: %s\n", argv[2]);
+    return 1;
+  }
+  if (strlen(argv[3]) == 2) {
+    run_spherical_cavity(diameter, N, "WB", WB);
+  } else if (strlen(argv[3]) == 3) {
+    run_spherical_cavity(diameter, N, "WBT", WBT);
+  } else {
+    printf("Weird functional encountered:  %s\n", argv[3]);
+    return 1;
+  }
+
+  return 0;
 }
