@@ -4,6 +4,9 @@
 
 #include "Functional.h"
 
+// This file is intended for functionals that are themselves
+// optimized, but are also needed by other optimized functionals.
+
 extern Functional kT;
 
 // HardSpheresNoTensor is used in various SAFT functionals that are
@@ -29,15 +32,3 @@ Functional Association(double radius, double epsilon, double kappa,
 Functional Dispersion(double radius, double epsdis, double lambda, double lscale);
   Functional DispersionGrad(double radius, double epsdis, double lambda, double lscale);
   Functional Dispersion_by_dT(double radius, double epsdis, double lambda, double lscale);
-
-// SaftExcessEnergy is used by the crossover functional, which we'd
-// like to be able to optimize.
-Functional SaftExcessEnergy(double R, double epsilon, double kappa,
-                            double epsdis, double lambda, double lscale,
-                            double mu);
-  Functional SaftExcessEnergyGrad(double R, double epsilon, double kappa,
-                                  double epsdis, double lambda, double lscale,
-                                  double mu);
-  Functional SaftExcessEnergy_by_dT(double R, double epsilon, double kappa,
-                                    double epsdis, double lambda, double lscale,
-                                    double mu);

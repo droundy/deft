@@ -29,15 +29,16 @@ set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
-set ylabel 'density/liquid density'
-set xlabel 'position (nm)'
+set ylabel 'Density (g/mL)'
+set xlabel 'Position (nm)'
 
 nl=0.004938863
 nm = 18.8972613       # 1 nm equals this many bohrs
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 set style line 1 lt 1 lw 3
-set style line 2 lt 2 lw 3
+set style line 2 lt 3 lc 3 lw 3
 
 plot [:4] [:] \
-'figs/surface-298.dat' u ($1/nm):($2/nl) notitle with lines ls 1, \
-'figs/surface-298.dat' u 1:(1) notitle with lines ls 2
+'figs/surface-298.dat' u ($1/nm):($2/gpermL) notitle with lines ls 1, \
+'figs/surface-298.dat' u ($1/nm):(0.996782051315) notitle with lines ls 2

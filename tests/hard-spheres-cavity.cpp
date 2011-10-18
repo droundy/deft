@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
 #include "utilities.h"
@@ -54,7 +54,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
   min.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
 
-  const double true_energy = -0.0375954069264862;
+  const double true_energy = -0.0375954069264892;
 
   int retval = 0;
   double energy = min.energy();

@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
 #include "utilities.h"
@@ -70,28 +70,42 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
 }
 
 void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
-			    const Grid &c, const Grid &d) {
+                              const Grid &c, const Grid &d) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
     // don't just abort?
     return;
   }
+
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
+  const int y_half = gd.Ny/2;
+  const int z_half - gd.Nz/2;
+
   int dy = 20;
   while (gd.Ny % dy != 0) dy--;
   int dz = 20;
   while (gd.Nz % dz != 0) dz--;
   for (int y=0; y<gd.Ny; y+=dy) {
     for (int z=0; z<gd.Nz; z+=dz) {
-      Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
+      
+      //Rearrange coordinates for easier plotting
+      if (y < y_half && z < z_half)
+        Cartesian here = gd.fineLat.toCartesian(Relative(x, y + y_half, z + z_half));
+      else if (y >= y_half && z >= z_half)
+        Cartesian here = gd.fineLat.toCartesian(Relative(x, y - y_half, z - z_half));
+      else if (y >= y_half && z < z_half)
+        Cartesian here = gd.fineLat.toCartesian(Relative(x, y - y_half, z + z_half));
+      else if (y < y_half && z >= z_half)
+        Cartesian here = gd.fineLat.toCartesian(Relative(z, y + y_half, z - z_half));
+      
       double ahere = a(x,y,z);
       double bhere = b(x,y,z);
       double chere = c(x,y,z);
       double dhere = d(x,y,z);
       fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	      ahere, bhere, chere, dhere);
+              ahere, bhere, chere, dhere);
     }
     fprintf(out,"\n");
  }  
@@ -110,13 +124,13 @@ int main(int argc, char *argv[]) {
   }
   
   double zmax = 2*diameter+1*nm;
-  double ymax = 3*diameter+2*nm;
+  double ymax = 2*diameter+1*nm;
 
-  char *datname = (char *)malloc(1024);
+  char *datname = new char[1024];
   snprintf(datname, 1024, "paper/figs/four-rods-in-water-%04.1fnm.dat", diameter/nm);
   
   FILE *o = fopen(datname, "w");
-  //FILE *o = fopen("paper/figs/rods-in-water.dat", "w");
+  delete[] datname;
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,
@@ -217,7 +231,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(o, "%g\t%.15g\n", distance/nm, energy);
 
-    char *plotnameslice = (char *)malloc(1024);
+    char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "paper/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
@@ -225,17 +239,7 @@ int main(int argc, char *argv[]) {
     Grid Xassoc(gd, X(water_prop.kT, density));
     //plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
     plot_grids_yz_directions(plotnameslice, density, energy_density, entropy, Xassoc);
-    free(plotnameslice);
-    //free(plotname);
-
-    // double N = 0;
-    // {
-    //   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    //   for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
-    // }
-    
-    //N = N/width;
-    //printf("N is %.15g\n", N);
+    delete[] plotnameslice;
   }
   fclose(o);
 }

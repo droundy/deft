@@ -113,7 +113,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
   double retval = 0;
   printf("\n\n");
-  const double Einterface_with_external_true = -1.9050869873599068e-05;
+  const double Einterface_with_external_true = -1.9059612806502457e-05;
   printf("interface energy is %.15g (vs. %.15g)\n", Einterface, Einterface_with_external);
   if (Einterface_with_external < Einterface_with_external_true) {
     printf("FAIL: Einterface_with_external is too low: %.17g (should be %.17g)\n",
@@ -128,14 +128,14 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
 
   printf("gas energy is %.15g\n", Egas);
-  const double Egas_true = -2.72389740017384e-08;
+  const double Egas_true = -2.53378305461179e-05;
   if (Egas < Egas_true) {
     printf("FAIL: Egas is too low: %.16g\n", Egas);
     retval++;
   }
 
   printf("liquid energy is %.15g\n", Eliquid);
-  const double Eliquid_true = -2.532746825608696e-05;
+  const double Eliquid_true = -2.5337830546118e-05;
   if (Eliquid < Eliquid_true) {
     printf("FAIL: Eliquid is too low: %.16g\n", Eliquid);
     retval++;
@@ -144,7 +144,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   const double X = Ninterface/Nliquid; // Fraction of volume effectively filled with liquid.
   printf("X is %g\n", X);
   
-  const double true_surface_tension = 1.151658338e-05;
+  const double true_surface_tension = 6.09535573e-05;
 
   const double surface_tension = (Einterface - Eliquid*X - Egas*(1-X))/2/0.2/0.2;
   printf("surface tension is %.10g\n", surface_tension);

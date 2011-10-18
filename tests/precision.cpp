@@ -22,7 +22,7 @@
 const double my_kT = 1e-3; // room temperature in Hartree
 const double ngas = 1.14e-7; // vapor density of water
 const double nliquid = 4.9388942e-3; // density of liquid water
-const double mu = -my_kT*log(ngas);
+const double mu = -1.1*my_kT*log(ngas);
 const double Veff_liquid = -my_kT*log(nliquid);
 
 // Here we set up the lattice.
@@ -53,7 +53,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("**********************************\n\n");
 
-  const double true_energy = -0.2674037773854946;
+  const double true_energy = -0.2664377410447067;
   //const double gas_energy = -1.250000000000085e-11;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);

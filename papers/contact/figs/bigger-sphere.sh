@@ -13,5 +13,5 @@ set -ev
 hostname
 date
 
-time nice -19 papers/contact/figs/sphere.mkdat 16 265
+time nice -19 papers/contact/figs/sphere.mkdat 16 265 WB
 date
