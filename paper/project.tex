@@ -232,6 +232,7 @@ hard-sphere radius of
 \newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
 \newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
 \newcommand\epsilonassoc{\ensuremath{\epsilon_\textit{a}}}
+\newcommand\kappaassoc{\ensuremath{\kappa_\textit{a}}}
 \newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
 \newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
@@ -335,7 +336,7 @@ sphere.  These four sites represent two protons and two electron lone
 pairs.  There is an attractive energy $\epsilonassoc$ when
 two molecules are oriented such that the proton of one overlaps
 with the lone pair of the other.  The volume over which this
-interaction occurs is $\kappa_\textit{assoc}$, giving the association
+interaction occurs is $\kappaassoc$, giving the association
 term in the free energy has two empirical parameters that are fit to
 experimental data.
 
@@ -378,7 +379,7 @@ The functional $\Delta$ which appears in the formula for $X$ is a
 measure of hydrogen-bonding probability.  In the SAFT-VR
 model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
 \begin{align}
-  \Delta(\xx) &= \kappa_\textit{assoc} g^\textit{SW}_\sigma(\xx)
+  \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
   \left(e^{-\beta\epsilonassoc} - 1\right) \\
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\etadisp(\xx)) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
@@ -706,7 +707,7 @@ of the rod, as expected at the interface of any hydrophobic wall. }
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/energy-vs-diameter}
 \end{center}
-\caption{ Free nergy versus radius for a single hydrophobic rod
+\caption{ Free energy versus radius for a single hydrophobic rod
 immersed in water. This should have an asymptote equal to the surface
 tension at room temperature, and it agrees well with the surface tension in
 Figure~\ref{fig:surface-tension}. }
@@ -731,7 +732,7 @@ bonds in water more than hydrophobic rods.
 \caption{ Density profiles for 
 a single hydrophobic rod with a radius of 0.5~nm using several different 
 lattice spacing resolutions. We used a high resolution of 0.05~bohrs ($\approx$~0.003~nm), 
-medium 0.2~bohrs ($\approx$~0.001~nm), and low 0.5~bohrs ($\approx$~0.03~nm).}
+medium 0.2~bohrs ($\approx$~0.01~nm), and low 0.5~bohrs ($\approx$~0.03~nm).}
 \label{fig:densityresolution}
 \end{figure}
 
@@ -865,7 +866,7 @@ even though the rods are nanoscale, the water molecules will ``see'' them classi
 To estimate how the transition from vapor to liquid between the rods depends on their 
 radius, we will again use this classical approximation and propose that 
 the critical separation, $d_c$, will occur when the free energies are equal. This 
-corresponds to equating the circumference of the stadium shape (see 
+corresponds to equating the circumference of the stadium-shape (see 
 top of Figure~\ref{fig:density-rods}) and the circumference of the two rods (see bottom
 of Figure~\ref{fig:density-rods}), which results in
 \begin{equation}
