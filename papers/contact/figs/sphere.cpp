@@ -25,7 +25,7 @@
 
 const double nm = 18.8972613;
 // Here we set up the lattice.
-double diameter;
+static double diameter;
 
 double notinwall(Cartesian r) {
   const double z = r.z();
@@ -55,20 +55,21 @@ double N_from_mu(Functional fhs, Minimizer *min, Grid *potential,
                  const Grid &constraint, double mu) {
   Functional f = constrain(constraint, OfEffectivePotential(fhs + IdealGas()
                                                             + ChemicalPotential(mu)));
-  double Nnow = 0;
+  //double Nnow = 0;
   min->minimize(f, potential->description());
   for (int i=0;i<numiters && min->improve_energy(false);i++) {
-    Grid density(potential->description(), EffectivePotentialToDensity()(1, potential->description(), *potential));
-    Nnow = density.sum()*potential->description().dvolume;
+    //Grid density(potential->description(), EffectivePotentialToDensity()(1, potential->description(), *potential));
+    //Nnow = density.sum()*potential->description().dvolume;
     //printf("Nnow is %g vs %g\n", Nnow, N);
-    fflush(stdout);
+    //fflush(stdout);
     
     //density.epsNativeSlice("papers/contact/figs/sphere.eps", 
     //                       Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
     //                       Cartesian(0,xmax/2,xmax/2));
     //sleep(3);
   }
-  return Nnow;
+  Grid density(potential->description(), EffectivePotentialToDensity()(1, potential->description(), *potential));
+  return density.sum()*potential->description().dvolume;
 }
 
 void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e) {
