@@ -1,0 +1,122 @@
+% TODO:
+
+% Write ``Liquid-vapor interface'' section A.
+
+% Look up question-mark references (citations).
+
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\xx}{\textbf{x}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+\begin{document}
+\title{A Fundamental Measure Theory Functional for Hard-Sphere Contact Densities}
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+\needsworklater{ We examine a functional based on FMT~\cite{roth2002whitebear}
+ with smoother convolution kernels.  This functional is numerically
+ easier to converge, and yet (hopefully) gives comparable results.}
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+
+\section{Fundamental-Measure Theory}
+
+We use the White Bear version of the Fundamental-Measure Theory~(FMT)
+functional published in reference~\cite{roth2002whitebear}.  The FMT
+functional describes the excess free energy of a hard-sphere fluid.
+This particular FMT reduces to the Carnahan-Starling equation of state
+for homogeneous systems.
+\begin{equation}
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)\right) d\xx \; ,
+\end{equation}
+with integrands
+\begin{align}
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+  n_3 + (1-n_3)^2 \ln(1-n_3)
+}{
+  36\pi n_3^2\left( 1 - n_3 \right)^2
+} ,
+\end{align}
+using the weighted densities
+\begin{align}
+  n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
+  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+\end{align}
+\begin{align}
+  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
+  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R} \\
+  n_1 &= \frac{n_2}{4\pi R} , \quad
+  n_0 = \frac{n_2}{4\pi R^2}
+\end{align}
+
+\section{Comparison with simulation}
+
+\subsection{Hard spheres confined in a spherical cavity}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/density-08-013}
+  \caption{Density and contact densities of thirteen hard spheres in a
+    spherical cavity with diameter 8.}
+  \label{fig:sphere-8}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/density-12-112}
+  \caption{Density and contact densities of 112 hard spheres in a
+    spherical cavity with diameter 12.}
+  \label{fig:sphere-12}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/density-16-265}
+  \caption{Density and contact densities of 265 hard spheres in a
+    spherical cavity with diameter 16.}
+  \label{fig:sphere-16}
+\end{figure}
+
+\subsection{Hard spheres confined in a cubical cavity}
+
+\begin{figure*}
+\includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
+\includegraphics[height=5cm]{figs/box-100s--05,05,05-13}
+\includegraphics[height=5cm]{figs/box-110c--05,05,05-13}
+\caption{Density of hard spheres in a $5\times5\times5$ box.}
+\label{fig:box-density}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
+
