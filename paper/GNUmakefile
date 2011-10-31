@@ -52,6 +52,8 @@ ALL_FIGURES=\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
+	figs/sphere-energy-vs-diameter.gp\
+	figs/sphere-density.gp\
 	figs/energy-vs-diameter.gp\
 	figs/density-rods-in-water.gp\
 	figs/density-single-rod.gp\
@@ -120,3 +122,10 @@ figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
 	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
 figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
+
+figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
+figs/sphere.dat: $(wildcard figs/sphere-%nm-energy.dat)
+	echo 0 0 > $@
+	cat figs/sphere-*nm-energy.dat >> $@
+figs/sphere-density.eps: figs/rods-picture-01.0-00.2.dat \
+	figs/rods-picture-01.0-00.4.dat

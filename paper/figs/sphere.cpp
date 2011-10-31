@@ -24,9 +24,9 @@
 
 const double nm = 18.8972613;
 // Here we set up the lattice.
-const double zmax = 2.5*nm;
-const double ymax = 2.5*nm;
-const double xmax = 2.5*nm;
+double zmax = 2.5*nm;
+double ymax = 2.5*nm;
+double xmax = 2.5*nm;
 double diameter = 1*nm;
 bool using_default_diameter = true;
 
@@ -48,7 +48,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
     return;
   }
   const GridDescription gd = a.description();
-  const int x = gd.Nx/2;
+  const int x = 0;
   const int z = 0;
   for (int y=0; y<gd.Ny; y++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
@@ -71,9 +71,10 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   }
   const GridDescription gd = a.description();
   const int x = 0;
+  const int stepsize = 4;
   //const int y = gd.Ny/2;
-  for (int y=-gd.Ny/2; y<=gd.Ny/2; y++) {
-    for (int z=-gd.Nz/2; z<=gd.Nz/2; z++) {
+  for (int y=-gd.Ny/2; y<=gd.Ny/2; y+=stepsize) {
+    for (int z=-gd.Nz/2; z<=gd.Nz/2; z+=stepsize) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
       double ahere = a(here);
       double bhere = b(here);
@@ -95,8 +96,9 @@ int main(int argc, char *argv[]) {
     }
     diameter *= nm;
     using_default_diameter = false;
-    printf("Diameter is %g bohr\n", diameter);
   }
+  printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
+  xmax = ymax = zmax = diameter + 1*nm;
 
   char *datname = (char *)malloc(1024);
   sprintf(datname, "paper/figs/sphere-%04.1fnm-energy.dat", diameter/nm);
@@ -133,7 +135,7 @@ int main(int argc, char *argv[]) {
   
   //for (diameter=0*nm; diameter<3.0*nm; diameter+= .1*nm) {
     Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-    GridDescription gd(lat, 0.3);
+    GridDescription gd(lat, 0.2);
     
     Grid potential(gd);
     Grid constraint(gd);
@@ -179,15 +181,23 @@ int main(int argc, char *argv[]) {
 
     fprintf(o, "%g\t%.15g\n", diameter/nm, energy);
 
-    char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/sphere-%04.1f.dat", diameter/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));
     Grid Xassoc(gd, X(water_prop.kT, density));
+
+    char *plotname = (char *)malloc(1024);
+
+    sprintf(plotname, "paper/figs/sphere-%04.1f-slice.dat", diameter/nm);
     plot_grids_yz_directions(plotname, density, 
    			     energy_density, entropy, Xassoc);
+
+    sprintf(plotname, "paper/figs/sphere-%04.1f.dat", diameter/nm);
+    plot_grids_y_direction(plotname, density, 
+   			     energy_density, entropy, Xassoc);
+
     free(plotname);
+
     density.epsNativeSlice("paper/figs/sphere.eps", 
 			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
 			   Cartesian(0,ymax/2,zmax/2));
