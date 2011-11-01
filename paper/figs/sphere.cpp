@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
     
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
-      fflush(stdout);
+      //fflush(stdout);
       //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
      
       //density.epsNativeSlice("paper/figs/sphere.eps", 
@@ -198,9 +198,9 @@ int main(int argc, char *argv[]) {
 
     free(plotname);
 
-    density.epsNativeSlice("paper/figs/sphere.eps", 
-			   Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-			   Cartesian(0,ymax/2,zmax/2));
+    //density.epsNativeSlice("paper/figs/sphere.eps",
+		//	   Cartesian(0,ymax,0), Cartesian(0,0,zmax),
+		//	   Cartesian(0,ymax/2,zmax/2));
     
     double peak = peak_memory()/1024.0/1024;
     printf("Peak memory use is %g M\n", peak);

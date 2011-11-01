@@ -127,5 +127,4 @@ figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
 figs/sphere.dat: $(wildcard figs/sphere-%nm-energy.dat)
 	echo 0 0 > $@
 	cat figs/sphere-*nm-energy.dat >> $@
-figs/sphere-density.eps: figs/rods-picture-01.0-00.2.dat \
-	figs/rods-picture-01.0-00.4.dat
+figs/sphere-density.eps: $(wildcard figs/sphere-%slice.dat)
