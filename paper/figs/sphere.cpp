@@ -71,7 +71,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   }
   const GridDescription gd = a.description();
   const int x = 0;
-  const int stepsize = 4;
+  const int stepsize = 2;
   //const int y = gd.Ny/2;
   for (int y=-gd.Ny/2; y<=gd.Ny/2; y+=stepsize) {
     for (int z=-gd.Nz/2; z<=gd.Nz/2; z+=stepsize) {
@@ -89,6 +89,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 }
 
 int main(int argc, char *argv[]) {
+  clock_t start_time = clock();
   if (argc > 1) {
     if (sscanf(argv[1], "%lg", &diameter) != 1) {
       printf("Got bad argument: %s\n", argv[1]);
@@ -121,6 +122,8 @@ int main(int argc, char *argv[]) {
 				     water_prop.lambda_dispersion,
 				     water_prop.length_scaling, mu_satp));
   
+  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
 			      water_prop.kappaAB, water_prop.epsilon_dispersion,
 			      water_prop.lambda_dispersion,
@@ -177,9 +180,12 @@ int main(int argc, char *argv[]) {
     }
 
     double energy = min.energy();
-    printf("Energy is %.15g\n", energy);
+    printf("Total energy is %.15g\n", energy);
 
-    fprintf(o, "%g\t%.15g\n", diameter/nm, energy);
+    const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
+    printf("The bulk energy per cell should be %g\n", EperCell);
+
+    fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
 
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
@@ -207,4 +213,8 @@ int main(int argc, char *argv[]) {
   
   // }
   fclose(o);
+  clock_t end_time = clock();
+  double seconds = (end_time - start_time)/double(CLOCKS_PER_SEC);
+  double hours = seconds/60/60;
+  printf("Entire calculation took %.1g hours\n", hours);
 }

@@ -31,6 +31,7 @@ all :  paper.pdf poster.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
+	rm -f paper/figs/*.tmp.sh
 
 ALL_FIGURES=\
 	figs/correlation.gp \
@@ -124,7 +125,7 @@ figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 
 figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
-figs/sphere.dat: $(wildcard figs/sphere-%nm-energy.dat)
-	echo 0 0 > $@
-	cat figs/sphere-*nm-energy.dat >> $@
-figs/sphere-density.eps: $(wildcard figs/sphere-%slice.dat)
+sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)
+figs/sphere.dat: $(sphereEnergies)
+	cat $(sphereEnergies) > $@
+figs/sphere-density.eps: $(wildcard figs/sphere-*slice.dat)
