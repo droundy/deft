@@ -69,7 +69,7 @@ int main(int, char **argv) {
                             water_prop.epsilonAB, water_prop.kappaAB,
                             water_prop.epsilon_dispersion,
                             water_prop.lambda_dispersion, water_prop.length_scaling, 0),
-              kT, -8.140492012098989e-09);
+              kT, -8.142045381835621e-09);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

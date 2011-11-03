@@ -188,7 +188,7 @@ clean-local:
 	cd papers && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
-paper: paper/figs/equation-of-state.dat \
+paper: all paper/figs/equation-of-state.dat \
 	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/enthalpy.dat \
@@ -200,7 +200,7 @@ paper: paper/figs/equation-of-state.dat \
 	paper/figs/single-rod-in-water-low-res.dat
 	cd paper && $(MAKE)
 
-papers: papers/contact/figs/gHS-vs-n.dat \
+papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/sphere.mkdat papers/contact/figs/box.mkdat \
 	papers/contact/figs/free-energy.dat
 	cd papers && $(MAKE)

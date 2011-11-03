@@ -81,25 +81,25 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
   const int y_half = gd.Ny/2;
-  const int z_half - gd.Nz/2;
+  const int z_half = gd.Nz/2;
 
-  int dy = 20;
+  int dy = 10;
   while (gd.Ny % dy != 0) dy--;
-  int dz = 20;
+  int dz = 10;
   while (gd.Nz % dz != 0) dz--;
   for (int y=0; y<gd.Ny; y+=dy) {
     for (int z=0; z<gd.Nz; z+=dz) {
-      
+      Cartesian here;
       //Rearrange coordinates for easier plotting
-      if (y < y_half && z < z_half)
-        Cartesian here = gd.fineLat.toCartesian(Relative(x, y + y_half, z + z_half));
-      else if (y >= y_half && z >= z_half)
-        Cartesian here = gd.fineLat.toCartesian(Relative(x, y - y_half, z - z_half));
-      else if (y >= y_half && z < z_half)
-        Cartesian here = gd.fineLat.toCartesian(Relative(x, y - y_half, z + z_half));
-      else if (y < y_half && z >= z_half)
-        Cartesian here = gd.fineLat.toCartesian(Relative(z, y + y_half, z - z_half));
-      
+      if (y < y_half && z < z_half) {
+         here = gd.fineLat.toCartesian(Relative(x, y + y_half, z + z_half));
+      } else if (y >= y_half && z >= z_half) {
+         here = gd.fineLat.toCartesian(Relative(x, y - y_half, z - z_half));
+      } else if (y >= y_half && z < z_half) {
+         here = gd.fineLat.toCartesian(Relative(x, y - y_half, z + z_half));
+      } else {
+         here = gd.fineLat.toCartesian(Relative(x, y + y_half, z - z_half));
+      }
       double ahere = a(x,y,z);
       double bhere = b(x,y,z);
       double chere = c(x,y,z);
@@ -123,8 +123,9 @@ int main(int argc, char *argv[]) {
     printf("Diameter is %g bohr\n", diameter);
   }
   
-  double zmax = 2*diameter+1*nm;
-  double ymax = 2*diameter+1*nm;
+  const double dmax = 2*nm;
+  double zmax = 2*diameter+dmax+2*nm;
+  double ymax = 2*diameter+dmax+2*nm;
 
   char *datname = new char[1024];
   snprintf(datname, 1024, "paper/figs/four-rods-in-water-%04.1fnm.dat", diameter/nm);
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]) {
                                                   water_prop.epsilon_dispersion,
                                                   water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
-  for (distance=0*nm; distance<2.0*nm; distance += .1*nm) {
+  for (distance=1*nm; distance<=dmax; distance += .1*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     
