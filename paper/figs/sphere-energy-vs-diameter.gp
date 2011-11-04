@@ -37,5 +37,5 @@ set style line 1 lt 3 lw 3 pt 7 ps 2
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units
 
-plot [:] [:] \
+plot [0:] [:] \
 'figs/sphere.dat' u ($1/2):($2/(4*pi*$1*$1*nm*nm)/mNpermeter) notitle with lp ls 1
