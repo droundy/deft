@@ -23,7 +23,8 @@
 set terminal postscript eps enhanced color solid "Helvetica" 20
 set output 'figs/sphere-energy-vs-diameter.eps'
 
-set key noauto outside top
+#set key noauto outside top
+set key bottom right
 
 # set multiplot
 
@@ -33,9 +34,12 @@ set xlabel 'Radius (nm)'
 set ylabel 'Energy/Area (mN/m)'
 
 set style line 1 lt 3 lw 3 pt 7 ps 2
+set style line 2 lt 7 pt 6 lw 3 ps 2
 
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units
 
-plot [0:] [:] \
-'figs/sphere.dat' u ($1/2):($2/(4*pi*$1*$1*nm*nm)/mNpermeter) notitle with lp ls 1
+plot [0:] [0:] \
+'figs/sphere.dat' u ($1/2):($2/(pi*($1+0.00001)*($1+0.00001)*nm*nm)/mNpermeter) title 'CDFT' with lp ls 1, \
+'figs/sphere-energy-vs-diameter-spce.dat' u ($1/10):2 title 'SPC/E molecular dynamics' with p ls 2
+

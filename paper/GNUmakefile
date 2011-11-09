@@ -55,6 +55,7 @@ ALL_FIGURES=\
 	figs/density-1D.gp\
 	figs/sphere-energy-vs-diameter.gp\
 	figs/sphere-density.gp\
+	figs/density-sphere.gp\
 	figs/energy-vs-diameter.gp\
 	figs/density-rods-in-water.gp\
 	figs/density-single-rod.gp\
@@ -129,3 +130,4 @@ sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)
 figs/sphere.dat: $(sphereEnergies)
 	cat $(sphereEnergies) > $@
 figs/sphere-density.eps: $(wildcard figs/sphere-*slice.dat)
+figs/density-sphere.eps: $(wildcard figs/sphere-*.dat)

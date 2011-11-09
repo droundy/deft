@@ -50,7 +50,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
   const GridDescription gd = a.description();
   const int x = 0;
   const int z = 0;
-  for (int y=0; y<gd.Ny; y++) {
+  for (int y=0; y<gd.Ny/2; y++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
@@ -99,7 +99,8 @@ int main(int argc, char *argv[]) {
     using_default_diameter = false;
   }
   printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
-  xmax = ymax = zmax = diameter + 1*nm;
+  const double padding = 1*nm;
+  xmax = ymax = zmax = diameter + 2*padding;
 
   char *datname = (char *)malloc(1024);
   sprintf(datname, "paper/figs/sphere-%04.1fnm-energy.dat", diameter/nm);
