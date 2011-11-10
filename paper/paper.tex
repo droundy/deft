@@ -256,10 +256,10 @@ associative interations between molecules.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory and Methods}
 We introduce a new classical density functional for water that
-predicts the vapor pressure, vapor density, liquid density, bulk surface tension, 
-and enthalpy, as well 
-as allows for liquid-vapor coexistence.  The Helmholtz free energy functional is
-based on SAFT, and is composed of the usual terms:
+predicts the vapor pressure, vapor density, liquid density, bulk
+surface tension, and enthalpy, as well as allows for liquid-vapor
+coexistence.  The Helmholtz free energy functional is based on SAFT,
+and is composed of the usual terms:
 \begin{equation}
   F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
 F_\textit{disp}[n]+ F_\textit{assoc}[n],
@@ -272,37 +272,33 @@ the grand canonical ensemble.  In the following sections, we will
 introduce the terms of this functional.
 
 \subsection{Ideal gas functional}
-The first term is the ideal gas free energy functional,
-which incorporates effects of kinetic energy.  The ideal gas
-functional is given by
+The first term is the ideal gas free energy functional, which
+incorporates effects of kinetic energy.  The ideal gas functional is
+given by
 \begin{equation}\label{idealgas}
   F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{n_Q}} - 1\right) d\xx
 \end{equation}
-where n(\xx) is the density of water molecules and $n_Q$ is the quantum 
-concentration. This is the particle concentration where quantum effects
-become appreciable and is given by
+where n(\xx) is the density of water molecules and $n_Q$ is the
+quantum concentration
 \begin{equation}\label{quantumconcentration}
- n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}
+ n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}.
 \end{equation}
-where $m$ is the molecular mass of water. The ideal gas free
-energy functional has the property that the contact density at a hard
-surface $n_c$ is proportional to the pressure on that surface,
-according to the contact value theorem
+The ideal gas free energy functional satisfies the contact density
+theorem, which states that the contact density at a hard surface $n_c$
+is proportional to the pressure on that surface:
 \begin{equation}\label{contactvaluethm}
   p = n_c k_BT \:,
 \end{equation}
 which also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes.  These properties are retained by the total functional,
-provided the remaining terms are \emph{purely nonlocal}. This requires
-that
-\begin{equation}
- \frac{\delta^2F_{\textit{excess}}[n]}{\delta n(\xx_1)~\delta n(\xx_1)}\neq\infty
-\end{equation}
-where $F_{\textit{excess}}[n]$ describes all the remaining terms in the functional.
-This ensures that any higher order terms in the Taylor expansion
-of $F[n+\Delta n]$ are small and do not contribute to the small
-solute free energy of solvation.
+provided the remaining terms are \emph{purely nonlocal}.  A common
+failing of SAFT-based functionals (see, for instance
+references\cite{felipe2001examination, gloor2002saft,
+  gloor2004accurate, clark2006developing, gloor2007prediction,
+  kahl2008modified, gross2009density}) is to treat other terms in the
+functional locally, resulting in a functional that is suitable only
+for studying the liquid-vapor interface.
 
 
 \subsection{Hard-sphere repulsion}
