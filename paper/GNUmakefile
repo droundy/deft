@@ -58,6 +58,7 @@ ALL_FIGURES=\
 	figs/density-sphere.gp\
 	figs/energy-vs-diameter.gp\
 	figs/density-rods-in-water.gp\
+	figs/density-four-rods.gp\
 	figs/density-single-rod.gp\
 	figs/density-vs-radius.gp\
 	figs/rods-energy-vs-distance.gp\
