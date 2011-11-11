@@ -1,9 +1,3 @@
-% TODO:
-
-% Write ``Liquid-vapor interface'' section A.
-
-% Look up question-mark references (citations).
-
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
@@ -39,25 +33,49 @@
 \begin{document}
 \title{A Classical Density-Functional Theory for Describing Water Interfaces}
 
-\author{Dennis L. Jackson}
+\author{Jessica Hughes}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
-
+\author{Eric Krebs}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\needsworklater{ We develop a classical density functional theory for
-  water by combining the fundamental-measure theory functional--which
-  describes hard sphere fluids--with attractive interactions.  Using
-  this approximation, we are able to describe various properties of
-  water near liquid-vapor and liquid-solid interfaces.  We plan to use
-  this functional as the foundation for a efficient method for
-  predicting the interactions of chemicals in aqueous solution on an
-  atomic level.}
+{We develop a classical density functional theory for water by combining the
+fundamental-measure theory functional--which describes hard sphere fluids--with
+attractive interactions based on the Statistical Associating Fluid Theory
+(SAFT-VR). Using this approximation with an additional length scale parameter, we are able to describe the vapor pressure, saturated liquid density, surface tension, and enthalpy of water, as well as the number of hydrogen bonds and density oscillations formed near hydrophobic rods and spheres immersed in water. 
+\needsworknow{For two rods being pulled apart, a transition occurs 
+from a vapor state to a liquid state in the area between
+the rods at approximately $(\pi-2)$ multipled by the radius. Even 
+for nanoscale rods (radius 0.5~-~1.0~nm), we find that in the
+vapor state, the force can be approximated
+classically and is equal to 144~mN/m, or twice the bulk surface tension.
+(Keep this? Add spheres stuff?)}
+This functional is computationally efficient and provides a foundation for 
+future work describing interactions in aqueous solution on an
+atomic level.}
 \end{abstract}
-
 \maketitle
+
+{\begin{itemize}
+\color{blue}
+\item Put finished things up here
+\item[JRH] Rewrite abstract (copying from project)
+\color{red}
+\item[JRH] Rewrite and join introductions
+\item[JRH] Work on abstract
+\item[DJR] Read and edit changes to abstract
+\item[DJR] Look through theory section for stuff to cut
+\item[DJR,JRH] Find figures to cut
+\item[JRH] Cut the test-particle section
+\item[JRH] Decide what to do with slit (cut?)
+\item[DJR] Write text (or clean up existing) for hard sphere solutes
+\item[EJK] Add 4-rods figures
+\item[EJK] Add 4-rods text
+\end{itemize}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
