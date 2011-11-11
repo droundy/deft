@@ -6,4 +6,4 @@ clean:
 	rm -f *.hi *.o
 
 test: test.lhs
-	ghc --make -o test test.lhs
+	ghc -Werror -Wall --make -o test test.lhs
