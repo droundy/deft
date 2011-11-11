@@ -21,14 +21,14 @@
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20 size 4.2,4
-set output 'figs/density-rods-in-water.eps'
+set output 'figs/density-four-rods.eps'
 
 reset
 unset arrow
 set view map
 
 #set key inside bottom
-#set title 'Two hydrophobic rods - Density'
+#set title 'four hydrophobic rods - Density'
 
 set multiplot 
 #set pm3d map
@@ -38,7 +38,25 @@ set multiplot
 #set palette rgbformulae 22,13,-31
 set palette defined ( 0 "white", 0.4 "green", 0.8 "cyan", 1.1 "blue", 1.2 "black" )
 
-set size 0.95,0.58          # The bottom plot
+gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
+nm=18.8972613 # 1 nm in atomic units
+
+set size 0.58,0.53          # The top plot
+set origin 0,0.48
+unset xlabel
+unset xtics
+set ylabel 'z (nm)'
+set rmargin 4
+set lmargin 3
+set tmargin -2
+set bmargin 0
+unset colorbox
+set title  'Before transition' 
+
+splot [:] [:] [:] \
+'figs/four-rods-01.0-01.0.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+
+set size 0.58,0.58          # The bottom plot
 set origin 0,0
 set xlabel 'y (nm)'
 set ylabel 'z (nm)'
@@ -52,29 +70,5 @@ set cbrange [0:1.2]
 set cbtics 0.1
 set title  'After transition' 
 
-gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
-nm=18.8972613 # 1 nm in atomic units
-
-splot [-3:3] [-1.5:1.5] [:] \
-'figs/rods-picture-01.0-00.4.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/nm-5):($3/nm):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/nm):($3/nm-3):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.4.dat' u ($2/nm-5):($3/nm-3):($4/gpermL) notitle with pm3d
-
-set size 0.95,0.53          # The top plot
-set origin 0,0.48
-unset xlabel
-unset xtics
-set ylabel 'z (nm)'
-set rmargin 4
-set lmargin 3
-set tmargin -2
-set bmargin 0
-unset colorbox
-set title  'Before transition' 
-
-splot [-3:3] [-1.5:1.5] [:] \
-'figs/rods-picture-01.0-00.2.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/nm-5):($3/nm):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/nm):($3/nm-3):($4/gpermL) notitle with pm3d , \
-'figs/rods-picture-01.0-00.2.dat' u ($2/nm-5):($3/nm-3):($4/gpermL) notitle with pm3d
+splot [:] [:] [:] \
+'figs/four-rods-01.0-01.9.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d

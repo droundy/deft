@@ -65,30 +65,17 @@ Functional da1_deta(double radius, double epsdis, double lambdainput, double lsc
 Functional da1_dlam(double radius, double epsdis, double lambdainput, double lscale);
 
 Functional eta_for_dispersion(double radius, double lambdainput, double lscale) {
-  Functional length_scaling(lscale, "length_scaling");
   Expression length_scalingE("length_scaling");
-  Functional lambda(lambdainput, "lambda_dispersion");
   Expression lambdaE("lambda_dispersion");
   lambdaE.set_type("double");
-  Expression R("R");
-  R.set_type("double");
+  Expression Rexpr("R");
+  Rexpr.set_type("double");
+  Functional R(radius, "R");
 
   return
-    (StepConvolve(2*lambdainput*lscale*radius, 2*lambdaE*length_scalingE*R)
-     /Pow(3)(2*lambda*length_scaling)).set_name("eta_dispersion");
-
-  /*
-  return
-    ((StepConvolve(2*lambdainput*radius, 2*lambdaE*R) - StepConvolve(radius))
-     /(8*Pow(3)(lambda) - 1)).set_name("eta_dispersion");
-  */
-  
-  /*
-  return (StepConvolve(lambdainput*radius,lambdaE*R)/Pow(3)(lambda)).set_name("eta_dispersion");
-  // FIXME: I think maybe I actually want to compute eta with a larger
-  // radius, so as to effectively give the interaction a larger
-  // radius? Maybe lambda*radius?
-  */
+    ((4/3.0*M_PI)*Pow(3)(R)*GaussianConvolve(2*lambdainput*lscale*radius,
+                                             2*lambdaE*length_scalingE*Rexpr)
+     ).set_name("eta_dispersion");
 }
 
 Functional gSW(double R, double epsdis0, double lambda, double lscale) {
