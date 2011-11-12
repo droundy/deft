@@ -1,9 +1,7 @@
-.PHONY: test
-
 all: test
 
 clean:
 	rm -f *.hi *.o
 
-test: test.lhs
-	ghc -Werror -Wall --make -o test test.lhs
+test: test.lhs $(wildcard *.lhs)
+	ghc -Werror -Wall -fno-warn-unused-do-bind --make -o test test.lhs

@@ -1,12 +1,15 @@
 \begin{code}
-module Fields ( RealSpace, r_var,
-                KSpace, k_var,
-                Scalar, s_var,
-                (**),
-                fft, ifft, integrate, grad, derive,
-                Expression ) 
+{-# LANGUAGE GADTs #-}
+module CodeGen ( RealSpace, r_var,
+                 KSpace, k_var,
+                 Scalar, s_var,
+                 (**),
+                 fft, ifft, integrate, grad, derive,
+                 Expression, 
+                 Statement( (:=), (:?=) ) ) 
        where
 
+import Hash ( hash )
 import Prelude hiding ((**))
 \end{code}
 
@@ -30,6 +33,8 @@ instance Show RealSpace where
   showsPrec _ (IFFT k) = showString "ifft(" . showsPrec 0 k . showString ")"
 instance Type RealSpace where
   derivativeHelper = deriveR
+  var v (Scalar _) = s_var v
+  var v _ = r_var v
 deriveR :: String -> Expression RealSpace -> RealSpace -> Expression RealSpace
 deriveR v dda (R v') | v == v' = dda
                      | otherwise = 0
@@ -41,6 +46,8 @@ instance Show KSpace where
   showsPrec _ (FFT r) = showString "fft(" . showsPrec 0 r . showString ")"
 instance Type KSpace where
   derivativeHelper = deriveK
+  var v (Scalar _) = s_var v
+  var v _ = k_var v
 deriveK :: String -> Expression KSpace -> KSpace -> Expression RealSpace
 deriveK _ _ (K _) = 0
 deriveK _ _ Delta = 0
@@ -76,6 +83,7 @@ instance Type Scalar where
   isConstant (Scalar x) = isConstant x
   isConstant _ = Nothing
   derivativeHelper = deriveS
+  var v _ = s_var v
 deriveS :: String -> Expression Scalar -> Scalar -> Expression RealSpace
 deriveS _ _ (S _) = 0
 deriveS _ _ (Constant _) = 0
@@ -160,6 +168,7 @@ class (Eq a, Show a) => Type a where
   isConstant (Scalar x) = isConstant x
   isConstant _ = Nothing
   derivativeHelper :: String -> Expression a -> a -> Expression RealSpace
+  var :: String -> Expression a -> Expression a
 
 instance Type a => Pow (Expression a) where
   (**) = \x n -> 
@@ -332,4 +341,34 @@ derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (e ::** n) = derive v (dda*(fromIntegral n)*e**(n-1)) e
 derive v dda (Expression e) = derivativeHelper v dda e
+\end{code}
+
+The statement type allows us to string together a sequence of
+definitions and assignments.
+
+\begin{code}
+data Statement a where
+     (:=) :: Type a => String -> Expression a -> Statement (Expression a)
+     (:?=) :: Type a => String -> Expression a -> Statement (Expression a)
+     Return :: a -> Statement a
+     (:>>) :: Statement b -> Statement a -> Statement a
+instance Monad Statement where
+  (>>=) = thenS
+  return = Return
+instance Show (Statement a) where
+  showsPrec = showsS
+showsS :: Int -> Statement a -> ShowS
+showsS _ (x := y) = showString x . showString " = " . showsPrec 0 y . showString ";"
+showsS _ (x :?= y) = showString x . showString " := " . showsPrec 0 y . showString ";"
+showsS _ (Return _) = id
+showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
+
+thenS :: Statement a -> (a -> Statement b) -> Statement b
+thenS f g = f :>> g (evalS f)
+
+evalS :: Statement a -> a
+evalS (s := e) = var s e
+evalS (s :?= e) = var (s ++ "-" ++ hash (show e)) e
+evalS (Return a) = a
+evalS (_ :>> b) = evalS b
 \end{code}

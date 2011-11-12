@@ -1,5 +1,5 @@
 \begin{code}
-import Fields
+import CodeGen
 import Prelude hiding ((**))
 import Test.HUnit
 
@@ -21,8 +21,17 @@ showTests = TestList [show_test "x" x,
   where show_test str e = TestCase $ assertEqual str str (show e)
         x = r_var "x"
 
+showStatements :: Test
+showStatements = TestList [ss "x = 5.0;" ("x" := (5 :: Expression RealSpace)),
+                           ss "x = y;" ("x" := y),
+                           ss "x = y;\na = y;" $ 
+                           do "x" := y
+                              "a" := y]
+  where ss str st = TestCase $ assertEqual str str (show st)
+        y = r_var "y"
+
 main :: IO ()
-main = do c <- runTestTT $ TestList [ gradTests, showTests ]
+main = do c <- runTestTT $ TestList [ gradTests, showTests, showStatements ]
           if failures c > 0
             then fail $ "Failed " ++ show (failures c) ++ "tests."
             else putStrLn "All tests passed!"
