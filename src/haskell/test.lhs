@@ -15,24 +15,26 @@ gradTests = TestList [test_grad "foo" (integrate $ foo*foo) (dV*2*foo),
         s = s_var "s"
 
 showTests :: Test
-showTests = TestList [show_test "x" x,
-                      show_test "x*x" (x**2),
-                      show_test "x*x*(x*x)" (x**4)]
+showTests = TestList [show_test "x[i]" x,
+                      show_test "x[i]*x[i]" (x**2),
+                      show_test "x[i]*x[i]*(x[i]*x[i])" (x**4)]
   where show_test str e = TestCase $ assertEqual str str (show e)
         x = r_var "x"
 
 showStatements :: Test
-showStatements = TestList [ss "x = 5.0;" ("x" := (5 :: Expression RealSpace)),
-                           ss "x = y;" ("x" := y),
-                           ss "x = y;\na = y;" $ 
+showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n}\n" 
+                               ("x" := (5 :: Expression RealSpace)),
+                           ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = y[i];\n}\n" 
+                               ("x" := y),
+                           ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = y[i];\n}\n\nGrid a(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \na[i] := y[i];\n}\n" $ 
                            do "x" := y
-                              "a" := y]
+                              "a" :?= y]
   where ss str st = TestCase $ assertEqual str str (show st)
         y = r_var "y"
 
 main :: IO ()
 main = do c <- runTestTT $ TestList [ gradTests, showTests, showStatements ]
           if failures c > 0
-            then fail $ "Failed " ++ show (failures c) ++ "tests."
+            then fail $ "Failed " ++ show (failures c) ++ " tests."
             else putStrLn "All tests passed!"
 \end{code}

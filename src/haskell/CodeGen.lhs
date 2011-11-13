@@ -29,25 +29,31 @@ data Scalar = Constant Double |
             deriving ( Eq, Ord )
 
 instance Show RealSpace where
-  showsPrec _ (R v) = showString v
+  showsPrec _ (R v) = showString (v ++ "[i]")
   showsPrec _ (IFFT k) = showString "ifft(" . showsPrec 0 k . showString ")"
 instance Type RealSpace where
   derivativeHelper = deriveR
   var v (Scalar _) = s_var v
   var v _ = r_var v
+  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
+  prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
+  postfix _ = "\n}\n"
 deriveR :: String -> Expression RealSpace -> RealSpace -> Expression RealSpace
 deriveR v dda (R v') | v == v' = dda
                      | otherwise = 0
 deriveR v ddr (IFFT k) = derive v (fft ddr) k -- CHECK THIS!
 
 instance Show KSpace where
-  showsPrec _ (K v) = showString v
+  showsPrec _ (K v) = showString (v ++ "[i]")
   showsPrec _ Delta = showString "delta(k?)"
   showsPrec _ (FFT r) = showString "fft(" . showsPrec 0 r . showString ")"
 instance Type KSpace where
   derivativeHelper = deriveK
   var v (Scalar _) = s_var v
   var v _ = k_var v
+  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
+  prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
+  postfix _ = "\n}\n"
 deriveK :: String -> Expression KSpace -> KSpace -> Expression RealSpace
 deriveK _ _ (K _) = 0
 deriveK _ _ Delta = 0
@@ -84,6 +90,8 @@ instance Type Scalar where
   isConstant _ = Nothing
   derivativeHelper = deriveS
   var v _ = s_var v
+  prefix "" _ = ""
+  prefix x e = "double " ++ show (var x e) ++ ";\n"
 deriveS :: String -> Expression Scalar -> Scalar -> Expression RealSpace
 deriveS _ _ (S _) = 0
 deriveS _ _ (Constant _) = 0
@@ -169,6 +177,9 @@ class (Eq a, Show a) => Type a where
   isConstant _ = Nothing
   derivativeHelper :: String -> Expression a -> a -> Expression RealSpace
   var :: String -> Expression a -> Expression a
+  prefix :: String -> Expression a -> String
+  postfix :: Expression a -> String
+  postfix _ = ""
 
 instance Type a => Pow (Expression a) where
   (**) = \x n -> 
@@ -358,8 +369,12 @@ instance Monad Statement where
 instance Show (Statement a) where
   showsPrec = showsS
 showsS :: Int -> Statement a -> ShowS
-showsS _ (x := y) = showString x . showString " = " . showsPrec 0 y . showString ";"
-showsS _ (x :?= y) = showString x . showString " := " . showsPrec 0 y . showString ";"
+showsS _ (x := y) = showString (prefix "" y) . 
+                    showsPrec 0 (var x y) . showString " = " . showsPrec 0 y . showString ";" .
+                    showString (postfix y)
+showsS _ (x :?= y) = showString (prefix x y) .
+                     showsPrec 0 (var x y) . showString " := " . showsPrec 0 y . showString ";" .
+                     showString (postfix y)
 showsS _ (Return _) = id
 showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
 
