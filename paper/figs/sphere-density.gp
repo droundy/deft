@@ -59,7 +59,7 @@ set size square
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 splot [-ymax:ymax] [-zmax:zmax] [0:1.2] \
-'figs/sphere-00.1-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
+'figs/sphere-0.10-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
 
 set size 0.5,0.6          # The bottom-right plot
 set origin 0.35,0
@@ -80,7 +80,7 @@ set size square
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 splot [-ymax:ymax] [-zmax:zmax] [0:1.2] \
-'figs/sphere-00.4-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
+'figs/sphere-0.40-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
 
 set size 0.5,0.5          # The top-left plot
 set origin 0.02,0.48
@@ -97,7 +97,7 @@ set title  'd = 0.8 nm'
 set size square
 
 splot [-ymax:ymax] [-zmax:zmax] [0:1.2] \
-'figs/sphere-00.8-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
+'figs/sphere-0.80-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
 
 set size 0.5,0.5          # The top-right plot
 set origin 0.35,0.48
@@ -114,4 +114,4 @@ set title  'd = 1 nm'
 set size square
 
 splot [:] [:] [0:1.2] \
-'figs/sphere-01.0-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
+'figs/sphere-1.00-slice.dat' u ($2/18.8972613):($3/18.8972613):($4/gpermL) notitle with pm3d
