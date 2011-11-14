@@ -1,4 +1,4 @@
-.PHONY: paper project poster papers comparison slowfigs
+.PHONY: paper project poster papers comparison slowfigs haskell
 
 EXTRA_DIST = autogen.sh
 
@@ -210,6 +210,9 @@ project: paper
 
 poster: paper
 	cd paper && $(MAKE) poster.pdf
+
+haskell:
+	cd src/haskell && $(MAKE)
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\
