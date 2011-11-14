@@ -1,6 +1,5 @@
 \begin{code}
 import CodeGen
-import Prelude hiding ((**))
 import Test.HUnit
 
 gradTests :: Test
@@ -26,6 +25,10 @@ showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n
                                ("x" := (5 :: Expression RealSpace)),
                            ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = y[i];\n}\n" 
                                ("x" := y),
+                           ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = ifft(exp((-1.0)*(khere[0]*khere[0] + khere[1]*khere[1] + khere[2]*khere[2]))*fft(y[i]));\n}\n" 
+                               ("x" := ifft (exp (-ksqr) * fft y)),
+                           ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = ifft(exp((-1.0)*(khere[0]*khere[0] + khere[1]*khere[1] + khere[2]*khere[2]))*fft(y[i]));\n}\n" 
+                               ("x" := ifft (exp (-k**2) * fft y)),
                            ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx[i] = y[i];\n}\n\nGrid a(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \na[i] := y[i];\n}\n" $ 
                            do "x" := y
                               "a" :?= y]

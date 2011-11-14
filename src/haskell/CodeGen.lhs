@@ -1,16 +1,14 @@
 \begin{code}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, PatternGuards #-}
 module CodeGen ( RealSpace, r_var,
-                 KSpace, k_var,
+                 KSpace, k_var, kx, ky, kz, k, ksqr,
                  Scalar, s_var,
-                 (**),
                  fft, ifft, integrate, grad, derive,
-                 Expression, 
+                 Expression,                 
                  Statement( (:=), (:?=) ) ) 
        where
 
 import Hash ( hash )
-import Prelude hiding ((**))
 \end{code}
 
 The \verb!RealSpaceField! data type describes a field in real space.
@@ -21,6 +19,7 @@ data RealSpace = R String |
                deriving ( Eq, Ord )
 data KSpace = K String |
               Delta | -- handy for FFT of homogeneous systems
+              Kx | Ky | Kz |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord )
 data Scalar = Constant Double | 
@@ -30,7 +29,7 @@ data Scalar = Constant Double |
 
 instance Show RealSpace where
   showsPrec _ (R v) = showString (v ++ "[i]")
-  showsPrec _ (IFFT k) = showString "ifft(" . showsPrec 0 k . showString ")"
+  showsPrec _ (IFFT ke) = showString "ifft(" . showsPrec 0 ke . showString ")"
 instance Type RealSpace where
   derivativeHelper = deriveR
   var v (Scalar _) = s_var v
@@ -41,10 +40,13 @@ instance Type RealSpace where
 deriveR :: String -> Expression RealSpace -> RealSpace -> Expression RealSpace
 deriveR v dda (R v') | v == v' = dda
                      | otherwise = 0
-deriveR v ddr (IFFT k) = derive v (fft ddr) k -- CHECK THIS!
+deriveR v ddr (IFFT ke) = derive v (fft ddr) ke -- CHECK THIS!
 
 instance Show KSpace where
   showsPrec _ (K v) = showString (v ++ "[i]")
+  showsPrec _ Kx = showString "khere[0]"
+  showsPrec _ Ky = showString "khere[1]"
+  showsPrec _ Kz = showString "khere[2]"
   showsPrec _ Delta = showString "delta(k?)"
   showsPrec _ (FFT r) = showString "fft(" . showsPrec 0 r . showString ")"
 instance Type KSpace where
@@ -56,6 +58,9 @@ instance Type KSpace where
   postfix _ = "\n}\n"
 deriveK :: String -> Expression KSpace -> KSpace -> Expression RealSpace
 deriveK _ _ (K _) = 0
+deriveK _ _ Kx = 0
+deriveK _ _ Ky = 0
+deriveK _ _ Kz = 0
 deriveK _ _ Delta = 0
 deriveK v ddk (FFT r) = derive v (ifft ddk) r -- CHECK THIS!
 
@@ -67,7 +72,7 @@ mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
 mapExpression f (Signum e) = signum (mapExpression f e)
-mapExpression f (a ::** n) = (mapExpression f a) ** n
+mapExpression f (a ::** n) = (mapExpression f a) ** mapExpression f n
 mapExpression f (a ::+ b) = mapExpression f a + mapExpression f b
 mapExpression f (a ::* b) = mapExpression f a * mapExpression f b
 mapExpression f (a ::/ b) = mapExpression f a / mapExpression f b
@@ -75,6 +80,9 @@ mapExpression f (Expression x) = f x
 
 kzeroValue :: KSpace -> Expression RealSpace
 kzeroValue (K v) = s_var (v ++ "[0]")
+kzeroValue Kx = 0
+kzeroValue Ky = 0
+kzeroValue Kz = 0
 kzeroValue Delta = error "Can't find zero value of delta function!"
 kzeroValue (FFT _) = error "Hard to find zero value of an fft"
 
@@ -83,7 +91,7 @@ instance Show Scalar where
   showsPrec p (Constant d) = showsPrec p d
   showsPrec _ (Integrate r) = showString "integrate(" . showsPrec 0 r . showString ")"
 instance Type Scalar where
-  toExpression = Expression . Constant . fromRational
+  toExpression = Expression . Constant . fromRational . toRational
   s_var = Expression . S
   isConstant (Expression (Constant x)) = Just x
   isConstant (Scalar x) = isConstant x
@@ -103,6 +111,21 @@ r_var v = Expression (R v)
 k_var :: String -> Expression KSpace
 k_var v = Expression (K v)
 
+kx :: Expression KSpace
+kx = Expression Kx
+
+ky :: Expression KSpace
+ky = Expression Ky
+
+kz :: Expression KSpace
+kz = Expression Kz
+
+k :: Expression KSpace
+k = sqrt ksqr
+
+ksqr :: Expression KSpace
+ksqr = kx**2 + ky**2 + kz**2
+
 integrate :: Expression RealSpace -> Expression Scalar
 integrate = Expression . Integrate
 
@@ -111,9 +134,9 @@ fft (Scalar e) = Scalar e * Expression Delta
 fft r = Expression (FFT r)
 
 ifft :: Expression KSpace -> Expression RealSpace
-ifft k = case factor (Expression Delta) k of
-           Just k' -> mapExpression kzeroValue k'
-           Nothing -> Expression (IFFT k)
+ifft ke = case factor (Expression Delta) ke of
+            Just k' -> mapExpression kzeroValue k'
+            Nothing -> Expression (IFFT ke)
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -133,20 +156,20 @@ data Expression a = Scalar (Expression Scalar) |
                     Log (Expression a) |
                     Abs (Expression a) |
                     Signum (Expression a) |
-                    Expression a ::** Int |
+                    Expression a ::** Expression a |
                     Expression a ::+ Expression a |
                     Expression a ::* Expression a |
                     Expression a ::/ Expression a
               deriving (Eq, Ord)
 
 
-infixr 8 ::**, **
+infixr 8 ::**
 infixl 7 ::*, ::/
 infixl 6 ::+
 
-instance (Eq a, Show a) => Show (Expression a) where
+instance Type a => Show (Expression a) where
   showsPrec = showsE
-showsE :: Show a => Int -> Expression a -> ShowS
+showsE :: Type a => Int -> Expression a -> ShowS
 showsE p (Scalar x) = showsPrec p x
 showsE p (Expression x) = showsPrec p x
 showsE _ (Cos x) = showString "cos(" . showsE 0 x . showString ")"
@@ -155,21 +178,28 @@ showsE _ (Exp x) = showString "exp(" . showsE 0 x . showString ")"
 showsE _ (Log x) = showString "log(" . showsE 0 x . showString ")"
 showsE _ (Abs x) = showString "fabs(" . showsE 0 x . showString ")"
 showsE _ (Signum _) = undefined
-showsE _ (_ ::** 0) = showString "0" -- this shouldn't happen...
-showsE p (x ::** 1) = showsE p x       -- this also shouldn't happen
-showsE p (x ::** n) | n `mod` 1 == 1 = showsE p (x ::* (x ::** (n-1)))
-showsE p (x ::** n) = showsE p (x2 ::* x2)
-  where x2 = x ::** (n `div` 2)
+showsE p (x ::** y) =
+  case isConstant y of
+    Just 0 -> showString "1" -- this shouldn't happen...
+    Just 1 -> showsE p x
+    Just 0.5 -> showString "sqrt(" . showsPrec 0 x . showString ")"
+    Just n
+      | n > 0 && n == fromInteger (floor n) && 
+        fromInteger (floor (n/2)) /= fromInteger(floor n)/(2 :: Double) ->
+          showsE p (x ::* x ::** toExpression (n-1))
+      | n > 0 && n == fromInteger (floor n) ->
+          showsE p (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
+      | n > 0 && n - fromInteger (floor n) == 0.5 ->
+          showsE p (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
+      | n < 0 -> showsE p (1 ::/ x ::** toExpression (-n))
+    _ -> showString "pow(" . showsE 0 x . showString ", " . showsE 0 y . showString ")"
 showsE p (x ::+ y) = showParen (p > 6) (showsE 6 x . showString " + " . showsE 7 y)
 showsE p (x ::* y) = showParen (p > 7) (showsE 7 x . showString "*" . showsE 8 y)
 showsE p (x ::/ y) = showParen (p > 7) (showsE 7 x . showString "/" . showsE 8 y)
 
-class Pow p where
-  (**) :: p -> Int -> p
-
 class (Eq a, Show a) => Type a where 
-  toExpression :: Rational -> Expression a
-  toExpression = Scalar . Expression . Constant . fromRational
+  toExpression :: Real x => x -> Expression a
+  toExpression = Scalar . Expression . Constant . fromRational . toRational
   s_var :: String -> Expression a
   s_var = Scalar . s_var
   isConstant :: Expression a -> Maybe Double
@@ -181,26 +211,14 @@ class (Eq a, Show a) => Type a where
   postfix :: Expression a -> String
   postfix _ = ""
 
-instance Type a => Pow (Expression a) where
-  (**) = \x n -> 
-    case (x, n) of
-      (0, _) -> 0
-      (_, 0) -> 1
-      (_, 1) -> x
-      _ -> x ::** n
 instance Type a => Num (Expression a) where
   (+) = \x y -> case (x, y) of
                   _ | y == 0 -> x
                     | x == 0 -> y
                   (Scalar s1 ::* a, Scalar s2 ::* b) | s1 == s2 -> Scalar s1 * (a + b)
                   (Scalar a, Scalar b) -> Scalar (a+b)
-                  _ -> 
-                    case isConstant x of
-                      Just xx ->
-                        case isConstant y of
-                          Just yy -> toExpression $ toRational (xx + yy)
-                          _ -> x ::+ y
-                      _ ->
+                  _ | Just xx <- isConstant x, Just yy <- isConstant y -> toExpression (xx + yy)
+                    | otherwise ->
                         case factor x y of
                          Just y' | x /= 1 -> (1+y')*x
                          _ ->
@@ -215,6 +233,7 @@ instance Type a => Num (Expression a) where
                   _ | x == 1 -> y
                     | y == 1 -> x
                     | x == 0 || y == 0 -> 0
+                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a*b)
                   (Scalar a ::* c, Scalar b) -> Scalar (a*b) * c
                   (Scalar a, Scalar s ::* b) -> Scalar (a*s) * b
                   (Scalar s1 ::* a, Scalar s2 ::* b) -> Scalar (s1*s2) * a * b
@@ -234,7 +253,7 @@ instance Type a => Num (Expression a) where
                   (Scalar a, Scalar b) -> Scalar (a*b)
                   (_, Scalar _) -> y * x
                   _ -> x ::* y
-  fromInteger = toExpression . fromInteger
+  fromInteger = \x -> toExpression (fromInteger x :: Rational)
   abs = undefined
   signum = undefined
 
@@ -256,6 +275,8 @@ instance Type a => Fractional (Expression a) where
   (/) = \x y -> case (x, y) of
                   _ | y == 1 -> x
                     | x == 0 -> 0
+                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a/b)
+                    | Just b <- isConstant y -> x * toExpression (1.0 / b)
                   (Scalar a, (Scalar s) ::* b) -> Scalar (a/s) / b
                   ((Scalar r) ::* a, (Scalar s) ::* b) -> Scalar (r/s) * a / b
                   (Scalar a, Scalar b) -> Scalar (a/b)
@@ -304,6 +325,16 @@ instance Type a => Floating (Expression a) where
   cos = \x -> case x of
     0 -> 1
     _ -> Cos x
+  (**) = \x y ->
+    case isConstant x of
+      Just 0 -> 0
+      Just 1 -> 1
+      _ -> case isConstant y of
+             Just 0 -> 1
+             Just 1 -> x
+             _ -> case x of
+                    e ::** n -> e ** (n * y)
+                    _ -> x ::** y
   asin = undefined
   acos = undefined
   atan = undefined
@@ -350,7 +381,7 @@ derive v dda (Exp e) = derive v (dda*exp e) e
 derive v dda (Log e) = derive v (dda/e) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
-derive v dda (e ::** n) = derive v (dda*(fromIntegral n)*e**(n-1)) e
+derive v dda (e ::** n) = derive v (dda*n*e**(n-1)) e
 derive v dda (Expression e) = derivativeHelper v dda e
 \end{code}
 
