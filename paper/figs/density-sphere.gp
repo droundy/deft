@@ -57,7 +57,7 @@ set label "r=0.1nm" at 0.05,1.72 rotate by 0 font 'Helvetica,20'
 set arrow from 0.1,1.6 to 0.1,1.5 lw 2
 set label "r=0.3nm" at 0.5,2.3 rotate by 0 font 'Helvetica,20' textcolor lt 3
 set arrow from 0.48,2.28 to 0.35,2.2 lw 2 lc rgb "blue"
-set label "r=1.0nm" at 0.7,1.5 rotate by 0 font 'Helvetica,20' textcolor lt 1
+set label "r=0.5nm" at 0.7,1.5 rotate by 0 font 'Helvetica,20' textcolor lt 1
 set arrow from 0.68,1.48 to 0.6,1.4 lw 2 lc rgb "red"
 
 nl=0.004938863
@@ -65,7 +65,7 @@ nm = 18.8972613     # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:1.2] [:] \
-'figs/sphere-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
-'figs/sphere-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
-'figs/sphere-00.2.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
-'figs/sphere-01.0.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4
+'figs/sphere-1.00.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
+'figs/sphere-0.60.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
+'figs/sphere-0.20.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
+'figs/sphere-1.00.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4

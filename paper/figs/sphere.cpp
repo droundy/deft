@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
   xmax = ymax = zmax = diameter + 2*padding;
 
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "paper/figs/sphere-%04.1fnm-energy.dat", diameter/nm);
+  sprintf(datname, "paper/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
   
   FILE *o = fopen(datname, "w");
 
@@ -162,9 +162,9 @@ int main(int argc, char *argv[]) {
     potential = -water_prop.kT*potential.cwise().log();
     
     Minimizer min = Precision(1e-6, 
-			      PreconditionedConjugateGradient(f, gd, water_prop.kT, 
-							      &potential,
-							      QuadraticLineMinimizer));
+                              PreconditionedConjugateGradient(f, gd, water_prop.kT, 
+                                                              &potential,
+                                                              QuadraticLineMinimizer));
     
     printf("\nDiameter of sphere = %g bohr (%g nm)\n", diameter, diameter/nm);
     
@@ -195,11 +195,11 @@ int main(int argc, char *argv[]) {
 
     char *plotname = (char *)malloc(1024);
 
-    sprintf(plotname, "paper/figs/sphere-%04.1f-slice.dat", diameter/nm);
+    sprintf(plotname, "paper/figs/sphere-%04.2f-slice.dat", diameter/nm);
     plot_grids_yz_directions(plotname, density, 
    			     energy_density, entropy, Xassoc);
 
-    sprintf(plotname, "paper/figs/sphere-%04.1f.dat", diameter/nm);
+    sprintf(plotname, "paper/figs/sphere-%04.2f.dat", diameter/nm);
     plot_grids_y_direction(plotname, density, 
    			     energy_density, entropy, Xassoc);
 
