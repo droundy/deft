@@ -14,9 +14,9 @@ foreach $dd (1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.15, 0.1, 0
   my $resolution = 0.2; # spacing of grid points in nm.
 
   # Here I estimate the amount of memory that will be needed.  I know
-  # from experience that 2000 works fine for a 1.9 nm cubical cell at
+  # from experience that 1900 works fine for a 1.9 nm cubical cell at
   # a resolution of 0.2 nm.
-  my $memuse = sprintf "%.0f", 2000*((($d + 2*$padding)/1.9)*(0.2/$resolution))**3;
+  my $memuse = sprintf "%.0f", 1900*((($d + 2*$padding)/1.9)*(0.2/$resolution))**3;
 
   my $scriptname = "paper/figs/sphere-$d.tmp.sh";
   open SCRIPT, ">$scriptname" or die $!;

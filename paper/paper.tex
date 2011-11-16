@@ -321,7 +321,7 @@ for studying the liquid-vapor interface.
 
 \subsection{Hard-sphere repulsion}
 
-We model the repulsive interactions using the White Bear version of
+We treat the repulsive interactions using the White Bear version of
 the Fundamental-Measure Theory~(FMT) functional for the hard-sphere
 fluid~\cite{roth2002whitebear}.  In the homogeneous limit, the White
 Bear functional reduces to the Mansoori-Carnahan-Starling-Leland
@@ -369,15 +369,14 @@ hard-sphere radius of
 \subsection{Dispersion free energy}
 The first term in the attractive energy is the dispersion term.  This
 will include van der Waals attraction and any orientation-independent
-interactions. We use a
-dispersion term based on the SAFT-VR
+interactions. We use a dispersion term based on the SAFT-VR
 approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
 parameters, an interaction energy $\epsilondisp$ and a
-length scale $\lambdadisp$.
+length scale $\lambdadisp R$.
 
 The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
-  F_\text{disp}[n] &= \int (a_1(\xx) + \beta a_2(\xx))d\xx
+  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
 perturbation expansion and $\beta=1/k_BT$.  The first term $a_1$ is 
@@ -401,7 +400,7 @@ is the choice used by Clark \emph{et al}~\cite{clark2006developing},
 and allows a reasonable fit to the equation of state.  Thus our model
 interaction has the form:
 \begin{equation}
-  \varphi(r) = \Theta(r-2 \lambdadisp R)
+  \varphi(r) = \color{red}\Theta(r-2 \lambdadisp R)
 \end{equation}
 where $\Theta$ is the Heaviside step function.
 
