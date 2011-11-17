@@ -37,7 +37,6 @@ ALL_FIGURES=\
 	figs/contact.svg\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
-	figs/sphere-radial-08-13.gp\
 	figs/box-100c--05,05,05-13.gp\
 	figs/box-100s--05,05,05-13.gp\
 	figs/box-110c--05,05,05-13.gp\

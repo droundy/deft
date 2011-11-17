@@ -33,8 +33,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\needsworklater{ We develop a functional based on FMT~\cite{roth2002whitebear}
- to ... for SAFT}
+  We investigate the use of the White Bear functional,
+  based on Fundamental Measure Theory~\cite{roth2002whitebear} to
+  predict contact densities for the inhomogeneous hard-sphere fluid.
 \end{abstract}
 
 \maketitle
@@ -46,23 +47,28 @@
 \begin{figure}
 \includegraphics[width=5cm]{figs/gHS-vs-n}
 \caption{A comparison of the various approximations to the contact
-  density.}
+  density in the homogeneous limit.  As expected, they are all
+  identical, and we won't include this plot in the paper (but it's
+  here to verify that our code is working).}
 \label{fig:gHS-vs-n}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=5cm]{figs/free-energy}
-\caption{A comparison of the various approximations to the free
-  energy.  Note that the White Bear functional uses a modified form of
-  the Carnahan equation of state.}
-\label{fig:free-energy}
-\end{figure}
+%% \begin{figure}
+%% \includegraphics[width=5cm]{figs/free-energy}
+%% \caption{A comparison of the various approximations to the free energy
+%%   in the homogeneous limit.  Note that the White Bear functional uses
+%%   a modified form of the Carnahan equation of state.  As expected,
+%%   these are all identical, and we won't include this plot in the paper
+%%   (but it's here to verify that our code is working).}
+%% \label{fig:free-energy}
+%% \end{figure}
 
-The hard-sphere contact density---which we will define as the density
-of hard spheres touching a given hard sphere---is important for the
+The hard-sphere contact density---that is to say, the density of hard
+spheres touching a given hard sphere---is important for the
 association term in Statistical Associating Fluid Theory (SAFT).  For
 a homogeneous hard-sphere fluid, the contact density---which is to
-say, $n g_{HS}(\sigma)$---is easily computed from the
+say, $n g_{HS}(\sigma)$, where $g_{HS}(\sigma)$ is the contact value
+of the correlation function---is easily computed from the
 Carnahan-Starling equation of state
 \begin{align}
   g_{HS}(\sigma) &= \frac{1}{1-\eta} + \cdots
@@ -144,7 +150,7 @@ using the weighted densities
 
 \begin{widetext}
 
-\section{Mean Contact density}
+\section{Mean Contact density}\label{simple-contact}
 
 One reasonably simple question to ask is what the \emph{mean} contact
 density of an inhomogeneous system is.  This comes down to simply
@@ -293,7 +299,8 @@ seriously localized density distributions.
   \right)
 \end{align}
 
-\section{Contact density at a given hard sphere}
+\section{Contact density at a given hard
+  sphere}\label{contact-at-sphere}
 
 When we consider an inhomogeneous system, we may ask for \emph{which}
 sphere we are interested in computing the contact density.  One way to
@@ -520,38 +527,75 @@ change at position $\mathbf{r}$:
 
 \section{Comparison with simulation}
 
+We performed a Monte-Carlo simulation of the hard sphere fluid to
+measure the contact density as a function of position for a few simple
+geometries.  For each scenario, we compute and compare several
+quantities.  We compare the Monte Carlo density with the DFT
+prediction.  We also plot Monte Carlo results for the two contact
+densities: the contact density evaluated at contact, and the contact
+density evaluated at the sphere location.  Alongside these, we plot
+the contact density of Fu and Wu~\cite{fu2005vapor-liquid-dft} (or
+should it be Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}?), the ``simple
+contact density'' from Section~\ref{simple-contact}, and the ``contact
+density at sphere'' from Section~\ref{contact-at-sphere}.  In
+principle, the functional of Wu (FIXME) should match the
+CenConDensity, while the DFT at sphere should match the ConDensity...
+
 \subsection{Hard spheres confined in a spherical cavity}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/sphere-radial-08-13}
-  \caption{Density and contact densities of fourteen hard spheres in a
-    spherical cavity with radius 8.  Also similar densities of spheres
-    in even larger cavities.}
-  \label{fig:sphere-density2}
-\end{figure}
+The first geometry we consider is a number of hard spheres confined
+within a spherical cavity.  In
+Figures~\ref{fig:sphere-8}-\ref{fig:sphere-16}, we show
+the densities and contact densities for several cavity sizes.  In each
+case, the number of hard spheres was chosen to set the mean filling
+fraction to around 0.3?.  This value was chosen because it roughly
+corresponds to the filling fraction of water at standard atmospheric
+temperature and pressure in the optimal SAFT model developed by Clark
+\emph{et al}\cite{clark2006developing}.
+
+\textcolor{red}{We should also try looking at a few other densities.}
+
+\newcommand\sphereExplanation{ Blue curves describe the density of
+  hard spheres.  Green curves describe the contact density averaged
+  according to the point of contact.  Red curves describe the contact
+  density as averaged according to the centers of the spheres that are
+  touching.  In each case, solid lines correspond to the Monte Carlo
+  simulation, and dashed lines of various sorts represent DFT model
+  predictions.  }
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/contact-08-013}
   \caption{Density and contact densities of thirteen hard spheres in a
-    spherical cavity with diameter 8.}
+    spherical cavity with diameter 8. \sphereExplanation }
   \label{fig:sphere-8}
 \end{figure}
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/contact-12-112}
   \caption{Density and contact densities of 112 hard spheres in a
-    spherical cavity with diameter 12.}
+    spherical cavity with diameter 12.  \sphereExplanation}
   \label{fig:sphere-12}
 \end{figure}
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/contact-16-265}
   \caption{Density and contact densities of 265 hard spheres in a
-    spherical cavity with diameter 16.}
+    spherical cavity with diameter 16. \sphereExplanation}
   \label{fig:sphere-16}
 \end{figure}
 
 \subsection{Hard spheres confined in a cubical cavity}
+
+\textcolor{red}{
+  I am thinking of also performing simulations for a cubical cavity, and
+  examining the result near the center of a face, which (for a large
+  cavity) will give us a prediction for the hard-sphere fluid near a
+  single hard wall.  We've got some simulations in
+  Figure~\ref{fig:box-density}, but these aren't very nice plots.
+  We'll want to do a much larger box, and plot the density vs $x$ near
+  the wall.  But I'm waiting on simulation data for this...
+}
 
 \begin{figure*}
 \includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
@@ -564,7 +608,13 @@ change at position $\mathbf{r}$:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
-We get a nice spatial dependence for SAFT.
+We (will) have compared several functionals for the contact density of
+a hard-sphere fluid with simulations.  This quantity is of particular
+interest, as it plays a critical role in Statistical Associating Fluid
+Theory (SAFT), which is the basis of a number of recent classical
+density functionals.  We compute the contact density directly from the
+White Bear version of the FMT hard-sphere functional, and find
+reasonable agreement?
 
 \begin{widetext}
   \appendix
