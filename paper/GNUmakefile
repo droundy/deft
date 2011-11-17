@@ -42,9 +42,6 @@ ALL_FIGURES=\
 	figs/temperature-versus-density.gp\
 	figs/surface-tension.gp\
 	figs/surface-298.gp\
-	figs/entropy.gp\
-	figs/entropy-at-690K.gp\
-	figs/entropy-per-molecule.gp\
 	figs/pressure-with-isotherms.gp\
 	figs/cavitysize-060.gp\
 	figs/cavity-cartoon.gp\
@@ -95,10 +92,6 @@ figs/saturated-liquid-density.eps: figs/equation-of-state.dat \
 	figs/experimental-equation-of-state.dat
 figs/temperature-versus-density.eps: figs/equation-of-state.dat \
 	figs/experimental-equation-of-state.dat
-figs/entropy.eps: figs/entropy.dat
-figs/entropy-at-690K.eps: figs/entropy-at-690K.dat
-figs/entropy-per-molecule.eps: figs/entropy-per-molecule.gp figs/entropy.dat \
-	figs/entropy-at-690K.dat 
 figs/pressure-with-isotherms.eps: figs/pressure-with-isotherms.dat \
 	figs/equation-of-state.dat
 figs/surface-tension.eps: figs/surface-tension.gp \
