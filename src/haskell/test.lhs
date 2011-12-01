@@ -2,7 +2,7 @@
 import CodeGen
 import Test.HUnit
 
-gradTests :: Test
+{-gradTests :: Test
 gradTests = TestList [test_grad "foo" (integrate $ foo*foo) (dV*2*foo),
                       test_grad "foo" (integrate $ foo**2) (dV*2*foo),
                       test_grad "x" (integrate $ x * ifft (5*fft s)) (dV*5*s),
@@ -16,8 +16,15 @@ gradTests = TestList [test_grad "foo" (integrate $ foo*foo) (dV*2*foo),
 showTests :: Test
 showTests = TestList [show_test "x[i]" x,
                       show_test "x[i]*x[i]" (x**2),
-                      show_test "x[i]*x[i]*(x[i]*x[i])" (x**4)]
+                      show_test "R \"x\"*R \"x\"*(R \"x\"*R \"x\")" (x**4)]
   where show_test str e = TestCase $ assertEqual str str (show e)
+        x = r_var "x"
+
+codeTests :: Test
+codeTests = TestList [show_test "x[i]" x,
+                      show_test "x[i]*x[i]" (x**2),
+                      show_test "x[i]*x[i]*(x[i]*x[i])" (x**4)]
+  where show_test str e = TestCase $ assertEqual str str (code e)
         x = r_var "x"
 
 showStatements :: Test
@@ -34,9 +41,17 @@ showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n
                               "a" :?= y]
   where ss str st = TestCase $ assertEqual str str (show st)
         y = r_var "y"
-
+-}
 main :: IO ()
-main = do c <- runTestTT $ TestList [ gradTests, showTests, showStatements ]
+main = do writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") "NiceSum"
+          writeFile "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") "NiceQuad"
+          writeFile "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) "NiceSqrt"
+          writeFile "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") "NiceSqrtandMore"
+          writeFile "tests/generated-haskell/nice-log.h" $ generateHeader (log (r_var "x")) "NiceLog"
+          writeFile "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log (r_var "x") + (r_var "x")**2) "NiceLogandSqr"
+          writeFile "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log (r_var "x") + (r_var "x")**2 - (r_var "x")**3 + (r_var "x")**(-1)) "NiceLogandSqrandInverse"
+          writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) "NiceLogOneMinusX"
+          c <- runTestTT $ TestList []
           if failures c > 0
             then fail $ "Failed " ++ show (failures c) ++ " tests."
             else putStrLn "All tests passed!"
