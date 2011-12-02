@@ -41,8 +41,6 @@ public:
   virtual bool I_give_zero_for_zero() const;
   virtual bool I_am_local() const; // WARNING:  this defaults to true!
 
-  virtual bool append_to_name(const std::string) = 0; // returns true if this object wants its name changed.
-
   bool have_integral;
 };
 
@@ -214,11 +212,6 @@ public:
     return out;
   }
   const std::string get_name() const { return itsCounter->name; }
-  Functional append_to_name(const std::string x) {
-    bool appendme = itsCounter->ptr->append_to_name(x);
-    if (appendme && itsCounter->name != "") itsCounter->name = itsCounter->name + x;
-    return *this;
-  }
   Functional set_name_stdstring(const std::string &n) { itsCounter->name = n; return *this; }
   Functional set_name(const char *n) {
     try {
@@ -374,9 +367,6 @@ public:
     : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
     : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
-  bool append_to_name(const std::string) {
-    return true;
-  }
   bool I_am_local() const {
     return false;
   }

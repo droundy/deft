@@ -16,6 +16,16 @@
 
 #include "Functionals.h"
 #include "equation-of-state.h"
+
+#include "generated-haskell/nice-sum.h"
+#include "generated-haskell/nice-quad.h"
+#include "generated-haskell/nice-sqrt.h"
+#include "generated-haskell/nice-sqrtandmore.h"
+#include "generated-haskell/nice-log.h"
+#include "generated-haskell/nice-logandsqr.h"
+#include "generated-haskell/nice-logandsqrandinverse.h"
+#include "generated-haskell/nice-logoneminusx.h"
+
 #include "generated/sum.h"
 #include "generated/quadratic.h"
 #include "generated/sqrt.h"
@@ -114,6 +124,22 @@ int main(int, char **argv) {
   Grid n(gd);
   n = 0.001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
 
+  compare_functionals(NiceSum(), x + kT, myT, n, 4e-13);
+
+  compare_functionals(NiceQuad(), sqr(x + kT) - x + 2*kT, myT, n, 2e-12);
+
+  compare_functionals(NiceSqrt(), sqrt(x) , myT, n, 1e-12);
+
+  compare_functionals(NiceSqrtandMore(), sqrt(x) - x + 2*kT, myT, n, 1e-12);
+
+  compare_functionals(NiceLog(), log(x), myT, n, 7e-14);
+
+  compare_functionals(NiceLogandSqr(), log(x) + sqr(x), myT, n, 6e-13);
+
+  compare_functionals(NiceLogandSqrandInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, myT, n, 3e-10);
+
+  compare_functionals(NiceLogOneMinusX(), log(1-x), myT, n, 1e-12);
+
   compare_functionals(Sum(), x + kT, myT, n, 2e-13);
 
   compare_functionals(Quadratic(), sqr(x + kT) - x + 2*kT, myT, n, 2e-12);
@@ -121,8 +147,6 @@ int main(int, char **argv) {
   compare_functionals(Sqrt(), sqrt(x), myT, n, 1e-12);
 
   compare_functionals(SqrtAndMore(), sqrt(x) - x + 2*kT, myT, n, 1e-12);
-
-  compare_functionals(Log(), log(x), myT, n, 3e-14);
 
   compare_functionals(LogAndSqr(), log(x) + sqr(x), myT, n, 3e-14);
 

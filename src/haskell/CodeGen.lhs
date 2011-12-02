@@ -5,7 +5,8 @@ module CodeGen ( RealSpace, r_var,
                  Scalar, s_var,
                  fft, ifft, integrate, grad, derive,
                  Expression,                 
-                 Statement( (:=), (:?=) ) ) 
+                 Statement( (:=), (:?=) ),
+                 generateHeader, code, codeDouble, codeVector ) 
        where
 
 import Hash ( hash )
@@ -16,20 +17,22 @@ The \verb!RealSpaceField! data type describes a field in real space.
 \begin{code}
 data RealSpace = R String |
                  IFFT (Expression KSpace)
-               deriving ( Eq, Ord )
+               deriving ( Eq, Ord, Show )
 data KSpace = K String |
               Delta | -- handy for FFT of homogeneous systems
               Kx | Ky | Kz |
               FFT (Expression RealSpace)
-            deriving ( Eq, Ord )
+            deriving ( Eq, Ord, Show )
 data Scalar = Constant Double | 
               S String |
               Integrate (Expression RealSpace)
-            deriving ( Eq, Ord )
+            deriving ( Eq, Ord, Show )
 
-instance Show RealSpace where
-  showsPrec _ (R v) = showString (v ++ "[i]")
-  showsPrec _ (IFFT ke) = showString "ifft(" . showsPrec 0 ke . showString ")"
+instance Code RealSpace where
+  codePrec _ (R v) = showString (v ++ "[i]")
+  codePrec _ (IFFT ke) = showString "ifft(" . showsPrec 0 ke . showString ")"
+  codeDouble (R v) = v
+  codeDouble (IFFT ke) = "ifft(" ++ codeDouble ke ++ ")"
 instance Type RealSpace where
   derivativeHelper = deriveR
   var v (Scalar _) = s_var v
@@ -37,18 +40,20 @@ instance Type RealSpace where
   prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
   prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
   postfix _ = "\n}\n"
+  toScalar (R v) = s_var v
+  toScalar (IFFT ke) = makeHomogeneous ke
 deriveR :: String -> Expression RealSpace -> RealSpace -> Expression RealSpace
 deriveR v dda (R v') | v == v' = dda
                      | otherwise = 0
 deriveR v ddr (IFFT ke) = derive v (fft ddr) ke -- CHECK THIS!
 
-instance Show KSpace where
-  showsPrec _ (K v) = showString (v ++ "[i]")
-  showsPrec _ Kx = showString "khere[0]"
-  showsPrec _ Ky = showString "khere[1]"
-  showsPrec _ Kz = showString "khere[2]"
-  showsPrec _ Delta = showString "delta(k?)"
-  showsPrec _ (FFT r) = showString "fft(" . showsPrec 0 r . showString ")"
+instance Code KSpace where
+  codePrec _ (K v) = showString (v ++ "[i]")
+  codePrec _ Kx = showString "khere[0]"
+  codePrec _ Ky = showString "khere[1]"
+  codePrec _ Kz = showString "khere[2]"
+  codePrec _ Delta = showString "delta(k?)"
+  codePrec _ (FFT r) = showString "fft(" . showsPrec 0 r . showString ")"
 instance Type KSpace where
   derivativeHelper = deriveK
   var v (Scalar _) = s_var v
@@ -56,6 +61,12 @@ instance Type KSpace where
   prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
   prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
   postfix _ = "\n}\n"
+  toScalar (K v) = s_var v
+  toScalar Delta = 1
+  toScalar Kx = 0
+  toScalar Ky = 0
+  toScalar Kz = 0
+  toScalar (FFT e) = makeHomogeneous e
 deriveK :: String -> Expression KSpace -> KSpace -> Expression RealSpace
 deriveK _ _ (K _) = 0
 deriveK _ _ Kx = 0
@@ -86,10 +97,10 @@ kzeroValue Kz = 0
 kzeroValue Delta = error "Can't find zero value of delta function!"
 kzeroValue (FFT _) = error "Hard to find zero value of an fft"
 
-instance Show Scalar where
-  showsPrec _ (S v) = showString v
-  showsPrec p (Constant d) = showsPrec p d
-  showsPrec _ (Integrate r) = showString "integrate(" . showsPrec 0 r . showString ")"
+instance Code Scalar where
+  codePrec _ (S v) = showString v
+  codePrec p (Constant d) = showsPrec p d
+  codePrec _ (Integrate r) = showString "output += (" . codePrec 0 r . showString ") * gd.dvolume"
 instance Type Scalar where
   toExpression = Expression . Constant . fromRational . toRational
   s_var = Expression . S
@@ -99,7 +110,10 @@ instance Type Scalar where
   derivativeHelper = deriveS
   var v _ = s_var v
   prefix "" _ = ""
-  prefix x e = "double " ++ show (var x e) ++ ";\n"
+  prefix x e = "double " ++ code (var x e) ++ ";\n"
+  toScalar (Integrate r) = makeHomogeneous r
+  toScalar v = Expression v
+  
 deriveS :: String -> Expression Scalar -> Scalar -> Expression RealSpace
 deriveS _ _ (S _) = 0
 deriveS _ _ (Constant _) = 0
@@ -127,7 +141,8 @@ ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
 
 integrate :: Expression RealSpace -> Expression Scalar
-integrate = Expression . Integrate
+--integrate (x ::+ y) = Expression (Integrate x) + Expression (Integrate y)
+integrate x = Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
@@ -160,42 +175,82 @@ data Expression a = Scalar (Expression Scalar) |
                     Expression a ::+ Expression a |
                     Expression a ::* Expression a |
                     Expression a ::/ Expression a
-              deriving (Eq, Ord)
+              deriving (Eq, Ord, Show)
 
 
 infixr 8 ::**
 infixl 7 ::*, ::/
 infixl 6 ::+
 
-instance Type a => Show (Expression a) where
-  showsPrec = showsE
-showsE :: Type a => Int -> Expression a -> ShowS
-showsE p (Scalar x) = showsPrec p x
-showsE p (Expression x) = showsPrec p x
-showsE _ (Cos x) = showString "cos(" . showsE 0 x . showString ")"
-showsE _ (Sin x) = showString "sin(" . showsE 0 x . showString ")"
-showsE _ (Exp x) = showString "exp(" . showsE 0 x . showString ")"
-showsE _ (Log x) = showString "log(" . showsE 0 x . showString ")"
-showsE _ (Abs x) = showString "fabs(" . showsE 0 x . showString ")"
-showsE _ (Signum _) = undefined
-showsE p (x ::** y) =
+instance (Type a, Code a) => Code (Expression a) where
+  codePrec = codeE
+                   
+  codeDouble (x ::+ y) = "(" ++ codeDouble x ++ ") + (" ++ codeDouble y ++ ")"
+  codeDouble (x ::* y) = "(" ++ codeDouble x ++ ") * (" ++ codeDouble y ++ ")"
+  codeDouble (x ::/ y) = "(" ++ codeDouble x ++ ") / (" ++ codeDouble y ++ ")"
+  codeDouble (x ::** y) = 
+    case isConstant y of
+      Just 1 -> codeDouble x
+      Just 0.5 -> "sqrt(" ++ codeDouble x ++ ")"
+      Just n
+        | n > 0 && n == fromInteger (floor n) && 
+          fromInteger (floor (n/2)) /= fromInteger(floor n)/(2 :: Double) ->
+            codeDouble (x ::* x ::** toExpression (n-1))
+        | n > 0 && n == fromInteger (floor n) ->
+            codeDouble (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
+        | n > 0 && n - fromInteger (floor n) == 0.5 ->
+            codeDouble (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
+        | n < 0 -> codeDouble (1 ::/ x ::** toExpression (-n))
+      _ -> "pow(" ++ codeDouble x ++ ", " ++ codeDouble y ++ ")"
+  codeDouble (Expression x) = codeDouble x
+  codeDouble (Log x) = "log(" ++ codeDouble x ++ ")"
+  codeDouble x = code x
+
+  codeVector (Expression x) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t" ++ code x ++ ";\n}\n"
+  codeVector (Log x) = "for (int i=0; i<gd.NxNyNz; i++) {\n\toutput[i] = " ++ code (Log x) ++ ";\n}\n"
+  codeVector (x ::+ y) = "for (int i=0; i<gd.NxNyNz; i++) {\n\toutput[i] = " ++ code (x+y) ++ ";\n}\n"
+  codeVector (x ::* y) = "for (int i=0; i<gd.NxNyNz; i++) {\n\toutput[i] = " ++ code (x*y) ++ ";\n}\n"
+  codeVector (x ::/ y) = "for (int i=0; i<gd.NxNyNz; i++) {\n\toutput[i] = " ++ code (x/y) ++ ";\n}\n"
+  codeVector (x ::** y) = "for (int i=0; i<gd.NxNyNz; i++) {\n\toutput[i] = " ++ code (x**y) ++ ";\n}\n"
+  codeVector x = code x
+
+codeE :: (Type a, Code a) => Int -> Expression a -> ShowS
+codeE p (Scalar x) = codePrec p x
+codeE p (Expression x) = codePrec p x
+codeE _ (Cos x) = showString "cos(" . codeE 0 x . showString ")"
+codeE _ (Sin x) = showString "sin(" . codeE 0 x . showString ")"
+codeE _ (Exp x) = showString "exp(" . codeE 0 x . showString ")"
+codeE _ (Log x) = showString "log(" . codeE 0 x . showString ")"
+codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
+codeE _ (Signum _) = undefined
+codeE p (x ::** y) =
   case isConstant y of
     Just 0 -> showString "1" -- this shouldn't happen...
-    Just 1 -> showsE p x
-    Just 0.5 -> showString "sqrt(" . showsPrec 0 x . showString ")"
+    Just 1 -> codeE p x
+    Just 0.5 -> showString "sqrt(" . codePrec 0 x . showString ")"
     Just n
       | n > 0 && n == fromInteger (floor n) && 
         fromInteger (floor (n/2)) /= fromInteger(floor n)/(2 :: Double) ->
-          showsE p (x ::* x ::** toExpression (n-1))
+          codeE p (x ::* x ::** toExpression (n-1))
       | n > 0 && n == fromInteger (floor n) ->
-          showsE p (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
+          codeE p (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
       | n > 0 && n - fromInteger (floor n) == 0.5 ->
-          showsE p (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
-      | n < 0 -> showsE p (1 ::/ x ::** toExpression (-n))
-    _ -> showString "pow(" . showsE 0 x . showString ", " . showsE 0 y . showString ")"
-showsE p (x ::+ y) = showParen (p > 6) (showsE 6 x . showString " + " . showsE 7 y)
-showsE p (x ::* y) = showParen (p > 7) (showsE 7 x . showString "*" . showsE 8 y)
-showsE p (x ::/ y) = showParen (p > 7) (showsE 7 x . showString "/" . showsE 8 y)
+          codeE p (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
+      | n < 0 -> codeE p (1 ::/ x ::** toExpression (-n))
+    _ -> showString "pow(" . codeE 0 x . showString ", " . codeE 0 y . showString ")"
+codeE p (x ::+ y) = showParen (p > 6) (codeE 6 x . showString " + " . codeE 7 y)
+codeE p (x ::* y) = showParen (p > 7) (codeE 7 x . showString " * " . codeE 8 y)
+codeE p (x ::/ y) = showParen (p > 7) (codeE 7 x . showString " / " . codeE 8 y)
+
+class Code a  where
+    codePrec  :: Int -> a -> ShowS
+    codePrec _ x s = code x ++ s
+    code      :: a -> String 
+    code x = codePrec 0 x ""
+    codeDouble :: a -> String
+    codeDouble x = code x
+    codeVector :: a -> String
+    codeVector x = code x
 
 class (Eq a, Show a) => Type a where 
   toExpression :: Real x => x -> Expression a
@@ -210,6 +265,10 @@ class (Eq a, Show a) => Type a where
   prefix :: String -> Expression a -> String
   postfix :: Expression a -> String
   postfix _ = ""
+  toScalar :: a -> Expression Scalar
+
+makeHomogeneous :: Type a => Expression a -> Expression Scalar
+makeHomogeneous = mapExpression toScalar
 
 instance Type a => Num (Expression a) where
   (+) = \x y -> case (x, y) of
@@ -260,6 +319,7 @@ instance Type a => Num (Expression a) where
 -- | Factor is used to do some crude simplification in the * and /
 -- operators.  I should note that we *don't* fully simplify ratios,
 -- but I expect that this may be "good enough," whatever that means.
+
 factor :: Type a => Expression a -> Expression a -> Maybe (Expression a)
 factor x (y ::* z) | x == y = Just z
                    | x == z = Just y
@@ -332,6 +392,7 @@ instance Type a => Floating (Expression a) where
       _ -> case isConstant y of
              Just 0 -> 1
              Just 1 -> x
+             Just 2 -> x ::* x
              _ -> case x of
                     e ::** n -> e ** (n * y)
                     _ -> x ::** y
@@ -344,6 +405,7 @@ instance Type a => Floating (Expression a) where
 
 -- | grad takes the gradient of a scalar-valued expression with
 -- respect to a particular realspace variable.
+
 grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive v 1 e
 -- grad v (Expression (Integrate (Expression (R v')))) 
@@ -390,24 +452,34 @@ definitions and assignments.
 
 \begin{code}
 data Statement a where
-     (:=) :: Type a => String -> Expression a -> Statement (Expression a)
-     (:?=) :: Type a => String -> Expression a -> Statement (Expression a)
+     (:=) :: (Type a, Code a) => String -> Expression a -> Statement (Expression a)
+     (:?=) :: (Type a, Code a) => String -> Expression a -> Statement (Expression a)
      Return :: a -> Statement a
      (:>>) :: Statement b -> Statement a -> Statement a
+infixl 1 :>>
+infix 4 :=, :?=
 instance Monad Statement where
   (>>=) = thenS
   return = Return
 instance Show (Statement a) where
-  showsPrec = showsS
+    showsPrec = showsS
 showsS :: Int -> Statement a -> ShowS
-showsS _ (x := y) = showString (prefix "" y) . 
-                    showsPrec 0 (var x y) . showString " = " . showsPrec 0 y . showString ";" .
-                    showString (postfix y)
-showsS _ (x :?= y) = showString (prefix x y) .
-                     showsPrec 0 (var x y) . showString " := " . showsPrec 0 y . showString ";" .
-                     showString (postfix y)
-showsS _ (Return _) = id
+showsS _ (x := y) = showString x . showString " := " . showsPrec 0 y
+showsS _ (x :?= y) = showString x . showString " :?= " . showsPrec 0 y
+showsS _ (Return _) = showString "return ???" -- . showsPrec 0 x
 showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
+
+instance Code (Statement a) where
+	codePrec = codeS
+codeS :: Int -> Statement a -> ShowS
+codeS _ (x := y) = showString (prefix "" y) . 
+                    codePrec 0 (var x y) . showString " = " . codePrec 0 y . showString ";" .
+                    showString (postfix y)
+codeS _ (x :?= y) = showString (prefix x y) .
+                     codePrec 0 (var x y) . showString " := " . codePrec 0 y . showString ";" .
+                     showString (postfix y)
+codeS _ (Return _) = id
+codeS p (x :>> y) = codeS p x . showString "\n" . codeS p y
 
 thenS :: Statement a -> (a -> Statement b) -> Statement b
 thenS f g = f :>> g (evalS f)
@@ -417,4 +489,38 @@ evalS (s := e) = var s e
 evalS (s :?= e) = var (s ++ "-" ++ hash (show e)) e
 evalS (Return a) = a
 evalS (_ :>> b) = evalS b
+\end{code}
+
+\begin{code}
+functionCode :: String -> String -> [(String, String)] -> String -> String
+functionCode "" "" [] "" = ""
+functionCode "" "" (x:xs) "" = if xs == [] 
+                               then fst x ++ " " ++ snd x
+                               else fst x ++ " " ++ snd x ++ ", " ++ functionCode "" "" xs ""
+functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") const {\n" ++ b ++ "\n}\n"
+
+
+
+classCode :: Expression RealSpace -> String -> String
+classCode e n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ "()  {\n\thave_integral = true;\n}\n" ++
+                functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output = 0;\n\t" ++ codeVector (integrate e) ++ "\n\treturn output;\n")  ++
+                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tVectorXd output(gd.NxNyNz);\n\t" ++ codeVector e ++ "\n\treturn output;\n")  ++
+                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n\treturn " ++ codeDouble e ++ ";\n") ++
+                functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
+                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n\treturn " ++ codeDouble (derive "x" 1 e) ++ ";\n") ++
+                functionCode "d_by_dT" "double" [("double", ""), ("double", "")] "\tassert(0); // fail\n\treturn 0;\n" ++
+                functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
+                functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\tassert(&ingrad==&ingrad);\n\tassert(&x==&x);\n\treturn ingrad;" ++
+                functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\tassert(&ingradT==&ingradT);\n\treturn ingradT;" ++
+                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t(*outgrad)[i] += (" ++ code (derive "x" 1 e) ++ ") * ingrad[i];\n\t}" ) ++
+                functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
+                functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
+                "private:\n}; // End of " ++ n ++ " class"
+
+generateHeader :: Expression RealSpace -> String -> String
+generateHeader e n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
+                     classCode e (n ++ "_type") ++
+                     "\n\ninline Functional " ++ n ++"() {\n\treturn Functional(new " ++ n ++ "_type(), \"" ++ n ++ "\");\n}\n"
+
 \end{code}

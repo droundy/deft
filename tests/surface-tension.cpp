@@ -113,7 +113,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
 
   double retval = 0;
   printf("\n\n");
-  const double Einterface_with_external_true = -1.9059612806502457e-05;
+  const double Einterface_with_external_true = -1.9059612817366499e-05;
   printf("interface energy is %.15g (vs. %.15g)\n", Einterface, Einterface_with_external);
   if (Einterface_with_external < Einterface_with_external_true) {
     printf("FAIL: Einterface_with_external is too low: %.17g (should be %.17g)\n",

@@ -73,9 +73,6 @@ double FunctionalInterface::integral(const GridDescription &gd, double kT, const
 class PretendIngradType : public FunctionalInterface {
 public:
   PretendIngradType() {}
-  bool append_to_name(const std::string) {
-    return false;
-  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &x) const {
     return x;
@@ -166,9 +163,6 @@ void Functional::create_source(const std::string filename, const std::string cla
     eg.generate_code(o, "    return %s;\n");
     fprintf(o, "  }\n");
 
-    fprintf(o, "  bool append_to_name(const std::string) {\n");
-    fprintf(o, "    return false;\n");
-    fprintf(o, "  }\n"); 
     // Don't define the gradient:
     fprintf(o, "  double derive(double, double) const {\n");
     fprintf(o, "    assert(0); // fail\n");
@@ -239,9 +233,6 @@ void Functional::create_source(const std::string filename, const std::string cla
     eg.generate_code(o, "    return %s;\n");
     fprintf(o, "  }\n");
 
-    fprintf(o, "  bool append_to_name(const std::string) {\n");
-    fprintf(o, "    return false;\n");
-    fprintf(o, "  }\n");
     // Don't define the gradient:
     fprintf(o, "  double derive(double, double) const {\n");
     fprintf(o, "    assert(0); // fail\n");
@@ -347,9 +338,6 @@ void Functional::create_source(const std::string filename, const std::string cla
     myself.generate_code(o, "    return %s;\n");
     fprintf(o, "  } // end of transform(double,double)\n");
   }
-  fprintf(o, "  bool append_to_name(const std::string) {\n");
-  fprintf(o, "    return false;\n");
-  fprintf(o, "  }\n");
   {
     fprintf(o, "  double derive(double kT, double x) const {\n");
     fprintf(o, "    assert(kT == kT); assert(x == x);\n");
@@ -672,9 +660,6 @@ Functional Identity() { return Pow(1); }
 class dVType : public FunctionalInterface {
 public:
   dVType() {}
-  bool append_to_name(const std::string) {
-    return false;
-  }
 
   VectorXd transform(const GridDescription &gd, double, const VectorXd &) const {
     return gd.dvolume*VectorXd::Ones(gd.NxNyNz);
@@ -713,9 +698,6 @@ Functional dV = Functional(new dVType());
 class Constant : public FunctionalInterface {
 public:
   Constant(double x, const char *n) : c(x), name(n) {}
-  bool append_to_name(const std::string) {
-    return false;
-  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return c*VectorXd::Ones(data.rows());
@@ -769,9 +751,6 @@ Functional::Functional(double x, const char *n) : itsCounter(0) {
 class ConstantField : public FunctionalInterface {
 public:
   ConstantField(const VectorXd &x) : c(x) {}
-  bool append_to_name(const std::string) {
-    return false;
-  }
   bool I_preserve_homogeneous() const {
     return false;
   }
@@ -817,11 +796,6 @@ Functional::Functional(const VectorXd &x) : itsCounter(0) {
 class ChainRuleType : public FunctionalInterface {
 public:
   ChainRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
-  bool append_to_name(const std::string x) {
-    f1.append_to_name(x);
-    f2.append_to_name(x);
-    return true;
-  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
   }
@@ -909,11 +883,6 @@ Functional Functional::operator()(const Functional &f) const {
 class QuotientRuleType : public FunctionalInterface {
 public:
   QuotientRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
-  bool append_to_name(const std::string x) {
-    f1.append_to_name(x);
-    f2.append_to_name(x);
-    return true;
-  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
   }
@@ -974,11 +943,6 @@ Functional Functional::operator/(const Functional &f) const {
 class ProductRuleType : public FunctionalInterface {
 public:
   ProductRuleType(const Functional &fa, const Functional &fb) : f1(fa), f2(fb) {}
-  bool append_to_name(const std::string x) {
-    f1.append_to_name(x);
-    f2.append_to_name(x);
-    return true;
-  }
   bool I_am_local() const {
     return f1.I_am_local() && f2.I_am_local();
   }
@@ -1038,9 +1002,6 @@ Functional Functional::operator*(const Functional &f) const {
 class LogType : public FunctionalInterface {
 public:
   LogType() {}
-  bool append_to_name(const std::string) {
-    return true;
-  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().log();
@@ -1081,9 +1042,6 @@ Functional log(const Functional &f) {
 class ExpType : public FunctionalInterface {
 public:
   ExpType() {}
-  bool append_to_name(const std::string) {
-    return true;
-  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().exp();
@@ -1124,9 +1082,6 @@ Functional exp(const Functional &f) {
 class AbsType : public FunctionalInterface {
 public:
   AbsType() {}
-  bool append_to_name(const std::string) {
-    return true;
-  }
 
   VectorXd transform(const GridDescription &, double, const VectorXd &data) const {
     return data.cwise().abs();
@@ -1197,10 +1152,6 @@ public:
   }
   bool I_am_one() const {
     return f.I_am_one();
-  }
-  bool append_to_name(const std::string x) {
-    f.append_to_name(x);
-    return true;
   }
 
   double integral(const GridDescription &gd, double kT, const VectorXd &x) const {
