@@ -32,6 +32,7 @@ config.*
 /.ikiwiki
 /recentchanges
 tests/generated/*.h
+tests/generated-haskell/*.h
 *-t
 optimize-functionals
 src/*Fast.cpp
