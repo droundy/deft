@@ -53,19 +53,52 @@ set style line 4 lt 3 lc 3 lw 3
 set xlabel 'Radius (nm)'
 set ylabel 'Density (g/mL)'
 
-set label "r=0.1nm" at 0.05,1.72 rotate by 0 font 'Helvetica,20' 
-set arrow from 0.1,1.6 to 0.1,1.5 lw 2
-set label "r=0.3nm" at 0.5,2.3 rotate by 0 font 'Helvetica,20' textcolor lt 3
-set arrow from 0.48,2.28 to 0.35,2.2 lw 2 lc rgb "blue"
-set label "r=0.5nm" at 0.7,1.5 rotate by 0 font 'Helvetica,20' textcolor lt 1
-set arrow from 0.68,1.48 to 0.6,1.4 lw 2 lc rgb "red"
+# set label "r=0.1nm" at 0.05,1.72 rotate by 0 font 'Helvetica,20' 
+# set arrow from 0.1,1.6 to 0.1,1.5 lw 2
+# set label "r=0.3nm" at 0.5,2.3 rotate by 0 font 'Helvetica,20' textcolor lt 3
+# set arrow from 0.48,2.28 to 0.35,2.2 lw 2 lc rgb "blue"
+# set label "r=0.5nm" at 0.7,1.5 rotate by 0 font 'Helvetica,20' textcolor lt 1
+# set arrow from 0.68,1.48 to 0.6,1.4 lw 2 lc rgb "red"
 
 nl=0.004938863
 nm = 18.8972613     # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
-plot [:1.2] [:] \
-'figs/sphere-1.00.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
-'figs/sphere-0.60.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
-'figs/sphere-0.20.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
-'figs/sphere-1.00.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4
+# plot [:1.2] [:] \
+# 'figs/sphere-1.00.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
+# 'figs/sphere-0.60.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
+# 'figs/sphere-0.20.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
+# 'figs/sphere-1.00.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4
+
+set xlabel 'r (nm)'
+set ylabel ' '
+set xtics 0.2
+set ytics 1,10
+set multiplot
+set tmargin 0
+set bmargin 0
+set origin 0.0,0.17
+set size 1,0.15
+plot [0:1.4] [0:2.5] 'figs/sphere-0.40.dat' u ($2/nm):($4/gpermL) notitle with lines lw 3, \
+'figs/grspce-2.0.dat' u ($1/10):2 notitle with lines lt 0 lw 0
+set origin 0.0,0.32
+set size 1,0.15
+set xtics offset graph 100,graph 100
+set xlabel ''
+plot [0:1.4] [0:2.5] 'figs/sphere-0.80.dat' u ($2/nm):($4/gpermL) notitle with lines lw 3, \
+'figs/grspce-4.0.dat' u ($1/10):2 notitle with lines lt 0 lw 0
+set origin 0.0,0.47
+set size 1,0.15
+set ylabel 'n (g/mL)'
+plot [0:1.4] [0:2.5] 'figs/sphere-1.20.dat' u ($2/nm):($4/gpermL) notitle with lines lw 3, \
+'figs/grspce-6.0.dat' u ($1/10):2 notitle with lines lt 0 lw 0
+set origin 0.0,0.62
+set size 1,0.15
+set ylabel ' '
+plot [0:1.4] [0:2.5] 'figs/sphere-1.60.dat' u ($2/nm):($4/gpermL) notitle with lines lw 3, \
+'figs/grspce-8.0.dat' u ($1/10):2 notitle with lines lt 0 lw 0
+set origin 0.0,0.77
+set size 1,0.15
+plot [0:1.4] [0:2.5] 'figs/sphere-2.00.dat' u ($2/nm):($4/gpermL) notitle with lines lw 3, \
+'figs/grspce-10.0.dat' u ($1/10):2 notitle with lines lt 0 lw 0
+unset multiplot

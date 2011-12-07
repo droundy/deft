@@ -355,7 +355,7 @@ is the choice used by Clark \emph{et al}~\cite{clark2006developing},
 and allows a reasonable fit to the equation of state.  Thus our model
 interaction has the form:
 \begin{equation}
-  \varphi(r) = \color{red}\Theta(r-2 \lambdadisp R)
+  \varphi(r) = \Theta(r-2 \lambdadisp R)
 \end{equation}
 where $\Theta$ is the Heaviside step function.
 
@@ -365,9 +365,15 @@ of the filling fraction.  In order to apply this form to an
 inhomogeneous density distribution, we construct an effective local
 filling fraction for dispersion $\etadisp$, given by
 \begin{align}
-  \etadisp(\xx) &=
-  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
-             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
+%    ((4/3.0*M_PI)*Pow(3)(R)*GaussianConvolve(2*lambdainput*lscale*radius,
+%                                             2*lambdaE*length_scalingE*Rexpr)
+%  \etadisp(\xx) &= \color{red}
+%  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
+%             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
+  \\
+  \etadisp(\xx) &= \frac{1}{6\sqrt{\pi} \lambdadisp^3\lscale^3}
+  \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
+      \lscale R)^2}}\right)d\xx'
 \end{align}
 This effective filling fraction is used throughout the dispersion
 calculations, and represents a filling fraction averaged over the
@@ -1000,8 +1006,7 @@ with the agreement becoming worse for larger radii.
 %\includegraphics[width=\columnwidth]{radial-plots/cavity-density}
 \end{center}
 \caption{Density profiles for multiple sizes of hard sphere solute.
-  Results from a simulation of SPC/E water~\cite{huang2001shs} are
-  shown as a dotted lines.}
+  }
 \label{fig:cavities}
 \end{figure}
 
@@ -1042,9 +1047,11 @@ energy per unit surface area of a hard sphere.
 \includegraphics[width=\columnwidth]{figs/sphere-energy-vs-diameter}
 \end{center}
 \caption{ Free energy versus radius for a single hydrophobic sphere
-immersed in water. This should have an asymptote equal to the surface
-tension at room temperature, and it agrees well with the surface tension in
-Figure~\ref{fig:surface-tension}. }
+  immersed in water. This should have an asymptote equal to the
+  surface tension at room temperature, and it agrees well with the
+  surface tension in Figure~\ref{fig:surface-tension}. Results from a
+  simulation of SPC/E water~\cite{huang2001shs} are shown as
+  circles. }
 \label{fig:sphere-energy-vs-diameter}
 \end{figure}
 
@@ -1065,8 +1072,10 @@ the energy for these and other separations.}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-sphere}
 \end{center}
-\caption{ Density profiles for spheres of different radii. The dotted line
-represents the saturated liquid density.  }
+\caption{ Density profiles around hard-sphere solutes of different radii. Predictions
+  from our classical density-functional theory are in solid red, while
+  the dotted line shows the result of a molecular dynamics simulation
+  of SPC/E water~\cite{huang2001shs}.  }
 \label{fig:density-sphere}
 \end{figure}
 
