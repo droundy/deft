@@ -51,6 +51,11 @@ main = do writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var
           writeFile "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log (r_var "x") + (r_var "x")**2) "NiceLogandSqr"
           writeFile "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log (r_var "x") + (r_var "x")**2 - (r_var "x")**3 + (r_var "x")**(-1)) "NiceLogandSqrandInverse"
           writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) "NiceLogOneMinusX"
+          let spreading = 6.0
+              kdr = k * s_var "dr"
+              kR = k * s_var "R"
+              nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+          writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar "NiceNbar"
           c <- runTestTT $ TestList []
           if failures c > 0
             then fail $ "Failed " ++ show (failures c) ++ " tests."
