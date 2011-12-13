@@ -387,23 +387,24 @@ the above filling fraction for dispersion has the form
   a_1 &= 
    -4(\lambdadisp^3 - 1)\epsilondisp \etadisp(\xx)
     g^{HS}_\sigma(\eta_\textit{eff}(\xx)) \\
-  g_\sigma^{HS}(\eta) &= \frac{1}{1-\eta}
-  +\frac32\frac{\zeta(\xx)}{(1-\eta)^2}
-  + \frac12\frac{\eta^2\zeta(\xx)}{(1-\eta)^3}
+  g_\sigma^{HS}(\eta) &= \frac{1 - \frac12 \eta}{(1 - \eta)^3} \label{eq:ghs}
   \\
-  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}\\
+  g_\sigma^{HS}(\eta) &= \frac{1}{1-\eta}
+  +\frac32\frac{1}{(1-\eta)^2}
+  + \frac12\frac{\eta^2}{(1-\eta)^3}
+  \\
   \eta_\textit{eff}(\xx) &= \sum_{ij=0}^3 C_{ij}  \etadisp^i(\xx)
   \lambdadisp^j
 \end{align}
 where $g_\sigma^{HS}$
-is the hard-sphere fluid correlation function evaluated at contact.
-The $\zeta$ factor
-(also seen in the association energy, below) is a dimensionless
-measure of the local density inhomogeneity. The $C_{ij}$ values
+is the Carnahan-Starling value for the hard-sphere fluid correlation
+function evaluated at contact.  \textcolor{red}{Jess, could you verify
+that the two formulas for gHS above are equivalent? Thanks!}
+The $C_{ij}$ values
  are numerical constants taken from
 reference\cite{gil-villegas-1997-SAFT-VR}, which come from a numerical
 fit to the integral in Equation~\ref{eq:A1-simple} over a range of
-values for $\lambdadisp$ and filling fractions.
+values for filling fraction and $\lambdadisp$.
 
 The second term, $a_2$, which describes the contribution to the free
 energy associated with fluctuations is given by
@@ -431,6 +432,7 @@ interaction occurs is $\kappaassoc$, giving the association
 term in the free energy has two empirical parameters that are fit to
 experimental data.
 
+\textcolor{red}{
 The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
@@ -444,35 +446,43 @@ based on the SAFT-HS equation of state, rather than the SAFT-VR
 equation of state\cite{gil-villegas-1997-SAFT-VR} which is used in the
 optimal SAFT parametrization for water found by Clark \emph{et
   al}\cite{clark2006developing}.
+}
 
+The association functional we use is constructed by using the density
+$n_0(\xx)$, which is the density of hard spheres touching a given
+point, in the standard SAFT-VR association
+energy\cite{gil-villegas-1997-SAFT-VR}.
 The association free energy for our four-site model has the form
 \begin{align}
-  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx)\zeta(\xx)
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) % \zeta(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
 where the value of $4$ comes from the four association sites per
 molecule, and the functional $X$ is the fraction of assotiation sites
-\emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
-measure of the density inhomogeneity.  The fraction $X$ is determined
+\emph{not} hydrogen-bonded. %, and $\zeta(\xx)$ is a dimensionless
+%measure of the density inhomogeneity.
+The fraction $X$ is determined
 by the quadratic equation
 \begin{align}
-  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)\Delta(\xx)} - 1}
-  {4 n_0(\xx)\zeta(\xx)\Delta(\xx)}
+  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)%\zeta(\xx)
+      \Delta(\xx)} - 1}
+  {4 n_0(\xx)%\zeta(\xx)
+    \Delta(\xx)}
 \end{align}
-where the factor $\zeta$ from
-Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
-density, and reduces to unity in the homogeneous limit:
-\begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
-\end{align}
+%where the factor $\zeta$ from
+%Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating,
+%  fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
+%density, and reduces to unity in the homogeneous limit:
+%\begin{align}
+%  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
+%\end{align}
 The functional $\Delta$ which appears in the formula for $X$ is a
 measure of hydrogen-bonding probability.  In the SAFT-VR
 model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
 \begin{align}
   \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
   \left(e^{-\beta\epsilonassoc} - 1\right) \\
-  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\etadisp(\xx)) +
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma\left(\frac{4\pi R^3}{3}n_0(\xx)\right) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
   \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)
 \end{align}
@@ -482,13 +492,15 @@ contact for a hard-sphere fluid with a square-well attractive
 potential, and $a_1$ and $a_2$ are two terms in the dispersive term of
 the free energy.  The correlation function $g^\textit{SW}_\sigma$ is
 written as a perturbative correction to the hard-sphere fluid correlation
-function $g^\textit{HS}_\sigma$, for which we use the functional of Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
-\begin{align}
-  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
-  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
-  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
-\end{align}
+function $g^\textit{HS}_\sigma$ given in Equation~\ref{eq:ghs},
+evaluated using the filling fraction computed from $n_0(\xx)$.
+%, for which we use the functional of Yu and
+%Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
+%\begin{align}
+%  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
+%  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
+%  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
+%\end{align}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
