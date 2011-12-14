@@ -27,7 +27,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf poster.pdf
+all :  paper.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -43,13 +43,6 @@ ALL_FIGURES=\
 	figs/surface-tension.gp\
 	figs/surface-298.gp\
 	figs/pressure-with-isotherms.gp\
-	figs/cavitysize-060.gp\
-	figs/cavity-cartoon.gp\
-	figs/cavitysize-vs-energy-1D.gp\
-	figs/xassoc-1D.gp\
-	figs/entropy-1D.gp\
-	figs/energy-1D.gp\
-	figs/density-1D.gp\
 	figs/sphere-energy-vs-diameter.gp\
 	figs/sphere-density.gp\
 	figs/density-sphere.gp\
@@ -74,14 +67,8 @@ LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
-project.pdf: project.tex paper.bib $(FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
-
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
-
-poster.pdf: poster.tex paper.bib $(FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
 
@@ -99,13 +86,6 @@ figs/surface-tension.eps: figs/surface-tension.gp \
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
-figs/cavitysize-060.eps: figs/cavitysize-06.0.dat
-figs/cavity-cartoon.eps: figs/cavitysize-06.0.dat
-figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
-figs/xassoc-1D.eps: figs/cavitysize-06.0.dat 
-figs/entropy-1D.eps: figs/cavitysize-06.0.dat 
-figs/energy-1D.eps: figs/cavitysize-06.0.dat
-figs/density-1D.eps: figs/cavitysize-06.0.dat
 figs/density-rods-in-water.eps: figs/rods-picture-01.0-00.2.dat \
 	figs/rods-picture-01.0-00.4.dat
 figs/xassoc-single-rod.gp: figs/single-rod-slice-00.6.dat
