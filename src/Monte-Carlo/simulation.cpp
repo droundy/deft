@@ -157,19 +157,6 @@ Vector3d move(Vector3d v, double x, double y, double z){
  return temp + v;
 }
 
-//To be deleted... cvh
-Vector3d move(Vector3d v, double R){
-  const double scale = .05;
-  Vector3d temp;
-  while(true){
-    temp = ran3()*scale;
-    if(distance(v+temp,Vector3d(0,0,0))<=R){
-      break;
-    }
-  }
-  return temp + v;
-}
-
 bool touch(Vector3d *spheres, Vector3d v, int n, double R, double delta, int s){
   for(int i = 0; i < n; i++){
     if(i==s){
