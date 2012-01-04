@@ -32,7 +32,13 @@ instance Code RealSpace where
   codePrec _ (R v) = showString (v ++ "[i]")
   codePrec _ (IFFT ke) = showString "ifft(" . codePrec 0 ke . showString ")"
 instance Type RealSpace where
-  derivativeHelper = deriveR
+  isRealSpace _ = Same
+  derivativeHelper v ddr r | Same <- isRealSpace (Expression v), v == r = ddr
+  derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) ke
+  derivativeHelper _ _ _ = 0
+  zeroHelper v x | Same <- isRealSpace (Expression v), v == x = 0
+  zeroHelper v (IFFT ke) = ifft (setZero v ke)
+  zeroHelper _ x = Expression x
   simpHelper (R x) = (return (), r_var x)
   simpHelper (IFFT ksp@(Expression (K _))) = (do st
                                                  Initialize (r_var temp)
@@ -82,11 +88,6 @@ simplifyR (n :?= e1 ::** e2) = combineS (simplify (n :?= e1)) (simplify ("temp" 
 simplifyR (n :?= e) = simplify (n := e)
 simplifyR s = s
 
-deriveR :: String -> Expression RealSpace -> RealSpace -> Expression RealSpace
-deriveR v dda (R v') | v == v' = dda
-                     | otherwise = 0
-deriveR v ddr (IFFT ke) = derive v (fft ddr) ke -- CHECK THIS!
-
 instance Code KSpace where
   codePrec _ (K v) = showString (v ++ "[i]")
   codePrec _ Kx = showString "k_i[0]"
@@ -95,7 +96,13 @@ instance Code KSpace where
   codePrec _ Delta = showString "delta(k?)"
   codePrec _ (FFT r) = showString "fft(" . codePrec 0 r . showString ")"
 instance Type KSpace where
-  derivativeHelper = deriveK
+  isKSpace _ = Same
+  derivativeHelper v ddk kk | Same <- isKSpace (Expression v), kk == v = ddk
+  derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
+  derivativeHelper _ _ _ = 0
+  zeroHelper v x | Same <- isKSpace (Expression v), x == v = 0
+  zeroHelper v (FFT r) = fft (setZero v r)
+  zeroHelper _ x = Expression x
   simpHelper (FFT rsp@(Expression (R _))) = (do st
                                                 Initialize (k_var temp)
                                                 temp := fft rsp'
@@ -147,14 +154,6 @@ simplifyK (n :?= e1 ::** e2) = combineS (simplify (n :?= e1)) (simplify ("temp" 
 simplifyK (n :?= e) = simplify (n := e)
 simplifyK s = s
 
-deriveK :: String -> Expression KSpace -> KSpace -> Expression RealSpace
-deriveK _ _ (K _) = 0
-deriveK _ _ Kx = 0
-deriveK _ _ Ky = 0
-deriveK _ _ Kz = 0
-deriveK _ _ Delta = 0
-deriveK v ddk (FFT r) = derive v (ifft ddk) r -- CHECK THIS!
-
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
 mapExpression _ (Scalar e) = Scalar e
 mapExpression f (Cos e) = cos (mapExpression f e)
@@ -169,7 +168,38 @@ mapExpression f (a ::* b) = mapExpression f a * mapExpression f b
 mapExpression f (a ::/ b) = mapExpression f a / mapExpression f b
 mapExpression f (Expression x) = f x
 
-kzeroValue :: KSpace -> Expression RealSpace
+setZero :: (Type aa, Type b) => b -> Expression aa -> Expression aa
+setZero _ (Scalar e) = Scalar e
+setZero v (Cos e) = cos (setZero v e)
+setZero v (Sin e) = sin (setZero v e)
+setZero v (Exp e) = exp (setZero v e)
+setZero v (Log e) = log (setZero v e)
+setZero v (Abs e) = abs (setZero v e)
+setZero v (Signum e) = signum (setZero v e)
+setZero v (a ::** n) = (setZero v a) ** setZero v n
+setZero v (a ::+ b) = setZero v a + setZero v b
+setZero v (a ::* b) = setZero v a * setZero v b
+setZero v (a ::/ b) =
+    if zb == 0
+    then case isKSpace (Expression v) of
+           Same -> case isKSpace a  of
+                     Same -> setZero v (derive v 1 a / derive v 1 b)
+                     _ -> error "oopsies"
+           _ -> case isScalar (Expression v) of
+                  Same -> case isScalar a  of
+                            Same -> setZero v (derive v 1 a / derive v 1 b)
+                            _ -> error "oopsies"
+                  _ -> case isRealSpace (Expression v) of
+                         Same -> case isRealSpace a  of
+                                   Same -> setZero v (derive v 1 a / derive v 1 b)
+                                   _ -> error "oopsies"
+                         _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
+                      else za / zb
+    where za = setZero v a
+          zb = setZero v b
+setZero v (Expression x) = zeroHelper v x
+
+kzeroValue :: Type a => KSpace -> Expression a
 kzeroValue (K v) = s_var (v ++ "[0]")
 kzeroValue Kx = 0
 kzeroValue Ky = 0
@@ -187,7 +217,13 @@ instance Type Scalar where
   isConstant (Expression (Constant x)) = Just x
   isConstant (Scalar x) = isConstant x
   isConstant _ = Nothing
-  derivativeHelper = deriveS
+  isScalar _ = Same
+  derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
+  derivativeHelper v dds s | Same <- isScalar (Expression v), v == s = dds
+  derivativeHelper _ _ _ = 0
+  zeroHelper v x | Same <- isScalar (Expression v), v == x = 0
+  zeroHelper v (Integrate e) = integrate (setZero v e)
+  zeroHelper _ x = Expression x
   simpHelper (Integrate r) = (st, integrate r')
       where (st, r') = simp r
   simpHelper sc = (return (), Expression sc)
@@ -204,11 +240,6 @@ instance Type Scalar where
   initialize _ = "double output = 0;\n"
   toScalar (Integrate r) = makeHomogeneous r
   toScalar v = Expression v
-  
-deriveS :: String -> Expression Scalar -> Scalar -> Expression RealSpace
-deriveS _ _ (S _) = 0
-deriveS _ _ (Constant _) = 0
-deriveS v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
 
 r_var :: String -> Expression RealSpace
 r_var v = Expression (R v)
@@ -310,15 +341,26 @@ class Code a  where
     code      :: a -> String 
     code x = codePrec 0 x ""
 
+data Same a b where
+    Same :: Same a a
+    Different :: Same a b
+
 class (Eq a, Show a, Code a) => Type a where 
   toExpression :: Real x => x -> Expression a
   toExpression = Scalar . Expression . Constant . fromRational . toRational
+  isScalar :: Expression a -> Same a Scalar
+  isScalar _ = Different
+  isRealSpace :: Expression a -> Same a RealSpace
+  isRealSpace _ = Different
+  isKSpace :: Expression a -> Same a KSpace
+  isKSpace _ = Different
   s_var :: String -> Expression a
   s_var = Scalar . s_var
   isConstant :: Expression a -> Maybe Double
   isConstant (Scalar x) = isConstant x
   isConstant _ = Nothing
-  derivativeHelper :: String -> Expression a -> a -> Expression RealSpace
+  derivativeHelper :: Type b => b -> Expression a -> a -> Expression b
+  zeroHelper :: Type b => b -> a -> Expression a
   simpHelper :: a -> (Statement (), Expression a)
   var :: String -> Expression a -> Expression a
   codeStatementHelper :: String -> String -> Expression a -> String
@@ -365,6 +407,7 @@ instance Type a => Num (Expression a) where
                   _ | x == 1 -> y
                     | y == 1 -> x
                     | x == 0 || y == 0 -> 0
+                    | x == y -> x ** 2
                     | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a*b)
                   (Scalar a ::* c, Scalar b) -> Scalar (a*b) * c
                   (Scalar a, Scalar s ::* b) -> Scalar (a*s) * b
@@ -458,17 +501,14 @@ instance Type a => Floating (Expression a) where
   cos = \x -> case x of
     0 -> 1
     _ -> Cos x
-  (**) = \x y ->
-    case isConstant x of
-      Just 0 -> 0
-      Just 1 -> 1
-      _ -> case isConstant y of
-             Just 0 -> 1
-             Just 1 -> x
-             Just 2 -> x ::* x
-             _ -> case x of
-                    e ::** n -> e ** (n * y)
-                    _ -> x ::** y
+  (a ::* b) ** y | a == b = a ** (2*y)
+  (x ::** b) ** c = x ::** (b*c)
+  x ** y | isConstant x == Just 0 = 0
+         | isConstant x == Just 1 = 1
+         | isConstant y == Just 0 = 1
+         | isConstant y == Just 1 = x
+         | Just xv <- isConstant x, Just yv <- isConstant y = toExpression (xv**yv)
+  x ** y = x ::** y
   asin = undefined
   acos = undefined
   atan = undefined
@@ -480,7 +520,7 @@ instance Type a => Floating (Expression a) where
 -- respect to a particular realspace variable.
 
 grad :: String -> Expression Scalar -> Expression RealSpace
-grad v e = derive v 1 e
+grad v e = derive (R v) 1 e
 
 simp :: Type a => Expression a -> (Statement (), Expression a)
 simp (Expression e) = simpHelper e
@@ -508,7 +548,7 @@ simp (Scalar s) = (st, Scalar s')
     where (st, s') = simp s
 simp x = error ("I haven't finished simp" ++ show x)
 
-derive :: Type a => String -> Expression a -> Expression a -> Expression RealSpace
+derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
 derive v dda (x ::+ y) = derive v dda x + derive v dda y
 derive v dda (x ::* y) = derive v (dda*x) y + derive v (dda*y) x
 derive v dda (x ::/ y) = derive v (dda / y) x + derive v (-dda*x/y**2) y
@@ -622,9 +662,9 @@ classCode e n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++
                           "output" := e
       codeDTransform = do Initialize (makeHomogeneous e)
                           "output" := (makeHomogeneous e)
-      codeDerive = do Initialize (makeHomogeneous (derive "x" 1 e))
-                      "output" := makeHomogeneous (derive "x" 1 e)
-      codeGrad = "(*outgrad)" :+= derive "x" 1 e * r_var "ingrad"
+      codeDerive = do Initialize (makeHomogeneous (derive (R "x") 1 e))
+                      "output" := makeHomogeneous (derive (R "x") 1 e)
+      codeGrad = "(*outgrad)" :+= derive (R "x") 1 e * r_var "ingrad"
 
 generateHeader :: Expression RealSpace -> String -> String
 generateHeader e n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
