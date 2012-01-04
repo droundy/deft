@@ -14,8 +14,12 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
+#include <sched.h> // linux-specific, for sched_setaffinity
+
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
+#include <string.h>
 #include "OptimizedFunctionals.h"
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
@@ -23,15 +27,21 @@
 
 int retval = 0;
 clock_t last_time = clock();
-double reference_time = 1;
 
-double check_peak(const char *name, const char *name2, double peakmin, double peakmax) {
+char *hn = new char[80+1];
+
+double check_peak(const char *name, const char *name2, FILE *out,
+                  double peakmin, double peakmax,
+                  double cpu = 0, double cpurat = 1.3) {
   printf("\n===> Testing %s of %s <===\n", name, name2);
   
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
   double peak = peak_memory()/1024.0/1024;
-  printf("CPU time is %g s (or %gx)\n", cputime, cputime/reference_time);
-  printf("Peak memory use is %g M\n", peak);
+  if (cpu)
+    printf("CPU time is %g s (%.0f%%)\n", cputime, (cputime - cpu)/cpu*100);
+  else
+    printf("CPU time is %g s\n", cputime);
+  //printf("Peak memory use is %g M\n", peak);
   if (peak < peakmin) {
     printf("FAIL: Peak memory use of %s %s should be at least %g!\n", name, name2, peakmin);
     retval++;
@@ -39,6 +49,20 @@ double check_peak(const char *name, const char *name2, double peakmin, double pe
   if (peak > peakmax) {
     printf("FAIL: Peak memory use of %s %s should be under %g!\n", name, name2, peakmax);
     retval++;
+  }
+  if (cpu) {
+    if (cputime < cpu/cpurat) {
+      printf("FAIL: CPU time of %s %s should be at least %g!\n", name, name2, cpu/cpurat);
+      retval++;
+    }
+    if (cputime > cpu*cpurat) {
+      printf("FAIL: CPU time of %s %s should be under %g!\n", name, name2, cpu*cpurat);
+      retval++;
+    }
+  }
+  if (out) {
+    fprintf(out, "%g\t%g\n", peak, cputime);
+    fflush(out);
   }
   reset_peak_memory();
   last_time = clock();
@@ -61,8 +85,7 @@ double incavity(Cartesian r) {
   return 1 - notincavity(r);
 }
 
-void check_a_functional(const char *name, Functional f, const Grid &x,
-                        double memE, double memG, double memP, double memPonly) {
+void check_a_functional(const char *name, Functional f, const Grid &x) {
   const double kT = water_prop.kT; // room temperature in Hartree
 
   printf("\n************");
@@ -71,20 +94,60 @@ void check_a_functional(const char *name, Functional f, const Grid &x,
   for (unsigned i=0;i<strlen(name) + 4;i++) printf("*");
   printf("************\n\n");
   fflush(stdout);
+
+  double memE, cpuE, memG, cpuG, memP, cpuP, memPonly, cpuPonly;
+
+  FILE *out;
+  {
+    char *fname = new char[1024];
+    snprintf(fname, 1024, "tests/bench/good/%s.%s", name, hn);
+    FILE *good = fopen(fname, "r");
+    bool nocpu = false;
+    if (!good) {
+      printf("Unable to open file %s, will not check cpu times!\n", fname);
+      nocpu = true;
+      snprintf(fname, 1024, "tests/bench/good/%s.bingley", name);
+      good = fopen(fname, "r");
+      if (!good) {
+        printf("Unable to open file %s, so I have to fail!\n", fname);
+        exit(1);
+      }
+    }
+    if (fscanf(good, " mem cpu %lg %lg %lg %lg %lg %lg %lg %lg",
+               &memE, &cpuE,
+               &memG, &cpuG,
+               &memP, &cpuP,
+               &memPonly, &cpuPonly) != 8) {
+      printf("Unable to read file %s\n", fname);
+      exit(1);
+    }
+    fclose(good);
+    if (nocpu) {
+      cpuE = cpuG = cpuP = cpuPonly = 0;
+    }
+    snprintf(fname, 1024, "tests/bench/%s.%s", name, hn);
+    out = fopen(fname, "w");
+    if (!out) {
+      printf("Unable to create file %s\n", fname);
+      exit(1);
+    }
+    fprintf(out, "mem\tcpu\n");
+    delete[] fname;
+  }
+
   reset_peak_memory();
   last_time = clock();
 
   f.integral(kT, x);
   //printf("\n\nEnergy of %s is %g\n", name, f.integral(x));
-
-  check_peak("Energy", name, memE, memE + 1);
+  check_peak("Energy", name, out, memE-0.1, memE+0.1, cpuE);
 
   Grid mygrad(x);
   mygrad.setZero();
   f.integralgrad(kT, x, &mygrad);
-  //printf("Grad of %s is: %g\n", name, mygrad.norm());
+  //printf("Grad of %s is: %g\n", name, out, mygrad.norm());
 
-  check_peak("Gradient", name, memG, memG+1);
+  check_peak("Gradient", name, out, memG-0.1, memG+0.1, cpuG);
   
   {
     Grid mypgrad(x);
@@ -92,14 +155,34 @@ void check_a_functional(const char *name, Functional f, const Grid &x,
     mypgrad.setZero();
     f.integralgrad(kT, x, &mygrad, &mypgrad);
   }
-  check_peak("Gradient and preconditioned gradient", name, memP, memP+1);
+  check_peak("Gradient and preconditioned gradient", name, out, memP-0.1, memP+0.1, cpuP);
 
   f.integralpgrad(kT, x, &mygrad);
-  check_peak("Preconditioned gradient", name, memPonly, memPonly+1);
+  check_peak("Preconditioned gradient", name, out, memPonly-0.1, memPonly+0.1, cpuPonly);
 
+  fclose(out);
 }
 
 int main(int, char **argv) {
+  {
+    // Here I set this test to continue running on its current cpu.
+    // This is a slightly hokey trick to try to avoid any timings
+    // variation due to NUMA and the process bouncing from one CPU to
+    // another.  Ideally we'd figure out a better way to decide on
+    // which CPU to use for real jobs.
+    cpu_set_t cpus;
+    CPU_ZERO(&cpus);
+    CPU_SET(sched_getcpu(), &cpus);
+    int err = sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
+    if (err != 0) {
+      printf("Error from sched_setaffinity: %d\n", err);
+    }
+  }
+  // Let's figure out which machine we're running on (since we only
+  // want to test CPU time if we have timings for this particular
+  // machine).
+  gethostname(hn, 80);
+
   const double kT = water_prop.kT; // room temperature in Hartree
   const double eta_one = 3.0/(4*M_PI*R*R*R);
   const double nliquid = 0.324*eta_one;
@@ -126,7 +209,7 @@ int main(int, char **argv) {
   // And now let's set the external_potential up as we'd like it.
   external_potential.Set(incavity);
   external_potential *= 1e9;
-  reference_time = check_peak("Setting", "external potential", 7, 8);
+  check_peak("Setting", "external potential", NULL, 7, 8);
 
   Grid constraint(gd);
   constraint.Set(notincavity);
@@ -135,37 +218,37 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  check_a_functional("HardSpheres", ff, potential, 80, 101, 108, 104);
+  check_a_functional("HardSpheres", ff, potential);
 
   ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereFast", ff, potential, 66, 90, 97, 94);
+  check_a_functional("HardSphereFast", ff, potential);
 
   ff = constrain(constraint, (HardSpheresRF(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRF", ff, potential, 52, 83, 90, 87);
+  check_a_functional("HardSphereRF", ff, potential);
 
   ff = constrain(constraint, (HardSpheresRFFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRFFast", ff, potential, 45, 69, 76, 73);
+  check_a_functional("HardSphereRFFast", ff, potential);
 
   ff = constrain(constraint, (HardSpheresTarazona(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazona", ff, potential, 83, 104, 111, 108);
+  check_a_functional("HardSphereTarazona", ff, potential);
 
   ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazonaFast", ff, potential, 66, 90, 97, 94);
+  check_a_functional("HardSphereTarazonaFast", ff, potential);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSpheresWBnotensor", ff, potential, 52, 87, 94, 90);
+  check_a_functional("HardSpheresWBnotensor", ff, potential);
 
   ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereNoTensor", ff, potential, 45, 69, 76, 73);
+  check_a_functional("HardSphereNoTensor", ff, potential);
 
   ff = constrain(constraint, HardSphereGas(R, mu));
-  check_a_functional("HardSphereGas", ff, potential, 62, 76, 83, 76);
+  check_a_functional("HardSphereGas", ff, potential);
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
-  check_a_functional("SaftFluid", ff, potential, 41, 76, 80, 80);
+  check_a_functional("SaftFluid", ff, potential);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
