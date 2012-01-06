@@ -32,7 +32,7 @@ char *hn = new char[80+1];
 
 double check_peak(const char *name, const char *name2, FILE *out,
                   double peakmin, double peakmax,
-                  double cpu = 0, double cpurat = 1.3) {
+                  double cpu = 0, double cpurat = 1.6) {
   printf("\n===> Testing %s of %s <===\n", name, name2);
   
   double cputime = (clock()-last_time)/double(CLOCKS_PER_SEC);
