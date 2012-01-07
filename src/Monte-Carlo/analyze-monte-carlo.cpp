@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "Monte-Carlo/monte-carlo.h"
 #include <cassert>
+#include <math.h>
 
 int main(int argc, char *argv[]){
   if (argc != 4) {
@@ -53,10 +54,15 @@ int main(int argc, char *argv[]){
     radius[i] = rad*(pow(double(i)/div, 1.0/3.0) + 0.1*double(i)*uncertainty_goal)/
       (1 + 0.1*div*uncertainty_goal);
   }
-
+  printf("Got to here! ");
+  fflush(stdout);
   int *shells = new int[div];
   for (int i=0; i<div; i++) shells[i] = 0;
-
+  
+  double *shellsArea = new double [div];
+  for (int i=0; i<div; i++) shellsArea[i]=0;
+  printf("Got to here now");
+  fflush(stdout);
   double *density = new double[div];
 
   double x;
@@ -83,7 +89,8 @@ int main(int argc, char *argv[]){
     printf("Bad file format");
     exit(1);
   }
-  
+  fflush(stdout);
+ 
   Vector3d *vecs = new Vector3d[N];
   for(int i=0; i<(iterations/N); i++){
     for(int j=0; j<N; j++){
@@ -93,6 +100,27 @@ int main(int argc, char *argv[]){
       }
       vecs[j] = Vector3d(x,y,z);
       shells[shell(vecs[j], div, radius)]++;
+      for (int k=0; k<div; k++) {
+	const double rj = distance(vecs[j],Vector3d(0,0,0));
+	if (rj < radius[k+1] + R && rj + radius[k+1] > R && rj > radius[k] - R) {
+	  // There is at least some overlap with shell k! (not so easy)
+	  double costhetamax, costhetamin;
+	  if (rj > radius[k] + R) {
+	    costhetamin = 1;
+	  } else if (radius[k] + rj < R) {
+	    costhetamin = 1;
+	  } else {
+	    costhetamin = (rj*rj - radius[k]*radius[k] + R*R)/(2*rj*R);
+	  }
+	  if (rj < radius[k+1] - R) {
+	    costhetamax = -1;
+	  } else {
+	    costhetamax = (rj*rj - radius[k+1]*radius[k+1] + R*R)/(2*rj*R);
+	  }
+	  assert(costhetamin >= costhetamax);
+	  shellsArea[k] += 2*M_PI*R*R*(costhetamin-costhetamax);
+	}
+      }
     }
     for(int j=0; j<N; j++){
       for(int count = 0; count<N; count++){
@@ -115,7 +143,7 @@ int main(int argc, char *argv[]){
 
   for(int i=0; i<div; i++){
     conDensity[i]=((conShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShell*8*oShell*oShell-4/3.*M_PI*8*R*R*R));
-    cenConDensity[i]=((cenConShells[i]+0.0)/shells[i])/((4/3.*M_PI*8*oShell*oShell*oShell-4/3.*M_PI*8*R*R*R));
+    cenConDensity[i]=4*M_PI*R*R*((cenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShell*oShell*oShell-4/3.*M_PI*8*R*R*R));
   }
   for(int i=0; i<div; i++){
     printf("Number of contacts in division %d = %d\n", i+1, conShells[i]);
