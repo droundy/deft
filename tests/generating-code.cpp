@@ -36,6 +36,7 @@ int main(int, char **) {
   log(1-x).create_header("tests/generated/log-one-minus-x.h", "LogOneMinusX", noargs);
   const char *R_arg[] = { "R", 0 };
   const char *R_mu_arg[] = { "R", "mu", 0 };
+  StepConvolve(Rval).create_header("tests/generated/nbar.h", "Nbar", R_arg);
   log(1-StepConvolve(Rval)).create_header("tests/generated/log-one-minus-nbar.h",
                                           "LogOneMinusNbar", R_arg);
   sqr(xShellConvolve(Rval)).create_header("tests/generated/sqr-xshell.h", "SquareXshell", R_arg);

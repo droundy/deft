@@ -25,6 +25,7 @@
 #include "generated-haskell/nice-logandsqr.h"
 #include "generated-haskell/nice-logandsqrandinverse.h"
 #include "generated-haskell/nice-logoneminusx.h"
+#include "generated-haskell/nice-nbar.h"
 
 #include "generated/sum.h"
 #include "generated/quadratic.h"
@@ -34,6 +35,7 @@
 #include "generated/log-and-sqr.h"
 #include "generated/log-and-sqr-and-inverse.h"
 #include "generated/log-one-minus-x.h"
+#include "generated/nbar.h"
 #include "generated/log-one-minus-nbar.h"
 #include "generated/sqr-xshell.h"
 #include "generated/n2_and_n3.h"
@@ -100,8 +102,8 @@ void compare_functionals(const Functional &f1, const Functional &f2,
   double f1x = f1(kT, x);
   double f2x = f2(kT, x);
   if (1 - fabs(f1x/f2x) > fraccuracydoub) {
-    printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name().c_str(),
-           1 - fabs(f1x/f2x), f2x);
+    printf("FAIL: Error in double %s is %g as a fraction of %g it is %g\n", f1.get_name().c_str(),
+           1 - fabs(f1x/f2x), f2x, f1x);
     errors++;
   }
   
@@ -140,6 +142,8 @@ int main(int, char **argv) {
 
   compare_functionals(NiceLogOneMinusX(), log(1-x), myT, n, 1e-12);
 
+  compare_functionals(NiceNbar(R), StepConvolve(R), myT, n, 3e-13);
+
   compare_functionals(Sum(), x + kT, myT, n, 2e-13);
 
   compare_functionals(Quadratic(), sqr(x + kT) - x + 2*kT, myT, n, 2e-12);
@@ -155,6 +159,8 @@ int main(int, char **argv) {
   compare_functionals(LogOneMinusX(), log(1-x), myT, n, 1e-12);
 
   compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)), myT, n, 1e-13);
+
+  compare_functionals(Nbar(R), StepConvolve(R), myT, n, 3e-13);
 
   compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)), myT, n);
 
