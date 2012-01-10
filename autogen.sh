@@ -22,12 +22,14 @@ autoconf
 
 #CXXFLAGS='-ansi -pipe -W -g -Wall -O2 -Werror' ./configure
 #CXXFLAGS='-ansi -pipe -W -Wall -O2 -Werror' ./configure
+export CXXFLAGS='-ansi -pipe -W -Wall -O2 -ffast-math -Werror'
+export CXXFLAGS='-ansi -pipe -W -Wall -O2 -Werror'
 if env | grep CCACHE_; then
     echo Using ccache to speed up compilation.
-    CXX='ccache g++' CXXFLAGS='-ansi -pipe -W -Wall -O1 -Werror' ./configure
+    CXX='ccache g++' ./configure
 else
     echo 'Consider installing ccache to speed up compilation!'
-    CXXFLAGS='-ansi -pipe -W -Wall -O1 -Werror' ./configure
+    ./configure
 fi
 
 set +v
