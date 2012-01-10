@@ -690,9 +690,9 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
 
 
 generateHeader :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
-generateHeader e arg n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
+generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
                      classCode e arg (n ++ "_type") ++
-                     "\n\ninline Functional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
+                     "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
     where codeA (Just rep) = "double " ++ code (makeHomogeneous rep)
           codeA Nothing = ""
           codeA' (Just rep) = code (makeHomogeneous rep)
