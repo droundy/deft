@@ -46,7 +46,6 @@ ALL_FIGURES=\
 	figs/cavitysize-060.gp\
 	figs/cavity-cartoon.gp\
 	figs/cavitysize-vs-energy-1D.gp\
-	figs/xassoc-1D.gp\
 	figs/entropy-1D.gp\
 	figs/energy-1D.gp\
 	figs/density-1D.gp\
@@ -57,12 +56,9 @@ ALL_FIGURES=\
 	figs/density-rods-in-water.gp\
 	figs/density-four-rods.gp\
 	figs/density-single-rod.gp\
-	figs/density-vs-radius.gp\
 	figs/rods-energy-vs-distance.gp\
 	figs/energy-rods.gp\
 	figs/osu-logo.svg\
-	figs/xassoc-rods-in-water.gp\
-	figs/xassoc-single-rod.gp\
 	figs/two-rods-diagram.svg\
 	figs/rods-diagram.svg\
 
@@ -102,17 +98,12 @@ figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
 figs/cavitysize-060.eps: figs/cavitysize-06.0.dat
 figs/cavity-cartoon.eps: figs/cavitysize-06.0.dat
 figs/cavitysize-vs-energy-1D.eps: figs/constrained-water-1D.dat
-figs/xassoc-1D.eps: figs/cavitysize-06.0.dat 
 figs/entropy-1D.eps: figs/cavitysize-06.0.dat 
 figs/energy-1D.eps: figs/cavitysize-06.0.dat
 figs/density-1D.eps: figs/cavitysize-06.0.dat
 figs/density-rods-in-water.eps: figs/rods-picture-01.0-00.2.dat \
 	figs/rods-picture-01.0-00.4.dat
-figs/xassoc-single-rod.gp: figs/single-rod-slice-00.6.dat
-figs/xassoc-rods-in-water.gp: figs/rods-1nm-01.0.dat
 figs/density-single-rod.eps: figs/single-rod-01.0.dat
-figs/density-vs-radius.eps: figs/single-rod-slice-01.0.dat \
-	figs/single-rod-res0.05-slice-01.0.dat figs/single-rod-res0.5-slice-01.0.dat 
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
 	figs/rods-in-water-01.0nm.dat figs/rods-in-water-01.4nm.dat \
 	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
