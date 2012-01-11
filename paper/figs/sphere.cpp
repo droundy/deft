@@ -40,7 +40,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
+void plot_grids_y_direction(const char *fname, const Grid &a) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -53,16 +53,12 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
   for (int y=0; y<gd.Ny/2; y++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
-    double bhere = b(x,y,z);
-    double chere = c(x,y,z);
-    double dhere = d(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere, chere, dhere);
+    fprintf(out, "%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere);
   }
   fclose(out);
 }
 
-void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
-			    const Grid &c, const Grid &d) {
+void plot_grids_yz_directions(const char *fname, const Grid &a) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -77,11 +73,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
     for (int z=-gd.Nz/2; z<=gd.Nz/2; z+=stepsize) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
       double ahere = a(here);
-      double bhere = b(here);
-      double chere = c(here);
-      double dhere = d(here);
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	      ahere, bhere, chere, dhere);
+      fprintf(out, "%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere);
     }
     fprintf(out,"\n");
  }  
@@ -161,27 +153,45 @@ int main(int argc, char *argv[]) {
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(1e-6, 
-                              PreconditionedConjugateGradient(f, gd, water_prop.kT, 
-                                                              &potential,
-                                                              QuadraticLineMinimizer));
-    
-    printf("\nDiameter of sphere = %g bohr (%g nm)\n", diameter, diameter/nm);
-    
-    const int numiters = 200;
-    for (int i=0;i<numiters && min.improve_energy(true);i++) {
-      //fflush(stdout);
-      //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-     
-      //density.epsNativeSlice("paper/figs/sphere.eps", 
-      //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-      //			     Cartesian(0,ymax/2,zmax/2));
+    double energy;
+    {
+      Minimizer min = Precision(1e-6, 
+                                PreconditionedConjugateGradient(f, gd, water_prop.kT, 
+                                                                &potential,
+                                                                QuadraticLineMinimizer));
       
-      //sleep(3);
+      printf("\nDiameter of sphere = %g bohr (%g nm)\n", diameter, diameter/nm);
+      
+      const int numiters = 200;
+      for (int i=0;i<numiters && min.improve_energy(true);i++) {
+        //fflush(stdout);
+        //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+        
+        //density.epsNativeSlice("paper/figs/sphere.eps", 
+        //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+        //			     Cartesian(0,ymax/2,zmax/2));
+        
+        //sleep(3);
+
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
+      
+      double peak = peak_memory()/1024.0/1024;
+      double current = current_memory()/1024.0/1024;
+      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      
+      energy = min.energy();
+      printf("Total energy is %.15g\n", energy);
+      // Here we free the minimizer with its associated data structures.
     }
 
-    double energy = min.energy();
-    printf("Total energy is %.15g\n", energy);
+    {
+      double peak = peak_memory()/1024.0/1024;
+      double current = current_memory()/1024.0/1024;
+      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    }
 
     const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
     printf("The bulk energy per cell should be %g\n", EperCell);
@@ -189,19 +199,14 @@ int main(int argc, char *argv[]) {
     fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
 
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    Grid energy_density(gd, f(water_prop.kT, gd, potential));
-    Grid entropy(gd, S(water_prop.kT, potential));
-    Grid Xassoc(gd, X(water_prop.kT, density));
 
     char *plotname = (char *)malloc(1024);
 
     sprintf(plotname, "paper/figs/sphere-%04.2f-slice.dat", diameter/nm);
-    plot_grids_yz_directions(plotname, density, 
-   			     energy_density, entropy, Xassoc);
+    plot_grids_yz_directions(plotname, density);
 
     sprintf(plotname, "paper/figs/sphere-%04.2f.dat", diameter/nm);
-    plot_grids_y_direction(plotname, density, 
-   			     energy_density, entropy, Xassoc);
+    plot_grids_y_direction(plotname, density);
 
     free(plotname);
 

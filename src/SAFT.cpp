@@ -107,8 +107,8 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   // includes spatial dependence and is published and tested in
   // various ways.
 
-  // Functional ghs = gHS(zeta3, R);
-  Functional ghs = gHS(n3, R); // This should be correct!!!
+  Functional ghs = gHS(zeta3, R);
+  //Functional ghs = gHS(n3, R); // This should be correct!!!
 
   // The following ghs, called gHScarnahan, is the one that is used by
   // Gloor et al, and is in the fortran code that I compare with to
