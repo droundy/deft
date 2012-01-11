@@ -1000,91 +1000,6 @@ prediction model and explanation of Figure~\ref{fig:rods-energy-vs-distance}}.}
 
 \subsection{Hydration energy of hard-sphere solutes}
 
-A more widely studied system that is simpler in many ways than the
-test-particle problem is that of a \emph{hard sphere solute} dissolved
-in water.  This is a common model for hydrophobic interactions.  The
-effect of this solute is merely to create a cavity within which the
-water may not penetrate.  This is the simples possible solute, and
-will serve as a test case, which if passed could lead to the ability
-to insert different chemicals into aqueous solution, instead of a
-vapor cavity, in order to observe biologically and chemically
-important aqueous solvation interactions.
-
-The most obvious output of such a calculation is the free energy of
-solvation.  In Figure~\ref{fig:surfaceTension} we plot the ratio of the
-energy of the cavity system to the surface area of the cavity.  This
-is an \emph{effective surface tension}, which approaches the bulk
-surface tension as the cavity radius increases.  On the same plot, we
-include the result from an SPC/E molecular dynamics
-simulation\cite{huang2001shs}, showing very good agreement.  At very
-small solute radius the effective surface tension is linear, meaning
-that the free energy is proportional to the volume---this limiting
-case is an exact result, which is exactly reproduced by any functional
-that reduces to the ideal gas functional at small distances.
-
-\begin{figure}
-\begin{center}
-%\includegraphics[width=\columnwidth]{radial-plots/surface-tension}
-\end{center}
-\caption{Free energy per surface area as a function of cavity
-  radius. SPC/E results from~\cite{huang2001shs}}
-\label{fig:surfaceTension}
-\end{figure}
-
-This exact result for small radius solutes relates to a general property of
-fluids interacting with hard surfaces, which is that the pressure on a hard
-surface is determined by the contact density of the fluid at the surface.
-Thus, a functional that correctly predicts the free energy as a function of
-radius will also give the proper contact density.
-Figure~\ref{fig:cavities} shows the density profile for several hard sphere
-radii, plotted together with with the results of the same SPC/E molecular
-dynamics simulation shown in
-Figure~\ref{fig:surfaceTension}\cite{huang2001shs}.  As expected---since
-the free energies agree so well---the contact densities show good
-agreement.  For small spheres the entire curve shows reasonable agreement,
-with the agreement becoming worse for larger radii.
-
-\begin{figure}[b]
-\begin{center}
-%\includegraphics[width=\columnwidth]{radial-plots/cavity-density}
-\end{center}
-\caption{Density profiles for multiple sizes of hard sphere solute.
-  }
-\label{fig:cavities}
-\end{figure}
-
-In order to understand the worsening agreement in the density profile
-for larger solutes in Figure~\ref{fig:cavities}, it is instructive to
-consider the limit as the radius becomes very large.  In this limit,
-the surface becomes essentially flat, and the liquid should develop a
-\emph{vapor layer}, so that as the effective surface tension
-approaches the bulk surface tension, the density profile should
-approach the profile of the liquid-vapor interface as plotted in
-Figure~\ref{fig:cartesianDensity}.  We demonstrate this effect in
-Figure~\ref{fig:LargeR_RadialDensity}, which shows superimposed the
-density profiles for several large solutes with that of the
-liquid-vapor interface.  It is clear that as the radius is increased,
-the profile is approaching that of the liquid-vapor interface.  Thus
-we can understand the deviations from the molecular dynamics
-simulations in Figure~\ref{fig:cavities} at larger radii as a direct
-result of the oscillations observed in the planar liquid-vapor
-interface.
-
-\fixme{Not sure if we want to keep this paragraph or work it into the
-  discussion somewhere?} For \emph{very} small cavities \fixme{not
-  shown... should we add one?}, the contact density is equal to the
-bulk liquid density, as the solute is too small to really perturb the
-water (see the blue curve in Fig.~\ref{fig:cavities}).  As the cavity
-size increases, the contact density (and pressure) first rise, and
-then fall again, as seen in Figure~\ref{fig:cavities}.  This is due to
-short range attractive interactions that are able to pass through the
-cavities of small radii.  For larger radii, these interactions are
-less prominent and there is less attraction to molecules across the
-cavity.  Thus, the contact density is decreased.
-
-Figure~\ref{fig:sphere-energy-vs-diameter} shows the hydration free
-energy per unit surface area of a hard sphere.
-
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/sphere-energy-vs-diameter}
@@ -1093,10 +1008,41 @@ energy per unit surface area of a hard sphere.
   immersed in water. This should have an asymptote equal to the
   surface tension at room temperature, and it agrees well with the
   surface tension in Figure~\ref{fig:surface-tension}. Results from a
-  simulation of SPC/E water~\cite{huang2001shs} are shown as
-  circles. }
+  simulation of SPC/E water~\cite{huang2001shs} are shown as circles.
+  The horizonal lines show the experimental and SPC/E bulk surface
+  tension for water at standard atmospheric temperature and
+  pressure. }
 \label{fig:sphere-energy-vs-diameter}
 \end{figure}
+
+A common model of hydrophobic solutes is the \emph{hard sphere solute}
+\fixme{add citations?}.  The effect of this solute is merely to create
+a cavity within which the water may not penetrate.  This is the
+simples possible solute, and will serve as a test case, which if
+passed could lead to the ability to insert different chemicals into
+aqueous solution, instead of a vapor cavity, in order to observe
+biologically and chemically important aqueous solvation interactions.
+
+As in the single rod, we begin by examining the free energy of
+hydration, expressed in Figure~\ref{fig:sphere-energy-vs-diameter} as
+the ratio of the energy of the cavity system to the surface area of
+the cavity.  This \emph{effective surface tension}, approaches the
+bulk surface tension as the cavity radius increases.  As with the
+single rod, we see the analytically correct behavior in the limit of
+small solutes.  We also plot the surface tension calculated using a
+molecular dynamics simulation of SPC/E water\cite{huang2001shs}.  The
+agreement is quite excellent, apart from the issue that the SPC/E
+model for water significantly underestimates the surface tension of
+water at room temperature\cite{vega2007surface}.
+
+Figure~\ref{fig:density-sphere} shows the density profile for several
+hard sphere radii, plotted together with with the results of the same
+SPC/E molecular dynamics simulation shown in
+Figure~\ref{fig:sphere-energy-vs-diameter}\cite{huang2001shs}.  The
+agreement with simulation is quite reasonable.  The largest
+disagreement involves the density at contact, which according to the
+contact value theorem cannot agree, since the free energies do not
+agree.
 
 \begin{figure}
 \begin{center}

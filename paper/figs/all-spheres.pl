@@ -6,8 +6,8 @@ my $dd;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-#foreach $dd (2.0, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.15, 0.1, 0.05, 0) {
-foreach $dd (2.0) {
+foreach $dd (2.0, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.15, 0.1, 0.05, 0) {
+#foreach $dd (2.0) {
   my $d = sprintf("%04.2f", $dd);
 
   print "Submitting sphere for $d nm\n";
