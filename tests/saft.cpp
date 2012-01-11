@@ -21,7 +21,7 @@
 int retval = 0;
 
 void test_energy(const char *name, Functional f, double kT,
-                 double true_energy, double fraccuracy = 1e-15) {
+                 double true_energy, double fraccuracy = 2e-14) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
