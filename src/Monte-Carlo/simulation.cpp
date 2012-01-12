@@ -2,6 +2,14 @@
 #include <time.h>
 #include "Monte-Carlo/monte-carlo.h"
 
+//Input "1" for large spherical cavity of radius "rad"
+//Input "2" for two dimensions boundary conditions (x and y) of 
+//  length "2*rad" and two walls (in z) that are "2*rad" apart
+//Input "3" for a cube of length "2*R" that has a spherical 
+//  cavity of radius cavRad in the center of it.
+
+int walls = 1;
+double cavRad;
 
 
 void run(const double rad, const int N, const long times, const char *filename){
@@ -14,9 +22,13 @@ void run(const double rad, const int N, const long times, const char *filename){
   // constrain to never increase.  Note that this may not work at all
   // for high filling fractions, since we could get stuck in a local
   // minimum.
+  
   for(int i=0; i<N; i++){
     spheres[i]=rad*ran3();
   }
+  for (int i=0; i<3; i++){
+    printf("%f",spheres[1][i]);}
+  
   int i = 0;
   clock_t start = clock();
   int num_to_time = 1000;
@@ -31,7 +43,7 @@ void run(const double rad, const int N, const long times, const char *filename){
       start = now;
     }
     Vector3d old =spheres[i%N];
-    spheres[i%N]=move(spheres[i%N]);
+    spheres[i%N]=move(spheres[i%N],rad);
     double newOverLaps=countOverLaps(spheres, N, R, rad);
     if(newOverLaps>numOverLaps){
       spheres[i%N]=old;
@@ -77,7 +89,7 @@ void run(const double rad, const int N, const long times, const char *filename){
       //printf("%g%% complete...\r",j/(times*1.0)*100);
       fflush(stdout);
     }
-    Vector3d temp = move(spheres[i%N]);
+    Vector3d temp = move(spheres[i%N], rad);
     if(overlap(spheres, temp, N, R, rad, i%N)){
       continue;
     }
@@ -94,33 +106,178 @@ void run(const double rad, const int N, const long times, const char *filename){
 
 double countOverLaps(Vector3d *spheres, int n, double R, double rad){
   double num = 0;
-  for(int j = 0; j<n; j++){
-    if(distance(spheres[j],Vector3d(0,0,0))>rad){
-      num+=distance(spheres[j],Vector3d(0,0,0))-rad;
+  if (walls == 1){
+    for(int j = 0; j<n; j++){
+      if(distance(spheres[j],Vector3d(0,0,0))>rad){
+        num+=distance(spheres[j],Vector3d(0,0,0))-rad;
+      }
+      for(int i = j+1; i < n; i++){
+        if(distance(spheres[i],spheres[j])<2*R){
+          num+=2*R-distance(spheres[i],spheres[j]);
+        }
+      }
     }
-    for(int i = j+1; i < n; i++){
-      if(distance(spheres[i],spheres[j])<2*R){
-        num+=2*R-distance(spheres[i],spheres[j]);
+  } else if (walls ==2){
+    //the following ignores two spheres in opposite corners of large cube
+    for(int j = 0; j<n; j++){
+      if (spheres[j][2] > rad){
+        num += (spheres[j][2] - rad);
+      } else if (spheres[j][2] < (-1)*rad){
+        num -= (spheres[j][2] + rad);
+      }
+      for (int i = j+1; i<n; i++){
+        if(distance(spheres[j],Vector3d(0,0,0))>rad){
+          num+=distance(spheres[j],Vector3d(0,0,0))-rad;
+        }
+        if (rad-spheres[j][0] < R || spheres[j][0]-rad < R ||rad-spheres[j][1] < R || spheres[j][1]-rad < R){  
+          if ( (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+	    num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  } 
+          if ( (spheres[j][0]-spheres[i][0]-2*rad)*(spheres[j][0]-spheres[i][0]-2*rad) 
+	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1])
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+          }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  }
+	}
+      }
+    }
+  } else if (walls == 3){
+    for(int j = 0; j<n; j++){
+      if(distance(spheres[j],Vector3d(0,0,0)) < cavRad){
+        num -= distance(spheres[j],Vector3d(0,0,0))-cavRad;
+      }
+      for(int i = j+1; i < n; i++){
+        if(distance(spheres[i],spheres[j])<2*R){
+          num+=2*R-distance(spheres[i],spheres[j]);
+	}
+        if (rad-spheres[j][0] < R || spheres[j][0]-rad < R || rad-spheres[j][1] < R || 
+            spheres[j][1]-rad < R ||rad-spheres[j][2] < R || spheres[j][2]-rad < R ){  
+          if ( (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+	    num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  } 
+          if ( (spheres[j][0]-spheres[i][0]-2*rad)*(spheres[j][0]-spheres[i][0]-2*rad) 
+	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1])
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+          }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
+		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+	       + (spheres[j][2]-spheres[i][2]+2*rad)*(spheres[j][2]-spheres[i][2]+2*rad) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2]+2*rad)*(spheres[j][2]-spheres[i][2]+2*rad) - 2*rad*2*rad;
+	  }
+          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
+	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
+            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
+		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
+		     + (spheres[j][2]-spheres[i][2]-2*rad)*(spheres[j][2]-spheres[i][2]-2*rad) - 2*rad*2*rad;
+	  }
+	}
       }
     }
   }
-  return num;
+ return num;
 }
 
-
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s){
-  if(distance(v,Vector3d(0,0,0))>rad){
-      return true;
+  for(int i = 0; i < n; i++){
+      if(i==s){
+        continue;
+      }
+      if(distance(spheres[i],v)<2*R){
+        return true;
+      }
   }
   for(int i = 0; i < n; i++){
-    if(i==s){
-      continue;
-    }
-    if(distance(spheres[i],v)<2*R){
+    if (walls == 1){
+      if(distance(v,Vector3d(0,0,0))>rad){
+          return true;
+      }
+    } else if (walls == 2){
+    if (v[2] > rad || v[2] < (-1)*rad){
       return true;
     }
+    if ( (v[0]-spheres[i][0]+2*rad)*(v[0]-spheres[i][0]+2*rad) 
+         + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
+         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0]-2*rad)*(v[0]-spheres[i][0]-2*rad) 
+         + (v[1]-spheres[i][1])*(v[1]-spheres[i][1])
+         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+         + (v[1]-spheres[i][1]+2*rad)*(v[1]-spheres[i][1]+2*rad) 
+         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+         + (v[1]-spheres[i][1]-2*rad)*(v[1]-spheres[i][1]-2*rad) 
+         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ){
+      return true;}
+    } else if (walls == 3){
+      if (distance(v,Vector3d(0,0,0)) < cavRad){
+      return true;
+    }
+      if ( (v[0]-spheres[i][0]+2*rad)*(v[0]-spheres[i][0]+2*rad) 
+           + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
+           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0]-2*rad)*(v[0]-spheres[i][0]-2*rad) 
+           + (v[1]-spheres[i][1])*(v[1]-spheres[i][1])
+           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+           + (v[1]-spheres[i][1]+2*rad)*(v[1]-spheres[i][1]+2*rad) 
+           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+           + (v[1]-spheres[i][1]-2*rad)*(v[1]-spheres[i][1]-2*rad) 
+	   + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+	   + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
+           + (v[2]-spheres[i][2]+2*rad)*(v[2]-spheres[i][2]+2*rad) < 2*rad*2*rad ||
+         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
+	   + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
+	   + (v[2]-spheres[i][2]-2*rad)*(v[2]-spheres[i][2]-2*rad) < 2*rad*2*rad){
+      return true;}
+    }
   }
-  return false;
+return false;
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s, double x, double y, double z){
@@ -139,9 +296,40 @@ bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s, double x, do
 }
 
 
-Vector3d move(Vector3d v){
+Vector3d move(Vector3d v, double rad){
   double scale = .5;
-  return v+scale*ran3();
+  if (walls == 1){
+    return v+scale*ran3();
+  } else if (walls == 2){
+    Vector3d newv = v +scale*ran3();
+    if (newv[0] > rad){
+      newv[0] -= 2*rad;
+    }  else if (newv[0] < (-1)*rad){
+      newv[0] += 2*rad;}
+    if (newv[1] > rad){
+      newv[1] -= 2*rad;
+    }  else if (newv[1] < (-1)*rad){
+      newv[1] += 2*rad;}
+    return newv;
+  } else if (walls == 3){
+    Vector3d newv = v +scale*ran3();
+    if (newv[0] > rad){
+      newv[0] -= 2*rad;
+    }  else if (newv[0] < (-1)*rad){
+      newv[0] += 2*rad;}
+    if (newv[1] > rad){
+      newv[1] -= 2*rad;
+    }  else if (newv[1] < (-1)*rad){
+      newv[1] += 2*rad;}
+    if (newv[2] > rad){
+      newv[2] -= 2*rad;
+    }  else if (newv[2] < (-1)*rad){
+      newv[2] += 2*rad;}
+    return newv;
+  }
+  printf("You need to pick a Boundary type!");
+  fflush(stdout);
+  exit (1);
 }
  
 //To be deleted... cvh 
