@@ -30,6 +30,8 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresWBFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
+
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
 bin_PROGRAMS = deft monte-carlo analyze-monte-carlo
@@ -68,6 +70,9 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
+
+$(HASKELL_CODE): src/haskell/functionals
+	src/haskell/functionals $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
@@ -206,10 +211,11 @@ project: paper
 poster: paper
 	cd paper && $(MAKE) poster.pdf
 
-haskell: src/haskell/test
+haskell: src/haskell/functionals
 
-src/haskell/test: $(wildcard src/haskell/*.lhs)
+src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildcard src/haskell/*.hs)
 	cd src/haskell && $(MAKE)
+
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\

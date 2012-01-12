@@ -6,7 +6,8 @@ module CodeGen ( RealSpace(..), r_var,
                  fft, ifft, integrate, grad, derive,
                  Expression,                 
                  Statement( (:=), (:?=) ),
-                 generateHeader, code, latex, simp, setZero, codeStatement ) 
+                 Type,
+                 generateHeader, code, latex, simp, setZero, codeStatement )
        where
 
 import Hash ( hash )
