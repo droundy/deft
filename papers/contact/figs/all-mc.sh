@@ -4,7 +4,7 @@ set -ev
 
 MC=papers/contact/figs/mc.sh
 
-time make -j4 monte-carlo analyze-monte-carlo
+#time make -j4 monte-carlo analyze-monte-carlo
 
 rm -f mc-*.out
 
