@@ -2,15 +2,36 @@
 #include <time.h>
 #include "Monte-Carlo/monte-carlo.h"
 
+
+//CORNERS!!!!!!!!
+
+
+
 //Input "1" for large spherical cavity of radius "rad"
 //Input "2" for two dimensions boundary conditions (x and y) of 
 //  length "2*rad" and two walls (in z) that are "2*rad" apart
 //Input "3" for a cube of length "2*R" that has a spherical 
 //  cavity of radius cavRad in the center of it.
 
-int walls = 1;
-double cavRad;
+//int walls = 1;
+//double cavRad;
+/*bool periodic_x = false; 
+bool periodic_y = false;
+bool periodic_z = false;
+bool has_x_wall = false;
+bool has_y_wall = false;
+bool has_z_wall = false;
+bool spherical_cavity = false;  //spherical walls on outside of entire volume
+bool spherical_solute = true;  //sphere at center of entire volume that is a wall
+double lenx = 50; 
+double leny = 50; 
+double lenz = 50; 
+double rad = 50;  //of outer spherical walls
+double solRad = 10;  //of inner spherical "solute"*/
 
+//const Vector3d latticex = Vector3d(rad,0,0);
+
+//Vector3d movedj = spheres[j] + Vector3d(rad,0,0);
 
 void run(const double rad, const int N, const long times, const char *filename){
   const double R = 1; 
@@ -43,7 +64,7 @@ void run(const double rad, const int N, const long times, const char *filename){
       start = now;
     }
     Vector3d old =spheres[i%N];
-    spheres[i%N]=move(spheres[i%N],rad);
+    spheres[i%N]=move(spheres[i%N]);
     double newOverLaps=countOverLaps(spheres, N, R, rad);
     if(newOverLaps>numOverLaps){
       spheres[i%N]=old;
@@ -89,7 +110,7 @@ void run(const double rad, const int N, const long times, const char *filename){
       //printf("%g%% complete...\r",j/(times*1.0)*100);
       fflush(stdout);
     }
-    Vector3d temp = move(spheres[i%N], rad);
+    Vector3d temp = move(spheres[i%N]);
     if(overlap(spheres, temp, N, R, rad, i%N)){
       continue;
     }
@@ -104,122 +125,165 @@ void run(const double rad, const int N, const long times, const char *filename){
 }
 
 
+//const Vector3d latticex = Vector3d(rad,0,0);
+
+//Vector3d movedj = spheres[j] + Vector3d(rad,0,0);
+
+bool periodic_x = false; // will go from -lenx/2 to +lenx/2 
+bool periodic_y = false;
+bool periodic_z = false;
+bool has_x_wall = false;
+bool has_y_wall = false;
+bool has_z_wall = false;
+bool spherical_cavity = false;  //spherical walls on outside of entire volume
+bool spherical_solute = true;  //sphere at center of entire volume that is a wall
+double lenx = 50; 
+double leny = 50; 
+double lenz = 50; 
+double rad = 50;  //of outer spherical walls
+double solRad = 10;  //of inner spherical "solute"
+const Vector3d latx = Vector3d(lenx,0,0);
+const Vector3d laty = Vector3d(0,leny,0);
+const Vector3d latz = Vector3d(0,0,lenz);
+
 double countOverLaps(Vector3d *spheres, int n, double R, double rad){
   double num = 0;
-  if (walls == 1){
-    for(int j = 0; j<n; j++){
+  for(int j = 0; j<n; j++){
+    for(int i = j+1; i < n; i++){
+        if(distance(spheres[i],spheres[j])<2*R){
+          num+=2*R-distance(spheres[i],spheres[j]);
+	}
+    }
+    if (spherical_cavity){
       if(distance(spheres[j],Vector3d(0,0,0))>rad){
-        num+=distance(spheres[j],Vector3d(0,0,0))-rad;
+        num += distance(spheres[j],Vector3d(0,0,0))-rad;
       }
+    }
+    if (spherical_solute){
+      if(distance(spheres[j],Vector3d(0,0,0))<solRad){
+        num -= distance(spheres[j],Vector3d(0,0,0))-solRad;
+      }
+    }
+     //do I need an num += for going outside square walls if move won't allow them to do that?
+    if (has_x_wall){
+      if (spheres[j][0] > lenx/2 ){
+	num += spheres[j][0]-(lenx/2);
+      } else if (spheres[j][0] < -lenx/2){
+	num -= spheres[j][0] + (lenx/2);
+      }
+    }
+    if (has_y_wall){
+      if (spheres[j][1] > leny/2 ){
+	num += spheres[j][1]-(leny/2);
+      } else if (spheres[j][1] < -leny/2){
+	num -= spheres[j][1] + (leny/2);
+      }
+    }
+    if (has_z_wall){
+      if (spheres[j][2] > lenz/2 ){
+	num += spheres[j][2]-(lenz/2);
+      } else if (spheres[j][2] < -lenz/2){
+	num -= spheres[j][2] + (lenz/2);
+      }
+    }
+    /*for (int i = j+1; i<n; i++){
+      //want to test to make sure that the distance function returns the absolute value (whatever "norm" means)
+      if (periodic_x){
+        if (distance(spheres[j],(spheres[i]+latx)) < 2*R){
+          num += 2*R - distance(spheres[j],(spheres[i]+latx));
+	} else if (distance(spheres[j],(spheres[i]-latx)) < 2*R) {
+          num += 2*R - distance(spheres[j],(spheres[i]-latx));
+	}
+      }
+      if (periodic_y){
+        if (distance(spheres[j],(spheres[i]+laty)) < 2*R){
+          num += 2*R - distance(spheres[j],(spheres[i]+laty));
+	} else if(distance(spheres[j],(spheres[i]-laty)) < 2*R) {
+	  num += 2*R - distance(spheres[j],(spheres[i]-laty));
+	}
+      }
+      if (periodic_z){
+        if (distance(spheres[j],(spheres[i]+latz)) < 2*R){
+          num += 2*R - distance(spheres[j],(spheres[i]+latz));
+	} else if(distance(spheres[j],(spheres[i]-latz)) < 2*R) {
+	  num += 2*R - distance(spheres[j],(spheres[i]-latz));
+	}
+	}*/
+      Vector3d lat[3] = {latx,laty,latz};
+      bool periodic[3] = {periodic_x, periodic_y, periodic_z};
       for(int i = j+1; i < n; i++){
-        if(distance(spheres[i],spheres[j])<2*R){
-          num+=2*R-distance(spheres[i],spheres[j]);
-        }
-      }
-    }
-  } else if (walls ==2){
-    //the following ignores two spheres in opposite corners of large cube
-    for(int j = 0; j<n; j++){
-      if (spheres[j][2] > rad){
-        num += (spheres[j][2] - rad);
-      } else if (spheres[j][2] < (-1)*rad){
-        num -= (spheres[j][2] + rad);
-      }
-      for (int i = j+1; i<n; i++){
-        if(distance(spheres[j],Vector3d(0,0,0))>rad){
-          num+=distance(spheres[j],Vector3d(0,0,0))-rad;
-        }
-        if (rad-spheres[j][0] < R || spheres[j][0]-rad < R ||rad-spheres[j][1] < R || spheres[j][1]-rad < R){  
-          if ( (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-	    num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	for (int k=0; k<3; k++){
+	  if (periodic[k]){
+	    if (distance(spheres[j],spheres[i]+lat[k]) < 2*R){
+	      num += 2*R - distance(spheres[j],spheres[i]+lat[k]);
+	    } else if (distance(spheres[j],spheres[i]-lat[k]) < 2*R) {
+	      num += 2*R - distance(spheres[j],spheres[i]-lat[k]);
+	    }
 	  } 
-          if ( (spheres[j][0]-spheres[i][0]-2*rad)*(spheres[j][0]-spheres[i][0]-2*rad) 
-	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1])
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
-          }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	  for (int m=k+1; m<3; m++){
+	    if (periodic[m] && periodic[k]){
+	      if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
+		num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+	      }
+	      if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
+		num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+	      }
+	      if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
+		num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+	      }
+	      if (distance(spheres[j],spheres[i]-lat[k]+lat[m]) < 2*R){
+		num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+	      }
+	    }
 	  }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
+	}
+	if (periodic[0] && periodic[1] && periodic[2]){
+	  if (distance(spheres[j],spheres[i]+latx+laty+latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]+latx+laty+latz);
+	  }
+	  if (distance(spheres[j],spheres[i]+latx+laty-latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]+latx+laty-latz);
+	  }
+	  if (distance(spheres[j],spheres[i]+latx-laty+latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]+latx-laty+latz);
+	  }
+	  if (distance(spheres[j],spheres[i]-latx+laty+latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]-latx+laty+latz);
+	  }
+	  if (distance(spheres[j],spheres[i]-latx-laty+latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]-latx-laty+latz);
+	  }
+	  if (distance(spheres[j],spheres[i]-latx+laty-latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]-latx+laty-latz);
+	  }
+	  if (distance(spheres[j],spheres[i]+latx-laty-latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]+latx-laty-latz);
+	  }
+	  if (distance(spheres[j],spheres[i]-latx-laty-latz) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]-latx-laty-latz);
 	  }
 	}
       }
-    }
-  } else if (walls == 3){
-    for(int j = 0; j<n; j++){
-      if(distance(spheres[j],Vector3d(0,0,0)) < cavRad){
-        num -= distance(spheres[j],Vector3d(0,0,0))-cavRad;
-      }
-      for(int i = j+1; i < n; i++){
-        if(distance(spheres[i],spheres[j])<2*R){
-          num+=2*R-distance(spheres[i],spheres[j]);
-	}
-        if (rad-spheres[j][0] < R || spheres[j][0]-rad < R || rad-spheres[j][1] < R || 
-            spheres[j][1]-rad < R ||rad-spheres[j][2] < R || spheres[j][2]-rad < R ){  
-          if ( (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-	    num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
-	  } 
-          if ( (spheres[j][0]-spheres[i][0]-2*rad)*(spheres[j][0]-spheres[i][0]-2*rad) 
-	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1])
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0]+2*rad)*(spheres[j][0]-spheres[i][0]+2*rad) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
-          }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1]+2*rad)*(spheres[j][1]-spheres[i][1]+2*rad) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
-	  }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
-		     + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) - 2*rad*2*rad;
-	  }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-	       + (spheres[j][2]-spheres[i][2]+2*rad)*(spheres[j][2]-spheres[i][2]+2*rad) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2]+2*rad)*(spheres[j][2]-spheres[i][2]+2*rad) - 2*rad*2*rad;
-	  }
-          if ( (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-	       + (spheres[j][1]-spheres[i][1]-2*rad)*(spheres[j][1]-spheres[i][1]-2*rad) 
-	       + (spheres[j][2]-spheres[i][2])*(spheres[j][2]-spheres[i][2]) < 2*rad*2*rad){
-            num -= (spheres[j][0]-spheres[i][0])*(spheres[j][0]-spheres[i][0]) 
-		     + (spheres[j][1]-spheres[i][1])*(spheres[j][1]-spheres[i][1]) 
-		     + (spheres[j][2]-spheres[i][2]-2*rad)*(spheres[j][2]-spheres[i][2]-2*rad) - 2*rad*2*rad;
-	  }
-	}
-      }
-    }
   }
- return num;
+  return num;
 }
+
+/*bool periodic_x = false; // will go from -lenx/2 to +lenx/2 
+bool periodic_y = false;
+bool periodic_z = false;
+bool has_x_wall = false;
+bool has_y_wall = false;
+bool has_z_wall = false;
+bool spherical_cavity = false;  //spherical walls on outside of entire volume
+bool spherical_solute = true;  //sphere at center of entire volume that is a wall
+double lenx = 50; 
+double leny = 50; 
+double lenz = 50; 
+double rad = 50;  //of outer spherical walls
+double solRad = 10;  //of inner spherical "solute"
+const Vector3d latx = Vector3d(lenx,0,0);
+const Vector3d laty = Vector3d(0,leny,0);
+const Vector3d latz = Vector3d(0,0,lenz);*/ 
 
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s){
   for(int i = 0; i < n; i++){
@@ -229,52 +293,51 @@ bool overlap(Vector3d *spheres, Vector3d v, int n, double R, double rad, int s){
       if(distance(spheres[i],v)<2*R){
         return true;
       }
-  }
-  for(int i = 0; i < n; i++){
-    if (walls == 1){
-      if(distance(v,Vector3d(0,0,0))>rad){
+      if (periodic_x){
+        if (distance(v,spheres[i]+latx) < 2*R){
           return true;
+	} else if (distance(v,spheres[i]-latx) < 2*R) {
+          return true;
+	}
       }
-    } else if (walls == 2){
-    if (v[2] > rad || v[2] < (-1)*rad){
+      if (periodic_y){
+        if (distance(v,spheres[i]+laty) < 2*R){
+          return true;
+	} else if (distance(v,spheres[i]-laty) < 2*R) {
+          return true;
+	}
+      }
+      if (periodic_z){
+        if (distance(v,spheres[i]+latz) < 2*R){
+          return true;
+	} else if (distance(v,spheres[i]-latz) < 2*R) {
+          return true;
+	}
+      }
+  }
+    if (spherical_cavity) {
+      if (distance(v,Vector3d(0,0,0)) > rad){
+        return true;
+      }
+    }
+  if (spherical_solute) {
+    if (distance(v,Vector3d(0,0,0)) < solRad){
+	return true;
+      }
+  }
+  if (has_x_wall){
+    if (v[0] > lenx/2 || v[0] < -lenx/2) {
       return true;
     }
-    if ( (v[0]-spheres[i][0]+2*rad)*(v[0]-spheres[i][0]+2*rad) 
-         + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
-         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0]-2*rad)*(v[0]-spheres[i][0]-2*rad) 
-         + (v[1]-spheres[i][1])*(v[1]-spheres[i][1])
-         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-         + (v[1]-spheres[i][1]+2*rad)*(v[1]-spheres[i][1]+2*rad) 
-         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-         + (v[1]-spheres[i][1]-2*rad)*(v[1]-spheres[i][1]-2*rad) 
-         + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ){
-      return true;}
-    } else if (walls == 3){
-      if (distance(v,Vector3d(0,0,0)) < cavRad){
+  }
+  if (has_y_wall){
+    if (v[1] > leny/2 || v[1] < -leny/2) {
       return true;
     }
-      if ( (v[0]-spheres[i][0]+2*rad)*(v[0]-spheres[i][0]+2*rad) 
-           + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
-           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0]-2*rad)*(v[0]-spheres[i][0]-2*rad) 
-           + (v[1]-spheres[i][1])*(v[1]-spheres[i][1])
-           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-           + (v[1]-spheres[i][1]+2*rad)*(v[1]-spheres[i][1]+2*rad) 
-           + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-           + (v[1]-spheres[i][1]-2*rad)*(v[1]-spheres[i][1]-2*rad) 
-	   + (v[2]-spheres[i][2])*(v[2]-spheres[i][2]) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-	   + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
-           + (v[2]-spheres[i][2]+2*rad)*(v[2]-spheres[i][2]+2*rad) < 2*rad*2*rad ||
-         (v[0]-spheres[i][0])*(v[0]-spheres[i][0]) 
-	   + (v[1]-spheres[i][1])*(v[1]-spheres[i][1]) 
-	   + (v[2]-spheres[i][2]-2*rad)*(v[2]-spheres[i][2]-2*rad) < 2*rad*2*rad){
-      return true;}
+  }
+  if (has_z_wall){
+    if (v[2] > lenz/2 || v[2] < -lenz/2) {
+      return true;
     }
   }
 return false;
@@ -295,42 +358,51 @@ bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s, double x, do
   return false;
 }
 
+/*bool periodic_x = false; // will go from -lenx/2 to +lenx/2 
+bool periodic_y = false;
+bool periodic_z = false;
+bool has_x_wall = false;
+bool has_y_wall = false;
+bool has_z_wall = false;
+bool spherical_cavity = false;  //spherical walls on outside of entire volume
+bool spherical_solute = true;  //sphere at center of entire volume that is a wall
+double lenx = 50; 
+double leny = 50; 
+double lenz = 50; 
+double rad = 50;  //of outer spherical walls
+double solRad = 10;  //of inner spherical "solute"
+const Vector3d latx = Vector3d(lenx,0,0);
+const Vector3d laty = Vector3d(0,leny,0);
+const Vector3d latz = Vector3d(0,0,lenz);*/ 
 
-Vector3d move(Vector3d v, double rad){
+
+Vector3d move(Vector3d v){
   double scale = .5;
-  if (walls == 1){
-    return v+scale*ran3();
-  } else if (walls == 2){
-    Vector3d newv = v +scale*ran3();
-    if (newv[0] > rad){
-      newv[0] -= 2*rad;
-    }  else if (newv[0] < (-1)*rad){
-      newv[0] += 2*rad;}
-    if (newv[1] > rad){
-      newv[1] -= 2*rad;
-    }  else if (newv[1] < (-1)*rad){
-      newv[1] += 2*rad;}
-    return newv;
-  } else if (walls == 3){
-    Vector3d newv = v +scale*ran3();
-    if (newv[0] > rad){
-      newv[0] -= 2*rad;
-    }  else if (newv[0] < (-1)*rad){
-      newv[0] += 2*rad;}
-    if (newv[1] > rad){
-      newv[1] -= 2*rad;
-    }  else if (newv[1] < (-1)*rad){
-      newv[1] += 2*rad;}
-    if (newv[2] > rad){
-      newv[2] -= 2*rad;
-    }  else if (newv[2] < (-1)*rad){
-      newv[2] += 2*rad;}
-    return newv;
+  Vector3d newv = v+scale*ran3();  
+  if (periodic_x){
+    if (newv[0] > lenx/2){
+      newv[0] -= lenx;
+    } else if (newv[0] < -lenx/2){
+      newv[0] += lenx;
+    }
   }
-  printf("You need to pick a Boundary type!");
-  fflush(stdout);
-  exit (1);
-}
+  if (periodic_y){
+    if (newv[1] > leny/2){
+      newv[1] -= leny;
+    } else if (newv[1] < -leny/2){
+      newv[1] += leny;
+    }
+  }
+  if (periodic_z){
+    if (newv[2] > lenz/2){
+      newv[2] -= lenz;
+    } else if (newv[2] < -lenz/2){
+      newv[2] += lenz;
+    }
+  }
+  return newv;
+}  
+
  
 //To be deleted... cvh 
 Vector3d move(Vector3d v, double x, double y, double z){
