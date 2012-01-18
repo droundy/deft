@@ -1,7 +1,5 @@
 #!/bin/sh
 #SBATCH --mem-per-cpu=1000
-#SBATCH --mail-type ALL
-#SBATCH --mail-user jrbhughes@gmail.com
 #SBATCH --output rods-%j.out
 
 set -ev

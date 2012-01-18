@@ -21,7 +21,7 @@
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20
-set output 'figs/rods-energy-vs-distance.eps'
+set output 'figs/four-rods-energy-vs-distance.eps'
 
 set key inside bottom
 #set title 'Energy of 2 rods vs distance between them'
@@ -53,20 +53,17 @@ kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 #'figs/rods-in-water.dat' u 1:($2/(2*pi*1*nm)/mNpermeter/2) notitle with lines ls 1 
 #'figs/rods-in-water.dat' u 1:($2/(kJpermol/angstrom) - 59.06) notitle with lp ls 1
 
-set label "Before transition" at 0.05,0.03 rotate by 0 font 'Helvetica,20'
+#set label "Before transition" at 0.05,0.03 rotate by 0 font 'Helvetica,20'
 #set label "(FIG. 14 top)" at 0.05,0.017 rotate by 0 font 'Helvetica,20' 
-set arrow from 0.16,0.022 to 0.195,-0.075 lw 2
-set label "After transition" at 0.75,0.03 rotate by 0 font 'Helvetica,20' 
+#set arrow from 0.16,0.022 to 0.195,-0.075 lw 2
+#set label "After transition" at 0.75,0.03 rotate by 0 font 'Helvetica,20' 
 #set label "(FIG. 14 bottom)" at 0.215,0.017 rotate by 0 font 'Helvetica,20'
-set arrow from 0.74,0.03 to 0.61,0.0075 lw 2
+#set arrow from 0.74,0.03 to 0.61,0.0075 lw 2
 
 
-plot [:1.3] [:0.05] \
-'figs/rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.337) title 'r=0.3 nm' with lp ls 1 , \
-'figs/rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-0.700) title 'r=0.5 nm' with lp ls 2 , \
-'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.085) title 'r=0.7 nm' with lp ls 3 , \
-'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.385) title 'r=0.9 nm' with lp ls 4 , \
-'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.555) title 'r=1.0 nm' with lp ls 6
-#'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-1.939) title 'r=1.2 nm' with lp ls 6 
-#'figs/rods-in-water-02.0nm.dat' u 1:(52.18-$3*kB*298/.0001/kJpermol/nm) title '-TS, r=0.3 nm' with l ls 1, \
-#'figs/rods-in-water-02.0nm.dat' u 1:(-52.18+($2+$3*kB*298/.0001)/kJpermol/nm) title 'U, r=0.3 nm' with l ls 2
+plot [:] [:] \
+'figs/four-rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.7) title 'r=0.3 nm' with lp ls 1, \
+'figs/four-rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-1.43) title 'r=0.5 nm' with lp ls 2, \
+'figs/four-rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-2.12) title 'r=0.7 nm' with lp ls 3, \
+'figs/four-rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-2.735) title 'r=0.9 nm' with lp ls 4, \
+'figs/four-rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-3.1) title 'r=1.0 nm' with lp ls 6

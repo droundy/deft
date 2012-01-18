@@ -20,7 +20,7 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color "Helvetica" 20 size 4.2,4
+set terminal postscript eps enhanced color "Helvetica" 20 size 4.2,5.5
 set output 'figs/density-four-rods.eps'
 
 reset
@@ -28,7 +28,7 @@ unset arrow
 set view map
 
 #set key inside bottom
-#set title 'four hydrophobic rods - Density'
+#set title 'Four hydrophobic rods - Density'
 
 set multiplot 
 #set pm3d map
@@ -38,11 +38,29 @@ set multiplot
 #set palette rgbformulae 22,13,-31
 set palette defined ( 0 "white", 0.4 "green", 0.8 "cyan", 1.1 "blue", 1.2 "black" )
 
+set size 0.95,0.6          # The bottom plot
+set size square
+set origin 0,0
+set xlabel 'y (nm)'
+set ylabel 'z (nm)'
+set rmargin 4
+set lmargin 3
+set tmargin 0
+set bmargin 2
+set colorbox user origin 0.76,0.128 size 0.04,0.769
+set cblabel 'Density (g/mL)'
+set cbrange [0:1.2]
+set cbtics 0.1
+set title  'After transition'
+
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 nm=18.8972613 # 1 nm in atomic units
 
-set size 0.58,0.53          # The top plot
-set origin 0,0.48
+splot [:] [:] [:] \
+'figs/four-rods-01.0-01.2.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+
+set size 0.95,0.55          # The top plot
+set origin 0,0.5
 unset xlabel
 unset xtics
 set ylabel 'z (nm)'
@@ -55,20 +73,3 @@ set title  'Before transition'
 
 splot [:] [:] [:] \
 'figs/four-rods-01.0-01.0.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
-
-set size 0.58,0.58          # The bottom plot
-set origin 0,0
-set xlabel 'y (nm)'
-set ylabel 'z (nm)'
-set rmargin 4
-set lmargin 3
-set tmargin 0
-set bmargin 2
-set colorbox user origin 0.81,0.128 size 0.04,0.769
-set cblabel 'Density (g/mL)'
-set cbrange [0:1.2]
-set cbtics 0.1
-set title  'After transition' 
-
-splot [:] [:] [:] \
-'figs/four-rods-01.0-01.9.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d

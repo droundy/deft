@@ -917,6 +917,79 @@ from liquid to vapor between two hydrophobic rods.}
 
 \subsection{Hydrophobic interactions of four rods}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/four-rods-energy-vs-distance}
+\end{center}
+\caption{ Free energy (also known as the potential of mean force) 
+versus separation for four hydrophobic rods ranging in radius from
+0.3~nm to 1.0~nm.
+All were arbitrarily offset to zero at large separations. The
+transition corresponds to the phase change from
+vapor to liquid between the rods as pictured in the density profiles in 
+Figure~\ref{fig:density-four-rods}. }
+\label{fig:four-rods-energy-vs-distance}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/density-four-rods}
+\end{center}
+\caption{ Density profiles illustrating the transition from vapor 
+to liquid water between four rods. The radius is 0.5~nm, the top figure is 
+at a separation of 1.1~nm and the
+bottom is 1.2~nm. Figure~\ref{fig:four-rods-energy-vs-distance} shows
+the energy for these and other separations.}
+
+\label{fig:density-four-rods}
+\end{figure}
+
+We extend the study to four rods in water using the same radii as the two rods and
+separation distance $d = 0$~nm to $d = 2$~nm for nearest neighbor rods. These exhibit
+a similar behavior to the two rods where for small $d$ only vapor is present in the 
+middle of the rods until a critical separation between where water occupies the middle.
+Before the transition, the four rods and vapor form a square with rounded courners 
+where each rod forms a corner (shown in Fig. \ref{fig:density-four-rods} as 'before').
+For large $d$, the rods behave like separate single rods.  Free energy
+is plotted against rod separation in Fig. \ref{fig:four-rods-energy-vs-distance}.
+From the slope we calculate the force per length to be [number].
+
+The rounded square's circumference is estimated by
+\begin{equation}
+C_{rs} = 2 \pi r + 8r + 4d.
+\end{equation}
+We again equate this circumference with the total circumference of the four rods, which
+results in a critical separation
+\begin{equation}
+d_{c4} = \frac{3 \pi - 4}{2} r \label{criticalfourrods}
+\end{equation}
+
+\begin{table}
+\begin{tabular} {|c|c|c|c|}
+\hline
+$r$ (nm) & $d_{rs}$ prediction (nm) & $d_{c4}$ result (nm) & \% error \\
+\hline
+0.3 & 0.81 & 0.40 & 51\% \\
+\hline
+0.5 & 1.36 & 1.15 & 15\% \\
+\hline
+0.7 & 1.90 & 1.70 & 11\% \\
+\hline
+0.9 & 2.44 & 2.30 & 06\% \\
+\hline
+1.0 & 2.70 & 0.00 & 00\% \\
+\hline
+\end{tabular}
+\caption{Calculations of the critical separation (see Equation~\ref{criticalfourrods})
+for the transition
+from liquid to vapor between four hydrophobic rods.}
+\label{criticalfourrodstable}
+\end{table}
+
+The predicted and computed valued for $d_{c4}$ are show in Table \ref{criticalfourrodstable}. 
+[talk about table here]
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % \subsection{Test-particle approach}
