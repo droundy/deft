@@ -506,7 +506,7 @@ instance Type a => Floating (Expression a) where
     0 -> 1
     _ -> Cos x
   (a ::* b) ** y | a == b = a ** (2*y)
-  (x ::** b) ** c = x ::** (b*c)
+  (x ::** b) ** c = x ** (b*c)
   x ** y | isConstant x == Just 0 = 0
          | isConstant x == Just 1 = 1
          | isConstant y == Just 0 = 1
