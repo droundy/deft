@@ -41,5 +41,6 @@ nm = 18.8972613 # in atomic units
 
 plot [0:1.05] [0:] \
 'figs/sphere.dat' u ($1/2):($2/(pi*($1+0.00001)*($1+0.00001)*nm*nm)/mNpermeter) title 'CDFT' with lp ls 1, \
-'figs/sphere-energy-vs-diameter-spce.dat' u ($1/10):2 title 'SPC/E molecular dynamics' with p ls 2
-
+'figs/sphere-energy-vs-diameter-spce.dat' u ($1/10):2 title 'SPC/E molecular dynamics' with p ls 2, \
+'figs/sphere-energy-vs-diameter-spce.dat' u ($1/9):(71.73) notitle with l ls 1, \
+'figs/sphere-energy-vs-diameter-spce.dat' u ($1/9):(63.4) notitle with l ls 2

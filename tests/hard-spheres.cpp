@@ -25,8 +25,7 @@ const double mu = -1e-3*log(ngas);
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,10));
-double resolution = 0.5;
-GridDescription gd(lat, resolution);
+GridDescription gd(lat, 21, 21, 21);
 
 // And the functional...
 Functional f = HardSphereGas(R, 0);

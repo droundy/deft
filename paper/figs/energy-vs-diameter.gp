@@ -20,22 +20,35 @@
 # 15 (6)              full  pentagon
 # 16-31               watches
 
-set terminal postscript eps enhanced color solid "Helvetica" 20
+set terminal postscript eps enhanced dl 3 color "Helvetica" 20
 set output 'figs/energy-vs-diameter.eps'
 
 set key noauto outside top
 
-# set multiplot
+set multiplot
 
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'Radius (nm)'
 set ylabel 'Energy/Area (mN/m)'
 
-set style line 1 lt 3 lw 3 pt 7 ps 2
+set style line 1 lt 1 lc 3 lw 3 pt 7 ps 2
+set style line 2 lt 2 lw 3 lc 1 
 
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units
+kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
+nl=0.004938863
 
-plot [0:1.5] [0:] \
+plot [0:1] [0:] \
 'figs/single-rod-in-water.dat' u ($1/2):($2/(pi*$1*nm)/mNpermeter) notitle with lp ls 1
+
+set size 0.49,0.37        # The second one (inset)
+set origin 0.3,0.25
+set xlabel
+set ylabel
+set ytics 2.0
+set xtics 0.025
+plot [0:0.08] [0:] \
+'figs/single-rod-in-water.dat' u ($1/2):($2/(pi*$1*nm)/mNpermeter) notitle with points ls 1,\
+'figs/single-rod-in-water.dat' u ($1/2):(kB*298*10*nl*$1/2/mNpermeter) notitle with lines ls 2

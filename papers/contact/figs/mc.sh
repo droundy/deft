@@ -15,6 +15,8 @@ MYTMP=`mktemp -d --tmpdir $MYNAME.XXXXXX`
 echo time nice -19 ./monte-carlo $R $N $NITER `printf $MYTMP/mc-%02d-%03d.dat $R $N`
 time nice -19 ./monte-carlo $R $N $NITER `printf $MYTMP/mc-%02d-%03d.dat $R $N`
 
+ls -lh `printf $MYTMP/mc-%02d-%03d.dat $R $N`
+
 echo time nice -19 ./analyze-monte-carlo $PREC `printf $MYTMP/mc-%02d-%03d.dat $R $N` `printf papers/contact/figs/mc-%02d-%03d.dat $R $N`
 time nice -19 ./analyze-monte-carlo $PREC `printf $MYTMP/mc-%02d-%03d.dat $R $N` `printf papers/contact/figs/mc-%02d-%03d.dat $R $N`
 

@@ -30,6 +30,8 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresWBFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
+
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
 bin_PROGRAMS = deft monte-carlo analyze-monte-carlo
@@ -41,7 +43,6 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
 	paper/figs/finding-vapor-pressure.mkdat \
-	paper/figs/constrained-water-1D.mkdat \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/four-rods-in-water.mkdat \
@@ -69,6 +70,9 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
+
+$(HASKELL_CODE): src/haskell/functionals
+	src/haskell/functionals $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
@@ -136,7 +140,6 @@ tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
-paper_figs_constrained_water_1D_mkdat_SOURCES = paper/figs/constrained-water-1D.cpp $(ALL_CODE)
 paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
@@ -192,7 +195,6 @@ paper: all paper/figs/equation-of-state.dat \
 	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/enthalpy.dat \
-	paper/figs/constrained-water-1D.dat \
 	paper/figs/constrained-water-2D.dat \
 	paper/figs/pressure-with-isotherms.dat \
 	paper/figs/single-rod-in-water-low-res.dat
@@ -209,10 +211,11 @@ project: paper
 poster: paper
 	cd paper && $(MAKE) poster.pdf
 
-haskell: src/haskell/test
+haskell: src/haskell/functionals
 
-src/haskell/test: $(wildcard src/haskell/*.lhs)
+src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildcard src/haskell/*.hs)
 	cd src/haskell && $(MAKE)
+
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\
