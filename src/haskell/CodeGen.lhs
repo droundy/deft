@@ -146,9 +146,9 @@ mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
 mapExpression f (Signum e) = signum (mapExpression f e)
-mapExpression f (Product p) = trace "mapExpression Product" product $ map ff $ product2list p
+mapExpression f (Product p) = product $ map ff $ product2list p
   where ff (e,n) = (mapExpression f e) ** toExpression n
-mapExpression f (Sum s) = trace "mapExpression Sum" pairs2sum $ map ff $ sum2list_pair s
+mapExpression f (Sum s) = pairs2sum $ map ff $ sum2list_pair s
   where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
 
@@ -163,37 +163,40 @@ setZero v (Signum e) = signum (setZero v e)
 setZero v (Product p) | product2denominator p == [] = product $ map ff $ product2list p
   where ff (e,n) = (setZero v e) ** toExpression n
 setZero v (Product p) = 
-  if trace ("setZero Product " ++ latex (Product p)) zd /= 0
+  if trace ("setZero Product " ++ latex (Product p)) 
+     zd /= 0
   then zn / zd
   else if trace "L'Hopital's rule" zn /= 0
-       then error "L'Hopital's rule failure"
-       else               case isKSpace (Expression v) of
-                            Same -> 
-                              case isKSpace n of
-                                Same -> trace ("dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
-                                        setZero v (dtop / dbot)
-                                  where dtop = derive v 1 n
-                                        dbot = derive v 1 d
-                                _ -> error "oopsies"
-                            _ -> 
-                              case isScalar (Expression v) of
-                                Same -> 
-                                  case isScalar n of
-                                    Same -> setZero v (derive v 1 n / derive v 1 d)
-                                    _ -> error "oopsies"
-                                _ -> 
-                                  case isRealSpace (Expression v) of
-                                    Same -> 
-                                      case isRealSpace n  of
-                                        Same -> setZero v (derive v 1 n / derive v 1 d)
-                                        _ -> error "oopsies"
-                                    _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
+       then error ("L'Hopital's rule failure: " ++ latex n ++ " / " ++ latex d)
+       else case isKSpace (Expression v) of
+              Same -> 
+                case isKSpace n of
+                  Same -> trace ("dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
+                          setZero v (dtop / dbot)
+                    where dtop = derive v 1 n
+                          dbot = derive v 1 d
+                  _ -> error "oopsies"
+              _ -> 
+                case isScalar (Expression v) of
+                  Same -> 
+                    case isScalar n of
+                      Same -> setZero v (derive v 1 n / derive v 1 d)
+                      _ -> error "oopsies"
+                  _ -> 
+                    case isRealSpace (Expression v) of
+                      Same -> 
+                        case isRealSpace n  of
+                          Same -> setZero v (derive v 1 n / derive v 1 d)
+                          _ -> error "oopsies"
+                      _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
   where d = product $ product2denominator p
         n = product $ product2numerator p
         zn = setZero v n
         zd = setZero v d
-setZero v (Sum s) = pairs2sum $ map sz $ sum2list_pair s
+setZero _ (Sum s) | Sum s == 0 = 0
+setZero v (Sum s) = trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2list_pair s))out
   where sz (f,x) = (f, setZero v x)
+        out = pairs2sum $ map sz $ sum2list_pair s
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
@@ -290,11 +293,17 @@ sum2list_pair s = map rev $ Map.assocs s
 
 pairs2sum :: Type a => [(Double, Expression a)] -> Expression a
 pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
-  where rev (a,b) = (b,a)
-        helper [] = 0
+  where helper [] = 0
         helper [(1,e)] = e
         helper [(x,Sum y)] | [(x2,y')] <- sum2list_pair y = helper [(x*x2, y')]
-        helper es = Sum $ Map.fromList $ map rev es
+        helper es = Sum $ fl (Map.empty) es
+        fl a [] = a
+        fl a ((f,x):xs) = case Map.lookup x a of
+                          Just f' -> if f + f' == 0
+                                     then fl (Map.delete x a) xs
+                                     else fl (Map.insert x (f+f') a) xs
+                          Nothing -> fl (Map.insert x f a) xs
+        
 
 product2list :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
 product2list s = Map.assocs s
@@ -305,8 +314,13 @@ prod p | Map.size p == 1 = case product2list p of [(e,1)] -> e
 prod p = Product p
 
 list2product :: Type a => [(Expression a, Double)] -> Expression a
-list2product [(e,1)] = e
-list2product xs = prod $ Map.fromList xs
+list2product = prod . fl (Map.empty)
+  where fl a [] = a
+        fl a ((x,n):xs) = case Map.lookup x a of
+                            Just n' -> if n + n' == 0
+                                       then fl (Map.delete x a) xs
+                                       else fl (Map.insert x (n+n') a) xs
+                            Nothing -> fl (Map.insert x n a) xs
 
 product2numerator :: Type a => Map.Map (Expression a) Double -> [Expression a]
 product2numerator s = map f $ product2numerator_pair s
@@ -332,6 +346,7 @@ codeE _ (Exp x) = showString "exp(" . codeE 0 x . showString ")"
 codeE _ (Log x) = showString "log(" . codeE 0 x . showString ")"
 codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
 codeE _ (Signum _) = undefined
+codeE _ (Product p) | Product p == 1 = showString "1"
 codeE pree (Product p) = showParen (pree > 7) $
                          case den of
                          [] -> codesimple num
@@ -355,6 +370,7 @@ codeE pree (Product p) = showParen (pree > 7) $
           where n2 = floor (2*nn)
                 n = floor nn
         codee x n = showString "pow(" . codeE 0 x . showString (", " ++ show n ++ ")")
+codeE _ (Sum s) | Sum s == 0 = showString "0"
 codeE p (Sum s) = showParen (p > 6) (showString me)
   where me = foldl addup "" $ sum2list_pair s
         addup "" (1,e) = codeE 6 e ""
@@ -396,16 +412,19 @@ latexE pree (Product p) = showParen (pree > 7) $
                           a -> showString "\\frac{" . ltexsimple num . showString "}{" . 
                                  latexE 7 (product a) . showString "}"
   where ltexsimple [] = showString "1"
-        ltexsimple [a,b] = latexE 7 a . showString "*" . latexE 7 b
-        ltexsimple (a:es) = latexE 7 a . showString "*" . ltexsimple es
+        ltexsimple [a] = latexE 7 a
+        ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
+        ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
         num = product2numerator p
         den = product2denominator p
+latexE _ (Sum s) | Sum s == 0 = showString "0"
 latexE p (Sum s) = showParen (p > 6) (showString me)
   where me = foldl addup "" $ sum2list_pair s
         addup "" (1,e) = latexE 6 e ""
         addup "" (f,e) = if e == 1
                          then show f
                          else show f ++ " " ++ latexE 6 e ""
+        addup rest (1,e) = latexE 6 e (showString " + " $ rest)
         addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
 
 
@@ -467,7 +486,23 @@ codeStatement (a :>> b) = codeStatement a ++ codeStatement b
 
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
-makeHomogeneous = mapExpression toScalar
+makeHomogeneous ee = 
+  scalarScalar $ case isKSpace ee of
+                    Same -> mapExpression toScalar $ setZero Kx $ setZero Ky $ setZero Kz ee
+                    _ -> mapExpression toScalar ee
+  where scalarScalar :: Expression Scalar -> Expression Scalar
+        scalarScalar (Scalar s) = s
+        scalarScalar (Sum x) = pairs2sum $ map f $ sum2list_pair x
+          where f (a,b) = (a, scalarScalar b)
+        scalarScalar (Product x) = list2product $ map f $ product2list x
+          where f (a,b) = (scalarScalar a, b)
+        scalarScalar (Expression e) = Expression e -- FIXME
+        scalarScalar (Cos x) = cos (scalarScalar x)
+        scalarScalar (Sin x) = sin (scalarScalar x)
+        scalarScalar (Exp x) = exp (scalarScalar x)
+        scalarScalar (Log x) = log (scalarScalar x)
+        scalarScalar (Abs x) = abs (scalarScalar x)
+        scalarScalar (Signum x) = signum (scalarScalar x)
 
 instance Type a => Num (Expression a) where
   x + y | Just 0 == isConstant x = y
