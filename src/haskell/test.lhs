@@ -21,13 +21,6 @@ showTests = TestList [show_test "x[i]" x,
   where show_test str e = TestCase $ assertEqual str str (show e)
         x = r_var "x"
 
-codeTests :: Test
-codeTests = TestList [show_test "x[i]" x,
-                      show_test "x[i]*x[i]" (x**2),
-                      show_test "x[i]*x[i]*(x[i]*x[i])" (x**4)]
-  where show_test str e = TestCase $ assertEqual str str (code e)
-        x = r_var "x"
-
 showStatements :: Test
 showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n}\n" 
                                ("x" := (5 :: Expression RealSpace)),
@@ -43,6 +36,78 @@ showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n
   where ss str st = TestCase $ assertEqual str str (show st)
         y = r_var "y"
 -}
+
+codeTests :: Test
+codeTests = TestList [t "x[i]" x,
+                      t "sqrt(x[i])" (sqrt x),
+                      t "x[i]*x[i]" (x**2),
+                      t "1/(x[i]*x[i])" (1/x**2),
+                      t "y*y/(x[i]*x[i])" (y**2/x**2),
+                      t "(x[i]*x[i])*(x[i]*x[i])" (x**4)]
+  where t str e = TestCase $ assertEqual str str (code e)
+        x = r_var "x"
+        y = s_var "y" :: Expression RealSpace
+
+eqTests :: Test
+eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
+                    t "isConstant 0 == Just 0" (Just 0) (isConstant (0 :: Expression RealSpace)),
+                    t "isConstant 1 == Just 1" (Just 1) (isConstant (1 :: Expression RealSpace)),
+                    t "isConstant 2 == Just 2" (Just 2) (isConstant (2 :: Expression RealSpace)),
+                    t "(x*y)*4*(a*b) == 4*x*y*a*b" (4*x*y*a*b) ((x*y)*4*(a*b)),
+                    t "(x*y)*(a*b) == x*y*a*b" (x*y*a*b) ((x*y)*(a*b)),
+                    t "(x+y)+(a+b) == x+y+a+b" (x+y+a+b) ((x+y)+(a+b)),
+                    t "(x*y*4)*(a*b) == 4*x*y*a*b" (4*x*y*a*b) ((x*y*4)*(a*b)),
+                    t "(x*y*4)*(a*b*4) == 16*x*y*a*b" (16*x*y*a*b) ((x*y*4)*(a*b*4)),
+                    t "4*(x*y) == 4*x*y" (4*x*y) (4*(x*y)),
+                    t "2*(x + x) == 4*x" (4*x) (2*(x+x)),
+                    t "2*(x + y) == 2*x + 2*y" (2*x + 2*y) (2*(x+y)),
+                    t "2*(x/2 + y) == x + 2*y" (x + 2*y) (2*(x/2+y)),
+                    t "derive x (x+y) == 1" 1 (derive (R "x") 1 (x+y)),
+                    t "derive x (x+y) == 1" 1 (derive (R "x") 1 (x+y)),
+                    t "derive x (x**2) == 2x" (2*x) (derive (R "x") 1 (x**2)),
+                    t "derive x (k cos kx)" 
+                       (latex $ kk * cos(kk*x))
+                       (latex $ derive (R "x") 1 (sin (kk*x))),
+                    t "derive x dV (sin kx)" 
+                       (latex $ s_var "dV" * kk * cos(kk*x))
+                       (latex $ derive (R "x") (s_var "dV") (sin (kk*x))),
+                    t "derive x (sin x cos x) == 4x**3" 
+                       (latex $ (cos x)**2 - (sin x)**2) 
+                       (latex $ derive (R "x") 1 (sin x * cos x)),
+                    t "derive x sin kx"
+                       (latex $ (kk*cos (kk*x)))
+                       (latex $ derive (R "x") 1 (sin (kk*x))),
+                    t "derive x (A*sin kx)"
+                       (latex $ (s_var "A"*kk*cos (kk*x)))
+                       (latex $ derive (R "x") 1 (s_var "A"*sin (kk*x))),
+                    t "derive x (sin kx cos kx)"
+                       (latex $ kk*(cos (kk*x))**2 - kk*(sin (kk*x))**2) 
+                       (latex $ derive (R "x") 1 (sin (kk*x) * cos (kk*x))),
+                    t "derive x (kx cos kx)" 
+                       (latex $ kk*cos(kk*x) - kk**2*x*sin(kk*x)) 
+                       (latex $ derive (R "x") 1 (kk*x*cos(kk*x))),
+                    t "derive x (sin kx) == k cos kx" 
+                       (latex $ kk*cos(kk*x)) 
+                       (latex $ derive (R "x") 1 (sin(kk*x))),
+                    t "derive x (sin kx - kx cos kx)"
+                       (latex $ kk**2*x*sin(kk*x)) 
+                       (latex $ derive (R "x") 1 (sin (kk*x) - kk*x*cos(kk*x))),
+                    t "derive x (sin kx) - derive x (kx cos kx)" 
+                       (latex $ kk**2*x*sin(kk*x)) 
+                       (latex $ derive (R "x") 1 (sin (kk*x)) - derive (R "x") 1 (kk*x*cos(kk*x))),
+                    t "derive x (log x + x**2)"
+                       (latex $ 1/x + 2*x -3*x**2 - 1/x**2)
+                       (latex $ derive (R "x") 1 (log x + x**2 - x**3 + 1/x)),
+                    t "makeHomogeneous (x+y) == x + y" (s_var "x"+s_var "y") (makeHomogeneous (x+y)),
+                    t "makeHomogeneous (x**2) == x**2" (s_var "x"**2) (makeHomogeneous (x**2)),
+                    t "x+0 == x" (x+0) x]
+  where t str e1 e2 = TestCase $ assertEqual str e1 e2
+        x = r_var "x"
+        y = r_var "y"
+        a = r_var "a"
+        b = r_var "b"
+        kk = s_var "k" :: Expression RealSpace
+
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
           writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") Nothing "NiceSum"
@@ -57,8 +122,9 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               kdr = k * s_var "dr"
               kR = k * s_var "R"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+              -- nbar = ifft ( (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
-          c <- runTestTT $ TestList []
+          c <- runTestTT $ TestList [eqTests, codeTests]
           if failures c > 0
             then fail $ "Failed " ++ show (failures c) ++ " tests."
             else putStrLn "All tests passed!"

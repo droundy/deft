@@ -6,10 +6,14 @@ module CodeGen ( RealSpace(..), r_var,
                  fft, ifft, integrate, grad, derive,
                  Expression,                 
                  Statement( (:=), (:?=) ),
-                 Type,
+                 Type, 
+                 makeHomogeneous, isConstant, -- for debugging only!!!
                  generateHeader, code, latex, simp, setZero, codeStatement )
        where
 
+import Debug.Trace
+
+import qualified Data.Map as Map
 import Hash ( hash )
 \end{code}
 
@@ -24,8 +28,7 @@ data KSpace = K String |
               Kx | Ky | Kz |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
-data Scalar = Constant Double | 
-              S String |
+data Scalar = S String |
               Integrate (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 
@@ -143,10 +146,10 @@ mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
 mapExpression f (Signum e) = signum (mapExpression f e)
-mapExpression f (a ::** n) = (mapExpression f a) ** mapExpression f n
-mapExpression f (a ::+ b) = mapExpression f a + mapExpression f b
-mapExpression f (a ::* b) = mapExpression f a * mapExpression f b
-mapExpression f (a ::/ b) = mapExpression f a / mapExpression f b
+mapExpression f (Product p) = trace "mapExpression Product" product $ map ff $ product2list p
+  where ff (e,n) = (mapExpression f e) ** toExpression n
+mapExpression f (Sum s) = trace "mapExpression Sum" pairs2sum $ map ff $ sum2list_pair s
+  where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
 
 setZero :: (Type a, Type b) => b -> Expression a -> Expression a
@@ -157,50 +160,49 @@ setZero v (Exp e) = exp (setZero v e)
 setZero v (Log e) = log (setZero v e)
 setZero v (Abs e) = abs (setZero v e)
 setZero v (Signum e) = signum (setZero v e)
-setZero v (a ::** n) = (setZero v a) ** setZero v n
-setZero v (a ::+ b) = setZero v a + setZero v b
-setZero v (a ::* b) = setZero v a * setZero v b
-setZero v (a ::/ b) =
-    if zb == 0
-    then case isKSpace (Expression v) of
-           Same -> case isKSpace a  of
-                     Same -> setZero v (derive v 1 a / derive v 1 b)
-                     _ -> error "oopsies"
-           _ -> case isScalar (Expression v) of
-                  Same -> case isScalar a  of
-                            Same -> setZero v (derive v 1 a / derive v 1 b)
-                            _ -> error "oopsies"
-                  _ -> case isRealSpace (Expression v) of
-                         Same -> case isRealSpace a  of
-                                   Same -> setZero v (derive v 1 a / derive v 1 b)
-                                   _ -> error "oopsies"
-                         _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
-                      else za / zb
-    where za = setZero v a
-          zb = setZero v b
+setZero v (Product p) | product2denominator p == [] = product $ map ff $ product2list p
+  where ff (e,n) = (setZero v e) ** toExpression n
+setZero v (Product p) = 
+  if trace ("setZero Product " ++ latex (Product p)) zd /= 0
+  then zn / zd
+  else if trace "L'Hopital's rule" zn /= 0
+       then error "L'Hopital's rule failure"
+       else               case isKSpace (Expression v) of
+                            Same -> 
+                              case isKSpace n of
+                                Same -> trace ("dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
+                                        setZero v (dtop / dbot)
+                                  where dtop = derive v 1 n
+                                        dbot = derive v 1 d
+                                _ -> error "oopsies"
+                            _ -> 
+                              case isScalar (Expression v) of
+                                Same -> 
+                                  case isScalar n of
+                                    Same -> setZero v (derive v 1 n / derive v 1 d)
+                                    _ -> error "oopsies"
+                                _ -> 
+                                  case isRealSpace (Expression v) of
+                                    Same -> 
+                                      case isRealSpace n  of
+                                        Same -> setZero v (derive v 1 n / derive v 1 d)
+                                        _ -> error "oopsies"
+                                    _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
+  where d = product $ product2denominator p
+        n = product $ product2numerator p
+        zn = setZero v n
+        zd = setZero v d
+setZero v (Sum s) = pairs2sum $ map sz $ sum2list_pair s
+  where sz (f,x) = (f, setZero v x)
 setZero v (Expression x) = zeroHelper v x
-
-kzeroValue :: Type a => KSpace -> Expression a
-kzeroValue (K v) = s_var (v ++ "[0]")
-kzeroValue Kx = 0
-kzeroValue Ky = 0
-kzeroValue Kz = 0
-kzeroValue Delta = error "Can't find zero value of delta function!"
-kzeroValue (FFT _) = error "Hard to find zero value of an fft"
 
 instance Code Scalar where
   codePrec _ (S v) = showString v
-  codePrec p (Constant d) = showsPrec p d
   codePrec _ (Integrate r) = showString "(" . codePrec 0 r . showString ") * gd.dvolume"
   latexPrec _ (S v) = showString v
-  latexPrec p (Constant d) = showsPrec p d
   latexPrec _ (Integrate r) = showString "integrate(" . latexPrec 0 r . showString ")"
 instance Type Scalar where
-  toExpression = Expression . Constant . fromRational . toRational
   s_var = Expression . S
-  isConstant (Expression (Constant x)) = Just x
-  isConstant (Scalar x) = isConstant x
-  isConstant _ = Nothing
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   derivativeHelper v dds s | Same <- isScalar (Expression v), v == s = dds
@@ -247,7 +249,6 @@ ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
 
 integrate :: Expression RealSpace -> Expression Scalar
---integrate (x ::+ y) = Expression (Integrate x) + Expression (Integrate y)
 integrate x = Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
@@ -255,9 +256,7 @@ fft (Scalar e) = Scalar e * Expression Delta
 fft r = Expression (FFT r)
 
 ifft :: Expression KSpace -> Expression RealSpace
-ifft ke = case factor (Expression Delta) ke of
-            Just k' -> mapExpression kzeroValue k'
-            Nothing -> Expression (IFFT ke)
+ifft ke = Expression (IFFT ke)
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -277,16 +276,48 @@ data Expression a = Scalar (Expression Scalar) |
                     Log (Expression a) |
                     Abs (Expression a) |
                     Signum (Expression a) |
-                    Expression a ::** Expression a |
-                    Expression a ::+ Expression a |
-                    Expression a ::* Expression a |
-                    Expression a ::/ Expression a
+                    Product (Map.Map (Expression a) Double) |
+                    Sum (Map.Map (Expression a) Double)
               deriving (Eq, Ord, Show)
 
+sum2list :: Type a => Map.Map (Expression a) Double -> [Expression a]
+sum2list s = map toe $ sum2list_pair s
+  where toe (f,x) = Sum $ Map.singleton x f
 
-infixr 8 ::**
-infixl 7 ::*, ::/
-infixl 6 ::+
+sum2list_pair :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
+sum2list_pair s = map rev $ Map.assocs s
+  where rev (a,b) = (b,a)
+
+pairs2sum :: Type a => [(Double, Expression a)] -> Expression a
+pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
+  where rev (a,b) = (b,a)
+        helper [] = 0
+        helper [(1,e)] = e
+        helper [(x,Sum y)] | [(x2,y')] <- sum2list_pair y = helper [(x*x2, y')]
+        helper es = Sum $ Map.fromList $ map rev es
+
+product2list :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2list s = Map.assocs s
+
+prod :: Type a => Map.Map (Expression a) Double -> Expression a
+prod p | Map.size p == 1 = case product2list p of [(e,1)] -> e
+                                                  _ -> Product p
+prod p = Product p
+
+list2product :: Type a => [(Expression a, Double)] -> Expression a
+list2product [(e,1)] = e
+list2product xs = prod $ Map.fromList xs
+
+product2numerator :: Type a => Map.Map (Expression a) Double -> [Expression a]
+product2numerator s = map f $ product2numerator_pair s
+  where f (a,b) = a ** (toExpression b)
+
+product2numerator_pair :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2numerator_pair s = filter ((>=0) . snd) $ product2list s
+
+product2denominator :: Type a => Map.Map (Expression a) Double -> [Expression a]
+product2denominator s = map n $ filter ((<0) . snd) $ product2list s
+  where n (a,b) = a **(toExpression $ -b)
 
 instance (Type a, Code a) => Code (Expression a) where
   codePrec = codeE
@@ -301,25 +332,37 @@ codeE _ (Exp x) = showString "exp(" . codeE 0 x . showString ")"
 codeE _ (Log x) = showString "log(" . codeE 0 x . showString ")"
 codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
 codeE _ (Signum _) = undefined
-codeE p (x ::** y) =
-  case isConstant y of
-    Just 0 -> showString "1" -- this shouldn't happen...
-    Just 1 -> codeE p x
-    Just 0.5 -> showString "sqrt(" . codePrec 0 x . showString ")"
-    Just n
-      | n > 0 && n == fromInteger (floor n) && 
-        fromInteger (floor (n/2)) /= fromInteger(floor n)/(2 :: Double) ->
-          codeE p (x ::* x ::** toExpression (n-1))
-      | n > 0 && n == fromInteger (floor n) ->
-          codeE p (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
-      | n > 0 && n - fromInteger (floor n) == 0.5 ->
-          codeE p (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
-      | n < 0 -> codeE p (1 ::/ x ::** toExpression (-n))
-    _ -> showString "pow(" . codeE 0 x . showString ", " . codeE 0 y . showString ")"
-codeE p (x ::+ y) = showParen (p > 6) (codeE 6 x . showString " + " . codeE 7 y)
-codeE p (x ::* y) = showParen (p > 7) (codeE 7 x . showString " * " . codeE 8 y)
-codeE p (x ::/ y) = showParen (p > 7) (codeE 7 x . showString " / " . codeE 8 y)
-
+codeE pree (Product p) = showParen (pree > 7) $
+                         case den of
+                         [] -> codesimple num
+                         [a] -> codesimple num . showString "/" . codeE 8 a
+                         _ -> codesimple num . showString " / ( " . codeE 0 (product den) . showString " )"
+  where codesimple [] = showString "1"
+        codesimple [(a,n)] = codee a n
+        codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
+        codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
+        num = product2numerator_pair p
+        den = product2denominator p
+        codee _ 0 = showString "1" -- this shouldn't happen...
+        codee _ n | n < 0 = error "shouldn't have negative power here"
+        codee x 1 = codeE 7 x
+        codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
+        codee x nn
+          | fromInteger n2 == 2*nn && odd n2 = codee x 0.5 . showString "*" . codee x (nn-0.5)
+          | fromInteger n == nn && odd n = codee x 1 . showString "*" . codee x (nn-1)
+          | fromInteger n == nn = 
+            showParen (nn/2>1) (codee x (nn / 2)) . showString "*" . showParen (nn/2>1) (codee x (nn / 2))
+          where n2 = floor (2*nn)
+                n = floor nn
+        codee x n = showString "pow(" . codeE 0 x . showString (", " ++ show n ++ ")")
+codeE p (Sum s) = showParen (p > 6) (showString me)
+  where me = foldl addup "" $ sum2list_pair s
+        addup "" (1,e) = codeE 6 e ""
+        addup "" (f,e) = if e == 1
+                         then show f
+                         else show f ++ "*" ++ codeE 6 e ""
+        addup rest (1,e) = codeE 6 e (showString " + " $ rest)
+        addup rest (f,e) = show f ++ "*" ++ codeE 6 e (showString " + " $ rest)
 
 latexE :: (Type a, Code a) => Int -> Expression a -> ShowS
 latexE p (Scalar x) = latexPrec p x
@@ -330,10 +373,40 @@ latexE _ (Exp x) = showString "exp(" . latexE 0 x . showString ")"
 latexE _ (Log x) = showString "log(" . latexE 0 x . showString ")"
 latexE _ (Abs x) = showString "fabs(" . latexE 0 x . showString ")"
 latexE _ (Signum _) = undefined
-latexE _ (x ::** y) = latexE 8 x . showString "^{" . latexE 0 y . showString "}"
-latexE p (x ::+ y) = showParen (p > 6) (latexE 6 x . showString " + " . latexE 7 y)
-latexE p (x ::* y) = showParen (p > 7) (latexE 7 x . showString " * " . latexE 8 y)
-latexE p (x ::/ y) = showParen (p > 7) (latexE 7 x . showString " / " . latexE 8 y)
+latexE p (Product x) | Map.size x == 1 && length (product2denominator x) == 0 =
+  case product2list x of
+    [(_,0)] -> showString "1" -- this shouldn't happen...
+    [(_, n)] | n < 0 -> error "shouldn't have negative power here"
+    [(e, 1)] -> latexE p e
+    [(e, 0.5)] -> showString "sqrt(" . latexE 0 e . showString ")"
+    [(e, nn)]
+      | fromInteger n2 == 2*nn && odd n2 -> if n2 < 10
+                                            then latexE 8 e . showString ("^\\frac" ++ show n2 ++ "2")
+                                            else latexE 8 e . showString ("^\\frac{" ++ show n2 ++ "}2")
+      | fromInteger n == nn -> if n2 < 10
+                               then latexE 8 e . showString ("^" ++ show n)
+                               else latexE 8 e . showString ("^{" ++ show n ++ "}")
+          where n2 = floor (2*nn)
+                n = floor nn
+    [(e,n)] -> latexE 8 e . showString ("^{" ++ show n ++ "}")
+    _ -> error "This really cannot happen."
+latexE pree (Product p) = showParen (pree > 7) $
+                          case den of
+                          [] -> ltexsimple num
+                          a -> showString "\\frac{" . ltexsimple num . showString "}{" . 
+                                 latexE 7 (product a) . showString "}"
+  where ltexsimple [] = showString "1"
+        ltexsimple [a,b] = latexE 7 a . showString "*" . latexE 7 b
+        ltexsimple (a:es) = latexE 7 a . showString "*" . ltexsimple es
+        num = product2numerator p
+        den = product2denominator p
+latexE p (Sum s) = showParen (p > 6) (showString me)
+  where me = foldl addup "" $ sum2list_pair s
+        addup "" (1,e) = latexE 6 e ""
+        addup "" (f,e) = if e == 1
+                         then show f
+                         else show f ++ " " ++ latexE 6 e ""
+        addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
 
 
 class Code a  where
@@ -350,9 +423,20 @@ data Same a b where
     Same :: Same a a
     Different :: Same a b
 
-class (Eq a, Show a, Code a) => Type a where 
-  toExpression :: Real x => x -> Expression a
-  toExpression = Scalar . Expression . Constant . fromRational . toRational
+toExpression :: (Type a, Real x) => x -> Expression a
+toExpression 0 = Sum $ Map.empty
+toExpression 1 = Product $ Map.empty
+toExpression x = Sum $ Map.singleton 1 (fromRational $ toRational x)
+
+isConstant :: Type a => Expression a -> Maybe Double
+isConstant (Sum s) = case sum2list_pair s of
+                       [] -> Just 0
+                       [(x,1)] -> Just x
+                       _ -> Nothing
+isConstant (Product p) = if Map.size p == 0 then Just 1 else Nothing
+isConstant _ = Nothing
+
+class (Ord a, Show a, Code a) => Type a where 
   isScalar :: Expression a -> Same a Scalar
   isScalar _ = Different
   isRealSpace :: Expression a -> Same a RealSpace
@@ -361,9 +445,6 @@ class (Eq a, Show a, Code a) => Type a where
   isKSpace _ = Different
   s_var :: String -> Expression a
   s_var = Scalar . s_var
-  isConstant :: Expression a -> Maybe Double
-  isConstant (Scalar x) = isConstant x
-  isConstant _ = Nothing
   derivativeHelper :: Type b => b -> Expression a -> a -> Expression b
   zeroHelper :: Type b => b -> a -> Expression a
   simpHelper :: a -> (Statement (), Expression a)
@@ -389,109 +470,69 @@ makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous = mapExpression toScalar
 
 instance Type a => Num (Expression a) where
-  (+) = \x y -> case (x, y) of
-                  _ | y == 0 -> x
-                    | x == 0 -> y
-                  (Scalar s1 ::* a, Scalar s2 ::* b) | s1 == s2 -> Scalar s1 * (a + b)
-                  (Scalar a, Scalar b) -> Scalar (a+b)
-                  _ | Just xx <- isConstant x, Just yy <- isConstant y -> toExpression (xx + yy)
-                    | otherwise ->
-                        case factor x y of
-                         Just y' | x /= 1 -> (1+y')*x
-                         _ ->
-                           case factor y x of
-                             Just x' | y /= 1 -> (1+x')*y
-                             _ -> x ::+ y
+  x + y | Just 0 == isConstant x = y
+        | Just 0 == isConstant y = x
+  Sum a + Sum b = sumup a $ sum2list_pair b
+      where sumup x [] = Sum x
+            sumup x ((f,y):ys) = case Map.lookup y x of
+                                 Nothing -> sumup (Map.insert y f x) ys
+                                 Just f' -> if f + f' == 0
+                                            then sumup (Map.delete y x) ys
+                                            else sumup (Map.insert y (f+f') x) ys
+  Sum a + b = case Map.lookup b a of
+                Just fac -> if fac + 1 == 0
+                            then 
+                              case Map.size a of 
+                                1 -> 0
+                                2 -> head $ sum2list deleted
+                                _ -> Sum deleted
+                            else Sum $ Map.insert b (fac + 1) a
+                Nothing -> Sum $ Map.insert b 1 a
+    where deleted = Map.delete b a
+  a + Sum b = Sum b + a
+  a + b = Sum (Map.singleton a 1) + b
   (-) = \x y -> x + (-y)
   -- the fromRational on the following line is needed to avoid a
   -- tricky infinite loop where -1 intepreted as (negate $ fromRational 1)
   negate = \x -> (fromRational $ -1) * x
-  (*) = \x y -> case (x, y) of
-                  _ | x == 1 -> y
-                    | y == 1 -> x
-                    | x == 0 || y == 0 -> 0
-                    | x == y -> x ** 2
-                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a*b)
-                  (Scalar a ::* c, Scalar b) -> Scalar (a*b) * c
-                  (Scalar a, Scalar s ::* b) -> Scalar (a*s) * b
-                  (Scalar s1 ::* a, Scalar s2 ::* b) -> Scalar (s1*s2) * a * b
-                  (_, a ::* b) -> x * a * b
-                  (_, a ::/ b) -> case factor x b of
-                                  Just b' -> a / b'
-                                  Nothing -> 
-                                    case factor b x of
-                                      Just x' -> x' * a
-                                      Nothing -> (x*a)/b
-                  (a ::/ b, _) -> case factor y b of
-                                  Just b' -> a / b'
-                                  Nothing -> 
-                                    case factor b y of
-                                      Just y' -> a * y'
-                                      Nothing -> (a*y)/b
-                  (Scalar a, Scalar b) -> Scalar (a*b)
-                  (_, Scalar _) -> y * x
-                  _ -> x ::* y
+  x * y | x == 0 = 0
+        | y == 0 = 0
+        | x == 1 = y
+        | y == 1 = x
+  Sum x * y | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2list_pair x
+                      where f c (a,b) = (c*a, b)
+  y * Sum x | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2list_pair x
+                      where f c (a,b) = (c*a, b)
+  Sum x * y | [(f,a)] <- sum2list_pair x = pairs2sum [(f, a*y)]
+  y * Sum x | [(f,a)] <- sum2list_pair x = pairs2sum [(f, a*y)]
+  Product a * Product b = puttogether a (product2list b)
+      where puttogether x [] = prod x
+            puttogether x ((y,n):ys) =
+                  case Map.lookup y x of
+                    Just n' -> if n + n' == 0
+                               then puttogether (Map.delete y x) ys
+                               else puttogether (Map.insert y (n+n') x) ys
+                    Nothing -> puttogether (Map.insert y n x) ys
+  Product a * b = case Map.lookup b a of
+                    Just n -> if n + 1 == 0
+                             then prod deleted
+                             else prod $ Map.insert b (n+1) a
+                    Nothing -> prod $ Map.insert b 1 a
+    where deleted = Map.delete b a
+  a * Product b = Product b * a
+  a * b = Product (Map.singleton a 1) * b
   fromInteger = \x -> toExpression (fromInteger x :: Rational)
   abs = undefined
   signum = undefined
 
--- | Factor is used to do some crude simplification in the * and /
--- operators.  I should note that we *don't* fully simplify ratios,
--- but I expect that this may be "good enough," whatever that means.
-
-factor :: Type a => Expression a -> Expression a -> Maybe (Expression a)
-factor x (y ::* z) | x == y = Just z
-                   | x == z = Just y
-                   | otherwise = case factor x y of
-                                 Just y' -> Just (y' * z)
-                                 _ -> case factor x z of
-                                      Just z' -> Just (y * z')
-                                      _ -> Nothing
-factor x (y ::** n) | x == y = Just (y ** (n-1))
-factor x y | x == y = Just 1
-factor _ _ = Nothing
-
 instance Type a => Fractional (Expression a) where
-  (/) = \x y -> case (x, y) of
-                  _ | y == 1 -> x
-                    | x == 0 -> 0
-                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a/b)
-                    | Just b <- isConstant y -> x * toExpression (1.0 / b)
-                  (Scalar a, (Scalar s) ::* b) -> Scalar (a/s) / b
-                  ((Scalar r) ::* a, (Scalar s) ::* b) -> Scalar (r/s) * a / b
-                  (Scalar a, Scalar b) -> Scalar (a/b)
-                  (a ::/ b, c ::/ d) ->
-                    case factor b c of
-                      Just c' -> a * c' / d
-                      Nothing -> 
-                        case factor d a of
-                          Just a' -> a' * c / b
-                          Nothing -> 
-                            case factor c b of
-                              Just b' -> a / d / b'
-                              Nothing ->
-                                case factor a d of
-                                  Just d' -> c / b / d'
-                                  Nothing -> (a * c) / (b * d)
-                  (_, a ::/ b) -> 
-                    case factor x a of
-                      Just a' -> b / a'
-                      Nothing ->
-                        case factor a x of
-                          Just x' -> x'*b
-                          Nothing -> (x*b)/a
-                  (a ::/ b, _) -> 
-                    case factor a y of
-                      Just y' -> 1/(b*y')
-                      Nothing ->
-                        case factor y a of
-                          Just a' -> a' / b
-                          Nothing -> a/(b*y)
-                  _ -> x ::/ y
+  x / y | Just yy <- isConstant y = x * toExpression (1/yy)
+  x / Product y = x * Product (Map.map negate y)
+  x / y = x * Product (Map.singleton y (-1))
   fromRational = toExpression
 
 instance Type a => Floating (Expression a) where
-  pi = Scalar $ Expression $ Constant pi
+  pi = toExpression (pi :: Double)
   exp = \x -> case x of 0 -> 1
                         _ -> Exp x
   log = \x -> case x of 1 -> 0
@@ -505,14 +546,13 @@ instance Type a => Floating (Expression a) where
   cos = \x -> case x of
     0 -> 1
     _ -> Cos x
-  (a ::* b) ** y | a == b = a ** (2*y)
-  (x ::** b) ** c = x ** (b*c)
-  x ** y | isConstant x == Just 0 = 0
-         | isConstant x == Just 1 = 1
-         | isConstant y == Just 0 = 1
-         | isConstant y == Just 1 = x
-         | Just xv <- isConstant x, Just yv <- isConstant y = toExpression (xv**yv)
-  x ** y = x ::** y
+  a ** b | Just x <- isConstant a, Just y <- isConstant b = toExpression (x ** y)
+  x ** y | y == 0 = 1
+         | y == 1 = x
+  (Product x) ** c | Just n <- isConstant c = list2product $ map (p n) $ product2list x
+                       where p n (e,n2) = (e,n2*n)
+  x ** c | Just n <- isConstant c = list2product [(x,n)]
+  x ** y = exp (y*log x)
   asin = undefined
   acos = undefined
   atan = undefined
@@ -528,18 +568,11 @@ grad v e = derive (R v) 1 e
 
 simp :: Type a => Expression a -> (Statement (), Expression a)
 simp (Expression e) = simpHelper e
-simp (e1 ::+ e2) = (st1 >> st2, f1 + f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::* e2) = (st1 >> st2, f1 * f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::/ e2) = (st1 >> st2, f1 / f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::** e2) = (st1 >> st2, f1 ** f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
+simp (Sum s) = (sequence_ $ map fst simped, pairs2sum $ map snd simped)
+  where es = sum2list_pair s
+        simped = map simpme es
+        simpme (f,x) = (st, (f,x'))
+          where (st, x') = simp x
 simp (Cos e) = (st, Cos e')
     where (st, e') = simp e
 simp (Sin e) = (st, Sin e')
@@ -550,12 +583,18 @@ simp (Exp e) = (st, Exp e')
     where (st, e') = simp e
 simp (Scalar s) = (st, Scalar s')
     where (st, s') = simp s
-simp x = error ("I haven't finished simp" ++ show x)
+simp (Product p) = (sequence_ $ map fst simped, product $ map snd simped)
+  where es = product2list p
+        simped = map simpme es
+        simpme (x,n) = (st, x' ** toExpression n)
+          where (st,x') = simp x
+simp _ = error "simp incomplete"
 
 derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
-derive v dda (x ::+ y) = derive v dda x + derive v dda y
-derive v dda (x ::* y) = derive v (dda*x) y + derive v (dda*y) x
-derive v dda (x ::/ y) = derive v (dda / y) x + derive v (-dda*x/y**2) y
+derive v dda (Sum s) = sum $ map dbythis $ sum2list_pair s
+  where dbythis (f,x) = toExpression f * derive v dda x
+derive v dda (Product p) = sum $ map dbythis $ product2list p
+  where dbythis (x,n) = derive v (Product p*toExpression n*dda/x) x
 derive v _ (Scalar x) = derive v 1 x -- FIXME
 derive v dda (Cos e) = derive v (-dda*sin e) e
 derive v dda (Sin e) = derive v (dda*cos e) e
@@ -563,7 +602,6 @@ derive v dda (Exp e) = derive v (dda*exp e) e
 derive v dda (Log e) = derive v (dda/e) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
-derive v dda (e ::** n) = derive v (dda*n*e**(n-1)) e
 derive v dda (Expression e) = derivativeHelper v dda e
 \end{code}
 
@@ -655,7 +693,7 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ trace "hi there" codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
                 functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform ++ ";\nreturn output;\n")  ++
                 functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n" ++ code codeDTransform ++ ";\nreturn output;\n") ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
@@ -670,20 +708,20 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
     where
       codeIntegrate = do st
-                         "output" :+= e'
-          where (st, e') = simp (integrate e)
+                         "output" :+= trace "outputting codeIntegrate stuff" e'
+          where (st, e') = trace "codeIntegrate" simp (integrate e)
       codeVTransform = do Initialize e
                           st
                           "output" := e'
-          where (st, e') = simp e
-      codeDTransform = do Initialize (makeHomogeneous e)
-                          "output" := (makeHomogeneous e)
-      codeDerive = do Initialize (makeHomogeneous (derive (R "x") 1 e))
-                      "output" := makeHomogeneous (derive (R "x") 1 e)
+          where (st, e') = trace "codeVTransform" simp e
+      codeDTransform = do Initialize (trace "codeDTransform" makeHomogeneous e)
+                          "output" := (trace "codeDTransform" makeHomogeneous e)
+      codeDerive = do Initialize (trace "codeDerive" makeHomogeneous (derive (R "x") 1 e))
+                      "output" := trace "codeDerive" makeHomogeneous (derive (R "x") 1 e)
       codeGrad = do st
                     "(*outgrad)" :+= e'
-          where (st, e') = simp (derive (R "x") (r_var "ingrad") e )
-      codeA (Just rep) = "(double " ++ code (makeHomogeneous rep) ++ "_arg) : " ++ code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
+          where (st, e') = trace "codeGrad" simp (derive (R "x") (r_var "ingrad") e )
+      codeA (Just rep) = "(double " ++ trace "codeA" code (makeHomogeneous rep) ++ "_arg) : " ++ trace "codeA" code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
       codeA Nothing = "()"
       codeArgInit (Just rep) = code (Initialize (makeHomogeneous rep))
       codeArgInit Nothing = ""
