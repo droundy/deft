@@ -152,6 +152,34 @@ mapExpression f (Sum s) = pairs2sum $ map ff $ sum2list_pair s
   where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
 
+isEven :: (Type a, Type b) => b -> Expression a -> Double
+isEven v (Scalar e) = isEven v e
+isEven _ (Cos _) = 1
+isEven v (Sin e) = isEven v e
+isEven v (Exp e) = if isEven v e == 1 then 1 else 0
+isEven v (Log e) = if isEven v e == 1 then 1 else 0
+isEven _ (Abs _) = 1
+isEven v (Signum e) = isEven v e
+isEven v (Product p) = product $ map ie $ product2list p
+  where ie (x,n) = isEven v x ** n
+isEven _ (Sum s) | Sum s == 0 = 1 -- ???
+isEven v (Sum s) = ie (isEven v x) xs
+  where (_,x):xs = sum2list_pair s
+        ie sofar ((_,y):ys) = if isEven v y /= sofar 
+                              then 0
+                              else ie sofar ys
+        ie sofar [] = sofar
+isEven v (Expression e) | Same <- isKSpace (Expression v), 
+                          Same <- isKSpace (Expression e),
+                          v == e = -1
+isEven v (Expression e) | Same <- isRealSpace (Expression v), 
+                          Same <- isRealSpace (Expression e),
+                          v == e = -1
+isEven v (Expression e) | Same <- isScalar (Expression v), 
+                          Same <- isScalar (Expression e),
+                          v == e = -1
+isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into this
+
 setZero :: (Type a, Type b) => b -> Expression a -> Expression a
 setZero v (Scalar e) = Scalar (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
@@ -163,15 +191,19 @@ setZero v (Signum e) = signum (setZero v e)
 setZero v (Product p) | product2denominator p == [] = product $ map ff $ product2list p
   where ff (e,n) = (setZero v e) ** toExpression n
 setZero v (Product p) = 
-  if trace ("setZero Product " ++ latex (Product p)) 
+  if --trace ("setZero Product " ++ latex (Product p)) 
      zd /= 0
   then zn / zd
-  else if trace "L'Hopital's rule" zn /= 0
+  else if --trace ("L'Hopital's rule: " ++ latex (Product p)) 
+          zn /= 0
        then error ("L'Hopital's rule failure: " ++ latex n ++ " / " ++ latex d)
-       else case isKSpace (Expression v) of
+       else 
+         if isEven v (Product p) == -1
+         then 0
+         else case isKSpace (Expression v) of
               Same -> 
                 case isKSpace n of
-                  Same -> trace ("dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
+                  Same -> --trace ("Need to derive: dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
                           setZero v (dtop / dbot)
                     where dtop = derive v 1 n
                           dbot = derive v 1 d
@@ -186,7 +218,12 @@ setZero v (Product p) =
                     case isRealSpace (Expression v) of
                       Same -> 
                         case isRealSpace n  of
-                          Same -> setZero v (derive v 1 n / derive v 1 d)
+                          Same -> --trace ("Need to derive: dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot
+                                  --       ++
+                                  --       "\n\ttop is " ++ latex n ++ " bot is " ++ latex d) 
+                                  setZero v (dtop / dbot)
+                            where dtop = derive v 1 n
+                                  dbot = derive v 1 d
                           _ -> error "oopsies"
                       _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
   where d = product $ product2denominator p
@@ -194,7 +231,9 @@ setZero v (Product p) =
         zn = setZero v n
         zd = setZero v d
 setZero _ (Sum s) | Sum s == 0 = 0
-setZero v (Sum s) = trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2list_pair s))out
+setZero v (Sum s) = --trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2list_pair s) 
+                    --      ++ " = " ++ latex out)
+                    out
   where sz (f,x) = (f, setZero v x)
         out = pairs2sum $ map sz $ sum2list_pair s
 setZero v (Expression x) = zeroHelper v x
@@ -311,7 +350,11 @@ product2list s = Map.assocs s
 prod :: Type a => Map.Map (Expression a) Double -> Expression a
 prod p | Map.size p == 1 = case product2list p of [(e,1)] -> e
                                                   _ -> Product p
-prod p = Product p
+prod p = helper 1 (Map.empty) $ product2list p
+  where helper 1 a [] = Product a
+        helper f a [] = Sum $ Map.singleton (Product a) f
+        helper f a ((Sum x,n):xs) | [(f',x')] <- sum2list_pair x = helper (f*f'**n) a ((x',n):xs)
+        helper f a ((x,n):xs) = helper f (Map.insert x n a) xs
 
 list2product :: Type a => [(Expression a, Double)] -> Expression a
 list2product = prod . fl (Map.empty)
@@ -584,6 +627,8 @@ instance Type a => Floating (Expression a) where
   a ** b | Just x <- isConstant a, Just y <- isConstant b = toExpression (x ** y)
   x ** y | y == 0 = 1
          | y == 1 = x
+  (Sum x) ** c | Just n <- isConstant c,
+                 [(f,y)] <- sum2list_pair x = pairs2sum [(f**n, y ** c)]
   (Product x) ** c | Just n <- isConstant c = list2product $ map (p n) $ product2list x
                        where p n (e,n2) = (e,n2*n)
   x ** c | Just n <- isConstant c = list2product [(x,n)]
@@ -625,10 +670,34 @@ simp (Product p) = (sequence_ $ map fst simped, product $ map snd simped)
           where (st,x') = simp x
 simp _ = error "simp incomplete"
 
+factorandsum :: Type a => [Expression a] -> Expression a
+factorandsum [] = 0
+factorandsum (x:xs) = helper (getprodlist x) (x:xs)
+  where helper :: Type a => [(Expression a, Double)] -> [Expression a] -> Expression a
+        helper [] as = sum as
+        helper ((f,n):fs) as = if --trace ("factoring " ++ show n' ++ " copies of "++latex f) 
+                                  n' /= 0
+                               then (helper fs (map (/(f**(toExpression n'))) as)) * (f**(toExpression n'))
+                               else helper fs as
+          where n' = if n < 0 then if --trace (show f ++ show (map (countup f) as)) 
+                                      maximum (map (countup f) as) < 0
+                                   then maximum (map (countup f) as)
+                                   else 0
+                              else if minimum (map (countup f) as) > 0
+                                   then minimum (map (countup f) as)
+                                   else 0
+        countup f (Product y) = Map.findWithDefault 0 f y
+        countup f (Sum a) | [(_,y)] <- sum2list_pair a = countup f y
+        countup f y | f == y = 1
+        countup _ _ = 0
+        getprodlist (Product xx) = product2list xx
+        getprodlist (Sum a) | [(_,Product xx)] <- sum2list_pair a = product2list xx
+        getprodlist xx = [(xx,1)]
+
 derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
 derive v dda (Sum s) = sum $ map dbythis $ sum2list_pair s
   where dbythis (f,x) = toExpression f * derive v dda x
-derive v dda (Product p) = sum $ map dbythis $ product2list p
+derive v dda (Product p) = factorandsum (map dbythis $ product2list p)
   where dbythis (x,n) = derive v (Product p*toExpression n*dda/x) x
 derive v _ (Scalar x) = derive v 1 x -- FIXME
 derive v dda (Cos e) = derive v (-dda*sin e) e
@@ -728,7 +797,7 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ trace "hi there" codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
                 functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform ++ ";\nreturn output;\n")  ++
                 functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n" ++ code codeDTransform ++ ";\nreturn output;\n") ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++

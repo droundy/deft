@@ -83,7 +83,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                        (latex $ (s_var "A"*kk*cos (kk*x)))
                        (latex $ derive (R "x") 1 (s_var "A"*sin (kk*x))),
                     t "derive x (sin kx cos kx)"
-                       (latex $ kk*(cos (kk*x))**2 - kk*(sin (kk*x))**2) 
+                       (latex $ kk*((cos (kk*x))**2 - (sin (kk*x))**2)) 
                        (latex $ derive (R "x") 1 (sin (kk*x) * cos (kk*x))),
                     t "derive x (kx cos kx)" 
                        (latex $ kk*cos(kk*x) - kk**2*x*sin(kk*x)) 
@@ -109,16 +109,23 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                        (makeHomogeneous (r * cos kr - sin kr/k)),
                     t "makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k) == 0" 0
                        (makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k)),
-                    -- FIXME:  the following test fails!!!
-                    --t "makeHomogeneous (kx*(r * cos kr - sin kr/k)/k**2) == 0" 0
-                    --   (makeHomogeneous (kx*(r * cos kr - sin kr/k)/k**2)),
+                    t "derive aaa (1 - sin aaa/aaa)" 
+                       (latex $ - (cos aaa - sin aaa/aaa)/aaa)
+                       (latex $ derive (R "aaa") 1 (1 - sin aaa/aaa)),
+                    t "derive aaa (cos aaa - sin aaa/aaa)" 
+                       (latex $ - sin aaa - (cos aaa - sin aaa/aaa)/aaa)
+                       (latex $ derive (R "aaa") 1 (cos aaa - sin aaa/aaa)),
+                    t "setZero aaa ((1 - sin aaa/aaa)/aaa) == 0" 0
+                       (setZero (R "aaa") ((1 - sin aaa/aaa)/aaa)),
                     t "makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2) == 0" 0
                        (makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2)),
                     t "makeHomogeneous n2" (4*pi*(s_var "r")**2*s_var "x") (makeHomogeneous n2),
                     t "makeHomogeneous n2z" 0 (makeHomogeneous n2z),
                     t "makeHomogeneous n2y" 0 (makeHomogeneous n2y),
-                    -- t "makeHomogeneous n2x" 0 (makeHomogeneous n2x),
-                    -- t "makeHomogeneous vectorThirdTerm" 0 (makeHomogeneous vectorThirdTerm),
+                    t "makeHomogeneous n2x" 0 (makeHomogeneous n2x),
+                    t "makeHomogeneous vectorThirdTerm" 
+                       ((4*pi*(s_var "r")**2 *s_var "x")**3) 
+                       (makeHomogeneous vectorThirdTerm),
                     t "makeHomogeneous (sin kr / k)" 1 (makeHomogeneous (sin kr/kr)),
                     t "makeHomogeneous (x+y) == x + y" (s_var "x"+s_var "y") (makeHomogeneous (x+y)),
                     t "makeHomogeneous (x**2) == x**2" (s_var "x"**2) (makeHomogeneous (x**2)),
@@ -127,15 +134,16 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
         x = r_var "x"
         y = r_var "y"
         a = r_var "a"
+        aaa = r_var "aaa"
         b = r_var "b"
         kk = s_var "k" :: Expression RealSpace
         kr = k*r
         r = s_var "r" :: Expression KSpace
         n2 = ifft ( smear * (4*pi) * r * (sin kr / k) * fft (r_var "x"))
-        -- n2x = ifft ( smear * (4*pi) * i * kx*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
+        n2x = ifft ( smear * (4*pi) * i * kx*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
         n2y = ifft ( smear * (4*pi) * i * ky*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
         n2z = ifft ( smear * (4*pi) * i * kz*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
-        -- vectorThirdTerm = n2*(n2**2 - 3*(n2x**2 + n2y**2 + n2z**2))
+        vectorThirdTerm = n2*(n2**2 - 3*(n2x**2 + n2y**2 + n2z**2))
         smear = exp (-6.0*kdr*kdr)
         kdr = k*s_var "dr"
         i = s_var "complex(0,1)"
