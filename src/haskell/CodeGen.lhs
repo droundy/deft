@@ -11,7 +11,7 @@ module CodeGen ( RealSpace(..), r_var,
                  generateHeader, code, latex, simp, setZero, codeStatement )
        where
 
-import Debug.Trace
+--import Debug.Trace
 
 import qualified Data.Map as Map
 import Hash ( hash )
@@ -77,8 +77,7 @@ instance Type RealSpace where
   initialize (Expression (R x)) = "VectorXd " ++ x ++ "(gd.NxNyNz);\n"
   initialize _ = "VectorXd output(gd.NxNyNz);\n"
   toScalar (R v) = s_var v
-  toScalar (IFFT ke) = makeHomogeneous $ setZero (S "dr") $ setZero Kx $ setZero Ky $ setZero Kz ke
-
+  toScalar (IFFT ke) = makeHomogeneous ke
 
 instance Code KSpace where
   codePrec _ (K v) = showString (v ++ "[i]")
@@ -122,7 +121,7 @@ instance Type KSpace where
   var v (Scalar _) = s_var v
   var v _ = k_var v
   prefix "" (Expression (FFT _)) = ""
-  prefix "" _ = "for (int i=0; i<gd.NxNyNzOver2; i++) {\n\tconst int z = i % gd.NzOver2;\n\tconst int n = (i-z)/gd.NzOver2;\n\tconst int y = n % gd.Ny;\n\tconst int x = (n-y)/gd.Ny;\n\tconst RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n\t"
+  prefix "" _ = "for (int i=0; i<gd.NxNyNzOver2; i++) {\n\tconst int z = i % gd.NzOver2;\n\tconst int n = (i-z)/gd.NzOver2;\n\tconst int y = n % gd.Ny;\n\tconst int x = (n-y)/gd.Ny;\n\tconst RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t"
   prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t"
   postfix (Expression (FFT _)) = ""
   postfix _ = "}\n"
@@ -133,7 +132,7 @@ instance Type KSpace where
   initialize _ = "VectorXcd output(gd.NxNyNz);\n"
   toScalar (K v) = s_var v
   toScalar Delta = 1
-  toScalar Kx = 0
+  toScalar Kx = s_var "_kx"
   toScalar Ky = 0
   toScalar Kz = 0
   toScalar (FFT e) = makeHomogeneous e
@@ -178,6 +177,21 @@ isEven v (Expression e) | Same <- isRealSpace (Expression v),
 isEven v (Expression e) | Same <- isScalar (Expression v), 
                           Same <- isScalar (Expression e),
                           v == e = -1
+isEven v (Expression e) 
+  | Same <- isKSpace (Expression e) =
+    case e of
+      FFT r -> isEven v r
+      _ -> 1
+isEven v (Expression e) 
+  | Same <- isRealSpace (Expression e) =
+    case e of
+      IFFT ks -> isEven v ks
+      _ -> 1
+isEven v (Expression e) 
+  | Same <- isScalar (Expression e) =
+    case e of
+      Integrate x -> isEven v x
+      _ -> 1
 isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into this
 
 setZero :: (Type a, Type b) => b -> Expression a -> Expression a
@@ -191,15 +205,17 @@ setZero v (Signum e) = signum (setZero v e)
 setZero v (Product p) | product2denominator p == [] = product $ map ff $ product2list p
   where ff (e,n) = (setZero v e) ** toExpression n
 setZero v (Product p) = 
-  if --trace ("setZero Product " ++ latex (Product p)) 
-     zd /= 0
-  then zn / zd
-  else if --trace ("L'Hopital's rule: " ++ latex (Product p)) 
-          zn /= 0
-       then error ("L'Hopital's rule failure: " ++ latex n ++ " / " ++ latex d)
-       else 
-         if isEven v (Product p) == -1
-         then 0
+  if --trace ("isEven " ++ latex (Product p) ++ " = " ++ show (isEven v (Product p)))
+     isEven v (Product p) == -1
+  then 0
+  else 
+    if --trace ("setZero Product " ++ latex (Product p)) 
+       zd /= 0
+    then zn / zd
+    else if --trace ("L'Hopital's rule: " ++ latex (Product p)) 
+            zn /= 0
+         then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
+                     ++ latex (Product p) ++ "\n\n\n" ++ latex zn)
          else case isKSpace (Expression v) of
               Same -> 
                 case isKSpace n of
@@ -295,10 +311,12 @@ integrate x = Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
-fft r = Expression (FFT r)
+fft r | r == 0 = 0
+      | otherwise = Expression (FFT r)
 
 ifft :: Expression KSpace -> Expression RealSpace
-ifft ke = Expression (IFFT ke)
+ifft ke | ke == 0 = 0
+        | otherwise = Expression (IFFT ke)
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -465,11 +483,13 @@ latexE p (Sum s) = showParen (p > 6) (showString me)
   where me = foldl addup "" $ sum2list_pair s
         addup "" (1,e) = latexE 6 e ""
         addup "" (f,e) = if e == 1
-                         then show f
-                         else show f ++ " " ++ latexE 6 e ""
+                         then showd f
+                         else showd f ++ " " ++ latexE 6 e ""
         addup rest (1,e) = latexE 6 e (showString " + " $ rest)
         addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
-
+        showd f = if fromInteger (floor f) == f
+                  then show (floor f :: Integer)
+                  else show f
 
 class Code a  where
     codePrec  :: Int -> a -> ShowS
@@ -531,7 +551,7 @@ codeStatement (a :>> b) = codeStatement a ++ codeStatement b
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous ee = 
   scalarScalar $ case isKSpace ee of
-                    Same -> mapExpression toScalar $ setZero Kx $ setZero Ky $ setZero Kz ee
+                    Same -> setZero (S "_kx") $ mapExpression toScalar ee
                     _ -> mapExpression toScalar ee
   where scalarScalar :: Expression Scalar -> Expression Scalar
         scalarScalar (Scalar s) = s
@@ -812,20 +832,20 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
     where
       codeIntegrate = do st
-                         "output" :+= trace "outputting codeIntegrate stuff" e'
-          where (st, e') = trace "codeIntegrate" simp (integrate e)
+                         "output" :+= e'
+          where (st, e') = simp (integrate e)
       codeVTransform = do Initialize e
                           st
                           "output" := e'
-          where (st, e') = trace "codeVTransform" simp e
-      codeDTransform = do Initialize (trace "codeDTransform" makeHomogeneous e)
-                          "output" := (trace "codeDTransform" makeHomogeneous e)
-      codeDerive = do Initialize (trace "codeDerive" makeHomogeneous (derive (R "x") 1 e))
-                      "output" := trace "codeDerive" makeHomogeneous (derive (R "x") 1 e)
+          where (st, e') = simp e
+      codeDTransform = do Initialize (makeHomogeneous e)
+                          "output" := (makeHomogeneous e)
+      codeDerive = do Initialize (makeHomogeneous (derive (R "x") 1 e))
+                      "output" := makeHomogeneous (derive (R "x") 1 e)
       codeGrad = do st
                     "(*outgrad)" :+= e'
-          where (st, e') = trace "codeGrad" simp (derive (R "x") (r_var "ingrad") e )
-      codeA (Just rep) = "(double " ++ trace "codeA" code (makeHomogeneous rep) ++ "_arg) : " ++ trace "codeA" code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
+          where (st, e') = simp (derive (R "x") (r_var "ingrad") e )
+      codeA (Just rep) = "(double " ++ code (makeHomogeneous rep) ++ "_arg) : " ++ code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
       codeA Nothing = "()"
       codeArgInit (Just rep) = code (Initialize (makeHomogeneous rep))
       codeArgInit Nothing = ""
@@ -833,9 +853,9 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
 
 
 generateHeader :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
-generateHeader e arg n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
+generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
                      classCode e arg (n ++ "_type") ++
-                     "\n\ninline Functional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
+                     "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
     where codeA (Just rep) = "double " ++ code (makeHomogeneous rep)
           codeA Nothing = ""
           codeA' (Just rep) = code (makeHomogeneous rep)

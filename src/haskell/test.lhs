@@ -126,6 +126,33 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "makeHomogeneous vectorThirdTerm" 
                        ((4*pi*(s_var "r")**2 *s_var "x")**3) 
                        (makeHomogeneous vectorThirdTerm),
+                    t "makeHomogeneous passing simplification"
+                       0
+                       (makeHomogeneous $
+                        ((ifft(((-1*sin(kx)/kx + cos(kx)))/kx)*ifft((sin(kx))/kx)*(log(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2 + ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))))/(ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))**2*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2))),
+                    
+                    t "makeHomogeneous derivative of sinc" 0
+                       (makeHomogeneous $ (-1*sin(kx)/kx + cos(kx)) / kx),
+                    
+                    t "makeHomogeneous works unless you multiply by sinc'"
+                       0
+                       (makeHomogeneous $
+                        (fft((ifft(((-1*sin(kx)/kx + cos(kx)))/kx)*ifft((sin(kx))/kx)*(log(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2 + ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))))/(ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))**2*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2)))),
+                    
+                    t "makeHomogeneous with fft"
+                       0
+                       (makeHomogeneous $
+                        (fft((ifft(((-1*sin(kx)/kx + cos(kx)))/kx)*ifft((sin(kx))/kx)*(log(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2 + ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))))/(ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))**2*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2))
+                         * (-1*sin(kx)/kx + cos(kx)))
+                        / kx),
+                    
+                    t "makeHomogeneous of annoying fft ifft combo"
+                       0
+                       (makeHomogeneous $
+                        (fft(2*(ifft(((-1*sin(kx)/kx + cos(kx)))/kx)*ifft((sin(kx))/kx)*(log(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2 + ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))))/(ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3))**2*(1 + (-1)*ifft(((-1*kx*cos(kx) + sin(kx)))/(kx**3)))**2))
+                         * (-1*sin(kx)/kx + cos(kx)))
+                        / kx),
+                    
                     t "makeHomogeneous (sin kr / k)" 1 (makeHomogeneous (sin kr/kr)),
                     t "makeHomogeneous (x+y) == x + y" (s_var "x"+s_var "y") (makeHomogeneous (x+y)),
                     t "makeHomogeneous (x**2) == x**2" (s_var "x"**2) (makeHomogeneous (x**2)),
