@@ -2,11 +2,6 @@
 
 EXTRA_DIST = autogen.sh
 
-MONTECARLO_CODE = src/Monte-Carlo/monte-carlo.cpp \
-	src/utilities.cpp \
-	src/Monte-Carlo/fileio.cpp \
-	src/Monte-Carlo/simulation.cpp 
-
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
@@ -32,10 +27,9 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
 
-bin_PROGRAMS = deft monte-carlo analyze-monte-carlo
+bin_PROGRAMS = deft monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE) 
-monte_carlo_SOURCES = $(MONTECARLO_CODE)
-analyze_monte_carlo_SOURCES = src/Monte-Carlo/analyze-monte-carlo.cpp \
+monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
@@ -262,12 +256,3 @@ comparisons/da1deta_vrpack.test: comparisons/da1deta_vrpack.f fortran/vrpack.f
 
 comparison: $(COMPARISONDATA)
 	tests/comparisons.sh
-
-MCITERATIONS = 1000000
-papers/contact/figs/mc-06-112.dat: monte-carlo
-	time ./monte-carlo 6 112 $(MCITERATIONS) $@
-
-
-papers/contact/figs/mc-density-%.dat: papers/contact/figs/mc-%.dat \
-		analyze-monte-carlo
-	time ./analyze-monte-carlo $@ $<
