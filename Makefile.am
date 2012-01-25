@@ -40,7 +40,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/four-rods-in-water.mkdat \
-	paper/figs/single-rod-in-water.mkdat \
+	paper/figs/single-rod.mkdat \
 	paper/figs/single-rod-in-water-high-res.mkdat \
 	paper/figs/single-rod-in-water-low-res.mkdat \
 	paper/figs/sphere.mkdat \
@@ -139,7 +139,7 @@ paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE
 paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
-paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
+paper_figs_single_rod_mkdat_SOURCES = paper/figs/single-rod.cpp $(ALL_CODE)
 paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
@@ -213,7 +213,6 @@ src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildca
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\
-	paper/figs/single-rod-in-water.dat \
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
 	papers/contact/figs/mc-06-112.dat \
