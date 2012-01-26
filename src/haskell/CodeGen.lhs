@@ -37,7 +37,7 @@ instance Code RealSpace where
   codePrec _ (IFFT ksp@(Expression (K _))) = showString "ifft(gd, " . codePrec 0 (makeHomogeneous ksp) . showString ")"
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
   latexPrec _ (R v) = showString v
-  latexPrec _ (IFFT ke) = showString "ifft(" . latexPrec 0 ke . showString ")"
+  latexPrec _ (IFFT ke) = showString "\\text{ifft}(" . latexPrec 0 ke . showString ")"
 instance Type RealSpace where
   isRealSpace _ = Same
   derivativeHelper v ddr r | Same <- isRealSpace (Expression v), v == r = ddr
@@ -91,7 +91,7 @@ instance Code KSpace where
   latexPrec _ Ky = showString "ky"
   latexPrec _ Kz = showString "kz"
   latexPrec _ Delta = showString "delta(k)"
-  latexPrec _ (FFT r) = showString "fft(" . latexPrec 0 r . showString ")"
+  latexPrec _ (FFT r) = showString "\\text{fft}(" . latexPrec 0 r . showString ")"
 instance Type KSpace where
   isKSpace _ = Same
   derivativeHelper v ddk kk | Same <- isKSpace (Expression v), kk == v = ddk
@@ -437,13 +437,14 @@ codeE p (Sum s) = showParen (p > 6) (showString me)
         addup rest (f,e) = show f ++ "*" ++ codeE 6 e (showString " + " $ rest)
 
 latexE :: (Type a, Code a) => Int -> Expression a -> ShowS
+latexE _ x | Just xx <- isConstant x = showString (latexDouble xx)
 latexE p (Scalar x) = latexPrec p x
 latexE p (Expression x) = latexPrec p x
-latexE _ (Cos x) = showString "cos(" . latexE 0 x . showString ")"
-latexE _ (Sin x) = showString "sin(" . latexE 0 x . showString ")"
-latexE _ (Exp x) = showString "exp(" . latexE 0 x . showString ")"
-latexE _ (Log x) = showString "log(" . latexE 0 x . showString ")"
-latexE _ (Abs x) = showString "fabs(" . latexE 0 x . showString ")"
+latexE _ (Cos x) = showString "\\cos(" . latexE 0 x . showString ")"
+latexE _ (Sin x) = showString "\\sin(" . latexE 0 x . showString ")"
+latexE _ (Exp x) = showString "\\exp(" . latexE 0 x . showString ")"
+latexE _ (Log x) = showString "\\log(" . latexE 0 x . showString ")"
+latexE _ (Abs x) = showString "\\left|" . latexE 0 x . showString "\\right|"
 latexE _ (Signum _) = undefined
 latexE p (Product x) | Map.size x == 1 && product2denominator x == 1 =
   case product2pairs x of
@@ -471,18 +472,30 @@ latexE pree (Product p) = showParen (pree > 7) $ showString "\\frac{" . latexE 7
                                                                         latexE 7 den . showString "}"
   where num = product $ product2numerator p
         den = product2denominator p
-latexE _ (Sum s) | Sum s == 0 = showString "0"
 latexE p (Sum s) = showParen (p > 6) (showString me)
   where me = foldl addup "" $ sum2pairs s
         addup "" (1,e) = latexE 6 e ""
         addup "" (f,e) = if e == 1
-                         then showd f
-                         else showd f ++ " " ++ latexE 6 e ""
+                         then latexDouble f
+                         else latexDouble f ++ " " ++ latexE 6 e ""
         addup rest (1,e) = latexE 6 e (showString " + " $ rest)
         addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
-        showd f = if fromInteger (floor f) == f
-                  then show (floor f :: Integer)
-                  else show f
+
+latexDouble :: Double -> String
+latexDouble x = case double2int x of
+                  Just n -> show n
+                  Nothing -> case double2int (x/pi) of
+                               Just n -> show n ++ "\\pi"
+                               Nothing -> printpi [2 .. 32]
+  where printpi [] = show x
+        printpi (n:ns) = case double2int (fromInteger n*x/pi) of
+                           Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "}\\pi"
+                           Nothing -> printpi ns
+
+double2int :: Double -> Maybe Int
+double2int f = if fromInteger (floor f) == f
+               then Just (floor f :: Int)
+               else Nothing
 
 class Code a  where
     codePrec  :: Int -> a -> ShowS

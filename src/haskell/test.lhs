@@ -212,6 +212,6 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
                     putStrLn $ show c
 
 latexfile :: Type a => [(String, Expression a)] -> String
-latexfile xs = "\\documentclass{article}\n\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"
+latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"
   where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex e ++ "\n\\end{equation}\n"
 \end{code}
