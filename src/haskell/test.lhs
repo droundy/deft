@@ -37,6 +37,18 @@ showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n
         y = r_var "y"
 -}
 
+latexTests :: Test
+latexTests = TestList [t "x" x,
+                       t "0" (0 :: Expression RealSpace),
+                       t "\\sqrt{x}" (sqrt x),
+                       t "x^2" (x**2),
+                       t "\\frac{1}{x^2}" (1/x**2),
+                       t "\\frac{y^2}{x^2}" (y**2/x**2),
+                       t "x^4" (x**4)]
+  where t str e = TestCase $ assertEqual str str (latex e)
+        x = r_var "x"
+        y = s_var "y" :: Expression RealSpace
+
 codeTests :: Test
 codeTests = TestList [t "x[i]" x,
                       t "0" (0 :: Expression RealSpace),
@@ -191,9 +203,15 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
               -- nbar = ifft ( (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
-          c <- runTestTT $ TestList [eqTests, codeTests]
+          
+          writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar)]
+          c <- runTestTT $ TestList [eqTests, codeTests, latexTests]
           if failures c > 0 || errors c > 0
             then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
             else do putStrLn "All tests passed!"
                     putStrLn $ show c
+
+latexfile :: Type a => [(String, Expression a)] -> String
+latexfile xs = "\\documentclass{article}\n\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"
+  where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex e ++ "\n\\end{equation}\n"
 \end{code}

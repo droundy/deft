@@ -74,7 +74,7 @@ tests/generated/sum.h: tests/generating-code.test $(COMPARISONDATA)
 	test -d tests/generated || mkdir tests/generated
 	rm -f tests/generated/*
 	tests/generating-code.test
-tests/generated-haskell/nice-sum.h: src/haskell/test
+tests/generated-haskell/nice-sum.h tests/generated-haskell/math.tex: src/haskell/test
 	test -d tests/generated-haskell || mkdir tests/generated-haskell
 	rm -f tests/generated-haskell/*
 	src/haskell/test
@@ -105,7 +105,7 @@ check_PROGRAMS = \
 	tests/eos.test \
 	tests/eps.test
 
-TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test $(check_PROGRAMS)
+TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh tests/latex-generation.sh src/haskell/test $(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
