@@ -145,9 +145,9 @@ mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
 mapExpression f (Signum e) = signum (mapExpression f e)
-mapExpression f (Product p) = product $ map ff $ product2list p
+mapExpression f (Product p) = product $ map ff $ product2pairs p
   where ff (e,n) = (mapExpression f e) ** toExpression n
-mapExpression f (Sum s) = pairs2sum $ map ff $ sum2list_pair s
+mapExpression f (Sum s) = pairs2sum $ map ff $ sum2pairs s
   where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
 
@@ -159,11 +159,11 @@ isEven v (Exp e) = if isEven v e == 1 then 1 else 0
 isEven v (Log e) = if isEven v e == 1 then 1 else 0
 isEven _ (Abs _) = 1
 isEven v (Signum e) = isEven v e
-isEven v (Product p) = product $ map ie $ product2list p
+isEven v (Product p) = product $ map ie $ product2pairs p
   where ie (x,n) = isEven v x ** n
 isEven _ (Sum s) | Sum s == 0 = 1 -- ???
 isEven v (Sum s) = ie (isEven v x) xs
-  where (_,x):xs = sum2list_pair s
+  where (_,x):xs = sum2pairs s
         ie sofar ((_,y):ys) = if isEven v y /= sofar 
                               then 0
                               else ie sofar ys
@@ -202,7 +202,7 @@ setZero v (Exp e) = exp (setZero v e)
 setZero v (Log e) = log (setZero v e)
 setZero v (Abs e) = abs (setZero v e)
 setZero v (Signum e) = signum (setZero v e)
-setZero v (Product p) | product2denominator p == [] = product $ map ff $ product2list p
+setZero v (Product p) | product2denominator p == 1 = product $ map ff $ product2pairs p
   where ff (e,n) = (setZero v e) ** toExpression n
 setZero v (Product p) = 
   if --trace ("isEven " ++ latex (Product p) ++ " = " ++ show (isEven v (Product p)))
@@ -242,16 +242,16 @@ setZero v (Product p) =
                                   dbot = derive v 1 d
                           _ -> error "oopsies"
                       _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
-  where d = product $ product2denominator p
+  where d = product2denominator p
         n = product $ product2numerator p
         zn = setZero v n
         zd = setZero v d
 setZero _ (Sum s) | Sum s == 0 = 0
-setZero v (Sum s) = --trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2list_pair s) 
+setZero v (Sum s) = --trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2pairs s) 
                     --      ++ " = " ++ latex out)
                     out
   where sz (f,x) = (f, setZero v x)
-        out = pairs2sum $ map sz $ sum2list_pair s
+        out = pairs2sum $ map sz $ sum2pairs s
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
@@ -340,19 +340,15 @@ data Expression a = Scalar (Expression Scalar) |
                     Sum (Map.Map (Expression a) Double)
               deriving (Eq, Ord, Show)
 
-sum2list :: Type a => Map.Map (Expression a) Double -> [Expression a]
-sum2list s = map toe $ sum2list_pair s
-  where toe (f,x) = Sum $ Map.singleton x f
-
-sum2list_pair :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
-sum2list_pair s = map rev $ Map.assocs s
+sum2pairs :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
+sum2pairs s = map rev $ Map.assocs s
   where rev (a,b) = (b,a)
 
 pairs2sum :: Type a => [(Double, Expression a)] -> Expression a
 pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
   where helper [] = 0
         helper [(1,e)] = e
-        helper [(x,Sum y)] | [(x2,y')] <- sum2list_pair y = helper [(x*x2, y')]
+        helper [(x,Sum y)] | [(x2,y')] <- sum2pairs y = helper [(x*x2, y')]
         helper es = Sum $ fl (Map.empty) es
         fl a [] = a
         fl a ((f,x):xs) = case Map.lookup x a of
@@ -362,20 +358,20 @@ pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
                           Nothing -> fl (Map.insert x f a) xs
         
 
-product2list :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
-product2list s = Map.assocs s
+product2pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2pairs s = Map.assocs s
 
-prod :: Type a => Map.Map (Expression a) Double -> Expression a
-prod p | Map.size p == 1 = case product2list p of [(e,1)] -> e
-                                                  _ -> Product p
-prod p = helper 1 (Map.empty) $ product2list p
+map2product :: Type a => Map.Map (Expression a) Double -> Expression a
+map2product p | Map.size p == 1 = case product2pairs p of [(e,1)] -> e
+                                                          _ -> Product p
+map2product p = helper 1 (Map.empty) $ product2pairs p
   where helper 1 a [] = Product a
         helper f a [] = Sum $ Map.singleton (Product a) f
-        helper f a ((Sum x,n):xs) | [(f',x')] <- sum2list_pair x = helper (f*f'**n) a ((x',n):xs)
+        helper f a ((Sum x,n):xs) | [(f',x')] <- sum2pairs x = helper (f*f'**n) a ((x',n):xs)
         helper f a ((x,n):xs) = helper f (Map.insert x n a) xs
 
-list2product :: Type a => [(Expression a, Double)] -> Expression a
-list2product = prod . fl (Map.empty)
+pairs2product :: Type a => [(Expression a, Double)] -> Expression a
+pairs2product = map2product . fl (Map.empty)
   where fl a [] = a
         fl a ((x,n):xs) = case Map.lookup x a of
                             Just n' -> if n + n' == 0
@@ -384,15 +380,15 @@ list2product = prod . fl (Map.empty)
                             Nothing -> fl (Map.insert x n a) xs
 
 product2numerator :: Type a => Map.Map (Expression a) Double -> [Expression a]
-product2numerator s = map f $ product2numerator_pair s
+product2numerator s = map f $ product2numerator_pairs s
   where f (a,b) = a ** (toExpression b)
 
-product2numerator_pair :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
-product2numerator_pair s = filter ((>=0) . snd) $ product2list s
+product2numerator_pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2numerator_pairs s = filter ((>=0) . snd) $ product2pairs s
 
-product2denominator :: Type a => Map.Map (Expression a) Double -> [Expression a]
-product2denominator s = map n $ filter ((<0) . snd) $ product2list s
-  where n (a,b) = a **(toExpression $ -b)
+product2denominator :: Type a => Map.Map (Expression a) Double -> Expression a
+product2denominator s = pairs2product $ map n $ filter ((<0) . snd) $ product2pairs s
+  where n (a,b) = (a, -b)
 
 instance (Type a, Code a) => Code (Expression a) where
   codePrec = codeE
@@ -409,15 +405,14 @@ codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
 codeE _ (Signum _) = undefined
 codeE _ (Product p) | Product p == 1 = showString "1"
 codeE pree (Product p) = showParen (pree > 7) $
-                         case den of
-                         [] -> codesimple num
-                         [a] -> codesimple num . showString "/" . codeE 8 a
-                         _ -> codesimple num . showString " / ( " . codeE 0 (product den) . showString " )"
+                         if den == 1 
+                         then codesimple num
+                         else codesimple num . showString "/" . codeE 8 den
   where codesimple [] = showString "1"
         codesimple [(a,n)] = codee a n
         codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
         codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
-        num = product2numerator_pair p
+        num = product2numerator_pairs p
         den = product2denominator p
         codee _ 0 = showString "1" -- this shouldn't happen...
         codee _ n | n < 0 = error "shouldn't have negative power here"
@@ -433,7 +428,7 @@ codeE pree (Product p) = showParen (pree > 7) $
         codee x n = showString "pow(" . codeE 0 x . showString (", " ++ show n ++ ")")
 codeE _ (Sum s) | Sum s == 0 = showString "0"
 codeE p (Sum s) = showParen (p > 6) (showString me)
-  where me = foldl addup "" $ sum2list_pair s
+  where me = foldl addup "" $ sum2pairs s
         addup "" (1,e) = codeE 6 e ""
         addup "" (f,e) = if e == 1
                          then show f
@@ -450,12 +445,12 @@ latexE _ (Exp x) = showString "exp(" . latexE 0 x . showString ")"
 latexE _ (Log x) = showString "log(" . latexE 0 x . showString ")"
 latexE _ (Abs x) = showString "fabs(" . latexE 0 x . showString ")"
 latexE _ (Signum _) = undefined
-latexE p (Product x) | Map.size x == 1 && length (product2denominator x) == 0 =
-  case product2list x of
+latexE p (Product x) | Map.size x == 1 && product2denominator x == 1 =
+  case product2pairs x of
     [(_,0)] -> showString "1" -- this shouldn't happen...
     [(_, n)] | n < 0 -> error "shouldn't have negative power here"
     [(e, 1)] -> latexE p e
-    [(e, 0.5)] -> showString "sqrt(" . latexE 0 e . showString ")"
+    [(e, 0.5)] -> showString "\\sqrt{" . latexE 0 e . showString "}"
     [(e, nn)]
       | fromInteger n2 == 2*nn && odd n2 -> if n2 < 10
                                             then latexE 8 e . showString ("^\\frac" ++ show n2 ++ "2")
@@ -467,20 +462,18 @@ latexE p (Product x) | Map.size x == 1 && length (product2denominator x) == 0 =
                 n = floor nn
     [(e,n)] -> latexE 8 e . showString ("^{" ++ show n ++ "}")
     _ -> error "This really cannot happen."
-latexE pree (Product p) = showParen (pree > 7) $
-                          case den of
-                          [] -> ltexsimple num
-                          a -> showString "\\frac{" . ltexsimple num . showString "}{" . 
-                                 latexE 7 (product a) . showString "}"
+latexE pree (Product p) | product2denominator p == 1 = showParen (pree > 7) $ ltexsimple $ product2numerator p
   where ltexsimple [] = showString "1"
         ltexsimple [a] = latexE 7 a
         ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
         ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
-        num = product2numerator p
+latexE pree (Product p) = showParen (pree > 7) $ showString "\\frac{" . latexE 7 num . showString "}{" . 
+                                                                        latexE 7 den . showString "}"
+  where num = product $ product2numerator p
         den = product2denominator p
 latexE _ (Sum s) | Sum s == 0 = showString "0"
 latexE p (Sum s) = showParen (p > 6) (showString me)
-  where me = foldl addup "" $ sum2list_pair s
+  where me = foldl addup "" $ sum2pairs s
         addup "" (1,e) = latexE 6 e ""
         addup "" (f,e) = if e == 1
                          then showd f
@@ -511,7 +504,7 @@ toExpression 1 = Product $ Map.empty
 toExpression x = Sum $ Map.singleton 1 (fromRational $ toRational x)
 
 isConstant :: Type a => Expression a -> Maybe Double
-isConstant (Sum s) = case sum2list_pair s of
+isConstant (Sum s) = case sum2pairs s of
                        [] -> Just 0
                        [(x,1)] -> Just x
                        _ -> Nothing
@@ -555,9 +548,9 @@ makeHomogeneous ee =
                     _ -> mapExpression toScalar ee
   where scalarScalar :: Expression Scalar -> Expression Scalar
         scalarScalar (Scalar s) = s
-        scalarScalar (Sum x) = pairs2sum $ map f $ sum2list_pair x
+        scalarScalar (Sum x) = pairs2sum $ map f $ sum2pairs x
           where f (a,b) = (a, scalarScalar b)
-        scalarScalar (Product x) = list2product $ map f $ product2list x
+        scalarScalar (Product x) = pairs2product $ map f $ product2pairs x
           where f (a,b) = (scalarScalar a, b)
         scalarScalar (Expression e) = Expression e -- FIXME
         scalarScalar (Cos x) = cos (scalarScalar x)
@@ -570,7 +563,7 @@ makeHomogeneous ee =
 instance Type a => Num (Expression a) where
   x + y | Just 0 == isConstant x = y
         | Just 0 == isConstant y = x
-  Sum a + Sum b = sumup a $ sum2list_pair b
+  Sum a + Sum b = sumup a $ sum2pairs b
       where sumup x [] = Sum x
             sumup x ((f,y):ys) = case Map.lookup y x of
                                  Nothing -> sumup (Map.insert y f x) ys
@@ -579,11 +572,10 @@ instance Type a => Num (Expression a) where
                                             else sumup (Map.insert y (f+f') x) ys
   Sum a + b = case Map.lookup b a of
                 Just fac -> if fac + 1 == 0
-                            then 
-                              case Map.size a of 
-                                1 -> 0
-                                2 -> head $ sum2list deleted
-                                _ -> Sum deleted
+                            then case sum2pairs deleted of 
+                                   [(1,e)] -> e
+                                   [(f,e)] -> Sum $ Map.singleton e f
+                                   _ -> Sum deleted
                             else Sum $ Map.insert b (fac + 1) a
                 Nothing -> Sum $ Map.insert b 1 a
     where deleted = Map.delete b a
@@ -597,14 +589,14 @@ instance Type a => Num (Expression a) where
         | y == 0 = 0
         | x == 1 = y
         | y == 1 = x
-  Sum x * y | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2list_pair x
+  Sum x * y | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2pairs x
                       where f c (a,b) = (c*a, b)
-  y * Sum x | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2list_pair x
+  y * Sum x | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2pairs x
                       where f c (a,b) = (c*a, b)
-  Sum x * y | [(f,a)] <- sum2list_pair x = pairs2sum [(f, a*y)]
-  y * Sum x | [(f,a)] <- sum2list_pair x = pairs2sum [(f, a*y)]
-  Product a * Product b = puttogether a (product2list b)
-      where puttogether x [] = prod x
+  Sum x * y | [(f,a)] <- sum2pairs x = pairs2sum [(f, a*y)]
+  y * Sum x | [(f,a)] <- sum2pairs x = pairs2sum [(f, a*y)]
+  Product a * Product b = puttogether a (product2pairs b)
+      where puttogether x [] = map2product x
             puttogether x ((y,n):ys) =
                   case Map.lookup y x of
                     Just n' -> if n + n' == 0
@@ -613,9 +605,9 @@ instance Type a => Num (Expression a) where
                     Nothing -> puttogether (Map.insert y n x) ys
   Product a * b = case Map.lookup b a of
                     Just n -> if n + 1 == 0
-                             then prod deleted
-                             else prod $ Map.insert b (n+1) a
-                    Nothing -> prod $ Map.insert b 1 a
+                             then map2product deleted
+                             else map2product $ Map.insert b (n+1) a
+                    Nothing -> map2product $ Map.insert b 1 a
     where deleted = Map.delete b a
   a * Product b = Product b * a
   a * b = Product (Map.singleton a 1) * b
@@ -648,10 +640,10 @@ instance Type a => Floating (Expression a) where
   x ** y | y == 0 = 1
          | y == 1 = x
   (Sum x) ** c | Just n <- isConstant c,
-                 [(f,y)] <- sum2list_pair x = pairs2sum [(f**n, y ** c)]
-  (Product x) ** c | Just n <- isConstant c = list2product $ map (p n) $ product2list x
+                 [(f,y)] <- sum2pairs x = pairs2sum [(f**n, y ** c)]
+  (Product x) ** c | Just n <- isConstant c = pairs2product $ map (p n) $ product2pairs x
                        where p n (e,n2) = (e,n2*n)
-  x ** c | Just n <- isConstant c = list2product [(x,n)]
+  x ** c | Just n <- isConstant c = pairs2product [(x,n)]
   x ** y = exp (y*log x)
   asin = undefined
   acos = undefined
@@ -669,7 +661,7 @@ grad v e = derive (R v) 1 e
 simp :: Type a => Expression a -> (Statement (), Expression a)
 simp (Expression e) = simpHelper e
 simp (Sum s) = (sequence_ $ map fst simped, pairs2sum $ map snd simped)
-  where es = sum2list_pair s
+  where es = sum2pairs s
         simped = map simpme es
         simpme (f,x) = (st, (f,x'))
           where (st, x') = simp x
@@ -684,7 +676,7 @@ simp (Exp e) = (st, Exp e')
 simp (Scalar s) = (st, Scalar s')
     where (st, s') = simp s
 simp (Product p) = (sequence_ $ map fst simped, product $ map snd simped)
-  where es = product2list p
+  where es = product2pairs p
         simped = map simpme es
         simpme (x,n) = (st, x' ** toExpression n)
           where (st,x') = simp x
@@ -707,17 +699,17 @@ factorandsum (x:xs) = helper (getprodlist x) (x:xs)
                                    then minimum (map (countup f) as)
                                    else 0
         countup f (Product y) = Map.findWithDefault 0 f y
-        countup f (Sum a) | [(_,y)] <- sum2list_pair a = countup f y
+        countup f (Sum a) | [(_,y)] <- sum2pairs a = countup f y
         countup f y | f == y = 1
         countup _ _ = 0
-        getprodlist (Product xx) = product2list xx
-        getprodlist (Sum a) | [(_,Product xx)] <- sum2list_pair a = product2list xx
+        getprodlist (Product xx) = product2pairs xx
+        getprodlist (Sum a) | [(_,Product xx)] <- sum2pairs a = product2pairs xx
         getprodlist xx = [(xx,1)]
 
 derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
-derive v dda (Sum s) = sum $ map dbythis $ sum2list_pair s
+derive v dda (Sum s) = sum $ map dbythis $ sum2pairs s
   where dbythis (f,x) = toExpression f * derive v dda x
-derive v dda (Product p) = factorandsum (map dbythis $ product2list p)
+derive v dda (Product p) = factorandsum (map dbythis $ product2pairs p)
   where dbythis (x,n) = derive v (Product p*toExpression n*dda/x) x
 derive v _ (Scalar x) = derive v 1 x -- FIXME
 derive v dda (Cos e) = derive v (-dda*sin e) e
