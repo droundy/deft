@@ -2,14 +2,18 @@
 {-# LANGUAGE GADTs, PatternGuards #-}
 module CodeGen ( RealSpace(..), r_var,
                  KSpace(..), k_var, kx, ky, kz, k, ksqr,
-                 Scalar, s_var,
+                 Scalar(..), s_var,
                  fft, ifft, integrate, grad, derive,
                  Expression,                 
                  Statement( (:=), (:?=) ),
-                 Type,
-                 generateHeader, code, latex, simp, setZero, codeStatement )
+                 Type, 
+                 makeHomogeneous, isConstant, -- for debugging only!!!
+                 generateHeader, code, latex, simp, setZero, codeStatement, substitute, countFFT )
        where
 
+--import Debug.Trace
+
+import qualified Data.Map as Map
 import Hash ( hash )
 \end{code}
 
@@ -24,8 +28,7 @@ data KSpace = K String |
               Kx | Ky | Kz |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
-data Scalar = Constant Double | 
-              S String |
+data Scalar = S String |
               Integrate (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 
@@ -34,7 +37,7 @@ instance Code RealSpace where
   codePrec _ (IFFT ksp@(Expression (K _))) = showString "ifft(gd, " . codePrec 0 (makeHomogeneous ksp) . showString ")"
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
   latexPrec _ (R v) = showString v
-  latexPrec _ (IFFT ke) = showString "ifft(" . latexPrec 0 ke . showString ")"
+  latexPrec _ (IFFT ke) = showString "\\text{ifft}(" . latexPrec 0 ke . showString ")"
 instance Type RealSpace where
   isRealSpace _ = Same
   derivativeHelper v ddr r | Same <- isRealSpace (Expression v), v == r = ddr
@@ -64,18 +67,19 @@ instance Type RealSpace where
   var v (Scalar _) = s_var v
   var v _ = r_var v
   prefix "" (Expression (IFFT _)) = ""
-  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
-  prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
+  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
+  prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
   postfix (Expression (IFFT _)) = ""
-  postfix _ = "\n}\n"
+  postfix _ = "\t\n}\n"
   codeStatementHelper a op (Expression (IFFT (Expression (K v)))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT _)) = error "It is a bug to generate code for a non-var input to ifft"
   codeStatementHelper a op e = prefix "" e ++ a ++ "[i]" ++ op ++ code e ++ ";\n" ++ postfix e
+  countFFTHelper (Expression (IFFT _)) = 1
+  countFFTHelper _ = 0
   initialize (Expression (R x)) = "VectorXd " ++ x ++ "(gd.NxNyNz);\n"
   initialize _ = "VectorXd output(gd.NxNyNz);\n"
   toScalar (R v) = s_var v
-  toScalar (IFFT ke) = makeHomogeneous $ setZero (S "dr") $ setZero Kx $ setZero Ky $ setZero Kz ke
-
+  toScalar (IFFT ke) = makeHomogeneous ke
 
 instance Code KSpace where
   codePrec _ (K v) = showString (v ++ "[i]")
@@ -89,7 +93,7 @@ instance Code KSpace where
   latexPrec _ Ky = showString "ky"
   latexPrec _ Kz = showString "kz"
   latexPrec _ Delta = showString "delta(k)"
-  latexPrec _ (FFT r) = showString "fft(" . latexPrec 0 r . showString ")"
+  latexPrec _ (FFT r) = showString "\\text{fft}(" . latexPrec 0 r . showString ")"
 instance Type KSpace where
   isKSpace _ = Same
   derivativeHelper v ddk kk | Same <- isKSpace (Expression v), kk == v = ddk
@@ -119,18 +123,20 @@ instance Type KSpace where
   var v (Scalar _) = s_var v
   var v _ = k_var v
   prefix "" (Expression (FFT _)) = ""
-  prefix "" _ = "for (int i=0; i<gd.NxNyNzOver2; i++) {\n\tconst int z = i % gd.NzOver2;\n\tconst int n = (i-z)/gd.NzOver2;\n\tconst int y = n % gd.Ny;\n\tconst int x = (n-y)/gd.Ny;\n\tconst RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n\t"
-  prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t"
+  prefix "" _ = "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n"
+  prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
   postfix (Expression (FFT _)) = ""
-  postfix _ = "}\n"
+  postfix _ = "\t}\n"
   codeStatementHelper a op (Expression (FFT (Expression (R v)))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
-  codeStatementHelper a op e = prefix "" e ++ "if (i == 0) {\n\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\telse {\n\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";\n\t}" ++ postfix e
+  codeStatementHelper a op e = "{\n\t\tconst int i = 0;\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\t" ++ prefix "" e ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+  countFFTHelper (Expression (FFT _)) = 1
+  countFFTHelper _ = 0
   initialize (Expression (K x)) = "VectorXcd " ++ x ++ "(gd.NxNyNz);\n"
   initialize _ = "VectorXcd output(gd.NxNyNz);\n"
   toScalar (K v) = s_var v
   toScalar Delta = 1
-  toScalar Kx = 0
+  toScalar Kx = s_var "_kx"
   toScalar Ky = 0
   toScalar Kz = 0
   toScalar (FFT e) = makeHomogeneous e
@@ -143,11 +149,54 @@ mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
 mapExpression f (Signum e) = signum (mapExpression f e)
-mapExpression f (a ::** n) = (mapExpression f a) ** mapExpression f n
-mapExpression f (a ::+ b) = mapExpression f a + mapExpression f b
-mapExpression f (a ::* b) = mapExpression f a * mapExpression f b
-mapExpression f (a ::/ b) = mapExpression f a / mapExpression f b
+mapExpression f (Product p) = product $ map ff $ product2pairs p
+  where ff (e,n) = (mapExpression f e) ** toExpression n
+mapExpression f (Sum s) = pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
+
+isEven :: (Type a, Type b) => b -> Expression a -> Double
+isEven v (Scalar e) = isEven v e
+isEven _ (Cos _) = 1
+isEven v (Sin e) = isEven v e
+isEven v (Exp e) = if isEven v e == 1 then 1 else 0
+isEven v (Log e) = if isEven v e == 1 then 1 else 0
+isEven _ (Abs _) = 1
+isEven v (Signum e) = isEven v e
+isEven v (Product p) = product $ map ie $ product2pairs p
+  where ie (x,n) = isEven v x ** n
+isEven _ (Sum s) | Sum s == 0 = 1 -- ???
+isEven v (Sum s) = ie (isEven v x) xs
+  where (_,x):xs = sum2pairs s
+        ie sofar ((_,y):ys) = if isEven v y /= sofar 
+                              then 0
+                              else ie sofar ys
+        ie sofar [] = sofar
+isEven v (Expression e) | Same <- isKSpace (Expression v), 
+                          Same <- isKSpace (Expression e),
+                          v == e = -1
+isEven v (Expression e) | Same <- isRealSpace (Expression v), 
+                          Same <- isRealSpace (Expression e),
+                          v == e = -1
+isEven v (Expression e) | Same <- isScalar (Expression v), 
+                          Same <- isScalar (Expression e),
+                          v == e = -1
+isEven v (Expression e) 
+  | Same <- isKSpace (Expression e) =
+    case e of
+      FFT r -> isEven v r
+      _ -> 1
+isEven v (Expression e) 
+  | Same <- isRealSpace (Expression e) =
+    case e of
+      IFFT ks -> isEven v ks
+      _ -> 1
+isEven v (Expression e) 
+  | Same <- isScalar (Expression e) =
+    case e of
+      Integrate x -> isEven v x
+      _ -> 1
+isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into this
 
 setZero :: (Type a, Type b) => b -> Expression a -> Expression a
 setZero v (Scalar e) = Scalar (setZero v e)
@@ -157,50 +206,65 @@ setZero v (Exp e) = exp (setZero v e)
 setZero v (Log e) = log (setZero v e)
 setZero v (Abs e) = abs (setZero v e)
 setZero v (Signum e) = signum (setZero v e)
-setZero v (a ::** n) = (setZero v a) ** setZero v n
-setZero v (a ::+ b) = setZero v a + setZero v b
-setZero v (a ::* b) = setZero v a * setZero v b
-setZero v (a ::/ b) =
-    if zb == 0
-    then case isKSpace (Expression v) of
-           Same -> case isKSpace a  of
-                     Same -> setZero v (derive v 1 a / derive v 1 b)
-                     _ -> error "oopsies"
-           _ -> case isScalar (Expression v) of
-                  Same -> case isScalar a  of
-                            Same -> setZero v (derive v 1 a / derive v 1 b)
-                            _ -> error "oopsies"
-                  _ -> case isRealSpace (Expression v) of
-                         Same -> case isRealSpace a  of
-                                   Same -> setZero v (derive v 1 a / derive v 1 b)
-                                   _ -> error "oopsies"
-                         _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
-                      else za / zb
-    where za = setZero v a
-          zb = setZero v b
+setZero v (Product p) | product2denominator p == 1 = product $ map ff $ product2pairs p
+  where ff (e,n) = (setZero v e) ** toExpression n
+setZero v (Product p) = 
+  if --trace ("isEven " ++ latex (Product p) ++ " = " ++ show (isEven v (Product p)))
+     isEven v (Product p) == -1
+  then 0
+  else 
+    if --trace ("setZero Product " ++ latex (Product p)) 
+       zd /= 0
+    then zn / zd
+    else if --trace ("L'Hopital's rule: " ++ latex (Product p)) 
+            zn /= 0
+         then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
+                     ++ latex (Product p) ++ "\n\n\n" ++ latex zn)
+         else case isKSpace (Expression v) of
+              Same -> 
+                case isKSpace n of
+                  Same -> --trace ("Need to derive: dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot) 
+                          setZero v (dtop / dbot)
+                    where dtop = derive v 1 n
+                          dbot = derive v 1 d
+                  _ -> error "oopsies"
+              _ -> 
+                case isScalar (Expression v) of
+                  Same -> 
+                    case isScalar n of
+                      Same -> setZero v (derive v 1 n / derive v 1 d)
+                      _ -> error "oopsies"
+                  _ -> 
+                    case isRealSpace (Expression v) of
+                      Same -> 
+                        case isRealSpace n  of
+                          Same -> --trace ("Need to derive: dtop is " ++ latex dtop ++ " dbot is " ++ latex dbot
+                                  --       ++
+                                  --       "\n\ttop is " ++ latex n ++ " bot is " ++ latex d) 
+                                  setZero v (dtop / dbot)
+                            where dtop = derive v 1 n
+                                  dbot = derive v 1 d
+                          _ -> error "oopsies"
+                      _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
+  where d = product2denominator p
+        n = product $ product2numerator p
+        zn = setZero v n
+        zd = setZero v d
+setZero _ (Sum s) | Sum s == 0 = 0
+setZero v (Sum s) = --trace ("out " ++ latex (Sum s) ++ " = " ++ show (map show $ map sz $ sum2pairs s) 
+                    --      ++ " = " ++ latex out)
+                    out
+  where sz (f,x) = (f, setZero v x)
+        out = pairs2sum $ map sz $ sum2pairs s
 setZero v (Expression x) = zeroHelper v x
-
-kzeroValue :: Type a => KSpace -> Expression a
-kzeroValue (K v) = s_var (v ++ "[0]")
-kzeroValue Kx = 0
-kzeroValue Ky = 0
-kzeroValue Kz = 0
-kzeroValue Delta = error "Can't find zero value of delta function!"
-kzeroValue (FFT _) = error "Hard to find zero value of an fft"
 
 instance Code Scalar where
   codePrec _ (S v) = showString v
-  codePrec p (Constant d) = showsPrec p d
   codePrec _ (Integrate r) = showString "(" . codePrec 0 r . showString ") * gd.dvolume"
   latexPrec _ (S v) = showString v
-  latexPrec p (Constant d) = showsPrec p d
   latexPrec _ (Integrate r) = showString "integrate(" . latexPrec 0 r . showString ")"
 instance Type Scalar where
-  toExpression = Expression . Constant . fromRational . toRational
   s_var = Expression . S
-  isConstant (Expression (Constant x)) = Just x
-  isConstant (Scalar x) = isConstant x
-  isConstant _ = Nothing
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   derivativeHelper v dds s | Same <- isScalar (Expression v), v == s = dds
@@ -212,9 +276,10 @@ instance Type Scalar where
       where (st, r') = simp r
   simpHelper sc = (return (), Expression sc)
   var v _ = s_var v
-  codeStatementHelper a " = " (Expression (Integrate e)) = a ++ " = 0;\nfor (int i=0; i<gd.NxNyNz; i++) {    \n" ++ a ++ "+=" ++ code e ++ ";\n}\n"
-  codeStatementHelper a " += " (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {    \n" ++ a ++ " += " ++ code e ++ ";\n}\n"
-  codeStatementHelper a op e = a ++ op ++ code e ++ ";\n"
+  codeStatementHelper a " = " (Expression (Integrate e)) = a ++ " = 0;\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ "+=" ++ code e ++ ";\n\t}\n"
+  codeStatementHelper a " += " (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code e ++ ";\n\t}\n"
+  codeStatementHelper a op e = a ++ op ++ code e ++ ";\n\t"
+  countFFTHelper _ = 0
   prefix "" (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
@@ -247,17 +312,16 @@ ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
 
 integrate :: Expression RealSpace -> Expression Scalar
---integrate (x ::+ y) = Expression (Integrate x) + Expression (Integrate y)
 integrate x = Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
-fft r = Expression (FFT r)
+fft r | r == 0 = 0
+      | otherwise = Expression (FFT r)
 
 ifft :: Expression KSpace -> Expression RealSpace
-ifft ke = case factor (Expression Delta) ke of
-            Just k' -> mapExpression kzeroValue k'
-            Nothing -> Expression (IFFT ke)
+ifft ke | ke == 0 = 0
+        | otherwise = Expression (IFFT ke)
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -277,16 +341,59 @@ data Expression a = Scalar (Expression Scalar) |
                     Log (Expression a) |
                     Abs (Expression a) |
                     Signum (Expression a) |
-                    Expression a ::** Expression a |
-                    Expression a ::+ Expression a |
-                    Expression a ::* Expression a |
-                    Expression a ::/ Expression a
+                    Product (Map.Map (Expression a) Double) |
+                    Sum (Map.Map (Expression a) Double)
               deriving (Eq, Ord, Show)
 
+sum2pairs :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
+sum2pairs s = map rev $ Map.assocs s
+  where rev (a,b) = (b,a)
 
-infixr 8 ::**
-infixl 7 ::*, ::/
-infixl 6 ::+
+pairs2sum :: Type a => [(Double, Expression a)] -> Expression a
+pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
+  where helper [] = 0
+        helper [(1,e)] = e
+        helper [(x,Sum y)] | [(x2,y')] <- sum2pairs y = helper [(x*x2, y')]
+        helper es = Sum $ fl (Map.empty) es
+        fl a [] = a
+        fl a ((f,x):xs) = case Map.lookup x a of
+                          Just f' -> if f + f' == 0
+                                     then fl (Map.delete x a) xs
+                                     else fl (Map.insert x (f+f') a) xs
+                          Nothing -> fl (Map.insert x f a) xs
+        
+
+product2pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2pairs s = Map.assocs s
+
+map2product :: Type a => Map.Map (Expression a) Double -> Expression a
+map2product p | Map.size p == 1 = case product2pairs p of [(e,1)] -> e
+                                                          _ -> Product p
+map2product p = helper 1 (Map.empty) $ product2pairs p
+  where helper 1 a [] = Product a
+        helper f a [] = Sum $ Map.singleton (Product a) f
+        helper f a ((Sum x,n):xs) | [(f',x')] <- sum2pairs x = helper (f*f'**n) a ((x',n):xs)
+        helper f a ((x,n):xs) = helper f (Map.insert x n a) xs
+
+pairs2product :: Type a => [(Expression a, Double)] -> Expression a
+pairs2product = map2product . fl (Map.empty)
+  where fl a [] = a
+        fl a ((x,n):xs) = case Map.lookup x a of
+                            Just n' -> if n + n' == 0
+                                       then fl (Map.delete x a) xs
+                                       else fl (Map.insert x (n+n') a) xs
+                            Nothing -> fl (Map.insert x n a) xs
+
+product2numerator :: Type a => Map.Map (Expression a) Double -> [Expression a]
+product2numerator s = map f $ product2numerator_pairs s
+  where f (a,b) = a ** (toExpression b)
+
+product2numerator_pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2numerator_pairs s = filter ((>=0) . snd) $ product2pairs s
+
+product2denominator :: Type a => Map.Map (Expression a) Double -> Expression a
+product2denominator s = pairs2product $ map n $ filter ((<0) . snd) $ product2pairs s
+  where n (a,b) = (a, -b)
 
 instance (Type a, Code a) => Code (Expression a) where
   codePrec = codeE
@@ -301,40 +408,99 @@ codeE _ (Exp x) = showString "exp(" . codeE 0 x . showString ")"
 codeE _ (Log x) = showString "log(" . codeE 0 x . showString ")"
 codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
 codeE _ (Signum _) = undefined
-codeE p (x ::** y) =
-  case isConstant y of
-    Just 0 -> showString "1" -- this shouldn't happen...
-    Just 1 -> codeE p x
-    Just 0.5 -> showString "sqrt(" . codePrec 0 x . showString ")"
-    Just n
-      | n > 0 && n == fromInteger (floor n) && 
-        fromInteger (floor (n/2)) /= fromInteger(floor n)/(2 :: Double) ->
-          codeE p (x ::* x ::** toExpression (n-1))
-      | n > 0 && n == fromInteger (floor n) ->
-          codeE p (x ::** toExpression (n/2) ::* x ::** toExpression (n/2))
-      | n > 0 && n - fromInteger (floor n) == 0.5 ->
-          codeE p (x ::** toExpression (floor n :: Integer) ::* x ::** 0.5)
-      | n < 0 -> codeE p (1 ::/ x ::** toExpression (-n))
-    _ -> showString "pow(" . codeE 0 x . showString ", " . codeE 0 y . showString ")"
-codeE p (x ::+ y) = showParen (p > 6) (codeE 6 x . showString " + " . codeE 7 y)
-codeE p (x ::* y) = showParen (p > 7) (codeE 7 x . showString " * " . codeE 8 y)
-codeE p (x ::/ y) = showParen (p > 7) (codeE 7 x . showString " / " . codeE 8 y)
-
+codeE _ (Product p) | Product p == 1 = showString "1"
+codeE pree (Product p) = showParen (pree > 7) $
+                         if den == 1 
+                         then codesimple num
+                         else codesimple num . showString "/" . codeE 8 den
+  where codesimple [] = showString "1"
+        codesimple [(a,n)] = codee a n
+        codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
+        codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
+        num = product2numerator_pairs p
+        den = product2denominator p
+        codee _ 0 = showString "1" -- this shouldn't happen...
+        codee _ n | n < 0 = error "shouldn't have negative power here"
+        codee x 1 = codeE 7 x
+        codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
+        codee x nn
+          | fromInteger n2 == 2*nn && odd n2 = codee x 0.5 . showString "*" . codee x (nn-0.5)
+          | fromInteger n == nn && odd n = codee x 1 . showString "*" . codee x (nn-1)
+          | fromInteger n == nn = 
+            showParen (nn/2>1) (codee x (nn / 2)) . showString "*" . showParen (nn/2>1) (codee x (nn / 2))
+          where n2 = floor (2*nn)
+                n = floor nn
+        codee x n = showString "pow(" . codeE 0 x . showString (", " ++ show n ++ ")")
+codeE _ (Sum s) | Sum s == 0 = showString "0"
+codeE p (Sum s) = showParen (p > 6) (showString me)
+  where me = foldl addup "" $ sum2pairs s
+        addup "" (1,e) = codeE 6 e ""
+        addup "" (f,e) = if e == 1
+                         then show f
+                         else show f ++ "*" ++ codeE 6 e ""
+        addup rest (1,e) = codeE 6 e (showString " + " $ rest)
+        addup rest (f,e) = show f ++ "*" ++ codeE 6 e (showString " + " $ rest)
 
 latexE :: (Type a, Code a) => Int -> Expression a -> ShowS
+latexE _ x | Just xx <- isConstant x = showString (latexDouble xx)
 latexE p (Scalar x) = latexPrec p x
 latexE p (Expression x) = latexPrec p x
-latexE _ (Cos x) = showString "cos(" . latexE 0 x . showString ")"
-latexE _ (Sin x) = showString "sin(" . latexE 0 x . showString ")"
-latexE _ (Exp x) = showString "exp(" . latexE 0 x . showString ")"
-latexE _ (Log x) = showString "log(" . latexE 0 x . showString ")"
-latexE _ (Abs x) = showString "fabs(" . latexE 0 x . showString ")"
+latexE _ (Cos x) = showString "\\cos(" . latexE 0 x . showString ")"
+latexE _ (Sin x) = showString "\\sin(" . latexE 0 x . showString ")"
+latexE _ (Exp x) = showString "\\exp(" . latexE 0 x . showString ")"
+latexE _ (Log x) = showString "\\log(" . latexE 0 x . showString ")"
+latexE _ (Abs x) = showString "\\left|" . latexE 0 x . showString "\\right|"
 latexE _ (Signum _) = undefined
-latexE _ (x ::** y) = latexE 8 x . showString "^{" . latexE 0 y . showString "}"
-latexE p (x ::+ y) = showParen (p > 6) (latexE 6 x . showString " + " . latexE 7 y)
-latexE p (x ::* y) = showParen (p > 7) (latexE 7 x . showString " * " . latexE 8 y)
-latexE p (x ::/ y) = showParen (p > 7) (latexE 7 x . showString " / " . latexE 8 y)
+latexE p (Product x) | Map.size x == 1 && product2denominator x == 1 =
+  case product2pairs x of
+    [(_,0)] -> showString "1" -- this shouldn't happen...
+    [(_, n)] | n < 0 -> error "shouldn't have negative power here"
+    [(e, 1)] -> latexE p e
+    [(e, 0.5)] -> showString "\\sqrt{" . latexE 0 e . showString "}"
+    [(e, nn)]
+      | fromInteger n2 == 2*nn && odd n2 -> if n2 < 10
+                                            then latexE 8 e . showString ("^\\frac" ++ show n2 ++ "2")
+                                            else latexE 8 e . showString ("^\\frac{" ++ show n2 ++ "}2")
+      | fromInteger n == nn -> if n2 < 10
+                               then latexE 8 e . showString ("^" ++ show n)
+                               else latexE 8 e . showString ("^{" ++ show n ++ "}")
+          where n2 = floor (2*nn)
+                n = floor nn
+    [(e,n)] -> latexE 8 e . showString ("^{" ++ show n ++ "}")
+    _ -> error "This really cannot happen."
+latexE pree (Product p) | product2denominator p == 1 = showParen (pree > 7) $ ltexsimple $ product2numerator p
+  where ltexsimple [] = showString "1"
+        ltexsimple [a] = latexE 7 a
+        ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
+        ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
+latexE pree (Product p) = showParen (pree > 7) $ showString "\\frac{" . latexE 7 num . showString "}{" . 
+                                                                        latexE 7 den . showString "}"
+  where num = product $ product2numerator p
+        den = product2denominator p
+latexE p (Sum s) = showParen (p > 6) (showString me)
+  where me = foldl addup "" $ sum2pairs s
+        addup "" (1,e) = latexE 6 e ""
+        addup "" (f,e) = if e == 1
+                         then latexDouble f
+                         else latexDouble f ++ " " ++ latexE 6 e ""
+        addup rest (1,e) = latexE 6 e (showString " + " $ rest)
+        addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
 
+latexDouble :: Double -> String
+latexDouble x = case double2int x of
+                  Just n -> show n
+                  Nothing -> case double2int (x/pi) of
+                               Just n -> show n ++ "\\pi"
+                               Nothing -> printpi [2 .. 32]
+  where printpi [] = show x
+        printpi (n:ns) = case double2int (fromInteger n*x/pi) of
+                           Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "}\\pi"
+                           Nothing -> printpi ns
+
+double2int :: Double -> Maybe Int
+double2int f = if fromInteger (floor f) == f
+               then Just (floor f :: Int)
+               else Nothing
 
 class Code a  where
     codePrec  :: Int -> a -> ShowS
@@ -350,9 +516,20 @@ data Same a b where
     Same :: Same a a
     Different :: Same a b
 
-class (Eq a, Show a, Code a) => Type a where 
-  toExpression :: Real x => x -> Expression a
-  toExpression = Scalar . Expression . Constant . fromRational . toRational
+toExpression :: (Type a, Real x) => x -> Expression a
+toExpression 0 = Sum $ Map.empty
+toExpression 1 = Product $ Map.empty
+toExpression x = Sum $ Map.singleton 1 (fromRational $ toRational x)
+
+isConstant :: Type a => Expression a -> Maybe Double
+isConstant (Sum s) = case sum2pairs s of
+                       [] -> Just 0
+                       [(x,1)] -> Just x
+                       _ -> Nothing
+isConstant (Product p) = if Map.size p == 0 then Just 1 else Nothing
+isConstant _ = Nothing
+
+class (Ord a, Show a, Code a) => Type a where 
   isScalar :: Expression a -> Same a Scalar
   isScalar _ = Different
   isRealSpace :: Expression a -> Same a RealSpace
@@ -361,14 +538,13 @@ class (Eq a, Show a, Code a) => Type a where
   isKSpace _ = Different
   s_var :: String -> Expression a
   s_var = Scalar . s_var
-  isConstant :: Expression a -> Maybe Double
-  isConstant (Scalar x) = isConstant x
-  isConstant _ = Nothing
   derivativeHelper :: Type b => b -> Expression a -> a -> Expression b
   zeroHelper :: Type b => b -> a -> Expression a
   simpHelper :: a -> (Statement (), Expression a)
   var :: String -> Expression a -> Expression a
   codeStatementHelper :: String -> String -> Expression a -> String
+  countFFTHelper :: Expression a -> Int
+  countFFTHelper _ = 0
   prefix :: String -> Expression a -> String
   postfix :: Expression a -> String
   postfix _ = ""
@@ -377,121 +553,102 @@ class (Eq a, Show a, Code a) => Type a where
   toScalar :: a -> Expression Scalar
 
 codeStatement :: Statement a -> String
-codeStatement (a := e) = codeStatementHelper a " = " e
-codeStatement (a :?= e) = codeStatementHelper (a ++ "_" ++ hash (show e)) " = " e
-codeStatement (a :+= e) = codeStatementHelper a " += " e
-codeStatement (Initialize e) = initialize e
+codeStatement (a := e) = "\t" ++ codeStatementHelper a " = " e
+codeStatement (a :?= e) = "\t" ++ codeStatementHelper (a ++ "_" ++ hash (show e)) " = " e
+codeStatement (a :+= e) = "\t" ++ codeStatementHelper a " += " e
+codeStatement (Initialize e) = "\t" ++ initialize e
 codeStatement (Return _) = ""
 codeStatement (a :>> b) = codeStatement a ++ codeStatement b
 
+countFFT :: Statement a -> Int
+countFFT (_ := e) = countFFTHelper e
+countFFT (_ :?= e) = countFFTHelper e
+countFFT (_ :+= e) = countFFTHelper e
+countFFT (a :>> b) = countFFT a + countFFT b
+countFFT _ = 0
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
-makeHomogeneous = mapExpression toScalar
+makeHomogeneous ee = 
+  scalarScalar $ case isKSpace ee of
+                    Same -> setZero (S "_kx") $ mapExpression toScalar ee
+                    _ -> mapExpression toScalar ee
+  where scalarScalar :: Expression Scalar -> Expression Scalar
+        scalarScalar (Scalar s) = s
+        scalarScalar (Sum x) = pairs2sum $ map f $ sum2pairs x
+          where f (a,b) = (a, scalarScalar b)
+        scalarScalar (Product x) = pairs2product $ map f $ product2pairs x
+          where f (a,b) = (scalarScalar a, b)
+        scalarScalar (Expression e) = Expression e -- FIXME
+        scalarScalar (Cos x) = cos (scalarScalar x)
+        scalarScalar (Sin x) = sin (scalarScalar x)
+        scalarScalar (Exp x) = exp (scalarScalar x)
+        scalarScalar (Log x) = log (scalarScalar x)
+        scalarScalar (Abs x) = abs (scalarScalar x)
+        scalarScalar (Signum x) = signum (scalarScalar x)
 
 instance Type a => Num (Expression a) where
-  (+) = \x y -> case (x, y) of
-                  _ | y == 0 -> x
-                    | x == 0 -> y
-                  (Scalar s1 ::* a, Scalar s2 ::* b) | s1 == s2 -> Scalar s1 * (a + b)
-                  (Scalar a, Scalar b) -> Scalar (a+b)
-                  _ | Just xx <- isConstant x, Just yy <- isConstant y -> toExpression (xx + yy)
-                    | otherwise ->
-                        case factor x y of
-                         Just y' | x /= 1 -> (1+y')*x
-                         _ ->
-                           case factor y x of
-                             Just x' | y /= 1 -> (1+x')*y
-                             _ -> x ::+ y
+  x + y | Just 0 == isConstant x = y
+        | Just 0 == isConstant y = x
+  Sum a + Sum b = sumup a $ sum2pairs b
+      where sumup x [] = Sum x
+            sumup x ((f,y):ys) = case Map.lookup y x of
+                                 Nothing -> sumup (Map.insert y f x) ys
+                                 Just f' -> if f + f' == 0
+                                            then sumup (Map.delete y x) ys
+                                            else sumup (Map.insert y (f+f') x) ys
+  Sum a + b = case Map.lookup b a of
+                Just fac -> if fac + 1 == 0
+                            then case sum2pairs deleted of 
+                                   [(1,e)] -> e
+                                   [(f,e)] -> Sum $ Map.singleton e f
+                                   _ -> Sum deleted
+                            else Sum $ Map.insert b (fac + 1) a
+                Nothing -> Sum $ Map.insert b 1 a
+    where deleted = Map.delete b a
+  a + Sum b = Sum b + a
+  a + b = Sum (Map.singleton a 1) + b
   (-) = \x y -> x + (-y)
   -- the fromRational on the following line is needed to avoid a
   -- tricky infinite loop where -1 intepreted as (negate $ fromRational 1)
   negate = \x -> (fromRational $ -1) * x
-  (*) = \x y -> case (x, y) of
-                  _ | x == 1 -> y
-                    | y == 1 -> x
-                    | x == 0 || y == 0 -> 0
-                    | x == y -> x ** 2
-                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a*b)
-                  (Scalar a ::* c, Scalar b) -> Scalar (a*b) * c
-                  (Scalar a, Scalar s ::* b) -> Scalar (a*s) * b
-                  (Scalar s1 ::* a, Scalar s2 ::* b) -> Scalar (s1*s2) * a * b
-                  (_, a ::* b) -> x * a * b
-                  (_, a ::/ b) -> case factor x b of
-                                  Just b' -> a / b'
-                                  Nothing -> 
-                                    case factor b x of
-                                      Just x' -> x' * a
-                                      Nothing -> (x*a)/b
-                  (a ::/ b, _) -> case factor y b of
-                                  Just b' -> a / b'
-                                  Nothing -> 
-                                    case factor b y of
-                                      Just y' -> a * y'
-                                      Nothing -> (a*y)/b
-                  (Scalar a, Scalar b) -> Scalar (a*b)
-                  (_, Scalar _) -> y * x
-                  _ -> x ::* y
+  x * y | x == 0 = 0
+        | y == 0 = 0
+        | x == 1 = y
+        | y == 1 = x
+  Sum x * y | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2pairs x
+                      where f c (a,b) = (c*a, b)
+  y * Sum x | Just c <- isConstant y = pairs2sum $ map (f c) $ sum2pairs x
+                      where f c (a,b) = (c*a, b)
+  Sum x * y | [(f,a)] <- sum2pairs x = pairs2sum [(f, a*y)]
+  y * Sum x | [(f,a)] <- sum2pairs x = pairs2sum [(f, a*y)]
+  Product a * Product b = puttogether a (product2pairs b)
+      where puttogether x [] = map2product x
+            puttogether x ((y,n):ys) =
+                  case Map.lookup y x of
+                    Just n' -> if n + n' == 0
+                               then puttogether (Map.delete y x) ys
+                               else puttogether (Map.insert y (n+n') x) ys
+                    Nothing -> puttogether (Map.insert y n x) ys
+  Product a * b = case Map.lookup b a of
+                    Just n -> if n + 1 == 0
+                             then map2product deleted
+                             else map2product $ Map.insert b (n+1) a
+                    Nothing -> map2product $ Map.insert b 1 a
+    where deleted = Map.delete b a
+  a * Product b = Product b * a
+  a * b = Product (Map.singleton a 1) * b
   fromInteger = \x -> toExpression (fromInteger x :: Rational)
   abs = undefined
   signum = undefined
 
--- | Factor is used to do some crude simplification in the * and /
--- operators.  I should note that we *don't* fully simplify ratios,
--- but I expect that this may be "good enough," whatever that means.
-
-factor :: Type a => Expression a -> Expression a -> Maybe (Expression a)
-factor x (y ::* z) | x == y = Just z
-                   | x == z = Just y
-                   | otherwise = case factor x y of
-                                 Just y' -> Just (y' * z)
-                                 _ -> case factor x z of
-                                      Just z' -> Just (y * z')
-                                      _ -> Nothing
-factor x (y ::** n) | x == y = Just (y ** (n-1))
-factor x y | x == y = Just 1
-factor _ _ = Nothing
-
 instance Type a => Fractional (Expression a) where
-  (/) = \x y -> case (x, y) of
-                  _ | y == 1 -> x
-                    | x == 0 -> 0
-                    | Just a <- isConstant x, Just b <- isConstant y -> toExpression (a/b)
-                    | Just b <- isConstant y -> x * toExpression (1.0 / b)
-                  (Scalar a, (Scalar s) ::* b) -> Scalar (a/s) / b
-                  ((Scalar r) ::* a, (Scalar s) ::* b) -> Scalar (r/s) * a / b
-                  (Scalar a, Scalar b) -> Scalar (a/b)
-                  (a ::/ b, c ::/ d) ->
-                    case factor b c of
-                      Just c' -> a * c' / d
-                      Nothing -> 
-                        case factor d a of
-                          Just a' -> a' * c / b
-                          Nothing -> 
-                            case factor c b of
-                              Just b' -> a / d / b'
-                              Nothing ->
-                                case factor a d of
-                                  Just d' -> c / b / d'
-                                  Nothing -> (a * c) / (b * d)
-                  (_, a ::/ b) -> 
-                    case factor x a of
-                      Just a' -> b / a'
-                      Nothing ->
-                        case factor a x of
-                          Just x' -> x'*b
-                          Nothing -> (x*b)/a
-                  (a ::/ b, _) -> 
-                    case factor a y of
-                      Just y' -> 1/(b*y')
-                      Nothing ->
-                        case factor y a of
-                          Just a' -> a' / b
-                          Nothing -> a/(b*y)
-                  _ -> x ::/ y
+  x / y | Just yy <- isConstant y = x * toExpression (1/yy)
+  x / Product y = x * Product (Map.map negate y)
+  x / y = x * Product (Map.singleton y (-1))
   fromRational = toExpression
 
 instance Type a => Floating (Expression a) where
-  pi = Scalar $ Expression $ Constant pi
+  pi = toExpression (pi :: Double)
   exp = \x -> case x of 0 -> 1
                         _ -> Exp x
   log = \x -> case x of 1 -> 0
@@ -505,14 +662,15 @@ instance Type a => Floating (Expression a) where
   cos = \x -> case x of
     0 -> 1
     _ -> Cos x
-  (a ::* b) ** y | a == b = a ** (2*y)
-  (x ::** b) ** c = x ** (b*c)
-  x ** y | isConstant x == Just 0 = 0
-         | isConstant x == Just 1 = 1
-         | isConstant y == Just 0 = 1
-         | isConstant y == Just 1 = x
-         | Just xv <- isConstant x, Just yv <- isConstant y = toExpression (xv**yv)
-  x ** y = x ::** y
+  a ** b | Just x <- isConstant a, Just y <- isConstant b = toExpression (x ** y)
+  x ** y | y == 0 = 1
+         | y == 1 = x
+  (Sum x) ** c | Just n <- isConstant c,
+                 [(f,y)] <- sum2pairs x = pairs2sum [(f**n, y ** c)]
+  (Product x) ** c | Just n <- isConstant c = pairs2product $ map (p n) $ product2pairs x
+                       where p n (e,n2) = (e,n2*n)
+  x ** c | Just n <- isConstant c = pairs2product [(x,n)]
+  x ** y = exp (y*log x)
   asin = undefined
   acos = undefined
   atan = undefined
@@ -528,18 +686,11 @@ grad v e = derive (R v) 1 e
 
 simp :: Type a => Expression a -> (Statement (), Expression a)
 simp (Expression e) = simpHelper e
-simp (e1 ::+ e2) = (st1 >> st2, f1 + f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::* e2) = (st1 >> st2, f1 * f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::/ e2) = (st1 >> st2, f1 / f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
-simp (e1 ::** e2) = (st1 >> st2, f1 ** f2)
-    where (st1, f1) = simp e1
-          (st2, f2) = simp e2
+simp (Sum s) = (sequence_ $ map fst simped, pairs2sum $ map snd simped)
+  where es = sum2pairs s
+        simped = map simpme es
+        simpme (f,x) = (st, (f,x'))
+          where (st, x') = simp x
 simp (Cos e) = (st, Cos e')
     where (st, e') = simp e
 simp (Sin e) = (st, Sin e')
@@ -550,12 +701,42 @@ simp (Exp e) = (st, Exp e')
     where (st, e') = simp e
 simp (Scalar s) = (st, Scalar s')
     where (st, s') = simp s
-simp x = error ("I haven't finished simp" ++ show x)
+simp (Product p) = (sequence_ $ map fst simped, product $ map snd simped)
+  where es = product2pairs p
+        simped = map simpme es
+        simpme (x,n) = (st, x' ** toExpression n)
+          where (st,x') = simp x
+simp _ = error "simp incomplete"
+
+factorandsum :: Type a => [Expression a] -> Expression a
+factorandsum [] = 0
+factorandsum (x:xs) = helper (getprodlist x) (x:xs)
+  where helper :: Type a => [(Expression a, Double)] -> [Expression a] -> Expression a
+        helper [] as = sum as
+        helper ((f,n):fs) as = if --trace ("factoring " ++ show n' ++ " copies of "++latex f) 
+                                  n' /= 0
+                               then (helper fs (map (/(f**(toExpression n'))) as)) * (f**(toExpression n'))
+                               else helper fs as
+          where n' = if n < 0 then if --trace (show f ++ show (map (countup f) as)) 
+                                      maximum (map (countup f) as) < 0
+                                   then maximum (map (countup f) as)
+                                   else 0
+                              else if minimum (map (countup f) as) > 0
+                                   then minimum (map (countup f) as)
+                                   else 0
+        countup f (Product y) = Map.findWithDefault 0 f y
+        countup f (Sum a) | [(_,y)] <- sum2pairs a = countup f y
+        countup f y | f == y = 1
+        countup _ _ = 0
+        getprodlist (Product xx) = product2pairs xx
+        getprodlist (Sum a) | [(_,Product xx)] <- sum2pairs a = product2pairs xx
+        getprodlist xx = [(xx,1)]
 
 derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
-derive v dda (x ::+ y) = derive v dda x + derive v dda y
-derive v dda (x ::* y) = derive v (dda*x) y + derive v (dda*y) x
-derive v dda (x ::/ y) = derive v (dda / y) x + derive v (-dda*x/y**2) y
+derive v dda (Sum s) = sum $ map dbythis $ sum2pairs s
+  where dbythis (f,x) = toExpression f * derive v dda x
+derive v dda (Product p) = factorandsum (map dbythis $ product2pairs p)
+  where dbythis (x,n) = derive v (Product p*toExpression n*dda/x) x
 derive v _ (Scalar x) = derive v 1 x -- FIXME
 derive v dda (Cos e) = derive v (-dda*sin e) e
 derive v dda (Sin e) = derive v (dda*cos e) e
@@ -563,8 +744,24 @@ derive v dda (Exp e) = derive v (dda*exp e) e
 derive v dda (Log e) = derive v (dda/e) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
-derive v dda (e ::** n) = derive v (dda*n*e**(n-1)) e
 derive v dda (Expression e) = derivativeHelper v dda e
+
+substitute :: (Type a) => Expression a -> Expression a -> Expression a -> Expression a
+substitute x y (Expression v) | x == Expression v = y
+                              | otherwise = Expression v
+substitute x y (Scalar v) | x == Scalar v = y
+                          | otherwise = Scalar v
+substitute x y (Sum s) = pairs2sum $ map sub $ sum2pairs s
+    where sub (f,e) = (f, substitute x y e)
+substitute x y (Product p) = pairs2product $ map sub $ product2pairs p
+    where sub (e, n) = (substitute x y e, n)
+substitute x y (Cos e)   = substitute x y e
+substitute x y (Sin e)   = substitute x y e
+substitute x y (Log e)   = substitute x y e
+substitute x y (Exp e)   = substitute x y e
+substitute x y (Abs e)   = substitute x y e
+substitute x y (Signum e) = substitute x y e
+
 \end{code}
 
 The statement type allows us to string together a sequence of
@@ -597,8 +794,8 @@ showsS _ (Return _) = showString "return ???"
 showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
 
 instance Code (Statement a) where
-	codePrec = codeS
-        latexPrec = latexS
+  codePrec = codeS
+  latexPrec = latexS
 codeS :: Int -> Statement a -> ShowS
 codeS _ (x := y) = showString (prefix "" y) . 
                     codePrec 0 (var x y) . showString " = " . codePrec 0 y . showString ";" .
@@ -655,16 +852,16 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
-                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform ++ ";\nreturn output;\n")  ++
-                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n" ++ code codeDTransform ++ ";\nreturn output;\n") ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n" ++ codeStatement codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n" ++ "\treturn output*gd.dvolume;\n" ) ++
+                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.\n" ++ "\treturn output;\n")  ++
+                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n\t" ++ codeStatement codeDTransform ++ "\n\treturn output;\n") ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
-                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n" ++ code codeDerive ++ ";\nreturn output;\n") ++
+                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n" ++ codeStatement codeDerive ++ "\n\treturn output;\n") ++
                 functionCode "d_by_dT" "double" [("double", ""), ("double", "")] "\tassert(0); // fail\n\treturn 0;\n" ++
                 functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
                 functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\tassert(&ingrad==&ingrad);\n\tassert(&x==&x);\n\treturn ingrad;" ++
                 functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\tassert(&ingradT==&ingradT);\n\treturn ingradT;" ++
-                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n" ++ codeStatement codeGrad) ++
+                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n" ++ codeStatement codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n") ++
                 functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
@@ -691,11 +888,14 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
 
 
 generateHeader :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
-generateHeader e arg n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
+generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
                      classCode e arg (n ++ "_type") ++
-                     "\n\ninline Functional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
+                     "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
     where codeA (Just rep) = "double " ++ code (makeHomogeneous rep)
           codeA Nothing = ""
           codeA' (Just rep) = code (makeHomogeneous rep)
           codeA' Nothing = ""
+
+
+
 \end{code}
