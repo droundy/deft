@@ -37,10 +37,9 @@ ALL_FIGURES=\
 	figs/contact.svg\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
-	figs/box-100c--05,05,05-13.gp\
-	figs/box-100s--05,05,05-13.gp\
-	figs/box-110c--05,05,05-13.gp\
 	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
+	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
+	figs/inner-4-30.pdf figs/inner-4-40.pdf figs/inner-8-30.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -58,7 +57,7 @@ figs/gHS-vs-n.eps: figs/gHS-vs-n.dat
 
 figs/free-energy.eps: figs/free-energy.dat
 
-figs/box-%.eps: figs/box-%.dat
+#figs/box-%.eps: figs/box-%.dat
 
 figs/contact-08-013.pdf: figs/contact-density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat
 	python $^ $@
@@ -67,4 +66,22 @@ figs/contact-12-112.pdf: figs/contact-density.py figs/mc-06-112.dat figs/sphereW
 	python $^ $@
 
 figs/contact-16-265.pdf: figs/contact-density.py figs/mc-08-265.dat figs/sphereWB-radial-16.0-265.dat figs/sphereWBT-radial-16.0-265.dat
+	python $^ $@
+
+figs/walls-10.pdf: figs/plot-walls.py figs/mc-04-013.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat
+	python $^ $@
+
+figs/walls-30.pdf: figs/plot-walls.py figs/mc-04-013.dat figs/wallsWB-0.30.dat figs/wallsWBT-0.30.dat
+	python $^ $@
+
+figs/walls-40.pdf: figs/plot-walls.py figs/mc-04-013.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat
+	python $^ $@
+
+figs/inner-4-30.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat
+	python $^ $@
+
+figs/inner-4-40.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-04.0-0.40.dat figs/inner-sphereWBT-04.0-0.40.dat
+	python $^ $@
+
+figs/inner-8-30.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-08.0-0.30.dat figs/inner-sphereWBT-08.0-0.30.dat
 	python $^ $@

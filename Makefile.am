@@ -48,7 +48,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
-	papers/contact/figs/box.mkdat \
+	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -145,7 +146,8 @@ paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
 papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CODE)
-papers_contact_figs_box_mkdat_SOURCES = papers/contact/figs/box.cpp $(ALL_CODE)
+papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CODE)
+papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -192,7 +194,9 @@ paper: all paper/figs/equation-of-state.dat \
 	cd paper && $(MAKE)
 
 papers: all papers/contact/figs/gHS-vs-n.dat \
-	papers/contact/figs/sphere.mkdat papers/contact/figs/box.mkdat \
+	papers/contact/figs/sphere.mkdat \
+	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/walls.dat \
 	papers/contact/figs/free-energy.dat
 	cd papers && $(MAKE)
 
@@ -212,8 +216,7 @@ slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
-	papers/contact/figs/mc-06-112.dat \
-	papers/contact/figs/box.dat
+	papers/contact/figs/mc-06-112.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<
