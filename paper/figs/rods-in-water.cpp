@@ -146,6 +146,7 @@ int main(int argc, char *argv[]) {
 				     water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperCell = EperVolume*(zmax*ymax - 2*0.25*M_PI*diameter*diameter)*width;
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
   			    water_prop.kappaAB, water_prop.epsilon_dispersion,
@@ -192,10 +193,18 @@ int main(int argc, char *argv[]) {
     
     //    //sleep(3);
     //  }
-    
-    Minimizer min = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT, 
-								 &potential,
-								 QuadraticLineMinimizer));
+
+    //based of David's single rod precision
+    const double surface_tension = 1e-5; // crude guess from memory...
+    const double surfprecision = 1e-5*(2*M_PI*diameter)*width*surface_tension; // five digits accuracy
+    const double bulkprecision = 1e-10*fabs(EperCell); // but there's a limit on our precision for small rods
+    const double precision = bulkprecision + surfprecision;
+    printf("Precision limit from surface tension is to %g based on %g and %g\n",
+           precision, surfprecision, bulkprecision);
+    Minimizer min = Precision(precision, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+                                                                         &potential,
+                                                                         QuadraticLineMinimizer));
+
     printf("Diameter is %g bohr (%g nm)\n", diameter, diameter/nm);
     printf("Distance between rods = %g bohr (%g nm)\n", distance, distance/nm);
     
@@ -221,7 +230,6 @@ int main(int argc, char *argv[]) {
     char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "paper/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
 
-    const double EperCell = EperVolume*(zmax*ymax - 2*0.25*M_PI*diameter*diameter)*width;
     printf("The bulk energy per cell should be %g\n", EperCell);
     double energy;
     if (min.energy() < min2.energy()) {
