@@ -37,7 +37,7 @@ instance Code RealSpace where
   codePrec _ (IFFT ksp@(Expression (K _))) = showString "ifft(gd, " . codePrec 0 (makeHomogeneous ksp) . showString ")"
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
   latexPrec _ (R v) = showString v
-  latexPrec _ (IFFT ke) = showString "\\text{ifft}(" . latexPrec 0 ke . showString ")"
+  latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
 instance Type RealSpace where
   isRealSpace _ = Same
   derivativeHelper v ddr r | Same <- isRealSpace (Expression v), v == r = ddr
@@ -378,6 +378,9 @@ map2product p = helper 1 (Map.empty) $ product2pairs p
 pairs2product :: Type a => [(Expression a, Double)] -> Expression a
 pairs2product = map2product . fl (Map.empty)
   where fl a [] = a
+        fl a ((_,0):xs) = fl a xs
+        fl a ((Product p, n):xs) = fl a (map tonpower (product2pairs p) ++ xs)
+            where tonpower (e,n') = (e, n'*n)
         fl a ((x,n):xs) = case Map.lookup x a of
                             Just n' -> if n + n' == 0
                                        then fl (Map.delete x a) xs
@@ -746,21 +749,24 @@ derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (Expression e) = derivativeHelper v dda e
 
-substitute :: (Type a) => Expression a -> Expression a -> Expression a -> Expression a
-substitute x y (Expression v) | x == Expression v = y
-                              | otherwise = Expression v
-substitute x y (Scalar v) | x == Scalar v = y
-                          | otherwise = Scalar v
+substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
+substitute x y e | Same <- isKSpace e, Same <- isKSpace x, x == e = y
+                 | Same <- isRealSpace e, Same <- isRealSpace x, x == e = y
+                 | Same <- isScalar e, Same <- isScalar x, x == e = y
+substitute x y (Expression v) | Same <- isKSpace (Expression v), FFT e <- v = Expression $ FFT (substitute x y e)
+                              | Same <- isRealSpace (Expression v), IFFT e <- v = Expression $ IFFT (substitute x y e)
+                              | Same <- isScalar (Expression v), Integrate e <- v = Expression $ Integrate (substitute x y e)
 substitute x y (Sum s) = pairs2sum $ map sub $ sum2pairs s
     where sub (f,e) = (f, substitute x y e)
 substitute x y (Product p) = pairs2product $ map sub $ product2pairs p
     where sub (e, n) = (substitute x y e, n)
-substitute x y (Cos e)   = substitute x y e
-substitute x y (Sin e)   = substitute x y e
-substitute x y (Log e)   = substitute x y e
-substitute x y (Exp e)   = substitute x y e
-substitute x y (Abs e)   = substitute x y e
-substitute x y (Signum e) = substitute x y e
+substitute x y (Cos e)   = cos $ substitute x y e
+substitute x y (Sin e)   = sin $ substitute x y e
+substitute x y (Log e)   = log $ substitute x y e
+substitute x y (Exp e)   = exp $ substitute x y e
+substitute x y (Abs e)   = abs $ substitute x y e
+substitute x y (Signum e) = signum $ substitute x y e
+substitute _ _ e = e
 
 \end{code}
 

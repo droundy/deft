@@ -26,6 +26,7 @@
 #include "generated-haskell/nice-logandsqrandinverse.h"
 #include "generated-haskell/nice-logoneminusx.h"
 #include "generated-haskell/nice-nbar.h"
+#include "generated-haskell/nice-logoneminusnbar.h"
 
 #include "generated/sum.h"
 #include "generated/quadratic.h"
@@ -143,6 +144,8 @@ int main(int, char **argv) {
   compare_functionals(NiceLogOneMinusX(), log(1-x), myT, n, 1e-12);
 
   compare_functionals(NiceNbar(R), StepConvolve(R), myT, n, 3e-13);
+
+  compare_functionals(NiceLogOneMinusNbar(R), log(1 - StepConvolve(R)), myT, n, 3e-13);
 
   compare_functionals(Sum(), x + kT, myT, n, 2e-13);
 
