@@ -2,11 +2,12 @@
 {-# LANGUAGE GADTs, PatternGuards #-}
 module CodeGen ( RealSpace(..), r_var,
                  KSpace(..), k_var, kx, ky, kz, k, ksqr,
-                 Scalar, s_var,
+                 Scalar(..), s_var,
                  fft, ifft, integrate, grad, derive,
                  Expression,                 
                  Statement( (:=), (:?=) ),
-                 generateHeader, code, latex, simp, setZero, codeStatement ) 
+                 generateHeader, code, latex, simp, 
+                 setZero, codeStatement, substitute, countFFT ) 
        where
 
 import Hash ( hash )
@@ -63,13 +64,15 @@ instance Type RealSpace where
   var v (Scalar _) = s_var v
   var v _ = r_var v
   prefix "" (Expression (IFFT _)) = ""
-  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {    \n"
-  prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {    \n"
+  prefix "" _ = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
+  prefix v _ = "Grid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
   postfix (Expression (IFFT _)) = ""
-  postfix _ = "\n}\n"
+  postfix _ = "\t\n}\n"
   codeStatementHelper a op (Expression (IFFT (Expression (K v)))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT _)) = error "It is a bug to generate code for a non-var input to ifft"
   codeStatementHelper a op e = prefix "" e ++ a ++ "[i]" ++ op ++ code e ++ ";\n" ++ postfix e
+  countFFTHelper (Expression (IFFT _)) = 1
+  countFFTHelper _ = 0
   initialize (Expression (R x)) = "VectorXd " ++ x ++ "(gd.NxNyNz);\n"
   initialize _ = "VectorXd output(gd.NxNyNz);\n"
   toScalar (R v) = s_var v
@@ -118,13 +121,15 @@ instance Type KSpace where
   var v (Scalar _) = s_var v
   var v _ = k_var v
   prefix "" (Expression (FFT _)) = ""
-  prefix "" _ = "for (int i=0; i<gd.NxNyNzOver2; i++) {\n\tconst int z = i % gd.NzOver2;\n\tconst int n = (i-z)/gd.NzOver2;\n\tconst int y = n % gd.Ny;\n\tconst int x = (n-y)/gd.Ny;\n\tconst RelativeReciprocal rvec((x>gd.Nx/2) ? x - gd.Nx : x, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n\t"
-  prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t"
+  prefix "" _ = "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n"
+  prefix v _ = "ReciprocalGrid " ++ v ++ "(gd);\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
   postfix (Expression (FFT _)) = ""
-  postfix _ = "}\n"
+  postfix _ = "\t}\n"
   codeStatementHelper a op (Expression (FFT (Expression (R v)))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
-  codeStatementHelper a op e = prefix "" e ++ "if (i == 0) {\n\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\telse {\n\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";\n\t}" ++ postfix e
+  codeStatementHelper a op e = "int i = 0;\n\tconst int z = i % gd.NzOver2;\n\tconst int n = (i-z)/gd.NzOver2;\n\tconst int y = n % gd.Ny;\n\tconst int xa = (n-y)/gd.Ny;\n\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n" ++ prefix "" e ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+  countFFTHelper (Expression (FFT _)) = 1
+  countFFTHelper _ = 0
   initialize (Expression (K x)) = "VectorXcd " ++ x ++ "(gd.NxNyNz);\n"
   initialize _ = "VectorXcd output(gd.NxNyNz);\n"
   toScalar (K v) = s_var v
@@ -211,9 +216,10 @@ instance Type Scalar where
       where (st, r') = simp r
   simpHelper sc = (return (), Expression sc)
   var v _ = s_var v
-  codeStatementHelper a " = " (Expression (Integrate e)) = a ++ " = 0;\nfor (int i=0; i<gd.NxNyNz; i++) {    \n" ++ a ++ "+=" ++ code e ++ ";\n}\n"
-  codeStatementHelper a " += " (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {    \n" ++ a ++ " += " ++ code e ++ ";\n}\n"
-  codeStatementHelper a op e = a ++ op ++ code e ++ ";\n"
+  codeStatementHelper a " = " (Expression (Integrate e)) = a ++ " = 0;\nfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ "+=" ++ code e ++ ";\n\t}\n"
+  codeStatementHelper a " += " (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code e ++ ";\n\t}\n"
+  codeStatementHelper a op e = a ++ op ++ code e ++ ";\n\t"
+  countFFTHelper _ = 0
   prefix "" (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
@@ -257,6 +263,7 @@ ifft :: Expression KSpace -> Expression RealSpace
 ifft ke = case factor (Expression Delta) ke of
             Just k' -> mapExpression kzeroValue k'
             Nothing -> Expression (IFFT ke)
+
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -368,6 +375,8 @@ class (Eq a, Show a, Code a) => Type a where
   simpHelper :: a -> (Statement (), Expression a)
   var :: String -> Expression a -> Expression a
   codeStatementHelper :: String -> String -> Expression a -> String
+  countFFTHelper :: Expression a -> Int
+  countFFTHelper _ = 0
   prefix :: String -> Expression a -> String
   postfix :: Expression a -> String
   postfix _ = ""
@@ -376,13 +385,19 @@ class (Eq a, Show a, Code a) => Type a where
   toScalar :: a -> Expression Scalar
 
 codeStatement :: Statement a -> String
-codeStatement (a := e) = codeStatementHelper a " = " e
-codeStatement (a :?= e) = codeStatementHelper (a ++ "_" ++ hash (show e)) " = " e
-codeStatement (a :+= e) = codeStatementHelper a " += " e
-codeStatement (Initialize e) = initialize e
+codeStatement (a := e) = "\t" ++ codeStatementHelper a " = " e
+codeStatement (a :?= e) = "\t" ++ codeStatementHelper (a ++ "_" ++ hash (show e)) " = " e
+codeStatement (a :+= e) = "\t" ++ codeStatementHelper a " += " e
+codeStatement (Initialize e) = "\t" ++ initialize e
 codeStatement (Return _) = ""
 codeStatement (a :>> b) = codeStatement a ++ codeStatement b
 
+countFFT :: Statement a -> Int
+countFFT (_ := e) = countFFTHelper e
+countFFT (_ :?= e) = countFFTHelper e
+countFFT (_ :+= e) = countFFTHelper e
+countFFT (a :>> b) = countFFT a + countFFT b
+countFFT _ = 0
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous = mapExpression toScalar
@@ -564,6 +579,23 @@ derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (e ::** n) = derive v (dda*n*e**(n-1)) e
 derive v dda (Expression e) = derivativeHelper v dda e
+
+substitute :: (Type a) => Expression a -> Expression a -> Expression a -> Expression a
+substitute x y (Expression v) | x == Expression v = y
+                              | otherwise = Expression v
+substitute x y (Scalar v) | x == Scalar v = y
+                          | otherwise = Scalar v
+substitute x y (u ::+ v) = substitute x y u + substitute x y v
+substitute x y (u ::* v) = substitute x y u * substitute x y v
+substitute x y (u ::** v) = substitute x y u ** substitute x y v
+substitute x y (u ::/ v) = substitute x y u / substitute x y v
+substitute x y (Cos e)   = substitute x y e
+substitute x y (Sin e)   = substitute x y e
+substitute x y (Log e)   = substitute x y e
+substitute x y (Exp e)   = substitute x y e
+substitute x y (Abs e)   = substitute x y e
+substitute x y (Signum e) = substitute x y e
+
 \end{code}
 
 The statement type allows us to string together a sequence of
@@ -596,8 +628,8 @@ showsS _ (Return _) = showString "return ???"
 showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
 
 instance Code (Statement a) where
-	codePrec = codeS
-        latexPrec = latexS
+  codePrec = codeS
+  latexPrec = latexS
 codeS :: Int -> Statement a -> ShowS
 codeS _ (x := y) = showString (prefix "" y) . 
                     codePrec 0 (var x y) . showString " = " . codePrec 0 y . showString ";" .
@@ -654,16 +686,16 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\ndouble output=0;\n" ++ codeStatement codeIntegrate ++ "return output*gd.dvolume;\n" ) ++
-                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform ++ ";\nreturn output;\n")  ++
-                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n" ++ code codeDTransform ++ ";\nreturn output;\n") ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n" ++ codeStatement codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n" ++ "\treturn output*gd.dvolume;\n" ) ++
+                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n" ++ codeStatement codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.\n" ++ "\treturn output;\n")  ++
+                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n\t" ++ codeStatement codeDTransform ++ "\n\treturn output;\n") ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
-                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n" ++ code codeDerive ++ ";\nreturn output;\n") ++
+                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n" ++ codeStatement codeDerive ++ "\n\treturn output;\n") ++
                 functionCode "d_by_dT" "double" [("double", ""), ("double", "")] "\tassert(0); // fail\n\treturn 0;\n" ++
                 functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
                 functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\tassert(&ingrad==&ingrad);\n\tassert(&x==&x);\n\treturn ingrad;" ++
                 functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\tassert(&ingradT==&ingradT);\n\treturn ingradT;" ++
-                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n" ++ codeStatement codeGrad) ++
+                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n" ++ codeStatement codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n") ++
                 functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
@@ -697,4 +729,7 @@ generateHeader e arg n = "// -*- mode: C++; -*-\n\n#pragma once\n\n#include \"Mi
           codeA Nothing = ""
           codeA' (Just rep) = code (makeHomogeneous rep)
           codeA' Nothing = ""
+
+
+
 \end{code}
