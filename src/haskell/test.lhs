@@ -1,4 +1,5 @@
 \begin{code}
+import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
 
@@ -43,7 +44,8 @@ showStatements = TestList [ss "for (int i=0; i<gd.NxNyNz; i++) {    \nx = 5.0;\n
         y = r_var "y"
 -}
 main :: IO ()
-main = do writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") Nothing "NiceSum"
+main = do createDirectoryIfMissing True "tests/generated-haskell"
+          writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") Nothing "NiceSum"
           writeFile "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") Nothing "NiceQuad"
           writeFile "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) Nothing "NiceSqrt"
           writeFile "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") Nothing "NiceSqrtandMore"
