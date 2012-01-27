@@ -37,10 +37,9 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
 	paper/figs/finding-vapor-pressure.mkdat \
-	paper/figs/constrained-water-2D.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/four-rods-in-water.mkdat \
-	paper/figs/single-rod-in-water.mkdat \
+	paper/figs/single-rod.mkdat \
 	paper/figs/single-rod-in-water-high-res.mkdat \
 	paper/figs/single-rod-in-water-low-res.mkdat \
 	paper/figs/sphere.mkdat \
@@ -49,7 +48,8 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
-	papers/contact/figs/box.mkdat \
+	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -134,12 +134,11 @@ tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
 paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
-paper_figs_constrained_water_2D_mkdat_SOURCES = paper/figs/constrained-water-2D.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
-paper_figs_single_rod_in_water_mkdat_SOURCES = paper/figs/single-rod-in-water.cpp $(ALL_CODE)
+paper_figs_single_rod_mkdat_SOURCES = paper/figs/single-rod.cpp $(ALL_CODE)
 paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
@@ -147,7 +146,8 @@ paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
 papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CODE)
-papers_contact_figs_box_mkdat_SOURCES = papers/contact/figs/box.cpp $(ALL_CODE)
+papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CODE)
+papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -189,13 +189,14 @@ paper: all paper/figs/equation-of-state.dat \
 	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/enthalpy.dat \
-	paper/figs/constrained-water-2D.dat \
 	paper/figs/pressure-with-isotherms.dat \
 	paper/figs/single-rod-in-water-low-res.dat
 	cd paper && $(MAKE)
 
 papers: all papers/contact/figs/gHS-vs-n.dat \
-	papers/contact/figs/sphere.mkdat papers/contact/figs/box.mkdat \
+	papers/contact/figs/sphere.mkdat \
+	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/walls.dat \
 	papers/contact/figs/free-energy.dat
 	cd papers && $(MAKE)
 
@@ -213,11 +214,9 @@ src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildca
 
 slowfigs: paper/figs/rods-in-water.dat \
 	paper/figs/four-rods-in-water.dat\
-	paper/figs/single-rod-in-water.dat \
 	paper/figs/single-rod-in-water-high-res.dat \
 	paper/figs/sphere.dat \
-	papers/contact/figs/mc-06-112.dat \
-	papers/contact/figs/box.dat
+	papers/contact/figs/mc-06-112.dat
 
 paper/figs/%.dat: paper/figs/%.mkdat
 	$<

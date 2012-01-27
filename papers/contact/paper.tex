@@ -714,35 +714,61 @@ temperature and pressure in the optimal SAFT model developed by Clark
   \label{fig:sphere-16}
 \end{figure}
 
-\subsection{Hard spheres confined in a cubical cavity}
+\subsection{Hard spheres at a hard wall}
 
-\textcolor{red}{
-  I am thinking of also performing simulations for a cubical cavity, and
-  examining the result near the center of a face, which (for a large
-  cavity) will give us a prediction for the hard-sphere fluid near a
-  single hard wall.  We've got some simulations in
-  Figure~\ref{fig:box-density}, but these aren't very nice plots.
-  We'll want to do a much larger box, and plot the density vs $x$ near
-  the wall.  But I'm waiting on simulation data for this...
-}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-10}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.1.}
+  \label{fig:walls-10}
+\end{figure}
 
-\subsection{Hard spheres around a hard sphere (or rod)}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-30}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.3.}
+  \label{fig:walls-30}
+\end{figure}
 
-\textcolor{red}{
-  It would also be interesting to study a system with opposite
-  curvature.  Put a (larger) hard sphere in the hard-sphere fluid, and
-  see what the contact density is around that hard sphere.  This
-  touches on an important limiting case...
-}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-40}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.4.}
+  \label{fig:walls-40}
+\end{figure}
 
-\begin{figure*}
-\includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-100s--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-110c--05,05,05-13}
-\caption{Density of hard spheres in a $5\times5\times5$ box.}
-\label{fig:box-density}
-\end{figure*}
+We study the case of hard spheres near a single hard wall.  This is
+shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.  Actually, we
+should begin with this.
 
+\subsection{Hard spheres around a hard sphere}
+
+It is also interesting to study a system with opposite curvature.  Put
+a (larger) hard sphere in the hard-sphere fluid, and see what the
+contact density is around that hard sphere.  This is particularly
+relevant when we consider using classical density-functional theory to
+model solvation.
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-30}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-40}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-40}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-8-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 3.}
+  \label{fig:inner-8-30}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
