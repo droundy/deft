@@ -60,16 +60,18 @@ int main(int, char **) {
     fflush(experiment);
   }
 
-  for (double T=650; T<=695; T += 1) {
+  for (double T=650; T<=693; T += 1) {
     //printf("Working on bonus equation of state at %g Kelvin...\n", T);
     double kT = kB*T;
     saturated_liquid_vapor(f, kT, 0.0005, 0.0019, 0.003, &nl, &nv, &mu, 1e-6);
     took("Finding coesisting liquid and vapor densities");
     double pv = pressure(f, kT, nv);
     took("Finding pressure");
-      
-    fprintf(o, "%g\t%g\t%g\t%g\n", T, pv, nl, nv);
-    fflush(o); // FOR DEBUGGING
+    
+    if (T != 692) {
+      fprintf(o, "%g\t%g\t%g\t%g\n", T, pv, nl, nv);
+      fflush(o); // FOR DEBUGGING
+    }
   }
 
   fclose(o);

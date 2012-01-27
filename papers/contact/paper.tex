@@ -59,6 +59,21 @@ say, $n g_{HS}(\sigma)$, where $g_{HS}(\sigma)$ is the contact value
 of the correlation function---is well-known.  However, for
 inhomogeneous fluids, the contact density has not been well studied.
 
+{
+  \color{blue}We need to figure out a few bits of terminology.
+
+  \begin{enumerate}
+  \item What should we call the contact density between two hard
+    spheres, to distinguish it from the contact density at any other
+    hard surface.  One option would be to focus on the contact value
+    of the correlation function, which would make it clear what we're
+    talking about.
+  \item How should we distinguish between the various definitions.  In
+    particular, ``at the sphere'' vs. ``at contact''.  It'd be helpful
+    to have a short way of describing these.
+  \end{enumerate}
+}
+
 \subsection{Association free energy of SAFT}
 \newcommand\epsilonassoc{\ensuremath{\varepsilon_\textit{AB}}}
 \newcommand\kappaassoc{\ensuremath{\kappa_\textit{AB}}}
@@ -227,7 +242,9 @@ system in general.
   hints as to a different and interesting approximation for the
   contact density.}
 
-\begin{widetext}
+\derivation{
+  \begin{widetext}
+}
 
 \section{Mean Contact density}\label{simple-contact}
 
@@ -236,205 +253,226 @@ density of an inhomogeneous system is.  This comes down to simply
 reproducing the derivation for a homogeneous system using the
 FMT functional.
 \begin{align}
-  p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR}
+  p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR} \\
+  \ncontact &= \frac{1}{N k_BT 4\pi (2R)^2} \frac{dA_{HS}}{dR}
 \end{align}
-So to compute this we need
-\begin{align}
-  \frac{d A_{HS}}{d R} &=
-  \frac{\partial A_{HS}}{\partial R} \\
-  &+
-  \int \left(
-  \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
-  \frac{d n_3(\mathbf{r}')}{d R}
-  +
-  \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
-  \frac{d n_2(\mathbf{r}')}{d R}
-  + \cdots
-  \right) d\mathbf{r}'
-\end{align}
+While this should give the true mean contact density for any given
+system, this is not particularly useful, as we have no way of knowing
+the contact density on any given sphere.  However, the mean contact
+density comes out as an integral, so we can plot the integrand, and
+treat it as a somewhat ill-defined local contact density.
 
-\begin{align}
-  \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
-  \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
-  \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
-  &= \int n(\mathbf{r}+\mathbf{r}')
-  \delta'(r' - R) d\Omega' r'^2 dr'\\
-  &= \int 
-  \delta(r' - R) d\Omega' \left(\frac{dn(\mathbf{r}+\mathbf{r}')}{dr'}r'^2 + 2n(\mathbf{r}+\mathbf{r}')r' \right) dr'\\
-  &= \frac1{R} \int 
-  \delta(|\mathbf{r}'| - R)
-  \left(\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') +
-  2n(\mathbf{r}+\mathbf{r}') \right) \mathbf{dr}' \\
-  &= \frac{2}{R}n_2(\mathbf{r}) + \frac{1}{R} \int 
-  \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-  \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
-  \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-  \frac{dn_1(\mathbf{r})}{dR} &=
+\derivation{
+
+  To compute the mean contact density of a system, we need
+  \begin{align}
+    \frac{d A_{HS}}{d R} &=
+    \frac{\partial A_{HS}}{\partial R} \\
+    &+
+    \int \left(
+    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
+    \frac{d n_3(\mathbf{r}')}{d R}
+    +
+    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
+    \frac{d n_2(\mathbf{r}')}{d R}
+    + \cdots
+    \right) d\mathbf{r}'
+  \end{align}
+
+  \begin{align}
+    \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
+    \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
+    \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
+    &= \int n(\mathbf{r}+\mathbf{r}')
+    \delta'(r' - R) d\Omega' r'^2 dr'\\
+    &= \int 
+    \delta(r' - R) d\Omega' \left(\frac{dn(\mathbf{r}+\mathbf{r}')}{dr'}r'^2 + 2n(\mathbf{r}+\mathbf{r}')r' \right) dr'\\
+    &= \frac1{R} \int 
+    \delta(|\mathbf{r}'| - R)
+    \left(\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') +
+    2n(\mathbf{r}+\mathbf{r}') \right) \mathbf{dr}' \\
+    &= \frac{2}{R}n_2(\mathbf{r}) + \frac{1}{R} \int 
+    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+    \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
+    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+    \frac{dn_1(\mathbf{r})}{dR} &=
     \frac1{4\pi R}\frac{dn_2(\mathbf{r})}{dR} - n_0(\mathbf{r}) \\
     &= n_0(\mathbf{r}) + \frac{1}{4\pi R^2} \int 
     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-  \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
-\end{align}
-
-The total force due to $\Phi_1$ is actually very easy to work out:
-\begin{align}
-  \frac{d A_{HS}^{(1)}}{d R} &=
-  \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
-\end{align}
-where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
-homogeneous system, and small for reasonably smooth density
-distributions.  The next term from $\Phi_2$ is as follows:
-\begin{align}
-  \frac{d A_{HS}^{(2)}}{d R} &=
-  \int \mathbf{dr}' \left(
+    \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
+  \end{align}
+  
+  The total force due to $\Phi_1$ is actually very easy to work out:
+  \begin{align}
+    \frac{d A_{HS}^{(1)}}{d R} &=
+    \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
+  \end{align}
+  where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
+  homogeneous system, and small for reasonably smooth density
+  distributions.  The next term from $\Phi_2$ is as follows:
+  \begin{align}
+    \frac{d A_{HS}^{(2)}}{d R} &=
+    \int \mathbf{dr}' \left(
     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2} - 2 n_1
       \frac{dn_2}{dR} + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot
     }{1-n_3}
-  \right) \\
-  &= \int \mathbf{dr}' \left(
+    \right) \\
+    &= \int \mathbf{dr}' \left(
     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       - 2 n_1 \left(\frac2{R}n_2 \frac{dn_0}{dR}\right)
       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-  \right) \\
-  &= \int \mathbf{dr}' \left(
+    \right) \\
+    &= \int \mathbf{dr}' \left(
     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       - 4 n_0n_2 - 2 n_1\frac{dn_0}{dR}
       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-  \right) \\
-  &= \int \mathbf{dr}' \left(
+    \right) \\
+    &= \int \mathbf{dr}' \left(
     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
     n_2
     + \frac{3n_0n_2 + \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
       + 2 n_1\frac{dn_0}{dR}
       - 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-  \right)
-\end{align}
-
-And the last term looks like this.  I should perhaps note that this
-term should be replaced by a tensor version if want to examine
-seriously localized density distributions.
-\begin{align}
-  A_{HS}^{(3)} &=
-  \int \mathbf{dr}'\left(
-     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
-     \frac{
-       n_3 + (1-n_3)^2 \ln(1-n_3)
-     }{
-       36\pi n_3^2\left( 1 - n_3 \right)^2
-     }
-  \right) \\
-  \frac{d A_{HS}^{(3)}}{d R} &=
-  \int \mathbf{dr}'
-     \left[
-       3(n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
-       \left(\frac2{R}n_2 + \frac{dn_0}{dR}\right)
-       - 6n_2 \mathbf{n}_{V2} \cdot \nabla n_2
-     \right]
-     \frac{
-       n_3 + (1-n_3)^2 \ln(1-n_3)
-     }{
-       36\pi n_3^2\left( 1 - n_3 \right)^2
-     }
-   \\
-  &+
-     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
-     \frac{
-       (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
-       -
-       (n_3 + (1-n_3)^2 \ln(1-n_3))(-2 n_3^2( 1 - n_3) + 2n_3(1-n_3)^2)
-     }{
-       36\pi (n_3^2\left( 1 - n_3 \right)^2)^2
-     }
-     \\
-     &=
-     \int \mathbf{dr}'
-     \left[
-       (n_1n_2 - \mathbf{n}_{V1} \cdot \mathbf{n}_{V2})
-       \left(2n_2 + \frac{1}{4\pi}\frac{dn_0}{dR}\right)
-       - \frac{1}{2\pi}n_2 \mathbf{n}_{V2} \cdot \nabla n_2
-     \right]
-     \frac{
-       n_3 + (1-n_3)^2 \ln(1-n_3)
-     }{
-       3 n_3^2\left( 1 - n_3 \right)^2
-     }
-   \\
-  &+
-     \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
-   \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
-\end{align}
-
-\begin{align}
-  \frac{d A_{HS}}{d R} &=
-  \int \mathbf{dr}' \left(
+    \right)
+  \end{align}
+  
+  And the last term looks like this.  I should perhaps note that this
+  term should be replaced by a tensor version if want to examine
+  seriously localized density distributions.
+  \begin{align}
+    A_{HS}^{(3)} &=
+    \int \mathbf{dr}'\left(
+    (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+    \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2\left( 1 - n_3 \right)^2
+    }
+    \right) \\
+    \frac{d A_{HS}^{(3)}}{d R} &=
+    \int \mathbf{dr}'
+    \left[
+      3(n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+      \left(\frac2{R}n_2 + \frac{dn_0}{dR}\right)
+      - 6n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+      \right]
+    \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2\left( 1 - n_3 \right)^2
+    }
+    \\
+    &+
+    (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
+    \frac{
+      (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
+      -
+      (n_3 + (1-n_3)^2 \ln(1-n_3))(-2 n_3^2( 1 - n_3) + 2n_3(1-n_3)^2)
+    }{
+      36\pi (n_3^2\left( 1 - n_3 \right)^2)^2
+    }
+    \\
+    &=
+    \int \mathbf{dr}'
+    \left[
+      (n_1n_2 - \mathbf{n}_{V1} \cdot \mathbf{n}_{V2})
+      \left(2n_2 + \frac{1}{4\pi}\frac{dn_0}{dR}\right)
+      - \frac{1}{2\pi}n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+      \right]
+    \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      3 n_3^2\left( 1 - n_3 \right)^2
+    }
+    \\
+    &+
+    \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
+    \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
+  \end{align}
+  
+  \begin{align}
+    \frac{d A_{HS}}{d R} &=
+    \int \mathbf{dr}' \left(
     -\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3)
     + \cdots
-  \right)
-\end{align}
+    \right)
+  \end{align}
+}
 
 \section{Contact density at a given hard
   sphere}\label{contact-at-sphere}
 
-When we consider an inhomogeneous system, we may ask for \emph{which}
-sphere we are interested in computing the contact density.  One way to
-answer this is to specify a sphere at a fixed position $\mathbf{r}$.
-By making the hard-sphere radius dependent on position, we can compute
-the pressure on the hard spheres located at $\mathbf{r}$.
+When we consider an inhomogeneous system, we may prefer to ask for
+\emph{which} sphere we are interested in computing the contact
+density.  One way to answer this is to specify a sphere at a fixed
+position $\mathbf{r}$.  By making the hard-sphere radius dependent on
+position, we can compute the pressure on the hard spheres located at
+$\mathbf{r}$.
 \begin{align}
-  p_{HS}(\mathbf{r}) &= \frac{1}{4\pi (2R)^2} \frac{\delta A_{HS}}{\delta R(\mathbf{r})}
+  p_{HS}(\mathbf{r}) &= \frac{1}{4\pi (2R)^2} \frac{\delta
+    A_{HS}}{\delta R(\mathbf{r})} \\
+  \ncontact(\xx) &= \frac{1}{k_BT 4\pi (2R)^2} \frac{\delta
+    A_{HS}}{\delta R(\mathbf{r})}
 \end{align}
-So to compute this we need
-\begin{align}
-  \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
-  \int \left(
-  \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
-  \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})}
-  +
-  \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
-  \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})}
-  + \cdots
-  \right) d\mathbf{r}'
-\end{align}
-There are \emph{many} such terms, and this could get expensive.
+After considerable math to do the above functional derivative, we find
+a functional giving the contact density for spheres at any given
+position.  This functional unavoidably involves more convolutions than
+are present in the free energy itself, which makes it relatively
+expensive.
 
+\derivation{
+  So to compute this we need
+  \begin{align}
+    \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
+    \int \left(
+    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
+    \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})}
+    +
+    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
+    \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})}
+    + \cdots
+    \right) d\mathbf{r}'
+  \end{align}
+  There are \emph{many} such terms, and this could get expensive.
+  
   First, let's rewrite the free energy in terms of a smaller set of
   weighted densities:
   \begin{align}
     A_{HS} &= \int \left\{
-      -n_0 \ln\left( 1 - n_3\right)
-      + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
-      + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-        n_3 + (1-n_3)^2 \ln(1-n_3)
-      }{
-        36\pi n_3^2(1-n_3)^2
-      }
+    -n_0 \ln\left( 1 - n_3\right)
+    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2(1-n_3)^2
+    }
     \right\}
     \\
     &= \int \left\{
-      -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
-      + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
-      + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-        n_3 + (1-n_3)^2 \ln(1-n_3)
-      }{
-        36\pi n_3^2(1-n_3)^2
-      }
+    -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
+    + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2(1-n_3)^2
+    }
     \right\}
-\end{align}
-
-\begin{align}
+  \end{align}
+  
+  \begin{align}
     \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
     -\frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
     + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
       n_3(\mathbf{r}'))^2}
     + \frac{n_2^3 -
       3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
-      \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
+    \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
     \right)
     \\
     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
@@ -455,39 +493,40 @@ There are \emph{many} such terms, and this could get expensive.
     \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
     - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
   \end{align}
-
-\begin{align}
-  \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-  n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \\
-  \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-  n(\mathbf{r}) \delta'(|\mathbf{r}-\mathbf{r}'| - R) \\
-  \frac{\delta \mathbf{n}_{V2}(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-  -\frac{\delta}{\delta R(\mathbf{r})} \mathbf{\nabla}' n_3(\mathbf{r}')
-  \\
-  &= -\mathbf{\nabla}'
-  \left(n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \right)
-\end{align}
-These give us some basic tools with which to perform derivatives.
-
-Finally, we get an answer like
-\begin{align}
-  \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
-  \int \mathbf{dr}' \left\{
-  \left(
-  \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
-  + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
-    n_3(\mathbf{r}'))^2}
-  + \frac{1}{4\pi}\frac{
-    \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
-  }{
-    (1-n_3(\mathbf{r}'))^3
-  }
-  \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R)
-  + \cdots
-  \right\}
-\end{align}
-This comes out to quite a mess.  It wouldn't be infeasible to compute
-this, but it wouldn't be efficient or pretty either.
+  
+  \begin{align}
+    \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})} &=
+    n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \\
+    \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} &=
+    n(\mathbf{r}) \delta'(|\mathbf{r}-\mathbf{r}'| - R) \\
+    \frac{\delta \mathbf{n}_{V2}(\mathbf{r}')}{\delta R(\mathbf{r})} &=
+    -\frac{\delta}{\delta R(\mathbf{r})} \mathbf{\nabla}' n_3(\mathbf{r}')
+    \\
+    &= -\mathbf{\nabla}'
+    \left(n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \right)
+  \end{align}
+  These give us some basic tools with which to perform derivatives.
+  
+  Finally, we get an answer like
+  \begin{align}
+    \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
+    \int \mathbf{dr}' \left\{
+    \left(
+    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+      n_3(\mathbf{r}'))^2}
+    + \frac{1}{4\pi}\frac{
+      \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
+    }{
+      (1-n_3(\mathbf{r}'))^3
+    }
+    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R)
+    + \cdots
+    \right\}
+  \end{align}
+  This comes out to quite a mess.  It wouldn't be infeasible to compute
+  this, but it wouldn't be efficient or pretty either.
+}
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
@@ -498,22 +537,28 @@ this, but it wouldn't be efficient or pretty either.
 
 \section{Contact density at a given contact position}
 
-Unfortunately, knowing the average contact density on each hard sphere
-doesn't really give us what we want for SAFT.  The trouble is that in
-order to work out the fraction of association sites occupied, we need
-to know the contact density \emph{at the point of contact}.
-Fortunately, we don't need to know the contact density for a
-particular sphere at each point of contact.  Just as $n_0(\mathbf{r})$
-gives us the density of spheres that are contacting point $\mathbf{r}$
-(see Figure~\ref{fig:n0}), we can use similar reasoning to work out the
-contact density for these spheres.
+A final definition of the inhomogeneous contact density would be the
+contact density for spheres \emph{touching at a given point}.  This
+would be a symmetric measure, since both spheres involved are treated
+in the same way.  In fact, the density of such spheres is just the
+density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
+illustration $n_0$.  Since $n_0$ is the fundamental measure of sphere
+surface contact, it would make sense to define a contact density that
+would correspond.
 
 To find the contact density at a given point of contact, we can't
 simply change the radius for spheres touching that point, since that
 would give us the pressure averaged over the entire surface of those
-spheres.  Instead, we'll have to imagine extending a patch of those
+spheres.  Instead, we would have to imagine extending a patch of those
 spheres which is located at the point of interest, as illustrated in
-Figure~\ref{fig:contact}.
+Figure~\ref{fig:contact}.  \textcolor{red}{I'm not sure how to go
+  about doing this.  In the derivation section, I have some ideas
+  jotted down, but they don't really work.}
+
+Yu and Wu developed a functional that should correspond to the contact
+density at a given contact
+position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
+compare both their functional as well as ours with simulation data.
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/contact}
@@ -523,86 +568,91 @@ the point $\mathbf{r}$ extended by a distance $dR$.}
 \label{fig:contact}
 \end{figure}
 
-So we need to find the small change in free energy that is caused by
-these small changes in the shape and size of the hard spheres that are
-in contact with this point.  In the following section, we will work
-out the changes in the weighted densities at position $\mathbf{r}'$
-when point of contact we are considering is $\mathbf{r}$.
+\derivation{
 
-The packing fraction $n_3$ is changed at the point where the sphere is
-extended, since a few more spheres will overlap this point.
-\begin{align}
-  \Delta n_3(\mathbf{r}') &= n(\mathbf{r})\Delta A \Delta R
-  \delta(|\mathbf{r}-\mathbf{r}'| - R)
-\end{align}
-The density $n_0$ is the average density, averaged over a spherical
-shell.  As such, shifting the position of a shell just shifts which
-location we are averaging over.
-\begin{align}
-  \Delta n_0(\mathbf{r}') &=
+  So we need to find the small change in free energy that is caused by
+  these small changes in the shape and size of the hard spheres that are
+  in contact with this point.  In the following section, we will work
+  out the changes in the weighted densities at position $\mathbf{r}'$
+  when point of contact we are considering is $\mathbf{r}$.
+
+  The packing fraction $n_3$ is changed at the point where the sphere is
+  extended, since a few more spheres will overlap this point.
+  \begin{align}
+    \Delta n_3(\mathbf{r}') &= n(\mathbf{r})\Delta A \Delta R
+    \delta(|\mathbf{r}-\mathbf{r}'| - R)
+  \end{align}
+  The density $n_0$ is the average density, averaged over a spherical
+  shell.  As such, shifting the position of a shell just shifts which
+  location we are averaging over.
+  \begin{align}
+    \Delta n_0(\mathbf{r}') &=
     \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-      \mathbf{\nabla}n(\mathbf{r}) \Delta A \Delta R
+    \mathbf{\nabla}n(\mathbf{r}) \Delta A \Delta R
     \delta(|\mathbf{r}-\mathbf{r}'|-R)
-\end{align}
-The change in $n_2$ comes from two terms: a change in the density value, as
-we saw in $n_0$, and a change in the area of the segment.
-\begin{align}
-  \Delta n_2(\mathbf{r}') &=
-  \left(n\left(\mathbf{r} + \Delta R
-  \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-  R}{R}\right)- n(\mathbf{r})\right) \Delta A
-  \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-  &=
-  \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
+  \end{align}
+  The change in $n_2$ comes from two terms: a change in the density value, as
+  we saw in $n_0$, and a change in the area of the segment.
+  \begin{align}
+    \Delta n_2(\mathbf{r}') &=
+    \left(n\left(\mathbf{r} + \Delta R
+    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
+      R}{R}\right)- n(\mathbf{r})\right) \Delta A
+    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
+    &=
+    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
     \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
     \right) \Delta A \Delta R
-  \delta(|\mathbf{r}-\mathbf{r}'|-R)
-\end{align}
-The vector density $\mathbf{n}_{V2}$ is similar to the density
-$n_2$: both changes in the density value and changes in the surface
-area play a role.
-\begin{align}
-  \Delta \mathbf{n}_{V2}(\mathbf{r}') &=
-  \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-  \left(n\left(\mathbf{r} + \Delta R
-  \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-  R}{R}\right)- n(\mathbf{r})\right) \Delta A
-  \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-  &=
-  \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-  \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
+    \delta(|\mathbf{r}-\mathbf{r}'|-R)
+  \end{align}
+  The vector density $\mathbf{n}_{V2}$ is similar to the density
+  $n_2$: both changes in the density value and changes in the surface
+  area play a role.
+  \begin{align}
+    \Delta \mathbf{n}_{V2}(\mathbf{r}') &=
+    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
+    \left(n\left(\mathbf{r} + \Delta R
+    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
+      R}{R}\right)- n(\mathbf{r})\right) \Delta A
+    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
+    &=
+    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
+    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
     \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
     \right) \Delta A \Delta R
-  \delta(|\mathbf{r}-\mathbf{r}'|-R) 
-\end{align}
-The density $n_1$ (and similarly $\mathbf{n}_{V1}$) can be roughly
-interpreted as the density weighted by the area-averaged mean
-curvature~\cite{oversteegen2005general, roth2010review}.  When we
-extend the sphere at the contact point, we will introduce regions of
-both positive and negative mean curvature.  In principle, we can do
-this in such a way that the two portions cancel, and hence we will
-assume that
-\begin{align}
-  \Delta n_1(\mathbf{r}') &= 0 \\
-  \Delta \mathbf{n}_{V1}(\mathbf{r}') &= 0
-\end{align}
-In fact, the negative and positive portions are spatially separated,
-so these terms should probably include a derivative term, which I
-should work out.  Particularly as it may even happen to cancel a
-different derivative term that we then won't have to drop!
+    \delta(|\mathbf{r}-\mathbf{r}'|-R) 
+  \end{align}
+  The density $n_1$ (and similarly $\mathbf{n}_{V1}$) can be roughly
+  interpreted as the density weighted by the area-averaged mean
+  curvature~\cite{oversteegen2005general, roth2010review}.  When we
+  extend the sphere at the contact point, we will introduce regions of
+  both positive and negative mean curvature.  In principle, we can do
+  this in such a way that the two portions cancel, and hence we will
+  assume that
+  \begin{align}
+    \Delta n_1(\mathbf{r}') &= 0 \\
+    \Delta \mathbf{n}_{V1}(\mathbf{r}') &= 0
+  \end{align}
+  In fact, the negative and positive portions are spatially separated,
+  so these terms should probably include a derivative term, which I
+  should work out.  Particularly as it may even happen to cancel a
+  different derivative term that we then won't have to drop!
+  
+  We need to then find the change in Helmholtz free energy due to this
+  change at position $\mathbf{r}$:
+  \begin{align}
+    \Delta A_{HS} &= \int \mathbf{dr}'
+    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}\Delta n_3(\mathbf{r}')
+    +
+    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}\Delta n_2(\mathbf{r}')
+    +
+    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} \cdot \Delta \mathbf{n}_{V2}(\mathbf{r}')
+  \end{align}
+}
 
-We need to then find the change in Helmholtz free energy due to this
-change at position $\mathbf{r}$:
-\begin{align}
-  \Delta A_{HS} &= \int \mathbf{dr}'
-  \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}\Delta n_3(\mathbf{r}')
-  +
-  \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}\Delta n_2(\mathbf{r}')
-  +
-  \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} \cdot \Delta \mathbf{n}_{V2}(\mathbf{r}')
-\end{align}
-
-\end{widetext}
+\derivation{
+  \end{widetext}
+}
 
 \section{Comparison with simulation}
 
@@ -664,26 +714,61 @@ temperature and pressure in the optimal SAFT model developed by Clark
   \label{fig:sphere-16}
 \end{figure}
 
-\subsection{Hard spheres confined in a cubical cavity}
+\subsection{Hard spheres at a hard wall}
 
-\textcolor{red}{
-  I am thinking of also performing simulations for a cubical cavity, and
-  examining the result near the center of a face, which (for a large
-  cavity) will give us a prediction for the hard-sphere fluid near a
-  single hard wall.  We've got some simulations in
-  Figure~\ref{fig:box-density}, but these aren't very nice plots.
-  We'll want to do a much larger box, and plot the density vs $x$ near
-  the wall.  But I'm waiting on simulation data for this...
-}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-10}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.1.}
+  \label{fig:walls-10}
+\end{figure}
 
-\begin{figure*}
-\includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-100s--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-110c--05,05,05-13}
-\caption{Density of hard spheres in a $5\times5\times5$ box.}
-\label{fig:box-density}
-\end{figure*}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-30}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.3.}
+  \label{fig:walls-30}
+\end{figure}
 
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-40}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.4.}
+  \label{fig:walls-40}
+\end{figure}
+
+We study the case of hard spheres near a single hard wall.  This is
+shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.  Actually, we
+should begin with this.
+
+\subsection{Hard spheres around a hard sphere}
+
+It is also interesting to study a system with opposite curvature.  Put
+a (larger) hard sphere in the hard-sphere fluid, and see what the
+contact density is around that hard sphere.  This is particularly
+relevant when we consider using classical density-functional theory to
+model solvation.
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-30}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-40}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-40}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-8-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 3.}
+  \label{fig:inner-8-30}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}

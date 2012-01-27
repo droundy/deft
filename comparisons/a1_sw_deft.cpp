@@ -26,6 +26,10 @@ int main(int, char **) {
   for (double eta=0.0; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
     // Energy units in the vrpack code are water_prop.epsilon_dispersion?
-    printf("%17.12f%17.12f\n", eta, a1(0, n)/water_prop.epsilon_dispersion);
+    double a1n = a1(0, n)/water_prop.epsilon_dispersion;
+    // The following is a hokey trick to deal with optimizations like
+    // -ffast-math that may turn -0.0 into 0.0.
+    if (fabs(a1n) < 1e-12) printf("%17.12f  -0.000000000000\n", eta);
+    else printf("%17.12f%17.12f\n", eta, a1n);
   }
 }

@@ -23,8 +23,9 @@ pylab.plot(mcdata[:,0],mcdata[:,2]*4*numpy.pi/3,"r-",label="ConDensity")
 pylab.plot(mcdata[:,0],mcdata[:,3]*4*numpy.pi/3,"g-",label="CenConDensity")
 
 pylab.plot(dftdata[:,0],dftdata[:,3]*4*numpy.pi/3,"g+--",label="simple contact")
-pylab.plot(dftdata[:,0],dftdata[:,4]*4*numpy.pi/3,"gx--",label="Wu and Fu")
+pylab.plot(dftdata[:,0],dftdata[:,4]*4*numpy.pi/3,"gx--",label="Yu and Wu")
 pylab.plot(dftdata[:,0],dftdata[:,5]*4*numpy.pi/3,"ro--",label="DFT at sphere")
+pylab.plot(dftdata[:,0],dftdata[:,6]*4*numpy.pi/3,"g*--",label="n2-only")
 
 pylab.xlabel("radius")
 pylab.ylabel("filling fraction")

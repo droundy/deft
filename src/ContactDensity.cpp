@@ -188,15 +188,69 @@ Functional FuWuContactDensity(double radius) {
   // is more direcly relevant to the association free energy.
   Functional zeta3 = (R/Functional(3))*n2;
 
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+  Functional zeta = 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
+
   // This gHS (called simply gHS) is the gHS that is used in Fu and
   // Wu's 2005 paper, in equation 13.  It seems ideal, since it
   // includes spatial dependence and is published and tested in
   // various ways.
 
-  Functional ghs = gHS(zeta3, radius);
+  // zeta2 is defined right after equation 13 in Fu and Wu 2005.  But
+  // it has a typo in it, and should really be the following, which is
+  // the packing fraction (and is dimensionless).  Note that this
+  // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
+  // 2005.
+  Functional zeta2 = (R/Functional(3))*n2;
+  Functional invdiff = Functional(1)/(1-zeta3);
+  // This is equation 13 in Fu and Wu 2005:
+  //return invdiff + 1.5*n3*zeta*sqr(invdiff) + 0.5*sqr(n3)*zeta*Pow(3)(invdiff);
+
+  // This is equation 13 in Fu and Wu 2005, but written to be slightly
+  // more efficient:
+  Functional ghs = invdiff*(Functional(1) +
+                            0.5*(invdiff*zeta2)*zeta*(Functional(3) + invdiff*zeta2));
+
+  return n0*zeta*ghs;
+}
+
+Functional FuWuContactDensityNoZeta(double radius) {
+  Functional R(radius, "R");
+  Functional n2 = ShellConvolve(radius);
+  Functional n0 = n2/(4*M_PI*sqr(R));
+  Functional n3 = StepConvolve(radius);
+  // The following is from equation 13 of Fu and Wu 2005, which I have
+  // translated in terms of n2.  zeta3 is a version of the packing
+  // fraction (usually called eta in our code) that is computed using
+  // the shell convolution, so it is using the weighted density that
+  // is more direcly relevant to the association free energy.
+  Functional zeta3 = (R/Functional(3))*n2;
+
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
-  Functional zeta = 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
-  return n0*zeta*ghs;
+
+  // This gHS (called simply gHS) is the gHS that is used in Fu and
+  // Wu's 2005 paper, in equation 13.  It seems ideal, since it
+  // includes spatial dependence and is published and tested in
+  // various ways.
+
+  // zeta2 is defined right after equation 13 in Fu and Wu 2005.  But
+  // it has a typo in it, and should really be the following, which is
+  // the packing fraction (and is dimensionless).  Note that this
+  // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
+  // 2005.
+  Functional zeta2 = (R/Functional(3))*n2;
+  Functional invdiff = Functional(1)/(1-zeta3);
+  // This is equation 13 in Fu and Wu 2005:
+  //return invdiff + 1.5*n3*sqr(invdiff) + 0.5*sqr(n3)*Pow(3)(invdiff);
+
+  // This is equation 13 in Fu and Wu 2005, but written to be slightly
+  // more efficient:
+  Functional ghs = invdiff*(Functional(1) +
+                            0.5*(invdiff*zeta2)*(Functional(3) + invdiff*zeta2));
+
+  return n0*ghs;
 }

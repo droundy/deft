@@ -198,7 +198,7 @@ int main(int, char **argv) {
 
   compare_functionals(Phi2Veff(R), phi2(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-14);
 
-  compare_functionals(Phi3rfVeff(R), phi3rf(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-13);
+  compare_functionals(Phi3rfVeff(R), phi3rf(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-13, 0.001, 2e-15);
 
   compare_functionals(IdealGasFast(), IdealGasOfVeff, myT, Grid(gd, -myT*n.cwise().log()),
                       1e-12);
