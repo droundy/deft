@@ -97,8 +97,6 @@ int main(int argc, char *argv[]) {
   char *datname = (char *)malloc(1024);
   sprintf(datname, "paper/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
   
-  FILE *o = fopen(datname, "w");
-
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
 						water_prop.epsilon_dispersion,
@@ -116,6 +114,7 @@ int main(int argc, char *argv[]) {
 				     water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
 			      water_prop.kappaAB, water_prop.epsilon_dispersion,
@@ -155,7 +154,11 @@ int main(int argc, char *argv[]) {
     
     double energy;
     {
-      Minimizer min = Precision(1e-6, 
+      const double surface_tension = 5e-5; // crude guess from memory...
+      const double surfprecision = 1e-4*M_PI*diameter*diameter*surface_tension; // four digits precision
+      const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small spheres
+      const double precision = bulkprecision + surfprecision;
+      Minimizer min = Precision(precision,
                                 PreconditionedConjugateGradient(f, gd, water_prop.kT, 
                                                                 &potential,
                                                                 QuadraticLineMinimizer));
@@ -193,10 +196,11 @@ int main(int argc, char *argv[]) {
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
 
-    const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
     printf("The bulk energy per cell should be %g\n", EperCell);
 
+    FILE *o = fopen(datname, "w");
     fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
+    fclose(o);
 
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
 
@@ -218,9 +222,8 @@ int main(int argc, char *argv[]) {
     printf("Peak memory use is %g M\n", peak);
   
   // }
-  fclose(o);
   clock_t end_time = clock();
   double seconds = (end_time - start_time)/double(CLOCKS_PER_SEC);
   double hours = seconds/60/60;
-  printf("Entire calculation took %.1g hours\n", hours);
+  printf("Entire calculation took %.0f hours %.0f minutes\n", hours, 60*(hours-floor(hours)));
 }

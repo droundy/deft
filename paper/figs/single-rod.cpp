@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
   //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
   potential = -water_prop.kT*potential.cwise().log();
   
-  const double surface_tension = 1e-5; // crude guess from memory...
+  const double surface_tension = 5e-5; // crude guess from memory...
   const double surfprecision = 1e-5*M_PI*diameter*width*surface_tension; // five digits accuracy
   const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small rods
   const double precision = bulkprecision + surfprecision;
