@@ -153,6 +153,37 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
         kdr = k*s_var "dr"
         i = s_var "complex(0,1)"
 
+fftTests :: Test
+fftTests = TestList [t "countFFT x = 0" 0 x,
+                     t "countFFT nbar = 1" 2 nbar,
+                     t "countFFT nbar = 1" 4 (nbar + log nbar)]
+  where t str n e = TestCase $ assertEqual str n (countFFT $ fst $ simp e)
+        x = r_var "x"
+        spreading = 6.0
+        kdr = k * s_var "dr"
+        kR = k * s_var "R"
+        nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+
+substitutionTests :: Test
+substitutionTests = TestList [t x y (y**2) (x**2),
+                              t x y (cos y**2) (cos x**2),
+                              t (fft x) (k_var "temp_FFT") nbar_temp nbar,
+                              t (k**2) (kk**2) nbarkk nbar,
+                              t x y (integrate y) (integrate x),
+                              t x y nbary nbar]
+  where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ " on " ++ latex e) (latex eresult) (latex $ substitute a b e)
+        x = r_var "x"
+        y = r_var "y" :: Expression RealSpace
+        kk = k_var "k"
+        spreading = 6.0
+        dr = s_var "dr" :: Expression KSpace
+        kdr = k * dr
+        kR = k * s_var "R"
+        nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
+        nbar_temp = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * k_var "temp_FFT")
+        nbarkk = ifft ( exp (-spreading*kk**2*dr**2) * (4*pi) * (sin(kk*s_var "R") - kk*s_var "R" * cos(kk*s_var "R")) / kk**3 * fft x)
+        nbary = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft y)
+
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
           writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") Nothing "NiceSum"
@@ -169,9 +200,9 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
               -- nbar = ifft ( (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
-          --writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ generateHeader (log (1-ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x")))) (Just (r_var "R")) "NiceLogOneMinusNbar"
+          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ generateHeader (log (1-ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x")))) (Just (r_var "R")) "NiceLogOneMinusNbar"
           writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar)]
-          c <- runTestTT $ TestList [eqTests, codeTests, latexTests]
+          c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
           if failures c > 0 || errors c > 0
             then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
             else do putStrLn "All tests passed!"
@@ -179,5 +210,6 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
 
 latexfile :: Type a => [(String, Expression a)] -> String
 latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"
-  where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex e ++ "\n\\end{equation}\n"
+  where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex (substitute (k**2) (kk**2) e) ++ "\n\\end{equation}\n"
+        kk = k_var "k"
 \end{code}
