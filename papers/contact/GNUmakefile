@@ -51,7 +51,7 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 figs/gHS-vs-n.eps: figs/gHS-vs-n.dat
 
