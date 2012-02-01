@@ -36,7 +36,6 @@ monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
-	paper/figs/finding-vapor-pressure.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/four-rods-in-water.mkdat \
 	paper/figs/single-rod.mkdat \
@@ -133,7 +132,6 @@ tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
-paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
@@ -186,7 +184,6 @@ clean-local:
 	rm -f comparisons/*.o comparisons/*.mkdat
 
 paper: all paper/figs/equation-of-state.dat \
-	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/enthalpy.dat \
 	paper/figs/pressure-with-isotherms.dat \
