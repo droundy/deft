@@ -136,6 +136,69 @@ Functional dWBNT_dn3(double radius) {
   Functional ttt = TensorThirdTerm(radius);
 }
 
+
+
+Functional dWBm2_dn0(double radius) {
+  return -log(1-n3(radius));
+}
+
+static Functional phi2_n3(const Functional &n3) {
+  return (Functional(1) + (1/9.0)*(6-3*n3+6*(1-n3)*log(1-n3)/n3))/(1-n3);
+}
+
+static Functional phi3_n3(const Functional &n3) {
+  return (1 - (1.0/9)*(6 - 9*n3 + 6*sqr(n3) + 6*sqr(1-n3)*log(1-n3)/n3)/n3)/sqr(1 - n3);
+}
+
+Functional dWBm2_dn1v_over_n2v(double radius) {
+  return Functional(1)*phi2_n3(n3(radius));
+}
+
+Functional dWBm2_dn1(double radius) {
+  return n2(radius)*dWBm2_dn1v_over_n2v(radius);
+}
+
+Functional dWBm2_dn2(double radius) {
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+  return n1(radius)*phi2_n3(n3(radius)) +
+    (sqr(n2(radius)) - (sqr(n2x) + sqr(n2y) + sqr(n2z)))*
+    phi3_n3(n3(radius))/Functional(12*M_PI);
+}
+
+Functional dWBm2_dn2v_over_n2v(double radius) {
+  Functional R(radius, "R");
+  return (Functional(1)/(4*M_PI*R))*phi2_n3(n3(radius)) -
+    6*n2(radius)*phi3_n3(n3(radius))/Functional(36*M_PI);
+}
+
+Functional dWBm2_dn3(double radius) {
+  // FIXME
+  Functional R(radius, "R");
+  Functional vtt = VectorThirdTerm(radius);
+  Functional n3_ = n3(radius);
+  Functional omn3 = 1 - n3_;
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+  Functional nV22 = sqr(n2x) + sqr(n2y) + sqr(n2z);
+  Functional n22mnV22 = sqr(n2(radius)) - nV22;
+  return n0(radius)/omn3 +
+
+    n22mnV22/(4*M_PI*R)*((Functional(1) + (1/9.0)*(6-3*n3_+6*omn3*log(omn3)/n3_))/sqr(omn3) +
+                         (1/9.0)*(Functional(-3) +
+                                  6*(-log(omn3)/n3_ +
+                                     Functional(1)/n3_ -omn3*log(omn3)/sqr(n3_)))/omn3) +
+
+    (1/(36*M_PI))*vtt*
+    (3*phi3_n3(n3_)/omn3 +
+     (Functional(-6)/sqr(n3_) + Functional(6) - 6*(omn3*log(omn3)/sqr(n3_) + omn3/sqr(n3_) + sqr(omn3)*log(omn3)/Pow(3)(n3_)))
+     *(Functional(1.0/9)/sqr(omn3)));
+  // derivative of (1 - (1.0/9)*(6 - 9*n3 + 6*sqr(n3) + 6*sqr(1-n3)*log(1-n3)/n3)/n3)/sqr(1 - n3);
+}
+
+
 Functional dAdR_simplest(double radius) {
   Functional R(radius, "R");
   return dWBNT_dn3(radius)*n2(radius) +
@@ -172,6 +235,36 @@ Functional ContactDensitySimplest(double radius) {
 }
 
 Functional ContactDensitySphere(double radius) {
+  Functional R(radius, "R");
+  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n(radius);
+}
+
+
+Functional dAdR_sphere_over_n_WBm2(double radius) {
+  Functional R(radius, "R");
+  Functional two_over_R = Functional(2)/R;
+  Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
+
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+
+
+  return 4*M_PI*sqr(R)*(dWBm2_dn3(radius)
+                        + two_over_R*dWBm2_dn2(radius)
+                        + one_over_4piRsqr*dWBm2_dn1(radius));
+  return ShellConvolve(radius)(dWBm2_dn3(radius)
+                               + two_over_R*dWBm2_dn2(radius)
+                               + one_over_4piRsqr*dWBm2_dn1(radius)) +
+    xShellConvolve(radius)(one_over_4piRsqr*n2x*dWBm2_dn1v_over_n2v(radius) +
+                           two_over_R*n2x*dWBm2_dn2v_over_n2v(radius)) +
+    yShellConvolve(radius)(one_over_4piRsqr*n2y*dWBm2_dn1v_over_n2v(radius) +
+                           two_over_R*n2y*dWBm2_dn2v_over_n2v(radius)) +
+    zShellConvolve(radius)(one_over_4piRsqr*n2z*dWBm2_dn1v_over_n2v(radius) +
+                           two_over_R*n2z*dWBm2_dn2v_over_n2v(radius));
+}
+
+Functional ContactDensitySphereWBm2(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n(radius);
 }

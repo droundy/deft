@@ -11,3 +11,4 @@ Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);
 Functional HardSpheresWBFast(double radius);
+Functional HardSpheresWBm2(double radius);

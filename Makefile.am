@@ -22,7 +22,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/SaftFluidFast.cpp \
 	src/AssociationFast.cpp src/DispersionFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
-	src/HardSpheresWBFast.cpp \
+	src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
