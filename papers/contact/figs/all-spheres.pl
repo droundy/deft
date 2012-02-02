@@ -8,7 +8,7 @@ my $F;
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
 foreach $dd ([16,265], [12,112], [8,13]) {
-  foreach $F ("WB", "WBT") {
+  foreach $F ("WB", "WBT", "WBm2") {
     my $d = sprintf("%02.0f", $$dd[0]);
     my $N = sprintf("%04.0f", $$dd[1]);
 

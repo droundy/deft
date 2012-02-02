@@ -53,7 +53,8 @@ Functional WBm2 = HardSpheresWBm2(1.0);
 const int numiters = 25;
 
 
-void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e, const Grid &f, const Grid &g) {
+void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
+                 const Grid &f, const Grid &g) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -72,7 +73,8 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere, dhere, ehere, fhere, ghere);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere);
   }
   fclose(out);
 }
@@ -142,11 +144,13 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   Grid energy_density(gd, f(1, gd, potential));
   Grid contact_density(gd, ContactDensitySimplest(1.0)(1, gd, density));
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
-  Grid contact_density_sphere_m2(gd, ContactDensitySphereWBm2(1.0)(1, gd, density));
+  if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
+  Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density));
   Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
   Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
-  radial_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere, wu_contact_density_no_zeta, contact_density_sphere_m2);
+  radial_plot(plotname, density, energy_density, contact_density, wu_contact_density,
+              contact_density_sphere, wu_contact_density_no_zeta, gross_density);
   free(plotname);
   {
     double peak = peak_memory()/1024.0/1024;

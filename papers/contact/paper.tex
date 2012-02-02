@@ -101,20 +101,37 @@ approximations.  A functional for the association term of the free
 energy was introduced by Wu and
 Yu\cite{yu2002fmt-dft-inhomogeneous-associating}, and was used in
 several subsequent functionals\cite{fu2005vapor-liquid-dft,
-  bryk2006density}.  A key input (FIXME: term, factor?) to this
-functional is the contact value of the correlation function of a
-hard-sphere fluid.
+  bryk2006density}.  A key input (FIXME: term, factor?) to both the
+association and chain free energies is the contact value of the
+correlation function of a hard-sphere fluid.
 
-The contact value of the correlation function---also known as the
-cavity correlation function---is the the value of the
-correlation function evaluated a distance equal to the hard-sphere
-diameter.  Yu and Wu introduce an approximation based on the
-fundamental measures of Fundamental Measure Theory (see
-Section~\ref{sec:yuwu}).  In this paper, we will report on the
-accuracy of this approximation by comparing with Monte Carlo
-simulations of the inhomogeneous hard-sphere fluid.  In addition, we
-will introduce and test differing approximations for the cavity
-correlation function.
+The contact value of the correlation function---which is the same as
+the contact value of the cavity correlation function for hard
+spheres---is the the value of the correlation function evaluated a
+distance equal to the hard-sphere diameter.  In an inhomogeneous
+system treated using fundamental measures, there is some ambiguity in
+the meaning of the \emph{local} contact value of the correlation
+function which appears in the equations for the homogeneous system.
+Clearly the contact value of the correlation function will depend on
+position, but how should that position be defined? It will depend on
+how the correlation function is used.  There are two reasonable
+choices for functionals based on fundamental measure theory, which
+will depend on which densities are used...
+\begin{align}
+  F[n(\rr)] = \int n(\rr) f(\bar{n}(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+\begin{align}
+  F[n(\rr)] = \int f(n_2(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+
+Yu and Wu introduce an approximation based on the fundamental measures
+of Fundamental Measure Theory (see Section~\ref{sec:yuwu}).  Gross
+also does\cite{gross2009density}. 
+
+In this paper, we will report on the accuracy of this approximation by
+comparing with Monte Carlo simulations of the inhomogeneous
+hard-sphere fluid.  In addition, we will introduce and test differing
+approximations for the cavity correlation function.
 
 \textcolor{red}{Cavity correlation function!}
 

@@ -269,6 +269,19 @@ Functional ContactDensitySphereWBm2(double radius) {
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n(radius);
 }
 
+Functional GrossContactDensity(double radius) {
+  Functional R(radius, "R");
+  Functional n2prime = ShellConvolve(2*radius, Expression("2*R"));
+  Functional n0prime = n2prime/(4*M_PI*sqr(2*R));
+  Functional n3prime = StepConvolve(2*radius, Expression("2*R"));
+
+  Functional eta = (1.0/8)*n3prime;
+  Functional ghs = (1 - 0.5*eta)/Pow(3)(1 - eta);
+
+  return n0prime*ghs;
+}
+
+
 Functional FuWuContactDensity(double radius) {
   Functional R(radius, "R");
   Functional n2 = ShellConvolve(radius);
