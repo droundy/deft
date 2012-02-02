@@ -254,12 +254,6 @@ int main(int, char **argv) {
   ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereTarazonaFast", ff, potential);
 
-  ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSpheresWBnotensor", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereNoTensor", ff, potential);
-
   ff = constrain(constraint, HardSphereGas(R, mu));
   check_a_functional("HardSphereGas", ff, potential);
 
@@ -268,6 +262,15 @@ int main(int, char **argv) {
   ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   check_a_functional("SaftFluid", ff, potential);
+
+  ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  check_a_functional("HardSpheresWBnotensor", ff, potential);
+
+  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  check_a_functional("HardSphereNoTensor", ff, potential);
+
+  ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  check_a_functional("HardSpheresNoTensor2", ff, potential);
 
   if (numoops == 0) {
     printf("\n%s has no oopses!\n", argv[0]);
