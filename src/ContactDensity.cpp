@@ -297,7 +297,11 @@ Functional FuWuContactDensity(double radius) {
   // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
   // 2005.
   Functional zeta2 = (R/Functional(3))*n2;
-  Functional invdiff = Functional(1)/(1-zeta3);
+  //Functional invdiff = Functional(1)/(1-zeta3);
+
+  // A careful reading of the Yu and Wu paper indicates that n3 is
+  // used rather than n2...
+  Functional invdiff = Functional(1)/(1-n3);
   // This is equation 13 in Fu and Wu 2005:
   //return invdiff + 1.5*n3*zeta*sqr(invdiff) + 0.5*sqr(n3)*zeta*Pow(3)(invdiff);
 
