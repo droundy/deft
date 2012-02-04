@@ -91,7 +91,9 @@ figs/density-four-rods.eps: figs/four-rods-01.0-01.1.dat \
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
 	figs/rods-in-water-01.0nm.dat figs/rods-in-water-01.4nm.dat \
 	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
-figs/four-rods-energy-vs-distance.eps: figs/four-rods-energy-1.0.dat
+figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.6nm.dat \
+	figs/four-rods-in-water-01.0nm.dat figs/four-rods-in-water-01.4nm.dat \
+	figs/four-rods-in-water-01.8nm.dat figs/four-rods-in-water-02.0nm.dat
 figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
 
 figs/density-single-rod.eps: figs/single-rod-slice-02.0.dat \
