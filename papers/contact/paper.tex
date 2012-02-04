@@ -51,6 +51,90 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+% The following are papers that use a SAFT-based classical DFT with at
+% least some of the terms purely local
+\newcommand\saftlocaldft{felipe2001examination, gloor2002saft,%
+  gloor2004accurate, clark2006developing, gloor2007prediction,%
+  kahl2008modified, gross2009density}
+% The following are papers that use a SAFT-based classical DFT with
+% all the terms that should be non-local being non-local.
+\newcommand\saftnonlocaldft{yu2002fmt-dft-inhomogeneous-associating,%
+  fu2005vapor-liquid-dft,bryk2006density}
+
+There has been considerable recent interest in using Statistical
+Associating Fluid Theory (SAFT) to construct classical density
+functionals to describe associating
+fluids\cite{\saftlocaldft,\saftnonlocaldft}.  This approach has been
+successful in qualitatively describing the dependence of surface
+tension on temperature.  Unfortunately, most of these constructed
+functionals\cite{\saftlocaldft} cannot be used to study arbitrary
+inhomogeneous density distributions, because they use local
+density approximations that are only valid for densities that vary
+slowly over molecular length scales.
+
+Constructing a classical density functional based on SAFT involves
+rewriting each term in the free energy as a functional of an
+inhomogeneous density.  The SAFT free energy consists of four terms:
+\begin{align}
+  A_\textit{SAFT} &= A_\textit{ideal} + A_\textit{HS} + A_\textit{chain} + A_\textit{disp} + A_\textit{assoc}
+\end{align}
+where $A_\textit{ideal}$ is the ideal-gas free energy, $A_\textit{HS}$
+is the excess free energy of a hard-sphere fluid of monomers,
+$A_\textit{chain}$ is the contribution to the free energy from the
+chaining effect in a polymeric fluid, $A_\textit{disp}$ is the
+dispersion contribution to the free energy, and $A_\textit{assoc}$ is
+the free energy contribution from \emph{association}, which is to say,
+hydrogen bonding.  Each of these terms has some dependence on the
+inhomogeneity in the density.  The ideal gas is purely local, and in
+fact must be the only purely local term in the free energy in order
+for the functional to satisfy the contact-value theorem.  The
+hard-sphere contribution contribution to the free energy has been
+thoroughly studied, and is well approximated by the White Bear version
+of the Fundamental-Measure Theory (FMT)
+functional\cite{roth2002whitebear}.  A functional for the chain
+contribution is has recently been introduced\cite{bryk2006density,
+  gross2009density}, but is not needed for small associating molecules
+such as water.  The dispersion term is long-range and thus has
+significant dependence on the density distribution, but because its
+relatively weak position dependence, is amenable to mean-field
+approximations.  A functional for the association term of the free
+energy was introduced by Wu and
+Yu\cite{yu2002fmt-dft-inhomogeneous-associating}, and was used in
+several subsequent functionals\cite{fu2005vapor-liquid-dft,
+  bryk2006density}.  A key input (FIXME: term, factor?) to both the
+association and chain free energies is the contact value of the
+correlation function of a hard-sphere fluid.
+
+The contact value of the correlation function---which is the same as
+the contact value of the cavity correlation function for hard
+spheres---is the the value of the correlation function evaluated a
+distance equal to the hard-sphere diameter.  In an inhomogeneous
+system treated using fundamental measures, there is some ambiguity in
+the meaning of the \emph{local} contact value of the correlation
+function which appears in the equations for the homogeneous system.
+Clearly the contact value of the correlation function will depend on
+position, but how should that position be defined? It will depend on
+how the correlation function is used.  There are two reasonable
+choices for functionals based on fundamental measure theory, which
+will depend on which densities are used...
+\begin{align}
+  F[n(\rr)] = \int n(\rr) f(\bar{n}(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+\begin{align}
+  F[n(\rr)] = \int f(n_2(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+
+Yu and Wu introduce an approximation based on the fundamental measures
+of Fundamental Measure Theory (see Section~\ref{sec:yuwu}).  Gross
+also does\cite{gross2009density}. 
+
+In this paper, we will report on the accuracy of this approximation by
+comparing with Monte Carlo simulations of the inhomogeneous
+hard-sphere fluid.  In addition, we will introduce and test differing
+approximations for the cavity correlation function.
+
+\textcolor{red}{Cavity correlation function!}
+
 The hard-sphere contact density---that is to say, the density of hard
 spheres touching a given hard sphere---is important for the
 association term in Statistical Associating Fluid Theory (SAFT).
@@ -555,6 +639,20 @@ Figure~\ref{fig:contact}.  \textcolor{red}{I'm not sure how to go
   about doing this.  In the derivation section, I have some ideas
   jotted down, but they don't really work.}
 
+\section{Gross' functional}\label{sec:gross}
+We compare with the functional of Gross \emph{et
+  al}\cite{gross2009density}, which is of the first kind, where the
+contact density is evaluated at the sphere location.
+\begin{align}
+  n_\textit{contact} &= n_{0'} \frac{1 - \frac12 n_{3'}}{\left(1 - n_{3'}\right)^3}
+\end{align}
+where $n_{0'}$ and $n_{3'}$ are defined in a manner analogous to the
+$n_0$ and $n_3$ of FMT, but with the hard-sphere radius replaced by
+the hard-sphere diameter, so the integrals range over spheres that are
+twice as large.
+
+\section{Yu and Wu's functional}\label{sec:yuwu}
+
 Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
 position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
@@ -664,12 +762,12 @@ prediction.  We also plot Monte Carlo results for the two contact
 densities: the contact density evaluated at contact, and the contact
 density evaluated at the sphere location.  Alongside these, we plot
 the contact density of Fu and Wu~\cite{fu2005vapor-liquid-dft} (or
-should it be Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating}?), the ``simple
-contact density'' from Section~\ref{simple-contact}, and the ``contact
-density at sphere'' from Section~\ref{contact-at-sphere}.  In
-principle, the functional of Wu (FIXME) should match the
-CenConDensity, while the DFT at sphere should match the ConDensity...
+should it be Yu and Wu\cite{yu2002structures,
+  yu2002fmt-dft-inhomogeneous-associating}?), the ``simple contact
+density'' from Section~\ref{simple-contact}, and the ``contact density
+at sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
+functional of Wu (FIXME) should match the CenConDensity, while the DFT
+at sphere should match the ConDensity...
 
 \subsection{Hard spheres confined in a spherical cavity}
 

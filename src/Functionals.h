@@ -19,6 +19,7 @@ Functional HardSpheresRF(double radius);
 Functional HardSpheresTarazona(double radius);
 Functional HardSpheresWB(double radius);
 Functional HardSpheresWBnotensor(double radius);
+Functional HardSpheresWBm2slow(double radius);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 

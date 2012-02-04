@@ -10,7 +10,6 @@ FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
-	src/ContactDensity.cpp \
 	src/EffectivePotentialToDensity.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
@@ -18,16 +17,21 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
+CONTACT_CODE = $(GENERIC_CODE) \
+	src/ContactDensity.cpp
+
 OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/SaftFluidFast.cpp \
 	src/AssociationFast.cpp src/DispersionFast.cpp \
 	src/HardSpheresFast.cpp src/HardSpheresRFFast.cpp \
-	src/HardSpheresWBFast.cpp \
+	src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
 
-ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE)
+ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
+
+ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE)
 
 bin_PROGRAMS = deft monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE) 
@@ -36,7 +40,6 @@ monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	paper/figs/surface-tension.mkdat \
 	paper/figs/equation-of-state.mkdat \
-	paper/figs/finding-vapor-pressure.mkdat \
 	paper/figs/rods-in-water.mkdat \
 	paper/figs/four-rods-in-water.mkdat \
 	paper/figs/single-rod.mkdat \
@@ -123,7 +126,7 @@ tests_convolve_test_SOURCES = tests/convolve.cpp $(ALL_CODE)
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
-tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(GENERIC_CODE)
+tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CONTACT_CODE)
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
@@ -133,7 +136,6 @@ tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
 paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
 paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
-paper_figs_finding_vapor_pressure_mkdat_SOURCES = paper/figs/finding-vapor-pressure.cpp $(ALL_CODE)
 paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
 paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
 paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
@@ -143,11 +145,11 @@ paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
 paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
 
-papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(GENERIC_CODE)
-papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(GENERIC_CODE)
-papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CODE)
-papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CODE)
-papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CODE)
+papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(CONTACT_CODE)
+papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(CONTACT_CODE)
+papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CONTACT_CODE)
+papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CONTACT_CODE)
+papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CONTACT_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -186,7 +188,6 @@ clean-local:
 	rm -f comparisons/*.o comparisons/*.mkdat
 
 paper: all paper/figs/equation-of-state.dat \
-	paper/figs/finding-vapor-pressure.dat \
 	paper/figs/surface-tension.dat \
 	paper/figs/enthalpy.dat \
 	paper/figs/pressure-with-isotherms.dat \

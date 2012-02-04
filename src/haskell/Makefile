@@ -11,5 +11,5 @@ test: test.lhs $(wildcard *.lhs)
 # I make functionals depend on test, so they won't get confused by
 # compiling both files at once (which can mean compiling CodeGen.lhs
 # twice at the same time).
-functionals: functionals.hs test $(wildcard *.lhs)
+functionals: functionals.hs test $(wildcard *.lhs) $(wildcard *.hs)
 	ghc $(GHCFLAGS) --make -o $@ $<

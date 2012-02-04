@@ -46,11 +46,13 @@ static void took(const char *name) {
 }
 
 Functional WB = HardSpheresNoTensor(1.0);
+Functional WBm2 = HardSpheresWBm2(1.0);
 Functional WBT = HardSpheresWBFast(1.0);
 
 const int numiters = 25;
 
-void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e, const Grid &f) {
+void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d,
+            const Grid &e, const Grid &f, const Grid &g) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -68,7 +70,9 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, cons
     double dhere = d(x,y,z);
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2], ahere, bhere, chere, dhere, ehere, fhere);
+    double ghere = g(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere);
   }
   fclose(out);
 }
@@ -145,12 +149,15 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid energy_density(gd, f(1, gd, potential));
   Grid contact_density(gd, ContactDensitySimplest(1.0)(1, gd, density));
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
+  if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
+  Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density));
   Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
   Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
   // plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere, wu_contact_density_no_zeta);
+  z_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere,
+         wu_contact_density_no_zeta, gross_density);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/walls.eps", 
   //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
@@ -168,6 +175,7 @@ int main(int, char **) {
   for (double eta = 0.1; eta < 0.6; eta+=0.1) {
     run_walls(eta, "WB", WB);
     run_walls(eta, "WBT", WBT);
+    run_walls(eta, "WBm2", WBm2);
   }
   // Just create this file so make knows we have run.
   fopen("papers/contact/figs/walls.dat", "w");
