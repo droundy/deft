@@ -216,9 +216,9 @@ Functional dAdR_sphere_over_n(double radius) {
   Functional n2z = zShellConvolve(radius);
 
 
-  return 4*M_PI*sqr(R)*(dWBNT_dn3(radius)
-                        + two_over_R*dWBNT_dn2(radius)
-                        + one_over_4piRsqr*dWBNT_dn1(radius));
+  //return 4*M_PI*sqr(R)*(dWBNT_dn3(radius)
+  //                      + two_over_R*dWBNT_dn2(radius)
+  //                      + one_over_4piRsqr*dWBNT_dn1(radius));
   return ShellConvolve(radius)(dWBNT_dn3(radius)
                                + two_over_R*dWBNT_dn2(radius)
                                + one_over_4piRsqr*dWBNT_dn1(radius)) +
@@ -250,9 +250,9 @@ Functional dAdR_sphere_over_n_WBm2(double radius) {
   Functional n2z = zShellConvolve(radius);
 
 
-  return 4*M_PI*sqr(R)*(dWBm2_dn3(radius)
-                        + two_over_R*dWBm2_dn2(radius)
-                        + one_over_4piRsqr*dWBm2_dn1(radius));
+  //return 4*M_PI*sqr(R)*(dWBm2_dn3(radius)
+  //                      + two_over_R*dWBm2_dn2(radius)
+  //                      + one_over_4piRsqr*dWBm2_dn1(radius));
   return ShellConvolve(radius)(dWBm2_dn3(radius)
                                + two_over_R*dWBm2_dn2(radius)
                                + one_over_4piRsqr*dWBm2_dn1(radius)) +
