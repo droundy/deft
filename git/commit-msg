@@ -13,6 +13,6 @@ case "$TEST" in
         echo Tested only compile and papers. >> "$1"
         ;;
     *)
-        echo Tested everything. >> "$1"
+        echo Tested everything on `hostname`. >> "$1"
         ;;
 esac
