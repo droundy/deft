@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     printf("Diameter is %g bohr\n", diameter);
   }
   
-  const double dmax = 1.0*nm;
+  const double dmax = ((3*M_PI-4)*(diameter/2)/2)*1.5;
   double zmax = 2*diameter+dmax+2*nm;
   double ymax = 2*diameter+dmax+2*nm;
 
@@ -195,9 +195,9 @@ int main(int argc, char *argv[]) {
     potential = -water_prop.kT*potential.cwise().log();
 
     //calculation for precision based on David's for Single rod
-    const double surface_tension = 1e-5; // crude guess from memory...
+    const double surface_tension = 5e-5; // crude guess from memory...
     const double surfprecision = 1e-5*(4*M_PI*diameter)*width*surface_tension; // five digits accuracy
-    const double bulkprecision = 1e-10*fabs(EperCell); // but there's a limit on our precision for small rods
+    const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small rods
     const double precision = bulkprecision + surfprecision;
     printf("Precision limit from surface tension is to %g based on %g and %g\n",
            precision, surfprecision, bulkprecision);

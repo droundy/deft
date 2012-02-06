@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
     //based of David's single rod precision
     const double surface_tension = 1e-5; // crude guess from memory...
     const double surfprecision = 1e-5*(2*M_PI*diameter)*width*surface_tension; // five digits accuracy
-    const double bulkprecision = 1e-10*fabs(EperCell); // but there's a limit on our precision for small rods
+    const double bulkprecision = 1e-9*fabs(EperCell); // but there's a limit on our precision for small rods
     const double precision = bulkprecision + surfprecision;
     printf("Precision limit from surface tension is to %g based on %g and %g\n",
            precision, surfprecision, bulkprecision);
