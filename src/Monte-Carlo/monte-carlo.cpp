@@ -44,7 +44,9 @@ int main(int argc, char *argv[]){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
       spherical_outer_wall = true;
+      periodic_x = periodic_y = periodic_z = false;
       rad = atof(argv[a+1]);
+      printf("Using outerSphere of %g\n", rad);
     }
     if (strcmp(argv[a],"innerSphere") == 0) {
       spherical_inner_wall = true;
@@ -61,19 +63,27 @@ int main(int argc, char *argv[]){
       lenx = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"periody") == 0) {
-      periodic_y = true; leny = atof(argv[a+1]);
+      periodic_y = true;
+      leny = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"periodz") == 0) {
-      periodic_z = true; lenz = atof(argv[a+1]);
+      periodic_z = true;
+      lenz = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"wallx") == 0) {
-      has_x_wall = true; lenx = atof(argv[a+1]);
+      has_x_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_x = false;
     }
     if (strcmp(argv[a],"wally") == 0) {
-      has_y_wall = true; lenx = atof(argv[a+1]);
+      has_y_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_y = false;
     }
     if (strcmp(argv[a],"wallz") == 0) {
-      has_z_wall = true; lenx = atof(argv[a+1]);
+      has_z_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_z = false;
     }
     if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
@@ -94,12 +104,6 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-//FILE *out = fopen((const char *)outfilename,"w");
-  FILE *out = fopen((const char *)outfilename,"w");
-  if (out == NULL) {
-    printf("Error creating file %s\n", outfilename);
-    return 1;
-  }
   //////////////////////////////////////////////////////////////////////////////////////////
   // We start with randomly-placed spheres, and then gradually wiggle
   // them around until they are all within bounds and are not
@@ -368,6 +372,12 @@ int main(int argc, char *argv[]){
 	   ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
   
+//FILE *out = fopen((const char *)outfilename,"w");
+  FILE *out = fopen((const char *)outfilename,"w");
+  if (out == NULL) {
+    printf("Error creating file %s\n", outfilename);
+    return 1;
+  }
   if (flat_div){
     fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
 	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);

@@ -19,8 +19,8 @@
 
 \newcommand{\fixme}[1]{\red{[#1]}}
 
-%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
-\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+%\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 
 % needsworklater is used to annotate bits that need work, but that we
 % can postpone for a while.
@@ -47,6 +47,8 @@
 \end{abstract}
 
 \maketitle
+
+%\input{formulas}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -1240,6 +1242,21 @@ of state the excess free energy, which is
   A = Nk_BT\frac{4\eta -3\eta^2}{(1-\eta)^2}
 \end{align}
 \end{widetext}
+
+%% \begin{widetext}
+%% \section{Formulas generated from Haskell}
+
+%% \begin{align}
+%%   \Phi_1 &= \phione \\
+%%   \Phi_2 &= \phitwo \\
+%%   \Phi_3 &= \phithree \\
+%%   \frac{d F}{dn_3} &= \dwbdnthree \\
+%%   \frac{d F}{dn_2} &= \dwbdntwo \\
+%%   \frac{d F}{dn_1} &= \dwbdnone \\
+%%   \frac{d F}{d\vec{n}_{2v}} &= \dwbdntwov \\
+%%   \frac{d F}{d\vec{n}_{1v}} &= \dwbdnonev \\
+%% \end{align}
+%% \end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
