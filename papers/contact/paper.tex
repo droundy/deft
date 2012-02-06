@@ -623,23 +623,16 @@ expensive.
 
 \section{Contact density at a given contact position}
 
-A final definition of the inhomogeneous contact density would be the
-contact density for spheres \emph{touching at a given point}.  This
-would be a symmetric measure, since both spheres involved are treated
-in the same way.  In fact, the density of such spheres is just the
-density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
+An alternate definition of the inhomogeneous contact density would be
+the contact density for spheres \emph{touching at a given point}.
+This would be a symmetric measure, since both spheres involved are
+treated in the same way.  In fact, the density of such spheres is just
+the density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
 illustration $n_0$.  Since $n_0$ is the fundamental measure of sphere
 surface contact, it would make sense to define a contact density that
-would correspond.
-
-To find the contact density at a given point of contact, we can't
-simply change the radius for spheres touching that point, since that
-would give us the pressure averaged over the entire surface of those
-spheres.  Instead, we would have to imagine extending a patch of those
-spheres which is located at the point of interest, as illustrated in
-Figure~\ref{fig:contact}.  \textcolor{red}{I'm not sure how to go
-  about doing this.  In the derivation section, I have some ideas
-  jotted down, but they don't really work.}
+would correspond.  This is what is done by Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as discussed in
+Section~\ref{sec:yuwu}.
 
 \section{Gross' functional}\label{sec:gross}
 We compare with the functional of Gross \emph{et
@@ -659,14 +652,6 @@ Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
 position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
 compare both their functional as well as ours with simulation data.
-
-\begin{figure}
-\includegraphics[width=5cm]{figs/contact}
-\caption{Construction for finding the contact density at a given point
-  of contact.  We envision a small area $dA$ of each sphere that touches
-the point $\mathbf{r}$ extended by a distance $dR$.}
-\label{fig:contact}
-\end{figure}
 
 \derivation{
 

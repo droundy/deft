@@ -34,7 +34,6 @@ clean:
 
 ALL_FIGURES=\
 	figs/n0.svg\
-	figs/contact.svg\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
 	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
