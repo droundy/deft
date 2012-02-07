@@ -97,6 +97,12 @@ Functional ShellConvolve(double R, Expression r) {
                     r, Expression(4*M_PI)*(r*r), true);
 }
 
+Functional ShellPrimeConvolve(double R, Expression r) {
+  r.set_type("double");
+  return Functional(function_for_convolve<shellprime_op<complex> >, R,
+                    r, Expression(8*M_PI)*r, true);
+}
+
 static Expression zero = Expression(0).set_alias("literal");
 
 Functional xShellConvolve(double R, Expression r) {

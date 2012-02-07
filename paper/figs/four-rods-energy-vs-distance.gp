@@ -62,8 +62,8 @@ kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
 
 plot [:] [:] \
-'figs/four-rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.7) title 'r=0.3 nm' with lp ls 1, \
-'figs/four-rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-1.43) title 'r=0.5 nm' with lp ls 2, \
-'figs/four-rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-2.12) title 'r=0.7 nm' with lp ls 3, \
+'figs/four-rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.833) title 'r=0.3 nm' with lp ls 1, \
+'figs/four-rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-1.553) title 'r=0.5 nm' with lp ls 2, \
+'figs/four-rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-2.25) title 'r=0.7 nm' with lp ls 3, \
 'figs/four-rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-2.735) title 'r=0.9 nm' with lp ls 4, \
 'figs/four-rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-3.1) title 'r=1.0 nm' with lp ls 6

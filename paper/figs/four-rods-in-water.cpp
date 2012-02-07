@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     printf("Diameter is %g bohr\n", diameter);
   }
   
-  const double dmax = 3.0*nm;
+  const double dmax = ((3*M_PI-4)*(diameter/2)/2)*1.5;
   double zmax = 2*diameter+dmax+2*nm;
   double ymax = 2*diameter+dmax+2*nm;
 
@@ -154,6 +154,7 @@ int main(int argc, char *argv[]) {
                                      water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperCell = EperVolume*(zmax*ymax - 4*0.25*M_PI*diameter*diameter)*width;
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
                               water_prop.kappaAB, water_prop.epsilon_dispersion,
@@ -166,7 +167,10 @@ int main(int argc, char *argv[]) {
                                                   water_prop.epsilon_dispersion,
                                                   water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
-  for (distance=2.5*nm; distance<=dmax; distance += 0.1*nm) {
+  //Note for Eric...
+  ///////////////  LOOP OVER DISTANCES BELOW!!! /////////////////
+
+  for (distance=0.0*nm; distance<=dmax; distance += 0.1*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     
@@ -189,8 +193,15 @@ int main(int argc, char *argv[]) {
       + 400*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
     //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
     potential = -water_prop.kT*potential.cwise().log();
-    
-    Minimizer min = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+
+    //calculation for precision based on David's for Single rod
+    const double surface_tension = 5e-5; // crude guess from memory...
+    const double surfprecision = 1e-5*(4*M_PI*diameter)*width*surface_tension; // five digits accuracy
+    const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small rods
+    const double precision = bulkprecision + surfprecision;
+    printf("Precision limit from surface tension is to %g based on %g and %g\n",
+           precision, surfprecision, bulkprecision);
+    Minimizer min = Precision(precision, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     const int numiters = 200;
@@ -215,7 +226,6 @@ int main(int argc, char *argv[]) {
     char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "paper/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
 
-    const double EperCell = EperVolume*(zmax*ymax - 4*0.25*M_PI*diameter*diameter)*width;
     printf("The bulk energy per cell should be %g\n", EperCell);
     double energy;
     if (min.energy() < min2.energy()) {

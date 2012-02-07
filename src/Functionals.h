@@ -19,6 +19,7 @@ Functional HardSpheresRF(double radius);
 Functional HardSpheresTarazona(double radius);
 Functional HardSpheresWB(double radius);
 Functional HardSpheresWBnotensor(double radius);
+Functional HardSpheresWBm2slow(double radius);
 Functional ChemicalPotential(double chemical_potential);
 Functional ExternalPotential(const VectorXd &V);
 
@@ -52,6 +53,7 @@ Functional GaussianConvolve(double width, Expression r);
 Functional StepConvolve(double radius, Expression r = Expression("R"));
 
 Functional ShellConvolve(double radius, Expression r = Expression("R"));
+Functional ShellPrimeConvolve(double radius, Expression r = Expression("R"));
 
 Functional xShellConvolve(double radius, Expression r = Expression("R"));
 Functional yShellConvolve(double radius, Expression r = Expression("R"));

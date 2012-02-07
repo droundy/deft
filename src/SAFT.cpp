@@ -23,7 +23,7 @@ Functional getzeta(double radius) {
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
-  return Functional(1.0);
+  //return Functional(1.0);
   return 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
   //return (1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2)).set_name("xi");
 }
@@ -107,8 +107,8 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   // includes spatial dependence and is published and tested in
   // various ways.
 
-  Functional ghs = gHS(zeta3, R);
-  //Functional ghs = gHS(n3, R); // This should be correct!!!
+  //Functional ghs = gHS(zeta3, R);
+  Functional ghs = gHS(n3, R); // This should be correct!!!
 
   // The following ghs, called gHScarnahan, is the one that is used by
   // Gloor et al, and is in the fortran code that I compare with to

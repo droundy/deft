@@ -3,8 +3,13 @@ all: test functionals
 clean:
 	rm -f *.hi *.o test
 
-test: test.lhs $(wildcard *.lhs)
-	ghc -Werror -Wall -fno-warn-unused-do-bind --make -o $@ $<
+GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind
 
-functionals: functionals.hs $(wildcard *.lhs)
-	ghc -O2 -Wall -fno-warn-unused-do-bind --make -o $@ $<
+test: test.lhs $(wildcard *.lhs)
+	ghc $(GHCFLAGS) --make -o $@ $<
+
+# I make functionals depend on test, so they won't get confused by
+# compiling both files at once (which can mean compiling CodeGen.lhs
+# twice at the same time).
+functionals: functionals.hs test $(wildcard *.lhs) $(wildcard *.hs)
+	ghc $(GHCFLAGS) --make -o $@ $<

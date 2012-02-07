@@ -44,7 +44,9 @@ int main(int argc, char *argv[]){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
       spherical_outer_wall = true;
+      periodic_x = periodic_y = periodic_z = false;
       rad = atof(argv[a+1]);
+      printf("Using outerSphere of %g\n", rad);
     }
     if (strcmp(argv[a],"innerSphere") == 0) {
       spherical_inner_wall = true;
@@ -61,19 +63,27 @@ int main(int argc, char *argv[]){
       lenx = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"periody") == 0) {
-      periodic_y = true; leny = atof(argv[a+1]);
+      periodic_y = true;
+      leny = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"periodz") == 0) {
-      periodic_z = true; lenz = atof(argv[a+1]);
+      periodic_z = true;
+      lenz = atof(argv[a+1]);
     }
     if (strcmp(argv[a],"wallx") == 0) {
-      has_x_wall = true; lenx = atof(argv[a+1]);
+      has_x_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_x = false;
     }
     if (strcmp(argv[a],"wally") == 0) {
-      has_y_wall = true; lenx = atof(argv[a+1]);
+      has_y_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_y = false;
     }
     if (strcmp(argv[a],"wallz") == 0) {
-      has_z_wall = true; lenx = atof(argv[a+1]);
+      has_z_wall = true;
+      lenx = atof(argv[a+1]);
+      periodic_z = false;
     }
     if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
@@ -94,12 +104,6 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-//FILE *out = fopen((const char *)outfilename,"w");
-  FILE *out = fopen((const char *)outfilename,"w");
-  if (out == NULL) {
-    printf("Error creating file %s\n", outfilename);
-    return 1;
-  }
   //////////////////////////////////////////////////////////////////////////////////////////
   // We start with randomly-placed spheres, and then gradually wiggle
   // them around until they are all within bounds and are not
@@ -119,8 +123,8 @@ int main(int argc, char *argv[]){
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
-      printf("took %g seconds per initialising iteration\n",
-             (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      //printf("took %g seconds per initialising iteration\n",
+      //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
       num_timed = 0;
       start = now;
     }
@@ -245,12 +249,13 @@ int main(int argc, char *argv[]){
   
   start = clock();
   num_timed = 0;
+  double secs_per_iteration = 0;
   int workingmoves=0;
   for (long j=0; j<iterations; j++){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
-      printf("took %g seconds per iteration\n",
-	     (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
+      printf("took %g seconds per iteration\n", secs_per_iteration);
       num_timed = 0;
       start = now;
       // after the first timing, just time things once per percent (as
@@ -318,9 +323,20 @@ int main(int argc, char *argv[]){
 	}
       }
     }
-    if(j % (iterations/100)==0){
-      printf("%g%% complete...\n",j/(iterations*1.0)*100);
-      //printf("%g%% complete...\r",j/(times*1.0)*100);
+    if(j % (iterations/100)==0 && j != 0){
+      double secs_to_go = secs_per_iteration*(iterations - j);
+      int mins_to_go = secs_to_go / 60;
+      int hours_to_go = mins_to_go / 60;
+      mins_to_go = mins_to_go % 60;
+      if (hours_to_go > 5) {
+        printf("%g%% complete... (%d hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+      } else if (hours_to_go < 1) {
+        printf("%g%% complete... (%d minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else if (hours_to_go < 2) {
+        printf("%g%% complete... (1 hour, %d minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else {
+        printf("%g%% complete... (%d hours, %d minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
+      }
       fflush(stdout);
     }
     Vector3d temp = move(spheres[j%N],scale);
@@ -368,6 +384,12 @@ int main(int argc, char *argv[]){
 	   ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
   
+//FILE *out = fopen((const char *)outfilename,"w");
+  FILE *out = fopen((const char *)outfilename,"w");
+  if (out == NULL) {
+    printf("Error creating file %s\n", outfilename);
+    return 1;
+  }
   if (flat_div){
     fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
 	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);

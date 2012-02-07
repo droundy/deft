@@ -19,8 +19,8 @@
 
 \newcommand{\fixme}[1]{\red{[#1]}}
 
-%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
-\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+%\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 
 % needsworklater is used to annotate bits that need work, but that we
 % can postpone for a while.
@@ -48,8 +48,94 @@
 
 \maketitle
 
+%\input{formulas}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+
+% The following are papers that use a SAFT-based classical DFT with at
+% least some of the terms purely local
+\newcommand\saftlocaldft{felipe2001examination, gloor2002saft,%
+  gloor2004accurate, clark2006developing, gloor2007prediction,%
+  kahl2008modified, gross2009density}
+% The following are papers that use a SAFT-based classical DFT with
+% all the terms that should be non-local being non-local.
+\newcommand\saftnonlocaldft{yu2002fmt-dft-inhomogeneous-associating,%
+  fu2005vapor-liquid-dft,bryk2006density}
+
+There has been considerable recent interest in using Statistical
+Associating Fluid Theory (SAFT) to construct classical density
+functionals to describe associating
+fluids\cite{\saftlocaldft,\saftnonlocaldft}.  This approach has been
+successful in qualitatively describing the dependence of surface
+tension on temperature.  Unfortunately, most of these constructed
+functionals\cite{\saftlocaldft} cannot be used to study arbitrary
+inhomogeneous density distributions, because they use local
+density approximations that are only valid for densities that vary
+slowly over molecular length scales.
+
+Constructing a classical density functional based on SAFT involves
+rewriting each term in the free energy as a functional of an
+inhomogeneous density.  The SAFT free energy consists of four terms:
+\begin{align}
+  A_\textit{SAFT} &= A_\textit{ideal} + A_\textit{HS} + A_\textit{chain} + A_\textit{disp} + A_\textit{assoc}
+\end{align}
+where $A_\textit{ideal}$ is the ideal-gas free energy, $A_\textit{HS}$
+is the excess free energy of a hard-sphere fluid of monomers,
+$A_\textit{chain}$ is the contribution to the free energy from the
+chaining effect in a polymeric fluid, $A_\textit{disp}$ is the
+dispersion contribution to the free energy, and $A_\textit{assoc}$ is
+the free energy contribution from \emph{association}, which is to say,
+hydrogen bonding.  Each of these terms has some dependence on the
+inhomogeneity in the density.  The ideal gas is purely local, and in
+fact must be the only purely local term in the free energy in order
+for the functional to satisfy the contact-value theorem.  The
+hard-sphere contribution contribution to the free energy has been
+thoroughly studied, and is well approximated by the White Bear version
+of the Fundamental-Measure Theory (FMT)
+functional\cite{roth2002whitebear}.  A functional for the chain
+contribution is has recently been introduced\cite{bryk2006density,
+  gross2009density}, but is not needed for small associating molecules
+such as water.  The dispersion term is long-range and thus has
+significant dependence on the density distribution, but because its
+relatively weak position dependence, is amenable to mean-field
+approximations.  A functional for the association term of the free
+energy was introduced by Wu and
+Yu\cite{yu2002fmt-dft-inhomogeneous-associating}, and was used in
+several subsequent functionals\cite{fu2005vapor-liquid-dft,
+  bryk2006density}.  A key input (FIXME: term, factor?) to both the
+association and chain free energies is the contact value of the
+correlation function of a hard-sphere fluid.
+
+The contact value of the correlation function---which is the same as
+the contact value of the cavity correlation function for hard
+spheres---is the the value of the correlation function evaluated a
+distance equal to the hard-sphere diameter.  In an inhomogeneous
+system treated using fundamental measures, there is some ambiguity in
+the meaning of the \emph{local} contact value of the correlation
+function which appears in the equations for the homogeneous system.
+Clearly the contact value of the correlation function will depend on
+position, but how should that position be defined? It will depend on
+how the correlation function is used.  There are two reasonable
+choices for functionals based on fundamental measure theory, which
+will depend on which densities are used...
+\begin{align}
+  F[n(\rr)] = \int n(\rr) f(\bar{n}(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+\begin{align}
+  F[n(\rr)] = \int f(n_2(\rr), g_\sigma(\rr)) d\rr
+\end{align}
+
+Yu and Wu introduce an approximation based on the fundamental measures
+of Fundamental Measure Theory (see Section~\ref{sec:yuwu}).  Gross
+also does\cite{gross2009density}. 
+
+In this paper, we will report on the accuracy of this approximation by
+comparing with Monte Carlo simulations of the inhomogeneous
+hard-sphere fluid.  In addition, we will introduce and test differing
+approximations for the cavity correlation function.
+
+\textcolor{red}{Cavity correlation function!}
 
 The hard-sphere contact density---that is to say, the density of hard
 spheres touching a given hard sphere---is important for the
@@ -520,12 +606,18 @@ expensive.
     }{
       (1-n_3(\mathbf{r}'))^3
     }
-    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R)
-    + \cdots
+    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R) \right.
+    \\
+    & \left.
+    + \frac{\delta A}{\delta n_2(\rr')} n(\rr) \delta'(|\rr-\rr'|-R) \cdots
     \right\}
   \end{align}
-  This comes out to quite a mess.  It wouldn't be infeasible to compute
-  this, but it wouldn't be efficient or pretty either.
+  This comes out to quite a mess.  It isn't be infeasible to compute
+  this, but it is challenging.
+}
+
+\derivation{
+  \end{widetext}
 }
 
 \begin{figure}
@@ -537,122 +629,36 @@ expensive.
 
 \section{Contact density at a given contact position}
 
-A final definition of the inhomogeneous contact density would be the
-contact density for spheres \emph{touching at a given point}.  This
-would be a symmetric measure, since both spheres involved are treated
-in the same way.  In fact, the density of such spheres is just the
-density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
+An alternate definition of the inhomogeneous contact density would be
+the contact density for spheres \emph{touching at a given point}.
+This would be a symmetric measure, since both spheres involved are
+treated in the same way.  In fact, the density of such spheres is just
+the density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
 illustration $n_0$.  Since $n_0$ is the fundamental measure of sphere
 surface contact, it would make sense to define a contact density that
-would correspond.
+would correspond.  This is what is done by Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as discussed in
+Section~\ref{sec:yuwu}.
 
-To find the contact density at a given point of contact, we can't
-simply change the radius for spheres touching that point, since that
-would give us the pressure averaged over the entire surface of those
-spheres.  Instead, we would have to imagine extending a patch of those
-spheres which is located at the point of interest, as illustrated in
-Figure~\ref{fig:contact}.  \textcolor{red}{I'm not sure how to go
-  about doing this.  In the derivation section, I have some ideas
-  jotted down, but they don't really work.}
+\section{Gross' functional}\label{sec:gross}
+We compare with the functional of Gross \emph{et
+  al}\cite{gross2009density}, which is of the first kind, where the
+contact density is evaluated at the sphere location.
+\begin{align}
+  n_\textit{contact} &= n_{0'} \frac{1 - \frac12 n_{3'}}{\left(1 - n_{3'}\right)^3}
+\end{align}
+where $n_{0'}$ and $n_{3'}$ are defined in a manner analogous to the
+$n_0$ and $n_3$ of FMT, but with the hard-sphere radius replaced by
+the hard-sphere diameter, so the integrals range over spheres that are
+twice as large.
+
+\section{Yu and Wu's functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
 position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
 compare both their functional as well as ours with simulation data.
 
-\begin{figure}
-\includegraphics[width=5cm]{figs/contact}
-\caption{Construction for finding the contact density at a given point
-  of contact.  We envision a small area $dA$ of each sphere that touches
-the point $\mathbf{r}$ extended by a distance $dR$.}
-\label{fig:contact}
-\end{figure}
-
-\derivation{
-
-  So we need to find the small change in free energy that is caused by
-  these small changes in the shape and size of the hard spheres that are
-  in contact with this point.  In the following section, we will work
-  out the changes in the weighted densities at position $\mathbf{r}'$
-  when point of contact we are considering is $\mathbf{r}$.
-
-  The packing fraction $n_3$ is changed at the point where the sphere is
-  extended, since a few more spheres will overlap this point.
-  \begin{align}
-    \Delta n_3(\mathbf{r}') &= n(\mathbf{r})\Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'| - R)
-  \end{align}
-  The density $n_0$ is the average density, averaged over a spherical
-  shell.  As such, shifting the position of a shell just shifts which
-  location we are averaging over.
-  \begin{align}
-    \Delta n_0(\mathbf{r}') &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R)
-  \end{align}
-  The change in $n_2$ comes from two terms: a change in the density value, as
-  we saw in $n_0$, and a change in the area of the segment.
-  \begin{align}
-    \Delta n_2(\mathbf{r}') &=
-    \left(n\left(\mathbf{r} + \Delta R
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-      R}{R}\right)- n(\mathbf{r})\right) \Delta A
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-    &=
-    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
-    \right) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R)
-  \end{align}
-  The vector density $\mathbf{n}_{V2}$ is similar to the density
-  $n_2$: both changes in the density value and changes in the surface
-  area play a role.
-  \begin{align}
-    \Delta \mathbf{n}_{V2}(\mathbf{r}') &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-    \left(n\left(\mathbf{r} + \Delta R
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-      R}{R}\right)- n(\mathbf{r})\right) \Delta A
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-    &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
-    \right) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) 
-  \end{align}
-  The density $n_1$ (and similarly $\mathbf{n}_{V1}$) can be roughly
-  interpreted as the density weighted by the area-averaged mean
-  curvature~\cite{oversteegen2005general, roth2010review}.  When we
-  extend the sphere at the contact point, we will introduce regions of
-  both positive and negative mean curvature.  In principle, we can do
-  this in such a way that the two portions cancel, and hence we will
-  assume that
-  \begin{align}
-    \Delta n_1(\mathbf{r}') &= 0 \\
-    \Delta \mathbf{n}_{V1}(\mathbf{r}') &= 0
-  \end{align}
-  In fact, the negative and positive portions are spatially separated,
-  so these terms should probably include a derivative term, which I
-  should work out.  Particularly as it may even happen to cancel a
-  different derivative term that we then won't have to drop!
-  
-  We need to then find the change in Helmholtz free energy due to this
-  change at position $\mathbf{r}$:
-  \begin{align}
-    \Delta A_{HS} &= \int \mathbf{dr}'
-    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}\Delta n_3(\mathbf{r}')
-    +
-    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}\Delta n_2(\mathbf{r}')
-    +
-    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} \cdot \Delta \mathbf{n}_{V2}(\mathbf{r}')
-  \end{align}
-}
-
-\derivation{
-  \end{widetext}
-}
 
 \section{Comparison with simulation}
 
@@ -664,12 +670,12 @@ prediction.  We also plot Monte Carlo results for the two contact
 densities: the contact density evaluated at contact, and the contact
 density evaluated at the sphere location.  Alongside these, we plot
 the contact density of Fu and Wu~\cite{fu2005vapor-liquid-dft} (or
-should it be Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating}?), the ``simple
-contact density'' from Section~\ref{simple-contact}, and the ``contact
-density at sphere'' from Section~\ref{contact-at-sphere}.  In
-principle, the functional of Wu (FIXME) should match the
-CenConDensity, while the DFT at sphere should match the ConDensity...
+should it be Yu and Wu\cite{yu2002structures,
+  yu2002fmt-dft-inhomogeneous-associating}?), the ``simple contact
+density'' from Section~\ref{simple-contact}, and the ``contact density
+at sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
+functional of Wu (FIXME) should match the CenConDensity, while the DFT
+at sphere should match the ConDensity...
 
 \subsection{Hard spheres confined in a spherical cavity}
 
@@ -714,35 +720,61 @@ temperature and pressure in the optimal SAFT model developed by Clark
   \label{fig:sphere-16}
 \end{figure}
 
-\subsection{Hard spheres confined in a cubical cavity}
+\subsection{Hard spheres at a hard wall}
 
-\textcolor{red}{
-  I am thinking of also performing simulations for a cubical cavity, and
-  examining the result near the center of a face, which (for a large
-  cavity) will give us a prediction for the hard-sphere fluid near a
-  single hard wall.  We've got some simulations in
-  Figure~\ref{fig:box-density}, but these aren't very nice plots.
-  We'll want to do a much larger box, and plot the density vs $x$ near
-  the wall.  But I'm waiting on simulation data for this...
-}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-10}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.1.}
+  \label{fig:walls-10}
+\end{figure}
 
-\subsection{Hard spheres around a hard sphere (or rod)}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-30}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.3.}
+  \label{fig:walls-30}
+\end{figure}
 
-\textcolor{red}{
-  It would also be interesting to study a system with opposite
-  curvature.  Put a (larger) hard sphere in the hard-sphere fluid, and
-  see what the contact density is around that hard sphere.  This
-  touches on an important limiting case...
-}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-40}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.4.}
+  \label{fig:walls-40}
+\end{figure}
 
-\begin{figure*}
-\includegraphics[height=5cm]{figs/box-100c--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-100s--05,05,05-13}
-\includegraphics[height=5cm]{figs/box-110c--05,05,05-13}
-\caption{Density of hard spheres in a $5\times5\times5$ box.}
-\label{fig:box-density}
-\end{figure*}
+We study the case of hard spheres near a single hard wall.  This is
+shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.  Actually, we
+should begin with this.
 
+\subsection{Hard spheres around a hard sphere}
+
+It is also interesting to study a system with opposite curvature.  Put
+a (larger) hard sphere in the hard-sphere fluid, and see what the
+contact density is around that hard sphere.  This is particularly
+relevant when we consider using classical density-functional theory to
+model solvation.
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-30}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-4-40}
+  \caption{Density and contact densities around a hard sphere with
+    radius 1.}
+  \label{fig:inner-4-40}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[height=5cm]{figs/inner-8-30}
+  \caption{Density and contact densities around a hard sphere with
+    radius 3.}
+  \label{fig:inner-8-30}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
@@ -1116,6 +1148,21 @@ of state the excess free energy, which is
   A = Nk_BT\frac{4\eta -3\eta^2}{(1-\eta)^2}
 \end{align}
 \end{widetext}
+
+%% \begin{widetext}
+%% \section{Formulas generated from Haskell}
+
+%% \begin{align}
+%%   \Phi_1 &= \phione \\
+%%   \Phi_2 &= \phitwo \\
+%%   \Phi_3 &= \phithree \\
+%%   \frac{d F}{dn_3} &= \dwbdnthree \\
+%%   \frac{d F}{dn_2} &= \dwbdntwo \\
+%%   \frac{d F}{dn_1} &= \dwbdnone \\
+%%   \frac{d F}{d\vec{n}_{2v}} &= \dwbdntwov \\
+%%   \frac{d F}{d\vec{n}_{1v}} &= \dwbdnonev \\
+%% \end{align}
+%% \end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

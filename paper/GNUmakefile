@@ -37,8 +37,6 @@ ALL_FIGURES=\
 	figs/correlation.gp \
 	figs/equation-of-state.gp\
 	figs/saturated-liquid-density.gp\
-	figs/finding-vapor-pressure.gp\
-	figs/near-critical-point.gp\
 	figs/temperature-versus-density.gp\
 	figs/surface-tension.gp\
 	figs/surface-298.gp\
@@ -71,7 +69,6 @@ paper.pdf: paper.tex paper.bib $(FIGURES)
 
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
 
-figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
 figs/equation-of-state.eps: figs/equation-of-state.dat \
 	figs/experimental-equation-of-state.dat
 figs/saturated-liquid-density.eps: figs/equation-of-state.dat \
@@ -83,18 +80,23 @@ figs/pressure-with-isotherms.eps: figs/pressure-with-isotherms.dat \
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
-figs/finding-vapor-pressure.eps: figs/finding-vapor-pressure.dat
-figs/near-critical-point.eps: figs/finding-vapor-pressure.dat
 figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.3.dat figs/rods-slice-01.0-00.4.dat
 figs/density-four-rods.eps: figs/four-rods-01.0-01.1.dat \
 	figs/four-rods-01.0-01.2.dat
-figs/density-single-rod.eps: figs/single-rod-01.0.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
 	figs/rods-in-water-01.0nm.dat figs/rods-in-water-01.4nm.dat \
 	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
-figs/four-rods-energy-vs-distance.eps: figs/four-rods-energy-1.0.dat
+figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.6nm.dat \
+	figs/four-rods-in-water-01.0nm.dat figs/four-rods-in-water-01.4nm.dat \
+	figs/four-rods-in-water-01.8nm.dat figs/four-rods-in-water-02.0nm.dat
 figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
+
+figs/density-single-rod.eps: figs/single-rod-slice-02.0.dat \
+		figs/single-rod-slice-01.0.dat figs/single-rod-slice-00.6.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
+singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
+figs/single-rod-in-water.dat: $(singleRodEnergies)
+	cat $^ > $@
 
 figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
 sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)
