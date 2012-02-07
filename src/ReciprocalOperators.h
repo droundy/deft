@@ -142,6 +142,24 @@ struct shell_op : public base_rop<Scalar> {
 };
 
 template<typename Scalar>
+struct shellprime_op : public base_rop<Scalar> {
+  shellprime_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  const char *name() const { return "shell"; }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kR = k*R;
+    if (kR > 1e-5) {
+      return exp(-spreading*k*k*dr*dr)*(4*M_PI)*(sin(kR)/k + R*cos(kR));
+    } else {
+      return 2*(4*M_PI)*R;
+    }
+  }
+  double R, dr;
+};
+
+template<typename Scalar>
 struct xshell_op : public base_rop<Scalar> {
   xshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
@@ -346,6 +364,7 @@ namespace Eigen {
   ADD_ONE_ROP(gaussian_op);
   ADD_ONE_ROP(step_op);
   ADD_ONE_ROP(shell_op);
+  ADD_ONE_ROP(shellprime_op);
   ADD_ONE_ROP(xshell_op);
   ADD_ONE_ROP(yshell_op);
   ADD_ONE_ROP(zshell_op);
@@ -378,6 +397,7 @@ MAKE_FUNCTION_ROP(gz_op,gz)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(gaussian_op,gaussian)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(step_op,step)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(shell_op,shell)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(shellprime_op,shellprime)
 
 MAKE_FUNCTION_WITH_DOUBLE_ROP(xshell_op,xshell)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(yshell_op,yshell)

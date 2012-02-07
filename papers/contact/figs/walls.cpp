@@ -26,7 +26,7 @@
 // Here we set up the lattice.
 static double width = 30;
 const double dw = 0.001;
-const double spacing = 2; // space on each side
+const double spacing = 3; // space on each side
 
 double notinwall(Cartesian r) {
   const double z = r.z();

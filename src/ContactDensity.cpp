@@ -209,6 +209,7 @@ Functional dAdR_simplest(double radius) {
 Functional dAdR_sphere_over_n(double radius) {
   Functional R(radius, "R");
   Functional two_over_R = Functional(2)/R;
+  Functional one_over_4piR = Functional(1)/(4*M_PI*R);
   Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
 
   Functional n2x = xShellConvolve(radius);
@@ -219,15 +220,18 @@ Functional dAdR_sphere_over_n(double radius) {
   //return 4*M_PI*sqr(R)*(dWBNT_dn3(radius)
   //                      + two_over_R*dWBNT_dn2(radius)
   //                      + one_over_4piRsqr*dWBNT_dn1(radius));
-  return ShellConvolve(radius)(dWBNT_dn3(radius)
-                               + two_over_R*dWBNT_dn2(radius)
-                               + one_over_4piRsqr*dWBNT_dn1(radius)) +
-    xShellConvolve(radius)(one_over_4piRsqr*n2x*dWBNT_dn1v_over_n2v(radius) +
-                           two_over_R*n2x*dWBNT_dn2v_over_n2v(radius)) +
-    yShellConvolve(radius)(one_over_4piRsqr*n2y*dWBNT_dn1v_over_n2v(radius) +
-                           two_over_R*n2y*dWBNT_dn2v_over_n2v(radius)) +
-    zShellConvolve(radius)(one_over_4piRsqr*n2z*dWBNT_dn1v_over_n2v(radius) +
-                           two_over_R*n2z*dWBNT_dn2v_over_n2v(radius));
+  return ShellConvolve(radius)(dWBNT_dn3(radius))
+    + ShellConvolve(radius)(- 2*one_over_4piRsqr/R*dWBNT_dn0(radius)
+                            - one_over_4piR/R*dWBNT_dn1(radius))
+    + ShellPrimeConvolve(radius)(dWBNT_dn2(radius)
+                                 + one_over_4piR*dWBNT_dn1(radius)
+                                 + one_over_4piRsqr*dWBNT_dn0(radius))
+    + xShellConvolve(radius)(one_over_4piRsqr*n2x*dWBNT_dn1v_over_n2v(radius) +
+                             two_over_R*n2x*dWBNT_dn2v_over_n2v(radius))
+    + yShellConvolve(radius)(one_over_4piRsqr*n2y*dWBNT_dn1v_over_n2v(radius) +
+                             two_over_R*n2y*dWBNT_dn2v_over_n2v(radius))
+    + zShellConvolve(radius)(one_over_4piRsqr*n2z*dWBNT_dn1v_over_n2v(radius) +
+                             two_over_R*n2z*dWBNT_dn2v_over_n2v(radius));
 }
 
 Functional ContactDensitySimplest(double radius) {
@@ -243,6 +247,7 @@ Functional ContactDensitySphere(double radius) {
 Functional dAdR_sphere_over_n_WBm2(double radius) {
   Functional R(radius, "R");
   Functional two_over_R = Functional(2)/R;
+  Functional one_over_4piR = Functional(1)/(4*M_PI*R);
   Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
 
   Functional n2x = xShellConvolve(radius);
@@ -253,6 +258,18 @@ Functional dAdR_sphere_over_n_WBm2(double radius) {
   //return 4*M_PI*sqr(R)*(dWBm2_dn3(radius)
   //                      + two_over_R*dWBm2_dn2(radius)
   //                      + one_over_4piRsqr*dWBm2_dn1(radius));
+  return ShellConvolve(radius)(dWBm2_dn3(radius))
+    + ShellConvolve(radius)(- 2*one_over_4piRsqr/R*dWBm2_dn0(radius)
+                            - one_over_4piR/R*dWBm2_dn1(radius))
+    + ShellPrimeConvolve(radius)(dWBm2_dn2(radius)
+                                 + one_over_4piR*dWBm2_dn1(radius)
+                                 + one_over_4piRsqr*dWBm2_dn0(radius))
+    + xShellConvolve(radius)(one_over_4piRsqr*n2x*dWBm2_dn1v_over_n2v(radius) +
+                             two_over_R*n2x*dWBm2_dn2v_over_n2v(radius))
+    + yShellConvolve(radius)(one_over_4piRsqr*n2y*dWBm2_dn1v_over_n2v(radius) +
+                             two_over_R*n2y*dWBm2_dn2v_over_n2v(radius))
+    + zShellConvolve(radius)(one_over_4piRsqr*n2z*dWBm2_dn1v_over_n2v(radius) +
+                             two_over_R*n2z*dWBm2_dn2v_over_n2v(radius));
   return ShellConvolve(radius)(dWBm2_dn3(radius)
                                + two_over_R*dWBm2_dn2(radius)
                                + one_over_4piRsqr*dWBm2_dn1(radius)) +
@@ -266,7 +283,7 @@ Functional dAdR_sphere_over_n_WBm2(double radius) {
 
 Functional ContactDensitySphereWBm2(double radius) {
   Functional R(radius, "R");
-  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n(radius);
+  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n_WBm2(radius);
 }
 
 Functional GrossContactDensity(double radius) {

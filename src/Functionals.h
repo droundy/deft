@@ -53,6 +53,7 @@ Functional GaussianConvolve(double width, Expression r);
 Functional StepConvolve(double radius, Expression r = Expression("R"));
 
 Functional ShellConvolve(double radius, Expression r = Expression("R"));
+Functional ShellPrimeConvolve(double radius, Expression r = Expression("R"));
 
 Functional xShellConvolve(double radius, Expression r = Expression("R"));
 Functional yShellConvolve(double radius, Expression r = Expression("R"));
