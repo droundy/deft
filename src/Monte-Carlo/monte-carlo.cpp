@@ -123,8 +123,8 @@ int main(int argc, char *argv[]){
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
-      printf("took %g seconds per initialising iteration\n",
-             (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      //printf("took %g seconds per initialising iteration\n",
+      //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
       num_timed = 0;
       start = now;
     }
@@ -249,12 +249,13 @@ int main(int argc, char *argv[]){
   
   start = clock();
   num_timed = 0;
+  double secs_per_iteration = 0;
   int workingmoves=0;
   for (long j=0; j<iterations; j++){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
-      printf("took %g seconds per iteration\n",
-	     (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+      secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
+      printf("took %g seconds per iteration\n", secs_per_iteration);
       num_timed = 0;
       start = now;
       // after the first timing, just time things once per percent (as
@@ -322,9 +323,20 @@ int main(int argc, char *argv[]){
 	}
       }
     }
-    if(j % (iterations/100)==0){
-      printf("%g%% complete...\n",j/(iterations*1.0)*100);
-      //printf("%g%% complete...\r",j/(times*1.0)*100);
+    if(j % (iterations/100)==0 && j != 0){
+      double secs_to_go = secs_per_iteration*(iterations - j);
+      int mins_to_go = secs_to_go / 60;
+      int hours_to_go = mins_to_go / 60;
+      mins_to_go = mins_to_go % 60;
+      if (hours_to_go > 5) {
+        printf("%g%% complete... (%d hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+      } else if (hours_to_go < 1) {
+        printf("%g%% complete... (%d minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else if (hours_to_go < 2) {
+        printf("%g%% complete... (1 hour, %d minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else {
+        printf("%g%% complete... (%d hours, %d minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
+      }
       fflush(stdout);
     }
     Vector3d temp = move(spheres[j%N],scale);

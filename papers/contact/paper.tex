@@ -606,12 +606,18 @@ expensive.
     }{
       (1-n_3(\mathbf{r}'))^3
     }
-    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R)
-    + \cdots
+    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R) \right.
+    \\
+    & \left.
+    + \frac{\delta A}{\delta n_2(\rr')} n(\rr) \delta'(|\rr-\rr'|-R) \cdots
     \right\}
   \end{align}
-  This comes out to quite a mess.  It wouldn't be infeasible to compute
-  this, but it wouldn't be efficient or pretty either.
+  This comes out to quite a mess.  It isn't be infeasible to compute
+  this, but it is challenging.
+}
+
+\derivation{
+  \end{widetext}
 }
 
 \begin{figure}
@@ -653,91 +659,6 @@ density at a given contact
 position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
 compare both their functional as well as ours with simulation data.
 
-\derivation{
-
-  So we need to find the small change in free energy that is caused by
-  these small changes in the shape and size of the hard spheres that are
-  in contact with this point.  In the following section, we will work
-  out the changes in the weighted densities at position $\mathbf{r}'$
-  when point of contact we are considering is $\mathbf{r}$.
-
-  The packing fraction $n_3$ is changed at the point where the sphere is
-  extended, since a few more spheres will overlap this point.
-  \begin{align}
-    \Delta n_3(\mathbf{r}') &= n(\mathbf{r})\Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'| - R)
-  \end{align}
-  The density $n_0$ is the average density, averaged over a spherical
-  shell.  As such, shifting the position of a shell just shifts which
-  location we are averaging over.
-  \begin{align}
-    \Delta n_0(\mathbf{r}') &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R)
-  \end{align}
-  The change in $n_2$ comes from two terms: a change in the density value, as
-  we saw in $n_0$, and a change in the area of the segment.
-  \begin{align}
-    \Delta n_2(\mathbf{r}') &=
-    \left(n\left(\mathbf{r} + \Delta R
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-      R}{R}\right)- n(\mathbf{r})\right) \Delta A
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-    &=
-    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
-    \right) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R)
-  \end{align}
-  The vector density $\mathbf{n}_{V2}$ is similar to the density
-  $n_2$: both changes in the density value and changes in the surface
-  area play a role.
-  \begin{align}
-    \Delta \mathbf{n}_{V2}(\mathbf{r}') &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-    \left(n\left(\mathbf{r} + \Delta R
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\right)\left(1+2\frac{\Delta
-      R}{R}\right)- n(\mathbf{r})\right) \Delta A
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) \\
-    &=
-    \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}
-    \left(\frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|}\cdot
-    \mathbf{\nabla}n(\mathbf{r}) + 2 \frac{n(\mathbf{r})}{R}
-    \right) \Delta A \Delta R
-    \delta(|\mathbf{r}-\mathbf{r}'|-R) 
-  \end{align}
-  The density $n_1$ (and similarly $\mathbf{n}_{V1}$) can be roughly
-  interpreted as the density weighted by the area-averaged mean
-  curvature~\cite{oversteegen2005general, roth2010review}.  When we
-  extend the sphere at the contact point, we will introduce regions of
-  both positive and negative mean curvature.  In principle, we can do
-  this in such a way that the two portions cancel, and hence we will
-  assume that
-  \begin{align}
-    \Delta n_1(\mathbf{r}') &= 0 \\
-    \Delta \mathbf{n}_{V1}(\mathbf{r}') &= 0
-  \end{align}
-  In fact, the negative and positive portions are spatially separated,
-  so these terms should probably include a derivative term, which I
-  should work out.  Particularly as it may even happen to cancel a
-  different derivative term that we then won't have to drop!
-  
-  We need to then find the change in Helmholtz free energy due to this
-  change at position $\mathbf{r}$:
-  \begin{align}
-    \Delta A_{HS} &= \int \mathbf{dr}'
-    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}\Delta n_3(\mathbf{r}')
-    +
-    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}\Delta n_2(\mathbf{r}')
-    +
-    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} \cdot \Delta \mathbf{n}_{V2}(\mathbf{r}')
-  \end{align}
-}
-
-\derivation{
-  \end{widetext}
-}
 
 \section{Comparison with simulation}
 

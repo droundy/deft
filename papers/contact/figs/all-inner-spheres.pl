@@ -19,7 +19,7 @@ foreach $dd ([4,0.3], [4,0.4], [8,0.3]) {
     my $resolution = 0.1; # spacing of grid points in hard-sphere radius.
 
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = sprintf "%.0f", 2400*((($d + $padding)/20.0)*(0.1/$resolution))**3;
+    my $memuse = sprintf "%.0f", 2800*((($d + $padding)/20.0)*(0.1/$resolution))**3;
 
     my $scriptname = "papers/contact/figs/inner-sphere-$d-$eta-$F.tmp.sh";
     open SCRIPT, ">$scriptname" or die $!;
