@@ -177,8 +177,5 @@ int main(int, char **) {
     run_walls(eta, "WBT", WBT);
     run_walls(eta, "WBm2", WBm2);
   }
-  // Just create this file so make knows we have run.
-  fopen("papers/contact/figs/walls.dat", "w");
-
   return 0;
 }

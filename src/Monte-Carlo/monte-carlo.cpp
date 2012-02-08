@@ -57,10 +57,12 @@ int main(int argc, char *argv[]){
       periodic_y = true;
       lenx = atof(argv[a+1]);
       leny = atof(argv[a+1]);
+      rad = lenx/2;
     }
     if (strcmp(argv[a],"periodx") == 0) {
       periodic_x = true;
       lenx = atof(argv[a+1]);
+      rad = lenx/2;
     }
     if (strcmp(argv[a],"periody") == 0) {
       periodic_y = true;
@@ -381,9 +383,9 @@ int main(int argc, char *argv[]){
     GcenConDensity[i]=4*M_PI*R*R*((GcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[3]*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
   }
   for(int i=0; i<div; i++){
-    printf("Number of contacts in division %d = %d%d%d%d\n", i+1, 
+    printf("Number of contacts in division %d = %d %d %d %d\n", i+1, 
 	   SconShells[i], MconShells[i], LconShells[i], GconShells[i]);
-    printf("Number of contacts (center) in division %d = %d%d%d%d\n", i+1, 
+    printf("Number of contacts (center) in division %d = %d %d %d %d\n", i+1, 
 	   ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
   
