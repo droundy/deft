@@ -41,5 +41,6 @@ pylab.xlabel("z")
 pylab.ylabel("filling fraction")
 pylab.legend(loc='lower right', ncol=2).get_frame().set_alpha(0.5)
 pylab.xlim(-1,8)
+pylab.ylim(ymin=0)
 
 pylab.savefig(sys.argv[5])

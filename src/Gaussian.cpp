@@ -115,6 +115,16 @@ Functional zShellConvolve(double R, Expression r) {
   return Functional(function_for_convolve<zshell_op<complex> >, R, r, zero, false);
 }
 
+Functional xShellPrimeConvolve(double R, Expression r) {
+  return Functional(function_for_convolve<xshellprime_op<complex> >, R, r, zero, false);
+}
+Functional yShellPrimeConvolve(double R, Expression r) {
+  return Functional(function_for_convolve<yshellprime_op<complex> >, R, r, zero, false);
+}
+Functional zShellPrimeConvolve(double R, Expression r) {
+  return Functional(function_for_convolve<zshellprime_op<complex> >, R, r, zero, false);
+}
+
 Functional xyShellConvolve(double R, Expression r) {
   return Functional(function_for_convolve<xyshell_op<complex> >, R, r, zero, true);
 }

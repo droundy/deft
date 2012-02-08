@@ -59,6 +59,10 @@ Functional xShellConvolve(double radius, Expression r = Expression("R"));
 Functional yShellConvolve(double radius, Expression r = Expression("R"));
 Functional zShellConvolve(double radius, Expression r = Expression("R"));
 
+Functional xShellPrimeConvolve(double radius, Expression r = Expression("R"));
+Functional yShellPrimeConvolve(double radius, Expression r = Expression("R"));
+Functional zShellPrimeConvolve(double radius, Expression r = Expression("R"));
+
 Functional xxShellConvolve(double radius, Expression r = Expression("R"));
 Functional yyShellConvolve(double radius, Expression r = Expression("R"));
 Functional zzShellConvolve(double radius, Expression r = Expression("R"));
