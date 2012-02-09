@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     printf("Diameter is %g bohr\n", diameter);
   }
   
-  const double dmax = ((3*M_PI-4)*(diameter/2)/2)*1.5;
+  const double dmax = ((3.0*M_PI-4.0)*(diameter/2.0)/2.0)+0.4*nm;
   double zmax = 2*diameter+dmax+2*nm;
   double ymax = 2*diameter+dmax+2*nm;
 
@@ -167,9 +167,9 @@ int main(int argc, char *argv[]) {
                                                   water_prop.epsilon_dispersion,
                                                   water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
-  //Note for Eric...
-  ///////////////  LOOP OVER DISTANCES BELOW!!! /////////////////
 
+  ///////////////  LOOP OVER DISTANCES BELOW!!! /////////////////
+  //dmax already in bohrs (so it doesn't need to be converted from nm)
   for (distance=0.0*nm; distance<=dmax; distance += 0.1*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
