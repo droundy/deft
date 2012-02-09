@@ -539,16 +539,6 @@ expensive.
       36\pi n_3^2(1-n_3)^2
     }
     \right\}
-    \\
-    &= \int \left\{
-    -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
-    + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      36\pi n_3^2(1-n_3)^2
-    }
-    \right\}
   \end{align}
   
   \begin{align}
@@ -562,19 +552,24 @@ expensive.
     \right)
     \\
     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
-    -\frac{1}{4\pi R^2} \ln\left( 1 - n_3\right)
-    +  \frac{2n_1}{1-n_3}
+    \frac{n_1}{1-n_3}
     + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
       (1-n_3)^2\ln(1-n_3)}{
       36\pi n_3^2(1-n_3)^2
     }
     \\
+    \frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+    \\
+    \frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &=
+    -\frac{1}{4\pi R^2} \ln\left( 1 - n_3\right) \\
     \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
-    \frac{2\mathbf{n}_{V1}}{1-n_3}
+    \frac{\mathbf{n}_{V1}}{1-n_3}
     - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
       (1-n_3)^2\ln(1-n_3)}{
       36\pi n_3^2(1-n_3)^2
     }    \\
+    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+    \frac{\mathbf{n}_{V2}}{1-n_3} \\
     \frac{\delta A_{HS}}{\delta R(\mathbf{r}')} &=
     \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
     - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
@@ -677,19 +672,34 @@ at sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
 functional of Wu (FIXME) should match the CenConDensity, while the DFT
 at sphere should match the ConDensity...
 
-\subsection{Hard spheres confined in a spherical cavity}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-10}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.1.}
+  \label{fig:walls-10}
+\end{figure}
 
-The first geometry we consider is a number of hard spheres confined
-within a spherical cavity.  In
-Figures~\ref{fig:sphere-8}-\ref{fig:sphere-16}, we show
-the densities and contact densities for several cavity sizes.  In each
-case, the number of hard spheres was chosen to set the mean filling
-fraction to around 0.3?.  This value was chosen because it roughly
-corresponds to the filling fraction of water at standard atmospheric
-temperature and pressure in the optimal SAFT model developed by Clark
-\emph{et al}\cite{clark2006developing}.
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-30}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.3.}
+  \label{fig:walls-30}
+\end{figure}
 
-\textcolor{red}{We should also try looking at a few other densities.}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-40}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.4.}
+  \label{fig:walls-40}
+\end{figure}
+
+\subsection{Hard spheres at a hard wall}
+
+We begin by examining the simplest situation with an inhomogeneous
+density:  the case of hard spheres near a single hard wall.  This is
+shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.
+
+
 
 \newcommand\sphereExplanation{ Blue curves describe the density of
   hard spheres.  Green curves describe the contact density averaged
@@ -720,40 +730,19 @@ temperature and pressure in the optimal SAFT model developed by Clark
   \label{fig:sphere-16}
 \end{figure}
 
-\subsection{Hard spheres at a hard wall}
+\subsection{Hard spheres confined in a spherical cavity}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-10}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.1.}
-  \label{fig:walls-10}
-\end{figure}
+The first geometry we consider is a number of hard spheres confined
+within a spherical cavity.  In
+Figures~\ref{fig:sphere-8}-\ref{fig:sphere-16}, we show
+the densities and contact densities for several cavity sizes.  In each
+case, the number of hard spheres was chosen to set the mean filling
+fraction to around 0.3?.  This value was chosen because it roughly
+corresponds to the filling fraction of water at standard atmospheric
+temperature and pressure in the optimal SAFT model developed by Clark
+\emph{et al}\cite{clark2006developing}.
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-30}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.3.}
-  \label{fig:walls-30}
-\end{figure}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-40}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.4.}
-  \label{fig:walls-40}
-\end{figure}
-
-We study the case of hard spheres near a single hard wall.  This is
-shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.  Actually, we
-should begin with this.
-
-\subsection{Hard spheres around a hard sphere}
-
-It is also interesting to study a system with opposite curvature.  Put
-a (larger) hard sphere in the hard-sphere fluid, and see what the
-contact density is around that hard sphere.  This is particularly
-relevant when we consider using classical density-functional theory to
-model solvation.
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/inner-4-30}
@@ -775,6 +764,15 @@ model solvation.
     radius 3.}
   \label{fig:inner-8-30}
 \end{figure}
+
+\subsection{Hard spheres around a hard sphere}
+
+It is also interesting to study a system with opposite curvature.  Put
+a (larger) hard sphere in the hard-sphere fluid, and see what the
+contact density is around that hard sphere.  This is particularly
+relevant when we consider using classical density-functional theory to
+model solvation.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
