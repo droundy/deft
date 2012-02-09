@@ -57,10 +57,12 @@ int main(int argc, char *argv[]){
       periodic_y = true;
       lenx = atof(argv[a+1]);
       leny = atof(argv[a+1]);
+      rad = lenx/2;
     }
     if (strcmp(argv[a],"periodx") == 0) {
       periodic_x = true;
       lenx = atof(argv[a+1]);
+      rad = lenx/2;
     }
     if (strcmp(argv[a],"periody") == 0) {
       periodic_y = true;
@@ -225,11 +227,12 @@ int main(int argc, char *argv[]){
   int count = 0;
   int *shells = new int[div];
   for (int l=0; l<div; l++) shells[l] = 0;
-  
+
   double *shellsArea = new double [div];
   for (int l=0; l<div; l++) shellsArea[l]=0;
   
   double *density = new double[div];
+  double *n0 = new double[div];
   
   double *SconDensity = new double[div]; double *ScenConDensity = new double[div];
   int *SconShells = new int[div]; int *ScenConShells = new int[div];
@@ -360,10 +363,12 @@ int main(int argc, char *argv[]){
       double rmax = radius[i+1];
       double rmin = radius[i];
       density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N));
+      n0[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))/(4*M_PI*R*R);
     }
   } else {
     for(int i=0; i<div; i++){
       density[i]=shells[i]/(lenx*leny*lenz/div)/(iterations/double(N));
+      n0[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*R*R);
     }
   }
   
@@ -378,9 +383,9 @@ int main(int argc, char *argv[]){
     GcenConDensity[i]=4*M_PI*R*R*((GcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[3]*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
   }
   for(int i=0; i<div; i++){
-    printf("Number of contacts in division %d = %d%d%d%d\n", i+1, 
+    printf("Number of contacts in division %d = %d %d %d %d\n", i+1, 
 	   SconShells[i], MconShells[i], LconShells[i], GconShells[i]);
-    printf("Number of contacts (center) in division %d = %d%d%d%d\n", i+1, 
+    printf("Number of contacts (center) in division %d = %d %d %d %d\n", i+1, 
 	   ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
   
@@ -391,31 +396,37 @@ int main(int argc, char *argv[]){
     return 1;
   }
   if (flat_div){
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
-	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   } else if (spherical_inner_wall) {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0, 
-	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
-	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0, 
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   } else {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0], 
-	    SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0], LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0]);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0], 
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   }
   
   int divtoprint = div;
   if (!spherical_outer_wall) divtoprint = div - 1;
   if (!flat_div) {
     for(int i=1; i<divtoprint; i++){
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-	      0.5*(radius[i]+radius[i+1]), density[i], 
-	      SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i], LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i]);
+      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              0.5*(radius[i]+radius[i+1]), density[i],
+              SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i]);
     }
   } else {
     for(int i=1; i<div; i++){
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-	      0.5*(sections[i]+sections[i+1]), density[i], 
-	      SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i], LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i]);
+      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              0.5*(sections[i]+sections[i+1]), density[i],
+              SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i]);
     }
   }
 

@@ -2,6 +2,8 @@
 
 use strict;
 
+system "make papers/contact/figs/sphere.mkdat";
+
 my $dd;
 my $F;
 # We do the largest diameters first, so the small calculations won't
