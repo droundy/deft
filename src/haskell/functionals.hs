@@ -20,4 +20,4 @@ main =
          phi3 = (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*vectorThirdTerm
      writeFile "src/HardSpheresNoTensor2Fast.cpp" $ 
        generateHeader (s_var "kT" * (phi1+phi2+phi3)) (Just (r_var "R")) "HardSpheresNoTensor2"
-     -- compile with make src/HardSpheresNoTensor2Fast.o
+    -- compile with make src/HardSpheresNoTensor2Fast.o
