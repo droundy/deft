@@ -4,4 +4,4 @@
 
 set -ev
 
-time make -j4 check
+time make -j `grep -c processor /proc/cpuinfo` check
