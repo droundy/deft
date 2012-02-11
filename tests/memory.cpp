@@ -125,7 +125,7 @@ void check_a_functional(const char *name, Functional f, const Grid &x) {
     if (!good) {
       printf("Unable to open file %s, will not check cpu times!\n", fname);
       nocpu = true;
-      snprintf(fname, 1024, "tests/bench/good/%s.bingley", name);
+      snprintf(fname, 1024, "tests/bench/good/%s.kipu", name);
       good = fopen(fname, "r");
       if (!good) {
         printf("Unable to open file %s, so I have to fail!\n", fname);

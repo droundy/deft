@@ -155,14 +155,16 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
 
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,
-                     t "countFFT nbar = 1" 2 nbar,
-                     t "countFFT nbar = 1" 4 (nbar + log nbar)]
-  where t str n e = TestCase $ assertEqual str n (countFFT $ fst $ simp e)
+                     t "countFFT nbar" 2 nbar,
+                     t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
+                     t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
+  where t str n e = TestCase $ assertEqual str n (countFFT $ fst $ simp2 e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
         kR = k * s_var "R"
         nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+        n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * s_var "R" * (sin kR / k) * fft (r_var "x"))
 
 substitutionTests :: Test
 substitutionTests = TestList [t x y (y**2) (x**2),
@@ -196,11 +198,15 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
           writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) Nothing "NiceLogOneMinusX"
           let spreading = 6.0
               kdr = k * s_var "dr"
-              kR = k * s_var "R"
+              kR = k * rad
+              rad :: Type a => Expression a
+              rad = s_var "R"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
-              -- nbar = ifft ( (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+              n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
-          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ generateHeader (log (1-ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x")))) (Just (r_var "R")) "NiceLogOneMinusNbar"
+          writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 (Just (r_var "R")) "NiceN2"
+          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ generateHeader (log (1-nbar)) (Just (r_var "R")) "NiceLogOneMinusNbar"
+          writeFile "tests/generated-haskell/nice-phi1.h" $ generateHeader (-n2*log(1-nbar)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
           writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar)]
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
           if failures c > 0 || errors c > 0
