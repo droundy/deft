@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "OptimizedFunctionals.h"
+#include "ContactDensity.h"
 #include "equation-of-state.h"
 
 int errors = 0;
@@ -86,6 +87,12 @@ int main(int, char **argv) {
   compare_functionals(HardSpheresTarazonaFast(R), HardSpheresTarazona(R), n, 2e-14);
 
   compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 2e-14);
+
+  // FIXME: the following fails
+  //compare_functionals(HardSpheresNoTensor2(R), HardSpheresNoTensor(R), n, 2e-14);
+
+  // FIXME: the following fails
+  //compare_functionals(ContactAtSphere(R), ContactDensitySphere(R), n, 2e-14);
 
   
   const double mu = 1e-5;

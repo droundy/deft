@@ -14,3 +14,4 @@ Functional HardSpheresWBFast(double radius);
 Functional HardSpheresWBm2(double radius);
 
 Functional HardSpheresNoTensor2(double radius);
+Functional ContactAtSphere(double radius);

@@ -27,11 +27,12 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
-HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
+	src/ContactAtSphereFast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
-ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE)
+ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
 bin_PROGRAMS = deft monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE) 
@@ -112,7 +113,7 @@ TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh tests/latex-gener
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
-tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
+tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CONTACT_CODE)
 tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)

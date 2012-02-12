@@ -39,6 +39,8 @@ instance Code RealSpace where
   codePrec _ (R v) = showString (v ++ "[i]")
   codePrec _ (IFFT ksp@(Expression (K _))) = showString "ifft(gd, " . codePrec 0 (makeHomogeneous ksp) . showString ")"
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
+  latexPrec _ (R v@('{':_)) = showString v
+  latexPrec _ (R (a:v@(_:_))) = showString (a : '_' : '{' : v ++ "}")
   latexPrec _ (R v) = showString v
   latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
 instance Type RealSpace where
@@ -81,6 +83,8 @@ instance Code KSpace where
   codePrec _ Kz = showString "k_i[2]"
   codePrec _ Delta = showString "delta(k?)"
   codePrec _ (FFT r) = showString "fft(gd, " . codePrec 0 (makeHomogeneous r) . showString ")"
+  latexPrec _ (K v@('{':_)) = showString v
+  latexPrec _ (K (a:v@(_:_))) = showString (a : '_' : '{' : v ++ "}")
   latexPrec _ (K v) = showString v
   latexPrec _ Kx = showString "kx"
   latexPrec _ Ky = showString "ky"
@@ -244,6 +248,8 @@ setZero v (Expression x) = zeroHelper v x
 instance Code Scalar where
   codePrec _ (S v) = showString v
   codePrec _ (Integrate r) = showString "(" . codePrec 0 r . showString ") * gd.dvolume"
+  latexPrec _ (S v@('{':_)) = showString v
+  latexPrec _ (S (a:v@(_:_))) = showString (a : '_' : '{' : v ++ "}")
   latexPrec _ (S v) = showString v
   latexPrec _ (Integrate r) = showString "integrate(" . latexPrec 0 r . showString ")"
 instance Type Scalar where
@@ -452,38 +458,53 @@ latexE p (Product x) | Map.size x == 1 && product2denominator x == 1 =
                 n = floor nn
     [(e,n)] -> latexE 8 e . showString ("^{" ++ show n ++ "}")
     _ -> error "This really cannot happen."
-latexE pree (Product p) | product2denominator p == 1 = showParen (pree > 7) $ ltexsimple $ product2numerator p
+latexE pree (Product p) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
   where ltexsimple [] = showString "1"
         ltexsimple [a] = latexE 7 a
         ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
         ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
-latexE pree (Product p) = showParen (pree > 7) $ showString "\\frac{" . latexE 7 num . showString "}{" . 
+latexE pree (Product p) = latexParen (pree > 7) $ showString "\\frac{" . latexE 7 num . showString "}{" .
                                                                         latexE 7 den . showString "}"
   where num = product $ product2numerator p
         den = product2denominator p
-latexE p (Sum s) = showParen (p > 6) (showString me)
+latexE p (Sum s) = latexParen (p > 6) (showString me)
   where me = foldl addup "" $ sum2pairs s
         addup "" (1,e) = latexE 6 e ""
+        addup "" (f,e) | f < 0 = "-" ++ addup "" (-f, e)
         addup "" (f,e) = if e == 1
                          then latexDouble f
                          else latexDouble f ++ " " ++ latexE 6 e ""
-        addup rest (1,e) = latexE 6 e (showString " + " $ rest)
-        addup rest (f,e) = show f ++ " " ++ latexE 6 e (showString " + " $ rest)
+        addup ('-':rest) (1,e) = latexE 6 e (" - " ++ rest)
+        addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 6 e (showString " - " $ rest)
+        addup rest (1,e) = latexE 6 e (" + " ++ rest)
+        addup rest (f,e) = latexDouble f ++ " " ++ latexE 6 e (showString " + " $ rest)
+
+latexParen :: Bool -> ShowS -> ShowS
+latexParen False x = x
+latexParen True x = showString "\\left(" . x . showString "\\right)"
 
 latexDouble :: Double -> String
+latexDouble 0 = "0"
 latexDouble x = case double2int x of
                   Just n -> show n
-                  Nothing -> case double2int (x/pi) of
-                               Just n -> show n ++ "\\pi"
-                               Nothing -> printpi [2 .. 32]
+                  Nothing ->
+                    case double2int (x/pi) of
+                      Just n -> show n ++ "\\pi"
+                      Nothing ->
+                        case double2int (pi/x) of
+                          Just n -> "\\frac{\\pi}{" ++ show n ++ "}"
+                          Nothing -> printpi [2 .. 36]
   where printpi [] = show x
         printpi (n:ns) = case double2int (fromInteger n*x/pi) of
                            Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "}\\pi"
-                           Nothing -> printpi ns
+                           Nothing ->
+                             case double2int (x*fromInteger n*pi) of
+                               Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "\\pi}"
+                               Nothing -> printpi ns
 
 double2int :: Double -> Maybe Int
-double2int f = if fromInteger (floor f) == f
-               then Just (floor f :: Int)
+double2int f = if abs(fromInteger (round f) - f) < 1e-13*f
+               then Just (round f :: Int)
                else Nothing
 
 class Code a  where

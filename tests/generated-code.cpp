@@ -28,7 +28,7 @@
 #include "generated-haskell/nice-nbar.h"
 #include "generated-haskell/nice-logoneminusnbar.h"
 #include "generated-haskell/nice-n2.h"
-// #include "generated-haskell/nice-phi1.h"
+#include "generated-haskell/nice-phi1.h"
 
 #include "generated/sum.h"
 #include "generated/quadratic.h"
@@ -174,12 +174,14 @@ int main(int, char **argv) {
   compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), myT, n, 1e-14);
   compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
 
+  compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
+
   const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   compare_functionals(Phi1(R), phi1, myT, n, 1e-13);
 
-  //  compare_functionals(NicePhi1(R), phi1, myT, n, 1e-13);
+  compare_functionals(NicePhi1(R), phi1, myT, n, 1e-13);
 
   const double four_pi_r = 4*M_PI*R;
   Functional n2x = xShellConvolve(R);
