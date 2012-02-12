@@ -29,6 +29,8 @@
 #include "generated-haskell/nice-logoneminusnbar.h"
 #include "generated-haskell/nice-n2.h"
 #include "generated-haskell/nice-phi1.h"
+#include "generated-haskell/nice-phi2.h"
+#include "generated-haskell/nice-n2xsqr.h"
 
 #include "generated/sum.h"
 #include "generated/quadratic.h"
@@ -189,6 +191,11 @@ int main(int, char **argv) {
   Functional n2z = zShellConvolve(R);
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   compare_functionals(Phi2(R), phi2, myT, n, 1e-14);
+
+  compare_functionals(NiceN2xsqr(R), sqr(n2x), myT, n, 2e-14);
+
+  // FIXME: the following is broken...
+  //compare_functionals(NicePhi2(R), phi1, myT, n, 1e-13);
 
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(R), phi3rf, myT, n, 1e-13);

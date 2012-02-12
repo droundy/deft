@@ -35,6 +35,9 @@ data Scalar = S String |
               Integrate (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 
+kinversion :: Expression KSpace -> Expression KSpace
+kinversion = substitute kx (-kx) . substitute ky (-ky) . substitute kz (-kz)
+
 instance Code RealSpace where
   codePrec _ (R v) = showString (v ++ "[i]")
   codePrec _ (IFFT ksp@(Expression (K _))) = showString "ifft(gd, " . codePrec 0 (makeHomogeneous ksp) . showString ")"
@@ -46,7 +49,7 @@ instance Code RealSpace where
 instance Type RealSpace where
   isRealSpace _ = Same
   derivativeHelper v ddr r | Same <- isRealSpace (Expression v), v == r = ddr
-  derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) ke
+  derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) (kinversion ke)
   derivativeHelper _ _ _ = 0
   zeroHelper v x | Same <- isRealSpace (Expression v), v == x = 0
   zeroHelper v (IFFT ke) = ifft (setZero v ke)
@@ -86,11 +89,11 @@ instance Code KSpace where
   latexPrec _ (K v@('{':_)) = showString v
   latexPrec _ (K (a:v@(_:_))) = showString (a : '_' : '{' : v ++ "}")
   latexPrec _ (K v) = showString v
-  latexPrec _ Kx = showString "kx"
-  latexPrec _ Ky = showString "ky"
-  latexPrec _ Kz = showString "kz"
-  latexPrec _ Delta = showString "delta(k)"
-  latexPrec _ (FFT r) = showString "\\text{fft}(" . latexPrec 0 r . showString ")"
+  latexPrec _ Kx = showString "k_{x}"
+  latexPrec _ Ky = showString "k_{y}"
+  latexPrec _ Kz = showString "k_{z}"
+  latexPrec _ Delta = showString "\\delta(k)"
+  latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
 instance Type KSpace where
   isKSpace _ = Same
   derivativeHelper v ddk kk | Same <- isKSpace (Expression v), kk == v = ddk
@@ -116,7 +119,11 @@ instance Type KSpace where
   postfix _ = "\t}\n"
   codeStatementHelper a op (Expression (FFT (Expression (R v)))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
-  codeStatementHelper a op e = "{\n\t\tconst int i = 0;\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+  codeStatementHelper a op e =
+          if k0code == "0"
+          then a ++ "[0]" ++ op ++ "0;\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+          else "{\n\t\tconst int i = 0;\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+      where k0code = code (setZero Kz (setZero Ky (setZero Kx e)))
   initialize (Expression (K x)) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);\n\t//printf(\"Memory use k alloc " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
   initialize _ = "VectorXcd output(gd.NxNyNzOver2);\n\t//printf(\"Memory use k output is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
   free (Expression (K x)) = x ++ ".resize(0);\n\t//printf(\"Memory use free " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
@@ -248,6 +255,8 @@ setZero v (Expression x) = zeroHelper v x
 instance Code Scalar where
   codePrec _ (S v) = showString v
   codePrec _ (Integrate r) = showString "(" . codePrec 0 r . showString ") * gd.dvolume"
+  latexPrec _ (S "complex(0,1)") = showString "i"
+  latexPrec _ (S ['d',v]) = showString ['d',v] -- for differentials
   latexPrec _ (S v@('{':_)) = showString v
   latexPrec _ (S (a:v@(_:_))) = showString (a : '_' : '{' : v ++ "}")
   latexPrec _ (S v) = showString v

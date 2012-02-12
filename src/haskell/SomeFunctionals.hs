@@ -1,6 +1,7 @@
 module SomeFunctionals 
        ( fmt, whitebear, wb_contact_at_sphere, idealgas, mu, n,
          phi1, phi2, phi3,
+         xshell, yshell, zshell,
          dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
        where
 

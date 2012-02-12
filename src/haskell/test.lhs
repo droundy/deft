@@ -2,6 +2,7 @@
 import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
+import SomeFunctionals
 
 latexTests :: Test
 latexTests = TestList [t "x" x,
@@ -158,7 +159,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT nbar" 2 nbar,
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
-  where t str n e = TestCase $ assertEqual str n (countFFT $ fst $ simp2 e)
+  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -205,9 +206,23 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
           writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 (Just (r_var "R")) "NiceN2"
-          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ generateHeader (log (1-nbar)) (Just (r_var "R")) "NiceLogOneMinusNbar"
-          writeFile "tests/generated-haskell/nice-phi1.h" $ generateHeader (-n2*log(1-nbar)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
-          writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar)]
+          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ 
+            generateHeader (log (1-nbar)) (Just (r_var "R")) "NiceLogOneMinusNbar"
+          writeFile "tests/generated-haskell/nice-phi1.h" $ 
+            generateHeader (-n2*log(1-nbar)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
+          let smear = exp (-spreading*kdr*kdr)
+              i = s_var "complex(0,1)"
+              x = r_var "x"
+              n2x = ifft ( smear * (4*pi) * i * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              n2y = ifft ( smear * (4*pi) * i * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              n2z = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-nbar)/(4*pi*rad)
+          writeFile "tests/generated-haskell/nice-phi2.h" $ 
+            generateHeader phi2here (Just (r_var "R")) "NicePhi2"
+          writeFile "tests/generated-haskell/nice-n2xsqr.h" $ 
+            generateHeader (n2x**2) (Just (r_var "R")) "NiceN2xsqr"
+          writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar), ("n2", n2), ("n2x", n2x), 
+                                                                    ("grad n2xsqr", derive (R "x") 1 (n2x**2))]
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
           if failures c > 0 || errors c > 0
             then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
@@ -216,6 +231,8 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
 
 latexfile :: Type a => [(String, Expression a)] -> String
 latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"
-  where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex (substitute (k**2) (kk**2) e) ++ "\n\\end{equation}\n"
+  where helper (v,e) = v ++ "\n\\begin{equation}\n" ++ latex (cleanup e) ++ "\n\\end{equation}\n"
         kk = k_var "k"
+        x = r_var "x"
+        cleanup = substitute (k**2) (kk**2) . substitute (xshell x) (r_var "n2x")
 \end{code}

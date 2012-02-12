@@ -69,7 +69,7 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
 
-$(HASKELL_CODE): src/haskell/functionals
+$(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
 	src/haskell/functionals $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
@@ -195,7 +195,7 @@ paper: all paper/figs/equation-of-state.dat \
 	paper/figs/single-rod-in-water-low-res.dat
 	cd paper && $(MAKE)
 
-papers: all papers/contact/figs/gHS-vs-n.dat \
+papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/walls.dat \
