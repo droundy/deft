@@ -203,25 +203,29 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               rad :: Type a => Expression a
               rad = s_var "R"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+              n3 = nbar
               n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft (r_var "x"))
           writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
           writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 (Just (r_var "R")) "NiceN2"
           writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ 
             generateHeader (log (1-nbar)) (Just (r_var "R")) "NiceLogOneMinusNbar"
           writeFile "tests/generated-haskell/nice-phi1.h" $ 
-            generateHeader (-n2*log(1-nbar)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
+            generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
           let smear = exp (-spreading*kdr*kdr)
               i = s_var "complex(0,1)"
               x = r_var "x"
               n2x = ifft ( smear * (4*pi) * i * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
               n2y = ifft ( smear * (4*pi) * i * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
               n2z = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
-              phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-nbar)/(4*pi*rad)
+              phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-n3)/(4*pi*rad)
           writeFile "tests/generated-haskell/nice-phi2.h" $ 
             generateHeader phi2here (Just (r_var "R")) "NicePhi2"
-          writeFile "tests/generated-haskell/nice-n2xsqr.h" $ 
+          writeFile "tests/generated-haskell/nice-phi3.h" $ 
+            generateHeader ((n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))) 
+            (Just (r_var "R")) "NicePhi3"
+          writeFile "tests/generated-haskell/nice-n2xsqr.h" $
             generateHeader (n2x**2) (Just (r_var "R")) "NiceN2xsqr"
-          writeFile "tests/generated-haskell/math.tex" $ latexfile [("nbar", nbar), ("n2", n2), ("n2x", n2x), 
+          writeFile "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x), 
                                                                     ("grad n2xsqr", derive (R "x") 1 (n2x**2))]
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
           if failures c > 0 || errors c > 0
