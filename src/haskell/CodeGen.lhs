@@ -822,7 +822,7 @@ factorandsum (x:xs) = helper (getprodlist x) (x:xs)
         getprodlist xx = [(xx,1)]
 
 derive :: (Type a, Type b) => b -> Expression a -> Expression a -> Expression b
-derive v dda (Sum s) = sum $ map dbythis $ sum2pairs s
+derive v dda (Sum s) = factorandsum $ map dbythis $ sum2pairs s
   where dbythis (f,x) = toExpression f * derive v dda x
 derive v dda (Product p) = factorandsum (map dbythis $ product2pairs p)
   where dbythis (x,n) = derive v (Product p*toExpression n*dda/x) x
