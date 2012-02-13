@@ -7,7 +7,7 @@ module CodeGen ( RealSpace(..), r_var,
                  Expression,                 
                  Statement(..),
                  Type, 
-                 makeHomogeneous, isConstant, hasexpression, -- for debugging only!!!
+                 makeHomogeneous, isConstant, hasexpression, factorandsum, -- for debugging only!!!
                  code, latex, setZero, codeStatement, substitute,
                  generateHeader, simp, simp2, countFFT, checkDup)
        where
@@ -487,8 +487,8 @@ latexE pree (Product p) | product2denominator p == 1 = latexParen (pree > 7) $ l
         ltexsimple [a] = latexE 7 a
         ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
         ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
-latexE pree (Product p) = latexParen (pree > 7) $ showString "\\frac{" . latexE 7 num . showString "}{" .
-                                                                        latexE 7 den . showString "}"
+latexE pree (Product p) = latexParen (pree > 7) $ showString "\\frac{" . latexE 0 num . showString "}{" .
+                                                                        latexE 0 den . showString "}"
   where num = product $ product2numerator p
         den = product2denominator p
 latexE p (Sum s) = latexParen (p > 6) (showString me)
