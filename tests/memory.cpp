@@ -122,21 +122,24 @@ void check_a_functional(const char *name, Functional f, const Grid &x) {
       printf("Refusing to test cpu times, since there is swapping going on! (%g M)\n", majorfaults);
       nocpu = true;
     }
-    if (!good) {
+    if (!good || fscanf(good, " mem cpu %lg %lg %lg %lg %lg %lg %lg %lg",
+                        &memE, &cpuE,
+                        &memG, &cpuG,
+                        &memP, &cpuP,
+                        &memPonly, &cpuPonly) != 8) {
       printf("Unable to open file %s, will not check cpu times!\n", fname);
       nocpu = true;
-      snprintf(fname, 1024, "tests/bench/good/%s.kipu", name);
-      good = fopen(fname, "r");
-      if (!good) {
-        printf("Unable to open file %s, so I have to fail!\n", fname);
-        exit(1);
-      }
+    } else {
+      fclose(good);
     }
-    if (fscanf(good, " mem cpu %lg %lg %lg %lg %lg %lg %lg %lg",
-               &memE, &cpuE,
-               &memG, &cpuG,
-               &memP, &cpuP,
-               &memPonly, &cpuPonly) != 8) {
+    snprintf(fname, 1024, "tests/bench/good/%s.kipu", name);
+    good = fopen(fname, "r");
+    if (!good) {
+      printf("Unable to open file %s, so I have to fail!\n", fname);
+      exit(1);
+    }
+    if (fscanf(good, " mem cpu %lg %*g %lg %*g %lg %*g %lg %*g",
+               &memE, &memG, &memP, &memPonly) != 4) {
       printf("Unable to read file %s\n", fname);
       exit(1);
     }
