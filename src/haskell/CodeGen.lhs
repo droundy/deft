@@ -36,7 +36,21 @@ data Scalar = S String |
             deriving ( Eq, Ord, Show )
 
 kinversion :: Expression KSpace -> Expression KSpace
-kinversion = substitute kx (-kx) . substitute ky (-ky) . substitute kz (-kz)
+kinversion (Scalar e) = Scalar e
+kinversion (Cos e) = cos (kinversion e)
+kinversion (Sin e) = sin (kinversion e)
+kinversion (Exp e) = exp (kinversion e)
+kinversion (Log e) = log (kinversion e)
+kinversion (Abs e) = abs (kinversion e)
+kinversion (Signum e) = signum (kinversion e)
+kinversion (Product p) = product $ map ff $ product2pairs p
+  where ff (e,n) = (kinversion e) ** toExpression n
+kinversion (Sum s) = pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, kinversion y)
+kinversion (Expression Kx) = -kx
+kinversion (Expression Ky) = -ky
+kinversion (Expression Kz) = -kz
+kinversion (Expression x) = Expression x
 
 instance Code RealSpace where
   codePrec _ (R v) = showString (v ++ "[i]")
@@ -349,9 +363,10 @@ pairs2sum :: Type a => [(Double, Expression a)] -> Expression a
 pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
   where helper [] = 0
         helper [(1,e)] = e
-        helper [(x,Sum y)] | [(x2,y')] <- sum2pairs y = helper [(x*x2, y')]
         helper es = Sum $ fl (Map.empty) es
         fl a [] = a
+        fl a ((f,Sum s'):xs) = fl a (map mulf (sum2pairs s') ++ xs)
+          where mulf (ff,e) = (ff*f, e)
         fl a ((f,x):xs) = case Map.lookup x a of
                           Just f' -> if f + f' == 0
                                      then fl (Map.delete x a) xs
@@ -494,6 +509,7 @@ latexParen True x = showString "\\left(" . x . showString "\\right)"
 
 latexDouble :: Double -> String
 latexDouble 0 = "0"
+latexDouble x | x < 0 = "-" ++ latexDouble (-x)
 latexDouble x = case double2int x of
                   Just n -> show n
                   Nothing ->

@@ -172,9 +172,12 @@ substitutionTests = TestList [t x y (y**2) (x**2),
                               t x y (cos y**2) (cos x**2),
                               t (fft x) (k_var "temp_FFT") nbar_temp nbar,
                               t (k**2) (kk**2) nbarkk nbar,
+                              t (r_var "n2x") (xshell x) (xshell x**2) (r_var "n2x" ** 2),
+                              t (r_var "n2x") (xshell x) (r_var "n2y"**2 + xshell x**2) (r_var "n2y"**2 + r_var "n2x"**2),
                               t x y (integrate y) (integrate x),
                               t x y nbary nbar]
-  where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ " on " ++ latex e) (latex eresult) (latex $ substitute a b e)
+  where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
+                                                 (eresult) (substitute a b e)
         x = r_var "x"
         y = r_var "y" :: Expression RealSpace
         kk = k_var "k"
