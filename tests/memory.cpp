@@ -51,10 +51,9 @@ double check_peak(const char *name, const char *name2, FILE *out,
   double cputime = get_time() - last_time;
   double peak = peak_memory()/1024.0/1024;
   if (cpu)
-    printf("CPU time is %g s (%.0f%%)\n", cputime, (cputime - cpu)/cpu*100);
+    printf("CPU time is %g s (%.0f%%, with memory use %.0f M)\n", cputime, (cputime - cpu)/cpu*100, peak);
   else
-    printf("CPU time is %g s\n", cputime);
-  //printf("Peak memory use is %g M\n", peak);
+    printf("CPU time is %g s (with memory use %.0f M)\n", cputime, peak);
   if (peak < peakmin) {
     printf("FAIL: Peak memory use of %s %s should be at least %g (but it's %g)!\n", name, name2, peakmin, peak);
     retval++;
