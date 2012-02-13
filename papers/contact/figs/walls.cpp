@@ -132,7 +132,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
                             PreconditionedConjugateGradient(f, gd, 1, 
                                                             &potential,
                                                             QuadraticLineMinimizer));
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0;min.improve_energy(false) && i<100;i++) {
   }
   took("Doing the minimization");
     
@@ -152,7 +152,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
+  Grid wu_contact_density(gd, YuWuContact(1.0)(1, gd, density));
   //Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
   // plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);

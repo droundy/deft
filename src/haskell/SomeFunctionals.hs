@@ -2,6 +2,8 @@ module SomeFunctionals
        ( fmt, whitebear, wb_contact_at_sphere, idealgas, mu, n,
          phi1, phi2, phi3,
          xshell, yshell, zshell,
+         yuwu_zeta, yuwu_contact,
+         saft_dispersion, saft_association,
          dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
        where
 
@@ -113,3 +115,46 @@ wb_contact_at_sphere =
   -- + xshell (n2x*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
   -- + yshell (n2y*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
   -- + zshell (n2z*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
+
+yuwu_zeta :: Expression RealSpace
+yuwu_zeta = (n2**2 - n2x**2 - n2y**2 - n2z**2)/n2**2
+
+yuwu_contact :: Expression RealSpace
+yuwu_contact = n0*yuwu_zeta*ghs
+  where ghs = invdiff*(1 + 0.5*(invdiff*zeta2)*yuwu_zeta*(3 + invdiff*zeta2))
+        zeta2 = rad*n2/3
+        invdiff = 1/(1-n3)
+
+lambda_dispersion, epsilon_dispersion :: Type a => Expression a
+lambda_dispersion = s_var "lambda_dispersion"
+epsilon_dispersion = s_var "epsilon_dispersion"
+
+length_scaling :: Type a => Expression a
+length_scaling = s_var "length_scaling"
+
+eta_for_dispersion, eta_effective :: Expression RealSpace
+eta_for_dispersion = r_var "{\\eta_d}" -- ifft (exp (-k**2/2/(length_scaling*lambda_dispersion*rad)**2) * fft n)
+
+-- The following equation is equation 36 in Gil-Villegas 1997 paper.
+eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_effective**2)*eta_for_dispersion
+  where c1 = 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
+        c2 = -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
+        c3 = 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
+
+saft_dispersion, saft_association, xsaft, a1, a2 :: Expression RealSpace
+saft_dispersion = subst $ n*(a1 + a2/kT)
+  where subst = substitute eta_for_dispersion (ifft (exp (-k**2/2/(length_scaling*lambda_dispersion*rad)**2) * fft n))
+
+a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion* eta_for_dispersion *(1 - eta_effective/2)/(1-eta_effective)**3
+
+a2 = 0.5*khs*eta_for_dispersion* derive (R "{\\eta_d}") 1 a1
+     where khs = (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
+
+saft_association = 4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2)
+
+kappa_association, epsilon_association :: Type a => Expression a
+kappa_association = s_var "kappa_association"
+epsilon_association = s_var "epsilon_association"
+
+xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*n0*yuwu_contact*kappa_association*boltz)
+  where boltz = exp(epsilon_association/kT)-1

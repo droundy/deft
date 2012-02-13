@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "OptimizedFunctionals.h"
+#include "ContactDensity.h"
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
 #include "utilities.h"
@@ -239,6 +240,7 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
+  /*
   check_a_functional("HardSpheres", ff, potential);
 
   ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
@@ -258,6 +260,7 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, HardSphereGas(R, mu));
   check_a_functional("HardSphereGas", ff, potential);
+  */
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
@@ -273,6 +276,12 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresNoTensor2", ff, potential);
+
+  ff = constrain(constraint, FuWuContactDensity(R));
+  check_a_functional("FuWuContactDensity", ff, potential);
+
+  ff = constrain(constraint, YuWuContact(R));
+  check_a_functional("YuWuContact", ff, potential);
 
   if (numoops == 0) {
     printf("\n%s has no oopses!\n", argv[0]);

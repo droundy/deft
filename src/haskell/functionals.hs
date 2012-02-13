@@ -12,11 +12,14 @@ main =
        generateHeader (fmt whitebear) (Just (r_var "R")) "HardSpheresNoTensor2"
      gen "src/ContactAtSphereFast.cpp" $
        generateHeader (fmt wb_contact_at_sphere) (Just (r_var "R")) "ContactAtSphere"
+     gen "src/YuWuContactFast.cpp" $
+       generateHeader (fmt yuwu_contact) (Just (r_var "R")) "YuWuContact"
      gen "papers/contact/formulas.tex" $ unlines $ map definelatex
        [("phione", phi1),
         ("phitwo", phi2),
         ("phithree", phi2),
         ("whitebear", whitebear),
+        ("yuwucontact", yuwu_contact),
         ("dwbdnthree", dwbdn3),
         ("dwbdntwo", dwbdn2),
         ("dwbdnone", dwbdn1),
