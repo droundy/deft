@@ -4,7 +4,7 @@ module CodeGen ( RealSpace(..), r_var,
                  KSpace(..), k_var, kx, ky, kz, k, ksqr,
                  Scalar(..), s_var,
                  fft, ifft, integrate, grad, derive,
-                 Expression,                 
+                 Expression, joinFFTs,
                  Statement(..),
                  Type, 
                  makeHomogeneous, isConstant, hasexpression, factorandsum, -- for debugging only!!!
@@ -758,6 +758,40 @@ findToDo (Abs e) = findToDo e
 findToDo (Signum e) = findToDo e
 findToDo _ = DoNothing
 
+isfft :: Expression KSpace -> Maybe (Expression RealSpace)
+isfft (Expression (FFT e)) = Just e
+isfft (Product p) = tofft 1 Nothing $ product2pairs p
+  where tofft _ Nothing [] = Nothing
+        tofft sc (Just e) [] = Just $ sc*e
+        tofft sc Nothing ((Expression (FFT e),1):xs) = tofft sc (Just e) xs
+        tofft sc myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) myfft xs
+        tofft _ _ _ = Nothing
+isfft _ = Nothing
+
+isifft :: Expression RealSpace -> Maybe (Expression KSpace)
+isifft (Expression (IFFT e)) = Just e
+isifft (Product p) = tofft 1 Nothing $ product2pairs p
+  where tofft _ Nothing [] = Nothing
+        tofft sc (Just e) [] = Just $ sc*e
+        tofft sc Nothing ((Expression (IFFT e),1):xs) = tofft sc (Just e) xs
+        tofft sc myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) myfft xs
+        tofft _ _ _ = Nothing
+isifft _ = Nothing
+
+joinFFTs :: Type a => Expression a -> Expression a
+joinFFTs (Expression e)
+  | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinFFTs e')
+  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinFFTs e')
+joinFFTs (Sum s) | Same <- isKSpace (Sum s) = joinup [] $ sum2pairs s
+  where joinup tofft [] = fft $ factorandsum tofft
+        joinup tofft ((f,x):xs) | Just e <- isfft x = joinup (toExpression f*e:tofft) xs
+                                | otherwise = toExpression f*x + joinup tofft xs
+joinFFTs (Sum s) | Same <- isRealSpace (Sum s) = joinup [] $ sum2pairs s
+  where joinup tofft [] = ifft $ factorandsum tofft
+        joinup tofft ((f,x):xs) | Just e <- isifft x = joinup (toExpression f*e:tofft) xs
+                                | otherwise = toExpression f*x + joinup tofft xs
+joinFFTs e = e
+
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 = simp2helper (0 :: Int) []
     where simp2helper n sts e = case findToDo e of
@@ -1060,13 +1094,13 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
     where
       codeIntegrate = freeVectors (st ++ [AssignS "output" e'])
-          where (st, e') = simp2 (integrate e)
+          where (st, e') = simp2 (joinFFTs $ integrate e)
       codeVTransform = freeVectors (InitializeR e: st ++ [AssignR "output" e'])
-          where (st, e') = simp2 e
+          where (st, e') = simp2 $ joinFFTs e
       codeDTransform = freeVectors [InitializeS (makeHomogeneous e), AssignS "output" (makeHomogeneous e)]
       codeDerive = freeVectors [InitializeS (makeHomogeneous (derive (R "x") 1 e)), AssignS "output" (makeHomogeneous (derive (R "x") 1 e))]
       codeGrad = freeVectors (st ++ [AssignR "(*outgrad)" (r_var "(*outgrad)" + e')])
-          where (st, e') = simp2 (derive (R "x") (r_var "ingrad") e )
+          where (st, e') = simp2 (joinFFTs $ derive (R "x") (r_var "ingrad") e )
       codeA (Just rep) = "(double " ++ code (makeHomogeneous rep) ++ "_arg) : " ++ code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
       codeA Nothing = "()"
       codeArgInit (Just rep) = code (InitializeS (makeHomogeneous rep))

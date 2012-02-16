@@ -162,9 +162,10 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT nbar" 2 nbar,
+                     t "countFFT nbar + n2" 2 (nbar + n2),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 e)
+  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 $ joinFFTs e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
