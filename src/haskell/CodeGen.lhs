@@ -9,7 +9,7 @@ module CodeGen ( RealSpace(..), r_var,
                  Type, 
                  makeHomogeneous, isConstant, hasexpression, factorandsum, -- for debugging only!!!
                  code, latex, setZero, codeStatement, substitute,
-                 generateHeader, simp, simp2, countFFT, checkDup)
+                 generateHeader, simp, simp2, countFFT, checkDup, peakMem)
        where
 
 --import Debug.Trace
@@ -86,9 +86,9 @@ instance Type RealSpace where
   codeStatementHelper a op (Expression (IFFT (Expression (K v)))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT e)) = error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
   codeStatementHelper a op e = prefix "" e ++ a ++ "[i]" ++ op ++ code e ++ ";\n" ++ postfix e
-  initialize (Expression (R x)) = "VectorXd " ++ x ++ "(gd.NxNyNz);\n\t//printf(\"Memory use alloc " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
-  initialize _ = "VectorXd output(gd.NxNyNz);\n\t//printf(\"Memory use output is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
-  free (Expression (R x)) = x ++ ".resize(0);\n\t//printf(\"Memory use free " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
+  initialize (Expression (R x)) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
+  initialize _ = "VectorXd output(gd.NxNyNz);"
+  free (Expression (R x)) = x ++ ".resize(0);"
   free _ = error "free error"
   toScalar (R v) = s_var v
   toScalar (IFFT ke) = makeHomogeneous ke
@@ -136,11 +136,11 @@ instance Type KSpace where
   codeStatementHelper a op e =
           if k0code == "0"
           then a ++ "[0]" ++ op ++ "0;\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
-          else "{\n\t\tconst int i = 0;\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
+          else "{\n\t\tconst int i = 0;\n\t\tconst Reciprocal k_i = Reciprocal(0,0,0);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero Kz (setZero Ky (setZero Kx e))) ++ ";\n\t}\n\t" ++ prefix "" e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
       where k0code = code (setZero Kz (setZero Ky (setZero Kx e)))
-  initialize (Expression (K x)) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);\n\t//printf(\"Memory use k alloc " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
-  initialize _ = "VectorXcd output(gd.NxNyNzOver2);\n\t//printf(\"Memory use k output is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
-  free (Expression (K x)) = x ++ ".resize(0);\n\t//printf(\"Memory use free " ++ x ++ " is %g with peak %g\\n\", current_memory()/1024.0/1024, peak_memory()/1024.0/1024);\n"
+  initialize (Expression (K x)) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);"
+  initialize _ = "VectorXcd output(gd.NxNyNzOver2);"
+  free (Expression (K x)) = x ++ ".resize(0);"
   free _ = error "free error"
   toScalar (K v) = s_var v
   toScalar Delta = 1
@@ -595,21 +595,20 @@ codeStatement (InitializeS e) = "\t" ++ initialize e
 codeStatement (FreeR e) = "\t" ++ free e
 codeStatement (FreeK e) = "\t" ++ free e
 
-{-
-codeStatement :: Statement a -> String
-codeStatement (a := e) = "\t" ++ codeStatementHelper a " = " e
-codeStatement (a :?= e) = "\t" ++ codeStatementHelper (a ++ "_" ++ hash (show e)) " = " e
-codeStatement (a :+= e) = "\t" ++ codeStatementHelper a " += " e
-codeStatement (Initialize e) = "\t" ++ initialize e
-codeStatement (Return _) = ""
-codeStatement (a :>> b) = codeStatement a ++ codeStatement b
--}
-
 countFFT :: [Statement] -> Int
 countFFT = sum . map helper
     where helper (AssignR _ (Expression (IFFT _))) = 1
           helper (AssignK _ (Expression (FFT _))) = 1
           helper _ = 0
+
+peakMem :: [Statement] -> Int
+peakMem = maximum . (helper 0)
+    where helper n (x:xs) | (InitializeR _) <- x = (n+1) : (helper (n+1) xs)
+                          | (InitializeK _) <- x = (n+1) : (helper (n+1) xs)
+                          | (FreeR _) <- x = (n-1) : (helper (n-1) xs)
+                          | (FreeR _) <- x = (n-1) : (helper (n-1) xs)
+                          | otherwise = n : helper n xs
+          helper n [] = [n]
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous ee = 
@@ -956,81 +955,6 @@ vecInMem s = filter isFreeVec $ map ini s
 
 \end{code}
 
-
-\begin{code}
-{-
-data Statement a where
-     (:=) :: (Type a, Code a) => String -> Expression a -> Statement (Expression a)
-     (:?=) :: (Type a, Code a) => String -> Expression a -> Statement (Expression a)
-     (:+=) :: (Type a, Code a) => String -> Expression a-> Statement (Expression a)
-     Initialize :: (Type a) => Expression a -> Statement (Expression a)
-     Return :: a -> Statement a
-     (:>>) :: Statement b -> Statement a -> Statement a
-infixl 1 :>>
-infix 4 :=, :?=, :+=
-instance Monad Statement where
-  Return _ >> x = x
-  (a :>> Return _) >> b = a >> b
-  a >> b = a :>> b
-  (>>=) = thenS
-  return = Return
-instance Show (Statement a) where
-    showsPrec = showsS
-showsS :: Int -> Statement a -> ShowS
-showsS _ (x := y) = showString x . showString " := " . showsPrec 0 y
-showsS _ (x :?= y) = showString (x ++ "_" ++ hash (show y)) . showString " :?= " . showsPrec 0 y
-showsS _ (x :+= y) = showString x . showString " :+= " . showsPrec 0 y
-showsS _ (Initialize _) = showString "initialize ???"
-showsS _ (Return _) = showString "return ???" 
-showsS p (x :>> y) = showsS p x . showString "\n" . showsS p y
-
-instance Code (Statement a) where
-  codePrec = codeS
-  latexPrec = latexS
-codeS :: Int -> Statement a -> ShowS
-codeS _ (x := y) = showString (prefix "" y) . 
-                    codePrec 0 (var x y) . showString " = " . codePrec 0 y . showString ";" .
-                    showString (postfix y)
-codeS _ (x :?= y) = showString (prefix x y) .
-                     codePrec 0 (var x y) . showString " := " . codePrec 0 y . showString ";" .
-                     showString (postfix y)
-codeS _ (x :+= y) = showString (prefix "" y) .
-                     codePrec 0 (var x y) . showString " += " . codePrec 0 y . showString ";" .
-                     showString (postfix y)
-codeS _ (Initialize e) = showString (initialize e)
-codeS _ (Return _) = showString ""
-codeS p (x :>> y) = codeS p x . showString "\n" . codeS p y
-
-latexS :: Int -> Statement a -> ShowS
-latexS _ (x := y) = latexPrec 0 (var x y) . showString " = " . latexPrec 0 y
-latexS _ (x :?= y) = latexPrec 0 (var x y) . showString " := " . latexPrec 0 y
-latexS _ (x :+= y) =  latexPrec 0 (var x y) . showString " += " . latexPrec 0 y
-latexS _ (Initialize e) = showString (initialize e)
-latexS _ (Return _) = showString ""
-latexS p (x :>> y) = latexS p x . showString "\n" . latexS p y
-
-
-thenS :: Statement a -> (a -> Statement b) -> Statement b
-thenS f g = f :>> g (evalS f)
-
-evalS :: Statement a -> a
-evalS (s := e) = var s e
-evalS (s :?= e) = var (s ++ "_" ++ hash (show e)) e
-evalS (s :+= e) = var s e
-evalS (Initialize a) = a
-evalS (Return a) = a
-evalS (_ :>> b) = evalS b
-{-
-combineS :: Statement a -> Statement b -> (a -> b -> a) -> Statement a
-combineS (s1 := e1) (_ := e2) op = (s1 := (op e1 e2))
-combineS (s1 :?= e1) (_ := e2) op = (s1 :?= (op e1 e2))
-combineS s1 (s2 :?= e) op = combineS s1 (s2 := e) op
-combineS s1 (s2 :>> s3) op = s2 :>> (combineS s1 s3 op)
-combineS s1 _ _ = s1
--}
--}
-\end{code}
-
 \begin{code}
 
 functionCode :: String -> String -> [(String, String)] -> String -> String
@@ -1042,7 +966,7 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 
 
 
-classCode :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
+classCode :: Expression RealSpace -> [String] -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
                 functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n" ++ codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n" ++ "\treturn output*gd.dvolume;\n" ) ++
@@ -1057,7 +981,7 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tassert(outpgrad==outpgrad);\n" ++ codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n") ++
                 functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
-                "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class"
+                "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t//peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
       codeIntegrate = freeVectors (st ++ [AssignS "output" e'])
           where (st, e') = simp2 (integrate e)
@@ -1067,19 +991,19 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
       codeDerive = freeVectors [InitializeS (makeHomogeneous (derive (R "x") 1 e)), AssignS "output" (makeHomogeneous (derive (R "x") 1 e))]
       codeGrad = freeVectors (st ++ [AssignR "(*outgrad)" (r_var "(*outgrad)" + e')])
           where (st, e') = simp2 (derive (R "x") (r_var "ingrad") e )
-      codeA (Just rep) = "(double " ++ code (makeHomogeneous rep) ++ "_arg) : " ++ code (makeHomogeneous rep) ++ "(" ++ code (makeHomogeneous rep) ++ "_arg)"
-      codeA Nothing = "()"
-      codeArgInit (Just rep) = code (InitializeS (makeHomogeneous rep))
-      codeArgInit Nothing = ""
+      codeA [] = "()"
+      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
+      codeArgInit [] = ""
+      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
 
-generateHeader :: Expression RealSpace -> Maybe (Expression RealSpace) -> String -> String
+generateHeader :: Expression RealSpace -> [String] -> String -> String
 generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
                      classCode e arg (n ++ "_type") ++
                      "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
-    where codeA (Just rep) = "double " ++ code (makeHomogeneous rep)
-          codeA Nothing = ""
-          codeA' (Just rep) = code (makeHomogeneous rep)
-          codeA' Nothing = ""
+    where codeA [] = ""
+          codeA a = foldl1 (\x y -> x ++ ", " ++ y ) (map ("double " ++) a)
+          codeA' [] = ""
+          codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
 
 
 
