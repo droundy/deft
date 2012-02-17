@@ -33,9 +33,6 @@ clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 
 ALL_FIGURES=\
-	figs/box-100c--05,05,05-13.gp\
-	figs/box-100s--05,05,05-13.gp\
-	figs/box-110c--05,05,05-13.gp\
 	figs/density-08-013.pdf figs/density-12-112.pdf figs/density-16-265.pdf\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -49,8 +46,6 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
-
-figs/box-%.eps: figs/box-%.dat
 
 figs/density-08-013.pdf: figs/density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat
 	python $^ $@
