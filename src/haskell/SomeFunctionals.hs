@@ -160,4 +160,4 @@ xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*n0*yuwu_cont
   where boltz = exp(epsilon_association/kT)-1
 
 saft_fluid :: Expression RealSpace
-saft_fluid = idealgas + fmt whitebear + mu*n + fmt saft_association + fmt saft_dispersion
+saft_fluid = idealgas + fmt whitebear + mu*n + fmt saft_association + fmt saft_dispersion + n*mu
