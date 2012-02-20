@@ -135,7 +135,7 @@ int test_minimizer(const char *name, Minimizer *min, int numiters, double fraccu
   }
 
   printf("liquid energy is %.15g\n", Eliquid);
-  const double Eliquid_true = -2.5337830546118e-05;
+  const double Eliquid_true = -2.53378305461181e-05;
   if (Eliquid < Eliquid_true) {
     printf("FAIL: Eliquid is too low: %.16g\n", Eliquid);
     retval++;
