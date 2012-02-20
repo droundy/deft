@@ -17,7 +17,7 @@ cp README.md README
 
 aclocal
 autoheader
-automake --add-missing || true #workaround for buggy old automake
+automake --add-missing
 autoconf
 
 #CXXFLAGS='-ansi -pipe -W -g -Wall -O2 -Werror' ./configure

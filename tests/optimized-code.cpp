@@ -78,7 +78,7 @@ int main(int, char **argv) {
   Functional x(Identity());
 
   Grid n(gd);
-  n = 0.00001*VectorXd::Ones(gd.NxNyNz) + 0.001*(-10*r2(gd)).cwise().exp();
+  n = 0.00001*VectorXd::Ones(gd.NxNyNz) + 0.1*(-10*r2(gd)).cwise().exp();
 
   compare_functionals(HardSpheresFast(R), HardSpheres(R), n, 2e-14);
 
@@ -109,7 +109,11 @@ int main(int, char **argv) {
   double lscale = 0.7;
   compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
                       SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
-                      n, 1e-12);
+                      n, 3e-12);
+
+  //compare_functionals(SaftFluid2(R, eps, kappa, epsdis, lambda, lscale, mu),
+  //                    SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
+  //                    n, 3e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

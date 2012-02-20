@@ -105,18 +105,18 @@ neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
 more efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
-Water stands out among liquids for its extraordinary properties.  Water is
-the only natural substance that is found in solid, liquid and gaseous
-states at temperatures and pressures normally found on Earth.  Water has a
-density maximum at 4$^\circ$C, and expands upon freezing.  The heat
-capacity of water is the highest of any liquid, and its latent heat of
-fusion and vaporization are also the highest.  Water's thermal conductivity
-and surface tensions are the highest of any non-metallic liquid.  Water has
-an unusually high dielectric constant.
-Much of the unusual behavior of water is explained by the ability of each
-water molecule to form \emph{four} strong, directional hydrogen bonds---two
-acceptors and two donors.  This directional bonding dictates the open
-structure of ice, leading to thermal expansion upon freezing.
+Water stands out among liquids for its extraordinary properties.
+Water is the only natural substance that is found in solid, liquid and
+gaseous states at temperatures and pressures normally found on Earth.
+Water has a density maximum at 4$^\circ$C, and expands upon freezing.
+Water has the highest heat capacity, latent heat of fusion and
+vaporization, thermal conductivity and surface tension of any
+non-metallic liquid.  Water has an unusually high dielectric constant.
+Much of the unusual behavior of water is explained by the ability of
+each water molecule to form \emph{four} strong, directional hydrogen
+bonds---two acceptors and two donors.  This directional bonding
+dictates the open structure of ice, leading to thermal expansion upon
+freezing.
 
 Due to its large dielectric constant, small molecular size and strong
 hydrogen-bonding network, water as ``the universal solvent'' is as
@@ -185,13 +185,13 @@ Several classical density functionals have already been developed for
 water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
 qualitative behavior of water.  However, many of these are less
 sophisticated than those describing the hard-sphere fluid, and a
-quantitatively accurate functional describing water---which reproduces both
-the macroscopic surface tension and its decrease as curvature
-increases---has not yet been published.  For instance, Jaqaman \emph{et al}
-developed a classical density-functional for water including orientational
-effects, but their functional resulted in a surface tension twice the
-experimental value, with the result that it can really only be used to make
-very qualitative predictions~\cite{Jaqaman2004}.
+quantitatively accurate functional describing water---which reproduces
+both the macroscopic surface tension and its decrease as curvature
+increases---has not yet been published.  For instance, Jaqaman
+\emph{et al} developed a classical density-functional for water
+including orientational effects, but their functional resulted in a
+surface tension twice the experimental value, limiting it to purely
+qualitative predictions~\cite{Jaqaman2004}.
 
 \needsworknow{Add discussion and citations for more recent papers}
 
@@ -209,6 +209,7 @@ suitability for describing interactions with ionic solutes.
 
 \needsworknow{Add smooth transition from others' work to ours}
 
+\section{Theory and Methods}
 We use classical DFT to construct a new functional that will predict
 the density of water molecules in a classical system.  The model we use
 starts with a treatment of each individual water molecule as a purely
@@ -218,21 +219,17 @@ fluids which are mainly defined by van der Waals forces and weak electrostatic
 interations, requires direct treatment of association effects. The strong 
 hydrogen bonds and polar
 interactions in water are ideal for describing with SAFT, which was designed for
-use with such fluids. It is based on Wertheim's first-order
+use with hydrogen-bonding fluids. It is based on Wertheim's first-order
 thermodynamic perturbation theory (TPT1)
 \cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
 wertheim1986fluidsIV} which provides a useful way to account for strong
 associative interations between molecules. SAFT can account for the association energies
-as well as any effects due to clusters or chains forming
-in the liquid\cite{muller2001molecular}. \needsworknow{Expand or move this 
-introduction to SAFT?}
+as well as any effects due to clusters or chains forming \fixme{not true}
+in the liquid\cite{muller2001molecular}.  \needsworknow{Expand this a
+  bit to accurately describe SAFT and its advantages.}
 
-\section{Theory and Methods}
-We introduce a new classical density functional for water that
-predicts the vapor pressure, vapor density, liquid density, bulk
-surface tension, and enthalpy, as well as allows for liquid-vapor
-coexistence.  The Helmholtz free energy functional is based on SAFT,
-and is composed of the usual terms:
+The Helmholtz free energy functional is based on SAFT,
+and is composed of the terms:
 \begin{equation}
   F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
 F_\textit{disp}[n]+ F_\textit{assoc}[n],
@@ -327,7 +324,7 @@ The first term in the attractive energy is the dispersion term.  This
 will include van der Waals attraction and any orientation-independent
 interactions. We use a dispersion term based on the SAFT-VR
 approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters, an interaction energy $\epsilondisp$ and a
+parameters: an interaction energy $\epsilondisp$ and a
 length scale $\lambdadisp R$.
 
 The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
@@ -1076,7 +1073,7 @@ The predicted and computed valued for $d_{c4}$ are show in Table \ref{criticalfo
 A common model of hydrophobic solutes is the \emph{hard sphere solute}
 \fixme{add citations?}.  The effect of this solute is merely to create
 a cavity within which the water may not penetrate.  This is the
-simples possible solute, and will serve as a test case, which if
+simplest possible solute, and will serve as a test case, which if
 passed could lead to the ability to insert different chemicals into
 aqueous solution, instead of a vapor cavity, in order to observe
 biologically and chemically important aqueous solvation interactions.

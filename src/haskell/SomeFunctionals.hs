@@ -3,7 +3,7 @@ module SomeFunctionals
          phi1, phi2, phi3,
          xshell, yshell, zshell,
          yuwu_zeta, yuwu_contact,
-         saft_dispersion, saft_association,
+         saft_dispersion, saft_association, saft_fluid,
          dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
        where
 
@@ -136,7 +136,7 @@ eta_for_dispersion, eta_effective :: Expression RealSpace
 eta_for_dispersion = r_var "{\\eta_d}" -- ifft (exp (-k**2/2/(length_scaling*lambda_dispersion*rad)**2) * fft n)
 
 -- The following equation is equation 36 in Gil-Villegas 1997 paper.
-eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_effective**2)*eta_for_dispersion
+eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion
   where c1 = 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
         c2 = -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
         c3 = 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
@@ -158,3 +158,6 @@ epsilon_association = s_var "epsilon_association"
 
 xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*n0*yuwu_contact*kappa_association*boltz)
   where boltz = exp(epsilon_association/kT)-1
+
+saft_fluid :: Expression RealSpace
+saft_fluid = idealgas + fmt whitebear + mu*n + fmt saft_association + fmt saft_dispersion + n*mu
