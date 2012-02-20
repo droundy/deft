@@ -79,12 +79,12 @@ int main(int argc, char *argv[]){
     }
     if (strcmp(argv[a],"wally") == 0) {
       has_y_wall = true;
-      lenx = atof(argv[a+1]);
+      leny = atof(argv[a+1]);
       periodic_y = false;
     }
     if (strcmp(argv[a],"wallz") == 0) {
       has_z_wall = true;
-      lenx = atof(argv[a+1]);
+      lenz = atof(argv[a+1]);
       periodic_z = false;
     }
     if (strcmp(argv[a],"flatdiv") == 0) {
