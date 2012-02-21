@@ -647,6 +647,59 @@ expensive.
     &= -\mathbf{\nabla}'
     \left(n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \right)
   \end{align}
+  
+
+  ??? Derivatives of the density functions with respect to R.
+  n_3(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(?)) d\mathbf{r}''
+  
+  
+  For the derivation of n_3 in the symmetric case:
+  \frac{\delta n_3 (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mthbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}''
+  
+  R(\mathbf{r}) refers to all the spheres that just touch the point \mathbf{r}
+
+  some stuff times p(\mathbf{r}) &= \int \frac{\deltaA_{HS}}{\delta n_3(\methbf{r}')} 
+  \frac{\delta n_3(\mathbf{r}'}{\deltaR(\mthbf{r})} d\mathbf{r}'
+
+  &= \int \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}'} \int n (\mthbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}'' d\mathbf{r}'
+
+  &= \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}'} \int n (\mthbf{r}'') \delta(|\mathbf{r} - \mathbf{r}''| - R(\mathbf{r})) d\mathbf{r}''
+
+  &= \frac{\delta A_{HS}}{\deltan_3(\mathbf{r}''} n_2(\mathbf{r})
+
+  So only one n_3(\methbf{r}' is affected, and that's when \mathbf{r}' = \mathbf{r}
+  It's affected by all the spheres that \emph{touch} \mathbf{r}'.  To say that R(\mathbf{r})
+  changes means that all the spheres touching \methbf{r}'.  And keep in mind these are possible spheres,
+  given by densities, not real spheres.  (Write this more good like grammar and stuff.  Look at how to do superscripts)
+
+  And for Assymmetric case: 
+
+  \frac{\delta n_3 (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mthbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) \delta(\mathbf{r}-\mathbf{r}'') d\mathbf{r}''
+ 
+  &= n (\mthbf{r}) \delta(|\mathbf{r} - \mathbf{r}'| - R(\mathbf{r}))
+  
+  here it's a lot of n_3(\mathbf{r}') points that are affected by the sphere changing at R(\mathbf{r}) 
+  so sphere is centered at \mathbf{r} here
+
+  Also, here's n_2(\mathbf{r}') for Symmetric case:
+
+  n_2(\mathbf{r}')
+
+
+  eh.  I'm done for tonight.  Keep going with this.
+
+
+
+
+  \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})} &=
+    n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \\
+   
+n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
+  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+
+
   These give us some basic tools with which to perform derivatives.
   
   Finally, we get an answer like
