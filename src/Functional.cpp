@@ -806,6 +806,25 @@ public:
     return f1.I_preserve_homogeneous() && f2.I_am_constant_wrt_x();
   }
 
+  double integral(const GridDescription &gd, double kT, const VectorXd &data) const {
+    if (!f1.next()) {
+      // This is the simple, efficient case!
+      return f1.integral(gd, kT, f2(gd, kT, data));
+    }
+    // This does some extra work to save the energies of each term in
+    // the sum, just in case we want to print it!
+    VectorXd f2data(f2(gd, kT, data));
+    double e = f1.justMeIntegral(gd, kT, f2data);
+    f1.set_last_energy(e);
+    Functional *nxt = f1.next();
+    while (nxt) {
+      double enxt = nxt->justMeIntegral(gd, kT, f2data);
+      nxt->set_last_energy(enxt);
+      e += enxt;
+      nxt = nxt->next();
+    }
+    return e;
+  }
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
     if (!f1.next()) {
       // This is the simple, efficient case!

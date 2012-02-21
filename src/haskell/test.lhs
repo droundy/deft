@@ -198,14 +198,14 @@ substitutionTests = TestList [t x y (y**2) (x**2),
 
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
-          writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") Nothing "NiceSum"
-          writeFile "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") Nothing "NiceQuad"
-          writeFile "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) Nothing "NiceSqrt"
-          writeFile "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") Nothing "NiceSqrtandMore"
-          writeFile "tests/generated-haskell/nice-log.h" $ generateHeader (log (r_var "x")) Nothing "NiceLog"
-          writeFile "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log (r_var "x") + (r_var "x")**2) Nothing "NiceLogandSqr"
-          writeFile "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log (r_var "x") + (r_var "x")**2 - (r_var "x")**3 + (r_var "x")**(-1)) Nothing "NiceLogandSqrandInverse"
-          writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) Nothing "NiceLogOneMinusX"
+          writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") [] "NiceSum"
+          writeFile "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") [] "NiceQuad"
+          writeFile "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) [] "NiceSqrt"
+          writeFile "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") [] "NiceSqrtandMore"
+          writeFile "tests/generated-haskell/nice-log.h" $ generateHeader (log (r_var "x")) [] "NiceLog"
+          writeFile "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log (r_var "x") + (r_var "x")**2) [] "NiceLogandSqr"
+          writeFile "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log (r_var "x") + (r_var "x")**2 - (r_var "x")**3 + (r_var "x")**(-1)) [] "NiceLogandSqrandInverse"
+          writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) [] "NiceLogOneMinusX"
           let spreading = 6.0
               kdr = k * s_var "dr"
               kR = k * rad
@@ -214,12 +214,12 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
               n3 = nbar
               n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft (r_var "x"))
-          writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar (Just (r_var "R")) "NiceNbar"
-          writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 (Just (r_var "R")) "NiceN2"
+          writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar ["R"] "NiceNbar"
+          writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 ["R"] "NiceN2"
           writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ 
-            generateHeader (log (1-nbar)) (Just (r_var "R")) "NiceLogOneMinusNbar"
+            generateHeader (log (1-nbar)) ["R"] "NiceLogOneMinusNbar"
           writeFile "tests/generated-haskell/nice-phi1.h" $ 
-            generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) (Just (r_var "R")) "NicePhi1"
+            generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) ["R"] "NicePhi1"
           let smear = exp (-spreading*kdr*kdr)
               i = s_var "complex(0,1)"
               x = r_var "x"
@@ -228,12 +228,12 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
               n2z = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
               phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-n3)/(4*pi*rad)
           writeFile "tests/generated-haskell/nice-phi2.h" $ 
-            generateHeader phi2here (Just (r_var "R")) "NicePhi2"
+            generateHeader phi2here ["R"] "NicePhi2"
           writeFile "tests/generated-haskell/nice-phi3.h" $ 
             generateHeader ((n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))) 
-            (Just (r_var "R")) "NicePhi3"
+            ["R"] "NicePhi3"
           writeFile "tests/generated-haskell/nice-n2xsqr.h" $
-            generateHeader (n2x**2) (Just (r_var "R")) "NiceN2xsqr"
+            generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           writeFile "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x), 
                                                                     ("grad n2xsqr", derive (R "x") 1 (n2x**2))]
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]

@@ -28,7 +28,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
-	src/ContactAtSphereFast.cpp src/YuWuContactFast.cpp # src/SaftFluid2Fast.cpp
+	src/ContactAtSphereFast.cpp src/YuWuContactFast.cpp src/SaftFluid2Fast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 

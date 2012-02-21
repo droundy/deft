@@ -76,11 +76,11 @@ int main(int argc, char *argv[]){
       periodic_x = false;
     } else if (strcmp(argv[a],"wally") == 0) {
       has_y_wall = true;
-      lenx = atof(argv[a+1]);
+      leny = atof(argv[a+1]);
       periodic_y = false;
     } else if (strcmp(argv[a],"wallz") == 0) {
       has_z_wall = true;
-      lenx = atof(argv[a+1]);
+      lenz = atof(argv[a+1]);
       periodic_z = false;
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions

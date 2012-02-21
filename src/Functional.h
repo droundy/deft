@@ -112,6 +112,9 @@ public:
   VectorXd justMe(const GridDescription &gd, double kT, const VectorXd &data) const {
     return itsCounter->ptr->transform(gd, kT, data);
   }
+  double justMeIntegral(const GridDescription &gd, double kT, const VectorXd &data) const {
+    return itsCounter->ptr->integral(gd, kT, data);
+  }
   VectorXd operator()(double kT, const GridDescription &gd, const VectorXd &data) const {
     return (*this)(gd, kT, data);
   }

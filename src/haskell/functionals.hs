@@ -9,13 +9,15 @@ main =
                    then writeFile f x
                    else return ()
      gen "src/HardSpheresNoTensor2Fast.cpp" $ 
-       generateHeader (fmt whitebear) (Just (r_var "R")) "HardSpheresNoTensor2"
+       generateHeader (fmt whitebear) ["R"] "HardSpheresNoTensor2"
      gen "src/ContactAtSphereFast.cpp" $
-       generateHeader (fmt wb_contact_at_sphere) (Just (r_var "R")) "ContactAtSphere"
+       generateHeader (fmt wb_contact_at_sphere) ["R"] "ContactAtSphere"
      gen "src/YuWuContactFast.cpp" $
-       generateHeader (fmt yuwu_contact) (Just (r_var "R")) "YuWuContact"
+       generateHeader (fmt yuwu_contact) ["R"] "YuWuContact"
      gen "src/SaftFluid2Fast.cpp" $
-       generateHeader saft_fluid (Just (r_var "R")) "SaftFluid2"
+       generateHeader saft_fluid ["R", "epsilon_association", "kappa_association",
+                                  "epsilon_dispersion", "lambda_dispersion", "length_scaling",
+                                  "mu"] "SaftFluid2"
      gen "papers/contact/formulas.tex" $ unlines $ map definelatex
        [("phione", phi1),
         ("phitwo", phi2),
