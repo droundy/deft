@@ -235,6 +235,61 @@ struct zshell_op : public base_rop<Scalar> {
 };
 
 template<typename Scalar>
+struct xshellprime_op : public base_rop<Scalar> {
+  xshellprime_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  const char *name() const { return "xshell"; }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kR = k*R;
+    if (kR > 1e-5) {
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[0]/(k*k)*(-sin(kR)));
+    } else {
+      return complex(0,(4*M_PI)*R*R*kvec[0]*(-1.0/3));
+    }
+  }
+  double R, dr;
+};
+
+template<typename Scalar>
+struct yshellprime_op : public base_rop<Scalar> {
+  yshellprime_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  const char *name() const { return "yshell"; }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kR = k*R;
+    if (kR > 1e-3) {
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[1]/(k*k)*(- sin(kR)));
+    } else {
+      return complex(0,(4*M_PI)*R*R*kvec[1]*(-1.0/3));
+    }
+  }
+  double R, dr;
+};
+
+template<typename Scalar>
+struct zshellprime_op : public base_rop<Scalar> {
+  zshellprime_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
+    dr = pow(gd.fineLat.volume(), 1.0/3);
+  }
+  const char *name() const { return "zshell"; }
+  Scalar func(Reciprocal kvec) const {
+    double k = kvec.norm();
+    double kR = k*R;
+    if (kR > 1e-3) {
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[2]/(k*k)*(- sin(kR)));
+    } else {
+      return complex(0,(4*M_PI)*R*R*kvec[2]*(-1.0/3));
+    }
+  }
+  double R, dr;
+};
+
+
+template<typename Scalar>
 struct xyshell_op : public base_rop<Scalar> {
   xyshell_op(const GridDescription &gd, double r) : base_rop<Scalar>(gd), R(r) {
     dr = pow(gd.fineLat.volume(), 1.0/3);
@@ -368,6 +423,9 @@ namespace Eigen {
   ADD_ONE_ROP(xshell_op);
   ADD_ONE_ROP(yshell_op);
   ADD_ONE_ROP(zshell_op);
+  ADD_ONE_ROP(xshellprime_op);
+  ADD_ONE_ROP(yshellprime_op);
+  ADD_ONE_ROP(zshellprime_op);
 
   ADD_ONE_ROP(xyshell_op);
   ADD_ONE_ROP(yzshell_op);
@@ -402,6 +460,10 @@ MAKE_FUNCTION_WITH_DOUBLE_ROP(shellprime_op,shellprime)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(xshell_op,xshell)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(yshell_op,yshell)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(zshell_op,zshell)
+
+MAKE_FUNCTION_WITH_DOUBLE_ROP(xshellprime_op,xshellprime)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(yshellprime_op,yshellprime)
+MAKE_FUNCTION_WITH_DOUBLE_ROP(zshellprime_op,zshellprime)
 
 MAKE_FUNCTION_WITH_DOUBLE_ROP(xyshell_op,xyshell)
 MAKE_FUNCTION_WITH_DOUBLE_ROP(yzshell_op,yzshell)

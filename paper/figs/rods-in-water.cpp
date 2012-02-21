@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
-  for (distance=0*nm; distance<1.3*nm; distance +=0.1*nm) {
+  for (distance=0*nm; distance<1.3*nm; distance +=0.05*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     

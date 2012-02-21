@@ -27,6 +27,11 @@
 #include "generated-haskell/nice-logoneminusx.h"
 #include "generated-haskell/nice-nbar.h"
 #include "generated-haskell/nice-logoneminusnbar.h"
+#include "generated-haskell/nice-n2.h"
+#include "generated-haskell/nice-phi1.h"
+#include "generated-haskell/nice-phi2.h"
+#include "generated-haskell/nice-phi3.h"
+#include "generated-haskell/nice-n2xsqr.h"
 
 #include "generated/sum.h"
 #include "generated/quadratic.h"
@@ -170,11 +175,16 @@ int main(int, char **argv) {
   Functional n2 = ShellConvolve(R);
   Functional n3 = StepConvolve(R);
   compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), myT, n, 1e-14);
+  compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
+
+  compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
 
   const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   compare_functionals(Phi1(R), phi1, myT, n, 1e-13);
+
+  compare_functionals(NicePhi1(R), phi1, myT, n, 1e-13);
 
   const double four_pi_r = 4*M_PI*R;
   Functional n2x = xShellConvolve(R);
@@ -183,8 +193,16 @@ int main(int, char **argv) {
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   compare_functionals(Phi2(R), phi2, myT, n, 1e-14);
 
+  compare_functionals(NiceN2xsqr(R), sqr(n2x), myT, n, 2e-14);
+
+  compare_functionals(NicePhi2(R), phi2, myT, n, 1e-13);
+
   Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
   compare_functionals(Phi3rf(R), phi3rf, myT, n, 1e-13);
+
+  Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))/(36*M_PI*sqr(n3)*sqr(one_minus_n3))
+    *n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)));
+  compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13);
 
   compare_functionals(AlmostRF(R), myT*(phi1 + phi2 + phi3rf), myT, n, 2e-14);
 

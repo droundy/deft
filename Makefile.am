@@ -27,11 +27,12 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
-HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
+	src/ContactAtSphereFast.cpp src/YuWuContactFast.cpp src/SaftFluid2Fast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
-ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE)
+ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
 bin_PROGRAMS = deft monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE) 
@@ -68,7 +69,7 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 $(OPTIMIZED_CODE): optimize-functionals
 	./optimize-functionals $@
 
-$(HASKELL_CODE): src/haskell/functionals
+$(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
 	src/haskell/functionals $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
@@ -108,17 +109,17 @@ check_PROGRAMS = \
 	tests/eos.test \
 	tests/eps.test
 
-TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh tests/latex-generation.sh src/haskell/test $(check_PROGRAMS)
+TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh tests/latex-generation.sh $(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
-tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CODE)
+tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CONTACT_CODE)
 tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
-tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CODE)
+tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CONTACT_CODE)
 tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(ALL_CODE)
 tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(ALL_CODE)
 tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(ALL_CODE)
@@ -194,7 +195,7 @@ paper: all paper/figs/equation-of-state.dat \
 	paper/figs/single-rod-in-water-low-res.dat
 	cd paper && $(MAKE)
 
-papers: all papers/contact/figs/gHS-vs-n.dat \
+papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/walls.dat \

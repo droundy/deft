@@ -2,6 +2,8 @@
 
 use strict;
 
+system "make papers/contact/figs/sphere.mkdat";
+
 my $dd;
 my $F;
 # We do the largest diameters first, so the small calculations won't
@@ -17,7 +19,7 @@ foreach $dd ([16,265], [12,112], [8,13]) {
     my $resolution = 0.1; # spacing of grid points in hard-sphere radius.
 
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = sprintf "%.0f", 2200*((($d + $padding)/20.0)*(0.1/$resolution))**3;
+    my $memuse = sprintf "%.0f", 2400*((($d + $padding)/20.0)*(0.1/$resolution))**3;
 
     my $scriptname = "papers/contact/figs/sphere-$d-$N-$F.tmp.sh";
     open SCRIPT, ">$scriptname" or die $!;

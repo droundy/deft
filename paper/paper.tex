@@ -105,18 +105,18 @@ neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
 more efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
-Water stands out among liquids for its extraordinary properties.  Water is
-the only natural substance that is found in solid, liquid and gaseous
-states at temperatures and pressures normally found on Earth.  Water has a
-density maximum at 4$^\circ$C, and expands upon freezing.  The heat
-capacity of water is the highest of any liquid, and its latent heat of
-fusion and vaporization are also the highest.  Water's thermal conductivity
-and surface tensions are the highest of any non-metallic liquid.  Water has
-an unusually high dielectric constant.
-Much of the unusual behavior of water is explained by the ability of each
-water molecule to form \emph{four} strong, directional hydrogen bonds---two
-acceptors and two donors.  This directional bonding dictates the open
-structure of ice, leading to thermal expansion upon freezing.
+Water stands out among liquids for its extraordinary properties.
+Water is the only natural substance that is found in solid, liquid and
+gaseous states at temperatures and pressures normally found on Earth.
+Water has a density maximum at 4$^\circ$C, and expands upon freezing.
+Water has the highest heat capacity, latent heat of fusion and
+vaporization, thermal conductivity and surface tension of any
+non-metallic liquid.  Water has an unusually high dielectric constant.
+Much of the unusual behavior of water is explained by the ability of
+each water molecule to form \emph{four} strong, directional hydrogen
+bonds---two acceptors and two donors.  This directional bonding
+dictates the open structure of ice, leading to thermal expansion upon
+freezing.
 
 Due to its large dielectric constant, small molecular size and strong
 hydrogen-bonding network, water as ``the universal solvent'' is as
@@ -185,13 +185,13 @@ Several classical density functionals have already been developed for
 water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
 qualitative behavior of water.  However, many of these are less
 sophisticated than those describing the hard-sphere fluid, and a
-quantitatively accurate functional describing water---which reproduces both
-the macroscopic surface tension and its decrease as curvature
-increases---has not yet been published.  For instance, Jaqaman \emph{et al}
-developed a classical density-functional for water including orientational
-effects, but their functional resulted in a surface tension twice the
-experimental value, with the result that it can really only be used to make
-very qualitative predictions~\cite{Jaqaman2004}.
+quantitatively accurate functional describing water---which reproduces
+both the macroscopic surface tension and its decrease as curvature
+increases---has not yet been published.  For instance, Jaqaman
+\emph{et al} developed a classical density-functional for water
+including orientational effects, but their functional resulted in a
+surface tension twice the experimental value, limiting it to purely
+qualitative predictions~\cite{Jaqaman2004}.
 
 \needsworknow{Add discussion and citations for more recent papers}
 
@@ -209,6 +209,7 @@ suitability for describing interactions with ionic solutes.
 
 \needsworknow{Add smooth transition from others' work to ours}
 
+\section{Theory and Methods}
 We use classical DFT to construct a new functional that will predict
 the density of water molecules in a classical system.  The model we use
 starts with a treatment of each individual water molecule as a purely
@@ -218,21 +219,17 @@ fluids which are mainly defined by van der Waals forces and weak electrostatic
 interations, requires direct treatment of association effects. The strong 
 hydrogen bonds and polar
 interactions in water are ideal for describing with SAFT, which was designed for
-use with such fluids. It is based on Wertheim's first-order
+use with hydrogen-bonding fluids. It is based on Wertheim's first-order
 thermodynamic perturbation theory (TPT1)
 \cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
 wertheim1986fluidsIV} which provides a useful way to account for strong
 associative interations between molecules. SAFT can account for the association energies
-as well as any effects due to clusters or chains forming
-in the liquid\cite{muller2001molecular}. \needsworknow{Expand or move this 
-introduction to SAFT?}
+as well as any effects due to clusters or chains forming \fixme{not true}
+in the liquid\cite{muller2001molecular}.  \needsworknow{Expand this a
+  bit to accurately describe SAFT and its advantages.}
 
-\section{Theory and Methods}
-We introduce a new classical density functional for water that
-predicts the vapor pressure, vapor density, liquid density, bulk
-surface tension, and enthalpy, as well as allows for liquid-vapor
-coexistence.  The Helmholtz free energy functional is based on SAFT,
-and is composed of the usual terms:
+The Helmholtz free energy functional is based on SAFT,
+and is composed of the terms:
 \begin{equation}
   F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
 F_\textit{disp}[n]+ F_\textit{assoc}[n],
@@ -327,7 +324,7 @@ The first term in the attractive energy is the dispersion term.  This
 will include van der Waals attraction and any orientation-independent
 interactions. We use a dispersion term based on the SAFT-VR
 approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters, an interaction energy $\epsilondisp$ and a
+parameters: an interaction energy $\epsilondisp$ and a
 length scale $\lambdadisp R$.
 
 The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
@@ -433,21 +430,21 @@ interaction occurs is $\kappaassoc$, giving the association
 term in the free energy has two empirical parameters that are fit to
 experimental data.
 
-\textcolor{red}{
 The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
   the same functional, but their paper contains errors in the
   association term and is not useful as a reference.}  The association
-functional of Fu and Wu includes the effects of density
+functional of Yu and Wu includes the effects of density
 inhomogeneities on the \emph{contact density} of hard spheres, which
 conventionally appears in the form of the density multiplied by the
 contact value of the correlation function $g^{HS}_\sigma$, but is
 based on the SAFT-HS equation of state, rather than the SAFT-VR
 equation of state\cite{gil-villegas-1997-SAFT-VR} which is used in the
 optimal SAFT parametrization for water found by Clark \emph{et
-  al}\cite{clark2006developing}.
-}
+  al}\cite{clark2006developing}.  The modification to use the SAFT-VR
+equation of state involves adding a correction term, see
+Equation~\ref{eq:gSW}.  \fixme{needs work}
 
 The association functional we use is constructed by using the density
 $n_0(\xx)$, which is the density of hard spheres touching a given
@@ -455,28 +452,28 @@ point, in the standard SAFT-VR association
 energy\cite{gil-villegas-1997-SAFT-VR}.
 The association free energy for our four-site model has the form
 \begin{align}
-  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) % \zeta(\xx)
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) \zeta(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
 where the value of $4$ comes from the four association sites per
-molecule, and the functional $X$ is the fraction of assotiation sites
-\emph{not} hydrogen-bonded. %, and $\zeta(\xx)$ is a dimensionless
-%measure of the density inhomogeneity.
-The fraction $X$ is determined
-by the quadratic equation
+molecule, and the functional $X$ is the fraction of association sites
+\emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
+measure of the density inhomogeneity.
+%
+The fraction $X$ is determined by the quadratic equation
 \begin{align}
-  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)%\zeta(\xx)
+  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)
       \Delta(\xx)} - 1}
-  {4 n_0(\xx)%\zeta(\xx)
+  {4 n_0(\xx)\zeta(\xx)
     \Delta(\xx)}
 \end{align}
-%where the factor $\zeta$ from
-%Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating,
-%  fu2005vapor-liquid-dft} describes the inhomogeneity of the fluid
-%density, and reduces to unity in the homogeneous limit:
-%\begin{align}
-%  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
-%\end{align}
+where the factor $\zeta$ from Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating} describes the
+inhomogeneity of the fluid density, and reduces to unity in the
+homogeneous limit:
+\begin{align}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
+\end{align}
 The functional $\Delta$ which appears in the formula for $X$ is a
 measure of hydrogen-bonding probability.  In the SAFT-VR
 model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
@@ -485,7 +482,7 @@ model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
   \left(e^{-\beta\epsilonassoc} - 1\right) \\
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma\left(\frac{4\pi R^3}{3}n_0(\xx)\right) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
-  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)
+  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW}
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
@@ -493,15 +490,13 @@ contact for a hard-sphere fluid with a square-well attractive
 potential, and $a_1$ and $a_2$ are two terms in the dispersive term of
 the free energy.  The correlation function $g^\textit{SW}_\sigma$ is
 written as a perturbative correction to the hard-sphere fluid correlation
-function $g^\textit{HS}_\sigma$ given in Equation~\ref{eq:ghs},
-evaluated using the filling fraction computed from $n_0(\xx)$.
-%, for which we use the functional of Yu and
-%Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
-%\begin{align}
-%  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
-%  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
-%  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
-%\end{align}
+function $g^\textit{HS}_\sigma$, for which we use the functional of Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
+\begin{align}
+  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
+  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
+  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
+\end{align}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
@@ -1078,7 +1073,7 @@ The predicted and computed valued for $d_{c4}$ are show in Table \ref{criticalfo
 A common model of hydrophobic solutes is the \emph{hard sphere solute}
 \fixme{add citations?}.  The effect of this solute is merely to create
 a cavity within which the water may not penetrate.  This is the
-simples possible solute, and will serve as a test case, which if
+simplest possible solute, and will serve as a test case, which if
 passed could lead to the ability to insert different chemicals into
 aqueous solution, instead of a vapor cavity, in order to observe
 biologically and chemically important aqueous solvation interactions.

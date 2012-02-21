@@ -69,14 +69,14 @@ gamma = 72 # mN/m
 f(d,r) = d>(pi-2)*r/2 ? 0 : (d - (pi-2)*r/2)*2*gamma*mNpermeter/kJpermol
 
 plot [:1.3] [:0.05] \
-'figs/rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.415) title 'r=0.3 nm' with l ls 1 , \
+'figs/rods-in-water-00.6nm.dat' u 1:($2/kJpermol/(nm)-0.411) title 'r=0.3 nm' with l ls 1 , \
 'figs/rods-in-water-00.6nm.dat' u 1:(f($1,0.6)) notitle with l ls 11 , \
-'figs/rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-0.779) title 'r=0.5 nm' with l ls 2 , \
+'figs/rods-in-water-01.0nm.dat' u 1:($2/kJpermol/(nm)-0.776) title 'r=0.5 nm' with l ls 2 , \
 'figs/rods-in-water-01.0nm.dat' u 1:(f($1,1.0)) notitle with l ls 12 , \
-'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.1295) title 'r=0.7 nm' with l ls 3 , \
+'figs/rods-in-water-01.4nm.dat' u 1:($2/kJpermol/(nm)-1.127) title 'r=0.7 nm' with l ls 3 , \
 'figs/rods-in-water-01.4nm.dat' u 1:(f($1,1.4)) notitle with l ls 13 , \
-'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.480) title 'r=0.9 nm' with l ls 4 , \
+'figs/rods-in-water-01.8nm.dat' u 1:($2/kJpermol/(nm)-1.477) title 'r=0.9 nm' with l ls 4 , \
 'figs/rods-in-water-01.8nm.dat' u 1:(f($1,1.8)) notitle with l ls 14 , \
-'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.655) title 'r=1.0 nm' with l ls 5, \
+'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.652) title 'r=1.0 nm' with l ls 5, \
 'figs/rods-in-water-02.0nm.dat' u 1:(f($1,2.0)) notitle with l ls 15
 #'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-1.939) title 'r=1.2 nm' with lp ls 6

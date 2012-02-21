@@ -4,7 +4,7 @@
 
 % Look up question-mark references (citations).
 
-\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,jcp,10pt,aip]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -31,8 +31,12 @@
 \begin{document}
 \title{A Fundamental Measure Theory Functional for Hard-Sphere Contact Densities}
 
+\author{Jeff Schulte}
+\author{Chris Haglund}
+\author{Patrick Kreitzburg}
 \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
@@ -47,8 +51,6 @@
 \end{abstract}
 
 \maketitle
-
-%\input{formulas}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -70,9 +72,14 @@ fluids\cite{\saftlocaldft,\saftnonlocaldft}.  This approach has been
 successful in qualitatively describing the dependence of surface
 tension on temperature.  Unfortunately, most of these constructed
 functionals\cite{\saftlocaldft} cannot be used to study arbitrary
-inhomogeneous density distributions, because they use local
-density approximations that are only valid for densities that vary
-slowly over molecular length scales.
+inhomogeneous density distributions, because they use local density
+approximations that are only valid for densities that vary slowly over
+molecular length scales.  A key input to those SAFT-based functionals
+that can handle sharply varying densities is the correlation function
+evaluated at contact. \fixme{I need to figure out how best to phrase
+  this... do we want to compute correlation at contact, or contact
+  density itself? I prefer the latter, but the former is what is
+  commonly included in formulas.}
 
 Constructing a classical density functional based on SAFT involves
 rewriting each term in the free energy as a functional of an
@@ -86,79 +93,133 @@ $A_\textit{chain}$ is the contribution to the free energy from the
 chaining effect in a polymeric fluid, $A_\textit{disp}$ is the
 dispersion contribution to the free energy, and $A_\textit{assoc}$ is
 the free energy contribution from \emph{association}, which is to say,
-hydrogen bonding.  Each of these terms has some dependence on the
-inhomogeneity in the density.  The ideal gas is purely local, and in
-fact must be the only purely local term in the free energy in order
-for the functional to satisfy the contact-value theorem.  The
-hard-sphere contribution contribution to the free energy has been
-thoroughly studied, and is well approximated by the White Bear version
-of the Fundamental-Measure Theory (FMT)
-functional\cite{roth2002whitebear}.  A functional for the chain
-contribution is has recently been introduced\cite{bryk2006density,
-  gross2009density}, but is not needed for small associating molecules
-such as water.  The dispersion term is long-range and thus has
-significant dependence on the density distribution, but because its
-relatively weak position dependence, is amenable to mean-field
-approximations.  A functional for the association term of the free
-energy was introduced by Wu and
-Yu\cite{yu2002fmt-dft-inhomogeneous-associating}, and was used in
-several subsequent functionals\cite{fu2005vapor-liquid-dft,
-  bryk2006density}.  A key input (FIXME: term, factor?) to both the
-association and chain free energies is the contact value of the
-correlation function of a hard-sphere fluid.
+hydrogen bonding.  The chain and association contributions to the SAFT
+free energy are of particular interest for this paper, since each uses
+as input the contact value of the correlation function.
+%
+Yu and Wu introduced in 2002 a functional for the association term of
+the free energy, which included a functional for the contact value of
+the correlation function (see
+Section~\ref{sec:yuwu})\cite{yu2002fmt-dft-inhomogeneous-associating},
+which has subsequently been used in other
+functionals\cite{fu2005vapor-liquid-dft, bryk2006density}.
+%% Each of these terms has some dependence on the
+%% inhomogeneity in the density.  The ideal gas is purely local, and in
+%% fact must be the only purely local term in the free energy in order
+%% for the functional to satisfy the contact-value theorem.  The
+%% hard-sphere contribution contribution to the free energy has been
+%% thoroughly studied, and is well approximated by the White Bear version
+%% of the Fundamental-Measure Theory (FMT)
+%% functional\cite{roth2002whitebear}.
+Two functionals for the chain contribution have recently been
+introduced\cite{bryk2006density, gross2009density}, one which uses the
+contact value of the correlation function of Yu and
+Wu\cite{bryk2006density}, while the other introduces a new functional
+for the contact value of the correlation
+function (see Section~\ref{sec:gross})\cite{gross2009density}.
+%% The dispersion term is long-range and thus has significant
+%% dependence on the density distribution, but because its relatively
+%% weak position dependence, is amenable to mean-field approximations.
+Given these different approaches, it seems worthwhile to examine this
+property of the hard-sphere fluid through direct simulation, in order
+to establish the advantages and disadvantages of each approach.
 
-The contact value of the correlation function---which is the same as
-the contact value of the cavity correlation function for hard
-spheres---is the the value of the correlation function evaluated a
-distance equal to the hard-sphere diameter.  In an inhomogeneous
-system treated using fundamental measures, there is some ambiguity in
-the meaning of the \emph{local} contact value of the correlation
-function which appears in the equations for the homogeneous system.
-Clearly the contact value of the correlation function will depend on
-position, but how should that position be defined? It will depend on
-how the correlation function is used.  There are two reasonable
-choices for functionals based on fundamental measure theory, which
-will depend on which densities are used...
+\fixme{Should we include these equations? Maybe just later?}
 \begin{align}
-  F[n(\rr)] = \int n(\rr) f(\bar{n}(\rr), g_\sigma(\rr)) d\rr
+  \frac{A_\textit{chain}}{kT} &= -(m-1) n \left(\ln\left(g_\sigma\right)-1\right)
 \end{align}
 \begin{align}
-  F[n(\rr)] = \int f(n_2(\rr), g_\sigma(\rr)) d\rr
+  \frac{A_\textit{assoc}}{kT} &= \sum_i n \left(\ln X_i - \frac12 X_i + \frac12\right) \\
+  X_i &= \frac{1}{1 + \sum_j n g_\sigma X_j\kappa_{ij} \left(e^{\beta \epsilon_{ij}}-1\right)}
 \end{align}
 
-Yu and Wu introduce an approximation based on the fundamental measures
-of Fundamental Measure Theory (see Section~\ref{sec:yuwu}).  Gross
-also does\cite{gross2009density}. 
+\section{Contact density and correlation function}
 
-In this paper, we will report on the accuracy of this approximation by
-comparing with Monte Carlo simulations of the inhomogeneous
-hard-sphere fluid.  In addition, we will introduce and test differing
-approximations for the cavity correlation function.
+\fixme{We should decide on good names for these two densities.  In
+  this section I define them formally, and we should keep using the
+  same names (and mathematical symbols) for them throughout.}
 
-\textcolor{red}{Cavity correlation function!}
+We will define our terms by making use of the two-particle density
+$n^{(2)}(\rr_1,\rr_2)$, which gives the probability per unit volume of
+finding one particle at position $\rr_1$ and the other at position
+$\rr_2$.  The pair correlation function is defined by
+\begin{align}
+  g(\rr_1,\rr_2) &\equiv \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
+\end{align}
+In a homogeneous fluid, the pair correlation only depends on the
+distance $|\rr_1-\rr_2|$, and can be expressed as a function of a
+single variable, with the contact value being when that distance is
+$2R$.  It is desirable for reasons of efficiency to limit CDFT
+functionals to one-center convolutions, which leads us to seek a
+simplified expression for the contact value of the correlation
+function---which is the same as the contact value of the cavity
+correlation function for hard spheres.
+%
+\fixme{The following bit is awkward.}
+%
+In a system with an inhomogeneous density, we seek a \emph{local}
+contact value of the correlation function.  There are two reasonable
+options for defining such a local function:  a symmetric and an
+asymmetric formulation.
 
-The hard-sphere contact density---that is to say, the density of hard
-spheres touching a given hard sphere---is important for the
-association term in Statistical Associating Fluid Theory (SAFT).
-For a homogeneous hard-sphere fluid, the contact density---which is to
-say, $n g_{HS}(\sigma)$, where $g_{HS}(\sigma)$ is the contact value
-of the correlation function---is well-known.  However, for
-inhomogeneous fluids, the contact density has not been well studied.
+The first option treats the two particles that are in contact
+symmetrically:
+\begin{align}
+  g^a_\sigma(\rr) &= \frac{n^a_\textit{contact}(\rr)}{n_a(\rr)}
+\end{align}
+\begin{align}
+  n^a_\textit{contact}(\rr) &= \frac1{4\pi R^2}\int n^{(2)}(\rr - \rr', \rr + \rr')\delta(|\rr'| -
+  R)d\rr'
+\end{align}
+\begin{align}
+  n_a(\rr) &= \frac{1}{4\pi R^2}\int n(\rr')\delta(|\rr-\rr'|-R) d\rr'
+\end{align}
+This functional gives a value averaged over spheres that touch at the
+position $\rr$.  The density $n_a$ is the same as the density $n_0$
+defined in Fundamental Measure Theory (FMT), and seems ideal for
+treating touching spheres.
 
-{
-  \color{blue}We need to figure out a few bits of terminology.
+The second option is to treat one of the two touching spheres
+specially:
+\begin{align}
+  g^b_\sigma(\rr) &= \frac{n^b_\textit{contact}(\rr)}{n_b(\rr)} \\
+  n^b_\textit{contact}(\rr) &= \frac1{16\pi R^2}\int n^{(2)}(\rr, \rr + \rr')
+  \delta(|\rr'| - 2R)d\rr' \\
+  n_b(\rr) &= \frac1{16\pi R^2}\int n(\rr') \delta(|\rr-\rr'|-2R) d\rr'
+\end{align}
+In this case, we find the average number of contacts for a sphere at a
+given position.
 
-  \begin{enumerate}
-  \item What should we call the contact density between two hard
-    spheres, to distinguish it from the contact density at any other
-    hard surface.  One option would be to focus on the contact value
-    of the correlation function, which would make it clear what we're
-    talking about.
-  \item How should we distinguish between the various definitions.  In
-    particular, ``at the sphere'' vs. ``at contact''.  It'd be helpful
-    to have a short way of describing these.
-  \end{enumerate}
-}
+In the process of defining these two averaged correlation functions,
+we also defined four averaged densities, two \emph{contact
+  densities}, $n^a_\textit{contact}(\rr)$ and $n^b_\textit{contact}(\rr)$,
+and two \emph{contacting densities}, $n_a(\rr)$ and $n_b(\rr)$.  The
+former are the density of spheres that are in contact with each other,
+while the latter are the density of spheres available to be in
+contact.  In the homogeneous limit, $n_a = n_b = n$ and
+$n^a_\textit{contact} = n^b_\textit{contact} = g(\sigma)n$.  It is an
+open question, which of these averages will be more useful in any
+particular functional.  Suffice to say, either average is a
+\emph{possible} way to convert a function that is defined for a
+homogeneous system to a functional that is applicable to inhomogeneous
+systems.
+
+Yu and Wu introduce an approximation for
+$g^a$\cite{yu2002fmt-dft-inhomogeneous-associating}, which will be
+discussed in Section~\ref{sec:yuwu}.  Gross introduced an
+approximation for $g^b$\cite{gross2009density}, which will be
+introduced in Section~\ref{sec:gross}.  We will also introduce our own
+approximation to $g^b$ which is based on the assumption of
+thermodynamic consistency within FMT, in
+Section~\ref{contact-at-sphere}.  We will report on the accuracy of
+these approximations by comparing with Monte Carlo simulations of the
+inhomogeneous hard-sphere fluid.  We will focus on the contact
+densities, rather than the correlation function itself, because these
+are simpler, and because they are the quantity that you want to
+``average''.  i.e. if you were to average $g$ itself, you'd want to
+weight that average based on the density, which would mean averaging
+$n^{(2)}$.
+
 
 \subsection{Association free energy of SAFT}
 \newcommand\epsilonassoc{\ensuremath{\varepsilon_\textit{AB}}}
@@ -297,199 +358,199 @@ using the weighted densities
   n_0 = \frac{n_2}{4\pi R^2}
 \end{align}
 
-\section{Direct correlation function}
+%% \section{Direct correlation function}
 
-\textcolor{red}{FIXME WRITE THIS SECTION!} The direct correlation
-function is readily accessible from density-functional theory, as the
-second functional derivative of the free energy:
-\textcolor{red}{(Something like...)}
-\begin{align}
-  -c^{(2)}(\xx_1, \xx_2) &= \frac{1}{k_BT}\frac{\delta^2 F_{ex}}{\delta n(\xx_1) \delta n(\xx_2)}
-\end{align}
-The direct correlation function is related to the ordinary correlation
-function by the Ornstein-Zernike relation
-\begin{align}
-  h(\xx_1, \xx'_2) &= g(\xx_1, \xx_2) - 1 \\
-  h(\xx_1, \xx_2) &= c(\xx_1, \xx_2)
-    + \int n(\xx_3)c(\xx_1, \xx_3) h(\xx_2, \xx_3)d\xx''
-\end{align}
-From these two equation, we could in principle extract the correlation
-function evaluated at contact from the DFT free energy functional.
-The Ornstein-Zernike equation is usually solved by taking a Fourier
-transform of all the relevant quantities.  In the inhomogeneous case,
-however, this approach isn't workable, since the Fourier transforms
-don't speed things up like you'd hope, and we don't have a periodic
-system in general.
+%% \textcolor{red}{FIXME WRITE THIS SECTION!} The direct correlation
+%% function is readily accessible from density-functional theory, as the
+%% second functional derivative of the free energy:
+%% \textcolor{red}{(Something like...)}
+%% \begin{align}
+%%   -c^{(2)}(\xx_1, \xx_2) &= \frac{1}{k_BT}\frac{\delta^2 F_{ex}}{\delta n(\xx_1) \delta n(\xx_2)}
+%% \end{align}
+%% The direct correlation function is related to the ordinary correlation
+%% function by the Ornstein-Zernike relation
+%% \begin{align}
+%%   h(\xx_1, \xx'_2) &= g(\xx_1, \xx_2) - 1 \\
+%%   h(\xx_1, \xx_2) &= c(\xx_1, \xx_2)
+%%     + \int n(\xx_3)c(\xx_1, \xx_3) h(\xx_2, \xx_3)d\xx''
+%% \end{align}
+%% From these two equation, we could in principle extract the correlation
+%% function evaluated at contact from the DFT free energy functional.
+%% The Ornstein-Zernike equation is usually solved by taking a Fourier
+%% transform of all the relevant quantities.  In the inhomogeneous case,
+%% however, this approach isn't workable, since the Fourier transforms
+%% don't speed things up like you'd hope, and we don't have a periodic
+%% system in general.
 
-\textcolor{red}{It seems worth looking into this, to see what (if
-  anything) we can do! I don't see a solution just now, but that
-  doesn't mean there isn't one around somewhere.  In any case, just
-  looking at the direct correlation function might give us some
-  hints as to a different and interesting approximation for the
-  contact density.}
+%% \textcolor{red}{It seems worth looking into this, to see what (if
+%%   anything) we can do! I don't see a solution just now, but that
+%%   doesn't mean there isn't one around somewhere.  In any case, just
+%%   looking at the direct correlation function might give us some
+%%   hints as to a different and interesting approximation for the
+%%   contact density.}
 
 \derivation{
   \begin{widetext}
 }
 
-\section{Mean Contact density}\label{simple-contact}
+%% \section{Mean Contact density}\label{simple-contact}
 
-One reasonably simple question to ask is what the \emph{mean} contact
-density of an inhomogeneous system is.  This comes down to simply
-reproducing the derivation for a homogeneous system using the
-FMT functional.
-\begin{align}
-  p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR} \\
-  \ncontact &= \frac{1}{N k_BT 4\pi (2R)^2} \frac{dA_{HS}}{dR}
-\end{align}
-While this should give the true mean contact density for any given
-system, this is not particularly useful, as we have no way of knowing
-the contact density on any given sphere.  However, the mean contact
-density comes out as an integral, so we can plot the integrand, and
-treat it as a somewhat ill-defined local contact density.
+%% One reasonably simple question to ask is what the \emph{mean} contact
+%% density of an inhomogeneous system is.  This comes down to simply
+%% reproducing the derivation for a homogeneous system using the
+%% FMT functional.
+%% \begin{align}
+%%   p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR} \\
+%%   \ncontact &= \frac{1}{N k_BT 4\pi (2R)^2} \frac{dA_{HS}}{dR}
+%% \end{align}
+%% While this should give the true mean contact density for any given
+%% system, this is not particularly useful, as we have no way of knowing
+%% the contact density on any given sphere.  However, the mean contact
+%% density comes out as an integral, so we can plot the integrand, and
+%% treat it as a somewhat ill-defined local contact density.
 
-\derivation{
+%% \derivation{
 
-  To compute the mean contact density of a system, we need
-  \begin{align}
-    \frac{d A_{HS}}{d R} &=
-    \frac{\partial A_{HS}}{\partial R} \\
-    &+
-    \int \left(
-    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
-    \frac{d n_3(\mathbf{r}')}{d R}
-    +
-    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
-    \frac{d n_2(\mathbf{r}')}{d R}
-    + \cdots
-    \right) d\mathbf{r}'
-  \end{align}
+%%   To compute the mean contact density of a system, we need
+%%   \begin{align}
+%%     \frac{d A_{HS}}{d R} &=
+%%     \frac{\partial A_{HS}}{\partial R} \\
+%%     &+
+%%     \int \left(
+%%     \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
+%%     \frac{d n_3(\mathbf{r}')}{d R}
+%%     +
+%%     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
+%%     \frac{d n_2(\mathbf{r}')}{d R}
+%%     + \cdots
+%%     \right) d\mathbf{r}'
+%%   \end{align}
 
-  \begin{align}
-    \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
-    \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
-    \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
-    &= \int n(\mathbf{r}+\mathbf{r}')
-    \delta'(r' - R) d\Omega' r'^2 dr'\\
-    &= \int 
-    \delta(r' - R) d\Omega' \left(\frac{dn(\mathbf{r}+\mathbf{r}')}{dr'}r'^2 + 2n(\mathbf{r}+\mathbf{r}')r' \right) dr'\\
-    &= \frac1{R} \int 
-    \delta(|\mathbf{r}'| - R)
-    \left(\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') +
-    2n(\mathbf{r}+\mathbf{r}') \right) \mathbf{dr}' \\
-    &= \frac{2}{R}n_2(\mathbf{r}) + \frac{1}{R} \int 
-    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-    \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
-    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-    \frac{dn_1(\mathbf{r})}{dR} &=
-    \frac1{4\pi R}\frac{dn_2(\mathbf{r})}{dR} - n_0(\mathbf{r}) \\
-    &= n_0(\mathbf{r}) + \frac{1}{4\pi R^2} \int 
-    \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
-    \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
-  \end{align}
+%%   \begin{align}
+%%     \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
+%%     \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
+%%     \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
+%%     &= \int n(\mathbf{r}+\mathbf{r}')
+%%     \delta'(r' - R) d\Omega' r'^2 dr'\\
+%%     &= \int 
+%%     \delta(r' - R) d\Omega' \left(\frac{dn(\mathbf{r}+\mathbf{r}')}{dr'}r'^2 + 2n(\mathbf{r}+\mathbf{r}')r' \right) dr'\\
+%%     &= \frac1{R} \int 
+%%     \delta(|\mathbf{r}'| - R)
+%%     \left(\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') +
+%%     2n(\mathbf{r}+\mathbf{r}') \right) \mathbf{dr}' \\
+%%     &= \frac{2}{R}n_2(\mathbf{r}) + \frac{1}{R} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{dn_1(\mathbf{r})}{dR} &=
+%%     \frac1{4\pi R}\frac{dn_2(\mathbf{r})}{dR} - n_0(\mathbf{r}) \\
+%%     &= n_0(\mathbf{r}) + \frac{1}{4\pi R^2} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
+%%   \end{align}
   
-  The total force due to $\Phi_1$ is actually very easy to work out:
-  \begin{align}
-    \frac{d A_{HS}^{(1)}}{d R} &=
-    \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
-  \end{align}
-  where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
-  homogeneous system, and small for reasonably smooth density
-  distributions.  The next term from $\Phi_2$ is as follows:
-  \begin{align}
-    \frac{d A_{HS}^{(2)}}{d R} &=
-    \int \mathbf{dr}' \left(
-    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
-    n_2
-    - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2} - 2 n_1
-      \frac{dn_2}{dR} + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot
-    }{1-n_3}
-    \right) \\
-    &= \int \mathbf{dr}' \left(
-    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
-    n_2
-    - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
-      - 2 n_1 \left(\frac2{R}n_2 \frac{dn_0}{dR}\right)
-      + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-    \right) \\
-    &= \int \mathbf{dr}' \left(
-    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
-    n_2
-    - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
-      - 4 n_0n_2 - 2 n_1\frac{dn_0}{dR}
-      + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-    \right) \\
-    &= \int \mathbf{dr}' \left(
-    \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
-    n_2
-    + \frac{3n_0n_2 + \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
-      + 2 n_1\frac{dn_0}{dR}
-      - 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
-    \right)
-  \end{align}
+%%   The total force due to $\Phi_1$ is actually very easy to work out:
+%%   \begin{align}
+%%     \frac{d A_{HS}^{(1)}}{d R} &=
+%%     \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
+%%   \end{align}
+%%   where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
+%%   homogeneous system, and small for reasonably smooth density
+%%   distributions.  The next term from $\Phi_2$ is as follows:
+%%   \begin{align}
+%%     \frac{d A_{HS}^{(2)}}{d R} &=
+%%     \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2} - 2 n_1
+%%       \frac{dn_2}{dR} + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot
+%%     }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       - 2 n_1 \left(\frac2{R}n_2 \frac{dn_0}{dR}\right)
+%%       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       - 4 n_0n_2 - 2 n_1\frac{dn_0}{dR}
+%%       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     + \frac{3n_0n_2 + \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       + 2 n_1\frac{dn_0}{dR}
+%%       - 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right)
+%%   \end{align}
   
-  And the last term looks like this.  I should perhaps note that this
-  term should be replaced by a tensor version if want to examine
-  seriously localized density distributions.
-  \begin{align}
-    A_{HS}^{(3)} &=
-    \int \mathbf{dr}'\left(
-    (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
-    \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      36\pi n_3^2\left( 1 - n_3 \right)^2
-    }
-    \right) \\
-    \frac{d A_{HS}^{(3)}}{d R} &=
-    \int \mathbf{dr}'
-    \left[
-      3(n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
-      \left(\frac2{R}n_2 + \frac{dn_0}{dR}\right)
-      - 6n_2 \mathbf{n}_{V2} \cdot \nabla n_2
-      \right]
-    \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      36\pi n_3^2\left( 1 - n_3 \right)^2
-    }
-    \\
-    &+
-    (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
-    \frac{
-      (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
-      -
-      (n_3 + (1-n_3)^2 \ln(1-n_3))(-2 n_3^2( 1 - n_3) + 2n_3(1-n_3)^2)
-    }{
-      36\pi (n_3^2\left( 1 - n_3 \right)^2)^2
-    }
-    \\
-    &=
-    \int \mathbf{dr}'
-    \left[
-      (n_1n_2 - \mathbf{n}_{V1} \cdot \mathbf{n}_{V2})
-      \left(2n_2 + \frac{1}{4\pi}\frac{dn_0}{dR}\right)
-      - \frac{1}{2\pi}n_2 \mathbf{n}_{V2} \cdot \nabla n_2
-      \right]
-    \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      3 n_3^2\left( 1 - n_3 \right)^2
-    }
-    \\
-    &+
-    \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
-    \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
-  \end{align}
+%%   And the last term looks like this.  I should perhaps note that this
+%%   term should be replaced by a tensor version if want to examine
+%%   seriously localized density distributions.
+%%   \begin{align}
+%%     A_{HS}^{(3)} &=
+%%     \int \mathbf{dr}'\left(
+%%     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       36\pi n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \right) \\
+%%     \frac{d A_{HS}^{(3)}}{d R} &=
+%%     \int \mathbf{dr}'
+%%     \left[
+%%       3(n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+%%       \left(\frac2{R}n_2 + \frac{dn_0}{dR}\right)
+%%       - 6n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+%%       \right]
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       36\pi n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \\
+%%     &+
+%%     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
+%%     \frac{
+%%       (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
+%%       -
+%%       (n_3 + (1-n_3)^2 \ln(1-n_3))(-2 n_3^2( 1 - n_3) + 2n_3(1-n_3)^2)
+%%     }{
+%%       36\pi (n_3^2\left( 1 - n_3 \right)^2)^2
+%%     }
+%%     \\
+%%     &=
+%%     \int \mathbf{dr}'
+%%     \left[
+%%       (n_1n_2 - \mathbf{n}_{V1} \cdot \mathbf{n}_{V2})
+%%       \left(2n_2 + \frac{1}{4\pi}\frac{dn_0}{dR}\right)
+%%       - \frac{1}{2\pi}n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+%%       \right]
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       3 n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \\
+%%     &+
+%%     \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
+%%     \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
+%%   \end{align}
   
-  \begin{align}
-    \frac{d A_{HS}}{d R} &=
-    \int \mathbf{dr}' \left(
-    -\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3)
-    + \cdots
-    \right)
-  \end{align}
-}
+%%   \begin{align}
+%%     \frac{d A_{HS}}{d R} &=
+%%     \int \mathbf{dr}' \left(
+%%     -\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3)
+%%     + \cdots
+%%     \right)
+%%   \end{align}
+%% }
 
 \section{Contact density at a given hard
   sphere}\label{contact-at-sphere}
@@ -539,16 +600,6 @@ expensive.
       36\pi n_3^2(1-n_3)^2
     }
     \right\}
-    \\
-    &= \int \left\{
-    -\frac{n_2}{4\pi R^2} \ln\left( 1 - n_3\right)
-    + \frac{1}{4\pi R} \frac{n_2^2 - \mathbf{n}_{V2} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      36\pi n_3^2(1-n_3)^2
-    }
-    \right\}
   \end{align}
   
   \begin{align}
@@ -562,19 +613,24 @@ expensive.
     \right)
     \\
     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
-    -\frac{1}{4\pi R^2} \ln\left( 1 - n_3\right)
-    +  \frac{2n_1}{1-n_3}
+    \frac{n_1}{1-n_3}
     + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
       (1-n_3)^2\ln(1-n_3)}{
       36\pi n_3^2(1-n_3)^2
     }
     \\
+    \frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+    \\
+    \frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &=
+    -\frac{1}{4\pi R^2} \ln\left( 1 - n_3\right) \\
     \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
-    \frac{2\mathbf{n}_{V1}}{1-n_3}
+    \frac{\mathbf{n}_{V1}}{1-n_3}
     - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
       (1-n_3)^2\ln(1-n_3)}{
       36\pi n_3^2(1-n_3)^2
     }    \\
+    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+    \frac{\mathbf{n}_{V2}}{1-n_3} \\
     \frac{\delta A_{HS}}{\delta R(\mathbf{r}')} &=
     \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
     - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
@@ -642,21 +698,23 @@ Section~\ref{sec:yuwu}.
 
 \section{Gross' functional}\label{sec:gross}
 We compare with the functional of Gross \emph{et
-  al}\cite{gross2009density}, which is of the first kind, where the
+  al}\cite{gross2009density}, which is of the second kind ($g^b$), where the
 contact density is evaluated at the sphere location.
 \begin{align}
-  n_\textit{contact} &= n_{0'} \frac{1 - \frac12 n_{3'}}{\left(1 - n_{3'}\right)^3}
+  n_\textit{contact} &= n_b \frac{1 - \frac12 n_{3'}}{\left(1 -
+    n_{3'}\right)^3} \\
+  n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
 \end{align}
-where $n_{0'}$ and $n_{3'}$ are defined in a manner analogous to the
-$n_0$ and $n_3$ of FMT, but with the hard-sphere radius replaced by
-the hard-sphere diameter, so the integrals range over spheres that are
-twice as large.
+where $n_b$ is defined in the introduction and $n_{3'}$ is an averaged
+filling fraction defined in a manner analogous to the $n_3$ of FMT,
+but with the hard-sphere radius replaced by the hard-sphere diameter,
+so the integrals range over spheres that are twice as large.
 
 \section{Yu and Wu's functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
-position~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
+position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
 compare both their functional as well as ours with simulation data.
 
 
@@ -669,27 +727,41 @@ quantities.  We compare the Monte Carlo density with the DFT
 prediction.  We also plot Monte Carlo results for the two contact
 densities: the contact density evaluated at contact, and the contact
 density evaluated at the sphere location.  Alongside these, we plot
-the contact density of Fu and Wu~\cite{fu2005vapor-liquid-dft} (or
-should it be Yu and Wu\cite{yu2002structures,
-  yu2002fmt-dft-inhomogeneous-associating}?), the ``simple contact
-density'' from Section~\ref{simple-contact}, and the ``contact density
-at sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
-functional of Wu (FIXME) should match the CenConDensity, while the DFT
+the contact density of Yu and
+Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, the contact density
+of Gross~\cite{gross2009density}, and the ``contact density at
+sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
+functional of Yu (FIXME) should match the CenConDensity, while the DFT
 at sphere should match the ConDensity...
 
-\subsection{Hard spheres confined in a spherical cavity}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-10}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.1.}
+  \label{fig:walls-10}
+\end{figure}
 
-The first geometry we consider is a number of hard spheres confined
-within a spherical cavity.  In
-Figures~\ref{fig:sphere-8}-\ref{fig:sphere-16}, we show
-the densities and contact densities for several cavity sizes.  In each
-case, the number of hard spheres was chosen to set the mean filling
-fraction to around 0.3?.  This value was chosen because it roughly
-corresponds to the filling fraction of water at standard atmospheric
-temperature and pressure in the optimal SAFT model developed by Clark
-\emph{et al}\cite{clark2006developing}.
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-30}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.3.}
+  \label{fig:walls-30}
+\end{figure}
 
-\textcolor{red}{We should also try looking at a few other densities.}
+\begin{figure}
+  \includegraphics[height=5cm]{figs/walls-40}
+  \caption{Density and contact densities at a wall with bulk filling
+    fraction of 0.4.}
+  \label{fig:walls-40}
+\end{figure}
+
+\subsection{Hard spheres at a hard wall}
+
+We begin by examining the simplest situation with an inhomogeneous
+density:  the case of hard spheres near a single hard wall.  This is
+shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.
+
+
 
 \newcommand\sphereExplanation{ Blue curves describe the density of
   hard spheres.  Green curves describe the contact density averaged
@@ -720,40 +792,19 @@ temperature and pressure in the optimal SAFT model developed by Clark
   \label{fig:sphere-16}
 \end{figure}
 
-\subsection{Hard spheres at a hard wall}
+\subsection{Hard spheres confined in a spherical cavity}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-10}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.1.}
-  \label{fig:walls-10}
-\end{figure}
+The first geometry we consider is a number of hard spheres confined
+within a spherical cavity.  In
+Figures~\ref{fig:sphere-8}-\ref{fig:sphere-16}, we show
+the densities and contact densities for several cavity sizes.  In each
+case, the number of hard spheres was chosen to set the mean filling
+fraction to around 0.3?.  This value was chosen because it roughly
+corresponds to the filling fraction of water at standard atmospheric
+temperature and pressure in the optimal SAFT model developed by Clark
+\emph{et al}\cite{clark2006developing}.
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-30}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.3.}
-  \label{fig:walls-30}
-\end{figure}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/walls-40}
-  \caption{Density and contact densities at a wall with bulk filling
-    fraction of 0.4.}
-  \label{fig:walls-40}
-\end{figure}
-
-We study the case of hard spheres near a single hard wall.  This is
-shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.  Actually, we
-should begin with this.
-
-\subsection{Hard spheres around a hard sphere}
-
-It is also interesting to study a system with opposite curvature.  Put
-a (larger) hard sphere in the hard-sphere fluid, and see what the
-contact density is around that hard sphere.  This is particularly
-relevant when we consider using classical density-functional theory to
-model solvation.
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/inner-4-30}
@@ -775,6 +826,15 @@ model solvation.
     radius 3.}
   \label{fig:inner-8-30}
 \end{figure}
+
+\subsection{Hard spheres around a hard sphere}
+
+It is also interesting to study a system with opposite curvature.  Put
+a (larger) hard sphere in the hard-sphere fluid, and see what the
+contact density is around that hard sphere.  This is particularly
+relevant when we consider using classical density-functional theory to
+model solvation.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
@@ -1149,20 +1209,21 @@ of state the excess free energy, which is
 \end{align}
 \end{widetext}
 
-%% \begin{widetext}
-%% \section{Formulas generated from Haskell}
+\begin{widetext}
+\section{Formulas generated from Haskell}
 
-%% \begin{align}
-%%   \Phi_1 &= \phione \\
-%%   \Phi_2 &= \phitwo \\
-%%   \Phi_3 &= \phithree \\
-%%   \frac{d F}{dn_3} &= \dwbdnthree \\
-%%   \frac{d F}{dn_2} &= \dwbdntwo \\
-%%   \frac{d F}{dn_1} &= \dwbdnone \\
-%%   \frac{d F}{d\vec{n}_{2v}} &= \dwbdntwov \\
-%%   \frac{d F}{d\vec{n}_{1v}} &= \dwbdnonev \\
-%% \end{align}
-%% \end{widetext}
+\input{formulas}
+\begin{align}
+  \Phi_1 &= \phione \\
+  \Phi_2 &= \phitwo \\
+  \Phi_3 &= \phithree \\
+  \frac{d F}{dn_3} &= \dwbdnthree \\
+  \frac{d F}{dn_2} &= \dwbdntwo \\
+  \frac{d F}{dn_1} &= \dwbdnone \\
+  \frac{d F}{d\vec{n}_{2v}} &= \dwbdntwov \\
+  \frac{d F}{d\vec{n}_{1v}} &= \dwbdnonev
+\end{align}
+\end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

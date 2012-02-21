@@ -132,7 +132,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
                             PreconditionedConjugateGradient(f, gd, 1, 
                                                             &potential,
                                                             QuadraticLineMinimizer));
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0;min.improve_energy(false) && i<100;i++) {
   }
   took("Doing the minimization");
     
@@ -151,13 +151,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
   if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
-  Grid n0(gd, ShellConvolve(1)(1, density));
-  Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
-  Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
+  Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
+  Grid wu_contact_density(gd, YuWuContact(1.0)(1, gd, density));
+  //Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
   // plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere,
-         wu_contact_density_no_zeta, gross_density);
+         n0, gross_density);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/walls.eps", 
   //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
@@ -176,6 +176,11 @@ int main(int, char **) {
     run_walls(eta, "WB", WB);
     run_walls(eta, "WBT", WBT);
     run_walls(eta, "WBm2", WBm2);
+  }
+  // Just create this file so make knows we have run.
+  if (!fopen("papers/contact/figs/walls.dat", "w")) {
+    printf("Error creating walls.dat!\n");
+    return 1;
   }
   return 0;
 }

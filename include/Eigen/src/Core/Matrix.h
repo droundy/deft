@@ -265,16 +265,19 @@ class Matrix
       *
       * \sa resize(int) for vectors.
       */
-    inline void resize(int rows, int cols)
+    inline void resize(int newrows, int newcols)
     {
-      ei_assert((MaxRowsAtCompileTime == Dynamic || MaxRowsAtCompileTime >= rows)
-             && (RowsAtCompileTime == Dynamic || RowsAtCompileTime == rows)
-             && (MaxColsAtCompileTime == Dynamic || MaxColsAtCompileTime >= cols)
-             && (ColsAtCompileTime == Dynamic || ColsAtCompileTime == cols));
-      int size = rows*cols;
+      ei_assert((MaxRowsAtCompileTime == Dynamic || MaxRowsAtCompileTime >= newrows)
+             && (RowsAtCompileTime == Dynamic || RowsAtCompileTime == newrows)
+             && (MaxColsAtCompileTime == Dynamic || MaxColsAtCompileTime >= newcols)
+             && (ColsAtCompileTime == Dynamic || ColsAtCompileTime == newcols));
+      int size = newrows*newcols;
       bool size_changed = size != this->size();
       if(size_changed) TRACK_FREE_FOR_DJR(this->size());
-      m_storage.resize(size, rows, cols);
+      m_storage.resize(size, newrows, newcols);
+      if (size_changed) {
+        TRACK_ALLOC_FOR_DJR;
+      }
       #ifdef EIGEN_INITIALIZE_MATRICES_BY_ZERO
         if(size_changed) EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED
       #endif
@@ -296,6 +299,9 @@ class Matrix
         m_storage.resize(size, 1, size);
       else
         m_storage.resize(size, size, 1);
+      if (size_changed) {
+        TRACK_ALLOC_FOR_DJR;
+      }
       if (size_changed) {
         EIGEN_INITIALIZE_BY_ZERO_IF_THAT_OPTION_IS_ENABLED;
       }

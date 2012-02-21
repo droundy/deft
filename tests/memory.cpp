@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "OptimizedFunctionals.h"
+#include "ContactDensity.h"
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
 #include "utilities.h"
@@ -51,10 +52,9 @@ double check_peak(const char *name, const char *name2, FILE *out,
   double cputime = get_time() - last_time;
   double peak = peak_memory()/1024.0/1024;
   if (cpu)
-    printf("CPU time is %g s (%.0f%%)\n", cputime, (cputime - cpu)/cpu*100);
+    printf("CPU time is %g s (%.0f%%, with memory use %.0f M)\n", cputime, (cputime - cpu)/cpu*100, peak);
   else
-    printf("CPU time is %g s\n", cputime);
-  //printf("Peak memory use is %g M\n", peak);
+    printf("CPU time is %g s (with memory use %.0f M)\n", cputime, peak);
   if (peak < peakmin) {
     printf("FAIL: Peak memory use of %s %s should be at least %g (but it's %g)!\n", name, name2, peakmin, peak);
     retval++;
@@ -122,21 +122,24 @@ void check_a_functional(const char *name, Functional f, const Grid &x) {
       printf("Refusing to test cpu times, since there is swapping going on! (%g M)\n", majorfaults);
       nocpu = true;
     }
-    if (!good) {
+    if (!good || fscanf(good, " mem cpu %lg %lg %lg %lg %lg %lg %lg %lg",
+                        &memE, &cpuE,
+                        &memG, &cpuG,
+                        &memP, &cpuP,
+                        &memPonly, &cpuPonly) != 8) {
       printf("Unable to open file %s, will not check cpu times!\n", fname);
       nocpu = true;
-      snprintf(fname, 1024, "tests/bench/good/%s.bingley", name);
-      good = fopen(fname, "r");
-      if (!good) {
-        printf("Unable to open file %s, so I have to fail!\n", fname);
-        exit(1);
-      }
+    } else {
+      fclose(good);
     }
-    if (fscanf(good, " mem cpu %lg %lg %lg %lg %lg %lg %lg %lg",
-               &memE, &cpuE,
-               &memG, &cpuG,
-               &memP, &cpuP,
-               &memPonly, &cpuPonly) != 8) {
+    snprintf(fname, 1024, "tests/bench/good/%s.kipu", name);
+    good = fopen(fname, "r");
+    if (!good) {
+      printf("Unable to open file %s, so I have to fail!\n", fname);
+      exit(1);
+    }
+    if (fscanf(good, " mem cpu %lg %*g %lg %*g %lg %*g %lg %*g",
+               &memE, &memG, &memP, &memPonly) != 4) {
       printf("Unable to read file %s\n", fname);
       exit(1);
     }
@@ -237,6 +240,7 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
+  /*
   check_a_functional("HardSpheres", ff, potential);
 
   ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
@@ -256,12 +260,17 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, HardSphereGas(R, mu));
   check_a_functional("HardSphereGas", ff, potential);
+  */
 
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
   ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   check_a_functional("SaftFluid", ff, potential);
+
+  ff = OfEffectivePotential(SaftFluid2(R, eps, kappa, water_prop.epsilon_dispersion,
+                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  check_a_functional("SaftFluid2", ff, potential);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresWBnotensor", ff, potential);
@@ -271,6 +280,12 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresNoTensor2", ff, potential);
+
+  ff = constrain(constraint, FuWuContactDensity(R));
+  check_a_functional("FuWuContactDensity", ff, potential);
+
+  ff = constrain(constraint, YuWuContact(R));
+  check_a_functional("YuWuContact", ff, potential);
 
   if (numoops == 0) {
     printf("\n%s has no oopses!\n", argv[0]);

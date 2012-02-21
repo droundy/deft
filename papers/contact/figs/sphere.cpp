@@ -43,6 +43,7 @@ static void took(const char *name) {
   assert(name); // so it'll count as being used...
   double peak = peak_memory()/1024.0/1024;
   printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  fflush(stdout);
   last_time = t;
 }
 
@@ -263,13 +264,13 @@ void run_spherical_cavity(double diam, int N, const char *name, Functional fhs) 
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
   if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
-  Grid n0(gd, ShellConvolve(1)(1, density));
+  Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
-  Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
+  //Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
   // plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/sphere%s-radial-%04.1f-%02d.dat", name, diameter, N);
   radial_plot(plotname, density, energy_density, contact_density, wu_contact_density,
-              contact_density_sphere, wu_contact_density_no_zeta, gross_density);
+              contact_density_sphere, n0, gross_density);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/sphere.eps", 
   //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
