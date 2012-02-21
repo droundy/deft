@@ -223,7 +223,7 @@ int main(int argc, char *argv[]){
   printf("%f\n",radius[2]);
   fflush(stdout); 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  scale = .5;
+  scale = .2;
   long count = 0;
   long *shells = new long[div];
   for (long l=0; l<div; l++) shells[l] = 0;
@@ -348,7 +348,7 @@ int main(int argc, char *argv[]){
     Vector3d temp = move(spheres[j%N],scale);
     count++;
     if(overlap(spheres, temp, N, R, j%N)){
-      if (scale > 0.001) {
+      if (scale > 0.001 && false) {
 	scale = scale/sqrt(1.02);
 	//printf("Reducing scale to %g\n", scale);
       }
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]){
     }
     spheres[j%N] = temp;
     workingmoves++;
-    if (scale < 5) {
+    if (scale < 5 && false) {
       scale = scale*1.02;
       //printf("Increasing scale to %g\n", scale);
     }
