@@ -34,8 +34,8 @@ pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,7]*4*numpy.pi/3,"g-",label="CenConDensi
 pylab.plot(dftdata[:,0]-2,dftdata[:,4]*4*numpy.pi/3,"gx--",markevery=me,label="Yu and Wu", markeredgewidth=1)
 pylab.plot(dftdata[:,0]-2,dftdata[:,5]*4*numpy.pi/3,"ro--",markevery=me,label="DFT at sphere",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
-#pylab.plot(wbm2data[:,0]-2,wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
-#           markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
+pylab.plot(wbm2data[:,0]-2,wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
+           markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 pylab.plot(dftdata[:,0]-2,dftdata[:,7]*4*numpy.pi/3,"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 
