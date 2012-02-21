@@ -16,6 +16,8 @@ Functional ContactDensitySimplest(double radius);
 Functional ContactDensitySphere(double radius);
 Functional ContactDensitySphereWBm2(double radius);
 
+Functional ContactDensity_S(double radius);
+
 Functional GrossContactDensity(double radius);
 Functional FuWuContactDensity(double radius);
 Functional FuWuContactDensityNoZeta(double radius);

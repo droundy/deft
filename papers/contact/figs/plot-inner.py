@@ -14,7 +14,9 @@ if len(sys.argv) != 6:
 
 rmin = 0
 mcdata = numpy.loadtxt(sys.argv[1])
+print 'all done', sys.argv[2]
 dftdata = numpy.loadtxt(sys.argv[2])
+print 'all done'
 wbtdata = numpy.loadtxt(sys.argv[3])
 wbm2data = numpy.loadtxt(sys.argv[4])
 
@@ -29,7 +31,7 @@ pylab.plot(dftdata[:,0]-rmin,dftdata[:,6]*4*numpy.pi/3,"c--",markevery=me,label=
 #pylab.plot(mcdata[:,0],mcdata[:,2]*4*numpy.pi/3,"r-",label="ConDensity")
 #pylab.plot(mcdata[:,0],mcdata[:,3]*4*numpy.pi/3,"g-",label="CenConDensity")
 
-#pylab.plot(dftdata[:,0]-rmin,dftdata[:,3]*4*numpy.pi/3,"g+--",markevery=me,label="simple contact")
+pylab.plot(dftdata[:,0]-rmin,dftdata[:,3]*4*numpy.pi/3,"g+--",markevery=me,label="$n^{S}_{contact}$")
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,4]*4*numpy.pi/3,"gx--",markevery=me,label="Yu and Wu")
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,5]*4*numpy.pi/3,"ro--",markevery=me,label="DFT at sphere")
 #pylab.plot(wbm2data[:,0]-rmin,wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",

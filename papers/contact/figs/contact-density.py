@@ -28,7 +28,7 @@ pylab.plot(mcdata[:,0],mcdata[:,2+2*off]*4*numpy.pi/3,"r-",label="ConDensity")
 pylab.plot(mcdata[:,0],mcdata[:,3+2*off]*4*numpy.pi/3,"g-",label="CenConDensity")
 
 me = 3
-#pylab.plot(dftdata[:,0],dftdata[:,3]*4*numpy.pi/3,"g+--",label="simple contact")
+pylab.plot(dftdata[:,0],dftdata[:,3]*4*numpy.pi/3,"g+--",label="$n^{S}_{contact}$")
 pylab.plot(dftdata[:,0],dftdata[:,4]*4*numpy.pi/3,"gx--",label="Yu and Wu")
 pylab.plot(dftdata[:,0],dftdata[:,5]*4*numpy.pi/3,"ro--",label="DFT at sphere")
 #pylab.plot(wbm2data[:,0],wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
