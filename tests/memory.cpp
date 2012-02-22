@@ -272,6 +272,22 @@ int main(int, char **argv) {
                                        water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   check_a_functional("SaftFluid2", ff, potential);
 
+  ff = Association(R, eps, kappa, water_prop.epsilon_dispersion,
+                   water_prop.lambda_dispersion, water_prop.length_scaling);
+  check_a_functional("Association", ff, potential);
+
+  ff = Association2(R, eps, kappa, water_prop.epsilon_dispersion,
+                    water_prop.lambda_dispersion, water_prop.length_scaling);
+  check_a_functional("Association2", ff, potential);
+
+  ff = Dispersion(R, water_prop.epsilon_dispersion,
+                  water_prop.lambda_dispersion, water_prop.length_scaling);
+  check_a_functional("Dispersion", ff, potential);
+
+  ff = Dispersion2(R, water_prop.epsilon_dispersion,
+                   water_prop.lambda_dispersion, water_prop.length_scaling);
+  check_a_functional("Dispersion2", ff, potential);
+
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresWBnotensor", ff, potential);
 

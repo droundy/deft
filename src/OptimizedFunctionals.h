@@ -9,6 +9,10 @@ Functional SaftFluid(double radius, double epsilon, double kappa,
 Functional SaftFluid2(double radius, double epsilon, double kappa,
                       double epsdis, double lambda, double lscale, double mu);
 
+Functional Association2(double radius, double epsilon, double kappa,
+                        double epsdis, double lambda, double lscale);
+Functional Dispersion2(double radius, double epsdis, double lambda, double lscale);
+
 Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);
