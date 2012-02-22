@@ -18,6 +18,13 @@ main =
        generateHeader saft_fluid ["R", "epsilon_association", "kappa_association",
                                   "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                   "mu"] "SaftFluid2"
+     gen "src/Association2Fast.cpp" $
+       generateHeader (fmt saft_association)
+       ["R", "epsilon_association", "kappa_association",
+        "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "Association2"
+     gen "src/Dispersion2Fast.cpp" $
+       generateHeader (fmt saft_dispersion)
+       ["R", "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "Dispersion2"
      gen "papers/contact/formulas.tex" $ unlines $ map definelatex
        [("phione", phi1),
         ("phitwo", phi2),

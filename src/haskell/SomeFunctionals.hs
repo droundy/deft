@@ -1,6 +1,7 @@
 module SomeFunctionals 
        ( fmt, whitebear, wb_contact_at_sphere, idealgas, mu, n,
          phi1, phi2, phi3,
+         of_effective_potential,
          xshell, yshell, zshell,
          yuwu_zeta, yuwu_contact,
          saft_dispersion, saft_association, saft_fluid,
@@ -133,7 +134,8 @@ length_scaling :: Type a => Expression a
 length_scaling = s_var "length_scaling"
 
 eta_for_dispersion, eta_effective :: Expression RealSpace
-eta_for_dispersion = r_var "{\\eta_d}" -- ifft (exp (-k**2/2/(length_scaling*lambda_dispersion*rad)**2) * fft n)
+eta_for_dispersion = r_var "{\\eta_d}"
+-- eta_for_dispersion = ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
 
 -- The following equation is equation 36 in Gil-Villegas 1997 paper.
 eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion
@@ -143,11 +145,13 @@ eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_
 
 saft_dispersion, saft_association, xsaft, a1, a2 :: Expression RealSpace
 saft_dispersion = subst $ n*(a1 + a2/kT)
-  where subst = substitute eta_for_dispersion (ifft (exp (-k**2/2/(length_scaling*lambda_dispersion*rad)**2) * fft n))
+  -- where subst = id
+  where subst = substitute eta_for_dispersion ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
 
-a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion* eta_for_dispersion *(1 - eta_effective/2)/(1-eta_effective)**3
+a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
+  where ghs = (1 - eta_effective/2)/(1-eta_effective)**3
 
-a2 = 0.5*khs*eta_for_dispersion* derive (R "{\\eta_d}") 1 a1
+a2 = 0.5*khs*eta_for_dispersion*derive (R "{\\eta_d}") 1 a1
      where khs = (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
 saft_association = 4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2)
@@ -156,8 +160,12 @@ kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_var "kappa_association"
 epsilon_association = s_var "epsilon_association"
 
-xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*n0*yuwu_contact*kappa_association*boltz)
+xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*yuwu_contact*kappa_association*boltz)
   where boltz = exp(epsilon_association/kT)-1
 
 saft_fluid :: Expression RealSpace
 saft_fluid = idealgas + fmt whitebear + mu*n + fmt saft_association + fmt saft_dispersion + n*mu
+
+of_effective_potential :: Expression RealSpace -> Expression RealSpace
+of_effective_potential = substitute (r_var "veff") (r_var "x") .
+                         substitute (r_var "x") (exp (- r_var "veff" / kT))
