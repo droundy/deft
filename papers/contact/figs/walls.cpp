@@ -147,7 +147,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.1f-%04.2f.dat", name, width, eta);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid contact_density(gd, ContactDensitySimplest(1.0)(1, gd, density));
+  Grid contact_density_S(gd, ContactDensity_S(1.0)(1, gd, density));
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
   if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
@@ -156,7 +156,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
   // plot_grids_yz_directions(plotname, density, energy_density, contact_density);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, contact_density, wu_contact_density, contact_density_sphere,
+  z_plot(plotname, density, energy_density, contact_density_S, wu_contact_density, contact_density_sphere,
          n0, gross_density);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/walls.eps", 
