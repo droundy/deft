@@ -168,10 +168,20 @@ int main(int argc, char *argv[]) {
                                                   water_prop.epsilon_dispersion,
                                                   water_prop.lambda_dispersion,
                                                   water_prop.length_scaling));
-  double distance = 0.0*nm;
   //dmax, dstep already in bohrs (so it doesn't need to be converted from nm)
-  //for (distance=0.0*nm; distance<=dmax; distance += dstep) {
-  while (distance <= dmax) {
+  double dstep = 0.25*nm;
+  for (distance=0.0*nm; distance<=dmax; distance += dstep) {
+
+    if ((distance >= ptransition - 0.5*nm) && (distance <= ptransition + 0.05*nm)) {
+      if (distance >= ptransition - 0.25*nm) {
+        dstep = 0.03*nm;
+      } else {
+        dstep = 0.08*nm;
+      }
+    } else {
+      dstep = 0.25*nm;
+    }
+
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
     
@@ -249,16 +259,6 @@ int main(int argc, char *argv[]) {
     //plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
     //Grid energy_density(gd, f(water_prop.kT, gd, potential));    
     delete[] plotnameslice;
-
-    if ((distance >= ptransition - 0.5*nm) && (distance <= ptransition + 0.05*nm)) {
-      if (distance >= ptransition - 0.25*nm) {
-        distance += 0.03*nm;
-      } else {
-        distance += 0.08*nm;
-      }
-    } else {
-      distance += 0.25*nm;
-    }
   }
   fclose(o);
 }
