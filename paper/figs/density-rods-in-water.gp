@@ -56,7 +56,7 @@ gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass densit
 nm=18.8972613 # 1 nm in atomic units
 
 splot [-2.51:2.5] [-1.48:1.48] [:] \
-'figs/rods-slice-01.0-00.4.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+'figs/rods-slice-01.0-00.6.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
 
 set size 0.95,0.53          # The top plot
 set origin 0,0.48
@@ -71,4 +71,4 @@ unset colorbox
 set title  'Before transition' 
 
 splot [-2.51:2.5] [-1.48:1.48] [:] \
-'figs/rods-slice-01.0-00.3.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+'figs/rods-slice-01.0-00.5.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d

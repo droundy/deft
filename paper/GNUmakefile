@@ -27,7 +27,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf
+all :  paper.pdf march-2012.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -41,6 +41,7 @@ ALL_FIGURES=\
 	figs/surface-tension.gp\
 	figs/surface-298.gp\
 	figs/pressure-with-isotherms.gp\
+	figs/pressure-with-isotherms-truncated.gp\
 	figs/sphere-energy-vs-diameter.gp\
 	figs/sphere-density.gp\
 	figs/density-sphere.gp\
@@ -53,7 +54,9 @@ ALL_FIGURES=\
 	figs/density-four-rods.gp\
 	figs/energy-rods.gp\
 	figs/osu-logo.svg\
+	figs/stadium-vs-circles.svg\
 	figs/two-rods-diagram.svg\
+	figs/four-rods-diagram.svg\
 	figs/rods-diagram.svg\
 
 
@@ -67,6 +70,9 @@ FIGURES=$(patsubst %.eps,%.pdf, \
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
+march-2012.pdf: march-2012.tex $(FIGURES)
+	pdflatex $< && pdflatex $<
+
 figs/correlation.eps: figs/correlation.gp figs/gOO.exp figs/gOH.exp figs/gHH.exp
 
 figs/equation-of-state.eps: figs/equation-of-state.dat \
@@ -77,10 +83,12 @@ figs/temperature-versus-density.eps: figs/equation-of-state.dat \
 	figs/experimental-equation-of-state.dat
 figs/pressure-with-isotherms.eps: figs/pressure-with-isotherms.dat \
 	figs/equation-of-state.dat
+figs/pressure-with-isotherms-truncated.eps: figs/pressure-with-isotherms.dat \
+	figs/equation-of-state.dat
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
-figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.3.dat figs/rods-slice-01.0-00.4.dat
+figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.5.dat figs/rods-slice-01.0-00.6.dat
 figs/density-four-rods.eps: figs/four-rods-01.0-01.1.dat \
 	figs/four-rods-01.0-01.2.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
