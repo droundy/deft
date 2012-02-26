@@ -45,43 +45,43 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "2*(x/2 + y) == x + 2*y" (x + 2*y) (2*(x/2+y)),
                     t "factorandsum yx+yx^2" (y*x*(1+x*y)) (factorandsum [y*x,y**2 * x**2]),
                     t "factorandsum yx+2yx^2" (y*x*(1+2*x*y)) (factorandsum [y*x,2 * y**2 * x**2]),
-                    t "derive x y(x+yx^2)" (y*(1+2*x*y)) (derive (R "x") 1 (y*(x+y*x**2))),
-                    t "derive x (x+y) == 1" 1 (derive (R "x") 1 (x+y)),
-                    t "derive x (x+y) == 1" 1 (derive (R "x") 1 (x+y)),
-                    t "derive x (x**2) == 2x" (2*x) (derive (R "x") 1 (x**2)),
+                    t "derive x y(x+yx^2)" (y*(1+2*x*y)) (derive x 1 (y*(x+y*x**2))),
+                    t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
+                    t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
+                    t "derive x (x**2) == 2x" (2*x) (derive x 1 (x**2)),
                     t "derive x (k cos kx)" 
                        (kk * cos(kk*x))
-                       (derive (R "x") 1 (sin (kk*x))),
+                       (derive x 1 (sin (kk*x))),
                     t "derive x dV (sin kx)" 
                        (s_var "dV" * kk * cos(kk*x))
-                       (derive (R "x") (s_var "dV") (sin (kk*x))),
+                       (derive x (s_var "dV") (sin (kk*x))),
                     t "derive x (sin x cos x) == 4x**3" 
                        ((cos x)**2 - (sin x)**2) 
-                       (derive (R "x") 1 (sin x * cos x)),
+                       (derive x 1 (sin x * cos x)),
                     t "derive x sin kx"
                        ((kk*cos (kk*x)))
-                       (derive (R "x") 1 (sin (kk*x))),
+                       (derive x 1 (sin (kk*x))),
                     t "derive x (A*sin kx)"
                        ((s_var "A"*kk*cos (kk*x)))
-                       (derive (R "x") 1 (s_var "A"*sin (kk*x))),
+                       (derive x 1 (s_var "A"*sin (kk*x))),
                     t "derive x (sin kx cos kx)"
                        (kk*((cos (kk*x))**2 - (sin (kk*x))**2)) 
-                       (derive (R "x") 1 (sin (kk*x) * cos (kk*x))),
+                       (derive x 1 (sin (kk*x) * cos (kk*x))),
                     t "derive x (kx cos kx)" 
                        (kk*cos(kk*x) - kk**2*x*sin(kk*x)) 
-                       (derive (R "x") 1 (kk*x*cos(kk*x))),
+                       (derive x 1 (kk*x*cos(kk*x))),
                     t "derive x (sin kx) == k cos kx" 
                        (kk*cos(kk*x)) 
-                       (derive (R "x") 1 (sin(kk*x))),
+                       (derive x 1 (sin(kk*x))),
                     t "derive x (sin kx - kx cos kx)"
                        (kk**2*x*sin(kk*x)) 
-                       (derive (R "x") 1 (sin (kk*x) - kk*x*cos(kk*x))),
+                       (derive x 1 (sin (kk*x) - kk*x*cos(kk*x))),
                     t "derive x (sin kx) - derive x (kx cos kx)" 
                        (kk**2*x*sin(kk*x)) 
-                       (derive (R "x") 1 (sin (kk*x)) - derive (R "x") 1 (kk*x*cos(kk*x))),
+                       (derive x 1 (sin (kk*x)) - derive x 1 (kk*x*cos(kk*x))),
                     t "derive x (log x + x**2)"
                        (1/x + 2*x -3*x**2 - 1/x**2)
-                       (derive (R "x") 1 (log x + x**2 - x**3 + 1/x)),
+                       (derive x 1 (log x + x**2 - x**3 + 1/x)),
                     t "makeHomogeneous (sin kr)" 0 (makeHomogeneous (sin kr)),
                     t "makeHomogeneous (cos kr)" 1 (makeHomogeneous (cos kr)),
                     t "makeHomogeneous (sin kr/k) == r" (s_var "r") (makeHomogeneous (sin kr/k)),
@@ -93,12 +93,12 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                        (makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k)),
                     t "derive aaa (1 - sin aaa/aaa)" 
                        (- (cos aaa - sin aaa/aaa)/aaa)
-                       (derive (R "aaa") 1 (1 - sin aaa/aaa)),
+                       (derive (r_var "aaa") 1 (1 - sin aaa/aaa)),
                     t "derive aaa (cos aaa - sin aaa/aaa)" 
                        (- sin aaa - (cos aaa - sin aaa/aaa)/aaa)
-                       (derive (R "aaa") 1 (cos aaa - sin aaa/aaa)),
+                       (derive (r_var "aaa") 1 (cos aaa - sin aaa/aaa)),
                     t "setZero aaa ((1 - sin aaa/aaa)/aaa) == 0" 0
-                       (setZero (R "aaa") ((1 - sin aaa/aaa)/aaa)),
+                       (setZero (r_var "aaa") ((1 - sin aaa/aaa)/aaa)),
                     t "makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2) == 0" 0
                        (makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2)),
                     t "makeHomogeneous n2" (4*pi*(s_var "r")**2*s_var "x") (makeHomogeneous n2),
@@ -150,10 +150,10 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
         kk = s_var "k" :: Expression RealSpace
         kr = k*r
         r = s_var "r" :: Expression KSpace
-        n2 = ifft ( smear * (4*pi) * r * (sin kr / k) * fft (r_var "x"))
-        n2x = ifft ( smear * (4*pi) * i * kx*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
-        n2y = ifft ( smear * (4*pi) * i * ky*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
-        n2z = ifft ( smear * (4*pi) * i * kz*(r * cos kr - sin kr/k)/k**2 * fft (r_var "x"))
+        n2 = ifft ( smear * (4*pi) * r * (sin kr / k) * fft x)
+        n2x = ifft ( smear * (4*pi) * i * kx*(r * cos kr - sin kr/k)/k**2 * fft x)
+        n2y = ifft ( smear * (4*pi) * i * ky*(r * cos kr - sin kr/k)/k**2 * fft x)
+        n2z = ifft ( smear * (4*pi) * i * kz*(r * cos kr - sin kr/k)/k**2 * fft x)
         vectorThirdTerm = n2*(n2**2 - 3*(n2x**2 + n2y**2 + n2z**2))
         smear = exp (-6.0*kdr*kdr)
         kdr = k*s_var "dr"
@@ -170,8 +170,8 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         spreading = 6.0
         kdr = k * s_var "dr"
         kR = k * s_var "R"
-        nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
-        n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * s_var "R" * (sin kR / k) * fft (r_var "x"))
+        nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
+        n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * s_var "R" * (sin kR / k) * fft x)
 
 substitutionTests :: Test
 substitutionTests = TestList [t x y (y**2) (x**2),
@@ -198,44 +198,46 @@ substitutionTests = TestList [t x y (y**2) (x**2),
 
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
-          writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") [] "NiceSum"
-          writeFile "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") [] "NiceQuad"
-          writeFile "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) [] "NiceSqrt"
-          writeFile "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") [] "NiceSqrtandMore"
-          writeFile "tests/generated-haskell/nice-log.h" $ generateHeader (log (r_var "x")) [] "NiceLog"
-          writeFile "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log (r_var "x") + (r_var "x")**2) [] "NiceLogandSqr"
-          writeFile "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log (r_var "x") + (r_var "x")**2 - (r_var "x")**3 + (r_var "x")**(-1)) [] "NiceLogandSqrandInverse"
-          writeFile "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) [] "NiceLogOneMinusX"
+          let x = r_var "x"
+              wf fn s = do putStrLn $ "Creating file " ++ fn
+                           writeFile fn s
+          wf "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") [] "NiceSum"
+          wf "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") [] "NiceQuad"
+          wf "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) [] "NiceSqrt"
+          wf "tests/generated-haskell/nice-sqrtandmore.h" $ generateHeader ((r_var "x"**0.5) - r_var "x" + 2*s_var "kT") [] "NiceSqrtandMore"
+          wf "tests/generated-haskell/nice-log.h" $ generateHeader (log x) [] "NiceLog"
+          wf "tests/generated-haskell/nice-logandsqr.h" $ generateHeader (log x + x**2) [] "NiceLogandSqr"
+          wf "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log x + x**2 - x**3 + x**(-1)) [] "NiceLogandSqrandInverse"
+          wf "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) [] "NiceLogOneMinusX"
           let spreading = 6.0
               kdr = k * s_var "dr"
               kR = k * rad
               rad :: Type a => Expression a
               rad = s_var "R"
-              nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft (r_var "x"))
+              nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
               n3 = nbar
-              n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft (r_var "x"))
-          writeFile "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar ["R"] "NiceNbar"
-          writeFile "tests/generated-haskell/nice-n2.h" $ generateHeader n2 ["R"] "NiceN2"
-          writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ 
+              n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * rad * (sin kR/k) * fft x)
+          wf "tests/generated-haskell/nice-nbar.h" $ generateHeader nbar ["R"] "NiceNbar"
+          wf "tests/generated-haskell/nice-n2.h" $ generateHeader n2 ["R"] "NiceN2"
+          wf "tests/generated-haskell/nice-logoneminusnbar.h" $
             generateHeader (log (1-nbar)) ["R"] "NiceLogOneMinusNbar"
-          writeFile "tests/generated-haskell/nice-phi1.h" $ 
+          wf "tests/generated-haskell/nice-phi1.h" $
             generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) ["R"] "NicePhi1"
           let smear = exp (-spreading*kdr*kdr)
               i = s_var "complex(0,1)"
-              x = r_var "x"
               n2x = ifft ( smear * (4*pi) * i * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
               n2y = ifft ( smear * (4*pi) * i * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
               n2z = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
               phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-n3)/(4*pi*rad)
-          writeFile "tests/generated-haskell/nice-phi2.h" $ 
+          wf "tests/generated-haskell/nice-phi2.h" $
             generateHeader phi2here ["R"] "NicePhi2"
-          writeFile "tests/generated-haskell/nice-phi3.h" $ 
+          wf "tests/generated-haskell/nice-phi3.h" $
             generateHeader ((n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))) 
             ["R"] "NicePhi3"
-          writeFile "tests/generated-haskell/nice-n2xsqr.h" $
+          wf "tests/generated-haskell/nice-n2xsqr.h" $
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
-          writeFile "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x), 
-                                                                    ("grad n2xsqr", derive (R "x") 1 (n2x**2))]
+          wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
+                                                                    ("grad n2xsqr", derive x 1 (n2x**2))]
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
           if failures c > 0 || errors c > 0
             then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
