@@ -31,37 +31,25 @@ smear = exp (-6.0*kdr*kdr)
 n, n3, n2, n1, n0, n2x, n2y, n2z, n1x, n1y, n1z,
  n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = r_var "x"
-n3 = r_var "n3" -- === step n
-n2 = r_var "n2" -- === shell n
-n1 = r_var "n1" -- === n2 / (4*pi*rad)
-n0 = r_var "n0" -- === n2 / (4*pi*rad**2)
-n2x = r_var "n2x" -- === xshell n
-n2y = r_var "n2y" -- === yshell n
-n2z = r_var "n2z" -- === zshell n
-n1x = r_var "n1x" -- === xshell n / (4*pi*rad)
-n1y = r_var "n1y" -- === yshell n / (4*pi*rad)
-n1z = r_var "n1z" -- === zshell n / (4*pi*rad)
-n1v_dot_n2v = r_var n1vdotname
-              -- (n2x**2 + n2y**2 + n2z**2)/(4*pi*rad)
-sqr_n2v = r_var n2vsqrname -- n2x**2 + n2y**2 + n2z**2
+n3 = "n3" === step n
+n2 = shell n
+n1 = {- "n1" === -} n2 / (4*pi*rad)
+n0 = "n0" === n2 / (4*pi*rad**2)
+n2x = {- "n2x" === -} xshell n
+n2y = {- "n2y" === -} yshell n
+n2z = {- "n2z" === -} zshell n
+n1x = {- "n1x" === -} xshell n / (4*pi*rad)
+n1y = {- "n1y" === -} yshell n / (4*pi*rad)
+n1z = {- "n1z" === -} zshell n / (4*pi*rad)
+n1v_dot_n2v = {- var "n1vdn2v" n1vdotname -} (n1x*n2x + n1y*n2y + n1z*n2z)
+sqr_n2v = {- var "n2vsqr" n2vsqrname -} (n2x**2 + n2y**2 + n2z**2)
 
-n1vdotname, n2vsqrname :: String
-n1vdotname = "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}"
-n2vsqrname = "{\\left|\\vec{n}_{2v}\\right|}"
+--n1vdotname, n2vsqrname :: String
+--n1vdotname = "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}"
+--n2vsqrname = "{\\left|\\vec{n}_{2v}\\right|}"
 
 fmt :: Expression RealSpace -> Expression RealSpace
-fmt = substitute n3 (step n) .
-      substitute n2 (shell n) .
-      substitute n1 (shell n/(4*pi*rad)) .
-      substitute n0 (shell n/(4*pi*rad**2)) .
-      substitute n2x (xshell n) .
-      substitute n2y (yshell n) .
-      substitute n2z (zshell n) .
-      substitute n1x (xshell n/(4*pi*rad)) .
-      substitute n1y (yshell n/(4*pi*rad)) .
-      substitute n1z (zshell n/(4*pi*rad)) .
-      substitute n1v_dot_n2v (n1x*n2x + n1y*n2y + n1z*n2z) .
-      substitute sqr_n2v (n2x**2 + n2y**2 + n2z**2)
+fmt = id
 
 shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
@@ -136,8 +124,8 @@ length_scaling :: Type a => Expression a
 length_scaling = s_var "length_scaling"
 
 eta_for_dispersion, eta_effective :: Expression RealSpace
-eta_for_dispersion = r_var "{\\eta_d}" -- var "eta_d" "{\\eta_d}" $
-                     -- ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
+eta_for_dispersion = var "eta_d" "{\\eta_d}" $
+                     ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
 
 -- The following equation is equation 36 in Gil-Villegas 1997 paper.
 eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion

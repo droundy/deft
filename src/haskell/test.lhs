@@ -3,6 +3,7 @@ import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
 import SomeFunctionals
+import System.Environment ( getArgs )
 
 latexTests :: Test
 latexTests = TestList [t "x" x,
@@ -47,6 +48,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "factorandsum yx+2yx^2" (y*x*(1+2*x*y)) (factorandsum [y*x,2 * y**2 * x**2]),
                     t "derive x y(x+yx^2)" (y*(1+2*x*y)) (derive x 1 (y*(x+y*x**2))),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
+                    t "derive x (x+y) == 1" 1 (derive ("xx" === x**2) 1 (("xx" === x**2)+y)),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
                     t "derive x (x**2) == 2x" (2*x) (derive x 1 (x**2)),
                     t "derive x (k cos kx)" 
@@ -161,8 +163,9 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
 
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,
-                     t "countFFT nbar" 2 nbar,
+                     t "countFFT nbar" 2 n3,
                      t "countFFT nbar + n2" 2 (nbar + n2),
+                     t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
   where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 $ joinFFTs e)
@@ -172,10 +175,13 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         kR = k * s_var "R"
         nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
         n2 = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * s_var "R" * (sin kR / k) * fft x)
+        n3 = "n3" === nbar
+        n2a = "n2" === n2
 
 substitutionTests :: Test
 substitutionTests = TestList [t x y (y**2) (x**2),
                               t x y (cos y**2) (cos x**2),
+                              t xx xy (xy**2) (xx**2),
                               t (fft x) (k_var "temp_FFT") nbar_temp nbar,
                               t (k**2) (kk**2) nbarkk nbar,
                               t (r_var "n2x") (xshell x) (xshell x**2) (r_var "n2x" ** 2),
@@ -185,6 +191,8 @@ substitutionTests = TestList [t x y (y**2) (x**2),
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
                                                  (eresult) (substitute a b e)
         x = r_var "x"
+        xx = "xx" === x**2
+        xy = "xy" === x*y
         y = r_var "y" :: Expression RealSpace
         kk = k_var "k"
         spreading = 6.0
@@ -198,9 +206,12 @@ substitutionTests = TestList [t x y (y**2) (x**2),
 
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
+          args <- getArgs
           let x = r_var "x"
-              wf fn s = do putStrLn $ "Creating file " ++ fn
-                           writeFile fn s
+              wf fn s = if "codegen" `elem` args
+                        then do putStrLn $ "Creating file " ++ fn
+                                writeFile fn s
+                        else return ()
           wf "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") [] "NiceSum"
           wf "tests/generated-haskell/nice-quad.h" $ generateHeader ((r_var "x" + s_var"kT")**2 - r_var "x" + 2*s_var "kT") [] "NiceQuad"
           wf "tests/generated-haskell/nice-sqrt.h" $ generateHeader (r_var "x"**0.5) [] "NiceSqrt"
