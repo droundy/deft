@@ -15,7 +15,7 @@ main =
      gen "src/YuWuContactFast.cpp" $
        generateHeader (fmt yuwu_contact) ["R"] "YuWuContact"
      gen "src/SaftFluid2Fast.cpp" $
-       generateHeader saft_fluid ["R", "epsilon_association", "kappa_association",
+       generateHeader (fmt saft_fluid) ["R", "epsilon_association", "kappa_association",
                                   "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                   "mu"] "SaftFluid2"
      gen "src/Association2Fast.cpp" $
