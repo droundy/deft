@@ -30,13 +30,14 @@ pylab.plot(dftdata[:,0]-2,dftdata[:,6]*4*numpy.pi/3,"c--",markevery=me,label="$n
 pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,4]*4*numpy.pi/3,"r-",label="ConDensity")
 pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,5]*4*numpy.pi/3,"g-",label="CenConDensity")
 
-pylab.plot(dftdata[:,0]-2,dftdata[:,3]*4*numpy.pi/3,"g+--",markevery=me,label="$n^{S}_{contact}$", markeredgewidth=1)
-pylab.plot(dftdata[:,0]-2,dftdata[:,4]*4*numpy.pi/3,"gx--",markevery=me,label="Yu and Wu", markeredgewidth=1)
-pylab.plot(dftdata[:,0]-2,dftdata[:,5]*4*numpy.pi/3,"ro--",markevery=me,label="DFT at sphere",
+pylab.plot(dftdata[:,0],dftdata[:,3]*4*numpy.pi/3,"g+--",label="$n^{S}_{contact}$")
+pylab.plot(dftdata[:,0],dftdata[:,4]*4*numpy.pi/3,"gx--",label="Yu and Wu")
+pylab.plot(dftdata[:,0],dftdata[:,5]*4*numpy.pi/3,"ro--",label="DFT at sphere")
+pylab.plot(wbm2data[:,0],wbm2data[:,3]*4*numpy.pi/3,"go--",markevery=me,label="$n^{S}_{contact}$ (mark II)",
+           markerfacecolor='none',markeredgecolor='green', markeredgewidth=1)
+pylab.plot(wbm2data[:,0],wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
-pylab.plot(wbm2data[:,0]-2,wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
-           markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
-pylab.plot(dftdata[:,0]-2,dftdata[:,7]*4*numpy.pi/3,"rx--",markevery=me,label="Gross",
+pylab.plot(dftdata[:,0],dftdata[:,7]*4*numpy.pi/3,"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 
 pylab.xlabel("z")

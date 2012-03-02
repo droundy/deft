@@ -1,2 +1,2 @@
-a812e734a2262a6a94cc394565f196d52e3eb239
-./monte-carlo 112 100000000 0.001 papers/contact/figs/mc-06-112.dat outerSphere 06
+247160fabbb14c3c1302660bd9a349145a2178a9
+./monte-carlo 112 100000000 0.0007 papers/contact/figs/mc-06-112.dat outerSphere 06
