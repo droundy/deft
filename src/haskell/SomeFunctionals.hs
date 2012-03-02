@@ -34,7 +34,7 @@ n = r_var "x"
 n3 = "n3" === step n
 n2 = {- "n2" === -} shell n
 n1 = {- "n1" === -} n2 / (4*pi*rad)
-n0 = "n0" === n2 / (4*pi*rad**2)
+n0 = {- "n0" === -} n2 / (4*pi*rad**2)
 n2x = {- "n2x" === -} xshell n
 n2y = {- "n2y" === -} yshell n
 n2z = {- "n2z" === -} zshell n
