@@ -196,6 +196,40 @@ substitutionTests = TestList [t x y (y**2) (x**2),
         nbarkk = ifft ( exp (-spreading*kk**2*dr**2) * (4*pi) * (sin(kk*s_var "R") - kk*s_var "R" * cos(kk*s_var "R")) / kk**3 * fft x)
         nbary = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft y)
 
+hasexpressionTests :: Test
+hasexpressionTests = TestList [t x1 (x1 + x2) True,
+                               t x4 (x1 + x2) False,
+                               t (x1 + x2) x True,
+                               t (x1 + x3) (x1 + x2 + x3) True,
+                               t (x3 + x1) (x1 + x2 + x3) True,
+                               t (x1 + x3) x False,
+                               t (x4 + x5) x True,
+                               t x2 x True]
+  where t a b e = TestCase $ assertEqual (latex a ++ " in " ++ latex b)
+                                         e (hasexpression a b)
+        x1 = r_var "x1"
+        x2 = r_var "x2"
+        x3 = r_var "x3"
+        x4 = r_var "x4"
+        x5 = r_var "x5"
+        x = x1 + x2 + x3 * (x4 + x5)
+
+multisubstituteTests :: Test
+multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
+                                 t (x1+x2) x4 (x4+x3) (x1+x2+x3),
+                                 t (x4+x5) x3 (x1+x2+x3*x3) x,
+                                 t (x1+x2) z (z*x3+(z+x4)*x3+x5*(x2+x3)) y ]
+  where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
+                                                 (eresult) (substitute a b e)
+        x1 = r_var "x1"
+        x2 = r_var "x2"
+        x3 = r_var "x3"
+        x4 = r_var "x4"
+        x5 = r_var "x5"
+        z = r_var "z"
+        x = x1 + x2 + x3 * (x4 + x5)
+        y = (x1 + x2) * x3 + x3 * (x1 + x2 + x4) + x5 * (x2 + x3)
+
 main :: IO ()
 main = do createDirectoryIfMissing True "tests/generated-haskell"
           writeFile "tests/generated-haskell/nice-sum.h" $ generateHeader (r_var "x" + s_var "kT") [] "NiceSum"
@@ -219,6 +253,8 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
           writeFile "tests/generated-haskell/nice-logoneminusnbar.h" $ 
             generateHeader (log (1-nbar)) ["R"] "NiceLogOneMinusNbar"
           writeFile "tests/generated-haskell/nice-phi1.h" $ 
+            generateHeader (-n2*log(1-n3)) ["R"] "NicePhi1"
+          writeFile "tests/generated-haskell/nice-phi1.h" $ 
             generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) ["R"] "NicePhi1"
           let smear = exp (-spreading*kdr*kdr)
               i = s_var "complex(0,1)"
@@ -236,7 +272,8 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           writeFile "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x), 
                                                                     ("grad n2xsqr", derive (R "x") 1 (n2x**2))]
-          c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests]
+
+          c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, substitutionTests, hasexpressionTests, multisubstituteTests]
           if failures c > 0 || errors c > 0
             then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
             else do putStrLn "All tests passed!"
