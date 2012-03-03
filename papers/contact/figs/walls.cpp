@@ -149,7 +149,10 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid energy_density(gd, f(1, gd, potential));
   Grid contact_density_S(gd, ContactDensity_S(1.0)(1, gd, density));
   Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
-  if (strlen(name) == 4) contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
+  if (strlen(name) == 4) { 
+    contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
+    contact_density_S = ContactDensity_S_WBm2(1.0)(1, gd, density);
+  }
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid wu_contact_density(gd, YuWuContact(1.0)(1, gd, density));

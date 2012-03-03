@@ -9,8 +9,8 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/monte-carlo.cpp"));
 
 system "make monte-carlo";
 
-my $iters  = 10000000;
-my $acc = 0.001;
+my $iters  = 100000000;
+my $acc = 0.0007;
 
 my $dd;
 foreach $dd ([8,265], [6,112], [4,13]) {
@@ -62,7 +62,7 @@ date
     }
 }
 
-foreach $dd ([15,300], [10,112], [6,13]) {
+foreach $dd ([15,400], [10,224], [6,17]) {
     my $len = sprintf("%02.0f", $$dd[0]);
     my $N = sprintf("%03.0f", $$dd[1]);
 

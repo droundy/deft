@@ -34,8 +34,10 @@ pylab.plot(dftdata[:,0]-rmin,dftdata[:,6]*4*numpy.pi/3,"c--",markevery=me,label=
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,3]*4*numpy.pi/3,"g+--",markevery=me,label="$n^{S}_{contact}$")
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,4]*4*numpy.pi/3,"gx--",markevery=me,label="Yu and Wu")
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,5]*4*numpy.pi/3,"ro--",markevery=me,label="DFT at sphere")
-#pylab.plot(wbm2data[:,0]-rmin,wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
-#           markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
+pylab.plot(wbm2data[:,0],wbm2data[:,3]*4*numpy.pi/3,"go--",markevery=me,label="$n^{S}_{contact}$ (mark II)",
+           markerfacecolor='none',markeredgecolor='green', markeredgewidth=1)
+pylab.plot(wbm2data[:,0],wbm2data[:,5]*4*numpy.pi/3,"r+--",markevery=me,label="DFT at sphere (mark II)",
+           markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 pylab.plot(dftdata[:,0]-rmin,dftdata[:,7]*4*numpy.pi/3,"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 
