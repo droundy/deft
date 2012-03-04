@@ -130,7 +130,7 @@ mapExpression f (Expression x) = f x
 cleanvars :: Type a => Expression a -> Expression a
 cleanvars (Var _ _ _ (Just e)) = cleanvars e
 cleanvars (Var c v t Nothing) = Var c v t Nothing
-cleanvars (Scalar e) = Scalar e
+cleanvars (Scalar e) = Scalar (cleanvars e)
 cleanvars (Cos e) = cos (cleanvars e)
 cleanvars (Sin e) = sin (cleanvars e)
 cleanvars (Exp e) = exp (cleanvars e)
@@ -436,9 +436,9 @@ codeE p (Sum s) = showParen (p > 6) (showString me)
         addup "" (1,e) = codeE 6 e ""
         addup "" (f,e) = if e == 1
                          then show f
-                         else show f ++ "*" ++ codeE 6 e ""
+                         else show f ++ "*" ++ codeE 7 e ""
         addup rest (1,e) = codeE 6 e (showString " + " $ rest)
-        addup rest (f,e) = show f ++ "*" ++ codeE 6 e (showString " + " $ rest)
+        addup rest (f,e) = show f ++ "*" ++ codeE 7 e (showString " + " $ rest)
 
 latexE :: (Type a, Code a) => Int -> Expression a -> ShowS
 latexE p (Var _ "" "" (Just e)) = latexE p e
@@ -487,9 +487,9 @@ latexE p (Sum s) = latexParen (p > 6) (showString me)
                          then latexDouble f
                          else latexDouble f ++ " " ++ latexE 6 e ""
         addup ('-':rest) (1,e) = latexE 6 e (" - " ++ rest)
-        addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 6 e (showString " - " $ rest)
+        addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " - " $ rest)
         addup rest (1,e) = latexE 6 e (" + " ++ rest)
-        addup rest (f,e) = latexDouble f ++ " " ++ latexE 6 e (showString " + " $ rest)
+        addup rest (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " + " $ rest)
 
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x
@@ -852,7 +852,7 @@ simp2 = simp2helper (0 :: Int) [] -- . cleanvars
                                             e'  = substitute ke (k_var v) e
                                   DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
                                       where v = case re of Var _ x@('k':_) _ _ -> x
-                                                           Var _ x _ _ -> "k_" ++ x
+                                                           Var _ x _ _ -> "r_" ++ x
                                                            _ -> "r" ++ show n
                                             inire = InitializeR $ r_var v
                                             setre = AssignR v re
@@ -1122,7 +1122,7 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
       codeDTransform = freeVectors [InitializeS (makeHomogeneous e), AssignS "output" (makeHomogeneous e)]
       codeDerive = freeVectors [InitializeS (makeHomogeneous (derive (r_var "x") 1 e)), AssignS "output" (makeHomogeneous (derive (r_var "x") 1 e))]
       codeGrad = freeVectors (st ++ [AssignR "(*outgrad)" (r_var "(*outgrad)" + e')])
-          where (st, e') = simp2 (joinFFTs $ derive (r_var "x") (r_var "ingrad") e )
+          where (st, e') = simp2 (joinFFTs $ derive (r_var "x") (r_var "ingrad") $ cleanvars e )
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit [] = ""

@@ -21,6 +21,8 @@ codeTests :: Test
 codeTests = TestList [t "x[i]" x,
                       t "0" (0 :: Expression RealSpace),
                       t "sqrt(x[i])" (sqrt x),
+                      t "x[i] + -3.0*(x[i]*x[i]*x[i] + x[i]*x[i])" foo,
+                      t "-3.0*x[i]*x[i]*x[i] + -3.0*x[i]*x[i] + x[i]" (cleanvars foo),
                       t "x[i]*x[i]" (x**2),
                       t "1/(x[i]*x[i])" (1/x**2),
                       t "y*y/(x[i]*x[i])" (y**2/x**2),
@@ -28,6 +30,7 @@ codeTests = TestList [t "x[i]" x,
   where t str e = TestCase $ assertEqual str str (code e)
         x = r_var "x"
         y = s_var "y" :: Expression RealSpace
+        foo = x - 3* var "foo" "foo" (x**2 + x**3)
 
 eqTests :: Test
 eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
@@ -180,9 +183,9 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT n0 log n3" 3 (n0*log n3),
                      t "countFFT derive n0raw log n3" 6 (gradme $ kT*n0raw*log n3),
                      t "countFFT derive n0 log n3" 6 (gradme $ kT*n0*log n3),
-                     t "countFFT derive assocalike n0raw" 10 -- FIX THIS!
+                     t "countFFT derive assocalike n0raw" 8
                            (gradme $ assocalike n0raw),
-                     t "countFFT derive assocalike n0" 9
+                     t "countFFT derive assocalike n0" 8
                            (gradme $ assocalike n0),
                      t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
@@ -198,7 +201,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
-        gradme = derive (r_var "x") (r_var "ingrad")
+        gradme = derive (r_var "x") (r_var "ingrad") . cleanvars
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
 
@@ -219,9 +222,9 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem n0 log n3" 5 (n0*log n3),
                      t "peakMem derive n0raw log n3" 11 (gradme $ kT*n0raw*log n3),
                      t "peakMem derive n0 log n3" 11 (gradme $ kT*n0*log n3),
-                     t "peakMem derive assocalike n0raw" 18 -- FIX THIS!
+                     t "peakMem derive assocalike n0raw" 15
                            (gradme $ assocalike n0raw),
-                     t "peakMem derive assocalike n0" 17
+                     t "peakMem derive assocalike n0" 15
                            (gradme $ assocalike n0),
                      t "peakMem n3 + n2a" 3 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 5 (nbar*n2 + nbar),
@@ -237,7 +240,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
-        gradme = derive (r_var "x") (r_var "ingrad")
+        gradme = derive (r_var "x") (r_var "ingrad") . cleanvars
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
 

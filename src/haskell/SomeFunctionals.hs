@@ -1,5 +1,5 @@
 module SomeFunctionals 
-       ( fmt, whitebear, wb_contact_at_sphere, idealgas, mu, n,
+       ( whitebear, wb_contact_at_sphere, idealgas, mu, n,
          phi1, phi2, phi3,
          of_effective_potential,
          xshell, yshell, zshell,
@@ -28,28 +28,17 @@ i = s_var "complex(0,1)"
 smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
-n, n3, n2, n1, n0, n2x, n2y, n2z, n1x, n1y, n1z,
- n1v_dot_n2v, sqr_n2v :: Expression RealSpace
+n, n3, n2, n1, n0, n2x, n2y, n2z, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = r_var "x"
 n3 = "n3" === step n
-n2 = {- "n2" === -} shell n
-n1 = {- "n1" === -} n2 / (4*pi*rad)
-n0 = {- "n0" === -} n2 / (4*pi*rad**2)
-n2x = {- "n2x" === -} xshell n
-n2y = {- "n2y" === -} yshell n
-n2z = {- "n2z" === -} zshell n
-n1x = {- "n1x" === -} n2x / (4*pi*rad)
-n1y = {- "n1y" === -} n2y / (4*pi*rad)
-n1z = {- "n1z" === -} n2z / (4*pi*rad)
-n1v_dot_n2v = {- var "n1vdn2v" n1vdotname -} (n1x*n2x + n1y*n2y + n1z*n2z)
-sqr_n2v = {- var "n2vsqr" n2vsqrname -} (n2x**2 + n2y**2 + n2z**2)
-
---n1vdotname, n2vsqrname :: String
---n1vdotname = "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}"
---n2vsqrname = "{\\left|\\vec{n}_{2v}\\right|}"
-
-fmt :: Expression RealSpace -> Expression RealSpace
-fmt = id
+n2 = "n2" === shell n
+n1 = "n1" === n2 / (4*pi*rad)
+n0 = "n0" === n2 / (4*pi*rad**2)
+n2x = "n2x" === xshell n
+n2y = "n2y" === yshell n
+n2z = "n2z" === zshell n
+sqr_n2v = var "n2vsqr" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x**2 + n2y**2 + n2z**2)
+n1v_dot_n2v = {- var "n1vdn2v" "{\\left|\\vec{n}_{2v}\\right|}" -} (sqr_n2v/(4*pi*rad))
 
 shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
@@ -134,9 +123,7 @@ eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_
         c3 = 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
 
 saft_dispersion, saft_association, xsaft, a1, a2 :: Expression RealSpace
-saft_dispersion = subst $ n*(a1 + a2/kT)
-  where subst = substitute eta_for_dispersion $
-                                   ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
+saft_dispersion = n*(a1 + a2/kT)
 
 a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
   where ghs = (1 - eta_effective/2)/(1-eta_effective)**3
