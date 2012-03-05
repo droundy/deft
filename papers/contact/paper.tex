@@ -646,7 +646,7 @@ expensive.
 \begin{align} 
 A_{HS} &= \int \left\{
     -n_0 \ln\left(1 - n_3\right)
-    + (1 + \frac{1}{9}n_3^2 \phi_2(n_3))   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
     + (1 - \frac{4}{9}n_3\phi_3(n_3))\frac{(n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{24\pi (1-n_3)^2}
     \right\}
 \end{align}
@@ -672,12 +672,12 @@ where
 \end{align}
 We also have
 \begin{align}
-  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2(n_3))\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)(\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2})\\
+  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)(\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2})\\
   \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
   \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
   \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
   \frac{\delta A_{HS}}{\delta \mathbf{n}_2} &= -(1 + \frac{1}{9}n_3^2\phi_2)\frac{\mathbf{n}_1}{1 - n_3} 
-  - (1 - \frac{4}{9}n_3\phi_3)\frac{6\mathbf{n}_2}{24\pi(1 - n_3)^2}
+  - (1 - \frac{4}{9}n_3\phi_3)\frac{6n_2\mathbf{n}_2}{24\pi(1 - n_3)^2}
 \end{align}
 
 

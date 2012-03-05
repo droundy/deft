@@ -172,14 +172,14 @@ Functional dWBm2_dn2(double radius) {
   Functional n2z = zShellConvolve(radius);
   return (Functional(1) + (1/9.0)*sqr(n3(radius))*phi2(n3(radius)))*n1(radius) / (1-n3(radius)) +
     (1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
-    (n2(radius) - (sqr(n2x) + sqr(n2y) + sqr(n2z))) / (8*M_PI*sqr(1-n3(radius)));
+    (sqr(n2(radius)) - (sqr(n2x) + sqr(n2y) + sqr(n2z))) / (8*M_PI*sqr(1-n3(radius)));
 }
 
 Functional dWBm2_dn2v_over_n2v(double radius) {
   Functional R(radius, "R");
-  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (4*M_PI*R*(1-n3(radius))) -
-    (1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
-    Functional(6) / (24*M_PI*sqr(1-n3(radius)));
+  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (4*M_PI*R*(1-n3(radius))) 
+    -(1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
+    Functional(6)*n2(radius) / (24*M_PI*sqr(1-n3(radius)));
 }
 
 Functional dWBm2_dn3(double radius) {
