@@ -204,28 +204,11 @@ setZero v (Product p) =
     else if zn /= 0
          then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
                      ++ latex (Product p) ++ "\n\n\n" ++ latex zn)
-         else case isKSpace v of
-              Same -> 
-                case isKSpace n of
-                  Same -> setZero v (dtop / dbot)
-                    where dtop = derive v 1 n
-                          dbot = derive v 1 d
-                  _ -> error "oopsies"
-              _ -> 
-                case isScalar v of
-                  Same -> 
-                    case isScalar n of
-                      Same -> setZero v (derive v 1 n / derive v 1 d)
-                      _ -> error "oopsies"
-                  _ -> 
-                    case isRealSpace v of
-                      Same -> 
-                        case isRealSpace n  of
-                          Same -> setZero v (dtop / dbot)
-                            where dtop = derive v 1 n
-                                  dbot = derive v 1 d
-                          _ -> error "oopsies"
-                      _ -> error "oops" -- setZero v (derive v 1 a / derive v 1 b)
+         else case compareTypes v n of
+                Same -> setZero v (dtop / dbot)
+                  where dtop = derive v 1 n
+                        dbot = derive v 1 d
+                Different -> error "oops, failure in setZero that makes no sense."
   where d = product2denominator p
         n = product $ product2numerator p
         zn = setZero v n
@@ -882,10 +865,14 @@ factorandsum (x:xs) = helper (getprodlist x) (x:xs)
         getprodlist xx = [(xx,1)]
 
 compareExpressions :: (Type a, Type b) => Expression a -> Expression b -> Same a b
-compareExpressions x y | Same <- isKSpace x, Same <- isKSpace y, x == y = Same
-compareExpressions x y | Same <- isRealSpace x, Same <- isRealSpace y, x == y = Same
-compareExpressions x y | Same <- isScalar x, Same <- isScalar y, x == y = Same
+compareExpressions x y | Same <- compareTypes x y, x == y = Same
 compareExpressions _ _ = Different
+
+compareTypes :: (Type a, Type b) => Expression a -> Expression b -> Same a b
+compareTypes x y | Same <- isKSpace x, Same <- isKSpace y = Same
+compareTypes x y | Same <- isRealSpace x, Same <- isRealSpace y = Same
+compareTypes x y | Same <- isScalar x, Same <- isScalar y = Same
+compareTypes _ _ = Different
 
 derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Expression b
 derive v dda e | Same <- compareExpressions v e = dda
@@ -912,17 +899,12 @@ hasexpression x (Expression v)
   | Same <- isScalar (Expression v), Integrate e <- v = hasexpression x e
   | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = False
   | otherwise = error "Unhandled case in hasexpression"
-hasexpression x e
-  | Same <- isKSpace e, Same <- isKSpace x, (Sum xs) <- x, (Sum es) <- e = 
+hasexpression x@(Sum xs) e@(Sum es) 
+  | Same <- compareTypes e x = 
        (and $ map (\term -> elem term $ sum2pairs es) (sum2pairs xs)) 
        || (or $ map (hasexpression x) (map snd (sum2pairs es)))
-  | Same <- isRealSpace e, Same <- isRealSpace x, (Sum xs) <- x, (Sum es) <- e = 
-       (and $ map (\term -> elem term $ sum2pairs es) (sum2pairs xs)) 
-       || (or $ map (hasexpression x) (map snd (sum2pairs es)))
-  | Same <- isKSpace e, Same <- isKSpace x, (Product xs) <- x, (Product es) <- e = 
-       (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs)) 
-       || (or $ map (hasexpression x) (map fst (product2pairs es)))
-  | Same <- isRealSpace e, Same <- isRealSpace x, (Product xs) <- x, (Product es) <- e = 
+hasexpression x@(Product xs) e@(Product es)
+  | Same <- compareTypes e x = 
        (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs)) 
        || (or $ map (hasexpression x) (map fst (product2pairs es)))
 hasexpression x (Sum s) = or $ map sub $ sum2pairs s
@@ -942,21 +924,13 @@ hasexpression x (Scalar e) = hasexpression x e
 substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
 substitute x y e | Same <- compareExpressions x e = y
 substitute x@(Sum xs) y e@(Sum es) 
-  | Same <- isKSpace x, Same <- isKSpace e, hasexpression x e =
-    if (and $ map (\term -> elem term $ sum2pairs es) (sum2pairs xs))
-    then (pairs2sum $ filter (\term -> not $ elem term $ sum2pairs xs) (sum2pairs es)) + y
-    else pairs2sum $ map (subSnd x y) (sum2pairs es)
-  | Same <- isRealSpace x, Same <- isRealSpace e, hasexpression x e =
+  | Same <- compareTypes x e, hasexpression x e =
     if (and $ map (\term -> elem term $ sum2pairs es) (sum2pairs xs))
     then (pairs2sum $ filter (\term -> not $ elem term $ sum2pairs xs) (sum2pairs es)) + y
     else pairs2sum $ map (subSnd x y) (sum2pairs es)
   where subSnd m n (f, ex) = (f, substitute m n ex)
 substitute x@(Product xs) y e@(Product es) 
-  | Same <- isKSpace x, Same <- isKSpace e, hasexpression x e = 
-    if (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs))
-    then (pairs2product $ filter (\term -> not $ elem term $ product2pairs xs) (product2pairs es)) * y
-    else pairs2product $ map (subFst x y) (product2pairs es)
-  | Same <- isRealSpace x, Same <- isRealSpace e, hasexpression x e = 
+  | Same <- compareTypes x e, hasexpression x e = 
     if (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs))
     then (pairs2product $ filter (\term -> not $ elem term $ product2pairs xs) (product2pairs es)) * y
     else pairs2product $ map (subFst x y) (product2pairs es)
