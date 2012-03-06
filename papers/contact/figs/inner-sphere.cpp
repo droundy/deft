@@ -150,8 +150,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   } 
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid wu_contact_density(gd, FuWuContactDensity(1.0)(1, gd, density));
-  //Grid wu_contact_density_no_zeta(gd, FuWuContactDensityNoZeta(1.0)(1, gd, density));
+  Grid wu_contact_density(gd, FuWuContactDensity_S(1.0)(1, gd, density));
   radial_plot(plotname, density, energy_density, contact_density_S, wu_contact_density,
               contact_density_sphere, n0, gross_density);
   free(plotname);

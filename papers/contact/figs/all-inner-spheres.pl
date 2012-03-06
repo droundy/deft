@@ -25,8 +25,8 @@ foreach $dd ([4,0.3], [4,0.4], [8,0.3]) {
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
-#SBATCH --mail-type ALL
-#SBATCH --mail-user daveroundy\@gmail.com
+##SBATCH --mail-type ALL
+##SBATCH --mail-user daveroundy\@gmail.com
 #SBATCH --output inner-sphere-$d-$eta-$F.out
 
 set -ev

@@ -547,8 +547,7 @@ using the weighted densities
 %%   \end{align}
 %% }
 
-\section{Contact density at a given hard
-  sphere}\label{contact-at-sphere}
+\section{Asymmetrically averaged correlation function}\label{contact-at-sphere}
 
 When we consider an inhomogeneous system, we may prefer to ask for
 \emph{which} sphere we are interested in computing the contact
@@ -790,6 +789,21 @@ These give us some basic tools with which to perform derivatives.
   \end{widetext}
 }
 
+\section{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
+We compare with the averaged correlation function of
+Gross\cite{gross2009density}, which is of the asymmetrical variety
+($g_\sigma^A$), where the correlation function is averaged at location
+of one of the spheres in concact.
+\begin{align}
+  g_\sigma^\text{Gross,A} &= \frac{1 - \frac12 n_{3'}}{\left(1 -
+    n_{3'}\right)^3} \\
+  n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
+\end{align}
+where $n_{3'}$ is an averaged
+filling fraction defined in a manner analogous to the $n_3$ of FMT,
+but with the hard-sphere radius replaced by the hard-sphere diameter,
+so the integrals range over spheres that are twice as large.
+
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
 \caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
@@ -797,73 +811,52 @@ These give us some basic tools with which to perform derivatives.
 \label{fig:n0}
 \end{figure}
 
-\section{Contact density at a given contact position}
+\section{Symmetrically averaged correlation function}
 
-An alternate definition of the inhomogeneous contact density would be
-the contact density for spheres \emph{touching at a given point}.
-This would be a symmetric measure, since both spheres involved are
-treated in the same way.  In fact, the density of such spheres is just
-the density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
-illustration $n_0$.  Since $n_0$ is the fundamental measure of sphere
-surface contact, it would make sense to define a contact density that
-would correspond.  This is what is done by Yu and
+An alternate definition of the averaged correlation function for an
+inhomogeneous system would be the correlation function averaged for
+spheres \emph{touching at a given point}.  This would be a symmetric
+measure, since both spheres involved are treated in the same way.  In
+fact, the density of such spheres is just the density $n_0(\xx)$ from
+FMT.  See Figure~\ref{fig:n0} for an illustration $n_0$.  Since $n_0$
+is the fundamental measure of sphere surface contact, it makes sense
+to define a corresponding correlation function $g_\sigma^S$.  This is
+\emph{almost} what is done by Yu and
 Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as discussed in
-Section~\ref{sec:yuwu}.
-
-\section{Gross' functional}\label{sec:gross}
-We compare with the functional of Gross \emph{et
-  al}\cite{gross2009density}, which is of the second kind ($g^b$), where the
-contact density is evaluated at the sphere location.
-\begin{align}
-  n_\textit{contact} &= n_{A} \frac{1 - \frac12 n_{3'}}{\left(1 -
-    n_{3'}\right)^3} \\
-  n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
-\end{align}
-where $n_A$ is defined in the introduction and $n_{3'}$ is an averaged
-filling fraction defined in a manner analogous to the $n_3$ of FMT,
-but with the hard-sphere radius replaced by the hard-sphere diameter,
-so the integrals range over spheres that are twice as large.
+Section~\ref{sec:yuwu}, although they use a modified density $\zeta
+n_0$ to account for density gradients.
 
 \section{Yu and Wu's functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
-position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
-compare both their functional as well as ours with simulation data.
-
-The functional of Yu and Wu for $g_\sigma$ is a symmetric formulation,
-but instead of using $n_0$ as the associated density, it uses a
-density given by
+position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We
+will compare both their functional as well as ours with simulation
+data.  Yu and Wu use a symmetric formulation for $g_\sigma$, but
+instead of using $n_0$ as the associated density, it uses a density
+given by
 \begin{align}
-  n_{YW} &= n_0 \zeta \\
+  n^\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
   \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
-point of contact.  Given this definition of density, $g_\sigma$ is
+point of contact.  Given this definition of density, their $g_\sigma$ is
 given by:
 \begin{align}
-  g_\sigma^{YW} &= \frac{1}{1-n_3}
+  g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
     + \frac32 \frac{R n_2}{3}\frac{\zeta}{(1-n_3)^2}
     + \frac12 \frac{\left(\frac{R n_2}{3}\right)^2 \zeta}{(1-n_3)^3}
     \\
-  g_\sigma^{YW} &= \frac{1}{1-n_3}
+  g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
     + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
     + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}
+    \\
+  g_\sigma^\text{Yu,S} &= \frac{\frac{1}{1-n_3}
+    + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
+    + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}}{\zeta^2}
 \end{align}
-We should write a bit more about this functional.  I think we can view
-it as a third alternative, which we could also predict:
-\begin{align}
-  g_\sigma^{S'}(\rr) &= \frac1{n_{S'}(\rr)^2}\frac1{4\pi R^2}\int n^{(2)}(\rr - \rr', \rr + \rr')\delta(|\rr'| -
-  R)d\rr'
-\end{align}
-\begin{align}
-  n_{S'}(\rr) &= \zeta(\rr) \frac{1}{4\pi R^2}\int n(\rr')\delta(|\rr-\rr'|-R) d\rr'
-\end{align}
-This is closely related to $g_\sigma^{S}$, but is ever so slightly
-different.  In order to be completely fair, we should see about
-computing this from our MC calculations.  Unfortunately, it will
-require that we compute $\mathbf{n}_2 \cdot \mathbf{n}_2$ which will
-be a bit of a pain.  $\ddot\frown$
+I think the adjusted functional $g_\sigma^{\text{Yu,}S}$ can be directly
+compared with our $g_\sigma^S$.  It is implemented in our code.
 
 \section{Comparison with simulation}
 
