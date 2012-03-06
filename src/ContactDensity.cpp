@@ -377,7 +377,7 @@ Functional FuWuContactDensity_S(double radius) {
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
   Functional zeta = 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
-  return FuWuContactDensity(radius)/sqr(zeta); // Here we divide by zeta^2 to get our symmetrical answer.
+  return FuWuContactDensity(radius)*sqr(zeta); // Here we multiply by zeta^2 to get our symmetrical answer.
 }
 
 Functional FuWuContactDensity(double radius) {
