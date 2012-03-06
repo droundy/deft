@@ -76,11 +76,11 @@ figs/walls-30.pdf: figs/plot-walls.py figs/mc-walls-15-300.dat figs/wallsWB-0.30
 figs/walls-40.pdf: figs/plot-walls.py figs/mc-walls-15-300.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
 	python $^ $@
 
-figs/inner-4-30.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat figs/inner-sphereWBm2-04.0-0.30.dat
+figs/inner-4-30.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat figs/inner-sphereWBm2-04.0-0.30.dat
 	python $^ $@
 
-figs/inner-4-40.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-04.0-0.40.dat figs/inner-sphereWBT-04.0-0.40.dat figs/inner-sphereWBm2-04.0-0.40.dat
+figs/inner-4-40.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.40.dat figs/inner-sphereWBT-04.0-0.40.dat figs/inner-sphereWBm2-04.0-0.40.dat
 	python $^ $@
 
-figs/inner-8-30.pdf: figs/plot-inner.py figs/mc-04-013.dat figs/inner-sphereWB-08.0-0.30.dat figs/inner-sphereWBT-08.0-0.30.dat figs/inner-sphereWBm2-08.0-0.30.dat
+figs/inner-8-30.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-08.0-0.30.dat figs/inner-sphereWBT-08.0-0.30.dat figs/inner-sphereWBm2-08.0-0.30.dat
 	python $^ $@

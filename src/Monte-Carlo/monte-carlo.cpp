@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
   // constrain to never increase.  Note that this may not work at all
   // for high filling fractions, since we could get stuck in a local
   // minimum.
-  for(long i=0; i<N; i++){
+  for(long i=0; i<N; i++) {
     spheres[i]=rad*ran3();
   }
   clock_t start = clock();
@@ -135,10 +135,8 @@ int main(int argc, char *argv[]){
     double newOverLaps=countOverLaps(spheres, N, R);
     if(newOverLaps>numOverLaps){
       spheres[i%N]=old;
-      scale = scale*0.98;
-    } else if (scale < 5) {
+    } else {
       numOverLaps=newOverLaps;
-      scale = scale*1.02;
     }
     i++;
     if (i%N == 0) {
@@ -170,35 +168,9 @@ int main(int argc, char *argv[]){
     }
   } else {
     if (spherical_inner_wall){
-      vector <double> Radius;
-      long newdiv = div;
-      long rs = 0;
-      for (long l=0;l<div+1;l++) {
-	Radius.push_back(rad*(pow(double(l)/(div), 1.0/3.0) + 0.1*double(l)*uncertainty_goal)/
-			 (1 + 0.1*(div)*uncertainty_goal) );
-      }
-      for (long ks=0;ks<1000000;ks++){
-	while (Radius[rs] < innerRad) rs++;
-	newdiv = newdiv+(rs-1);
-	Radius.clear();
-	for (long l=0;l<newdiv+1;l++) {
-	  Radius.push_back (rad*(pow(double(l)/(newdiv), 1.0/3.0) + 0.1*double(l)*uncertainty_goal)/
-			    (1 + 0.1*(newdiv)*uncertainty_goal) );
-	}
-	if (newdiv-(rs-1) == div) break;
-	printf("HEEEEEEEEEEERE    %ld",ks);
-	fflush(stdout);
-      }
-      rs=0;
-      while (Radius[rs]<innerRad)rs++;
-      double VolDelta = pow(Radius[rs],3)-pow(innerRad,3);
-      double VolDeltaNext = pow(Radius[rs+1],3)-pow(Radius[rs],3);
-      if (VolDelta < VolDeltaNext/2.0){
-	Radius[rs] = pow( (pow(Radius[rs+1],3)-pow(innerRad,3))/2 + pow(innerRad,3) ,1.0/3.0);
-      }
-      radius[0] = innerRad;
-      for (long k=0;k<div;k++){
-	radius[k+1]= Radius[k+rs];
+      double size = (rad - innerRad)/div;
+      for (long s=0; s<div+1; s++){
+	radius[s] = size*s + innerRad;
       }
     } else {
       for (long l=0;l<div+1;l++) {
@@ -267,7 +239,7 @@ int main(int argc, char *argv[]){
     }
     // only write out the sphere positions after they've all had a
     // chance to move
-    if (j%N == 0) {
+    if (workingmoves%N == 0) {
       for (long i=0;i<N;i++) {
 	//printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
 	shells[shell(spheres[i], div, radius, sections)]++;
