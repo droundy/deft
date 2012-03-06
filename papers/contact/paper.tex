@@ -155,53 +155,44 @@ $\rr_2$.  The pair correlation function is defined by
 In a homogeneous fluid, the pair correlation only depends on the
 distance $|\rr_1-\rr_2|$, and can be expressed as a function of a
 single variable, with the contact value being when that distance is
-$2R$.  It is desirable for reasons of efficiency to limit CDFT
+the diameter $\sigma$.  It is desirable for reasons of efficiency to limit CDFT
 functionals to one-center convolutions, which leads us to seek a
 simplified expression for the contact value of the correlation
 function---which is the same as the contact value of the cavity
 correlation function for hard spheres.
-%
-\fixme{The following bit is awkward.}
-%
 In a system with an inhomogeneous density, we seek a \emph{local}
-contact value of the correlation function.  There are two reasonable
-options for defining such a local function:  a symmetric (which we refer to as S) and an
-asymmetric (which we refer to as A) formulation.
+value for $g_\sigma$.  There are two reasonable options for defining
+such a local function: a symmetric formulation (which we refer to as $S$) and an
+asymmetric formulation (which we refer to as $A$). \fixme{Should we
+  introduce a third one, for Yu and Wu?}
 
-For the S case:
+For the symmetric $S$ case:
 \begin{align}
-  g^S_\sigma(\rr) &= \frac{n^S_\textit{contact}(\rr)}{n_S(\rr)}
-\end{align}
-\begin{align}\label{eq:n-contactS}
-  n^S_\textit{contact}(\rr) &= \frac1{4\pi R^2}\int n^{(2)}(\rr - \rr', \rr + \rr')\delta(|\rr'| -
-  R)d\rr'
-\end{align}
-\begin{align}
-  n_S(\rr) &= \frac{1}{4\pi R^2}\int n(\rr')\delta(|\rr-\rr'|-R) d\rr'
+  g^S_\sigma(\rr) &= \frac{1}{n_S(\rr)^2}\int n^{(2)}(\rr - \rr', \rr
+  + \rr')
+  \frac{\delta(|\rr'| -\sigma/2)}{\pi\sigma^2}d\rr' \\
+  n_S(\rr) &= \int n(\rr')\frac{\delta(|\rr-\rr'|-\sigma/2)}{\pi\sigma^2} d\rr'
 \end{align}
 This functional gives a value averaged over spheres that touch at the
 position $\rr$.  The density $n_S$ is the same as the density $n_0$
 defined in Fundamental Measure Theory (FMT), and seems ideal for
 treating touching spheres.
 
-And for the A case:
+And for the asymmetric $A$ case:
 \begin{align}
-  g^A_\sigma(\rr) &= \frac{n^A_\textit{contact}(\rr)}{n_A(\rr)} \\
-  n^A_\textit{contact}(\rr) &= \frac1{16\pi R^2}\int n^{(2)}(\rr, \rr + \rr')
-  \delta(|\rr'| - 2R)d\rr' \\
-  n_A(\rr) &= \frac1{16\pi R^2}\int n(\rr') \delta(|\rr-\rr'|-2R) d\rr'
+  g^A_\sigma(\rr) &= \frac{1}{n(\rr)n_A(\rr)}
+  \int n^{(2)}(\rr, \rr + \rr')
+  \frac{\delta(|\rr'| - \sigma)}{4\pi\sigma^2}d\rr' \\
+  n_A(\rr) &= \int n(\rr')
+  \frac{\delta(|\rr-\rr'|-\sigma)}{4\pi\sigma^2} d\rr'
 \end{align}
-In this case, we find the average number of contacts for a sphere at a
-given position.
+In this case, the two-particle density is averaged over spheres
+touching a sphere that is aat the given position $\rr$.
 
 In the process of defining these two averaged correlation functions,
-we also defined four averaged densities, two \emph{contact
-  densities}, $n^S_\textit{contact}(\rr)$ and $n^A_\textit{contact}(\rr)$,
-and two \emph{contacting densities}, $n_S(\rr)$ and $n_A(\rr)$.  The
-former are the density of spheres that are in contact with each other,
-while the latter are the density of spheres available to be in
-contact.  In the homogeneous limit, $n_S = n_A = n$ and
-$n^S_\textit{contact} = n^A_\textit{contact} = g(\sigma)n$.  It is an
+we also defined two averaged densities, $n_S(\rr)$ and $n_A(\rr)$,
+which are the density of spheres available to be in
+contact.  In the homogeneous limit, $n_S = n_A = n$.  It is an
 open question, which of these averages will be more useful in any
 particular functional.  Suffice to say, either average is a
 \emph{possible} way to convert a function that is defined for a
@@ -824,11 +815,11 @@ We compare with the functional of Gross \emph{et
   al}\cite{gross2009density}, which is of the second kind ($g^b$), where the
 contact density is evaluated at the sphere location.
 \begin{align}
-  n_\textit{contact} &= n_b \frac{1 - \frac12 n_{3'}}{\left(1 -
+  n_\textit{contact} &= n_{A} \frac{1 - \frac12 n_{3'}}{\left(1 -
     n_{3'}\right)^3} \\
   n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
 \end{align}
-where $n_b$ is defined in the introduction and $n_{3'}$ is an averaged
+where $n_A$ is defined in the introduction and $n_{3'}$ is an averaged
 filling fraction defined in a manner analogous to the $n_3$ of FMT,
 but with the hard-sphere radius replaced by the hard-sphere diameter,
 so the integrals range over spheres that are twice as large.
@@ -840,6 +831,39 @@ density at a given contact
 position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
 compare both their functional as well as ours with simulation data.
 
+The functional of Yu and Wu for $g_\sigma$ is a symmetric formulation,
+but instead of using $n_0$ as the associated density, it uses a
+density given by
+\begin{align}
+  n_{YW} &= n_0 \zeta \\
+  \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
+\end{align}
+where the function $\zeta$ is a measure of local inhomogeneity at the
+point of contact.  Given this definition of density, $g_\sigma$ is
+given by:
+\begin{align}
+  g_\sigma^{YW} &= \frac{1}{1-n_3}
+    + \frac32 \frac{R n_2}{3}\frac{\zeta}{(1-n_3)^2}
+    + \frac12 \frac{\left(\frac{R n_2}{3}\right)^2 \zeta}{(1-n_3)^3}
+    \\
+  g_\sigma^{YW} &= \frac{1}{1-n_3}
+    + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
+    + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}
+\end{align}
+We should write a bit more about this functional.  I think we can view
+it as a third alternative, which we could also predict:
+\begin{align}
+  g_\sigma^{S'}(\rr) &= \frac1{n_{S'}(\rr)^2}\frac1{4\pi R^2}\int n^{(2)}(\rr - \rr', \rr + \rr')\delta(|\rr'| -
+  R)d\rr'
+\end{align}
+\begin{align}
+  n_{S'}(\rr) &= \zeta(\rr) \frac{1}{4\pi R^2}\int n(\rr')\delta(|\rr-\rr'|-R) d\rr'
+\end{align}
+This is closely related to $g_\sigma^{S}$, but is ever so slightly
+different.  In order to be completely fair, we should see about
+computing this from our MC calculations.  Unfortunately, it will
+require that we compute $\mathbf{n}_2 \cdot \mathbf{n}_2$ which will
+be a bit of a pain.  $\ddot\frown$
 
 \section{Comparison with simulation}
 
