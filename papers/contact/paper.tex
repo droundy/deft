@@ -123,6 +123,12 @@ function (see Section~\ref{sec:gross})\cite{gross2009density}.
 Given these different approaches, it seems worthwhile to examine this
 property of the hard-sphere fluid through direct simulation, in order
 to establish the advantages and disadvantages of each approach.
+\fixme{
+
+Jeff's Notes:
+A novice (me) is confused by the use of 'contact value of correlation function' throuhout this introduction while throughout the rest of the paper we refer to the 'contact density'.  Pehaps the audince will understand that they're interchangable (if they are) but this was confusing to me.  Also, I would think I'd like to see something like:
+
+We first discuss two possibilities for the definition of contact density.  The first involves a more symmetric interpretation and so we call it the 'S case'.  The second involves a sphere-centered, assymetrical interpretation and so we call it the 'A case'.  We present where in the SAFT free energy formulation these contact densities will contribute.  We next present a thermodynamic method that we will use to calculate the above contact densities.  This method involves the use of surface pressure and the minimization of the excess free energy refered to above.  We use the White Bear and White Bear Mark II formulations of these free energy terms and take neccesary derivitives in the concpetual spirit of the seperately defined S an A case contact densities.  Finally we compare the resulting contact densities with those of Gross, those of Yu and Wu, and as well with our wn monte carlo simulations.}            
 
 \fixme{Should we include these equations? Maybe just later?}
 \begin{align}
@@ -149,55 +155,44 @@ $\rr_2$.  The pair correlation function is defined by
 In a homogeneous fluid, the pair correlation only depends on the
 distance $|\rr_1-\rr_2|$, and can be expressed as a function of a
 single variable, with the contact value being when that distance is
-$2R$.  It is desirable for reasons of efficiency to limit CDFT
+the diameter $\sigma$.  It is desirable for reasons of efficiency to limit CDFT
 functionals to one-center convolutions, which leads us to seek a
 simplified expression for the contact value of the correlation
 function---which is the same as the contact value of the cavity
 correlation function for hard spheres.
-%
-\fixme{The following bit is awkward.}
-%
 In a system with an inhomogeneous density, we seek a \emph{local}
-contact value of the correlation function.  There are two reasonable
-options for defining such a local function:  a symmetric and an
-asymmetric formulation.
+value for $g_\sigma$.  There are two reasonable options for defining
+such a local function: a symmetric formulation (which we refer to as $S$) and an
+asymmetric formulation (which we refer to as $A$). \fixme{Should we
+  introduce a third one, for Yu and Wu?}
 
-The first option treats the two particles that are in contact
-symmetrically:
+For the symmetric $S$ case:
 \begin{align}
-  g^a_\sigma(\rr) &= \frac{n^a_\textit{contact}(\rr)}{n_a(\rr)}
-\end{align}
-\begin{align}
-  n^a_\textit{contact}(\rr) &= \frac1{4\pi R^2}\int n^{(2)}(\rr - \rr', \rr + \rr')\delta(|\rr'| -
-  R)d\rr'
-\end{align}
-\begin{align}
-  n_a(\rr) &= \frac{1}{4\pi R^2}\int n(\rr')\delta(|\rr-\rr'|-R) d\rr'
+  g^S_\sigma(\rr) &= \frac{1}{n_S(\rr)^2}\int n^{(2)}(\rr - \rr', \rr
+  + \rr')
+  \frac{\delta(|\rr'| -\sigma/2)}{\pi\sigma^2}d\rr' \\
+  n_S(\rr) &= \int n(\rr')\frac{\delta(|\rr-\rr'|-\sigma/2)}{\pi\sigma^2} d\rr'
 \end{align}
 This functional gives a value averaged over spheres that touch at the
-position $\rr$.  The density $n_a$ is the same as the density $n_0$
+position $\rr$.  The density $n_S$ is the same as the density $n_0$
 defined in Fundamental Measure Theory (FMT), and seems ideal for
 treating touching spheres.
 
-The second option is to treat one of the two touching spheres
-specially:
+And for the asymmetric $A$ case:
 \begin{align}
-  g^b_\sigma(\rr) &= \frac{n^b_\textit{contact}(\rr)}{n_b(\rr)} \\
-  n^b_\textit{contact}(\rr) &= \frac1{16\pi R^2}\int n^{(2)}(\rr, \rr + \rr')
-  \delta(|\rr'| - 2R)d\rr' \\
-  n_b(\rr) &= \frac1{16\pi R^2}\int n(\rr') \delta(|\rr-\rr'|-2R) d\rr'
+  g^A_\sigma(\rr) &= \frac{1}{n(\rr)n_A(\rr)}
+  \int n^{(2)}(\rr, \rr + \rr')
+  \frac{\delta(|\rr'| - \sigma)}{4\pi\sigma^2}d\rr' \\
+  n_A(\rr) &= \int n(\rr')
+  \frac{\delta(|\rr-\rr'|-\sigma)}{4\pi\sigma^2} d\rr'
 \end{align}
-In this case, we find the average number of contacts for a sphere at a
-given position.
+In this case, the two-particle density is averaged over spheres
+touching a sphere that is aat the given position $\rr$.
 
 In the process of defining these two averaged correlation functions,
-we also defined four averaged densities, two \emph{contact
-  densities}, $n^a_\textit{contact}(\rr)$ and $n^b_\textit{contact}(\rr)$,
-and two \emph{contacting densities}, $n_a(\rr)$ and $n_b(\rr)$.  The
-former are the density of spheres that are in contact with each other,
-while the latter are the density of spheres available to be in
-contact.  In the homogeneous limit, $n_a = n_b = n$ and
-$n^a_\textit{contact} = n^b_\textit{contact} = g(\sigma)n$.  It is an
+we also defined two averaged densities, $n_S(\rr)$ and $n_A(\rr)$,
+which are the density of spheres available to be in
+contact.  In the homogeneous limit, $n_S = n_A = n$.  It is an
 open question, which of these averages will be more useful in any
 particular functional.  Suffice to say, either average is a
 \emph{possible} way to convert a function that is defined for a
@@ -205,11 +200,11 @@ homogeneous system to a functional that is applicable to inhomogeneous
 systems.
 
 Yu and Wu introduce an approximation for
-$g^a$\cite{yu2002fmt-dft-inhomogeneous-associating}, which will be
+$g^S$\cite{yu2002fmt-dft-inhomogeneous-associating}, which will be
 discussed in Section~\ref{sec:yuwu}.  Gross introduced an
-approximation for $g^b$\cite{gross2009density}, which will be
+approximation for $g^A$\cite{gross2009density}, which will be
 introduced in Section~\ref{sec:gross}.  We will also introduce our own
-approximation to $g^b$ which is based on the assumption of
+approximation to $g^A$ which is based on the assumption of
 thermodynamic consistency within FMT, in
 Section~\ref{contact-at-sphere}.  We will report on the accuracy of
 these approximations by comparing with Monte Carlo simulations of the
@@ -552,8 +547,7 @@ using the weighted densities
 %%   \end{align}
 %% }
 
-\section{Contact density at a given hard
-  sphere}\label{contact-at-sphere}
+\section{Asymmetrically averaged correlation function}\label{contact-at-sphere}
 
 When we consider an inhomogeneous system, we may prefer to ask for
 \emph{which} sphere we are interested in computing the contact
@@ -635,19 +629,138 @@ expensive.
     \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
     - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
   \end{align}
+
+*******************************************************************************8
+\fixme{The following is the same calculation for WBm2.  Not sure if you want these in the appendix or in the paper at all?}
+ 
+\begin{align} 
+A_{HS} &= \int \left\{
+    -n_0 \ln\left(1 - n_3\right)
+    + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (1 - \frac{4}{9}n_3\phi_3(n_3))\frac{(n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{24\pi (1-n_3)^2}
+    \right\}
+\end{align}
+ where
+ \begin{align}
+   \phi_2 &= (6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3))\frac{1}{n_3^3}\\
+   \phi_3 &= (6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3))\frac{1}{4n_3^3}
+ \end{align}
+For the following derivitives we have
+\begin{align}
+   \frac{\delta \phi_2}{\delta n_3} &= ((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2]\frac{3}{n_3^4}\\
+   \frac{\delta \phi_3}{\delta n_3} &= (-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3))\frac{3}{4n_3^4}
+ \end{align}
+And using these
+\begin{align}
+  \frac{\delta A_{HS}}{\delta n_3} &= \psi _1 + \psi _2 + \psi _3
+\end{align}
+where
+\begin{align}
+  \psi_1 &= \frac{n_0}{1-n_3}\\
+  \psi_2 &= (\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3})(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}) + (1 + \frac{1}{9}n_3^2\phi_2)(\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2})\\
+  \psi_3 &= (\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2})(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}) + 2(1 - \frac{4}{9}n_3\phi_3)(\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3}) 
+\end{align}
+We also have
+\begin{align}
+  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)(\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2})\\
+  \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
+  \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
+  \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
+  \frac{\delta A_{HS}}{\delta \mathbf{n}_2} &= -(1 + \frac{1}{9}n_3^2\phi_2)\frac{\mathbf{n}_1}{1 - n_3} 
+  - (1 - \frac{4}{9}n_3\phi_3)\frac{6n_2\mathbf{n}_2}{24\pi(1 - n_3)^2}
+\end{align}
+
+
+
+
   
-  \begin{align}
-    \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-    n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \\
-    \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-    n(\mathbf{r}) \delta'(|\mathbf{r}-\mathbf{r}'| - R) \\
-    \frac{\delta \mathbf{n}_{V2}(\mathbf{r}')}{\delta R(\mathbf{r})} &=
-    -\frac{\delta}{\delta R(\mathbf{r})} \mathbf{\nabla}' n_3(\mathbf{r}')
-    \\
-    &= -\mathbf{\nabla}'
-    \left(n(\mathbf{r})\delta(|\mathbf{r}-\mathbf{r}'| - R) \right)
-  \end{align}
-  These give us some basic tools with which to perform derivatives.
+****************************************************************************************\\
+Jeff's understanding as of 02/22/2012
+
+
+  In order to motivate our particular forms for $\frac{\delta n_3^{S} (\mathbf{r}')}{\delta R(\mathbf{r})}$, $\frac{\delta n_2^{S}(\mathbf{r}')}{\delta R(\mathbf{r})}$, etc. we interpret the contact density in the $S$ case as follows: 
+  Given that there is a sphere just touching the point $\mathbf{r}'$, $n_{Contact}^{S}(\mathbf{r}')$ is the density
+  of spheres that are also touching that point so that they are touching the given sphere.  We can see this in the integral in eq \ref{eq:n-contactS},where we sum over the double densities of spheres that are positioned opposite eachother and touching at the point $\mathbf{r}$ and then divide
+  by $n_0$, the average density of a single sphere touching the point.  Thus we have the density of contact at $\mathbf{r}$, where the
+  contact between the two spheres actually takes place at $\mathbf{r}$.
+
+Involved in the terms in our free energy functional are derivatives of density functions with respect to $R$.  We take these integrals differently when dealing with the S and the A cases. In both cases we wish to calculate how the density function changes when a 'certain amount of sphere', at some point, is changed.  The A case is conceptually simple.  We say that a changing spherical radius at a point $\mathbf{r}$ represents the outward expansion, by a distance $\delta R$, of the shell of any sphere that is centered at $\mathbf{r}$.  In the case of S we instead expand a multitude of spheres, all of them positioned around and just touching the point $\mathbf{r}$.  When their radii expand each does not expand outward in all directions as in the case of A, rather they each expand outward at only the point $\mathbf{r}$.  One can imagine a shell that touches $\mathbf{r}$ that has an infinitesimal bit of shell area protruding outward at $\mathbf{r}$ while the rest of its shell remains at radius $R$.  When we expand each sphere that touches $\mathbf{r}$ in this peculiar fashion, we have in the end the same amount of shell area protruding outward as we would if we had simply expanded one sphere in fashion of case A.  Also the protrusions, once added up for all spheres sourrounding $\mathbf{r}$, will yield a symmetry in their direction of protrusion.  Each protruding sphere bit will expand outward from its center and all directions will be covered uniformly.  
+
+
+
+  For the derivation of $n_{3}$ in the symmetric case:
+
+\begin{align}  
+  n_3^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}')) d\mathbf{r}''\\
+  \frac{\delta n_3^{S} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}''
+\end{align}
+  
+  $\delta R(\mathbf{r})$ in this equation refers to an expansion, in the fashion described above, of all the spheres that just touch $\mathbf{r}$.  We can see that if the radii change in this fashion, the only point at which $n_3(\mathbf{r}')$ will be affected is at $\mathbf{r}' = \mathbf{r}$, so that $\delta n_3(\mathbf{r}')$ is zero everywhere except where $\mathbf{r}' = \mathbf{r}$.  Thus we have the 2nd $\delta$ function in the lower integral.
+
+This term in the free energy functional, once integrated, takes an interesting form:  
+
+\begin{align}
+  \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} 
+  \frac{\delta n_3^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}' 
+  &= \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}'' d\mathbf{r}' \\
+  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r} - \mathbf{r}''| - R(\mathbf{r})) d\mathbf{r}''\\
+  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}'')} n_2(\mathbf{r})\\
+\end{align}
+  
+ $n_2(\mathbf{r}')$ in the case of S in calculated similarly:
+\begin{align}
+  n_2^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''\\
+    \frac{\delta n_2^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int n(\mathbf{r}'') 
+  \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}''
+\end{align}
+
+For $\mathbf{n}_{V2}(\mathbf{r}')$ in the case of S we take the gradient of $n_3(\mathbf{r}')$ with respect to $\mathbf{r}'$: 
+\begin{align}
+  \mathbf{n}_{V2}^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'))
+  \frac{(\mathbf{r}' - \mathbf{r}'')}{|\mathbf{r}' - \mathbf{r}''|} d \mathbf{r}''\\
+  \frac{\delta \mathbf{n}_{V2}^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= \delta(\mathbf{r} - \mathbf{r}')
+  \int n(\mathbf{r}'') \delta'(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) 
+  \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|} d\mathbf{r}''
+\end{align}
+
+  In the case of A, the changing radius we refer to is the radius of a sphere that is centered at $\mathbf{r}$ and it expands in a more conventional fashion.  The $n_3$ values that will be affected are those which are a distance $R$ fom $\mathbf{r}$.
+
+\begin{align}
+  n_3^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}'')) d\mathbf{r}''\\ 
+  \frac{\delta n_3^{A} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) \delta(\mathbf{r}-\mathbf{r}'') d\mathbf{r}'' \\
+   &= n (\mathbf{r}) \delta(|\mathbf{r} - \mathbf{r}'| - R(\mathbf{r}))
+\end{align}
+ 
+And likewise:
+\begin{align}
+  n_2^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) d \mathbf{r}''\\
+  \frac{\delta n_2^{A}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -n(\mathbf{r}) \delta'(|\mathbf{r}' - \mathbf{r}| - R)\\
+ \end{align}
+
+ \fixme {
+And then there's a lot with taking the derivative of the delta for the case of $n_{2}^{S}(\mathbf{r}')$.  Not sure if we'll use any of this, but wrote down some equations that Roundy wrote out.  So can use the terms at least if going to write about this - I'm just copying it in for now (probably a lotof mistakes)
+
+\begin{align}
+  p(\mathbf{r}) &= \frac{\delta A}{\delta n_2(\mathbf{r}')} \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}'\\
+  &= \frac{\delta A}{\delta n_2(\mathbf{r})} - \int n(\mathbf{r}'') \delta' (|\mathbf{r} - \mathbf{r}''| - R) d\mathbf{r}''
+  \int n (\mathbf{r} +\mathbf{r}'') \delta'(|\mathbf{r}'''| - R) d \mathbf{r}'''\\
+  &= \int n(\mathbf{r} + \mathbf{r}''') \delta'(|\mathbf{r}'''| - R) r'''^2 cos\theta d \theta''' dr'''\\
+  du = \delta'(\mathbf{r}''' - R) d \mathbf{r}'''     v = n(\mathbf{r} - \mathbf{r}'')r'''\\
+   u = \delta(\mathbf{r}''' - R)                       
+   dv = \mathbf{\nabla} n(\mathbf{r} + \mathbf{r}'') \cdot \frac{\mathbf{r}'''}{r'''} + 2n(\mathbf{r}' - \mathbf{r}'')r'''\\
+  &= -\int(\mathbf{\nabla}n(\mathbf{r}' + \mathbf{r}'') \cdot \mathbf r'''(hat)r'''^2 dr''' 
+  + 2n(\mathbf{r} + \mathbf{r}''')r''') dr''' \delta(\mathbf{r} - R) dcos\theta''' d\theta''\\
+  &= - \int \delta(\mathbf{r}''' - R) d\mathbf{r}''' 
+  (\mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) + \frac{2n(\mathbf{r} + \mathbf{r}'')}{\mathbf{r}'''})\\
+  &= \frac{2n_2(\mathbf{r})}{R} + 
+  \int \delta(|\mathbf{r}'''| - R) \mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) d \mathbf{r}'''\\
+\end{align} 
+}
+********************************************************************************\\
+
+These give us some basic tools with which to perform derivatives.
   
   Finally, we get an answer like
   \begin{align}
@@ -676,6 +789,21 @@ expensive.
   \end{widetext}
 }
 
+\section{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
+We compare with the averaged correlation function of
+Gross\cite{gross2009density}, which is of the asymmetrical variety
+($g_\sigma^A$), where the correlation function is averaged at location
+of one of the spheres in concact.
+\begin{align}
+  g_\sigma^\text{Gross,A} &= \frac{1 - \frac12 n_{3'}}{\left(1 -
+    n_{3'}\right)^3} \\
+  n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
+\end{align}
+where $n_{3'}$ is an averaged
+filling fraction defined in a manner analogous to the $n_3$ of FMT,
+but with the hard-sphere radius replaced by the hard-sphere diameter,
+so the integrals range over spheres that are twice as large.
+
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
 \caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
@@ -683,40 +811,52 @@ expensive.
 \label{fig:n0}
 \end{figure}
 
-\section{Contact density at a given contact position}
+\section{Symmetrically averaged correlation function}
 
-An alternate definition of the inhomogeneous contact density would be
-the contact density for spheres \emph{touching at a given point}.
-This would be a symmetric measure, since both spheres involved are
-treated in the same way.  In fact, the density of such spheres is just
-the density $n_0(\xx)$ from FMT.  See Figure~\ref{fig:n0} for an
-illustration $n_0$.  Since $n_0$ is the fundamental measure of sphere
-surface contact, it would make sense to define a contact density that
-would correspond.  This is what is done by Yu and
+An alternate definition of the averaged correlation function for an
+inhomogeneous system would be the correlation function averaged for
+spheres \emph{touching at a given point}.  This would be a symmetric
+measure, since both spheres involved are treated in the same way.  In
+fact, the density of such spheres is just the density $n_0(\xx)$ from
+FMT.  See Figure~\ref{fig:n0} for an illustration $n_0$.  Since $n_0$
+is the fundamental measure of sphere surface contact, it makes sense
+to define a corresponding correlation function $g_\sigma^S$.  This is
+\emph{almost} what is done by Yu and
 Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as discussed in
-Section~\ref{sec:yuwu}.
-
-\section{Gross' functional}\label{sec:gross}
-We compare with the functional of Gross \emph{et
-  al}\cite{gross2009density}, which is of the second kind ($g^b$), where the
-contact density is evaluated at the sphere location.
-\begin{align}
-  n_\textit{contact} &= n_b \frac{1 - \frac12 n_{3'}}{\left(1 -
-    n_{3'}\right)^3} \\
-  n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
-\end{align}
-where $n_b$ is defined in the introduction and $n_{3'}$ is an averaged
-filling fraction defined in a manner analogous to the $n_3$ of FMT,
-but with the hard-sphere radius replaced by the hard-sphere diameter,
-so the integrals range over spheres that are twice as large.
+Section~\ref{sec:yuwu}, although they use a modified density $\zeta
+n_0$ to account for density gradients.
 
 \section{Yu and Wu's functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional that should correspond to the contact
 density at a given contact
-position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We will
-compare both their functional as well as ours with simulation data.
-
+position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We
+will compare both their functional as well as ours with simulation
+data.  Yu and Wu use a symmetric formulation for $g_\sigma$, but
+instead of using $n_0$ as the associated density, it uses a density
+given by
+\begin{align}
+  n^\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
+  \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
+\end{align}
+where the function $\zeta$ is a measure of local inhomogeneity at the
+point of contact.  Given this definition of density, their $g_\sigma$ is
+given by:
+\begin{align}
+  g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
+    + \frac32 \frac{R n_2}{3}\frac{\zeta}{(1-n_3)^2}
+    + \frac12 \frac{\left(\frac{R n_2}{3}\right)^2 \zeta}{(1-n_3)^3}
+    \\
+  g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
+    + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
+    + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}
+    \\
+  g_\sigma^\text{Yu,S} &= \zeta^2\left(\frac{1}{1-n_3}
+    + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
+    + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}\right)
+\end{align}
+I think the adjusted functional $g_\sigma^{\text{Yu,}S}$ can be directly
+compared with our $g_\sigma^S$.  It is implemented in our code.
 
 \section{Comparison with simulation}
 

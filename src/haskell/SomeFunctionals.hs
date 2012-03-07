@@ -1,5 +1,5 @@
 module SomeFunctionals 
-       ( fmt, whitebear, wb_contact_at_sphere, idealgas, mu, n,
+       ( whitebear, wb_contact_at_sphere, idealgas, mu, n,
          phi1, phi2, phi3,
          of_effective_potential,
          xshell, yshell, zshell,
@@ -28,38 +28,17 @@ i = s_var "complex(0,1)"
 smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
-n, n3, n2, n1, n0, n2x, n2y, n2z, n1x, n1y, n1z, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
+n, n3, n2, n1, n0, n2x, n2y, n2z, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = r_var "x"
-n3 = r_var "n3" -- step n
-n2 = r_var "n2" -- shell n
-n1 = r_var "n1" -- n2 / (4*pi*rad)
-n0 = r_var "n0" -- n2 / (4*pi*rad**2)
-n2x = r_var "n2x" -- xshell n
-n2y = r_var "n2y" -- yshell n
-n2z = r_var "n2z" -- zshell n
-n1x = r_var "n1x"
-n1y = r_var "n1y"
-n1z = r_var "n1z"
-n1v_dot_n2v = r_var n1vdotname
-sqr_n2v = r_var n2vsqrname
-
-n1vdotname, n2vsqrname :: String
-n1vdotname = "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}"
-n2vsqrname = "{\\left|\\vec{n}_{2v}\\right|}"
-
-fmt :: Expression RealSpace -> Expression RealSpace
-fmt = substitute n3 (step n) .
-      substitute n2 (shell n) .
-      substitute n1 (shell n/(4*pi*rad)) .
-      substitute n0 (shell n/(4*pi*rad**2)) .
-      substitute n2x (xshell n) .
-      substitute n2y (yshell n) .
-      substitute n2z (zshell n) .
-      substitute n1x (xshell n/(4*pi*rad)) .
-      substitute n1y (yshell n/(4*pi*rad)) .
-      substitute n1z (zshell n/(4*pi*rad)) .
-      substitute n1v_dot_n2v (n1x*n2x + n1y*n2y + n1z*n2z) .
-      substitute sqr_n2v (n2x**2 + n2y**2 + n2z**2)
+n3 = "n3" === step n
+n2 = "n2" === shell n
+n1 = "n1" === n2 / (4*pi*rad)
+n0 = "n0" === n2 / (4*pi*rad**2)
+n2x = "n2x" === xshell n
+n2y = "n2y" === yshell n
+n2z = "n2z" === zshell n
+sqr_n2v = var "n2vsqr" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x**2 + n2y**2 + n2z**2)
+n1v_dot_n2v = {- var "n1vdn2v" "{\\left|\\vec{n}_{2v}\\right|}" -} (sqr_n2v/(4*pi*rad))
 
 shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
@@ -92,16 +71,16 @@ mu = s_var "mu"
 
 dwbdn3, dwbdn2, dwbdn1, dwbdn1v_over_n2v, dwbdn2v_over_n2v :: Expression RealSpace
 dwbdn3 =  d phi1 + d phi2 + d phi3
-  where d = derive (R "n3") 1
+  where d = derive n3 1
 
 dwbdn2 = d phi1 + d phi2 + d phi3
-  where d = derive (R "n2") 1
+  where d = derive n2 1
 
-dwbdn1 = derive (R "n1") 1 (phi1 + phi2 + phi3)
+dwbdn1 = derive n1 1 (phi1 + phi2 + phi3)
 
-dwbdn1v_over_n2v = derive (R n1vdotname) 1 (phi1 + phi2 + phi3)
+dwbdn1v_over_n2v = derive n1v_dot_n2v 1 (phi1 + phi2 + phi3)
 
-dwbdn2v_over_n2v = 2*derive (R  n2vsqrname) 1 (phi1 + phi2 + phi3)
+dwbdn2v_over_n2v = 2*derive sqr_n2v 1 (phi1 + phi2 + phi3)
 
 --dwbdn2v, dwbdn1v :: Expression RealSpace
 --dwbdn2v = 1/(4*pi*rad)/(1-n3) - 6*n2*(n3 + (1-n3)**2*log(1-n3)/(36*pi*n3**2*(1-n3)**2))
@@ -134,8 +113,8 @@ length_scaling :: Type a => Expression a
 length_scaling = s_var "length_scaling"
 
 eta_for_dispersion, eta_effective :: Expression RealSpace
-eta_for_dispersion = r_var "{\\eta_d}"
--- eta_for_dispersion = ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
+eta_for_dispersion = var "eta_d" "{\\eta_d}" $
+                     ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
 
 -- The following equation is equation 36 in Gil-Villegas 1997 paper.
 eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion
@@ -144,14 +123,12 @@ eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_
         c3 = 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
 
 saft_dispersion, saft_association, xsaft, a1, a2 :: Expression RealSpace
-saft_dispersion = subst $ n*(a1 + a2/kT)
-  -- where subst = id
-  where subst = substitute eta_for_dispersion ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
+saft_dispersion = n*(a1 + a2/kT)
 
 a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
   where ghs = (1 - eta_effective/2)/(1-eta_effective)**3
 
-a2 = 0.5*khs*eta_for_dispersion*derive (R "{\\eta_d}") 1 a1
+a2 = 0.5*khs*eta_for_dispersion*derive eta_for_dispersion 1 a1
      where khs = (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
 saft_association = 4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2)
@@ -164,7 +141,7 @@ xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*yuwu_contact
   where boltz = exp(epsilon_association/kT)-1
 
 saft_fluid :: Expression RealSpace
-saft_fluid = idealgas + fmt whitebear + mu*n + fmt saft_association + fmt saft_dispersion + n*mu
+saft_fluid = idealgas + whitebear + mu*n + saft_association + saft_dispersion + n*mu
 
 of_effective_potential :: Expression RealSpace -> Expression RealSpace
 of_effective_potential = substitute (r_var "veff") (r_var "x") .

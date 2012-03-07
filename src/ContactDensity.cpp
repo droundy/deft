@@ -142,16 +142,24 @@ Functional dWBm2_dn0(double radius) {
   return -log(1-n3(radius));
 }
 
-static Functional phi2_n3(const Functional &n3) {
-  return (Functional(1) + (1/9.0)*(6-3*n3+6*(1-n3)*log(1-n3)/n3))/(1-n3);
+Functional phi2(const Functional &n3) {
+  return (6-3*n3+6*(1-n3)*log(1-n3)/n3)/sqr(n3);
 }
 
-static Functional phi3_n3(const Functional &n3) {
-  return (1 - (1.0/9)*(6 - 9*n3 + 6*sqr(n3) + 6*sqr(1-n3)*log(1-n3)/n3)/sqr(n3))/sqr(1 - n3);
+Functional phi3(const Functional &n3) {
+  return (6 - 9*n3 + 6*sqr(n3) + 6*sqr(1-n3)*log(1-n3)/n3)/(4*sqr(n3));
+}
+
+static Functional sqr_n3_times_phi2_dn3(const Functional &n3) {
+  return ((Functional(-6)+4*n3)*log(1-n3)-6*n3+sqr(n3))*Functional(3)/sqr(n3);
+}
+
+static Functional n3_times_phi3_dn3(const Functional &n3) {
+  return (Functional(-6) + 5*n3 + (-2*sqr(n3)+8*n3-Functional(6))*log(1-n3)/n3)*(Functional(3)/(4*sqr(n3)));
 }
 
 Functional dWBm2_dn1v_over_n2v(double radius) {
-  return Functional(-1)*phi2_n3(n3(radius));
+  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (1-n3(radius));
 }
 
 Functional dWBm2_dn1(double radius) {
@@ -162,15 +170,16 @@ Functional dWBm2_dn2(double radius) {
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
-  return n1(radius)*phi2_n3(n3(radius)) +
-    (sqr(n2(radius)) - (sqr(n2x) + sqr(n2y) + sqr(n2z)))*
-    phi3_n3(n3(radius))/Functional(12*M_PI);
+  return (Functional(1) + (1/9.0)*sqr(n3(radius))*phi2(n3(radius)))*n1(radius) / (1-n3(radius)) +
+    (1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
+    (sqr(n2(radius)) - (sqr(n2x) + sqr(n2y) + sqr(n2z))) / (8*M_PI*sqr(1-n3(radius)));
 }
 
 Functional dWBm2_dn2v_over_n2v(double radius) {
   Functional R(radius, "R");
-  return (Functional(-1)/(4*M_PI*R))*phi2_n3(n3(radius)) -
-    6*n2(radius)*phi3_n3(n3(radius))/Functional(36*M_PI);
+  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (4*M_PI*R*(1-n3(radius))) 
+    -(1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
+    Functional(6)*n2(radius) / (24*M_PI*sqr(1-n3(radius)));
 }
 
 Functional dWBm2_dn3(double radius) {
@@ -184,25 +193,18 @@ Functional dWBm2_dn3(double radius) {
   Functional nV22 = sqr(n2x) + sqr(n2y) + sqr(n2z);
   Functional n22mnV22 = sqr(n2(radius)) - nV22;
   return
-    // Phi1
+    // Psi1
     n0(radius)/omn3
     +
-    // Phi2
-    n22mnV22/(4*M_PI*R)
-    *((Functional(1) + (1/9.0)*(6-3*n3_+6*omn3*log(omn3)/n3_))/sqr(omn3) +
-      Functional(1/9.0)/omn3*(Functional(-3) +
-                              6*(-log(omn3)/n3_ +
-                                 Functional(1)/n3_ -omn3*log(omn3)/sqr(n3_))))
+    // Psi2
+    n22mnV22/(4*M_PI*R*omn3)
+    *((2.0/9.0)*n3_*phi2(n3_) + (1.0/9.0)*sqr_n3_times_phi2_dn3(n3_)) +
+    (Functional(1) + (1/9.0)*sqr(n3_)*phi2(n3_)) * (n22mnV22) / (4*M_PI*R*sqr(omn3)) 
     +
-    // Phi3
-    (1/(36*M_PI))*vtt
-    *(3*phi3_n3(n3_)/omn3
-      - Functional(1.0/9)/sqr(omn3)*(Functional(-6)/sqr(n3_)
-                                     + Functional(6)
-                                     + 6*(- omn3*log(omn3)/sqr(n3_)
-                                          - omn3/sqr(n3_)
-                                          - sqr(omn3)*log(omn3)/Pow(3)(n3_))));
-  // derivative of (1 - (1.0/9)*(6 - 9*n3 + 6*sqr(n3) + 6*sqr(1-n3)*log(1-n3)/n3)/n3)/sqr(1 - n3);
+    // Psi3
+    (Functional(1)/(24*M_PI*sqr(omn3)))*vtt*
+    ((-4.0/9.0)*phi3(n3_) - (4.0/9.0)*n3_times_phi3_dn3(n3_)) +
+    2*(1 - (4.0/9.0)*n3_*phi3(n3_)) * vtt / (24*M_PI*omn3*omn3*omn3);
 }
 
 
@@ -213,6 +215,7 @@ Functional dAdR_simplest(double radius) {
     dWBNT_dn1(radius)*n0(radius);
 }
 
+ 
 Functional dAdR_sphere_over_n(double radius) {
   Functional R(radius, "R");
   Functional two_over_R = Functional(2)/R;
@@ -286,7 +289,7 @@ Functional ContactDensity_S(double radius) {
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_S(radius)/n0(radius);
 }
 
-
+ 
 Functional dAdR_sphere_over_n_WBm2(double radius) {
   Functional R(radius, "R");
   Functional two_over_R = Functional(2)/R;
@@ -303,17 +306,57 @@ Functional dAdR_sphere_over_n_WBm2(double radius) {
     + ShellPrimeConvolve(radius)(dWBm2_dn2(radius)
                                  + one_over_4piR*dWBm2_dn1(radius)
                                  + one_over_4piRsqr*dWBm2_dn0(radius))
-    + xShellPrimeConvolve(radius)(one_over_4piR*n2x*dWBNT_dn1v_over_n2v(radius) +
-                                  n2x*dWBNT_dn2v_over_n2v(radius))
-    + yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWBNT_dn1v_over_n2v(radius) +
-                                  n2y*dWBNT_dn2v_over_n2v(radius))
-    + zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWBNT_dn1v_over_n2v(radius) +
-                                  n2z*dWBNT_dn2v_over_n2v(radius));
+    + xShellConvolve(radius)(-one_over_4piRsqr*n2x*dWBm2_dn1v_over_n2v(radius))
+    + yShellConvolve(radius)(-one_over_4piRsqr*n2y*dWBm2_dn1v_over_n2v(radius))
+    + zShellConvolve(radius)(-one_over_4piRsqr*n2z*dWBm2_dn1v_over_n2v(radius))
+    + xShellPrimeConvolve(radius)(one_over_4piR*n2x*dWBm2_dn1v_over_n2v(radius) +
+                                  n2x*dWBm2_dn2v_over_n2v(radius))
+    + yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWBm2_dn1v_over_n2v(radius) +
+                                  n2y*dWBm2_dn2v_over_n2v(radius))
+    + zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWBm2_dn1v_over_n2v(radius) +
+                                  n2z*dWBm2_dn2v_over_n2v(radius));
+}
+
+Functional dAdR_S_WBm2(double radius) {
+  Functional R(radius, "R");
+  Functional two_over_R = Functional(2)/R;
+  Functional one_over_4piR = Functional(1)/(4*M_PI*R);
+  Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
+
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+
+  Functional n2px = xShellPrimeConvolve(radius);
+  Functional n2py = yShellPrimeConvolve(radius);
+  Functional n2pz = zShellPrimeConvolve(radius);
+  Functional n2p = ShellPrimeConvolve(radius);
+
+  return n2(radius)*(dWBm2_dn3(radius)
+                     - dWBm2_dn1(radius)/(4*M_PI*sqr(R))
+                     - dWBm2_dn0(radius)/(2*M_PI*Pow(3)(R)))
+    + n2p*(dWBm2_dn2(radius)
+           + dWBm2_dn1(radius)/(4*M_PI*R)
+           + dWBm2_dn0(radius)/(4*M_PI*sqr(R)))
+    + n2x*(dWBm2_dn2v_over_n2v(radius)*n2px
+           + dWBm2_dn1v_over_n2v(radius)*n2px/(4*M_PI*R)
+           - dWBm2_dn1v_over_n2v(radius)*n2x/(4*M_PI*sqr(R)))
+    + n2y*(dWBm2_dn2v_over_n2v(radius)*n2py
+           + dWBm2_dn1v_over_n2v(radius)*n2py/(4*M_PI*R)
+           - dWBm2_dn1v_over_n2v(radius)*n2y/(4*M_PI*sqr(R)))
+    + n2z*(dWBm2_dn2v_over_n2v(radius)*n2pz
+           + dWBm2_dn1v_over_n2v(radius)*n2pz/(4*M_PI*R)
+           - dWBm2_dn1v_over_n2v(radius)*n2z/(4*M_PI*sqr(R)));
 }
 
 Functional ContactDensitySphereWBm2(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_sphere_over_n_WBm2(radius);
+}
+
+Functional ContactDensity_S_WBm2(double radius) {
+  Functional R(radius, "R");
+  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_S_WBm2(radius)/n0(radius);
 }
 
 Functional GrossContactDensity(double radius) {
@@ -328,6 +371,14 @@ Functional GrossContactDensity(double radius) {
   return n0prime*ghs;
 }
 
+Functional FuWuContactDensity_S(double radius) {
+  Functional n2 = ShellConvolve(radius);
+  Functional n2x = xShellConvolve(radius);
+  Functional n2y = yShellConvolve(radius);
+  Functional n2z = zShellConvolve(radius);
+  Functional zeta = 1 - (sqr(n2x) + sqr(n2y) + sqr(n2z))/sqr(n2);
+  return FuWuContactDensity(radius)*sqr(zeta); // Here we multiply by zeta^2 to get our symmetrical answer.
+}
 
 Functional FuWuContactDensity(double radius) {
   Functional R(radius, "R");
@@ -371,43 +422,4 @@ Functional FuWuContactDensity(double radius) {
                             0.5*(invdiff*zeta2)*zeta*(Functional(3) + invdiff*zeta2));
 
   return n0*zeta*ghs;
-}
-
-Functional FuWuContactDensityNoZeta(double radius) {
-  Functional R(radius, "R");
-  Functional n2 = ShellConvolve(radius);
-  Functional n0 = n2/(4*M_PI*sqr(R));
-  Functional n3 = StepConvolve(radius);
-  // The following is from equation 13 of Fu and Wu 2005, which I have
-  // translated in terms of n2.  zeta3 is a version of the packing
-  // fraction (usually called eta in our code) that is computed using
-  // the shell convolution, so it is using the weighted density that
-  // is more direcly relevant to the association free energy.
-  Functional zeta3 = (R/Functional(3))*n2;
-
-  Functional n2x = xShellConvolve(radius);
-  Functional n2y = yShellConvolve(radius);
-  Functional n2z = zShellConvolve(radius);
-
-  // This gHS (called simply gHS) is the gHS that is used in Fu and
-  // Wu's 2005 paper, in equation 13.  It seems ideal, since it
-  // includes spatial dependence and is published and tested in
-  // various ways.
-
-  // zeta2 is defined right after equation 13 in Fu and Wu 2005.  But
-  // it has a typo in it, and should really be the following, which is
-  // the packing fraction (and is dimensionless).  Note that this
-  // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
-  // 2005.
-  Functional zeta2 = (R/Functional(3))*n2;
-  Functional invdiff = Functional(1)/(1-zeta3);
-  // This is equation 13 in Fu and Wu 2005:
-  //return invdiff + 1.5*n3*sqr(invdiff) + 0.5*sqr(n3)*Pow(3)(invdiff);
-
-  // This is equation 13 in Fu and Wu 2005, but written to be slightly
-  // more efficient:
-  Functional ghs = invdiff*(Functional(1) +
-                            0.5*(invdiff*zeta2)*(Functional(3) + invdiff*zeta2));
-
-  return n0*ghs;
 }
