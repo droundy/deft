@@ -644,18 +644,18 @@ energy itself, making this formulation relatively expensive.
 A_{HS} &= \int \left\{
     -n_0 \ln\left(1 - n_3\right)
     + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + (1 - \frac{4}{9}n_3\phi_3(n_3))\frac{(n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{24\pi (1-n_3)^2}
+    + \left(1 - \frac{4}{9}n_3\phi_3(n_3)\right)\frac{n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}}{24\pi (1-n_3)^2}
     \right\}
 \end{align}
  where
  \begin{align}
-   \phi_2 &= (6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3))\frac{1}{n_3^3}\\
-   \phi_3 &= (6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3))\frac{1}{4n_3^3}
+   \phi_2 &= \left(6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3)\right)\frac{1}{n_3^3}\\
+   \phi_3 &= \left(6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3)\right)\frac{1}{4n_3^3}
  \end{align}
 For the following derivitives we have
 \begin{align}
-   \frac{\delta \phi_2}{\delta n_3} &= ((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2]\frac{3}{n_3^4}\\
-   \frac{\delta \phi_3}{\delta n_3} &= (-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3))\frac{3}{4n_3^4}
+   \frac{\delta \phi_2}{\delta n_3} &= \left((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2\right)\frac{3}{n_3^4}\\
+   \frac{\delta \phi_3}{\delta n_3} &= \left(-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3)\right)\frac{3}{4n_3^4}
  \end{align}
 And using these
 \begin{align}
@@ -664,12 +664,12 @@ And using these
 where
 \begin{align}
   \psi_1 &= \frac{n_0}{1-n_3}\\
-  \psi_2 &= (\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3})(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}) + (1 + \frac{1}{9}n_3^2\phi_2)(\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2})\\
-  \psi_3 &= (\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2})(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}) + 2(1 - \frac{4}{9}n_3\phi_3)(\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3}) 
+  \psi_2 &= \frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3}\left(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}\right) + \left(1 + \frac{1}{9}n_3^2\phi_2\right)\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2}\\
+  \psi_3 &= \frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2}\left(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}\right) + 2\left(1 - \frac{4}{9}n_3\phi_3\right)\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3} 
 \end{align}
 We also have
 \begin{align}
-  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)(\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2})\\
+  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2}\\
   \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
   \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
   \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
