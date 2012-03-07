@@ -24,8 +24,8 @@ pylab.plot(wbm2data[:,0],wbm2data[:,1]*4*numpy.pi/3,"c--",label='WB mark II dens
 pylab.plot(dftdata[:,0],dftdata[:,6]*4*numpy.pi/3,"c--",label="$n_0$")
 
 off = 2
-pylab.plot(mcdata[:,0],mcdata[:,2+2*off]*4*numpy.pi/3,"r-",label="ConDensity")
-pylab.plot(mcdata[:,0],mcdata[:,3+2*off]*4*numpy.pi/3,"g-",label="CenConDensity")
+pylab.plot(mcdata[:,0],mcdata[:,2+2*off]*4*numpy.pi/3,"r-",label="MC $n_{contact}^S$")
+pylab.plot(mcdata[:,0],mcdata[:,3+2*off]*4*numpy.pi/3,"g-",label="MC $n_{contact}^S$")
 
 me = 3
 pylab.plot(dftdata[:,0],dftdata[:,3]*4*numpy.pi/3,"g+--",label="$n^{S}_{contact}$")

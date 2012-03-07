@@ -27,8 +27,8 @@ me = 20
 
 pylab.plot(dftdata[:,0]-3,dftdata[:,6]*4*numpy.pi/3,"c--",markevery=me,label="$n_0$")
 
-pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,4]*4*numpy.pi/3,"r-",label="ConDensity")
-pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,5]*4*numpy.pi/3,"g-",label="CenConDensity")
+pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,4]*4*numpy.pi/3,"r-",label="MC $n^A$")
+pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,5]*4*numpy.pi/3,"g-",label="MC $n^S$")
 
 pylab.plot(dftdata[:,0]-3,dftdata[:,3]*4*numpy.pi/3,"g+--",markevery=me,label="$n^{S}_{contact}$")
 pylab.plot(dftdata[:,0]-3,dftdata[:,4]*4*numpy.pi/3,"gx--",markevery=me,label="Yu and Wu")

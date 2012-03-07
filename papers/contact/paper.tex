@@ -14,13 +14,12 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
-\newcommand{\xx}{\textbf{x}}
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
 
-\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
-%\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 
 % needsworklater is used to annotate bits that need work, but that we
 % can postpone for a while.
@@ -76,10 +75,7 @@ inhomogeneous density distributions, because they use local density
 approximations that are only valid for densities that vary slowly over
 molecular length scales.  A key input to those SAFT-based functionals
 that can handle sharply varying densities is the correlation function
-evaluated at contact. \fixme{I need to figure out how best to phrase
-  this... do we want to compute correlation at contact, or contact
-  density itself? I prefer the latter, but the former is what is
-  commonly included in formulas.}
+evaluated at contact.
 
 Constructing a classical density functional based on SAFT involves
 rewriting each term in the free energy as a functional of an
@@ -123,27 +119,24 @@ function (see Section~\ref{sec:gross})\cite{gross2009density}.
 Given these different approaches, it seems worthwhile to examine this
 property of the hard-sphere fluid through direct simulation, in order
 to establish the advantages and disadvantages of each approach.
-\fixme{
 
-Jeff's Notes:
-A novice (me) is confused by the use of 'contact value of correlation function' throuhout this introduction while throughout the rest of the paper we refer to the 'contact density'.  Pehaps the audince will understand that they're interchangable (if they are) but this was confusing to me.  Also, I would think I'd like to see something like:
+We first discuss two possibilities for the definition of contact
+density.  The first involves a more symmetric interpretation and so we
+call it the '$S$ case'.  The second involves a sphere-centered,
+assymetrical interpretation and so we call it the '$A$ case'.  We
+present where in the SAFT free energy formulation these contact
+densities will contribute.  We next present a thermodynamic method
+that we will use to calculate the above contact densities.  This
+method involves the use of surface pressure and the minimization of
+the excess free energy refered to above.  We use the White Bear and
+White Bear Mark II formulations of these free energy terms and take
+neccesary derivitives in the concpetual spirit of the seperately
+defined $S$ an $A$ case contact densities.  Finally we compare the
+resulting contact densities with those of Gross, those of Yu and Wu,
+and as well with our own Monte Carlo simulations.
 
-We first discuss two possibilities for the definition of contact density.  The first involves a more symmetric interpretation and so we call it the 'S case'.  The second involves a sphere-centered, assymetrical interpretation and so we call it the 'A case'.  We present where in the SAFT free energy formulation these contact densities will contribute.  We next present a thermodynamic method that we will use to calculate the above contact densities.  This method involves the use of surface pressure and the minimization of the excess free energy refered to above.  We use the White Bear and White Bear Mark II formulations of these free energy terms and take neccesary derivitives in the concpetual spirit of the seperately defined S an A case contact densities.  Finally we compare the resulting contact densities with those of Gross, those of Yu and Wu, and as well with our wn monte carlo simulations.}            
 
-\fixme{Should we include these equations? Maybe just later?}
-\begin{align}
-  \frac{A_\textit{chain}}{kT} &= -(m-1) n \left(\ln\left(g_\sigma\right)-1\right)
-\end{align}
-\begin{align}
-  \frac{A_\textit{assoc}}{kT} &= \sum_i n \left(\ln X_i - \frac12 X_i + \frac12\right) \\
-  X_i &= \frac{1}{1 + \sum_j n g_\sigma X_j\kappa_{ij} \left(e^{\beta \epsilon_{ij}}-1\right)}
-\end{align}
-
-\section{Contact density and correlation function}
-
-\fixme{We should decide on good names for these two densities.  In
-  this section I define them formally, and we should keep using the
-  same names (and mathematical symbols) for them throughout.}
+\section{Correlation function with inhomogeneity}
 
 We will define our terms by making use of the two-particle density
 $n^{(2)}(\rr_1,\rr_2)$, which gives the probability per unit volume of
@@ -163,20 +156,19 @@ correlation function for hard spheres.
 In a system with an inhomogeneous density, we seek a \emph{local}
 value for $g_\sigma$.  There are two reasonable options for defining
 such a local function: a symmetric formulation (which we refer to as $S$) and an
-asymmetric formulation (which we refer to as $A$). \fixme{Should we
-  introduce a third one, for Yu and Wu?}
+asymmetric formulation (which we refer to as $A$).
 
 For the symmetric $S$ case:
 \begin{align}
-  g^S_\sigma(\rr) &= \frac{1}{n_S(\rr)^2}\int n^{(2)}(\rr - \rr', \rr
+  g^S_\sigma(\rr) &= \frac{1}{n_0(\rr)^2}\int n^{(2)}(\rr - \rr', \rr
   + \rr')
   \frac{\delta(|\rr'| -\sigma/2)}{\pi\sigma^2}d\rr' \\
-  n_S(\rr) &= \int n(\rr')\frac{\delta(|\rr-\rr'|-\sigma/2)}{\pi\sigma^2} d\rr'
+  n_0(\rr) &= \int n(\rr')\frac{\delta(|\rr-\rr'|-\sigma/2)}{\pi\sigma^2} d\rr'
 \end{align}
 This functional gives a value averaged over spheres that touch at the
-position $\rr$.  The density $n_S$ is the same as the density $n_0$
-defined in Fundamental Measure Theory (FMT), and seems ideal for
-treating touching spheres.
+position $\rr$.  The density $n_0$ is one of the fundamental measures
+of Fundamental Measure Theory (FMT), and seems ideal for treating
+touching spheres.
 
 And for the asymmetric $A$ case:
 \begin{align}
@@ -190,9 +182,9 @@ In this case, the two-particle density is averaged over spheres
 touching a sphere that is aat the given position $\rr$.
 
 In the process of defining these two averaged correlation functions,
-we also defined two averaged densities, $n_S(\rr)$ and $n_A(\rr)$,
+we also defined two averaged densities, $n_0(\rr)$ and $n_A(\rr)$,
 which are the density of spheres available to be in
-contact.  In the homogeneous limit, $n_S = n_A = n$.  It is an
+contact.  In the homogeneous limit, $n_0 = n_A = n$.  It is an
 open question, which of these averages will be more useful in any
 particular functional.  Suffice to say, either average is a
 \emph{possible} way to convert a function that is defined for a
@@ -200,13 +192,13 @@ homogeneous system to a functional that is applicable to inhomogeneous
 systems.
 
 Yu and Wu introduce an approximation for
-$g^S$\cite{yu2002fmt-dft-inhomogeneous-associating}, which will be
-discussed in Section~\ref{sec:yuwu}.  Gross introduced an
-approximation for $g^A$\cite{gross2009density}, which will be
-introduced in Section~\ref{sec:gross}.  We will also introduce our own
-approximation to $g^A$ which is based on the assumption of
-thermodynamic consistency within FMT, in
-Section~\ref{contact-at-sphere}.  We will report on the accuracy of
+$g^S$\cite{yu2002fmt-dft-inhomogeneous-associating}, which we will
+discus in Section~\ref{sec:yuwu}.  Gross introduced an
+approximation for $g^A$\cite{gross2009density}, which we will
+introduce in Section~\ref{sec:gross}.  We will also introduce our own
+approximations for both $g^A$ and $g^S$ which are based on the
+assumption of thermodynamic consistency within FMT, in
+Sections~\ref{sec:g-S} and~\ref{sec:g-A}.  We will report on the accuracy of
 these approximations by comparing with Monte Carlo simulations of the
 inhomogeneous hard-sphere fluid.  We will focus on the contact
 densities, rather than the correlation function itself, because these
@@ -217,6 +209,16 @@ $n^{(2)}$.
 
 
 \subsection{Association free energy of SAFT}
+
+\fixme{Integrate the following equations into this section...}
+\begin{align}
+  \frac{A_\textit{chain}}{kT} &= -(m-1) n \left(\ln\left(n g_\sigma \right)-1\right)
+\end{align}
+\begin{align}
+  \frac{A_\textit{assoc}}{kT} &= \sum_i n \left(\ln X_i - \frac12 X_i + \frac12\right) \\
+  X_i &= \frac{1}{1 + \sum_j n g_\sigma X_j\kappa_{ij} \left(e^{\beta \epsilon_{ij}}-1\right)}
+\end{align}
+
 \newcommand\epsilonassoc{\ensuremath{\varepsilon_\textit{AB}}}
 \newcommand\kappaassoc{\ensuremath{\kappa_\textit{AB}}}
 \newcommand\ncontact{\ensuremath{n_\textit{contact}}}
@@ -300,10 +302,10 @@ hard-sphere radius:
 This derivative gives us the force on \emph{all} the hard
 spheres---since we're changing all their radii at once.  To compute
 the pressure on the spheres, we just need to divide by the total area,
-which means dividing by $N 4\pi (2R)^2$, since the relevant area
+which means dividing by $N 4\pi \sigma^2$, since the relevant area
 is the area over which the molecules can make contact.
 \begin{align}
-  p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR} \\
+  p_{HS} &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
   \derivation{
     &= \frac14 \frac{1}{N 4\pi R^2} Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R} \\
     &= \frac{3}{4\pi R^3} \eta k_BT \frac{1 -
@@ -329,7 +331,7 @@ functional describes the excess free energy of a hard-sphere fluid.
 This particular FMT reduces to the Carnahan-Starling equation of state
 for homogeneous systems.
 \begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)\right) d\xx \; ,
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
 \end{equation}
 with integrands
 \begin{align}
@@ -343,8 +345,8 @@ with integrands
 \end{align}
 using the weighted densities
 \begin{align}
-  n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
-  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - R) d\rr' \\
+  n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
 \end{align}
 \begin{align}
   \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
@@ -360,14 +362,14 @@ using the weighted densities
 %% second functional derivative of the free energy:
 %% \textcolor{red}{(Something like...)}
 %% \begin{align}
-%%   -c^{(2)}(\xx_1, \xx_2) &= \frac{1}{k_BT}\frac{\delta^2 F_{ex}}{\delta n(\xx_1) \delta n(\xx_2)}
+%%   -c^{(2)}(\rr_1, \rr_2) &= \frac{1}{k_BT}\frac{\delta^2 F_{ex}}{\delta n(\rr_1) \delta n(\rr_2)}
 %% \end{align}
 %% The direct correlation function is related to the ordinary correlation
 %% function by the Ornstein-Zernike relation
 %% \begin{align}
-%%   h(\xx_1, \xx'_2) &= g(\xx_1, \xx_2) - 1 \\
-%%   h(\xx_1, \xx_2) &= c(\xx_1, \xx_2)
-%%     + \int n(\xx_3)c(\xx_1, \xx_3) h(\xx_2, \xx_3)d\xx''
+%%   h(\rr_1, \rr'_2) &= g(\rr_1, \rr_2) - 1 \\
+%%   h(\rr_1, \rr_2) &= c(\rr_1, \rr_2)
+%%     + \int n(\rr_3)c(\rr_1, \rr_3) h(\rr_2, \rr_3)d\rr''
 %% \end{align}
 %% From these two equation, we could in principle extract the correlation
 %% function evaluated at contact from the DFT free energy functional.
@@ -395,8 +397,8 @@ using the weighted densities
 %% reproducing the derivation for a homogeneous system using the
 %% FMT functional.
 %% \begin{align}
-%%   p_{HS} &= \frac{1}{N 4\pi (2R)^2} \frac{dA_{HS}}{dR} \\
-%%   \ncontact &= \frac{1}{N k_BT 4\pi (2R)^2} \frac{dA_{HS}}{dR}
+%%   p_{HS} &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
+%%   \ncontact &= \frac{1}{N k_BT 4\pi \sigma^2} \frac{dA_{HS}}{dR}
 %% \end{align}
 %% While this should give the true mean contact density for any given
 %% system, this is not particularly useful, as we have no way of knowing
@@ -547,7 +549,8 @@ using the weighted densities
 %%   \end{align}
 %% }
 
-\section{Asymmetrically averaged correlation function}\label{contact-at-sphere}
+
+\section{Asymmetrically averaged correlation function}\label{sec:g-A}
 
 When we consider an inhomogeneous system, we may prefer to ask for
 \emph{which} sphere we are interested in computing the contact
@@ -556,16 +559,20 @@ position $\mathbf{r}$.  By making the hard-sphere radius dependent on
 position, we can compute the pressure on the hard spheres located at
 $\mathbf{r}$.
 \begin{align}
-  p_{HS}(\mathbf{r}) &= \frac{1}{4\pi (2R)^2} \frac{\delta
+  p_{HS}(\mathbf{r}) &= \frac{1}{n(\rr) 4\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta R(\mathbf{r})} \\
-  \ncontact(\xx) &= \frac{1}{k_BT 4\pi (2R)^2} \frac{\delta
-    A_{HS}}{\delta R(\mathbf{r})}
+  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 4\pi \sigma^2} \frac{\delta
+    A_{HS}}{\delta R(\mathbf{r})} \\
+  g_\sigma^A(\rr) &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
+  g_\sigma^A(\rr) &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 4\pi \sigma^2} \frac{\delta
+    A_{HS}}{\delta R(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
-After considerable math to do the above functional derivative, we find
-a functional giving the contact density for spheres at any given
-position.  This functional unavoidably involves more convolutions than
-are present in the free energy itself, which makes it relatively
-expensive.
+Equation~\ref{eq:g-A-exact} is an exact expression for $g_\sigma^A$
+given the exact functional $A_{HS}$.  In practice, we use the
+approximate White Bear functional, and find an approximate expression
+for $g_\sigma^A$, which is given in Appendix~\ref{appendix:g-A}.  This
+expression will involve more convolutions than are present in the free
+energy itself, making this formulation relatively expensive.
 
 \derivation{
   So to compute this we need
@@ -811,20 +818,23 @@ so the integrals range over spheres that are twice as large.
 \label{fig:n0}
 \end{figure}
 
-\section{Symmetrically averaged correlation function}
+\section{Symmetrically averaged correlation function}\label{sec:g-S}
 
 An alternate definition of the averaged correlation function for an
 inhomogeneous system would be the correlation function averaged for
 spheres \emph{touching at a given point}.  This would be a symmetric
 measure, since both spheres involved are treated in the same way.  In
-fact, the density of such spheres is just the density $n_0(\xx)$ from
+fact, the density of such spheres is just the density $n_0(\rr)$ from
 FMT.  See Figure~\ref{fig:n0} for an illustration $n_0$.  Since $n_0$
 is the fundamental measure of sphere surface contact, it makes sense
 to define a corresponding correlation function $g_\sigma^S$.  This is
 \emph{almost} what is done by Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as discussed in
-Section~\ref{sec:yuwu}, although they use a modified density $\zeta
-n_0$ to account for density gradients.
+
+\fixme{Add qualitative description of the derivation needed to get
+  $g_\sigma^S$.}
+
+Complete expressions for $g_\sigma^S$ are included in
+Appendix~\ref{appendix:g-S}.
 
 \section{Yu and Wu's functional}\label{sec:yuwu}
 
@@ -836,7 +846,7 @@ data.  Yu and Wu use a symmetric formulation for $g_\sigma$, but
 instead of using $n_0$ as the associated density, it uses a density
 given by
 \begin{align}
-  n^\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
+  n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
   \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
@@ -870,7 +880,7 @@ density evaluated at the sphere location.  Alongside these, we plot
 the contact density of Yu and
 Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, the contact density
 of Gross~\cite{gross2009density}, and the ``contact density at
-sphere'' from Section~\ref{contact-at-sphere}.  In principle, the
+sphere'' from Section~\ref{sec:g-A}.  In principle, the
 functional of Yu (FIXME) should match the CenConDensity, while the DFT
 at sphere should match the ConDensity...
 
@@ -1256,6 +1266,7 @@ There is a sign ambiguity here with regard to whether we are asking
 about the derivative of this delta function with regard to $R$ or
 something else.  We just need to get it right.
 
+\derivation{
 \begin{widetext}
 \section{The White Bear free energy for homogeneous systems}
 
@@ -1348,6 +1359,21 @@ of state the excess free energy, which is
   A = Nk_BT\frac{4\eta -3\eta^2}{(1-\eta)^2}
 \end{align}
 \end{widetext}
+}
+
+\section{Expression for asymmetrically averaged correlation
+  function}\label{appendix:g-A}
+
+\section{Expression for symmetrically averaged correlation
+  function}\label{appendix:g-S}
+
+\section{Expression for asymmetrically averaged correlation
+  function based on White Brear Mark II free energy}\label{appendix:g-A-ii}
+
+\section{Expression for symmetrically averaged correlation
+  function based on White Brear Mark II free energy}\label{appendix:g-S-ii}
+
+
 
 \begin{widetext}
 \section{Formulas generated from Haskell}
