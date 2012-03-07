@@ -12,7 +12,7 @@ long shell(Vector3d v, long div, double *radius, double *sections);
 double countOverLaps(Vector3d *spheres, long n, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 
-bool periodic_x = false; // will go from -lenx/2 to +lenx/2 
+bool periodic_x = false; // will go from -lenx/2 to +lenx/2
 bool periodic_y = false;
 bool periodic_z = false;
 bool has_x_wall = false;
@@ -20,9 +20,9 @@ bool has_y_wall = false;
 bool has_z_wall = false;
 bool spherical_outer_wall = false;  //spherical walls on outside of entire volume
 bool spherical_inner_wall = false;  //sphere at center of entire volume that is a wall
-double lenx = 20; 
-double leny = 20; 
-double lenz = 20; 
+double lenx = 20;
+double leny = 20;
+double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
 double R = 1;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     printf("usage:  %s spheres iterations uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
-  
+
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
   }
   printf("flatdiv = %s\n", flat_div ? "true" : "false");
   printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
-  
+
   const char *outfilename = argv[4];
   printf ("this is %s",outfilename);
   fflush(stdout);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
   long num_timed = 0;
   long i = 0;
   double scale = .5;
-  
+
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
@@ -145,11 +145,11 @@ int main(int argc, char *argv[]){
     }
   }
   printf("\nFound initial state!\n");
-//////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   //FILE *o = fopen(outfilename, "w");
   //fprintf(o,"Radius=%g\n",rad);
   //fprintf(o,"Number of Spheres=%d\n", N);
-  
+
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;
   printf("Using %ld divisions\n", div);
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]){
   printf("%ld\t", div);
   printf("%f\t", uncertainty_goal);
   fflush(stdout);
-  
+
   double *radius = new double[div+1];
   double *sections = new double [div+1];
 
@@ -170,17 +170,17 @@ int main(int argc, char *argv[]){
     if (spherical_inner_wall){
       double size = (rad - innerRad)/div;
       for (long s=0; s<div+1; s++){
-	radius[s] = size*s + innerRad;
+        radius[s] = size*s + innerRad;
       }
     } else {
       for (long l=0;l<div+1;l++) {
-	// make each bin have about the same volume
-	radius[l] = rad*(pow(double(l)/(div), 1.0/3.0) + 0.1*double(l)*uncertainty_goal)/
-	  (1 + 0.1*(div)*uncertainty_goal);
+        // make each bin have about the same volume
+        radius[l] = rad*(pow(double(l)/(div), 1.0/3.0) + 0.1*double(l)*uncertainty_goal)/
+          (1 + 0.1*(div)*uncertainty_goal);
       }
     }
   }
-  
+
   if (flat_div){
     for (long k=0;k<div+1;k++) printf("section  = %f\n",sections[k]);
     fflush(stdout);
@@ -190,22 +190,22 @@ int main(int argc, char *argv[]){
   }
 
 
-  printf("Look HEREE WAAAAAAAAAAAAAA !!!!%f\n",radius[0]); 
-  printf("%f\n",radius[1]); 
+  printf("Look HEREE WAAAAAAAAAAAAAA !!!!%f\n",radius[0]);
+  printf("%f\n",radius[1]);
   printf("%f\n",radius[2]);
-  fflush(stdout); 
+  fflush(stdout);
   //////////////////////////////////////////////////////////////////////////////////////////////
   scale = .2;
   long count = 0;
   long *shells = new long[div];
   for (long l=0; l<div; l++) shells[l] = 0;
-  
+
   double *shellsArea = new double [div];
   for (long l=0; l<div; l++) shellsArea[l]=0;
-  
+
   double *density = new double[div];
   double *n0 = new double[div];
-  
+
   double *SconDensity = new double[div]; double *ScenConDensity = new double[div];
   long *SconShells = new long[div]; long *ScenConShells = new long[div];
   double *MconDensity = new double[div]; double *McenConDensity = new double[div];
@@ -214,14 +214,14 @@ int main(int argc, char *argv[]){
   long *LconShells = new long[div]; long *LcenConShells = new long[div];
   double *GconDensity = new double[div]; double *GcenConDensity = new double[div];
   long *GconShells = new long[div]; long *GcenConShells = new long[div];
-  
-  
+
+
   for(int l=0; l<div; l++){
     SconShells[l]=0; MconShells[l]=0; LconShells[l]=0; GconShells[l]=0;
     ScenConShells[l]=0;McenConShells[l]=0;LcenConShells[l]=0;GcenConShells[l]=0;
   }
   /////////////////////////////////////////////////////////////////////////////
-  
+
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -241,62 +241,62 @@ int main(int argc, char *argv[]){
     // chance to move
     if (workingmoves%N == 0) {
       for (long i=0;i<N;i++) {
-	//printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-	shells[shell(spheres[i], div, radius, sections)]++;
-	if (!flat_div){
-	  for (long k=0; k<div; k++) {
-	    const double ri = distance(spheres[i],Vector3d(0,0,0));
-	    if (ri < radius[k+1] + R && ri + radius[k+1] > R && ri > radius[k] - R) {
-	      // There is at least some overlap with shell k! (not so easy)
-	      double costhetamax, costhetamin;
-	      if (ri > radius[k] + R) {
-		costhetamin = 1;
-	      } else if (radius[k] + ri < R) {
-		costhetamin = 1;
-	      } else {
-		costhetamin = (ri*ri - radius[k]*radius[k] + R*R)/(2*ri*R);
-	      }
-	      if (ri < radius[k+1] - R) {
-		costhetamax = -1;
-	      } else {
-		costhetamax = (ri*ri - radius[k+1]*radius[k+1] + R*R)/(2*ri*R);
-	      }
-	      assert(costhetamin >= costhetamax);
-	      shellsArea[k] += 2*M_PI*R*R*(costhetamin-costhetamax);
-	    }
-	  }
-	} else {
-	  for (long k=0; k<div+1; k++){
-	    double dl = spheres[i][2] - sections[k];
-	    double dh = spheres[i][2] - sections[k+1];
-	    if (dl > R) dl = R;
-	    if (dl < -R) dl = -R;
-	    if (dh > R) dh = R;
-	    if (dh < -R) dh = -R;
-	    shellsArea[k] += 2*M_PI*R*(dl-dh);
-	  }
-	}
-      }	
+        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+        shells[shell(spheres[i], div, radius, sections)]++;
+        if (!flat_div){
+          for (long k=0; k<div; k++) {
+            const double ri = distance(spheres[i],Vector3d(0,0,0));
+            if (ri < radius[k+1] + R && ri + radius[k+1] > R && ri > radius[k] - R) {
+              // There is at least some overlap with shell k! (not so easy)
+              double costhetamax, costhetamin;
+              if (ri > radius[k] + R) {
+                costhetamin = 1;
+              } else if (radius[k] + ri < R) {
+                costhetamin = 1;
+              } else {
+                costhetamin = (ri*ri - radius[k]*radius[k] + R*R)/(2*ri*R);
+              }
+              if (ri < radius[k+1] - R) {
+                costhetamax = -1;
+              } else {
+                costhetamax = (ri*ri - radius[k+1]*radius[k+1] + R*R)/(2*ri*R);
+              }
+              assert(costhetamin >= costhetamax);
+              shellsArea[k] += 2*M_PI*R*R*(costhetamin-costhetamax);
+            }
+          }
+        } else {
+          for (long k=0; k<div+1; k++){
+            double dl = spheres[i][2] - sections[k];
+            double dh = spheres[i][2] - sections[k+1];
+            if (dl > R) dl = R;
+            if (dl < -R) dl = -R;
+            if (dh > R) dh = R;
+            if (dh < -R) dh = -R;
+            shellsArea[k] += 2*M_PI*R*(dl-dh);
+          }
+        }
+      }
       for(long k=0; k<N; k++){
-	for(long n = 0; n<N; n++){
-	  //if(k!=n && distance(spheres[n],spheres[k]) <= oShell*2 || cornTouch(spheres[n],spheres[k],R)){
-	  if(k!=n && touch(spheres[n],spheres[k],oShellArray[0])){
-	    SconShells[shell(spheres[k],div,radius,sections)]++;
-	    ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-	  } 
-	  if(k!=n && touch(spheres[n],spheres[k],oShellArray[1])){
-	    MconShells[shell(spheres[k],div,radius,sections)]++;
-	    McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-	  }
-	  if(k!=n && touch(spheres[n],spheres[k],oShellArray[2])){
-	    LconShells[shell(spheres[k],div,radius,sections)]++;
-	    LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-	  }
-	  if(k!=n && touch(spheres[n],spheres[k],oShellArray[3])){
-	    GconShells[shell(spheres[k],div,radius,sections)]++;
-	    GcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-	  }
-	}
+        for(long n = 0; n<N; n++){
+          //if(k!=n && distance(spheres[n],spheres[k]) <= oShell*2 || cornTouch(spheres[n],spheres[k],R)){
+          if(k!=n && touch(spheres[n],spheres[k],oShellArray[0])){
+            SconShells[shell(spheres[k],div,radius,sections)]++;
+            ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+          }
+          if(k!=n && touch(spheres[n],spheres[k],oShellArray[1])){
+            MconShells[shell(spheres[k],div,radius,sections)]++;
+            McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+          }
+          if(k!=n && touch(spheres[n],spheres[k],oShellArray[2])){
+            LconShells[shell(spheres[k],div,radius,sections)]++;
+            LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+          }
+          if(k!=n && touch(spheres[n],spheres[k],oShellArray[3])){
+            GconShells[shell(spheres[k],div,radius,sections)]++;
+            GcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+          }
+        }
       }
     }
     if(j % (iterations/100)==0 && j != 0){
@@ -321,8 +321,8 @@ int main(int argc, char *argv[]){
     count++;
     if(overlap(spheres, temp, N, R, j%N)){
       if (scale > 0.001 && false) {
-	scale = scale/sqrt(1.02);
-	//printf("Reducing scale to %g\n", scale);
+        scale = scale/sqrt(1.02);
+        //printf("Reducing scale to %g\n", scale);
       }
       continue;
     }
@@ -334,8 +334,8 @@ int main(int argc, char *argv[]){
     }
   }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-  
+  //////////////////////////////////////////////////////////////////////////////////////////
+
   for(long i=0; i<div; i++){
     printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
   }
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]){
       n0[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*R*R);
     }
   }
-  
+
   for(long i=0; i<div; i++){
     SconDensity[i]=((SconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[0]*8*oShellArray[0]*oShellArray[0]-4/3.*M_PI*8*R*R*R));
     ScenConDensity[i]=4*M_PI*R*R*((ScenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[0]*oShellArray[0]*oShellArray[0]-4/3.*M_PI*8*R*R*R));
@@ -364,13 +364,13 @@ int main(int argc, char *argv[]){
     GcenConDensity[i]=4*M_PI*R*R*((GcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[3]*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
   }
   for(long i=0; i<div; i++){
-    printf("Number of contacts in division %ld = %ld %ld %ld %ld\n", i+1, 
-	   SconShells[i], MconShells[i], LconShells[i], GconShells[i]);
-    printf("Number of contacts (center) in division %ld = %ld %ld %ld %ld\n", i+1, 
-	   ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
+    printf("Number of contacts in division %ld = %ld %ld %ld %ld\n", i+1,
+           SconShells[i], MconShells[i], LconShells[i], GconShells[i]);
+    printf("Number of contacts (center) in division %ld = %ld %ld %ld %ld\n", i+1,
+           ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
-  
-//FILE *out = fopen((const char *)outfilename,"w");
+
+  //FILE *out = fopen((const char *)outfilename,"w");
   FILE *out = fopen((const char *)outfilename,"w");
   if (out == NULL) {
     printf("Error creating file %s\n", outfilename);
@@ -381,18 +381,18 @@ int main(int argc, char *argv[]){
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
             LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   } else if (spherical_inner_wall) {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0, 
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0,
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
             LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
     fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
             LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   } else {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0], 
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0],
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
             LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
   }
-  
+
   long divtoprint = div;
   if (!spherical_outer_wall) divtoprint = div - 1;
   if (!flat_div) {
@@ -420,10 +420,10 @@ int main(int argc, char *argv[]){
   //delete[] density;
   printf("heresecond");
   fflush(stdout);
-  delete[] SconShells; 
+  delete[] SconShells;
   printf("herethird");
   fflush(stdout);
-  delete[] SconDensity; 
+  delete[] SconDensity;
   printf("herefourth");
   fflush(stdout);
   delete[] ScenConDensity; delete[] ScenConShells;
@@ -443,9 +443,9 @@ double countOverLaps(Vector3d *spheres, long n, double R){
   double num = 0;
   for(long j = 0; j<n; j++){
     for(long i = j+1; i < n; i++){
-        if(distance(spheres[i],spheres[j])<2*R){
-          num+=2*R-distance(spheres[i],spheres[j]);
-	}
+      if(distance(spheres[i],spheres[j])<2*R){
+        num+=2*R-distance(spheres[i],spheres[j]);
+      }
     }
     if (spherical_outer_wall){
       if(distance(spheres[j],Vector3d(0,0,0))>rad){
@@ -459,78 +459,78 @@ double countOverLaps(Vector3d *spheres, long n, double R){
     }
     if (has_x_wall && periodic_x){
       if (spheres[j][0] > lenx/2 ){
-	num += spheres[j][0]-(lenx/2);
+        num += spheres[j][0]-(lenx/2);
       } else if (spheres[j][0] < -lenx/2){
-	num -= spheres[j][0] + (lenx/2);
+        num -= spheres[j][0] + (lenx/2);
       }
     }
     if (has_y_wall && periodic_y){
       if (spheres[j][1] > leny/2 ){
-	num += spheres[j][1]-(leny/2);
+        num += spheres[j][1]-(leny/2);
       } else if (spheres[j][1] < -leny/2){
-	num -= spheres[j][1] + (leny/2);
+        num -= spheres[j][1] + (leny/2);
       }
     }
     if (has_z_wall && periodic_z){
       if (spheres[j][2] > lenz/2 ){
-	num += spheres[j][2]-(lenz/2);
+        num += spheres[j][2]-(lenz/2);
       } else if (spheres[j][2] < -lenz/2){
-	num -= spheres[j][2] + (lenz/2);
+        num -= spheres[j][2] + (lenz/2);
       }
     }
     Vector3d lat[3] = {latx,laty,latz};
     bool periodic[3] = {periodic_x, periodic_y, periodic_z};
     for(long i = j+1; i < n; i++){
       for (long k=0; k<3; k++){
-	if (periodic[k]){
-	  if (distance(spheres[j],spheres[i]+lat[k]) < 2*R){
-	    num += 2*R - distance(spheres[j],spheres[i]+lat[k]);
-	  } else if (distance(spheres[j],spheres[i]-lat[k]) < 2*R) {
-	    num += 2*R - distance(spheres[j],spheres[i]-lat[k]);
-	  }
-	} 
-	for (long m=k+1; m<3; m++){
-	  if (periodic[m] && periodic[k]){
-	    if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
-	      num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
-	    }
-	    if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
-	      num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
-	    }
-	    if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
-	      num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
-	    }
-	    if (distance(spheres[j],spheres[i]-lat[k]+lat[m]) < 2*R){
-	      num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
-	    }
-	  }
-	}
+        if (periodic[k]){
+          if (distance(spheres[j],spheres[i]+lat[k]) < 2*R){
+            num += 2*R - distance(spheres[j],spheres[i]+lat[k]);
+          } else if (distance(spheres[j],spheres[i]-lat[k]) < 2*R) {
+            num += 2*R - distance(spheres[j],spheres[i]-lat[k]);
+          }
+        }
+        for (long m=k+1; m<3; m++){
+          if (periodic[m] && periodic[k]){
+            if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
+              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+            }
+            if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
+              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+            }
+            if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
+              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+            }
+            if (distance(spheres[j],spheres[i]-lat[k]+lat[m]) < 2*R){
+              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+            }
+          }
+        }
       }
       if (periodic[0] && periodic[1] && periodic[2]){
-	if (distance(spheres[j],spheres[i]+latx+laty+latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]+latx+laty+latz);
-	}
-	if (distance(spheres[j],spheres[i]+latx+laty-latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]+latx+laty-latz);
-	}
-	if (distance(spheres[j],spheres[i]+latx-laty+latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]+latx-laty+latz);
-	}
-	if (distance(spheres[j],spheres[i]-latx+laty+latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]-latx+laty+latz);
-	}
-	if (distance(spheres[j],spheres[i]-latx-laty+latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]-latx-laty+latz);
-	}
-	if (distance(spheres[j],spheres[i]-latx+laty-latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]-latx+laty-latz);
-	}
-	if (distance(spheres[j],spheres[i]+latx-laty-latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]+latx-laty-latz);
-	}
-	if (distance(spheres[j],spheres[i]-latx-laty-latz) < 2*R){
-	  num += 2*R - distance(spheres[j],spheres[i]-latx-laty-latz);
-	}
+        if (distance(spheres[j],spheres[i]+latx+laty+latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]+latx+laty+latz);
+        }
+        if (distance(spheres[j],spheres[i]+latx+laty-latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]+latx+laty-latz);
+        }
+        if (distance(spheres[j],spheres[i]+latx-laty+latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]+latx-laty+latz);
+        }
+        if (distance(spheres[j],spheres[i]-latx+laty+latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]-latx+laty+latz);
+        }
+        if (distance(spheres[j],spheres[i]-latx-laty+latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]-latx-laty+latz);
+        }
+        if (distance(spheres[j],spheres[i]-latx+laty-latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]-latx+laty-latz);
+        }
+        if (distance(spheres[j],spheres[i]+latx-laty-latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]+latx-laty-latz);
+        }
+        if (distance(spheres[j],spheres[i]-latx-laty-latz) < 2*R){
+          num += 2*R - distance(spheres[j],spheres[i]-latx-laty-latz);
+        }
       }
     }
   }
@@ -557,31 +557,31 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   for(long i = 0; i < n; i++){
     if(i!=s){
       if(distance(spheres[i],v)<2*R){
-	return true;
+        return true;
       }
       for (long k=0; k<3; k++){
-	if (periodic[k]){
-	  if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
-	  if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
-	} 
-	for (long m=k+1; m<3; m++){
-	  if (periodic[m] && periodic[k]){
-	    if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
-	    if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
-	    if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
-	    if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
-	  }
-	}
+        if (periodic[k]){
+          if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
+          if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
+        }
+        for (long m=k+1; m<3; m++){
+          if (periodic[m] && periodic[k]){
+            if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
+            if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
+            if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
+            if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
+          }
+        }
       }
       if (periodic[0] && periodic[1] && periodic[2]){
-	if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
-	if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
-	if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
-	if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
-	if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
-	if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
-	if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
-	if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
       }
     }
   }
@@ -590,7 +590,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
 
 
 Vector3d move(Vector3d v,double scale){
-  Vector3d newv = v+scale*ran3();  
+  Vector3d newv = v+scale*ran3();
   if (periodic_x){
     while (newv[0] > lenx/2){
       newv[0] -= lenx;
@@ -618,41 +618,41 @@ Vector3d move(Vector3d v,double scale){
   //printf("Moved to %.1f %.1f %.1f by scale %g\n", newv[0], newv[1], newv[2], scale);
   return newv;
 }
- 
+
 
 bool touch(Vector3d w, Vector3d v, double oShell){
   if (distance(v,w) < 2*oShell) return true;
   for (long k=0; k<3; k++){
-	if (periodic[k]){
-	  if (distance(v,w+lat[k]) < 2*oShell) return true;
-	  if (distance(v,w-lat[k]) < 2*oShell) return true;
-	} 
-	for (long m=k+1; m<3; m++){
-	  if (periodic[m] && periodic[k]){
-	    if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
-	    if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
-	    if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
-	    if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
-	  }
-	}
-  }
-      if (periodic[0] && periodic[1] && periodic[2]){
-	if (distance(v,w+latx+laty+latz) < 2*oShell) return true;
-	if (distance(v,w+latx+laty-latz) < 2*oShell) return true;
-	if (distance(v,w+latx-laty+latz) < 2*oShell) return true;
-	if (distance(v,w-latx+laty+latz) < 2*oShell) return true;
-	if (distance(v,w-latx-laty+latz) < 2*oShell) return true;
-	if (distance(v,w-latx+laty-latz) < 2*oShell) return true;
-	if (distance(v,w+latx-laty-latz) < 2*oShell) return true;
-	if (distance(v,w-latx-laty-latz) < 2*oShell) return true;
+    if (periodic[k]){
+      if (distance(v,w+lat[k]) < 2*oShell) return true;
+      if (distance(v,w-lat[k]) < 2*oShell) return true;
+    }
+    for (long m=k+1; m<3; m++){
+      if (periodic[m] && periodic[k]){
+        if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
+        if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
+        if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
+        if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
       }
-      return false;
+    }
+  }
+  if (periodic[0] && periodic[1] && periodic[2]){
+    if (distance(v,w+latx+laty+latz) < 2*oShell) return true;
+    if (distance(v,w+latx+laty-latz) < 2*oShell) return true;
+    if (distance(v,w+latx-laty+latz) < 2*oShell) return true;
+    if (distance(v,w-latx+laty+latz) < 2*oShell) return true;
+    if (distance(v,w-latx-laty+latz) < 2*oShell) return true;
+    if (distance(v,w-latx+laty-latz) < 2*oShell) return true;
+    if (distance(v,w+latx-laty-latz) < 2*oShell) return true;
+    if (distance(v,w-latx-laty-latz) < 2*oShell) return true;
+  }
+  return false;
 }
 
 
 
 long shell(Vector3d v, long div, double *radius, double *sections){
-  if (!flat_div){ 
+  if (!flat_div){
     double temp = distance(v,Vector3d(0,0,0));
     for(long count = 0; count<div; count++){
       if(temp<radius[count+1]) return count;
@@ -675,16 +675,16 @@ double ran(){
 Vector3d ran3(){
   double x, y, r2;
   do{
-   x = 2 * ran() - 1;
-   y = 2 * ran() - 1;
-   r2 = x * x + y * y;
+    x = 2 * ran() - 1;
+    y = 2 * ran() - 1;
+    r2 = x * x + y * y;
   } while(r2 >= 1 || r2 == 0);
   double fac = sqrt(-2*log(r2)/r2);
   Vector3d out(x*fac,y*fac,0);
   do{
-   x = 2 * ran() - 1;
-   y = 2 * ran() - 1;
-   r2 = x * x + y * y;
+    x = 2 * ran() - 1;
+    y = 2 * ran() - 1;
+    r2 = x * x + y * y;
   } while(r2 >= 1 || r2 == 0);
   fac = sqrt(-2*log(r2)/r2);
   out[2]=x*fac;
