@@ -37,6 +37,8 @@ Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool periodic[3] = {periodic_x, periodic_y, periodic_z};
+const double dxmin = 0.1;
+inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 5) {
@@ -44,12 +46,14 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
+  double maxrad = 0;
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
       spherical_outer_wall = true;
       periodic_x = periodic_y = periodic_z = false;
       rad = atof(argv[a+1]);
+      maxrad = max(maxrad,rad);
       printf("Using outerSphere of %g\n", rad);
     } else if (strcmp(argv[a],"innerSphere") == 0) {
       spherical_inner_wall = true;
@@ -60,28 +64,34 @@ int main(int argc, char *argv[]){
       lenx = atof(argv[a+1]);
       leny = atof(argv[a+1]);
       rad = lenx/2;
+      maxrad = max(maxrad, rad);
     } else if (strcmp(argv[a],"periodx") == 0) {
       periodic_x = true;
       lenx = atof(argv[a+1]);
       rad = lenx/2;
+      maxrad = max(maxrad, rad);
     } else if (strcmp(argv[a],"periody") == 0) {
       periodic_y = true;
       leny = atof(argv[a+1]);
     } else if (strcmp(argv[a],"periodz") == 0) {
       periodic_z = true;
       lenz = atof(argv[a+1]);
+      maxrad = max(maxrad, lenz/2);
     } else if (strcmp(argv[a],"wallx") == 0) {
       has_x_wall = true;
       lenx = atof(argv[a+1]);
       periodic_x = false;
+      maxrad = max(maxrad, lenx/2);
     } else if (strcmp(argv[a],"wally") == 0) {
       has_y_wall = true;
       leny = atof(argv[a+1]);
       periodic_y = false;
+      maxrad = max(maxrad, leny/2);
     } else if (strcmp(argv[a],"wallz") == 0) {
       has_z_wall = true;
       lenz = atof(argv[a+1]);
       periodic_z = false;
+      maxrad = max(maxrad, lenz/2);
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
@@ -92,9 +102,9 @@ int main(int argc, char *argv[]){
   }
   printf("flatdiv = %s\n", flat_div ? "true" : "false");
   printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
+  printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
 
   const char *outfilename = argv[4];
-  printf ("this is %s",outfilename);
   fflush(stdout);
   const long N = atol(argv[1]);
   const long iterations = atol(argv[2]);
@@ -122,6 +132,7 @@ int main(int argc, char *argv[]){
   long i = 0;
   double scale = .5;
 
+  printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
@@ -144,18 +155,13 @@ int main(int argc, char *argv[]){
       fflush(stdout);
     }
   }
+  assert(countOverLaps(spheres, N, R) == 0);
   printf("\nFound initial state!\n");
-  //////////////////////////////////////////////////////////////////////////
-  //FILE *o = fopen(outfilename, "w");
-  //fprintf(o,"Radius=%g\n",rad);
-  //fprintf(o,"Number of Spheres=%d\n", N);
 
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;
-  printf("Using %ld divisions\n", div);
-  fflush(stdout);
-  printf("%ld\t", div);
-  printf("%f\t", uncertainty_goal);
+  if (maxrad/div < dxmin) div = int(maxrad/dxmin);
+  printf("Using %ld divisions, dx ~ %g\n", div, maxrad/div);
   fflush(stdout);
 
   double *radius = new double[div+1];
@@ -190,11 +196,6 @@ int main(int argc, char *argv[]){
   }
 
 
-  printf("Look HEREE WAAAAAAAAAAAAAA !!!!%f\n",radius[0]);
-  printf("%f\n",radius[1]);
-  printf("%f\n",radius[2]);
-  fflush(stdout);
-  //////////////////////////////////////////////////////////////////////////////////////////////
   scale = .2;
   long count = 0;
   long *shells = new long[div];
@@ -486,7 +487,6 @@ int main(int argc, char *argv[]){
   fclose(out);
 }
 
-
 double countOverLaps(Vector3d *spheres, long n, double R){
   double num = 0;
   for(long j = 0; j<n; j++){
@@ -502,7 +502,7 @@ double countOverLaps(Vector3d *spheres, long n, double R){
     }
     if (spherical_inner_wall){
       if(distance(spheres[j],Vector3d(0,0,0))<innerRad){
-        num -= distance(spheres[j],Vector3d(0,0,0))-innerRad;
+        num += innerRad - distance(spheres[j],Vector3d(0,0,0));
       }
     }
     if (has_x_wall && periodic_x){
@@ -540,16 +540,16 @@ double countOverLaps(Vector3d *spheres, long n, double R){
         for (long m=k+1; m<3; m++){
           if (periodic[m] && periodic[k]){
             if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+              num += 2*R - distance(spheres[j],spheres[i]+lat[k]+lat[m]);
             }
             if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+              num += 2*R - distance(spheres[j],spheres[i]-lat[k]-lat[m]);
             }
             if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+              num += 2*R - distance(spheres[j],spheres[i]+lat[k]-lat[m]);
             }
             if (distance(spheres[j],spheres[i]-lat[k]+lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+latx+laty);
+              num += 2*R - distance(spheres[j],spheres[i]-lat[k]+lat[m]);
             }
           }
         }
