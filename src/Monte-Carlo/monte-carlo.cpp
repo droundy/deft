@@ -202,9 +202,12 @@ int main(int argc, char *argv[]){
 
   double *shellsArea = new double [div];
   for (long l=0; l<div; l++) shellsArea[l]=0;
+  double *shellsDoubleArea = new double [div];
+  for (long l=0; l<div; l++) shellsDoubleArea[l]=0;
 
   double *density = new double[div];
   double *n0 = new double[div];
+  double *nA = new double[div];
 
   double *SconDensity = new double[div]; double *ScenConDensity = new double[div];
   long *SconShells = new long[div]; long *ScenConShells = new long[div];
@@ -246,6 +249,11 @@ int main(int argc, char *argv[]){
         if (!flat_div){
           for (long k=0; k<div; k++) {
             const double ri = distance(spheres[i],Vector3d(0,0,0));
+            // In the following, we compute the shellsArea, which is
+            // used to compute n_0, which is one of the fundamental
+            // measures of Fundamental Measure Theory.  shellsArea
+            // tracks the amount of area of spheres that overlaps with
+            // each division of our volume (a.k.a. shell).
             if (ri < radius[k+1] + R && ri + radius[k+1] > R && ri > radius[k] - R) {
               // There is at least some overlap with shell k! (not so easy)
               double costhetamax, costhetamin;
@@ -264,8 +272,34 @@ int main(int argc, char *argv[]){
               assert(costhetamin >= costhetamax);
               shellsArea[k] += 2*M_PI*R*R*(costhetamin-costhetamax);
             }
+            // In the following, we will accumulate shellsDoubleArea,
+            // which tracks the amount of surface area present in each
+            // shell for double-spheres with a radius equal to the
+            // *diameter* of a hard sphere.  This is useful in
+            // computing the asymmetrically averaged version of the
+            // correlation function.
+            if (ri < radius[k+1] + 2*R && ri + radius[k+1] > 2*R && ri > radius[k] - 2*R) {
+              // There is at least some overlap with shell k! (not so easy)
+              double costhetamax, costhetamin;
+              if (ri > radius[k] + 2*R) {
+                costhetamin = 1;
+              } else if (radius[k] + ri < 2*R) {
+                costhetamin = 1;
+              } else {
+                costhetamin = (ri*ri - radius[k]*radius[k] + 2*R*2*R)/(2*ri*2*R);
+              }
+              if (ri < radius[k+1] - 2*R) {
+                costhetamax = -1;
+              } else {
+                costhetamax = (ri*ri - radius[k+1]*radius[k+1] + 2*R*2*R)/(2*ri*2*R);
+              }
+              assert(costhetamin >= costhetamax);
+              shellsDoubleArea[k] += 2*M_PI*2*R*2*R*(costhetamin-costhetamax);
+            }
           }
         } else {
+          // In the following, we compute the shellsArea.  See above
+          // for description and discussion.
           for (long k=0; k<div+1; k++){
             double dl = spheres[i][2] - sections[k];
             double dh = spheres[i][2] - sections[k+1];
@@ -274,6 +308,17 @@ int main(int argc, char *argv[]){
             if (dh > R) dh = R;
             if (dh < -R) dh = -R;
             shellsArea[k] += 2*M_PI*R*(dl-dh);
+          }
+          // In the following, we compute the shellsDoubleArea.  See
+          // above for description and discussion.
+          for (long k=0; k<div+1; k++){
+            double dl = spheres[i][2] - sections[k];
+            double dh = spheres[i][2] - sections[k+1];
+            if (dl > 2*R) dl = 2*R;
+            if (dl < -2*R) dl = -2*R;
+            if (dh > 2*R) dh = 2*R;
+            if (dh < -2*R) dh = -2*R;
+            shellsArea[k] += 2*M_PI*2*R*(dl-dh);
           }
         }
       }
@@ -344,12 +389,15 @@ int main(int argc, char *argv[]){
       double rmax = radius[i+1];
       double rmin = radius[i];
       density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N));
-      n0[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))/(4*M_PI*R*R);
+      n0[i]=shellsArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))/(4*M_PI*R*R);
+      nA[i]=shellsArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))
+        /(4*M_PI*2*R*2*R);
     }
   } else {
     for(long i=0; i<div; i++){
       density[i]=shells[i]/(lenx*leny*lenz/div)/(iterations/double(N));
       n0[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*R*R);
+      nA[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*2*R*2*R);
     }
   }
 
@@ -377,37 +425,37 @@ int main(int argc, char *argv[]){
     return 1;
   }
   if (flat_div){
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
-            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
   } else if (spherical_inner_wall) {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0,
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0,
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
-            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
-            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
   } else {
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0],
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0],
             SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
-            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0]);
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
   }
 
   long divtoprint = div;
   if (!spherical_outer_wall) divtoprint = div - 1;
   if (!flat_div) {
     for(long i=1; i<divtoprint; i++){
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
               0.5*(radius[i]+radius[i+1]), density[i],
               SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
-              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i]);
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i], nA[i]);
     }
   } else {
     for(long i=1; i<div; i++){
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
               0.5*(sections[i]+sections[i+1]), density[i],
               SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
-              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i]);
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i], nA[i]);
     }
   }
 
