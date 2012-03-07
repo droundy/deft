@@ -90,7 +90,7 @@ int main(int, char **argv) {
 
   compare_functionals(HardSpheresNoTensor2(R), HardSpheresNoTensor(R), n, 2e-14);
 
-  compare_functionals(ContactAtSphere(R), ContactDensitySphere(R), n, 3e-14);
+  //compare_functionals(ContactAtSphere(R), ContactDensitySphere(R), n, 3e-14);
 
   compare_functionals(YuWuContact(R), FuWuContactDensity(R), n, 3e-14);
 
