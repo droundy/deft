@@ -969,17 +969,17 @@ the energy for these and other separations.}
 \label{fig:density-four-rods}
 \end{figure}
 
-We extend the study to four rods in water using the same radii as the two rods and
-separation distance $d = 0$~nm to $d = 2$~nm for nearest neighbor rods. These exhibit
-a similar behavior to the two rods where for small $d$ only vapor is present in the 
-middle of the rods until a critical separation between where water occupies the middle.
-Before the transition, the four rods and vapor form a square with rounded courners 
-where each rod forms a corner (shown in Fig. \ref{fig:density-four-rods} as 'before').
-For large $d$, the rods behave like separate single rods.  Free energy
+We simulate four hydrophobic rods in water using the same radii as the two rods and
+separation distances $d = 0$~nm to $d = 3$~nm for nearest neighbor rods. We placed
+the rods in a 'square' arrangement and observed a similar behavior to the two rods
+where vapor is present in between the rods(shown in Fig. \ref{fig:density-four-rods}
+as 'before') until a critical separation where it becomes filled with water
+(shown in Fig. \ref{fig:density-four-rods} as 'after'). For large $d$,
+the rods behave like separate single rods.  Free energy per length
 is plotted against rod separation in Fig. \ref{fig:four-rods-energy-vs-distance}.
 From the slope we calculate the force per length to be [number].
 
-The rounded square's circumference is estimated by
+The rounded square formed by the rods has a circumference estimated by
 \begin{equation}
 C_{rs} = 2 \pi r + 8r + 4d.
 \end{equation}
@@ -988,31 +988,6 @@ results in a critical separation
 \begin{equation}
 d_{c4} = \frac{3 \pi - 4}{2} r \label{criticalfourrods}
 \end{equation}
-
-\begin{table}
-\begin{tabular} {|c|c|c|c|}
-\hline
-$r$ (nm) & $d_{rs}$ prediction (nm) & $d_{c4}$ result (nm) & \% error \\
-\hline
-0.3 & 0.81 & 0.40 & 51\% \\
-\hline
-0.5 & 1.36 & 1.15 & 15\% \\
-\hline
-0.7 & 1.90 & 1.70 & 11\% \\
-\hline
-0.9 & 2.44 & 2.30 & 06\% \\
-\hline
-1.0 & 2.70 & 0.00 & 00\% \\
-\hline
-\end{tabular}
-\caption{Calculations of the critical separation (see Equation~\ref{criticalfourrods})
-for the transition
-from liquid to vapor between four hydrophobic rods.}
-\label{criticalfourrodstable}
-\end{table}
-
-The predicted and computed valued for $d_{c4}$ are show in Table \ref{criticalfourrodstable}. 
-[talk about table here]
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1091,7 +1066,7 @@ model for water significantly underestimates the surface tension of
 water at room temperature\cite{vega2007surface}.
 
 Figure~\ref{fig:density-sphere} shows the density profile for several
-hard sphere radii, plotted together with with the results of the same
+hard sphere radii, plotted together with the results of the same
 SPC/E molecular dynamics simulation shown in
 Figure~\ref{fig:sphere-energy-vs-diameter}\cite{huang2001shs}.  The
 agreement with simulation is quite reasonable.  The largest
