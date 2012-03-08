@@ -179,10 +179,10 @@ int main(int argc, char *argv[]){
         radius[s] = size*s + innerRad;
       }
     } else {
+      const double w = 1.0/(1 + dxmin*div);
       for (long l=0;l<div+1;l++) {
         // make each bin have about the same volume
-        radius[l] = rad*(pow(double(l)/(div), 1.0/3.0) + 0.1*double(l)*uncertainty_goal)/
-          (1 + 0.1*(div)*uncertainty_goal);
+        radius[l] = w*rad*pow(double(l)/(div), 1.0/3.0) + (1-w)*dxmin*double(l);
       }
     }
   }
@@ -294,6 +294,7 @@ int main(int argc, char *argv[]){
               } else {
                 costhetamax = (ri*ri - radius[k+1]*radius[k+1] + 2*R*2*R)/(2*ri*2*R);
               }
+              assert(radius[k+1]>radius[k]);
               assert(costhetamin >= costhetamax);
               shellsDoubleArea[k] += 2*M_PI*2*R*2*R*(costhetamin-costhetamax);
             }
@@ -391,14 +392,14 @@ int main(int argc, char *argv[]){
       double rmin = radius[i];
       density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N));
       n0[i]=shellsArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))/(4*M_PI*R*R);
-      nA[i]=shellsArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))
+      nA[i]=shellsDoubleArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/(iterations/double(N))
         /(4*M_PI*2*R*2*R);
     }
   } else {
     for(long i=0; i<div; i++){
       density[i]=shells[i]/(lenx*leny*lenz/div)/(iterations/double(N));
       n0[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*R*R);
-      nA[i]=shellsArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*2*R*2*R);
+      nA[i]=shellsDoubleArea[i]/(lenx*leny*lenz/div)/(iterations/double(N))/(4*M_PI*2*R*2*R);
     }
   }
 
