@@ -47,3 +47,21 @@ pylab.xlim(-1,8)
 pylab.ylim(ymin=0, ymax=1.2*dftdata[:,1].max()*4*numpy.pi/3)
 
 pylab.savefig(sys.argv[5])
+
+NperVol = 0
+N = 0
+Totvol = 0
+for i in range(len(dftdata[:,0])-1):
+    if dftdata[i,1] > 0.001:
+        vol = 4*numpy.pi/3*dftdata[i+1,0]*dftdata[i+1,0]*dftdata[i+1,0] - 4*numpy.pi/3*dftdata[i,0]*dftdata[i,0]*dftdata[i,0]
+        N = N + dftdata[i,1]*vol
+        Totvol = Totvol +vol
+    
+NperVol = N/Totvol
+
+#print("For " + sys.argv[2] + " total number per volume = %f. Multiply this by your total volume to get the same filling fraction.",(N/Totvol),) 
+
+strFile = "figs/FillingFracInfo.dat"
+file = open(strFile , "a")
+file.write("For " + sys.argv[2] + " total number per volume = " +  str(NperVol) +".\n")
+file.close()
