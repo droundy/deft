@@ -75,7 +75,7 @@ double N_from_mu(Functional fhs, Minimizer *min, Grid *potential,
 }
 
 void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d,
-                 const Grid &e, const Grid &f, const Grid &g) {
+                 const Grid &e, const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -94,8 +94,9 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere);
+    double hhere = h(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
   }
   fclose(out);
 }
@@ -268,10 +269,11 @@ void run_spherical_cavity(double diam, int N, const char *name, Functional fhs) 
   }
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
+  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid wu_contact_density(gd, FuWuContactDensity_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/sphere%s-radial-%04.1f-%02d.dat", name, diameter, N);
   radial_plot(plotname, density, energy_density, contact_density_S, wu_contact_density,
-              contact_density_sphere, n0, gross_density);
+              contact_density_sphere, n0, gross_density, nA);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/sphere.eps", 
   //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
