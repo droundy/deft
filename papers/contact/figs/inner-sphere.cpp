@@ -54,7 +54,7 @@ const int numiters = 25;
 
 
 void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
-                 const Grid &f, const Grid &g) {
+                 const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -73,8 +73,9 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere);
+    double hhere = h(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
   }
   fclose(out);
 }
@@ -138,6 +139,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
+  printf("N = %g\n", density.sum()*gd.dvolume);
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
@@ -150,9 +152,10 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   } 
   Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
+  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid wu_contact_density(gd, FuWuContactDensity_S(1.0)(1, gd, density));
   radial_plot(plotname, density, energy_density, contact_density_S, wu_contact_density,
-              contact_density_sphere, n0, gross_density);
+              contact_density_sphere, n0, gross_density, nA);
   free(plotname);
   {
     double peak = peak_memory()/1024.0/1024;
