@@ -280,6 +280,7 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
                                t (x1 + x3) (x1 + x2 + x3) True,
                                t (x3 + x1) (x1 + x2 + x3) True,
                                t (x3 + x1) (x1 * 2 + x2 + x3 * 2) True,
+                               t (x1 + x2) (x1 * 2 + x2 * 3 + x3 * 2) False,
                                t (x1+x2) (x1+x2+cos(2*x1+2*x2)+x3) True,
                                t (x1 + x3) x False,
                                t (x4 + x5) x True,
@@ -296,9 +297,9 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
 multisubstituteTests :: Test
 multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
                                  t (x1+x2) x4 (x4+x3) (x1+x2+x3),
---                                 t (x1+x2) x4 (2*x4+x3) (2*x1+2*x2+x3),
+                                 t (x1+x2) x4 (2*x4+x3) (2*x1+2*x2+x3),
                                  t (x1+x2) x4 (x4+cos(x4)+x3) (x1+x2+cos(x1+x2)+x3),
---                                 t (x1+x2) x4 (x4+cos(2*x4)+x3) (x1+x2+cos(2*x1+2*x2)+x3),
+                                 t (x1+x2) x4 (x4+cos(2*x4)+x3) (x1+x2+cos(2*x1+2*x2)+x3),
                                  t (x4+x5) x3 (x1+x2+x3*x3) x,
                                  t (x1+x2) z (z*x3+(z+x4)*x3+x5*(x2+x3)) y ]
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
@@ -359,7 +360,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
-          wf "tests/generated-haskell/whitebear.tex" $ latexSimp yuwu_contact
+          wf "tests/generated-haskell/whitebear.tex" $ latexSimp (nbar + log (1 - nbar))
           c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, memTests,
                                      substitutionTests, hasexpressionTests, multisubstituteTests]
           if failures c > 0 || errors c > 0
