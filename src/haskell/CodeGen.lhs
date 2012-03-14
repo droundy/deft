@@ -778,8 +778,8 @@ findToDo everything (Expression e)
 
 findToDo _ (Sum s) | [] <- sum2pairs s = DoNothing
 findToDo everything (Sum s) 
-    | not $ hasFFT (Sum s), Same <- isRealSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoR firstToDo
-    | not $ hasFFT (Sum s), Same <- isKSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoK firstToDo
+    | Same <- isRealSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index, not $ hasFFT firstToDo = DoR firstToDo
+    | Same <- isKSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index, not $ hasFFT firstToDo = DoK firstToDo
     where index = reverse $ filter (\l -> length l /= 1) $ init $ take 1000 $ tail $ subsequences [1..length $ sum2pairs s] 
           simplifiable e n = (hasexpression (pairs2sum $ fst $ removeAt e n) (pairs2sum $ snd $ removeAt e n)) && ithelps e n
           oldnum = countVars everything
@@ -797,8 +797,8 @@ findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s
 
 findToDo _ (Product s) | [] <- product2pairs s = DoNothing
 findToDo everything (Product s) 
-    | not $ hasFFT (Product s), Same <- isRealSpace (Product s), or $ map (simplifiable $ product2pairs s) index = DoR firstToDo
-    | not $ hasFFT (Product s), Same <- isKSpace (Product s), or $ map (simplifiable $ product2pairs s) index = DoK firstToDo
+    | Same <- isRealSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo = DoR firstToDo
+    | Same <- isKSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo = DoK firstToDo
     where index = reverse $ filter (\l -> length l /= 1) $ init $ take 1000 $ tail $ subsequences [1..length $ product2pairs s]
           simplifiable e n = (hasexpression (pairs2product $ fst $ removeAt e n) (pairs2product $ snd $ removeAt e n)) && ithelps e n
           oldnum = countVars everything
@@ -949,15 +949,16 @@ hasexpression x (Expression v)
   | Same <- isScalar (Expression v), Integrate e <- v = hasexpression x e
   | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = False
   | otherwise = error "Unhandled case in hasexpression"
-
 hasexpression x@(Sum xs) e@(Sum es) -- check if x is a subexpression of e
-  | Same <- compareTypes e x, filter (\(_, ex) -> ex == (snd $ head $ sum2pairs xs)) (sum2pairs es) /= [] = 
-         (and $ map (\term -> elem term $ sum2pairs es) (map (\(f, s) -> (f*((fst $ head $ filter (\(_, ex) -> ex == (snd $ head $ sum2pairs xs)) (sum2pairs es)) / factorX), s)) (sum2pairs xs)))
---       (and $ map (\term -> elem term $ sum2pairs es) (sum2pairs xs)) 
-         || (or $ map (hasexpression x) (map snd (sum2pairs es)))
-    where factorX = fst $ head $ sum2pairs xs
---          factorE = fst $ head $ filter (\(_, exp) -> exp == (snd $ head $ sum2pairs xs)) (sum2pairs es)
---          ratio = factorE / factorX
+  | Same <- compareTypes e x,
+    filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs /= [], 
+    factorX <- fst $ head $ xspairs,
+    factorE <- fst $ head $ filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs,
+    ratio <- factorE / factorX = 
+         (and $ map (\term -> elem term $ espairs) (map (\(f, s) -> (f*ratio, s)) xspairs))
+         || (or $ map (hasexpression x) (map snd espairs))
+            where espairs = sum2pairs es
+                  xspairs = sum2pairs xs
 hasexpression x@(Product xs) e@(Product es)
   | Same <- compareTypes e x, filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es) /= [] = 
        (and $ map (\term -> elem term $ product2pairs es) (map (\(f, s) -> (f, s*((snd $ head $ filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es)) / factorX))) (product2pairs xs)))
@@ -980,14 +981,31 @@ hasexpression x (Scalar e) = hasexpression x e
 
 substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
 substitute x y e | Same <- compareExpressions x e = y
+
+
 substitute x@(Sum xs) y e@(Sum es) 
   | Same <- compareTypes x e, hasexpression x e = 
-    if (and $ map (\term -> elem term $ espairs) xspairs)
-    then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term $ sum2pairs xs) (sum2pairs es)) + y
-    else pairs2sum $ map (subSnd x y) (sum2pairs es)
+    let factorX = fst $ head $ xspairs
+        factorE = fst $ head $ filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs
+        ratio = factorE / factorX
+        in if (filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs /= []) && (and $ map (\term -> elem term $ espairs) (multiplyFst ratio xspairs))
+           then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term (multiplyFst ratio xspairs)) espairs) + (y * (pairs2sum [(ratio, pairs2product [])]))
+           else pairs2sum $ map (subSnd x y) espairs
   where subSnd m n (f, ex) = (f, substitute m n ex)
         espairs = sum2pairs es
         xspairs = sum2pairs xs
+        multiplyFst factor pairs = map (\(a, b) -> (a*factor, b)) pairs
+
+{-
+substitute x@(Sum xs) y e@(Sum es) 
+  | Same <- compareTypes x e, hasexpression x e =
+    if (and $ map (\term -> elem term $ espairs) xspairs)
+    then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term xspairs) espairs) + y
+    else pairs2sum $ map (subSnd x y) espairs
+  where subSnd m n (f, ex) = (f, substitute m n ex)
+        espairs = sum2pairs es
+        xspairs = sum2pairs xs
+-}
 substitute x@(Product xs) y e@(Product es) 
   | Same <- compareTypes x e, hasexpression x e = 
     if (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs))
