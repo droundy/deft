@@ -136,13 +136,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   took("Doing the minimization");
     
-  double energy = min.energy();
-  printf("Energy is %.15g\n", energy);
-  
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-  double mean_contact_density = ContactDensitySimplest(1.0).integral(1, density)/(dw*dw*width);
-    
-  printf("%g\t%.15g\t%.15g\n", width, energy, mean_contact_density);
+  printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.1f-%04.2f.dat", name, width, eta);
