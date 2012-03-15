@@ -111,7 +111,7 @@ gaseous states at temperatures and pressures normally found on Earth.
 Water has a density maximum at 4$^\circ$C, and expands upon freezing.
 Water has the highest heat capacity, latent heat of fusion and
 vaporization, thermal conductivity and surface tension of any
-non-metallic liquid.  Water has an unusually high dielectric constant.
+non-metallic liquid;  water also has an unusually high dielectric constant.
 Much of the unusual behavior of water is explained by the ability of
 each water molecule to form \emph{four} strong, directional hydrogen
 bonds---two acceptors and two donors.  This directional bonding
@@ -143,7 +143,7 @@ accurately describe the free energy cost of creating a cavity by placing a
 solute in water, but does not lend itself to extensions treating the strong
 interaction of water with hydrophilic solutes.  Treatment of water as a
 continuum dielectric with a cavity surrounding each solute can give
-accurate predictions of the energy of solvation of ions~\cite{latimer1939,
+accurate predictions for the energy of solvation of ions~\cite{latimer1939,
 rashin1985, zhan1998, hsu1999, hildebrandt2004, hildebrandt2007}, but
 provides no information about the size of this cavity.  In a physically
 correct approach, the size of the cavity will naturally arise from a
@@ -327,38 +327,21 @@ approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
 parameters: an interaction energy $\epsilondisp$ and a
 length scale $\lambdadisp R$.
 
-The dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
   F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
-perturbation expansion and $\beta=1/k_BT$.  The first term $a_1$ is 
-the mean-field dispersion
-interaction, which reduces in the homogeneous limit to
-\begin{align}\label{eq:A1-simple}
-  a_1 &= \frac12 n_b \int \varphi(\left|\xx\right|)
-  g_{HS}(\left|\xx\right|) d\xx
-\end{align}
-where $n_b$ is the bulk density and $g_{HS}$ is the homogeneous
-hard-sphere fluid correlation function.
-The second dispersion term in the free energy $a_2$ describes the
-effect of fluctuations resulting from the compression of the fluid due
-to the dispersion interaction itself, and is commonly approximated
-using the local compressibility approximation (LCA). In the LCA,
-we assume the energy fluctuation is directly related to the
+perturbation expansion and $\beta=1/k_BT$.  The first term ,$a_1$, is 
+the mean-field dispersion interaction and the second term, $a_2$, describes the
+effect of fluctuations resulting from compression of the fluid due
+to the dispersion interaction itself. $a_2$ is approximated
+using the local compressibility approximation (LCA), which
+assumes the energy fluctuation is directly related to the
 compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
-We use a free square-well function for the dispersion $\varphi$, which
-is the choice used by Clark \emph{et al}~\cite{clark2006developing},
-and allows a reasonable fit to the equation of state.  Thus our model
-interaction has the form:
-\begin{equation}
-  \varphi(r) = \Theta(r-2 \lambdadisp R)
-\end{equation}
-where $\Theta$ is the Heaviside step function.
-
-The form of $a_1$ is given in
-reference~\cite{gil-villegas-1997-SAFT-VR}, but is expressed in terms
+The form of $a_1$ and $a_2$ for SAFT-VR is given in
+reference~\cite{gil-villegas-1997-SAFT-VR} but is expressed in terms
 of the filling fraction.  In order to apply this form to an
 inhomogeneous density distribution, we construct an effective local
 filling fraction for dispersion $\etadisp$, given by
@@ -378,31 +361,6 @@ calculations, and represents a filling fraction averaged over the
 effective range of the dispersive interaction.  This functional
 introduces an additional empirical parameter $\lscale$ which adjusts
 the length scale over which the dispersion interaction is correlated.
-
-The first term in the dispersion functional $a_1$ when written using
-the above filling fraction for dispersion has the form
-\begin{align}
-  a_1 &= 
-   -4(\lambdadisp^3 - 1)\epsilondisp \etadisp(\xx)
-    g^{HS}_\sigma(\eta_\textit{eff}(\xx)) \\
-  g_\sigma^{HS}(\eta) &= \frac{1 - \frac12 \eta}{(1 - \eta)^3} \label{eq:ghs}
-  \\
-  g_\sigma^{HS}(\eta) &= \frac{1}{1-\eta}
-  +\frac32\frac{1}{(1-\eta)^2}
-  + \frac12\frac{\eta^2}{(1-\eta)^3}
-  \\
-  \eta_\textit{eff}(\xx) &= \sum_{ij=0}^3 C_{ij}  \etadisp^i(\xx)
-  \lambdadisp^j
-\end{align}
-where $g_\sigma^{HS}$
-is the Carnahan-Starling value for the hard-sphere fluid correlation
-function evaluated at contact.  \textcolor{red}{Jess, could you verify
-that the two formulas for gHS above are equivalent? Thanks!}
-The $C_{ij}$ values
- are numerical constants taken from
-reference\cite{gil-villegas-1997-SAFT-VR}, which come from a numerical
-fit to the integral in Equation~\ref{eq:A1-simple} over a range of
-values for filling fraction and $\lambdadisp$.
 
 The second term, $a_2$, which describes the contribution to the free
 energy associated with fluctuations is given by
@@ -427,18 +385,16 @@ pairs.  There is an attractive energy $\epsilonassoc$ when
 two molecules are oriented such that the proton of one overlaps
 with the lone pair of the other.  The volume over which this
 interaction occurs is $\kappaassoc$, giving the association
-term in the free energy has two empirical parameters that are fit to
+term in the free energy two empirical parameters that are fit to
 experimental data.
 
 The association functional we use is a modified version of that of Yu
 and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
   the same functional, but their paper contains errors in the
-  association term and is not useful as a reference.}  The association
-functional of Yu and Wu includes the effects of density
-inhomogeneities on the \emph{contact density} of hard spheres, which
-conventionally appears in the form of the density multiplied by the
-contact value of the correlation function $g^{HS}_\sigma$, but is
+  association term and is not useful as a reference.} 
+which includes the effects of density inhomogeneities in the
+contact value of the correlation function $g^{HS}_\sigma$. This, however, is
 based on the SAFT-HS equation of state, rather than the SAFT-VR
 equation of state\cite{gil-villegas-1997-SAFT-VR} which is used in the
 optimal SAFT parametrization for water found by Clark \emph{et
@@ -504,8 +460,8 @@ Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/surface-tension}
 \end{center}
-\caption{The theoretical versus experimental surface tension
-  versus temperature. The experimental data is taken from NIST.\cite{nistwater}
+\caption{Comparison of Surface tension versus temperature for theoretical and
+  experimental data. The experimental data is taken from NIST.\cite{nistwater}
   The length-scaling parameter $\lscale$ is fit so that the theoretical surface 
   tension will match the experimental surface tension near room temperature.}
 \label{fig:surface-tension}
@@ -533,12 +489,12 @@ empirical parameters of Clark \emph{et al}, we add a single additional
 parameter $\lscale$---with a fitted value of 0.72---which determines
 the length scale over which the density is averaged when computing the
 dispersion free energy.  We use this final parameter to fit the
-surface tension, with the result shown in
+surface tension with the result shown in
 Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
 \emph{et al} overestimates the critical temperature---which is a
 common feature of models which do not explicitly treat the critical
 point---we cannot correctly describe the surface tension at all
-temperatures, and chose to fit it for the temperature range at which
+temperatures, and choose to fit it for the temperature range at which
 water is liquid at one atmosphere of pressure.
 
 From the Helmholtz free energy functional, we may obtain any other
