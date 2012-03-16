@@ -575,7 +575,7 @@ countFFT = sum . map helper
           helper _ = 0
 
 peakMem :: [Statement] -> Int
-peakMem = maximum . (helper 0)
+peakMem = maximum . (helper 0) . freeVectors
     where helper n (x:xs) | (InitializeR _) <- x = (n+1) : (helper (n+1) xs)
                           | (InitializeK _) <- x = (n+1) : (helper (n+1) xs)
                           | (FreeR _) <- x = (n-1) : (helper (n-1) xs)
