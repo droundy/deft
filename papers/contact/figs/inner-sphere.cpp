@@ -54,7 +54,7 @@ const int numiters = 25;
 
 
 void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
-                 const Grid &f, const Grid &g) {
+                 const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -73,8 +73,9 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere);
+    double hhere = h(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
   }
   fclose(out);
 }
@@ -84,7 +85,6 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   diameter = diam;
   printf("Diameter is %g hard spheres, filling fraction %g\n", diameter, eta);
 
-  const double myvolume = M_PI*(diameter+1)*(diameter+1)*(diameter+1)/6;
   const double meandensity = eta/(4*M_PI/3);
 
   Functional f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas());
@@ -127,9 +127,8 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
     }
     
     Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-    double mean_contact_density = ContactDensitySimplest(1.0).integral(1, density)/myvolume;
-    
-    printf("%g\t%.15g\t%.15g\n", diameter, energy, mean_contact_density);
+       
+    printf("%g\t%.15g\n", diameter, energy);
   }
   
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
@@ -142,17 +141,19 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid contact_density_S(gd, ContactDensity_S(1.0)(1, gd, density));
-  Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
-    contact_density_S = ContactDensity_S_WBm2(1.0)(1, gd, density);
-  } 
-  Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
+    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
+    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
+  }
+  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid wu_contact_density(gd, FuWuContactDensity_S(1.0)(1, gd, density));
-  radial_plot(plotname, density, energy_density, contact_density_S, wu_contact_density,
-              contact_density_sphere, n0, gross_density);
+  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
+  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
+  sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
+  radial_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
+              correlation_A, n0, gross_correlation, nA);
   free(plotname);
   {
     double peak = peak_memory()/1024.0/1024;

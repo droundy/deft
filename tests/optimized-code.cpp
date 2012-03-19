@@ -92,7 +92,7 @@ int main(int, char **argv) {
 
   //compare_functionals(ContactAtSphere(R), ContactDensitySphere(R), n, 3e-14);
 
-  compare_functionals(YuWuContact(R), FuWuContactDensity(R), n, 3e-14);
+  compare_functionals(YuWuCorrelationFast(R), YuWuCorrelation(R), n, 3e-14);
 
   
   const double mu = 1e-5;

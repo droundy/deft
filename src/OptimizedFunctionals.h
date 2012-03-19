@@ -21,4 +21,4 @@ Functional HardSpheresWBm2(double radius);
 
 Functional HardSpheresNoTensor2(double radius);
 Functional ContactAtSphere(double radius);
-Functional YuWuContact(double radius);
+Functional YuWuCorrelationFast(double radius);
