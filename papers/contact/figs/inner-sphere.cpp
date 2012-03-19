@@ -137,6 +137,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
+  printf("N = %g\n", density.sum()*gd.dvolume);
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
