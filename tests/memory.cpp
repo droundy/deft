@@ -297,11 +297,11 @@ int main(int, char **argv) {
   ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresNoTensor2", ff, potential);
 
-  ff = constrain(constraint, FuWuContactDensity(R));
-  check_a_functional("FuWuContactDensity", ff, potential);
+  ff = constrain(constraint, YuWuCorrelation(R));
+  check_a_functional("YuWuCorrelation", ff, potential);
 
-  ff = constrain(constraint, YuWuContact(R));
-  check_a_functional("YuWuContact", ff, potential);
+  ff = constrain(constraint, YuWuCorrelationFast(R));
+  check_a_functional("YuWuCorrelationFast", ff, potential);
 
   if (numoops == 0) {
     printf("\n%s has no oopses!\n", argv[0]);

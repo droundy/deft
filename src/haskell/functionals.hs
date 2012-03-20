@@ -12,8 +12,8 @@ main =
        generateHeader whitebear ["R"] "HardSpheresNoTensor2"
      gen "src/ContactAtSphereFast.cpp" $
        generateHeader wb_contact_at_sphere ["R"] "ContactAtSphere"
-     gen "src/YuWuContactFast.cpp" $
-       generateHeader yuwu_contact ["R"] "YuWuContact"
+     gen "src/YuWuCorrelationFast.cpp" $
+       generateHeader yuwu_correlation ["R"] "YuWuCorrelationFast"
      gen "src/SaftFluid2Fast.cpp" $
        generateHeader saft_fluid ["R", "epsilon_association", "kappa_association",
                                   "epsilon_dispersion", "lambda_dispersion", "length_scaling",
@@ -30,7 +30,7 @@ main =
         ("phitwo", phi2),
         ("phithree", phi2),
         ("whitebear", whitebear),
-        ("yuwucontact", yuwu_contact),
+        ("yuwucorrelation", yuwu_correlation),
         ("dwbdnthree", dwbdn3),
         ("dwbdntwo", dwbdn2),
         ("dwbdnone", dwbdn1),

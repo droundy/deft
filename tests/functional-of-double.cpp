@@ -193,13 +193,7 @@ int main(int, char *argv[]) {
   }
 
   {
-    Functional f = ContactDensitySimplest(2.0);
-    retval += test_functional("contact density simplest", f, 0.01, 1e-12);
-    retval += test_functional("contact density simplest", f, 0.02, 1e-12);
-  }
-
-  {
-    Functional f = ContactDensitySphere(2.0);
+    Functional f = Correlation_A(2.0);
     retval += test_functional("contact density sphere", f, 0.02, 1e-12);
     retval += test_functional("contact density sphere", f, 0.01, 1e-12);
   }

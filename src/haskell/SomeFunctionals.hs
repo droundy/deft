@@ -3,7 +3,7 @@ module SomeFunctionals
          phi1, phi2, phi3,
          of_effective_potential,
          xshell, yshell, zshell,
-         yuwu_zeta, yuwu_contact,
+         yuwu_zeta, yuwu_correlation,
          saft_dispersion, saft_association, saft_fluid,
          dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
        where
@@ -99,8 +99,8 @@ wb_contact_at_sphere =
 yuwu_zeta :: Expression RealSpace
 yuwu_zeta = (n2**2 - n2x**2 - n2y**2 - n2z**2)/n2**2
 
-yuwu_contact :: Expression RealSpace
-yuwu_contact = n0*yuwu_zeta*ghs
+yuwu_correlation :: Expression RealSpace
+yuwu_correlation = ghs
   where ghs = invdiff*(1 + 0.5*(invdiff*zeta2)*yuwu_zeta*(3 + invdiff*zeta2))
         zeta2 = rad*n2/3
         invdiff = 1/(1-n3)
@@ -137,7 +137,8 @@ kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_var "kappa_association"
 epsilon_association = s_var "epsilon_association"
 
-xsaft = (sqrt(1 + 8*yuwu_contact*kappa_association*boltz) - 1) / (4*yuwu_contact*kappa_association*boltz)
+xsaft = (sqrt(1 + 8*n0*yuwu_zeta*yuwu_correlation*kappa_association*boltz) - 1)
+        / (4*n0*yuwu_zeta*yuwu_correlation*kappa_association*boltz)
   where boltz = exp(epsilon_association/kT)-1
 
 saft_fluid :: Expression RealSpace

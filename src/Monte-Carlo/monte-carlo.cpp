@@ -73,6 +73,7 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"periody") == 0) {
       periodic_y = true;
       leny = atof(argv[a+1]);
+      maxrad = max(maxrad, leny/2);
     } else if (strcmp(argv[a],"periodz") == 0) {
       periodic_z = true;
       lenz = atof(argv[a+1]);
@@ -81,17 +82,17 @@ int main(int argc, char *argv[]){
       has_x_wall = true;
       lenx = atof(argv[a+1]);
       periodic_x = false;
-      maxrad = max(maxrad, lenx/2);
+      maxrad = max(maxrad, lenx);
     } else if (strcmp(argv[a],"wally") == 0) {
       has_y_wall = true;
       leny = atof(argv[a+1]);
       periodic_y = false;
-      maxrad = max(maxrad, leny/2);
+      maxrad = max(maxrad, leny);
     } else if (strcmp(argv[a],"wallz") == 0) {
       has_z_wall = true;
       lenz = atof(argv[a+1]);
       periodic_z = false;
-      maxrad = max(maxrad, lenz/2);
+      maxrad = max(maxrad, lenz);
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
@@ -132,6 +133,10 @@ int main(int argc, char *argv[]){
   long i = 0;
   double scale = .5;
 
+  // Let's move each sphere once, so they'll all start within our
+  // periodic cell!
+  for (i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
+
   printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
@@ -151,7 +156,22 @@ int main(int argc, char *argv[]){
     }
     i++;
     if (i%N == 0) {
-      printf("numOverLaps=%g\n",numOverLaps);
+      if (i>iterations/4) {
+	for(long i=0; i<N; i++) {
+	  printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+	}
+	printf("couldn't find good state\n");
+	exit(1);
+      }
+      char *debugname = new char[10000];
+      sprintf(debugname, "%s.debug", outfilename);
+      FILE *spheredebug = fopen(debugname, "w");
+      for(long i=0; i<N; i++) {
+	fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+      }
+      fclose(spheredebug);
+      printf("numOverLaps=%g (debug file: %s)\n",numOverLaps, debugname);
+      delete[] debugname;
       fflush(stdout);
     }
   }
@@ -320,7 +340,7 @@ int main(int argc, char *argv[]){
             if (dl < -2*R) dl = -2*R;
             if (dh > 2*R) dh = 2*R;
             if (dh < -2*R) dh = -2*R;
-            shellsArea[k] += 2*M_PI*2*R*(dl-dh);
+            shellsDoubleArea[k] += 2*M_PI*2*R*(dl-dh);
           }
         }
       }

@@ -62,7 +62,7 @@ date
     }
 }
 
-foreach $dd ([15,400], [10,224], [6,17]) {
+foreach $dd ([15,400], [6,17]) {
     my $len = sprintf("%02.0f", $$dd[0]);
     my $N = sprintf("%03.0f", $$dd[1]);
 

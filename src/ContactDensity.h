@@ -4,36 +4,38 @@
 
 #include "Functionals.h"
 
-Functional dWBNT_dn0(double radius);
-Functional dWBNT_dn1(double radius);
-Functional dWBNT_dn2(double radius);
-Functional dWBNT_dn3(double radius);
+Functional n0(double radius);
 
-Functional dWBNT_dnV1(double radius);
-Functional dWBNT_dnV2(double radius);
+Functional dWB_dn0(double radius);
+Functional dWB_dn1(double radius);
+Functional dWB_dn2(double radius);
+Functional dWB_dn3(double radius);
+
+Functional dWB_dn1v_over_n2v(double radius);
+Functional dWB_dn2v_over_n2v(double radius);
+
+Functional phi2(const Functional &n3);
+Functional phi3(const Functional &n3);
 
 Functional dWBm2_dn0(double radius);
 Functional dWBm2_dn1(double radius);
 Functional dWBm2_dn2(double radius);
 Functional dWBm2_dn3(double radius);
 
-Functional dWBm2_dnV1(double radius);
-Functional dWBm2_dnV2(double radius);
+Functional dWBm2_dn1v_over_n2v(double radius);
+Functional dWBm2_dn2v_over_n2v(double radius);
 
-Functional dAdR_simplest(double radius);
-
-Functional dAdR_S_WBNT(double radius);
-Functional dAdR_sphere_over_n_WBNT(double radius);
+Functional dAdR_S(double radius);
+Functional dAdR_A_over_n(double radius);
 
 Functional dAdR_S_WBm2(double radius);
-Functional dAdR_sphere_over_n_WBm2(double radius);
+Functional dAdR_A_over_n_WBm2(double radius);
 
-Functional ContactDensitySimplest(double radius);
-Functional ContactDensitySphere(double radius);
-Functional ContactDensity_S(double radius);
-Functional ContactDensitySphereWBm2(double radius);
-Functional ContactDensity_S_WBm2(double radius);
+Functional Correlation_A(double radius);
+Functional Correlation_S(double radius);
+Functional Correlation_A_WBm2(double radius);
+Functional Correlation_S_WBm2(double radius);
 
-Functional GrossContactDensity(double radius);
-Functional FuWuContactDensity(double radius);
-Functional FuWuContactDensity_S(double radius);
+Functional GrossCorrelation(double radius);
+Functional YuWuCorrelation(double radius);
+Functional YuWuCorrelation_S(double radius);

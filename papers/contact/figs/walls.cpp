@@ -52,7 +52,7 @@ Functional WBT = HardSpheresWBFast(1.0);
 const int numiters = 25;
 
 void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d,
-            const Grid &e, const Grid &f, const Grid &g) {
+            const Grid &e, const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -71,8 +71,9 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, cons
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere);
+    double hhere = h(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
   }
   fclose(out);
 }
@@ -142,18 +143,19 @@ void run_walls(double eta, const char *name, Functional fhs) {
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.1f-%04.2f.dat", name, width, eta);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid contact_density_S(gd, ContactDensity_S(1.0)(1, gd, density));
-  Grid contact_density_sphere(gd, ContactDensitySphere(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    contact_density_sphere = ContactDensitySphereWBm2(1.0)(1, gd, density);
-    contact_density_S = ContactDensity_S_WBm2(1.0)(1, gd, density);
+    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
+    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
-  Grid gross_density(gd, GrossContactDensity(1.0)(1, gd, density));
+  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid wu_contact_density(gd, FuWuContactDensity_S(1.0)(1, gd, density));
+  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
+  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, contact_density_S, wu_contact_density, contact_density_sphere,
-         n0, gross_density);
+  z_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
+              correlation_A, n0, gross_correlation, nA);
   free(plotname);
   // density.epsNativeSlice("papers/contact/figs/walls.eps", 
   //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
