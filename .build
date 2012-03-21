@@ -6,4 +6,4 @@ set -ev
 
 ./autogen.sh
 
-time make -j `grep -c processor /proc/cpuinfol` recheck
+time make -j `grep -c processor /proc/cpuinfo` recheck
