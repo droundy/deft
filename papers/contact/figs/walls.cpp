@@ -175,10 +175,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
     double Extra_per_A = Ntot_per_A - eta/(4.0/3.0*M_PI)*width/2;
     
     FILE *fout = fopen("papers/contact/figs/wallsfillingfracInfo.txt", "a");
-    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n\n",
+    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n",
 	    name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
-    fprintf(fout, "sep = %04.9f \n div = %d \n eta = %04.4f \n Ntot = %04.4f\n other thing = %04.6f\nmydist = %g\n mid = %d\n",
-	    sep, div, eta, Ntot_per_A,eta/(4.0/3.0*M_PI)*width/2, mydist,mid);
+    
+    int wallslen = 20;
+    double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);  
+    fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f extra spheres.\n\n", eta, wallslen, Extra_spheres);
+    
     fclose(fout); 
   }
   
