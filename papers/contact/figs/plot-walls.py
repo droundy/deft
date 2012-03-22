@@ -67,18 +67,42 @@ pylab.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)
 
 pylab.savefig(sys.argv[5])
 
-N = 0
-Totvol = 0
-for i in dftdata[:,0]:
-  vol = 4*numpy.pi/3*dftdata[i+1,0]*dftdata[i+1,0]*dftdata[i+1,0] - 4*numpy.pi/3*dftdata[i,0]*dftdata[i,0]*dftdata[i,0]
-  N = N + dftdata[i,1]*vol
-  Totvol = Totvol +vol
+# div = len(dftdata[:,0])
+# sep = dftdata[1,0] - dftdata[0,0]
+# L = sep*div
+# mid = int (div/2.0)
+# midsec = int (div/2.0) - 20
+# Nb = 0
+# for i in dftdata[midsec:mid,0]
+#   Ni = dftdata[i,0]*sep
+#   Nb = Nb +Ni
 
-NperVol = N/Totvol
+# nb = Nb/(20*20*20*sep*sep*sep) 
 
-#print("For " + sys.argv[2] + " total number per volume = %f. Multiply this by your total volume to get the same filling fraction.",(N/Totvol),)jj 
+# Ntot = 0
+# for j in dftdata[:,0]:
+#   nj = dftdata[j,0]*sep
+#   Ntot = Ntot + nj
 
-strFile = "figs/FillingFracInfo.dat"
-file = open(strFile , "a")
-file.write("For " + sys.argv[2] + " total number per volume = " + str(NperVol) + ".\n")
-file.close()
+# Ntot = Ntot/(sep*div*sep*div)
+
+# Nextra = Ntot - L*nb
+#want to put in terms of per Area and also put the whole thing in th cpp file.  The abovefor j in dftdata[:,0] is 
+#quesionable as to what that will go through
+
+
+# N = 0
+# Totvol = 0
+# for i in dftdata[:,0]:
+#   vol = 4*numpy.pi/3*dftdata[i+1,0]*dftdata[i+1,0]*dftdata[i+1,0] - 4*numpy.pi/3*dftdata[i,0]*dftdata[i,0]*dftdata[i,0]
+#   N = N + dftdata[i,1]*vol
+#   Totvol = Totvol +vol
+
+# NperVol = N/Totvol
+
+# #print("For " + sys.argv[2] + " total number per volume = %f. Multiply this by your total volume to get the same filling fraction.",(N/Totvol),)jj 
+
+# strFile = "figs/FillingFracInfo.dat"
+# file = open(strFile , "a")
+# file.write("For " + sys.argv[2] + " total number per volume = " + str(NperVol) + ".\n")
+# file.close()
