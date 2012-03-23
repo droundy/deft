@@ -180,7 +180,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     
     int wallslen = 20;
     double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);  
-    fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f extra spheres.\n\n", eta, wallslen, Extra_spheres);
+    fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", eta, wallslen, Extra_spheres);
     
     fclose(fout); 
   }
