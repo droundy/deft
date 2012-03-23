@@ -19,7 +19,7 @@ wbm2data = numpy.loadtxt(sys.argv[4])
 dft_len = len(dftdata[:,0])
 dft_dr = dftdata[2,0] - dftdata[1,0]
 
-pylab.plot(mcdata[:,0],mcdata[:,1]*4*numpy.pi/3,"b-",label='MC $n$')
+#pylab.plot(mcdata[:,0],mcdata[:,1]*4*numpy.pi/3,"b-",label='MC $n$')
 pylab.plot(dftdata[:,0],dftdata[:,1]*4*numpy.pi/3,"b--",label='DFT $n$')
 pylab.plot(wbtdata[:,0],wbtdata[:,1]*4*numpy.pi/3,"m-.",label='WBT $n$')
 pylab.plot(wbm2data[:,0],wbm2data[:,1]*4*numpy.pi/3,"c--",label='Mark II $n$')
@@ -31,8 +31,8 @@ pylab.plot(dftdata[:,0],nA*4*numpy.pi/3,"m-.",label="$n_A$")
 
 nAmc = mcdata[:,11]
 n0mc = mcdata[:,10]
-pylab.plot(mcdata[:,0],n0mc*4*numpy.pi/3,"c-",label="MC $n_0$")
-pylab.plot(mcdata[:,0],nAmc*4*numpy.pi/3,"m-",label="MC $n_A$")
+#pylab.plot(mcdata[:,0],n0mc*4*numpy.pi/3,"c-",label="MC $n_0$")
+#pylab.plot(mcdata[:,0],nAmc*4*numpy.pi/3,"m-",label="MC $n_A$")
 
 pylab.xlabel("radius")
 pylab.ylabel("filling fraction")
@@ -41,26 +41,29 @@ pylab.legend(loc='lower left', ncol=2).get_frame().set_alpha(0.5)
 
 pylab.twinx()
 
+stop_here = int(dft_len - 1/dft_dr)
+print stop_here
+start_here = int(2.5/dft_dr)
+
 off = 2
-me = 3
-pylab.plot(mcdata[:,0],mcdata[:,2+2*off]/nAmc,"r-",label="MC $g_\sigma^A$")
-pylab.plot(dftdata[:,0],dftdata[:,5],"ro--",label="$g_\sigma^A$ (White Bear)")
-pylab.plot(wbm2data[:,0],wbm2data[:,5],"r+--",markevery=me,label="$g_\sigma^A$ (mark II)",
+me = 30
+#pylab.plot(mcdata[:,0],mcdata[:,2+2*off]/nAmc,"r-",label="MC $g_\sigma^A$")
+pylab.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,5],"ro--",markevery=me,label="$g_\sigma^A$ (White Bear)")
+pylab.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,5],"r+--",markevery=me,label="$g_\sigma^A$ (mark II)",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 pylab.plot(dftdata[:,0],dftdata[:,7],"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 
-sphere_end = int(dft_len - 1/dft_dr)
-print sphere_end
 
-pylab.plot(mcdata[:,0],mcdata[:,3+2*off]/n0mc,"g-",label="MC $g_\sigma^S$")
-pylab.plot(dftdata[0:sphere_end,0],dftdata[0:sphere_end,3],
-           "g+--",label="$g_\sigma^S$ (White Bear)")
-pylab.plot(wbm2data[:,0],wbm2data[:,3],"go--",markevery=me,label="$g_\sigma^S$ (mark II)",
+#pylab.plot(mcdata[:,0],mcdata[:,3+2*off]/n0mc,"g-",label="MC $g_\sigma^S$")
+pylab.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,3],
+           "g+--",markevery=me,label="$g_\sigma^S$ (White Bear)")
+pylab.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,3],"go--",markevery=me,label="$g_\sigma^S$ (mark II)",
            markerfacecolor='none',markeredgecolor='green', markeredgewidth=1)
-pylab.plot(dftdata[:,0],dftdata[:,4],"gx--",label="Yu and Wu")
+pylab.plot(dftdata[:,0],dftdata[:,4],"gx--",markevery=me,label="Yu and Wu")
 
 pylab.ylim(ymin=0)
+pylab.xlim(xmax=10)
 pylab.ylabel("$g_\sigma$")
 
 pylab.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)

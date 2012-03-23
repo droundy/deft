@@ -37,9 +37,10 @@ set style line 1 lt 1 lw 3
 set style line 2 lt 2 lw 3
 set style line 3 lt 3 lw 3
 set style line 4 lt 4 lw 3
+set style line 5 lt 5 lw 3
 
 plot [:.3] [0:] \
-'figs/gHS-vs-n.dat' u 1:2 title 'gHS' with lines ls 1, \
-'figs/gHS-vs-n.dat' u 1:5 title 'gHS at this sphere' with lp ls 4, \
-'figs/gHS-vs-n.dat' u 1:4 title 'gHS carnahan' with lines ls 3, \
-'figs/gHS-vs-n.dat' u 1:3 title 'gHS simple carnahan' with l ls 2
+'figs/gHS-vs-n.dat' u 1:2 title 'gHS correct' with lines ls 1, \
+'figs/gHS-vs-n.dat' u 1:3 title 'gHS correct again' with l ls 2, \
+'figs/gHS-vs-n.dat' u 1:4 title 'gHS S' with l ls 4, \
+'figs/gHS-vs-n.dat' u 1:5 title 'gHS A' with l ls 5
