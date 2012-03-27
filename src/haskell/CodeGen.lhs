@@ -230,17 +230,17 @@ instance Type Scalar where
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
-  codeStatementHelper a _ (Expression (Integrate e)) = 
-    "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
+  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
   codeStatementHelper a op e = a ++ op ++ code e ++ ";\n\t"
   prefix (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
   postfix _ = ""
   initialize (Expression (Integrate _)) = "double output = 0;\n"
-  initialize (Var _ x _ Nothing) = "double " ++ x ++ ";\n"
+  initialize (Var _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
   initialize _ = "double output = 0;\n"
   toScalar (Integrate r) = makeHomogeneous r
+  fromScalar = id
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var (v++"[i]") v v Nothing
@@ -287,8 +287,8 @@ k = sqrt ksqr
 ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
 
-integrate :: Expression RealSpace -> Expression Scalar
-integrate x = Expression (Integrate x)
+integrate :: Type a => Expression RealSpace -> Expression a
+integrate x = fromScalar $ Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
@@ -551,6 +551,8 @@ class (Ord a, Show a, Code a) => Type a where
   free :: Expression a -> String
   free _ = error "free nothing"
   toScalar :: a -> Expression Scalar
+  fromScalar :: Expression Scalar -> Expression a
+  fromScalar = Scalar
 
 
 
@@ -703,7 +705,7 @@ instance Type a => Floating (Expression a) where
 grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
-data ToDo = DoK (Expression KSpace) | DoR (Expression RealSpace) | DoNothing
+data ToDo = DoK (Expression KSpace) | DoR (Expression RealSpace) | DoS (Expression Scalar) | DoNothing
             deriving (Eq, Show)
 
 {-
@@ -772,7 +774,9 @@ findToDo everything (Expression e)
     | Same <- isRealSpace (Expression e), IFFT e' <- e = case findToDo everything e' of
                                                            DoNothing -> DoK $ e'
                                                            dothis -> dothis
-    | Same <- isScalar (Expression e), Integrate e' <- e = findToDo everything e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = case findToDo everything e' of
+                                                             DoNothing -> DoS $ Expression e
+                                                             dothis -> dothis
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in : " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
@@ -830,10 +834,13 @@ findToDo x (Var a b c (Just e)) =
     DoK e' -> case compareExpressions e e' of
                 Same -> DoK $ Var a b c (Just e)
                 Different -> DoK e'
+    DoS e' -> case compareExpressions e e' of
+                Same -> DoS $ Var a b c (Just e)
+                Different -> DoS e'
     DoNothing -> DoNothing
 --findToDo _ (Var _ _ _ (Just e)) = findToDo e
 findToDo _ (Var _ _ _ Nothing) = DoNothing
-findToDo _ (Scalar _) = DoNothing
+findToDo everything (Scalar e) = findToDo everything e
 
 
 isfft :: Expression KSpace -> Maybe (Expression RealSpace)
@@ -878,19 +885,26 @@ simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 = simp2helper (0 :: Int) [] -- . cleanvars
     where simp2helper n sts e = case findToDo e e of
                                   DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                      where (v,vtex) = case ke of Var _ x@('r':_) t _ -> (x, t)
+                                      where (v,vtex) = case ke of Var _ x@('k':_) t _ -> (x, t)
                                                                   Var _ x t _ -> ("k_" ++ x, t)
                                                                   _ -> ("k" ++ show n, "k_{" ++ show n ++ "}")
                                             inike = InitializeK $ Var (v++"[i]") v vtex Nothing
                                             setke = AssignK v ke
                                             e'  = substitute ke (Var (v++"[i]") v vtex Nothing) e
                                   DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where (v,vtex) = case re of Var _ x@('k':_) t _ -> (x,t)
+                                      where (v,vtex) = case re of Var _ x@('r':_) t _ -> (x,t)
                                                                   Var _ x t _ -> ("r_" ++ x,t)
                                                                   _ -> ("r" ++ show n, "r_{" ++ show n ++ "}")
                                             inire = InitializeR $ Var (v++"[i]") v vtex Nothing
                                             setre = AssignR v re
                                             e'  = substitute re (Var (v++"[i]") v vtex Nothing) e
+                                  DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
+                                      where (v,vtex) = case re of Var _ x@('s':_) t _ -> (x,t)
+                                                                  Var _ x t _ -> ("s_" ++ x,t)
+                                                                  _ -> ("s" ++ show n, "s_{" ++ show n ++ "}")
+                                            inire = InitializeS $ Var v v vtex Nothing
+                                            setre = AssignS v re
+                                            e'  = substitute re (Var v v vtex Nothing) e
                                   DoNothing -> (sts, e)
 
 factorandsum :: Type a => [Expression a] -> Expression a
