@@ -58,28 +58,6 @@ void plot_grids_y_direction(const char *fname, const Grid &a) {
   fclose(out);
 }
 
-void plot_grids_yz_directions(const char *fname, const Grid &a) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    // don't just abort?
-    return;
-  }
-  const GridDescription gd = a.description();
-  const int x = 0;
-  const int stepsize = 2;
-  //const int y = gd.Ny/2;
-  for (int y=-gd.Ny/2; y<=gd.Ny/2; y+=stepsize) {
-    for (int z=-gd.Nz/2; z<=gd.Nz/2; z+=stepsize) {
-      Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double ahere = a(here);
-      fprintf(out, "%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere);
-    }
-    fprintf(out,"\n");
- }  
-  fclose(out);
-}
-
 int main(int argc, char *argv[]) {
   clock_t start_time = clock();
   if (argc > 1) {
@@ -205,9 +183,6 @@ int main(int argc, char *argv[]) {
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
 
     char *plotname = (char *)malloc(1024);
-
-    sprintf(plotname, "paper/figs/sphere-%04.2f-slice.dat", diameter/nm);
-    plot_grids_yz_directions(plotname, density);
 
     sprintf(plotname, "paper/figs/sphere-%04.2f.dat", diameter/nm);
     plot_grids_y_direction(plotname, density);

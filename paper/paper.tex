@@ -17,7 +17,7 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
-\newcommand{\xx}{\textbf{x}}
+\newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
@@ -332,7 +332,7 @@ The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
   F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
-perturbation expansion and $\beta=1/k_BT$.  The first term ,$a_1$, is 
+perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
 the mean-field dispersion interaction and the second term, $a_2$, describes the
 effect of fluctuations resulting from compression of the fluid due
 to the dispersion interaction itself. $a_2$ is approximated
@@ -361,20 +361,6 @@ calculations, and represents a filling fraction averaged over the
 effective range of the dispersive interaction.  This functional
 introduces an additional empirical parameter $\lscale$ which adjusts
 the length scale over which the dispersion interaction is correlated.
-
-The second term, $a_2$, which describes the contribution to the free
-energy associated with fluctuations is given by
-\begin{align}
-  a_2 &= \frac12 \epsilondisp
-              K_{HS}(\etadisp(\xx)) \etadisp(\xx)
-              \frac{\partial a_1}{\partial \etadisp(\xx)}
-\end{align}
-where $K_{HS}$ is the Percus-Yevick hard-sphere compressibility, given
-by
-\begin{align}
-  K_{HS} &=
-    \frac{(1 - \etadisp)^4}{1 + 4(\etadisp + \etadisp^2)}.
-\end{align}
 
 \subsection{Association free energy}
 The final attractive energy term is the association term, which
@@ -499,10 +485,10 @@ water is liquid at one atmosphere of pressure.
 
 From the Helmholtz free energy functional, we may obtain any other
 thermodynamic functions we should choose.  The grand free energy
-$\Phi$, which we ordinarily use in our computations, is obtained by
+$\Omega$, which we ordinarily use in our computations, is obtained by
 simply adding a chemical potential term:
 \begin{equation}
-  \Phi[n] = F[n] + \mu \int n(\xx) d\xx.
+  \Omega[n] = F[n] + \mu \int n(\xx) d\xx.
 \end{equation}
 
 The pressure would naturally be obtained by taking a partial
@@ -855,12 +841,13 @@ of Figure~\ref{fig:density-rods}), which results in
 \begin{equation}
 d_c = (\pi-2)r.\label{criticalseparation}
 \end{equation}
-The predicted and actual computed values for $d_c$ are shown in 
-Table~\ref{criticalseparationtable}, and they match fairly well for the 
-0.5~-~1.0~nm rods. We hypothesize that larger radii rods
+The predicted and actual computed values for $d_c$ are shown graphically in 
+Figure~\ref{fig:rods-energy-vs-distance}, and they match fairly well for the 
+0.5~-~1.0~nm rods with differences between 1.3~-~5.5\%. We hypothesize that larger radii rods
 would also follow this trend, but smaller rods are likely to have a different
 relationship with the surrounding water molecules. This may explain why the critical
-separation result for a radius of 0.3~nm does not match the prediction well.
+separation result for a radius of 0.3~nm does not match the prediction
+well(32\% difference).
 
 Walther \emph{et al.}\cite{walther2004hydrodynamic} studied the interactions between two
 carbon nanotubes, which are geometrically similar to our hydrophobic rods. 
@@ -869,32 +856,7 @@ nanotubes of diameter 1.25~nm and separations ranging from about 0.3~nm to 1.5~n
 They also find that a drying transition occurs, and find it to be at separations near
 0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is larger than
 what we find for hydrophobic rods of a similar size, as expected due to the carbon-carbon
-and carbon-water interations. 
-
-\begin{table}
-\begin{tabular} {|c|c|c|c|}
-\hline
-$r$ (nm) & $d_c$ prediction (nm) & $d_c$ result (nm) & \% error \\
-\hline
-0.3 & 0.34 & 0.23 & 32\% \\
-\hline
-0.5 & 0.57 & 0.54 & 5.3\% \\
-\hline
-0.7 & 0.80 & 0.81 & 1.3\% \\
-\hline
-0.9 & 1.03 & 1.06 & 2.9\% \\
-\hline
-1.0 & 1.14 & 1.19 & 4.4\% \\
-\hline
-\end{tabular}
-\caption{Calculations of the critical separation 
-(see Equation~\ref{criticalseparation})
-for the transition
-from liquid to vapor between two hydrophobic rods.\needsworknow{Delete
-this table and move some of the information into the text along with
-prediction model and explanation of Figure~\ref{fig:rods-energy-vs-distance}}.}
-\label{criticalseparationtable}
-\end{table} 
+and carbon-water interations.
 
 \subsection{Hydrophobic interactions of four rods}
 
@@ -925,26 +887,30 @@ the energy for these and other separations.}
 \label{fig:density-four-rods}
 \end{figure}
 
-We simulate four hydrophobic rods in water using the same radii as the two rods and
-separation distances $d = 0$~nm to $d = 3$~nm for nearest neighbor rods. We placed
-the rods in a 'square' arrangement and observed a similar behavior to the two rods
-where vapor is present in between the rods(shown in Fig. \ref{fig:density-four-rods}
-as 'before') until a critical separation where it becomes filled with water
-(shown in Fig. \ref{fig:density-four-rods} as 'after'). For large $d$,
+We simulate four hydrophobic rods in water using the same radii as our
+two rods ($r = 0.3$~nm~-~$1.0$~nm)and
+separation distances between $d = 0$~nm to $d = 3$~nm for nearest neighbor rods. We placed
+the rods in a 'square' arrangement and observed a similar behavior as the two rods
+where vapor is present in the space between the rods until a critical separation
+where it becomes filled with water (shown in Fig. \ref{fig:density-four-rods}). 
+For large $d$,
 the rods behave like separate single rods.  Free energy per length
-is plotted against rod separation in Fig. \ref{fig:four-rods-energy-vs-distance}.
+is plotted against rod separation in Figure \ref{fig:four-rods-energy-vs-distance}.
 From the slope we calculate the force per length to be [number].
 
-The rounded square formed by the rods has a circumference estimated by
+The rounded square formed by the area of the four rods and the space
+inbetween them has a circumference estimated by
 \begin{equation}
 C_{rs} = 2 \pi r + 8r + 4d.
 \end{equation}
-We again equate this circumference with the total circumference of the four rods, which
-results in a critical separation
+We again equate this circumference with the total circumference of
+only the four rods, which results in a critical separation of
 \begin{equation}
-d_{c4} = \frac{3 \pi - 4}{2} r \label{criticalfourrods}
+d_{c4} = \frac{3 \pi - 4}{2} r. \label{criticalfourrods}
 \end{equation}
-
+We see in Figure \ref{fig:four-rods-energy-vs-distance} that the $r = 3.0$~nm
+rod has the largest difference between simulation and prediction with
+a 23\% difference, and better agreement for larger radii (between 0.5\% and 5.6\%).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -1028,20 +994,7 @@ Figure~\ref{fig:sphere-energy-vs-diameter}\cite{huang2001shs}.  The
 agreement with simulation is quite reasonable.  The largest
 disagreement involves the density at contact, which according to the
 contact value theorem cannot agree, since the free energies do not
-agree.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/sphere-density}
-\end{center}
-\caption{ Density profiles illustrating the transition from vapor 
-to liquid water between the rods. The radius is 0.5~nm, the top figure is 
-at a separation of 0.2~nm and the
-bottom is 0.6~nm. Figures~\ref{fig:rods-energy-vs-distance}~and~\ref{fig:energy-rods} show
-the energy for these and other separations.}
-\label{fig:sphere-density}
-\end{figure}
-
+agree.c
 
 \begin{figure}
 \begin{center}
