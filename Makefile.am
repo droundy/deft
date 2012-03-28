@@ -27,7 +27,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
-HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
 	src/ContactAtSphereFast.cpp src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp
 
@@ -106,6 +106,7 @@ check_PROGRAMS = \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
+	tests/hydrogen-atom.test \
 	tests/fftinverse.test \
 	tests/eos.test \
 	tests/eps.test
@@ -131,6 +132,7 @@ tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CONTACT_CODE)
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
+tests_hydrogen_atom_test_SOURCES = tests/hydrogen-atom.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)

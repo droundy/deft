@@ -23,4 +23,4 @@ Functional HardSpheresNoTensor2(double radius);
 Functional ContactAtSphere(double radius);
 Functional YuWuCorrelationFast(double radius);
 
-Functional OneElectron();
+Functional Hydrogen();

@@ -1,7 +1,7 @@
 \begin{code}
 {-# LANGUAGE GADTs, PatternGuards #-}
 module CodeGen ( RealSpace, r_var,
-                 KSpace(..), k_var, kx, ky, kz, k, ksqr,
+                 KSpace(..), k_var, kx, ky, kz, k, ksqr, setkzero,
                  Scalar(..), s_var,
                  fft, ifft, integrate, grad, derive,
                  Expression, joinFFTs, (===), var,
@@ -26,6 +26,7 @@ data RealSpace = IFFT (Expression KSpace)
                deriving ( Eq, Ord, Show )
 data KSpace = Delta | -- handy for FFT of homogeneous systems
               Kx | Ky | Kz |
+              SetKZeroValue (Expression KSpace) (Expression KSpace) |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 data Scalar = Integrate (Expression RealSpace)
@@ -77,18 +78,25 @@ instance Code KSpace where
   codePrec _ Ky = showString "k_i[1]"
   codePrec _ Kz = showString "k_i[2]"
   codePrec _ Delta = showString "delta(k?)"
+  codePrec p (SetKZeroValue _ val) = codePrec p val
   codePrec _ (FFT r) = showString "fft(gd, " . codePrec 0 (makeHomogeneous r) . showString ")"
   latexPrec _ Kx = showString "k_{x}"
   latexPrec _ Ky = showString "k_{y}"
   latexPrec _ Kz = showString "k_{z}"
   latexPrec _ Delta = showString "\\delta(k)"
+  latexPrec p (SetKZeroValue _ val) = latexPrec p val
   latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
 instance Type KSpace where
   isKSpace _ = Same
   derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
   derivativeHelper _ _ _ = 0
   zeroHelper v (FFT r) = fft (setZero v r)
-  zeroHelper _ x = Expression x
+  zeroHelper _ Kx = Expression Kx
+  zeroHelper _ Ky = Expression Ky
+  zeroHelper _ Kz = Expression Kz
+  zeroHelper _ Delta = Expression Delta
+  zeroHelper v e@(SetKZeroValue val _) | Same <- isKSpace v, v == kz = val -- slightly hokey... assuming that if we set kz = 0 then we set kx and ky = 0
+                                       | otherwise = Expression e
   prefix e = case isfft e of Just _ -> ""
                              Nothing -> "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n"
   postfix e = case isfft e of Just _ -> ""
@@ -109,6 +117,7 @@ instance Type KSpace where
   toScalar Kx = s_var "_kx"
   toScalar Ky = 0
   toScalar Kz = 0
+  toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
 
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
@@ -286,6 +295,9 @@ k = sqrt ksqr
 
 ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
+
+setkzero :: Expression KSpace -> Expression KSpace -> Expression KSpace
+setkzero zeroval otherval = Expression $ SetKZeroValue zeroval otherval
 
 integrate :: Type a => Expression RealSpace -> Expression a
 integrate x = fromScalar $ Expression (Integrate x)
@@ -962,6 +974,7 @@ hasexpression x (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = hasexpression x e
   | Same <- isRealSpace (Expression v), IFFT e <- v = hasexpression x e
   | Same <- isScalar (Expression v), Integrate e <- v = hasexpression x e
+  | Same <- isKSpace (Expression v), SetKZeroValue _ b <- v = hasexpression x b
   | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = False
   | otherwise = error "Unhandled case in hasexpression"
 hasexpression x@(Sum xs) e@(Sum es) -- check if x is a subexpression of e
@@ -1031,6 +1044,7 @@ substitute x y (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = Expression $ FFT (substitute x y e)
   | Same <- isRealSpace (Expression v), IFFT e <- v = Expression $ IFFT (substitute x y e)
   | Same <- isScalar (Expression v), Integrate e <- v = Expression $ Integrate (substitute x y e)
+  | Same <- isKSpace (Expression v), SetKZeroValue a e <- v = Expression $ SetKZeroValue a (substitute x y e)
   | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = Expression v
   | otherwise = error $ "unhandled case in substitute: " ++ show v
 substitute x y (Sum s) = pairs2sum $ map sub $ sum2pairs s
