@@ -3,7 +3,7 @@ all: test functionals
 clean:
 	rm -f *.hi *.o test
 
-GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2
+GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 # -prof -auto-all
 
 test: test.lhs $(wildcard *hs)
 	ghc $(GHCFLAGS) --make -o $@ $<

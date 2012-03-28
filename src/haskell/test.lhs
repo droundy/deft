@@ -209,15 +209,15 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
 memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem nbar" 2 n3,
-                     t "peakMem x1 + x2 and other stuff" 3 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
-                     t "peakMem saft_fluid" 7 saft_fluid,
+                     t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
+                     t "peakMem saft_fluid" 6 saft_fluid,
                      t "peakMem whitebear" 6 whitebear,
                      t "peakMem saft_dispersion" 2 saft_dispersion,
                      t "peakMem saft_association" 6 saft_association,
-                     -- t "peakMem grad saft_fluid" 132 (gradme saft_fluid),
-                     t "peakMem grad whitebear" 22 (gradme whitebear),
-                     t "peakMem grad saft_dispersion" 49 (gradme saft_dispersion),
-                     -- t "peakMem grad saft_association" 67 (gradme saft_association),
+                     t "peakMem grad saft_fluid" 130 (gradme saft_fluid), -- was 267
+                     t "peakMem grad whitebear" 20 (gradme whitebear), -- was 47
+                     t "peakMem grad saft_dispersion" 49 (gradme saft_dispersion), -- was 101 ~12mins
+                     t "peakMem grad saft_association" 65 (gradme saft_association), -- was 135
                      t "peakMem nbar + n2" 2 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3),
                      t "peakMem n0 log n3" 3 (n0*log n3),
@@ -244,8 +244,8 @@ memTests = TestList [t "peakMem x = 0" 0 x,
         gradme = derive (r_var "x") (r_var "ingrad") . cleanvars
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
-        x1 = ifft ( k_var "kkk1" )
-        x2 = ifft ( k_var "kkk2" )
+        x1 = r_var "x1"
+        x2 = r_var "x2"
 
 substitutionTests :: Test
 substitutionTests = TestList [t x y (y**2) (x**2),
@@ -255,7 +255,7 @@ substitutionTests = TestList [t x y (y**2) (x**2),
                               t (k**2) (kk**2) nbarkk nbar,
                               t (r_var "n2x") (xshell x) (xshell x**2) (r_var "n2x" ** 2),
                               t (r_var "n2x") (xshell x) (r_var "n2y"**2 + xshell x**2) (r_var "n2y"**2 + r_var "n2x"**2),
-                              t x y (integrate y) (integrate x),
+                              t x y (integrate y :: Expression Scalar) (integrate x),
                               t x y nbary nbar]
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
                                                  (eresult) (substitute a b e)
@@ -281,11 +281,17 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
                                t (x3 + x1) (x1 + x2 + x3) True,
                                t (x3 + x1) (x1 * 2 + x2 + x3 * 2) True,
                                t (x1 + x2) (x1 * 2 + x2 * 3 + x3 * 2) False,
+                               t (x1**2+x2**2)
+                                     ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi)
+                                     True,
+                               t (x1**2+2*x2**2)
+                                     ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi)
+                                     False,
                                t (x1+x2) (x1+x2+cos(2*x1+2*x2)+x3) True,
                                t (x1 + x3) x False,
                                t (x4 + x5) x True,
                                t x2 x True]
-  where t a b e = TestCase $ assertEqual (latex a ++ " in " ++ latex b)
+  where t a b e = TestCase $ assertEqual ("hasexpression failure " ++ latex a ++ " in " ++ latex b)
                                          e (hasexpression a b)
         x1 = r_var "x1"
         x2 = r_var "x2"
@@ -293,15 +299,36 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
         x4 = r_var "x4"
         x5 = r_var "x5"
         x = x1 + x2 + x3 * (x4 + x5)
+        rad = s_var "R"
+
+findToDoTests :: Test
+findToDoTests = TestList [t (DoR $ x1**2+x2**2)
+                            ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi),
+                          t (DoR $ -3*x1-3*x2)
+                            ((x1+x2)*rad + log(-3*x1-3*x2)),
+                          t DoNothing (x1**2/4/pi+x2**2/4/pi + 3 + cos(-3*x1**2-2*x2**2)),
+                          t (DoR $ x1+x2) (x1+x2 + x3 + x4 + cos(x1+x2) + rad)]
+    where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee (findToDo e e)
+          x1 = r_var "rtemp_1"
+          x2 = r_var "rtemp_2"
+          x3 = r_var "rtemp_3"
+          x4 = r_var "rtemp_4"
+          rad = r_var "R"
 
 multisubstituteTests :: Test
 multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
                                  t (x1+x2) x4 (x4+x3) (x1+x2+x3),
                                  t (x1+x2) x4 (2*x4+x3) (2*x1+2*x2+x3),
+                                 t (x1**2+x2**2) z
+                                       (z*rad + 3 + x4*log(1- x3)*(-3*z+x4**2)/(x3**2*(1-x3)**2)/36/pi)
+                                       ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi),
+                                 t (-x1**2-x2**2) x4 (-x4/4/pi+cos((3*x4+x5)/r_var "R")+x3) (x1**2/4/pi+x2**2/4/pi+cos((-3*x1**2+x5-3*x2**2)/r_var "R")+x3),
                                  t (x1+x2) x4 (x4+cos(x4)+x3) (x1+x2+cos(x1+x2)+x3),
                                  t (x1+x2) x4 (x4+cos(2*x4)+x3) (x1+x2+cos(2*x1+2*x2)+x3),
                                  t (x4+x5) x3 (x1+x2+x3*x3) x,
-                                 t (x1+x2) z (z*x3+(z+x4)*x3+x5*(x2+x3)) y ]
+                                 t (x1+x2) z (z*x3+(z+x4)*x3+x5*(x2+x3)) y,
+                                 t (x1*x2) x4 (x4*x3+x2*x3+x1*x3) (x1*x2*x3+x2*x3+x1*x3),
+                                 t (x1*x2) x4 (x4**2*x3+x2*x3+x4*x3) (x1**2*x2**2*x3+x2*x3+x1*x2*x3)]
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
                                                  (eresult) (substitute a b e)
         x1 = r_var "x1"
@@ -310,6 +337,7 @@ multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
         x4 = r_var "x4"
         x5 = r_var "x5"
         z = r_var "z"
+        rad = s_var "R"
         x = x1 + x2 + x3 * (x4 + x5)
         y = (x1 + x2) * x3 + x3 * (x1 + x2 + x4) + x5 * (x2 + x3)
 
@@ -360,13 +388,15 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
-          wf "tests/generated-haskell/whitebear.tex" $ latexSimp (nbar + log (1 - nbar))
-          c <- runTestTT $ TestList [eqTests, codeTests, latexTests, fftTests, memTests,
-                                     substitutionTests, hasexpressionTests, multisubstituteTests]
-          if failures c > 0 || errors c > 0
-            then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
-            else do putStrLn "All tests passed!"
-                    putStrLn $ show c
+          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ whitebear
+          if "codegen" `elem` args
+            then putStrLn "Not running actual tests, just generating test code...\n"
+            else do c <- runTestTT $ TestList [findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests,
+                                               substitutionTests, hasexpressionTests, multisubstituteTests]
+                    if failures c > 0 || errors c > 0
+                      then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
+                      else do putStrLn "All tests passed!"
+                              putStrLn $ show c
 
 latexfile :: Type a => [(String, Expression a)] -> String
 latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"

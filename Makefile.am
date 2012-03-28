@@ -68,10 +68,10 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
-	./optimize-functionals $@
+	time ./optimize-functionals $@ && echo timed $@
 
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
-	src/haskell/functionals $@
+	time src/haskell/functionals $@ && echo timed $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
@@ -90,11 +90,12 @@ check_PROGRAMS = \
 	tests/saft.test \
 	tests/saft-dispersion.test \
 	tests/optimized-code.test \
+	tests/memory.test \
+	tests/eos.test \
 	tests/constrained-water-fast-slow.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
-	tests/memory.test \
 	tests/ideal-gas.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
@@ -107,7 +108,6 @@ check_PROGRAMS = \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
 	tests/fftinverse.test \
-	tests/eos.test \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test \

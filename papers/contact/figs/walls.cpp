@@ -51,6 +51,7 @@ Functional WBT = HardSpheresWBFast(1.0);
 
 const int numiters = 25;
 
+
 void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d,
             const Grid &e, const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
@@ -157,9 +158,33 @@ void run_walls(double eta, const char *name, Functional fhs) {
   z_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
               correlation_A, n0, gross_correlation, nA);
   free(plotname);
-  // density.epsNativeSlice("papers/contact/figs/walls.eps", 
-  //                        Cartesian(0,xmax,0), Cartesian(0,0,xmax), 
-  //                        Cartesian(0,xmax/2,xmax/2));
+
+  {
+    GridDescription gdj = density.description(); 
+    double sep =  gdj.dz*gdj.Lat.a3().norm();
+    int div = gdj.Nz;
+    int mid = int (div/2.0);
+    double Ntot_per_A = 0;
+    double mydist = 0;
+   
+    for (int j=0; j<mid; j++){
+      Ntot_per_A += density(0,0,j)*sep;
+      mydist += sep;
+    }
+    
+    double Extra_per_A = Ntot_per_A - eta/(4.0/3.0*M_PI)*width/2;
+    
+    FILE *fout = fopen("papers/contact/figs/wallsfillingfracInfo.txt", "a");
+    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n",
+	    name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
+    
+    int wallslen = 20;
+    double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);  
+    fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", eta, wallslen, Extra_spheres);
+    
+    fclose(fout); 
+  }
+  
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
@@ -170,6 +195,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
 }
 
 int main(int, char **) {
+  FILE *fout = fopen("papers/contact/figs/wallsfillingfracInfo.txt", "w");
+  fclose(fout);
   for (double eta = 0.1; eta < 0.6; eta+=0.1) {
     run_walls(eta, "WB", WB);
     run_walls(eta, "WBT", WBT);

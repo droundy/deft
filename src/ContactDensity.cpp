@@ -275,7 +275,7 @@ Functional dAdR_S(double radius) {
 
 Functional Correlation_A(double radius) {
   Functional R(radius, "R");
-  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_A_over_n(radius)/n_A(radius);
+  return (Functional(1)/(4*4.0*(4*M_PI*sqr(R))))*dAdR_A_over_n(radius)/n_A(radius); // FIXME: there is a 4.0 here we don't understand!
 }
 
 Functional Correlation_S(double radius) {
@@ -345,7 +345,7 @@ Functional dAdR_S_WBm2(double radius) {
 
 Functional Correlation_A_WBm2(double radius) {
   Functional R(radius, "R");
-  return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_A_over_n_WBm2(radius)/n_A(radius);
+  return (Functional(1)/(4*4.0*(4*M_PI*sqr(R))))*dAdR_A_over_n_WBm2(radius)/n_A(radius); // FIXME: there is a 4.0 here we don't understand!
 }
 
 Functional Correlation_S_WBm2(double radius) {

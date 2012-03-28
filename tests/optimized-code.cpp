@@ -88,7 +88,7 @@ int main(int, char **argv) {
 
   compare_functionals(HardSpheresWBnotensor(R), HardSpheresNoTensor(R), n, 2e-14);
 
-  compare_functionals(HardSpheresNoTensor2(R), HardSpheresNoTensor(R), n, 2e-14);
+  compare_functionals(HardSpheresNoTensor2(R), HardSpheresNoTensor(R), n, 4e-14);
 
   //compare_functionals(ContactAtSphere(R), ContactDensitySphere(R), n, 3e-14);
 

@@ -9,13 +9,13 @@ module CodeGen ( RealSpace, r_var,
                  Type, 
                  makeHomogeneous, isConstant, hasexpression, factorandsum, -- for debugging only!!!
                  code, latex, setZero, codeStatement, substitute, cleanvars,
-                 generateHeader, simp2, countFFT, checkDup, peakMem, reuseVar, removeAt, findToDo, latexSimp, hasFFT )
+                 generateHeader, simp2, countFFT, checkDup, peakMem, reuseVar, removeAt, freeVectors, findToDo, ToDo(..), latexSimp, hasFFT, countexpression, subAndCount )
        where
 
 import Debug.Trace
 
 import qualified Data.Map as Map
-import Data.List ( nubBy, (\\), nub, subsequences )
+import Data.List ( nubBy, nub )
 
 \end{code}
 
@@ -220,7 +220,7 @@ setZero v (Sum s) = out
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
-  codePrec _ (Integrate r) = showString "(" . codePrec 0 r . showString ") * gd.dvolume"
+  codePrec _ (Integrate r) = showString "integrate(" . codePrec 0 r . showString ")"
   latexPrec _ (Integrate r) = showString "integrate(" . latexPrec 0 r . showString ")"
 instance Type Scalar where
   s_var ("complex(0,1)") = Var "complex(0,1)" "complex(0,1)" "i" Nothing
@@ -230,16 +230,17 @@ instance Type Scalar where
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
-  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code e ++ ";\n\t}\n"
+  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
   codeStatementHelper a op e = a ++ op ++ code e ++ ";\n\t"
   prefix (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
   postfix _ = ""
   initialize (Expression (Integrate _)) = "double output = 0;\n"
-  initialize (Var _ x _ Nothing) = "double " ++ x ++ ";\n"
+  initialize (Var _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
   initialize _ = "double output = 0;\n"
   toScalar (Integrate r) = makeHomogeneous r
+  fromScalar = id
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var (v++"[i]") v v Nothing
@@ -286,8 +287,8 @@ k = sqrt ksqr
 ksqr :: Expression KSpace
 ksqr = kx**2 + ky**2 + kz**2
 
-integrate :: Expression RealSpace -> Expression Scalar
-integrate x = Expression (Integrate x)
+integrate :: Type a => Expression RealSpace -> Expression a
+integrate x = fromScalar $ Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
@@ -550,11 +551,13 @@ class (Ord a, Show a, Code a) => Type a where
   free :: Expression a -> String
   free _ = error "free nothing"
   toScalar :: a -> Expression Scalar
+  fromScalar :: Expression Scalar -> Expression a
+  fromScalar = Scalar
 
 
 
 codeStatements :: [Statement] -> String
-codeStatements x = unlines $ map codeStatement (reuseVar x)
+codeStatements x = unlines $ map codeStatement x
 
 codeStatement :: Statement -> String
 codeStatement (AssignR x y) = "\t" ++ codeStatementHelper x " = " y
@@ -702,7 +705,7 @@ instance Type a => Floating (Expression a) where
 grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
-data ToDo = DoK (Expression KSpace) | DoR (Expression RealSpace) | DoNothing
+data ToDo = DoK (Expression KSpace) | DoR (Expression RealSpace) | DoS (Expression Scalar) | DoNothing
             deriving (Eq, Show)
 
 {-
@@ -719,25 +722,30 @@ How I find variables to eliminate:
 -}
 
 countVars :: Type a => Expression a -> Int
-countVars s = length $ nub $ varList s
-    where varList :: Type a => Expression a -> [String]
-          varList (Expression e) | Same <- isKSpace (Expression e), Kx <- e = []
-                                 | Same <- isKSpace (Expression e), Ky <- e = []
-                                 | Same <- isKSpace (Expression e), Kz <- e = []
-                                 | Same <- isRealSpace (Expression e), (IFFT e') <- e = varList e'
-                                 | Same <- isKSpace (Expression e), (FFT e') <- e = varList e'
-                                 | Same <- isScalar (Expression e), (Integrate e') <- e = varList e'
-          varList (Var _ _ _ (Just e)) = varList e
-          varList (Var _ c _ Nothing) = [c]
-          varList (Sin e) = varList e
-          varList (Cos e) = varList e
-          varList (Log e) = varList e
-          varList (Exp e) = varList e
-          varList (Abs e) = varList e
-          varList (Signum e) = varList e
-          varList (Sum e) = concat $ map (varList . snd) (sum2pairs e)
-          varList (Product e) = concat $ map (varList . fst) (product2pairs e)
-          varList _ = []
+countVars s = length $ filter (/= []) $ nub $ varList s
+
+
+varList :: Type a => Expression a -> [String]
+varList (Expression e) | Same <- isKSpace (Expression e), Kx <- e = []
+                       | Same <- isKSpace (Expression e), Ky <- e = []
+                       | Same <- isKSpace (Expression e), Kz <- e = []
+                       | Same <- isRealSpace (Expression e), (IFFT e') <- e = varList e'
+                       | Same <- isKSpace (Expression e), (FFT e') <- e = varList e'
+                       | Same <- isScalar (Expression e), (Integrate e') <- e = varList e'
+                       | otherwise = error "There is no other possible expression"
+varList (Var _ _ _ (Just e)) = varList e
+varList (Var _ c _ Nothing) | ('r':'t':'e':'m':'p':_) <- c = [c] 
+                            | ('k':'t':'e':'m':'p':_) <- c = [c] 
+                            | otherwise = []
+varList (Sin e) = varList e
+varList (Cos e) = varList e
+varList (Log e) = varList e
+varList (Exp e) = varList e
+varList (Abs e) = varList e
+varList (Signum e) = varList e
+varList (Sum e) = concat $ map (varList . snd) (sum2pairs e)
+varList (Product e) = concat $ map (varList . fst) (product2pairs e)
+varList (Scalar _) = []
 
 removeAt :: [a] -> [Int] -> ([a], [a])
 removeAt xs n = (map fst (filter (\x -> elem (snd x) n) list), map fst (filter (\x -> not $ elem (snd x) n) list))
@@ -760,7 +768,48 @@ hasFFT (Abs e) = hasFFT e
 hasFFT (Signum e) = hasFFT e
 hasFFT _ = False
 
+hasK :: Type a => Expression a -> Bool
+hasK (Expression e) 
+    | Same <- isKSpace (Expression e), Kx <- e = True
+    | Same <- isKSpace (Expression e), Ky <- e = True
+    | Same <- isKSpace (Expression e), Kz <- e = True
+    | otherwise = False
+hasK (Var _ _ _ (Just e)) = hasK e
+hasK (Sum s) = or $ map (hasK . snd) (sum2pairs s)
+hasK (Product p) = or $ map (hasK . fst) (product2pairs p)
+hasK (Sin e) = hasK e
+hasK (Cos e) = hasK e
+hasK (Log e) = hasK e
+hasK (Exp e) = hasK e
+hasK (Abs e) = hasK e
+hasK (Signum e) = hasK e
+hasK (Var _ _ _ Nothing) = False
+hasK (Scalar _) = False
+
+{-
+isVar :: Type a => Expression a -> Bool
+isVar (Var _ _ _ Nothing) = True
+isVar (Var _ _ _ (Just e)) = isVar e
+isVar (Sum s) = (length $ sum2pairs s) == 1 || (length $ sum2pairs s) == 0
+isVar (Product p) = (length $ sum2pairs p) == 1 || (length $ product2pairs p) == 0
+isVar (Sin e) = isVar e
+isVar (Cos e) = isVar e
+isVar (Log e) = isVar e
+isVar (Exp e) = isVar e
+isVar (Abs e) = isVar e
+isVar (Signum e) = isVar e
+isVar (Scalar _) = True
+isVar _ = False
+-}
 findToDo :: (Type a, Type b) => Expression a -> Expression b -> ToDo
+
+numtotake :: Int
+numtotake = 20
+
+subsq :: [a] -> [[a]]
+subsq xs = map (:[]) xs ++ rest xs
+    where rest (y:ys@(_:_)) = map (:[y]) ys ++ rest ys
+          rest _ = []
 
 findToDo everything (Expression e)
     | Same <- isKSpace (Expression e), FFT (Var _ _ _ Nothing) <- e = DoK (Expression e)
@@ -771,23 +820,30 @@ findToDo everything (Expression e)
     | Same <- isRealSpace (Expression e), IFFT e' <- e = case findToDo everything e' of
                                                            DoNothing -> DoK $ e'
                                                            dothis -> dothis
-    | Same <- isScalar (Expression e), Integrate e' <- e = findToDo everything e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = case findToDo everything e' of
+                                                             DoNothing -> DoS $ Expression e
+                                                             dothis -> dothis
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in : " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
-
 findToDo _ (Sum s) | [] <- sum2pairs s = DoNothing
 findToDo everything (Sum s) 
-    | Same <- isRealSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index, not $ hasFFT firstToDo = DoR firstToDo
-    | Same <- isKSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index, not $ hasFFT firstToDo = DoK firstToDo
-    where index = reverse $ filter (\l -> length l /= 1) $ init $ take 1000 $ tail $ subsequences [1..length $ sum2pairs s] 
-          simplifiable e n = (hasexpression (pairs2sum $ fst $ removeAt e n) (pairs2sum $ snd $ removeAt e n)) && ithelps e n
+    | Same <- isRealSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoR firstToDo
+              -- (firstToDo:_) <- filter (simplifiable $ sum2pairs s) index
+    | Same <- isKSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoK firstToDo
+    where index = take numtotake $ subsq [1..len]
+          len = length $ sum2pairs s
+          --all_subes = map (pairs2sum . fst . removeAt e) index
+          simplifiable e n = not (hasK sube) && countVarssube > 1 && countVarssube < 3 && not (hasFFT sube) && ithelps e n && (countexpression sube everything) > 1
+              where sube = pairs2sum $ fst $ removeAt e n
+                    countVarssube = countVars sube
           oldnum = countVars everything
           ithelps :: Type a => [(Double, Expression a)] -> [Int] -> Bool
-          ithelps e n | Same <- isRealSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (r_var "WhatIfISubstituteThis") everything) < oldnum
-                      | Same <- isKSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (k_var "WhatIfISubstituteThis") everything) < oldnum
+          ithelps e n | Same <- isRealSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
+                      | Same <- isKSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                       | otherwise = False
           firstToDo = pairs2sum $ fst $ removeAt (sum2pairs s) $ last $ filter (simplifiable $ sum2pairs s) index
+
 findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
                                 [] -> if hasFFT (Sum s)
                                       then error ("FFT not detected in : " ++ show (Sum s))
@@ -797,14 +853,18 @@ findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s
 
 findToDo _ (Product s) | [] <- product2pairs s = DoNothing
 findToDo everything (Product s) 
-    | Same <- isRealSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo = DoR firstToDo
-    | Same <- isKSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo = DoK firstToDo
-    where index = reverse $ filter (\l -> length l /= 1) $ init $ take 1000 $ tail $ subsequences [1..length $ product2pairs s]
-          simplifiable e n = (hasexpression (pairs2product $ fst $ removeAt e n) (pairs2product $ snd $ removeAt e n)) && ithelps e n
+    | Same <- isRealSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo, countVars firstToDo > 1 = DoR firstToDo
+    | Same <- isKSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo, countVars firstToDo > 1 = DoK firstToDo
+    where index = take numtotake $ subsq [1..len]
+          len = length $ product2pairs s
+          --simplifiable e n = ithelps e n && countexpression (pairs2product $ fst $ removeAt e n) everything > 1
+          simplifiable e n = not (hasK sube) && countVarssube > 1 && countVarssube < 3 && not (hasFFT sube) && ithelps e n && (countexpression sube everything) > 1
+              where sube = pairs2product $ fst $ removeAt e n
+                    countVarssube = countVars sube
           oldnum = countVars everything
           ithelps :: Type a => [(Expression a, Double)] -> [Int] -> Bool
-          ithelps e n | Same <- isRealSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (r_var "WhatIfISubstituteThis") everything) < oldnum
-                      | Same <- isKSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (k_var "WhatIfISubstituteThis") everything) < oldnum
+          ithelps e n | Same <- isRealSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
+                      | Same <- isKSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                       | otherwise = False
           firstToDo = pairs2product $ fst $ removeAt (product2pairs s) $ last $ filter (simplifiable $ product2pairs s) index
 
@@ -829,10 +889,13 @@ findToDo x (Var a b c (Just e)) =
     DoK e' -> case compareExpressions e e' of
                 Same -> DoK $ Var a b c (Just e)
                 Different -> DoK e'
+    DoS e' -> case compareExpressions e e' of
+                Same -> DoS $ Var a b c (Just e)
+                Different -> DoS e'
     DoNothing -> DoNothing
 --findToDo _ (Var _ _ _ (Just e)) = findToDo e
 findToDo _ (Var _ _ _ Nothing) = DoNothing
-findToDo _ (Scalar _) = DoNothing
+findToDo everything (Scalar e) = findToDo everything e
 
 
 isfft :: Expression KSpace -> Maybe (Expression RealSpace)
@@ -877,19 +940,26 @@ simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 = simp2helper (0 :: Int) [] -- . cleanvars
     where simp2helper n sts e = case findToDo e e of
                                   DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                      where (v,vtex) = case ke of Var _ x@('r':_) t _ -> (x, t)
-                                                                  Var _ x t _ -> ("k_" ++ x, t)
-                                                                  _ -> ("k" ++ show n, "k_{" ++ show n ++ "}")
+                                      where (v,vtex) = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
+                                                                  Var _ x t _ -> ("ktemp_" ++ x, t)
+                                                                  _ -> ("ktemp_" ++ show n, "ktemp_{" ++ show n ++ "}")
                                             inike = InitializeK $ Var (v++"[i]") v vtex Nothing
                                             setke = AssignK v ke
                                             e'  = substitute ke (Var (v++"[i]") v vtex Nothing) e
                                   DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where (v,vtex) = case re of Var _ x@('k':_) t _ -> (x,t)
-                                                                  Var _ x t _ -> ("r_" ++ x,t)
-                                                                  _ -> ("r" ++ show n, "r_{" ++ show n ++ "}")
+                                      where (v,vtex) = case re of --Var _ x@('k':_) t _ -> (x,t)
+                                                                  Var _ x t _ -> ("rtemp_" ++ x,t)
+                                                                  _ -> ("rtemp_" ++ show n, "rtemp_{" ++ show n ++ "}")
                                             inire = InitializeR $ Var (v++"[i]") v vtex Nothing
                                             setre = AssignR v re
                                             e'  = substitute re (Var (v++"[i]") v vtex Nothing) e
+                                  DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
+                                      where (v,vtex) = case re of Var _ x@('s':_) t _ -> (x,t)
+                                                                  Var _ x t _ -> ("s_" ++ x,t)
+                                                                  _ -> ("s" ++ show n, "s_{" ++ show n ++ "}")
+                                            inire = InitializeS $ Var v v vtex Nothing
+                                            setre = AssignS v re
+                                            e'  = substitute re (Var v v vtex Nothing) e
                                   DoNothing -> (sts, e)
 
 factorandsum :: Type a => [Expression a] -> Expression a
@@ -940,6 +1010,53 @@ derive v dda (Log e) = derive v (dda/e) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (Expression e) = derivativeHelper v dda e
+{-
+countexpression :: (Type a, Type b) => Expression a -> Expression b -> Int
+countexpression x e | Same <- compareExpressions x e = 1
+countexpression x (Expression v)
+  | Same <- isKSpace (Expression v), FFT e <- v = countexpression x e
+  | Same <- isRealSpace (Expression v), IFFT e <- v = countexpression x e
+  | Same <- isScalar (Expression v), Integrate e <- v = countexpression x e
+  | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = 0
+  | otherwise = error "Unhandled case in countexpression"
+countexpression (Sum xs) (Sum es) | [] == sum2pairs es || [] == sum2pairs xs = 0
+countexpression x@(Sum xs) e@(Sum es)
+  | Same <- compareTypes e x,
+    ((factorX,sndheadxspairs):_) <- xspairs,
+    ((factorE,_):_) <- filter (\(_, ex) -> ex == sndheadxspairs) espairs,
+    ratio <- factorE / factorX =
+             if and $ map (\term -> elem term $ espairs) (map (\(f, s) -> (f*ratio, s)) xspairs)
+             then 1 + rest
+             else rest
+            where espairs = sum2pairs es
+                  xspairs = sum2pairs xs
+                  rest = sum $ map (countexpression x) (map snd espairs)
+countexpression (Product xs) (Product es) | [] == product2pairs xs || [] == product2pairs es = 0
+countexpression x@(Product xs) e@(Product es)
+  | Same <- compareTypes e x, 
+    filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es) /= [],
+    factorX <- snd $ head $ xspairs,
+    factorE <- snd $ head $ filter (\(ex, _) -> ex == (fst $ head $ xspairs)) espairs,
+    ratio <- factorE / factorX = 
+             if and $ map (\term -> elem term $ espairs) (map (\(f, s) -> (f, s*ratio)) xspairs)
+             then 1 + rest
+             else rest
+    where espairs = product2pairs es
+          xspairs = product2pairs xs
+          rest = sum $ map (countexpression x) (map fst espairs)
+countexpression x (Sum s) = sum $ map sub $ sum2pairs s
+    where sub (_,e) = countexpression x e
+countexpression x (Product p) = sum $ map sub $ product2pairs p
+    where sub (e, _) = countexpression x e
+countexpression x (Cos e)   = countexpression x e
+countexpression x (Sin e)   = countexpression x e
+countexpression x (Log e)   = countexpression x e
+countexpression x (Exp e)   = countexpression x e
+countexpression x (Abs e)   = countexpression x e
+countexpression x (Signum e) = countexpression x e
+countexpression x (Var _ _ _ (Just e)) = countexpression x e
+countexpression _ (Var _ _ _ Nothing) = 0
+countexpression x (Scalar e) = countexpression x e
 
 hasexpression :: (Type a, Type b) => Expression a -> Expression b -> Bool
 hasexpression x e | Same <- compareExpressions x e = True
@@ -960,11 +1077,15 @@ hasexpression x@(Sum xs) e@(Sum es) -- check if x is a subexpression of e
             where espairs = sum2pairs es
                   xspairs = sum2pairs xs
 hasexpression x@(Product xs) e@(Product es)
-  | Same <- compareTypes e x, filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es) /= [] = 
-       (and $ map (\term -> elem term $ product2pairs es) (map (\(f, s) -> (f, s*((snd $ head $ filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es)) / factorX))) (product2pairs xs)))
-       || (or $ map (hasexpression x) (map fst (product2pairs es)))
-    where factorX = snd $ head $ product2pairs xs
-
+  | Same <- compareTypes e x, 
+    filter (\(ex, _) -> ex == (fst $ head $ product2pairs xs)) (product2pairs es) /= [],
+    factorX <- snd $ head $ xspairs,
+    factorE <- snd $ head $ filter (\(ex, _) -> ex == (fst $ head $ xspairs)) espairs,
+    ratio <- factorE / factorX = 
+         (and $ map (\term -> elem term $ espairs) (map (\(f, s) -> (f, s*ratio)) xspairs))
+         || (or $ map (hasexpression x) (map fst espairs))
+    where espairs = product2pairs es
+          xspairs = product2pairs xs
 hasexpression x (Sum s) = or $ map sub $ sum2pairs s
     where sub (_,e) = hasexpression x e
 hasexpression x (Product p) = or $ map sub $ product2pairs p
@@ -981,37 +1102,30 @@ hasexpression x (Scalar e) = hasexpression x e
 
 substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
 substitute x y e | Same <- compareExpressions x e = y
-
-
 substitute x@(Sum xs) y e@(Sum es) 
-  | Same <- compareTypes x e, hasexpression x e = 
-    let factorX = fst $ head $ xspairs
-        factorE = fst $ head $ filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs
-        ratio = factorE / factorX
-        in if (filter (\(_, ex) -> ex == (snd $ head $ xspairs)) espairs /= []) && (and $ map (\term -> elem term $ espairs) (multiplyFst ratio xspairs))
-           then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term (multiplyFst ratio xspairs)) espairs) + (y * (pairs2sum [(ratio, pairs2product [])]))
-           else pairs2sum $ map (subSnd x y) espairs
+  | Same <- compareTypes x e, hasexpression x e,
+    ((factorX, termX):_) <- xspairs,
+    ((factorE, _):_) <- filter (\(_, ex) -> ex == termX) espairs,
+    ratio <- factorE / factorX = 
+        if (filter (\(_, ex) -> ex == termX) espairs /= []) && (and $ map (\term -> elem term $ espairs) (multiplyFst ratio xspairs))
+        then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term (multiplyFst ratio xspairs)) espairs) + (y * toExpression ratio)
+        else pairs2sum $ map (subSnd x y) espairs
   where subSnd m n (f, ex) = (f, substitute m n ex)
         espairs = sum2pairs es
         xspairs = sum2pairs xs
         multiplyFst factor pairs = map (\(a, b) -> (a*factor, b)) pairs
-
-{-
-substitute x@(Sum xs) y e@(Sum es) 
-  | Same <- compareTypes x e, hasexpression x e =
-    if (and $ map (\term -> elem term $ espairs) xspairs)
-    then (pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term xspairs) espairs) + y
-    else pairs2sum $ map (subSnd x y) espairs
-  where subSnd m n (f, ex) = (f, substitute m n ex)
-        espairs = sum2pairs es
-        xspairs = sum2pairs xs
--}
 substitute x@(Product xs) y e@(Product es) 
-  | Same <- compareTypes x e, hasexpression x e = 
-    if (and $ map (\term -> elem term $ product2pairs es) (product2pairs xs))
-    then (pairs2product $ map (subFst x y) $ filter (\term -> not $ elem term $ product2pairs xs) (product2pairs es)) * y
-    else pairs2product $ map (subFst x y) (product2pairs es)
+  | Same <- compareTypes x e, hasexpression x e,
+    ((termX, factorX):_) <- xspairs,
+    ((_, factorE):_) <- filter (\(ex, _) -> ex == termX) espairs,
+    ratio <- factorE / factorX = 
+        if (filter (\(ex, _) -> ex == termX) espairs /= []) && (and $ map (\term -> elem term $ espairs) (multiplySnd ratio xspairs))
+        then (pairs2product $ map (subFst x y) $ filter (\term -> not $ elem term $ (multiplySnd ratio xspairs)) espairs) * (y ** toExpression ratio)
+        else pairs2product $ map (subFst x y) (product2pairs es)
   where subFst m n (ex, f) = (substitute m n ex, f)
+        espairs = product2pairs es
+        xspairs = product2pairs xs
+        multiplySnd factor pairs = map (\(a, b) -> (a, b*factor)) pairs
 substitute x y (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = Expression $ FFT (substitute x y e)
   | Same <- isRealSpace (Expression v), IFFT e <- v = Expression $ IFFT (substitute x y e)
@@ -1031,6 +1145,10 @@ substitute x y (Signum e) = signum $ substitute x y e
 substitute x y (Var a b c (Just e)) = Var a b c (Just $ substitute x y e)
 substitute _ _ v@(Var _ _ _ Nothing) = v
 substitute x y (Scalar e) = Scalar (substitute x y e)
+-}
+
+
+
 
 substituteS :: Type a => Expression a -> Expression a -> Statement -> Statement
 substituteS x y (AssignR s e) = AssignR s (substitute x y e)
@@ -1041,6 +1159,80 @@ substituteS x y (InitializeK e) = InitializeK (substitute x y e)
 substituteS x y (InitializeS e) = InitializeS (substitute x y e)
 substituteS x y (FreeR e) = FreeR (substitute x y e)
 substituteS x y (FreeK e) = FreeK (substitute x y e)
+
+hasexpression :: (Type a, Type b) => Expression a -> Expression b -> Bool
+hasexpression x e = countexpression x e > 0
+
+countexpression :: (Type a, Type b) => Expression a -> Expression b -> Int
+countexpression x e = snd $ subAndCount x (s_var "WeAreCounting") e
+
+substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
+substitute x y e = fst $ subAndCount x y e
+
+subAndCount :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> (Expression b, Int)
+subAndCount x y e | Same <- compareExpressions x e = (y, 1)
+subAndCount x@(Sum xs) y e@(Sum es)
+  | Same <- compareTypes x e,
+    ((factorX, termX):_) <- xspairs,
+    ((factorE, _):_) <- filter (\(_, ex) -> ex == termX) espairs,
+    ratio <- factorE / factorX = 
+        if and $ map (\term -> elem term $ espairs) (multiplyFst ratio xspairs)
+        then ((pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term (multiplyFst ratio xspairs)) espairs) + (y * toExpression ratio), 1 + rest)
+        else (pairs2sum $ map (subSnd x y) espairs, rest)
+  where subSnd m n (f, ex) = (f, fst $ subAndCount m n ex)
+        espairs = sum2pairs es
+        xspairs = sum2pairs xs
+        multiplyFst factor pairs = map (\(a, b) -> (a*factor, b)) pairs
+        rest = sum $ map (snd . subAndCount x y) (map snd espairs)
+
+subAndCount x@(Product xs) y e@(Product es) 
+  | Same <- compareTypes x e,
+    ((termX, factorX):_) <- xspairs,
+    ((_, factorE):_) <- filter (\(ex, _) -> ex == termX) espairs,
+    ratio <- factorE / factorX = 
+        if and $ map (\term -> elem term $ espairs) (multiplySnd ratio xspairs)
+        then ((pairs2product $ map (subFst x y) $ filter (\term -> not $ elem term $ (multiplySnd ratio xspairs)) espairs) * (y ** toExpression ratio), 1 + rest)
+        else (pairs2product $ map (subFst x y) (product2pairs es), rest)
+  where subFst m n (ex, f) = (fst $ subAndCount m n ex, f)
+        espairs = product2pairs es
+        xspairs = product2pairs xs
+        multiplySnd factor pairs = map (\(a, b) -> (a, b*factor)) pairs
+        rest = sum $ map (snd . subAndCount x y) (map fst espairs)
+subAndCount x y (Expression v)
+  | Same <- isKSpace (Expression v), FFT e <- v = let (e', n) = subAndCount x y e in (Expression $ FFT e', n)
+  | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
+  | Same <- isScalar (Expression v), Integrate e <- v = let (e', n) = subAndCount x y e in (Expression $ Integrate e', n)
+  | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = (Expression v, 0)
+  | otherwise = error $ "unhandled case in subAndCount: " ++ show v
+
+subAndCount x y (Sum s) = (pairs2sum $ map justfe results, sum $ map (snd . snd) results)
+    where results = map sub $ sum2pairs s
+          justfe (f, (e, _)) = (f,e)
+          sub (f, e) = (f, subAndCount x y e)
+subAndCount x y (Product p) = (pairs2product $ map justen results, sum $ map (snd . fst) results)
+    where results = map sub $ product2pairs p
+          justen ((e, _), n) = (e, n)
+          sub (e, n) = (subAndCount x y e, n)
+subAndCount x y (Cos e)   = (cos e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Sin e)   = (sin e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Log e)   = (log e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Exp e)   = (exp e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Abs e)   = (abs e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Signum e) = (signum e', n)
+    where (e', n) = subAndCount x y e
+subAndCount x y (Var a b c (Just e)) = (Var a b c (Just e'), n)
+    where (e', n) = subAndCount x y e
+subAndCount _ _ v@(Var _ _ _ Nothing) = (v, 0)
+subAndCount x y (Scalar e) = (Scalar e', n)
+    where (e', n) = subAndCount x y e
+
+
+
 
 \end{code}
 
@@ -1097,13 +1289,13 @@ latexStatements x = unlines $ map (\e -> "\n\\begin{dmath}\n" ++ latex e ++ "\n\
 
 latexSimp :: (Type a) => Expression a -> String
 latexSimp e = "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{breqn}\n\\begin{document}\n\n" ++
-              latexStatements (f sts) ++ "\n\\begin{dmath}\n" ++ latex e' {-(cleanvars e')-} ++ "\n\\end{dmath}" ++
+              latexStatements ( freeVectors $ f sts) ++ "\n\\begin{dmath}\n" ++ latex (cleanvars e') ++ "\n\\end{dmath}" ++
               "\n\\end{document}"
-    where f ((InitializeR _):xs) = f xs
-          f ((InitializeK _):xs) = f xs
-          f ((InitializeS _):xs) = f xs
-          f ((FreeR _):xs) = f xs
-          f ((FreeK _):xs) = f xs
+    where --f ((InitializeR _):xs) = f xs
+          --f ((InitializeK _):xs) = f xs
+          --f ((InitializeS _):xs) = f xs
+          --f ((FreeR _):xs) = f xs
+          --f ((FreeK _):xs) = f xs
           f (x:xs) = x:(f xs)
           f [] = []
           (sts,e') = simp2 e
@@ -1117,38 +1309,66 @@ checkDup = nubBy sameInit
 --          sameInit (AssignK x y) (AssignK x' y') = x == x' && y == y'
           sameInit _ _ = False
 
+{-
+-- Still have bugs in "check", don't know why
 freeVectors :: [Statement] -> [Statement]
 freeVectors s = reverse $ freeHelper (vecInMem s) (reverse s)
-    where freeHelper v (x@(AssignR _ xn):xs) | or $ map check v = ns ++ [x] ++ freeHelper (v \\ fe) xs
-              where fe = filter check v
+    where freeHelper v (x@(AssignR _ xn):xs) | or $ map check v  = ns ++ [x] ++ freeHelper (v \\ fe) xs
+              where fe = (trace $ show fe) filter check v
                     ns = map freeme fe
-                    check n = (hasexpression (r_var n) xn) || (hasexpression (k_var n) xn)
+                    check n@('r':_) = hasexpression (r_var n) xn
+                    check n@('k':_) = hasexpression (k_var n) xn
           freeHelper v (x@(AssignK _ xn):xs) | or $ map check v = ns ++ [x] ++ freeHelper (v \\ fe) xs
               where fe = filter check v
                     ns = map freeme fe
-                    check n = (hasexpression (r_var n) xn) || (hasexpression (k_var n) xn)
+                    check n@('r':_) = (hasexpression (r_var n) xn)
+                    check n@('k':_) = (hasexpression (k_var n) xn)
           freeHelper v (x:xs) = [x] ++ freeHelper v xs
-          freeHelper _ [] = []
-          freeme v@('r':_) = FreeR $ r_var v
-          freeme v@('k':_) = FreeK $ k_var v
+          freeHelper [] [] = []
+          freeHelper v  [] = error (show v ++ " still in memory")
+          freeme v@('r':'t':'e':'m':'p':_) = FreeR $ r_var v
+          freeme v@('k':'t':'e':'m':'p':_) = FreeK $ k_var v
           freeme _ = error "bad variable name!?!@"
+-}
 
+
+
+freeVectors :: [Statement] -> [Statement]
+freeVectors = reverse . freeHelper [] . reverse
+    where freeHelper :: [String] -> [Statement] -> [Statement]
+          freeHelper ns (xnn@(FreeR (Var _ varName _ Nothing)):xs) = [xnn] ++ freeHelper (varName:ns) xs
+          freeHelper ns (xnn@(FreeK (Var _ varName _ Nothing)):xs) = [xnn] ++ freeHelper (varName:ns) xs
+          freeHelper ns (xnn@(AssignR _ xn):xs) 
+              | (needFree@('r':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeR $ r_var needFree):xnn:xs)
+              | (needFree@('k':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeK $ k_var needFree):xnn:xs)
+              | otherwise = [xnn] ++ freeHelper ns xs
+          freeHelper ns (xnn@(AssignK _ xn):xs) 
+              | (needFree@('r':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeR $ r_var needFree):xnn:xs)
+              | (needFree@('k':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeK $ k_var needFree):xnn:xs)
+              | otherwise = [xnn] ++ freeHelper ns xs
+          freeHelper ns (x:xs) = [x] ++ freeHelper ns xs
+          freeHelper _ [] = []
+
+{- not used in freeVectors any more
 vecInMem :: [Statement] -> [String]
 vecInMem s = filter isFreeVec $ map ini s
-     where ini (InitializeR (Var _ x _ Nothing)) = x
-           ini (InitializeK (Var _ x _ Nothing)) = x
-           ini _ = ""
-           fre (FreeR (Var _ x _ Nothing)) = x
-           fre (FreeK (Var _ x _ Nothing)) = x
-           fre _ = ""
-           isFreeVec x = not $ elem x $ map fre s
+    where ini (InitializeR (Var _ x _ Nothing)) = x
+          ini (InitializeK (Var _ x _ Nothing)) = x
+          ini _ = ""
+          fre (FreeR (Var _ x _ Nothing)) = x
+          fre (FreeK (Var _ x _ Nothing)) = x
+          fre _ = ""
+          isFreeVec x = not $ elem x $ map fre s
+-}
 
+
+--BUGS to be fixed in reuseVar
 reuseVar :: [Statement] -> [Statement]
-reuseVar ((InitializeR (Var _ ivar _ Nothing)):(AssignR n e):(FreeR (Var _ fvar _ Nothing)):xs)
-    | ivar == n = (AssignR fvar e) : (reuseVar $ map (substituteS (r_var ivar) (r_var fvar)) xs)
+reuseVar ((InitializeR iivar@(Var _ ivar _ Nothing)):(AssignR n e):(FreeR ffvar@(Var _ fvar _ Nothing)):xs)
+    | ivar == n = (AssignR fvar e) : (reuseVar $ map (substituteS iivar ffvar) xs)
     | otherwise = error "RS initialize error: "
-reuseVar ((InitializeK (Var _ ivar _ Nothing)):(AssignK n e):(FreeK (Var _ fvar _ Nothing)):xs)
-    | ivar == n = (AssignK fvar e) : (reuseVar $ map (substituteS (k_var ivar) (k_var fvar)) xs)
+reuseVar ((InitializeK iivar@(Var _ ivar _ Nothing)):(AssignK n e):(FreeK ffvar@(Var _ fvar _ Nothing)):xs)
+    | ivar == n = (AssignK fvar e) : (reuseVar $ map (substituteS iivar ffvar) xs)
     | otherwise = error "initialize error"
 reuseVar (x:xs) = x : (reuseVar xs)
 reuseVar [] = []
@@ -1169,7 +1389,7 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> [String] -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n" ++ codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeIntegrate) ++ "\n\treturn output*gd.dvolume;\n" ) ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n" ++ codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeIntegrate) ++ "\n\treturn output;\n" ) ++
                 functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n" ++ codeStatements codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeVTransform)  ++ "\n\treturn output;\n")  ++
                 functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n\t" ++ codeStatements codeDTransform ++ "\n\treturn output;\n") ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
@@ -1184,9 +1404,9 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
       codeIntegrate = freeVectors (st ++ [AssignS "output" e'])
-          where (st, e') = simp2 (joinFFTs $ integrate e)
+          where (st, e') = simp2 (joinFFTs $ integrate $ cleanvars e)
       codeVTransform = freeVectors (InitializeR e: st ++ [AssignR "output" e'])
-          where (st, e') = simp2 $ joinFFTs e
+          where (st, e') = simp2 $ joinFFTs $ cleanvars e
       codeDTransform = freeVectors [InitializeS (makeHomogeneous e), AssignS "output" (makeHomogeneous e)]
       codeDerive = freeVectors [InitializeS (makeHomogeneous (derive (r_var "x") 1 e)), AssignS "output" (makeHomogeneous (derive (r_var "x") 1 e))]
       codeGrad = freeVectors (st ++ [AssignR "(*outgrad)" (r_var "(*outgrad)" + e')])
