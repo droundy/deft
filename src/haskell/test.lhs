@@ -389,12 +389,14 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
           wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ whitebear
-          c <- runTestTT $ TestList [findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests,
-                                     substitutionTests, hasexpressionTests, multisubstituteTests]
-          if failures c > 0 || errors c > 0
-            then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
-            else do putStrLn "All tests passed!"
-                    putStrLn $ show c
+          if "codegen" `elem` args
+            then putStrLn "Not running actual tests, just generating test code...\n"
+            else do c <- runTestTT $ TestList [findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests,
+                                               substitutionTests, hasexpressionTests, multisubstituteTests]
+                    if failures c > 0 || errors c > 0
+                      then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
+                      else do putStrLn "All tests passed!"
+                              putStrLn $ show c
 
 latexfile :: Type a => [(String, Expression a)] -> String
 latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{document}\n\n" ++ unlines (map helper xs) ++ "\n\\end{document}"

@@ -90,11 +90,12 @@ check_PROGRAMS = \
 	tests/saft.test \
 	tests/saft-dispersion.test \
 	tests/optimized-code.test \
+	tests/memory.test \
+	tests/eos.test \
 	tests/constrained-water-fast-slow.test \
 	tests/expression.test \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
-	tests/memory.test \
 	tests/ideal-gas.test \
 	tests/hard-spheres-cavity.test \
 	tests/hard-spheres-hard-wall.test \
@@ -107,7 +108,6 @@ check_PROGRAMS = \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
 	tests/fftinverse.test \
-	tests/eos.test \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test \
