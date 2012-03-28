@@ -13,7 +13,7 @@ main =
      gen "src/ContactAtSphereFast.cpp" $
        generateHeader wb_contact_at_sphere ["R"] "ContactAtSphere"
      gen "src/YuWuContactFast.cpp" $
-       generateHeader yuwu_contact ["R"] "YuWuContact"
+       generateHeader yuwu_contact ["R"] "YuWuContact"  
      gen "src/SaftFluid2Fast.cpp" $
        generateHeader saft_fluid ["R", "epsilon_association", "kappa_association",
                                   "epsilon_dispersion", "lambda_dispersion", "length_scaling",
