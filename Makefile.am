@@ -68,10 +68,10 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 
 $(OPTIMIZED_CODE): optimize-functionals
-	./optimize-functionals $@
+	time ./optimize-functionals $@ && echo timed $@
 
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
-	src/haskell/functionals $@
+	time src/haskell/functionals $@ && echo timed $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
