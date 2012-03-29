@@ -744,6 +744,7 @@ varList (Expression e) | Same <- isKSpace (Expression e), Kx <- e = []
                        | Same <- isRealSpace (Expression e), (IFFT e') <- e = varList e'
                        | Same <- isKSpace (Expression e), (FFT e') <- e = varList e'
                        | Same <- isScalar (Expression e), (Integrate e') <- e = varList e'
+                       | Same <- isKSpace (Expression e), SetKZeroValue _ e' <- e = varList e'
                        | otherwise = error "There is no other possible expression"
 varList (Var _ _ _ (Just e)) = varList e
 varList (Var _ c _ Nothing) | ('r':'t':'e':'m':'p':_) <- c = [c] 
@@ -1217,6 +1218,8 @@ subAndCount x y (Expression v)
   | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
   | Same <- isScalar (Expression v), Integrate e <- v = let (e', n) = subAndCount x y e in (Expression $ Integrate e', n)
   | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = (Expression v, 0)
+  | Same <- isKSpace (Expression v), SetKZeroValue z e <- v = 
+    let (e', n) = subAndCount x y e in (Expression $ SetKZeroValue z e', n)
   | otherwise = error $ "unhandled case in subAndCount: " ++ show v
 
 subAndCount x y (Sum s) = (pairs2sum $ map justfe results, sum $ map (snd . snd) results)
