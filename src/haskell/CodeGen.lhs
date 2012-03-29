@@ -89,7 +89,11 @@ instance Code KSpace where
 instance Type KSpace where
   isKSpace _ = Same
   derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
-  derivativeHelper _ _ _ = 0
+  derivativeHelper v ddk (SetKZeroValue _ e) = derive v (setkzero 0 ddk) e -- FIXME: how best to handle k=0 derivative?
+  derivativeHelper _ _ Kx = 0
+  derivativeHelper _ _ Ky = 0
+  derivativeHelper _ _ Kz = 0
+  derivativeHelper _ _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper _ Kx = Expression Kx
   zeroHelper _ Ky = Expression Ky
