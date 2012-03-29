@@ -42,6 +42,15 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
     return false;
   }
+  if (isinf(E0)) {
+    // There is no point continuing, since we've got an infinite result.  :(
+    // So we may as well quit here.
+    if (verbose) {
+      printf(" which is infinite, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
   if (isnan(slope)) {
     // The slope here is a NaN, so there is no point continuing!
     // So we may as well quit here.

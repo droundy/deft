@@ -41,7 +41,7 @@ main =
         ("dwbdnone", dwbdn1),
         ("dwbdnonev", dwbdn1v_over_n2v),
         ("dwbdntwov", dwbdn2v_over_n2v)]
-     gen "src/OneElectronFast.cpp" $ 
-       generateHeader oneElectron [] "OneElectron"
+     gen "src/HydrogenFast.cpp" $ 
+       generateHeader (oneElectron hydrogenPotential) [] "Hydrogen"
 definelatex :: (String, Expression RealSpace) -> String
 definelatex (v,e) = "\\newcommand\\" ++ v ++ "{" ++ latex e ++ "}"
