@@ -314,6 +314,7 @@ fft r | r == 0 = 0
 ifft :: Expression KSpace -> Expression RealSpace
 ifft ke | ke == 0 = 0
         | otherwise = Expression (IFFT ke)
+
 \end{code}
 
 The \verb!ReciprocalSpaceField! data type describes a field in real space.
@@ -1193,30 +1194,35 @@ subAndCount x y e | Same <- compareExpressions x e = (y, 1)
 subAndCount x@(Sum xs) y e@(Sum es)
   | Same <- compareTypes x e,
     ((factorX, termX):_) <- xspairs,
-    ((factorE, _):_) <- filter (\(_, ex) -> ex == termX) espairs,
-    ratio <- factorE / factorX = 
-        if and $ map (\term -> elem term $ espairs) (multiplyFst ratio xspairs)
-        then ((pairs2sum $ map (subSnd x y) $ filter (\term -> not $ elem term (multiplyFst ratio xspairs)) espairs) + (y * toExpression ratio), 1 + rest)
-        else (pairs2sum $ map (subSnd x y) espairs, rest)
-  where subSnd m n (f, ex) = (f, fst $ subAndCount m n ex)
-        espairs = sum2pairs es
-        xspairs = sum2pairs xs
-        multiplyFst factor pairs = map (\(a, b) -> (a*factor, b)) pairs
-        rest = sum $ map (snd . subAndCount x y) (map snd espairs)
-
+    Just factorE <- Map.lookup termX es,
+    ratio <- factorE / factorX,
+    Just es' <- filterout ratio xspairs es,
+    (e'',n) <- subAndCount x y (mksum es') = (e'' + toExpression ratio*y, n+1)
+  where xspairs = sum2pairs xs
+        filterout ratio ((f,x1):rest) emap =
+          case Map.lookup x1 emap of
+            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
+                                        else Nothing
+            Nothing -> Nothing
+        filterout _ [] emap = Just emap
+        mksum mymap | [(ee,1)] <- Map.assocs mymap = ee
+                    | otherwise = Sum mymap
 subAndCount x@(Product xs) y e@(Product es) 
   | Same <- compareTypes x e,
     ((termX, factorX):_) <- xspairs,
-    ((_, factorE):_) <- filter (\(ex, _) -> ex == termX) espairs,
-    ratio <- factorE / factorX = 
-        if and $ map (\term -> elem term $ espairs) (multiplySnd ratio xspairs)
-        then ((pairs2product $ map (subFst x y) $ filter (\term -> not $ elem term $ (multiplySnd ratio xspairs)) espairs) * (y ** toExpression ratio), 1 + rest)
-        else (pairs2product $ map (subFst x y) (product2pairs es), rest)
-  where subFst m n (ex, f) = (fst $ subAndCount m n ex, f)
-        espairs = product2pairs es
-        xspairs = product2pairs xs
-        multiplySnd factor pairs = map (\(a, b) -> (a, b*factor)) pairs
-        rest = sum $ map (snd . subAndCount x y) (map fst espairs)
+    Just factorE <- Map.lookup termX es,
+    ratio <- factorE / factorX,
+    Just es' <- filterout ratio xspairs es,
+    (e'',n) <- subAndCount x y (mkproduct es') = (e'' * y**(toExpression ratio), n+1)
+  where xspairs = product2pairs xs
+        filterout ratio ((x1,f):rest) emap =
+          case Map.lookup x1 emap of
+            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
+                                        else Nothing
+            Nothing -> Nothing
+        filterout _ [] emap = Just emap
+        mkproduct mymap | [(ee,1)] <- Map.assocs mymap = ee
+                        | otherwise = Product mymap
 subAndCount x y (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = let (e', n) = subAndCount x y e in (Expression $ FFT e', n)
   | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
@@ -1225,13 +1231,16 @@ subAndCount x y (Expression v)
   | Same <- isKSpace (Expression v), SetKZeroValue z e <- v = 
     let (e', n) = subAndCount x y e in (Expression $ SetKZeroValue z e', n)
   | otherwise = error $ "unhandled case in subAndCount: " ++ show v
-
-subAndCount x y (Sum s) = (pairs2sum $ map justfe results, sum $ map (snd . snd) results)
-    where results = map sub $ sum2pairs s
+subAndCount x y (Sum s) = if n > 0 then (pairs2sum $ map justfe results, n)
+                                   else (Sum s, 0)
+    where n = sum $ map (snd . snd) results
+          results = map sub $ sum2pairs s
           justfe (f, (e, _)) = (f,e)
           sub (f, e) = (f, subAndCount x y e)
-subAndCount x y (Product p) = (pairs2product $ map justen results, sum $ map (snd . fst) results)
-    where results = map sub $ product2pairs p
+subAndCount x y (Product p) = if num > 0 then (pairs2product $ map justen results, num)
+                                         else (Product p, 0)
+    where num = sum $ map (snd . fst) results
+          results = map sub $ product2pairs p
           justen ((e, _), n) = (e, n)
           sub (e, n) = (subAndCount x y e, n)
 subAndCount x y (Cos e)   = (cos e', n)

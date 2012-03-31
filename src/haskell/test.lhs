@@ -327,7 +327,9 @@ multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
                                  t (x1+x2) x4 (x4+cos(2*x4)+x3) (x1+x2+cos(2*x1+2*x2)+x3),
                                  t (x4+x5) x3 (x1+x2+x3*x3) x,
                                  t (x1+x2) z (z*x3+(z+x4)*x3+x5*(x2+x3)) y,
+                                 t (x1+x2) z (3*z + x3 + cos(z*(z+x3))) (3*x1+3*x2 + x3 + cos(z*(x1+x2+x3))),
                                  t (x1*x2) x4 (x4*x3+x2*x3+x1*x3) (x1*x2*x3+x2*x3+x1*x3),
+                                 t (sqrt(x1*x2)) x4 (x4**4*x3+x2*x3+x4**2*x3) (x1**2*x2**2*x3+x2*x3+x1*x2*x3),
                                  t (x1*x2) x4 (x4**2*x3+x2*x3+x4*x3) (x1**2*x2**2*x3+x2*x3+x1*x2*x3)]
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
                                                  (eresult) (substitute a b e)
@@ -388,11 +390,13 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
-          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ whitebear
+          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ joinFFTs $ derive (r_var "x") (r_var "ingrad") $
+            substitute k (k_var "k") $
+            (n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))
           if "codegen" `elem` args
             then putStrLn "Not running actual tests, just generating test code...\n"
-            else do c <- runTestTT $ TestList [findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests,
-                                               substitutionTests, hasexpressionTests, multisubstituteTests]
+            else do c <- runTestTT $ TestList [substitutionTests, hasexpressionTests, multisubstituteTests,
+                                               findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests]
                     if failures c > 0 || errors c > 0
                       then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
                       else do putStrLn "All tests passed!"
