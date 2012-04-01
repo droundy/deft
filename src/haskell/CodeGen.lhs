@@ -9,7 +9,7 @@ module CodeGen ( RealSpace, r_var,
                  Type, 
                  makeHomogeneous, isConstant, hasexpression, factorandsum, -- for debugging only!!!
                  code, latex, setZero, codeStatement, substitute, cleanvars,
-                 generateHeader, simp2, countFFT, checkDup, peakMem, reuseVar, removeAt, freeVectors, findToDo, ToDo(..), latexSimp, hasFFT, countexpression, subAndCount )
+                 generateHeader, simp2, countFFT, checkDup, peakMem, reuseVar, freeVectors, findToDo, ToDo(..), latexSimp, hasFFT, countexpression, subAndCount )
        where
 
 import Debug.Trace
@@ -765,12 +765,6 @@ varList (Sum e) = concat $ map (varList . snd) (sum2pairs e)
 varList (Product e) = concat $ map (varList . fst) (product2pairs e)
 varList (Scalar _) = []
 
-removeAt :: [a] -> [Int] -> ([a], [a])
-removeAt xs n = (map fst (filter (\x -> elem (snd x) n) list), map fst (filter (\x -> not $ elem (snd x) n) list))
-    where list = consList 1 xs 
-          consList m (p:ps) = [(p, m)] ++ (consList (m+1) ps)
-          consList _ [] = []
-
 hasFFT :: Type a => Expression a -> Bool
 hasFFT (Expression e) 
     | Same <- isKSpace (Expression e), FFT _ <- e = True
@@ -844,24 +838,18 @@ findToDo everything (Expression e)
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in : " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
-findToDo _ (Sum s) | [] <- sum2pairs s = DoNothing
-findToDo everything (Sum s) 
-    | Same <- isRealSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoR firstToDo
-              -- (firstToDo:_) <- filter (simplifiable $ sum2pairs s) index
-    | Same <- isKSpace (Sum s), or $ map (simplifiable $ sum2pairs s) index = DoK firstToDo
-    where index = take numtotake $ subsq [1..len]
-          len = length $ sum2pairs s
-          --all_subes = map (pairs2sum . fst . removeAt e) index
-          simplifiable e n = not (hasK sube) && countVarssube > 1 && countVarssube < 3 && not (hasFFT sube) && ithelps e n && (countexpression sube everything) > 1
-              where sube = pairs2sum $ fst $ removeAt e n
-                    countVarssube = countVars sube
+findToDo everything (Sum s)
+    | Same <- isRealSpace (Sum s), todo:_ <- filter simplifiable subes = DoR todo
+    | Same <- isKSpace (Sum s), todo:_ <- filter simplifiable subes = DoK todo
+    where acceptables = take numtotake $ filter (\(_,e) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ sum2pairs s
+          subes = map pairs2sum $ take numtotake $ subsq acceptables
+          simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube && (countexpression sube everything) > 1
+              where countVarssube = countVars sube
           oldnum = countVars everything
-          ithelps :: Type a => [(Double, Expression a)] -> [Int] -> Bool
-          ithelps e n | Same <- isRealSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
-                      | Same <- isKSpace (pairs2sum $ fst $ removeAt e n)= countVars (substitute (pairs2sum $ fst $ removeAt e n) (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
-                      | otherwise = False
-          firstToDo = pairs2sum $ fst $ removeAt (sum2pairs s) $ last $ filter (simplifiable $ sum2pairs s) index
-
+          ithelps :: Type a => Expression a -> Bool
+          ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
+                    | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
+                    | otherwise = False
 findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
                                 [] -> if hasFFT (Sum s)
                                       then error ("FFT not detected in : " ++ show (Sum s))
@@ -870,22 +858,18 @@ findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s
     where sub (_,e) = findToDo everything e
 
 findToDo _ (Product s) | [] <- product2pairs s = DoNothing
-findToDo everything (Product s) 
-    | Same <- isRealSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo, countVars firstToDo > 1 = DoR firstToDo
-    | Same <- isKSpace (Product s), or $ map (simplifiable $ product2pairs s) index, not $ hasFFT firstToDo, countVars firstToDo > 1 = DoK firstToDo
-    where index = take numtotake $ subsq [1..len]
-          len = length $ product2pairs s
-          --simplifiable e n = ithelps e n && countexpression (pairs2product $ fst $ removeAt e n) everything > 1
-          simplifiable e n = not (hasK sube) && countVarssube > 1 && countVarssube < 3 && not (hasFFT sube) && ithelps e n && (countexpression sube everything) > 1
-              where sube = pairs2product $ fst $ removeAt e n
-                    countVarssube = countVars sube
+findToDo everything (Product s)
+    | Same <- isRealSpace (Product s), todo:_ <- filter simplifiable subes = DoR todo
+    | Same <- isKSpace (Product s), todo:_ <- filter simplifiable subes = DoK todo
+    where acceptables = take numtotake $ filter (\(e,_) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ product2pairs s
+          subes = map pairs2product $ take numtotake $ subsq acceptables
+          simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube && (countexpression sube everything) > 1
+              where countVarssube = countVars sube
           oldnum = countVars everything
-          ithelps :: Type a => [(Expression a, Double)] -> [Int] -> Bool
-          ithelps e n | Same <- isRealSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
-                      | Same <- isKSpace(pairs2product $ fst $ removeAt e n) = countVars (substitute (pairs2product $ fst $ removeAt e n) (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
-                      | otherwise = False
-          firstToDo = pairs2product $ fst $ removeAt (product2pairs s) $ last $ filter (simplifiable $ product2pairs s) index
-
+          ithelps :: Type a => Expression a -> Bool
+          ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
+                    | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
+                    | otherwise = False
 findToDo everything (Product p) = case filter (/= DoNothing) $ map sub $ product2pairs p of
                          [] -> if hasFFT (Product p)
                                then error ("FFT not detected in : " ++ show (Product p))
