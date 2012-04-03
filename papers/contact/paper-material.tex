@@ -1,0 +1,548 @@
+\derivation{
+  So to compute this we need
+  \begin{align}
+    \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
+    \int \left(
+    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
+    \frac{\delta n_3(\mathbf{r}')}{\delta R(\mathbf{r})}
+    +
+    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
+    \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})}
+    + \cdots
+    \right) d\mathbf{r}'
+  \end{align}
+  There are \emph{many} such terms, and this could get expensive.
+  
+  First, let's rewrite the free energy in terms of a smaller set of
+  weighted densities:
+  \begin{align}
+    A_{HS} &= \int \left\{
+    -n_0 \ln\left( 1 - n_3\right)
+    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2(1-n_3)^2
+    }
+    \right\}
+  \end{align}
+  
+  \begin{align}
+    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
+    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+      n_3(\mathbf{r}'))^2}
+    - \frac{n_2^3 -
+      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
+    \frac{n_3^2-5n_3+2}{n_3^3(1-n_3)^3} + 2\frac{\ln(1-n_3)}{n_3^3}
+    \right)
+    \\
+    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
+    \frac{n_1}{1-n_3}
+    + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
+      (1-n_3)^2\ln(1-n_3)}{
+      36\pi n_3^2(1-n_3)^2
+    }
+    \\
+    \frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+    \\
+    \frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &=
+    -\ln\left( 1 - n_3\right) \\
+    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
+    \frac{\mathbf{n}_{V1}}{1-n_3}
+    - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
+      (1-n_3)^2\ln(1-n_3)}{
+      36\pi n_3^2(1-n_3)^2
+    }    \\
+    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+    \frac{\mathbf{n}_{V2}}{1-n_3} \\
+    \frac{\delta A_{HS}}{\delta R(\mathbf{r}')} &=
+    \frac{n_2}{2\pi R^3} \ln\left( 1 - n_3\right)
+    - \frac1{R} \frac{n_1n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+  \end{align}
+
+*******************************************************************************8
+\fixme{The following is the same calculation for WBm2.  Not sure if you want these in the appendix or in the paper at all?}
+ 
+\begin{align} 
+A_{HS} &= \int \left\{
+    -n_0 \ln\left(1 - n_3\right)
+    + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + \left(1 - \frac{4}{9}n_3\phi_3(n_3)\right)\frac{n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}}{24\pi (1-n_3)^2}
+    \right\}
+\end{align}
+ where
+ \begin{align}
+   \phi_2 &= \left(6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3)\right)\frac{1}{n_3^3}\\
+   \phi_3 &= \left(6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3)\right)\frac{1}{4n_3^3}
+ \end{align}
+For the following derivitives we have
+\begin{align}
+   \frac{\delta \phi_2}{\delta n_3} &= \left((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2\right)\frac{3}{n_3^4}\\
+   \frac{\delta \phi_3}{\delta n_3} &= \left(-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3)\right)\frac{3}{4n_3^4}
+ \end{align}
+And using these
+\begin{align}
+  \frac{\delta A_{HS}}{\delta n_3} &= \psi _1 + \psi _2 + \psi _3
+\end{align}
+where
+\begin{align}
+  \psi_1 &= \frac{n_0}{1-n_3}\\
+  \psi_2 &= \frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3}\left(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}\right) + \left(1 + \frac{1}{9}n_3^2\phi_2\right)\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2}\\
+  \psi_3 &= \frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2}\left(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}\right) + 2\left(1 - \frac{4}{9}n_3\phi_3\right)\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3} 
+\end{align}
+We also have
+\begin{align}
+  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2}\\
+  \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
+  \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
+  \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
+  \frac{\delta A_{HS}}{\delta \mathbf{n}_2} &= -(1 + \frac{1}{9}n_3^2\phi_2)\frac{\mathbf{n}_1}{1 - n_3} 
+  - (1 - \frac{4}{9}n_3\phi_3)\frac{6n_2\mathbf{n}_2}{24\pi(1 - n_3)^2}
+\end{align}
+
+
+
+
+  
+****************************************************************************************\\
+Jeff's understanding as of 02/22/2012
+
+
+  In order to motivate our particular forms for $\frac{\delta n_3^{S} (\mathbf{r}')}{\delta R(\mathbf{r})}$, $\frac{\delta n_2^{S}(\mathbf{r}')}{\delta R(\mathbf{r})}$, etc. we interpret the contact density in the $S$ case as follows: 
+  Given that there is a sphere just touching the point $\mathbf{r}'$, $n_{Contact}^{S}(\mathbf{r}')$ is the density
+  of spheres that are also touching that point so that they are touching the given sphere.  We can see this in the integral in eq \ref{eq:n-contactS},where we sum over the double densities of spheres that are positioned opposite eachother and touching at the point $\mathbf{r}$ and then divide
+  by $n_0$, the average density of a single sphere touching the point.  Thus we have the density of contact at $\mathbf{r}$, where the
+  contact between the two spheres actually takes place at $\mathbf{r}$.
+
+Involved in the terms in our free energy functional are derivatives of density functions with respect to $R$.  We take these integrals differently when dealing with the S and the A cases. In both cases we wish to calculate how the density function changes when a 'certain amount of sphere', at some point, is changed.  The A case is conceptually simple.  We say that a changing spherical radius at a point $\mathbf{r}$ represents the outward expansion, by a distance $\delta R$, of the shell of any sphere that is centered at $\mathbf{r}$.  In the case of S we instead expand a multitude of spheres, all of them positioned around and just touching the point $\mathbf{r}$.  When their radii expand each does not expand outward in all directions as in the case of A, rather they each expand outward at only the point $\mathbf{r}$.  One can imagine a shell that touches $\mathbf{r}$ that has an infinitesimal bit of shell area protruding outward at $\mathbf{r}$ while the rest of its shell remains at radius $R$.  When we expand each sphere that touches $\mathbf{r}$ in this peculiar fashion, we have in the end the same amount of shell area protruding outward as we would if we had simply expanded one sphere in fashion of case A.  Also the protrusions, once added up for all spheres sourrounding $\mathbf{r}$, will yield a symmetry in their direction of protrusion.  Each protruding sphere bit will expand outward from its center and all directions will be covered uniformly.  
+
+
+
+  For the derivation of $n_{3}$ in the symmetric case:
+
+\begin{align}  
+  n_3^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}')) d\mathbf{r}''\\
+  \frac{\delta n_3^{S} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}''
+\end{align}
+  
+  $\delta R(\mathbf{r})$ in this equation refers to an expansion, in the fashion described above, of all the spheres that just touch $\mathbf{r}$.  We can see that if the radii change in this fashion, the only point at which $n_3(\mathbf{r}')$ will be affected is at $\mathbf{r}' = \mathbf{r}$, so that $\delta n_3(\mathbf{r}')$ is zero everywhere except where $\mathbf{r}' = \mathbf{r}$.  Thus we have the 2nd $\delta$ function in the lower integral.
+
+This term in the free energy functional, once integrated, takes an interesting form:  
+
+\begin{align}
+  \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} 
+  \frac{\delta n_3^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}' 
+  &= \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}'' d\mathbf{r}' \\
+  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r} - \mathbf{r}''| - R(\mathbf{r})) d\mathbf{r}''\\
+  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}'')} n_2(\mathbf{r})\\
+\end{align}
+  
+ $n_2(\mathbf{r}')$ in the case of S in calculated similarly:
+\begin{align}
+  n_2^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''\\
+    \frac{\delta n_2^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int n(\mathbf{r}'') 
+  \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}''
+\end{align}
+
+For $\mathbf{n}_{V2}(\mathbf{r}')$ in the case of S we take the gradient of $n_3(\mathbf{r}')$ with respect to $\mathbf{r}'$: 
+\begin{align}
+  \mathbf{n}_{V2}^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'))
+  \frac{(\mathbf{r}' - \mathbf{r}'')}{|\mathbf{r}' - \mathbf{r}''|} d \mathbf{r}''\\
+  \frac{\delta \mathbf{n}_{V2}^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= \delta(\mathbf{r} - \mathbf{r}')
+  \int n(\mathbf{r}'') \delta'(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) 
+  \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|} d\mathbf{r}''
+\end{align}
+
+  In the case of A, the changing radius we refer to is the radius of a sphere that is centered at $\mathbf{r}$ and it expands in a more conventional fashion.  The $n_3$ values that will be affected are those which are a distance $R$ fom $\mathbf{r}$.
+
+\begin{align}
+  n_3^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}'')) d\mathbf{r}''\\ 
+  \frac{\delta n_3^{A} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
+  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) \delta(\mathbf{r}-\mathbf{r}'') d\mathbf{r}'' \\
+   &= n (\mathbf{r}) \delta(|\mathbf{r} - \mathbf{r}'| - R(\mathbf{r}))
+\end{align}
+ 
+And likewise:
+\begin{align}
+  n_2^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) d \mathbf{r}''\\
+  \frac{\delta n_2^{A}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -n(\mathbf{r}) \delta'(|\mathbf{r}' - \mathbf{r}| - R)\\
+ \end{align}
+
+ \fixme {
+And then there's a lot with taking the derivative of the delta for the case of $n_{2}^{S}(\mathbf{r}')$.  Not sure if we'll use any of this, but wrote down some equations that Roundy wrote out.  So can use the terms at least if going to write about this - I'm just copying it in for now (probably a lotof mistakes)
+
+\begin{align}
+  p(\mathbf{r}) &= \frac{\delta A}{\delta n_2(\mathbf{r}')} \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}'\\
+  &= \frac{\delta A}{\delta n_2(\mathbf{r})} - \int n(\mathbf{r}'') \delta' (|\mathbf{r} - \mathbf{r}''| - R) d\mathbf{r}''
+  \int n (\mathbf{r} +\mathbf{r}'') \delta'(|\mathbf{r}'''| - R) d \mathbf{r}'''\\
+  &= \int n(\mathbf{r} + \mathbf{r}''') \delta'(|\mathbf{r}'''| - R) r'''^2 cos\theta d \theta''' dr'''\\
+  du = \delta'(\mathbf{r}''' - R) d \mathbf{r}'''     v = n(\mathbf{r} - \mathbf{r}'')r'''\\
+   u = \delta(\mathbf{r}''' - R)                       
+   dv = \mathbf{\nabla} n(\mathbf{r} + \mathbf{r}'') \cdot \frac{\mathbf{r}'''}{r'''} + 2n(\mathbf{r}' - \mathbf{r}'')r'''\\
+  &= -\int(\mathbf{\nabla}n(\mathbf{r}' + \mathbf{r}'') \cdot \mathbf r'''(hat)r'''^2 dr''' 
+  + 2n(\mathbf{r} + \mathbf{r}''')r''') dr''' \delta(\mathbf{r} - R) dcos\theta''' d\theta''\\
+  &= - \int \delta(\mathbf{r}''' - R) d\mathbf{r}''' 
+  (\mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) + \frac{2n(\mathbf{r} + \mathbf{r}'')}{\mathbf{r}'''})\\
+  &= \frac{2n_2(\mathbf{r})}{R} + 
+  \int \delta(|\mathbf{r}'''| - R) \mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) d \mathbf{r}'''\\
+\end{align} 
+}
+********************************************************************************\\
+
+These give us some basic tools with which to perform derivatives.
+  
+  Finally, we get an answer like
+  \begin{align}
+    \frac{\delta A_{HS}}{\delta R(\mathbf{r})} &=
+    \int \mathbf{dr}' \left\{
+    \left(
+    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+      n_3(\mathbf{r}'))^2}
+    + \frac{1}{4\pi}\frac{
+      \frac13 n_2^3 - n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}
+    }{
+      (1-n_3(\mathbf{r}'))^3
+    }
+    \right) n(\mathbf{r}') \delta(|\mathbf{r}-\mathbf{r}'| - R) \right.
+    \\
+    & \left.
+    + \frac{\delta A}{\delta n_2(\rr')} n(\rr) \delta'(|\rr-\rr'|-R) \cdots
+    \right\}
+  \end{align}
+  This comes out to quite a mess.  It isn't be infeasible to compute
+  this, but it is challenging.
+}
+
+
+
+
+
+%% \section{Direct correlation function}
+
+%% \textcolor{red}{FIXME WRITE THIS SECTION!} The direct correlation
+%% function is readily accessible from density-functional theory, as the
+%% second functional derivative of the free energy:
+%% \textcolor{red}{(Something like...)}
+%% \begin{align}
+%%   -c^{(2)}(\rr_1, \rr_2) &= \frac{1}{k_BT}\frac{\delta^2 F_{ex}}{\delta n(\rr_1) \delta n(\rr_2)}
+%% \end{align}
+%% The direct correlation function is related to the ordinary correlation
+%% function by the Ornstein-Zernike relation
+%% \begin{align}
+%%   h(\rr_1, \rr'_2) &= g(\rr_1, \rr_2) - 1 \\
+%%   h(\rr_1, \rr_2) &= c(\rr_1, \rr_2)
+%%     + \int n(\rr_3)c(\rr_1, \rr_3) h(\rr_2, \rr_3)d\rr''
+%% \end{align}
+%% From these two equation, we could in principle extract the correlation
+%% function evaluated at contact from the DFT free energy functional.
+%% The Ornstein-Zernike equation is usually solved by taking a Fourier
+%% transform of all the relevant quantities.  In the inhomogeneous case,
+%% however, this approach isn't workable, since the Fourier transforms
+%% don't speed things up like you'd hope, and we don't have a periodic
+%% system in general.
+
+%% \textcolor{red}{It seems worth looking into this, to see what (if
+%%   anything) we can do! I don't see a solution just now, but that
+%%   doesn't mean there isn't one around somewhere.  In any case, just
+%%   looking at the direct correlation function might give us some
+%%   hints as to a different and interesting approximation for the
+%%   contact density.}
+
+\derivation{
+  \begin{widetext}
+}
+
+%% \section{Mean Contact density}\label{simple-contact}
+
+%% One reasonably simple question to ask is what the \emph{mean} contact
+%% density of an inhomogeneous system is.  This comes down to simply
+%% reproducing the derivation for a homogeneous system using the
+%% FMT functional.
+%% \begin{align}
+%%   p_{HS} &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
+%%   \ncontact &= \frac{1}{N k_BT 4\pi \sigma^2} \frac{dA_{HS}}{dR}
+%% \end{align}
+%% While this should give the true mean contact density for any given
+%% system, this is not particularly useful, as we have no way of knowing
+%% the contact density on any given sphere.  However, the mean contact
+%% density comes out as an integral, so we can plot the integrand, and
+%% treat it as a somewhat ill-defined local contact density.
+
+%% \derivation{
+
+%%   To compute the mean contact density of a system, we need
+%%   \begin{align}
+%%     \frac{d A_{HS}}{d R} &=
+%%     \frac{\partial A_{HS}}{\partial R} \\
+%%     &+
+%%     \int \left(
+%%     \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
+%%     \frac{d n_3(\mathbf{r}')}{d R}
+%%     +
+%%     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
+%%     \frac{d n_2(\mathbf{r}')}{d R}
+%%     + \cdots
+%%     \right) d\mathbf{r}'
+%%   \end{align}
+
+%%   \begin{align}
+%%     \frac{dn_3(\mathbf{r})}{dR} &= n_2(\mathbf{r})\\
+%%     \frac{dn_2(\mathbf{r})}{dR} &= \int n(\mathbf{r}+\mathbf{r}')
+%%     \delta'(|\mathbf{r'}| - R)\mathbf{dr}'\\
+%%     &= \int n(\mathbf{r}+\mathbf{r}')
+%%     \delta'(r' - R) d\Omega' r'^2 dr'\\
+%%     &= \int 
+%%     \delta(r' - R) d\Omega' \left(\frac{dn(\mathbf{r}+\mathbf{r}')}{dr'}r'^2 + 2n(\mathbf{r}+\mathbf{r}')r' \right) dr'\\
+%%     &= \frac1{R} \int 
+%%     \delta(|\mathbf{r}'| - R)
+%%     \left(\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') +
+%%     2n(\mathbf{r}+\mathbf{r}') \right) \mathbf{dr}' \\
+%%     &= \frac{2}{R}n_2(\mathbf{r}) + \frac{1}{R} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{dn_0(\mathbf{r})}{dR} &= \frac{1}{R} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{dn_1(\mathbf{r})}{dR} &=
+%%     \frac1{4\pi R}\frac{dn_2(\mathbf{r})}{dR} - n_0(\mathbf{r}) \\
+%%     &= n_0(\mathbf{r}) + \frac{1}{4\pi R^2} \int 
+%%     \delta(|\mathbf{r}'| - R)\mathbf{r}'\cdot \nabla n(\mathbf{r}+\mathbf{r}') \mathbf{dr}' \\
+%%     \frac{d\mathbf{n}_{V2}}{dR} &= \nabla n_2
+%%   \end{align}
+  
+%%   The total force due to $\Phi_1$ is actually very easy to work out:
+%%   \begin{align}
+%%     \frac{d A_{HS}^{(1)}}{d R} &=
+%%     \int \mathbf{dr}' \left(\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3) \right)
+%%   \end{align}
+%%   where you can see that $\frac{dn_0(\mathbf{r})}{dR}$ is zero for a
+%%   homogeneous system, and small for reasonably smooth density
+%%   distributions.  The next term from $\Phi_2$ is as follows:
+%%   \begin{align}
+%%     \frac{d A_{HS}^{(2)}}{d R} &=
+%%     \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2} - 2 n_1
+%%       \frac{dn_2}{dR} + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot
+%%     }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       - 2 n_1 \left(\frac2{R}n_2 \frac{dn_0}{dR}\right)
+%%       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     - \frac{n_0n_2 - \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       - 4 n_0n_2 - 2 n_1\frac{dn_0}{dR}
+%%       + 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right) \\
+%%     &= \int \mathbf{dr}' \left(
+%%     \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{(1-n_3)^2}
+%%     n_2
+%%     + \frac{3n_0n_2 + \mathbf{n}_{V0} \cdot\mathbf{n}_{V2}
+%%       + 2 n_1\frac{dn_0}{dR}
+%%       - 2 \mathbf{n}_{V1} \cdot \nabla n_2 \cdot }{1-n_3}
+%%     \right)
+%%   \end{align}
+  
+%%   And the last term looks like this.  I should perhaps note that this
+%%   term should be replaced by a tensor version if want to examine
+%%   seriously localized density distributions.
+%%   \begin{align}
+%%     A_{HS}^{(3)} &=
+%%     \int \mathbf{dr}'\left(
+%%     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       36\pi n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \right) \\
+%%     \frac{d A_{HS}^{(3)}}{d R} &=
+%%     \int \mathbf{dr}'
+%%     \left[
+%%       3(n_2^2 - \mathbf{n}_{V2} \cdot \mathbf{n}_{V2})
+%%       \left(\frac2{R}n_2 + \frac{dn_0}{dR}\right)
+%%       - 6n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+%%       \right]
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       36\pi n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \\
+%%     &+
+%%     (n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) n_2
+%%     \frac{
+%%       (1 - 2(1-n_3)\ln(1-n_3) - (1-n_3))n_3^2( 1 - n_3)^2
+%%       -
+%%       (n_3 + (1-n_3)^2 \ln(1-n_3))(-2 n_3^2( 1 - n_3) + 2n_3(1-n_3)^2)
+%%     }{
+%%       36\pi (n_3^2\left( 1 - n_3 \right)^2)^2
+%%     }
+%%     \\
+%%     &=
+%%     \int \mathbf{dr}'
+%%     \left[
+%%       (n_1n_2 - \mathbf{n}_{V1} \cdot \mathbf{n}_{V2})
+%%       \left(2n_2 + \frac{1}{4\pi}\frac{dn_0}{dR}\right)
+%%       - \frac{1}{2\pi}n_2 \mathbf{n}_{V2} \cdot \nabla n_2
+%%       \right]
+%%     \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       3 n_3^2\left( 1 - n_3 \right)^2
+%%     }
+%%     \\
+%%     &+
+%%     \frac{n_2(n_2^3 - 3n_2\mathbf{n}_{V2} \cdot \mathbf{n}_{V2})}{36\pi}
+%%     \left( \frac{1}{(1-n_3)^2} + 2 \frac{\ln(1-n_3)}{n_3^2(1-n_3)} \right)
+%%   \end{align}
+  
+%%   \begin{align}
+%%     \frac{d A_{HS}}{d R} &=
+%%     \int \mathbf{dr}' \left(
+%%     -\frac{n_0n_2}{1-n_3} - \frac{dn_0(\mathbf{r})}{dR}\ln(1-n_3)
+%%     + \cdots
+%%     \right)
+%%   \end{align}
+%% }
+
+
+\fixme{This section is the big derivitives in terms of the Carnahan values.  I'm not sure if it's accurate but I didn't look at it since I don't know if you want it in the paper or not.} 
+
+  Here is the White Bear free energy functional for the hard-sphere
+  fluid:~\cite{roth2002whitebear}
+  \begin{align}
+    \beta A_{HS} &= \int \left\{
+    -n_0 \ln\left( 1 - n_3\right)
+    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+      n_3 + (1-n_3)^2 \ln(1-n_3)
+    }{
+      36\pi n_3^2(1-n_3)^2
+    }
+    \right\}
+\end{align}
+
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
+    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+      n_3(\mathbf{r}'))^2}
+    + \frac{n_2^3 -
+      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}
+    %\left(
+    %  \frac{1}{(1-n_3)^2} + 2\frac{\ln(1-n_3)}{n_2^2(1-n_3)}
+    %\right)
+    \\
+    & \times \left(\frac{2}{n_3(1-n_3)^3} -\frac1{n_3^2(1-n_3)^2}  -
+      \frac{1}{n_3^2(1-n_3)} - 2\frac{\ln(1-n_3)}{n_3^3}\right) \\
+    \beta\frac{\partial A_{HS}}{\partial n_3}
+    &\sim \frac{n}{1-\eta} + \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      \frac{n}{1-\eta} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= \frac{3n\eta}{(1-\eta)^2} +
+      \frac{2n\eta}{(1-\eta)^3} -
+      \frac{n}{(1-\eta)^2} -
+      2n \frac{ \ln(1-\eta) }{ \eta } \\
+    &= n\left(
+      \frac{3\eta - 3 \eta^2}{(1-\eta)^3} +
+      \frac{2\eta}{(1-\eta)^3} -
+      \frac{1 - \eta}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right) \\
+    &= n\left(
+      \frac{6\eta - 3 \eta^2 - 1}{(1-\eta)^3} -
+      2 \frac{ \ln(1-\eta) }{ \eta }
+      \right)
+\end{align}
+\end{widetext}
+
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &= -\ln(1-n_3)
+    \\
+    \beta\frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+    \\
+    \beta\frac{\partial A_{HS}}{\partial n_1}
+    &\sim n \frac{4\pi R^2}{1-\eta}
+\end{align}
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
+      \frac{n_1}{1-n_3}
+      + (n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
+        (1-n_3)^2\ln(1-n_3)}{
+        12\pi n_3^2(1-n_3)^2
+      }
+\end{align}
+\begin{align}
+    \beta\frac{\partial A_{HS}}{\partial n_2}
+    &\sim n\frac{R}{1-\eta} +
+    \frac{4\pi}{3} R^4 n^2 \frac{\eta + (1-\eta)^2\ln(1-\eta)}{\eta^2(1-\eta)^2}
+    \\
+    &= n\frac{R}{1-\eta} +
+    \frac{R n}{(1-\eta)^2}
+    + Rn \frac{\ln(1-\eta)}{\eta}
+    \\
+    &= nR\left( \frac{1 + \eta^2  - 2\eta}{(1-\eta)^3} +
+      \frac{1 - \eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
+    \\
+    &= nR\left( \frac{2 + \eta^2  - 3\eta}{(1-\eta)^3}
+    + \frac{\ln(1-\eta)}{\eta}
+    \right)
+\end{align}
+\begin{align}
+    \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+      \frac{\mathbf{n}_{V2}}{1-n_3}
+    \\
+    \beta\frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
+      \frac{\mathbf{n}_{V1}}{1-n_3}
+      - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
+        (1-n_3)^2\ln(1-n_3)}{
+        36\pi n_3^2(1-n_3)^2
+      }
+  \end{align}
+
+\begin{widetext}
+\begin{align}
+  \beta \frac{\partial A_{HS}}{\partial R} &\sim
+    \beta \frac{\partial A_{HS}}{\partial n_3} n_2 +
+    \beta \frac{\partial A_{HS}}{\partial n_2} 2 \frac{n_2}{R} +
+    \beta \frac{\partial A_{HS}}{\partial n_1} n
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} -
+      2\frac{\ln(1-\eta)}{\eta}
+    \right) +
+    n_2n \left( \frac{4+2\eta^2-6\eta}{(1-\eta)^3} + 2\frac{\ln(1-\eta)}{\eta} \right) +
+    n_2n\frac{1}{1-\eta}
+  \\
+  &=
+    n_2n \left(
+      \frac{6\eta - 3\eta^2 - 1}{(1-\eta)^3} +
+    \frac{4+2\eta^2-6\eta}{(1-\eta)^3} +
+    \frac{1 - 2\eta + \eta^2}{(1-\eta)^3}
+  \right)
+  \\
+  &=
+    n_2n \frac{4 - 2\eta}{(1-\eta)^3}
+\end{align}
+\end{widetext}
+Recall from Equation~\ref{eq:dAhsdR}, the standard Carnahan result is
+\begin{align}
+  \frac{dA_{HS}}{dR}
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R}
+  \\ &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} n_2
+\end{align}
+which means that we miraculously come out with a correct answer!
