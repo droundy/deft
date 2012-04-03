@@ -208,29 +208,29 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
 
 memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
-                     t "peakMem nbar" 2 n3,
+                     t "peakMem nbar" 1 n3,
                      t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
-                     t "peakMem saft_fluid" 6 saft_fluid,
-                     t "peakMem whitebear" 6 whitebear,
-                     t "peakMem saft_dispersion" 2 saft_dispersion,
-                     t "peakMem saft_association" 6 saft_association,
+                     t "peakMem saft_fluid" 4 saft_fluid,
+                     t "peakMem whitebear" 4 whitebear,
+                     t "peakMem saft_dispersion" 1 saft_dispersion,
+                     t "peakMem saft_association" 4 saft_association,
                      t "peakMem grad saft_fluid" 130 (gradme saft_fluid), -- was 267
                      t "peakMem grad whitebear" 20 (gradme whitebear), -- was 47
                      t "peakMem grad saft_dispersion" 49 (gradme saft_dispersion), -- was 101 ~12mins
                      t "peakMem grad saft_association" 65 (gradme saft_association), -- was 135
-                     t "peakMem nbar + n2" 2 (nbar + n2),
-                     t "peakMem n0raw log n3" 3 (n0raw*log n3),
-                     t "peakMem n0 log n3" 3 (n0*log n3),
+                     t "peakMem nbar + n2" 1 (nbar + n2),
+                     t "peakMem n0raw log n3" 2 (n0raw*log n3),
+                     t "peakMem n0 log n3" 2 (n0*log n3),
                      t "peakMem derive n0raw log n3" 4 (gradme $ kT*n0raw*log n3),
                      t "peakMem derive n0 log n3" 4 (gradme $ kT*n0*log n3),
                      t "peakMem derive assocalike n0raw" 5
                            (gradme $ assocalike n0raw),
                      t "peakMem derive assocalike n0" 5
                            (gradme $ assocalike n0),
-                     t "peakMem n3 + n2a" 2 (n3 + n2a),
-                     t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar),
-                     t "peakMem nbar + log nbar" 2 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (peakMem $ fst $ simp2 $ joinFFTs e)
+                     t "peakMem n3 + n2a" 1 (n3 + n2a),
+                     t "peakMem nbar*n2 + nbar" 2 (nbar*n2 + nbar),
+                     t "peakMem nbar + log nbar" 1 (nbar + log nbar)]
+  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $ joinFFTs e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"

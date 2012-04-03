@@ -15,7 +15,7 @@ module CodeGen ( RealSpace, r_var,
 import Debug.Trace
 
 import qualified Data.Map as Map
-import Data.List ( nubBy, nub )
+import Data.List ( nubBy, nub, partition, (\\) )
 
 \end{code}
 
@@ -62,15 +62,15 @@ instance Type RealSpace where
   prefix e = case isifft e of Just _ -> ""
                               Nothing -> "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
   postfix e = case isifft e of Just _ -> ""
-                               Nothing -> "\t\n}\n"
-  codeStatementHelper a op (Expression (IFFT (Var _ v _ Nothing))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
+                               Nothing -> "\t}\n"
+  codeStatementHelper (Var _ a _ _) op (Expression (IFFT (Var _ v _ Nothing))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT e)) = error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
   codeStatementHelper a op (Var _ _ _ (Just e)) = codeStatementHelper a op e
-  codeStatementHelper a op e = prefix e ++ a ++ "[i]" ++ op ++ code e ++ ";\n" ++ postfix e
+  codeStatementHelper a op e = prefix e ++ code a ++ op ++ code e ++ ";\n" ++ postfix e
   initialize (Var _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
-  initialize _ = "VectorXd output(gd.NxNyNz);"
+  initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var _ x _ Nothing) = x ++ ".resize(0); // Realspace"
-  free _ = error $ trace "free error" "free error"
+  free e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
 
 instance Code KSpace where
@@ -104,17 +104,18 @@ instance Type KSpace where
   prefix e = case isfft e of Just _ -> ""
                              Nothing -> "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n"
   postfix e = case isfft e of Just _ -> ""
-                              Nothing -> "\t}\n"
-  codeStatementHelper a op (Expression (FFT (Var _ v _ Nothing))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
+                              Nothing -> "\n\t}\n"
+  codeStatementHelper (Var _ a _ _) op (Expression (FFT (Var _ v _ Nothing))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
   codeStatementHelper a op (Var _ _ _ (Just e)) = codeStatementHelper a op e
-  codeStatementHelper a op e =
+  codeStatementHelper (Var _ a _ _) op e =
           if k0code == "0"
           then a ++ "[0]" ++ op ++ "0;\n\t" ++ prefix e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
           else "{\n\t\tconst int i = 0;\n\t\tconst Reciprocal k_i = Reciprocal(0,0,0);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero kz (setZero ky (setZero kx e))) ++ ";\n\t}\n\t" ++ prefix e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
       where k0code = code (setZero kz (setZero ky (setZero kx e)))
+  codeStatementHelper _ _ _ = error "Illegal input to codeStatementHelper for kspace"
   initialize (Var _ x _ Nothing) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);"
-  initialize _ = "VectorXcd output(gd.NxNyNzOver2);"
+  initialize _ = error "VectorXcd output(gd.NxNyNzOver2);"
   free (Var _ x _ Nothing) = x ++ ".resize(0); // KSpace"
   free _ = error "free error"
   toScalar Delta = 1
@@ -243,15 +244,15 @@ instance Type Scalar where
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
-  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
-  codeStatementHelper a op e = a ++ op ++ code e ++ ";\n\t"
+  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ code a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
+  codeStatementHelper a op e = code a ++ op ++ code e ++ ";\n\t"
   prefix (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
   postfix _ = ""
   initialize (Expression (Integrate _)) = "double output = 0;\n"
   initialize (Var _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
-  initialize _ = "double output = 0;\n"
+  initialize _ = error "double output = 0;\n"
   toScalar (Integrate r) = makeHomogeneous r
   fromScalar = id
 
@@ -559,12 +560,11 @@ class (Ord a, Show a, Code a) => Type a where
   s_var = Scalar . s_var
   derivativeHelper :: Type b => Expression b -> Expression a -> a -> Expression b
   zeroHelper :: Type b => Expression b -> a -> Expression a
-  codeStatementHelper :: String -> String -> Expression a -> String
+  codeStatementHelper :: Expression a -> String -> Expression a -> String
   prefix :: Expression a -> String
   postfix :: Expression a -> String
   postfix _ = ""
   initialize :: Expression a -> String
-  initialize _ = ""
   free :: Expression a -> String
   free _ = error "free nothing"
   toScalar :: a -> Expression Scalar
@@ -942,26 +942,28 @@ simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 = simp2helper (0 :: Int) [] -- . cleanvars
     where simp2helper n sts e = case findToDo e e of
                                   DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                      where (v,vtex) = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
-                                                                  Var _ x t _ -> ("ktemp_" ++ x, t)
-                                                                  _ -> ("ktemp_" ++ show n, "ktemp_{" ++ show n ++ "}")
-                                            inike = InitializeK $ Var (v++"[i]") v vtex Nothing
+                                      where v = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
+                                                           Var xi x t _ -> Var ("ktemp_"++xi) ("ktemp_" ++ x) t Nothing
+                                                           _ -> Var ("ktemp_" ++ show n++"[i]") 
+                                                                    ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
+                                            inike = InitializeK v
                                             setke = AssignK v ke
-                                            e'  = substitute ke (Var (v++"[i]") v vtex Nothing) e
+                                            e'  = substitute ke v e
                                   DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where (v,vtex) = case re of --Var _ x@('k':_) t _ -> (x,t)
-                                                                  Var _ x t _ -> ("rtemp_" ++ x,t)
-                                                                  _ -> ("rtemp_" ++ show n, "rtemp_{" ++ show n ++ "}")
-                                            inire = InitializeR $ Var (v++"[i]") v vtex Nothing
+                                      where v = case re of --Var _ x@('k':_) t _ -> (x,t)
+                                                           Var xi x t _ -> Var ("rtemp_" ++ xi) ("rtemp_"++x) t Nothing
+                                                           _ -> Var ("rtemp_" ++ show n++"[i]") 
+                                                                    ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
+                                            inire = InitializeR v
                                             setre = AssignR v re
-                                            e'  = substitute re (Var (v++"[i]") v vtex Nothing) e
+                                            e'  = substitute re v e
                                   DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where (v,vtex) = case re of Var _ x@('s':_) t _ -> (x,t)
-                                                                  Var _ x t _ -> ("s_" ++ x,t)
-                                                                  _ -> ("s" ++ show n, "s_{" ++ show n ++ "}")
-                                            inire = InitializeS $ Var v v vtex Nothing
+                                      where v = case re of Var _ x@('s':_) t _ -> Var x x t Nothing
+                                                           Var _ x t _ -> Var ("s_" ++ x) ("s_" ++ x) t Nothing
+                                                           _ -> Var ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
+                                            inire = InitializeS v
                                             setre = AssignS v re
-                                            e'  = substitute re (Var v v vtex Nothing) e
+                                            e'  = substitute re v e
                                   DoNothing -> (sts, e)
 
 factorandsum :: Type a => [Expression a] -> Expression a
@@ -1254,9 +1256,9 @@ The statement type allows us to string together a sequence of
 definitions and assignments.
 
 \begin{code}
-data Statement = AssignR String (Expression RealSpace)
-               | AssignK String (Expression KSpace)
-               | AssignS String (Expression Scalar)
+data Statement = AssignR (Expression RealSpace) (Expression RealSpace)
+               | AssignK (Expression KSpace) (Expression KSpace)
+               | AssignS (Expression Scalar) (Expression Scalar)
                | InitializeR (Expression RealSpace)
                | InitializeK (Expression KSpace)
                | InitializeS (Expression Scalar)
@@ -1266,9 +1268,9 @@ data Statement = AssignR String (Expression RealSpace)
 instance Show Statement where
   showsPrec = showsS
 showsS :: Int -> Statement -> ShowS
-showsS _ (AssignR x y) = showString x . showString " := " . showsPrec 0 y
-showsS _ (AssignK x y) = showString x . showString " := " . showsPrec 0 y
-showsS _ (AssignS x y) = showString x . showString " := " . showsPrec 0 y
+showsS _ (AssignR x y) = showsPrec 0 x . showString " := " . showsPrec 0 y
+showsS _ (AssignK x y) = showsPrec 0 x . showString " := " . showsPrec 0 y
+showsS _ (AssignS x y) = showsPrec 0 x . showString " := " . showsPrec 0 y
 showsS _ (InitializeR x) = showString "Initialize " . showsPrec 0 x
 showsS _ (InitializeK x) = showString "Initialize " . showsPrec 0 x
 showsS _ (InitializeS x) = showString "Initialize " . showsPrec 0 x
@@ -1279,9 +1281,9 @@ instance Code Statement where
   codePrec = codeS
   latexPrec = latexS
 codeS :: Int -> Statement -> ShowS
-codeS _ (AssignR x y) = showString (prefix y) . codePrec 0 (r_var x) . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
-codeS _ (AssignK x y) = showString (prefix y) . codePrec 0 (k_var x) . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
-codeS _ (AssignS x y) = showString (prefix y) . codePrec 0 (s_var x :: Expression Scalar) . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
+codeS _ (AssignR x y) = showString (prefix y) . codePrec 0 x . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
+codeS _ (AssignK x y) = showString (prefix y) . codePrec 0 x . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
+codeS _ (AssignS x y) = showString (prefix y) . codePrec 0 x . showString " = " . codePrec 0 y . showString ";" . showString (postfix y)
 codeS _ (InitializeR e) = showString (initialize e)
 codeS _ (InitializeK e) = showString (initialize e)
 codeS _ (InitializeS e) = showString (initialize e)
@@ -1289,9 +1291,9 @@ codeS _ (FreeR e) = showString (free e)
 codeS _ (FreeK e) = showString (free e)
 
 latexS :: Int -> Statement -> ShowS
-latexS _ (AssignR x y) = latexPrec 0 (r_var x) . showString " = " . latexPrec 0 (cleanvars y)
-latexS _ (AssignK x y) = latexPrec 0 (k_var x) . showString " = " . latexPrec 0 (cleanvars y)
-latexS _ (AssignS x y) = latexPrec 0 (s_var x :: Expression Scalar) . showString " = " . latexPrec 0 (cleanvars y)
+latexS _ (AssignR x y) = latexPrec 0 x . showString " = " . latexPrec 0 (cleanvars y)
+latexS _ (AssignK x y) = latexPrec 0 x . showString " = " . latexPrec 0 (cleanvars y)
+latexS _ (AssignS x y) = latexPrec 0 x . showString " = " . latexPrec 0 (cleanvars y)
 latexS _ (InitializeR e) = showString (initialize e)
 latexS _ (InitializeK e) = showString (initialize e)
 latexS _ (InitializeS e) = showString (initialize e)
@@ -1345,44 +1347,49 @@ freeVectors s = reverse $ freeHelper (vecInMem s) (reverse s)
           freeme _ = error "bad variable name!?!@"
 -}
 
+hasE :: Type a => Expression a -> [Statement] -> Bool
+hasE _ [] = False
+hasE e (AssignK _ a:_) | hasexpression e a = True
+hasE e (AssignR _ a:_) | hasexpression e a = True
+hasE e (AssignS _ a:_) | hasexpression e a = True
+hasE e (FreeK a:_) | Same <- compareExpressions a e = True
+hasE e (FreeR a:_) | Same <- compareExpressions a e = True
+hasE e (_:rest) = hasE e rest
 
-
+-- FIXME: This freeVectors uses O(n^2) calls to hasexpression, which
+-- is worse than before, and is worse than we should be able to do!
+-- :( On the plus side, it now preserves variable names, and reuseVar
+-- works again.
 freeVectors :: [Statement] -> [Statement]
-freeVectors = reverse . freeHelper [] . reverse
-    where freeHelper :: [String] -> [Statement] -> [Statement]
-          freeHelper ns (xnn@(FreeR (Var _ varName _ Nothing)):xs) = [xnn] ++ freeHelper (varName:ns) xs
-          freeHelper ns (xnn@(FreeK (Var _ varName _ Nothing)):xs) = [xnn] ++ freeHelper (varName:ns) xs
-          freeHelper ns (xnn@(AssignR _ xn):xs) 
-              | (needFree@('r':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeR $ r_var needFree):xnn:xs)
-              | (needFree@('k':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeK $ k_var needFree):xnn:xs)
-              | otherwise = [xnn] ++ freeHelper ns xs
-          freeHelper ns (xnn@(AssignK _ xn):xs) 
-              | (needFree@('r':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeR $ r_var needFree):xnn:xs)
-              | (needFree@('k':'t':'e':'m':'p':_):_) <- filter (\x -> not $ elem x ns) (varList xn) = freeHelper ns ((FreeK $ k_var needFree):xnn:xs)
-              | otherwise = [xnn] ++ freeHelper ns xs
-          freeHelper ns (x:xs) = [x] ++ freeHelper ns xs
-          freeHelper _ [] = []
+freeVectors = freeHelper [] []
+    where freeHelper :: [Expression RealSpace] -> [Expression KSpace] -> [Statement] -> [Statement]
+          freeHelper rs ks (xnn@(FreeR v):xs) = [xnn] ++ freeHelper (rs \\ [v]) ks xs
+          freeHelper rs ks (xnn@(FreeK v):xs) = [xnn] ++ freeHelper rs (ks \\ [v]) xs
+          freeHelper rs ks (xnn@(InitializeR v@(Var _ _ _ Nothing)):xs) = [xnn] ++ freeHelper (v:rs) ks xs
+          freeHelper _ _ (InitializeR v:_) = error ("crazy InitializeR: " ++ show v)
+          freeHelper rs ks (xnn@(InitializeK v@(Var _ _ _ Nothing)):xs) = [xnn] ++ freeHelper rs (v:ks) xs
+          freeHelper _ _ (InitializeK v:_) = error ("crazy InitializeK: " ++ show v)
+          freeHelper rs ks (xnn@(InitializeS _):xs) = [xnn] ++ freeHelper rs ks xs
+          freeHelper rs ks (xnn@(AssignR _ _):xs) = xnn : freeme ++ freeHelper rs' ks' xs
+            where (rs', rsfree) = partition (`hasE` xs) rs
+                  (ks', ksfree) = partition (`hasE` xs) ks
+                  freeme = map FreeR rsfree ++ map FreeK ksfree
+          freeHelper rs ks (xnn@(AssignK _ _):xs) = xnn : freeme ++ freeHelper rs' ks' xs
+            where (rs', rsfree) = partition (`hasE` xs) rs
+                  (ks', ksfree) = partition (`hasE` xs) ks
+                  freeme = map FreeR rsfree ++ map FreeK ksfree
+          freeHelper rs ks (xnn@(AssignS _ _):xs) = xnn : freeme ++ freeHelper rs' ks' xs
+            where (rs', rsfree) = partition (`hasE` xs) rs
+                  (ks', ksfree) = partition (`hasE` xs) ks
+                  freeme = map FreeR rsfree ++ map FreeK ksfree
+          freeHelper _ _ [] = []
 
-{- not used in freeVectors any more
-vecInMem :: [Statement] -> [String]
-vecInMem s = filter isFreeVec $ map ini s
-    where ini (InitializeR (Var _ x _ Nothing)) = x
-          ini (InitializeK (Var _ x _ Nothing)) = x
-          ini _ = ""
-          fre (FreeR (Var _ x _ Nothing)) = x
-          fre (FreeK (Var _ x _ Nothing)) = x
-          fre _ = ""
-          isFreeVec x = not $ elem x $ map fre s
--}
-
-
---BUGS to be fixed in reuseVar
 reuseVar :: [Statement] -> [Statement]
-reuseVar ((InitializeR iivar@(Var _ ivar _ Nothing)):(AssignR n e):(FreeR ffvar@(Var _ fvar _ Nothing)):xs)
-    | ivar == n = (AssignR fvar e) : (reuseVar $ map (substituteS iivar ffvar) xs)
+reuseVar ((InitializeR iivar@(Var _ _ _ Nothing)):(AssignR n e):(FreeR ffvar@(Var _ _ _ Nothing)):xs)
+    | iivar == n = (AssignR ffvar e) : reuseVar (map (substituteS iivar ffvar) xs)
     | otherwise = error "RS initialize error: "
-reuseVar ((InitializeK iivar@(Var _ ivar _ Nothing)):(AssignK n e):(FreeK ffvar@(Var _ fvar _ Nothing)):xs)
-    | ivar == n = (AssignK fvar e) : (reuseVar $ map (substituteS iivar ffvar) xs)
+reuseVar ((InitializeK iivar@(Var _ _ _ Nothing)):(AssignK n e):(FreeK ffvar@(Var _ _ _ Nothing)):xs)
+    | iivar == n = (AssignK ffvar e) : reuseVar (map (substituteS iivar ffvar) xs)
     | otherwise = error "initialize error"
 reuseVar (x:xs) = x : (reuseVar xs)
 reuseVar [] = []
@@ -1403,11 +1410,35 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 classCode :: Expression RealSpace -> [String] -> String -> String
 classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
-                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\tdouble output=0;\n\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n" ++ codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeIntegrate) ++ "\n\treturn output;\n" ) ++
-                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd); // to avoid an unused parameter error\n\tassert(&x); // to avoid an unused parameter error\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n" ++ codeStatements codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeVTransform)  ++ "\n\treturn output;\n")  ++
-                functionCode "transform" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error\n\t" ++ codeStatements codeDTransform ++ "\n\treturn output;\n") ++
+                functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
+                    (unlines ["\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(&gd);",
+                              "// to avoid an unused parameter error",
+                              "\tassert(&x); // to avoid an unused parameter error",
+                              "\tdouble output=0;",
+                              "\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);", 
+                              codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.",
+                              "\t// " ++ show (peakMem codeIntegrate),
+                              "\treturn output;\n"]) ++
+                functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
+                    (unlines ["\tassert(kT==kT); // to avoid an unused parameter error",
+                              "\tassert(&gd); // to avoid an unused parameter error",
+                              "\tassert(&x); // to avoid an unused parameter error",
+                              "\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);",
+                              "\tVectorXd output(gd.NxNyNz);",
+                              codeStatements codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.",
+                              "\t// " ++ show (peakMem codeVTransform), 
+                              "\treturn output;\n"])  ++
+                functionCode "transform" "double" [("double", "kT"), ("double", "x")] 
+                    (unlines ["\tassert(kT==kT); // to avoid an unused parameter error\n\tassert(x==x); // to avoid an unused parameter error",
+                              "\tdouble output = 0;",
+                              "\t" ++ codeStatements codeDTransform,
+                              "\treturn output;\n"]) ++
                 functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;" ++
-                functionCode "derive" "double" [("double", "kT"), ("double", "x")] ("\tassert(kT==kT);\n\tassert(x==x);\n" ++ codeStatements codeDerive ++ "\n\treturn output;\n") ++
+                functionCode "derive" "double" [("double", "kT"), ("double", "x")] 
+                    (unlines ["\tassert(kT==kT);\n\tassert(x==x);",
+                              "\tdouble output = 0;",
+                              codeStatements codeDerive,
+                              "\treturn output;\n"]) ++
                 functionCode "d_by_dT" "double" [("double", ""), ("double", "")] "\tassert(0); // fail\n\treturn 0;\n" ++
                 functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
                 functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\tassert(&ingrad==&ingrad);\n\tassert(&x==&x);\n\treturn ingrad;" ++
@@ -1417,13 +1448,13 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
-      codeIntegrate = freeVectors (st ++ [AssignS "output" e'])
+      codeIntegrate = reuseVar $ freeVectors (st ++ [AssignS (s_var "output") e'])
           where (st, e') = simp2 (joinFFTs $ integrate $ cleanvars e)
-      codeVTransform = freeVectors (InitializeR e: st ++ [AssignR "output" e'])
+      codeVTransform = reuseVar $ freeVectors (st ++ [AssignR (r_var "output") e'])
           where (st, e') = simp2 $ joinFFTs $ cleanvars e
-      codeDTransform = freeVectors [InitializeS (makeHomogeneous e), AssignS "output" (makeHomogeneous e)]
-      codeDerive = freeVectors [InitializeS (makeHomogeneous (derive (r_var "x") 1 e)), AssignS "output" (makeHomogeneous (derive (r_var "x") 1 e))]
-      codeGrad = freeVectors (st ++ [AssignR "(*outgrad)" (r_var "(*outgrad)" + e')])
+      codeDTransform = freeVectors [AssignS (s_var "output") (makeHomogeneous e)]
+      codeDerive = freeVectors [AssignS (s_var "output") (makeHomogeneous (derive (r_var "x") 1 e))]
+      codeGrad = reuseVar $ freeVectors (st ++ [AssignR (r_var "(*outgrad)") (r_var "(*outgrad)" + e')])
           where (st, e') = simp2 (joinFFTs $ derive (r_var "x") (r_var "ingrad") $ cleanvars e ) -- why cleanvars here ?
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
