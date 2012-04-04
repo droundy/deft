@@ -31,11 +31,12 @@ double oShellMed =R+.01*R;
 double oShellLarge =R+.05*R;
 double oShellGiant =R+.1*R;
 double oShellArray[4] = {oShellSmall,oShellMed,oShellLarge,oShellGiant};
-bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
+bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
+
 bool periodic[3] = {periodic_x, periodic_y, periodic_z};
 const double dxmin = 0.1;
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -104,6 +105,11 @@ int main(int argc, char *argv[]){
   printf("flatdiv = %s\n", flat_div ? "true" : "false");
   printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
   printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
+  latx = Vector3d(lenx,0,0);
+  laty = Vector3d(0,leny,0);
+  latz = Vector3d(0,0,lenz);
+
+
 
   const char *outfilename = argv[4];
   fflush(stdout);
