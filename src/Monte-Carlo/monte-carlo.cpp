@@ -143,6 +143,7 @@ int main(int argc, char *argv[]){
   // periodic cell!
   for (i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
 
+  clock_t starting_initial_state = clock();
   printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
@@ -163,17 +164,17 @@ int main(int argc, char *argv[]){
     i++;
     if (i%N == 0) {
       if (i>iterations/4) {
-	for(long i=0; i<N; i++) {
-	  printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-	}
-	printf("couldn't find good state\n");
-	exit(1);
+        for(long i=0; i<N; i++) {
+          printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        }
+        printf("couldn't find good state\n");
+        exit(1);
       }
       char *debugname = new char[10000];
       sprintf(debugname, "%s.debug", outfilename);
       FILE *spheredebug = fopen(debugname, "w");
       for(long i=0; i<N; i++) {
-	fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
       }
       fclose(spheredebug);
       printf("numOverLaps=%g (debug file: %s)\n",numOverLaps, debugname);
@@ -182,7 +183,12 @@ int main(int argc, char *argv[]){
     }
   }
   assert(countOverLaps(spheres, N, R) == 0);
-  printf("\nFound initial state!\n");
+  {
+    clock_t now = clock();
+    //printf("took %g seconds per initialising iteration\n",
+    //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+    printf("\nFound initial state in %g days!\n", (now - double(starting_initial_state))/CLOCKS_PER_SEC/60.0/60.0/24.0);
+  }
 
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;
