@@ -156,6 +156,27 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   radial_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
               correlation_A, n0, gross_correlation, nA);
   free(plotname);
+  
+  {
+    const GridDescription gdp = density.description();
+    double inner_rad = diameter/2.0; 
+        
+    double Ntot = density.sum()*gdp.dvolume;
+    double Ndisplaced = eta*gdp.Lat.volume()/(4*M_PI/3) - Ntot;
+
+    double mc_side_len = 25;
+    double N = eta*mc_side_len*mc_side_len*mc_side_len/(4.0/3.0*M_PI) - Ndisplaced;
+    
+    FILE *fout = fopen("papers/contact/figs/innerfillingfracInfo.txt", "a");
+    
+   
+    fprintf (fout, "For filling fraction %04.02f, inner-sphere size %04.02f and walls of length %04.02f you'll want to use %.0f spheres.\n\n", eta, inner_rad, mc_side_len, N);
+    
+    fclose(fout); 
+  }
+  
+  
+
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
@@ -180,6 +201,8 @@ int main(int argc, char *argv[]) {
     printf("Got bad eta argument: %s\n", argv[2]);
     return 1;
   }
+  FILE *fout = fopen("papers/contact/figs/innerfillingfracInfo.txt", "w");
+  fclose(fout);
   if (strlen(argv[3]) == 2) {
     run_spherical_solute(diameter, eta, "WB", WB);
   } else if (strlen(argv[3]) == 3) {
