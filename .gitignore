@@ -40,3 +40,4 @@ src/HardSpheresNoTensor.cpp
 cited-papers
 *.err
 *.out
+cleanups.txt
