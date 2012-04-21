@@ -264,6 +264,7 @@ int main(int, char **argv) {
   
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
+
   ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   check_a_functional("SaftFluid", ff, potential);
@@ -290,7 +291,7 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresWBnotensor", ff, potential);
-  
+
   ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSphereNoTensor", ff, potential);
 
