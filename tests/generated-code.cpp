@@ -184,7 +184,7 @@ int main(int, char **argv) {
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
   compare_functionals(Phi1(R), phi1, myT, n, 1e-13);
 
-  compare_functionals(NicePhi1(R), phi1, myT, n, 1e-13);
+  compare_functionals(NicePhi1(R), phi1, myT, n, 1e-6);
 
   const double four_pi_r = 4*M_PI*R;
   Functional n2x = xShellConvolve(R);
