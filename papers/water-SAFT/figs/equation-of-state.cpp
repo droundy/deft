@@ -31,8 +31,8 @@ static void took(const char *name) {
 const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
 
 int main(int, char **) {
-  FILE *o = fopen("paper/figs/equation-of-state.dat", "w");
-  FILE *experiment = fopen("paper/figs/experimental-equation-of-state.dat", "w");
+  FILE *o = fopen("papers/water-SAFT/figs/equation-of-state.dat", "w");
+  FILE *experiment = fopen("papers/water-SAFT/figs/experimental-equation-of-state.dat", "w");
   int imax=0;
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");

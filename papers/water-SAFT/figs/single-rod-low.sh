@@ -9,6 +9,6 @@ set -ev
 hostname
 date
 
-time nice -19 paper/figs/single-rod-in-water-low-res.mkdat
+time nice -19 papers/water-SAFT/figs/single-rod-in-water-low-res.mkdat
 
 date

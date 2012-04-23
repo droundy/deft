@@ -87,7 +87,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 }
 
 int main(int, char **) {
-  FILE *o = fopen("paper/figs/single-rod-in-water-low-res.dat", "w");
+  FILE *o = fopen("papers/water-SAFT/figs/single-rod-in-water-low-res.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -168,7 +168,7 @@ int main(int, char **) {
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-res0.5-slice-%04.1f.dat", cavitysize/nm);
+    sprintf(plotname, "papers/water-SAFT/figs/single-rod-res0.5-slice-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));

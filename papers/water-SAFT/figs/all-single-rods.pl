@@ -2,7 +2,7 @@
 
 use strict;
 
-system "make -j4 paper/figs/single-rod.mkdat";
+system "make -j4 papers/water-SAFT/figs/single-rod.mkdat";
 
 my $dd;
 # We do the largest diameters first, so the small calculations won't
@@ -21,7 +21,7 @@ foreach $dd (2.0, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5,
   # Here I estimate the amount of memory that will be needed...
   my $memuse = sprintf "%.0f", 1300*((($d + 2*$padding)/5.0)*(0.1/$resolution))**2;
 
-  my $scriptname = "paper/figs/single-rod-$d.tmp.sh";
+  my $scriptname = "papers/water-SAFT/figs/single-rod-$d.tmp.sh";
   open SCRIPT, ">$scriptname" or die $!;
   print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
@@ -35,7 +35,7 @@ hostname
 date
 
 echo I think this will take $memuse megs of memory
-time nice -19 paper/figs/single-rod.mkdat $d
+time nice -19 papers/water-SAFT/figs/single-rod.mkdat $d
 
 date
 

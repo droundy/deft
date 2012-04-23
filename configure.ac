@@ -80,4 +80,6 @@ esac],[debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
 AC_CONFIG_FILES([Makefile])
+AC_PROG_CC
+AM_PROG_CC_C_O
 AC_OUTPUT
