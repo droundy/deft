@@ -188,29 +188,20 @@ html:
 
 clean-local:
 	rm -rf .ikiwiki html
-	cd papers/water-SAFT && $(MAKE) clean
 	cd papers && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
-
-paper: all papers/water-SAFT/figs/equation-of-state.dat \
-	papers/water-SAFT/figs/surface-tension.dat \
-	papers/water-SAFT/figs/enthalpy.dat \
-	papers/water-SAFT/figs/pressure-with-isotherms.dat \
-	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
-	cd papers/water-SAFT && $(MAKE)
 
 papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/walls.dat \
-	papers/contact/figs/free-energy.dat
+	papers/contact/figs/free-energy.dat \
+	papers/water-SAFT/figs/equation-of-state.dat \
+	papers/water-SAFT/figs/surface-tension.dat \
+	papers/water-SAFT/figs/enthalpy.dat \
+	papers/water-SAFT/figs/pressure-with-isotherms.dat \
+	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
 	cd papers && $(MAKE)
-
-project: paper
-	cd papers/water-SAFT && $(MAKE) project.pdf
-
-poster: paper
-	cd papers/water-SAFT && $(MAKE) poster.pdf
 
 haskell: src/haskell/functionals
 
