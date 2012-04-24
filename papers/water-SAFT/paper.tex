@@ -46,13 +46,12 @@
 fundamental-measure theory functional--which describes hard sphere fluids--with
 attractive interactions based on the Statistical Associating Fluid Theory
 (SAFT-VR). Using this approximation with an additional length scale parameter, we are able to calculate the vapor pressure, saturated liquid density, surface tension, and enthalpy of water, as well as the number of hydrogen bonds and density oscillations formed near hydrophobic rods and spheres immersed in water. 
-\needsworknow{For two rods being pulled apart, a transition occurs 
-from a vapor state to a liquid state in the area between
-the rods at approximately $(\pi-2)$ multipled by the radius. Even 
-for nanoscale rods (radius 0.5~-~1.0~nm), we find that in the
-vapor state, the force can be approximated
-classically and is equal to 144~mN/m, or twice the bulk surface tension.
-(Edit this and add spheres stuff)}
+For two rods and four rods(arranged as the corners of a square) in water, our functional predicts
+a transition from a vapor state to a liquid state in the area between
+the rods that agrees with clasical theory.   We find that in the vapor state, the force per length can be
+approximated classically and is equal to 144~mN/m, or twice the bulk surface 
+tension even for nm scale rods, and  our hydrophobic spheres agree
+reasonably well with SPC/E simulations.
 This functional is computationally efficient and provides a foundation for 
 future work describing complex interactions in aqueous solution on an
 atomic level.}
@@ -101,7 +100,7 @@ molecules per unit cell, which places the minimum solute concentration
 at 0.84 molar and allows contact between the second solvation shell of
 neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
 \emph{ab initio} approaches using classical molecular dynamics have
-\textcolor{red}{vague problems}\cite{weber2010ab-initio-water}.  A
+\textcolor{red}{vague problems [DJR]}\cite{weber2010ab-initio-water}.  A
 more efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
@@ -179,7 +178,7 @@ rosenfeld1989, rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.
 This has led to a large number of very sophisticated functionals, such as
 the fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
 rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.  This functional
-\needsworknow{has many nice properties}.
+\needsworknow{has many nice properties DJR}.
 
 Several classical density functionals have already been developed for
 water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
@@ -194,7 +193,13 @@ surface tension twice the experimental value, limiting it to purely
 qualitative predictions~\cite{Jaqaman2004}.
 
 \needsworknow{Add discussion and citations for more recent papers}
-Test
+
+A recent functional presented by Lischner and Arias~\cite{lischner2010classical}
+describes water as non-interacting molecules in a an
+effective external potential.  This functional contains the exact
+entropy for no-interacting molecules and, among other things, can 
+predict the nonlinear dielectric response in water but must be paramaterized
+for different temperatures.
 
 One of the most interesting functionals for water is that of Ding \emph{et
 al}, which was developed in order to explain the freezing of
@@ -895,8 +900,9 @@ the rods in a 'square' arrangement and observed a similar behavior as the two ro
 where vapor is present in the space between the rods until a critical separation
 where it becomes filled with water and the rods behave like separate single rods
 (shown in Fig. \ref{fig:density-four-rods}).  Free energy per length
-is plotted against rod separation in Figure \ref{fig:four-rods-energy-vs-distance} and
-from the slope we calculate the force per length to be [number].
+is plotted against rod separation in Figure
+\ref{fig:four-rods-energy-vs-distance} with a slight disagreement of
+the predicted$2\gamma$ force per unit length.
 
 The 'rounded square' formed by the area of the four rods and the space
 inbetween them has a circumference estimated by

@@ -67,7 +67,7 @@ FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
 
 march-2012.pdf: march-2012.tex $(FIGURES)
 	pdflatex $< && pdflatex $<
