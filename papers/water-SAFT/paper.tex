@@ -201,18 +201,6 @@ entropy for no-interacting molecules and, among other things, can
 predict the nonlinear dielectric response in water but must be paramaterized
 for different temperatures.
 
-One of the most interesting functionals for water is that of Ding \emph{et
-al}, which was developed in order to explain the freezing of
-water~\cite{ding1987}.  This functional uses the approach of Chandler
-\emph{et al}, which uses separate atomic densities for the constituent
-atoms of a molecular fluid~\cite{chandler1986a, chandler1986b}.  Although
-this is a compelling approach, the actual functional developed cannot
-describe the vapor state or liquid-vapor interface, both of which are
-crucial to correct predictions of hydrophobic behavior at large length
-scales.  In addition, the functional of Ding \emph{et al} also fails to
-rigorously enforce intramolecular correlations, which casts doubt on its
-suitability for describing interactions with ionic solutes.
-
 \needsworknow{Add smooth transition from others' work to ours}
 
 \section{Theory and Methods}
@@ -780,34 +768,7 @@ the energy for these and other separations.}
 \label{fig:density-rods}
 \end{figure}
 
-The free energy per length is compared for rods of several different radii
-in Figure~\ref{fig:rods-energy-vs-distance}. For ease of comparison, we 
-arbitrarily offset each free energy such that they all go 
-to zero at large separations. For large $d$, the rods 
-simply act like two separate single rods in water and the energy will
-reach an asymptote determined by the effective surface tension (shown in 
-Figure~\ref{fig:energy-vs-diameter}). For small $d$, we see that all the rods 
-have the same behavior, with a positive linear relationship
-between free energy per length and separation during the initial state 
-(where the rods have vapor between them). This indicates that the force 
-per length on the rods is constant, and surprisingly independent of separation. 
-By finding the slope of this curve, we calculate this force per length to be 144~mN/m.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
-\end{center}
-\caption{ Free energy of hydration (also known as the potential of mean force) 
-versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 1.0~nm.
-All were arbitrarily offset to zero at large separations. The
-transition corresponds to the phase change from
-vapor to liquid between the rods as pictured in the density profiles in 
-Figure~\ref{fig:density-rods}. }
-\label{fig:rods-energy-vs-distance}
-\end{figure}
-
-To explain this, we consider a macroscopic surface
+To determine the critical separation, we consider a macroscopic surface
 tension model where the free energy in the macroscopic limit is given by 
 \begin{equation}
 F = \gamma A + pV
@@ -817,29 +778,40 @@ is the work needed to create a cavity of volume $V$. Since this pressure term
 scales with volume, it can be neglected relative to the surface term provided
 the length scale is small compared with $\frac{\gamma} p$. At room temperature,
 the value of $\frac{\gamma} p$ is equal to about $20~\mu m$ which is
-much larger than any of the solutes we study. We expect that for those 
+much larger than any of the solutes we study. We expect that for those
+larger radius 
 rods, the water on the sides of the 'stadium' configuration will bow inward 
 between the rods and the densty will still reduce to vapor where the rods 
 are closest to each other.
 
 Starting from the surface energy term, we can calculate the 
-free energy per 
-length, which is equal to the circumference multiplied by the surface tenson. 
-The force
-per length is the derivative of this with respect to the separation. 
+free energy per length, which is equal to the circumference multiplied 
+by the surface tenson. The force per length is the derivative of this
+with respect to the separation. 
 We approximate the circumference of the stadium-shape by
 \begin{equation}
 C_{s} = 2\pi r +4r+2d
 \end{equation}
 and so the force per length is equal to $2\gamma$.
 
-This is consistent with the calculation of the force per length from 
-Figure~\ref{fig:rods-energy-vs-distance} (144~mN/m) and the surface tension 
-in Figure~\ref{fig:surface-tension} (72~mN/m). This indicates that
-even though the rods are nanoscale, the water molecules will ``see'' them classically.
+This is consistent with the calculation of the surface tension in
+Figure~\ref{figs:surface-tension} (72~mN/m) and the force per length
+from Figure ~\ref{fig:rods-energy-vs-distance} (144~mN/m) which
+compares the free energy per length for rods of several different
+radii. This agreement indicates that even though the rods are nanoscale, the
+water molecules will ``see'' them classically.  For large $d$, the rods 
+simply act like two separate single rods in water and the energy will
+reach an asymptote determined by the effective surface tension (shown in 
+Figure~\ref{fig:energy-vs-diameter}). In figure
+~\ref{fig:rods-energy-vs-distance}, we see that for small $d$ all the rods 
+have the same behavior with a positive linear relationship
+between free energy per length and separation during the initial state 
+(where the rods have vapor between them). This indicates that the force 
+per length on the rods is constant, and surprisingly independent of separation. 
+By finding the slope of this curve, we calculate this force per length to be 144~mN/m.
 
 To estimate how the transition from vapor to liquid between the rods depends on their 
-radius, we will again use this model and propose that 
+radius, we will again use the aforementioned model and propose that 
 the critical separation, $d_c$, will occur when the free energies are equal. This 
 corresponds to equating the circumference of the stadium-shape (see 
 top of Figure~\ref{fig:density-rods}) and the circumference of the two rods (see bottom
@@ -848,12 +820,27 @@ of Figure~\ref{fig:density-rods}), which results in
 d_c = (\pi-2)r.\label{criticalseparation}
 \end{equation}
 The predicted and actual computed values for $d_c$ are shown graphically in 
-Figure~\ref{fig:rods-energy-vs-distance}, and they match fairly well for the 
-0.5~-~1.0~nm rods with differences between 1.3~-~5.5\%. We hypothesize that larger radii rods
+Figure~\ref{fig:rods-energy-vs-distance} where there is a transition
+betwen the sloped and flat portion of each plot. They match fairly well for the 
+0.5~-~1.0~nm rods with differences between 1.3~-~5.5\% and we hypothesize that larger radii rods
 would also follow this trend, but smaller rods are likely to have a different
 relationship with the surrounding water molecules. This may explain why the critical
 separation result for a radius of 0.3~nm does not match the prediction
 well (32\% difference).
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
+\end{center}
+\caption{ Free energy of hydration (also known as the potential of mean force) 
+versus separation for two hydrophobic rods ranging in radius from
+0.3~nm to 1.0~nm.
+All were arbitrarily offset to zero at large separations for ease of comparison. The
+transition corresponds to the phase change from
+vapor to liquid between the rods as pictured in the density profiles in 
+Figure~\ref{fig:density-rods}. }
+\label{fig:rods-energy-vs-distance}
+\end{figure}
 
 Walther \emph{et al.}\cite{walther2004hydrodynamic} studied the interactions between two
 carbon nanotubes, which are geometrically similar to our hydrophobic rods. 
