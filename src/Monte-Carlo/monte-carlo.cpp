@@ -31,11 +31,12 @@ double oShellMed =R+.01*R;
 double oShellLarge =R+.05*R;
 double oShellGiant =R+.1*R;
 double oShellArray[4] = {oShellSmall,oShellMed,oShellLarge,oShellGiant};
-bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
+bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
+
 bool periodic[3] = {periodic_x, periodic_y, periodic_z};
 const double dxmin = 0.1;
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -104,6 +105,11 @@ int main(int argc, char *argv[]){
   printf("flatdiv = %s\n", flat_div ? "true" : "false");
   printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
   printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
+  latx = Vector3d(lenx,0,0);
+  laty = Vector3d(0,leny,0);
+  latz = Vector3d(0,0,lenz);
+
+
 
   const char *outfilename = argv[4];
   fflush(stdout);
@@ -137,6 +143,7 @@ int main(int argc, char *argv[]){
   // periodic cell!
   for (i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
 
+  clock_t starting_initial_state = clock();
   printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
   for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
     if (num_timed++ > num_to_time) {
@@ -157,17 +164,17 @@ int main(int argc, char *argv[]){
     i++;
     if (i%N == 0) {
       if (i>iterations/4) {
-	for(long i=0; i<N; i++) {
-	  printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-	}
-	printf("couldn't find good state\n");
-	exit(1);
+        for(long i=0; i<N; i++) {
+          printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        }
+        printf("couldn't find good state\n");
+        exit(1);
       }
       char *debugname = new char[10000];
       sprintf(debugname, "%s.debug", outfilename);
       FILE *spheredebug = fopen(debugname, "w");
       for(long i=0; i<N; i++) {
-	fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
       }
       fclose(spheredebug);
       printf("numOverLaps=%g (debug file: %s)\n",numOverLaps, debugname);
@@ -176,7 +183,12 @@ int main(int argc, char *argv[]){
     }
   }
   assert(countOverLaps(spheres, N, R) == 0);
-  printf("\nFound initial state!\n");
+  {
+    clock_t now = clock();
+    //printf("took %g seconds per initialising iteration\n",
+    //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+    printf("\nFound initial state in %g days!\n", (now - double(starting_initial_state))/CLOCKS_PER_SEC/60.0/60.0/24.0);
+  }
 
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;

@@ -40,16 +40,16 @@ deft_SOURCES = src/deft.cpp $(ALL_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
-	paper/figs/surface-tension.mkdat \
-	paper/figs/equation-of-state.mkdat \
-	paper/figs/rods-in-water.mkdat \
-	paper/figs/four-rods-in-water.mkdat \
-	paper/figs/single-rod.mkdat \
-	paper/figs/single-rod-in-water-high-res.mkdat \
-	paper/figs/single-rod-in-water-low-res.mkdat \
-	paper/figs/sphere.mkdat \
-	paper/figs/pressure-with-isotherms.mkdat \
-	paper/figs/enthalpy.mkdat \
+	papers/water-SAFT/figs/surface-tension.mkdat \
+	papers/water-SAFT/figs/equation-of-state.mkdat \
+	papers/water-SAFT/figs/rods-in-water.mkdat \
+	papers/water-SAFT/figs/four-rods-in-water.mkdat \
+	papers/water-SAFT/figs/single-rod.mkdat \
+	papers/water-SAFT/figs/single-rod-in-water-high-res.mkdat \
+	papers/water-SAFT/figs/single-rod-in-water-low-res.mkdat \
+	papers/water-SAFT/figs/sphere.mkdat \
+	papers/water-SAFT/figs/pressure-with-isotherms.mkdat \
+	papers/water-SAFT/figs/enthalpy.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
@@ -139,16 +139,16 @@ tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
 tests_eos_test_SOURCES = tests/eos.cpp $(ALL_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
-paper_figs_surface_tension_mkdat_SOURCES = paper/figs/surface-tension.cpp $(ALL_CODE)
-paper_figs_equation_of_state_mkdat_SOURCES = paper/figs/equation-of-state.cpp $(ALL_CODE)
-paper_figs_rods_in_water_mkdat_SOURCES = paper/figs/rods-in-water.cpp $(ALL_CODE)
-paper_figs_four_rods_in_water_mkdat_SOURCES = paper/figs/four-rods-in-water.cpp $(ALL_CODE)
-paper_figs_single_rod_in_water_high_res_mkdat_SOURCES = paper/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
-paper_figs_single_rod_in_water_low_res_mkdat_SOURCES = paper/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
-paper_figs_single_rod_mkdat_SOURCES = paper/figs/single-rod.cpp $(ALL_CODE)
-paper_figs_sphere_mkdat_SOURCES = paper/figs/sphere.cpp $(ALL_CODE)
-paper_figs_pressure_with_isotherms_mkdat_SOURCES = paper/figs/pressure-with-isotherms.cpp $(ALL_CODE)
-paper_figs_enthalpy_mkdat_SOURCES = paper/figs/enthalpy.cpp $(ALL_CODE)
+papers_water_SAFT_figs_surface_tension_mkdat_SOURCES = papers/water-SAFT/figs/surface-tension.cpp $(ALL_CODE)
+papers_water_SAFT_figs_equation_of_state_mkdat_SOURCES = papers/water-SAFT/figs/equation-of-state.cpp $(ALL_CODE)
+papers_water_SAFT_figs_rods_in_water_mkdat_SOURCES = papers/water-SAFT/figs/rods-in-water.cpp $(ALL_CODE)
+papers_water_SAFT_figs_four_rods_in_water_mkdat_SOURCES = papers/water-SAFT/figs/four-rods-in-water.cpp $(ALL_CODE)
+papers_water_SAFT_figs_single_rod_in_water_high_res_mkdat_SOURCES = papers/water-SAFT/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
+papers_water_SAFT_figs_single_rod_in_water_low_res_mkdat_SOURCES = papers/water-SAFT/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
+papers_water_SAFT_figs_single_rod_mkdat_SOURCES = papers/water-SAFT/figs/single-rod.cpp $(ALL_CODE)
+papers_water_SAFT_figs_sphere_mkdat_SOURCES = papers/water-SAFT/figs/sphere.cpp $(ALL_CODE)
+papers_water_SAFT_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-SAFT/figs/pressure-with-isotherms.cpp $(ALL_CODE)
+papers_water_SAFT_figs_enthalpy_mkdat_SOURCES = papers/water-SAFT/figs/enthalpy.cpp $(ALL_CODE)
 
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(CONTACT_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(CONTACT_CODE)
@@ -188,29 +188,20 @@ html:
 
 clean-local:
 	rm -rf .ikiwiki html
-	cd paper && $(MAKE) clean
 	cd papers && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
-
-paper: all paper/figs/equation-of-state.dat \
-	paper/figs/surface-tension.dat \
-	paper/figs/enthalpy.dat \
-	paper/figs/pressure-with-isotherms.dat \
-	paper/figs/single-rod-in-water-low-res.dat
-	cd paper && $(MAKE)
 
 papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/walls.dat \
-	papers/contact/figs/free-energy.dat
+	papers/contact/figs/free-energy.dat \
+	papers/water-SAFT/figs/equation-of-state.dat \
+	papers/water-SAFT/figs/surface-tension.dat \
+	papers/water-SAFT/figs/enthalpy.dat \
+	papers/water-SAFT/figs/pressure-with-isotherms.dat \
+	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
 	cd papers && $(MAKE)
-
-project: paper
-	cd paper && $(MAKE) project.pdf
-
-poster: paper
-	cd paper && $(MAKE) poster.pdf
 
 haskell: src/haskell/functionals
 
@@ -218,13 +209,13 @@ src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildca
 	cd src/haskell && $(MAKE)
 
 
-slowfigs: paper/figs/rods-in-water.dat \
-	paper/figs/four-rods-in-water.dat\
-	paper/figs/single-rod-in-water-high-res.dat \
-	paper/figs/sphere.dat \
+slowfigs: papers/water-SAFT/figs/rods-in-water.dat \
+	papers/water-SAFT/figs/four-rods-in-water.dat\
+	papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
+	papers/water-SAFT/figs/sphere.dat \
 	papers/contact/figs/mc-06-112.dat
 
-paper/figs/%.dat: paper/figs/%.mkdat
+papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<
 papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
 	$<
