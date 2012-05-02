@@ -19,7 +19,8 @@ wbm2data = numpy.loadtxt(sys.argv[4])
 dft_len = len(dftdata[:,0])
 dft_dr = dftdata[2,0] - dftdata[1,0]
 
-#pylab.plot(mcdata[:,0],mcdata[:,1]*4*numpy.pi/3,"b-",label='MC $n$')
+mcoffset = 13
+pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,1]*4*numpy.pi/3,"b-",label='MC $n$')
 pylab.plot(dftdata[:,0],dftdata[:,1]*4*numpy.pi/3,"b--",label='DFT $n$')
 pylab.plot(wbtdata[:,0],wbtdata[:,1]*4*numpy.pi/3,"m-.",label='WBT $n$')
 pylab.plot(wbm2data[:,0],wbm2data[:,1]*4*numpy.pi/3,"c--",label='Mark II $n$')
@@ -31,10 +32,10 @@ pylab.plot(dftdata[:,0],nA*4*numpy.pi/3,"m-.",label="$n_A$")
 
 nAmc = mcdata[:,11]
 n0mc = mcdata[:,10]
-#pylab.plot(mcdata[:,0],n0mc*4*numpy.pi/3,"c-",label="MC $n_0$")
-#pylab.plot(mcdata[:,0],nAmc*4*numpy.pi/3,"m-",label="MC $n_A$")
+pylab.plot(mcdata[:,0]+mcoffset,n0mc*4*numpy.pi/3,"c-",label="MC $n_0$")
+pylab.plot(mcdata[:,0]+mcoffset,nAmc*4*numpy.pi/3,"m-",label="MC $n_A$")
 
-pylab.xlabel("radius")
+pylab.xlabel("position")
 pylab.ylabel("filling fraction")
 
 pylab.legend(loc='lower left', ncol=2).get_frame().set_alpha(0.5)
