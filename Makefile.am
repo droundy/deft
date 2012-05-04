@@ -70,6 +70,13 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 $(OPTIMIZED_CODE): optimize-functionals
 	time ./optimize-functionals $@ && echo timed $@
 
+haskell: src/haskell/functionals src/haskell/test
+
+src/haskell/functionals: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE) functionals
+src/haskell/test: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE) test
+
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
 	time src/haskell/functionals $@ && echo timed $@
 
@@ -202,11 +209,6 @@ papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
 	papers/water-SAFT/figs/pressure-with-isotherms.dat \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
 	cd papers && $(MAKE)
-
-haskell: src/haskell/functionals
-
-src/haskell/functionals src/haskell/test: $(wildcard src/haskell/*.lhs) $(wildcard src/haskell/*.hs)
-	cd src/haskell && $(MAKE)
 
 
 slowfigs: papers/water-SAFT/figs/rods-in-water.dat \

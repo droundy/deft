@@ -1,15 +1,45 @@
-all: test functionals
+.SUFFIXES : .o .hs .hi .lhs
+
+all: depend test functionals
 
 clean:
-	rm -f *.hi *.o test
+	rm -f *.hi *.o test functionals
 
-GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 # -prof -auto-all
+GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
 
-test: test.lhs $(wildcard *hs)
-	ghc $(GHCFLAGS) --make -o $@ $<
+.o.hi:
+	@:
+.lhs.o:
+	ghc -c $< $(GHCFLAGS)
+.hs.o:
+	ghc -c $< $(GHCFLAGS)
 
-# I make functionals depend on test, so they won't get confused by
-# compiling both files at once (which can mean compiling CodeGen.lhs
-# twice at the same time).
-functionals: functionals.hs test $(wildcard *hs)
-	ghc $(GHCFLAGS) --make -o $@ $<
+test: test.o Expression.o CodeGen.o Statement.o SomeFunctionals.o
+	$(MAKE) depend
+	ghc $(GHCFLAGS) -o $@ $^
+
+functionals: functionals.o SomeFunctionals.o Expression.o CodeGen.o Statement.o Quantum.o
+	ghc $(GHCFLAGS) -o $@ $^
+
+depend:
+	ghc -M $(GHCFLAGS) $(wildcard *hs)
+
+# DO NOT DELETE: Beginning of Haskell dependencies
+Expression.o : Expression.lhs
+Statement.o : Statement.lhs
+Statement.o : Expression.hi
+CodeGen.o : CodeGen.lhs
+CodeGen.o : Expression.hi
+CodeGen.o : Statement.hi
+SomeFunctionals.o : SomeFunctionals.hs
+SomeFunctionals.o : CodeGen.hi
+Quantum.o : Quantum.hs
+Quantum.o : CodeGen.hi
+functionals.o : functionals.hs
+functionals.o : Quantum.hi
+functionals.o : SomeFunctionals.hi
+functionals.o : CodeGen.hi
+test.o : test.lhs
+test.o : SomeFunctionals.hi
+test.o : CodeGen.hi
+# DO NOT DELETE: End of Haskell dependencies
