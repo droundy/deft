@@ -20,11 +20,6 @@
 \newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
-\newcommand{\fixme}[1]{\red{[#1]}}
-
-% needsworklater is used to annotate bits that need work, but that we
-% can postpone for a while.
-\newcommand{\needsworklater}[1]{\emph{[#1]}}
 % needsworknow is intended to prioritize stuff that needs fixing.
 \newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
 
@@ -59,29 +54,6 @@ atomic level.}
 \end{abstract}
 \maketitle
 
-{\begin{itemize}
-\color{blue}
-\item Put finished things up here
-\item[JRH] Rewrite abstract (copying from project)
-\item[JRH] Cut the test-particle section
-\item[JRH] Rewrite and join introductions
-\item[JRH] Decide what to do with slit (cut)
-\item[JRH] Combine and edit Other Thermo and Empirical Parameters sections
-\color{red}
-\item[JRH] Work on abstract
-\item[DJR] Read and edit changes to abstract and introduction
-\item[DJR] Look through theory section for stuff to cut
-\item[DJR,JRH] Finalize figures in beginning
-\item[JRH] Better/expanded description of ``macroscopic surface tension'' model in 2 rods section?
-\item[JRH] Recalculate and clean up 2 rods figures and data - new code?
-\item[DJR] Write text (or clean up existing) for hard sphere solutes
-\item[EJK] Add 4-rods figures
-\item[EJK] Add 4-rods text
-\item[JRH,DJR] Rewrite conclusion
-\end{itemize}
-}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
@@ -99,9 +71,18 @@ in \emph{ab initio} molecular dynamics is limited to around 64 water
 molecules per unit cell, which places the minimum solute concentration
 at 0.84 molar and allows contact between the second solvation shell of
 neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
-\emph{ab initio} approaches using classical molecular dynamics have
-\textcolor{red}{vague problems [DJR]}\cite{weber2010ab-initio-water}.  A
-more efficient approach is needed in order to study nanoscale and
+standard \emph{ab initio} methods using classical molecular dynamics
+without van der Waals corrections strongly over-structure water, to
+the point that ice melts at over 400K\cite{yoo2009phase}!  There has
+been a recent flurry of publications implicating van der Waals effects
+as significant in reducing this
+over-structuring\cite{lin2009importance, wang2011density,
+  mogelhoj2011ab, jonchiere2011van}.  It has also been bound that
+inclusion of nuclear quantum effects can have a similar
+effect\cite{morrone2008nuclear}.  Each of these corrections imposes an
+additional computational burden on an approach that is already
+feasible only for very small number of water molecules. A more
+efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
 Water stands out among liquids for its extraordinary properties.
@@ -122,14 +103,6 @@ hydrogen-bonding network, water as ``the universal solvent'' is as
 interesting as its anomalous thermodynamic properties.
 
 \subsection{Classical density-functional theory}
-
-%\begin{figure}
-%\includegraphics[width=6cm, angle=270]{figs/correlation}
-%\caption{ Experimental atom-atom radial distribution functions for water at
-%room temperature and pressure from reference~\cite{Soper2000}.\needsworknow{Either 
-%mention this figure in the text or delete it.}  }
-%\label{correlation}
-%\end{figure}
 
 Numerous approaches have been developed to approximate the effect of water
 as a solvent in atomistic calculations.  Each of these approaches gives
@@ -169,66 +142,94 @@ that can describe interaction of water with arbitrary external
 potentials---including potentials describing a \emph{strong} interaction
 with a solute.
  
-A number of exact properties are easily achieved in the density-functional
-framework, such as the relationship between the pressure on a hard wall and
-the contact density---which ensures a correct solvation free energy for
-small hard solutes.  Much of the research on classical density-functional
-theory has focused on the hard-sphere fluid~\cite{curtin1985,
-rosenfeld1989, rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.
-This has led to a large number of very sophisticated functionals, such as
-the fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
-rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.  This functional
-\needsworknow{has many nice properties DJR}.
+A number of exact properties are easily achieved in the
+density-functional framework, such as the relationship between the
+pressure on a hard wall and the contact density---which ensures a
+correct solvation free energy for small hard solutes.  Much of the
+research on classical density-functional theory has focused on the
+hard-sphere fluid~\cite{curtin1985, rosenfeld1989, rosenfeld1993,
+  rosenfeld1997, tarazona1997, tarazona2000}.  This has led to a large
+number of very sophisticated functionals, such as the
+fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
+  rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000,
+  roth2002whitebear}.  The White Bear version of the FMT
+functional\cite{roth2002whitebear}  has a number of useful
+properties.  Like all FMT functionals, it is expressed as a function
+of a few convolutions of the density that can be efficiently
+computed.  In the homogeneous limit, it reduces to the
+Carnahan-Starling equation of state, and in the strongly-confined
+limit of a zero-dimensional cavity, it gives the exact free energy.  
 
-Several classical density functionals have already been developed for
-water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
-qualitative behavior of water.  However, many of these are less
-sophisticated than those describing the hard-sphere fluid, and a
-quantitatively accurate functional describing water---which reproduces
-both the macroscopic surface tension and its decrease as curvature
-increases---has not yet been published.  For instance, Jaqaman
-\emph{et al} developed a classical density-functional for water
-including orientational effects, but their functional resulted in a
-surface tension twice the experimental value, limiting it to purely
-qualitative predictions~\cite{Jaqaman2004}.
+A number of classical density functionals have been developed for
+water~\cite{ding1987, Yang1992, gloor2002saft, Jaqaman2004,
+  clark2006developing, lischner2010classical}\needsworknow{ADD REST OF
+  LIST HERE!}, capturing some of the qualitative behavior of water.
+However, many of these are less sophisticated than those describing
+the hard-sphere fluid, and a quantitatively accurate functional
+describing water---which reproduces the temperature dependence of the
+macroscopic surface tension, its decrease as curvature increases, and
+its quantitative value---has not yet been published.  For instance,
+the functional of Lischner \emph{et al}\cite{lischner2010classical}
+treats the surface tension correctly, but can only be used at room
+temperature.  A numer of classical density functionals have recently
+been produced that are based on Statistical Associating Fluid Theory
+(SAFT)\cite{gloor2002saft, clark2006developing}\needsworknow{add
+  more}.  These functionals are based on a perturbative thermodynamic
+expansion, and give a reasonable prediction for the temperature
+dependence of the surface tension.  However, they also overestimate
+the surface tension by \needsworknow{how much? significant factor, I
+  think}, and are unsuited for studying systems with molecular-scale
+inhomogeneities.
 
-\needsworknow{Add discussion and citations for more recent papers}
+%% A recent functional presented by Lischner and Arias~\cite{lischner2010classical}
+%% describe water as non-interacting molecules in a an
+%% effective external potential.  This functional contains the exact
+%% entropy for no-interacting molecules and, among other things, can 
+%% predict the nonlinear dielectric response in water, but it must be paramaterized
+%% for different temperatures.
 
-A recent functional presented by Lischner and Arias~\cite{lischner2010classical}
-describe water as non-interacting molecules in a an
-effective external potential.  This functional contains the exact
-entropy for no-interacting molecules and, among other things, can 
-predict the nonlinear dielectric response in water, but it must be paramaterized
-for different temperatures.
 
-\needsworknow{Add smooth transition from others' work to ours}
-Using classical DFT, we aim to find an equation of state for water
-that describes interactions qualitatively and gives accurate
-quantitative results within a reasonable temperature range without
-needing extensive paramaterization.
+\subsection{Statistical associating fluid theory}
+
+Statistical Associating Fluid Theory (SAFT) is a set of models for
+complex fluids in which hydrogren bonding plays a significant
+role\cite{muller2001molecular}.  SAFT is used to accurately model the
+equations of state of pure fluids and predict the equations of state
+for mixtures over a wide range of temperatures and pressures.  SAFT is
+based on Wertheim's first-order thermodynamic perturbation theory
+(TPT1) \cite{wertheim1984fluidsI, wertheim1984fluidsII,
+  wertheim1986fluidsIII, wertheim1986fluidsIV} which allows it to
+account for strong associative interations between molecules.
+
+The SAFT Helmholtz free energy is composed of five terms:
+\begin{equation}
+  F[n] = F_\textit{id} + F_\textit{hs} + F_\textit{disp} +
+  F_\textit{assoc} + F_\textit{chain},
+\end{equation}
+where the first three terms encompass the \emph{monomer} contribution
+to the free energy, the fourth is the \emph{association} free energy,
+describing hydrogen bonds, and the final term is the chain formation
+energy of for fluids that are chain polymers.  The final term is not
+relevant for water.  While a number of SAFT formulations have been
+published, we will focus on SAFT-VR\cite{gil-villegas-1997-SAFT-VR},
+which has been used by Clark \emph{et al} to construct an optimal SAFT
+model for water\cite{clark2006developing}.
+
+SAFT has also been used to construct classical density functionals,
+which have been applied to study the surface tension as a function of
+temperature\cite{whotocite}.  Such functionals have qualitatively
+predicted the dependence of surface tension on temperature, but have
+in general provided poor quantitative agreement with experiment.
+Moreover, the vast majority of SAFT-based classical density
+functionals have made local-density approximations that make them
+unsuitable for application to systems that are inhomogeneous at the
+molecular length scale\cite{felipe2001examination, gloor2002saft,
+  gloor2004accurate, clark2006developing, gloor2007prediction,
+  kahl2008modified, gross2009density}.
 
 \section{Theory and Methods}
-We use classical DFT to construct a new functional that will predict
-the density of water molecules in a classical system.  The model we use
-starts with a treatment of each individual water molecule as a purely
-classical hard sphere and adds association terms based on Statistical 
-Associating Fluid Theory (SAFT). Water is unlike simple
-fluids (which are mainly defined by van der Waals forces and weak electrostatic
-interations) because it requires direct treatment of association effects. The strong 
-hydrogen bonds and polar
-interactions in water are ideal for describing with SAFT, which was designed for
-use with hydrogen-bonding fluids. It is based on Wertheim's first-order
-thermodynamic perturbation theory (TPT1)
-\cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
-wertheim1986fluidsIV} which provides a useful way to account for strong
-associative interations between molecules. SAFT can account for the association energies
-as well as any effects due to clusters or chains forming \fixme{not true}
-in the liquid\cite{muller2001molecular}. SAFT assumes a repulsive hard
-sphere core for each atom with a number of short-ranged off center
-attractive sites. This model applied to give equation of state for
-various systmes and can be applied to inhomogeneous fluids.
-\needsworknow{Expand this a
-  bit to accurately describe SAFT and its advantages.}
+We construct a new classical density functional for water.  We
+start with a treatment of each individual water molecule as a purely
 
 The Helmholtz free energy functional is based on SAFT,
 and is composed of the terms:
@@ -912,44 +913,6 @@ d_{c4} = \frac{3 \pi - 4}{2} r. \label{criticalfourrods}
 We see in Figure \ref{fig:four-rods-energy-vs-distance} that the $r = 0.3$~nm
 rod has the largest difference between simulation and prediction with
 a 23\% difference, and better agreement for larger radii rods (between 0.5\% and 5.6\%).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% \subsection{Test-particle approach}
-% 
-% More interesting applications are possible when we move into three
-% dimensions using spherical coordinates.  The first (but not simplest)
-% thing to try is looking at the response of liquid water to a single
-% fixed water molecule.  This is referred to as the \emph{test particle}
-% method, and is as simple as constraining the density to
-% include a delta function at the origin---meaning that a single
-% molecule is fixed in location.  The free energy is then minimized
-% under this constraint, giving a density profile and an associated free
-% energy.  The density profile is just the self-correlation function
-% multiplied by the bulk liquid density.  \fixme{We should be
-%   distinguishing between the properties of the \emph{exact functional}
-%   and those of an approximate functional...}  Thus, a test-particle
-% calculation provides a stringent test of the correctness of any
-% approximate functional.
-% 
-% In order to perform the test-particle test, we introduce a sharp
-% gaussian density spike at the origin and relax the density under a
-% constraint that this spike remain.  Figure~\ref{fig:test-particle}
-% shows the resulting density profile, compared with the experimental
-% $g_{\textrm{OO}}$.  Note that this data was \emph{not} used in the
-% fitting of the empirical parameters of the functional.  The agreement
-% between experiment and theory is both qualitatively and quantitatively
-% poor.  The integral of the difference between this density profile
-% (excluding the delta function) and the bulk liquid density should be
-% 0.06~molecules \fixme{look up and show derivation... or cut this},
-% but we find instead to be $-0.15$~molecules.  In addition, the associated
-% free energy should be positive: there is an entropic cost in fixing
-% one molecule in position, but for our functional the free energy of
-% this density configuration is in fact negative, with a value of
-% -3.5~eV, meaning that the homogeneous fluid is unstable.  This is a
-% serious flaw that must be addressed in future work.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Hydration energy of hard-sphere solutes}
 
