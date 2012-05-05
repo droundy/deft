@@ -17,7 +17,7 @@ foreach $dd (2.0, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.
   # Here I estimate the amount of memory that will be needed...
   my $memuse = sprintf "%.0f", 1800*((($d + 2*$padding)/1.9)*(0.2/$resolution))**3;
 
-  my $scriptname = "paper/figs/sphere-$d.tmp.sh";
+  my $scriptname = "papers/water-SAFT/figs/sphere-$d.tmp.sh";
   open SCRIPT, ">$scriptname" or die $!;
   print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
@@ -31,7 +31,7 @@ hostname
 date
 
 echo I think this will take $memuse megs of memory
-time nice -19 paper/figs/sphere.mkdat $d
+time nice -19 papers/water-SAFT/figs/sphere.mkdat $d
 
 date
 

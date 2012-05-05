@@ -46,13 +46,12 @@
 fundamental-measure theory functional--which describes hard sphere fluids--with
 attractive interactions based on the Statistical Associating Fluid Theory
 (SAFT-VR). Using this approximation with an additional length scale parameter, we are able to calculate the vapor pressure, saturated liquid density, surface tension, and enthalpy of water, as well as the number of hydrogen bonds and density oscillations formed near hydrophobic rods and spheres immersed in water. 
-\needsworknow{For two rods being pulled apart, a transition occurs 
-from a vapor state to a liquid state in the area between
-the rods at approximately $(\pi-2)$ multipled by the radius. Even 
-for nanoscale rods (radius 0.5~-~1.0~nm), we find that in the
-vapor state, the force can be approximated
-classically and is equal to 144~mN/m, or twice the bulk surface tension.
-(Edit this and add spheres stuff)}
+For two rods and four rods(arranged as the corners of a square) in water, our functional predicts
+a transition from a vapor state to a liquid state in the area between
+the rods that agrees with clasical theory.   We find that in the vapor state, the force per length can be
+approximated classically and is equal to 144~mN/m, or twice the bulk surface 
+tension even for nm scale rods, and  our hydrophobic spheres agree
+reasonably well with SPC/E simulations.
 This functional is computationally efficient and provides a foundation for 
 future work describing complex interactions in aqueous solution on an
 atomic level.}
@@ -101,7 +100,7 @@ molecules per unit cell, which places the minimum solute concentration
 at 0.84 molar and allows contact between the second solvation shell of
 neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
 \emph{ab initio} approaches using classical molecular dynamics have
-\textcolor{red}{vague problems}\cite{weber2010ab-initio-water}.  A
+\textcolor{red}{vague problems [DJR]}\cite{weber2010ab-initio-water}.  A
 more efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
@@ -111,7 +110,7 @@ gaseous states at temperatures and pressures normally found on Earth.
 Water has a density maximum at 4$^\circ$C, and expands upon freezing.
 Water has the highest heat capacity, latent heat of fusion and
 vaporization, thermal conductivity and surface tension of any
-non-metallic liquid;  water also has an unusually high dielectric constant.
+non-metallic liquid.  Water also has an unusually high dielectric constant.
 Much of the unusual behavior of water is explained by the ability of
 each water molecule to form \emph{four} strong, directional hydrogen
 bonds---two acceptors and two donors.  This directional bonding
@@ -179,7 +178,7 @@ rosenfeld1989, rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.
 This has led to a large number of very sophisticated functionals, such as
 the fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
 rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}.  This functional
-\needsworknow{has many nice properties}.
+\needsworknow{has many nice properties DJR}.
 
 Several classical density functionals have already been developed for
 water~\cite{ding1987, Yang1992, Jaqaman2004}, capturing some of the
@@ -195,28 +194,27 @@ qualitative predictions~\cite{Jaqaman2004}.
 
 \needsworknow{Add discussion and citations for more recent papers}
 
-One of the most interesting functionals for water is that of Ding \emph{et
-al}, which was developed in order to explain the freezing of
-water~\cite{ding1987}.  This functional uses the approach of Chandler
-\emph{et al}, which uses separate atomic densities for the constituent
-atoms of a molecular fluid~\cite{chandler1986a, chandler1986b}.  Although
-this is a compelling approach, the actual functional developed cannot
-describe the vapor state or liquid-vapor interface, both of which are
-crucial to correct predictions of hydrophobic behavior at large length
-scales.  In addition, the functional of Ding \emph{et al} also fails to
-rigorously enforce intramolecular correlations, which casts doubt on its
-suitability for describing interactions with ionic solutes.
+A recent functional presented by Lischner and Arias~\cite{lischner2010classical}
+describe water as non-interacting molecules in a an
+effective external potential.  This functional contains the exact
+entropy for no-interacting molecules and, among other things, can 
+predict the nonlinear dielectric response in water, but it must be paramaterized
+for different temperatures.
 
 \needsworknow{Add smooth transition from others' work to ours}
+Using classical DFT, we aim to find an equation of state for water
+that describes interactions qualitatively and gives accurate
+quantitative results within a reasonable temperature range without
+needing extensive paramaterization.
 
 \section{Theory and Methods}
 We use classical DFT to construct a new functional that will predict
 the density of water molecules in a classical system.  The model we use
 starts with a treatment of each individual water molecule as a purely
 classical hard sphere and adds association terms based on Statistical 
-Associating Fluid Theory (SAFT). Water, unlike simple
-fluids which are mainly defined by van der Waals forces and weak electrostatic
-interations, requires direct treatment of association effects. The strong 
+Associating Fluid Theory (SAFT). Water is unlike simple
+fluids (which are mainly defined by van der Waals forces and weak electrostatic
+interations) because it requires direct treatment of association effects. The strong 
 hydrogen bonds and polar
 interactions in water are ideal for describing with SAFT, which was designed for
 use with hydrogen-bonding fluids. It is based on Wertheim's first-order
@@ -225,7 +223,11 @@ thermodynamic perturbation theory (TPT1)
 wertheim1986fluidsIV} which provides a useful way to account for strong
 associative interations between molecules. SAFT can account for the association energies
 as well as any effects due to clusters or chains forming \fixme{not true}
-in the liquid\cite{muller2001molecular}.  \needsworknow{Expand this a
+in the liquid\cite{muller2001molecular}. SAFT assumes a repulsive hard
+sphere core for each atom with a number of short-ranged off center
+attractive sites. This model applied to give equation of state for
+various systmes and can be applied to inhomogeneous fluids.
+\needsworknow{Expand this a
   bit to accurately describe SAFT and its advantages.}
 
 The Helmholtz free energy functional is based on SAFT,
@@ -374,19 +376,19 @@ interaction occurs is $\kappaassoc$, giving the association
 term in the free energy two empirical parameters that are fit to
 experimental data.
 
-The association functional we use is a modified version of that of Yu
-and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}.\footnote{We
+The association functional we use is a modified version of Yu
+and Wu.\cite{yu2002fmt-dft-inhomogeneous-associating} \footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
   the same functional, but their paper contains errors in the
   association term and is not useful as a reference.} 
-which includes the effects of density inhomogeneities in the
-contact value of the correlation function $g^{HS}_\sigma$. This, however, is
-based on the SAFT-HS equation of state, rather than the SAFT-VR
-equation of state\cite{gil-villegas-1997-SAFT-VR} which is used in the
+This functional includes the effects of density inhomogeneities in the
+contact value of the correlation function $g^{HS}_\sigma$, but is
+based on the SAFT-HS equation of state rather than the SAFT-VR
+equation of state\cite{gil-villegas-1997-SAFT-VR}. SAFT-VR is used in the
 optimal SAFT parametrization for water found by Clark \emph{et
-  al}\cite{clark2006developing}.  The modification to use the SAFT-VR
-equation of state involves adding a correction term, see
-Equation~\ref{eq:gSW}.  \fixme{needs work}
+  al}\cite{clark2006developing}, but to use it's
+equation of state involves adding a correction term (see
+Equation~\ref{eq:gSW}).
 
 The association functional we use is constructed by using the density
 $n_0(\xx)$, which is the density of hard spheres touching a given
@@ -695,11 +697,9 @@ The results for this spacing of 0.01~nm are within 0.5\% of the free energy
 and a few percent of the contact
 density for the highest resolution tested.
 Figure~\ref{fig:density-single-rod} shows density
-profiles for three different radii, 0.3~nm, 0.5~nm, and 1~nm. There are the
-expected oscillations outside the rod and as the distance away from the rod
-increases
-the density approaches that of the bulk saturated liquid density. The small
-radius
+profiles for three different radii (0.3~nm, 0.5~nm, and 1~nm) which have the
+expected oscillations outside the rod that reduce to the bulk saturated liquid
+density as the distance away from the rods increases. The small radius
 rod has comparatively larger oscillations and a higher contact density.
 \needsworknow{Expand or add to this description of density profiles and
 oscillations for single rod?}
@@ -744,8 +744,8 @@ reached and liquid water fills the region between the rods.
 Figure~\ref{fig:density-rods} 
 shows density profiles before and after this transition
 for rods of radius 0.5~nm. This critical separation for the transition to liquid depends
-on the radii of the rods, and is about 0.54~nm for the rods shown in 
-Figure~\ref{fig:density-rods}. 
+on the radii of the rods, which is about 0.54~nm for the rods shown in 
+Figure~\ref{fig:density-rods}.
 Since we are looking at only hard-walled
 non-interacting rods, the critical separation will be
 different for any system where there is an appreciable direct force between rods. 
@@ -776,34 +776,7 @@ the energy for these and other separations.}
 \label{fig:density-rods}
 \end{figure}
 
-The free energy per length is compared for rods of several different radii
-in Figure~\ref{fig:rods-energy-vs-distance}. For ease of comparison, we 
-arbitrarily offset each free energy such that they all go 
-to zero at large separations. For large $d$, the rods 
-simply act like two separate single rods in water and the energy will
-reach an asymptote determined by the effective surface tension (shown in 
-Figure~\ref{fig:energy-vs-diameter}). For small $d$, we see that all the rods 
-have the same behavior, with a positive linear relationship
-between free energy per length and separation during the initial state 
-(where the rods have vapor between them). This indicates that the force 
-per length on the rods is constant, and surprisingly independent of separation. 
-By finding the slope of this curve, we calculate this force per length to be 144~mN/m.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
-\end{center}
-\caption{ Free energy of hydration (also known as the potential of mean force) 
-versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 1.0~nm.
-All were arbitrarily offset to zero at large separations. The
-transition corresponds to the phase change from
-vapor to liquid between the rods as pictured in the density profiles in 
-Figure~\ref{fig:density-rods}. }
-\label{fig:rods-energy-vs-distance}
-\end{figure}
-
-To explain this, we consider a macroscopic surface
+To determine the critical separation, we start by consider a macroscopic surface
 tension model where the free energy in the macroscopic limit is given by 
 \begin{equation}
 F = \gamma A + pV
@@ -813,27 +786,40 @@ is the work needed to create a cavity of volume $V$. Since this pressure term
 scales with volume, it can be neglected relative to the surface term provided
 the length scale is small compared with $\frac{\gamma} p$. At room temperature,
 the value of $\frac{\gamma} p$ is equal to about $20~\mu m$ which is
-much larger than any of the solutes we study. We expect that for larger 
-rods ... \needsworknow{Explain ``bowing'' out of vapor area for larger rods.}
+much larger than any of the solutes we study. We expect that for those
+larger radius 
+rods, the water on the sides of the 'stadium' configuration will bow inward 
+between the rods and the density will reduce to vapor near the center
+point where the rods are closest to each other.
 
 Starting from the surface energy term, we can calculate the 
-free energy per 
-length, which is equal to the circumference multiplied by the surface tenson. 
-The force
-per length is the derivative of this with respect to the separation. 
+free energy per length, which is equal to the circumference multiplied 
+by the surface tenson. The force per length is the derivative of this
+with respect to the separation. 
 We approximate the circumference of the stadium-shape by
 \begin{equation}
 C_{s} = 2\pi r +4r+2d
 \end{equation}
 and so the force per length is equal to $2\gamma$.
 
-This is consistent with the calculation of the force per length from 
-Figure~\ref{fig:rods-energy-vs-distance} (144~mN/m) and the surface tension 
-in Figure~\ref{fig:surface-tension} (72~mN/m). This indicates that
-even though the rods are nanoscale, the water molecules will ``see'' them classically.
+This is consistent with the calculation of the surface tension in
+Figure~\ref{fig:surface-tension} (72~mN/m) and the force per length
+from Figure ~\ref{fig:rods-energy-vs-distance} (144~mN/m) which
+compares the free energy per length for rods of several different
+radii. This agreement indicates that even though the rods are nanoscale, the
+water molecules will ``see'' them classically.  For large $d$, the rods 
+simply act like two separate single rods in water and the energy will
+reach an asymptote determined by the effective surface tension (shown in 
+Figure~\ref{fig:energy-vs-diameter}). In Figure
+~\ref{fig:rods-energy-vs-distance}, we see that for small $d$ all the rods 
+have the same behavior with a positive linear relationship
+between free energy per length and separation during the initial state 
+(where the rods have vapor between them). This indicates that the force 
+per length on the rods is constant, and surprisingly independent of separation. 
+By finding the slope of this curve, we calculate this force per length to be 144~mN/m.
 
 To estimate how the transition from vapor to liquid between the rods depends on their 
-radius, we will again use this model and propose that 
+radius, we will again use the aforementioned model and propose that 
 the critical separation, $d_c$, will occur when the free energies are equal. This 
 corresponds to equating the circumference of the stadium-shape (see 
 top of Figure~\ref{fig:density-rods}) and the circumference of the two rods (see bottom
@@ -842,12 +828,27 @@ of Figure~\ref{fig:density-rods}), which results in
 d_c = (\pi-2)r.\label{criticalseparation}
 \end{equation}
 The predicted and actual computed values for $d_c$ are shown graphically in 
-Figure~\ref{fig:rods-energy-vs-distance}, and they match fairly well for the 
-0.5~-~1.0~nm rods with differences between 1.3~-~5.5\%. We hypothesize that larger radii rods
+Figure~\ref{fig:rods-energy-vs-distance} where there is a transition
+betwen the sloped and flat portion of each plot. They match fairly well for the 
+0.5~-~1.0~nm rods with differences between 1.3~-~5.5\% and we hypothesize that larger radii rods
 would also follow this trend, but smaller rods are likely to have a different
 relationship with the surrounding water molecules. This may explain why the critical
 separation result for a radius of 0.3~nm does not match the prediction
-well(32\% difference).
+well (32\% difference).
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
+\end{center}
+\caption{ Free energy of hydration (also known as the potential of mean force) 
+versus separation for two hydrophobic rods ranging in radius from
+0.3~nm to 1.0~nm.
+All were arbitrarily offset to zero at large separations for ease of comparison. The
+transition corresponds to the phase change from
+vapor to liquid between the rods as pictured in the density profiles in 
+Figure~\ref{fig:density-rods}. }
+\label{fig:rods-energy-vs-distance}
+\end{figure}
 
 Walther \emph{et al.}\cite{walther2004hydrodynamic} studied the interactions between two
 carbon nanotubes, which are geometrically similar to our hydrophobic rods. 
@@ -864,7 +865,7 @@ and carbon-water interations.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/four-rods-energy-vs-distance}
 \end{center}
-\caption{ Free energy (also known as the potential of mean force) 
+\caption{ Free energy of hydradon 
 versus separation for four hydrophobic rods ranging in radius from
 0.3~nm to 1.0~nm.
 All were arbitrarily offset to zero at large separations. The
@@ -888,29 +889,29 @@ the energy for these and other separations.}
 \end{figure}
 
 We simulate four hydrophobic rods in water using the same radii as our
-two rods ($r = 0.3$~nm~-~$1.0$~nm)and
+two rods ($r = 0.3$~nm~-~$1.0$~nm) and
 separation distances between $d = 0$~nm to $d = 3$~nm for nearest neighbor rods. We placed
 the rods in a 'square' arrangement and observed a similar behavior as the two rods
 where vapor is present in the space between the rods until a critical separation
-where it becomes filled with water (shown in Fig. \ref{fig:density-four-rods}). 
-For large $d$,
-the rods behave like separate single rods.  Free energy per length
-is plotted against rod separation in Figure \ref{fig:four-rods-energy-vs-distance}.
-From the slope we calculate the force per length to be [number].
+where it becomes filled with water and the rods behave like separate single rods
+(shown in Fig. \ref{fig:density-four-rods}).  Free energy per length
+is plotted against rod separation in Figure
+\ref{fig:four-rods-energy-vs-distance} with a slight disagreement of
+the predicted force per unit length.
 
-The rounded square formed by the area of the four rods and the space
-inbetween them has a circumference estimated by
+The 'rounded square' formed by the area of the four rods and the space
+between them has a circumference estimated by
 \begin{equation}
 C_{rs} = 2 \pi r + 8r + 4d.
 \end{equation}
 We again equate this circumference with the total circumference of
-only the four rods, which results in a critical separation of
+the four separate rods, which results in a critical separation of
 \begin{equation}
 d_{c4} = \frac{3 \pi - 4}{2} r. \label{criticalfourrods}
 \end{equation}
-We see in Figure \ref{fig:four-rods-energy-vs-distance} that the $r = 3.0$~nm
+We see in Figure \ref{fig:four-rods-energy-vs-distance} that the $r = 0.3$~nm
 rod has the largest difference between simulation and prediction with
-a 23\% difference, and better agreement for larger radii (between 0.5\% and 5.6\%).
+a 23\% difference, and better agreement for larger radii rods (between 0.5\% and 5.6\%).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
@@ -968,7 +969,7 @@ a 23\% difference, and better agreement for larger radii (between 0.5\% and 5.6\
 \end{figure}
 
 A common model of hydrophobic solutes is the \emph{hard sphere solute}
-\fixme{add citations?}.  The effect of this solute is merely to create
+\cite{sedlmeier2011entropy}.  The effect of this solute is merely to create
 a cavity within which the water may not penetrate.  This is the
 simplest possible solute, and will serve as a test case, which if
 passed could lead to the ability to insert different chemicals into
@@ -994,7 +995,7 @@ Figure~\ref{fig:sphere-energy-vs-diameter}\cite{huang2001shs}.  The
 agreement with simulation is quite reasonable.  The largest
 disagreement involves the density at contact, which according to the
 contact value theorem cannot agree, since the free energies do not
-agree.c
+agree.
 
 \begin{figure}
 \begin{center}
@@ -1022,9 +1023,12 @@ able to classically describe rods with a radius of about 0.5~nm or larger.
 For two hydrophobic rods surrounded by water, we see a transition from a vapor-filled
 stadium shape to two rods with liquid between them. A
 classical treatment of the critical separation for this transition
-works well for rods larger than 0.5~nm. Further evidence for the
+works well for rods larger than 0.5~nm.  Further evidence for the
 accuracy of this classical treatment is the calculation of the force on the
-stadium shape. The force per length is constant and equal to twice the surface tension.
+stadium shape. The force per length is constant and equal to twice the
+surface tension. A simulations of hydrophobic spheres agrees with
+SPC/E calculations and a system with four hydrophobic rods exhibited
+similar behavior as the two rod.
 
 For the hydrophobic systems studied, this functional is more computationally 
 efficient than molecular dynamics. This allows for future work

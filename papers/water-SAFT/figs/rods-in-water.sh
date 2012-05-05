@@ -8,9 +8,9 @@ hostname
 date
 
 if test -n "$DIAMETER"; then
-    time nice -19 paper/figs/rods-in-water.mkdat $DIAMETER
+    time nice -19 papers/water-SAFT/figs/rods-in-water.mkdat $DIAMETER
 else
-    time nice -19 paper/figs/rods-in-water.mkdat
+    time nice -19 papers/water-SAFT/figs/rods-in-water.mkdat
 fi
 
 date
