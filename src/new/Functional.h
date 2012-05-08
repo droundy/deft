@@ -39,9 +39,9 @@ public:
   // We have one additional method, which computes both the grad and
   // the preconditioned gradient.  This one is optional, and only need
   // be defined if there is some actual preconditioning to do;
-  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &x,
-                                                       bool verbose,
-                                                       const Bools *grad_these) const {
+  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &,
+                                                       bool,
+                                                       const Bools *) const {
     assert(0);
   }
   virtual bool have_preconditioner() const { return false; }
