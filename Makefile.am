@@ -2,6 +2,8 @@
 
 EXTRA_DIST = autogen.sh
 
+NEW_CODE = src/new/test.cpp
+
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
 	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
@@ -35,8 +37,9 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo
-deft_SOURCES = src/deft.cpp $(ALL_CODE) 
+bin_PROGRAMS = deft monte-carlo foobar
+deft_SOURCES = src/deft.cpp $(ALL_CODE)
+foobar_SOURCES = src/new/test.cpp
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \

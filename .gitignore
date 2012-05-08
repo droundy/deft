@@ -15,6 +15,7 @@ stamp-*
 deft
 monte-carlo
 analyze-monte-carlo
+foobar
 install-sh
 depcomp
 missing
