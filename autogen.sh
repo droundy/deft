@@ -20,11 +20,8 @@ autoheader
 automake --add-missing
 autoconf
 
-#CXXFLAGS='-ansi -pipe -W -g -Wall -O2 -Werror' ./configure
-#CXXFLAGS='-ansi -pipe -W -Wall -O2 -Werror' ./configure
-export CXXFLAGS='-ansi -pipe -W -Wall -O2 -ffast-math -Werror'
-export CXXFLAGS='-ansi -pipe -W -Wall -O2 -Werror'
-export CXXFLAGS='-ansi -pipe -W -Werror -O2 -DNDEBUG'
+export CXXFLAGS='-ansi -pipe -W -Wall -O2'
+export CXXFLAGS="-ansi -W -Wall -pipe -O2 -DNDEBUG"
 if env | grep CCACHE_; then
     echo Using ccache to speed up compilation.
     CXX='ccache g++' ./configure

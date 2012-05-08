@@ -82,7 +82,6 @@ void Lattice::reorientBasis(Cartesian zdir) {
     }
   }
   // set up the new lattice...
-  double vol0 = volume();
   R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
   if (R.determinant() < 0) R.col(2) = -a3new;
   Rinv = R.inverse();
