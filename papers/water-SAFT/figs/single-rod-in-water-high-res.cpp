@@ -87,7 +87,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 }
 
 int main(int, char **) {
-  FILE *o = fopen("paper/figs/single-rod-in-water-high-res.dat", "w");
+  FILE *o = fopen("papers/water-SAFT/figs/single-rod-in-water-high-res.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -132,7 +132,7 @@ int main(int, char **) {
 				       water_prop.lambda_dispersion,
 				       water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
-    // constraint.epsNativeSlice("paper/figs/single-rod-in-water-constraint.eps",
+    // constraint.epsNativeSlice("papers/water-SAFT/figs/single-rod-in-water-constraint.eps",
     // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
@@ -153,7 +153,7 @@ int main(int, char **) {
       fflush(stdout);
       //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
      
-      //density.epsNativeSlice("paper/figs/single-rod-in-water.eps", 
+      //density.epsNativeSlice("papers/water-SAFT/figs/single-rod-in-water.eps", 
       //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
       //			     Cartesian(0,ymax/2,zmax/2));
       
@@ -168,7 +168,7 @@ int main(int, char **) {
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "paper/figs/single-rod-res0.05-%04.1f.dat", cavitysize/nm);
+    sprintf(plotname, "papers/water-SAFT/figs/single-rod-res0.05-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     Grid energy_density(gd, f(water_prop.kT, gd, potential));
     Grid entropy(gd, S(water_prop.kT, potential));

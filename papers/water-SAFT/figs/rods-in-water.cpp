@@ -124,10 +124,10 @@ int main(int argc, char *argv[]) {
   double ymax = 3*diameter+2*nm;
 
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "paper/figs/rods-in-water-%04.1fnm.dat", diameter/nm);
+  sprintf(datname, "papers/water-SAFT/figs/rods-in-water-%04.1fnm.dat", diameter/nm);
   
   FILE *o = fopen(datname, "w");
-  //FILE *o = fopen("paper/figs/rods-in-water.dat", "w");
+  //FILE *o = fopen("papers/water-SAFT/figs/rods-in-water.dat", "w");
 
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 				       water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
     
-    // constraint.epsNativeSlice("paper/figs/rods-in-water-constraint.eps",
+    // constraint.epsNativeSlice("papers/water-SAFT/figs/rods-in-water-constraint.eps",
     // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
     // {
     //    fflush(stdout);
     //    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    //    //density.epsNative1d("paper/figs/constrained-water-1D.eps",
+    //    //density.epsNative1d("papers/water-SAFT/figs/constrained-water-1D.eps",
     //    //			Cartesian(0,0,0), Cartesian(0,0,zmax),
     //    //			water_prop.liquid_density, 1, " ");
     
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
       fflush(stdout);
     }
     char *plotnameslice = new char[1024];
-    snprintf(plotnameslice, 1024, "paper/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+    snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
 
     printf("The bulk energy per cell should be %g\n", EperCell);
     double energy;
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
     //plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
     //if ((close(distance, 0.2*nm) || close(distance, 0.4*nm)) && close(diameter, 1*nm)) {
     //char *plotname = (char *)malloc(1024);
-    // sprintf(plotname, "paper/figs/rods-picture-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+    // sprintf(plotname, "papers/water-SAFT/figs/rods-picture-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
     //plot_grids_yz_directions(plotname, density);
     //free(plotname);
     //}

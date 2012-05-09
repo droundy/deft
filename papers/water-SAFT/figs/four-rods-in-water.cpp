@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   double ymax = 2*diameter+dmax+2*nm;
 
   char *datname = new char[1024];
-  snprintf(datname, 1024, "paper/figs/four-rods-in-water-%04.1fnm.dat", diameter/nm);
+  snprintf(datname, 1024, "papers/water-SAFT/figs/four-rods-in-water-%04.1fnm.dat", diameter/nm);
   
   FILE *o = fopen(datname, "w");
   delete[] datname;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
       fflush(stdout);
     }
     char *plotnameslice = new char[1024];
-    snprintf(plotnameslice, 1024, "paper/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+    snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
 
     printf("The bulk energy per cell should be %g\n", EperCell);
     double energy;
