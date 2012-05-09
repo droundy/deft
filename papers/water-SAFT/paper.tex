@@ -20,8 +20,8 @@
 \newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
-% needsworknow is intended to prioritize stuff that needs fixing.
-\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+% fixme is intended to prioritize stuff that needs fixing.
+\newcommand{\fixme}[1]{\textcolor{red}{[\emph{#1}]}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -162,7 +162,7 @@ limit of a zero-dimensional cavity, it gives the exact free energy.
 
 A number of classical density functionals have been developed for
 water~\cite{ding1987, Yang1992, gloor2002saft, Jaqaman2004,
-  clark2006developing, lischner2010classical}\needsworknow{ADD REST OF
+  clark2006developing, lischner2010classical}\fixme{ADD REST OF
   LIST HERE!}, capturing some of the qualitative behavior of water.
 However, many of these are less sophisticated than those describing
 the hard-sphere fluid, and a quantitatively accurate functional
@@ -173,11 +173,11 @@ the functional of Lischner \emph{et al}\cite{lischner2010classical}
 treats the surface tension correctly, but can only be used at room
 temperature.  A numer of classical density functionals have recently
 been produced that are based on Statistical Associating Fluid Theory
-(SAFT)\cite{gloor2002saft, clark2006developing}\needsworknow{add
+(SAFT)\cite{gloor2002saft, clark2006developing}\fixme{add
   more}.  These functionals are based on a perturbative thermodynamic
 expansion, and give a reasonable prediction for the temperature
 dependence of the surface tension.  However, they also overestimate
-the surface tension by \needsworknow{how much? significant factor, I
+the surface tension by \fixme{how much? significant factor, I
   think}, and are unsuited for studying systems with molecular-scale
 inhomogeneities.
 
@@ -230,6 +230,24 @@ molecular length scale\cite{felipe2001examination, gloor2002saft,
 \section{Theory and Methods}
 We construct a new classical density functional for water.  We
 start with a treatment of each individual water molecule as a purely
+classical hard sphere and add association terms based on Statistical 
+Associating Fluid Theory (SAFT). Water is unlike simple
+fluids (which are mainly defined by van der Waals forces and weak electrostatic
+interations) because it requires direct treatment of association effects. The strong 
+hydrogen bonds and polar
+interactions in water are ideal for describing with SAFT, which was designed for
+use with hydrogen-bonding fluids. It is based on Wertheim's first-order
+thermodynamic perturbation theory (TPT1)
+\cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
+wertheim1986fluidsIV} which provides a useful way to account for strong
+associative interations between molecules. SAFT can account for the association energies
+as well as any effects due to clusters or chains forming \fixme{not true}
+in the liquid\cite{muller2001molecular}. SAFT assumes a repulsive hard
+sphere core for each atom with a number of short-ranged off center
+attractive sites. This model can be applied to give an equation of state for
+various systems even inhomogeneous fluids.
+\fixme{Expand this a
+  bit to accurately describe SAFT and its advantages.}
 
 The Helmholtz free energy functional is based on SAFT,
 and is composed of the terms:
@@ -263,8 +281,8 @@ also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes: 
 \begin{equation}\label{contactvaluethm}
-  F = n_c k_BT V\:.
-\end{equation}
+  F = n k_BT V\:.
+\end{equation}\fixme{may be ambiguous about n}
 These properties are retained by the total functional,
 provided the remaining terms are \emph{purely nonlocal}.  A common
 failing of SAFT-based functionals (see, for instance
@@ -552,24 +570,11 @@ an error of only a few percent.
 %\includegraphics[width=\columnwidth]{figs/temperature-versus-density}
 %\end{center}
 %\caption{The theoretical versus experimental coexistence curve. Away from
-%the critical temperature, the agreement is good.\needsworknow{(keep figure?
+%the critical temperature, the agreement is good.\fixme{(keep figure?
 %its the same as Clark paper)} }
 %\label{fig:temperature-vs-density}
 %x\end{figure}
 
-\subsection{Liquid-vapor interface}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/surface-298}
-\end{center}
-\caption{The liquid-vapor density profile at room temperature shows
-some small oscillations close to the interface.  }
-\label{fig:liquid-vapor-profile}
-\end{figure}
-
-We set up a liquid-vapor
-interface and plot the density profile.
 The fluid density at a liquid-solid interface commonly displays
 oscillatory behavior, but the presence of density oscillations at
 liquid-vapor interfaces is more debated\cite{penfold2001structure}.
@@ -578,10 +583,9 @@ interface is clouded by the existence of long-wavelength perturbations
 known as \emph{capillary waves}.  These waves are not accounted for in
 density-functional theory (although the exact
 density-functional theory would include them), with the result
-that the density profile will be smoothed out by capillary wave effects. 
-The liquid-vapor
-interface is plotted in Figure~\ref{fig:liquid-vapor-profile} and shows
-some small oscillations.
+that the density profile will be smoothed out by capillary wave
+effects. We set up a liquid-vapor interface and observed small density
+oscillations in the water near the surface.
 
 %For reference, we plot the predicted vapor pressure (see
 %Figure~\ref{fig:equation-of-state}) and the coexistence curve (see
@@ -702,7 +706,7 @@ profiles for three different radii (0.3~nm, 0.5~nm, and 1~nm) which have the
 expected oscillations outside the rod that reduce to the bulk saturated liquid
 density as the distance away from the rods increases. The small radius
 rod has comparatively larger oscillations and a higher contact density.
-\needsworknow{Expand or add to this description of density profiles and
+\fixme{Expand or add to this description of density profiles and
 oscillations for single rod?}
 
 \begin{figure}
@@ -1001,4 +1005,3 @@ involving hydrophilic interactions with more complex electrostatic interactions.
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
-

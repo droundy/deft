@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   xmax = ymax = zmax = diameter + 2*padding;
 
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "paper/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
+  sprintf(datname, "papers/water-SAFT/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
   
   Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 				       water_prop.lambda_dispersion,
 				       water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
-    //constraint.epsNativeSlice("paper/figs/sphere-constraint.eps",
+    //constraint.epsNativeSlice("papers/water-SAFT/figs/sphere-constraint.eps",
     // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
         //fflush(stdout);
         //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
         
-        //density.epsNativeSlice("paper/figs/sphere.eps", 
+        //density.epsNativeSlice("papers/water-SAFT/figs/sphere.eps", 
         //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
         //			     Cartesian(0,ymax/2,zmax/2));
         
@@ -184,12 +184,12 @@ int main(int argc, char *argv[]) {
 
     char *plotname = (char *)malloc(1024);
 
-    sprintf(plotname, "paper/figs/sphere-%04.2f.dat", diameter/nm);
+    sprintf(plotname, "papers/water-SAFT/figs/sphere-%04.2f.dat", diameter/nm);
     plot_grids_y_direction(plotname, density);
 
     free(plotname);
 
-    //density.epsNativeSlice("paper/figs/sphere.eps",
+    //density.epsNativeSlice("papers/water-SAFT/figs/sphere.eps",
 		//	   Cartesian(0,ymax,0), Cartesian(0,0,zmax),
 		//	   Cartesian(0,ymax/2,zmax/2));
     

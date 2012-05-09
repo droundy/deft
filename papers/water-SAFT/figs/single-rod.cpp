@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
                                      water_prop.lambda_dispersion,
                                      water_prop.length_scaling, mu_satp));
   f = constrain(constraint, f);
-  // constraint.epsNativeSlice("paper/figs/single-rod-in-water-constraint.eps",
+  // constraint.epsNativeSlice("papers/water-SAFT/figs/single-rod-in-water-constraint.eps",
   // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
   // 			      Cartesian(0,ymax/2,zmax/2));
   //printf("Constraint has become a graph!\n");
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     fflush(stdout);
     //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
      
-    //density.epsNativeSlice("paper/figs/single-rod-in-water.eps", 
+    //density.epsNativeSlice("papers/water-SAFT/figs/single-rod-in-water.eps", 
     //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     //			     Cartesian(0,ymax/2,zmax/2));
       
@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
   printf("Energy is %.15g\n", energy);
 
   char *datname = new char[1024];
-  sprintf(datname, "paper/figs/single-rod-%04.2fnm-energy.dat", diameter/nm);
+  sprintf(datname, "papers/water-SAFT/figs/single-rod-%04.2fnm-energy.dat", diameter/nm);
   FILE *o = fopen(datname, "w");
   delete[] datname;
   fprintf(o, "%g\t%.15g\n", diameter/nm, energy);
@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
   }
 
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "paper/figs/single-rod-slice-%04.1f.dat", diameter/nm);
+  sprintf(plotname, "papers/water-SAFT/figs/single-rod-slice-%04.1f.dat", diameter/nm);
   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
   Grid energy_density(gd, f(water_prop.kT, gd, potential));
   Grid entropy(gd, S(water_prop.kT, potential));
