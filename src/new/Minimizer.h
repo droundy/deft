@@ -24,6 +24,12 @@ public:
     orig_stepsize = 0.1;
 
     oldgradsqr = 1.0;
+
+    precision = 0;
+    relative_precision = 1e-15;
+    deltaE = 0;
+    dEdn = 0;
+    log_dEdn_ratio_average = 0;
   }
   ~Minimizer() {
     invalidate_cache();
@@ -39,6 +45,9 @@ public:
   // minimizer.
   void set_precision(double p) {
     precision = p;
+  }
+  void set_relative_precision(double p) {
+    relative_precision = p;
   }
   void set_maxiter(int mx) {
     maxiter = mx;
@@ -104,7 +113,6 @@ private:
   const Functional *f;
   Vector *x; // Note that we don't own this data!
   int iter, maxiter;
-  double precision;
 
   mutable Vector last_grad, last_pgrad;
   mutable double *last_energy;
@@ -118,4 +126,5 @@ private:
 
   double oldgradsqr;
 
+  double precision, relative_precision, deltaE, dEdn, log_dEdn_ratio_average;
 };

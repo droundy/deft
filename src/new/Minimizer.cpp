@@ -15,10 +15,15 @@ Verbosity quietest(Verbosity v) {
 
 const Verbosity min_details = chatty;
 
+inline double max(double a, double b) {
+  return (a > b) ? a : b;
+}
+
 bool Minimizer::improve_energy(Verbosity v) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy(quietest(v));
+  const double old_deltaE = deltaE;
   if (isnan(E0)) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
@@ -64,7 +69,6 @@ bool Minimizer::improve_energy(Verbosity v) {
     // want to make sure we improve the energy at least a little bit.
   
     const double slope = gdotd;
-    const double E0 = energy(quietest(v));
     if (v >= min_details) {
       printf("\t\tQuad: E0 = %25.15g", E0);
       fflush(stdout);
@@ -235,7 +239,53 @@ bool Minimizer::improve_energy(Verbosity v) {
     if (v >= min_details) printf("\t\tgrad*direction = %g\n", grad().dot(direction)/gdotd);
     print_info("");
   }
-  return (energy(quietest(v)) < E0);
+
+  // At this point, we start work on estimating how close we are to
+  // being adequately converged.
+  const double newE = energy(quietest(v));
+  deltaE = newE - E0;
+  
+  const double w = 0.1; // weighting for windowed average
+  dEdn = (1-w)*dEdn + w*deltaE;
+  dEdn = max(deltaE, old_deltaE);
+
+  const double new_log_dEdn_ratio_average =
+    (deltaE && old_deltaE) ? log(fabs(deltaE/old_deltaE)) : 0;
+  log_dEdn_ratio_average = (1-w)*log_dEdn_ratio_average + w*new_log_dEdn_ratio_average;
+
+  const double dEdn_ratio_average = exp(log_dEdn_ratio_average);
+  // We assume below an exponential again...
+  double error_guess = fabs(max(dEdn,deltaE)/log_dEdn_ratio_average);
+  if (dEdn_ratio_average >= 1) {
+    // We aren't converging at all! We'll just fudge a guess here,
+    // adding on a bit of precision to make sure we don't stop early.
+    error_guess = precision + fabs(newE);
+  }
+
+  const double error_estimate = 2*error_guess; // Just a bit of paranoia...
+
+  if (deltaE == 0 && old_deltaE == 0) {
+    if (v >= verbose) printf("We got no change twice in a row, so we're done!\n");
+    return false;
+  }
+  if (!(error_estimate < precision) && !(error_estimate < relative_precision*fabs(newE))) {
+    if (dEdn_ratio_average < 1) {
+      const double itersleft = log(precision/error_guess)/log(dEdn_ratio_average);
+      if (v >= verbose) {
+        if (precision > 0) {
+          printf("Error estimate is %10g ... %.1f iterations remaining.\n",
+                 error_estimate, itersleft);
+        } else {
+          printf("Error estimate is %10g.\n", error_estimate);
+        }
+        printf("\n");
+      }
+    }
+    return true;
+  } else {
+    if (v >= verbose) printf("Converged with precision of %g!\n", error_estimate);
+    return false;
+  }
 }
 
 void Minimizer::print_info(const char *prefix) const {
