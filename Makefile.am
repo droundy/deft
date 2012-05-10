@@ -2,7 +2,7 @@
 
 EXTRA_DIST = autogen.sh
 
-NEW_CODE = src/new/test.cpp
+NEW_CODE = src/new/test.cpp src/new/Minimizer.cpp
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
@@ -37,9 +37,9 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo foobar
+bin_PROGRAMS = deft monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
-foobar_SOURCES = src/new/test.cpp
+tests_newcode_test_SOURCES = $(NEW_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
@@ -96,6 +96,7 @@ tests/generated-haskell/nice-sum.h tests/generated-haskell/math.tex: src/haskell
 tests/generated-code.o: tests/generated/sum.h tests/generated-haskell/nice-sum.h
 
 check_PROGRAMS = \
+	tests/newcode.test \
 	tests/generated-code.test \
 	tests/saft.test \
 	tests/saft-dispersion.test \

@@ -4,6 +4,7 @@
 
 #include "Vector.h"
 #include "Bools.h"
+#include "Verbosity.h"
 
 struct EnergyGradAndPrecond {
   double energy;
@@ -28,7 +29,7 @@ class Functional {
 public:
   // The following is the "energy" function, which must be defined by
   // any real functionals.
-  virtual double energy(const Vector &x, bool verbose = false) const = 0;
+  virtual double energy(const Vector &x, Verbosity verbose = quiet) const = 0;
 
   // grad is the gradient.  The input "grad_these allows cases where
   // we may want to compute a gradient with regard to just *some* of

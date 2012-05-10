@@ -235,7 +235,7 @@ findToDo everything (Product p) =
            [] -> DoNothing
            dothis:_ -> dothis
     where sub (e, _) = findToDo everything e
-          iszero e = setZero kx (setZero ky (setZero kz e)) == 0
+          iszero e = hasK e && setZero kx (setZero ky (setZero kz e)) == 0
           notk (DoK e) = not (hasK e)
           notk _ = True
 findToDo x (Cos e) = findToDo x e
