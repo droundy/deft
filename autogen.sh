@@ -20,8 +20,10 @@ autoheader
 automake --add-missing
 autoconf
 
-export CXXFLAGS='-ansi -pipe -W -Wall -O2'
-export CXXFLAGS="-ansi -W -Wall -pipe -O2 -DNDEBUG"
+WARNINGEXCEPTIONS=' -Wno-unused-variable -Wno-unused-parameter -Wno-return-type '
+
+export CXXFLAGS="-ansi -pipe -W -Wall -O2"
+export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2 -DNDEBUG"
 if env | grep CCACHE_; then
     echo Using ccache to speed up compilation.
     CXX='ccache g++' ./configure
