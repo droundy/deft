@@ -35,7 +35,8 @@ bool Minimizer::improve_energy(Verbosity v) {
   }
   double gdotd;
   {
-    const Vector g = -grad();
+    const Vector pg = pgrad();
+    const Vector g = grad();
     // Let's immediately free the cached gradient stored internally!
     invalidate_cache();
 
@@ -46,31 +47,33 @@ bool Minimizer::improve_energy(Verbosity v) {
     // it seems worth implementing that as an option for
     // memory-constrained problems (then we wouldn't need to store oldgrad).
     if (v >= min_details) {
-      printf("\t\tnorm g is %g\n", g.norm());
-      printf("\t\toldgrad size is %d\n", oldgrad.get_size());
-      printf("\t\tnorm(g - oldgrad) is %g\n", (g-oldgrad).norm());
+      printf("\t\tnorm of gradient is %g\n", g.norm());
+      //printf("\t\toldgrad size is %d\n", oldgrad.get_size());
+      //printf("\t\tnorm(g - oldgrad) is %g\n", (g-oldgrad).norm());
     }
-    double beta = g.dot(g - oldgrad)/oldgradsqr;
+    double beta = pg.dot(g - oldgrad)/oldgradsqr;
     oldgrad = g;
     if (beta < 0 || beta != beta || oldgradsqr == 0) beta = 0;
-    oldgradsqr = oldgrad.dot(oldgrad);
-    direction = g + beta*direction;
-    gdotd = oldgrad.dot(direction);
-    if (gdotd < 0) {
-      direction = 1.0*oldgrad; // If our direction is uphill, reset to gradient.
-      if (v >= verbose) printf("reset to gradient...\n");
-      gdotd = oldgrad.dot(direction);
+    oldgradsqr = pg.dot(g);
+    direction = -pg + beta*direction;
+    gdotd = g.dot(direction);
+    if (gdotd > 0) {
+      direction = -g; // If our direction is uphill, reset to gradient.
+      if (v >= verbose) printf("\t\treset to gradient, since g*d = %g < 0\n", gdotd);
+      gdotd = g.dot(direction);
     }
+    // g and pg will be destructed here.
   }
 
   {
     // Now we will do the line minimization... this is a bit
     // complicated.  We want to use as few steps as possible, but also
     // want to make sure we improve the energy at least a little bit.
+    //if (v >= min_details) printf("\t\tInitial stepsize is %g\n", step);
   
-    const double slope = gdotd;
+    const double slope = -gdotd;
     if (v >= min_details) {
-      printf("\t\tQuad: E0 = %25.15g", E0);
+      printf("\t\tQuad: s0 = %25.15g  E0 = %25.15g", 0.0, E0);
       fflush(stdout);
     }
     if (isnan(E0)) {
@@ -143,10 +146,12 @@ bool Minimizer::improve_energy(Verbosity v) {
 
     // Do a parabolic extrapolation with E0, E1, and gd to get curvature
     // and new step
-    const double curvature = 2.0*(E1-E0-step1*slope)/(step1*step1);
-    double step2 = -slope/curvature;
+    const double curvature = 2.0*(E1-E0+step1*slope)/(step1*step1);
+    double step2 = slope/curvature;
     if (v >= min_details) {
-      printf("   E1 = %25.15g\n", E1);
+      //printf("   E1 = %25.15g\n", E1);
+      printf("\n\t\tQuad: s1 = %25.15g  E1 = %25.15g\n", step1, E1);
+      //printf("\t\t                            Predicted E1 = %25.15g\n", E0 - step1*slope);
       printf("\t\tQuad: slope = %14.7g  curvature = %14.7g\n", slope, curvature);
       fflush(stdout);
     }
@@ -169,6 +174,7 @@ bool Minimizer::improve_energy(Verbosity v) {
         double Ebest = E0;
         while (energy(quietest(v)) <= Ebest) {
           Ebest = energy(quietest(v));
+          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: Ei = %25.15g\n", Ebest);
           *x += step1*direction;
           invalidate_cache();
           step1 *= 2;
@@ -205,8 +211,7 @@ bool Minimizer::improve_energy(Verbosity v) {
       invalidate_cache();
       *x += (step2-step1)*direction; // and move to the expected minimum.
       if (v >= verbose) {
-        printf("\t\tQuad: step1 = %14.7g  step2 = %14.7g\n", step1, step2);
-        printf("\t\tQuad: E2 = %25.15g\n", energy(quietest(v)));
+        printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(quietest(v)));
         fflush(stdout);
       }
       
@@ -218,6 +223,7 @@ bool Minimizer::improve_energy(Verbosity v) {
         if (v >= verbose) printf("\t\tGoing back to the first try...\n");
         invalidate_cache();
         *x -= (step2-step1)*direction;
+        step = step1;
       } else if (energy(quietest(v)) > E0) {
         const double E2 = energy(quietest(v));
         invalidate_cache();
@@ -235,7 +241,10 @@ bool Minimizer::improve_energy(Verbosity v) {
   // Finished with the line minimization!
 
   if (v >= verbose) {
-    //lm->print_info();
+    pgrad(); // call pgrad here, since it might be more efficient to
+             // compute everything at once, rather than first
+             // computing just the grad...
+    printf("\t\tfinal stepsize: = %g\n", step);
     if (v >= min_details) printf("\t\tgrad*direction = %g\n", grad().dot(direction)/gdotd);
     print_info("");
   }

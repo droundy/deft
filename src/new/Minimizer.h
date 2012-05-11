@@ -52,6 +52,9 @@ public:
   void set_maxiter(int mx) {
     maxiter = mx;
   }
+  int get_iteration_count() const {
+    return iter;
+  }
   void precondition(bool u) {
     use_preconditioning = u;
   }
@@ -88,9 +91,9 @@ public:
   }
   const Vector &pgrad() const {
     if (!last_pgrad.get_size()) {
-      if (f->have_preconditioner()) {
+      if (use_preconditioning && f->have_preconditioner()) {
         invalidate_cache();
-        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x, false, 0);
+        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x, silent, 0);
         last_energy = new double(foo.energy);
         last_grad = foo.grad;
         last_pgrad = foo.precond;

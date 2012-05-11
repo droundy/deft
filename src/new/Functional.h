@@ -41,7 +41,7 @@ public:
   // the preconditioned gradient.  This one is optional, and only need
   // be defined if there is some actual preconditioning to do;
   virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &,
-                                                       bool,
+                                                       Verbosity,
                                                        const Bools *) const {
     assert(0);
   }
