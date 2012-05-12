@@ -762,195 +762,217 @@ We also have
 
 \subsection{Expressions for $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta R(\mathbf{r})}$, etc. for the assymetric case}\label{appendix:g-A}
 
-In the case of A, the changing radius we refer to is the radius of a sphere that is centered at $\mathbf{r}$.  The $n_3$ values that will be affected are those which are a distance $R$ from $\mathbf{r}$.
-
+The derivatation of the asymmetrically averaged correlation function
+$g_\sigma^A(\rr)$ requires that we express the free energy in terms of
+a set of weighted densities in which the radius of the weighting
+kernel is determined according to the position of the sphere in
+question---which is to say, the location where the density itself is
+evaluated.  This is the most natural way to construct such a
+functional, in which the radius of spheres is a function of position.
+Thus we define $n_3^A$ as
 \begin{align}
-  n_3^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}'')) d\mathbf{r}''\\ 
-  \frac{\delta n_3^{A} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
-  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) \delta(\mathbf{r}-\mathbf{r}'') d\mathbf{r}'' \\
-   &= n (\mathbf{r}) \delta(|\mathbf{r'} - \mathbf{r}| - R(\mathbf{r}))
+  n_3^{A}(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| -R(\rr')) d\rr'
 \end{align}
- 
-And likewise:
+and we define the other weighted densities similarly.  In order to
+compute derivatives of the free energy with respect to $R(\rr)$, we
+need to find $g_\sigma^A$.  In the case of $n_3^A$, we needS
 \begin{align}
-  n_2^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) d \mathbf{r}''\\
-  \frac{\delta n_2^{A}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -n(\mathbf{r}) \delta'(|\mathbf{r}' - \mathbf{r}| - R(\mathbf{r}))\\
- \end{align}
-
-where the trouble here is that the derivative of the delta function,
-$\delta'$, isn't something we really like to deal with.  Particularly
-as we're looking  at a 3D integral involving a 1D delta function,
-which means there are Jacobian factors to be considered.  On the other
-hand, there's no reason why we couldn't convolve with this kernel as
-efficiently as we do with any other kernel.
-\\
-\\
+  \frac{\delta n_3^{A} (\rr')}{\delta R(\rr)} &=
+  \int n (\rr'') \delta(|\rr' - \rr''| - R(\rr'')) \delta(\rr-\rr'') d\rr'' \\
+   &= n (\rr) \delta(|\rr' - \rr| - R(\rr))
+\end{align}
+Similarly, for $n_2^A$, we find
+\begin{align}
+  n_2^{A}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - R(\rr'')) d \rr''\\
+  \frac{\delta n_2^{A}(\rr')}{\delta R(\rr)} &= -n(\rr) \delta'(|\rr' - \rr| - R(\rr))\\
+\end{align}
+This is somewhat more challenging, since it involves an unfamiliar
+function, the derivative the Dirac delta function $\delta'$.
+%
 The derivatives of the remaining scalar densities can be reduced to
 sums of the terms above:
 \begin{align}
-  n_1(\mathbf{r}') &= \int \mathbf{dr''} \frac{n(\mathbf{r''})}{4\pi R(\mathbf{r''})}
-  \delta(|\mathbf{r'}-\mathbf{r''}| - R(\mathbf{r''})) \\
-  \frac{\delta n_1(\mathbf{r}')}{\delta R(\mathbf{r})}
-  &= -\frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})}\delta'(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r}))
+  n_1(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{4\pi R(\rr'')}
+  \delta(|\rr'-\rr''| - R(\rr'')) \\
+  \frac{\delta n_1(\rr')}{\delta R(\rr)}
+  &= -\frac{n(\rr)}{4\pi
+    R(\rr)}\delta'(|\rr'-\rr| - R(\rr))
   -
-  \frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})^2}\delta(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r}))
+  \frac{n(\rr)}{4\pi
+    R(\rr)^2}\delta(|\rr'-\rr| - R(\rr))
 \end{align}
+and
 \begin{align}
-  n_0(\mathbf{r}') &= \int \mathbf{dr''} \frac{n(\mathbf{r''})}{4\pi R(\mathbf{r''})^2}
-  \delta(|\mathbf{r'}-\mathbf{r''}| - R(\mathbf{r''})) \\
-  \frac{\delta n_1(\mathbf{r}')}{\delta R(\mathbf{r})^2}
-  &= -\frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})^2}\delta'(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r}))
+  n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{4\pi R(\rr'')^2}
+  \delta(|\rr'-\rr''| - R(\rr'')) \\
+  \frac{\delta n_1(\rr')}{\delta R(\rr)^2}
+  &= -\frac{n(\rr)}{4\pi
+    R(\rr)^2}\delta'(|\rr'-\rr| - R(\rr))
   -
-  2\frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})^3}\delta(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r}))
+  2\frac{n(\rr)}{4\pi
+    R(\rr)^3}\delta(|\rr'-\rr| - R(\rr))
 \end{align}
-
-Since the vector-weighted densities have no additional occurrences of
-$R$, their derivatives come out similarly.
+The vector-weighted densities have no additional occurrences of $R$,
+their functional derivatives come out similarly:
 \begin{align}
-  \mathbf{n}_{V2}^{A}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'')) 
-    \frac{\mathbf{r'}-\mathbf{r''}}{|\mathbf{r'}-\mathbf{r''}|} d \mathbf{r}''\\
-  \frac{\delta \mathbf{n}_{V2}^{A}(\mathbf{r}')}{\delta R(\mathbf{r})} &= - n(\mathbf{r}) \delta'(|\mathbf{r}' - \mathbf{r}| - R(\mathbf{r}))
-    \frac{\mathbf{r}'-\mathbf{r}}{|\mathbf{r}'-\mathbf{r}|}\\
+  \mathbf{n}_{V2}^{A}(\rr) &= \int n(\rr') \delta(|\rr' - \rr''| - R(\rr''))
+    \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
+  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta R(\rr)} &= - n(\rr) \delta'(|\rr' - \rr| - R(\rr))
+    \frac{\rr'-\rr}{|\rr'-\rr|}\\
 \end{align}
-
-and analogously for $\mathbf{n}_{V1}$:
-
+and analogously for $\mathbf{n}_{V1}^A$:
 \begin{align}
-  \mathbf{n}_{V1}(\mathbf{r}') &= \int \mathbf{dr''} \frac{n(\mathbf{r''})}{4\pi R(\mathbf{r''})}
-  \delta(|\mathbf{r'}-\mathbf{r''}| - R(\mathbf{r''})) \frac{\mathbf{r'}-\mathbf{r}}{|\mathbf{r'}-\mathbf{r}|}\\
-  \frac{\delta \mathbf{n}_{V1}(\mathbf{r}')}{\delta R(\mathbf{r})}
-  &= -\frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})}\delta'(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r})) \frac{\mathbf{r'}-\mathbf{r}}{|\mathbf{r'}-\mathbf{r}|}
+  \mathbf{n}_{V1}^A(\rr) &= \int d\rr' \frac{n(\rr')}{4\pi R(\rr')}
+  \delta(|\mathbf{r}-\rr'| - R(\rr')) \frac{\rr-\rr'}{|\rr-\rr'|}\\
+  \frac{\delta \mathbf{n}_{V1}^A(\rr')}{\delta R(\rr)}
+  &= -\frac{n(\rr)}{4\pi
+    R(\rr)}\delta'(|\rr'-\rr| - R(\rr)) \frac{\rr'-\rr}{|\rr'-\rr|}
   -
-  \frac{n(\mathbf{r})}{4\pi
-    R(\mathbf{r})^2}\delta(|\mathbf{r'}-\mathbf{r}| - R(\mathbf{r})) \frac{\mathbf{r'}-\mathbf{r}}{|\mathbf{r'}-\mathbf{r}|}  
+  \frac{n(\rr)}{4\pi
+    R(\rr)^2}\delta(|\rr'-\rr| - R(\rr)) \frac{\rr'-\rr}{|\rr'-\rr|}
 \end{align}
+\fixme{double-check the directions of all the vector quantities...}
 
-So, what is this convolution with a $\delta'$? Let's look at the
-scalar version:
-\fixme{With following the primes are certainly not in the right places}
+%% So, what is this convolution with a $\delta'$? Let's look at the
+%% scalar version:
+%% \fixme{With following the primes are certainly not in the right places}
+%% \begin{align}
+%%   \bar{f}(\mathbf{r})
+%%   &= \int f(\mathbf{r'}) \delta'(|\mathbf{r}-\mathbf{r'}| - R)
+%%   \\
+%%   &= \int
+%%         f(\mathbf{r'})
+%%         \lim_{\Delta R \rightarrow 0}
+%%           \frac{\delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
+%%             -
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%%       }{\Delta R}
+%%   \\
+%%   &= \lim_{\Delta R \rightarrow 0}
+%%           \frac{\int
+%%             f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
+%%             -
+%%             \int
+%%             f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%%       }{\Delta R}
+%%   \\
+%%   &\approx\lim_{\Delta R \rightarrow 0}
+%%           \frac{\int
+%%             \frac{(R+\Delta R)^2}{R^2}f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%%             -
+%%             \int
+%%             f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%%       }{\Delta R}
+%%   \\
+%%   &\approx\lim_{\Delta R \rightarrow 0}
+%%           \frac{2\frac{\Delta R}{R} \int
+%%             f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%%       }{\Delta R}
+%%   \\
+%%   &= \frac{2}{R} \int
+%%             f(\mathbf{r'})
+%%             \delta(|\mathbf{r}-\mathbf{r'}| - R)
+%% \end{align}
+%% There is a sign ambiguity here with regard to whether we are asking
+%% about the derivative of this delta function with regard to $R$ or
+%% something else.  We just need to get it right.
+
+This completes our exploration of the partial derivatives of weighted
+densities of the $A$ variety.
+
+
+\subsection{Expressions for $\beta\frac{\delta
+    n_3^{S}(\mathbf{r}')}{\delta R(\mathbf{r})}$, etc. for the
+  symetric case}\label{appendix:g-S}
+
+The derivatation of the asymmetrically averaged correlation function
+$g_\sigma^S(\rr)$ requires that we express the free energy in terms of
+a set of weighted densities in which the radius of the weighting
+kernel is determined according to the position at which the weighted
+density is being evaluated.  This is less intuitive than the $A$ case,
+since \emph{nothing is there}!  However, in practice it corresponds to
+the picture shown in Figure~\ref{fig:contact}, which involves
+extending the radius for spheres just at the position touching a
+given spot, where we are evaluating the correlation function.  We
+define the weighted density $n_3^S$ as:
 \begin{align}
-  \bar{f}(\mathbf{r})
-  &= \int f(\mathbf{r'}) \delta'(|\mathbf{r}-\mathbf{r'}| - R)
-  \\
-  &= \int
-        f(\mathbf{r'})
-        \lim_{\Delta R \rightarrow 0}
-          \frac{\delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
-            -
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
-      }{\Delta R}
-  \\
-  &= \lim_{\Delta R \rightarrow 0}
-          \frac{\int
-            f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R - \Delta R)
-            -
-            \int
-            f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
-      }{\Delta R}
-  \\
-  &\approx\lim_{\Delta R \rightarrow 0}
-          \frac{\int
-            \frac{(R+\Delta R)^2}{R^2}f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
-            -
-            \int
-            f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
-      }{\Delta R}
-  \\
-  &\approx\lim_{\Delta R \rightarrow 0}
-          \frac{2\frac{\Delta R}{R} \int
-            f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
-      }{\Delta R}
-  \\
-  &= \frac{2}{R} \int
-            f(\mathbf{r'})
-            \delta(|\mathbf{r}-\mathbf{r'}| - R)
+  n_3^{S}(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| -R(\rr)) d\rr'
 \end{align}
-There is a sign ambiguity here with regard to whether we are asking
-about the derivative of this delta function with regard to $R$ or
-something else.  We just need to get it right.
-
-\subsection{Expressions for $\beta\frac{\delta n_3^{S}(\mathbf{r}')}{\delta R(\mathbf{r})}$, etc. for the symetric case}\label{appendix:g-S}
-
-
-For the derivation of $n_{3}$ in the symmetric case:
-
-\begin{align}  
-  n_3^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \Theta(\left|\mathbf{r}' - \mathbf{r}''\right| -R(\mathbf{r}')) d\mathbf{r}''\\
-  \frac{\delta n_3^{S} (\mathbf{r}')}{\delta R(\mathbf{r})} &=
-  \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}''
-\end{align}
-  
-\fixme{Not sure if we need any more explanation here (probably want better than this) -  $\delta R(\mathbf{r})$ in this equation refers to an expansion, in the fashion described above, of all the spheres that just touch $\mathbf{r}$.  We can see that if the radii change in this fashion, the only point at which $n_3(\mathbf{r}')$ will be affected is at $\mathbf{r}' = \mathbf{r}$, so that $\delta n_3(\mathbf{r}')$ is zero everywhere except where $\mathbf{r}' = \mathbf{r}$.  Thus we have the 2nd $\delta$ function in the lower integral.}
-\\
-\\
-This term in the free energy functional, once integrated, takes an interesting form:  
-
+In the symmetric case, the functional derivative is strikingly simple:
 \begin{align}
-  \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} 
-  \frac{\delta n_3^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}' 
-  &= \int \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}'-\mathbf{r}) d\mathbf{r}'' d\mathbf{r}' \\
-  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}')} \int n (\mathbf{r}'') \delta(|\mathbf{r} - \mathbf{r}''| - R(\mathbf{r})) d\mathbf{r}''\\
-  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\mathbf{r}'')} n_2(\mathbf{r})\\
+  \frac{\delta n_3^{S} (\rr')}{\delta R(\rr)} &=
+   \delta(\rr'-\rr) \int n (\rr'') \delta(|\rr' - \rr''| - R(\rr'))
+   \delta(\rr'-\rr) d\rr''
+   \\
+   &= \delta(\rr'-\rr) n_2^S(\rr')
 \end{align}
-  
- $n_2(\mathbf{r}')$ in the case of S in calculated similarly
+The functional derivative does \emph{not} eliminate the integral,
+which simply changes from one weighted density to another.  The
+corresponding term in the free energy functional, once integrated,
+takes a simple form:
 \begin{align}
-  n_2^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''\\
-    \frac{\delta n_2^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int n(\mathbf{r}'') 
-  \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}''
+  \int \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')}
+  \frac{\delta n_3^{S}(\rr')}{\delta R(\rr)} d\rr'
+  &= \int \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')} \delta(\rr'-\rr)
+  n_2^S(\rr') d\rr' \\
+  &= \frac{\delta A_{HS}}{\delta n_3^{S}(\rr)} n_2(\rr)
 \end{align}
+which means that we can compute $g_\sigma^S(\rr)$ using only
+convolutions of the density, in strong contrast with
+$g_\sigma^A(\rr)$, which requires convolutions of derivatives of the
+free energy density.
 
-And similarly to the A case we compute
+The functional derivative of $n_2^S(\rr')$ is quite similar:
 \begin{align}
-  n_1^{S}(\mathbf{r}') &= \int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''\\
-    \frac{\delta n_1^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})} 
-  \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}'' 
-  -
-  \int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})^2} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''
+  n_2^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| + R(\rr))d\mathbf
+  r'\\
+  \frac{\delta n_2^{S}(\rr')}{\delta R(\rr)} &= -\delta(\rr-\rr') \int n(\rr'')
+  \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
 \end{align}
-
-and 
+where we recognize that the convolution---while not one of the standard
+FMT weighted density---is a simple convolution of the density.  We can
+go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
-  n_0^{S}(\mathbf{r}') &= \int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})^2} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''\\
-    \frac{\delta n_0^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})^2} 
-  \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}'' 
-  -
-  2\int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})^3} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''
+  n_1^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'\\
+    \frac{\delta n_1^{S}(\rr')}{\delta R(\rr)} &=
+    -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)}
+    \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
+    + n_0^s(\rr') \right)
 \end{align}
-
 \begin{align}
-  \mathbf{n}_{V2}^{S}(\mathbf{r}') &= \int n(\mathbf{r}'') \delta(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}'))
-  \frac{(\mathbf{r}' - \mathbf{r}'')}{|\mathbf{r}' - \mathbf{r}''|} d \mathbf{r}''\\
-  \frac{\delta \mathbf{n}_{V2}^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= \delta(\mathbf{r} - \mathbf{r}')
-  \int n(\mathbf{r}'') \delta'(|\mathbf{r}' - \mathbf{r}''| - R(\mathbf{r}')) 
-  \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|} d\mathbf{r}''
+  n_0^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)^2} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'\\
+    \frac{\delta n_0^{S}(\rr')}{\delta R(\rr)}
+    &= -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)^2}
+    \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
+    +
+    \frac{2}{R} n_0^S(\rr') \right)
 \end{align}
-
 \begin{align}
- \mathbf{n}_{V1}^{S}(\mathbf{r}') &= \int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r''
-   \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|}\\
- \frac{\delta \mathbf{n}_{V1}^{S}(\mathbf{r}')}{\delta R(\mathbf{r})} &= -\int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})} 
-   \delta'(|\mathbf{r}'-\mathbf{r}''| - R(\mathbf{r}')) \delta(\mathbf{r}-\mathbf{r}') d\mathbf{r}'' \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|} 
-   -
-   \int \frac{n(\mathbf{r}'')}{4\pi R(\mathbf{r})^2} \delta(|\mathbf{r}' - \mathbf{r}''| + R(\mathbf{r}'))d\mathbf r'' 
-   \frac{(\mathbf{r} - \mathbf{r}'')}{|\mathbf{r} - \mathbf{r}''|}
+  \mathbf{n}_{V2}^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| - R(\rr))
+  \frac{(\rr - \rr')}{|\rr - \rr'|} d \rr'\\
+  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta R(\rr)} &= \delta(\rr - \rr')
+  \int n(\rr'') \delta'(|\rr' - \rr''| - R(\rr'))
+  \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
+\end{align}
+\begin{align}
+ \mathbf{n}_{V1}^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'
+   \frac{(\rr - \rr')}{|\rr - \rr'|}\\
+ \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta R(\rr)}
+ &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi R(\rr)}
+   \delta'(|\rr'-\rr''| - R(\rr')) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
+   + \mathbf{n}_{V2}^S(\rr') \right)
 \end{align}
 
+The above equations involve just two additional weighted densities
+beyond those required for FMT: one scalar density computed with a
+derivative of the Dirac delta function, and one analogous vector
+density.
 
-
-
-
-\begin{widetext}
 \section{Formulas generated from Haskell}
 
 \input{formulas}
@@ -965,31 +987,6 @@ and
   \frac{d F}{d\vec{n}_{1v}} &= \dwbdnonev
 \end{align}
 
-
-
-\fixme{This is the hypthetical end of the paper}
-
-
- \fixme {
-And then there's a lot with taking the derivative of the delta for the case of $n_{2}^{S}(\mathbf{r}')$.  Not sure if we'll use any of this, but wrote down some equations that Roundy wrote out.  So can use the terms at least if going to write about this - I'm just copying it in for now (probably a lotof mistakes)}
-
-\begin{align}
-  p(\mathbf{r}) &= \frac{\delta A}{\delta n_2(\mathbf{r}')} \frac{\delta n_2(\mathbf{r}')}{\delta R(\mathbf{r})} d\mathbf{r}'\\
-  &= \frac{\delta A}{\delta n_2(\mathbf{r})} - \int n(\mathbf{r}'') \delta' (|\mathbf{r} - \mathbf{r}''| - R) d\mathbf{r}''
-  \int n (\mathbf{r} +\mathbf{r}'') \delta'(|\mathbf{r}'''| - R) d \mathbf{r}'''\\
-  &= \int n(\mathbf{r} + \mathbf{r}''') \delta'(|\mathbf{r}'''| - R) r'''^2 cos\theta d \theta''' dr'''\\
-  du = \delta'(\mathbf{r}''' - R) d \mathbf{r}'''     v = n(\mathbf{r} - \mathbf{r}'')r'''\\
-   u = \delta(\mathbf{r}''' - R)                       
-   dv = \mathbf{\nabla} n(\mathbf{r} + \mathbf{r}'') \cdot \frac{\mathbf{r}'''}{r'''} + 2n(\mathbf{r}' - \mathbf{r}'')r'''\\
-  &= -\int(\mathbf{\nabla}n(\mathbf{r}' + \mathbf{r}'') \cdot \mathbf r'''(hat)r'''^2 dr''' 
-  + 2n(\mathbf{r} + \mathbf{r}''')r''') dr''' \delta(\mathbf{r} - R) dcos\theta''' d\theta''\\
-  &= - \int \delta(\mathbf{r}''' - R) d\mathbf{r}''' 
-  (\mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) + \frac{2n(\mathbf{r} + \mathbf{r}'')}{\mathbf{r}'''})\\
-  &= \frac{2n_2(\mathbf{r})}{R} + 
-  \int \delta(|\mathbf{r}'''| - R) \mathbf{\nabla}n(\mathbf{r} + \mathbf{r}''') \cdot \mathbf{r}''' (hat) d \mathbf{r}'''\\
-\end{align} 
-
-\end{widetext}
 \end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
