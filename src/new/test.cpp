@@ -16,7 +16,7 @@ class SqrSum : public Functional {
     }
     return out;
   }
-  Vector grad(const Vector &x, const Bools *) const {
+  Vector grad(const Vector &x, const GradSpecifier *) const {
     const int sz = x.get_size();
     Vector out(sz);
     for (int i=0; i<sz; i++) {
@@ -26,7 +26,7 @@ class SqrSum : public Functional {
   }
   EnergyGradAndPrecond energy_grad_and_precond(const Vector &x,
                                                Verbosity v,
-                                               const Bools *) const {
+                                               const GradSpecifier *) const {
     EnergyGradAndPrecond egpg;
     egpg.energy = energy(x, v);
     egpg.grad = grad(x, 0);
