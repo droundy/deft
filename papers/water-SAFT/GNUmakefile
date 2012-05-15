@@ -99,11 +99,14 @@ figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.6nm.dat \
 figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
 
 figs/density-single-rod.eps: figs/single-rod-slice-02.0.dat \
-		figs/single-rod-slice-01.0.dat figs/single-rod-slice-00.6.dat
+		figs/single-rod-slice-01.0.dat figs/single-rod-slice-00.6.dat \
+		figs/single-rods-calculated-density.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@
+figs/single-rods-calculated-density.dat: figs/density_calc.py figs/single-rod-in-water.dat
+	python figs/density_calc.py
 
 figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
 sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)

@@ -64,8 +64,9 @@ nl=0.004938863
 nm = 18.8972613     # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
-plot [:2.5] [:] \
+plot [:1.75] [:] \
 'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
 'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
 'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
-'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4
+'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4 , \
+'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) notitle with points ls 1
