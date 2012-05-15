@@ -25,8 +25,8 @@ foreach $dd (2.0, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5,
   open SCRIPT, ">$scriptname" or die $!;
   print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
-#SBATCH --mail-type END
-#SBATCH --mail-user daveroundy\@gmail.com
+##SBATCH --mail-type END
+##SBATCH --mail-user daveroundy\@gmail.com
 #SBATCH --output single-$d.out
 
 set -ev
