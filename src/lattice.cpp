@@ -49,6 +49,8 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
 }
 
 void Lattice::reorientBasis(Cartesian zdir) {
+  // First remember the volume, to make sure we don't break anything.
+  double vol0 = volume();
   zdir = zdir / zdir.norm();
   double vol0 = volume();
   Cartesian a1new(1e10, 0, 0.3e9),
