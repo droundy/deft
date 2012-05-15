@@ -77,11 +77,11 @@ the point that ice melts at over 400K\cite{yoo2009phase}!  There has
 been a recent flurry of publications implicating van der Waals effects
 as significant in reducing this
 over-structuring\cite{lin2009importance, wang2011density,
-  mogelhoj2011ab, jonchiere2011van}.  It has also been bound that
-inclusion of nuclear quantum effects can have a similar
-effect\cite{morrone2008nuclear}.  Each of these corrections imposes an
+  mogelhoj2011ab, jonchiere2011van}.  It has also been found that
+inclusion of nuclear quantum effects can provide similar improvements
+\cite{morrone2008nuclear}.  Each of these corrections imposes an
 additional computational burden on an approach that is already
-feasible only for very small number of water molecules. A more
+feasible only for a very small number of water molecules. A more
 efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
@@ -100,7 +100,8 @@ freezing.
 
 Due to its large dielectric constant, small molecular size and strong
 hydrogen-bonding network, water as ``the universal solvent'' is as
-interesting as its anomalous thermodynamic properties.
+interesting as its anomalous thermodynamic properties.  \fixme{what
+  the heck?}
 
 \subsection{Classical density-functional theory}
 
@@ -228,26 +229,15 @@ molecular length scale\cite{felipe2001examination, gloor2002saft,
   kahl2008modified, gross2009density}.
 
 \section{Theory and Methods}
-We construct a new classical density functional for water.  We
-start with a treatment of each individual water molecule as a purely
-classical hard sphere and add association terms based on Statistical 
-Associating Fluid Theory (SAFT). Water is unlike simple
-fluids (which are mainly defined by van der Waals forces and weak electrostatic
-interations) because it requires direct treatment of association effects. The strong 
+We construct a new classical density functional for water by treating
+each individual water molecule as a purely
+classical hard sphere and adding association terms based on SAFT. Water
+is unlike simple fluids (which are mainly defined by van der Waals
+forces and weak electrostatic interations) because it requires direct
+treatment of association effects. The strong 
 hydrogen bonds and polar
 interactions in water are ideal for describing with SAFT, which was designed for
-use with hydrogen-bonding fluids. It is based on Wertheim's first-order
-thermodynamic perturbation theory (TPT1)
-\cite{wertheim1984fluidsI,wertheim1984fluidsII,wertheim1986fluidsIII,
-wertheim1986fluidsIV} which provides a useful way to account for strong
-associative interations between molecules. SAFT can account for the association energies
-as well as any effects due to clusters or chains forming \fixme{not true}
-in the liquid\cite{muller2001molecular}. SAFT assumes a repulsive hard
-sphere core for each atom with a number of short-ranged off center
-attractive sites. This model can be applied to give an equation of state for
-various systems even inhomogeneous fluids.
-\fixme{Expand this a
-  bit to accurately describe SAFT and its advantages.}
+use with hydrogen-bonding fluids.
 
 The Helmholtz free energy functional is based on SAFT,
 and is composed of the terms:

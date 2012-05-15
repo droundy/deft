@@ -50,6 +50,7 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
 
 void Lattice::reorientBasis(Cartesian zdir) {
   zdir = zdir / zdir.norm();
+  double vol0 = volume();
   Cartesian a1new(1e10, 0, 0.3e9),
     a2new(1.3e9, 1e10, 0.7e9),
     a3new(1.23e9, 1e9, 0.73e9);
