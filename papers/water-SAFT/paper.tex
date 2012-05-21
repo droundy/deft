@@ -77,11 +77,11 @@ the point that ice melts at over 400K\cite{yoo2009phase}!  There has
 been a recent flurry of publications implicating van der Waals effects
 as significant in reducing this
 over-structuring\cite{lin2009importance, wang2011density,
-  mogelhoj2011ab, jonchiere2011van}.  It has also been found that
+  mogelhoj2011ab, jonchiere2011van}.  It has also been found that the
 inclusion of nuclear quantum effects can provide similar improvements
 \cite{morrone2008nuclear}.  Each of these corrections imposes an
 additional computational burden on an approach that is already
-feasible only for a very small number of water molecules. A more
+feasible for only a very small number of water molecules. A more
 efficient approach is needed in order to study nanoscale and
 hydrophobic solutes.
 
@@ -106,7 +106,7 @@ interesting as its anomalous thermodynamic properties.  \fixme{what
 \subsection{Classical density-functional theory}
 
 Numerous approaches have been developed to approximate the effect of water
-as a solvent in atomistic calculations.  Each of these approaches gives
+as a solvent in atomistic calculations.  Each of these approaches gives an
 adequate description of some aspect of interactions with water, but none of
 them is adequate for describing \emph{all} these interactions with an
 accuracy close to that attained by \emph{ab initio} calculations.  The
@@ -229,25 +229,11 @@ molecular length scale\cite{felipe2001examination, gloor2002saft,
   kahl2008modified, gross2009density}.
 
 \section{Theory and Methods}
-We construct a new classical density functional for water by treating
-each individual water molecule as a purely
-classical hard sphere and adding association terms based on SAFT. Water
-is unlike simple fluids (which are mainly defined by van der Waals
-forces and weak electrostatic interations) because it requires direct
-treatment of association effects. The strong 
-hydrogen bonds and polar
-interactions in water are ideal for describing with SAFT, which was designed for
-use with hydrogen-bonding fluids.
-
-The Helmholtz free energy functional is based on SAFT,
-and is composed of the terms:
-\begin{equation}
-  F[n] = F_\textit{id}[n] + F_\textit{hs}[n]  +
-F_\textit{disp}[n]+ F_\textit{assoc}[n],
-\end{equation}
-where $F_\textit{id}$ is the ideal gas free energy, $F_\textit{hs}$ is
-the hard-sphere free energy, $F_\textit{disp}$ is the dispersion energy,
-and $F_\textit{assoc}$ is the free energy of association.  In
+We construct a new classical density functional for water. We treat
+each individual water molecule as a purely classical hard sphere and
+add association terms based on SAFT. For our free energy, we use the
+first four terms from equation (number): $F_\textit{id}$,
+$F_\textit{hs}$, $F_\textit{disp}$ and $F_\textit{assoc}$. In
 addition, a chemical potential term is used, so we actually work in
 the grand canonical ensemble.  In the following sections, we will
 introduce the terms of this functional.
@@ -271,8 +257,8 @@ also leads to the property that the free energy of solvation of
 a hard solute is proportional to its volume in the limit of small
 solutes: 
 \begin{equation}\label{contactvaluethm}
-  F = n k_BT V\:.
-\end{equation}\fixme{may be ambiguous about n}
+  F = n_c k_BT V\:
+\end{equation}
 These properties are retained by the total functional,
 provided the remaining terms are \emph{purely nonlocal}.  A common
 failing of SAFT-based functionals (see, for instance
@@ -681,7 +667,9 @@ oscillations in the water near the surface.
 \includegraphics[width=\columnwidth]{figs/density-single-rod}
 \end{center}
 \caption{ Density profiles for a single rod of different radii. The dotted line
-represents the saturated liquid density.  }
+represents the saturated liquid density and the points represent the
+expected contact density derived from the contact value theorem and
+data used in Figure \ref{fig:energy-vs-diameter}.}
 \label{fig:density-single-rod}
 \end{figure}
 
@@ -694,10 +682,17 @@ density for the highest resolution tested.
 Figure~\ref{fig:density-single-rod} shows density
 profiles for three different radii (0.3~nm, 0.5~nm, and 1~nm) which have the
 expected oscillations outside the rod that reduce to the bulk saturated liquid
-density as the distance away from the rods increases. The small radius
-rod has comparatively larger oscillations and a higher contact density.
-\fixme{Expand or add to this description of density profiles and
-oscillations for single rod?}
+density as the distance away from the rods increases. We use the
+contact value theorem to derive the contact density at the water-rod
+interface.  We start with the thermodyamic expression relating
+pressure to the partial derivative of free energy with respect the
+radius of a cylinder. Using the contact value theorem and sustituting in
+the free energy gradient for the pressure, we can derive values for
+the contact density from data used in Figure
+\ref{fig:energy-vs-diameter}.  As the radius of the rods approch zero we
+expect the contact density to approach the bulk density, which our
+functional does.  This self consistency shows that our functional is
+thermodynamically correct.
 
 \begin{figure}
 \begin{center}
@@ -799,7 +794,8 @@ and so the force per length is equal to $2\gamma$.
 
 This is consistent with the calculation of the surface tension in
 Figure~\ref{fig:surface-tension} (72~mN/m) and the force per length
-from Figure ~\ref{fig:rods-energy-vs-distance} (144~mN/m) which
+found from the slopes of the curves in Figure
+~\ref{fig:rods-energy-vs-distance} (144~mN/m)  which
 compares the free energy per length for rods of several different
 radii. This agreement indicates that even though the rods are nanoscale, the
 water molecules will ``see'' them classically.  For large $d$, the rods 
@@ -810,8 +806,7 @@ Figure~\ref{fig:energy-vs-diameter}). In Figure
 have the same behavior with a positive linear relationship
 between free energy per length and separation during the initial state 
 (where the rods have vapor between them). This indicates that the force 
-per length on the rods is constant, and surprisingly independent of separation. 
-By finding the slope of this curve, we calculate this force per length to be 144~mN/m.
+per length on the rods is constant, and surprisingly independent of separation.
 
 To estimate how the transition from vapor to liquid between the rods depends on their 
 radius, we will again use the aforementioned model and propose that 
@@ -888,7 +883,7 @@ two rods ($r = 0.3$~nm~-~$1.0$~nm) and
 separation distances between $d = 0$~nm to $d = 3$~nm for nearest neighbor rods. We placed
 the rods in a 'square' arrangement and observed a similar behavior as the two rods
 where vapor is present in the space between the rods until a critical separation
-where it becomes filled with water and the rods behave like separate single rods
+where it becomes filled with water and the rods behave as separate single rods
 (shown in Fig. \ref{fig:density-four-rods}).  Free energy per length
 is plotted against rod separation in Figure
 \ref{fig:four-rods-energy-vs-distance} with a slight disagreement of
@@ -899,8 +894,8 @@ between them has a circumference estimated by
 \begin{equation}
 C_{rs} = 2 \pi r + 8r + 4d.
 \end{equation}
-We again equate this circumference with the total circumference of
-the four separate rods, which results in a critical separation of
+As with the two rods, we equate this circumference with the total circumference of
+the four separate rods. This gives a critical separation of
 \begin{equation}
 d_{c4} = \frac{3 \pi - 4}{2} r. \label{criticalfourrods}
 \end{equation}
