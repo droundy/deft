@@ -142,7 +142,7 @@ xsaft = (sqrt(1 + 8*n0*yuwu_zeta*yuwu_correlation*kappa_association*boltz) - 1)
   where boltz = exp(epsilon_association/kT)-1
 
 saft_fluid :: Expression RealSpace
-saft_fluid = idealgas + whitebear + mu*n + saft_association + saft_dispersion + n*mu
+saft_fluid = idealgas + whitebear + saft_association + saft_dispersion + n*mu
 
 of_effective_potential :: Expression RealSpace -> Expression RealSpace
 of_effective_potential = substitute (r_var "veff") (r_var "x") .

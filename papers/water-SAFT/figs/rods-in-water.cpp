@@ -226,6 +226,11 @@ int main(int argc, char *argv[]) {
                                                                      QuadraticLineMinimizer));
     for (int i=0;i<numiters && min2.improve_energy(true);i++) {
       fflush(stdout);
+      {
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
     }
     char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
@@ -262,4 +267,10 @@ int main(int argc, char *argv[]) {
     delete[] plotnameslice;
   }
   fclose(o);
+
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+  }
 }
