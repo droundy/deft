@@ -46,9 +46,9 @@ stop_here = int(dft_len - 1/dft_dr)
 print stop_here
 start_here = int(2.5/dft_dr)
 
-off = 2
+off = 0
 me = 30
-#pylab.plot(mcdata[:,0],mcdata[:,2+2*off]/nAmc,"r-",label="MC $g_\sigma^A$")
+pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,2+2*off]/nAmc,"r-",label="MC $g_\sigma^A$")
 pylab.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,5],"ro--",markevery=me,label="$g_\sigma^A$ (White Bear)")
 pylab.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,5],"r+--",markevery=me,label="$g_\sigma^A$ (mark II)",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
@@ -56,7 +56,7 @@ pylab.plot(dftdata[:,0],dftdata[:,7],"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 
 
-#pylab.plot(mcdata[:,0],mcdata[:,3+2*off]/n0mc,"g-",label="MC $g_\sigma^S$")
+pylab.plot(mcdata[:,0]+mcoffset,mcdata[:,3+2*off]/n0mc,"g-",label="MC $g_\sigma^S$")
 pylab.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,3],
            "g+--",markevery=me,label="$g_\sigma^S$ (White Bear)")
 pylab.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,3],"go--",markevery=me,label="$g_\sigma^S$ (mark II)",

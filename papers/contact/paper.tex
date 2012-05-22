@@ -408,6 +408,17 @@ expression will involve convolutions of derivatives of the free
 energy, making this formulation computationally more expensive than
 the free energy itself.
 
+In addition to the different densities in the denominators of Equations 
+\ref{eq:g-A-exact-a} and \ref{eq:g-S-exact-a} there is also a difference 
+between the treatment of the A and S cases in the derivatives 
+$\frac{\delta A_{HS}}{\delta R(\mathbf{r})}$ in Equations \ref{eq:g-A-exact} 
+and \ref{eq:g-S-exact}. The White Bear approximations for $A_{HS}$ 
+that we use involve a number of weighted densities and for the derivatives 
+of these we use two different conceptual approaches.  In the assymetric case, 
+a change in $R(\mathbf{r})$ will refer to a change in the radius of a sphere 
+that is located at the position $\mathbf{r}$.  The weighted densities that are 
+affected by such a change will be those that are located a distance $R$ away 
+from such a sphere.  We compute the assymetric derivatives In Appendix~\ref{appendix:g-A}.     
 
 \derivation{
   \end{widetext}
@@ -440,6 +451,59 @@ spheres themselves.  This has the effect of expanding spheres as they
 touch the point $\rr$, a concept illustrated in
 Figure~\ref{fig:contact}.  This enables a similar derivation to that
 which gave us $g_\sigma^A(\rr)$:
+%% =======
+%% For the computation of the symmetrically averaged correlation function 
+%% we must formulate derivatives with respect to $R$ in a symmetric fashion.  
+%% Conceptually we expand the radii of spheres that just touch a specific 
+%% point of contact and only expand them outward at that point of contact.  
+%% Therefore $R(\mathbf{r})$ in our calculations refers to the radii of 
+%% spheres that touch $\mathbf{r}$ and $\delta R(\mathbf{r})$ refers to a 
+%% change of these radii at only the point $\mathbf{r}$.  One can imagine 
+%% a shell that touches $\mathbf{r}$ that has an infinitesimal bit of shell 
+%% area protruding outward at $\mathbf{r}$.  Figure~\ref{fig:contact} 
+%% illustrates such a change in $R$.  The full derivations are found in Appendix~\ref{appendix:g-S} 
+
+%% \begin{figure}
+%% \includegraphics[width=5cm]{figs/n0}
+%% \caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
+%%   consist of those which just touch the point $\mathbf{r}$.}
+%% \label{fig:n0}
+%% \end{figure}
+
+%% These qualitative concepts lead us to the derivative terms in $\frac{\delta A_{HS}}{\delta R(\mathbf{r})}$, 
+%% which is in turn found in Equation~\ref{eq:p_{HS}^S}.  The rest of the 
+%% derivation of the correlatation function results when we recognize that 
+%% instead of dividing the pressure by $n(\mathbf{r})$ and $n_A(\mathbf{r})$ 
+%% as in the assymmetric case we will instead divide by $n_0(\mathbf{r})^2$ 
+%% since we have symmetry around the point $\mathbf{r}$.
+
+%% \begin{align}
+%%   p_{HS}(\mathbf{r}) &= \frac{1}{n_0(\rr) 4\pi \sigma^2} \frac{\delta
+%%     A_{HS}}{\delta R(\mathbf{r})} \label{eq:p_{HS}^S}\\
+%%   \ncontact(\rr) &= \frac{1}{n_0(\rr) k_BT 4\pi \sigma^2} \frac{\delta
+%%     A_{HS}}{\delta R(\mathbf{r})} \\
+%%   g_\sigma^A(\rr) &= \frac{\ncontact(\rr)}{n_0(\rr)} \label{eq:g-S-exact-a}\\
+%%   g_\sigma^A(\rr) &= \frac{1}{n_0(\rr) n_0(\rr)}\frac{1}{ k_BT 4\pi \sigma^2} \frac{\delta
+%%     A_{HS}}{\delta R(\mathbf{r})} \label{eq:g-S-exact}
+%% \end{align}Complete expressions for $g_\sigma^S$ are included in
+%% Appendix~\ref{appendix:g-S}.\\
+
+%% \section{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
+%% We compare with the averaged correlation function of
+%% Gross\cite{gross2009density}, which is of the asymmetrical variety
+%% ($g_\sigma^A$), where the correlation function is averaged at location
+%% of one of the spheres in concact.
+%% \begin{align}
+%%   g_\sigma^\text{Gross,A} &= \frac{1 - \frac12 n_{3'}}{\left(1 -
+%%     n_{3'}\right)^3} \\
+%%   n_{3'}(\rr) &= \int n(\rr')\Theta(|\rr-\rr'| - 2R) d\rr'
+%% \end{align}
+%% where $n_{3'}$ is an averaged
+%% filling fraction defined in a manner analogous to the $n_3$ of FMT,
+%% but with the hard-sphere radius replaced by the hard-sphere diameter,
+%% so the integrals range over spheres that are twice as large.
+
+%% >>>>>>> a989df3e529c6d7afbecef041c2a6afb3cb30c08
 \begin{figure}
 \includegraphics[width=5cm]{figs/contact}
 \caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
