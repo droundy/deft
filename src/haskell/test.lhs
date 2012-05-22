@@ -214,10 +214,10 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem whitebear" 4 whitebear,
                      t "peakMem saft_dispersion" 1 saft_dispersion,
                      t "peakMem saft_association" 4 saft_association,
-                     t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
+                     -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
                      t "peakMem grad whitebear" 22 (gradme whitebear), -- was 20
                      t "peakMem grad saft_dispersion" 11 (gradme saft_dispersion), -- was 49 ~12mins
-                     t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
+                     -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
                      t "peakMem n0 log n3" 3 (n0*log n3), --was 2
