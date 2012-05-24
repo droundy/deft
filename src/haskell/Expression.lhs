@@ -131,7 +131,7 @@ instance Type KSpace where
   toScalar (FFT e) = makeHomogeneous e
 
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
-mapExpression f (Var _ _ _ (Just e)) = mapExpression f e
+mapExpression f (Var a b c (Just e)) = Var a b c $ Just $ mapExpression f e
 mapExpression _ (Var c v t Nothing) = Var c v t Nothing
 mapExpression _ (Scalar e) = Scalar e
 mapExpression f (Cos e) = cos (mapExpression f e)
@@ -203,7 +203,7 @@ isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into thi
 
 setZero :: (Type a, Type b) => Expression b -> Expression a -> Expression a
 setZero v e | Same <- compareExpressions v e = 0
-setZero v (Var _ _ _ (Just e)) = setZero v e
+setZero v (Var a b c (Just e)) = Var a b c (Just $ setZero v e)
 setZero _ e@(Var _ _ _ Nothing) = e
 setZero v (Scalar e) = Scalar (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
@@ -249,8 +249,12 @@ instance Type Scalar where
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
-  codeStatementHelper a _ (Expression (Integrate e)) = "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++ code a ++ " += " ++ code (e * s_var "gd.dvolume") ++ ";\n\t}\n"
-  codeStatementHelper a op e = code a ++ op ++ code e ++ ";\n\t"
+  codeStatementHelper a " = " (Expression (Integrate e)) =
+    code a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
+    code a ++ " += " ++ code (e * s_var "gd.dvolume") ++
+    ";\n\t}\n"
+  codeStatementHelper _ op (Expression (Integrate _)) = error ("Haven't implemented "++op++" for integrate...")
+  codeStatementHelper a op e = code a ++ op ++ code e ++ ";"
   prefix (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
   prefix _ = ""
   postfix (Expression (Integrate _)) = "\n}\n"
@@ -310,6 +314,8 @@ setkzero :: Expression KSpace -> Expression KSpace -> Expression KSpace
 setkzero zeroval otherval = Expression $ SetKZeroValue zeroval otherval
 
 integrate :: Type a => Expression RealSpace -> Expression a
+integrate (Sum s) = pairs2sum $ map i $ sum2pairs s
+  where i (f, e) = (f, integrate e)
 integrate x = fromScalar $ Expression (Integrate x)
 
 fft :: Expression RealSpace -> Expression KSpace
@@ -585,7 +591,7 @@ makeHomogeneous ee =
                     Same -> setZero (s_var "_kx" :: Expression Scalar) $ mapExpression toScalar ee
                     _ -> mapExpression toScalar ee
   where scalarScalar :: Expression Scalar -> Expression Scalar
-        scalarScalar (Var _ _ _ (Just e)) = scalarScalar e
+        scalarScalar (Var a b c (Just e)) = Var a b c (Just $ scalarScalar e)
         scalarScalar (Var _ c _ Nothing) = s_var c
         scalarScalar (Scalar s) = s
         scalarScalar (Sum x) = pairs2sum $ map f $ sum2pairs x
@@ -829,6 +835,16 @@ compareTypes _ _ = Different
 
 derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Expression b
 derive v dda e | Same <- compareExpressions v e = dda
+derive v@(Var a b c _) dda (Var aa bb cc (Just e))
+  | Same <- compareTypes v dda =
+    case isConstant $ derive v dda e of
+      Just x -> toExpression x
+      Nothing ->
+        case isConstant $ derive v 1 e of
+          Just x -> toExpression x * dda
+          Nothing -> dda*(Var (aa ++ "_by_d" ++ a) (bb ++ "_by_d" ++ b)
+                          ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
+                          (derive v 1 e))
 derive v dda (Var _ _ _ (Just e)) = derive v dda e
 derive _ _ (Var _ _ _ Nothing) = 0
 derive v dda (Sum s) = factorandsum $ map dbythis $ sum2pairs s
@@ -924,5 +940,23 @@ subAndCount x y (Var a b c (Just e)) = (Var a b c (Just e'), n)
 subAndCount _ _ v@(Var _ _ _ Nothing) = (v, 0)
 subAndCount x y (Scalar e) = (Scalar e', n)
     where (e', n) = subAndCount x y e
+
+
+
+-- factorize :: Type a => Expression a -> Expression a
+-- factorize (Expression e)
+--   | Same <- isKSpace (Expression e), FFT e' <- e = fft (factorize e')
+--   | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (factorize e')
+-- factorize (Sum s) | Same <- isKSpace (Sum s) = joinup [] $ sum2pairs s
+--   where joinup tofft [] = fft $ factorandsum tofft
+--         joinup tofft ((f,x):xs) | Just e <- isfft x = joinup (toExpression f*e:tofft) xs
+--                                 | otherwise = toExpression f*x + joinup tofft xs
+-- factorize (Sum s) | Same <- isRealSpace (Sum s) = joinup [] $ sum2pairs s
+--   where joinup tofft [] = ifft $ factorandsum tofft
+--         joinup tofft ((f,x):xs) | Just e <- isifft x = joinup (toExpression f*e:tofft) xs
+--                                 | otherwise = toExpression f*x + joinup tofft xs
+-- factorize (Var a b c (Just e)) = Var a b c (Just (factorize e))
+-- factorize e = e
+
 
 \end{code}

@@ -134,7 +134,7 @@ int main(int, char **argv) {
 
   compare_functionals(NiceSum(), x + kT, myT, n, 4e-13);
 
-  compare_functionals(NiceQuad(), sqr(x + kT) - x + 2*kT, myT, n, 2e-12);
+  compare_functionals(NiceQuad(), sqr(x + kT) - x + 2*kT, myT, n, 3e-12);
 
   compare_functionals(NiceSqrt(), sqrt(x) , myT, n, 1e-12);
 

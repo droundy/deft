@@ -78,7 +78,11 @@ latexSimp e = "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{bre
           (sts,e') = simp2 e
 
 codeStatements :: [Statement] -> String
-codeStatements x = unlines $ map codeStatement x
+codeStatements (InitializeS v : AssignS v' e : ss)
+  | v == v' = "\tdouble " ++ codeStatementHelper v " = " e ++ "\n" ++
+              codeStatements ss
+codeStatements (s:ss) = codeStatement s ++ "\n" ++ codeStatements ss
+codeStatements [] = ""
 
 codeStatement :: Statement -> String
 codeStatement (AssignR x y) = "\t" ++ codeStatementHelper x " = " y
@@ -255,7 +259,9 @@ findToDo x (Var a b c (Just e)) =
     DoS e' -> case compareExpressions e e' of
                 Same -> DoS $ Var a b c (Just e)
                 Different -> DoS e'
-    DoNothing -> DoNothing
+    DoNothing -> case isScalar e of
+                 Different -> DoNothing
+                 Same -> if hasFFT e then DoNothing else DoS $ Var a b c (Just e)
 --findToDo _ (Var _ _ _ (Just e)) = findToDo e
 findToDo _ (Var _ _ _ Nothing) = DoNothing
 findToDo everything (Scalar e) = findToDo everything e

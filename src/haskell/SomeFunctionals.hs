@@ -29,7 +29,7 @@ smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
 n, n3, n2, n1, n0, n2x, n2y, n2z, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
-n = r_var "x"
+n = "n" === r_var "x"
 n3 = "n3" === step n
 n2 = "n2" === shell n
 n1 = "n1" === n2 / (4*pi*rad)
@@ -57,7 +57,7 @@ phi3 = (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*vectorThirdTerm
 
 
 whitebear :: Expression RealSpace
-whitebear = kT * (phi1+phi2+phi3)
+whitebear = kT*phi1+kT*phi2+kT*phi3
 
 nQ :: Expression RealSpace
 nQ = (mass*kT/2/pi)**1.5
@@ -117,19 +117,20 @@ eta_for_dispersion = var "eta_d" "{\\eta_d}" $
                      ((4*pi*rad**3/3)*ifft (exp (-k**2*(length_scaling*lambda_dispersion*rad)**2) * fft n))
 
 -- The following equation is equation 36 in Gil-Villegas 1997 paper.
-eta_effective = (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion
-  where c1 = 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
-        c2 = -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
-        c3 = 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
+eta_effective = var "eta_eff" "{\\eta_{eff}}" $
+                (c1 + c2*eta_for_dispersion + c3*eta_for_dispersion**2)*eta_for_dispersion
+  where c1 = "c1" === 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
+        c2 = "c2" === -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
+        c3 = "c3" === 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
 
 saft_dispersion, saft_association, xsaft, a1, a2 :: Expression RealSpace
 saft_dispersion = n*(a1 + a2/kT)
 
-a1 = -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
-  where ghs = (1 - eta_effective/2)/(1-eta_effective)**3
+a1 = "a1" === -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
+  where ghs = "ghs" === (1 - eta_effective/2)/(1-eta_effective)**3
 
-a2 = 0.5*khs*eta_for_dispersion*derive eta_for_dispersion 1 a1
-     where khs = (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
+a2 = "a2" === 0.5*khs*eta_for_dispersion*derive eta_for_dispersion 1 a1
+     where khs = var "KHS" "{\\kappa_{HS}}" $ (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
 saft_association = 4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2)
 
