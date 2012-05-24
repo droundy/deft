@@ -24,10 +24,10 @@ double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
 double R = 1;
-double oShellSmall =R+.001*R;
-double oShellMed =R+.01*R;
-double oShellLarge =R+.05*R;
-double oShellGiant =R+.1*R;
+double oShellSmall =R+.0001*R;
+double oShellMed =R+.0005*R;
+double oShellLarge =R+.001*R;
+double oShellGiant =R+.01*R;
 double oShellArray[4] = {oShellSmall,oShellMed,oShellLarge,oShellGiant};
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
@@ -41,7 +41,7 @@ inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 5) {
-    printf("usage:  %s spheres iterations uncertainty_goal filename \n there will be more!\n", argv[0]);
+    printf("usage:  %s Nspheres iterations*N uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
 
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
   const char *outfilename = argv[4];
   fflush(stdout);
   const long N = atol(argv[1]);
-  const long iterations = atol(argv[2]);
+  const long iterations = atol(argv[2])/N;
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {

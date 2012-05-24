@@ -39,6 +39,7 @@ ALL_FIGURES=\
 	figs/gHS-vs-n.gp\
 	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
 	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
+        figs/gnn-walls-10.pdf figs/gnn-walls-30.pdf figs/gnn-walls-40.pdf \
 	figs/inner-4-30.pdf figs/inner-4-40.pdf figs/inner-8-30.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -75,6 +76,15 @@ figs/walls-30.pdf: figs/plot-walls.py figs/mc-walls-20-589.dat figs/wallsWB-0.30
 	python $^ $@
 
 figs/walls-40.pdf: figs/plot-walls.py figs/mc-walls-20-790.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
+	python $^ $@
+
+figs/gnn-walls-10.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-193.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
+	python $^ $@
+
+figs/gnn-walls-30.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-589.dat figs/wallsWB-0.30.dat figs/wallsWBT-0.30.dat figs/wallsWBm2-0.30.dat
+	python $^ $@
+
+figs/gnn-walls-40.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-790.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
 	python $^ $@
 
 figs/inner-4-30.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat figs/inner-sphereWBm2-04.0-0.30.dat
