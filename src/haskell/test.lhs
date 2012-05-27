@@ -302,7 +302,7 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
         rad = s_var "R"
 
 findToDoTests :: Test
-findToDoTests = TestList [t (DoR $ x1**2+x2**2)
+findToDoTests = TestList [t (DoR $ -3*(x1**2+x2**2))
                             ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi),
                           --FIXME
                           --t (DoR $ -3*x1-3*x2)

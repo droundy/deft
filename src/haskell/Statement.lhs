@@ -108,8 +108,8 @@ countFFT :: [Statement] -> Int
 countFFT = sum . map helper
     where helper (AssignR _ (Expression (IFFT _))) = 1
           helper (AssignK _ (Expression (FFT _))) = 1
-          helper (AssignR _ (Var _ _ _ (Just (Expression (IFFT _))))) = 1
-          helper (AssignK _ (Var _ _ _ (Just (Expression (FFT _))))) = 1
+          helper (AssignR _ (Var _ _ _ _ (Just (Expression (IFFT _))))) = 1
+          helper (AssignK _ (Var _ _ _ _ (Just (Expression (FFT _))))) = 1
           helper _ = 0
 
 peakMem :: [Statement] -> Int
@@ -145,9 +145,9 @@ freeVectors = freeHelper [] []
     where freeHelper :: [Expression RealSpace] -> [Expression KSpace] -> [Statement] -> [Statement]
           freeHelper rs ks (xnn@(FreeR v):xs) = [xnn] ++ freeHelper (rs \\ [v]) ks xs
           freeHelper rs ks (xnn@(FreeK v):xs) = [xnn] ++ freeHelper rs (ks \\ [v]) xs
-          freeHelper rs ks (xnn@(InitializeR v@(Var _ _ _ Nothing)):xs) = [xnn] ++ freeHelper (v:rs) ks xs
+          freeHelper rs ks (xnn@(InitializeR v@(Var IsTemp _ _ _ Nothing)):xs) = [xnn] ++ freeHelper (v:rs) ks xs
           freeHelper _ _ (InitializeR v:_) = error ("crazy InitializeR: " ++ show v)
-          freeHelper rs ks (xnn@(InitializeK v@(Var _ _ _ Nothing)):xs) = [xnn] ++ freeHelper rs (v:ks) xs
+          freeHelper rs ks (xnn@(InitializeK v@(Var IsTemp _ _ _ Nothing)):xs) = [xnn] ++ freeHelper rs (v:ks) xs
           freeHelper _ _ (InitializeK v:_) = error ("crazy InitializeK: " ++ show v)
           freeHelper rs ks (xnn@(InitializeS _):xs) = [xnn] ++ freeHelper rs ks xs
           freeHelper rs ks (xnn@(AssignR _ _):xs) = xnn : freeme ++ freeHelper rs' ks' xs
@@ -165,10 +165,10 @@ freeVectors = freeHelper [] []
           freeHelper _ _ [] = []
 
 reuseVar :: [Statement] -> [Statement]
-reuseVar ((InitializeR iivar@(Var _ _ _ Nothing)):(AssignR n e):(FreeR ffvar@(Var _ _ _ Nothing)):xs)
+reuseVar ((InitializeR iivar@(Var IsTemp _ _ _ Nothing)):(AssignR n e):(FreeR ffvar@(Var IsTemp _ _ _ Nothing)):xs)
     | iivar == n = (AssignR ffvar e) : reuseVar (map (substituteS iivar ffvar) xs)
     | otherwise = error "RS initialize error: "
-reuseVar ((InitializeK iivar@(Var _ _ _ Nothing)):(AssignK n e):(FreeK ffvar@(Var _ _ _ Nothing)):xs)
+reuseVar ((InitializeK iivar@(Var IsTemp _ _ _ Nothing)):(AssignK n e):(FreeK ffvar@(Var IsTemp _ _ _ Nothing)):xs)
     | iivar == n = (AssignK ffvar e) : reuseVar (map (substituteS iivar ffvar) xs)
     | otherwise = error "initialize error"
 reuseVar (x:xs) = x : (reuseVar xs)
@@ -217,7 +217,6 @@ findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s
                                 [] -> DoNothing
                                 dothis:_ -> dothis
     where sub (_,e) = findToDo everything e
-findToDo _ (Product s) | [] <- product2pairs s = DoNothing
 findToDo everything (Product s)
     | Same <- isRealSpace (Product s), todo:_ <- filter simplifiable subes = DoR todo
     | Same <- isKSpace (Product s), todo:_ <- filter simplifiable subes = DoK todo
@@ -230,6 +229,7 @@ findToDo everything (Product s)
           ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
                     | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                     | otherwise = False
+findToDo _ (Product s) | [] <- product2pairs s = DoNothing
 findToDo everything (Product p) =
     if iszero (product2denominator p)
     then case filter notk $ filter (/= DoNothing) $ map sub $ product2pairs p of
@@ -248,32 +248,31 @@ findToDo x (Log e) = findToDo x e
 findToDo x (Exp e) = findToDo x e
 findToDo x (Abs e) = findToDo x e
 findToDo x (Signum e) = findToDo x e
-findToDo x (Var a b c (Just e)) =
+findToDo x (Var t a b c (Just e)) =
   case findToDo x e of
     DoR e' -> case compareExpressions e e' of
-                Same -> DoR $ Var a b c (Just e)
+                Same -> DoR $ Var t a b c (Just e)
                 Different -> DoR e'
     DoK e' -> case compareExpressions e e' of
-                Same -> DoK $ Var a b c (Just e)
+                Same -> DoK $ Var t a b c (Just e)
                 Different -> DoK e'
     DoS e' -> case compareExpressions e e' of
-                Same -> DoS $ Var a b c (Just e)
+                Same -> DoS $ Var t a b c (Just e)
                 Different -> DoS e'
     DoNothing -> case isScalar e of
                  Different -> DoNothing
-                 Same -> if hasFFT e then DoNothing else DoS $ Var a b c (Just e)
+                 Same -> if hasFFT e then DoNothing else DoS $ Var t a b c (Just e)
 --findToDo _ (Var _ _ _ (Just e)) = findToDo e
-findToDo _ (Var _ _ _ Nothing) = DoNothing
+findToDo _ (Var _ _ _ _ Nothing) = DoNothing
 findToDo everything (Scalar e) = findToDo everything e
-
 
 findFFTtodo :: (Type a, Type b) => Expression a -> Expression b -> ToDo
 findFFTtodo everything (Expression e)
-    | Same <- isKSpace (Expression e), FFT (Var _ _ _ Nothing) <- e = DoK (Expression e)
+    | Same <- isKSpace (Expression e), FFT (Var _ _ _ _ Nothing) <- e = DoK (Expression e)
     | Same <- isKSpace (Expression e), FFT e' <- e = case findFFTtodo everything e' of
                                                        DoNothing -> DoR $ e'
                                                        dothis -> dothis
-    | Same <- isRealSpace (Expression e), IFFT (Var _ _ _ Nothing) <- e = DoR (Expression e)
+    | Same <- isRealSpace (Expression e), IFFT (Var _ _ _ _ Nothing) <- e = DoR (Expression e)
     | Same <- isRealSpace (Expression e), IFFT e' <- e = case findFFTtodo everything e' of
                                                            DoNothing -> DoK $ e'
                                                            dothis -> dothis
@@ -302,20 +301,20 @@ findFFTtodo x (Log e) = findFFTtodo x e
 findFFTtodo x (Exp e) = findFFTtodo x e
 findFFTtodo x (Abs e) = findFFTtodo x e
 findFFTtodo x (Signum e) = findFFTtodo x e
-findFFTtodo x (Var a b c (Just e)) =
+findFFTtodo x (Var t a b c (Just e)) =
   case findFFTtodo x e of
     DoR e' -> case compareExpressions e e' of
-                Same -> DoR $ Var a b c (Just e)
+                Same -> DoR $ Var t a b c (Just e)
                 Different -> DoR e'
     DoK e' -> case compareExpressions e e' of
-                Same -> DoK $ Var a b c (Just e)
+                Same -> DoK $ Var t a b c (Just e)
                 Different -> DoK e'
     DoS e' -> case compareExpressions e e' of
-                Same -> DoS $ Var a b c (Just e)
+                Same -> DoS $ Var t a b c (Just e)
                 Different -> DoS e'
     DoNothing -> DoNothing
 --findFFTtodo _ (Var _ _ _ (Just e)) = findFFTtodo e
-findFFTtodo _ (Var _ _ _ Nothing) = DoNothing
+findFFTtodo _ (Var _ _ _ _ Nothing) = DoNothing
 findFFTtodo everything (Scalar e) = findFFTtodo everything e
 
 
@@ -324,48 +323,46 @@ simp2 = simp2helper (0 :: Int) [] -- . cleanvars
     where simp2helper n sts e = case findToDo e e of
                                   DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
                                       where v = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
-                                                           Var xi x t _ -> Var ("ktemp_"++xi) ("ktemp_" ++ x) t Nothing
-                                                           _ -> Var ("ktemp_" ++ show n++"[i]") 
+                                                           Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                                           _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
                                                                     ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
                                             inike = InitializeK v
                                             setke = AssignK v ke
                                             e'  = substitute ke v e
                                   DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
                                       where v = case re of --Var _ x@('k':_) t _ -> (x,t)
-                                                           Var xi x t _ -> Var ("rtemp_" ++ xi) ("rtemp_"++x) t Nothing
-                                                           _ -> Var ("rtemp_" ++ show n++"[i]") 
+                                                           Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                                           _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
                                                                     ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
                                             inire = InitializeR v
                                             setre = AssignR v re
                                             e'  = substitute re v e
                                   DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where v = case re of Var _ x@('s':_) t _ -> Var x x t Nothing
-                                                           Var _ x t _ -> Var ("s_" ++ x) ("s_" ++ x) t Nothing
-                                                           _ -> Var ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
+                                      where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
+                                                           _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
                                             inire = InitializeS v
                                             setre = AssignS v re
                                             e'  = substitute re v e
                                   DoNothing -> case findFFTtodo e e of
                                                  DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                                     where v = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
-                                                                 Var xi x t _ -> Var ("ktemp_"++xi) ("ktemp_" ++ x) t Nothing
-                                                                 _ -> Var ("ktemp_" ++ show n++"[i]") 
+                                                     where v = case ke of
+                                                                 Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                                                 _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
                                                                           ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
                                                            inike = InitializeK v
                                                            setke = AssignK v ke
                                                            e'  = substitute ke v e
                                                  DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                                     where v = case re of --Var _ x@('k':_) t _ -> (x,t)
-                                                                 Var xi x t _ -> Var ("rtemp_" ++ xi) ("rtemp_"++x) t Nothing
-                                                                 _ -> Var ("rtemp_" ++ show n++"[i]") 
+                                                     where v = case re of
+                                                                 Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                                                 _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
                                                                       ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
                                                            inire = InitializeR v
                                                            setre = AssignR v re
                                                            e'  = substitute re v e
                                                  DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                                     where v = case re of Var _ x@('s':_) t _ -> Var x x t Nothing
-                                                                          Var _ x t _ -> Var ("s_" ++ x) ("s_" ++ x) t Nothing
-                                                                          _ -> Var ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
+                                                     where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
+                                                                          _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
                                                            inire = InitializeS v
                                                            setre = AssignS v re
                                                            e'  = substitute re v e
