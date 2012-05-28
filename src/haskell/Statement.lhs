@@ -21,6 +21,7 @@ module Statement ( Statement(..),
 
 import Expression
 import Data.List ( nubBy, partition, (\\) )
+-- import qualified Data.Set as Set
 
 data Statement = AssignR (Expression RealSpace) (Expression RealSpace)
                | AssignK (Expression KSpace) (Expression KSpace)
@@ -201,9 +202,10 @@ findToDo everything (Expression e)
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in findToDo: " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
-findToDo everything (Sum s)
-    | Same <- isRealSpace (Sum s), todo:_ <- filter simplifiable subes = DoR todo
-    | Same <- isKSpace (Sum s), todo:_ <- filter simplifiable subes = DoK todo
+-- findToDo _ (Sum i _) | Set.size i < 2 = DoNothing
+findToDo everything (Sum s i)
+    | Same <- isRealSpace (Sum s i), todo:_ <- filter simplifiable subes = DoR todo
+    | Same <- isKSpace (Sum s i), todo:_ <- filter simplifiable subes = DoK todo
     where acceptables = take numtotake $ filter (\(_,e) -> {- not (hasK e) && -} countVars e > 0 && not (hasFFT e)) $ sum2pairs s
           subes = map pairs2sum $ take numtotake $ subsq acceptables
           simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube {- && (countexpression sube everything) > 1 -}
@@ -213,13 +215,15 @@ findToDo everything (Sum s)
           ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
                     | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                     | otherwise = False
-findToDo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+findToDo everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
                                 [] -> DoNothing
                                 dothis:_ -> dothis
     where sub (_,e) = findToDo everything e
-findToDo everything (Product s)
-    | Same <- isRealSpace (Product s), todo:_ <- filter simplifiable subes = DoR todo
-    | Same <- isKSpace (Product s), todo:_ <- filter simplifiable subes = DoK todo
+findToDo _ (Product p _) | [] <- product2pairs p = DoNothing
+-- findToDo _ (Product i _) | False && Set.size i < 2 = DoNothing
+findToDo everything (Product s i)
+    | Same <- isRealSpace (Product s i), todo:_ <- filter simplifiable subes = DoR todo
+    | Same <- isKSpace (Product s i), todo:_ <- filter simplifiable subes = DoK todo
     where acceptables = take numtotake $ filter (\(e,_) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ product2pairs s
           subes = map pairs2product $ take numtotake $ subsq acceptables
           simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube {- && (countexpression sube everything) > 1 -}
@@ -229,8 +233,7 @@ findToDo everything (Product s)
           ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
                     | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                     | otherwise = False
-findToDo _ (Product s) | [] <- product2pairs s = DoNothing
-findToDo everything (Product p) =
+findToDo everything (Product p _) =
     if iszero (product2denominator p)
     then case filter notk $ filter (/= DoNothing) $ map sub $ product2pairs p of
            [] -> DoNothing
@@ -266,6 +269,7 @@ findToDo x (Var t a b c (Just e)) =
 findToDo _ (Var _ _ _ _ Nothing) = DoNothing
 findToDo everything (Scalar e) = findToDo everything e
 
+
 findFFTtodo :: (Type a, Type b) => Expression a -> Expression b -> ToDo
 findFFTtodo everything (Expression e)
     | Same <- isKSpace (Expression e), FFT (Var _ _ _ _ Nothing) <- e = DoK (Expression e)
@@ -282,16 +286,15 @@ findFFTtodo everything (Expression e)
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in : " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findFFTtodo: " ++ show e)
-findFFTtodo everything (Sum s) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
-                                [] -> if hasFFT (Sum s)
-                                      then error ("FFT not detected in : " ++ show (Sum s))
+findFFTtodo everything (Sum s i) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                                [] -> if hasFFT (Sum s i)
+                                      then error ("FFT not detected in : " ++ show (Sum s i))
                                       else DoNothing
                                 dothis:_ -> dothis
     where sub (_,e) = findFFTtodo everything e
-findFFTtodo _ (Product s) | [] <- product2pairs s = DoNothing
-findFFTtodo everything (Product p) = case filter (/= DoNothing) $ map sub $ product2pairs p of
-                         [] -> if hasFFT (Product p)
-                               then error ("FFT not detected in : " ++ show (Product p))
+findFFTtodo everything (Product p i) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                         [] -> if hasFFT (Product p i)
+                               then error ("FFT not detected in : " ++ show (Product p i))
                                else DoNothing
                          dothis:_ -> dothis
     where sub (e, _) = findFFTtodo everything e
