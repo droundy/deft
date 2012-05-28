@@ -909,7 +909,7 @@ substitute x y e = fst $ subAndCount x y e
 
 subAndCount :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> (Expression b, Int)
 subAndCount x y e | Same <- compareExpressions x e = (y, 1)
-                  | False && not (Set.isSubsetOf (varSet x) (varSet e)) = (e, 0) -- quick check -- FIXME!
+                  | not (Set.isSubsetOf (varSet x) (varSet e)) = (e, 0) -- quick check
 subAndCount x@(Sum xs _) y e@(Sum es _)
   | Same <- compareTypes x e,
     ((factorX, termX):_) <- xspairs,

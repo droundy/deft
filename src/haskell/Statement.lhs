@@ -21,7 +21,7 @@ module Statement ( Statement(..),
 
 import Expression
 import Data.List ( nubBy, partition, (\\) )
--- import qualified Data.Set as Set
+import qualified Data.Set as Set
 
 data Statement = AssignR (Expression RealSpace) (Expression RealSpace)
                | AssignK (Expression KSpace) (Expression KSpace)
@@ -202,7 +202,7 @@ findToDo everything (Expression e)
     | otherwise = if hasFFT (Expression e)
                   then error ("FFT not detected in findToDo: " ++ show e)
                   else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
--- findToDo _ (Sum i _) | Set.size i < 2 = DoNothing
+findToDo _ (Sum _ i) | Set.size i < 2 = DoNothing
 findToDo everything (Sum s i)
     | Same <- isRealSpace (Sum s i), todo:_ <- filter simplifiable subes = DoR todo
     | Same <- isKSpace (Sum s i), todo:_ <- filter simplifiable subes = DoK todo
@@ -219,8 +219,7 @@ findToDo everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs
                                 [] -> DoNothing
                                 dothis:_ -> dothis
     where sub (_,e) = findToDo everything e
-findToDo _ (Product p _) | [] <- product2pairs p = DoNothing
--- findToDo _ (Product i _) | False && Set.size i < 2 = DoNothing
+findToDo _ (Product _ i) | Set.size i < 2 = DoNothing
 findToDo everything (Product s i)
     | Same <- isRealSpace (Product s i), todo:_ <- filter simplifiable subes = DoR todo
     | Same <- isKSpace (Product s i), todo:_ <- filter simplifiable subes = DoK todo
