@@ -322,52 +322,31 @@ findFFTtodo everything (Scalar e) = findFFTtodo everything e
 
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 = simp2helper (0 :: Int) [] -- . cleanvars
-    where simp2helper n sts e = case findToDo e e of
-                                  DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                      where v = case ke of --Var _ x@('r':_) t _ -> (x, t) Why we do this ???
-                                                           Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                                                           _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
-                                                                    ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
-                                            inike = InitializeK v
-                                            setke = AssignK v ke
-                                            e'  = substitute ke v e
-                                  DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where v = case re of --Var _ x@('k':_) t _ -> (x,t)
-                                                           Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                                                           _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
-                                                                    ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
-                                            inire = InitializeR v
-                                            setre = AssignR v re
-                                            e'  = substitute re v e
-                                  DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                      where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
-                                                           _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
-                                            inire = InitializeS v
-                                            setre = AssignS v re
-                                            e'  = substitute re v e
-                                  DoNothing -> case findFFTtodo e e of
-                                                 DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                                                     where v = case ke of
-                                                                 Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                                                                 _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
-                                                                          ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
-                                                           inike = InitializeK v
-                                                           setke = AssignK v ke
-                                                           e'  = substitute ke v e
-                                                 DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                                     where v = case re of
-                                                                 Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                                                                 _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
-                                                                      ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
-                                                           inire = InitializeR v
-                                                           setre = AssignR v re
-                                                           e'  = substitute re v e
-                                                 DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                                                     where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
-                                                                          _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n) ("s_{" ++ show n ++ "}") Nothing
-                                                           inire = InitializeS v
-                                                           setre = AssignS v re
-                                                           e'  = substitute re v e
-                                                 DoNothing -> (sts, e)
+    where simp2helper n sts e = handletodos [findToDo e e, findFFTtodo e e]
+            where handletodos [] = (sts, e)
+                  handletodos (todo:ts) =
+                    case todo of
+                      DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
+                        where v = case ke of Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                             _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
+                                                             ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
+                              inike = InitializeK v
+                              setke = AssignK v ke
+                              e'  = substitute ke v e
+                      DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
+                        where v = case re of Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                             _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
+                                                             ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
+                              inire = InitializeR v
+                              setre = AssignR v re
+                              e'  = substitute re v e
+                      DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
+                        where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
+                                             _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n)
+                                                                    ("s_{" ++ show n ++ "}") Nothing
+                              inire = InitializeS v
+                              setre = AssignS v re
+                              e'  = substitute re v e
+                      DoNothing -> handletodos ts
 
 \end{code}
