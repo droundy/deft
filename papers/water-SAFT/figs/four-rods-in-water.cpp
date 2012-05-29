@@ -217,6 +217,11 @@ int main(int argc, char *argv[]) {
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
+      {
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
     }
 
     Grid potential2(gd);
@@ -248,11 +253,25 @@ int main(int argc, char *argv[]) {
       Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
       printf("Using liquid in middle initially.\n");
       plot_grids_yz_directions(plotnameslice, density);
+
+      {
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
+
     } else {
       energy = (min2.energy() - EperCell)/width;
       Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential2));
       printf("Using vapor in middle initially.\n");    
       plot_grids_yz_directions(plotnameslice, density);
+
+      {
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
+
     }
     
     printf("Liquid energy is %.15g. Vapor energy is %.15g\n", min.energy(), min2.energy());

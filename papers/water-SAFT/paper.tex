@@ -50,7 +50,6 @@ reasonably well with SPC/E simulations.
 This functional is computationally efficient and provides a foundation for 
 future work describing complex interactions in aqueous solution on an
 atomic level.}
-\tableofcontents
 \end{abstract}
 \maketitle
 
@@ -98,10 +97,10 @@ bonds---two acceptors and two donors.  This directional bonding
 dictates the open structure of ice, leading to thermal expansion upon
 freezing.
 
-Due to its large dielectric constant, small molecular size and strong
-hydrogen-bonding network, water as ``the universal solvent'' is as
-interesting as its anomalous thermodynamic properties.  \fixme{what
-  the heck?}
+As common as water is, its large dielectric constant, small
+molecular size, strong hydrogen-bonding network and anomolous
+thermodynamic properties make ``the universal solvent'' an interesting
+subject of study.
 
 \subsection{Classical density-functional theory}
 
@@ -178,17 +177,24 @@ been produced that are based on Statistical Associating Fluid Theory
   more}.  These functionals are based on a perturbative thermodynamic
 expansion, and give a reasonable prediction for the temperature
 dependence of the surface tension.  However, they also overestimate
-the surface tension by \fixme{how much? significant factor, I
-  think}, and are unsuited for studying systems with molecular-scale
-inhomogeneities.
+the surface tension by a factor of about 1.5, and are unsuited for studying
+systems with molecular-scale inhomogeneities.
 
-%% A recent functional presented by Lischner and Arias~\cite{lischner2010classical}
-%% describe water as non-interacting molecules in a an
-%% effective external potential.  This functional contains the exact
-%% entropy for no-interacting molecules and, among other things, can 
-%% predict the nonlinear dielectric response in water, but it must be paramaterized
-%% for different temperatures.
+\subsection{Contact-value theorem}
 
+The contact value theorem states that the pressure of a fluid at a
+hard wall interface is proportional to the contact density of the fluid,
+$n_c$.  Specifically,
+\begin{equation}\label{eq:contact}
+  P = n_ck_BT
+\end{equation}
+where $k_B$ is the Boltzmann constant and $T$ is the temperature of the
+fluid. This leads to the property that the free energy of solvation of
+a hard solute is proportional to its volume in the limit of small
+solutes: 
+\begin{equation}\label{contactvaluethm}
+  F = n_c k_BT V\:
+\end{equation}
 
 \subsection{Statistical associating fluid theory}
 
@@ -215,6 +221,18 @@ relevant for water.  While a number of SAFT formulations have been
 published, we will focus on SAFT-VR\cite{gil-villegas-1997-SAFT-VR},
 which has been used by Clark \emph{et al} to construct an optimal SAFT
 model for water\cite{clark2006developing}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+\end{center}
+\caption{The pressure versus density for various temperatures, including
+experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
+indicate the computationally calculated pressure and the open circles are 
+NIST data points, plotted for every other isotherm. The solid and dotted lines
+represent the theoretical and experimental coexistence curves.}
+\label{fig:pressure-with-isotherms}
+\end{figure}
 
 SAFT has also been used to construct classical density functionals,
 which have been applied to study the surface tension as a function of
@@ -250,24 +268,10 @@ quantum concentration
 \begin{equation}\label{quantumconcentration}
  n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}.
 \end{equation}
-The ideal gas free energy functional satisfies the contact density
-theorem, which states that the contact density at a hard surface $n_c$
-is proportional to the pressure on that surface. This
-also leads to the property that the free energy of solvation of
-a hard solute is proportional to its volume in the limit of small
-solutes: 
-\begin{equation}\label{contactvaluethm}
-  F = n_c k_BT V\:
-\end{equation}
-These properties are retained by the total functional,
-provided the remaining terms are \emph{purely nonlocal}.  A common
-failing of SAFT-based functionals (see, for instance
-references\cite{felipe2001examination, gloor2002saft,
-  gloor2004accurate, clark2006developing, gloor2007prediction,
-  kahl2008modified, gross2009density}) is to treat other terms in the
-functional locally, resulting in a functional that is suitable only
-for studying the liquid-vapor interface.
-
+The ideal gas free energy functional satisfies the contact value
+theorem and its limiting case of small solutes (Equation
+\ref{contactvaluethm}). These properties are retained by the total
+functional, provided the remaining terms are \emph{purely nonlocal}.
 
 \subsection{Hard-sphere repulsion}
 
@@ -448,18 +452,6 @@ Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
   The length-scaling parameter $\lscale$ is fit so that the theoretical surface 
   tension will match the experimental surface tension near room temperature.}
 \label{fig:surface-tension}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
-\end{center}
-\caption{The pressure versus density for various temperatures, including
-experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
-indicate the computationally calculated pressure and the open circles are 
-NIST data points, plotted for every other isotherm. The solid and dotted lines
-represent the theoretical and experimental coexistence curves.}
-\label{fig:pressure-with-isotherms}
 \end{figure}
 
 The majority of the empirical parameters used in our functional are
@@ -678,10 +670,9 @@ We move into two dimensions by studying a single hydrophobic rod
 immersed in water. We use a lattice spacing of about 0.01~nm (0.2 bohrs), 
 which is a reasonable resolution based on several lattice spacing calculations.
 The results for this spacing of 0.01~nm are within 0.5\% of the free energy 
-and a few percent of the contact
-density for the highest resolution tested.
-Figure~\ref{fig:density-single-rod} shows density
-profiles for three different radii (0.3~nm, 0.5~nm, and 1~nm) which have the
+and a few percent of the contact density for the highest resolution tested.
+Figure~\ref{fig:density-single-rod} shows density profiles for
+different radii rods which have the
 expected oscillations outside the rod that reduce to the bulk saturated liquid
 density as the distance away from the rods increases. We use the
 contact value theorem to derive the contact density at the water-rod
@@ -972,16 +963,16 @@ rods.
 The free energy per area for water surrounding a hydrophobic rod shows the
 expected behavior with an asymptote equal to the surface tension.
 Based on this result, we expect to be
-able to classically describe rods with a radius of about 0.5~nm or larger. 
+able to classically describe a single rod with a radius of about 0.5~nm or larger. 
 For two hydrophobic rods surrounded by water, we see a transition from a vapor-filled
 stadium shape to two rods with liquid between them. A
 classical treatment of the critical separation for this transition
-works well for rods larger than 0.5~nm.  Further evidence for the
+works well for pairs of rods with radii larger than 0.5~nm.  Further evidence for the
 accuracy of this classical treatment is the calculation of the force on the
 stadium shape. The force per length is constant and equal to twice the
-surface tension. A simulations of hydrophobic spheres agrees with
-SPC/E calculations and a system with four hydrophobic rods exhibited
-similar behavior as the two rod.
+surface tension. A similar system with four hydrophobic rods exhibited the same
+behavior while simulations of hydrophobic spheres agrees with
+SPC/E calculations.
 
 For the hydrophobic systems studied, this functional is more computationally 
 efficient than molecular dynamics. This allows for future work
