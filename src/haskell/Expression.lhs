@@ -14,7 +14,7 @@ module Expression (
                    product2pairs, pairs2product, product2denominator,
                    hasK, hasFFT, hasexpression,
                    countexpression, substitute, 
-                   compareExpressions, countVars)
+                   compareExpressions, countVars, varSet)
     where
 
 import Debug.Trace

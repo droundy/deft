@@ -4,6 +4,7 @@ import CodeGen
 import Test.HUnit
 import SomeFunctionals
 import System.Environment ( getArgs )
+import qualified Data.Set as Set
 
 latexTests :: Test
 latexTests = TestList [t "x" x,
@@ -223,9 +224,9 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem n0 log n3" 3 (n0*log n3), --was 2
                      t "peakMem derive n0raw log n3" 4 (gradme $ kT*n0raw*log n3),
                      t "peakMem derive n0 log n3" 4 (gradme $ kT*n0*log n3),
-                     t "peakMem derive assocalike n0raw" 5
+                     t "peakMem derive assocalike n0raw" 6
                            (gradme $ assocalike n0raw),
-                     t "peakMem derive assocalike n0" 5
+                     t "peakMem derive assocalike n0" 6
                            (gradme $ assocalike n0),
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
@@ -309,7 +310,7 @@ findToDoTests = TestList [t (DoR $ -3*(x1**2+x2**2))
                           --  ((x1+x2)*rad + log(x1+x2)),
                           t DoNothing (x1**2/4/pi+x2**2/4/pi + 3 + cos(-3*x1**2-2*x2**2)),
                           t (DoR $ x1+x2) (x1+x2 + x3 + x4 + cos(x1+x2) + rad)]
-    where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee (findToDo e e)
+    where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee (findToDo Set.empty e e)
           x1 = r_var "rtemp_1"
           x2 = r_var "rtemp_2"
           x3 = r_var "rtemp_3"

@@ -183,27 +183,27 @@ data ToDo = DoK (Expression KSpace) | DoR (Expression RealSpace) | DoS (Expressi
             deriving (Eq, Show)
 
 numtotake :: Int
-numtotake = 20
+numtotake = 20000
 
 subsq :: [a] -> [[a]]
-subsq xs = map (:[]) xs ++ rest xs
+subsq xs = -- map (:[]) xs ++
+           rest xs
     where rest (y:ys@(_:_)) = map (:[y]) ys ++ rest ys
           rest _ = []
 
-findToDo :: (Type a, Type b) => Expression a -> Expression b -> ToDo
-findToDo everything (Expression e)
-    | Same <- isKSpace (Expression e), FFT e' <- e = findToDo everything e'
-    | Same <- isRealSpace (Expression e), IFFT e' <- e = findToDo everything e'
-    | Same <- isScalar (Expression e), Integrate e' <- e = case findToDo everything e' of
+findToDo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> ToDo
+findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = DoNothing
+findToDo i everything (Expression e)
+    | Same <- isKSpace (Expression e), FFT e' <- e = findToDo i everything e'
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = findToDo i everything e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = case findToDo i everything e' of
                                                              DoNothing -> if not (hasFFT e')
                                                                           then DoS $ Expression e
                                                                           else DoNothing
                                                              dothis -> dothis
-    | otherwise = if hasFFT (Expression e)
-                  then error ("FFT not detected in findToDo: " ++ show e)
-                  else DoNothing -- error ("Missed Expression type in findToDo: " ++ show e)
-findToDo _ (Sum _ i) | Set.size i < 2 = DoNothing
-findToDo everything (Sum s i)
+    | otherwise = DoNothing
+findToDo _ _ (Sum _ i) | Set.size i < 2 = DoNothing
+findToDo _ everything (Sum s i)
     | Same <- isRealSpace (Sum s i), todo:_ <- filter simplifiable subes = DoR todo
     | Same <- isKSpace (Sum s i), todo:_ <- filter simplifiable subes = DoK todo
     where acceptables = take numtotake $ filter (\(_,e) -> {- not (hasK e) && -} countVars e > 0 && not (hasFFT e)) $ sum2pairs s
@@ -215,12 +215,12 @@ findToDo everything (Sum s i)
           ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
                     | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                     | otherwise = False
-findToDo everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+findToDo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
                                 [] -> DoNothing
                                 dothis:_ -> dothis
-    where sub (_,e) = findToDo everything e
-findToDo _ (Product _ i) | Set.size i < 2 = DoNothing
-findToDo everything (Product s i)
+    where sub (_,e) = findToDo i everything e
+findToDo _ _ (Product _ i) | Set.size i < 2 = DoNothing
+findToDo _ everything (Product s i)
     | Same <- isRealSpace (Product s i), todo:_ <- filter simplifiable subes = DoR todo
     | Same <- isKSpace (Product s i), todo:_ <- filter simplifiable subes = DoK todo
     where acceptables = take numtotake $ filter (\(e,_) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ product2pairs s
@@ -232,7 +232,7 @@ findToDo everything (Product s i)
           ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
                     | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
                     | otherwise = False
-findToDo everything (Product p _) =
+findToDo i everything (Product p _) =
     if iszero (product2denominator p)
     then case filter notk $ filter (/= DoNothing) $ map sub $ product2pairs p of
            [] -> DoNothing
@@ -240,18 +240,18 @@ findToDo everything (Product p _) =
     else case filter (/= DoNothing) $ map sub $ product2pairs p of
            [] -> DoNothing
            dothis:_ -> dothis
-    where sub (e, _) = findToDo everything e
+    where sub (e, _) = findToDo i everything e
           iszero e = hasK e && setZero kx (setZero ky (setZero kz e)) == 0
           notk (DoK e) = not (hasK e)
           notk _ = True
-findToDo x (Cos e) = findToDo x e
-findToDo x (Sin e) = findToDo x e
-findToDo x (Log e) = findToDo x e
-findToDo x (Exp e) = findToDo x e
-findToDo x (Abs e) = findToDo x e
-findToDo x (Signum e) = findToDo x e
-findToDo x (Var t a b c (Just e)) =
-  case findToDo x e of
+findToDo i x (Cos e) = findToDo i x e
+findToDo i x (Sin e) = findToDo i x e
+findToDo i x (Log e) = findToDo i x e
+findToDo i x (Exp e) = findToDo i x e
+findToDo i x (Abs e) = findToDo i x e
+findToDo i x (Signum e) = findToDo i x e
+findToDo i x (Var t a b c (Just e)) =
+  case findToDo i x e of
     DoR e' -> case compareExpressions e e' of
                 Same -> DoR $ Var t a b c (Just e)
                 Different -> DoR e'
@@ -264,37 +264,25 @@ findToDo x (Var t a b c (Just e)) =
     DoNothing -> case isScalar e of
                  Different -> DoNothing
                  Same -> if hasFFT e then DoNothing else DoS $ Var t a b c (Just e)
---findToDo _ (Var _ _ _ (Just e)) = findToDo e
-findToDo _ (Var _ _ _ _ Nothing) = DoNothing
-findToDo everything (Scalar e) = findToDo everything e
+--findToDo i _ (Var _ _ _ (Just e)) = findToDo i e
+findToDo _ _ (Var _ _ _ _ Nothing) = DoNothing
+findToDo i everything (Scalar e) = findToDo i everything e
 
 
 findFFTtodo :: (Type a, Type b) => Expression a -> Expression b -> ToDo
 findFFTtodo everything (Expression e)
     | Same <- isKSpace (Expression e), FFT (Var _ _ _ _ Nothing) <- e = DoK (Expression e)
-    | Same <- isKSpace (Expression e), FFT e' <- e = case findFFTtodo everything e' of
-                                                       DoNothing -> DoR $ e'
-                                                       dothis -> dothis
+    | Same <- isKSpace (Expression e), FFT e' <- e = findFFTtodo everything e'
     | Same <- isRealSpace (Expression e), IFFT (Var _ _ _ _ Nothing) <- e = DoR (Expression e)
-    | Same <- isRealSpace (Expression e), IFFT e' <- e = case findFFTtodo everything e' of
-                                                           DoNothing -> DoK $ e'
-                                                           dothis -> dothis
-    | Same <- isScalar (Expression e), Integrate e' <- e = case findFFTtodo everything e' of
-                                                             DoNothing -> DoS $ Expression e
-                                                             dothis -> dothis
-    | otherwise = if hasFFT (Expression e)
-                  then error ("FFT not detected in : " ++ show e)
-                  else DoNothing -- error ("Missed Expression type in findFFTtodo: " ++ show e)
-findFFTtodo everything (Sum s i) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
-                                [] -> if hasFFT (Sum s i)
-                                      then error ("FFT not detected in : " ++ show (Sum s i))
-                                      else DoNothing
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = findFFTtodo everything e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = findFFTtodo everything e'
+    | otherwise = DoNothing
+findFFTtodo everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                                [] -> DoNothing
                                 dothis:_ -> dothis
     where sub (_,e) = findFFTtodo everything e
-findFFTtodo everything (Product p i) = case filter (/= DoNothing) $ map sub $ product2pairs p of
-                         [] -> if hasFFT (Product p i)
-                               then error ("FFT not detected in : " ++ show (Product p i))
-                               else DoNothing
+findFFTtodo everything (Product p _) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                         [] -> DoNothing
                          dothis:_ -> dothis
     where sub (e, _) = findFFTtodo everything e
 findFFTtodo x (Cos e) = findFFTtodo x e
@@ -320,28 +308,86 @@ findFFTtodo _ (Var _ _ _ _ Nothing) = DoNothing
 findFFTtodo everything (Scalar e) = findFFTtodo everything e
 
 
+findFFTinputtodo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> ToDo
+findFFTinputtodo i everything (Expression e)
+  | Same <- isKSpace (Expression e), FFT e' <- e =
+    if hasFFT e'
+    then findFFTinputtodo i everything e'
+    else case findFFTinputtodo i everything e' of
+      DoNothing -> DoR $ e'
+      dothis -> dothis
+  | Same <- isRealSpace (Expression e), IFFT e' <- e =
+      if hasFFT e'
+      then findFFTinputtodo i everything e'
+      else case findFFTinputtodo i everything e' of
+        DoNothing -> DoK $ e'
+        dothis -> dothis
+  | Same <- isScalar (Expression e), Integrate e' <- e =
+      if hasFFT e'
+      then findFFTinputtodo i everything e'
+      else case findFFTinputtodo i everything e' of
+        DoNothing -> DoS (Expression e)
+        dothis -> dothis
+  | otherwise = DoNothing
+findFFTinputtodo i everything (Product p _) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                                                [] -> DoNothing
+                                                dothis:_ -> dothis
+    where sub (e, _) = findFFTinputtodo i everything e
+findFFTinputtodo i x (Cos e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Sin e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Log e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Exp e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Abs e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Signum e) = findFFTinputtodo i x e
+findFFTinputtodo i x (Var t a b c (Just e)) =
+  case findFFTinputtodo i x e of
+    DoR e' -> case compareExpressions e e' of
+                Same -> DoR $ Var t a b c (Just e)
+                Different -> DoR e'
+    DoK e' -> case compareExpressions e e' of
+                Same -> DoK $ Var t a b c (Just e)
+                Different -> DoK e'
+    DoS e' -> case compareExpressions e e' of
+                Same -> DoS $ Var t a b c (Just e)
+                Different -> DoS e'
+    DoNothing -> DoNothing
+findFFTinputtodo _ _ (Var _ _ _ _ Nothing) = DoNothing
+findFFTinputtodo i everything (Scalar e) = findFFTinputtodo i everything e
+-- If possible, we want to only look for ffts that are in a sum
+-- including the variable we most recently evaluated, since that's
+-- where we're most likely to find more memory-saving improvements.
+findFFTinputtodo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = DoNothing
+findFFTinputtodo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                                            [] -> DoNothing
+                                            dothis:_ -> dothis
+    where sub (_,e) = findFFTinputtodo i everything e
+
+
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
-simp2 = simp2helper (0 :: Int) [] -- . cleanvars
-    where simp2helper n sts e = handletodos [findToDo e e, findFFTtodo e e]
+simp2 = simp2helper Set.empty (0 :: Int) [] -- . cleanvars
+    where simp2helper i n sts e = if Set.size i == 0
+                                  then handletodos [findToDo i e e, findFFTtodo e e, findFFTinputtodo i e e]
+                                  else handletodos [findToDo i e e, {- findToDo Set.empty e e, -} findFFTtodo e e,
+                                                    findFFTinputtodo i e e, findFFTinputtodo Set.empty e e]
             where handletodos [] = (sts, e)
                   handletodos (todo:ts) =
                     case todo of
-                      DoK ke -> simp2helper (n+1) (sts++[inike, setke]) e'
-                        where v = case ke of Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                      DoK ke -> simp2helper (varSet v) (n+1) (sts++[inike, setke]) e'
+                        where v = case ke of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression KSpace
                                              _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
                                                              ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
                               inike = InitializeK v
                               setke = AssignK v ke
                               e'  = substitute ke v e
-                      DoR re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                        where v = case re of Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                      DoR re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) e'
+                        where v = case re of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression RealSpace
                                              _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
                                                              ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
                               inire = InitializeR v
                               setre = AssignR v re
                               e'  = substitute re v e
-                      DoS re -> simp2helper (n+1) (sts++[inire, setre]) e'
-                        where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing
+                      DoS re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) e'
+                        where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing :: Expression Scalar
                                              _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n)
                                                                     ("s_{" ++ show n ++ "}") Nothing
                               inire = InitializeS v
