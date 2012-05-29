@@ -10,6 +10,7 @@ using std::vector;
 
 long shell(Vector3d v, long div, double *radius, double *sections);
 double countOverLaps(Vector3d *spheres, long n, double R);
+double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 
 bool periodic_x = false; // will go from -lenx/2 to +lenx/2
@@ -137,7 +138,7 @@ int main(int argc, char *argv[]){
   long num_to_time = 100000;
   long num_timed = 0;
   long i = 0;
-  double scale = .5;
+  double scale = .005;
 
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
@@ -145,41 +146,42 @@ int main(int argc, char *argv[]){
 
   clock_t starting_initial_state = clock();
   printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
-  for(double numOverLaps=countOverLaps(spheres, N, R); numOverLaps>0;){
-    if (num_timed++ > num_to_time) {
-      clock_t now = clock();
-      //printf("took %g seconds per initialising iteration\n",
-      //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
-      num_timed = 0;
-      start = now;
-    }
-    Vector3d old =spheres[i%N];
-    spheres[i%N]=move(spheres[i%N],scale);
-    double newOverLaps=countOverLaps(spheres, N, R);
-    if(newOverLaps>numOverLaps){
-      spheres[i%N]=old;
-    } else {
-      numOverLaps=newOverLaps;
-    }
-    i++;
-    if (i%N == 0) {
-      if (i>iterations/4) {
-        for(long i=0; i<N; i++) {
-          printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-        }
-        printf("couldn't find good state\n");
-        exit(1);
+  while (countOverLaps(spheres, N, R)>0){
+    for (int movethis=0;movethis < 100*N; movethis++) {
+      if (num_timed++ > num_to_time) {
+	clock_t now = clock();
+	//printf("took %g seconds per initialising iteration\n",
+	//       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+	num_timed = 0;
+	start = now;
       }
-      char *debugname = new char[10000];
-      sprintf(debugname, "%s.debug", outfilename);
-      FILE *spheredebug = fopen(debugname, "w");
-      for(long i=0; i<N; i++) {
-        fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+      Vector3d old =spheres[i%N];
+      double oldoverlap = countOneOverLap(spheres, N, i%N, R);
+      spheres[i%N]=move(spheres[i%N],scale);
+      double newoverlap = countOneOverLap(spheres, N, i%N, R);
+      if(newoverlap>oldoverlap){
+	spheres[i%N]=old;
       }
-      fclose(spheredebug);
-      printf("numOverLaps=%g (debug file: %s)\n",numOverLaps, debugname);
-      delete[] debugname;
-      fflush(stdout);
+      i++;
+      if (i%(100*N) == 0) {
+	if (i>iterations/4) {
+	  for(long i=0; i<N; i++) {
+	    printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+	  }
+	  printf("couldn't find good state\n");
+	  exit(1);
+	}
+	char *debugname = new char[10000];
+	sprintf(debugname, "%s.debug", outfilename);
+	FILE *spheredebug = fopen(debugname, "w");
+	for(long i=0; i<N; i++) {
+	  fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+	}
+	fclose(spheredebug);
+	printf("numOverLaps=%g (debug file: %s)\n",countOverLaps(spheres,N,R), debugname);
+	delete[] debugname;
+	fflush(stdout);
+      }
     }
   }
   assert(countOverLaps(spheres, N, R) == 0);
@@ -206,9 +208,9 @@ int main(int argc, char *argv[]){
     }
   } else {
     if (spherical_inner_wall){
-      double size = (rad - innerRad)/div;
+      double size = rad/div;
       for (long s=0; s<div+1; s++){
-        radius[s] = size*s + innerRad;
+        radius[s] = size*s;
       }
     } else {
       const double w = 1.0/(1 + dxmin*div);
@@ -520,100 +522,110 @@ int main(int argc, char *argv[]){
   fclose(out);
 }
 
-double countOverLaps(Vector3d *spheres, long n, double R){
+double countOneOverLap(Vector3d *spheres, long n, long j, double R){
   double num = 0;
-  for(long j = 0; j<n; j++){
-    for(long i = j+1; i < n; i++){
-      if(distance(spheres[i],spheres[j])<2*R){
-        num+=2*R-distance(spheres[i],spheres[j]);
-      }
+  for(long i = 0; i < n; i++){
+    if(i != j && distance(spheres[i],spheres[j])<2*R){
+      num+=2*R-distance(spheres[i],spheres[j]);
     }
-    if (spherical_outer_wall){
-      if(distance(spheres[j],Vector3d(0,0,0))>rad){
-        num += distance(spheres[j],Vector3d(0,0,0))-rad;
-      }
+  }
+  if (spherical_outer_wall){
+    if(distance(spheres[j],Vector3d(0,0,0))>rad){
+      num += distance(spheres[j],Vector3d(0,0,0))-rad;
     }
-    if (spherical_inner_wall){
-      if(distance(spheres[j],Vector3d(0,0,0))<innerRad){
-        num += innerRad - distance(spheres[j],Vector3d(0,0,0));
-      }
+  }
+  if (spherical_inner_wall){
+    if(distance(spheres[j],Vector3d(0,0,0))<innerRad){
+      num += innerRad - distance(spheres[j],Vector3d(0,0,0));
     }
-    if (has_x_wall && periodic_x){
-      if (spheres[j][0] > lenx/2 ){
-        num += spheres[j][0]-(lenx/2);
-      } else if (spheres[j][0] < -lenx/2){
-        num -= spheres[j][0] + (lenx/2);
-      }
+  }
+  if (has_x_wall || periodic_x){
+    if (spheres[j][0] > lenx/2 ){
+      num += spheres[j][0]-(lenx/2);
+    } else if (spheres[j][0] < -lenx/2){
+      num -= spheres[j][0] + (lenx/2);
     }
-    if (has_y_wall && periodic_y){
-      if (spheres[j][1] > leny/2 ){
-        num += spheres[j][1]-(leny/2);
-      } else if (spheres[j][1] < -leny/2){
-        num -= spheres[j][1] + (leny/2);
-      }
+  }
+  if (has_y_wall || periodic_y){
+    if (spheres[j][1] > leny/2 ){
+      num += spheres[j][1]-(leny/2);
+    } else if (spheres[j][1] < -leny/2){
+      num -= spheres[j][1] + (leny/2);
     }
-    if (has_z_wall && periodic_z){
-      if (spheres[j][2] > lenz/2 ){
-        num += spheres[j][2]-(lenz/2);
-      } else if (spheres[j][2] < -lenz/2){
-        num -= spheres[j][2] + (lenz/2);
-      }
+  }
+  if (has_z_wall || periodic_z){
+    if (spheres[j][2] > lenz/2 ){
+      num += spheres[j][2]-(lenz/2);
+    } else if (spheres[j][2] < -lenz/2){
+      num -= spheres[j][2] + (lenz/2);
     }
-    Vector3d lat[3] = {latx,laty,latz};
-    bool periodic[3] = {periodic_x, periodic_y, periodic_z};
-    for(long i = j+1; i < n; i++){
+  }
+  Vector3d lat[3] = {latx,laty,latz};
+  bool periodic[3] = {periodic_x, periodic_y, periodic_z};
+  for(long i = 0; i < n; i++){
+    if (i != j) {
       for (long k=0; k<3; k++){
-        if (periodic[k]){
-          if (distance(spheres[j],spheres[i]+lat[k]) < 2*R){
-            num += 2*R - distance(spheres[j],spheres[i]+lat[k]);
-          } else if (distance(spheres[j],spheres[i]-lat[k]) < 2*R) {
-            num += 2*R - distance(spheres[j],spheres[i]-lat[k]);
-          }
-        }
-        for (long m=k+1; m<3; m++){
-          if (periodic[m] && periodic[k]){
-            if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+lat[k]+lat[m]);
-            }
-            if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]-lat[k]-lat[m]);
-            }
-            if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
-              num += 2*R - distance(spheres[j],spheres[i]+lat[k]-lat[m]);
-            }
+	if (periodic[k]){
+	  if (distance(spheres[j],spheres[i]+lat[k]) < 2*R){
+	    num += 2*R - distance(spheres[j],spheres[i]+lat[k]);
+	  } else if (distance(spheres[j],spheres[i]-lat[k]) < 2*R) {
+	    num += 2*R - distance(spheres[j],spheres[i]-lat[k]);
+	  }
+	}
+	for (long m=k+1; m<3; m++){
+	  if (periodic[m] && periodic[k]){
+	    if (distance(spheres[j],spheres[i]+lat[k]+lat[m]) < 2*R){
+	      num += 2*R - distance(spheres[j],spheres[i]+lat[k]+lat[m]);
+	    }
+	    if (distance(spheres[j],spheres[i]-lat[k]-lat[m]) < 2*R){
+	      num += 2*R - distance(spheres[j],spheres[i]-lat[k]-lat[m]);
+	    }
+	    if (distance(spheres[j],spheres[i]+lat[k]-lat[m]) < 2*R){
+	      num += 2*R - distance(spheres[j],spheres[i]+lat[k]-lat[m]);
+	    }
             if (distance(spheres[j],spheres[i]-lat[k]+lat[m]) < 2*R){
               num += 2*R - distance(spheres[j],spheres[i]-lat[k]+lat[m]);
             }
-          }
-        }
+	  }
+	}
       }
       if (periodic[0] && periodic[1] && periodic[2]){
-        if (distance(spheres[j],spheres[i]+latx+laty+latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]+latx+laty+latz);
-        }
-        if (distance(spheres[j],spheres[i]+latx+laty-latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]+latx+laty-latz);
-        }
-        if (distance(spheres[j],spheres[i]+latx-laty+latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]+latx-laty+latz);
-        }
-        if (distance(spheres[j],spheres[i]-latx+laty+latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]-latx+laty+latz);
-        }
-        if (distance(spheres[j],spheres[i]-latx-laty+latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]-latx-laty+latz);
-        }
-        if (distance(spheres[j],spheres[i]-latx+laty-latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]-latx+laty-latz);
-        }
-        if (distance(spheres[j],spheres[i]+latx-laty-latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]+latx-laty-latz);
-        }
-        if (distance(spheres[j],spheres[i]-latx-laty-latz) < 2*R){
-          num += 2*R - distance(spheres[j],spheres[i]-latx-laty-latz);
-        }
+	if (distance(spheres[j],spheres[i]+latx+laty+latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]+latx+laty+latz);
+	}
+	if (distance(spheres[j],spheres[i]+latx+laty-latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]+latx+laty-latz);
+	}
+	if (distance(spheres[j],spheres[i]+latx-laty+latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]+latx-laty+latz);
+	}
+	if (distance(spheres[j],spheres[i]-latx+laty+latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]-latx+laty+latz);
+	}
+	if (distance(spheres[j],spheres[i]-latx-laty+latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]-latx-laty+latz);
+	}
+	if (distance(spheres[j],spheres[i]-latx+laty-latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]-latx+laty-latz);
+	}
+	if (distance(spheres[j],spheres[i]+latx-laty-latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]+latx-laty-latz);
+	}
+	if (distance(spheres[j],spheres[i]-latx-laty-latz) < 2*R){
+	  num += 2*R - distance(spheres[j],spheres[i]-latx-laty-latz);
+	}
       }
     }
+  }
+  return num;
+}
+
+
+
+double countOverLaps(Vector3d *spheres, long n, double R){
+  double num = 0;
+  for(long j = 0; j<n; j++){
+    num += countOneOverLap(spheres, n, j, R);
   }
   return num;
 }
