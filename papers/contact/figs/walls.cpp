@@ -207,5 +207,35 @@ int main(int, char **) {
     printf("Error creating walls.dat!\n");
     return 1;
   }
+  for (double eta = 0.01; eta < 0.6; eta+=0.1) {
+    run_walls(eta, "WB", WB);
+    run_walls(eta, "WBT", WBT);
+    run_walls(eta, "WBm2", WBm2);
+  }
+  // Just create this file so make knows we have run.
+  if (!fopen("papers/contact/figs/walls.dat", "w")) {
+    printf("Error creating walls.dat!\n");
+    return 1;
+  }
+  for (double eta = 0.05; eta < 0.6; eta+=0.1) {
+    run_walls(eta, "WB", WB);
+    run_walls(eta, "WBT", WBT);
+    run_walls(eta, "WBm2", WBm2);
+  }
+  // Just create this file so make knows we have run.
+  if (!fopen("papers/contact/figs/walls.dat", "w")) {
+    printf("Error creating walls.dat!\n");
+    return 1;
+  }
+  for (double eta = 0.2; eta < 0.6; eta+=0.1) {
+    run_walls(eta, "WB", WB);
+    run_walls(eta, "WBT", WBT);
+    run_walls(eta, "WBm2", WBm2);
+  }
+  // Just create this file so make knows we have run.
+  if (!fopen("papers/contact/figs/walls.dat", "w")) {
+    printf("Error creating walls.dat!\n");
+    return 1;
+  }
   return 0;
 }
