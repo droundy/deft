@@ -18,19 +18,20 @@ for line in fin:
         E2 = float(pieces[1])
         first = 0
     else:
-        r1 = r2
-        r2 = float(pieces[0])/2*nm
-        E1 = E2
-        E2 = float(pieces[1]) # actually it's energy per unit length!
-        length = 1 # arbitrary
-        r = (r1 + r2)/2
-        dEdR = (E2-E1)/(r2-r1)*length
-        area = 2*math.pi*r*length
-        force = dEdR
-        pressure = force/area
-        kT = kB*298 # about this
-        ncontact = pressure/kT
-        fout.write(str(r)+'\t'+str(ncontact)+'\n')
+        if ((float(pieces[0])/2*nm - r2) > 0.25):
+            r1 = r2
+            r2 = float(pieces[0])/2*nm
+            E1 = E2
+            E2 = float(pieces[1]) # actually it's energy per unit length!
+            length = 1 # arbitrary
+            r = (r1 + r2)/2
+            dEdR = (E2-E1)/(r2-r1)*length
+            area = 2*math.pi*r*length
+            force = dEdR
+            pressure = force/area
+            kT = kB*298 # about this
+            ncontact = pressure/kT
+            fout.write(str(r)+'\t'+str(ncontact)+'\n')
 
 fin.close()
 fout.close()

@@ -31,11 +31,15 @@ int main(int, char **) {
                                                 water_prop.epsilonAB, water_prop.kappaAB,
                                                 water_prop.epsilon_dispersion,
                                                 water_prop.lambda_dispersion, water_prop.length_scaling, 0));
-  for (double dens=0.00001; dens<=0.0055; dens *= 1.02) {
+  for (double dens=0.00001; dens<=0.0055; dens *= 1.002) {
     fprintf(o, "%g", dens);
 
-    for (double kT=kB*298; kT<=kB*798; kT+=50*kB) {
-      double p = pressure(f, kT, dens);
+    for (double kT=kB*298; kT<=kB*648; kT+=50*kB) {
+      double mu = 0, nl = 0, nv = 0;
+      saturated_liquid_vapor(f, kT, 1e-14, 0.0017, 0.0055, &nl, &nv, &mu, 1e-6);
+      double p = 0;
+      if (dens <= nv || dens >= nl) p = pressure(f, kT, dens);
+      else p = pressure(f, kT, nv);
       //printf("Pressure = %g\n", p); //DEBUGGING
       fprintf(o, "\t%g\t%g", kT, p); //Prints kT, pressure, to data file
       //fflush(o);

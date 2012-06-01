@@ -52,6 +52,8 @@ set style line 13 pt 6 ps 1 lw 0 lt 0 lc 8
 set style line 14 pt 6 ps 1 lw 0 lt 0 lc 2
 set style line 15 pt 6 ps 1 lw 0 lt 0 lc 4
 set style line 16 pt 6 ps 1 lw 0 lt 0 lc 9
+set style line 17 pt 6 ps 1 lw 0 lt 0 lc 6
+set style line 18 pt 6 ps 1 lw 0 lt 0 lc 5
 
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 
@@ -77,26 +79,33 @@ set label "698K" at 0.24, 360 rotate by 10 font 'Helvetica,14'
 set label "748K" at 0.175, 400 rotate by 55 font 'Helvetica,14'
 #set arrow from 0.001,1e-6 to 0.002,1e-6
 
-plot [:1.05] [-10:500] \
+set logscale y
+
+plot [:1.05] [0.01:150] \
 'figs/pressure-with-isotherms.dat' u ($1/gpermL):($3/atm) title 'T = 298K' with lines ls 4 , \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($5/atm) title 'T = 348K' with lines  ls 5, \
 'figs/pressure-with-isotherms.dat' u ($1/gpermL):($7/atm) title 'T = 398K' with lines ls 6 , \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($9/atm) title 'T = 448K' with lines ls 7, \
 'figs/pressure-with-isotherms.dat' u ($1/gpermL):($11/atm) title 'T = 498K' with lines ls 8, \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($13/atm) title 'T = 548K' with lines ls 9, \
 'figs/pressure-with-isotherms.dat' u ($1/gpermL):($15/atm) title 'T = 598K' with lines ls 10, \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($17/atm) title 'T = 648K' with lines ls 11, \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($19/atm) title 'T = 698K' with lines ls 12, \
-'figs/pressure-with-isotherms.dat' u ($1/gpermL):($21/atm) title 'T = 748K' with lines ls 4 , \
+'figs/pressure-with-isotherms.dat' u ($1/gpermL):($5/atm) title 'T = 348K' with lines  ls 5, \
+'figs/pressure-with-isotherms.dat' u ($1/gpermL):($9/atm) title 'T = 448K' with lines ls 7, \
 'figs/equation-of-state.dat' u ($3/gpermL):($2/atm) title 'eos' with lines ls 1 , \
 'figs/equation-of-state.dat' u ($4/gpermL):($2/atm) notitle with lines ls 1 , \
 'figs/experimental-equation-of-state.dat' u ($3/gpermL):($2/atm) title 'expt' with lines ls 2 , \
 'figs/experimental-equation-of-state.dat' u ($4/gpermL):($2/atm) notitle with lines ls 2 , \
 'figs/pressure-298K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 3 , \
+'figs/pressure-348K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 18 , \
 'figs/pressure-398K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 14 , \
+'figs/pressure-448K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 17 , \
 'figs/pressure-498K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 13 , \
-'figs/pressure-598K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 15 , \
-'figs/pressure-698K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 16 
+'figs/pressure-598K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 15# , \
+#'figs/pressure-698K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 16 
+#'figs/pressure-with-isotherms.dat' u ($1/gpermL):($19/atm) title 'T = 698K' with lines ls 12, \
+#'figs/pressure-with-isotherms.dat' u ($1/gpermL):($21/atm) title 'T = 748K' with lines ls 4 , \
+
+
+#'figs/pressure-with-isotherms.dat' u ($1/gpermL):($13/atm) title 'T = 548K' with lines ls 9, \
+#'figs/pressure-with-isotherms.dat' u ($1/gpermL):($17/atm) title 'T = 648K' with lines ls 11, \
+
 #m*x+b title 'fit at T = 298K' with lines
 
 # set size 0.36,0.32        # The second one (inset)

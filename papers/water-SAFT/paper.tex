@@ -161,9 +161,10 @@ Carnahan-Starling equation of state, and in the strongly-confined
 limit of a zero-dimensional cavity, it gives the exact free energy.  
 
 A number of classical density functionals have been developed for
-water~\cite{ding1987, Yang1992, gloor2002saft, Jaqaman2004,
-  clark2006developing, lischner2010classical}\fixme{ADD REST OF
-  LIST HERE!}, capturing some of the qualitative behavior of water.
+water~\cite{ding1987, Yang1992, gloor2002saft,gloor2004accurate,
+  gloor2007prediction, Jaqaman2004, clark2006developing,
+  lischner2010classical, fu2005vapor-liquid-dft,felipe2001examination}
+, capturing some of the qualitative behavior of water.
 However, many of these are less sophisticated than those describing
 the hard-sphere fluid, and a quantitatively accurate functional
 describing water---which reproduces the temperature dependence of the
@@ -171,30 +172,16 @@ macroscopic surface tension, its decrease as curvature increases, and
 its quantitative value---has not yet been published.  For instance,
 the functional of Lischner \emph{et al}\cite{lischner2010classical}
 treats the surface tension correctly, but can only be used at room
-temperature.  A numer of classical density functionals have recently
+temperature.  A number of classical density functionals have recently
 been produced that are based on Statistical Associating Fluid Theory
-(SAFT)\cite{gloor2002saft, clark2006developing}\fixme{add
-  more}.  These functionals are based on a perturbative thermodynamic
+(SAFT)\cite{gloor2002saft, clark2006developing, gloor2007prediction,
+  gloor2004accurate, gross2009density, kahl2008modified, felipe2001examination}.
+These functionals are based on a perturbative thermodynamic
 expansion, and give a reasonable prediction for the temperature
 dependence of the surface tension.  However, they also overestimate
-the surface tension by a factor of about 1.5, and are unsuited for studying
-systems with molecular-scale inhomogeneities.
-
-\subsection{Contact-value theorem}
-
-The contact value theorem states that the pressure of a fluid at a
-hard wall interface is proportional to the contact density of the fluid,
-$n_c$.  Specifically,
-\begin{equation}\label{eq:contact}
-  P = n_ck_BT
-\end{equation}
-where $k_B$ is the Boltzmann constant and $T$ is the temperature of the
-fluid. This leads to the property that the free energy of solvation of
-a hard solute is proportional to its volume in the limit of small
-solutes: 
-\begin{equation}\label{contactvaluethm}
-  F = n_c k_BT V\:
-\end{equation}
+the surface tension by a factor of about 1.5, and \fixme{most?} are unsuited
+for studying systems that have density variations on a molecular
+length scale due to the use of a local density approximation.
 
 \subsection{Statistical associating fluid theory}
 
@@ -209,7 +196,7 @@ based on Wertheim's first-order thermodynamic perturbation theory
 account for strong associative interations between molecules.
 
 The SAFT Helmholtz free energy is composed of five terms:
-\begin{equation}
+\begin{equation} \label{eq:SAFT-free-energy}
   F[n] = F_\textit{id} + F_\textit{hs} + F_\textit{disp} +
   F_\textit{assoc} + F_\textit{chain},
 \end{equation}
@@ -224,12 +211,12 @@ model for water\cite{clark2006developing}.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms}
+\includegraphics[width=\columnwidth]{figs/pressure-with-isotherms-truncated}
 \end{center}
 \caption{The pressure versus density for various temperatures, including
 experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
 indicate the computationally calculated pressure and the open circles are 
-NIST data points, plotted for every other isotherm. The solid and dotted lines
+NIST data points. The solid and dotted lines
 represent the theoretical and experimental coexistence curves.}
 \label{fig:pressure-with-isotherms}
 \end{figure}
@@ -241,16 +228,42 @@ predicted the dependence of surface tension on temperature, but have
 in general provided poor quantitative agreement with experiment.
 Moreover, the vast majority of SAFT-based classical density
 functionals have made local-density approximations that make them
-unsuitable for application to systems that are inhomogeneous at the
-molecular length scale\cite{felipe2001examination, gloor2002saft,
+unsuitable for application to systems that obey the contact-value
+theorem. \cite{felipe2001examination, gloor2002saft,
   gloor2004accurate, clark2006developing, gloor2007prediction,
-  kahl2008modified, gross2009density}.
+  kahl2008modified, gross2009density}.\
+
+ However, they also overestimate
+the surface tension by a factor of about 1.5, and \fixme{most?} are unsuited
+for studying systems that have density variations on a molecular
+length scale due to the use of a local density approximation.
+
+Functionals constructed using a local density approximation
+  will always fail to satisfy the contact-value theorem, and will
+  therefore incorrectly model small hard solutes.
+The contact-value theorem states that the pressure of any fluid at a
+hard wall interface is proportional to the contact density of the
+fluid\cite{henderson1979exact}, according to the following relation:
+\begin{equation}\label{eq:contact}
+  p = n_ck_BT
+\end{equation}
+where $n_c$ is the contact density, $k_B$ is the Boltzmann constant
+and $T$ is the temperature of
+the fluid. This leads to the property that the free energy of
+solvation of a small hard solute is proportional to the
+solvent-excluded volume:
+\begin{equation}\label{contactvaluethm}
+  F = n k_BT V
+\end{equation}
+\fixme{add this here? :} The contact-value theorem is satisfied for
+functionals for with the only purely local term is the free energy of
+an ideal gas.
 
 \section{Theory and Methods}
 We construct a new classical density functional for water. We treat
 each individual water molecule as a purely classical hard sphere and
 add association terms based on SAFT. For our free energy, we use the
-first four terms from equation (number): $F_\textit{id}$,
+first four terms from Equation \ref{eq:SAFT-free-energy}: $F_\textit{id}$,
 $F_\textit{hs}$, $F_\textit{disp}$ and $F_\textit{assoc}$. In
 addition, a chemical potential term is used, so we actually work in
 the grand canonical ensemble.  In the following sections, we will
