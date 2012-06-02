@@ -880,9 +880,12 @@ derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
       Nothing ->
         case isConstant $ derive v 1 e of
           Just x -> toExpression x * dda
-          Nothing -> dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
-                          ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
-                          (derive v 1 e))
+          Nothing ->
+            if derive v (Var IsTemp "o" "o" "oo" Nothing) e == (Var IsTemp "o" "o" "oo" Nothing)*derive v 1 e
+            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+                      ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
+                      (derive v 1 e))
+            else derive v dda e
 derive v dda (Var _ _ _ _ (Just e)) = derive v dda e
 derive _ _ (Var _ _ _ _ Nothing) = 0
 derive v dda (Sum s _) = factorandsum $ map dbythis $ sum2pairs s
