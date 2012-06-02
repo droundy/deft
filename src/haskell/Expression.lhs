@@ -21,7 +21,6 @@ import Debug.Trace
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.List ( nub )
 \end{code}
 
 The \verb!RealSpaceField! data type describes a field in real space.
@@ -719,10 +718,7 @@ grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
 countVars :: Type a => Expression a -> Int
-countVars s = if newval == oldval then newval
-                                  else error "bug in countVars!"
-  where newval = Set.size $ varSet s
-        oldval = length $ filter (/= "") $ nub $ varList s
+countVars s = Set.size $ varSet s
 
 varSet :: Type a => Expression a -> Set.Set String
 varSet (Expression e) | Same <- isKSpace (Expression e), Kx <- e = Set.empty
@@ -745,28 +741,6 @@ varSet (Signum e) = varSet e
 varSet (Sum _ i) = i
 varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
-
-varList :: Type a => Expression a -> [String]
-varList (Expression e) | Same <- isKSpace (Expression e), Kx <- e = []
-                       | Same <- isKSpace (Expression e), Ky <- e = []
-                       | Same <- isKSpace (Expression e), Kz <- e = []
-                       | Same <- isRealSpace (Expression e), (IFFT e') <- e = varList e'
-                       | Same <- isKSpace (Expression e), (FFT e') <- e = varList e'
-                       | Same <- isScalar (Expression e), (Integrate e') <- e = varList e'
-                       | Same <- isKSpace (Expression e), SetKZeroValue _ e' <- e = varList e'
-                       | otherwise = error "There is no other possible expression"
-varList (Var _ _ _ _ (Just e)) = varList e
-varList (Var t _ c _ Nothing) | t == IsTemp = [c]
-                                 | otherwise = []
-varList (Sin e) = varList e
-varList (Cos e) = varList e
-varList (Log e) = varList e
-varList (Exp e) = varList e
-varList (Abs e) = varList e
-varList (Signum e) = varList e
-varList (Sum e _) = concat $ map (varList . snd) (sum2pairs e)
-varList (Product e _) = concat $ map (varList . fst) (product2pairs e)
-varList (Scalar _) = []
 
 hasFFT :: Type a => Expression a -> Bool
 hasFFT (Expression e) 
