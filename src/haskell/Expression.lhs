@@ -146,7 +146,8 @@ mapExpression f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
 mapExpression f (Expression x) = f x
 
 cleanvars :: Type a => Expression a -> Expression a
-cleanvars (Var _ _ _ _ (Just e)) = cleanvars e
+cleanvars (Var tt c v t (Just e)) | Same <- isScalar e = Var tt c v t (Just (cleanvars e))
+                                  | otherwise = cleanvars e
 cleanvars (Var tt c v t Nothing) = Var tt c v t Nothing
 cleanvars (Scalar e) = Scalar (cleanvars e)
 cleanvars (Cos e) = cos (cleanvars e)
@@ -561,6 +562,9 @@ class Code a  where
 data Same a b where
     Same :: Same a a
     Different :: Same a b
+instance Show (Same a b) where
+  showsPrec _ Same = showString "Same"
+  showsPrec _ _ = showString "Different"
 
 toExpression :: (Type a, Real x) => x -> Expression a
 toExpression 0 = Sum Map.empty Set.empty

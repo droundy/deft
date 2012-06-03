@@ -191,6 +191,38 @@ subsq xs = -- map (:[]) xs ++
     where rest (y:ys@(_:_)) = map (:[y]) ys ++ rest ys
           rest _ = []
 
+findNamedScalar :: Type b => Expression b -> ToDo
+findNamedScalar (Expression e)
+    | Same <- isKSpace (Expression e), FFT e' <- e = findNamedScalar e'
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = findNamedScalar e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = findNamedScalar e'
+    | otherwise = DoNothing
+findNamedScalar (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                                [] -> DoNothing
+                                dothis:_ -> dothis
+    where sub (_,e) = findNamedScalar e
+findNamedScalar (Product p _) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                                               [] -> DoNothing
+                                               dothis:_ -> dothis
+    where sub (e, _) = findNamedScalar e
+findNamedScalar (Cos e) = findNamedScalar e
+findNamedScalar (Sin e) = findNamedScalar e
+findNamedScalar (Log e) = findNamedScalar e
+findNamedScalar (Exp e) = findNamedScalar e
+findNamedScalar (Abs e) = findNamedScalar e
+findNamedScalar (Signum e) = findNamedScalar e
+findNamedScalar (Var t a b c (Just e)) =
+  case findNamedScalar e of
+    DoS e' -> case compareExpressions e e' of
+                Same -> DoS $ Var t a b c (Just e)
+                Different -> DoS e'
+    DoNothing -> case isScalar e of
+                 Different -> DoNothing
+                 Same -> if hasFFT e then DoNothing else DoS $ Var t a b c (Just e)
+    _ -> error "impossible case in findNamedScalar"
+findNamedScalar (Var _ _ _ _ Nothing) = DoNothing
+findNamedScalar (Scalar e) = findNamedScalar e
+
 findToDo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> ToDo
 findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = DoNothing
 findToDo i everything (Expression e)
@@ -364,8 +396,17 @@ findFFTinputtodo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $
 
 
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
-simp2 = simp2helper Set.empty (0 :: Int) [] -- . cleanvars
-    where simp2helper i n sts e = if Set.size i == 0
+simp2 = scalarhelper []
+    where -- First, we want to evaluate any purely scalar expressions
+          -- that we can, just to simplify things!
+          scalarhelper sts e =
+            case findNamedScalar e of
+              DoS s@(Var _ _ x t (Just _)) -> scalarhelper (sts++[InitializeS v, AssignS v s]) (substitute s v e)
+                where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
+              DoNothing -> simp2helper Set.empty (0 :: Int) sts e
+              _ -> error "bad result in scalarhelper"
+          -- Then we go looking for memory to save or ffts to evaluate...
+          simp2helper i n sts e = if Set.size i == 0
                                   then handletodos [findToDo i e e, findFFTtodo e e, findFFTinputtodo i e e]
                                   else handletodos [findToDo i e e, {- findToDo Set.empty e e, -} findFFTtodo e e,
                                                     findFFTinputtodo i e e, findFFTinputtodo Set.empty e e]
