@@ -99,8 +99,8 @@ freezing.
 
 As common as water is, its large dielectric constant, small
 molecular size, strong hydrogen-bonding network and anomolous
-thermodynamic properties make ``the universal solvent'' an interesting
-subject of study.
+thermodynamic properties make ``the universal solvent'' a unique
+and interesting material.
 
 \subsection{Classical density-functional theory}
 
@@ -178,10 +178,7 @@ been produced that are based on Statistical Associating Fluid Theory
   gloor2004accurate, gross2009density, kahl2008modified, felipe2001examination}.
 These functionals are based on a perturbative thermodynamic
 expansion, and give a reasonable prediction for the temperature
-dependence of the surface tension.  However, they also overestimate
-the surface tension by a factor of about 1.5, and \fixme{most?} are unsuited
-for studying systems that have density variations on a molecular
-length scale due to the use of a local density approximation.
+dependence of the surface tension.
 
 \subsection{Statistical associating fluid theory}
 
@@ -207,7 +204,11 @@ energy of for fluids that are chain polymers.  The final term is not
 relevant for water.  While a number of SAFT formulations have been
 published, we will focus on SAFT-VR\cite{gil-villegas-1997-SAFT-VR},
 which has been used by Clark \emph{et al} to construct an optimal SAFT
-model for water\cite{clark2006developing}.
+model for water\cite{clark2006developing}. A majority of the empirical
+parameters used in our functional are taken from the Clark\emph{et al}
+SAFT functional which contains five empirical parameters and give the
+correct pressure at liquid-vapor coexistince curve shown in Figure
+\ref{fig:pressure-with-isotherms}.
 
 \begin{figure}
 \begin{center}
@@ -216,24 +217,15 @@ model for water\cite{clark2006developing}.
 \caption{The pressure versus density for various temperatures, including
 experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
 indicate the computationally calculated pressure and the open circles are 
-NIST data points. The solid and dotted lines
-represent the theoretical and experimental coexistence curves.}
+NIST data points. The solid and dotted lines represent the theoretical
+and experimental coexistence curves.}
 \label{fig:pressure-with-isotherms}
 \end{figure}
 
 SAFT has also been used to construct classical density functionals,
 which have been applied to study the surface tension as a function of
 temperature\cite{whotocite}.  Such functionals have qualitatively
-predicted the dependence of surface tension on temperature, but have
-in general provided poor quantitative agreement with experiment.
-Moreover, the vast majority of SAFT-based classical density
-functionals have made local-density approximations that make them
-unsuitable for application to systems that obey the contact-value
-theorem. \cite{felipe2001examination, gloor2002saft,
-  gloor2004accurate, clark2006developing, gloor2007prediction,
-  kahl2008modified, gross2009density}.\
-
- However, they also overestimate
+predicted the dependence of surface tension on temperature, however, they also overestimate
 the surface tension by a factor of about 1.5, and \fixme{most?} are unsuited
 for studying systems that have density variations on a molecular
 length scale due to the use of a local density approximation.
@@ -255,9 +247,8 @@ solvent-excluded volume:
 \begin{equation}\label{contactvaluethm}
   F = n k_BT V
 \end{equation}
-\fixme{add this here? :} The contact-value theorem is satisfied for
-functionals for with the only purely local term is the free energy of
-an ideal gas.
+The contact-value theorem is satisfied for functionals where the
+only purely local term is the free energy of an ideal gas.
 
 \section{Theory and Methods}
 We construct a new classical density functional for water. We treat
@@ -810,7 +801,7 @@ Figure~\ref{fig:energy-vs-diameter}). In Figure
 ~\ref{fig:rods-energy-vs-distance}, we see that for small $d$ all the rods 
 have the same behavior with a positive linear relationship
 between free energy per length and separation during the initial state 
-(where the rods have vapor between them). This indicates that the force 
+with vapor between them. This indicates that the force 
 per length on the rods is constant, and surprisingly independent of separation.
 
 To estimate how the transition from vapor to liquid between the rods depends on their 
