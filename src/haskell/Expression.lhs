@@ -21,7 +21,6 @@ import Debug.Trace
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.List ( nub )
 \end{code}
 
 The \verb!RealSpaceField! data type describes a field in real space.
@@ -147,7 +146,8 @@ mapExpression f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
 mapExpression f (Expression x) = f x
 
 cleanvars :: Type a => Expression a -> Expression a
-cleanvars (Var _ _ _ _ (Just e)) = cleanvars e
+cleanvars (Var tt c v t (Just e)) | Same <- isScalar e = Var tt c v t (Just (cleanvars e))
+                                  | otherwise = cleanvars e
 cleanvars (Var tt c v t Nothing) = Var tt c v t Nothing
 cleanvars (Scalar e) = Scalar (cleanvars e)
 cleanvars (Cos e) = cos (cleanvars e)
@@ -562,6 +562,9 @@ class Code a  where
 data Same a b where
     Same :: Same a a
     Different :: Same a b
+instance Show (Same a b) where
+  showsPrec _ Same = showString "Same"
+  showsPrec _ _ = showString "Different"
 
 toExpression :: (Type a, Real x) => x -> Expression a
 toExpression 0 = Sum Map.empty Set.empty
@@ -719,10 +722,7 @@ grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
 countVars :: Type a => Expression a -> Int
-countVars s = if newval == oldval then newval
-                                  else error "bug in countVars!"
-  where newval = Set.size $ varSet s
-        oldval = length $ filter (/= "") $ nub $ varList s
+countVars s = Set.size $ varSet s
 
 varSet :: Type a => Expression a -> Set.Set String
 varSet (Expression e) | Same <- isKSpace (Expression e), Kx <- e = Set.empty
@@ -745,28 +745,6 @@ varSet (Signum e) = varSet e
 varSet (Sum _ i) = i
 varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
-
-varList :: Type a => Expression a -> [String]
-varList (Expression e) | Same <- isKSpace (Expression e), Kx <- e = []
-                       | Same <- isKSpace (Expression e), Ky <- e = []
-                       | Same <- isKSpace (Expression e), Kz <- e = []
-                       | Same <- isRealSpace (Expression e), (IFFT e') <- e = varList e'
-                       | Same <- isKSpace (Expression e), (FFT e') <- e = varList e'
-                       | Same <- isScalar (Expression e), (Integrate e') <- e = varList e'
-                       | Same <- isKSpace (Expression e), SetKZeroValue _ e' <- e = varList e'
-                       | otherwise = error "There is no other possible expression"
-varList (Var _ _ _ _ (Just e)) = varList e
-varList (Var t _ c _ Nothing) | t == IsTemp = [c]
-                                 | otherwise = []
-varList (Sin e) = varList e
-varList (Cos e) = varList e
-varList (Log e) = varList e
-varList (Exp e) = varList e
-varList (Abs e) = varList e
-varList (Signum e) = varList e
-varList (Sum e _) = concat $ map (varList . snd) (sum2pairs e)
-varList (Product e _) = concat $ map (varList . fst) (product2pairs e)
-varList (Scalar _) = []
 
 hasFFT :: Type a => Expression a -> Bool
 hasFFT (Expression e) 
@@ -880,9 +858,12 @@ derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
       Nothing ->
         case isConstant $ derive v 1 e of
           Just x -> toExpression x * dda
-          Nothing -> dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
-                          ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
-                          (derive v 1 e))
+          Nothing ->
+            if derive v (Var IsTemp "o" "o" "oo" Nothing) e == (Var IsTemp "o" "o" "oo" Nothing)*derive v 1 e
+            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+                      ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
+                      (derive v 1 e))
+            else derive v dda e
 derive v dda (Var _ _ _ _ (Just e)) = derive v dda e
 derive _ _ (Var _ _ _ _ Nothing) = 0
 derive v dda (Sum s _) = factorandsum $ map dbythis $ sum2pairs s

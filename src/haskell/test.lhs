@@ -176,7 +176,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT saft_association" 6 saft_association,
                      -- t "countFFT grad saft_fluid" 134 (gradme saft_fluid),
                      t "countFFT grad whitebear" 24 (gradme whitebear),
-                     t "countFFT grad saft_dispersion" 32 (gradme saft_dispersion),
+                     t "countFFT grad saft_dispersion" 51 (gradme saft_dispersion),
                      -- t "countFFT grad saft_association" 68 (gradme saft_association),
                      t "countFFT nbar" 2 n3,
                      t "countFFT nbar + n2" 2 (nbar + n2),
@@ -217,7 +217,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem saft_association" 4 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
                      t "peakMem grad whitebear" 22 (gradme whitebear), -- was 20
-                     t "peakMem grad saft_dispersion" 6 (gradme saft_dispersion), -- was 49 ~12mins
+                     t "peakMem grad saft_dispersion" 11 (gradme saft_dispersion), -- was 49 ~12mins
                      -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
