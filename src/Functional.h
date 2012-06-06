@@ -239,6 +239,8 @@ public:
   int run_finite_difference_test(const char *testname,
                                  double kT, const Grid &data,
                                  const VectorXd *direction = 0) const;
+  int run_homogeneous_finite_difference_test(const char *testname,
+                                             double kT, double data) const;
   Expression printme(const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
                      const char *args[], bool isheader=false) const;
