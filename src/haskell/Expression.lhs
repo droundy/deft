@@ -479,7 +479,7 @@ latexE p (Scalar x) = latexPrec p x
 latexE p (Expression x) = latexPrec p x
 latexE _ (Cos x) = showString "\\cos(" . latexE 0 x . showString ")"
 latexE _ (Sin x) = showString "\\sin(" . latexE 0 x . showString ")"
-latexE _ (Exp x) = showString "\\exp(" . latexE 0 x . showString ")"
+latexE _ (Exp x) = showString "\\exp\\left(" . latexE 0 x . showString "\\right)"
 latexE _ (Log x) = showString "\\log(" . latexE 0 x . showString ")"
 latexE _ (Abs x) = showString "\\left|" . latexE 0 x . showString "\\right|"
 latexE _ (Signum _) = undefined
@@ -518,6 +518,7 @@ latexE p (Sum s _) = latexParen (p > 6) (showString me)
                          else latexDouble f ++ " " ++ latexE 6 e ""
         addup ('-':rest) (1,e) = latexE 6 e (" - " ++ rest)
         addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " - " $ rest)
+        addup rest (-1,e) = "-" ++ latexE 6 e (" + " ++ rest)
         addup rest (1,e) = latexE 6 e (" + " ++ rest)
         addup rest (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " + " $ rest)
 
@@ -528,22 +529,30 @@ latexParen True x = showString "\\left(" . x . showString "\\right)"
 latexDouble :: Double -> String
 latexDouble 0 = "0"
 latexDouble x | x < 0 = "-" ++ latexDouble (-x)
-latexDouble x = case double2int x of
-                  Just n -> show n
+latexDouble x = case double2frac x of
+                  Just (n,1) -> show n
+                  Just (n,d) | n < 10 && d < 10 -> "\\frac" ++ show n ++ show d
+                  Just (n,d) | n < 10 -> "\\frac" ++ show n ++ "{" ++ show d ++ "}"
+                  Just (n,d) -> "\\frac{" ++ show n ++ "}{" ++ show d ++ "}"
                   Nothing ->
-                    case double2int (x/pi) of
-                      Just n -> show n ++ "\\pi"
+                    case double2frac (x/pi) of
+                      Just (n,1) -> show n ++ "\\pi"
+                      Just (n,d) -> "\\frac{" ++ show n ++ "\\pi}{"  ++ show d ++ "}"
                       Nothing ->
-                        case double2int (pi/x) of
+                        case double2frac (x*pi) of
+                          Just (n,1) -> "\\frac{" ++ show n ++ "}\\pi"
+                          Just (n,d) -> "\\frac{" ++ show n ++ "}{"  ++ show d ++ "\\pi}"
                           Just n -> "\\frac{\\pi}{" ++ show n ++ "}"
-                          Nothing -> printpi [2 .. 36]
-  where printpi [] = show x
-        printpi (n:ns) = case double2int (fromInteger n*x/pi) of
-                           Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "}\\pi"
-                           Nothing ->
-                             case double2int (x*fromInteger n*pi) of
-                               Just n' -> "\\frac{" ++ show n' ++ "}{" ++ show n ++ "\\pi}"
-                               Nothing -> printpi ns
+                          Nothing -> show x
+
+double2frac :: Double -> Maybe (Int, Int)
+double2frac f = do denominator <- divby [1..36]
+                   numerator <- double2int (f * fromIntegral denominator)
+                   Just (numerator, denominator)
+  where divby (d:ds) = case double2int (f * fromIntegral d) of
+                         Just _ -> Just d
+                         Nothing -> divby ds
+        divby [] = Nothing
 
 double2int :: Double -> Maybe Int
 double2int f = if abs(fromInteger (round f) - f) < 1e-13*f
