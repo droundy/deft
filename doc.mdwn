@@ -2,3 +2,4 @@ Documentation for deft.
 
 * First, you'll want to [[install]] it.
 * There's also a [[FAQ]].
+* [[LaTeX tricks]].
