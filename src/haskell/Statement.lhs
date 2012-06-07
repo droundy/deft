@@ -11,7 +11,7 @@ module Statement ( Statement(..),
                    latexStatements,
                    latexSimp,
                    simp2,
-                   findToDo,
+                   findToDo, findNamedSubexpression,
                    countFFT,
                    checkDup,
                    peakMem,
@@ -222,6 +222,37 @@ findNamedScalar (Var t a b c (Just e)) =
     _ -> error "impossible case in findNamedScalar"
 findNamedScalar (Var _ _ _ _ Nothing) = DoNothing
 findNamedScalar (Scalar e) = findNamedScalar e
+
+findNamedSubexpression :: Type b => Expression b -> ToDo
+findNamedSubexpression (Expression e)
+    | Same <- isKSpace (Expression e), FFT e' <- e = findNamedSubexpression e'
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = findNamedSubexpression e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = findNamedSubexpression e'
+    | otherwise = DoNothing
+findNamedSubexpression (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                                     [] -> DoNothing
+                                     dothis:_ -> dothis
+    where sub (_,e) = findNamedSubexpression e
+findNamedSubexpression (Product p _) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                                         [] -> DoNothing
+                                         dothis:_ -> dothis
+    where sub (e, _) = findNamedSubexpression e
+findNamedSubexpression (Cos e) = findNamedSubexpression e
+findNamedSubexpression (Sin e) = findNamedSubexpression e
+findNamedSubexpression (Log e) = findNamedSubexpression e
+findNamedSubexpression (Exp e) = findNamedSubexpression e
+findNamedSubexpression (Abs e) = findNamedSubexpression e
+findNamedSubexpression (Signum e) = findNamedSubexpression e
+findNamedSubexpression e@(Var _ _ _ _ (Just e'))
+  | DoS s <- findNamedSubexpression e' = DoS s
+  | DoK s <- findNamedSubexpression e' = DoK s
+  | DoR s <- findNamedSubexpression e' = DoR s
+  | Same <- isKSpace e = DoK e
+  | Same <- isRealSpace e = DoR e
+  | Same <- isScalar e = DoS e
+  | otherwise = error "impossible case in findNamedSubexpression"
+findNamedSubexpression (Var _ _ _ _ Nothing) = DoNothing
+findNamedSubexpression (Scalar e) = findNamedSubexpression e
 
 findToDo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> ToDo
 findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = DoNothing

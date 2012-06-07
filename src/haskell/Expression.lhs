@@ -246,6 +246,7 @@ instance Type Scalar where
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
   s_var vv@(a:v@(_:_)) = Var CannotBeFreed vv vv (a : '_' : '{' : v ++ "}") Nothing
   s_var v = Var CannotBeFreed v v v Nothing
+  s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
@@ -588,6 +589,8 @@ class (Ord a, Show a, Code a) => Type a where
   isKSpace _ = Different
   s_var :: String -> Expression a
   s_var = Scalar . s_var
+  s_tex :: String -> String -> Expression a
+  s_tex v t = Scalar (s_tex v t)
   derivativeHelper :: Type b => Expression b -> Expression a -> a -> Expression b
   zeroHelper :: Type b => Expression b -> a -> Expression a
   codeStatementHelper :: Expression a -> String -> Expression a -> String
