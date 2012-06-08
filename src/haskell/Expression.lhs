@@ -517,6 +517,7 @@ latexE p (Sum s _) = latexParen (p > 6) (showString me)
                          then latexDouble f
                          else latexDouble f ++ " " ++ latexE 6 e ""
         addup ('-':rest) (1,e) = latexE 6 e (" - " ++ rest)
+        addup ('-':rest) (-1,e) = "-" ++ latexE 6 e (" - " ++ rest)
         addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " - " $ rest)
         addup rest (-1,e) = "-" ++ latexE 6 e (" + " ++ rest)
         addup rest (1,e) = latexE 6 e (" + " ++ rest)
@@ -860,8 +861,29 @@ compareTypes x y | Same <- isRealSpace x, Same <- isRealSpace y = Same
 compareTypes x y | Same <- isScalar x, Same <- isScalar y = Same
 compareTypes _ _ = Different
 
+hasExpressionInFFT :: (Type a, Type b) => Expression b -> Expression a -> Bool
+hasExpressionInFFT v e | not (hasexpression v e) = False
+hasExpressionInFFT v (Expression e)
+    | Same <- isKSpace (Expression e), FFT e' <- e = hasexpression v e'
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = hasexpression v e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = hasExpressionInFFT v e'
+    | otherwise = False
+hasExpressionInFFT v (Var _ _ _ _ (Just e)) = hasExpressionInFFT v e
+hasExpressionInFFT v (Sum s _) = or $ map (hasExpressionInFFT v . snd) (sum2pairs s)
+hasExpressionInFFT v (Product p _) = or $ map (hasExpressionInFFT v . fst) (product2pairs p)
+hasExpressionInFFT v (Sin e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Cos e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Log e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Exp e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Abs e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Signum e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Scalar e) = hasExpressionInFFT v e
+hasExpressionInFFT _ (Var _ _ _ _ Nothing) = False
+
 derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Expression b
 derive v dda e | Same <- compareExpressions v e = dda
+derive vv@(Scalar v) dda (Scalar e) -- Treat scalar derivative of scalar as scalar.  :)
+  | Same <- compareExpressions vv dda = dda * Scalar (derive v 1 e)
 derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
   | Same <- compareTypes v dda =
     case isConstant $ derive v dda e of
@@ -870,7 +892,20 @@ derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
         case isConstant $ derive v 1 e of
           Just x -> toExpression x * dda
           Nothing ->
-            if derive v (Var IsTemp "o" "o" "oo" Nothing) e == (Var IsTemp "o" "o" "oo" Nothing)*derive v 1 e
+            if dda == 1 || not (hasExpressionInFFT v e)
+            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+                      ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
+                      (derive v 1 e))
+            else derive v dda e
+derive v@(Scalar (Var _ a b c _)) dda (Var t aa bb cc (Just e))
+  | Same <- compareTypes v dda =
+  case isConstant $ derive v dda e of
+    Just x -> toExpression x
+    Nothing ->
+      case isConstant $ derive v 1 e of
+        Just x -> toExpression x * dda
+        Nothing ->
+            if dda == 1 || not (hasExpressionInFFT v e)
             then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))

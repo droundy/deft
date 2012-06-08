@@ -1,4 +1,4 @@
-.PHONY: paper project poster papers comparison slowfigs haskell
+.PHONY: paper project poster papers comparison slowfigs haskell pdf
 
 EXTRA_DIST = autogen.sh
 
@@ -77,6 +77,8 @@ haskell: src/haskell/functionals src/haskell/test
 
 src/haskell/functionals: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) functionals
+src/haskell/latex-functionals: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE) latex-functionals
 src/haskell/test: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) test
 
@@ -193,13 +195,16 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # IKIWIKI=ikiwiki
 # endif
 
-html:
+pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf
+
+html: pdf
 	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
 		--exclude=html --exclude=Makefile.am
 
 clean-local:
 	rm -rf .ikiwiki html
 	cd papers && $(MAKE) clean
+	cd src/haskell && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
 papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
@@ -225,6 +230,8 @@ papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<
 papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
 	$<
+doc/%.pdf: src/haskell/latex-functionals
+	$< $@
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
 	comparisons/gHSetaeff_vrpack.dat comparisons/gHSetaeff_deft.dat \
