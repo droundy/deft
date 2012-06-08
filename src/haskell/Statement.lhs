@@ -275,8 +275,8 @@ findToDo _ everything (Sum s i)
               where countVarssube = countVars sube
           oldnum = countVars everything
           ithelps :: Type a => Expression a -> Bool
-          ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
-                    | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
+          ithelps e | Same <- isRealSpace e = countAfterRemoval e everything + 1 < oldnum
+                    | Same <- isKSpace e = countAfterRemoval e everything + 1 < oldnum
                     | otherwise = False
 findToDo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
                                 [] -> DoNothing
@@ -292,8 +292,8 @@ findToDo _ everything (Product s i)
               where countVarssube = countVars sube
           oldnum = countVars everything
           ithelps :: Type a => Expression a -> Bool
-          ithelps e | Same <- isRealSpace e = countVars (substitute e (r_var "rtempWhatIfISubstituteThis") everything) < oldnum
-                    | Same <- isKSpace e = countVars (substitute e (k_var "ktempWhatIfISubstituteThis") everything) < oldnum
+          ithelps e | Same <- isRealSpace e = countAfterRemoval e everything + 1 < oldnum
+                    | Same <- isKSpace e = countAfterRemoval e everything + 1 < oldnum
                     | otherwise = False
 findToDo i everything (Product p _) =
     if iszero (product2denominator p)

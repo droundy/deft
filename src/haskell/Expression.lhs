@@ -13,7 +13,7 @@ module Expression (
                    sum2pairs, pairs2sum,
                    product2pairs, pairs2product, product2denominator,
                    hasK, hasFFT, hasexpression,
-                   countexpression, substitute, 
+                   countexpression, substitute, countAfterRemoval,
                    compareExpressions, countVars, varSet)
     where
 
@@ -899,6 +899,58 @@ countexpression x e = snd $ subAndCount x (s_var "WeAreCounting") e
 
 substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
 substitute x y e = fst $ subAndCount x y e
+
+countAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Int
+countAfterRemoval v e = Set.size (varsetAfterRemoval v e)
+
+varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Set String
+-- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent
+varsetAfterRemoval x e | Same <- compareExpressions x e = Set.empty
+                       | not (Set.isSubsetOf (varSet x) (varSet e)) = varSet e
+varsetAfterRemoval x@(Sum xs _) e@(Sum es _)
+  | Same <- compareTypes x e,
+    ((factorX, termX):_) <- xspairs,
+    Just factorE <- Map.lookup termX es,
+    ratio <- factorE / factorX,
+    Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2sum es')
+  where xspairs = sum2pairs xs
+        filterout ratio ((f,x1):rest) emap =
+          case Map.lookup x1 emap of
+            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
+                                        else Nothing
+            Nothing -> Nothing
+        filterout _ [] emap = Just emap
+varsetAfterRemoval x@(Product xs _) e@(Product es _)
+  | Same <- compareTypes x e,
+    ((termX, factorX):_) <- xspairs,
+    Just factorE <- Map.lookup termX es,
+    ratio <- factorE / factorX,
+    Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2product es')
+  where xspairs = product2pairs xs
+        filterout ratio ((x1,f):rest) emap =
+          case Map.lookup x1 emap of
+            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
+                                        else Nothing
+            Nothing -> Nothing
+        filterout _ [] emap = Just emap
+varsetAfterRemoval x (Expression v)
+  | Same <- isKSpace (Expression v), FFT e <- v = varsetAfterRemoval x e
+  | Same <- isRealSpace (Expression v), IFFT e <- v = varsetAfterRemoval x e
+  | Same <- isScalar (Expression v), Integrate e <- v = varsetAfterRemoval x e
+  | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = Set.empty
+  | Same <- isKSpace (Expression v), SetKZeroValue _ e <- v = varsetAfterRemoval x e
+  | otherwise = error $ "unhandled case in varsetAfterRemoval: " ++ show v
+varsetAfterRemoval x (Sum s _) = Set.unions (map (varsetAfterRemoval x . snd) (sum2pairs s))
+varsetAfterRemoval x (Product p _) = Set.unions (map (varsetAfterRemoval x . fst) (product2pairs p))
+varsetAfterRemoval x (Cos e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Sin e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Log e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Exp e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Abs e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Signum e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Var _ _ _ _ (Just e)) = varsetAfterRemoval x e
+varsetAfterRemoval _ v@(Var _ _ _ _ Nothing) = varSet v
+varsetAfterRemoval x (Scalar e) = varsetAfterRemoval x e
 
 subAndCount :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> (Expression b, Int)
 subAndCount x y e | Same <- compareExpressions x e = (y, 1)
