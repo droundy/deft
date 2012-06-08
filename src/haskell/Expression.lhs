@@ -542,7 +542,6 @@ latexDouble x = case double2frac x of
                         case double2frac (x*pi) of
                           Just (n,1) -> "\\frac{" ++ show n ++ "}\\pi"
                           Just (n,d) -> "\\frac{" ++ show n ++ "}{"  ++ show d ++ "\\pi}"
-                          Just n -> "\\frac{\\pi}{" ++ show n ++ "}"
                           Nothing -> show x
 
 double2frac :: Double -> Maybe (Int, Int)
@@ -961,7 +960,7 @@ subAndCount x@(Sum xs _) y e@(Sum es _)
     Just factorE <- Map.lookup termX es,
     ratio <- factorE / factorX,
     Just es' <- filterout ratio xspairs es,
-    (e'',n) <- subAndCount x y (mksum es') = (e'' + toExpression ratio*y, n+1)
+    (e'',n) <- subAndCount x y (map2sum es') = (e'' + toExpression ratio*y, n+1)
   where xspairs = sum2pairs xs
         filterout ratio ((f,x1):rest) emap =
           case Map.lookup x1 emap of
@@ -969,14 +968,13 @@ subAndCount x@(Sum xs _) y e@(Sum es _)
                                         else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
-        mksum = pairs2sum . sum2pairs
 subAndCount x@(Product xs _) y e@(Product es _)
   | Same <- compareTypes x e,
     ((termX, factorX):_) <- xspairs,
     Just factorE <- Map.lookup termX es,
     ratio <- factorE / factorX,
     Just es' <- filterout ratio xspairs es,
-    (e'',n) <- subAndCount x y (mkproduct es') = (e'' * y**(toExpression ratio), n+1)
+    (e'',n) <- subAndCount x y (map2product es') = (e'' * y**(toExpression ratio), n+1)
   where xspairs = product2pairs xs
         filterout ratio ((x1,f):rest) emap =
           case Map.lookup x1 emap of
@@ -984,7 +982,6 @@ subAndCount x@(Product xs _) y e@(Product es _)
                                         else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
-        mkproduct = pairs2product . product2pairs
 subAndCount x y (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = let (e', n) = subAndCount x y e in (Expression $ FFT e', n)
   | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
