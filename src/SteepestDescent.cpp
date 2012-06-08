@@ -22,8 +22,9 @@ protected:
   double step, orig_step;
   LineMinimizer linmin;
 public:
-  SteepestDescentType(Functional f, const GridDescription &gdin, VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
-    : MinimizerInterface(f, gdin, data), step(stepsize), orig_step(step), linmin(lm) {}
+  SteepestDescentType(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
+                      LineMinimizer lm, double stepsize = 0.1)
+    : MinimizerInterface(f, gdin, kT, data), step(stepsize), orig_step(step), linmin(lm) {}
   void minimize(Functional newf, const GridDescription &gdnew, VectorXd *newx = 0) {
     step = orig_step;
     MinimizerInterface::minimize(newf, gdnew, newx);
@@ -35,9 +36,9 @@ public:
 
 class PreconditionedSteepestDescentType : public SteepestDescentType {
 public:
-  PreconditionedSteepestDescentType(Functional f, const GridDescription &gdin,
+  PreconditionedSteepestDescentType(Functional f, const GridDescription &gdin, double kT,
                                     VectorXd *data, LineMinimizer lm, double stepsize = 0.1)
-    : SteepestDescentType(f, gdin, data, lm, stepsize) {}
+    : SteepestDescentType(f, gdin, kT, data, lm, stepsize) {}
 
   bool improve_energy(bool verbose = false);
 };
@@ -46,12 +47,21 @@ bool SteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf("The initial energy is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
   const VectorXd d = -grad();
   const double d2 = -d.dot(d);
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer lm = linmin(f, gd, x, d, d2, &step);
+  Minimizer lm = linmin(f, gd, kT, x, d, d2, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
@@ -72,12 +82,21 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf("The initial energy is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
   const VectorXd d = -pgrad();
   const double gdotd = d.dot(grad());
   // Let's immediately free the cached gradient stored internally!
   invalidate_cache();
 
-  Minimizer lm = linmin(f, gd, x, d, gdotd, &step);
+  Minimizer lm = linmin(f, gd, kT, x, d, gdotd, &step);
   for (int i=0; i<100 && lm.improve_energy(verbose); i++) {
     if (verbose) lm.print_info("\t");
   }
@@ -90,12 +109,12 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
 }
 
 
-Minimizer SteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
+Minimizer SteepestDescent(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
                           LineMinimizer lm, double stepsize) {
-  return Minimizer(new SteepestDescentType(f, gdin, data, lm, stepsize));
+  return Minimizer(new SteepestDescentType(f, gdin, kT, data, lm, stepsize));
 }
 
-Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, VectorXd *data,
-                                        LineMinimizer lm, double stepsize) {
-  return Minimizer(new PreconditionedSteepestDescentType(f, gdin, data, lm, stepsize));
+Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, double kT,
+                                        VectorXd *data, LineMinimizer lm, double stepsize) {
+  return Minimizer(new PreconditionedSteepestDescentType(f, gdin, kT, data, lm, stepsize));
 }

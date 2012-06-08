@@ -25,9 +25,9 @@ GridDescription::GridDescription(Lattice lat, int nx, int ny, int nz)
 }
 
 GridDescription::GridDescription(Lattice lat, double delta)
-  : Nx(1+int(lat.a1().norm()/delta)),
-    Ny(1+int(lat.a2().norm()/delta)),
-    Nz(1+int(lat.a3().norm()/delta)),
+  : Nx(1+int(exp(1)/100+lat.a1().norm()/delta)),
+    Ny(1+int(exp(1)/100+lat.a2().norm()/delta)),
+    Nz(1+int(exp(1)/100+lat.a3().norm()/delta)),
     Lat(lat), fineLat(Cartesian(lat.a1()/Nx), Cartesian(lat.a2()/Ny),
                       Cartesian(lat.a3()/Nz)) {
   NyNz = Ny*Nz; NxNyNz = Nx*NyNz;

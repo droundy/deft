@@ -169,10 +169,10 @@ void Grid::epsNativeSlice(const char *fname,
     max div\n\
     dup 0 lt {\n\
         1 add\n\
-        dup 1\n\
+        dup 1 3 1 roll\n\
     }{\n\
         neg 1 add\n\
-        dup 1 3 1 roll\n\
+        dup 1\n\
     } ifelse\n\
     setrgbcolor\n\
     newpath\n\
@@ -331,6 +331,35 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
   }
 }
 
+
+void Grid::Dump1D(const char *fname, Cartesian xmin, Cartesian xmax) const {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+  } else {
+    // put ends on the grid!
+    xmin = gd.fineLat.round(xmin);
+    xmax = xmin + gd.fineLat.round(Cartesian(xmax - xmin));
+    const double myxrange = (xmax-xmin).norm();
+    Lattice weelat(gd.fineLat);
+    double mydx = 0.1*pow(weelat.volume(), 1.0/3);
+    {
+      Relative foo = weelat.round(weelat.toRelative(Cartesian(xmax - xmin)));
+      if (foo[1] == 0 && foo[2] == 0) mydx = weelat.a1().norm();
+      else if (foo[0] == 0 && foo[2] == 0) mydx = weelat.a2().norm();
+      else if (foo[0] == 0 && foo[1] == 0) mydx = weelat.a3().norm();
+    }
+
+    for (double x=0; x<=1; x += mydx/myxrange) {
+      Cartesian here(xmin + (xmax-xmin)*x);
+      double fhere = (*this)(gd.fineLat.round(here));
+      fprintf(out, "%g\t%g\n", (here-xmin).norm(), fhere);
+    }
+    fclose(out);
+  }
+}
+
 void Grid::epsRadial1d(const char *fname, double rmin, double rmax, double yscale, double rscale, const char *comment) const {
   FILE *out = fopen(fname, "w");
   if (!out) {
@@ -435,15 +464,18 @@ void Grid::epsRadial1d(const char *fname, double rmin, double rmax, double yscal
 }
 
 ReciprocalGrid Grid::fft() const {
+  return ::fft(gd, *this);
+}
+
+ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g) {
   ReciprocalGrid out(gd);
-  const double *mydata = data();
+  const double *mydata = g.data();
   fftw_plan p = fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_ESTIMATE);
   fftw_execute(p);
   fftw_destroy_plan(p);
-  out /= gd.NxNyNz;
+  out *= gd.dvolume;
   return out;
 }
-
 
 void Grid::ShellProjection(const VectorXd &R, VectorXd *output) const {
   output->setZero();

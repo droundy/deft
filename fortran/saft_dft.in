@@ -1,0 +1,10 @@
+1
+ 1  1                       sigma epsilon_mf m
+5.6 0.0381876 1.7889              epsilon_hb k_hb lambda
+0.95163191  0.70513961E-05 rho_l rho_v
+0.59188000E-01  0.21844555E-06  -0.7404460586 temp  pressure cp_bulk
+-10.00 10.00 200                      zmin zmax nzinv
+20 1e-5                           niter_max toleranc
+3                                    menu(=0 new pr.;=1 old pr.;=3 loop
+4                                   type(=1 HSMF; 2=1site; 3=2sites; 4=water)
+0                                   att(0=SW; 1=Yukawa)

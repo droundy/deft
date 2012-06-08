@@ -19,27 +19,21 @@
 #include "Functionals.h"
 #include "LineMinimizer.h"
 
-const double kT = 1e-3; // room temperature in Hartree
 const double R = 2.7;
 const double ngas = 0.005; // approximate density of interest
-const double mu = -kT*log(ngas);
+const double mu = -1e-3*log(ngas);
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,10));
-double resolution = 0.5;
-GridDescription gd(lat, resolution);
+GridDescription gd(lat, 21, 21, 21);
 
 // And the functional...
-Functional f00 = HardSpheres(R, kT);
-Functional f0 = IdealGas(kT) + HardSpheres(R, kT) + ChemicalPotential(mu);
-Functional n = EffectivePotentialToDensity(kT);
-Functional f = f0(n);
+Functional f = HardSphereGas(R, 0);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/ngas*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-Functional ff = (f0 + ExternalPotential(external_potential))(n);
-
+Functional ff = OfEffectivePotential(f + ExternalPotential(external_potential));
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1e-3) {
   clock_t start = clock();
@@ -49,7 +43,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.00121302232893198;
+  const double true_energy = -0.0362040151887125;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 
@@ -73,24 +67,8 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
 }
 
 int main(int, char **argv) {
+  const double kT = 1e-3; // room temperature in Hartree
   int retval = 0;
-
-  {
-    potential = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(gd.NxNyNz);
-    Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, potential));
-    //Grid test_density(gd, EffectivePotentialToDensity(kT)(gd, -0.04*(-2*r2(gd)).cwise().exp()
-    //                                                      + mu*VectorXd::Ones(gd.NxNyNz)));
-    //retval += f00.run_finite_difference_test("hard spheres with no ideal gas", test_density);
-    //retval += f0.run_finite_difference_test("hard spheres straight", test_density);
-    const double expected_energy = -0.001678597251376433;
-    printf("hard sphere energy is %.16g\n", f.integral(potential));
-    if (fabs(f.integral(potential)/expected_energy - 1) > 1e-13) {
-      printf("FAIL: Error in hard sphere energy (of fixed potential) is too big %g (from %.16g)\n",
-             f.integral(potential)/expected_energy - 1, f.integral(potential));
-      retval++;
-    }
-    retval += f.run_finite_difference_test("hard spheres", potential);
-  }
 
   /*
   Minimizer downhill = MaxIter(300, Downhill(ff, gd, &potential));
@@ -102,24 +80,26 @@ int main(int, char **argv) {
   retval += test_minimizer("PreconditionedDownhill", pd, &potential, 1e-9);
   */
 
-  Minimizer steepest = Precision(1e-5, MaxIter(20, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
+  /*
+  Minimizer steepest = Precision(1e-5, MaxIter(100, SteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
   retval += test_minimizer("SteepestDescent", steepest, &potential, 1e-4);
 
-  Minimizer psd = Precision(1e-6, MaxIter(15, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer psd = Precision(1e-5, MaxIter(50, PreconditionedSteepestDescent(ff, gd, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 3e-6);
+  retval += test_minimizer("PreconditionedSteepestDescent", psd, &potential, 1e-4);
 
-  Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer cg = Precision(1e-6, MaxIter(25, ConjugateGradient(ff, gd, kT, &potential, QuadraticLineMinimizer)));
   potential.setZero();
   retval += test_minimizer("ConjugateGradient", cg, &potential, 3e-6);
 
-  Grid density(gd, EffectivePotentialToDensity(kT)(gd, potential));
+  Grid density(gd, EffectivePotentialToDensity()(kT, gd, potential));
   density.epsNativeSlice("hardspheres.eps", Cartesian(10,0,0), Cartesian(0,10,0), Cartesian(0,0,0));
+  */
 
-  Minimizer pcg = Precision(1e-6, MaxIter(15, PreconditionedConjugateGradient(ff, gd, &potential, QuadraticLineMinimizer)));
+  Minimizer pcg = Precision(1e-6, MaxIter(60, PreconditionedConjugateGradient(ff, gd, kT, &potential, QuadraticLineMinimizer)));
   potential.setZero();
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 3e-6);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, &potential, 1e-5);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

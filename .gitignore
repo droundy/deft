@@ -1,5 +1,7 @@
 *.[oa]
+*.prof
 *~
+*.dat
 *.Po
 .deps
 .dirstamp
@@ -11,6 +13,9 @@ html
 stamp-*
 *.test
 deft
+monte-carlo
+analyze-monte-carlo
+foobar
 install-sh
 depcomp
 missing
@@ -27,3 +32,13 @@ config.*
 \#*\#
 /.ikiwiki
 /recentchanges
+tests/generated/*.h
+tests/generated-haskell/*.h
+*-t
+optimize-functionals
+src/*Fast.cpp
+src/HardSpheresNoTensor.cpp
+cited-papers
+*.err
+*.out
+cleanups.txt

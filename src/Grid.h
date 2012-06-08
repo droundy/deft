@@ -10,6 +10,8 @@ static const double default_eps_size = 1000.0;
 
 class ReciprocalGrid;
 
+ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g);
+
 class Grid : public VectorXd {
 public:
   explicit Grid(const GridDescription &);
@@ -42,6 +44,7 @@ public:
   void epsNativeSlice(const char *fname,
                       Cartesian xmax, Cartesian ymax, Cartesian corner) const;
   void epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double yscale = 1, double xscale = 1, const char *comment = 0) const;
+  void Dump1D(const char *fname, Cartesian xmin, Cartesian xmax) const;
   void epsRadial1d(const char *fname, double rmin = 0, double rmax = 0, double yscale = 1, double rscale = 1, const char *comment = 0) const;
   void ShellProjection(const VectorXd &R, VectorXd *output) const;
   GridDescription description() const { return gd; }

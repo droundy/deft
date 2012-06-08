@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -ev
+
+# Make sure we can run git add from out of tree:
+export GIT_DIR=`pwd`/.git
+export GIT_INDEX_FILE=`pwd`/$GIT_INDEX_FILE
+export AM_RUNNING_PRECOMMIT=yes
+
+# Create a clean temp directory for running tests:
+TEMPDIR=`mktemp -d -t testing-XXXXXXXXX`
+git checkout-index --prefix=$TEMPDIR/ -af
+cd $TEMPDIR
+
+
+case "$TEST" in
+    none)
+        echo Skipping all tests.
+        ;;
+    compile)
+        echo Testing compile only.
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` recheck
+        echo Compile successful!
+        ;;
+    build)
+        echo Testing build only.
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` recheck pdf papers
+        echo Compile successful, and papers successfully built!
+        ;;
+    *)
+        echo Testing everything!
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` check pdf papers
+        echo Compile successful, papers successfully built, and all tests passed!
+        ;;
+esac
+
+cd /tmp
+rm -rf $TEMPDIR

@@ -14,10 +14,24 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
+#include <time.h>
 #include <stdio.h>
+#include <signal.h>
+#include <setjmp.h>
 #include "Functionals.h"
+#include "OptimizedFunctionals.h"
+#include "ContactDensity.h"
+
+void took(const char *action) {
+  static clock_t start = 0;
+  clock_t end = clock();
+  printf("    %s took %g seconds.\n", action, (end - double(start))/CLOCKS_PER_SEC);
+  start = end;
+}
 
 int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
+  const double kT = 1e-3;
+
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s of %10g *\n", name, n);
@@ -30,17 +44,22 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
   GridDescription gd(lat, resolution);
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
-  const double Edouble = f(n);
-  const double Egrid = f.integral(nr)/gd.Lat.volume();
+  const double Edouble = f(kT, n);
+  took("Evaluating functional of a double");
+  printf("Edouble = %g\n", Edouble);
+  const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
+  took("Evaluating functional of a 20x20x20 grid");
 
   int retval = 0;
   printf("Edouble = %g\n", Edouble);
   printf("Egrid   = %g\n", Egrid);
 
-  const double deriv_double = f.derive(n);
+  const double deriv_double = f.derive(kT, n);
+  took("Evaluating derivative of a double");
   Grid grad(nr);
   grad.setZero();
-  f.integralgrad(gd, nr, &grad);
+  f.integralgrad(kT, gd, nr, &grad);
+  took("Evaluating gradient of a 20x20x20 grid");
   const double deriv_grid = grad[0]/gd.dvolume;
   printf("deriv double = %g\n", deriv_double);
   printf("deriv grid   = %g\n", deriv_grid);
@@ -52,8 +71,8 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
       retval++;
     }
   } else {
-    printf("fractional error = %g\n", (Edouble - Egrid)/fabs(Edouble));
-    if (fabs((Edouble - Egrid)/Edouble) > fraccuracy) {
+    printf("fractional error in energy = %g\n", (Edouble - Egrid)/fabs(Edouble));
+    if (!(fabs((Edouble - Egrid)/Edouble) < fraccuracy)) {
       printf("FAIL: Error in the energy is too big!\n");
       retval++;
     }
@@ -66,23 +85,42 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
       retval++;
     }
   } else {
-    printf("fractional error = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
-    if (fabs((deriv_double - deriv_grid)/deriv_double) > fraccuracy) {
-      printf("FAIL: Error in the gradient is too big!\n");
+    printf("fractional error in gradient = %g\n", (deriv_double - deriv_grid)/fabs(deriv_double));
+    if (!(fabs((deriv_double - deriv_grid)/deriv_double) < fraccuracy)) {
+      printf("FAIL: Error in the gradient is just too darn big!\n");
       retval++;
     }
+  }
+
+  if (fabs(deriv_double) > 1e-30) {
+    retval += f.run_finite_difference_test(name, kT, nr);
+    took("Finite difference test");
   }
 
   return retval;
 }
 
-int main(int, char **argv) {
+jmp_buf sig_int_response;
+
+void dieplease(int) {
+  longjmp(sig_int_response, 1);
+}
+
+int main(int, char *argv[]) {
+  if (setjmp(sig_int_response)) {
+    printf("I was interrupted by control-C...\n");
+    printf("I will exit now!\n");
+    exit(1);
+  }
+  signal(SIGINT, dieplease);
   int retval = 0;
+  const Functional n = EffectivePotentialToDensity();
   const double kT = 1e-3;
-  const Functional n = EffectivePotentialToDensity(kT);
 
   {
+    double Veff = -1e-3*log(1e-5);
     Functional x = Identity();
+
     retval += test_functional("sqr(yzShellConvolve(1)(x)))", sqr(yzShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("sqr(xyShellConvolve(1)(x)))", sqr(xyShellConvolve(1)(x)), 1, 1e-13);
     retval += test_functional("zxShellConvolve(1)(x))", zxShellConvolve(1)(x), 1, 1e-13);
@@ -95,10 +133,34 @@ int main(int, char **argv) {
     retval += test_functional("StepConvolve(1)(x)", StepConvolve(1)(x), 1e-5, 1e-13);
     retval += test_functional("ShellConvolve(1)(x))", ShellConvolve(1)(x), 1e-5, 2e-13);
 
-    retval += test_functional("IdealGas(1e-3)(x))", IdealGas(1e-3)(x), 1e-5, 2e-13);
-    retval += test_functional("HardSpheres(2,1e-3)(x))", HardSpheres(2,1e-3)(x), 1e-5, 1e-13);
-    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
-    retval += test_functional("", IdealGas(1e-3)(x), 1e-5, 2e-13);
+    Functional stepped = StepConvolve(1);
+    retval += test_functional("StepConvolve(1)(sqr(StepConvolve(x)))", ShellConvolve(1)(sqr(stepped)), 1e-5, 2e-13);
+
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), -0.01, 2e-13);
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), 0.2, 2e-13);
+    retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
+                              OfEffectivePotential(sqr(StepConvolve(1))), 0, 3e-14);
+
+    retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
+    //retval += test_functional("HardSpheresWBnotensor(...)",
+    //                          HardSpheresWBnotensor(2)(n), Veff, 1e-13);
+    retval += test_functional("HardSpheresNoTensor(...)",
+                              HardSpheresNoTensor(2)(n), Veff, 1e-13);
+    retval += test_functional("IdealGasOfVeff", IdealGasOfVeff, Veff, 2e-13);
+    //retval += test_functional("AssociationSAFT(...)",
+    //                          AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7, 0.7), 1e-4, 2e-13);
+    retval += test_functional("Association(...)",
+                              Association(2,1e-2,0.02,1.2e-2, 1.7, 0.7), 1e-4, 2e-13);
+    retval += test_functional("SaftFluid(...)",
+                              SaftFluid(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 4e-13);
+    //retval += test_functional("SaftFluidSlow(...)",
+    //                          SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 2e-13);
+    //retval += test_functional("OfEffectivePotential(SaftFluidSlow(...))",
+    //                          OfEffectivePotential(SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 2e-13);
+    retval += test_functional("OfEffectivePotential(SaftFluid(...))",
+                              OfEffectivePotential(SaftFluid(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 4e-13);
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 
@@ -106,6 +168,9 @@ int main(int, char **argv) {
     retval += test_functional("3*sqr(4*x))", 3*sqr(4*x), 0.1, 1e-13);
     retval += test_functional("Gaussian(2)(-3*sqr(4*x)))", Gaussian(2)(-3*sqr(4*x)), 0.1, 1e-13);
     retval += test_functional("Pow(4)(x))", Pow(4)(x), 0.1, 1e-13);
+
+    retval += test_functional("log(x)", log(x), 0.1, 1e-13);
+    retval += test_functional("exp(x)", exp(x), 0.1, 1e-13);
   }
 
   {
@@ -119,20 +184,18 @@ int main(int, char **argv) {
   }
 
   {
-    Functional f = IdealGas(kT);
-    retval += test_functional("Ideal gas", f, 1e-9, 2e-13);
-    retval += test_functional("Ideal gas", f, 1e-3, 1e-12);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-9), 2e-13);
-    retval += test_functional("Ideal gas of V", f(n), -kT*log(1e-3), 1e-12);
-  }
-
-  {
     Functional f = ChemicalPotential(0.1);
     retval += test_functional("chemical potential", f, 1e-9, 1e-12);
     retval += test_functional("chemical potential", f, 1e9, 1e-14);
     retval += test_functional("chemical potential", f, 1e-2, 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-9), 1e-12);
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
+  }
+
+  {
+    Functional f = Correlation_A(2.0);
+    retval += test_functional("contact density sphere", f, 0.02, 1e-12);
+    retval += test_functional("contact density sphere", f, 0.01, 1e-12);
   }
 
   if (retval == 0) {

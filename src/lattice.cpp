@@ -1,6 +1,7 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 #include "lattice.h"
+#include <stdio.h>
 
 Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
   R.col(0) = a1; R.col(1) = a2; R.col(2) = a3;
@@ -48,6 +49,8 @@ Lattice::Lattice(Cartesian a1, Cartesian a2, Cartesian a3) {
 }
 
 void Lattice::reorientBasis(Cartesian zdir) {
+  // First remember the volume, to make sure we don't break anything.
+  double vol0 = volume();
   zdir = zdir / zdir.norm();
   Cartesian a1new(1e10, 0, 0.3e9),
     a2new(1.3e9, 1e10, 0.7e9),
@@ -81,7 +84,6 @@ void Lattice::reorientBasis(Cartesian zdir) {
     }
   }
   // set up the new lattice...
-  double vol0 = volume();
   R.col(0) = a1new; R.col(1) = a2new; R.col(2) = a3new;
   if (R.determinant() < 0) R.col(2) = -a3new;
   Rinv = R.inverse();

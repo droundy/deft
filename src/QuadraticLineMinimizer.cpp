@@ -8,9 +8,10 @@ private:
   const VectorXd direction;
   double *step, slope, alternatestep;
 public:
-  QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, VectorXd *data, const VectorXd &dir,
+  QuadraticLineMinimizerType(Functional f, const GridDescription &gdin, double kT,
+                             VectorXd *data, const VectorXd &dir,
                              double gradDotDirection, double *instep)
-    : MinimizerInterface(f, gdin, data), direction(dir), step(instep), slope(gradDotDirection) {
+    : MinimizerInterface(f, gdin, kT, data), direction(dir), step(instep), slope(gradDotDirection) {
     if (step == 0) {
       // If the caller doesn't specify the stepsize, we'll just use an
       // internal one.
@@ -28,6 +29,48 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   //fflush(stdout);
   // FIXME: The following probably double-computes the energy!
   const double E0 = energy();
+  if (verbose) {
+    printf("\t\tQuad: E0 = %25.15g", E0);
+    fflush(stdout);
+  }
+  if (isnan(E0)) {
+    // There is no point continuing, since we're starting with a NaN!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(" which is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
+  if (isinf(E0)) {
+    // There is no point continuing, since we've got an infinite result.  :(
+    // So we may as well quit here.
+    if (verbose) {
+      printf(" which is infinite, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
+  if (isnan(slope)) {
+    // The slope here is a NaN, so there is no point continuing!
+    // So we may as well quit here.
+    if (verbose) {
+      printf(", but the slope is a NaN, so I'm quitting early.\n");
+      fflush(stdout);
+    }
+    return false;
+  }
+  if (slope == 0) {
+    // When the slope is precisely zero, there's no point continuing,
+    // as the gradient doesn't have any information about how to
+    // improve things.  Or possibly we're at the minimum to numerical
+    // precision.
+    if (verbose) {
+      printf(" which means we've arrived at the minimum!\n");
+      fflush(stdout);
+    }
+    return false;
+  }
 
   if (slope*(*step) > 0) {
     if (verbose) printf("Swapping sign of step with slope %g...\n", slope);
@@ -48,7 +91,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
         printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g (%g vs %g)\n",
                step1, energy(), Etried);
         Grid foo(gd, *x);
-        f.run_finite_difference_test("In QuadraticLineMinimizerType", foo, &direction);
+        f.run_finite_difference_test("In QuadraticLineMinimizerType", kT, foo, &direction);
         fflush(stdout);
       }
       break;
@@ -63,7 +106,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
   const double curvature = 2.0*(E1-E0-step1*slope)/(step1*step1);
   double step2 = -slope/curvature;
   if (verbose) {
-    printf("\t\tQuad: E0 = %25.15g   E1 = %25.15g\n", E0, E1);
+    printf("   E1 = %25.15g\n", E1);
     printf("\t\tQuad: slope = %14.7g  curvature = %14.7g\n", slope, curvature);
     fflush(stdout);
   }
@@ -96,20 +139,28 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
   } else if (E1 == E0) {
     if (verbose) {
-      printf("\t\tNo change in energy...\n");
+      printf("\t\tNo change in energy... step1 is %g, direction has mag %g pos is %g\n",
+             step1, direction.norm(), x->norm());
       fflush(stdout);
     }
     do {
       invalidate_cache();
-      *x += step1*direction;
+      *x -= step1*direction;
       step1 *= 2;
-      //printf("From step1 of %10g I get delta E of %g\n", step1, energy()-E0);
+      *x += step1*direction;
+      // printf("From step1 of %10g I get delta E of %g\n", step1, energy()-E0);
     } while (energy() == E0);
     if (energy() > E0) {
       *x -= step1*direction;
       invalidate_cache();
       step1 = 0;
       printf("\t\tQuad: failed to find any improvement!  :(\n");
+    } else if (isnan(energy())) {
+      printf("\t\tQuad: found NaN with smallest possible step!!!\n");
+      *x -= step1*direction;
+      invalidate_cache();
+      step1 = 0;
+      //printf("\t\tQuad: put energy back to %g...\n", energy());
     }
   } else {
     *step = step2; // output the stepsize for later reuse.
@@ -154,11 +205,11 @@ void QuadraticLineMinimizerType::print_info(int iter) const {
 
 
 
-Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, VectorXd *data,
+Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, double kT, VectorXd *data,
                                   const VectorXd &direction, double gradDotDirection, double *step) {
   //if (gradDotDirection > 0) {
   //  printf("The slope is backwards!!!\n");
   //  assert(gradDotDirection < 0);
   //}
-  return Minimizer(new QuadraticLineMinimizerType(f, gd, data, direction, gradDotDirection, step));
+  return Minimizer(new QuadraticLineMinimizerType(f, gd, kT, data, direction, gradDotDirection, step));
 }

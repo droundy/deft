@@ -28,19 +28,10 @@ int main(int, char **argv) {
 
   int retval = 0;
 
-  Functional ig = IdealGas(kT);
-  retval += ig.run_finite_difference_test("ideal gas", density);
-
-  printf("\nNow let's try this with an effective potential...\n");
+  printf("\nLet's test the ideal gas of an effective potential (IdealGasOfVeff)...\n");
   Grid potential(gd, 1e-2*((-50*r2(gd)).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
-  //potential.epsNativeSlice("potential.eps", Cartesian(1,0,0),
-  //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  //density = EffectivePotentialToDensity(kT)(potential);
-  //density.epsNativeSlice("dens.eps", Cartesian(1,0,0),
-  //                         Cartesian(0,1,0), Cartesian(0,0,0));
-  Functional ig2 = IdealGas(kT)(EffectivePotentialToDensity(kT));
-  density *= 1e-5;
-  retval += ig2.run_finite_difference_test("ideal gas", potential);
+
+  retval += IdealGasOfVeff.run_finite_difference_test("ideal gas of Veff", kT, potential);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

@@ -31,15 +31,16 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad1(gd, n*VectorXd::Ones(gd.NxNyNz));
   Grid mygrad2(gd, n*VectorXd::Ones(gd.NxNyNz));
+  const double roomT = 1e-3;
 
   printf("Working on f1 of double...\n");
-  const double Edouble1 = f1(n);
+  const double Edouble1 = f1(roomT, n);
   printf("Working on f1 of grid...\n");
-  const double Egrid1 = f1.integral(nr)/gd.Lat.volume();
+  const double Egrid1 = f1.integral(roomT, nr)/gd.Lat.volume();
   printf("Working on f2 of double...\n");
-  const double Edouble2 = f2(n);
+  const double Edouble2 = f2(roomT, n);
   printf("Working on f2 of grid...\n");
-  const double Egrid2 = f2.integral(nr)/gd.Lat.volume();
+  const double Egrid2 = f2.integral(roomT, nr)/gd.Lat.volume();
 
   printf("Edouble1 = %g\n", Edouble1);
   printf("Egrid1   = %g\n", Egrid1);
@@ -62,12 +63,14 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
     retval++;
   }
 
-  retval += f1.run_finite_difference_test("f1", nr);
-  retval += f2.run_finite_difference_test("f2", nr);
+  retval += f1.run_finite_difference_test("f1", roomT, nr);
+  retval += f2.run_finite_difference_test("f2", roomT, nr);
   mygrad1.setZero();
   mygrad2.setZero();
-  f1.integralgrad(gd, nr, &mygrad1);
-  f2.integralgrad(gd, nr, &mygrad2);
+  f1.integralgrad(roomT, gd, nr, &mygrad1);
+  printf("mygrad1 is %g\n", mygrad1.sum());
+  f2.integralgrad(roomT, gd, nr, &mygrad2);
+  printf("mygrad2 is %g\n", mygrad2.sum());
   printf("fractional error in grad = %g\n", (mygrad1[0] - mygrad2[0])/fabs(mygrad2[0]));
   if (fabs((mygrad1[0] - mygrad2[0])/mygrad2[0]) > fraccuracy) {
     printf("FAIL: Error in the grad is too big!\n");
@@ -78,16 +81,15 @@ int test_functionals(const char *name, Functional f1, Functional f2, double n, d
 
 int main(int, char **argv) {
   int retval = 0;
-  const double kT = 1e-3;
-  const Functional n = EffectivePotentialToDensity(kT);
+  const Functional n = EffectivePotentialToDensity();
 
   Functional x = Gaussian(1);
-  retval += test_functionals("twice x", x*2, 2*x, 0.1, 2e-13);
+  retval += test_functionals("twice x", x*Functional(2.0), 2*x, 0.1, 2e-13);
   retval += test_functionals("x^2 only", Pow(2), sqr(Identity()), 0.1, 2e-13);
 
-  retval += test_functionals("derivative of x", x.grad(1,false) - x, 1 - x, 0.1, 2e-13);
-  retval += test_functionals("derivative of x^3", Pow(3).grad(1,false), 3*Pow(2), 0.1, 2e-13);
-  retval += test_functionals("derivative of x^2", sqr(x).grad(1,false), 2*x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x", x.grad(Functional(1.0),Identity(),false) - x, 1 - x, 0.1, 2e-13);
+  retval += test_functionals("derivative of x^3", Pow(3).grad(Functional(1.0),Identity(),false), 3*Pow(2), 0.1, 2e-13);
+  retval += test_functionals("derivative of x^2", sqr(x).grad(Functional(1.0),Identity(),false), 2*x, 0.1, 2e-13);
 
   retval += test_functionals("Square vs mul", sqr(x), x*x, 0.1, 1e-13);
   retval += test_functionals("Pow(2) vs mul", Pow(2)(x), x*x, 0.1, 1e-13);
@@ -95,11 +97,19 @@ int main(int, char **argv) {
   retval += test_functionals("Cube vs other mul", Pow(3)(x), x*(x*x), 0.1, 1e-12);
   retval += test_functionals("Fourth power vs mul", Pow(4)(x), x*x*x*x, 0.1, 1e-12);
 
-  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), x, 0.1, 1e-12);
-  retval += test_functionals("choose(0.5,x,2*x)", choose(0.5,x,2*x), 2*x, 0.9, 1e-12);
+  retval += test_functionals("exp(log(x))", exp(log(x)), x, 0.1, 1e-12);
+  retval += test_functionals("exp(2*x)", exp(2*x), sqr(exp(x)), 0.1, 1e-12);
 
-  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), x, 0.1, 1e-12);
-  retval += test_functionals("choose(0.5,x,sqr(x))", choose(0.5,x,sqr(x)), sqr(x), 0.9, 1e-12);
+  retval += test_functionals("sqrt(x)", sqrt(x), x/sqrt(x), 0.1, 1e-12);
+
+  retval += test_functionals("PowAndHalf(-1)", PowAndHalf(-1), Functional(1)/sqrt(x), 0.1, 1e-12);
+
+  retval += test_functionals("log(sqrt(x))", log(sqrt(x)), 0.5*log(x), 0.1, 1e-12);
+
+  retval += test_functionals("sqr(log(x))*x", sqr(log(x))*x, Pow(2)(log(x))*x, 0.1, 1e-12);
+  retval += test_functionals("sqr(log(x))*x no Pow", sqr(log(x))*x, (x*x)(log(x))*x, 0.1, 1e-12);
+  retval += test_functionals("sqr(log(x))/x", sqr(log(x))/x, Pow(2)(log(x))/x, 0.1, 1e-12);
+  retval += test_functionals("log(x)*log(x)/x", sqr(log(x))/x, log(x)*log(x)/x, 0.1, 1e-12);
 
   // The following tests the chain rule...
   retval += test_functionals("Pow(2)(Pow(2))", Pow(2)(Pow(2)(x)), x*x*x*x, 0.1, 1e-12);

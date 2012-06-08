@@ -8,7 +8,6 @@ Energy is 1
 	PREFIX:Iteration    1
 	PREFIX:==============
 	PREFIX:                   foobar =        1.00000000000000000
-	PREFIX:             total energy =        1.00000000000000000
 
 *********************
 * Testing sqr + log *

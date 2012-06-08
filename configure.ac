@@ -19,6 +19,13 @@ AC_ARG_ENABLE(profiling, [AC_HELP_STRING([--enable-profiling],
 if test "x$use_profiling" = "xyes"; then
    CXXFLAGS="$CXXFLAGS -pg"
 fi
+
+AC_CHECK_LIB(profiler, clock,LIBS="$LIBS -lprofiler",
+             [AC_MSG_WARN([could not find google perftools library, no profiling for you!])])
+
+AC_CHECK_LIB(tcmalloc, clock,LIBS="$LIBS -ltcmalloc",
+             [AC_MSG_WARN([could not find google tcmalloc library, no heap profiling for you!])])
+
 AC_ARG_ENABLE(coverage, [AC_HELP_STRING([--enable-coverage],
                          [use coverage testing])],
                   use_coverage=$enableval, use_coverage=no)

@@ -17,5 +17,6 @@
 #include "Functionals.h"
 
 Functional ChemicalPotential(double chemical_potential) {
-  return (chemical_potential*Identity()).set_name("chemical potential");
+  Functional mu(chemical_potential, "mu");
+  return (mu*Identity()).set_name("chemical_potential");
 }

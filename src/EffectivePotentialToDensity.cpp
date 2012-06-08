@@ -15,58 +15,77 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
-#include <stdio.h>
+#include "Testables.h"
 
-class EffectivePotentialToDensityType : public FunctionalInterface {
+Functional EffectivePotentialToDensity() {
+  Functional Veff = Identity().set_name("Veff");
+  return exp(Veff/(-kT));
+}
+
+
+// The following is a utility function used to create debug prints on
+// functionals.
+class OfEffectivePotentialClass : public FunctionalInterface {
 public:
-  EffectivePotentialToDensityType(double temp) {
-    minusbeta = -1.0/temp;
+  OfEffectivePotentialClass(const Functional &myf) : f(myf) {};
+  bool append_to_name(const std::string) {
+    return false;
   }
-  ~EffectivePotentialToDensityType() {}
 
-  VectorXd transform(const GridDescription &, const VectorXd &data) const {
-    VectorXd out(data);
-    for (int i=0; i<out.rows(); i++) {
-      const double n = exp(minusbeta*out[i]);
-      if (n != n) {
-        printf("got NaN from out[%d] == %g\n", i, out[i]);
-        assert(n == n);
-      }
-      out[i] = n;
+  VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
+    return f(gd, kT, (data/(-kT)).cwise().exp());
+  }
+  double integral(const GridDescription &gd, double kT, const VectorXd &x) const {
+    return f.integral(gd, kT, (x/(-kT)).cwise().exp());
+  }
+  double transform(double kT, double n) const {
+    return f(kT, exp(-n/kT));
+  }
+  double derive(double kT, double V) const {
+    double n = exp(-V/kT);
+    return (n/-kT)*f.derive(kT, n);
+  }
+  Expression derive_homogeneous(const Expression &x) const {
+    return x*f.derive_homogeneous(exp(-x/Expression("kT").set_type("double")));
+  }
+  double d_by_dT(double kT, double n) const {
+    return f.d_by_dT(kT, exp(-n/kT));
+  }
+  Functional grad(const Functional &ingrad, const Functional &V, bool ispgrad) const {
+    Functional n = exp(-V/kT);
+    if (ispgrad) return f.grad(-ingrad/kT, n, false);
+    return (-n/kT)*f.grad(ingrad, n, false);
+  }
+  Functional grad_T(const Functional &ingradT) const {
+    return OfEffectivePotential(f.grad_T(ingradT));
+  }
+  void grad(const GridDescription &gd, double kT, const VectorXd &data,
+            const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
+    if (outpgrad) {
+      Grid g(gd);
+      g.setZero();
+      f.grad(gd, kT, (data/(-kT)).cwise().exp(), ingrad, &g, 0);
+      *outgrad += (data/(-kT)).cwise().exp().cwise()*g/(-kT);
+      *outpgrad += g/(-kT);
+    } else {
+      Grid g(gd);
+      g.setZero();
+      f.grad(gd, kT, (data/(-kT)).cwise().exp(), ingrad, &g, 0);
+      *outgrad += (data/(-kT)).cwise().exp().cwise()*g/(-kT);
     }
-    return out;
-    //return (minusbeta*data).cwise().exp();
-  }
-  double transform(double Veff) const {
-    return exp(minusbeta*Veff);
-  }
-  double derive(double Veff) const {
-    return minusbeta*exp(minusbeta*Veff);
-  }
-  Functional grad(const Functional &ingrad, bool ispgrad) const {
-    if (ispgrad) return minusbeta*ingrad;
-    else return minusbeta*EffectivePotentialToDensity(-1/minusbeta)*ingrad;
-  }
-  // This computes the gradient of the functional, given a gradient of
-  // its output field (i.e. it applies the chain rule).
-  void grad(const GridDescription &, const VectorXd &data, const VectorXd &ingrad,
-            VectorXd *outgrad, VectorXd *outpgrad) const {
-    for (int i=0; i<data.rows(); i++)
-      (*outgrad)[i] += minusbeta*ingrad[i]*exp(minusbeta*data[i]);
-    if (outpgrad) // precondition by not dividing by n! (big change)
-      for (int i=0; i<data.rows(); i++) (*outpgrad)[i] += minusbeta*ingrad[i];
-    //*outgrad += (minusbeta*ingrad).cwise()*((minusbeta*data).cwise().exp());
-    //if (outpgrad) {
-    // *outpgrad += (minusbeta*ingrad).cwise()*((minusbeta*data).cwise().exp());
-    //}
   }
   Expression printme(const Expression &x) const {
-    return (Expression("minusbeta") * x).method("exp");
+    return f.printme(exp(x/(-Expression("kT").set_type("double"))));
+  }
+  void print_summary(const char *prefix, double e, std::string name) const {
+    f.print_summary(prefix, e, name);
   }
 private:
-  double minusbeta; // -1/kT
+  Functional f;
+  const std::string pattern, args;
 };
 
-Functional EffectivePotentialToDensity(double temp) {
-  return Functional(new EffectivePotentialToDensityType(temp));
+
+Functional OfEffectivePotential(const Functional &f) {
+  return Functional(new OfEffectivePotentialClass(f));
 }
