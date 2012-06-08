@@ -37,26 +37,22 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-{We develop a classical density functional theory for water by combining the
-fundamental-measure theory functional--which describes hard sphere fluids--with
-attractive interactions based on the Statistical Associating Fluid Theory
-(SAFT-VR). Using this approximation with an additional length scale parameter, we are able to calculate the vapor pressure, saturated liquid density, surface tension, and enthalpy of water, as well as the number of hydrogen bonds and density oscillations formed near hydrophobic rods and spheres immersed in water. 
-For two rods and four rods(arranged as the corners of a square) in water, our functional predicts
-a transition from a vapor state to a liquid state in the area between
-the rods that agrees with clasical theory.   We find that in the vapor state, the force per length can be
-approximated classically and is equal to 144~mN/m, or twice the bulk surface 
-tension even for nm scale rods, and  our hydrophobic spheres agree
-reasonably well with SPC/E simulations.
-This functional is computationally efficient and provides a foundation for 
-future work describing complex interactions in aqueous solution on an
-atomic level.}
+We develop a classical density functional for water which combines the
+White Bear fundamental-measure theory (FMT)
+functional\cite{roth2002whitebear} for the hard sphere fluid with
+attractive interactions based on the Statistical Associating Fluid
+Theory (SAFT-VR)\cite{clark2006developing}.
+This functional reproduces the properties of water at both long and
+short length scales over a wide range of temperatures, and is
+efficient to evaluate computationally, comparable to the cost of FMT
+itself.  We demonstrate our functional by applying it to systems
+composed of of two hard rods, four hard rods arranged in a square and
+hard spheres in water.
 \end{abstract}
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-
-\subsection{Water---the universal solvent}
 
 A large fraction of interesting chemistry---including all of molecular
 biology---takes place in aqueous solution.  However, while quantum
@@ -69,38 +65,20 @@ dynamics~\cite{car1985, grossman2004}.  The current state-of-the art
 in \emph{ab initio} molecular dynamics is limited to around 64 water
 molecules per unit cell, which places the minimum solute concentration
 at 0.84 molar and allows contact between the second solvation shell of
-neighboring solutes~\cite{izvekov2005, choe2007}.  On top of this,
-standard \emph{ab initio} methods using classical molecular dynamics
-without van der Waals corrections strongly over-structure water, to
-the point that ice melts at over 400K\cite{yoo2009phase}!  There has
-been a recent flurry of publications implicating van der Waals effects
-as significant in reducing this
-over-structuring\cite{lin2009importance, wang2011density,
-  mogelhoj2011ab, jonchiere2011van}.  It has also been found that the
-inclusion of nuclear quantum effects can provide similar improvements
-\cite{morrone2008nuclear}.  Each of these corrections imposes an
-additional computational burden on an approach that is already
-feasible for only a very small number of water molecules. A more
-efficient approach is needed in order to study nanoscale and
-hydrophobic solutes.
-
-Water stands out among liquids for its extraordinary properties.
-Water is the only natural substance that is found in solid, liquid and
-gaseous states at temperatures and pressures normally found on Earth.
-Water has a density maximum at 4$^\circ$C, and expands upon freezing.
-Water has the highest heat capacity, latent heat of fusion and
-vaporization, thermal conductivity and surface tension of any
-non-metallic liquid.  Water also has an unusually high dielectric constant.
-Much of the unusual behavior of water is explained by the ability of
-each water molecule to form \emph{four} strong, directional hydrogen
-bonds---two acceptors and two donors.  This directional bonding
-dictates the open structure of ice, leading to thermal expansion upon
-freezing.
-
-As common as water is, its large dielectric constant, small
-molecular size, strong hydrogen-bonding network and anomolous
-thermodynamic properties make ``the universal solvent'' a unique
-and interesting material.
+neighboring solutes~\cite{izvekov2005, choe2007}\fixme{Look up more
+  recent numbers on this!}.  On top of this, standard \emph{ab initio}
+methods using classical molecular dynamics without van der Waals
+corrections strongly over-structure water, to the point that ice melts
+at over 400K\cite{yoo2009phase}!  There has been a recent flurry of
+publications implicating van der Waals effects as significant in
+reducing this over-structuring\cite{lin2009importance,
+  wang2011density, mogelhoj2011ab, jonchiere2011van}.  It has also
+been found that the inclusion of nuclear quantum effects can provide
+similar improvements \cite{morrone2008nuclear}.  Each of these
+corrections imposes an additional computational burden on an approach
+that is already feasible for only a very small number of water
+molecules. A more efficient approach is needed in order to study
+nanoscale and hydrophobic solutes.
 
 \subsection{Classical density-functional theory}
 
@@ -118,67 +96,66 @@ continuum dielectric with a cavity surrounding each solute can give
 accurate predictions for the energy of solvation of ions~\cite{latimer1939,
 rashin1985, zhan1998, hsu1999, hildebrandt2004, hildebrandt2007}, but
 provides no information about the size of this cavity.  In a physically
-correct approach, the size of the cavity will naturally arise from a
+consistent approach, the size of the cavity will naturally arise from a
 balance between the free energy required to create the cavity, the
 attraction between the water and the solute, and the steric repulsion which
 opens up the cavity in the first place.
 
-A very promising approach for an efficient continuum description of water
-is that of classical density-functional theory (DFT), which is an approach
-for evaluating the free energy and thermally averaged density of fluids in
-an arbitrary external potential~\cite{ebner1976density}. The Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} allows us to write the ground state
-energy in terms of a universal functional of the electron density and a separate
-term including the external potential. Mermin\cite{mermin1965thermal} gives a
-theorem extending that of Hohenberg and Kohn to nonzero temperatures:
+One promising approach for an efficient continuum description of water
+is that of classical density-functional theory (DFT), which is an
+approach for evaluating the free energy and thermally averaged density
+of fluids in an arbitrary external potential~\cite{ebner1976density}.
+The foundation of classical DFT is the Mermin
+theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
+theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
+stating that
 \begin{equation}
-  A(T) = \underset{n(r)}{min}\left\{ F[n(r),T] + \int V_{ext}(r) n(r)
-d^3r\right\}.
+  A(T) = \underset{n(\rr)}{min}\left\{ F[n(r),T] + \int V_\textit{ext}(\rr) n(\rr)
+d\rr\right\}.
 \end{equation}
-This is the basis for classical DFT, where the relevant density is not the
-electron density, but the density of molecules. Classical DFT is a
-natural framework for creating a more flexible theory of hydrophobicity
-that can describe interaction of water with arbitrary external
-potentials---including potentials describing a \emph{strong} interaction
-with a solute.
- 
+where $A(T)$ is the Helmholtz free energy of a system in the external
+potential $V_\textit{ext}$ at temperature $T$, $F[n(r),T]$ is a
+universal free-energy functional, independent of external potential,
+and $n(\rr)$ is a density of atoms or molecules.  Classical DFT is a
+natural framework for creating a more flexible theory of
+hydrophobicity that can describe interaction of water with arbitrary
+external potentials---including potentials describing strong
+interactions with solutes or surfaces.
+
 A number of exact properties are easily achieved in the
-density-functional framework, such as the relationship between the
-pressure on a hard wall and the contact density---which ensures a
-correct solvation free energy for small hard solutes.  Much of the
-research on classical density-functional theory has focused on the
-hard-sphere fluid~\cite{curtin1985, rosenfeld1989, rosenfeld1993,
-  rosenfeld1997, tarazona1997, tarazona2000}.  This has led to a large
-number of very sophisticated functionals, such as the
-fundamental-measure theory (FMT) functional~\cite{rosenfeld1989,
+density-functional framework, such as the contact-value theorem, which
+ensures a correct free energy of hydration for small hard solutes.
+Much of the research on classical density-functional theory has
+focused on the hard-sphere fluid~\cite{curtin1985, rosenfeld1989,
+  rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000}, which has
+led to a number of sophisticated functionals, such as the
+fundamental-measure theory (FMT) functionals\cite{rosenfeld1989,
   rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000,
-  roth2002whitebear}.  The White Bear version of the FMT
-functional\cite{roth2002whitebear}  has a number of useful
-properties.  Like all FMT functionals, it is expressed as a function
-of a few convolutions of the density that can be efficiently
-computed.  In the homogeneous limit, it reduces to the
-Carnahan-Starling equation of state, and in the strongly-confined
-limit of a zero-dimensional cavity, it gives the exact free energy.  
+  roth2002whitebear}, which are entirely expressed as an integral of
+local functions of a few convolutions of the density that can be
+efficiently computed.  We will use the White Bear version of the FMT
+functional\cite{roth2002whitebear}.  In the homogeneous limit, this
+functional reduces to the Carnahan-Starling equation of state, and in
+the strongly-confined limit of a highly confined cavity, it reproduces
+the exact free energy.
 
 A number of classical density functionals have been developed for
 water~\cite{ding1987, Yang1992, gloor2002saft,gloor2004accurate,
   gloor2007prediction, Jaqaman2004, clark2006developing,
-  lischner2010classical, fu2005vapor-liquid-dft,felipe2001examination}
-, capturing some of the qualitative behavior of water.
-However, many of these are less sophisticated than those describing
-the hard-sphere fluid, and a quantitatively accurate functional
-describing water---which reproduces the temperature dependence of the
-macroscopic surface tension, its decrease as curvature increases, and
-its quantitative value---has not yet been published.  For instance,
-the functional of Lischner \emph{et al}\cite{lischner2010classical}
-treats the surface tension correctly, but can only be used at room
-temperature.  A number of classical density functionals have recently
-been produced that are based on Statistical Associating Fluid Theory
-(SAFT)\cite{gloor2002saft, clark2006developing, gloor2007prediction,
-  gloor2004accurate, gross2009density, kahl2008modified, felipe2001examination}.
-These functionals are based on a perturbative thermodynamic
-expansion, and give a reasonable prediction for the temperature
-dependence of the surface tension.
+  lischner2010classical,
+  fu2005vapor-liquid-dft,felipe2001examination}, each of which
+captures some of the qualitative behavior of water.  However, each of
+these functionals also fail to capture some of water's unique
+properties.  For instance, the functional of Lischner \emph{et
+  al}\cite{lischner2010classical} treats the surface tension
+correctly, but can only be used at room temperature, and thus captures
+none of the temperature-dependence of water.  A number of classical
+density functionals have recently been produced that are based on
+Statistical Associating Fluid Theory (SAFT)\cite{gloor2002saft,
+  clark2006developing, gloor2007prediction, gloor2004accurate,
+  gross2009density, kahl2008modified, felipe2001examination}.  These
+functionals are based on a perturbative thermodynamic expansion, and
+do reproduce the temperature-dependence of water's properties.
 
 \subsection{Statistical associating fluid theory}
 
