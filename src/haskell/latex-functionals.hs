@@ -1,5 +1,6 @@
 import SomeFunctionals
 import Latex
+import Expression ( (===) )
 import System.Environment ( getArgs )
 import System.Process ( rawSystem )
 import System.FilePath ( dropFileName )
@@ -13,6 +14,6 @@ main =
                            rawSystem "pdflatex" ["-output-directory", dropFileName f, texname]
                            return ()
                    else return ()
-     pdf "doc/WhiteBear.pdf" $ latexEasy whitebear
-     pdf "doc/Association.pdf" $ latexEasy saft_association
-     pdf "doc/Dispersion.pdf" $ latexEasy saft_dispersion
+     pdf "doc/WhiteBear.pdf" $ latexEasy $ "FHS" === whitebear
+     pdf "doc/Association.pdf" $ latexEasy $ "Fassoc" === saft_association
+     pdf "doc/Dispersion.pdf" $ latexEasy $ "Fdisp" === saft_dispersion

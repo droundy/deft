@@ -176,7 +176,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT saft_association" 6 saft_association,
                      -- t "countFFT grad saft_fluid" 134 (gradme saft_fluid),
                      t "countFFT grad whitebear" 24 (gradme whitebear),
-                     t "countFFT grad saft_dispersion" 51 (gradme saft_dispersion),
+                     t "countFFT grad saft_dispersion" 32 (gradme saft_dispersion),
                      -- t "countFFT grad saft_association" 68 (gradme saft_association),
                      t "countFFT nbar" 2 n3,
                      t "countFFT nbar + n2" 2 (nbar + n2),
@@ -217,7 +217,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem saft_association" 4 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
                      t "peakMem grad whitebear" 22 (gradme whitebear), -- was 20
-                     t "peakMem grad saft_dispersion" 11 (gradme saft_dispersion), -- was 49 ~12mins
+                     t "peakMem grad saft_dispersion" 6 (gradme saft_dispersion), -- was 49 ~12mins
                      -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
@@ -319,6 +319,9 @@ findToDoTests = TestList [t (DoR $ -3*(x1**2+x2**2))
 
 multisubstituteTests :: Test
 multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
+                                 -- t k kv (kv**2) (k**2),
+                                 t (k**2) (kv**2) (kv**2) (k**2),
+                                 t k kv (kv**3) (k**3),
                                  t (x1+x2) x4 (x4+x3) (x1+x2+x3),
                                  t (x1+x2) x4 (2*x4+x3) (2*x1+2*x2+x3),
                                  t (x1**2+x2**2) z
@@ -340,6 +343,7 @@ multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
         x3 = r_var "x3"
         x4 = r_var "x4"
         x5 = r_var "x5"
+        kv = k_var "k"
         z = r_var "z"
         rad = s_var "R"
         x = x1 + x2 + x3 * (x4 + x5)

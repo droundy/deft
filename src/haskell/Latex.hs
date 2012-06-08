@@ -16,7 +16,7 @@ latexEasy e0 = unlines $
           latexme (DoR e) = latexe e
           latexme DoNothing = error "oops in latexme"
           latexe (Var _ _ _ t (Just e')) = unlines ["\\begin{dmath}",
-                                                    "  " ++ t ++ " = " ++ latex (substitute k (k_var "k") e'),
+                                                    "  " ++ t ++ " = " ++ latex (substitute (k**2) (k_var "k" **2) e'),
                                                     "\\end{dmath}"]
           latexe _ = error "oops in latexe"
 

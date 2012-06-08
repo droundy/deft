@@ -3,7 +3,7 @@
 all: depend test functionals latex-functionals
 
 clean:
-	rm -f *.hi *.o test functionals
+	rm -f *.hi *.o test functionals latex-functionals
 
 GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
 GHCFLAGS=-Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
@@ -41,6 +41,7 @@ CodeGen.o : Statement.hi
 SomeFunctionals.o : SomeFunctionals.hs
 SomeFunctionals.o : CodeGen.hi
 latex-functionals.o : latex-functionals.hs
+latex-functionals.o : Expression.hi
 latex-functionals.o : Latex.hi
 latex-functionals.o : SomeFunctionals.hi
 Quantum.o : Quantum.hs
