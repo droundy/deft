@@ -18,32 +18,22 @@ case "$TEST" in
         echo Skipping all tests.
         ;;
     compile)
-        echo Testing compile and papers.
-        
-        time bash .build
+        echo Testing compile only.
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` recheck
         echo Compile successful!
-        
         ;;
     build)
         echo Testing build only.
-        
-        time bash .build
-        echo Compile successful!
-        
-        time bash .papers
-        echo Papers successfully built!
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` recheck pdf papers
+        echo Compile successful, and papers successfully built!
         ;;
     *)
         echo Testing everything!
-        
-        time bash .build
-        echo Compile successful!
-        
-        time bash .papers
-        echo Papers successfully built!
-
-        time bash .test
-        echo All tests passed!
+        ./autogen.sh
+        time make -j `grep -c processor /proc/cpuinfo` check pdf papers
+        echo Compile successful, papers successfully built, and all tests passed!
         ;;
 esac
 
