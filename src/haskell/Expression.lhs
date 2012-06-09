@@ -21,6 +21,7 @@ import Debug.Trace
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import LatexDouble ( latexDouble )
 \end{code}
 
 The \verb!RealSpaceField! data type describes a field in real space.
@@ -526,38 +527,6 @@ latexE p (Sum s _) = latexParen (p > 6) (showString me)
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x
 latexParen True x = showString "\\left(" . x . showString "\\right)"
-
-latexDouble :: Double -> String
-latexDouble 0 = "0"
-latexDouble x | x < 0 = "-" ++ latexDouble (-x)
-latexDouble x = case double2frac x of
-                  Just (n,1) -> show n
-                  Just (n,d) | n < 10 && d < 10 -> "\\frac" ++ show n ++ show d
-                  Just (n,d) | n < 10 -> "\\frac" ++ show n ++ "{" ++ show d ++ "}"
-                  Just (n,d) -> "\\frac{" ++ show n ++ "}{" ++ show d ++ "}"
-                  Nothing ->
-                    case double2frac (x/pi) of
-                      Just (n,1) -> show n ++ "\\pi"
-                      Just (n,d) -> "\\frac{" ++ show n ++ "\\pi}{"  ++ show d ++ "}"
-                      Nothing ->
-                        case double2frac (x*pi) of
-                          Just (n,1) -> "\\frac{" ++ show n ++ "}\\pi"
-                          Just (n,d) -> "\\frac{" ++ show n ++ "}{"  ++ show d ++ "\\pi}"
-                          Nothing -> show x
-
-double2frac :: Double -> Maybe (Int, Int)
-double2frac f = do denominator <- divby [1..36]
-                   numerator <- double2int (f * fromIntegral denominator)
-                   Just (numerator, denominator)
-  where divby (d:ds) = case double2int (f * fromIntegral d) of
-                         Just _ -> Just d
-                         Nothing -> divby ds
-        divby [] = Nothing
-
-double2int :: Double -> Maybe Int
-double2int f = if abs(fromInteger (round f) - f) < 1e-13*f
-               then Just (round f :: Int)
-               else Nothing
 
 class Code a  where
     codePrec  :: Int -> a -> ShowS
