@@ -24,7 +24,7 @@ test: test.o SomeFunctionals.o $(CODEGEN_O)
 functionals: functionals.o SomeFunctionals.o Quantum.o $(CODEGEN_O)
 	ghc $(GHCFLAGS) -o $@ $^
 
-latex-functionals: latex-functionals.o SomeFunctionals.o Latex.o $(CODEGEN_O)
+latex-functionals: latex-functionals.o SomeFunctionals.o Latex.o Quantum.o $(CODEGEN_O)
 	ghc $(GHCFLAGS) -o $@ $^
 
 depend:
@@ -44,12 +44,13 @@ CodeGen.o : Expression.hi
 CodeGen.o : Statement.hi
 SomeFunctionals.o : SomeFunctionals.hs
 SomeFunctionals.o : CodeGen.hi
+Quantum.o : Quantum.hs
+Quantum.o : CodeGen.hi
 latex-functionals.o : latex-functionals.hs
 latex-functionals.o : Expression.hi
 latex-functionals.o : Latex.hi
+latex-functionals.o : Quantum.hi
 latex-functionals.o : SomeFunctionals.hi
-Quantum.o : Quantum.hs
-Quantum.o : CodeGen.hi
 functionals.o : functionals.hs
 functionals.o : Quantum.hi
 functionals.o : SomeFunctionals.hi

@@ -175,8 +175,8 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT saft_dispersion" 2 saft_dispersion,
                      t "countFFT saft_association" 7 saft_association,
                      -- t "countFFT grad saft_fluid" 134 (gradme saft_fluid),
-                     t "countFFT grad whitebear" 24 (gradme whitebear),
-                     t "countFFT grad saft_dispersion" 32 (gradme saft_dispersion),
+                     t "countFFT grad whitebear" 12 (gradme whitebear),
+                     t "countFFT grad saft_dispersion" 4 (gradme saft_dispersion),
                      -- t "countFFT grad saft_association" 68 (gradme saft_association),
                      t "countFFT nbar" 2 n3,
                      t "countFFT nbar + n2" 2 (nbar + n2),
@@ -184,9 +184,9 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT n0 log n3" 3 (n0*log n3),
                      t "countFFT derive n0raw log n3" 6 (gradme $ kT*n0raw*log n3),
                      t "countFFT derive n0 log n3" 6 (gradme $ kT*n0*log n3),
-                     t "countFFT derive assocalike n0raw" 8
+                     t "countFFT derive assocalike n0raw" 6
                            (gradme $ assocalike n0raw),
-                     t "countFFT derive assocalike n0" 8
+                     t "countFFT derive assocalike n0" 6
                            (gradme $ assocalike n0),
                      t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
@@ -206,6 +206,18 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
 
+joinFFTtests :: Test
+joinFFTtests = TestList [t "joinFFT fft(a)*k + fft(b)*k = fft(a+b)*k" (fft (a+b)*k) (fft a*k + fft b*k),
+                         t "joinFFT ifft(fft(a)*k + fft(b)*k) = ifft(fft(a+b)*k)"
+                         (ifft (fft (a+b)*k))
+                         (ifft (fft a*k + fft b*k)),
+                         t "joinFFT integrate(fft(a)*k + fft(b)*k) = integrate(fft(a+b)*k)"
+                         (integrate $ ifft (fft (a+b)*k) :: Expression Scalar)
+                         (integrate $ ifft (fft a*k + fft b*k)),
+                         t "joinFFT fft(a) + fft(b) = fft(a+b)" (fft (a+b)) (fft a + fft b)]
+  where t str nn e = TestCase $ assertEqual str nn (joinFFTs e)
+        a = r_var "a"
+        b = r_var "b"
 
 memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
@@ -216,17 +228,17 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem saft_dispersion" 3 saft_dispersion,
                      t "peakMem saft_association" 4 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
-                     t "peakMem grad whitebear" 22 (gradme whitebear), -- was 20
-                     t "peakMem grad saft_dispersion" 6 (gradme saft_dispersion), -- was 49 ~12mins
+                     t "peakMem grad whitebear" 8 (gradme whitebear), -- was 20
+                     t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
                      -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
                      t "peakMem n0 log n3" 3 (n0*log n3), --was 2
                      t "peakMem derive n0raw log n3" 4 (gradme $ kT*n0raw*log n3),
                      t "peakMem derive n0 log n3" 4 (gradme $ kT*n0*log n3),
-                     t "peakMem derive assocalike n0raw" 6
+                     t "peakMem derive assocalike n0raw" 4
                            (gradme $ assocalike n0raw),
-                     t "peakMem derive assocalike n0" 6
+                     t "peakMem derive assocalike n0" 4
                            (gradme $ assocalike n0),
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
@@ -382,10 +394,9 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
           wf "tests/generated-haskell/nice-phi1.h" $ 
             generateHeader (-n2*log(1-n3)/(4*pi*rad**2)) ["R"] "NicePhi1"
           let smear = exp (-spreading*kdr*kdr)
-              i = s_var "complex(0,1)"
-              n2x = ifft ( smear * (4*pi) * i * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
-              n2y = ifft ( smear * (4*pi) * i * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
-              n2z = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              n2x = ifft ( smear * (4*pi) * imaginary * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              n2y = ifft ( smear * (4*pi) * imaginary * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
+              n2z = ifft ( smear * (4*pi) * imaginary * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
               phi2here = (n2**2 - n2x**2 - n2y**2 - n2z**2)/(1-n3)/(4*pi*rad)
           wf "tests/generated-haskell/nice-phi2.h" $
             generateHeader phi2here ["R"] "NicePhi2"
@@ -401,7 +412,8 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             (n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))
           if "codegen" `elem` args
             then putStrLn "Not running actual tests, just generating test code...\n"
-            else do c <- runTestTT $ TestList [substitutionTests, hasexpressionTests, multisubstituteTests,
+            else do c <- runTestTT $ TestList [joinFFTtests,
+                                               substitutionTests, hasexpressionTests, multisubstituteTests,
                                                findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests]
                     if failures c > 0 || errors c > 0
                       then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."

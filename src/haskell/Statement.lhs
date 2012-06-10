@@ -12,6 +12,7 @@ module Statement ( Statement(..),
                    latexSimp,
                    simp2,
                    findToDo, findNamedSubexpression,
+                   findNamedScalar, findFFTtodo, findFFTinputtodo,
                    countFFT,
                    checkDup,
                    peakMem,
@@ -377,7 +378,9 @@ findFFTinputtodo i everything (Expression e)
     if hasFFT e'
     then findFFTinputtodo i everything e'
     else case findFFTinputtodo i everything e' of
-      DoNothing -> DoR $ e'
+      DoNothing -> if hasFFT e'
+                   then error "craziness"
+                   else DoR e'
       dothis -> dothis
   | Same <- isRealSpace (Expression e), IFFT e' <- e =
       if hasFFT e'

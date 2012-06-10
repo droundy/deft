@@ -23,9 +23,6 @@ kdr = k * s_tex "dr" "\\Delta r"
 kR :: Expression KSpace
 kR = k * rad
 
-i :: Type a => Expression a
-i = s_var "complex(0,1)"
-
 smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
@@ -44,9 +41,9 @@ n1v_dot_n2v = {- var "n1vdn2v" "{\\left|\\vec{n}_{2v}\\right|}" -} (sqr_n2v/(4*p
 shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
 step x = ifft ( smear * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
-xshell x = ifft ( smear * (4*pi) * i * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
-yshell x = ifft ( smear * (4*pi) * i * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
-zshell x = ifft ( smear * (4*pi) * i * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
+xshell x = ifft ( smear * (4*pi) * imaginary * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
+yshell x = ifft ( smear * (4*pi) * imaginary * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
+zshell x = ifft ( smear * (4*pi) * imaginary * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
 
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)
