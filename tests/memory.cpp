@@ -240,28 +240,6 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  /*
-  check_a_functional("HardSpheres", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereFast", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresRF(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRF", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresRFFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereRFFast", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresTarazona(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazona", ff, potential);
-
-  ff = constrain(constraint, (HardSpheresTarazonaFast(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
-  check_a_functional("HardSphereTarazonaFast", ff, potential);
-
-  ff = constrain(constraint, HardSphereGas(R, mu));
-  check_a_functional("HardSphereGas", ff, potential);
-  */
-  
   double eps = water_prop.epsilonAB;
   double kappa = water_prop.kappaAB;
 
@@ -297,12 +275,6 @@ int main(int, char **argv) {
 
   ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
   check_a_functional("HardSpheresNoTensor2", ff, potential);
-
-  ff = constrain(constraint, YuWuCorrelation(R));
-  check_a_functional("YuWuCorrelation", ff, potential);
-
-  ff = constrain(constraint, YuWuCorrelationFast(R));
-  check_a_functional("YuWuCorrelationFast", ff, potential);
 
   if (numoops == 0) {
     printf("\n%s has no oopses!\n", argv[0]);

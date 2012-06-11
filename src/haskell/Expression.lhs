@@ -3,7 +3,7 @@
 
 module Expression (
                    RealSpace(..), r_var,
-                   KSpace(..), k_var, kx, ky, kz, k, ksqr, setkzero,
+                   KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    fft, ifft, integrate, grad, derive,
                    Expression(..), joinFFTs, (===), var,
@@ -21,6 +21,7 @@ import Debug.Trace
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import LatexDouble ( latexDouble )
 \end{code}
 
 The \verb!RealSpaceField! data type describes a field in real space.
@@ -280,6 +281,12 @@ k_var v | take 4 v == "temp" = Var IsTemp ("k"++v++"[i]") ('r':v) v Nothing
 k_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
 k_var "" = error "r_var needs non-empty string"
 
+imaginary :: Expression KSpace
+imaginary = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
+
+--imaginary :: Type a => Expression a
+--imaginary = s_var "complex(0,1)"
+
 infix 4 ===
 
 (===) :: Type a => String -> Expression a -> Expression a
@@ -527,38 +534,6 @@ latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x
 latexParen True x = showString "\\left(" . x . showString "\\right)"
 
-latexDouble :: Double -> String
-latexDouble 0 = "0"
-latexDouble x | x < 0 = "-" ++ latexDouble (-x)
-latexDouble x = case double2frac x of
-                  Just (n,1) -> show n
-                  Just (n,d) | n < 10 && d < 10 -> "\\frac" ++ show n ++ show d
-                  Just (n,d) | n < 10 -> "\\frac" ++ show n ++ "{" ++ show d ++ "}"
-                  Just (n,d) -> "\\frac{" ++ show n ++ "}{" ++ show d ++ "}"
-                  Nothing ->
-                    case double2frac (x/pi) of
-                      Just (n,1) -> show n ++ "\\pi"
-                      Just (n,d) -> "\\frac{" ++ show n ++ "\\pi}{"  ++ show d ++ "}"
-                      Nothing ->
-                        case double2frac (x*pi) of
-                          Just (n,1) -> "\\frac{" ++ show n ++ "}\\pi"
-                          Just (n,d) -> "\\frac{" ++ show n ++ "}{"  ++ show d ++ "\\pi}"
-                          Nothing -> show x
-
-double2frac :: Double -> Maybe (Int, Int)
-double2frac f = do denominator <- divby [1..36]
-                   numerator <- double2int (f * fromIntegral denominator)
-                   Just (numerator, denominator)
-  where divby (d:ds) = case double2int (f * fromIntegral d) of
-                         Just _ -> Just d
-                         Nothing -> divby ds
-        divby [] = Nothing
-
-double2int :: Double -> Maybe Int
-double2int f = if abs(fromInteger (round f) - f) < 1e-13*f
-               then Just (round f :: Int)
-               else Nothing
-
 class Code a  where
     codePrec  :: Int -> a -> ShowS
     codePrec _ x s = code x ++ s
@@ -762,6 +737,8 @@ hasFFT :: Type a => Expression a -> Bool
 hasFFT (Expression e) 
     | Same <- isKSpace (Expression e), FFT _ <- e = True
     | Same <- isRealSpace (Expression e), IFFT _ <- e = True
+    | Same <- isScalar (Expression e), Integrate _ <- e = True -- a bit weird... rename this function?
+    | otherwise = False
 hasFFT (Var _ _ _ _ (Just e)) = hasFFT e
 hasFFT (Sum s _) = or $ map (hasFFT . snd) (sum2pairs s)
 hasFFT (Product p _) = or $ map (hasFFT . fst) (product2pairs p)
@@ -771,7 +748,8 @@ hasFFT (Log e) = hasFFT e
 hasFFT (Exp e) = hasFFT e
 hasFFT (Abs e) = hasFFT e
 hasFFT (Signum e) = hasFFT e
-hasFFT _ = False
+hasFFT (Var _ _ _ _ Nothing) = False
+hasFFT (Scalar e) = hasFFT e
 
 hasK :: Type a => Expression a -> Bool
 hasK (Expression e) 
@@ -791,25 +769,25 @@ hasK (Signum e) = hasK e
 hasK (Var _ _ _ _ Nothing) = False
 hasK (Scalar _) = False
 
-isfft :: Expression KSpace -> Maybe (Expression RealSpace)
-isfft (Expression (FFT e)) = Just e
-isfft (Product p _) = tofft 1 Nothing $ product2pairs p
-  where tofft _ Nothing [] = Nothing
-        tofft sc (Just e) [] = Just $ sc*e
-        tofft sc Nothing ((Expression (FFT e),1):xs) = tofft sc (Just e) xs
-        tofft sc myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) myfft xs
-        tofft _ _ _ = Nothing
+isfft :: Expression KSpace -> Maybe (Expression RealSpace, Expression KSpace)
+isfft (Expression (FFT e)) = Just (e,1)
+isfft (Product p _) = tofft 1 1 Nothing $ product2pairs p
+  where tofft _ _ Nothing [] = Nothing
+        tofft sc ks (Just e) [] = Just (sc*e, ks)
+        tofft sc ks Nothing ((Expression (FFT e),1):xs) = tofft sc ks (Just e) xs
+        tofft sc ks myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) ks myfft xs
+        tofft sc ks myfft ((kk,n):xs) = tofft sc (ks * kk ** toExpression n) myfft xs
 isfft (Var _ _ _ _ (Just e)) = isfft e
 isfft _ = Nothing
 
-isifft :: Expression RealSpace -> Maybe (Expression KSpace)
-isifft (Expression (IFFT e)) = Just e
-isifft (Product p _) = tofft 1 Nothing $ product2pairs p
-  where tofft _ Nothing [] = Nothing
-        tofft sc (Just e) [] = Just $ sc*e
-        tofft sc Nothing ((Expression (IFFT e),1):xs) = tofft sc (Just e) xs
-        tofft sc myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) myfft xs
-        tofft _ _ _ = Nothing
+isifft :: Expression RealSpace -> Maybe (Expression KSpace, Expression RealSpace)
+isifft (Expression (IFFT e)) = Just (e,1)
+isifft (Product p _) = tofft 1 1 Nothing $ product2pairs p
+  where tofft _ _ Nothing [] = Nothing
+        tofft sc rs (Just e) [] = Just (sc*e, rs)
+        tofft sc rs Nothing ((Expression (IFFT e),1):xs) = tofft sc rs (Just e) xs
+        tofft sc rs myfft ((Scalar s,n):xs) = tofft (sc * Scalar s ** toExpression n) rs myfft xs
+        tofft sc rs myfft ((r,n):xs) = tofft sc (rs * r ** toExpression n) myfft xs
 isifft (Var _ _ _ _ (Just e)) = isifft e
 isifft _ = Nothing
 
@@ -818,14 +796,35 @@ joinFFTs :: Type a => Expression a -> Expression a
 joinFFTs (Expression e)
   | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinFFTs e')
   | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinFFTs e')
-joinFFTs (Sum s i) | Same <- isKSpace (Sum s i) = joinup [] $ sum2pairs s
-  where joinup tofft [] = fft $ factorandsum tofft
-        joinup tofft ((f,x):xs) | Just e <- isfft x = joinup (toExpression f*e:tofft) xs
-                                | otherwise = toExpression f*x + joinup tofft xs
-joinFFTs (Sum s i) | Same <- isRealSpace (Sum s i) = joinup [] $ sum2pairs s
-  where joinup tofft [] = ifft $ factorandsum tofft
-        joinup tofft ((f,x):xs) | Just e <- isifft x = joinup (toExpression f*e:tofft) xs
-                                | otherwise = toExpression f*x + joinup tofft xs
+  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (joinFFTs e')
+joinFFTs (Sum s0 i)
+  | Same <- isKSpace (Sum s0 i) = joinup Map.empty $ sum2pairs s0
+        where joinup m [] = sum $ map toe $ Map.toList m
+                where toe (rs, Right ks) = rs * fft (joinFFTs ks)
+                      toe (_, Left (_,e)) = e
+              joinup m ((f,e):es) =
+                case isfft e of
+                  Nothing -> toExpression f * joinFFTs e + joinup m es
+                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
+                    where ks' = case Map.lookup rs m of
+                                Nothing -> Left (toExpression f * joinFFTs ks,
+                                                 toExpression f * e)
+                                Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
+                                Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
+joinFFTs (Sum s0 i)
+  | Same <- isRealSpace (Sum s0 i) = joinup Map.empty $ sum2pairs s0
+        where joinup m [] = sum $ map toe $ Map.toList m
+                where toe (rs, Right ks) = rs * ifft (joinFFTs ks)
+                      toe (_, Left (_,e)) = e
+              joinup m ((f,e):es) =
+                case isifft e of
+                  Nothing -> toExpression f * joinFFTs e + joinup m es
+                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
+                    where ks' = case Map.lookup rs m of
+                                Nothing -> Left (toExpression f * joinFFTs ks,
+                                                 toExpression f * e)
+                                Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
+                                Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
 joinFFTs (Var t a b c (Just e)) = Var t a b c (Just (joinFFTs e))
 joinFFTs e = e
 

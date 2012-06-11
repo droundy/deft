@@ -195,7 +195,8 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # IKIWIKI=ikiwiki
 # endif
 
-pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf
+pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
+	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf
 
 html: pdf
 	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
