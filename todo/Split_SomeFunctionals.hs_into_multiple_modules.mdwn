@@ -1,1 +1,5 @@
 We'd ideally create separate modules for FMT, ideal gas, etc.
+
+This will eventually make it possible for us to minimize recompiling,
+by making separate versions of "functionals.hs" for each output, so we
+can only regenerate code that needs to be regenerated.
