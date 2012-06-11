@@ -394,6 +394,12 @@ map2sum s = Sum s (Set.unions $ map varSet $ Map.keys s)
 product2pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
 product2pairs s = Map.assocs s
 
+-- map2sum converts a Map to a product.  It handles the case of a
+-- singleton map properly.  It also appropriately combines any
+-- constant values in the product, and eliminates any terms with a
+-- zero power (which are thus one).  Unline pairs2product, map2product
+-- *doesn't* need to check for a given expression occurring more than
+-- once, which makes it a bit simpler.
 map2product :: Type a => Map.Map (Expression a) Double -> Expression a
 map2product p | Map.size p == 1 =
   case product2pairs p of [(e,1)] -> e
@@ -403,9 +409,17 @@ map2product p = helper 1 (Map.empty) $ product2pairs p
         helper f a [] = Sum (Map.singleton (Product a i) f) i
           where i = vl a
         helper f a ((Sum x _,n):xs) | [(f',x')] <- sum2pairs x = helper (f*f'**n) a ((x',n):xs)
-        helper f a ((x,n):xs) = helper f (Map.insert x n a) xs
+        helper f a ((x,n):xs)
+          | n == 0 = helper f a xs
+          | x == 1 = helper f a xs
+          | otherwise = helper f (Map.insert x n a) xs
         vl = Set.unions . map varSet . Map.keys
 
+-- pairs2product combines a list of expressions and their powers into
+-- a product expression.  It calls map2product internally, so it
+-- automatically handles anything map2product can handle.  In
+-- addition, it handles situations where the same expression occurs
+-- several times, such as x**2/y/x.
 pairs2product :: Type a => [(Expression a, Double)] -> Expression a
 pairs2product = map2product . fl (Map.empty)
   where fl a [] = a
@@ -797,6 +811,7 @@ joinFFTs (Expression e)
   | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinFFTs e')
   | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinFFTs e')
   | Same <- isScalar (Expression e), Integrate e' <- e = integrate (joinFFTs e')
+  | otherwise = Expression e
 joinFFTs (Sum s0 i)
   | Same <- isKSpace (Sum s0 i) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
