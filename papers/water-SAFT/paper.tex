@@ -140,10 +140,10 @@ the strongly-confined limit of a highly confined cavity, it reproduces
 the exact free energy.
 
 A number of classical density functionals have been developed for
-water~\cite{ding1987, Yang1992, gloor2002saft,gloor2004accurate,
+water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft,gloor2004accurate,
   gloor2007prediction, Jaqaman2004, clark2006developing,
-  lischner2010classical,
-  fu2005vapor-liquid-dft,felipe2001examination}, each of which
+  lischner2010classical, fu2005vapor-liquid-dft,
+  blas2001examination}, each of which
 captures some of the qualitative behavior of water.  However, each of
 these functionals also fail to capture some of water's unique
 properties.  For instance, the functional of Lischner \emph{et
@@ -151,23 +151,25 @@ properties.  For instance, the functional of Lischner \emph{et
 correctly, but can only be used at room temperature, and thus captures
 none of the temperature-dependence of water.  A number of classical
 density functionals have recently been produced that are based on
-Statistical Associating Fluid Theory (SAFT)\cite{gloor2002saft,
+Statistical Associating Fluid Theory (SAFT)\cite{ 
+  yu2002fmt-dft-inhomogeneous-associating,
+  fu2005vapor-liquid-dft,gloor2002saft,
   clark2006developing, gloor2007prediction, gloor2004accurate,
-  gross2009density, kahl2008modified, felipe2001examination}.  These
+  gross2009density, kahl2008modified, blas2001examination}.  These
 functionals are based on a perturbative thermodynamic expansion, and
 do reproduce the temperature-dependence of water's properties.
 
 \subsection{Statistical associating fluid theory}
 
 Statistical Associating Fluid Theory (SAFT) is a set of models for
-complex fluids in which hydrogren bonding plays a significant
+complex fluids in which hydrogen bonding plays a significant
 role\cite{muller2001molecular}.  SAFT is used to accurately model the
 equations of state of pure fluids and predict the equations of state
 for mixtures over a wide range of temperatures and pressures.  SAFT is
 based on Wertheim's first-order thermodynamic perturbation theory
 (TPT1) \cite{wertheim1984fluidsI, wertheim1984fluidsII,
   wertheim1986fluidsIII, wertheim1986fluidsIV} which allows it to
-account for strong associative interations between molecules.
+account for strong associative interactions between molecules.
 
 The SAFT Helmholtz free energy is composed of five terms:
 \begin{equation} \label{eq:SAFT-free-energy}
@@ -182,9 +184,9 @@ relevant for water.  While a number of SAFT formulations have been
 published, we will focus on SAFT-VR\cite{gil-villegas-1997-SAFT-VR},
 which has been used by Clark \emph{et al} to construct an optimal SAFT
 model for water\cite{clark2006developing}. A majority of the empirical
-parameters used in our functional are taken from the Clark\emph{et al}
-SAFT functional which contains five empirical parameters and give the
-correct pressure at liquid-vapor coexistince curve shown in Figure
+parameters used in our functional are taken from the Clark \emph{et al}
+paper which contains five empirical parameters and gives
+correct pressures at the liquid-vapor coexistence curve shown in Figure
 \ref{fig:pressure-with-isotherms}.
 
 \begin{figure}
@@ -192,24 +194,67 @@ correct pressure at liquid-vapor coexistince curve shown in Figure
 \includegraphics[width=\columnwidth]{figs/pressure-with-isotherms-truncated}
 \end{center}
 \caption{The pressure versus density for various temperatures, including
-experimental pressure data from NIST\cite{nistwater}. The dash-dotted lines
-indicate the computationally calculated pressure and the open circles are 
-NIST data points. The solid and dotted lines represent the theoretical
-and experimental coexistence curves.}
+experimental pressure data from NIST\cite{nistwater}. The solid colored lines
+indicate the computationally calculated pressure and the dotted
+colored lines are NIST data points. The solid and dotted black lines
+represent the theoretical and experimental coexistence curves.}
 \label{fig:pressure-with-isotherms}
 \end{figure}
 
 SAFT has also been used to construct classical density functionals,
 which have been applied to study the surface tension as a function of
-temperature\cite{whotocite}.  Such functionals have qualitatively
-predicted the dependence of surface tension on temperature, however, they also overestimate
-the surface tension by a factor of about 1.5, and \fixme{most?} are unsuited
+temperature\cite{clark2006developing, gloor2004accurate,
+  gloor2007prediction, blas2001examination, gloor2002saft}.  Such
+functionals have qualitatively predicted the dependence of surface
+tension on temperature, however, they also overestimate
+the surface tension by a factor of about 1.5, and most are unsuited
 for studying systems that have density variations on a molecular
-length scale due to the use of a local density approximation.
+length scale due to the use of a local density
+approximation\cite{gloor2002saft,clark2006developing, gloor2007prediction,
+gloor2004accurate, gross2009density, kahl2008modified, blas2001examination}.
+
+\begin{table}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+paper & SAFT functional & water & LDA & tension \\
+\hline
+yuwu2002dft & X & & & \\
+\hline
+fuwu2005 & X & X & & X \\
+\hline
+kiselev2006 &  & X & X & X \\
+\hline
+clark2006developing & X & X & X & X \\
+\hline
+gloor2002 & X & X & X & X \\
+\hline
+gloor2004 & X & X & X & X \\
+\hline
+gloor2007 & X & X & X & X \\
+\hline
+gross2009 & X &  & X & X \\
+\hline
+Lischner2010 &  & X &  &  \\
+\hline
+Blas2001 & X & X & X & X \\
+\hline
+Kahl2008 & X &  & X & X \\
+\hline
+Muller2001 & X &  &  &  \\
+\hline
+Yang1994 &  & X &  & X \\
+\hline
+ding1987 &  & X & ? &  \\
+\hline
+next & ? & ? & ? & ? \\
+\hline
+\end{tabular}
+\caption{Which papers do what}
+\end{table}
 
 Functionals constructed using a local density approximation
-  will always fail to satisfy the contact-value theorem, and will
-  therefore incorrectly model small hard solutes.
+will always fail to satisfy the contact-value theorem, and will
+therefore incorrectly model small hard solutes.
 The contact-value theorem states that the pressure of any fluid at a
 hard wall interface is proportional to the contact density of the
 fluid\cite{henderson1979exact}, according to the following relation:
@@ -250,9 +295,10 @@ quantum concentration
  n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}.
 \end{equation}
 The ideal gas free energy functional satisfies the contact value
-theorem and its limiting case of small solutes (Equation
-\ref{contactvaluethm}). These properties are retained by the total
-functional, provided the remaining terms are \emph{purely nonlocal}.
+theorem and its limiting case of small solutes (Equations
+\ref{eq:contact} and \ref{contactvaluethm}). These properties are
+retained by the total functional, provided the remaining terms are
+\emph{purely nonlocal}.
 
 \subsection{Hard-sphere repulsion}
 
@@ -357,10 +403,10 @@ term in the free energy two empirical parameters that are fit to
 experimental data.
 
 The association functional we use is a modified version of Yu
-and Wu.\cite{yu2002fmt-dft-inhomogeneous-associating} \footnote{We
+and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}. \footnote{We
   should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
   the same functional, but their paper contains errors in the
-  association term and is not useful as a reference.} 
+  association term and is not useful as a reference.}
 This functional includes the effects of density inhomogeneities in the
 contact value of the correlation function $g^{HS}_\sigma$, but is
 based on the SAFT-HS equation of state rather than the SAFT-VR
@@ -639,11 +685,10 @@ oscillations in the water near the surface.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/density-single-rod}
 \end{center}
-\caption{ Density profiles for a single rod of different radii. The dotted line
+\caption{ Density profiles for single rods of different radii. The dotted line
 represents the saturated liquid density and the points represent the
 expected contact density derived from the contact value theorem and
-the free energy data
-data plotted in Figure \ref{fig:energy-vs-diameter}.}
+calculated free energy data.}
 \label{fig:density-single-rod}
 \end{figure}
 
@@ -657,12 +702,12 @@ different radii rods which have the
 expected oscillations outside the rod that reduce to the bulk saturated liquid
 density as the distance away from the rods increases. We use the
 contact value theorem to derive the contact density at the water-rod
-interface.  We start with the thermodyamic expression relating
+interface.  We start with the thermodynamic expression relating
 pressure to the partial derivative of free energy with respect the
-radius of a cylinder. Using the contact value theorem and sustituting in
+radius of a cylinder. Using the contact value theorem and substituting in
 the free energy gradient for the pressure, we can derive values for
 the contact density from data used in Figure
-\ref{fig:energy-vs-diameter}.  As the radius of the rods approch zero we
+\ref{fig:energy-vs-diameter}.  As the radius of the rods approach zero we
 expect the contact density to approach the bulk density, which our
 functional does.  This self consistency shows that our functional is
 thermodynamically correct.
@@ -739,7 +784,7 @@ the energy for these and other separations.}
 \label{fig:density-rods}
 \end{figure}
 
-To determine the critical separation, we start by consider a macroscopic surface
+To determine the critical separation, we start by considering a macroscopic surface
 tension model where the free energy in the macroscopic limit is given by 
 \begin{equation}
 F = \gamma A + pV
@@ -757,7 +802,7 @@ point where the rods are closest to each other.
 
 Starting from the surface energy term, we can calculate the 
 free energy per length, which is equal to the circumference multiplied 
-by the surface tenson. The force per length is the derivative of this
+by the surface tension. The force per length is the derivative of this
 with respect to the separation. 
 We approximate the circumference of the stadium-shape by
 \begin{equation}
@@ -792,7 +837,7 @@ d_c = (\pi-2)r.\label{criticalseparation}
 \end{equation}
 The predicted and actual computed values for $d_c$ are shown graphically in 
 Figure~\ref{fig:rods-energy-vs-distance} where there is a transition
-betwen the sloped and flat portion of each plot. They match fairly well for the 
+between the sloped and flat portion of each plot. They match fairly well for the 
 0.5~-~1.0~nm rods with differences between 1.3~-~5.5\% and we hypothesize that larger radii rods
 would also follow this trend, but smaller rods are likely to have a different
 relationship with the surrounding water molecules. This may explain why the critical
@@ -820,7 +865,7 @@ nanotubes of diameter 1.25~nm and separations ranging from about 0.3~nm to 1.5~n
 They also find that a drying transition occurs, and find it to be at separations near
 0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is larger than
 what we find for hydrophobic rods of a similar size, as expected due to the carbon-carbon
-and carbon-water interations.
+and carbon-water interactions.
 
 \subsection{Hydrophobic interactions of four rods}
 
@@ -828,7 +873,7 @@ and carbon-water interations.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/four-rods-energy-vs-distance}
 \end{center}
-\caption{ Free energy of hydradon 
+\caption{ Free energy of hydration 
 versus separation for four hydrophobic rods ranging in radius from
 0.3~nm to 1.0~nm.
 All were arbitrarily offset to zero at large separations. The
@@ -887,7 +932,7 @@ a 23\% difference, and better agreement for larger radii rods (between 0.5\% and
   surface tension at room temperature, and it agrees well with the
   surface tension in Figure~\ref{fig:surface-tension}. Results from a
   simulation of SPC/E water~\cite{huang2001shs} are shown as circles.
-  The horizonal lines show the experimental and SPC/E bulk surface
+  The horizontal lines show the experimental and SPC/E bulk surface
   tension for water at standard atmospheric temperature and
   pressure. }
 \label{fig:sphere-energy-vs-diameter}
@@ -936,7 +981,7 @@ agree.
 \section{Conclusion}
 
 The classical density functional we developed by combining fundamental-measure 
-theory with SAFT is able to produce reasonable results for hydrophobic interations.
+theory with SAFT is able to produce reasonable results for hydrophobic interactions.
 We added the parameter $\lscale$ to the functional and fit it to the surface tension
 at room temperature, which we find to be consistent with results for larger hydrophobic
 rods. 
