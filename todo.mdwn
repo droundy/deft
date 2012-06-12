@@ -1,4 +1,7 @@
 This is deft's TODO list. Link items to [[todo/done]] when done.
 
+There are [[!pagecount pages="todo/* and !todo/done and !link(done)
+and !todo/*/*"]] open TODO items:
+
 [[!inline pages="./todo/* and !./todo/done* and !link(done) 
 and !*/Discussion" actions=yes postform=yes show=0]]
