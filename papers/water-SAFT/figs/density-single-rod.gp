@@ -45,9 +45,9 @@ set key inside bottom
 set style line 1 lt 1 lc 7 lw 3
 set style line 2 lt 1 lc 3 lw 3
 set style line 3 lt 1 lc 1 lw 3
-set style line 5 lt 1 lc 8 lw 3
-set style line 6 lt 1 lc 2 lw 3
-set style line 7 lt 1 lc 5 lw 3
+set style line 5 lt 1 lw 3 lc rgb "#999900"
+set style line 6 lt 1 lw 3 lc rgb "#00ff88"
+set style line 7 lt 1 lw 3 lc rgb "#99dddd"
 set style line 4 lt 3 lc 3 lw 3
 
 #splot [:] [:] [:] \
