@@ -25,6 +25,7 @@ main =
      let foo = "Fdisp" === integrate saft_dispersion
      pdf "doc/GradDispersion.pdf" $ latexEasy $ "grad" === (grad "x" foo)
      pdf "doc/JoinedGradDispersion.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" foo)
+     pdf "doc/SimpGradDispersion.pdf" $ latexSimp $ "grad" === (joinFFTs $ grad "x" $ integrate saft_dispersion)
      let assoc = "Fassoc" === integrate saft_association
      pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" assoc)
      pdf "doc/JoinedGradAssociation.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" assoc)

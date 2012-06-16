@@ -125,7 +125,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test \
-			tests/latex-generation.sh $(check_PROGRAMS)
+			$(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
@@ -196,7 +196,7 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # endif
 
 pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
-	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf
+	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
 
 html: pdf
 	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
