@@ -6,7 +6,7 @@ module Expression (
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    fft, ifft, integrate, grad, derive,
-                   Expression(..), joinFFTs, (===), var,
+                   Expression(..), joinFFTs, joinScalars, (===), var,
                    Type(..), Code(..), Same(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorandsum,
@@ -262,8 +262,8 @@ instance Type Scalar where
   postfix (Expression (Integrate _)) = "\n}\n"
   postfix _ = ""
   initialize (Expression (Integrate _)) = "double output = 0;\n"
-  initialize (Var IsTemp _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
-  initialize _ = error "double output = 0;\n"
+  initialize (Var _ _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
+  initialize v = error ("bug in initialize Scalar: "++show v)
   toScalar (Integrate r) = makeHomogeneous r
   fromScalar = id
 
@@ -841,7 +841,58 @@ joinFFTs (Sum s0 i)
                                 Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
                                 Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
 joinFFTs (Var t a b c (Just e)) = Var t a b c (Just (joinFFTs e))
-joinFFTs e = e
+joinFFTs (Sum s _) = pairs2sum $ map j $ sum2pairs s
+  where j (f,x) = (f,joinFFTs x)
+joinFFTs (Product p _) = pairs2product $ map j $ product2pairs p
+  where j (x,n) = (joinFFTs x, n)
+joinFFTs (Scalar s) = Scalar (joinFFTs s)
+joinFFTs (Cos e) = cos (joinFFTs e)
+joinFFTs (Sin e) = sin (joinFFTs e)
+joinFFTs (Exp e) = exp (joinFFTs e)
+joinFFTs (Log e) = log (joinFFTs e)
+joinFFTs (Abs e) = abs (joinFFTs e)
+joinFFTs (Signum e) = signum (joinFFTs e)
+joinFFTs e@(Var _ _ _ _ Nothing) = e
+
+joinScalars :: Type a => Expression a -> Expression a
+joinScalars (Expression e)
+  | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinScalars e')
+  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinScalars e')
+  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (joinScalars e')
+  | otherwise = Expression e
+joinScalars (Sum s0 _) = pairs2sum $ fixup [] [] $ sum2pairs s0
+  where fixup m ps [] = if sval == 0
+                        then m
+                        else (1, Scalar sval) : m
+          where sval = pairs2sum ps
+        fixup m ps ((f,x0):xs) =
+          case joinScalars x0 of
+            Scalar x -> fixup m ((f, x):ps) xs
+            x -> fixup ((f, x):m) ps xs
+joinScalars (Product p0 _) = pairs2product $ fixup [] [] $ product2pairs p0
+  where fixup m ps [] = if sval == 1
+                        then m
+                        else (Scalar sval, 1) : m
+          where sval = pairs2product ps
+        fixup m ps ((x0,n):xs) =
+          case joinScalars x0 of
+            Scalar x -> fixup m ((x,n):ps) xs
+            x -> fixup ((x,n):m) ps xs
+joinScalars (Var t a b c (Just e)) = Var t a b c (Just (joinScalars e))
+joinScalars (Scalar s) = case isConstant s' of Just x -> toExpression x
+                                               Nothing -> Scalar s'
+  where s' = joinScalars s
+joinScalars (Cos e) = case joinScalars e of Scalar e' -> Scalar (cos e')
+                                            e' -> cos e'
+joinScalars (Sin e) = case joinScalars e of Scalar e' -> Scalar (sin e')
+                                            e' -> sin e'
+joinScalars (Exp e) = case joinScalars e of Scalar e' -> Scalar (exp e')
+                                            e' -> exp e'
+joinScalars (Log e) = case joinScalars e of Scalar e' -> Scalar (log e')
+                                            e' -> log e'
+joinScalars (Abs e) = abs (joinScalars e)
+joinScalars (Signum e) = signum (joinScalars e)
+joinScalars e@(Var _ _ _ _ Nothing) = e
 
 factorandsum :: Type a => [Expression a] -> Expression a
 factorandsum [] = 0
