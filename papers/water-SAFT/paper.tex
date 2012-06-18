@@ -161,14 +161,14 @@ do reproduce the temperature-dependence of water's properties.
 
 \subsection{Statistical associating fluid theory}
 
-Statistical Associating Fluid Theory (SAFT) is a set of models for
+Statistical Associating Fluid Theory (SAFT) is a theory describing
 complex fluids in which hydrogen bonding plays a significant
 role\cite{muller2001molecular}.  SAFT is used to accurately model the
-equations of state of pure fluids and predict the equations of state
-for mixtures over a wide range of temperatures and pressures.  SAFT is
+equations of state of both pure fluids and mixtures over a wide range
+of temperatures and pressures.  SAFT is
 based on Wertheim's first-order thermodynamic perturbation theory
-(TPT1) \cite{wertheim1984fluidsI, wertheim1984fluidsII,
-  wertheim1986fluidsIII, wertheim1986fluidsIV} which allows it to
+(TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
+  wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
 account for strong associative interactions between molecules.
 
 The SAFT Helmholtz free energy is composed of five terms:
@@ -179,15 +179,19 @@ The SAFT Helmholtz free energy is composed of five terms:
 where the first three terms encompass the \emph{monomer} contribution
 to the free energy, the fourth is the \emph{association} free energy,
 describing hydrogen bonds, and the final term is the chain formation
-energy of for fluids that are chain polymers.  The final term is not
-relevant for water.  While a number of SAFT formulations have been
+energy of for fluids that (unlike water) are chain polymers.
+While a number of forumlations of SAFT have been
 published, we will focus on SAFT-VR\cite{gil-villegas-1997-SAFT-VR},
-which has been used by Clark \emph{et al} to construct an optimal SAFT
-model for water\cite{clark2006developing}. A majority of the empirical
-parameters used in our functional are taken from the Clark \emph{et al}
-paper which contains five empirical parameters and gives
-correct pressures at the liquid-vapor coexistence curve shown in Figure
-\ref{fig:pressure-with-isotherms}.
+which was used by Clark \emph{et al} to construct an optimal SAFT
+model for water\cite{clark2006developing}. All but one of the six
+empirical parameters used in the functional introduced in this paper
+are taken directly from this Clark \emph{et al} paper.  The phase
+diagram for this optimal SAFT model for water is shown in
+Figure~\ref{fig:pressure-with-isotherms}, which demonstrates that its
+vapor pressure as a function of temperature is very accurate, while
+the liquid density shows larger discrepancies.  The critical point is
+very poorly described, which is a common failing of mean-field
+expansions.
 
 \begin{figure}
 \begin{center}
@@ -202,14 +206,14 @@ represent the theoretical and experimental coexistence curves.}
 \end{figure}
 
 SAFT has also been used to construct classical density functionals,
-which have been applied to study the surface tension as a function of
+which are commonly used to study the surface tension as a function of
 temperature\cite{clark2006developing, gloor2004accurate,
   gloor2007prediction, blas2001examination, gloor2002saft}.  Such
 functionals have qualitatively predicted the dependence of surface
-tension on temperature, however, they also overestimate
-the surface tension by a factor of about 1.5, and most are unsuited
-for studying systems that have density variations on a molecular
-length scale due to the use of a local density
+tension on temperature, but they also overestimate
+the surface tension by about 50\%, and most SAFT-based functionals are
+unsuited for studying systems that have density variations on a
+molecular length scale due to the use of a local density
 approximation\cite{gloor2002saft,clark2006developing, gloor2007prediction,
 gloor2004accurate, gross2009density, kahl2008modified, blas2001examination}.
 
@@ -253,11 +257,11 @@ next & ? & ? & ? & ? \\
 \end{table}
 
 Functionals constructed using a local density approximation
-will always fail to satisfy the contact-value theorem, and will
+fail to satisfy the contact-value theorem, and
 therefore incorrectly model small hard solutes.
 The contact-value theorem states that the pressure of any fluid at a
 hard wall interface is proportional to the contact density of the
-fluid\cite{henderson1979exact}, according to the following relation:
+fluid\cite{henderson1979exact}:
 \begin{equation}\label{eq:contact}
   p = n_ck_BT
 \end{equation}
@@ -270,22 +274,20 @@ solvent-excluded volume:
   F = n k_BT V
 \end{equation}
 The contact-value theorem is satisfied for functionals where the
-only purely local term is the free energy of an ideal gas.
+only purely local term is the free energy of an ideal gas, and is not
+satisfied for functionals built using a local density approximation.
 
 \section{Theory and Methods}
-We construct a new classical density functional for water. We treat
-each individual water molecule as a purely classical hard sphere and
-add association terms based on SAFT. For our free energy, we use the
+We construct a classical density functional for water, which reduces
+in the homogeneous limit to the optimal SAFT model for water found by
+Clark~\emph{et al}.  The Helmholtz free energy is constructed using the
 first four terms from Equation \ref{eq:SAFT-free-energy}: $F_\textit{id}$,
-$F_\textit{hs}$, $F_\textit{disp}$ and $F_\textit{assoc}$. In
-addition, a chemical potential term is used, so we actually work in
-the grand canonical ensemble.  In the following sections, we will
-introduce the terms of this functional.
+$F_\textit{hs}$, $F_\textit{disp}$ and $F_\textit{assoc}$.  In the
+following sections, we will introduce the terms of this functional.
 
 \subsection{Ideal gas functional}
-The first term is the ideal gas free energy functional, which
-incorporates effects of kinetic energy.  The ideal gas functional is
-given by
+The first term is the ideal gas free energy functional, which is
+purely local:
 \begin{equation}\label{idealgas}
   F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{n_Q}} - 1\right) d\xx
 \end{equation}
@@ -294,23 +296,23 @@ quantum concentration
 \begin{equation}\label{quantumconcentration}
  n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}.
 \end{equation}
-The ideal gas free energy functional satisfies the contact value
-theorem and its limiting case of small solutes (Equations
+The ideal gas free energy functional on its own satisfies the contact
+value theorem and its limiting case of small solutes (Equations
 \ref{eq:contact} and \ref{contactvaluethm}). These properties are
-retained by the total functional, provided the remaining terms are
+retained by the total functional, provided all the remaining terms are
 \emph{purely nonlocal}.
 
 \subsection{Hard-sphere repulsion}
 
-We treat the repulsive interactions using the White Bear version of
+We treat the hard-sphere repulsive interactions using the White Bear version of
 the Fundamental-Measure Theory~(FMT) functional for the hard-sphere
 fluid~\cite{roth2002whitebear}.  In the homogeneous limit, the White
-Bear functional reduces to the Mansoori-Carnahan-Starling-Leland
+Bear functional reduces to the Carnahan-Starling
 equation of state.  FMT functionals are expressed as the integral of
 the \emph{fundamental measures} of a fluid, which provide local
 measures of quantities such as the filling fraction, density of
-spheres touching a given point and mean curvature.  The excess free
-energy is written as:
+spheres touching a given point and mean curvature.  The hard-sphere
+excess free energy is written as:
 \begin{equation}
 F_{hs}[n] = k_B T \int (\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)) d\xx \; ,
 \end{equation}
@@ -348,12 +350,12 @@ hard-sphere radius of
 \newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
 \newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
-The first term in the attractive energy is the dispersion term.  This
-will include van der Waals attraction and any orientation-independent
-interactions. We use a dispersion term based on the SAFT-VR
-approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters: an interaction energy $\epsilondisp$ and a
-length scale $\lambdadisp R$.
+The dispersion free energy includes the van der Waals attraction and
+any orientation-independent interactions. We use a dispersion term
+based on the SAFT-VR approach\cite{gil-villegas-1997-SAFT-VR}, which
+has two free parameters (taken from Clark~\emph{et
+  al}\cite{clark2006developing}): an interaction energy $\epsilondisp$
+and a length scale $\lambdadisp R$.
 
 The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
@@ -365,27 +367,27 @@ the mean-field dispersion interaction and the second term, $a_2$, describes the
 effect of fluctuations resulting from compression of the fluid due
 to the dispersion interaction itself. $a_2$ is approximated
 using the local compressibility approximation (LCA), which
-assumes the energy fluctuation is directly related to the
+assumes the energy fluctuation is simply related to the
 compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
 The form of $a_1$ and $a_2$ for SAFT-VR is given in
-reference~\cite{gil-villegas-1997-SAFT-VR} but is expressed in terms
+reference~\cite{gil-villegas-1997-SAFT-VR}, expressed in terms
 of the filling fraction.  In order to apply this form to an
-inhomogeneous density distribution, we construct an effective local
-filling fraction for dispersion $\etadisp$, given by
+\emph{inhomogeneous} density distribution, we construct an effective local
+filling fraction for dispersion $\etadisp$, given by a Gaussian
+convolution of the density:
 \begin{align}
 %    ((4/3.0*M_PI)*Pow(3)(R)*GaussianConvolve(2*lambdainput*lscale*radius,
 %                                             2*lambdaE*length_scalingE*Rexpr)
 %  \etadisp(\xx) &= \color{red}
 %  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
 %             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
-  \\
   \etadisp(\xx) &= \frac{1}{6\sqrt{\pi} \lambdadisp^3\lscale^3}
   \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
       \lscale R)^2}}\right)d\xx'
 \end{align}
 This effective filling fraction is used throughout the dispersion
-calculations, and represents a filling fraction averaged over the
+functional, and represents a filling fraction averaged over the
 effective range of the dispersive interaction.  This functional
 introduces an additional empirical parameter $\lscale$ which adjusts
 the length scale over which the dispersion interaction is correlated.
@@ -400,21 +402,23 @@ two molecules are oriented such that the proton of one overlaps
 with the lone pair of the other.  The volume over which this
 interaction occurs is $\kappaassoc$, giving the association
 term in the free energy two empirical parameters that are fit to
-experimental data.
+experimental data (again, taken from Clark~\emph{et
+  al}\cite{clark2006developing}).
 
 The association functional we use is a modified version of Yu
-and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}. \footnote{We
-  should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
-  the same functional, but their paper contains errors in the
-  association term and is not useful as a reference.}
-This functional includes the effects of density inhomogeneities in the
-contact value of the correlation function $g^{HS}_\sigma$, but is
-based on the SAFT-HS equation of state rather than the SAFT-VR
-equation of state\cite{gil-villegas-1997-SAFT-VR}. SAFT-VR is used in the
-optimal SAFT parametrization for water found by Clark \emph{et
-  al}\cite{clark2006developing}, but to use it's
-equation of state involves adding a correction term (see
-Equation~\ref{eq:gSW}).
+and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, which
+% \footnote{We
+%  should note that Fu and Wu\cite{fu2005vapor-liquid-dft} use almost
+%  the same functional, but their paper contains errors in the
+%  association term and is not useful as a reference.}
+includes the effects of density inhomogeneities in the contact value
+of the correlation function $g^{HS}_\sigma$, but is based on the
+SAFT-HS model, rather than the SAFT-VR
+model\cite{gil-villegas-1997-SAFT-VR}, which is used in the optimal
+SAFT parametrization for water of Clark \emph{et
+  al}\cite{clark2006developing}.  Adapting Yu and Wu's association
+free energy to SAFT-VR, simply involves the addition of a correction
+term in the correlation function (see Equation~\ref{eq:gSW}).
 
 The association functional we use is constructed by using the density
 $n_0(\xx)$, which is the density of hard spheres touching a given
@@ -429,6 +433,9 @@ where the value of $4$ comes from the four association sites per
 molecule, and the functional $X$ is the fraction of association sites
 \emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
 measure of the density inhomogeneity.
+\begin{align}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
+\end{align}
 %
 The fraction $X$ is determined by the quadratic equation
 \begin{align}
@@ -437,35 +444,28 @@ The fraction $X$ is determined by the quadratic equation
   {4 n_0(\xx)\zeta(\xx)
     \Delta(\xx)}
 \end{align}
-where the factor $\zeta$ from Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating} describes the
-inhomogeneity of the fluid density, and reduces to unity in the
-homogeneous limit:
-\begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{2V}\cdot\mathbf{n}_{2V}}{n_2^2}.
-\end{align}
-The functional $\Delta$ which appears in the formula for $X$ is a
-measure of hydrogen-bonding probability.  In the SAFT-VR
-model\cite{gil-villegas-1997-SAFT-VR}, $\Delta$ is given by
+where the functional $\Delta$ which is a measure of hydrogen-bonding
+probability, given by
 \begin{align}
   \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
   \left(e^{-\beta\epsilonassoc} - 1\right) \\
-  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma\left(\frac{4\pi R^3}{3}n_0(\xx)\right) +
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
   \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW}
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well attractive
-potential, and $a_1$ and $a_2$ are two terms in the dispersive term of
-the free energy.  The correlation function $g^\textit{SW}_\sigma$ is
-written as a perturbative correction to the hard-sphere fluid correlation
-function $g^\textit{HS}_\sigma$, for which we use the functional of Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
+potential, and $a_1$ and $a_2$ are the two terms in the dispersion
+free energy.  The correlation function $g^\textit{SW}_\sigma$ is
+written as a perturbative correction to the hard-sphere fluid
+correlation function $g^\textit{HS}_\sigma$, for which we use the
+functional of Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 \begin{align}
-  g_\sigma^{HS}(\xx) &= \frac{1}{1-\etadisp(\xx)}
-  +\frac32\frac{\zeta(\xx)}{(1-\etadisp(\xx))^2}
-  + \frac12\frac{\etadisp(\xx)^2\zeta(\xx)}{(1-\etadisp(\xx))^3}.
+  g_\sigma^{HS} &= \frac{1}{1-n_3}
+  +\frac32\frac{\zeta\zeta_2}{(1-n_3)^2}
+  + \frac12\frac{\zeta_2^2\zeta}{(1-n_3)^3} \\
+  \zeta_2 &= \frac{R}{3}n_2
 \end{align}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
