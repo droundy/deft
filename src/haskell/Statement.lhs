@@ -11,7 +11,7 @@ module Statement ( Statement(..),
                    latexStatements,
                    latexSimp,
                    simp2,
-                   findToDo, findNamedSubexpression,
+                   findToDo, findNamedSubexpression, findNiceScalar,
                    findNamedScalar, findFFTtodo, findFFTinputtodo,
                    countFFT,
                    checkDup,
@@ -81,7 +81,7 @@ latexSimp e = "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{bre
 
 codeStatements :: [Statement] -> String
 codeStatements (InitializeS v : AssignS v' e : ss)
-  | v == v' = "\tdouble " ++ codeStatementHelper v " = " e ++ "\n" ++
+  | v == v' = "\tdouble " ++ codeStatementHelper v " = " e ++ " // " ++ show e ++ "\n" ++
               codeStatements ss
 codeStatements (s:ss) = codeStatement s ++ "\n" ++ codeStatements ss
 codeStatements [] = ""
@@ -224,6 +224,34 @@ findNamedScalar (Var t a b c (Just e)) =
 findNamedScalar (Var _ _ _ _ Nothing) = DoNothing
 findNamedScalar (Scalar e) = findNamedScalar e
 
+findNiceScalar :: Type b => Expression b -> ToDo
+findNiceScalar (Expression e)
+    | Same <- isKSpace (Expression e), FFT e' <- e = findNiceScalar e'
+    | Same <- isRealSpace (Expression e), IFFT e' <- e = findNiceScalar e'
+    | Same <- isScalar (Expression e), Integrate e' <- e = if hasFFT e'
+                                                           then findNiceScalar e'
+                                                           else DoS (Expression e)
+    | otherwise = DoNothing
+findNiceScalar (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pairs s of
+                             [] -> DoNothing
+                             dothis:_ -> dothis
+    where sub (_,e) = findNiceScalar e
+findNiceScalar (Product p _) = case filter (/= DoNothing) $ map sub $ product2pairs p of
+                                 [] -> DoNothing
+                                 dothis:_ -> dothis
+    where sub (e, _) = findNiceScalar e
+findNiceScalar (Cos e) = findNiceScalar e
+findNiceScalar (Sin e) = findNiceScalar e
+findNiceScalar (Log e) = findNiceScalar e
+findNiceScalar (Exp e) = findNiceScalar e
+findNiceScalar (Abs e) = findNiceScalar e
+findNiceScalar (Signum e) = findNiceScalar e
+findNiceScalar (Var _ _ _ _ (Just e)) = findNiceScalar e
+findNiceScalar (Var _ _ _ _ Nothing) = DoNothing
+findNiceScalar (Scalar (Var _ _ _ _ Nothing)) = DoNothing
+findNiceScalar (Scalar e) | not (hasFFT e) = DoS e
+                          | otherwise = DoNothing
+
 findNamedSubexpression :: Type b => Expression b -> ToDo
 findNamedSubexpression (Expression e)
     | Same <- isKSpace (Expression e), FFT e' <- e = findNamedSubexpression e'
@@ -256,6 +284,12 @@ findNamedSubexpression (Var _ _ _ _ Nothing) = DoNothing
 findNamedSubexpression (Scalar e) = findNamedSubexpression e
 
 findToDo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> ToDo
+findToDo _ _ (Var _ _ _ _ Nothing) = DoNothing
+--findToDo i everything e
+--  | Same <- isRealSpace e, isok = DoR e
+--  | Same <- isKSpace e, isok = DoK e
+--    where isok = Set.isSubsetOf i (varSet e) && countVars e == 1 && not (hasFFT e) &&
+--                 countAfterRemoval e everything < countVars everything
 findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = DoNothing
 findToDo i everything (Expression e)
     | Same <- isKSpace (Expression e), FFT e' <- e = findToDo i everything e'
@@ -329,7 +363,6 @@ findToDo i x (Var t a b c (Just e)) =
                  Different -> DoNothing
                  Same -> if hasFFT e then DoNothing else DoS $ Var t a b c (Just e)
 --findToDo i _ (Var _ _ _ (Just e)) = findToDo i e
-findToDo _ _ (Var _ _ _ _ Nothing) = DoNothing
 findToDo i everything (Scalar e) = findToDo i everything e
 
 
@@ -430,14 +463,20 @@ findFFTinputtodo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $
 
 
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
-simp2 = scalarhelper []
+simp2 = scalarhelper [] 0 . joinScalars
     where -- First, we want to evaluate any purely scalar expressions
           -- that we can, just to simplify things!
-          scalarhelper sts e =
+          scalarhelper sts n e =
             case findNamedScalar e of
-              DoS s@(Var _ _ x t (Just _)) -> scalarhelper (sts++[InitializeS v, AssignS v s]) (substitute s v e)
+              DoS s@(Var _ _ x t (Just _)) -> scalarhelper (sts++[InitializeS v, AssignS v s]) n (substitute s v e)
                 where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
-              DoNothing -> simp2helper Set.empty (0 :: Int) sts e
+              DoNothing ->
+                case findNiceScalar e of
+                  DoS s -> scalarhelper (sts++[InitializeS v, AssignS v s]) (n+1) (substitute s v e)
+                    where v = Var CannotBeFreed ("s"++show n) ("s"++show n)
+                                                ("s_{"++show n++"}") Nothing :: Expression Scalar
+                  DoNothing -> simp2helper Set.empty (n :: Int) sts e
+                  dothis -> error ("bad result in scalarhelper: " ++ show dothis)
               _ -> error "bad result in scalarhelper"
           -- Then we go looking for memory to save or ffts to evaluate...
           simp2helper i n sts e = if Set.size i == 0
