@@ -510,16 +510,7 @@ latexE p (Product x _) | Map.size x == 1 && product2denominator x == 1 =
     [(_, n)] | n < 0 -> error "shouldn't have negative power here"
     [(e, 1)] -> latexE p e
     [(e, 0.5)] -> showString "\\sqrt{" . latexE 0 e . showString "}"
-    [(e, nn)]
-      | fromInteger n2 == 2*nn && odd n2 -> if n2 < 10
-                                            then latexE 8 e . showString ("^{\\frac" ++ show n2 ++ "2}")
-                                            else latexE 8 e . showString ("^{\\frac{" ++ show n2 ++ "}2}")
-      | fromInteger n == nn -> if n2 < 10
-                               then latexE 8 e . showString ("^" ++ show n)
-                               else latexE 8 e . showString ("^{" ++ show n ++ "}")
-          where n2 = floor (2*nn)
-                n = floor nn
-    [(e,n)] -> latexE 8 e . showString ("^{" ++ show n ++ "}")
+    [(e, n)] -> latexE 8 e . showString ("^{" ++ latexDouble n ++ "}")
     _ -> error "This really cannot happen."
 latexE pree (Product p _) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
   where ltexsimple [] = showString "1"

@@ -6,18 +6,6 @@ import SomeFunctionals
 import System.Environment ( getArgs )
 import qualified Data.Set as Set
 
-latexTests :: Test
-latexTests = TestList [t "x" x,
-                       t "0" (0 :: Expression RealSpace),
-                       t "\\sqrt{x}" (sqrt x),
-                       t "x^2" (x**2),
-                       t "\\frac{1}{x^2}" (1/x**2),
-                       t "\\frac{y^2}{x^2}" (y**2/x**2),
-                       t "x^4" (x**4)]
-  where t str e = TestCase $ assertEqual str str (latex e)
-        x = r_var "x"
-        y = s_var "y" :: Expression RealSpace
-
 codeTests :: Test
 codeTests = TestList [t "x[i]" x,
                       t "0" (0 :: Expression RealSpace),
@@ -414,7 +402,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             then putStrLn "Not running actual tests, just generating test code...\n"
             else do c <- runTestTT $ TestList [joinFFTtests,
                                                substitutionTests, hasexpressionTests, multisubstituteTests,
-                                               findToDoTests, eqTests, codeTests, latexTests, fftTests, memTests]
+                                               findToDoTests, eqTests, codeTests, fftTests, memTests]
                     if failures c > 0 || errors c > 0
                       then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
                       else do putStrLn "All tests passed!"

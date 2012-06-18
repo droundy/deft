@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternGuards #-}
 module Latex ( latexEasy, latexSimp ) where
 
 import Expression ( Expression(..), Type, substitute, latex, k, k_var, cleanvars )
@@ -7,6 +8,7 @@ latexEasy :: (Type a) => Expression a -> String
 latexEasy e0 = unlines $
               ["\\documentclass{article}",
                "\\usepackage{amsmath}",
+               "\\usepackage{color}",
                "\\usepackage{breqn}",
                "\\begin{document}"]
               ++ map latexme (niceToDos e0) ++
@@ -15,9 +17,22 @@ latexEasy e0 = unlines $
 latexSimp :: (Type a) => Expression a -> String
 latexSimp e = unlines $
               ["\\documentclass{article}",
+               "\\usepackage{environ}", -- consider mdframed when it is in debian
                "\\usepackage{amsmath}",
+               "\\usepackage{color}",
                "\\usepackage{breqn}",
-               "\\begin{document}"]
+               "\\begin{document}",
+               "\\newbox{\\savetextbox}",
+               "\\NewEnviron{bracetext}[1][\\textwidth]{%",
+               "  \\begin{lrbox}{\\savetextbox}%",
+               "    \\begin{minipage}{#1} \\BODY \\end{minipage}",
+               "  \\end{lrbox}%",
+               "  \\smallskip%",
+               "  \\noindent\\makebox[0pt][r]{$\\left\\{\\rule{0pt}{\\ht\\savetextbox}\\right.$}%",
+               "  \\usebox{\\savetextbox}\\par",
+               "  \\smallskip%",
+               "}",
+               ""]
               ++ map latexS (sts) ++
               [latexe e',
                "\\end{document}"]
@@ -61,11 +76,24 @@ niceToDos _ = error "need named input in niceToDos"
 
 
 latexS :: Statement -> String
-latexS (AssignR x y) = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
-latexS (AssignK x y) = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
-latexS (AssignS x y) = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
+latexS (AssignR x@(Var a b c t _) y)
+  | tds@(_:_:_) <- niceToDos (Var a b c t (Just y)) = unlines $ ["\\begin{bracetext}"] ++
+                                                      map latexme tds ++
+                                                      ["\\end{bracetext}"]
+  | otherwise  = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
+latexS (AssignK x@(Var a b c t _) y)
+  | tds@(_:_:_) <- niceToDos (Var a b c t (Just y)) = unlines $ ["\\begin{bracetext}"] ++
+                                                      map latexme tds ++
+                                                      ["\\end{bracetext}}"]
+  | otherwise  = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
+latexS (AssignS x@(Var a b c t _) y)
+  | tds@(_:_:_) <- niceToDos (Var a b c t (Just y)) = unlines $ ["\\begin{bracetext}"] ++
+                                                      map latexme tds ++
+                                                      ["\\end{bracetext}"]
+  | otherwise  = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
 latexS (InitializeR e) = eqn $ "\\text{initialize real space } " ++ latex e
 latexS (InitializeK e) = eqn $ "\\text{initialize reciprocal space } " ++ latex e
 latexS (InitializeS _) = ""
 latexS (FreeR e) = eqn $ "\\text{free real space } " ++ latex e
 latexS (FreeK e) = eqn $ "\\text{free reciprocal space } " ++ latex e
+latexS st = error ("bad statement in latexS: "++ show st)
