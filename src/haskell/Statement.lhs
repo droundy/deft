@@ -450,14 +450,14 @@ simp2 = scalarhelper []
                       DoK ke -> simp2helper (varSet v) (n+1) (sts++[inike, setke]) e'
                         where v = case ke of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression KSpace
                                              _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
-                                                             ("ktemp_"++show n) ("ktemp_{" ++ show n ++ "}") Nothing
+                                                             ("ktemp_"++show n) ("\\tilde{f}_{" ++ show n ++ "}") Nothing
                               inike = InitializeK v
                               setke = AssignK v ke
                               e'  = substitute ke v e
                       DoR re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) e'
                         where v = case re of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression RealSpace
                                              _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
-                                                             ("rtemp_"++show n) ("rtemp_{" ++ show n ++ "}") Nothing
+                                                             ("rtemp_"++show n) ("f_{" ++ show n ++ "}") Nothing
                               inire = InitializeR v
                               setre = AssignR v re
                               e'  = substitute re v e
