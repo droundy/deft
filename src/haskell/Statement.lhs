@@ -81,7 +81,7 @@ latexSimp e = "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{bre
 
 codeStatements :: [Statement] -> String
 codeStatements (InitializeS v : AssignS v' e : ss)
-  | v == v' = "\tdouble " ++ codeStatementHelper v " = " e ++ " // " ++ show e ++ "\n" ++
+  | v == v' = "\tdouble " ++ codeStatementHelper v " = " e ++ "\n" ++
               codeStatements ss
 codeStatements (s:ss) = codeStatement s ++ "\n" ++ codeStatements ss
 codeStatements [] = ""
