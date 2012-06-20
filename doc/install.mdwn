@@ -7,6 +7,18 @@ To build, just run:
     ./configure
     make
 
+Building on Ubuntu Precise Pangolin
+===================================
+
+You need ...
+
+    haskell-mode # optional, but handy
+    fftw3-dev
+    g++
+    gfortran
+    ghc
+    HUnit
+
 Running the test suite
 ======================
 
