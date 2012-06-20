@@ -1,4 +1,3 @@
-
 import matplotlib
 matplotlib.use('Agg')
 
@@ -40,12 +39,12 @@ Agnn_plt.plot(dftdata[start_here:stop_here,0],(dftdata[start_here:stop_here,1]*4
            "rx--",markevery=me,label="$nn_Ag_\sigma^A$ (Gross)")
 Agnn_plt.legend(loc=1, bbox_to_anchor=[1.0, 1.0], ncol=1).get_frame().set_alpha(0.5)
 #It seems like with the Gross here we do n*n*g and not n*nA*g, why?
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
-#     pylab.ylim(0.3,0.980) 
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
-#     pylab.ylim(0.090,0.360)
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
-#     pylab.ylim(0.000,0.034)
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
+    pylab.ylim(0.3,0.980) 
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
+    pylab.ylim(0.090,0.360)
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
+    pylab.ylim(0.000,0.034)
 
 Sgnn_plt = pylab.subplot(2,1,2)
 Sgnn_plt.plot(dftdata[start_here:stop_here,0],(n0[start_here:stop_here]*4*numpy.pi/3)**2*dftdata[start_here:stop_here,3],
@@ -56,12 +55,12 @@ Sgnn_plt.plot(dftdata[start_here:stop_here,0],(n0[start_here:stop_here]*4*numpy.
 Sgnn_plt.legend(loc=1, bbox_to_anchor=[1.0, 1.0], ncol=1).get_frame().set_alpha(0.5)
 
 pylab.xlim(0,12)
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
-#     pylab.ylim(0.270,0.980)
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
-#     pylab.ylim(0.120,0.380)
-# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
-#     pylab.ylim(0.000,0.030)
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
+    pylab.ylim(0.270,0.980)
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
+    pylab.ylim(0.120,0.380)
+if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
+    pylab.ylim(0.000,0.030)
 #xticklabels = A_plt.get_xticklabels() + S_plt.get_xticklabels()
 #pylab.setp(xticklabels, visible=False)
 
