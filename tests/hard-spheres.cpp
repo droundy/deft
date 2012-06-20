@@ -43,7 +43,7 @@ int test_minimizer(const char *name, Minimizer min, Grid *pot, double accuracy=1
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
-  const double true_energy = -0.02169765851193863;
+  const double true_energy = -0.021697658511944;
 
   *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*mu*VectorXd::Ones(pot->description().NxNyNz);
 

@@ -50,15 +50,15 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
       codeIntegrate = reuseVar $ freeVectors (st ++ [AssignS (s_var "output") e'])
-          where (st, e') = simp2 (joinFFTs $ integrate e)
+          where (st, e') = simp2 (factorize $ joinFFTs $ integrate e)
       codeVTransform = reuseVar $ freeVectors (st ++ [AssignR (r_var "output") e'])
-          where (st, e') = simp2 $ joinFFTs e
+          where (st, e') = simp2 $ factorize $ joinFFTs e
       codeDTransform = freeVectors (st ++ [AssignS (s_var "output") e'])
           where (st, e') = simp2 $ makeHomogeneous e
       codeDerive = freeVectors (st ++ [AssignS (s_var "output") e'])
           where (st, e') = simp2 $ derive (s_var "x") 1 $ makeHomogeneous e
       codeGrad = reuseVar $ freeVectors (st ++ [AssignR (r_var "(*outgrad)") (r_var "(*outgrad)" + e')])
-          where (st, e') = simp2 (joinFFTs $ {- cleanvars $ -} derive (r_var "x") (r_var "ingrad") e)
+          where (st, e') = simp2 (factorize $ joinFFTs $ {- cleanvars $ -} derive (r_var "x") (r_var "ingrad") e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit [] = ""

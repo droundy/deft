@@ -179,7 +179,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 $ joinFFTs e)
+  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 $ factorize $ joinFFTs e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -216,7 +216,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem saft_dispersion" 3 saft_dispersion,
                      t "peakMem saft_association" 4 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
-                     t "peakMem grad whitebear" 8 (gradme whitebear), -- was 20
+                     t "peakMem grad whitebear" 9 (gradme whitebear), -- was 20
                      t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
                      -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
@@ -231,7 +231,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
                      t "peakMem nbar + log nbar" 1 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $ joinFFTs e)
+  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $ factorize $ joinFFTs e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -395,7 +395,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
-          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ joinFFTs $ derive (r_var "x") (r_var "ingrad") $
+          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ factorize $ joinFFTs $ derive (r_var "x") (r_var "ingrad") $
             substitute k (k_var "k") $
             (n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))
           if "codegen" `elem` args

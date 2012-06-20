@@ -9,10 +9,11 @@ module Expression (
                    Expression(..), joinFFTs, joinScalars, (===), var,
                    Type(..), Code(..), Same(..), IsTemp(..),
                    makeHomogeneous, isConstant,
-                   setZero, cleanvars, factorandsum,
+                   setZero, cleanvars, factorandsum, factorize, factorOut,
                    sum2pairs, pairs2sum,
                    product2pairs, pairs2product, product2denominator,
                    hasK, hasFFT, hasexpression,
+                   findRepeatedSubExpression,
                    countexpression, substitute, countAfterRemoval,
                    compareExpressions, countVars, varSet)
     where
@@ -71,7 +72,14 @@ instance Type RealSpace where
   codeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT e)) = error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
   codeStatementHelper a op (Var _ _ _ _ (Just e)) = codeStatementHelper a op e
-  codeStatementHelper a op e = prefix e ++ code a ++ op ++ code e ++ ";\n" ++ postfix e
+  codeStatementHelper a op e =
+    unlines ["for (int i=0; i<gd.NxNyNz; i++) {",
+             codes (1 :: Int) e,
+             "\t}"]
+      where codes n x = case findRepeatedSubExpression x of
+              MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ code x' ++ ";\n" ++
+                                  codes (n+1) (substitute x' (s_var ("t"++show n)) x)
+              MB Nothing -> "\t\t" ++ code a ++ op ++ code x ++ ";"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
   initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
@@ -114,10 +122,23 @@ instance Type KSpace where
   codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
   codeStatementHelper a op (Var _ _ _ _ (Just e)) = codeStatementHelper a op e
   codeStatementHelper (Var _ _ a _ _) op e =
-          if k0code == "0"
-          then a ++ "[0]" ++ op ++ "0;\n\t" ++ prefix e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
-          else "{\n\t\tconst int i = 0;\n\t\tconst Reciprocal k_i = Reciprocal(0,0,0);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n\t\t" ++ a ++ "[0]" ++ op ++ code (setZero kz (setZero ky (setZero kx e))) ++ ";\n\t}\n\t" ++ prefix e ++ "\t\t" ++ a ++ "[i]"  ++ op ++ code e ++ ";" ++ postfix e
-      where k0code = code (setZero kz (setZero ky (setZero kx e)))
+    unlines [setzero,
+             prefix e,
+             codes (1 :: Int) e,
+             "\t}"]
+      where codes n x = case findRepeatedSubExpression x of
+              MB (Just (_,x')) -> "\t\tconst complex t"++ show n ++ " = " ++ code x' ++ ";\n" ++
+                                  codes (n+1) (substitute x' (s_var ("t"++show n)) x)
+              MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
+            setzero = case code (setZero kz (setZero ky (setZero kx e))) of
+                      "0" -> a ++ "[0]" ++ op ++ "0;"
+                      k0code -> unlines ["\t{",
+                                         "\t\tconst int i = 0;",
+                                         "\t\tconst Reciprocal k_i = Reciprocal(0,0,0);",
+                                         "\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
+                                         "\t\t" ++ a ++ "[0]" ++ op ++ k0code ++ ";",
+                                         "\t}"]
+
   codeStatementHelper _ _ _ = error "Illegal input to codeStatementHelper for kspace"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);"
   initialize _ = error "VectorXcd output(gd.NxNyNzOver2);"
@@ -907,6 +928,54 @@ factorandsum (x:xs) = helper (getprodlist x) (x:xs)
         getprodlist (Sum a _) | [(_,Product xx _)] <- sum2pairs a = product2pairs xx
         getprodlist xx = [(xx,1)]
 
+factorOut :: Type a => Expression a -> Expression a -> Maybe Double
+factorOut e e' | e == e' = Just 1
+factorOut e (Sum s _) | [(f,xx)] <- sum2pairs s = factorOut e xx
+factorOut e (Product p _) = Map.lookup e p
+factorOut _ _ = Nothing
+
+allFactors :: Type a => Expression a -> Set.Set (Expression a)
+allFactors (Product p _) = Map.keysSet p
+allFactors e = Set.singleton e
+
+factorize :: Type a => Expression a -> Expression a
+factorize (Expression e)
+  | Same <- isKSpace (Expression e), FFT e' <- e = fft (factorize e')
+  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (factorize e')
+  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (factorize e')
+  | otherwise = Expression e
+factorize (Sum s _) = fac (Set.toList $ Set.unions $ map (allFactors . snd) $ sum2pairs s) $
+                      map toe $ sum2pairs s
+  where toe (f,e) = toExpression f * e
+        fac _ [] = 0
+        fac [] pairs = sum pairs
+        fac (f:fs) pairs = collect [] [] [] pairs
+          where collect pos none neg (x:xs) = case factorOut f x of
+                                                Just n | n <= -1 -> collect pos none (x:neg) xs
+                                                       | n >= 1 -> collect (x:pos) none neg xs
+                                                _ -> collect pos (x:none) neg xs
+                collect pos none neg []
+                  | length pos <= 1 && length neg <= 1 =
+                    fac fs (pos ++ none ++ neg)
+                  | length pos <= 1 = fac fs (pos ++ none) +
+                                      (fac (f:fs) (map (*f) neg))/f
+                  | length neg <= 1 = fac fs (neg ++ none) +
+                                      f*(fac (f:fs) (map (/f) pos))
+                  | otherwise = f * fac (f:fs) (map (/f) pos) +
+                                fac fs none +
+                                (fac (f:fs) (map (*f) neg))/f
+factorize (Product p _) = pairs2product $ map fixup $ product2pairs p
+  where fixup (e,n) = (factorize e, n)
+factorize (Var a b c d (Just e)) = Var a b c d (Just (factorize e))
+factorize (Scalar e) = Scalar (factorize e)
+factorize (Cos e) = cos (factorize e)
+factorize (Sin e) = sin (factorize e)
+factorize (Exp e) = exp (factorize e)
+factorize (Log e) = log (factorize e)
+factorize (Signum e) = signum (factorize e)
+factorize (Abs e) = abs (factorize e)
+factorize e@(Var _ _ _ _ Nothing) = e
+
 compareExpressions :: (Type a, Type b) => Expression a -> Expression b -> Same a b
 compareExpressions x y | Same <- compareTypes x y, x == y = Same
 compareExpressions _ _ = Different
@@ -1015,6 +1084,7 @@ varsetAfterRemoval x@(Product xs _) e@(Product es _)
     ((termX, factorX):_) <- xspairs,
     Just factorE <- Map.lookup termX es,
     ratio <- factorE / factorX,
+    abs ratio >= 1,
     Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2product es')
   where xspairs = product2pairs xs
         filterout ratio ((x1,f):rest) emap =
@@ -1064,6 +1134,7 @@ subAndCount x@(Product xs _) y e@(Product es _)
     ((termX, factorX):_) <- xspairs,
     Just factorE <- Map.lookup termX es,
     ratio <- factorE / factorX,
+    abs ratio >= 1,
     Just es' <- filterout ratio xspairs es,
     (e'',n) <- subAndCount x y (map2product es') = (e'' * y**(toExpression ratio), n+1)
   where xspairs = product2pairs xs
@@ -1112,21 +1183,36 @@ subAndCount x y (Scalar e) = (Scalar e', n)
     where (e', n) = subAndCount x y e
 
 
+newtype MkBetter a = MB (Maybe (Expression a -> MkBetter a, Expression a))
 
--- factorize :: Type a => Expression a -> Expression a
--- factorize (Expression e)
---   | Same <- isKSpace (Expression e), FFT e' <- e = fft (factorize e')
---   | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (factorize e')
--- factorize (Sum s) | Same <- isKSpace (Sum s) = joinup [] $ sum2pairs s
---   where joinup tofft [] = fft $ factorandsum tofft
---         joinup tofft ((f,x):xs) | Just e <- isfft x = joinup (toExpression f*e:tofft) xs
---                                 | otherwise = toExpression f*x + joinup tofft xs
--- factorize (Sum s) | Same <- isRealSpace (Sum s) = joinup [] $ sum2pairs s
---   where joinup tofft [] = ifft $ factorandsum tofft
---         joinup tofft ((f,x):xs) | Just e <- isifft x = joinup (toExpression f*e:tofft) xs
---                                 | otherwise = toExpression f*x + joinup tofft xs
--- factorize (Var a b c (Just e)) = Var a b c (Just (factorize e))
--- factorize e = e
-
-
+findRepeatedSubExpression :: Type a => Expression a -> MkBetter a
+findRepeatedSubExpression everything = frse everything
+  where frse x@(Sum s _) | Map.size s > 1,
+                           MB (Just (better,_)) <- frs (sum2pairs s) = better x
+          where frs ((_,y):ys) = case frse y of
+                                   MB Nothing -> frs ys
+                                   se -> se
+                frs [] = MB Nothing
+        frse x@(Product s _) | Map.size s > 1,
+                               MB (Just (better,_)) <- frs (product2pairs s) = better x
+          where frs ((y,n):ys) = case frse y of
+                                   MB Nothing -> frs ys
+                                   MB (Just (better,_)) -> better (y ** toExpression n)
+                frs [] = MB Nothing
+        frse x@(Cos e) | MB (Just (better, _)) <- frse e = better x
+        frse x@(Sin e) | MB (Just (better, _)) <- frse e = better x
+        frse x@(Log e) | MB (Just (better, _)) <- frse e = better x
+        frse x@(Exp e) | MB (Just (better, _)) <- frse e = better x
+        frse (Expression _) = MB Nothing
+        frse (Var _ _ _ _ Nothing) = MB Nothing
+        frse x@(Var _ _ _ _ (Just e)) | MB (Just (better, _)) <- frse e = better x
+        frse (Scalar (Var _ _ _ _ Nothing)) = MB Nothing
+        frse e = if mytimes > 1
+                 then MB (Just (makebetter e mytimes, e))
+                 else MB Nothing
+           where mytimes = countexpression e everything
+        makebetter :: Type a => Expression a -> Int -> Expression a -> MkBetter a
+        makebetter e n e' = if n' >= n then MB (Just (makebetter e' n', e'))
+                                       else MB (Just (makebetter e n, e))
+                 where n' = countexpression e' everything
 \end{code}
