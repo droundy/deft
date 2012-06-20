@@ -134,7 +134,7 @@ int main(int, char **argv) {
 
   compare_functionals(NiceSum(), x + kT, myT, n, 4e-13);
 
-  compare_functionals(NiceQuad(), sqr(x + kT) - x + 2*kT, myT, n, 2e-12);
+  compare_functionals(NiceQuad(), sqr(x + kT) - x + 2*kT, myT, n, 3e-12);
 
   compare_functionals(NiceSqrt(), sqrt(x) , myT, n, 1e-12);
 
@@ -193,7 +193,7 @@ int main(int, char **argv) {
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
   compare_functionals(Phi2(R), phi2, myT, n, 1e-14);
 
-  compare_functionals(NiceN2xsqr(R), sqr(n2x), myT, n, 2e-14);
+  compare_functionals(NiceN2xsqr(R), sqr(n2x), myT, n, 3e-14);
 
   compare_functionals(NicePhi2(R), phi2, myT, n, 1e-13);
 

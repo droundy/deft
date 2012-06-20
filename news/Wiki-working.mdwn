@@ -1,0 +1,4 @@
+The wiki should now be working, so you can post new "news" items
+here.  I'm not sure that deft really deserves or requires a "news"
+page, but it comes for free with the ikiwiki software we're using, so
+why not?

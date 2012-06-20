@@ -5,3 +5,9 @@ Deft frequently asked questions.
 ## Has anyone ever asked a question about Deft?
 
 No.
+
+
+## How do I add a new C++ file to the deft core?
+
+You edit the Makefile.am file, and search for a similar
+file and make similar additions everywhere it shows up.

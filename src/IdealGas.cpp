@@ -59,14 +59,14 @@ Functional find_nQ() {
   Functional mass = Functional(18.01528*1822.8885); // modified 9/20/11 FIXME: molecular weight of water, eventually should be input parameter
   // Note:  hbar is one in atomic units, yay!
   // nQ = (m*kT/(2 pi hbar^2))^3/2
-  return PowAndHalf(3)(mass*kT/Functional(2*M_PI));
+  return PowAndHalf(1)(mass*kT/Functional(2*M_PI));
 }
 
 Functional find_dnQ_dT() {
   Functional mass = Functional(18.01528*1822.8885); // FIXME: molecular weight of water, eventually should be input parameter
   // Note:  hbar is one in atomic units, yay!
   // nQ = (m*kT/(2 pi hbar^2))^3/2
-  return 1.5*PowAndHalf(3)(mass/Functional(2*M_PI))*sqrt(kT);
+  return 1.5*PowAndHalf(1)(mass/Functional(2*M_PI))*sqrt(kT);
 }
 
 Functional IdealGas() {

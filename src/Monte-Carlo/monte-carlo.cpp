@@ -144,7 +144,7 @@ int main(int argc, char *argv[]){
   long num_to_time = 100000;
   long num_timed = 0;
   long i = 0;
-  double scale = .05;
+  double scale = .005;
 
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
@@ -214,9 +214,9 @@ int main(int argc, char *argv[]){
     }
   } else {
     if (spherical_inner_wall){
-      double size = (rad - innerRad)/div;
+      double size = rad/div;
       for (long s=0; s<div+1; s++){
-        radius[s] = size*s + innerRad;
+        radius[s] = size*s;
       }
     } else {
       const double w = 1.0/(1 + dxmin*div);
@@ -566,7 +566,6 @@ double countOneOverLap(Vector3d *spheres, long n, long j, double R){
       num -= spheres[j][2] + (lenz/2);
     }
   }
-  Vector3d lat[3] = {latx,laty,latz};
   for(long i = 0; i < n; i++){
     if (i != j) {
       for (long k=0; k<3; k++){

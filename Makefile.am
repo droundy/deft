@@ -1,4 +1,4 @@
-.PHONY: paper project poster papers comparison slowfigs haskell
+.PHONY: paper project poster papers comparison slowfigs haskell pdf
 
 EXTRA_DIST = autogen.sh
 
@@ -77,6 +77,8 @@ haskell: src/haskell/functionals src/haskell/test
 
 src/haskell/functionals: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) functionals
+src/haskell/latex-functionals: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE) latex-functionals
 src/haskell/test: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) test
 
@@ -123,7 +125,7 @@ check_PROGRAMS = \
 	tests/eps.test
 
 TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test \
-			tests/latex-generation.sh $(check_PROGRAMS)
+			$(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
@@ -142,7 +144,7 @@ tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference
 tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CONTACT_CODE)
-tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(ALL_CODE)
+tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(GENERIC_CODE)
 tests_hydrogen_atom_test_SOURCES = tests/hydrogen-atom.cpp $(ALL_CODE)
 tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
@@ -193,13 +195,17 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # IKIWIKI=ikiwiki
 # endif
 
-html:
+pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
+	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
+
+html: pdf
 	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
 		--exclude=html --exclude=Makefile.am
 
 clean-local:
 	rm -rf .ikiwiki html
 	cd papers && $(MAKE) clean
+	cd src/haskell && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
 papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
@@ -225,6 +231,8 @@ papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<
 papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
 	$<
+doc/%.pdf: src/haskell/latex-functionals
+	$< $@
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
 	comparisons/gHSetaeff_vrpack.dat comparisons/gHSetaeff_deft.dat \

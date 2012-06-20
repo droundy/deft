@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# I use bash because I prefer its builtin time function over /usr/bin/time.
-
-set -ev
-
-time make -j `grep -c processor /proc/cpuinfo` paper papers

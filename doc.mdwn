@@ -1,4 +1,5 @@
-Documentation for deft.
+Documentation for deft.  Please add more documentation!
 
 * First, you'll want to [[install]] it.
 * There's also a [[FAQ]].
+* [[LaTeX tricks]].
