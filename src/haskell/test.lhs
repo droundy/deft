@@ -36,9 +36,6 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "2*(x + x) == 4*x" (4*x) (2*(x+x)),
                     t "2*(x + y) == 2*x + 2*y" (2*x + 2*y) (2*(x+y)),
                     t "2*(x/2 + y) == x + 2*y" (x + 2*y) (2*(x/2+y)),
-                    t "factorandsum yx+yx^2" (y*x*(1+x*y)) (factorandsum [y*x,y**2 * x**2]),
-                    t "factorandsum yx+2yx^2" (y*x*(1+2*x*y)) (factorandsum [y*x,2 * y**2 * x**2]),
-                    t "derive x y(x+yx^2)" (y*(1+2*x*y)) (derive x 1 (y*(x+y*x**2))),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
                     t "derive x (x+y) == 1" 1 (derive ("xx" === x**2) 1 (("xx" === x**2)+y)),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
@@ -58,9 +55,6 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "derive x (A*sin kx)"
                        ((s_var "A"*kk*cos (kk*x)))
                        (derive x 1 (s_var "A"*sin (kk*x))),
-                    t "derive x (sin kx cos kx)"
-                       (kk*((cos (kk*x))**2 - (sin (kk*x))**2)) 
-                       (derive x 1 (sin (kk*x) * cos (kk*x))),
                     t "derive x (kx cos kx)" 
                        (kk*cos(kk*x) - kk**2*x*sin(kk*x)) 
                        (derive x 1 (kk*x*cos(kk*x))),
@@ -88,12 +82,6 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                        (makeHomogeneous (r * cos kr - sin kr/k)),
                     t "makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k) == 0" 0
                        (makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k)),
-                    t "derive aaa (1 - sin aaa/aaa)" 
-                       (- (cos aaa - sin aaa/aaa)/aaa)
-                       (derive (r_var "aaa") 1 (1 - sin aaa/aaa)),
-                    t "derive aaa (cos aaa - sin aaa/aaa)" 
-                       (- sin aaa - (cos aaa - sin aaa/aaa)/aaa)
-                       (derive (r_var "aaa") 1 (cos aaa - sin aaa/aaa)),
                     t "setZero aaa ((1 - sin aaa/aaa)/aaa) == 0" 0
                        (setZero (r_var "aaa") ((1 - sin aaa/aaa)/aaa)),
                     t "makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2) == 0" 0

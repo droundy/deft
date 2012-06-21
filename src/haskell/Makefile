@@ -6,7 +6,7 @@ clean:
 	rm -f *.hi *.o test functionals latex-functionals
 
 GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
-GHCFLAGS=-Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
+GHCFLAGS=-Wall -fno-warn-unused-do-bind -O2 -package process -package containers -package HUnit # -prof -auto-all
 
 .o.hi:
 	@:

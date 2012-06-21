@@ -9,7 +9,7 @@ module Expression (
                    Expression(..), joinFFTs, joinScalars, (===), var,
                    Type(..), Code(..), Same(..), IsTemp(..),
                    makeHomogeneous, isConstant,
-                   setZero, cleanvars, factorandsum, factorize, factorOut,
+                   setZero, cleanvars, factorize, factorOut,
                    sum2pairs, pairs2sum,
                    product2pairs, pairs2product, product2denominator,
                    hasK, hasFFT, hasexpression,
@@ -831,7 +831,7 @@ joinFFTs (Sum s0 i)
                       toe (_, Left (_,e)) = e
               joinup m ((f,e):es) =
                 case isfft e of
-                  Nothing -> toExpression f * joinFFTs e + joinup m es
+                  Nothing -> toExpression (f :: Double) * joinFFTs e + joinup m es
                   Just (ks,rs) -> joinup (Map.insert rs ks' m) es
                     where ks' = case Map.lookup rs m of
                                 Nothing -> Left (toExpression f * joinFFTs ks,
@@ -848,7 +848,7 @@ joinFFTs (Sum s0 i)
                   Nothing -> toExpression f * joinFFTs e + joinup m es
                   Just (ks,rs) -> joinup (Map.insert rs ks' m) es
                     where ks' = case Map.lookup rs m of
-                                Nothing -> Left (toExpression f * joinFFTs ks,
+                                Nothing -> Left (toExpression (f :: Double) * joinFFTs ks,
                                                  toExpression f * e)
                                 Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
                                 Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
@@ -906,31 +906,9 @@ joinScalars (Abs e) = abs (joinScalars e)
 joinScalars (Signum e) = signum (joinScalars e)
 joinScalars e@(Var _ _ _ _ Nothing) = e
 
-factorandsum :: Type a => [Expression a] -> Expression a
-factorandsum [] = 0
-factorandsum (x:xs) = helper (getprodlist x) (x:xs)
-  where helper :: Type a => [(Expression a, Double)] -> [Expression a] -> Expression a
-        helper [] as = sum as
-        helper ((f,n):fs) as = if n' /= 0
-                               then (helper fs (map (/(f**(toExpression n'))) as)) * (f**(toExpression n'))
-                               else helper fs as
-          where n' = if n < 0 then if maximum (map (countup f) as) < 0
-                                   then maximum (map (countup f) as)
-                                   else 0
-                              else if minimum (map (countup f) as) > 0
-                                   then minimum (map (countup f) as)
-                                   else 0
-        countup f (Product y _) = Map.findWithDefault 0 f y
-        countup f (Sum a _) | [(_,y)] <- sum2pairs a = countup f y
-        countup f y | f == y = 1
-        countup _ _ = 0
-        getprodlist (Product xx _) = product2pairs xx
-        getprodlist (Sum a _) | [(_,Product xx _)] <- sum2pairs a = product2pairs xx
-        getprodlist xx = [(xx,1)]
-
 factorOut :: Type a => Expression a -> Expression a -> Maybe Double
 factorOut e e' | e == e' = Just 1
-factorOut e (Sum s _) | [(f,xx)] <- sum2pairs s = factorOut e xx
+factorOut e (Sum s _) | [(_,xx)] <- sum2pairs s = factorOut e xx
 factorOut e (Product p _) = Map.lookup e p
 factorOut _ _ = Nothing
 
@@ -1037,10 +1015,10 @@ derive v@(Scalar (Var _ a b c _)) dda (Var t aa bb cc (Just e))
             else derive v dda e
 derive v dda (Var _ _ _ _ (Just e)) = derive v dda e
 derive _ _ (Var _ _ _ _ Nothing) = 0
-derive v dda (Sum s _) = factorandsum $ map dbythis $ sum2pairs s
-  where dbythis (f,x) = toExpression f * derive v dda x
-derive v dda (Product p i) = factorandsum (map dbythis $ product2pairs p)
-  where dbythis (x,n) = derive v (Product p i*toExpression n*dda/x) x
+derive v dda (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
+  where dbythis (f,x) = (f, derive v dda x)
+derive v dda (Product p i) = pairs2sum $ map dbythis $ product2pairs p
+  where dbythis (x,n) = (1, derive v (Product p i*toExpression n*dda/x) x)
 derive _ _ (Scalar _) = 0 -- FIXME
 derive v dda (Cos e) = derive v (-dda*sin e) e
 derive v dda (Sin e) = derive v (dda*cos e) e
@@ -1073,10 +1051,13 @@ varsetAfterRemoval x@(Sum xs _) e@(Sum es _)
     ratio <- factorE / factorX,
     Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2sum es')
   where xspairs = sum2pairs xs
+        filterout :: Type a => Double -> [(Double, Expression a)] -> Map.Map (Expression a) Double
+                     -> Maybe (Map.Map (Expression a) Double)
         filterout ratio ((f,x1):rest) emap =
           case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
-                                        else Nothing
+            Just f' -> if ratio*(f :: Double) == f'
+                       then filterout ratio rest (Map.delete x1 emap)
+                       else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
 varsetAfterRemoval x@(Product xs _) e@(Product es _)
@@ -1087,10 +1068,13 @@ varsetAfterRemoval x@(Product xs _) e@(Product es _)
     abs ratio >= 1,
     Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2product es')
   where xspairs = product2pairs xs
+        filterout :: Type a => Double -> [(Expression a, Double)] -> Map.Map (Expression a) Double
+                     -> Maybe (Map.Map (Expression a) Double)
         filterout ratio ((x1,f):rest) emap =
           case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
-                                        else Nothing
+            Just f' -> if ratio*f == f'
+                       then filterout ratio rest (Map.delete x1 emap)
+                       else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
 varsetAfterRemoval x (Expression v)
@@ -1123,10 +1107,13 @@ subAndCount x@(Sum xs _) y e@(Sum es _)
     Just es' <- filterout ratio xspairs es,
     (e'',n) <- subAndCount x y (map2sum es') = (e'' + toExpression ratio*y, n+1)
   where xspairs = sum2pairs xs
+        filterout :: Type a => Double -> [(Double, Expression a)] -> Map.Map (Expression a) Double
+                     -> Maybe (Map.Map (Expression a) Double)
         filterout ratio ((f,x1):rest) emap =
           case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
-                                        else Nothing
+            Just f' -> if ratio*f == f'
+                       then filterout ratio rest (Map.delete x1 emap)
+                       else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
 subAndCount x@(Product xs _) y e@(Product es _)
@@ -1138,10 +1125,13 @@ subAndCount x@(Product xs _) y e@(Product es _)
     Just es' <- filterout ratio xspairs es,
     (e'',n) <- subAndCount x y (map2product es') = (e'' * y**(toExpression ratio), n+1)
   where xspairs = product2pairs xs
+        filterout :: Type a => Double -> [(Expression a, Double)] -> Map.Map (Expression a) Double
+                     -> Maybe (Map.Map (Expression a) Double)
         filterout ratio ((x1,f):rest) emap =
           case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f' then filterout ratio rest (Map.delete x1 emap)
-                                        else Nothing
+            Just f' -> if ratio*f == f'
+                       then filterout ratio rest (Map.delete x1 emap)
+                       else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
 subAndCount x y (Expression v)

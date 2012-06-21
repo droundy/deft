@@ -22,6 +22,7 @@ module Statement ( Statement(..),
 
 import Expression
 import Data.List ( nubBy, partition, (\\) )
+import qualified Data.Map as Map
 import qualified Data.Set as Set
 
 data Statement = AssignR (Expression RealSpace) (Expression RealSpace)
@@ -302,10 +303,13 @@ findToDo i everything (Expression e)
     | otherwise = DoNothing
 findToDo _ _ (Sum _ i) | Set.size i < 2 = DoNothing
 findToDo _ everything (Sum s i)
-    | Same <- isRealSpace (Sum s i), todo:_ <- filter simplifiable subes = DoR todo
-    | Same <- isKSpace (Sum s i), todo:_ <- filter simplifiable subes = DoK todo
-    where acceptables = take numtotake $ filter (\(_,e) -> {- not (hasK e) && -} countVars e > 0 && not (hasFFT e)) $ sum2pairs s
-          subes = map pairs2sum $ take numtotake $ subsq acceptables
+    | Same <- isRealSpace (Sum s i), todo:_ <- filter simplifiable (subes s) = DoR todo
+    | Same <- isKSpace (Sum s i), todo:_ <- filter simplifiable (subes s) = DoK todo
+    where acceptables :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
+          acceptables m = take numtotake $ filter (\(_,e) -> {- not (hasK e) && -} countVars e > 0 && not (hasFFT e)) $ sum2pairs m
+          subes :: Type a => Map.Map (Expression a) Double -> [Expression a]
+          subes m = map pairs2sum $ take numtotake $ subsq (acceptables m)
+          simplifiable :: Type a => Expression a -> Bool
           simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube {- && (countexpression sube everything) > 1 -}
               where countVarssube = countVars sube
           oldnum = countVars everything
@@ -319,10 +323,13 @@ findToDo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $ sum2pai
     where sub (_,e) = findToDo i everything e
 findToDo _ _ (Product _ i) | Set.size i < 2 = DoNothing
 findToDo _ everything (Product s i)
-    | Same <- isRealSpace (Product s i), todo:_ <- filter simplifiable subes = DoR todo
-    | Same <- isKSpace (Product s i), todo:_ <- filter simplifiable subes = DoK todo
-    where acceptables = take numtotake $ filter (\(e,_) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ product2pairs s
-          subes = map pairs2product $ take numtotake $ subsq acceptables
+    | Same <- isRealSpace (Product s i), todo:_ <- filter simplifiable (subes s) = DoR todo
+    | Same <- isKSpace (Product s i), todo:_ <- filter simplifiable (subes s) = DoK todo
+    where acceptables :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+          acceptables m = take numtotake $ filter (\(e,_) -> not (hasK e) && countVars e > 0 && not (hasFFT e)) $ product2pairs m
+          subes :: Type a => Map.Map (Expression a) Double -> [Expression a]
+          subes m = map pairs2product $ take numtotake $ subsq (acceptables m)
+          simplifiable :: Type a => Expression a -> Bool
           simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube {- && (countexpression sube everything) > 1 -}
               where countVarssube = countVars sube
           oldnum = countVars everything
