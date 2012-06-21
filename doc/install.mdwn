@@ -18,6 +18,9 @@ You need ...
     gfortran
     ghc
     HUnit
+    texlive-full
+    gnuplot
+    python-matplotlib
 
 Running the test suite
 ======================
