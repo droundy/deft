@@ -87,9 +87,9 @@ void plot_grids_yz_directions(const char *fname, const Grid &a) {
   const int y_half = gd.Ny/2;
   const int z_half = gd.Nz/2;
 
-  int dy = 5;
+  int dy = 18;
   while (gd.Ny % dy != 0) dy--;
-  int dz = 5;
+  int dz = 18;
   while (gd.Nz % dz != 0) dz--;
 
   for (int yy=-y_half; yy<y_half; yy+=dy) {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
   FILE *o = fopen(datname, "w");
   //FILE *o = fopen("papers/water-SAFT/figs/rods-in-water.dat", "w");
 
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
 						water_prop.epsilon_dispersion,
 						water_prop.lambda_dispersion,
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 
   double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 		water_prop.epsilonAB, water_prop.kappaAB,
 		water_prop.epsilon_dispersion,
 		water_prop.lambda_dispersion,
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				       water_prop.epsilonAB, water_prop.kappaAB,
 				       water_prop.epsilon_dispersion,
 				       water_prop.lambda_dispersion,
@@ -209,13 +209,13 @@ int main(int argc, char *argv[]) {
     printf("Distance between rods = %g bohr (%g nm)\n", distance, distance/nm);
     
     const int numiters = 200;
-    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min.improve_energy(false);i++) {
       fflush(stdout);
-      {
-        double peak = peak_memory()/1024.0/1024;
-        double current = current_memory()/1024.0/1024;
-        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-      }
+      // {
+      //   double peak = peak_memory()/1024.0/1024;
+      //   double current = current_memory()/1024.0/1024;
+      //   printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      // }
     }
 
     Grid potential2(gd);
@@ -229,13 +229,13 @@ int main(int argc, char *argv[]) {
     Minimizer min2 = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential2,
                                                                      QuadraticLineMinimizer));
-    for (int i=0;i<numiters && min2.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min2.improve_energy(false);i++) {
       fflush(stdout);
-      {
-        double peak = peak_memory()/1024.0/1024;
-        double current = current_memory()/1024.0/1024;
-        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-      }
+      // {
+      //   double peak = peak_memory()/1024.0/1024;
+      //   double current = current_memory()/1024.0/1024;
+      //   printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      // }
     }
     char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/rods-slice-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
