@@ -272,6 +272,7 @@ instance Type Scalar where
   isScalar _ = Same
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
   zeroHelper v (Integrate e) = integrate (setZero v e)
+  codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
   codeStatementHelper a " = " (Expression (Integrate e)) =
     code a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
     code a ++ " += " ++ code (e * s_var "gd.dvolume") ++

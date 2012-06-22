@@ -21,11 +21,10 @@
 #include "steam-table.h"
 
 static void took(const char *name) {
-  static clock_t last_time = clock();
-  clock_t t = clock();
-  assert(name); // so it'll count as being used...
+  //static clock_t last_time = clock();
+  //clock_t t = clock();
   //printf("%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
-  last_time = t;
+  //last_time = t;
 }
 
 const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin

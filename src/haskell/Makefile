@@ -5,8 +5,7 @@ all: depend test functionals latex-functionals
 clean:
 	rm -f *.hi *.o test functionals latex-functionals
 
-GHCFLAGS=-Werror -Wall -fno-warn-unused-do-bind -O2 -package containers -package HUnit # -prof -auto-all
-GHCFLAGS=-Wall -fno-warn-unused-do-bind -O2 -package process -package containers -package HUnit # -prof -auto-all
+GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package process -package containers -package HUnit # -prof -auto-all
 
 .o.hi:
 	@:

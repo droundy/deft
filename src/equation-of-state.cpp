@@ -286,7 +286,7 @@ void saturated_liquid_vapor(Functional f, double kT,
   // be two minima, one on each side of ncrit, provided ncrit is
   // between the two inflection points which themselves are between
   // the two minima.
-  double nl_old, nv_old, mu_old, mu = find_chemical_potential(f, kT, ncrit);
+  double nl_old, nv_old, mu = find_chemical_potential(f, kT, ncrit);
 
   // Here I compute a start value for "closeness" that yields a stop
   // point very close to fraccuracy, to minimize the number of
@@ -299,7 +299,6 @@ void saturated_liquid_vapor(Functional f, double kT,
   do {
     nl_old = *nl_ptr;
     nv_old = *nv_ptr;
-    mu_old = mu;
 
     // First solve for the optimal liquid density
     double nlmin = ncrit, nlmax = nmax;
@@ -369,8 +368,6 @@ void saturated_liquid_vapor(Functional f, double kT,
     *nv_ptr = nv;
     *mu_ptr = mu;
     //printf("nl = %20.15g\tnv = %20.15g\n", nl, nv);
-    //printf("Iteration %d,\tmu = %g,\tdelta mu = %g\tfrac dnv = %g\t frac dnl = %g\n",
-    //       i, mu, mu - mu_old, (*nv_ptr - nv_old)/ *nv_ptr, (*nl_ptr - nl_old)/ *nl_ptr);
     if (i++ > 15) {
       printf("PANICKING in saturated_liquid_vapor!\n");
       break;
