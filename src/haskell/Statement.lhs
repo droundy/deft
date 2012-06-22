@@ -220,7 +220,7 @@ findNamedScalar (Var t a b c (Just e)) =
                 Different -> DoS e'
     DoNothing -> case isScalar e of
                  Different -> DoNothing
-                 Same -> if hasFFT e then DoNothing else DoS $ Var t a b c (Just e)
+                 Same -> DoS $ Var t a b c (Just e)
     _ -> error "impossible case in findNamedScalar"
 findNamedScalar (Var _ _ _ _ Nothing) = DoNothing
 findNamedScalar (Scalar e) = findNamedScalar e
@@ -470,50 +470,61 @@ findFFTinputtodo i everything (Sum s _) = case filter (/= DoNothing) $ map sub $
 
 
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
-simp2 = scalarhelper [] 0 . joinScalars
+simp2 eee = case scalarhelper [] 0 eee of
+            (a,_,b) -> (a,b)
     where -- First, we want to evaluate any purely scalar expressions
           -- that we can, just to simplify things!
+          scalarhelper :: Type a => [Statement] -> Int -> Expression a -> ([Statement], Int, Expression a)
           scalarhelper sts n e =
             case findNamedScalar e of
-              DoS s@(Var _ _ x t (Just _)) -> scalarhelper (sts++[InitializeS v, AssignS v s]) n (substitute s v e)
-                where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
+              DoS s@(Var _ _ x t (Just e')) ->
+                case simp2helper Set.empty n [] e e' of
+                  ([],_,_) -> scalarhelper (sts++[InitializeS v, AssignS v s]) n (substitute s v e)
+                              where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
+                  (sts',n',e'') -> scalarhelper (sts++sts') n' e''
               DoNothing ->
                 case findNiceScalar e of
                   DoS s -> scalarhelper (sts++[InitializeS v, AssignS v s]) (n+1) (substitute s v e)
                     where v = Var CannotBeFreed ("s"++show n) ("s"++show n)
                                                 ("s_{"++show n++"}") Nothing :: Expression Scalar
-                  DoNothing -> simp2helper Set.empty (n :: Int) sts e
+                  DoNothing -> simp2helper Set.empty (n :: Int) sts e e
                   dothis -> error ("bad result in scalarhelper: " ++ show dothis)
               _ -> error "bad result in scalarhelper"
           -- Then we go looking for memory to save or ffts to evaluate...
-          simp2helper i n sts e = if Set.size i == 0
-                                  then handletodos [findToDo i e e, findFFTtodo e e, findFFTinputtodo i e e]
-                                  else handletodos [findToDo i e e, {- findToDo Set.empty e e, -} findFFTtodo e e,
-                                                    findFFTinputtodo i e e, findFFTinputtodo Set.empty e e]
-            where handletodos [] = (sts, e)
+          simp2helper :: (Type a, Type b) => Set.Set String -> Int -> [Statement] -> Expression a -> Expression b
+                         -> ([Statement], Int, Expression a)
+          simp2helper i n sts everything e =
+            if Set.size i == 0
+            then handletodos [findToDo i everything e, findFFTtodo everything e, findFFTinputtodo i everything e]
+            else handletodos [findToDo i everything e, findFFTtodo everything e,
+                             findFFTinputtodo i everything e, findFFTinputtodo Set.empty everything e]
+            where handletodos [] = (sts, n, everything)
                   handletodos (todo:ts) =
                     case todo of
-                      DoK ke -> simp2helper (varSet v) (n+1) (sts++[inike, setke]) e'
+                      DoK ke -> simp2helper (varSet v) (n+1) (sts++[inike, setke]) everything' e'
                         where v = case ke of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression KSpace
                                              _ -> Var IsTemp ("ktemp_" ++ show n++"[i]")
                                                              ("ktemp_"++show n) ("\\tilde{f}_{" ++ show n ++ "}") Nothing
                               inike = InitializeK v
                               setke = AssignK v ke
                               e'  = substitute ke v e
-                      DoR re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) e'
+                              everything' = substitute ke v everything
+                      DoR re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) everything' e'
                         where v = case re of Var _ xi x t _ -> Var IsTemp xi x t Nothing :: Expression RealSpace
                                              _ -> Var IsTemp ("rtemp_" ++ show n++"[i]")
                                                              ("rtemp_"++show n) ("f_{" ++ show n ++ "}") Nothing
                               inire = InitializeR v
                               setre = AssignR v re
                               e'  = substitute re v e
-                      DoS re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) e'
+                              everything'  = substitute re v everything
+                      DoS re -> simp2helper (varSet v) (n+1) (sts++[inire, setre]) everything' e'
                         where v = case re of Var _ _ x t _ -> Var CannotBeFreed x x t Nothing :: Expression Scalar
                                              _ -> Var CannotBeFreed ("s" ++ show n) ("s" ++ show n)
                                                                     ("s_{" ++ show n ++ "}") Nothing
                               inire = InitializeS v
                               setre = AssignS v re
                               e'  = substitute re v e
+                              everything'  = substitute re v everything
                       DoNothing -> handletodos ts
 
 \end{code}

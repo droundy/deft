@@ -158,12 +158,12 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT nbar + n2" 2 (nbar + n2),
                      t "countFFT n0raw log n3" 3 (n0raw*log n3),
                      t "countFFT n0 log n3" 3 (n0*log n3),
-                     t "countFFT derive n0raw log n3" 6 (gradme $ kT*n0raw*log n3),
-                     t "countFFT derive n0 log n3" 6 (gradme $ kT*n0*log n3),
+                     t "countFFT derive n0raw log n3" 6 (gradme $ integrate $ kT*n0raw*log n3),
+                     t "countFFT derive n0 log n3" 6 (gradme $ integrate $ kT*n0*log n3),
                      t "countFFT derive assocalike n0raw" 6
-                           (gradme $ assocalike n0raw),
+                           (gradme $ integrate $ assocalike n0raw),
                      t "countFFT derive assocalike n0" 6
-                           (gradme $ assocalike n0),
+                           (gradme $ integrate $ assocalike n0),
                      t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
@@ -178,7 +178,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
-        gradme = derive (r_var "x") (r_var "ingrad") . cleanvars
+        gradme = cleanvars . derive (r_var "x") 1
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
 
@@ -199,10 +199,10 @@ memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem nbar" 1 n3,
                      t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
-                     t "peakMem saft_fluid" 4 saft_fluid,
-                     t "peakMem whitebear" 4 whitebear,
+                     t "peakMem saft_fluid" 6 saft_fluid,
+                     t "peakMem whitebear" 6 whitebear,
                      t "peakMem saft_dispersion" 3 saft_dispersion,
-                     t "peakMem saft_association" 4 saft_association,
+                     t "peakMem saft_association" 5 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
                      t "peakMem grad whitebear" 9 (gradme whitebear), -- was 20
                      t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
@@ -210,12 +210,12 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
                      t "peakMem n0 log n3" 3 (n0*log n3), --was 2
-                     t "peakMem derive n0raw log n3" 4 (gradme $ kT*n0raw*log n3),
-                     t "peakMem derive n0 log n3" 4 (gradme $ kT*n0*log n3),
+                     t "peakMem derive n0raw log n3" 4 (gradme $ integrate $ kT*n0raw*log n3),
+                     t "peakMem derive n0 log n3" 4 (gradme $ integrate $ kT*n0*log n3),
                      t "peakMem derive assocalike n0raw" 4
-                           (gradme $ assocalike n0raw),
+                           (gradme $ integrate $ assocalike n0raw),
                      t "peakMem derive assocalike n0" 4
-                           (gradme $ assocalike n0),
+                           (gradme $ integrate $ assocalike n0),
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
                      t "peakMem nbar + log nbar" 1 (nbar + log nbar)]
@@ -230,7 +230,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
-        gradme = derive (r_var "x") (r_var "ingrad") . cleanvars
+        gradme = cleanvars . derive (r_var "x") 1
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
         x1 = r_var "x1"

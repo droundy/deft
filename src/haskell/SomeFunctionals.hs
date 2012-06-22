@@ -54,19 +54,19 @@ phi2 = var "phi2" "\\Phi_2" $ (n2*n1 - n1v_dot_n2v)/(1-n3)
 phi3 = var "phi3" "\\Phi_3" $ (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*vectorThirdTerm
 
 
-whitebear :: Expression RealSpace
-whitebear = var "whitebear" "F_{wb}" $ kT*phi1+kT*phi2+kT*phi3
+whitebear :: Expression Scalar
+whitebear = var "whitebear" "F_{HS}" $ integrate (kT*(phi1+phi2+phi3))
 
 nQ :: Expression RealSpace
 nQ = (mass*kT/2/pi)**1.5
   where mass = var "mH2O" "m_{H_2O}" (18.01528 * gpermol) -- uses molecular weight of water
         gpermol = var "gpermol" "\\frac{\\textrm{g}}{\\textrm{mol}}" 1822.8885
 
-idealgas :: Expression RealSpace
-idealgas = kT*n*(log(n/nQ) - 1)
+idealgas :: Expression Scalar
+idealgas = integrate (kT*n*(log(n/nQ) - 1))
 
 mu :: Type a => Expression a
-mu = s_var "mu"
+mu = s_tex "mu" "\\mu"
 
 dwbdn3, dwbdn2, dwbdn1, dwbdn1v_over_n2v, dwbdn2v_over_n2v :: Expression RealSpace
 dwbdn3 =  d phi1 + d phi2 + d phi3
@@ -135,8 +135,8 @@ deta_effective_by_dlambda = (c1 + 2*c2*eta_for_dispersion + 3*c3*eta_for_dispers
         c3 = -15.0427 + 2*5.30827*lambda_dispersion
 -}
 
-saft_dispersion, saft_association, xsaft, deltasaft, a1, a2 :: Expression RealSpace
-saft_dispersion = "Fdisp" === n*(a1 + a2/kT)
+saft_dispersion, saft_association :: Expression Scalar
+saft_dispersion = "Fdisp" === (("a1integrated" === integrate (n*a1)) + ("a2integrated" === integrate (n*a2/kT)))
 
 a1 = "a1" === -4*(lambda_dispersion**3-1)*epsilon_dispersion*eta_for_dispersion*ghs
   where ghs = var "ghs" "g_{HS}" $ (1 - eta_effective/2)/(1-eta_effective)**3
@@ -149,12 +149,13 @@ da1_detad = derive eta_for_dispersion 1 a1
 a2 = "a2" === 0.5*khs*epsilon_dispersion*eta_for_dispersion*da1_detad
      where khs = var "KHS" "{\\kappa_{HS}}" $ (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
-saft_association = "Fassoc" === 4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2)
+saft_association = "Fassoc" === integrate (4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2))
 
 kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_tex "kappa_association" "\\kappa_a"
 epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 
+xsaft, deltasaft, a1, a2 :: Expression RealSpace
 xsaft = "X" === (sqrt(1 + 8*n0*yuwu_zeta*deltasaft) - 1) / (4*n0*yuwu_zeta*deltasaft)
 
 deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
@@ -165,9 +166,9 @@ gSW = "gSW" ===
       yuwu_correlation
       + (1/4/kT)*(da1_detad - lambda_dispersion/(3*eta_for_dispersion)*da1_dlambda)
 
-saft_fluid :: Expression RealSpace
-saft_fluid = ("Fig" === idealgas) + ("FHS" === whitebear) + saft_association + saft_dispersion + n*mu
+saft_fluid :: Expression Scalar
+saft_fluid = idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu)
 
-of_effective_potential :: Expression RealSpace -> Expression RealSpace
+of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .
                          substitute (r_var "x") (exp (- r_var "veff" / kT))
