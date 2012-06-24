@@ -1,5 +1,5 @@
 \begin{code}
-{-# LANGUAGE GADTs, PatternGuards #-}
+{-# LANGUAGE PatternGuards #-}
 
 module CodeGen (module Statement,
                 module Expression,
@@ -50,15 +50,16 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
-      codeIntegrate = reuseVar $ freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 (factorize $ joinFFTs $ integrate e)
-      codeVTransform = reuseVar $ freeVectors (st ++ [AssignR (r_var "output") e'])
+      codeVTransform = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "output")) (ER e')])
           where (st, e') = simp2 $ factorize $ joinFFTs e
-      codeDTransform = freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ makeHomogeneous e
-      codeDerive = freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ derive (s_var "x") 1 $ makeHomogeneous e
-      codeGrad = reuseVar $ freeVectors (st ++ [AssignR (r_var "(*outgrad)") (r_var "(*outgrad)" + e')])
+      codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
+                                                       (ER (r_var "(*outgrad)" + e'))])
           where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ derive (r_var "x") (r_var "ingrad") e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
@@ -66,7 +67,7 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
 
 generateHeader :: Expression RealSpace -> [String] -> String -> String
-generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++ 
+generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++
                      classCode e arg (n ++ "_type") ++
                      "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
     where codeA [] = ""
@@ -138,17 +139,18 @@ scalarClass e arg n =
     where
       printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
                       "\tprint_double(\"\", " ++ v ++ ");"
-      codeIntegrate = reuseVar $ freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st0, e') = simp2 (factorize $ joinFFTs e)
                 st = filter (not . isns) st0
-                isns (InitializeS (Var _ _ s _ Nothing)) = Set.member s ns
+                isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                 isns _ = False
                 ns = findNamedScalars e
-      codeDTransform = freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ makeHomogeneous e
-      codeDerive = freeVectors (st ++ [AssignS (s_var "output") e'])
+      codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ derive (s_var "x") 1 $ makeHomogeneous e
-      codeGrad = reuseVar $ freeVectors (st ++ [AssignR (r_var "(*outgrad)") (r_var "(*outgrad)" + e')])
+      codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
+                                                       (ER (r_var "(*outgrad)" + e'))])
           where (st, e') = simp2 $ factorize $ joinFFTs $ cleanvars $
                            substitute (s_var "dV" :: Expression RealSpace) 1 $
                            (r_var "ingrad" * derive (r_var "x") 1 e)
@@ -179,10 +181,10 @@ defineFunctional e arg n =
           codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
 
 findNamedScalars :: Type b => Expression b -> Set.Set String
-findNamedScalars (Expression e)
-    | Same <- isKSpace (Expression e), FFT e' <- e = findNamedScalars e'
-    | Same <- isRealSpace (Expression e), IFFT e' <- e = findNamedScalars e'
-    | Same <- isScalar (Expression e), Integrate e' <- e = findNamedScalars e'
+findNamedScalars e@(Expression _)
+    | EK (Expression (FFT e')) <- mkExprn e = findNamedScalars e'
+    | ER (Expression (IFFT e')) <- mkExprn e = findNamedScalars e'
+    | ES (Expression (Integrate e')) <- mkExprn e = findNamedScalars e'
     | otherwise = Set.empty
 findNamedScalars (Sum s _) = Set.unions $ map (findNamedScalars . snd) $ sum2pairs s
 findNamedScalars (Product p _) = Set.unions $ map (findNamedScalars . fst) $ product2pairs p
@@ -193,7 +195,7 @@ findNamedScalars (Exp e) = findNamedScalars e
 findNamedScalars (Abs e) = findNamedScalars e
 findNamedScalars (Signum e) = findNamedScalars e
 findNamedScalars (Var _ _ b _ (Just e))
-  | Same <- isScalar e = Set.insert b $ findNamedScalars e
+  | ES _ <- mkExprn e = Set.insert b $ findNamedScalars e
   | otherwise = findNamedScalars e
 findNamedScalars (Var _ _ _ _ Nothing) = Set.empty
 findNamedScalars (Scalar e) = findNamedScalars e

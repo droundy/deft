@@ -1,21 +1,23 @@
 \begin{code}
 {-# LANGUAGE GADTs, PatternGuards #-}
 
-module Expression (
+module Expression (Exprn(..),
                    RealSpace(..), r_var,
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    fft, ifft, integrate, grad, derive,
                    Expression(..), joinFFTs, joinScalars, (===), var,
-                   Type(..), Code(..), Same(..), IsTemp(..),
+                   Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
-                   sum2pairs, pairs2sum,
+                   cleanvarsE, initializeE, freeE,
+                   sum2pairs, pairs2sum, codeStatementE,
                    product2pairs, pairs2product, product2denominator,
-                   hasK, hasFFT, hasexpression,
+                   hasK, hasFFT, hasexpression, hasExprn,
                    findRepeatedSubExpression,
                    countexpression, substitute, countAfterRemoval,
-                   compareExpressions, countVars, varSet)
+                   substituteE, countAfterRemovalE, countVarsE,
+                   compareExpressions, countVars, varSet, varSetE)
     where
 
 import Debug.Trace
@@ -63,7 +65,10 @@ instance Code RealSpace where
   latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
 instance Type RealSpace where
   isRealSpace _ = Same
+  amRealSpace _ = True
+  mkExprn = ER
   derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) (kinversion ke)
+  scalarderivativeHelper v (IFFT ke) = ifft (scalarderive v ke)
   zeroHelper v (IFFT ke) = ifft (setZero v ke)
   prefix e = case isifft e of Just _ -> ""
                               Nothing -> "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
@@ -101,18 +106,23 @@ instance Code KSpace where
   latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
 instance Type KSpace where
   isKSpace _ = Same
+  amKSpace _ = True
+  mkExprn = EK
   derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
   derivativeHelper v ddk (SetKZeroValue _ e) = derive v (setkzero 0 ddk) e -- FIXME: how best to handle k=0 derivative?
   derivativeHelper _ _ Kx = 0
   derivativeHelper _ _ Ky = 0
   derivativeHelper _ _ Kz = 0
   derivativeHelper _ _ Delta = 0
+  scalarderivativeHelper v (FFT r) = fft (scalarderive v r)
+  scalarderivativeHelper v (SetKZeroValue z e) = setkzero (scalarderive v z) (scalarderive v e)
+  scalarderivativeHelper _ _ = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper _ Kx = Expression Kx
   zeroHelper _ Ky = Expression Ky
   zeroHelper _ Kz = Expression Kz
   zeroHelper _ Delta = Expression Delta
-  zeroHelper v e@(SetKZeroValue val _) | Same <- isKSpace v, v == kz = val -- slightly hokey... assuming that if we set kz = 0 then we set kx and ky = 0
+  zeroHelper v e@(SetKZeroValue val _) | v == EK kz = val -- slightly hokey... assuming that if we set kz = 0 then we set kx and ky = 0
                                        | otherwise = Expression e
   prefix e = case isfft e of Just _ -> ""
                              Nothing -> "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n"
@@ -130,7 +140,7 @@ instance Type KSpace where
               MB (Just (_,x')) -> "\t\tconst complex t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
-            setzero = case code (setZero kz (setZero ky (setZero kx e))) of
+            setzero = case code (setZero (EK kz) (setZero (EK ky) (setZero (EK kx) e))) of
                       "0" -> a ++ "[0]" ++ op ++ "0;"
                       k0code -> unlines ["\t{",
                                          "\t\tconst int i = 0;",
@@ -167,6 +177,11 @@ mapExpression f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
   where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
 
+cleanvarsE :: Exprn -> Exprn
+cleanvarsE (ES e) = ES $ cleanvars e
+cleanvarsE (EK e) = EK $ cleanvars e
+cleanvarsE (ER e) = ER $ cleanvars e
+
 cleanvars :: Type a => Expression a -> Expression a
 cleanvars (Var tt c v t (Just e)) | Same <- isScalar e = Var tt c v t (Just (cleanvars e))
                                   | otherwise = cleanvars e
@@ -188,8 +203,8 @@ cleanvars (Expression e)
   | Same <- isScalar (Expression e), Integrate e' <- e = integrate (cleanvars e')
   | otherwise = Expression e
 
-isEven :: (Type a, Type b) => Expression b -> Expression a -> Double
-isEven v e | Same <- compareExpressions v e = -1
+isEven :: (Type a) => Exprn -> Expression a -> Double
+isEven v e | v == mkExprn e = -1
 isEven v (Var _ _ _ _ (Just e)) = isEven v e
 isEven _ (Var _ _ _ _ Nothing) = 1
 isEven v (Scalar e) = isEven v e
@@ -204,27 +219,19 @@ isEven v (Product p _) = product $ map ie $ product2pairs p
 isEven _ (Sum s i) | Sum s i == 0 = 1 -- ???
 isEven v (Sum s _) = ie (isEven v x) xs
   where (_,x):xs = sum2pairs s
-        ie sofar ((_,y):ys) = if isEven v y /= sofar 
+        ie sofar ((_,y):ys) = if isEven v y /= sofar
                               then 0
                               else ie sofar ys
         ie sofar [] = sofar
-isEven v (Expression e) 
-  | Same <- isKSpace (Expression e) =
-    case e of
-      FFT r -> isEven v r
-      _ -> 1
-isEven v (Expression e) 
-  | Same <- isRealSpace (Expression e) =
-    case e of
-      IFFT ks -> isEven v ks
-isEven v (Expression e) 
-  | Same <- isScalar (Expression e) =
-    case e of
-      Integrate x -> isEven v x
+isEven v e
+  | EK (Expression (FFT r)) <- mkExprn e = isEven v r
+  | EK _ <- mkExprn e = 1
+  | ER (Expression (IFFT ks)) <- mkExprn e = isEven v ks
+  | ES (Expression (Integrate x)) <- mkExprn e = isEven v x
 isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into this
 
-setZero :: (Type a, Type b) => Expression b -> Expression a -> Expression a
-setZero v e | Same <- compareExpressions v e = 0
+setZero :: Type a => Exprn -> Expression a -> Expression a
+setZero v e | v == mkExprn e = 0
 setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
 setZero _ e@(Var _ _ _ _ Nothing) = e
 setZero v (Scalar e) = Scalar (setZero v e)
@@ -245,11 +252,7 @@ setZero v (Product p i) =
     else if zn /= 0
          then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
                      ++ latex (Product p i) ++ "\n\n\n" ++ latex zn)
-         else case compareTypes v n of
-                Same -> setZero v (dtop / dbot)
-                  where dtop = derive v 1 n
-                        dbot = derive v 1 d
-                Different -> error "oops, failure in setZero that makes no sense."
+         else setZero v (scalarderive v n / scalarderive v d)
   where d = product2denominator p
         n = product $ product2numerator p
         zn = setZero v n
@@ -270,7 +273,10 @@ instance Type Scalar where
   s_var v = Var CannotBeFreed v v v Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   isScalar _ = Same
+  amScalar _ = True
+  mkExprn = ES
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
+  scalarderivativeHelper v (Integrate e) = integrate (scalarderive v e)
   zeroHelper v (Integrate e) = integrate (setZero v e)
   codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
   codeStatementHelper a " = " (Expression (Integrate e)) =
@@ -376,6 +382,10 @@ type.
 data IsTemp = IsTemp | CannotBeFreed
             deriving (Eq, Ord, Show)
 
+-- An expression statement holds a mathematical expression, which is
+-- be any one of several different types: RealSpace (as in n(\vec{r})),
+-- KSpace (as in w(\vec{k})), or Scalar (as in an ordinary scalar value
+-- like k_BT.
 data Expression a = Scalar (Expression Scalar) |
                     Var IsTemp String String String (Maybe (Expression a)) | -- A variable with a possible value
                     Expression a |
@@ -388,6 +398,14 @@ data Expression a = Scalar (Expression Scalar) |
                     Product (Map.Map (Expression a) Double) (Set.Set String) |
                     Sum (Map.Map (Expression a) Double) (Set.Set String)
               deriving (Eq, Ord, Show)
+
+-- An "E" type is *any* type of expression.  This is useful when we
+-- want to specify subexpressions, for instance, when we might not
+-- want to care in advance which sort of subexpression it is.  Also
+-- useful for comparing two expressions that might not be the same
+-- type.
+data Exprn = EK (Expression KSpace) | ER (Expression RealSpace) | ES (Expression Scalar)
+       deriving (Eq, Ord, Show)
 
 sum2pairs :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
 sum2pairs s = map rev $ Map.assocs s
@@ -465,97 +483,99 @@ product2denominator :: Type a => Map.Map (Expression a) Double -> Expression a
 product2denominator s = pairs2product $ map n $ filter ((<0) . snd) $ product2pairs s
   where n (a,b) = (a, -b)
 
+instance Code Exprn where
+  codePrec p (ES e) = codePrec p e
+  codePrec p (EK e) = codePrec p e
+  codePrec p (ER e) = codePrec p e
+  latexPrec p (ES e) = latexPrec p e
+  latexPrec p (EK e) = latexPrec p e
+  latexPrec p (ER e) = latexPrec p e
 instance (Type a, Code a) => Code (Expression a) where
-  codePrec = codeE
-  latexPrec = latexE
-
-codeE :: (Type a, Code a) => Int -> Expression a -> ShowS
-codeE _ (Var _ c _ _ Nothing) = showString c
-codeE p (Var _ _ _ _ (Just e)) = codeE p e
-codeE p (Scalar x) = codePrec p x
-codeE p (Expression x) = codePrec p x
-codeE _ (Cos x) = showString "cos(" . codeE 0 x . showString ")"
-codeE _ (Sin x) = showString "sin(" . codeE 0 x . showString ")"
-codeE _ (Exp x) = showString "exp(" . codeE 0 x . showString ")"
-codeE _ (Log x) = showString "log(" . codeE 0 x . showString ")"
-codeE _ (Abs x) = showString "fabs(" . codeE 0 x . showString ")"
-codeE _ (Signum _) = undefined
-codeE _ (Product p i) | Product p i == 1 = showString "1"
-codeE pree (Product p _) = showParen (pree > 7) $
+  codePrec _ (Var _ c _ _ Nothing) = showString c
+  codePrec p (Var _ _ _ _ (Just e)) = codePrec p e
+  codePrec p (Scalar x) = codePrec p x
+  codePrec p (Expression x) = codePrec p x
+  codePrec _ (Cos x) = showString "cos(" . codePrec 0 x . showString ")"
+  codePrec _ (Sin x) = showString "sin(" . codePrec 0 x . showString ")"
+  codePrec _ (Exp x) = showString "exp(" . codePrec 0 x . showString ")"
+  codePrec _ (Log x) = showString "log(" . codePrec 0 x . showString ")"
+  codePrec _ (Abs x) = showString "fabs(" . codePrec 0 x . showString ")"
+  codePrec _ (Signum _) = undefined
+  codePrec _ (Product p i) | Product p i == 1 = showString "1"
+  codePrec pree (Product p _) = showParen (pree > 7) $
                            if den == 1
                            then codesimple num
-                           else codesimple num . showString "/" . codeE 8 den
-  where codesimple [] = showString "1"
-        codesimple [(a,n)] = codee a n
-        codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
-        codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
-        num = product2numerator_pairs p
-        den = product2denominator p
-        codee _ 0 = showString "1" -- this shouldn't happen...
-        codee _ n | n < 0 = error "shouldn't have negative power here"
-        codee x 1 = codeE 7 x
-        codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
-        codee x nn
-          | fromInteger n2 == 2*nn && odd n2 = codee x 0.5 . showString "*" . codee x (nn-0.5)
-          | fromInteger n == nn && odd n = codee x 1 . showString "*" . codee x (nn-1)
-          | fromInteger n == nn =
-            showParen (nn/2>1) (codee x (nn / 2)) . showString "*" . showParen (nn/2>1) (codee x (nn / 2))
-          where n2 = floor (2*nn)
-                n = floor nn
-        codee x n = showString "pow(" . codeE 0 x . showString (", " ++ show n ++ ")")
-codeE _ (Sum s i) | Sum s i == 0 = showString "0"
-codeE p (Sum s _) = showParen (p > 6) (showString me)
-  where me = foldl addup "" $ sum2pairs s
-        addup "" (1,e) = codeE 6 e ""
-        addup "" (f,e) = if e == 1
-                         then show f
-                         else show f ++ "*" ++ codeE 7 e ""
-        addup rest (1,e) = codeE 6 e (showString " + " $ rest)
-        addup rest (f,e) = show f ++ "*" ++ codeE 7 e (showString " + " $ rest)
-
-latexE :: (Type a, Code a) => Int -> Expression a -> ShowS
-latexE p (Var _ _ "" "" (Just e)) = latexE p e
-latexE _ (Var _ _ c "" _) = showString c
-latexE _ (Var _ _ _ t _) = showString t
-latexE _ x | Just xx <- isConstant x = showString (latexDouble xx)
-latexE p (Scalar x) = latexPrec p x
-latexE p (Expression x) = latexPrec p x
-latexE _ (Cos x) = showString "\\cos(" . latexE 0 x . showString ")"
-latexE _ (Sin x) = showString "\\sin(" . latexE 0 x . showString ")"
-latexE _ (Exp x) = showString "\\exp\\left(" . latexE 0 x . showString "\\right)"
-latexE _ (Log x) = showString "\\log(" . latexE 0 x . showString ")"
-latexE _ (Abs x) = showString "\\left|" . latexE 0 x . showString "\\right|"
-latexE _ (Signum _) = undefined
-latexE p (Product x _) | Map.size x == 1 && product2denominator x == 1 =
-  case product2pairs x of
-    [(_,0)] -> showString "1" -- this shouldn't happen...
-    [(_, n)] | n < 0 -> error "shouldn't have negative power here"
-    [(e, 1)] -> latexE p e
-    [(e, 0.5)] -> showString "\\sqrt{" . latexE 0 e . showString "}"
-    [(e, n)] -> latexE 8 e . showString ("^{" ++ latexDouble n ++ "}")
-    _ -> error "This really cannot happen."
-latexE pree (Product p _) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
-  where ltexsimple [] = showString "1"
-        ltexsimple [a] = latexE 7 a
-        ltexsimple [a,b] = latexE 7 a . showString " " . latexE 7 b
-        ltexsimple (a:es) = latexE 7 a . showString " " . ltexsimple es
-latexE pree (Product p _) = latexParen (pree > 7) $ showString "\\frac{" . latexE 0 num . showString "}{" .
-                                                                        latexE 0 den . showString "}"
-  where num = product $ product2numerator p
-        den = product2denominator p
-latexE p (Sum s _) = latexParen (p > 6) (showString me)
-  where me = foldl addup "" $ sum2pairs s
-        addup "" (1,e) = latexE 6 e ""
-        addup "" (f,e) | f < 0 = "-" ++ addup "" (-f, e)
-        addup "" (f,e) = if e == 1
-                         then latexDouble f
-                         else latexDouble f ++ " " ++ latexE 6 e ""
-        addup ('-':rest) (1,e) = latexE 6 e (" - " ++ rest)
-        addup ('-':rest) (-1,e) = "-" ++ latexE 6 e (" - " ++ rest)
-        addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " - " $ rest)
-        addup rest (-1,e) = "-" ++ latexE 6 e (" + " ++ rest)
-        addup rest (1,e) = latexE 6 e (" + " ++ rest)
-        addup rest (f,e) = latexDouble f ++ " " ++ latexE 7 e (showString " + " $ rest)
+                           else codesimple num . showString "/" . codePrec 8 den
+    where codesimple [] = showString "1"
+          codesimple [(a,n)] = codee a n
+          codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
+          codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
+          num = product2numerator_pairs p
+          den = product2denominator p
+          codee _ 0 = showString "1" -- this shouldn't happen...
+          codee _ n | n < 0 = error "shouldn't have negative power here"
+          codee x 1 = codePrec 7 x
+          codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
+          codee x nn
+            | fromInteger n2 == 2*nn && odd n2 = codee x 0.5 . showString "*" . codee x (nn-0.5)
+            | fromInteger n == nn && odd n = codee x 1 . showString "*" . codee x (nn-1)
+            | fromInteger n == nn =
+              showParen (nn/2>1) (codee x (nn / 2)) . showString "*" . showParen (nn/2>1) (codee x (nn / 2))
+            where n2 = floor (2*nn)
+                  n = floor nn
+          codee x n = showString "pow(" . codePrec 0 x . showString (", " ++ show n ++ ")")
+  codePrec _ (Sum s i) | Sum s i == 0 = showString "0"
+  codePrec p (Sum s _) = showParen (p > 6) (showString me)
+    where me = foldl addup "" $ sum2pairs s
+          addup "" (1,e) = codePrec 6 e ""
+          addup "" (f,e) = if e == 1
+                           then show f
+                           else show f ++ "*" ++ codePrec 7 e ""
+          addup rest (1,e) = codePrec 6 e (showString " + " $ rest)
+          addup rest (f,e) = show f ++ "*" ++ codePrec 7 e (showString " + " $ rest)
+  latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
+  latexPrec _ (Var _ _ c "" _) = showString c
+  latexPrec _ (Var _ _ _ t _) = showString t
+  latexPrec _ x | Just xx <- isConstant x = showString (latexDouble xx)
+  latexPrec p (Scalar x) = latexPrec p x
+  latexPrec p (Expression x) = latexPrec p x
+  latexPrec _ (Cos x) = showString "\\cos(" . latexPrec 0 x . showString ")"
+  latexPrec _ (Sin x) = showString "\\sin(" . latexPrec 0 x . showString ")"
+  latexPrec _ (Exp x) = showString "\\exp\\left(" . latexPrec 0 x . showString "\\right)"
+  latexPrec _ (Log x) = showString "\\log(" . latexPrec 0 x . showString ")"
+  latexPrec _ (Abs x) = showString "\\left|" . latexPrec 0 x . showString "\\right|"
+  latexPrec _ (Signum _) = undefined
+  latexPrec p (Product x _) | Map.size x == 1 && product2denominator x == 1 =
+    case product2pairs x of
+      [(_,0)] -> showString "1" -- this shouldn't happen...
+      [(_, n)] | n < 0 -> error "shouldn't have negative power here"
+      [(e, 1)] ->   latexPrec p e
+      [(e, 0.5)] -> showString "\\sqrt{" . latexPrec 0 e . showString "}"
+      [(e, n)] -> latexPrec 8 e . showString ("^{" ++ latexDouble n ++ "}")
+      _ -> error "This really cannot happen."
+  latexPrec pree (Product p _) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
+    where ltexsimple [] = showString "1"
+          ltexsimple [a] = latexPrec 7 a
+          ltexsimple [a,b] = latexPrec 7 a . showString " " . latexPrec 7 b
+          ltexsimple (a:es) = latexPrec 7 a . showString " " . ltexsimple es
+  latexPrec pree (Product p _) = latexParen (pree > 7) $
+              showString "\\frac{" . latexPrec 0 num . showString "}{" .
+                                     latexPrec 0 den . showString "}"
+    where num = product $ product2numerator p
+          den = product2denominator p
+  latexPrec p (Sum s _) = latexParen (p > 6) (showString me)
+    where me = foldl addup "" $ sum2pairs s
+          addup "" (1,e) = latexPrec 6 e ""
+          addup "" (f,e) | f < 0 = "-" ++ addup "" (-f, e)
+          addup "" (f,e) = if e == 1
+                           then latexDouble f
+                           else latexDouble f ++ " " ++ latexPrec 6 e ""
+          addup ('-':rest) (1,e) = latexPrec 6 e (" - " ++ rest)
+          addup ('-':rest) (-1,e) = "-" ++ latexPrec 6 e (" - " ++ rest)
+          addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " - " $ rest)
+          addup rest (-1,e) = "-" ++ latexPrec 6 e (" + " ++ rest)
+          addup rest (1,e) = latexPrec 6 e (" + " ++ rest)
+          addup rest (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " + " $ rest)
 
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x
@@ -571,6 +591,11 @@ class Code a  where
     latex     :: a -> String
     latex x = latexPrec 0 x ""
 
+-- The Same type is used to prove to the compiler that two types are
+-- actually identical in a type-safe way.  It is a GADT, and I'd like
+-- to phase out its use entirely, since this aspect of the Haskell
+-- language hasn't been standardized, and changes from one version of
+-- the compiler to the next.
 data Same a b where
     Same :: Same a a
     Different :: Same a b
@@ -592,6 +617,13 @@ isConstant (Product p _) = if Map.size p == 0 then Just 1 else Nothing
 isConstant _ = Nothing
 
 class (Ord a, Show a, Code a) => Type a where 
+  amScalar :: Expression a -> Bool
+  amScalar _ = False
+  amRealSpace :: Expression a -> Bool
+  amRealSpace _ = False
+  amKSpace :: Expression a -> Bool
+  amKSpace _ = False
+  mkExprn :: Expression a -> Exprn
   isScalar :: Expression a -> Same a Scalar
   isScalar _ = Different
   isRealSpace :: Expression a -> Same a RealSpace
@@ -603,26 +635,38 @@ class (Ord a, Show a, Code a) => Type a where
   s_tex :: String -> String -> Expression a
   s_tex v t = Scalar (s_tex v t)
   derivativeHelper :: Type b => Expression b -> Expression a -> a -> Expression b
-  zeroHelper :: Type b => Expression b -> a -> Expression a
+  scalarderivativeHelper :: Exprn -> a -> Expression a
+  zeroHelper :: Exprn -> a -> Expression a
   codeStatementHelper :: Expression a -> String -> Expression a -> String
   prefix :: Expression a -> String
   postfix :: Expression a -> String
   postfix _ = ""
   initialize :: Expression a -> String
   free :: Expression a -> String
-  free _ = error "free nothing"
+  free x = error ("free nothing " ++ show x)
   toScalar :: a -> Expression Scalar
   fromScalar :: Expression Scalar -> Expression a
   fromScalar = Scalar
 
+initializeE :: Exprn -> String
+initializeE (ES e) = initialize e
+initializeE (EK e) = initialize e
+initializeE (ER e) = initialize e
+freeE :: Exprn -> String
+freeE (ES e) = free e
+freeE (ER e) = free e
+freeE (EK e) = free e
 
+codeStatementE :: Exprn -> String -> Exprn -> String
+codeStatementE (ES a) op (ES b) = codeStatementHelper a op b
+codeStatementE (EK a) op (EK b) = codeStatementHelper a op b
+codeStatementE (ER a) op (ER b) = codeStatementHelper a op b
+codeStatementE _ _ _ = error "bug revealed by codeStatementE"
 
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
-makeHomogeneous ee = 
-  scalarScalar $ case isKSpace ee of
-                    Same -> setZero (s_var "_kx" :: Expression Scalar) $ mapExpression toScalar ee
-                    _ -> mapExpression toScalar ee
+makeHomogeneous ee =
+  scalarScalar $ setZero (ES (s_var "_kx")) $ mapExpression toScalar ee
   where scalarScalar :: Expression Scalar -> Expression Scalar
         scalarScalar (Var t a b c (Just e)) = Var t a b c (Just $ scalarScalar e)
         scalarScalar (Var _ _ c l Nothing) = Var CannotBeFreed c c l Nothing
@@ -738,6 +782,14 @@ grad v e = derive (r_var v) 1 e
 countVars :: Type a => Expression a -> Int
 countVars s = Set.size $ varSet s
 
+countVarsE :: Exprn -> Int
+countVarsE = Set.size . varSetE
+
+varSetE :: Exprn -> Set.Set String
+varSetE (ES e) = varSet e
+varSetE (EK e) = varSet e
+varSetE (ER e) = varSet e
+
 varSet :: Type a => Expression a -> Set.Set String
 varSet (Expression e) | Same <- isKSpace (Expression e), Kx <- e = Set.empty
                        | Same <- isKSpace (Expression e), Ky <- e = Set.empty
@@ -761,7 +813,7 @@ varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
 
 hasFFT :: Type a => Expression a -> Bool
-hasFFT (Expression e) 
+hasFFT (Expression e)
     | Same <- isKSpace (Expression e), FFT _ <- e = True
     | Same <- isRealSpace (Expression e), IFFT _ <- e = True
     | Same <- isScalar (Expression e), Integrate _ <- e = True -- a bit weird... rename this function?
@@ -984,6 +1036,27 @@ hasExpressionInFFT v (Signum e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Scalar e) = hasExpressionInFFT v e
 hasExpressionInFFT _ (Var _ _ _ _ Nothing) = False
 
+-- scalarderive gives a derivative of the same type as the original,
+-- and will always either be a derivative with respect to a scalar, or
+-- with respect to kx.
+scalarderive :: Type a => Exprn -> Expression a -> Expression a
+scalarderive v e | v == mkExprn e = 1
+scalarderive v (Scalar e) = Scalar (scalarderive v e)
+scalarderive v (Var _ _ _ _ (Just e)) = scalarderive v e
+scalarderive _ (Var _ _ _ _ Nothing) = 0
+scalarderive v (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
+  where dbythis (f,x) = (f, scalarderive v x)
+scalarderive v (Product p i) = pairs2sum $ map dbythis $ product2pairs p
+  where dbythis (x,n) = (1, Product p i*toExpression n/x * scalarderive v x)
+scalarderive v (Cos e) = -sin e * scalarderive v e
+scalarderive v (Sin e) = cos e * scalarderive v e
+scalarderive v (Exp e) = exp e * scalarderive v e
+scalarderive v (Log e) = scalarderive v e / e
+scalarderive _ (Abs _) = error "I didn't think we'd need abs"
+scalarderive _ (Signum _) = error "I didn't think we'd need signum"
+scalarderive v (Expression e) = scalarderivativeHelper v e
+
+
 derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Expression b
 derive v dda e | Same <- compareExpressions v e = dda
 derive vv@(Scalar v) dda (Scalar e) -- Treat scalar derivative of scalar as scalar.  :)
@@ -1032,14 +1105,35 @@ derive v dda (Expression e) = derivativeHelper v dda e
 hasexpression :: (Type a, Type b) => Expression a -> Expression b -> Bool
 hasexpression x e = countexpression x e > 0
 
+hasExprn :: Exprn -> Exprn -> Bool
+hasExprn (ES a) (ES b) = hasexpression a b
+hasExprn (ES a) (ER b) = hasexpression a b
+hasExprn (ES a) (EK b) = hasexpression a b
+hasExprn (ER a) (ES b) = hasexpression a b
+hasExprn (ER a) (ER b) = hasexpression a b
+hasExprn (ER a) (EK b) = hasexpression a b
+hasExprn (EK a) (ES b) = hasexpression a b
+hasExprn (EK a) (ER b) = hasexpression a b
+hasExprn (EK a) (EK b) = hasexpression a b
+
 countexpression :: (Type a, Type b) => Expression a -> Expression b -> Int
 countexpression x e = snd $ subAndCount x (s_var "WeAreCounting") e
 
 substitute :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> Expression b
 substitute x y e = fst $ subAndCount x y e
 
+substituteE :: Type a => Expression a -> Expression a -> Exprn -> Exprn
+substituteE a a' (ES b) = mkExprn $ substitute a a' b
+substituteE a a' (ER b) = mkExprn $ substitute a a' b
+substituteE a a' (EK b) = mkExprn $ substitute a a' b
+
 countAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Int
 countAfterRemoval v e = Set.size (varsetAfterRemoval v e)
+
+countAfterRemovalE :: Type a => Exprn -> Expression a -> Int
+countAfterRemovalE (EK a) b = countAfterRemoval a b
+countAfterRemovalE (ER a) b = countAfterRemoval a b
+countAfterRemovalE (ES a) b = countAfterRemoval a b
 
 varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Set String
 -- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent

@@ -83,7 +83,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k) == 0" 0
                        (makeHomogeneous (r * cos kr) - makeHomogeneous (sin kr/k)),
                     t "setZero aaa ((1 - sin aaa/aaa)/aaa) == 0" 0
-                       (setZero (r_var "aaa") ((1 - sin aaa/aaa)/aaa)),
+                       (setZero (ER $ r_var "aaa") ((1 - sin aaa/aaa)/aaa)),
                     t "makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2) == 0" 0
                        (makeHomogeneous (ky*(r * cos kr - sin kr/k)/k**2)),
                     t "makeHomogeneous n2" (4*pi*(s_var "r")**2*s_var "x") (makeHomogeneous n2),
@@ -291,13 +291,13 @@ hasexpressionTests = TestList [t x1 (x1 + x2) True,
         rad = s_var "R"
 
 findToDoTests :: Test
-findToDoTests = TestList [t (DoR $ -3*(x1**2+x2**2))
+findToDoTests = TestList [t (Just $ ER $ -3*(x1**2+x2**2))
                             ((x1**2+x2**2)*rad + 3 + x4*log(1- x3)*(-3*x1**2-3*x2**2+x4**2)/(x3**2*(1-x3)**2)/36/pi),
                           --FIXME
                           --t (DoR $ -3*x1-3*x2)
                           --  ((x1+x2)*rad + log(x1+x2)),
-                          t DoNothing (x1**2/4/pi+x2**2/4/pi + 3 + cos(-3*x1**2-2*x2**2)),
-                          t (DoR $ x1+x2) (x1+x2 + x3 + x4 + cos(x1+x2) + rad)]
+                          t Nothing (x1**2/4/pi+x2**2/4/pi + 3 + cos(-3*x1**2-2*x2**2)),
+                          t (Just $ ER $ x1+x2) (x1+x2 + x3 + x4 + cos(x1+x2) + rad)]
     where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee (findToDo Set.empty e e)
           x1 = r_var "rtemp_1"
           x2 = r_var "rtemp_2"

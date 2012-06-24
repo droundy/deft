@@ -196,6 +196,7 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # endif
 
 pdf: doc/Association.pdf doc/WhiteBear.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
+	doc/SimpDispersion.pdf \
 	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
 
 html: pdf
