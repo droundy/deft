@@ -365,9 +365,6 @@ k_var "" = error "r_var needs non-empty string"
 imaginary :: Expression KSpace
 imaginary = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
 
---imaginary :: Type a => Expression a
---imaginary = s_var "complex(0,1)"
-
 infix 4 ===
 
 (===) :: Type a => String -> Expression a -> Expression a

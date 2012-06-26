@@ -91,13 +91,12 @@ void plot_grids_yz_directions(const char *fname, const Grid &a) {
 
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
-  const int y_half = gd.Ny/2;
-  const int z_half = gd.Nz/2;
 
   int dy = 5;
-  while (gd.Ny % dy != 0) dy--;
   int dz = 5;
-  while (gd.Nz % dz != 0) dz--;
+  const int y_half = dy*(gd.Ny/2/dy);
+  const int z_half = dz*(gd.Nz/2/dz);
+  printf("dy and dz are %d and %d\n", dy, dz);
   for (int yy=-y_half; yy<y_half; yy+=dy) {
     for (int zz=-z_half; zz<z_half; zz+=dz) {
       //Rearrange coordinates for easier plotting
@@ -112,7 +111,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a) {
               ahere);
     }
     fprintf(out,"\n");
- }  
+  }
   fclose(out);
 }
 
@@ -138,7 +137,7 @@ int main(int argc, char *argv[]) {
   FILE *o = fopen(datname, "w");
   delete[] datname;
 
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,
                                                 water_prop.epsilon_dispersion,
                                                 water_prop.lambda_dispersion,
@@ -148,7 +147,7 @@ int main(int argc, char *argv[]) {
 
   double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                      water_prop.epsilonAB, water_prop.kappaAB,
                                      water_prop.epsilon_dispersion,
                                      water_prop.lambda_dispersion,
@@ -184,12 +183,12 @@ int main(int argc, char *argv[]) {
 
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
-    
+    printf("Grid is %d x %d x %d\n", gd.Nx, gd.Ny, gd.Nz);
     Grid potential(gd);
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                        water_prop.epsilonAB, water_prop.kappaAB,
                                        water_prop.epsilon_dispersion,
                                        water_prop.lambda_dispersion,
@@ -215,13 +214,13 @@ int main(int argc, char *argv[]) {
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     const int numiters = 200;
-    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min.improve_energy(false);i++) {
       fflush(stdout);
-      {
-        double peak = peak_memory()/1024.0/1024;
-        double current = current_memory()/1024.0/1024;
-        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-      }
+      // {
+      //   double peak = peak_memory()/1024.0/1024;
+      //   double current = current_memory()/1024.0/1024;
+      //   printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      // }
     }
 
     Grid potential2(gd);
@@ -235,13 +234,13 @@ int main(int argc, char *argv[]) {
     Minimizer min2 = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                                      &potential2,
                                                                      QuadraticLineMinimizer));
-    for (int i=0;i<numiters && min2.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min2.improve_energy(false);i++) {
       fflush(stdout);
-      {
-        double peak = peak_memory()/1024.0/1024;
-        double current = current_memory()/1024.0/1024;
-        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-      }
+      // {
+      //   double peak = peak_memory()/1024.0/1024;
+      //   double current = current_memory()/1024.0/1024;
+      //   printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      // }
     }
     char *plotnameslice = new char[1024];
     snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);

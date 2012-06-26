@@ -56,7 +56,7 @@ set title  'After transition'
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 nm=18.8972613 # 1 nm in atomic units
 
-splot [:] [:] [:] \
+splot [-2.5:2.5] [-2.5:2.5] [:] \
 'figs/four-rods-01.0-01.4.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
 
 set size 0.95,0.55          # The top plot
@@ -71,5 +71,5 @@ set bmargin 0
 unset colorbox
 set title  'Before transition' 
 
-splot [:] [:] [:] \
+splot [-2.5:2.5] [-2.5:2.5] [:] \
 'figs/four-rods-01.0-01.2.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d

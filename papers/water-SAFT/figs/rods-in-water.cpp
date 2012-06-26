@@ -84,14 +84,11 @@ void plot_grids_yz_directions(const char *fname, const Grid &a) {
   }
   const GridDescription gd = a.description();
   const int x = gd.Nx/2;
-  const int y_half = gd.Ny/2;
-  const int z_half = gd.Nz/2;
 
-  int dy = 18;
-  while (gd.Ny % dy != 0) dy--;
-  int dz = 18;
-  while (gd.Nz % dz != 0) dz--;
-
+  int dy = 5;
+  int dz = 5;
+  const int y_half = dy*(gd.Ny/2/dy);
+  const int z_half = dz*(gd.Nz/2/dz);
   for (int yy=-y_half; yy<y_half; yy+=dy) {
     for (int zz=-z_half; zz<z_half; zz+=dz) {
       int y = (yy + gd.Ny) % gd.Ny;
@@ -101,7 +98,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a) {
       fprintf(out, "%g\t%g\t%g\t%.3g\n", here[0], here[1], here[2], ahere);
     }
     fprintf(out,"\n");
- }  
+  }
   fclose(out);
 }
 
