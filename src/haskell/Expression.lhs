@@ -6,7 +6,7 @@ module Expression (Exprn(..),
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    fft, ifft, integrate, grad, derive,
-                   Expression(..), joinFFTs, joinScalars, (===), var,
+                   Expression(..), joinFFTs, (===), var,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
@@ -183,7 +183,7 @@ cleanvarsE (EK e) = EK $ cleanvars e
 cleanvarsE (ER e) = ER $ cleanvars e
 
 cleanvars :: Type a => Expression a -> Expression a
-cleanvars (Var tt c v t (Just e)) | Same <- isScalar e = Var tt c v t (Just (cleanvars e))
+cleanvars (Var tt c v t (Just e)) | ES _ <- mkExprn e = Var tt c v t (Just (cleanvars e))
                                   | otherwise = cleanvars e
 cleanvars (Var tt c v t Nothing) = Var tt c v t Nothing
 cleanvars (Scalar e) = Scalar (cleanvars e)
@@ -223,12 +223,12 @@ isEven v (Sum s _) = ie (isEven v x) xs
                               then 0
                               else ie sofar ys
         ie sofar [] = sofar
-isEven v e
-  | EK (Expression (FFT r)) <- mkExprn e = isEven v r
-  | EK _ <- mkExprn e = 1
-  | ER (Expression (IFFT ks)) <- mkExprn e = isEven v ks
-  | ES (Expression (Integrate x)) <- mkExprn e = isEven v x
-isEven _ (Expression _) = 1 -- Technically, it might be good to recurse into this
+isEven v e = case mkExprn e of
+             EK (Expression (FFT r)) -> isEven v r
+             EK _ -> 1
+             ER (Expression (IFFT ks)) -> isEven v ks
+             ES (Expression (Integrate x)) -> isEven v x
+             _ -> 1 -- Expression _.  Technically, it might be good to recurse into this
 
 setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
@@ -321,19 +321,13 @@ infix 4 ===
 --_ === e = e
 v@(a:r@(_:_)) === e = Var CannotBeFreed c v ltx (Just e)
   where ltx = a : "_{"++r++"}"
-        c = (case isScalar e of
-              Same -> v
-              Different -> v ++ "[i]") :: String
+        c = if amScalar e then v else v ++ "[i]"
 v === e = Var CannotBeFreed c v v (Just e)
-  where c = (case isScalar e of
-              Same -> v
-              Different -> v ++ "[i]") :: String
+  where c = if amScalar e then v else v ++ "[i]"
 
 var :: Type a => String -> String -> Expression a -> Expression a
 var v ltx e = Var CannotBeFreed c v ltx (Just e)
-  where c = (case isScalar e of
-              Same -> v
-              Different -> v ++ "[i]") :: String
+  where c = if amScalar e then v else v ++ "[i]"
 
 kx :: Expression KSpace
 kx = Expression Kx
@@ -791,14 +785,12 @@ varSetE (EK e) = varSet e
 varSetE (ER e) = varSet e
 
 varSet :: Type a => Expression a -> Set.Set String
-varSet (Expression e) | Same <- isKSpace (Expression e), Kx <- e = Set.empty
-                       | Same <- isKSpace (Expression e), Ky <- e = Set.empty
-                       | Same <- isKSpace (Expression e), Kz <- e = Set.empty
-                       | Same <- isRealSpace (Expression e), (IFFT e') <- e = varSet e'
-                       | Same <- isKSpace (Expression e), (FFT e') <- e = varSet e'
-                       | Same <- isScalar (Expression e), (Integrate e') <- e = varSet e'
-                       | Same <- isKSpace (Expression e), SetKZeroValue _ e' <- e = varSet e'
-                       | otherwise = error "There is no other possible expression"
+varSet e@(Expression _) = case mkExprn e of
+                          EK (Expression (FFT e')) -> varSet e'
+                          EK (Expression (SetKZeroValue _ e')) -> varSet e'
+                          ER (Expression (IFFT e')) -> varSet e'
+                          ES (Expression (Integrate e')) -> varSet e'
+                          _ -> Set.empty
 varSet (Var _ _ _ _ (Just e)) = varSet e
 varSet (Var IsTemp _ c _ Nothing) = Set.singleton c
 varSet (Var CannotBeFreed _ _ _ Nothing) = Set.empty
@@ -813,11 +805,12 @@ varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
 
 hasFFT :: Type a => Expression a -> Bool
-hasFFT (Expression e)
-    | Same <- isKSpace (Expression e), FFT _ <- e = True
-    | Same <- isRealSpace (Expression e), IFFT _ <- e = True
-    | Same <- isScalar (Expression e), Integrate _ <- e = True -- a bit weird... rename this function?
-    | otherwise = False
+hasFFT e@(Expression _) = case mkExprn e of
+  EK (Expression (FFT _)) -> True
+  EK (Expression (SetKZeroValue _ e')) -> hasFFT e'
+  ER (Expression (IFFT _)) -> True
+  ES (Expression (Integrate _)) -> True -- a bit weird... rename this function?
+  _ -> False
 hasFFT (Var _ _ _ _ (Just e)) = hasFFT e
 hasFFT (Sum s _) = or $ map (hasFFT . snd) (sum2pairs s)
 hasFFT (Product p _) = or $ map (hasFFT . fst) (product2pairs p)
@@ -831,11 +824,14 @@ hasFFT (Var _ _ _ _ Nothing) = False
 hasFFT (Scalar e) = hasFFT e
 
 hasK :: Type a => Expression a -> Bool
-hasK (Expression e) 
-    | Same <- isKSpace (Expression e), Kx <- e = True
-    | Same <- isKSpace (Expression e), Ky <- e = True
-    | Same <- isKSpace (Expression e), Kz <- e = True
-    | otherwise = False
+hasK e | ER _ <- mkExprn e = False
+       | ES _ <- mkExprn e = False
+hasK e@(Expression _) = case mkExprn e of
+                        EK (Expression Kx) -> True
+                        EK (Expression Ky) -> True
+                        EK (Expression Kz) -> True
+                        EK (Expression (SetKZeroValue _ e')) -> hasK e'
+                        _ -> False
 hasK (Var _ _ _ _ (Just e)) = hasK e
 hasK (Sum s _) = or $ map (hasK . snd) (sum2pairs s)
 hasK (Product p _) = or $ map (hasK . fst) (product2pairs p)
@@ -918,46 +914,6 @@ joinFFTs (Log e) = log (joinFFTs e)
 joinFFTs (Abs e) = abs (joinFFTs e)
 joinFFTs (Signum e) = signum (joinFFTs e)
 joinFFTs e@(Var _ _ _ _ Nothing) = e
-
-joinScalars :: Type a => Expression a -> Expression a
-joinScalars (Expression e)
-  | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinScalars e')
-  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinScalars e')
-  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (joinScalars e')
-  | otherwise = Expression e
-joinScalars (Sum s0 _) = pairs2sum $ fixup [] [] $ sum2pairs s0
-  where fixup m ps [] = if sval == 0
-                        then m
-                        else (1, Scalar sval) : m
-          where sval = pairs2sum ps
-        fixup m ps ((f,x0):xs) =
-          case joinScalars x0 of
-            Scalar x -> fixup m ((f, x):ps) xs
-            x -> fixup ((f, x):m) ps xs
-joinScalars (Product p0 _) = pairs2product $ fixup [] [] $ product2pairs p0
-  where fixup m ps [] = if sval == 1
-                        then m
-                        else (Scalar sval, 1) : m
-          where sval = pairs2product ps
-        fixup m ps ((x0,n):xs) =
-          case joinScalars x0 of
-            Scalar x -> fixup m ((x,n):ps) xs
-            x -> fixup ((x,n):m) ps xs
-joinScalars (Var t a b c (Just e)) = Var t a b c (Just (joinScalars e))
-joinScalars (Scalar s) = case isConstant s' of Just x -> toExpression x
-                                               Nothing -> Scalar s'
-  where s' = joinScalars s
-joinScalars (Cos e) = case joinScalars e of Scalar e' -> Scalar (cos e')
-                                            e' -> cos e'
-joinScalars (Sin e) = case joinScalars e of Scalar e' -> Scalar (sin e')
-                                            e' -> sin e'
-joinScalars (Exp e) = case joinScalars e of Scalar e' -> Scalar (exp e')
-                                            e' -> exp e'
-joinScalars (Log e) = case joinScalars e of Scalar e' -> Scalar (log e')
-                                            e' -> log e'
-joinScalars (Abs e) = abs (joinScalars e)
-joinScalars (Signum e) = signum (joinScalars e)
-joinScalars e@(Var _ _ _ _ Nothing) = e
 
 factorOut :: Type a => Expression a -> Expression a -> Maybe Double
 factorOut e e' | e == e' = Just 1

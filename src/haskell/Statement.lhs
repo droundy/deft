@@ -9,7 +9,7 @@ module Statement ( Statement(..),
                    latexStatements,
                    latexSimp,
                    simp2,
-                   findToDo, findNamedSubexpression, findNiceScalar,
+                   findToDo, findNamedSubexpression,
                    findNamedScalar, findFFTtodo, findFFTinputtodo,
                    countFFT,
                    checkDup,
@@ -163,34 +163,6 @@ findNamedScalar (Var t a b c (Just e)) =
     _ -> error "impossible case in findNamedScalar"
 findNamedScalar (Var _ _ _ _ Nothing) = Nothing
 findNamedScalar (Scalar e) = findNamedScalar e
-
-findNiceScalar :: Type b => Expression b -> Maybe Exprn
-findNiceScalar e@(Expression _)
-  | EK (Expression (FFT e')) <- mkExprn e = findNiceScalar e'
-  | ER (Expression (IFFT e')) <- mkExprn e = findNiceScalar e'
-  | ES (Expression (Integrate e')) <- mkExprn e = if hasFFT e'
-                                                  then findNiceScalar e'
-                                                  else Just $ mkExprn e
-  | otherwise = Nothing
-findNiceScalar (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                             [] -> Nothing
-                             dothis:_ -> dothis
-    where sub (_,e) = findNiceScalar e
-findNiceScalar (Product p _) = case filter (/= Nothing) $ map sub $ product2pairs p of
-                                 [] -> Nothing
-                                 dothis:_ -> dothis
-    where sub (e, _) = findNiceScalar e
-findNiceScalar (Cos e) = findNiceScalar e
-findNiceScalar (Sin e) = findNiceScalar e
-findNiceScalar (Log e) = findNiceScalar e
-findNiceScalar (Exp e) = findNiceScalar e
-findNiceScalar (Abs e) = findNiceScalar e
-findNiceScalar (Signum e) = findNiceScalar e
-findNiceScalar (Var _ _ _ _ (Just e)) = findNiceScalar e
-findNiceScalar (Var _ _ _ _ Nothing) = Nothing
-findNiceScalar (Scalar (Var _ _ _ _ Nothing)) = Nothing
-findNiceScalar (Scalar e) | not (hasFFT e) = Just $ ES e
-                          | otherwise = Nothing
 
 findNamedSubexpression :: Type b => Expression b -> Maybe Exprn
 findNamedSubexpression e@(Expression _)
@@ -384,13 +356,7 @@ simp2 eee = case scalarhelper [] 0 eee of
                   ([],_,_) -> scalarhelper (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n (substitute s v e)
                               where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
                   (sts',n',e'') -> scalarhelper (sts++sts') n' e''
-              Nothing ->
-                case findNiceScalar e of
-                  Just (ES s) -> scalarhelper (sts++[Initialize (ES v), Assign (ES v) (ES s)]) (n+1) (substitute s v e)
-                    where v = Var CannotBeFreed ("s"++show n) ("s"++show n)
-                                                ("s_{"++show n++"}") Nothing :: Expression Scalar
-                  Nothing -> simp2helper Set.empty (n :: Int) sts e e
-                  dothis -> error ("bad result in scalarhelper: " ++ show dothis)
+              Nothing -> simp2helper Set.empty (n :: Int) sts e e
               _ -> error "bad result in scalarhelper"
           -- Then we go looking for memory to save or ffts to evaluate...
           simp2helper :: (Type a, Type b) => Set.Set String -> Int -> [Statement] -> Expression a
