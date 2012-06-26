@@ -111,8 +111,10 @@ date
     }
 }
 
+#[2,24,1492], [2,25,1119], [4,28,1601]){
 
-foreach $dd ([8,25,1305], [8,25,1119], [8,25,930], [8,25,745], [8,25,560], [8,25,375], [6,25,1305], [6,25,1120], [6,25,930], [6,25,745], [6,25,555], [6,25,375], [2,25,1310], [2,25,1120], [2,25,930], [2,25,745], [2,25,555], [2,25,375], [12,25,1300], [12,25,1110], [12,25,930], [12,25,745], [12,25,555], [12,25,375]) {
+foreach $dd ([2,24,501], [2,24,751], [2,24,1153], [6,32,1400]){ #, [2,24,1488], [2,25,1120], [4,28,1602], [6,32,1602]){   #[2,24,330],[2,24,494], [2,25,1118], [2,24,1491], [2,24,659], [2,24,824], [2,24,990], [2,24,1320], [2,24,1485], [4,28,550], [4,28,750], [4,28,850], [4,28,950], [4,28,1100], [4,28,1300],[4,28,1400],[4,28,1500],[4,28,1600], [6,32,1400], [6,32,1500],[6,32,1600]){
+
     my $innerRad = sprintf("%02.0f", $$dd[0]);
     my $len = sprintf("%02.0f", $$dd[1]);
     my $N = sprintf("%03.0f", $$dd[2]);
@@ -120,7 +122,7 @@ foreach $dd ([8,25,1305], [8,25,1119], [8,25,930], [8,25,745], [8,25,560], [8,25
     # Here I estimate the amount of memory that will be needed...
     my $memuse = sprintf "%.0f", 0.001*($N) + 30; # It's a very hokey guess
 
-    my $scriptname = "papers/contact/figs/mc-periodic-innerSphere-$len-$N.tmp.sh";
+    my $scriptname = "papers/contact/figs/mc-periodic-innerSphere-$len-$innerRad-$N.tmp.sh";
 
     my $outfilename = "$dir/mc-innerSphere-$len-$innerRad-$N.dat";
     my $command = "./monte-carlo $N $iters $acc $outfilename innerSphere $innerRad periodx $len periody $len periodz $len";
