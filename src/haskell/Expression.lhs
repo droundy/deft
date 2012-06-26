@@ -1,5 +1,5 @@
 \begin{code}
-{-# LANGUAGE GADTs, PatternGuards #-}
+{-# LANGUAGE GADTs, PatternGuards, Rank2Types #-}
 
 module Expression (Exprn(..),
                    RealSpace(..), r_var,
@@ -17,7 +17,7 @@ module Expression (Exprn(..),
                    findRepeatedSubExpression,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE, countVarsE,
-                   compareExpressions, countVars, varSet, varSetE)
+                   countVars, varSet, varSetE)
     where
 
 import Debug.Trace
@@ -90,6 +90,22 @@ instance Type RealSpace where
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
   free e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
+  mapExpressionHelper' f (IFFT ke) = ifft (f ke)
+  joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
+        where joinup m [] = sum $ map toe $ Map.toList m
+                where toe (rs, Right ks) = rs * ifft (joinFFTs $ pairs2sum ks)
+                      toe (_, Left (_,e)) = e
+              joinup m ((f,e):es) =
+                case isifft e of
+                  Nothing -> toExpression f * e + joinup m es
+                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
+                    where ks' = case Map.lookup rs m of
+                                Nothing -> Left ([(f, ks)],
+                                                 toExpression f * e)
+                                Just (Left (ks0,_)) -> Right $ (f, ks) : ks0
+                                Just (Right ks0) -> Right $ (f, ks) : ks0
+  joinFFThelper e = e
+
 
 instance Code KSpace where
   codePrec _ Kx = showString "k_i[0]"
@@ -160,6 +176,23 @@ instance Type KSpace where
   toScalar Kz = 0
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
+  mapExpressionHelper' f (FFT e) = fft (f e)
+  mapExpressionHelper' f (SetKZeroValue z v) = setkzero (f z) (f v)
+  mapExpressionHelper' _ kk = Expression kk
+  joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
+        where joinup m [] = sum $ map toe $ Map.toList m
+                where toe (rs, Right ks) = rs * fft (joinFFTs $ pairs2sum ks)
+                      toe (_, Left (_,e)) = e
+              joinup m ((f,e):es) =
+                case isfft e of
+                  Nothing -> toExpression f * e + joinup m es
+                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
+                    where ks' = case Map.lookup rs m of
+                                Nothing -> Left ([(f,ks)],
+                                                 toExpression f * e)
+                                Just (Left (ks0,_)) -> Right $ (f, ks) : ks0
+                                Just (Right ks0) -> Right $ (f, ks) : ks0
+  joinFFThelper e = e
 
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
 mapExpression f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpression f e
@@ -182,26 +215,45 @@ cleanvarsE (ES e) = ES $ cleanvars e
 cleanvarsE (EK e) = EK $ cleanvars e
 cleanvarsE (ER e) = ER $ cleanvars e
 
+mapExpression' :: Type a => (forall b. Type b => Expression b -> Expression b) -> Expression a -> Expression a
+mapExpression' f (Var t a b c (Just e)) = f $ Var t a b c $ Just $ mapExpression' f e
+mapExpression' f (Var tt c v t Nothing) = f $ Var tt c v t Nothing
+mapExpression' f (Scalar e) = f $ Scalar (mapExpression' f e)
+mapExpression' f (Cos e) = f $ cos (mapExpression' f e)
+mapExpression' f (Sin e) = f $ sin (mapExpression' f e)
+mapExpression' f (Exp e) = f $ exp (mapExpression' f e)
+mapExpression' f (Log e) = f $ log (mapExpression' f e)
+mapExpression' f (Abs e) = f $ abs (mapExpression' f e)
+mapExpression' f (Signum e) = f $ signum (mapExpression' f e)
+mapExpression' f (Product p _) = f $ pairs2product $ map ff $ product2pairs p
+  where ff (e,n) = (mapExpression' f e, n)
+mapExpression' f (Sum s _) = f $ pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, mapExpression' f y)
+mapExpression' f (Expression x) = f $ mapExpressionHelper' (mapExpression' f) x
+
+mapExpressionShortcut :: Type a => (forall b. Type b => Expression b -> Maybe (Expression b))
+                         -> Expression a -> Expression a
+mapExpressionShortcut f e | Just e' <- f e = e'
+mapExpressionShortcut f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpressionShortcut f e
+mapExpressionShortcut _ (Var tt c v t Nothing) = Var tt c v t Nothing
+mapExpressionShortcut f (Scalar e) = Scalar (mapExpressionShortcut f e)
+mapExpressionShortcut f (Cos e) = cos (mapExpressionShortcut f e)
+mapExpressionShortcut f (Sin e) = sin (mapExpressionShortcut f e)
+mapExpressionShortcut f (Exp e) = exp (mapExpressionShortcut f e)
+mapExpressionShortcut f (Log e) = log (mapExpressionShortcut f e)
+mapExpressionShortcut f (Abs e) = abs (mapExpressionShortcut f e)
+mapExpressionShortcut f (Signum e) = signum (mapExpressionShortcut f e)
+mapExpressionShortcut f (Product p _) = pairs2product $ map ff $ product2pairs p
+  where ff (e,n) = (mapExpressionShortcut f e, n)
+mapExpressionShortcut f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, mapExpressionShortcut f y)
+mapExpressionShortcut f (Expression x) = mapExpressionHelper' (mapExpressionShortcut f) x
+
 cleanvars :: Type a => Expression a -> Expression a
-cleanvars (Var tt c v t (Just e)) | ES _ <- mkExprn e = Var tt c v t (Just (cleanvars e))
-                                  | otherwise = cleanvars e
-cleanvars (Var tt c v t Nothing) = Var tt c v t Nothing
-cleanvars (Scalar e) = Scalar (cleanvars e)
-cleanvars (Cos e) = cos (cleanvars e)
-cleanvars (Sin e) = sin (cleanvars e)
-cleanvars (Exp e) = exp (cleanvars e)
-cleanvars (Log e) = log (cleanvars e)
-cleanvars (Abs e) = abs (cleanvars e)
-cleanvars (Signum e) = signum (cleanvars e)
-cleanvars (Product p _) = product $ map ff $ product2pairs p
-  where ff (e,n) = (cleanvars e) ** toExpression n
-cleanvars (Sum s _) = pairs2sum $ map ff $ sum2pairs s
-  where ff (x,y) = (x, cleanvars y)
-cleanvars (Expression e)
-  | Same <- isKSpace (Expression e), FFT e' <- e = fft (cleanvars e')
-  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (cleanvars e')
-  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (cleanvars e')
-  | otherwise = Expression e
+cleanvars = mapExpression' helper
+  where helper (Var a b c d (Just e)) | ES _ <- mkExprn e = Var a b c d (Just e)
+                                      | otherwise = e
+        helper e = e
 
 isEven :: (Type a) => Exprn -> Expression a -> Double
 isEven v e | v == mkExprn e = -1
@@ -294,6 +346,7 @@ instance Type Scalar where
   initialize v = error ("bug in initialize Scalar: "++show v)
   toScalar (Integrate r) = makeHomogeneous r
   fromScalar = id
+  mapExpressionHelper' f (Integrate e) = integrate (f e)
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
@@ -641,6 +694,9 @@ class (Ord a, Show a, Code a) => Type a where
   toScalar :: a -> Expression Scalar
   fromScalar :: Expression Scalar -> Expression a
   fromScalar = Scalar
+  mapExpressionHelper' :: (forall b. Type b => Expression b -> Expression b) -> a -> Expression a
+  joinFFThelper :: Expression a -> Expression a
+  joinFFThelper = id
 
 initializeE :: Exprn -> String
 initializeE (ES e) = initialize e
@@ -867,53 +923,7 @@ isifft (Var _ _ _ _ (Just e)) = isifft e
 isifft _ = Nothing
 
 joinFFTs :: Type a => Expression a -> Expression a
---joinFFTs e | cleanvars e /= e = joinFFTs $ cleanvars e
-joinFFTs (Expression e)
-  | Same <- isKSpace (Expression e), FFT e' <- e = fft (joinFFTs e')
-  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (joinFFTs e')
-  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (joinFFTs e')
-  | otherwise = Expression e
-joinFFTs (Sum s0 i)
-  | Same <- isKSpace (Sum s0 i) = joinup Map.empty $ sum2pairs s0
-        where joinup m [] = sum $ map toe $ Map.toList m
-                where toe (rs, Right ks) = rs * fft (joinFFTs ks)
-                      toe (_, Left (_,e)) = e
-              joinup m ((f,e):es) =
-                case isfft e of
-                  Nothing -> toExpression (f :: Double) * joinFFTs e + joinup m es
-                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
-                    where ks' = case Map.lookup rs m of
-                                Nothing -> Left (toExpression f * joinFFTs ks,
-                                                 toExpression f * e)
-                                Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
-                                Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
-joinFFTs (Sum s0 i)
-  | Same <- isRealSpace (Sum s0 i) = joinup Map.empty $ sum2pairs s0
-        where joinup m [] = sum $ map toe $ Map.toList m
-                where toe (rs, Right ks) = rs * ifft (joinFFTs ks)
-                      toe (_, Left (_,e)) = e
-              joinup m ((f,e):es) =
-                case isifft e of
-                  Nothing -> toExpression f * joinFFTs e + joinup m es
-                  Just (ks,rs) -> joinup (Map.insert rs ks' m) es
-                    where ks' = case Map.lookup rs m of
-                                Nothing -> Left (toExpression (f :: Double) * joinFFTs ks,
-                                                 toExpression f * e)
-                                Just (Left (ks0,_)) -> Right $ toExpression f * joinFFTs ks + ks0
-                                Just (Right ks0) -> Right $ toExpression f * joinFFTs ks + ks0
-joinFFTs (Var t a b c (Just e)) = Var t a b c (Just (joinFFTs e))
-joinFFTs (Sum s _) = pairs2sum $ map j $ sum2pairs s
-  where j (f,x) = (f,joinFFTs x)
-joinFFTs (Product p _) = pairs2product $ map j $ product2pairs p
-  where j (x,n) = (joinFFTs x, n)
-joinFFTs (Scalar s) = Scalar (joinFFTs s)
-joinFFTs (Cos e) = cos (joinFFTs e)
-joinFFTs (Sin e) = sin (joinFFTs e)
-joinFFTs (Exp e) = exp (joinFFTs e)
-joinFFTs (Log e) = log (joinFFTs e)
-joinFFTs (Abs e) = abs (joinFFTs e)
-joinFFTs (Signum e) = signum (joinFFTs e)
-joinFFTs e@(Var _ _ _ _ Nothing) = e
+joinFFTs = mapExpression' joinFFThelper
 
 factorOut :: Type a => Expression a -> Expression a -> Maybe Double
 factorOut e e' | e == e' = Just 1
@@ -926,13 +936,19 @@ allFactors (Product p _) = Map.keysSet p
 allFactors e = Set.singleton e
 
 factorize :: Type a => Expression a -> Expression a
-factorize (Expression e)
-  | Same <- isKSpace (Expression e), FFT e' <- e = fft (factorize e')
-  | Same <- isRealSpace (Expression e), IFFT e' <- e = ifft (factorize e')
-  | Same <- isScalar (Expression e), Integrate e' <- e = integrate (factorize e')
-  | otherwise = Expression e
-factorize (Sum s _) = fac (Set.toList $ Set.unions $ map (allFactors . snd) $ sum2pairs s) $
-                      map toe $ sum2pairs s
+factorize = mapExpressionShortcut factorizeHelper
+
+-- The following factorizes more thoroughly, which leads to quicker
+-- code generation, but ends up needing more memory when running
+-- (although it also runs faster).
+
+--factorize = mapExpression' helper
+--     where helper e | Just e' <- factorizeHelper e = e'
+--                    | otherwise = e
+
+factorizeHelper :: Type a => Expression a -> Maybe (Expression a)
+factorizeHelper (Sum s _) = Just $ fac (Set.toList $ Set.unions $ map (allFactors . snd) $ sum2pairs s) $
+                            map toe $ sum2pairs s
   where toe (f,e) = toExpression f * e
         fac _ [] = 0
         fac [] pairs = sum pairs
@@ -951,17 +967,7 @@ factorize (Sum s _) = fac (Set.toList $ Set.unions $ map (allFactors . snd) $ su
                   | otherwise = f * fac (f:fs) (map (/f) pos) +
                                 fac fs none +
                                 (fac (f:fs) (map (*f) neg))/f
-factorize (Product p _) = pairs2product $ map fixup $ product2pairs p
-  where fixup (e,n) = (factorize e, n)
-factorize (Var a b c d (Just e)) = Var a b c d (Just (factorize e))
-factorize (Scalar e) = Scalar (factorize e)
-factorize (Cos e) = cos (factorize e)
-factorize (Sin e) = sin (factorize e)
-factorize (Exp e) = exp (factorize e)
-factorize (Log e) = log (factorize e)
-factorize (Signum e) = signum (factorize e)
-factorize (Abs e) = abs (factorize e)
-factorize e@(Var _ _ _ _ Nothing) = e
+factorizeHelper _ = Nothing
 
 compareExpressions :: (Type a, Type b) => Expression a -> Expression b -> Same a b
 compareExpressions x y | Same <- compareTypes x y, x == y = Same
@@ -975,11 +981,12 @@ compareTypes _ _ = Different
 
 hasExpressionInFFT :: (Type a, Type b) => Expression b -> Expression a -> Bool
 hasExpressionInFFT v e | not (hasexpression v e) = False
-hasExpressionInFFT v (Expression e)
-    | Same <- isKSpace (Expression e), FFT e' <- e = hasexpression v e'
-    | Same <- isRealSpace (Expression e), IFFT e' <- e = hasexpression v e'
-    | Same <- isScalar (Expression e), Integrate e' <- e = hasExpressionInFFT v e'
-    | otherwise = False
+hasExpressionInFFT v e@(Expression _)
+  | EK (Expression (FFT e')) <- mkExprn e = hasexpression v e'
+  | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = hasExpressionInFFT v e'
+  | ER (Expression (IFFT e')) <- mkExprn e = hasexpression v e'
+  | ES (Expression (Integrate e')) <- mkExprn e = hasExpressionInFFT v e'
+  | otherwise = False
 hasExpressionInFFT v (Var _ _ _ _ (Just e)) = hasExpressionInFFT v e
 hasExpressionInFFT v (Sum s _) = or $ map (hasExpressionInFFT v . snd) (sum2pairs s)
 hasExpressionInFFT v (Product p _) = or $ map (hasExpressionInFFT v . fst) (product2pairs p)
@@ -1093,7 +1100,7 @@ countAfterRemovalE (ES a) b = countAfterRemoval a b
 
 varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Set String
 -- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent
-varsetAfterRemoval x e | Same <- compareExpressions x e = Set.empty
+varsetAfterRemoval x e | mkExprn x == mkExprn e = Set.empty
                        | not (Set.isSubsetOf (varSet x) (varSet e)) = varSet e
 varsetAfterRemoval x@(Sum xs _) e@(Sum es _)
   | Same <- compareTypes x e,
@@ -1128,13 +1135,12 @@ varsetAfterRemoval x@(Product xs _) e@(Product es _)
                        else Nothing
             Nothing -> Nothing
         filterout _ [] emap = Just emap
-varsetAfterRemoval x (Expression v)
-  | Same <- isKSpace (Expression v), FFT e <- v = varsetAfterRemoval x e
-  | Same <- isRealSpace (Expression v), IFFT e <- v = varsetAfterRemoval x e
-  | Same <- isScalar (Expression v), Integrate e <- v = varsetAfterRemoval x e
-  | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = Set.empty
-  | Same <- isKSpace (Expression v), SetKZeroValue _ e <- v = varsetAfterRemoval x e
-  | otherwise = error $ "unhandled case in varsetAfterRemoval: " ++ show v
+varsetAfterRemoval x v@(Expression _)
+  | EK (Expression (FFT e)) <- mkExprn v = varsetAfterRemoval x e
+  | EK (Expression (SetKZeroValue _ e)) <- mkExprn v = varsetAfterRemoval x e
+  | ER (Expression (IFFT e)) <- mkExprn v = varsetAfterRemoval x e
+  | ES (Expression (Integrate e)) <- mkExprn v = varsetAfterRemoval x e
+  | otherwise = Set.empty
 varsetAfterRemoval x (Sum s _) = Set.unions (map (varsetAfterRemoval x . snd) (sum2pairs s))
 varsetAfterRemoval x (Product p _) = Set.unions (map (varsetAfterRemoval x . fst) (product2pairs p))
 varsetAfterRemoval x (Cos e) = varsetAfterRemoval x e
