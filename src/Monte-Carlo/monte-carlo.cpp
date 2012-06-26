@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
   // for high filling fractions, since we could get stuck in a local
   // minimum.
   for(long i=0; i<N; i++) {
-    spheres[i]=rad*ran3();
+    spheres[i]=10*rad*ran3();
   }
   clock_t start = clock();
   long num_to_time = 100000;
@@ -402,6 +402,14 @@ int main(int argc, char *argv[]){
       } else {
         printf("%g%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
       }
+      char *debugname = new char[10000];
+      sprintf(debugname, "%s.debug", outfilename);
+      FILE *spheredebug = fopen(debugname, "w");
+      for(long i=0; i<N; i++) {
+	fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+      }
+      fclose(spheredebug);
+      delete[] debugname;
       fflush(stdout);
     }
     Vector3d temp = move(spheres[j%N],scale);
@@ -688,7 +696,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
 
 Vector3d move(Vector3d v,double scale){
   Vector3d newv = v+scale*ran3();
-  if (periodic[0]){
+  if (periodic[0] || has_x_wall){
     while (newv[0] > lenx/2){
       newv[0] -= lenx;
     }
@@ -696,7 +704,7 @@ Vector3d move(Vector3d v,double scale){
       newv[0] += lenx;
     }
   }
-  if (periodic[1]){
+  if (periodic[1] || has_y_wall){
     while (newv[1] > leny/2){
       newv[1] -= leny;
     }
@@ -704,12 +712,22 @@ Vector3d move(Vector3d v,double scale){
       newv[1] += leny;
     }
   }
-  if (periodic[2]){
+  if (periodic[2] || has_z_wall){
     while (newv[2] > lenz/2){
       newv[2] -= lenz;
     }
     while (newv[2] < -lenz/2){
       newv[2] += lenz;
+    }
+  }
+  if (spherical_inner_wall) {
+    while (newv.norm() < innerRad) {
+      newv *= rad/innerRad;
+    }
+  }
+  if (spherical_outer_wall) {
+    while (newv.norm() > rad) {
+      newv *= 0.5;
     }
   }
   //printf("Moved to %.1f %.1f %.1f by scale %g\n", newv[0], newv[1], newv[2], scale);

@@ -24,6 +24,8 @@ for f in sys.argv[1:]:
     pylab.xlabel("radius")
     pylab.ylabel("filling fraction")
     pylab.legend(loc='upper left', ncol=1).get_frame().set_alpha(0.5)
+    #pylab.yticks( numpy.arange(0.0,5.0, 0.1) )
+    #pylab.grid('True')
     pylab.show()
 
 
