@@ -139,6 +139,16 @@ int main(int argc, char *argv[]){
   // minimum.
   for(long i=0; i<N; i++) {
     spheres[i]=10*rad*ran3();
+    if (spherical_outer_wall) {
+      while (spheres[i].norm() > rad) {
+        spheres[i] *= 0.9;
+      }
+    }
+    if (spherical_inner_wall) {
+      while (spheres[i].norm() < innerRad) {
+        spheres[i] *= rad/innerRad;
+      }
+    }
   }
   clock_t start = clock();
   long num_to_time = 100000;
@@ -166,27 +176,27 @@ int main(int argc, char *argv[]){
       spheres[i%N]=move(spheres[i%N],scale);
       double newoverlap = countOneOverLap(spheres, N, i%N, R);
       if(newoverlap>oldoverlap){
-	spheres[i%N]=old;
+        spheres[i%N]=old;
       }
       i++;
       if (i%(100*N) == 0) {
-	if (i>iterations/4) {
-	  for(long i=0; i<N; i++) {
-	    printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-	  }
-	  printf("couldn't find good state\n");
-	  exit(1);
-	}
-	char *debugname = new char[10000];
-	sprintf(debugname, "%s.debug", outfilename);
-	FILE *spheredebug = fopen(debugname, "w");
-	for(long i=0; i<N; i++) {
-	  fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-	}
-	fclose(spheredebug);
-	printf("numOverLaps=%g (debug file: %s)\n",countOverLaps(spheres,N,R), debugname);
-	delete[] debugname;
-	fflush(stdout);
+        if (i>iterations/4) {
+          for(long i=0; i<N; i++) {
+            printf("%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+          }
+          printf("couldn't find good state\n");
+          exit(1);
+        }
+        char *debugname = new char[10000];
+        sprintf(debugname, "%s.debug", outfilename);
+        FILE *spheredebug = fopen(debugname, "w");
+        for(long i=0; i<N; i++) {
+          fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        }
+        fclose(spheredebug);
+        printf("numOverLaps=%g (debug file: %s)\n",countOverLaps(spheres,N,R), debugname);
+        delete[] debugname;
+        fflush(stdout);
       }
     }
   }
@@ -222,7 +232,7 @@ int main(int argc, char *argv[]){
       const double w = 1.0/(1 + dxmin*div);
       for (long l=0;l<div+1;l++) {
         // make each bin have about the same volume
-        radius[l] = w*rad*pow(double(l)/(div), 1.0/3.0) + (1-w)*dxmin*double(l);
+        radius[l] = w*rad*pow(double(l)/(div), 1.0/3.0) + (1-w)*rad*double(l)/div;
       }
     }
   }
@@ -235,8 +245,16 @@ int main(int argc, char *argv[]){
     fflush(stdout);
   }
 
-
-  scale = .2;
+  // Here we use a hokey heuristic to decide on an average move
+  // distance, which is proportional to the mean distance between
+  // spheres.
+  const double mean_spacing = pow(rad*rad*rad/N, 1.0/3);
+  if (mean_spacing > 2*R) {
+    scale = 2*(mean_spacing - 2*R);
+  } else {
+    scale = 0.1;
+  }
+  printf("Using scale of %g\n", scale);
   long count = 0;
   long *shells = new long[div];
   for (long l=0; l<div; l++) shells[l] = 0;
@@ -274,7 +292,7 @@ int main(int argc, char *argv[]){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
       secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
-      printf("took %g seconds per iteration\n", secs_per_iteration);
+      printf("took %g microseconds per iteration\n", 1000000*secs_per_iteration);
       num_timed = 0;
       start = now;
       // after the first timing, just time things once per percent (as
@@ -406,7 +424,7 @@ int main(int argc, char *argv[]){
       sprintf(debugname, "%s.debug", outfilename);
       FILE *spheredebug = fopen(debugname, "w");
       for(long i=0; i<N; i++) {
-	fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+        fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
       }
       fclose(spheredebug);
       delete[] debugname;
@@ -659,18 +677,25 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   if (has_z_wall){
     if (v[2] > lenz/2 || v[2] < -lenz/2) return true;
   }
-  for(long i = 0; i < n; i++){
-    if(i!=s){
-      if(distance(spheres[i],v)<2*R){
-        return true;
+  bool amonborder[3] = {
+    fabs(v[0]) + 2*R >= latx.norm(),
+    fabs(v[1]) + 2*R >= laty.norm(),
+    fabs(v[2]) + 2*R >= latz.norm()
+  };
+  for(long i = 0; i < n; i+=(i==s-1)?2:1){
+    if(distance(spheres[i],v)<2*R){
+      return true;
+    }
+  }
+  for (long k=0; k<3; k++) {
+    if (periodic[k] && amonborder[k]) {
+      for(long i = 0; i < n; i+=(i==s-1)?2:1) {
+        if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
+        if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
       }
-      for (long k=0; k<3; k++){
-        if (periodic[k]){
-          if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
-          if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
-        }
-        for (long m=k+1; m<3; m++){
-          if (periodic[m] && periodic[k]){
+      for (long m=k+1; m<3; m++){
+        if (periodic[m] && amonborder[m]){
+          for(long i = 0; i < n; i+=(i==s-1)?2:1) {
             if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
             if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
             if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
@@ -678,16 +703,19 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
           }
         }
       }
-      if (periodic[0] && periodic[1] && periodic[2]){
-        if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
-        if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
-        if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
-        if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
-        if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
-        if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
-        if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
-        if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
-      }
+    }
+  }
+  if (periodic[0] && periodic[1] && periodic[2]
+      && amonborder[0] && amonborder[1] && amonborder[2]){
+    for(long i = 0; i < n; i+=(i==s-1)?2:1) {
+      if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
+      if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
+      if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
+      if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
+      if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
+      if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
+      if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
+      if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
     }
   }
   return false;
@@ -718,16 +746,6 @@ Vector3d move(Vector3d v,double scale){
     }
     while (newv[2] < -lenz/2){
       newv[2] += lenz;
-    }
-  }
-  if (spherical_inner_wall) {
-    while (newv.norm() < innerRad) {
-      newv *= rad/innerRad;
-    }
-  }
-  if (spherical_outer_wall) {
-    while (newv.norm() > rad) {
-      newv *= 0.5;
     }
   }
   //printf("Moved to %.1f %.1f %.1f by scale %g\n", newv[0], newv[1], newv[2], scale);
