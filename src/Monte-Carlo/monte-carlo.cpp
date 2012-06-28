@@ -115,7 +115,9 @@ int main(int argc, char *argv[]){
   latx = Vector3d(lenx,0,0);
   laty = Vector3d(0,leny,0);
   latz = Vector3d(0,0,lenz);
-
+  lat[0] = latx;
+  lat[1] = laty;
+  lat[2] = latz;
 
 
   const char *outfilename = argv[4];
@@ -165,11 +167,11 @@ int main(int argc, char *argv[]){
   while (countOverLaps(spheres, N, R)>0){
     for (int movethis=0;movethis < 100*N; movethis++) {
       if (num_timed++ > num_to_time) {
-	clock_t now = clock();
-	//printf("took %g seconds per initialising iteration\n",
-	//       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
-	num_timed = 0;
-	start = now;
+        clock_t now = clock();
+        //printf("took %g seconds per initialising iteration\n",
+        //       (now - double(start))/CLOCKS_PER_SEC/num_to_time);
+        num_timed = 0;
+        start = now;
       }
       Vector3d old =spheres[i%N];
       double oldoverlap = countOneOverLap(spheres, N, i%N, R);
@@ -386,6 +388,26 @@ int main(int argc, char *argv[]){
         for(long n = 0; n<N; n++){
           //if(k!=n && distance(spheres[n],spheres[k]) <= oShell*2 || cornTouch(spheres[n],spheres[k],R)){
           if(k!=n && touch(spheres[n],spheres[k],oShellArray[0])){
+            /*
+            if ((spheres[n]-spheres[k]).norm() > 2*oShellArray[0]) {
+              printf("Got a weird one: %g %g %g\n",
+                     (spheres[n]-spheres[k])[0],
+                     (spheres[n]-spheres[k])[1],
+                     (spheres[n]-spheres[k])[2]);
+              printf("Compare with: %g %g %g\n",
+                     lat[0][0],
+                     lat[0][1],
+                     lat[0][2]);
+              printf("Compare with: %g %g %g\n",
+                     lat[1][0],
+                     lat[1][1],
+                     lat[1][2]);
+              printf("Compare with: %g %g %g\n",
+                     lat[2][0],
+                     lat[2][1],
+                     lat[2][2]);
+            }
+            */
             SconShells[shell(spheres[k],div,radius,sections)]++;
             ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
           }
@@ -531,25 +553,19 @@ int main(int argc, char *argv[]){
   printf("Total number of successful moves = %ld\n",workingmoves);
   printf("Acceptance rate = %g\n", workingmoves/double(count));
   //delete[] shells;
-  printf("herefirst");
   fflush(stdout);
   //delete[] density;
-  printf("heresecond");
   fflush(stdout);
   delete[] SconShells;
-  printf("herethird");
   fflush(stdout);
   delete[] SconDensity;
-  printf("herefourth");
   fflush(stdout);
   delete[] ScenConDensity; delete[] ScenConShells;
   delete[] MconShells; delete[] MconDensity; delete[] McenConDensity; delete[] McenConShells;
   delete[] LconShells; delete[] LconDensity; delete[] LcenConDensity; delete[] LcenConShells;
   delete[] GconShells; delete[] GconDensity; delete[] GcenConDensity; delete[] GcenConShells;
-  printf("herefifth");
   fflush(stdout);
   delete[] spheres;
-  printf("heresixth\n");
   fflush(stdout);
   fclose(out);
 }
@@ -678,9 +694,9 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     if (v[2] > lenz/2 || v[2] < -lenz/2) return true;
   }
   bool amonborder[3] = {
-    fabs(v[0]) + 2*R >= latx.norm(),
-    fabs(v[1]) + 2*R >= laty.norm(),
-    fabs(v[2]) + 2*R >= latz.norm()
+    fabs(v[0]) + 2*R >= lenx/2,
+    fabs(v[1]) + 2*R >= leny/2,
+    fabs(v[2]) + 2*R >= lenz/2
   };
   for(long i = 0; i < n; i+=(i==s-1)?2:1){
     if(distance(spheres[i],v)<2*R){
@@ -754,18 +770,31 @@ Vector3d move(Vector3d v,double scale){
 
 
 bool touch(Vector3d w, Vector3d v, double oShell){
-  if (distance(v,w) < 2*oShell) return true;
+  const double dvw = distance(v,w);
+  if (dvw < 2*oShell) return true;
+  // The following is a hack to avoid doing many distance calculations
+  // in cases where we can be certain that periodic boundaries
+  // couldn't be allowing these two spheres to touch.  It makes a
+  // shocking difference in the overall speed, when we have periodic
+  // boundary conditions in all three directions!
+  if (dvw < lenx - 2*oShell &&
+      dvw < leny - 2*oShell &&
+      dvw < lenz - 2*oShell) return false;
+
+  // Now we check for all the possible ways the two spheres could
+  // touch across the cell in periodic directions...
+  //return false;
   for (long k=0; k<3; k++){
     if (periodic[k]){
       if (distance(v,w+lat[k]) < 2*oShell) return true;
       if (distance(v,w-lat[k]) < 2*oShell) return true;
-    }
-    for (long m=k+1; m<3; m++){
-      if (periodic[m] && periodic[k]){
-        if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
-        if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
-        if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
-        if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
+      for (long m=k+1; m<3; m++){
+        if (periodic[m]){
+          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
+          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
+          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
+          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
+        }
       }
     }
   }
