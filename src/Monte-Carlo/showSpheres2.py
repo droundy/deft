@@ -17,7 +17,7 @@ subplots_adjust(left=0.25, bottom=0.25)
 
 a0 = 0
 axcoord = axes([0.25,.1,.65,.03])
-scoord = Slider(axcoord, 'x cord', -15, 15, valinit=a0)
+scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
 
 
 allSpheres = numpy.loadtxt(sys.argv[1])

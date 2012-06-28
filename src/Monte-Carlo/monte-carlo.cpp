@@ -386,42 +386,21 @@ int main(int argc, char *argv[]){
       }
       for(long k=0; k<N; k++){
         for(long n = 0; n<N; n++){
-          //if(k!=n && distance(spheres[n],spheres[k]) <= oShell*2 || cornTouch(spheres[n],spheres[k],R)){
-          if(k!=n && touch(spheres[n],spheres[k],oShellArray[0])){
-            /*
-            if ((spheres[n]-spheres[k]).norm() > 2*oShellArray[0]) {
-              printf("Got a weird one: %g %g %g\n",
-                     (spheres[n]-spheres[k])[0],
-                     (spheres[n]-spheres[k])[1],
-                     (spheres[n]-spheres[k])[2]);
-              printf("Compare with: %g %g %g\n",
-                     lat[0][0],
-                     lat[0][1],
-                     lat[0][2]);
-              printf("Compare with: %g %g %g\n",
-                     lat[1][0],
-                     lat[1][1],
-                     lat[1][2]);
-              printf("Compare with: %g %g %g\n",
-                     lat[2][0],
-                     lat[2][1],
-                     lat[2][2]);
-            }
-            */
-            SconShells[shell(spheres[k],div,radius,sections)]++;
-            ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-          }
-          if(k!=n && touch(spheres[n],spheres[k],oShellArray[1])){
-            MconShells[shell(spheres[k],div,radius,sections)]++;
-            McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-          }
-          if(k!=n && touch(spheres[n],spheres[k],oShellArray[2])){
-            LconShells[shell(spheres[k],div,radius,sections)]++;
-            LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
-          }
-          if(k!=n && touch(spheres[n],spheres[k],oShellArray[3])){
+          if (k!=n && touch(spheres[n],spheres[k],oShellArray[3])) {
             GconShells[shell(spheres[k],div,radius,sections)]++;
             GcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+            if (touch(spheres[n],spheres[k],oShellArray[1])) {
+              MconShells[shell(spheres[k],div,radius,sections)]++;
+              McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+              if (touch(spheres[n],spheres[k],oShellArray[2])) {
+                LconShells[shell(spheres[k],div,radius,sections)]++;
+                LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+                if (touch(spheres[n],spheres[k],oShellArray[0])) {
+                  SconShells[shell(spheres[k],div,radius,sections)]++;
+                  ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+                }
+              }
+            }
           }
         }
       }
