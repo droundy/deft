@@ -978,12 +978,15 @@ compareTypes _ _ = Different
 
 hasExpressionInFFT :: (Type a, Type b) => Expression b -> Expression a -> Bool
 hasExpressionInFFT v e | not (hasexpression v e) = False
-hasExpressionInFFT v e@(Expression _)
-  | EK (Expression (FFT e')) <- mkExprn e = hasexpression v e'
-  | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = hasExpressionInFFT v e'
-  | ER (Expression (IFFT e')) <- mkExprn e = hasexpression v e'
-  | ES (Expression (Integrate e')) <- mkExprn e = hasExpressionInFFT v e'
-  | otherwise = False
+hasExpressionInFFT v (Expression e) = case mkExprn (Expression e) of
+                                      EK (Expression (FFT e')) -> hasexpression v e'
+                                      EK (Expression (SetKZeroValue _ e')) -> hasExpressionInFFT v e'
+                                      ER (Expression (IFFT e')) -> hasexpression v e'
+                                      ES (Expression (Integrate e')) -> hasExpressionInFFT v e'
+                                      EK (Expression Kx) -> False
+                                      EK (Expression Ky) -> False
+                                      EK (Expression Kz) -> False
+                                      _ -> error "inexhaustive pattern in hasExpressionInFFT"
 hasExpressionInFFT v (Var _ _ _ _ (Just e)) = hasExpressionInFFT v e
 hasExpressionInFFT v (Sum s _) = or $ map (hasExpressionInFFT v . snd) (sum2pairs s)
 hasExpressionInFFT v (Product p _) = or $ map (hasExpressionInFFT v . fst) (product2pairs p)
