@@ -12,6 +12,11 @@ TEMPDIR=`mktemp -d -t testing-XXXXXXXXX`
 git checkout-index --prefix=$TEMPDIR/ -af
 cd $TEMPDIR
 
+# removing the following can prevent crashes in matplotlib.  Hokey,
+# but effective.  For a bit more information, see:
+#
+# https://github.com/matplotlib/matplotlib/issues/198
+rm -f ~/.matplotlib/fontList.cache
 
 case "$TEST" in
     none)
