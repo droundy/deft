@@ -110,11 +110,11 @@ theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
 theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
 stating that
 \begin{equation}
-  A(T) = \underset{n(\rr)}{min}\left\{ F[n(r),T] + \int V_\textit{ext}(\rr) n(\rr)
+  A(T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int V_\textit{ext}(\rr) n(\rr)
 d\rr\right\}.
 \end{equation}
 where $A(T)$ is the Helmholtz free energy of a system in the external
-potential $V_\textit{ext}$ at temperature $T$, $F[n(r),T]$ is a
+potential $V_\textit{ext}$ at temperature $T$, $F[n(\rr),T]$ is a
 universal free-energy functional, independent of external potential,
 and $n(\rr)$ is a density of atoms or molecules.  Classical DFT is a
 natural framework for creating a more flexible theory of
@@ -141,9 +141,9 @@ the strongly-confined limit of a highly confined cavity, it reproduces
 the exact free energy.
 
 A number of classical density functionals have been developed for
-water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft,gloor2004accurate,
-  gloor2007prediction, Jaqaman2004, clark2006developing,
-  lischner2010classical, fu2005vapor-liquid-dft,
+water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft, 
+  gloor2004accurate, gloor2007prediction, Jaqaman2004, clark2006developing,
+  lischner2010classical, fu2005vapor-liquid-dft,kiselev2006new,
   blas2001examination}, each of which
 captures some of the qualitative behavior of water.  However, each of
 these functionals also fail to capture some of water's unique
@@ -154,7 +154,7 @@ none of the temperature-dependence of water.  A number of classical
 density functionals have recently been produced that are based on
 Statistical Associating Fluid Theory (SAFT)\cite{ 
   yu2002fmt-dft-inhomogeneous-associating,
-  fu2005vapor-liquid-dft,gloor2002saft,
+  fu2005vapor-liquid-dft,gloor2002saft,muller2001molecular,
   clark2006developing, gloor2007prediction, gloor2004accurate,
   gross2009density, kahl2008modified, blas2001examination}.  These
 functionals are based on a perturbative thermodynamic expansion, and
@@ -212,15 +212,18 @@ represent the theoretical and experimental coexistence curves.}
 
 SAFT has also been used to construct classical density functionals,
 which are commonly used to study the surface tension as a function of
-temperature\cite{clark2006developing, gloor2004accurate,
-  gloor2007prediction, blas2001examination, gloor2002saft}.  Such
+temperature\cite{clark2006developing, gloor2004accurate, kahl2008modified,
+  gloor2007prediction, blas2001examination, kiselev2006new,
+  gloor2002saft,fu2005vapor-liquid-dft, gross2009density,
+  yang1994density}.  Such
 functionals have qualitatively predicted the dependence of surface
 tension on temperature, but they also overestimate
 the surface tension by about 50\%, and most SAFT-based functionals are
 unsuited for studying systems that have density variations on a
 molecular length scale due to the use of a local density
 approximation\cite{gloor2002saft,clark2006developing, gloor2007prediction,
-gloor2004accurate, gross2009density, kahl2008modified, blas2001examination}.
+gloor2004accurate, gross2009density, kahl2008modified,
+blas2001examination, kiselev2006new}.
 
 \begin{table}
 \begin{tabular}{|c|c|c|c|c|}
@@ -468,9 +471,8 @@ correlation function $g^\textit{HS}_\sigma$, for which we use the
 functional of Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 \begin{align}
   g_\sigma^{HS} &= \frac{1}{1-n_3}
-  +\frac32\frac{\zeta\zeta_2}{(1-n_3)^2}
-  + \frac12\frac{\zeta_2^2\zeta}{(1-n_3)^3} \\
-  \zeta_2 &= \frac{R}{3}n_2
+  +\frac{R}{2}\frac{\zeta n_2}{(1-n_3)^2}
+  + \frac{R^2}{18}\frac{\zeta n_2^2}{(1-n_3)^3}
 \end{align}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}

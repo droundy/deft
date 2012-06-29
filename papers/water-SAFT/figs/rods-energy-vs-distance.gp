@@ -36,17 +36,17 @@ set xlabel 'd (nm)'
 set ylabel 'Free energy per length (kJ/mol nm)'
 set mxtics 2
 
-set style line 1 lt 1 lc 1 pt 7 ps 1.5 lw 5
-set style line 2 lt 1 lc 3 pt 7 ps 1.5 lw 5
-set style line 3 lt 1 lc 2 pt 7 ps 1.5 lw 5
-set style line 4 lt 1 lc 4 pt 7 ps 1.5 lw 5
-set style line 5 lt 1 lc 7 pt 7 ps 1.5 lw 5
+set style line 1 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#eecc11"
+set style line 2 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#aacc11"
+set style line 3 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#11cc33"
+set style line 4 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#008888"
+set style line 5 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#002266"
 
-set style line 11 lt 2 lc 1 pt 7 ps 1.5 lw 5
-set style line 12 lt 2 lc 3 pt 7 ps 1.5 lw 5
-set style line 13 lt 2 lc 2 pt 7 ps 1.5 lw 5
-set style line 14 lt 2 lc 4 pt 7 ps 1.5 lw 5
-set style line 15 lt 2 lc 7 pt 7 ps 1.5 lw 5
+set style line 11 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#eecc11"
+set style line 12 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#aacc11"
+set style line 13 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#11cc33"
+set style line 14 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#008888"
+set style line 15 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#002266"
 
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units

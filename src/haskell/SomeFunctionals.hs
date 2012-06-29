@@ -100,9 +100,8 @@ yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (n2**2 - sqr_n2v)/n2**2
 
 yuwu_correlation :: Expression RealSpace
 yuwu_correlation = var "ghsyuwu" "g_{HS}^{\\textit{YuWu}}" ghs
-  where ghs = invdiff*(1 + 0.5*(invdiff*zeta2)*yuwu_zeta*(3 + invdiff*zeta2))
-        zeta2 = var "zeta2" "\\zeta_2" $ rad*n2/3
-        invdiff = 1/(1-n3)
+    where ghs = 1/(1-n3) + rad/2*n2*yuwu_zeta/(1-n3)**2 +
+                rad**2/18*n2**2*yuwu_zeta/(1-n3)**3
 
 lambda_dispersion, epsilon_dispersion :: Type a => Expression a
 lambda_dispersion = s_tex "lambda_dispersion" "\\lambda_d"
