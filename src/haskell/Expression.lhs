@@ -1102,39 +1102,29 @@ varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Se
 -- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent
 varsetAfterRemoval x e | mkExprn x == mkExprn e = Set.empty
                        | not (Set.isSubsetOf (varSet x) (varSet e)) = varSet e
-varsetAfterRemoval x@(Sum xs _) e@(Sum es _)
-  | Same <- compareTypes x e,
-    ((factorX, termX):_) <- xspairs,
-    Just factorE <- Map.lookup termX es,
-    ratio <- factorE / factorX,
-    Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2sum es')
-  where xspairs = sum2pairs xs
-        filterout :: Type a => Double -> [(Double, Expression a)] -> Map.Map (Expression a) Double
-                     -> Maybe (Map.Map (Expression a) Double)
-        filterout ratio ((f,x1):rest) emap =
-          case Map.lookup x1 emap of
-            Just f' -> if ratio*(f :: Double) == f'
-                       then filterout ratio rest (Map.delete x1 emap)
-                       else Nothing
-            Nothing -> Nothing
-        filterout _ [] emap = Just emap
-varsetAfterRemoval x@(Product xs _) e@(Product es _)
-  | Same <- compareTypes x e,
-    ((termX, factorX):_) <- xspairs,
-    Just factorE <- Map.lookup termX es,
-    ratio <- factorE / factorX,
-    abs ratio >= 1,
-    Just es' <- filterout ratio xspairs es = varsetAfterRemoval x (map2product es')
-  where xspairs = product2pairs xs
-        filterout :: Type a => Double -> [(Expression a, Double)] -> Map.Map (Expression a) Double
-                     -> Maybe (Map.Map (Expression a) Double)
-        filterout ratio ((x1,f):rest) emap =
-          case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f'
-                       then filterout ratio rest (Map.delete x1 emap)
-                       else Nothing
-            Nothing -> Nothing
-        filterout _ [] emap = Just emap
+varsetAfterRemoval x y
+  | EK (Sum xs _) <- mkExprn x,
+    EK (Sum es _) <- mkExprn y,
+    Just (_, es') <- removeFromMap xs es = varsetAfterRemoval x (map2sum es')
+  | ER (Sum xs _) <- mkExprn x,
+    ER (Sum es _) <- mkExprn y,
+    Just (_, es') <- removeFromMap xs es = varsetAfterRemoval x (map2sum es')
+  | ES (Sum xs _) <- mkExprn x,
+    ES (Sum es _) <- mkExprn y,
+    Just (_, es') <- removeFromMap xs es = varsetAfterRemoval x (map2sum es')
+varsetAfterRemoval x y
+  | EK (Product xs _) <- mkExprn x,
+    EK (Product es _) <- mkExprn y,
+    Just (ratio, es') <- removeFromMap xs es,
+    abs ratio >= 1 = varsetAfterRemoval x (map2product es')
+  | ER (Product xs _) <- mkExprn x,
+    ER (Product es _) <- mkExprn y,
+    Just (ratio, es') <- removeFromMap xs es,
+    abs ratio >= 1 = varsetAfterRemoval x (map2product es')
+  | ES (Product xs _) <- mkExprn x,
+    ES (Product es _) <- mkExprn y,
+    Just (ratio, es') <- removeFromMap xs es,
+    abs ratio >= 1 = varsetAfterRemoval x (map2product es')
 varsetAfterRemoval x v@(Expression _)
   | EK (Expression (FFT e)) <- mkExprn v = varsetAfterRemoval x e
   | EK (Expression (SetKZeroValue _ e)) <- mkExprn v = varsetAfterRemoval x e
@@ -1153,44 +1143,42 @@ varsetAfterRemoval x (Var _ _ _ _ (Just e)) = varsetAfterRemoval x e
 varsetAfterRemoval _ v@(Var _ _ _ _ Nothing) = varSet v
 varsetAfterRemoval x (Scalar e) = varsetAfterRemoval x e
 
+
+-- removeFromMap is a bit tricky.  It is used to look for a given set
+-- of expressions in a Map.Map, and remove them, with some possible
+-- "factor".  It is used for removing composite subexpressions from
+-- both summations and products.
+--
+-- This function uses the "do" monad notation, which I generally try
+-- to avoid, but I think in this case it helps enough, and the
+-- function is complicated enough to start with, that it is
+-- worthwhile.
+removeFromMap :: Type a => Map.Map (Expression a) Double -> Map.Map (Expression a) Double
+                 -> Maybe (Double, Map.Map (Expression a) Double)
+removeFromMap xm ym =
+  do (xe, xX):_ <- Just $ Map.toList xm
+     yX <- Map.lookup xe ym
+     let ratio = yX/xX
+         filterout ((a,d):rest) emap = do d' <- Map.lookup a emap
+                                          if ratio*d == d'
+                                            then filterout rest (Map.delete a emap)
+                                            else Nothing
+         filterout [] emap = Just emap
+     ym' <- filterout (Map.toList xm) ym
+     Just (ratio, ym')
+
 subAndCount :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> (Expression b, Int)
 subAndCount x y e | Same <- compareExpressions x e = (y, 1)
                   | not (Set.isSubsetOf (varSet x) (varSet e)) = (e, 0) -- quick check
 subAndCount x@(Sum xs _) y e@(Sum es _)
   | Same <- compareTypes x e,
-    ((factorX, termX):_) <- xspairs,
-    Just factorE <- Map.lookup termX es,
-    ratio <- factorE / factorX,
-    Just es' <- filterout ratio xspairs es,
+    Just (ratio, es') <- removeFromMap xs es,
     (e'',n) <- subAndCount x y (map2sum es') = (e'' + toExpression ratio*y, n+1)
-  where xspairs = sum2pairs xs
-        filterout :: Type a => Double -> [(Double, Expression a)] -> Map.Map (Expression a) Double
-                     -> Maybe (Map.Map (Expression a) Double)
-        filterout ratio ((f,x1):rest) emap =
-          case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f'
-                       then filterout ratio rest (Map.delete x1 emap)
-                       else Nothing
-            Nothing -> Nothing
-        filterout _ [] emap = Just emap
 subAndCount x@(Product xs _) y e@(Product es _)
   | Same <- compareTypes x e,
-    ((termX, factorX):_) <- xspairs,
-    Just factorE <- Map.lookup termX es,
-    ratio <- factorE / factorX,
+    Just (ratio, es') <- removeFromMap xs es,
     abs ratio >= 1,
-    Just es' <- filterout ratio xspairs es,
     (e'',n) <- subAndCount x y (map2product es') = (e'' * y**(toExpression ratio), n+1)
-  where xspairs = product2pairs xs
-        filterout :: Type a => Double -> [(Expression a, Double)] -> Map.Map (Expression a) Double
-                     -> Maybe (Map.Map (Expression a) Double)
-        filterout ratio ((x1,f):rest) emap =
-          case Map.lookup x1 emap of
-            Just f' -> if ratio*f == f'
-                       then filterout ratio rest (Map.delete x1 emap)
-                       else Nothing
-            Nothing -> Nothing
-        filterout _ [] emap = Just emap
 subAndCount x y (Expression v)
   | Same <- isKSpace (Expression v), FFT e <- v = let (e', n) = subAndCount x y e in (Expression $ FFT e', n)
   | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
