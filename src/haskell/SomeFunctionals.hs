@@ -167,7 +167,7 @@ gSW = "gSW" ===
       + (1/4/kT)*(da1_detad - lambda_dispersion/(3*eta_for_dispersion)*da1_dlambda)
 
 saft_fluid :: Expression Scalar
-saft_fluid = idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu)
+saft_fluid = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
 
 of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .

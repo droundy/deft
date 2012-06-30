@@ -18,11 +18,11 @@ main =
                               then fail $ f ++ " failed with exit code " ++ show ec
                               else return ()
                    else return ()
-     pdf "doc/WhiteBear.pdf" $ latexEasy $ "FHS" === whitebear
-     pdf "doc/Association.pdf" $ latexEasy $ "Fassoc" === saft_association
-     pdf "doc/Dispersion.pdf" $ latexEasy $ "Fdisp" === saft_dispersion
-     pdf "doc/SimpDispersion.pdf" $ latexSimp $ "Fdisp" === saft_dispersion
-     pdf "doc/SaftFluid.pdf" $ latexEasy $ "Fw" === saft_fluid
+     pdf "doc/WhiteBear.pdf" $ latexEasy $ whitebear
+     pdf "doc/Association.pdf" $ latexEasy $ saft_association
+     pdf "doc/Dispersion.pdf" $ latexEasy $ saft_dispersion
+     pdf "doc/SimpDispersion.pdf" $ latexSimp $ saft_dispersion
+     pdf "doc/SaftFluid.pdf" $ latexEasy $ saft_fluid
      pdf "doc/GradDispersion.pdf" $ latexEasy $ "grad" === (grad "x" saft_dispersion)
      pdf "doc/JoinedGradDispersion.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
      pdf "doc/SimpGradDispersion.pdf" $ latexSimp $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
