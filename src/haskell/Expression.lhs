@@ -1,5 +1,5 @@
 \begin{code}
-{-# LANGUAGE GADTs, PatternGuards, Rank2Types #-}
+{-# LANGUAGE PatternGuards, Rank2Types #-}
 
 module Expression (Exprn(..),
                    RealSpace(..), r_var,
@@ -64,7 +64,6 @@ instance Code RealSpace where
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
   latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
 instance Type RealSpace where
-  isRealSpace _ = Same
   amRealSpace _ = True
   mkExprn = ER
   derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) (kinversion ke)
@@ -91,6 +90,7 @@ instance Type RealSpace where
   free e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
   mapExpressionHelper' f (IFFT ke) = ifft (f ke)
+  subAndCountHelper x y (IFFT ke) = case subAndCount x y ke of (ke', n) -> (ifft ke', n)
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * ifft (joinFFTs $ pairs2sum ks)
@@ -105,6 +105,9 @@ instance Type RealSpace where
                                 Just (Left (ks0,_)) -> Right $ (f, ks) : ks0
                                 Just (Right ks0) -> Right $ (f, ks) : ks0
   joinFFThelper e = e
+  safeCoerce a _ = case mkExprn a of
+                    ER a' -> Just a'
+                    _ -> Nothing
 
 
 instance Code KSpace where
@@ -121,7 +124,6 @@ instance Code KSpace where
   latexPrec p (SetKZeroValue _ val) = latexPrec p val
   latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
 instance Type KSpace where
-  isKSpace _ = Same
   amKSpace _ = True
   mkExprn = EK
   derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
@@ -179,6 +181,14 @@ instance Type KSpace where
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SetKZeroValue z v) = setkzero (f z) (f v)
   mapExpressionHelper' _ kk = Expression kk
+  subAndCountHelper x y (FFT e) = case subAndCount x y e of (e', n) -> (fft e', n)
+  subAndCountHelper x y (SetKZeroValue z e) = (setkzero z' e', n1+n2)
+        where (z',n1) = subAndCount x y z
+              (e',n2) = subAndCount x y e
+  subAndCountHelper _ _ Kx = (kx, 0)
+  subAndCountHelper _ _ Ky = (ky, 0)
+  subAndCountHelper _ _ Kz = (kz, 0)
+  subAndCountHelper _ _ Delta = error "unhandled case: Delta"
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * fft (joinFFTs $ pairs2sum ks)
@@ -193,6 +203,9 @@ instance Type KSpace where
                                 Just (Left (ks0,_)) -> Right $ (f, ks) : ks0
                                 Just (Right ks0) -> Right $ (f, ks) : ks0
   joinFFThelper e = e
+  safeCoerce a _ = case mkExprn a of
+                    EK a' -> Just a'
+                    _ -> Nothing
 
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
 mapExpression f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpression f e
@@ -324,7 +337,6 @@ instance Type Scalar where
   s_var vv@(a:v@(_:_)) = Var CannotBeFreed vv vv (a : '_' : '{' : v ++ "}") Nothing
   s_var v = Var CannotBeFreed v v v Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
-  isScalar _ = Same
   amScalar _ = True
   mkExprn = ES
   derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
@@ -347,6 +359,10 @@ instance Type Scalar where
   toScalar (Integrate r) = makeHomogeneous r
   fromScalar = id
   mapExpressionHelper' f (Integrate e) = integrate (f e)
+  subAndCountHelper x y (Integrate e) = case subAndCount x y e of (e', n) -> (integrate e', n)
+  safeCoerce a _ = case mkExprn a of
+                    ES a' -> Just a'
+                    _ -> Nothing
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
@@ -635,18 +651,6 @@ class Code a  where
     latex     :: a -> String
     latex x = latexPrec 0 x ""
 
--- The Same type is used to prove to the compiler that two types are
--- actually identical in a type-safe way.  It is a GADT, and I'd like
--- to phase out its use entirely, since this aspect of the Haskell
--- language hasn't been standardized, and changes from one version of
--- the compiler to the next.
-data Same a b where
-    Same :: Same a a
-    Different :: Same a b
-instance Show (Same a b) where
-  showsPrec _ Same = showString "Same"
-  showsPrec _ _ = showString "Different"
-
 toExpression :: (Type a, Real x) => x -> Expression a
 toExpression 0 = Sum Map.empty Set.empty
 toExpression 1 = Product Map.empty Set.empty
@@ -668,12 +672,6 @@ class (Ord a, Show a, Code a) => Type a where
   amKSpace :: Expression a -> Bool
   amKSpace _ = False
   mkExprn :: Expression a -> Exprn
-  isScalar :: Expression a -> Same a Scalar
-  isScalar _ = Different
-  isRealSpace :: Expression a -> Same a RealSpace
-  isRealSpace _ = Different
-  isKSpace :: Expression a -> Same a KSpace
-  isKSpace _ = Different
   s_var :: String -> Expression a
   s_var = Scalar . s_var
   s_tex :: String -> String -> Expression a
@@ -694,6 +692,8 @@ class (Ord a, Show a, Code a) => Type a where
   mapExpressionHelper' :: (forall b. Type b => Expression b -> Expression b) -> a -> Expression a
   joinFFThelper :: Expression a -> Expression a
   joinFFThelper = id
+  safeCoerce :: Type b => Expression b -> Expression a -> Maybe (Expression a)
+  subAndCountHelper :: Type b => Expression b -> Expression b -> a -> (Expression a, Int)
 
 initializeE :: Exprn -> String
 initializeE (ES e) = initialize e
@@ -966,16 +966,6 @@ factorizeHelper (Sum s _) = Just $ fac (Set.toList $ Set.unions $ map (allFactor
                                 (fac (f:fs) (map (*f) neg))/f
 factorizeHelper _ = Nothing
 
-compareExpressions :: (Type a, Type b) => Expression a -> Expression b -> Same a b
-compareExpressions x y | Same <- compareTypes x y, x == y = Same
-compareExpressions _ _ = Different
-
-compareTypes :: (Type a, Type b) => Expression a -> Expression b -> Same a b
-compareTypes x y | Same <- isKSpace x, Same <- isKSpace y = Same
-compareTypes x y | Same <- isRealSpace x, Same <- isRealSpace y = Same
-compareTypes x y | Same <- isScalar x, Same <- isScalar y = Same
-compareTypes _ _ = Different
-
 hasExpressionInFFT :: (Type a, Type b) => Expression b -> Expression a -> Bool
 hasExpressionInFFT v e | not (hasexpression v e) = False
 hasExpressionInFFT v (Expression e) = case mkExprn (Expression e) of
@@ -1021,11 +1011,19 @@ scalarderive v (Expression e) = scalarderivativeHelper v e
 
 
 derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Expression b
-derive v dda e | Same <- compareExpressions v e = dda
-derive vv@(Scalar v) dda (Scalar e) -- Treat scalar derivative of scalar as scalar.  :)
-  | Same <- compareExpressions vv dda = dda * Scalar (derive v 1 e)
-derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
-  | Same <- compareTypes v dda =
+derive v0 dda0 e | Just v <- safeCoerce v0 e,
+                   v == e,
+                   Just dda <- safeCoerce dda0 v0 = dda
+-- The following would treat a scalar derivative of a scalar as
+-- scalar, which would make sense.  However, as it turns out, it leads
+-- to higher memory use for some reason.  I'm not sure why, but that's
+-- why it's disabled for now.
+
+--derive vv@(Scalar v) dda0 (Scalar e)
+--  | Just dda <- safeCoerce dda0 vv = dda * Scalar (derive v 1 e)
+derive v@(Var _ a b c _) dda0 (Var t aa bb cc (Just e0))
+  | Just e <- safeCoerce e0 v,
+    Just dda <- safeCoerce dda0 v =
     case isConstant $ derive v dda e of
       Just x -> toExpression x
       Nothing ->
@@ -1037,8 +1035,9 @@ derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e
-derive v@(Scalar (Var _ a b c _)) dda (Var t aa bb cc (Just e))
-  | Same <- compareTypes v dda =
+derive v@(Scalar (Var _ a b c _)) dda0 (Var t aa bb cc (Just e0))
+  | Just e <- safeCoerce e0 v,
+    Just dda <- safeCoerce dda0 v =
   case isConstant $ derive v dda e of
     Just x -> toExpression x
     Nothing ->
@@ -1168,25 +1167,22 @@ removeFromMap xm ym =
      Just (ratio, ym')
 
 subAndCount :: (Type a, Type b) => Expression a -> Expression a -> Expression b -> (Expression b, Int)
-subAndCount x y e | Same <- compareExpressions x e = (y, 1)
-                  | not (Set.isSubsetOf (varSet x) (varSet e)) = (e, 0) -- quick check
-subAndCount x@(Sum xs _) y e@(Sum es _)
-  | Same <- compareTypes x e,
+subAndCount x0 y0 e | Just x <- safeCoerce x0 e,
+                      x == e,
+                      Just y <- safeCoerce y0 e = (y, 1)
+                    | not (Set.isSubsetOf (varSet x0) (varSet e)) = (e, 0) -- quick check
+subAndCount x0 y0 e@(Sum es _)
+  | Just x@(Sum xs _) <- safeCoerce x0 e,
+    Just y <- safeCoerce y0 e,
     Just (ratio, es') <- removeFromMap xs es,
     (e'',n) <- subAndCount x y (map2sum es') = (e'' + toExpression ratio*y, n+1)
-subAndCount x@(Product xs _) y e@(Product es _)
-  | Same <- compareTypes x e,
+subAndCount x0 y0 e@(Product es _)
+  | Just x@(Product xs _) <- safeCoerce x0 e,
+    Just y <- safeCoerce y0 e,
     Just (ratio, es') <- removeFromMap xs es,
     abs ratio >= 1,
     (e'',n) <- subAndCount x y (map2product es') = (e'' * y**(toExpression ratio), n+1)
-subAndCount x y (Expression v)
-  | Same <- isKSpace (Expression v), FFT e <- v = let (e', n) = subAndCount x y e in (Expression $ FFT e', n)
-  | Same <- isRealSpace (Expression v), IFFT e <- v = let (e', n) = subAndCount x y e in (Expression $ IFFT e', n)
-  | Same <- isScalar (Expression v), Integrate e <- v = let (e', n) = subAndCount x y e in (Expression $ Integrate e', n)
-  | Same <- isKSpace (Expression v), v == Kx || v == Ky || v == Kz || v == Delta = (Expression v, 0)
-  | Same <- isKSpace (Expression v), SetKZeroValue z e <- v = 
-    let (e', n) = subAndCount x y e in (Expression $ SetKZeroValue z e', n)
-  | otherwise = error $ "unhandled case in subAndCount: " ++ show v
+subAndCount x y (Expression v) = subAndCountHelper x y v
 subAndCount x y (Sum s i) = if n > 0 then (pairs2sum $ map justfe results, n)
                                      else (Sum s i, 0)
     where n = sum $ map (snd . snd) results

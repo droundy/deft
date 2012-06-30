@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
   const char *outfilename = argv[4];
   fflush(stdout);
   const long N = atol(argv[1]);
-  const long iterations = atol(argv[2])/N;
+  const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
