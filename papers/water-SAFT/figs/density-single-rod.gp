@@ -42,13 +42,13 @@ set key inside bottom
 #set xlabel 'y (nm)'
 #set ylabel 'z (nm)'
 
-set style line 1 lt 1 lc 7 lw 3
-set style line 2 lt 1 lc 3 lw 3
-set style line 3 lt 1 lc 1 lw 3
-set style line 5 lt 1 lw 3 lc rgb "#999900"
-set style line 6 lt 1 lw 3 lc rgb "#00ff88"
-set style line 7 lt 1 lw 3 lc rgb "#99dddd"
-set style line 4 lt 3 lc 3 lw 3
+set style line 1 lt 1 lw 4 lc rgb "#000044"
+set style line 2 lt 1 lw 4 lc rgb "#1133aa"
+set style line 3 lt 1 lw 4 lc rgb "#337799"
+set style line 5 lt 1 lw 4 lc rgb "#33bb88"
+set style line 6 lt 1 lw 4 lc rgb "#44dd55"
+set style line 7 lt 1 lw 4 lc rgb "#99ff88"
+set style line 4 lt 3 lw 3 lc rgb "#000000"
 
 #splot [:] [:] [:] \
 #'figs/single-rod-01.0.dat' u ($2/nm):($3/nm):4 notitle with pm3d 
@@ -68,11 +68,11 @@ nm = 18.8972613     # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:1.30] [:] \
-'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
-'figs/single-rod-slice-01.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
-'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
-'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 5 , \
-'figs/single-rod-slice-00.3.dat' u ($2/nm):($4/gpermL) notitle with lines ls 6 , \
 'figs/single-rod-slice-00.1.dat' u ($2/nm):($4/gpermL) notitle with lines ls 7 , \
+'figs/single-rod-slice-00.3.dat' u ($2/nm):($4/gpermL) notitle with lines ls 6 , \
+'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 5 , \
+'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
+'figs/single-rod-slice-01.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
+'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
 'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4 , \
-'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) notitle with points ls 3
+'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) notitle with points lw 4 lc 1

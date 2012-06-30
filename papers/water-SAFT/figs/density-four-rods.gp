@@ -36,7 +36,7 @@ set multiplot
 #set ticslevel 0
 #set samples 50; set isosamples 50
 #set palette rgbformulae 22,13,-31
-set palette defined ( 0 "white", 0.4 "green", 0.8 "cyan", 1.1 "blue", 1.2 "black" )
+set palette defined ( 0 "white", 0.4 "#aaffaa", 0.85 "cyan" , 1.10 "blue", 1.2 "black" )
 
 set size 0.95,0.6          # The bottom plot
 set size square
@@ -57,7 +57,7 @@ gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass densit
 nm=18.8972613 # 1 nm in atomic units
 
 splot [-2.5:2.5] [-2.5:2.5] [:] \
-'figs/four-rods-01.0-01.4.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+'figs/four-rods-01.0-1.37.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
 
 set size 0.95,0.55          # The top plot
 set origin 0,0.5
@@ -72,4 +72,4 @@ unset colorbox
 set title  'Before transition' 
 
 splot [-2.5:2.5] [-2.5:2.5] [:] \
-'figs/four-rods-01.0-01.2.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+'figs/four-rods-01.0-1.22.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d

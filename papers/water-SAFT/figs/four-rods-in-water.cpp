@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
       // }
     }
     char *plotnameslice = new char[1024];
-    snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/four-rods-%04.1f-%04.1f.dat", diameter/nm, distance/nm);
+    snprintf(plotnameslice, 1024, "papers/water-SAFT/figs/four-rods-%04.1f-%04.2f.dat", diameter/nm, distance/nm);
 
     printf("The bulk energy per cell should be %g\n", EperCell);
     double energy;

@@ -36,7 +36,7 @@ set multiplot
 #set ticslevel 0
 #set samples 50; set isosamples 50
 #set palette rgbformulae 22,13,-31
-set palette defined ( 0 "white", 0.4 "green", 0.8 "cyan", 1.1 "blue", 1.2 "black" )
+set palette defined ( 0 "white", 0.4 "#aaffaa", 0.85 "cyan" , 1.10 "blue", 1.2 "black" )
 
 set size 0.95,0.58          # The bottom plot
 set origin 0,0

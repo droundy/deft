@@ -88,8 +88,8 @@ figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.5.dat figs/rods-slice-01.0-00.6.dat
-figs/density-four-rods.eps: figs/four-rods-01.0-01.1.dat \
-	figs/four-rods-01.0-01.2.dat
+figs/density-four-rods.eps: figs/four-rods-01.0-1.22.dat \
+	figs/four-rods-01.0-1.37.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
 	figs/rods-in-water-01.0nm.dat figs/rods-in-water-01.4nm.dat \
 	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
