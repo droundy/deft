@@ -933,15 +933,15 @@ allFactors (Product p _) = Map.keysSet p
 allFactors e = Set.singleton e
 
 factorize :: Type a => Expression a -> Expression a
-factorize = mapExpressionShortcut factorizeHelper
+--factorize = mapExpressionShortcut factorizeHelper
 
 -- The following factorizes more thoroughly, which leads to quicker
 -- code generation, but ends up needing more memory when running
 -- (although it also runs faster).
 
---factorize = mapExpression' helper
---     where helper e | Just e' <- factorizeHelper e = e'
---                    | otherwise = e
+factorize = mapExpression' helper
+     where helper e | Just e' <- factorizeHelper e = e'
+                    | otherwise = e
 
 factorizeHelper :: Type a => Expression a -> Maybe (Expression a)
 factorizeHelper (Sum s _) = Just $ fac (Set.toList $ Set.unions $ map (allFactors . snd) $ sum2pairs s) $
