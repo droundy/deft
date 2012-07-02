@@ -158,7 +158,7 @@ instance Type KSpace where
               MB (Just (_,x')) -> "\t\tconst complex t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
-            setzero = case code (setZero (EK kz) (setZero (EK ky) (setZero (EK kx) e))) of
+            setzero = case code $ setZero (EK kz) $ expand kz $ setZero (EK ky) $ setZero (EK kx) e of
                       "0" -> a ++ "[0]" ++ op ++ "0;"
                       k0code -> unlines ["\t{",
                                          "\t\tconst int i = 0;",
@@ -294,6 +294,37 @@ isEven v e = case mkExprn e of
              ER (Expression (IFFT ks)) -> isEven v ks
              ES (Expression (Integrate x)) -> isEven v x
              _ -> 1 -- Expression _.  Technically, it might be good to recurse into this
+
+-- expand does a few terms in a taylor expansion, and is intended only
+-- to be a tool for setting a variable (k, in particular) to zero.
+expand :: Type a => Expression a -> Expression a -> Expression a
+expand v (Var a b c d (Just e)) = Var a b c d (Just $ expand v e)
+expand _ e@(Var _ _ _ _ Nothing) = e
+expand _ (Scalar e) = Scalar e
+expand v (Cos e) = if setZero (mkExprn v) e == 0
+                   then 1 - e'**2/2 + e'**4/4/3/2
+                   else cos e'
+     where e' = expand v e
+expand v (Sin e) = if setZero (mkExprn v) e == 0
+                   then e' - e'**3/3/2
+                   else sin e'
+     where e' = expand v e
+expand v (Exp e) = if setZero (mkExprn v) e == 0
+                   then 1 + e' + e'**2/2 + e'**3/3/2
+                   else exp e'
+     where e' = expand v e
+expand v (Log e) = if setZero (mkExprn v) e == 1
+                   then - (1 - e') - (1-e')**2/2 - (1-e')**3/3
+                   else log e'
+     where e' = expand v e
+expand v (Abs e) = abs e'
+  where e' = expand v e
+expand _ (Signum _) = error "ugh signum"
+expand v (Sum s _) = pairs2sum $ map ex $ sum2pairs s
+  where ex (f,e) = (f, expand v e)
+expand v (Product p _) = distribute $ pairs2product $ map ex $ product2pairs p
+  where ex (e,n) = (expand v e, n)
+expand _ (Expression e) = Expression e
 
 setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
@@ -714,7 +745,7 @@ codeStatementE _ _ _ = error "bug revealed by codeStatementE"
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous ee =
-  scalarScalar $ setZero (ES (s_var "_kx")) $ mapExpression toScalar ee
+  scalarScalar $ setZero (ES (s_var "_kx")) $ expand (s_var "_kx") $ mapExpression toScalar ee
   where scalarScalar :: Expression Scalar -> Expression Scalar
         scalarScalar (Var t a b c (Just e)) = Var t a b c (Just $ scalarScalar e)
         scalarScalar (Var _ _ c l Nothing) = Var CannotBeFreed c c l Nothing
@@ -966,6 +997,21 @@ factorizeHelper (Sum s _) = Just $ fac (Set.toList $ Set.unions $ map (allFactor
                                 fac fs none +
                                 (fac (f:fs) (map (*f) neg))/f
 factorizeHelper _ = Nothing
+
+-- distribute is the complement of factorize, but it currently is only
+-- used as a helper in creating a Taylor expansion in "expand".
+distribute :: Type a => Expression a -> Expression a
+distribute = mapExpression' helper
+  where helper (Product p _) = sum $ dist $ product2pairs p
+          where dist :: Type a => [(Expression a, Double)] -> [Expression a]
+                dist [] = [1]
+                dist ((Sum s i,n):es) | n > 1 = dist $ (Sum s i, 1):(Sum s i, n-1):es
+                dist ((Sum s _,1):es) = concatMap (\e -> map (e *) es') $ sum2es s
+                  where es' = dist es
+                dist ((e,n):es) = map ((e ** toExpression n) *) $ dist es
+        helper e = e
+        sum2es :: Type a => Map.Map (Expression a) Double -> [Expression a]
+        sum2es = map (\(f,x) -> toExpression f * x) . sum2pairs
 
 hasExpressionInFFT :: (Type a, Type b) => Expression b -> Expression a -> Bool
 hasExpressionInFFT v e | not (hasexpression v e) = False

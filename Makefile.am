@@ -75,12 +75,12 @@ $(OPTIMIZED_CODE): optimize-functionals
 
 haskell: src/haskell/functionals src/haskell/test
 
-src/haskell/functionals: $(wildcard src/haskell/*hs)
-	cd src/haskell && $(MAKE) functionals
-src/haskell/latex-functionals: $(wildcard src/haskell/*hs)
-	cd src/haskell && $(MAKE) latex-functionals
-src/haskell/test: $(wildcard src/haskell/*hs)
-	cd src/haskell && $(MAKE) test
+# The following uses a weird trick.  We are using "pattern rule", to
+# tell make that a single rule (calling another make, in this
+# instance) can be used to generate several executables.  The pattern,
+# in this case, matches the letter "s".
+src/haskell/latex-functional% src/haskell/functional% src/haskell/te%t: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE)
 
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
 	time src/haskell/functionals $@ && echo timed $@
