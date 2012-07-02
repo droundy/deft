@@ -74,12 +74,14 @@ $(OPTIMIZED_CODE): optimize-functionals
 	time ./optimize-functionals $@ && echo timed $@
 
 haskell: src/haskell/functionals src/haskell/test
+src/haskell/Makefile: $(wildcard src/haskell/*hs)
+	cd src/haskell && $(MAKE) depend
 
-src/haskell/functionals: $(wildcard src/haskell/*hs)
+src/haskell/functionals: src/haskell/Makefile $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) functionals
-src/haskell/latex-functionals: $(wildcard src/haskell/*hs)
+src/haskell/latex-functionals: src/haskell/Makefile $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) latex-functionals
-src/haskell/test: $(wildcard src/haskell/*hs)
+src/haskell/test: src/haskell/Makefile $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) test
 
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
