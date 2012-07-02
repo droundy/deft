@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Vector.h"
-#include "GradSpecifier.h"
 #include "Verbosity.h"
 
 struct EnergyGradAndPrecond {
@@ -35,14 +34,12 @@ public:
   // we may want to compute a gradient with regard to just *some* of
   // the input.  This will most likely happen because we are
   // minimizing under some constraint.
-  virtual Vector grad(const Vector &x, const GradSpecifier *grad_these = 0) const = 0;
+  virtual Vector grad(const Vector &x) const = 0;
 
   // We have one additional method, which computes both the grad and
   // the preconditioned gradient.  This one is optional, and only need
   // be defined if there is some actual preconditioning to do;
-  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &,
-                                                       Verbosity,
-                                                       const GradSpecifier *) const {
+  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &, Verbosity) const {
     assert(0);
   }
   virtual bool have_preconditioner() const { return false; }

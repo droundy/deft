@@ -83,7 +83,7 @@ latexS (Assign (ER x@(Var a b c t _)) (ER y))
 latexS (Assign (EK x@(Var a b c t _)) (EK y))
   | tds@(_:_:_) <- niceExprns (Var a b c t (Just y)) = unlines $ ["\\begin{bracetext}"] ++
                                                       map latexme tds ++
-                                                      ["\\end{bracetext}}"]
+                                                      ["\\end{bracetext}"]
   | otherwise  = eqn $ latex x ++ " = " ++ latex (simpk $ cleanvars y)
 latexS (Assign (ES x@(Var a b c t _)) (ES y))
   | tds@(_:_:_) <- niceExprns (Var a b c t (Just y)) = unlines $ ["\\begin{bracetext}"] ++

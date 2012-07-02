@@ -93,7 +93,7 @@ public:
     if (!last_pgrad.get_size()) {
       if (use_preconditioning && f->have_preconditioner()) {
         invalidate_cache();
-        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x, silent, 0);
+        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x, silent);
         last_energy = new double(foo.energy);
         last_grad = foo.grad;
         last_pgrad = foo.precond;

@@ -120,9 +120,7 @@ reuseVar ((Initialize (EK iivar@(Var IsTemp _ _ _ Nothing))) :
 reuseVar (x:xs) = x : (reuseVar xs)
 reuseVar [] = []
 
-\end{code}
 
-\begin{code}
 numtotake :: Int
 numtotake = 20000
 

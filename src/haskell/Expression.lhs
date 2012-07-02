@@ -297,6 +297,7 @@ isEven v e = case mkExprn e of
 
 setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
+            | isEven v e == -1 = 0
 setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
 setZero _ e@(Var _ _ _ _ Nothing) = e
 setZero v (Scalar e) = Scalar (setZero v e)
@@ -330,7 +331,7 @@ setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
   codePrec _ (Integrate r) = showString "integrate(" . codePrec 0 r . showString ")"
-  latexPrec _ (Integrate r) = showString "integrate(" . latexPrec 0 r . showString ")"
+  latexPrec _ (Integrate r) = showString "\\int " . latexPrec 0 r
 instance Type Scalar where
   s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
