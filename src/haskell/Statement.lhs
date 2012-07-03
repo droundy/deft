@@ -131,215 +131,50 @@ subsq xs = -- map (:[]) xs ++
           rest _ = []
 
 findNamedScalar :: Type b => Expression b -> Maybe Exprn
-findNamedScalar e@(Expression _)
-  | EK (Expression (FFT e')) <- mkExprn e = findNamedScalar e'
-  | ER (Expression (IFFT e')) <- mkExprn e = findNamedScalar e'
-  | ES (Expression (Integrate e')) <- mkExprn e = findNamedScalar e'
-  | otherwise = Nothing
-findNamedScalar (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                                [] -> Nothing
-                                dothis:_ -> dothis
-    where sub (_,e) = findNamedScalar e
-findNamedScalar (Product p _) = case filter (/= Nothing) $ map sub $ product2pairs p of
-                                               [] -> Nothing
-                                               dothis:_ -> dothis
-    where sub (e, _) = findNamedScalar e
-findNamedScalar (Cos e) = findNamedScalar e
-findNamedScalar (Sin e) = findNamedScalar e
-findNamedScalar (Log e) = findNamedScalar e
-findNamedScalar (Exp e) = findNamedScalar e
-findNamedScalar (Abs e) = findNamedScalar e
-findNamedScalar (Signum e) = findNamedScalar e
-findNamedScalar (Var t a b c (Just e)) =
-  case findNamedScalar e of
-    Just (ES e') -> if ES e' == mkExprn e
-                    then Just $ ES $ Var t a b c (Just e')
-                    else Just $ ES e'
-    Nothing -> if amScalar e
-               then Just $ mkExprn $ Var t a b c (Just e)
-               else Nothing
-    _ -> error "impossible case in findNamedScalar"
-findNamedScalar (Var _ _ _ _ Nothing) = Nothing
-findNamedScalar (Scalar e) = findNamedScalar e
+findNamedScalar = searchExpressionDepthFirst Set.empty helper
+  where helper e@(Var _ _ _ _ (Just _)) | ES _ <- mkExprn e = Just $ mkExprn e
+        helper _ = Nothing
 
 findNamedSubexpression :: Type b => Expression b -> Maybe Exprn
-findNamedSubexpression e@(Expression _)
-  | EK (Expression (FFT e')) <- mkExprn e = findNamedSubexpression e'
-  | ER (Expression (IFFT e')) <- mkExprn e = findNamedSubexpression e'
-  | ES (Expression (Integrate e')) <- mkExprn e = findNamedSubexpression e'
-  | otherwise = Nothing
-findNamedSubexpression (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                                     [] -> Nothing
-                                     dothis:_ -> dothis
-    where sub (_,e) = findNamedSubexpression e
-findNamedSubexpression (Product p _) = case filter (/= Nothing) $ map sub $ product2pairs p of
-                                         [] -> Nothing
-                                         dothis:_ -> dothis
-    where sub (e, _) = findNamedSubexpression e
-findNamedSubexpression (Cos e) = findNamedSubexpression e
-findNamedSubexpression (Sin e) = findNamedSubexpression e
-findNamedSubexpression (Log e) = findNamedSubexpression e
-findNamedSubexpression (Exp e) = findNamedSubexpression e
-findNamedSubexpression (Abs e) = findNamedSubexpression e
-findNamedSubexpression (Signum e) = findNamedSubexpression e
-findNamedSubexpression e@(Var _ _ _ _ (Just e'))
-  | Just ee <- findNamedSubexpression e' = Just ee
-  | otherwise = Just (mkExprn e)
-  | otherwise = error "impossible case in findNamedSubexpression"
-findNamedSubexpression (Var _ _ _ _ Nothing) = Nothing
-findNamedSubexpression (Scalar e) = findNamedSubexpression e
+findNamedSubexpression = searchExpressionDepthFirst Set.empty helper
+  where helper e@(Var _ _ _ _ (Just _)) = Just $ mkExprn e
+        helper _ = Nothing
 
 findToDo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> Maybe Exprn
-findToDo _ _ (Var _ _ _ _ Nothing) = Nothing
-findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = Nothing
-               | countVars e == 0 = Nothing
---findToDo i everything e
---  | Set.isSubsetOf i (varSet e) && countVars e == 1 && not (hasFFT e) &&
---                 countAfterRemoval e everything + 1 < countVars everything = Just $ mkExprn e
-findToDo i everything e@(Expression _)
-    | EK (Expression (FFT e')) <- mkExprn e = findToDo i everything e'
-    | ER (Expression (IFFT e')) <- mkExprn e = findToDo i everything e'
-    | ES (Expression (Integrate e')) <- mkExprn e = if hasFFT e'
-                                                    then findToDo i everything e'
-                                                    else Just $ ES $ Expression (Integrate e')
-    | otherwise = Nothing
-findToDo _ _ (Sum _ i) | Set.size i < 2 = Nothing
-findToDo _ everything (Sum s _) | todo:_ <- filter simplifiable subes = Just todo
-    where subes = map (mkExprn . pairs2sum) $ take numtotake $ subsq $
-                  take numtotake $ filter (\(_,e) -> countVars e > 0 && not (hasFFT e)) $ sum2pairs s
-          simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
-              where countVarssube = countVarsE sube
-          oldnum = countVars everything
-          ithelps e = countAfterRemovalE e everything + 1 < oldnum
-findToDo i everything (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                                [] -> Nothing
-                                dothis:_ -> dothis
-    where sub (_,e) = findToDo i everything e
-findToDo _ _ (Product _ i) | Set.size i < 2 = Nothing
-findToDo _ everything (Product p _) | todo:_ <- filter simplifiable subes = Just todo
-    where subes = map (mkExprn . pairs2product) $ take numtotake $ subsq $
-                  take numtotake $ filter (\(e,_) -> countVars e > 0 &&
-                                                     kok (mkExprn e) &&
-                                                     not (hasFFT e)) $ product2pairs p
-          simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
-              where countVarssube = countVarsE sube
-          oldnum = countVars everything
-          ithelps e = countAfterRemovalE e everything + 1 < oldnum
-          zerodenom = iszero (product2denominator p)
-          kok (EK kk) = if zerodenom -- kok is true if we don't have to worry about a divide by
-                        then not (hasK kk) -- zero in the limit when when k == 0
-                        else True
-          kok _ = True
-          iszero e = hasK e && setZero (EK kx) (setZero (EK ky) (setZero (EK kz) e)) == 0
-findToDo i everything (Product p _) =
-    if iszero (product2denominator p)
-    then case filter notk $ filter (/= Nothing) $ map sub $ product2pairs p of
-           [] -> Nothing
-           dothis:_ -> dothis
-    else case filter (/= Nothing) $ map sub $ product2pairs p of
-           [] -> Nothing
-           dothis:_ -> dothis
-    where sub (e, _) = findToDo i everything e
-          iszero e = hasK e && setZero (EK kx) (setZero (EK ky) (setZero (EK kz) e)) == 0
-          notk (Just (EK e)) = not (hasK e)
-          notk _ = True
-findToDo i x (Cos e) = findToDo i x e
-findToDo i x (Sin e) = findToDo i x e
-findToDo i x (Log e) = findToDo i x e
-findToDo i x (Exp e) = findToDo i x e
-findToDo i x (Abs e) = findToDo i x e
-findToDo i x (Signum e) = findToDo i x e
-findToDo i x (Var t a b c (Just e)) =
-  case findToDo i x e of
-    Just e' -> if e' == mkExprn e
-               then case e' of
-                    ES e'' -> Just $ ES (Var t a b c (Just e''))
-                    EK e'' -> Just $ EK (Var t a b c (Just e''))
-                    ER e'' -> Just $ ER (Var t a b c (Just e''))
-               else Just e'
-    Nothing -> if amScalar e && hasFFT e
-               then Just $ mkExprn $ Var t a b c (Just e)
-               else Nothing
-findToDo i everything (Scalar e) = findToDo i everything e
-
+findToDo i everything = searchExpression i helper
+  where helper (Sum _ ii) | Set.size ii < 2 = Nothing
+        helper (Product _ ii) | Set.size ii < 2 = Nothing
+        helper (Sum s _) | todo:_ <- filter simplifiable subes = Just todo
+          where subes = map (mkExprn . pairs2sum) $ take numtotake $ subsq $
+                        take numtotake $ filter (\(_,e) -> countVars e > 0 && not (hasFFT e)) $ sum2pairs s
+                simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
+                  where countVarssube = countVarsE sube
+                oldnum = countVars everything
+                ithelps e = countAfterRemovalE e everything + 1 < oldnum
+        helper (Product p _) | todo:_ <- filter simplifiable subes = Just todo
+          where subes = map (mkExprn . pairs2product) $ take numtotake $ subsq $
+                        take numtotake $ filter (\(e,_) -> countVars e > 0 &&
+                                                           not (hasFFT e)) $ product2pairs p
+                simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
+                  where countVarssube = countVarsE sube
+                oldnum = countVars everything
+                ithelps e = countAfterRemovalE e everything + 1 < oldnum
+        helper _ = Nothing
 
 findFFTtodo :: (Type a, Type b) => Expression a -> Expression b -> Maybe Exprn
-findFFTtodo everything e@(Expression _)
-    | EK (Expression (FFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
-    | EK (Expression (FFT e')) <- mkExprn e = findFFTtodo everything e'
-    | ER (Expression (IFFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
-    | ER (Expression (IFFT e')) <- mkExprn e = findFFTtodo everything e'
-    | ES (Expression (Integrate e')) <- mkExprn e = findFFTtodo everything e'
-    | otherwise = Nothing
-findFFTtodo everything (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                                [] -> Nothing
-                                dothis:_ -> dothis
-    where sub (_,e) = findFFTtodo everything e
-findFFTtodo everything (Product p _) = case filter (/= Nothing) $ map sub $ product2pairs p of
-                         [] -> Nothing
-                         dothis:_ -> dothis
-    where sub (e, _) = findFFTtodo everything e
-findFFTtodo x (Cos e) = findFFTtodo x e
-findFFTtodo x (Sin e) = findFFTtodo x e
-findFFTtodo x (Log e) = findFFTtodo x e
-findFFTtodo x (Exp e) = findFFTtodo x e
-findFFTtodo x (Abs e) = findFFTtodo x e
-findFFTtodo x (Signum e) = findFFTtodo x e
-findFFTtodo x (Var t a b c (Just e)) =
-  case findFFTtodo x e of
-    Just e' -> if e' == mkExprn e
-               then case e' of
-                    ES e'' -> Just $ ES (Var t a b c (Just e''))
-                    EK e'' -> Just $ EK (Var t a b c (Just e''))
-                    ER e'' -> Just $ ER (Var t a b c (Just e''))
-               else Just e'
-    Nothing -> Nothing
-findFFTtodo _ (Var _ _ _ _ Nothing) = Nothing
-findFFTtodo everything (Scalar e) = findFFTtodo everything e
-
+findFFTtodo _ = searchExpression Set.empty helper
+  where helper e@(Expression _)
+          | EK (Expression (FFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
+          | ER (Expression (IFFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
+        helper _ = Nothing
 
 findFFTinputtodo :: (Type a, Type b) => Set.Set String -> Expression a -> Expression b -> Maybe Exprn
-findFFTinputtodo i everything e@(Expression _)
-    | EK (Expression (FFT e')) <- mkExprn e = if hasFFT e'
-                                              then findFFTinputtodo i everything e'
-                                              else Just $ ER e'
-    | ER (Expression (IFFT e')) <- mkExprn e = if hasFFT e'
-                                               then findFFTinputtodo i everything e'
-                                               else Just $ EK e'
-    | ES (Expression (Integrate e')) <- mkExprn e = if hasFFT e'
-                                                    then findFFTinputtodo i everything e'
-                                                    else Just $ ES $ Expression $ Integrate e'
-    | otherwise = Nothing
-findFFTinputtodo i everything (Product p _) = case filter (/= Nothing) $ map sub $ product2pairs p of
-                                                [] -> Nothing
-                                                dothis:_ -> dothis
-    where sub (e, _) = findFFTinputtodo i everything e
-findFFTinputtodo i x (Cos e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Sin e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Log e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Exp e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Abs e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Signum e) = findFFTinputtodo i x e
-findFFTinputtodo i x (Var t a b c (Just e)) =
-  case findFFTinputtodo i x e of
-    Just e' -> if e' == mkExprn e
-               then case e' of
-                    ES e'' -> Just $ ES (Var t a b c (Just e''))
-                    EK e'' -> Just $ EK (Var t a b c (Just e''))
-                    ER e'' -> Just $ ER (Var t a b c (Just e''))
-               else Just e'
-    Nothing -> Nothing
-findFFTinputtodo _ _ (Var _ _ _ _ Nothing) = Nothing
-findFFTinputtodo i everything (Scalar e) = findFFTinputtodo i everything e
--- If possible, we want to only look for ffts that are in a sum
--- including the variable we most recently evaluated, since that's
--- where we're most likely to find more memory-saving improvements.
-findFFTinputtodo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = Nothing
-findFFTinputtodo i everything (Sum s _) = case filter (/= Nothing) $ map sub $ sum2pairs s of
-                                            [] -> Nothing
-                                            dothis:_ -> dothis
-    where sub (_,e) = findFFTinputtodo i everything e
-
+findFFTinputtodo i _ = searchExpressionDepthFirst i helper
+  where helper e@(Expression _)
+          | EK (Expression (FFT e')) <- mkExprn e, not (hasFFT e') = Just $ ER e'
+          | ER (Expression (IFFT e')) <- mkExprn e, not (hasFFT e') = Just $ EK e'
+          | ES (Expression (Integrate e')) <- mkExprn e, not (hasFFT e') = Just $ mkExprn e
+        helper _ = Nothing
 
 simp2 :: Type a => Expression a -> ([Statement], Expression a)
 simp2 eee = case scalarhelper [] 0 eee of

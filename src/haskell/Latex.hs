@@ -1,7 +1,8 @@
 {-# LANGUAGE PatternGuards #-}
 module Latex ( latexEasy, latexSimp ) where
 
-import Expression ( Expression(..), Exprn(..), Type, substitute, latex, k, k_var, cleanvars )
+import Expression ( Expression(..), Exprn(..), Type, substitute, latex, k, k_var,
+                    cleanvars )
 import Statement ( Statement(..), findNamedSubexpression, simp2, freeVectors, reuseVar )
 
 latexEasy :: (Type a) => Expression a -> String

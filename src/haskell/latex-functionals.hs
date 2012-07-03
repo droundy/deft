@@ -20,6 +20,7 @@ main =
                    else return ()
      pdf "doc/WhiteBear.pdf" $ latexEasy $ whitebear
      pdf "doc/Association.pdf" $ latexEasy $ saft_association
+     pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" saft_association)
      pdf "doc/Dispersion.pdf" $ latexEasy $ saft_dispersion
      pdf "doc/SimpDispersion.pdf" $ latexSimp $ saft_dispersion
      pdf "doc/SaftFluid.pdf" $ latexEasy $ saft_fluid

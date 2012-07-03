@@ -39,11 +39,19 @@ sqr_n2v = var "n2vsqr" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x**2 + n2y**2 + n
 n1v_dot_n2v = {- var "n1vdn2v" "{\\left|\\vec{n}_{2v}\\right|}" -} (sqr_n2v/(4*pi*rad))
 
 shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
-shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
-step x = ifft ( smear * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
-xshell x = ifft ( smear * (4*pi) * imaginary * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
-yshell x = ifft ( smear * (4*pi) * imaginary * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
-zshell x = ifft ( smear * (4*pi) * imaginary * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
+shell x = ifft ( deltak * fft x)
+  where deltak = protect "deltak" "\\delta(k)" $ smear * (4*pi) * rad * sin kR / k
+step x = ifft ( stepk * fft x)
+  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+xshell x = ifft ( deltax * fft x)
+  where deltax = protect "deltax" "\\delta_x(k)" $
+                 smear * (4*pi) * imaginary * kx*(rad * cos kR - sin kR/k)/k**2
+yshell x = ifft ( deltay * fft x)
+  where deltay = protect "deltay" "\\delta_y(k)" $
+                 smear * (4*pi) * imaginary * ky*(rad * cos kR - sin kR/k)/k**2
+zshell x = ifft ( deltaz * fft x)
+  where deltaz = protect "deltaz" "\\delta_z(k)" $
+                 smear * (4*pi) * imaginary * kz*(rad * cos kR - sin kR/k)/k**2
 
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)

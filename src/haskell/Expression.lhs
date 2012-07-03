@@ -6,14 +6,15 @@ module Expression (Exprn(..),
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    fft, ifft, integrate, grad, derive,
-                   Expression(..), joinFFTs, (===), var,
+                   Expression(..), joinFFTs, (===), var, protect,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
                    cleanvarsE, initializeE, freeE,
                    sum2pairs, pairs2sum, codeStatementE,
                    product2pairs, pairs2product, product2denominator,
-                   hasK, hasFFT, hasexpression, hasExprn,
+                   hasFFT, hasexpression, hasExprn,
+                   searchExpression, searchExpressionDepthFirst,
                    findRepeatedSubExpression,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE, countVarsE,
@@ -91,6 +92,7 @@ instance Type RealSpace where
   toScalar (IFFT ke) = makeHomogeneous ke
   mapExpressionHelper' f (IFFT ke) = ifft (f ke)
   subAndCountHelper x y (IFFT ke) = case subAndCount x y ke of (ke', n) -> (ifft ke', n)
+  searchHelper f (IFFT e) = f e
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * ifft (joinFFTs $ pairs2sum ks)
@@ -109,6 +111,15 @@ instance Type RealSpace where
                     ER a' -> Just a'
                     _ -> Nothing
 
+-- In the following, we assume that when we have k == 0, then any
+-- imaginary terms will vanish.  This simplifies the situation for odd
+-- functions (whose fourier transforms are pure imaginary), since our
+-- setZero sometimes has trouble employing L'Hopital's rule.
+setKequalToZero :: Expression KSpace -> Expression KSpace
+setKequalToZero e = setZero (EK kz) $ expand kz $ setZero (EK ky) $ setZero (EK kx) $
+                    setZero (EK imaginary) $
+                    -- trace ("setKequalToZero\n    "++code e)
+                    e
 
 instance Code KSpace where
   codePrec _ Kx = showString "k_i[0]"
@@ -158,7 +169,7 @@ instance Type KSpace where
               MB (Just (_,x')) -> "\t\tconst complex t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
-            setzero = case code $ setZero (EK kz) $ expand kz $ setZero (EK ky) $ setZero (EK kx) e of
+            setzero = case code $ setKequalToZero e of
                       "0" -> a ++ "[0]" ++ op ++ "0;"
                       k0code -> unlines ["\t{",
                                          "\t\tconst int i = 0;",
@@ -189,6 +200,12 @@ instance Type KSpace where
   subAndCountHelper _ _ Ky = (ky, 0)
   subAndCountHelper _ _ Kz = (kz, 0)
   subAndCountHelper _ _ Delta = error "unhandled case: Delta"
+  searchHelper f (FFT e) = f e
+  searchHelper f (SetKZeroValue _ e) = f e
+  searchHelper _ Kx = Nothing
+  searchHelper _ Ky = Nothing
+  searchHelper _ Kz = Nothing
+  searchHelper _ Delta = Nothing
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * fft (joinFFTs $ pairs2sum ks)
@@ -229,7 +246,8 @@ cleanvarsE (EK e) = EK $ cleanvars e
 cleanvarsE (ER e) = ER $ cleanvars e
 
 mapExpression' :: Type a => (forall b. Type b => Expression b -> Expression b) -> Expression a -> Expression a
-mapExpression' f (Var t a b c (Just e)) = f $ Var t a b c $ Just $ mapExpression' f e
+mapExpression' f (Var IsTemp a b c (Just e)) = f $ Var IsTemp a b c $ Just $ mapExpression' f e
+mapExpression' f e@(Var CannotBeFreed _ _ _ (Just _)) = f e
 mapExpression' f (Var tt c v t Nothing) = f $ Var tt c v t Nothing
 mapExpression' f (Scalar e) = f $ Scalar (mapExpression' f e)
 mapExpression' f (Cos e) = f $ cos (mapExpression' f e)
@@ -262,10 +280,72 @@ mapExpressionShortcut f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
   where ff (x,y) = (x, mapExpressionShortcut f y)
 mapExpressionShortcut f (Expression x) = mapExpressionHelper' (mapExpressionShortcut f) x
 
+searchExpression :: Type a => Set.Set String -> (forall b. Type b => Expression b -> Maybe Exprn)
+                    -> Expression a -> Maybe Exprn
+searchExpression _ f e | Just c <- f e = Just c
+searchExpression i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
+searchExpression _ _ (Var _ _ _ _ Nothing) = Nothing
+searchExpression i f v@(Var IsTemp _ _ _ (Just e)) =
+  case searchExpression i f e of
+    Nothing -> Nothing
+    Just e' | mkExprn e == e' -> Just $ mkExprn v
+            | otherwise -> Just e'
+searchExpression _ _ (Var CannotBeFreed _ _ _ (Just _)) = Nothing
+searchExpression i f (Scalar e) = searchExpression i f e
+searchExpression i f (Cos e) = searchExpression i f e
+searchExpression i f (Sin e) = searchExpression i f e
+searchExpression i f (Exp e) = searchExpression i f e
+searchExpression i f (Log e) = searchExpression i f e
+searchExpression i f (Abs e) = searchExpression i f e
+searchExpression i f (Signum e) = searchExpression i f e
+searchExpression i f (Product p _) = se $ map (searchExpression i f . fst) $ product2pairs p
+    where se [] = Nothing
+          se (Just c:_) = Just c
+          se (_:cs) = se cs
+searchExpression i f (Sum s _) = se $ map (searchExpression i f . snd) $ sum2pairs s
+  where se [] = Nothing
+        se (Just c:_) = Just c
+        se (_:cs) = se cs
+searchExpression i f (Expression x) = searchHelper (searchExpression i f) x
+
+searchExpressionDepthFirst :: Type a => Set.Set String
+                              -> (forall b. Type b => Expression b -> Maybe Exprn)
+                              -> Expression a -> Maybe Exprn
+searchExpressionDepthFirst i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
+searchExpressionDepthFirst _ f e@(Var _ _ _ _ Nothing) = f e
+searchExpressionDepthFirst i f x@(Var IsTemp _ _ _ (Just e)) =
+  case searchExpressionDepthFirst i f e of
+    Nothing -> f x
+    Just e' | mkExprn e == e' -> Just $ mkExprn x
+            | otherwise -> Just e'
+searchExpressionDepthFirst _ f x@(Var CannotBeFreed _ _ _ (Just _)) = f x
+searchExpressionDepthFirst i f x@(Scalar e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Cos e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Sin e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Exp e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Log e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Abs e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Signum e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Product p _) =
+  se (map (searchExpressionDepthFirst i f . fst) $ product2pairs p) `mor` f x
+  where se [] = Nothing
+        se (Just c:_) = Just c
+        se (_:cs) = se cs
+searchExpressionDepthFirst i f x@(Sum s _) =
+  se (map (searchExpressionDepthFirst i f . snd) $ sum2pairs s)  `mor` f x
+  where se [] = Nothing
+        se (Just c:_) = Just c
+        se (_:cs) = se cs
+searchExpressionDepthFirst i f x@(Expression e) = searchHelper (searchExpressionDepthFirst i f) e `mor` f x
+
+mor :: Maybe a -> Maybe a -> Maybe a
+mor (Just x) _ = Just x
+mor _ y = y
+
 cleanvars :: Type a => Expression a -> Expression a
 cleanvars = mapExpression' helper
-  where helper (Var a b c d (Just e)) | ES _ <- mkExprn e = Var a b c d (Just e)
-                                      | otherwise = e
+  where helper (Var IsTemp b c d (Just e)) | ES _ <- mkExprn e = Var IsTemp b c d (Just e)
+                                           | otherwise = e
         helper e = e
 
 isEven :: (Type a) => Exprn -> Expression a -> Double
@@ -347,7 +427,8 @@ setZero v (Product p i) =
     if zd /= 0
     then zn / zd
     else if zn /= 0
-         then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
+         then error ("L'Hopital's rule failure:\n" ++
+                     latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n"
                      ++ latex (Product p i) ++ "\n\n\n" ++ latex zn)
          else setZero v (scalarderive v n / scalarderive v d)
   where d = product2denominator p
@@ -392,9 +473,15 @@ instance Type Scalar where
   fromScalar = id
   mapExpressionHelper' f (Integrate e) = integrate (f e)
   subAndCountHelper x y (Integrate e) = case subAndCount x y e of (e', n) -> (integrate e', n)
+  searchHelper f (Integrate e) = f e
   safeCoerce a _ = case mkExprn a of
                     ES a' -> Just a'
                     _ -> Nothing
+
+scalar :: Type a => Expression Scalar -> Expression a
+scalar (Scalar e) = scalar e
+scalar e | Just c <- isConstant e = toExpression c
+scalar e = Scalar e
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
@@ -417,15 +504,20 @@ infix 4 ===
 
 (===) :: Type a => String -> Expression a -> Expression a
 --_ === e = e
-v@(a:r@(_:_)) === e = Var CannotBeFreed c v ltx (Just e)
+v@(a:r@(_:_)) === e = Var IsTemp c v ltx (Just e)
   where ltx = a : "_{"++r++"}"
         c = if amScalar e then v else v ++ "[i]"
-v === e = Var CannotBeFreed c v v (Just e)
+v === e = Var IsTemp c v v (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
 var :: Type a => String -> String -> Expression a -> Expression a
-var v ltx e = Var CannotBeFreed c v ltx (Just e)
+var v ltx e = Var IsTemp c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
+
+protect :: Type a => String -> String -> Expression a -> Expression a
+protect v ltx e = Var CannotBeFreed c v ltx (Just e)
+  where c = if amScalar e then v else v ++ "[i]"
+
 
 kx :: Expression KSpace
 kx = Expression Kx
@@ -726,6 +818,7 @@ class (Ord a, Show a, Code a) => Type a where
   joinFFThelper = id
   safeCoerce :: Type b => Expression b -> Expression a -> Maybe (Expression a)
   subAndCountHelper :: Type b => Expression b -> Expression b -> a -> (Expression a, Int)
+  searchHelper :: (forall b. Type b => Expression b -> Maybe c) -> a -> Maybe c
 
 initializeE :: Exprn -> String
 initializeE (ES e) = initialize e
@@ -892,7 +985,7 @@ varSet (Scalar _) = Set.empty
 hasFFT :: Type a => Expression a -> Bool
 hasFFT e@(Expression _) = case mkExprn e of
   EK (Expression (FFT _)) -> True
-  EK (Expression (SetKZeroValue _ e')) -> hasFFT e'
+  EK (Expression (SetKZeroValue z e')) -> hasFFT e' || hasFFT z
   ER (Expression (IFFT _)) -> True
   ES (Expression (Integrate _)) -> True -- a bit weird... rename this function?
   _ -> False
@@ -907,27 +1000,6 @@ hasFFT (Abs e) = hasFFT e
 hasFFT (Signum e) = hasFFT e
 hasFFT (Var _ _ _ _ Nothing) = False
 hasFFT (Scalar e) = hasFFT e
-
-hasK :: Type a => Expression a -> Bool
-hasK e | ER _ <- mkExprn e = False
-       | ES _ <- mkExprn e = False
-hasK e@(Expression _) = case mkExprn e of
-                        EK (Expression Kx) -> True
-                        EK (Expression Ky) -> True
-                        EK (Expression Kz) -> True
-                        EK (Expression (SetKZeroValue _ e')) -> hasK e'
-                        _ -> False
-hasK (Var _ _ _ _ (Just e)) = hasK e
-hasK (Sum s _) = or $ map (hasK . snd) (sum2pairs s)
-hasK (Product p _) = or $ map (hasK . fst) (product2pairs p)
-hasK (Sin e) = hasK e
-hasK (Cos e) = hasK e
-hasK (Log e) = hasK e
-hasK (Exp e) = hasK e
-hasK (Abs e) = hasK e
-hasK (Signum e) = hasK e
-hasK (Var _ _ _ _ Nothing) = False
-hasK (Scalar _) = False
 
 isfft :: Expression KSpace -> Maybe (Expression RealSpace, Expression KSpace)
 isfft (Expression (FFT e)) = Just (e,1)
@@ -1041,7 +1113,7 @@ hasExpressionInFFT _ (Var _ _ _ _ Nothing) = False
 -- with respect to kx.
 scalarderive :: Type a => Exprn -> Expression a -> Expression a
 scalarderive v e | v == mkExprn e = 1
-scalarderive v (Scalar e) = Scalar (scalarderive v e)
+scalarderive v (Scalar e) = scalar (scalarderive v e)
 scalarderive v (Var _ _ _ _ (Just e)) = scalarderive v e
 scalarderive _ (Var _ _ _ _ Nothing) = 0
 scalarderive v (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
