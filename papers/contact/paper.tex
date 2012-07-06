@@ -54,6 +54,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+\fixme{Figure out whether to stick with both $R$ and $\sigma$, or move
+to only $\sigma$ in the paper, which would have a certain appeal.}
+
 % The following are papers that use a SAFT-based classical DFT with at
 % least some of the terms purely local
 \newcommand\saftlocaldft{felipe2001examination, gloor2002saft,%
@@ -167,7 +170,7 @@ For the symmetric $S$ case:
 \end{align}
 This functional gives a value averaged over spheres that touch at the
 position $\rr$.  The density $n_0$ is one of the fundamental measures
-of Fundamental Measure Theory (FMT), and seems ideal for treating
+of Fundamental Measure Theory (FMT), and is ideal for treating
 touching spheres, as illustrated in Figure~\ref{fig:n0}.
 
 \begin{figure}
@@ -186,7 +189,7 @@ And for the asymmetric $A$ case:
   \frac{\delta(|\rr-\rr'|-\sigma)}{4\pi\sigma^2} d\rr' \label{eq:nA}
 \end{align}
 In this case, the two-particle density is averaged over spheres
-touching a sphere that is aat the given position $\rr$.
+touching a sphere that is at the given position~$\rr$.
 
 In the process of defining these two averaged correlation functions,
 we also defined two averaged densities, $n_0(\rr)$ and $n_A(\rr)$,
@@ -482,7 +485,7 @@ formulation of the fundamental measures.  Complete expressions for
 $g_\sigma^S$ are included in Appendix~\ref{appendix:g-S}.\\
 
 \section{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
-One existing approximation for the ccorrelation function is that of
+One approximation for the correlation function is that of
 Gross\cite{gross2009density}, which is of the asymmetrically averaged
 variety ($g_\sigma^A$):
 \begin{align}
@@ -497,21 +500,20 @@ given in Equation~\ref{eq:cs-g}.
 
 \section{Yu and Wu's symmetrically averaged functional}\label{sec:yuwu}
 
-\fixme{I (DJR) haven't yet edited this section!}
-Yu and Wu developed a functional that should correspond to the contact
-density at a given contact
-position~$g^a$~\cite{yu2002fmt-dft-inhomogeneous-associating}.  We
-will compare both their functional as well as ours with simulation
-data.  Yu and Wu use a symmetric formulation for $g_\sigma$, but
-instead of using $n_0$ as the associated density, it uses a density
-given by
+Yu and Wu developed a functional for the correlation function
+evaluated at contac, which should correspond to the symmetrically
+averaged correlation
+function~$g_\sigma^S$~\cite{yu2002fmt-dft-inhomogeneous-associating}.
+Although Yu and Wu use a symmetric formulation for $g_\sigma$, instead
+of using $n_0$ as the associated density, they use a density given by
 \begin{align}
   n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
   \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
-point of contact.  Given this definition of density, their $g_\sigma$ is
-given by:
+point of contact.  Given this definition of density, their $g_\sigma$
+is given by: \fixme{Which of the following two equations is more clear
+  to you? We only want one.}
 \begin{align}
   g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
     + \frac32 \frac{R n_2}{3}\frac{\zeta}{(1-n_3)^2}
@@ -520,13 +522,15 @@ given by:
   g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
     + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
     + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}
-    \\
+\end{align}
+From this function, we extract a symmetric correlation function
+\begin{align}
   g_\sigma^\text{Yu,S} &= \zeta^2\left(\frac{1}{1-n_3}
     + \frac12 \frac{R n_2\zeta}{(1-n_3)^2}
     + \frac1{18} \frac{R^2 n_2^2 \zeta}{(1-n_3)^3}\right)
 \end{align}
-I think the adjusted functional $g_\sigma^{\text{Yu,}S}$ can be directly
-compared with our $g_\sigma^S$.  It is implemented in our code.
+which corresponds to our $g_\sigma^S$ and can be directly compared
+with it.
 
 \section{Comparison with simulation}
 
@@ -545,42 +549,42 @@ functional of Yu (FIXME) should match the CenConDensity, while the DFT
 at sphere should match the ConDensity...
 
 \begin{figure}
-  \includegraphics[height=10cm]{figs/walls-10}
+  \includegraphics[width=\columnwidth]{figs/walls-10}
   \caption{Density and contact densities at a wall with bulk filling
     fraction of 0.1.}
   \label{fig:walls-10}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=10cm]{figs/walls-30}
+  \includegraphics[width=\columnwidth]{figs/walls-30}
   \caption{Density and contact densities at a wall with bulk filling
     fraction of 0.3.}
   \label{fig:walls-30}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=10cm]{figs/walls-40}
+  \includegraphics[width=\columnwidth]{figs/walls-40}
   \caption{Density and contact densities at a wall with bulk filling
     fraction of 0.4.}
   \label{fig:walls-40}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-walls-10}
+  \includegraphics[width=\columnwidth]{figs/gnn-walls-10}
   \caption{Correlation multiplied twice by density with bulk filling
     fraction of 0.1.}
   \label{fig:gnn-walls-10}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-walls-30}
+  \includegraphics[width=\columnwidth]{figs/gnn-walls-30}
   \caption{Correlation multiplied twice by density with bulk filling
     fraction of 0.3.}
   \label{fig:gnn-walls-30}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-walls-40}
+  \includegraphics[width=\columnwidth]{figs/gnn-walls-40}
   \caption{Correlation multiplied twice by density with bulk filling
     fraction of 0.4.}
   \label{fig:gnn-walls-10}
@@ -603,42 +607,42 @@ shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.
   predictions.  }
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/contact-08-013}
+  \includegraphics[width=\columnwidth]{figs/contact-08-013}
   \caption{Density and contact densities of thirteen hard spheres in a
     spherical cavity with diameter 8. \sphereExplanation }
   \label{fig:sphere-8}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/contact-12-112}
+  \includegraphics[width=\columnwidth]{figs/contact-12-112}
   \caption{Density and contact densities of 112 hard spheres in a
     spherical cavity with diameter 12.  \sphereExplanation}
   \label{fig:sphere-12}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/contact-16-265}
+  \includegraphics[width=\columnwidth]{figs/contact-16-265}
   \caption{Density and contact densities of 265 hard spheres in a
     spherical cavity with diameter 16. \sphereExplanation}
   \label{fig:sphere-16}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-sphere-08-013}
+  \includegraphics[width=\columnwidth]{figs/gnn-sphere-08-013}
   \caption{Correlation multiplied twice by density of 13 hard spheres in a
     spherical cavity with diameter 8.}
   \label{fig:gnn-sphere-08-013}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-sphere-12-112}
+  \includegraphics[width=\columnwidth]{figs/gnn-sphere-12-112}
   \caption{Correlation multiplied twice by density of 112 hard spheres in a
     spherical cavity with diameter 12.}
   \label{fig:gnn-sphere-12-112}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=9cm]{figs/gnn-sphere-16-265}
+  \includegraphics[width=\columnwidth]{figs/gnn-sphere-16-265}
   \caption{Correlation multiplied twice by density of 265 hard spheres in a
     spherical cavity with diameter 16.}
   \label{fig:gnn-sphere-16-265}
@@ -660,21 +664,21 @@ temperature and pressure in the optimal SAFT model developed by Clark
 
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/inner-4-30}
+  \includegraphics[width=\columnwidth]{figs/inner-4-30}
   \caption{Density and contact densities around a hard sphere with
     radius 1.}
   \label{fig:inner-4-30}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/inner-4-40}
+  \includegraphics[width=\columnwidth]{figs/inner-4-40}
   \caption{Density and contact densities around a hard sphere with
     radius 1.}
   \label{fig:inner-4-40}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[height=5cm]{figs/inner-8-30}
+  \includegraphics[width=\columnwidth]{figs/inner-8-30}
   \caption{Density and contact densities around a hard sphere with
     radius 3.}
   \label{fig:inner-8-30}
@@ -702,7 +706,7 @@ reasonable agreement?
 \appendix
 
 \begin{figure}
-\includegraphics[width=5cm]{figs/gHS-vs-n}
+\includegraphics[width=\columnwidth]{figs/gHS-vs-n}
 \caption{A comparison of the various approximations to the contact
   density in the homogeneous limit.  As expected, they are all
   identical, and we won't include this plot in the paper (but it's
@@ -711,7 +715,7 @@ reasonable agreement?
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=5cm]{figs/free-energy}
+\includegraphics[width=\columnwidth]{figs/free-energy}
 \caption{A comparison of the various approximations to the free energy
   in the homogeneous limit.  Note that the White Bear functional uses
   a modified form of the Carnahan equation of state.  As expected,
