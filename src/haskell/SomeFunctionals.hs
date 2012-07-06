@@ -9,7 +9,7 @@ module SomeFunctionals
          dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
        where
 
-import CodeGen
+import Expression
 
 kT :: Type a => Expression a
 kT = s_tex "kT" "kT"
@@ -71,7 +71,7 @@ nQ = (mass*kT/2/pi)**1.5
         gpermol = var "gpermol" "\\frac{\\textrm{g}}{\\textrm{mol}}" 1822.8885
 
 idealgas :: Expression Scalar
-idealgas = integrate (kT*n*(log(n/nQ) - 1))
+idealgas = "Fideal" === integrate (kT*n*(log(n/nQ) - 1))
 
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"

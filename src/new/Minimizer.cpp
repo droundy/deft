@@ -5,24 +5,10 @@ inline bool better(double a, double b) {
   return a < b || isnan(b);
 }
 
-Verbosity quieter(Verbosity v) {
-  return Verbosity(v-1);
-}
-
-Verbosity quietest(Verbosity v) {
-  return Verbosity(v-2);
-}
-
-const Verbosity min_details = chatty;
-
-inline double max(double a, double b) {
-  return (a > b) ? a : b;
-}
-
 bool Minimizer::improve_energy(Verbosity v) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
-  const double E0 = energy(quietest(v));
+  const double E0 = energy(v);
   const double old_deltaE = deltaE;
   if (isnan(E0)) {
     // There is no point continuing, since we're starting with a NaN!
@@ -35,7 +21,7 @@ bool Minimizer::improve_energy(Verbosity v) {
   }
   double gdotd;
   {
-    const Vector pg = pgrad();
+    const Vector pg = pgrad(v);
     const Vector g = grad();
     // Let's immediately free the cached gradient stored internally!
     invalidate_cache();
@@ -129,20 +115,20 @@ bool Minimizer::improve_energy(Verbosity v) {
       step1 *= 0.5;
       *x -= step1*direction; // and then step back a bit less...
       invalidate_cache();
-      if (energy(quietest(v)) == Etried) {
+      if (energy(v) == Etried) {
         if (v >= verbose) {
           printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g (%g vs %g)\n",
-                 step1, energy(quietest(v)), Etried);
+                 step1, energy(v), Etried);
           //Grid foo(gd, *x);
           //f.run_finite_difference_test("In QuadraticLineMinimizerType", kT, foo, &direction);
           //fflush(stdout);
         }
         break;
       }
-      Etried = energy(quietest(v));
-    } while (energy(quietest(v)) > E0 || isnan(energy(quietest(v))));
+      Etried = energy(v);
+    } while (energy(v) > E0 || isnan(energy(v)));
   
-    const double E1 = energy(quietest(v));
+    const double E1 = energy(v);
 
     // Do a parabolic extrapolation with E0, E1, and gd to get curvature
     // and new step
@@ -172,8 +158,8 @@ bool Minimizer::improve_energy(Verbosity v) {
         // It looks like we aren't moving far enough, so let's try
         // progressively doubling how far we're going.
         double Ebest = E0;
-        while (energy(quietest(v)) <= Ebest) {
-          Ebest = energy(quietest(v));
+        while (energy(v) <= Ebest) {
+          Ebest = energy(v);
           if (Ebest != E1 && v >= verbose) printf("\t\tQuad: Ei = %25.15g\n", Ebest);
           *x += step1*direction;
           invalidate_cache();
@@ -194,13 +180,13 @@ bool Minimizer::improve_energy(Verbosity v) {
         *x -= step1*direction;
         step1 *= 2;
         *x += step1*direction;
-      } while (energy(quietest(v)) == E0);
-      if (energy(quietest(v)) > E0) {
+      } while (energy(v) == E0);
+      if (energy(v) > E0) {
         *x -= step1*direction;
         invalidate_cache();
         step1 = 0;
         printf("\t\tQuad: failed to find any improvement!  :(\n");
-      } else if (isnan(energy(quietest(v)))) {
+      } else if (isnan(energy(v))) {
         printf("\t\tQuad: found NaN with smallest possible step!!!\n");
         *x -= step1*direction;
         invalidate_cache();
@@ -211,26 +197,26 @@ bool Minimizer::improve_energy(Verbosity v) {
       invalidate_cache();
       *x += (step2-step1)*direction; // and move to the expected minimum.
       if (v >= verbose) {
-        printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(quietest(v)));
+        printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(v));
         fflush(stdout);
       }
       
       // Check that the energy did indeed drop!  FIXME: this may do
       // extra energy calculations, since it's not necessarily shared
       // with the driver routine!
-      if (better(E1, energy(quietest(v))) && better(E1, E0)) {
+      if (better(E1, energy(v)) && better(E1, E0)) {
         // The first try was better, so let's go with that one!
         if (v >= verbose) printf("\t\tGoing back to the first try...\n");
         invalidate_cache();
         *x -= (step2-step1)*direction;
         step = step1;
-      } else if (energy(quietest(v)) > E0) {
-        const double E2 = energy(quietest(v));
+      } else if (energy(v) > E0) {
+        const double E2 = energy(v);
         invalidate_cache();
         *x -= step2*direction;
         if (v >= verbose) {
           printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g, E0 = %14.7g)\n",
-                 E2, energy(quietest(v)));
+                 E2, energy(v));
           fflush(stdout);
         }
         return false;
@@ -251,7 +237,7 @@ bool Minimizer::improve_energy(Verbosity v) {
 
   // At this point, we start work on estimating how close we are to
   // being adequately converged.
-  const double newE = energy(quietest(v));
+  const double newE = energy(v);
   deltaE = newE - E0;
   
   const double w = 0.1; // weighting for windowed average
@@ -297,7 +283,10 @@ bool Minimizer::improve_energy(Verbosity v) {
   }
 }
 
-void Minimizer::print_info(const char *prefix) const {
-  printf("%s==== Iteration %d ====\n", prefix, iter);
-  printf("%sEnergy: %g\n\n", prefix, energy(silent));
+void Minimizer::print_info(const char *prefix, bool with_iteration) const {
+  if (with_iteration) printf("\n%s==== Iteration %d ====\n", prefix, iter);
+  f->printme(prefix);
+  printf("%s total energy =", prefix);
+  print_double("", energy(silent));
+  printf("\n\n");
 }

@@ -63,16 +63,21 @@ public:
       memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?
     }
   }
+  void operator=(double x) {
+    for (int i=0; i<size; i++) {
+      data[i] = x;
+    }
+  }
 
   // operator[] is a pair of "safe" operator for indexing a vector
   double operator[](int i) const {
     assert(i + offset >= 0);
-    assert(i + offset < size);
+    assert(i < size);
     return data[i + offset];
   };
   double &operator[](int i) {
     assert(i + offset >= 0);
-    assert(i + offset < size);
+    assert(i < size);
     return data[i + offset];
   };
   Vector slice(int start, int num) const {

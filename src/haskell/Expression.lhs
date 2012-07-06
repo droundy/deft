@@ -5,19 +5,22 @@ module Expression (Exprn(..),
                    RealSpace(..), r_var,
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
+                   ThreeVector, t_var, cross, dot,
                    fft, ifft, integrate, grad, derive,
                    Expression(..), joinFFTs, (===), var, protect,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
-                   cleanvarsE, initializeE, freeE,
-                   sum2pairs, pairs2sum, codeStatementE,
+                   cleanvarsE, initializeE, freeE, newinitializeE, newfreeE,
+                   nameE, newdeclareE,
+                   sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
                    product2pairs, pairs2product, product2denominator,
                    hasFFT, hasexpression, hasExprn,
                    searchExpression, searchExpressionDepthFirst,
-                   findRepeatedSubExpression,
+                   findRepeatedSubExpression, findNamedScalars, findInputs,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE, countVarsE,
+                   mapExpressionShortcut, -- just to avoid unused warning
                    countVars, varSet, varSetE)
     where
 
@@ -26,11 +29,7 @@ import Debug.Trace
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import LatexDouble ( latexDouble )
-\end{code}
 
-The \verb!RealSpaceField! data type describes a field in real space.
-
-\begin{code}
 data RealSpace = IFFT (Expression KSpace)
                deriving ( Eq, Ord, Show )
 data KSpace = Delta | -- handy for FFT of homogeneous systems
@@ -39,7 +38,12 @@ data KSpace = Delta | -- handy for FFT of homogeneous systems
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 data Scalar = Integrate (Expression RealSpace)
+            | Component Int (Expression ThreeVector)
             deriving ( Eq, Ord, Show )
+
+data ThreeVector = Permute Int (Expression ThreeVector)
+                 | ThreeVector (Expression Scalar) (Expression Scalar) (Expression Scalar)
+     deriving ( Eq, Ord, Show )
 
 kinversion :: Expression KSpace -> Expression KSpace
 kinversion (Var _ _ _ _ (Just e)) = kinversion e
@@ -60,6 +64,106 @@ kinversion (Expression Ky) = -ky
 kinversion (Expression Kz) = -kz
 kinversion (Expression x) = Expression x
 
+unitvector :: Int -> Expression ThreeVector
+unitvector 0 = threeVector 1 0 0
+unitvector 1 = threeVector 0 1 0
+unitvector 2 = threeVector 0 0 1
+unitvector n = unitvector (n `mod` 3)
+
+threeVector :: Expression Scalar -> Expression Scalar -> Expression Scalar -> Expression ThreeVector
+threeVector x y z | x == 0 && y == 0 && z == 0 = 0
+                  | otherwise = Expression (ThreeVector x y z)
+
+permute :: Int -> Expression ThreeVector -> Expression ThreeVector
+permute n e | n `mod` 3 == 0 = e
+permute n (Expression (Permute n' e)) = permute (n+n') e
+permute n (Expression (ThreeVector x y z)) = permute (n-1) $ Expression (ThreeVector y z x)
+permute n e@(Var _ _ _ _ Nothing) = Expression $ Permute n e
+permute n (Var t a b c (Just e)) = Var t a b c $ Just $ permute n e
+permute _ (Scalar e) = scalar e
+permute _ (Cos _) = error "can't take cosine of 3vec"
+permute _ (Sin _) = error "can't take sin of 3vec"
+permute _ (Exp _) = error "can't take exp of 3vec"
+permute _ (Log _) = error "can't take log of 3vec"
+permute _ (Abs _) = error "can't take abs of 3vec"
+permute _ (Signum _) = error "can't take signum of 3vec"
+permute n (Product p _) = pairs2product $ map ff $ product2pairs p
+  where ff (e,x) = (permute n e, x)
+permute n (Sum s _) = pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, permute n y)
+
+component :: Type a => Int -> Expression ThreeVector -> Expression a
+component n e | n `mod` 3 /= n = component (n `mod` 3) e
+component n (Expression (Permute n' e)) = component (n+n') e
+component 0 (Expression (ThreeVector x _ _)) = fromScalar x
+component 1 (Expression (ThreeVector _ y _)) = fromScalar y
+component 2 (Expression (ThreeVector _ _ z)) = fromScalar z
+component n (Expression (ThreeVector _ _ _)) = error ("invalid component: "++show n)
+component n v@(Var _ _ _ _ Nothing) = scalar $ Expression (Component n v)
+component n (Var t _ b c (Just e)) =
+  Var t (b++["xyz" !! n]) (b++["xyz" !! n]) (c++"_{"++ "xyz" !! n : "}") $ Just $ component n e
+component _ (Scalar e) = scalar e
+component _ (Cos _) = error "can't take cosine of 3vec"
+component _ (Sin _) = error "can't take sin of 3vec"
+component _ (Exp _) = error "can't take exp of 3vec"
+component _ (Log _) = error "can't take log of 3vec"
+component _ (Abs _) = error "can't take abs of 3vec"
+component _ (Signum _) = error "can't take signum of 3vec"
+component n (Product p _) = pairs2product $ map ff $ product2pairs p
+  where ff (e,x) = (component n e, x)
+component n (Sum s _) = pairs2sum $ map ff $ sum2pairs s
+  where ff (x,y) = (x, component n y)
+
+cross :: Expression ThreeVector -> Expression ThreeVector -> Expression ThreeVector
+cross a b = permute 1 a * permute 2 b - permute 2 a * permute 1 b
+dot :: Type a => Expression ThreeVector -> Expression ThreeVector -> Expression a
+dot a b = component 0 a * component 0 b + component 1 a * component 1 b + component 2 a * component 2 b
+infixl 7 `cross`, `dot`
+
+instance Code ThreeVector where
+  codePrec _ (Permute n (Var _ _ v _ Nothing)) = showString (v ++ "[i+"++show n++"]")
+  codePrec _ e = error ("Bad permute: " ++ show e)
+  latexPrec _ (Permute n (Var _ _ _ v Nothing)) = showString (v ++ "_{+"++show n++"}")
+  latexPrec _ e = error ("Bad latex permute: " ++ show e)
+instance Type ThreeVector where
+  amThreeVector _ = True
+  mkExprn = E3
+  derivativeHelper v ddv (Permute n e) = derive v (permute (n+2) ddv) e
+  derivativeHelper v ddv (ThreeVector x y z) = derive v (component 0 ddv) x +
+                                               derive v (component 1 ddv) y +
+                                               derive v (component 2 ddv) z
+  scalarderivativeHelper v (Permute n e) = permute n (scalarderive v e)
+  scalarderivativeHelper v (ThreeVector x y z) = threeVector (scalarderive v x) (scalarderive v y) (scalarderive v z)
+  zeroHelper v (Permute n e) = permute n $ setZero v e
+  zeroHelper v (ThreeVector x y z) = threeVector (setZero v x) (setZero v y) (setZero v z)
+  codeStatementHelper (Var _ _ a _ _) op e =
+    unlines ["\tfor (int i=0; i<3; i++) {",
+             "\t\t" ++ a ++ op ++ code e ++ ";",
+             "\t}"]
+  codeStatementHelper _ _ _ = error "bad input to newcodeStatementHelper"
+  newcodeStatementHelper (Var _ _ a _ _) op e =
+    unlines ["\tfor (int i=0; i<3; i++) {",
+             "\t\t" ++ a ++ op ++ newcode e ++ ";",
+             "\t}"]
+  newcodeStatementHelper _ _ _ = error "bad input to newcodeStatementHelper"
+  initialize _ = error "initialize 3vec"
+  free e = error $ trace "free error" ("free error " ++ show e)
+  newdeclare _ = "Vector"
+  newfree e = error $ trace "free error" ("free error " ++ show e)
+  toScalar _ = error "how do I make a 3vector homogeneous?"
+  mapExpressionHelper' f (Permute n e) = permute n $ f e
+  mapExpressionHelper' f (ThreeVector x y z) = threeVector (f x) (f y) (f z)
+  subAndCountHelper x y (Permute n e) = case subAndCount x y e of
+                                        (e', nn) -> (permute n e', nn)
+  subAndCountHelper a b (ThreeVector x y z) =
+    case (subAndCount a b x, subAndCount a b y, subAndCount a b z) of
+      ((x', nx), (y', ny), (z', nz)) -> (threeVector x' y' z', nx+ny+nz)
+  searchHelper f (Permute _ e) = f e
+  searchHelper f (ThreeVector x y z) = mconcat [f x, f y, f z]
+  safeCoerce a _ = case mkExprn a of
+                    E3 a' -> Just a'
+                    _ -> Nothing
+
 instance Code RealSpace where
   codePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(gd, " ++ksp++ ")")
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
@@ -70,12 +174,10 @@ instance Type RealSpace where
   derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) (kinversion ke)
   scalarderivativeHelper v (IFFT ke) = ifft (scalarderive v ke)
   zeroHelper v (IFFT ke) = ifft (setZero v ke)
-  prefix e = case isifft e of Just _ -> ""
-                              Nothing -> "for (int i=0; i<gd.NxNyNz; i++) {\n\t\t"
-  postfix e = case isifft e of Just _ -> ""
-                               Nothing -> "\t}\n"
-  codeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) = a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
-  codeStatementHelper _ _ (Expression (IFFT e)) = error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
+  codeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) =
+    a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
+  codeStatementHelper _ _ (Expression (IFFT e)) =
+    error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
   codeStatementHelper a op (Var _ _ _ _ (Just e)) = codeStatementHelper a op e
   codeStatementHelper a op e =
     unlines ["for (int i=0; i<gd.NxNyNz; i++) {",
@@ -85,10 +187,27 @@ instance Type RealSpace where
               MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ code a ++ op ++ code x ++ ";"
+  
+  newcodeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) =
+    a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
+  newcodeStatementHelper _ _ (Expression (IFFT e)) =
+    error ("It is a bug to generate newcode for a non-var input to ifft\n"++ latex e)
+  newcodeStatementHelper a op (Var _ _ _ _ (Just e)) = newcodeStatementHelper a op e
+  newcodeStatementHelper a op e =
+    unlines ["for (int i=0; i<gd.NxNyNz; i++) {",
+             newcodes (1 :: Int) e,
+             "\t}"]
+      where newcodes n x = case findRepeatedSubExpression x of
+              MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
+                                  newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
+              MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode x ++ ";"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
   initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
   free e = error $ trace "free error" ("free error " ++ show e)
+  newdeclare _ = "Vector"
+  newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // Realspace"
+  newfree e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
   mapExpressionHelper' f (IFFT ke) = ifft (f ke)
   subAndCountHelper x y (IFFT ke) = case subAndCount x y ke of (ke', n) -> (ifft ke', n)
@@ -153,16 +272,21 @@ instance Type KSpace where
   zeroHelper _ Delta = Expression Delta
   zeroHelper v e@(SetKZeroValue val _) | v == EK kz = val -- slightly hokey... assuming that if we set kz = 0 then we set kx and ky = 0
                                        | otherwise = Expression e
-  prefix e = case isfft e of Just _ -> ""
-                             Nothing -> "for (int i=1; i<gd.NxNyNzOver2; i++) {\n\t\tconst int z = i % gd.NzOver2;\n\t\tconst int n = (i-z)/gd.NzOver2;\n\t\tconst int y = n % gd.Ny;\n\t\tconst int xa = (n-y)/gd.Ny;\n\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);\n\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);\n\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3); assert(dr);\n"
-  postfix e = case isfft e of Just _ -> ""
-                              Nothing -> "\n\t}\n"
-  codeStatementHelper (Var _ _ a _ _) op (Expression (FFT (Var _ _ v _ Nothing))) = a ++ op ++ "fft(gd, " ++ v ++ ");\n"
-  codeStatementHelper _ _ (Expression (FFT _)) = error "It is a bug to generate code for a non-var input to fft"
+  codeStatementHelper (Var _ _ a _ _) op (Expression (FFT (Var _ _ v _ Nothing))) =
+    a ++ op ++ "fft(gd, " ++ v ++ ");\n"
+  codeStatementHelper _ _ (Expression (FFT _)) =
+    error "It is a bug to generate code for a non-var input to fft"
   codeStatementHelper a op (Var _ _ _ _ (Just e)) = codeStatementHelper a op e
   codeStatementHelper (Var _ _ a _ _) op e =
     unlines [setzero,
-             prefix e,
+             "\tfor (int i=1; i<gd.NxNyNzOver2; i++) {",
+             "\t\tconst int z = i % gd.NzOver2;",
+             "\t\tconst int n = (i-z)/gd.NzOver2;",
+             "\t\tconst int y = n % gd.Ny;",
+             "\t\tconst int xa = (n-y)/gd.Ny;",
+             "\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);",
+             "\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);",
+             "\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
              codes (1 :: Int) e,
              "\t}"]
       where codes n x = case findRepeatedSubExpression x of
@@ -179,10 +303,46 @@ instance Type KSpace where
                                          "\t}"]
 
   codeStatementHelper _ _ _ = error "Illegal input to codeStatementHelper for kspace"
+
+
+  newcodeStatementHelper (Var _ _ a _ _) op (Expression (FFT (Var _ _ v _ Nothing))) =
+    a ++ op ++ "fft(gd, " ++ v ++ ");\n"
+  newcodeStatementHelper _ _ (Expression (FFT _)) =
+    error "It is a bug to generate newcode for a non-var input to fft"
+  newcodeStatementHelper a op (Var _ _ _ _ (Just e)) = newcodeStatementHelper a op e
+  newcodeStatementHelper (Var _ _ a _ _) op e =
+    unlines [setzero,
+             "\tfor (int i=1; i<gd.NxNyNzOver2; i++) {",
+             "\t\tconst int z = i % gd.NzOver2;",
+             "\t\tconst int n = (i-z)/gd.NzOver2;",
+             "\t\tconst int y = n % gd.Ny;",
+             "\t\tconst int xa = (n-y)/gd.Ny;",
+             "\t\tconst RelativeReciprocal rvec((xa>gd.Nx/2) ? xa - gd.Nx : xa, (y>gd.Ny/2) ? y - gd.Ny : y, z);",
+             "\t\tconst Reciprocal k_i = gd.Lat.toReciprocal(rvec);",
+             "\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
+             newcodes (1 :: Int) e,
+             "\t}"]
+      where newcodes n x = case findRepeatedSubExpression x of
+              MB (Just (_,x')) -> "\t\tconst complex t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
+                                  newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
+              MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ newcode x ++ ";"
+            setzero = case newcode $ setKequalToZero e of
+                      "0" -> a ++ "[0]" ++ op ++ "0;"
+                      k0newcode -> unlines ["\t{",
+                                         "\t\tconst int i = 0;",
+                                         "\t\tconst Reciprocal k_i = Reciprocal(0,0,0);",
+                                         "\t\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
+                                         "\t\t" ++ a ++ "[0]" ++ op ++ k0newcode ++ ";",
+                                         "\t}"]
+
+  newcodeStatementHelper _ _ _ = error "Illegal input to newcodeStatementHelper for kspace"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);"
   initialize _ = error "VectorXcd output(gd.NxNyNzOver2);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // KSpace"
   free _ = error "free error"
+  newdeclare _ = "Vector"
+  newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // KSpace"
+  newfree _ = error "free error"
   toScalar Delta = 1
   toScalar Kx = s_var "_kx"
   toScalar Ky = 0
@@ -202,10 +362,10 @@ instance Type KSpace where
   subAndCountHelper _ _ Delta = error "unhandled case: Delta"
   searchHelper f (FFT e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
-  searchHelper _ Kx = Nothing
-  searchHelper _ Ky = Nothing
-  searchHelper _ Kz = Nothing
-  searchHelper _ Delta = Nothing
+  searchHelper _ Kx = mempty
+  searchHelper _ Ky = mempty
+  searchHelper _ Kz = mempty
+  searchHelper _ Delta = mempty
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * fft (joinFFTs $ pairs2sum ks)
@@ -244,6 +404,7 @@ cleanvarsE :: Exprn -> Exprn
 cleanvarsE (ES e) = ES $ cleanvars e
 cleanvarsE (EK e) = EK $ cleanvars e
 cleanvarsE (ER e) = ER $ cleanvars e
+cleanvarsE (E3 e) = E3 $ cleanvars e
 
 mapExpression' :: Type a => (forall b. Type b => Expression b -> Expression b) -> Expression a -> Expression a
 mapExpression' f (Var IsTemp a b c (Just e)) = f $ Var IsTemp a b c $ Just $ mapExpression' f e
@@ -298,14 +459,8 @@ searchExpression i f (Exp e) = searchExpression i f e
 searchExpression i f (Log e) = searchExpression i f e
 searchExpression i f (Abs e) = searchExpression i f e
 searchExpression i f (Signum e) = searchExpression i f e
-searchExpression i f (Product p _) = se $ map (searchExpression i f . fst) $ product2pairs p
-    where se [] = Nothing
-          se (Just c:_) = Just c
-          se (_:cs) = se cs
-searchExpression i f (Sum s _) = se $ map (searchExpression i f . snd) $ sum2pairs s
-  where se [] = Nothing
-        se (Just c:_) = Just c
-        se (_:cs) = se cs
+searchExpression i f (Product p _) = mconcat $ map (searchExpression i f . fst) $ product2pairs p
+searchExpression i f (Sum s _) = mconcat $ map (searchExpression i f . snd) $ sum2pairs s
 searchExpression i f (Expression x) = searchHelper (searchExpression i f) x
 
 searchExpressionDepthFirst :: Type a => Set.Set String
@@ -443,7 +598,11 @@ setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
   codePrec _ (Integrate r) = showString "integrate(" . codePrec 0 r . showString ")"
+  codePrec _ (Component n (Var _ _ v _ Nothing)) = showString (v ++ "[" ++ show n ++ "]")
+  codePrec _ (Component _ e) = error ("bad component: " ++ show e)
   latexPrec _ (Integrate r) = showString "\\int " . latexPrec 0 r
+  latexPrec _ (Component n (Var _ _ _ v Nothing)) = showString (v ++ "_{" ++ "xyz" !! n : "}")
+  latexPrec _ (Component _ e) = error ("bad component: " ++ show e)
 instance Type Scalar where
   s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
@@ -452,9 +611,12 @@ instance Type Scalar where
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
-  derivativeHelper v dds (Integrate e) = derive v (Scalar dds*s_var "dV") e
+  derivativeHelper v dds (Integrate e) = derive v (scalar dds*s_var "dV") e
+  derivativeHelper v dds (Component n e) = derive v (unitvector n * scalar dds) e
   scalarderivativeHelper v (Integrate e) = integrate (scalarderive v e)
+  scalarderivativeHelper v (Component n e) = component n (scalarderive v e)
   zeroHelper v (Integrate e) = integrate (setZero v e)
+  zeroHelper v (Component n e) = component n (setZero v e)
   codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
   codeStatementHelper a " = " (Expression (Integrate e)) =
     code a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
@@ -462,18 +624,26 @@ instance Type Scalar where
     ";\n\t}\n"
   codeStatementHelper _ op (Expression (Integrate _)) = error ("Haven't implemented "++op++" for integrate...")
   codeStatementHelper a op e = code a ++ op ++ code e ++ ";"
-  prefix (Expression (Integrate _))  = "for (int i=0; i<gd.NxNyNz; i++) {    "
-  prefix _ = ""
-  postfix (Expression (Integrate _)) = "\n}\n"
-  postfix _ = ""
-  initialize (Expression (Integrate _)) = "double output = 0;\n"
+
+  newcodeStatementHelper a " = " (Var _ _ _ _ (Just e)) = newcodeStatementHelper a " = " e
+  newcodeStatementHelper a " = " (Expression (Integrate e)) =
+    newcode a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
+    newcode a ++ " += " ++ newcode (e * s_var "gd.dvolume") ++
+    ";\n\t}\n"
+  newcodeStatementHelper _ op (Expression (Integrate _)) = error ("Haven't implemented "++op++" for integrate...")
+  newcodeStatementHelper a op e = newcode a ++ op ++ newcode e ++ ";"
   initialize (Var _ _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
   initialize v = error ("bug in initialize Scalar: "++show v)
+  newdeclare _ = "double"
   toScalar (Integrate r) = makeHomogeneous r
+  toScalar (Component n e) = component n e
   fromScalar = id
   mapExpressionHelper' f (Integrate e) = integrate (f e)
+  mapExpressionHelper' f (Component n e) = component n (f e)
   subAndCountHelper x y (Integrate e) = case subAndCount x y e of (e', n) -> (integrate e', n)
+  subAndCountHelper x y (Component nn e) = case subAndCount x y e of (e', n) -> (component nn e', n)
   searchHelper f (Integrate e) = f e
+  searchHelper f (Component _ e) = f e
   safeCoerce a _ = case mkExprn a of
                     ES a' -> Just a'
                     _ -> Nothing
@@ -481,7 +651,7 @@ instance Type Scalar where
 scalar :: Type a => Expression Scalar -> Expression a
 scalar (Scalar e) = scalar e
 scalar e | Just c <- isConstant e = toExpression c
-scalar e = Scalar e
+scalar e = fromScalar e
 
 r_var :: String -> Expression RealSpace
 r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
@@ -496,6 +666,11 @@ k_var v | take 5 v == "ktemp" = Var IsTemp (v++"[i]") ('r':v) v Nothing
 k_var v | take 4 v == "temp" = Var IsTemp ("k"++v++"[i]") ('r':v) v Nothing
 k_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
 k_var "" = error "r_var needs non-empty string"
+
+t_var :: String -> Expression ThreeVector
+t_var v@([_]) = Var CannotBeFreed (v++"[i]") v ("\\vec{"++v++"}") Nothing
+t_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) ("\\vec{"++[a]++"_{"++v++"}}") Nothing
+t_var "" = error "t_var needs non-empty string"
 
 imaginary :: Expression KSpace
 imaginary = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
@@ -589,6 +764,7 @@ data Expression a = Scalar (Expression Scalar) |
 -- useful for comparing two expressions that might not be the same
 -- type.
 data Exprn = EK (Expression KSpace) | ER (Expression RealSpace) | ES (Expression Scalar)
+           | E3 (Expression ThreeVector)
        deriving (Eq, Ord, Show)
 
 sum2pairs :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
@@ -671,9 +847,11 @@ instance Code Exprn where
   codePrec p (ES e) = codePrec p e
   codePrec p (EK e) = codePrec p e
   codePrec p (ER e) = codePrec p e
+  codePrec p (E3 e) = codePrec p e
   latexPrec p (ES e) = latexPrec p e
   latexPrec p (EK e) = latexPrec p e
   latexPrec p (ER e) = latexPrec p e
+  latexPrec p (E3 e) = latexPrec p e
 instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Var _ c _ _ Nothing) = showString c
   codePrec p (Var _ _ _ _ (Just e)) = codePrec p e
@@ -768,8 +946,12 @@ latexParen True x = showString "\\left(" . x . showString "\\right)"
 class Code a  where
     codePrec  :: Int -> a -> ShowS
     codePrec _ x s = code x ++ s
-    code      :: a -> String 
+    code      :: a -> String
     code x = codePrec 0 x ""
+    newcodePrec  :: Int -> a -> ShowS
+    newcodePrec = codePrec
+    newcode      :: a -> String
+    newcode x = newcodePrec 0 x ""
     latexPrec :: Int -> a -> ShowS
     latexPrec _ x s = latex x ++ s
     latex     :: a -> String
@@ -788,6 +970,20 @@ isConstant (Sum s _) = case sum2pairs s of
 isConstant (Product p _) = if Map.size p == 0 then Just 1 else Nothing
 isConstant _ = Nothing
 
+class Monoid m where
+  mappend :: m -> m -> m
+  mempty :: m
+instance Monoid (Maybe a) where
+  mappend (Just x) _ = Just x
+  mappend Nothing y = y
+  mempty = Nothing
+instance Ord a => Monoid (Set.Set a) where
+  mappend x y = Set.union x y
+  mempty = Set.empty
+mconcat :: Monoid m => [m] -> m
+mconcat (x:xs) = mappend x (mconcat xs)
+mconcat [] = mempty
+
 class (Ord a, Show a, Code a) => Type a where 
   amScalar :: Expression a -> Bool
   amScalar _ = False
@@ -795,6 +991,8 @@ class (Ord a, Show a, Code a) => Type a where
   amRealSpace _ = False
   amKSpace :: Expression a -> Bool
   amKSpace _ = False
+  amThreeVector :: Expression a -> Bool
+  amThreeVector _ = False
   mkExprn :: Expression a -> Exprn
   s_var :: String -> Expression a
   s_var = Scalar . s_var
@@ -804,12 +1002,16 @@ class (Ord a, Show a, Code a) => Type a where
   scalarderivativeHelper :: Exprn -> a -> Expression a
   zeroHelper :: Exprn -> a -> Expression a
   codeStatementHelper :: Expression a -> String -> Expression a -> String
-  prefix :: Expression a -> String
-  postfix :: Expression a -> String
-  postfix _ = ""
+  newcodeStatementHelper :: Expression a -> String -> Expression a -> String
   initialize :: Expression a -> String
+  newinitialize :: Expression a -> String
+  newinitialize e@(Var _ _ x _ _) = newdeclare e ++ " " ++ x
+  newinitialize _ = error "bad newinitialize"
+  newdeclare :: Expression a -> String
   free :: Expression a -> String
   free x = error ("free nothing " ++ show x)
+  newfree :: Expression a -> String
+  newfree x = error ("free nothing " ++ show x)
   toScalar :: a -> Expression Scalar
   fromScalar :: Expression Scalar -> Expression a
   fromScalar = Scalar
@@ -818,16 +1020,43 @@ class (Ord a, Show a, Code a) => Type a where
   joinFFThelper = id
   safeCoerce :: Type b => Expression b -> Expression a -> Maybe (Expression a)
   subAndCountHelper :: Type b => Expression b -> Expression b -> a -> (Expression a, Int)
-  searchHelper :: (forall b. Type b => Expression b -> Maybe c) -> a -> Maybe c
+  searchHelper :: Monoid c => (forall b. Type b => Expression b -> c) -> a -> c
 
 initializeE :: Exprn -> String
 initializeE (ES e) = initialize e
 initializeE (EK e) = initialize e
 initializeE (ER e) = initialize e
+initializeE (E3 e) = initialize e
 freeE :: Exprn -> String
 freeE (ES e) = free e
 freeE (ER e) = free e
 freeE (EK e) = free e
+freeE (E3 e) = free e
+
+newinitializeE :: Exprn -> String
+newinitializeE (ES e) = newinitialize e
+newinitializeE (EK e) = newinitialize e
+newinitializeE (ER e) = newinitialize e
+newinitializeE (E3 e) = newinitialize e
+
+newdeclareE :: Exprn -> String
+newdeclareE (ES e) = newdeclare e
+newdeclareE (EK e) = newdeclare e
+newdeclareE (ER e) = newdeclare e
+newdeclareE (E3 e) = newdeclare e
+
+nameE :: Exprn -> String
+nameE (ES (Var _ _ v _ Nothing)) = v
+nameE (EK (Var _ _ v _ Nothing)) = v
+nameE (ER (Var _ _ v _ Nothing)) = v
+nameE (E3 (Var _ _ v _ Nothing)) = v
+nameE e = show e
+
+newfreeE :: Exprn -> String
+newfreeE (ES e) = newfree e
+newfreeE (ER e) = newfree e
+newfreeE (EK e) = newfree e
+newfreeE (E3 e) = newfree e
 
 codeStatementE :: Exprn -> String -> Exprn -> String
 codeStatementE (ES a) op (ES b) = codeStatementHelper a op b
@@ -835,6 +1064,11 @@ codeStatementE (EK a) op (EK b) = codeStatementHelper a op b
 codeStatementE (ER a) op (ER b) = codeStatementHelper a op b
 codeStatementE _ _ _ = error "bug revealed by codeStatementE"
 
+newcodeStatementE :: Exprn -> String -> Exprn -> String
+newcodeStatementE (ES a) op (ES b) = newcodeStatementHelper a op b
+newcodeStatementE (EK a) op (EK b) = newcodeStatementHelper a op b
+newcodeStatementE (ER a) op (ER b) = newcodeStatementHelper a op b
+newcodeStatementE _ _ _ = error "bug revealed by newcodeStatementE"
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
 makeHomogeneous ee =
@@ -961,6 +1195,7 @@ varSetE :: Exprn -> Set.Set String
 varSetE (ES e) = varSet e
 varSetE (EK e) = varSet e
 varSetE (ER e) = varSet e
+varSetE (E3 e) = varSet e
 
 varSet :: Type a => Expression a -> Set.Set String
 varSet e@(Expression _) = case mkExprn e of
@@ -1190,12 +1425,19 @@ hasExprn :: Exprn -> Exprn -> Bool
 hasExprn (ES a) (ES b) = hasexpression a b
 hasExprn (ES a) (ER b) = hasexpression a b
 hasExprn (ES a) (EK b) = hasexpression a b
+hasExprn (ES a) (E3 b) = hasexpression a b
 hasExprn (ER a) (ES b) = hasexpression a b
 hasExprn (ER a) (ER b) = hasexpression a b
 hasExprn (ER a) (EK b) = hasexpression a b
+hasExprn (ER a) (E3 b) = hasexpression a b
 hasExprn (EK a) (ES b) = hasexpression a b
 hasExprn (EK a) (ER b) = hasexpression a b
 hasExprn (EK a) (EK b) = hasexpression a b
+hasExprn (EK a) (E3 b) = hasexpression a b
+hasExprn (E3 a) (ES b) = hasexpression a b
+hasExprn (E3 a) (ER b) = hasexpression a b
+hasExprn (E3 a) (EK b) = hasexpression a b
+hasExprn (E3 a) (E3 b) = hasexpression a b
 
 countexpression :: (Type a, Type b) => Expression a -> Expression b -> Int
 countexpression x e = snd $ subAndCount x (s_var "WeAreCounting") e
@@ -1207,6 +1449,7 @@ substituteE :: Type a => Expression a -> Expression a -> Exprn -> Exprn
 substituteE a a' (ES b) = mkExprn $ substitute a a' b
 substituteE a a' (ER b) = mkExprn $ substitute a a' b
 substituteE a a' (EK b) = mkExprn $ substitute a a' b
+substituteE a a' (E3 b) = mkExprn $ substitute a a' b
 
 countAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Int
 countAfterRemoval v e = Set.size (varsetAfterRemoval v e)
@@ -1215,6 +1458,7 @@ countAfterRemovalE :: Type a => Exprn -> Expression a -> Int
 countAfterRemovalE (EK a) b = countAfterRemoval a b
 countAfterRemovalE (ER a) b = countAfterRemoval a b
 countAfterRemovalE (ES a) b = countAfterRemoval a b
+countAfterRemovalE (E3 a) b = countAfterRemoval a b
 
 varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Set String
 -- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent
@@ -1365,4 +1609,33 @@ findRepeatedSubExpression everything = frse everything
         makebetter e n e' = if n' >= n then MB (Just (makebetter e' n', e'))
                                        else MB (Just (makebetter e n, e))
                  where n' = countexpression e' everything
+
+-- A monoid is (just about) any data type that allows you to combine
+-- two elements together to create a third element of the same type.
+-- Sets are like this (union combines two sets), and so is Maybe,
+-- where we want to short-cut to find the first "Just" element.
+searchMonoid :: (Type a, Monoid c) => (forall b. Type b => Expression b -> c)
+                    -> Expression a -> c
+searchMonoid f x@(Var _ _ _ _ Nothing) = f x
+searchMonoid f x@(Var _ _ _ _ (Just e)) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Scalar e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Cos e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Sin e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Exp e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Log e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Abs e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Signum e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Product p _) = f x `mappend` mconcat (map (searchMonoid f . fst) $ product2pairs p)
+searchMonoid f x@(Sum s _) = f x `mappend` mconcat (map (searchMonoid f . snd) $ sum2pairs s)
+searchMonoid f x@(Expression e) = f x `mappend` searchHelper (searchMonoid f) e
+
+findNamedScalars :: Type b => Expression b -> Set.Set String
+findNamedScalars = searchMonoid helper
+  where helper (Var _ _ b _ (Just e)) | ES _ <- mkExprn e = Set.singleton b
+        helper _ = Set.empty
+
+findInputs :: Type b => Expression b -> Set.Set Exprn
+findInputs = searchMonoid helper
+  where helper e@(Var _ _ _ _ Nothing) = Set.singleton (mkExprn e)
+        helper _ = Set.empty
 \end{code}

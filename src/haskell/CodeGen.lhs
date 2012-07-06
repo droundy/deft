@@ -179,24 +179,4 @@ defineFunctional e arg n =
           codeA a = foldl1 (\x y -> x ++ ", " ++ y ) (map ("double " ++) a)
           codeA' [] = ""
           codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
-
-findNamedScalars :: Type b => Expression b -> Set.Set String
-findNamedScalars e@(Expression _)
-    | EK (Expression (FFT e')) <- mkExprn e = findNamedScalars e'
-    | ER (Expression (IFFT e')) <- mkExprn e = findNamedScalars e'
-    | ES (Expression (Integrate e')) <- mkExprn e = findNamedScalars e'
-    | otherwise = Set.empty
-findNamedScalars (Sum s _) = Set.unions $ map (findNamedScalars . snd) $ sum2pairs s
-findNamedScalars (Product p _) = Set.unions $ map (findNamedScalars . fst) $ product2pairs p
-findNamedScalars (Cos e) = findNamedScalars e
-findNamedScalars (Sin e) = findNamedScalars e
-findNamedScalars (Log e) = findNamedScalars e
-findNamedScalars (Exp e) = findNamedScalars e
-findNamedScalars (Abs e) = findNamedScalars e
-findNamedScalars (Signum e) = findNamedScalars e
-findNamedScalars (Var _ _ b _ (Just e))
-  | ES _ <- mkExprn e = Set.insert b $ findNamedScalars e
-  | otherwise = findNamedScalars e
-findNamedScalars (Var _ _ _ _ Nothing) = Set.empty
-findNamedScalars (Scalar e) = findNamedScalars e
 \end{code}

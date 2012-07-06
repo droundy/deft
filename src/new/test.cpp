@@ -7,14 +7,19 @@ inline double spring(int i) {
 }
 
 class SqrSum : public Functional {
-  double energy(const Vector &x, Verbosity v) const {
+  double energy(const Vector &x) const {
     const int sz = x.get_size();
     double out = 0;
     for (int i=0; i<sz; i++) {
-      if (v >= verbose) printf("x[%2d] = %g\n", i, x[i]);
       out += spring(i)*x[i]*x[i];
     }
     return out;
+  }
+  double energy_per_volume(const Vector &x) const {
+    return 0;
+  }
+  double denergy_per_volume_dx(const Vector &x) const {
+    return 0;
   }
   Vector grad(const Vector &x) const {
     const int sz = x.get_size();
@@ -24,10 +29,9 @@ class SqrSum : public Functional {
     }
     return out;
   }
-  EnergyGradAndPrecond energy_grad_and_precond(const Vector &x,
-                                               Verbosity v) const {
+  EnergyGradAndPrecond energy_grad_and_precond(const Vector &x) const {
     EnergyGradAndPrecond egpg;
-    egpg.energy = energy(x, v);
+    egpg.energy = energy(x);
     egpg.grad = grad(x);
     egpg.precond = grad(x);
     const int sz = x.get_size();
@@ -35,6 +39,8 @@ class SqrSum : public Functional {
       egpg.precond[i] /= spring(i);
     }
     return egpg;
+  }
+  void printme(const char *) const {
   }
   bool have_preconditioner() const { return true; }
 };
@@ -104,7 +110,7 @@ int main() {
     min.set_precision(prec);
     min.precondition(true);
     printf("Starting energy is %g\n\n", min.energy());
-    while (min.improve_energy(chatty)) {
+    while (min.improve_energy(louder(min_details))) {
     }
     min.print_info();
     // We should be able to quickly find the exact minimum, which

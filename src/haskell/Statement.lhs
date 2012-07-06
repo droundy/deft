@@ -6,6 +6,7 @@ definitions and assignments.
 
 module Statement ( Statement(..),
                    codeStatements,
+                   newcodeStatements,
                    latexStatements,
                    latexSimp,
                    simp2,
@@ -35,6 +36,9 @@ instance Code Statement where
   codePrec _ (Assign x y) = showString ("\t" ++ codeStatementE x " = " y)
   codePrec _ (Initialize e) = showString ("\t" ++ initializeE e)
   codePrec _ (Free e) = showString ("\t" ++ freeE e)
+  newcodePrec _ (Assign x y) = showString ("\t" ++ newcodeStatementE x " = " y)
+  newcodePrec _ (Initialize e) = showString ("\t" ++ newinitializeE e)
+  newcodePrec _ (Free e) = showString ("\t" ++ newfreeE e)
   latexPrec _ (Assign x y) = latexPrec 0 x . showString " = " . latexPrec 0 (cleanvarsE y)
   latexPrec _ (Initialize e) = showString (initializeE e)
   latexPrec _ (Free e) = showString (freeE e)
@@ -55,6 +59,12 @@ codeStatements (Initialize v : Assign v' (ES e) : ss)
   | v == v' = "\tdouble " ++ code (Assign v (ES e)) ++ "\n" ++ codeStatements ss
 codeStatements (s:ss) = code s ++ "\n" ++ codeStatements ss
 codeStatements [] = ""
+
+newcodeStatements :: [Statement] -> String
+newcodeStatements (Initialize v : Assign v' (ES e) : ss)
+  | v == v' = "\tdouble " ++ newcode (Assign v (ES e)) ++ "\n" ++ newcodeStatements ss
+newcodeStatements (s:ss) = newcode s ++ "\n" ++ newcodeStatements ss
+newcodeStatements [] = ""
 
 substituteS :: Type a => Expression a -> Expression a -> Statement -> Statement
 substituteS x y (Assign s e) = Assign s (substituteE x y e)
@@ -230,6 +240,15 @@ simp2 eee = case scalarhelper [] 0 eee of
                                 _ -> Var CannotBeFreed ("s" ++ show n)
                                                        ("s"++show n)
                                                        ("s_{" ++ show n ++ "}") Nothing
+                      Just (E3 ve) -> simp2helper (varSet v) (n+1)
+                                      (sts++[Initialize (E3 v), Assign (E3 v) (E3 ve)])
+                                      (substitute ve v everything) (substitute ve v e)
+                        where v :: Expression ThreeVector
+                              v = case ve of
+                                Var _ xi x t _ -> Var IsTemp xi x t Nothing
+                                _ -> Var CannotBeFreed ("v" ++ show n)
+                                                       ("v"++show n)
+                                                       ("\\vec{v_{" ++ show n ++ "}}") Nothing
                       Nothing -> handletodos ts
 
 \end{code}

@@ -3,8 +3,12 @@
 #pragma once
 
 #include "Functional.h"
+#include "handymath.h"
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
+
+const Verbosity min_details = chatty;
 
 class Minimizer {
 public:
@@ -12,6 +16,8 @@ public:
     : f(myf), x(data) {
     iter = 0;
     maxiter = 10000000;
+    num_energy_calcs = 0;
+    num_grad_calcs = 0;
     precision = 0;
     
     last_energy = 0;
@@ -37,6 +43,8 @@ public:
   void minimize(const Functional *newf, Vector *newx = 0) {
     f = newf;
     iter = 0;
+    num_energy_calcs = 0;
+    num_grad_calcs = 0;
     invalidate_cache();
     if (newx) x = newx;
   }
@@ -74,26 +82,57 @@ public:
   // The print_info function should be called at each iteration,
   // unless verbose is set to quiet in improve_energy.  But you can
   // also call it manually.
-  void print_info(const char *prefix = "") const;
+  void print_info(const char *prefix = "", bool with_iteration = true) const;
 
   // energy returns the current energy.
   double energy(Verbosity v = quiet) const {
     if (last_energy == 0) {
-      last_energy = new double(f->energy(*x, v));
+      const clock_t start = clock();
+
+      last_energy = new double(f->energy(*x));
+      if (v >= louder(min_details)) { // we need to get really paranoid before we print each energy...
+        const clock_t end = clock();
+        if (end > start + 10) {
+          printf("\n\t\t\t=== Energy calculation #%d (took %g seconds) ===\n",
+                 num_energy_calcs, (end - double(start))/CLOCKS_PER_SEC);
+        } else {
+          // no point printing the time, since it probably isn't
+          // accurate anyhow...
+          printf("\n\t\t\t=== Energy calculation #%d ===\n", num_energy_calcs);
+        }
+        print_info("\t\t\t", false);
+      }
+      num_energy_calcs++;
     }
     return *last_energy;
   }
   const Vector &grad() const {
     if (!last_grad.get_size()) {
       last_grad = f->grad(*x);
+      num_grad_calcs++;
     }
     return last_grad;
   }
-  const Vector &pgrad() const {
+  const Vector &pgrad(Verbosity v = quiet) const {
     if (!last_pgrad.get_size()) {
       if (use_preconditioning && f->have_preconditioner()) {
         invalidate_cache();
-        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x, silent);
+        const clock_t start = clock();
+        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x);
+        if (v >= louder(min_details)) { // we need to get really paranoid before we print each energy...
+          const clock_t end = clock();
+          if (end > start + 10) {
+            printf("\n\t\t\t=== Energy and grad calculation #%d and #%d resp. (took %g seconds) ===\n",
+                   num_energy_calcs, num_grad_calcs, (end - double(start))/CLOCKS_PER_SEC);
+          } else {
+            // no point printing the time, since it probably isn't
+            // accurate anyhow...
+            printf("\n\t\t\t=== Energy calculation #%d (grad #%d) ===\n", num_energy_calcs, num_grad_calcs);
+          }
+          print_info("\t\t\t", false);
+        }
+        num_energy_calcs++;
+        num_grad_calcs++;
         last_energy = new double(foo.energy);
         last_grad = foo.grad;
         last_pgrad = foo.precond;
@@ -117,6 +156,7 @@ private:
   Vector *x; // Note that we don't own this data!
   int iter, maxiter;
 
+  mutable int num_energy_calcs, num_grad_calcs;
   mutable Vector last_grad, last_pgrad;
   mutable double *last_energy;
 

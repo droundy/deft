@@ -33,6 +33,8 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
 	src/ContactAtSphereFast.cpp src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp
 
+NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
+
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
@@ -79,12 +81,15 @@ haskell: src/haskell/functionals src/haskell/test
 # tell make that a single rule (calling another make, in this
 # instance) can be used to generate several executables.  The pattern,
 # in this case, matches the letter "s".
-src/haskell/latex-functional% src/haskell/functional% src/haskell/te%t: $(wildcard src/haskell/*hs)
+src/haskell/latex-functional% src/haskell/functional% src/haskell/newfunctional% src/haskell/te%t: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) depend
 	cd src/haskell && $(MAKE)
 
 $(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
 	time src/haskell/functionals $@ && echo timed $@
+
+$(NEWHASKELL_CODE): src/haskell/newfunctionals
+	time src/haskell/newfunctionals $@ && echo timed $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
@@ -98,9 +103,16 @@ tests/generated-haskell/nice-sum.h tests/generated-haskell/math.tex: src/haskell
 	src/haskell/test codegen
 tests/generated-code.o: tests/generated/sum.h tests/generated-haskell/nice-sum.h
 
+tests/new-generated-haskell/volume_minus_one_sqr.h: src/haskell/newfunctionals
+	test -d tests/new-generated-haskell || mkdir tests/new-generated-haskell
+	rm -f tests/new-generated-haskell/*
+	src/haskell/newfunctionals tests
+tests/new-generated-code.o: tests/new-generated-haskell/volume_minus_one_sqr.h
+
 check_PROGRAMS = \
 	tests/newcode.test \
 	tests/generated-code.test \
+	tests/new-generated-code.test \
 	tests/saft.test \
 	tests/saft-dispersion.test \
 	tests/optimized-code.test \
@@ -130,6 +142,7 @@ TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test 
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
+tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CONTACT_CODE)
 tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)

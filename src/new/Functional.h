@@ -28,7 +28,10 @@ class Functional {
 public:
   // The following is the "energy" function, which must be defined by
   // any real functionals.
-  virtual double energy(const Vector &x, Verbosity verbose = quiet) const = 0;
+  virtual double energy(const Vector &x) const = 0;
+
+  // The following handles the "homeogeneous" case.
+  virtual double energy_per_volume(const Vector &x) const = 0;
 
   // grad is the gradient.  The input "grad_these allows cases where
   // we may want to compute a gradient with regard to just *some* of
@@ -36,11 +39,15 @@ public:
   // minimizing under some constraint.
   virtual Vector grad(const Vector &x) const = 0;
 
+  // The following handles the "homeogeneous" case.
+  virtual double denergy_per_volume_dx(const Vector &x) const = 0;
+
   // We have one additional method, which computes both the grad and
   // the preconditioned gradient.  This one is optional, and only need
   // be defined if there is some actual preconditioning to do;
-  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &, Verbosity) const {
+  virtual EnergyGradAndPrecond energy_grad_and_precond(const Vector &) const {
     assert(0);
   }
+  virtual void printme(const char *) const = 0;
   virtual bool have_preconditioner() const { return false; }
 };
