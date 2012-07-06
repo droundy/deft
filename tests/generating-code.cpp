@@ -45,7 +45,7 @@ int main(int, char **) {
 
   sqr(veff).create_header("tests/generated/sqr-Veff.h", "SquareVeff", R_arg);
 
-  IdealGasOfVeff.create_header("tests/generated/ideal-gas.h", "IdealGasFast", noargs);
+  IdealGasOfVeff().create_header("tests/generated/ideal-gas.h", "IdealGasFast", noargs);
 
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
@@ -75,7 +75,7 @@ int main(int, char **) {
 
   phi3rf(veff).create_header("tests/generated/phi3rf-Veff.h", "Phi3rfVeff", R_arg);
 
-  (phi1(veff) + IdealGasOfVeff + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
+  (phi1(veff) + IdealGasOfVeff() + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
                                                                            "Phi1plus", R_mu_arg);
 
   //(phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "R");

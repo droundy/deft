@@ -31,7 +31,7 @@ int main(int, char **argv) {
   printf("\nLet's test the ideal gas of an effective potential (IdealGasOfVeff)...\n");
   Grid potential(gd, 1e-2*((-50*r2(gd)).cwise().exp()) + -2e-3*VectorXd::Ones(gd.NxNyNz));
 
-  retval += IdealGasOfVeff.run_finite_difference_test("ideal gas of Veff", kT, potential);
+  retval += IdealGasOfVeff().run_finite_difference_test("ideal gas of Veff", kT, potential);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

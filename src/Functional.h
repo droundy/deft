@@ -292,6 +292,7 @@ public:
   bool I_am_zero() const {
     const Functional *nxt = this;
     while (nxt) {
+      assert(nxt->itsCounter);
       if (!nxt->itsCounter->ptr->I_am_zero()) return false;
       nxt = nxt->next();
     }

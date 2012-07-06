@@ -75,14 +75,12 @@ Functional IdealGas() {
   return (kT*n*(log(n/nQ) - Functional(1))).set_name("ideal_gas");
 }
 
-Functional CreateIdealGasOfVeff() {
+Functional IdealGasOfVeff() {
   Functional Veff = Identity().set_name("Veff");
   Functional n = exp(-Veff /kT);
   Functional nQ = find_nQ();
   return (-(Veff + kT*log(nQ) + kT)*n).set_name("ideal_gas");
 }
-
-Functional IdealGasOfVeff = CreateIdealGasOfVeff();
 
 Functional EntropyOfIdealGasOfVeff() {
   Functional Veff = Identity().set_name("Veff");

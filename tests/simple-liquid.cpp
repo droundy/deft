@@ -36,12 +36,12 @@ Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nli
 Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
 Functional f0 = ChemicalPotential(mu) + attraction + repulsion;
 Functional n = EffectivePotentialToDensity();
-Functional f = IdealGasOfVeff + f0(n);
+Functional f = IdealGasOfVeff() + f0(n);
 
 Grid potential(gd);
 Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
 
-Functional ff = IdealGasOfVeff + (f0 + ExternalPotential(external_potential))(n);
+Functional ff = IdealGasOfVeff() + (f0 + ExternalPotential(external_potential))(n);
 
 
 int test_minimizer(const char *name, Minimizer min, Grid *pot, double fraccuracy=1e-3) {
