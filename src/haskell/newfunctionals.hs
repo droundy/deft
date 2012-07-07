@@ -1,5 +1,5 @@
 import NewCode
-import SomeFunctionals ( whitebear )
+import WhiteBear ( whitebear )
 import System.Environment ( getArgs )
 
 a1, a2, a3 :: Expression ThreeVector

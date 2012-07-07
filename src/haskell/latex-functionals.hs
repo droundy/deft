@@ -1,4 +1,5 @@
 import SomeFunctionals
+import WhiteBear ( whitebear )
 import Quantum
 import Latex
 import Expression ( (===), grad, joinFFTs, integrate )

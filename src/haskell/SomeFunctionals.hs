@@ -1,14 +1,12 @@
 module SomeFunctionals 
-       ( whitebear, wb_contact_at_sphere, idealgas, mu, n,
-         phi1, phi2, phi3,
+       ( idealgas, mu, n,
          of_effective_potential,
-         xshell, yshell, zshell,
          yuwu_zeta, yuwu_correlation,
          eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid,
-         dwbdn3, dwbdn2, dwbdn1, dwbdn2v_over_n2v, dwbdn1v_over_n2v )
+         saft_dispersion, saft_association, saft_fluid )
        where
 
+import WhiteBear ( whitebear )
 import Expression
 
 kT :: Type a => Expression a
@@ -56,15 +54,6 @@ zshell x = ifft ( deltaz * fft x)
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)
 
-phi1, phi2, phi3 :: Expression RealSpace
-phi1 = var "phi1" "\\Phi_1" $ -n0*log(1-n3)
-phi2 = var "phi2" "\\Phi_2" $ (n2*n1 - n1v_dot_n2v)/(1-n3)
-phi3 = var "phi3" "\\Phi_3" $ (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*vectorThirdTerm
-
-
-whitebear :: Expression Scalar
-whitebear = var "whitebear" "F_{HS}" $ integrate (kT*(phi1+phi2+phi3))
-
 nQ :: Expression RealSpace
 nQ = (mass*kT/2/pi)**1.5
   where mass = var "mH2O" "m_{H_2O}" (18.01528 * gpermol) -- uses molecular weight of water
@@ -75,33 +64,6 @@ idealgas = "Fideal" === integrate (kT*n*(log(n/nQ) - 1))
 
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
-
-dwbdn3, dwbdn2, dwbdn1, dwbdn1v_over_n2v, dwbdn2v_over_n2v :: Expression RealSpace
-dwbdn3 =  d phi1 + d phi2 + d phi3
-  where d = derive n3 1
-
-dwbdn2 = d phi1 + d phi2 + d phi3
-  where d = derive n2 1
-
-dwbdn1 = derive n1 1 (phi1 + phi2 + phi3)
-
-dwbdn1v_over_n2v = derive n1v_dot_n2v 1 (phi1 + phi2 + phi3)
-
-dwbdn2v_over_n2v = 2*derive sqr_n2v 1 (phi1 + phi2 + phi3)
-
---dwbdn2v, dwbdn1v :: Expression RealSpace
---dwbdn2v = 1/(4*pi*rad)/(1-n3) - 6*n2*(n3 + (1-n3)**2*log(1-n3)/(36*pi*n3**2*(1-n3)**2))
-
---dwbdn1v = 1/(1-n3)
-
-wb_contact_at_sphere :: Expression RealSpace
-wb_contact_at_sphere =
-  1/(4*4*pi*rad**2)*(shell (dwbdn3 + 2*dwbdn2/rad + dwbdn1/(4*pi*rad**2)) +
-                     xshell (n2x * vecpart) + yshell (n2y * vecpart) + zshell (n2z * vecpart))
-    where vecpart = 0*dwbdn1v_over_n2v / (4*pi*rad**2) + 2/rad*dwbdn2v_over_n2v
-  -- + xshell (n2x*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
-  -- + yshell (n2y*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
-  -- + zshell (n2z*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
 
 yuwu_zeta :: Expression RealSpace
 yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (n2**2 - sqr_n2v)/n2**2
