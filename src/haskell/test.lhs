@@ -3,7 +3,8 @@ import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
 import SomeFunctionals
-import WhiteBear ( whitebear, xshell )
+import WhiteBear ( whitebear )
+import FMT ( xshell )
 import System.Environment ( getArgs )
 import qualified Data.Set as Set
 
@@ -168,7 +169,8 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT n3 + n2a" 2 (n3 + n2a),
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (countFFT $ fst $ simp2 $ factorize $ joinFFTs e)
+  where t str nn e = TestCase $ assertEqual str nn
+                     (countFFT $ fst $ simp2 $ factorize $ joinFFTs $ cleanvars e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -202,8 +204,8 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
                      t "peakMem saft_fluid" 6 saft_fluid,
                      t "peakMem whitebear" 6 whitebear,
-                     t "peakMem saft_dispersion" 3 saft_dispersion,
-                     t "peakMem saft_association" 5 saft_association,
+                     t "peakMem saft_dispersion" 2 saft_dispersion,
+                     t "peakMem saft_association" 6 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
                      t "peakMem grad whitebear" 8 (gradme whitebear), -- was 20
                      t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
@@ -220,7 +222,8 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
                      t "peakMem nbar + log nbar" 1 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $ factorize $ joinFFTs e)
+  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $
+                                                    factorize $ joinFFTs $ cleanvars e)
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
