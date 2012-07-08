@@ -26,7 +26,7 @@ const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.324*eta_one;
 Functional n = EffectivePotentialToDensity();
-const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff, water_prop.kT, nliquid);
+const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff(), water_prop.kT, nliquid);
 
 // Here we set up the lattice.
 const double rcav = R+R; // 11.8*R+R;

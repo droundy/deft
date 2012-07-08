@@ -76,10 +76,6 @@ int main(int, char **argv) {
   test_expression("Pow(2)(n2)", Pow(2)(n2).printme(Expression("x")),
                   "ifft(gd, shell(gd, R).cwise()*fft(gd, x)).cwise().square()");
   
-  test_expression("IdealGasOfVeff",
-                  IdealGasOfVeff.printme(Expression("x")),
-                  "(-(x + kT*log(32839.84673628*kT/6.283185307179586*sqrt(32839.84673628*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
-
   test_expression("kT*xxx",
                   (kT*sqr(xShellConvolve(R))).printme(
                                                       Expression("x")),

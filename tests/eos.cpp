@@ -74,8 +74,8 @@ int main(int, char **argv) {
 
   {
     double ngas = 2e-5;
-    double mu = find_chemical_potential(IdealGasOfVeff, water_prop.kT, ngas);
-    test_eos("ideal gas", IdealGasOfVeff + ChemicalPotential(mu)(n), ngas, ngas*water_prop.kT);
+    double mu = find_chemical_potential(IdealGasOfVeff(), water_prop.kT, ngas);
+    test_eos("ideal gas", IdealGasOfVeff() + ChemicalPotential(mu)(n), ngas, ngas*water_prop.kT);
   }
 
   test_eos("quadratic", 0.5*sqr(n) - n, 1.0, 0.5, 2e-6);
@@ -84,7 +84,7 @@ int main(int, char **argv) {
 
   {
     //FILE *o = fopen("ideal-gas.dat", "w");
-    //equation_of_state(o, IdealGasOfVeff, water_prop.kT, nmin, nmax);
+    //equation_of_state(o, IdealGasOfVeff(), water_prop.kT, nmin, nmax);
     //fclose(o);
   }
 
@@ -204,7 +204,7 @@ int main(int, char **argv) {
 
   {
     FILE *o = fopen("hard-sphere-fluid.dat", "w");
-    Functional f = HardSpheresWBnotensor(water_prop.lengthscale)(n) + IdealGasOfVeff;
+    Functional f = HardSpheresWBnotensor(water_prop.lengthscale)(n) + IdealGasOfVeff();
     double mu = f.derive(water_prop.kT, Veff)*water_prop.kT/water_prop.liquid_density; // convert from derivative w.r.t. V
     equation_of_state(o, f + ChemicalPotential(mu)(n), water_prop.kT, nmin, nmax);
     fclose(o);

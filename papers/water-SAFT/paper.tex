@@ -132,7 +132,7 @@ focused on the hard-sphere fluid~\cite{curtin1985, rosenfeld1989,
 led to a number of sophisticated functionals, such as the
 fundamental-measure theory (FMT) functionals\cite{rosenfeld1989,
   rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000,
-  roth2002whitebear}, which are entirely expressed as an integral of
+  roth2002whitebear}.  These functionals are entirely expressed as an integral of
 local functions of a few convolutions of the density that can be
 efficiently computed.  We will use the White Bear version of the FMT
 functional\cite{roth2002whitebear}.  In the homogeneous limit, this
@@ -180,8 +180,8 @@ The SAFT Helmholtz free energy is composed of five terms:
 where the first three terms encompass the \emph{monomer} contribution
 to the free energy, the fourth is the \emph{association} free energy,
 describing hydrogen bonds, and the final term is the chain formation
-energy of for fluids that (unlike water) are chain polymers.  While a
-number of forumlations of SAFT have been published, we will focus on
+energy for fluids that (unlike water) are chain polymers.  While a
+number of formulations of SAFT have been published, we will focus on
 SAFT-VR\cite{gil-villegas-1997-SAFT-VR}, which was used by Clark
 \emph{et al} to construct an optimal SAFT model for
 water\cite{clark2006developing}. All but one of the six empirical
@@ -371,9 +371,9 @@ The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
 perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
-the mean-field dispersion interaction and the second term, $a_2$, describes the
+the mean-field dispersion interaction. The second term, $a_2$, describes the
 effect of fluctuations resulting from compression of the fluid due
-to the dispersion interaction itself. $a_2$ is approximated
+to the dispersion interaction itself; it is approximated
 using the local compressibility approximation (LCA), which
 assumes the energy fluctuation is simply related to the
 compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
@@ -425,7 +425,7 @@ SAFT-HS model, rather than the SAFT-VR
 model\cite{gil-villegas-1997-SAFT-VR}, which is used in the optimal
 SAFT parametrization for water of Clark \emph{et
   al}\cite{clark2006developing}.  Adapting Yu and Wu's association
-free energy to SAFT-VR, simply involves the addition of a correction
+free energy to SAFT-VR simply involves the addition of a correction
 term in the correlation function (see Equation~\ref{eq:gSW}).
 
 The association functional we use is constructed by using the density
@@ -452,7 +452,7 @@ The fraction $X$ is determined by the quadratic equation
   {4 n_0(\xx)\zeta(\xx)
     \Delta(\xx)}
 \end{align}
-where the functional $\Delta$ which is a measure of hydrogen-bonding
+where the functional $\Delta$ is a measure of hydrogen-bonding
 probability, given by
 \begin{align}
   \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
@@ -534,7 +534,9 @@ surface area of the hard rod, plotted as a function of hard-rod
 radius, which we define as the radius from which water is excluded.
 For rods with radius larger than 0.5~nm or so, this reaches a value of
 75~mN/m, which is slightly higher than the bulk surface, which will be
-approached from above in the limit of very large rods.  For very small
+approached from above in the limit of very large rods \fixme{this is a
+terrible sentence, want to say something more concrete about free
+energy / area dropping (getting data) DJR}.  For very small
 radius (less than about 0.1~nm) the relationship between the free
 energy per area and radius is linear, with the slope required by the
 contact-value theorem (see Equation~\ref{contactvaluethm}).
@@ -553,10 +555,10 @@ calculated free energy data.}
 We show in Figure~\ref{fig:density-single-rod} density profiles for
 different radii rods, as well as the prediction for the contact value
 of the density as a function of rod radius, as computed from the free
-energies plotted in Figure~\ref{fig:energy-vs-diameter}.  Thee
+energies plotted in Figure~\ref{fig:energy-vs-diameter}.  The
 agreement between these curves confirms that our functional satisfies
 the contact-value theorem and that our minimization is well converged.
-As expected, as the radius of the rods approach zero the
+As expected, as the radius of the rods becomes zero the
 contact density approaches the bulk density, and as the radius becomes
 large, the contact density will approach the vapor density.
 
@@ -575,7 +577,7 @@ about 0.54~nm for the rods shown in Figure~\ref{fig:density-rods}.
 The critical separation will be different for a system where there is
 a significant direct force between rods, or attraction between the
 rods and water.  At small separations, the water around the two
-rods look as if the two rods were one solid ``stadium''-shaped object
+rods looks as if the two rods were one solid ``stadium''-shaped object
 (a rectangle with semi-circles on both ends).
 
 \begin{figure}
@@ -607,8 +609,9 @@ F = \gamma A + pV
 The first term describes the surface energy and the second term is the
 work needed to create a cavity of volume $V$. Since the pressure term
 scales with volume, it can be neglected relative to the surface term
-provided the length scale is small compared with $\gamma / p$, which
-is around $20~\mu m$, which is much larger than any of the solutes we
+provided the length scale is small compared with $\gamma / p$. The
+value of $\gamma / p$ is around $20~\mu m$, which is much larger than
+any of the solutes we
 study. For micron-scale rods, the water on the sides of the `stadium'
 configuration will bow inward between the rods and the density will
 reduce to vapor near the center point where the rods are closest to
@@ -630,13 +633,13 @@ as a function of the separation $d$, along with the free energy
 predicted by our simple macroscopic model (dashed lines).  The models
 agree very well on the force between the two rods at close
 separations, and have reasonable agreement as to the critical
-separation for rods greater than 1~nm in diameter.
+separation for rods greater than 0.5~nm in radius.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
-\caption{ Free energy of hydration (also known as the potential of mean force) 
+\caption{ \fixme{Free energy of hydration} (also known as the potential of mean force) 
 versus separation for two hydrophobic rods ranging in radius from
 0.3~nm to 1.0~nm.
 All were arbitrarily offset to zero at large separations for ease of comparison. The
@@ -722,7 +725,7 @@ water\cite{sedlmeier2011entropy}.  As in the single rod, we begin by
 examining the free energy of hydration, expressed in
 Figure~\ref{fig:sphere-energy-vs-diameter} as the ratio of the energy
 of the cavity system to the solvent-accessible surface area.  This
-effective surface tension, surpasses the bulk surface tension at a
+effective surface tension surpasses the bulk surface tension at a
 radius of almost 1~nm, and will eventually drop to the bulk value.  As
 with the single rod, we see the analytically correct behavior in the
 limit of small solutes.  For comparison, we plot the free energy

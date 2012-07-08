@@ -221,12 +221,12 @@ int main(int, char **argv) {
 
   compare_functionals(Phi3rfVeff(R), phi3rf(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-13, 0.001, 2e-15);
 
-  compare_functionals(IdealGasFast(), IdealGasOfVeff, myT, Grid(gd, -myT*n.cwise().log()),
+  compare_functionals(IdealGasFast(), IdealGasOfVeff(), myT, Grid(gd, -myT*n.cwise().log()),
                       1e-12);
 
   double mu = -1;
   compare_functionals(Phi1plus(R, mu),
-                      phi1(veff) + IdealGasOfVeff + ChemicalPotential(mu)(veff),
+                      phi1(veff) + IdealGasOfVeff() + ChemicalPotential(mu)(veff),
                       myT, Grid(gd, -myT*n.cwise().log()), 1e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);

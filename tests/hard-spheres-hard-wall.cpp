@@ -44,7 +44,7 @@ Functional fslow = HardSpheres(R)(EffectivePotentialToDensity())
   + IdealGas()(EffectivePotentialToDensity()) + ChemicalPotential(mu)(EffectivePotentialToDensity());
 //Functional ig = IdealGas()(EffectivePotentialToDensity());
 Functional ig = OfEffectivePotential(IdealGas());
-Functional igveff = IdealGasOfVeff;
+Functional igveff = IdealGasOfVeff();
 
 Grid external_potential(gd);
 Grid potential(gd);
