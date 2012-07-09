@@ -7,7 +7,7 @@
 // This file is intended for functionals that are themselves
 // optimized, but are also needed by other optimized functionals.
 
-extern Functional kT;
+Functional kT();
 
 // HardSpheresNoTensor is used in various SAFT functionals that are
 // themselves optimized.

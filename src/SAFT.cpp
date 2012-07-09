@@ -82,7 +82,7 @@ Functional eta_for_dispersion(double radius, double lambdainput, double lscale) 
 Functional gSW(double R, double epsdis0, double lambda, double lscale) {
   // This is the approximate *contact* density of a square-well fluid.
   // The formula for this is:
-  //      gSW = gHS + 0.25/kT*(da1_deta - lambda/(3*eta)*da1_dlambda)
+  //      gSW = gHS + 0.25/kT()*(da1_deta - lambda/(3*eta)*da1_dlambda)
 
   // First let's give names to a few constants...
   Functional lam = Functional(lambda, "lambda_dispersion");
@@ -122,7 +122,7 @@ Functional gSW(double R, double epsdis0, double lambda, double lscale) {
 
   // Functional ghs = gHScarnahan(zeta3, R);
 
-  return ghs + (Functional(0.25)/kT)*(da1deta - lam/(3*eta)*da1dlam);
+  return ghs + (Functional(0.25)/kT())*(da1deta - lam/(3*eta)*da1dlam);
 }
 
 Functional dgSW_dT(double R, double epsdis0, double lambda, double lscale) { 
@@ -135,7 +135,7 @@ Functional dgSW_dT(double R, double epsdis0, double lambda, double lscale) {
   Functional da1deta = da1_deta(R, epsdis0, lambda, lscale);
   Functional da1dlam = da1_dlam(R, epsdis0, lambda, lscale);
 
-  return (Functional(0.25)/sqr(kT))*(lam/(3*eta)*da1dlam - da1deta);
+  return (Functional(0.25)/sqr(kT()))*(lam/(3*eta)*da1dlam - da1deta);
 }
 
 Functional gHScarnahan(Functional n3, double R) {
@@ -161,7 +161,7 @@ Functional DeltaSAFT(double radius, double epsilon, double kappa,
   Functional g = gSW(radius, epsdis, lambdadis, lscale);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = ((exp(eps/kT) - Functional(1))*K)*g;
+  Functional delta = ((exp(eps/kT()) - Functional(1))*K)*g;
   delta.set_name("delta");
   return delta;
 }
@@ -172,9 +172,9 @@ Functional dDelta_dT(double radius, double epsilon, double kappa,
   Functional dgSWdT = dgSW_dT(radius, epsdis, lambdadis, lscale);
   Functional eps(epsilon, "epsilonAB");
   Functional K(kappa, "kappaAB");
-  Functional delta = g*(exp(eps/kT) - Functional(1))*K;
+  Functional delta = g*(exp(eps/kT()) - Functional(1))*K;
   delta.set_name("delta");
-  return dgSWdT*K*(exp(eps/kT) - Functional(double(1))) - g*K*eps*exp(eps/kT)/sqr(kT);
+  return dgSWdT*K*(exp(eps/kT()) - Functional(double(1))) - g*K*eps*exp(eps/kT())/sqr(kT());
 }
 
 Functional Xassociation(double radius, double epsilon, double kappa,
@@ -209,7 +209,7 @@ Functional AssociationSAFT(double radius, double epsilon, double kappa,
   Functional n0 = n2/(4*M_PI*sqr(R));
   Functional zeta = getzeta(radius);
   Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis, lscale);
-  return (kT*Functional(double(4))*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
+  return (kT()*Functional(double(4))*n0*zeta*(Functional(0.5) - 0.5*X + log(X))).set_name("association");
 }
 
 Functional dFassoc_dT(double radius, double epsilon, double kappa,
@@ -220,7 +220,7 @@ Functional dFassoc_dT(double radius, double epsilon, double kappa,
   Functional zeta = getzeta(radius);
   Functional X = Xassociation(radius, epsilon, kappa, epsdis, lambdadis, lscale);
   Functional dXdT = dXassoc_dT(radius, epsilon, kappa, epsdis, lambdadis, lscale);
-  return 4*n0*zeta*(Functional(0.5) - 0.5*X + log(X) + kT*dXdT*(Functional(1)/X-Functional(0.5)));
+  return 4*n0*zeta*(Functional(0.5) - 0.5*X + log(X) + kT()*dXdT*(Functional(1)/X-Functional(0.5)));
 }
 
 Functional eta_effective(Functional eta, double lambdainput) {
@@ -329,7 +329,7 @@ Functional DispersionSAFT(double radius, double epsdis, double lambdainput, doub
 
   Functional a1 = DispersionSAFTa1(radius, epsdis, lambdainput, lscale);
   Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput, lscale);
-  return (ndisp*(a1 + a2/kT)).set_name("dispersion");
+  return (ndisp*(a1 + a2/kT())).set_name("dispersion");
 }
 
 Functional dFdisp_dT(double radius, double epsdis, double lambdainput, double lscale) {
@@ -337,7 +337,7 @@ Functional dFdisp_dT(double radius, double epsdis, double lambdainput, double ls
   Functional ndisp = Identity();
 
   Functional a2 = DispersionSAFTa2(radius, epsdis, lambdainput, lscale);
-  return (-ndisp*a2/sqr(kT)).set_name("dFdisp_dT");
+  return (-ndisp*a2/sqr(kT())).set_name("dFdisp_dT");
 }
 
 Functional SaftFluidSlow(double R, double epsilon, double kappa,
@@ -355,7 +355,7 @@ Functional SaftFluidSlow(double R, double epsilon, double kappa,
 Functional SaftEntropy(double R,
                        double epsilon, double kappa,
                        double epsdis, double lambda, double lscale) {
-  return HardSpheresWBnotensor(R)/(-kT) + EntropyOfIdealGas()
+  return HardSpheresWBnotensor(R)/(-kT()) + EntropyOfIdealGas()
     - dFassoc_dT(R, epsilon, kappa, epsdis, lambda, lscale)
     - dFdisp_dT(R, epsdis, lambda, lscale);
 }

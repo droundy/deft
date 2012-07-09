@@ -360,7 +360,7 @@ Functional sqr(const Functional &);
 Functional sqrt(const Functional &);
 Functional constrain(const Grid &, Functional);
 
-extern Functional dV;
+Functional dV();
 
 
 

@@ -31,7 +31,7 @@ static void took(const char *name) {
 const double nv = 1e-7, nl = 1e-3;
 Functional n0 = Gaussian(1);
 // The following is the simplest interesting functional
-Functional f = /*IdealGasOfVeff + */ 1e6*sqr(n0 - Functional(water_prop.liquid_density))*sqr(n0 - Functional(water_prop.vapor_density));
+Functional f = /*IdealGasOfVeff() + */ 1e6*sqr(n0 - Functional(water_prop.liquid_density))*sqr(n0 - Functional(water_prop.vapor_density));
 
 int main(int, char **argv) {
   int retval = 0;

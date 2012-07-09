@@ -77,16 +77,16 @@ int main(int, char **argv) {
                   "ifft(gd, shell(gd, R).cwise()*fft(gd, x)).cwise().square()");
   
   test_expression("IdealGasOfVeff",
-                  IdealGasOfVeff.printme(Expression("x")),
+                  IdealGasOfVeff().printme(Expression("x")),
                   "(-(x + kT*log(32839.84673628*kT/6.283185307179586*sqrt(32839.84673628*kT/6.283185307179586))*VectorXd::Ones(gd.NxNyNz) + kT*VectorXd::Ones(gd.NxNyNz))).cwise()*(-x/kT).cwise().exp()");
 
   test_expression("kT*xxx",
-                  (kT*sqr(xShellConvolve(R))).printme(
+                  (kT()*sqr(xShellConvolve(R))).printme(
                                                       Expression("x")),
                   "kT*ifft(gd, xshell(gd, R).cwise()*fft(gd, x)).cwise().square()");
 
   test_expression("sqr(n1)",
-                  sqr(xShellConvolve(R)).grad(dV, Identity(), false).printme(Expression("x")),
+                  sqr(xShellConvolve(R)).grad(dV(), Identity(), false).printme(Expression("x")),
                   "-2*gd.dvolume*ifft(gd, xshell(gd, R).cwise()*fft(gd, ifft(gd, xshell(gd, R).cwise()*fft(gd, x))))");
 
 
@@ -132,18 +132,18 @@ int main(int, char **argv) {
   test_expression("xshell(double)", n2x.printme(Expression("x").set_type("double")),
                   "0");
 
-  test_expression_type("exp(x/(-kT))", exp(x/-kT).printme(Expression("x")),
+  test_expression_type("exp(x/(-kT))", exp(x/-kT()).printme(Expression("x")),
                        "Grid");
 
-  test_expression_type("exp(x/(-kT))", exp(x/Functional(-kT)).printme(Expression("x").set_type("double")),
+  test_expression_type("exp(x/(-kT))", exp(x/Functional(-kT())).printme(Expression("x").set_type("double")),
                        "double");
 
   test_expression_type("Step(exp(x/(-kT)))",
-                       (StepConvolve(R)(exp(x/Functional(-kT)))).printme(Expression("x").set_type("double")),
+                       (StepConvolve(R)(exp(x/Functional(-kT())))).printme(Expression("x").set_type("double")),
                        "double");
 
   test_expression_type("Step(exp(x/(-kT)))",
-                       (StepConvolve(R)(exp(x/Functional(-kT)))).printme(Expression("x")),
+                       (StepConvolve(R)(exp(x/Functional(-kT())))).printme(Expression("x")),
                        "Grid");
 
   if (retval == 0) {

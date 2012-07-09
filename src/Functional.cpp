@@ -547,14 +547,14 @@ int Functional::run_finite_difference_test(const char *testname, double temp, co
     if (I_have_analytic_grad()) {
       // We have an analytic grad, so let's make sure it matches the
       // other one...
-      VectorXd othergrad(grad(dV, Identity(), false)(temp, x));
+      VectorXd othergrad(grad(dV(), Identity(), false)(temp, x));
       double maxgraderr = (othergrad-my_grad).cwise().abs().maxCoeff();
       double maxgrad = my_grad.cwise().abs().maxCoeff();
       if (maxgraderr/maxgrad > 1e-9) {
         printf("func itself is %s\n", printme(Expression("x")).printme().c_str());
         printf("othergrad[0] = %g\n", othergrad[0]);
         printf("othergrad itself is %s\n",
-               grad(dV, Identity(), false).printme(Expression("x")).printme().c_str());
+               grad(dV(), Identity(), false).printme(Expression("x")).printme().c_str());
         printf("my_grad[0] = %g\n", my_grad[0]);
         printf("maxgraderr is %g while maxgrad is %g\n", maxgraderr, maxgrad);
         printf("FAIL: Discrepancy in my gradient is too big: %g\n\n", maxgraderr/maxgrad);
@@ -760,7 +760,9 @@ public:
   }
 };
 
-Functional dV = Functional(new dVType());
+Functional dV() {
+  return Functional(new dVType());
+}
 
 class Constant : public FunctionalInterface {
 public:

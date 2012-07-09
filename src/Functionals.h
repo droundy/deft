@@ -6,8 +6,7 @@
 
 #include "MinimalFunctionals.h"
 
-extern Functional kT;
-extern Functional IdealGasOfVeff;
+Functional IdealGasOfVeff();
 Functional IdealGas();
 Functional EntropyOfIdealGasOfVeff();
 Functional EntropyOfIdealGas();

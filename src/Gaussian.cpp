@@ -103,44 +103,54 @@ Functional ShellPrimeConvolve(double R, Expression r) {
                     r, Expression(8*M_PI)*r, true);
 }
 
-static Expression zero = Expression(0).set_alias("literal");
-
 Functional xShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<xshell_op<complex> >, R, r, zero, false);
 }
 Functional yShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<yshell_op<complex> >, R, r, zero, false);
 }
 Functional zShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<zshell_op<complex> >, R, r, zero, false);
 }
 
 Functional xShellPrimeConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<xshellprime_op<complex> >, R, r, zero, false);
 }
 Functional yShellPrimeConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<yshellprime_op<complex> >, R, r, zero, false);
 }
 Functional zShellPrimeConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<zshellprime_op<complex> >, R, r, zero, false);
 }
 
 Functional xyShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<xyshell_op<complex> >, R, r, zero, true);
 }
 Functional yzShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<yzshell_op<complex> >, R, r, zero, true);
 }
 Functional zxShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<zxshell_op<complex> >, R, r, zero, true);
 }
 
 Functional xxShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<xxshell_op<complex> >, R, r, zero, true);
 }
 Functional yyShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<yyshell_op<complex> >, R, r, zero, true);
 }
 Functional zzShellConvolve(double R, Expression r) {
+  Expression zero = Expression(0).set_alias("literal");
   return Functional(function_for_convolve<zzshell_op<complex> >, R, r, zero, true);
 }

@@ -209,7 +209,7 @@ int main(int, char **argv) {
   const double eta_one = 3.0/(4*M_PI*R*R*R);
   const double nliquid = 0.324*eta_one;
   Functional n = EffectivePotentialToDensity();
-  const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff, kT, nliquid);
+  const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff(), kT, nliquid);
 
   // Here we set up the lattice.
   const double rmax = rcav*2;
@@ -236,7 +236,7 @@ int main(int, char **argv) {
   Grid constraint(gd);
   constraint.Set(notincavity);
   //Functional f1 = f0 + ExternalPotential(external_potential);
-  Functional ff = constrain(constraint, IdealGasOfVeff + (HardSpheres(R) + ChemicalPotential(mu))(n));
+  Functional ff = constrain(constraint, IdealGasOfVeff() + (HardSpheres(R) + ChemicalPotential(mu))(n));
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
@@ -267,13 +267,13 @@ int main(int, char **argv) {
                   water_prop.lambda_dispersion, water_prop.length_scaling);
   check_a_functional("Dispersion", ff, potential);
 
-  ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
   check_a_functional("HardSpheresWBnotensor", ff, potential);
 
-  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
   check_a_functional("HardSphereNoTensor", ff, potential);
 
-  ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff);
+  ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
   check_a_functional("HardSpheresNoTensor2", ff, potential);
 
   if (numoops == 0) {

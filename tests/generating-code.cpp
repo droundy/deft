@@ -23,10 +23,10 @@ int main(int, char **) {
   const double Rval = 4;
   Functional R(Rval, "R");
   const char *noargs[] = { 0, 0 };
-  (kT.set_name("temp") + x).create_header("tests/generated/sum.h", "Sum", noargs);
-  (sqr(kT + x) - x + 2*kT).create_header("tests/generated/quadratic.h", "Quadratic", noargs);
+  (kT().set_name("temp") + x).create_header("tests/generated/sum.h", "Sum", noargs);
+  (sqr(kT() + x) - x + 2*kT()).create_header("tests/generated/quadratic.h", "Quadratic", noargs);
   sqrt(x).create_header("tests/generated/sqrt.h", "Sqrt", noargs);
-  (CallMe(sqrt(x), "Sqrt", "()") - x + 2*kT).create_header("tests/generated/sqrt-and-more.h",
+  (CallMe(sqrt(x), "Sqrt", "()") - x + 2*kT()).create_header("tests/generated/sqrt-and-more.h",
                                                            "SqrtAndMore", noargs);
   log(x).create_header("tests/generated/log.h", "Log", noargs);
   (log(x)+sqr(x)).create_header("tests/generated/log-and-sqr.h", "LogAndSqr", noargs);
@@ -45,7 +45,7 @@ int main(int, char **) {
 
   sqr(veff).create_header("tests/generated/sqr-Veff.h", "SquareVeff", R_arg);
 
-  IdealGasOfVeff.create_header("tests/generated/ideal-gas.h", "IdealGasFast", noargs);
+  IdealGasOfVeff().create_header("tests/generated/ideal-gas.h", "IdealGasFast", noargs);
 
   Functional n2 = ShellConvolve(Rval);
   Functional n3 = StepConvolve(Rval);
@@ -75,12 +75,12 @@ int main(int, char **) {
 
   phi3rf(veff).create_header("tests/generated/phi3rf-Veff.h", "Phi3rfVeff", R_arg);
 
-  (phi1(veff) + IdealGasOfVeff + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
+  (phi1(veff) + IdealGasOfVeff() + ChemicalPotential(0)(veff)).create_header("tests/generated/phi1-plus.h",
                                                                            "Phi1plus", R_mu_arg);
 
   //(phi1+phi2+phi3rf).create_header("tests/generated/almostrf.h", "AlmostRF", "R");
 
-  ((kT*phi1).set_name("phi1")+(kT*phi2).set_name("phi2")+(kT*phi3rf).set_name("phi3")).create_header("tests/generated/almostrf.h", "AlmostRF", R_arg);
+  ((kT()*phi1).set_name("phi1")+(kT()*phi2).set_name("phi2")+(kT()*phi3rf).set_name("phi3")).create_header("tests/generated/almostrf.h", "AlmostRF", R_arg);
 
   (CallMe(phi1, "Phi1", "(R)")+phi2+phi3rf).create_header("tests/generated/almostrfnokt.h", "AlmostRFnokT", R_arg);
 }

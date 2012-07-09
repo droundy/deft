@@ -19,7 +19,7 @@
 
 Functional EffectivePotentialToDensity() {
   Functional Veff = Identity().set_name("Veff");
-  return exp(Veff/(-kT));
+  return exp(Veff/(-kT()));
 }
 
 
@@ -52,9 +52,9 @@ public:
     return f.d_by_dT(kT, exp(-n/kT));
   }
   Functional grad(const Functional &ingrad, const Functional &V, bool ispgrad) const {
-    Functional n = exp(-V/kT);
-    if (ispgrad) return f.grad(-ingrad/kT, n, false);
-    return (-n/kT)*f.grad(ingrad, n, false);
+    Functional n = exp(-V/kT());
+    if (ispgrad) return f.grad(-ingrad/kT(), n, false);
+    return (-n/kT())*f.grad(ingrad, n, false);
   }
   Functional grad_T(const Functional &ingradT) const {
     return OfEffectivePotential(f.grad_T(ingradT));
