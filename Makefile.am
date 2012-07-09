@@ -31,7 +31,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
-	src/ContactAtSphereFast.cpp src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp
+	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
 
@@ -85,7 +85,7 @@ src/haskell/latex-functional% src/haskell/functional% src/haskell/newfunctional%
 	cd src/haskell && $(MAKE) depend
 	cd src/haskell && $(MAKE)
 
-$(HASKELL_CODE) papers/contact/formulas.tex: src/haskell/functionals
+$(HASKELL_CODE): src/haskell/functionals
 	time src/haskell/functionals $@ && echo timed $@
 
 $(NEWHASKELL_CODE): src/haskell/newfunctionals
@@ -223,7 +223,7 @@ clean-local:
 	cd src/haskell && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
-papers: all papers/contact/figs/gHS-vs-n.dat papers/contact/formulas.tex \
+papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/walls.dat \

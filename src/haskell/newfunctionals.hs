@@ -1,5 +1,5 @@
 import NewCode
-import SomeFunctionals ( whitebear )
+import WhiteBear ( whitebear )
 import System.Environment ( getArgs )
 
 a1, a2, a3 :: Expression ThreeVector
@@ -18,6 +18,8 @@ main =
                    else return ()
      gen "src/new/WhiteBearFast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
+     gentest "tests/new-generated-haskell/integrate_sqr.h" $
+       defineFunctional (integrate $ r_var "n"**2) [] "integrate_sqr"
+     let volume = "V" === a1 `dot` (a2 `cross` a3)
      gentest "tests/new-generated-haskell/volume_minus_one_sqr.h" $
        defineFunctional ((volume - 1)**2) [] "volume_minus_one_sqr"
-         where volume = "V" === a1 `dot` (a2 `cross` a3)

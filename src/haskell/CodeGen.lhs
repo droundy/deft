@@ -51,7 +51,7 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
-          where (st, e') = simp2 (factorize $ joinFFTs $ integrate e)
+          where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ integrate e)
       codeVTransform = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "output")) (ER e')])
           where (st, e') = simp2 $ factorize $ joinFFTs e
       codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
@@ -140,7 +140,7 @@ scalarClass e arg n =
       printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
                       "\tprint_double(\"\", " ++ v ++ ");"
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
-          where (st0, e') = simp2 (factorize $ joinFFTs e)
+          where (st0, e') = simp2 (factorize $ joinFFTs $ cleanvars e)
                 st = filter (not . isns) st0
                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                 isns _ = False
@@ -152,7 +152,7 @@ scalarClass e arg n =
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
           where (st, e') = simp2 $ factorize $ joinFFTs $ cleanvars $
-                           substitute (s_var "dV" :: Expression RealSpace) 1 $
+                           substitute (dV :: Expression Scalar) 1 $
                            (r_var "ingrad" * derive (r_var "x") 1 e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)

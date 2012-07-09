@@ -51,7 +51,7 @@ Functional gHS(Functional n3, double Rval) {
   // the packing fraction (and is dimensionless).  Note that this
   // matches the Yu and Wu 2002 paper which is cited by Fu and Wu
   // 2005.
-  Functional zeta2 = (R/Functional(3))*n2;
+  //Functional zeta2 = (R/Functional(3))*n2;
   Functional invdiff = Functional(1)/(1-n3);
   // This is equation 13 in Fu and Wu 2005:
   //return invdiff + 1.5*n3*zeta*sqr(invdiff) + 0.5*sqr(n3)*zeta*Pow(3)(invdiff);
@@ -59,7 +59,7 @@ Functional gHS(Functional n3, double Rval) {
   // This is equation 13 in Fu and Wu 2005, but written to be slightly
   // more efficient:
   return invdiff*(Functional(1) +
-                  0.5*(invdiff*zeta2)*zeta*(Functional(3) + invdiff*zeta2));
+                  0.5*invdiff*(n2*zeta*R/Functional(3))*(Functional(3) + invdiff*n2*R/Functional(3)));
 }
 
 Functional da1_deta(double radius, double epsdis, double lambdainput, double lscale);
