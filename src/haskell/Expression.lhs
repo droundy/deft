@@ -2,7 +2,7 @@
 {-# LANGUAGE PatternGuards, Rank2Types #-}
 
 module Expression (Exprn(..),
-                   RealSpace(..), r_var,
+                   RealSpace(..), r_var, dV,
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
                    ThreeVector, t_var, cross, dot,
@@ -17,7 +17,7 @@ module Expression (Exprn(..),
                    product2pairs, pairs2product, product2denominator,
                    hasFFT, hasexpression, hasExprn,
                    searchExpression, searchExpressionDepthFirst,
-                   findRepeatedSubExpression, findNamedScalars, findInputs,
+                   findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE, countVarsE,
                    mapExpressionShortcut, -- just to avoid unused warning
@@ -187,14 +187,14 @@ instance Type RealSpace where
               MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ code a ++ op ++ code x ++ ";"
-  
+  --
   newcodeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) =
     a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   newcodeStatementHelper _ _ (Expression (IFFT e)) =
     error ("It is a bug to generate newcode for a non-var input to ifft\n"++ latex e)
   newcodeStatementHelper a op (Var _ _ _ _ (Just e)) = newcodeStatementHelper a op e
   newcodeStatementHelper a op e =
-    unlines ["for (int i=0; i<gd.NxNyNz; i++) {",
+    unlines ["for (int i=0; i<Nx*Ny*Nz; i++) {",
              newcodes (1 :: Int) e,
              "\t}"]
       where newcodes n x = case findRepeatedSubExpression x of
@@ -206,6 +206,8 @@ instance Type RealSpace where
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
   free e = error $ trace "free error" ("free error " ++ show e)
   newdeclare _ = "Vector"
+  newinitialize (Var _ _ x _ Nothing) = "Vector " ++ x ++ "(Nx*Ny*Nz);"
+  newinitialize _ = error "oops newinitializeE"
   newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // Realspace"
   newfree e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
@@ -312,7 +314,7 @@ instance Type KSpace where
   newcodeStatementHelper a op (Var _ _ _ _ (Just e)) = newcodeStatementHelper a op e
   newcodeStatementHelper (Var _ _ a _ _) op e =
     unlines [setzero,
-             "\tfor (int i=1; i<gd.NxNyNzOver2; i++) {",
+             "\tfor (int i=1; i<Nx*Ny*Nz/2; i++) {",
              "\t\tconst int z = i % gd.NzOver2;",
              "\t\tconst int n = (i-z)/gd.NzOver2;",
              "\t\tconst int y = n % gd.Ny;",
@@ -611,7 +613,7 @@ instance Type Scalar where
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
-  derivativeHelper v dds (Integrate e) = derive v (scalar dds*s_var "dV") e
+  derivativeHelper v dds (Integrate e) = derive v (scalar $ dds*dV) e
   derivativeHelper v dds (Component n e) = derive v (unitvector n * scalar dds) e
   scalarderivativeHelper v (Integrate e) = integrate (scalarderive v e)
   scalarderivativeHelper v (Component n e) = component n (scalarderive v e)
@@ -627,8 +629,8 @@ instance Type Scalar where
 
   newcodeStatementHelper a " = " (Var _ _ _ _ (Just e)) = newcodeStatementHelper a " = " e
   newcodeStatementHelper a " = " (Expression (Integrate e)) =
-    newcode a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
-    newcode a ++ " += " ++ newcode (e * s_var "gd.dvolume") ++
+    newcode a ++ " = 0;\n\tfor (int i=0; i<Nx*Ny*Nz; i++) {\n\t\t" ++
+    newcode a ++ " += " ++ newcode (e * dV) ++
     ";\n\t}\n"
   newcodeStatementHelper _ op (Expression (Integrate _)) = error ("Haven't implemented "++op++" for integrate...")
   newcodeStatementHelper a op e = newcode a ++ op ++ newcode e ++ ";"
@@ -1573,7 +1575,7 @@ subAndCount x y (Signum e) = (signum e', n)
 subAndCount x y (Var t a b c (Just e)) = (Var t a b c (Just e'), n)
     where (e', n) = subAndCount x y e
 subAndCount _ _ v@(Var _ _ _ _ Nothing) = (v, 0)
-subAndCount x y (Scalar e) = (Scalar e', n)
+subAndCount x y (Scalar e) = (scalar e', n)
     where (e', n) = subAndCount x y e
 
 
@@ -1634,8 +1636,45 @@ findNamedScalars = searchMonoid helper
   where helper (Var _ _ b _ (Just e)) | ES _ <- mkExprn e = Set.singleton b
         helper _ = Set.empty
 
+findOrderedInputs :: Type a => Expression a -> [Exprn]
+findOrderedInputs e = fst $ helper Set.empty (findInputs e)
+  where helper sofar inps
+          | x:_ <- filter isok $ Set.toList inps =
+            case helper (Set.insert x sofar) (Set.delete x inps) of
+              (out, sofar') -> (x:out, sofar')
+          | x:_ <- filter lessok $ Set.toList inps =
+              case helper sofar (Set.difference (Set.delete x $ findInputsE x) sofar) of
+                (out, sofar') ->
+                  case helper sofar' (Set.difference inps sofar') of
+                    (out', sofar'') -> (out ++ out', sofar'')
+          | otherwise = ([], sofar)
+            where isok ee = Set.size (Set.difference (findInputsE ee) sofar) == 1 && not (Set.member ee sofar)
+                  lessok ee = not (Set.member ee sofar)
+        findInputsE (ES ee) = findInputs ee
+        findInputsE (EK ee) = findInputs ee
+        findInputsE (ER ee) = findInputs ee
+        findInputsE (E3 ee) = findInputs ee
+
 findInputs :: Type b => Expression b -> Set.Set Exprn
 findInputs = searchMonoid helper
-  where helper e@(Var _ _ _ _ Nothing) = Set.singleton (mkExprn e)
+  where helper e | ER (Var _ _ _ _ Nothing) <- mkExprn e,
+                   not (Set.member (mkExprn e) grid_description) = Set.insert (mkExprn e) grid_description
+        helper e@(Var _ _ _ _ Nothing) = Set.singleton (mkExprn e)
         helper _ = Set.empty
+        grid_description = Set.fromList [ES numx, ES numy, ES numz,
+                                         E3 lat1, E3 lat2, E3 lat3]
+
+dV, volume :: Type a => Expression a
+dV = protect "dV" "\\Delta V" $ volume / numx / numy / numz
+volume = protect "volume" "volume" $ lat1 `dot` (lat2 `cross` lat3)
+
+numx, numy, numz :: Type a => Expression a
+numx = s_var "Nx"
+numy = s_var "Ny"
+numz = s_var "Nz"
+
+lat1, lat2, lat3 :: Expression ThreeVector
+lat1 = Var CannotBeFreed "lat1" "lat1" "\\vec{a_1}" Nothing
+lat2 = Var CannotBeFreed "lat2" "lat2" "\\vec{a_2}" Nothing
+lat3 = Var CannotBeFreed "lat3" "lat3" "\\vec{a_3}" Nothing
 \end{code}

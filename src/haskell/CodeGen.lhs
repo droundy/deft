@@ -152,7 +152,7 @@ scalarClass e arg n =
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
           where (st, e') = simp2 $ factorize $ joinFFTs $ cleanvars $
-                           substitute (s_var "dV" :: Expression RealSpace) 1 $
+                           substitute (dV :: Expression Scalar) 1 $
                            (r_var "ingrad" * derive (r_var "x") 1 e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
