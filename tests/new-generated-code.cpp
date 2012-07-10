@@ -54,6 +54,53 @@ private:
 	mutable double V;
 };
 
+class nsqr : public Functional {
+public:
+  nsqr() {}
+  double energy(const Vector &x) const {
+    double Nx = x[0];
+    double Ny = x[0];
+    double Nz = x[0];
+    Vector a1 = x.slice(3,3);
+    Vector a2 = x.slice(6,3);
+    Vector a3 = x.slice(9,3);
+    Vector n = x.slice(12,Nx*Ny*Nz);
+    double volume = a1[0]*a2[1]*a3[2]; // only works for simple cubic lattice
+    double dV = volume/Nx/Ny/Nz;
+    double E = 0;
+    for (int i=0;i<Nx*Ny*Nz;i++) {
+      E += dV*n[i]*n[i];
+    }
+    return E;
+  }
+  double energy_per_volume(const Vector &x) const {
+    return 0; // What does this mean?
+  }
+  double denergy_per_volume_dx(const Vector &x) const {
+    return 0; // What does this mean?
+  }
+  Vector grad(const Vector &x) const {
+    double Nx = x[0];
+    double Ny = x[0];
+    double Nz = x[0];
+    Vector a1 = x.slice(3,3);
+    Vector a2 = x.slice(6,3);
+    Vector a3 = x.slice(9,3);
+    Vector n = x.slice(12,Nx*Ny*Nz);
+    double volume = a1[0]*a2[1]*a3[2]; // only works for simple cubic lattice
+    double dV = volume/Nx/Ny/Nz;
+    double E = 0;
+    Vector g(x.get_size());
+    g *= 0.0;
+    for (int i=0;i<Nx*Ny*Nz;i++) {
+      g[i+12] += 2*dV*n[i];
+    }
+    return g;
+  }
+  void printme(const char *prefix) const {
+  }
+};
+
 void compare_functionals(const char *name,
                          const Functional &f1, const Functional &f2, Vector v,
                          double fraccuracy = 1e-15) {
@@ -98,6 +145,13 @@ int main(int, char **argv) {
   lat[3] = 0; lat[4] = 5; lat[5] = 0;
   lat[6] = 0; lat[7] = 0; lat[8] = 5;
   compare_functionals("volume minus 1 squared", vm1s, vm1sgen, lat, 1e-10);
+
+  Vector n(1000);
+  for (int i=0;i<1000;i++) n[i] = 0.5;
+  Vector x = integrate_sqr().createInput(10,10,10,
+                                         lat.slice(0,3), lat.slice(3,3), lat.slice(6,3),
+                                         n);
+  compare_functionals("integrate_sqr", nsqr(), integrate_sqr(), x, 1e-10);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

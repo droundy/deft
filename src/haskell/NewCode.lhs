@@ -17,8 +17,8 @@ functionCode "" "" (x:xs) "" = if xs == []
                                else fst x ++ " " ++ snd x ++ ", " ++ functionCode "" "" xs ""
 functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") const {\n" ++ b ++ "}\n"
 
-scalarClass :: Expression Scalar -> [String] -> String -> String
-scalarClass e arg n =
+scalarClass :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
+scalarClass e arg variables n =
   unlines
   ["class " ++ n ++ " : public Functional {",
    "public:",
@@ -48,8 +48,7 @@ scalarClass e arg n =
                   xxx (map getsize $ inputs e),
                   "\tVector out(newsize);",
                   "\tint sofar = 0;"] ++
-                 map (\x -> concat ["\tout.slice(sofar,", getsize x, ") = ",nameE x,";\n\t",
-                                    "sofar += ",getsize x,";"]) (inputs e) ++
+                 map initializeOut (inputs e) ++
                  ["\treturn out;"]),
   "private:",
   ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class",
@@ -57,12 +56,25 @@ scalarClass e arg n =
   "\t// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
   ]
     where
+      initializeOut x@(ES _) = concat ["\tout[sofar] = ",nameE x,";\n\tsofar += 1;"]
+      initializeOut x = concat ["\tout.slice(sofar,", getsize x, ") = ",nameE x,";\n\t",
+                                "sofar += ",getsize x,";"]
       getsize (ES _) = "1"
       getsize ee = nameE ee ++ ".get_size()"
       createInput ee@(E3 _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,3); sofar += 3;"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = x[sofar]; sofar += 1;"
       createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      createInputAndGrad ee@(E3 _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,3);\n" ++
+                                     "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,3); " ++
+                                     "sofar += 3;"
+      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = x[sofar];\n" ++
+                                     "\tVector grad_" ++ nameE ee ++ " = x.slice(sofar,1); " ++
+                                     "sofar += 1;"
+      createInputAndGrad ee@(ER _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,Nx*Ny*Nz);\n"++
+                                     "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
+                                     "sofar += Nx*Ny*Nz;"
+      createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
@@ -73,33 +85,49 @@ scalarClass e arg n =
       energy = codex e
       energy_per_volume = codex (makeHomogeneous e)
       denergy_per_volume_dx = codex (derive (s_var "x" :: Expression Scalar) 1 $ makeHomogeneous e)
-      grade = codex (grad "n" e)
-      evalv (_,0) = unlines["\tVector output(x.get_size());",
-                            "\tfor (int i=0;i<x.get_size();i++) {",
-                            "\t\toutput[i] = 0;",
-                            "\t}",
-                            "\treturn output;"]
-      evalv (st,ee) = unlines ("\tint sofar = 0;" : map createInput (inputs e) ++
-                               [newcodeStatements (st ++ [Initialize (ER $ r_var "output"),
-                                                          Assign (ER $ r_var "output") (mkExprn ee)]) ++
+      grade :: ([Statement], [Exprn])
+      grade = if variables == []
+              then ([],[])
+              else case simp2 $ map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
+                                                                   ("grad_"++nameE (mkExprn x)) $
+                                                     derive x 1 e)) variables of
+                (st0, es) -> let st = filter (not . isns) st0
+                                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+                                 isns _ = False
+                                 ns = findNamedScalars e
+                                 _:revst = reverse $ reuseVar $ freeVectors $ st ++ map (\e' -> Assign (justvarname e') e') es
+                             in (reverse revst, es)
+      justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
+      justvarname (ER (Var a b c d _)) = ER $ Var a b c d Nothing
+      justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
+      justvarname (E3 (Var a b c d _)) = E3 $ Var a b c d Nothing
+      justvarname _ = error "bad in justvarname"
+      evalv (st,ee) = unlines (["\tVector output(x.get_size());",
+                                "\tfor (int i=0;i<x.get_size();i++) {",
+                                "\t\toutput[i] = 0;",
+                                "\t}"]++
+                               "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
+                               [newcodeStatements (st ++ concatMap assignit ee),
                                 "\treturn output;"])
-      codex :: Type a => Expression a -> ([Statement], Expression a)
-      codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign (mkExprn e') (mkExprn e')], e')
-        where (st0, e') = simp2 (factorize $ joinFFTs x)
+        where assignit eee = [Assign (justvarname eee) eee]
+      codex :: Expression Scalar -> ([Statement], Exprn)
+      codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
+        where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
               st = filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e
+      codeA :: [Exprn] -> String
       codeA [] = "()"
-      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
+      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ nameE x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> nameE x ++ "(" ++ nameE x ++ "_arg)") a)
       codeInputArgs = map (\x -> (newdeclareE x, nameE x))
-      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
+      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ nameE x ++ ";") a
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
       xxx [] = ""
       xxx iii = foldl1 (\x y -> x ++ " + " ++ y) iii ++";"
 
-defineFunctional :: Expression Scalar -> [String] -> String -> String
-defineFunctional e arg n =
+defineFunctional :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
+defineFunctional e arg variables n =
   unlines ["// -*- mode: C++; -*-",
            "",
            "#include \"new/Functional.h\"",
@@ -107,5 +135,5 @@ defineFunctional e arg n =
            "#include \"handymath.h\"",
            "",
            "",
-           scalarClass e arg n]
+           scalarClass e arg variables n]
 \end{code}

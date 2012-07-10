@@ -5,13 +5,14 @@ module Expression (Exprn(..),
                    RealSpace(..), r_var, dV,
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..),
+                   Monoid, mconcat,
                    ThreeVector, t_var, cross, dot,
                    fft, ifft, integrate, grad, derive,
                    Expression(..), joinFFTs, (===), var, protect,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
-                   cleanvarsE, initializeE, freeE, newinitializeE, newfreeE,
+                   initializeE, freeE, newinitializeE, newfreeE,
                    nameE, newdeclareE,
                    sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
                    product2pairs, pairs2product, product2denominator,
@@ -19,9 +20,10 @@ module Expression (Exprn(..),
                    searchExpression, searchExpressionDepthFirst,
                    findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
                    countexpression, substitute, countAfterRemoval,
-                   substituteE, countAfterRemovalE, countVarsE,
+                   substituteE, countAfterRemovalE,
+                   mapExprn,
                    mapExpressionShortcut, -- just to avoid unused warning
-                   countVars, varSet, varSetE)
+                   countVars, varSet)
     where
 
 import Debug.Trace
@@ -207,7 +209,7 @@ instance Type RealSpace where
   free e = error $ trace "free error" ("free error " ++ show e)
   newdeclare _ = "Vector"
   newinitialize (Var _ _ x _ Nothing) = "Vector " ++ x ++ "(Nx*Ny*Nz);"
-  newinitialize _ = error "oops newinitializeE"
+  newinitialize x = error ("oops newinitializeE: " ++ show x)
   newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // Realspace"
   newfree e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
@@ -386,6 +388,12 @@ instance Type KSpace where
                     EK a' -> Just a'
                     _ -> Nothing
 
+mapExprn :: (forall a. Type a => Expression a -> c) -> Exprn -> c
+mapExprn f (ES e) = f e
+mapExprn f (ER e) = f e
+mapExprn f (EK e) = f e
+mapExprn f (E3 e) = f e
+
 mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expression b
 mapExpression f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpression f e
 mapExpression _ (Var tt c v t Nothing) = Var tt c v t Nothing
@@ -401,12 +409,6 @@ mapExpression f (Product p _) = product $ map ff $ product2pairs p
 mapExpression f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
   where ff (x,y) = (x, mapExpression f y)
 mapExpression f (Expression x) = f x
-
-cleanvarsE :: Exprn -> Exprn
-cleanvarsE (ES e) = ES $ cleanvars e
-cleanvarsE (EK e) = EK $ cleanvars e
-cleanvarsE (ER e) = ER $ cleanvars e
-cleanvarsE (E3 e) = E3 $ cleanvars e
 
 mapExpression' :: Type a => (forall b. Type b => Expression b -> Expression b) -> Expression a -> Expression a
 mapExpression' f (Var IsTemp a b c (Just e)) = f $ Var IsTemp a b c $ Just $ mapExpression' f e
@@ -846,14 +848,8 @@ product2denominator s = pairs2product $ map n $ filter ((<0) . snd) $ product2pa
   where n (a,b) = (a, -b)
 
 instance Code Exprn where
-  codePrec p (ES e) = codePrec p e
-  codePrec p (EK e) = codePrec p e
-  codePrec p (ER e) = codePrec p e
-  codePrec p (E3 e) = codePrec p e
-  latexPrec p (ES e) = latexPrec p e
-  latexPrec p (EK e) = latexPrec p e
-  latexPrec p (ER e) = latexPrec p e
-  latexPrec p (E3 e) = latexPrec p e
+  codePrec p = mapExprn (codePrec p)
+  latexPrec p = mapExprn (latexPrec p)
 instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Var _ c _ _ Nothing) = showString c
   codePrec p (Var _ _ _ _ (Just e)) = codePrec p e
@@ -1070,6 +1066,7 @@ newcodeStatementE :: Exprn -> String -> Exprn -> String
 newcodeStatementE (ES a) op (ES b) = newcodeStatementHelper a op b
 newcodeStatementE (EK a) op (EK b) = newcodeStatementHelper a op b
 newcodeStatementE (ER a) op (ER b) = newcodeStatementHelper a op b
+newcodeStatementE (E3 a) op (E3 b) = newcodeStatementHelper a op b
 newcodeStatementE _ _ _ = error "bug revealed by newcodeStatementE"
 
 makeHomogeneous :: Type a => Expression a -> Expression Scalar
@@ -1187,17 +1184,8 @@ instance Type a => Floating (Expression a) where
 grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
-countVars :: Type a => Expression a -> Int
-countVars s = Set.size $ varSet s
-
-countVarsE :: Exprn -> Int
-countVarsE = Set.size . varSetE
-
-varSetE :: Exprn -> Set.Set String
-varSetE (ES e) = varSet e
-varSetE (EK e) = varSet e
-varSetE (ER e) = varSet e
-varSetE (E3 e) = varSet e
+countVars :: [Exprn] -> Int
+countVars s = Set.size $ mconcat $ map (mapExprn varSet) s
 
 varSet :: Type a => Expression a -> Set.Set String
 varSet e@(Expression _) = case mkExprn e of
@@ -1453,14 +1441,11 @@ substituteE a a' (ER b) = mkExprn $ substitute a a' b
 substituteE a a' (EK b) = mkExprn $ substitute a a' b
 substituteE a a' (E3 b) = mkExprn $ substitute a a' b
 
-countAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Int
-countAfterRemoval v e = Set.size (varsetAfterRemoval v e)
+countAfterRemoval :: Type a => Expression a -> [Exprn] -> Int
+countAfterRemoval v e = Set.size $ mconcat $ map (mapExprn (varsetAfterRemoval v)) e
 
-countAfterRemovalE :: Type a => Exprn -> Expression a -> Int
-countAfterRemovalE (EK a) b = countAfterRemoval a b
-countAfterRemovalE (ER a) b = countAfterRemoval a b
-countAfterRemovalE (ES a) b = countAfterRemoval a b
-countAfterRemovalE (E3 a) b = countAfterRemoval a b
+countAfterRemovalE :: Exprn -> [Exprn] -> Int
+countAfterRemovalE a b = mapExprn (\a' -> countAfterRemoval a' b) a
 
 varsetAfterRemoval :: (Type a, Type b) => Expression a -> Expression b -> Set.Set String
 -- varsetAfterRemoval v e = varSet (substitute v 2 e) -- This should be equivalent

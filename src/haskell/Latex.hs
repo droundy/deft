@@ -2,7 +2,7 @@
 module Latex ( latexEasy, latexSimp ) where
 
 import Expression ( Expression(..), Exprn(..), Type, substitute, latex, k, k_var,
-                    cleanvars )
+                    cleanvars, mapExprn, mkExprn )
 import Statement ( Statement(..), findNamedSubexpression, simp2, freeVectors, reuseVar )
 
 latexEasy :: (Type a) => Expression a -> String
@@ -35,9 +35,9 @@ latexSimp e = unlines $
                "}",
                ""]
               ++ map latexS (sts) ++
-              [latexe e',
+              [mapExprn latexe e',
                "\\end{document}"]
-    where (sts0,e') = simp2 e
+    where (sts0,[e']) = simp2 [mkExprn e]
           sts = reuseVar $ freeVectors sts0
 
 eqn :: String -> String
