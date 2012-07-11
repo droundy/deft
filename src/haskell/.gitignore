@@ -1,6 +1,3 @@
 *.hi
-test
-functionals
+*.exe
 Makefile.bak
-latex-functionals
-newfunctionals

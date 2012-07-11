@@ -1,6 +1,6 @@
 .SUFFIXES : .o .hs .hi .lhs
 
-all: depend test functionals latex-functionals newfunctionals
+all: depend test.exe functionals.exe latex-functionals.exe newfunctionals.exe
 
 clean:
 	rm -f *.hi *.o test functionals latex-functionals newfunctionals
@@ -17,17 +17,17 @@ GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package proc
 CODEGEN_O=Expression.o CodeGen.o Statement.o LatexDouble.o
 NEWCODEGEN_O=Expression.o NewCode.o Statement.o LatexDouble.o
 
-test: test.o SomeFunctionals.o WhiteBear.o FMT.o $(CODEGEN_O)
+test.exe: test.o SomeFunctionals.o WhiteBear.o FMT.o $(CODEGEN_O)
 	$(MAKE) depend
 	ghc $(GHCFLAGS) -o $@ $^
 
-functionals: functionals.o SomeFunctionals.o WhiteBear.o FMT.o Quantum.o $(CODEGEN_O)
+functionals.exe: functionals.o SomeFunctionals.o WhiteBear.o FMT.o Quantum.o $(CODEGEN_O)
 	ghc $(GHCFLAGS) -o $@ $^
 
-newfunctionals: newfunctionals.o WhiteBear.o FMT.o $(NEWCODEGEN_O)
+newfunctionals.exe: newfunctionals.o WhiteBear.o FMT.o $(NEWCODEGEN_O)
 	ghc $(GHCFLAGS) -o $@ $^
 
-latex-functionals: latex-functionals.o SomeFunctionals.o WhiteBear.o FMT.o Latex.o Quantum.o $(CODEGEN_O)
+latex-functionals.exe: latex-functionals.o SomeFunctionals.o WhiteBear.o FMT.o Latex.o Quantum.o $(CODEGEN_O)
 	ghc $(GHCFLAGS) -o $@ $^
 
 depend:

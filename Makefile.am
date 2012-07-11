@@ -75,21 +75,21 @@ optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
 $(OPTIMIZED_CODE): optimize-functionals
 	time ./optimize-functionals $@ && echo timed $@
 
-haskell: src/haskell/functionals src/haskell/test
+haskell: src/haskell/functionals.exe src/haskell/test.exe
 
 # The following uses a weird trick.  We are using "pattern rule", to
 # tell make that a single rule (calling another make, in this
 # instance) can be used to generate several executables.  The pattern,
 # in this case, matches the letter "s".
-src/haskell/latex-functional% src/haskell/functional% src/haskell/newfunctional% src/haskell/te%t: $(wildcard src/haskell/*hs)
+src/haskell/latex-functionals.% src/haskell/functionals.% src/haskell/newfunctionals.% src/haskell/test.%: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) depend
 	cd src/haskell && $(MAKE)
 
-$(HASKELL_CODE): src/haskell/functionals
-	time src/haskell/functionals $@ && echo timed $@
+$(HASKELL_CODE): src/haskell/functionals.exe
+	time src/haskell/functionals.exe $@ && echo timed $@
 
-$(NEWHASKELL_CODE): src/haskell/newfunctionals
-	time src/haskell/newfunctionals $@ && echo timed $@
+$(NEWHASKELL_CODE): src/haskell/newfunctionals.exe
+	time src/haskell/newfunctionals.exe $@ && echo timed $@
 
 # The $(COMPARISONDATA) below is a fake dependency in order to ensure
 # that the comparisons are run prior to the tests.
@@ -97,16 +97,16 @@ tests/generated/sum.h: tests/generating-code.test $(COMPARISONDATA)
 	test -d tests/generated || mkdir tests/generated
 	rm -f tests/generated/*
 	tests/generating-code.test
-tests/generated-haskell/nice-sum.h tests/generated-haskell/math.tex: src/haskell/test
+tests/generated-haskell/nice-sum.h tests/generated-haskell/math.tex: src/haskell/test.exe
 	test -d tests/generated-haskell || mkdir tests/generated-haskell
 	rm -f tests/generated-haskell/*
-	src/haskell/test codegen
+	src/haskell/test.exe codegen
 tests/generated-code.o: tests/generated/sum.h tests/generated-haskell/nice-sum.h
 
-tests/new-generated-haskell/volume_minus_one_sqr.h: src/haskell/newfunctionals
+tests/new-generated-haskell/volume_minus_one_sqr.h: src/haskell/newfunctionals.exe
 	test -d tests/new-generated-haskell || mkdir tests/new-generated-haskell
 	rm -f tests/new-generated-haskell/*
-	src/haskell/newfunctionals tests
+	src/haskell/newfunctionals.exe tests
 tests/new-generated-code.o: tests/new-generated-haskell/volume_minus_one_sqr.h
 
 check_PROGRAMS = \
@@ -137,7 +137,7 @@ check_PROGRAMS = \
 	tests/fftinverse.test \
 	tests/eps.test
 
-TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test \
+TESTS = tests/null.sh tests/print-iter.sh tests/comparisons.sh src/haskell/test.exe \
 			$(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
@@ -246,7 +246,7 @@ papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<
 papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
 	$<
-doc/%.pdf: src/haskell/latex-functionals
+doc/%.pdf: src/haskell/latex-functionals.exe
 	$< $@
 
 COMPARISONDATA = comparisons/eta_effective_vrpack.dat comparisons/eta_effective_deft.dat \
