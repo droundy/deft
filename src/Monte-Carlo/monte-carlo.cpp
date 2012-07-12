@@ -677,24 +677,30 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     fabs(v[1]) + 2*R >= leny/2,
     fabs(v[2]) + 2*R >= lenz/2
   };
-  for(long i = 0; i < n; i+=(i==s-1)?2:1){
-    if(distance(spheres[i],v)<2*R){
-      return true;
+  for(long i = 0; i < n; i++){
+    if (i!=s){
+      if(distance(spheres[i],v)<2*R){
+        return true;
+      }
     }
   }
   for (long k=0; k<3; k++) {
     if (periodic[k] && amonborder[k]) {
-      for(long i = 0; i < n; i+=(i==s-1)?2:1) {
-        if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
-        if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
+      for(long i = 0; i < n; i++) {
+        if (i!=s){
+          if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
+          if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
+        }
       }
       for (long m=k+1; m<3; m++){
         if (periodic[m] && amonborder[m]){
-          for(long i = 0; i < n; i+=(i==s-1)?2:1) {
-            if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
-            if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
-            if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
-            if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
+          for(long i = 0; i < n; i++) {
+            if (i!=s){
+              if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
+            }
           }
         }
       }
@@ -702,15 +708,17 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   }
   if (periodic[0] && periodic[1] && periodic[2]
       && amonborder[0] && amonborder[1] && amonborder[2]){
-    for(long i = 0; i < n; i+=(i==s-1)?2:1) {
-      if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
-      if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
-      if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
-      if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
-      if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
-      if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
-      if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
-      if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
+    for(long i = 0; i < n; i++) {
+      if (i!=s){
+        if (distance(v,spheres[i]+latx+laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx+laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx-laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx+laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx-laty+latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx+laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]+latx-laty-latz) < 2*R) return true;
+        if (distance(v,spheres[i]-latx-laty-latz) < 2*R) return true;
+      }
     }
   }
   return false;
