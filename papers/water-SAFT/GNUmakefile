@@ -51,7 +51,6 @@ ALL_FIGURES=\
 	figs/rods-energy-vs-distance.gp\
 	figs/four-rods-energy-vs-distance.gp\
 	figs/density-four-rods.gp\
-	figs/energy-rods.gp\
 	figs/osu-logo.svg\
 	figs/stadium-vs-circles.svg\
 	figs/two-rods-diagram.svg\
@@ -90,14 +89,13 @@ figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.5.dat figs/rods-slice-01.0-00.6.dat
 figs/density-four-rods.eps: figs/four-rods-01.0-1.22.dat \
 	figs/four-rods-01.0-1.37.dat
-figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.6nm.dat \
-	figs/rods-in-water-01.0nm.dat figs/rods-in-water-01.4nm.dat \
-	figs/rods-in-water-01.8nm.dat figs/rods-in-water-02.0nm.dat
+figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.4nm.dat \
+	figs/rods-in-water-00.8nm.dat figs/rods-in-water-01.2nm.dat \
+	figs/rods-in-water-01.6nm.dat figs/rods-in-water-02.0nm.dat \
+	figs/rods-in-water-02.4nm.dat
 figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.6nm.dat \
 	figs/four-rods-in-water-01.0nm.dat figs/four-rods-in-water-01.4nm.dat \
 	figs/four-rods-in-water-01.8nm.dat figs/four-rods-in-water-02.0nm.dat
-figs/energy-rods.eps: figs/rods-in-water-01.0nm.dat
-
 figs/density-single-rod.eps: figs/single-rod-slice-02.0.dat \
 		figs/single-rod-slice-01.0.dat figs/single-rod-slice-00.6.dat \
 		figs/single-rods-calculated-density.dat
