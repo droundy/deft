@@ -81,7 +81,7 @@ haskell: src/haskell/functionals.exe src/haskell/test.exe
 # tell make that a single rule (calling another make, in this
 # instance) can be used to generate several executables.  The pattern,
 # in this case, matches the letter "s".
-src/haskell/latex-functionals.% src/haskell/functionals.% src/haskell/newfunctionals.% src/haskell/test.%: $(wildcard src/haskell/*hs)
+src/haskell/latex-functionals.%xe src/haskell/functionals.%xe src/haskell/newfunctionals.%xe src/haskell/test.%xe: $(wildcard src/haskell/*hs)
 	cd src/haskell && $(MAKE) depend
 	cd src/haskell && $(MAKE)
 
