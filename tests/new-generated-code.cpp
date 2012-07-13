@@ -17,6 +17,7 @@
 #include "new/Functional.h"
 #include "new-generated-haskell/volume_minus_one_sqr.h"
 #include "new-generated-haskell/integrate_sqr.h"
+#include "new-generated-haskell/WhiteBear.h"
 #include "handymath.h"
 
 int errors = 0;

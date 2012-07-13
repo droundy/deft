@@ -470,7 +470,7 @@ ReciprocalGrid Grid::fft() const {
 ReciprocalGrid fft(const GridDescription &gd, const VectorXd &g) {
   ReciprocalGrid out(gd);
   const double *mydata = g.data();
-  fftw_plan p = fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_ESTIMATE);
+  fftw_plan p = fftw_plan_dft_r2c_3d(gd.Nx, gd.Ny, gd.Nz, (double *)mydata, (fftw_complex *)out.data(), FFTW_MEASURE);
   fftw_execute(p);
   fftw_destroy_plan(p);
   out *= gd.dvolume;

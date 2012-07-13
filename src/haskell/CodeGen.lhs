@@ -22,13 +22,11 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
                 functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
                     (unlines ["\tdouble output=0;",
-                              "\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
                               codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.",
                               "\t// " ++ show (peakMem codeIntegrate),
                               "\treturn output;\n"]) ++
                 functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
-                    (unlines ["\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
-                              "\tVectorXd output(gd.NxNyNz);",
+                    (unlines ["\tVectorXd output(gd.NxNyNz);",
                               codeStatements codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.",
                               "\t// " ++ show (peakMem codeVTransform), 
                               "\treturn output;\n"])  ++
@@ -45,22 +43,27 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
                 functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\treturn ingrad;" ++
                 functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\treturn ingradT;" ++
-                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] ("\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);\n" ++ codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeGrad) ++ "\n") ++
+                functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] (codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeGrad) ++ "\n") ++
                 functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
+      defineGrid :: Type a => Expression a -> Expression a
+      defineGrid = substitute dVscalar (s_var "gd.dvolume") .
+                   substitute dr (s_var "gd.dvolume" ** (1.0/3))
+      defineHomogeneousGrid = substitute dVscalar 1 .
+                              substitute dr (s_var "gd.dvolume" ** (1.0/3))
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
-          where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ integrate e)
+          where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ defineGrid $ integrate e)
       codeVTransform = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "output")) (ER e')])
-          where (st, e') = simp2 $ factorize $ joinFFTs e
+          where (st, e') = simp2 $ factorize $ defineGrid $ joinFFTs e
       codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ makeHomogeneous e
       codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
           where (st, e') = simp2 $ derive (s_var "x") 1 $ makeHomogeneous e
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
-          where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ derive (r_var "x") (r_var "ingrad") e)
+          where (st, e') = simp2 (factorize $ joinFFTs $ cleanvars $ defineHomogeneousGrid $ derive (r_var "x") (r_var "ingrad") e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit [] = ""
@@ -90,13 +93,11 @@ scalarClass e arg n =
    functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
    functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
     (unlines ["\tdouble output=0;",
-              "\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
               codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.",
               "\t// " ++ show (peakMem codeIntegrate) ++ " temporaries made",
               "\treturn output;", ""]),
    functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
-    (unlines ["\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
-              "\tassert(0);"]),
+    (unlines ["\tassert(0);"]),
    functionCode "transform" "double" [("double", "kT"), ("double", "x")]
     (unlines ["\tdouble output = 0;",
               "\t" ++ codeStatements codeDTransform,
@@ -120,8 +121,7 @@ scalarClass e arg n =
       ("const VectorXd", "&ingrad"),
       ("VectorXd", "*outgrad"),
       ("VectorXd", "*outpgrad")]
-     (unlines ["\tconst double dr = pow(gd.fineLat.volume(), 1.0/3);",
-               codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.",
+     (unlines [codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.",
                "\t// " ++ show (peakMem codeGrad),
                ""]),
    functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);"),
@@ -137,10 +137,14 @@ scalarClass e arg n =
   "\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeGrad])
   ]
     where
+      defineGrid = substitute dVscalar (s_var "gd.dvolume") .
+                   substitute dr (s_var "gd.dvolume" ** (1.0/3))
+      defineHomogeneousGrid = substitute dVscalar 1 .
+                              substitute dr (s_var "gd.dvolume" ** (1.0/3))
       printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
                       "\tprint_double(\"\", " ++ v ++ ");"
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) (ES e')])
-          where (st0, e') = simp2 (factorize $ joinFFTs $ cleanvars e)
+          where (st0, e') = simp2 (factorize $ joinFFTs $ cleanvars $ defineGrid e)
                 st = filter (not . isns) st0
                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                 isns _ = False
@@ -152,7 +156,7 @@ scalarClass e arg n =
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
           where (st, e') = simp2 $ factorize $ joinFFTs $ cleanvars $
-                           substitute (dV :: Expression Scalar) 1 $
+                           defineHomogeneousGrid $
                            (r_var "ingrad" * derive (r_var "x") 1 e)
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
