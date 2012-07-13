@@ -28,7 +28,7 @@ off = 0
 me = 30
 n = len(mcdata[:,0])
 
-pylab.figure(figsize=(8,8))
+pylab.figure(figsize=(8,6))
 pylab.subplots_adjust(hspace=0.001)
 
 Agnn_plt = pylab.subplot(2,1,1)

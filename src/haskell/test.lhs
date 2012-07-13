@@ -170,7 +170,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
                      t "countFFT nbar*n2 + nbar" 3 (nbar*n2 + nbar),
                      t "countFFT nbar + log nbar" 2 (nbar + log nbar)]
   where t str nn e = TestCase $ assertEqual str nn
-                     (countFFT $ fst $ simp2 $ factorize $ joinFFTs $ cleanvars e)
+                     (countFFT $ fst $ simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars e])
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -222,8 +222,8 @@ memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem n3 + n2a" 1 (n3 + n2a),
                      t "peakMem nbar*n2 + nbar" 3 (nbar*n2 + nbar), --was 2
                      t "peakMem nbar + log nbar" 1 (nbar + log nbar)]
-  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2 $
-                                                    factorize $ joinFFTs $ cleanvars e)
+  where t str nn e = TestCase $ assertEqual str nn (peakMem $ reuseVar $ freeVectors $ fst $ simp2
+                                                    [mkExprn $ factorize $ joinFFTs $ cleanvars e])
         x = r_var "x"
         spreading = 6.0
         kdr = k * s_var "dr"
@@ -302,7 +302,8 @@ findToDoTests = TestList [t (Just $ ER $ -3*(x1**2+x2**2))
                           --  ((x1+x2)*rad + log(x1+x2)),
                           t Nothing (x1**2/4/pi+x2**2/4/pi + 3 + cos(-3*x1**2-2*x2**2)),
                           t (Just $ ER $ x1+x2) (x1+x2 + x3 + x4 + cos(x1+x2) + rad)]
-    where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee (findToDo Set.empty e e)
+    where t ee e = TestCase $ assertEqual ("findToDo" ++ latex e) ee
+                   (findToDo Set.empty [mkExprn e] e)
           x1 = r_var "rtemp_1"
           x2 = r_var "rtemp_2"
           x3 = r_var "rtemp_3"

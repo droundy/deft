@@ -40,7 +40,7 @@ nm = 18.8972613 # in atomic units
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 nl=0.004938863
 
-plot [0:1] [0:] \
+plot [0:1.0] [0:] \
 'figs/single-rod-in-water.dat' u ($1/2):(72.098) notitle with lines lt 0,\
 'figs/single-rod-in-water.dat' u ($1/2):($2/(pi*$1*nm)/mNpermeter) notitle with lp ls 1
 
