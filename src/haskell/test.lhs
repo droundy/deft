@@ -359,7 +359,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
           wf "tests/generated-haskell/nice-logandsqrandinverse.h" $ generateHeader (log x + x**2 - x**3 + x**(-1)) [] "NiceLogandSqrandInverse"
           wf "tests/generated-haskell/nice-logoneminusx.h" $ generateHeader (log (1 - r_var "x")) [] "NiceLogOneMinusX"
           let spreading = 6.0
-              kdr = k * s_var "dr"
+              kdr = k * dr
               kR = k * rad
               rad :: Type a => Expression a
               rad = s_var "R"

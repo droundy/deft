@@ -17,9 +17,11 @@ main =
                    then writeFile f x
                    else return ()
      gen "src/new/WhiteBearFast.cpp" $
-       defineFunctional whitebear [ES $ s_var "R"] [ER $ r_var "nn"] "HardSpheresNoTensor2"
+       defineFunctional whitebear [ES $ s_var "R"] [ER $ r_var "x"] "HardSpheresNoTensor2"
+     gentest "tests/new-generated-haskell/WhiteBear.h" $
+       defineFunctional whitebear [ES $ s_var "R"] [ER $ r_var "x"] "WhiteBear"
      gentest "tests/new-generated-haskell/integrate_sqr.h" $
        defineFunctional (integrate $ r_var "nn"**2) [] [ER $ r_var "nn"] "integrate_sqr"
-     let volume = "V" === a1 `dot` (a2 `cross` a3)
+     let myvolume = "V" === a1 `dot` (a2 `cross` a3)
      gentest "tests/new-generated-haskell/volume_minus_one_sqr.h" $
-       defineFunctional ((volume - 1)**2) [] [] "volume_minus_one_sqr"
+       defineFunctional ((myvolume - 1)**2) [] [] "volume_minus_one_sqr"

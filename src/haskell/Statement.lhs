@@ -141,9 +141,16 @@ subsq xs = -- map (:[]) xs ++
           rest _ = []
 
 findNamedScalar :: Type b => Expression b -> Maybe Exprn
-findNamedScalar = searchExpressionDepthFirst Set.empty helper
+findNamedScalar xxxx = mconcat [find volume,
+                                find mydV,
+                                find mydr,
+                                searchExpressionDepthFirst Set.empty helper xxxx]
   where helper e@(Var _ _ _ _ (Just _)) | ES _ <- mkExprn e = Just $ mkExprn e
         helper _ = Nothing
+        find :: Expression Scalar -> Maybe Exprn
+        find x = if hasexpression x xxxx then Just $ mkExprn x else Nothing
+        mydV = substitute volume (scalarVariable volume) dVscalar
+        mydr = substitute dVscalar (scalarVariable dVscalar) $ var "dr" "\\Delta r" $ dVscalar ** (1.0/3)
 
 findNamedSubexpression :: Type b => Expression b -> Maybe Exprn
 findNamedSubexpression = searchExpressionDepthFirst Set.empty helper
@@ -183,8 +190,12 @@ findFFTinputtodo i = searchExpressionDepthFirst i helper
   where helper e@(Expression _)
           | EK (Expression (FFT e')) <- mkExprn e, not (hasFFT e') = Just $ ER e'
           | ER (Expression (IFFT e')) <- mkExprn e, not (hasFFT e') = Just $ EK e'
-          | ES (Expression (Integrate e')) <- mkExprn e, not (hasFFT e') = Just $ mkExprn e
+          | ES (Expression (Summate e')) <- mkExprn e, not (hasFFT e') = Just $ mkExprn e
         helper _ = Nothing
+
+scalarVariable :: Expression Scalar -> Expression Scalar
+scalarVariable (Var _ _ x t _) = Var CannotBeFreed x x t Nothing
+scalarVariable _ = error "oopsisse"
 
 simp2 :: [Exprn] -> ([Statement], [Exprn])
 simp2 eee = case scalarhelper [] 0 eee of
@@ -194,11 +205,11 @@ simp2 eee = case scalarhelper [] 0 eee of
           scalarhelper :: [Statement] -> Int -> [Exprn] -> ([Statement], Int, [Exprn])
           scalarhelper sts n everything =
             case mconcat $ map (mapExprn findNamedScalar) everything of
-              Just (ES s@(Var _ _ x t (Just e))) ->
+              Just (ES s@(Var _ _ _ _ (Just e))) ->
                 case simp2helper Set.empty n [] everything [mkExprn e] of
                   ([],_,_) -> scalarhelper (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n
                                            (map (mapExprn (mkExprn . substitute s v)) everything)
-                              where v = Var CannotBeFreed x x t Nothing :: Expression Scalar
+                              where v = scalarVariable s
                   (sts',n',everything') -> scalarhelper (sts++sts') n' everything'
               Nothing -> simp2helper Set.empty (n :: Int) sts everything everything
               _ -> error "bad result in scalarhelper"

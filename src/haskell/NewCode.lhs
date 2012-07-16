@@ -25,22 +25,22 @@ scalarClass e arg variables n =
    "" ++ n ++ codeA arg ++ "  {",
    "}",
    "",
-   functionCode "energy" "double" [("const Vector", "&x")]
+   functionCode "energy" "double" [("const Vector", "&xxx")]
       (unlines $
        ["\tint sofar = 0;"] ++
        map createInput (inputs e) ++
        [newcodeStatements (fst energy),
        "\treturn " ++ newcode (snd energy) ++ ";\n"]),
-   functionCode "energy_per_volume" "double" [("const Vector", "&x")]
+   functionCode "energy_per_volume" "double" [("const Vector", "&xxx")]
       (unlines $
        ["\tint sofar = 0;"] ++
        map createInput (inputs $ makeHomogeneous e) ++
        [newcodeStatements (fst energy_per_volume),
        "\treturn " ++ newcode (snd energy_per_volume) ++ ";\n"]),
-   functionCode "denergy_per_volume_dx" "double" [("const Vector", "&x")]
+   functionCode "denergy_per_volume_dx" "double" [("const Vector", "&xxx")]
     (newcodeStatements (fst denergy_per_volume_dx) ++
      "\treturn " ++ newcode (snd denergy_per_volume_dx) ++ ";\n"),
-   functionCode "grad" "Vector" [("const Vector", "&x")] (evalv grade),
+   functionCode "grad" "Vector" [("const Vector", "&xxx")] (evalv grade),
    functionCode "printme" "void" [("const char *", "prefix")]
       (unlines $ map printEnergy (Set.toList (findNamedScalars e))),
    functionCode "createInput" "Vector" (codeInputArgs (inputs e))
@@ -61,17 +61,17 @@ scalarClass e arg variables n =
                                 "sofar += ",getsize x,";"]
       getsize (ES _) = "1"
       getsize ee = nameE ee ++ ".get_size()"
-      createInput ee@(E3 _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,3); sofar += 3;"
-      createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = x[sofar]; sofar += 1;"
-      createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
+      createInput ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3); sofar += 3;"
+      createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"
+      createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(E3 _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,3);\n" ++
+      createInputAndGrad ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3);\n" ++
                                      "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,3); " ++
                                      "sofar += 3;"
-      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = x[sofar];\n" ++
-                                     "\tVector grad_" ++ nameE ee ++ " = x.slice(sofar,1); " ++
+      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar];\n" ++
+                                     "\tVector grad_" ++ nameE ee ++ " = xxx.slice(sofar,1); " ++
                                      "sofar += 1;"
-      createInputAndGrad ee@(ER _) = "\tVector " ++ nameE ee ++ " = x.slice(sofar,Nx*Ny*Nz);\n"++
+      createInputAndGrad ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz);\n"++
                                      "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
                                      "sofar += Nx*Ny*Nz;"
       createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -84,13 +84,14 @@ scalarClass e arg variables n =
                       "\tprintf(\"\\n\");"
       energy = codex e
       energy_per_volume = codex (makeHomogeneous e)
-      denergy_per_volume_dx = codex (derive (s_var "x" :: Expression Scalar) 1 $ makeHomogeneous e)
+      denergy_per_volume_dx = codex (derive (s_var "xxx" :: Expression Scalar) 1 $ makeHomogeneous e)
+      the_actual_gradients = map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
+                                                                ("grad_"++nameE (mkExprn x)) $
+                                                  derive x 1 e)) variables
       grade :: ([Statement], [Exprn])
       grade = if variables == []
               then ([],[])
-              else case simp2 $ map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
-                                                                   ("grad_"++nameE (mkExprn x)) $
-                                                     derive x 1 e)) variables of
+              else case simp2 the_actual_gradients of
                 (st0, es) -> let st = filter (not . isns) st0
                                  isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                                  isns _ = False
@@ -102,18 +103,35 @@ scalarClass e arg variables n =
       justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
       justvarname (E3 (Var a b c d _)) = E3 $ Var a b c d Nothing
       justvarname _ = error "bad in justvarname"
-      evalv (st,ee) = unlines (["\tVector output(x.get_size());",
-                                "\tfor (int i=0;i<x.get_size();i++) {",
+      evalv :: ([Statement], [Exprn]) -> String
+      evalv (st,ee) = unlines (["\tVector output(xxx.get_size());",
+                                "\tfor (int i=0;i<xxx.get_size();i++) {",
                                 "\t\toutput[i] = 0;",
                                 "\t}"]++
                                "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
-                               [newcodeStatements (st ++ concatMap assignit ee),
+                               [newcodeStatements (inits ++ st ++ concatMap assignit ee),
                                 "\treturn output;"])
         where assignit eee = [Assign (justvarname eee) eee]
+              inits = if any (mapExprn hasActualFFT) the_actual_gradients
+                      then [Initialize (E3 $ t_var "rlat1"),
+                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
+                            Initialize (E3 $ t_var "rlat2"),
+                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
+                            Initialize (E3 $ t_var "rlat3"),
+                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
+                      else []
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
         where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
-              st = filter (not . isns) st0
+              inits = if hasActualFFT x
+                      then [Initialize (E3 $ t_var $ "rlat1"),
+                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
+                            Initialize (E3 $ t_var "rlat2"),
+                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
+                            Initialize (E3 $ t_var "rlat3"),
+                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
+                      else []
+              st = inits ++ filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e

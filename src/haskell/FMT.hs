@@ -4,7 +4,7 @@ defined in WhiteBear (or other modules for other versions thereof). -}
 
 module FMT
        ( n, n3, n2, n1, n0, n2x, n2y, n2z, n1x, n1y, n1z, sqr_n2v, n1v_dot_n2v,
-         shell, step, xshell, yshell, zshell )
+         shell, step, xshell, yshell, zshell, dr )
        where
 
 import Expression
@@ -13,7 +13,7 @@ rad :: Type a => Expression a
 rad = s_var "R"
 
 kdr :: Expression KSpace
-kdr = k * s_tex "dr" "\\Delta r"
+kdr = k * dr
 
 kR :: Expression KSpace
 kR = k * rad

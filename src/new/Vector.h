@@ -5,6 +5,7 @@
 #include <cassert>
 #include <string.h>
 #include <math.h>
+#include <fftw3.h>
 
 // A Vector is a reference-counted array of doubles.  You need to be
 // careful, because a copy of a Vector (or the use of assignment,
@@ -34,6 +35,12 @@ public:
   Vector(const Vector &a) : size(a.size), offset(a.offset),
                             data(a.data), references_count(a.references_count) {
     *references_count += 1;
+  }
+  Vector(double x, double y, double z) : size(3), offset(0), data(new double[3]), references_count(new int) {
+    *references_count = 1;
+    data[0] = x;
+    data[1] = y;
+    data[2] = z;
   }
   ~Vector() { free(); }
   void free() {
@@ -188,6 +195,8 @@ private:
   int size, offset;
   double *data;
   int *references_count; // counts how many objects refer to the data.
+  friend Vector ifft(int Nx, int Ny, int Nz, double dV, Vector f);
+  friend Vector fft(int Nx, int Ny, int Nz, double dV, Vector f);
 };
 
 inline Vector operator*(double a, const Vector &b) {
@@ -197,5 +206,48 @@ inline Vector operator*(double a, const Vector &b) {
   for (int i=0; i<sz; i++) {
     out.data[i] = a*p2[i];
   }
+  return out;
+}
+
+inline Vector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
+  assert((Nx&1)); // We want an odd number of grid points in each direction.
+  assert((Ny&1)); // We want an odd number of grid points in each direction.
+  assert((Nz&1)); // We want an odd number of grid points in each direction.
+  Vector out(Nx*Ny*(int(Nz)/2 + 1));
+  fftw_plan p = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, (double *)f.data, (fftw_complex *)out.data, FFTW_WISDOM_ONLY);
+  if (!p) {
+    double *r = (double *)fftw_malloc(Nx*Ny*Nz*sizeof(double));
+    fftw_plan_dft_r2c_3d(Nx, Ny, Nz, r, (fftw_complex *)out.data, FFTW_MEASURE);
+    fftw_free(r);
+    p = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, (double *)f.data, (fftw_complex *)out.data, FFTW_WISDOM_ONLY);
+  }
+  fftw_execute(p);
+  fftw_destroy_plan(p);
+  out *= dV;
+  return out;
+}
+
+inline Vector ifft(int Nx, int Ny, int Nz, double dV, Vector f) {
+  assert(!(Nx&1)); // We want an even number of grid points in each direction.
+  assert(!(Ny&1)); // We want an even number of grid points in each direction.
+  assert(!(Nz&1)); // We want an even number of grid points in each direction.
+  Vector out(Nx*Ny*Nz); // create output vector
+  out = f; // copy input to output.
+  fftw_plan p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, (fftw_complex *)f.data, (double *)out.data, FFTW_WISDOM_ONLY);
+  if (!p) {
+    fftw_complex *c = (fftw_complex *)fftw_malloc(Nx*Ny*(int(Nz)/2+1)*sizeof(fftw_complex));
+    fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c, (double *)out.data, FFTW_MEASURE);
+    fftw_free(c);
+    p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, (fftw_complex *)f.data, (double *)out.data, FFTW_WISDOM_ONLY);
+  }
+  fftw_execute(p);
+  // FFTW overwrites the input on a c2r transform, so let's throw it
+  // away so we don't accidentally try to reuse an invalid array! An
+  // alternative approach would be to copy it first into a scratch
+  // array.  If we saved that scratch array, we could even keep
+  // reusing the same plan.
+  f.free();
+  fftw_destroy_plan(p);
+  out *= 1.0/(Nx*Ny*Nz*dV);
   return out;
 }
