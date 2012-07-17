@@ -135,6 +135,7 @@ subsq xs = -- map (:[]) xs ++
 findNamedScalar :: Type b => Expression b -> Maybe Exprn
 findNamedScalar e@(Expression _)
   | EK (Expression (FFT e')) <- mkExprn e = findNamedScalar e'
+  | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = findNamedScalar e'
   | ER (Expression (IFFT e')) <- mkExprn e = findNamedScalar e'
   | ES (Expression (Integrate e')) <- mkExprn e = findNamedScalar e'
   | otherwise = Nothing
@@ -167,6 +168,7 @@ findNamedScalar (Scalar e) = findNamedScalar e
 findNamedSubexpression :: Type b => Expression b -> Maybe Exprn
 findNamedSubexpression e@(Expression _)
   | EK (Expression (FFT e')) <- mkExprn e = findNamedSubexpression e'
+  | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = findNamedSubexpression e'
   | ER (Expression (IFFT e')) <- mkExprn e = findNamedSubexpression e'
   | ES (Expression (Integrate e')) <- mkExprn e = findNamedSubexpression e'
   | otherwise = Nothing
@@ -200,6 +202,7 @@ findToDo i _ e | Set.size i > 0 && not (Set.isSubsetOf i (varSet e)) = Nothing
 --                 countAfterRemoval e everything + 1 < countVars everything = Just $ mkExprn e
 findToDo i everything e@(Expression _)
     | EK (Expression (FFT e')) <- mkExprn e = findToDo i everything e'
+    | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = findToDo i everything e'
     | ER (Expression (IFFT e')) <- mkExprn e = findToDo i everything e'
     | ES (Expression (Integrate e')) <- mkExprn e = if hasFFT e'
                                                     then findToDo i everything e'
@@ -269,6 +272,7 @@ findFFTtodo :: (Type a, Type b) => Expression a -> Expression b -> Maybe Exprn
 findFFTtodo everything e@(Expression _)
     | EK (Expression (FFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
     | EK (Expression (FFT e')) <- mkExprn e = findFFTtodo everything e'
+    | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = findFFTtodo everything e'
     | ER (Expression (IFFT (Var _ _ _ _ Nothing))) <- mkExprn e = Just $ mkExprn e
     | ER (Expression (IFFT e')) <- mkExprn e = findFFTtodo everything e'
     | ES (Expression (Integrate e')) <- mkExprn e = findFFTtodo everything e'
@@ -305,6 +309,7 @@ findFFTinputtodo i everything e@(Expression _)
     | EK (Expression (FFT e')) <- mkExprn e = if hasFFT e'
                                               then findFFTinputtodo i everything e'
                                               else Just $ ER e'
+    | EK (Expression (SetKZeroValue _ e')) <- mkExprn e = findFFTinputtodo i everything e'
     | ER (Expression (IFFT e')) <- mkExprn e = if hasFFT e'
                                                then findFFTinputtodo i everything e'
                                                else Just $ EK e'

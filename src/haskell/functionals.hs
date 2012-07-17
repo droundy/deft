@@ -11,8 +11,10 @@ main =
                    else return ()
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
-     gen "src/ContactAtSphereFast.cpp" $
-       generateHeader wb_contact_at_sphere ["R"] "ContactAtSphere"
+     gen "src/Correlation_S_Fast.cpp" $
+       generateHeader correlation_S_WB ["R"] "Correlation_S2"
+     gen "src/Correlation_A_Fast.cpp" $
+       generateHeader correlation_A_WB ["R"] "Correlation_A2"
      gen "src/YuWuCorrelationFast.cpp" $
        generateHeader yuwu_correlation ["R"] "YuWuCorrelationFast"
      gen "src/SaftFluid2Fast.cpp" $

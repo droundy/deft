@@ -33,6 +33,8 @@ Functional dAdR_A_over_n_WBm2(double radius);
 
 Functional Correlation_A(double radius);
 Functional Correlation_S(double radius);
+Functional Correlation_S2(double radius);
+Functional Correlation_A2(double radius);
 Functional Correlation_A_WBm2(double radius);
 Functional Correlation_S_WBm2(double radius);
 

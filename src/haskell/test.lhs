@@ -146,7 +146,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
 
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,
-                     t "countFFT saft_fluid" 7 saft_fluid,
+                     t "countFFT saft_fluid" 10 saft_fluid,
                      t "countFFT whitebear" 6 whitebear,
                      t "countFFT saft_dispersion" 2 saft_dispersion,
                      t "countFFT saft_association" 7 saft_association,
@@ -199,12 +199,12 @@ memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem nbar" 1 n3,
                      t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
-                     t "peakMem saft_fluid" 6 saft_fluid,
+                     t "peakMem saft_fluid" 11 saft_fluid,
                      t "peakMem whitebear" 6 whitebear,
                      t "peakMem saft_dispersion" 3 saft_dispersion,
                      t "peakMem saft_association" 5 saft_association,
                      -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
-                     t "peakMem grad whitebear" 9 (gradme whitebear), -- was 20
+                     t "peakMem grad whitebear" 10 (gradme whitebear), -- was 20
                      t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
                      -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),

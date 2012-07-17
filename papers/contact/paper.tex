@@ -472,7 +472,7 @@ since we have symmetry around the point $\mathbf{r}$.
     A_{HS}}{\delta R(\mathbf{r})} \label{eq:p_{HS}^S}\\
   \ncontact(\rr) &= \frac{1}{n_0(\rr) k_BT 4\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta R(\mathbf{r})} \\
-  g_\sigma^A(\rr) &= \frac{\ncontact(\rr)}{n_0(\rr)} \\
+  g_\sigma^S(\rr) &= \frac{\ncontact(\rr)}{n_0(\rr)} \\
   &= \frac{1}{n_0(\rr)^2}\frac{1}{ k_BT 4\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta R(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
@@ -600,7 +600,7 @@ shown in Figures~\ref{fig:walls-10}-\ref{fig:walls-40}.
   density as averaged according to the centers of the spheres that are
   touching.  In each case, solid lines correspond to the Monte Carlo
   simulation, and dashed lines of various sorts represent DFT model
-  predictions.  }
+  predictions.}
 
 \begin{figure}
   \includegraphics[height=5cm]{figs/contact-08-013}
@@ -879,7 +879,7 @@ and
 \begin{align}
   n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{4\pi R(\rr'')^2}
   \delta(|\rr'-\rr''| - R(\rr'')) \\
-  \frac{\delta n_1(\rr')}{\delta R(\rr)^2}
+  \frac{\delta n_0(\rr')}{\delta R(\rr)}
   &= -\frac{n(\rr)}{4\pi
     R(\rr)^2}\delta'(|\rr'-\rr| - R(\rr))
   -
@@ -1003,7 +1003,7 @@ free energy density.
 
 The functional derivative of $n_2^S(\rr')$ is quite similar:
 \begin{align}
-  n_2^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| + R(\rr))d\mathbf
+  n_2^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| - R(\rr))d\mathbf
   r'\\
   \frac{\delta n_2^{S}(\rr')}{\delta R(\rr)} &= -\delta(\rr-\rr') \int n(\rr'')
   \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
@@ -1012,14 +1012,14 @@ where we recognize that the convolution---while not one of the standard
 FMT weighted density---is a simple convolution of the density.  We can
 go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
-  n_1^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'\\
+  n_1^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| - R(\rr))d\mathbf r'\\
     \frac{\delta n_1^{S}(\rr')}{\delta R(\rr)} &=
     -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)}
     \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
     + n_0^s(\rr') \right)
 \end{align}
 \begin{align}
-  n_0^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)^2} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'\\
+  n_0^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)^2} \delta(|\rr - \rr'| - R(\rr))d\mathbf r'\\
     \frac{\delta n_0^{S}(\rr')}{\delta R(\rr)}
     &= -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)^2}
     \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
@@ -1029,7 +1029,7 @@ go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
   \mathbf{n}_{V2}^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| - R(\rr))
   \frac{(\rr - \rr')}{|\rr - \rr'|} d \rr'\\
-  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta R(\rr)} &= \delta(\rr - \rr')
+  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta R(\rr)} &= -\delta(\rr - \rr')
   \int n(\rr'') \delta'(|\rr' - \rr''| - R(\rr'))
   \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
 \end{align}
@@ -1039,7 +1039,7 @@ go on to compute the derivatives of the remaining weighted densities:
  \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta R(\rr)}
  &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi R(\rr)}
    \delta'(|\rr'-\rr''| - R(\rr')) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
-   + \mathbf{n}_{V2}^S(\rr') \right)
+   + \frac{\mathbf{n}_{V2}^S(\rr')}{4\pi R(\rr)^2} \right)
 \end{align}
 
 The above equations involve just two additional weighted densities

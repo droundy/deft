@@ -22,6 +22,7 @@ main =
      pdf "doc/Association.pdf" $ latexEasy $ "Fassoc" === saft_association
      pdf "doc/Dispersion.pdf" $ latexEasy $ "Fdisp" === saft_dispersion
      pdf "doc/SimpDispersion.pdf" $ latexSimp $ "Fdisp" === saft_dispersion
+     --pdf "doc/CorrelationS.pdf" $ latexEasy $ correlation_S_WB
      pdf "doc/SaftFluid.pdf" $ latexEasy $ "Fw" === saft_fluid
      pdf "doc/GradDispersion.pdf" $ latexEasy $ "grad" === (grad "x" saft_dispersion)
      pdf "doc/JoinedGradDispersion.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_dispersion)

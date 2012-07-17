@@ -144,11 +144,11 @@ void run_walls(double eta, const char *name, Functional fhs) {
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/walls%s-%04.1f-%04.2f.dat", name, width, eta);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
-    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
+    correlation_S = Correlation_S(1.0)(1, gd, density);    
+    correlation_A = Correlation_A(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));

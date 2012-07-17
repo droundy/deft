@@ -286,7 +286,9 @@ setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
 setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
 setZero _ e@(Var _ _ _ _ Nothing) = e
-setZero v (Scalar e) = Scalar (setZero v e)
+setZero v (Scalar e) = case isConstant $ setZero v e of
+                         Just c -> toExpression c
+                         Nothing -> Scalar (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
 setZero v (Sin e) = sin (setZero v e)
 setZero v (Exp e) = exp (setZero v e)
@@ -302,17 +304,19 @@ setZero v (Product p i) =
     if zd /= 0
     then zn / zd
     else if zn /= 0
-         then error ("L'Hopital's rule failure: " ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n" 
-                     ++ latex (Product p i) ++ "\n\n\n" ++ latex zn)
+         then error ("L'Hopital's rule failure: " ++ code n ++ "\n /\n  " ++ code d ++ "\n\n\n" 
+                     ++ code (Product p i) ++ "\n\n\n" ++ code zn)
          else setZero v (scalarderive v n / scalarderive v d)
   where d = product2denominator p
         n = product $ product2numerator p
         zn = setZero v n
         zd = setZero v d
 setZero _ (Sum s i) | Sum s i == 0 = 0
-setZero v (Sum s _) = out
+setZero v (Sum s i) =
+    case factorize (Sum s i) of
+      x | x == Sum s i -> pairs2sum $ map sz $ sum2pairs s
+      x -> setZero v x
   where sz (f,x) = (f, setZero v x)
-        out = pairs2sum $ map sz $ sum2pairs s
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
@@ -1004,7 +1008,10 @@ hasExpressionInFFT _ (Var _ _ _ _ Nothing) = False
 -- with respect to kx.
 scalarderive :: Type a => Exprn -> Expression a -> Expression a
 scalarderive v e | v == mkExprn e = 1
-scalarderive v (Scalar e) = Scalar (scalarderive v e)
+scalarderive v (Scalar e) = case isConstant dedv of
+                              Just c -> toExpression c
+                              Nothing -> Scalar dedv
+    where dedv = scalarderive v e
 scalarderive v (Var _ _ _ _ (Just e)) = scalarderive v e
 scalarderive _ (Var _ _ _ _ Nothing) = 0
 scalarderive v (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
@@ -1024,7 +1031,7 @@ derive :: (Type a, Type b) => Expression b -> Expression a -> Expression a -> Ex
 derive v dda e | Same <- compareExpressions v e = dda
 derive vv@(Scalar v) dda (Scalar e) -- Treat scalar derivative of scalar as scalar.  :)
   | Same <- compareExpressions vv dda = dda * Scalar (derive v 1 e)
-derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
+derive v@(Var _ a b c _) dda (Var t _ bb cc (Just e))
   | Same <- compareTypes v dda =
     case isConstant $ derive v dda e of
       Just x -> toExpression x
@@ -1033,11 +1040,11 @@ derive v@(Var _ a b c _) dda (Var t aa bb cc (Just e))
           Just x -> toExpression x * dda
           Nothing ->
             if dda == 1 || not (hasExpressionInFFT v e)
-            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+            then dda*(Var t ("d" ++ bb ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e
-derive v@(Scalar (Var _ a b c _)) dda (Var t aa bb cc (Just e))
+derive v@(Scalar (Var _ a b c _)) dda (Var t _ bb cc (Just e))
   | Same <- compareTypes v dda =
   case isConstant $ derive v dda e of
     Just x -> toExpression x
@@ -1046,7 +1053,7 @@ derive v@(Scalar (Var _ a b c _)) dda (Var t aa bb cc (Just e))
         Just x -> toExpression x * dda
         Nothing ->
             if dda == 1 || not (hasExpressionInFFT v e)
-            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+            then dda*(Var t ("d" ++ bb ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e

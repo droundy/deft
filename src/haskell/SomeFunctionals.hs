@@ -1,5 +1,5 @@
 module SomeFunctionals 
-       ( whitebear, wb_contact_at_sphere, idealgas, mu, n,
+       ( whitebear, correlation_S_WB, correlation_A_WB, idealgas, mu, n,
          phi1, phi2, phi3,
          of_effective_potential,
          xshell, yshell, zshell,
@@ -26,24 +26,40 @@ kR = k * rad
 smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
-n, n3, n2, n1, n0, n2x, n2y, n2z, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
+n, n3, n2, n1, n0, n1x, n1y, n1z, n2x, n2y, n2z, n2p, n2px, n2py, n2pz, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"
 n3 = "n3" === step n
 n2 = "n2" === shell n
-n1 = "n1" === n2 / (4*pi*rad)
-n0 = "n0" === n2 / (4*pi*rad**2)
+n2p = "n2p" === shellPrime n
+n1 = "n1" === shell n / (4*pi*rad)
+n0 = "n0" === shell n / (4*pi*rad**2)
 n2x = "n2x" === xshell n
 n2y = "n2y" === yshell n
 n2z = "n2z" === zshell n
-sqr_n2v = var "n2vsqr" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x**2 + n2y**2 + n2z**2)
-n1v_dot_n2v = {- var "n1vdn2v" "{\\left|\\vec{n}_{2v}\\right|}" -} (sqr_n2v/(4*pi*rad))
+n1x = "n1x" === xshell n / (4*pi*rad)
+n1y = "n1y" === yshell n / (4*pi*rad)
+n1z = "n1z" === zshell n / (4*pi*rad)
+n2px = "n2px" === xshellPrime n
+n2py = "n2py" === yshellPrime n
+n2pz = "n2pz" === zshellPrime n
 
-shell, step, xshell, yshell, zshell :: Expression RealSpace -> Expression RealSpace
+sqr_n2v = var "n2vsqr" "{\\left|\\vec{n}_{2v}\\right|^2}" (n2x**2 + n2y**2 + n2z**2)
+n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x*n1x + n2y*n1y + n2z*n1z)
+
+shell_diam, shell, step, xshell, yshell, zshell, shellPrime, xshellPrime, yshellPrime, zshellPrime :: Expression RealSpace -> Expression RealSpace 
 shell x = ifft ( smear * (4*pi) * rad * (sin kR / k) * fft x)
+shell_diam x = substitute rad (2*rad :: Expression Scalar) (shell x)
 step x = ifft ( smear * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)
 xshell x = ifft ( smear * (4*pi) * imaginary * kx*(rad * cos kR - sin kR/k)/k**2 * fft x)
 yshell x = ifft ( smear * (4*pi) * imaginary * ky*(rad * cos kR - sin kR/k)/k**2 * fft x)
 zshell x = ifft ( smear * (4*pi) * imaginary * kz*(rad * cos kR - sin kR/k)/k**2 * fft x)
+shellPrime x = ifft ( smear * (4*pi) * ( -sin kR/k - rad * cos kR) * fft x)
+-- setkzero 0 is needed below because our code that handles the k == 0
+-- case for some reason fails on this particular bit of code,
+-- n2x*n2px.  :(  (FIXME: this fails if we include fft x inside the setkzero 0!)
+xshellPrime x = ifft ( setkzero 0 (smear * (4*pi) * imaginary * kx*( rad * sin kR)/k) * fft x) 
+yshellPrime x = ifft ( setkzero 0 (smear * (4*pi) * imaginary * ky*( rad * sin kR)/k) * fft x) 
+zshellPrime x = ifft ( setkzero 0 (smear * (4*pi) * imaginary * kz*( rad * sin kR)/k) * fft x)
 
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)
@@ -68,41 +84,62 @@ idealgas = integrate (kT*n*(log(n/nQ) - 1))
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
 
-dwbdn3, dwbdn2, dwbdn1, dwbdn1v_over_n2v, dwbdn2v_over_n2v :: Expression RealSpace
-dwbdn3 =  d phi1 + d phi2 + d phi3
+phitot :: Expression RealSpace
+phitot = var "phitot" "\\Phi" $ phi1 + phi2 + phi3
+
+dwbdn3, dwbdn0, dwbdn2, dwbdn1, dwbdn1v_over_n2v, dwbdn2v_over_n2v :: Expression RealSpace
+dwbdn3 =  d (var "phitot" "\\Phi" $ phi1 + phi2 + phi3)-- d phi1 + d phi2 + d phi3
   where d = derive n3 1
 
-dwbdn2 = d phi1 + d phi2 + d phi3
+dwbdn2 = d (var "phitot" "\\Phi" $ phi1 + phi2 + phi3)-- d phi1 + d phi2 + d phi3
   where d = derive n2 1
 
-dwbdn1 = derive n1 1 (phi1 + phi2 + phi3)
+dwbdn1 = derive n1 1 (var "phitot" "\\Phi" $ phi1 + phi2 + phi3)
 
-dwbdn1v_over_n2v = derive n1v_dot_n2v 1 (phi1 + phi2 + phi3)
+dwbdn0 = derive n0 1 (var "phitot" "\\Phi" $ phi1 + phi2 + phi3)
 
-dwbdn2v_over_n2v = 2*derive sqr_n2v 1 (phi1 + phi2 + phi3)
+dwbdn1v_over_n2v = derive n1v_dot_n2v 1 (var "phitot | " "\\Phi" $ phi1 + phi2 + phi3)
+
+dwbdn2v_over_n2v = 2*derive sqr_n2v 1 (var "phitot" "\\Phi" $ phi1 + phi2 + phi3)
 
 --dwbdn2v, dwbdn1v :: Expression RealSpace
 --dwbdn2v = 1/(4*pi*rad)/(1-n3) - 6*n2*(n3 + (1-n3)**2*log(1-n3)/(36*pi*n3**2*(1-n3)**2))
 
 --dwbdn1v = 1/(1-n3)
 
-wb_contact_at_sphere :: Expression RealSpace
-wb_contact_at_sphere =
-  1/(4*4*pi*rad**2)*(shell (dwbdn3 + 2*dwbdn2/rad + dwbdn1/(4*pi*rad**2)) +
-                     xshell (n2x * vecpart) + yshell (n2y * vecpart) + zshell (n2z * vecpart))
-    where vecpart = 0*dwbdn1v_over_n2v / (4*pi*rad**2) + 2/rad*dwbdn2v_over_n2v
-  -- + xshell (n2x*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
-  -- + yshell (n2y*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
-  -- + zshell (n2z*(dwbdn1v/(4*pi*rad**2) + dwbdn2v*2/rad))
+correlation_S_WB :: Expression RealSpace
+correlation_S_WB = var "correlation_S_WB" "g_{\\sigma}^{S}" g_S_WB
+    where g_S_WB = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
+          dAdR = var "dAdR" "\\frac{dA}{dR}" $
+                 kT*(dwbdn3*n2 
+                     - dwbdn2*n2p 
+                     - dwbdn1*( n2p/(4*pi*rad) + n0) 
+                     - dwbdn0 * ( n2p/(4*pi*rad**2) + 2*n0/rad )
+                     - (derive n2x 1 phitot * n2px + derive n1x 1 phitot * ( n2px + n2x/rad)/(4*pi*rad))
+                     - (derive n2y 1 phitot * n2py + derive n1y 1 phitot * ( n2py + n2y/rad)/(4*pi*rad))
+                     - (derive n2z 1 phitot * n2pz + derive n1z 1 phitot * ( n2pz + n2z/rad)/(4*pi*rad)))
+
+correlation_A_WB :: Expression RealSpace
+correlation_A_WB = var "correlation_A_WB" "g_{\\sigma}^{A}" g_A_WB
+    where g_A_WB = dAdR/(kT * n*shell_diam n )
+          dAdR = var "dAdR" "\\frac{dA}{dR}" $
+                 kT*n*( shell dwbdn3 
+                        - shellPrime dwbdn2 
+                        - ( shellPrime dwbdn1 + (shell dwbdn1)/rad ) / (4*pi*rad) 
+                        - ( shellPrime dwbdn0 + 2*(shell dwbdn0)/rad ) / (4*pi*rad**2)
+                        - ( xshellPrime (derive n2x 1 phitot)  +
+                            ( xshellPrime (derive n1x 1 phitot) + (xshell (derive n1x 1 phitot))/rad )/(4*pi*rad) )
+                        - ( yshellPrime (derive n2y 1 phitot)  +
+                            ( yshellPrime (derive n1y 1 phitot) + (yshell (derive n1y 1 phitot))/rad )/(4*pi*rad) )
+                        - ( zshellPrime (derive n2z 1 phitot)  +
+                            ( zshellPrime (derive n1z 1 phitot) + (zshell (derive n1z 1 phitot))/rad )/(4*pi*rad) ))
 
 yuwu_zeta :: Expression RealSpace
-yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (n2**2 - sqr_n2v)/n2**2
+yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (1 - sqr_n2v/n2**2)
 
 yuwu_correlation :: Expression RealSpace
 yuwu_correlation = var "ghsyuwu" "g_{HS}^{\\textit{YuWu}}" ghs
-  where ghs = invdiff*(1 + 0.5*(invdiff*zeta2)*yuwu_zeta*(3 + invdiff*zeta2))
-        zeta2 = var "zeta2" "\\zeta_2" $ rad*n2/3
-        invdiff = 1/(1-n3)
+  where ghs = (1 + 0.5*(rad*n2/3/(1-n3))*yuwu_zeta*(3 + rad*n2/3/(1-n3)))/(1-n3)
 
 lambda_dispersion, epsilon_dispersion :: Type a => Expression a
 lambda_dispersion = s_tex "lambda_dispersion" "\\lambda_d"
@@ -172,3 +209,21 @@ saft_fluid = idealgas + whitebear + saft_association + saft_dispersion + integra
 of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .
                          substitute (r_var "x") (exp (- r_var "veff" / kT))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
