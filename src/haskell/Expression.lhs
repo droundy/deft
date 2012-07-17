@@ -251,9 +251,10 @@ mapExpressionShortcut f (Expression x) = mapExpressionHelper' (mapExpressionShor
 
 cleanvars :: Type a => Expression a -> Expression a
 cleanvars = mapExpression' helper
-  where helper (Var a b c d (Just e)) | ES _ <- mkExprn e = Var a b c d (Just e)
-                                      | otherwise = e
-        helper e = e
+    where helper :: Type a => Expression a -> Expression a
+          helper (Var a b c d (Just e)) | ES _ <- mkExprn e = Var a b c d (Just e)
+                                        | otherwise = e
+          helper e = e
 
 isEven :: (Type a) => Exprn -> Expression a -> Double
 isEven v e | v == mkExprn e = -1

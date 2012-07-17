@@ -290,6 +290,10 @@ int main(int argc, char *argv[]){
   num_timed = 0;
   double secs_per_iteration = 0;
   long workingmoves=0;
+  int * max_move_counter = new int [N];
+  for (int i=0;i<N;i++){max_move_counter[i]=0;}
+  int * move_counter = new int [N];
+  for (int i=0;i<N;i++){move_counter[i]=0;}
   for (long j=0; j<iterations; j++){
     if (num_timed++ > num_to_time) {
       clock_t now = clock();
@@ -394,7 +398,7 @@ int main(int argc, char *argv[]){
 	      LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
 	      if (touch(spheres[n],spheres[k],oShellArray[1])) {
 		MconShells[shell(spheres[k],div,radius,sections)]++;
-		McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++; 
+		McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
 		if (touch(spheres[n],spheres[k],oShellArray[0])) {
                   SconShells[shell(spheres[k],div,radius,sections)]++;
                   ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
@@ -411,15 +415,15 @@ int main(int argc, char *argv[]){
       long hours_to_go = mins_to_go / 60;
       mins_to_go = mins_to_go % 60;
       if (hours_to_go > 5) {
-        printf("%g%% complete... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+        printf("%.0f%% complete... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
       } else if (mins_to_go < 1) {
-        printf("%g%% complete... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
+        printf("%.0f%% complete... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
       } else if (hours_to_go < 1) {
-        printf("%g%% complete... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% complete... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
       } else if (hours_to_go < 2) {
-        printf("%g%% complete... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% complete... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
       } else {
-        printf("%g%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
+        printf("%.0f%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
       }
       char *debugname = new char[10000];
       sprintf(debugname, "%s.debug", outfilename);
@@ -438,8 +442,13 @@ int main(int argc, char *argv[]){
         scale = scale/sqrt(1.02);
         //printf("Reducing scale to %g\n", scale);
       }
+      move_counter[j%N]++;
+      if(move_counter[j%N] > max_move_counter[j%N]){
+        max_move_counter[j%N] = move_counter[j%N];
+      }
       continue;
     }
+    move_counter[j%N] = 0;
     spheres[j%N] = temp;
     workingmoves++;
     if (scale < 5 && false) {
@@ -447,6 +456,12 @@ int main(int argc, char *argv[]){
       //printf("Increasing scale to %g\n", scale);
     }
   }
+  char * counterout = new char[10000];
+  sprintf(counterout, "monte-carlo-count-%s-%d.dat", argv[1], int (rad));
+  FILE *countout = fopen(counterout,"w");
+  for (long i=0;i<N; i++){
+    fprintf(countout, "%d\n", max_move_counter[i]);
+      }
 
   //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -545,8 +560,11 @@ int main(int argc, char *argv[]){
   delete[] GconShells; delete[] GconDensity; delete[] GcenConDensity; delete[] GcenConShells;
   fflush(stdout);
   delete[] spheres;
+  delete[] max_move_counter;
+  delete[] move_counter;
   fflush(stdout);
   fclose(out);
+  fclose(countout);
 }
 
 double countOneOverLap(Vector3d *spheres, long n, long j, double R){
@@ -654,7 +672,6 @@ double countOverLaps(Vector3d *spheres, long n, double R){
   }
   return num;
 }
-
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   if (spherical_outer_wall){
@@ -816,7 +833,8 @@ long shell(Vector3d v, long div, double *radius, double *sections){
 }
 
 double ran(){
-  static MTRand my_mtrand;
+  const long unsigned int x =0;
+  static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
   return my_mtrand.randExc(); // which is the range of [0,1)
 }
 
