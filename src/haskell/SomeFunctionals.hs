@@ -1,4 +1,4 @@
-module SomeFunctionals 
+module SomeFunctionals
        ( idealgas, mu, n,
          of_effective_potential,
          yuwu_zeta, yuwu_correlation,
@@ -28,12 +28,13 @@ mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
 
 yuwu_zeta :: Expression RealSpace
-yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (n2**2 - sqr_n2v)/n2**2
+yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (1 - sqr_n2v/n2**2)
 
 yuwu_correlation :: Expression RealSpace
 yuwu_correlation = var "ghsyuwu" "g_{HS}^{\\textit{YuWu}}" ghs
     where ghs = 1/(1-n3) + rad/2*n2*yuwu_zeta/(1-n3)**2 +
                 rad**2/18*n2**2*yuwu_zeta/(1-n3)**3
+    --where ghs = (1 + 0.5*(rad*n2/3/(1-n3))*yuwu_zeta*(3 + rad*n2/3/(1-n3)))/(1-n3)
 
 lambda_dispersion, epsilon_dispersion :: Type a => Expression a
 lambda_dispersion = s_tex "lambda_dispersion" "\\lambda_d"
@@ -103,3 +104,21 @@ saft_fluid = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispers
 of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .
                          substitute (r_var "x") (exp (- r_var "veff" / kT))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -148,6 +148,13 @@ int main(int, char **argv) {
   }
   bar.epsNativeSlice("shell-1.eps", plotx, ploty, plotcorner);
 
+
+  printf("Running ShellPrimeConvolve(1)...\n");
+  bar = ShellPrimeConvolve(1)(kT, foo);
+  printf("ShellPrimeConvolve(1) integrates to %.15g\n", Identity().integral(kT, bar));
+  printf("ShellPrimeConvolve(1) Maximum is %g\n", bar.maxCoeff());
+  bar.epsNativeSlice("shellPrime-1.eps", plotx, ploty, plotcorner);
+
   printf("Running ShellConvolve(3)...\n");
   bar = ShellConvolve(3)(kT, foo);
   printf("ShellConvolve(3) Maximum is %g\n", bar.maxCoeff());

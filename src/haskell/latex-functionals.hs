@@ -1,5 +1,5 @@
 import SomeFunctionals
-import WhiteBear ( whitebear )
+import WhiteBear ( whitebear, correlation_A_WB, correlation_S_WB )
 import Quantum
 import Latex
 import Expression ( (===), grad, joinFFTs, integrate )
@@ -20,6 +20,8 @@ main =
                               else return ()
                    else return ()
      pdf "doc/WhiteBear.pdf" $ latexEasy $ whitebear
+     pdf "doc/CorrelationS.pdf" $ latexEasy $ correlation_S_WB
+     pdf "doc/CorrelationA.pdf" $ latexEasy $ correlation_A_WB
      pdf "doc/Association.pdf" $ latexEasy $ saft_association
      pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" saft_association)
      pdf "doc/Dispersion.pdf" $ latexEasy $ saft_dispersion

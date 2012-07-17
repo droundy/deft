@@ -62,8 +62,8 @@ me = 30
 
 A_plt = pylab.subplot(3,1,1)
 A_plt.plot(mcdata[:,0]+mcoffset,mcdata[:,2+2*off]/nAmc,"b-",label="$g_\sigma^A$ MC")
-A_plt.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,5],"g--",markevery=me,label="$g_\sigma^A$ (White Bear)")
-A_plt.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,5],"m--",markevery=me,label="$g_\sigma^A$ (mark II)",
+A_plt.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,5],"g+-",markevery=me,label="$g_\sigma^A$ (White Bear)")
+A_plt.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,5],"mx-",markevery=me,label="$g_\sigma^A$ (mark II)",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 A_plt.plot(dftdata[:,0],dftdata[:,7],"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
@@ -81,18 +81,12 @@ pylab.ylim(ymin=0)
 S_plt = pylab.subplot(3,1,2)
 S_plt.plot(mcdata[:,0]+mcoffset,mcdata[:,3+2*off]/n0mc,"b-",label="$g_\sigma^S$ MC")
 S_plt.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,3],
-           "g--",markevery=me,label="$g_\sigma^S$ (White Bear)")
+           "g+--",markevery=me,label="$g_\sigma^S$ (White Bear)")
 S_plt.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,3],"m--",markevery=me,label="$g_\sigma^S$ (mark II)",
            markerfacecolor='none',markeredgecolor='green', markeredgewidth=1)
 S_plt.plot(dftdata[:,0],dftdata[:,4],"rx--",markevery=me,label="Yu and Wu")
 S_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
 pylab.xlim(0,12)
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
-    pylab.ylim(2.3,9.0)
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
-    pylab.ylim(1.50,3.70)
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
-    pylab.ylim(1.10,1.60)
 pylab.ylim(ymin=0)
 
 pylab.ylabel("filling fraction")

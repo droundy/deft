@@ -151,9 +151,9 @@ struct shellprime_op : public base_rop<Scalar> {
     double k = kvec.norm();
     double kR = k*R;
     if (kR > 1e-5) {
-      return exp(-spreading*k*k*dr*dr)*(4*M_PI)*(sin(kR)/k + R*cos(kR));
+      return exp(-spreading*k*k*dr*dr)*(4*M_PI)*(-sin(kR)/k - R*cos(kR));
     } else {
-      return 2*(4*M_PI)*R;
+      return -2*(4*M_PI)*R;
     }
   }
   double R, dr;
@@ -244,9 +244,9 @@ struct xshellprime_op : public base_rop<Scalar> {
     double k = kvec.norm();
     double kR = k*R;
     if (kR > 1e-5) {
-      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[0]/(k*k)*(-sin(kR)));
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*R*kvec[0]/k*(sin(kR)));
     } else {
-      return complex(0,(4*M_PI)*R*R*kvec[0]*(-1.0/3));
+      return complex(0,(4*M_PI)*R*R*kvec[0]);
     }
   }
   double R, dr;
@@ -262,9 +262,9 @@ struct yshellprime_op : public base_rop<Scalar> {
     double k = kvec.norm();
     double kR = k*R;
     if (kR > 1e-3) {
-      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[1]/(k*k)*(- sin(kR)));
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*R*kvec[1]/k*( sin(kR)));
     } else {
-      return complex(0,(4*M_PI)*R*R*kvec[1]*(-1.0/3));
+      return complex(0,(4*M_PI)*R*R*kvec[1]);
     }
   }
   double R, dr;
@@ -280,9 +280,9 @@ struct zshellprime_op : public base_rop<Scalar> {
     double k = kvec.norm();
     double kR = k*R;
     if (kR > 1e-3) {
-      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*kvec[2]/(k*k)*(- sin(kR)));
+      return complex(0,exp(-spreading*k*k*dr*dr)*(4*M_PI)*R*kvec[2]/k*( sin(kR)));
     } else {
-      return complex(0,(4*M_PI)*R*R*kvec[2]*(-1.0/3));
+      return complex(0,(4*M_PI)*R*R*kvec[2]);
     }
   }
   double R, dr;

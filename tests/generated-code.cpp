@@ -202,7 +202,7 @@ int main(int, char **argv) {
 
   Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))/(36*M_PI*sqr(n3)*sqr(one_minus_n3))
     *n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)));
-  compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13);
+  compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13, 0.001, 1e-14);
 
   compare_functionals(AlmostRF(R), myT*(phi1 + phi2 + phi3rf), myT, n, 2e-14);
 

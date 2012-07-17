@@ -148,14 +148,6 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
 
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,
-                     t "countFFT saft_fluid" 7 saft_fluid,
-                     t "countFFT whitebear" 6 whitebear,
-                     t "countFFT saft_dispersion" 2 saft_dispersion,
-                     t "countFFT saft_association" 7 saft_association,
-                     -- t "countFFT grad saft_fluid" 134 (gradme saft_fluid),
-                     t "countFFT grad whitebear" 12 (gradme whitebear),
-                     t "countFFT grad saft_dispersion" 4 (gradme saft_dispersion),
-                     -- t "countFFT grad saft_association" 68 (gradme saft_association),
                      t "countFFT nbar" 2 n3,
                      t "countFFT nbar + n2" 2 (nbar + n2),
                      t "countFFT n0raw log n3" 3 (n0raw*log n3),
@@ -181,6 +173,7 @@ fftTests = TestList [t "countFFT x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
+        gradme :: Expression Scalar -> Expression RealSpace
         gradme = cleanvars . derive (r_var "x") 1
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
@@ -202,14 +195,6 @@ memTests :: Test
 memTests = TestList [t "peakMem x = 0" 0 x,
                      t "peakMem nbar" 1 n3,
                      t "peakMem x1 + x2 and other stuff" 2 (x1 + x2 + cos(x1 + x2) + ifft ( ksqr * fft (x1 + x2 + 5) )),
-                     t "peakMem saft_fluid" 6 saft_fluid,
-                     t "peakMem whitebear" 6 whitebear,
-                     t "peakMem saft_dispersion" 2 saft_dispersion,
-                     t "peakMem saft_association" 6 saft_association,
-                     -- t "peakMem grad saft_fluid" 16 (gradme saft_fluid), -- was 130
-                     t "peakMem grad whitebear" 8 (gradme whitebear), -- was 20
-                     t "peakMem grad saft_dispersion" 3 (gradme saft_dispersion), -- was 49 ~12mins
-                     -- t "peakMem grad saft_association" 64 (gradme saft_association), -- was 65
                      t "peakMem nbar + n2" 1 (nbar + n2),
                      t "peakMem n0raw log n3" 3 (n0raw*log n3), -- was 2
                      t "peakMem n0 log n3" 3 (n0*log n3), --was 2
@@ -234,6 +219,7 @@ memTests = TestList [t "peakMem x = 0" 0 x,
         n2a = "n2" === n2
         n0raw = n2 / (4*pi*s_var "R"**2)
         n0 = "n0" === n0raw
+        gradme :: Expression Scalar -> Expression RealSpace
         gradme = cleanvars . derive (r_var "x") 1
         kT = s_var "kT"
         assocalike nn = nn*(1-n3)*log(nn*n2a*(1 - n3))
@@ -258,7 +244,6 @@ substitutionTests = TestList [t x y (y**2) (x**2),
         y = r_var "y" :: Expression RealSpace
         kk = k_var "k"
         spreading = 6.0
-        dr = s_var "dr" :: Expression KSpace
         kdr = k * dr
         kR = k * s_var "R"
         nbar = ifft ( exp (-spreading*kdr*kdr) * (4*pi) * (sin kR - kR * cos kR) / k**3 * fft x)

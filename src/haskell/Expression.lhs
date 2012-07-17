@@ -590,7 +590,9 @@ setZero v e | v == mkExprn e = 0
             | isEven v e == -1 = 0
 setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
 setZero _ e@(Var _ _ _ _ Nothing) = e
-setZero v (Scalar e) = Scalar (setZero v e)
+setZero v (Scalar e) = case isConstant $ setZero v e of
+                         Just c -> toExpression c
+                         Nothing -> Scalar (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
 setZero v (Sin e) = sin (setZero v e)
 setZero v (Exp e) = exp (setZero v e)
@@ -615,9 +617,11 @@ setZero v (Product p i) =
         zn = setZero v n
         zd = setZero v d
 setZero _ (Sum s i) | Sum s i == 0 = 0
-setZero v (Sum s _) = out
+setZero v (Sum s i) =
+    case factorize (Sum s i) of
+      x | x == Sum s i -> pairs2sum $ map sz $ sum2pairs s
+      x -> setZero v x
   where sz (f,x) = (f, setZero v x)
-        out = pairs2sum $ map sz $ sum2pairs s
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
@@ -1305,7 +1309,7 @@ hasActualFFT e@(Expression _) = case mkExprn e of
   EK (Expression (FFT _)) -> True
   EK (Expression (SetKZeroValue z e')) -> hasActualFFT e' || hasActualFFT z
   ER (Expression (IFFT _)) -> True
-  ES (Expression (Summate e)) -> hasActualFFT e
+  ES (Expression (Summate e')) -> hasActualFFT e'
   _ -> False
 hasActualFFT (Var _ _ _ _ (Just e)) = hasActualFFT e
 hasActualFFT (Sum s _) = or $ map (hasActualFFT . snd) (sum2pairs s)
@@ -1458,7 +1462,7 @@ derive v0 dda0 e | Just v <- safeCoerce v0 e,
 
 --derive vv@(Scalar v) dda0 (Scalar e)
 --  | Just dda <- safeCoerce dda0 vv = dda * Scalar (derive v 1 e)
-derive v@(Var _ a b c _) dda0 (Var t aa bb cc (Just e0))
+derive v@(Var _ a b c _) dda0 (Var t _ bb cc (Just e0))
   | Just e <- safeCoerce e0 v,
     Just dda <- safeCoerce dda0 v =
     case isConstant $ derive v dda e of
@@ -1468,11 +1472,11 @@ derive v@(Var _ a b c _) dda0 (Var t aa bb cc (Just e0))
           Just x -> toExpression x * dda
           Nothing ->
             if dda == 1 || not (hasExpressionInFFT v e)
-            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+            then dda*(Var t ("d" ++ bb ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e
-derive v@(Scalar (Var _ a b c _)) dda0 (Var t aa bb cc (Just e0))
+derive v@(Scalar (Var _ a b c _)) dda0 (Var t _ bb cc (Just e0))
   | Just e <- safeCoerce e0 v,
     Just dda <- safeCoerce dda0 v =
   case isConstant $ derive v dda e of
@@ -1482,7 +1486,7 @@ derive v@(Scalar (Var _ a b c _)) dda0 (Var t aa bb cc (Just e0))
         Just x -> toExpression x * dda
         Nothing ->
             if dda == 1 || not (hasExpressionInFFT v e)
-            then dda*(Var t ("d" ++ aa ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+            then dda*(Var t ("d" ++ bb ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e
