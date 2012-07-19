@@ -206,7 +206,7 @@ instance Type RealSpace where
       where newcodes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
                                   newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
-              MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode x ++ ";"
+              MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode (cleanvars x) ++ ";"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
   initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
