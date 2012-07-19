@@ -81,10 +81,9 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
 
   const double meandensity = eta/(4*M_PI/3);
 
-  Functional f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas());
+  Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, meandensity);
-  f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas()
-                           + ChemicalPotential(mu));
+  f = OfEffectivePotential(fhs + IdealGas() + ChemicalPotential(mu));
 
   const double xmax = 2*cavity_radius + padding;
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,xmax,0), Cartesian(0,0,xmax));
@@ -124,6 +123,19 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
         fflush(stdout);
       }
     }
+    printf("All done minimizing...");
+    {
+      double peak = peak_memory()/1024.0/1024;
+      double current = current_memory()/1024.0/1024;
+      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    }
+    fflush(stdout);
+    constraint.resize(0); // free memory used by constraint
+    {
+      double peak = peak_memory()/1024.0/1024;
+      double current = current_memory()/1024.0/1024;
+      printf("Freed constraint and memory use is %g M (current is %g M)\n", peak, current);
+    }
 
     double energy = min.energy();
     printf("Energy is %.15g\n", energy);
@@ -132,13 +144,13 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
-
-    Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
+    fflush(stdout);
 
     printf("%g\t%.15g\n", cavity_radius, energy);
+    fflush(stdout);
   }
-
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
+  potential.resize(0); // free memory used by potential.
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
@@ -148,19 +160,44 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/outer-sphere%s-%02.0f-%04.1f.dat", name, cavity_radius, eta);
   printf("Saving as %s\n", plotname);
-  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory after correlation_S is %g M (current is %g M)\n", peak, current);
+  }
+  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory after correlation_A is %g M (current is %g M)\n", peak, current);
+  }
   if (strlen(name) == 4) {
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory after WBM2 is %g M (current is %g M)\n", peak, current);
+  }
   Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory after gross_correlation is %g M (current is %g M)\n", peak, current);
+  }
+  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+  }
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
-  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/outer-sphere%s-%02.0f-%04.1f.dat", name, cavity_radius, eta);
-  radial_plot(plotname, density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
+  radial_plot(plotname, density, n0, nA, correlation_S, correlation_A,
+              yuwu_correlation, gross_correlation);
   free(plotname);
 
   {

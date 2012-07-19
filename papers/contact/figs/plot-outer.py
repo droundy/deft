@@ -7,11 +7,15 @@ matplotlib.use('Agg')
 
 import pylab, numpy, sys
 
-if len(sys.argv) != 3:
-    print("Usage:  " + sys.argv[0] + " wb-filename.dat out-filename.pdf")
+if len(sys.argv) != 4:
+    print("Usage:  " + sys.argv[0] + " RADIUS <integer filling fraction in tenths> out-filename.pdf")
     exit(1)
 
-dftdata = numpy.loadtxt(sys.argv[1])
+radiusname = sys.argv[1]
+ffdigit = sys.argv[2]
+pdffilename = sys.argv[3]
+dftdatafilename = "figs/outer-sphereWB-%s-00.%s.dat" % (radiusname, ffdigit)
+dftdata = numpy.loadtxt(dftdatafilename)
 r = dftdata[:,0]
 n = dftdata[:,1]
 n0 = dftdata[:,2]
@@ -48,6 +52,7 @@ pylab.ylabel("filling fraction")
 off = 2
 me = 3
 A_plt = pylab.subplot(3,1,1)
+A_plt.set_title("Spherical cavity with radius %s and filling fraction 0.%s" % (radiusname, ffdigit))
 A_plt.axvline(x=radius, color='k', linestyle=':')
 A_plt.plot(r,gA,"ro--",label="$g_\sigma^A$ (White Bear)")
 A_plt.plot(r,gross,"rx--",markevery=me,label="Gross",
@@ -73,6 +78,6 @@ pylab.ylabel("$g^S$")
 xticklabels = A_plt.get_xticklabels() + S_plt.get_xticklabels()
 pylab.setp(xticklabels, visible=False)
 
-pylab.savefig(sys.argv[2])
+pylab.savefig(pdffilename)
 
 pylab.show()
