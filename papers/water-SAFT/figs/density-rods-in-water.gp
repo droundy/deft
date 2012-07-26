@@ -53,10 +53,10 @@ set cbtics 0.1
 set title  'After transition'
 
 d = 0.6
-set style line 1 lt 1 lw 2 lc "white"
+set style line 1 lt 1 lw 2 lc rgb "white"
 set style arrow 1 heads filled size screen 0.015, 15, 5 front ls 1
 set arrow from -d/2, 0, 1 to d/2, 0, 1 as 1
-set label "d" at -0.07, 0.2 rotate by 0 font 'Helvetica, 20' front
+set label "d" at -0.07, 0.2 rotate by 0 font 'Helvetica, 20' textcolor rgb "white" front
 
 set style fill empty border 7
 set obj 2 circle at (d/2+.5), 0   size 0.5 lw 3 front
@@ -82,9 +82,9 @@ set bmargin 0
 unset colorbox
 
 d = 0.5
-set style line 1 lt 1 lw 2 lc "black"
-set style arrow 1 heads filled size screen 0.015, 15, 5 front ls 1
-set arrow from -d/2, 0, 1 to d/2, 0, 1 as 1
+set style line 2 lt 1 lw 2 lc rgb "#black"
+set style arrow 2 heads filled size screen 0.015, 15, 5 front ls 2
+set arrow from -d/2, 0, 1 to d/2, 0, 1 as 2
 set label "d" at -0.07, 0.2 rotate by 0 font 'Helvetica, 20' front
 
 set style fill empty border 7

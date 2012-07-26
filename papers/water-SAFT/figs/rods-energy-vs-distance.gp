@@ -23,7 +23,7 @@
 set terminal postscript eps enhanced dl 3 color "Helvetica" 20
 set output 'figs/rods-energy-vs-distance.eps'
 
-set key at 1.2,-0.18 # inside bottom
+set key at 1.5,-0.22 # inside bottom
 #set title 'Energy of 2 rods vs distance between them'
 
 #set multiplot
@@ -40,15 +40,15 @@ set style line 1 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#eecc11"
 set style line 2 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#aacc11"
 set style line 3 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#11cc33"
 set style line 4 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#008888"
-set style line 5 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#002266"
-set style line 6 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#000044"
+set style line 5 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#002299"
+set style line 6 lt 1 pt 7 ps 1.5 lw 5 lc rgb "#002255"
 
 set style line 11 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#eecc11"
 set style line 12 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#aacc11"
 set style line 13 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#11cc33"
 set style line 14 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#008888"
-set style line 15 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#002266"
-set style line 16 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#000044"
+set style line 15 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#002299"
+set style line 16 lt 2 pt 7 ps 1.5 lw 5 lc rgb "#002255"
 
 mNpermeter = 6.4230498e-07 # in atomic units
 nm = 18.8972613 # in atomic units
@@ -70,7 +70,7 @@ kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 gamma = 72 # mN/m
 f(d,r) = d>(pi-2)*r/2 ? 0 : (d - (pi-2)*r/2)*2*gamma*mNpermeter/kJpermol
 
-plot [:1.3] [:0.05] \
+plot [:1.6] [:0.05] \
 'figs/rods-in-water-00.4nm.dat' u 1:($2/kJpermol/(nm)-0.200) title 'r=0.2 nm' with l ls 1 , \
 'figs/rods-in-water-00.4nm.dat' u 1:(f($1,0.4)) notitle with l ls 11 , \
 'figs/rods-in-water-00.8nm.dat' u 1:($2/kJpermol/(nm)-0.598) title 'r=0.4 nm' with l ls 2 , \
@@ -81,6 +81,5 @@ plot [:1.3] [:0.05] \
 'figs/rods-in-water-01.6nm.dat' u 1:(f($1,1.6)) notitle with l ls 14 , \
 'figs/rods-in-water-02.0nm.dat' u 1:($2/kJpermol/(nm)-1.652) title 'r=1.0 nm' with l ls 5, \
 'figs/rods-in-water-02.0nm.dat' u 1:(f($1,2.0)) notitle with l ls 15 , \
-'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-2.002) title 'r=1.2 nm' with l ls 6, \
+'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-2.007) title 'r=1.2 nm' with l ls 6, \
 'figs/rods-in-water-02.4nm.dat' u 1:(f($1,2.4)) notitle with l ls 16
-#'figs/rods-in-water-02.4nm.dat' u 1:($2/kJpermol/(nm)-1.939) title 'r=1.2 nm' with lp ls 6

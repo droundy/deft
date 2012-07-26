@@ -93,11 +93,14 @@ figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.4nm.dat \
 	figs/rods-in-water-00.8nm.dat figs/rods-in-water-01.2nm.dat \
 	figs/rods-in-water-01.6nm.dat figs/rods-in-water-02.0nm.dat \
 	figs/rods-in-water-02.4nm.dat
-figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.6nm.dat \
-	figs/four-rods-in-water-01.0nm.dat figs/four-rods-in-water-01.4nm.dat \
-	figs/four-rods-in-water-01.8nm.dat figs/four-rods-in-water-02.0nm.dat
-figs/density-single-rod.eps: figs/single-rod-slice-02.0.dat \
-		figs/single-rod-slice-01.0.dat figs/single-rod-slice-00.6.dat \
+figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.4nm.dat \
+	figs/four-rods-in-water-00.8nm.dat figs/four-rods-in-water-01.2nm.dat \
+	figs/four-rods-in-water-01.6nm.dat figs/four-rods-in-water-02.0nm.dat \
+	figs/four-rods-in-water-02.4nm.dat
+figs/density-single-rod.eps: figs/single-rod-slice-00.1.dat \
+		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
+		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
+		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
 		figs/single-rods-calculated-density.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
