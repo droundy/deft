@@ -461,7 +461,7 @@ int main(int argc, char *argv[]){
   FILE *countout = fopen(counterout,"w");
   for (long i=0;i<N; i++){
     fprintf(countout, "%d\n", max_move_counter[i]);
-      }
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
 
