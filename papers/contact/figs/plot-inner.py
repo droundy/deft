@@ -59,6 +59,7 @@ start_here = int(2/dft_dr)
 print stop_here
 
 A_plt = pylab.subplot(3,1,1)
+A_plt.set_title(sys.argv[2])
 A_plt.plot(mcdata[:,0],mcdata[:,2+2*off]/nAmc,"r-",label="MC $g_\sigma^A$")
 A_plt.plot(dftdata[start_here:stop_here,0],dftdata[start_here:stop_here,5],"ro--",markevery=me,label="$g_\sigma^A$ (White Bear)")
 A_plt.plot(wbm2data[start_here:stop_here,0],wbm2data[start_here:stop_here,5],"r+--",markevery=me,label="$g_\sigma^A$ (mark II)",

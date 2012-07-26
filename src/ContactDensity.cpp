@@ -237,7 +237,7 @@ Functional dAdR_A_over_n(double radius) {
     - yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWB_dn1v_over_n2v(radius) +
                                   n2y*dWB_dn2v_over_n2v(radius))
     - zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWB_dn1v_over_n2v(radius) +
-                                  n2z*dWB_dn2v_over_n2v(radius));
+				  n2z*dWB_dn2v_over_n2v(radius));
 }
 
 Functional dAdR_S(double radius) {

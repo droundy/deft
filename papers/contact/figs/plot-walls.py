@@ -70,13 +70,13 @@ A_plt.plot(dftdata[:,0],dftdata[:,7],"rx--",markevery=me,label="Gross",
 A_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
 pylab.xlim(0,12)
 #matplotlib.ticks(arange(0.5, 1.5, 3.5))
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
-    pylab.ylim(2.7,4.8)
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
-    pylab.ylim(1.0,4.20)
-if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
-    pylab.ylim(0.95,1.50)
-pylab.ylim(ymin=0)
+# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.45) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.35)):
+#     pylab.ylim(2.7,4.8)
+# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.35) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.25)):
+#     pylab.ylim(1.0,4.20)
+# if ((mcdata[int(n/2),1]*4*numpy.pi/3<0.15) & (mcdata[int(n/2),1]*4*numpy.pi/3>0.05)):
+#     pylab.ylim(0.95,1.50)
+# pylab.ylim(ymin=-1)
 
 S_plt = pylab.subplot(3,1,2)
 S_plt.plot(mcdata[:,0]+mcoffset,mcdata[:,3+2*off]/n0mc,"b-",label="$g_\sigma^S$ MC")

@@ -39,6 +39,16 @@ ALL_FIGURES=\
 	figs/gHS-vs-n.gp\
 	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
 	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
+	figs/outer-20-04.pdf \
+	figs/outer-20-03.pdf \
+	figs/outer-16-05.pdf \
+	figs/outer-16-04.pdf \
+	figs/outer-16-03.pdf \
+	figs/outer-12-01.pdf \
+	figs/outer-12-02.pdf \
+	figs/outer-12-03.pdf \
+	figs/outer-12-04.pdf \
+	figs/outer-12-05.pdf \
 	figs/gnn-inner-4-30.pdf figs/gnn-inner-4-40.pdf figs/gnn-inner-8-30.pdf\
 	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
         figs/gnn-walls-10.pdf figs/gnn-walls-30.pdf figs/gnn-walls-40.pdf \
@@ -64,6 +74,13 @@ figs/free-energy.eps: figs/free-energy.dat
 
 figs/contact-08-013.pdf: figs/contact-density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat figs/sphereWBm2-radial-08.0-13.dat
 	python $^ $@
+
+figs/outer-20-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-20-00.%.dat
+	python $< 20 $* $@
+figs/outer-16-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-16-00.%.dat
+	python $< 16 $* $@
+figs/outer-12-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-12-00.%.dat
+	python $< 12 $* $@
 
 figs/contact-12-112.pdf: figs/contact-density.py figs/mc-06-112.dat figs/sphereWB-radial-12.0-112.dat figs/sphereWBT-radial-12.0-112.dat figs/sphereWBm2-radial-12.0-112.dat
 	python $^ $@

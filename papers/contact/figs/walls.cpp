@@ -79,31 +79,6 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, cons
   fclose(out);
 }
 
-void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
-			    const Grid &c) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    // don't just abort?
-    return;
-  }
-  const GridDescription gd = a.description();
-  const int x = 0;
-  //const int y = gd.Ny/2;
-  for (int y=-gd.Ny/2; y<=gd.Ny/2; y++) {
-    for (int z=-gd.Nz/2; z<=gd.Nz/2; z++) {
-      Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double ahere = a(here);
-      double bhere = b(here);
-      double chere = c(here);
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	      ahere, bhere, chere);
-    }
-    fprintf(out,"\n");
- }  
-  fclose(out);
-}
-
 
 void run_walls(double eta, const char *name, Functional fhs) {
   printf("Filling fraction is %g\n", eta);
@@ -142,13 +117,12 @@ void run_walls(double eta, const char *name, Functional fhs) {
   printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/contact/figs/walls%s-%04.1f-%04.2f.dat", name, width, eta);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    correlation_S = Correlation_S(1.0)(1, gd, density);    
-    correlation_A = Correlation_A(1.0)(1, gd, density);
+    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
+    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
@@ -198,36 +172,6 @@ int main(int, char **) {
   FILE *fout = fopen("papers/contact/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
   for (double eta = 0.1; eta < 0.6; eta+=0.1) {
-    run_walls(eta, "WB", WB);
-    run_walls(eta, "WBT", WBT);
-    run_walls(eta, "WBm2", WBm2);
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/contact/figs/walls.dat", "w")) {
-    printf("Error creating walls.dat!\n");
-    return 1;
-  }
-  for (double eta = 0.01; eta < 0.6; eta+=0.1) {
-    run_walls(eta, "WB", WB);
-    run_walls(eta, "WBT", WBT);
-    run_walls(eta, "WBm2", WBm2);
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/contact/figs/walls.dat", "w")) {
-    printf("Error creating walls.dat!\n");
-    return 1;
-  }
-  for (double eta = 0.05; eta < 0.6; eta+=0.1) {
-    run_walls(eta, "WB", WB);
-    run_walls(eta, "WBT", WBT);
-    run_walls(eta, "WBm2", WBm2);
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/contact/figs/walls.dat", "w")) {
-    printf("Error creating walls.dat!\n");
-    return 1;
-  }
-  for (double eta = 0.2; eta < 0.6; eta+=0.1) {
     run_walls(eta, "WB", WB);
     run_walls(eta, "WBT", WBT);
     run_walls(eta, "WBm2", WBm2);
