@@ -182,7 +182,7 @@ Functional dWBm2_dn2(double radius) {
 
 Functional dWBm2_dn2v_over_n2v(double radius) {
   Functional R(radius, "R");
-  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (4*M_PI*R*(1-n3(radius))) 
+  return -(Functional(1) + (1.0/9.0)*sqr(n3(radius))*phi2(n3(radius))) / (4*M_PI*R*(1-n3(radius)))
     -(1 - (4.0/9.0)*n3(radius)*phi3(n3(radius)))*
     Functional(6)*n2(radius) / (24*M_PI*sqr(1-n3(radius)));
 }
@@ -204,7 +204,7 @@ Functional dWBm2_dn3(double radius) {
     // Psi2
     n22mnV22/(4*M_PI*R*omn3)
     *((2.0/9.0)*n3_*phi2(n3_) + (1.0/9.0)*sqr_n3_times_phi2_dn3(n3_)) +
-    (Functional(1) + (1/9.0)*sqr(n3_)*phi2(n3_)) * (n22mnV22) / (4*M_PI*R*sqr(omn3)) 
+    (Functional(1) + (1/9.0)*sqr(n3_)*phi2(n3_)) * (n22mnV22) / (4*M_PI*R*sqr(omn3))
     +
     // Psi3
     (Functional(1)/(24*M_PI*sqr(omn3)))*vtt*
@@ -237,7 +237,7 @@ Functional dAdR_A_over_n(double radius) {
     - yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWB_dn1v_over_n2v(radius) +
                                   n2y*dWB_dn2v_over_n2v(radius))
     - zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWB_dn1v_over_n2v(radius) +
-				  n2z*dWB_dn2v_over_n2v(radius));
+                                  n2z*dWB_dn2v_over_n2v(radius));
 }
 
 Functional dAdR_S(double radius) {
@@ -263,14 +263,14 @@ Functional dAdR_S(double radius) {
            + dWB_dn0(radius)/(4*M_PI*sqr(R)))
     - n2x*(dWB_dn2v_over_n2v(radius)*n2px
            + dWB_dn1v_over_n2v(radius)*n2px/(4*M_PI*R)
-	   + dWB_dn1v_over_n2v(radius)*n2x/(4*M_PI*sqr(R)))
+           + dWB_dn1v_over_n2v(radius)*n2x/(4*M_PI*sqr(R)))
     - n2y*(dWB_dn2v_over_n2v(radius)*n2py
-	   + dWB_dn1v_over_n2v(radius)*n2py/(4*M_PI*R)
-	   + dWB_dn1v_over_n2v(radius)*n2y/(4*M_PI*sqr(R)))
+           + dWB_dn1v_over_n2v(radius)*n2py/(4*M_PI*R)
+           + dWB_dn1v_over_n2v(radius)*n2y/(4*M_PI*sqr(R)))
     - n2z*(dWB_dn2v_over_n2v(radius)*n2pz
            + dWB_dn1v_over_n2v(radius)*n2pz/(4*M_PI*R)
            + dWB_dn1v_over_n2v(radius)*n2z/(4*M_PI*sqr(R)));
-    }
+}
 
 
 Functional Correlation_A(double radius) {
@@ -295,19 +295,19 @@ Functional dAdR_A_over_n_WBm2(double radius) {
   Functional n2z = zShellConvolve(radius);
 
   return ShellConvolve(radius)(dWBm2_dn3(radius))
-    + ShellConvolve(radius)(- 2*one_over_4piRsqr/R*dWBm2_dn0(radius)
-                            - one_over_4piRsqr*dWBm2_dn1(radius))
-    + ShellPrimeConvolve(radius)(dWBm2_dn2(radius)
+    - ShellConvolve(radius)( 2*one_over_4piRsqr/R*dWBm2_dn0(radius)
+                             + one_over_4piRsqr*dWBm2_dn1(radius))
+    - ShellPrimeConvolve(radius)(dWBm2_dn2(radius)
                                  + one_over_4piR*dWBm2_dn1(radius)
                                  + one_over_4piRsqr*dWBm2_dn0(radius))
-    + xShellConvolve(radius)(-one_over_4piRsqr*n2x*dWBm2_dn1v_over_n2v(radius))
-    + yShellConvolve(radius)(-one_over_4piRsqr*n2y*dWBm2_dn1v_over_n2v(radius))
-    + zShellConvolve(radius)(-one_over_4piRsqr*n2z*dWBm2_dn1v_over_n2v(radius))
-    + xShellPrimeConvolve(radius)(one_over_4piR*n2x*dWBm2_dn1v_over_n2v(radius) +
+    - xShellConvolve(radius)(one_over_4piRsqr*n2x*dWBm2_dn1v_over_n2v(radius))
+    - yShellConvolve(radius)(one_over_4piRsqr*n2y*dWBm2_dn1v_over_n2v(radius))
+    - zShellConvolve(radius)(one_over_4piRsqr*n2z*dWBm2_dn1v_over_n2v(radius))
+    - xShellPrimeConvolve(radius)(one_over_4piR*n2x*dWBm2_dn1v_over_n2v(radius) +
                                   n2x*dWBm2_dn2v_over_n2v(radius))
-    + yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWBm2_dn1v_over_n2v(radius) +
+    - yShellPrimeConvolve(radius)(one_over_4piR*n2y*dWBm2_dn1v_over_n2v(radius) +
                                   n2y*dWBm2_dn2v_over_n2v(radius))
-    + zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWBm2_dn1v_over_n2v(radius) +
+    - zShellPrimeConvolve(radius)(one_over_4piR*n2z*dWBm2_dn1v_over_n2v(radius) +
                                   n2z*dWBm2_dn2v_over_n2v(radius));
 }
 
@@ -329,18 +329,18 @@ Functional dAdR_S_WBm2(double radius) {
   return n2(radius)*(dWBm2_dn3(radius)
                      - dWBm2_dn1(radius)/(4*M_PI*sqr(R))
                      - dWBm2_dn0(radius)/(2*M_PI*Pow(3)(R)))
-    + n2p*(dWBm2_dn2(radius)
+    - n2p*(dWBm2_dn2(radius)
            + dWBm2_dn1(radius)/(4*M_PI*R)
            + dWBm2_dn0(radius)/(4*M_PI*sqr(R)))
-    + n2x*(dWBm2_dn2v_over_n2v(radius)*n2px
+    - n2x*(dWBm2_dn2v_over_n2v(radius)*n2px
            + dWBm2_dn1v_over_n2v(radius)*n2px/(4*M_PI*R)
-           - dWBm2_dn1v_over_n2v(radius)*n2x/(4*M_PI*sqr(R)))
-    + n2y*(dWBm2_dn2v_over_n2v(radius)*n2py
+           + dWBm2_dn1v_over_n2v(radius)*n2x/(4*M_PI*sqr(R)))
+    - n2y*(dWBm2_dn2v_over_n2v(radius)*n2py
            + dWBm2_dn1v_over_n2v(radius)*n2py/(4*M_PI*R)
-           - dWBm2_dn1v_over_n2v(radius)*n2y/(4*M_PI*sqr(R)))
-    + n2z*(dWBm2_dn2v_over_n2v(radius)*n2pz
+           + dWBm2_dn1v_over_n2v(radius)*n2y/(4*M_PI*sqr(R)))
+    - n2z*(dWBm2_dn2v_over_n2v(radius)*n2pz
            + dWBm2_dn1v_over_n2v(radius)*n2pz/(4*M_PI*R)
-           - dWBm2_dn1v_over_n2v(radius)*n2z/(4*M_PI*sqr(R)));
+           + dWBm2_dn1v_over_n2v(radius)*n2z/(4*M_PI*sqr(R)));
 }
 
 Functional Correlation_A_WBm2(double radius) {
