@@ -62,11 +62,9 @@ smallest molecules in the presence of a solvent poses a continuing
 challenge due to the complex structure of a liquid and the
 computational cost of \emph{ab initio} molecular
 dynamics~\cite{car1985, grossman2004}.  The current state-of-the art
-in \emph{ab initio} molecular dynamics is limited to around 64 water
-molecules per unit cell, which places the minimum solute concentration
-at 0.84 molar and allows contact between the second solvation shell of
-neighboring solutes~\cite{izvekov2005, choe2007}\fixme{Look up more
-  recent numbers on this!}.  On top of this, standard \emph{ab initio}
+in \emph{ab initio} molecular dynamics is limited to a few hundred water
+molecules per unit cell~\cite{lewis2011doesnitric}.  On top of this,
+standard \emph{ab initio}
 methods using classical molecular dynamics without van der Waals
 corrections strongly over-structure water, to the point that ice melts
 at over 400K\cite{yoo2009phase}!  There has been a recent flurry of
@@ -531,14 +529,12 @@ We show in Figure~\ref{fig:energy-vs-diameter} the excess chemical
 potential at room temperature, scaled by the solvent-accessible
 surface area of the hard rod, plotted as a function of hard-rod
 radius, which we define as the radius from which water is excluded.
-For rods with radius larger than 0.5~nm or so, this reaches a value of
-75~mN/m, which is slightly higher than the bulk surface, which will be
-approached from above in the limit of very large rods \fixme{this is a
-terrible sentence, want to say something more concrete about free
-energy / area dropping (getting data) DJR}.  For very small
-radius (less than about 0.1~nm) the relationship between the free
-energy per area and radius is linear, with the slope required by the
-contact-value theorem (see Equation~\ref{contactvaluethm}).
+For rods with radius larger than 0.5~nm or so, this reaches a maximum value of
+75~mN/m, which is slightly higher than the bulk surface.  In the limit
+of very large rods, this value will decrease and approach the bulk
+surface value.  For very small radius (less than about 0.1~nm) the
+relationship between the free energy per area and radius is linear,
+with the slope required by the contact-value theorem (see Equation~\ref{contactvaluethm}).
 
 \begin{figure}
 \begin{center}
