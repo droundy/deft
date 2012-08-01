@@ -12,6 +12,7 @@ long shell(Vector3d v, long div, double *radius, double *sections);
 double countOverLaps(Vector3d *spheres, long n, double R);
 double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
+Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -392,16 +393,16 @@ int main(int argc, char *argv[]){
         for(long n = 0; n<N; n++){
           if (k!=n && touch(spheres[n],spheres[k],oShellArray[3])) {
             GconShells[shell(spheres[k],div,radius,sections)]++;
-            GcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+            GcenConShells[shell(halfwayBetween(spheres[n], spheres[k], oShellArray[3]),div,radius,sections)]++;
             if (touch(spheres[n],spheres[k],oShellArray[2])) {
               LconShells[shell(spheres[k],div,radius,sections)]++;
-              LcenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+              LcenConShells[shell(halfwayBetween(spheres[n], spheres[k], oShellArray[2]),div,radius,sections)]++;
               if (touch(spheres[n],spheres[k],oShellArray[1])) {
                 MconShells[shell(spheres[k],div,radius,sections)]++;
-                McenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+                McenConShells[shell(halfwayBetween(spheres[n], spheres[k], oShellArray[1]),div,radius,sections)]++;
                 if (touch(spheres[n],spheres[k],oShellArray[0])) {
                   SconShells[shell(spheres[k],div,radius,sections)]++;
-                  ScenConShells[shell((spheres[n]+spheres[k])/2,div,radius,sections)]++;
+                  ScenConShells[shell(halfwayBetween(spheres[n], spheres[k], oShellArray[0]),div,radius,sections)]++;
                 }
               }
             }
@@ -501,7 +502,6 @@ int main(int argc, char *argv[]){
     printf("Number of contacts (center) in division %ld = %ld %ld %ld %ld\n", i+1,
            ScenConShells[i], McenConShells[i], LcenConShells[i], GcenConShells[i]);
   }
-
   //FILE *out = fopen((const char *)outfilename,"w");
   FILE *out = fopen((const char *)outfilename,"w");
   if (out == NULL) {
@@ -741,9 +741,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   return false;
 }
 
-
-Vector3d move(Vector3d v,double scale){
-  Vector3d newv = v+scale*ran3();
+inline Vector3d fixPeriodic(Vector3d newv){
   if (periodic[0] || has_x_wall){
     while (newv[0] > lenx/2){
       newv[0] -= lenx;
@@ -772,6 +770,52 @@ Vector3d move(Vector3d v,double scale){
   return newv;
 }
 
+Vector3d move(Vector3d v,double scale){
+  Vector3d newv = v+scale*ran3();
+  return fixPeriodic(newv);
+}
+
+
+Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
+  const double dvw = distance(v,w);
+  // The following is a hack to avoid doing many distance calculations
+  // in cases where we can be certain that periodic boundaries
+  // couldn't be allowing these two spheres to touch.  It makes a
+  // shocking difference in the overall speed, when we have periodic
+  // boundary conditions in all three directions!
+  if (dvw < lenx - 2*oShell &&
+      dvw < leny - 2*oShell &&
+      dvw < lenz - 2*oShell) return (w + v)/2;
+
+  // Now we check for all the possible ways the two spheres could
+  // touch across the cell in periodic directions...
+  //return false;
+  for (long k=0; k<3; k++){
+    if (periodic[k]){
+      if (distance(v,w+lat[k]) < 2*oShell) return fixPeriodic((v + w + lat[k])/2);
+      if (distance(v,w-lat[k]) < 2*oShell) return fixPeriodic((v + w - lat[k])/2);
+      for (long m=k+1; m<3; m++){
+        if (periodic[m]){
+          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]+lat[m]);
+          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]-lat[m]);
+          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]-lat[m]);
+          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]+lat[m]);
+        }
+      }
+    }
+  }
+  if (periodic[0] && periodic[1] && periodic[2]){
+    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic(v+w+latx+laty+latz);
+    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic(v+w+latx+laty-latz);
+    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic(v+w+latx-laty+latz);
+    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic(v+w-latx+laty+latz);
+    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic(v+w-latx-laty+latz);
+    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic(v+w-latx+laty-latz);
+    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic(v+w+latx-laty-latz);
+    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic(v+w-latx-laty-latz);
+  }
+  return (w+v)/2;
+}
 
 bool touch(Vector3d w, Vector3d v, double oShell){
   const double dvw = distance(v,w);
