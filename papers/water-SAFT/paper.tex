@@ -212,7 +212,7 @@ which are commonly used to study the surface tension as a function of
 temperature\cite{clark2006developing, gloor2004accurate, kahl2008modified,
   gloor2007prediction, blas2001examination, kiselev2006new,
   gloor2002saft,fu2005vapor-liquid-dft, gross2009density,
-  yang1994density}.  Such
+  yang1994density, Jaqaman2004}.  Such
 functionals have qualitatively predicted the dependence of surface
 tension on temperature, but they also overestimate
 the surface tension by about 50\%, and most SAFT-based functionals are
@@ -254,6 +254,8 @@ Muller2001 & X &  &  &  \\
 Yang1994 &  & X &  & X \\
 \hline
 ding1987 &  & X & ? &  \\
+\hline
+Jaqaman2004 &  & X & ? & X \\
 \hline
 next & ? & ? & ? & ? \\
 \hline
@@ -532,9 +534,10 @@ radius, which we define as the radius from which water is excluded.
 For rods with radius larger than 0.5~nm or so, this reaches a maximum value of
 75~mN/m, which is slightly higher than the bulk surface.  In the limit
 of very large rods, this value will decrease and approach the bulk
-surface value.  For very small radius (less than about 0.1~nm) the
-relationship between the free energy per area and radius is linear,
-with the slope required by the contact-value theorem (see Equation~\ref{contactvaluethm}).
+surface value.  As seen in the inset of
+Fig.~\ref{fig:energy-vs-diameter}, for rods with very small radius (less than
+about 0.5~\AA) the excess chemical potential is proportional to volume,
+as required by the contact-value theorem (see Equation~\ref{contactvaluethm}).
 
 \begin{figure}
 \begin{center}
@@ -566,9 +569,9 @@ between the rods, but as the rods are pulled apart, the vapor region
 expands until a critical separation is reached at which point liquid
 water fills the region between the rods.
 Figure~\ref{fig:density-rods} shows density profiles before and after
-this transition for rods of radius 0.5~nm. This critical separation
+this transition for rods of radius 0.6~nm. This critical separation
 for the transition to liquid depends on the radii of the rods, and is
-about 0.54~nm for the rods shown in Figure~\ref{fig:density-rods}.
+about 0.65~nm for the rods shown in Figure~\ref{fig:density-rods}.
 The critical separation will be different for a system where there is
 a significant direct force between rods, or attraction between the
 rods and water.  At small separations, the water around the two
@@ -589,9 +592,9 @@ rods looks as if the two rods were one solid ``stadium''-shaped object
 \includegraphics[width=\columnwidth]{figs/density-rods-in-water}
 \end{center}
 \caption{ Density profiles illustrating the transition from vapor 
-to liquid water between the rods. The radius is 0.5~nm, the top figure is 
-at a separation of 0.5~nm and the
-bottom is 0.6~nm. Figure~\ref{fig:rods-energy-vs-distance} shows
+to liquid water between the rods. The radius is 0.6~nm, the top figure is
+at a separation of 0.6~nm and the
+bottom is 0.7~nm. Figure~\ref{fig:rods-energy-vs-distance} shows
 the energy for these and other separations.}
 \label{fig:density-rods}
 \end{figure}
@@ -622,7 +625,8 @@ C_{s} = 2\pi r +4r+2d
 \end{equation}
 and so the force per length is equal to twice the surface tension.
 
-We plot in Figure~\ref{fig:rods-energy-vs-distance} the computed free energy
+We plot in Figure~\ref{fig:rods-energy-vs-distance} the computed free
+energy of interaction
 per unit length from our classical density functional (solid lines),
 as a function of the separation $d$, along with the free energy
 predicted by our simple macroscopic model (dashed lines).  The models
@@ -634,9 +638,9 @@ separation for rods greater than 0.5~nm in radius.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/rods-energy-vs-distance}
 \end{center}
-\caption{ \fixme{Free energy of hydration} (also known as the potential of mean force) 
+\caption{ Free energy of interaction (also known as the potential of mean force)
 versus separation for two hydrophobic rods ranging in radius from
-0.3~nm to 1.0~nm.
+0.2~nm to 1.2~nm.
 All were arbitrarily offset to zero at large separations for ease of comparison. The
 transition corresponds to the phase change from
 vapor to liquid between the rods as pictured in the density profiles in 
@@ -660,9 +664,9 @@ carbon-water interactions.
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/four-rods-energy-vs-distance}
 \end{center}
-\caption{ \fixme{Free energy of hydration} 
+\caption{ Free energy of interaction
 versus separation for four hydrophobic rods ranging in radius from
-0.3~nm to 1.0~nm.
+0.2~nm to 1.2~nm.
 All were arbitrarily offset to zero at large separations. The
 transition corresponds to the phase change from
 vapor to liquid between the rods as pictured in the density profiles in 
@@ -675,11 +679,10 @@ Figure~\ref{fig:density-four-rods}. }
 \includegraphics[width=\columnwidth]{figs/density-four-rods}
 \end{center}
 \caption{ Density profiles illustrating the transition from vapor 
-to liquid water between four rods. The radius is 0.5~nm, the top figure is 
-at a separation of 1.1~nm and the
-bottom is 1.2~nm. Figure~\ref{fig:four-rods-energy-vs-distance} shows
+to liquid water between four rods. The radius is 0.6~nm, the top figure is
+at a separation of 1.53~nm and the
+bottom is 1.56~nm. Figure~\ref{fig:four-rods-energy-vs-distance} shows
 the energy for these and other separations.}
-
 \label{fig:density-four-rods}
 \end{figure}
 
@@ -689,12 +692,13 @@ and large length scales~\cite{lum1999hydrophobicity}.  As in the case
 of two rods---and as predicted by Lum~\emph{et al}---we observe a
 drying transition, as seen the density plot shown in
 Figure~\ref{fig:density-four-rods}.  In
-Figure~\ref{fig:four-rods-energy-vs-distance}, we plot the \fixme{free energy
-of hydration} together with the macroscopic approximation, and find
-good agreement for rods larger than 1~nm in diameter.  \fixme{ Add
-  data from LCW paper to the plot? I ended up cutting what felt like
-  needless verbiage (and excessive explanation of the macroscopic
-  model), but now it seems too short. }
+Figure~\ref{fig:four-rods-energy-vs-distance}, we plot the free energy
+of interaction together with the macroscopic approximation, and find
+good agreement for rods larger than 0.5~nm in radius.  This free
+energy plot is qualitatively similar to that predicted by the LCW
+theory~\cite{lum1999hydrophobicity}, with the minor difference that
+we find no barrier to the association of four rods.
+
 
 \subsection{Hydration energy of hard-sphere solutes}
 
@@ -702,7 +706,8 @@ good agreement for rods larger than 1~nm in diameter.  \fixme{ Add
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/sphere-energy-vs-diameter}
 \end{center}
-\caption{ Free energy versus radius for a single hydrophobic sphere
+\caption{ Excess chemical potential per area versus radius for
+  a single hydrophobic sphere
   immersed in water. This should have an asymptote equal to the
   surface tension at room temperature, and it agrees well with the
   surface tension in Figure~\ref{fig:surface-tension}. Results from a

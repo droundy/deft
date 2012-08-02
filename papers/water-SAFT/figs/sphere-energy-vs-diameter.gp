@@ -31,7 +31,7 @@ set key bottom right
 set size 1,1          # The first plot (host plot)
 set origin 0,0
 set xlabel 'Radius (nm)'
-set ylabel 'Energy/Area (mN/m)'
+set ylabel '{/Symbol m}_{ex}/Area (mN/m)'
 
 set style line 1 lt 3 lw 3 pt 7 ps 2
 set style line 2 lt 7 pt 6 lw 3 ps 2

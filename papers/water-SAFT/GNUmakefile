@@ -86,9 +86,9 @@ figs/pressure-with-isotherms-truncated.eps: figs/pressure-with-isotherms.dat \
 figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
-figs/density-rods-in-water.eps: figs/rods-slice-01.0-00.5.dat figs/rods-slice-01.0-00.6.dat
-figs/density-four-rods.eps: figs/four-rods-01.0-1.22.dat \
-	figs/four-rods-01.0-1.37.dat
+figs/density-rods-in-water.eps: figs/rods-slice-01.2-00.6.dat figs/rods-slice-01.2-00.7.dat
+figs/density-four-rods.eps: figs/four-rods-01.2-1.53.dat \
+	figs/four-rods-01.2-1.56.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.4nm.dat \
 	figs/rods-in-water-00.8nm.dat figs/rods-in-water-01.2nm.dat \
 	figs/rods-in-water-01.6nm.dat figs/rods-in-water-02.0nm.dat \
