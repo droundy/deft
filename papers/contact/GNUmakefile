@@ -37,7 +37,6 @@ ALL_FIGURES=\
 	figs/contact.svg\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
-	figs/contact-08-013.pdf figs/contact-12-112.pdf figs/contact-16-265.pdf\
 	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
 	figs/outer-20-04.pdf \
 	figs/outer-20-03.pdf \
@@ -52,7 +51,8 @@ ALL_FIGURES=\
 	figs/gnn-inner-4-30.pdf figs/gnn-inner-4-40.pdf figs/gnn-inner-8-30.pdf\
 	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
         figs/gnn-walls-10.pdf figs/gnn-walls-30.pdf figs/gnn-walls-40.pdf \
-	figs/inner-4-30.pdf figs/inner-4-40.pdf figs/inner-8-30.pdf \
+	figs/inner-4-10.pdf figs/inner-4-20.pdf figs/inner-4-30.pdf figs/inner-4-40.pdf \
+	figs/inner-12-20.pdf figs/inner-12-30.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -72,21 +72,12 @@ figs/free-energy.eps: figs/free-energy.dat
 
 #figs/box-%.eps: figs/box-%.dat
 
-figs/contact-08-013.pdf: figs/contact-density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat figs/sphereWBm2-radial-08.0-13.dat
-	python $^ $@
-
 figs/outer-20-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-20-00.%.dat
 	python $< 20 $* $@
 figs/outer-16-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-16-00.%.dat
 	python $< 16 $* $@
 figs/outer-12-0%.pdf: figs/plot-outer.py figs/outer-sphereWB-12-00.%.dat
 	python $< 12 $* $@
-
-figs/contact-12-112.pdf: figs/contact-density.py figs/mc-06-112.dat figs/sphereWB-radial-12.0-112.dat figs/sphereWBT-radial-12.0-112.dat figs/sphereWBm2-radial-12.0-112.dat
-	python $^ $@
-
-figs/contact-16-265.pdf: figs/contact-density.py figs/mc-08-265.dat figs/sphereWB-radial-16.0-265.dat figs/sphereWBT-radial-16.0-265.dat figs/sphereWBm2-radial-16.0-265.dat
-	python $^ $@
 
 figs/gnn-sphere-08-013.pdf: figs/plot-gnn-sphere.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat figs/sphereWBm2-radial-08.0-13.dat
 	python $^ $@
@@ -115,14 +106,11 @@ figs/gnn-walls-30.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-605.dat figs/wall
 figs/gnn-walls-40.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-816.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
 	python $^ $@
 
-figs/inner-4-30.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat figs/inner-sphereWBm2-04.0-0.30.dat
-	python $^ $@
+figs/inner-4-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-04.0-0.%0.dat figs/
+	python $< 2 $* $@
 
-figs/inner-4-40.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.40.dat figs/inner-sphereWBT-04.0-0.40.dat figs/inner-sphereWBm2-04.0-0.40.dat
-	python $^ $@
-
-figs/inner-8-30.pdf: figs/plot-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-08.0-0.30.dat figs/inner-sphereWBT-08.0-0.30.dat figs/inner-sphereWBm2-08.0-0.30.dat
-	python $^ $@
+figs/inner-12-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-12.0-0.%0.dat figs/
+	python $< 6 $* $@
 
 figs/gnn-inner-4-30.pdf: figs/plot-gnn-inner.py figs/mc-innerSphere-20-02-760.dat figs/inner-sphereWB-04.0-0.30.dat figs/inner-sphereWBT-04.0-0.30.dat figs/inner-sphereWBm2-04.0-0.30.dat
 	python $^ $@
