@@ -52,21 +52,21 @@ set cbrange [0:1.2]
 set cbtics 0.1
 set title  'After transition'
 
-d = 0.6
+d = 0.7
 set style line 1 lt 1 lw 2 lc rgb "white"
 set style arrow 1 heads filled size screen 0.015, 15, 5 front ls 1
 set arrow from -d/2, 0, 1 to d/2, 0, 1 as 1
 set label "d" at -0.07, 0.2 rotate by 0 font 'Helvetica, 20' textcolor rgb "white" front
 
 set style fill empty border 7
-set obj 2 circle at (d/2+.5), 0   size 0.5 lw 3 front
-set obj 3 circle at -(d/2+0.5), 0   size 0.5 lw 3 front
+set obj 2 circle at (d/2+.6), 0   size 0.6 lw 3 front
+set obj 3 circle at -(d/2+0.6), 0   size 0.6 lw 3 front
 
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 nm=18.8972613 # 1 nm in atomic units
 
-splot [-2.4:2.4] [-1.2:1.2] [:] \
-'figs/rods-slice-01.0-00.6.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+splot [-2.7:2.7] [-1.3:1.3] [:] \
+'figs/rods-slice-01.2-00.7.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
 
 unset arrow
 
@@ -81,17 +81,17 @@ set tmargin -2
 set bmargin 0
 unset colorbox
 
-d = 0.5
+d = 0.6
 set style line 2 lt 1 lw 2 lc rgb "#black"
 set style arrow 2 heads filled size screen 0.015, 15, 5 front ls 2
 set arrow from -d/2, 0, 1 to d/2, 0, 1 as 2
 set label "d" at -0.07, 0.2 rotate by 0 font 'Helvetica, 20' front
 
 set style fill empty border 7
-set obj 2 circle at (d/2+.5), 0   size 0.5 lw 3 front
-set obj 3 circle at -(d/2+0.5), 0   size 0.5 lw 3 front
+set obj 2 circle at (d/2+.6), 0   size 0.6 lw 3 front
+set obj 3 circle at -(d/2+0.6), 0   size 0.6 lw 3 front
 
 set title  'Before transition'
 
-splot [-2.4:2.4] [-1.2:1.2] [:] \
-'figs/rods-slice-01.0-00.5.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
+splot [-2.7:2.7] [-1.3:1.3] [:] \
+'figs/rods-slice-01.2-00.6.dat' u ($2/nm):($3/nm):($4/gpermL) notitle with pm3d
