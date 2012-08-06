@@ -154,7 +154,7 @@ int main(int argc, char *argv[]){
     }
   }
   clock_t start = clock();
-  long num_to_time = 100000;
+  long num_to_time = 2000000000;
   long num_timed = 0;
   long i = 0;
   double scale = .005;
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]){
     ScenConShells[l]=0;McenConShells[l]=0;LcenConShells[l]=0;GcenConShells[l]=0;
   }
   /////////////////////////////////////////////////////////////////////////////
-
+  int hours_now = 1;
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -304,7 +304,95 @@ int main(int argc, char *argv[]){
       start = now;
       // after the first timing, just time things once per percent (as
       // often as we print the % complete messages)
-      if (iterations/100 > num_to_time) num_to_time = iterations/100;
+//       //if (iterations/10000 > num_to_time) num_to_time = iterations/10000;
+      
+       ///////////////////////////////////////////start of print.dat
+    
+
+
+    int hours_passed = 0;
+    hours_passed = floor(clock()/10000/100/60 + 0.5);
+    if (hours_passed >= hours_now && hours_passed != 0){
+      printf("Saved Data after %d hours(s) \n", hours_passed);      
+      hours_now = hours_passed + 1;
+      if (!flat_div){
+        for(long i=0; i<div; i++){
+            double rmax = radius[i+1];
+            double rmin = radius[i];
+            density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N));
+            n0[i]=shellsArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N))/(4*M_PI*R*R);
+            nA[i]=shellsDoubleArea[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N))
+                  /(4*M_PI*2*R*2*R);
+        }
+      } else {
+        for(long i=0; i<div; i++){
+          density[i]=shells[i]/(lenx*leny*lenz/div)/((j+1)/double(N));
+          n0[i]=shellsArea[i]/(lenx*leny*lenz/div)/((j+1)/double(N))/(4*M_PI*R*R);
+          nA[i]=shellsDoubleArea[i]/(lenx*leny*lenz/div)/((j+1)/double(N))/(4*M_PI*2*R*2*R);
+        }
+        }
+      for(long i=0; i<div; i++){
+        SconDensity[i]=((SconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[0]*8*oShellArray[0]*oShellArray[0]-4/3.*M_PI*8*R*R*R));
+        ScenConDensity[i]=4*M_PI*R*R*((ScenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[0]*oShellArray[0]*oShellArray[0]-4/3.*M_PI*8*R*R*R));
+          MconDensity[i]=((MconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[1]*8*oShellArray[1]*oShellArray[1]-4/3.*M_PI*8*R*R*R));
+          McenConDensity[i]=4*M_PI*R*R*((McenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[1]*oShellArray[1]*oShellArray[1]-4/3.*M_PI*8*R*R*R));
+          LconDensity[i]=((LconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[2]*8*oShellArray[2]*oShellArray[2]-4/3.*M_PI*8*R*R*R));
+          LcenConDensity[i]=4*M_PI*R*R*((LcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[2]*oShellArray[2]*oShellArray[2]-4/3.*M_PI*8*R*R*R));
+          GconDensity[i]=((GconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[3]*8*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
+          GcenConDensity[i]=4*M_PI*R*R*((GcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[3]*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
+      }
+      
+        //FILE *out = fopen((const char *)outfilename,"w");
+      FILE *out = fopen((const char *)outfilename,"w");
+      if (out == NULL) {
+        printf("Error creating file %s\n", outfilename);
+          return 1;
+      }
+      if (flat_div){
+        fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
+      } else if (spherical_inner_wall) {
+        fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", radius[0], 0.0,
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+                  LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
+          fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0],
+                  SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+                  LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
+      } else {
+        fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n" , 0.0, density[0],
+            SconDensity[0], ScenConDensity[0], MconDensity[0], McenConDensity[0],
+            LconDensity[0], LcenConDensity[0], GconDensity[0], GcenConDensity[0], n0[0], nA[0]);
+        }
+
+      long divtoprint = div;
+      if (!spherical_outer_wall) divtoprint = div - 1;
+      if (!flat_div) {
+        for(long i=1; i<divtoprint; i++){
+          fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              0.5*(radius[i]+radius[i+1]), density[i],
+              SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i], nA[i]);
+        }
+      } else {
+        for(long i=1; i<div; i++){
+          fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              0.5*(sections[i]+sections[i+1]), density[i],
+              SconDensity[i], ScenConDensity[i], MconDensity[i], McenConDensity[i],
+              LconDensity[i], LcenConDensity[i], GconDensity[i], GcenConDensity[i], n0[i], nA[i]);
+        }
+      }
+      
+      fflush(stdout);
+      fclose(out);
+      
+    
+    }
+    
+    
+    
+    ///////////////////////////////////////////end of print.dat
+      
     }
     // only write out the sphere positions after they've all had a
     // chance to move
@@ -410,6 +498,9 @@ int main(int argc, char *argv[]){
         }
       }
     }
+    
+   
+    
     if(j % (iterations/100)==0 && j != 0){
       double secs_to_go = secs_per_iteration*(iterations - j);
       long mins_to_go = secs_to_go / 60;
