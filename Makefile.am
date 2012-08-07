@@ -60,6 +60,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
@@ -181,6 +182,7 @@ papers_water_SAFT_figs_enthalpy_mkdat_SOURCES = papers/water-SAFT/figs/enthalpy.
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(CONTACT_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(CONTACT_CODE)
 papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CONTACT_CODE)
+papers_contact_figs_test_particle_wall_mkdat_SOURCES = papers/contact/figs/test-particle-wall.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CONTACT_CODE)
 
@@ -228,6 +230,7 @@ clean-local:
 papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
+	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.dat \
 	papers/contact/figs/free-energy.dat \
 	papers/water-SAFT/figs/equation-of-state.dat \
