@@ -19,7 +19,7 @@ functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") con
 
 scalarClass :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
 scalarClass e arg variables n =
-  unlines
+  unlines $
   ["class " ++ n ++ " : public Functional {",
    "public:",
    "" ++ n ++ codeA arg ++ "  {",
@@ -49,13 +49,44 @@ scalarClass e arg variables n =
                   "\tVector out(newsize);",
                   "\tint sofar = 0;"] ++
                  map initializeOut (inputs e) ++
-                 ["\treturn out;"]),
-  "private:",
+                 ["\treturn out;"])] ++
+  map setarg (inputs e) ++
+  map getarg (inputs e) ++
+ ["private:",
   ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class",
   "\t// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
   "\t// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
   ]
     where
+      -- setarg creates a method that will set a given input argument's value.
+      setarg :: Exprn -> String
+      setarg ee = functionCode ("set_" ++ nameE ee) "void" [("Vector", "xxx"), (newdeclareE ee, nameE ee)] $
+                  unlines ("\tint sofar = 0;" : initme (inputs e) )
+                    where initme (xx@(ES _):_) | xx == ee = ["\txxx[sofar] = "++nameE ee++";"]
+                          initme (xx:_) | xx == ee = ["\txxx.slice(sofar," ++ sizeE ee ++ ") = "++nameE ee++";"]
+                          initme (xx@(ES _):rr)
+                            | nameE xx `elem` ["Nx","Ny","Nz"] =
+                              ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
+                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
+                          initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
+                          initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
+                          initme _ = error "bug inin setarg initme"
+      getarg :: Exprn -> String
+      getarg ee = functionCode ("get_" ++ nameE ee) (newdeclareE ee) [("Vector", "xxx")] $
+                  unlines ("\tint sofar = 0;" : initme (inputs e) )
+                    where initme (xx@(ES _):_) | xx == ee = ["\treturn xxx[sofar];"]
+                          initme (xx:_) | xx == ee = ["\treturn xxx.slice(sofar," ++ sizeE ee ++ ");"]
+                          initme (xx@(ES _):rr)
+                            | nameE xx `elem` ["Nx","Ny","Nz"] =
+                              ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
+                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
+                          initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
+                          initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
+                          initme _ = error "bug inin getarg initme"
+      sizeE (E3 _) = "3"
+      sizeE (ES _) = "1"
+      sizeE (ER _) = "Nx*Ny*Nz"
+      sizeE (EK _) = error "no sizeE for EK yet"
       initializeOut x@(ES _) = concat ["\tout[sofar] = ",nameE x,";\n\tsofar += 1;"]
       initializeOut x = concat ["\tout.slice(sofar,", getsize x, ") = ",nameE x,";\n\t",
                                 "sofar += ",getsize x,";"]
@@ -75,6 +106,7 @@ scalarClass e arg variables n =
                                      "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
                                      "sofar += Nx*Ny*Nz;"
       createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      inputs :: Expression Scalar -> [Exprn]
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
