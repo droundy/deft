@@ -52,9 +52,102 @@ Functional WBm2 = HardSpheresWBm2(1.0);
 
 const int numiters = 25;
 
+const double golden = (1 + sqrt(5))/2;
+const Cartesian icosohedron[] = {
+  Cartesian( 1, 1, 1),
+  Cartesian(-1, 1, 1),
+  Cartesian( 1,-1, 1),
+  Cartesian( 1, 1,-1),
+  Cartesian( 1,-1,-1),
+  Cartesian(-1, 1,-1),
+  Cartesian(-1,-1, 1),
+  Cartesian(-1,-1,-1),
+  Cartesian(0, 1/golden, golden),
+  Cartesian(0, 1/golden,-golden),
+  Cartesian(0,-1/golden, golden),
+  Cartesian(0,-1/golden,-golden),
+  Cartesian( golden,0, 1/golden),
+  Cartesian(-golden,0, 1/golden),
+  Cartesian( golden,0,-1/golden),
+  Cartesian(-golden,0,-1/golden),
+  Cartesian( 1/golden, golden,0),
+  Cartesian( 1/golden,-golden,0),
+  Cartesian(-1/golden, golden,0),
+  Cartesian(-1/golden,-golden,0),
+};
+
+// The following computes the closest value that is at least a vector
+// delta from pos.
+double closest_value(const Grid &g, Cartesian pos, Vector3d delta) {
+  double closest = 1e300;
+  double bestyet = 0;
+  //printf("finding closest_value to %g %g %g\n", pos[0], pos[1], pos[2]);
+  //printf("in direction %g %g %g\n", delta[0], delta[1], delta[2]);
+  const GridDescription gd = g.description();
+  for (int x=-gd.Nx/2; x<gd.Nx/2; x++) {
+    for (int y=-gd.Ny/2; y<gd.Ny/2; y++) {
+      for (int z=-gd.Nz/2; z<gd.Nz/2; z++) {
+        Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
+        //printf("Hello %d %d %d vs %d %d %d\n", x, y, z, gd.Nx, gd.Ny, gd.Nz);
+        //printf("here is %g %g %g\n", here[0], here[1], here[2]);
+        if ((here-pos-delta).dot(delta) > 0 && (here-pos-delta).norm() < closest) {
+          //printf("here we are... %d %d %d\n", x, y, z);
+          bestyet = g(Cartesian(pos + here));
+          closest = (here-pos-delta).norm();
+        }
+        //printf("Got here now..;\n");
+      }
+    }
+  }
+  return bestyet;
+}
+// The following computes the average value for the grid x at radius
+// from pos.
+double radial_average(const Grid &g, Cartesian pos, double radius) {
+  double total = 0;
+  for (int i=0;i<20;i++) {
+    total += closest_value(g, pos, Vector3d(radius * icosohedron[i]/icosohedron[i].norm()));
+  }
+  return total/20;
+}
+
+void radial_plot2(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
+                 const Grid &f, const Grid &g) {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+    return;
+  }
+  const GridDescription gd = a.description();
+  const double dr = diameter / floor(diameter/gd.fineLat.a2().norm());
+  //fprintf(out, "dr = %g\n", dr);
+  //fprintf(out, "gd.dx = %g\n", gd.dx);
+  //fprintf(out, "Nx*dr = %g\n", gd.Nx*dr);
+  //fprintf(out, "Ny*dr = %g\n", gd.Ny*dr);
+  for (double r = 0; r < gd.Nx*dr/2; r += dr) {
+    //printf("WOrking on %g\n", r);
+    const double meana = radial_average(a, Cartesian(0,0,0), r);
+    const double meanb = radial_average(b, Cartesian(0,0,0), r);
+    const double meanc = radial_average(c, Cartesian(0,0,0), r);
+    const double meand = radial_average(d, Cartesian(0,0,0), r);
+    const double meane = radial_average(e, Cartesian(0,0,0), r);
+    const double meanf = radial_average(f, Cartesian(0,0,0), r);
+    const double meang = radial_average(g, Cartesian(0,0,0), r);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", r,
+            meana,
+            meanb,
+            meanc,
+            meand,
+            meane,
+            meanf,
+            meang);
+  }
+  fclose(out);
+}
 
 void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
-                 const Grid &f, const Grid &g, const Grid &h) {
+                 const Grid &f, const Grid &g) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -66,6 +159,7 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
   const int z = 0;
   for (int y=0; y<gd.Ny/2; y++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
+    printf("r = %g vs %g\n", here.norm(), y*gd.dx);
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
     double chere = c(x,y,z);
@@ -73,9 +167,8 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
     double ehere = e(x,y,z);
     double fhere = f(x,y,z);
     double ghere = g(x,y,z);
-    double hhere = h(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[1],
+            ahere, bhere, chere, dhere, ehere, fhere, ghere);
   }
   fclose(out);
 }
@@ -87,10 +180,9 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
 
   const double meandensity = eta/(4*M_PI/3);
 
-  Functional f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas());
+  Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, meandensity);
-  f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas()
-                           + ChemicalPotential(mu));
+  f = OfEffectivePotential(fhs + IdealGas() + ChemicalPotential(mu));
 
   const double xmax = diameter + padding;
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,xmax,0), Cartesian(0,0,xmax));
@@ -141,10 +233,10 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
-  Grid energy_density(gd, f(1, gd, potential));
   Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
   Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
-  if (strlen(name) == 4) { 
+  if (strlen(name) == 4) {
+    printf("Computing correlation for mark II version...\n");
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
@@ -153,8 +245,11 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
-  radial_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
+  radial_plot(plotname, density, n0, correlation_S, yuwu_correlation,
+              nA, correlation_A, gross_correlation);
+  sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f-mean.dat", name, diameter, eta);
+  radial_plot2(plotname, density, n0, correlation_S, yuwu_correlation,
+               nA, correlation_A, gross_correlation);
   free(plotname);
   
   {
@@ -202,12 +297,19 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   FILE *fout = fopen("papers/contact/figs/innerfillingfracInfo.txt", "w");
+  if (!fout) {
+    printf("Unable to create innerfillingfracInfo.txt!\n");
+    exit(1);
+  }
   fclose(fout);
   if (strlen(argv[3]) == 2) {
+    printf("Using Mark I version of White Bear functional...\n");
     run_spherical_solute(diameter, eta, "WB", WB);
   } else if (strlen(argv[3]) == 3) {
+    printf("Using Mark I tensorized version of White Bear functional...\n");
     run_spherical_solute(diameter, eta, "WBT", WBT);
   } else if (strlen(argv[3]) == 4) {
+    printf("Using Mark II version of White Bear functional...\n");
     run_spherical_solute(diameter, eta, "WBm2", WBm2);
   } else {
     printf("Weird functional encountered:  %s\n", argv[3]);
