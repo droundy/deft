@@ -26,7 +26,7 @@ nA = dftdata[:,5]
 gA = dftdata[:,6]
 gross = dftdata[:,7]
 
-dftdatafilename2 = "figs/inner-sphereWB-%04.1f-0.%d0.dat" % (2*float(radiusname), int(ffdigit))
+dftdatafilename2 = "figs/inner-sphereWBm2-%04.1f-0.%d0.dat" % (2*float(radiusname), int(ffdigit))
 print 'Using', dftdatafilename2
 dftdata2 = numpy.loadtxt(dftdatafilename2)
 r_2 = dftdata2[:,0]
@@ -79,13 +79,13 @@ pylab.ylabel("filling fraction")
 #pylab.twinx()
 
 off = 2
-me = 3
+me = 4
 A_plt = pylab.subplot(3,1,1)
 A_plt.set_title("Spherical solute with radius %s and filling fraction 0.%s" % (radiusname, ffdigit))
 A_plt.axvline(x=radius, color='k', linestyle=':')
 A_plt.plot(r_mc,gA_mc,"r-",label="$g_\sigma^A$ (MC)")
-A_plt.plot(r,gA,"ro--",label="$g_\sigma^A$ (White Bear)")
-A_plt.plot(r_2,gA_2,"g.--",label="$g_\sigma^A$ (White Bear mark II)")
+A_plt.plot(r,gA,"ro--",markevery=me,label="$g_\sigma^A$ (White Bear)")
+A_plt.plot(r_2,gA_2,"g.--",markevery=me,label="$g_\sigma^A$ (White Bear mark II)")
 A_plt.plot(r,gross,"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 A_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
@@ -97,9 +97,9 @@ pylab.ylabel("$g^A$")
 S_plt = pylab.subplot(3,1,2)
 S_plt.axvline(x=radius, color='k', linestyle=':')
 S_plt.plot(r_mc[gS_mc<5],gS_mc[gS_mc<5],"g-",label="$g_\sigma^S$ (MC)")
-S_plt.plot(r[gS<5],gS[gS<5], "g+--",label="$g_\sigma^S$ (White Bear)")
-S_plt.plot(r_2[gS_2<5],gS_2[gS_2<5], "r.--",label="$g_\sigma^S$ (White Bear mark II)")
-S_plt.plot(r,gyuwu,"gx--",label="Yu and Wu")
+S_plt.plot(r[gS<5],gS[gS<5], "g+--",markevery=me,label="$g_\sigma^S$ (White Bear)")
+S_plt.plot(r_2[gS_2<5],gS_2[gS_2<5], "r.--",markevery=me,label="$g_\sigma^S$ (White Bear mark II)")
+S_plt.plot(r,gyuwu,"gx--",markevery=me,label="Yu and Wu")
 S_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
 pylab.xlim(showrmin,showrmax)
 
