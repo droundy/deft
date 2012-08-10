@@ -824,7 +824,7 @@ evaluated.  This is the most natural way to construct such a
 functional, in which the radius of spheres is a function of position.
 Thus we define $n_3^A$ as
 \begin{align}
-  n_3^{A}(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| -R(\rr')) d\rr'
+  n_3^{A}(\rr') &= \int n(\rr'') \Theta(\left|\rr' - \rr''\right| -R(\rr'')) d\rr''
 \end{align}
 and we define the other weighted densities similarly.  In order to
 compute derivatives of the free energy with respect to $R(\rr)$, we
@@ -868,21 +868,21 @@ and
 The vector-weighted densities have no additional occurrences of $R$,
 their functional derivatives come out similarly:
 \begin{align}
-  \mathbf{n}_{V2}^{A}(\rr) &= \int n(\rr') \delta(|\rr' - \rr''| - R(\rr''))
+  \mathbf{n}_{V2}^{A}(\rr') &= \int n(\rr') \delta(|\rr' - \rr''| - R(\rr''))
     \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
-  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta R(\rr)} &= - n(\rr) \delta'(|\rr' - \rr| - R(\rr))
-    \frac{\rr'-\rr}{|\rr'-\rr|}\\
+  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta R(\rr)} &= n(\rr) \delta'(|\rr' - \rr| - R(\rr))
+    \frac{\rr-\rr'}{|\rr-\rr'|}\\
 \end{align}
 and analogously for $\mathbf{n}_{V1}^A$:
 \begin{align}
-  \mathbf{n}_{V1}^A(\rr) &= \int d\rr' \frac{n(\rr')}{4\pi R(\rr')}
-  \delta(|\mathbf{r}-\rr'| - R(\rr')) \frac{\rr-\rr'}{|\rr-\rr'|}\\
+  \mathbf{n}_{V1}^A(\rr') &= \int d\rr'' \frac{n(\rr'')}{4\pi R(\rr'')}
+  \delta(|\mathbf{r'}-\rr''| - R(\rr'')) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
   \frac{\delta \mathbf{n}_{V1}^A(\rr')}{\delta R(\rr)}
-  &= -\frac{n(\rr)}{4\pi
-    R(\rr)}\delta'(|\rr'-\rr| - R(\rr)) \frac{\rr'-\rr}{|\rr'-\rr|}
-  -
+  &= \frac{n(\rr)}{4\pi
+    R(\rr)}\delta'(|\rr'-\rr| - R(\rr)) \frac{\rr-\rr'}{|\rr-\rr'|}
+  +
   \frac{n(\rr)}{4\pi
-    R(\rr)^2}\delta(|\rr'-\rr| - R(\rr)) \frac{\rr'-\rr}{|\rr'-\rr|}
+    R(\rr)^2}\delta(|\rr'-\rr| - R(\rr)) \frac{\rr-\rr'}{|\rr-\rr'|}
 \end{align}
 \fixme{double-check the directions of all the vector quantities...}
 
@@ -954,7 +954,7 @@ extending the radius for spheres just at the position touching a
 given spot, where we are evaluating the correlation function.  We
 define the weighted density $n_3^S$ as:
 \begin{align}
-  n_3^{S}(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| -R(\rr)) d\rr'
+  n_3^{S}(\rr') &= \int n(\rr'') \Theta(\left|\rr' - \rr''\right| -R(\rr')) d\rr''
 \end{align}
 In the symmetric case, the functional derivative is strikingly simple:
 \begin{align}
@@ -982,8 +982,8 @@ free energy density.
 
 The functional derivative of $n_2^S(\rr')$ is quite similar:
 \begin{align}
-  n_2^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| - R(\rr))d\mathbf
-  r'\\
+  n_2^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - R(\rr'))d\mathbf
+  r''\\
   \frac{\delta n_2^{S}(\rr')}{\delta R(\rr)} &= -\delta(\rr-\rr') \int n(\rr'')
   \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
 \end{align}
@@ -991,14 +991,14 @@ where we recognize that the convolution---while not one of the standard
 FMT weighted density---is a simple convolution of the density.  We can
 go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
-  n_1^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| - R(\rr))d\mathbf r'\\
+  n_1^{S}(\rr') &= \int \frac{n(\rr'')}{4\pi R(\rr')} \delta(|\rr' - \rr''| - R(\rr'))d\mathbf r''\\
     \frac{\delta n_1^{S}(\rr')}{\delta R(\rr)} &=
     -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)}
     \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
     + n_0^s(\rr') \right)
 \end{align}
 \begin{align}
-  n_0^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)^2} \delta(|\rr - \rr'| - R(\rr))d\mathbf r'\\
+  n_0^{S}(\rr') &= \int \frac{n(\rr'')}{4\pi R(\rr')^2} \delta(|\rr' - \rr''| - R(\rr'))d\mathbf r''\\
     \frac{\delta n_0^{S}(\rr')}{\delta R(\rr)}
     &= -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi R(\rr)^2}
     \delta'(|\rr'-\rr''| - R(\rr')) d\rr''
@@ -1006,15 +1006,15 @@ go on to compute the derivatives of the remaining weighted densities:
     \frac{2}{R} n_0^S(\rr') \right)
 \end{align}
 \begin{align}
-  \mathbf{n}_{V2}^{S}(\rr) &= \int n(\rr') \delta(|\rr - \rr'| - R(\rr))
-  \frac{(\rr - \rr')}{|\rr - \rr'|} d \rr'\\
+  \mathbf{n}_{V2}^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - R(\rr'))
+  \frac{(\rr' - \rr'')}{|\rr' - \rr''|} d \rr''\\
   \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta R(\rr)} &= -\delta(\rr - \rr')
   \int n(\rr'') \delta'(|\rr' - \rr''| - R(\rr'))
   \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
 \end{align}
 \begin{align}
- \mathbf{n}_{V1}^{S}(\rr) &= \int \frac{n(\rr')}{4\pi R(\rr)} \delta(|\rr - \rr'| + R(\rr))d\mathbf r'
-   \frac{(\rr - \rr')}{|\rr - \rr'|}\\
+ \mathbf{n}_{V1}^{S}(\rr') &= \int \frac{n(\rr'')}{4\pi R(\rr')} \delta(|\rr' - \rr''| - R(\rr'))d\mathbf r''
+   \frac{(\rr' - \rr'')}{|\rr' - \rr''|}\\
  \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta R(\rr)}
  &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi R(\rr)}
    \delta'(|\rr'-\rr''| - R(\rr')) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
