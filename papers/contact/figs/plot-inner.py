@@ -14,7 +14,7 @@ if len(sys.argv) != 4:
 radiusname = sys.argv[1]
 ffdigit = sys.argv[2]
 pdffilename = sys.argv[3]
-dftdatafilename = "figs/inner-sphereWB-%04.1f-0.%d0.dat" % (2*float(radiusname), int(ffdigit))
+dftdatafilename = "figs/inner-sphereWB-%04.1f-0.%d0-mean.dat" % (2*float(radiusname), int(ffdigit))
 print 'Using', dftdatafilename
 dftdata = numpy.loadtxt(dftdatafilename)
 r = dftdata[:,0]
@@ -26,7 +26,7 @@ nA = dftdata[:,5]
 gA = dftdata[:,6]
 gross = dftdata[:,7]
 
-dftdatafilename2 = "figs/inner-sphereWBm2-%04.1f-0.%d0.dat" % (2*float(radiusname), int(ffdigit))
+dftdatafilename2 = "figs/inner-sphereWBm2-%04.1f-0.%d0-mean.dat" % (2*float(radiusname), int(ffdigit))
 print 'Using', dftdatafilename2
 dftdata2 = numpy.loadtxt(dftdatafilename2)
 r_2 = dftdata2[:,0]
@@ -65,8 +65,8 @@ n_plt.plot(r_mc,n_mc*4*numpy.pi/3,"b-",label='MC $n$')
 n_plt.plot(r_mc,n0_mc*4*numpy.pi/3,"c-",label="MC $n_0$")
 n_plt.plot(r_mc,nA_mc*4*numpy.pi/3,"m-",label="MC $n_A$")
 
-n_plt.plot(r,n*4*numpy.pi/3,"b--",label='DFT $n$')
-n_plt.plot(r_2,n_2*4*numpy.pi/3,"b--",label='DFT $n$ (mark II)')
+n_plt.plot(r[r>=radius],n[r>=radius]*4*numpy.pi/3,"b--",label='DFT $n$')
+n_plt.plot(r_2[r_2>=radius],n_2[r_2>=radius]*4*numpy.pi/3,"b--",label='DFT $n$ (mark II)')
 n_plt.plot(r,n0*4*numpy.pi/3,"c--",label="$n_0$")
 n_plt.plot(r,nA*4*numpy.pi/3,"m-.",label="$n_A$")
 n_plt.legend(loc='upper right', ncol=2).get_frame().set_alpha(0.5)
