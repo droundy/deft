@@ -42,7 +42,7 @@ Grid::Grid(const Grid &x) : VectorXd(x), gd(x.gd) {
 
 void Grid::Set(double f(Cartesian)) {
   for (int x=0; x<gd.Nx; x++) {
-    for (int y=0; y<gd.Ny; y++) { 
+    for (int y=0; y<gd.Ny; y++) {
       for (int z=0; z<gd.Nz; z++) {
         Cartesian h(gd.Lat.wignerSeitz(gd.Lat.toCartesian(Relative(x*gd.dx,y*gd.dy,z*gd.dz))));
         (*this)(x,y,z) = f(h);
@@ -209,7 +209,7 @@ void Grid::epsNativeSlice(const char *fname,
         }
       }
     }
-    
+
     // And now we can output the trailer!
     fprintf(out, "grestore\n");
     fprintf(out, "showpage\n");

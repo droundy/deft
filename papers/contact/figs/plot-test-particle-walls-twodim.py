@@ -5,6 +5,8 @@ import matplotlib
 from matplotlib import cm
 from matplotlib import pyplot as plt
 
+#contourf plots
+
 import pylab, numpy, sys, math
 
 if len(sys.argv) != 3:
@@ -21,7 +23,7 @@ nA = dftdata[:,9]
 #step = 0.04
 maxval = 1.0
 fig = plt.figure()
-ax = Axes3D(fig)
+#ax = Axes3D(fig)
 
 dft_len = len(dftdata[:,0])
 Nz = int(math.sqrt(dft_len))
@@ -31,11 +33,18 @@ yaxis,zaxis = numpy.meshgrid(y,z)
 Z,Y = dftdata[Nz*zaxis+yaxis,0],dftdata[Nz*zaxis+yaxis,1]
 value = dftdata[Nz*zaxis+yaxis,2]
 
-ax.plot_wireframe(Z, Y, value, rstride=1, cstride=1, cmap=cm.jet)
-ax.set_zlim3d(-0.04, 0.04)
-ax.set_xlabel(r'$Z position$')
-ax.set_ylabel(r'$Y position$')
-ax.set_zlabel(r'$Value')
+nx = len(dftdata[:,0][dftdata[:,0] == 0])
+ny = len(dftdata[:,0])/nx
+print 'Nx is', nx
+print 'len is', len(dftdata[:,0])
+print 'sqr nx is', nx*nx
+X = numpy.reshape(dftdata[:,0], (ny,nx))
+Y = numpy.reshape(dftdata[:,1], (ny,nx))
+n = numpy.reshape(dftdata[:,2], (ny,nx))
+pylab.contourf(X, Y, n, 100)
+pylab.axes().set_aspect('equal')
+pylab.xlabel(r'$Z position$')
+pylab.ylabel(r'$Y position$')
 plt.show()
 
 
