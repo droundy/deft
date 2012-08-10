@@ -179,7 +179,7 @@ where the first three terms---ideal gas, hard-sphere repulsion and
 dispersion---encompass the \emph{monomer} contribution
 to the free energy, the fourth is the \emph{association} free energy,
 describing hydrogen bonds, and the final term is the chain formation
-energy for fluids that (unlike water) are chain polymers.  While a
+energy for fluids that are chain polymers.  While a
 number of formulations of SAFT have been published, we will focus on
 SAFT-VR\cite{gil-villegas-1997-SAFT-VR}, which was used by Clark
 \emph{et al} to construct an optimal SAFT model for
@@ -528,10 +528,11 @@ We begin by studying a single hydrophobic rod immersed in water.
 % model the density on a grid with spacing of about 0.01~nm, which gives
 % the free energy of hydration to a precision of better than a percent,
 % and the density at contact to a few percent precision.
-We show in Figure~\ref{fig:energy-vs-diameter} the excess chemical
+In Figure~\ref{fig:energy-vs-diameter} we show the excess chemical
 potential at room temperature, scaled by the solvent-accessible
 surface area of the hard rod, plotted as a function of hard-rod
-radius, which we define as the radius from which water is excluded.
+radius.  We define the hard-rods radius as the radius from which water
+is excluded.
 For rods with radius larger than 0.5~nm or so, this reaches a maximum value of
 75~mN/m, which is slightly higher than the bulk surface.  In the limit
 of very large rods, this value will decrease and approach the bulk
@@ -575,8 +576,8 @@ for the transition to liquid depends on the radii of the rods, and is
 about 0.65~nm for the rods shown in Figure~\ref{fig:density-rods}.
 The critical separation will be different for a system where there is
 attraction between the
-rods and water.  At small separations, the water around the two
-rods looks as if the two rods were one solid ``stadium''-shaped object
+rods and water.  At small separations, the shape of the water around the two
+rods makes them appear as one solid ``stadium''-shaped object
 (a rectangle with semi-circles on both ends).
 
 %\begin{figure}
@@ -648,21 +649,22 @@ Figure~\ref{fig:density-rods}. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 
-Walther \emph{et al.}\cite{walther2004hydrodynamic} studied the
+Walther \emph{et al.}\cite{walther2004hydrophobic} studied the
 interactions between two carbon nanotubes, which are geometrically
-similar to our hydrophobic rods.  They use molecular dynamics with
+similar to our hydrophobic rods, by using molecular dynamics with
 Lennard-Jones potentials for nanotubes of diameter 1.25~nm and
-separations ranging from about 0.3~nm to 1.5~nm, and find that a
-drying transition occurs, and find it to be at separations near
-0.9~-~1.0~nm\cite{walther2004hydrodynamic}. This is larger than what
-we find for hydrophobic rods of a similar size, as expected due to the
-carbon-water interactions.  \fixme{Can you (Jess or Eric) double-check
-  what the excluded-volume diameter is for them? The discrepancy we
-  describe in the text is actually the opposite of what I would
-  expect, but looking at the plot, I see something that is the
-  opposite of what is described in the text.  We should really figure
-  this out, and probably spend another phrase or two clarifying why it
-  is the direction we expect.}
+separations ranging from about 0.3~nm to 1.5~nm. They compute the
+force to constrain the nanotubes at different sepearation distances
+and find that a drying transition begins at separations near 0.9~-~1.0~nm where two
+layers of water molecules can exist in a metastable state between the
+rods. This reduces to one layer at a spacing of 0.55~-~0.58~nm, and at
+0.35~nm water is complete expelled and is in
+equilibrium\cite{walther2004hydrophobic}. The final drying state is
+smaller than what we find for hydrophobic rods of a similar size, as
+expected due to the carbon-water interaction and the
+van der Waals interaction between the rods that causes more attraction
+than our rods.  Our model does not predict any of the transitional
+states seen here\fixme{why?}.
 
 \subsection{Hydrophobic interactions of four rods}
 
