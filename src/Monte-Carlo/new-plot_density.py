@@ -13,6 +13,7 @@ for f in sys.argv[1:]:
     #print data[1]
     t= 22/19.0
     pylab.plot(data[:,0],data[:,1]*4*numpy.pi/3,"o-", label='density')
+    pylab.plot(data[:,0],data[:,10]*4*numpy.pi/3,"r-", label='n0')
     pylab.plot(data[:,0],t*data[:,2]*4*numpy.pi/3,"x-", label='small contact density')
     pylab.plot(data[:,0],t*data[:,3]*4*numpy.pi/3,"o-", label='small centered contact density')
     pylab.plot(data[:,0],t*data[:,4]*4*numpy.pi/3,"x-", label='medium contact density')

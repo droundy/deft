@@ -34,7 +34,7 @@ double notinwall(Cartesian r) {
   const double z = r.z();
   const double y = r.y();
   const double x = r.x();
-  if (fabs(z) > spacing && sqrt(sqr(z-z_part)+sqr(y)+sqr(x)) > diameter/2) {
+  if (fabs(z) > spacing && sqrt(sqr(z-z_part)+sqr(y)+sqr(x)) > diameter) {
       return 1;
   }
   return 0;

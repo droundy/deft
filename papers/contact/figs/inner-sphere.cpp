@@ -32,7 +32,7 @@ double notinwall(Cartesian r) {
   const double y = r.y();
   const double x = r.x();
   if (sqrt(sqr(z)+sqr(y)+sqr(x)) > diameter/2) {
-      return 1; 
+      return 1;
   }
   return 0;
 }
@@ -187,14 +187,14 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   const double xmax = diameter + padding;
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,xmax,0), Cartesian(0,0,xmax));
   GridDescription gd(lat, 0.1);
-    
+
   Grid potential(gd);
   Grid constraint(gd);
   constraint.Set(notinwall);
   took("Setting the constraint");
 
   f = constrain(constraint, f);
-  
+
   potential = meandensity*constraint + 1e-4*meandensity*VectorXd::Ones(gd.NxNyNz);
   potential = -potential.cwise().log();
   //f.run_finite_difference_test("foobar", 1, potential);
@@ -204,7 +204,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
     const double precision = fabs(approx_energy*1e-10);
     printf("Minimizing to %g absolute precision...\n", precision);
     Minimizer min = Precision(precision,
-                              PreconditionedConjugateGradient(f, gd, 1, 
+                              PreconditionedConjugateGradient(f, gd, 1,
                                                               &potential,
                                                               QuadraticLineMinimizer));
     for (int i=0;min.improve_energy(true) && i<200;i++) {
@@ -217,12 +217,12 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
-    
+
     Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-       
+
     printf("%g\t%.15g\n", diameter, energy);
   }
-  
+
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   {
     double peak = peak_memory()/1024.0/1024;
@@ -237,7 +237,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
   if (strlen(name) == 4) {
     printf("Computing correlation for mark II version...\n");
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
+    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
@@ -251,33 +251,36 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   radial_plot2(plotname, density, n0, correlation_S, yuwu_correlation,
                nA, correlation_A, gross_correlation);
   free(plotname);
-  
+
   {
     const GridDescription gdp = density.description();
-    double inner_rad = diameter/2.0; 
-        
+    double inner_rad = diameter/2.0;
+
     double Ntot = density.sum()*gdp.dvolume;
     double Ndisplaced = eta*gdp.Lat.volume()/(4*M_PI/3) - Ntot;
 
     double mc_side_len = 25;
     double N = eta*mc_side_len*mc_side_len*mc_side_len/(4.0/3.0*M_PI) - Ndisplaced;
-    
+
     FILE *fout = fopen("papers/contact/figs/innerfillingfracInfo.txt", "a");
-    
-   
+    if (fout==0){
+      printf("Not able to open papers/contact/figs/innerfillingfracInfo.txt properly\n");
+      exit (1);
+    }
+
     fprintf (fout, "For filling fraction %04.02f, inner-sphere size %04.02f and walls of length %04.02f you'll want to use %.0f spheres.\n\n", eta, inner_rad, mc_side_len, N);
-    
-    fclose(fout); 
+
+    fclose(fout);
   }
-  
-  
+
+
 
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
-  
+
   took("Plotting stuff");
 }
 

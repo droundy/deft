@@ -119,7 +119,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   char *plotname = (char *)malloc(1024);
   Grid energy_density(gd, f(1, gd, potential));
   Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
