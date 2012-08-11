@@ -649,22 +649,25 @@ Figure~\ref{fig:density-rods}. }
 \label{fig:rods-energy-vs-distance}
 \end{figure}
 
-Walther \emph{et al.}\cite{walther2004hydrophobic} studied the
+Walther \emph{et al}\cite{walther2004hydrophobic} studied the
 interactions between two carbon nanotubes, which are geometrically
-similar to our hydrophobic rods, by using molecular dynamics with
-Lennard-Jones potentials for nanotubes of diameter 1.25~nm and
-separations ranging from about 0.3~nm to 1.5~nm. They compute the
-force to constrain the nanotubes at different sepearation distances
-and find that a drying transition begins at separations near 0.9~-~1.0~nm where two
-layers of water molecules can exist in a metastable state between the
-rods. This reduces to one layer at a spacing of 0.55~-~0.58~nm, and at
-0.35~nm water is complete expelled and is in
-equilibrium\cite{walther2004hydrophobic}. The final drying state is
-smaller than what we find for hydrophobic rods of a similar size, as
-expected due to the carbon-water interaction and the
-van der Waals interaction between the rods that causes more attraction
-than our rods.  Our model does not predict any of the transitional
-states seen here\fixme{why?}.
+similar to our hydrophobic rods, using molecular dynamics with the SPC
+model for water, and a Lennard-Jones potential for the interaction of
+carbon with water, for nanotubes of diameter 1.25~nm and separations
+ranging from about 0.3~nm to 1.5~nm.  The SPC model underestimates the
+surface tension of water by about 24\%\cite{vega2007surface}, so we
+cannot expect this work to provide quantitative agreement with real
+water.  Walther \emph{et al} observe a drying transition between the
+two nanotubes, which occurs at a smaller radius than our results
+suggest.  However, when Walther \emph{et al} disable the attractive
+interaction between nanotube and water, the drying effect occurs at
+much longer range, in agreement with our results.  \fixme{Please read
+  this carefully, as I did some major changes.  I took a look at the
+  paper, and it seems that in Figure 3c (and the paragraph that ends
+  at the top of that page) they finally do a truly hydrophobic
+  interaction, which is a better comparison with what we did.  The
+  drying transition is inhibited by the attraction between tube and
+  water. }
 
 \subsection{Hydrophobic interactions of four rods}
 
