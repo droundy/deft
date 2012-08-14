@@ -83,6 +83,66 @@ void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c,
   fclose(out);
 }
 
+
+const double golden = (1 + sqrt(5))/2;
+const Cartesian icosohedron[] = {
+  Cartesian( 1, 1, 1),
+  Cartesian(-1, 1, 1),
+  Cartesian( 1,-1, 1),
+  Cartesian( 1, 1,-1),
+  Cartesian( 1,-1,-1),
+  Cartesian(-1, 1,-1),
+  Cartesian(-1,-1, 1),
+  Cartesian(-1,-1,-1),
+  Cartesian(0, 1/golden, golden),
+  Cartesian(0, 1/golden,-golden),
+  Cartesian(0,-1/golden, golden),
+  Cartesian(0,-1/golden,-golden),
+  Cartesian( golden,0, 1/golden),
+  Cartesian(-golden,0, 1/golden),
+  Cartesian( golden,0,-1/golden),
+  Cartesian(-golden,0,-1/golden),
+  Cartesian( 1/golden, golden,0),
+  Cartesian( 1/golden,-golden,0),
+  Cartesian(-1/golden, golden,0),
+  Cartesian(-1/golden,-golden,0),
+};
+
+// The following computes the closest value that is at least a vector
+// delta from pos.
+double closest_value(const Grid &g, Cartesian pos, Vector3d delta) {
+  double closest = 1e300;
+  double bestyet = 0;
+  //printf("finding closest_value to %g %g %g\n", pos[0], pos[1], pos[2]);
+  //printf("in direction %g %g %g\n", delta[0], delta[1], delta[2]);
+  const GridDescription gd = g.description();
+  for (int x=-gd.Nx/2; x<gd.Nx/2; x++) {
+    for (int y=-gd.Ny/2; y<gd.Ny/2; y++) {
+      for (int z=-gd.Nz/2; z<gd.Nz/2; z++) {
+        Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
+        //printf("Hello %d %d %d vs %d %d %d\n", x, y, z, gd.Nx, gd.Ny, gd.Nz);
+        //printf("here is %g %g %g\n", here[0], here[1], here[2]);
+        if ((here-pos-delta).dot(delta) > 0 && (here-pos-delta).norm() < closest) {
+          //printf("here we are... %d %d %d\n", x, y, z);
+          bestyet = g(Cartesian(pos + here));
+          closest = (here-pos-delta).norm();
+        }
+        //printf("Got here now..;\n");
+      }
+    }
+  }
+  return bestyet;
+}
+// The following computes the average value for the grid x at radius
+// from pos.
+double radial_average(const Grid &g, Cartesian pos, double radius) {
+  double total = 0;
+  for (int i=0;i<20;i++) {
+    total += closest_value(g, pos, Vector3d(radius * icosohedron[i]/icosohedron[i].norm()));
+  }
+  return total/20;
+}
+
 void plane_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
                  const Grid &f, const Grid &g, const Grid &h) {
   FILE *out = fopen(fname, "w");
@@ -171,6 +231,7 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
+  printf("Density at contact is %g\n", radial_average(density, Cartesian(0,0,z_part), 1.0));
   printf("N = %g\n", density.sum()*gd.dvolume);
   char *plotname = (char *)malloc(1024);
   char *plane_plotname = (char *)malloc(1024);
