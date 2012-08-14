@@ -73,12 +73,12 @@ figs/gnn-sphere-08-013.pdf: figs/plot-gnn-sphere.py figs/mc-04-013.dat figs/sphe
 	python $^ $@
 
 figs/gnn-sphere-12-112.pdf: figs/plot-gnn-sphere.py figs/mc-06-112.dat figs/sphereWB-radial-12.0-112.dat figs/sphereWBT-radial-12.0-112.dat figs/sphereWBm2-radial-12.0-112.dat
-	python $^ $@ 
+	python $^ $@
 
 figs/gnn-sphere-16-265.pdf: figs/plot-gnn-sphere.py figs/mc-08-265.dat figs/sphereWB-radial-16.0-265.dat figs/sphereWBT-radial-16.0-265.dat figs/sphereWBm2-radial-16.0-265.dat
-	python $^ $@ 
+	python $^ $@
 
-figs/walls-10.pdf: figs/plot-walls.py figs/mc-walls-20-193.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
+figs/walls-10.pdf: figs/plot-walls.py figs/mc-walls-20-195.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
 	python $^ $@
 
 figs/walls-30.pdf: figs/plot-walls.py figs/mc-walls-20-605.dat figs/wallsWB-0.30.dat figs/wallsWBT-0.30.dat figs/wallsWBm2-0.30.dat
