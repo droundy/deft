@@ -2,8 +2,6 @@
 import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
-import SomeFunctionals
-import WhiteBear ( whitebear )
 import FMT ( xshell )
 import System.Environment ( getArgs )
 import qualified Data.Set as Set

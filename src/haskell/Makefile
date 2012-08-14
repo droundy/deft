@@ -75,7 +75,5 @@ functionals.o : SomeFunctionals.hi
 functionals.o : CodeGen.hi
 test.o : test.lhs
 test.o : FMT.hi
-test.o : WhiteBear.hi
-test.o : SomeFunctionals.hi
 test.o : CodeGen.hi
 # DO NOT DELETE: End of Haskell dependencies

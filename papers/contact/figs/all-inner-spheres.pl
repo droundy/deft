@@ -9,8 +9,8 @@ my $F;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-foreach $dd ([4,0.1], [4,0.2], [4,0.3], [4,0.4], [4,0.5],
-             [12,0.4], [12, 0.1]
+foreach $dd ([12,0.4], [12, 0.1],
+             [4,0.1], [4,0.4]
             ) {
   foreach $F ("WB", "WBm2") {
     my $d = sprintf("%02.0f", $$dd[0]);
@@ -21,7 +21,7 @@ foreach $dd ([4,0.1], [4,0.2], [4,0.3], [4,0.4], [4,0.5],
     my $resolution = 0.1; # spacing of grid points in hard-sphere radius.
 
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = sprintf "%.0f", 2500*((($d + $padding)/20.0)*(0.1/$resolution))**3;
+    my $memuse = sprintf "%.0f", 2000*((($d + $padding)/20.0)*(0.1/$resolution))**3;
 
     my $scriptname = "papers/contact/figs/inner-sphere-$d-$eta-$F.tmp.sh";
     open SCRIPT, ">$scriptname" or die $!;

@@ -39,7 +39,7 @@ dft_len = len(r)
 dft_dr = r[2] - r[1]
 padding = 4 # amount of extra space in cell
 radius = round(r[dft_len-1]) - padding/2
-showrmax = radius + 2
+showrmax = radius + 1
 showrmin = radius - 6
 
 pylab.figure(figsize=(8, 7))
@@ -55,6 +55,7 @@ n_plt.plot(r,n*4*numpy.pi/3,"b--",label='DFT $n$')
 n_plt.plot(r,n0*4*numpy.pi/3,"c--",label="$n_0$")
 n_plt.plot(r,nA*4*numpy.pi/3,"m-.",label="$n_A$")
 n_plt.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)
+pylab.ylim(0, n.max()*4*numpy.pi/3*1.1)
 pylab.xlim(showrmin,showrmax)
 pylab.xlabel("$r/R$")
 pylab.ylabel("filling fraction")

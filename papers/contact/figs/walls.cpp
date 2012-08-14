@@ -121,7 +121,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
   Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);    
+    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));

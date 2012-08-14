@@ -16,6 +16,10 @@ main =
        generateHeader correlation_S_WB ["R"] "Correlation_S2"
      gen "src/Correlation_A_Fast.cpp" $
        generateHeader correlation_A_WB ["R"] "Correlation_A2"
+     gen "src/Correlation_Sm2_Fast.cpp" $
+       generateHeader correlation_S_WB_m2 ["R"] "Correlation_Sm2"
+     gen "src/Correlation_Am2_Fast.cpp" $
+       generateHeader correlation_A_WB_m2 ["R"] "Correlation_Am2"
      gen "src/YuWuCorrelationFast.cpp" $
        generateHeader yuwu_correlation ["R"] "YuWuCorrelationFast"
      gen "src/SaftFluid2Fast.cpp" $

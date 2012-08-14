@@ -233,8 +233,8 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
-  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
+  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
+  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
   if (strlen(name) == 4) {
     printf("Computing correlation for mark II version...\n");
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);

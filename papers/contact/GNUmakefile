@@ -38,14 +38,8 @@ ALL_FIGURES=\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
 	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
-	figs/outer-20-04.pdf \
-	figs/outer-20-03.pdf \
 	figs/outer-16-04.pdf \
-	figs/outer-12-01.pdf \
-	figs/outer-12-02.pdf \
-	figs/outer-12-03.pdf \
-	figs/outer-12-04.pdf \
-	figs/outer-12-05.pdf \
+	figs/outer-16-01.pdf \
 	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
 	figs/inner-4-10.pdf figs/inner-4-40.pdf \
 	figs/inner-12-10.pdf figs/inner-12-40.pdf \
