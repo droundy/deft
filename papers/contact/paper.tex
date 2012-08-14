@@ -46,15 +46,14 @@
   Theory (SAFT), which is the basis of a number of recent classical
   density functionals.  We define two averaged values for the
   correlation function at contact, and derive formulas for each of
-  them White Bear version of the Fundamental Measure Theory
-  functional~\cite{roth2002whitebear} based on an assumption of
+  them from the White Bear version of the Fundamental Measure Theory
+  functional~\cite{roth2002whitebear}, based on an assumption of
   thermodynamic consistency. We have tested these functionals and two
   existing functionals~\cite{yu2002fmt-dft-inhomogeneous-associating,
-    gross2009density} against Monte Carlo simulations.  We find that
-  excellent agreement with the Monte Carlo results for our
+    gross2009density} against Monte Carlo simulations.  We find
+  excellent agreement between the Monte Carlo data and our
   asymmetrically averaged correlation function, and less impressive
-  results for the two existing functionals and our symmetrically
-  averaged correlation function.
+  agreement with the other three correlation functionals.
 \end{abstract}
 
 \maketitle
@@ -83,13 +82,21 @@ Associating Fluid Theory (SAFT) to construct classical density
 functionals to describe associating
 fluids\cite{\saftlocaldft,\saftnonlocaldft}.  This approach has been
 successful in qualitatively describing the dependence of surface
-tension on temperature.  Unfortunately, most of these constructed
-functionals\cite{\saftlocaldft} cannot be used to study arbitrary
-inhomogeneous density distributions, because they use local density
-approximations that are only valid for densities that vary slowly over
-molecular length scales.  A key input to those SAFT-based functionals
-that can handle sharply varying densities is the correlation function
-evaluated at contact.
+tension on temperature.
+%
+%% Unfortunately, most of these constructed
+%% functionals\cite{\saftlocaldft} cannot be used to study arbitrary
+%% inhomogeneous density distributions, because they use local density
+%% approximations that are only valid for densities that vary slowly over
+%% molecular length scales.
+%
+A key input to SAFT-based functionals is the correlation function
+evaluated at contact.  Although two recent works have introduced
+approximate functionals for this
+quantity\cite{yu2002fmt-dft-inhomogeneous-associating,
+  gross2009density}, there has yet to be a careful study of the
+correlation function at contact in the inhomogeneous hard-sphere
+fluid.
 
 Constructing a classical density functional based on SAFT involves
 rewriting each term in the free energy as a functional of an
@@ -98,21 +105,21 @@ inhomogeneous density.  The SAFT free energy consists of four terms:
   A_\textit{SAFT} &= A_\textit{ideal} + A_\textit{HS} + A_\textit{chain} + A_\textit{disp} + A_\textit{assoc}
 \end{align}
 where $A_\textit{ideal}$ is the ideal-gas free energy, $A_\textit{HS}$
-is the excess free energy of a hard-sphere fluid of monomers,
-$A_\textit{chain}$ is the contribution to the free energy from the
-chaining effect in a polymeric fluid, $A_\textit{disp}$ is the
-dispersion contribution to the free energy, and $A_\textit{assoc}$ is
-the free energy contribution from \emph{association}, which is to say,
-hydrogen bonding.  The chain and association contributions to the SAFT
-free energy are of particular interest for this paper, since each uses
-as input the contact value of the correlation function.
+is the excess free energy of a hard-sphere fluid, $A_\textit{chain}$
+is the free energy of formation for polymeric fluids,
+$A_\textit{disp}$ is the dispersion contribution to the free energy,
+and $A_\textit{assoc}$ is the free energy contribution from
+\emph{association}, which is to say, hydrogen bonding.  The chain and
+association contributions to the SAFT free energy are of particular
+interest for this paper, since each requires as input the contact
+value of the correlation function.
 %
 Yu and Wu introduced in 2002 a functional for the association term of
 the free energy, which included a functional for the contact value of
 the correlation function (see
 Section~\ref{sec:yuwu})\cite{yu2002fmt-dft-inhomogeneous-associating},
-which has subsequently been used in other
-functionals\cite{fu2005vapor-liquid-dft, bryk2006density}.
+which has subsequently been used in the development of other
+SAFT-based functionals\cite{fu2005vapor-liquid-dft, bryk2006density}.
 %% Each of these terms has some dependence on the
 %% inhomogeneity in the density.  The ideal gas is purely local, and in
 %% fact must be the only purely local term in the free energy in order
@@ -130,32 +137,30 @@ function (see Section~\ref{sec:gross})\cite{gross2009density}.
 %% The dispersion term is long-range and thus has significant
 %% dependence on the density distribution, but because its relatively
 %% weak position dependence, is amenable to mean-field approximations.
-Given these different approaches, it seems worthwhile to examine this
+Given these different approaches, it seems valuable to examine this
 property of the hard-sphere fluid through direct simulation, in order
 to establish the advantages and disadvantages of each approach.
 
-We first discuss two possibilities for the definition of contact
-density.  The first involves a more symmetric interpretation and so we
-call it the '$S$ case'.  The second involves a sphere-centered,
-assymetrical interpretation and so we call it the '$A$ case'.  We
-present where in the SAFT free energy formulation these contact
-densities will contribute.  We next present a thermodynamic method
-that we will use to calculate the above contact densities.  This
-method involves the use of surface pressure and the minimization of
-the excess free energy refered to above.  We use the White Bear and
-White Bear Mark II formulations of these free energy terms and take
-neccesary derivitives in the concpetual spirit of the seperately
-defined $S$ an $A$ case contact densities.  Finally we compare the
-resulting contact densities with those of Gross, those of Yu and Wu,
-and as well with our own Monte Carlo simulations.
+In this paper we introduce two definitions for the locally averaged
+correlation function of an inhomogeneous system.  The first is more
+symmetric (which we call the $S$ case), while the second involves a
+sphere-centered, assymetrical interpretation (the $A$ case).  Given
+these definitions, we will present a thermodynamic approach for
+evaluating these these correlation functions directly from the free
+energy functional itself.  We will then explain how the correlation
+function of Yu and Wu and that of Gross compare with our
+definitions---the former is a variant of the $S$ correlation function,
+while the latter is an $A$ function.  Finally, we will compare these
+four approximations with exact Monte-Carlo simulations for the
+hard-sphere fluid in at a variety of hard-wall surfaces.
 
 
 \section{Correlation function with inhomogeneity}
 
 We will define our terms by making use of the two-particle density
-$n^{(2)}(\rr_1,\rr_2)$, which gives the probability per unit volume of
-finding one particle at position $\rr_1$ and the other at position
-$\rr_2$.  The pair correlation function is defined by
+$n^{(2)}(\rr_1,\rr_2)$, which gives the probability per unit volume
+squared of finding one particle at position $\rr_1$ and the other at
+position $\rr_2$.  The pair correlation function is defined by
 \begin{align}
   g(\rr_1,\rr_2) &\equiv \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
 \end{align}
@@ -172,17 +177,21 @@ value for $g_\sigma$.  There are two reasonable options for defining
 such a local function: a symmetric formulation (which we refer to as $S$) and an
 asymmetric formulation (which we refer to as $A$).
 
-For the symmetric $S$ case:
+For the symmetric $S$ case, the correlation function at contact is
+given by:
 \begin{align}
   g^S_\sigma(\rr) &= \frac{1}{n_0(\rr)^2}\int n^{(2)}(\rr - \rr', \rr
   + \rr')
-  \frac{\delta(|\rr'| -\sigma/2)}{\pi\sigma^2}d\rr' \label{eq:gS} \\
+  \frac{\delta(|\rr'| -\sigma/2)}{\pi\sigma^2}d\rr' \label{eq:gS}
+\end{align}
+where density $n_0$ is one of the fundamental measures of Fundamental
+Measure Theory (FMT), and is ideal for treating touching spheres, as
+illustrated in Figure~\ref{fig:n0}.
+\begin{align}
   n_0(\rr) &= \int n(\rr')\frac{\delta(|\rr-\rr'|-\sigma/2)}{\pi\sigma^2} d\rr'
 \end{align}
-This functional gives a value averaged over spheres that touch at the
-position $\rr$.  The density $n_0$ is one of the fundamental measures
-of Fundamental Measure Theory (FMT), and is ideal for treating
-touching spheres, as illustrated in Figure~\ref{fig:n0}.
+This functional gives a value averaged over all spheres that touch at
+the position $\rr$.
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
@@ -191,117 +200,159 @@ touching spheres, as illustrated in Figure~\ref{fig:n0}.
 \label{fig:n0}
 \end{figure}
 
-And for the asymmetric $A$ case:
+In contrast, the asymmetrically averaged $A$ correlation function is
+given by
 \begin{align}
   g^A_\sigma(\rr) &= \frac{1}{n(\rr)n_A(\rr)}
   \int n^{(2)}(\rr, \rr + \rr')
-  \frac{\delta(|\rr'| - \sigma)}{4\pi\sigma^2}d\rr' \label{eq:gA} \\
+  \frac{\delta(|\rr'| - \sigma)}{4\pi\sigma^2}d\rr' \label{eq:gA}
+\end{align}
+where the density $n_A(\rr)$ is similar to $n_0$, but measures the
+density of spheres that could be touching a sphere that is located at
+point $\rr$.
+\begin{align}
   n_A(\rr) &= \int n(\rr')
   \frac{\delta(|\rr-\rr'|-\sigma)}{4\pi\sigma^2} d\rr' \label{eq:nA}
 \end{align}
-In this case, the two-particle density is averaged over spheres
-touching a sphere that is at the given position~$\rr$.
+Thus $g_\sigma^A$ corresponds to an average of the two-particle
+density over spheres touching a sphere that is located at the
+position~$\rr$.
 
-In the process of defining these two averaged correlation functions,
-we also defined two averaged densities, $n_0(\rr)$ and $n_A(\rr)$,
-which are the density of spheres available to be in
-contact.  In the homogeneous limit, $n_0 = n_A = n$.  It is an
-open question, which of these averages will be more useful in any
-particular functional.  Suffice to say, either average is a
-\emph{possible} way to convert a function that is defined for a
-homogeneous system to a functional that is applicable to inhomogeneous
-systems.
+%% In the process of defining these two averaged correlation functions,
+%% we also defined two averaged densities, $n_0(\rr)$ and $n_A(\rr)$,
+%% which are the density of spheres available to be in
+%% contact.  In the homogeneous limit, $n_0 = n_A = n$.  It is an
+%% open question, which of these averages will be more useful in any
+%% particular functional.  Suffice to say, either average is a
+%% \emph{possible} way to convert a function that is defined for a
+%% homogeneous system to a functional that is applicable to inhomogeneous
+%% systems.
 
-Yu and Wu introduce an approximation for
-$g^S$\cite{yu2002fmt-dft-inhomogeneous-associating}, which we will
-discus in Section~\ref{sec:yuwu}.  Gross introduced an
-approximation for $g^A$\cite{gross2009density}, which we will
-introduce in Section~\ref{sec:gross}.  We will also introduce our own
-approximations for both $g^A$ and $g^S$ which are based on the
-assumption of thermodynamic consistency within FMT, in
-Sections~\ref{sec:g-S} and~\ref{sec:g-A}.  We will report on the accuracy of
-these approximations by comparing with Monte Carlo simulations of the
-inhomogeneous hard-sphere fluid.  We will focus on the contact
-densities, rather than the correlation function itself, because these
-are simpler, and because they are the quantity that you want to
-``average''.  i.e. if you were to average $g$ itself, you'd want to
-weight that average based on the density, which would mean averaging
-$n^{(2)}$.
+%% Yu and Wu introduce an approximation for
+%% $g^S$\cite{yu2002fmt-dft-inhomogeneous-associating}, which we will
+%% discus in Section~\ref{sec:yuwu}.  Gross introduced an
+%% approximation for $g^A$\cite{gross2009density}, which we will
+%% introduce in Section~\ref{sec:gross}.  We will also introduce our own
+%% approximations for both $g^A$ and $g^S$ which are based on the
+%% assumption of thermodynamic consistency within FMT, in
+%% Sections~\ref{sec:g-S} and~\ref{sec:g-A}.  We will report on the accuracy of
+%% these approximations by comparing with Monte Carlo simulations of the
+%% inhomogeneous hard-sphere fluid.  We will focus on the contact
+%% densities, rather than the correlation function itself, because these
+%% are simpler, and because they are the quantity that you want to
+%% ``average''.  i.e. if you were to average $g$ itself, you'd want to
+%% weight that average based on the density, which would mean averaging
+%% $n^{(2)}$.
 
 
-\subsection{Association free energy of SAFT}
+%% \subsection{Association free energy of SAFT}
 
-\fixme{Integrate the following equations into this section...}
-\begin{align}
-  \frac{A_\textit{chain}}{kT} &= -(m-1) n \left(\ln\left(n g_\sigma \right)-1\right)
-\end{align}
-\begin{align}
-  \frac{A_\textit{assoc}}{kT} &= \sum_i n \left(\ln X_i - \frac12 X_i + \frac12\right) \\
-  X_i &= \frac{1}{1 + \sum_j n g_\sigma X_j\kappa_{ij} \left(e^{\beta \epsilon_{ij}}-1\right)}
-\end{align}
+%% \fixme{Integrate the following equations into this section...}
+%% \begin{align}
+%%   \frac{A_\textit{chain}}{kT} &= -(m-1) n \left(\ln\left(n g_\sigma \right)-1\right)
+%% \end{align}
+%% \begin{align}
+%%   \frac{A_\textit{assoc}}{kT} &= \sum_i n \left(\ln X_i - \frac12 X_i + \frac12\right) \\
+%%   X_i &= \frac{1}{1 + \sum_j n g_\sigma X_j\kappa_{ij} \left(e^{\beta \epsilon_{ij}}-1\right)}
+%% \end{align}
 
-\newcommand\epsilonassoc{\ensuremath{\varepsilon_\textit{AB}}}
-\newcommand\kappaassoc{\ensuremath{\kappa_\textit{AB}}}
+%% \newcommand\epsilonassoc{\ensuremath{\varepsilon_\textit{AB}}}
+%% \newcommand\kappaassoc{\ensuremath{\kappa_\textit{AB}}}
 \newcommand\ncontact{\ensuremath{n_\textit{contact}}}
 
-The free energy term in Statistical Associating Fluid Teory (SAFT)
-from which it derives its name is the association term, which accounts
-for hydrogen bonding.  Hydrogen bonds are modeled as attractive
-patches (``association sites'') on the surface of hard spheres.  These
-sites represent protons or electron lone pairs, and have an attractive
-energy $\epsilonassoc$ when two molecules are oriented such that the
-proton of one overlaps with the lone pair of the other.  The volume
-over which this interaction occurs is $\kappaassoc$, giving the
-association term in the free energy has two empirical parameters fit
-to experimental data.
+%% The free energy term in Statistical Associating Fluid Teory (SAFT)
+%% from which it derives its name is the association term, which accounts
+%% for hydrogen bonding.  Hydrogen bonds are modeled as attractive
+%% patches (``association sites'') on the surface of hard spheres.  These
+%% sites represent protons or electron lone pairs, and have an attractive
+%% energy $\epsilonassoc$ when two molecules are oriented such that the
+%% proton of one overlaps with the lone pair of the other.  The volume
+%% over which this interaction occurs is $\kappaassoc$, giving the
+%% association term in the free energy has two empirical parameters fit
+%% to experimental data.
 
-The association free energy per unit volume has the form
+%% The association free energy per unit volume has the form
+%% \begin{align}
+%%   f_\text{assoc} &= k_BT n\sum_A 
+%%                   \left(\ln X^A - \frac{X^A}{2} + \frac12\right)
+%% \end{align}
+%% where the summation is over the association sites, and $X^A$ is the
+%% fraction of association sites \emph{not} hydrogen-bonded.  The
+%% fractions $X^A$ are determined by the self-consistent equations
+%% \begin{align}
+%%   X^A &= \frac{1}
+%%   {1 + \sum_B n X^B \Delta^{AB}}\label{eq:X}
+%%   \\
+%%   \Delta^{AB} &= g(\sigma) \kappaassoc\left( e^{\epsilonassoc/kT} -
+%%   1 \right)\label{eq:delta}
+%% \end{align}
+%% where $g(\sigma)$ is the correlation function evaluated at contact.
+%% The product of density with correlation function evaluated at contact
+%% gives the contact density, when we combine Equations~\ref{eq:X} and
+%% \ref{eq:delta}:
+%% \begin{align}
+%%   X^A &= \frac{1}
+%%   {1 + \sum_B \ncontact\kappaassoc X^B\left( e^{\epsilonassoc/kT} -
+%%   1 \right)}
+%% \end{align}
+%% where the product $\ncontact\kappaassoc$ is the expected number of
+%% molecules present in the association volume in the absence of the
+%% association interaction.  In the SAFT-VR
+%% model\cite{gil-villegas-1997-SAFT-VR}, this contact density is found
+%% by adding a perturbative correction to the contact value for a hard
+%% sphere fluid.
+
+\subsection{Fundamental-Measure Theory}
+
+We use the White Bear version of the Fundamental-Measure Theory~(FMT)
+functional published in reference~\cite{roth2002whitebear}.  The FMT
+functional describes the excess free energy of a hard-sphere fluid.
+This particular FMT reduces to the Carnahan-Starling equation of state
+for homogeneous systems.
+\begin{equation}
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
+\end{equation}
+with integrands
 \begin{align}
-  f_\text{assoc} &= k_BT n\sum_A 
-                  \left(\ln X^A - \frac{X^A}{2} + \frac12\right)
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+  n_3 + (1-n_3)^2 \ln(1-n_3)
+}{
+  36\pi n_3^2\left( 1 - n_3 \right)^2
+} ,
 \end{align}
-where the summation is over the association sites, and $X^A$ is the
-fraction of association sites \emph{not} hydrogen-bonded.  The
-fractions $X^A$ are determined by the self-consistent equations
+using the weighted densities
 \begin{align}
-  X^A &= \frac{1}
-  {1 + \sum_B n X^B \Delta^{AB}}\label{eq:X}
-  \\
-  \Delta^{AB} &= g(\sigma) \kappaassoc\left( e^{\epsilonassoc/kT} -
-  1 \right)\label{eq:delta}
+  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - \sigma/2) d\rr' \\
+  n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) d\rr' \\
+  \mathbf{n}_{2V}(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
 \end{align}
-where $g(\sigma)$ is the correlation function evaluated at contact.
-The product of density with correlation function evaluated at contact
-gives the contact density, when we combine Equations~\ref{eq:X} and
-\ref{eq:delta}:
 \begin{align}
-  X^A &= \frac{1}
-  {1 + \sum_B \ncontact\kappaassoc X^B\left( e^{\epsilonassoc/kT} -
-  1 \right)}
+  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{2\pi \sigma}, \quad
+  n_1 &= \frac{n_2}{2\pi \sigma} , \quad
+  n_0 = \frac{n_2}{\pi \sigma^2}
 \end{align}
-where the product $\ncontact\kappaassoc$ is the expected number of
-molecules present in the association volume in the absence of the
-association interaction.  In the SAFT-VR
-model\cite{gil-villegas-1997-SAFT-VR}, this contact density is found
-by adding a perturbative correction to the contact value for a hard
-sphere fluid.
+
 
 \subsection{Homogeneous limit}
 
-In order to motivate the derivation of our functional for contact
-density, we begin by deriving the well-known contact density for a
-homogeneous hard-sphere fluid from the Carnahan-Starling free energy.
-The contact density is most easily computed from the contact density
-theorem, which states that the pressure on any hard surface is
-determined by the density at contact:
+In order to motivate the derivation of our functional for the value of
+the correlation function at contact, we begin by deriving the
+well-known value of $g_\sigma$ for a homogeneous hard-sphere fluid
+from the Carnahan-Starling free energy.  The contact value of the
+correlation function density is most easily found by using the
+contact-value theorem, which states that the pressure on any hard
+surface is determined by the density at contact:
 \begin{align}
-  p &= k_BT n_\textit{contact}.
+  p &= k_BT n_\textit{contact} \\
+  &= k_BT n g_\sigma
 \end{align}
-Since we are interested in the contact density at the surface of the
-hard spheres, all we need compute is the pressure on that surface, and
-we'll have our answer.  The pressure on a hard sphere can be readily
-computed from the dependence of the Carnahan-Starling free energy on
-hard sphere radius.
+Since we are interested in the correlation function at the surface of
+the hard spheres, all we need compute is the pressure on that surface,
+and we'll have our answer.  The pressure on a hard sphere can be
+readily computed from the dependence of the Carnahan-Starling free
+energy on hard sphere radius.
 \begin{align}
   A_{HS} &= Nk_BT \frac{4\eta - 3\eta^2}{(1-\eta)^2}
 \end{align}
@@ -393,8 +444,8 @@ position $\mathbf{r}$.  By making the hard-sphere radius dependent on
 position, we can compute the pressure on the hard spheres located at
 $\mathbf{r}$.  Since the hard-sphere radius enters the FMT free energy
 by means of the fundamental measures, this requires that we adjust the
-convolutions to have a radius $R$ which depends on the location of the
-sphere:
+convolutions to have a diameter $\sigma$ which depends on the location
+of the sphere:
 \begin{align}
   n_3^A(\rr) &= \int n(\rr')\Theta(|\rr-\rr'|-\sigma(\rr')/2)d\rr' \label{eq:n3A}
 \end{align}
@@ -458,7 +509,7 @@ function $g_\sigma^S(\rr)$ is less straight-forward than
 \begin{align}
   n_3^S(\rr) &= \int n(\rr')\Theta(|\rr-\rr'|-\sigma(\rr)/2)d\rr'
 \end{align}
-The hard-sphere radius $R$ in this weighted density has an unusual
+The hard-sphere radius $\sigma/2$ in this weighted density has an unusual
 position dependence:  it depends on the position at which we are
 evaluating the weighted density, rather than the position of the hard
 spheres themselves.  This has the effect of expanding spheres as they
