@@ -9,8 +9,10 @@ my $F;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-foreach $dd ([2,0.1,6], [2,0.2,6], [2,0.3,6]) {
-  foreach $F ("WB", "WBT", "WBm2") {
+foreach $dd ([2,0.4,3], [2,0.4,4], [2,0.4,5], [2,0.4,6], [2,0.4,8], [2,0.4,11],
+    [2,0.1,3], [2,0.1,4], [2,0.1,5], [2,0.1,11]) {
+  foreach $F ("WB"){
+#, "WBT", "WBm2") {
     my $d = sprintf("%02.0f", $$dd[0]);
     my $eta = sprintf("%04.2f", $$dd[1]);
     my $z = sprintf("%04.2f", $$dd[2]);
