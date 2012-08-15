@@ -135,12 +135,19 @@ double closest_value(const Grid &g, Cartesian pos, Vector3d delta) {
 }
 // The following computes the average value for the grid x at radius
 // from pos.
-double radial_average(const Grid &g, Cartesian pos, double radius) {
+void radial_average(const char *fname, const Grid &g, Cartesian pos, double radius) {
+  FILE *out = fopen(fname, "w");
+  if (!out){
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    return;
+  }
   double total = 0;
   for (int i=0;i<20;i++) {
     total += closest_value(g, pos, Vector3d(radius * icosohedron[i]/icosohedron[i].norm()));
   }
-  return total/20;
+  double z_part = pos[2];
+  fprintf(out, "%g\t%g\n", z_part, total/20);
+  return;
 }
 
 void plane_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
@@ -231,7 +238,11 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
-  printf("Density at contact is %g\n", radial_average(density, Cartesian(0,0,z_part), 1.0));
+  char *contact_plot = (char *)malloc(1024);
+  sprintf(contact_plot, "papers/contact/figs/test-particle-cont-dens-%04.2f-%04.2f.dat",
+          z_part, eta);
+  radial_average(contact_plot, density, Cartesian(0,0,z_part), 1.0);
+//printf("Density at contact is %g\n", radial_average(density, Cartesian(0,0,z_part), 1.0));
   printf("N = %g\n", density.sum()*gd.dvolume);
   char *plotname = (char *)malloc(1024);
   char *plane_plotname = (char *)malloc(1024);

@@ -43,6 +43,7 @@ ALL_FIGURES=\
 	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
 	figs/inner-4-10.pdf figs/inner-4-40.pdf \
 	figs/inner-12-10.pdf figs/inner-12-40.pdf \
+	figs/test-particle-10.pdf figs/test-particle-40.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -101,3 +102,21 @@ figs/inner-4-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-04.0-0.%0.dat figs/
 
 figs/inner-12-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-12.0-0.%0.dat figs/
 	python $< 6 $* $@
+
+test-particle-0.10 := $(wildcard figs/test-particle-cont-dens-*-0.10.dat)
+figs/test-particle-cont-dens-0.10.dat: $(test-particle-0.10)
+	cat $^ > $@
+
+test-particle-0.40 := $(wildcard figs/test-particle-cont-dens-*-0.40.dat)
+figs/test-particle-cont-dens-0.40.dat: $(test-particle-0.40)
+	cat $^ > $@
+
+figs/test-particle-10.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20-195.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat figs/test-particle-cont-dens-0.10.dat
+	python $^ $@
+
+figs/test-particle-40.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20-816.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat figs/test-particle-cont-dens-0.40.dat
+	python $^ $@
+
+
+
+
