@@ -356,83 +356,31 @@ energy on hard sphere radius.
 \begin{align}
   A_{HS} &= Nk_BT \frac{4\eta - 3\eta^2}{(1-\eta)^2}
 \end{align}
-where $\eta \equiv \frac{4\pi}{24} \sigma^3 n$ is the filling fraction.  We
+where $\eta \equiv \frac{\pi}{6} \sigma^3 n$ is the filling fraction.  We
 can thus readily compute the derivative of free energy with respect to
-hard-sphere radius:
+hard-sphere diameter:
 \begin{align}
-  \frac{dA_{HS}}{dR} &= 2\frac{dA_{HS}}{d\eta} \frac{d\eta}{d\sigma} \\
-  \derivation{
-    &= Nk_BT \left( \frac{4 - 6\eta}{(1-\eta)^2} + 2 \frac{4\eta - 3\eta^2}{(1-\eta)^3} \right) \frac{d\eta}{dR}
-    \\
-    &= Nk_BT \frac{4 - 4\eta - 6\eta + 6\eta^2 + 8\eta - 6\eta^2}{(1-\eta)^3} \frac{d\eta}{dR}
-    \\
-    &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{d\eta}{dR}
-    \\
-  }
-  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{6 \eta}{\sigma} \label{eq:dAhsdR}
+  \frac{dA_{HS}}{d\sigma} &= \frac{dA_{HS}}{d\eta} \frac{d\eta}{d\sigma} \\
+  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{\sigma} \label{eq:dAhsdR}
 \end{align}
-This derivative gives us the force on \emph{all} the hard
+This derivative gives us half the force on \emph{all} the hard
 spheres---since we're changing all their radii at once.  To compute
-the pressure on the spheres, we just need to divide by the total area,
-which means dividing by $N 4\pi \sigma^2$, since the relevant area
-is the area over which the molecules can make contact.
+the pressure on the spheres, we just need to divide by half the total
+area, which means dividing by $N 8\pi \sigma^2$, since the relevant
+area is the area over which the molecules can make contact.
 \begin{align}
-  p_{HS} &= \frac{1}{N 2\pi \sigma^2} \frac{dA_{HS}}{d\sigma} \\
-  \derivation{
-    &= \frac14 \frac{1}{N 4\pi R^2} Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{R} \\
-    &= \frac{3}{4\pi R^3} \eta k_BT \frac{1 -
-      \frac{\eta}2}{(1-\eta)^3} \\
-  }
+  p_{HS} &= \frac{1}{N 8\pi \sigma^2} \frac{dA_{HS}}{d\sigma} \\
   &= k_BT n \frac{1 - \frac{\eta}2}{(1-\eta)^3}
 \end{align}
-Using the contact-value theorem, we can thus find the contact density
-and the well-known correlation function evaluated at contact.
+Using the contact-value theorem, we can thus find the well-known
+correlation function evaluated at contact.
 \begin{align}
-  n_\textit{contact} &= n \frac{1 - \frac{\eta}2}{(1-\eta)^3} \\
   g_{HS}(\sigma) &= \frac{1 - \frac{\eta}2}{(1-\eta)^3} \label{eq:cs-g}
 \end{align}
 Thus we can readily derive the contact density for the homogeneous
-hard-sphere fluid.  Extending this to the inhomogeneous fluid will
-require that we use density-functional theory.
-
-\section{Fundamental-Measure Theory}
-
-We use the White Bear version of the Fundamental-Measure Theory~(FMT)
-functional published in reference~\cite{roth2002whitebear}.  The FMT
-functional describes the excess free energy of a hard-sphere fluid.
-This particular FMT reduces to the Carnahan-Starling equation of state
-for homogeneous systems.
-\begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
-\end{equation}
-with integrands
-\begin{align}
-\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
-\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
-\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-  n_3 + (1-n_3)^2 \ln(1-n_3)
-}{
-  36\pi n_3^2\left( 1 - n_3 \right)^2
-} ,
-\end{align}
-using the weighted densities
-\begin{align}
-  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - \sigma/2) d\rr' \\
-  n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) d\rr'
-\end{align}
-\begin{align}
-  \mathbf{n}_{V2} &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) \frac{\rr - \rr'}{\left|\rr - \rr'\right|} d\rr' \quad \\
-  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{2\pi \sigma} , \quad
-  n_1 &= \frac{n_2}{2\pi \sigma} , \quad
-  n_0 = \frac{n_2}{\pi \sigma^2}
-\end{align}
-
-
-\derivation{
-  \begin{widetext}
-}
-
-
+hard-sphere fluid.  Extending this derivation to the inhomogeneous
+fluid requires that we find the pressure on particular spheres---or
+potentially particular parts of particular spheres.
 
 
 \section{Asymmetrically averaged correlation function}\label{sec:g-A}
