@@ -412,7 +412,7 @@ the averaged correlation function at contact.
   &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
-The functional derivative $2 \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
+The functional derivative $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
 in the above formula must be computed with the asymmetric formulation
 for the fundamental measures.  In practice, we use the approximate
 White Bear functional to find an approximate expression for
@@ -424,7 +424,7 @@ the free energy itself.
 In addition to the different densities in the denominators of Equations 
 \ref{eq:g-A-exact-a} and \ref{eq:g-S-exact-a} there is also a difference 
 between the treatment of the A and S cases in the derivatives 
-$2 \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$ in Equations \ref{eq:g-A-exact} 
+$\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$ in Equations \ref{eq:g-A-exact} 
 and \ref{eq:g-S-exact}. The White Bear approximations for $A_{HS}$ 
 that we use involve a number of weighted densities and for the derivatives 
 of these we use two different conceptual approaches.  In the assymetric case, 
@@ -473,7 +473,7 @@ which gave us $g_\sigma^A(\rr)$:
 \label{fig:contact}
 \end{figure}
 
-These qualitative concepts lead us to the derivative terms in $2 \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$,
+These qualitative concepts lead us to the derivative terms in $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$,
 which is in turn found in Equation~\ref{eq:p_{HS}^S}.  The rest of the
 derivation of the correlatation function results when we recognize that
 instead of dividing the pressure by $n(\mathbf{r})$ and $n_A(\mathbf{r})$
@@ -489,7 +489,7 @@ since we have symmetry around the point $\mathbf{r}$.
   &= \frac{1}{n_0(\rr)^2}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
-where the functional derivative $2 \frac{\delta A_{HS}}{\delta
+where the functional derivative $\frac{\delta A_{HS}}{\delta
   \sigma(\mathbf{r})}$ in this case is computed with the symmetric
 formulation of the fundamental measures.  Complete expressions for
 $g_\sigma^S$ are included in Appendix~\ref{appendix:g-S}.\\
@@ -692,7 +692,7 @@ reasonable agreement?
 
 \section*{Introduction to Appendices}
 
-In our expressions for pressure (eq \ref{eq:p_{HS}^A} and eq \ref{eq:p_{HS}^S}) we have $2 \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$ terms that must be derived for both the S and A cases.  We break these terms up as follows:
+In our expressions for pressure (eq \ref{eq:p_{HS}^A} and eq \ref{eq:p_{HS}^S}) we have $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$ terms that must be derived for both the S and A cases.  We break these terms up as follows:
 
   \begin{align}
     \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})} &=
@@ -707,7 +707,7 @@ In our expressions for pressure (eq \ref{eq:p_{HS}^A} and eq \ref{eq:p_{HS}^S}) 
   \end{align}
 
 
-We must therefore compute both the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms and the $2 \frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms.  We will compute the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms for both the functional derived in the White Bear I formulation and for that in the White Bear II formulation.  Following this we will compute the $2 \frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms for both the A and S cases.  These latter derivitives will differ for the A and S cases according to the qualitive concepts described above.
+We must therefore compute both the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms and the $\frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms.  We will compute the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms for both the functional derived in the White Bear I formulation and for that in the White Bear II formulation.  Following this we will compute the $\frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms for both the A and S cases.  These latter derivitives will differ for the A and S cases according to the qualitive concepts described above.
 
 \subsection{Expressions for $\beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}$, etc. for the White Bear Mark I free energy $A_{HS}$}
 
@@ -816,16 +816,16 @@ Thus we define $n_3^A$ as
 \end{align}
 and we define the other weighted densities similarly.  In order to
 compute derivatives of the free energy with respect to $R(\rr)$, we
-need to find $g_\sigma^A$.  In the case of $n_3^A$, we needS
+need to find $g_\sigma^A$.  In the case of $n_3^A$, we need
 \begin{align}
-  2 \frac{\delta n_3^{A} (\rr')}{\delta \sigma(\rr)} &=
-  \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr'')/2) \delta(\rr-\rr'') d\rr'' \\
+  \frac{\delta n_3^{A} (\rr')}{\delta \sigma(\rr)} &=
+  \frac 12 \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr'')/2) \delta(\rr-\rr'') d\rr'' \\
    &= n (\rr) \delta(|\rr' - \rr| - \sigma(\rr)/2)
 \end{align}
 Similarly, for $n_2^A$, we find
 \begin{align}
   n_2^{A}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr'')/2) d \rr''\\
-  2 \frac{\delta n_2^{A}(\rr')}{\delta \sigma(\rr)} &= -n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)\\
+  \frac{\delta n_2^{A}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)\\
 \end{align}
 This is somewhat more challenging, since it involves an unfamiliar
 function, the derivative the Dirac delta function $\delta'$.
@@ -835,22 +835,22 @@ sums of the terms above:
 \begin{align}
   n_1(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{2\pi \sigma(\rr'')}
   \delta(|\rr'-\rr''| - \sigma(\rr'')/2) \\
-  2 \frac{\delta n_1(\rr')}{\delta \sigma(\rr)}
-  &= -\frac{n(\rr)}{2\pi
+  \frac{\delta n_1(\rr')}{\delta \sigma(\rr)}
+  &= -\frac{n(\rr)}{4\pi
     \sigma(\rr)}\delta'(|\rr'-\rr| - \sigma(\rr)/2)
   -
-  \frac{n(\rr)}{\pi
+  \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(|\rr'-\rr| - \sigma(\rr)/2)
 \end{align}
 and
 \begin{align}
   n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{\pi \sigma(\rr'')^2}
   \delta(|\rr'-\rr''| - \sigma(\rr'')/2) \\
-  2 \frac{\delta n_0(\rr')}{\delta \sigma(\rr)}
-  &= -\frac{n(\rr)}{\pi
+  \frac{\delta n_0(\rr')}{\delta \sigma(\rr)}
+  &= -\frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta'(|\rr'-\rr| - \sigma(\rr)/2)
   -
-  4 \frac{n(\rr)}{\pi
+  2 \frac{n(\rr)}{\pi
     \sigma(\rr)^3}\delta(|\rr'-\rr| - \sigma(\rr)/2)
 \end{align}
 The vector-weighted densities have no additional occurrences of $R$,
@@ -858,18 +858,18 @@ their functional derivatives come out similarly:
 \begin{align}
   \mathbf{n}_{V2}^{A}(\rr') &= \int n(\rr') \delta(|\rr' - \rr''| - \sigma(\rr'')/2)
     \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
-  2 \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta \sigma(\rr)} &= n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)
+  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta \sigma(\rr)} &= \frac 12 n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)
     \frac{\rr-\rr'}{|\rr-\rr'|}\\
 \end{align}
 and analogously for $\mathbf{n}_{V1}^A$:
 \begin{align}
   \mathbf{n}_{V1}^A(\rr') &= \int d\rr'' \frac{n(\rr'')}{2\pi \sigma(\rr'')}
   \delta(|\mathbf{r'}-\rr''| - \sigma(\rr'')/2) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
-  2 \frac{\delta \mathbf{n}_{V1}^A(\rr')}{\delta \sigma(\rr)}
-  &= \frac{n(\rr)}{2\pi
+  \frac{\delta \mathbf{n}_{V1}^A(\rr')}{\delta \sigma(\rr)}
+  &= \frac{n(\rr)}{4\pi
     \sigma(\rr)}\delta'(|\rr'-\rr| - \sigma(\rr)/2) \frac{\rr-\rr'}{|\rr-\rr'|}
   +
-  \frac{n(\rr)}{\pi
+  \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(|\rr'-\rr| - \sigma(\rr)/2) \frac{\rr-\rr'}{|\rr-\rr'|}
 \end{align}
 \fixme{double-check the directions of all the vector quantities...}
@@ -897,22 +897,22 @@ define the weighted density $n_3^S$ as:
 \end{align}
 In the symmetric case, the functional derivative is strikingly simple:
 \begin{align}
-  2 \frac{\delta n_3^{S} (\rr')}{\delta \sigma(\rr)} &=
-   \delta(\rr'-\rr) \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
+   \frac{\delta n_3^{S} (\rr')}{\delta \sigma(\rr)} &=
+   \delta(\rr'-\rr) \frac 12 \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
    \delta(\rr'-\rr) d\rr''
    \\
-   &= \delta(\rr'-\rr) n_2^S(\rr')
+   &= \frac 12 \delta(\rr'-\rr) n_2^S(\rr')
 \end{align}
 The functional derivative does \emph{not} eliminate the integral,
 which simply changes from one weighted density to another.  The
 corresponding term in the free energy functional, once integrated,
 takes a simple form:
 \begin{align}
-  \int 2 \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')}
+  \int \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')}
   \frac{\delta n_3^{S}(\rr')}{\delta \sigma(\rr)} d\rr'
-  &= \int 2 \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')} \delta(\rr'-\rr)
+  &= \frac 12 \int \frac{\delta A_{HS}}{\delta n_3^{S}(\rr')} \delta(\rr'-\rr)
   n_2^S(\rr') d\rr' \\
-  &= 2 \frac{\delta A_{HS}}{\delta n_3^{S}(\rr)} n_2(\rr)
+  &= \frac 12 \frac{\delta A_{HS}}{\delta n_3^{S}(\rr)} n_2(\rr)
 \end{align}
 which means that we can compute $g_\sigma^S(\rr)$ using only
 convolutions of the density, in strong contrast with
@@ -923,41 +923,41 @@ The functional derivative of $n_2^S(\rr')$ is quite similar:
 \begin{align}
   n_2^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf
   r''\\
-  2 \frac{\delta n_2^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr-\rr') \int n(\rr'')
-  \delta'(|\rr'-\rr''| - \sigma(\rr')) d\rr''
+  \frac{\delta n_2^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr-\rr') \frac 12 \int n(\rr'')
+  \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
 \end{align}
 where we recognize that the convolution---while not one of the standard
 FMT weighted density---is a simple convolution of the density.  We can
 go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
   n_1^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
-    2\frac{\delta n_1^{S}(\rr')}{\delta \sigma(\rr)} &=
-    -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{2\pi \sigma(\rr)}
+    \frac{\delta n_1^{S}(\rr')}{\delta \sigma(\rr)} &=
+    -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi \sigma(\rr)}
     \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
-    + n_0^s(\rr') \right)
+    + \frac 12 n_0^s(\rr') \right)
 \end{align}
 \begin{align}
   n_0^{S}(\rr') &= \int \frac{n(\rr'')}{\pi \sigma(\rr')^2} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
-    2 \frac{\delta n_0^{S}(\rr')}{\delta \sigma(\rr)}
-    &= -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{\pi \sigma(\rr)^2}
+    \frac{\delta n_0^{S}(\rr')}{\delta \sigma(\rr)}
+    &= -\delta(\rr-\rr') \left( \frac 12 \int \frac{n(\rr'')}{\pi \sigma(\rr)^2}
     \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
     +
-    \frac{4}{\sigma} n_0^S(\rr') \right)
+    \frac{2}{\sigma} n_0^S(\rr') \right)
 \end{align}
 \begin{align}
   \mathbf{n}_{V2}^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
   \frac{(\rr' - \rr'')}{|\rr' - \rr''|} d \rr''\\
-  2 \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr - \rr')
-  \int n(\rr'') \delta'(|\rr' - \rr''| - \sigma(\rr')/2)
+  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr - \rr')
+  \frac 12 \int n(\rr'') \delta'(|\rr' - \rr''| - \sigma(\rr')/2)
   \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
 \end{align}
 \begin{align}
  \mathbf{n}_{V1}^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''
    \frac{(\rr' - \rr'')}{|\rr' - \rr''|}\\
- 2 \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta \sigma(\rr)}
- &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{2\pi \sigma(\rr)}
+ \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta \sigma(\rr)}
+ &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi \sigma(\rr)}
    \delta'(|\rr'-\rr''| - \sigma(\rr')/2) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
-   + \frac{\mathbf{n}_{V2}^S(\rr')}{\pi \sigma(\rr)^2} \right)
+   + \frac{\mathbf{n}_{V2}^S(\rr')}{2 \pi \sigma(\rr)^2} \right)
 \end{align}
 
 The above equations involve just two additional weighted densities
