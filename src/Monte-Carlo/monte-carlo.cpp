@@ -154,7 +154,7 @@ int main(int argc, char *argv[]){
     }
   }
   clock_t start = clock();
-  long num_to_time = 2000000000;
+  long num_to_time = 100*N;
   long num_timed = 0;
   long i = 0;
   double scale = .005;
@@ -287,6 +287,7 @@ int main(int argc, char *argv[]){
   }
   /////////////////////////////////////////////////////////////////////////////
   int hours_now = 1;
+  num_to_time = 10000000/60/23 / N;  // this many iterations is equal to about 23 minutes
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -304,15 +305,15 @@ int main(int argc, char *argv[]){
       start = now;
       // after the first timing, just time things once per percent (as
       // often as we print the % complete messages)
-//       //if (iterations/10000 > num_to_time) num_to_time = iterations/10000;
+      
       
        ///////////////////////////////////////////start of print.dat
     
 
 
     int hours_passed = 0;
-    hours_passed = floor(clock()/10000/100/60 + 0.5);
-    if (hours_passed >= hours_now && hours_passed != 0){
+    hours_passed = floor(clock()/10000/100/60/60 + 0.5);  // rounds to the nearest hour
+    if (hours_passed >= hours_now){
       printf("Saved Data after %d hours(s) \n", hours_passed);      
       hours_now = hours_passed + 1;
       if (!flat_div){
