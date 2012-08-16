@@ -122,10 +122,10 @@ double closest_value(const Grid &g, Cartesian pos, Vector3d delta) {
         Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
         //printf("Hello %d %d %d vs %d %d %d\n", x, y, z, gd.Nx, gd.Ny, gd.Nz);
         //printf("here is %g %g %g\n", here[0], here[1], here[2]);
-        if ((here-pos-delta).dot(delta) > 0 && (here-pos-delta).norm() < closest) {
+        if ((here-pos-delta).dot(delta) > 0 && (here-pos).norm() < closest) {
           //printf("here we are... %d %d %d\n", x, y, z);
-          bestyet = g(Cartesian(pos + here));
-          closest = (here-pos-delta).norm();
+          bestyet = g(here);
+          closest = (here-pos).norm();
         }
         //printf("Got here now..;\n");
       }
@@ -241,7 +241,7 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
   char *contact_plot = (char *)malloc(1024);
   sprintf(contact_plot, "papers/contact/figs/test-particle-cont-dens-%04.2f-%04.2f.dat",
           z_part, eta);
-  radial_average(contact_plot, density, Cartesian(0,0,z_part), 1.0);
+  radial_average(contact_plot, density, Cartesian(0,0,z_part), 2.0);
 //printf("Density at contact is %g\n", radial_average(density, Cartesian(0,0,z_part), 1.0));
   printf("N = %g\n", density.sum()*gd.dvolume);
   char *plotname = (char *)malloc(1024);
