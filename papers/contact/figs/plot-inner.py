@@ -70,6 +70,7 @@ n_plt.plot(r_2[r_2>=radius],n_2[r_2>=radius]*4*numpy.pi/3,"b--",label='DFT $n$ (
 n_plt.plot(r,n0*4*numpy.pi/3,"c--",label="$n_0$")
 n_plt.plot(r,nA*4*numpy.pi/3,"m-.",label="$n_A$")
 n_plt.legend(loc='upper right', ncol=2).get_frame().set_alpha(0.5)
+n_plt.yaxis.set_major_locator(pylab.MaxNLocator(3,steps=[1,5,10],prune='upper'))
 pylab.xlim(showrmin,showrmax)
 pylab.ylim(0, n.max()*4*numpy.pi/3*1.1)
 pylab.xlabel("$r/R$")
@@ -90,6 +91,7 @@ A_plt.plot(r_2[r_2>=showrmin],gA_2[r_2>=showrmin],"g.--",markevery=me,label="$g_
 A_plt.plot(r,gross,"rx--",markevery=me,label="Gross",
            markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
 A_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
+A_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True,prune='upper'))
 pylab.xlim(showrmin,showrmax)
 #matplotlib.ticks(arange(0.5, 1.5, 3.5))
 
@@ -102,6 +104,11 @@ S_plt.plot(r[showrmin<=r],gS[showrmin<=r], "g+--",markevery=me,label="$g_\sigma^
 S_plt.plot(r_2[showrmin<=r_2],gS_2[showrmin<=r_2], "r.--",markevery=me,label="$g_\sigma^S$ (White Bear mark II)")
 S_plt.plot(r,gyuwu,"gx--",markevery=me,label="Yu and Wu")
 S_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
+if int(ffdigit) == 4 and  int(radiusname) == 6:
+        S_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True, prune='both'))
+else:
+    S_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True, prune='upper'))
+
 pylab.xlim(showrmin,showrmax)
 
 pylab.ylabel("$g^S$")
