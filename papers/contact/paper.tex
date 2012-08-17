@@ -612,11 +612,11 @@ solvation.
 
 \section{Results}
 
-\subsection{Test-particle result}
+%% \subsection{Test-particle result}
 
-Here we discuss comparison of the correlation function calculated via
-both Monte Carlo and the test-particle approach (see
-Figures~\ref{fig:inner-4-10} and~\ref{fig:inner-4-40}).
+%% Here we discuss comparison of the correlation function calculated via
+%% both Monte Carlo and the test-particle approach (see
+%% Figures~\ref{fig:inner-4-10} and~\ref{fig:inner-4-40}).
 
 \subsection{Low density}
 
@@ -651,19 +651,19 @@ which are shown in Figures~\ref{fig:walls-10}-\ref{fig:outer-10}.
   \label{fig:outer-40}
 \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/test-particle-10}
-  \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-    fraction of 0.1.}
-  \label{fig:test-particle-10}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-10}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.1.}
+%%   \label{fig:test-particle-10}
+%% \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/test-particle-40}
-  \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-    fraction of 0.4.}
-  \label{fig:test-particle-40}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-40}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.4.}
+%%   \label{fig:test-particle-40}
+%% \end{figure}
 
 \subsection{High density}
 
@@ -722,97 +722,6 @@ In our expressions for pressure (eq \ref{eq:p_{HS}^A} and eq \ref{eq:p_{HS}^S}) 
 
 
 We must therefore compute both the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms and the $\frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms.  We will compute the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms for both the functional derived in the White Bear I formulation and for that in the White Bear II formulation.  Following this we will compute the $\frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms for both the A and S cases.  These latter derivitives will differ for the A and S cases according to the qualitive concepts described above.
-
-\subsection{Expressions for $\beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}$, etc. for the White Bear Mark I free energy $A_{HS}$}
-
-  First, let's rewrite the free energy in terms of a smaller set of weighted densities
-
-  \begin{align}
-    A_{HS} &= \int \left\{
-    -n_0 \ln\left( 1 - n_3\right)
-    + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
-      n_3 + (1-n_3)^2 \ln(1-n_3)
-    }{
-      36\pi n_3^2(1-n_3)^2
-    }
-    \right\}
-  \end{align}
-
-Taking derivatives we have
-
-  \begin{align}
-    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
-    \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
-    + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
-      n_3(\mathbf{r}'))^2}
-    - \frac{n_2^3 -
-      3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
-    \frac{n_3^2-5n_3+2}{n_3^3(1-n_3)^3} + 2\frac{\ln(1-n_3)}{n_3^3}
-    \right)
-    \\
-    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
-    \frac{n_1}{1-n_3}
-    + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
-      (1-n_3)^2\ln(1-n_3)}{
-      36\pi n_3^2(1-n_3)^2
-    }
-    \\
-    \frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
-    \\
-    \frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &=
-    -\ln\left( 1 - n_3\right) \\
-    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
-    \frac{\mathbf{n}_{V1}}{1-n_3}
-    - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
-      (1-n_3)^2\ln(1-n_3)}{
-      36\pi n_3^2(1-n_3)^2
-    }    \\
-    \frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
-    \frac{\mathbf{n}_{V2}}{1-n_3} \\
-  \end{align}
-
-
-\subsection{Expressions for $\beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}$, etc. for the White Brear Mark II free energy $A_{HS}$}
-
-Similarly to the White Bear I case we first write
-
-\begin{align} 
-A_{HS} &= \int \left\{
-    -n_0 \ln\left(1 - n_3\right)
-    + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
-    + \left(1 - \frac{4}{9}n_3\phi_3(n_3)\right)\frac{n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}}{24\pi (1-n_3)^2}
-    \right\}
-\end{align}
- where
- \begin{align}
-   \phi_2 &= \left(6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3)\right)\frac{1}{n_3^3}\\
-   \phi_3 &= \left(6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3)\right)\frac{1}{4n_3^3}
- \end{align}
-For the following derivitives we have
-\begin{align}
-   \frac{\delta \phi_2}{\delta n_3} &= \left((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2\right)\frac{3}{n_3^4}\\
-   \frac{\delta \phi_3}{\delta n_3} &= \left(-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3)\right)\frac{3}{4n_3^4}
- \end{align}
-And using these
-\begin{align}
-  \frac{\delta A_{HS}}{\delta n_3} &= \psi _1 + \psi _2 + \psi _3
-\end{align}
-where
-\begin{align}
-  \psi_1 &= \frac{n_0}{1-n_3}\\
-  \psi_2 &= \frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3}\left(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}\right) + \left(1 + \frac{1}{9}n_3^2\phi_2\right)\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2}\\
-  \psi_3 &= \frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2}\left(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}\right) + 2\left(1 - \frac{4}{9}n_3\phi_3\right)\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3} 
-\end{align}
-We also have
-\begin{align}
-  \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2}\\
-  \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
-  \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
-  \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
-  \frac{\delta A_{HS}}{\delta \mathbf{n}_2} &= -(1 + \frac{1}{9}n_3^2\phi_2)\frac{\mathbf{n}_1}{1 - n_3} 
-  - (1 - \frac{4}{9}n_3\phi_3)\frac{6n_2\mathbf{n}_2}{24\pi(1 - n_3)^2}
-\end{align}
 
 
 \subsection{Expressions for $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta \sigma(\mathbf{r})/2}$, etc. for the assymetric case}\label{appendix:g-A}
@@ -984,3 +893,98 @@ density.
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
+
+
+
+
+%% \subsection{Expressions for $\beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}$, etc. for the White Bear Mark I free energy $A_{HS}$}
+
+%%   First, let's rewrite the free energy in terms of a smaller set of weighted densities
+
+%%   \begin{align}
+%%     A_{HS} &= \int \left\{
+%%     -n_0 \ln\left( 1 - n_3\right)
+%%     + \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+%%     + (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+%%       n_3 + (1-n_3)^2 \ln(1-n_3)
+%%     }{
+%%       36\pi n_3^2(1-n_3)^2
+%%     }
+%%     \right\}
+%%   \end{align}
+
+%% Taking derivatives we have
+
+%%   \begin{align}
+%%     \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')} &=
+%%     \frac{n_0(\mathbf{r}')}{1 - n_3(\mathbf{r}')}
+%%     + \frac{n_1n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{(1 -
+%%       n_3(\mathbf{r}'))^2}
+%%     - \frac{n_2^3 -
+%%       3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{36\pi}\left(
+%%     \frac{n_3^2-5n_3+2}{n_3^3(1-n_3)^3} + 2\frac{\ln(1-n_3)}{n_3^3}
+%%     \right)
+%%     \\
+%%     \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')} &=
+%%     \frac{n_1}{1-n_3}
+%%     + 3(n_2^2 - \mathbf{n}_{V2}\cdot\mathbf{n}_{V2})\frac{n_3 +
+%%       (1-n_3)^2\ln(1-n_3)}{
+%%       36\pi n_3^2(1-n_3)^2
+%%     }
+%%     \\
+%%     \frac{\delta A_{HS}}{\delta n_1(\mathbf{r}')} &= \frac{n_2}{1-n_3}
+%%     \\
+%%     \frac{\delta A_{HS}}{\delta n_0(\mathbf{r}')} &=
+%%     -\ln\left( 1 - n_3\right) \\
+%%     \frac{\delta A_{HS}}{\delta \mathbf{n}_{V2}(\mathbf{r}')} &=
+%%     \frac{\mathbf{n}_{V1}}{1-n_3}
+%%     - 6 n_2 \mathbf{n}_{V2} \frac{n_3 +
+%%       (1-n_3)^2\ln(1-n_3)}{
+%%       36\pi n_3^2(1-n_3)^2
+%%     }    \\
+%%     \frac{\delta A_{HS}}{\delta \mathbf{n}_{V1}(\mathbf{r}')} &=
+%%     \frac{\mathbf{n}_{V2}}{1-n_3} \\
+%%   \end{align}
+
+
+%% \subsection{Expressions for $\beta\frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}$, etc. for the White Brear Mark II free energy $A_{HS}$}
+
+%% Similarly to the White Bear I case we first write
+
+%% \begin{align} 
+%% A_{HS} &= \int \left\{
+%%     -n_0 \ln\left(1 - n_3\right)
+%%     + \left(1 + \frac{1}{9}n_3^2 \phi_2(n_3)\right)   \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3}
+%%     + \left(1 - \frac{4}{9}n_3\phi_3(n_3)\right)\frac{n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}}{24\pi (1-n_3)^2}
+%%     \right\}
+%% \end{align}
+%%  where
+%%  \begin{align}
+%%    \phi_2 &= \left(6n_3 - 3n_3^2 + 6(1-n_3)\ln(1-n_3)\right)\frac{1}{n_3^3}\\
+%%    \phi_3 &= \left(6n_3 - 9n_3^2 + 6n_3^3 + 6(1-n_3)^2 \ln(1-n_3)\right)\frac{1}{4n_3^3}
+%%  \end{align}
+%% For the following derivitives we have
+%% \begin{align}
+%%    \frac{\delta \phi_2}{\delta n_3} &= \left((-6+4n_3)\ln(1-n_3) - 6n_3 + n_3^2\right)\frac{3}{n_3^4}\\
+%%    \frac{\delta \phi_3}{\delta n_3} &= \left(-6n_3 + 5n_3^2 + (-2n_3^2 + 8n_3 -6)\ln(1-n_3)\right)\frac{3}{4n_3^4}
+%%  \end{align}
+%% And using these
+%% \begin{align}
+%%   \frac{\delta A_{HS}}{\delta n_3} &= \psi _1 + \psi _2 + \psi _3
+%% \end{align}
+%% where
+%% \begin{align}
+%%   \psi_1 &= \frac{n_0}{1-n_3}\\
+%%   \psi_2 &= \frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{1-n_3}\left(\frac{2}{9}n_3\phi_2 + \frac{1}{9}n_3^2\frac{\delta \phi_2}{\delta n_3}\right) + \left(1 + \frac{1}{9}n_3^2\phi_2\right)\frac{n_1n_2 - \mathbf{n}_1\cdot \mathbf{n}_2}{(1-n_3)^2}\\
+%%   \psi_3 &= \frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^2}\left(-\frac{4}{9}\phi_3 - \frac{4}{9}n_3\frac{\delta \phi_3}{\delta n_3}\right) + 2\left(1 - \frac{4}{9}n_3\phi_3\right)\frac{n_2^3 - 3n_2\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1-n_3)^3} 
+%% \end{align}
+%% We also have
+%% \begin{align}
+%%   \frac{\delta A_{HS}}{\delta n_2} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_1}{1-n_3} + (1 - \frac{4}{9}n_3\phi_3)\frac{3n_2^2 - 3\mathbf{n}_2 \cdot \mathbf{n}_2}{24\pi(1 - n_3)^2}\\
+%%   \frac{\delta A_{HS}}{\delta n_1} &= (1 + \frac{1}{9}n_3^2\phi_2)\frac{n_2}{1 - n_3}\\
+%%   \frac{\delta A_{HS}}{\delta n_0} &= -\ln(1 - n_3)\\
+%%   \frac{\delta A_{HS}}{\delta \mathbf{n}_1} &= -(1 + \frac{1}{9}n_3^2 \phi_2)\frac{\mathbf{n}_2}{1 - n_3}\\
+%%   \frac{\delta A_{HS}}{\delta \mathbf{n}_2} &= -(1 + \frac{1}{9}n_3^2\phi_2)\frac{\mathbf{n}_1}{1 - n_3} 
+%%   - (1 - \frac{4}{9}n_3\phi_3)\frac{6n_2\mathbf{n}_2}{24\pi(1 - n_3)^2}
+%% \end{align}
+
