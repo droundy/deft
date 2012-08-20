@@ -139,8 +139,9 @@ homogeneous limit, and it reproduces the exact free energy in the
 strongly-confined limit of a small cavity.
 
 A number of classical density functionals have been developed for
-water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft, 
-  gloor2004accurate, gloor2007prediction, Jaqaman2004, chuev2006, clark2006developing,
+water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft,
+  gloor2004accurate, gloor2007prediction, Jaqaman2004, chuev2006,
+  clark2006developing, chuev2006,
   lischner2010classical, fu2005vapor-liquid-dft,kiselev2006new,
   blas2001examination}, each of which
 captures some of the qualitative behavior of water.  However, each of
@@ -148,8 +149,11 @@ these functionals also fail to capture some of water's unique
 properties.  For instance, the functional of Lischner \emph{et
   al}\cite{lischner2010classical} treats the surface tension
 correctly, but can only be used at room temperature, and thus captures
-none of the temperature-dependence of water.  A number of classical
-density functionals have recently been produced that are based on
+none of the temperature-dependence of water.  A functional by Chuev
+and Skolov\cite{chuev2006} uses an ad hoc modification of FMT that can
+predict hydrophobic hydration near temperatures of 298~K, but does not produce a
+correct equation of state due to their method producting a high value
+for pressure. A number of classical density functionals have recently been produced that are based on
 Statistical Associating Fluid Theory (SAFT)\cite{ 
   yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft,gloor2002saft,muller2001molecular,
@@ -663,13 +667,7 @@ water.  Walther \emph{et al} observe a drying transition between the
 two nanotubes, which occurs at a smaller radius than our results
 suggest.  However, when Walther \emph{et al} disable the attractive
 interaction between nanotube and water, the drying effect occurs at
-much longer range, in agreement with our results.  \fixme{Please read
-  this carefully, as I did some major changes.  I took a look at the
-  paper, and it seems that in Figure 3c (and the paragraph that ends
-  at the top of that page) they finally do a truly hydrophobic
-  interaction, which is a better comparison with what we did.  The
-  drying transition is inhibited by the attraction between tube and
-  water. }
+much longer range, in agreement with our results.
 
 \subsection{Hydrophobic interactions of four rods}
 
