@@ -318,16 +318,19 @@ with integrands
 \end{align}
 using the weighted densities
 \begin{align}
-  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - \sigma/2) d\rr' \\
+  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - \sigma/2)
+  d\rr' \label{eq:FMn3} \\
   n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) d\rr' \\
   \mathbf{n}_{2V}(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - \sigma/2) \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
 \end{align}
 \begin{align}
   \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{2\pi \sigma}, \quad
   n_1 &= \frac{n_2}{2\pi \sigma} , \quad
-  n_0 = \frac{n_2}{\pi \sigma^2}
+  n_0 = \frac{n_2}{\pi \sigma^2} \label{eq:FMrest}
 \end{align}
 
+
+\section{Theoretical Approaches}
 
 \subsection{Homogeneous limit}
 
@@ -377,118 +380,114 @@ fluid requires that we find the pressure on particular spheres---or
 potentially particular parts of particular spheres.
 
 
-\section{Asymmetrically averaged correlation function}\label{sec:g-A}
+\subsection{Asymmetrically averaged correlation function}\label{sec:g-A}
 
-When we consider an inhomogeneous system, we may prefer to ask for
-\emph{which} sphere we are interested in computing the contact
-density.  One way to answer this is to specify a sphere at a fixed
-position $\mathbf{r}$.  By making the hard-sphere radius dependent on
-position, we can compute the pressure on the hard spheres located at
-$\mathbf{r}$.  Since the hard-sphere radius enters the FMT free energy
-by means of the fundamental measures, this requires that we adjust the
-convolutions to have a diameter $\sigma$ which depends on the location
-of the sphere:
+We will begin our derivation of the locally averaged correlation
+function with the asymmetric definition of $g_\sigma^A(\rr)$ given in
+Equation~\ref{eq:gA}, which is averaged over contacts in which one of
+the two spheres is located at position~$\rr$.  This correlation
+function is related to the contact density averaged over the surface
+of a sphere located at $\rr$, and can thus be determined by finding
+the pressure on that sphere.  We find this pressure by treating the
+hard-sphere diameter as a function of the location of the sphere in
+question, when defining the fundamental measured (in
+Equations~\ref{eq:FMn3}-\ref{eq:FMrest}):
 \begin{align}
   n_3^A(\rr) &= \int n(\rr')\Theta(|\rr-\rr'|-\sigma(\rr')/2)d\rr' \label{eq:n3A}
 \end{align}
-Once we have done this---and similarly for the other fundamental
-measures---we derive a formula for the correlation function
-$g_\sigma^A(\rr)$ by finding the pressure on the surface of any hard
-spheres located at position $\rr$, and using the contact-density
-theorem to extract the contact density, from which we can establish
-the averaged correlation function at contact.
+Once we have done this, we derive a formula for the correlation
+function $g_\sigma^A(\rr)$ by finding the pressure on the surface of
+any hard spheres located at position $\rr$, and using the
+contact-density theorem to extract the contact density, from which we
+can establish the averaged correlation function at contact.
 \begin{align}
   p_{HS}(\mathbf{r}) &= \frac{1}{n(\rr) 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:p_{HS}^A}\\
-  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 2\pi \sigma^2} \frac{\delta
-    A_{HS}}{\delta \sigma(\mathbf{r})} \\
-  g_\sigma^A(\rr) &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
+%  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 2\pi \sigma^2} \frac{\delta
+%    A_{HS}}{\delta \sigma(\mathbf{r})} \\
+  g_\sigma^A(\rr)% &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
   &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
-The functional derivative $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
-in the above formula must be computed with the asymmetric formulation
-for the fundamental measures.  In practice, we use the approximate
-White Bear functional to find an approximate expression for
-$g_\sigma^A$, which is given in Appendix~\ref{appendix:g-A}.  This
-expression will involve convolutions of derivatives of the free
-energy, making this formulation computationally more expensive than
-the free energy itself.
-
-In addition to the different densities in the denominators of Equations 
-\ref{eq:g-A-exact-a} and \ref{eq:g-S-exact-a} there is also a difference 
-between the treatment of the A and S cases in the derivatives 
-$\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$ in Equations \ref{eq:g-A-exact} 
-and \ref{eq:g-S-exact}. The White Bear approximations for $A_{HS}$ 
-that we use involve a number of weighted densities and for the derivatives 
-of these we use two different conceptual approaches.  In the assymetric case, 
-a change in $\sigma(\mathbf{r})/2$ will refer to a change in the radius of a sphere 
-that is located at the position $\mathbf{r}$.  The weighted densities that are 
-affected by such a change will be those that are located a distance $\sigma/2$ away 
-from such a sphere.  We compute the assymetric derivatives In Appendix~\ref{appendix:g-A}.     
+The functional derivative $\frac{\delta A_{HS}}{\delta
+  \sigma(\mathbf{r})}$ in the above formula is computed with the
+asymmetric formulation of the fundamental measures, as in
+Equation~\ref{eq:n3A}.  Details of some aspects of finding this
+derivative using FMT are given in Appendix~\ref{appendix:g-A}.  The
+equation for $g_\sigma^A$ involves convolutions of local derivatives
+of the free energy, making this formulation somewhat computationally
+more expensive than the free energy itself.
 
 \derivation{
   \end{widetext}
 }
 
-\section{Symmetrically averaged correlation function}\label{sec:g-S}
-
-We now address the symmetrically averaged correlation function, which
-is defined in Equation~\ref{eq:gS}.  This corresponds to the
-correlation function averaged for
-spheres \emph{touching at a given point}.  It is a symmetric
-measure, since both spheres involved are treated in the same way.  In
-fact, the density of such spheres is just the density $n_0(\rr)$ from
-FMT.  See Figure~\ref{fig:n0} for an illustration $n_0$.  Since $n_0$
-is the fundamental measure of sphere surface contact, it makes sense
-to define a corresponding correlation function $g_\sigma^S$.  This is
-\emph{almost} what is done by Yu and  Wu in
-reference\cite{yu2002fmt-dft-inhomogeneous-associating}, as will be
-discussed in Section~\ref{sec:yuwu}.
-
-The procedure for finding the symmetrically averaged correlation
-function $g_\sigma^S(\rr)$ is less straight-forward than 
-\begin{align}
-  n_3^S(\rr) &= \int n(\rr')\Theta(|\rr-\rr'|-\sigma(\rr)/2)d\rr'
-\end{align}
-The hard-sphere radius $\sigma/2$ in this weighted density has an unusual
-position dependence:  it depends on the position at which we are
-evaluating the weighted density, rather than the position of the hard
-spheres themselves.  This has the effect of expanding spheres as they
-touch the point $\rr$, a concept illustrated in
-Figure~\ref{fig:contact}.  This enables a similar derivation to that
-which gave us $g_\sigma^A(\rr)$:
-
+\subsection{Symmetrically averaged correlation function}\label{sec:g-S}
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/contact}
-\caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
-  consist of those which just touch the point $\mathbf{r}$.}
+\caption{An illustration of the prospect of changing the radius of
+  hard spheres only where they contact a given point, in order to find
+  the pressure on those spheres at just that point. }
 \label{fig:contact}
 \end{figure}
 
-These qualitative concepts lead us to the derivative terms in $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$,
-which is in turn found in Equation~\ref{eq:p_{HS}^S}.  The rest of the
-derivation of the correlatation function results when we recognize that
-instead of dividing the pressure by $n(\mathbf{r})$ and $n_A(\mathbf{r})$
-as in the assymmetric case we will divide by $n_0(\mathbf{r})^2$
-since we have symmetry around the point $\mathbf{r}$.
+We now address the symmetrically averaged correlation function, which
+is defined in Equation~\ref{eq:gS}.  This corresponds to the
+correlation function averaged for spheres \emph{touching at a given
+  point}.  It is a symmetric measure, since the two spheres involved
+are both treated in the same way.  The density of spheres that could
+be touching at the point $\rr$ is precisely the density $n_0(\rr)$
+from FMT (see Figure~\ref{fig:n0} for an illustration $n_0$).  Since
+$n_0$ is the fundamental measure of sphere surface contact, it makes
+sense to define a corresponding correlation function $g_\sigma^S$.
+This is closely related what is done by Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating}, as will be discussed
+in Section~\ref{sec:yuwu}.
 
+The procedure for finding the symmetrically averaged correlation
+function $g_\sigma^S(\rr)$ is less straight-forward than that of the
+previous section, since we must find the average pressure exerted on
+the portion of the surface of spheres which is at position $\rr$.  We
+achieve this, as in the previous section, by defining a
+position-dependent hard-sphere diameter $\sigma(\rr)$, but this time
+we define the diameter to be dependent on the position at which the
+fundamental measure itself is evaluated:
+\begin{align}
+  n_3^S(\rr) &= \int n(\rr')\Theta(|\rr-\rr'|-\sigma(\rr)/2)d\rr'
+  \label{eq:n3S}
+\end{align}
+This has the effect of expanding spheres as they touch the point
+$\rr$, a concept illustrated in Figure~\ref{fig:contact}.This
+enables a similar derivation to that which gave us $g_\sigma^A(\rr)$:
 \begin{align}
   p_{HS}(\mathbf{r}) &= \frac{1}{n_0(\rr) 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:p_{HS}^S}\\
-  \ncontact(\rr) &= \frac{1}{n_0(\rr) k_BT 2\pi \sigma^2} \frac{\delta
-    A_{HS}}{\delta \sigma(\mathbf{r})} \\
-  g_\sigma^S(\rr) &= \frac{\ncontact(\rr)}{n_0(\rr)} \\
+%  \ncontact(\rr) &= \frac{1}{n_0(\rr) k_BT 2\pi \sigma^2} \frac{\delta
+%    A_{HS}}{\delta \sigma(\mathbf{r})} \\
+  g_\sigma^S(\rr)% &= \frac{\ncontact(\rr)}{n_0(\rr)} \\
   &= \frac{1}{n_0(\rr)^2}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
 where the functional derivative $\frac{\delta A_{HS}}{\delta
-  \sigma(\mathbf{r})}$ in this case is computed with the symmetric
-formulation of the fundamental measures.  Complete expressions for
-$g_\sigma^S$ are included in Appendix~\ref{appendix:g-S}.\\
+  \sigma(\mathbf{r})}$ in the above formula is computed with the
+symmetric formulation of the fundamental measures, as in
+Equation~\ref{eq:n3S}.  Details of some aspects of finding this
+derivative using FMT are given in Appendix~\ref{appendix:g-S}.  The
+equation for $g_\sigma^S$ is computationally simpler than that for
+$g_\sigma^A$, as it only involves convolutions of the density itself,
+although it does require two new fundamental measures
+\begin{align}
+  n_{2'}(\rr) &= \int n(\rr') \delta'(\left|\rr - \rr'\right| -
+  \sigma/2) d\rr' \\
+  \mathbf{n}_{2V'}(\rr) &=
+  \int n(\rr') \delta'(\left|\rr - \rr'\right| - \sigma/2) \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
+\end{align}
+where $\delta'$ is the derivative of the Dirac delta function.  These
+convolutions are easily expressed in reciprocal space, and can be
+easily and efficiently computed.
 
-\section{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
+\subsection{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
 One approximation for the correlation function is that of
 Gross\cite{gross2009density}, which is of the asymmetrically averaged
 variety ($g_\sigma^A$):
@@ -502,21 +501,21 @@ spheres that could be touching a sphere at point $\rr$ in the
 Carnahan-Starling equation for the correlation function at contact,
 given in Equation~\ref{eq:cs-g}.
 
-\section{Yu and Wu's symmetrically averaged functional}\label{sec:yuwu}
+\subsection{Yu and Wu's symmetrically averaged functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional for the correlation function
-evaluated at contac, which should correspond to the symmetrically
-averaged correlation
-function~$g_\sigma^S$~\cite{yu2002fmt-dft-inhomogeneous-associating}.
-Although Yu and Wu use a symmetric formulation for $g_\sigma$, instead
-of using $n_0$ as the associated density, they use a density given by
+evaluated at contact, which is symmetrically
+averaged~\cite{yu2002fmt-dft-inhomogeneous-associating}.  Although Yu
+and Wu use a symmetric formulation for $g_\sigma$, instead of using
+$n_0$ as the associated density, they use a density given by
 \begin{align}
   n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
   \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
-point of contact.  Given this definition of density, their $g_\sigma$
-is given by:
+point of contact, and has the effect of reducing the density at
+interfaces.  Given this definition of density, their $g_\sigma$ is
+given by:
 % \fixme{Which of the following two equations is more clear to you? We
 %  only want one.}
 \begin{align}
@@ -534,8 +533,8 @@ From this function, we extract a symmetric correlation function
     + \frac14 \frac{\sigma n_2\zeta}{(1-n_3)^2}
     + \frac1{72} \frac{\sigma^2 n_2^2 \zeta}{(1-n_3)^3}\right)
 \end{align}
-which corresponds to our $g_\sigma^S$ and can be directly compared
-with it.
+which corresponds to our $g_\sigma^S$ so that they can be directly
+compared.
 
 \section{Comparison with simulation}
 
