@@ -14,16 +14,9 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
-\newcommand{\xx}{\textbf{x}}
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
-
-% needsworklater is used to annotate bits that need work, but that we
-% can postpone for a while.
-\newcommand{\needsworklater}[1]{\emph{[#1]}}
-% needsworknow is intended to prioritize stuff that needs fixing.
-\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
 
 \begin{document}
 \title{Smoothing the Fundamental Measure Theory Functional for Hard Spheres}
@@ -33,9 +26,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\needsworklater{ We examine a functional based on FMT~\cite{roth2002whitebear}
- with smoother convolution kernels.  This functional is numerically
- easier to converge, and yet (hopefully) gives comparable results.}
+\fixme{ We examine a functional based on SFMT~\cite{schmidt2000fluid}.
+  We pick a slightly soft potential, and demonstrate that it gives
+  good results.}
 \end{abstract}
 
 \maketitle
@@ -53,7 +46,7 @@ functional describes the excess free energy of a hard-sphere fluid.
 This particular FMT reduces to the Carnahan-Starling equation of state
 for homogeneous systems.
 \begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\xx) + \Phi_2(\xx) + \Phi_3(\xx)\right) d\xx \; ,
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
 \end{equation}
 with integrands
 \begin{align}
@@ -67,8 +60,8 @@ with integrands
 \end{align}
 using the weighted densities
 \begin{align}
-  n_3(\xx) &= \int n(\xx') \Theta(\left|\xx - \xx'\right| - R) d\xx' \\
-  n_2(\xx) &= \int n(\xx') \delta(\left|\xx - \xx'\right| - R) d\xx'
+  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - R) d\rr' \\
+  n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
 \end{align}
 \begin{align}
   \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
@@ -81,30 +74,196 @@ using the weighted densities
 
 \subsection{Hard spheres confined in a spherical cavity}
 
-\begin{figure}
-  \includegraphics[height=5cm]{figs/density-08-013}
-  \caption{Density and contact densities of thirteen hard spheres in a
-    spherical cavity with diameter 8.}
-  \label{fig:sphere-8}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[height=5cm]{figs/density-12-112}
-  \caption{Density and contact densities of 112 hard spheres in a
-    spherical cavity with diameter 12.}
-  \label{fig:sphere-12}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[height=5cm]{figs/density-16-265}
-  \caption{Density and contact densities of 265 hard spheres in a
-    spherical cavity with diameter 16.}
-  \label{fig:sphere-16}
-\end{figure}
-
+\fixme{TODO: Create actual Monte Carlo data, and make a comparison.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
+
+\appendix
+
+\section{Soft Fundamental-Measure Theory}
+
+We follow the Soft Fundamental-Measure Theory introduced by
+Schmidt~\cite{schmidt2000fluid}.  Here I will derive the fundamental
+measures for a hard-sphere fluid, so we can see how this works.
+Schmidt defines the relationship between the weighting functions as:
+\begin{align}
+  w_2(r) &= -\frac{\partial w_3(r)}{\partial r} \\
+  \mathbf{w}_{v2}(\rr) &= w_2(r)\frac{\rr}{r} \\
+  \mathbf{w}_{m2}(\rr) &= w_2(r)\left( \frac{\rr \rr}{r^2}
+                              - \frac{\mathbf{\hat{1}}}{3} \right) \\
+  w_1(r) &= \frac{w_2(r)}{4\pi r} \\
+  \mathbf{w}_{v1}(\rr) &= w_1(r) \frac{\rr}{r} \\
+  w_0(r) &= \frac{w_1(r)}{r}
+\end{align}
+The weighting functions are themselves given by a deconvolution of the
+Mayer $f$ function:
+\begin{align}
+  f(r) &= \exp\left(-\frac{V(r)}{k_BT}\right) - 1 \\
+  &= w_0 * w_3 + w_1 * w_2 - \mathbf{w}_{v1} * \mathbf{w}_{v2}
+\end{align}
+where the $*$ operator denotes a three-dimensional convolution, and a
+scalar product between vectors.  Schmidt explains that there is a
+simple relationship in fourier space between the Mayer $f$ function
+and the weighting function $w_2$:
+\begin{align}
+  \tilde{w}_2(k) &= \pm \sqrt{ik\tilde{f}(k)} \label{eq:w2fromf}
+\end{align}
+where the tilde denotes a \emph{one-dimensional} Fourier transform:
+\begin{align}
+  \tilde{f}(k) &= \int_{-\infty}^\infty f(r) e^{ikr} dr
+\end{align}
+
+I am writing this section to explore this formula, and to help me to
+understand how to deal with this branch cut (i.e. the sign in
+Equation~\ref{eq:w2fromf}).  One interesting challenge here is that
+$\tilde{w}_2(k)$ is \emph{not} actually the function that we will use
+in our convolutions, which are three-dimensional convolutions.  So we
+will still have to go into real space and back again to get our
+convolution kernel.  $\ddot\frown$
+
+\section{Hard spheres}
+
+For the hard-sphere fluid,
+\begin{align}
+  f(r) = - \Theta(r - 2R)
+\end{align}
+which means that
+\begin{align}
+  \tilde{f}(k) &= \int_{-\infty}^\infty f(r) e^{ikr} dr \\
+  &= -\int_{-2R}^{2R} e^{ikr} dr \\
+  &= -\int_{-2R}^{2R} \cos(kr) dr \\
+  &= -\frac{2}{k}\sin(2kR)
+\end{align}
+At this point, we want to solve for $w_2$.
+\begin{align}
+  \tilde{w}_2(k) &= \pm \sqrt{ik\tilde{f}(k)} \\
+  &= \pm \sqrt{-2i\sin(2kR)} \\
+  &= \pm \sqrt{-4i\sin(kR)\cos(kR)}
+\end{align}
+I happen to know that
+\begin{align}
+  w_2(r) &= \delta(r - R) \\
+  \tilde{w}_2(k) &= \int_{-\infty}^\infty w_2(r) e^{ikr} dr \\
+  &= \int_{-\infty}^\infty \delta(r-R) e^{ikr} dr \\
+  &= e^{ikr} + e^{-ikr + i\Phi}
+\end{align}
+where in the last step, I use the fact that there is a physical
+ambiguity as to whether $w_2$ is even or odd or somewhere in between
+when understood in one dimension, since only even values for $r$ make
+physical sense.  Thus looking at the square of this, we see
+\begin{align}
+  \tilde{w}_2(k)^2 &= e^{i2kr} + e^{-i2kr + 2\Phi} + 2e^{i\Phi} \\
+  &= -2i\sin(2kR) \\
+  &= -2i\frac{e^{i2kR} - e^{-i2kR}}{2i} \\
+  &= e^{-i2kR} - e^{i2kR}
+\end{align}
+This almost makes sense (if $\Phi = \pi/2$), but not quite, because
+there is the extra term of $2e^{i\Phi}$, which would give us an extra
+$2i$.
+
+This looks like a contradiction.  However, we assumed here that there
+was a $\delta$-function at $-R$, and that $f(r)$ was a symmetric
+function, simply because the three-dimensional function is symmetric.
+What if there is only one spike at $R$ and $f(r)$ is asymmetric?  Then
+we would have
+\begin{align}
+  \tilde{f}(k) &= \int_{-\infty}^\infty f(r) e^{ikr} dr \\
+  &= -\int_{-\infty}^{2R} e^{ik2R} dr
+\end{align}
+This integral isn't very nicely behaved.  But if I were to ignore the
+lower bound---which is actually okay for computing the slope, which is
+all we need---then I would find that
+\begin{align}
+  \tilde{f}(k) &= -\frac{e^{ikr}}{ik} + C
+\end{align}
+When I solve for $\tilde{w}_2$ I get something similar:
+\begin{align}
+  w_2(r) &= \delta(r - R) \\
+  \tilde{w}_2(k) &= \int_{-\infty}^\infty \delta(r-R) e^{ikr} dr \\
+  &= e^{ikR}
+\end{align}
+And now it's obvious that the solution is correct, apart from an
+unexplained minus sign in $\tilde{f}$, which I imagine I could find in
+time.  So it looks like we want to assume that the slope of $f(r)$ is
+zero for $r<0$, and therefore that $w_2(r<0)=0$.
+
+\section{Linear soft potential}
+
+Now let's imagine a potential
+\begin{align}
+  V(r) =
+  \begin{cases}
+    V_0 & r < 0 \\
+    V_0\left(1 - \frac{r}{r_0}\right) & r < r_0 \\
+    0 & r \ge r_0
+  \end{cases}
+\end{align}
+This gives us a Mayer $f$ function of
+\begin{align}
+  f(r) &= e^{-\beta V(r)} - 1 \\
+  f'(r) &=
+  \begin{cases}
+    \frac{\beta V_0}{r_0} e^{-\beta V_0(1-r/r_0)} & 0 < r < r_0 \\
+    0 & \text{otherwise}
+  \end{cases} \\
+  \tilde{f'}(k) &= \frac{\beta V_0}{r_0}\int_{0}^{r_0} e^{-\beta
+    V_0(1-r/r_0)}e^{ikr}dr \\
+  &= \frac{\beta V_0}{r_0}e^{-\beta V_0}
+  \int_{0}^{r_0} e^{(\beta V_0/r_0 + ik)r} dr
+  \\
+  &= \frac{\beta V_0}{r_0}e^{-\beta V_0} \frac{1}{\beta V_0/r_0 + ik}\left(
+  e^{\beta V_0+ikr_0} - 1 \right)
+  \\
+  &= \frac{e^{ikr_0} - e^{-\beta V_0}}{1 + \frac{ikr_0}{\beta V_0}}
+  \\
+  &= \tilde{w}_2(k)^2
+\end{align}
+That's just a little bit yucky, and I'm not sure I can solve for it in
+real space.
+
+Now let's imagine a potential that has some interesting (but
+numerically convenient) values for $r<0$
+\begin{align}
+  V(r) =
+  \begin{cases}
+    V_0\left(1 - \frac{r}{r_0}\right) & r < r_0 \\
+    0 & r \ge r_0
+  \end{cases}
+\end{align}
+This gives us a Mayer $f$ function of
+\begin{align}
+  f(r) &= e^{-\beta V(r)} - 1 \\
+  f'(r) &=
+  \begin{cases}
+    \frac{\beta V_0}{r_0} e^{-\beta V_0(1-r/r_0)} & r < r_0 \\
+    0 & \text{otherwise}
+  \end{cases} \\
+  \tilde{f'}(k) &= \frac{\beta V_0}{r_0}\int_{-\infty}^{r_0} e^{-\beta
+    V_0(1-r/r_0)}e^{ikr}dr \\
+  &= \frac{\beta V_0}{r_0}e^{-\beta V_0}
+  \int_{-\infty}^{r_0} e^{(\beta V_0/r_0 + ik)r} dr
+  \\
+  &= \frac{\beta V_0}{r_0}e^{-\beta V_0} \frac{1}{\beta V_0/r_0 + ik}e^{\beta V_0+ikr_0}
+  \\
+  &= \frac{e^{ikr_0}}{1 + \frac{ikr_0}{\beta V_0}}
+  \\
+  &= \tilde{w}_2(k)^2
+\end{align}
+Now this is nicer.  The top is really easy to square root.  The bottom
+is ever so slightly harder, but not really hard.
+\begin{align}
+  \tilde{w}_2(k) &=
+  \frac1{\sqrt{2}}\frac{e^{ikr_0/2}}{\sqrt{\sqrt{1+\frac{kr_0}{\beta
+          V_0}}+1} +
+      i\sqrt{\sqrt{1+\frac{kr_0}{\beta V_0}}-1}}
+\end{align}
+Okay, that's a bit ugly, and I'm not sure that we can Fourier
+transform it to get a useful result.  We could potentially approximate
+it in the limit that $\beta V_0 \gg 1$, although any simple power
+series expansion would require us to prove that $kr_0\gg1$ is
+unimportant, possibly by arguing that phase cancellation will cause it
+to be unimportant when we evaluate our actual $w_2(r)$.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
