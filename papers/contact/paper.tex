@@ -479,9 +479,11 @@ $g_\sigma^A$, as it only involves convolutions of the density itself,
 although it does require two new fundamental measures
 \begin{align}
   n_{2'}(\rr) &= \int n(\rr') \delta'(\left|\rr - \rr'\right| -
-  \sigma/2) d\rr' \\
+  \sigma/2) d\rr' \label{n2p} \\
   \mathbf{n}_{2V'}(\rr) &=
-  \int n(\rr') \delta'(\left|\rr - \rr'\right| - \sigma/2) \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
+  \int n(\rr') \delta'(\left|\rr - \rr'\right| - \sigma/2)
+  \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
+  \label{n2vp}
 \end{align}
 where $\delta'$ is the derivative of the Dirac delta function.  These
 convolutions are easily expressed in reciprocal space, and can be
@@ -864,9 +866,12 @@ The functional derivative of $n_2^S(\rr')$ is quite similar:
   r''\\
   \frac{\delta n_2^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr-\rr') \frac 12 \int n(\rr'')
   \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
+  \\
+  &= -\delta(\rr-\rr') \frac12 n_{2'}(\rr')
 \end{align}
 where we recognize that the convolution---while not one of the standard
-FMT weighted density---is a simple convolution of the density.  We can
+FMT weighted density---is a simple convolution of the density, which
+we define in Equation~\ref{n2p} as $n_{2'}$.  We can
 go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
   n_1^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
@@ -874,6 +879,10 @@ go on to compute the derivatives of the remaining weighted densities:
     -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi \sigma(\rr)}
     \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
     + \frac 12 n_0^s(\rr') \right)
+    \\
+    &= -\delta(\rr-\rr')\left(
+    \frac{n_{2'}(\rr')}{4\pi\sigma} + \frac12n_0(\rr')
+    \right)
 \end{align}
 \begin{align}
   n_0^{S}(\rr') &= \int \frac{n(\rr'')}{\pi \sigma(\rr')^2} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
@@ -882,6 +891,11 @@ go on to compute the derivatives of the remaining weighted densities:
     \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
     +
     \frac{2}{\sigma} n_0^S(\rr') \right)
+    \\
+    &= -\delta(\rr-\rr')\left(
+    \frac{n_{2'}(\rr')}{2\pi\sigma^2}
+    + \frac{2}{\sigma} n_0(\rr')
+    \right)
 \end{align}
 \begin{align}
   \mathbf{n}_{V2}^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
@@ -889,6 +903,9 @@ go on to compute the derivatives of the remaining weighted densities:
   \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr - \rr')
   \frac 12 \int n(\rr'') \delta'(|\rr' - \rr''| - \sigma(\rr')/2)
   \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
+  \\
+  &= -\delta(\rr-\rr')
+   \frac12\mathbf{n}_{V2'}(\rr')
 \end{align}
 \begin{align}
  \mathbf{n}_{V1}^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''
@@ -897,12 +914,17 @@ go on to compute the derivatives of the remaining weighted densities:
  &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi \sigma(\rr)}
    \delta'(|\rr'-\rr''| - \sigma(\rr')/2) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
    + \frac{\mathbf{n}_{V2}^S(\rr')}{2 \pi \sigma(\rr)^2} \right)
+   \\
+   &= -\delta(\rr-\rr')\left(
+   \frac{\mathbf{n}_{V2'}(\rr')}{4\pi \sigma}
+   + \frac{\mathbf{n}_{V2}(\rr')}{2 \pi \sigma^2}
+   \right)
 \end{align}
 
 The above equations involve just two additional weighted densities
-beyond those required for FMT: one scalar density computed with a
+beyond those required for FMT: one scalar density $n_{2'}$ computed with a
 derivative of the Dirac delta function, and one analogous vector
-density.
+density $\mathbf{n}_{2V'}$, defined in Equations~\ref{n2p} and \ref{n2vp}.
 
 \end{widetext}
 
