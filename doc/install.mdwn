@@ -17,10 +17,11 @@ You need ...
     g++
     gfortran
     ghc
-    HUnit
+    libghc-hunit-dev
     texlive-full
     gnuplot
     python-matplotlib
+    python-scipy
 
 Running the test suite
 ======================
