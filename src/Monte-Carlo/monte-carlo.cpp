@@ -287,7 +287,7 @@ int main(int argc, char *argv[]){
   }
   /////////////////////////////////////////////////////////////////////////////
   int hours_now = 1;
-  num_to_time = 10000000/60/23 / N;  // this many iterations is equal to about 23 minutes
+  num_to_time = 1000000*60*35;  
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -296,15 +296,12 @@ int main(int argc, char *argv[]){
   for (int i=0;i<N;i++){max_move_counter[i]=0;}
   int * move_counter = new int [N];
   for (int i=0;i<N;i++){move_counter[i]=0;}
+
   for (long j=0; j<iterations; j++){
-    if (num_timed++ > num_to_time) {
-      clock_t now = clock();
-      secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
-      printf("took %g microseconds per iteration\n", 1000000*secs_per_iteration);
+	  num_timed = num_timed + 1;
+	if (num_timed*sqrt(N) > num_to_time) {
       num_timed = 0;
-      start = now;
-      // after the first timing, just time things once per percent (as
-      // often as we print the % complete messages)
+
       
       
        ///////////////////////////////////////////start of print.dat
@@ -312,8 +309,15 @@ int main(int argc, char *argv[]){
 
 
     int hours_passed = 0;
-    hours_passed = floor(clock()/10000/100/60/60 + 0.5);  // rounds to the nearest hour
+    hours_passed = floor(clock()/10000/100/60/60/3 + 0.5);  // rounds to the nearest hour multiple of 3
     if (hours_passed >= hours_now){
+    	
+      clock_t now = clock();
+      secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
+      printf("took %g microseconds per iteration\n", 1000000*secs_per_iteration);
+      start = now;
+        // after the first timing, just time things once per percent (as
+        // often as we print the % complete messages)
       printf("Saved Data after %d hours(s) \n", hours_passed);      
       hours_now = hours_passed + 1;
       if (!flat_div){
@@ -393,8 +397,8 @@ int main(int argc, char *argv[]){
     
     
     ///////////////////////////////////////////end of print.dat
-      
     }
+	
     // only write out the sphere positions after they've all had a
     // chance to move
     if (workingmoves%N == 0) {
