@@ -882,6 +882,7 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
   if (dvw < lenx - 2*oShell &&
       dvw < leny - 2*oShell &&
       dvw < lenz - 2*oShell) return (w + v)/2;
+  if (dvw < 2*oShell) return (w + v)/2;
 
   // Now we check for all the possible ways the two spheres could
   // touch across the cell in periodic directions...
@@ -892,23 +893,23 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
       if (distance(v,w-lat[k]) < 2*oShell) return fixPeriodic((v + w - lat[k])/2);
       for (long m=k+1; m<3; m++){
         if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]+lat[m]);
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]-lat[m]);
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]-lat[m]);
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]+lat[m]);
+          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]+lat[m])/2);
+          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]-lat[m])/2);
+          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]-lat[m])/2);
+          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]+lat[m])/2);
         }
       }
     }
   }
   if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic(v+w+latx+laty+latz);
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic(v+w+latx+laty-latz);
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic(v+w+latx-laty+latz);
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic(v+w-latx+laty+latz);
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic(v+w-latx-laty+latz);
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic(v+w-latx+laty-latz);
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic(v+w+latx-laty-latz);
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic(v+w-latx-laty-latz);
+    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic((v+w+latx+laty+latz)/2);
+    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic((v+w+latx+laty-latz)/2);
+    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic((v+w+latx-laty+latz)/2);
+    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic((v+w-latx+laty+latz)/2);
+    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic((v+w-latx-laty+latz)/2);
+    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic((v+w-latx+laty-latz)/2);
+    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
+    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
   }
   return (w+v)/2;
 }
