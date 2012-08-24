@@ -297,13 +297,15 @@ int main(int argc, char *argv[]){
   int * move_counter = new int [N];
   for (int i=0;i<N;i++){move_counter[i]=0;}
 
+  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
+  clock_t max_output_period = CLOCKS_PER_SEC*60*60; // top out at one hour interval
+  clock_t last_output = clock(); // when we last output data
   for (long j=0; j<iterations; j++){
 	  num_timed = num_timed + 1;
     if (num_timed > num_to_time) {
       num_timed = 0;
       ///////////////////////////////////////////start of print.dat
-      clock_t now = clock();
-      int hours_passed = floor(now/10000/100/60/60/3 + 0.5);  // rounds to the nearest hour multiple of 3
+      const clock_t now = clock();
       secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
       if (secs_per_iteration*num_to_time < 1) {
         printf("took %g microseconds per iteration\n", 1000000*secs_per_iteration);
@@ -314,11 +316,30 @@ int main(int argc, char *argv[]){
         num_to_time = long(60/secs_per_iteration);
       }
       start = now;
-      if (hours_passed >= hours_now){
-        // after the first timing, just time things once per percent (as
-        // often as we print the % complete messages)
-        printf("Saved Data after %d hours(s) \n", hours_passed);
-        hours_now = hours_passed + 1;
+      if (now > last_output + output_period) {
+        last_output = now;
+        if (output_period < max_output_period/2) {
+          output_period *= 2;
+        } else if (output_period < max_output_period) {
+          output_period = max_output_period;
+        }
+        {
+          double secs_done = double(now)/CLOCKS_PER_SEC;
+          long mins_done = secs_done / 60;
+          long hours_done = mins_done / 60;
+          mins_done = mins_done % 60;
+          if (hours_done > 50) {
+            printf("Saved data after %ld hours\n", hours_done);
+          } else if (mins_done < 1) {
+            printf("Saved data after %.1f seconds\n", secs_done);
+          } else if (hours_done < 1) {
+            printf("Saved data after %ld minutes\n", mins_done);
+          } else if (hours_done < 2) {
+            printf("Saved data after %ld minutes\n", mins_done);
+          } else {
+            printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
+          }
+        }
         if (!flat_div){
           for(long i=0; i<div; i++){
             double rmax = radius[i+1];
