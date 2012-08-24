@@ -233,7 +233,7 @@ numerically convenient) values for $r<0$
 \end{align}
 This gives us a Mayer $f$ function of
 \begin{align}
-  f(r) &= e^{-\beta V(r)} - 1 \\
+  f(r) &= e^{-\beta V(r)} - 1 \label{eq:ftrytwo} \\
   f'(r) &=
   \begin{cases}
     \frac{\beta V_0}{r_0} e^{-\beta V_0(1-r/r_0)} & r < r_0 \\
@@ -264,6 +264,21 @@ it in the limit that $\beta V_0 \gg 1$, although any simple power
 series expansion would require us to prove that $kr_0\gg1$ is
 unimportant, possibly by arguing that phase cancellation will cause it
 to be unimportant when we evaluate our actual $w_2(r)$.
+\begin{align}
+  w_2(r) &= \int_{-\infty}^\infty \tilde{w}_2(k) &=
+  \frac1{\sqrt{2}}\frac{e^{ikr_0/2}}{\sqrt{\sqrt{1+\frac{kr_0}{\beta
+          V_0}}+1} +
+      i\sqrt{\sqrt{1+\frac{kr_0}{\beta V_0}}-1}}
+\end{align}
+
+It occurs to me now that Schmidt may have assumed right after his
+Equation~A7 that $w_2(r<0)=0$, in which case this attempt won't work:
+we'll need to make things zero for $r<0$ if we're going to use this
+Fourier transform trick at all.  On the other hand, if this comes out
+to be \emph{effectively} zero for reasonable temperatures, perhaps
+this will be a good approach.  After all, I'm interested in $\beta V_0
+\gg 1$, which means that the Mayer function is essentially flat in
+Equation~\ref{eq:ftrytwo} for $r<0$.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
