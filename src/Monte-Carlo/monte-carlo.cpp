@@ -287,7 +287,7 @@ int main(int argc, char *argv[]){
   }
   /////////////////////////////////////////////////////////////////////////////
   int hours_now = 1;
-  num_to_time = 10000000/60/23 / N;  // this many iterations is equal to about 23 minutes
+  num_to_time = 1000000000000/60/23 / N;  // this many iterations is equal to about 23 minutes
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -499,9 +499,6 @@ int main(int argc, char *argv[]){
         }
       }
     }
-    
-   
-    
     if(j % (iterations/100)==0 && j != 0){
       double secs_to_go = secs_per_iteration*(iterations - j);
       long mins_to_go = secs_to_go / 60;
@@ -875,9 +872,10 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
   // couldn't be allowing these two spheres to touch.  It makes a
   // shocking difference in the overall speed, when we have periodic
   // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return (w + v)/2;
+  //if (dvw < lenx - 2*oShell &&
+  //    dvw < leny - 2*oShell &&
+  //    dvw < lenz - 2*oShell) return (w + v)/2;
+  if (dvw < 2*oShell) return (w + v)/2;
 
   // Now we check for all the possible ways the two spheres could
   // touch across the cell in periodic directions...
@@ -888,24 +886,26 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
       if (distance(v,w-lat[k]) < 2*oShell) return fixPeriodic((v + w - lat[k])/2);
       for (long m=k+1; m<3; m++){
         if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]+lat[m]);
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]-lat[m]);
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic(v+w+lat[k]-lat[m]);
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic(v+w-lat[k]+lat[m]);
+          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]+lat[m])/2);
+          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]-lat[m])/2);
+          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]-lat[m])/2);
+          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]+lat[m])/2);
         }
       }
     }
   }
   if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic(v+w+latx+laty+latz);
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic(v+w+latx+laty-latz);
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic(v+w+latx-laty+latz);
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic(v+w-latx+laty+latz);
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic(v+w-latx-laty+latz);
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic(v+w-latx+laty-latz);
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic(v+w+latx-laty-latz);
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic(v+w-latx-laty-latz);
+    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic((v+w+latx+laty+latz)/2);
+    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic((v+w+latx+laty-latz)/2);
+    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic((v+w+latx-laty+latz)/2);
+    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic((v+w-latx+laty+latz)/2);
+    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic((v+w-latx-laty+latz)/2);
+    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic((v+w-latx+laty-latz)/2);
+    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
+    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
   }
+  printf("BUGHHHH@!:\n");
+  exit(1);
   return (w+v)/2;
 }
 
