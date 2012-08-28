@@ -287,7 +287,7 @@ int main(int argc, char *argv[]){
   }
   /////////////////////////////////////////////////////////////////////////////
   int hours_now = 1;
-  num_to_time = 1000000000000/60/23 / N;  // this many iterations is equal to about 23 minutes
+  num_to_time = 1000;
   start = clock();
   num_timed = 0;
   double secs_per_iteration = 0;
@@ -890,9 +890,9 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
   // couldn't be allowing these two spheres to touch.  It makes a
   // shocking difference in the overall speed, when we have periodic
   // boundary conditions in all three directions!
-  //if (dvw < lenx - 2*oShell &&
-  //    dvw < leny - 2*oShell &&
-  //    dvw < lenz - 2*oShell) return (w + v)/2;
+  if (dvw < lenx - 2*oShell &&
+      dvw < leny - 2*oShell &&
+      dvw < lenz - 2*oShell) return (w + v)/2;
   if (dvw < 2*oShell) return (w + v)/2;
 
   // Now we check for all the possible ways the two spheres could
@@ -922,7 +922,8 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
     if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
     if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
   }
-  return (w+v)/2;
+  printf("BUGHHHH@!:\n");
+  exit(1);
 }
 
 bool touch(Vector3d w, Vector3d v, double oShell){
