@@ -72,7 +72,7 @@ A_plt.plot(dftdata[:,0]+offset,dftdata[:,7],"rx--",markevery=me,label="Gross",
 A_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
 A_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True,prune='upper'))
 pylab.ylim(ymin=0)
-pylab.ylim(ymax=(dftdata[20,5]+1))
+#pylab.ylim(ymax=(dftdata[20,5]+1))
 pylab.ylabel("$g^A$")
 pylab.xlim(-1,9)
 
@@ -89,7 +89,7 @@ S_plt.plot(dftdata[:,0]+offset,dftdata[:,4],"gx--",markevery=me,label="Yu and Wu
 S_plt.legend(loc='lower right', ncol=1).get_frame().set_alpha(0.5)
 S_plt.yaxis.set_major_locator(pylab.MaxNLocator(5,integer=True,prune='upper'))
 pylab.xlim(-1,9)
-#pylab.ylim(ymin=0)
+pylab.ylim(ymin=0)
 pylab.ylabel("$g^S$")
 
 xticklabels = A_plt.get_xticklabels() + S_plt.get_xticklabels()
