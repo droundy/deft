@@ -517,9 +517,6 @@ int main(int argc, char *argv[]){
         }
       }
     }
-    
-   
-    
     if(j % (iterations/100)==0 && j != 0){
       double secs_to_go = secs_per_iteration*(iterations - j);
       long mins_to_go = secs_to_go / 60;
@@ -925,7 +922,8 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
     if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
     if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
   }
-  return (w+v)/2;
+  printf("BUGHHHH@!:\n");
+  exit(1);
 }
 
 bool touch(Vector3d w, Vector3d v, double oShell){
