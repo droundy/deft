@@ -48,9 +48,9 @@ correlation_S_helper phit = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
                      - (d n2)*n2p
                      - (d n1)*( n2p/(4*pi*rad) + n0)
                      - (d n0) * ( n2p/(4*pi*rad**2) + 2*n0/rad )
-                     - (d n2x * n2px + d n1x * ( n2px + n2x/rad)/(4*pi*rad))
-                     - (d n2y * n2py + d n1y * ( n2py + n2y/rad)/(4*pi*rad))
-                     - (d n2z * n2pz + d n1z * ( n2pz + n2z/rad)/(4*pi*rad)))
+                     - (d n2x * n2px + d n1x * ( n2px - n2x/rad)/(4*pi*rad))
+                     - (d n2y * n2py + d n1y * ( n2py - n2y/rad)/(4*pi*rad))
+                     - (d n2z * n2pz + d n1z * ( n2pz - n2z/rad)/(4*pi*rad)))
           d a = derive a 1 phit
 
 correlation_A_WB :: Expression RealSpace
