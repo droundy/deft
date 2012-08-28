@@ -97,10 +97,10 @@ figs/gnn-walls-30.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-605.dat figs/wall
 figs/gnn-walls-40.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-816.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
 	python $^ $@
 
-figs/inner-4-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-04.0-0.%0.dat figs/
+figs/inner-4-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-04.0-0.%0.dat $(wildcard figs/mc-inner-sphere*.dat)
 	python $< 2 $* $@
 
-figs/inner-12-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-12.0-0.%0.dat figs/
+figs/inner-12-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-12.0-0.%0.dat $(wildcard figs/mc-inner-sphere*.dat)
 	python $< 6 $* $@
 
 test-particle-0.10 := $(wildcard figs/test-particle-cont-dens-*-0.10.dat)
