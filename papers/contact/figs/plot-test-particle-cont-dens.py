@@ -41,8 +41,8 @@ mcoffset = 13
 for i in range(test_len):
     new_nA[i] = numpy.interp(testdata[i,0], dftdata[:,0], dftdata[:,8])
     new_gA[i] = numpy.interp(testdata[i,0], dftdata[:,0], dftdata[:,5])
-    new_nAmc[i] = numpy.interp(testdata[i,0], mcdata[:,0], mcdata[:,11])
-    new_gmc[i] = numpy.interp(testdata[i,0], mcdata[:,0], mcdata[:,4])/new_nAmc[i]
+    new_nAmc[i] = numpy.interp(testdata[i,0], mcdata[:,0] + mcoffset, mcdata[:,11])
+    new_gmc[i] = numpy.interp(testdata[i,0], mcdata[:,0] + mcoffset, mcdata[:,4])/new_nAmc[i]
 
 
 n0 = dftdata[:,6]

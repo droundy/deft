@@ -44,7 +44,7 @@ print dftdata[2,5]
 n_plt.plot(dftdata[:,0],dftdata[:,8]*dftdata[:,5]*4*numpy.pi/3,"g+-",markevery=me,label="$n-contact_\sigma^A$ (White Bear)")
 
 pylab.xlim(0,12)
-pylab.ylim(-.05,0.2)
+#pylab.ylim(-.05,0.2)
 pylab.xlabel("position")
 
 pylab.ylabel("density")

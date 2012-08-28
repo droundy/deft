@@ -9,8 +9,8 @@ my $F;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-foreach $dd ([2,0.4,3], [2,0.4,4], [2,0.4,5], [2,0.4,6], [2,0.4,8], [2,0.4,11],
-    [2,0.1,3], [2,0.1,4], [2,0.1,5], [2,0.1,11]) {
+foreach $dd ([2,0.4,4.5]) {
+#foreach $dd ([2,0.4,3], [2,0.4,3.5], [2,0.4,4], [2,0.4,4.5], [2,0.4,5], [2,0.4,5.5], [2,0.4,6], [2,0.4,8], [2,0.4,11], [2,0.1,3], [2,0.1,3.5], [2,0.1,4], [2,0.1,4.5], [2,0.1,5], [2,0.1,11]) {
   foreach $F ("WB"){
 #, "WBT", "WBm2") {
     my $d = sprintf("%02.0f", $$dd[0]);
@@ -19,7 +19,7 @@ foreach $dd ([2,0.4,3], [2,0.4,4], [2,0.4,5], [2,0.4,6], [2,0.4,8], [2,0.4,11],
 
     print "Submitting sphere with diameter $d that is $z away from origin\n";
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = 4000;
+    my $memuse =15999;
 
     my $scriptname = "papers/contact/figs/test-particle-wall-$d-$eta-$z-$F.tmp.sh";
     open SCRIPT, ">$scriptname" or die $!;

@@ -56,34 +56,6 @@ Functional WBm2 = HardSpheresWBm2(1.0);
 const int numiters = 25;
 
 
-void radial_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
-                 const Grid &f, const Grid &g, const Grid &h) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    // don't just abort?
-    return;
-  }
-  const GridDescription gd = a.description();
-  const int x = 0;
-  const int y = 0;
-  for (int z=0; z<gd.Nz/2; z++) {
-    Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-    double ahere = a(here);
-    double bhere = b(here);
-    double chere = c(here);
-    double dhere = d(here);
-    double ehere = e(here);
-    double fhere = f(here);
-    double ghere = g(here);
-    double hhere = h(here);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
-  }
-  fclose(out);
-}
-
-
 const double golden = (1 + sqrt(5))/2;
 const Cartesian icosohedron[] = {
   Cartesian( 1, 1, 1),
@@ -150,33 +122,6 @@ void radial_average(const char *fname, const Grid &g, Cartesian pos, double radi
   return;
 }
 
-void plane_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d, const Grid &e,
-                 const Grid &f, const Grid &g, const Grid &h) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    // don't just abort?
-    return;
-  }
-  const GridDescription gd = a.description();
-  const int x = 0;
-  for (int z=0; z<gd.Nz/2; z++) {
-    for (int y=-gd.Ny/2; y<gd.Ny/2; y++){
-      Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double ahere = a(here);
-      double bhere = b(here);
-      double chere = c(here);
-      double dhere = d(here);
-      double ehere = e(here);
-      double fhere = f(here);
-      double ghere = g(here);
-      double hhere = h(here);
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2], here[1],
-              ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
-    }
-  }
-  fclose(out);
-}
 
 void run_spherical_solute(double diam, double eta, double z_particle, const char *name, Functional fhs) {
   diameter = diam;
@@ -193,7 +138,7 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
   const double zmax = width + 2*spacing;
   const double xmax = width;
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,xmax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.1);
+  GridDescription gd(lat, 0.05);
 
   Grid potential(gd);
   Grid constraint(gd);
@@ -242,60 +187,7 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
   sprintf(contact_plot, "papers/contact/figs/test-particle-cont-dens-%04.2f-%04.2f.dat",
           z_part, eta);
   radial_average(contact_plot, density, Cartesian(0,0,z_part), 2.0);
-//printf("Density at contact is %g\n", radial_average(density, Cartesian(0,0,z_part), 1.0));
-  printf("N = %g\n", density.sum()*gd.dvolume);
-  char *plotname = (char *)malloc(1024);
-  char *plane_plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/contact/figs/test-particle-wall%s-%04.1f-%04.2f-%04.2f.dat", name, diameter, eta, z_part);
-  printf("Saving as %s\n", plotname);
-  sprintf(plane_plotname, "papers/contact/figs/test-particle-wall%s-twodim-%04.1f-%04.2f-%04.2f.dat", name, diameter, eta, z_part);
-  printf("Saving as %s\n", plane_plotname);
-  if (plane_plotname == 0){
-    printf("plane_plotname has not been allocated correctly!\n");
-    exit (1);
-  }
   Grid energy_density(gd, f(1, gd, potential));
-  Grid correlation_S(gd, Correlation_S(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A(1.0)(1, gd, density));
-  if (strlen(name) == 4) {
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
-    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
-  }
-  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
-  Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
-  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
-  sprintf(plotname, "papers/contact/figs/test-particle-wall%s-%04.1f-%04.2f-%04.2f.dat", name, diameter, eta, z_part);
-  sprintf(plane_plotname, "papers/contact/figs/test-particle-wall%s-twodim-%04.1f-%04.2f-%04.2f.dat", name, diameter, eta, z_part);
-  radial_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
-  plane_plot(plane_plotname, density, energy_density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
-  free(plotname);
-  free(plane_plotname);
-  //  free(plane_plotname);
-
-  {
-    const GridDescription gdp = density.description();
-    double inner_rad = diameter/2.0;
-
-    double Ntot = density.sum()*gdp.dvolume;
-    double Ndisplaced = eta*gdp.Lat.volume()/(4*M_PI/3) - Ntot;
-
-    double mc_side_len = 25;
-    double N = eta*mc_side_len*mc_side_len*mc_side_len/(4.0/3.0*M_PI) - Ndisplaced;
-
-    FILE *fout = fopen("papers/contact/figs/testfillingfracInfo.txt", "a");
-    if (fout==0){
-      printf("Not able to open papers/contact/figs/testfillingfracInfo.txt properly\n");
-      exit (1);
-    }
-
-    fprintf(fout, "For filling fraction %04.02f, inner-sphere size %04.02f and walls of length %04.02f you'll want to use %.0f spheres.\n\n", eta, inner_rad, mc_side_len, N);
-
-    fclose(fout);
-  }
-
 
 
   {
@@ -326,7 +218,6 @@ int main(int argc, char *argv[]) {
     printf("Got bad z_part argument: %s\n", argv[3]);
     return 1;
   }
-
   FILE *fout = fopen("papers/contact/figs/testfillingfracInfo.txt", "w");
   if (fout==0){
     printf("Not able to open papers/contact/figs/testfillingfracInfo.txt properly\n");
