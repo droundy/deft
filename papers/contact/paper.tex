@@ -524,6 +524,7 @@ compared.
 %% simulations of the hard-sphere fluid.  We performed these simulations
 %% in a fixed-number ensemble.
 
+
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/walls-10}
   \caption{Density and contact densities at a wall with bulk filling
@@ -568,12 +569,6 @@ chose these as typical examples.
     fraction of 0.1.}
   \label{fig:inner-4-10}
 \end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-12-10}
-  \caption{Density and contact densities at a xxx with bulk filling
-    fraction of 0.1.}
-  \label{fig:inner-12-10}
-\end{figure}
 
 \subsection{Low density}
 
@@ -587,54 +582,65 @@ surface is only around 50\% higher than the bulk, and the FMT
 predicted density is close to indistinguishable from the true
 density for each of the four configurations.
 
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/inner-12-10}
+  \caption{Density and contact densities at a xxx with bulk filling
+    fraction of 0.1.}
+  \label{fig:inner-12-10}
+\end{figure}
+
 The $g_\sigma^A$ correlation function in each configuration is very
 flat, with only small, smooth changes as the surface is approached.
 Our functional $g_\sigma^A$ very closely matches the Monte Carlo
 predictions in each case, while that of Gross consistently
-underestimates the correlation at the interface by about
-\textcolor{red}{few percent}.
+underestimates the correlation at the interface by
+\textcolor{red}{several percent}.  We note that the theoretical curves
+extend into the region from which the fluid is excluded.  This value
+corresponds to the correlation function that would be observed in the
+vanishingly unlikely scenario in which there was a sphere present at
+that location.  Naturally, we are unable to observe this quantity in
+our Monte Carlo simulations.
 
 The $g_\sigma^S$ correlation function shows considerably more
 structure, as well as additional variation due to the curvature of the
-hard surface.
+hard surface.  The symmetric correlation function is nonzero at
+locations where spheres may touch, which for a convex hard surface
+means that $g_\sigma^S$ may be nonzero in the volume in which hard
+spheres are excluded.  In every configuration studied, the agreement
+between the theoretical predictions and the Monte Carlo simulation in
+each case is very poor in the region where there should be no contacts
+at all.  Because $n_0$ is comparable to its bulk value in this region,
+this means that these functionals predict a significant number of
+contacts in the region where there should be none.  The correlation
+function of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
+and ours described in Section~\ref{sec:g-S} give similar results, with
+slightly larger errors in our prediction.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/outer-16-01}
-  \caption{Density and contact densities at a xxx with bulk filling
+  \caption{Density and correlation functions near the surface of a
+    spherical cavity with diameter $16\sigma$ at a bulk filling
     fraction of 0.1.}
   \label{fig:outer-10}
 \end{figure}
 
-We can see that the White Bear DFT calulations for the densities at
-varying distances from the respective surfaces match up well with the
-monte-carlo simulated densities.  The densities slope up towards and
-reach a maximum at the surfaces as the diffusion cutoff in that
-direction causes hard spheres to collect. We also see that $n_0$
-slopes sharply downward towards the different surfaces, beginning the
-trend at about one radius away.  Part of the average that is taken for
-spheres in these locations will be taken within a volume for which the
-sphere density is uniformily zero. A similar trend is followed by
-$n_A$ beginning at about two radii away.  A sphere that is in contact
-with another at any position must be two radii away from the center of
-the first.  Thus, within two radii of the surface, one enters into a
-region where some of the contact volume is past the zero density
-boundary.
 
-The $S$ case correlation functions do not match the monte carlo
-simulated correlation as well as the functionals of Yu and Wu.  For
-the walls and the sperical cavity, the monte carlo simulations show
-this function going to zero at these surfaces, roughly beginning its
-downward trend at about one sphere radius out.  This stands to reason
-since that because there is an increased density up against the wall,
-there is little chance that points within a radius of the wall and the
-center of those spheres will be a contact point between two spheres,
-since the hard spheres cannot overlap.
 
-The $A$ correlation White Bear calculations match up very well with
-monte-carlo simulation.  Although they seem to be both very close, the
-Gross functional deos not have the near perfect overlap with
-simulation that the White Bear calculation deos.
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-10}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.1.}
+%%   \label{fig:test-particle-10}
+%% \end{figure}
 
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-40}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.4.}
+%%   \label{fig:test-particle-40}
+%% \end{figure}
+
+\subsection{High density}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/walls-40}
@@ -657,28 +663,56 @@ simulation that the White Bear calculation deos.
   \label{fig:inner-12-40}
 \end{figure}
 
+At a higher density corresponding to a filling fraction of 0.4,
+correlations are much stronger, with the bulk contact value of the
+correlation function of 3.7, as seen in
+Figures~\ref{fig:walls-40}-\ref{fig:outer-40}.  This results in larger
+oscillations in the density at the hard surfaces, and correspondingly
+more interesting behavior in the correlation function near the
+interface.  The density predicted by the White Bear functional agrees
+reasonably well with the simulation results, although not so well as
+it did at lower density.  The discrepancies are largest in the case of
+the spherical cavity, in which the DFT considerably underestimates the
+range of the density oscillations.
+
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/outer-16-04}
-  \caption{Density and contact densities at a xxx with bulk filling
+  \caption{Density and correlation functions near the surface of a
+    spherical cavity with diameter $16\sigma$ at a bulk filling
     fraction of 0.4.}
   \label{fig:outer-40}
 \end{figure}
 
-%% \begin{figure}
-%%   \includegraphics[width=\columnwidth]{figs/test-particle-10}
-%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-%%     fraction of 0.1.}
-%%   \label{fig:test-particle-10}
-%% \end{figure}
+The asymmetric version of the correlation function once again displays
+relatively smooth behavior near the interface, with a few small
+oscillations near the interface, and a somewhat elevated value within
+a diameter of the hard surface, with the magnitude of this elevation
+somewhat different in each configuration.  As was the case at low
+density, our correlation function $g_\sigma^A$ matches very closely
+the Monte Carlo data, reproducing quite well the structure near the
+interface in each configuration, although in the spherical cavity
+(Figure~\ref{fig:outer-40}), there is a small, but significant
+discrepancy, comparable to the discrepancy found in the density
+itself.  In each case, the correlation of Gross dramatically
+underestimates the correlation at the interface, at one extreme by
+\fixme{40\%} in the case of the spherical cavity
+(Figure~\ref{fig:outer-40}), and at the other extreme by \fixme{10\%}
+in the test-particle scenario (Figure~\ref{fig:inner-4-40}).
 
-%% \begin{figure}
-%%   \includegraphics[width=\columnwidth]{figs/test-particle-40}
-%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-%%     fraction of 0.4.}
-%%   \label{fig:test-particle-40}
-%% \end{figure}
-
-\subsection{High density}
+The symmetrically averaged correlation function shows considerably
+more structure near the interface at high density, and this structure
+varies considerably depending on the curvature of the hard surface.
+In each case, this structure is not reflected in the theoretical
+predictions, neither that of this paper, nor that of Yu and
+Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  As was the case at
+low density, both functionals give significant and finite values in
+the region in which there are no contacts, but at high density they
+also miss the large oscillations that are present near the flat wall
+and the concave surface (Figures~\ref{fig:walls-40}
+and~\ref{fig:outer-40}).  As was the case at low density, the
+functional of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
+gives slightly better agreement with the simulation results than that
+which we derive in Section~\ref{sec:g-S}.
 
 Here we discuss the high-density results (filling fraction of 0.4),
 which are shown in Figures~\ref{fig:walls-40}-\ref{fig:outer-40}.
