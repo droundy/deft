@@ -524,14 +524,15 @@ compared.
 %% simulations of the hard-sphere fluid.  We performed these simulations
 %% in a fixed-number ensemble.
 
+
+\section{Comparison with simulation}
+
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/walls-10}
   \caption{Density and contact densities at a wall with bulk filling
     fraction of 0.1.}
   \label{fig:walls-10}
 \end{figure}
-
-\section{Comparison with simulation}
 
 We performed a Monte-Carlo simulation of the hard sphere fluid to
 measure the contact value of the correlation function for several
@@ -562,19 +563,6 @@ computations at over a wider range of curvatures and densities, but
 chose these as typical examples.
 
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-4-10}
-  \caption{Density and contact densities at a xxx with bulk filling
-    fraction of 0.1.}
-  \label{fig:inner-4-10}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-12-10}
-  \caption{Density and contact densities at a xxx with bulk filling
-    fraction of 0.1.}
-  \label{fig:inner-12-10}
-\end{figure}
-
 \subsection{Low density}
 
 We begin by presenting our low-density results, corresponding to a
@@ -591,12 +579,37 @@ The $g_\sigma^A$ correlation function in each configuration is very
 flat, with only small, smooth changes as the surface is approached.
 Our functional $g_\sigma^A$ very closely matches the Monte Carlo
 predictions in each case, while that of Gross consistently
-underestimates the correlation at the interface by about
-\textcolor{red}{few percent}.
+underestimates the correlation at the interface by
+\textcolor{red}{several percent}.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/inner-4-10}
+  \caption{Density and contact densities at a xxx with bulk filling
+    fraction of 0.1.}
+  \label{fig:inner-4-10}
+\end{figure}
 
 The $g_\sigma^S$ correlation function shows considerably more
 structure, as well as additional variation due to the curvature of the
-hard surface.
+hard surface.  The symmetric correlation function is nonzero at
+locations where spheres may touch, which for a convex hard surface
+means that $g_\sigma^S$ may be nonzero in the volume in which hard
+spheres are excluded.  In every configuration studied, the agreement
+between the theoretical predictions and the Monte Carlo simulation in
+each case is very poor in the region where there should be no contacts
+at all.  Because $n_0$ is comparable to its bulk value in this region,
+this means that these functionals predict a significant number of
+contacts in the region where there should be none.  The correlation
+function of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
+and ours described in Section~\ref{sec:g-S} give similar results, with
+slightly larger errors in our prediction.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/inner-12-10}
+  \caption{Density and contact densities at a xxx with bulk filling
+    fraction of 0.1.}
+  \label{fig:inner-12-10}
+\end{figure}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/outer-16-01}
@@ -605,36 +618,23 @@ hard surface.
   \label{fig:outer-10}
 \end{figure}
 
-We can see that the White Bear DFT calulations for the densities at
-varying distances from the respective surfaces match up well with the
-monte-carlo simulated densities.  The densities slope up towards and
-reach a maximum at the surfaces as the diffusion cutoff in that
-direction causes hard spheres to collect. We also see that $n_0$
-slopes sharply downward towards the different surfaces, beginning the
-trend at about one radius away.  Part of the average that is taken for
-spheres in these locations will be taken within a volume for which the
-sphere density is uniformily zero. A similar trend is followed by
-$n_A$ beginning at about two radii away.  A sphere that is in contact
-with another at any position must be two radii away from the center of
-the first.  Thus, within two radii of the surface, one enters into a
-region where some of the contact volume is past the zero density
-boundary.
 
-The $S$ case correlation functions do not match the monte carlo
-simulated correlation as well as the functionals of Yu and Wu.  For
-the walls and the sperical cavity, the monte carlo simulations show
-this function going to zero at these surfaces, roughly beginning its
-downward trend at about one sphere radius out.  This stands to reason
-since that because there is an increased density up against the wall,
-there is little chance that points within a radius of the wall and the
-center of those spheres will be a contact point between two spheres,
-since the hard spheres cannot overlap.
 
-The $A$ correlation White Bear calculations match up very well with
-monte-carlo simulation.  Although they seem to be both very close, the
-Gross functional deos not have the near perfect overlap with
-simulation that the White Bear calculation deos.
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-10}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.1.}
+%%   \label{fig:test-particle-10}
+%% \end{figure}
 
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/test-particle-40}
+%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
+%%     fraction of 0.4.}
+%%   \label{fig:test-particle-40}
+%% \end{figure}
+
+\subsection{High density}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/walls-40}
@@ -663,22 +663,6 @@ simulation that the White Bear calculation deos.
     fraction of 0.4.}
   \label{fig:outer-40}
 \end{figure}
-
-%% \begin{figure}
-%%   \includegraphics[width=\columnwidth]{figs/test-particle-10}
-%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-%%     fraction of 0.1.}
-%%   \label{fig:test-particle-10}
-%% \end{figure}
-
-%% \begin{figure}
-%%   \includegraphics[width=\columnwidth]{figs/test-particle-40}
-%%   \caption{DFT and monte-carlo nA compared with averaged test particle data with bulk filling
-%%     fraction of 0.4.}
-%%   \label{fig:test-particle-40}
-%% \end{figure}
-
-\subsection{High density}
 
 Here we discuss the high-density results (filling fraction of 0.4),
 which are shown in Figures~\ref{fig:walls-40}-\ref{fig:outer-40}.
