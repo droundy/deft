@@ -443,28 +443,42 @@ leads to the expression
   \frac{\partial \Phi(\rr)}{\partial \sigma} \label{eq:g-S}
 \end{align}
 where $\Phi(\rr) = \Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)$ is the
-dimensionless free energy density.  This requires that we evaluate the
-derivatives of the fundamental measures $n_\alpha(\rr)$ with respect
-to diameter.  These derivatives, when performed exact, lead to
-derivatives of the $\delta$~function, resulting in a functional gives
-poor results.  We find that our $g_\sigma^S$ is considerably improved
-by using integration by parts to eliminate derivatives of the
-$\delta$~function by approximating the density to be smoothly varying,
-which leads to derivatives such as:
+dimensionless free energy density.  This step is an
+approximation---unlike the analogous
+Equation~\ref{eq:g-A-exact}---because it assumes that we have
+available a local functional $\Phi(\rr)$ whose derivative provides the
+pressure needed to compute $g_\sigma(\rr)$.  Equation~\ref{eq:g-S}
+requires that we evaluate the derivatives of the fundamental measures
+$n_\alpha(\rr)$ with respect to diameter, which leads us to
+derivatives of the $\delta$~function, which we can simplify and
+approximate using an assumption of a reasonably smooth density:
 \begin{align}
-  \frac{\partial n_2(\rr)}{\partial \sigma} &\approx \frac{2}{\sigma}n_2(\rr)
+  \frac{\partial n_2(\rr)}{\partial \sigma}
+  &= \int \delta'(\sigma - |\rr-\rr'|) n(\rr')d\rr' \\
+  &= \frac2{\sigma}n_2(\rr) - \int \delta\left(\frac\sigma2 - |\rr-\rr'|\right)
+  \frac{\rr-\rr'}{|\rr-\rr'|}\cdot\mathbf{\nabla}n(\rr')d\rr' \\
+  &\approx \frac{2}{\sigma}n_2(\rr)
 \end{align}
-We note that the density at a hard surface is \emph{not} smoothly
-varying, but that the removal of these terms improves the functional,
-while at the same time reducing its computational cost by avoiding the
-need to calculate any additional weighted densities or convolutions.
+In the systems that we study, the density is \emph{not} reasonably
+smooth, but we can state empirically making this approximation
+nevertheless improves the predictions of our functional, while at the
+same time reducing its computational cost by avoiding the need to
+calculate any additional weighted densities or convolutions.
 
-The final formula for the symmetrically averaged correlation function
-under these approximations is:
+The final formula for our approximation to the symmetrically averaged
+correlation function under these approximations is:
 \begin{align}
   g_\sigma^S &= \text{\textcolor{red}{put formula in here, if it is
       short enough}}
 \end{align}
+We note that there is a flaw in this functional, which tracks back to
+the assumption in Equation~\ref{eq:g-S} that the pressure due to
+spheres touching at point~$\rr$ can be written as a derivative of
+$\Phi(\rr)$.  This assumption cannot be valid in regions of space
+(such as within a hard wall) where there are no contacts, but the
+local energy density, as defined within FMT, is nonzero.  As we shall
+see in Section~\ref{sec:comparison}, this leads to a significant and
+systematic error.
 
 \subsection{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
 One approximation for the correlation function is that of
@@ -532,7 +546,7 @@ compared.
   \label{fig:walls-10}
 \end{figure}
 
-\section{Comparison with simulation}
+\section{Comparison with simulation}\label{sec:simulation}
 
 We performed a Monte-Carlo simulation of the hard sphere fluid to
 measure the contact value of the correlation function for several
