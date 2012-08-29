@@ -789,20 +789,20 @@ evaluated.  This is the most natural way to construct such a
 functional, in which the radius of spheres is a function of position.
 Thus we define $n_3^A$ as
 \begin{align}
-  n_3^{A}(\rr') &= \int n(\rr'') \Theta(\left|\rr' - \rr''\right| -\sigma(\rr'')/2) d\rr''
+  n_3^{A}(\rr') &= \int n(\rr'') \Theta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
 \end{align}
 and we define the other weighted densities similarly.  In order to
 compute derivatives of the free energy with respect to $R(\rr)$, we
 need to find $g_\sigma^A$.  In the case of $n_3^A$, we need
 \begin{align}
   \frac{\delta n_3^{A} (\rr')}{\delta \sigma(\rr)} &=
-  \frac 12 \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr'')/2) \delta(\rr-\rr'') d\rr'' \\
-   &= n (\rr) \delta(|\rr' - \rr| - \sigma(\rr)/2)
+  \frac 12 \int n (\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \delta(\rr-\rr'') d\rr'' \\
+   &= n (\rr) \delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
 \end{align}
 Similarly, for $n_2^A$, we find
 \begin{align}
-  n_2^{A}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr'')/2) d \rr''\\
-  \frac{\delta n_2^{A}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)\\
+  n_2^{A}(\rr') &= \int n(\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d \rr''\\
+  \frac{\delta n_2^{A}(\rr')}{\delta \sigma(\rr)} &= \frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)\\
 \end{align}
 This is somewhat more challenging, since it involves an unfamiliar
 function, the derivative the Dirac delta function $\delta'$.
@@ -811,43 +811,43 @@ The derivatives of the remaining scalar densities can be reduced to
 sums of the terms above:
 \begin{align}
   n_1(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{2\pi \sigma(\rr'')}
-  \delta(|\rr'-\rr''| - \sigma(\rr'')/2) \\
+  \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
   \frac{\delta n_1(\rr')}{\delta \sigma(\rr)}
-  &= -\frac{n(\rr)}{4\pi
-    \sigma(\rr)}\delta'(|\rr'-\rr| - \sigma(\rr)/2)
+  &= \frac{n(\rr)}{4\pi
+    \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
   -
   \frac{n(\rr)}{2\pi
-    \sigma(\rr)^2}\delta(|\rr'-\rr| - \sigma(\rr)/2)
+    \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
 \end{align}
 and
 \begin{align}
   n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{\pi \sigma(\rr'')^2}
-  \delta(|\rr'-\rr''| - \sigma(\rr'')/2) \\
+  \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
   \frac{\delta n_0(\rr')}{\delta \sigma(\rr)}
-  &= -\frac{n(\rr)}{2\pi
-    \sigma(\rr)^2}\delta'(|\rr'-\rr| - \sigma(\rr)/2)
+  &= \frac{n(\rr)}{2\pi
+    \sigma(\rr)^2}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
   -
   2 \frac{n(\rr)}{\pi
-    \sigma(\rr)^3}\delta(|\rr'-\rr| - \sigma(\rr)/2)
+    \sigma(\rr)^3}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
 \end{align}
 The vector-weighted densities have no additional occurrences of $R$,
 their functional derivatives come out similarly:
 \begin{align}
-  \mathbf{n}_{V2}^{A}(\rr') &= \int n(\rr') \delta(|\rr' - \rr''| - \sigma(\rr'')/2)
+  \mathbf{n}_{V2}^{A}(\rr') &= \int n(\rr') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
     \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
-  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta \sigma(\rr)} &= \frac 12 n(\rr) \delta'(|\rr' - \rr| - \sigma(\rr)/2)
+  \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
     \frac{\rr-\rr'}{|\rr-\rr'|}\\
 \end{align}
 and analogously for $\mathbf{n}_{V1}^A$:
 \begin{align}
   \mathbf{n}_{V1}^A(\rr') &= \int d\rr'' \frac{n(\rr'')}{2\pi \sigma(\rr'')}
-  \delta(|\mathbf{r'}-\rr''| - \sigma(\rr'')/2) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
+  \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
   \frac{\delta \mathbf{n}_{V1}^A(\rr')}{\delta \sigma(\rr)}
-  &= \frac{n(\rr)}{4\pi
-    \sigma(\rr)}\delta'(|\rr'-\rr| - \sigma(\rr)/2) \frac{\rr-\rr'}{|\rr-\rr'|}
+  &= -\frac{n(\rr)}{4\pi
+    \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
   +
   \frac{n(\rr)}{2\pi
-    \sigma(\rr)^2}\delta(|\rr'-\rr| - \sigma(\rr)/2) \frac{\rr-\rr'}{|\rr-\rr'|}
+    \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
 \end{align}
 This completes our exploration of the partial derivatives of weighted
 densities of the $A$ variety.
@@ -868,12 +868,12 @@ extending the radius for spheres just at the position touching a
 given spot, where we are evaluating the correlation function.  We
 define the weighted density $n_3^S$ as:
 \begin{align}
-  n_3^{S}(\rr') &= \int n(\rr'') \Theta(\left|\rr' - \rr''\right| -\sigma(\rr')/2) d\rr''
+  n_3^{S}(\rr') &= \int n(\rr'') \Theta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
 \end{align}
 In the symmetric case, the functional derivative is strikingly simple:
 \begin{align}
    \frac{\delta n_3^{S} (\rr')}{\delta \sigma(\rr)} &=
-   \delta(\rr'-\rr) \frac 12 \int n (\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
+   \delta(\rr'-\rr) \frac 12 \int n (\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
    \delta(\rr'-\rr) d\rr''
    \\
    &= \frac 12 \delta(\rr'-\rr) n_2^S(\rr')
@@ -896,62 +896,62 @@ free energy density.
 
 The functional derivative of $n_2^S(\rr')$ is quite similar:
 \begin{align}
-  n_2^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf
+  n_2^{S}(\rr') &= \int n(\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)d\mathbf
   r''\\
-  \frac{\delta n_2^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr-\rr') \frac 12 \int n(\rr'')
-  \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
+  \frac{\delta n_2^{S}(\rr')}{\delta \sigma(\rr)} &= \delta(\rr-\rr') \frac 12 \int n(\rr'')
+  \delta'(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
   \\
-  &= -\delta(\rr-\rr') \frac12 n_{2'}(\rr')
+  &= \delta(\rr-\rr') \frac12 n_{2'}(\rr')
 \end{align}
 where we recognize that the convolution---while not one of the standard
 FMT weighted density---is a simple convolution of the density, which
 we define in Equation~\ref{n2p} as $n_{2'}$.  We can
 go on to compute the derivatives of the remaining weighted densities:
 \begin{align}
-  n_1^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
+  n_1^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)d\mathbf r''\\
     \frac{\delta n_1^{S}(\rr')}{\delta \sigma(\rr)} &=
-    -\delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi \sigma(\rr)}
-    \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
-    + \frac 12 n_0^s(\rr') \right)
+    \delta(\rr-\rr') \left( \int \frac{n(\rr'')}{4\pi \sigma(\rr)}
+    \delta'(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
+    - \frac 12 n_0^s(\rr') \right)
     \\
-    &= -\delta(\rr-\rr')\left(
-    \frac{n_{2'}(\rr')}{4\pi\sigma} + \frac12n_0(\rr')
+    &= \delta(\rr-\rr')\left(
+    \frac{n_{2'}(\rr')}{4\pi\sigma} - \frac12n_0(\rr')
     \right)
 \end{align}
 \begin{align}
-  n_0^{S}(\rr') &= \int \frac{n(\rr'')}{\pi \sigma(\rr')^2} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''\\
+  n_0^{S}(\rr') &= \int \frac{n(\rr'')}{\pi \sigma(\rr')^2} \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)d\mathbf r''\\
     \frac{\delta n_0^{S}(\rr')}{\delta \sigma(\rr)}
-    &= -\delta(\rr-\rr') \left( \frac 12 \int \frac{n(\rr'')}{\pi \sigma(\rr)^2}
-    \delta'(|\rr'-\rr''| - \sigma(\rr')/2) d\rr''
-    +
+    &= \delta(\rr-\rr') \left( \frac 12 \int \frac{n(\rr'')}{\pi \sigma(\rr)^2}
+    \delta'(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
+    -
     \frac{2}{\sigma} n_0^S(\rr') \right)
     \\
-    &= -\delta(\rr-\rr')\left(
+    &= \delta(\rr-\rr')\left(
     \frac{n_{2'}(\rr')}{2\pi\sigma^2}
-    + \frac{2}{\sigma} n_0(\rr')
+    - \frac{2}{\sigma} n_0(\rr')
     \right)
 \end{align}
 \begin{align}
-  \mathbf{n}_{V2}^{S}(\rr') &= \int n(\rr'') \delta(|\rr' - \rr''| - \sigma(\rr')/2)
+  \mathbf{n}_{V2}^{S}(\rr') &= \int n(\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
   \frac{(\rr' - \rr'')}{|\rr' - \rr''|} d \rr''\\
-  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta \sigma(\rr)} &= -\delta(\rr - \rr')
-  \frac 12 \int n(\rr'') \delta'(|\rr' - \rr''| - \sigma(\rr')/2)
+  \frac{\delta \mathbf{n}_{V2}^{S}(\rr')}{\delta \sigma(\rr)} &= \delta(\rr - \rr')
+  \frac 12 \int n(\rr'') \delta'(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
   \frac{(\rr - \rr'')}{|\rr - \rr''|} d\rr''
   \\
-  &= -\delta(\rr-\rr')
+  &= \delta(\rr-\rr')
    \frac12\mathbf{n}_{V2'}(\rr')
 \end{align}
 \begin{align}
- \mathbf{n}_{V1}^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(|\rr' - \rr''| - \sigma(\rr')/2)d\mathbf r''
+ \mathbf{n}_{V1}^{S}(\rr') &= \int \frac{n(\rr'')}{2\pi \sigma(\rr')} \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)d\mathbf r''
    \frac{(\rr' - \rr'')}{|\rr' - \rr''|}\\
  \frac{\delta \mathbf{n}_{V1}^{S}(\rr')}{\delta \sigma(\rr)}
- &= -\delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi \sigma(\rr)}
-   \delta'(|\rr'-\rr''| - \sigma(\rr')/2) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
-   + \frac{\mathbf{n}_{V2}^S(\rr')}{2 \pi \sigma(\rr)^2} \right)
+ &= \delta(\rr-\rr')\left(\int \frac{n(\rr'')}{4\pi \sigma(\rr)}
+   \delta'(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \frac{(\rr - \rr'')}{|\rr - \rr''|}  d\rr''
+   - \frac{\mathbf{n}_{V2}^S(\rr')}{2 \pi \sigma(\rr)^2} \right)
    \\
-   &= -\delta(\rr-\rr')\left(
+   &= \delta(\rr-\rr')\left(
    \frac{\mathbf{n}_{V2'}(\rr')}{4\pi \sigma}
-   + \frac{\mathbf{n}_{V2}(\rr')}{2 \pi \sigma^2}
+   - \frac{\mathbf{n}_{V2}(\rr')}{2 \pi \sigma^2}
    \right)
 \end{align}
 
