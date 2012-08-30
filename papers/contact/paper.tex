@@ -395,7 +395,7 @@ the previous section:
 \end{align}
 Details of evaluating the functional derivative in
 Equation~\ref{eq:g-A-exact} using FMT are given in
-Appendix~\ref{appendix:g-A}.  The equation for $g_\sigma^A$ requires
+the appendix.  The equation for $g_\sigma^A$ requires
 finding convolutions of local derivatives of the free energy, making
 this formulation computationally somewhat more expensive than the free
 energy itself.
@@ -746,21 +746,27 @@ Section~\ref{sec:g-A}.
 
 \section*{Appendix}
 
-In the expression for our A correlation function $g_\sigma^A(\rr)$ (eq \ref{eq:g-A-exact}) we have $\frac{\delta A_{HS}}{\delta
-  \sigma(\mathbf{r})}$ terms that must be derived.  We break these terms up as follows:
-
+The expression for the asymmetric correlation function
+$g_\sigma^A(\rr)$ (Equation~\ref{eq:g-A-exact}) involves the
+functional derivative $\frac{\delta A_{HS}}{\delta
+  \sigma(\mathbf{r})}$.  In this appendix we will explain how this
+derivative is evaluated.  We begin by applying the chain rule in the
+following way:
   \begin{align}
     \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})} &=
     \int \left(
-    \frac{\delta A_{HS}}{\delta n_3(\mathbf{r}')}
-    \frac{\delta n_3(\mathbf{r}')}{\delta \sigma(\mathbf{r})}
-    +
-    \frac{\delta A_{HS}}{\delta n_2(\mathbf{r}')}
-    \frac{\delta n_2(\mathbf{r}')}{\delta \sigma(\mathbf{r})}
-    + \cdots
+    \sum_\alpha
+    \frac{\delta A_{HS}}{\delta n_\alpha(\mathbf{r}')}
+    \frac{\delta n_\alpha(\mathbf{r}')}{\delta \sigma(\mathbf{r})}
     \right) d\mathbf{r}'
   \end{align}
-
+This expression requires us to evaluate $\frac{\delta A_{HS}}{\delta
+  n_\alpha(\mathbf{r}')}$ and $\frac{\delta
+  n_\alpha(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$.  The former is
+straightforward, if tedious, and we will write no more about it.  The
+functional derivatives of the fundamental measures, however, require a
+bit more subtlety, and we will address them here.  We note that
+\textcolor{red}{still working on this...}
 
 We will show here the derivation of the $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta \sigma(\mathbf{r})/2}$, etc., terms for the asymmetric case.  The derivation of the S correlation follows the same format using the symmetric conceptual approach introduced in \ref{sec:g-S} and the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms are straightforward (if tedious) derivatives.
 
