@@ -452,8 +452,8 @@ derivatives of the $\delta$~function, which we can simplify and
 approximate using an assumption of a reasonably smooth density:
 \begin{align}
   \frac{\partial n_2(\rr)}{\partial \sigma}
-  &= \int \delta'(\sigma - |\rr-\rr'|) n(\rr')d\rr' \\
-  &= \frac2{\sigma}n_2(\rr) - \int \delta\left(\frac\sigma2 - |\rr-\rr'|\right)
+  &= \frac12 \int \delta'(\frac\sigma2 - |\rr-\rr'|) n(\rr')d\rr' \\
+  &= \frac2{\sigma}n_2(\rr) - \frac12 \int \delta\left(\frac\sigma2 - |\rr-\rr'|\right)
   \frac{\rr-\rr'}{|\rr-\rr'|}\cdot\mathbf{\nabla}n(\rr')d\rr' \\
   &\approx \frac{2}{\sigma}n_2(\rr)
 \end{align}
@@ -463,34 +463,6 @@ nevertheless improves the predictions of our functional, while at the
 same time reducing its computational cost by avoiding the need to
 calculate any additional weighted densities or convolutions.
 
-The final formula for our approximation to the symmetrically averaged
-correlation function under these approximations is:
-\begin{align}
-  g_\sigma^S &= \text{\textcolor{red}{put formula in here, if it is
-      short enough}}
-\end{align}
-We note that there is a flaw in this functional, which tracks back to
-the assumption in Equation~\ref{eq:g-S} that the pressure due to
-spheres touching at point~$\rr$ can be written as a derivative of
-$\Phi(\rr)$.  This assumption cannot be valid in regions of space
-(such as within a hard wall) where there are no contacts, but the
-local energy density, as defined within FMT, is nonzero.  As we shall
-see in Section~\ref{sec:comparison}, this leads to a significant and
-systematic error.
-
-\subsection{Gross's asymmetrically averaged correlation functional}\label{sec:gross}
-One approximation for the correlation function is that of
-Gross\cite{gross2009density}, which is of the asymmetrically averaged
-variety ($g_\sigma^A$):
-\begin{align}
-  g_\sigma^\text{Gross,A}(\rr) &= \frac{1 - \frac{\pi}{12}\sigma^3n_A(\rr)}{\left(1 -
-    \frac{\pi}{6}\sigma^3n_A(\rr)\right)^3}
-\end{align}
-where $n_A$ is the averaged density defined in Equation~\ref{eq:nA}.
-This formula is arrived at by using the density averaged over all
-spheres that could be touching a sphere at point~$\rr$ in the
-Carnahan-Starling equation for the correlation function at contact,
-given in Equation~\ref{eq:cs-g}.
 
 \subsection{Yu and Wu's symmetrically averaged functional}\label{sec:yuwu}
 
