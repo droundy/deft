@@ -663,14 +663,6 @@ it did at lower density.  The discrepancies are largest in the case of
 the spherical cavity, in which the DFT considerably underestimates the
 range of the density oscillations.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/outer-16-04}
-  \caption{Density and correlation functions near the surface of a
-    spherical cavity with diameter $16\sigma$ at a bulk filling
-    fraction of 0.4.}
-  \label{fig:outer-40}
-\end{figure}
-
 The asymmetric version of the correlation function once again displays
 relatively smooth behavior with a few small
 oscillations near the interface, and a somewhat elevated value within
@@ -687,6 +679,14 @@ underestimates the correlation at the interface, at one extreme by
 (Figure~\ref{fig:outer-40}), and at the other extreme by \fixme{10\%}
 in the test-particle scenario (Figure~\ref{fig:inner-4-40}).
 
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/outer-16-04}
+  \caption{Density and correlation functions near the surface of a
+    spherical cavity with diameter $16\sigma$ at a bulk filling
+    fraction of 0.4.}
+  \label{fig:outer-40}
+\end{figure}
+
 The symmetrically averaged correlation function shows considerably
 more structure near the interface at high density, and this structure
 varies considerably depending on the curvature of the hard surface.
@@ -702,30 +702,11 @@ functional of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
 gives slightly better agreement with the simulation results than that
 which we derive in Section~\ref{sec:g-S}.
 
-Here we discuss the high-density results (filling fraction of 0.4),
-which are shown in Figures~\ref{fig:walls-40}-\ref{fig:outer-40}.
-
-Although the general density attributes look similar to those of the low density calculations as one moves away from the surfaces, the range of difference is altered.  The spikes at the surfaces reach a height of roughly five times the homogeneous average, whereas with the low densities the difference is closer to a factor of $0.5$.  With a higher density of spheres to pack in those that are up against the wall, it is more difficult for those spheres to ever find their way out and away.  We also notice that the downward trend in both $n_0$ and $n_A$ have similar characteristics but are over all much more flat.  (Don't see why!)
-
-We once again see that in the $S$ case, although neither functionals
-tested fit perfectly, Yu and Wu's functional is a closer fit than the
-White Bear's.  We can see in the monte carlo's oscillations over
-increased distance from the surfaces that there are layers of spheres
-that are formed.  If one picks a point in one of these layers, that
-point is more likely to be a contact point between spheres, whereas if
-one picks a sphere a little over half a radius away, the likelyhood is
-at a minimum.  There is then another maximum at roughly one radius
-away from the surface.  (This suggests close packed layers?)
-
-As with the lower densities, the $A$ case White Bear fits to the monte
-carlo simulations very well.  The Gross functional seems to be
-accurate until it falls off close to surfaces.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 We investigated several approximations to the contact value of the
 correlation function for inhomogeneous fluid distributions
-corresponding to flat walls, and both concave and convex walls.  We
+corresponding to flat, concave, and convex walls.  We
 defined and simulated two averages of the correlation function, an
 asymmetric $A$ average centered at the location of one of the two
 spheres that is in contact, and a symmetric $S$ average centered at
@@ -734,7 +715,7 @@ derived a functional form from FMT, and also found an approximation
 that has been used in the literature.  When compared with essentially
 exact Monte Carlo simulations, the $A$ correlation function derived
 from Fundamental Measure Theory in Section~\ref{sec:g-A} gives
-excellent results for each surface, and at both high density and low
+excellent results for each surface, at both high density and low
 density.  The other three approximations that we studied all showed
 significant and systematic deviations under some circumstances.  Thus,
 we recommend that creators of SAFT-based classical density functionals
