@@ -105,9 +105,9 @@ SAFT-based functionals\cite{fu2005vapor-liquid-dft, bryk2006density}.
 %% of the Fundamental-Measure Theory (FMT)
 %% functional\cite{roth2002whitebear}.
 Two functionals for the chain contribution have recently been
-introduced\cite{bryk2006density, gross2009density}, one which uses the
-correlation function of Yu and Wu\cite{bryk2006density}, while the
-other introduces a new approximation for the contact value of the
+introduced, one which uses the
+correlation function of Yu and Wu\cite{bryk2006density} and another that
+introduces a new approximation for the contact value of the
 correlation function (described in
 Section~\ref{sec:gross})\cite{gross2009density}.
 %% The dispersion term is long-range and thus has significant
@@ -339,8 +339,7 @@ pressure on any hard surface is determined by the density at contact:
   &= k_BT n g_\sigma
 \end{align}
 Since we are interested in the correlation function at the surface of
-the hard spheres, all we need compute is the pressure on that surface,
-and we'll have our answer.  The pressure on a hard sphere can be
+the hard spheres, we need to compute the pressure on that surface.  The pressure on a hard sphere can be
 readily computed from the dependence of the Carnahan-Starling free
 energy on hard sphere radius.
 \begin{align}
@@ -355,7 +354,7 @@ to hard-sphere diameter:
 \end{align}
 This derivative gives us half the force on \emph{all} the hard
 spheres---since we're changing all their radii at once.  To compute
-the pressure on the spheres, we just need to divide by half the total
+the pressure on the spheres, we need to divide by half the total
 area, which means dividing by $N 8\pi \sigma^2$, since the relevant
 area is the area over which the molecules can make contact.
 \begin{align}
@@ -413,7 +412,7 @@ correlation function averaged for spheres \emph{touching at a given
 pressure felt by the surface of spheres where that surface is located
 at point~$\rr$.  We can approximate this value by assuming that this
 pressure will be simply related to the free energy density at
-point~$\rr$.  Through math similar to the previous derivations, this
+point~$\rr$.  Through a process similar to the previous derivations, this
 leads to the expression
 \begin{align}
   %% p_{HS}^S(\mathbf{r}) &= \frac{1}{n_0(\rr) 2\pi \sigma^2} \frac{\partial
@@ -529,7 +528,7 @@ were essentially indistinguishable on our plots, so we exclusively
 show the results due to the original White Bear functional.
 
 We simulate the inhomogeneous hard sphere fluid at four hard-wall
-interfaces.  The first and simplest is a simple flat hard wall.  We
+interfaces.  The first and simplest is a flat hard wall.  We
 then study two convex hard surfaces.  One is an excluded sphere with
 diameter $2\sigma$, which corresponds to a ``test particle''
 simulation with one of a hard sphere at the origin with diameter

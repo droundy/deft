@@ -45,7 +45,7 @@ nA_mc = mcdata[:,11]
 n0_mc = mcdata[:,10]
 r_mc = mcdata[:,0]
 n_mc = mcdata[:,1]
-off = 1/2 # 0 = huge or tiny? 1 = large or medium? etc
+off = 2 # 2 is large and 3 is huge
 gA_mc = mcdata[:,2+2*off] / nA_mc
 gS_mc = mcdata[:,3+2*off] / n0_mc
 
