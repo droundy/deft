@@ -68,7 +68,10 @@ n_plt.plot(r/2,nA*4*numpy.pi/3,"m--",label="$n_A$")
 #n_plt.plot(r_2[r_2>=radius],n_2[r_2>=radius]*4*numpy.pi/3,"b--",label='DFT $n$ (mark II)')
 #n_plt.plot(r,n0*4*numpy.pi/3,"c--",label="$n_0$")
 #n_plt.plot(r,nA*4*numpy.pi/3,"m-.",label="$n_A$")
-n_plt.legend(loc='upper right', ncol=2).get_frame().set_alpha(0.5)
+if (n[dft_len-3]*4*numpy.pi/3 < 0.15 and n[dft_len-3]*4*numpy.pi/3 > 0.05):
+    n_plt.legend(loc='lower right', ncol=2).get_frame().set_alpha(0.5)
+else:
+    n_plt.legend(loc='upper right', ncol=2).get_frame().set_alpha(0.5)
 n_plt.yaxis.set_major_locator(pylab.MaxNLocator(3,steps=[1,5,10],prune='upper'))
 pylab.xlim(showrmin/2,showrmax/2)
 pylab.ylim(0, n.max()*4*numpy.pi/3*1.1)

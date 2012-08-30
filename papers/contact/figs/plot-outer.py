@@ -59,7 +59,10 @@ n_plt.plot(r/2,n0*4*numpy.pi/3,"c-.",label="$n_0$")
 n_plt.plot(r/2,nA*4*numpy.pi/3,"m--",label="$n_A$")
 #n_plt.plot(r/2,n0*4*numpy.pi/3,"c--",label="$n_0$")
 #n_plt.plot(r/2,nA*4*numpy.pi/3,"m-.",label="$n_A$")
-n_plt.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)
+if (n[2]*4*numpy.pi/3 < 0.15 and n[2]*4*numpy.pi/3 > 0.05):
+    n_plt.legend(loc='lower left', ncol=2).get_frame().set_alpha(0.5)
+else:
+    n_plt.legend(loc='upper left', ncol=2).get_frame().set_alpha(0.5)
 n_plt.yaxis.set_major_locator(pylab.MaxNLocator(4,steps=[1,5,10],prune='upper'))
 pylab.ylim(0, n.max()*4*numpy.pi/3*1.1)
 pylab.xlim(showrmin/2,showrmax/2)
@@ -93,7 +96,10 @@ S_plt.axvline(x=radius/2, color='k', linestyle=':')
 S_plt.plot(r_mc/2,gS_mc,"g-",label="$g_\sigma^S$ (MC)")
 S_plt.plot(r[0:sphere_end]/2,gS[0:sphere_end], "go--",markevery=me, label="$g_\sigma^S$ (White Bear)")
 S_plt.plot(r/2,gyuwu,"gx--",markevery=me, label="Yu and Wu")
-S_plt.legend(loc='lower left', ncol=1).get_frame().set_alpha(0.5)
+if (n[2]*4*numpy.pi/3 < 0.15 and n[2]*4*numpy.pi/3 > 0.05):
+    S_plt.legend(loc='lower left', ncol=1).get_frame().set_alpha(0.5)
+else:
+    S_plt.legend(loc='upper left', ncol=1).get_frame().set_alpha(0.5)
 S_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True,prune='upper'))
 pylab.xlim(showrmin/2,showrmax/2)
 
