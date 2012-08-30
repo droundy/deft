@@ -246,16 +246,17 @@ Functional dAdR_S(double radius) {
   Functional one_over_4piR = Functional(1)/(4*M_PI*R);
   Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
 
+  Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
 
-  Functional n2px = xShellPrimeConvolve(radius);
-  Functional n2py = yShellPrimeConvolve(radius);
-  Functional n2pz = zShellPrimeConvolve(radius);
-  Functional n2p = ShellPrimeConvolve(radius);
+  Functional n2px = -2*n2/R;
+  Functional n2py = -2*n2/R;
+  Functional n2pz = -2*n2/R;
+  Functional n2p = -2*n2/R;
 
-  return n2(radius)*(dWB_dn3(radius)
+  return n2*(dWB_dn3(radius)
                      - dWB_dn1(radius)/(4*M_PI*sqr(R))
                      - dWB_dn0(radius)/(2*M_PI*Pow(3)(R)))
     - n2p*(dWB_dn2(radius)
@@ -283,7 +284,7 @@ Functional Correlation_S(double radius) {
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_S(radius)/sqr(n0(radius));
 }
 
- 
+
 Functional dAdR_A_over_n_WBm2(double radius) {
   Functional R(radius, "R");
   Functional two_over_R = Functional(2)/R;
@@ -317,16 +318,17 @@ Functional dAdR_S_WBm2(double radius) {
   Functional one_over_4piR = Functional(1)/(4*M_PI*R);
   Functional one_over_4piRsqr = Functional(1)/(4*M_PI*sqr(R));
 
+  Functional n2 = ShellConvolve(radius);
   Functional n2x = xShellConvolve(radius);
   Functional n2y = yShellConvolve(radius);
   Functional n2z = zShellConvolve(radius);
 
-  Functional n2px = xShellPrimeConvolve(radius);
-  Functional n2py = yShellPrimeConvolve(radius);
-  Functional n2pz = zShellPrimeConvolve(radius);
-  Functional n2p = ShellPrimeConvolve(radius);
+  Functional n2px = -2*n2/R;
+  Functional n2py = -2*n2/R;
+  Functional n2pz = -2*n2/R;
+  Functional n2p = -2*n2/R;
 
-  return n2(radius)*(dWBm2_dn3(radius)
+  return n2*(dWBm2_dn3(radius)
                      - dWBm2_dn1(radius)/(4*M_PI*sqr(R))
                      - dWBm2_dn0(radius)/(2*M_PI*Pow(3)(R)))
     - n2p*(dWBm2_dn2(radius)

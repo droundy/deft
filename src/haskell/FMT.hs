@@ -46,7 +46,7 @@ n2pz = "n2pz" === zshellPrime n
 sqr_n2v = var "n2vsqr" "{\\left|\\vec{n}_{2v}\\right|^2}" (n2x**2 + n2y**2 + n2z**2)
 n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2x*n1x + n2y*n1y + n2z*n1z)
 
-shell_diam, shell, step, xshell, yshell, zshell, shellPrime, xshellPrime, yshellPrime, zshellPrime :: Expression RealSpace -> Expression RealSpace 
+shell_diam, shell, step, xshell, yshell, zshell, shellPrime, xshellPrime, yshellPrime, zshellPrime :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( deltak * fft x)
   where deltak = protect "deltak" "\\delta(k)" $ smear * (4*pi) * rad * sin kR / k
 shell_diam x = ifft ( deltak * fft x)
