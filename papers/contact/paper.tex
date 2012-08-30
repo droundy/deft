@@ -47,7 +47,7 @@
   density functionals.  We define two averaged values for the
   correlation function at contact, and derive formulas for each of
   them from the White Bear version of the Fundamental Measure Theory
-  functional~\cite{roth2002whitebear}, based on an assumption of
+  functional~\cite{roth2002whitebear}, using an assumption of
   thermodynamic consistency. We test these formulas, as well as two
   existing formulas~\cite{yu2002fmt-dft-inhomogeneous-associating,
     gross2009density} against Monte Carlo simulations, and find
@@ -83,25 +83,9 @@ tension on temperature.
 %% approximations that are only valid for densities that vary slowly over
 %% molecular length scales.
 %
-A key input to SAFT-based functionals is the correlation function
-evaluated at contact.
-
-%% Constructing a classical density functional based on SAFT involves
-%% rewriting each term in the free energy as a functional of an
-%% inhomogeneous density.  The SAFT free energy consists of four terms:
-%% \begin{align}
-%%   A_\textit{SAFT} &= A_\textit{ideal} + A_\textit{HS} + A_\textit{chain} + A_\textit{disp} + A_\textit{assoc}
-%% \end{align}
-%% where $A_\textit{ideal}$ is the ideal-gas free energy, $A_\textit{HS}$
-%% is the excess free energy of a hard-sphere fluid, $A_\textit{chain}$
-%% is the free energy of formation for polymeric fluids,
-%% $A_\textit{disp}$ is the dispersion contribution to the free energy,
-%% and $A_\textit{assoc}$ is the free energy contribution from
-%% \emph{association}, which is to say, hydrogen bonding.  
-
-The chain and association terms in the SAFT free energy are of
-particular interest for this paper, since each requires as input the
-contact value of the correlation function.  The chain term describes
+A key input to these functionals is the correlation function
+evaluated at contact, which is required for both the chain and
+association terms in the SAFT free energy.  The chain term describes
 the chain formation energy in polymeric fluids, while the association
 term describes the effects of hydrogen bonding, both of which can be
 large.
@@ -137,8 +121,7 @@ Although these recent works have introduced approximate functionals
 for the contact value of the correlation
 function\cite{yu2002fmt-dft-inhomogeneous-associating,
   gross2009density}, there has not been a study that specifically
-addresses the correlation function at contact of an inhomogeneous
-hard-sphere fluid.
+addresses this contact value for an inhomogeneous hard-sphere fluid.
 %
 In this paper we introduce two definitions for the locally averaged
 correlation function of an inhomogeneous system.
@@ -148,8 +131,8 @@ correlation function of an inhomogeneous system.
 %% $A$ case).
 %
 Given these definitions, we will present a thermodynamic derivation
-for each correlation functions from the free energy functional.  We
-will then discuss the correlation functions of Yu and Wu of Gross, and
+for each correlation function from the free energy functional.  We
+will then discuss the correlation functions of Yu and Wu and of Gross, and
 will end by comparing all four approximations with Monte-Carlo
 simulations of the hard-sphere fluid at a variety of hard-wall
 surfaces.
@@ -166,7 +149,8 @@ position $\rr_2$.  The pair correlation function is defined by
 \end{align}
 In a homogeneous fluid, the pair correlation only depends on the
 distance $|\rr_1-\rr_2|$ and can be expressed as a function of a
-single variable. The contact value is this correlation evaluated at a distance of the
+single variable. The contact value of the correlation function is this
+correlation function's value when evaluated at a distance of the
 diameter $\sigma$.  It is desirable for reasons of efficiency to limit CDFT
 functionals to one-center convolutions, which leads us to seek a
 simplified expression for the contact value of the correlation
@@ -184,7 +168,7 @@ given by:
   + \rr')
   \frac{\delta(\sigma/2 -|\rr'|)}{\pi\sigma^2}d\rr' \label{eq:gS}
 \end{align}
-where density $n_0$ is one of the fundamental measures of Fundamental
+where $\sigma$ is the hard sphere diameter and density $n_0$ is one of the fundamental measures of Fundamental
 Measure Theory (FMT), and is ideal for treating touching spheres, as
 illustrated in Figure~\ref{fig:n0}.
 \begin{align}
@@ -195,7 +179,7 @@ the position $\rr$.
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
-\caption{Set of hard spheres that included in $n_0(\mathbf{r})$, which
+\caption{Set of hard spheres that are included in $n_0(\mathbf{r})$, which
   consist of those which just touch the point $\mathbf{r}$.}
 \label{fig:n0}
 \end{figure}
@@ -394,9 +378,9 @@ function with the asymmetric definition of $g_\sigma^A(\rr)$ given in
 Equation~\ref{eq:gA}, which is averaged over contacts in which one of
 the two spheres is located at position~$\rr$.  This correlation
 function is related to the contact density averaged over the surface
-of a sphere located at $\rr$, and can thus be determined by finding
+of a sphere located at~$\rr$, and can thus be determined by finding
 the pressure on that sphere.  We find this pressure from the change in
-free energy changes resulting from an infinitesimal expansion of any
+free energy resulting from an infinitesimal expansion of any
 spheres located at position~$\rr$.  From this pressure, we derive a
 formula for the correlation function $g_\sigma^A(\rr)$ as was done in
 the previous section:
@@ -761,12 +745,10 @@ Section~\ref{sec:g-A}.
 
 \begin{widetext}
 
-\section*{Introduction to Appendices}
+\section*{Appendix}
 
-In our expressions for pressure (eq \ref{eq:p_{HS}^A} and eq
-\ref{eq:p_{HS}^S}) we have $\frac{\delta A_{HS}}{\delta
-  \sigma(\mathbf{r})}$ terms that must be derived for both the $S$ and A
-cases.  We break these terms up as follows:
+In the expression for our A correlation function $g_\sigma^A(\rr)$ (eq \ref{eq:g-A-exact}) we have $\frac{\delta A_{HS}}{\delta
+  \sigma(\mathbf{r})}$ terms that must be derived.  We break these terms up as follows:
 
   \begin{align}
     \frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})} &=
@@ -781,35 +763,12 @@ cases.  We break these terms up as follows:
   \end{align}
 
 
-We must therefore compute both the $\frac{\delta A_{HS}}{\delta
-  n(\mathbf{r}')}$, etc., terms and the $\frac{\delta
-  n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc., terms.  We will
-compute the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms
-for both the functional derived from the White Bear
-functional\cite{roth2002whitebear} and from the White Bear mark
-II functional\cite{hansen2006density}.  Following this we will compute
-the $\frac{\delta n(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$, etc.,
-terms for both the $A$ and $S$ cases.  These latter derivitives will
-differ for the $A$ and $S$ cases according to the qualitive concepts
-described above.
+We will show here the derivation of the $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta \sigma(\mathbf{r})/2}$, etc., terms for the assymetric case.  The derivation of the S correlation follows the same format using the symmetric conceptual approach introduced in \ref{sec:g-S} and the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms are straightforward (if tedious) derivatives.
 
-
-\subsection{Expressions for $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta \sigma(\mathbf{r})/2}$, etc. for the assymetric case}\label{appendix:g-A}
-
-The derivatation of the asymmetrically averaged correlation function
-$g_\sigma^A(\rr)$ requires that we express the free energy in terms of
-a set of weighted densities in which the radius of the weighting
-kernel is determined according to the position of the sphere in
-question---which is to say, the location where the density itself is
-evaluated.  This is the most natural way to construct such a
-functional, in which the radius of spheres is a function of position.
-Thus we define $n_3^A$ as
-\begin{align}
-  n_3^{A}(\rr') &= \int n(\rr'') \Theta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d\rr''
-\end{align}
-and we define the other weighted densities similarly.  In order to
-compute derivatives of the free energy with respect to $R(\rr)$, we
-need to find $g_\sigma^A$.  In the case of $n_3^A$, we need
+The derivation of $g_\sigma^A(\rr)$ requires that we express our weighted
+densities so that the radius of the weighting kernel is determined according
+to the position of the sphere in question, the location where the density
+itself is evaluated.  Thus for the derivative of $n_3^A$, we have
 \begin{align}
   \frac{\delta n_3^{A} (\rr')}{\delta \sigma(\rr)} &=
   \frac 12 \int n (\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \delta(\rr-\rr'') d\rr'' \\
@@ -820,9 +779,7 @@ Similarly, for $n_2^A$, we find
   n_2^{A}(\rr') &= \int n(\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d \rr''\\
   \frac{\delta n_2^{A}(\rr')}{\delta \sigma(\rr)} &= \frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)\\
 \end{align}
-This is somewhat more challenging, since it involves an unfamiliar
-function, the derivative the Dirac delta function $\delta'$.
-%
+
 The derivatives of the remaining scalar densities can be reduced to
 sums of the terms above:
 \begin{align}
@@ -835,7 +792,7 @@ sums of the terms above:
   \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
 \end{align}
-and
+
 \begin{align}
   n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{\pi \sigma(\rr'')^2}
   \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
@@ -846,15 +803,13 @@ and
   2 \frac{n(\rr)}{\pi
     \sigma(\rr)^3}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
 \end{align}
-The vector-weighted densities have no additional occurrences of $R$,
-their functional derivatives come out similarly:
+The vector-weighted densities have no additional occurrences of $\sigma$.  Their functional derivatives come out similarly:
 \begin{align}
   \mathbf{n}_{V2}^{A}(\rr') &= \int n(\rr') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
     \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
   \frac{\delta \mathbf{n}_{V2}^{A}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
     \frac{\rr-\rr'}{|\rr-\rr'|}\\
 \end{align}
-and analogously for $\mathbf{n}_{V1}^A$:
 \begin{align}
   \mathbf{n}_{V1}^A(\rr') &= \int d\rr'' \frac{n(\rr'')}{2\pi \sigma(\rr'')}
   \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
@@ -865,8 +820,6 @@ and analogously for $\mathbf{n}_{V1}^A$:
   \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
 \end{align}
-This completes our exploration of the partial derivatives of weighted
-densities of the $A$ variety.
 
 \end{widetext}
 \end{document}
