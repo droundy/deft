@@ -301,13 +301,13 @@ A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\righ
 \end{equation}
 with integrands
 \begin{align}
-\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right) \label{eq:Phi1}\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
 \Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
   n_3 + (1-n_3)^2 \ln(1-n_3)
 }{
   36\pi n_3^2\left( 1 - n_3 \right)^2
-} ,
+} , \label{eq:Phi3}
 \end{align}
 using the fundamental measures
 \begin{align}
@@ -717,8 +717,6 @@ we recommend that creators of SAFT-based classical density functionals
 consider using the $g_\sigma^A$ functional defined in
 Section~\ref{sec:g-A}.
 
-\bibliography{paper}% Produces the bibliography via BibTeX.
-
 \appendix
 
 %% \begin{figure}
@@ -741,8 +739,6 @@ Section~\ref{sec:g-A}.
 %% \end{figure}
 
 
-\begin{widetext}
-
 \section*{Appendix}
 
 The expression for the asymmetric correlation function
@@ -762,10 +758,99 @@ following way:
 This expression requires us to evaluate $\frac{\delta A_{HS}}{\delta
   n_\alpha(\mathbf{r}')}$ and $\frac{\delta
   n_\alpha(\mathbf{r}')}{\delta \sigma(\mathbf{r})}$.  The former is
-straightforward, if tedious, and we will write no more about it.  The
-functional derivatives of the fundamental measures, however, require a
-bit more subtlety, and we will address them here.  We note that
-\textcolor{red}{still working on this...}
+straightforward, given Equations~\ref{eq:Phi1}-\ref{eq:Phi3}, and we
+will write no more about it.  The functional derivatives of the
+fundamental measures, however, require a bit more subtlety, and we
+will address them here.
+
+We begin with the derivative of $n_3$, the filling fraction, which we
+will discuss in somewhat more detail than the remainder, which are
+similar in nature.  Because the diameter $\sigma(\rr)$ is the diameter
+of a sphere \emph{at position~$\rr$}, we write the fundamental measure
+$n_3(\rr')$ as
+\begin{align}
+  n_3(\rr') &= \int n(\rr'') \Theta\left(\frac{\sigma(\rr'')}{2}
+  -\left|\rr' - \rr''\right|\right)
+  d\rr''
+\end{align}
+where we note that the integration variable~$\rr''$ is the position of
+the sphere in question.  Thus the derivative we seek is
+\begin{align}
+  \frac{\delta n_3(\rr')}{\delta \sigma(\rr)} &= \frac 12 \int n
+  (\rr'') \delta\left(\frac{\sigma(\rr'')}{2} -\left|\rr' - \rr''\right|\right)
+  \delta(\rr-\rr'') d\rr'' \\ &= n (\rr) \delta(\sigma(\rr)/2
+  -\left|\rr' - \rr\right|)
+\end{align}
+This pattern will hold for each fundamental measure: because we are
+seeking the change in free energy when spheres at point~$\rr$ are
+expanded, the integral over density is eliminated.  To compute the
+correlation funtion $g_\sigma^A$, we convolve this delta function with
+the product of the density and a local derivative of $\Phi(\rr)$:
+\begin{align}
+  \frac{\delta A_{HS}}{\delta \sigma(\rr)} &= \int \frac{\partial \Phi(\rr')}{\partial
+    n_3(\rr')}n(\rr') \delta(\sigma/2-|\rr'-\rr|)d\rr'
+  + \cdots
+\end{align}
+As we shall see, there are only four convolution kernels, leading to
+four additional convolutions beyond those required for FMT.
+
+The functional derivative of $n_2$ introduces our second convolution
+kernel, which is a derivative of the delta function.
+\begin{align}
+  %n_2(\rr') &= \int n(\rr'') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) d \rr''\\
+  \frac{\delta n_2(\rr')}{\delta \sigma(\rr)} &= \frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+\end{align}
+The derivatives of the remaining scalar densities $n_1$ and $n_0$ reduce to
+sums of the terms above:
+\begin{align}
+  %n_1(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{2\pi \sigma(\rr'')}
+  %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
+  \frac{\delta n_1(\rr')}{\delta \sigma(\rr)}
+  &= \frac{n(\rr)}{4\pi
+    \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \\
+  &\quad-
+  \frac{n(\rr)}{2\pi
+    \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+\end{align}
+and
+\begin{align}
+  %n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{\pi \sigma(\rr'')^2}
+  %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
+  \frac{\delta n_0(\rr')}{\delta \sigma(\rr)}
+  &= \frac{n(\rr)}{2\pi
+    \sigma(\rr)^2}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+  \\&\quad-
+  2 \frac{n(\rr)}{\pi
+    \sigma(\rr)^3}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+\end{align}
+
+The vector-weighted densities $\mathbf{n}_{V1}$ and $\mathbf{n}_{V2}$
+give terms analogous to those of $n_1$ and $n_2$:
+\begin{align}
+  %\mathbf{n}_{V2}(\rr') &= \int n(\rr') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
+  %  \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
+  \frac{\delta \mathbf{n}_{V2}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+    \frac{\rr-\rr'}{|\rr-\rr'|}\\
+\end{align}
+\begin{align}
+  %\mathbf{n}_{V1}(\rr') &= \int d\rr'' \frac{n(\rr'')}{2\pi \sigma(\rr'')}
+  %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
+  \frac{\delta \mathbf{n}_{V1}(\rr')}{\delta \sigma(\rr)}
+  &= -\frac{n(\rr)}{4\pi
+    \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
+  \\ &\quad+
+  \frac{n(\rr)}{2\pi
+    \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
+\end{align}
+Thus there are four convolution kernels used in computing $g_\sigma^A$
+one scalar and one vector delta function, and one scalar and one
+vector derivative of the delta function.
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
+
+\begin{widetext}
 
 We will show here the derivation of the $\beta\frac{\delta n_3^{A}(\mathbf{r}')}{\delta \sigma(\mathbf{r})/2}$, etc., terms for the asymmetric case.  The derivation of the S correlation follows the same format using the symmetric conceptual approach introduced in \ref{sec:g-S} and the $\frac{\delta A_{HS}}{\delta n(\mathbf{r}')}$, etc., terms are straightforward (if tedious) derivatives.
 
