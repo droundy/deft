@@ -1,4 +1,4 @@
-\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\documentclass[a4paper,12pt,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -29,24 +29,27 @@
 \title{A Classical Density-Functional Theory for Describing Water Interfaces}
 
 \author{Jessica Hughes}
-\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331, USA}
 \author{Eric Krebs}
-\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331, USA}
 \author{David Roundy}
-\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331, USA}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 We develop a classical density functional for water which combines the
 White Bear fundamental-measure theory (FMT)
-functional\cite{roth2002whitebear} for the hard sphere fluid with
+functional for the hard sphere fluid with
 attractive interactions based on the Statistical Associating Fluid
-Theory (SAFT-VR)\cite{clark2006developing}.
+Theory (SAFT-VR).
 This functional reproduces the properties of water at both long and
 short length scales over a wide range of temperatures, and is
 computationally efficient, comparable to the cost of FMT
 itself.  We demonstrate our functional by applying it to systems
-composed of of two hard rods, four hard rods arranged in a square and
+composed of two hard rods, four hard rods arranged in a square and
 hard spheres in water.
 \end{abstract}
 \maketitle
@@ -109,7 +112,7 @@ theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
 stating that
 \begin{equation}
   A(T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int V_\textit{ext}(\rr) n(\rr)
-d\rr\right\}.
+d\rr\right\},
 \end{equation}
 where $A(T)$ is the Helmholtz free energy of a system in the external
 potential $V_\textit{ext}$ at temperature $T$, $n(\rr)$ is the density
@@ -278,7 +281,7 @@ The contact-value theorem states that the pressure any fluid exerts
 on a hard wall interface is proportional to the contact density of the
 fluid\cite{henderson1979exact}:
 \begin{equation}\label{eq:contact}
-  p = n_ck_BT
+  p = n_ck_BT,
 \end{equation}
 where $n_c$ is the contact density, $k_B$ is the Boltzmann constant
 and $T$ is the temperature of
@@ -286,7 +289,7 @@ the fluid. This leads to the property that the excess chemical
 potential of a small hard solute is proportional to the
 solvent-excluded volume:
 \begin{equation}\label{contactvaluethm}
-  F = n k_BT V
+  F = n k_BT V.
 \end{equation}
 The contact-value theorem is satisfied by classical density
 functionals in which the only purely local term is the ideal gas
@@ -305,7 +308,7 @@ following sections, we will introduce the terms of this functional.
 The first term is the ideal gas free energy functional, which is
 purely local:
 \begin{equation}\label{idealgas}
-  F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{n_Q}} - 1\right) d\xx
+  F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{n_Q}} - 1\right) d\xx,
 \end{equation}
 where n(\xx) is the density of water molecules and $n_Q$ is the
 quantum concentration
@@ -373,7 +376,7 @@ and a length scale $\lambdadisp R$.
 
 The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
-  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx
+  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx,
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
 perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
@@ -398,7 +401,7 @@ convolution of the density:
 %             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
   \etadisp(\xx) &= \frac{1}{6\sqrt{\pi} \lambdadisp^3\lscale^3}
   \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
-      \lscale R)^2}}\right)d\xx'
+      \lscale R)^2}}\right)d\xx'.
 \end{align}
 This effective filling fraction is used throughout the dispersion
 functional, and represents a filling fraction averaged over the
@@ -441,7 +444,7 @@ energy\cite{gil-villegas-1997-SAFT-VR}.
 The association free energy for our four-site model has the form
 \begin{align}
   F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) \zeta(\xx)
-  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
+  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx,
 \end{align}
 where the factor of $4$ comes from the four association sites per
 molecule, the functional $X$ is the fraction of association sites
@@ -456,7 +459,7 @@ The fraction $X$ is determined by the quadratic equation
   X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)
       \Delta(\xx)} - 1}
   {4 n_0(\xx)\zeta(\xx)
-    \Delta(\xx)}
+    \Delta(\xx)},
 \end{align}
 where the functional $\Delta$ is a measure of hydrogen-bonding
 probability, given by
@@ -465,7 +468,7 @@ probability, given by
   \left(e^{-\beta\epsilonassoc} - 1\right) \\
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
-  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW}
+  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW},
 \end{align}
 % This is equation 77 of gil-villegas-1997-SAFT-VR
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
@@ -478,7 +481,7 @@ functional of Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 \begin{align}
   g_\sigma^{HS} &= \frac{1}{1-n_3}
   +\frac{R}{2}\frac{\zeta n_2}{(1-n_3)^2}
-  + \frac{R^2}{18}\frac{\zeta n_2^2}{(1-n_3)^3}
+  + \frac{R^2}{18}\frac{\zeta n_2^2}{(1-n_3)^3}.
 \end{align}
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
@@ -610,7 +613,7 @@ the energy for these and other separations.}
 To understand this critical separation, we consider the free energy in
 the macroscopic limit, which is given by
 \begin{equation}
-F = \gamma A + pV
+F = \gamma A + pV.
 \end{equation}
 The first term describes the surface energy and the second term is the
 work needed to create a cavity of volume $V$. Since the pressure term
