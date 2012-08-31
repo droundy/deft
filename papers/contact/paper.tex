@@ -347,18 +347,13 @@ energy on hard sphere radius.
 \end{align}
 where $\eta \equiv \frac{\pi}{6} \sigma^3 n$ is the filling fraction.
 We can thus readily compute the derivative of free energy with respect
-to hard-sphere diameter:
+to hard-sphere diameter, which is half the force on \emph{all} the
+hard spheres---since we're changing all their diameters at once.  To
+compute the pressure on the spheres, we need to divide the total force
+by the total area of contact, which means dividing by $N 4\pi
+\sigma^2$.
 \begin{align}
-  \frac{dA_{HS}}{d\sigma} &= \frac{dA_{HS}}{d\eta} \frac{d\eta}{d\sigma} \\
-  &= Nk_BT \frac{4 - 2\eta}{(1-\eta)^3} \frac{3 \eta}{\sigma} \label{eq:dAhsdR}
-\end{align}
-This derivative gives us half the force on \emph{all} the hard
-spheres---since we're changing all their radii at once.  To compute
-the pressure on the spheres, we need to divide by half the total
-area, which means dividing by $N 8\pi \sigma^2$, since the relevant
-area is the area over which the molecules can make contact.
-\begin{align}
-  p_\sigma &= \frac{1}{N 8\pi \sigma^2} \frac{dA_{HS}}{d\sigma} \\
+  p_\sigma &= \frac{1}{N 4\pi \sigma^2} \frac12 \frac{dA_{HS}}{d\sigma} \\
   &= k_BT n \frac{1 - \frac{\eta}2}{(1-\eta)^3}
 \end{align}
 Using the contact-value theorem, we can thus find the well-known
@@ -463,37 +458,31 @@ given in Equation~\ref{eq:cs-g}.
 \subsection{Yu and Wu's symmetrically averaged functional}\label{sec:yuwu}
 
 Yu and Wu developed a functional for the correlation function
-evaluated at contact, which is symmetrically
-averaged~\cite{yu2002fmt-dft-inhomogeneous-associating}.  Although Yu
-and Wu use a symmetric formulation for $g_\sigma$, instead of using
-$n_0$ as the associated density, they use a density given by
+evaluated at contact which is symmetrically
+averaged~\cite{yu2002fmt-dft-inhomogeneous-associating}.  However,
+instead of using $n_0$ as the corresponding density, they use a
+density given by
 \begin{align}
-  n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \\
+  n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \label{eq:nYu} \\
   \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
-point of contact, and has the effect of reducing the density at
-interfaces.  Given this definition of density, their $g_\sigma$ is
-given by:
-% \fixme{Which of the following two equations is more clear to you? We
-%  only want one.}
+point of contact, and has the effect of reducing this density at
+interfaces.  Because of this difference, the correlation function of
+Yu and Wu cannot be directly compared with $g_\sigma^S$ as defined in
+Equation~\ref{eq:gS}.  Therefore in order to make a comparison we move
+the factors of $\zeta$ in Equation~\ref{eq:nYu} from the density into
+the correlation function itself.
 \begin{align}
-  %% g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
-  %%   + \frac32 \frac{\sigma n_2}{6}\frac{\zeta}{(1-n_3)^2}
-  %%   + \frac12 \frac{\left(\frac{\sigma n_2}{6}\right)^2 \zeta}{(1-n_3)^3}
-  %%   \\
-  g_\sigma^\text{Yu} &= \frac{1}{1-n_3}
-    + \frac14 \frac{\sigma n_2\zeta}{(1-n_3)^2}
-    + \frac1{72} \frac{\sigma^2 n_2^2 \zeta}{(1-n_3)^3}
-\end{align}
-From this function, we extract a symmetric correlation function
-\begin{align}
-  g_\sigma^\text{Yu,S} &= \zeta^2\left(\frac{1}{1-n_3}
+  g_\sigma^\text{Yu,S} &= \zeta^2 g_\sigma^\text{Yu} \\
+   &= \zeta^2\left(\frac{1}{1-n_3}
     + \frac14 \frac{\sigma n_2\zeta}{(1-n_3)^2}
     + \frac1{72} \frac{\sigma^2 n_2^2 \zeta}{(1-n_3)^3}\right)
 \end{align}
-which corresponds to our $g_\sigma^S$ so that they can be directly
-compared.
+where $g_\sigma^\text{Yu}$ is the correlation function as defined in
+reference~\cite{yu2002fmt-dft-inhomogeneous-associating}, and
+$g_\sigma^\text{Yu,S}$ is the function we will examine in this paper.
+
 
 %% \section{Method}
 
@@ -773,8 +762,10 @@ $n_3(\rr')$ as
   -\left|\rr' - \rr''\right|\right)
   d\rr''
 \end{align}
-where we note that the integration variable~$\rr''$ is the position of
-the sphere in question.  Thus the derivative we seek is
+where we note that $\sigma(\rr'')$ and $n(\rr'')$ are the diameter and
+density, respectively, of spheres centered at position~$\rr''$.  Thus the
+derivative with respect to the diameter of spheres at position
+$\rr$ is
 \begin{align}
   \frac{\delta n_3(\rr')}{\delta \sigma(\rr)} &= \frac 12 \int n
   (\rr'') \delta\left(\frac{\sigma(\rr'')}{2} -\left|\rr' - \rr''\right|\right)
@@ -802,47 +793,47 @@ kernel, which is a derivative of the delta function.
 \end{align}
 The derivatives of the remaining scalar densities $n_1$ and $n_0$ reduce to
 sums of the terms above:
-\begin{align}
+\begin{multline}
   %n_1(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{2\pi \sigma(\rr'')}
   %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
   \frac{\delta n_1(\rr')}{\delta \sigma(\rr)}
-  &= \frac{n(\rr)}{4\pi
+  = \frac{n(\rr)}{4\pi
     \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \\
-  &\quad-
+  -
   \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
-\end{align}
+\end{multline}
 and
-\begin{align}
+\begin{multline}
   %n_0(\rr') &= \int \mathbf{dr''} \frac{n(\rr'')}{\pi \sigma(\rr'')^2}
   %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \\
   \frac{\delta n_0(\rr')}{\delta \sigma(\rr)}
-  &= \frac{n(\rr)}{2\pi
+  = \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
-  \\&\quad-
+  \\-
   2 \frac{n(\rr)}{\pi
     \sigma(\rr)^3}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
-\end{align}
+\end{multline}
 
 The vector-weighted densities $\mathbf{n}_{V1}$ and $\mathbf{n}_{V2}$
 give terms analogous to those of $n_1$ and $n_2$:
-\begin{align}
+\begin{multline}
   %\mathbf{n}_{V2}(\rr') &= \int n(\rr') \delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|)
   %  \frac{\rr'-\rr''}{|\rr'-\rr''|} d \rr''\\
-  \frac{\delta \mathbf{n}_{V2}(\rr')}{\delta \sigma(\rr)} &= -\frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
-    \frac{\rr-\rr'}{|\rr-\rr'|}\\
-\end{align}
-\begin{align}
+  \frac{\delta \mathbf{n}_{V2}(\rr')}{\delta \sigma(\rr)} = -\frac 12 n(\rr) \delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|)
+    \frac{\rr-\rr'}{|\rr-\rr'|}
+\end{multline}
+\begin{multline}
   %\mathbf{n}_{V1}(\rr') &= \int d\rr'' \frac{n(\rr'')}{2\pi \sigma(\rr'')}
   %\delta(\sigma(\rr'')/2 -\left|\rr' - \rr''\right|) \frac{\rr'-\rr''}{|\rr'-\rr''|}\\
   \frac{\delta \mathbf{n}_{V1}(\rr')}{\delta \sigma(\rr)}
-  &= -\frac{n(\rr)}{4\pi
+  = -\frac{n(\rr)}{4\pi
     \sigma(\rr)}\delta'(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
-  \\ &\quad+
+  \\ +
   \frac{n(\rr)}{2\pi
     \sigma(\rr)^2}\delta(\sigma(\rr)/2 -\left|\rr' - \rr\right|) \frac{\rr-\rr'}{|\rr-\rr'|}
-\end{align}
-Thus there are four convolution kernels used in computing $g_\sigma^A$
+\end{multline}
+Thus there are four convolution kernels used in computing $g_\sigma^A$:
 one scalar and one vector delta function, and one scalar and one
 vector derivative of the delta function.
 

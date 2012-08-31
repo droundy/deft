@@ -48,7 +48,7 @@ off = 1
 gA_mc = mcdata[:,2+2*off] / nA_mc
 gS_mc = mcdata[:,3+2*off] / n0_mc
 
-pylab.figure(figsize=(8, 7))
+pylab.figure(figsize=(7, 6))
 pylab.subplots_adjust(hspace=0.001)
 
 n_plt = pylab.subplot(3,1,3)

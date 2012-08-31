@@ -30,7 +30,7 @@ nA = dftdata[:,8]
 nAmc = mcdata[:,11]
 n0mc = mcdata[:,10]
 
-pylab.figure(figsize=(8, 8))
+pylab.figure(figsize=(7, 6))
 pylab.subplots_adjust(hspace=0.001)
 
 n_plt = pylab.subplot(3,1,3)
