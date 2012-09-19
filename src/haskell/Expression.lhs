@@ -6,7 +6,7 @@ module Expression (Exprn(..),
                    RealSpace(..), r_var, dV, dVscalar, dr, lat1, lat2, lat3, volume,
                    KSpace(..), k_var, imaginary, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..), scalar,
-                   ThreeVector, t_var, cross, dot,
+                   ThreeVector, t_var, cross, dot, threeVector,
                    fft, ifft, integrate, grad, derive,
                    Expression(..), joinFFTs, (===), var, protect,
                    Type(..), Code(..), IsTemp(..),
@@ -126,7 +126,17 @@ infixl 7 `cross`, `dot`
 
 instance Code ThreeVector where
   codePrec _ (Permute n (Var _ _ v _ Nothing)) = showString (v ++ "[i+"++show n++"]")
-  codePrec _ e = error ("Bad permute: " ++ show e)
+  codePrec p (ThreeVector a b c) | b == c && a == b = codePrec p a
+                                 | b == c = showString ("((i == 0) ? " ++ code a ++ " : " ++
+                                                        code b ++ ")")
+                                 | b == a = showString ("((i == 2) ? " ++ code c ++ " : " ++
+                                                        code b ++ ")")
+                                 | a == c = showString ("((i == 1) ? " ++ code b ++ " : " ++
+                                                        code a ++ ")")
+  codePrec _ (ThreeVector a b c) = showString ("((i == 0) ? " ++ code a ++ " : " ++
+                                               "(i == 1) ? " ++ code b ++ " : " ++
+                                               code c ++ ")")
+  codePrec _ e = error ("Bad ThreeVector: " ++ show e)
   latexPrec _ (Permute n (Var _ _ _ v Nothing)) = showString (v ++ "_{+"++show n++"}")
   latexPrec _ e = error ("Bad latex permute: " ++ show e)
 instance Type ThreeVector where
@@ -327,11 +337,14 @@ instance Type KSpace where
   newcodeStatementHelper (Var _ _ a _ _) op e =
     unlines [setzero++
              "\tfor (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {",
-             "\t\tconst int z = i % (int(Nz)/2+1);",
-             "\t\tconst int n = (i-z)/(int(Nz)/2+1);",
-             "\t\tconst int y = n % int(Ny);",
-             "\t\tconst int xa = (n-y)/int(Ny);",
-             "\t\tconst Vector k_i = xa/Nx*rlat1 + y/Ny*rlat2 + z/Nz*rlat3;",
+             "\t\tconst int _z = i % (int(Nz)/2+1);",
+             "\t\tconst int _n = (i-_z)/(int(Nz)/2+1);",
+             "\t\tconst int _y = _n % int(Ny);",
+             "\t\tconst int _x = (_n-_y)/int(Ny);",
+             --"\t\tconst Vector k_i = xa/Nx*rlat1 + y/Ny*rlat2 + z/Nz*rlat3;",
+             "\t\tconst Vector k_i(2*M_PI/(Nx*_a1)*((_x>Nx/2)?_x-Nx:_x),",
+             "\t\t                 2*M_PI/(Ny*_a2)*((_y>Ny/2)?_y-Ny:_y),",
+             "\t\t                 2*M_PI/(Nz*_a3)*((_z>Nz/2)?_z-Nz:_z));",
              newcodes (1 :: Int) e,
              "\t}"]
       where newcodes n x = case findRepeatedSubExpression x of
@@ -635,8 +648,7 @@ instance Code Scalar where
 instance Type Scalar where
   s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
-  s_var vv@(a:v@(_:_)) = Var CannotBeFreed vv vv (a : '_' : '{' : v ++ "}") Nothing
-  s_var v = Var CannotBeFreed v v v Nothing
+  s_var v = Var CannotBeFreed v v (cleanTex v) Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
@@ -682,19 +694,21 @@ scalar (Scalar e) = scalar e
 scalar e | Just c <- isConstant e = toExpression c
 scalar e = fromScalar e
 
+cleanTex :: String -> String
+cleanTex [a] = [a]
+cleanTex ('_':v) = cleanTex v
+cleanTex (a:v) = a : '_' : '{' : v ++ "}"
+cleanTex "" = error "cleanTex on empty string"
+
 r_var :: String -> Expression RealSpace
-r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
 r_var v | take 5 v == "rtemp" = Var IsTemp (v++"[i]") ('r':v) v Nothing
 r_var v | take 4 v == "temp" = Var IsTemp ("r"++v++"[i]") ('r':v) v Nothing
-r_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
-r_var "" = error "r_var needs non-empty string"
+r_var v = Var CannotBeFreed (v++"[i]") v (cleanTex v) Nothing
 
 k_var :: String -> Expression KSpace
-k_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
 k_var v | take 5 v == "ktemp" = Var IsTemp (v++"[i]") ('r':v) v Nothing
 k_var v | take 4 v == "temp" = Var IsTemp ("k"++v++"[i]") ('r':v) v Nothing
-k_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
-k_var "" = error "r_var needs non-empty string"
+k_var v = Var CannotBeFreed (v++"[i]") v (cleanTex v) Nothing
 
 t_var :: String -> Expression ThreeVector
 t_var v@([_]) = Var CannotBeFreed (v++"[i]") v ("\\vec{"++v++"}") Nothing
@@ -1743,7 +1757,7 @@ findInputs = searchMonoid helper
         helper e@(Var _ _ _ _ Nothing) = Set.singleton (mkExprn e)
         helper _ = Set.empty
         grid_description = Set.fromList [ES numx, ES numy, ES numz,
-                                         E3 lat1, E3 lat2, E3 lat3]
+                                         ES a1, ES a2, ES a3]
 
 dV :: Expression RealSpace
 dV = scalar dVscalar
@@ -1762,8 +1776,17 @@ numx = s_var "Nx"
 numy = s_var "Ny"
 numz = s_var "Nz"
 
+a1, a2, a3 :: Expression Scalar
+a1 = s_var "_a1"
+a2 = s_var "_a2"
+a3 = s_var "_a3"
+
 lat1, lat2, lat3 :: Expression ThreeVector
-lat1 = Var CannotBeFreed "lat1" "lat1" "\\vec{a_1}" Nothing
-lat2 = Var CannotBeFreed "lat2" "lat2" "\\vec{a_2}" Nothing
-lat3 = Var CannotBeFreed "lat3" "lat3" "\\vec{a_3}" Nothing
+--lat1 = Var CannotBeFreed "lat1" "lat1" "\\vec{a_1}" Nothing
+--lat2 = Var CannotBeFreed "lat2" "lat2" "\\vec{a_2}" Nothing
+--lat3 = Var CannotBeFreed "lat3" "lat3" "\\vec{a_3}" Nothing
+lat1 = threeVector a1 0 0
+lat2 = threeVector 0 a2 0
+lat3 = threeVector 0 0 a3
+
 \end{code}

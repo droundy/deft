@@ -141,29 +141,13 @@ scalarClass e arg variables n =
                                 "\t\toutput[i] = 0;",
                                 "\t}"]++
                                "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
-                               [newcodeStatements (inits ++ st ++ concatMap assignit ee),
+                               [newcodeStatements (st ++ concatMap assignit ee),
                                 "\treturn output;"])
         where assignit eee = [Assign (justvarname eee) eee]
-              inits = if any (mapExprn hasActualFFT) the_actual_gradients
-                      then [Initialize (E3 $ t_var "rlat1"),
-                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
-                            Initialize (E3 $ t_var "rlat2"),
-                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
-                            Initialize (E3 $ t_var "rlat3"),
-                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
-                      else []
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
         where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
-              inits = if hasActualFFT x
-                      then [Initialize (E3 $ t_var $ "rlat1"),
-                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
-                            Initialize (E3 $ t_var "rlat2"),
-                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
-                            Initialize (E3 $ t_var "rlat3"),
-                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
-                      else []
-              st = inits ++ filter (not . isns) st0
+              st = filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e
