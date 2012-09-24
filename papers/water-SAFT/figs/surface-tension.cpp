@@ -35,14 +35,14 @@ int main(int, char **) {
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     LiquidProperties prop = water_prop;
     prop.kT = kB*T;
-    Functional f = OfEffectivePotential(SaftFluid(prop.lengthscale,
+    Functional f = OfEffectivePotential(SaftFluid2(prop.lengthscale,
                                                   prop.epsilonAB, prop.kappaAB,
                                                   prop.epsilon_dispersion,
                                                   prop.lambda_dispersion, water_prop.length_scaling, 0));
     saturated_liquid_properties(f, &prop);
     took("Finding bulk densities");
     double mu = find_chemical_potential(f, prop.kT, prop.liquid_density);
-    f = OfEffectivePotential(SaftFluid(prop.lengthscale,
+    f = OfEffectivePotential(SaftFluid2(prop.lengthscale,
                                        prop.epsilonAB, prop.kappaAB,
                                        prop.epsilon_dispersion,
                                        prop.lambda_dispersion, water_prop.length_scaling, mu));

@@ -89,7 +89,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 int main(int, char **) {
   FILE *o = fopen("papers/water-SAFT/figs/single-rod-in-water-high-res.dat", "w");
 
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
 						water_prop.epsilon_dispersion,
 						water_prop.lambda_dispersion,
@@ -99,7 +99,7 @@ int main(int, char **) {
 
   double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				     water_prop.epsilonAB, water_prop.kappaAB,
 				     water_prop.epsilon_dispersion,
 				     water_prop.lambda_dispersion,
@@ -126,7 +126,7 @@ int main(int, char **) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				       water_prop.epsilonAB, water_prop.kappaAB,
 				       water_prop.epsilon_dispersion,
 				       water_prop.lambda_dispersion,

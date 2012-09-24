@@ -27,7 +27,7 @@ int main(int, char **) {
   
   FILE *o = fopen("papers/water-SAFT/figs/pressure-with-isotherms.dat", "w");
   
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,
                                                 water_prop.epsilon_dispersion,
                                                 water_prop.lambda_dispersion, water_prop.length_scaling, 0));

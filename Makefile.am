@@ -1,4 +1,4 @@
-.PHONY: paper project poster papers comparison slowfigs haskell pdf
+.PHONY: paper project poster papers comparison slowwaterfigs haskell pdf
 
 EXTRA_DIST = autogen.sh
 
@@ -180,6 +180,16 @@ papers_water_SAFT_figs_sphere_mkdat_SOURCES = papers/water-SAFT/figs/sphere.cpp 
 papers_water_SAFT_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-SAFT/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 papers_water_SAFT_figs_enthalpy_mkdat_SOURCES = papers/water-SAFT/figs/enthalpy.cpp $(ALL_CODE)
 
+slowwaterfigs: papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
+	$(wildcard papers/water-SAFT/figs/rods-in-water-*nm.dat) \
+	$(wildcard papers/water-SAFT/figs/single-rod-*nm-energy.dat)
+
+papers/water-SAFT/figs/rods-in-water-0%nm.dat: papers/water-SAFT/figs/rods-in-water.mkdat
+	time $< $*
+
+papers/water-SAFT/figs/single-rod-%nm-energy.dat: papers/water-SAFT/figs/single-rod.mkdat
+	time $< $*
+
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(CONTACT_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(CONTACT_CODE)
 papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CONTACT_CODE)
@@ -241,12 +251,6 @@ papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
 	cd papers && $(MAKE)
 
-
-slowfigs: papers/water-SAFT/figs/rods-in-water.dat \
-	papers/water-SAFT/figs/four-rods-in-water.dat\
-	papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
-	papers/water-SAFT/figs/sphere.dat \
-	papers/contact/figs/mc-06-112.dat
 
 papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<

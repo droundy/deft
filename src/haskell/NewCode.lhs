@@ -42,7 +42,9 @@ scalarClass e arg variables n =
      "\treturn " ++ newcode (snd denergy_per_volume_dx) ++ ";\n"),
    functionCode "grad" "Vector" [("const Vector", "&xxx")] (evalv grade),
    functionCode "printme" "void" [("const char *", "prefix")]
-      (unlines $ map printEnergy (Set.toList (findNamedScalars e))),
+      (unlines $ map printEnergy $
+       filter (`notElem` ["dV", "dr", "volume"]) $
+       (Set.toList (findNamedScalars e))),
    functionCode "createInput" "Vector" (codeInputArgs (inputs e))
       (unlines $ ["\tconst int newsize = " ++
                   xxx (map getsize $ inputs e),

@@ -40,7 +40,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
+void plot_grids_y_direction(const char *fname, const Grid &a) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -53,11 +53,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
   for (int y=0; y<gd.Ny/2; y++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
-    double bhere = b(x,y,z);
-    double chere = c(x,y,z);
-    double dhere = d(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	    ahere, bhere, chere, dhere);
+    fprintf(out, "%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere);
   }
   fclose(out);
 }
@@ -104,7 +100,7 @@ int main(int argc, char **argv) {
   const double ymax = diameter+2*padding;
   const double zmax = diameter+2*padding;
 
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
 						water_prop.epsilon_dispersion,
 						water_prop.lambda_dispersion,
@@ -114,7 +110,7 @@ int main(int argc, char **argv) {
 
   double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				     water_prop.epsilonAB, water_prop.kappaAB,
 				     water_prop.epsilon_dispersion,
 				     water_prop.lambda_dispersion,
@@ -142,7 +138,7 @@ int main(int argc, char **argv) {
   Grid constraint(gd);
   constraint.Set(notinwall);
     
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                      water_prop.epsilonAB, water_prop.kappaAB,
                                      water_prop.epsilon_dispersion,
                                      water_prop.lambda_dispersion,
@@ -208,11 +204,7 @@ int main(int argc, char **argv) {
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/water-SAFT/figs/single-rod-slice-%04.1f.dat", diameter/nm);
   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-  Grid energy_density(gd, f(water_prop.kT, gd, potential));
-  Grid entropy(gd, S(water_prop.kT, potential));
-  Grid Xassoc(gd, X(water_prop.kT, density));
-  plot_grids_y_direction(plotname, density, 
-                         energy_density, entropy, Xassoc);
+  plot_grids_y_direction(plotname, density);
   free(plotname);
 
   {
