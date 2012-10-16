@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
 				     water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
@@ -174,13 +175,15 @@ int main(int argc, char *argv[]) {
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
 
+    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    printf("Number of water molecules is %g\n", density.integrate());
     printf("The bulk energy per cell should be %g\n", EperCell);
+    printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
 
     FILE *o = fopen(datname, "w");
-    fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
+    //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
+    fprintf(o, "%g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell);
     fclose(o);
-
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
 
     char *plotname = (char *)malloc(1024);
 

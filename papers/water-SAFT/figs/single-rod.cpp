@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
 				     water_prop.length_scaling, mu_satp));
   
   const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*diameter*diameter)*width;
 
   Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
@@ -184,8 +185,12 @@ int main(int argc, char **argv) {
     }
   }
 
+  Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
   printf("The bulk energy per cell should be %g\n", EperCell);
+  printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
+  printf("Number of water molecules is %g\n", density.integrate());
   double energy = (min.energy() - EperCell)/width;
+  energy = (min.energy() - EperNumber*density.integrate())/width;
   printf("Energy is %.15g\n", energy);
 
   char *datname = new char[1024];
@@ -203,7 +208,6 @@ int main(int argc, char **argv) {
 
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/water-SAFT/figs/single-rod-slice-%04.1f.dat", diameter/nm);
-  Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
   plot_grids_y_direction(plotname, density);
   free(plotname);
 
