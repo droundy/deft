@@ -147,17 +147,20 @@ position $\rr_2$.  The pair correlation function is defined by
 \begin{align}
   g(\rr_1,\rr_2) &\equiv \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
 \end{align}
-In a homogeneous fluid, the pair correlation only depends on the
-distance $|\rr_1-\rr_2|$ and can be expressed as a function of a
-single variable. The contact value of the correlation function is this
+The contact value of the correlation function is this
 correlation function's value when evaluated at a distance of the
-diameter $\sigma$.  It is desirable for reasons of efficiency to limit CDFT
-functionals to one-center convolutions, which leads us to seek a
+diameter $\sigma$.  In a homogeneous fluid, the pair correlation only depends on the
+distance $|\rr_1-\rr_2|$ and can be expressed as a function of a
+single variable. The pair correlations for an inhomogeneous fluid are of course
+not as simple but it is desirable for reasons of computational efficiency and theoretical elegance
+to limit these classical density functionals
+to one-center convolutions, which leads us to seek a
 simplified expression for the contact value of the correlation
-function---which is the same as the contact value of the cavity
+function--- which is the same as the contact value of the cavity
 correlation function for hard spheres.
 In a system with an inhomogeneous density, we seek a \emph{local}
-value for $g_\sigma$.  There are two reasonable options for defining
+value for $g_\sigma$ that is dependent upon only one position variable $\rr$.
+There are two reasonable options for defining
 such a local function: a symmetric formulation (which we refer to as $S$) and an
 asymmetric formulation (which we refer to as $A$).
 
@@ -169,7 +172,8 @@ given by:
   \frac{\delta(\sigma/2 -|\rr'|)}{\pi\sigma^2}d\rr' \label{eq:gS}
 \end{align}
 where $\sigma$ is the hard sphere diameter and density $n_0$ is one of the fundamental measures of Fundamental
-Measure Theory (FMT), and is ideal for treating touching spheres, as
+Measure Theory (FMT).\ \ $g^S_\sigma(\rr)$ is defined to treat the geometrically
+symmetric possibility of spheres touching at the position $\rr$ as
 illustrated in Figure~\ref{fig:n0}.
 \begin{align}
   n_0(\rr) &= \int n(\rr')\frac{\delta(\sigma/2 -|\rr-\rr'|)}{\pi\sigma^2} d\rr'
@@ -346,12 +350,13 @@ energy on hard sphere radius.
   A_{HS} &= Nk_BT \frac{4\eta - 3\eta^2}{(1-\eta)^2}
 \end{align}
 where $\eta \equiv \frac{\pi}{6} \sigma^3 n$ is the filling fraction.
-We can thus readily compute the derivative of free energy with respect
+Each sphere will be in contact with spheres that are one diameter away
+from its center so we expand a number of contact area spheres
+of radius $\sigma$ and divide by two.  We can thus readily compute the derivative of free energy with respect
 to hard-sphere diameter, which is half the force on \emph{all} the
 hard spheres---since we're changing all their diameters at once.  To
 compute the pressure on the spheres, we need to divide the total force
-by the total area of contact, which means dividing by $N 4\pi
-\sigma^2$.
+by the total area of contact which means we divide by $N 4\pi \sigma^2$.
 \begin{align}
   p_\sigma &= \frac{1}{N 4\pi \sigma^2} \frac12 \frac{dA_{HS}}{d\sigma} \\
   &= k_BT n \frac{1 - \frac{\eta}2}{(1-\eta)^3}
