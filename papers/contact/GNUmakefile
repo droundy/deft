@@ -37,7 +37,7 @@ clean:
 	mkdir arxiv/figs
 
 ALL_FIGURES=\
-	figs/n0.svg\
+	figs/n0.svg figs/nA.svg \
 	figs/contact.svg\
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
@@ -108,6 +108,9 @@ figs/inner-4-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-04.0-0.%0.dat $(wild
 
 figs/inner-12-%0.pdf: figs/plot-inner.py figs/inner-sphereWB-12.0-0.%0.dat $(wildcard figs/mc-inner-sphere*.dat)
 	python $< 6 $* $@
+
+figs/ghs.pdf: figs/plot-ghs.py $(wildcard figs/mc-inner-sphere*.dat)
+	python $< $@
 
 test-particle-0.10 := $(wildcard figs/test-particle-cont-dens-*-0.10.dat)
 figs/test-particle-cont-dens-0.10.dat: $(test-particle-0.10)

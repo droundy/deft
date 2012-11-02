@@ -4,7 +4,7 @@
 
 % Look up question-mark references (citations).
 
-\documentclass[letterpaper,twocolumn,amsmath,amssymb,10pt,pre]{revtex4-1}
+\documentclass[letterpaper,amsmath,amssymb,10pt,pre]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -84,7 +84,8 @@ tension on temperature.
 %% molecular length scales.
 %
 A key input to these functionals is the correlation function
-evaluated at contact, which is required for both the chain and
+evaluated at contact, which is identical to the contact value of the cavity
+correlation function for hard spheres, and is required for both the chain and
 association terms in the SAFT free energy.  The chain term describes
 the chain formation energy in polymeric fluids, while the association
 term describes the effects of hydrogen bonding, both of which can be
@@ -108,14 +109,49 @@ Two functionals for the chain contribution have recently been
 introduced, one which uses the
 correlation function of Yu and Wu\cite{bryk2006density} and another that
 introduces a new approximation for the contact value of the
-correlation function (described in
-Section~\ref{sec:gross})\cite{gross2009density}.
+correlation function\cite{gross2009density}.
 %% The dispersion term is long-range and thus has significant
 %% dependence on the density distribution, but because its relatively
 %% weak position dependence, is amenable to mean-field approximations.
 Given these different approaches, it seems valuable to examine this
 property of the hard-sphere fluid through direct simulation, in order
 to establish the advantages and disadvantages of each approach.
+
+Here we will briefly describe how the contact value of the correlation
+function has been used in two recent papers introducing SAFT-based
+classical density functionals.  In order to aide in understanding, we
+will use our own notation to describe the work of these authors.  In
+his paper presenting a density functional based on the PCP-SAFT
+equation of state\cite{gross2009density}, Gross introduces the chain
+free energy in SAFT as
+\begin{align}
+  \frac{A_\textit{chain}}{kT} &= -(m-1) \int n(\rr) \left(\ln\left(n^A(\rr)
+  g_\sigma^A(\rr) \right)-1\right) d\rr \label{eq:Achain}
+\end{align}
+where $n^A(\rr)$ is a weighted density defined in Equation~\ref{eq:nA}
+and $g_\sigma^A(\rr)$ the local value of the correlation function at
+contact, which we define in Equation~\ref{eq:gA}, and in
+Section~\ref{sec:gross} we describe Gross's approximation for this
+function. In a paper describing a classical
+density functional for inhomogeneous associating
+fluids\cite{yu2002fmt-dft-inhomogeneous-associating}, Yu and Wu define
+the association free energy as
+\begin{align}
+  \frac{A_\textit{assoc}}{kT} &= \sum_i \int \zeta(\rr)n_0(\rr) \left(\ln X_i(\rr) - \frac12
+  X_i(\rr) + \frac12\right) d\rr \label{eq:Aassoc} \\
+  X_i(\rr) &= \frac{1}{1 + \sum_j \frac{n_0(\rr) g_\sigma^{S}(\rr)}{\zeta(\rr)}
+                                 X_j(\rr)\kappa_{ij} \left(e^{\beta
+                                   \epsilon_{ij}}-1\right)}
+  \label{eq:X}
+\end{align}
+where $X_i(\rr)$ is the fraction of interaction sites of type $i$ at
+position $\rr$ that are unoccupied, $n_0(\rr)$ is a weighted density
+defined in Equation~\ref{eq:n0}, $\zeta(\rr)$ is a nonlocal measure of
+the local density gradient defined in Equation~\ref{eq:zeta}, and
+$g_\sigma^S(\rr)$ is a different local value of the correlation
+function at contact, which we define in Equation~\ref{eq:gS}.  In
+Section~\ref{sec:yuwu} we present the approximation to
+$g_\sigma^S(\rr)$ used by Yu and Wu.
 
 Although these recent works have introduced approximate functionals
 for the contact value of the correlation
@@ -147,22 +183,21 @@ position $\rr_2$.  The pair correlation function is defined by
 \begin{align}
   g(\rr_1,\rr_2) &\equiv \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
 \end{align}
-The contact value of the correlation function is this
-correlation function's value when evaluated at a distance of the
-diameter $\sigma$.  In a homogeneous fluid, the pair correlation only depends on the
+In a homogeneous fluid, the pair correlation only depends on the
 distance $|\rr_1-\rr_2|$ and can be expressed as a function of a
-single variable. The pair correlations for an inhomogeneous fluid are of course
-not as simple but it is desirable for reasons of computational efficiency and theoretical elegance
-to limit these classical density functionals
-to one-center convolutions, which leads us to seek a
-simplified expression for the contact value of the correlation
-function--- which is the same as the contact value of the cavity
-correlation function for hard spheres.
-In a system with an inhomogeneous density, we seek a \emph{local}
-value for $g_\sigma$ that is dependent upon only one position variable $\rr$.
-There are two reasonable options for defining
-such a local function: a symmetric formulation (which we refer to as $S$) and an
-asymmetric formulation (which we refer to as $A$).
+single variable, and the contact value of the correlation function is
+its value when evaluated at a distance of the diameter $\sigma$.  The
+pair correlation function of an \emph{inhomogeneous} fluid is not as
+simple, but it is desirable for reasons of computational efficiency to
+construct classical density functionals using just one-center
+convolutions.  Moreover, a local function is helpful when defining
+functionals such as Equations~\ref{eq:Achain}-\ref{eq:X}.  This leads
+us to seek a \emph{local} value for $g_\sigma$ that is dependent upon
+only one position variable $\rr$.  There are two reasonable options
+for defining such a local function: a symmetric formulation such as
+that used in Equations~\ref{eq:Aassoc}-\ref{eq:X} (which we refer to
+as $S$) and an asymmetric formulation such as that used in
+Equation~\ref{eq:Achain} (which we refer to as $A$).
 
 For the symmetric $S$ case, the correlation function at contact is
 given by:
@@ -172,20 +207,31 @@ given by:
   \frac{\delta(\sigma/2 -|\rr'|)}{\pi\sigma^2}d\rr' \label{eq:gS}
 \end{align}
 where $\sigma$ is the hard sphere diameter and density $n_0$ is one of the fundamental measures of Fundamental
-Measure Theory (FMT).\ \ $g^S_\sigma(\rr)$ is defined to treat the geometrically
+Measure Theory (FMT).  $g^S_\sigma(\rr)$ is defined to treat the geometrically
 symmetric possibility of spheres touching at the position $\rr$ as
 illustrated in Figure~\ref{fig:n0}.
 \begin{align}
   n_0(\rr) &= \int n(\rr')\frac{\delta(\sigma/2 -|\rr-\rr'|)}{\pi\sigma^2} d\rr'
+  \label{eq:n0}
 \end{align}
-This functional gives a value averaged over all spheres that touch at
-the position $\rr$.
+This functional $n_0(\rr)$ gives a density averaged over all spheres that touch at
+the position $\rr$.  Together, $n_0(\rr)$ and $g_\sigma^S(\rr)$ are
+used in the association free energy given in Equations~\ref{eq:Aassoc}-\ref{eq:X}.
 
 \begin{figure}
 \includegraphics[width=5cm]{figs/n0}
 \caption{Set of hard spheres that are included in $n_0(\mathbf{r})$, which
   consist of those which just touch the point $\mathbf{r}$.}
 \label{fig:n0}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=7cm]{figs/nA}
+\caption{Set of hard spheres that are included in $n_A(\mathbf{r})$,
+  which consist of those which just touch a sphere centered at
+  $\mathbf{r}$.  The dashed line illustrates the surface over which
+  contact is possible.}
+\label{fig:nA}
 \end{figure}
 
 In contrast, the asymmetrically averaged $A$ correlation function is
@@ -197,14 +243,15 @@ given by
 \end{align}
 where the density $n_A(\rr)$ is similar to $n_0$, but measures the
 density of spheres that are touching a sphere that is located at
-point $\rr$.
+point $\rr$, as illustrated in Figure~\ref{fig:nA}.
 \begin{align}
   n_A(\rr) &= \int n(\rr')
   \frac{\delta(\sigma -|\rr-\rr'|)}{4\pi\sigma^2} d\rr' \label{eq:nA}
 \end{align}
 Thus $g_\sigma^A$ corresponds to an average of the two-particle
 density over spheres touching a sphere that is located at the
-position~$\rr$.
+position~$\rr$.  The functionals $n_A(\rr)$ and $g_\sigma^A(\rr)$ are
+used in the chain free energy given in Equation~\ref{eq:Achain}.
 
 %% In the process of defining these two averaged correlation functions,
 %% we also defined two averaged densities, $n_0(\rr)$ and $n_A(\rr)$,
@@ -350,15 +397,16 @@ energy on hard sphere radius.
   A_{HS} &= Nk_BT \frac{4\eta - 3\eta^2}{(1-\eta)^2}
 \end{align}
 where $\eta \equiv \frac{\pi}{6} \sigma^3 n$ is the filling fraction.
-Each sphere will be in contact with spheres that are one diameter away
-from its center so we expand a number of contact area spheres
-of radius $\sigma$ and divide by two.  We can thus readily compute the derivative of free energy with respect
-to hard-sphere diameter, which is half the force on \emph{all} the
-hard spheres---since we're changing all their diameters at once.  To
-compute the pressure on the spheres, we need to divide the total force
-by the total area of contact which means we divide by $N 4\pi \sigma^2$.
+We compute the pressure on each sphere using the total force with
+respect to a changing radius of all the spheres.
+To find the pressure, we divide by $4\pi \sigma^2$, which is the area
+over which contact is possible, as defined by the centers of the
+contacting spheres, as illustrated in Figure~\ref{fig:nA}.
+Finally, we divide by $N$ to account for the total area of all the
+spheres in the fluid.
 \begin{align}
-  p_\sigma &= \frac{1}{N 4\pi \sigma^2} \frac12 \frac{dA_{HS}}{d\sigma} \\
+  p_\sigma &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
+  &= \frac{1}{N 4\pi \sigma^2} \frac12 \frac{dA_{HS}}{d\sigma} \\
   &= k_BT n \frac{1 - \frac{\eta}2}{(1-\eta)^3}
 \end{align}
 Using the contact-value theorem, we can thus find the well-known
@@ -392,12 +440,14 @@ the previous section:
   &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
-Details of evaluating the functional derivative in
-Equation~\ref{eq:g-A-exact} using FMT are given in
-the appendix.  The equation for $g_\sigma^A$ requires
-finding convolutions of local derivatives of the free energy, making
-this formulation computationally somewhat more expensive than the free
-energy itself.
+Equation~\ref{eq:g-A-exact} is an exact expression for
+$g_\sigma^A(\rr)$ as defined in Equation~\ref{eq:gA}.  However, since
+we do not know the exact hard-sphere free energy, we approximate
+$A_{HS}$ using FMT.  Details of evaluating the functional derivative
+in Equation~\ref{eq:g-A-exact} using FMT are given in the appendix.
+The equation for $g_\sigma^A$ requires finding convolutions of local
+derivatives of the free energy, making this formulation
+computationally somewhat more expensive than the free energy itself.
 
 \derivation{
   \end{widetext}
@@ -424,7 +474,7 @@ leads to the expression
   \frac{\partial \Phi(\rr)}{\partial \sigma} \label{eq:g-S}
 \end{align}
 where $\Phi(\rr) = \Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)$ is the
-dimensionless free energy density.  This step is an
+dimensionless free energy density.  This expression is an
 approximation---unlike the analogous
 Equation~\ref{eq:g-A-exact}---because it assumes that we have
 available a local functional $\Phi(\rr)$ whose derivative provides the
@@ -469,7 +519,7 @@ instead of using $n_0$ as the corresponding density, they use a
 density given by
 \begin{align}
   n_\text{Yu}(\rr) &= n_0(\rr) \zeta(\rr) \label{eq:nYu} \\
-  \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2}
+  \zeta &= 1 - \frac{\mathbf{n_2}\cdot\mathbf{n_2}}{n_2^2} \label{eq:zeta}
 \end{align}
 where the function $\zeta$ is a measure of local inhomogeneity at the
 point of contact, and has the effect of reducing this density at
