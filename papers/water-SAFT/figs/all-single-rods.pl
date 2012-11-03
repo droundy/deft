@@ -41,6 +41,6 @@ date
 
 ";
   close(SCRIPT);
-  system("sh", $scriptname);
-  #system("sbatch", $scriptname);
+  #system("sh", $scriptname);
+  system("sbatch", $scriptname);
 }
