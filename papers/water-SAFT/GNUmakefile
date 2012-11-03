@@ -32,6 +32,7 @@ all :  paper.pdf march-2012.pdf
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 	rm -f paper/figs/*.tmp.sh
+	rm -rf arxiv arxiv.tar.gz
 
 ALL_FIGURES=\
 	figs/correlation.gp \
@@ -64,6 +65,8 @@ LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
 FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
+ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%, \
+	$(patsubst %.pdf,%.ps, $(LESS_CANONICAL_FIGURES)))
 
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
@@ -114,3 +117,11 @@ sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)
 figs/sphere.dat: $(sphereEnergies)
 	cat $(sphereEnergies) > $@
 figs/density-sphere.eps: $(wildcard figs/sphere-*.dat)
+
+arxiv/figs/%: figs/%
+	mkdir -p arxiv/figs
+	cp $< $@
+
+arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
+	cp paper.tex paper.bbl arxiv/
+	tar cvzf arxiv.tar.gz arxiv

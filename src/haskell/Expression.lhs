@@ -3,7 +3,7 @@
 
 module Expression (Exprn(..),
                    break_real_from_imag,
-                   RealSpace(..), r_var, dV, dVscalar, dr, lat1, lat2, lat3, volume,
+                   RealSpace(..), r_var, dV, dVscalar, dr, lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
                    KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..), scalar,
                    Vector, t_var, cross, dot, (/.), (*.), (.*), xhat, yhat, zhat,
@@ -103,38 +103,10 @@ instance Type a => Num (Vector a) where
   Vector x y z - Vector x' y' z' = vector (x-x') (y-y') (z-z')
   negate (Vector x y z) = Vector (-x) (-y) (-z)
   fromInteger 0 = Vector 0 0 0
-  fromInteger n = error "cannot convert non-zero integer to Vector!"
-
-{-
-instance Type a => Type (Vector a) where
-  amThreeVector _ = True
-  mkExprn = E3S
-  derivativeHelper v ddv (Vector _ _ _) = error "need to figure out derivative of Vector"
-  scalarderivativeHelper v (Vector a b c) = vector (scalarderive v a) (scalarderive v b) (scalarderive v c)
-  zeroHelper v (Vector a b c) = vector (setZero v a) (setZero v b) (setZero v c)
-  codeStatementHelper (Var _ _ a _ _) op e =
-    unlines ["\tfor (int i=0; i<3; i++) {",
-             "\t\t" ++ a ++ op ++ code e ++ ";",
-             "\t}"]
-  codeStatementHelper _ _ _ = error "bad input to newcodeStatementHelper"
-  newcodeStatementHelper (Var _ _ a _ _) op e =
-    unlines ["\tfor (int i=0; i<3; i++) {",
-             "\t\t" ++ a ++ op ++ newcode e ++ ";",
-             "\t}"]
-  newcodeStatementHelper _ _ _ = error "bad input to newcodeStatementHelper"
-  initialize _ = error "initialize 3vec"
-  free e = error $ trace "free error" ("free error " ++ show e)
-  newdeclare _ = "Vector"
-  newfree e = error $ trace "free error" ("free error " ++ show e)
-  toScalar _ = error "how do I make a 3vector homogeneous?"
-  mapExpressionHelper' f (Vector a b c) = vector (f a) (f b) (f c)
-  subAndCountHelper x y (Vector a b c) = case (subAndCount x y a, subAndCount x y b, subAndCount x y c) of
-                                           ((a', na), (b', nb), c', nc) -> (vector a' b' c', na+nb+nc)
-  searchHelper f (Vector a b c) = mconcat [f a, f b, f c]
-  safeCoerce a _ = case mkExprn a of
-                    E3S a' -> Just a'
-                    _ -> Nothing
--}
+  fromInteger _ = error "cannot convert non-zero integer to Vector!"
+  abs _ = error "cannot use abs on Vector (it has wrong type in Haskell!)"
+  signum x = x /. sqrt (x `dot` x)
+  (*) = error "cannot use * on Vectors (use dot or cross instead!)"
 
 instance Code RealSpace where
   codePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(gd, " ++ksp++ ")")
@@ -295,14 +267,20 @@ instance Type KSpace where
   newcodeStatementHelper (Var _ _ a _ _) op e =
     unlines [setzero++
              "\tfor (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {",
-             "\t\tconst int z = i % (int(Nz)/2+1);",
-             "\t\tconst int n = (i-z)/(int(Nz)/2+1);",
-             "\t\tconst int y = n % int(Ny);",
-             "\t\tconst int xa = (n-y)/int(Ny);",
-             "\t\tconst Vector k_i = Vector(xa/Nx*rlat1x + y/Ny*rlat2x + z/Nz*rlat3x, xa/Nx*rlat1y + y/Ny*rlat2y + z/Nz*rlat3y, xa/Nx*rlat1z + y/Ny*rlat2z + z/Nz*rlat3z);",
+             "\t\tconst int _z = i % (int(Nz)/2+1);",
+             "\t\tconst int _n = (i-_z)/(int(Nz)/2+1);",
+             "\t\tconst int _y = _n % int(Ny);",
+             "\t\tconst int _x = (_n-_y)/int(Ny);",
+             "\t\tconst Vector k_i = Vector(" ++ code (xhat `dot` k_i) ++ ", " ++
+                                                 code (yhat `dot` k_i) ++ ", " ++
+                                                 code (zhat `dot` k_i) ++ ");",
              newcodes (1 :: Int) e,
              "\t}"]
-      where newcodes n x = case findRepeatedSubExpression x of
+      where k_i = cleanvec $ s_var "_x" / s_var "Nx" .* rlat1 +
+                             s_var "_y" / s_var "Ny" .* rlat2 +
+                             s_var "_z" / s_var "Nz" .* rlat3
+            cleanvec (Vector a b c) = vector (cleanvars a) (cleanvars b) (cleanvars c)
+            newcodes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) ->
                   case break_real_from_imag x' of
                     Expression (Complex r 0) ->
@@ -598,8 +576,7 @@ instance Code Scalar where
 instance Type Scalar where
   s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
-  s_var vv@(a:v@(_:_)) = Var CannotBeFreed vv vv (a : '_' : '{' : v ++ "}") Nothing
-  s_var v = Var CannotBeFreed v v v Nothing
+  s_var v = Var CannotBeFreed v v (cleanTex v) Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
@@ -638,19 +615,21 @@ scalar (Scalar e) = scalar e
 scalar e | Just c <- isConstant e = toExpression c
 scalar e = fromScalar e
 
+cleanTex :: String -> String
+cleanTex [a] = [a]
+cleanTex ('_':v) = cleanTex v
+cleanTex (a:v) = a : '_' : '{' : v ++ "}"
+cleanTex "" = error "cleanTex on empty string"
+
 r_var :: String -> Expression RealSpace
-r_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
 r_var v | take 5 v == "rtemp" = Var IsTemp (v++"[i]") ('r':v) v Nothing
 r_var v | take 4 v == "temp" = Var IsTemp ("r"++v++"[i]") ('r':v) v Nothing
-r_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
-r_var "" = error "r_var needs non-empty string"
+r_var v = Var CannotBeFreed (v++"[i]") v (cleanTex v) Nothing
 
 k_var :: String -> Expression KSpace
-k_var v@([_]) = Var CannotBeFreed (v++"[i]") v v Nothing
 k_var v | take 5 v == "ktemp" = Var IsTemp (v++"[i]") ('r':v) v Nothing
 k_var v | take 4 v == "temp" = Var IsTemp ("k"++v++"[i]") ('r':v) v Nothing
-k_var (a:v) = Var CannotBeFreed (a:v++"[i]") (a:v) (a:'_':'{':v++"}") Nothing
-k_var "" = error "r_var needs non-empty string"
+k_var v = Var CannotBeFreed (v++"[i]") v (cleanTex v) Nothing
 
 t_var :: String -> Vector Scalar
 t_var v = Vector (s_var $ v++"x") (s_var $ v++"y") (s_var $ v++"z")
@@ -1718,10 +1697,15 @@ numx = s_var "Nx"
 numy = s_var "Ny"
 numz = s_var "Nz"
 
-lat1, lat2, lat3 :: Vector Scalar
+lat1, lat2, lat3, rlat1, rlat2, rlat3 :: Vector Scalar
 lat1 = Vector (s_var "a1") 0 0
 lat2 = Vector 0 (s_var "a2") 0
 lat3 = Vector 0 0 (s_var "a3")
+
+
+rlat1 = (lat2 `cross` lat3) /. (lat1 `dot` (lat2 `cross` lat3))
+rlat2 = (lat3 `cross` lat1) /. (lat1 `dot` (lat2 `cross` lat3))
+rlat3 = (lat1 `cross` lat2) /. (lat1 `dot` (lat2 `cross` lat3))
 
 nameVector :: Type a => String -> Vector a -> Vector a
 nameVector n (Vector x y z) = Vector (nn "x" x) (nn "y" y) (nn "z" z)

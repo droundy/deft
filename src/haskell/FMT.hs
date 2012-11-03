@@ -50,7 +50,7 @@ step x = ifft ( stepk * fft x)
   where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
 
 vshell, vshellPrime :: Expression RealSpace -> Vector RealSpace
-vshell n = vifft $ deltav *. fft n
+vshell x = vifft $ deltav *. fft x
   where deltav = vprotect "delta" "\\delta(k)" $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 
@@ -62,7 +62,7 @@ vshellPrime x = vifft ( delta' *. fft x)
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec
 
 vshellPrimedot, vshelldot :: Vector RealSpace -> Expression RealSpace
-vshelldot n = ifft $ deltav `dot` vfft n
+vshelldot x = ifft $ deltav `dot` vfft x
   where deltav = vprotect "delta" "\\delta(k)" $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 vshellPrimedot x = ifft ( delta' `dot` vfft x )

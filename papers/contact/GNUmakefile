@@ -2,8 +2,8 @@
 		.gp .mf .2602gf .pl .xgr
 .tex.pdf:
 	pdflatex $<
-.ps.pdf:
-	ps2pdf $<
+#.ps.pdf:
+#	ps2pdf $<
 .jpg.eps:
 	convert $< $@
 .pl.eps:
@@ -12,6 +12,8 @@
 	convert $< $@
 .eps.pdf:
 	epstopdf $<
+.pdf.ps:
+	pdftops $< $@
 .svg.eps:
 	inkscape --export-eps $@ $<
 .dvi.ps:
@@ -31,6 +33,8 @@ all :  paper.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
+	rm -f arxiv/*
+	mkdir arxiv/figs
 
 ALL_FIGURES=\
 	figs/n0.svg\
@@ -49,8 +53,10 @@ LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
 						$(patsubst %.xgr,%.eps, \
 						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
-FIGURES=$(patsubst %.jpg,%.eps, \
-		$(patsubst %.png,%.eps,$(LESS_CANONICAL_FIGURES)))
+FIGURES=$(patsubst %.pdf,%.ps, \
+		$(patsubst %.jpg,%.eps, \
+		$(patsubst %.png,%.eps,$(LESS_CANONICAL_FIGURES))))
+ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%,$(FIGURES))
 PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
@@ -79,13 +85,13 @@ figs/gnn-sphere-12-112.pdf: figs/plot-gnn-sphere.py figs/mc-06-112.dat figs/sphe
 figs/gnn-sphere-16-265.pdf: figs/plot-gnn-sphere.py figs/mc-08-265.dat figs/sphereWB-radial-16.0-265.dat figs/sphereWBT-radial-16.0-265.dat figs/sphereWBm2-radial-16.0-265.dat
 	python $^ $@
 
-figs/walls-10.pdf: figs/plot-walls.py figs/mc-walls-20-195.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
+figs/walls-10.pdf: figs/plot-walls.py figs/mc-walls-20-196.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
 	python $^ $@
 
 figs/walls-30.pdf: figs/plot-walls.py figs/mc-walls-20-605.dat figs/wallsWB-0.30.dat figs/wallsWBT-0.30.dat figs/wallsWBm2-0.30.dat
 	python $^ $@
 
-figs/walls-40.pdf: figs/plot-walls.py figs/mc-walls-20-816.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
+figs/walls-40.pdf: figs/plot-walls.py figs/mc-walls-20-817.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat
 	python $^ $@
 
 figs/gnn-walls-10.pdf: figs/plot-gnn-walls.py figs/mc-walls-20-193.dat figs/wallsWB-0.10.dat figs/wallsWBT-0.10.dat figs/wallsWBm2-0.10.dat
@@ -117,6 +123,9 @@ figs/test-particle-10.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20
 figs/test-particle-40.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20-816.dat figs/wallsWB-0.40.dat figs/wallsWBT-0.40.dat figs/wallsWBm2-0.40.dat figs/test-particle-cont-dens-0.40.dat
 	python $^ $@
 
+arxiv/figs/%: figs/%
+	cp $< $@
 
-
-
+arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
+	cp paper.tex paper.bbl arxiv/
+	tar cvzf arxiv.tar.gz arxiv

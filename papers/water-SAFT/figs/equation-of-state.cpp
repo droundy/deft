@@ -36,7 +36,7 @@ int main(int, char **) {
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");
   double mu = 0, nl = 0, nv = 0;
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,
                                                 water_prop.epsilon_dispersion,
                                                 water_prop.lambda_dispersion,

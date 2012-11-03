@@ -42,7 +42,9 @@ scalarClass e arg variables n =
      "\treturn " ++ newcode (snd denergy_per_volume_dx) ++ ";\n"),
    functionCode "grad" "Vector" [("const Vector", "&xxx")] (evalv grade),
    functionCode "printme" "void" [("const char *", "prefix")]
-      (unlines $ map printEnergy (Set.toList (findNamedScalars e))),
+      (unlines $ map printEnergy $
+       filter (`notElem` ["dV", "dr", "volume"]) $
+       (Set.toList (findNamedScalars e))),
    functionCode "createInput" "Vector" (codeInputArgs (inputs e))
       (unlines $ ["\tconst int newsize = " ++
                   xxx (map getsize $ inputs e),
@@ -133,26 +135,16 @@ scalarClass e arg variables n =
                                 "\t\toutput[i] = 0;",
                                 "\t}"]++
                                "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
-                               [newcodeStatements (inits ++ st ++ concatMap assignit ee),
+                               [newcodeStatements (st ++ concatMap assignit ee),
                                 "\treturn output;"])
         where assignit eee = [Assign (justvarname eee) eee]
-              inits = if any (mapExprn hasActualFFT) the_actual_gradients
-                      then rlatvars
-                      else []
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
         where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
-              inits = if hasActualFFT x
-                      then rlatvars
-                      else []
-              st = inits ++ filter (not . isns) st0
+              st = filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e
-      rlat1 = nameVector "rlat1" $ (lat2 `cross` lat3)/.volume
-      rlat2 = nameVector "rlat2" $ (lat3 `cross` lat1)/.volume
-      rlat3 = nameVector "rlat3" $ (lat1 `cross` lat2)/.volume
-      (rlatvars,_) = simp2 [ES $ rlat1`dot`rlat1 + 0.3*(rlat2`dot`rlat2) + 0.11*(rlat3`dot`rlat3)]
       codeA :: [Exprn] -> String
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ nameE x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> nameE x ++ "(" ++ nameE x ++ "_arg)") a)

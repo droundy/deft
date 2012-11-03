@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   char *datname = (char *)malloc(1024);
   sprintf(datname, "papers/water-SAFT/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
   
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 						water_prop.epsilonAB, water_prop.kappaAB,
 						water_prop.epsilon_dispersion,
 						water_prop.lambda_dispersion,
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
   double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				     water_prop.epsilonAB, water_prop.kappaAB,
 				     water_prop.epsilon_dispersion,
 				     water_prop.lambda_dispersion,
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
 				       water_prop.epsilonAB, water_prop.kappaAB,
 				       water_prop.epsilon_dispersion,
 				       water_prop.lambda_dispersion,
