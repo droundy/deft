@@ -60,13 +60,13 @@ public:
   nsqr() {}
   double energy(const Vector &x) const {
     double Nx = x[0];
-    double Ny = x[0];
-    double Nz = x[0];
-    Vector a1 = x.slice(3,3);
-    Vector a2 = x.slice(6,3);
-    Vector a3 = x.slice(9,3);
-    Vector n = x.slice(12,Nx*Ny*Nz);
-    double volume = a1[0]*a2[1]*a3[2]; // only works for simple cubic lattice
+    double Ny = x[1];
+    double Nz = x[2];
+    double a1 = x[3];
+    double a2 = x[4];
+    double a3 = x[5];
+    Vector n = x.slice(6,Nx*Ny*Nz);
+    double volume = a1*a2*a3; // only works for simple orthorhombic lattice
     double dV = volume/Nx/Ny/Nz;
     double E = 0;
     for (int i=0;i<Nx*Ny*Nz;i++) {
@@ -82,19 +82,19 @@ public:
   }
   Vector grad(const Vector &x) const {
     double Nx = x[0];
-    double Ny = x[0];
-    double Nz = x[0];
-    Vector a1 = x.slice(3,3);
-    Vector a2 = x.slice(6,3);
-    Vector a3 = x.slice(9,3);
-    Vector n = x.slice(12,Nx*Ny*Nz);
-    double volume = a1[0]*a2[1]*a3[2]; // only works for simple cubic lattice
+    double Ny = x[1];
+    double Nz = x[2];
+    double a1 = x[3];
+    double a2 = x[4];
+    double a3 = x[5];
+    Vector n = x.slice(6,Nx*Ny*Nz);
+    double volume = a1*a2*a3; // only works for simple cubic lattice
     double dV = volume/Nx/Ny/Nz;
     double E = 0;
     Vector g(x.get_size());
     g *= 0.0;
     for (int i=0;i<Nx*Ny*Nz;i++) {
-      g[i+12] += 2*dV*n[i];
+      g[i+6] += 2*dV*n[i];
     }
     return g;
   }
@@ -150,7 +150,7 @@ int main(int, char **argv) {
   Vector n(1000);
   for (int i=0;i<1000;i++) n[i] = 0.5;
   Vector x = integrate_sqr().createInput(10,10,10,
-                                         lat.slice(0,3), lat.slice(3,3), lat.slice(6,3),
+                                         5, 5, 5,
                                          n);
   compare_functionals("integrate_sqr", nsqr(), integrate_sqr(), x, 1e-10);
 

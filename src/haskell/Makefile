@@ -34,6 +34,7 @@ depend:
 	ghc -M $(GHCFLAGS) $(wildcard *hs)
 
 # DO NOT DELETE: Beginning of Haskell dependencies
+Symmetry.o : Symmetry.hs
 LatexDouble.o : LatexDouble.hs
 Expression.o : Expression.lhs
 Expression.o : LatexDouble.hi

@@ -8,10 +8,9 @@ module WhiteBear
        where
 
 import Expression
-import FMT ( n, n0, n1, n2, n2p, n3,
-             n1x, n1y, n1z, n2x, n2y, n2z, n2px, n2py, n2pz,
-             shell, shell_diam, xshell, yshell, zshell,
-             shellPrime, xshellPrime, yshellPrime, zshellPrime,
+import FMT ( n, n0, n1, n2, n3, n1v, n2v,
+             shell, shell_diam, vshelldot,
+             shellPrime, vshellPrimedot,
              rad,
              sqr_n2v, n1v_dot_n2v )
 
@@ -48,14 +47,11 @@ correlation_S_helper phit = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
                      - (d n2)*n2p'
                      - (d n1)*( n2p'/(4*pi*rad) + n0)
                      - (d n0) * ( n2p'/(4*pi*rad**2) + 2*n0/rad )
-                     - (d n2x * n2px' + d n1x * ( n2px' - n2x/rad)/(4*pi*rad))
-                     - (d n2y * n2py' + d n1y * ( n2py' - n2y/rad)/(4*pi*rad))
-                     - (d n2z * n2pz' + d n1z * ( n2pz' - n2z/rad)/(4*pi*rad)))
+                     - (dv n2v `dot` n2vp' + dv n1v `dot` ( n2vp' - n2v/.rad)/(4*pi*rad)))
           d a = derive a 1 phit
+          dv a = realspaceGradient a phit
           n2p' = -2*n2/rad
-          n2px' = -2*n2x/rad
-          n2py' = -2*n2y/rad
-          n2pz' = -2*n2z/rad
+          n2vp' = (-2/rad).*n2v
 
 correlation_A_WB :: Expression RealSpace
 correlation_A_WB = var "correlation_A_WB" "g_{\\sigma}^{A}" $
@@ -72,13 +68,10 @@ correlation_A_helper phit = dAdR/(kT * n*shell_diam n )
                         - shellPrime (d n2)
                         - ( shellPrime (d n1) + (shell (d n1))/rad ) / (4*pi*rad)
                         - ( shellPrime (d n0) + 2*(shell (d n0))/rad ) / (4*pi*rad**2)
-                        + ( xshellPrime (d n2x)  +
-                            ( xshellPrime (d n1x) + (xshell (d n1x))/rad )/(4*pi*rad) )
-                        + ( yshellPrime (d n2y)  +
-                            ( yshellPrime (d n1y) + (yshell (d n1y))/rad )/(4*pi*rad) )
-                        + ( zshellPrime (d n2z)  +
-                            ( zshellPrime (d n1z) + (zshell (d n1z))/rad )/(4*pi*rad) ))
+                        + ( vshellPrimedot (dv n2v)  +
+                            ( vshellPrimedot (dv n1v) + (vshelldot (dv n1v))/rad )/(4*pi*rad) ))
           d a = derive a 1 phit
+          dv a = realspaceGradient a phit
 
 
 whitebear_m2 :: Expression Scalar

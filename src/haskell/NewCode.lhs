@@ -67,7 +67,6 @@ scalarClass e arg variables n =
                           initme (xx@(ES _):rr)
                             | nameE xx `elem` ["Nx","Ny","Nz"] =
                               ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
-                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
                           initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
                           initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
                           initme _ = error "bug inin setarg initme"
@@ -79,11 +78,9 @@ scalarClass e arg variables n =
                           initme (xx@(ES _):rr)
                             | nameE xx `elem` ["Nx","Ny","Nz"] =
                               ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
-                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
                           initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
                           initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
                           initme _ = error "bug inin getarg initme"
-      sizeE (E3 _) = "3"
       sizeE (ES _) = "1"
       sizeE (ER _) = "Nx*Ny*Nz"
       sizeE (EK _) = error "no sizeE for EK yet"
@@ -92,13 +89,9 @@ scalarClass e arg variables n =
                                 "sofar += ",getsize x,";"]
       getsize (ES _) = "1"
       getsize ee = nameE ee ++ ".get_size()"
-      createInput ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3); sofar += 3;"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"
       createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3);\n" ++
-                                     "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,3); " ++
-                                     "sofar += 3;"
       createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar];\n" ++
                                      "\tVector grad_" ++ nameE ee ++ " = xxx.slice(sofar,1); " ++
                                      "sofar += 1;"
@@ -133,7 +126,6 @@ scalarClass e arg variables n =
       justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
       justvarname (ER (Var a b c d _)) = ER $ Var a b c d Nothing
       justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
-      justvarname (E3 (Var a b c d _)) = E3 $ Var a b c d Nothing
       justvarname _ = error "bad in justvarname"
       evalv :: ([Statement], [Exprn]) -> String
       evalv (st,ee) = unlines (["\tVector output(xxx.get_size());",
@@ -145,28 +137,22 @@ scalarClass e arg variables n =
                                 "\treturn output;"])
         where assignit eee = [Assign (justvarname eee) eee]
               inits = if any (mapExprn hasActualFFT) the_actual_gradients
-                      then [Initialize (E3 $ t_var "rlat1"),
-                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
-                            Initialize (E3 $ t_var "rlat2"),
-                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
-                            Initialize (E3 $ t_var "rlat3"),
-                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
+                      then rlatvars
                       else []
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
         where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
               inits = if hasActualFFT x
-                      then [Initialize (E3 $ t_var $ "rlat1"),
-                            Assign (E3 $ t_var "rlat1") (E3 $ (lat2 `cross` lat3)/volume),
-                            Initialize (E3 $ t_var "rlat2"),
-                            Assign (E3 $ t_var "rlat2") (E3 $ (lat3 `cross` lat1)/volume),
-                            Initialize (E3 $ t_var "rlat3"),
-                            Assign (E3 $ t_var "rlat3") (E3 $ (lat1 `cross` lat2)/volume)]
+                      then rlatvars
                       else []
               st = inits ++ filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e
+      rlat1 = nameVector "rlat1" $ (lat2 `cross` lat3)/.volume
+      rlat2 = nameVector "rlat2" $ (lat3 `cross` lat1)/.volume
+      rlat3 = nameVector "rlat3" $ (lat1 `cross` lat2)/.volume
+      (rlatvars,_) = simp2 [ES $ rlat1`dot`rlat1 + 0.3*(rlat2`dot`rlat2) + 0.11*(rlat3`dot`rlat3)]
       codeA :: [Exprn] -> String
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ nameE x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> nameE x ++ "(" ++ nameE x ++ "_arg)") a)
