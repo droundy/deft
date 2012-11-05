@@ -69,7 +69,6 @@ scalarClass e arg variables n =
                           initme (xx@(ES _):rr)
                             | nameE xx `elem` ["Nx","Ny","Nz"] =
                               ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
-                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
                           initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
                           initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
                           initme _ = error "bug inin setarg initme"
@@ -81,11 +80,9 @@ scalarClass e arg variables n =
                           initme (xx@(ES _):rr)
                             | nameE xx `elem` ["Nx","Ny","Nz"] =
                               ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
-                          initme (xx@(E3 _):rr) = ("\tsofar += 3; // " ++ nameE xx) : initme rr
                           initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
                           initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
                           initme _ = error "bug inin getarg initme"
-      sizeE (E3 _) = "3"
       sizeE (ES _) = "1"
       sizeE (ER _) = "Nx*Ny*Nz"
       sizeE (EK _) = error "no sizeE for EK yet"
@@ -94,13 +91,9 @@ scalarClass e arg variables n =
                                 "sofar += ",getsize x,";"]
       getsize (ES _) = "1"
       getsize ee = nameE ee ++ ".get_size()"
-      createInput ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3); sofar += 3;"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"
       createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(E3 _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,3);\n" ++
-                                     "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,3); " ++
-                                     "sofar += 3;"
       createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar];\n" ++
                                      "\tVector grad_" ++ nameE ee ++ " = xxx.slice(sofar,1); " ++
                                      "sofar += 1;"
@@ -135,7 +128,6 @@ scalarClass e arg variables n =
       justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
       justvarname (ER (Var a b c d _)) = ER $ Var a b c d Nothing
       justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
-      justvarname (E3 (Var a b c d _)) = E3 $ Var a b c d Nothing
       justvarname _ = error "bad in justvarname"
       evalv :: ([Statement], [Exprn]) -> String
       evalv (st,ee) = unlines (["\tVector output(xxx.get_size());",

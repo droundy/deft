@@ -26,6 +26,10 @@ main =
        defineFunctional saft_fluid ["R", "epsilon_association", "kappa_association",
                                     "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                     "mu"] "SaftFluid2"
+     gen "src/EntropySaftFluid2Fast.cpp" $
+       defineFunctionalNoGradient saft_entropy
+       ["R", "epsilon_association", "kappa_association",
+        "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "EntropySaftFluid2"
      gen "src/Association2Fast.cpp" $
        defineFunctional saft_association
        ["R", "epsilon_association", "kappa_association",
