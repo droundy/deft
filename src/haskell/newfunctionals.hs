@@ -2,7 +2,7 @@ import NewCode
 import WhiteBear ( whitebear )
 import System.Environment ( getArgs )
 
-a1, a2, a3 :: Expression ThreeVector
+a1, a2, a3 :: Vector Scalar
 a1 = t_var "a1"
 a2 = t_var "a2"
 a3 = t_var "a3"

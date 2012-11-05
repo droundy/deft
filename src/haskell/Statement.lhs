@@ -258,15 +258,5 @@ simp2 eee = case scalarhelper [] 0 eee of
                                 _ -> Var CannotBeFreed ("s" ++ show n)
                                                        ("s"++show n)
                                                        ("s_{" ++ show n ++ "}") Nothing
-                      Just (E3 ve) -> simp2helper (varSet v) (n+1)
-                                      (sts++[Initialize (E3 v), Assign (E3 v) (E3 ve)])
-                                      (map (mapExprn (mkExprn . substitute ve v)) everything)
-                                      (map (mapExprn (mkExprn . substitute ve v)) e)
-                        where v :: Expression ThreeVector
-                              v = case ve of
-                                Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                                _ -> Var CannotBeFreed ("v" ++ show n)
-                                                       ("v"++show n)
-                                                       ("\\vec{v_{" ++ show n ++ "}}") Nothing
                       Nothing -> handletodos ts
 \end{code}
