@@ -8,6 +8,8 @@ Functional SaftFluid(double radius, double epsilon, double kappa,
                      double epsdis, double lambda, double lscale, double mu);
 Functional SaftFluid2(double radius, double epsilon, double kappa,
                       double epsdis, double lambda, double lscale, double mu);
+Functional EntropySaftFluid2(double radius, double epsilon, double kappa,
+                             double epsdis, double lambda, double lscale);
 
 Functional Association2(double radius, double epsilon, double kappa,
                         double epsdis, double lambda, double lscale);

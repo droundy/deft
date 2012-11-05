@@ -91,21 +91,22 @@ int main(int argc, char *argv[]) {
 				     water_prop.lambda_dispersion,
 				     water_prop.length_scaling, mu_satp));
   
-  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
-  const double EperNumber = EperVolume/n_1atm;
-  const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
-
-  Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
-			      water_prop.kappaAB, water_prop.epsilon_dispersion,
-			      water_prop.lambda_dispersion,
-			      water_prop.length_scaling);
-  
   Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, 
 						  water_prop.epsilonAB, 
 						  water_prop.kappaAB, 
 						  water_prop.epsilon_dispersion,
 						  water_prop.lambda_dispersion,
 						  water_prop.length_scaling));
+  
+  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperNumber = EperVolume/n_1atm;
+  const double SperNumber = S(water_prop.kT, -water_prop.kT*log(n_1atm))/n_1atm;
+  const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
+
+  Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
+			      water_prop.kappaAB, water_prop.epsilon_dispersion,
+			      water_prop.lambda_dispersion,
+			      water_prop.length_scaling);
   
   //for (diameter=0*nm; diameter<3.0*nm; diameter+= .1*nm) {
     Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
@@ -175,14 +176,31 @@ int main(int argc, char *argv[]) {
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
 
+    double entropy = S.integral(water_prop.kT, potential);
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     printf("Number of water molecules is %g\n", density.integrate());
     printf("The bulk energy per cell should be %g\n", EperCell);
     printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
+    printf("The bulk entropy is %g/N\n", SperNumber);
+    Functional otherS = EntropySaftFluid2(water_prop.lengthscale,
+                                          water_prop.epsilonAB,
+                                          water_prop.kappaAB,
+                                          water_prop.epsilon_dispersion,
+                                          water_prop.lambda_dispersion,
+                                          water_prop.length_scaling);
+    printf("The bulk entropy (haskell) = %g/N\n", otherS(water_prop.kT, n_1atm)/n_1atm);
+    //printf("My entropy is %g when I would expect %g\n", entropy, entropy - SperNumber*density.integrate());
+    double hentropy = otherS.integral(water_prop.kT, density);
+    otherS.print_summary("   ", hentropy, "total entropy");
+    printf("My haskell entropy is %g, when I would expect = %g, difference is %g\n", hentropy,
+           otherS(water_prop.kT, n_1atm)*density.integrate()/n_1atm,
+           hentropy - otherS(water_prop.kT, n_1atm)*density.integrate()/n_1atm);
 
     FILE *o = fopen(datname, "w");
     //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
-    fprintf(o, "%g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell);
+    fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
+            water_prop.kT*(entropy - SperNumber*density.integrate()),
+            water_prop.kT*(hentropy - otherS(water_prop.kT, n_1atm)*density.integrate()/n_1atm));
     fclose(o);
 
     char *plotname = (char *)malloc(1024);
@@ -199,6 +217,12 @@ int main(int argc, char *argv[]) {
     double peak = peak_memory()/1024.0/1024;
     printf("Peak memory use is %g M\n", peak);
   
+    double oldN = density.integrate();
+    density = n_1atm*VectorXd::Ones(gd.NxNyNz);;
+    double hentropyb = otherS.integral(water_prop.kT, density);
+    printf("bulklike thingy has %g molecules\n", density.integrate());
+    otherS.print_summary("   ", hentropyb, "bulk-like entropy");
+    printf("entropy difference is %g\n", hentropy - hentropyb*oldN/density.integrate());
   // }
   clock_t end_time = clock();
   double seconds = (end_time - start_time)/double(CLOCKS_PER_SEC);

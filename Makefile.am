@@ -32,6 +32,7 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
+	src/EntropySaftFluid2Fast.cpp \
 	src/Correlation_Sm2_Fast.cpp src/Correlation_Am2_Fast.cpp \
 	src/Correlation_S_Fast.cpp src/Correlation_A_Fast.cpp
 
@@ -224,7 +225,7 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # endif
 
 pdf: doc/Association.pdf doc/WhiteBear.pdf doc/WhiteBearMarkII.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
-	doc/SimpDispersion.pdf \
+	doc/SimpDispersion.pdf doc/EntropySaftFluid.pdf \
 	doc/CorrelationS.pdf doc/CorrelationA.pdf doc/CorrelationAm2.pdf \
 	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
 

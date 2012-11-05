@@ -3,18 +3,12 @@ module SomeFunctionals
          of_effective_potential,
          yuwu_zeta, yuwu_correlation,
          eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid )
+         saft_dispersion, saft_association, saft_fluid, saft_entropy )
        where
 
-import FMT ( n, n0, n2, n3, sqr_n2v )
-import WhiteBear ( whitebear )
+import FMT ( rad, n, n0, n2, n3, sqr_n2v )
+import WhiteBear ( whitebear, kT )
 import Expression
-
-kT :: Type a => Expression a
-kT = s_tex "kT" "kT"
-
-rad :: Type a => Expression a
-rad = s_var "R"
 
 nQ :: Expression RealSpace
 nQ = (mass*kT/2/pi)**1.5
@@ -101,24 +95,10 @@ gSW = "gSW" ===
 saft_fluid :: Expression Scalar
 saft_fluid = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
 
+saft_entropy :: Expression Scalar
+saft_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
+  where d n f = n === - scalarderive (ES kT) f
+
 of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .
                          substitute (r_var "x") (exp (- r_var "veff" / kT))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

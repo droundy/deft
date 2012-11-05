@@ -2,14 +2,14 @@
 functional for the excess free energy of the hard sphere fluid. -}
 
 module WhiteBear
-       ( whitebear, correlation_S_WB, correlation_A_WB,
+       ( kT, whitebear, correlation_S_WB, correlation_A_WB,
          whitebear_m2, correlation_S_WB_m2, correlation_A_WB_m2,
          phi1, phi2, phi3 )
        where
 
 import Expression
-import FMT ( n, n0, n1, n2, n2p, n3,
-             n1x, n1y, n1z, n2x, n2y, n2z, n2px, n2py, n2pz,
+import FMT ( n, n0, n1, n2, n3, -- n2p,
+             n1x, n1y, n1z, n2x, n2y, n2z, -- n2px, n2py, n2pz,
              shell, shell_diam, xshell, yshell, zshell,
              shellPrime, xshellPrime, yshellPrime, zshellPrime,
              rad,

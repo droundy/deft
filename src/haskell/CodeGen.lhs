@@ -3,7 +3,7 @@
 
 module CodeGen (module Statement,
                 module Expression,
-                generateHeader, defineFunctional )
+                generateHeader, defineFunctional, defineFunctionalNoGradient )
     where
 
 import Statement
@@ -174,6 +174,104 @@ defineFunctional e arg n =
            "",
            "",
            scalarClass e arg (n ++ "_type"),
+           "",
+           "",
+           "Functional " ++ n ++"(" ++ codeA arg ++ ") {",
+           "\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");",
+           "}",
+           ""]
+    where codeA [] = ""
+          codeA a = foldl1 (\x y -> x ++ ", " ++ y ) (map ("double " ++) a)
+          codeA' [] = ""
+          codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
+
+
+
+
+
+scalarClassNoGradient :: Expression Scalar -> [String] -> String -> String
+scalarClassNoGradient e arg n =
+  unlines
+  ["class " ++ n ++ " : public FunctionalInterface {",
+   "public:",
+   "" ++ n ++ codeA arg ++ "  {",
+   "\thave_integral = true;",
+   "}",
+   "",
+   functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
+   functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
+    (unlines ["\tdouble output=0;",
+              codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.",
+              "\t// " ++ show (peakMem codeIntegrate) ++ " temporaries made",
+              "\treturn output;", ""]),
+   functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
+    (unlines ["\tassert(0);"]),
+   functionCode "transform" "double" [("double", "kT"), ("double", "x")]
+    (unlines ["\tdouble output = 0;",
+              "\t" ++ codeStatements codeDTransform,
+              "\treturn output;", ""]),
+   functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;",
+   functionCode "derive" "double" [("double", "kT"), ("double", "x")]
+    (unlines ["\tdouble output = 0;",
+              codeStatements codeDerive,
+              "\treturn output;", ""]),
+   functionCode "d_by_dT" "double" [("double", ""), ("double", "")]
+    (unlines ["\tassert(0); // fail", "\treturn 0;", ""]),
+   functionCode "derive_homogeneous" "Expression" [("const Expression &", "")]
+    (unlines ["\tassert(0); // fail", "\treturn Expression(0);", ""]),
+   functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")]
+    "\treturn ingrad;",
+   functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\treturn ingradT;",
+   functionCode "grad" "void"
+     [("const GridDescription", "&gd"),
+      ("double", "kT"),
+      ("const VectorXd", "&x"),
+      ("const VectorXd", "&ingrad"),
+      ("VectorXd", "*outgrad"),
+      ("VectorXd", "*outpgrad")]
+     (unlines ["\tassert(0); // fail"]),
+   functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);"),
+   functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")]
+    (unlines $ ["\tif (name != \"\") printf(\"%s%25s =\", prefix, name.c_str());",
+                "\telse printf(\"%s%25s =\", prefix, \"UNKNOWN\");",
+                "\tprint_double(\"\", energy);"] ++
+               map printEnergy (Set.toList (findNamedScalars e)) ++
+               ["\tprintf(\"\\n\");"]),
+  "private:",
+  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class",
+  "\t// Total " ++ (show $ countFFT codeIntegrate) ++ " Fourier transform used.",
+  "\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate])
+  ]
+    where
+      defineGrid = substitute dVscalar (s_var "gd.dvolume") .
+                   substitute dr (s_var "gd.dvolume" ** (1.0/3))
+      printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
+                      "\tprint_double(\"\", " ++ v ++ ");"
+      codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) e'])
+          where (st0, [e']) = simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars $ defineGrid e]
+                st = filter (not . isns) st0
+                isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+                isns _ = False
+                ns = findNamedScalars e
+      codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
+          where (st, [e']) = simp2 [mkExprn $ makeHomogeneous e]
+      codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
+          where (st, [e']) = simp2 [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
+      codeA [] = "()"
+      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
+      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
+      codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
+
+defineFunctionalNoGradient :: Expression Scalar -> [String] -> String -> String
+defineFunctionalNoGradient e arg n =
+  unlines ["// -*- mode: C++; -*-",
+           "",
+           "#include \"MinimalFunctionals.h\"",
+           "#include \"utilities.h\"",
+           "#include \"handymath.h\"",
+           "",
+           "",
+           scalarClassNoGradient e arg (n ++ "_type"),
            "",
            "",
            "Functional " ++ n ++"(" ++ codeA arg ++ ") {",
