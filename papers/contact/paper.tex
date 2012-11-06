@@ -1,10 +1,4 @@
-% TODO:
-
-% Write ``Liquid-vapor interface'' section A.
-
-% Look up question-mark references (citations).
-
-\documentclass[letterpaper,amsmath,amssymb,10pt,pre]{revtex4-1}
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -31,13 +25,13 @@
 \title{Using Fundamental Measure Theory to Treat the Correlation
   Function of the Inhomogeneous Hard-Sphere Fluid}
 
-\author{Jeff Schulte}
-\author{Patrick Kreitzberg}
-\author{Chris Haglund}
+\author{Jeff B. Schulte}
+\author{Patrick A. Kreitzberg}
+\author{Chris V. Haglund}
 \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
-
+%\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
   We investigate the value of the correlation function of an
@@ -107,19 +101,16 @@ SAFT-based functionals\cite{fu2005vapor-liquid-dft, bryk2006density}.
 %% functional\cite{roth2002whitebear}.
 Two functionals for the chain contribution have recently been
 introduced, one which uses the
-correlation function of Yu and Wu\cite{bryk2006density} and another that
+correlation function of Yu and Wu\cite{bryk2006density} and another which
 introduces a new approximation for the contact value of the
 correlation function\cite{gross2009density}.
 %% The dispersion term is long-range and thus has significant
 %% dependence on the density distribution, but because its relatively
 %% weak position dependence, is amenable to mean-field approximations.
-Given these different approaches, it seems valuable to examine this
-property of the hard-sphere fluid through direct simulation, in order
-to establish the advantages and disadvantages of each approach.
 
 Here we will briefly describe how the contact value of the correlation
-function has been used in two recent papers introducing SAFT-based
-classical density functionals.  In order to aide in understanding, we
+function has been used in two of these recent papers introducing SAFT-based
+classical density functionals.  For simplicity, we
 will use our own notation to describe the work of these authors.  In
 his paper presenting a density functional based on the PCP-SAFT
 equation of state\cite{gross2009density}, Gross introduces the chain
@@ -130,7 +121,7 @@ free energy in SAFT as
 \end{align}
 where $n^A(\rr)$ is a weighted density defined in Equation~\ref{eq:nA}
 and $g_\sigma^A(\rr)$ the local value of the correlation function at
-contact, which we define in Equation~\ref{eq:gA}, and in
+contact, which we define in Equation~\ref{eq:gA}.  In
 Section~\ref{sec:gross} we describe Gross's approximation for this
 function. In a paper describing a classical
 density functional for inhomogeneous associating
@@ -147,17 +138,20 @@ the association free energy as
 where $X_i(\rr)$ is the fraction of interaction sites of type $i$ at
 position $\rr$ that are unoccupied, $n_0(\rr)$ is a weighted density
 defined in Equation~\ref{eq:n0}, $\zeta(\rr)$ is a nonlocal measure of
-the local density gradient defined in Equation~\ref{eq:zeta}, and
-$g_\sigma^S(\rr)$ is a different local value of the correlation
+the density gradient defined in Equation~\ref{eq:zeta}, and
+$g_\sigma^S(\rr)$ is a form of the correlation
 function at contact, which we define in Equation~\ref{eq:gS}.  In
 Section~\ref{sec:yuwu} we present the approximation to
-$g_\sigma^S(\rr)$ used by Yu and Wu.
+$g_\sigma^S(\rr)$ introduced by Yu and Wu.
+Given these differing approaches, it seems valuable to examine this
+property of the hard-sphere fluid through direct simulation, in order
+to establish the advantages and disadvantages of each approach.
 
 Although these recent works have introduced approximate functionals
-for the contact value of the correlation
-function\cite{yu2002fmt-dft-inhomogeneous-associating,
+for the contact value of the correlation function for an inhomogeneous
+hard-sphere fluid\cite{yu2002fmt-dft-inhomogeneous-associating,
   gross2009density}, there has not been a study that specifically
-addresses this contact value for an inhomogeneous hard-sphere fluid.
+addresses this functional.
 %
 In this paper we introduce two definitions for the locally averaged
 correlation function of an inhomogeneous system.
@@ -189,9 +183,10 @@ single variable, and the contact value of the correlation function is
 its value when evaluated at a distance of the diameter $\sigma$.  The
 pair correlation function of an \emph{inhomogeneous} fluid is not as
 simple, but it is desirable for reasons of computational efficiency to
-construct classical density functionals using just one-center
+construct classical density functionals using only one-center
 convolutions.  Moreover, a local function is helpful when defining
-functionals such as Equations~\ref{eq:Achain}-\ref{eq:X}.  This leads
+functionals based on perturbation theory, such as those in
+Equations~\ref{eq:Achain}-\ref{eq:X}.  This leads
 us to seek a \emph{local} value for $g_\sigma$ that is dependent upon
 only one position variable $\rr$.  There are two reasonable options
 for defining such a local function: a symmetric formulation such as
@@ -206,8 +201,9 @@ given by:
   + \rr')
   \frac{\delta(\sigma/2 -|\rr'|)}{\pi\sigma^2}d\rr' \label{eq:gS}
 \end{align}
-where $\sigma$ is the hard sphere diameter and density $n_0$ is one of the fundamental measures of Fundamental
-Measure Theory (FMT).  $g^S_\sigma(\rr)$ is defined to treat the geometrically
+where $\sigma$ is the hard sphere diameter and the density $n_0$ is one of
+the fundamental measures of Fundamental Measure Theory (FMT).  The
+functional $g^S_\sigma(\rr)$ is defined to treat the geometrically
 symmetric possibility of spheres touching at the position $\rr$ as
 illustrated in Figure~\ref{fig:n0}.
 \begin{align}
@@ -241,7 +237,7 @@ given by
   \int n^{(2)}(\rr, \rr + \rr')
   \frac{\delta(\sigma -|\rr'|)}{4\pi\sigma^2}d\rr' \label{eq:gA}
 \end{align}
-where the density $n_A(\rr)$ is similar to $n_0$, but measures the
+where the density $n_A(\rr)$ is analogous to $n_0(\rr)$, but measures the
 density of spheres that are touching a sphere that is located at
 point $\rr$, as illustrated in Figure~\ref{fig:nA}.
 \begin{align}
@@ -389,8 +385,9 @@ pressure on any hard surface is determined by the density at contact:
   p &= k_BT n_\textit{contact} \\
   &= k_BT n g_\sigma
 \end{align}
-Since we are interested in the correlation function at the surface of
-the hard spheres, we need to compute the pressure on that surface.  The pressure on a hard sphere can be
+Since we are interested in the correlation function at the surface at
+which hard spheres contact, we need to compute the pressure on that
+surface.   This pressure can be
 readily computed from the dependence of the Carnahan-Starling free
 energy on hard sphere radius.
 \begin{align}
@@ -432,12 +429,12 @@ spheres located at position~$\rr$.  From this pressure, we derive a
 formula for the correlation function $g_\sigma^A(\rr)$ as was done in
 the previous section:
 \begin{align}
-  p_\sigma(\mathbf{r}) &= \frac{1}{n(\rr) 2\pi \sigma^2} \frac{\delta
+  p_\sigma(\mathbf{r}) &= \frac{1}{n(\rr) 4\pi \sigma^2}\frac12 \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:p_{HS}^A}\\
-%  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 2\pi \sigma^2} \frac{\delta
+%  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 4\pi \sigma^2}\frac12 \frac{\delta
 %    A_{HS}}{\delta \sigma(\mathbf{r})} \\
   g_\sigma^A(\rr)% &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
-  &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 2\pi \sigma^2} \frac{\delta
+  &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 4\pi \sigma^2}\frac12 \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
 Equation~\ref{eq:g-A-exact} is an exact expression for
@@ -470,7 +467,7 @@ leads to the expression
 %  \ncontact(\rr) &= \frac{1}{n_0(\rr) k_BT 2\pi \sigma^2} \frac{\delta
 %    A_{HS}}{\delta \sigma(\mathbf{r})} \\
   g_\sigma^S(\rr)% &= \frac{\ncontact(\rr)}{n_0(\rr)} \\
-  &= \frac{1}{n_0(\rr)^2}\frac{1}{ 2\pi \sigma^2}
+  &= \frac{1}{n_0(\rr)^2}\frac{1}{ 4\pi \sigma^2}\frac12
   \frac{\partial \Phi(\rr)}{\partial \sigma} \label{eq:g-S}
 \end{align}
 where $\Phi(\rr) = \Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)$ is the

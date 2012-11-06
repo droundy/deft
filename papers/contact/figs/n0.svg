@@ -107,8 +107,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.3854166"
-     inkscape:cx="255.71429"
-     inkscape:cy="698.57143"
+     inkscape:cx="127.23308"
+     inkscape:cy="697.12782"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -165,7 +165,7 @@
        transform="translate(42.85713,80.000009)" />
     <path
        sodipodi:type="arc"
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#c1c1c1;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
        id="path2816-0"
        sodipodi:cx="308.57144"
        sodipodi:cy="366.64789"
@@ -196,16 +196,17 @@
     <text
        xml:space="preserve"
        style="font-size:32px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:FreeSerif;-inkscape-font-specification:Andale Mono"
-       x="145.95691"
-       y="523.13708"
+       x="162.55841"
+       y="513.0318"
        id="text2828"><tspan
          sodipodi:role="line"
          id="tspan2830"
-         x="145.95691"
-         y="523.13708">r'</tspan></text>
+         x="162.55841"
+         y="513.0318">r'</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#Arrow1Mend);marker-start:url(#Arrow1Mstart)"
-       d="M 258.31224,357.22926 70.353332,498.98597 237.31124,486.38537"
-       id="path2832" />
+       d="M 258.31224,357.22926 70.353332,498.98597 344.86012,448.12973"
+       id="path2832"
+       sodipodi:nodetypes="ccc" />
   </g>
 </svg>
