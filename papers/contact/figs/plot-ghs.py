@@ -76,15 +76,14 @@ for (c,ff) in [('r',.1008),('b',.2),('g',.3),('c',.4)]:
     g3 = theta1*(r**9/2100 - 3/35*r**7 + 16/35*r**6 +12/5*r**5 - 573/25*r**4 + 77/2*r**3 + 2658/35*r**2 - 5367/20*r + 22843/105 - 13299/350/r) +\
          theta2*(-r**9/1050 + 6/35*r**7 - 32/35*r**6 - 24/5*r**5 + 249/5*r**4 - 205/2*r**3 - 1146/7*r**2 + 3423/4*r - 20323/21 + 89049/350/r) +\
          theta3*(1/2100*r**9-3/35*r**7+16/35*r**6+12/5*r**5-672/25*r**4+64*r**3+3072/35*r**2-3072/5*r+90112/105-49152/175/r)
-    pylab.plot(r_mc, 1 + g1*ff + 0*g2*ff**2 + 0*g3*ff**3, c+'--')
-    #n_plt.plot(1+rr/2, 1 - x - (ghssigma-0.4)*(1-x)*x, c+"--")
+    #pylab.plot(r_mc, 1 + g1*ff + 0*g2*ff**2 + 0*g3*ff**3, c+'--')
+    pylab.plot(r_mc, 1 + g1*ff, c+'--')
     
-    #pylab.plot(r_mc, g2, 'c.-')
-    #pylab.plot(r_mc, (ghsnorm - g1)/ghssigma**2, c+"--",label='filling fraction %.1f'%ff)
     sigma_correction = (ghs - (1 + g1*ff)).max()
     pylab.figure(2)
+    pylab.plot(r_mc, (ghs - (1 + g1*ff)), c+"-",label='filling fraction %.1f'%ff)
+    pylab.figure(3)
     pylab.plot(r_mc, (ghs - (1 + g1*ff))/sigma_correction, c+"-",label='filling fraction %.1f'%ff)
-    #pylab.plot(r_mc, 1 + g1*ff + g2*ff**2 + g3*ff**3, c+"--")
     fac = ghssigma-1
     period = 6.0/2 # converting from units of R to units of diameter
     slope = 1.5 # dimensions of 1/distance
@@ -103,7 +102,72 @@ for (c,ff) in [('r',.1008),('b',.2),('g',.3),('c',.4)]:
     correction = fac*( (1-minval)*(2*x - minloc)**2/(minloc-2)**2 + minval )
     maxr = 4.0
     correction[r_mc>maxr] = 0
-    pylab.plot(r_mc, correction/sigma_correction, c+"-.")
+    # The following is motivated by the paper of Trokhymchuk et al,
+    # and uses their notation.
+    sigma = 2 # the diameter
+    d = (2*ff)**(1/3) # ???
+    mu = -d/sigma
+    beta0 = - numpy.sqrt(3)*d/2/sigma
+    alpha0 = d/2/sigma
+    gamma = -sigma/beta0*((alpha0*sigma-mu*sigma)*(alpha0**2+beta0**2) +
+                          alpha0**2 + beta0**2 - mu*alpha0)
+    omega = (4.720 - 0.682)/sigma
+    kappa = (4.67 + 3.536)/sigma
+    alpha = 44.554
+    beta = -5.022
+    rstar = sigma*2.0016
+    gm = 1.0286
+    delta = -omega*rstar - (kappa*rstar + 1)/(omega*rstar)
+    B = rstar*(gm - ghssigma/rstar*numpy.exp(mu*(rstar-sigma)))/  \
+        (numpy.cos(beta*(rstar-sigma)+gamma)*numpy.exp(alpha*(rstar-sigma)) - \
+         numpy.cos(gamma)*numpy.exp(mu*(rstar-sigma)))
+    A = sigma*ghssigma - B*numpy.cos(gamma)
+    C = rstar*(gm-1)*numpy.exp(kappa*rstar)/numpy.cos(omega*rstar+delta)
+    correction = A/r_mc*numpy.exp(mu*(r_mc-sigma)) + \
+                 B/r_mc*numpy.cos(beta*(r_mc-sigma)+gamma)*numpy.exp(alpha*(r_mc-sigma))
+    correction2 = 1 + C/r_mc*numpy.cos(omega*r_mc+delta)*numpy.exp(-kappa*r_mc)
+    correction[r_mc>rstar] = correction2[r_mc>rstar]
+    correction[r_mc<sigma] = 0
+    # Now here is my very hokey function
+    #pylab.figure(1)
+    slope = -3.4
+    mu = -1.7
+    beta = 2*numpy.pi/(2.2*sigma)
+    alpha = -.8
+    frac = (slope - mu)/beta
+    gamma = 0
+    correction = numpy.exp(mu*(r_mc-sigma))*sigma/r_mc + \
+        frac*(beta*(r_mc-sigma))*numpy.exp(-(alpha*(r_mc-sigma))**2)*sigma/r_mc
+    correction[r_mc<sigma] = 0
+    correction /= correction.max()
+    # Another hokey attempt
+    A = 4.0
+    a = 0.5
+    B = -4.0
+    b = 1.0
+    C = 1 - A - B
+    cc = 1.5
+    correction = A*numpy.exp(-(r_mc-sigma)/a) +  B*numpy.exp(-(r_mc-sigma)/b) +  C*numpy.exp(-(r_mc-sigma)/cc)
+    correction[r_mc<sigma] = 0
+    correction /= correction.max()
+    # Another hokey attempt
+    A = 1.0
+    a = 0.8
+    B = sigma*(slope + A/a)
+    b = 0.6
+    correction = A*numpy.exp(-(r_mc-sigma)/a) +  B*numpy.exp(-(r_mc-sigma)/b)*(r_mc-sigma)/sigma
+    correction[r_mc<sigma] = 0
+    correction /= correction.max()
+    # Another hokey attempt
+    a = 0.6
+    b = 4.0
+    correction = numpy.exp(-(r_mc-sigma)/a)*(1 + slope*(r_mc-sigma) + b*((r_mc-sigma)/sigma)**2)
+    correction[r_mc<sigma] = 0
+    correction /= correction.max()
+    pylab.figure(2)
+    pylab.plot(r_mc, correction*(ghssigma-1-g1.max()*ff), c+"-.")
+    pylab.figure(3)
+    pylab.plot(r_mc, correction, c+"-.")
 
 print r_mc[0]
 
