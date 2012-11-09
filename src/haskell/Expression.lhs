@@ -287,8 +287,8 @@ instance Type KSpace where
                             "\t\tconst double t"++ show n ++ " = " ++ newcode r ++ ";\n" ++
                             newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
                     _ -> error "don't hanld e complex well"
-              MB Nothing -> "\t\t" ++ a ++ "[2*i]" ++ op ++ newcode (real_part x) ++ ";\n" ++
-                            "\t\t" ++ a ++ "[2*i+1]" ++ op ++ newcode (imag_part x) ++ ";"
+              MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
+                            "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
             setzero = case newcode $ setKequalToZero e of
                       "0" -> a ++ "[0]" ++ op ++ "0;\n"
                       k0newcode -> unlines ["{",
@@ -731,8 +731,8 @@ break_real_from_imag = brfi
         brfi (Cos e) = case brfi e of
                          Expression (Complex r 0) -> Expression (Complex (cos r) 0)
                          _ -> error "ceraziness in cos"
-        brfi (Var t _ b tex Nothing) = Expression $ Complex (Var t (b++"[2*i]") b tex Nothing)
-                                                            (Var t (b++"[2*i+1]") b tex Nothing)
+        brfi (Var t _ b tex Nothing) = Expression $ Complex (Var t (b++"[i].real()") b tex Nothing)
+                                                            (Var t (b++"[i].imag()") b tex Nothing)
         brfi (Var a b c d (Just e))
           | i == 0 && r /= 0 = Expression $ Complex (Var a b c d (Just r)) 0
           | otherwise = Expression $ Complex r i

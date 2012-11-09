@@ -68,7 +68,7 @@ public:
       references_count = a.references_count;
       *references_count += 1;
     } else {
-      assert(size = a.size);
+      assert(size == a.size);
       memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?
     }
   }
@@ -110,6 +110,15 @@ public:
     const double *p1 = data + offset, *p2 = a.data + a.offset;
     for (int i=0; i<size; i++) {
       out.data[i] = p1[i] + p2[i];
+    }
+    return out;
+  }
+  Vector operator+(double a) const {
+    if (size == 0) return *this;
+    Vector out(size);
+    const double *p1 = data + offset;
+    for (int i=0; i<size; i++) {
+      out.data[i] = p1[i] + a;
     }
     return out;
   }
@@ -212,9 +221,9 @@ inline Vector operator*(double a, const Vector &b) {
 }
 
 inline ComplexVector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
-  assert((Nx&1)); // We want an odd number of grid points in each direction.
-  assert((Ny&1)); // We want an odd number of grid points in each direction.
-  assert((Nz&1)); // We want an odd number of grid points in each direction.
+  assert(!(Nx&1)); // We want an odd number of grid points in each direction.
+  assert(!(Ny&1)); // We want an odd number of grid points in each direction.
+  assert(!(Nz&1)); // We want an odd number of grid points in each direction.
   ComplexVector out(Nx*Ny*(int(Nz)/2 + 1));
   fftw_plan p = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, (double *)f.data, (fftw_complex *)out.data, FFTW_WISDOM_ONLY);
   if (!p) {

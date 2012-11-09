@@ -10,14 +10,15 @@ a3 = t_var "a3"
 main :: IO ()
 main =
   do todo <- getArgs
-     let gen f x = if f `elem` todo
-                   then writeFile f x
-                   else return ()
+     let headerAndCpp fn f args inp name =
+           if ("src/"++fn++".cpp") `elem` todo
+           then do writeFile ("src/"++fn++".h") $ createHeader f args name
+                   writeFile ("src/"++fn++".cpp") $ createCppFile f inp name (fn++".h")
+           else return ()
      let gentest f x = if "tests" `elem` todo
                    then writeFile f x
                    else return ()
-     gen "src/new/WhiteBearFast.cpp" $
-       defineFunctional whitebear [ES $ s_var "R"] [ER $ r_var "x"] "HardSpheresNoTensor2"
+     headerAndCpp "new/WhiteBearFast" whitebear [ES $ s_var "R"] [ER $ r_var "x"] "WhiteBear"
      gentest "tests/new-generated-haskell/WhiteBear.h" $
        defineFunctional whitebear [ES $ s_var "R"] [ER $ r_var "x"] "WhiteBear"
      gentest "tests/new-generated-haskell/integrate_sqr.h" $

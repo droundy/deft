@@ -37,6 +37,7 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/Correlation_S_Fast.cpp src/Correlation_A_Fast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
+src/new/WhiteBearFast.h: src/new/WhiteBearFast.cpp
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
@@ -114,6 +115,7 @@ tests/new-generated-haskell/volume_minus_one_sqr.h: src/haskell/newfunctionals.e
 tests/new-generated-code.o: tests/new-generated-haskell/volume_minus_one_sqr.h
 
 check_PROGRAMS = \
+	tests/new-hard-spheres.test \
 	tests/newcode.test \
 	tests/generated-code.test \
 	tests/new-generated-code.test \
@@ -147,6 +149,7 @@ tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
 tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
+tests_new_hard_spheres_test_SOURCES = tests/new-hard-spheres.cpp $(GENERIC_CODE) $(NEWHASKELL_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CONTACT_CODE)
 tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
