@@ -152,7 +152,7 @@ instance Type RealSpace where
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
   free e = error $ trace "free error" ("free error " ++ show e)
   newdeclare _ = "Vector"
-  newinitialize (Var _ _ x _ Nothing) = "Vector " ++ x ++ "(Nx*Ny*Nz);"
+  newinitialize (Var _ _ x _ Nothing) = "Vector " ++ x ++ "(Nx*Ny*Nz); // RS"
   newinitialize x = error ("oops newinitializeE: " ++ show x)
   newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // Realspace"
   newfree e = error $ trace "free error" ("free error " ++ show e)
@@ -303,7 +303,7 @@ instance Type KSpace where
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // KSpace"
   free _ = error "free error"
   newdeclare _ = "Vector"
-  newinitialize (Var _ _ x _ Nothing) = "Vector " ++ x ++ "(Nx*Ny*Nz);"
+  newinitialize (Var _ _ x _ Nothing) = "ComplexVector " ++ x ++ "(Nx*Ny*(int(Nz)/2+1)); // KS"
   newinitialize _ = error "oops newinitialize"
   newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // KSpace"
   newfree _ = error "free error"
