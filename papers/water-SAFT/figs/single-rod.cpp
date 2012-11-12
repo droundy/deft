@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     printf("Usage: %s RADIUS (got argc of %d)\n", argv[0], argc);
     return 1;
   }
-  printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
+  //printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
   const double padding = 2*nm;
   const double ymax = diameter+2*padding;
   const double zmax = diameter+2*padding;
@@ -159,14 +159,14 @@ int main(int argc, char **argv) {
   const double surfprecision = 1e-5*M_PI*diameter*width*surface_tension; // five digits accuracy
   const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small rods
   const double precision = bulkprecision + surfprecision;
-  printf("Precision limit from surface tension is to %g based on %g and %g\n",
-         precision, surfprecision, bulkprecision);
+  //printf("Precision limit from surface tension is to %g based on %g and %g\n",
+  //       precision, surfprecision, bulkprecision);
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, water_prop.kT,
                                                             &potential,
                                                             QuadraticLineMinimizer));
     
-  printf("\nDiameter of rod = %g bohr (%g nm), dr = %g nm\n", diameter, diameter/nm, dr/nm);
+  //printf("\nDiameter of rod = %g bohr (%g nm), dr = %g nm\n", diameter, diameter/nm, dr/nm);
     
   const int numiters = 200;
   for (int i=0;i<numiters && min.improve_energy(true);i++) {
@@ -186,12 +186,12 @@ int main(int argc, char **argv) {
   }
 
   Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-  printf("The bulk energy per cell should be %g\n", EperCell);
-  printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
-  printf("Number of water molecules is %g\n", density.integrate());
+  //printf("The bulk energy per cell should be %g\n", EperCell);
+  //printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
+  //printf("Number of water molecules is %g\n", density.integrate());
   double energy = (min.energy() - EperCell)/width;
   energy = (min.energy() - EperNumber*density.integrate())/width;
-  printf("Energy is %.15g\n", energy);
+  //printf("Energy is %.15g\n", energy);
 
   char *datname = new char[1024];
   sprintf(datname, "papers/water-SAFT/figs/single-rod-%04.2fnm-energy.dat", diameter/nm);
@@ -201,9 +201,9 @@ int main(int argc, char **argv) {
   fclose(o);
 
   {
-    double peak = peak_memory()/1024.0/1024;
-    double current = current_memory()/1024.0/1024;
-    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    //double peak = peak_memory()/1024.0/1024;
+    //double current = current_memory()/1024.0/1024;
+    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 
   char *plotname = (char *)malloc(1024);
@@ -212,8 +212,8 @@ int main(int argc, char **argv) {
   free(plotname);
 
   {
-    double peak = peak_memory()/1024.0/1024;
-    double current = current_memory()/1024.0/1024;
-    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    //double peak = peak_memory()/1024.0/1024;
+    //double current = current_memory()/1024.0/1024;
+    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 }

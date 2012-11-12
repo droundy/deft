@@ -58,7 +58,6 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.mkdat \
 	papers/water-SAFT/figs/sphere.mkdat \
 	papers/water-SAFT/figs/pressure-with-isotherms.mkdat \
-	papers/water-SAFT/figs/enthalpy.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
@@ -182,7 +181,6 @@ papers_water_SAFT_figs_single_rod_in_water_low_res_mkdat_SOURCES = papers/water-
 papers_water_SAFT_figs_single_rod_mkdat_SOURCES = papers/water-SAFT/figs/single-rod.cpp $(ALL_CODE)
 papers_water_SAFT_figs_sphere_mkdat_SOURCES = papers/water-SAFT/figs/sphere.cpp $(ALL_CODE)
 papers_water_SAFT_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-SAFT/figs/pressure-with-isotherms.cpp $(ALL_CODE)
-papers_water_SAFT_figs_enthalpy_mkdat_SOURCES = papers/water-SAFT/figs/enthalpy.cpp $(ALL_CODE)
 
 slowwaterfigs: papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
 	$(wildcard papers/water-SAFT/figs/rods-in-water-*nm.dat) \
@@ -250,7 +248,6 @@ papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/free-energy.dat \
 	papers/water-SAFT/figs/equation-of-state.dat \
 	papers/water-SAFT/figs/surface-tension.dat \
-	papers/water-SAFT/figs/enthalpy.dat \
 	papers/water-SAFT/figs/pressure-with-isotherms.dat \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
 	cd papers && $(MAKE)

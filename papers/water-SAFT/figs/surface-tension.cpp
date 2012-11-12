@@ -20,18 +20,18 @@
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
 
-static void took(const char *name) {
-  static clock_t last_time = clock();
-  clock_t t = clock();
-  printf("%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
-  last_time = t;
+static void took(const char *_name) {
+  //static clock_t last_time = clock();
+  //clock_t t = clock();
+  //printf("%s took %g seconds\n", name, (t-last_time)/double(CLOCKS_PER_SEC));
+  //last_time = t;
 }
 
 
 int main(int, char **) {
   FILE *o = fopen("papers/water-SAFT/figs/surface-tension.dat", "w");
   for (double T=273; T<=693; T+=25) {
-    printf("Working on surface tension at %g Kelvin...\n", T);
+    //printf("Working on surface tension at %g Kelvin...\n", T);
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
     LiquidProperties prop = water_prop;
     prop.kT = kB*T;

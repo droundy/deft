@@ -40,8 +40,8 @@ static void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
   assert(name); // so it'll count as being used...
-  double peak = peak_memory()/1024.0/1024;
-  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  //double peak = peak_memory()/1024.0/1024;
+  //printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
   last_time = t;
 }
 
@@ -81,7 +81,7 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, cons
 
 
 void run_walls(double eta, const char *name, Functional fhs) {
-  printf("Filling fraction is %g\n", eta);
+  //printf("Filling fraction is %g\n", eta);
 
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
@@ -103,7 +103,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
   const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*dw*dw*width;
   const double precision = fabs(approx_energy*1e-4);
-  printf("Minimizing to %g absolute precision...\n", precision);
+  //printf("Minimizing to %g absolute precision...\n", precision);
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, 1, 
@@ -114,7 +114,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   took("Doing the minimization");
     
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-  printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
+  //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   
   char *plotname = (char *)malloc(1024);
   Grid energy_density(gd, f(1, gd, potential));
@@ -160,9 +160,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   
   {
-    double peak = peak_memory()/1024.0/1024;
-    double current = current_memory()/1024.0/1024;
-    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    //double peak = peak_memory()/1024.0/1024;
+    //double current = current_memory()/1024.0/1024;
+    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
   
   took("Plotting stuff");

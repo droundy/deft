@@ -143,10 +143,10 @@ int main(int, char **) {
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     
-    printf("\nDiameter of rod = %g bohr (%g nm)\n", cavitysize, cavitysize/nm);
+    //printf("\nDiameter of rod = %g bohr (%g nm)\n", cavitysize, cavitysize/nm);
     
     const int numiters = 50;
-    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+    for (int i=0;i<numiters && min.improve_energy(false);i++) {
       fflush(stdout);
       //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
      
@@ -158,9 +158,9 @@ int main(int, char **) {
     }
 
     const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*cavitysize*cavitysize)*width;
-    printf("The bulk energy per cell should be %g\n", EperCell);
+    //printf("The bulk energy per cell should be %g\n", EperCell);
     double energy = (min.energy() - EperCell)/width;
-    printf("Energy is %.15g\n", energy);
+    //printf("Energy is %.15g\n", energy);
 
     fprintf(o, "%g\t%.15g\n", cavitysize/nm, energy);
 

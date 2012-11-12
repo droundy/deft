@@ -68,7 +68,7 @@ int main(int, char **) {
   double NA = 6.02214179e23;               // Avogadros number, molecules to moles
   double HtoJ = 27.2117*1.602176487e-19;        // Hartrees to Joules
 
-  printf("H = %g J/mol, p = %g, pV = %g J/mol\n", H*HtoJ*NA, p_1atm, pV*NA*HtoJ);
+  //printf("H = %g J/mol, p = %g, pV = %g J/mol\n", H*HtoJ*NA, p_1atm, pV*NA*HtoJ);
 
   //fprintf(o, "%g\t%g\t%g\t%g\t%g\n", dens, ff, SS, ff + kT*SS, kT*SS); 
   //Prints n, F, S, U, TS to data file
