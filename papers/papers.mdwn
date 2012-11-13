@@ -1,0 +1,6 @@
+The `papers/` directory
+=======================
+
+This is where we have the latex code and code to generate the figures
+that will produce papers that are describe deft and the methods it
+implements.

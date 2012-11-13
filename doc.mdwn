@@ -4,3 +4,4 @@ Documentation for deft.  Please add more documentation!
 * There's also a [[FAQ]].
 * [[LaTeX tricks]].
 * Read about how to configure your [[editors]] properly.
+* Read about how the code is [organized](code-organization).
