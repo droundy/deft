@@ -18,6 +18,9 @@ cd $TEMPDIR
 # https://github.com/matplotlib/matplotlib/issues/198
 rm -f ~/.matplotlib/fontList.cache
 
+ALLCPUS=`grep -c processor /proc/cpuinfo`
+USING=${SLURM_CPUS_PER_TASK:-$ALLCPUS}
+
 case "$TEST" in
     none)
         echo Skipping all tests.
@@ -25,19 +28,19 @@ case "$TEST" in
     compile)
         echo Testing compile only.
         ./autogen.sh
-        time make -j `grep -c processor /proc/cpuinfo` recheck
+        time make -j $USING recheck
         echo Compile successful!
         ;;
     build)
         echo Testing build only.
         ./autogen.sh
-        time make -j `grep -c processor /proc/cpuinfo` recheck pdf papers
+        time make -j $USING recheck pdf papers
         echo Compile successful, and papers successfully built!
         ;;
     *)
         echo Testing everything!
         ./autogen.sh
-        time make -j `grep -c processor /proc/cpuinfo` check pdf papers
+        time make -j $USING check pdf papers
         echo Compile successful, papers successfully built, and all tests passed!
         ;;
 esac
