@@ -37,12 +37,12 @@ double notinwall(Cartesian r) {
 }
 
 static void took(const char *name) {
-  static clock_t last_time = clock();
-  clock_t t = clock();
+  //static clock_t last_time = clock();
+  //clock_t t = clock();
   assert(name); // so it'll count as being used...
   //double peak = peak_memory()/1024.0/1024;
   //printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
-  last_time = t;
+  //last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor(1.0);

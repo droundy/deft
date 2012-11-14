@@ -1,4 +1,4 @@
-import SomeFunctionals
+import HughesSaft ( saft_fluid, saft_entropy, saft_association, saft_dispersion )
 import WhiteBear ( whitebear, whitebear_m2, correlation_A_WB, correlation_S_WB, correlation_A_WB_m2 )
 import Quantum
 import Latex

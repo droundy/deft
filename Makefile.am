@@ -30,7 +30,6 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
-	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
 	src/EntropySaftFluid2Fast.cpp \
 	src/Correlation_Sm2_Fast.cpp src/Correlation_Am2_Fast.cpp \
@@ -38,6 +37,7 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
 src/new/WhiteBearFast.h: src/new/WhiteBearFast.cpp
+tests/new-hard-spheres.o: src/new/WhiteBearFast.h # doing this by hand is ugly!
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
