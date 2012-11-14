@@ -16,7 +16,7 @@ newfunctionals.exe: Expression.o FMT.o LatexDouble.o NewCode.o Statement.o White
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-test.exe: CodeGen.o Expression.o FMT.o LatexDouble.o Statement.o test.o 
+test.exe: CodeGen.o Expression.o FMT.o LatexDouble.o SFMT.o Statement.o test.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 # DO NOT DELETE: Beginning of Haskell dependencies
@@ -37,6 +37,8 @@ HughesSaft.o : Expression.hi
 HughesSaft.o : IdealGas.hi
 HughesSaft.o : WhiteBear.hi
 HughesSaft.o : FMT.hi
+SFMT.o : SFMT.hs
+SFMT.o : Expression.hi
 Statement.o : Statement.lhs
 Statement.o : Expression.hi
 Latex.o : Latex.hs
@@ -65,6 +67,7 @@ functionals.o : WhiteBear.hi
 functionals.o : HughesSaft.hi
 functionals.o : CodeGen.hi
 test.o : test.lhs
+test.o : SFMT.hi
 test.o : FMT.hi
 test.o : CodeGen.hi
 # DO NOT DELETE: End of Haskell dependencies
