@@ -17,7 +17,7 @@ GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package proc
 CODEGEN_O=Expression.o CodeGen.o Statement.o LatexDouble.o
 NEWCODEGEN_O=Expression.o NewCode.o Statement.o LatexDouble.o
 
-test.exe: test.o SomeFunctionals.o WhiteBear.o FMT.o $(CODEGEN_O)
+test.exe: test.o SomeFunctionals.o WhiteBear.o FMT.o SFMT.o $(CODEGEN_O)
 	$(MAKE) depend
 	ghc $(GHCFLAGS) -o $@ $^
 
@@ -46,6 +46,8 @@ SomeFunctionals.o : SomeFunctionals.hs
 SomeFunctionals.o : Expression.hi
 SomeFunctionals.o : WhiteBear.hi
 SomeFunctionals.o : FMT.hi
+SFMT.o : SFMT.hs
+SFMT.o : Expression.hi
 Statement.o : Statement.lhs
 Statement.o : Expression.hi
 Latex.o : Latex.hs
@@ -74,6 +76,7 @@ functionals.o : WhiteBear.hi
 functionals.o : SomeFunctionals.hi
 functionals.o : CodeGen.hi
 test.o : test.lhs
+test.o : SFMT.hi
 test.o : FMT.hi
 test.o : CodeGen.hi
 # DO NOT DELETE: End of Haskell dependencies

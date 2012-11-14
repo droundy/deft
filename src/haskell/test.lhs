@@ -3,6 +3,7 @@ import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Test.HUnit
 import FMT ( shell )
+import SFMT ( n1 )
 import System.Environment ( getArgs )
 import qualified Data.Set as Set
 
@@ -231,7 +232,7 @@ substitutionTests = TestList [t x y (y**2) (x**2),
                               t (fft x) (k_var "temp_FFT") nbar_temp nbar,
                               t (k**2) (kk**2) nbarkk nbar,
                               t (r_var "n2x") (shell x) (shell x**2) (r_var "n2x" ** 2),
-                              t (r_var "n2x") (shell x) (r_var "n2y"**2 + shell x**2) (r_var "n2y"**2 + r_var "n2x"**2),
+                              t (r_var "n2x") n1 (r_var "n2y"**2 + n1**2) (r_var "n2y"**2 + r_var "n2x"**2),
                               t x y (integrate y :: Expression Scalar) (integrate x),
                               t x y nbary nbar]
   where t a b eresult e = TestCase $ assertEqual (latex a ++ " -> " ++ latex b ++ "\non\n" ++ latex e) 
