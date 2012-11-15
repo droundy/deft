@@ -240,6 +240,12 @@ clean-local:
 	cd src/haskell && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
+# Below, we remove ~/.matplotlib/fontList.cache, which can prevent
+# crashes in matplotlib.  Hokey, but effective.  For a bit more
+# information, see:
+#
+# https://github.com/matplotlib/matplotlib/issues/198
+
 papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
@@ -250,8 +256,8 @@ papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/water-SAFT/figs/surface-tension.dat \
 	papers/water-SAFT/figs/pressure-with-isotherms.dat \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
+	rm -f ~/.matplotlib/fontList.cache # see above for explanation
 	cd papers && $(MAKE)
-
 
 papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
 	$<
