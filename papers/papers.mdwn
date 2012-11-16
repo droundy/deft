@@ -4,3 +4,13 @@ The `papers/` directory
 This is where we have the latex code and code to generate the figures
 that will produce papers that are describe deft and the methods it
 implements.
+
+
+Each paper is in a subdirectory, which contains all the code required
+to create the paper.  These subdirectories are themselves listed in
+`papers/GNUmakefile`.
+
+Within each paper directory is a `GNUmakefile` that controls the
+building of the paper itself.  There is a `figs/` subdirectory, which
+contains all the code (and data) required to generate the figures for
+that paper.

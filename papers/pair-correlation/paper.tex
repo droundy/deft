@@ -1,0 +1,111 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+\begin{document}
+\title{Using Fundamental Measure Theory to treat the two-point pair
+  distribution function of the Inhomogeneous Hard-Sphere Fluid}
+
+\author{Paho}
+\author{???}
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+%\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+  We develop and test an efficient approximation for the two-point
+  pair distribution function of an inhomogeneous hard-sphere fluid.
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Attard worked out the triplet correlation function, which is something
+that we can access from the pair distribution function, if we consider
+the pair correlation near a single hard sphere
+solute\cite{attard1989spherically}.  Gonz\'alez \emph{et al} wrote an
+interesting paper using DFT and Monte Carlo to compute the
+three-particle distribution function (same as the triplet correlation
+function)\cite{gonzalez1999test}.  Their theory compares favorably
+with the ``superposition approximation'', and we could probably do
+something similar.
+
+Plischke and Henderson worked out the pair correlation function near a
+hard wall using Percus-Yevick, and compare with Monte Carlo
+results\cite{plischke1986pair}.  They plot the pair correlation
+function along interesting paths.
+
+\section{Pair distribution function with inhomogeneity}
+
+\subsection*{Fundamental-Measure Theory}
+
+We use the White Bear version of the Fundamental-Measure Theory~(FMT)
+functional~\cite{roth2002whitebear}, which describes the excess free
+energy of a hard-sphere fluid.  The White Bear functional reduces to
+the Carnahan-Starling equation of state for homogeneous systems.  It
+is written as an integral over all space of a local function of a set
+of ``fundamental measures'' $n_\alpha(\rr)$, each of which is written
+as a one-center convolution of the density.  The White Bear free
+energy is thus
+\begin{equation}
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
+\end{equation}
+with integrands
+\begin{align}
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right) \label{eq:Phi1}\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
+  n_3 + (1-n_3)^2 \ln(1-n_3)
+}{
+  36\pi n_3^2\left( 1 - n_3 \right)^2
+} , \label{eq:Phi3}
+\end{align}
+using the fundamental measures
+\begin{align}
+  n_3(\rr) &= \int n(\rr') \Theta(\sigma/2 -\left|\rr - \rr'\right|)
+  d\rr' \label{eq:FMn3} \\
+  n_2(\rr) &= \int n(\rr') \delta(\sigma/2 -\left|\rr - \rr'\right|) d\rr' \\
+  \mathbf{n}_{2V}(\rr) &= \int n(\rr') \delta(\sigma/2 -\left|\rr - \rr'\right|) \frac{\rr-\rr'}{|\rr-\rr'|}d\rr'
+\end{align}
+\begin{align}
+  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{2\pi \sigma}, \quad
+  n_1 &= \frac{n_2}{2\pi \sigma} , \quad
+  n_0 = \frac{n_2}{\pi \sigma^2} \label{eq:FMrest}
+\end{align}
+
+
+\section{Theoretical Approaches}
+
+\section{Comparison with simulation}\label{sec:comparison}
+
+\section{Conclusion}
+
+\appendix
+
+\section*{Appendix}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
