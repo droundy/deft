@@ -3,6 +3,7 @@
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{color}
+\usepackage{breqn}
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
@@ -37,7 +38,7 @@
   pair distribution function of an inhomogeneous hard-sphere fluid.
 \end{abstract}
 
-\maketitle
+%\maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -57,7 +58,109 @@ hard wall using Percus-Yevick, and compare with Monte Carlo
 results\cite{plischke1986pair}.  They plot the pair correlation
 function along interesting paths.
 
+Lado recently introduced a new and improved efficient algorithm for
+implementing integral equation theory for inhomogeneous fluids, which
+computes $g^{(2)}(\rr_1,\rr_2)$ among other
+things\cite{lado2009efficient}.  Lado's work looks pretty awkward to
+use, and their example is limited to 1D systems.  And the scaling is
+still (so far as I can tell) $O(N^2)$, since their improvement is in
+the prefactor, by developing a nice basis set.
+
 \section{Pair distribution function with inhomogeneity}
+
+The pair distribution function can be defined using the two particle
+density as
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) &\equiv \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
+\end{align}
+
+We may also want to consider the \emph{triplet} distribution function
+\begin{align}
+  g^{(3)}(\rr_1,\rr_2,\rr_3) &\equiv \frac{n^{(3)}(\rr_1,\rr_2,\rr_3)}{n(\rr_1)n(\rr_2)n(\rr_3)}
+\end{align}
+The triplet distribution is relevant, because we can compute the
+triplet distribution of the homogeneous system by considering the
+\emph{pair} distribution of the inhomogeneous ``test-particle
+scenario.''  The process is that we solve the inhomogeneous situation
+in which we have one hard sphere located at the origin.  We solve for
+the density around that hard sphere, and this gives us the pair
+distribution function of the homogeneous system $g^{(2)}(0, \rr)$.
+When we solve for the pair distribution $g^{(2)}(\rr_1,\rr_2)$ of the
+inhomogeneous system, this will give us the \emph{triplet}
+distribution function of the homogeneous system
+$g^{(3)}(0,\rr_1,\rr_2)$.
+
+\section{Goals of this paper (to be integrated into rest of paper)}
+
+
+In this paper, we seek an efficient approximation for the pair
+correlation function of an inhomogeneous hard-sphere fluid, where we
+define efficient as an algorithm that scales as $O(N\log N)$ where $N$
+scales as the volume of the system under consideration.
+Integral equation theory (look this up) scales as $O(N^2)$, which can
+be very expensive for large three-dimensional systems.
+
+Fundamental-Measure Theory (FMT) is constructed using only single-point
+convolutions (check terminology) such as
+\begin{align}
+  n_\alpha(\rr) &= \int n(\rr')w_\alpha(|\rr-\rr'|) d\rr'
+\end{align}
+These convolutions can be computed in Fourier space in $O(N\log N)$
+time, with the result that the FMT free energy---and its
+gradient---can be computed in $O(N\log N)$ time.
+
+The pair distribution function is used in computing the first term in
+the high-temperature perturbation expansion, which is used in SAFT
+(for instance) to treat dispersion interactions.  This term is written
+as
+\begin{align}\label{eq:a1}
+  a_1 &\propto \iint n(\rr)n(\rr') \Phi(|\rr-\rr'|)
+  g^{(2)}(\rr,\rr')d\rr d\rr'
+\end{align}
+where $\Phi(r)$ is the pair potential.  If $g^{(2)}(\rr,\rr')$ could
+be written as $g(|\rr-\rr'|)$, this term could be computed in $O(N\log
+N)$ time.  However, this is not possible when the density is
+inhomogeneous, because the pair distribution function depends on the
+density.
+
+In this paper, we consider a superposition approximation, in which
+construct an approximate representation for the pair distribution
+function, which allows the first term in the high temperature
+expansion given in Equation~\ref{eq:a1} to be computed in $O(N\log N)$
+time.  One input to this approach is our recently published expression
+for an average of the value of the pair distribution function at
+contact $g_\sigma(\rr)$, which itself can be computed in $O(N\log N)$
+time.
+
+The general idea is to write
+\begin{dmath}
+  g^{(2)}(\rr_1,\rr_2) = \Theta(r_{12}-\sigma)
+  \left(1 + \sum_{\alpha} \frac{f_{\alpha}(g_\sigma(\rr_1)) + f_{\alpha}(g_\sigma(\rr_2))}{2}g_{\alpha}(r_{12})\right)\label{eq:gpair-approx}
+\end{dmath}
+where $f_{\alpha}$ and $g_{\alpha}$ are a set of functions that
+satisfy the following constraint:
+\begin{dmath}\label{eq:definealpha}
+  \sum_{\alpha} f_{\alpha}(g_\sigma(\eta)) g_{\alpha}(r) \approx g(r; \eta)
+\end{dmath}
+which ensures that our pair distribution function reduces
+(approximately) to the radial distribution function in the homogeneous
+limit.  Equation~\ref{eq:gpair-approx} is constructed such that
+Equation~\ref{eq:a1} can be evaluated in $O(N\log N)$ time, since all
+the required convolutions may be performed with a fixed kernel.
+
+Our proposed pair distribution function has several good properties.
+When evaluated at contact ($r_{12}=\sigma$), it gives the same good
+result as our previously-published functional for the averaged pair
+distribution function at contact, which is constructed to give an
+accurate prediction for the contribution to Equation~\ref{eq:a1} from
+spheres in contact.  In the homogeneous limit,
+Equation~\ref{eq:gpqair-approx} should give a prediction that is as
+accurate as the approximate equality in
+Equation~\ref{eq:definealpha}.  In inhomogeneous distributions and at
+intermediate distances, we expect our pair distribution function to be
+least accurate, but one hopes that it will be reasonable, simply
+because it is an average of two reasonable results.
+
 
 \subsection*{Fundamental-Measure Theory}
 
@@ -70,7 +173,7 @@ of ``fundamental measures'' $n_\alpha(\rr)$, each of which is written
 as a one-center convolution of the density.  The White Bear free
 energy is thus
 \begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
+A_{\textit{HS}}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
 \end{equation}
 with integrands
 \begin{align}
@@ -97,6 +200,10 @@ using the fundamental measures
 
 
 \section{Theoretical Approaches}
+
+The traditional approach for solving for the pair distribution
+function of an inhomogeneous density distribution is to use an
+integral equation theory...
 
 \section{Comparison with simulation}\label{sec:comparison}
 
