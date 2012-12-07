@@ -59,21 +59,30 @@ hard spheres in water.
 
 A large fraction of interesting chemistry---including all of molecular
 biology---takes place in aqueous solution.  However, while quantum
-chemistry enables us to calculate the ground state energies of
-large molecules in vacuum, prediction of the free energy of even the
+chemistry enables us to calculate the ground state energies of large
+molecules in vacuum, prediction of the free energy of even the
 smallest molecules in the presence of a solvent poses a continuing
 challenge due to the complex structure of a liquid and the
 computational cost of \emph{ab initio} molecular
 dynamics~\cite{car1985, grossman2004}.  The current state-of-the art
-in \emph{ab initio} molecular dynamics is limited to a few hundred water
-molecules per unit cell~\cite{lewis2011doesnitric}.  On top of this,
-standard \emph{ab initio}
-methods using classical molecular dynamics without van der Waals
-corrections strongly over-structure water, to the point that ice melts
-at over 400K\cite{yoo2009phase}!  There has been a flurry of recent
-publications implicating van der Waals effects as significant in
+in \emph{ab initio} molecular dynamics is limited to a few hundred
+water molecules per unit cell~\cite{lewis2011doesnitric}.
+%
+On top of this, traditional density-functional theory (DFT) methods
+without the use of dispersion corrections strongly over-structure
+water, to the point that ice melts at over 120$^\circ$C\cite{yoo2009phase}!
+%
+There has been a flurry of recent
+publications implicating van der Waals effects (i.e. dispersion
+corrections) as significant in
 reducing this over-structuring\cite{lin2009importance,
-  wang2011density, mogelhoj2011ab, jonchiere2011van}.  It has also
+  wang2011density, mogelhoj2011ab, jonchiere2011van}.
+%
+However, one particular study found that water modeled using a
+hybrid functional with dispersion corrections \emph{still} has a
+melting point over 80$^\circ$C\cite{yoo2011}.
+%
+It has also
 been found that the inclusion of nuclear quantum effects can provide
 similar improvements \cite{morrone2008nuclear}.  Each of these
 corrections imposes an additional computational burden on an approach
@@ -111,18 +120,18 @@ theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
 theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
 stating that
 \begin{equation}
-  A(T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int V_\textit{ext}(\rr) n(\rr)
+  \Omega (T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int (V_\textit{ext}(\rr) +\mu)n(\rr)
 d\rr\right\},
 \end{equation}
-where $A(T)$ is the Helmholtz free energy of a system in the external
-potential $V_\textit{ext}$ at temperature $T$, $n(\rr)$ is the density
-of atoms or molecules, and $F[n(\rr),T]$ is a
-universal free-energy functional for the fluid, which is independent
-of the external potential $V_\textit{ext}$.  Classical DFT is a
-natural framework for creating a more flexible theory of
-hydrophobicity that can readily describe interaction of water with arbitrary
-external potentials---such as potentials describing strong
-interactions with solutes or surfaces.
+where $\Omega (T)$ is the grand potential of a system in the
+external potential $V_\textit{ext}$ at temperature $T$, $n(\rr)$ is
+the density of atoms or molecules, and $F[n(\rr),T]$ is a universal
+free-energy functional for the fluid, which is independent of the
+external potential $V_\textit{ext}$.  Classical DFT is a natural
+framework for creating a more flexible theory of hydrophobicity that
+can readily describe interaction of water with arbitrary external
+potentials---such as potentials describing strong interactions with
+solutes or surfaces.
 
 A number of exact properties are easily achieved in the
 density-functional framework, such as the contact-value theorem, which
@@ -133,31 +142,32 @@ focused on the hard-sphere fluid~\cite{curtin1985, rosenfeld1989,
 led to a number of sophisticated functionals, such as the
 fundamental-measure theory (FMT) functionals\cite{rosenfeld1989,
   rosenfeld1993, rosenfeld1997, tarazona1997, tarazona2000,
-  roth2002whitebear}.  These functionals are entirely expressed as an integral of
-local functions of a few convolutions of the density (fundamental
-measures) that can be efficiently computed.  We will use the White
-Bear version of the FMT functional\cite{roth2002whitebear}.  This
-functional reduces to the Carnahan-Starling equation of state in the
-homogeneous limit, and it reproduces the exact free energy in the
+  roth2002whitebear, yu2002structures}.  These functionals are
+entirely expressed as an integral of local functions of a few
+convolutions of the density (fundamental measures) that can be
+efficiently computed.  We will use the White Bear version of the FMT
+functional\cite{roth2002whitebear, yu2002structures}.  This functional
+reduces to the Carnahan-Starling equation of state in the homogeneous
+limit, and it reproduces the exact free energy in the
 strongly-confined limit of a small cavity.
 
 A number of classical density functionals have been developed for
 water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft,
   gloor2004accurate, gloor2007prediction, Jaqaman2004,
-  clark2006developing, chuev2006,
-  lischner2010classical, fu2005vapor-liquid-dft,kiselev2006new,
-  blas2001examination}, each of which
-captures some of the qualitative behavior of water.  However, each of
-these functionals also fail to capture some of water's unique
+  clark2006developing, chuev2006, lischner2010classical,
+  fu2005vapor-liquid-dft,kiselev2006new, blas2001examination}, each of
+which captures some of the qualitative behavior of water.  However,
+each of these functionals also fail to capture some of water's unique
 properties.  For instance, the functional of Lischner \emph{et
   al}\cite{lischner2010classical} treats the surface tension
 correctly, but can only be used at room temperature, and thus captures
 none of the temperature-dependence of water.  A functional by Chuev
 and Skolov\cite{chuev2006} uses an ad hoc modification of FMT that can
-predict hydrophobic hydration near temperatures of 298~K, but does not produce a
-correct equation of state due to their method producting a high value
-for pressure. A number of classical density functionals have recently been produced that are based on
-Statistical Associating Fluid Theory (SAFT)\cite{ 
+predict hydrophobic hydration near temperatures of 298~K, but does not
+produce a correct equation of state due to their method producting a
+high value for pressure. A number of classical density functionals
+have recently been produced that are based on Statistical Associating
+Fluid Theory (SAFT)\cite{ segura1997associating, segura1998comparison,
   yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft,gloor2002saft,muller2001molecular,
   clark2006developing, gloor2007prediction, gloor2004accurate,
@@ -169,9 +179,9 @@ do reproduce the temperature-dependence of water's properties.
 
 Statistical Associating Fluid Theory (SAFT) is a theory describing
 complex fluids in which hydrogen bonding plays a significant
-role\cite{muller2001molecular}.  SAFT is used to accurately model the
-equations of state of both pure fluids and mixtures over a wide range
-of temperatures and pressures.  SAFT is
+role\cite{chapman1989saft, muller2001molecular}.  SAFT is used to
+accurately model the equations of state of both pure fluids and
+mixtures over a wide range of temperatures and pressures.  SAFT is
 based on Wertheim's first-order thermodynamic perturbation theory
 (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
   wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
@@ -228,7 +238,7 @@ the surface tension by about 50\%, and most SAFT-based functionals are
 unsuited for studying systems that have density variations on a
 molecular length scale due to the use of a local density
 approximation\cite{gloor2002saft,clark2006developing, gloor2007prediction,
-gloor2004accurate, gross2009density, kahl2008modified,
+gloor2004accurate, kahl2008modified,
 blas2001examination, kiselev2006new}.
 
 %% \begin{table}
@@ -308,12 +318,12 @@ following sections, we will introduce the terms of this functional.
 The first term is the ideal gas free energy functional, which is
 purely local:
 \begin{equation}\label{idealgas}
-  F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{n_Q}} - 1\right) d\xx,
+  F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{{l_Q}^3}} - 1\right) d\xx,
 \end{equation}
-where n(\xx) is the density of water molecules and $n_Q$ is the
-quantum concentration
+where n(\xx) is the density of water molecules and $l_Q$ is the
+thermal wavelength
 \begin{equation}\label{quantumconcentration}
- n_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{3/2}.
+ l_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{1/2}.
 \end{equation}
 The ideal gas free energy functional on its own satisfies the contact
 value theorem and its limiting case of small solutes (Equations
@@ -325,9 +335,9 @@ purely nonlocal.
 
 We treat the hard-sphere repulsive interactions using the White Bear version of
 the Fundamental-Measure Theory~(FMT) functional for the hard-sphere
-fluid~\cite{roth2002whitebear}.  FMT functionals are expressed as the integral of
+fluid~\cite{roth2002whitebear, yu2002structures}.  FMT functionals are expressed as the integral of
 the \emph{fundamental measures} of a fluid, which provide local
-measures of quantities such as the filling fraction, density of
+measures of quantities such as the packing fraction, density of
 spheres touching a given point and mean curvature.  The hard-sphere
 excess free energy is written as:
 \begin{equation}
@@ -354,11 +364,10 @@ where the fundamental measure densities are given by:
   \mathbf{n}_{V1} &= \frac{\mathbf{n}_{V2}}{4\pi R}\\
   n_0 &= \frac{n_2}{4\pi R^2}.
 \end{align}
-The density $n_3$ is the filling fraction and $n_2$ describes the number
-of spheres touching a given point. For our functional for water, we use the 
-hard-sphere radius of
-3.03420~\AA, which was found to be optimal by Clark
-\emph{et al}.\cite{clark2006developing}
+The density $n_3$ is the packing fraction and $n_0$ is the
+average density at contact distance. For our functional for water, we
+use the hard-sphere diameter of 3.0342~\AA, which was found to be
+optimal by Clark \emph{et al}.\cite{clark2006developing}
 
 \newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
 \newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
@@ -389,9 +398,9 @@ compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
 The form of $a_1$ and $a_2$ for SAFT-VR is given in
 reference~\cite{gil-villegas-1997-SAFT-VR}, expressed in terms
-of the filling fraction.  In order to apply this form to an
+of the packing fraction.  In order to apply this form to an
 \emph{inhomogeneous} density distribution, we construct an effective local
-filling fraction for dispersion $\etadisp$, given by a Gaussian
+packing fraction for dispersion $\etadisp$, given by a Gaussian
 convolution of the density:
 \begin{align}
 %    ((4/3.0*M_PI)*Pow(3)(R)*GaussianConvolve(2*lambdainput*lscale*radius,
@@ -403,8 +412,8 @@ convolution of the density:
   \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
       \lscale R)^2}}\right)d\xx'.
 \end{align}
-This effective filling fraction is used throughout the dispersion
-functional, and represents a filling fraction averaged over the
+This effective packing fraction is used throughout the dispersion
+functional, and represents a packing fraction averaged over the
 effective range of the dispersive interaction.  Here we have
 introduced an additional empirical parameter $\lscale$ which modifies
 the length scale over which the dispersion interaction is correlated.
@@ -413,13 +422,13 @@ the length scale over which the dispersion interaction is correlated.
 The final attractive energy term is the association term, which
 accounts for hydrogen bonding.  Hydrogen bonds are modeled as four
 attractive patches (``association sites'') on the surface of the hard
-sphere.  These four sites represent two protons and two electron lone
-pairs.  There is an attractive energy $\epsilonassoc$ when
-two molecules are oriented such that the proton of one overlaps
-with the lone pair of the other.  The volume over which this
-interaction occurs is $\kappaassoc$, giving the association
-term in the free energy two empirical parameters that are fit to
-the experimental equation of state of water (again, taken from
+sphere.  These four sites represent the two hydrogen bond donor sites,
+and two hydrogen bond acceptor sites.  There is an attractive energy
+$\epsilonassoc$ when two molecules are oriented such that the donor site
+of one overlaps with the acceptor site of the other.  The volume over
+which this interaction occurs is $\kappaassoc$, giving the association
+term in the free energy two empirical parameters that are fit to the
+experimental equation of state of water (again, taken from
 Clark~\emph{et al}\cite{clark2006developing}).
 
 The association functional we use is a modified version of Yu
@@ -503,17 +512,18 @@ SAFT model for water\cite{clark2006developing}.  This SAFT model
 contains five empirical parameters: the hard-sphere radius, an energy
 and length scale for the dispersion interaction, and an energy and
 length scale for the association interaction.  In addition to the five
-empirical parameters of Clark \emph{et al}, we add a single additional dimensionless
-parameter $\lscale$---with a fitted value of 0.353---which determines
-the length scale over which the density is averaged when computing the
-dispersion free energy and its derivative.  We determine this final
-parameter by fitting the to the experimental surface tension with the
-result shown in Figure~\ref{fig:surface-tension}.  Because the SAFT
-model of Clark \emph{et al} overestimates the critical
-temperature---which is a common feature of SAFT-based functionals that
-do not explicitly treat the critical point---we cannot reasonably
-describe the surface tension at all temperatures, and choose to fit
-the surface tension at and around room temperature.
+empirical parameters of Clark \emph{et al}, we add a single additional
+dimensionless parameter $\lscale$---with a fitted value of
+0.353---which determines the length scale over which the density is
+averaged when computing the dispersion free energy and its derivative.
+We determine this final parameter by fitting the computed surface
+tension to the experimental surface tension with the result shown in
+Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
+\emph{et al} overestimates the critical temperature---which is a
+common feature of SAFT-based functionals that do not explicitly treat
+the critical point---we cannot reasonably describe the surface tension
+at all temperatures, and choose to fit the surface tension at and
+around room temperature.
 
 \section{Results and discussion}
 
@@ -563,13 +573,14 @@ calculated free energy data.}
 
 We show in Figure~\ref{fig:density-single-rod} density profiles for
 different radii rods, as well as the prediction for the contact value
-of the density as a function of rod radius, as computed from the free
-energies plotted in Figure~\ref{fig:energy-vs-diameter}.  The
-agreement between these curves confirms that our functional satisfies
-the contact-value theorem and that our minimization is well converged.
-As expected, as the radius of the rods becomes zero the
-contact density approaches the bulk density, and as the radius becomes
-large, the contact density will approach the vapor density.
+of the density as a function of rod radius, as computed from the
+excess chemical potentials plotted in
+Figure~\ref{fig:energy-vs-diameter}.  The agreement between these
+curves confirms that our functional satisfies the contact-value
+theorem and that our minimization is well converged.  As expected, as
+the radius of the rods becomes zero the contact density approaches the
+bulk density, and as the radius becomes large, the contact density
+will approach the vapor density.
 
 \subsection{Hydrophobic interaction of two rods}
 
