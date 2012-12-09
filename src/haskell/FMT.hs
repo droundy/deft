@@ -50,20 +50,20 @@ step x = ifft ( stepk * fft x)
 
 vshell, vshellPrime :: Expression RealSpace -> Vector RealSpace
 vshell x = vifft $ deltav *. fft x
-  where deltav = vprotect "delta" "\\delta(k)" $
+  where deltav = vprotect "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 
 shellPrime x = ifft ( delta' * fft x)
   where delta' = protect "deltaprime" "\\delta'(k)" $
                  smear * (4*pi) * ( -sin kR/k - rad * cos kR)
 vshellPrime x = vifft ( delta' *. fft x)
-  where delta' = vprotect "deltaprime" "\\delta'(k)" $
+  where delta' = vprotect "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec
 
 vshellPrimedot, vshelldot :: Vector RealSpace -> Expression RealSpace
 vshelldot x = ifft $ deltav `dot` vfft x
-  where deltav = vprotect "delta" "\\delta(k)" $
+  where deltav = vprotect "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 vshellPrimedot x = ifft ( delta' `dot` vfft x )
-  where delta' = vprotect "deltaprime" "\\delta'(k)" $
+  where delta' = vprotect "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec

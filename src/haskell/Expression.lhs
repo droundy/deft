@@ -637,7 +637,7 @@ t_var v = Vector (s_var $ v++"x") (s_var $ v++"y") (s_var $ v++"z")
 imaginary :: Expression KSpace
 imaginary = complex 0 1
 
-infix 4 ===
+infix 4 ===, `nameVector`
 
 (===) :: Type a => String -> Expression a -> Expression a
 --_ === e = e
@@ -655,9 +655,10 @@ protect :: Type a => String -> String -> Expression a -> Expression a
 protect v ltx e = Var CannotBeFreed c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
-vprotect :: Type a => String -> String -> Vector a -> Vector a
-vprotect v ltx (Vector x y z) =
-  Vector (protect (v++"x") ltx x) (protect (v++"y") ltx y) (protect (v++"z") ltx z)
+vprotect :: Type a => String -> (String -> String) -> Vector a -> Vector a
+vprotect v ltx (Vector x y z) = Vector (protect (v++"x") (ltx "x") x) 
+                                       (protect (v++"y") (ltx "y") y) 
+                                       (protect (v++"z") (ltx "z") z)
 
 kx :: Expression KSpace
 kx = Expression Kx
