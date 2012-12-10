@@ -155,7 +155,8 @@ A number of classical density functionals have been developed for
 water~\cite{ding1987, Yang1992, yang1994density, gloor2002saft,
   gloor2004accurate, gloor2007prediction, Jaqaman2004,
   clark2006developing, chuev2006, lischner2010classical,
-  fu2005vapor-liquid-dft,kiselev2006new, blas2001examination}, each of
+  fu2005vapor-liquid-dft,kiselev2006new, blas2001examination,
+  sundararaman2012computationally}, each of
 which captures some of the qualitative behavior of water.  However,
 each of these functionals also fail to capture some of water's unique
 properties.  For instance, the functional of Lischner \emph{et
@@ -164,8 +165,9 @@ correctly, but can only be used at room temperature, and thus captures
 none of the temperature-dependence of water.  A functional by Chuev
 and Skolov\cite{chuev2006} uses an ad hoc modification of FMT that can
 predict hydrophobic hydration near temperatures of 298~K, but does not
-produce a correct equation of state due to their method producting a
-high value for pressure. A number of classical density functionals
+produce a correct equation of state due to their method producing a
+high value for pressure.
+A number of classical density functionals
 have recently been produced that are based on Statistical Associating
 Fluid Theory (SAFT)\cite{ segura1997associating, segura1998comparison,
   yu2002fmt-dft-inhomogeneous-associating,
@@ -174,6 +176,15 @@ Fluid Theory (SAFT)\cite{ segura1997associating, segura1998comparison,
   gross2009density, kahl2008modified, blas2001examination}.  These
 functionals are based on a perturbative thermodynamic expansion, and
 do reproduce the temperature-dependence of water's properties.
+%
+We should give special mention to Sundararaman \emph{et al} recently
+introduced a classical density functional for water using an model in
+which a water molecule is seen as a hard sphere attached to two
+tetrahedrally oriented hard spheres representing voids, or
+orientations in which a hydrogen bond may not be formed, with all
+attractive interactions being lumped into a single pair potential
+treated in a mean field
+approximation\cite{sundararaman2012computationally}.
 
 \subsection{Statistical associating fluid theory}
 
@@ -284,27 +295,30 @@ blas2001examination, kiselev2006new}.
 %% \caption{Which papers do what}
 %% \end{table}
 
-Functionals constructed using a local density approximation
-fail to satisfy the contact-value theorem, and
-therefore incorrectly model small hard solutes.
-The contact-value theorem states that the pressure any fluid exerts
-on a hard wall interface is proportional to the contact density of the
-fluid\cite{henderson1979exact}:
+Functionals constructed using a local density approximation fail to
+satisfy the contact-value theorem, and therefore incorrectly model
+small hard solutes.  The contact-value theorem relates the pressure on
+a hard wall interface to the contact density of the fluid at that
+interface:
 \begin{equation}\label{eq:contact}
   p = n_ck_BT,
 \end{equation}
 where $n_c$ is the contact density, $k_B$ is the Boltzmann constant
-and $T$ is the temperature of
-the fluid. This leads to the property that the excess chemical
-potential of a small hard solute is proportional to the
+and $T$ is the temperature of the fluid.  The pressure in this formula
+is defined as the force per unit \emph{solvent accessible area}, which
+differs from the actual pressure when the surface is curved.  For a
+cavity in which the solvent is excluded from an arbitrarily small
+volume, the contact density will be the same as the bulk density, and
+therefore we can integrate the above pressure to find that the excess
+chemical potential of a small hard solute is proportional to the
 solvent-excluded volume:
 \begin{equation}\label{contactvaluethm}
   F = n k_BT V.
 \end{equation}
-The contact-value theorem is satisfied by classical density
-functionals in which the only purely local term is the ideal gas
-contribution to the free energy, and conversely, this theorem is not
-satisfied by functionals built using a local density approximation.
+The contact-value theorem is violated by local classical density
+functionals such as those using a local density approximation or a
+square-gradient term, but is satisfied by non-local classical density
+functionals, such as those using a weighted-density approach.
 
 \section{Theory and Methods}
 We construct a classical density functional for water, which reduces
@@ -523,7 +537,13 @@ Figure~\ref{fig:surface-tension}.  Because the SAFT model of Clark
 common feature of SAFT-based functionals that do not explicitly treat
 the critical point---we cannot reasonably describe the surface tension
 at all temperatures, and choose to fit the surface tension at and
-around room temperature.
+around room temperature.  We note here that although we could have
+chosen to fit the surface tension with a square-gradient term in the
+free energy, instead of adjusting the length scale for the dispersive
+attraction.  However, would have resulted in a functional that
+violates the contact-value theorem, which among other problems would
+fail to satisfy Equation~\ref{contactvaluethm} for the excess chemical
+potential of small solutes.
 
 \section{Results and discussion}
 
@@ -551,14 +571,14 @@ In Figure~\ref{fig:energy-vs-diameter} we show the excess chemical
 potential at room temperature, scaled by the solvent-accessible
 surface area of the hard rod, plotted as a function of hard-rod
 radius.  We define the hard-rods radius as the radius from which water
-is excluded.
-For rods with radius larger than 0.5~nm or so, this reaches a maximum value of
-75~mN/m, which is slightly higher than the bulk surface.  In the limit
-of very large rods, this value will decrease and approach the bulk
-surface value.  As seen in the inset of
-Fig.~\ref{fig:energy-vs-diameter}, for rods with very small radius (less than
-about 0.5~\AA) the excess chemical potential is proportional to volume,
-as required by the contact-value theorem (see Equation~\ref{contactvaluethm}).
+is excluded.  For rods with radius larger than 0.5~nm or so, this
+reaches a maximum value of 75~mN/m, which is slightly higher than
+macroscopic surface tension.  In the limit of very large rods, this
+value will decrease and approach the macroscopic value.  As seen in
+the inset of Fig.~\ref{fig:energy-vs-diameter}, for rods with very
+small radius (less than about 0.5~\AA) the excess chemical potential
+is proportional to volume, satisfying Equation~\ref{contactvaluethm},
+which results from the contact-value theorem.
 
 \begin{figure}
 \begin{center}
@@ -638,13 +658,17 @@ each other.
 
 Starting from the surface energy term, we can calculate the 
 free energy per length, which is equal to the circumference multiplied 
-by the surface tension. The force per length is the derivative of this
-with respect to the separation. 
-The circumference of the stadium-shape is
+by the surface tension. 
+Working out the circumference of the stadium-shape leads us to
 \begin{equation}
-C_{s} = 2\pi r +4r+2d
+F = (2\pi r +4r+2d)\gamma
 \end{equation}
-and so the force per length is equal to twice the surface tension.
+where $\gamma$ is the surface tension, $r$ is the radius of the rods,
+and $d$ is the separation between rods illustrated in
+Figure~\ref{fig:density-rods}.  The force per length is the derivative
+of the free energy with respect to the separation $d$, from which we
+conclude that the force per length is twice the
+surface tension.
 
 We plot in Figure~\ref{fig:rods-energy-vs-distance} the computed free
 energy of interaction
@@ -672,16 +696,14 @@ Figure~\ref{fig:density-rods}. }
 Walther \emph{et al}\cite{walther2004hydrophobic} studied the
 interactions between two carbon nanotubes, which are geometrically
 similar to our hydrophobic rods, using molecular dynamics with the SPC
-model for water, and a Lennard-Jones potential for the interaction of
-carbon with water, for nanotubes of diameter 1.25~nm and separations
-ranging from about 0.3~nm to 1.5~nm.  The SPC model underestimates the
-surface tension of water by about 24\%\cite{vega2007surface}, so we
-cannot expect this work to provide quantitative agreement with real
-water.  Walther \emph{et al} observe a drying transition between the
-two nanotubes, which occurs at a smaller radius than our results
-suggest.  However, when Walther \emph{et al} disable the attractive
-interaction between nanotube and water, the drying effect occurs at
-much longer range, in agreement with our results.
+model for water, for nanotubes of diameter 1.25~nm and separations
+ranging from about 0.3~nm to 1.5~nm.  In agreement with our findings
+for two purely hydrophobic rods, Walther \emph{et al} find that in the
+absence of Lennard-Jones attraction between carbon and oxygen, there
+is a drying transition at a distance comparable to the diameter of the
+nanotube.  In contrast to this, when the attraction between nanotubes
+and water is turned on, they find that the drying transition occurs at
+much shorter distances, comparable to the diameter of water.
 
 \subsection{Hydrophobic interactions of four rods}
 
@@ -737,7 +759,7 @@ no significant barrier to the association of four rods.
   surface tension at room temperature, and it agrees well with the
   surface tension in Figure~\ref{fig:surface-tension}. Results from a
   simulation of SPC/E water~\cite{huang2001shs} are shown as circles.
-  The horizontal lines show the experimental and SPC/E bulk surface
+  The horizontal lines show the experimental and SPC/E macroscopic surface
   tension for water at standard atmospheric temperature and
   pressure. }
 \label{fig:sphere-energy-vs-diameter}
@@ -750,14 +772,14 @@ water\cite{sedlmeier2011entropy}.  As in the single rod, we begin by
 examining the ratio of the excess chemical potential of the cavity
 system to the solvent-accessible surface area
 (Figure~\ref{fig:sphere-energy-vs-diameter}).  This
-effective surface tension surpasses the bulk surface tension at a
-radius of almost 1~nm, and at large radius will drop to the bulk value.  As
+effective surface tension surpasses the macroscopic surface tension at a
+radius of almost 1~nm, and at large radius will drop to the macroscopic value.  As
 with the single rod, we see the analytically correct behavior in the
 limit of small solutes.  For comparison, we plot the free energy
 calculated using a molecular dynamics simulation of SPC/E
 water\cite{huang2001shs}.  The agreement is quite good, apart from the
 issue that the SPC/E model for water significantly underestimates the
-surface bulk tension of water at room
+macroscopic surface tension of water at room
 temperature\cite{vega2007surface}.
 
 Figure~\ref{fig:density-sphere} shows the density profile for several
