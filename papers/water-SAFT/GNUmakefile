@@ -134,6 +134,7 @@ submit/figs/%: figs/%
 
 submit.tar.gz: paper.pdf change-format-for-submission.pl $(SUBMIT_FIGURES)
 	perl change-format-for-submission.pl
+	cp paper.bbl submit/
 	tar cvzf submit.tar.gz submit
 	cd submit && pdflatex paper && pdflatex paper
 	mv submit/paper.pdf submit.pdf
