@@ -27,12 +27,13 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf march-2012.pdf
+all :  paper.pdf march-2012.pdf arxiv.tar.gz submit.tar.gz
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 	rm -f paper/figs/*.tmp.sh
 	rm -rf arxiv arxiv.tar.gz
+	rm -rf submit submit.tar.gz
 
 ALL_FIGURES=\
 	figs/correlation.gp \
@@ -67,6 +68,7 @@ FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%, \
 	$(patsubst %.pdf,%.ps, $(LESS_CANONICAL_FIGURES)))
+SUBMIT_FIGURES=$(patsubst figs/%,submit/figs/%, $(FIGURES))
 
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
@@ -125,3 +127,13 @@ arxiv/figs/%: figs/%
 arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
 	cp paper.tex paper.bbl arxiv/
 	tar cvzf arxiv.tar.gz arxiv
+
+submit/figs/%: figs/%
+	mkdir -p submit/figs
+	cp $< $@
+
+submit.tar.gz: paper.pdf change-format-for-submission.pl $(SUBMIT_FIGURES)
+	perl change-format-for-submission.pl
+	tar cvzf submit.tar.gz submit
+	cd submit && pdflatex paper && pdflatex paper
+	mv submit/paper.pdf submit.pdf
