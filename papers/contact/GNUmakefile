@@ -129,6 +129,7 @@ figs/test-particle-40.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20
 	python $^ $@
 
 arxiv/figs/%: figs/%
+	mkdir -p arxiv/figs
 	cp $< $@
 
 arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
