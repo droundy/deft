@@ -8,11 +8,11 @@ my $aminfigure = 0;
 while (<PAPER>) {
   s/twocolumn/preprint/;
   if ($aminfigure) {
-    if (/end{figure}/) {
+    if (/end{figure}/ or /end{figure\*/) {
       $aminfigure = 0;
     }
   } else {
-    if (/begin{figure}/) {
+    if (/begin{figure}/ or /begin{figure\*/) {
       $aminfigure = 1;
     } elsif (/end{document}/) {
       break;
@@ -28,12 +28,12 @@ $aminfigure = 0;
 while (<PAPER>) {
   s/twocolumn/preprint/;
   if ($aminfigure) {
-    if (/end{figure}/) {
+    if (/end{figure}/ or /end{figure\*/) {
       $aminfigure = 0;
     }
     print SUBMIT $_;
   } else {
-    if (/begin{figure}/) {
+    if (/begin{figure}/ or /begin{figure\*/) {
       $aminfigure = 1;
       print SUBMIT $_;
     }

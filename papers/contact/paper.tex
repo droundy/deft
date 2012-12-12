@@ -41,10 +41,9 @@
   density functionals.  We define two averaged values for the
   correlation function at contact, and derive formulas for each of
   them from the White Bear version of the Fundamental Measure Theory
-  functional~\cite{roth2002whitebear}, using an assumption of
+  functional, using an assumption of
   thermodynamic consistency. We test these formulas, as well as two
-  existing formulas~\cite{yu2002fmt-dft-inhomogeneous-associating,
-    gross2009density} against Monte Carlo simulations, and find
+  existing formulas against Monte Carlo simulations, and find
   excellent agreement between the Monte Carlo data and one of our
   averaged correlation functions.
 \end{abstract}
@@ -369,7 +368,6 @@ using the fundamental measures
   n_0 = \frac{n_2}{\pi \sigma^2} \label{eq:FMrest}
 \end{align}
 
-
 \section{Theoretical Approaches}
 
 \subsection{Homogeneous limit}
@@ -385,37 +383,35 @@ pressure on any hard surface is determined by the density at contact:
   p(\rr_c) &= k_BT n(\rr_c)
 \end{align}
 where $\rr_c$ is a position of a sphere that would be in contact with
-the hard surface, and $p(\rr_c)$ is the pressure that the spheres
-exert on that surface at the point $\rr_c$.  This pressure is
+the hard surface, $n(\rr_c)$ is the density at this point $\rr_c$, and $p(\rr_c)$ is the pressure that the spheres
+exert on the surface at the same point.  This pressure is
 understood as the ratio of force to an infinitesimal element of
-\emph{solvent accessible surface} area.
+\emph{solvent accessible surface} (SAS) area.
 %
 In the homogeneous fluid, the contact-value theorem implies that
 \begin{align}
-  p &= k_BT n g_\sigma.
+  p_{\textit{SAS}} &= k_BT n g_\sigma
 \end{align}
-Since we are interested in the correlation function at the surface at
-which hard spheres contact, we need to compute the pressure on that
-surface.   This pressure can be
+where $p_{SAS}$ is the pressure on a hard sphere's solvent accessible surface.
+This pressure can be
 readily computed from the dependence of the Carnahan-Starling free
-energy on hard sphere radius.
+energy on hard sphere radius:
 \begin{align}
   A_{HS} &= Nk_BT \frac{4\eta - 3\eta^2}{(1-\eta)^2}
 \end{align}
 where $\eta \equiv \frac{\pi}{6} \sigma^3 n$ is the filling fraction.
-We compute the pressure on each sphere using the total force with
+We compute the pressure using the total force with
 respect to a changing radius of all the spheres.
-To find the pressure, we divide by $4\pi \sigma^2$, which is the area
-over which contact is possible, as defined by the centers of the
-contacting spheres, as illustrated in Figure~\ref{fig:nA}.
+To find the pressure, we divide this force by $4\pi \sigma^2$, which
+is the SAS area of a single hard sphere, illustrated in Figure~\ref{fig:nA}.
 Finally, we divide by $N$ to account for the total area of all the
 spheres in the fluid.
 \begin{align}
-  p_\sigma &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
+  p_{\textit{SAS}} &= \frac{1}{N 4\pi \sigma^2} \frac{dA_{HS}}{dR} \\
   &= \frac{1}{N 4\pi \sigma^2} \frac12 \frac{dA_{HS}}{d\sigma} \\
   &= k_BT n \frac{1 - \frac{\eta}2}{(1-\eta)^3}
 \end{align}
-Using the contact-value theorem, we can thus find the well-known
+Using the contact-value theorem, we thus find the well-known
 correlation function evaluated at contact.
 \begin{align}
   g_\sigma &= \frac{1 - \frac{\eta}2}{(1-\eta)^3} \label{eq:cs-g}
@@ -430,15 +426,15 @@ We will begin our derivation of the locally averaged correlation
 function with the asymmetric definition of $g_\sigma^A(\rr)$ given in
 Equation~\ref{eq:gA}, which is averaged over contacts in which one of
 the two spheres is located at position~$\rr$.  This correlation
-function is related to the contact density averaged over the surface
+function is related to the contact density averaged over the solvent accessible surface
 of a sphere located at~$\rr$, and can thus be determined by finding
-the pressure on that sphere.  We find this pressure from the change in
-free energy resulting from an infinitesimal expansion of any
-spheres located at position~$\rr$.  From this pressure, we derive a
+the pressure on that surface.  We find this pressure from the change in
+free energy resulting from an infinitesimal expansion of spheres
+located at position~$\rr$.  From this pressure, we derive a
 formula for the correlation function $g_\sigma^A(\rr)$ as was done in
 the previous section:
 \begin{align}
-  p_\sigma(\mathbf{r}) &= \frac{1}{n(\rr) 4\pi \sigma^2}\frac12 \frac{\delta
+  p_{\textit{SAS}}(\mathbf{r}) &= \frac{1}{n(\rr) 4\pi \sigma^2}\frac12 \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:p_{HS}^A}\\
 %  \ncontact(\rr) &= \frac{1}{n(\rr) k_BT 4\pi \sigma^2}\frac12 \frac{\delta
 %    A_{HS}}{\delta \sigma(\mathbf{r})} \\
@@ -446,6 +442,9 @@ the previous section:
   &= \frac{1}{n(\rr) n_A(\rr)}\frac{1}{ k_BT 4\pi \sigma^2}\frac12 \frac{\delta
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
+where $\sigma(\mathbf{r})$ is the diameter of spheres located at position $\rr$.
+Details regarding the evaluation of the functional derivative $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
+are discussed in the Appendix.
 Equation~\ref{eq:g-A-exact} is an exact expression for
 $g_\sigma^A(\rr)$ as defined in Equation~\ref{eq:gA}.  However, since
 we do not know the exact hard-sphere free energy, we approximate
@@ -555,12 +554,20 @@ $g_\sigma^\text{Yu,S}$ is the function we will examine in this paper.
 %% in a fixed-number ensemble.
 
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/walls-10}
-  \caption{Density and correlation function at a hard wall with bulk
-    filling fraction of 0.1.}
-  \label{fig:walls-10}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/walls-10}
+%%   \caption{Density and correlation function at a hard wall with bulk
+%%     filling fraction of 0.1.  In the top and middle panels are plotted
+%%     the asymmetrically averaged correlation function $g_\sigma^A$
+%%     (defined in Equation~\ref{eq:gA}) and the symmetrically averaged
+%%     correlation function $g_\sigma^S$ (defined in
+%%     Equation~\ref{eq:gS}).  The results of Monte Carlo, our functional,
+%%     and one previously published functional\cite{gross2009density,
+%%       yu2002fmt-dft-inhomogeneous-associating} are compared in each
+%%     case.  In the bottom panel we plot the density, computed with
+%%     Monte Carlo and with DFT.}
+%%   \label{fig:walls-10}
+%% \end{figure}
 
 \section{Comparison with simulation}\label{sec:comparison}
 
@@ -582,10 +589,11 @@ interfaces.  The first and simplest is a flat hard wall.  We
 then study two convex hard surfaces.  One is an excluded sphere with
 diameter $2\sigma$, which corresponds to a ``test particle''
 simulation with one of a hard sphere at the origin with diameter
-$\sigma$.  The second is an excluded sphere with diameter $6\sigma$,
+$\sigma$.  The
+second is an excluded sphere with diameter $6\sigma$,
 which demonstrates behavior typical of mildly convex hard surfaces.
 Finally, we study a concave surface given by a hard cavity in which
-our fluid is free to move up to a diameter of $16\sigma$, which
+our fluid is free to move up to a diameter of $8\sigma$, which
 demonstrates behavior typical of mildly concave surfaces.  In each
 case, we performed a low-density (filling fraction 0.1) and high-density
 (filling fraction 0.4) simulation.  We performed additional
@@ -593,19 +601,19 @@ computations over a wider range of curvatures and densities, but
 chose these as typical examples.
 
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-4-10}
-  \caption{Density and correlation function around a hard sphere with
-    diameter the same as those in the fluid, with a bulk filling
-    fraction of 0.1.}
-  \label{fig:inner-4-10}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/inner-4-10}
+%%   \caption{(Color online) Density and correlation function around a hard sphere with
+%%     diameter the same as those in the fluid, with a bulk filling
+%%     fraction of 0.1.}
+%%   \label{fig:inner-4-10}
+%% \end{figure}
 
 \subsection{Low density}
 
 We begin by presenting our low-density results, corresponding to a
 filling fraction of 0.1, which are shown in
-Figures~\ref{fig:walls-10}-\ref{fig:outer-10}.  At this low density,
+Figure~\ref{fig:low-density}.  At this low density,
 the contact value of the correlation function in the bulk is only 1.3,
 indicating that correlations are indeed small and that the fluid should be
 relatively easy to model.  Indeed, the contact density at the hard
@@ -613,13 +621,13 @@ surface is only around 50\% higher than the bulk, and the FMT
 predicted density is close to indistinguishable from the true
 density for each of the four configurations.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-12-10}
-  \caption{Density and correlation function around a hard sphere with
-    an excluded diameter of $6\sigma$, with a bulk filling fraction of
-    0.1.}
-  \label{fig:inner-12-10}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/inner-12-10}
+%%   \caption{Density and correlation function around a hard sphere with
+%%     an excluded diameter of $6\sigma$, with a bulk filling fraction of
+%%     0.1.}
+%%   \label{fig:inner-12-10}
+%% \end{figure}
 
 The $g_\sigma^A$ correlation function in each configuration is very
 flat, with only small, smooth changes as the surface is approached.
@@ -647,13 +655,13 @@ function of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
 and ours described in Section~\ref{sec:g-S} give similar results, with
 slightly larger errors in our prediction.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/outer-16-01}
-  \caption{Density and correlation functions near the surface of a
-    spherical cavity with diameter $16\sigma$ at a bulk filling
-    fraction of 0.1.}
-  \label{fig:outer-10}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/outer-16-01}
+%%   \caption{Density and correlation functions near the surface of a
+%%     spherical cavity with diameter $16\sigma$ at a bulk filling
+%%     fraction of 0.1.}
+%%   \label{fig:outer-10}
+%% \end{figure}
 
 
 
@@ -673,39 +681,95 @@ slightly larger errors in our prediction.
 
 \subsection{High density}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/walls-40}
-  \caption{Density and correlation function at a hard wall with bulk
-    filling fraction of 0.4.}
-  \label{fig:walls-40}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/walls-40}
+%%   \caption{Density and correlation function at a hard wall with bulk
+%%     filling fraction of 0.4.}
+%%   \label{fig:walls-40}
+%% \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-4-40}
-  \caption{Density and correlation function around a hard sphere with
-    diameter the same as those in the fluid, with a bulk filling
-    fraction of 0.4.}
-  \label{fig:inner-4-40}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/inner-4-40}
+%%   \caption{Density and correlation function around a hard sphere with
+%%     diameter the same as those in the fluid, with a bulk filling
+%%     fraction of 0.4.}
+%%   \label{fig:inner-4-40}
+%% \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/inner-12-40}
-  \caption{Density and correlation function around a hard sphere with
-    an excluded diameter of $6\sigma$, with a bulk filling fraction of
-    0.4.}
-  \label{fig:inner-12-40}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/inner-12-40}
+%%   \caption{Density and correlation function around a hard sphere with
+%%     an excluded diameter of $6\sigma$, with a bulk filling fraction of
+%%     0.4.}
+%%   \label{fig:inner-12-40}
+%% \end{figure}
+
+\begin{figure*}
+  \noindent\includegraphics[width=0.8\textwidth]{figs/low-density}
+  %% \noindent
+  %% \begin{tabular}{cc}
+  %%   (a)\includegraphics[width=8cm]{figs/walls-10} &
+  %%   (c)\includegraphics[width=8cm]{figs/inner-4-10}\\
+  %%   (b)\includegraphics[width=8cm]{figs/inner-12-10} &
+  %%   (d)\includegraphics[width=8cm]{figs/outer-16-01}
+  %% \end{tabular}
+  \caption{ (Color online) Density and correlation function in systems
+    with a ``low density'' bulk filling fraction of 0.1.  The
+    subplots each show a different system: (a) next to a flat hard wall, (b)
+    around a hard sphere with an excluded diameter of $6\sigma$, (c)
+    around a hard sphere with an excluded diameter of $2\sigma$, and
+    (d) within a spherical cavity with an included diameter of $8\sigma$.
+    In the top and middle panels of each subfigure are the
+    asymmetrically averaged correlation function $g_\sigma^A$ (defined
+    in Equation~\ref{eq:gA}) and the symmetrically averaged
+    correlation function $g_\sigma^S$ (defined in
+    Equation~\ref{eq:gS}).  The results of Monte Carlo, our
+    functional, and one previously published
+    functional\cite{gross2009density,
+      yu2002fmt-dft-inhomogeneous-associating} are compared in each
+    case.  The bottom panels show the density computed with
+    Monte Carlo and with DFT.}
+  \label{fig:low-density}
+\end{figure*}
+
+\begin{figure*}
+  \noindent\includegraphics[width=0.8\textwidth]{figs/high-density}
+  %% \noindent
+  %% \begin{tabular}{cc}
+  %%   (a)\includegraphics[width=8cm]{figs/walls-40} &
+  %%   (c)\includegraphics[width=8cm]{figs/inner-4-40}\\
+  %%   (b)\includegraphics[width=8cm]{figs/inner-12-40} &
+  %%   (d)\includegraphics[width=8cm]{figs/outer-16-04}
+  %% \end{tabular}
+  \caption{ (Color online) Density and correlation function in systems
+    with a ``high density'' bulk filling fraction of 0.4.  The
+    subplots each show a different system: (a) next to a flat hard wall, (b)
+    around a hard sphere with an excluded diameter of $6\sigma$, (c)
+    around a hard sphere with an excluded diameter of $2\sigma$, and
+    (d) within a spherical cavity with an included diameter of $8\sigma$.
+    In the top and middle panels of each subfigure are the
+    asymmetrically averaged correlation function $g_\sigma^A$ (defined
+    in Equation~\ref{eq:gA}) and the symmetrically averaged
+    correlation function $g_\sigma^S$ (defined in
+    Equation~\ref{eq:gS}).  The results of Monte Carlo, our
+    functional, and one previously published
+    functional\cite{gross2009density,
+      yu2002fmt-dft-inhomogeneous-associating} are compared in each
+    case.  The bottom panels show the density computed with
+    Monte Carlo and with DFT.}
+  \label{fig:high-density}
+\end{figure*}
 
 At a higher density corresponding to a filling fraction of 0.4,
 correlations are much stronger, with the bulk contact value of the
 correlation function of 3.7, as seen in
-Figures~\ref{fig:walls-40}-\ref{fig:outer-40}.  This results in larger
+Figure~\ref{fig:high-density}.  This results in larger
 oscillations in the density at the hard surfaces, and correspondingly
 more interesting behavior in the correlation function near the
 interface.  The density predicted by the White Bear functional agrees
 reasonably well with the simulation results, although not so well as
 it did at lower density.  The discrepancies are largest in the case of
-the spherical cavity, in which the DFT considerably underestimates the
+the spherical cavity (Figure~\ref{fig:high-density}d), in which the DFT considerably underestimates the
 range of the density oscillations.
 
 The asymmetric version of the correlation function once again displays
@@ -715,22 +779,20 @@ a diameter of the hard surface, with the magnitude of this elevation
 somewhat different in each configuration.  As was the case at low
 density, our correlation function $g_\sigma^A$ matches very closely
 the Monte Carlo data, reproducing quite well the structure near the
-interface in each configuration, although in the spherical cavity
-(Figure~\ref{fig:outer-40}), there is a small, but significant
+interface in each configuration, although in the spherical cavity there is a small, but significant
 discrepancy, comparable to the discrepancy found in the density
 itself.  In each case, the correlation of Gross dramatically
 underestimates the correlation at the interface, at one extreme by
-40\% in the case of the spherical cavity
-(Figure~\ref{fig:outer-40}), and at the other extreme by 15\%
-in the test-particle scenario (Figure~\ref{fig:inner-4-40}).
+40\% in the case of the spherical cavity, and at the other extreme by 15\%
+in the test-particle scenario (Figure~\ref{fig:high-density}c).
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/outer-16-04}
-  \caption{Density and correlation functions near the surface of a
-    spherical cavity with diameter $16\sigma$ at a bulk filling
-    fraction of 0.4.}
-  \label{fig:outer-40}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/outer-16-04}
+%%   \caption{Density and correlation functions near the surface of a
+%%     spherical cavity with diameter $16\sigma$ at a bulk filling
+%%     fraction of 0.4.}
+%%   \label{fig:outer-40}
+%% \end{figure}
 
 The symmetrically averaged correlation function shows considerably
 more structure near the interface at high density, and this structure
@@ -739,10 +801,9 @@ In each case, this structure is not reflected in the theoretical
 predictions, neither that of this paper, nor that of Yu and
 Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  As was the case at
 low density, both functionals give significant and finite values in
-the region in which there are no contacts, but at high density they
+the region in which there are no contacts (Figures~\ref{fig:low-density}a), but at high density they
 also miss the large oscillations that are present near the flat wall
-and the concave surface (Figures~\ref{fig:walls-40}
-and~\ref{fig:outer-40}).  As was the case at low density, the
+and the concave surface (Figures~\ref{fig:high-density}a).  As was the case at low density, the
 functional of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
 gives slightly better agreement with the simulation results than that
 which we derive in Section~\ref{sec:g-S}.

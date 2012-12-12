@@ -40,6 +40,7 @@ clean:
 ALL_FIGURES=\
 	figs/n0.svg figs/nA.svg \
 	figs/contact.svg\
+	figs/high-density.svg figs/low-density.svg \
 	figs/free-energy.gp\
 	figs/gHS-vs-n.gp\
 	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
