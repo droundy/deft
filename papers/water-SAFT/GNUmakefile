@@ -27,7 +27,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf march-2012.pdf arxiv.tar.gz submit.tar.gz
+all :  paper.pdf arxiv.tar.gz submit.tar.gz
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -36,28 +36,29 @@ clean:
 	rm -rf submit submit.tar.gz
 
 ALL_FIGURES=\
-	figs/correlation.gp \
-	figs/equation-of-state.gp\
-	figs/saturated-liquid-density.gp\
-	figs/temperature-versus-density.gp\
-	figs/surface-tension.gp\
-	figs/surface-298.gp\
-	figs/pressure-with-isotherms.gp\
 	figs/pressure-with-isotherms-truncated.gp\
-	figs/sphere-energy-vs-diameter.gp\
-	figs/density-sphere.gp\
+	figs/surface-tension.gp\
 	figs/energy-vs-diameter.gp\
-	figs/density-rods-in-water.gp\
-	figs/density-four-rods.gp\
 	figs/density-single-rod.gp\
+	figs/density-rods-in-water.gp\
 	figs/rods-energy-vs-distance.gp\
 	figs/four-rods-energy-vs-distance.gp\
 	figs/density-four-rods.gp\
-	figs/osu-logo.svg\
-	figs/stadium-vs-circles.svg\
-	figs/two-rods-diagram.svg\
-	figs/four-rods-diagram.svg\
-	figs/rods-diagram.svg\
+	figs/sphere-energy-vs-diameter.gp\
+	figs/density-sphere.gp
+
+# figs/correlation.gp \
+# figs/equation-of-state.gp\
+# figs/saturated-liquid-density.gp\
+# figs/temperature-versus-density.gp\
+# figs/surface-298.gp\
+# figs/pressure-with-isotherms.gp\
+# figs/density-four-rods.gp\
+# figs/osu-logo.svg\
+# figs/stadium-vs-circles.svg\
+# figs/two-rods-diagram.svg\
+# figs/four-rods-diagram.svg\
+# figs/rods-diagram.svg\
 
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -68,7 +69,7 @@ FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%, \
 	$(patsubst %.pdf,%.ps, $(LESS_CANONICAL_FIGURES)))
-SUBMIT_FIGURES=$(patsubst figs/%,submit/figs/%, $(FIGURES))
+SUBMIT_FIGURES=$(patsubst figs/%,submit/figs/%, $(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
@@ -136,5 +137,6 @@ submit.tar.gz: paper.pdf change-format-for-submission.pl $(SUBMIT_FIGURES)
 	perl change-format-for-submission.pl
 	cp paper.bbl submit/
 	tar cvzf submit.tar.gz submit
-	cd submit && pdflatex paper && pdflatex paper
-	mv submit/paper.pdf submit.pdf
+	zip -r submit submit
+	cd submit && latex paper && latex paper
+	mv submit/paper.dvi submit.dvi
