@@ -11,3 +11,13 @@ No.
 
 You edit the Makefile.am file, and search for a similar
 file and make similar additions everywhere it shows up.
+
+## How do I speed up the make on srun?
+
+You can run with multiple cores, designated by -j4
+
+    srun -p debian -c4 make papers -j4
+
+The `-c4` tells srun that make will use 4 cores.  The `-j4` tells make to use 4 cores.
+If the srun job does not start immediately you will want to reduce the number of cores used.
+The idea being that all the processes will run on a single node.
