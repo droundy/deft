@@ -119,7 +119,7 @@ free energy in SAFT as
   g_\sigma^A(\rr) \right)-1\right) d\rr \label{eq:Achain}
 \end{align}
 where $n^A(\rr)$ is a weighted density defined in Equation~\ref{eq:nA}
-and $g_\sigma^A(\rr)$ the local value of the correlation function at
+and $g_\sigma^A(\rr)$ is the local value of the correlation function at
 contact, which we define in Equation~\ref{eq:gA}.  In
 Section~\ref{sec:gross} we describe Gross's approximation for this
 function. In a paper describing a classical
@@ -380,10 +380,11 @@ energy.  The contact value of the correlation function density can be
 found by using the contact-value theorem, which states that the
 pressure on any hard surface is determined by the density at contact:
 \begin{align}
-  p(\rr_c) &= k_BT n(\rr_c)
+  p_{\textit{SAS}}(\rr_c) &= k_BT n(\rr_c)
 \end{align}
 where $\rr_c$ is a position of a sphere that would be in contact with
-the hard surface, $n(\rr_c)$ is the density at this point $\rr_c$, and $p(\rr_c)$ is the pressure that the spheres
+the hard surface, $n(\rr_c)$ is the density at this point $\rr_c$, and
+$p_{\textit{SAS}}(\rr_c)$ is the pressure that the spheres
 exert on the surface at the same point.  This pressure is
 understood as the ratio of force to an infinitesimal element of
 \emph{solvent accessible surface} (SAS) area.
@@ -443,16 +444,17 @@ the previous section:
     A_{HS}}{\delta \sigma(\mathbf{r})} \label{eq:g-A-exact}
 \end{align}
 where $\sigma(\mathbf{r})$ is the diameter of spheres located at position $\rr$.
-Details regarding the evaluation of the functional derivative $\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
+Details regarding the evaluation of the functional derivative
+$\frac{\delta A_{HS}}{\delta \sigma(\mathbf{r})}$
 are discussed in the Appendix.
 Equation~\ref{eq:g-A-exact} is an exact expression for
 $g_\sigma^A(\rr)$ as defined in Equation~\ref{eq:gA}.  However, since
 we do not know the exact hard-sphere free energy, we approximate
-$A_{HS}$ using FMT.  Details of evaluating the functional derivative
-in Equation~\ref{eq:g-A-exact} using FMT are given in the appendix.
-The equation for $g_\sigma^A$ requires finding convolutions of local
-derivatives of the free energy, making this formulation
-computationally somewhat more expensive than the free energy itself.
+$A_{HS}$ using FMT.
+The equation for $g_\sigma^A$ found using FMT requires finding
+convolutions of local derivatives of the free energy, making this
+formulation computationally somewhat more expensive than the free
+energy itself.
 
 \derivation{
   \end{widetext}
@@ -497,7 +499,7 @@ approximate using an assumption of a reasonably smooth density:
 \end{align}
 In the systems that we study, the density is \emph{not} reasonably
 smooth, but we can state empirically making this approximation
-nevertheless improves the predictions of our functional, while at the
+nevertheless improves the predictions of our functional $g_\sigma^S$, while at the
 same time reducing its computational cost by avoiding the need to
 calculate any additional weighted densities or convolutions.
 
@@ -593,7 +595,7 @@ $\sigma$.  The
 second is an excluded sphere with diameter $6\sigma$,
 which demonstrates behavior typical of mildly convex hard surfaces.
 Finally, we study a concave surface given by a hard cavity in which
-our fluid is free to move up to a diameter of $8\sigma$, which
+our fluid is free to move up to a diameter of $16\sigma$, which
 demonstrates behavior typical of mildly concave surfaces.  In each
 case, we performed a low-density (filling fraction 0.1) and high-density
 (filling fraction 0.4) simulation.  We performed additional
@@ -623,8 +625,8 @@ chose these as typical examples.
     subplots each show a different system: (a) next to a flat hard wall, (b)
     around a hard sphere with an excluded diameter of $6\sigma$, (c)
     around a hard sphere with an excluded diameter of $2\sigma$, and
-    (d) within a spherical cavity with an included diameter of $8\sigma$.
-    In the top and middle panels of each subfigure are the
+    (d) within a spherical cavity with an included diameter of $16\sigma$.
+    In the top and middle panels of each subfigure respectively are the
     asymmetrically averaged correlation function $g_\sigma^A$ (defined
     in Equation~\ref{eq:gA}) and the symmetrically averaged
     correlation function $g_\sigma^S$ (defined in
@@ -647,10 +649,12 @@ indicating that correlations are indeed small and that the fluid should be
 relatively easy to model.  Indeed, the contact density at the hard
 surface is only around 50\% higher than the bulk, and the FMT
 predicted density is close to indistinguishable from the true
-density for each of the four configurations.
+density for each of the four configurations, as seen in the bottom
+subpanel of each subfigure within Figure~\ref{fig:low-density}.
 
-The $g_\sigma^A$ correlation function in each configuration is very
-flat, with only small, smooth changes as the surface is approached.
+The $g_\sigma^A$ correlation function in each configuration (plotted
+in the top panel of each subfigure within Figure~\ref{fig:low-density}) is
+very flat, with only small, smooth changes as the surface is approached.
 Our functional $g_\sigma^A$ very closely matches the Monte Carlo
 predictions in each case, while that of Gross consistently
 underestimates the correlation at the interface by a significant margin.  We note that the theoretical curves
@@ -660,7 +664,8 @@ vanishingly unlikely scenario in which there was a sphere present at
 that location.  Naturally, we are unable to observe this quantity in
 our Monte Carlo simulations.
 
-The $g_\sigma^S$ correlation function shows considerably more
+The $g_\sigma^S$ correlation function (plotted
+in the middle panels of Figure~\ref{fig:low-density}) shows considerably more
 structure, as well as additional variation due to the curvature of the
 hard surface.  The symmetric correlation function is nonzero at
 locations where spheres may touch, which for a convex hard surface
@@ -689,8 +694,8 @@ slightly larger errors in our prediction.
     subplots each show a different system: (a) next to a flat hard wall, (b)
     around a hard sphere with an excluded diameter of $6\sigma$, (c)
     around a hard sphere with an excluded diameter of $2\sigma$, and
-    (d) within a spherical cavity with an included diameter of $8\sigma$.
-    In the top and middle panels of each subfigure are the
+    (d) within a spherical cavity with an included diameter of $16\sigma$.
+    In the top and middle panels of each subfigure respectively are the
     asymmetrically averaged correlation function $g_\sigma^A$ (defined
     in Equation~\ref{eq:gA}) and the symmetrically averaged
     correlation function $g_\sigma^S$ (defined in
@@ -707,17 +712,19 @@ slightly larger errors in our prediction.
 
 At a higher density corresponding to a filling fraction of 0.4,
 correlations are much stronger, with the bulk contact value of the
-correlation function of 3.7, as seen in
-Figure~\ref{fig:high-density}.  This results in larger
-oscillations in the density at the hard surfaces, and correspondingly
-more interesting behavior in the correlation function near the
-interface.  The density predicted by the White Bear functional agrees
-reasonably well with the simulation results, although not so well as
-it did at lower density.  The discrepancies are largest in the case of
-the spherical cavity (Figure~\ref{fig:high-density}d), in which the DFT considerably underestimates the
-range of the density oscillations.
+correlation function of 3.7, as seen in Figure~\ref{fig:high-density}.
+This results in larger oscillations in the density at the hard
+surfaces, and correspondingly more interesting behavior in the
+correlation function near the interface, as shown in the bottom panels
+of the plots in Figure~\ref{fig:high-density}.  The density predicted
+by the White Bear functional agrees reasonably well with the
+simulation results, although not so well as it did at lower density.
+The discrepancies are largest in the case of the spherical cavity
+(Figure~\ref{fig:high-density}d), in which the DFT considerably
+underestimates the range of the density oscillations.
 
-The asymmetric version of the correlation function once again displays
+The asymmetric version of the correlation function (plotted
+in the top panels of Figure~\ref{fig:high-density}) once again displays
 relatively smooth behavior with a few small
 oscillations near the interface, and a somewhat elevated value within
 a diameter of the hard surface, with the magnitude of this elevation
@@ -728,7 +735,8 @@ interface in each configuration, although in the spherical cavity there is a sma
 discrepancy, comparable to the discrepancy found in the density
 itself.  In each case, the correlation of Gross dramatically
 underestimates the correlation at the interface, at one extreme by
-40\% in the case of the spherical cavity, and at the other extreme by 15\%
+40\% in the case of the spherical cavity
+(Figure~\ref{fig:high-density}d), and at the other extreme by 15\%
 in the test-particle scenario (Figure~\ref{fig:high-density}c).
 
 %% \begin{figure}
@@ -739,16 +747,18 @@ in the test-particle scenario (Figure~\ref{fig:high-density}c).
 %%   \label{fig:outer-40}
 %% \end{figure}
 
-The symmetrically averaged correlation function shows considerably
+The symmetrically averaged correlation function (plotted
+in the middle panels of Figure~\ref{fig:high-density}) shows considerably
 more structure near the interface at high density, and this structure
 varies considerably depending on the curvature of the hard surface.
 In each case, this structure is not reflected in the theoretical
 predictions, neither that of this paper, nor that of Yu and
 Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  As was the case at
 low density, both functionals give significant and finite values in
-the region in which there are no contacts (Figures~\ref{fig:low-density}a), but at high density they
+the region in which there are no contacts, but at high density they
 also miss the large oscillations that are present near the flat wall
-and the concave surface (Figures~\ref{fig:high-density}a).  As was the case at low density, the
+and the concave surface (Figures~\ref{fig:high-density}a
+and~\ref{fig:high-density}d).  As was the case at low density, the
 functional of Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}
 gives slightly better agreement with the simulation results than that
 which we derive in Section~\ref{sec:g-S}.
