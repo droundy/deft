@@ -2,15 +2,26 @@ Deft frequently asked questions.
 
 [[!toc ]]
 
-## Has anyone ever asked a question about Deft?
-
-No.
-
 
 ## How do I add a new C++ file to the deft core?
 
-You edit the Makefile.am file, and search for a similar
+First create a new file in the `src/` directory.  Then
+you edit the `Makefile.am` file, and search for a similar
 file and make similar additions everywhere it shows up.
+
+
+## How do I create a new C++ program to generate data?
+
+We keep programs that generate data in `papers/PAPERNAME/figs/`,
+so you'll want to create a `.cpp` file in that directory.  Then,
+as in the case of a deft core file above, you edit `Makefile.am`,
+and copy a similar file, making similar additions where ever it
+shows up.  If you want your program to be automatically run when
+building papers (which you should, if it runs quickly), then you
+need to be sure to add a `.dat` dependency, which will tell make
+to run your program.  Programs that generate data are built with
+a `.mkdat` extension, which when run should generate a file with
+a `.dat` extension, and the same base name.
 
 ## How do I speed up the make on srun?
 
