@@ -14,6 +14,12 @@ while (<PAPER>) {
   } else {
     if (/begin{figure}/) {
       $aminfigure = 1;
+    } elsif (/bibliography/) {
+      open(BBL, "paper.bbl") or die "oops bbl $!";
+      while (<BBL>) {
+        print SUBMIT $_;
+      }
+      close(BBL);
     } elsif (/end{document}/) {
       break;
     } else {
@@ -35,6 +41,8 @@ while (<PAPER>) {
   } else {
     if (/begin{figure}/) {
       $aminfigure = 1;
+      print SUBMIT "\n";
+      print SUBMIT "\\clearpage\n";
       print SUBMIT $_;
     }
   }
