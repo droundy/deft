@@ -39,16 +39,19 @@ clean:
 
 ALL_FIGURES=\
 	figs/n0.svg figs/nA.svg \
-	figs/contact.svg\
-	figs/free-energy.gp\
-	figs/gHS-vs-n.gp\
-	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
+	figs/high-density.svg figs/low-density.svg \
 	figs/outer-16-04.pdf \
 	figs/outer-16-01.pdf \
-	figs/walls-10.pdf figs/walls-30.pdf figs/walls-40.pdf \
+	figs/walls-10.pdf figs/walls-40.pdf \
 	figs/inner-4-10.pdf figs/inner-4-40.pdf \
-	figs/inner-12-10.pdf figs/inner-12-40.pdf \
-	figs/test-particle-10.pdf figs/test-particle-40.pdf \
+	figs/inner-12-10.pdf figs/inner-12-40.pdf
+
+#	figs/contact.svg\
+#	figs/free-energy.gp\
+#	figs/gHS-vs-n.gp\
+#	figs/gnn-sphere-08-013.pdf figs/gnn-sphere-12-112.pdf figs/gnn-sphere-16-265.pdf\
+# figs/walls-30.pdf
+#	figs/test-particle-10.pdf figs/test-particle-40.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -60,7 +63,7 @@ FIGURES=$(patsubst %.pdf,%.ps, \
 PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%,$(PDF_FIGURES))
-SUBMIT_FIGURES=$(patsubst figs/%,submit/figs/%, $(PDF_FIGURES))
+SUBMIT_FIGURES=$(patsubst figs/%,submit/%, $(FIGURES))
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
@@ -129,19 +132,19 @@ figs/test-particle-40.pdf: figs/plot-test-particle-cont-dens.py figs/mc-walls-20
 	python $^ $@
 
 arxiv/figs/%: figs/%
+	mkdir -p arxiv/figs
 	cp $< $@
 
 arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
 	cp paper.tex paper.bbl arxiv/
 	tar cvzf arxiv.tar.gz arxiv
 
-submit/figs/%: figs/%
-	mkdir -p submit/figs
+submit/%: figs/%
+	mkdir -p submit
 	cp $< $@
 
 submit.tar.gz: paper.pdf change-format-for-submission.pl $(SUBMIT_FIGURES)
 	perl change-format-for-submission.pl
 	cp paper.bbl submit/
 	tar cvzf submit.tar.gz submit
-	cd submit && pdflatex paper && pdflatex paper
-	mv submit/paper.pdf submit.pdf
+	cd submit && latex paper && latex paper
