@@ -6,5 +6,11 @@ Terminal commands:
 takes the stderr of your program (one of the types of output) and puts it in stdout, along with what would also be in stdout.  The idea is that the "2" represents the stderr and the "&1" represents the fact that "1" is a file descriptor and "1" itself is the stdout.
 
     valgrind *program* | less
-Will run program in valgrind and pipe results in less so can read them.  Valgrind is named after the main entrance to Valhalla, which is ruled by Odin and is where warriors go when they die in combat.  Runs the program on a virtual machine after it has converted it into a language called Intermediate Representation.  Once in IR, it can use "tools" on it, that do stuff that's nice for us when debugging.  Most common is "memcheck".  This keeps track of allocation of memory - it let's you know when memory is unallocated or "undefined" and also whether a memory address points to an allocated, non-freed memory block. 
+Will run program in valgrind and pipe results in less so can read them.  Valgrind is named after the main entrance to Valhalla, which is ruled by Odin and is where warriors go when they die in combat.  Runs the program on a virtual machine after it has converted it into a language called Intermediate Representation.  Once in IR, it can use "tools" on it, that do stuff that's nice for us when debugging.  Most common is "memcheck".  This keeps track of allocation of memory - it let's you know when memory is unallocated or "undefined" and also whether a memory address points to an allocated, non-freed memory block. Output is in the form:
    
+    ==2088== Conditional jump or move depends on uninitialised value(s)
+    ==2088==    at 0x56274A0: __printf_fp (printf_fp.c:404)
+    ==2088==    by 0x562396A: vfprintf (vfprintf.c:1622)
+    ==2088==    by 0x562C927: fprintf (fprintf.c:33)
+    ==2088==    by 0x402D10: main (protein.cpp:307)
+The problem in your code is given in the last line (the protein.cpp in example above)
