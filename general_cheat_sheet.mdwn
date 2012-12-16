@@ -15,5 +15,5 @@ Will run program in valgrind and pipe results in less so can read them.  Valgrin
     ==2088==    by 0x402D10: main (protein.cpp:307)
 The problem in your code is given in the last line (the protein.cpp in example above)
  
-   git diff
+    git diff
 This views the changes you made relative to the index (staging area for the next commit).  There are different forms or options with git diff that allows you to compare different things.  Worth looking up. Git has nothing to do with Odin *or* warriors.
