@@ -5,4 +5,6 @@ Terminal commands:
     2>&1 
 takes the stderr of your program (one of the types of output) and puts it in stdout, along with what would also be in stdout.  The idea is that the "2" represents the stderr and the "&1" represents the fact that "1" is a file descriptor and "1" itself is the stdout.
 
+    valgrind *program* | less
+Will run program in valgrind and pipe results in less so can read them.  Valgrind is named after the main entrance to Valhalla, which is ruled by Odin and is where warriors go when they die in combat.  Runs the program on a virtual machine after it has converted it into a language called Intermediate Representation.  Once in IR, it can use "tools" on it, that do stuff that's nice for us when debugging.  Most common is "memcheck".  This keeps track of allocation of memory - it let's you know when memory is unallocated or "undefined" and also whether a memory address points to an allocated, non-freed memory block. 
    
