@@ -14,6 +14,7 @@ stamp-*
 *.test
 deft
 monte-carlo
+soft-monte-carlo
 analyze-monte-carlo
 foobar
 install-sh
