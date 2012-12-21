@@ -332,13 +332,13 @@ following sections, we will introduce the terms of this functional.
 The first term is the ideal gas free energy functional, which is
 purely local:
 \begin{equation}\label{idealgas}
-  F_{id}[n] = k_B T \int n(\xx)\left( \ln{\frac{n(\xx)}{{l_Q}^3}} - 1\right) d\xx,
+  F_{id}[n] = k_B T \int n(\xx)\left( \ln({n(\xx){\Lambda}^3}) - 1\right) d\xx,
 \end{equation}
-where n(\xx) is the density of water molecules and $l_Q$ is the
+where n(\xx) is the density of water molecules and $\Lambda$ is the
 thermal wavelength
-\begin{equation}\label{quantumconcentration}
- l_Q =\left(\frac{mk_BT}{2\pi\hbar^2}\right)^{1/2}.
-\end{equation}
+%\begin{equation}\label{quantumconcentration}
+$ \Lambda = \left(\frac{2\pi\hbar^2}{mk_BT}\right )^{1/2}$.
+%\end{equation}
 The ideal gas free energy functional on its own satisfies the contact
 value theorem and its limiting case of small solutes (Equations
 \ref{eq:contact} and \ref{contactvaluethm}). These properties are
