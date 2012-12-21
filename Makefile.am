@@ -66,6 +66,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.mkdat \
+	papers/pair-correlation/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -201,6 +202,8 @@ papers_contact_figs_test_particle_wall_mkdat_SOURCES = papers/contact/figs/test-
 papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CONTACT_CODE)
 
+papers_pair_correlation_figs_walls_mkdat_SOURCES = papers/pair-correlation/figs/walls.cpp $(ALL_CONTACT_CODE)
+
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
 comparisons_delta_deft_test_SOURCES = comparisons/delta_deft.cpp $(GENERIC_CODE)
@@ -254,6 +257,7 @@ papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.dat \
 	papers/contact/figs/free-energy.dat \
+	papers/pair-correlation/figs/walls.dat \
 	papers/water-SAFT/figs/equation-of-state.dat \
 	papers/water-SAFT/figs/surface-tension.dat \
 	papers/water-SAFT/figs/pressure-with-isotherms.dat \
@@ -261,9 +265,7 @@ papers: all papers/contact/figs/gHS-vs-n.dat \
 	rm -f ~/.matplotlib/fontList.cache # see above for explanation
 	cd papers && $(MAKE)
 
-papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
-	$<
-papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
+papers/%.dat: papers/%.mkdat
 	$<
 doc/%.pdf: src/haskell/latex-functionals.exe
 	$< $@

@@ -48,5 +48,5 @@ w3 x = ifft ( stepk * fft x)
 
 vsoft_shell :: Expression RealSpace -> Vector RealSpace
 vsoft_shell x = vifft $ deltav *. fft x
-  where deltav = vprotect "delta" "\\delta(k)" $
+  where deltav = vprotect "delta" (\i -> "\\delta_"++i++"(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
