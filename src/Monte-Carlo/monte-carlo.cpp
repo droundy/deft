@@ -567,6 +567,7 @@ int main(int argc, char *argv[]){
   char * counterout = new char[10000];
   sprintf(counterout, "monte-carlo-count-%s-%d.dat", argv[1], int (rad));
   FILE *countout = fopen(counterout,"w");
+  delete[] counterout;
   for (long i=0;i<N; i++){
     fprintf(countout, "%d\n", max_move_counter[i]);
   }
