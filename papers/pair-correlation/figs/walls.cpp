@@ -52,8 +52,7 @@ Functional WBT = HardSpheresWBFast(1.0);
 const int numiters = 25;
 
 
-void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d,
-            const Grid &e, const Grid &f, const Grid &g, const Grid &h) {
+void z_plot(const char *fname, const Grid &a, const Grid &b) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -67,14 +66,12 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c, cons
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
-    double chere = c(x,y,z);
-    double dhere = d(x,y,z);
-    double ehere = e(x,y,z);
-    double fhere = f(x,y,z);
-    double ghere = g(x,y,z);
-    double hhere = h(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[2],
-            ahere, bhere, chere, dhere, ehere, fhere, ghere, hhere);
+    fprintf(out, "%g\t%g\t%g\n", here[2], ahere, bhere);
+  }
+  // hypothetical loop
+  for (double z=0; z<gd.Lat.a3().z(); z+= 0.015) {
+    double ahere = a(Cartesian(0,0,z));
+    printf("a(%g) = %g\n", z, ahere);
   }
   fclose(out);
 }
@@ -117,20 +114,10 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   
   char *plotname = (char *)malloc(1024);
-  Grid energy_density(gd, f(1, gd, potential));
-  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
-  if (strlen(name) == 4) { 
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
-    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
-  }
-  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
-  Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
-  Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
-  Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
+  Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
+
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
+  z_plot(plotname, density, gsigma);
   free(plotname);
 
   {
@@ -173,8 +160,8 @@ int main(int, char **) {
   fclose(fout);
   for (double eta = 0.1; eta < 0.6; eta+=0.1) {
     run_walls(eta, "WB", WB);
-    run_walls(eta, "WBT", WBT);
-    run_walls(eta, "WBm2", WBm2);
+    //run_walls(eta, "WBT", WBT);
+    //run_walls(eta, "WBm2", WBm2);
   }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
