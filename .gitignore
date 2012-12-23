@@ -15,7 +15,7 @@ stamp-*
 deft
 monte-carlo
 soft-monte-carlo
-analyze-monte-carlo
+pair-monte-carlo
 foobar
 install-sh
 depcomp
