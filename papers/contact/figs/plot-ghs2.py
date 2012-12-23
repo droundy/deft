@@ -33,7 +33,7 @@ x[2] = .5
 x[3] = 6.56
 x[4] = 2.1
 
-x[5] = -.4
+x[5] = .4
 x[6] = 4.8
 x[7] = 3.02
 
@@ -46,10 +46,10 @@ def dist(x, ind):
 
     h1 = x[2]*gsig
     f1 = numpy.sin(x[3]*r) * numpy.exp(-x[4]*r)
-    
-    h2 = x[5]*gsig**(2)
+
+    h2 = -x[5]*gsig**(2)
     f2 = numpy.sin(x[6]*r) * numpy.exp(-x[7]*r)
-   
+
     g = 1 + h0*f0 + h1*f1 + h2*f2
     return g
 
@@ -62,13 +62,13 @@ def distWeighted(x, ind):
 
     h1 = x[2]*gsig
     f1 = numpy.sin(x[3]*r) * numpy.exp(-x[4]*r)
-    
+
     h2 = x[5]*gsig**(2)
     f2 = numpy.sin(x[6]*r) * numpy.exp(-x[7]*r)
-   
+
     g = 1 + h0*f0 + h1*f1 + h2*f2
     return g*r**(-4)
-  
+
 def plotdatag(x, ind):
     gsig, r = ind
     #gsig -= 1
@@ -79,19 +79,19 @@ def plotdatag(x, ind):
 
     h1 = x[3]*gsig
     f1 = numpy.cos(x[4]*r - x[5]) * numpy.exp(-x[6]*r)
-    
+
     h2 = x[7]*gsig**(-1)
     f2 = numpy.cos(x[8]*r - x[9]) * numpy.exp(-x[10]*r)
 
     h3 = x[11]*gsig**(2)
     f3 = numpy.cos(x[12]*r - x[13]) * numpy.exp(-x[14]*r)
-    
+
 #    h4 = x[15]*gsig**(-2)
 #    f4 = numpy.cos(x[16]*r - x[17]) * numpy.exp(-x[18]*r)
-       
+
     g = 1 + h0*f0 + h1*f1 + h2*f2 + h3*f3 #+ h4*f4
     return g, h0*f0, h1*f1, h2*f2, h3*f3
-    
+
 def read_ghs(ff):
     mcdatafilename = "figs/mc-inner-sphere-2-0.%d.dat" % (10*ff)
     print 'Using', mcdatafilename
