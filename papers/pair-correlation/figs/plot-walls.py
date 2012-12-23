@@ -6,6 +6,7 @@ from __future__ import division
 import matplotlib
 import pylab, numpy, sys
 import os.path
+from matplotlib.colors import LinearSegmentedColormap
 
 ff = .3
 z0 = 9
@@ -36,12 +37,36 @@ def read_walls(ff, z0):
 
 g2 = read_walls(ff, z0)
 
-pylab.figure(1)
-CS = pylab.contourf(Z, X, g2, 100)
-CB = pylab.colorbar(CS)
+cdict = {'red':  ((0.0, 0.0, 0.0),
+                  (0.25,0.0, 0.0),
+                  (0.5, 0.8, 1.0),
+                  (0.75,1.0, 1.0),
+                  (1.0, 0.4, 1.0)),
 
-pylab.axvline(x=0, color='k', linestyle=':')
-pylab.axhline(y=0, color='k', linestyle=':')
+        'green': ((0.0, 0.0, 0.0),
+                  (0.25,0.0, 0.0),
+                  (0.5, 0.9, 0.9),
+                  (0.75,0.0, 0.0),
+                  (1.0, 0.0, 0.0)),
+
+        'blue':  ((0.0, 0.0, 0.4),
+                  (0.25,1.0, 1.0),
+                  (0.5, 1.0, 0.8),
+                  (0.75,0.0, 0.0),
+                  (1.0, 0.0, 0.0))
+        }
+map = LinearSegmentedColormap('map', cdict)
+pylab.register_cmap(cmap = map)
+cmap = pylab.get_cmap('map')
+fig = pylab.figure(1)
+max = int(g2.max())+1
+dw = .05
+levels = numpy.arange(2-max, max+dw/2, dw)
+CS = pylab.contourf(Z, X, g2, levels, cmap=cmap)
+pylab.contourf(Z, -X, g2, levels, cmap=cmap)
+CB = pylab.colorbar(CS)
+pylab.axes().set_aspect('equal')
+
 pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
 pylab.xlabel("z")
 pylab.ylabel("x")
