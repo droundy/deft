@@ -25,7 +25,7 @@
 
 // Maximum and spacing values for plotting, saved for use by plot-walls.py
 const double zmax = 18;
-const double xmax = 10;
+const double xmax = 7;
 const double dx = 0.01;
 
 // Here we set up the lattice.
@@ -36,6 +36,7 @@ const double spacing = 3; // space on each side
 double radial_distribution(double gsigma, double r)
 {
   // Constants determined by fit to monte-carlo data by papers/contact/figs/plot-ghs2.py
+  double d = r/2 - 1;
   const double a0 = 1.207,
                a1 = 6.896,
                a2 = .4921,
@@ -44,8 +45,10 @@ double radial_distribution(double gsigma, double r)
                a5 = .3890,
                a6 = 4.670,
                a7 = 3.033;
-  return 1 + a0*(gsigma-1)*exp(-a1*r) + a2*(gsigma-1)*sin(a3*r)*exp(-a4*r)
-           - a5*(gsigma-1)*(gsigma-1)*sin(a6*r)*exp(-a7*r);
+  if (d <= 0)
+    return 0;
+  return 1 + a0*(gsigma-1)*exp(-a1*d) + a2*(gsigma-1)*sin(a3*d)*exp(-a4*d)
+           - a5*(gsigma-1)*(gsigma-1)*sin(a6*d)*exp(-a7*d);
 }
 
 double notinwall(Cartesian r) {
@@ -107,7 +110,9 @@ void plot_pair_distribution(const char *fname, double z0, const Grid &gsigma) {
     for (double z1 = 0; z1 < zmax - dx/2; z1 += dx) {
       double gsigma1 = gsigma(Cartesian(0, 0, z1));
       double r = sqrt((z0 - z1)*(z0 - z1) + x*x);
-      double g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
+      double g2 = 0;
+      if (r > 2)
+        g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
       fprintf(out, "%g\t", g2);
     }
     fprintf(out, "\n");

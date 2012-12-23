@@ -86,7 +86,7 @@ n = int(z0/dx)
 pylab.plot(x, g2[:,n])
 
 pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$ for $z_1=z_0$.' %(z0, ff))
-pylab.xlim(0,2.25)
+pylab.xlim(2, 6.5)
 pylab.ylim(0, 3.5)
 pylab.xlabel("x")
 pylab.ylabel("g")
