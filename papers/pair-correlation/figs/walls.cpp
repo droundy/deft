@@ -24,8 +24,8 @@
 #include "handymath.h"
 
 // Maximum and spacing values for plotting, saved for use by plot-walls.py
-const double zmax = 18;
-const double xmax = 7;
+const double zmax = 20;
+const double xmax = 10;
 const double dx = 0.01;
 
 // Here we set up the lattice.
@@ -36,7 +36,6 @@ const double spacing = 3; // space on each side
 double radial_distribution(double gsigma, double r)
 {
   // Constants determined by fit to monte-carlo data by papers/contact/figs/plot-ghs2.py
-  double d = r/2 - 1;
   const double a0 = 1.207,
                a1 = 6.896,
                a2 = .4921,
@@ -45,6 +44,7 @@ double radial_distribution(double gsigma, double r)
                a5 = .3890,
                a6 = 4.670,
                a7 = 3.033;
+  double d = r/2 - 1;
   if (d <= 0)
     return 0;
   return 1 + a0*(gsigma-1)*exp(-a1*d) + a2*(gsigma-1)*sin(a3*d)*exp(-a4*d)
@@ -98,26 +98,40 @@ void z_plot(const char *fname, const Grid &a, const Grid &b) {
   fclose(out);
 }
 
-void plot_pair_distribution(const char *fname, double z0, const Grid &gsigma) {
+void plot_pair_distribution(const char *fname, const char *fname2, double z0, const Grid &gsigma) {
   FILE *out = fopen(fname, "w");
+  FILE *out2 = fopen(fname2, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
     return;
   }
-  double gsigma0 = gsigma(Cartesian(0, 0, z0));
+  if (!out2) {
+    fprintf(stderr, "Unable to create file %s!\n", fname2);
+    return;
+  }
+  // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
+  // is at z = 0, to match with the monte carlo data
+  double gsigma0 = gsigma(Cartesian(0, 0, z0+1));
   const GridDescription gd = gsigma.description();
   for (double x = 0; x < xmax - dx/2; x += dx) {
     for (double z1 = 0; z1 < zmax - dx/2; z1 += dx) {
-      double gsigma1 = gsigma(Cartesian(0, 0, z1));
+      double gsigma1 = gsigma(Cartesian(0, 0, z1+1));
+      double gsigma2 = gsigma(Cartesian(0, 0, z1+2));
       double r = sqrt((z0 - z1)*(z0 - z1) + x*x);
       double g2 = 0;
-      if (r > 2)
+      double g2b = 0;
+      if (r > 2) {
         g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
+        g2b = (radial_distribution(gsigma0, r) + radial_distribution(gsigma2, z1+2))/2;
+      }
       fprintf(out, "%g\t", g2);
+      fprintf(out2, "%g\t", g2b);
     }
     fprintf(out, "\n");
+    fprintf(out2, "\n");
   }
   fclose(out);
+  fclose(out2);
 }
 
 
@@ -159,16 +173,20 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
   char *plotname = (char *)malloc(1024);
+  char *plotname2 = (char *)malloc(1024);
   Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
 
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma);
 
-  for (double z0 = 1; z0 < 18; z0 += 2) {
+  // here you choose the values of z0 to use
+  for (double z0 = 0; z0 < 5; z0 += .5) {
     sprintf(plotname, "papers/pair-correlation/figs/walls%s-pair-%04.2f-%g.dat", name, eta, z0);
-    plot_pair_distribution(plotname, z0, gsigma);
+    sprintf(plotname2, "papers/pair-correlation/figs/walls%s-pair-%04.2f-%g-b.dat", name, eta, z0);
+    plot_pair_distribution(plotname, plotname2, z0, gsigma);
   }
     free(plotname);
+    free(plotname2);
 
   {
     GridDescription gdj = density.description();

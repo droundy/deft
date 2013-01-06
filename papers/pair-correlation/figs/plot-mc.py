@@ -9,7 +9,7 @@ import os.path
 from matplotlib.colors import LinearSegmentedColormap
 
 ff = .3
-z0 = 9
+z0 = 2
 if (len(sys.argv) > 1):
     ff = float(sys.argv[1])
 if (len(sys.argv) > 2):
@@ -18,26 +18,29 @@ if (len(sys.argv) > 2):
 
 
 constants = numpy.loadtxt("constants.dat")
-zmax = constants[0]
-xmax = constants[1]
-dx = constants[2]
+zmax = 20
+xmax = 10
+bins = 200
+
+dx = xmax/bins
+dz = zmax/bins
 
 x = numpy.arange(0, xmax, dx)
-z = numpy.arange(0, zmax, dx)
+z = numpy.arange(0, zmax, dz)
 Z, X = numpy.meshgrid(z, x)
 
-def read_walls(ff, z0, function_version):
-    filename = "wallsWB-pair-0.%d0-%g%s.dat" % (10*ff, z0, function_version)
+def read_walls(ff, z0):
+    filename = "mc/wallsMC-pair-0.%d0-%g.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
-        print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or edit walls.cpp then rerun make papers to generate more data."
+        print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
         sys.exit(1)
     data = numpy.loadtxt(filename)
     return data
 
-g2 = read_walls(ff, z0, '')
-g2b = read_walls(ff, z0, '-b')
-
+g2 = read_walls(ff, z0)
+#g2 /= 1.25
+g2*=.76
 cdict = {'red':  ((0.0, 0.0, 0.0),
                   (0.25,0.0, 0.0),
                   (0.5, 0.8, 1.0),
@@ -59,11 +62,12 @@ cdict = {'red':  ((0.0, 0.0, 0.0),
 map = LinearSegmentedColormap('map', cdict)
 pylab.register_cmap(cmap = map)
 cmap = pylab.get_cmap('map')
-
 fig = pylab.figure(1)
-max = int(g2.max())+1
+max = int(g2.max()) + 1
+print max
 dw = .05
 levels = numpy.arange(2-max, max+dw/2, dw)
+
 CS = pylab.contourf(Z, X, g2, levels, cmap=cmap)
 pylab.contourf(Z, -X, g2, levels, cmap=cmap)
 CB = pylab.colorbar(CS)
@@ -72,41 +76,6 @@ pylab.axes().set_aspect('equal')
 pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
 pylab.xlabel("z")
 pylab.ylabel("x")
-#pylab.xlim(1, 21)
 
-fig = pylab.figure(2)
-max = int(g2b.max())+1
-dw = .05
-levels = numpy.arange(2-max, max+dw/2, dw)
-CS = pylab.contourf(Z, X, g2b, levels, cmap=cmap)
-pylab.contourf(Z, -X, g2b, levels, cmap=cmap)
-CB = pylab.colorbar(CS)
-pylab.axes().set_aspect('equal')
 
-#pylab.xlim(1, 21)
-pylab.title('$g_b^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
-pylab.xlabel("z")
-pylab.ylabel("x")
-
-'''
-pylab.figure(2)
-pylab.plot(z, g2[0,:])
-
-pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$ for $x_1=0$' %(z0, ff))
-pylab.xlabel("z")
-pylab.ylabel("g")
-
-pylab.figure(3)
-# This should be exactly the same as g(r) in contact/figs/plot-ghs2.py for the same
-# gsigma, if everything is coded correctly. It is scaled similary so the two can be
-# compared.
-n = int(z0/dx)
-pylab.plot(x, g2[:,n])
-
-pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$ for $z_1=z_0$.' %(z0, ff))
-pylab.xlim(2, 6.5)
-pylab.ylim(0, 3.5)
-pylab.xlabel("x")
-pylab.ylabel("g")
-'''
 pylab.show()

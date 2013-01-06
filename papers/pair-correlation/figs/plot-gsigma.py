@@ -15,6 +15,7 @@ import pylab, numpy, sys
 
 pylab.figure(1)
 pylab.title('$g_{\sigma}$')
+pylab.xlabel('r')
 pylab.axvline(x=1, color='k', linestyle=':')
 pylab.axhline(y=1, color='k', linestyle=':')
 
