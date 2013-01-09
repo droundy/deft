@@ -347,7 +347,7 @@ int main(int argc, char *argv[]){
           for (int i=0; i<bins; i++) {
             for (int k=0; k<bins; k++) {
               double value = double(histogram[k][i])/workingmoves/
-                (3.141592654*(2*i+1)/(4*bins*bins*bins));
+                (3.141592654*(2*i+1)/(4*bins*bins*bins)); // V_bin / Total Volume
               fprintf(out, "%g\t", value);
             }
             fprintf(out, "\n");
@@ -386,17 +386,15 @@ int main(int argc, char *argv[]){
         shells[shell(spheres[i], div, radius, sections)]++;
 
         // convert data from coordinates to matrix indices for data storage
-        int z0bin = int((z0+lenz/2)*bins/lenz);
         int z1 = int((spheres[i].z()+lenz/2)*bins/lenz);
         double xydist = distance(Vector3d(spheres[i].x(), spheres[i].y(), 0),
                                  Vector3d(0, 0, 0));
         int x1 = int((xydist)*bins/lenx*2);
         //printf ("%g\t%i\n", xydist, x1);
-        //printf("z0: %.3f, bin: %i, z1: %.3f, bin: %i, x1: %.3f, bin: %i\n",
-        //       spheres[0].z(), z0bin, spheres[i].z(), z1, xydist, x1);
-        if (x1 < bins) { // ignore data past outermost complete cylindrical shell
+        //printf("z1: %.3f, bin: %i, x1: %.3f, bin: %i\n",
+        //       spheres[i].z(), z1, xydist, x1);
+        if (x1 < bins) // ignore data past outermost complete cylindrical shell
           histogram[z1][x1]++;
-        }
       }
     }
     if(j % (iterations/100)==0 && j != 0){
