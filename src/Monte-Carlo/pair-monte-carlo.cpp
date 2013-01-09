@@ -15,7 +15,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 
-int bins = 200; // number of bins to have in each dimension
+int bins = 20; // number of bins to have in each dimension
 bool has_x_wall = false;
 bool has_y_wall = false;
 bool has_z_wall = false;
@@ -124,10 +124,13 @@ int main(int argc, char *argv[]){
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  long histogram[bins][bins];
-  for (int i=0; i<bins; i++)
+  long *histogram = new long[bins*bins];
+  long *density_histogram = new long[bins];
+  for (int i=0; i<bins; i++) {
+    density_histogram[i] = 0;
     for (int j=0; j<bins; j++)
-      histogram[i][j]=0;
+      histogram[i*bins+j]=0;
+  }
 
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
@@ -200,6 +203,10 @@ int main(int argc, char *argv[]){
         char *debugname = new char[10000];
         sprintf(debugname, "%s.debug", outfilename);
         FILE *spheredebug = fopen(debugname, "w");
+        if (!spheredebug) {
+          printf("oops opening %s\n", debugname);
+          exit(1);
+        }
         for(long i=0; i<N; i++) {
           fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
         }
@@ -346,9 +353,15 @@ int main(int argc, char *argv[]){
         if (flat_div){
           for (int i=0; i<bins; i++) {
             for (int k=0; k<bins; k++) {
-              double value = double(histogram[k][i])/workingmoves/
-                (3.141592654*(2*i+1)/(4*bins*bins*bins));
-              fprintf(out, "%g\t", value);
+              const double dz = lenz/bins;
+              const double dr = lenx/bins/2;
+              const double rmin = i*dr; // +/- dr/2?
+              const double rmax = (i+1)*dr; // +/- dr/2?
+              const double bin_volume = M_PI*(rmax*rmax-rmin*rmin)*dz;
+              const double total_volume = lenx*leny*lenz;
+              double n2sortof = double(histogram[k*bins+i])/workingmoves/bin_volume;
+              double g = n2sortof; // n2/n;
+              fprintf(out, "%g\t", g);
             }
             fprintf(out, "\n");
           }
@@ -387,15 +400,17 @@ int main(int argc, char *argv[]){
 
         // convert data from coordinates to matrix indices for data storage
         int z0bin = int((z0+lenz/2)*bins/lenz);
-        int z1 = int((spheres[i].z()+lenz/2)*bins/lenz);
+        const double dz = lenz/bins;
+        int z1 = int((spheres[i].z()+lenz/2)/dz);
         double xydist = distance(Vector3d(spheres[i].x(), spheres[i].y(), 0),
                                  Vector3d(0, 0, 0));
-        int x1 = int((xydist)*bins/lenx*2);
+        const double dr = lenx/bins/2;
+        int x1 = int(xydist/dr);
         //printf ("%g\t%i\n", xydist, x1);
         //printf("z0: %.3f, bin: %i, z1: %.3f, bin: %i, x1: %.3f, bin: %i\n",
         //       spheres[0].z(), z0bin, spheres[i].z(), z1, xydist, x1);
         if (x1 < bins) { // ignore data past outermost complete cylindrical shell
-          histogram[z1][x1]++;
+          histogram[z1*bins+x1]++;
         }
       }
     }
@@ -451,6 +466,10 @@ int main(int argc, char *argv[]){
   char * counterout = new char[10000];
   sprintf(counterout, "monte-carlo-count-%s-%d.dat", argv[1], int (rad));
   FILE *countout = fopen(counterout,"w");
+  if (!countout) {
+    printf("error opening %s\n", counterout);
+    exit(1);
+  }
   delete[] counterout;
   for (long i=0;i<N; i++){
     fprintf(countout, "%d\n", max_move_counter[i]);
@@ -481,6 +500,7 @@ int main(int argc, char *argv[]){
   delete[] spheres;
   delete[] max_move_counter;
   delete[] move_counter;
+  delete[] histogram;
   fflush(stdout);
   fclose(countout);
 }
