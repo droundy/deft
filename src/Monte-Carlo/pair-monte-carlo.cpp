@@ -354,7 +354,6 @@ int main(int argc, char *argv[]){
             // probably not here, although this code will need to change
             double z0coord = l*lenz/z0bins + dz/2;
             sprintf(finalfilename, "%s-%1.1f.dat", outfilename, z0coord);
-            printf("name: %s\n", finalfilename);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
