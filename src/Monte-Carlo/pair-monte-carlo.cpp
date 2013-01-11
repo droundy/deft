@@ -15,9 +15,9 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 
-int zbins = 20; // number of divisions for data collection
-int rbins = 20;
-int z0bins = 20; // number of z0 locations to look in reference to
+int zbins = 200; // number of divisions for data collection
+int rbins = 200;
+int z0bins = 200; // number of z0 locations to look in reference to
                  // they may be specified later
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -359,25 +359,24 @@ int main(int argc, char *argv[]){
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
-            const double r0min = i*dr; // +/- dr/2?
-            const double r0max = (i+1)*dr; // +/- dr/2?
-            const double bin0_volume = M_PI*(r0max*r0max-r0min*r0min)*dz;
-            const double z0density = density_histogram[l]/lenx/leny/dz;
+            const double bin0_volume = M_PI*dr*dr*dz;
+            const double z0density = density_histogram[l]/bin0_volume;
                                   // this will need to change if z0bins != zbins!!!!!!!
             for (int i=0; i<rbins; i++) {
+              const double r1min = i*dr; // +/- dr/2?
+              const double r1max = (i+1)*dr; // +/- dr/2?
+              const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
               for (int k=0; k<zbins; k++) {
-                const double r1min = k*dr;
-                const double r1max = (k+1)*dr;
-                const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
-                const double z1density = density_histogram[k]/lenx/leny/dz;
+                const double z1density = density_histogram[k]/bin1_volume;
                 double n2sortof = double(histogram[l*z0bins*rbins + i*rbins + k])
-                                  /workingmoves/bin0_volume/bin1_volume;
+                  /bin0_volume/bin1_volume/bin1_volume*lenx*leny*lenz;
                 double g = n2sortof/z0density/z1density;
+                //double g = n2sortof;
                 fprintf(out, "%g\t", g);
               }
+              fprintf(out, "\n");
             }
             fclose(out);
-            fprintf(out, "\n");
           }
         }/* else if (spherical_inner_wall) {
           fprintf(out, "%g\t%g\n", radius[0], 0.0);
@@ -420,8 +419,7 @@ int main(int argc, char *argv[]){
         for (int k=0; k<N; k++) {
           if (i != k) { // don't look at a sphere in relation to itself
             int z1 = int((spheres[k].z() + lenz/2)/dz);
-            double rdist = distance(Vector3d(spheres[k].x(), spheres[k].y(), 0),
-                                    Vector3d(spheres[i].x(), spheres[i].y(), 0));
+            double rdist = distXY(spheres[k], spheres[i]);
             int r1 = int(rdist/dr);
             if (r1 < rbins) // ignore data past outermost complete cylindrical shell
               histogram[z0*z0bins*rbins + r1*rbins + z1]++;
