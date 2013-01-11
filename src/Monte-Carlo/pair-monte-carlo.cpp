@@ -15,7 +15,10 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 
-int bins = 200; // number of bins to have in each dimension
+int zbins = 20; // number of divisions for data collection
+int rbins = 20;
+int z0bins = 20; // number of z0 locations to look in reference to
+                 // they may be specified later
 bool has_x_wall = false;
 bool has_y_wall = false;
 bool has_z_wall = false;
@@ -39,12 +42,12 @@ inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 5) {
-    printf("usage:  %s Nspheres iterations*N uncertainty_goal z0 filename \n there will be more!\n", argv[0]);
+    printf("usage:  %s Nspheres iterations*N uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
 
   double maxrad = 0;
-  for (int a=6; a<argc; a+=2){
+  for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
       spherical_outer_wall = true;
@@ -117,18 +120,24 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const char *outfilename = argv[5];
+  const char *outfilename = argv[4];
+  char *finalfilename = new char[1024];
   fflush(stdout);
   const long N = atol(argv[1]);
-  const double z0 = atof(argv[4])-lenz/2;
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  long histogram[bins][bins];
-  for (int i=0; i<bins; i++)
-    for (int j=0; j<bins; j++)
-      histogram[i][j]=0;
-
+  long *histogram = new long[z0bins*rbins*zbins];
+  long *density_histogram = new long[zbins];
+  int tempcount = 0;
+  for (int i=0; i<zbins; i++) {
+    density_histogram[i] = 0;
+    for (int k=0; k<rbins; k++) {
+      for (int l=0; l<z0bins; l++) {
+        histogram[l*z0bins*rbins + k*rbins + i]=0;
+      }
+    }
+  }
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
     return 1;
@@ -142,10 +151,7 @@ int main(int argc, char *argv[]){
   // constrain to never increase.  Note that this may not work at all
   // for high filling fractions, since we could get stuck in a local
   // minimum.
-  // The first sphere, that we will be comparing the rest of them to,
-  // is fixed in position forever.
-  spheres[0] = Vector3d(0, 0, z0);
-  for(long i=1; i<N; i++) {
+  for(long i=0; i<N; i++) {
     spheres[i]=10*rad*ran3();
     if (spherical_outer_wall) {
       while (spheres[i].norm() > rad) {
@@ -166,7 +172,7 @@ int main(int argc, char *argv[]){
 
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
-  for (i=1;i<N;i++) spheres[i] = move(spheres[i], scale);
+  for (i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
 
   clock_t starting_initial_state = clock();
   printf("Initial countOverLaps is %g\n", countOverLaps(spheres, N, R));
@@ -179,14 +185,12 @@ int main(int argc, char *argv[]){
         num_timed = 0;
         start = now;
       }
-      if (i%N != 0) {
-        Vector3d old = spheres[i%N];
-        double oldoverlap = countOneOverLap(spheres, N, i%N, R);
-        spheres[i%N]=move(spheres[i%N],scale);
-        double newoverlap = countOneOverLap(spheres, N, i%N, R);
-        if(newoverlap>oldoverlap){
-          spheres[i%N]=old;
-        }
+      Vector3d old = spheres[i%N];
+      double oldoverlap = countOneOverLap(spheres, N, i%N, R);
+      spheres[i%N]=move(spheres[i%N],scale);
+      double newoverlap = countOneOverLap(spheres, N, i%N, R);
+      if(newoverlap>oldoverlap){
+        spheres[i%N]=old;
       }
       i++;
       if (i%(100*N) == 0) {
@@ -200,6 +204,10 @@ int main(int argc, char *argv[]){
         char *debugname = new char[10000];
         sprintf(debugname, "%s.debug", outfilename);
         FILE *spheredebug = fopen(debugname, "w");
+        if (!spheredebug) {
+          printf("oops opening %s\n", debugname);
+          exit(1);
+        }
         for(long i=0; i<N; i++) {
           fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
         }
@@ -337,19 +345,39 @@ int main(int argc, char *argv[]){
             density[i]=shells[i]/(lenx*leny*lenz/div)/((j+1)/double(N));
           }
         }
-
-        FILE *out = fopen((const char *)outfilename,"w");
-        if (out == NULL) {
-          printf("Error creating file %s\n", outfilename);
-          return 1;
-        }
         if (flat_div){
-          for (int i=0; i<bins; i++) {
-            for (int k=0; k<bins; k++) {
-              double value = double(histogram[k][i])/workingmoves/
-                (3.141592654*(2*i+1)/(4*bins*bins*bins)); // V_bin / Total Volume
-              fprintf(out, "%g\t", value);
+          const double dz = lenz/zbins;
+          const double dr = lenx/rbins/2;
+          const double total_volume = lenx*leny*lenz;
+          for (int l=0; l<z0bins; l++) {
+            // ADD provision somewhere to only care about certain values of z0,
+            // probably not here, although this code will need to change
+            double z0coord = l*lenz/z0bins + dz/2;
+            sprintf(finalfilename, "%s-%1.1f.dat", outfilename, z0coord);
+            printf("name: %s\n", finalfilename);
+            FILE *out = fopen((const char *)finalfilename, "w");
+            if (out == NULL) {
+              printf("Error creating file %s\n", finalfilename);
+              return 1;
             }
+            const double r0min = i*dr; // +/- dr/2?
+            const double r0max = (i+1)*dr; // +/- dr/2?
+            const double bin0_volume = M_PI*(r0max*r0max-r0min*r0min)*dz;
+            const double z0density = density_histogram[l]/lenx/leny/dz;
+                                  // this will need to change if z0bins != zbins!!!!!!!
+            for (int i=0; i<rbins; i++) {
+              for (int k=0; k<zbins; k++) {
+                const double r1min = k*dr;
+                const double r1max = (k+1)*dr;
+                const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
+                const double z1density = density_histogram[k]/lenx/leny/dz;
+                double n2sortof = double(histogram[l*z0bins*rbins + i*rbins + k])
+                                  /workingmoves/bin0_volume/bin1_volume;
+                double g = n2sortof/z0density/z1density;
+                fprintf(out, "%g\t", g);
+              }
+            }
+            fclose(out);
             fprintf(out, "\n");
           }
         }/* else if (spherical_inner_wall) {
@@ -373,28 +401,33 @@ int main(int argc, char *argv[]){
           }
         }
 */        fflush(stdout);
-        fclose(out);
       }
       ///////////////////////////////////////////end of print.dat
     }
 
     // only write out the sphere positions after they've all had a
     // chance to move
+    // positions are converted from coordinates to matrix indices,
+    // then histogram and density_histogram count spheres at the
+    // appropriate locations
     if (workingmoves%N == 0) {
-      for (long i=1; i<N; i++) {
+      for (int i=0; i<N; i++) {
+        const double dz = lenz/zbins;
+        const double dr = lenx/rbins/2;
+        int z0 = int((spheres[i].z() + lenz/2)/dz);
+        density_histogram[z0]++;
+        shells[shell(spheres[i], div, radius, sections)]++; // old, maybe delete?
         //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-        shells[shell(spheres[i], div, radius, sections)]++;
-
-        // convert data from coordinates to matrix indices for data storage
-        int z1 = int((spheres[i].z()+lenz/2)*bins/lenz);
-        double xydist = distance(Vector3d(spheres[i].x(), spheres[i].y(), 0),
-                                 Vector3d(0, 0, 0));
-        int x1 = int((xydist)*bins/lenx*2);
-        //printf ("%g\t%i\n", xydist, x1);
-        //printf("z1: %.3f, bin: %i, x1: %.3f, bin: %i\n",
-        //       spheres[i].z(), z1, xydist, x1);
-        if (x1 < bins) // ignore data past outermost complete cylindrical shell
-          histogram[z1][x1]++;
+        for (int k=0; k<N; k++) {
+          if (i != k) { // don't look at a sphere in relation to itself
+            int z1 = int((spheres[k].z() + lenz/2)/dz);
+            double rdist = distance(Vector3d(spheres[k].x(), spheres[k].y(), 0),
+                                    Vector3d(spheres[i].x(), spheres[i].y(), 0));
+            int r1 = int(rdist/dr);
+            if (r1 < rbins) // ignore data past outermost complete cylindrical shell
+              histogram[z0*z0bins*rbins + r1*rbins + z1]++;
+          }
+        }
       }
     }
     if(j % (iterations/100)==0 && j != 0){
@@ -449,6 +482,10 @@ int main(int argc, char *argv[]){
   char * counterout = new char[10000];
   sprintf(counterout, "monte-carlo-count-%s-%d.dat", argv[1], int (rad));
   FILE *countout = fopen(counterout,"w");
+  if (!countout) {
+    printf("error opening %s\n", counterout);
+    exit(1);
+  }
   delete[] counterout;
   for (long i=0;i<N; i++){
     fprintf(countout, "%d\n", max_move_counter[i]);
@@ -479,6 +516,9 @@ int main(int argc, char *argv[]){
   delete[] spheres;
   delete[] max_move_counter;
   delete[] move_counter;
+  delete[] histogram;
+  delete[] density_histogram;
+  delete[] finalfilename;
   fflush(stdout);
   fclose(countout);
 }

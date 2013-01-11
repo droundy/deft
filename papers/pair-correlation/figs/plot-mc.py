@@ -30,7 +30,7 @@ z = numpy.arange(0, zmax, dz)
 Z, X = numpy.meshgrid(z, x)
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d0-%g.dat" % (10*ff, z0)
+    filename = "mc/wallsMC-pair-0.%d0-%1.1f.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
@@ -40,7 +40,7 @@ def read_walls(ff, z0):
 
 g2 = read_walls(ff, z0)
 #g2 /= 1.25
-g2*=.76
+#g2*=.76
 cdict = {'red':  ((0.0, 0.0, 0.0),
                   (0.25,0.0, 0.0),
                   (0.5, 0.8, 1.0),
@@ -68,8 +68,8 @@ print max
 dw = .05
 levels = numpy.arange(2-max, max+dw/2, dw)
 
-CS = pylab.contourf(Z, X, g2, levels, cmap=cmap)
-pylab.contourf(Z, -X, g2, levels, cmap=cmap)
+CS = pylab.contourf(Z, X, g2)#, levels, cmap=cmap)
+pylab.contourf(Z, -X, g2)#, levels, cmap=cmap)
 CB = pylab.colorbar(CS)
 pylab.axes().set_aspect('equal')
 
