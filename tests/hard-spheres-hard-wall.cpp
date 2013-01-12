@@ -150,14 +150,14 @@ int main(int, char **argv) {
     Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
     //density.epsNativeSlice("PreconditionedConjugateGradient.eps", Cartesian(0,0,zmax), Cartesian(1,0,0),
     //                       Cartesian(0,0,0));
-    density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), diameter_cubed, R, "Y axis: n*8*R^3, x axis: R");
-    potential.epsNative1d("hard-wall-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    //density.epsNative1d("hard-wall-plot.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), diameter_cubed, R, "Y axis: n*8*R^3, x axis: R");
+    //potential.epsNative1d("hard-wall-potential.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid grad(gd), pgrad(gd);
     grad.setZero();
     pgrad.setZero();
     ff.integralgrad(water_prop.kT, potential, &grad, &pgrad);
-    grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
-    pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    //grad.epsNative1d("hard-wall-grad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
+    //pgrad.epsNative1d("hard-wall-pgrad.eps", Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
     Grid(gd, StepConvolve(R)(water_prop.kT, density)).epsNative1d("n3.eps",
                                                                   Cartesian(0,0,0), Cartesian(0,0,zmax), 1, R);
  
