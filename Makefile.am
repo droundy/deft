@@ -43,7 +43,7 @@ ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo
+bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 tests_newcode_test_SOURCES = $(NEW_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
@@ -51,6 +51,8 @@ monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 soft_monte_carlo_SOURCES = src/Monte-Carlo/soft-monte-carlo.cpp \
 	src/utilities.cpp
 pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
+	src/utilities.cpp
+radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/water-SAFT/figs/surface-tension.mkdat \
