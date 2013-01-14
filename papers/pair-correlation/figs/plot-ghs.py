@@ -93,15 +93,13 @@ def plotdatag(x, ind):
     return g, h0*f0, h1*f1, h2*f2, h3*f3
 
 def read_ghs(ff):
-    mcdatafilename = "figs/mc-inner-sphere-2-0.%d.dat" % (10*ff)
+    mcdatafilename = "figs/gr-0.%d0.dat" % (10*ff)
     print 'Using', mcdatafilename
     mcdata = numpy.loadtxt(mcdatafilename)
-    nA_mc = mcdata[:,11]
-    n0_mc = mcdata[:,10]
     r_mc = mcdata[:,0]
     n_mc = mcdata[:,1]
-    ghs = n_mc[r_mc>2]*4*numpy.pi/3/ff
-    return r_mc[r_mc>2], ghs
+    ghs = n_mc*4*numpy.pi/3/ff
+    return r_mc, ghs
 
 colors = ['r', 'g', 'b', 'c']
 ff = [.1008, .2, .3, .4]
@@ -146,6 +144,7 @@ while (i < len(r)*len(gsig)):
 #    print "ind[i] + (0,1): " + str((ind[i][0], ind[i][1]+1)) + "r: " + str((ind[i][1]+1)) + ", r^-4: " + str((ind[i][1]+1)**(-4)) + ", gW: " + str(g2[i]*(ind[i][1]+1)**(-4))
     i += 1
 
+print "beginning least squares fit..."
 vals, cov = ls.leastSquaresFit(dist, x, data)
 print "original fit complete, cov: " + str(cov)
 i = 0

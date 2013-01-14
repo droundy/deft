@@ -202,7 +202,16 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", outfilename);
           return 1;
         }
-        fprintf(out, "%g\t%g\n", radius[0], 0.0);
+        if (fabs(density[1] - density[0])/density[0] > 0.1/sqrt(shells[0])) {
+          // We have enough precision to consider extrapolating to the
+          // contact point.  We could do better than this, but this
+          // should be good enough when we have solid statistics.
+          fprintf(out, "%g\t%g\n", radius[0], 1.5*density[0] - 0.5*density[1]);
+        } else {
+          // We'll just duplicate the lowest point we have, as if it
+          // were the value at contact.
+          fprintf(out, "%g\t%g\n", radius[0], density[0]);
+        }
         fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
         long divtoprint = div;
         divtoprint = div - 1;
