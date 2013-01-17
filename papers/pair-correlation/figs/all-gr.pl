@@ -10,7 +10,8 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/radial-distribution-monte-car
 system "make radial-distribution-monte-carlo" || die "make failed";
 
 my $acc = 1e-5; # This is the fractional uncertainty in g(r) at contact
-my $dr = 0.001;
+my $dr = 0.01;
+my $version = "";
 
 my $dd;
 foreach $dd (0.1, 0.2, 0.3, 0.4, 0.5) {
@@ -19,15 +20,15 @@ foreach $dd (0.1, 0.2, 0.3, 0.4, 0.5) {
     # Here I estimate the amount of memory that will be needed...
     my $memuse = 30; # It's a very hokey guess
 
-    my $scriptname = "$dir/gr-$packingfraction.tmp.sh";
+    my $scriptname = "$dir/gr$version-$packingfraction.tmp.sh";
 
-    my $outfilename = "$dir/gr-$packingfraction.dat";
+    my $outfilename = "$dir/gr$version-$packingfraction.dat";
     my $command = "./radial-distribution-monte-carlo $packingfraction $acc $dr $outfilename";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
-#SBATCH --output gr-$packingfraction.out
+#SBATCH --output gr$version-$packingfraction.out
 
 set -ev
 

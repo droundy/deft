@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
   // At this stage, we'll set up our output grid...
   long div = long((lenx/2 - innerRad)/dr);
   if (div < 10) div = 10;
-  printf("Using %ld divisions, dx ~ %g\n", div, lenx/2/div);
+  printf("Using %ld divisions, dx ~ %g\n", div, (lenx/2 - innerRad)/div);
 
   double *radius = new double[div+1];
   for (long i=0;i<div+1;i++) radius[i] = innerRad + (lenx/2 - innerRad)*double(i)/div;
@@ -202,16 +202,11 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", outfilename);
           return 1;
         }
-        if (fabs(density[1] - density[0])/density[0] > 0.1/sqrt(shells[0])) {
-          // We have enough precision to consider extrapolating to the
-          // contact point.  We could do better than this, but this
-          // should be good enough when we have solid statistics.
-          fprintf(out, "%g\t%g\n", radius[0], 1.5*density[0] - 0.5*density[1]);
-        } else {
-          // We'll just duplicate the lowest point we have, as if it
-          // were the value at contact.
-          fprintf(out, "%g\t%g\n", radius[0], density[0]);
-        }
+        // We will just extrapolate to the contact point with a linear
+        // extrapolation.  We could do better than this, but this
+        // should be good enough once we have solid statistics.  And
+        // in a pinch we could always delete this first line.
+        fprintf(out, "%g\t%g\n", radius[0], 1.5*density[0] - 0.5*density[1]);
         fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
         long divtoprint = div;
         divtoprint = div - 1;
@@ -260,18 +255,9 @@ int main(int argc, char *argv[]){
     }
     Vector3d temp = move(spheres[j%N],scale);
     count++;
-    if(overlap(spheres, temp, N, R, j%N)){
-      if (scale > 0.001 && false) {
-        scale = scale/sqrt(1.02);
-        //printf("Reducing scale to %g\n", scale);
-      }
-      continue;
-    }
-    spheres[j%N] = temp;
-    workingmoves++;
-    if (scale < 5 && false) {
-      scale = scale*1.02;
-      //printf("Increasing scale to %g\n", scale);
+    if(!overlap(spheres, temp, N, R, j%N)){
+      spheres[j%N] = temp;
+      workingmoves++;
     }
   }
 
@@ -388,19 +374,23 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   for (long k=0; k<3; k++) {
-    for(long i = 0; i < n; i++) {
-      if (i!=s){
-        if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
-        if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
-      }
-    }
-    for (long m=k+1; m<3; m++){
+    if (amonborder[k]) {
       for(long i = 0; i < n; i++) {
         if (i!=s){
-          if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
-          if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
-          if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
-          if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
+          if (distance(v,spheres[i]+lat[k]) < 2*R) return true;
+          if (distance(v,spheres[i]-lat[k]) < 2*R) return true;
+        }
+      }
+      for (long m=k+1; m<3; m++) {
+        if (amonborder[m]) {
+          for(long i = 0; i < n; i++) {
+            if (i!=s){
+              if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) return true;
+              if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) return true;
+            }
+          }
         }
       }
     }
@@ -437,44 +427,6 @@ Vector3d move(Vector3d v,double scale){
   Vector3d newv = v+scale*ran3();
   return fixPeriodic(newv);
 }
-
-
-bool touch(Vector3d w, Vector3d v, double oShell){
-  const double dvw = distance(v,w);
-  if (dvw < 2*oShell) return true;
-  // The following is a hack to avoid doing many distance calculations
-  // in cases where we can be certain that periodic boundaries
-  // couldn't be allowing these two spheres to touch.  It makes a
-  // shocking difference in the overall speed, when we have periodic
-  // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return false;
-
-  // Now we check for all the possible ways the two spheres could
-  // touch across the cell in periodic directions...
-  //return false;
-  for (long k=0; k<3; k++){
-    if (distance(v,w+lat[k]) < 2*oShell) return true;
-    if (distance(v,w-lat[k]) < 2*oShell) return true;
-    for (long m=k+1; m<3; m++){
-      if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
-      if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
-      if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
-      if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
-    }
-  }
-  if (distance(v,w+latx+laty+latz) < 2*oShell) return true;
-  if (distance(v,w+latx+laty-latz) < 2*oShell) return true;
-  if (distance(v,w+latx-laty+latz) < 2*oShell) return true;
-  if (distance(v,w-latx+laty+latz) < 2*oShell) return true;
-  if (distance(v,w-latx-laty+latz) < 2*oShell) return true;
-  if (distance(v,w-latx+laty-latz) < 2*oShell) return true;
-  if (distance(v,w+latx-laty-latz) < 2*oShell) return true;
-  if (distance(v,w-latx-laty-latz) < 2*oShell) return true;
-  return false;
-}
-
 
 
 long shell(Vector3d v, long div, double *radius){
