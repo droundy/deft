@@ -34,7 +34,7 @@ all :  paper.pdf wigner-properties.pdf
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 	rm -f arxiv/*
-	mkdir arxiv/figs
+	mkdir -p arxiv/figs
 
 ALL_FIGURES=\
 	figs/w3cube.svg
