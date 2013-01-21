@@ -104,7 +104,7 @@ This gives a Mayer function with a quadratic potential:
 \begin{align}
   f(r) =
   \begin{cases}
-    e^{-\gamma V_0 \left( 1 - \frac{r}{r_0} \right)^2} - 1 & 0 \leq r
+    e^{-\beta V_0 \left( 1 - \frac{r}{r_0} \right)^2} - 1 & 0 \leq r
     \leq r_0 \\
     0 & otherwise.
   \end{cases} 
@@ -143,13 +143,13 @@ is is when $R \leq r \leq 2R$.  The integral is
 
 Now, for $ 0 \leq r \leq 2R$
 \begin{align}
-f'(r) = \frac{\gamma V_0}{R} \left( 1 - \frac{r}{2R} \right)
-              e^{-\gamma V_0 \left( 1 - \frac{r}{2R} \right)^2}
+f'(r) = \frac{\beta V_0}{R} \left( 1 - \frac{r}{2R} \right)
+              e^{-\beta V_0 \left( 1 - \frac{r}{2R} \right)^2}
 \end{align}
 If we integrate $f'(r)$ for the quadratic potential we get
 \begin{align}
 \int_0^{\infty} f'(r)dr &= f(\infty) - f(0)\\
-                    &= e^{-\gamma V_0}
+                    &= e^{-\beta V_0}
 \end{align}
 
 \fixme{I was a little unsure of this due to the Theta functions and
