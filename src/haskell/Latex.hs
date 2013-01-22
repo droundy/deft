@@ -56,7 +56,6 @@ latexme :: Exprn -> String
 latexme (ES e) = latexe e
 latexme (EK e) = latexe e
 latexme (ER e) = latexe e
-latexme (E3 e) = latexe e
 
 latexe :: Type a => Expression a -> String
 latexe (Var _ _ _ t (Just e')) = eqn (t ++ " = " ++ latex (simpk e'))

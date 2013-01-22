@@ -47,6 +47,13 @@ public:
   void Dump1D(const char *fname, Cartesian xmin, Cartesian xmax) const;
   void epsRadial1d(const char *fname, double rmin = 0, double rmax = 0, double yscale = 1, double rscale = 1, const char *comment = 0) const;
   void ShellProjection(const VectorXd &R, VectorXd *output) const;
+  double integrate() const {
+    double val = 0;
+    for (int i=0; i<gd.NxNyNz; i++) {
+      val += (*this)[i];
+    }
+    return val*gd.dvolume;
+  }
   GridDescription description() const { return gd; }
 private:
   GridDescription gd;

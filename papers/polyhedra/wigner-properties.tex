@@ -1,0 +1,64 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
+
+\begin{document}
+\title{Properties of the Wigner D Function}
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University}
+%\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+  This is just some notes to myself regarding the Wigner $D$ function,
+  which I hope to find useful in my research.
+\end{abstract}
+
+\newcommand\rot{\ensuremath{\mathbf{\varpi}}}
+\newcommand\rhat{\ensuremath{\mathbf{\hat{r}}}}
+\newcommand\solidangle{\ensuremath{\Omega}}
+
+\maketitle
+
+\subsection{Properties of the Wigner $D$ matrix}
+
+There are various ways one can understand the Wigner $D$ function, but
+I think the simplest is to state that it defines how spherical
+harmonics behave under a rotation that I will call $\rot$, which we
+can think of as being defined by a set of Euler angles.  I will
+describe the rotation matrix as $R(\rot)$.  Without further ado, I
+will state that the $D$ functions (or matrices) are defined by:
+\begin{align}\label{eq:Ylm-rotation}
+  Y_{lm}(R(\rot)\rhat) &= \sum_{|m'|<l} D^{l}_{mm'}(\rot) Y_{lm'}(\rhat)
+\end{align}
+which is to say that the $D$ matrix defines how spherical harmonics
+transform under rotation.  $D$ functions also form an orthogonal basis
+set in the space of rotations (or orientations).
+\begin{align}
+  \int D^{l}_{mn}(\rot)^{*}D^{l'}_{m'n'}(\rot) d\rot
+  &= \frac{8\pi^2}{2l+1}\delta_{ll'}\delta_{mm'}\delta_{nn'}
+\end{align}
+Sadly, the $D$ matrices aren't normalized... but if they were, then
+that normalization would have popped up in
+Equation~\ref{eq:Ylm-rotation}, so you can't have everything.
+
+The complex conjugate of a $D$ matrix just corresponds to an inverse
+rotation:
+\begin{align}
+  D^{l}_{mm'}(\rot)^{*} &= (-1)^{m'-m}D^{l}_{-m-m'}(\rot)
+\end{align}
+
+\subsection{Properties of spherical harmonics}
+
+Spherical harmonics are properly orthonormal
+\begin{align}
+  \int Y_{lm}(\rhat)^{*}Y_{l'm'}(\rhat) d\solidangle
+  &= \delta_{ll'}\delta_{mm'}\delta_{nn'}
+\end{align}
+
+The complex conjugate of a $Y_{lm}$ corresponds to time reversal, or
+an opposite rotation (up to a sign):
+\begin{align}
+  Y_{lm}^{*}(\rhat) &= (-1)^{m} Y_{l,-m}(\rhat) \\
+  Y_{lm}(\rhat) &= (-1)^{m} Y_{lm}(-\rhat)
+\end{align}
+
+\end{document}

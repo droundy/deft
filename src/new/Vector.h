@@ -7,6 +7,8 @@
 #include <math.h>
 #include <fftw3.h>
 
+#include "ComplexVector.h"
+
 // A Vector is a reference-counted array of doubles.  You need to be
 // careful, because a copy of a Vector (or the use of assignment,
 // operator= when the array being assigned hasn't been initialized)
@@ -66,7 +68,7 @@ public:
       references_count = a.references_count;
       *references_count += 1;
     } else {
-      assert(size = a.size);
+      assert(size == a.size);
       memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?
     }
   }
@@ -108,6 +110,15 @@ public:
     const double *p1 = data + offset, *p2 = a.data + a.offset;
     for (int i=0; i<size; i++) {
       out.data[i] = p1[i] + p2[i];
+    }
+    return out;
+  }
+  Vector operator+(double a) const {
+    if (size == 0) return *this;
+    Vector out(size);
+    const double *p1 = data + offset;
+    for (int i=0; i<size; i++) {
+      out.data[i] = p1[i] + a;
     }
     return out;
   }
@@ -195,8 +206,8 @@ private:
   int size, offset;
   double *data;
   int *references_count; // counts how many objects refer to the data.
-  friend Vector ifft(int Nx, int Ny, int Nz, double dV, Vector f);
-  friend Vector fft(int Nx, int Ny, int Nz, double dV, Vector f);
+  friend Vector ifft(int Nx, int Ny, int Nz, double dV, ComplexVector f);
+  friend ComplexVector fft(int Nx, int Ny, int Nz, double dV, Vector f);
 };
 
 inline Vector operator*(double a, const Vector &b) {
@@ -209,11 +220,11 @@ inline Vector operator*(double a, const Vector &b) {
   return out;
 }
 
-inline Vector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
-  assert((Nx&1)); // We want an odd number of grid points in each direction.
-  assert((Ny&1)); // We want an odd number of grid points in each direction.
-  assert((Nz&1)); // We want an odd number of grid points in each direction.
-  Vector out(Nx*Ny*(int(Nz)/2 + 1));
+inline ComplexVector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
+  assert(!(Nx&1)); // We want an odd number of grid points in each direction.
+  assert(!(Ny&1)); // We want an odd number of grid points in each direction.
+  assert(!(Nz&1)); // We want an odd number of grid points in each direction.
+  ComplexVector out(Nx*Ny*(int(Nz)/2 + 1));
   fftw_plan p = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, (double *)f.data, (fftw_complex *)out.data, FFTW_WISDOM_ONLY);
   if (!p) {
     double *r = (double *)fftw_malloc(Nx*Ny*Nz*sizeof(double));
@@ -227,12 +238,11 @@ inline Vector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
   return out;
 }
 
-inline Vector ifft(int Nx, int Ny, int Nz, double dV, Vector f) {
+inline Vector ifft(int Nx, int Ny, int Nz, double dV, ComplexVector f) {
   assert(!(Nx&1)); // We want an even number of grid points in each direction.
   assert(!(Ny&1)); // We want an even number of grid points in each direction.
   assert(!(Nz&1)); // We want an even number of grid points in each direction.
   Vector out(Nx*Ny*Nz); // create output vector
-  out = f; // copy input to output.
   fftw_plan p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, (fftw_complex *)f.data, (double *)out.data, FFTW_WISDOM_ONLY);
   if (!p) {
     fftw_complex *c = (fftw_complex *)fftw_malloc(Nx*Ny*(int(Nz)/2+1)*sizeof(fftw_complex));

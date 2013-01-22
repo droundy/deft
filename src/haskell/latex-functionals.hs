@@ -1,4 +1,4 @@
-import SomeFunctionals
+import HughesSaft ( saft_fluid, saft_entropy, saft_association, saft_dispersion )
 import WhiteBear ( whitebear, whitebear_m2, correlation_A_WB, correlation_S_WB, correlation_A_WB_m2 )
 import Quantum
 import Latex
@@ -29,6 +29,7 @@ main =
      pdf "doc/Dispersion.pdf" $ latexEasy $ saft_dispersion
      pdf "doc/SimpDispersion.pdf" $ latexSimp $ saft_dispersion
      pdf "doc/SaftFluid.pdf" $ latexEasy $ saft_fluid
+     pdf "doc/EntropySaftFluid.pdf" $ latexEasy $ saft_entropy
      pdf "doc/GradDispersion.pdf" $ latexEasy $ "grad" === (grad "x" saft_dispersion)
      pdf "doc/JoinedGradDispersion.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
      pdf "doc/SimpGradDispersion.pdf" $ latexSimp $ "grad" === (joinFFTs $ grad "x" saft_dispersion)

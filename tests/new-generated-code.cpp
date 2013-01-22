@@ -65,9 +65,8 @@ public:
     double a1 = x[3];
     double a2 = x[4];
     double a3 = x[5];
-    printf("foobar foobar\n");
     Vector n = x.slice(6,Nx*Ny*Nz);
-    double volume = a1*a2*a3; // only works for simple cubic lattice
+    double volume = a1*a2*a3; // only works for simple orthorhombic lattice
     double dV = volume/Nx/Ny/Nz;
     double E = 0;
     for (int i=0;i<Nx*Ny*Nz;i++) {
@@ -88,7 +87,6 @@ public:
     double a1 = x[3];
     double a2 = x[4];
     double a3 = x[5];
-    printf("foobar bazbar\n");
     Vector n = x.slice(6,Nx*Ny*Nz);
     double volume = a1*a2*a3; // only works for simple cubic lattice
     double dV = volume/Nx/Ny/Nz;
@@ -152,7 +150,7 @@ int main(int, char **argv) {
   Vector n(1000);
   for (int i=0;i<1000;i++) n[i] = 0.5;
   Vector x = integrate_sqr().createInput(10,10,10,
-                                         3, 3, 3,
+                                         5, 5, 5,
                                          n);
   compare_functionals("integrate_sqr", nsqr(), integrate_sqr(), x, 1e-10);
 

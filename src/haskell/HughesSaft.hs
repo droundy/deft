@@ -1,28 +1,21 @@
-module SomeFunctionals
-       ( idealgas, mu, n,
-         of_effective_potential,
-         yuwu_zeta, yuwu_correlation,
+-- This is the SAFT functional defined in the Hughes, Krebs and Roundy
+-- paper (to be published), and described in papers/water-SAFT.  It is
+-- in its own separate module, so that we will leave it unmodified for
+-- posterity (and for future comparisons).
+
+-- This module also defines some functions from Yu and Wu (2002),
+-- which are used in the Hughes functional.
+
+module HughesSaft
+       ( yuwu_zeta, yuwu_correlation,
          eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid )
+         saft_dispersion, saft_association, saft_fluid, saft_entropy )
        where
 
-import FMT ( n, n0, n2, n3, sqr_n2v )
-import WhiteBear ( whitebear )
+import FMT ( rad, n, n0, n2, n3, sqr_n2v )
+import WhiteBear ( whitebear, kT )
+import IdealGas ( idealgas )
 import Expression
-
-kT :: Type a => Expression a
-kT = s_tex "kT" "kT"
-
-rad :: Type a => Expression a
-rad = s_var "R"
-
-nQ :: Expression RealSpace
-nQ = (mass*kT/2/pi)**1.5
-  where mass = var "mH2O" "m_{H_2O}" (18.01528 * gpermol) -- uses molecular weight of water
-        gpermol = var "gpermol" "\\frac{\\textrm{g}}{\\textrm{mol}}" 1822.8885
-
-idealgas :: Expression Scalar
-idealgas = "Fideal" === integrate (kT*n*(log(n/nQ) - 1))
 
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
@@ -52,20 +45,6 @@ eta_effective = var "eta_eff" "\\eta_{\\textit{eff}}" $
   where c1 = "c1" === 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
         c2 = "c2" === -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
         c3 = "c3" === 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
-
-{-
-deta_effective_by_deta_for_dispersion :: Expression RealSpace
-deta_effective_by_deta_for_dispersion = (c1 + 2*c2*eta_for_dispersion + 3*c3*eta_for_dispersion**2)
-  where c1 = "c1" === 2.25855 - 1.50349*lambda_dispersion + 0.249434*lambda_dispersion**2
-        c2 = "c2" === -0.669270 + 1.40049*lambda_dispersion - 0.827739*lambda_dispersion**2
-        c3 = "c3" === 10.1576 - 15.0427*lambda_dispersion + 5.30827*lambda_dispersion**2
-
-deta_effective_by_dlambda :: Expression RealSpace
-deta_effective_by_dlambda = (c1 + 2*c2*eta_for_dispersion + 3*c3*eta_for_dispersion**2)*eta_for_dispersion
-  where c1 = -1.50349 + 2*0.249434*lambda_dispersion
-        c2 = 1.40049 - 2*0.827739
-        c3 = -15.0427 + 2*5.30827*lambda_dispersion
--}
 
 saft_dispersion, saft_association :: Expression Scalar
 saft_dispersion = "Fdisp" === (("a1integrated" === integrate (n*a1)) + ("a2integrated" === integrate (n*a2/kT)))
@@ -101,24 +80,6 @@ gSW = "gSW" ===
 saft_fluid :: Expression Scalar
 saft_fluid = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
 
-of_effective_potential :: Expression Scalar -> Expression Scalar
-of_effective_potential = substitute (r_var "veff") (r_var "x") .
-                         substitute (r_var "x") (exp (- r_var "veff" / kT))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+saft_entropy :: Expression Scalar
+saft_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
+  where d nn f = nn === - scalarderive (ES kT) f

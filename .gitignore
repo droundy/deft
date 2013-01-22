@@ -13,9 +13,7 @@ html
 stamp-*
 *.test
 deft
-monte-carlo
-soft-monte-carlo
-analyze-monte-carlo
+*monte-carlo
 foobar
 install-sh
 depcomp

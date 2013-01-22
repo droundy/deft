@@ -1,5 +1,5 @@
 import CodeGen
-import SomeFunctionals
+import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation )
 import WhiteBear
 import Quantum
 import System.Environment ( getArgs )
@@ -26,13 +26,10 @@ main =
        defineFunctional saft_fluid ["R", "epsilon_association", "kappa_association",
                                     "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                     "mu"] "SaftFluid2"
-     gen "src/Association2Fast.cpp" $
-       defineFunctional saft_association
+     gen "src/EntropySaftFluid2Fast.cpp" $
+       defineFunctionalNoGradient saft_entropy
        ["R", "epsilon_association", "kappa_association",
-        "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "Association2"
-     gen "src/Dispersion2Fast.cpp" $
-       defineFunctional saft_dispersion
-       ["R", "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "Dispersion2"
+        "epsilon_dispersion", "lambda_dispersion", "length_scaling"] "EntropySaftFluid2"
      let psi = r_var "x"
 	 chrisfunc = psi**3/(1+3*psi)*(exp (-psi))*((psi-psi**2)**0.5)
      gen "src/haskell/ChrisFunctional.tex" $ latex $ chrisfunc

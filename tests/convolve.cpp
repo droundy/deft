@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
+#include <sys/stat.h>
 #include "Grid.h"
 #include "Functionals.h"
 
@@ -50,7 +51,8 @@ int main(int, char **argv) {
     printf("Integral of original is negative (which may throw off tests):  %g\n", integrate_foo);
     retval++;
   }
-  foo.epsNativeSlice("unblurred.eps", plotx, ploty, plotcorner);
+  mkdir("tests/vis", 0777);
+  foo.epsNativeSlice("tests/vis/unblurred.eps", plotx, ploty, plotcorner);
 
   printf("Running Gaussian(10)...\n");
   bar = Gaussian(10)(kT, foo);
@@ -59,7 +61,7 @@ int main(int, char **argv) {
     printf("Error in Gaussian(10) is too large:  %g\n", Identity().integral(kT, bar)/integrate_foo-1);
     retval++;
   }
-  bar.epsNativeSlice("gaussian-width-10.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/gaussian-width-10.eps", plotx, ploty, plotcorner);
 
   printf("Gaussian(1) integrates to %g\n", Identity().integral(kT, bar));
   printf("Running Gaussian(1)...\n");
@@ -68,7 +70,7 @@ int main(int, char **argv) {
     printf("Error in Gaussian(1) is too large:  %g\n", Identity().integral(kT, bar)/integrate_foo-1);
     retval++;
   }
-  bar.epsNativeSlice("gaussian-width-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/gaussian-width-1.eps", plotx, ploty, plotcorner);
 
   printf("Running StepConvolve(1)...\n");
   bar = StepConvolve(1)(kT, foo);
@@ -89,7 +91,7 @@ int main(int, char **argv) {
            (Identity().integral(kT, bar)/integrate_foo-fourpiover3)/fourpiover3);
     retval++;
   }
-  bar.epsNativeSlice("step-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/step-1.eps", plotx, ploty, plotcorner);
 
   printf("Running StepConvolve(2)...\n");
   bar = StepConvolve(2)(kT, foo);
@@ -108,7 +110,7 @@ int main(int, char **argv) {
     printf("Min of StepConvolve(2) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("step-2.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/step-2.eps", plotx, ploty, plotcorner);
 
   printf("Running StepConvolve(3)...\n");
   bar = StepConvolve(3)(kT, foo);
@@ -128,7 +130,7 @@ int main(int, char **argv) {
     printf("Min of StepConvolve(3) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("step-3.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/step-3.eps", plotx, ploty, plotcorner);
 
 
   const double fourpi = 4*M_PI;
@@ -146,14 +148,14 @@ int main(int, char **argv) {
     printf("Min of ShellConvolve(1) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("shell-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/shell-1.eps", plotx, ploty, plotcorner);
 
 
   printf("Running ShellPrimeConvolve(1)...\n");
   bar = ShellPrimeConvolve(1)(kT, foo);
   printf("ShellPrimeConvolve(1) integrates to %.15g\n", Identity().integral(kT, bar));
   printf("ShellPrimeConvolve(1) Maximum is %g\n", bar.maxCoeff());
-  bar.epsNativeSlice("shellPrime-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/shellPrime-1.eps", plotx, ploty, plotcorner);
 
   printf("Running ShellConvolve(3)...\n");
   bar = ShellConvolve(3)(kT, foo);
@@ -169,7 +171,7 @@ int main(int, char **argv) {
     printf("Min of ShellConvolve(3) is wrong:  %g\n", bar.minCoeff()/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("shell-3.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/shell-3.eps", plotx, ploty, plotcorner);
 
   printf("Running yShellConvolve(1)...\n");
   bar = yShellConvolve(1)(kT, foo);
@@ -181,7 +183,7 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo-fourpi);
     retval++;
   }
-  bar.epsNativeSlice("y-shell-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/y-shell-1.eps", plotx, ploty, plotcorner);
   Functional ysh = yShellConvolve(1), sh = ShellConvolve(1);
   {
     Grid scalarsh(gd, ShellConvolve(1)(kT, foo));
@@ -205,7 +207,7 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("x-shell-3.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/x-shell-3.eps", plotx, ploty, plotcorner);
   double mymax = ref.maxCoeff();
   for (int i=0;i<gd.NxNyNz;i++) {
     if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
@@ -225,7 +227,7 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo-fourpi);
     retval++;
   }
-  bar.epsNativeSlice("xy-shell-1.eps", plotx, ploty, plotcorner);
+  bar.epsNativeSlice("tests/vis/xy-shell-1.eps", plotx, ploty, plotcorner);
   mymax = ref.maxCoeff();
   for (int i=0;i<gd.NxNyNz;i++) {
     if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
@@ -245,8 +247,8 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("xx-shell-2.eps", plotx, ploty, plotcorner);
-  //bar.epsNativeSlice("xx-shell-2.eps", Cartesian(0,10,0), Cartesian(0,0,10), Cartesian(0,0,0));
+  bar.epsNativeSlice("tests/vis/xx-shell-2.eps", plotx, ploty, plotcorner);
+  //bar.epsNativeSlice("tests/vis/xx-shell-2.eps", Cartesian(0,10,0), Cartesian(0,0,10), Cartesian(0,0,0));
   mymax = ref.maxCoeff();
   for (int i=0;i<gd.NxNyNz;i++) {
     if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-12) {
@@ -266,7 +268,7 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
+  bar.epsNativeSlice("tests/vis/zx-shell-3.eps", plotx, ploty, Cartesian(-5,-5,0.5));
 
   if (retval == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], retval);

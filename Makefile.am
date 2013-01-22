@@ -30,23 +30,29 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 	src/HardSpheresTarazonaFast.cpp src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
-	src/Association2Fast.cpp src/Dispersion2Fast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
+	src/EntropySaftFluid2Fast.cpp \
 	src/Correlation_Sm2_Fast.cpp src/Correlation_Am2_Fast.cpp \
 	src/Correlation_S_Fast.cpp src/Correlation_A_Fast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
+src/new/WhiteBearFast.h: src/new/WhiteBearFast.cpp
+tests/new-hard-spheres.o: src/new/WhiteBearFast.h # doing this by hand is ugly!
 
 ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo soft-monte-carlo
+bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 tests_newcode_test_SOURCES = $(NEW_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 	src/utilities.cpp
 soft_monte_carlo_SOURCES = src/Monte-Carlo/soft-monte-carlo.cpp \
+	src/utilities.cpp
+pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
+	src/utilities.cpp
+radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/water-SAFT/figs/surface-tension.mkdat \
@@ -58,13 +64,13 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.mkdat \
 	papers/water-SAFT/figs/sphere.mkdat \
 	papers/water-SAFT/figs/pressure-with-isotherms.mkdat \
-	papers/water-SAFT/figs/enthalpy.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.mkdat \
+	papers/pair-correlation/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -115,6 +121,7 @@ tests/new-generated-haskell/volume_minus_one_sqr.h: src/haskell/newfunctionals.e
 tests/new-generated-code.o: tests/new-generated-haskell/volume_minus_one_sqr.h
 
 check_PROGRAMS = \
+	tests/new-hard-spheres.test \
 	tests/newcode.test \
 	tests/generated-code.test \
 	tests/new-generated-code.test \
@@ -148,6 +155,7 @@ tests_saft_test_SOURCES = tests/saft.cpp $(GENERIC_CODE)
 tests_saft_dispersion_test_SOURCES = tests/saft-dispersion.cpp $(GENERIC_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
 tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
+tests_new_hard_spheres_test_SOURCES = tests/new-hard-spheres.cpp $(GENERIC_CODE) $(NEWHASKELL_CODE)
 tests_optimized_code_test_SOURCES = tests/optimized-code.cpp $(ALL_CONTACT_CODE)
 tests_constrained_water_fast_slow_test_SOURCES = tests/constrained-water-fast-slow.cpp $(ALL_CODE)
 tests_generating_code_test_SOURCES = tests/generating-code.cpp $(GENERIC_CODE)
@@ -180,7 +188,6 @@ papers_water_SAFT_figs_single_rod_in_water_low_res_mkdat_SOURCES = papers/water-
 papers_water_SAFT_figs_single_rod_mkdat_SOURCES = papers/water-SAFT/figs/single-rod.cpp $(ALL_CODE)
 papers_water_SAFT_figs_sphere_mkdat_SOURCES = papers/water-SAFT/figs/sphere.cpp $(ALL_CODE)
 papers_water_SAFT_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-SAFT/figs/pressure-with-isotherms.cpp $(ALL_CODE)
-papers_water_SAFT_figs_enthalpy_mkdat_SOURCES = papers/water-SAFT/figs/enthalpy.cpp $(ALL_CODE)
 
 slowwaterfigs: papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
 	$(wildcard papers/water-SAFT/figs/rods-in-water-*nm.dat) \
@@ -198,6 +205,8 @@ papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_
 papers_contact_figs_test_particle_wall_mkdat_SOURCES = papers/contact/figs/test-particle-wall.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-sphere.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CONTACT_CODE)
+
+papers_pair_correlation_figs_walls_mkdat_SOURCES = papers/pair-correlation/figs/walls.cpp $(ALL_CONTACT_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)
@@ -226,7 +235,7 @@ comparisons_gHSetaeff_deft_test_SOURCES = comparisons/gHSetaeff_deft.cpp $(GENER
 # endif
 
 pdf: doc/Association.pdf doc/WhiteBear.pdf doc/WhiteBearMarkII.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
-	doc/SimpDispersion.pdf \
+	doc/SimpDispersion.pdf doc/EntropySaftFluid.pdf \
 	doc/CorrelationS.pdf doc/CorrelationA.pdf doc/CorrelationAm2.pdf \
 	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
 
@@ -240,23 +249,27 @@ clean-local:
 	cd src/haskell && $(MAKE) clean
 	rm -f comparisons/*.o comparisons/*.mkdat
 
+# Below, we remove ~/.matplotlib/fontList.cache, which can prevent
+# crashes in matplotlib.  Hokey, but effective.  For a bit more
+# information, see:
+#
+# https://github.com/matplotlib/matplotlib/issues/198
+
 papers: all papers/contact/figs/gHS-vs-n.dat \
 	papers/contact/figs/sphere.mkdat \
 	papers/contact/figs/inner-sphere.mkdat \
 	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.dat \
 	papers/contact/figs/free-energy.dat \
+	papers/pair-correlation/figs/walls.dat \
 	papers/water-SAFT/figs/equation-of-state.dat \
 	papers/water-SAFT/figs/surface-tension.dat \
-	papers/water-SAFT/figs/enthalpy.dat \
 	papers/water-SAFT/figs/pressure-with-isotherms.dat \
 	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
+	rm -f ~/.matplotlib/fontList.cache # see above for explanation
 	cd papers && $(MAKE)
 
-
-papers/water-SAFT/figs/%.dat: papers/water-SAFT/figs/%.mkdat
-	$<
-papers/contact/figs/%.dat: papers/contact/figs/%.mkdat
+papers/%.dat: papers/%.mkdat
 	$<
 doc/%.pdf: src/haskell/latex-functionals.exe
 	$< $@

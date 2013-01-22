@@ -70,6 +70,88 @@ using the weighted densities
   n_0 = \frac{n_2}{4\pi R^2}
 \end{align}
 
+\section{Theory}
+
+We begin by examining the Mayer function:
+
+\begin{equation}
+f(r) = \exp (-\beta V(r)) - 1.
+\end{equation}
+
+From Schmidt\cite{schmidt2000fluid},
+
+\begin{equation}
+\frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r')
+\end{equation}
+
+We have a choice to either start with a pair potential, $V(r)$, and
+derive the appropriate $w_2(r)$, or we start with the latter and find
+the former. All other weighting functions can be derived from
+$w_2(r)$ (see Appendix A).  Another way to attack this problem is to
+pick a pair potential and determine a $w_2(r)$ to ``fit'' to the
+potential.
+
+We choose a quadratic pair potential:
+
+\begin{align}
+  V(r) =
+  \begin{cases}
+    V_0 \left ( 1 - \frac{r}{r_0} \right )^2 & 0 \leq r \leq r_0\\
+    0 & otherwise.
+  \end{cases}
+\end{align}
+This gives a Mayer function with a quadratic potential: 
+\begin{align}
+  f(r) =
+  \begin{cases}
+    e^{-\beta V_0 \left( 1 - \frac{r}{r_0} \right)^2} - 1 & 0 \leq r
+    \leq r_0 \\
+    0 & otherwise.
+  \end{cases} 
+\end{align}
+Because $w_2(r)$ will \emph{look} similar to \emph{-f(r)} but at
+$\frac{r_0}{2}$, we guess that
+\begin{equation}
+w_2(r) = B r e^{-\gamma \left ( 1 - \frac{r}{R} \right )^2}\Theta_1
+(r) \Theta_2 (R - r)
+\end{equation}
+where B is a constant to be determined by fitting (stuff) and $R =
+\frac{r_0}{2}$.  Now we'll first want to convolve $w_2(r)$ with
+itself:
+\begin{align*}
+f'(r) &= \int dr' w_2 (r')w_2(r - r') \\ 
+     &= \int dr' \left(B r' e^{- \gamma \left (1 - \frac{r}{R} \right )^2}
+                              \Theta_1 (r') \Theta_2 (R - r') \right) \\
+     &\times \left( B (r-r') e^{- \gamma \left(1 - \frac{r-r'}{R}
+                                \right)^2}\Theta_{1'} (r-r') \Theta_{2'} (R -
+                                (r-r')) \right) \\
+     &= \alpha \int dr' r'(r-r') \exp \left [-\frac{2\gamma}{R} \left (r' -
+                              \frac{r}{2} \right)^2 \right ] \Theta_1
+                              \Theta_2 \Theta_{1'} \Theta_{2'}
+\end{align*}
+where we have substituted $\alpha = B^2 e^{- 2 \gamma \left(1 -
+  \frac{r}{R} + (\frac{r}{2R})^2 \right )}$. The Theta functions create two separate
+cases to integrate.  The case that is, perhaps, more important for us
+is is when $R \leq r \leq 2R$.  The integral is
+
+\begin{align}
+ f_{r \geq R}'(r) &= \alpha \int_{r - R}^R dr' r'(r-r') \exp \left [ -
+   \frac {2\gamma}{R}\left( r' - \frac{r}{2} \right)^2 \right]
+\end{align}
+
+\fixme{More derivation here...}
+
+Now, for $ 0 \leq r \leq 2R$
+\begin{align}
+f'(r) = \frac{\beta V_0}{R} \left( 1 - \frac{r}{2R} \right)
+              e^{-\beta V_0 \left( 1 - \frac{r}{2R} \right)^2}
+\end{align}
+If we integrate $f'(r)$ for the quadratic potential we get
+\begin{align}
+\int_0^{\infty} f'(r)dr &= f(\infty) - f(0)\\
+                    &= 1 - e^{-\beta V_0}
+\end{align}
+
 \section{Comparison with simulation}
 
 \subsection{Hard spheres confined in a spherical cavity}
@@ -265,7 +347,8 @@ series expansion would require us to prove that $kr_0\gg1$ is
 unimportant, possibly by arguing that phase cancellation will cause it
 to be unimportant when we evaluate our actual $w_2(r)$.
 \begin{align}
-  w_2(r) &= \int_{-\infty}^\infty \tilde{w}_2(k) &=
+  w_2(r) &= \int_{-\infty}^\infty \tilde{w}_2(k) \\
+ &=
   \frac1{\sqrt{2}}\frac{e^{ikr_0/2}}{\sqrt{\sqrt{1+\frac{kr_0}{\beta
           V_0}}+1} +
       i\sqrt{\sqrt{1+\frac{kr_0}{\beta V_0}}-1}}
