@@ -7,6 +7,7 @@ module Expression (Exprn(..),
                    KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..), scalar,
                    Vector, t_var, cross, dot, (/.), (*.), (.*), xhat, yhat, zhat,
+                   erf,
                    nameVector, vfft, vifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
                    Expression(..), joinFFTs, (===), var, protect, vprotect,
@@ -54,6 +55,7 @@ kinversion e@(Var _ _ _ _ Nothing) = e
 kinversion (Scalar e) = Scalar e
 kinversion (Cos e) = cos (kinversion e)
 kinversion (Sin e) = sin (kinversion e)
+kinversion (Erf e) = erf (kinversion e)
 kinversion (Exp e) = exp (kinversion e)
 kinversion (Log e) = log (kinversion e)
 kinversion (Abs e) = abs (kinversion e)
@@ -365,6 +367,7 @@ mapExpression _ (Var tt c v t Nothing) = Var tt c v t Nothing
 mapExpression _ (Scalar e) = Scalar e
 mapExpression f (Cos e) = cos (mapExpression f e)
 mapExpression f (Sin e) = sin (mapExpression f e)
+mapExpression f (Erf e) = erf (mapExpression f e)
 mapExpression f (Exp e) = exp (mapExpression f e)
 mapExpression f (Log e) = log (mapExpression f e)
 mapExpression f (Abs e) = abs (mapExpression f e)
@@ -382,6 +385,7 @@ mapExpression' f (Var tt c v t Nothing) = f $ Var tt c v t Nothing
 mapExpression' f (Scalar e) = f $ Scalar (mapExpression' f e)
 mapExpression' f (Cos e) = f $ cos (mapExpression' f e)
 mapExpression' f (Sin e) = f $ sin (mapExpression' f e)
+mapExpression' f (Erf e) = f $ erf (mapExpression' f e)
 mapExpression' f (Exp e) = f $ exp (mapExpression' f e)
 mapExpression' f (Log e) = f $ log (mapExpression' f e)
 mapExpression' f (Abs e) = f $ abs (mapExpression' f e)
@@ -400,6 +404,7 @@ mapExpressionShortcut _ (Var tt c v t Nothing) = Var tt c v t Nothing
 mapExpressionShortcut f (Scalar e) = Scalar (mapExpressionShortcut f e)
 mapExpressionShortcut f (Cos e) = cos (mapExpressionShortcut f e)
 mapExpressionShortcut f (Sin e) = sin (mapExpressionShortcut f e)
+mapExpressionShortcut f (Erf e) = erf (mapExpressionShortcut f e)
 mapExpressionShortcut f (Exp e) = exp (mapExpressionShortcut f e)
 mapExpressionShortcut f (Log e) = log (mapExpressionShortcut f e)
 mapExpressionShortcut f (Abs e) = abs (mapExpressionShortcut f e)
@@ -424,6 +429,7 @@ searchExpression _ _ (Var CannotBeFreed _ _ _ (Just _)) = Nothing
 searchExpression i f (Scalar e) = searchExpression i f e
 searchExpression i f (Cos e) = searchExpression i f e
 searchExpression i f (Sin e) = searchExpression i f e
+searchExpression i f (Erf e) = searchExpression i f e
 searchExpression i f (Exp e) = searchExpression i f e
 searchExpression i f (Log e) = searchExpression i f e
 searchExpression i f (Abs e) = searchExpression i f e
@@ -446,6 +452,7 @@ searchExpressionDepthFirst _ f x@(Var CannotBeFreed _ _ _ (Just _)) = f x
 searchExpressionDepthFirst i f x@(Scalar e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Cos e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Sin e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Erf e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Exp e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Log e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Abs e) = searchExpressionDepthFirst i f e `mor` f x
@@ -480,6 +487,7 @@ isEven _ (Var _ _ _ _ Nothing) = 1
 isEven v (Scalar e) = isEven v e
 isEven _ (Cos _) = 1
 isEven v (Sin e) = isEven v e
+isEven v (Erf e) = isEven v e
 isEven v (Exp e) = if isEven v e == 1 then 1 else 0
 isEven v (Log e) = if isEven v e == 1 then 1 else 0
 isEven _ (Abs _) = 1
@@ -514,6 +522,10 @@ expand v (Sin e) = if setZero (mkExprn v) e == 0
                    then e' - e'**3/3/2
                    else sin e'
      where e' = expand v e
+expand v (Erf e) = if setZero (mkExprn v) e == 0
+                   then (2/sqrt pi)*(e' - e'**3/3)
+                   else erf e'
+     where e' = expand v e
 expand v (Exp e) = if setZero (mkExprn v) e == 0
                    then 1 + e' + e'**2/2 + e'**3/3/2
                    else exp e'
@@ -541,6 +553,7 @@ setZero v (Scalar e) = case isConstant $ setZero v e of
                          Nothing -> Scalar (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
 setZero v (Sin e) = sin (setZero v e)
+setZero v (Erf e) = erf (setZero v e)
 setZero v (Exp e) = exp (setZero v e)
 setZero v (Log e) = log (setZero v e)
 setZero v (Abs e) = abs (setZero v e)
@@ -722,6 +735,9 @@ break_real_from_imag = brfi
            where handle re im ((f,x):xs) = handle ((f,r):re) ((f,i):im) xs
                    where Expression (Complex r i) = brfi x
                  handle re im [] = Expression (Complex (pairs2sum re) (pairs2sum im))
+        brfi (Erf e) = case brfi e of
+                         Expression (Complex r 0) -> Expression (Complex (erf r) 0)
+                         _ -> error "cerazinesss in erf"
         brfi (Exp e) = case brfi e of
                          Expression (Complex r 0) -> Expression (Complex (exp r) 0)
                          Expression (Complex r i) -> Expression (Complex (exp r * cos i) (exp r * sin i))
@@ -780,6 +796,7 @@ data Expression a = Scalar (Expression Scalar) |
                     Sin (Expression a) |
                     Exp (Expression a) |
                     Log (Expression a) |
+                    Erf (Expression a) |
                     Abs (Expression a) |
                     Signum (Expression a) |
                     Product (Map.Map (Expression a) Double) (Set.Set String) |
@@ -881,6 +898,7 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Cos x) = showString "cos(" . codePrec 0 x . showString ")"
   codePrec _ (Sin x) = showString "sin(" . codePrec 0 x . showString ")"
   codePrec _ (Exp x) = showString "exp(" . codePrec 0 x . showString ")"
+  codePrec _ (Erf x) = showString "erf(" . codePrec 0 x . showString ")"
   codePrec _ (Log x) = showString "log(" . codePrec 0 x . showString ")"
   codePrec _ (Abs x) = showString "fabs(" . codePrec 0 x . showString ")"
   codePrec _ (Signum _) = undefined
@@ -925,6 +943,7 @@ instance (Type a, Code a) => Code (Expression a) where
   latexPrec _ (Cos x) = showString "\\cos(" . latexPrec 0 x . showString ")"
   latexPrec _ (Sin x) = showString "\\sin(" . latexPrec 0 x . showString ")"
   latexPrec _ (Exp x) = showString "\\exp\\left(" . latexPrec 0 x . showString "\\right)"
+  latexPrec _ (Erf x) = showString "\\textrm{erf}\\left(" . latexPrec 0 x . showString "\\right)"
   latexPrec _ (Log x) = showString "\\log(" . latexPrec 0 x . showString ")"
   latexPrec _ (Abs x) = showString "\\left|" . latexPrec 0 x . showString "\\right|"
   latexPrec _ (Signum _) = undefined
@@ -1100,6 +1119,7 @@ makeHomogeneous ee =
         scalarScalar (Cos x) = cos (scalarScalar x)
         scalarScalar (Sin x) = sin (scalarScalar x)
         scalarScalar (Exp x) = exp (scalarScalar x)
+        scalarScalar (Erf x) = erf (scalarScalar x)
         scalarScalar (Log x) = log (scalarScalar x)
         scalarScalar (Abs x) = abs (scalarScalar x)
         scalarScalar (Signum x) = signum (scalarScalar x)
@@ -1163,6 +1183,10 @@ instance Type a => Fractional (Expression a) where
   x / y = x * pairs2product [(y, -1)]
   fromRational = toExpression
 
+erf :: Type a => Expression a -> Expression a
+erf x = case x of 0 -> 0
+                  _ -> Erf x
+
 instance Type a => Floating (Expression a) where
   pi = toExpression (pi :: Double)
   exp = \x -> case x of 0 -> 1
@@ -1217,6 +1241,7 @@ varSet (Sin e) = varSet e
 varSet (Cos e) = varSet e
 varSet (Log e) = varSet e
 varSet (Exp e) = varSet e
+varSet (Erf e) = varSet e
 varSet (Abs e) = varSet e
 varSet (Signum e) = varSet e
 varSet (Sum _ i) = i
@@ -1237,6 +1262,7 @@ hasFFT (Sin e) = hasFFT e
 hasFFT (Cos e) = hasFFT e
 hasFFT (Log e) = hasFFT e
 hasFFT (Exp e) = hasFFT e
+hasFFT (Erf e) = hasFFT e
 hasFFT (Abs e) = hasFFT e
 hasFFT (Signum e) = hasFFT e
 hasFFT (Var _ _ _ _ Nothing) = False
@@ -1256,6 +1282,7 @@ hasActualFFT (Sin e) = hasActualFFT e
 hasActualFFT (Cos e) = hasActualFFT e
 hasActualFFT (Log e) = hasActualFFT e
 hasActualFFT (Exp e) = hasActualFFT e
+hasActualFFT (Erf e) = hasActualFFT e
 hasActualFFT (Abs e) = hasActualFFT e
 hasActualFFT (Signum e) = hasActualFFT e
 hasActualFFT (Var _ _ _ _ Nothing) = False
@@ -1363,6 +1390,7 @@ hasExpressionInFFT v (Sin e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Cos e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Log e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Exp e) = hasExpressionInFFT v e
+hasExpressionInFFT v (Erf e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Abs e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Signum e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Scalar e) = hasExpressionInFFT v e
@@ -1383,6 +1411,7 @@ scalarderive v (Product p i) = pairs2sum $ map dbythis $ product2pairs p
 scalarderive v (Cos e) = -sin e * scalarderive v e
 scalarderive v (Sin e) = cos e * scalarderive v e
 scalarderive v (Exp e) = exp e * scalarderive v e
+scalarderive v (Erf e) = 2/sqrt pi*exp (-e**2) * scalarderive v e
 scalarderive v (Log e) = scalarderive v e / e
 scalarderive _ (Abs _) = error "I didn't think we'd need abs"
 scalarderive _ (Signum _) = error "I didn't think we'd need signum"
@@ -1445,6 +1474,7 @@ derive v dda (Cos e) = derive v (-dda*sin e) e
 derive v dda (Sin e) = derive v (dda*cos e) e
 derive v dda (Exp e) = derive v (dda*exp e) e
 derive v dda (Log e) = derive v (dda/e) e
+derive v dda (Erf e) = derive v (dda*2/sqrt pi*exp (-e**2)) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (Expression e) = derivativeHelper v dda e
@@ -1519,6 +1549,7 @@ varsetAfterRemoval x (Cos e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Sin e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Log e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Exp e) = varsetAfterRemoval x e
+varsetAfterRemoval x (Erf e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Abs e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Signum e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Var _ _ _ _ (Just e)) = varsetAfterRemoval x e
@@ -1586,6 +1617,8 @@ subAndCount x y (Log e)   = (log e', n)
     where (e', n) = subAndCount x y e
 subAndCount x y (Exp e)   = (exp e', n)
     where (e', n) = subAndCount x y e
+subAndCount x y (Erf e)   = (erf e', n)
+    where (e', n) = subAndCount x y e
 subAndCount x y (Abs e)   = (abs e', n)
     where (e', n) = subAndCount x y e
 subAndCount x y (Signum e) = (signum e', n)
@@ -1621,6 +1654,7 @@ findRepeatedSubExpression everything = frse everything
         frse x@(Sin e) | MB (Just (better, _)) <- frse e = better x
         frse x@(Log e) | MB (Just (better, _)) <- frse e = better x
         frse x@(Exp e) | MB (Just (better, _)) <- frse e = better x
+        frse x@(Erf e) | MB (Just (better, _)) <- frse e = better x
         frse x@(Var _ _ _ _ (Just e)) | MB (Just (better, _)) <- frse e = better x
         frse _ = MB Nothing
         makebetter :: Type a => Expression a -> Int -> Expression a -> MkBetter a
@@ -1640,6 +1674,7 @@ searchMonoid f x@(Scalar e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Cos e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Sin e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Exp e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Erf e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Log e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Abs e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Signum e) = f x `mappend` searchMonoid f e
