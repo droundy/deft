@@ -115,11 +115,11 @@ $\frac{r_0}{2}$, we guess that
 w_2(r) = B r e^{-\gamma \left ( 1 - \frac{r}{R} \right )^2}\Theta_1
 (r) \Theta_2 (R - r)
 \end{equation}
-where B is a constant to be determined by fitting (stuff) and $R =
+where B is a constant to be determined by fitting \fixme{stuff} and $R =
 \frac{r_0}{2}$.  Now we'll first want to convolve $w_2(r)$ with
 itself:
 \begin{align*}
-f'(r) &= \int dr' w_2 (r')w_2(r - r') \\ 
+  f'(r) &= \int dr' w_2 (r')w_2(r - r') \\ 
      &= \int dr' \left(B r' e^{- \gamma \left (1 - \frac{r}{R} \right )^2}
                               \Theta_1 (r') \Theta_2 (R - r') \right) \\
      &\times \left( B (r-r') e^{- \gamma \left(1 - \frac{r-r'}{R}
@@ -143,15 +143,99 @@ is is when $R \leq r \leq 2R$.  The integral is
 
 Now, for $ 0 \leq r \leq 2R$
 \begin{align}
-f'(r) = \frac{\beta V_0}{R} \left( 1 - \frac{r}{2R} \right)
+  f'(r) = \frac{\beta V_0}{R} \left( 1 - \frac{r}{2R} \right)
               e^{-\beta V_0 \left( 1 - \frac{r}{2R} \right)^2}
 \end{align}
 If we integrate $f'(r)$ for the quadratic potential we get
 \begin{align}
-\int_0^{\infty} f'(r)dr &= f(\infty) - f(0)\\
+  \int_0^{\infty} f'(r)dr &= f(\infty) - f(0)\\
                     &= 1 - e^{-\beta V_0}
 \end{align}
+For the $w_2(r)$ convolved with itself,
+\begin{widetext}
+\begin{align*}
+  w_2\ast w_2 &= \alpha \frac{R}{4}\sqrt{\frac{\pi}{2\gamma}}
+               \left( r^2 - \frac{R^2}{\gamma}
+               \right)\textrm{erf} \left( \sqrt{2\gamma} \left(1 - \frac{r}{2R}
+               \right) \right)%\\
+               %&
+               + \alpha \frac{R^2}{2\gamma} \left( R - \frac{r}{2}
+               \right) e^{-2\gamma \left( 1 - \frac{r}{2R} \right)^2}.
+\end{align*}
+\end{widetext}
+We substitute $u = \sqrt{2\gamma}\left( 1 - \frac{r}{2R} \right)$ and
+plug in our expression above for $\alpha$ so that,
+\begin{align*}
+  w_2\ast w_2 &= \frac{B^2 R}{\sqrt{2\gamma}} \left[
+               \frac{\sqrt{\pi}}{4} \left( r^2 - \frac{R^2}{\gamma}
+               \right) e^{-u^2} \textrm{erf}(u)
+               + \frac{R^2 u}{\sqrt{2\gamma}}
+               e^{-2u^2} \right]
+\end{align*}
+Now we'll need to integrate this and set it to the integral of $f'(r)$
+to solve for the constant $B$. Since this expression is only the part
+of $w_2(r)$ from $R \leq r \leq 2R$, we need to justify only using
+this portion by saying that at low temps (which is our region of
+interest), $w_2(r)$ below $R$ (or $\frac{r_0}{2}$) is nearly zero.
+This upper part of $w_2(r)$ which we have used above goes to very
+small numbers in the region $0 \leq r \leq R$.  Both parts of $w_2(r)$
+are nearly zero for $r \leq 0$, so we can carry out the integrate to
+$-\infty$ so that the error function integrals are analytic.
+Therefore, we can integrate from $-\infty$ to $r_0$ and it is
+approximately correct.
 
+If we do this integration on over $r$, then the limits for $u$ are
+$\infty$ to zero.  I'll set \fixme{for now to save space} $w_2\ast
+w_2 = w_{2c}(u)$. Then,
+\begin{widetext}
+\begin{align}
+\int_{-\infty}^0 w_{2c}(u) du &= \frac{B^2 R^4}{2 \gamma^2}
+           \int_\infty^0 \left[ \frac{\sqrt{\pi}}{2} \left( 4\gamma - 1 -
+           4\sqrt{2\gamma}u + 2 u^2 \right) e^{-u^2} \textrm{erf}(u) +
+           u e^{-2u^2} \right]du \\
+           &= \frac{B^2 R^4}{2 \gamma^2} \left[ \frac{\sqrt{\pi}}{2}
+             \left( \frac{-\pi}{4}(4\gamma - 1) + 2 \sqrt{\gamma}
+             -\frac{2 + \pi}{4 \sqrt{\pi}} \right) - \frac{1}{4} \right].
+\end{align}
+\end{widetext}
+
+Now, to find B we set
+\begin{align}
+  \int f'(r)dr &= \int w_2(r)\ast w_2(r) dr\\
+   1 - e^{-\beta V_0} &= \frac{B^2 R^4}{4 \gamma^2} \left[ \sqrt{\pi}
+             \left( \frac{-\pi}{4}(4\gamma - 1) + 2 \sqrt{\gamma}
+             -\frac{2 + \pi}{4 \sqrt{\pi}} \right) - \frac{1}{2}
+             \right]
+\end{align}
+Which gives
+\begin{align}
+  B = \frac{4\gamma}{R^2} \left[ \frac{1 - e^{-\beta V_0}}{8
+             \sqrt{\pi \gamma} + \pi - \pi^{3/2}(4\gamma -1) -4} \right]^{1/2} 
+\end{align}
+
+\subsection{Weighting functions in real space}
+
+\begin{align}
+  w_2(r) &= -\frac{\partial w_3(r)}{\partial r}\\
+  w_3(r) &= \int_r^\infty w_2(r') dr' \\
+  &= \\
+  w_1(r) &= \frac{w_2(r)}{4\pi r}\\
+  w_0(r) &= \frac{w_2(r)}{4\pi r^2}\\
+  \mathbf{w}_{2V}(\rr) &= \frac{w_2(r)}{r}\rr\\
+  \mathbf{w}_{1V}(\rr) &= \frac{w_2(r)}{4\pi r^2} \rr
+\end{align}
+
+\subsection{Weighting functions in fourier space}\
+
+\begin{align}
+  \tilde{w}_2(k) &?= \frac{i}{k} \int_{0}^{\infty} r w_2(r) \sin(kr) dr \\
+  \tilde{w}_3(k) &= \\
+  \tilde{w}_1(k) &= \\
+  \tilde{w}_0(k) &= \\
+  \mathbf{\tilde{w}}_{2V}(k) &= \\
+  \mathbf{\tilde{w}}_{1V}(k) &= 
+\end{align}
+ 
 \section{Comparison with simulation}
 
 \subsection{Hard spheres confined in a spherical cavity}
