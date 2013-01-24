@@ -189,40 +189,40 @@ $\infty$ to zero.  I'll set \fixme{for now to save space} $w_2\ast
 w_2 = w_{2c}(u)$. Then,
 \begin{widetext}
 \begin{align}
-\int_{-\infty}^0 w_{2c}(u) du &= \frac{B^2 R^4}{2 \gamma^2}
+\int_{\infty}^0 w_{2c}(u) du &= \frac{B^2 R^4}{2 \gamma^2}
            \int_\infty^0 \left[ \frac{\sqrt{\pi}}{2} \left( 4\gamma - 1 -
            4\sqrt{2\gamma}u + 2 u^2 \right) e^{-u^2} \textrm{erf}(u) +
            u e^{-2u^2} \right]du \\
-           &= \frac{B^2 R^4}{2 \gamma^2} \left[ \frac{\sqrt{\pi}}{2}
-             \left( \frac{-\pi}{4}(4\gamma - 1) + 2 \sqrt{\gamma}
-             -\frac{2 + \pi}{4 \sqrt{\pi}} \right) - \frac{1}{4} \right].
+           &= -\left[ \frac{B R^2}{2\gamma} (\sqrt{\pi \gamma} -1) \right]^2
 \end{align}
 \end{widetext}
-
 Now, to find B we set
 \begin{align}
   \int f'(r)dr &= \int w_2(r)\ast w_2(r) dr\\
-   1 - e^{-\beta V_0} &= \frac{B^2 R^4}{4 \gamma^2} \left[ \sqrt{\pi}
-             \left( \frac{-\pi}{4}(4\gamma - 1) + 2 \sqrt{\gamma}
-             -\frac{2 + \pi}{4 \sqrt{\pi}} \right) - \frac{1}{2}
-             \right]
+   1 - e^{-\beta V_0} &= -\left[ \frac{B R^2}{2\gamma} (\sqrt{\pi
+       \gamma} -1)  \right]^2
 \end{align}
 Which gives
 \begin{align}
-  B = \frac{4\gamma}{R^2} \left[ \frac{1 - e^{-\beta V_0}}{8
-             \sqrt{\pi \gamma} + \pi - \pi^{3/2}(4\gamma -1) -4} \right]^{1/2} 
+  B = \frac{2\gamma}{(\sqrt{\pi \gamma}-1)R^2} \left(
+    e^{-\beta V_0}-1 \right)^{1/2}
 \end{align}
 
 \subsection{Weighting functions in real space}
 
 \begin{align}
-  w_2(r) &= -\frac{\partial w_3(r)}{\partial r}\\
-  w_3(r) &= \int_r^\infty w_2(r') dr' \\
+  w_2(r) &= B r e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
+           \Theta_1(r) \Theta_2 (R - r )\\
+  w_3(r) &= \int_r^\infty w_2(r') dr'\\
   &= \\
-  w_1(r) &= \frac{w_2(r)}{4\pi r}\\
-  w_0(r) &= \frac{w_2(r)}{4\pi r^2}\\
-  \mathbf{w}_{2V}(\rr) &= \frac{w_2(r)}{r}\rr\\
-  \mathbf{w}_{1V}(\rr) &= \frac{w_2(r)}{4\pi r^2} \rr
+  w_1(r) &= \frac{B}{4\pi}e^{-\gamma \left ( 1 - \frac{r}{R}
+            \right)^2} \Theta_1(r) \Theta_2 (R - r)\\
+  w_0(r) &= \frac{B}{4\pi r}e^{-\gamma \left ( 1 - \frac{r}{R}
+            \right)^2} \Theta_1(r) \Theta_2 (R - r)\\
+  \mathbf{w}_{2V}(\rr) &= B e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
+           \Theta_1(r) \Theta_2 (R - r) \rr\\
+  \mathbf{w}_{1V}(\rr) &= \frac{B}{4\pi r} e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
+           \Theta_1(r) \Theta_2 (R - r )\rr
 \end{align}
 
 \subsection{Weighting functions in fourier space}\
