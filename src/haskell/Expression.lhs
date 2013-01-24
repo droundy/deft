@@ -281,7 +281,7 @@ instance Type KSpace where
       where k_i = cleanvec $ s_var "_x" / s_var "Nx" .* rlat1 +
                              s_var "_y" / s_var "Ny" .* rlat2 +
                              s_var "_z" / s_var "Nz" .* rlat3
-            cleanvec (Vector a b c) = vector (cleanvars a) (cleanvars b) (cleanvars c)
+            cleanvec (Vector ea eb ec) = vector (cleanvars ea) (cleanvars eb) (cleanvars ec)
             newcodes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) ->
                   case break_real_from_imag x' of
