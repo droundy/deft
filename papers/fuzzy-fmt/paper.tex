@@ -214,7 +214,10 @@ Which gives
   w_2(r) &= B r e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
            \Theta_1(r) \Theta_2 (R - r )\\
   w_3(r) &= \int_r^\infty w_2(r') dr'\\
-  &= \\
+         &= -B \int_r^R r' e^{-\gamma \left(1- \frac{r'}{R} \right)^2}dr'\\
+         &= \frac{B R^2}{2\gamma}\left[ 1 - e^{-\gamma
+      \left(1-\frac{r}{R} \right)^2} - \sqrt{\pi \gamma} \mathrm{erf} \left[
+        \sqrt{\gamma} \left( 1- \frac{r}{R} \right) \right] \right]\\
   w_1(r) &= \frac{B}{4\pi}e^{-\gamma \left ( 1 - \frac{r}{R}
             \right)^2} \Theta_1(r) \Theta_2 (R - r)\\
   w_0(r) &= \frac{B}{4\pi r}e^{-\gamma \left ( 1 - \frac{r}{R}
