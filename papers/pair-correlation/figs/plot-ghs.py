@@ -106,16 +106,16 @@ ff = [.1, .2, .3, .4]
 
 # READ DATA
 ghs = [0]*4
-ghslores = [0]*4
+#ghslores = [0]*4
 gsig = [0]*4
 i = 0
 while (i < 4):
     r_mc, ghs[i] = read_ghs("gr", ff[i])
-    r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
+    #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
 
     pylab.figure(1)
     pylab.plot(r_mc, ghs[i], colors[i]+"-",label='filling fraction %.1f'%ff[i])
-    pylab.plot(r_mclores, ghslores[i], colors[i]+":")
+    #pylab.plot(r_mclores, ghslores[i], colors[i]+":")
 
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
