@@ -1,5 +1,7 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
 
+\usepackage{color}
+
 \begin{document}
 \title{Properties of the Wigner D Function}
 
@@ -46,6 +48,20 @@ rotation:
   D^{l}_{mm'}(\rot)^{*} &= (-1)^{m'-m}D^{l}_{-m-m'}(\rot)
 \end{align}
 
+We have a final relationship that allows us to convert products of $D$
+matrices into a linear combination of other $D$ matrices:
+\begin{align}
+  D^{l}_{mk}(\rot)D^{l'}_{m'k'} &=
+  \sum_{l'', m'', k''} \left<lml'm' | l''m''\right>
+  \left<lkl'k' | l''k''\right> D^{l''}_{m''k''}(\rot)
+\end{align}
+where the coefficients are Clebsch-Gordon coefficients.  Relating to
+this, we have a special case that seems to be sort of handy for
+certain Clebsch-Gordon coefficients:
+\begin{align}
+  \left< lm l'm' | 00 \right> &= \delta_{ll'}\delta{m,-m'}\frac{(-1)^{l-m}}{\sqrt{2l+1}}
+\end{align}
+
 \subsection{Properties of spherical harmonics}
 
 Spherical harmonics are properly orthonormal
@@ -60,5 +76,139 @@ an opposite rotation (up to a sign):
   Y_{lm}^{*}(\rhat) &= (-1)^{m} Y_{l,-m}(\rhat) \\
   Y_{lm}(\rhat) &= (-1)^{m} Y_{lm}(-\rhat)
 \end{align}
+
+\subsection{A simple integral}
+Let's consider the following integral, where $n>1$:
+\begin{align}
+  X_{lmkn} &\equiv \int \left(\Delta^{l}_{mk}(\rot)\right)^{2n} d\rot
+\end{align}
+This is useful in the above.  Of course, odd powers vanish.  I expect
+that this integral is:
+\begin{align}
+  X_{lmkn} &=  8\pi^2 \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} i}
+\end{align}
+based on the assumption that it is independent of the particular value
+of $m$ and $k$.  If this is true, then we can simply evaluate
+\begin{align}
+  X_{ll0n} &= \int \left(\Delta^{l}_{l0}(\rot)\right)^{2n} d\rot \\
+  &= \int \left( \sin(l\phi) \right)^{2n} \sin\theta d\theta d\phi
+  d\chi \\
+  &= 4\pi \int_0^{2\pi} \left( \sin(l\phi) \right)^{2n} d\phi \\
+  &=  8\pi^2 \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} 2i}
+\end{align}
+So if this particular integral, which could be gotten from appropriate
+sums of Clebsch-Gordon coefficients, is independent of $m$ and
+$k$---which seems likely, somehow, since it shouldn't be affected by a
+rotation---then we have a relatively nice closed-form solution for its
+value.
+
+\begin{widetext}
+\subsection{An interesting integral}
+
+Let's consider the following quantity, which is the simplest
+nontrivial real and positive function of orientation that I can
+imagine:
+\begin{align}
+  f(\rot) &= a + b\frac{D^{l}_{mk}(\rot) +
+    (-1)^{m}D^{l}_{-m,-k}(\rot)}{\sqrt 2}
+  \\
+  &= a + b \Delta^{l}_{mk}(\rot)
+\end{align}
+where I've taken a constant plus a single $lmk$ value, but made it
+real.  If $a > |b|$ by enough, then this will always be real, which
+will turn out to be important for a density.  I have defined the
+function $\Delta^{l}_{mk}(\rot)$, which is a real version of the
+Wigner $D$ function, and has the interesting properties that
+\begin{align}
+  \int \Delta^{l}_{mk}(\rot) \Delta^{l'}_{m'k'}(\rot)d\rot
+  &= \frac{8\pi^2}{2l+1}\delta_{ll'}\delta_{mm'}\delta_{nn'}
+  \\
+  \Delta^{l}_{mk}(\rot)^2 &= \frac{\Delta^{0}_{00}(\rot)}{2l+1} + \text{h.o.t.}
+\end{align}
+where the higher-order terms are terms with non-zero $l$ value.
+
+We are interested in evaluating the integral:
+\begin{align}
+  I &= \int f(\rot)\ln(f(\rot)) d\rot
+  \\
+  &=
+  \int f(\rot)\left(\ln a
+  + \ln\left(1 + \frac{b}{a}\Delta^{l}_{mk}(\rot)\right)\right) d\rot
+  \\
+  &=
+  \int f(\rot)\left(\ln a
+  + \frac{b}{a}\Delta^{l}_{mk}(\rot)
+  - \frac12 \frac{b^2}{a^2}(\Delta^{l}_{mk}(\rot))^2
+  + \frac13 \frac{b^3}{a^3}(\Delta^{l}_{mk}(\rot))^3
+  - \frac14 \frac{b^4}{a^4}(\Delta^{l}_{mk}(\rot))^4
+  + \cdots\right) d\rot \\
+  &=
+  \int f(\rot)\left(\ln a
+  - \sum_{n=1}^{\infty} \frac{(-1)^{n}}{n} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^n
+  \right) d\rot
+  \\
+  &=
+  \int (a + b \Delta^{l}_{mk}(\rot))\left(\ln a
+  - \sum_{n=1}^{\infty} \frac{(-1)^{n}}{n} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^n
+  \right) d\rot
+  \\
+  &=
+  a\int \left(\ln a
+  - \sum_{n=1}^{\infty} \frac{(-1)^{n}}{n} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^n
+  \right) d\rot
+  -
+  b\int \left(\sum_{n=1}^{\infty} \frac{(-1)^{n}}{n} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^{n+1}
+  \right) d\rot
+  \\
+  &=
+  a\int \left(\ln a
+  - \sum_{n=1}^{\infty} \frac{1}{2n} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^{2n}
+  \right) d\rot
+  +
+  b\int \left(\sum_{n=1}^{\infty} \frac{1}{2n-1} \left(\frac{b}{a}\Delta^{l}_{mk}\right)^{2n}
+  \right) d\rot
+  \\
+  &=
+  8\pi^2 a \ln a
+  - 8\pi^2a\left(
+  \sum_{n=1}^{\infty} \frac{1}{2n} \left(\frac{b}{a}\right)^{2n}
+   \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  \right)
+  +
+  8\pi^2 b \left(
+   \sum_{n=1}^{\infty} \frac{1}{2n-1} \left(\frac{b}{a}\right)^{2n}
+   \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  \right)
+  \\
+  &=
+  8\pi^2 a \ln a
+  - 8\pi^2a\left(
+  \sum_{n=1}^{\infty} \frac{1}{2n} \left(\frac{b}{a}\right)^{2n}
+   \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  \right)
+  +
+  8\pi^2 b \left(
+   \sum_{n=1}^{\infty} \left(\frac{b}{a}\right)^{2n}
+   \frac{\prod_{i=1}^{n-1} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  \right)
+  \\
+  &=
+  8\pi^2 a \left\{
+  \ln a
+  -
+  \sum_{n=1}^{\infty} \frac{1}{2n} \left(\frac{b}{a}\right)^{2n}
+   \frac{\prod_{i=1}^{n} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  +
+   \sum_{n=1}^{\infty} \left(\frac{b}{a}\right)^{2n+1}
+   \frac{\prod_{i=1}^{n-1} (2i-1) }{ \prod_{i=1}^{n} 2i}
+  \right\}
+\end{align}
+\end{widetext}
+The next idea would be to take these power series sums, and see if I
+could turn them into an analytic form.  As it is, I don't recognize
+them, but it's quite possible that they have a relatively simple
+form.  If they don't, I'll come up with a reasonable approximation
+that has the correct behavior in the limit as $b \ll a$, and also has
+the correct divergent behavior as $b$ approaches $a$.
 
 \end{document}

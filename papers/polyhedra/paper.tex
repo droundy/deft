@@ -5,6 +5,8 @@
 
 \newcommand{\fixme}[1]{\red{[#1]}}
 
+\newcommand\thetamax{\theta_{\text{max}}}
+
 \begin{document}
 \title{Fundamental measure theory for hard polyhedra.}
 
@@ -102,9 +104,11 @@ Given this expansion, we can simplify the weighted densities:
 \end{align}
 This reduces the challenge of handling the rotation to that of solving
 for a set of densities $n_{lmm'}(\rr)$.
+
 \subsection{Ideal gas free energy}
 To address this, we will
 first consider the free energy of an ideal gas.
+\begin{widetext}
 \begin{align}
   A_{\textit{ideal}} &=
   k_BT \int
@@ -282,6 +286,7 @@ perturbation theory, and would give us something like
 where I have substituted the notation $n(\rr)$ for $n_{000}(\rr)$ to
 save space.
 
+\end{widetext}
 \subsection{Finding the orientational moments}
 We find the orientational moments $n_{lmm'}(\rr)$ by minimizing the
 free energy.  Let's begin by optimizing the free energy with respect
@@ -446,6 +451,7 @@ through the sphere.  We just need to integrate through one of these
 points, and multiply by four... which might be easiest to do in a
 Cartesian coordinates rotated by 45$^\circ$ around the ordinary $z$
 axis.
+\begin{widetext}
 \begin{align}
   w_3^{000}(r)
   &=
@@ -505,8 +511,6 @@ Instead I'm going now to think of using cylindrical coordinates...
   R &= \frac{2}{\sqrt{3}}s\cos\phi + \frac{1}{\sqrt{3}}z \\
   s &= 2\frac{\sqrt{3}R-z}{\cos\phi}
 \end{align}
-\newcommand\thetamax{\theta_{\text{max}}}
-\begin{widetext}
 Maybe spherical coordinates? Rotated $\pi/4$? Let's look first at the
 plane that is our limit for $\theta$:
 \begin{align}
@@ -534,7 +538,8 @@ plane that is our limit for $\theta$:
   - \sqrt{12\frac{R^2}{r^2} - 4(1+2\cos^2\phi)\left(3\frac{R^2}{r^2}-2\cos^2\phi\right)}}{2(1+2\cos^2\phi)}
   \\
   &= \frac{\sqrt{3}\frac{R}{r}
-  - \sqrt{3\frac{R^2}{r^2} - (1+2\cos^2\phi)\left(3\frac{R^2}{r^2}-2\cos^2\phi\right)}}{1+2\cos^2\phi}
+  - \sqrt{3\frac{R^2}{r^2} -
+    (1+2\cos^2\phi)\left(3\frac{R^2}{r^2}-2\cos^2\phi\right)}}{1+2\cos^2\phi}
   \\
   &= \frac{\sqrt{3}\frac{R}{r}
   - \sqrt{3\frac{R^2}{r^2} - (2-\cos2\phi)\left(3\frac{R^2}{r^2}-1+\cos2\phi\right)}}{2-\cos2\phi}
