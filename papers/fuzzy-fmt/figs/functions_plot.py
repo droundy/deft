@@ -42,6 +42,8 @@ w2w2 = 2*B**2*R/root2gam*(sqrt(pi)/4*(rlarge**2-R**2/gamma)*exp(-2*gamma*(1-rlar
                         +R/root2gam*(R-rlarge/2)*exp(-4*gamma*(1-rlarge/(2*R))**2))
 #w2w2 = w2w2/w2w2.max()
 plot(rlarge, w2w2, label="gaussian W2*W2")
+xlim(0,2)
+ylim(ymin=0)
 
 # w2w2erfterm = B**2*R/root2gam*(sqrt(pi)/4*(rlarge**2-R**2/gamma)*exp(-2*gamma*(1-rlarge/(2*R))**2)*erf((1-rlarge/(2*R))*root2gam))
 # plot(rlarge, w2w2erfterm, label="gaussian W2*W2 erf term")
