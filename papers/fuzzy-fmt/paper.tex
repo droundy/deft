@@ -125,7 +125,7 @@ itself:
      &\times \left( B (r-r') e^{- \gamma \left(1 - \frac{r-r'}{R}
                                 \right)^2}\Theta_{1'} (r-r') \Theta_{2'} (R -
                                 (r-r')) \right) \\
-     &= \alpha \int dr' r'(r-r') \exp \left [-\frac{2\gamma}{R} \left (r' -
+     &= \alpha \int dr' r'(r-r') \exp \left [-\frac{2\gamma}{R^2} \left (r' -
                               \frac{r}{2} \right)^2 \right ] \Theta_1
                               \Theta_2 \Theta_{1'} \Theta_{2'}
 \end{align*}
@@ -136,7 +136,7 @@ is is when $R \leq r \leq 2R$.  The integral is
 
 \begin{align}
  f_{r \geq R}'(r) &= \alpha \int_{r - R}^R dr' r'(r-r') \exp \left [ -
-   \frac {2\gamma}{R}\left( r' - \frac{r}{2} \right)^2 \right]
+   \frac {2\gamma}{R^2}\left( r' - \frac{r}{2} \right)^2 \right]
 \end{align}
 
 \fixme{More derivation here...}
@@ -183,6 +183,15 @@ are nearly zero for $r \leq 0$, so we can carry out the integrate to
 $-\infty$ so that the error function integrals are analytic.
 Therefore, we can integrate from $-\infty$ to $r_0$ and it is
 approximately correct.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/w2convolves}
+\end{center}
+\caption{Comparison of the $-f'(r)$ function with various $w_2(r)\ast
+  w_2(r)$.}
+\label{fig:w2convolves}
+\end{figure}
 
 If we do this integration on over $r$, then the limits for $u$ are
 $\infty$ to zero.  I'll set \fixme{for now to save space} $w_2\ast
@@ -231,10 +240,10 @@ Which gives
 \subsection{Weighting functions in fourier space}\
 
 \begin{align}
-  \tilde{w}_2(k) &?= \frac{i}{k} \int_{0}^{\infty} r w_2(r) \sin(kr) dr \\
+  \tilde{w}_2(k) &= \frac{2\pi B}{k} \int_{0}^{\infty} r w_2(r) \sin(kr) dr \\
   \tilde{w}_3(k) &= \\
-  \tilde{w}_1(k) &= \\
-  \tilde{w}_0(k) &= \\
+  \tilde{w}_1(k) &= \frac{B}{k} \int_0^\infty w_2(r) \sin(kr) dr \\
+  \tilde{w}_0(k) &= \frac{B}{k} \int_0^\infty \frac{w_2(r)}{r} \sin(kr) dr \\
   \mathbf{\tilde{w}}_{2V}(k) &= \\
   \mathbf{\tilde{w}}_{1V}(k) &= 
 \end{align}
