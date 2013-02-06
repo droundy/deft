@@ -3,7 +3,7 @@
 %\usepackage{breqn}
 \usepackage{color}
 
-\newcommand{\fixme}[1]{\red{[#1]}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \newcommand\thetamax{\theta_{\text{max}}}
 
@@ -113,7 +113,7 @@ first consider the free energy of an ideal gas.
   A_{\textit{ideal}} &=
   k_BT \int
   \left(n(\rr,\rot)\ln(\Lambda^3\Theta^3 n(\rr,\rot)) - n(\rr,\rot)
-  \right) d\rr d\rot
+  \right) d\rr d\rot \label{eq:Aideal}
   \\
   &=
   k_BT \sum_{lmm'} \int
@@ -315,7 +315,15 @@ I note that this equation for $n_{lmm'}$ is approximate, since we made
 an approximation when we neglected higher order terms in the expansion
 of the log in the ideal gas free energy.  Thus in cases where there is
 relatively little orientational ordering, it ought to be an accurate
-equation.  In any case I imagine it will be plausible.
+equation.
+
+In cases where $n_{lmm'} \approx n_{000}$, we could reasonbly become
+concerned that $n(\rr, \rot)$ could become negative for some
+orientations, which would be unphysical.  If this becomes a problem,
+we would want to address it by including nonlinear effects of the
+$\ln$ in Equation~\ref{eq:Aideal}.  For now, let's stick with the
+linear approximation, and hope for the best.  If we find that
+$n_{lmm'} > n_{000}$ in practice, we would want to revisit this decision.
 
 \subsection{The Procedure}
 Our input when computing the free energy is the ordinary density
@@ -353,18 +361,24 @@ approximations for the fundamental measures aren't \emph{too} wildly
 different, and that the two approximations to the free energy also
 aren't too wildly different.
 
-\subsection{Finding the weighted densities}
+\subsection{Finding the $000$ weighting functions for any polyhedron}
 
 \newcommand\xhat{\mathbf{\hat{x}}}
 \newcommand\yhat{\mathbf{\hat{y}}}
 \newcommand\zhat{\mathbf{\hat{z}}}
 \newcommand\facehat{\mathbf{\hat{f}}}
-\newcommand\Rface{\ensuremath{R_{\text{face}}}}
-\newcommand\Rvertex{\ensuremath{R_{\text{vertex}}}}
+\newcommand\Rface{\ensuremath{R_f}}
+\newcommand\Rvertex{\ensuremath{R_v}}
 
 Here I will discuss how to find the weighted densities we need in
-order to study polyhedra.  We begin with $n_3(\rr)$, the packing
-fraction.
+order to study polyhedra.  I will attempt in this section to evaluate
+the $000$ weighting function for an arbitrary polyhedron, specified in
+terms of the locations of its vertices and face centers (and possibly
+also edge centers, although they should be computable from the vertex
+and face radii).
+
+\subsubsection{$w_3$}
+We begin with the packing fraction $n_3(\rr)$.
 \begin{align}
   w_3(\rr) &= 1 \text{ inside the polyhedron}\\
   &= 0 \text{ outside the polyhedron} \\
@@ -372,8 +386,49 @@ fraction.
 \end{align}
 This is pretty easy, although the integrals will be less so.  The
 $000$ integral is always going to give us something that is
-essentially the same, but I won't go into this yet.
+essentially the same.  This integral is simply:
+\begin{align}
+  w_3^{000}(r) = \int w_3(\rr') \delta(|\rr'|-r) d^3r'\label{eq:w3000}
+\end{align}
+or we could write it as an integral over solid angle:
+\begin{align}
+  w_3^{000}(r) = \int w_3(\rr) d\Omega
+\end{align}
+Let's suppose we have $N$ faces and $M$ vertices per face.  If the
+face center is at radius $\Rface$ and the vertex is at radius $\Rvertex$, then
+we can compute $w_3^{000}$ by integrating over the irregular
+tetrahedron enclosed by the for radii given by one vertex, one edge
+center and one face center, as depicted in Figure~\ref{fig:r3000}, and
+multiplying by $NM$ to account for the entire volume.  By doing this,
+we can solve once for $w_3^{000}(r)$ for any regular polyhedron.
 
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/w3-000}
+\caption{How we integrate for arbitrary polyhedron.}\label{fig:r3000}
+\end{figure}
+
+To begin, we solve for the positions of the vertices, which are shown
+in Figure~\ref{fig:r3000}.  To perform our integration, as in
+Equation~\ref{eq:w3000}, we will choose a coordinate system in which
+the center of the face is in the $\xhat$ direction, and the line from the
+center of the face to the center of the edge is in the $\yhat$
+direction.  Our integral then becomes:
+\begin{widetext}
+\begin{align}
+  w_3^{000}(r) &= \int w_3(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM \int_0^{\Rface} dx
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\cos\left(\frac{2\pi}{M}\right)} dy
+  \int_0^{y\tan\left(\frac{2\pi}{M}\right)} dz \delta(r - \sqrt{x^2 +
+    y^2 + z^2})
+\end{align}
+\end{widetext}
+This integral gives a piecewise smooth result, with different forms
+when $r<\Rface$, $\Rface<r<R_e$, $R_e<r<\Rvertex$ and $\Rvertex<r$ (when it is zero).
+
+\todo{Do the above integral}
+
+\subsubsection{$w_2$}
 $n_2(\rr)$ is the area, which we can easily get from the above
 weighted density.
 \begin{align}
@@ -381,7 +436,25 @@ weighted density.
   &= \sum_i^{\text{faces}} \delta(\Rface-\rr\cdot\facehat_i)
   \prod_{j\ne i} \Theta(\Rface-\rr\cdot\facehat_j)
 \end{align}
-We could also just ask what the area is at a given position.
+Using the same notation as in the previous section, the integral
+for $w_2^{000}$ becomes:
+\begin{widetext}
+\begin{align}
+  w_2^{000}(r) &= \int w_2(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\cos\left(\frac{2\pi}{M}\right)} dy
+  \int_0^{y\tan\left(\frac{2\pi}{M}\right)} dz \delta(r - \sqrt{\Rface^2 +
+    y^2 + z^2})
+\end{align}
+\end{widetext}
+This integral gives a piecewise smooth result, with different forms
+when $r<\Rface$ (it is zero), $\Rface<r<R_e$, $R_e<r<\Rvertex$ and $\Rvertex<r$ (it is
+zero).
+
+\todo{Do the above integral}
+
+\subsubsection{$w_1$}
 
 $n_1(\rr)$ is the first fundamental measure that is interestingly
 different for polyhedra than it is for spheres.  This is a measure of
@@ -397,10 +470,32 @@ there it will be a delta function.
 where $\facehat_i$ is a unit vector in the direction of the $i$ face
 of the polyhedron, $\Rvertex$ is the distance between the center of
 the polyhedron and the vertex, and $\Rface$ is the distance of the
-center of the face from the origin.  WARNING: I may have something off
-in these formulas, but the general idea is there.  To find a constant
-factor, we'd consider the
+center of the face from the origin.  \todo{WARNING: I may have something off
+in these formulas, but the general idea is there.  To check on a
+constant factor that may be off, we could check that the result
+approaches the spherical value for a dodecahedron.  If it's off, it's
+likely off by a largish factor.}
 
+As before, we should be able to do this integral for $w_1^{000}$
+independently of the specific polyhedron in question.  Our choice of
+coordinates will be different, as we only want to integrate over the
+edge, so we may as well put the edge center on the $\xhat$ axis, and
+the edge itself along the $\yhat$ axis.
+\begin{align}
+  w_1^{000}(r) &= \int w_1(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM \text{constant factor}
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\sin\left(\frac{2\pi}{M}\right)} dy
+  \delta(r - \sqrt{R_e^2 + y^2})
+\end{align}
+The only tricky bit is to get this constant factor right, which will
+relate to the angle between adjacent faces.
+
+\todo{Do this integral}
+
+\todo{Find the constant factor}
+
+\subsubsection{$w_0$}
 
 $n_0(\rr)$ is the fundamental measure of gaussian curvature, which is
 the product of the curvature in the two eigendirections.  This is zero
@@ -410,13 +505,21 @@ must satisfy a sum rule, which tells us that
 \begin{align}
   w_0(\rr) &= \frac1{N}\sum_{i}^{N\text{ vertices}} \delta(\rr-\rr_i)
 \end{align}
-Interestingly, this meas that
+Interestingly, this means that
 \begin{align}
   w_0^{000}(\rr) &= \frac{\delta(\Rvertex - |\rr|)}{4\pi \Rvertex^2}
 \end{align}
 which means that as far as $w_0^{000}$ is concerned, the polyhedron is a
 sphere with a radius equal to the vertex distance (i.e. the distance
 from the center to the vertex of the polyhedron).
+
+\subsubsection{$\mathbf{w_{2V}}$}
+
+\todo{TODO}
+
+\subsubsection{$\mathbf{w_{1V}}$}
+
+\todo{TODO}
 
 \subsection{Tetrahedron}
 

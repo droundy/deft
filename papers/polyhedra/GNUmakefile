@@ -37,6 +37,7 @@ clean:
 	mkdir -p arxiv/figs
 
 ALL_FIGURES=\
+	figs/w3-000.svg \
 	figs/w3cube.svg
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
