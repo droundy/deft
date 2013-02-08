@@ -116,177 +116,71 @@ first consider the free energy of an ideal gas.
   \right) d\rr d\rot \label{eq:Aideal}
   \\
   &=
-  k_BT \sum_{lmm'} \int
-  n_{lmm'}(\rr)D_{lmm'}(\rot)\left(
-  \ln\left(\Lambda^3\Theta^3 \sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)D_{l_1m_1m'_1}(\rot)\right) - 1
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)\left(
+  \ln\left(\Lambda^3\Theta^3 \sum_{l'm'k'} n_{l'm'k'}(\rr)D_{l'm'k'}(\rot)\right) - 1
   \right) d\rr d\rot
   \\
   &=
-  k_BT \int n_{000}(\rr)
-  \left(\ln\left(\Lambda^3\Theta^3 \sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)\right) - 1
-  \right) d\rr d\rot
-  \\&+
-  k_BT \sum_{l>1,mm'} \int
-  n_{lmm'}(\rr)D_{lmm'}(\rot)
-  \ln\left(\Lambda^3\Theta^3 \sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)D_{l_1m_1m'_1}(\rot)\right)
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3) - 1) +
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \ln\left(n_{000}(\rr) + \sum_{\substack{l'>0\\m'k'}} n_{l'm'k'}(\rr)D_{l'm'k'}(\rot)\right)
   d\rr d\rot
-  \\
-  &= A_{000} + \sum_{l>1,mm'} A_{lmm'} - k_BT\int n_{000}(\rr)d\rr
-\end{align}
-Here I have broken the $000$ term out of the outer summation over
-$lmm'$, since this one is special, since it is independent of $\rot$.
-We'll tackle that integral first, since it is a tad simpler.
-\begin{align}
-  A_{000} &= k_BT\int
-  n_{000}(\rr)\ln\left(
-  \sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)
-  \right)
-  d\rr d\rot
-\end{align}
-We can simplify this integral a bit if we write the log as a power
-series...
-\begin{align}
-  A_{000}
-  &= k_BT\int
-  n_{000}(\rr)\ln\left(
-  n_{000}(\rr)\left(1 + \frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  \right)
-  d\rr d\rot
-  \\
-  &= k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)
-  \\&+k_BT\int
-  n_{000}(\rr)\ln\left(1 + \frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
-  \\
-  &= k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)
-  \\&+k_BT\int
-  n_{000}(\rr)\left(\frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
-  \\&-\frac{k_BT}{2!}\int
-  n_{000}(\rr)\left(\frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)^2
-  d\rr d\rot
-  \\&+\cdots
-\end{align}
-Now the linear term in the power series will vanish, since the
-summation is over $l>0$ only.  In the quadratic term, only a few terms
-will survive, and we'll end up with
-\begin{align}
-  A_{000}
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad-\frac{k_BT}{2!}\int
-  \frac{\sum_{lmm'} \frac{2l+1}{8\pi^2} n_{lmm'}(\rr)n_{l,-m,-m'}}{n_{000}(\rr)}
-  d\rr
-  \\&\quad+\cdots
   \\
   &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad-\frac{k_BT}{2!}\int
-  \frac{\sum_{lmm'} \frac{2l+1}{8\pi^2} |n_{lmm'}(\rr)|^2}{n_{000}(\rr)}
-  d\rr
-  \\&\quad+\cdots
-\end{align}
-Now an interesting question is whether we can mimic this power series
-with a log, such as
-\begin{align}
-  A_{000}
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln \left( \sqrt{n_{000}(\rr)^2 + \sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2} \right)d\rr
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1) +
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \ln\left(1 + \sum_{\substack{l'>0\\m'k'}} \frac{n_{l'm'k'}}{n_{000}(\rr)}(\rr)D_{l'm'k'}(\rot)\right)
+  d\rr d\rot
   \\
-  &= 
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
+  &=
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
   \\&\quad+
-  k_BT\int n_{000}(\rr)\ln\left( \sqrt{1 + \frac{\sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2}{n_{000}(\rr)^2}} \right)d\rr
-  \\
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad+
-  k_BT\int \frac12 \frac{\sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2}{n_{000}(\rr)} d\rr
-  \\&\quad+\cdots
-\end{align}
-from which we can conclude that to get an answer correct to the
-quadratic order, we need
-\begin{align}
-  c_l &= -\frac{2l+1}{8\pi^2}
-\end{align}
-which seems all right except for the sign:  I expect that the free
-energy should increase as we increase $n_{lmm'}$, since it means the
-system is becoming more ordered, and it looks like to this quadratic
-term, the free energy decreases... except that we're only looking at
-$A_{000}$ right now, and thus are neglecting a possibly significant
-increase due to the other terms...  so perhaps we should call this all
-right, and move on for now.
-
-The $A_{lmm'}$ terms are a bit different, but not too different:
-\begin{align}
-  A_{lmm'} &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \ln\left(\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)\right)
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \left(\sum_{\substack{l'>0\\m'k'}}
+  \frac{n_{l'm'k'}(\rr)}{n_{000}(\rr)}D_{l'm'k'}(\rot)
+  - \frac12 \left(\sum_{\substack{l'>0\\m'k'}}
+    \frac{n_{l'm'k'}(\rr)}{n_{000}(\rr)}D_{l'm'k'}(\rot)
+  \right)^2
+  + \cdots \right)
   d\rr d\rot
   \\
   &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \ln\left(1 + \frac{\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  %\\&\quad
+  +
+  k_BT \sum_{l>0mk}
+  \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  - \frac12 \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  + \cdots \label{eq:integrated}
   \\
   &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \left(\frac{\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)}{n_{000}(\rr)}+\cdots\right)
-  d\rr d\rot
-  \\
-  &=
-  k_BT \int n_{lmm'}(\rr) \frac{8\pi^2}{2l+1} \frac{n_{l,-m,-m'}(\rr)}{n_{000}(\rr)}
-  d\rr + \cdots
-  \\
-  &=
-  k_BT \int \frac{8\pi^2}{2l+1} \frac{|n_{lmm'}(\rr)|^2}{n_{000}(\rr)}
-  d\rr + \cdots
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  +
+  k_BT \sum_{l>0mk}
+  \frac{4\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  + \cdots \\
+  &\approx
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  -
+  \frac{n_{000}(\rr)}{2}k_BT \ln\left(1 - \sum_{l>0mk}
+  \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  \right) \label{eq:approxideal}
 \end{align}
-It is interesting how similar the $A_{lmm'}$ terms are to the
-quadratic terms in $A_{000}$, off by a factor of $-\frac12$.  This
-leads me to wonder about the possibility of writing
-\begin{align}
-  A_{\textit{ideal}} &\approx
-  k_BT \int n_{000}(\rr)\left( \ln\left(
-  \sqrt{\sum_{lmm'}\frac{2l+1}{16\pi^2}|n_{lmm'}|^2}
-  \right) - 1\right)d\rr
-\end{align}
-This would be correct up to the quadratic terms, and doesn't require
-any rotational integrals.  It also seems liable to be reasonable up to
-higher order terms, although I have no guarantee of that.  An
-interesting excersize would be to take this out to the fourth order,
-and also take the exact expression out to the fourth order and see how
-they compare.  They will actually differ in the third order terms, I
-expect, since the exact expression will indeed have nonzero third
-order terms.
-
-So we have two plausible options that I can see: we could either go
-with this logarithmic approximation, or we could just go out to second
-order.  The latter is probably more defensible in terms of
-perturbation theory, and would give us something like
-\begin{align}
-  A_{\textit{ideal}} &\approx
-  k_BT \int \left(n(\rr)\ln n(\rr) - n(\rr) +
-  \sum_{lmm'}\frac{2l+1}{16\pi^2}\frac{|n_{lmm'}|^2}{n_{000}(\rr)}
-  \right)d\rr
-\end{align}
-where I have substituted the notation $n(\rr)$ for $n_{000}(\rr)$ to
-save space.
-
 \end{widetext}
+In Equation~\ref{eq:integrated} we have used the fact that
+$D_{000}(\rot)=1$, and because $n(\rr,\rot)$ is real, $n_{l,-m,-k} =
+n_{lmk}^*$.  In Equation~\ref{eq:approxideal}, we have constructed an
+approxmation to the ideal gas free energy which has the correct
+first-order response in the orientational order $n_{l>0,mk}(\rr)$ and
+diverges (as it should) when $n_{l>0,mk}(\rr) \gg n_{000}(\rr)$, which
+would lead to the nonsense result that $n(\rr,\rot) < 0$.  We can tune
+the divergence a bit by moving constant factors (e.g. $8\pi^2$ into
+our out of the logarithm.
+
 \subsection{Finding the orientational moments}
 We find the orientational moments $n_{lmm'}(\rr)$ by minimizing the
 free energy.  Let's begin by optimizing the free energy with respect
@@ -323,7 +217,10 @@ orientations, which would be unphysical.  If this becomes a problem,
 we would want to address it by including nonlinear effects of the
 $\ln$ in Equation~\ref{eq:Aideal}.  For now, let's stick with the
 linear approximation, and hope for the best.  If we find that
-$n_{lmm'} > n_{000}$ in practice, we would want to revisit this decision.
+$n_{lmm'} > n_{000}$ in practice, we would want to revisit this
+decision, and make use of something like
+Equation~\ref{eq:approxideal}.
+
 
 \subsection{The Procedure}
 Our input when computing the free energy is the ordinary density
