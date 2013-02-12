@@ -35,8 +35,8 @@ def read_walls(ff, z0, function_version):
     data = numpy.loadtxt(filename)
     return data
 
-g2 = read_walls(ff, z0, '')
-#g2b = read_walls(ff, z0, '-b')
+#g2 = read_walls(ff, z0, '')
+g2 = read_walls(ff, z0, '-b')
 
 cdict = {'red':  ((0.0, 0.0, 0.0),
                   (0.25,0.0, 0.0),
@@ -61,7 +61,7 @@ pylab.register_cmap(cmap = map)
 cmap = pylab.get_cmap('map')
 
 fig = pylab.figure(1)
-#max = int(g2.max())+1
+max = int(g2.max())+1
 dw = .05
 #levels = numpy.arange(2-max, max+dw/2, dw)
 CS = pylab.contourf(Z, X, g2, 50)#levels, cmap=cmap)
@@ -69,7 +69,7 @@ pylab.contourf(Z, -X, g2, 50)#levels, cmap=cmap)
 CB = pylab.colorbar(CS)
 pylab.axes().set_aspect('equal')
 
-pylab.title('$g^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
+pylab.title('$g_b^{(2)}(z_0, z_1, x_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
 pylab.xlabel("z")
 pylab.ylabel("x")
 #pylab.xlim(1, 21)
