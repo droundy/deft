@@ -16,11 +16,11 @@ if (len(sys.argv) > 1):
 if (len(sys.argv) > 2):
     z0 = float(sys.argv[2])
 
-zmax = 20
-rmax = 10
+zmax = 10
+rmax = 5
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d0-%1.2f.dat" % (10*ff, z0)
+    filename = "mc2/wallsMC-pair-0.%d0-%1.2f.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
@@ -30,7 +30,7 @@ def read_walls(ff, z0):
 
 g2 = read_walls(ff, z0)
 
-#g2/= 2.552
+#g2*= 20.25
 
 zbins = len(g2[0,:])
 rbins = len(g2[:,0])
@@ -66,11 +66,12 @@ cmap = pylab.get_cmap('map')
 fig = pylab.figure(1)
 max = int(g2.max()) + 1
 print max
-dw = 0.01
-levels = numpy.arange(2-max, max+dw/2, dw)
+dw = 0.05
+levels = numpy.arange(2-max, max, dw)
 
 #CS = pylab.contourf(Z, R, g2, levels, cmap=cmap)
 #pylab.contourf(Z, -R, g2, levels, cmap=cmap)
+
 
 CS = pylab.contourf(Z, R, g2, 50)
 pylab.contourf(Z, -R, g2, 50)

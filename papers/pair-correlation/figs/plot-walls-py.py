@@ -27,7 +27,7 @@ z = numpy.arange(0, zmax, dx)
 Z, X = numpy.meshgrid(z, x)
 
 def read_walls(ff, z0, function_version):
-    filename = "wallsWB-pair-0.%d0-%g%s.dat" % (10*ff, z0, function_version)
+    filename = "wallsWB-pair-py-0.%d0-%g%s.dat" % (10*ff, z0, function_version)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or edit walls.cpp then rerun make papers to generate more data."
@@ -61,11 +61,11 @@ pylab.register_cmap(cmap = map)
 cmap = pylab.get_cmap('map')
 
 fig = pylab.figure(1)
-#max = int(g2.max())+1
+max = int(g2.max())+1
 dw = .05
-#levels = numpy.arange(2-max, max+dw/2, dw)
-CS = pylab.contourf(Z, X, g2, 50)#levels, cmap=cmap)
-pylab.contourf(Z, -X, g2, 50)#levels, cmap=cmap)
+levels = numpy.arange(2-max, max+dw/2, dw)
+CS = pylab.contourf(Z, X, g2, levels, cmap=cmap)
+pylab.contourf(Z, -X, g2, levels, cmap=cmap)
 CB = pylab.colorbar(CS)
 pylab.axes().set_aspect('equal')
 

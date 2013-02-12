@@ -29,7 +29,7 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf wigner-properties.pdf
+all :  paper.pdf wigner-properties.pdf harmonics.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
@@ -37,6 +37,7 @@ clean:
 	mkdir -p arxiv/figs
 
 ALL_FIGURES=\
+	figs/w3-000.svg \
 	figs/w3cube.svg
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \

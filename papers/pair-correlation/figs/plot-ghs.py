@@ -27,15 +27,15 @@ toFit = 4
 numParams = 7
 x = [1]*numParams
 # x[0] = 1.0 # 1.15
-x[0] = 6.8
+x[0] = 6.134
 
-x[1] = .5
-x[2] = 6.56
-x[3] = 2.1
+x[1] = .413
+x[2] = 6.449
+x[3] = 2.058
 
-x[4] = .4
-x[5] = 4.8
-x[6] = 3.02
+x[4] = .331
+x[5] = 4.560
+x[6] = 3.319
 
 def dist(x, ind):
     gsig, r = ind
@@ -93,7 +93,7 @@ def plotdatag(x, ind):
     return g, h0*f0, h1*f1, h2*f2, h3*f3
 
 def read_ghs(base, ff):
-    mcdatafilename = "figs/%s-0.%d0.dat" % (base, 10*ff)
+    mcdatafilename = "%s-0.%d0.dat" % (base, 10*ff)
     print 'Using', mcdatafilename
     mcdata = numpy.loadtxt(mcdatafilename)
     r_mc = mcdata[:,0]

@@ -15,10 +15,10 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 
-int zbins = 200; // number of divisions for data collection
-int rbins = 200;
-int z0bins = 200; // number of z0 locations to look in reference to
-                 // they may be specified later
+int zbins = 200; // Number of divisions for data collection. Must be even.
+int rbins = zbins/2; // half zbins to maintain same r and z resolution
+int z0bins = zbins/2; // half zbins because half of z0's are reflected
+
 bool has_x_wall = false;
 bool has_y_wall = false;
 bool has_z_wall = false;
@@ -120,6 +120,8 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
+  const double dr = lenx/rbins/2;
+  const double dz = lenz/zbins;
   const char *outfilename = argv[4];
   char *finalfilename = new char[1024];
   fflush(stdout);
@@ -129,12 +131,13 @@ int main(int argc, char *argv[]){
   Vector3d *spheres = new Vector3d[N];
   long *histogram = new long[z0bins*rbins*zbins];
   long *density_histogram = new long[zbins];
-  int tempcount = 0;
+  long numinhistogram = 0;
+  long numindensityhistogram = 0;
   for (int i=0; i<zbins; i++) {
     density_histogram[i] = 0;
     for (int k=0; k<rbins; k++) {
       for (int l=0; l<z0bins; l++) {
-        histogram[l*z0bins*rbins + k*rbins + i]=0;
+        histogram[l*rbins*zbins + k*zbins + i] = 0;
       }
     }
   }
@@ -294,6 +297,8 @@ int main(int argc, char *argv[]){
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = CLOCKS_PER_SEC*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
+  // Begin main program loop
+  //////////////////////////////////////////////////////////////////////////////
   for (long j=0; j<iterations; j++){
 	  num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
@@ -329,7 +334,7 @@ int main(int argc, char *argv[]){
           } else if (hours_done < 1) {
             printf("Saved data after %ld minutes\n", mins_done);
           } else if (hours_done < 2) {
-            printf("Saved data after %ld minutes\n", mins_done);
+            printf("Saved data after 1 hour, %ld minutes\n", mins_done);
           } else {
             printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
           }
@@ -346,87 +351,59 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          const double dz = lenz/zbins;
-          const double dr = lenx/rbins/2;
-          const double total_volume = lenx*leny*lenz;
+          char *densityfilename = new char[1024];
+          char *radialfilename = new char[1024];
+          sprintf(densityfilename, "%s-density.dat", outfilename);
+          FILE *densityout = fopen((const char *)densityfilename, "w");
           for (int l=0; l<z0bins; l++) {
-            // ADD provision somewhere to only care about certain values of z0,
-            // probably not here, although this code will need to change
-            double z0coord = l*lenz/z0bins + dz/2;
-            sprintf(finalfilename, "%s-%1.1f.dat", outfilename, z0coord);
+            const double z0coord = l*lenz/zbins + dz/2;
+            sprintf(finalfilename, "%s-%1.2f.dat", outfilename, z0coord);
+            sprintf(radialfilename, "%s-%1.2f-rad.dat", outfilename, z0coord);
             FILE *out = fopen((const char *)finalfilename, "w");
+            FILE *radialout = fopen((const char *)radialfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
             const double bin0_volume = M_PI*dr*dr*dz;
-            const double z0density = density_histogram[l]/bin0_volume;
-                                  // this will need to change if z0bins != zbins!!!!!!!
+            const double z0density = double(density_histogram[l])
+              /double(numindensityhistogram)/lenx/leny/dz;
+            fprintf(densityout, "%g\t%g\n", z0coord, z0density);
             for (int i=0; i<rbins; i++) {
-              const double r1min = i*dr; // +/- dr/2?
-              const double r1max = (i+1)*dr; // +/- dr/2?
+              const double r1min = i*dr;
+              const double r1max = (i+1)*dr;
               const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
               for (int k=0; k<zbins; k++) {
-                const double z1density = density_histogram[k]/bin1_volume;
-                double n2sortof = double(histogram[l*z0bins*rbins + i*rbins + k])
-                  /bin0_volume/bin1_volume/bin1_volume*lenx*leny*lenz;
-                double g = n2sortof/z0density/z1density;
-                //double g = n2sortof;
+                const double z1density = double(density_histogram[k])
+                  /double(numindensityhistogram)/lenx/leny/dz;
+                const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
+                  /double(numinhistogram);
+                const double n2 = probability/bin0_volume/bin1_volume;
+                double g = n2/z0density/z1density;
+
+                g *= bin0_volume/dz/lenx/leny;
+                // correction to make g parameter-independent
+                // the real problem is that bin0_volume is independent of the number
+                // of spheres in it
+
                 fprintf(out, "%g\t", g);
+                if (k == l)
+                  fprintf(radialout, "%g\n", g);
               }
               fprintf(out, "\n");
             }
             fclose(out);
+	    fclose(radialout);
           }
-        }/* else if (spherical_inner_wall) {
-          fprintf(out, "%g\t%g\n", radius[0], 0.0);
-          fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
-        } else {
-          fprintf(out, "%g\t%g\n", 0.0, density[0]);
+          fclose(densityout);
+          delete[] densityfilename;
+	  delete[] radialfilename;
         }
-
-        long divtoprint = div;
-        if (!spherical_outer_wall) divtoprint = div - 1;
-        if (!flat_div) {
-          for(long i=1; i<divtoprint; i++){
-            fprintf(out, "%g\t%g\n",
-                    0.5*(radius[i]+radius[i+1]), density[i]);
-          }
-        } else {
-          for(long i=1; i<div; i++){
-            fprintf(out, "%g\t%g\n",
-                    0.5*(sections[i]+sections[i+1]), density[i]);
-          }
-        }
-*/        fflush(stdout);
+        fflush(stdout);
       }
       ///////////////////////////////////////////end of print.dat
     }
 
-    // only write out the sphere positions after they've all had a
-    // chance to move
-    // positions are converted from coordinates to matrix indices,
-    // then histogram and density_histogram count spheres at the
-    // appropriate locations
-    if (workingmoves%N == 0) {
-      for (int i=0; i<N; i++) {
-        const double dz = lenz/zbins;
-        const double dr = lenx/rbins/2;
-        int z0 = int((spheres[i].z() + lenz/2)/dz);
-        density_histogram[z0]++;
-        shells[shell(spheres[i], div, radius, sections)]++; // old, maybe delete?
-        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-        for (int k=0; k<N; k++) {
-          if (i != k) { // don't look at a sphere in relation to itself
-            int z1 = int((spheres[k].z() + lenz/2)/dz);
-            double rdist = distXY(spheres[k], spheres[i]);
-            int r1 = int(rdist/dr);
-            if (r1 < rbins) // ignore data past outermost complete cylindrical shell
-              histogram[z0*z0bins*rbins + r1*rbins + z1]++;
-          }
-        }
-      }
-    }
     if(j % (iterations/100)==0 && j != 0){
       double secs_to_go = secs_per_iteration*(iterations - j);
       long mins_to_go = secs_to_go / 60;
@@ -454,9 +431,8 @@ int main(int argc, char *argv[]){
       fflush(stdout);
     }
     Vector3d temp = move(spheres[j%N],scale);
-    if (j%N == 0)
-      temp = spheres[j%N];
     count++;
+
     if(overlap(spheres, temp, N, R, j%N)){
       if (scale > 0.001 && false) {
         scale = scale/sqrt(1.02);
@@ -471,7 +447,39 @@ int main(int argc, char *argv[]){
     move_counter[j%N] = 0;
     spheres[j%N] = temp;
     workingmoves++;
+    // only write out the sphere positions after they've all had a
+    // chance to move
+    // positions are converted from coordinates to matrix indices,
+    // then histogram and density_histogram count spheres at the
+    // appropriate locations
+    if (workingmoves%N == 0) {
+      for (int i=0; i<N; i++) {
+        bool reflect = false;
+        int z0 = int((spheres[i].z() + lenz/2)/dz);
+        density_histogram[z0]++;
+        numindensityhistogram++;
+        if (spheres[i].z() > 0) {
+          reflect = true;
+          z0 = int(((-spheres[i].z()) + lenz/2)/dz);
+        }
+        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+        for (int k=0; k<N; k++) {
+          if (i != k) { // don't look at a sphere in relation to itself
+            int z1 = int((spheres[k].z() + lenz/2)/dz);
+            if (reflect) z1 = int(((-spheres[k].z()) + lenz/2)/dz);
+            double rdist = distXY(spheres[k], spheres[i]);
+            int r1 = int(rdist/dr);
+            if (r1 < rbins) { // ignore data past outermost complete cylindrical shell
+              numinhistogram++;
+              histogram[z0*rbins*zbins + r1*zbins + z1]++;
+            }
+          }
+        }
+      }
+    }
   }
+  //////////////////////////////////////////////////////////////////////////////
+  // End main program loop
   if (scale < 5 && false) {
     scale = scale*1.02;
     //printf("Increasing scale to %g\n", scale);
@@ -842,7 +850,7 @@ long shell(Vector3d v, long div, double *radius, double *sections){
 }
 
 double ran(){
-  const long unsigned int x =0;
+  const long unsigned int x = 0;
   static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
   return my_mtrand.randExc(); // which is the range of [0,1)
 }

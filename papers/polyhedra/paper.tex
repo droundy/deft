@@ -3,7 +3,7 @@
 %\usepackage{breqn}
 \usepackage{color}
 
-\newcommand{\fixme}[1]{\red{[#1]}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \newcommand\thetamax{\theta_{\text{max}}}
 
@@ -113,180 +113,74 @@ first consider the free energy of an ideal gas.
   A_{\textit{ideal}} &=
   k_BT \int
   \left(n(\rr,\rot)\ln(\Lambda^3\Theta^3 n(\rr,\rot)) - n(\rr,\rot)
+  \right) d\rr d\rot \label{eq:Aideal}
+  \\
+  &=
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)\left(
+  \ln\left(\Lambda^3\Theta^3 \sum_{l'm'k'} n_{l'm'k'}(\rr)D_{l'm'k'}(\rot)\right) - 1
   \right) d\rr d\rot
   \\
   &=
-  k_BT \sum_{lmm'} \int
-  n_{lmm'}(\rr)D_{lmm'}(\rot)\left(
-  \ln\left(\Lambda^3\Theta^3 \sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)D_{l_1m_1m'_1}(\rot)\right) - 1
-  \right) d\rr d\rot
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3) - 1) +
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \ln\left(n_{000}(\rr) + \sum_{\substack{l'>0\\m'k'}} n_{l'm'k'}(\rr)D_{l'm'k'}(\rot)\right)
+  d\rr d\rot
   \\
   &=
-  k_BT \int n_{000}(\rr)
-  \left(\ln\left(\Lambda^3\Theta^3 \sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)\right) - 1
-  \right) d\rr d\rot
-  \\&+
-  k_BT \sum_{l>1,mm'} \int
-  n_{lmm'}(\rr)D_{lmm'}(\rot)
-  \ln\left(\Lambda^3\Theta^3 \sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)D_{l_1m_1m'_1}(\rot)\right)
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1) +
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \ln\left(1 + \sum_{\substack{l'>0\\m'k'}} \frac{n_{l'm'k'}}{n_{000}(\rr)}(\rr)D_{l'm'k'}(\rot)\right)
   d\rr d\rot
-  \\
-  &= A_{000} + \sum_{l>1,mm'} A_{lmm'} - k_BT\int n_{000}(\rr)d\rr
-\end{align}
-Here I have broken the $000$ term out of the outer summation over
-$lmm'$, since this one is special, since it is independent of $\rot$.
-We'll tackle that integral first, since it is a tad simpler.
-\begin{align}
-  A_{000} &= k_BT\int
-  n_{000}(\rr)\ln\left(
-  \sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)
-  \right)
-  d\rr d\rot
-\end{align}
-We can simplify this integral a bit if we write the log as a power
-series...
-\begin{align}
-  A_{000}
-  &= k_BT\int
-  n_{000}(\rr)\ln\left(
-  n_{000}(\rr)\left(1 + \frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  \right)
-  d\rr d\rot
-  \\
-  &= k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)
-  \\&+k_BT\int
-  n_{000}(\rr)\ln\left(1 + \frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
-  \\
-  &= k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)
-  \\&+k_BT\int
-  n_{000}(\rr)\left(\frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
-  \\&-\frac{k_BT}{2!}\int
-  n_{000}(\rr)\left(\frac{\sum_{lmm'} n_{lmm'}(\rr)D_{lmm'}(\rot)}{n_{000}(\rr)}\right)^2
-  d\rr d\rot
-  \\&+\cdots
-\end{align}
-Now the linear term in the power series will vanish, since the
-summation is over $l>0$ only.  In the quadratic term, only a few terms
-will survive, and we'll end up with
-\begin{align}
-  A_{000}
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad-\frac{k_BT}{2!}\int
-  \frac{\sum_{lmm'} \frac{2l+1}{8\pi^2} n_{lmm'}(\rr)n_{l,-m,-m'}}{n_{000}(\rr)}
-  d\rr
-  \\&\quad+\cdots
   \\
   &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad-\frac{k_BT}{2!}\int
-  \frac{\sum_{lmm'} \frac{2l+1}{8\pi^2} |n_{lmm'}(\rr)|^2}{n_{000}(\rr)}
-  d\rr
-  \\&\quad+\cdots
-\end{align}
-Now an interesting question is whether we can mimic this power series
-with a log, such as
-\begin{align}
-  A_{000}
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln \left( \sqrt{n_{000}(\rr)^2 + \sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2} \right)d\rr
-  \\
-  &= 
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
   \\&\quad+
-  k_BT\int n_{000}(\rr)\ln\left( \sqrt{1 + \frac{\sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2}{n_{000}(\rr)^2}} \right)d\rr
-  \\
-  &=
-  k_BT\int
-  n_{000}(\rr)\ln n_{000}(\rr)d\rr
-  \\&\quad+
-  k_BT\int \frac12 \frac{\sum_{lmm'}
-    c_ln_{lmm'}(\rr)^2}{n_{000}(\rr)} d\rr
-  \\&\quad+\cdots
-\end{align}
-from which we can conclude that to get an answer correct to the
-quadratic order, we need
-\begin{align}
-  c_l &= -\frac{2l+1}{8\pi^2}
-\end{align}
-which seems all right except for the sign:  I expect that the free
-energy should increase as we increase $n_{lmm'}$, since it means the
-system is becoming more ordered, and it looks like to this quadratic
-term, the free energy decreases... except that we're only looking at
-$A_{000}$ right now, and thus are neglecting a possibly significant
-increase due to the other terms...  so perhaps we should call this all
-right, and move on for now.
-
-The $A_{lmm'}$ terms are a bit different, but not too different:
-\begin{align}
-  A_{lmm'} &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \ln\left(\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)\right)
+  k_BT \sum_{lmk} \int
+  n_{lmk}(\rr)D_{lmk}(\rot)
+  \left(\sum_{\substack{l'>0\\m'k'}}
+  \frac{n_{l'm'k'}(\rr)}{n_{000}(\rr)}D_{l'm'k'}(\rot)
+  - \frac12 \left(\sum_{\substack{l'>0\\m'k'}}
+    \frac{n_{l'm'k'}(\rr)}{n_{000}(\rr)}D_{l'm'k'}(\rot)
+  \right)^2
+  + \cdots \right)
   d\rr d\rot
   \\
   &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \ln\left(1 + \frac{\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)}{n_{000}(\rr)}\right)
-  d\rr d\rot
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  %\\&\quad
+  +
+  k_BT \sum_{l>0mk}
+  \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  - \frac12 \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  + \cdots \label{eq:integrated}
   \\
   &=
-  k_BT \int n_{lmm'}(\rr) D_{lmm'}(\rot)
-  \left(\frac{\sum_{l_1m_1m'_1} n_{l_1m_1m'_1}(\rr)
-  D_{l_1m_1m'_1}(\rot)}{n_{000}(\rr)}+\cdots\right)
-  d\rr d\rot
-  \\
-  &=
-  k_BT \int n_{lmm'}(\rr) \frac{8\pi^2}{2l+1} \frac{n_{l,-m,-m'}(\rr)}{n_{000}(\rr)}
-  d\rr + \cdots
-  \\
-  &=
-  k_BT \int \frac{8\pi^2}{2l+1} \frac{|n_{lmm'}(\rr)|^2}{n_{000}(\rr)}
-  d\rr + \cdots
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  +
+  k_BT \sum_{l>0mk}
+  \frac{4\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  + \cdots \\
+  &\approx
+  k_BT 8\pi^2 n_{000}(\rr)( \ln(\Lambda^3\Theta^3n_{000}(\rr)) - 1)
+  -
+  \frac{n_{000}(\rr)}{2}k_BT \ln\left(1 - \sum_{l>0mk}
+  \frac{8\pi^2}{2l+1}\frac{|n_{l'm'k'}(\rr)|^2}{n_{000}(\rr)}
+  \right) \label{eq:approxideal}
 \end{align}
-It is interesting how similar the $A_{lmm'}$ terms are to the
-quadratic terms in $A_{000}$, off by a factor of $-\frac12$.  This
-leads me to wonder about the possibility of writing
-\begin{align}
-  A_{\textit{ideal}} &\approx
-  k_BT \int n_{000}(\rr)\left( \ln\left(
-  \sqrt{\sum_{lmm'}\frac{2l+1}{16\pi^2}|n_{lmm'}|^2}
-  \right) - 1\right)d\rr
-\end{align}
-This would be correct up to the quadratic terms, and doesn't require
-any rotational integrals.  It also seems liable to be reasonable up to
-higher order terms, although I have no guarantee of that.  An
-interesting excersize would be to take this out to the fourth order,
-and also take the exact expression out to the fourth order and see how
-they compare.  They will actually differ in the third order terms, I
-expect, since the exact expression will indeed have nonzero third
-order terms.
-
-So we have two plausible options that I can see: we could either go
-with this logarithmic approximation, or we could just go out to second
-order.  The latter is probably more defensible in terms of
-perturbation theory, and would give us something like
-\begin{align}
-  A_{\textit{ideal}} &\approx
-  k_BT \int \left(n(\rr)\ln n(\rr) - n(\rr) +
-  \sum_{lmm'}\frac{2l+1}{16\pi^2}\frac{|n_{lmm'}|^2}{n_{000}(\rr)}
-  \right)d\rr
-\end{align}
-where I have substituted the notation $n(\rr)$ for $n_{000}(\rr)$ to
-save space.
-
 \end{widetext}
+In Equation~\ref{eq:integrated} we have used the fact that
+$D_{000}(\rot)=1$, and because $n(\rr,\rot)$ is real, $n_{l,-m,-k} =
+n_{lmk}^*$.  In Equation~\ref{eq:approxideal}, we have constructed an
+approxmation to the ideal gas free energy which has the correct
+first-order response in the orientational order $n_{l>0,mk}(\rr)$ and
+diverges (as it should) when $n_{l>0,mk}(\rr) \gg n_{000}(\rr)$, which
+would lead to the nonsense result that $n(\rr,\rot) < 0$.  We can tune
+the divergence a bit by moving constant factors (e.g. $8\pi^2$ into
+our out of the logarithm.
+
 \subsection{Finding the orientational moments}
 We find the orientational moments $n_{lmm'}(\rr)$ by minimizing the
 free energy.  Let's begin by optimizing the free energy with respect
@@ -315,7 +209,18 @@ I note that this equation for $n_{lmm'}$ is approximate, since we made
 an approximation when we neglected higher order terms in the expansion
 of the log in the ideal gas free energy.  Thus in cases where there is
 relatively little orientational ordering, it ought to be an accurate
-equation.  In any case I imagine it will be plausible.
+equation.
+
+In cases where $n_{lmm'} \approx n_{000}$, we could reasonbly become
+concerned that $n(\rr, \rot)$ could become negative for some
+orientations, which would be unphysical.  If this becomes a problem,
+we would want to address it by including nonlinear effects of the
+$\ln$ in Equation~\ref{eq:Aideal}.  For now, let's stick with the
+linear approximation, and hope for the best.  If we find that
+$n_{lmm'} > n_{000}$ in practice, we would want to revisit this
+decision, and make use of something like
+Equation~\ref{eq:approxideal}.
+
 
 \subsection{The Procedure}
 Our input when computing the free energy is the ordinary density
@@ -353,18 +258,24 @@ approximations for the fundamental measures aren't \emph{too} wildly
 different, and that the two approximations to the free energy also
 aren't too wildly different.
 
-\subsection{Finding the weighted densities}
+\subsection{Finding the $000$ weighting functions for any polyhedron}
 
 \newcommand\xhat{\mathbf{\hat{x}}}
 \newcommand\yhat{\mathbf{\hat{y}}}
 \newcommand\zhat{\mathbf{\hat{z}}}
 \newcommand\facehat{\mathbf{\hat{f}}}
-\newcommand\Rface{\ensuremath{R_{\text{face}}}}
-\newcommand\Rvertex{\ensuremath{R_{\text{vertex}}}}
+\newcommand\Rface{\ensuremath{R_f}}
+\newcommand\Rvertex{\ensuremath{R_v}}
 
 Here I will discuss how to find the weighted densities we need in
-order to study polyhedra.  We begin with $n_3(\rr)$, the packing
-fraction.
+order to study polyhedra.  I will attempt in this section to evaluate
+the $000$ weighting function for an arbitrary polyhedron, specified in
+terms of the locations of its vertices and face centers (and possibly
+also edge centers, although they should be computable from the vertex
+and face radii).
+
+\subsubsection{$w_3$}
+We begin with the packing fraction $n_3(\rr)$.
 \begin{align}
   w_3(\rr) &= 1 \text{ inside the polyhedron}\\
   &= 0 \text{ outside the polyhedron} \\
@@ -372,8 +283,49 @@ fraction.
 \end{align}
 This is pretty easy, although the integrals will be less so.  The
 $000$ integral is always going to give us something that is
-essentially the same, but I won't go into this yet.
+essentially the same.  This integral is simply:
+\begin{align}
+  w_3^{000}(r) = \int w_3(\rr') \delta(|\rr'|-r) d^3r'\label{eq:w3000}
+\end{align}
+or we could write it as an integral over solid angle:
+\begin{align}
+  w_3^{000}(r) = \int w_3(\rr) d\Omega
+\end{align}
+Let's suppose we have $N$ faces and $M$ vertices per face.  If the
+face center is at radius $\Rface$ and the vertex is at radius $\Rvertex$, then
+we can compute $w_3^{000}$ by integrating over the irregular
+tetrahedron enclosed by the for radii given by one vertex, one edge
+center and one face center, as depicted in Figure~\ref{fig:r3000}, and
+multiplying by $NM$ to account for the entire volume.  By doing this,
+we can solve once for $w_3^{000}(r)$ for any regular polyhedron.
 
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/w3-000}
+\caption{How we integrate for arbitrary polyhedron.}\label{fig:r3000}
+\end{figure}
+
+To begin, we solve for the positions of the vertices, which are shown
+in Figure~\ref{fig:r3000}.  To perform our integration, as in
+Equation~\ref{eq:w3000}, we will choose a coordinate system in which
+the center of the face is in the $\xhat$ direction, and the line from the
+center of the face to the center of the edge is in the $\yhat$
+direction.  Our integral then becomes:
+\begin{widetext}
+\begin{align}
+  w_3^{000}(r) &= \int w_3(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM \int_0^{\Rface} dx
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\cos\left(\frac{2\pi}{M}\right)} dy
+  \int_0^{y\tan\left(\frac{2\pi}{M}\right)} dz \delta(r - \sqrt{x^2 +
+    y^2 + z^2})
+\end{align}
+\end{widetext}
+This integral gives a piecewise smooth result, with different forms
+when $r<\Rface$, $\Rface<r<R_e$, $R_e<r<\Rvertex$ and $\Rvertex<r$ (when it is zero).
+
+\todo{Do the above integral}
+
+\subsubsection{$w_2$}
 $n_2(\rr)$ is the area, which we can easily get from the above
 weighted density.
 \begin{align}
@@ -381,7 +333,25 @@ weighted density.
   &= \sum_i^{\text{faces}} \delta(\Rface-\rr\cdot\facehat_i)
   \prod_{j\ne i} \Theta(\Rface-\rr\cdot\facehat_j)
 \end{align}
-We could also just ask what the area is at a given position.
+Using the same notation as in the previous section, the integral
+for $w_2^{000}$ becomes:
+\begin{widetext}
+\begin{align}
+  w_2^{000}(r) &= \int w_2(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\cos\left(\frac{2\pi}{M}\right)} dy
+  \int_0^{y\tan\left(\frac{2\pi}{M}\right)} dz \delta(r - \sqrt{\Rface^2 +
+    y^2 + z^2})
+\end{align}
+\end{widetext}
+This integral gives a piecewise smooth result, with different forms
+when $r<\Rface$ (it is zero), $\Rface<r<R_e$, $R_e<r<\Rvertex$ and $\Rvertex<r$ (it is
+zero).
+
+\todo{Do the above integral}
+
+\subsubsection{$w_1$}
 
 $n_1(\rr)$ is the first fundamental measure that is interestingly
 different for polyhedra than it is for spheres.  This is a measure of
@@ -397,10 +367,32 @@ there it will be a delta function.
 where $\facehat_i$ is a unit vector in the direction of the $i$ face
 of the polyhedron, $\Rvertex$ is the distance between the center of
 the polyhedron and the vertex, and $\Rface$ is the distance of the
-center of the face from the origin.  WARNING: I may have something off
-in these formulas, but the general idea is there.  To find a constant
-factor, we'd consider the
+center of the face from the origin.  \todo{WARNING: I may have something off
+in these formulas, but the general idea is there.  To check on a
+constant factor that may be off, we could check that the result
+approaches the spherical value for a dodecahedron.  If it's off, it's
+likely off by a largish factor.}
 
+As before, we should be able to do this integral for $w_1^{000}$
+independently of the specific polyhedron in question.  Our choice of
+coordinates will be different, as we only want to integrate over the
+edge, so we may as well put the edge center on the $\xhat$ axis, and
+the edge itself along the $\yhat$ axis.
+\begin{align}
+  w_1^{000}(r) &= \int w_1(\rr') \delta(|\rr'|-r) d^3r'
+  \\
+  &= NM \text{constant factor}
+  \int_0^{\sqrt{\Rvertex^2-\Rface^2}\sin\left(\frac{2\pi}{M}\right)} dy
+  \delta(r - \sqrt{R_e^2 + y^2})
+\end{align}
+The only tricky bit is to get this constant factor right, which will
+relate to the angle between adjacent faces.
+
+\todo{Do this integral}
+
+\todo{Find the constant factor}
+
+\subsubsection{$w_0$}
 
 $n_0(\rr)$ is the fundamental measure of gaussian curvature, which is
 the product of the curvature in the two eigendirections.  This is zero
@@ -410,13 +402,21 @@ must satisfy a sum rule, which tells us that
 \begin{align}
   w_0(\rr) &= \frac1{N}\sum_{i}^{N\text{ vertices}} \delta(\rr-\rr_i)
 \end{align}
-Interestingly, this meas that
+Interestingly, this means that
 \begin{align}
   w_0^{000}(\rr) &= \frac{\delta(\Rvertex - |\rr|)}{4\pi \Rvertex^2}
 \end{align}
 which means that as far as $w_0^{000}$ is concerned, the polyhedron is a
 sphere with a radius equal to the vertex distance (i.e. the distance
 from the center to the vertex of the polyhedron).
+
+\subsubsection{$\mathbf{w_{2V}}$}
+
+\todo{TODO}
+
+\subsubsection{$\mathbf{w_{1V}}$}
+
+\todo{TODO}
 
 \subsection{Tetrahedron}
 
