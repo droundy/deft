@@ -240,7 +240,7 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
-  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
+  Grid gross_correlation(gd, CorrelationGrossCorrect(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));

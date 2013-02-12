@@ -39,6 +39,7 @@ Functional Correlation_Sm2(double radius); // from Haskell
 Functional Correlation_Am2(double radius); // from Haskell
 Functional Correlation_A_WBm2(double radius);
 Functional Correlation_S_WBm2(double radius);
+Functional CorrelationGrossCorrect(double radius);
 
 Functional GrossCorrelation(double radius);
 Functional YuWuCorrelation(double radius);

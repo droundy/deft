@@ -6,7 +6,7 @@ module FMT
        ( n, n3, n2, n2p, n1, n0, rad,
          n2v, n1v, n2vp,
          sqr_n2v, n1v_dot_n2v,
-         shell, shell_diam, step, vshell, vshelldot,
+         shell, shell_diam, step, step_diam, vshell, vshelldot,
          shellPrime, vshellPrime, vshellPrimedot )
        where
 
@@ -40,13 +40,15 @@ n2vp = "n2vp" `nameVector` vshellPrime n
 sqr_n2v = var "n2vsqr" "{\\left|\\vec{n}_{2v}\\right|^2}" (n2v `dot` n2v)
 n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` n1v)
 
-shell_diam, shell, step, shellPrime :: Expression RealSpace -> Expression RealSpace
+shell_diam, step_diam, shell, step, shellPrime :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( deltak * fft x)
   where deltak = protect "deltak" "\\delta(k)" $ smear * (4*pi) * rad * sin kR / k
 shell_diam x = ifft ( deltak * fft x)
   where deltak = protect "deltak2" "\\delta_{2R}(k)" $ smear * (4*pi) * 2*rad * sin (2*kR) / k
 step x = ifft ( stepk * fft x)
   where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+step_diam x = ifft ( stepk * fft x)
+  where stepk = protect "stepdiam" "\\Theta_{2R}(k)" $ smear * (4*pi) * (sin(2*kR) - 2*kR * cos(2*kR)) / k**3
 
 vshell, vshellPrime :: Expression RealSpace -> Vector RealSpace
 vshell x = vifft $ deltav *. fft x

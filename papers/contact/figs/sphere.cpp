@@ -181,7 +181,7 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
     double current = current_memory()/1024.0/1024;
     printf("Peak memory after WBM2 is %g M (current is %g M)\n", peak, current);
   }
-  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
+  Grid gross_correlation(gd, CorrelationGrossCorrect(1.0)(1, gd, density));
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;

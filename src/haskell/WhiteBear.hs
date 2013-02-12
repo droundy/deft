@@ -4,12 +4,12 @@ functional for the excess free energy of the hard sphere fluid. -}
 module WhiteBear
        ( kT, whitebear, correlation_S_WB, correlation_A_WB,
          whitebear_m2, correlation_S_WB_m2, correlation_A_WB_m2,
-         phi1, phi2, phi3 )
+         correlation_gross, phi1, phi2, phi3 )
        where
 
 import Expression
 import FMT ( n, n0, n1, n2, n3, n1v, n2v,
-             shell, shell_diam, vshelldot,
+             shell, shell_diam, step_diam, vshelldot,
              shellPrime, vshellPrimedot,
              rad,
              sqr_n2v, n1v_dot_n2v )
@@ -73,6 +73,9 @@ correlation_A_helper phit = dAdR/(kT * n*shell_diam n )
           d a = derive a 1 phit
           dv a = realspaceGradient a phit
 
+correlation_gross :: Expression RealSpace
+correlation_gross = (1 - 0.5*eta)/(1 - eta)**3
+    where eta = step_diam n/8
 
 whitebear_m2 :: Expression Scalar
 whitebear_m2 = var "whitebear_m2" "F_{HS}^{(m2)}" $ integrate (kT*phitot_m2)
