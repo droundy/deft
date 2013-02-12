@@ -66,6 +66,18 @@ use, and their example is limited to 1D systems.  And the scaling is
 still (so far as I can tell) $O(N^2)$, since their improvement is in
 the prefactor, by developing a nice basis set.
 
+\section{Previous approaches}
+
+Gloor \emph{et al} explain that little is known of the pair
+distribution function of the hard-sphere fluid, and therefore use the
+formula
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(|\rr_1-\rr_2|, \frac{\rho(\rr_1)+\rho(\rr_2)}2\right)
+\end{align}
+They go on to further approximate the radial distribution function,
+but we can just stop here.
+
+
 \section{Pair distribution function with inhomogeneity}
 
 The pair distribution function can be defined using the two particle
