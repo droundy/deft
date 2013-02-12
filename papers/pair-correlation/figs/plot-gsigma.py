@@ -1,37 +1,41 @@
 #!/usr/bin/python
 
 from __future__ import division
-# We need the following two lines in order for matplotlib to work
-# without access to an X server.
-import matplotlib
-#matplotlib.use('Agg')
-
-import pylab, numpy, sys
+from pylab import *
+import sys
 #if len(sys.argv) != 2:
 #    print("Usage:  " + sys.argv[0] + " out-filename.pdf")
 #    exit(1)
 
 #pdffilename = sys.argv[1]
 
-pylab.figure(1)
-pylab.title('$g_{\sigma}$')
-pylab.xlabel('r')
-pylab.axvline(x=1, color='k', linestyle=':')
-pylab.axhline(y=1, color='k', linestyle=':')
+figure(1)
+title('$g_{\sigma}$')
+axvline(x=1, color='k', linestyle=':')
+axhline(y=1, color='k', linestyle=':')
+figure(2)
+title('density')
+figure(3)
+title('nA')
 
 def read_gs(ff):
-    filename = "wallsWB-0.%d0.dat" % (10*ff)
-    print 'Using', filename
-    data = numpy.loadtxt(filename)
-    r = data[:,0]
-    gsigma = data[:,2]
-    return r, gsigma
+  filename = "wallsWB-0.%d0.dat" % (10*ff)
+  print 'Using', filename
+  data = loadtxt(filename)
+  r = data[:,0]
+  density = data[:,1]
+  gsigma = data[:,2]
+  nA = data[:,3]
+  return r, density, gsigma, nA
 
 ff = [.1, .2, .3, .4, .5]
 for i in ff:
-    r, gsigma = read_gs(i)
+  r, density, gsigma, nA = read_gs(i)
+  figure(1)
+  plot(r, gsigma)
+  figure(2)
+  plot(r-3, density)
+  figure(3)
+  plot(r, nA)
 
-    pylab.plot(r, gsigma)
-
-
-pylab.show()
+show()
