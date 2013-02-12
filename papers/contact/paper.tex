@@ -506,12 +506,16 @@ One approximation for the correlation function is that of
 Gross\cite{gross2009density}, which is of the asymmetrically averaged
 variety ($g_\sigma^A$):
 \begin{align}
-  g_\sigma^\text{Gross,A}(\rr) &= \frac{1 - \frac{\pi}{12}\sigma^3n_A(\rr)}{\left(1 -
-    \frac{\pi}{6}\sigma^3n_A(\rr)\right)^3}
+  g_\sigma^\text{Gross,A}(\rr) &= \frac{1 - 0.5\bar{\eta}(\mathbf{r})}{\left(1 -
+    \bar{\eta}(\mathbf{r})\right)^3}
 \end{align}
-where $n_A$ is the averaged density defined in Equation~\ref{eq:nA}.
+where $\bar{\eta}$ is defined as
+\begin{align}
+\bar{\eta} &= \frac{1}{8} \int n(\rr') \Theta(\sigma -\left|\rr - \rr'\right|)
+  d\rr'
+\end{align}
 This formula is arrived at by using the density averaged over all
-spheres that could be touching a sphere at point~$\rr$ in the
+spheres that overlap a point~$\rr$ in the
 Carnahan-Starling equation for the correlation function at contact,
 given in Equation~\ref{eq:cs-g}.
 

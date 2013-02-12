@@ -124,13 +124,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
     correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
     correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
   }
-  Grid gross_correlation(gd, GrossCorrelation(1.0)(1, gd, density));
+  Grid gross_correlation(gd, CorrelationGrossCorrect(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
-              correlation_A, n0, gross_correlation, nA);
+         correlation_A, n0, gross_correlation, nA);
   free(plotname);
 
   {
