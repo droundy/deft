@@ -248,22 +248,34 @@ Which gives
   \tilde{w}_1(k) &= \int_0^\infty \int_0^{2\pi} \int_{-1}^{1} w_1(r)
            e^{-ikr\cos\theta} r^2drd\phi d\cos\theta
     \\
-    &= -\frac{4\pi}{k} \int_0^\infty r w_1(r) \sin(kr) dr
+    &= \frac{4\pi}{k} \int_0^\infty r w_1(r) \sin(kr) dr
     \\
-    &= \frac{2\pi}{k} \int_{-\infty}^\infty r w_1(|r|) e^{-ikr} dr
+    &= -\frac{2\pi}{ik} \int_{-\infty}^\infty r w_1(|r|) e^{-ikr} dr
     \\
-    &= -\frac{2\pi}{k} \int_0^{R} r \frac{B}{4\pi} e^{-\gamma\left(1-\frac{r}{R}\right)^2} \sin(kr) dr
+    &= \frac{2\pi}{k} \int_0^{R} r \frac{B}{4\pi} e^{-\gamma\left(1-\frac{|r|}{R}\right)^2} \sin(kr) dr
     \\
-    &= \frac{B}{k} \int_{-R}^{R} r e^{-\gamma\left(1-\frac{r}{R}\right)^2} e^{-ikr} dr
+    &= -\frac{B}{ik} \int_{-R}^{R} r e^{-\gamma\left(1-\frac{|r|}{R}\right)^2} e^{-ikr} dr
     \\
-    &= \frac{B}{k} \int_{-R}^{R} r e^{-\gamma\left(1-\frac{r}{R}\right)^2 - ikr} dr
+    &= -\frac{B}{ik} \int_{-R}^{R} r
+    e^{-\gamma\left(1-\frac{|r|}{R}\right)^2 - ikr} dr
+    \\
+    x &\equiv \frac{r}{R} \\
+    \\
+    \tilde{w}_1(k) &=
+    -\frac{BR^2}{ik} \int_{-1}^{1} x
+    e^{-\gamma\left(1-|x|\right)^2 - ikRx} dx
+    \\
+    &=
+    -\frac{BR^2}{ik}
+    \bigg(
+    \int_{0}^{1} x e^{-\gamma\left(1-x\right)^2 - ikRx} dx
+    \notag\\&\quad\quad\quad\quad\quad\quad+
+    \int_{-1}^{0} x e^{-\gamma\left(1+x\right)^2 - ikRx} dx
+    \bigg)
 \end{align}
-I'm not sure about the above math---I expect there are math errors
-lurking about.  So it needs to be looked over (or redone) carefully.
-But I expect that there aren't fundamental errors, and the final
-integral is solvable by completing the square in the exponent, and
-then doing a change of variables ($u$ substitution) to turn it into an
-ordinary exponential.
+Eric has checked this, and it looks fine, and looks solvable by
+Mathematica.  The final integral is alternatively solvable by
+completing the square in the exponent.
 \begin{align}
   \tilde{w}_0(k) &= \frac{B}{k} \int_0^\infty \frac{w_2(r)}{r} \sin(kr) dr
     \\
