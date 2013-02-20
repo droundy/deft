@@ -21,7 +21,7 @@ foreach $dd ([20,193, 0.1], [20,390, 0.2], [20, 589, 0.3], [20, 790, 0.4], [20, 
     # Here I estimate the amount of memory that will be needed...
     my $memuse = sprintf "%.0f", 0.001*($N) + 30; # It's a very hokey guess
 
-    my $scriptname = "$dir/mc-walls-$len-$N.tmp.sh";
+    my $scriptname = "$dir/wallsMC-pair-$len-$N.tmp.sh";
 
     my $outfilename = "$dir/mc/wallsMC-pair-$ff";
     my $command = "./pair-monte-carlo $N $iters $acc $outfilename periodxy $len wallz $len flatdiv";
@@ -30,7 +30,6 @@ foreach $dd ([20,193, 0.1], [20,390, 0.2], [20, 589, 0.3], [20, 790, 0.4], [20, 
     print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type ALL
-##SBATCH --mail-user paho\@paholg.com
 #SBATCH --output wallsMC-pair-$len-$N.out
 
 set -ev
