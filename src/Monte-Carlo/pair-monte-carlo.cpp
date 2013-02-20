@@ -132,7 +132,6 @@ int main(int argc, char *argv[]){
   long *histogram = new long[z0bins*rbins*zbins];
   long *density_histogram = new long[zbins];
   long numinhistogram = 0;
-  long numindensityhistogram = 0;
   for (int i=0; i<zbins; i++) {
     density_histogram[i] = 0;
     for (int k=0; k<rbins; k++) {
@@ -339,17 +338,6 @@ int main(int argc, char *argv[]){
             printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
           }
         }
-        if (!flat_div){
-          for(long i=0; i<div; i++){
-            double rmax = radius[i+1];
-            double rmin = radius[i];
-            density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N));
-          }
-        } else {
-          for(long i=0; i<div; i++){
-            density[i]=shells[i]/(lenx*leny*lenz/div)/((j+1)/double(N));
-          }
-        }
         if (flat_div){
           char *densityfilename = new char[1024];
           char *radialfilename = new char[1024];
@@ -365,27 +353,20 @@ int main(int argc, char *argv[]){
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
-            const double bin0_volume = M_PI*dr*dr*dz;
-            const double z0density = double(density_histogram[l])
-              /double(numindensityhistogram)/lenx/leny/dz;
+            const double z0density = double(density_histogram[l]*N)
+              /double(workingmoves)/lenx/leny/dz;
             fprintf(densityout, "%g\t%g\n", z0coord, z0density);
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
               const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
               for (int k=0; k<zbins; k++) {
-                const double z1density = double(density_histogram[k])
-                  /double(numindensityhistogram)/lenx/leny/dz;
+                const double z1density = double(density_histogram[k]*N)
+                  /double(workingmoves)/lenx/leny/dz;
                 const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
-                  /double(numinhistogram);
-                const double n2 = probability/bin0_volume/bin1_volume;
-                double g = n2/z0density/z1density;
-
-                g *= bin0_volume/dz/lenx/leny;
-                // correction to make g parameter-independent
-                // the real problem is that bin0_volume is independent of the number
-                // of spheres in it
-
+                  /double(numinhistogram)/2; // the 2 because reflecting -> double counting
+                const double n2 = probability/bin1_volume/dz/lenx/leny;
+                const double g = n2/z0density/z1density;
                 fprintf(out, "%g\t", g);
                 if (k == l)
                   fprintf(radialout, "%g\n", g);
@@ -393,11 +374,11 @@ int main(int argc, char *argv[]){
               fprintf(out, "\n");
             }
             fclose(out);
-	    fclose(radialout);
+            fclose(radialout);
           }
           fclose(densityout);
           delete[] densityfilename;
-	  delete[] radialfilename;
+          delete[] radialfilename;
         }
         fflush(stdout);
       }
@@ -453,24 +434,22 @@ int main(int argc, char *argv[]){
     // then histogram and density_histogram count spheres at the
     // appropriate locations
     if (workingmoves%N == 0) {
+      numinhistogram++;
       for (int i=0; i<N; i++) {
-        bool reflect = false;
-        int z0 = int((spheres[i].z() + lenz/2)/dz);
-        density_histogram[z0]++;
-        numindensityhistogram++;
-        if (spheres[i].z() > 0) {
-          reflect = true;
-          z0 = int(((-spheres[i].z()) + lenz/2)/dz);
-        }
+        const int reflect = 2*(double(spheres[i].z() < 0) - 0.5);
+        // reflect = +/-1, used to reflect everything if you're past halfway through the box
+        // except for the density
+        const int z0 = int((reflect*spheres[i].z() + lenz/2)/dz);
+        const int z0_unreflected = int((spheres[i].z() + lenz/2)/dz);
+        density_histogram[z0_unreflected]++;
         //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+
         for (int k=0; k<N; k++) {
           if (i != k) { // don't look at a sphere in relation to itself
-            int z1 = int((spheres[k].z() + lenz/2)/dz);
-            if (reflect) z1 = int(((-spheres[k].z()) + lenz/2)/dz);
-            double rdist = distXY(spheres[k], spheres[i]);
-            int r1 = int(rdist/dr);
+            const int z1 = int((reflect*spheres[k].z() + lenz/2)/dz);
+            const double rdist = distXY(spheres[k], spheres[i]);
+            const int r1 = int(rdist/dr);
             if (r1 < rbins) { // ignore data past outermost complete cylindrical shell
-              numinhistogram++;
               histogram[z0*rbins*zbins + r1*zbins + z1]++;
             }
           }
