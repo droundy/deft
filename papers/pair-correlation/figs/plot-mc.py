@@ -8,9 +8,10 @@ import matplotlib
 import pylab, numpy, sys
 import os.path
 import matplotlib.colors as mcolors
+from matplotlib.widgets import Slider, RadioButtons
 
-ff = .3
-z0 = 2
+ff = 0.3
+z0 = 0.05
 if (len(sys.argv) > 1):
     ff = float(sys.argv[1])
 if (len(sys.argv) > 2):
@@ -20,7 +21,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d0-%1.2f.dat" % (10*ff, z0)
+    filename = "mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
@@ -41,39 +42,13 @@ r = numpy.arange(0, rmax, dr)
 z = numpy.arange(0, zmax, dz)
 Z, R = numpy.meshgrid(z, r)
 
-cdict = {'red':  ((0.0, 0.0, 0.0),
-                  (0.25,0.0, 0.0),
-                  (0.5, 0.8, 1.0),
-                  (0.75,1.0, 1.0),
-                  (1.0, 0.4, 1.0)),
-
-        'green': ((0.0, 0.0, 0.0),
-                  (0.25,0.0, 0.0),
-                  (0.5, 0.9, 0.9),
-                  (0.75,0.0, 0.0),
-                  (1.0, 0.0, 0.0)),
-
-        'blue':  ((0.0, 0.0, 0.4),
-                  (0.25,1.0, 1.0),
-                  (0.5, 1.0, 0.8),
-                  (0.75,0.0, 0.0),
-                  (1.0, 0.0, 0.0))
-        }
-map = mcolors.LinearSegmentedColormap('map', cdict)
-pylab.register_cmap(cmap = map)
-cmap = pylab.get_cmap('map')
-
 fig = pylab.figure(1)
-max = int(g2.max()) + 1
-print max
-dw = 0.01
-levels = numpy.arange(2-max, max+dw/2, dw)
+ax = pylab.subplot(111)
+print g2.max()
 
-#CS = pylab.contourf(Z, R, g2, levels, cmap=cmap)
-#pylab.contourf(Z, -R, g2, levels, cmap=cmap)
-
-CS = pylab.contourf(Z, R, g2, 50)
-pylab.contourf(Z, -R, g2, 50)
+levels = 100
+CS = pylab.contourf(Z, R, g2, levels)
+CS2 = pylab.contourf(Z, -R, g2, levels)
 
 CB = pylab.colorbar(CS)
 pylab.axes().set_aspect('equal')
@@ -81,5 +56,41 @@ pylab.axes().set_aspect('equal')
 pylab.title('$g^{(2)}(z_0, z_1, r_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
 pylab.xlabel("z")
 pylab.ylabel("r")
+
+# slider code
+z0ax = pylab.axes([0.25, 0, 0.5, 0.05], axisbg='slategray')
+z0_slider = Slider(z0ax, '$z_0$', 0.0, 9.90, valinit = 0.0)
+
+def update(val):
+  global z0, ax
+  ax.collections = []
+  z0 = z0_slider.val - z0_slider.val%0.10 + 0.05
+  g2 = read_walls(ff, z0)
+  CS = ax.contourf(Z, R, g2, levels)
+  CS2 = ax.contourf(Z, -R, g2, levels)
+  CB.set_clim(vmax = g2.max())
+  CB.draw_all()
+  ax.set_title('$g^{(2)}(z_0, z_1, r_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
+  pylab.draw()
+
+z0_slider.on_changed(update)
+
+# radio button code
+ffax = pylab.axes([0.05, 0.3, 0.1, 0.4], axisbg='slategray')
+ffbutt = RadioButtons(ffax, (0.1, 0.2, 0.3, 0.4, 0.5), active=2)
+
+def updateff(label):
+  global ff, ax, CB
+  ax.collections = []
+  ff = float(label)
+  g2 = read_walls(ff, z0)
+  CS = ax.contourf(Z, R, g2, levels)
+  CS2 = ax.contourf(Z, -R, g2, levels)
+  CB.set_clim(vmax = g2.max())
+  CB.draw_all()
+  ax.set_title('$g^{(2)}(z_0, z_1, r_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
+  pylab.draw()
+
+ffbutt.on_clicked(updateff)
 
 pylab.show()
