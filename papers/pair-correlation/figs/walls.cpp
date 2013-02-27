@@ -23,10 +23,20 @@
 #include "utilities.h"
 #include "handymath.h"
 
-// Maximum and spacing values for plotting, saved for use by plot-walls.py
+// Maximum and spacing values for plotting
 const double zmax = 20;
 const double xmax = 10;
 const double dx = 0.1;
+
+// set up which functions to output, and how many.
+// possible values are:
+// simple:  g2(r1, r2) = 1/2(g(|r2-r1|, gsigma1) + g(|r2-r1|), gsigma2)
+// py:      g2(r1, r2) = g_py(|r2-r1|, 1/2(eta(r1) + eta(r2)))
+// nA:      g2(r1, r2) = (nA(r1)*g(|r2-r1|, gsigma1) + nA(r2)*g(|r2-r1|), gsigma2)
+//                     / (1/nA(r1) + 1/nA(r2))
+const char *fun[] = {"simple", "nA", "py"};
+const int numplots = 3;
+
 
 // Here we set up the lattice.
 static double width = 30;
@@ -43,7 +53,7 @@ double radial_distribution(double gsigma, double r) {
                a5 = 4.555,
                a6 = 3.312;
   double d = r/2 - 1;
-  if (d <= 0)
+  if (d < 0)
     return 0;
   return 1 + (gsigma-1)*exp(-a0*d) + a1*(gsigma-1)*sin(a2*d)*exp(-a3*d)
            - a4*(gsigma-1)*(gsigma-1)*sin(a5*d)*exp(-a6*d);
@@ -51,26 +61,26 @@ double radial_distribution(double gsigma, double r) {
 
 double py_rdf (double eta, double r) {
   // taken from the paper by Trokhymchuk et. al.
-  const double sigma = 1;
-  const double gsigma = 1/4/eta*((1 + eta + eta*eta - 2/3*eta*eta*eta
-                      - 2/3*eta*eta*eta*eta)/(1 - eta)/(1 - eta)/(1 - eta) - 1);
+  const double sigma = 1.0;
+  const double gsigma = 1.0/4.0/eta*((1.0 + eta + eta*eta - 2.0/3.0*eta*eta*eta
+                      - 2.0/3.0*eta*eta*eta*eta)/(1.0 - eta)/(1.0 - eta)/(1.0 - eta) - 1.0);
   const double rstar = sigma*(2.0116 - 1.0647*eta + 0.0538*eta*eta);
-  const double d = pow((2*eta*(eta*eta - 3*eta - 3 + sqrt(3*(eta*eta*eta*eta
-	               - 2*eta*eta*eta + eta*eta + 6*eta + 3)))), 1.0/3.0);
+  const double d = pow((2.0*eta*(eta*eta - 3.0*eta - 3.0 + sqrt(3.0*(eta*eta*eta*eta
+	               - 2.0*eta*eta*eta + eta*eta + 6.0*eta + 3.0)))), 1.0/3.0);
   const double g_m = 1.0286 - 0.6095*eta + 3.5781*eta*eta - 21.3651*eta*eta*eta
                    + 42.6344*eta*eta*eta*eta - 33.8485*eta*eta*eta*eta*eta;
-  const double alpha = (44.554 + 79.868*eta + 116.432*eta*eta - 44.652*exp(2*eta))/sigma;
-  const double alpha0 = 2*eta/(1 - eta)*(-1 + d/4/eta - eta/2/d)/sigma;
-  const double beta = (-5.022 + 5.857*eta + 5.089*exp(-4*eta))/sigma;
-  const double beta0 = 2*eta/(1-eta)*sqrt(3)*(-d/4/eta - eta/2/d)/sigma;
-  const double mu = (2*eta/(1 - eta)*(-1 - d/2/eta - eta/d))/sigma;
+  const double alpha = (44.554 + 79.868*eta + 116.432*eta*eta - 44.652*exp(2.0*eta))/sigma;
+  const double alpha0 = 2.0*eta/(1.0 - eta)*(-1.0 + d/4.0/eta - eta/2.0/d)/sigma;
+  const double beta = (-5.022 + 5.857*eta + 5.089*exp(-4.0*eta))/sigma;
+  const double beta0 = 2.0*eta/(1.0-eta)*sqrt(3.0)*(-d/4.0/eta - eta/2.0/d)/sigma;
+  const double mu = (2.0*eta/(1.0 - eta)*(-1.0 - d/2.0/eta - eta/d))/sigma;
   const double gamma = atan(-sigma/beta0*((alpha0*sigma*(alpha0*alpha0 + beta0*beta0)
-                     - mu*sigma*(alpha0*alpha0 + beta0*beta0))*(1 + eta/2)
-                     + (alpha0*alpha0 + beta0*beta0 - mu*alpha0)*(1 + 2*eta)));
+                     - mu*sigma*(alpha0*alpha0 + beta0*beta0))*(1.0 + eta/2.0)
+                     + (alpha0*alpha0 + beta0*beta0 - mu*alpha0)*(1.0 + 2.0*eta)));
   const double kappa = (4.674*exp(-3.935*eta) + 3.536*exp(-56.270*eta))/sigma;
   const double omega = (-0.682*exp(-24.697*eta) + 4.720 + 4.450*eta)/sigma;
-  const double delta = -omega*rstar - atan((kappa*rstar + 1)/omega/rstar);
-  const double C = rstar*(g_m - 1)*exp(kappa*rstar)/cos(omega*rstar + delta);
+  const double delta = -omega*rstar - atan((kappa*rstar + 1.0)/omega/rstar);
+  const double C = rstar*(g_m - 1.0)*exp(kappa*rstar)/cos(omega*rstar + delta);
   const double B = (g_m - (sigma*gsigma/rstar)*exp(mu*(rstar - sigma)))
                  / (cos(beta*(rstar - sigma) + gamma)*exp(alpha*(rstar-sigma))
 		    - cos(gamma)*exp(mu*(rstar - sigma)))*rstar;
@@ -134,85 +144,52 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
   fclose(out);
 }
 
-void plot_pair_distribution(const char *fname, const char *fname2, double z0,
+void plot_pair_distribution(const char *fname, const char *fun, double z0,
                             const Grid &gsigma, const Grid &density, const Grid &nA) {
   FILE *out = fopen(fname, "w");
-  FILE *out2 = fopen(fname2, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
     return;
   }
-  if (!out2) {
-    fprintf(stderr, "Unable to create file %s!\n", fname2);
-    return;
-  }
-
   // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
   // is at z = 0, to match with the monte carlo data
   z0 += 1;
-  double gsigma0 = gsigma(Cartesian(0, 0, z0));
-  double density0 = density(Cartesian(0, 0, z0+2)); //density starts at z=3 for some reason
-  double nA0 = nA(Cartesian(0, 0, z0));
-  const GridDescription gd = gsigma.description();
+  const double gsigma0 = gsigma(Cartesian(0, 0, z0));
+  const double density0 = density(Cartesian(0, 0, z0+2)); //density data starts at z = 3
+  const double nA0 = nA(Cartesian(0, 0, z0));
   for (double x = 0; x < xmax - dx/2; x += dx) {
     for (double z1 = 1; z1 < zmax + 1 - dx/2; z1 += dx) {
-      double gsigma1 = gsigma(Cartesian(0, 0, z1));
-      double density1 = density(Cartesian(0, 0, z1+2));
-      double nA1 = nA(Cartesian(0, 0, z1));
-      double r = sqrt((z1 - z0)*(z1 - z0) + x*x);
+      const double gsigma1 = gsigma(Cartesian(0, 0, z1));
+      const double density1 = density(Cartesian(0, 0, z1+2));
+      const double nA1 = nA(Cartesian(0, 0, z1));
+      const double r = sqrt((z1 - z0)*(z1 - z0) + x*x);
       double g2 = 0;
-      double g2b = 0;
       if (r >= 2) {
-        //g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
-        //g2b = (radial_distribution(gsigma0, r)*density2 + radial_distribution(gsigma2, z1+2)*density0)/(density0+density2);
-        //g2 = density1;//(radial_distribution(gsigma0, r));//*density1)/(density0 + density1);
-        //g2b = (radial_distribution(gsigma1, r));//*density0)/(density0 + density1);
-        //g2 = radial_distribution(gsigma0, r) + radial_distribution(gsigma1, z1+1);
-        //g2b = (nA1*radial_distribution(gsigma0, r) + nA0*radial_distribution(gsigma1, r))
-	/// (nA0 + nA1);
-        //        g2 = (radial_distribution(gsigma0, r)*density1 + radial_distribution(gsigma1, r)*density0)/(density0 + density1);
-        // g2 = radial_distribution(gsigma0, r);
-        //   g2b = radial_distribution(gsigma1, r)*density0/density1;
-
-        //g2 = radial_distribution(gsigma0, r)*nA1/(nA0 + nA1) + radial_distribution(gsigma1, r)*nA0/(nA0 + nA1);
-        //g2b = (radial_distribution(gsigma1, r)/density1 + radial_distribution(gsigma0, r)/density0)*(density0);
-        //g2 = radial_distribution(gsigma1, r)/density1*(density0 + density1) + radial_distribution(gsigma0, r)/density0*(density0 + density1);
-        g2 = (radial_distribution(gsigma0, r)/nA1 + radial_distribution(gsigma1, r)/nA0)
-          /(1/nA0 + 1/nA1);
-        g2b = (radial_distribution(gsigma0, r)/density0
-             + radial_distribution(gsigma1, r)/density1)
-          /(1/density0 + 1/density1);
-        const double a = radial_distribution(gsigma1, r)/density1/(1/density0 + 1/density1);
-        const double b = radial_distribution(gsigma0, r)/density0/(1/density0 + 1/density1);
-        g2 = a + b;
+        if(!strcmp(fun, "simple")) {
+          g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
+          }
+        else if(!strcmp(fun, "py")) {
+          const double eta = 4/3*M_PI*1*1*1*density(Cartesian(0, 0, (z0 + z1)/2 + 2));
+          //printf("z1: %g, eta: %g, den: %g\n", z1, eta, density(Cartesian(0, 0, z1)));
+          g2 = py_rdf(eta, r);
+          }
+        else if(!strcmp(fun, "nA")) {
+          g2 = (radial_distribution(gsigma0, r)/nA1 + radial_distribution(gsigma1, r)/nA0)
+            /(1/nA0 + 1/nA1);
+          }
+        else if(!strcmp(fun, "nA2")) {
+          g2 = (radial_distribution(gsigma0, r)/nA0 + radial_distribution(gsigma1, r)/nA1)
+            /(1/nA0 + 1/nA1);
+        }
+        else if(!strcmp(fun, "rdf")) {
+          g2 = radial_distribution(gsigma0, r);
+        }
+        else {
+          fprintf(stderr, "Invalid function %s", fun);
+          return;
+        }
       }
       fprintf(out, "%g\t", g2);
-      fprintf(out2, "%g\t", g2b);
-    }
-    fprintf(out, "\n");
-    fprintf(out2, "\n");
-  }
-  fclose(out);
-  fclose(out2);
-}
-
-void plot_py_rdf(const char *fname, double z0, const Grid &gsigma, double eta) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unabme to create file %s!\n", fname);
-    return;
-  }
-  double gsigma0 = gsigma(Cartesian(0, 0, z0+1));
-  const GridDescription gd = gsigma.description();
-  for (double x = 0; x < xmax - dx/2; x += dx) {
-    for (double z1 = 0; z1 < zmax - dx/2; z1 += dx) {
-      double gsigma1 = gsigma(Cartesian(0, 0, z1+1));
-      double r = sqrt((z0-z1)*(z0-z1) + x*x);
-      double g2py = 0;
-      if (r > 2) {
-	g2py = py_rdf(eta, r/2);
-      }
-      fprintf(out, "%g\t", g2py);
     }
     fprintf(out, "\n");
   }
@@ -256,8 +233,6 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
   char *plotname = new char[1024];
-  char *plotname2 = new char[1024];
-  char *plotname3 = new char[1024];
   Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
 
@@ -265,19 +240,14 @@ void run_walls(double eta, const char *name, Functional fhs) {
   z_plot(plotname, density, gsigma, nA);
 
   // here you choose the values of z0 to use
-  for (double z0 = 0; z0 < 3; z0 += .5) {
-    sprintf(plotname, "papers/pair-correlation/figs/walls%s-pair-%04.2f-%g.dat",
-	    name, eta, z0);
-    sprintf(plotname2, "papers/pair-correlation/figs/walls%s-pair-%04.2f-%g-b.dat",
-	    name, eta, z0);
-    sprintf(plotname3, "papers/pair-correlation/figs/walls%s-pair-py-%04.2f-%g.dat",
-	    name, eta, z0);
-    plot_pair_distribution(plotname, plotname2, z0, gsigma, density, nA);
-    plot_py_rdf(plotname3, z0, gsigma, eta);
+  for (double z0 = 0.05; z0 < 10; z0 += .1) {
+    for (int i = 0; i < numplots; i++) {
+      sprintf(plotname, "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
+              name, fun[i], eta, z0);
+      plot_pair_distribution(plotname, fun[i], z0, gsigma, density, nA);
+    }
   }
   delete[] plotname;
-  delete[] plotname2;
-  delete[] plotname3;
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
@@ -295,7 +265,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
     FILE *fout = fopen("papers/pair-correlation/figs/wallsfillingfracInfo.txt", "a");
     fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n",
-	    name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
+            name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
 
     int wallslen = 20;
     double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);
@@ -316,13 +286,6 @@ void run_walls(double eta, const char *name, Functional fhs) {
 int main(int, char **) {
   FILE *fout = fopen("papers/pair-correlation/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-  FILE *out = fopen("papers/pair-correlation/figs/constants.dat", "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file constants.dat!\n");
-    return 1;
-  }
-  fprintf(out, "%g\t%g\t%g", zmax, xmax, dx);
-  fclose(out);
 
   for (double eta = 0.1; eta < 0.6; eta += 0.1) {
     run_walls(eta, "WB", WB);
