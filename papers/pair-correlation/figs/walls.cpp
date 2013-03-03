@@ -22,6 +22,8 @@
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
+#include "errno.h"
+#include "sys/stat.h" // for mkdir
 
 // Maximum and spacing values for plotting
 const double zmax = 20;
@@ -239,6 +241,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
 
+  // Create the walls directory if it doesn't exist.
+  if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
+    // We failed to create the directory, and it doesn't exist.
+    printf("Failed to create papers/pair-correlation/figs/walls: %s",
+           strerror(errno));
+    exit(1); // fail immediately with error code
+  }
   // here you choose the values of z0 to use
   for (double z0 = 0.05; z0 < 10; z0 += .1) {
     for (int i = 0; i < numplots; i++) {
