@@ -5,7 +5,7 @@ all: depend test.exe functionals.exe latex-functionals.exe newfunctionals.exe
 clean:
 	rm -f *.hi *.o test functionals latex-functionals newfunctionals
 
-GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package process -package containers -package HUnit # -prof -auto-all
+GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package process -package containers -package HUnit -Werror # -prof -auto-all
 
 .o.hi:
 	@:

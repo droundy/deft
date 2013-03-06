@@ -3,11 +3,13 @@
 
 module Expression (Exprn(..),
                    break_real_from_imag,
-                   RealSpace(..), r_var, dV, dVscalar, dr, lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
+                   RealSpace(..), r_var, dV, dVscalar, dr,
+                   rx, ry, rz, rmag, rvec,
+                   lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
                    KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero,
                    Scalar(..), scalar,
                    Vector, t_var, cross, dot, (/.), (*.), (.*), xhat, yhat, zhat,
-                   erf,
+                   erf, heaviside,
                    nameVector, vfft, vifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
                    Expression(..), joinFFTs, (===), var, protect, vprotect,
@@ -36,6 +38,7 @@ import qualified Data.Set as Set
 import LatexDouble ( latexDouble )
 
 data RealSpace = IFFT (Expression KSpace)
+               | Rx | Ry | Rz
                deriving ( Eq, Ord, Show )
 data KSpace = Delta | -- handy for FFT of homogeneous systems
               Complex (Expression Scalar) (Expression Scalar) |
@@ -53,6 +56,7 @@ kinversion :: Expression KSpace -> Expression KSpace
 kinversion (Var _ _ _ _ (Just e)) = kinversion e
 kinversion e@(Var _ _ _ _ Nothing) = e
 kinversion (Scalar e) = Scalar e
+kinversion (Heaviside e) = heaviside (kinversion e)
 kinversion (Cos e) = cos (kinversion e)
 kinversion (Sin e) = sin (kinversion e)
 kinversion (Erf e) = erf (kinversion e)
@@ -113,15 +117,33 @@ instance Type a => Num (Vector a) where
 instance Code RealSpace where
   codePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(gd, " ++ksp++ ")")
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
+  codePrec _ Rx = showString "rx"
+  codePrec _ Ry = showString "ry"
+  codePrec _ Rz = showString "rz"
   newcodePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(" ++ksp++ ")")
   newcodePrec _ (IFFT ke) = showString "ifft(" . codePrec 0 ke . showString ")"
+  newcodePrec _ Rx = showString "rx"
+  newcodePrec _ Ry = showString "ry"
+  newcodePrec _ Rz = showString "rz"
   latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
+  latexPrec _ Rx = showString "\\textbf{r_x}"
+  latexPrec _ Ry = showString "\\textbf{r_y}"
+  latexPrec _ Rz = showString "\\textbf{r_z}"
 instance Type RealSpace where
   amRealSpace _ = True
   mkExprn = ER
   derivativeHelper v ddr (IFFT ke) = derive v (fft ddr) (kinversion ke)
+  derivativeHelper _ _ Rx = 0
+  derivativeHelper _ _ Ry = 0
+  derivativeHelper _ _ Rz = 0
   scalarderivativeHelper v (IFFT ke) = ifft (scalarderive v ke)
+  scalarderivativeHelper _ Rx = 0
+  scalarderivativeHelper _ Ry = 0
+  scalarderivativeHelper _ Rz = 0
   zeroHelper v (IFFT ke) = ifft (setZero v ke)
+  zeroHelper _ Rx = rx
+  zeroHelper _ Ry = ry
+  zeroHelper _ Rz = rz
   codeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) =
     a ++ op ++ "ifft(gd, " ++ v ++ ");\n"
   codeStatementHelper _ _ (Expression (IFFT e)) =
@@ -159,9 +181,21 @@ instance Type RealSpace where
   newfree (Var IsTemp _ x _ Nothing) = x ++ ".free(); // Realspace"
   newfree e = error $ trace "free error" ("free error " ++ show e)
   toScalar (IFFT ke) = makeHomogeneous ke
+  toScalar Rx = 0
+  toScalar Ry = 0
+  toScalar Rz = 0
   mapExpressionHelper' f (IFFT ke) = ifft (f ke)
+  mapExpressionHelper' _ Rx = rx
+  mapExpressionHelper' _ Ry = ry
+  mapExpressionHelper' _ Rz = rz
   subAndCountHelper x y (IFFT ke) = case subAndCount x y ke of (ke', n) -> (ifft ke', n)
+  subAndCountHelper _ _ Rx = (rx, 0)
+  subAndCountHelper _ _ Ry = (ry, 0)
+  subAndCountHelper _ _ Rz = (rz, 0)
   searchHelper f (IFFT e) = f e
+  searchHelper _ Rx = mempty
+  searchHelper _ Ry = mempty
+  searchHelper _ Rz = mempty
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * ifft (joinFFTs $ pairs2sum ks)
@@ -365,6 +399,7 @@ mapExpression :: (Type a, Type b) => (a -> Expression b) -> Expression a -> Expr
 mapExpression f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpression f e
 mapExpression _ (Var tt c v t Nothing) = Var tt c v t Nothing
 mapExpression _ (Scalar e) = Scalar e
+mapExpression f (Heaviside e) = heaviside (mapExpression f e)
 mapExpression f (Cos e) = cos (mapExpression f e)
 mapExpression f (Sin e) = sin (mapExpression f e)
 mapExpression f (Erf e) = erf (mapExpression f e)
@@ -383,6 +418,7 @@ mapExpression' f (Var IsTemp a b c (Just e)) = f $ Var IsTemp a b c $ Just $ map
 mapExpression' f e@(Var CannotBeFreed _ _ _ (Just _)) = f e
 mapExpression' f (Var tt c v t Nothing) = f $ Var tt c v t Nothing
 mapExpression' f (Scalar e) = f $ Scalar (mapExpression' f e)
+mapExpression' f (Heaviside e) = f $ heaviside (mapExpression' f e)
 mapExpression' f (Cos e) = f $ cos (mapExpression' f e)
 mapExpression' f (Sin e) = f $ sin (mapExpression' f e)
 mapExpression' f (Erf e) = f $ erf (mapExpression' f e)
@@ -402,6 +438,7 @@ mapExpressionShortcut f e | Just e' <- f e = e'
 mapExpressionShortcut f (Var t a b c (Just e)) = Var t a b c $ Just $ mapExpressionShortcut f e
 mapExpressionShortcut _ (Var tt c v t Nothing) = Var tt c v t Nothing
 mapExpressionShortcut f (Scalar e) = Scalar (mapExpressionShortcut f e)
+mapExpressionShortcut f (Heaviside e) = heaviside (mapExpressionShortcut f e)
 mapExpressionShortcut f (Cos e) = cos (mapExpressionShortcut f e)
 mapExpressionShortcut f (Sin e) = sin (mapExpressionShortcut f e)
 mapExpressionShortcut f (Erf e) = erf (mapExpressionShortcut f e)
@@ -427,6 +464,7 @@ searchExpression i f v@(Var IsTemp _ _ _ (Just e)) =
             | otherwise -> Just e'
 searchExpression _ _ (Var CannotBeFreed _ _ _ (Just _)) = Nothing
 searchExpression i f (Scalar e) = searchExpression i f e
+searchExpression i f (Heaviside e) = searchExpression i f e
 searchExpression i f (Cos e) = searchExpression i f e
 searchExpression i f (Sin e) = searchExpression i f e
 searchExpression i f (Erf e) = searchExpression i f e
@@ -450,6 +488,7 @@ searchExpressionDepthFirst i f x@(Var IsTemp _ _ _ (Just e)) =
             | otherwise -> Just e'
 searchExpressionDepthFirst _ f x@(Var CannotBeFreed _ _ _ (Just _)) = f x
 searchExpressionDepthFirst i f x@(Scalar e) = searchExpressionDepthFirst i f e `mor` f x
+searchExpressionDepthFirst i f x@(Heaviside e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Cos e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Sin e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Erf e) = searchExpressionDepthFirst i f e `mor` f x
@@ -514,6 +553,8 @@ expand :: Type a => Expression a -> Expression a -> Expression a
 expand v (Var a b c d (Just e)) = Var a b c d (Just $ expand v e)
 expand _ e@(Var _ _ _ _ Nothing) = e
 expand _ (Scalar e) = Scalar e
+expand v (Heaviside e) = heaviside e'
+     where e' = expand v e
 expand v (Cos e) = if setZero (mkExprn v) e == 0
                    then 1 - e'**2/2 + e'**4/4/3/2
                    else cos e'
@@ -551,6 +592,7 @@ setZero _ e@(Var _ _ _ _ Nothing) = e
 setZero v (Scalar e) = case isConstant $ setZero v e of
                          Just c -> toExpression c
                          Nothing -> Scalar (setZero v e)
+setZero v (Heaviside e) = heaviside (setZero v e)
 setZero v (Cos e) = cos (setZero v e)
 setZero v (Sin e) = sin (setZero v e)
 setZero v (Erf e) = erf (setZero v e)
@@ -673,6 +715,21 @@ vprotect v ltx (Vector x y z) = Vector (protect (v++"x") (ltx "x") x)
                                        (protect (v++"y") (ltx "y") y) 
                                        (protect (v++"z") (ltx "z") z)
 
+rmag :: Expression RealSpace
+rmag = sqrt (rx**2 + ry**2 + rz**2)
+
+rvec :: Vector RealSpace
+rvec = Vector rx ry rz
+
+rx :: Expression RealSpace
+rx = Expression Rx
+
+ry :: Expression RealSpace
+ry = Expression Ry
+
+rz :: Expression RealSpace
+rz = Expression Rz
+
 kx :: Expression KSpace
 kx = Expression Kx
 
@@ -792,6 +849,7 @@ data IsTemp = IsTemp | CannotBeFreed
 data Expression a = Scalar (Expression Scalar) |
                     Var IsTemp String String String (Maybe (Expression a)) | -- A variable with a possible value
                     Expression a |
+                    Heaviside (Expression a) |
                     Cos (Expression a) |
                     Sin (Expression a) |
                     Exp (Expression a) |
@@ -895,6 +953,7 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec p (Var _ _ _ _ (Just e)) = codePrec p e
   codePrec p (Scalar x) = codePrec p x
   codePrec p (Expression x) = codePrec p x
+  codePrec _ (Heaviside x) = showString "heaviside(" . codePrec 0 x . showString ")"
   codePrec _ (Cos x) = showString "cos(" . codePrec 0 x . showString ")"
   codePrec _ (Sin x) = showString "sin(" . codePrec 0 x . showString ")"
   codePrec _ (Exp x) = showString "exp(" . codePrec 0 x . showString ")"
@@ -940,6 +999,7 @@ instance (Type a, Code a) => Code (Expression a) where
   latexPrec _ x | Just xx <- isConstant x = showString (latexDouble xx)
   latexPrec p (Scalar x) = latexPrec p x
   latexPrec p (Expression x) = latexPrec p x
+  latexPrec _ (Heaviside x) = showString "\\Theta(" . latexPrec 0 x . showString ")"
   latexPrec _ (Cos x) = showString "\\cos(" . latexPrec 0 x . showString ")"
   latexPrec _ (Sin x) = showString "\\sin(" . latexPrec 0 x . showString ")"
   latexPrec _ (Exp x) = showString "\\exp\\left(" . latexPrec 0 x . showString "\\right)"
@@ -1116,6 +1176,7 @@ makeHomogeneous ee =
         scalarScalar (Product x _) = pairs2product $ map f $ product2pairs x
           where f (a,b) = (scalarScalar a, b)
         scalarScalar (Expression e) = Expression e -- FIXME
+        scalarScalar (Heaviside x) = heaviside (scalarScalar x)
         scalarScalar (Cos x) = cos (scalarScalar x)
         scalarScalar (Sin x) = sin (scalarScalar x)
         scalarScalar (Exp x) = exp (scalarScalar x)
@@ -1187,6 +1248,11 @@ erf :: Type a => Expression a -> Expression a
 erf x = case x of 0 -> 0
                   _ -> Erf x
 
+heaviside :: Type a => Expression a -> Expression a
+heaviside x = case isConstant x of
+              Just n -> if n >= 0 then 1 else 0
+              Nothing -> Heaviside x
+
 instance Type a => Floating (Expression a) where
   pi = toExpression (pi :: Double)
   exp = \x -> case x of 0 -> 1
@@ -1237,6 +1303,7 @@ varSet e@(Expression _) = case mkExprn e of
 varSet (Var _ _ _ _ (Just e)) = varSet e
 varSet (Var IsTemp _ c _ Nothing) = Set.singleton c
 varSet (Var CannotBeFreed _ _ _ Nothing) = Set.empty
+varSet (Heaviside e) = varSet e
 varSet (Sin e) = varSet e
 varSet (Cos e) = varSet e
 varSet (Log e) = varSet e
@@ -1258,6 +1325,7 @@ hasFFT e@(Expression _) = case mkExprn e of
 hasFFT (Var _ _ _ _ (Just e)) = hasFFT e
 hasFFT (Sum s _) = or $ map (hasFFT . snd) (sum2pairs s)
 hasFFT (Product p _) = or $ map (hasFFT . fst) (product2pairs p)
+hasFFT (Heaviside e) = hasFFT e
 hasFFT (Sin e) = hasFFT e
 hasFFT (Cos e) = hasFFT e
 hasFFT (Log e) = hasFFT e
@@ -1278,6 +1346,7 @@ hasActualFFT e@(Expression _) = case mkExprn e of
 hasActualFFT (Var _ _ _ _ (Just e)) = hasActualFFT e
 hasActualFFT (Sum s _) = or $ map (hasActualFFT . snd) (sum2pairs s)
 hasActualFFT (Product p _) = or $ map (hasActualFFT . fst) (product2pairs p)
+hasActualFFT (Heaviside e) = hasActualFFT e
 hasActualFFT (Sin e) = hasActualFFT e
 hasActualFFT (Cos e) = hasActualFFT e
 hasActualFFT (Log e) = hasActualFFT e
@@ -1386,6 +1455,7 @@ hasExpressionInFFT v (Expression e) = case mkExprn (Expression e) of
 hasExpressionInFFT v (Var _ _ _ _ (Just e)) = hasExpressionInFFT v e
 hasExpressionInFFT v (Sum s _) = or $ map (hasExpressionInFFT v . snd) (sum2pairs s)
 hasExpressionInFFT v (Product p _) = or $ map (hasExpressionInFFT v . fst) (product2pairs p)
+hasExpressionInFFT v (Heaviside e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Sin e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Cos e) = hasExpressionInFFT v e
 hasExpressionInFFT v (Log e) = hasExpressionInFFT v e
@@ -1408,6 +1478,7 @@ scalarderive v (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
   where dbythis (f,x) = (f, scalarderive v x)
 scalarderive v (Product p i) = pairs2sum $ map dbythis $ product2pairs p
   where dbythis (x,n) = (1, Product p i*toExpression n/x * scalarderive v x)
+scalarderive _ (Heaviside _) = error "no scalarderive for Heaviside"
 scalarderive v (Cos e) = -sin e * scalarderive v e
 scalarderive v (Sin e) = cos e * scalarderive v e
 scalarderive v (Exp e) = exp e * scalarderive v e
@@ -1470,6 +1541,7 @@ derive v dda (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
 derive v dda (Product p i) = pairs2sum $ map dbythis $ product2pairs p
   where dbythis (x,n) = (1, derive v (Product p i*toExpression n*dda/x) x)
 derive _ _ (Scalar _) = 0 -- FIXME
+derive _ _ (Heaviside _) = error "cannot take derivative of Heaviside"
 derive v dda (Cos e) = derive v (-dda*sin e) e
 derive v dda (Sin e) = derive v (dda*cos e) e
 derive v dda (Exp e) = derive v (dda*exp e) e
@@ -1545,6 +1617,7 @@ varsetAfterRemoval x v@(Expression _)
   | otherwise = Set.empty
 varsetAfterRemoval x (Sum s _) = Set.unions (map (varsetAfterRemoval x . snd) (sum2pairs s))
 varsetAfterRemoval x (Product p _) = Set.unions (map (varsetAfterRemoval x . fst) (product2pairs p))
+varsetAfterRemoval x (Heaviside e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Cos e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Sin e) = varsetAfterRemoval x e
 varsetAfterRemoval x (Log e) = varsetAfterRemoval x e
@@ -1609,6 +1682,8 @@ subAndCount x y (Product p i) = if num > 0 then (pairs2product $ map justen resu
           results = map sub $ product2pairs p
           justen ((e, _), n) = (e, n)
           sub (e, n) = (subAndCount x y e, n)
+subAndCount x y (Heaviside e)   = (heaviside e', n)
+    where (e', n) = subAndCount x y e
 subAndCount x y (Cos e)   = (cos e', n)
     where (e', n) = subAndCount x y e
 subAndCount x y (Sin e)   = (sin e', n)
@@ -1671,6 +1746,7 @@ searchMonoid :: (Type a, Monoid c) => (forall b. Type b => Expression b -> c)
 searchMonoid f x@(Var _ _ _ _ Nothing) = f x
 searchMonoid f x@(Var _ _ _ _ (Just e)) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Scalar e) = f x `mappend` searchMonoid f e
+searchMonoid f x@(Heaviside e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Cos e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Sin e) = f x `mappend` searchMonoid f e
 searchMonoid f x@(Exp e) = f x `mappend` searchMonoid f e
