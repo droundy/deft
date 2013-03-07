@@ -149,18 +149,14 @@ int main(int, char *argv[]) {
     retval += test_functional("HardSpheresNoTensor(...)",
                               HardSpheresNoTensor(2)(n), Veff, 1e-13);
     retval += test_functional("IdealGasOfVeff", IdealGasOfVeff(), Veff, 2e-13);
-    //retval += test_functional("AssociationSAFT(...)",
-    //                          AssociationSAFT(2,1e-2,0.02,1.2e-2, 1.7, 0.7), 1e-4, 2e-13);
-    retval += test_functional("Association(...)",
-                              Association(2,1e-2,0.02,1.2e-2, 1.7, 0.7), 1e-4, 2e-13);
-    retval += test_functional("SaftFluid(...)",
-                              SaftFluid(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 4e-13);
+    retval += test_functional("SaftFluid2(...)",
+                              SaftFluid2(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 4e-13);
     //retval += test_functional("SaftFluidSlow(...)",
     //                          SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 2e-13);
     //retval += test_functional("OfEffectivePotential(SaftFluidSlow(...))",
     //                          OfEffectivePotential(SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 2e-13);
-    retval += test_functional("OfEffectivePotential(SaftFluid(...))",
-                              OfEffectivePotential(SaftFluid(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 4e-13);
+    retval += test_functional("OfEffectivePotential(SaftFluid2(...))",
+                              OfEffectivePotential(SaftFluid2(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 4e-13);
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 

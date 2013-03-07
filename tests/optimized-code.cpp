@@ -190,20 +190,9 @@ int main(int, char **argv) {
   double epsdis = 1e-5;
   double lambda = 1.8;
   double lscale = 0.7;
-  compare_functionals(SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
+  compare_functionals(SaftFluid2(R, eps, kappa, epsdis, lambda, lscale, mu),
                       SaftFluidSlow(R, eps, kappa, epsdis, lambda, lscale, mu),
                       n, 3e-12);
-
-  compare_functionals(SaftFluid2(R, eps, kappa, epsdis, lambda, lscale, mu),
-                      SaftFluid(R, eps, kappa, epsdis, lambda, lscale, mu),
-                      n, 3e-12);
-
-  //compare_functionals(Association2(R, eps, kappa, epsdis, lambda, lscale),
-  //                    Association(R, eps, kappa, epsdis, lambda, lscale),
-  //                    n, 3e-12);
-
-  //compare_functionals(Dispersion2(R, epsdis, lambda, lscale),
-  //                    Dispersion(R, epsdis, lambda, lscale), n, 3e-12);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

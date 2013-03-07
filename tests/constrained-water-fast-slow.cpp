@@ -213,7 +213,7 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
 }
 
 int main(int, char **argv) {
-  Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,
                                                 water_prop.epsilon_dispersion,
                                                 water_prop.lambda_dispersion, water_prop.length_scaling, 0));
@@ -223,7 +223,7 @@ int main(int, char **argv) {
                                                         water_prop.epsilonAB, water_prop.kappaAB,
                                                         water_prop.epsilon_dispersion,
                                                         water_prop.lambda_dispersion, water_prop.length_scaling, mu));
-  Functional ffast = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+  Functional ffast = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                     water_prop.epsilonAB, water_prop.kappaAB,
                                                     water_prop.epsilon_dispersion,
                                                     water_prop.lambda_dispersion, water_prop.length_scaling, mu));
