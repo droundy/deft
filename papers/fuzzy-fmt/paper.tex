@@ -198,30 +198,37 @@ $\infty$ to zero.  I'll set \fixme{for now to save space} $w_2\ast
 w_2 = w_{2c}(u)$. Then,
 \begin{widetext}
 \begin{align}
-\int_{\infty}^0 w_{2c}(u) du &= \frac{B^2 R^4}{2 \gamma^2}
+\int_{\infty}^0 w_{2c}(u) du &= -\frac{B^2 R^4}{2 \gamma^2}
            \int_\infty^0 \left[ \frac{\sqrt{\pi}}{2} \left( 4\gamma - 1 -
            4\sqrt{2\gamma}u + 2 u^2 \right) e^{-u^2} \textrm{erf}(u) +
            u e^{-2u^2} \right]du \\
-           &= -\left[ \frac{B R^2}{2\gamma} (\sqrt{\pi \gamma} -1) \right]^2
+           &= \left[ \frac{B R^2}{2\gamma} (\sqrt{\pi \gamma} -1) \right]^2
 \end{align}
 \end{widetext}
 Now, to find B we set
 \begin{align}
-  \int f'(r)dr &= \int w_2(r)\ast w_2(r) dr\\
-   1 - e^{-\beta V_0} &= -\left[ \frac{B R^2}{2\gamma} (\sqrt{\pi
+  \int_0^{\infty} f'(r)dr &= \int_{-\infty}^0 w_2(r)\ast w_2(r) dr\\
+   1 - e^{-\beta V_0} &= \left[ \frac{B R^2}{2\gamma} (\sqrt{\pi
        \gamma} -1)  \right]^2
 \end{align}
 Which gives
 \begin{align}
   B = \frac{2\gamma}{(\sqrt{\pi \gamma}-1)R^2} \left(
-    e^{-\beta V_0}-1 \right)^{1/2}
+    1-e^{-\beta V_0} \right)^{1/2}
+\end{align}
+
+we could also change the limits so that
+\begin{align}
+  \int_{-\infty}^{r_0} f'(r)dr &= 1 \\
+  \implies B &= \frac{2\gamma}{(\sqrt{\pi \gamma}-1)R^2}
 \end{align}
 
 \subsection{Weighting functions in real space}
 
 \begin{align}
-  w_2(r) &= B r e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
-           \Theta_1(r) \Theta_2 (R - r )\\
+  w_2(r) &=\frac{2\gamma \left(e^{-\beta V_0} - 1\right)^{1/2} r}
+  {(\sqrt{\pi \gamma}-1)R^2}e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
+           \Theta(r) \Theta(R - r )\\
   w_3(r) &= \int_r^\infty w_2(r') dr'\\
          &= -B \int_r^R r' e^{-\gamma \left(1- \frac{r'}{R} \right)^2}dr'\\
          &= \frac{B R^2}{2\gamma}\left[ 1 - e^{-\gamma
@@ -240,8 +247,8 @@ Which gives
 \subsection{Weighting functions in fourier space}\
 
 \begin{align}
-  \tilde{w}_2(k) &= \frac{2\pi B}{k} \int_{0}^{\infty} r w_2(r)
-  \sin(kr) dr \\
+  \tilde{w}_2(k) &= \frac{4\pi B}{k} \int_{0}^{\infty} r^2 
+   e^{-\gamma \left(1- \frac{r}{R} \right)^2} \sin(kr) dr \\
   \tilde{w}_3(k) &=
 \end{align}
 \begin{align}
@@ -281,6 +288,37 @@ completing the square in the exponent.
     \\
   \mathbf{\tilde{w}}_{2V}(k) &= \\
   \mathbf{\tilde{w}}_{1V}(k) &= 
+\end{align}
+
+\subsection{Homogeneous limit}
+
+\begin{align}
+  \int w_3(\rr)d\rr &= \frac{4\pi BR^2}{2\gamma}\int_0^R r^2 \bigg\{1-
+                     e^{-\gamma \left(1-\frac{r}{R} \right)^2} \notag\\
+                    &-\sqrt{\pi \gamma} \mathrm{erf}\left[ \gamma \left(1 - \frac{r}{R}
+                      \right) \right] \bigg\} d\rr\\
+                     &= \frac{\pi R
+                       e^{-\gamma}}{3\gamma^{3/2}(\sqrt{\pi \gamma})}
+                     \bigg\{2\sqrt{\gamma}
+                     \left(8e^\gamma(1+\gamma)-2\gamma -5 \right) \notag\\
+                     &- e^\gamma \sqrt{\pi} \left(4\gamma^2 +12\gamma
+                     +3 \right) \mathrm{erf}(\sqrt{\gamma}) \bigg\}\\
+  \int w_2(\rr)d\rr &= 4\pi B \int_0^R r^3 e^{-\gamma \left ( 1 - \frac{r}{R}
+           \right)^2} dr \\
+        &= \frac{-2\pi R^2}{(\sqrt{\pi
+           \gamma} -1)}\big[ \sqrt{\pi \gamma}(2\gamma
+           +3)\mathrm{erf}(\sqrt{\gamma})\notag \\
+           & - 2(7\gamma + 1)e^{-\gamma} +6\gamma +2 \big] \\
+  \int w_1(\rr)d\rr &= B\int_0^R r^2 e^{-\gamma \left ( 1 - \frac{r}{R}
+            \right)^2} dr\\
+         &= \frac{R\left[ \sqrt{\pi}(2\gamma + 1)\mathrm{erf}(\sqrt{\gamma})
+          + \left(4-6e^{-\gamma}\right)\sqrt{\gamma}
+          \right]}{2\sqrt{\gamma}( \sqrt{\pi \gamma} -1)} \\
+  \int w_0(\rr)d\rr &= B\int_0^R r e^{-\gamma \left ( 1 - \frac{r}{R}
+            \right)^2} dr\\
+              &= \frac{\sqrt{\gamma}}{\sqrt{\pi \gamma} -1}\left[
+              \sqrt{\pi} \mathrm{erf}(\sqrt{\gamma}) +
+               \frac{e^{-\gamma}-1}{\sqrt{\gamma}} \right]
 \end{align}
  
 \section{Comparison with simulation}

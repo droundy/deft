@@ -1,0 +1,75 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{cancel}
+\graphicspath{ {/home/krebse/deft/papers/water-SAFT/figs/} }
+\usetheme{Warsaw}
+\newcommand{\rr}{\textbf{r}}
+\title[Soft FMT]{Testing a ``soft'' Fundamental Measure Theory}
+\author{Eric Krebs, Patrick Kreitzberg, David Roundy}
+\institute{Oregon State University}
+\date{}
+\begin{document}
+
+\begin{frame}
+ \titlepage
+\end{frame}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item We currently model water as a hard sphere fluid
+    \item Hard spheres not physical for water
+    \item We would like to ``soften'' spheres
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Fundamental measure theory}
+  \begin{itemize}
+    \item Introduced by Rosenfeld in 1989
+    \item Hard sphere fluid can be represented by fundamental measures
+  \end{itemize}
+  \begin{block}{weight functions for sphere of radius R}
+    \begin{align}
+      w_3(\rr) = \theta (|\rr| - R) \\
+      w_2(\rr) = \delta (|\rr| - R)
+    \end{align}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Schmidt paper (2001)}
+  \begin{block}{Mayer Function}
+    $f(r) = e^{-\beta V(r)} - 1$
+    \begin{itemize}
+      \item $\beta = (k_BT)^{-1}$
+      \item $V(r)$ is a pair potential
+    \end{itemize}
+  \end{block}
+  Schmidt shows that:
+  \begin{align}
+    \frac{\partial f(r)}{\partial r} = \int_{-\infty}^{\infty}w_2(r')
+    \ast w_2(r - r') dr'
+  \end{align}
+\end{frame}
+
+\begin{frame}{Choosing a $w_2(r)$}
+  \begin{itemize}
+    \item We considered linear and quadratic pair potentials, $V(r)$
+    \item
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{theory results}
+\end{frame}
+
+\begin{frame}{Monte Carlo simulation results}
+\end{frame}
+
+\begin{frame}{Comparison}
+\end{frame}
+
+\begin{frame}{Finish}
+  Thank you!
+\end{frame}
+
+\end{document}
