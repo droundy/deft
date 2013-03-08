@@ -144,6 +144,14 @@ for an average of the value of the pair distribution function at
 contact $g_\sigma(\rr)$, which itself can be computed in $O(N\log N)$
 time.
 
+\begin{dmath}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, \eta(g_\sigma(\rr_1))) + g(|r_{12}|, \eta(g_\sigma(\rr_2)))}{2}
+\end{dmath}
+Bad:
+\begin{dmath}
+  g^{(2)}(\rr_1,\rr_2) = g\left(|r_{12}|, \frac{\eta(g_\sigma(\rr_1)) + \eta(g_\sigma(\rr_2))}{2}\right)
+\end{dmath}
+
 The general idea is to write
 \begin{dmath}
   g^{(2)}(\rr_1,\rr_2) = \Theta(r_{12}-\sigma)
