@@ -27,13 +27,13 @@
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf
+all :  paper.pdf march-2013.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 
 ALL_FIGURES=\
-	figs/density-08-013.pdf figs/density-12-112.pdf figs/density-16-265.pdf figs/w2convolves.pdf\
+	figs/density-08-013.pdf figs/density-12-112.pdf figs/density-16-265.pdf figs/w2convolves.pdf figs/p-vs-packing.pdf figs/harmonic.pdf figs/w_3.pdf figs/w_2.pdf figs/w_1.pdf figs/step.pdf\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -47,7 +47,28 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
 
+march-2013.pdf: march-2013.tex $(PDF_FIGURES)
+	pdflatex $< pdflatex $< pdflatex $<
+
 figs/w2convolves.pdf: figs/functions_plot.py
+	python $^ $@
+
+figs/p-vs-packing.pdf: figs/homogeneous.py
+	python $^ $@
+
+figs/harmonic.pdf: figs/harmonic.py
+	python $^ $@
+
+figs/w_3.pdf: figs/weight-functions.py
+	python $^ $@
+
+figs/w_2.pdf: figs/weight-functions.py
+	python $^ $@
+
+figs/w_1.pdf: figs/weight-functions.py
+	python $^ $@
+
+figs/step.pdf: figs/weight-functions.py
 	python $^ $@
 
 figs/density-08-013.pdf: figs/density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat
