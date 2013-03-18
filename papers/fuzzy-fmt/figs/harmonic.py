@@ -10,11 +10,13 @@ matplotlib.use('Agg')
 from pylab import *
 
 dx = 0.01
-x = arange(0, 1 + dx/2, dx)
-harmonic = (1-x)**2
+x = arange(0, 2.1 + dx/2, dx)
+harmonic = (2-x)**2/4
+harmonic[x>2] = 0
 
 figure(figsize=(4.5,4))
 plot(x,harmonic)
+xlim(0,2.2)
 
 xlabel('$r/R$')
 ylabel('$V/V_{max}$')
