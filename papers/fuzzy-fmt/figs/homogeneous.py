@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
 from __future__ import division
+# We need the following two lines in order for matplotlib to work
+# without access to an X server.
+import matplotlib
+matplotlib.use('Agg')
 from pylab import *
 from scipy.special import erf
 

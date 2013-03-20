@@ -102,7 +102,7 @@ def read_ghs(base, ff):
     return r_mc, ghs
 
 colors = ['r', 'g', 'b', 'c']
-ff = [.1, .2, .3, .4]
+ff = [.1, .3, .4, .5]
 
 # READ DATA
 ghs = [0]*4
