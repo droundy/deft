@@ -171,7 +171,11 @@ void plot_pair_distribution(const char *fname, const char *fun, double z0,
           g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
           }
         else if(!strcmp(fun, "py")) {
-          const double eta = 4/3*M_PI*1*1*1*density(Cartesian(0, 0, (z0 + z1)/2 + 2));
+          const double n0 = density(Cartesian(0, 0, z0 + 2));
+          const double n1 = density(Cartesian(0, 0, z1 + 2));
+          //const double nhalfway = density(Cartesian(0, 0, (z0 + z1)/2 + 2));
+          //const double eta = 4/3*M_PI*1*1*1*nhalfway;
+          const double eta = 4/3*M_PI*1*1*1*(n0 + n1)/2;
           //printf("z1: %g, eta: %g, den: %g\n", z1, eta, density(Cartesian(0, 0, z1)));
           g2 = py_rdf(eta, r);
           }
