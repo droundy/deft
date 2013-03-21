@@ -9,8 +9,7 @@ import pylab, numpy, sys, scipy.ndimage
 import os.path
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.widgets import Slider, RadioButtons
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.gridspec as gridspec
+#from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def plot1d():
   global g2, ax
@@ -111,14 +110,20 @@ Z, R = numpy.meshgrid(z, r)
 
 fig = pylab.figure(1)
 ax=[0]*5
-ax[0] = pylab.subplot2grid((2,3), (0,0))
-ax[1] = pylab.subplot2grid((2,3), (1,0))
-ax[2] = pylab.subplot2grid((2,3), (1,1))
-ax[3] = pylab.subplot2grid((2,3), (1,2))
-ax[4] = pylab.subplot2grid((2,3), (0,1), colspan=2)
+left = .05
+right = .95
+bottom = .1
+top = .96
+hspace = .02
+vspace = .04
+width = (right - left - 2*hspace)/3
+height = (top - bottom - vspace)/2
 
-ax[4].set_xlim(2, 6.5)
-ax[4].set_ylim(0, 4)
+ax[0] = pylab.axes([left, top-height, width, height])
+ax[1] = pylab.axes([left, bottom, width, height])
+ax[2] = pylab.axes([left+width+hspace, bottom, width, height])
+ax[3] = pylab.axes([left+width*2+hspace*2, bottom, width, height])
+ax[4] = pylab.axes([left+hspace+width, top-height, width*2+hspace, height])
 
 i = 0
 while i < numplots:
@@ -135,18 +140,21 @@ while i < numplots:
   gslice[i], = ax[4].plot(numpy.zeros(num), numpy.zeros(num), colors[i])
   i += 1
 
+ax[4].set_xlim(2, 6.5)
+ax[4].set_ylim(0, 4)
+
 pylab.legend(plots)
 ax[4].axhline(y=1, linestyle='--', color='slategray')
 
 plot()
-pylab.tight_layout()
+#pylab.tight_layout()
 
 # colorbar
-divider = make_axes_locatable(ax[0])
-cax = divider.append_axes("right", "5%", pad="3%")
-ticks = numpy.linspace(0, 5, 11)
-CB = pylab.colorbar(CS, cax=cax)
-CB.set_ticks(ticks)
+#divider = make_axes_locatable(ax[0])
+#cax = divider.append_axes("right", "5%", pad="3%")
+#ticks = numpy.linspace(0, 5, 11)
+#CB = pylab.colorbar(CS, cax=cax)
+#CB.set_ticks(ticks)
 
 # slider
 z0ax = pylab.axes([0.25, 0.01, 0.5, 0.025], axisbg='slategray')
