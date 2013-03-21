@@ -23,4 +23,47 @@ I plan on adding here an introduction to symmetrized linear
 combinations of spherical harmonics with the symmetries of platonic
 solids.
 
+\section{Cubic}
+
+Von der Lage and Bethe in 1947 give the first few cubic harmonics in
+Cartesian coordinates.  They refer to these as ``Kubic Harmonics.''
+We will want to convert these into spherical harmonics, using $x/\rho
+= \sin\theta\cos\phi$, etc.
+\begin{align}
+  f_0 &= 1 \\
+  f_4 &= \frac{5\sqrt{3\cdot 7}}{4}\left(
+  x^4 + y^4 + z^4 - \frac35 \rho^4
+  \right) \\
+  f_6 &= \frac{3\cdot 7 \cdot 11 \sqrt{2\cdot 13}}{8}\left(
+  x^2y^2z^2 + \frac1{22} f_4 - \frac1{105}\rho^6
+  \right)\\
+  f_8 &= \frac{5\cdot 13  \sqrt{3\cdot 11 \cdot 17}}{16}\left(
+  x^8 + y^8 - \frac{28}{f} f_6 \rho^2 - \frac{210}{143} f_4 \rho^4 - \frac16\rho^8
+  \right)
+\end{align}
+
+\section{Icosohedral}
+
+Zheng and Doerschuk give the icosohedral harmonics in terms of
+$\theta$ and $\phi$.  They also give formulas for these in terms of
+spherical harmonics, but these are hard to read.
+\begin{align}
+  I_{00}(\theta,\phi) &= 1 \\
+  I_{60}(\theta,\phi) &= 2^3 \cdot 3^2 \cdot 5 \cdot 11
+  P_{60}(\cos\theta) - P_{65}(\cos\theta)\cos(5\phi)
+  \\
+  P_{10,0} &= 2^8 \cdot 3^2 \cdot 5^2 \cdot 7 \cdot 13
+  \cdot 19 P_{10,10}
+\end{align}
+
+\section{Notes}
+
+The following are defined on page 5 of Zheng and Doerschuk:
+\begin{align}
+  \phi_k &\equiv \phi_0 + k \frac{2\pi}{5} \\
+  \cos \gamma_k &\equiv \cos\beta\cos\theta_0 + \sin\beta
+  \sin\theta_0\cos \phi_k \\
+  \sin \alpha_k &\equiv - \frac{\sin\theta_0 \sin\phi_k}{\sin\gamma_k}
+\end{align}
+
 \end{document}

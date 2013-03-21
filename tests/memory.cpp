@@ -247,9 +247,9 @@ int main(int, char **argv) {
                                        water_prop.lambda_dispersion, water_prop.length_scaling, mu));
   check_a_functional("SaftFluid2", ff, potential);
 
-  ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
-                                      water_prop.lambda_dispersion, water_prop.length_scaling, mu));
-  check_a_functional("SaftFluid", ff, potential);
+  //ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
+  //                                    water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  //check_a_functional("SaftFluid", ff, potential);
 
   //ff = Association2(R, eps, kappa, water_prop.epsilon_dispersion,
   //                  water_prop.lambda_dispersion, water_prop.length_scaling);

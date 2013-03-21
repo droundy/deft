@@ -97,7 +97,7 @@ int main(int, char **argv) {
     fclose(o);
     printf("Got dispersion!\n");
 
-    Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+    Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                   water_prop.epsilonAB, water_prop.kappaAB,
                                                   water_prop.epsilon_dispersion,
                                                   water_prop.lambda_dispersion,
@@ -159,14 +159,14 @@ int main(int, char **argv) {
 
     {
       o = fopen("room-temperature.dat", "w");
-      Functional f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+      Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                         water_prop.epsilonAB, water_prop.kappaAB,
                                                         water_prop.epsilon_dispersion,
                                                         water_prop.lambda_dispersion,
                                                         water_prop.length_scaling, 0));
       double mufoo = find_chemical_potential(f, water_prop.kT,
                                              water_prop.liquid_density);
-      f = OfEffectivePotential(SaftFluid(water_prop.lengthscale,
+      f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                              water_prop.epsilonAB, water_prop.kappaAB,
                                              water_prop.epsilon_dispersion,
                                              water_prop.lambda_dispersion,

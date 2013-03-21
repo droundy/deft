@@ -31,6 +31,9 @@ public:
   bool append_to_name(const std::string) {
     return false;
   }
+  bool I_have_analytic_grad() const {
+    return f.I_have_analytic_grad();
+  }
 
   VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
     return f(gd, kT, (data/(-kT)).cwise().exp());

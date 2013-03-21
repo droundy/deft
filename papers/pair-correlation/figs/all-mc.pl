@@ -9,7 +9,7 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/pair-monte-carlo.cpp"));
 
 system "make monte-carlo";
 
-my $iters  = 99999999999999;
+my $iters  = 999999999999;
 my $acc = 0.001;
 
 my $dd;
@@ -58,6 +58,7 @@ date
     } else {
       print "Submitting pair-monte-carlo with $N spheres and cavity with length $len wallz and flat divisions\n";
 
-      system("sbatch", $scriptname);
+      #system("sbatch", $scriptname");
+      system("nohup bash $scriptname &> $outfilename &");
     }
 }

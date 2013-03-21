@@ -1,0 +1,154 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{cancel}
+\graphicspath{ {/home/krebse/deft/papers/water-SAFT/figs/} }
+\usetheme{Warsaw}
+\newcommand{\rr}{\textbf{r}}
+\title[Testing Soft FMT]{Testing a ``soft'' Fundamental Measure Theory}
+\author{Eric Krebs, Patrick Kreitzberg, David Roundy}
+\institute{Oregon State University}
+\date{March, 20 2013}
+\begin{document}
+
+\begin{frame}
+ \titlepage
+\end{frame}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item Want theory that works for inhomogeneous liquids
+    \item The hard sphere fluid is well studied
+    \item Hard spheres used as reference for real liquids
+      \begin{itemize}
+        \item Hard spheres are not very physical
+        \item Not computationally convenient (delta functions)
+      \end{itemize}
+    \item We would like to ``soften'' spheres
+  \end{itemize}
+  \begin{block}{Classical density functional theory}
+    \begin{align}
+    \Omega(T) = \underset{n(\rr)}{min} \left\{F[n(\rr),T] + \int
+                \left(V_{ext}(\rr) + \mu \right)n(\rr)d\rr \right\}
+    \end{align}
+    \begin{itemize}
+      \item $n(\rr)$ can be an inhomogeneous particle density
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Fundamental measure theory}
+  \begin{itemize}
+    \item Classical DFT for hard sphere fluid
+    \item Introduced by Rosenfeld in 1989
+    \item Hard sphere fluid represented by fundamental measures
+    \begin{itemize}
+      \item Volume, surface area, mean curvature
+    \end{itemize}
+    \item $n_{\alpha}(\rr) = \int n(\rr')w_{\alpha}(\rr - \rr')d\rr'$
+  \end{itemize}
+  \begin{block}{Some weight functions for sphere of radius R}
+    \begin{align}
+      w_3(\rr) = \theta (R - |\rr|) \\
+      w_2(\rr) = \delta (R - |\rr|) \\
+      \notag
+    \end{align}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Soft fundamental measure theory}
+  \begin{itemize}
+    \item Modification of FMT to treat not-so-hard spheres
+    \item Introduced by Schmidt in 1999
+    \item Weight functions are modified
+  \end{itemize}
+  Schmidt showed that:
+  \begin{align}
+    \int_{-\infty}^{\infty}w_2(r')w_2(r - r') dr' = \frac{\partial f(r)}{\partial r}
+  \end{align}
+  \begin{block}{Mayer Function}
+    \begin{center}
+      $f(r) = e^{-\beta V(r)} - 1$ \\
+    \end{center}
+\end{block}
+  \begin{itemize}
+    \item If $w_2$ is known, all weight functions, $w_{\alpha}$'s, can
+      be derived
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Choosing a $w_2(r)$}
+  \begin{itemize}
+    \item Want spheres to overlap a little at ambient temperatures
+    \begin{itemize}
+      \item We use a harmonic potential in Mayer function\\
+      \includegraphics[width = 4cm]{figs/harmonic}
+      \includegraphics[width = 4cm]{figs/fprime}
+      \item Could not find simple analytic solution for $w_2$
+    \end{itemize}
+  \end{itemize}
+ %% \begin{align}
+ %%    w_2 &= \frac{2 \gamma r}{(\sqrt{\pi \gamma}-1)R^2} e^{-\gamma
+ %%       \left(1 - \frac{r}{2r_0} \right)^2} \Theta(r) \Theta(2r_0-r)\\
+ %%    \gamma &= \frac{1}{32} \left( \sqrt{\pi \beta V_0} + \sqrt{\pi \beta
+ %%        V_0 - 16\sqrt{\beta V_0}} \right)^2
+ %%  \end{align}
+\end{frame}
+
+\begin{frame}{Comparing $w_2$ with $f'(r)$}
+  \begin{itemize}
+    \item Recall: $\int_{-\infty}^{\infty}w_2(r')w_2(r - r') dr' = \frac{\partial f(r)}{\partial r}$
+    \item Chose a simple form of $w_2(r)$ with fitting parameters
+  \end{itemize}
+  \begin{center}
+    \includegraphics[trim = 0 13 0 37, clip, scale = 0.40]{figs/w2convolves}  \end{center}
+\end{frame}
+
+\begin{frame}{Weight functions comparison with FMT}
+  \begin{center}
+  \begin{tabular}{ccc}
+  %\includegraphics[trim = 0 13 0 37, clip, scale = 0.20]{figs/w_3} &
+  \includegraphics[width=4cm]{figs/w_3} \hspace{-1.5em} &
+  \includegraphics[width=4cm]{figs/w_2} \hspace{-1.5em} &
+  \includegraphics[width=4cm]{figs/w_1} \\
+  \includegraphics[width=4cm]{figs/step} \hspace{-1.5em} &
+  \includegraphics[width=4cm]{figs/delta} \hspace{-1.5em} &
+  \includegraphics[width=4cm]{figs/delta}  
+  \end{tabular}
+  \end{center}
+  %% \begin{tabular}{cc}
+  %% %\includegraphics[trim = 0 13 0 37, clip, scale = 0.20]{figs/w_3} &
+  %% \includegraphics[width=4cm]{figs/w_3} &
+  %% \includegraphics[width=4cm]{figs/step} \\
+  %% \includegraphics[width=4cm]{figs/w_2}
+  %% \vspace{-.7em} & \\
+  %% \includegraphics[width=4cm]{figs/w_1} &
+  %% \end{tabular}
+\end{frame}
+
+\begin{frame}{Homogeneous fluid}
+  \begin{center}
+    \includegraphics[trim = 0 13 0 35, clip, scale = 0.35]{figs/p-vs-packing}
+  \end{center}
+  \begin{itemize}
+    \item At low temps, should reduce to hard spheres
+    \item At low packing fraction, agrees with ideal gas
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item Soft FMT might be a possible alternative to hard spheres
+    \item Our approximate $w_2$ works well for homogeneous case
+    \item Reduces to hard spheres at low temps
+  \end{itemize}
+  \begin{block}{Future work}
+    \begin{itemize}
+      \item Compare with Monte Carlo simulation
+      \item Simulate soft spheres near a hard wall
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}

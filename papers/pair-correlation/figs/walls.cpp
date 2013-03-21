@@ -22,20 +22,60 @@
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
+#include "errno.h"
+#include "sys/stat.h" // for mkdir
+
+double radial_distribution(double gsigma, double r);
+double py_rdf (double eta, double r);
 
 // Maximum and spacing values for plotting
 const double zmax = 20;
 const double xmax = 10;
 const double dx = 0.1;
 
-// set up which functions to output, and how many.
-// possible values are:
-// simple:  g2(r1, r2) = 1/2(g(|r2-r1|, gsigma1) + g(|r2-r1|), gsigma2)
-// py:      g2(r1, r2) = g_py(|r2-r1|, 1/2(eta(r1) + eta(r2)))
-// nA:      g2(r1, r2) = (nA(r1)*g(|r2-r1|, gsigma1) + nA(r2)*g(|r2-r1|), gsigma2)
-//                     / (1/nA(r1) + 1/nA(r2))
-const char *fun[] = {"simple", "nA", "py"};
-const int numplots = 3;
+
+// The functions for different ways of computing the pair distribution function.
+double pairdist_simple(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+  return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
+}
+double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+  return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)/nA(r1))
+    /(1/nA(r0) + 1/nA(r1));
+}
+double pairdist_py(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+  const double eta = 4/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
+  return py_rdf(eta, r);
+}
+double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+  // This implements the pair distribution function of Fischer and
+  // Methfessel from the 1980 paper.  The py_rdf below should be the
+  // true radial distribution function for a homogeneous hard-sphere
+  // fluid with packing fraction eta.
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+  const double eta = n3(Cartesian(0.5*(r0+r1)));
+  return py_rdf(eta, r);
+}
+
+const char *fun[] = {
+  "simple",
+  "nA",
+  "py",
+  "fischer"
+};
+double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
+  pairdist_simple,
+  pairdist_nA,
+  pairdist_py,
+  pairdist_fischer
+};
+const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
@@ -107,12 +147,13 @@ double notinwall(Cartesian r) {
 }
 
 static void took(const char *name) {
-  //static clock_t last_time = clock();
-  //clock_t t = clock();
   assert(name); // so it'll count as being used...
-  //double peak = peak_memory()/1024.0/1024;
-  //printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
-  //last_time = t;
+  // static clock_t last_time = clock();
+  // clock_t t = clock();
+  // double peak = peak_memory()/1024.0/1024;
+  // printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  // fflush(stdout);
+  // last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor(1.0);
@@ -144,57 +185,6 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
   fclose(out);
 }
 
-void plot_pair_distribution(const char *fname, const char *fun, double z0,
-                            const Grid &gsigma, const Grid &density, const Grid &nA) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    return;
-  }
-  // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
-  // is at z = 0, to match with the monte carlo data
-  z0 += 1;
-  const double gsigma0 = gsigma(Cartesian(0, 0, z0));
-  const double density0 = density(Cartesian(0, 0, z0+2)); //density data starts at z = 3
-  const double nA0 = nA(Cartesian(0, 0, z0));
-  for (double x = 0; x < xmax - dx/2; x += dx) {
-    for (double z1 = 1; z1 < zmax + 1 - dx/2; z1 += dx) {
-      const double gsigma1 = gsigma(Cartesian(0, 0, z1));
-      const double density1 = density(Cartesian(0, 0, z1+2));
-      const double nA1 = nA(Cartesian(0, 0, z1));
-      const double r = sqrt((z1 - z0)*(z1 - z0) + x*x);
-      double g2 = 0;
-      if (r >= 2) {
-        if(!strcmp(fun, "simple")) {
-          g2 = (radial_distribution(gsigma0, r) + radial_distribution(gsigma1, r))/2;
-          }
-        else if(!strcmp(fun, "py")) {
-          const double eta = 4/3*M_PI*1*1*1*density(Cartesian(0, 0, (z0 + z1)/2 + 2));
-          //printf("z1: %g, eta: %g, den: %g\n", z1, eta, density(Cartesian(0, 0, z1)));
-          g2 = py_rdf(eta, r);
-          }
-        else if(!strcmp(fun, "nA")) {
-          g2 = (radial_distribution(gsigma0, r)/nA1 + radial_distribution(gsigma1, r)/nA0)
-            /(1/nA0 + 1/nA1);
-          }
-        else if(!strcmp(fun, "nA2")) {
-          g2 = (radial_distribution(gsigma0, r)/nA0 + radial_distribution(gsigma1, r)/nA1)
-            /(1/nA0 + 1/nA1);
-        }
-        else if(!strcmp(fun, "rdf")) {
-          g2 = radial_distribution(gsigma0, r);
-        }
-        else {
-          fprintf(stderr, "Invalid function %s", fun);
-          return;
-        }
-      }
-      fprintf(out, "%g\t", g2);
-    }
-    fprintf(out, "\n");
-  }
-  fclose(out);
-}
 
 void run_walls(double eta, const char *name, Functional fhs) {
   // Generates a data file for the pair distribution function, for filling fraction eta
@@ -235,16 +225,43 @@ void run_walls(double eta, const char *name, Functional fhs) {
   char *plotname = new char[1024];
   Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
+  Grid n3(gd, StepConvolve(1)(1, density));
 
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
 
+  // Create the walls directory if it doesn't exist.
+  if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
+    // We failed to create the directory, and it doesn't exist.
+    printf("Failed to create papers/pair-correlation/figs/walls: %s",
+           strerror(errno));
+    exit(1); // fail immediately with error code
+  }
   // here you choose the values of z0 to use
-  for (double z0 = 0.05; z0 < 10; z0 += .1) {
-    for (int i = 0; i < numplots; i++) {
+  for (double z0 = 3.05; z0 < 13; z0 += .1) {
+    // For each z0, we now pick one of our methods for computing the
+    // pair distribution function:
+    for (int version = 0; version < numplots; version++) {
       sprintf(plotname, "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
-              name, fun[i], eta, z0);
-      plot_pair_distribution(plotname, fun[i], z0, gsigma, density, nA);
+              name, fun[version], eta, z0);
+      FILE *out = fopen(plotname, "w");
+      if (!out) {
+        fprintf(stderr, "Unable to create file %s!\n", plotname);
+        return;
+      }
+      // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
+      // is at z = 0, to match with the monte carlo data
+      const Cartesian r0(0,0,z0);
+      for (double x = 0; x < xmax - dx/2; x += dx) {
+        for (double z1 = 3; z1 < zmax + 3 - dx/2; z1 += dx) {
+          const Cartesian r1(x,0,z1);
+          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          fprintf(out, "%g\t", g2);
+        }
+        fprintf(out, "\n");
+      }
+      fclose(out);
+      took(plotname);
     }
   }
   delete[] plotname;
