@@ -196,8 +196,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   f = OfEffectivePotential(fhs + IdealGas()
                            + ChemicalPotential(mu));
 
-  const double zmax = width + 2*spacing;
-  Lattice lat(Cartesian(dw,0,0), Cartesian(0,dw,0), Cartesian(0,0,zmax));
+  Lattice lat(Cartesian(dw,0,0), Cartesian(0,dw,0), Cartesian(0,0,width+2*spacing));
   GridDescription gd(lat, 0.01);
 
   Grid potential(gd);
@@ -243,7 +242,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
       sprintf(plotname, "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
-              name, fun[version], eta, z0);
+              name, fun[version], eta, z0-3);
       FILE *out = fopen(plotname, "w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname);
