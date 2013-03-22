@@ -18,6 +18,7 @@ inline double uipow(double x, unsigned int n) {
 
 inline double min(double a, double b) { return (a<b) ? a : b; }
 inline double max(double a, double b) { return (a>b) ? a : b; }
+inline double heaviside(double x) { return x>0; }
 
 inline double ipow(double x, int n) {
   if (n >= 0) return uipow(x,n);
