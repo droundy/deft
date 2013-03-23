@@ -18,7 +18,7 @@ functionCode "" "" (x:xs) "" = if xs == []
 functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") const {\n" ++ b ++ "}\n"
 
 classCode :: Expression RealSpace -> [String] -> String -> String
-classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;\n}\n" ++
+classCode ewithtransforms arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n" ++ n ++ codeA arg ++ "  {\n\thave_integral = true;" ++ definetransforms ++ "\n}\n" ++
                 functionCode "I_have_analytic_grad" "bool" [] "\treturn false;" ++
                 functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
                     (unlines ["\tdouble output=0;",
@@ -46,7 +46,7 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
                 functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] (codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeGrad) ++ "\n") ++
                 functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
-                "private:\n"++ codeArgInit arg  ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
+                "private:\n"++ codeArgInit arg ++ declaretransforms ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
       defineGrid :: Type a => Expression a -> Expression a
       defineGrid = substitute dVscalar (s_var "gd.dvolume") .
@@ -69,6 +69,35 @@ classCode e arg n = "class " ++ n ++ " : public FunctionalInterface {\npublic:\n
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit [] = ""
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
+      -- The following is needed to handle spherical fourier
+      -- transforms that we store on 1D grids.
+      declaretransforms = unlines $ map (\(t,_,_) -> "\tdouble *" ++ t ++ ";") transforms
+      chomp str = case reverse str of '\n':rstr -> reverse rstr
+                                      _ -> str
+      definetransforms = chomp $ concat $ map definet transforms
+        where definet (t,s,r) =
+                unlines ["\t" ++ t ++ " = new double[" ++ nk ++ "];",
+                         "\tfor (int i=0; i<" ++ nk ++"; i++) {",
+                         "\t\tconst double k = i*" ++ show (dk s) ++ ";",
+                         "\t\t" ++ t ++ "[i] = 0;",
+                         "\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
+                         "\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
+                         "\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t}",
+                         "\t}"]
+                  where nk = show (round (kmax s/dk s) :: Int)
+                        mydr = code (rresolution s)
+                        halfdr = code (rresolution s/2)
+      (transforms, e) = mktransforms [1 :: Int ..] (findTransforms ewithtransforms) ewithtransforms
+      mktransforms _ [] ee = ([], ee)
+      mktransforms (nn:ns) (ft@(Expression (SphericalFourierTransform s r)):ts) ee =
+        case mktransforms ns ts ee of
+          (xs,ee') -> ((varname, s, r):xs, substitute ft evaluateme ee')
+          where varname = "ft" ++ show nn
+                evaluateme = setkzero (s_var (varname ++ "[0]")) $
+                             s_var (varname ++ "[int(" ++ code k ++ "*" ++ show (1/dk s) ++ "+0.5)]")
+      mktransforms _ (z:_) _ = error ("Not a transform: " ++ show z)
 
 generateHeader :: Expression RealSpace -> [String] -> String -> String
 generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++
@@ -83,29 +112,35 @@ generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals
 
 
 scalarClass :: Expression Scalar -> [String] -> String -> String
-scalarClass e arg n =
+scalarClass ewithtransforms arg n =
   unlines
   ["class " ++ n ++ " : public FunctionalInterface {",
    "public:",
    "" ++ n ++ codeA arg ++ "  {",
    "\thave_integral = true;",
+   "\t// TODO: code to evaluate Fourier transforms goes here",
+   "\toldkT = 0.0/0.0;  // initialize to NaN so we'll have to define transforms",
+   -- insert code here to compute and store the spherical fourier transforms
    "}",
    "",
    functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
    functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
-    (unlines ["\tdouble output=0;",
+    (unlines [redefinetransforms,
+              "\tdouble output=0;",
               codeStatements codeIntegrate ++ "\t// " ++ show (countFFT codeIntegrate) ++ " Fourier transform used.",
               "\t// " ++ show (peakMem codeIntegrate) ++ " temporaries made",
               "\treturn output;", ""]),
    functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
     (unlines ["\tassert(0);"]),
    functionCode "transform" "double" [("double", "kT"), ("double", "x")]
-    (unlines ["\tdouble output = 0;",
+    (unlines [redefinetransforms,
+              "\tdouble output = 0;",
               "\t" ++ codeStatements codeDTransform,
               "\treturn output;", ""]),
    functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;",
    functionCode "derive" "double" [("double", "kT"), ("double", "x")]
-    (unlines ["\tdouble output = 0;",
+    (unlines [redefinetransforms,
+              "\tdouble output = 0;",
               codeStatements codeDerive,
               "\treturn output;", ""]),
    functionCode "d_by_dT" "double" [("double", ""), ("double", "")]
@@ -122,7 +157,8 @@ scalarClass e arg n =
       ("const VectorXd", "&ingrad"),
       ("VectorXd", "*outgrad"),
       ("VectorXd", "*outpgrad")]
-     (unlines [codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.",
+     (unlines [redefinetransforms,
+               codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.",
                "\t// " ++ show (peakMem codeGrad),
                ""]),
    functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);"),
@@ -133,7 +169,10 @@ scalarClass e arg n =
                map printEnergy (Set.toList (findNamedScalars e)) ++
                ["\tprintf(\"\\n\");"]),
   "private:",
-  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class",
+  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)
+  ++ "\t// TODO: add declaration of spherical fourier transform data here\n"
+  ++ declaretransforms
+  ++"}; // End of " ++ n ++ " class",
   "\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeGrad)) ++ " Fourier transform used.",
   "\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeGrad])
   ]
@@ -163,6 +202,39 @@ scalarClass e arg n =
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
+      -- The following is needed to handle spherical fourier
+      -- transforms that we store on 1D grids.
+      declaretransforms = chomp $ unlines $ "\tmutable double oldkT;" : map (\(t,_,_) -> "\tmutable double *" ++ t ++ ";") transforms
+      chomp str = case reverse str of '\n':rstr -> reverse rstr
+                                      _ -> str
+      redefinetransforms = chomp $ unlines $ [
+                         "\tif (oldkT != kT) {",
+                         "\t\toldkT = kT;",
+                         chomp $ concat $ map definet transforms,
+                         "\t}"]
+        where definet (t,s,r) =
+                unlines ["\t\tif (!"++t++") " ++ t ++ " = new double[" ++ nk ++ "];",
+                         "\t\tfor (int i=0; i<" ++ nk ++"; i++) {",
+                         "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
+                         "\t\t\t" ++ t ++ "[i] = 0;",
+                         "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
+                         "\t\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
+                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t\t}",
+                         "\t\t}"]
+                  where nk = show (round (kmax s/dk s) :: Int)
+                        mydr = code (rresolution s)
+                        halfdr = code (rresolution s/2)
+      (transforms, e) = mktransforms [1 :: Int ..] (findTransforms ewithtransforms) ewithtransforms
+      mktransforms _ [] ee = ([], ee)
+      mktransforms (nn:ns) (ft@(Expression (SphericalFourierTransform s r)):ts) ee =
+        case mktransforms ns ts ee of
+          (xs,ee') -> ((varname, s, r):xs, substitute ft evaluateme ee')
+          where varname = "ft" ++ show nn
+                evaluateme = setkzero (s_var (varname ++ "[0]")) $
+                             s_var (varname ++ "[int(" ++ code k ++ "*" ++ show (1/dk s) ++ "+0.5)]")
+      mktransforms _ (z:_) _ = error ("Not a transform: " ++ show z)
 
 defineFunctional :: Expression Scalar -> [String] -> String -> String
 defineFunctional e arg n =
@@ -190,12 +262,13 @@ defineFunctional e arg n =
 
 
 scalarClassNoGradient :: Expression Scalar -> [String] -> String -> String
-scalarClassNoGradient e arg n =
+scalarClassNoGradient ewithtransforms arg n =
   unlines
   ["class " ++ n ++ " : public FunctionalInterface {",
    "public:",
    "" ++ n ++ codeA arg ++ "  {",
    "\thave_integral = true;",
+   definetransforms,
    "}",
    "",
    functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
@@ -238,7 +311,10 @@ scalarClassNoGradient e arg n =
                map printEnergy (Set.toList (findNamedScalars e)) ++
                ["\tprintf(\"\\n\");"]),
   "private:",
-  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class",
+  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)
+    ++ "\t// TODO: add declaration of spherical fourier transform data here\n"
+    ++ declaretransforms
+  ++"}; // End of " ++ n ++ " class",
   "\t// Total " ++ (show $ countFFT codeIntegrate) ++ " Fourier transform used.",
   "\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate])
   ]
@@ -261,6 +337,35 @@ scalarClassNoGradient e arg n =
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
+      -- The following is needed to handle spherical fourier
+      -- transforms that we store on 1D grids.
+      declaretransforms = unlines $ map (\(t,_,_) -> "\tdouble *" ++ t ++ ";") transforms
+      chomp str = case reverse str of '\n':rstr -> reverse rstr
+                                      _ -> str
+      definetransforms = chomp $ concat $ map definet transforms
+        where definet (t,s,r) =
+                unlines ["\t" ++ t ++ " = new double[" ++ nk ++ "];",
+                         "\tfor (int i=0; i<" ++ nk ++"; i++) {",
+                         "\t\tconst double k = i*" ++ show (dk s) ++ ";",
+                         "\t\t" ++ t ++ "[i] = 0;",
+                         "\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
+                         "\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
+                         "\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t}",
+                         "\t}"]
+                  where nk = show (round (kmax s/dk s) :: Int)
+                        mydr = code (rresolution s)
+                        halfdr = code (rresolution s/2)
+      (transforms, e) = mktransforms [1 :: Int ..] (findTransforms ewithtransforms) ewithtransforms
+      mktransforms _ [] ee = ([], ee)
+      mktransforms (nn:ns) (ft@(Expression (SphericalFourierTransform s r)):ts) ee =
+        case mktransforms ns ts ee of
+          (xs,ee') -> ((varname, s, r):xs, substitute ft evaluateme ee')
+          where varname = "ft" ++ show nn
+                evaluateme = setkzero (s_var (varname ++ "[0]")) $
+                             s_var (varname ++ "[int(" ++ code k ++ "*" ++ show (1/dk s) ++ "+0.5)]")
+      mktransforms _ (z:_) _ = error ("Not a transform: " ++ show z)
 
 defineFunctionalNoGradient :: Expression Scalar -> [String] -> String -> String
 defineFunctionalNoGradient e arg n =

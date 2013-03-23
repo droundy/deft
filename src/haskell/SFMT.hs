@@ -2,13 +2,20 @@
 soft fundamental measure theory. -}
 
 module SFMT
-       ( n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v, w1v )
+       ( sfmt, n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v, w1v )
        where
 
 import Expression
+import WhiteBear ( kT )
+import FMT ( rad )
 
-rad :: Type a => Expression a
-rad = s_var "R"
+phi1, phi2, phi3 :: Expression Scalar
+phi1 = var "phi1" "\\Phi_1" $ integrate $ -kT*n0*log(1-n3)
+phi2 = var "phi2" "\\Phi_2" $ integrate $ kT*(n2*n1 - n1v_dot_n2v)/(1-n3)
+phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*(n2**3/3 - sqr_n2v*n2)/(8*pi*(1-n3)**2)
+
+sfmt :: Expression Scalar
+sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
 
 betaV0 :: Type a => Expression a
 betaV0 = s_var "V0"/s_var "kT"
@@ -34,36 +41,37 @@ gamma, b :: Type a => Expression a
 b = 2*gamma/(sqrt(pi*gamma)-1)/rad**2
 gamma = "gamma" === 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 
+mys :: Symmetry
+mys = Spherical { dk = 0.001, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
+
+myvs :: Symmetry
+myvs = VectorS { dk = 0.001, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
+
+r :: Expression Scalar
+r = s_var "r"
+
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
-  where w3r = "w3r" === b*rad**2/(2*gamma)*(
-          1 - exp(-gamma*(1-rmag/rad)**2) - sqrt(pi*gamma)*erf(sqrt gamma*(1-rmag/rad))
-          )*heaviside(rad - rmag)
-        w3k = "w3k" === fft w3r
+  where w3k = transform mys $ b*rad**2/(2*gamma)*(
+            1 - exp(-gamma*(1-r/rad)**2) - sqrt(pi*gamma)*erf(sqrt gamma*(1-r/rad))
+          )*heaviside(rad - r)
 
 w0 :: Expression RealSpace -> Expression RealSpace
 w0 x = ifft ( w0k * fft x)
-  where w0r = "w0r" === b*exp(-gamma*(1-rmag/rad)**2)*heaviside(rad - rmag)/(4*pi*rmag)
-        w0k = "w0k" === fft w0r
+  where w0k = transform mys $ b*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r)
 
 w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
-  where w1r = "w1r" === b*exp(-gamma*(1-rmag/rad)**2)*heaviside(rad - rmag)/(4*pi)
-        w1k = "w1k" === fft w1r
+  where w1k = transform mys $ b*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
-  where w2r = "w2r" === b*rmag*exp(-gamma*(1-rmag/rad)**2)*heaviside(rad - rmag)
-        w2k = "w2k" === fft w2r
+  where w2k = transform mys $ b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vifft ( w2vk *. fft x)
-  where w2vr = "w2vr" `nameVector`
-               (b*rmag*exp(-gamma*(1-rmag/rad)**2)*heaviside(rad - rmag)/rmag).*rvec
-        w2vk = "w2vk" `nameVector` vfft w2vr
+  where w2vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/r)
 
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vifft ( w1vk *. fft x)
-  where w1vr = "w1vr" `nameVector`
-               (b*rmag*exp(-gamma*(1-rmag/rad)**2)*heaviside(rad - rmag)/(4*pi*rmag**2)).*rvec
-        w1vk = "w1vk" `nameVector` vfft w1vr
+  where w1vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r**2))

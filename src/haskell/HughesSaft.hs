@@ -9,7 +9,7 @@
 module HughesSaft
        ( yuwu_zeta, yuwu_correlation,
          eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid, saft_entropy )
+         saft_dispersion, saft_association, saft_fluid, saft_entropy, mu )
        where
 
 import FMT ( rad, n, n0, n2, n3, sqr_n2v )

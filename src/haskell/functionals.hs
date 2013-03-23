@@ -1,5 +1,8 @@
 import CodeGen
-import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation )
+import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation, mu )
+import IdealGas ( idealgas )
+import FMT ( n )
+import SFMT ( sfmt )
 import WhiteBear
 import Quantum
 import System.Environment ( getArgs )
@@ -10,6 +13,12 @@ main =
      let gen f x = if f `elem` todo
                    then writeFile f x
                    else return ()
+     let nmu = "nmu" === integrate (n*mu)
+     gen "src/SoftFluidFast.cpp" $
+       defineFunctional (idealgas + sfmt + nmu) ["R", "V0", "mu"] "SoftFluid"
+     gen "src/HardFluidFast.cpp" $
+       defineFunctional (idealgas + whitebear + nmu) ["R", "mu"] "HardFluid"
+     
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
      gen "src/Correlation_S_Fast.cpp" $

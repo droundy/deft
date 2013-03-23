@@ -23,6 +23,7 @@ module Expression (Exprn(..),
                    hasActualFFT, hasFFT, hasexpression, hasExprn,
                    searchExpression, searchExpressionDepthFirst,
                    findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
+                   findTransforms, transform, Symmetry(..),
                    MkBetter(..), Monoid(..), mconcat,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE,
@@ -37,6 +38,12 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import LatexDouble ( latexDouble )
 
+data Symmetry = Spherical { dk, kmax :: Double,
+                            rresolution, rmax :: Expression Scalar } |
+                VectorS { dk, kmax :: Double,
+                          rresolution, rmax :: Expression Scalar }
+                deriving ( Eq, Ord, Show )
+
 data RealSpace = IFFT (Expression KSpace)
                | Rx | Ry | Rz
                deriving ( Eq, Ord, Show )
@@ -44,6 +51,7 @@ data KSpace = Delta | -- handy for FFT of homogeneous systems
               Complex (Expression Scalar) (Expression Scalar) |
               Kx | Ky | Kz |
               SetKZeroValue (Expression KSpace) (Expression KSpace) |
+              SphericalFourierTransform Symmetry (Expression Scalar) |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 data Scalar = Summate (Expression RealSpace)
@@ -231,6 +239,8 @@ instance Code KSpace where
   codePrec _ Delta = showString "delta(k?)"
   codePrec p (SetKZeroValue _ val) = codePrec p val
   codePrec _ (FFT r) = showString "fft(gd, " . codePrec 0 (makeHomogeneous r) . showString ")"
+  codePrec _ (SphericalFourierTransform s r) =
+    showString ("transform(" ++ show s ++ ",") . codePrec 0 (makeHomogeneous r) . showString ")"
   codePrec _ (Complex 0 1) = showString "complex(0,1)"
   codePrec _ (Complex a b) = showString "complex(" . codePrec 0 a . showString ", " .
                                                      codePrec 0 b . showString ")"
@@ -240,11 +250,17 @@ instance Code KSpace where
   latexPrec _ Delta = showString "\\delta(k)"
   latexPrec p (SetKZeroValue _ val) = latexPrec p val
   latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
+  latexPrec _ (SphericalFourierTransform s r) =
+    showString ("\\mathcal{F}(" ++ show s ++ ",") . latexPrec 0 r . showString ")"
   latexPrec p (Complex a b) = latexPrec p (a + s_var "i" * b)
 instance Type KSpace where
   amKSpace _ = True
   mkExprn = EK
   derivativeHelper v ddk (FFT r) = derive v (ifft ddk) r
+  derivativeHelper v ddk (SphericalFourierTransform _ e) =
+    if derive v 1 e == 0 || ddk == 0
+    then 0
+    else error "do not have an implementation for derivativeHelper of SphericalFourierTransform"
   derivativeHelper v ddk (SetKZeroValue _ e) = derive v (setkzero 0 ddk) e -- FIXME: how best to handle k=0 derivative?
   derivativeHelper _ _ Kx = 0
   derivativeHelper _ _ Ky = 0
@@ -253,10 +269,15 @@ instance Type KSpace where
   derivativeHelper v ddk (Complex a b) = derive v (real_part ddk) a -
                                          derive v (imag_part ddk) b
   scalarderivativeHelper v (FFT r) = fft (scalarderive v r)
+  scalarderivativeHelper v (SphericalFourierTransform s e) = transform s (scalarderive v e)
   scalarderivativeHelper v (SetKZeroValue z e) = setkzero (scalarderive v z) (scalarderive v e)
   scalarderivativeHelper v (Complex a b) = complex (scalarderive v a) (scalarderive v b)
-  scalarderivativeHelper _ _ = 0
+  scalarderivativeHelper _ Kx = 0
+  scalarderivativeHelper _ Ky = 0
+  scalarderivativeHelper _ Kz = 0
+  scalarderivativeHelper _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
+  zeroHelper v (SphericalFourierTransform s e) = transform s (setZero v e)
   zeroHelper _ Kx = Expression Kx
   zeroHelper _ Ky = Expression Ky
   zeroHelper _ Kz = Expression Kz
@@ -349,12 +370,16 @@ instance Type KSpace where
   toScalar Kz = 0
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
+  toScalar (SphericalFourierTransform _ _) = error "need to do spherical transform for toScalar, really need to just evaluate the FT once, and then make this resultingarray[0]"
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
+  mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
   mapExpressionHelper' f (Complex a b) = complex (f a) (f b)
   mapExpressionHelper' f (SetKZeroValue z v) = setkzero (f z) (f v)
   mapExpressionHelper' _ kk = Expression kk
   subAndCountHelper x y (FFT e) = case subAndCount x y e of (e', n) -> (fft e', n)
+  subAndCountHelper x y (SphericalFourierTransform s e) =
+             case subAndCount x y e of (e', n) -> (transform s e', n)
   subAndCountHelper x y (SetKZeroValue z e) = (setkzero z' e', n1+n2)
         where (z',n1) = subAndCount x y z
               (e',n2) = subAndCount x y e
@@ -366,6 +391,7 @@ instance Type KSpace where
   subAndCountHelper _ _ Kz = (kz, 0)
   subAndCountHelper _ _ Delta = error "unhandled case: Delta"
   searchHelper f (FFT e) = f e
+  searchHelper f (SphericalFourierTransform _ e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
   searchHelper f (Complex a b) = mappend (f a) (f b)
   searchHelper _ Kx = mempty
@@ -758,6 +784,11 @@ summate :: Type a => Expression RealSpace -> Expression a
 summate (Sum s _) = pairs2sum $ map i $ sum2pairs s
   where i (f, e) = (f, summate e)
 summate x = fromScalar $ Expression $ Summate x
+
+transform :: Symmetry -> Expression Scalar -> Expression KSpace
+transform s e = if e == 0
+                then 0
+                else Expression (SphericalFourierTransform s e)
 
 fft :: Expression RealSpace -> Expression KSpace
 fft (Scalar e) = Scalar e * Expression Delta
@@ -1791,6 +1822,11 @@ findInputs = searchMonoid helper
                                          ES $ xhat `dot` lat1,
                                          ES $ yhat `dot` lat2,
                                          ES $ zhat `dot` lat3]
+
+findTransforms :: Type b => Expression b -> [Expression KSpace]
+findTransforms = Set.toList . searchMonoid helper
+  where helper e | EK ee@(Expression (SphericalFourierTransform _ _)) <- mkExprn e = Set.singleton ee
+        helper _ = Set.empty
 
 dV :: Expression RealSpace
 dV = scalar dVscalar

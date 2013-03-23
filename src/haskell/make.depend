@@ -4,7 +4,7 @@
 # Makefile itself, or find-deps.pl.                                     #
 #########################################################################
 
-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Quantum.o Statement.o WhiteBear.o functionals.o 
+functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Quantum.o SFMT.o Statement.o WhiteBear.o functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
@@ -16,7 +16,7 @@ newfunctionals.exe: Expression.o FMT.o LatexDouble.o NewCode.o Statement.o White
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-test.exe: CodeGen.o Expression.o FMT.o LatexDouble.o SFMT.o Statement.o test.o 
+test.exe: CodeGen.o Expression.o FMT.o LatexDouble.o SFMT.o Statement.o WhiteBear.o test.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 # DO NOT DELETE: Beginning of Haskell dependencies
@@ -38,6 +38,8 @@ HughesSaft.o : IdealGas.hi
 HughesSaft.o : WhiteBear.hi
 HughesSaft.o : FMT.hi
 SFMT.o : SFMT.hs
+SFMT.o : FMT.hi
+SFMT.o : WhiteBear.hi
 SFMT.o : Expression.hi
 Statement.o : Statement.lhs
 Statement.o : Expression.hi
@@ -64,6 +66,9 @@ latex-functionals.o : HughesSaft.hi
 functionals.o : functionals.hs
 functionals.o : Quantum.hi
 functionals.o : WhiteBear.hi
+functionals.o : SFMT.hi
+functionals.o : FMT.hi
+functionals.o : IdealGas.hi
 functionals.o : HughesSaft.hi
 functionals.o : CodeGen.hi
 test.o : test.lhs
