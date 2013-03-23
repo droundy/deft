@@ -212,7 +212,7 @@ scalarClass ewithtransforms arg n =
                          "\t\toldkT = kT;",
                          chomp $ concat $ map definet transforms,
                          "\t}"]
-        where definet (t,s,r) =
+        where definet (t,s@(Spherical {}),r) =
                 unlines ["\t\tif (!"++t++") " ++ t ++ " = new double[" ++ nk ++ "];",
                          "\t\tfor (int i=0; i<" ++ nk ++"; i++) {",
                          "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
@@ -220,7 +220,21 @@ scalarClass ewithtransforms arg n =
                          "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
                          "\t\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
                          "\t\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
-                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)/(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t\t}",
+                         "\t\t}"]
+                  where nk = show (round (kmax s/dk s) :: Int)
+                        mydr = code (rresolution s)
+                        halfdr = code (rresolution s/2)
+              definet (t,s@(VectorS {}),r) =
+                unlines ["\t\tif (!"++t++") " ++ t ++ " = new double[" ++ nk ++ "];",
+                         "\t\tfor (int i=1; i<" ++ nk ++"; i++) {",
+                         "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
+                         "\t\t\t" ++ t ++ "[i] = 0;",
+                         "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
+                         "\t\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
+                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*(cos(k*r)-sin(k*r)/(k*r))*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo)/(k*k);",
                          "\t\t\t}",
                          "\t\t}"]
                   where nk = show (round (kmax s/dk s) :: Int)
