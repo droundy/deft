@@ -32,3 +32,26 @@ You can run with multiple cores, designated by -j4
 The `-c4` tells srun that make will use 4 cores.  The `-j4` tells make to use 4 cores.
 If the srun job does not start immediately you will want to reduce the number of cores used.
 The idea being that all the processes will run on a single node.
+
+## How do I create a new density functional?
+
+This requires a few steps, and is most easily done by copying and
+modifying an existing functional.  You can begin by creating a new
+haskell module for your functional by copying `src/haskell/SFMT.hs` to
+a new `NewFunctional.hs` file for your new functional.  Edit that file
+to rename SFMT at the top to your new filename (which should not
+actually be NewFunctional, but should *start* with a capital letter).
+
+Now you need to edit `src/haskell/functionals.hs` to make that program
+use your functional to generate a new `src/NewFunctionalFast.cpp` file.
+
+Next, you need to teach `Makefile.am` to generate and use the new
+`src/NewFunctionalFast.cpp` file.  Edit this file, and add your new
+filename, analogous to how `src/SoftFluidFast.cpp` shows up currently.
+And this is all! You just need to go ahead and write code that uses
+your functional.  Of course, making the haskell code implement the
+functional you actually want requires more work.
+
+I am currently transitioning to a new system for C++ code generation,
+which is slightly different, and shows up in
+`src/haskell/newfunctionals.hs`.
