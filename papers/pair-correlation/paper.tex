@@ -77,6 +77,43 @@ formula
 They go on to further approximate the radial distribution function,
 but we can just stop here.
 
+Gloor et al \cite{gloor2007prediction} uses average density of two points and the uses
+bulk radial distribution for the reference system (hard spheres) at
+this density, in order to approximate pair correlation.
+
+Gross \cite{gross2009density} does the same as Gloor et al except that
+he uses a hard chain reference fluid.
+
+Sokolowski and Fischer \cite{sokolowski1992role} do the same as Gloor et al except that instead of
+taking the exact densities $\rho(\mathbf{r_1})$ and $\rho(\mathbf{r_2})$ to
+average he takes an integral $\int_{V_{sphere}} \rho(\mathbf{r})d\mathbf{r}$
+over a sphere of some radius centered at each point.  It's
+these two averaged densities that he takes the average of.
+
+Fischer and Methfessel \cite{fischer1980born}, in a paper that is cited by Sokolowski and Fischer (above) do the same thing (the originate the idea of the spherical average density.  Their Introduction has a very good discussion of the different averaging methods to get to $g(\mathbf{r})$ tried up until then (paper is written in 1980).
+
+Fu and Wu \cite{fu2005vapor} do I think the same as Gloor et al but maybe you (Dr. Roundy)
+should take a look at it.  They reference Tang \cite{tang2008accurate} which I've
+mentioned below in the Appendix.
+
+McCabe and Kiselev \cite{mccabe2004application} model a square well potential.  One of their terms uses a radial
+distribution function that once again is taken to be the bulk function evaluated at an
+effective density.  They reference a source that calculates this effective density (or filling fraction) to be
+$\eta_{effective} = c_1\eta + c_2\eta^2 + c_3\eta^3$ where the coeffecients are gotten
+from three coupled polynomial equations with $1,\lambda$, and $\lambda^2$, where $\lambda$
+is a measure of the model's potential range.  They reference another source who calculates
+the effective density in a similar (but more complicated) way.  I can look more at these
+if you'd like.  They also use a different first order expansion formula for the ditribution
+at contact in the chain term.
+
+
+Toxvaerd \cite{toxvaerd1976hydrostatic}approximates the radial distribution as the radial distribution
+of the bulk at the same density.  Uses the first two terms in a tempurature
+expansion.  First term is just Carnahan Starling derived, second is empirical.
+
+
+>>>>>>> Stashed changes
+
 
 \section{Pair distribution function with inhomogeneity}
 
@@ -232,7 +269,20 @@ integral equation theory...
 \appendix
 
 \section*{Appendix}
+\cite{jin2011perturbative} Combines hard sphere (white bear) with attraction that is not mean field but rather uses two other correltation expressions given in  -\cite{tang2008accurate} and \cite{hlushak2009direct}
+
+Tang \cite{tang2008accurate}Derives the direct correltation for a SW and Yukawa and LJ potentials by first getting the radial distribution function through a method I don't really understand.  Composes fourier transforms $c(k)$ and $h(k)$ of these complicated functions that depend on filling fraction and the potential in an integral. Uses first order mean spherical approximation.  This is just square potential well around particle but the radial distribution function takes only the first order in an expansion in... (high temp?).
+
+\cite{hlushak2009direct}
+Cites \cite{tang2008accurate} (above) and does largely the same thing but then adds a complication for $2 < \lambda \leq 3$
+
+\cite{levesque2012scalar}
+Uses direct correlation funtion that's gotten from a radial distribution function of a homogeneous density.  The direct correlation itself is only dependent on distance.  The $\rho_0$ that they use is the same $\rho_0$ that the used in the reference HS term in their functional.  The use the Carnahan Starling or the Perkis Yevick for these hard sphere free energies.  The other terms involve $\delta\rho$ so the change is a variation from the reference density.  They further modify it by looking at molecular dynamic simulations of a certain model of water molecules and looking at the oxygen-oxygen correlation.
+
+
+
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
+
 
 \end{document}

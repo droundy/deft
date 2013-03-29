@@ -1,0 +1,31 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+\usepackage{breqn}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+\begin{document}
+reference?
+\cite{jin2011perturbative}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
