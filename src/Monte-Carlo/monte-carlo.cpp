@@ -259,6 +259,9 @@ int main(int argc, char *argv[]){
   }
   printf("Using scale of %g\n", scale);
   long count = 0;
+  // In the following we compute shells, which for
+  // each element will give the number of spheres
+  // whos center is in that shell
   long *shells = new long[div];
   for (long l=0; l<div; l++) shells[l] = 0;
 
