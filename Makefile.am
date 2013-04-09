@@ -70,6 +70,7 @@ noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
 	papers/contact/figs/test-particle-wall.mkdat \
 	papers/contact/figs/walls.mkdat \
 	papers/pair-correlation/figs/walls.mkdat \
+	papers/fuzzy-fmt/figs/walls.mkdat \
 	comparisons/eta_effective_deft.test \
 	comparisons/gHSetaeff_deft.test \
 	comparisons/assoc_deft.test \
@@ -206,6 +207,8 @@ papers_contact_figs_inner_sphere_mkdat_SOURCES = papers/contact/figs/inner-spher
 papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CONTACT_CODE)
 
 papers_pair_correlation_figs_walls_mkdat_SOURCES = papers/pair-correlation/figs/walls.cpp $(ALL_CONTACT_CODE)
+
+papers_fuzzy_fmt_figs_walls_mkdat_SOURCES = papers/fuzzy-fmt/figs/walls.cpp $(ALL_CODE)
 
 comparisons_eta_effective_deft_test_SOURCES = comparisons/eta_effective_deft.cpp $(GENERIC_CODE)
 comparisons_assoc_deft_test_SOURCES = comparisons/assoc_deft.cpp $(GENERIC_CODE)

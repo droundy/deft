@@ -42,10 +42,10 @@ b = 2*gamma/(sqrt(pi*gamma)-1)/rad**2
 gamma = "gamma" === 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 
 mys :: Symmetry
-mys = Spherical { dk = 0.001, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
+mys = Spherical { dk = 0.01, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
 
 myvs :: Symmetry
-myvs = VectorS { dk = 0.001, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
+myvs = VectorS { dk = 0.01, kmax = 1000, rresolution = 0.01*rad, rmax = rad }
 
 r :: Expression Scalar
 r = s_var "r"

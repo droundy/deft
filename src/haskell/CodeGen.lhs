@@ -121,6 +121,10 @@ scalarClass ewithtransforms arg n =
    "\t// TODO: code to evaluate Fourier transforms goes here",
    "\toldkT = 0.0/0.0;  // initialize to NaN so we'll have to define transforms",
    -- insert code here to compute and store the spherical fourier transforms
+   initializetransforms,
+   "}",
+   "~" ++ n ++ "() {",
+   deletetransforms,
    "}",
    "",
    functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
@@ -207,6 +211,10 @@ scalarClass ewithtransforms arg n =
       declaretransforms = chomp $ unlines $ "\tmutable double oldkT;" : map (\(t,_,_) -> "\tmutable double *" ++ t ++ ";") transforms
       chomp str = case reverse str of '\n':rstr -> reverse rstr
                                       _ -> str
+      initializetransforms = chomp $ unlines $ map initt transforms
+        where initt (t,_,_) = "\t" ++ t ++ " = 0;"
+      deletetransforms = chomp $ unlines $ map delt transforms
+        where delt (t,_,_) = "\tdelete[] " ++ t ++ ";"
       redefinetransforms = chomp $ unlines $ [
                          "\tif (oldkT != kT) {",
                          "\t\toldkT = kT;",
