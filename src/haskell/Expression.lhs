@@ -1122,8 +1122,6 @@ class (Ord a, Show a, Code a) => Type a where
   amRealSpace _ = False
   amKSpace :: Expression a -> Bool
   amKSpace _ = False
-  amThreeVector :: Expression a -> Bool
-  amThreeVector _ = False
   mkExprn :: Expression a -> Exprn
   s_var :: String -> Expression a
   s_var = Scalar . s_var
