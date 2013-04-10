@@ -369,8 +369,7 @@ int main(int argc, char *argv[]){
           GconDensity[i]=((GconShells[i]+0.0)/shells[i])/((4/3.*M_PI*oShellArray[3]*8*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
           GcenConDensity[i]=4*M_PI*R*R*((GcenConShells[i]+0.0)/shellsArea[i])/((4/3.*M_PI*8*oShellArray[3]*oShellArray[3]*oShellArray[3]-4/3.*M_PI*8*R*R*R));
         }
-        
-        //FILE *out = fopen((const char *)outfilename,"w");
+
         FILE *out = fopen((const char *)outfilename,"w");
         if (out == NULL) {
           printf("Error creating file %s\n", outfilename);
