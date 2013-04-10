@@ -25,13 +25,21 @@
 #include "errno.h"
 #include "sys/stat.h" // for mkdir
 
+int count =0;
 double radial_distribution(double gsigma, double r);
 double py_rdf (double eta, double r);
+double mc (double local_eta, double r, double r_step, double g[]);
+
 
 // Maximum and spacing values for plotting
 const double zmax = 20;
 const double xmax = 10;
 const double dx = 0.1;
+
+double mc_r_step;
+double num_eta = 10.0;
+double eta_step = 0.5/num_eta;
+double * g = new double[1300*(int(num_eta)+1)];
 
 
 // The functions for different ways of computing the pair distribution function.
@@ -46,11 +54,11 @@ double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, cons
   return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)/nA(r1))
     /(1/nA(r0) + 1/nA(r1));
 }
-double pairdist_py(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_mc(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta = 4/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
-  return py_rdf(eta, r);
+  return mc(eta, r,mc_r_step,g);
 }
 double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   // This implements the pair distribution function of Fischer and
@@ -60,7 +68,7 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta = n3(Cartesian(0.5*(r0+r1)));
-  return py_rdf(eta, r);
+  return mc(eta, r, mc_r_step, g);
 }
 
 const char *fun[] = {
@@ -72,7 +80,7 @@ const char *fun[] = {
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
   pairdist_simple,
   pairdist_nA,
-  pairdist_py,
+  pairdist_mc,
   pairdist_fischer
 };
 const int numplots = sizeof fun/sizeof fun[0];
@@ -99,49 +107,77 @@ double radial_distribution(double gsigma, double r) {
            - a4*(gsigma-1)*(gsigma-1)*sin(a5*d)*exp(-a6*d);
 }
 
-double py_rdf (double eta, double r) {
-  // taken from the paper by Trokhymchuk et. al.
-  const double sigma = 1.0;
-  const double gsigma = 1.0/4.0/eta*((1.0 + eta + eta*eta - 2.0/3.0*eta*eta*eta
-                      - 2.0/3.0*eta*eta*eta*eta)/(1.0 - eta)/(1.0 - eta)/(1.0 - eta) - 1.0);
-  const double rstar = sigma*(2.0116 - 1.0647*eta + 0.0538*eta*eta);
-  const double d = pow((2.0*eta*(eta*eta - 3.0*eta - 3.0 + sqrt(3.0*(eta*eta*eta*eta
-	               - 2.0*eta*eta*eta + eta*eta + 6.0*eta + 3.0)))), 1.0/3.0);
-  const double g_m = 1.0286 - 0.6095*eta + 3.5781*eta*eta - 21.3651*eta*eta*eta
-                   + 42.6344*eta*eta*eta*eta - 33.8485*eta*eta*eta*eta*eta;
-  const double alpha = (44.554 + 79.868*eta + 116.432*eta*eta - 44.652*exp(2.0*eta))/sigma;
-  const double alpha0 = 2.0*eta/(1.0 - eta)*(-1.0 + d/4.0/eta - eta/2.0/d)/sigma;
-  const double beta = (-5.022 + 5.857*eta + 5.089*exp(-4.0*eta))/sigma;
-  const double beta0 = 2.0*eta/(1.0-eta)*sqrt(3.0)*(-d/4.0/eta - eta/2.0/d)/sigma;
-  const double mu = (2.0*eta/(1.0 - eta)*(-1.0 - d/2.0/eta - eta/d))/sigma;
-  const double gamma = atan(-sigma/beta0*((alpha0*sigma*(alpha0*alpha0 + beta0*beta0)
-                     - mu*sigma*(alpha0*alpha0 + beta0*beta0))*(1.0 + eta/2.0)
-                     + (alpha0*alpha0 + beta0*beta0 - mu*alpha0)*(1.0 + 2.0*eta)));
-  const double kappa = (4.674*exp(-3.935*eta) + 3.536*exp(-56.270*eta))/sigma;
-  const double omega = (-0.682*exp(-24.697*eta) + 4.720 + 4.450*eta)/sigma;
-  const double delta = -omega*rstar - atan((kappa*rstar + 1.0)/omega/rstar);
-  const double C = rstar*(g_m - 1.0)*exp(kappa*rstar)/cos(omega*rstar + delta);
-  const double B = (g_m - (sigma*gsigma/rstar)*exp(mu*(rstar - sigma)))
-                 / (cos(beta*(rstar - sigma) + gamma)*exp(alpha*(rstar-sigma))
-		    - cos(gamma)*exp(mu*(rstar - sigma)))*rstar;
-  const double A = sigma*gsigma - B*cos(gamma);
-  if (r < sigma)
+void read_mc() {
+  char *fname = new char[1024];
+  sprintf(fname, "papers/pair-correlation/figs/gr-0.10.dat");
+  FILE *in = fopen(fname, "r");
+  if (!in) {
+    fprintf(stderr, "Unable to open file %s!!!!\n", fname);
+    delete[] fname;
+    exit(1);
+  }
+  double num1;
+  double num2;
+  fscanf(in, " %lg %*g %lg", &num1, &num2);
+  mc_r_step = 2*(num2 - num1);
+  delete[] fname;
+  for (int i=0; i<1300; i++) {
+    g[i] = 1.0;
+  }
+  for (double eta = eta_step; eta < 0.5001; eta += eta_step) {
+    char *fname = new char[1024];
+    sprintf(fname, "papers/pair-correlation/figs/gr-%2.2f.dat", eta);
+    FILE *in = fopen(fname, "r");
+    if (!in) {
+      fprintf(stderr, "Unable to open file %s!!!!\n", fname);
+      delete[] fname;
+      exit(1);
+    }
+    int i=0;
+    while (fscanf(in, " %*g %lg", &g[int(floor(1300*(eta/eta_step)))+i]) == 1) {
+      i++;
+    }
+    if (i!=1300) {
+      printf("There  are not 1300 lines in papers/pair-correlation/figs/gr-%2.2f.dat which is a problem in walls.cpp\n", eta);
+      exit(1);
+    }
+    delete[] fname;
+  }
+}
+
+double mc (double local_eta, double r, double r_step, double g[]) {
+  int low_eta_i = floor(local_eta/eta_step);
+  int high_eta_i = low_eta_i + 1;
+  double g_low_eta;
+  double g_high_eta;
+  double fac;
+  int j=0;
+  double r_floor;
+  if (local_eta >.5) printf("YEP who would have thought\n");
+  if (r<2) {
     return 0;
-  else if ( r < rstar) {
-   const double g_dep = A/r*exp(mu*(r-sigma))
-                      + B/r*cos(beta*(r-sigma) + gamma)*exp(alpha*(r-sigma));
-   return g_dep;
   }
-  else {
-    const double g_str = 1 + C/r*cos(omega*r + delta)*exp(-kappa*r);
-    return g_str;
+  if (r < 2 +(r_step/2.0)) {
+    fac = (r-2.0)/(0.5*r_step);
+    g_low_eta = (1-fac)*g[low_eta_i*1300]+fac*g[low_eta_i*1300 + 1];
+    g_high_eta = (1-fac)*g[high_eta_i*1300]+fac*g[high_eta_i*1300 + 1];
+  } else {
+    j = floor((r-2.0+0.5*r_step)/r_step);
+    r_floor = 2+(j-0.5)*r_step;
+    fac = (r-r_floor)/r_step;
+    g_low_eta = (1-fac)*g[low_eta_i*1300+j] + fac*g[low_eta_i*1300+j+1];
+    g_high_eta = (1-fac)*g[high_eta_i*1300+j] + fac*g[high_eta_i*1300+j+1];
   }
+  //printf("low_eta_i = %d and high_eta_i = %d\n", low_eta_i*1300+j, high_eta_i*1300+j);
+  //fflush(stdout);
+  fac = (local_eta-(low_eta_i+1)*eta_step)/eta_step;
+  return (1-fac)*g_low_eta + fac*g_high_eta;
 }
 
 double notinwall(Cartesian r) {
   const double z = r.z();
   if (fabs(z) > spacing) {
-      return 1;
+    return 1;
   }
   return 0;
 }
@@ -190,7 +226,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   // Generates a data file for the pair distribution function, for filling fraction eta
   // and distance of first sphere from wall of z0. Data saved in a table such that the
   // columns are x values and rows are z1 values.
-
+  
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
   f = OfEffectivePotential(fhs + IdealGas()
@@ -225,7 +261,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
-
+  
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
 
@@ -264,6 +300,46 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
   }
   delete[] plotname;
+  //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
+  //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
+  // int count;
+  // char *plotname_a = new char [1024];
+  // for (int version = 0; version < numplots; version++) {
+  //   count = 1;
+  //   double a = 0;
+  //   //delta_thickness = 6*dw;
+  //   double delta_r = 1;
+  //   for (double z0 = 3; z0 < 13; z0 += dw) {
+  //     const Cartesian r0(0,0,z0);
+  //     printf("%d\t", count);
+  //     fflush(stdout);
+  //     count++;
+  //     for (double x1 = -delta_r - 3*dw; x1 <= delta_r + 3*dw; x1 += dw) {
+  //       for (double y1 = -delta_r - 3*dw; y1 <= delta_r + 3*dw; y1 += dw) {
+  //         if (y1*y1 < ((delta_r+3*dw)*(delta_r+3*dw) - x1*x1)) {
+  //             for (double z1 = -delta_r - 3*dw; z1 <= delta_r + 3*dw; z1 += dw) {
+  //               if (z1*z1 < ((delta_r+3*dw)*(delta_r+3*dw) - x1*x1 - y1*y1)
+  //                   && z1*z1 > ((delta_r-3*dw)*(delta_r-3*dw) - x1*x1 - y1*y1)) {
+  //                 const Cartesian r1(x1,y1,z1);
+  //                 double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+  //                 a += density(r0)*density(r1)*g2*dw*dw*dw*dw*(1/6/dw);
+  //               }
+  //             }
+  //           }
+  //           }
+  //       }
+  //     }
+  //   sprintf(plotname_a, "papers/pair-correlation/figs/walls_a%s-%s-%04.2f.dat", name, fun[version], eta);
+  //   FILE *out = fopen(plotname_a, "w");
+  //   if (!out) {
+  //     fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+  //     return;
+  //   }
+  //   //what is name?
+  //   fprintf(out, "total a1 for name  = %s,  version = %s, eta = %04.2f, is a1 = %04.2f\n", name, fun[version], eta, a);
+  //   fclose(out);
+  // }
+  // delete[] plotname_a;
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
@@ -302,9 +378,14 @@ void run_walls(double eta, const char *name, Functional fhs) {
 int main(int, char **) {
   FILE *fout = fopen("papers/pair-correlation/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-
-  for (double eta = 0.1; eta < 0.6; eta += 0.1) {
-    run_walls(eta, "WB", WB);
+  read_mc();
+  printf("the last g = %g\n", g[10*1300+1300+1]);
+  printf("Done with read\n");
+  fflush(stdout);
+  for (double this_eta = 0.1; this_eta < 0.5; this_eta += 0.1) {
+    printf("Got here\n");
+    fflush(stdout);
+    run_walls(this_eta, "WB", WB);
     //run_walls(eta, "WBT", WBT);
     //run_walls(eta, "WBm2", WBm2);
   }
