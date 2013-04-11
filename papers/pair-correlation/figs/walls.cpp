@@ -74,7 +74,7 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 const char *fun[] = {
   "simple",
   "nA",
-  "py",
+  "mc",
   "fischer"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
@@ -153,7 +153,6 @@ double mc (double local_eta, double r, double r_step, double g[]) {
   double fac;
   int j=0;
   double r_floor;
-  if (local_eta >.5) printf("YEP who would have thought\n");
   if (r<2) {
     return 0;
   }
@@ -184,12 +183,12 @@ double notinwall(Cartesian r) {
 
 static void took(const char *name) {
   assert(name); // so it'll count as being used...
-  // static clock_t last_time = clock();
-  // clock_t t = clock();
-  // double peak = peak_memory()/1024.0/1024;
-  // printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
-  // fflush(stdout);
-  // last_time = t;
+  static clock_t last_time = clock();
+  clock_t t = clock();
+  double peak = peak_memory()/1024.0/1024;
+  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  fflush(stdout);
+  last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor(1.0);
@@ -296,50 +295,50 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "\n");
       }
       fclose(out);
-      took(plotname);
+      //took(plotname);
     }
   }
   delete[] plotname;
-  //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
-  //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
-  // int count;
-  // char *plotname_a = new char [1024];
-  // for (int version = 0; version < numplots; version++) {
-  //   count = 1;
-  //   double a = 0;
-  //   //delta_thickness = 6*dw;
-  //   double delta_r = 1;
-  //   for (double z0 = 3; z0 < 13; z0 += dw) {
-  //     const Cartesian r0(0,0,z0);
-  //     printf("%d\t", count);
-  //     fflush(stdout);
-  //     count++;
-  //     for (double x1 = -delta_r - 3*dw; x1 <= delta_r + 3*dw; x1 += dw) {
-  //       for (double y1 = -delta_r - 3*dw; y1 <= delta_r + 3*dw; y1 += dw) {
-  //         if (y1*y1 < ((delta_r+3*dw)*(delta_r+3*dw) - x1*x1)) {
-  //             for (double z1 = -delta_r - 3*dw; z1 <= delta_r + 3*dw; z1 += dw) {
-  //               if (z1*z1 < ((delta_r+3*dw)*(delta_r+3*dw) - x1*x1 - y1*y1)
-  //                   && z1*z1 > ((delta_r-3*dw)*(delta_r-3*dw) - x1*x1 - y1*y1)) {
-  //                 const Cartesian r1(x1,y1,z1);
-  //                 double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
-  //                 a += density(r0)*density(r1)*g2*dw*dw*dw*dw*(1/6/dw);
-  //               }
-  //             }
-  //           }
-  //           }
-  //       }
-  //     }
-  //   sprintf(plotname_a, "papers/pair-correlation/figs/walls_a%s-%s-%04.2f.dat", name, fun[version], eta);
-  //   FILE *out = fopen(plotname_a, "w");
-  //   if (!out) {
-  //     fprintf(stderr, "Unable to create file %s!\n", plotname_a);
-  //     return;
-  //   }
-  //   //what is name?
-  //   fprintf(out, "total a1 for name  = %s,  version = %s, eta = %04.2f, is a1 = %04.2f\n", name, fun[version], eta, a);
-  //   fclose(out);
-  // }
-  // delete[] plotname_a;
+  // This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
+  // it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
+  printf("Starting the a1 integral now!!\n");
+  double dv=.05;
+  char *plotname_a = new char [1024];
+  for (int version = 0; version < numplots; version++) {
+    double a = 0;
+    //delta_thickness = 6*dv;
+    double delta_r = 1;
+    for (double z0 = 3; z0 < 13; z0 += dv) {
+      const Cartesian r0(0,0,z0);
+      for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
+        for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
+          if (y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1)) {
+              for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
+                if (z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1 - y1*y1)
+                    && z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv) - x1*x1 - y1*y1)) {
+                  const Cartesian r1(x1,y1,z1);
+                  double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+                  a += density(r0)*density(r1)*g2*dv*dv*dv*dv*(1/6/dv);
+                }
+              }
+          }
+        }
+      }
+      char z0_string[50];
+      sprintf(z0_string,"z0 = %g for %s a1 integral",z0,fun[version]);
+      took(z0_string);
+    }
+    sprintf(plotname_a, "papers/pair-correlation/figs/walls_a%s-%s-%04.2f.dat", name, fun[version], eta);
+    FILE *out = fopen(plotname_a, "w");
+    if (!out) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+      return;
+    }
+    //what is name?
+    fprintf(out, "total a1 for name  = %s,  version = %s, eta = %04.2f, is a1 = %04.2f\n", name, fun[version], eta, a);
+    fclose(out);
+  }
+   delete[] plotname_a;
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
