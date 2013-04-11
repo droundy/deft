@@ -118,7 +118,10 @@ void read_mc() {
   }
   double num1;
   double num2;
-  fscanf(in, " %lg %*g %lg", &num1, &num2);
+  if (fscanf(in, " %lg %*g %lg", &num1, &num2) != 2) {
+    printf("Error reading file...\n");
+    exit(1);
+  }
   mc_r_step = 2*(num2 - num1);
   delete[] fname;
   for (int i=0; i<1300; i++) {

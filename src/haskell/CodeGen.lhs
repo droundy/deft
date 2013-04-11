@@ -222,7 +222,13 @@ scalarClass ewithtransforms arg n =
                          "\t}"]
         where definet (t,s@(Spherical {}),r) =
                 unlines ["\t\tif (!"++t++") " ++ t ++ " = new double[" ++ nk ++ "];",
-                         "\t\tfor (int i=0; i<" ++ nk ++"; i++) {",
+                         "\t\t// first evaluate k=0 version of " ++ t ++ "... ",
+                         "\t\t" ++ t ++ "[0] = 0;",
+                         "\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\t\t" ++ t ++ "[0] += " ++ code r ++ "*4*M_PI/3*(8*r*r*r);",
+                         "\t\t}",
+                         "\t\t// ... now work on all other k values of " ++ t,
+                         "\t\tfor (int i=1; i<" ++ nk ++"; i++) {",
                          "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
                          "\t\t\t" ++ t ++ "[i] = 0;",
                          "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
