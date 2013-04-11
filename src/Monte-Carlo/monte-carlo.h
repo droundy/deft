@@ -11,11 +11,11 @@ Vector3d move(Vector3d v, double x, double y, double z);
 void run(const double rad, const int N, const long times, const char *filename);
 bool overlap(Vector3d *spheres, Vector3d v, int n, double R, int s);
 bool touch(Vector3d w, Vector3d v, double oShell);
-inline Vector3d fixPeriodic(Vector3d newv);
 Vector3d move(Vector3d v, double R);
 Vector3d move(Vector3d v);
 int shell(Vector3d v, int div, double *radius, double *sections);
-double countOverLaps(Vector3d *spheres, int n, double R);
+double calcPressure(Vector3d *spheres, long N, double volume);
+double potentialEnergy(Vector3d *spheres, long n, double R);
 
 inline double distance(Vector3d v1, Vector3d v2){
   return (v1 - v2).norm();
