@@ -41,11 +41,20 @@ gamma, b :: Type a => Expression a
 b = 2*gamma/(sqrt(pi*gamma)-1)/rad**2
 gamma = "gamma" === 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 
+mydr :: Expression Scalar
+mydr = 0.001
+
+mydk :: Double
+mydk = 0.01
+
+mykmax :: Double
+mykmax = 1000
+
 mys :: Symmetry
-mys = Spherical { dk = 0.01, kmax = 1000, rresolution = 0.001*rad, rmax = rad }
+mys = Spherical { dk = mydk, kmax = mykmax, rresolution = mydr*rad, rmax = rad }
 
 myvs :: Symmetry
-myvs = VectorS { dk = 0.01, kmax = 1000, rresolution = 0.01*rad, rmax = rad }
+myvs = VectorS { dk = mydk, kmax = mykmax, rresolution = mydr*rad, rmax = rad }
 
 r :: Expression Scalar
 r = s_var "r"
