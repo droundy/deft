@@ -35,7 +35,7 @@ def plot1d():
     i += 1
 
 colors = ['r', 'k', 'b', 'cyan']
-plots = ['mc', 'simple', 'nA', 'py']
+plots = ['mc_old', 'simple', 'nA', 'mc']
 numplots = 4
 
 def plot():
@@ -60,7 +60,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0, fun):
-  if fun == 'mc':
+  if fun == 'mc_old':
     filename = "mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
   else:
     filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
