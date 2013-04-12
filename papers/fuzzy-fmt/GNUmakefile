@@ -33,7 +33,7 @@ clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 
 ALL_FIGURES=\
-	figs/density-08-013.pdf figs/density-12-112.pdf figs/density-16-265.pdf figs/w2convolves.pdf figs/p-vs-packing.pdf figs/harmonic.pdf figs/w_3.pdf figs/w_2.pdf figs/w_1.pdf figs/step.pdf\
+	figs/w2convolves.pdf figs/p-vs-packing.pdf figs/harmonic.pdf figs/w_3.pdf figs/w_2.pdf figs/w_1.pdf figs/step.pdf\
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -69,13 +69,4 @@ figs/w_1.pdf: figs/weight-functions.py
 	python $^ $@
 
 figs/step.pdf: figs/weight-functions.py
-	python $^ $@
-
-figs/density-08-013.pdf: figs/density.py figs/mc-04-013.dat figs/sphereWB-radial-08.0-13.dat figs/sphereWBT-radial-08.0-13.dat
-	python $^ $@
-
-figs/density-12-112.pdf: figs/density.py figs/mc-06-112.dat figs/sphereWB-radial-12.0-112.dat figs/sphereWBT-radial-12.0-112.dat
-	python $^ $@
-
-figs/density-16-265.pdf: figs/density.py figs/mc-08-265.dat figs/sphereWB-radial-16.0-265.dat figs/sphereWBT-radial-16.0-265.dat
 	python $^ $@
