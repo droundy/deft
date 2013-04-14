@@ -274,7 +274,8 @@ void run_walls(double eta, const char *name, Functional fhs, double delta_r, dou
     exit(1); // fail immediately with error code
   }
   // here you choose the values of z0 to use
-  for (double z0 = 3.05; z0 < 13; z0 += .1) {
+  //dx is set at beggining of file
+  for (double z0 = 3.05; z0 < 13; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
@@ -307,42 +308,40 @@ void run_walls(double eta, const char *name, Functional fhs, double delta_r, dou
   //double dv=.05;
   char *plotname_a = new char [1024];
   for (int version = 0; version < numplots; version++) {
-    double a = 0;
     //delta_thickness = 6*dv;
     //double delta_r = 1;
-    for (double z0 = 3; z0 < 13; z0 += dv) {
+    sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
+    FILE *out = fopen(plotname_a,"w");
+    if (!out) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+      return;
+    }
+    for (double z0 = 3; z0 < 13; z0 += dx) {
+      double da_dz = 0;
       const Cartesian r0(0,0,z0);
       for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
         for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
-          if (y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1)) {
+          if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
               for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
-                if (z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1 - y1*y1)
-                    && z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv) - x1*x1 - y1*y1)) {
+                if (x1*x1 + y1*y1 + z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv))
+                    && x1*x1 + y1*y1 + z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv))) {
                   const Cartesian r1(x1,y1,z1);
                   double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
-                  a += 100000*density(r0)*density(r1)*g2*dv*dv*dv*(1/6.0);
+                  da_dz += 10000000*density(r0)*density(r1)*g2*dv*dv*dv*(1/6.0);
                 }
               }
           }
         }
       }
+      fprintf(out, "%g %g\n",z0,da_dz);
     }
+    fclose(out);
+
     char z0_string[50];
     sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
     took(z0_string);
-
-    sprintf(plotname_a, "papers/pair-correlation/figs/walls_a%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
-    FILE *out = fopen(plotname_a, "w");
-    if (!out) {
-      fprintf(stderr, "Unable to create file %s!\n", plotname_a);
-      return;
-    }
-    //what is name?
-    fprintf(out, "total a1 for name  = %s,  version = %s, eta = %04.2f, delta_r = %04.2f, dv = %04.2f, is a1 = %f\n",
-            name, fun[version], eta, delta_r, dv, a);
-    fclose(out);
   }
-   delete[] plotname_a;
+  delete[] plotname_a;
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
