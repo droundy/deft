@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
@@ -224,11 +225,12 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
 }
 
 
-void run_walls(double eta, const char *name, Functional fhs) {
+void run_walls(double eta, const char *name, Functional fhs, double delta_r, double dv) {
   // Generates a data file for the pair distribution function, for filling fraction eta
   // and distance of first sphere from wall of z0. Data saved in a table such that the
   // columns are x values and rows are z1 values.
-  
+  double lame = dv*dv*dv*(1/6.0);
+
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
   f = OfEffectivePotential(fhs + IdealGas()
@@ -263,7 +265,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
-  
+
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
 
@@ -275,7 +277,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
     exit(1); // fail immediately with error code
   }
   // here you choose the values of z0 to use
-  for (double z0 = 3.05; z0 < 13; z0 += .1) {
+  //dx is set at beggining of file
+  for (double z0 = 3.05; z0 < 13; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
@@ -305,43 +308,43 @@ void run_walls(double eta, const char *name, Functional fhs) {
   // This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
   // it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
   printf("Starting the a1 integral now!!\n");
-  double dv=.05;
+  //double dv=.05;
   char *plotname_a = new char [1024];
   for (int version = 0; version < numplots; version++) {
-    double a = 0;
     //delta_thickness = 6*dv;
-    double delta_r = 1;
-    for (double z0 = 3; z0 < 13; z0 += dv) {
+    //double delta_r = 1;
+    sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
+    FILE *out = fopen(plotname_a,"w");
+    if (!out) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+      return;
+    }
+    for (double z0 = 3; z0 < 13; z0 += dx) {
+      double da_dz = 0;
       const Cartesian r0(0,0,z0);
       for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
         for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
-          if (y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1)) {
+          if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
               for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
-                if (z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv) - x1*x1 - y1*y1)
-                    && z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv) - x1*x1 - y1*y1)) {
+                if (x1*x1 + y1*y1 + z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv))
+                    && x1*x1 + y1*y1 + z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv))) {
                   const Cartesian r1(x1,y1,z1);
                   double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
-                  a += density(r0)*density(r1)*g2*dv*dv*dv*dv*(1/6/dv);
+                  da_dz += 10000000*density(r0)*density(r1)*g2*dv*dv*dv*(1/6.0);
                 }
               }
           }
         }
       }
-      char z0_string[50];
-      sprintf(z0_string,"z0 = %g for %s a1 integral",z0,fun[version]);
-      took(z0_string);
+      fprintf(out, "%g %g\n",z0,da_dz);
     }
-    sprintf(plotname_a, "papers/pair-correlation/figs/walls_a%s-%s-%04.2f.dat", name, fun[version], eta);
-    FILE *out = fopen(plotname_a, "w");
-    if (!out) {
-      fprintf(stderr, "Unable to create file %s!\n", plotname_a);
-      return;
-    }
-    //what is name?
-    fprintf(out, "total a1 for name  = %s,  version = %s, eta = %04.2f, is a1 = %04.2f\n", name, fun[version], eta, a);
     fclose(out);
+
+    char z0_string[50];
+    sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
+    took(z0_string);
   }
-   delete[] plotname_a;
+  delete[] plotname_a;
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
@@ -384,13 +387,13 @@ int main(int, char **) {
   printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
   fflush(stdout);
-  for (double this_eta = 0.1; this_eta < 0.5; this_eta += 0.1) {
-    printf("Got here\n");
-    fflush(stdout);
-    run_walls(this_eta, "WB", WB);
-    //run_walls(eta, "WBT", WBT);
-    //run_walls(eta, "WBm2", WBm2);
-  }
+  // for (double delta_r = 1.0; delta_r <= 3.0; delta_r++){
+  //   for (double this_eta = 0.1; this_eta < 0.5; this_eta += 0.1) {
+  //     run_walls(this_eta, "WB", WB, delta_r, .1);
+  //     run_walls(this_eta, "WB", WB, delta_r, .05);
+  //     run_walls(this_eta, "WB", WB, delta_r, .01);
+  //   }
+  // }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
     printf("Error creating walls.dat!\n");
