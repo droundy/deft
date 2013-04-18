@@ -9,6 +9,7 @@
 using std::vector;
 using std::string;
 
+
 long shell(Vector3d v, long div, double *radius, double *sections);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
@@ -348,7 +349,7 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", pressureFileName);
           return 1;
         }
-        fprintf(pressureFile, "%g\n", pressure);
+        fprintf(pressureFile, "%g\n", (N/volume)*kT - pressure);
         fflush(stdout);
         fclose(pressureFile);
         
@@ -388,15 +389,12 @@ int main(int argc, char *argv[]){
 	    const double ri = distance(vri,Vector3d(0,0,0));
 	    if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
 		shellsFilled[k]++;
-		/*if (k==0){
-		  printf("distance is %g\n", ri);
-		  }*/
 	      }  
 	  }
       	}
       }
       
-      pressure = calcPressure(spheres, N, volume);
+      pressure = calcPressure(spheres, N, volume)/workingMovesCount;
       
     }
    
@@ -765,6 +763,10 @@ bool touch(Vector3d w, Vector3d v, double oShell){
   return false;
 }
 
+inline double force_times_distance(double rij) {
+  if (rij > 2*R) return 0;
+  return (-2*eps/(2*R))*(1-rij/(2*R))*rij;
+}
 
 double calcPressure(Vector3d *spheres, long N, double volume){
   double totalOverLap = 0;
@@ -779,7 +781,7 @@ double calcPressure(Vector3d *spheres, long N, double volume){
     for(long i = 0; i < N; i++){
       if (i!=s){
         if(distance(spheres[i],spheres[s])<2*R){
-          totalOverLap = totalOverLap + 2*R - distance(spheres[s],spheres[i]);
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]));
         }
       }
     }
@@ -789,19 +791,19 @@ double calcPressure(Vector3d *spheres, long N, double volume){
         for(long i = 0; i < N; i++) {
           if (i!=s){
             if (distance(spheres[s],spheres[i]+lat[k]) < 2*R){
-	            totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+lat[k]);
+	      totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]));
 	          }
-	          if (distance(spheres[s],spheres[i]-lat[k]) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-lat[k]);
+	    totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]));
           }
         }
         for (long m=k+1; m<3; m++){
           if (periodic[m] && amonborder[m]){
             for(long i = 0; i < N; i++) {
               if (i!=s){
-                if (distance(spheres[s],spheres[i]+lat[k]+lat[m]) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+lat[k]+lat[m]);
-                if (distance(spheres[s],spheres[i]-lat[k]-lat[m]) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-lat[k]-lat[m]);
-                if (distance(spheres[s],spheres[i]+lat[k]-lat[m]) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+lat[k]-lat[m]);
-                if (distance(spheres[s],spheres[i]-lat[k]+lat[m]) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-lat[k]+lat[m]);
+                totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]+lat[m]));
+                totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]-lat[m]));
+                totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]-lat[m]));
+                totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]+lat[m]));
               }
             }
           }
@@ -811,19 +813,23 @@ double calcPressure(Vector3d *spheres, long N, double volume){
     if (periodic[0] && periodic[1] && periodic[2] && amonborder[0] && amonborder[1] && amonborder[2]){
       for(long i = 0; i < N; i++) {
         if (i!=s){
-          if (distance(spheres[s],spheres[i]+latx+laty+latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+latx+laty+latz);
-	  if (distance(spheres[s],spheres[i]+latx+laty-latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+latx+laty-latz);
-	  if (distance(spheres[s],spheres[i]+latx-laty+latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+latx-laty+latz);
-          if (distance(spheres[s],spheres[i]-latx+laty+latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-latx+laty+latz);
-          if (distance(spheres[s],spheres[i]-latx-laty+latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-latx-laty+latz);
-          if (distance(spheres[s],spheres[i]-latx+laty-latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-latx+laty-latz);
-          if (distance(spheres[s],spheres[i]+latx-laty-latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]+latx-laty-latz);
-          if (distance(spheres[s],spheres[i]-latx-laty-latz) < 2*R) totalOverLap = totalOverLap +2*R - distance(spheres[s],spheres[i]-latx-laty-latz);
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty+latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty-latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty+latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty+latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty+latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty-latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty-latz));
+	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
+          //totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
         }
       }
     }
   }
-  return  (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*totalOverLap*totalOverLap*(-2*eps/(2*R));
+    //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*(-2*eps/(2*R));
+  return (1/(3*volume))*totalOverLap;
+  //moved ideal gas eq. to the dataa output so it isnt averaged over
+
   
 }
 
