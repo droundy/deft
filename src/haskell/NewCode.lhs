@@ -127,7 +127,7 @@ scalarClass e arg variables n =
       grade :: ([Statement], [Exprn])
       grade = if variables == []
               then ([],[])
-              else case simp2 the_actual_gradients of
+              else case optimize the_actual_gradients of
                 (st0, es) -> let st = filter (not . isns) st0
                                  isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                                  isns _ = False
@@ -149,7 +149,7 @@ scalarClass e arg variables n =
         where assignit eee = [Assign (justvarname eee) eee]
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
-        where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
+        where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
               st = filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
@@ -309,7 +309,7 @@ createCppFile e variables n headername =
       grade :: ([Statement], [Exprn])
       grade = if variables == []
               then ([],[])
-              else case simp2 the_actual_gradients of
+              else case optimize the_actual_gradients of
                 (st0, es) -> let st = filter (not . isns) st0
                                  isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                                  isns _ = False
@@ -331,7 +331,7 @@ createCppFile e variables n headername =
         where assignit eee = [Assign (justvarname eee) eee]
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
-        where (st0, [e']) = simp2 [ES $ factorize $ joinFFTs x]
+        where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
               st = filter (not . isns) st0
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False

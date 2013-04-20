@@ -9,7 +9,7 @@ module Statement ( Statement(..),
                    newcodeStatements,
                    latexStatements,
                    latexSimp,
-                   simp2,
+                   optimize,
                    findToDo, findNamedSubexpression,
                    findNamedScalar, findFFTtodo, findFFTinputtodo,
                    countFFT,
@@ -52,7 +52,7 @@ latexSimp e = "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{bre
               "\n\\end{document}"
     where f (x:xs) = x:(f xs)
           f [] = []
-          (sts,[e']) = simp2 [mkExprn e]
+          (sts,[e']) = optimize [mkExprn e]
 
 codeStatements :: [Statement] -> String
 codeStatements (Initialize v : Assign v' (ES e) : ss)
@@ -197,8 +197,8 @@ scalarVariable :: Expression Scalar -> Expression Scalar
 scalarVariable (Var _ _ x t _) = Var CannotBeFreed x x t Nothing
 scalarVariable _ = error "oopsisse"
 
-simp2 :: [Exprn] -> ([Statement], [Exprn])
-simp2 eee = case scalarhelper [] 0 eee of
+optimize :: [Exprn] -> ([Statement], [Exprn])
+optimize eee = case scalarhelper [] 0 eee of
             (a,_,b) -> (a,b)
     where -- First, we want to evaluate any purely scalar expressions
           -- that we can, just to simplify things!
@@ -206,17 +206,17 @@ simp2 eee = case scalarhelper [] 0 eee of
           scalarhelper sts n everything =
             case mconcat $ map (mapExprn findNamedScalar) everything of
               Just (ES s@(Var _ _ _ _ (Just e))) ->
-                case simp2helper Set.empty n [] everything [mkExprn e] of
+                case optimizehelper Set.empty n [] everything [mkExprn e] of
                   ([],_,_) -> scalarhelper (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n
                                            (map (mapExprn (mkExprn . substitute s v)) everything)
                               where v = scalarVariable s
                   (sts',n',everything') -> scalarhelper (sts++sts') n' everything'
-              Nothing -> simp2helper Set.empty (n :: Int) sts everything everything
+              Nothing -> optimizehelper Set.empty (n :: Int) sts everything everything
               _ -> error "bad result in scalarhelper"
           -- Then we go looking for memory to save or ffts to evaluate...
-          simp2helper :: Set.Set String -> Int -> [Statement] -> [Exprn] -> [Exprn]
+          optimizehelper :: Set.Set String -> Int -> [Statement] -> [Exprn] -> [Exprn]
                          -> ([Statement], Int, [Exprn])
-          simp2helper i n sts everything e =
+          optimizehelper i n sts everything e =
             if Set.size i == 0
             then handletodos [mconcat $ map (mapExprn (findToDo i everything)) e,
                               mconcat $ map (mapExprn findFFTtodo) e,
@@ -228,7 +228,7 @@ simp2 eee = case scalarhelper [] 0 eee of
             where handletodos [] = (sts, n, everything)
                   handletodos (todo:ts) =
                     case todo of
-                      Just (EK ke) -> simp2helper (varSet v) (n+1)
+                      Just (EK ke) -> optimizehelper (varSet v) (n+1)
                                       (sts++[Initialize (EK v), Assign (EK v) (EK ke)])
                                       (map (mapExprn (mkExprn . substitute ke v)) everything)
                                       (map (mapExprn (mkExprn . substitute ke v)) e)
@@ -238,7 +238,7 @@ simp2 eee = case scalarhelper [] 0 eee of
                                 _ -> Var IsTemp ("ktemp" ++ show n++"[i]")
                                                 ("ktemp"++show n)
                                                 ("\\tilde{f}_{" ++ show n ++ "}") Nothing
-                      Just (ER re) -> simp2helper (varSet v) (n+1)
+                      Just (ER re) -> optimizehelper (varSet v) (n+1)
                                       (sts++[Initialize (ER v), Assign (ER v) (ER re)])
                                       (map (mapExprn (mkExprn . substitute re v)) everything)
                                       (map (mapExprn (mkExprn . substitute re v)) e)
@@ -248,7 +248,7 @@ simp2 eee = case scalarhelper [] 0 eee of
                                 _ -> Var IsTemp ("rtemp" ++ show n++"[i]")
                                                 ("rtemp"++show n)
                                                 ("f_{" ++ show n ++ "}") Nothing
-                      Just (ES se) -> simp2helper (varSet v) (n+1)
+                      Just (ES se) -> optimizehelper (varSet v) (n+1)
                                       (sts++[Initialize (ES v), Assign (ES v) (ES se)])
                                       (map (mapExprn (mkExprn . substitute se v)) everything)
                                       (map (mapExprn (mkExprn . substitute se v)) e)
