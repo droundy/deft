@@ -76,66 +76,75 @@ scalarVariable (Var _ _ x t _) = Var CannotBeFreed x x t Nothing
 scalarVariable _ = error "oopsisse"
 
 optimize :: [Exprn] -> ([Statement], [Exprn])
-optimize eee = case scalarhelper [] 0 eee of
-            (a,_,b) -> (a,b)
-    where -- First, we want to evaluate any purely scalar expressions
-          -- that we can, just to simplify things!
-          scalarhelper :: [Statement] -> Int -> [Exprn] -> ([Statement], Int, [Exprn])
-          scalarhelper sts n everything =
-            case mconcat $ map (mapExprn findNamedScalar) everything of
-              Just (ES s@(Var _ _ _ _ (Just e))) ->
-                case optimizeHelper Set.empty n [] everything [mkExprn e] of
-                  ([],_,_) -> scalarhelper (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n
-                                           (map (mapExprn (mkExprn . substitute s v)) everything)
-                              where v = scalarVariable s
-                  (sts',n',everything') -> scalarhelper (sts++sts') n' everything'
-              Nothing -> optimizeHelper Set.empty (n :: Int) sts everything everything
-              _ -> error "bad result in scalarhelper"
+optimize eee = case optimizeScalars [] 0 eee of
+                 (a,_,b) -> (a,b)
+
+-- Evaluate any purely scalar expressions that we can.  These are the
+-- simplest computations we can do.  Currently this function also
+-- enables all other optimizations, but I'd like to separate them out
+-- again later so we can easily experiment with different sets of
+-- optimizations.
+optimizeScalars :: [Statement] -> Int -> [Exprn] -> ([Statement], Int, [Exprn])
+optimizeScalars sts n everything = case mconcat $ map (mapExprn findNamedScalar) everything of
+                                     Just (ES s@(Var _ _ _ _ (Just e))) ->
+                                       case optimizeHelper Set.empty n [] everything [mkExprn e] of
+                                         ([],_,_) -> optimizeScalars (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n
+                                                                     (map (mapExprn (mkExprn . substitute s v)) everything)
+                                              where v = scalarVariable s
+                                         (sts',n',everything') -> optimizeScalars (sts++sts') n' everything'
+                                     Nothing -> optimizeHelper Set.empty (n :: Int) sts everything everything
+                                     _ -> error "bad result in optimizeScalars"
 
 -- Then we go looking for memory to save or ffts to evaluate...
 optimizeHelper :: Set.Set String -> Int -> [Statement] -> [Exprn] -> [Exprn]
                -> ([Statement], Int, [Exprn])
-optimizeHelper i n sts everything e =
-  if Set.size i == 0
-  then handletodos [mconcat $ map (mapExprn (findToDo i everything)) e,
-                    mconcat $ map (mapExprn findFFTtodo) e,
-                    mconcat $ map (mapExprn (findFFTinputtodo i)) e]
-  else handletodos [mconcat $ map (mapExprn (findToDo i everything)) e,
-                    mconcat $ map (mapExprn findFFTtodo) e,
-                    mconcat $ map (mapExprn (findFFTinputtodo i)) e,
-                    mconcat $ map (mapExprn (findFFTinputtodo Set.empty)) e]
-  where handletodos [] = (sts, n, everything)
-        handletodos (todo:ts) =
-          case todo of
-            Just (EK ke) -> optimizeHelper (varSet v) (n+1)
-                            (sts++[Initialize (EK v), Assign (EK v) (EK ke)])
-                            (map (mapExprn (mkExprn . substitute ke v)) everything)
-                            (map (mapExprn (mkExprn . substitute ke v)) e)
-              where v :: Expression KSpace
-                    v = case ke of
-                      Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                      _ -> Var IsTemp ("ktemp" ++ show n++"[i]")
-                                      ("ktemp"++show n)
-                                      ("\\tilde{f}_{" ++ show n ++ "}") Nothing
-            Just (ER re) -> optimizeHelper (varSet v) (n+1)
-                            (sts++[Initialize (ER v), Assign (ER v) (ER re)])
-                            (map (mapExprn (mkExprn . substitute re v)) everything)
-                            (map (mapExprn (mkExprn . substitute re v)) e)
-              where v :: Expression RealSpace
-                    v = case re of
-                      Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                      _ -> Var IsTemp ("rtemp" ++ show n++"[i]")
-                                      ("rtemp"++show n)
-                                      ("f_{" ++ show n ++ "}") Nothing
-            Just (ES se) -> optimizeHelper (varSet v) (n+1)
-                            (sts++[Initialize (ES v), Assign (ES v) (ES se)])
-                            (map (mapExprn (mkExprn . substitute se v)) everything)
-                            (map (mapExprn (mkExprn . substitute se v)) e)
-              where v :: Expression Scalar
-                    v = case se of
-                      Var _ xi x t _ -> Var IsTemp xi x t Nothing
-                      _ -> Var CannotBeFreed ("s" ++ show n)
-                                             ("s"++show n)
-                                             ("s_{" ++ show n ++ "}") Nothing
-            Nothing -> handletodos ts
+optimizeHelper i n sts everything e = case handleSubstitution sts n everything e todos of
+                                        Nothing -> (sts, n, everything)
+                                        Just (vs, sts', n', everything', e') -> optimizeHelper vs n' sts' everything' e'
+  where todos = if Set.size i == 0
+                then [mconcat $ map (mapExprn (findToDo i everything)) e,
+                      mconcat $ map (mapExprn findFFTtodo) e,
+                      mconcat $ map (mapExprn (findFFTinputtodo i)) e]
+                else [mconcat $ map (mapExprn (findToDo i everything)) e,
+                      mconcat $ map (mapExprn findFFTtodo) e,
+                      mconcat $ map (mapExprn (findFFTinputtodo i)) e,
+                      mconcat $ map (mapExprn (findFFTinputtodo Set.empty)) e]
+
+handleSubstitution :: [Statement] -> Int -> [Exprn] -> [Exprn] -> [Maybe Exprn]
+                      -> Maybe (Set.Set String, [Statement], Int, [Exprn], [Exprn])
+handleSubstitution _ _ _ _ [] = Nothing
+handleSubstitution sts n e1 e2 (Nothing:todos) = handleSubstitution sts n e1 e2 todos
+handleSubstitution sts n e1 e2 (Just (EK ke):_) = Just (varSet v,
+                                                        sts++[Initialize (EK v), Assign (EK v) (EK ke)],
+                                                        n+1,
+                                                        map (mapExprn (mkExprn . substitute ke v)) e1,
+                                                        map (mapExprn (mkExprn . substitute ke v)) e2)
+  where v :: Expression KSpace
+        v = case ke of
+          Var _ xi x t _ -> Var IsTemp xi x t Nothing
+          _ -> Var IsTemp ("ktemp" ++ show n++"[i]")
+                          ("ktemp"++show n)
+                          ("\\tilde{f}_{" ++ show n ++ "}") Nothing
+handleSubstitution sts n e1 e2 (Just (ER re):_) = Just (varSet v,
+                                                        sts++[Initialize (ER v), Assign (ER v) (ER re)],
+                                                        n+1,
+                                                        map (mapExprn (mkExprn . substitute re v)) e1,
+                                                        map (mapExprn (mkExprn . substitute re v)) e2)
+  where v :: Expression RealSpace
+        v = case re of
+          Var _ xi x t _ -> Var IsTemp xi x t Nothing
+          _ -> Var IsTemp ("rtemp" ++ show n++"[i]")
+                          ("rtemp"++show n)
+                          ("f_{" ++ show n ++ "}") Nothing
+handleSubstitution sts n e1 e2 (Just (ES se):_) = Just (varSet v,
+                                                        sts++[Initialize (ES v), Assign (ES v) (ES se)],
+                                                        n+1,
+                                                        map (mapExprn (mkExprn . substitute se v)) e1,
+                                                        map (mapExprn (mkExprn . substitute se v)) e2)
+  where v :: Expression Scalar
+        v = case se of
+          Var _ xi x t _ -> Var IsTemp xi x t Nothing
+          _ -> Var CannotBeFreed ("s" ++ show n)
+                                 ("s"++show n)
+                                 ("s_{" ++ show n ++ "}") Nothing
 
