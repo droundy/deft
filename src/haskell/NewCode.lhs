@@ -8,6 +8,7 @@ module NewCode (module Statement,
 
 import Statement
 import Expression
+import Optimize ( optimize )
 import qualified Data.Set as Set
 
 functionCode :: String -> String -> [(String, String)] -> String -> String

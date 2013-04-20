@@ -1,9 +1,10 @@
 {-# LANGUAGE PatternGuards #-}
-module Latex ( latexEasy, latexSimp ) where
+module Latex ( latexEasy, latexOptimizedExpression ) where
 
 import Expression ( Expression(..), Exprn(..), Type, substitute, latex, k, k_var,
                     cleanvars, mapExprn, mkExprn )
-import Statement ( Statement(..), findNamedSubexpression, optimize, freeVectors, reuseVar )
+import Statement ( Statement(..), freeVectors, reuseVar )
+import Optimize ( optimize, findNamedSubexpression )
 
 latexEasy :: (Type a) => Expression a -> String
 latexEasy e0 = unlines $
@@ -15,9 +16,9 @@ latexEasy e0 = unlines $
               ++ map latexme (niceExprns e0) ++
               ["\\end{document}"]
 
-latexSimp :: (Type a) => Expression a -> String
-latexSimp e = unlines $
-              ["\\documentclass{article}",
+latexOptimizedExpression :: (Type a) => Expression a -> String
+latexOptimizedExpression e =
+  unlines $   ["\\documentclass{article}",
                "\\usepackage{environ}", -- consider mdframed when it is in debian
                "\\usepackage{amsmath}",
                "\\usepackage{color}",

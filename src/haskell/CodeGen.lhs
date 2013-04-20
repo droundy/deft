@@ -9,6 +9,7 @@ module CodeGen (module Statement,
 import Statement
 import Expression
 import qualified Data.Set as Set
+import Optimize ( optimize )
 
 functionCode :: String -> String -> [(String, String)] -> String -> String
 functionCode "" "" [] "" = ""

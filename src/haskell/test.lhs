@@ -1,6 +1,8 @@
 \begin{code}
 import System.Directory ( createDirectoryIfMissing )
 import CodeGen
+import Optimize ( optimize, findToDo )
+import Latex ( latexOptimizedExpression )
 import Test.HUnit
 import FMT ( shell )
 import SFMT ( n1 )
@@ -372,7 +374,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             generateHeader (n2x**2) ["R"] "NiceN2xsqr"
           wf "tests/generated-haskell/math.tex" $ latexfile [("n3", n3), ("n2", n2), ("n2x", n2x),
                                                                     ("grad n2xsqr", derive x 1 (n2x**2))]
-          wf "tests/generated-haskell/whitebear.tex" $ latexSimp $ factorize $ joinFFTs $ derive (r_var "x") (r_var "ingrad") $
+          wf "tests/generated-haskell/whitebear.tex" $ latexOptimizedExpression $ factorize $ joinFFTs $ derive (r_var "x") (r_var "ingrad") $
             substitute k (k_var "k") $
             (n3 + (1-n3)**2*log(1-n3))/(36*pi* n3**2 * (1-n3)**2)*n2*(n2**2 - 3*(n2x**2+n2y**2+n2z**2))
           if "codegen" `elem` args
