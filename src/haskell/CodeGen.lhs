@@ -9,6 +9,7 @@ module CodeGen (module Statement,
 import Statement
 import Expression
 import qualified Data.Set as Set
+import Optimize ( optimize )
 
 functionCode :: String -> String -> [(String, String)] -> String -> String
 functionCode "" "" [] "" = ""
@@ -54,17 +55,18 @@ classCode ewithtransforms arg n = "class " ++ n ++ " : public FunctionalInterfac
       defineHomogeneousGrid = substitute dVscalar 1 .
                               substitute dr (s_var "gd.dvolume" ** (1.0/3))
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [ES $ factorize $ joinFFTs $ cleanvars $ defineGrid $ integrate e]
+          where (st, [e']) = optimize [ES $ factorize $ joinFFTs $ cleanvars $
+                                       defineGrid $ integrate e]
       codeVTransform = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "output")) e'])
-          where (st, [e']) = simp2 [mkExprn $ factorize $ joinFFTs $ defineGrid e]
+          where (st, [e']) = optimize [mkExprn $ factorize $ joinFFTs $ defineGrid e]
       codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [mkExprn $ makeHomogeneous e]
+          where (st, [e']) = optimize [mkExprn $ makeHomogeneous e]
       codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
+          where (st, [e']) = optimize [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
-          where (st, [ER e']) = simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars $
-                                       defineHomogeneousGrid $ derive (r_var "x") (r_var "ingrad") e]
+          where (st, [ER e']) = optimize [mkExprn $ factorize $ joinFFTs $ cleanvars $
+                                          defineHomogeneousGrid $ derive (r_var "x") (r_var "ingrad") e]
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit [] = ""
@@ -188,20 +190,20 @@ scalarClass ewithtransforms arg n =
       printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
                       "\tprint_double(\"\", " ++ v ++ ");"
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st0, [e']) = simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars $ defineGrid e]
+          where (st0, [e']) = optimize [mkExprn $ factorize $ joinFFTs $ cleanvars $ defineGrid e]
                 st = filter (not . isns) st0
                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                 isns _ = False
                 ns = findNamedScalars e
       codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [mkExprn $ makeHomogeneous e]
+          where (st, [e']) = optimize [mkExprn $ makeHomogeneous e]
       codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
+          where (st, [e']) = optimize [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
       codeGrad = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "(*outgrad)"))
                                                        (ER (r_var "(*outgrad)" + e'))])
-          where (st, [ER e']) = simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars $
-                                       defineHomogeneousGrid $
-                                       (r_var "ingrad" * derive (r_var "x") 1 e)]
+          where (st, [ER e']) = optimize [mkExprn $ factorize $ joinFFTs $ cleanvars $
+                                          defineHomogeneousGrid $
+                                          (r_var "ingrad" * derive (r_var "x") 1 e)]
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
@@ -352,15 +354,15 @@ scalarClassNoGradient ewithtransforms arg n =
       printEnergy v = "\tprintf(\"\\n%s%25s =\", prefix, \"" ++ v ++ "\");\n" ++
                       "\tprint_double(\"\", " ++ v ++ ");"
       codeIntegrate = reuseVar $ freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st0, [e']) = simp2 [mkExprn $ factorize $ joinFFTs $ cleanvars $ defineGrid e]
+          where (st0, [e']) = optimize [mkExprn $ factorize $ joinFFTs $ cleanvars $ defineGrid e]
                 st = filter (not . isns) st0
                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                 isns _ = False
                 ns = findNamedScalars e
       codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [mkExprn $ makeHomogeneous e]
+          where (st, [e']) = optimize [mkExprn $ makeHomogeneous e]
       codeDerive = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
-          where (st, [e']) = simp2 [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
+          where (st, [e']) = optimize [ES $ derive (s_var "x") 1 $ makeHomogeneous e]
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
