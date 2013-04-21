@@ -1579,7 +1579,7 @@ derive v dda (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
 -- derivative.
 derive v _ (Product _ s) | not (Set.isSubsetOf (varSet v) s) = 0
 derive v dda (Product p i) = pairs2sum $ map dbythis $ product2pairs p
-  where dbythis (x,n) = (1, derive v (Product p i*toExpression n*dda/x) x)
+  where dbythis (x,n) = (n, derive v (Product p i*dda/x) x)
 derive _ _ (Scalar _) = 0 -- FIXME
 derive _ _ (Heaviside _) = error "cannot take derivative of Heaviside"
 derive v dda (Cos e) = derive v (-dda*sin e) e
