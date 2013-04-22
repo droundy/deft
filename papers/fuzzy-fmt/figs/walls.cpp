@@ -113,10 +113,10 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
                                                             potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(false) && i<100;i++) {
+  for (int i=0;min.improve_energy(true) && i<100;i++) {
   }
   took("Doing the minimization");
-  //min.print_info();
+  min.print_info();
 
   Grid density(gd, EffectivePotentialToDensity()(kT, gd, *potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);

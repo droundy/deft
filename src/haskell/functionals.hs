@@ -1,5 +1,6 @@
 import CodeGen
 import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation, mu )
+import WaterSaft ( water_saft )
 import IdealGas ( idealgas )
 import FMT ( n )
 import SFMT ( sfmt )
@@ -40,6 +41,10 @@ main =
        defineFunctional saft_fluid ["R", "epsilon_association", "kappa_association",
                                     "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                     "mu"] "SaftFluid2"
+     gen "src/WaterSaftFast.cpp" $
+       defineFunctional water_saft ["R", "epsilon_association", "kappa_association",
+                                    "epsilon_dispersion", "lambda_dispersion", "length_scaling",
+                                    "mu"] "WaterSaft"
      gen "src/EntropySaftFluid2Fast.cpp" $
        defineFunctionalNoGradient saft_entropy
        ["R", "epsilon_association", "kappa_association",

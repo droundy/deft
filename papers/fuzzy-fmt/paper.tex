@@ -104,7 +104,7 @@ We use a harmonic pair potential
   \end{cases}
 \end{align}
 which gives the Mayer function 
-\begin{align}
+\begin{align}\label{eq:harmonicmayer}
   f(r) =
   \begin{cases}
     e^{-\beta V_0 \left( 1 - \frac{r}{r_0} \right)^2} - 1 & 0 \leq r
@@ -112,10 +112,10 @@ which gives the Mayer function
     0 & otherwise.
   \end{cases} 
 \end{align}
-We use this form of the Mayer function to approximate $w_2(r)$ by
-choosing a simple form similar to $f(r)$ with fitting parameters. We fit the
-integral of boths sides of equation \ref{eq:mayerandw2}, and the
-slope at $r=r_0$ to give our approximate $w_2(r)$: 
+We use this Mayer function to approximate a $w_2(r)$ by choosing a
+simple form similar to $f(r)$ with fitting parameters. We fit the
+integral of boths sides of equation \ref{eq:mayerandw2} and the
+slope at $r=r_0$ to find our approximate $w_2(r)$: 
 \begin{equation}
   w_2(r) = \frac{2\gamma r}{(\sqrt{\pi \gamma} - 1)R^2} e^{-\gamma
     \left ( 1 - \frac{r}{R} \right )^2}\Theta(r) \Theta (R - r)
@@ -125,6 +125,10 @@ where
   \gamma = 2 \left(\frac{\sqrt{\pi \beta V_0} + \sqrt{\pi \beta V_0 -
     16\sqrt{\beta V_0}}}{8}\right)^2
 \end{equation}
+
+Comparisons of $w_2(r)\ast w_2(r)$ and $\frac{df}{dr}$ for the harmonic
+pair potential are shown in fig. \ref{fig:w2convolves}.
+
 %% where B is a constant to be determined by fitting the integral of
 %% $f'(r)$ with the integral of $w_2(\rr)\ast W_2(\rr)$ and $R =
 %% \frac{r_0}{2}$.  $\gamma$ is determined by the slope at $r = r_0$.  
