@@ -7,7 +7,7 @@ module FMT
          n2v, n1v, n2vp,
          sqr_n2v, n1v_dot_n2v,
          shell, shell_diam, step, step_diam, vshell, vshelldot,
-         shellPrime, vshellPrime, vshellPrimedot )
+         shellPrime, vshellPrime, vshellPrimedot, smear, kR )
        where
 
 import Expression
