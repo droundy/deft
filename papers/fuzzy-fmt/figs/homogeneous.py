@@ -61,7 +61,7 @@ eta = density*4*pi/3
 #P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
 P_cs = density*.001*(1+eta+eta**2)/(1-eta)**3
 plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
-#mcdata = loadtxt('figs/homogeneous-20.prs')
+#mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
 xlabel('Packing fraction')
 ylabel('Pressure/Temp')

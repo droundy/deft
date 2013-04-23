@@ -163,8 +163,8 @@ double mc (double local_eta, double r, double r_step, double g[]) {
   int j=0;
   double r_floor;
   if (local_eta > num_eta*eta_step) {
-    fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g", local_eta, num_eta*eta_step);
-    return 0;
+    //fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g", local_eta, num_eta*eta_step);
+    return NAN;
   }
   if (r < 2) {
     return 0;

@@ -1,33 +1,24 @@
--- This is the SAFT functional defined in the Hughes, Krebs and Roundy
--- paper (J. Chem. Phys. 138, 024509 (2013)), and described in papers/water-SAFT.  It is
+-- This is the SAFT functional defined in the Krebs and Roundy
+-- paper (to be published), and described in papers/water-SAFT.  It is
 -- in its own separate module, so that we will leave it unmodified for
 -- posterity (and for future comparisons).
 
 -- This module also defines some functions from Yu and Wu (2002),
 -- which are used in the Hughes functional.
 
-module HughesSaft
-       ( yuwu_zeta, yuwu_correlation,
-         eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid, saft_entropy, mu )
+module WaterSaft
+       ( eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
+         saft_dispersion, saft_association, water_saft, saft_entropy, mu )
        where
 
-import FMT ( rad, n, n0, n2, n3, sqr_n2v )
-import WhiteBear ( whitebear, kT )
+import FMT ( rad, n )
+import WhiteBear ( whitebear, kT, correlation_A_WB, nA )
 import IdealGas ( idealgas )
 import Expression
 
+
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
-
-yuwu_zeta :: Expression RealSpace
-yuwu_zeta = var "zeta_yuwu" "{\\zeta}" $ (1 - sqr_n2v/n2**2)
-
-yuwu_correlation :: Expression RealSpace
-yuwu_correlation = var "ghsyuwu" "g_{HS}^{\\textit{YuWu}}" ghs
-    where ghs = 1/(1-n3) + rad/2*n2*yuwu_zeta/(1-n3)**2 +
-                rad**2/18*n2**2*yuwu_zeta/(1-n3)**3
-    --where ghs = (1 + 0.5*(rad*n2/3/(1-n3))*yuwu_zeta*(3 + rad*n2/3/(1-n3)))/(1-n3)
 
 lambda_dispersion, epsilon_dispersion :: Type a => Expression a
 lambda_dispersion = s_tex "lambda_dispersion" "\\lambda_d"
@@ -60,25 +51,25 @@ da1_detad = derive eta_for_dispersion 1 a1
 a2 = "a2" === 0.5*khs*epsilon_dispersion*eta_for_dispersion*da1_detad
      where khs = var "KHS" "{\\kappa_{HS}}" $ (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
-saft_association = "Fassoc" === integrate (4*kT*n0*yuwu_zeta*(log xsaft - xsaft/2 + 1/2))
+saft_association = "Fassoc" === integrate (4*kT*n*(log xsaft - xsaft/2 + 1/2))
 
 kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_tex "kappa_association" "\\kappa_a"
 epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 
 xsaft, deltasaft, a1, a2 :: Expression RealSpace
-xsaft = "X" === (sqrt(1 + 8*n0*yuwu_zeta*deltasaft) - 1) / (4*n0*yuwu_zeta*deltasaft)
+xsaft = "X" === (sqrt(1 + 8*nA*deltasaft) - 1) / (4*nA*deltasaft)
 
 deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
   where boltz = "boltz" === exp(epsilon_association/kT)-1
 
 gSW :: Expression RealSpace
 gSW = "gSW" ===
-      yuwu_correlation
+      correlation_A_WB
       + (1/4/kT)*(da1_detad - lambda_dispersion/(3*eta_for_dispersion)*da1_dlambda)
 
-saft_fluid :: Expression Scalar
-saft_fluid = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
+water_saft :: Expression Scalar
+water_saft = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
 
 saft_entropy :: Expression Scalar
 saft_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
