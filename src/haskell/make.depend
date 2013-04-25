@@ -4,19 +4,19 @@
 # Makefile itself, or find-deps.pl.                                     #
 #########################################################################
 
-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Quantum.o SFMT.o Statement.o WhiteBear.o functionals.o 
+functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Optimize.o Quantum.o SFMT.o Statement.o WhiteBear.o functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-latex-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o Latex.o LatexDouble.o Quantum.o Statement.o WhiteBear.o latex-functionals.o 
+latex-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o Latex.o LatexDouble.o Optimize.o Quantum.o Statement.o WhiteBear.o latex-functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-newfunctionals.exe: Expression.o FMT.o LatexDouble.o NewCode.o Statement.o WhiteBear.o newfunctionals.o 
+newfunctionals.exe: Expression.o FMT.o LatexDouble.o NewCode.o Optimize.o Statement.o WhiteBear.o newfunctionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-test.exe: CodeGen.o Expression.o FMT.o LatexDouble.o SFMT.o Statement.o WhiteBear.o test.o 
+test.exe: CodeGen.o Expression.o FMT.o Latex.o LatexDouble.o Optimize.o SFMT.o Statement.o WhiteBear.o test.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 # DO NOT DELETE: Beginning of Haskell dependencies
@@ -43,16 +43,22 @@ SFMT.o : WhiteBear.hi
 SFMT.o : Expression.hi
 Statement.o : Statement.lhs
 Statement.o : Expression.hi
+Optimize.o : Optimize.hs
+Optimize.o : Statement.hi
+Optimize.o : Expression.hi
 Latex.o : Latex.hs
+Latex.o : Optimize.hi
 Latex.o : Statement.hi
 Latex.o : Expression.hi
 NewCode.o : NewCode.lhs
+NewCode.o : Optimize.hi
 NewCode.o : Expression.hi
 NewCode.o : Statement.hi
 newfunctionals.o : newfunctionals.hs
 newfunctionals.o : WhiteBear.hi
 newfunctionals.o : NewCode.hi
 CodeGen.o : CodeGen.lhs
+CodeGen.o : Optimize.hi
 CodeGen.o : Expression.hi
 CodeGen.o : Statement.hi
 Quantum.o : Quantum.hs
@@ -74,5 +80,7 @@ functionals.o : CodeGen.hi
 test.o : test.lhs
 test.o : SFMT.hi
 test.o : FMT.hi
+test.o : Latex.hi
+test.o : Optimize.hi
 test.o : CodeGen.hi
 # DO NOT DELETE: End of Haskell dependencies

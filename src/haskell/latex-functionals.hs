@@ -27,12 +27,12 @@ main =
      pdf "doc/Association.pdf" $ latexEasy $ saft_association
      pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" saft_association)
      pdf "doc/Dispersion.pdf" $ latexEasy $ saft_dispersion
-     pdf "doc/SimpDispersion.pdf" $ latexSimp $ saft_dispersion
+     pdf "doc/SimpDispersion.pdf" $ latexOptimizedExpression $ saft_dispersion
      pdf "doc/SaftFluid.pdf" $ latexEasy $ saft_fluid
      pdf "doc/EntropySaftFluid.pdf" $ latexEasy $ saft_entropy
      pdf "doc/GradDispersion.pdf" $ latexEasy $ "grad" === (grad "x" saft_dispersion)
      pdf "doc/JoinedGradDispersion.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
-     pdf "doc/SimpGradDispersion.pdf" $ latexSimp $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
+     pdf "doc/SimpGradDispersion.pdf" $ latexOptimizedExpression $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
      pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" saft_association)
      pdf "doc/JoinedGradAssociation.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_association)
      pdf "doc/JoinedGradHydrogen.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" (integrate (oneElectron hydrogenPotential)))

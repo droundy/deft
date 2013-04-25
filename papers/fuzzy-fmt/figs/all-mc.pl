@@ -22,7 +22,7 @@ foreach $dd ([20,382,1],[20,573,1],[20,764,1],[20,954,1]) {
     # Here I estimate the amount of memory that will be needed...
     my $memuse = sprintf "%.0f", 0.001*($N) + 30; # It's a very hokey guess
 
-    my $scriptname = "papers/fuzzy-fmt/figs/mc-soft-sphere-homogenous-$radius-$N-$kT.tmp.sh";
+    my $scriptname = "papers/fuzzy-fmt/figs/mc-soft-sphere-homogeneous-$radius-$N-$kT.tmp.sh";
 
     my $outfilename = "$dir/mc-soft-homogenous-$radius-$N-$kT.dat";
     my $command = "./soft-monte-carlo $N $iters $acc $outfilename periodxyz $radius kT $kT";
@@ -32,7 +32,7 @@ foreach $dd ([20,382,1],[20,573,1],[20,764,1],[20,954,1]) {
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type ALL
 ##SBATCH --mail-user jeffschulte83\@gmail.com
-#SBATCH --output mc-soft-hogen-$radius-$N.out
+#SBATCH --output mc-soft-hogeneous-$radius-$N.out
 
 set -ev
 

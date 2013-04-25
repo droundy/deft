@@ -478,6 +478,9 @@ mapExpressionShortcut f (Sum s _) = pairs2sum $ map ff $ sum2pairs s
   where ff (x,y) = (x, mapExpressionShortcut f y)
 mapExpressionShortcut f (Expression x) = mapExpressionHelper' (mapExpressionShortcut f) x
 
+-- The first argument, i, is a set of variables.  We search for a
+-- subexpression that satisfies the function f (which is the second
+-- argument), which itself contains the set of variables i.
 searchExpression :: Type a => Set.Set String -> (forall b. Type b => Expression b -> Maybe Exprn)
                     -> Expression a -> Maybe Exprn
 searchExpression _ f e | Just c <- f e = Just c
@@ -912,11 +915,11 @@ pairs2sum s = helper $ filter ((/= 0) . snd) $ filter ((/= 0) . fst) s
         fl a [] = a
         fl a ((f,Sum s' _):xs) = fl a (map mulf (sum2pairs s') ++ xs)
           where mulf (ff,e) = (ff*f, e)
-        fl a ((f,x):xs) = case Map.lookup x a of
-                          Just f' -> if f + f' == 0
-                                     then fl (Map.delete x a) xs
-                                     else fl (Map.insert x (f+f') a) xs
-                          Nothing -> fl (Map.insert x f a) xs
+        fl a ((f,x):xs) = fl (Map.alter upd x a) xs
+          where upd Nothing = Just f
+                upd (Just f') = if f + f' == 0
+                                then Nothing
+                                else Just (f+f')
 
 map2sum :: Type a => Map.Map (Expression a) Double -> Expression a
 map2sum s | Map.size s == 1 =
@@ -1565,10 +1568,18 @@ derive v@(Scalar (Var _ a b c _)) dda0 (Var t _ bb cc (Just e0))
             else derive v dda e
 derive v dda (Var _ _ _ _ (Just e)) = derive v dda e
 derive _ _ (Var _ _ _ _ Nothing) = 0
+-- In the following line, we avoid dealing with sums that don't
+-- include the variable with respect to which we are taking a
+-- derivative.
+derive v _ (Sum _ s) | not (Set.isSubsetOf (varSet v) s) = 0
 derive v dda (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
   where dbythis (f,x) = (f, derive v dda x)
+-- In the following line, we avoid dealing with products that don't
+-- include the variable with respect to which we are taking a
+-- derivative.
+derive v _ (Product _ s) | not (Set.isSubsetOf (varSet v) s) = 0
 derive v dda (Product p i) = pairs2sum $ map dbythis $ product2pairs p
-  where dbythis (x,n) = (1, derive v (Product p i*toExpression n*dda/x) x)
+  where dbythis (x,n) = (n, derive v (Product p i*dda/x) x)
 derive _ _ (Scalar _) = 0 -- FIXME
 derive _ _ (Heaviside _) = error "cannot take derivative of Heaviside"
 derive v dda (Cos e) = derive v (-dda*sin e) e
