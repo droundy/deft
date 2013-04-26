@@ -31,7 +31,7 @@ for version in versions:
   plt.plot(z0, da_dz)
 
 plt.xlim([2,9])
-plt.legend(versions, loc='upper left')
+plt.legend(versions, loc='upper right')
 
 plt.show()
 
