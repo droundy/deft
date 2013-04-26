@@ -70,7 +70,7 @@ correlation_A_WB_m2 = var "correlation_A_WB" "g_{\\sigma,m2}^{A}" $
 
 correlation_A_helper :: Expression RealSpace -> Expression RealSpace
 correlation_A_helper phit = dAdR/(kT * n*shell_diam n )
-    where dAdR = var "dAdR" "\\frac{dA}{dR}" $
+    where dAdR = var "dAdR" "\\frac{dA}{dR}" $ factorize $
                  kT*n*( shell (d n3)
                         - shellPrime (d n2)
                         - ( shellPrime (d n1) + (shell (d n1))/rad ) / (4*pi*rad)
