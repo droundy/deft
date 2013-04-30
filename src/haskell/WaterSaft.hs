@@ -12,7 +12,7 @@ module WaterSaft
        where
 
 import FMT ( rad, n )
-import WhiteBear ( whitebear, kT, correlation_A_WB, nA )
+import WhiteBear ( whitebear, kT, gSigmaA, nA )
 import IdealGas ( idealgas )
 import Expression
 
@@ -65,7 +65,7 @@ deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
 
 gSW :: Expression RealSpace
 gSW = "gSW" ===
-      correlation_A_WB
+      gSigmaA
       + (1/4/kT)*(da1_detad - lambda_dispersion/(3*eta_for_dispersion)*da1_dlambda)
 
 water_saft :: Expression Scalar

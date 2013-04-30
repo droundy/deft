@@ -30,8 +30,8 @@ OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
-	src/Correlation_Sm2_Fast.cpp src/Correlation_Am2_Fast.cpp \
-	src/Correlation_S_Fast.cpp src/Correlation_A_Fast.cpp \
+	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
+	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
 	src/SoftFluidFast.cpp src/HardFluidFast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
