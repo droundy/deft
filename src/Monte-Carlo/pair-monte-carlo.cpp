@@ -14,10 +14,15 @@ double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
+double distXYZ(Vector3d a, Vector3d b);
 
-int zbins = 200; // Number of divisions for data collection. Must be even.
-int rbins = zbins/2; // half zbins to maintain same r and z resolution
-int z0bins = zbins/2; // half zbins because half of z0's are reflected
+const int zbins = 200; // Number of divisions for data collection. Must be even.
+const int rbins = zbins/2; // half zbins to maintain same r and z resolution
+const int z0bins = zbins/2; // half zbins because half of z0's are reflected
+
+// resolution info for the a1 histogram / integral
+const int a1_zbins = 100;
+const int a1_rbins = 100;
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -120,8 +125,10 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const double dr = lenx/rbins/2;
+  const double dr = lenx/2/rbins;
   const double dz = lenz/zbins;
+  const double a1_dr = lenx/2/a1_rbins;
+  const double a1_dz = lenz/a1_zbins;
   const char *outfilename = argv[4];
   char *finalfilename = new char[1024];
   fflush(stdout);
@@ -129,17 +136,10 @@ int main(int argc, char *argv[]){
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  long *histogram = new long[z0bins*rbins*zbins];
-  long *density_histogram = new long[zbins];
+  long *histogram = new long[z0bins*rbins*zbins]();
+  long *a1_histogram = new long[a1_rbins*a1_zbins]();
+  long *density_histogram = new long[zbins]();
   long numinhistogram = 0;
-  for (int i=0; i<zbins; i++) {
-    density_histogram[i] = 0;
-    for (int k=0; k<rbins; k++) {
-      for (int l=0; l<z0bins; l++) {
-        histogram[l*rbins*zbins + k*zbins + i] = 0;
-      }
-    }
-  }
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
     return 1;
@@ -339,16 +339,26 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
+          char *a1filename = new char[1024];
+          sprintf(a1filename, "%s-a1.dat", outfilename);
+          FILE *a1out = fopen((const char *)a1filename, "w");
+          for (int i=0; i<a1_rbins; i++) {
+            for (int k=0; k<a1_zbins; k++) {
+              const double a1r = (i+1)*a1_dr;
+              const double surface_area = 4.0*M_PI*a1r*a1r;
+              const double a1 = a1_histogram[i*a1_zbins + k]/surface_area/a1_dr/a1_dz;
+              fprintf(a1out, "%g\t", a1);
+            }
+            fprintf(a1out, "\n");
+          }
+          fclose(a1out);
           char *densityfilename = new char[1024];
-          char *radialfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
           for (int l=0; l<z0bins; l++) {
             const double z0coord = l*lenz/zbins + dz/2;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, z0coord);
-            sprintf(radialfilename, "%s-%1.2f-rad.dat", outfilename, z0coord);
             FILE *out = fopen((const char *)finalfilename, "w");
-            FILE *radialout = fopen((const char *)radialfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
               return 1;
@@ -368,17 +378,14 @@ int main(int argc, char *argv[]){
                 const double n2 = probability/bin1_volume/dz/lenx/leny;
                 const double g = n2/z0density/z1density;
                 fprintf(out, "%g\t", g);
-                if (k == l)
-                  fprintf(radialout, "%g\n", g);
               }
               fprintf(out, "\n");
             }
             fclose(out);
-            fclose(radialout);
           }
           fclose(densityout);
           delete[] densityfilename;
-          delete[] radialfilename;
+          delete[] a1filename;
         }
         fflush(stdout);
       }
@@ -440,6 +447,7 @@ int main(int argc, char *argv[]){
         // reflect = +/-1, used to reflect everything if you're past halfway through the box
         // except for the density
         const int z0 = int((reflect*spheres[i].z() + lenz/2)/dz);
+        const int a1_z = int((reflect*spheres[i].z() + lenz/2)/a1_dz);
         const int z0_unreflected = int((spheres[i].z() + lenz/2)/dz);
         density_histogram[z0_unreflected]++;
         //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
@@ -449,14 +457,17 @@ int main(int argc, char *argv[]){
             const int z1 = int((reflect*spheres[k].z() + lenz/2)/dz);
             const double rdist = distXY(spheres[k], spheres[i]);
             const int r1 = int(rdist/dr);
-            if (r1 < rbins) { // ignore data past outermost complete cylindrical shell
-              histogram[z0*rbins*zbins + r1*zbins + z1]++;
-            }
+            const int a1_r = int(distXYZ(spheres[k], spheres[i])/a1_dr);
+            if (r1 < rbins) // ignore data past outermost complete cylindrical shell
+              histogram[z0*rbins*zbins + r1*zbins + z1] ++;
+            if (a1_r < a1_rbins)
+              a1_histogram[a1_r*a1_zbins + a1_z] ++;
           }
         }
       }
     }
   }
+
   //////////////////////////////////////////////////////////////////////////////
   // End main program loop
   if (scale < 5 && false) {
@@ -501,6 +512,7 @@ int main(int argc, char *argv[]){
   delete[] max_move_counter;
   delete[] move_counter;
   delete[] histogram;
+  delete[] a1_histogram;
   delete[] density_histogram;
   delete[] finalfilename;
   fflush(stdout);
@@ -717,8 +729,16 @@ Vector3d move(Vector3d v, double scale){
 
 double distXY(Vector3d a, Vector3d b)
 {
-  Vector3d c = fixPeriodic(Vector3d(b.x()-a.x(), b.y()-a.y(), 0));
-  return distance(c, Vector3d(0, 0, 0));
+  const double xdist = std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x())));
+  const double ydist = std::min(fabs(b.y()-a.y()), (lenx-fabs(b.y()-a.y())));
+  return sqrt(xdist*xdist + ydist*ydist);
+}
+double distXYZ(Vector3d a, Vector3d b)
+{
+  const double xdist = std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x())));
+  const double ydist = std::min(fabs(b.y()-a.y()), (lenx-fabs(b.y()-a.y())));
+  const double zdist = std::min(fabs(b.z()-a.z()), (lenx-fabs(b.z()-a.z())));
+  return sqrt(xdist*xdist + ydist*ydist + zdist*zdist);
 }
 
 

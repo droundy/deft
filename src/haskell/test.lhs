@@ -40,6 +40,9 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "2*(x + y) == 2*x + 2*y" (2*x + 2*y) (2*(x+y)),
                     t "2*(x/2 + y) == x + 2*y" (x + 2*y) (2*(x/2+y)),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
+                    --t "derive x (x**3+x**2) == x(3x+2)" (x*(3*x + 2)) (derive x 1 (x**3+x**2)),
+                    t "factorize" (x**2*(3*x + 2)) (factorize (3*x**3+2*x**2)),
+                    t "factorize" (x**2*(x + 1)) (factorize (x**3+x**2)),
                     t "derive x (x+y) == 1" 1 (derive ("xx" === x**2) 1 (("xx" === x**2)+y)),
                     t "derive x (x+y) == 1" 1 (derive x 1 (x+y)),
                     t "derive x (x**2) == 2x" (2*x) (derive x 1 (x**2)),
@@ -129,7 +132,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "x+0 == x" (x+0) x]
   where t :: Type a => String -> Expression a -> Expression a -> Test
         --t str e1 e2 = TestCase $ assertEqual str (latex e1) (latex e2)
-        t str e1 e2 = TestCase $ assertEqual str e1 e2
+        t str e1 e2 = TestCase $ assertEqual (str ++ " : " ++ code e1 ++ " == " ++ code e2) e1 e2
         x = r_var "x"
         y = r_var "y"
         a = r_var "a"
@@ -296,6 +299,13 @@ findToDoTests = TestList [t (Just $ ER $ -3*(x1**2+x2**2))
           x4 = r_var "rtemp_4"
           rad = r_var "R"
 
+factorOutTests :: Test
+factorOutTests = TestList [t (Just 2) x (x**3 + x**2),
+                           t (Just 2) x (3*x**3 + 2*x**2),
+                           t (Just 3) x (x**3)]
+    where t v xe e = TestCase $ assertEqual ("factorOut : " ++ code xe ++ " from " ++ code e) v (factorOut xe e)
+          x = r_var "x"
+
 multisubstituteTests :: Test
 multisubstituteTests = TestList [t x1 x2 (x2+x3) (x1+x3),
                                  -- t k kv (kv**2) (k**2),
@@ -381,7 +391,7 @@ main = do createDirectoryIfMissing True "tests/generated-haskell"
             then putStrLn "Not running actual tests, just generating test code...\n"
             else do c <- runTestTT $ TestList [joinFFTtests,
                                                substitutionTests, hasexpressionTests, multisubstituteTests,
-                                               findToDoTests, eqTests, codeTests, fftTests, memTests]
+                                               findToDoTests, eqTests, codeTests, fftTests, memTests, factorOutTests]
                     if failures c > 0 || errors c > 0
                       then fail $ "Failed " ++ show (failures c + errors c) ++ " tests."
                       else do putStrLn "All tests passed!"

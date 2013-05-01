@@ -1416,12 +1416,35 @@ joinFFTs = mapExpression' joinFFThelper
 
 factorOut :: Type a => Expression a -> Expression a -> Maybe Double
 factorOut e e' | e == e' = Just 1
-factorOut e (Sum s _) | [(_,xx)] <- sum2pairs s = factorOut e xx
+factorOut e (Sum s i) | Set.isSubsetOf (varSet e) i = factorOutSumPairs e (sum2pairs s)
 factorOut e (Product p _) = Map.lookup e p
 factorOut _ _ = Nothing
 
+factorOutSumPairs :: Type a => Expression a -> [(Double, Expression a)] -> Maybe Double
+factorOutSumPairs _ [] = Nothing
+factorOutSumPairs e pairs = findpower 0 pairs
+  where findpower smallestpower ((_,x):xs) = case factorOut e x of
+                                             Just n | n*smallestpower < 0 -> Nothing
+                                                    | smallestpower == 0 -> findpower n xs
+                                                    | n > 0 -> findpower (min smallestpower n) xs
+                                                    | n < 0 -> findpower (max smallestpower n) xs
+                                             _ -> Nothing
+        findpower smallestpower [] = Just smallestpower
+
+factorizeSumPairs :: Type a => [(Double, Expression a)] -> Expression a
+factorizeSumPairs [] = 0
+factorizeSumPairs p@([_]) = pairs2sum p
+factorizeSumPairs xs@((_,x):_) = fsp [] (Set.toList $ allFactors x) xs
+  where fsp prefac (f:fs) pairs = case factorOutSumPairs f pairs of
+                                     Nothing -> fsp prefac fs pairs
+                                     Just n -> fsp ((f,n):prefac) fs (map divbyme pairs)
+                                       where divbyme (a,e) = (a, e / fton)
+                                             fton = f ** toExpression n
+        fsp prefac [] pairs = pairs2product prefac * pairs2sum pairs
+
 allFactors :: Type a => Expression a -> Set.Set (Expression a)
 allFactors (Product p _) = Map.keysSet p
+allFactors (Sum s _) | [(_,e)] <- sum2pairs s = allFactors e
 allFactors e = Set.singleton e
 
 factorize :: Type a => Expression a -> Expression a
@@ -1457,6 +1480,7 @@ factorizeHelper (Sum s _) = Just $ fac (Set.toList $ Set.unions $ map (allFactor
                                 fac fs none +
                                 (fac (f:fs) (map (*f) neg))/f
 factorizeHelper _ = Nothing
+
 
 -- distribute is the complement of factorize, but it currently is only
 -- used as a helper in creating a Taylor expansion in "expand".
@@ -1578,7 +1602,9 @@ derive v dda (Sum s _) = pairs2sum $ map dbythis $ sum2pairs s
 -- include the variable with respect to which we are taking a
 -- derivative.
 derive v _ (Product _ s) | not (Set.isSubsetOf (varSet v) s) = 0
-derive v dda (Product p i) = pairs2sum $ map dbythis $ product2pairs p
+derive v dda (Product p i) = if False
+                             then factorizeSumPairs $ filterNonZero $ map dbythis $ product2pairs p
+                             else pairs2sum $ map dbythis $ product2pairs p
   where dbythis (x,n) = (n, derive v (Product p i*dda/x) x)
 derive _ _ (Scalar _) = 0 -- FIXME
 derive _ _ (Heaviside _) = error "cannot take derivative of Heaviside"
@@ -1590,6 +1616,11 @@ derive v dda (Erf e) = derive v (dda*2/sqrt pi*exp (-e**2)) e
 derive _ _ (Abs _) = error "I didn't think we'd need abs"
 derive _ _ (Signum _) = error "I didn't think we'd need signum"
 derive v dda (Expression e) = derivativeHelper v dda e
+
+filterNonZero :: Type a => [(Double, Expression a)] -> [(Double, Expression a)]
+filterNonZero = filter nz
+  where nz (0,_) = False
+        nz (_,x) = x /= 0
 
 hasexpression :: (Type a, Type b) => Expression a -> Expression b -> Bool
 hasexpression x e = countexpression x e > 0
