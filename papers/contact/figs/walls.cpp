@@ -118,19 +118,19 @@ void run_walls(double eta, const char *name, Functional fhs) {
   
   char *plotname = (char *)malloc(1024);
   Grid energy_density(gd, f(1, gd, potential));
-  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
+  Grid gSigmaS(gd, gSigmaS2(1.0)(1, gd, density));
+  Grid gSigmaA(gd, gSigmaA2(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
-    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
+    gSigmaS = gSigmaSm2(1.0)(1, gd, density);
+    gSigmaA = gSigmaAm2(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, CorrelationGrossCorrect(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, correlation_S, yuwu_correlation,
-         correlation_A, n0, gross_correlation, nA);
+  z_plot(plotname, density, energy_density, gSigmaS, yuwu_correlation,
+         gSigmaA, n0, gross_correlation, nA);
   free(plotname);
 
   {

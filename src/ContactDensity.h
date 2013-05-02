@@ -31,14 +31,14 @@ Functional dAdR_A_over_n(double radius);
 Functional dAdR_S_WBm2(double radius);
 Functional dAdR_A_over_n_WBm2(double radius);
 
-Functional Correlation_A(double radius);
-Functional Correlation_S(double radius);
-Functional Correlation_S2(double radius);
-Functional Correlation_A2(double radius);
-Functional Correlation_Sm2(double radius); // from Haskell
-Functional Correlation_Am2(double radius); // from Haskell
-Functional Correlation_A_WBm2(double radius);
-Functional Correlation_S_WBm2(double radius);
+Functional gSigmaA(double radius);
+Functional gSigmaS(double radius);
+Functional gSigmaS2(double radius);
+Functional gSigmaA2(double radius);
+Functional gSigmaS_m2(double radius); // from Haskell
+Functional gSigmaA_m2(double radius); // from Haskell
+Functional gSigmaAm2(double radius);
+Functional gSigmaSm2(double radius);
 Functional CorrelationGrossCorrect(double radius);
 
 Functional GrossCorrelation(double radius);

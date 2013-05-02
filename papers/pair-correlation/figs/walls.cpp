@@ -38,8 +38,8 @@ const double xmax = 10;
 const double dx = 0.1;
 
 double mc_r_step;
-double num_eta = 10.0;
-double eta_step = 0.5/num_eta;
+double num_eta = 13.0;
+double eta_step = 0.65/num_eta;
 double * g = new double[1300*(int(num_eta)+1)];
 
 // The functions for different ways of computing the pair distribution function.
@@ -163,7 +163,7 @@ double mc (double local_eta, double r, double r_step, double g[]) {
   int j=0;
   double r_floor;
   if (local_eta > num_eta*eta_step) {
-    //fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g", local_eta, num_eta*eta_step);
+    //fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g\n", local_eta, num_eta*eta_step);
     return NAN;
   }
   if (r < 2) {
@@ -237,11 +237,12 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
 }
 
 
-void run_walls(double eta, const char *name, Functional fhs, double delta_r, double dv) {
+void run_walls(double eta, const char *name, Functional fhs) {
   // Generates a data file for the pair distribution function, for filling fraction eta
   // and distance of first sphere from wall of z0. Data saved in a table such that the
   // columns are x values and rows are z1 values.
-  double lame = dv*dv*dv*(1/6.0);
+  printf("Now starting run_walls with eta = %g name = %s\n",
+         eta, name);
 
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
@@ -274,7 +275,7 @@ void run_walls(double eta, const char *name, Functional fhs, double delta_r, dou
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
   char *plotname = new char[1024];
-  Grid gsigma(gd, Correlation_A2(1.0)(1, gd, density));
+  Grid gsigma(gd, gSigmaA2(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
 
@@ -317,46 +318,50 @@ void run_walls(double eta, const char *name, Functional fhs, double delta_r, dou
     }
   }
   delete[] plotname;
-  // This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
-  // it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
-  // printf("Starting the a1 integral now!!\n");
-  // double dv=.05;
-  // char *plotname_a = new char [1024];
-  // for (int version = 0; version < numplots; version++) {
-  //   //delta_thickness = 6*dv;
-  //   //double delta_r = 1;
-  //   sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
-  //   FILE *out = fopen(plotname_a,"w");
-  //   if (!out) {
-  //     fprintf(stderr, "Unable to create file %s!\n", plotname_a);
-  //     return;
-  //   }
-  //   for (double z0 = 3; z0 < 13; z0 += dx) {
-  //     double da_dz = 0;
-  //     const Cartesian r0(0,0,z0);
-  //     for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
-  //       for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
-  //         if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
-  //             for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
-  //               if (x1*x1 + y1*y1 + z1*z1 < ((delta_r+3*dv)*(delta_r+3*dv))
-  //                   && x1*x1 + y1*y1 + z1*z1 > ((delta_r-3*dv)*(delta_r-3*dv))) {
-  //                 const Cartesian r1(x1,y1,z1);
-  //                 double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
-  //                 da_dz += 10000000*density(r0)*density(r1)*g2*dv*dv*dv*(1/6.0);
-  //               }
-  //             }
-  //         }
-  //       }
-  //     }
-  //     fprintf(out, "%g %g\n",z0,da_dz);
-  //   }
-  //   fclose(out);
-
-  //   char z0_string[50];
-  //   sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
-  //   took(z0_string);
-  // }
-  // delete[] plotname_a;
+  //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
+  //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
+  printf("Starting the a1 integrals now!!\n");
+  for (int version = 0; version < numplots; version++) {
+    for (double delta_r = 1.0; delta_r <= 3.0; delta_r++){
+      double dv;
+      for (int dv_option = 1; dv_option < 3.5; dv_option++){
+        if (dv_option == 1) dv = 0.1;
+        if (dv_option == 2) dv = 0.05; else dv = 0.01;
+        char *plotname_a = new char [1024];
+        sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
+        FILE *out = fopen(plotname_a,"w");
+        if (!out) {
+          fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+          return;
+        }
+        for (double z0 = 3; z0 < 13; z0 += dx) {
+          double da_dz = 0;
+          const Cartesian r0(0,0,z0);
+          for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
+            for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
+              if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
+                for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
+                  const double r2 = x1*x1 + y1*y1 +(z1-z0)*(z1-z0);
+                  if (r2 < ((delta_r+3*dv)*(delta_r+3*dv))
+                      && r2 > ((delta_r-3*dv)*(delta_r-3*dv))) {
+                    const Cartesian r1(x1,y1,z1);
+                    double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+                    da_dz += density(r0)*density(r1)*g2*dv*dv*(1/6.0);
+                  }
+                }
+              }
+            }
+          }
+          fprintf(out, "%g %g\n",z0,da_dz);
+        }
+        fclose(out);
+        char z0_string[50];
+        sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
+        took(z0_string);
+        delete[] plotname_a;
+      }
+    }
+  }
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
@@ -399,14 +404,9 @@ int main(int, char **) {
   printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
   fflush(stdout);
-  double delta_r = 1;
-  // for (double delta_r = 1.0; delta_r <= 3.0; delta_r++){
-    for (double this_eta = 0.1; this_eta < 0.55; this_eta += 0.1) {
-      run_walls(this_eta, "WB", WB, delta_r, .1);
-      // run_walls(this_eta, "WB", WB, delta_r, .05);
-      // run_walls(this_eta, "WB", WB, delta_r, .01);
-    }
-  // }
+    // for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
+    //   run_walls(this_eta, "WB", WB);
+    // }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
     printf("Error creating walls.dat!\n");

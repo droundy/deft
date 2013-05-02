@@ -4,7 +4,8 @@ import WaterSaft ( water_saft )
 import IdealGas ( idealgas )
 import FMT ( n )
 import SFMT ( sfmt )
-import WhiteBear
+import WhiteBear ( whitebear, correlation_gross, gSigmaA, gSigmaS, 
+                   gSigmaA_m2, gSigmaS_m2 )
 import Quantum
 import System.Environment ( getArgs )
 
@@ -22,19 +23,19 @@ main =
      
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
-     gen "src/Correlation_S_Fast.cpp" $
-       generateHeader correlation_S_WB ["R"] "Correlation_S2"
-     gen "src/Correlation_A_Fast.cpp" $
-       generateHeader correlation_A_WB ["R"] "Correlation_A2"
+     gen "src/gSigmaSFast.cpp" $
+       generateHeader gSigmaS ["R"] "gSigmaS2"
+     gen "src/gSigmaAFast.cpp" $
+       generateHeader gSigmaA ["R"] "gSigmaA2"
 
-     gen "src/Correlation_Sm2_Fast.cpp" $
-       generateHeader correlation_S_WB_m2 ["R"] "Correlation_Sm2"
+     gen "src/gSigmaSm2Fast.cpp" $
+       generateHeader gSigmaS_m2 ["R"] "gSigmaS_m2"
 
      gen "src/CorrelationGrossCorrectFast.cpp" $
        generateHeader correlation_gross ["R"] "CorrelationGrossCorrect"
 
-     gen "src/Correlation_Am2_Fast.cpp" $
-       generateHeader correlation_A_WB_m2 ["R"] "Correlation_Am2"
+     gen "src/gSigmaAm2Fast.cpp" $
+       generateHeader gSigmaA_m2 ["R"] "gSigmaA_m2"
      gen "src/YuWuCorrelationFast.cpp" $
        generateHeader yuwu_correlation ["R"] "YuWuCorrelationFast"
      gen "src/SaftFluid2Fast.cpp" $
