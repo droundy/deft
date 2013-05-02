@@ -29,7 +29,15 @@ n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
 n0 = "n0" === w0 n
-
+{-
+--These are temporary names for the soft weighted densities
+soft_n, soft_n3, soft_n2, soft_n1, soft_n0 :: Expression RealSpace
+soft_n "soft_n" === r_var "x"
+soft_n3 "soft_n3" === soft_w3 soft_n
+soft_n2 "soft_n2" === soft_w2 soft_n
+soft_n1 "soft_n1" === soft_w1 soft_n
+soft_n0 "soft_n0" === soft_w0 soft_n
+-}
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
 n1v = "n1v" `nameVector` w1v n
@@ -45,7 +53,7 @@ mydr :: Expression Scalar
 mydr = 0.001
 
 mydk :: Double
-mydk = 0.01
+mydk = 0.1
 
 mykmax :: Double
 mykmax = 1000
@@ -61,9 +69,10 @@ r = s_var "r"
 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
-  where w3k = transform mys $ b*rad**2/(2*gamma)*(
-            1 - exp(-gamma*(1-r/rad)**2) - sqrt(pi*gamma)*erf(sqrt gamma*(1-r/rad))
-          )*heaviside(rad - r)
+  where w3k = transform mys $ -1/(sqrt(pi*gammax)-1)*(
+            1 - exp(-gammax*(1-r/rad)**2) - sqrt(pi*gammax)*erf(sqrt gammax*(1-r/rad))
+          )
+        gammax = 360.38
 
 w0 :: Expression RealSpace -> Expression RealSpace
 w0 x = ifft ( w0k * fft x)
@@ -84,3 +93,16 @@ w2v x = vifft ( w2vk *. fft x)
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vifft ( w1vk *. fft x)
   where w1vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r**2))
+{-
+soft_w2 ::Expression RealSpace -> Expression RealSpace
+soft_w2 x = ifft ( stepk * fft x)
+  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+
+soft_w1 ::Expression RealSpace -> Expression RealSpace
+soft_w1 x = ifft ( stepk * fft x)
+  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+
+soft_w0 ::Expression RealSpace -> Expression RealSpace
+soft_w0 x = ifft ( stepk * fft x)
+  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+-}

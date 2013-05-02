@@ -113,7 +113,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
                                                             potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0;min.improve_energy(false) && i<100;i++) {
   }
   took("Doing the minimization");
   min.print_info();

@@ -4,7 +4,7 @@
 # Makefile itself, or find-deps.pl.                                     #
 #########################################################################
 
-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Optimize.o Quantum.o SFMT.o Statement.o WaterSaft.o WhiteBear.o functionals.o
+functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Optimize.o Quantum.o SFMT.o Statement.o WaterSaft.o WhiteBear.o functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 

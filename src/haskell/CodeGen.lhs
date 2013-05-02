@@ -87,6 +87,7 @@ classCode ewithtransforms arg n = "class " ++ n ++ " : public FunctionalInterfac
                          "\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
                          "\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
                          "\t\t}",
+                         "I think this bit of code in CodeGen.lhs is broken and is never used.  If it is, this will cause the compiler to fail.",
                          "\t}"]
                   where nk = show (round (kmax s/dk s) :: Int)
                         mydr = code (rresolution s)
@@ -227,35 +228,42 @@ scalarClass ewithtransforms arg n =
                          "\t\t// first evaluate k=0 version of " ++ t ++ "...",
                          "\t\t" ++ t ++ "[0] = 0;",
                          "\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
-                         "\t\t\t\t" ++ t ++ "[0] += " ++ code r ++ "*4*M_PI/3*(8*r*r*r);",
+                         "\t\t\t\t" ++ t ++ "[0] += " ++ code (r*dvolume) ++ ";",
                          "\t\t}",
                          "\t\t// ... now work on all other k values of " ++ t,
                          "\t\tfor (int i=1; i<" ++ nk ++"; i++) {",
                          "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
                          "\t\t\t" ++ t ++ "[i] = 0;",
                          "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
-                         "\t\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
-                         "\t\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
-                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)/(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t\t\t" ++ t ++ "[i] += " ++ code (r*sin(kvar*rvar)/(kvar*rvar)*dvolume)  ++ ";",
                          "\t\t\t}",
                          "\t\t}"]
                   where nk = show (round (kmax s/dk s) :: Int)
                         mydr = code (rresolution s)
                         halfdr = code (rresolution s/2)
+                        kvar = s_var "k"
+                        rvar = s_var "r"
+                        dvolume = "dvolume" === 4*pi/3*(rhi**3 - rlo**3)
+                        rhi = "rhi" === rvar + rresolution s/2
+                        rlo = "rlo" === rvar - rresolution s/2
               definet (t,s@(VectorS {}),r) =
                 unlines ["\t\tif (!"++t++") " ++ t ++ " = new double[" ++ nk ++ "];",
                          "\t\tfor (int i=1; i<" ++ nk ++"; i++) {",
                          "\t\t\tconst double k = i*" ++ show (dk s) ++ ";",
                          "\t\t\t" ++ t ++ "[i] = 0;",
                          "\t\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
-                         "\t\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
-                         "\t\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
-                         "\t\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*(cos(k*r)-sin(k*r)/(k*r))*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo)/(k*k);",
+                         "\t\t\t\t" ++ t ++ "[i] += " ++ code (r*(cos kr - sin kr/kr)*dvolume/kvar**2) ++ ";",
                          "\t\t\t}",
                          "\t\t}"]
                   where nk = show (round (kmax s/dk s) :: Int)
                         mydr = code (rresolution s)
                         halfdr = code (rresolution s/2)
+                        kr = kvar*rvar
+                        kvar = s_var "k"
+                        rvar = s_var "r"
+                        dvolume = "dvolume" === 4*pi/3*(rhi**3 - rlo**3)
+                        rhi = "rhi" === rvar + rresolution s/2
+                        rlo = "rlo" === rvar - rresolution s/2
       (transforms, e) = mktransforms [1 :: Int ..] (findTransforms ewithtransforms) ewithtransforms
       mktransforms _ [] ee = ([], ee)
       mktransforms (nn:ns) (ft@(Expression (SphericalFourierTransform s r)):ts) ee =
@@ -383,6 +391,7 @@ scalarClassNoGradient ewithtransforms arg n =
                          "\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
                          "\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
                          "\t\t}",
+                         "I think this bit of old code in CodeGen.lhs is broken and is never used.  If it is, this will cause the compiler to fail.",
                          "\t}"]
                   where nk = show (round (kmax s/dk s) :: Int)
                         mydr = code (rresolution s)
