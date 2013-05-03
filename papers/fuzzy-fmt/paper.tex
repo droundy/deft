@@ -166,26 +166,26 @@ pair potential are shown in fig. \ref{fig:w2convolves}.
 %%                     &= 1 - e^{-\beta V_0}
 %% \end{align}
 %% For the $w_2(r)$ convolved with itself,
-%% \begin{widetext}
-%% \begin{align*}
-%%   w_2\ast w_2 &= \alpha \frac{R}{4}\sqrt{\frac{\pi}{2\gamma}}
-%%                \left( r^2 - \frac{R^2}{\gamma}
-%%                \right)\textrm{erf} \left( \sqrt{2\gamma} \left(1 - \frac{r}{2R}
-%%                \right) \right)%\\
-%%                %&
-%%                + \alpha \frac{R^2}{2\gamma} \left( R - \frac{r}{2}
-%%                \right) e^{-2\gamma \left( 1 - \frac{r}{2R} \right)^2}.
-%% \end{align*}
-%% \end{widetext}
+\begin{widetext}
+\begin{align*}
+  w_2\ast w_2 &= \alpha \frac{R}{4}\sqrt{\frac{\pi}{2\gamma}}
+               \left( r^2 - \frac{R^2}{\gamma}
+               \right)\textrm{erf} \left( \sqrt{2\gamma} \left(1 - \frac{r}{2R}
+               \right) \right)%\\
+               %&
+               + \alpha \frac{R^2}{2\gamma} \left( R - \frac{r}{2}
+               \right) e^{-2\gamma \left( 1 - \frac{r}{2R} \right)^2}.
+\end{align*}
+\end{widetext}
 %% We substitute $u = \sqrt{2\gamma}\left( 1 - \frac{r}{2R} \right)$ and
 %% plug in our expression above for $\alpha$ so that,
-%% \begin{align*}
-%%   w_2\ast w_2 &= \frac{B^2 R}{\sqrt{2\gamma}} \left[
-%%                \frac{\sqrt{\pi}}{4} \left( r^2 - \frac{R^2}{\gamma}
-%%                \right) e^{-u^2} \textrm{erf}(u)
-%%                + \frac{R^2 u}{\sqrt{2\gamma}}
-%%                e^{-2u^2} \right]
-%% \end{align*}
+\begin{align*}
+  w_2\ast w_2 &= \frac{B^2 R}{\sqrt{2\gamma}} \left[
+               \frac{\sqrt{\pi}}{4} \left( r^2 - \frac{R^2}{\gamma}
+               \right) e^{-u^2} \textrm{erf}(u)
+               + \frac{R^2 u}{\sqrt{2\gamma}}
+               e^{-2u^2} \right]
+\end{align*}
 %% Now we'll need to integrate this and set it to the integral of $f'(r)$
 %% to solve for the constant $B$. Since this expression is only the part
 %% of $w_2(r)$ from $R \leq r \leq 2R$, we need to justify only using

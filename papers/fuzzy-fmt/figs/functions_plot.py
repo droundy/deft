@@ -13,15 +13,15 @@ from itertools import *
 
 r0 = 2
 R = r0/2
-dr = r0/200
+dr = r0/2000
 rsmall = arange(0, r0/2 + dr/2, dr)
 rlarge = arange(r0/2, r0 + dr/2, dr)
 r = arange(0,r0 + dr/2, dr)
-betaV0 = array([1.0/0.01, 1.0/0.001])
+betaV0 = array([1.0/0.1, 1.0/0.01, 1.0/0.001])
 colors = cycle(["b","b","r","r","g","g"])
 
 for i in range(len(betaV0)):
-  gamma = 2*((sqrt(pi*betaV0[i])+sqrt(pi*betaV0[i]-16*sqrt(betaV0[i])))/8)**2
+  gamma = 2*((sqrt(pi*betaV0[i])+sqrt(pi*betaV0[i]-8*sqrt(betaV0[i])))/8)**2
   alpha = betaV0[i]/r0
   A = 4*sqrt(betaV0[i]/r0**2*exp(-betaV0[i]))
 
@@ -60,7 +60,7 @@ savefig('figs/w2convolves.pdf')
 clf()
 
 betaV0 = 1000
-gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
+gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0+16*sqrt(betaV0)))/8)**2
 gaussianfprime = -2*betaV0*(r-r0)/r0*exp(-betaV0*(1-r/r0)**2)
 
 figure(figsize=(4.5,4))
