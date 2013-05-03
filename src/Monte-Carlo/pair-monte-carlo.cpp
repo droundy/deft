@@ -346,7 +346,7 @@ int main(int argc, char *argv[]){
             for (int k=0; k<a1_zbins; k++) {
               const double a1r = (i+1)*a1_dr;
               const double surface_area = 4.0*M_PI*a1r*a1r;
-              const double a1 = a1_histogram[i*a1_zbins + k]/surface_area/a1_dr/a1_dz;
+              const double a1 = a1_histogram[i*a1_zbins + k]/surface_area/a1_dr/a1_dz/workingmoves/2;
               fprintf(a1out, "%g\t", a1);
             }
             fprintf(a1out, "\n");
@@ -737,7 +737,7 @@ double distXYZ(Vector3d a, Vector3d b)
 {
   const double xdist = std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x())));
   const double ydist = std::min(fabs(b.y()-a.y()), (lenx-fabs(b.y()-a.y())));
-  const double zdist = std::min(fabs(b.z()-a.z()), (lenx-fabs(b.z()-a.z())));
+  const double zdist = b.z()-a.z();
   return sqrt(xdist*xdist + ydist*ydist + zdist*zdist);
 }
 

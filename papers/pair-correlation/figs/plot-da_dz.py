@@ -17,6 +17,16 @@ dv = float(dv)
 plt.title('$da/dz$')
 plt.gca().set_color_cycle(['red', 'green', 'blue', 'yellow'])
 
+def read_a1_mc():
+  filename = "mc/wallsMC-pair-%02.1f-a1.dat" % eta
+  print 'Using', filename
+  data = loadtxt(filename)
+  minr = delta_r - 3*dv
+  maxr = delta_r + 3*dv
+  row_min = floor(minr/0.1 + .05)
+  row_max = floor(maxr/0.1 + .05)
+  return sum(data[row_min:row_max], axis=0)
+
 def read_da_dz(version):
   filename = "walls_daWB-%s-%04.2f-%04.2f-%05.3f.dat" % (version,eta,delta_r,dv) #0.%d0
   print 'Using', filename
@@ -29,9 +39,11 @@ versions = ["fischer","mc","nA","simple"]
 for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
-
+plt.plot(arange(3,23,.2), read_a1_mc(), 'k')
 plt.xlim([2,9])
 plt.legend(versions, loc='upper right')
+
+xlim(3, 10)
 
 plt.show()
 
