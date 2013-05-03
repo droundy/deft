@@ -14,7 +14,7 @@ if (len(sys.argv) > 1):
     ff = float(sys.argv[1])
 
 def read_walls(ff):
-    filename = "mc/wallsMC-pair-0.%d0-density.dat" % (10*ff)
+    filename = "mc/wallsMC-pair-0.%d-density.dat" % (10*ff)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try a different values for ff or leave it blank to use defaults, or generate more monte carlo data."

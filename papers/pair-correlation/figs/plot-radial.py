@@ -20,7 +20,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d0-%1.2f-rad.dat" % (10*ff, z0)
+    filename = "mc/wallsMC-pair-0.%d-%1.2f-rad.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."

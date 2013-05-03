@@ -24,8 +24,8 @@ int main(int, char **) {
   FILE *o = fopen("papers/contact/figs/gHS-vs-n.dat", "w");
   assert(o);
 
-  Functional ghs_A = Correlation_A(1.0);
-  Functional ghs_S = Correlation_S(1.0);
+  Functional ghs_A = gSigmaA(1.0);
+  Functional ghs_S = gSigmaS(1.0);
   Functional ghs = gHS(Identity(), pow(3.0/(4*M_PI), 1.0/3));
   double mykT = 1.0e-30; // has no effect here!
 

@@ -233,23 +233,23 @@ void run_spherical_solute(double diam, double eta, const char *name, Functional 
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
   printf("Saving as %s\n", plotname);
-  Grid correlation_S(gd, Correlation_S2(1.0)(1, gd, density));
-  Grid correlation_A(gd, Correlation_A2(1.0)(1, gd, density));
+  Grid gSigmaS(gd, gSigmaS2(1.0)(1, gd, density));
+  Grid gSigmaA(gd, gSigmaA2(1.0)(1, gd, density));
   if (strlen(name) == 4) {
     printf("Computing correlation for mark II version...\n");
-    correlation_S = Correlation_S_WBm2(1.0)(1, gd, density);
-    correlation_A = Correlation_A_WBm2(1.0)(1, gd, density);
+    gSigmaS = gSigmaSm2(1.0)(1, gd, density);
+    gSigmaA = gSigmaAm2(1.0)(1, gd, density);
   }
   Grid gross_correlation(gd, CorrelationGrossCorrect(1.0)(1, gd, density));
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f.dat", name, diameter, eta);
-  radial_plot(plotname, density, n0, correlation_S, yuwu_correlation,
-              nA, correlation_A, gross_correlation);
+  radial_plot(plotname, density, n0, gSigmaS, yuwu_correlation,
+              nA, gSigmaA, gross_correlation);
   sprintf(plotname, "papers/contact/figs/inner-sphere%s-%04.1f-%04.2f-mean.dat", name, diameter, eta);
-  radial_plot2(plotname, density, n0, correlation_S, yuwu_correlation,
-               nA, correlation_A, gross_correlation);
+  radial_plot2(plotname, density, n0, gSigmaS, yuwu_correlation,
+               nA, gSigmaA, gross_correlation);
   free(plotname);
 
   {

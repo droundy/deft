@@ -274,12 +274,12 @@ Functional dAdR_S(double radius) {
 }
 
 
-Functional Correlation_A(double radius) {
+Functional gSigmaA(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4.0*(4*M_PI*sqr(R))))*dAdR_A_over_n(radius)/n_A(radius);
 }
 
-Functional Correlation_S(double radius) {
+Functional gSigmaS(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_S(radius)/sqr(n0(radius));
 }
@@ -345,12 +345,12 @@ Functional dAdR_S_WBm2(double radius) {
            + dWBm2_dn1v_over_n2v(radius)*n2z/(4*M_PI*sqr(R)));
 }
 
-Functional Correlation_A_WBm2(double radius) {
+Functional gSigmaAm2(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4.0*(4*M_PI*sqr(R))))*dAdR_A_over_n_WBm2(radius)/n_A(radius);
 }
 
-Functional Correlation_S_WBm2(double radius) {
+Functional gSigmaSm2(double radius) {
   Functional R(radius, "R");
   return (Functional(1)/(4*(4*M_PI*sqr(R))))*dAdR_S_WBm2(radius)/sqr(n0(radius));
 }

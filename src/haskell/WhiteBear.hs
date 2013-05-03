@@ -2,8 +2,8 @@
 functional for the excess free energy of the hard sphere fluid. -}
 
 module WhiteBear
-       ( kT, whitebear, correlation_S_WB, correlation_A_WB,
-         whitebear_m2, correlation_S_WB_m2, correlation_A_WB_m2,
+       ( kT, whitebear, gSigmaS, gSigmaA,
+         whitebear_m2, gSigmaS_m2, gSigmaA_m2,
          correlation_gross, phi1, phi2, phi3, nA )
        where
 
@@ -32,16 +32,16 @@ whitebear = var "whitebear" "F_{HS}" $ integrate (kT*(phi1+phi2+phi3))
 phitot :: Expression RealSpace
 phitot = var "phitot" "\\Phi" $ phi1 + phi2 + phi3
 
-correlation_S_WB :: Expression RealSpace
-correlation_S_WB = var "correlation_S_WB" "g_{\\sigma}^{S}" $
-                   correlation_S_helper phitot
+gSigmaS :: Expression RealSpace
+gSigmaS = var "gSigmaS" "g_{\\sigma}^{S}" $
+                   gSigmaS_helper phitot
 
-correlation_S_WB_m2 :: Expression RealSpace
-correlation_S_WB_m2 = var "correlation_S_WB" "g_{\\sigma,m2}^{S}" $
-                      correlation_S_helper phitot_m2
+gSigmaS_m2 :: Expression RealSpace
+gSigmaS_m2 = var "gSigmaS" "g_{\\sigma,m2}^{S}" $
+                      gSigmaS_helper phitot_m2
 
-correlation_S_helper :: Expression RealSpace -> Expression RealSpace
-correlation_S_helper phit = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
+gSigmaS_helper :: Expression RealSpace -> Expression RealSpace
+gSigmaS_helper phit = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
     where dAdR = var "dAdR" "\\frac{dA}{dR}" $
                  kT*((d n3)*n2
                      - (d n2)*n2p'
@@ -60,17 +60,17 @@ double_shell :: Expression RealSpace -> Expression RealSpace
 double_shell x = ifft ( deltak * fft x)
   where deltak = protect "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
 
-correlation_A_WB :: Expression RealSpace
-correlation_A_WB = var "correlation_A_WB" "g_{\\sigma}^{A}" $
-                   correlation_A_helper phitot
+gSigmaA :: Expression RealSpace
+gSigmaA = var "gSigmaA" "g_{\\sigma}^{A}" $
+                   gSigmaA_helper phitot
 
-correlation_A_WB_m2 :: Expression RealSpace
-correlation_A_WB_m2 = var "correlation_A_WB" "g_{\\sigma,m2}^{A}" $
-                      correlation_A_helper phitot_m2
+gSigmaA_m2 :: Expression RealSpace
+gSigmaA_m2 = var "gSigmaA" "g_{\\sigma,m2}^{A}" $
+                      gSigmaA_helper phitot_m2
 
-correlation_A_helper :: Expression RealSpace -> Expression RealSpace
-correlation_A_helper phit = dAdR/(kT * n*shell_diam n )
-    where dAdR = var "dAdR" "\\frac{dA}{dR}" $
+gSigmaA_helper :: Expression RealSpace -> Expression RealSpace
+gSigmaA_helper phit = dAdR/(kT * n*shell_diam n )
+    where dAdR = var "dAdR" "\\frac{dA}{dR}" $ factorize $
                  kT*n*( shell (d n3)
                         - shellPrime (d n2)
                         - ( shellPrime (d n1) + (shell (d n1))/rad ) / (4*pi*rad)
