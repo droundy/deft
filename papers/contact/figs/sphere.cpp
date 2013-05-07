@@ -160,21 +160,21 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/contact/figs/outer-sphere%s-%02.0f-%04.1f.dat", name, cavity_radius, eta);
   printf("Saving as %s\n", plotname);
-  Grid gSigmaS(gd, gSigmaS2(1.0)(1, gd, density));
+  Grid gSigmaSGrid(gd, gSigmaS(1.0)(1, gd, density));
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory after gSigmaS is %g M (current is %g M)\n", peak, current);
   }
-  Grid gSigmaA(gd, gSigmaA2(1.0)(1, gd, density));
+  Grid gSigmaAGrid(gd, gSigmaA(1.0)(1, gd, density));
   {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory after gSigmaA is %g M (current is %g M)\n", peak, current);
   }
   if (strlen(name) == 4) {
-    gSigmaS = gSigmaSm2(1.0)(1, gd, density);
-    gSigmaA = gSigmaAm2(1.0)(1, gd, density);
+    gSigmaSGrid = gSigmaSm2(1.0)(1, gd, density);
+    gSigmaAGrid = gSigmaAm2(1.0)(1, gd, density);
   }
   {
     double peak = peak_memory()/1024.0/1024;
@@ -196,7 +196,7 @@ void run_spherical_solute(double rad, double eta, const char *name, Functional f
   Grid n0(gd, ShellConvolve(1)(1, density)/(4*M_PI));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   sprintf(plotname, "papers/contact/figs/outer-sphere%s-%02.0f-%04.1f.dat", name, cavity_radius, eta);
-  radial_plot(plotname, density, n0, nA, gSigmaS, gSigmaA,
+  radial_plot(plotname, density, n0, nA, gSigmaSGrid, gSigmaAGrid,
               yuwu_correlation, gross_correlation);
   free(plotname);
 

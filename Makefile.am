@@ -199,7 +199,7 @@ papers/water-SAFT/figs/rods-in-water-0%nm.dat: papers/water-SAFT/figs/rods-in-wa
 papers/water-SAFT/figs/single-rod-%nm-energy.dat: papers/water-SAFT/figs/single-rod.mkdat
 	time $< $*
 
-papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(CONTACT_CODE)
+papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_free_energy_mkdat_SOURCES = papers/contact/figs/free-energy.cpp $(CONTACT_CODE)
 papers_contact_figs_sphere_mkdat_SOURCES = papers/contact/figs/sphere.cpp $(ALL_CONTACT_CODE)
 papers_contact_figs_test_particle_wall_mkdat_SOURCES = papers/contact/figs/test-particle-wall.cpp $(ALL_CONTACT_CODE)

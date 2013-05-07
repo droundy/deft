@@ -24,18 +24,18 @@ main =
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
      gen "src/gSigmaSFast.cpp" $
-       generateHeader gSigmaS ["R"] "gSigmaS2"
+       generateHeader gSigmaS ["R"] "gSigmaS"
      gen "src/gSigmaAFast.cpp" $
-       generateHeader gSigmaA ["R"] "gSigmaA2"
+       generateHeader gSigmaA ["R"] "gSigmaA"
 
      gen "src/gSigmaSm2Fast.cpp" $
-       generateHeader gSigmaS_m2 ["R"] "gSigmaS_m2"
+       generateHeader gSigmaS_m2 ["R"] "gSigmaSm2"
 
      gen "src/CorrelationGrossCorrectFast.cpp" $
        generateHeader correlation_gross ["R"] "CorrelationGrossCorrect"
 
      gen "src/gSigmaAm2Fast.cpp" $
-       generateHeader gSigmaA_m2 ["R"] "gSigmaA_m2"
+       generateHeader gSigmaA_m2 ["R"] "gSigmaAm2"
      gen "src/YuWuCorrelationFast.cpp" $
        generateHeader yuwu_correlation ["R"] "YuWuCorrelationFast"
      gen "src/SaftFluid2Fast.cpp" $

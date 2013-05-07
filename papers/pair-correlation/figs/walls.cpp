@@ -275,7 +275,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
   char *plotname = new char[1024];
-  Grid gsigma(gd, gSigmaA2(1.0)(1, gd, density));
+  Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
 
