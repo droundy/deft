@@ -29,7 +29,7 @@ static void took(const char *_name) {
 
 
 int main(int, char **) {
-  FILE *o = fopen("papers/water-SAFT/figs/surface-tension.dat", "w");
+  FILE *o = fopen("papers/hughes-saft/figs/surface-tension.dat", "w");
   for (double T=273; T<=693; T+=25) {
     //printf("Working on surface tension at %g Kelvin...\n", T);
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
@@ -47,7 +47,7 @@ int main(int, char **) {
                                        prop.epsilon_dispersion,
                                        prop.lambda_dispersion, water_prop.length_scaling, mu));
     char *plotname = (char *)malloc(1024);
-    sprintf(plotname, "papers/water-SAFT/figs/surface-%03g.dat", T);
+    sprintf(plotname, "papers/hughes-saft/figs/surface-%03g.dat", T);
     // Here we set up an unused lattice.
     Lattice lat(Cartesian(0.2,0,0), Cartesian(0,0.2,0), Cartesian(0,0,20));
     GridDescription gd(lat, 1, 1, 200);

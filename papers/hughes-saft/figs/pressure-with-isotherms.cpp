@@ -25,7 +25,7 @@ const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartre
 
 int main(int, char **) {
   
-  FILE *o = fopen("papers/water-SAFT/figs/pressure-with-isotherms.dat", "w");
+  FILE *o = fopen("papers/hughes-saft/figs/pressure-with-isotherms.dat", "w");
   
   Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
                                                 water_prop.epsilonAB, water_prop.kappaAB,

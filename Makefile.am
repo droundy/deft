@@ -54,15 +54,22 @@ pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
 radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS = optimize-functionals tests/generating-code.test \
-	papers/water-SAFT/figs/surface-tension.mkdat \
-	papers/water-SAFT/figs/equation-of-state.mkdat \
-	papers/water-SAFT/figs/rods-in-water.mkdat \
-	papers/water-SAFT/figs/four-rods-in-water.mkdat \
-	papers/water-SAFT/figs/single-rod.mkdat \
-	papers/water-SAFT/figs/single-rod-in-water-high-res.mkdat \
-	papers/water-SAFT/figs/single-rod-in-water-low-res.mkdat \
-	papers/water-SAFT/figs/sphere.mkdat \
-	papers/water-SAFT/figs/pressure-with-isotherms.mkdat \
+	papers/water-saft/figs/surface-tension.mkdat \
+	papers/water-saft/figs/equation-of-state.mkdat \
+	papers/water-saft/figs/rods-in-water.mkdat \
+	papers/water-saft/figs/four-rods-in-water.mkdat \
+	papers/water-saft/figs/single-rod.mkdat \
+	papers/water-saft/figs/sphere.mkdat \
+	papers/water-saft/figs/pressure-with-isotherms.mkdat \
+	papers/hughes-saft/figs/surface-tension.mkdat \
+	papers/hughes-saft/figs/equation-of-state.mkdat \
+	papers/hughes-saft/figs/rods-in-water.mkdat \
+	papers/hughes-saft/figs/four-rods-in-water.mkdat \
+	papers/hughes-saft/figs/single-rod.mkdat \
+	papers/hughes-saft/figs/single-rod-in-water-high-res.mkdat \
+	papers/hughes-saft/figs/single-rod-in-water-low-res.mkdat \
+	papers/hughes-saft/figs/sphere.mkdat \
+	papers/hughes-saft/figs/pressure-with-isotherms.mkdat \
 	papers/contact/figs/gHS-vs-n.mkdat \
 	papers/contact/figs/free-energy.mkdat \
 	papers/contact/figs/sphere.mkdat \
@@ -179,24 +186,38 @@ tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
 tests_eos_test_SOURCES = tests/eos.cpp $(ALL_CODE)
 tests_ideal_gas_test_SOURCES = tests/ideal-gas.cpp $(ALL_CODE)
 
-papers_water_SAFT_figs_surface_tension_mkdat_SOURCES = papers/water-SAFT/figs/surface-tension.cpp $(ALL_CODE)
-papers_water_SAFT_figs_equation_of_state_mkdat_SOURCES = papers/water-SAFT/figs/equation-of-state.cpp $(ALL_CODE)
-papers_water_SAFT_figs_rods_in_water_mkdat_SOURCES = papers/water-SAFT/figs/rods-in-water.cpp $(ALL_CODE)
-papers_water_SAFT_figs_four_rods_in_water_mkdat_SOURCES = papers/water-SAFT/figs/four-rods-in-water.cpp $(ALL_CODE)
-papers_water_SAFT_figs_single_rod_in_water_high_res_mkdat_SOURCES = papers/water-SAFT/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
-papers_water_SAFT_figs_single_rod_in_water_low_res_mkdat_SOURCES = papers/water-SAFT/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
-papers_water_SAFT_figs_single_rod_mkdat_SOURCES = papers/water-SAFT/figs/single-rod.cpp $(ALL_CODE)
-papers_water_SAFT_figs_sphere_mkdat_SOURCES = papers/water-SAFT/figs/sphere.cpp $(ALL_CODE)
-papers_water_SAFT_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-SAFT/figs/pressure-with-isotherms.cpp $(ALL_CODE)
+papers_water_saft_figs_surface_tension_mkdat_SOURCES = papers/water-saft/figs/surface-tension.cpp $(ALL_CODE)
+papers_water_saft_figs_equation_of_state_mkdat_SOURCES = papers/water-saft/figs/equation-of-state.cpp $(ALL_CODE)
+papers_water_saft_figs_rods_in_water_mkdat_SOURCES = papers/water-saft/figs/rods-in-water.cpp $(ALL_CODE)
+papers_water_saft_figs_four_rods_in_water_mkdat_SOURCES = papers/water-saft/figs/four-rods-in-water.cpp $(ALL_CODE)
+papers_water_saft_figs_single_rod_mkdat_SOURCES = papers/water-saft/figs/single-rod.cpp $(ALL_CODE)
+papers_water_saft_figs_sphere_mkdat_SOURCES = papers/water-saft/figs/sphere.cpp $(ALL_CODE)
+papers_water_saft_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-saft/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
-slowwaterfigs: papers/water-SAFT/figs/single-rod-in-water-high-res.dat \
-	$(wildcard papers/water-SAFT/figs/rods-in-water-*nm.dat) \
-	$(wildcard papers/water-SAFT/figs/single-rod-*nm-energy.dat)
+papers_hughes_saft_figs_surface_tension_mkdat_SOURCES = papers/hughes-saft/figs/surface-tension.cpp $(ALL_CODE)
+papers_hughes_saft_figs_equation_of_state_mkdat_SOURCES = papers/hughes-saft/figs/equation-of-state.cpp $(ALL_CODE)
+papers_hughes_saft_figs_rods_in_water_mkdat_SOURCES = papers/hughes-saft/figs/rods-in-water.cpp $(ALL_CODE)
+papers_hughes_saft_figs_four_rods_in_water_mkdat_SOURCES = papers/hughes-saft/figs/four-rods-in-water.cpp $(ALL_CODE)
+papers_hughes_saft_figs_single_rod_in_water_high_res_mkdat_SOURCES = papers/hughes-saft/figs/single-rod-in-water-high-res.cpp $(ALL_CODE)
+papers_hughes_saft_figs_single_rod_in_water_low_res_mkdat_SOURCES = papers/hughes-saft/figs/single-rod-in-water-low-res.cpp $(ALL_CODE)
+papers_hughes_saft_figs_single_rod_mkdat_SOURCES = papers/hughes-saft/figs/single-rod.cpp $(ALL_CODE)
+papers_hughes_saft_figs_sphere_mkdat_SOURCES = papers/hughes-saft/figs/sphere.cpp $(ALL_CODE)
+papers_hughes_saft_figs_pressure_with_isotherms_mkdat_SOURCES = papers/hughes-saft/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 
-papers/water-SAFT/figs/rods-in-water-0%nm.dat: papers/water-SAFT/figs/rods-in-water.mkdat
+slowwaterfigs: papers/hughes-saft/figs/single-rod-in-water-high-res.dat \
+	$(wildcard papers/hughes-saft/figs/rods-in-water-*nm.dat) \
+	$(wildcard papers/hughes-saft/figs/single-rod-*nm-energy.dat)
+
+papers/hughes-saft/figs/rods-in-water-0%nm.dat: papers/hughes-saft/figs/rods-in-water.mkdat
 	time $< $*
 
-papers/water-SAFT/figs/single-rod-%nm-energy.dat: papers/water-SAFT/figs/single-rod.mkdat
+papers/hughes-saft/figs/single-rod-%nm-energy.dat: papers/hughes-saft/figs/single-rod.mkdat
+	time $< $*
+
+papers/water-saft/figs/rods-in-water-0%nm.dat: papers/water-saft/figs/rods-in-water.mkdat
+	time $< $*
+
+papers/water-saft/figs/single-rod-%nm-energy.dat: papers/water-saft/figs/single-rod.mkdat
 	time $< $*
 
 papers_contact_figs_gHS_vs_n_mkdat_SOURCES = papers/contact/figs/gHS-vs-n.cpp $(ALL_CONTACT_CODE)
@@ -258,16 +279,19 @@ clean-local:
 # https://github.com/matplotlib/matplotlib/issues/198
 
 papers: all papers/contact/figs/gHS-vs-n.dat \
-	papers/contact/figs/sphere.mkdat \
-	papers/contact/figs/inner-sphere.mkdat \
-	papers/contact/figs/test-particle-wall.mkdat \
-	papers/contact/figs/walls.dat \
-	papers/contact/figs/free-energy.dat \
-	papers/pair-correlation/figs/walls.dat \
-	papers/water-SAFT/figs/equation-of-state.dat \
-	papers/water-SAFT/figs/surface-tension.dat \
-	papers/water-SAFT/figs/pressure-with-isotherms.dat \
-	papers/water-SAFT/figs/single-rod-in-water-low-res.dat
+		papers/contact/figs/sphere.mkdat \
+		papers/contact/figs/inner-sphere.mkdat \
+		papers/contact/figs/test-particle-wall.mkdat \
+		papers/contact/figs/walls.dat \
+		papers/contact/figs/free-energy.dat \
+		papers/pair-correlation/figs/walls.dat \
+		papers/water-saft/figs/equation-of-state.dat \
+		papers/water-saft/figs/surface-tension.dat \
+		papers/water-saft/figs/pressure-with-isotherms.dat \
+		papers/hughes-saft/figs/equation-of-state.dat \
+		papers/hughes-saft/figs/surface-tension.dat \
+		papers/hughes-saft/figs/pressure-with-isotherms.dat \
+		papers/hughes-saft/figs/single-rod-in-water-low-res.dat
 	rm -f ~/.matplotlib/fontList.cache # see above for explanation
 	cd papers && $(MAKE)
 
