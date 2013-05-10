@@ -1,6 +1,6 @@
 import CodeGen
-import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation, mu )
-import WaterSaft ( water_saft )
+import HughesSaft ( saft_fluid, yuwu_correlation )
+import WaterSaft ( water_saft, saft_entropy, mu )
 import IdealGas ( idealgas )
 import FMT ( n )
 import SFMT ( sfmt )

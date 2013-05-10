@@ -11,6 +11,10 @@ Functional SaftFluid2(double radius, double epsilon, double kappa,
 Functional EntropySaftFluid2(double radius, double epsilon, double kappa,
                              double epsdis, double lambda, double lscale);
 
+Functional WaterSaft(double R, double epsilon_association, double kappa_association,
+                     double epsilon_dispersion, double lambda_dispersion,
+                     double length_scaling, double mu);
+
 Functional HardSpheresFast(double radius);
 Functional HardSpheresRFFast(double radius);
 Functional HardSpheresTarazonaFast(double radius);

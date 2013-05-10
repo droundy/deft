@@ -32,6 +32,7 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
 	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
+	src/WaterSaftFast.cpp \
 	src/SoftFluidFast.cpp src/HardFluidFast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
