@@ -39,7 +39,8 @@ versions = ["fischer","mc","nA","simple"]
 for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
-plt.plot(arange(3,23,.2), read_a1_mc(), 'k')
+
+plt.plot(arange(3,13,.1), read_a1_mc(), 'k')
 plt.xlim([2,9])
 plt.legend(versions, loc='upper right')
 
