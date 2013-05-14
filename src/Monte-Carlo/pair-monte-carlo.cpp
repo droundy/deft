@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
   const double dr = lenx/2/rbins;
   const double dz = lenz/zbins;
   const double a1_dr = lenx/2/a1_rbins;
-  const double a1_dz = lenz/a1_zbins;
+  const double a1_dz = lenz/a1_zbins/2;
   const char *outfilename = argv[4];
   char *finalfilename = new char[1024];
   fflush(stdout);
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
   long *histogram = new long[z0bins*rbins*zbins]();
-  long *a1_histogram = new long[a1_rbins*a1_zbins]();
+  long *da_dv_histogram = new long[a1_rbins*a1_zbins]();
   long *density_histogram = new long[zbins]();
   long numinhistogram = 0;
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
@@ -339,19 +339,22 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          char *a1filename = new char[1024];
-          sprintf(a1filename, "%s-a1.dat", outfilename);
-          FILE *a1out = fopen((const char *)a1filename, "w");
+          // saving the da_dv data
+          char *da_dv_filename = new char[1024];
+          sprintf(da_dv_filename, "%s-a1.dat", outfilename);
+          FILE *da_dv_out = fopen((const char *)da_dv_filename, "w");
           for (int i=0; i<a1_rbins; i++) {
             for (int k=0; k<a1_zbins; k++) {
               const double a1r = (i+1)*a1_dr;
-              const double surface_area = 4.0*M_PI*a1r*a1r;
-              const double a1 = a1_histogram[i*a1_zbins + k]/surface_area/a1_dr/a1_dz/workingmoves/2;
-              fprintf(a1out, "%g\t", a1);
+              const double slice_volume = lenx*leny*a1_dz;
+              const double da_dv = double(da_dv_histogram[i*a1_zbins + k]*N)/
+                slice_volume/a1_dr/double(workingmoves)/2.0;
+              fprintf(da_dv_out, "%g\t", da_dv);
             }
-            fprintf(a1out, "\n");
+            fprintf(da_dv_out, "\n");
           }
-          fclose(a1out);
+          fclose(da_dv_out);
+          // saving the pair distribution data
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
@@ -374,7 +377,7 @@ int main(int argc, char *argv[]){
                 const double z1density = double(density_histogram[k]*N)
                   /double(workingmoves)/lenx/leny/dz;
                 const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
-                  /double(numinhistogram)/2; // the 2 because reflecting -> double counting
+                  /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
                 const double n2 = probability/bin1_volume/dz/lenx/leny;
                 const double g = n2/z0density/z1density;
                 fprintf(out, "%g\t", g);
@@ -385,7 +388,7 @@ int main(int argc, char *argv[]){
           }
           fclose(densityout);
           delete[] densityfilename;
-          delete[] a1filename;
+          delete[] da_dv_filename;
         }
         fflush(stdout);
       }
@@ -461,7 +464,7 @@ int main(int argc, char *argv[]){
             if (r1 < rbins) // ignore data past outermost complete cylindrical shell
               histogram[z0*rbins*zbins + r1*zbins + z1] ++;
             if (a1_r < a1_rbins)
-              a1_histogram[a1_r*a1_zbins + a1_z] ++;
+              da_dv_histogram[a1_r*a1_zbins + a1_z] ++;
           }
         }
       }
@@ -512,7 +515,7 @@ int main(int argc, char *argv[]){
   delete[] max_move_counter;
   delete[] move_counter;
   delete[] histogram;
-  delete[] a1_histogram;
+  delete[] da_dv_histogram;
   delete[] density_histogram;
   delete[] finalfilename;
   fflush(stdout);

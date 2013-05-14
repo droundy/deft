@@ -58,7 +58,7 @@ date
     } else {
       print "Submitting pair-monte-carlo with $N spheres and cavity with length $len wallz and flat divisions\n";
 
-      #system("sbatch", $scriptname");
-      system("nohup bash $scriptname &> $outfilename &");
+      system("sbatch", $scriptname);
+      #system("nohup bash $scriptname &> $outfilename &");
     }
 }
