@@ -64,20 +64,20 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
 
   Grid potential(gd);
 
-  potential = water_prop.liquid_density*constraint
-    + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-  //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+  potential = hughes_water_prop.liquid_density*constraint
+    + 100*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+  //potential = hughes_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
 
   // Change from density to effective potential...
-  potential = -water_prop.kT*potential.cwise().log();
+  potential = -hughes_water_prop.kT*potential.cwise().log();
   Grid fastpotential = potential;
   Grid slowpotential = potential;
 
-  Minimizer min = ConjugateGradient(ffast, gd, water_prop.kT, &potential, QuadraticLineMinimizer);
+  Minimizer min = ConjugateGradient(ffast, gd, hughes_water_prop.kT, &potential, QuadraticLineMinimizer);
 
-  Minimizer minfast = Precision(1e-18, ConjugateGradient(ffast, gd, water_prop.kT, &fastpotential,
+  Minimizer minfast = Precision(1e-18, ConjugateGradient(ffast, gd, hughes_water_prop.kT, &fastpotential,
 						 QuadraticLineMinimizer));
-  Minimizer minslow = Precision(1e-18, ConjugateGradient(fslow, gd, water_prop.kT, &slowpotential,
+  Minimizer minslow = Precision(1e-18, ConjugateGradient(fslow, gd, hughes_water_prop.kT, &slowpotential,
 						 QuadraticLineMinimizer));
 
   took("Initializing potentials");
@@ -86,8 +86,8 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   for (int i=0;i<num_comparisons && min.improve_energy(true);i++) {
     fflush(stdout);
 
-    double Eslow = fslow.integral(water_prop.kT, potential);
-    double Efast = ffast.integral(water_prop.kT, potential);
+    double Eslow = fslow.integral(hughes_water_prop.kT, potential);
+    double Efast = ffast.integral(hughes_water_prop.kT, potential);
     double discrepancy = Efast/Eslow - 1;
     printf("Energy discrepancy is %g\n", discrepancy);
     if (fabs(discrepancy) > 1e-12) {
@@ -98,8 +98,8 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
     Grid gfast(gd), gslow(gd);
     gfast.setZero(); // must zero the gradient before using it!!!
     gslow.setZero(); // must zero the gradient before using it!!!
-    fslow.integralgrad(water_prop.kT, potential, &gslow);
-    ffast.integralgrad(water_prop.kT, potential, &gfast);
+    fslow.integralgrad(hughes_water_prop.kT, potential, &gslow);
+    ffast.integralgrad(hughes_water_prop.kT, potential, &gfast);
     double gdiscrepancy = (gfast - gslow).cwise().abs().maxCoeff()
       / gfast.cwise().abs().maxCoeff();
     printf("Gradient discrepancy is %g\n", gdiscrepancy);
@@ -107,18 +107,18 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
       printf("FAIL: discrepancy in gradients is too large!\n");
       errors++;
     }
-    // Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    // Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
     // density.epsNative1d("comparison-water.eps",
 		// 	Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-		// 	water_prop.liquid_density, water_prop.lengthscale, "Y axis: n/n_bulk, x axis: z/R");
+		// 	hughes_water_prop.liquid_density, hughes_water_prop.lengthscale, "Y axis: n/n_bulk, x axis: z/R");
     // char *buf = new char[1024];
     // sprintf(buf, "fast-grad-%s.eps", name);
     // gfast.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-    //                   water_prop.liquid_density, water_prop.lengthscale,
+    //                   hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
     //                   "Y axis: n/n_bulk, x axis: z/R");
     // sprintf(buf, "slow-grad-%s.eps", name);
     // gslow.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-    //                   water_prop.liquid_density, water_prop.lengthscale,
+    //                   hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
     //                   "Y axis: n/n_bulk, x axis: z/R");
     // delete[] buf;
     // sleep(2);
@@ -126,40 +126,40 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   took("Verifying energies and gradients match");
   const int numiters = 40;
 
-  Functional myX = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
-                                water_prop.length_scaling);
-  Functional myDelta = DeltaSAFT(water_prop.lengthscale, water_prop.epsilonAB, water_prop.kappaAB,
-                                 water_prop.epsilon_dispersion, water_prop.lambda_dispersion,
-                                 water_prop.length_scaling);
+  Functional myX = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                hughes_water_prop.epsilon_dispersion, hughes_water_prop.lambda_dispersion,
+                                hughes_water_prop.length_scaling);
+  Functional myDelta = DeltaSAFT(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                 hughes_water_prop.epsilon_dispersion, hughes_water_prop.lambda_dispersion,
+                                 hughes_water_prop.length_scaling);
   printf("\n\nAbout to start improving fast free energy...\n\n");
   for (int i=0;i<numiters && minfast.improve_energy(true);i++) {
     fflush(stdout);
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, fastpotential));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, fastpotential));
     char *buf = new char[1024];
     sprintf(buf, "fast-%s.eps", name);
     density.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-                        water_prop.liquid_density, water_prop.lengthscale,
+                        hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
                         "Y axis: n/n_bulk, x axis: z/R");
 
-    Grid x(gd, myX(water_prop.kT, gd, density));
+    Grid x(gd, myX(hughes_water_prop.kT, gd, density));
     sprintf(buf, "fast-X-%s.eps", name);
     x.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-                  1, water_prop.lengthscale,
+                  1, hughes_water_prop.lengthscale,
                   "y axis: X (unitless), x axis: z/R");
 
-    Grid delta(gd, myDelta(water_prop.kT, gd, density));
+    Grid delta(gd, myDelta(hughes_water_prop.kT, gd, density));
     sprintf(buf, "fast-Delta-%s.eps", name);
     delta.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-                      1/water_prop.liquid_density, water_prop.lengthscale,
+                      1/hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
                       "y axis: delta*nliquid, x axis: z/R");
 
-    Functional n2 = ShellConvolve(water_prop.lengthscale);
-    Functional n0 = n2/(4*M_PI*sqr(Functional(water_prop.lengthscale)));
-    Grid n0val(gd, n0(water_prop.kT, gd, density));
+    Functional n2 = ShellConvolve(hughes_water_prop.lengthscale);
+    Functional n0 = n2/(4*M_PI*sqr(Functional(hughes_water_prop.lengthscale)));
+    Grid n0val(gd, n0(hughes_water_prop.kT, gd, density));
     sprintf(buf, "fast-n0-%s.eps", name);
     n0val.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-                      water_prop.liquid_density, water_prop.lengthscale,
+                      hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
                       "y axis: n0/nliquid, x axis: z/R");
     delete[] buf;
     // sleep(1);
@@ -168,11 +168,11 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
   printf("\n\nAbout to start improving slow free energy...\n\n");
   for (int i=0;i<numiters && minslow.improve_energy(true);i++) {
     fflush(stdout);
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, slowpotential));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, slowpotential));
     char *buf = new char[1024];
     sprintf(buf, "slow-%s.eps", name);
     density.epsNative1d(buf, Cartesian(0,0,-zmax/2), Cartesian(0,0,zmax/2),
-                        water_prop.liquid_density, water_prop.lengthscale,
+                        hughes_water_prop.liquid_density, hughes_water_prop.lengthscale,
                         "Y axis: n/n_bulk, x axis: z/R");
     delete[] buf;
   }
@@ -192,13 +192,13 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
 
   double Nfast = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, fastpotential));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, fastpotential));
     for (int i=0;i<gd.NxNyNz;i++) Nfast += density[i]*gd.dvolume;
   }
 
   double Nslow = 0;
   {
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, slowpotential));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, slowpotential));
     for (int i=0;i<gd.NxNyNz;i++) Nslow += density[i]*gd.dvolume;
   }
   printf("Discrepancy in N is %g\n", Nfast/Nslow - 1);
@@ -208,35 +208,35 @@ void test_fast_vs_slow(const char *name, Functional ffast, Functional fslow) {
     errors++;
   }
 
-  errors += ffast.run_finite_difference_test("ffast", water_prop.kT, fastpotential);
-  errors += fslow.run_finite_difference_test("fslow", water_prop.kT, fastpotential);
+  errors += ffast.run_finite_difference_test("ffast", hughes_water_prop.kT, fastpotential);
+  errors += fslow.run_finite_difference_test("fslow", hughes_water_prop.kT, fastpotential);
 }
 
 int main(int, char **argv) {
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                                water_prop.epsilonAB, water_prop.kappaAB,
-                                                water_prop.epsilon_dispersion,
-                                                water_prop.lambda_dispersion, water_prop.length_scaling, 0));
-  double mu = find_chemical_potential(f, water_prop.kT,
-                                      1.01*water_prop.liquid_density);
-  Functional fslow = OfEffectivePotential(SaftFluidSlow(water_prop.lengthscale,
-                                                        water_prop.epsilonAB, water_prop.kappaAB,
-                                                        water_prop.epsilon_dispersion,
-                                                        water_prop.lambda_dispersion, water_prop.length_scaling, mu));
-  Functional ffast = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                                    water_prop.epsilonAB, water_prop.kappaAB,
-                                                    water_prop.epsilon_dispersion,
-                                                    water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                                hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                                hughes_water_prop.epsilon_dispersion,
+                                                hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, 0));
+  double mu = find_chemical_potential(f, hughes_water_prop.kT,
+                                      1.01*hughes_water_prop.liquid_density);
+  Functional fslow = OfEffectivePotential(SaftFluidSlow(hughes_water_prop.lengthscale,
+                                                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                                        hughes_water_prop.epsilon_dispersion,
+                                                        hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, mu));
+  Functional ffast = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                                    hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                                    hughes_water_prop.epsilon_dispersion,
+                                                    hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, mu));
   took("Creating functionals");
 
   test_fast_vs_slow("Saft", ffast, fslow);
 
   Functional n = EffectivePotentialToDensity();
-  f = HardSpheresWBnotensor(water_prop.lengthscale)(n);
-  mu = find_chemical_potential(f, water_prop.kT, 1.3*water_prop.liquid_density);
-  fslow = OfEffectivePotential(HardSpheresWBnotensor(water_prop.lengthscale)
+  f = HardSpheresWBnotensor(hughes_water_prop.lengthscale)(n);
+  mu = find_chemical_potential(f, hughes_water_prop.kT, 1.3*hughes_water_prop.liquid_density);
+  fslow = OfEffectivePotential(HardSpheresWBnotensor(hughes_water_prop.lengthscale)
                                + ChemicalPotential(mu));
-  ffast = OfEffectivePotential(HardSpheresNoTensor(water_prop.lengthscale)
+  ffast = OfEffectivePotential(HardSpheresNoTensor(hughes_water_prop.lengthscale)
                                + ChemicalPotential(mu));
 
   //test_fast_vs_slow("HardSpheresNoTensor", ffast, fslow);

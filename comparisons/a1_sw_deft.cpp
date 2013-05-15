@@ -20,13 +20,13 @@
 #include "equation-of-state.h"
 
 int main(int, char **) {
-  double R = water_prop.lengthscale;
-  Functional a1 = DispersionSAFTa1(R, water_prop.epsilon_dispersion,
-                                   water_prop.lambda_dispersion, water_prop.length_scaling);
+  double R = hughes_water_prop.lengthscale;
+  Functional a1 = DispersionSAFTa1(R, hughes_water_prop.epsilon_dispersion,
+                                   hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   for (double eta=0.0; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
-    // Energy units in the vrpack code are water_prop.epsilon_dispersion?
-    double a1n = a1(0, n)/water_prop.epsilon_dispersion;
+    // Energy units in the vrpack code are hughes_water_prop.epsilon_dispersion?
+    double a1n = a1(0, n)/hughes_water_prop.epsilon_dispersion;
     // The following is a hokey trick to deal with optimizations like
     // -ffast-math that may turn -0.0 into 0.0.
     if (fabs(a1n) < 1e-12) printf("%17.12f  -0.000000000000\n", eta);

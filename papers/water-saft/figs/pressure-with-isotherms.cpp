@@ -19,7 +19,7 @@
 #include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
-//const double kT = water_prop.kT;
+//const double kT = new_water_prop.kT;
 const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 //const double kT = kB*293; // Temperature
 
@@ -31,10 +31,10 @@ int main(int, char **) {
     exit(1);
   }
   
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                                water_prop.epsilonAB, water_prop.kappaAB,
-                                                water_prop.epsilon_dispersion,
-                                                water_prop.lambda_dispersion, water_prop.length_scaling, 0));
+  Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
+                                                new_water_prop.epsilonAB, new_water_prop.kappaAB,
+                                                new_water_prop.epsilon_dispersion,
+                                                new_water_prop.lambda_dispersion, new_water_prop.length_scaling, 0));
   for (double dens=0.00001; dens<=0.0055; dens *= 1.002) {
     fprintf(o, "%g", dens);
 

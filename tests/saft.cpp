@@ -53,22 +53,22 @@ void test_energy(const char *name, Functional f, double kT,
 int main(int, char **argv) {
   const double kT = 1e-3; // room temperature in Hartree, approximately
   test_energy("association",
-              AssociationSAFT(water_prop.lengthscale,
-                              water_prop.epsilonAB, water_prop.kappaAB,
-                              water_prop.epsilon_dispersion,
-                              water_prop.lambda_dispersion, water_prop.length_scaling),
+              AssociationSAFT(hughes_water_prop.lengthscale,
+                              hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                              hughes_water_prop.epsilon_dispersion,
+                              hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling),
               kT,  -4.6637368217756e-12);
   const double dispersion_energy = -2.255347384146531e-12;
   test_energy("dispersion",
-              DispersionSAFT(water_prop.lengthscale,
-                             water_prop.epsilon_dispersion,
-                             water_prop.lambda_dispersion, water_prop.length_scaling),
+              DispersionSAFT(hughes_water_prop.lengthscale,
+                             hughes_water_prop.epsilon_dispersion,
+                             hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling),
               kT, dispersion_energy);
   test_energy("SAFT slow",
-              SaftFluidSlow(water_prop.lengthscale,
-                            water_prop.epsilonAB, water_prop.kappaAB,
-                            water_prop.epsilon_dispersion,
-                            water_prop.lambda_dispersion, water_prop.length_scaling, 0),
+              SaftFluidSlow(hughes_water_prop.lengthscale,
+                            hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                            hughes_water_prop.epsilon_dispersion,
+                            hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, 0),
               kT, -6.412053155504186e-09);
 
   if (retval == 0) {

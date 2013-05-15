@@ -20,14 +20,14 @@
 #include "equation-of-state.h"
 
 int main(int, char **) {
-  double R = water_prop.lengthscale;
+  double R = hughes_water_prop.lengthscale;
   for (double eta=0.03125; eta<=0.5; eta += 0.03125) {
     // I somewhat arbitrarily set the temperature to 1.2 times the
     // dispersion energy scale.
     double n = eta/(4*M_PI*R*R*R/3);
     printf("%15.10f%15.10f\n", eta,
-           gSW(R, water_prop.epsilon_dispersion,
-               water_prop.lambda_dispersion,
-               water_prop.length_scaling)(water_prop.epsilon_dispersion*1.2, n));
+           gSW(R, hughes_water_prop.epsilon_dispersion,
+               hughes_water_prop.lambda_dispersion,
+               hughes_water_prop.length_scaling)(hughes_water_prop.epsilon_dispersion*1.2, n));
   }
 }

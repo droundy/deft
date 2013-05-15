@@ -42,9 +42,9 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   for (unsigned i=0;i<f1.get_name().size();i++) printf("*");
   printf("************\n\n");
 
-  double f1n = f1.integral(water_prop.kT, n);
+  double f1n = f1.integral(hughes_water_prop.kT, n);
   took("Evaluating f1 of n");
-  double f2n = f2.integral(water_prop.kT, n);
+  double f2n = f2.integral(hughes_water_prop.kT, n);
   took("Evaluating f2 of n");
   if (fabs(f1n/f2n - 1) > fraccuracy) {
     printf("E1 = %g\n", f1n);
@@ -55,9 +55,9 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
   Grid gr1(gd), gr2(gd);
   gr1.setZero();
   gr2.setZero();
-  f1.integralgrad(water_prop.kT, n, &gr1);
+  f1.integralgrad(hughes_water_prop.kT, n, &gr1);
   took("Evaluating grad f1");
-  f2.integralgrad(water_prop.kT, n, &gr2);
+  f2.integralgrad(hughes_water_prop.kT, n, &gr2);
   took("Evaluating grad f2");
   double err = (gr1-gr2).cwise().abs().maxCoeff();
   double mag = gr1.cwise().abs().maxCoeff();
@@ -65,12 +65,12 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
     printf("FAIL: Error in grad %s is %g as a fraction of %g\n", f1.get_name().c_str(), err/mag, mag);
     errors++;
   }
-  errors += f1.run_finite_difference_test(f1.get_name().c_str(), water_prop.kT, n);
+  errors += f1.run_finite_difference_test(f1.get_name().c_str(), hughes_water_prop.kT, n);
   //errors += f2.run_finite_difference_test("other version", n);
   
   const double x = 0.001;
-  double f1x = f1(1.2*water_prop.kT, x);
-  double f2x = f2(1.2*water_prop.kT, x);
+  double f1x = f1(1.2*hughes_water_prop.kT, x);
+  double f2x = f2(1.2*hughes_water_prop.kT, x);
   if (fabs(1 - fabs(f1x/f2x)) > fraccuracy) {
     printf("FAIL: Error in double %s is %g as a fraction of %g\n", f1.get_name().c_str(),
            1 - fabs(f1x/f2x), f2x);
@@ -80,8 +80,8 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
     printf("Functions of double agree!\n");
   }
   
-  double f1p = f1.derive(1.2*water_prop.kT, x);
-  double f2p = f2.derive(1.2*water_prop.kT, x);
+  double f1p = f1.derive(1.2*hughes_water_prop.kT, x);
+  double f2p = f2.derive(1.2*hughes_water_prop.kT, x);
   if (fabs(1 - fabs(f1p/f2p)) > fraccuracy) {
     printf("FAIL: Error in derive double %s is %g as a fraction of %g\n", f1.get_name().c_str(),
            1 - fabs(f1p/f2p), f2p);
@@ -103,7 +103,7 @@ void compare_functionals(const Functional &f1, const Functional &f2, const Grid 
     const double n = x;
     Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
-    const double kT = water_prop.kT;
+    const double kT = hughes_water_prop.kT;
     const double Edouble = f1(kT, n);
     const double Edouble2 = f2(kT, n);
     took("Evaluating functional of a double");
@@ -180,13 +180,13 @@ int main(int, char **argv) {
 
   const double mu = 1e-5;
   Functional f = HardSpheresRFFast(R) + IdealGas() + ChemicalPotential(mu);
-  compare_functionals(HardSphereGasRF(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
+  compare_functionals(HardSphereGasRF(R, mu), f, Grid(gd, -hughes_water_prop.kT*n.cwise().log()), 1e-12);
  
   f = HardSpheresFast(R) + IdealGas() + ChemicalPotential(mu);
-  compare_functionals(HardSphereGas(R, mu), f, Grid(gd, -water_prop.kT*n.cwise().log()), 1e-12);
+  compare_functionals(HardSphereGas(R, mu), f, Grid(gd, -hughes_water_prop.kT*n.cwise().log()), 1e-12);
 
-  double eps = water_prop.epsilonAB;
-  double kappa = water_prop.kappaAB;
+  double eps = hughes_water_prop.epsilonAB;
+  double kappa = hughes_water_prop.kappaAB;
   double epsdis = 1e-5;
   double lambda = 1.8;
   double lscale = 0.7;

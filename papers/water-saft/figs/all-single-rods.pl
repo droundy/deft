@@ -19,7 +19,7 @@ foreach $dd ( 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8,
   my $resolution = 0.1; # spacing of grid points in nm.
 
   # Here I estimate the amount of memory that will be needed...
-  my $memuse = sprintf "%.0f", 375*((($d + 2*$padding)/5.0)*(0.1/$resolution))**2;
+  my $memuse = sprintf "%.0f", 700*((($d + 2*$padding)/5.0)*(0.1/$resolution))**2;
 
   my $scriptname = "papers/water-saft/figs/single-rod-$d.tmp.sh";
   open SCRIPT, ">$scriptname" or die $!;

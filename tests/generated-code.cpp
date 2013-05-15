@@ -125,7 +125,7 @@ void compare_functionals(const Functional &f1, const Functional &f2,
 }
 
 int main(int, char **argv) {
-  const double myT = water_prop.kT; // room temperature in Hartree
+  const double myT = hughes_water_prop.kT; // room temperature in Hartree
   const double R = 2.7;
 
   Functional x(Identity());

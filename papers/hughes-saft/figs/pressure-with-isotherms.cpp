@@ -19,7 +19,7 @@
 #include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
-//const double kT = water_prop.kT;
+//const double kT = hughes_water_prop.kT;
 const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 //const double kT = kB*293; // Temperature
 
@@ -27,10 +27,10 @@ int main(int, char **) {
   
   FILE *o = fopen("papers/hughes-saft/figs/pressure-with-isotherms.dat", "w");
   
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                                water_prop.epsilonAB, water_prop.kappaAB,
-                                                water_prop.epsilon_dispersion,
-                                                water_prop.lambda_dispersion, water_prop.length_scaling, 0));
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                                hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                                hughes_water_prop.epsilon_dispersion,
+                                                hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, 0));
   for (double dens=0.00001; dens<=0.0055; dens *= 1.002) {
     fprintf(o, "%g", dens);
 

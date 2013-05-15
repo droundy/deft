@@ -33,19 +33,19 @@ int main(int, char **) {
   for (double T=273; T<=693; T+=25) {
     //printf("Working on surface tension at %g Kelvin...\n", T);
     const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
-    LiquidProperties prop = water_prop;
+    LiquidProperties prop = new_water_prop;
     prop.kT = kB*T;
     Functional f = OfEffectivePotential(WaterSaft(prop.lengthscale,
                                                   prop.epsilonAB, prop.kappaAB,
                                                   prop.epsilon_dispersion,
-                                                  prop.lambda_dispersion, water_prop.length_scaling, 0));
+                                                  prop.lambda_dispersion, new_water_prop.length_scaling, 0));
     saturated_liquid_properties(f, &prop);
     took("Finding bulk densities");
     double mu = find_chemical_potential(f, prop.kT, prop.liquid_density);
     f = OfEffectivePotential(WaterSaft(prop.lengthscale,
                                        prop.epsilonAB, prop.kappaAB,
                                        prop.epsilon_dispersion,
-                                       prop.lambda_dispersion, water_prop.length_scaling, mu));
+                                       prop.lambda_dispersion, new_water_prop.length_scaling, mu));
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "papers/water-saft/figs/surface-%03g.dat", T);
     // Here we set up an unused lattice.
