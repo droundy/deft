@@ -17,6 +17,7 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
+	src/WaterSaftFast.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 CONTACT_CODE = $(GENERIC_CODE) \
@@ -32,7 +33,6 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
 	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
-	src/WaterSaftFast.cpp \
 	src/SoftFluidFast.cpp src/HardFluidFast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
