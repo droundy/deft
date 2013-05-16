@@ -89,35 +89,35 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
 int main(int, char **) {
   FILE *o = fopen("papers/hughes-saft/figs/single-rod-in-water-high-res.dat", "w");
 
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-						water_prop.epsilonAB, water_prop.kappaAB,
-						water_prop.epsilon_dispersion,
-						water_prop.lambda_dispersion,
-						water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+						hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+						hughes_water_prop.epsilon_dispersion,
+						hughes_water_prop.lambda_dispersion,
+						hughes_water_prop.length_scaling, 0));
+  double n_1atm = pressure_to_density(f, hughes_water_prop.kT, atmospheric_pressure,
 					      0.001, 0.01);
 
-  double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, hughes_water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-				     water_prop.epsilonAB, water_prop.kappaAB,
-				     water_prop.epsilon_dispersion,
-				     water_prop.lambda_dispersion,
-				     water_prop.length_scaling, mu_satp));
+  f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+				     hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+				     hughes_water_prop.epsilon_dispersion,
+				     hughes_water_prop.lambda_dispersion,
+				     hughes_water_prop.length_scaling, mu_satp));
   
-  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
 
-  Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
-  			    water_prop.kappaAB, water_prop.epsilon_dispersion,
-  			    water_prop.lambda_dispersion,
-  			    water_prop.length_scaling);
+  Functional X = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, 
+  			    hughes_water_prop.kappaAB, hughes_water_prop.epsilon_dispersion,
+  			    hughes_water_prop.lambda_dispersion,
+  			    hughes_water_prop.length_scaling);
   
-  Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, 
-						  water_prop.epsilonAB, 
-						  water_prop.kappaAB, 
-						  water_prop.epsilon_dispersion,
-						  water_prop.lambda_dispersion,
-						  water_prop.length_scaling));
+  Functional S = OfEffectivePotential(SaftEntropy(hughes_water_prop.lengthscale, 
+						  hughes_water_prop.epsilonAB, 
+						  hughes_water_prop.kappaAB, 
+						  hughes_water_prop.epsilon_dispersion,
+						  hughes_water_prop.lambda_dispersion,
+						  hughes_water_prop.length_scaling));
   for (cavitysize=0.5*nm; cavitysize<=3.0*nm; cavitysize += 0.5*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.05);
@@ -126,23 +126,23 @@ int main(int, char **) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-				       water_prop.epsilonAB, water_prop.kappaAB,
-				       water_prop.epsilon_dispersion,
-				       water_prop.lambda_dispersion,
-				       water_prop.length_scaling, mu_satp));
+    f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+				       hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+				       hughes_water_prop.epsilon_dispersion,
+				       hughes_water_prop.lambda_dispersion,
+				       hughes_water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
     // constraint.epsNativeSlice("papers/hughes-saft/figs/single-rod-in-water-constraint.eps",
     // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
    
-    potential = water_prop.liquid_density*constraint
-      + 100*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-    //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-    potential = -water_prop.kT*potential.cwise().log();
+    potential = hughes_water_prop.liquid_density*constraint
+      + 100*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    //potential = hughes_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+    potential = -hughes_water_prop.kT*potential.cwise().log();
     
-    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(0, PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT,
                                                                      &potential,
                                                                      QuadraticLineMinimizer));
     
@@ -151,7 +151,7 @@ int main(int, char **) {
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       fflush(stdout);
-      //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      //Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
      
       //density.epsNativeSlice("papers/hughes-saft/figs/single-rod-in-water.eps", 
       //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -169,10 +169,10 @@ int main(int, char **) {
 
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "papers/hughes-saft/figs/single-rod-res0.05-%04.1f.dat", cavitysize/nm);
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
-    Grid energy_density(gd, f(water_prop.kT, gd, potential));
-    Grid entropy(gd, S(water_prop.kT, potential));
-    Grid Xassoc(gd, X(water_prop.kT, density));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
+    Grid energy_density(gd, f(hughes_water_prop.kT, gd, potential));
+    Grid entropy(gd, S(hughes_water_prop.kT, potential));
+    Grid Xassoc(gd, X(hughes_water_prop.kT, density));
     plot_grids_yz_directions(plotname, density, 
 			     energy_density, entropy, Xassoc);
     free(plotname);

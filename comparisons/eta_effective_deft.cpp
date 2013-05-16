@@ -20,7 +20,7 @@
 #include "equation-of-state.h"
 
 int main(int, char **) {
-  Functional eta_eff = eta_effective(Identity(), water_prop.lambda_dispersion);
+  Functional eta_eff = eta_effective(Identity(), hughes_water_prop.lambda_dispersion);
   for (double eta=0.0; eta<=0.5; eta += 0.03125) {
     printf("%15.10f%15.10f\n", eta, eta_eff(0, eta));
   }

@@ -26,7 +26,7 @@ const double eta_one = 3.0/(4*M_PI*R*R*R);
 const double diameter_cubed = 1/(8*R*R*R);
 const double nliquid = 0.324*eta_one;
 Functional n = EffectivePotentialToDensity();
-const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff(), water_prop.kT, nliquid);
+const double mu = find_chemical_potential(HardSpheres(R)(n) + IdealGasOfVeff(), hughes_water_prop.kT, nliquid);
 
 // Here we set up the lattice.
 const double rcav = R+R; // 11.8*R+R;
@@ -70,7 +70,7 @@ int test_minimizer(const char *name, Minimizer min, int numiters, double fraccur
 
   double N = 0;
   {
-    Grid density(gd, n(water_prop.kT, gd, potential));
+    Grid density(gd, n(hughes_water_prop.kT, gd, potential));
     for (int i=0;i<gd.NxNyNz;i++) N += density[i]*gd.dvolume;
   }
   printf("N is %.15g\n", N);
@@ -136,15 +136,15 @@ int main(int, char **argv) {
     small_potential.Set(incavity);
     small_potential *= 1e9;
     small_potential = small_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
-    retval += f0wb(n).run_finite_difference_test("white bear functional", water_prop.kT, small_potential);
-    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", water_prop.kT, small_potential);
+    retval += f0wb(n).run_finite_difference_test("white bear functional", hughes_water_prop.kT, small_potential);
+    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", hughes_water_prop.kT, small_potential);
     printf("Done with both finite difference tests!\n");
   }
 
   {
     reset_peak_memory();
     {
-      Minimizer pd = Precision(0, ConjugateGradient(ff, gd, water_prop.kT, &potential, QuadraticLineMinimizer));
+      Minimizer pd = Precision(0, ConjugateGradient(ff, gd, hughes_water_prop.kT, &potential, QuadraticLineMinimizer));
       retval += test_minimizer("ConjugateGradient", pd, 100, 1e-5);
 
       double peak = peak_memory()/1024.0/1024;
@@ -156,7 +156,7 @@ int main(int, char **argv) {
       }
     }
     {
-      Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, water_prop.kT, &potential, QuadraticLineMinimizer));
+      Minimizer pd = Precision(0, PreconditionedConjugateGradient(ff, gd, hughes_water_prop.kT, &potential, QuadraticLineMinimizer));
       retval += test_minimizer("PreconditionedConjugateGradient", pd, 100, 1e-5);
 
       double peak = peak_memory()/1024.0/1024;
@@ -169,18 +169,18 @@ int main(int, char **argv) {
     }
 
     //potential = external_potential + mu*VectorXd::Ones(gd.NxNyNz);
-    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
     density.epsNativeSlice("cavity-density.eps", Cartesian(2*rmax,0,0), Cartesian(0,2*rmax,0), Cartesian(-rmax,-rmax,0));
     density.epsRadial1d("cavity-radial-density.eps", 0, rmax, nliquid, R, "Density scaled by nliquid");
 
     Grid grad(gd);
     grad.setZero();
-    ff.integralgrad(water_prop.kT, potential, &grad);
+    ff.integralgrad(hughes_water_prop.kT, potential, &grad);
  
     retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional",
-                                                                     water_prop.kT, density, &grad);
+                                                                     hughes_water_prop.kT, density, &grad);
     retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional",
-                                                                     water_prop.kT, density, &grad);
+                                                                     hughes_water_prop.kT, density, &grad);
   }
 
   double peak = peak_memory()/1024.0/1024;

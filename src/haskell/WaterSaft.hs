@@ -8,7 +8,7 @@
 
 module WaterSaft
        ( eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, water_saft, saft_entropy, mu )
+         saft_dispersion, saft_association, water_saft, water_entropy, mu )
        where
 
 import FMT ( rad, n )
@@ -71,6 +71,6 @@ gSW = "gSW" ===
 water_saft :: Expression Scalar
 water_saft = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispersion + integrate (n*mu))
 
-saft_entropy :: Expression Scalar
-saft_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
+water_entropy :: Expression Scalar
+water_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
   where d nn f = nn === - scalarderive (ES kT) f

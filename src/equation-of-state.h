@@ -10,7 +10,8 @@ struct LiquidProperties {
   double epsilon_dispersion, lambda_dispersion, length_scaling, epsilonAB, kappaAB;
 };
 
-extern LiquidProperties water_prop;
+extern LiquidProperties hughes_water_prop;
+extern LiquidProperties new_water_prop;
 static const double atmospheric_pressure = 101325*3.3989316e-14; // in Hartree/bohr^3
 
 // Ultimately, I'd like surface_tension to be smart about finding a

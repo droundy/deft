@@ -20,14 +20,14 @@
 #include "equation-of-state.h"
 
 int main(int, char **) {
-  double R = water_prop.lengthscale;
-  double kT = water_prop.epsilon_dispersion*1.2;
-  Functional f = DeltaSAFT(R, water_prop.epsilonAB, water_prop.kappaAB,
-                           water_prop.epsilon_dispersion,
-                           water_prop.lambda_dispersion, water_prop.length_scaling);
+  double R = hughes_water_prop.lengthscale;
+  double kT = hughes_water_prop.epsilon_dispersion*1.2;
+  Functional f = DeltaSAFT(R, hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                           hughes_water_prop.epsilon_dispersion,
+                           hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   for (double eta=0.03125; eta<=0.5; eta += 0.03125) {
     double n = eta/(4*M_PI*R*R*R/3);
-    // Energy units in the vrpack code are water_prop.epsilon_dispersion
+    // Energy units in the vrpack code are hughes_water_prop.epsilon_dispersion
     printf("%17.12f%17.12f\n", eta, f(kT, n)/(8*R*R*R));
   }
 }

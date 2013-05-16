@@ -17,6 +17,7 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
+	src/WaterSaftFast.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 CONTACT_CODE = $(GENERIC_CODE) \

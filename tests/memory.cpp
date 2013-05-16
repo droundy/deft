@@ -101,7 +101,7 @@ double incavity(Cartesian r) {
 }
 
 void check_a_functional(const char *name, Functional f, const Grid &x) {
-  const double kT = water_prop.kT; // room temperature in Hartree
+  const double kT = hughes_water_prop.kT; // room temperature in Hartree
 
   printf("\n***********");
   for (unsigned i=0;i<strlen(name) + 4;i++) printf("*");
@@ -205,7 +205,7 @@ int main(int, char **argv) {
   // machine).
   gethostname(hn, 80);
 
-  const double kT = water_prop.kT; // room temperature in Hartree
+  const double kT = hughes_water_prop.kT; // room temperature in Hartree
   const double eta_one = 3.0/(4*M_PI*R*R*R);
   const double nliquid = 0.324*eta_one;
   Functional n = EffectivePotentialToDensity();
@@ -240,31 +240,31 @@ int main(int, char **argv) {
   
   Grid potential(gd, external_potential + 0.005*VectorXd::Ones(gd.NxNyNz));
 
-  double eps = water_prop.epsilonAB;
-  double kappa = water_prop.kappaAB;
+  double eps = hughes_water_prop.epsilonAB;
+  double kappa = hughes_water_prop.kappaAB;
 
-  ff = OfEffectivePotential(SaftFluid2(R, eps, kappa, water_prop.epsilon_dispersion,
-                                       water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  ff = OfEffectivePotential(SaftFluid2(R, eps, kappa, hughes_water_prop.epsilon_dispersion,
+                                       hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, mu));
   check_a_functional("SaftFluid2", ff, potential);
 
-  //ff = OfEffectivePotential(SaftFluid(R, eps, kappa, water_prop.epsilon_dispersion,
-  //                                    water_prop.lambda_dispersion, water_prop.length_scaling, mu));
+  //ff = OfEffectivePotential(SaftFluid(R, eps, kappa, hughes_water_prop.epsilon_dispersion,
+  //                                    hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, mu));
   //check_a_functional("SaftFluid", ff, potential);
 
-  //ff = Association2(R, eps, kappa, water_prop.epsilon_dispersion,
-  //                  water_prop.lambda_dispersion, water_prop.length_scaling);
+  //ff = Association2(R, eps, kappa, hughes_water_prop.epsilon_dispersion,
+  //                  hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   //check_a_functional("Association2", ff, potential);
 
-  //ff = Association(R, eps, kappa, water_prop.epsilon_dispersion,
-  //                 water_prop.lambda_dispersion, water_prop.length_scaling);
+  //ff = Association(R, eps, kappa, hughes_water_prop.epsilon_dispersion,
+  //                 hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   //check_a_functional("Association", ff, potential);
 
-  //ff = Dispersion2(R, water_prop.epsilon_dispersion,
-  //                 water_prop.lambda_dispersion, water_prop.length_scaling);
+  //ff = Dispersion2(R, hughes_water_prop.epsilon_dispersion,
+  //                 hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   //check_a_functional("Dispersion2", ff, potential);
 
-  //ff = Dispersion(R, water_prop.epsilon_dispersion,
-  //                water_prop.lambda_dispersion, water_prop.length_scaling);
+  //ff = Dispersion(R, hughes_water_prop.epsilon_dispersion,
+  //                hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling);
   //check_a_functional("Dispersion", ff, potential);
 
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
