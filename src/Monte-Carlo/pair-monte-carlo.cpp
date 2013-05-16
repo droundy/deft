@@ -16,13 +16,14 @@ Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 double distXYZ(Vector3d a, Vector3d b);
 
-const int zbins = 200; // Number of divisions for data collection. Must be even.
-const int rbins = zbins/2; // half zbins to maintain same r and z resolution
-const int z0bins = zbins/2; // half zbins because half of z0's are reflected
+const double dr = 0.1;
+const double dz = 0.1;
+
+
 
 // resolution info for the a1 histogram / integral
-const int a1_zbins = 100;
-const int a1_rbins = 100;
+const double a1_dr = 0.1;
+const double a1_dz = 0.1;
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -125,10 +126,12 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const double dr = lenx/2/rbins;
-  const double dz = lenz/zbins;
-  const double a1_dr = lenx/2/a1_rbins;
-  const double a1_dz = lenz/a1_zbins/2;
+  const int zbins = lenz/dz;
+  const int rbins = lenx/dr/2;
+  const int z0bins = zbins/2; // half zbins because half of z0's are reflected
+  const int a1_zbins = lenz/a1_dz/2; // again, reflection -> half bins needed
+  const int a1_rbins = lenx/a1_dr/2;
+
   const char *outfilename = argv[4];
   char *finalfilename = new char[1024];
   fflush(stdout);

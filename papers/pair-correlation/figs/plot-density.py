@@ -22,9 +22,21 @@ def read_walls(ff):
     data = numpy.loadtxt(filename)
     return data
 
+def read_gs(ff):
+  filename = "wallsWB-0.%d0.dat" % (10*ff)
+  print 'Using', filename
+  data = pylab.loadtxt(filename)
+  r = data[:,0]
+  density = data[:,1]
+  gsigma = data[:,2]
+  nA = data[:,3]
+  return r, density
+
 den = read_walls(ff)
+r, den2 = read_gs(ff)
 
 pylab.plot(den[:,0], den[:,1])
+pylab.plot(r-3, den2)
 pylab.title('density(z), $ff = %g$' %(ff))
 pylab.xlabel("z")
 pylab.ylabel("density (balls/unit$^3$)")
