@@ -5,7 +5,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vector>
 
 long shell(Vector3d v, long div, double *radius);
 double countOverLaps(Vector3d *spheres, long n, double R);
