@@ -120,18 +120,6 @@ int main(int argc, char **argv) {
   const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*diameter*diameter)*width;
 
-  Functional X = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, 
-  			    hughes_water_prop.kappaAB, hughes_water_prop.epsilon_dispersion,
-  			    hughes_water_prop.lambda_dispersion,
-  			    hughes_water_prop.length_scaling);
-  
-  Functional S = OfEffectivePotential(SaftEntropy(hughes_water_prop.lengthscale, 
-						  hughes_water_prop.epsilonAB, 
-						  hughes_water_prop.kappaAB, 
-						  hughes_water_prop.epsilon_dispersion,
-						  hughes_water_prop.lambda_dispersion,
-						  hughes_water_prop.length_scaling));
-    
   Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, 0.1);
     

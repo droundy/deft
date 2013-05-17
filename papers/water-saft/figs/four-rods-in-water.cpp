@@ -156,17 +156,17 @@ int main(int argc, char *argv[]) {
   const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperCell = EperVolume*(zmax*ymax - 4*0.25*M_PI*diameter*diameter)*width;
 
-  Functional X = Xassociation(new_water_prop.lengthscale, new_water_prop.epsilonAB, 
-                              new_water_prop.kappaAB, new_water_prop.epsilon_dispersion,
-                              new_water_prop.lambda_dispersion,
-                              new_water_prop.length_scaling);
+  //Functional X = Xassociation(new_water_prop.lengthscale, new_water_prop.epsilonAB, 
+  //                            new_water_prop.kappaAB, new_water_prop.epsilon_dispersion,
+  //                            new_water_prop.lambda_dispersion,
+  //                            new_water_prop.length_scaling);
   
-  Functional S = OfEffectivePotential(SaftEntropy(new_water_prop.lengthscale, 
-                                                  new_water_prop.epsilonAB,
-                                                  new_water_prop.kappaAB,
-                                                  new_water_prop.epsilon_dispersion,
-                                                  new_water_prop.lambda_dispersion,
-                                                  new_water_prop.length_scaling));
+  Functional S = OfEffectivePotential(EntropySaftFluid2(new_water_prop.lengthscale, 
+                                                        new_water_prop.epsilonAB,
+                                                        new_water_prop.kappaAB,
+                                                        new_water_prop.epsilon_dispersion,
+                                                        new_water_prop.lambda_dispersion,
+                                                        new_water_prop.length_scaling));
   //dmax, dstep already in bohrs (so it doesn't need to be converted from nm)
   double dstep = 0.25*nm;
   for (distance=0.0*nm; distance<=dmax; distance += dstep) {

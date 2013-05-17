@@ -39,29 +39,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
-  FILE *out = fopen(fname, "w");
-  if (!out) {
-    fprintf(stderr, "Unable to create file %s!\n", fname);
-    // don't just abort?
-    return;
-  }
-  const GridDescription gd = a.description();
-  const int x = gd.Nx/2;
-  const int z = 0;
-  for (int y=0; y<gd.Ny; y++) {
-    Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-    double ahere = a(x,y,z);
-    double bhere = b(x,y,z);
-    double chere = c(x,y,z);
-    double dhere = d(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere, chere, dhere);
-  }
-  fclose(out);
-}
-
-void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b, 
-			    const Grid &c, const Grid &d) {
+void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -76,10 +54,7 @@ void plot_grids_yz_directions(const char *fname, const Grid &a, const Grid &b,
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
       double ahere = a(here);
       double bhere = b(here);
-      double chere = c(here);
-      double dhere = d(here);
-      fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], 
-	      ahere, bhere, chere, dhere);
+      fprintf(out, "%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere);
     }
     fprintf(out,"\n");
  }  
@@ -107,17 +82,6 @@ int main(int, char **) {
   
   const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
 
-  Functional X = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, 
-  			    hughes_water_prop.kappaAB, hughes_water_prop.epsilon_dispersion,
-  			    hughes_water_prop.lambda_dispersion,
-  			    hughes_water_prop.length_scaling);
-  
-  Functional S = OfEffectivePotential(SaftEntropy(hughes_water_prop.lengthscale, 
-						  hughes_water_prop.epsilonAB, 
-						  hughes_water_prop.kappaAB, 
-						  hughes_water_prop.epsilon_dispersion,
-						  hughes_water_prop.lambda_dispersion,
-						  hughes_water_prop.length_scaling));
   for (cavitysize=0.5*nm; cavitysize<=3.0*nm; cavitysize += 0.5*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.05);
@@ -171,10 +135,7 @@ int main(int, char **) {
     sprintf(plotname, "papers/hughes-saft/figs/single-rod-res0.05-%04.1f.dat", cavitysize/nm);
     Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
     Grid energy_density(gd, f(hughes_water_prop.kT, gd, potential));
-    Grid entropy(gd, S(hughes_water_prop.kT, potential));
-    Grid Xassoc(gd, X(hughes_water_prop.kT, density));
-    plot_grids_yz_directions(plotname, density, 
-			     energy_density, entropy, Xassoc);
+    plot_grids_yz_directions(plotname, density, energy_density);
     free(plotname);
 
   }

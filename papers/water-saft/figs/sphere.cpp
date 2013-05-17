@@ -91,22 +91,22 @@ int main(int argc, char *argv[]) {
 				     new_water_prop.lambda_dispersion,
 				     new_water_prop.length_scaling, mu_satp));
   
-  Functional S = OfEffectivePotential(SaftEntropy(new_water_prop.lengthscale, 
-						  new_water_prop.epsilonAB, 
-						  new_water_prop.kappaAB, 
-						  new_water_prop.epsilon_dispersion,
-						  new_water_prop.lambda_dispersion,
-						  new_water_prop.length_scaling));
+  Functional S = OfEffectivePotential(EntropySaftFluid2(new_water_prop.lengthscale,
+                                                        new_water_prop.epsilonAB,
+                                                        new_water_prop.kappaAB,
+                                                        new_water_prop.epsilon_dispersion,
+                                                        new_water_prop.lambda_dispersion,
+                                                        new_water_prop.length_scaling));
   
   const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
   const double SperNumber = S(new_water_prop.kT, -new_water_prop.kT*log(n_1atm))/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
 
-  Functional X = Xassociation(new_water_prop.lengthscale, new_water_prop.epsilonAB, 
-			      new_water_prop.kappaAB, new_water_prop.epsilon_dispersion,
-			      new_water_prop.lambda_dispersion,
-			      new_water_prop.length_scaling);
+  //Functional X = Xassociation(new_water_prop.lengthscale, new_water_prop.epsilonAB, 
+	//		      new_water_prop.kappaAB, new_water_prop.epsilon_dispersion,
+	//		      new_water_prop.lambda_dispersion,
+	//		      new_water_prop.length_scaling);
   
   //for (diameter=0*nm; diameter<3.0*nm; diameter+= .1*nm) {
     Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));

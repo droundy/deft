@@ -16,8 +16,6 @@ Functional WaterSaft(double R, double epsilon_association, double kappa_associat
                      double length_scaling, double mu);
 
 Functional HardSpheresFast(double radius);
-Functional HardSpheresRFFast(double radius);
-Functional HardSpheresTarazonaFast(double radius);
 Functional HardSpheresWBFast(double radius);
 Functional HardSpheresWBm2(double radius);
 

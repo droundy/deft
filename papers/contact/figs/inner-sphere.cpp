@@ -46,7 +46,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-Functional WB = HardSpheresNoTensor(1.0);
+Functional WB = HardSpheresNoTensor2(1.0);
 Functional WBT = HardSpheresWBFast(1.0);
 Functional WBm2 = HardSpheresWBm2(1.0);
 
