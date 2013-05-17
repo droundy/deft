@@ -25,7 +25,7 @@ def read_a1_mc():
   maxr = delta_r + 3*dv
   row_min = floor(minr/0.1 + .05)
   row_max = floor(maxr/0.1 + .05)
-  return sum(data[row_min:row_max], axis=0)
+  return sum(data[row_min:row_max], axis=0)/(row_max-row_min)
 
 def read_da_dz(version):
   filename = "walls_daWB-%s-%04.2f-%04.2f-%05.3f.dat" % (version,eta,delta_r,dv) #0.%d0
@@ -35,14 +35,14 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","mc","nA","simple"]
+versions = ["fischer","old","simple"]
 for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
 
 plt.plot(arange(3,13,.1), read_a1_mc(), 'k')
 plt.xlim([2,9])
-plt.legend(versions, loc='upper right')
+plt.legend(versions+['mc'], loc='upper right')
 
 xlim(3, 10)
 

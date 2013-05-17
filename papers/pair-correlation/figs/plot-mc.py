@@ -34,8 +34,8 @@ def plot1d():
     gslice[i].set_data(numpy.linspace(0, rlen, num), zi)
     i += 1
 
-colors = ['r', 'k', 'b', 'cyan']
-plots = ['mc_old', 'simple', 'nA', 'mc']
+colors = ['k', 'b', 'r', 'g']
+plots = ['mc', 'simple', 'fischer', 'old']
 numplots = 4
 
 def plot():
@@ -60,7 +60,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0, fun):
-  if fun == 'mc_old':
+  if fun == 'mc':
     filename = "mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
   else:
     filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
