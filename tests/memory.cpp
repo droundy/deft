@@ -270,8 +270,8 @@ int main(int, char **argv) {
   ff = constrain(constraint, (HardSpheresWBnotensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
   check_a_functional("HardSpheresWBnotensor", ff, potential);
 
-  ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
-  check_a_functional("HardSphereNoTensor", ff, potential);
+  //ff = constrain(constraint, (HardSpheresNoTensor(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
+  //check_a_functional("HardSphereNoTensor", ff, potential);
 
   ff = constrain(constraint, (HardSpheresNoTensor2(R) + ChemicalPotential(mu))(n) + IdealGasOfVeff());
   check_a_functional("HardSpheresNoTensor2", ff, potential);

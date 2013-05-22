@@ -112,7 +112,6 @@ int main(int, char **argv) {
   // The functionals are...
   Functional n = constrain(constraint, EffectivePotentialToDensity());
   Functional f0wb = HardSpheresWB(R);
-  Functional f0rf = HardSpheresRFFast(R);
   Functional ff = constrain(constraint, OfEffectivePotential(HardSphereGas(R, mu)));
 
   printf("I am about to set the initial cavity...\n"); 
@@ -137,7 +136,6 @@ int main(int, char **argv) {
     small_potential *= 1e9;
     small_potential = small_potential + 0.005*VectorXd::Ones(gd.NxNyNz);
     retval += f0wb(n).run_finite_difference_test("white bear functional", hughes_water_prop.kT, small_potential);
-    retval += f0rf(n).run_finite_difference_test("rosenfeld functional", hughes_water_prop.kT, small_potential);
     printf("Done with both finite difference tests!\n");
   }
 
@@ -178,8 +176,6 @@ int main(int, char **argv) {
     ff.integralgrad(hughes_water_prop.kT, potential, &grad);
  
     retval += constrain(constraint, f0wb).run_finite_difference_test("white bear functional",
-                                                                     hughes_water_prop.kT, density, &grad);
-    retval += constrain(constraint, f0rf).run_finite_difference_test("rosenfeld functional",
                                                                      hughes_water_prop.kT, density, &grad);
   }
 

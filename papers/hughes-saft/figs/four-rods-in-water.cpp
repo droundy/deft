@@ -156,17 +156,6 @@ int main(int argc, char *argv[]) {
   const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
   const double EperCell = EperVolume*(zmax*ymax - 4*0.25*M_PI*diameter*diameter)*width;
 
-  Functional X = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.epsilonAB, 
-                              hughes_water_prop.kappaAB, hughes_water_prop.epsilon_dispersion,
-                              hughes_water_prop.lambda_dispersion,
-                              hughes_water_prop.length_scaling);
-  
-  Functional S = OfEffectivePotential(SaftEntropy(hughes_water_prop.lengthscale, 
-                                                  hughes_water_prop.epsilonAB,
-                                                  hughes_water_prop.kappaAB,
-                                                  hughes_water_prop.epsilon_dispersion,
-                                                  hughes_water_prop.lambda_dispersion,
-                                                  hughes_water_prop.length_scaling));
   //dmax, dstep already in bohrs (so it doesn't need to be converted from nm)
   double dstep = 0.25*nm;
   for (distance=0.0*nm; distance<=dmax; distance += dstep) {

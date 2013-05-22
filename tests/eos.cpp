@@ -182,24 +182,6 @@ int main(int, char **argv) {
       fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
     }
-
-    /*
-    o = fopen("saft-fluid-other.dat", "w");
-    //other_equation_of_state(o, f + ChemicalPotential(mu)(n), hughes_water_prop.kT, 1e-7, 7e-3);
-    fclose(o);
-
-    Functional X = Xassociation(hughes_water_prop.lengthscale, hughes_water_prop.kT,
-                                hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB);
-    printf("X is %g\n", X(hughes_water_prop.liquid_density));
-    */
-    o = fopen("association.dat", "w");
-    equation_of_state(o, AssociationSAFT(hughes_water_prop.lengthscale,
-                                         hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-                                         hughes_water_prop.epsilon_dispersion,
-                                         hughes_water_prop.lambda_dispersion,
-                                         hughes_water_prop.length_scaling)(n),
-                      hughes_water_prop.kT, nmin, nmax);
-    fclose(o);
   }
 
   {

@@ -15,13 +15,13 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include <stdio.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
 int retval = 0;
 
 void test_energy(const char *name, Functional f, double kT,
-                 double true_energy, double fraccuracy = 2e-14) {
+                 double true_energy, double fraccuracy = 2e-13) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("\n* Testing %s *\n", name);
@@ -52,23 +52,11 @@ void test_energy(const char *name, Functional f, double kT,
 
 int main(int, char **argv) {
   const double kT = 1e-3; // room temperature in Hartree, approximately
-  test_energy("association",
-              AssociationSAFT(hughes_water_prop.lengthscale,
-                              hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-                              hughes_water_prop.epsilon_dispersion,
-                              hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling),
-              kT,  -4.6637368217756e-12);
-  const double dispersion_energy = -2.255347384146531e-12;
-  test_energy("dispersion",
-              DispersionSAFT(hughes_water_prop.lengthscale,
-                             hughes_water_prop.epsilon_dispersion,
-                             hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling),
-              kT, dispersion_energy);
   test_energy("SAFT slow",
-              SaftFluidSlow(hughes_water_prop.lengthscale,
-                            hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-                            hughes_water_prop.epsilon_dispersion,
-                            hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, 0),
+              SaftFluid2(hughes_water_prop.lengthscale,
+                         hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                         hughes_water_prop.epsilon_dispersion,
+                         hughes_water_prop.lambda_dispersion, hughes_water_prop.length_scaling, 0),
               kT, -6.412053155504186e-09);
 
   if (retval == 0) {

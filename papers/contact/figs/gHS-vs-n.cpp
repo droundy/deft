@@ -26,11 +26,10 @@ int main(int, char **) {
 
   Functional ghs_A = gSigmaA(1.0);
   Functional ghs_S = gSigmaS(1.0);
-  Functional ghs = gHS(Identity(), pow(3.0/(4*M_PI), 1.0/3));
   double mykT = 1.0e-30; // has no effect here!
 
   for (double eta=0.0001; eta<=0.6; eta *= 1.01) {
-    double gg = ghs(mykT, eta);
+    double gg = (1 - eta/2)/ipow(1-eta, 3);
     double n = eta/(4*M_PI/3);
     double s = ghs_S(mykT, n);
     double a = ghs_A(mykT, n);

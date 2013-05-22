@@ -49,7 +49,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-Functional WB = HardSpheresNoTensor(1.0);
+Functional WB = HardSpheresNoTensor2(1.0);
 Functional WBT = HardSpheresWBFast(1.0);
 Functional WBm2 = HardSpheresWBm2(1.0);
 
@@ -130,9 +130,9 @@ void run_spherical_solute(double diam, double eta, double z_particle, const char
 
   const double meandensity = eta/(4*M_PI/3);
 
-  Functional f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas());
+  Functional f = OfEffectivePotential(HardSpheresNoTensor2(1.0) + IdealGas());
   double mu = find_chemical_potential(f, 1, meandensity);
-  f = OfEffectivePotential(HardSpheresNoTensor(1.0) + IdealGas()
+  f = OfEffectivePotential(HardSpheresNoTensor2(1.0) + IdealGas()
                            + ChemicalPotential(mu));
 
   const double zmax = width + 2*spacing;
