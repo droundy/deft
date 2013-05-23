@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <time.h>
-#include "Monte-Carlo/monte-carlo.h"
+
+#include <Eigen/Core>
+#include "MersenneTwister.h"
+USING_PART_OF_NAMESPACE_EIGEN
+
 #include <cassert>
 #include <math.h>
 #include <stdlib.h> 
 #include <string.h>
-#include <vector>
-using std::vector;
-using std::string;
 
+double ran();
+Vector3d ran3();
 
+inline double distance(Vector3d v1, Vector3d v2){
+  return (v1 - v2).norm();
+}
+
+Vector3d move(Vector3d v, double R);
 long shell(Vector3d v, long div, double *radius, double *sections);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
@@ -114,18 +122,25 @@ int main(int argc, char *argv[]){
       return 1;
     }
   }
-  printf("flatdiv = %s\n", flat_div ? "true" : "false");
-  printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
-  printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
+  //printf("flatdiv = %s\n", flat_div ? "true" : "false");
+  //printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
+  //printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
   latx = Vector3d(lenx,0,0);
   laty = Vector3d(0,leny,0);
   latz = Vector3d(0,0,lenz);
   lat[0] = latx;
   lat[1] = laty;
   lat[2] = latz;
-  double pressure = 0;
+  double volume = lenx*leny*lenz;
+  if (spherical_inner_wall){
+    volume = (4*M_PI*(1/3))*(rad*rad*rad)-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad);
+  } else if (spherical_outer_wall) {
+    volume = lenx*leny*lenz;
+  }
+
   const char *outfilename = argv[4];
   const long N = atol(argv[1]);
+  const long iterations_per_pressure_check = 10*N;
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   long workingMovesCount = 0;
@@ -160,34 +175,42 @@ int main(int argc, char *argv[]){
   clock_t start = clock();
   long num_to_time = 100*N;
   long num_timed = 0;
-  long i = 0;
   double scale = .005;
   
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
-  for (i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
-  double initialPE = potentialEnergy(spheres,N,R);
-  printf("%g\n",initialPE);
-  double changePE = initialPE;
-  int counter = 0;
-  printf("%g\n",changePE);
-  do {
-    counter = counter + 1;
-    initialPE = changePE;
-    for (i=0;i<N;i++) {
-      Vector3d temp = move(spheres[i],scale);
-      if(!overlap(spheres, temp, N, R, i)){
-        spheres[i]=temp;
+  for (int i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
+  {
+    // First we'll run the simulation a while to get to a decent
+    // starting point...
+    const long paranoia = 20; // How careful must we be to wait a long
+                              // time while initializing.
+    double initialPE = potentialEnergy(spheres,N,R);
+    double changePE = initialPE;
+    double new_pressure = calcPressure(spheres, N, volume), initial_pressure;
+    int counter = 0;
+    do {
+      counter = counter + 1;
+      initialPE = changePE;
+      initial_pressure = new_pressure;
+      for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
+        for (int i=0;i<N;i++) {
+          Vector3d temp = move(spheres[i],scale);
+          if(!overlap(spheres, temp, N, R, i)){
+            spheres[i]=temp;
+          }
+        }
       }
-    }
-    changePE = potentialEnergy(spheres,N,R);
-    if (counter > 100){
-      printf("Potential Energy is %g\n",changePE);
-      counter = 0;
-    }
-  } while (initialPE >= changePE );//&& counter < 50);
-  if (initialPE > changePE ) printf("found good state\n");
-  
+      changePE = potentialEnergy(spheres,N,R);
+      new_pressure = calcPressure(spheres, N, volume);
+      if (counter%1 == 0)
+        printf("Potential energy is %g and pressure is %g\n",changePE, new_pressure);
+    } while (initialPE >= changePE || initial_pressure >= new_pressure);
+    if (initialPE > changePE ) printf("Found good state in %d tries.\n", counter);
+    else if (initialPE == 0) printf("It started out in a good state.\n");
+    else printf("Couldn't improve the energy from %g.\n", initialPE);
+  }
+
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;
   if (maxrad/div < dxmin) div = int(maxrad/dxmin);
@@ -196,19 +219,16 @@ int main(int argc, char *argv[]){
 
   double *radius = new double[div+1];
   double *sections = new double [div+1];
-  double volume;
   double *distriShells = new double[div+1];
   double *shellsRadius = new double[div+1];
 
   if (flat_div){
     double size = lenz/div;
-    volume = lenz*lenx*leny;
     for (long s=0; s<div+1; s++){
       sections[s] = size*s - lenz/2.0;
     }
   }
   if (spherical_inner_wall){
-    volume = (4*M_PI*(1/3))*(rad*rad*rad)-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad);
     double size = rad/div;
     for (long s=0; s<div+1; s++){
       radius[s] = size*s;
@@ -216,7 +236,6 @@ int main(int argc, char *argv[]){
     }
   } else {
     double size = rad/div;
-    volume = lenx*leny*lenz;
     const double w = 1.0/(1 + dxmin*div);
     for (long l=0;l<div+1;l++) {
       // make each bin have about the same volume
@@ -255,10 +274,12 @@ int main(int argc, char *argv[]){
   num_timed = 0;
   double secs_per_iteration = 0;
   long workingmoves=0;
+  long num_pressures_in_sum=0;
+  double pressure_sum = 0;
 
 
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
-  clock_t max_output_period = CLOCKS_PER_SEC*60*60; // top out at one hour interval
+  clock_t max_output_period = CLOCKS_PER_SEC*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   for (long j=0; j<iterations; j++){
     num_timed = num_timed + 1;
@@ -276,7 +297,7 @@ int main(int argc, char *argv[]){
         num_to_time = long(60/secs_per_iteration);
       }
       start = now;
-      if (now > last_output + output_period) {
+      if (now > last_output + output_period || j == iterations-1) {
         last_output = now;
         if (output_period < max_output_period/2) {
           output_period *= 2;
@@ -349,10 +370,13 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", pressureFileName);
           return 1;
         }
-        fprintf(pressureFile, "%g\n", (N/volume)*kT - pressure);
+        delete[] pressureFileName;
+        if (num_pressures_in_sum > 0)
+          fprintf(pressureFile, "%g\n", pressure_sum/num_pressures_in_sum);
+        else
+          printf("No pressure data yet after %ld iterations vs NxN=%ld...\n", workingmoves, N*N);
         fflush(stdout);
         fclose(pressureFile);
-        
         
         char *debugname = new char[10000];
         sprintf(debugname, "%s.debug", outfilename);
@@ -393,9 +417,13 @@ int main(int argc, char *argv[]){
 	  }
       	}
       }
-      
-      pressure = calcPressure(spheres, N, volume)/workingMovesCount;
-      
+    }
+    if (workingmoves%(10*N) == 0 && workingmoves > 0) {
+      double newpress = calcPressure(spheres, N, volume);
+      if (isnan(newpress)) printf("Got NaN trouble.\n");
+      else printf("Pressure is %g, energy is %g\n", newpress, potentialEnergy(spheres,N,R));
+      pressure_sum += calcPressure(spheres, N, volume);
+      num_pressures_in_sum += 1;
     }
    
     
@@ -827,10 +855,7 @@ double calcPressure(Vector3d *spheres, long N, double volume){
     }
   }
     //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*(-2*eps/(2*R));
-  return (1/(3*volume))*totalOverLap;
-  //moved ideal gas eq. to the dataa output so it isnt averaged over
-
-  
+  return (N/volume)*kT - (1/(3*volume))*totalOverLap;
 }
 
 
