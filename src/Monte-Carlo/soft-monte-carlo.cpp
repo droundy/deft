@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
   const char *outfilename = argv[4];
   const long N = atol(argv[1]);
   const long iterations_per_pressure_check = 10*N;
-  const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
+  long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   long workingMovesCount = 0;
 
@@ -183,12 +183,12 @@ int main(int argc, char *argv[]){
   {
     // First we'll run the simulation a while to get to a decent
     // starting point...
-    const long paranoia = 20; // How careful must we be to wait a long
-                              // time while initializing.
+    long paranoia = 20; // How careful must we be to wait a long time while initializing.
     double initialPE = potentialEnergy(spheres,N,R);
     double changePE = initialPE;
     double new_pressure = calcPressure(spheres, N, volume), initial_pressure;
-    int counter = 0;
+    long counter = 0;
+    long iters_initializing = 0;
     do {
       counter = counter + 1;
       initialPE = changePE;
@@ -199,17 +199,35 @@ int main(int argc, char *argv[]){
           if(!overlap(spheres, temp, N, R, i)){
             spheres[i]=temp;
           }
+          iters_initializing++;
         }
       }
       changePE = potentialEnergy(spheres,N,R);
       new_pressure = calcPressure(spheres, N, volume);
-      if (counter%1 == 0)
-        printf("Potential energy is %g and pressure is %g\n",changePE, new_pressure);
-    } while (initialPE >= changePE || initial_pressure >= new_pressure);
-    if (initialPE > changePE ) printf("Found good state in %d tries.\n", counter);
+      if (counter%1 == 0) {
+        printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
+               changePE, new_pressure, paranoia);
+        fflush(stdout);
+      }
+      paranoia = long(paranoia*1.2); // get a little more paranoid each time...
+    } while (initialPE > changePE || initial_pressure > new_pressure);
+    if (initialPE > changePE ) printf("Found good state in %ld tries.\n", counter);
     else if (initialPE == 0) printf("It started out in a good state.\n");
     else printf("Couldn't improve the energy from %g.\n", initialPE);
+
+    printf("I think we should scan every %ld iterations_per_pressure_check...\n", paranoia);
+
+    // At this stage, iters_initializing is the number of iterations
+    // we spent trying to get the system into a decent starting state.
+    // It seems risky to not run the simulation much more than we
+    // needed just to get it to a reasonable starting state.  So here
+    // we increase the number of iterations accordingly.
+    const long extra_iterations = 4*iters_initializing;
+    printf("running with an extra %ld iterations. (%.2f%% increase)\n",
+           extra_iterations, 100*double(extra_iterations)/iterations);
+    iterations += extra_iterations;
   }
+
 
   long div = uncertainty_goal*uncertainty_goal*iterations;
   if (div < 10) div = 10;
@@ -279,7 +297,7 @@ int main(int argc, char *argv[]){
 
 
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
-  clock_t max_output_period = CLOCKS_PER_SEC*60; // top out at one hour interval
+  clock_t max_output_period = CLOCKS_PER_SEC*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   for (long j=0; j<iterations; j++){
     num_timed = num_timed + 1;
@@ -299,9 +317,10 @@ int main(int argc, char *argv[]){
       start = now;
       if (now > last_output + output_period || j == iterations-1) {
         last_output = now;
-        if (output_period < max_output_period/2) {
-          output_period *= 2;
-        } else if (output_period < max_output_period) {
+        const double increase_ratio = 1.2;
+        if (output_period < max_output_period/increase_ratio) {
+          output_period *= increase_ratio;
+        } else {
           output_period = max_output_period;
         }
         {
@@ -363,29 +382,22 @@ int main(int argc, char *argv[]){
         }
         fflush(stdout);
         fclose(out);
-	char *pressureFileName = new char[10000];
-        sprintf(pressureFileName, "%s.prs", outfilename);
-        FILE *pressureFile = fopen(pressureFileName, "a");
-        if (pressureFile == NULL) {
-          printf("Error creating file %s\n", pressureFileName);
-          return 1;
-        }
-        delete[] pressureFileName;
-        if (num_pressures_in_sum > 0)
+        if (num_pressures_in_sum > 0) {
+          char *pressureFileName = new char[10000];
+          sprintf(pressureFileName, "%s.prs", outfilename);
+          FILE *pressureFile = fopen(pressureFileName, "w");
+          if (pressureFile == NULL) {
+            printf("Error creating file %s\n", pressureFileName);
+            return 1;
+          }
+          delete[] pressureFileName;
           fprintf(pressureFile, "%g\n", pressure_sum/num_pressures_in_sum);
-        else
-          printf("No pressure data yet after %ld iterations vs NxN=%ld...\n", workingmoves, N*N);
-        fflush(stdout);
-        fclose(pressureFile);
-        
-        char *debugname = new char[10000];
-        sprintf(debugname, "%s.debug", outfilename);
-        FILE *spheredebug = fopen(debugname, "w");
-        for(long i=0; i<N; i++) {
-          fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
+          fclose(pressureFile);
+        } else {
+          printf("No pressure data yet after %ld iterations\n", workingmoves);
+          fflush(stdout);
         }
-        fclose(spheredebug);
-        delete[] debugname;
+        
         fflush(stdout);
       }
       ///////////////////////////////////////////end of print.dat
@@ -420,8 +432,13 @@ int main(int argc, char *argv[]){
     }
     if (workingmoves%(10*N) == 0 && workingmoves > 0) {
       double newpress = calcPressure(spheres, N, volume);
-      if (isnan(newpress)) printf("Got NaN trouble.\n");
-      else printf("Pressure is %g, energy is %g\n", newpress, potentialEnergy(spheres,N,R));
+      const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
+      if (isnan(newpress)) {
+        printf("Got NaN trouble.\n");
+        exit(1);
+      }
+      //printf("Pressure is %g (excess pressure: %g), energy is %g\n",
+      //       newpress, excpress, potentialEnergy(spheres,N,R));
       pressure_sum += calcPressure(spheres, N, volume);
       num_pressures_in_sum += 1;
     }
@@ -443,20 +460,9 @@ int main(int argc, char *argv[]){
       } else {
         printf("%.0f%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
       }
-      char *debugname = new char[10000];
-      sprintf(debugname, "%s.debug", outfilename);
-      FILE *spheredebug = fopen(debugname, "w");
-      for(long i=0; i<N; i++) {
-        fprintf(spheredebug, "%g\t%g\t%g\n", spheres[i][0],spheres[i][1],spheres[i][2]);
-      }
-      fclose(spheredebug);
-      delete[] debugname;
       fflush(stdout);
     }
   }
-  char * counterout = new char[10000];
-  sprintf(counterout, "monte-carlo-count-%s-%d.dat", argv[1], int (rad));
-  FILE *countout = fopen(counterout,"w");
   
   //////////////////////////////////////////////////////////////////////////////////////////
   
@@ -474,7 +480,6 @@ int main(int argc, char *argv[]){
   delete[] spheres;
 
   fflush(stdout);
-  fclose(countout);
 }
 
 
