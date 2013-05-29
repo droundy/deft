@@ -482,11 +482,23 @@ int main(int argc, char *argv[]){
   fflush(stdout);
 }
 
+inline double sqr(double x) {
+  return x*x;
+}
 
+inline double potential(double r) {
+  if (r >= 2*R) return 0;
+  return eps*sqr(1-r/(2*R));
+}
+
+inline double force(double r) {
+  if (r >= 2*R) return 0;
+  return eps*(1-r/(2*R))/(2*R);
+}
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
-  double totalOverLapNew = 0.0;
-  double totalOverLapOld = 0.0;
+  double energyNew = 0.0;
+  double energyOld = 0.0;
   if (spherical_outer_wall){
     if (distance(v,Vector3d(0,0,0)) > rad) return true;
   }
@@ -507,35 +519,35 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     fabs(v[1]) + 2*R >= leny/2,
     fabs(v[2]) + 2*R >= lenz/2
   };
+  bool wasonborder[3] = {
+    fabs(spheres[s][0]) + 2*R >= lenx/2,
+    fabs(spheres[s][1]) + 2*R >= leny/2,
+    fabs(spheres[s][2]) + 2*R >= lenz/2
+  };
 
   // Energy before potential move  
   for(long i = 0; i < n; i++){
     if (i!=s){
-      if(distance(spheres[i],spheres[s])<2*R){
-        totalOverLapOld = totalOverLapOld + eps*(1-distance(spheres[s],spheres[i])*(1/(2*R)))*(1-distance(spheres[s],spheres[i])*(1/(2*R)));
-      }
+      energyOld += potential(distance(spheres[i],spheres[s]));
     }
   }
   
   for (long k=0; k<3; k++) {
-    if (periodic[k] && amonborder[k]) {
+    if (periodic[k] && wasonborder[k]) {
       for(long i = 0; i < n; i++) {
         if (i!=s){
-          if (distance(spheres[s],spheres[i]+lat[k]) < 2*R){
-	    totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)));
-	  }
-          
-	  if (distance(spheres[s],spheres[i]-lat[k]) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)));
+          energyOld += potential(distance(spheres[s],spheres[i]+lat[k]));
+          energyOld += potential(distance(spheres[s],spheres[i]-lat[k]));
         }
       }
       for (long m=k+1; m<3; m++){
-        if (periodic[m] && amonborder[m]){
+        if (periodic[m] && wasonborder[m]){
           for(long i = 0; i < n; i++) {
             if (i!=s){
-              if (distance(spheres[s],spheres[i]+lat[k]+lat[m]) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+lat[k]+lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k]+lat[m])*(1/(2*R)));
-              if (distance(spheres[s],spheres[i]-lat[k]-lat[m]) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-lat[k]-lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k]-lat[m])*(1/(2*R)));
-              if (distance(spheres[s],spheres[i]+lat[k]-lat[m]) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+lat[k]-lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k]-lat[m])*(1/(2*R)));
-              if (distance(spheres[s],spheres[i]-lat[k]+lat[m]) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-lat[k]+lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k]+lat[m])*(1/(2*R)));
+              energyOld += potential(distance(spheres[s],spheres[i]+lat[k]+lat[m]));
+              energyOld += potential(distance(spheres[s],spheres[i]-lat[k]-lat[m]));
+              energyOld += potential(distance(spheres[s],spheres[i]+lat[k]-lat[m]));
+              energyOld += potential(distance(spheres[s],spheres[i]-lat[k]+lat[m]));
             }
           }
         }
@@ -543,70 +555,63 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   if (periodic[0] && periodic[1] && periodic[2]
-      && amonborder[0] && amonborder[1] && amonborder[2]){
+      && wasonborder[0] && wasonborder[1] && wasonborder[2]){
     for(long i = 0; i < n; i++) {
       if (i!=s){
-        if (distance(spheres[s],spheres[i]+latx+laty+latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]+latx+laty-latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]+latx-laty+latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]-latx+laty+latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]-latx-laty+latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]-latx+laty-latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]+latx-laty-latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)));
-	      if (distance(spheres[s],spheres[i]-latx-laty-latz) < 2*R) totalOverLapOld = totalOverLapOld + eps*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)));
+        energyOld += potential(distance(spheres[s],spheres[i]+latx+laty+latz));
+        energyOld += potential(distance(spheres[s],spheres[i]+latx+laty-latz));
+        energyOld += potential(distance(spheres[s],spheres[i]+latx-laty+latz));
+        energyOld += potential(distance(spheres[s],spheres[i]-latx+laty+latz));
+        energyOld += potential(distance(spheres[s],spheres[i]-latx-laty+latz));
+        energyOld += potential(distance(spheres[s],spheres[i]-latx+laty-latz));
+        energyOld += potential(distance(spheres[s],spheres[i]+latx-laty-latz));
+        energyOld += potential(distance(spheres[s],spheres[i]-latx-laty-latz));
       }
     }
   }
   // Energy after potential move
   for(long i = 0; i < n; i++){
-    if (i!=s){
-      if(distance(spheres[i],v)<2*R){
-        totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i])*(1/(2*R)))*(1 - distance(v,spheres[i])*(1/(2*R)));
-      }
-    }
+    if (i!=s) energyNew += potential(distance(spheres[i],v));
   }
 
   for (long k=0; k<3; k++) {
     if (periodic[k] && amonborder[k]) {
       for(long i = 0; i < n; i++) {
         if (i!=s){
-          if (distance(v,spheres[i]+lat[k]) < 2*R){
-	          totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+lat[k])*(1/(2*R)))*(1 - distance(v,spheres[i]+lat[k])*(1/(2*R)));
-	        }
-          
-	        if (distance(v,spheres[i]-lat[k]) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-lat[k])*(1/(2*R)))*(1 - distance(v,spheres[i]-lat[k])*(1/(2*R)));
+          energyNew += potential(distance(v,spheres[i]+lat[k]));
+          energyNew += potential(distance(v,spheres[i]-lat[k]));
         }
       }
       for (long m=k+1; m<3; m++){
         if (periodic[m] && amonborder[m]){
           for(long i = 0; i < n; i++) {
             if (i!=s){
-              if (distance(v,spheres[i]+lat[k]+lat[m]) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+lat[k]+lat[m])*(1/(2*R)))*(1 - distance(v,spheres[i]+lat[k]+lat[m])*(1/(2*R)));
-              if (distance(v,spheres[i]-lat[k]-lat[m]) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-lat[k]-lat[m])*(1/(2*R)))*(1 - distance(v,spheres[i]-lat[k]-lat[m])*(1/(2*R)));
-              if (distance(v,spheres[i]+lat[k]-lat[m]) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+lat[k]-lat[m])*(1/(2*R)))*(1 - distance(v,spheres[i]+lat[k]-lat[m])*(1/(2*R)));
-              if (distance(v,spheres[i]-lat[k]+lat[m]) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-lat[k]+lat[m])*(1/(2*R)))*(1 - distance(v,spheres[i]-lat[k]+lat[m])*(1/(2*R)));
+              energyNew += potential(distance(v,spheres[i]+lat[k]+lat[m]));
+              energyNew += potential(distance(v,spheres[i]-lat[k]-lat[m]));
+              energyNew += potential(distance(v,spheres[i]+lat[k]-lat[m]));
+              energyNew += potential(distance(v,spheres[i]-lat[k]+lat[m]));
             }
           }
         }
       }
-    } 
+    }
   }
   if (periodic[0] && periodic[1] && periodic[2]
       && amonborder[0] && amonborder[1] && amonborder[2]){
     for(long i = 0; i < n; i++) {
       if (i!=s){
-        if (distance(v,spheres[i]+latx+laty+latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+latx+laty+latz)*(1/(2*R)))*(1 - distance(v,spheres[i]+latx+laty+latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]+latx+laty-latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+latx+laty-latz)*(1/(2*R)))*(1 - distance(v,spheres[i]+latx+laty-latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]+latx-laty+latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+latx-laty+latz)*(1/(2*R)))*(1 - distance(v,spheres[i]+latx-laty+latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]-latx+laty+latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-latx+laty+latz)*(1/(2*R)))*(1 - distance(v,spheres[i]-latx+laty+latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]-latx-laty+latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-latx-laty+latz)*(1/(2*R)))*(1 - distance(v,spheres[i]-latx-laty+latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]-latx+laty-latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-latx+laty-latz)*(1/(2*R)))*(1 - distance(v,spheres[i]-latx+laty-latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]+latx-laty-latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]+latx-laty-latz)*(1/(2*R)))*(1 - distance(v,spheres[i]+latx-laty-latz)*(1/(2*R)));
-	      if (distance(v,spheres[i]-latx-laty-latz) < 2*R) totalOverLapNew = totalOverLapNew + eps*(1 - distance(v,spheres[i]-latx-laty-latz)*(1/(2*R)))*(1 - distance(v,spheres[i]-latx-laty-latz)*(1/(2*R)));
+        energyNew += potential(distance(v,spheres[i]+latx+laty+latz));
+        energyNew += potential(distance(v,spheres[i]+latx+laty-latz));
+        energyNew += potential(distance(v,spheres[i]+latx-laty+latz));
+        energyNew += potential(distance(v,spheres[i]-latx+laty+latz));
+        energyNew += potential(distance(v,spheres[i]-latx-laty+latz));
+        energyNew += potential(distance(v,spheres[i]-latx+laty-latz));
+        energyNew += potential(distance(v,spheres[i]+latx-laty-latz));
+        energyNew += potential(distance(v,spheres[i]-latx-laty-latz));
       }
     }
   }
-  double probabilityOfChange = exp((totalOverLapNew-totalOverLapOld)/-kT);
+  double probabilityOfChange = exp((energyNew-energyOld)/-kT);
   double doesItChange = ran();
   if (doesItChange <= probabilityOfChange) return false;
   else return true;
