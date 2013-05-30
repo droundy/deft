@@ -20,7 +20,6 @@ inline double distance(Vector3d v1, Vector3d v2){
 Vector3d move(Vector3d v, double R);
 long shell(Vector3d v, long div, double *radius, double *sections);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
-Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double calcPressure(Vector3d *spheres, long N, double volume);
 double potentialEnergy(Vector3d *spheres, long n, double R);
 inline Vector3d fixPeriodic(Vector3d newv);
@@ -425,15 +424,15 @@ int main(int argc, char *argv[]){
       workingMovesCount++;
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
-        for (long i=0; i<N; i++){             
-	  for (long k=0; k<div; k++) {
-	    Vector3d vri = spheres[i]-spheres[s];
-	    vri = fixPeriodic(vri);
-	    const double ri = distance(vri,Vector3d(0,0,0));
-	    if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
-		shellsFilled[k]++;
-	      }  
-	  }
+        for (long i=0; i<N; i++){
+          for (long k=0; k<div; k++) {
+            Vector3d vri = spheres[i]-spheres[s];
+            vri = fixPeriodic(vri);
+            const double ri = distance(vri,Vector3d(0,0,0));
+            if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
+              shellsFilled[k]++;
+            }
+          }
       	}
       }
     }
@@ -648,10 +647,9 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
         for(long i = 0; i < n; i++) {
           if (i!=s){
             if (distance(spheres[s],spheres[i]+lat[k]) < 2*R){
-	      potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)));
-	    }
-	    
-	    if (distance(spheres[s],spheres[i]-lat[k]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)));
+              potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)));
+            }
+            if (distance(spheres[s],spheres[i]-lat[k]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)));
           }
         }
         for (long m=k+1; m<3; m++){
@@ -673,16 +671,16 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
       for(long i = 0; i < n; i++) {
         if (i!=s){
           if (distance(spheres[s],spheres[i]+latx+laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]+latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]+latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]-latx+laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]-latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]-latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]+latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)));
-	  if (distance(spheres[s],spheres[i]-latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]+latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]+latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]-latx+laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]-latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]-latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]+latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)));
+          if (distance(spheres[s],spheres[i]-latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)));
         }
       }
-    }  
+    }
   }
   
   return potEnergy;
@@ -722,92 +720,6 @@ Vector3d move(Vector3d v,double scale){
   return fixPeriodic(newv);
 }
 
-
-Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
-  const double dvw = distance(v,w);
-  // The following is a hack to avoid doing many distance calculations
-  // in cases where we can be certain that periodic boundaries
-  // couldn't be allowing these two spheres to touch.  It makes a
-  // shocking difference in the overall speed, when we have periodic
-  // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return (w + v)/2;
-  if (dvw < 2*oShell) return (w + v)/2;
-  
-  // Now we check for all the possible ways the two spheres could
-  // touch across the cell in periodic directions...
-  //return false;
-  for (long k=0; k<3; k++){
-    if (periodic[k]){
-      if (distance(v,w+lat[k]) < 2*oShell) return fixPeriodic((v + w + lat[k])/2);
-      if (distance(v,w-lat[k]) < 2*oShell) return fixPeriodic((v + w - lat[k])/2);
-      for (long m=k+1; m<3; m++){
-        if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]+lat[m])/2);
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]-lat[m])/2);
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return fixPeriodic((v+w+lat[k]-lat[m])/2);
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return fixPeriodic((v+w-lat[k]+lat[m])/2);
-        }
-      }
-    }
-  }
-  if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic((v+w+latx+laty+latz)/2);
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic((v+w+latx+laty-latz)/2);
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic((v+w+latx-laty+latz)/2);
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic((v+w-latx+laty+latz)/2);
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic((v+w-latx-laty+latz)/2);
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic((v+w-latx+laty-latz)/2);
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
-  }
-  printf("BUGHHHH@!:\n");
-  exit(1);
-}
-
-bool touch(Vector3d w, Vector3d v, double oShell){
-  const double dvw = distance(v,w);
-  if (dvw < 2*oShell) return true;
-  // The following is a hack to avoid doing many distance calculations
-  // in cases where we can be certain that periodic boundaries
-  // couldn't be allowing these two spheres to touch.  It makes a
-  // shocking difference in the overall speed, when we have periodic
-  // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return false;
-
-  // Now we check for all the possible ways the two spheres could
-  // touch across the cell in periodic directions...
-  //return false;
-  for (long k=0; k<3; k++){
-    if (periodic[k]){
-      if (distance(v,w+lat[k]) < 2*oShell) return true;
-      if (distance(v,w-lat[k]) < 2*oShell) return true;
-      for (long m=k+1; m<3; m++){
-        if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
-        }
-      }
-    }
-  }
-  if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return true;
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return true;
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return true;
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return true;
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return true;
-  }
-  return false;
-}
-
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
   return (-2*eps/(2*R))*(1-rij/(2*R))*rij;
@@ -822,7 +734,7 @@ double calcPressure(Vector3d *spheres, long N, double volume){
       fabs(v[1]) + 2*R >= leny/2,
       fabs(v[2]) + 2*R >= lenz/2
       };
-        
+    
     for(long i = 0; i < N; i++){
       if (i!=s){
         if(distance(spheres[i],spheres[s])<2*R){
@@ -859,19 +771,19 @@ double calcPressure(Vector3d *spheres, long N, double volume){
       for(long i = 0; i < N; i++) {
         if (i!=s){
           totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty+latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty-latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty+latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty+latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty+latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty-latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty-latz));
-	  totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty-latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty+latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty+latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty+latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty-latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty-latz));
+          totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
           //totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
         }
       }
     }
   }
-    //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*(-2*eps/(2*R));
+  //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*(-2*eps/(2*R));
   return (N/volume)*kT - (1/(3*volume))*totalOverLap;
 }
 
