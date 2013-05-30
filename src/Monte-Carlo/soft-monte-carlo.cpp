@@ -47,12 +47,11 @@ Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 
 bool periodic[3] = {false, false, false};
-const double dxmin = 0.1;
 inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 6) {
-    printf("usage:  %s Nspheres iterations*N kT uncertainty_goal filename \n there will be more!\n", argv[0]);
+    printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
   
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]){
   const char *outfilename = argv[4];
   const long N = atol(argv[1]);
   const long iterations_per_pressure_check = 10*N;
-  long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
+  const double dx_goal = atof(argv[2]);
   const double uncertainty_goal = atof(argv[3]);
   long workingMovesCount = 0;
 
@@ -150,7 +149,7 @@ int main(int argc, char *argv[]){
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
     return 1;
   }
-  printf("running with %ld spheres for %ld iterations.\n", N, iterations);
+  printf("running with %ld spheres.\n", N);
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // We start with randomly-placed spheres, and then gradually wiggle
@@ -176,6 +175,7 @@ int main(int argc, char *argv[]){
   long num_to_time = 100*N;
   long num_timed = 0;
   double scale = .005;
+  long iterations = 0;
   
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
@@ -221,17 +221,24 @@ int main(int argc, char *argv[]){
     // we spent trying to get the system into a decent starting state.
     // It seems risky to not run the simulation much more than we
     // needed just to get it to a reasonable starting state.  So here
-    // we increase the number of iterations accordingly.
-    const long extra_iterations = 4*iters_initializing;
-    printf("running with an extra %ld iterations. (%.2f%% increase)\n",
-           extra_iterations, 100*double(extra_iterations)/iterations);
-    iterations += extra_iterations;
+    // we set the number of iterations accordingly.
+    iterations = 4*iters_initializing;
+    printf("running with an extra %ld iterations.\n", iterations);
   }
+  if (dx_goal == 0) {
+    // This indicates that we are not interested in density variation
+    // at all!
+    iterations += 1.0/(N*uncertainty_goal*uncertainty_goal);
+  } else {
+    // The following should give us approaximately uncertainty_goal
+    // uncertainty in the density in each bin, assuming all the bins
+    // have an equal volume.
+    iterations += 1.0/(N*(dx_goal/maxrad)*uncertainty_goal*uncertainty_goal);
+  }
+  printf("Running for a total of %ld iterations.\n", iterations);
 
-
-  long div = uncertainty_goal*uncertainty_goal*iterations;
+  long div = maxrad/dx_goal;
   if (div < 10) div = 10;
-  if (maxrad/div < dxmin) div = int(maxrad/dxmin);
   printf("Using %ld divisions, dx ~ %g\n", div, maxrad/div);
   fflush(stdout);
 
@@ -254,7 +261,7 @@ int main(int argc, char *argv[]){
     }
   } else {
     double size = rad/div;
-    const double w = 1.0/(1 + dxmin*div);
+    const double w = 1.0/(1 + dx_goal*div);
     for (long l=0;l<div+1;l++) {
       // make each bin have about the same volume
       shellsRadius[l]=size*l;

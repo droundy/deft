@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 from pylab import *
 from scipy.special import erf
+import os
 
 #Constants and variables
 #k_b = 8.6173324*10**(-5) # in eV
@@ -19,6 +20,14 @@ R = 1# in Angstroms
 density = arange(0, .8 - .001/2, .001)/(4*pi/3)
 #gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 #sg = sqrt(gamma)
+
+eta = density*4*pi/3
+#P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
+P_cs = density*(1+eta+eta**2)/(1-eta)**3
+#plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
+
+
+colors = { 0.1: 'r', 0.01: 'b', 0.001: 'g', 0.0001: 'k', 0.00001: 'm' }
 
 Temp = 0.00001
 while Temp <= .011:
@@ -54,16 +63,24 @@ while Temp <= .011:
   dPhi_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
 
   pressure = Temp*(density*dPhi_dn - Phi) + density*Temp 
-  plot(density*(4*pi/3),pressure/Temp, label = 'T/V0=%.2e' %Temp)
-  Temp = Temp*sqrt(10)
+  plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%.2e' %Temp)
+  Temp = Temp*10 # sqrt(10)
 
-eta = density*4*pi/3
-#P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
-P_cs = density*.001*(1+eta+eta**2)/(1-eta)**3
-plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
+for ff in arange(0,0.8, 0.1):
+  density = ff/(4*pi/3)
+  phs = density*(1+ff+ff**2)/(1-ff)**3
+  for temp in [0.1, 0.01, 0.001]:
+    fname = 'figs/mc-%.4f-%.4f.dat.prs' % (ff, temp)
+    if os.path.exists(fname):
+      p = loadtxt(fname)
+      plot(ff, p/temp/phs, colors[temp] + 'o')
+
+#plot(density*(4*pi/3), density, label = 'ideal gas')
+
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
-xlabel('Packing fraction')
-ylabel('Pressure/Temp')
+xlabel('packing fraction')
+ylabel('pressure / hard-sphere pressure')
 legend(loc = 'best')
 savefig('figs/p-vs-packing.pdf', bbox_inches=0)
+show()
