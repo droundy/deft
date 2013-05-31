@@ -63,17 +63,20 @@ while Temp <= .011:
   dPhi_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
 
   pressure = Temp*(density*dPhi_dn - Phi) + density*Temp 
-  plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%.2e' %Temp)
+  plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%g' %Temp)
   Temp = Temp*10 # sqrt(10)
 
-for ff in arange(0,0.8, 0.1):
+for ff in arange(0.1,0.8, 0.1):
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
-  for temp in [0.1, 0.01, 0.001]:
+  for temp in [0.1, 0.01, 0.001, 0.0001]:
     fname = 'figs/mc-%.4f-%.4f.dat.prs' % (ff, temp)
     if os.path.exists(fname):
+      print 'found', fname
       p = loadtxt(fname)
       plot(ff, p/temp/phs, colors[temp] + 'o')
+    else:
+      print 'could not find', fname
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
 

@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
   const long iterations_per_pressure_check = 10*N;
   const double dx_goal = atof(argv[2]);
   const double uncertainty_goal = atof(argv[3]);
-  long workingMovesCount = 0;
+  long density_saved_count = 0;
 
   Vector3d *spheres = new Vector3d[N];
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
@@ -173,7 +173,16 @@ int main(int argc, char *argv[]){
   clock_t start = clock();
   long num_to_time = 100*N;
   long num_timed = 0;
-  double scale = .005;
+  double scale = .1;
+  // Here we use a hokey heuristic to decide on an average move
+  // distance, which is proportional to the mean distance between
+  // spheres.
+  const double mean_spacing = pow(rad*rad*rad/N, 1.0/3);
+  if (mean_spacing > 2*R) {
+    scale = 2*(mean_spacing - 2*R);
+  }
+  printf("Using scale of %g\n", scale);
+
   long iterations = 0;
   
   // Let's move each sphere once, so they'll all start within our
@@ -183,46 +192,47 @@ int main(int argc, char *argv[]){
     // First we'll run the simulation a while to get to a decent
     // starting point...
     long paranoia = 20; // How careful must we be to wait a long time while initializing.
-    double initialPE = potentialEnergy(spheres,N,R);
-    double changePE = initialPE;
-    double new_pressure = calcPressure(spheres, N, volume), initial_pressure;
+    double oldPE = potentialEnergy(spheres,N,R);
+    double newPE = oldPE, olderPE;
     long counter = 0;
-    long iters_initializing = 0;
+    long iters_initializing = 0, successes_initializing = 0;
     do {
       counter = counter + 1;
-      initialPE = changePE;
-      initial_pressure = new_pressure;
+      olderPE = oldPE;
+      oldPE = newPE;
       for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
         for (int i=0;i<N;i++) {
           Vector3d temp = move(spheres[i],scale);
           if(!overlap(spheres, temp, N, R, i)){
             spheres[i]=temp;
+            successes_initializing++;
           }
           iters_initializing++;
         }
       }
-      changePE = potentialEnergy(spheres,N,R);
-      new_pressure = calcPressure(spheres, N, volume);
+      newPE = potentialEnergy(spheres,N,R);
+      const double pressure = calcPressure(spheres, N, volume);
       if (counter%1 == 0) {
         printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
-               changePE, new_pressure, paranoia);
+               newPE, pressure, paranoia);
         fflush(stdout);
       }
-      paranoia = long(paranoia*1.2); // get a little more paranoid each time...
-    } while (initialPE > changePE || initial_pressure > new_pressure);
-    if (initialPE > changePE ) printf("Found good state in %ld tries.\n", counter);
-    else if (initialPE == 0) printf("It started out in a good state.\n");
-    else printf("Couldn't improve the energy from %g.\n", initialPE);
+      paranoia = long(paranoia*1.4); // get a little more paranoid each time...
 
-    printf("I think we should scan every %ld iterations_per_pressure_check...\n", paranoia);
+      // We keep going until the energy increases twice.  This is a
+      // heuristic to try to avoid starting taking data before the
+      // system has reached equilibrium.
+    } while (olderPE > oldPE || oldPE > newPE);
+    printf("olderPE %g  oldPE %g  newPE %g\n", olderPE, oldPE, newPE);
 
     // At this stage, iters_initializing is the number of iterations
     // we spent trying to get the system into a decent starting state.
     // It seems risky to not run the simulation much more than we
     // needed just to get it to a reasonable starting state.  So here
     // we set the number of iterations accordingly.
-    iterations = 4*iters_initializing;
+    iterations = 4*(iters_initializing + iterations_per_pressure_check);
     printf("running with an extra %ld iterations.\n", iterations);
+    printf("success rate initializing was %.0f\n", 100*double(successes_initializing)/iters_initializing);
   }
   if (dx_goal == 0) {
     // This indicates that we are not interested in density variation
@@ -243,7 +253,6 @@ int main(int argc, char *argv[]){
 
   double *radius = new double[div+1];
   double *sections = new double [div+1];
-  double *distriShells = new double[div+1];
   double *shellsRadius = new double[div+1];
 
   if (flat_div){
@@ -273,24 +282,16 @@ int main(int argc, char *argv[]){
 
   printf("shellsRadius[dv+1] is is is  %g\n", shellsRadius[div]);
   printf("shell total volume %g\n", shellTotalVolume);
-  // Here we use a hokey heuristic to decide on an average move
-  // distance, which is proportional to the mean distance between
-  // spheres.
-  const double mean_spacing = pow(rad*rad*rad/N, 1.0/3);
-  if (mean_spacing > 2*R) {
-    scale = 2*(mean_spacing - 2*R);
-  } else {
-    scale = 0.1;
-  }
-  printf("Using scale of %g\n", scale);
+
   long count = 0;
   long *shells = new long[div];
+  long *radial_distributon_histogram = new long[div];
 
-  double *shellsFilled = new double [div];
   double *density = new double[div];
+  double *radial_distribution = new double[div+1];
   for (long l=0; l<div; l++) {
     shells[l] = 0;
-    distriShells[l]=0;
+    radial_distributon_histogram[l]=0;
   }
 
   num_to_time = 5000;
@@ -346,48 +347,64 @@ int main(int argc, char *argv[]){
             printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
           }
         }
+        for (long i=0; i<div; i++) {
+          const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
+          radial_distribution[i] = radial_distributon_histogram[i]*shellTotalVolume*(shellsRadius[div]-shellsRadius[0])/(Vi*density_saved_count*N*(N-1));
+        }
         if (!flat_div){
           for(long i=0; i<div; i++){
             double rmax = radius[i+1];
             double rmin = radius[i];
             density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N));
-            distriShells[i]=shellsFilled[i]*shellTotalVolume*(shellsRadius[div]-shellsRadius[0])/((shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI)*workingMovesCount*N*(N-1));   
           }
         } else {
           for(long i=0; i<div; i++){
             density[i]=shells[i]/(lenx*leny*lenz/div)/((j+1)/double(N));
-            distriShells[i]=shellsFilled[i]*shellTotalVolume*(shellsRadius[div]-shellsRadius[0])/((shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI)*workingMovesCount*N*(N-1)); 
           }
         }
         
 	
-        FILE *out = fopen((const char *)outfilename,"w");
+        FILE *out = fopen(outfilename,"w");
         if (out == NULL) {
           printf("Error creating file %s\n", outfilename);
           return 1;
         }
         if (flat_div){
-          fprintf(out, "%g\t%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0], 0.0, distriShells[0]);
+          fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
         } else if (spherical_inner_wall) {
           fprintf(out, "%g\t%g\n", radius[0], 0.0);
           fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
         } else {
-          fprintf(out, "%g\t%g\t%g\t%g\n" , 0.0, density[0], 0.0, distriShells[0]);
+          fprintf(out, "%g\t%g\n" , 0.0, density[0]);
         }
 	
         long divtoprint = div;
         if (!spherical_outer_wall) divtoprint = div - 1;
         if (!flat_div) {
           for(long i=1; i<divtoprint; i++){
-            fprintf(out, "%g\t%g\t%g\t%g\n", 0.5*(radius[i]+radius[i+1]), density[i],0.5*(shellsRadius[i]+shellsRadius[i+1]), distriShells[i]);
+            fprintf(out, "%g\t%g\n", 0.5*(radius[i]+radius[i+1]), density[i]);
           }
         } else {
           for(long i=1; i<div; i++){
-            fprintf(out, "%g\t%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i], 0.5*(shellsRadius[i]+shellsRadius[i+1]), distriShells[i]);
+            fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
           }
         }
-        fflush(stdout);
         fclose(out);
+
+        char *gfilename = new char[1000];
+        sprintf(gfilename, "%s.gradial", outfilename);
+        out = fopen(gfilename, "w");
+        if (out == NULL) {
+          printf("Error creating file %s\n", gfilename);
+          return 1;
+        }
+        fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
+        for (long i=1; i<div; i++) {
+          fprintf(out, "%g\t%g\n", 0.5*(shellsRadius[i-1]+shellsRadius[i]), radial_distribution[i]);
+        }
+        fclose(out);
+
+        fflush(stdout);
         if (num_pressures_in_sum > 0) {
           char *pressureFileName = new char[10000];
           sprintf(pressureFileName, "%s.prs", outfilename);
@@ -400,7 +417,8 @@ int main(int argc, char *argv[]){
           fprintf(pressureFile, "%g\n", pressure_sum/num_pressures_in_sum);
           fclose(pressureFile);
         } else {
-          printf("No pressure data yet after %ld iterations\n", workingmoves);
+          printf("No pressure data yet after %ld iterations, compared with %ld\n",
+                 j, iterations_per_pressure_check);
           fflush(stdout);
         }
         
@@ -420,8 +438,8 @@ int main(int argc, char *argv[]){
     
     // only write out the sphere positions after they've all had a
     // chance to move
-    if (workingmoves%N == 0) {
-      workingMovesCount++;
+    if (j%N == 0) {
+      density_saved_count++;
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
         for (long i=0; i<N; i++){
@@ -430,21 +448,21 @@ int main(int argc, char *argv[]){
             vri = fixPeriodic(vri);
             const double ri = distance(vri,Vector3d(0,0,0));
             if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
-              shellsFilled[k]++;
+              radial_distributon_histogram[k]++;
             }
           }
       	}
       }
     }
-    if (workingmoves%(10*N) == 0 && workingmoves > 0) {
+    if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
       double newpress = calcPressure(spheres, N, volume);
       const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
       if (isnan(newpress)) {
         printf("Got NaN trouble.\n");
         exit(1);
       }
-      //printf("Pressure is %g (excess pressure: %g), energy is %g\n",
-      //       newpress, excpress, potentialEnergy(spheres,N,R));
+      printf("Pressure is %g (excess pressure: %g), energy is %g\n",
+             newpress, excpress, potentialEnergy(spheres,N,R));
       pressure_sum += calcPressure(spheres, N, volume);
       num_pressures_in_sum += 1;
     }
@@ -635,31 +653,24 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
     };
     
     for(long i = s; i < n; i++){
-      if (i!=s){
-        if(distance(spheres[i],spheres[s])<2*R){
-          potEnergy = potEnergy + eps*(1-distance(spheres[s],spheres[i])*(1/(2*R)))*(1-distance(spheres[s],spheres[i])*(1/(2*R)));
-        }
-      }
+      if (i!=s) potEnergy += potential(distance(spheres[i],spheres[s]));
     }
-    
     for (long k=0; k<3; k++) {
       if (periodic[k] && amonborder[k]) {
         for(long i = 0; i < n; i++) {
           if (i!=s){
-            if (distance(spheres[s],spheres[i]+lat[k]) < 2*R){
-              potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k])*(1/(2*R)));
-            }
-            if (distance(spheres[s],spheres[i]-lat[k]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k])*(1/(2*R)));
+            potEnergy += potential(distance(spheres[s],spheres[i]+lat[k]));
+            potEnergy += potential(distance(spheres[s],spheres[i]-lat[k]));
           }
         }
         for (long m=k+1; m<3; m++){
           if (periodic[m] && amonborder[m]){
             for(long i = 0; i < n; i++) {
               if (i!=s){
-                if (distance(spheres[s],spheres[i]+lat[k]+lat[m]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+lat[k]+lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k]+lat[m])*(1/(2*R)));
-                if (distance(spheres[s],spheres[i]-lat[k]-lat[m]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-lat[k]-lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k]-lat[m])*(1/(2*R)));
-                if (distance(spheres[s],spheres[i]+lat[k]-lat[m]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+lat[k]-lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+lat[k]-lat[m])*(1/(2*R)));
-                if (distance(spheres[s],spheres[i]-lat[k]+lat[m]) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-lat[k]+lat[m])*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-lat[k]+lat[m])*(1/(2*R)));
+                potEnergy += potential(distance(spheres[s],spheres[i]+lat[k]+lat[m]));
+                potEnergy += potential(distance(spheres[s],spheres[i]-lat[k]-lat[m]));
+                potEnergy += potential(distance(spheres[s],spheres[i]+lat[k]-lat[m]));
+                potEnergy += potential(distance(spheres[s],spheres[i]-lat[k]+lat[m]));
               }
             }
           }
@@ -670,19 +681,18 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
         && amonborder[0] && amonborder[1] && amonborder[2]){
       for(long i = 0; i < n; i++) {
         if (i!=s){
-          if (distance(spheres[s],spheres[i]+latx+laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty+latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]+latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx+laty-latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]+latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty+latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]-latx+laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty+latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]-latx-laty+latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty+latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]-latx+laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx+laty-latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]+latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]+latx-laty-latz)*(1/(2*R)));
-          if (distance(spheres[s],spheres[i]-latx-laty-latz) < 2*R) potEnergy = potEnergy + eps*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)))*(1 - distance(spheres[s],spheres[i]-latx-laty-latz)*(1/(2*R)));
+          potEnergy += potential(distance(spheres[s],spheres[i]+latx+laty+latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]+latx+laty-latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]+latx-laty+latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]-latx+laty+latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]-latx-laty+latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]-latx+laty-latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]+latx-laty-latz));
+          potEnergy += potential(distance(spheres[s],spheres[i]-latx-laty-latz));
         }
       }
     }
   }
-  
   return potEnergy;
 }
 
