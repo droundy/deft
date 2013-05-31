@@ -758,9 +758,9 @@ double calcPressure(Vector3d *spheres, long N, double volume){
         for(long i = 0; i < N; i++) {
           if (i!=s){
             if (distance(spheres[s],spheres[i]+lat[k]) < 2*R){
-	      totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]));
+              totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]));
 	          }
-	    totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]));
+            totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]));
           }
         }
         for (long m=k+1; m<3; m++){
