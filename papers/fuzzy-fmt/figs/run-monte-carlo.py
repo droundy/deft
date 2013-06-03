@@ -12,7 +12,7 @@ if os.path.isdir('figs'):
 def run_homogeneous(fillingfraction, temperature):
     nspheres = round(fillingfraction*30**3/(4*pi/3))
     filename = '%s/mc-%.4f-%.4f' % (figsdir, fillingfraction, temperature)
-    system("srun --mem=60 -J soft-%.4f-%.4f time %s/soft-monte-carlo %d 0 0.001 %s.dat periodxyz 30 kT %g > %s.out 2>&1 &" %
+    system("srun --mem=60 -J soft-%.4f-%.4f time %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxyz 30 kT %g > %s.out 2>&1 &" %
            (fillingfraction, temperature, bindir, nspheres, filename, temperature, filename))
 
 def run_walls(fillingfraction, nspheres, temperature):
