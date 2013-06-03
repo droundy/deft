@@ -349,7 +349,7 @@ int main(int argc, char *argv[]){
         }
         for (long i=0; i<div; i++) {
           const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
-          radial_distribution[i] = radial_distributon_histogram[i]*shellTotalVolume*(shellsRadius[div]-shellsRadius[0])/(Vi*density_saved_count*N*(N-1));
+          radial_distribution[i] = radial_distributon_histogram[i]*volume/(Vi*density_saved_count*N*(N-1));
         }
         if (!flat_div){
           for(long i=0; i<div; i++){
@@ -728,7 +728,7 @@ inline double force_times_distance(double rij) {
 }
 
 double calcPressure(Vector3d *spheres, long N, double volume){
-  double totalOverLap = 0;
+  double total_force_times_distance = 0;
   for (long s=0; s<N; s++){
     Vector3d v = spheres[s];
     bool amonborder[3] = {
@@ -738,21 +738,21 @@ double calcPressure(Vector3d *spheres, long N, double volume){
       };
     
     for(long i = s+1; i < N; i++)
-      totalOverLap += force_times_distance(distance(spheres[s],spheres[i]));
+      total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]));
 
     for (long k=0; k<3; k++) {
       if (periodic[k] && amonborder[k]) {
         for(long i = s+1; i < N; i++) {
-            totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]));
-            totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]));
+            total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+lat[k]));
+            total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-lat[k]));
         }
         for (long m=k+1; m<3; m++){
           if (periodic[m] && amonborder[m]){
             for(long i = s+1; i < N; i++) {
-              totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]+lat[m]));
-              totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]-lat[m]));
-              totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+lat[k]-lat[m]));
-              totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-lat[k]+lat[m]));
+              total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+lat[k]+lat[m]));
+              total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-lat[k]-lat[m]));
+              total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+lat[k]-lat[m]));
+              total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-lat[k]+lat[m]));
             }
           }
         }
@@ -760,19 +760,19 @@ double calcPressure(Vector3d *spheres, long N, double volume){
     }
     if (periodic[0] && periodic[1] && periodic[2] && amonborder[0] && amonborder[1] && amonborder[2]){
       for(long i = s+1; i < N; i++) {
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty+latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx+laty-latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty+latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty+latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty+latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx+laty-latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]+latx-laty-latz));
-        totalOverLap += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+latx+laty+latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+latx+laty-latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+latx-laty+latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-latx+laty+latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-latx-laty+latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-latx+laty-latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]+latx-laty-latz));
+        total_force_times_distance += force_times_distance(distance(spheres[s],spheres[i]-latx-laty-latz));
       }
     }
   }
-  //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*totalOverLap*totalOverLap*(-2*eps/(2*R));
-  return (N/volume)*kT - (1/(3*volume))*totalOverLap;
+  //double pressureValue = (N/volume)*kT - (2*M_PI/3)*(1/(6*volume))*total_force_times_distance*total_force_times_distance*(-2*eps/(2*R));
+  return (N/volume)*kT - (1/(3*volume))*total_force_times_distance;
 }
 
 

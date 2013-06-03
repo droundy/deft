@@ -49,7 +49,6 @@ run_homogeneous(0.6, 0.001)
 run_homogeneous(0.7, 0.001)
 run_homogeneous(0.8, 0.001)
 
-run_homogeneous(0.01, 0.01)
 run_homogeneous(0.1, 0.01)
 run_homogeneous(0.2, 0.01)
 run_homogeneous(0.3, 0.01)
