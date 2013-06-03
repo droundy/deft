@@ -30,9 +30,14 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 colors = { 0.1: 'r', 0.01: 'b', 0.001: 'g', 0.0001: 'k', 0.00001: 'm' }
 
 Temp = 0.00001
+eta = density*4*pi/3
+#P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
+P_cs = density*.001*(1+eta+eta**2)/(1-eta)**3
+plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 while Temp <= .011:
   betaV0 = V0/Temp
-  gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
+  gamma = betaV0*(4+sqrt((4+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)**2-4*pi**3/betaV0)+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)/(2*pi**2)
+  #gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
   sg = sqrt(gamma)
   #Integrals for the different weighted densities
   W3 = (-pi*R/(3*gamma**(3/2)*(sqrt(pi*gamma) -1)))*(2*sg*(8*(1 + gamma) - exp(-gamma)*(2*gamma+5))-sqrt(pi)*(4*gamma**2+12*gamma+3)*erf(sg))
@@ -79,7 +84,6 @@ for ff in arange(0.1,0.8, 0.1):
       print 'could not find', fname
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
-
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
 xlabel('packing fraction')
