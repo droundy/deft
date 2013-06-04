@@ -21,7 +21,8 @@ dr = 0.0001
 r = arange(0, 1.2 + dr/2, dr)
 
 def findgamma(betaV0):
-    return 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
+    return betaV0*(4+sqrt((4+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)**2-4*pi**3/betaV0)+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)/(2*pi**2)
+    #return 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 
 gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 sg = sqrt(gamma)
@@ -32,12 +33,16 @@ def w3(betaV0):
     sg = sqrt(gamma)
     return -1/(sqrt(pi*gamma) - 1)*(1 - exp(-gamma*(1-r)**2) - sqrt(pi*gamma)*erf(sg*(1-r)))
 
+stepfunc = 0*r
+stepfunc[r<=1] = 1
 figure(figsize=(4.5,4))
+plot(r,stepfunc, 'black', label = 'Hard sphere')
 plot(r, w3(betaV0), 'b-', label='$kT=%g V_{max}$' % (1/betaV0))
 plot(r, w3(betaV0*10), 'r-', label='$kT=%g V_{max}$' % (0.1/betaV0))
 ylim(0,1.1)
 legend(loc='best')
 ylabel('$w_3(r)$')
+xlabel('$r/R$')
 savefig('figs/w_3.pdf')
 clf()
 
@@ -50,12 +55,17 @@ def w2(betaV0):
     func[r>1] = 0
     return func
 
+stepfunc *= 0
+stepfunc[r == 1] = 30
+
 figure(figsize=(4.5,4))
+plot(r,stepfunc, 'black', label='Hard sphere')
 plot(r, w2(betaV0), 'b-', label='$kT=%g V_{max}$' % (1/betaV0))
 plot(r, w2(betaV0*10), 'r-', label='$kT=%g V_{max}$' % (0.1/betaV0))
 ylim(ymin=0)
 legend(loc='best')
 ylabel('$w_2(r)$')
+xlabel('$r/R$')
 savefig('figs/w_2.pdf')
 clf()
 
@@ -82,7 +92,7 @@ stepfunc[r<=1] = 1
 
 plot(r,stepfunc)
 ylim(0,1.1)
-ylabel('$\Theta(R-r)$')
+ylabel('$w_{3}(r)$')
 xlabel('$r/R$')
 savefig('figs/step.pdf')
 clf()
@@ -90,7 +100,7 @@ clf()
 stepfunc *= 0
 stepfunc[r == 1] = 1e300
 plot(r,stepfunc)
-ylabel('$\delta(R-r)$')
+ylabel('$w_{2}(r)$')
 xlabel('$r/R$')
 savefig('figs/delta.pdf')
 clf()

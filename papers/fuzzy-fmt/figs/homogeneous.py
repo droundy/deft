@@ -30,9 +30,13 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
 
 Temp = 0.00001
+eta = density*4*pi/3
+#P_cs = density*(1+eta+eta**2-eta**3)/(1-eta)**3
+P_cs = density*(1+eta+eta**2)/(1-eta)**3
 while Temp <= .011:
   betaV0 = V0/Temp
-  gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
+  gamma = betaV0*(4+sqrt((4+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)**2-4*pi**3/betaV0)+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)/(2*pi**2)
+  #gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
   sg = sqrt(gamma)
   #Integrals for the different weighted densities
   W3 = (-pi*R/(3*gamma**(3/2)*(sqrt(pi*gamma) -1)))*(2*sg*(8*(1 + gamma) - exp(-gamma)*(2*gamma+5))-sqrt(pi)*(4*gamma**2+12*gamma+3)*erf(sg))
