@@ -21,9 +21,9 @@ def plotff(ff):
         fname = "figs/walls-%04.2f-T%05.3f.dat" % (ff, kT)
         if os.path.exists(fname):
             names.append('kT = %4.2f' % kT)
-            data.append(numpy.loadtxt())
+            data.append(numpy.loadtxt(fname))
     for i in range(len(data)):
-        pylab.plot(data[i][:,0], data[i][:,1], label=names[i])
+        pylab.plot(data[i][:,0]-3, data[i][:,1]*(4*pi/3), label=names[i])
 
     for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
         print 'looking for', 'figs/mcwalls-%.4f-%.4f*.dat' % (ff, kT)
