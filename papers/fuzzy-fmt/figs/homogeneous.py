@@ -27,7 +27,7 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 
 
-colors = { 0.1: 'r', 0.01: 'b', 0.001: 'g', 0.0001: 'k', 0.00001: 'm' }
+colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
 
 Temp = 0.00001
 while Temp <= .011:

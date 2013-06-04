@@ -27,7 +27,7 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 
 
-colors = { 0.1: 'r', 0.01: 'b', 0.001: 'g', 0.0001: 'k', 0.00001: 'm' }
+colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
 
 for ff in arange(0.1,0.81, 0.1):
   figure()
@@ -43,6 +43,7 @@ for ff in arange(0.1,0.81, 0.1):
     else:
       print 'could not find', fname
 
+  title('Radial distribution function at packing fraction %g' % ff)
   xlabel('radius')
   ylabel('g')
   legend(loc = 'best')
