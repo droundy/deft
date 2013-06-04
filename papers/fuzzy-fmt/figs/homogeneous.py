@@ -66,7 +66,7 @@ while Temp <= .011:
   plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%g' %Temp)
   Temp = Temp*10 # sqrt(10)
 
-for ff in arange(0.1,0.8, 0.1):
+for ff in arange(0.1,0.81, 0.1):
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
   for temp in [0.1, 0.01, 0.001, 0.0001]:
@@ -80,6 +80,7 @@ for ff in arange(0.1,0.8, 0.1):
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
 
+xlim(xmax=0.8)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
 xlabel('packing fraction')

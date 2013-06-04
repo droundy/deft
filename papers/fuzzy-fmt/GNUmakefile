@@ -34,7 +34,7 @@ clean:
 
 ALL_FIGURES=\
 	figs/w2convolves.pdf figs/p-vs-packing.pdf figs/harmonic.pdf figs/w_3.pdf figs/w_2.pdf figs/w_1.pdf figs/step.pdf\
-	figs/radial-distribution-0.1.pdf
+	figs/radial-distribution-10.pdf
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
@@ -52,13 +52,13 @@ march-2013.pdf: march-2013.tex $(PDF_FIGURES)
 	pdflatex $< pdflatex $< pdflatex $<
 
 figs/w2convolves.pdf: figs/functions_plot.py
-	python $^ $@
+	python $<
 
-figs/radial-distribution-0.1.pdf: figs/radial-distribution.py
-	python $^ $@
+figs/radial-distribution-10.pdf: figs/radial-distribution.py $(wildcard figs/mc-*.gradial)
+	python $<
 
-figs/p-vs-packing.pdf: figs/homogeneous.py
-	python $^ $@
+figs/p-vs-packing.pdf: figs/homogeneous.py $(wildcard figs/mc-*.prs)
+	python $<
 
 figs/harmonic.pdf: figs/harmonic.py
 	python $^ $@

@@ -29,7 +29,7 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 
 colors = { 0.1: 'r', 0.01: 'b', 0.001: 'g', 0.0001: 'k', 0.00001: 'm' }
 
-for ff in arange(0.1,0.8, 0.1):
+for ff in arange(0.1,0.81, 0.1):
   figure()
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
@@ -39,12 +39,13 @@ for ff in arange(0.1,0.8, 0.1):
       print 'found', fname
       g = loadtxt(fname)
       plot(g[:,0], g[:,1], colors[temp] + '-', label='T = %g' % temp)
+      xlim(xmax=floor(max(g[:,0])))
     else:
       print 'could not find', fname
 
   xlabel('radius')
   ylabel('g')
   legend(loc = 'best')
-  savefig('figs/radial-distribution-%.1f.pdf' % ff, bbox_inches=0)
+  savefig('figs/radial-distribution-%02.0f.pdf' % (ff*100), bbox_inches=0)
 
 show()
