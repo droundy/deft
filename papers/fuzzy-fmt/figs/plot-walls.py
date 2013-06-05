@@ -13,6 +13,21 @@ if len(sys.argv) != 1:
     print("Usage:  " + sys.argv[0])
     exit(1)
 
+def smooth(x, N):
+    '''
+    smooth(x,N) takes a 2D array x that has many columns, and averages
+    out N nearby points.
+    '''
+    n0 = len(x[:,0])
+    n = n0 - n0 % N
+    x = x[:n,:]
+    y = numpy.zeros_like(x[0::N,:])
+    for i in range(N):
+        print 'y shape', y.shape
+        print 'x[i::N,:] shape', x[i::N, :].shape
+        y += x[i::N, :]
+    return y/N
+
 def plotff(ff):
     pylab.figure()
     data = []
@@ -30,6 +45,7 @@ def plotff(ff):
         for fname in glob.glob('figs/mcwalls-%.4f-%.4f*.dat' % (ff, kT)):
             print 'examining', fname
             d = numpy.loadtxt(fname)
+            d = smooth(d, 10)
             pylab.plot(d[:,0], d[:,1]*(4*pi/3), label=fname)
     pylab.title('Packing fraction = %.1f' % ff)
     pylab.legend()
