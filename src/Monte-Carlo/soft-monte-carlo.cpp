@@ -391,18 +391,21 @@ int main(int argc, char *argv[]){
         }
         fclose(out);
 
-        char *gfilename = new char[1000];
-        sprintf(gfilename, "%s.gradial", outfilename);
-        out = fopen(gfilename, "w");
-        if (out == NULL) {
-          printf("Error creating file %s\n", gfilename);
-          return 1;
+        if (periodic[0] && periodic[1] && periodic[2]) {
+          char *gfilename = new char[1000];
+          sprintf(gfilename, "%s.gradial", outfilename);
+          out = fopen(gfilename, "w");
+          if (out == NULL) {
+            printf("Error creating file %s\n", gfilename);
+            return 1;
+          }
+          delete[] gfilename;
+          fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
+          for (long i=1; i<div; i++) {
+            fprintf(out, "%g\t%g\n", 0.5*(shellsRadius[i-1]+shellsRadius[i]), radial_distribution[i]);
+          }
+          fclose(out);
         }
-        fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
-        for (long i=1; i<div; i++) {
-          fprintf(out, "%g\t%g\n", 0.5*(shellsRadius[i-1]+shellsRadius[i]), radial_distribution[i]);
-        }
-        fclose(out);
 
         fflush(stdout);
         if (num_pressures_in_sum > 0) {
