@@ -132,8 +132,15 @@ int main(int argc, char *argv[]){
   double volume = lenx*leny*lenz;
   if (spherical_inner_wall){
     volume = (4*M_PI*(1/3))*(rad*rad*rad)-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad);
+    //Possible error in these volume calculations.  With
+    //spherical_inner_wall: volume should be
+    //lenx*leny*lenz-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad) -Sam
   } else if (spherical_outer_wall) {
     volume = lenx*leny*lenz;
+    //Possible error in these volume calculations. With
+    //spherical_outer_wall, volume should be
+    //4*M_PI*(1/3)*(rad*rad*rad)... Also add need to add a volume for when both
+    //are true.  -Sam
   }
 
   const char *outfilename = argv[4];
