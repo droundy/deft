@@ -107,12 +107,12 @@ int main(int argc, char *argv[]){
       maxrad = max(maxrad, leny);
     } else if (strcmp(argv[a],"wallz") == 0) {
       has_z_wall = true;
+      flat_div = true; // we want flat divisions in the z directoin,
+                       // if we have a z wall.  In every other case we
+                       // use spherical divisions.
       lenz = atof(argv[a+1]);
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
-    } else if (strcmp(argv[a],"flatdiv") == 0) {
-      flat_div = true; //otherwise will default to radial divisions
-      a -= 1;
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else {
