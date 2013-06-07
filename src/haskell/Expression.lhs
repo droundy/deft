@@ -616,7 +616,9 @@ expand _ (Expression e) = Expression e
 setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
             | isEven v e == -1 = 0
-setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
+setZero v (Var t a b c (Just e)) = case isConstant e' of Nothing -> Var t a b c (Just e')
+                                                         Just _ -> e'
+  where e' = setZero v e
 setZero _ e@(Var _ _ _ _ Nothing) = e
 setZero v (Scalar e) = case isConstant $ setZero v e of
                          Just c -> toExpression c
