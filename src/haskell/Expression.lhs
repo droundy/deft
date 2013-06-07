@@ -738,6 +738,7 @@ var v ltx e = Var IsTemp c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
 protect :: Type a => String -> String -> Expression a -> Expression a
+protect _ _ e | Just _ <- isConstant e = e
 protect v ltx e = Var CannotBeFreed c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
