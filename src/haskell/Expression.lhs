@@ -1047,7 +1047,8 @@ instance (Type a, Code a) => Code (Expression a) where
       [(_, n)] | n < 0 -> error "shouldn't have negative power here"
       [(e, 1)] ->   latexPrec p e
       [(e, 0.5)] -> showString "\\sqrt{" . latexPrec 0 e . showString "}"
-      [(e, n)] -> latexPrec 8 e . showString ("^{" ++ latexDouble n ++ "}")
+      [(e, n)] | floor n == (ceiling n :: Int) && n < 10 -> latexPrec 8 e . showString ("^" ++ latexDouble n)
+               | otherwise -> latexPrec 8 e . showString ("^{" ++ latexDouble n ++ "}")
       _ -> error "This really cannot happen."
   latexPrec pree (Product p _) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
     where ltexsimple [] = showString "1"
