@@ -20,7 +20,7 @@ module Expression (Exprn(..),
                    nameE, newdeclareE,
                    sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
                    product2pairs, pairs2product, product2denominator,
-                   hasActualFFT, hasFFT, hasexpression, hasExprn,
+                   hasActualFFT, hasFFT, hasexpression, hasExprn, hasK,
                    searchExpression, searchExpressionDepthFirst,
                    findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
                    findTransforms, transform, Symmetry(..),
@@ -1349,6 +1349,33 @@ varSet (Signum e) = varSet e
 varSet (Sum _ i) = i
 varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
+
+-- The following returns true if the expression is a k-space
+-- expression with k in it.
+hasK :: Type a => Expression a -> Bool
+hasK e0 | EK e' <- mkExprn e0 = hask e'
+  where hask (Expression Kx) = True
+        hask (Expression Ky) = True
+        hask (Expression Kz) = True
+        hask (Expression Delta) = False
+        hask (Expression (Complex _ _)) = False
+        hask (Expression (FFT _)) = False
+        hask (Expression (SphericalFourierTransform _ _)) = False
+        hask (Expression (SetKZeroValue _ _)) = False -- the SetKZeroValue removes k-dependence effectively
+        hask (Var _ _ _ _ (Just e)) = hask e
+        hask (Var _ _ _ _ Nothing) = False
+        hask (Sin e) = hask e
+        hask (Cos e) = hask e
+        hask (Log e) = hask e
+        hask (Exp e) = hask e
+        hask (Heaviside e) = hask e
+        hask (Signum e) = hask e
+        hask (Erf e) = hask e
+        hask (Abs e) = hask e
+        hask (Sum s _) = or $ map (hask . snd) $ sum2pairs s
+        hask (Product p _) = or $ map (hask . fst) $ product2pairs p
+        hask (Scalar _) = False
+hasK _ = False
 
 hasFFT :: Type a => Expression a -> Bool
 hasFFT e@(Expression _) = case mkExprn e of
