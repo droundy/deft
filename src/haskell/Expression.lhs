@@ -306,7 +306,7 @@ instance Type KSpace where
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
             setzero = case code $ setKequalToZero e of
-                      "0" -> a ++ "[0]" ++ op ++ "0;"
+                      "0.0" -> a ++ "[0]" ++ op ++ "0;"
                       k0code -> unlines ["\t{",
                                          "\t\tconst int i = 0;",
                                          "\t\tconst Reciprocal k_i = Reciprocal(0,0,0);",
@@ -347,7 +347,7 @@ instance Type KSpace where
               MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
                             "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
             setzero = case newcode $ setKequalToZero e of
-                      "0" -> a ++ "[0]" ++ op ++ "0;\n"
+                      "0.0" -> a ++ "[0]" ++ op ++ "0;\n"
                       k0newcode -> unlines ["{",
                                          "\t\tconst int i = 0;",
                                          "\t\t" ++ a ++ "[0]" ++ op ++ k0newcode ++ ";",
@@ -997,18 +997,18 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Log x) = showString "log(" . codePrec 0 x . showString ")"
   codePrec _ (Abs x) = showString "fabs(" . codePrec 0 x . showString ")"
   codePrec _ (Signum _) = undefined
-  codePrec _ (Product p i) | Product p i == 1 = showString "1"
+  codePrec _ (Product p i) | Product p i == 1 = showString "1.0"
   codePrec pree (Product p _) = showParen (pree > 7) $
                            if den == 1
                            then codesimple num
                            else codesimple num . showString "/" . codePrec 8 den
-    where codesimple [] = showString "1"
+    where codesimple [] = showString "1.0"
           codesimple [(a,n)] = codee a n
           codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
           codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
           num = product2numerator_pairs p
           den = product2denominator p
-          codee _ 0 = showString "1" -- this shouldn't happen...
+          codee _ 0 = showString "1.0" -- this shouldn't happen...
           codee _ n | n < 0 = error "shouldn't have negative power here"
           codee x 1 = codePrec 7 x
           codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
@@ -1020,7 +1020,7 @@ instance (Type a, Code a) => Code (Expression a) where
             where n2 = floor (2*nn)
                   n = floor nn
           codee x n = showString "pow(" . codePrec 0 x . showString (", " ++ show n ++ ")")
-  codePrec _ (Sum s i) | Sum s i == 0 = showString "0"
+  codePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   codePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
           addup "" (1,e) = codePrec 6 e ""
