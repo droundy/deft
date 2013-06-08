@@ -58,7 +58,7 @@ nA = "nA" === double_shell n / (4*pi*(2*rad)**2)
 
 double_shell :: Expression RealSpace -> Expression RealSpace
 double_shell x = ifft ( deltak * fft x)
-  where deltak = protect "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
+  where deltak = var "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
 
 gSigmaA :: Expression RealSpace
 gSigmaA = var "gSigmaA" "g_{\\sigma}^{A}" $

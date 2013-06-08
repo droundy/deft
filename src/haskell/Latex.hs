@@ -2,6 +2,7 @@
 module Latex ( latexEasy, latexOptimizedExpression ) where
 
 import Expression ( Expression(..), Exprn(..), Type, substitute, latex, k, k_var,
+                    IsTemp( CannotBeFreed ),
                     cleanvars, mapExprn, mkExprn )
 import Statement ( Statement(..), freeVectors, reuseVar )
 import Optimize ( optimize, findNamedSubexpression )
@@ -69,9 +70,9 @@ simpk = substitute (k**2) (k_var "k" **2)
 niceExprns :: (Type a) => Expression a -> [Exprn]
 niceExprns e0@(Var _ _ _ _ _) =
   case findNamedSubexpression e0 of
-    Just (ES v@(Var a b c t (Just _))) -> ES v : niceExprns (substitute v (Var a b c t Nothing) e0)
-    Just (ER v@(Var a b c t (Just _))) -> ER v : niceExprns (substitute v (Var a b c t Nothing) e0)
-    Just (EK v@(Var a b c t (Just _))) -> EK v : niceExprns (substitute v (Var a b c t Nothing) e0)
+    Just (ES v@(Var _ b c t (Just _))) -> ES v : niceExprns (substitute v (Var CannotBeFreed b c t Nothing) e0)
+    Just (ER v@(Var _ b c t (Just _))) -> ER v : niceExprns (substitute v (Var CannotBeFreed b c t Nothing) e0)
+    Just (EK v@(Var _ b c t (Just _))) -> EK v : niceExprns (substitute v (Var CannotBeFreed b c t Nothing) e0)
     _ -> []
 niceExprns _ = error "need named input in niceExprns"
 

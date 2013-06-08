@@ -12,7 +12,7 @@ module Expression (Exprn(..),
                    erf, heaviside,
                    nameVector, vfft, vifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
-                   Expression(..), joinFFTs, (===), var, protect, vprotect,
+                   Expression(..), joinFFTs, (===), var, vvar,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
@@ -486,12 +486,11 @@ searchExpression :: Type a => Set.Set String -> (forall b. Type b => Expression 
 searchExpression _ f e | Just c <- f e = Just c
 searchExpression i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
 searchExpression _ _ (Var _ _ _ _ Nothing) = Nothing
-searchExpression i f v@(Var IsTemp _ _ _ (Just e)) =
+searchExpression i f v@(Var _ _ _ _ (Just e)) =
   case searchExpression i f e of
     Nothing -> Nothing
     Just e' | mkExprn e == e' -> Just $ mkExprn v
             | otherwise -> Just e'
-searchExpression _ _ (Var CannotBeFreed _ _ _ (Just _)) = Nothing
 searchExpression i f (Scalar e) = searchExpression i f e
 searchExpression i f (Heaviside e) = searchExpression i f e
 searchExpression i f (Cos e) = searchExpression i f e
@@ -510,12 +509,11 @@ searchExpressionDepthFirst :: Type a => Set.Set String
                               -> Expression a -> Maybe Exprn
 searchExpressionDepthFirst i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
 searchExpressionDepthFirst _ f e@(Var _ _ _ _ Nothing) = f e
-searchExpressionDepthFirst i f x@(Var IsTemp _ _ _ (Just e)) =
+searchExpressionDepthFirst i f x@(Var _ _ _ _ (Just e)) =
   case searchExpressionDepthFirst i f e of
     Nothing -> f x
     Just e' | mkExprn e == e' -> Just $ mkExprn x
             | otherwise -> Just e'
-searchExpressionDepthFirst _ f x@(Var CannotBeFreed _ _ _ (Just _)) = f x
 searchExpressionDepthFirst i f x@(Scalar e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Heaviside e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Cos e) = searchExpressionDepthFirst i f e `mor` f x
@@ -727,25 +725,21 @@ infix 4 ===, `nameVector`
 
 (===) :: Type a => String -> Expression a -> Expression a
 --_ === e = e
-v@(a:r@(_:_)) === e = Var IsTemp c v ltx (Just e)
+v@(a:[ch]) === e | ch `elem` (['a'..'Z']++['0'..'9']) = var v ltx e
+  where ltx = a : "_"++[ch]
+v@(a:r@(_:_)) === e = var v ltx e
   where ltx = a : "_{"++r++"}"
-        c = if amScalar e then v else v ++ "[i]"
-v === e = Var IsTemp c v v (Just e)
-  where c = if amScalar e then v else v ++ "[i]"
+v === e = var v v e
 
 var :: Type a => String -> String -> Expression a -> Expression a
+var _ _ e | Just _ <- isConstant e = e
 var v ltx e = Var IsTemp c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
-protect :: Type a => String -> String -> Expression a -> Expression a
-protect _ _ e | Just _ <- isConstant e = e
-protect v ltx e = Var CannotBeFreed c v ltx (Just e)
-  where c = if amScalar e then v else v ++ "[i]"
-
-vprotect :: Type a => String -> (String -> String) -> Vector a -> Vector a
-vprotect v ltx (Vector x y z) = Vector (protect (v++"x") (ltx "x") x) 
-                                       (protect (v++"y") (ltx "y") y) 
-                                       (protect (v++"z") (ltx "z") z)
+vvar :: Type a => String -> (String -> String) -> Vector a -> Vector a
+vvar v ltx (Vector x y z) = Vector (var (v++"x") (ltx "x") x)
+                                   (var (v++"y") (ltx "y") y)
+                                   (var (v++"z") (ltx "z") z)
 
 rmag :: Expression RealSpace
 rmag = sqrt (rx**2 + ry**2 + rz**2)
@@ -1909,7 +1903,7 @@ dr :: Expression KSpace
 dr = scalar $ var "dr" "\\Delta r" $ dVscalar ** (1.0/3)
 
 volume :: Type a => Expression a
-volume = scalar $ protect "volume" "volume" $ lat1 `dot` (lat2 `cross` lat3)
+volume = scalar $ var "volume" "volume" $ lat1 `dot` (lat2 `cross` lat3)
 
 numx, numy, numz :: Type a => Expression a
 numx = s_var "Nx"

@@ -42,30 +42,30 @@ n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` 
 
 shell_diam, step_diam, shell, step, shellPrime :: Expression RealSpace -> Expression RealSpace
 shell x = ifft ( deltak * fft x)
-  where deltak = protect "deltak" "\\delta(k)" $ smear * (4*pi) * rad * sin kR / k
+  where deltak = var "deltak" "\\delta(k)" $ smear * (4*pi) * rad * sin kR / k
 shell_diam x = ifft ( deltak * fft x)
-  where deltak = protect "deltak2" "\\delta_{2R}(k)" $ smear * (4*pi) * 2*rad * sin (2*kR) / k
+  where deltak = var "deltak2" "\\delta_{2R}(k)" $ smear * (4*pi) * 2*rad * sin (2*kR) / k
 step x = ifft ( stepk * fft x)
-  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
+  where stepk = var "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
 step_diam x = ifft ( stepk * fft x)
-  where stepk = protect "stepdiam" "\\Theta_{2R}(k)" $ smear * (4*pi) * (sin(2*kR) - 2*kR * cos(2*kR)) / k**3
+  where stepk = var "stepdiam" "\\Theta_{2R}(k)" $ smear * (4*pi) * (sin(2*kR) - 2*kR * cos(2*kR)) / k**3
 
 vshell, vshellPrime :: Expression RealSpace -> Vector RealSpace
 vshell x = vifft $ deltav *. fft x
-  where deltav = vprotect "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
+  where deltav = vvar "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 
 shellPrime x = ifft ( delta' * fft x)
-  where delta' = protect "deltaprime" "\\delta'(k)" $
+  where delta' = var "deltaprime" "\\delta'(k)" $
                  smear * (4*pi) * ( -sin kR/k - rad * cos kR)
 vshellPrime x = vifft ( delta' *. fft x)
-  where delta' = vprotect "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
+  where delta' = vvar "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec
 
 vshellPrimedot, vshelldot :: Vector RealSpace -> Expression RealSpace
 vshelldot x = ifft $ deltav `dot` vfft x
-  where deltav = vprotect "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
+  where deltav = vvar "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 vshellPrimedot x = ifft ( delta' `dot` vfft x )
-  where delta' = vprotect "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
+  where delta' = vvar "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec
