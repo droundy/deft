@@ -6,13 +6,17 @@ module Expression (Exprn(..),
                    RealSpace(..), r_var, dV, dVscalar, dr,
                    rx, ry, rz, rmag, rvec,
                    lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
-                   KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero,
+                   KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero, setKequalToZero,
                    Scalar(..), scalar,
                    Vector, t_var, cross, dot, (/.), (*.), (.*), xhat, yhat, zhat,
+                   Tensor, tensoridentity, tracetensor, tracetensorcube, (.*.), (.*..), outerproductsquare,
+                   tplus,
+                   tensor_xx, tensor_yy, tensor_zz, tensor_xy, tensor_yz, tensor_zx,
                    erf, heaviside,
                    nameVector, vfft, vifft,
+                   nameTensor, tfft, tifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
-                   Expression(..), joinFFTs, (===), var, vvar,
+                   Expression(..), joinFFTs, (===), var, vvar, tvar,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
@@ -60,6 +64,10 @@ data Scalar = Summate (Expression RealSpace)
 data Vector a = Vector (Expression a) (Expression a) (Expression a)
      deriving ( Eq, Ord, Show )
 
+data Tensor a = SymmetricTensor { tensor_xx, tensor_yy, tensor_zz,
+                                  tensor_xy, tensor_yz, tensor_zx :: Expression a }
+     deriving ( Eq, Ord, Show )
+
 kinversion :: Expression KSpace -> Expression KSpace
 kinversion (Var _ _ _ _ (Just e)) = kinversion e
 kinversion e@(Var _ _ _ _ Nothing) = e
@@ -104,7 +112,46 @@ Vector x y z *. s = vector (x*s) (y*s) (z*s)
 
 (.*) :: Type a => Expression a -> Vector a -> Vector a
 s .* Vector x y z = vector (x*s) (y*s) (z*s)
-infixl 7 `cross`, `dot`, /., .*, *.
+infixl 7 `cross`, `dot`, /., .*, *., .*., .*..
+
+outerproductsquare :: Type a => Vector a -> Tensor a
+outerproductsquare (Vector x y z) = SymmetricTensor { tensor_xx = x*x,
+                                                      tensor_yy = y*y,
+                                                      tensor_zz = z*z,
+                                                      tensor_xy = x*y,
+                                                      tensor_yz = y*z,
+                                                      tensor_zx = z*x }
+
+tplus :: Type a => Tensor a -> Tensor a -> Tensor a
+tplus (SymmetricTensor a b c d e f) (SymmetricTensor a' b' c' d' e' f') =
+  SymmetricTensor (a+a') (b+b') (c+c') (d+d') (e+e') (f+f')
+
+tracetensor :: Type a => Tensor a -> Expression a
+tracetensor t@(SymmetricTensor {}) = tensor_xx t + tensor_yy t + tensor_zz t
+
+-- tracetensorcube is the trace of the cube of a tensor, which shows
+-- up in some versions of FMT.
+tracetensorcube :: Type a => Tensor a -> Expression a
+tracetensorcube (SymmetricTensor {tensor_xx = txx, tensor_yy = tyy, tensor_zz = tzz,
+                                  tensor_xy = txy, tensor_yz = tyz, tensor_zx = tzx}) =
+  txx*txx*txx + txy*tyy*tyx + txz*tzz*tzx + 2*txy*tyx*txx + 2*txz*tzx*txx + 2*txy*tyz*tzx +
+  tyx*txx*txy + tyy*tyy*tyy + tyz*tzz*tzy + 2*tyy*tyx*txy + 2*tyz*tzx*txy + 2*tyy*tyz*tzy +
+  tzx*txx*txz + tzy*tyy*tyz + tzz*tzz*tzz + 2*tzy*tyx*txz + 2*tzz*tzx*txz + 2*tzy*tyz*tzz
+    where tyx = txy
+          tzy = tyz
+          txz = tzx
+
+tensoridentity :: Type a => Tensor a
+tensoridentity = SymmetricTensor { tensor_xx = 1, tensor_yy = 1, tensor_zz = 1,
+                                   tensor_xy = 0, tensor_yz = 0, tensor_zx = 0 }
+
+(.*.) :: Type a => Vector a -> Tensor a -> Vector a
+Vector x y z .*. t@(SymmetricTensor {}) = vector (tensor_xx t*x + tensor_xy t*y + tensor_zx t*z)
+                                                 (tensor_xy t*x + tensor_yy t*y + tensor_yz t*z)
+                                                 (tensor_zx t*x + tensor_yz t*y + tensor_zz t*z)
+
+(.*..) :: Type a => Expression a -> Tensor a -> Tensor a
+s .*.. (SymmetricTensor a b c d e f) = SymmetricTensor (s*a) (s*b) (s*c) (s*d) (s*e) (s*f)
 
 instance Type a => Code (Vector a) where
   codePrec _ (Vector a b c) = showString ("<" ++ code a ++ ", " ++ code b ++ ", " ++ code c ++">")
@@ -389,7 +436,7 @@ instance Type KSpace where
   subAndCountHelper _ _ Kx = (kx, 0)
   subAndCountHelper _ _ Ky = (ky, 0)
   subAndCountHelper _ _ Kz = (kz, 0)
-  subAndCountHelper _ _ Delta = error "unhandled case: Delta"
+  subAndCountHelper _ _ Delta = (Expression Delta, 0)
   searchHelper f (FFT e) = f e
   searchHelper f (SphericalFourierTransform _ e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
@@ -741,6 +788,15 @@ vvar v ltx (Vector x y z) = Vector (var (v++"x") (ltx "x") x)
                                    (var (v++"y") (ltx "y") y)
                                    (var (v++"z") (ltx "z") z)
 
+tvar :: Type a => String -> (String -> String) -> Tensor a -> Tensor a
+tvar v ltx (SymmetricTensor xx yy zz xy yz zx) =
+  SymmetricTensor (var (v++"xx") (ltx "{xx}") xx)
+                  (var (v++"yy") (ltx "{yy}") yy)
+                  (var (v++"zz") (ltx "{zz}") zz)
+                  (var (v++"xy") (ltx "{xy}") xy)
+                  (var (v++"yz") (ltx "{yz}") yz)
+                  (var (v++"zx") (ltx "{zx}") zx)
+
 rmag :: Expression RealSpace
 rmag = sqrt (rx**2 + ry**2 + rz**2)
 
@@ -804,6 +860,12 @@ vfft (Vector x y z) = Vector (fft x) (fft y) (fft z)
 
 vifft :: Vector KSpace -> Vector RealSpace
 vifft (Vector x y z) = Vector (ifft x) (ifft y) (ifft z)
+
+tfft :: Tensor RealSpace -> Tensor KSpace
+tfft (SymmetricTensor a b c d e f) = SymmetricTensor (fft a) (fft b) (fft c) (fft d) (fft e) (fft f)
+
+tifft :: Tensor KSpace -> Tensor RealSpace
+tifft (SymmetricTensor a b c d e f) = SymmetricTensor (ifft a) (ifft b) (ifft c) (ifft d) (ifft e) (ifft f)
 
 complex :: Expression Scalar -> Expression Scalar -> Expression KSpace
 complex a b | b == 0 = scalar a
@@ -1922,5 +1984,10 @@ rlat3 = (lat1 `cross` lat2) /. (lat1 `dot` (lat2 `cross` lat3))
 
 nameVector :: Type a => String -> Vector a -> Vector a
 nameVector n (Vector x y z) = Vector (nn "x" x) (nn "y" y) (nn "z" z)
+  where nn a s = (n++a) === s
+
+nameTensor :: Type a => String -> Tensor a -> Tensor a
+nameTensor n (SymmetricTensor xx yy zz xy yz zx) = SymmetricTensor (nn "xx" xx) (nn "yy" yy) (nn "zz" zz)
+                                                                   (nn "xy" xy) (nn "yz" yz) (nn "zx" zx)
   where nn a s = (n++a) === s
 \end{code}

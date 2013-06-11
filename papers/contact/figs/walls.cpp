@@ -45,9 +45,9 @@ static void took(const char *name) {
   //last_time = t;
 }
 
-Functional WB = HardSpheresNoTensor(1.0);
-Functional WBm2 = HardSpheresWBm2(1.0);
-Functional WBT = HardSpheresWBFast(1.0);
+Functional WB = HardSpheresNoTensor2(1.0);
+Functional WBm2 = WhiteBearMarkII(1.0);
+Functional WBT = TensorWhiteBear(1.0);
 
 const int numiters = 25;
 
@@ -117,7 +117,6 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   
   char *plotname = (char *)malloc(1024);
-  Grid energy_density(gd, f(1, gd, potential));
   Grid gSigmaSGrid(gd, gSigmaS(1.0)(1, gd, density));
   Grid gSigmaAGrid(gd, gSigmaA(1.0)(1, gd, density));
   if (strlen(name) == 4) { 
@@ -129,7 +128,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid yuwu_correlation(gd, YuWuCorrelation_S(1.0)(1, gd, density));
   sprintf(plotname, "papers/contact/figs/walls%s-%04.2f.dat", name, eta);
-  z_plot(plotname, density, energy_density, gSigmaSGrid, yuwu_correlation,
+  z_plot(plotname, density, density /* fixme hokey */, gSigmaSGrid, yuwu_correlation,
          gSigmaAGrid, n0, gross_correlation, nA);
   free(plotname);
 

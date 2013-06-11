@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
 #include "generated-haskell/nice-sum.h"
@@ -149,6 +150,8 @@ int main(int, char **argv) {
   Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))/(36*M_PI*sqr(n3)*sqr(one_minus_n3))
     *n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)));
   compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13, 0.001, 1e-14);
+
+  compare_functionals(TensorWhiteBear(R), HardSpheresWB(R), myT, n, 1e-13, 0.0001, 1e-13);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

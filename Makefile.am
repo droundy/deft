@@ -23,11 +23,15 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 CONTACT_CODE = $(GENERIC_CODE) \
 	src/ContactDensity.cpp
 
-OPTIMIZED_CODE = src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
-	src/HardSpheresFast.cpp src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
-	src/HardSpheresNoTensorFast.cpp
+OPTIMIZED_CODE =
+
+# src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
+#	src/HardSpheresFast.cpp src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
+#	src/HardSpheresNoTensorFast.cpp
 
 HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
+	src/TensorWhiteBearFast.cpp src/WhiteBearMarkIIFast.cpp \
+	src/TensorDensityXXFast.cpp src/VectorDensityXFast.cpp src/n2DensityFast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
@@ -124,9 +128,6 @@ check_PROGRAMS = \
 	tests/functional-expressions.test \
 	tests/print-iter.test \
 	tests/ideal-gas.test \
-	tests/hard-spheres-cavity.test \
-	tests/hard-spheres-hard-wall.test \
-	tests/hard-spheres.test \
 	tests/convolve.test \
 	tests/convolve-finite-difference.test \
 	tests/simple-liquid.test \
@@ -141,17 +142,15 @@ check_PROGRAMS = \
 TESTS = tests/null.sh tests/print-iter.sh src/haskell/test.exe \
 			$(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(ALL_CODE)
-tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE)
+tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE) src/TensorWhiteBearFast.cpp
 tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
 tests_new_hard_spheres_test_SOURCES = tests/new-hard-spheres.cpp $(GENERIC_CODE) $(NEWHASKELL_CODE)
 tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
 tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CONTACT_CODE)
-tests_hard_spheres_cavity_test_SOURCES = tests/hard-spheres-cavity.cpp $(ALL_CODE)
-tests_hard_spheres_hard_wall_test_SOURCES = tests/hard-spheres-hard-wall.cpp $(ALL_CODE)
-tests_hard_spheres_test_SOURCES = tests/hard-spheres.cpp $(ALL_CODE)
-tests_convolve_test_SOURCES = tests/convolve.cpp $(ALL_CODE)
+tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE) \
+			src/TensorDensityXXFast.cpp src/VectorDensityXFast.cpp src/n2DensityFast.cpp
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
 tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
@@ -224,7 +223,8 @@ papers_fuzzy_fmt_figs_walls_mkdat_SOURCES = papers/fuzzy-fmt/figs/walls.cpp $(AL
 # IKIWIKI=ikiwiki
 # endif
 
-pdf: doc/Association.pdf doc/WhiteBear.pdf doc/WhiteBearMarkII.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
+pdf: doc/Association.pdf doc/WhiteBear.pdf doc/TensorWhiteBear.pdf \
+	doc/WhiteBearMarkII.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
 	doc/SimpDispersion.pdf doc/EntropySaftFluid.pdf \
 	doc/CorrelationS.pdf doc/CorrelationA.pdf doc/CorrelationAm2.pdf \
 	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf

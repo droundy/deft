@@ -15,11 +15,10 @@ Functional WaterSaft(double R, double epsilon_association, double kappa_associat
                      double epsilon_dispersion, double lambda_dispersion,
                      double length_scaling, double mu);
 
-Functional HardSpheresFast(double radius);
-Functional HardSpheresWBFast(double radius);
-Functional HardSpheresWBm2(double radius);
-
+Functional TensorWhiteBear(double radius);
+Functional WhiteBearMarkII(double radius);
 Functional HardSpheresNoTensor2(double radius);
+
 Functional ContactAtSphere(double radius);
 Functional YuWuCorrelationFast(double radius);
 
