@@ -57,7 +57,7 @@ double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, cons
 double pairdist_mc(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  const double eta = 4/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
+  const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
   return mc(eta, r,mc_r_step,g);
 }
 double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
@@ -340,7 +340,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
           for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
             for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
               if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
-                for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
+                for (double z1 = z0-delta_r - 3*dv; z1-z0 <= delta_r+3*dv; z1 += dv) {
                   const double r2 = x1*x1 + y1*y1 +(z1-z0)*(z1-z0);
                   if (r2 < ((delta_r+3*dv)*(delta_r+3*dv))
                       && r2 > ((delta_r-3*dv)*(delta_r-3*dv))) {
@@ -403,10 +403,9 @@ int main(int, char **) {
   read_mc();
   printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
-  fflush(stdout);
-    // for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
-    //   run_walls(this_eta, "WB", WB);
-    // }
+  for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
+    run_walls(this_eta, "WB", WB);
+  }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
     printf("Error creating walls.dat!\n");
