@@ -44,11 +44,11 @@ int main(int, char **) {
   while (temperatures_kelvin[imax]) imax++;
   took("Counting the temperatures");
   double mu = 0, nl = 0, nv = 0;
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                                water_prop.epsilonAB, water_prop.kappaAB,
-                                                water_prop.epsilon_dispersion,
-                                                water_prop.lambda_dispersion,
-                                                water_prop.length_scaling, 0));
+  Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
+                                                new_water_prop.epsilonAB, new_water_prop.kappaAB,
+                                                new_water_prop.epsilon_dispersion,
+                                                new_water_prop.lambda_dispersion,
+                                                new_water_prop.length_scaling, 0));
   for (int i=0; i<imax; i+=1) {
     //printf("Working on equation of state at %g Kelvin...\n", temperatures_kelvin[i]);
     double kT = kB*temperatures_kelvin[i];

@@ -6,13 +6,17 @@ module Expression (Exprn(..),
                    RealSpace(..), r_var, dV, dVscalar, dr,
                    rx, ry, rz, rmag, rvec,
                    lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
-                   KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero,
+                   KSpace(..), k_var, imaginary, kvec, kx, ky, kz, k, ksqr, setkzero, setKequalToZero,
                    Scalar(..), scalar,
                    Vector, t_var, cross, dot, (/.), (*.), (.*), xhat, yhat, zhat,
+                   Tensor, tensoridentity, tracetensor, tracetensorcube, (.*.), (.*..), outerproductsquare,
+                   tplus,
+                   tensor_xx, tensor_yy, tensor_zz, tensor_xy, tensor_yz, tensor_zx,
                    erf, heaviside,
                    nameVector, vfft, vifft,
+                   nameTensor, tfft, tifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
-                   Expression(..), joinFFTs, (===), var, protect, vprotect,
+                   Expression(..), joinFFTs, (===), var, vvar, tvar,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
@@ -20,7 +24,7 @@ module Expression (Exprn(..),
                    nameE, newdeclareE,
                    sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
                    product2pairs, pairs2product, product2denominator,
-                   hasActualFFT, hasFFT, hasexpression, hasExprn,
+                   hasActualFFT, hasFFT, hasexpression, hasExprn, hasK,
                    searchExpression, searchExpressionDepthFirst,
                    findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
                    findTransforms, transform, Symmetry(..),
@@ -58,6 +62,10 @@ data Scalar = Summate (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 
 data Vector a = Vector (Expression a) (Expression a) (Expression a)
+     deriving ( Eq, Ord, Show )
+
+data Tensor a = SymmetricTensor { tensor_xx, tensor_yy, tensor_zz,
+                                  tensor_xy, tensor_yz, tensor_zx :: Expression a }
      deriving ( Eq, Ord, Show )
 
 kinversion :: Expression KSpace -> Expression KSpace
@@ -104,7 +112,46 @@ Vector x y z *. s = vector (x*s) (y*s) (z*s)
 
 (.*) :: Type a => Expression a -> Vector a -> Vector a
 s .* Vector x y z = vector (x*s) (y*s) (z*s)
-infixl 7 `cross`, `dot`, /., .*, *.
+infixl 7 `cross`, `dot`, /., .*, *., .*., .*..
+
+outerproductsquare :: Type a => Vector a -> Tensor a
+outerproductsquare (Vector x y z) = SymmetricTensor { tensor_xx = x*x,
+                                                      tensor_yy = y*y,
+                                                      tensor_zz = z*z,
+                                                      tensor_xy = x*y,
+                                                      tensor_yz = y*z,
+                                                      tensor_zx = z*x }
+
+tplus :: Type a => Tensor a -> Tensor a -> Tensor a
+tplus (SymmetricTensor a b c d e f) (SymmetricTensor a' b' c' d' e' f') =
+  SymmetricTensor (a+a') (b+b') (c+c') (d+d') (e+e') (f+f')
+
+tracetensor :: Type a => Tensor a -> Expression a
+tracetensor t@(SymmetricTensor {}) = tensor_xx t + tensor_yy t + tensor_zz t
+
+-- tracetensorcube is the trace of the cube of a tensor, which shows
+-- up in some versions of FMT.
+tracetensorcube :: Type a => Tensor a -> Expression a
+tracetensorcube (SymmetricTensor {tensor_xx = txx, tensor_yy = tyy, tensor_zz = tzz,
+                                  tensor_xy = txy, tensor_yz = tyz, tensor_zx = tzx}) =
+  txx*txx*txx + txy*tyy*tyx + txz*tzz*tzx + 2*txy*tyx*txx + 2*txz*tzx*txx + 2*txy*tyz*tzx +
+  tyx*txx*txy + tyy*tyy*tyy + tyz*tzz*tzy + 2*tyy*tyx*txy + 2*tyz*tzx*txy + 2*tyy*tyz*tzy +
+  tzx*txx*txz + tzy*tyy*tyz + tzz*tzz*tzz + 2*tzy*tyx*txz + 2*tzz*tzx*txz + 2*tzy*tyz*tzz
+    where tyx = txy
+          tzy = tyz
+          txz = tzx
+
+tensoridentity :: Type a => Tensor a
+tensoridentity = SymmetricTensor { tensor_xx = 1, tensor_yy = 1, tensor_zz = 1,
+                                   tensor_xy = 0, tensor_yz = 0, tensor_zx = 0 }
+
+(.*.) :: Type a => Vector a -> Tensor a -> Vector a
+Vector x y z .*. t@(SymmetricTensor {}) = vector (tensor_xx t*x + tensor_xy t*y + tensor_zx t*z)
+                                                 (tensor_xy t*x + tensor_yy t*y + tensor_yz t*z)
+                                                 (tensor_zx t*x + tensor_yz t*y + tensor_zz t*z)
+
+(.*..) :: Type a => Expression a -> Tensor a -> Tensor a
+s .*.. (SymmetricTensor a b c d e f) = SymmetricTensor (s*a) (s*b) (s*c) (s*d) (s*e) (s*f)
 
 instance Type a => Code (Vector a) where
   codePrec _ (Vector a b c) = showString ("<" ++ code a ++ ", " ++ code b ++ ", " ++ code c ++">")
@@ -306,7 +353,7 @@ instance Type KSpace where
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ a ++ "[i]" ++ op ++ code x ++ ";"
             setzero = case code $ setKequalToZero e of
-                      "0" -> a ++ "[0]" ++ op ++ "0;"
+                      "0.0" -> a ++ "[0]" ++ op ++ "0;"
                       k0code -> unlines ["\t{",
                                          "\t\tconst int i = 0;",
                                          "\t\tconst Reciprocal k_i = Reciprocal(0,0,0);",
@@ -347,7 +394,7 @@ instance Type KSpace where
               MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
                             "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
             setzero = case newcode $ setKequalToZero e of
-                      "0" -> a ++ "[0]" ++ op ++ "0;\n"
+                      "0.0" -> a ++ "[0]" ++ op ++ "0;\n"
                       k0newcode -> unlines ["{",
                                          "\t\tconst int i = 0;",
                                          "\t\t" ++ a ++ "[0]" ++ op ++ k0newcode ++ ";",
@@ -389,7 +436,7 @@ instance Type KSpace where
   subAndCountHelper _ _ Kx = (kx, 0)
   subAndCountHelper _ _ Ky = (ky, 0)
   subAndCountHelper _ _ Kz = (kz, 0)
-  subAndCountHelper _ _ Delta = error "unhandled case: Delta"
+  subAndCountHelper _ _ Delta = (Expression Delta, 0)
   searchHelper f (FFT e) = f e
   searchHelper f (SphericalFourierTransform _ e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
@@ -486,12 +533,11 @@ searchExpression :: Type a => Set.Set String -> (forall b. Type b => Expression 
 searchExpression _ f e | Just c <- f e = Just c
 searchExpression i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
 searchExpression _ _ (Var _ _ _ _ Nothing) = Nothing
-searchExpression i f v@(Var IsTemp _ _ _ (Just e)) =
+searchExpression i f v@(Var _ _ _ _ (Just e)) =
   case searchExpression i f e of
     Nothing -> Nothing
     Just e' | mkExprn e == e' -> Just $ mkExprn v
             | otherwise -> Just e'
-searchExpression _ _ (Var CannotBeFreed _ _ _ (Just _)) = Nothing
 searchExpression i f (Scalar e) = searchExpression i f e
 searchExpression i f (Heaviside e) = searchExpression i f e
 searchExpression i f (Cos e) = searchExpression i f e
@@ -510,12 +556,11 @@ searchExpressionDepthFirst :: Type a => Set.Set String
                               -> Expression a -> Maybe Exprn
 searchExpressionDepthFirst i _ e | not $ Set.isSubsetOf i (varSet e) = Nothing
 searchExpressionDepthFirst _ f e@(Var _ _ _ _ Nothing) = f e
-searchExpressionDepthFirst i f x@(Var IsTemp _ _ _ (Just e)) =
+searchExpressionDepthFirst i f x@(Var _ _ _ _ (Just e)) =
   case searchExpressionDepthFirst i f e of
     Nothing -> f x
     Just e' | mkExprn e == e' -> Just $ mkExprn x
             | otherwise -> Just e'
-searchExpressionDepthFirst _ f x@(Var CannotBeFreed _ _ _ (Just _)) = f x
 searchExpressionDepthFirst i f x@(Scalar e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Heaviside e) = searchExpressionDepthFirst i f e `mor` f x
 searchExpressionDepthFirst i f x@(Cos e) = searchExpressionDepthFirst i f e `mor` f x
@@ -616,7 +661,9 @@ expand _ (Expression e) = Expression e
 setZero :: Type a => Exprn -> Expression a -> Expression a
 setZero v e | v == mkExprn e = 0
             | isEven v e == -1 = 0
-setZero v (Var t a b c (Just e)) = Var t a b c (Just $ setZero v e)
+setZero v (Var t a b c (Just e)) = case isConstant e' of Nothing -> Var t a b c (Just e')
+                                                         Just _ -> e'
+  where e' = setZero v e
 setZero _ e@(Var _ _ _ _ Nothing) = e
 setZero v (Scalar e) = case isConstant $ setZero v e of
                          Just c -> toExpression c
@@ -725,24 +772,30 @@ infix 4 ===, `nameVector`
 
 (===) :: Type a => String -> Expression a -> Expression a
 --_ === e = e
-v@(a:r@(_:_)) === e = Var IsTemp c v ltx (Just e)
+v@(a:[ch]) === e | ch `elem` (['a'..'Z']++['0'..'9']) = var v ltx e
+  where ltx = a : "_"++[ch]
+v@(a:r@(_:_)) === e = var v ltx e
   where ltx = a : "_{"++r++"}"
-        c = if amScalar e then v else v ++ "[i]"
-v === e = Var IsTemp c v v (Just e)
-  where c = if amScalar e then v else v ++ "[i]"
+v === e = var v v e
 
 var :: Type a => String -> String -> Expression a -> Expression a
+var _ _ e | Just _ <- isConstant e = e
 var v ltx e = Var IsTemp c v ltx (Just e)
   where c = if amScalar e then v else v ++ "[i]"
 
-protect :: Type a => String -> String -> Expression a -> Expression a
-protect v ltx e = Var CannotBeFreed c v ltx (Just e)
-  where c = if amScalar e then v else v ++ "[i]"
+vvar :: Type a => String -> (String -> String) -> Vector a -> Vector a
+vvar v ltx (Vector x y z) = Vector (var (v++"x") (ltx "x") x)
+                                   (var (v++"y") (ltx "y") y)
+                                   (var (v++"z") (ltx "z") z)
 
-vprotect :: Type a => String -> (String -> String) -> Vector a -> Vector a
-vprotect v ltx (Vector x y z) = Vector (protect (v++"x") (ltx "x") x) 
-                                       (protect (v++"y") (ltx "y") y) 
-                                       (protect (v++"z") (ltx "z") z)
+tvar :: Type a => String -> (String -> String) -> Tensor a -> Tensor a
+tvar v ltx (SymmetricTensor xx yy zz xy yz zx) =
+  SymmetricTensor (var (v++"xx") (ltx "{xx}") xx)
+                  (var (v++"yy") (ltx "{yy}") yy)
+                  (var (v++"zz") (ltx "{zz}") zz)
+                  (var (v++"xy") (ltx "{xy}") xy)
+                  (var (v++"yz") (ltx "{yz}") yz)
+                  (var (v++"zx") (ltx "{zx}") zx)
 
 rmag :: Expression RealSpace
 rmag = sqrt (rx**2 + ry**2 + rz**2)
@@ -807,6 +860,12 @@ vfft (Vector x y z) = Vector (fft x) (fft y) (fft z)
 
 vifft :: Vector KSpace -> Vector RealSpace
 vifft (Vector x y z) = Vector (ifft x) (ifft y) (ifft z)
+
+tfft :: Tensor RealSpace -> Tensor KSpace
+tfft (SymmetricTensor a b c d e f) = SymmetricTensor (fft a) (fft b) (fft c) (fft d) (fft e) (fft f)
+
+tifft :: Tensor KSpace -> Tensor RealSpace
+tifft (SymmetricTensor a b c d e f) = SymmetricTensor (ifft a) (ifft b) (ifft c) (ifft d) (ifft e) (ifft f)
 
 complex :: Expression Scalar -> Expression Scalar -> Expression KSpace
 complex a b | b == 0 = scalar a
@@ -995,18 +1054,18 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Log x) = showString "log(" . codePrec 0 x . showString ")"
   codePrec _ (Abs x) = showString "fabs(" . codePrec 0 x . showString ")"
   codePrec _ (Signum _) = undefined
-  codePrec _ (Product p i) | Product p i == 1 = showString "1"
+  codePrec _ (Product p i) | Product p i == 1 = showString "1.0"
   codePrec pree (Product p _) = showParen (pree > 7) $
                            if den == 1
                            then codesimple num
                            else codesimple num . showString "/" . codePrec 8 den
-    where codesimple [] = showString "1"
+    where codesimple [] = showString "1.0"
           codesimple [(a,n)] = codee a n
           codesimple [(a,n),(b,m)] = codee a n . showString "*" . codee b m
           codesimple ((a,n):es) = codee a n . showString "*" . codesimple es
           num = product2numerator_pairs p
           den = product2denominator p
-          codee _ 0 = showString "1" -- this shouldn't happen...
+          codee _ 0 = showString "1.0" -- this shouldn't happen...
           codee _ n | n < 0 = error "shouldn't have negative power here"
           codee x 1 = codePrec 7 x
           codee x 0.5 = showString "sqrt(" . codePrec 0 x . showString ")"
@@ -1018,7 +1077,7 @@ instance (Type a, Code a) => Code (Expression a) where
             where n2 = floor (2*nn)
                   n = floor nn
           codee x n = showString "pow(" . codePrec 0 x . showString (", " ++ show n ++ ")")
-  codePrec _ (Sum s i) | Sum s i == 0 = showString "0"
+  codePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   codePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
           addup "" (1,e) = codePrec 6 e ""
@@ -1047,7 +1106,8 @@ instance (Type a, Code a) => Code (Expression a) where
       [(_, n)] | n < 0 -> error "shouldn't have negative power here"
       [(e, 1)] ->   latexPrec p e
       [(e, 0.5)] -> showString "\\sqrt{" . latexPrec 0 e . showString "}"
-      [(e, n)] -> latexPrec 8 e . showString ("^{" ++ latexDouble n ++ "}")
+      [(e, n)] | floor n == (ceiling n :: Int) && n < 10 -> latexPrec 8 e . showString ("^" ++ latexDouble n)
+               | otherwise -> latexPrec 8 e . showString ("^{" ++ latexDouble n ++ "}")
       _ -> error "This really cannot happen."
   latexPrec pree (Product p _) | product2denominator p == 1 = latexParen (pree > 7) $ ltexsimple $ product2numerator p
     where ltexsimple [] = showString "1"
@@ -1346,6 +1406,33 @@ varSet (Signum e) = varSet e
 varSet (Sum _ i) = i
 varSet (Product _ i) = i
 varSet (Scalar _) = Set.empty
+
+-- The following returns true if the expression is a k-space
+-- expression with k in it.
+hasK :: Type a => Expression a -> Bool
+hasK e0 | EK e' <- mkExprn e0 = hask e'
+  where hask (Expression Kx) = True
+        hask (Expression Ky) = True
+        hask (Expression Kz) = True
+        hask (Expression Delta) = False
+        hask (Expression (Complex _ _)) = False
+        hask (Expression (FFT _)) = False
+        hask (Expression (SphericalFourierTransform _ _)) = False
+        hask (Expression (SetKZeroValue _ _)) = False -- the SetKZeroValue removes k-dependence effectively
+        hask (Var _ _ _ _ (Just e)) = hask e
+        hask (Var _ _ _ _ Nothing) = False
+        hask (Sin e) = hask e
+        hask (Cos e) = hask e
+        hask (Log e) = hask e
+        hask (Exp e) = hask e
+        hask (Heaviside e) = hask e
+        hask (Signum e) = hask e
+        hask (Erf e) = hask e
+        hask (Abs e) = hask e
+        hask (Sum s _) = or $ map (hask . snd) $ sum2pairs s
+        hask (Product p _) = or $ map (hask . fst) $ product2pairs p
+        hask (Scalar _) = False
+hasK _ = False
 
 hasFFT :: Type a => Expression a -> Bool
 hasFFT e@(Expression _) = case mkExprn e of
@@ -1878,7 +1965,7 @@ dr :: Expression KSpace
 dr = scalar $ var "dr" "\\Delta r" $ dVscalar ** (1.0/3)
 
 volume :: Type a => Expression a
-volume = scalar $ protect "volume" "volume" $ lat1 `dot` (lat2 `cross` lat3)
+volume = scalar $ var "volume" "volume" $ lat1 `dot` (lat2 `cross` lat3)
 
 numx, numy, numz :: Type a => Expression a
 numx = s_var "Nx"
@@ -1897,5 +1984,10 @@ rlat3 = (lat1 `cross` lat2) /. (lat1 `dot` (lat2 `cross` lat3))
 
 nameVector :: Type a => String -> Vector a -> Vector a
 nameVector n (Vector x y z) = Vector (nn "x" x) (nn "y" y) (nn "z" z)
+  where nn a s = (n++a) === s
+
+nameTensor :: Type a => String -> Tensor a -> Tensor a
+nameTensor n (SymmetricTensor xx yy zz xy yz zx) = SymmetricTensor (nn "xx" xx) (nn "yy" yy) (nn "zz" zz)
+                                                                   (nn "xy" xy) (nn "yz" yz) (nn "zx" zx)
   where nn a s = (n++a) === s
 \end{code}

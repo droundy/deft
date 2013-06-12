@@ -19,6 +19,10 @@
 #include "Grid.h"
 #include "Functionals.h"
 
+Functional TensorDensityXX(double R);
+Functional VectorDensityX(double R);
+Functional n2Density(double R);
+
 double gaussian(Cartesian r) {
   const Cartesian center(1, 0, 0);
   const Cartesian dr(r - center);
@@ -207,8 +211,52 @@ int main(int, char **argv) {
            Identity().integral(kT, bar)/integrate_foo);
     retval++;
   }
-  bar.epsNativeSlice("tests/vis/x-shell-3.eps", plotx, ploty, plotcorner);
   double mymax = ref.maxCoeff();
+  if (fabs(bar.maxCoeff() - mymax)/mymax > 2e-3) {
+    printf("problem with xShellConvolve max: %g != %g (error of %g)\n",
+           bar.maxCoeff(), mymax, (bar.maxCoeff() - mymax)/mymax);
+    retval++;
+    exit(1);
+  }
+  if (fabs((bar.minCoeff() + mymax)/mymax) > 2e-3) {
+    printf("problem with xShellConvolve min: %g != minus %g (error of %g)\n",
+           bar.minCoeff(), mymax, (bar.minCoeff() + mymax)/mymax);
+    retval++;
+    exit(1);
+  }
+  bar.epsNativeSlice("tests/vis/x-shell-3.eps", plotx, ploty, plotcorner);
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
+      printf("FAIL: x shell is bigger in magnitude than shell by %g out of %g compared with %g!\n",
+             fabs(bar[i]) - fabs(ref[i]), fabs(ref[i]), mymax);
+      retval++;
+    }
+  }
+
+  printf("Running VectorDensityX(3)...\n");
+  ref = n2Density(3)(kT, foo);
+  bar = VectorDensityX(3)(kT, foo);
+  printf("VectorDensityX(3) Maximum is %g\n", bar.maxCoeff());
+  printf("VectorDensityX(3) integrates to %.15g\n", Identity().integral(kT, bar));
+  if (fabs(Identity().integral(kT, bar)/integrate_foo) > 1e-6) {
+    printf("Integral of VectorDensityX(3) is wrong:  %g\n",
+           Identity().integral(kT, bar)/integrate_foo);
+    retval++;
+  }
+  bar.epsNativeSlice("tests/vis/x-vector-3.eps", plotx, ploty, plotcorner);
+  mymax = ref.maxCoeff();
+  if (fabs(bar.maxCoeff() - mymax)/mymax > 2e-3) {
+    printf("problem with VectorDensityX max: %g != %g (error of %g)\n",
+           bar.maxCoeff(), mymax, (bar.maxCoeff() - mymax)/mymax);
+    retval++;
+    exit(1);
+  }
+  if (fabs((bar.minCoeff() + mymax)/mymax) > 2e-3) {
+    printf("problem with VectorDensityX min: %g != minus %g (error of %g)\n",
+           bar.minCoeff(), mymax, (bar.minCoeff() + mymax)/mymax);
+    retval++;
+    exit(1);
+  }
   for (int i=0;i<gd.NxNyNz;i++) {
     if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-11) {
       printf("FAIL: x shell is bigger in magnitude than shell by %g out of %g compared with %g!\n",
@@ -258,6 +306,32 @@ int main(int, char **argv) {
     }
   }
 
+  printf("Running TensorDensityXX(2)...\n");
+  ref = VectorDensityX(2)(kT, foo).cwise().abs() + 1./3*n2Density(2)(kT, foo);
+  bar = TensorDensityXX(2)(kT, foo);
+  printf("TensorDensityXX(2) integrates to %.15g\n", Identity().integral(kT, bar));
+  printf("TensorDensityXX(2) Maximum is %g\n", bar.maxCoeff());
+  if (fabs(Identity().integral(kT, bar)/integrate_foo) > 1e-14) {
+    printf("FAIL: Integral of xxShellConvolve(2) is wrong:  %g\n",
+           Identity().integral(kT, bar)/integrate_foo);
+    retval++;
+  }
+  bar.epsNativeSlice("tests/vis/xx-tensor-2.eps", plotx, ploty, plotcorner);
+  mymax = ref.maxCoeff();
+  double shellmax = n2Density(3)(kT, foo).maxCoeff();
+  if (fabs(bar.maxCoeff() - 2*shellmax/3)/(2*shellmax/3) > 1e-2) {
+    printf("problem with TensorDensityXX max: %g != %g (error of %g)\n",
+           bar.maxCoeff(), 2*shellmax/3, (bar.maxCoeff() - 2*shellmax/3)/(2*shellmax/3));
+    retval++;
+    exit(1);
+  }
+  for (int i=0;i<gd.NxNyNz;i++) {
+    if ((fabs(bar[i]) - fabs(ref[i]))/mymax > 1e-12) {
+      printf("FAIL: xx shell is bigger in magnitude than x shell by %g out of %g compared with %g!\n",
+             fabs(bar[i]) - fabs(ref[i]), fabs(ref[i]), mymax);
+      retval++;
+    }
+  }
   printf("Running zxShellConvolve(3)...\n");
   Functional zxsh = zxShellConvolve(3);
   bar = zxsh(kT, foo);

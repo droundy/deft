@@ -182,6 +182,9 @@ private:
 	double R;
 	mutable double dV;
 	mutable double dr;
+	mutable double kTphi1;
+	mutable double kTphi2;
+	mutable double kTphi3;
 	mutable double volume;
 	mutable double whitebear;
 }; // End of WhiteBear class

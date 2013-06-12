@@ -126,36 +126,25 @@ int main(int argc, char *argv[]) {
   FILE *o = fopen(datname, "w");
   //FILE *o = fopen("papers/hughes-saft/figs/rods-in-water.dat", "w");
 
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-						water_prop.epsilonAB, water_prop.kappaAB,
-						water_prop.epsilon_dispersion,
-						water_prop.lambda_dispersion,
-						water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+						hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+						hughes_water_prop.epsilon_dispersion,
+						hughes_water_prop.lambda_dispersion,
+						hughes_water_prop.length_scaling, 0));
+  double n_1atm = pressure_to_density(f, hughes_water_prop.kT, atmospheric_pressure,
 					      0.001, 0.01);
 
-  double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, hughes_water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-		water_prop.epsilonAB, water_prop.kappaAB,
-		water_prop.epsilon_dispersion,
-		water_prop.lambda_dispersion,
-				     water_prop.length_scaling, mu_satp));
+  f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+		hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+		hughes_water_prop.epsilon_dispersion,
+		hughes_water_prop.lambda_dispersion,
+				     hughes_water_prop.length_scaling, mu_satp));
   
-  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
   const double EperCell = EperVolume*(zmax*ymax - 2*0.25*M_PI*diameter*diameter)*width;
 
-  Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
-  			    water_prop.kappaAB, water_prop.epsilon_dispersion,
-  			    water_prop.lambda_dispersion,
-  			    water_prop.length_scaling);
-  
-  Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, 
-						  water_prop.epsilonAB, 
-						  water_prop.kappaAB, 
-						  water_prop.epsilon_dispersion,
-						  water_prop.lambda_dispersion,
-						  water_prop.length_scaling));
   for (distance=0*nm; distance<1.6*nm; distance +=0.05*nm) {
     Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
@@ -164,11 +153,11 @@ int main(int argc, char *argv[]) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-				       water_prop.epsilonAB, water_prop.kappaAB,
-				       water_prop.epsilon_dispersion,
-				       water_prop.lambda_dispersion,
-				       water_prop.length_scaling, mu_satp));
+    f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+				       hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+				       hughes_water_prop.epsilon_dispersion,
+				       hughes_water_prop.lambda_dispersion,
+				       hughes_water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
     
     // constraint.epsNativeSlice("papers/hughes-saft/figs/rods-in-water-constraint.eps",
@@ -176,17 +165,17 @@ int main(int argc, char *argv[]) {
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
    
-    potential = water_prop.liquid_density*constraint
-      + 500*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-    //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-    potential = -water_prop.kT*potential.cwise().log();
+    potential = hughes_water_prop.liquid_density*constraint
+      + 500*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    //potential = hughes_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+    potential = -hughes_water_prop.kT*potential.cwise().log();
     
     // {
     //    fflush(stdout);
-    //    Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    //    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
     //    //density.epsNative1d("papers/hughes-saft/figs/constrained-water-1D.eps",
     //    //			Cartesian(0,0,0), Cartesian(0,0,zmax),
-    //    //			water_prop.liquid_density, 1, " ");
+    //    //			hughes_water_prop.liquid_density, 1, " ");
     
     //    //sleep(3);
     //  }
@@ -198,7 +187,7 @@ int main(int argc, char *argv[]) {
     const double precision = bulkprecision + surfprecision;
     printf("Precision limit from surface tension is to %g based on %g and %g\n",
            precision, surfprecision, bulkprecision);
-    Minimizer min = Precision(precision, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min = Precision(precision, PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT,
                                                                          &potential,
                                                                          QuadraticLineMinimizer));
 
@@ -219,11 +208,11 @@ int main(int argc, char *argv[]) {
     Grid constraint2(gd);
     constraint2.Set(notinmiddle);
 
-    potential2 = water_prop.liquid_density*(constraint2.cwise()*constraint)
-      + 400*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-    potential2 = -water_prop.kT*potential2.cwise().log();
+    potential2 = hughes_water_prop.liquid_density*(constraint2.cwise()*constraint)
+      + 400*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    potential2 = -hughes_water_prop.kT*potential2.cwise().log();
 
-    Minimizer min2 = Precision(1e-12, PreconditionedConjugateGradient(f, gd, water_prop.kT,
+    Minimizer min2 = Precision(1e-12, PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT,
                                                                      &potential2,
                                                                      QuadraticLineMinimizer));
     for (int i=0;i<numiters && min2.improve_energy(false);i++) {
@@ -241,7 +230,7 @@ int main(int argc, char *argv[]) {
     double energy;
     if (min.energy() < min2.energy()) {
       energy = (min.energy() - EperCell)/width;
-      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+      Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
       printf("Using liquid in middle initially.\n");
       plot_grids_yz_directions(plotnameslice, density);
       {
@@ -251,7 +240,7 @@ int main(int argc, char *argv[]) {
       }
     } else {
       energy = (min2.energy() - EperCell)/width;
-      Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential2));
+      Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential2));
       printf("Using vapor in middle initially.\n");    
       plot_grids_yz_directions(plotnameslice, density);
       {
@@ -262,13 +251,13 @@ int main(int argc, char *argv[]) {
     } 
 
     printf("Liquid energy is %.15g. Vapor energy is %.15g\n", min.energy(), min2.energy());
-    //double totalentropy = S.integral(water_prop.kT, potential)/width;
+    //double totalentropy = S.integral(hughes_water_prop.kT, potential)/width;
     
     fprintf(o, "%g\t%.15g\t\n", distance/nm, energy);
 
-    //Grid energy_density(gd, f(water_prop.kT, gd, potential));
-    //Grid entropy(gd, S(water_prop.kT, potential));
-    //Grid Xassoc(gd, X(water_prop.kT, density));
+    //Grid energy_density(gd, f(hughes_water_prop.kT, gd, potential));
+    //Grid entropy(gd, S(hughes_water_prop.kT, potential));
+    //Grid Xassoc(gd, X(hughes_water_prop.kT, density));
     //plot_grids_y_direction(plotnameslice, density, energy_density, entropy, Xassoc);
     //if ((close(distance, 0.2*nm) || close(distance, 0.4*nm)) && close(diameter, 1*nm)) {
     //char *plotname = (char *)malloc(1024);

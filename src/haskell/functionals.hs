@@ -1,10 +1,10 @@
 import CodeGen
-import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation, mu )
-import WaterSaft ( water_saft )
+import HughesSaft ( saft_fluid, saft_entropy, yuwu_correlation )
+import WaterSaft ( water_saft, water_entropy, mu )
 import IdealGas ( idealgas )
-import FMT ( n )
+import FMT ( n, n2, n2mxx, n2x )
 import SFMT ( sfmt )
-import WhiteBear ( whitebear, correlation_gross, gSigmaA, gSigmaS, 
+import WhiteBear ( whitebear, tensorwhitebear, whitebear_m2, correlation_gross, gSigmaA, gSigmaS,
                    gSigmaA_m2, gSigmaS_m2 )
 import Quantum
 import System.Environment ( getArgs )
@@ -23,6 +23,16 @@ main =
      
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"
+     gen "src/WhiteBearMarkIIFast.cpp" $
+       defineFunctional whitebear_m2 ["R"] "WhiteBearMarkII"
+     gen "src/TensorWhiteBearFast.cpp" $
+       defineFunctional tensorwhitebear ["R"] "TensorWhiteBear"
+     gen "src/n2DensityFast.cpp" $
+       generateHeader n2 ["R"] "n2Density"
+     gen "src/TensorDensityXXFast.cpp" $
+       generateHeader n2mxx ["R"] "TensorDensityXX"
+     gen "src/VectorDensityXFast.cpp" $
+       generateHeader n2x ["R"] "VectorDensityX"
      gen "src/gSigmaSFast.cpp" $
        generateHeader gSigmaS ["R"] "gSigmaS"
      gen "src/gSigmaAFast.cpp" $
@@ -46,6 +56,10 @@ main =
        defineFunctional water_saft ["R", "epsilon_association", "kappa_association",
                                     "epsilon_dispersion", "lambda_dispersion", "length_scaling",
                                     "mu"] "WaterSaft"
+     gen "src/WaterEntropyFast.cpp" $
+       defineFunctional water_entropy ["R", "epsilon_association", "kappa_association",
+                                    "epsilon_dispersion", "lambda_dispersion", "length_scaling",
+                                    "mu"] "WaterEntropy"
      gen "src/EntropySaftFluid2Fast.cpp" $
        defineFunctionalNoGradient saft_entropy
        ["R", "epsilon_association", "kappa_association",

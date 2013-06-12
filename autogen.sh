@@ -24,13 +24,15 @@ WARNINGEXCEPTIONS=' -Wno-unused-variable -Wno-unused-parameter -Wno-return-type 
 
 export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2 -DNDEBUG"
 export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2"
-if env | grep CCACHE_; then
-    echo Using ccache to speed up compilation.
-    CXX='ccache g++' ./configure
-else
-    echo 'Consider installing ccache to speed up compilation!'
-    ./configure
-fi
+# if env | grep CCACHE_; then
+#     echo Using ccache to speed up compilation.
+#     CXX='ccache g++' ./configure
+# else
+#     echo 'Consider installing ccache to speed up compilation!'
+#     ./configure
+# fi
+
+./configure
 
 set +v
 echo If you are not a deft developer, you should now run ./configure

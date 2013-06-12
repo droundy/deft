@@ -48,27 +48,27 @@ int main(int argc, char **argv) {
     Functional f = HardSpheres(R) + IdealGas() + ChemicalPotential(mu);
     f.create_source(argv[1], "HardSphereGas", R_mu_arg);
   }
-  const char *saft_args[] = {
-    "R",
-    "epsilonAB", "kappaAB",
-    "epsilon_dispersion", "lambda_dispersion", "length_scaling", "mu",
-    0
-  };
-  if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0)
-    SaftFluidSlow(R, 0.01, 0.01, 0.01, 0.01, 0.01,
-                  mu).create_source(argv[1], "SaftFluid", saft_args);
-  const char *dispersion_args[] = { "R", "epsilon_dispersion", "lambda_dispersion",
-                                    "length_scaling", 0 };
-  if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
-    DispersionSAFT(R, 0.01, 0.01, 0.01).create_source(argv[1], "Dispersion", dispersion_args);
-  }
-  const char *association_args[] = {
-    "R",
-    "epsilonAB", "kappaAB",
-    "epsilon_dispersion", "lambda_dispersion", "length_scaling",
-    0
-  };
-  if (strcmp(argv[1], "src/AssociationFast.cpp") == 0)
-    AssociationSAFT(R, 0.01, 0.01, 0.01,
-                    0.01, 0.01).create_source(argv[1], "Association", association_args);
+  // const char *saft_args[] = {
+  //   "R",
+  //   "epsilonAB", "kappaAB",
+  //   "epsilon_dispersion", "lambda_dispersion", "length_scaling", "mu",
+  //   0
+  // };
+  // if (strcmp(argv[1], "src/SaftFluidFast.cpp") == 0)
+  //   SaftFluidSlow(R, 0.01, 0.01, 0.01, 0.01, 0.01,
+  //                 mu).create_source(argv[1], "SaftFluid", saft_args);
+  // const char *dispersion_args[] = { "R", "epsilon_dispersion", "lambda_dispersion",
+  //                                   "length_scaling", 0 };
+  // if (strcmp(argv[1], "src/DispersionFast.cpp") == 0) {
+  //   DispersionSAFT(R, 0.01, 0.01, 0.01).create_source(argv[1], "Dispersion", dispersion_args);
+  // }
+  // const char *association_args[] = {
+  //   "R",
+  //   "epsilonAB", "kappaAB",
+  //   "epsilon_dispersion", "lambda_dispersion", "length_scaling",
+  //   0
+  // };
+  // if (strcmp(argv[1], "src/AssociationFast.cpp") == 0)
+  //   AssociationSAFT(R, 0.01, 0.01, 0.01,
+  //                   0.01, 0.01).create_source(argv[1], "Association", association_args);
 }

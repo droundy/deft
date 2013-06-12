@@ -100,37 +100,32 @@ int main(int argc, char **argv) {
   const double ymax = diameter+2*padding;
   const double zmax = diameter+2*padding;
 
-  Functional f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-						water_prop.epsilonAB, water_prop.kappaAB,
-						water_prop.epsilon_dispersion,
-						water_prop.lambda_dispersion,
-						water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, water_prop.kT, atmospheric_pressure,
+  Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
+						new_water_prop.epsilonAB, new_water_prop.kappaAB,
+						new_water_prop.epsilon_dispersion,
+						new_water_prop.lambda_dispersion,
+						new_water_prop.length_scaling, 0));
+  double n_1atm = pressure_to_density(f, new_water_prop.kT, atmospheric_pressure,
 					      0.001, 0.01);
 
-  double mu_satp = find_chemical_potential(f, water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, new_water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-				     water_prop.epsilonAB, water_prop.kappaAB,
-				     water_prop.epsilon_dispersion,
-				     water_prop.lambda_dispersion,
-				     water_prop.length_scaling, mu_satp));
+  f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
+				     new_water_prop.epsilonAB, new_water_prop.kappaAB,
+				     new_water_prop.epsilon_dispersion,
+				     new_water_prop.lambda_dispersion,
+				     new_water_prop.length_scaling, mu_satp));
   
-  const double EperVolume = f(water_prop.kT, -water_prop.kT*log(n_1atm));
+  const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*diameter*diameter)*width;
-
-  Functional X = Xassociation(water_prop.lengthscale, water_prop.epsilonAB, 
-  			    water_prop.kappaAB, water_prop.epsilon_dispersion,
-  			    water_prop.lambda_dispersion,
-  			    water_prop.length_scaling);
   
-  Functional S = OfEffectivePotential(SaftEntropy(water_prop.lengthscale, 
-						  water_prop.epsilonAB, 
-						  water_prop.kappaAB, 
-						  water_prop.epsilon_dispersion,
-						  water_prop.lambda_dispersion,
-						  water_prop.length_scaling));
+  Functional S = OfEffectivePotential(EntropySaftFluid2(new_water_prop.lengthscale,
+                                                        new_water_prop.epsilonAB,
+                                                        new_water_prop.kappaAB,
+                                                        new_water_prop.epsilon_dispersion,
+                                                        new_water_prop.lambda_dispersion,
+                                                        new_water_prop.length_scaling));
     
   Lattice lat(Cartesian(width,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, 0.1);
@@ -139,21 +134,21 @@ int main(int argc, char **argv) {
   Grid constraint(gd);
   constraint.Set(notinwall);
     
-  f = OfEffectivePotential(SaftFluid2(water_prop.lengthscale,
-                                     water_prop.epsilonAB, water_prop.kappaAB,
-                                     water_prop.epsilon_dispersion,
-                                     water_prop.lambda_dispersion,
-                                     water_prop.length_scaling, mu_satp));
+  f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
+                                     new_water_prop.epsilonAB, new_water_prop.kappaAB,
+                                     new_water_prop.epsilon_dispersion,
+                                     new_water_prop.lambda_dispersion,
+                                     new_water_prop.length_scaling, mu_satp));
   f = constrain(constraint, f);
   // constraint.epsNativeSlice("papers/water-saft/figs/single-rod-in-water-constraint.eps",
   // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
   // 			      Cartesian(0,ymax/2,zmax/2));
   //printf("Constraint has become a graph!\n");
    
-  potential = water_prop.liquid_density*constraint
-    + 200*water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-  //potential = water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-  potential = -water_prop.kT*potential.cwise().log();
+  potential = new_water_prop.liquid_density*constraint
+    + 200*new_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+  //potential = new_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+  potential = -new_water_prop.kT*potential.cwise().log();
   
   const double surface_tension = 5e-5; // crude guess from memory...
   const double surfprecision = 1e-5*M_PI*diameter*width*surface_tension; // five digits accuracy
@@ -162,7 +157,7 @@ int main(int argc, char **argv) {
   //printf("Precision limit from surface tension is to %g based on %g and %g\n",
   //       precision, surfprecision, bulkprecision);
   Minimizer min = Precision(precision,
-                            PreconditionedConjugateGradient(f, gd, water_prop.kT,
+                            PreconditionedConjugateGradient(f, gd, new_water_prop.kT,
                                                             &potential,
                                                             QuadraticLineMinimizer));
     
@@ -171,7 +166,7 @@ int main(int argc, char **argv) {
   const int numiters = 200;
   for (int i=0;i<numiters && min.improve_energy(true);i++) {
     fflush(stdout);
-    //Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+    //Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
      
     //density.epsNativeSlice("papers/water-saft/figs/single-rod-in-water.eps", 
     //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -185,7 +180,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  Grid density(gd, EffectivePotentialToDensity()(water_prop.kT, gd, potential));
+  Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
   //printf("The bulk energy per cell should be %g\n", EperCell);
   //printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
   //printf("Number of water molecules is %g\n", density.integrate());

@@ -31,12 +31,12 @@ static void took(const char *name) {
 const double nv = 1e-7, nl = 1e-3;
 Functional n0 = Gaussian(1);
 // The following is the simplest interesting functional
-Functional f = /*IdealGasOfVeff() + */ 1e6*sqr(n0 - Functional(water_prop.liquid_density))*sqr(n0 - Functional(water_prop.vapor_density));
+Functional f = /*IdealGasOfVeff() + */ 1e6*sqr(n0 - Functional(hughes_water_prop.liquid_density))*sqr(n0 - Functional(hughes_water_prop.vapor_density));
 
 int main(int, char **argv) {
   int retval = 0;
   const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
-  LiquidProperties prop = water_prop;
+  LiquidProperties prop = hughes_water_prop;
   prop.lengthscale = 2;
   double criten = 0;
   for (double n = prop.vapor_density; n < prop.liquid_density; n *= 1.1) {
@@ -51,12 +51,12 @@ int main(int, char **argv) {
   saturated_liquid_properties(f, &prop);
   prop.critical_density = 1;
   took("Finding bulk densities");
-  if (fabs(prop.liquid_density-water_prop.liquid_density) > 1e-9*water_prop.liquid_density) {
-    printf("FAIL: bad liquid density:  %g (vs. %g)\n", prop.liquid_density, water_prop.liquid_density);
+  if (fabs(prop.liquid_density-hughes_water_prop.liquid_density) > 1e-9*hughes_water_prop.liquid_density) {
+    printf("FAIL: bad liquid density:  %g (vs. %g)\n", prop.liquid_density, hughes_water_prop.liquid_density);
     retval++;
   }
-  if (fabs(prop.vapor_density-water_prop.vapor_density) > 1e-9*water_prop.vapor_density) {
-    printf("FAIL: bad vapor density:  %g (vs. %g)\n", prop.vapor_density, water_prop.vapor_density);
+  if (fabs(prop.vapor_density-hughes_water_prop.vapor_density) > 1e-9*hughes_water_prop.vapor_density) {
+    printf("FAIL: bad vapor density:  %g (vs. %g)\n", prop.vapor_density, hughes_water_prop.vapor_density);
     retval++;
   }
   // Here we set up an unused lattice.

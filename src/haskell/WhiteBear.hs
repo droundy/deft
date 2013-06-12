@@ -3,12 +3,14 @@ functional for the excess free energy of the hard sphere fluid. -}
 
 module WhiteBear
        ( kT, whitebear, gSigmaS, gSigmaA,
+         tensorThirdTerm, phi3t,
+         tensorwhitebear,
          whitebear_m2, gSigmaS_m2, gSigmaA_m2,
          correlation_gross, phi1, phi2, phi3, nA )
        where
 
 import Expression
-import FMT ( n, n0, n1, n2, n3, n1v, n2v,
+import FMT ( n, n0, n1, n2, n3, n1v, n2v, n2m,
              shell, shell_diam, step_diam, vshelldot,
              shellPrime, vshellPrimedot,
              rad, smear, kR,
@@ -20,14 +22,26 @@ kT = s_tex "kT" "kT"
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)
 
-phi1, phi2, phi3 :: Expression RealSpace
+tensorThirdTerm :: Expression RealSpace
+tensorThirdTerm = n2**3 - 3*n2*sqr_n2v + 9*((n2v .*. n2m `dot` n2v) - tracetensorcube n2m/2)
+
+phi1, phi2, phi3, phi3t :: Expression RealSpace
 phi1 = var "phi1" "\\Phi_1" $ -n0*log(1-n3)
 phi2 = var "phi2" "\\Phi_2" $ (n2*n1 - n1v_dot_n2v)/(1-n3)
 phi3 = var "phi3" "\\Phi_3" $ (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*vectorThirdTerm
+phi3t = var "phi3t" "\\Phi_{3t}" $ (n3 + (1-n3)**2*log(1-n3))/(36*pi * n3**2 * (1-n3)**2)*tensorThirdTerm
 
+kTphi1, kTphi2, kTphi3, kTphi3t :: Expression Scalar
+kTphi1 = var "kTphi1" "kT\\Phi_1" (integrate (kT*phi1))
+kTphi2 = var "kTphi2" "kT\\Phi_2" (integrate (kT*phi2))
+kTphi3 = var "kTphi3" "kT\\Phi_3" (integrate (kT*phi3))
+kTphi3t = var "kTphi3t" "kT\\Phi_3" (integrate (kT*phi3t))
 
 whitebear :: Expression Scalar
-whitebear = var "whitebear" "F_{HS}" $ integrate (kT*(phi1+phi2+phi3))
+whitebear = var "whitebear" "F_{HS}" (kTphi1 + kTphi2 + kTphi3)
+
+tensorwhitebear :: Expression Scalar
+tensorwhitebear = var "tensorwhitebear" "F_{HSt}" (kTphi1 + kTphi2 + kTphi3t) -- $ integrate (kT*(phi1+phi2+phi3t))
 
 phitot :: Expression RealSpace
 phitot = var "phitot" "\\Phi" $ phi1 + phi2 + phi3
@@ -58,7 +72,7 @@ nA = "nA" === double_shell n / (4*pi*(2*rad)**2)
 
 double_shell :: Expression RealSpace -> Expression RealSpace
 double_shell x = ifft ( deltak * fft x)
-  where deltak = protect "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
+  where deltak = var "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
 
 gSigmaA :: Expression RealSpace
 gSigmaA = var "gSigmaA" "g_{\\sigma}^{A}" $

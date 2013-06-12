@@ -35,13 +35,21 @@ findNamedSubexpression = searchExpressionDepthFirst Set.empty helper
   where helper e@(Var _ _ _ _ (Just _)) = Just $ mkExprn e
         helper _ = Nothing
 
+-- In the following, we refuse to "find" a subexpression that has a
+-- "k" in it, according to the hasK function.  This is to avoid
+-- certain issues where we are unable to set k to zero correctly,
+-- since we have created a variable that happens to be zero when k ==
+-- 0, but which is divided by k (or by k^2).  This is a hokey
+-- overkill, but I don't have a better idea.
 findToDo :: Type b => Set.Set String -> [Exprn] -> Expression b -> Maybe Exprn
 findToDo i everything = searchExpression i helper
   where helper (Sum _ ii) | Set.size ii < 2 = Nothing
         helper (Product _ ii) | Set.size ii < 2 = Nothing
         helper (Sum s _) | todo:_ <- filter simplifiable subes = Just todo
           where subes = map (mkExprn . pairs2sum) $ take numtotake $ subsq $
-                        take numtotake $ filter (\(_,e) -> countVars [mkExprn e] > 0 && not (hasFFT e)) $ sum2pairs s
+                        take numtotake $ filter (\(_,e) -> countVars [mkExprn e] > 0 &&
+                                                           not (hasFFT e) &&
+                                                           not (hasK e)) $ sum2pairs s
                 simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
                   where countVarssube = countVars [sube]
                 oldnum = countVars everything
@@ -49,7 +57,8 @@ findToDo i everything = searchExpression i helper
         helper (Product p _) | todo:_ <- filter simplifiable subes = Just todo
           where subes = map (mkExprn . pairs2product) $ take numtotake $ subsq $
                         take numtotake $ filter (\(e,_) -> countVars [mkExprn e] > 0 &&
-                                                           not (hasFFT e)) $ product2pairs p
+                                                           not (hasFFT e) &&
+                                                           not (hasK e)) $ product2pairs p
                 simplifiable sube = countVarssube > 1 && countVarssube < 3 && ithelps sube
                   where countVarssube = countVars [sube]
                 oldnum = countVars everything

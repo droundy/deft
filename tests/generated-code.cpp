@@ -15,6 +15,7 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 
 #include "generated-haskell/nice-sum.h"
@@ -32,31 +33,6 @@
 #include "generated-haskell/nice-phi2.h"
 #include "generated-haskell/nice-phi3.h"
 #include "generated-haskell/nice-n2xsqr.h"
-
-#include "generated/sum.h"
-#include "generated/quadratic.h"
-#include "generated/sqrt.h"
-#include "generated/sqrt-and-more.h"
-#include "generated/log.h"
-#include "generated/log-and-sqr.h"
-#include "generated/log-and-sqr-and-inverse.h"
-#include "generated/log-one-minus-x.h"
-#include "generated/nbar.h"
-#include "generated/log-one-minus-nbar.h"
-#include "generated/sqr-xshell.h"
-#include "generated/n2_and_n3.h"
-#include "generated/sqr-Veff.h"
-#include "generated/ideal-gas.h"
-
-#include "generated/phi1.h"
-#include "generated/phi1-Veff.h"
-#include "generated/phi1-plus.h"
-#include "generated/phi2.h"
-#include "generated/phi2-Veff.h"
-#include "generated/phi3rf.h"
-#include "generated/phi3rf-Veff.h"
-#include "generated/almostrf.h"
-#include "generated/almostrfnokt.h"
 
 #include "handymath.h"
 
@@ -125,7 +101,7 @@ void compare_functionals(const Functional &f1, const Functional &f2,
 }
 
 int main(int, char **argv) {
-  const double myT = water_prop.kT; // room temperature in Hartree
+  const double myT = hughes_water_prop.kT; // room temperature in Hartree
   const double R = 2.7;
 
   Functional x(Identity());
@@ -152,38 +128,13 @@ int main(int, char **argv) {
 
   compare_functionals(NiceLogOneMinusNbar(R), log(1 - StepConvolve(R)), myT, n, 3e-13);
 
-  compare_functionals(Sum(), x + kT(), myT, n, 2e-13);
-
-  compare_functionals(Quadratic(), sqr(x + kT()) - x + 2*kT(), myT, n, 2e-12);
-
-  compare_functionals(Sqrt(), sqrt(x), myT, n, 1e-12);
-
-  compare_functionals(SqrtAndMore(), sqrt(x) - x + 2*kT(), myT, n, 1e-12);
-
-  compare_functionals(LogAndSqr(), log(x) + sqr(x), myT, n, 3e-14);
-
-  compare_functionals(LogAndSqrAndInverse(), log(x) + (sqr(x)-Pow(3)) + Functional(1)/x, myT, n, 3e-10);
-
-  compare_functionals(LogOneMinusX(), log(1-x), myT, n, 1e-12);
-
-  compare_functionals(LogOneMinusNbar(R), log(1-StepConvolve(R)), myT, n, 1e-13);
-
-  compare_functionals(Nbar(R), StepConvolve(R), myT, n, 3e-13);
-
-  compare_functionals(SquareXshell(R), sqr(xShellConvolve(R)), myT, n);
-
   Functional n2 = ShellConvolve(R);
   Functional n3 = StepConvolve(R);
-  compare_functionals(n2_and_n3(R), sqr(n2) + sqr(n3), myT, n, 1e-14);
-  compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
-
   compare_functionals(NiceN2(R), n2, myT, n, 1e-14);
 
   const double four_pi_r2 = 4*M_PI*R*R;
   Functional one_minus_n3 = 1 - n3;
   Functional phi1 = (-1/four_pi_r2)*n2*log(one_minus_n3);
-  compare_functionals(Phi1(R), phi1, myT, n, 1e-13);
-
   compare_functionals(NicePhi1(R), phi1, myT, n, 1e-6);
 
   const double four_pi_r = 4*M_PI*R;
@@ -191,43 +142,16 @@ int main(int, char **argv) {
   Functional n2y = yShellConvolve(R);
   Functional n2z = zShellConvolve(R);
   Functional phi2 = (sqr(n2) - sqr(n2x) - sqr(n2y) - sqr(n2z))/(four_pi_r*one_minus_n3);
-  compare_functionals(Phi2(R), phi2, myT, n, 1e-14);
 
   compare_functionals(NiceN2xsqr(R), sqr(n2x), myT, n, 3e-14);
 
   compare_functionals(NicePhi2(R), phi2, myT, n, 1e-13);
 
-  Functional phi3rf = n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)))/(24*M_PI*sqr(one_minus_n3));
-  compare_functionals(Phi3rf(R), phi3rf, myT, n, 1e-13);
-
   Functional phi3 = (n3 + sqr(one_minus_n3)*log(one_minus_n3))/(36*M_PI*sqr(n3)*sqr(one_minus_n3))
     *n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)));
   compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13, 0.001, 1e-14);
 
-  compare_functionals(AlmostRF(R), myT*(phi1 + phi2 + phi3rf), myT, n, 2e-14);
-
-  Functional veff = EffectivePotentialToDensity();
-  compare_functionals(SquareVeff(R), sqr(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-12);
-
-  compare_functionals(AlmostRFnokT(R), phi1 + phi2 + phi3rf, myT, n, 3e-14);
-
-  compare_functionals(AlmostRF(R),
-                      (myT*phi1).set_name("phi1") + (myT*phi2).set_name("phi2") + (myT*phi3rf).set_name("phi3"),
-                      myT, n, 4e-14);
-
-  compare_functionals(Phi1Veff(R), phi1(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-13);
-
-  compare_functionals(Phi2Veff(R), phi2(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-14);
-
-  compare_functionals(Phi3rfVeff(R), phi3rf(veff), myT, Grid(gd, -myT*n.cwise().log()), 1e-13, 0.001, 2e-15);
-
-  compare_functionals(IdealGasFast(), IdealGasOfVeff(), myT, Grid(gd, -myT*n.cwise().log()),
-                      1e-12);
-
-  double mu = -1;
-  compare_functionals(Phi1plus(R, mu),
-                      phi1(veff) + IdealGasOfVeff() + ChemicalPotential(mu)(veff),
-                      myT, Grid(gd, -myT*n.cwise().log()), 1e-12);
+  compare_functionals(TensorWhiteBear(R), HardSpheresWB(R), myT, n, 1e-13, 0.0001, 1e-13);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

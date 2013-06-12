@@ -146,8 +146,8 @@ int main(int, char *argv[]) {
     retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
     //retval += test_functional("HardSpheresWBnotensor(...)",
     //                          HardSpheresWBnotensor(2)(n), Veff, 1e-13);
-    retval += test_functional("HardSpheresNoTensor(...)",
-                              HardSpheresNoTensor(2)(n), Veff, 1e-13);
+    retval += test_functional("HardSpheresNoTensor2(...)",
+                              HardSpheresNoTensor2(2)(n), Veff, 2e-13);
     retval += test_functional("IdealGasOfVeff", IdealGasOfVeff(), Veff, 2e-13);
     retval += test_functional("SaftFluid2(...)",
                               SaftFluid2(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 4e-13);

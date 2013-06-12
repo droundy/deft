@@ -2,6 +2,7 @@
 *.prof
 *~
 *.dat
+*.dat.*
 *.Po
 .deps
 .dirstamp
