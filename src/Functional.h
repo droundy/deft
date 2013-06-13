@@ -3,7 +3,6 @@
 #pragma once
 
 #include "ReciprocalGrid.h"
-#include "Expression.h"
 
 class Functional;
 
@@ -25,11 +24,9 @@ public:
   virtual void grad(const GridDescription &gd, double kT, const VectorXd &data,
                     const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const = 0;
   virtual double derive(double kT, double data) const = 0;
-  virtual Expression derive_homogeneous(const Expression &x) const = 0;
   virtual double d_by_dT(double kT, double data) const = 0;
   virtual Functional grad(const Functional &ingrad, const Functional &x, bool ispgrad) const = 0;
   virtual Functional grad_T(const Functional &ingradT) const = 0;
-  virtual Expression printme(const Expression &) const = 0;
 
   virtual void print_summary(const char *prefix, double energy, std::string name) const;
   virtual bool I_have_analytic_grad() const;
@@ -53,14 +50,13 @@ public:
   explicit Functional(const VectorXd &); // This handles constant fields!
   template<typename Derived, typename extra>
   explicit Functional(Derived (*f)(const GridDescription &, extra), extra e,
-                      const Expression &R, const Expression &gzero, bool iseven)
+                      bool iseven)
     : itsCounter(0) {
     Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
     GridDescription gd(lat, 2, 2, 2);
     // This handles constant ephemeral fields!
     std::string n = f(gd, e).name();
-    if (R != Expression("R")) n = "";
-    init(new ConvolveWith<Derived,extra>(f,e,R,gzero,iseven), n);
+    init(new ConvolveWith<Derived,extra>(f,e,iseven), n);
   }
   explicit Functional(FunctionalInterface* p = 0, const std::string name = "") // allocate a new counter
     : itsCounter(0) {
@@ -178,11 +174,6 @@ public:
       return itsCounter->ptr->grad(ingrad, x, ispgrad);
     }
   }
-  Expression derive_homogeneous(const Expression &x) const {
-    if (mynext)
-      return itsCounter->ptr->derive_homogeneous(x) + mynext->derive_homogeneous(x);
-    else return itsCounter->ptr->derive_homogeneous(x);
-  }
   Functional pgrad(const Functional &ingrad, const Functional &x) const {
     return grad(ingrad, x, true);
   }
@@ -241,7 +232,6 @@ public:
                                  const VectorXd *direction = 0) const;
   int run_homogeneous_finite_difference_test(const char *testname,
                                              double kT, double data) const;
-  Expression printme(const Expression &) const;
   void create_source(const std::string filename, const std::string classname,
                      const char *args[], bool isheader=false) const;
   void create_header(const std::string filename, const std::string classname,
@@ -369,10 +359,10 @@ template<typename Derived, typename extra>
 class ConvolveWith : public FunctionalInterface {
 public:
   ConvolveWith(Derived (*ff)(const GridDescription &, extra),
-               extra e, const Expression &R, const Expression &gzerovv, bool isev)
-    : f(ff), radexpr(R), gzerov(gzerovv), data(e), iseven(isev) {}
+               extra e, bool isev)
+    : f(ff), data(e), iseven(isev) {}
   ConvolveWith(const ConvolveWith &cw)
-    : f(cw.f), radexpr(cw.radexpr), gzerov(cw.gzerov), data(cw.data), iseven(cw.iseven) {}
+    : f(cw.f), data(cw.data), iseven(cw.iseven) {}
   bool I_am_local() const {
     return false;
   }
@@ -403,14 +393,11 @@ public:
   double d_by_dT(double, double) const {
     return 0;
   }
-  Expression derive_homogeneous(const Expression &) const {
-    return gzerov;
-  }
   Functional grad(const Functional &ingrad, const Functional &, bool) const {
     if (iseven)
-      return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(ingrad);
+      return Functional(new ConvolveWith(f, data, iseven))(ingrad);
     else
-      return Functional(new ConvolveWith(f, data, radexpr, gzerov, iseven))(-1*ingrad);
+      return Functional(new ConvolveWith(f, data, iseven))(-1*ingrad);
   }
   Functional grad_T(const Functional &) const {
     // FIXME: I assume here that the convolution kernel itself doesn't
@@ -428,18 +415,8 @@ public:
     // FIXME: we will want to propogate preexisting preconditioning
     if (outpgrad) *outpgrad += out;
   }
-  Expression printme(const Expression &x) const {
-    if (x.typeIs("double")) {
-      return gzerov*x;
-    } else {
-      Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
-      Derived c(GridDescription(lat, 2, 2, 2), data);
-      return ifft(funexpr(c.name(), Expression("gd"), radexpr).set_type("ReciprocalGrid") * fft(x));
-    }
-  }
 private:
   Derived (*f)(const GridDescription &, extra);
-  Expression radexpr, gzerov;
   extra data;
   bool iseven;
 };

@@ -41,11 +41,9 @@ classCode ewithtransforms arg n = "class " ++ n ++ " : public FunctionalInterfac
                               codeStatements codeDerive,
                               "\treturn output;\n"]) ++
                 functionCode "d_by_dT" "double" [("double", ""), ("double", "")] "\tassert(0); // fail\n\treturn 0;\n" ++
-                functionCode "derive_homogeneous" "Expression" [("const Expression &", "")] "\tassert(0); // fail\n\treturn Expression(0);\n" ++
                 functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")] "\treturn ingrad;" ++
                 functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\treturn ingradT;" ++
                 functionCode "grad" "void" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x"), ("const VectorXd", "&ingrad"), ("VectorXd", "*outgrad"), ("VectorXd", "*outpgrad")] (codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.\n\t// " ++ show (peakMem codeGrad) ++ "\n") ++
-                functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);") ++
                 functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")] "\tFunctionalInterface::print_summary(prefix, energy, name);" ++
                 "private:\n"++ codeArgInit arg ++ declaretransforms ++"}; // End of " ++ n ++ " class\n\t// Total " ++ (show $ (countFFT codeIntegrate + countFFT codeVTransform + countFFT codeGrad)) ++ " Fourier transform used.\n\t// peak memory used: " ++ (show $ maximum $ map peakMem [codeIntegrate, codeVTransform, codeGrad])
     where
@@ -152,8 +150,6 @@ scalarClass ewithtransforms arg n =
               "\treturn output;", ""]),
    functionCode "d_by_dT" "double" [("double", ""), ("double", "")]
     (unlines ["\tassert(0); // fail", "\treturn 0;", ""]),
-   functionCode "derive_homogeneous" "Expression" [("const Expression &", "")]
-    (unlines ["\tassert(0); // fail", "\treturn Expression(0);", ""]),
    functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")]
     "\treturn ingrad;",
    functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\treturn ingradT;",
@@ -168,7 +164,6 @@ scalarClass ewithtransforms arg n =
                codeStatements codeGrad ++ "\t// " ++ show (countFFT codeGrad) ++ " Fourier transform used.",
                "\t// " ++ show (peakMem codeGrad),
                ""]),
-   functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);"),
    functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")]
     (unlines $ ["\tif (name != \"\") printf(\"%s%25s =\", prefix, name.c_str());",
                 "\telse printf(\"%s%25s =\", prefix, \"UNKNOWN\");",
@@ -328,8 +323,6 @@ scalarClassNoGradient ewithtransforms arg n =
               "\treturn output;", ""]),
    functionCode "d_by_dT" "double" [("double", ""), ("double", "")]
     (unlines ["\tassert(0); // fail", "\treturn 0;", ""]),
-   functionCode "derive_homogeneous" "Expression" [("const Expression &", "")]
-    (unlines ["\tassert(0); // fail", "\treturn Expression(0);", ""]),
    functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")]
     "\treturn ingrad;",
    functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\treturn ingradT;",
@@ -341,7 +334,6 @@ scalarClassNoGradient ewithtransforms arg n =
       ("VectorXd", "*outgrad"),
       ("VectorXd", "*outpgrad")]
      (unlines ["\tassert(0); // fail"]),
-   functionCode "printme" "Expression" [("const Expression", "&x")] ("\treturn funexpr(\"" ++ n ++ "()\")(x);"),
    functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")]
     (unlines $ ["\tif (name != \"\") printf(\"%s%25s =\", prefix, name.c_str());",
                 "\telse printf(\"%s%25s =\", prefix, \"UNKNOWN\");",

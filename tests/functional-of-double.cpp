@@ -170,16 +170,6 @@ int main(int, char *argv[]) {
   }
 
   {
-    Functional attr = GaussianPolynomial(-0.32, 0.5, 2);
-    retval += test_functional("Attractive Gaussian", attr, 0.1, 1e-13);
-    Functional repul = GaussianPolynomial(0.32, 0.25, 4);
-    retval += test_functional("Repulsive Gaussian", repul, 0.1, 1e-12);
-    retval += test_functional("Repulsive Gaussian", repul, 0.01, 1e-12);
-    retval += test_functional("sum of gaussians", attr + repul, 0.1, 2e-13);
-    retval += test_functional("other sum of gaussians", repul + attr, 0.1, 2e-13);
-  }
-
-  {
     Functional f = ChemicalPotential(0.1);
     retval += test_functional("chemical potential", f, 1e-9, 1e-12);
     retval += test_functional("chemical potential", f, 1e9, 1e-14);

@@ -6,10 +6,10 @@ NEW_CODE = src/new/test.cpp src/new/Minimizer.cpp
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \
-	src/IdealGas.cpp src/ChemicalPotential.cpp src/GaussianPolynomial.cpp \
+	src/IdealGas.cpp src/ChemicalPotential.cpp \
 	src/HardSpheres.cpp src/ExternalPotential.cpp \
 	src/Functional.cpp \
-	src/Gaussian.cpp src/Pow.cpp src/Expression.cpp src/CSE.cpp
+	src/Gaussian.cpp src/Pow.cpp
 
 GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/EffectivePotentialToDensity.cpp \
@@ -22,8 +22,6 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 
 CONTACT_CODE = $(GENERIC_CODE) \
 	src/ContactDensity.cpp
-
-OPTIMIZED_CODE =
 
 # src/HardSphereGasFast.cpp src/HardSphereGasRFFast.cpp \
 #	src/HardSpheresFast.cpp src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
@@ -42,9 +40,9 @@ NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
 src/new/WhiteBearFast.h: src/new/WhiteBearFast.cpp
 tests/new-hard-spheres.o: src/new/WhiteBearFast.h # doing this by hand is ugly!
 
-ALL_CODE = $(OPTIMIZED_CODE) $(GENERIC_CODE) $(HASKELL_CODE)
+ALL_CODE = $(GENERIC_CODE) $(HASKELL_CODE)
 
-ALL_CONTACT_CODE = $(OPTIMIZED_CODE) $(CONTACT_CODE) $(HASKELL_CODE)
+ALL_CONTACT_CODE = $(CONTACT_CODE) $(HASKELL_CODE)
 
 bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
@@ -57,7 +55,7 @@ pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
 	src/utilities.cpp
 radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
 	src/utilities.cpp
-noinst_PROGRAMS = optimize-functionals \
+noinst_PROGRAMS =  \
 	papers/water-saft/figs/surface-tension.mkdat \
 	papers/water-saft/figs/equation-of-state.mkdat \
 	papers/water-saft/figs/rods-in-water.mkdat \
@@ -82,11 +80,6 @@ noinst_PROGRAMS = optimize-functionals \
 	papers/contact/figs/walls.mkdat \
 	papers/pair-correlation/figs/walls.mkdat \
 	papers/fuzzy-fmt/figs/walls.mkdat
-
-optimize_functionals_SOURCES = src/optimize-functionals.cpp $(FUNCTIONAL_CODE)
-
-$(OPTIMIZED_CODE): optimize-functionals
-	time ./optimize-functionals $@ && echo timed $@
 
 haskell: src/haskell/functionals.exe src/haskell/test.exe
 
@@ -124,13 +117,10 @@ check_PROGRAMS = \
 	tests/saft.test \
 	tests/memory.test \
 	tests/eos.test \
-	tests/expression.test \
-	tests/functional-expressions.test \
 	tests/print-iter.test \
 	tests/ideal-gas.test \
 	tests/convolve.test \
 	tests/convolve-finite-difference.test \
-	tests/simple-liquid.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
@@ -145,8 +135,6 @@ tests_saft_test_SOURCES = tests/saft.cpp $(ALL_CODE)
 tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE) src/TensorWhiteBearFast.cpp
 tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
 tests_new_hard_spheres_test_SOURCES = tests/new-hard-spheres.cpp $(GENERIC_CODE) $(NEWHASKELL_CODE)
-tests_functional_expressions_test_SOURCES = tests/functional-expressions.cpp $(GENERIC_CODE)
-tests_expression_test_SOURCES = tests/expression.cpp $(GENERIC_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CONTACT_CODE)
 tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE) \
@@ -157,7 +145,6 @@ tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GEN
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CONTACT_CODE)
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(GENERIC_CODE)
 tests_hydrogen_atom_test_SOURCES = tests/hydrogen-atom.cpp $(ALL_CODE)
-tests_simple_liquid_test_SOURCES = tests/simple-liquid.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
 tests_eos_test_SOURCES = tests/eos.cpp $(ALL_CODE)

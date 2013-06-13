@@ -48,9 +48,6 @@ public:
     double n = exp(-V/kT);
     return (n/-kT)*f.derive(kT, n);
   }
-  Expression derive_homogeneous(const Expression &x) const {
-    return x*f.derive_homogeneous(exp(-x/Expression("kT").set_type("double")));
-  }
   double d_by_dT(double kT, double n) const {
     return f.d_by_dT(kT, exp(-n/kT));
   }
@@ -76,9 +73,6 @@ public:
       f.grad(gd, kT, (data/(-kT)).cwise().exp(), ingrad, &g, 0);
       *outgrad += (data/(-kT)).cwise().exp().cwise()*g/(-kT);
     }
-  }
-  Expression printme(const Expression &x) const {
-    return f.printme(exp(x/(-Expression("kT").set_type("double"))));
   }
   void print_summary(const char *prefix, double e, std::string name) const {
     f.print_summary(prefix, e, name);

@@ -84,7 +84,7 @@ Functional n0(double radius) {
 
 static Functional n_A(double radius) {
   Functional R(radius, "R");
-  return ShellConvolve(2*radius,2*Expression("R"))/(16*M_PI*sqr(R));
+  return ShellConvolve(2*radius)/(16*M_PI*sqr(R));
 }
 
 Functional dWB_dn0(double radius) {
@@ -357,9 +357,9 @@ Functional gSigmaSm2cpp(double radius) {
 
 Functional GrossCorrelation(double radius) {
   Functional R(radius, "R");
-  Functional n2prime = ShellConvolve(2*radius, Expression("2*R"));
+  Functional n2prime = ShellConvolve(2*radius);
   Functional n0prime = n2prime/(4*M_PI*sqr(2*R));
-  Functional n3prime = StepConvolve(2*radius, Expression("2*R"));
+  Functional n3prime = StepConvolve(2*radius);
 
   Functional eta = (1.0/8)*n3prime;
   Functional ghs = (1 - 0.5*eta)/Pow(3)(1 - eta);
