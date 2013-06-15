@@ -30,7 +30,7 @@
 all :  paper.pdf
 
 clean:
-	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
+	rm -f *.aux *.dvi *.ps *.log *.pdf *.mp */*.eps */*.pdf *.1 *Notes.bib
 
 ALL_FIGURES=\
 
@@ -44,4 +44,5 @@ PDF_FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(PDF_FIGURES)
-	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $<
+	pdflatex -shell-escape $< && pdflatex -shell-escape $< && bibtex $* && pdflatex -shell-escape $< && pdflatex -shell-escape $<
+

@@ -7,8 +7,26 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
-\usepackage{bm}% bold math
+%\usepackage{bm}% bold math
 \usepackage{color}
+
+\usepackage{feynmp}
+
+% The following code causes pdflatex (if given the -shell-escape flag)
+% to automagically call mpost as needed for feynmp diagrams.
+\DeclareGraphicsRule{*}{mps}{*}{}
+\makeatletter
+\def\endfmffile{%
+  \fmfcmd{\p@rcent\space the end.^^J%
+          end.^^J%
+          endinput;}%
+  \if@fmfio
+    \immediate\closeout\@outfmf
+  \fi
+  \ifnum\pdfshellescape>\z@
+    \immediate\write18{mpost \thefmffile}%
+  \fi}
+\makeatother
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
@@ -46,6 +64,53 @@ correctly describes its interaction with charged systems.  There are a
 couple of effects that seem particularly important to get accurately
 in order to provide a reasonable description for the solvation of
 ions.
+
+
+
+%% \begin{fmffile}{diagrams}
+%% \begin{fmfchar*}(40,25)
+%%   \fmfleft{em,ep} \fmflabel{$e^+$}{ep} \fmflabel{$e^-$}{em}
+%%   \fmf{fermion}{em,Zee,ep}
+%%   \fmf{photon,label=$\gamma,,Z$}{Zee,Zff}
+%%   \fmf{fermion}{fb,Zff,f}
+%%   \fmfright{fb,f} \fmflabel{$\bar f'$}{fb} \fmflabel{$f$}{f}
+%%   \fmfdot{Zee,Zff}
+%% \end{fmfchar*}
+%% \end{fmffile}
+
+\unitlength=1mm
+\begin{fmffile}{triangle}
+ \begin{fmfgraph}(25,25)
+   \fmfpen{thick}
+   \fmfsurroundn{v}{3}
+   \fmfvn{d.sh=circle,d.f=full}{v}{3}
+   \fmf{plain}{v1,v2}
+   \fmf{plain}{v2,v3}
+   \fmf{plain}{v1,v3}
+ \end{fmfgraph}
+\end{fmffile}
+
+\begin{fmffile}{square}
+ \begin{fmfgraph}(25,25)
+   \fmfsurround{x1,x2,x3,x4}
+   \fmfvn{d.sh=circle,d.f=empty}{x}{4}
+   \fmf{dots}{x1,x2}
+   \fmf{plain}{x2,x3}
+   \fmf{plain}{x1,x3}
+   \fmf{wiggly}{x1,x4}
+   \fmf{dashes}{x3,x4}
+ \end{fmfgraph}
+\end{fmffile}
+
+\begin{fmffile}{goodsquare}
+ \begin{fmfgraph}(25,25)
+   \fmfleft{x1,x2}
+   \fmfright{x3,x4}
+   \fmfn{plain}{x}{4}
+   \fmf{wiggly}{x1,x2,x4,x3,x1}
+   \fmfvn{d.sh=circle,d.f=full}{x}{4}
+ \end{fmfgraph}
+\end{fmffile}
 
 First, we should include the nonlocality of the dielectric response:
 water is unable to polarize at length scales small compared to its
