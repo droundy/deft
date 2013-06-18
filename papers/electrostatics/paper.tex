@@ -78,38 +78,48 @@ ions.
 %% \end{fmfchar*}
 %% \end{fmffile}
 
+
 \unitlength=1mm
-\begin{fmffile}{triangle}
- \begin{fmfgraph}(25,25)
-   \fmfpen{thick}
-   \fmfsurroundn{v}{3}
-   \fmfvn{d.sh=circle,d.f=full}{v}{3}
-   \fmf{plain}{v1,v2}
-   \fmf{plain}{v2,v3}
-   \fmf{plain}{v1,v3}
- \end{fmfgraph}
-\end{fmffile}
-
-\begin{fmffile}{square}
- \begin{fmfgraph}(25,25)
-   \fmfsurround{x1,x2,x3,x4}
-   \fmfvn{d.sh=circle,d.f=empty}{x}{4}
-   \fmf{dots}{x1,x2}
-   \fmf{plain}{x2,x3}
-   \fmf{plain}{x1,x3}
-   \fmf{wiggly}{x1,x4}
-   \fmf{dashes}{x3,x4}
- \end{fmfgraph}
-\end{fmffile}
-
-\begin{fmffile}{goodsquare}
- \begin{fmfgraph}(25,25)
-   \fmfleft{x1,x2}
-   \fmfright{x3,x4}
-   \fmfn{plain}{x}{4}
-   \fmf{wiggly}{x1,x2,x4,x3,x1}
-   \fmfvn{d.sh=circle,d.f=full}{x}{4}
- \end{fmfgraph}
+\begin{fmffile}{powerseries}
+\begin{equation}
+  \parbox{15mm}{
+    \begin{fmfgraph}(10,10)
+      \fmfpen{thick}
+      \fmfsurroundn{v}{2}
+      \fmfvn{d.sh=circle,d.f=empty}{v}{2}
+      \fmf{plain}{v1,v2}
+    \end{fmfgraph}
+  }
+  +
+  \parbox{30mm}{
+    \hspace{1em}
+    \begin{fmfgraph}(20,10)
+      \fmfpen{thick}
+      \fmfleft{v1}
+      \fmfright{v3}
+      \fmfv{d.sh=circle,d.f=empty}{v1,v3}
+      \fmfv{d.sh=circle,d.f=full}{v2}
+      \fmf{plain}{v1,v2,v3}
+    \end{fmfgraph}
+  }
+  +
+  \parbox{30mm}{
+    \hspace{1em}
+    \begin{fmfgraph}(20,10)
+      \fmfpen{thick}
+      \fmfleft{i}
+      \fmfright{o}
+      \fmfv{d.sh=circle,d.f=empty}{i,o}
+      \fmf{phantom}{i,vmid,o}
+      \fmffreeze
+      \fmffixed{(0,1.0h)}{vmid,v1}
+      \fmf{plain}{i,v1,o}
+      \fmfv{d.sh=circle,d.f=full}{v1}
+      \fmf{plain}{i,o}
+    \end{fmfgraph}
+  }
+    + \cdots
+\end{equation}
 \end{fmffile}
 
 First, we should include the nonlocality of the dielectric response:
