@@ -20,7 +20,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d-%1.2f-rad.dat" % (10*ff, z0)
+    filename = "mc/wallsMC-pair-0.%d-%1.2f.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
@@ -46,4 +46,5 @@ pylab.title('$g^{(2)}(z_0, z_1, r_1)$, $z_0 = %g$, $ff = %g$' %(z0, ff))
 pylab.xlabel("r")
 pylab.ylabel("g")
 
-pylab.show()
+plotname = "radial-" + str(10*ff) + "-" + str(z0) + ".pdf"
+pylab.savefig(plotname)
