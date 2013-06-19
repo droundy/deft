@@ -336,14 +336,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
         return;
       }
       delete[] plotname_a;
-      const double rmaxshell = delta_r + 3*dv;
       for (double z0 = 2; z0 < 13; z0 += dx) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
         for (double theta = dtheta/2; theta <= M_PI; theta += dtheta) {
           const double sintheta = sin(theta);
-          const double costheta = sin(theta);
+          const double costheta = cos(theta);
           const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
           /*
             // Integrating around phi is not strictly needed, since
