@@ -120,7 +120,7 @@ scalarClass ewithtransforms arg n =
    "" ++ n ++ codeA arg ++ "  {",
    "\thave_integral = true;",
    "\t// TODO: code to evaluate Fourier transforms goes here",
-   "\toldkT = 0.0/0.0;  // initialize to NaN so we'll have to define transforms",
+   "\toldkT = sqrt(-1.0);  // initialize to NaN so we'll have to define transforms",
    -- insert code here to compute and store the spherical fourier transforms
    initializetransforms,
    "}",
