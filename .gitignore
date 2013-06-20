@@ -41,3 +41,5 @@ cited-papers
 *.err
 *.out
 cleanups.txt
+.DS_Store
+.metadata
