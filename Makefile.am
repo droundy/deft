@@ -44,7 +44,7 @@ ALL_CODE = $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo
+bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo # electrostatic-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 tests_newcode_test_SOURCES = $(NEW_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
@@ -54,6 +54,8 @@ soft_monte_carlo_SOURCES = src/Monte-Carlo/soft-monte-carlo.cpp \
 pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
 	src/utilities.cpp
 radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
+	src/utilities.cpp
+electrostatic_monte_carlo_SOURCES = src/Monte-Carlo/electrostatic-monte-carlo.cpp \
 	src/utilities.cpp
 noinst_PROGRAMS =  \
 	papers/water-saft/figs/surface-tension.mkdat \
