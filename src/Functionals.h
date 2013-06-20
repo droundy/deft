@@ -48,26 +48,26 @@ Functional EffectivePotentialToDensity();
 Functional OfEffectivePotential(const Functional &f);
 Functional Gaussian(double width);
 
-Functional GaussianConvolve(double width, Expression r);
-Functional StepConvolve(double radius, Expression r = Expression("R"));
+Functional GaussianConvolve(double width);
+Functional StepConvolve(double radius);
 
-Functional ShellConvolve(double radius, Expression r = Expression("R"));
-Functional ShellPrimeConvolve(double radius, Expression r = Expression("R"));
+Functional ShellConvolve(double radius);
+Functional ShellPrimeConvolve(double radius);
 
-Functional xShellConvolve(double radius, Expression r = Expression("R"));
-Functional yShellConvolve(double radius, Expression r = Expression("R"));
-Functional zShellConvolve(double radius, Expression r = Expression("R"));
+Functional xShellConvolve(double radius);
+Functional yShellConvolve(double radius);
+Functional zShellConvolve(double radius);
 
-Functional xShellPrimeConvolve(double radius, Expression r = Expression("R"));
-Functional yShellPrimeConvolve(double radius, Expression r = Expression("R"));
-Functional zShellPrimeConvolve(double radius, Expression r = Expression("R"));
+Functional xShellPrimeConvolve(double radius);
+Functional yShellPrimeConvolve(double radius);
+Functional zShellPrimeConvolve(double radius);
 
-Functional xxShellConvolve(double radius, Expression r = Expression("R"));
-Functional yyShellConvolve(double radius, Expression r = Expression("R"));
-Functional zzShellConvolve(double radius, Expression r = Expression("R"));
-Functional xyShellConvolve(double radius, Expression r = Expression("R"));
-Functional yzShellConvolve(double radius, Expression r = Expression("R"));
-Functional zxShellConvolve(double radius, Expression r = Expression("R"));
+Functional xxShellConvolve(double radius);
+Functional yyShellConvolve(double radius);
+Functional zzShellConvolve(double radius);
+Functional xyShellConvolve(double radius);
+Functional yzShellConvolve(double radius);
+Functional zxShellConvolve(double radius);
 
 Functional Pow(int power);
 Functional PowAndHalf(int powerMinusHalf);

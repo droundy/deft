@@ -7,8 +7,26 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
-\usepackage{bm}% bold math
+%\usepackage{bm}% bold math
 \usepackage{color}
+
+\usepackage{feynmp}
+
+% The following code causes pdflatex (if given the -shell-escape flag)
+% to automagically call mpost as needed for feynmp diagrams.
+\DeclareGraphicsRule{*}{mps}{*}{}
+\makeatletter
+\def\endfmffile{%
+  \fmfcmd{\p@rcent\space the end.^^J%
+          end.^^J%
+          endinput;}%
+  \if@fmfio
+    \immediate\closeout\@outfmf
+  \fi
+  \ifnum\pdfshellescape>\z@
+    \immediate\write18{mpost \thefmffile}%
+  \fi}
+\makeatother
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
@@ -46,6 +64,65 @@ correctly describes its interaction with charged systems.  There are a
 couple of effects that seem particularly important to get accurately
 in order to provide a reasonable description for the solvation of
 ions.
+
+
+
+%% \begin{fmffile}{diagrams}
+%% \begin{fmfchar*}(40,25)
+%%   \fmfleft{em,ep} \fmflabel{$e^+$}{ep} \fmflabel{$e^-$}{em}
+%%   \fmf{fermion}{em,Zee,ep}
+%%   \fmf{photon,label=$\gamma,,Z$}{Zee,Zff}
+%%   \fmf{fermion}{fb,Zff,f}
+%%   \fmfright{fb,f} \fmflabel{$\bar f'$}{fb} \fmflabel{$f$}{f}
+%%   \fmfdot{Zee,Zff}
+%% \end{fmfchar*}
+%% \end{fmffile}
+
+
+
+\vspace{1em}
+\unitlength=1mm
+\begin{fmffile}{powerseries}
+\begin{equation}
+  \parbox{15mm}{
+    \begin{fmfgraph}(10,10)
+      \fmfpen{thick}
+      \fmfsurroundn{v}{2}
+      \fmfvn{d.sh=circle,d.f=empty}{v}{2}
+      \fmf{plain}{v1,v2}
+    \end{fmfgraph}
+  }
+  +
+  \parbox{30mm}{
+    \hspace{1em}
+    \begin{fmfgraph}(20,10)
+      \fmfpen{thick}
+      \fmfleft{v1}
+      \fmfright{v3}
+      \fmfv{d.sh=circle,d.f=empty}{v1,v3}
+      \fmfv{d.sh=circle,d.f=full}{v2}
+      \fmf{plain}{v1,v2,v3}
+    \end{fmfgraph}
+  }
+  +
+  \parbox{30mm}{
+    \hspace{1em}
+    \begin{fmfgraph}(20,10)
+      \fmfpen{thick}
+      \fmfleft{i}
+      \fmfright{o}
+      \fmfv{d.sh=circle,d.f=empty}{i,o}
+      \fmf{phantom}{i,vmid,o}
+      \fmffreeze
+      \fmffixed{(0,1.2h)}{vmid,v1}
+      \fmf{plain}{i,v1,o}
+      \fmfv{d.sh=circle,d.f=full}{v1}
+      \fmf{wiggly}{i,o}
+    \end{fmfgraph}
+  }
+    + \cdots
+\end{equation}
+\end{fmffile}
 
 First, we should include the nonlocality of the dielectric response:
 water is unable to polarize at length scales small compared to its

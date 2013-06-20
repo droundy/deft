@@ -40,7 +40,8 @@ for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
 
-plt.plot(arange(3,13,.1), read_a1_mc(), 'k')
+mc = read_a1_mc();
+plt.plot(arange(3.05,3.05+len(mc)*0.1,.1), mc, 'k')
 plt.xlim([2,9])
 plt.legend(versions+['mc'], loc='upper right')
 

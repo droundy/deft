@@ -19,3 +19,7 @@ paperNotes.bib
 *.tmp.*
 arxiv*
 referee*
+*.mp
+*.1
+*.tfm
+

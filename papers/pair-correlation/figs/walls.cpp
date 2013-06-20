@@ -57,7 +57,7 @@ double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, cons
 double pairdist_mc(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  const double eta = 4/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
+  const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
   return mc(eta, r,mc_r_step,g);
 }
 double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
@@ -202,7 +202,12 @@ static void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
   double peak = peak_memory()/1024.0/1024;
-  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+  if (seconds > 120) {
+    printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+  } else {
+    printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
+  }
   fflush(stdout);
   last_time = t;
 }
@@ -316,48 +321,55 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
   }
   delete[] plotname;
+  took("Dumping the pair dist plots");
   //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
   //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
   printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (double delta_r = 1.0; delta_r <= 3.0; delta_r++){
-      double dv;
-      for (int dv_option = 1; dv_option < 3.5; dv_option++){
-        if (dv_option == 1) dv = 0.1;
-        if (dv_option == 2) dv = 0.05; else dv = 0.01;
-        char *plotname_a = new char [1024];
-        sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f-%05.3f.dat", name, fun[version], eta, delta_r, dv);
-        FILE *out = fopen(plotname_a,"w");
-        if (!out) {
-          fprintf(stderr, "Unable to create file %s!\n", plotname_a);
-          return;
-        }
-        for (double z0 = 3; z0 < 13; z0 += dx) {
-          double da_dz = 0;
-          const Cartesian r0(0,0,z0);
-          for (double x1 = -delta_r - 3*dv; x1 <= delta_r + 3*dv; x1 += dv) {
-            for (double y1 = -delta_r - 3*dv; y1 <= delta_r + 3*dv; y1 += dv) {
-              if (x1*x1 + y1*y1 < ((delta_r+3*dv)*(delta_r+3*dv))) {
-                for (double z1 = -delta_r - 3*dv; z1 <= delta_r + 3*dv; z1 += dv) {
-                  const double r2 = x1*x1 + y1*y1 +(z1-z0)*(z1-z0);
-                  if (r2 < ((delta_r+3*dv)*(delta_r+3*dv))
-                      && r2 > ((delta_r-3*dv)*(delta_r-3*dv))) {
-                    const Cartesian r1(x1,y1,z1);
-                    double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
-                    da_dz += density(r0)*density(r1)*g2*dv*dv*(1/6.0);
-                  }
-                }
-              }
-            }
-          }
-          fprintf(out, "%g %g\n",z0,da_dz);
-        }
-        fclose(out);
-        char z0_string[50];
-        sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
-        took(z0_string);
-        delete[] plotname_a;
+    for (double delta_r = 2.0; delta_r <= 3.0; delta_r++){
+      const double dv = 0.01;
+      char *plotname_a = new char [1024];
+      sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
+      FILE *out = fopen(plotname_a,"w");
+      if (!out) {
+        fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+        return;
       }
+      delete[] plotname_a;
+      for (double z0 = 2; z0 < 13; z0 += dx) {
+        double da_dz = 0;
+        const Cartesian r0(0,0,z0);
+        const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
+        for (double theta = dtheta/2; theta <= M_PI; theta += dtheta) {
+          const double sintheta = sin(theta);
+          const double costheta = cos(theta);
+          const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
+          /*
+            // Integrating around phi is not strictly needed, since
+            // the system has a cylindrical symmetry, but could be
+            // nice, as it give us an average over grid points.
+
+          const double dphi = 2*M_PI/ceil(delta_r*2*M_PI/dv);
+          const double darea = delta_r*delta_r*dcostheta*dphi;
+          for (double phi = dphi/2; phi < 2*M_PI; phi += dphi) {
+            const Cartesian r1(delta_r*cos(phi)*sintheta,
+                               delta_r*sin(phi)*sintheta,
+                               z0 + delta_r*costheta);
+            double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+            da_dz += density(r0)*density(r1)*g2*darea;
+          }
+          */
+          const double darea = delta_r*delta_r*dcostheta*2*M_PI;
+          const Cartesian r1(delta_r*sintheta, 0, z0 + delta_r*costheta);
+          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          da_dz += density(r0)*density(r1)*g2*darea;
+        }
+        fprintf(out, "%g %g\n",z0,da_dz);
+      }
+      fclose(out);
+      char z0_string[50];
+      sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
+      took(z0_string);
     }
   }
   {
@@ -401,10 +413,9 @@ int main(int, char **) {
   read_mc();
   printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
-  fflush(stdout);
-    // for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
-    //   run_walls(this_eta, "WB", WB);
-    // }
+  for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
+    run_walls(this_eta, "WB", WB);
+  }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
     printf("Error creating walls.dat!\n");

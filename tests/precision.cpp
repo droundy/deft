@@ -16,33 +16,17 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Functionals.h"
+#include "OptimizedFunctionals.h"
 #include "LineMinimizer.h"
-
-const double my_kT = 1e-3; // room temperature in Hartree
-const double ngas = 1.14e-7; // vapor density of water
-const double nliquid = 4.9388942e-3; // density of liquid water
-const double mu = -1.1*my_kT*log(ngas);
-const double Veff_liquid = -my_kT*log(nliquid);
+#include "equation-of-state.h"
 
 // Here we set up the lattice.
 Lattice lat(Cartesian(5,0,0), Cartesian(0,5,0), Cartesian(0,0,5));
 double resolution = 0.2;
 GridDescription gd(lat, resolution);
 
-// And the functional...
-const double interaction_energy_scale = 0.01;
-Functional attraction = GaussianPolynomial(-interaction_energy_scale/nliquid/nliquid/2, 0.5, 2);
-Functional repulsion = GaussianPolynomial(interaction_energy_scale/nliquid/nliquid/nliquid/nliquid/4, 0.125, 4);
-Functional f0 = ChemicalPotential(mu) + attraction + repulsion;
 Functional n = EffectivePotentialToDensity();
-Functional f = IdealGasOfVeff() + f0(n);
-
-Grid potential(gd);
-Grid external_potential(gd, 1e-3/nliquid*(-0.2*r2(gd)).cwise().exp()); // repulsive bump
-
-Functional ff = IdealGasOfVeff() + (f0 + ExternalPotential(external_potential))(n);
-
+LiquidProperties prop = hughes_water_prop;
 
 int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
                    double precision=1e-3, int maxiter = 100) {
@@ -53,10 +37,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("**********************************\n\n");
 
-  const double true_energy = -0.26443672269179;
-  //const double gas_energy = -1.250000000000085e-11;
-
-  *pot = +1e-4*((-10*r2(gd)).cwise().exp()) + 1.14*Veff_liquid*VectorXd::Ones(pot->description().NxNyNz);
+  const double true_energy = -0.0003679537895448992;
 
   // First, let's reset the minimizer!
   min.minimize(f, pot->description(), pot);
@@ -71,7 +52,7 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
   foo.print_info();
   printf("Minimization took %g seconds.\n", (clock() - double(start))/CLOCKS_PER_SEC);
   printf("energy error = %g\n", foo.energy() - true_energy);
-  if (fabs(foo.energy() - true_energy) > precision) {
+  if (!(fabs(foo.energy() - true_energy) < precision)) { // double negatives handles NaNs correctly.
     printf("FAIL: Error in the energy is too big, should be %g! (%.16g vs %.16g)\n",
            precision, foo.energy(), true_energy);
     return 1;
@@ -82,40 +63,65 @@ int test_minimizer(const char *name, Minimizer min, Functional f, Grid *pot,
 int main(int, char **argv) {
   int retval = 0;
 
-  Minimizer downhill = Downhill(ff, gd, my_kT, &potential, 1e-11);
+  Grid potential(gd);
+  Functional f = OfEffectivePotential(SaftFluid2(prop.lengthscale,
+                                                 prop.epsilonAB, prop.kappaAB,
+                                                 prop.epsilon_dispersion,
+                                                 prop.lambda_dispersion, hughes_water_prop.length_scaling, 0));
+  double mu = find_chemical_potential(f, prop.kT, prop.liquid_density);
+  f = SaftFluid2(prop.lengthscale,
+                 prop.epsilonAB, prop.kappaAB,
+                 prop.epsilon_dispersion,
+                 prop.lambda_dispersion, hughes_water_prop.length_scaling, mu);
+
+  Grid external_potential(gd, 10*prop.kT*(-0.2*r2(gd)).cwise().exp()
+                          - 5*prop.kT*(-0.05*r2(gd)).cwise().exp());
+  Functional ff = OfEffectivePotential(f + ExternalPotential(external_potential));
   
+  Minimizer downhill = Downhill(ff, gd, prop.kT, &potential, 1e-9);
+  
+  const double potential_value = -prop.kT*log(0.9*prop.liquid_density);
   potential.setZero();
+  potential += potential_value*VectorXd::Ones(gd.NxNyNz);
   //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-13, 300);
   //retval += test_minimizer("Downhill", downhill, ff, &potential, 1e-10, 300);
 
-  Minimizer pd = PreconditionedDownhill(ff, gd, my_kT, &potential, 1e-11);
+  Minimizer pd = PreconditionedDownhill(ff, gd, prop.kT, &potential, 1e-11);
   potential.setZero();
+  potential += potential_value*VectorXd::Ones(gd.NxNyNz);
   //retval += test_minimizer("PreconditionedDownhill", pd, ff, &potential, 1e-13, 300);
 
-  Minimizer steepest = SteepestDescent(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-3);
-  potential.setZero();
+  Minimizer steepest = SteepestDescent(ff, gd, prop.kT, &potential, QuadraticLineMinimizer, 1e-3);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
   //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-13, 20);
   //retval += test_minimizer("SteepestDescent", steepest, ff, &potential, 1e-3, 20);
 
-  Minimizer psd = PreconditionedSteepestDescent(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-11);
+  Minimizer psd = PreconditionedSteepestDescent(ff, gd, prop.kT, &potential, QuadraticLineMinimizer, 1e-11);
   potential.setZero();
+  potential += potential_value*VectorXd::Ones(gd.NxNyNz);
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-13, 20);
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-5, 10);
   //retval += test_minimizer("PreconditionedSteepestDescent", psd, ff, &potential, 1e-2, 10);
 
-  Minimizer cg = ConjugateGradient(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-3);
-  potential.setZero();
-  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-12, 90);
-  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-3, 20);
+  Minimizer cg = ConjugateGradient(ff, gd, prop.kT, &potential, QuadraticLineMinimizer, 1e-3);
+  //potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  //retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-9, 200);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-5, 20);
+  //potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  //retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-12, 400);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  retval += test_minimizer("ConjugateGradient", cg, ff, &potential, 1e-3, 15);
 
-  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, my_kT, &potential, QuadraticLineMinimizer, 1e-11);
-  potential.setZero();
-  // Oddly enough with PreconditionedConjugateGradient we can't get
-  // better than 1e-11 precision, and even that requires setting the
-  // Precision requirement extra high.
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-11, 60);
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-5, 10);
-  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-2, 10);
+  Minimizer pcg = PreconditionedConjugateGradient(ff, gd, prop.kT, &potential, QuadraticLineMinimizer, 1e-11);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-11, 20);
+  //potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  //retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-9, 16);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-5, 11);
+  potential = potential_value*VectorXd::Ones(gd.NxNyNz);
+  retval += test_minimizer("PreconditionedConjugateGradient", pcg, ff, &potential, 1e-2, 3);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

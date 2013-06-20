@@ -11,12 +11,12 @@ import qualified Data.Set as Set
 
 codeTests :: Test
 codeTests = TestList [t "x[i]" x,
-                      t "0" (0 :: Expression RealSpace),
+                      t "0.0" (0 :: Expression RealSpace),
                       t "sqrt(x[i])" (sqrt x),
                       t "x[i] + -3.0*(x[i]*x[i]*x[i] + x[i]*x[i])" foo,
                       t "-3.0*x[i]*x[i]*x[i] + -3.0*x[i]*x[i] + x[i]" (cleanvars foo),
                       t "x[i]*x[i]" (x**2),
-                      t "1/(x[i]*x[i])" (1/x**2),
+                      t "1.0/(x[i]*x[i])" (1/x**2),
                       t "y*y/(x[i]*x[i])" (y**2/x**2),
                       t "(x[i]*x[i])*(x[i]*x[i])" (x**4)]
   where t str e = TestCase $ assertEqual str str (code e)

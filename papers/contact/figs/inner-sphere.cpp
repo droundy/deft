@@ -47,8 +47,8 @@ static void took(const char *name) {
 }
 
 Functional WB = HardSpheresNoTensor2(1.0);
-Functional WBT = HardSpheresWBFast(1.0);
-Functional WBm2 = HardSpheresWBm2(1.0);
+Functional WBT = TensorWhiteBear(1.0);
+Functional WBm2 = WhiteBearMarkII(1.0);
 
 const int numiters = 25;
 

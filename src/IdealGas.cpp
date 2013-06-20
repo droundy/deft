@@ -33,9 +33,6 @@ public:
   double d_by_dT(double, double) const {
     return 1;
   }
-  Expression derive_homogeneous(const Expression &) const {
-    return Expression(0).set_type("double");
-  }
   Functional grad(const Functional &, const Functional &, bool) const {
     return Functional(0.0);
   }
@@ -44,9 +41,6 @@ public:
   }
   void grad(const GridDescription &, double, const VectorXd &, const VectorXd &,
             VectorXd *, VectorXd *) const {
-  }
-  Expression printme(const Expression &) const {
-    return Expression("kT").set_type("double");
   }
   bool append_to_name(const std::string) {
     return false;

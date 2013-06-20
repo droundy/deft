@@ -739,12 +739,6 @@ double d_by_dT(double , double ) const {
 
 }
 
-Expression derive_homogeneous(const Expression & ) const {
-	assert(0); // fail
-	return Expression(0);
-
-}
-
 Functional grad(const Functional &ingrad, const Functional &x, bool ) const {
 	return ingrad;}
 
@@ -3077,9 +3071,6 @@ void grad(const GridDescription &gd, double kT, const VectorXd &x, const VectorX
 	// 44
 
 }
-
-Expression printme(const Expression &x) const {
-	return funexpr("WaterSaft_type()")(x);}
 
 void print_summary(const char *prefix, double energy, std::string name) const {
 	if (name != "") printf("%s%25s =", prefix, name.c_str());

@@ -50,11 +50,6 @@ public:
     for (int p=1; p < n; p++) v *= x;
     return v;
   }
-  Expression derive_homogeneous(const Expression &x) const {
-    if (n == 0) return Expression(0).set_type("double");
-    if (n == 1) return Expression(1).set_type("double");
-    return Expression(n).set_type("double")*Pow(n-1).printme(x);
-  }
   double d_by_dT(double, double) const {
     return 0;
   }
@@ -83,16 +78,6 @@ public:
       (*outgrad)[i] += foo;
       if (outpgrad) (*outpgrad)[i] += foo;
     }
-  }
-  Expression printme(const Expression &x) const {
-    switch (n) {
-    case 0: return 1;
-    case 1: return x;
-    case 2: return sqr(x);
-    }
-    // This is more than a little hokey...
-    if (n & 1) return x*Pow(n-1).printme(x);
-    return Pow(n/2).printme(sqr(x));
   }
   bool I_give_zero_for_zero() const {
     return n > 0;
@@ -141,9 +126,6 @@ public:
     }
     return out;
   }
-  Expression derive_homogeneous(const Expression &x) const {
-    return Expression(n+0.5).set_type("double")*PowAndHalf(n-1).printme(x);
-  }
   double d_by_dT(double, double) const {
     return 0;
   }
@@ -171,15 +153,6 @@ public:
         (*outgrad)[i] += foo;
         if (outpgrad) (*outpgrad)[i] += foo;
       }
-    }
-  }
-  Expression printme(const Expression &x) const {
-    if (n == 0) {
-      return sqrt(x);
-    } else if (n >= 0) {
-      return Pow(n).printme(x)*sqrt(x);
-    } else {
-      return sqrt(x) / Pow(-n).printme(x);
     }
   }
   bool I_give_zero_for_zero() const {

@@ -49,7 +49,7 @@ int main(int, char **argv) {
   WhiteBear wb(1);
   const int Nx = 100;
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
-  const double energy = 42.53522950836720895;
+  const double energy = 42.53522950699669281;
   Vector inp = wb.createInput(Nx, Nx, Nx, R, a, a, a, Vector(Nx*Nx*Nx), kT);
   wb.get_x(inp) = wb.get_x(inp)*0 + nval;
   retval += check_functional_value("WhiteBear", wb, inp, energy);
