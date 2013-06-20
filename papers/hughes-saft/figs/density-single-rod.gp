@@ -27,7 +27,7 @@ reset
 unset arrow
 set view map
 
-set key inside bottom
+set key inside top
 #set title 'One hydrophobic rod - Density'
 
 # set multiplot
@@ -47,7 +47,7 @@ set style line 2 lt 1 lw 4 lc rgb "#1133aa"
 set style line 3 lt 1 lw 4 lc rgb "#337799"
 set style line 5 lt 1 lw 4 lc rgb "#33bb88"
 set style line 6 lt 1 lw 4 lc rgb "#44dd55"
-set style line 7 lt 1 lw 4 lc rgb "#99ff88"
+set style line 7 lt 1 lw 4 lc rgb "#bbdd66"
 set style line 4 lt 3 lw 3 lc rgb "#000000"
 
 #splot [:] [:] [:] \
@@ -68,11 +68,11 @@ nm = 18.8972613     # 1 nm equals this many bohrs
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:1.3] [:] \
-'figs/single-rod-slice-00.1.dat' u ($2/nm):($4/gpermL) notitle with lines ls 7 , \
-'figs/single-rod-slice-00.3.dat' u ($2/nm):($4/gpermL) notitle with lines ls 6 , \
-'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 5 , \
-'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 3 , \
-'figs/single-rod-slice-01.6.dat' u ($2/nm):($4/gpermL) notitle with lines ls 2 , \
-'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) notitle with lines ls 1 , \
+'figs/single-rod-slice-00.1.dat' u ($2/nm):($4/gpermL) title 'r=0.05 nm' with lines ls 7 , \
+'figs/single-rod-slice-00.3.dat' u ($2/nm):($4/gpermL) title 'r=0.15 nm' with lines ls 6 , \
+'figs/single-rod-slice-00.6.dat' u ($2/nm):($4/gpermL) title 'r=0.30 nm' with lines ls 5 , \
+'figs/single-rod-slice-01.0.dat' u ($2/nm):($4/gpermL) title 'r=0.50 nm' with lines ls 3 , \
+'figs/single-rod-slice-01.6.dat' u ($2/nm):($4/gpermL) title 'r=0.80 nm'with lines ls 2 , \
+'figs/single-rod-slice-02.0.dat' u ($2/nm):($4/gpermL) title 'r=1.00 nm'with lines ls 1 , \
 'figs/single-rod-slice-00.6.dat' u ($2/nm):(nl/gpermL) notitle with lines ls 4 , \
-'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) notitle with points pt 6 ps 1 lw 4 lc 1
+'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) title 'Density at contact' with points pt 6 ps 1 lw 4 lc 1

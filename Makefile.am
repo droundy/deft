@@ -34,7 +34,8 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
 	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
-	src/SoftFluidFast.cpp src/HardFluidFast.cpp
+	src/SoftFluidFast.cpp src/HardFluidFast.cpp \
+	src/WaterXFast.cpp src/HughesXFast.cpp
 
 NEWHASKELL_CODE = src/new/WhiteBearFast.cpp
 src/new/WhiteBearFast.h: src/new/WhiteBearFast.cpp
@@ -61,6 +62,7 @@ noinst_PROGRAMS =  \
 	papers/water-saft/figs/rods-in-water.mkdat \
 	papers/water-saft/figs/four-rods-in-water.mkdat \
 	papers/water-saft/figs/single-rod.mkdat \
+	papers/water-saft/figs/hughes-single-rod.mkdat \
 	papers/water-saft/figs/sphere.mkdat \
 	papers/water-saft/figs/pressure-with-isotherms.mkdat \
 	papers/hughes-saft/figs/surface-tension.mkdat \
@@ -155,6 +157,7 @@ papers_water_saft_figs_equation_of_state_mkdat_SOURCES = papers/water-saft/figs/
 papers_water_saft_figs_rods_in_water_mkdat_SOURCES = papers/water-saft/figs/rods-in-water.cpp $(ALL_CODE)
 papers_water_saft_figs_four_rods_in_water_mkdat_SOURCES = papers/water-saft/figs/four-rods-in-water.cpp $(ALL_CODE)
 papers_water_saft_figs_single_rod_mkdat_SOURCES = papers/water-saft/figs/single-rod.cpp $(ALL_CODE)
+papers_water_saft_figs_hughes_single_rod_mkdat_SOURCES = papers/water-saft/figs/hughes-single-rod.cpp $(ALL_CODE)
 papers_water_saft_figs_sphere_mkdat_SOURCES = papers/water-saft/figs/sphere.cpp $(ALL_CODE)
 papers_water_saft_figs_pressure_with_isotherms_mkdat_SOURCES = papers/water-saft/figs/pressure-with-isotherms.cpp $(ALL_CODE)
 

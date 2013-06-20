@@ -8,7 +8,7 @@
 
 module WaterSaft
        ( eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, water_saft, water_entropy, mu )
+         saft_dispersion, saft_association, water_saft, water_entropy, water_X, mu )
        where
 
 import FMT ( rad, n )
@@ -51,14 +51,14 @@ da1_detad = derive eta_for_dispersion 1 a1
 a2 = "a2" === 0.5*khs*epsilon_dispersion*eta_for_dispersion*da1_detad
      where khs = var "KHS" "{\\kappa_{HS}}" $ (1 - eta_for_dispersion)**4/(1 + 4*(eta_for_dispersion + eta_for_dispersion**2))
 
-saft_association = "Fassoc" === integrate (4*kT*n*(log xsaft - xsaft/2 + 1/2))
+saft_association = "Fassoc" === integrate (4*kT*n*(log water_X - water_X/2 + 1/2))
 
 kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_tex "kappa_association" "\\kappa_a"
 epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 
-xsaft, deltasaft, a1, a2 :: Expression RealSpace
-xsaft = "X" === (sqrt(1 + 8*nA*deltasaft) - 1) / (4*nA*deltasaft)
+water_X, deltasaft, a1, a2 :: Expression RealSpace
+water_X = "X" === (sqrt(1 + 8*nA*deltasaft) - 1) / (4*nA*deltasaft)
 
 deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
   where boltz = "boltz" === exp(epsilon_association/kT)-1

@@ -45,7 +45,8 @@ ALL_FIGURES=\
 	figs/four-rods-energy-vs-distance.gp\
 	figs/density-four-rods.gp\
 	figs/sphere-energy-vs-diameter.gp\
-	figs/density-sphere.gp
+	figs/density-sphere.gp\
+	figs/single-rod-X-plot.gp
 
 
 
@@ -76,8 +77,8 @@ figs/surface-tension.eps: figs/surface-tension.gp \
 	figs/surface-tension.dat
 figs/surface-298.eps: figs/surface-298.gp figs/surface-298.dat
 figs/density-rods-in-water.eps: figs/rods-slice-01.2-00.6.dat figs/rods-slice-01.2-00.7.dat
-figs/density-four-rods.eps: figs/four-rods-01.2-1.53.dat \
-	figs/four-rods-01.2-1.56.dat
+figs/density-four-rods.eps: figs/four-rods-01.2-1.44.dat \
+	figs/four-rods-01.2-1.47.dat
 figs/rods-energy-vs-distance.eps: figs/rods-in-water-00.4nm.dat \
 	figs/rods-in-water-00.8nm.dat figs/rods-in-water-01.2nm.dat \
 	figs/rods-in-water-01.6nm.dat figs/rods-in-water-02.0nm.dat \
@@ -91,6 +92,14 @@ figs/density-single-rod.eps: figs/single-rod-slice-00.1.dat \
 		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
 		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
 		figs/single-rods-calculated-density.dat
+figs/single-rod-X-plot.eps: figs/single-rod-slice-00.1.dat \
+		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
+		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
+		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
+		figs/hughes-single-rod-slice-00.1.dat \
+		figs/hughes-single-rod-slice-00.3.dat figs/hughes-single-rod-slice-00.6.dat \
+		figs/hughes-single-rod-slice-01.0.dat figs/hughes-single-rod-slice-01.6.dat \
+		figs/hughes-single-rod-slice-02.0.dat figs/hughes-single-rod-slice-00.6.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)

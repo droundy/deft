@@ -21,7 +21,7 @@
 # 16-31               watches
 
 set terminal postscript eps enhanced color "Helvetica" 20
-set output 'figs/density-single-rod.eps'
+set output 'figs/single-rod-X-plot.eps'
 
 reset
 unset arrow
@@ -54,7 +54,7 @@ set style line 4 lt 3 lw 3 lc rgb "#000000"
 #'figs/single-rod-01.0.dat' u ($2/nm):($3/nm):4 notitle with pm3d 
 
 set xlabel 'Radius (nm)'
-set ylabel 'Density (g/mL)'
+set ylabel 'Number of hydrogen bonds'
 
 #set label "r=0.3nm" at 0.62,1.74 rotate by 0 font 'Helvetica,20' 
 #set arrow from 0.6,1.72 to 0.46,1.6 lw 2
@@ -65,14 +65,18 @@ set ylabel 'Density (g/mL)'
 
 nl=0.004938863
 nm = 18.8972613     # 1 nm equals this many bohrs
-gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 plot [:1.3] [:] \
-'figs/single-rod-slice-00.1.dat' u ($1/nm):($2/gpermL) notitle with lines ls 7 , \
-'figs/single-rod-slice-00.3.dat' u ($1/nm):($2/gpermL) notitle with lines ls 6 , \
-'figs/single-rod-slice-00.6.dat' u ($1/nm):($2/gpermL) notitle with lines ls 5 , \
-'figs/single-rod-slice-01.0.dat' u ($1/nm):($2/gpermL) notitle with lines ls 3 , \
-'figs/single-rod-slice-01.6.dat' u ($1/nm):($2/gpermL) notitle with lines ls 2 , \
-'figs/single-rod-slice-02.0.dat' u ($1/nm):($2/gpermL) notitle with lines ls 1 , \
-'figs/single-rod-slice-00.6.dat' u ($1/nm):(nl/gpermL) notitle with lines ls 4 , \
-'figs/single-rods-calculated-density.dat' u ($1/nm):($2/gpermL) notitle with points pt 6 ps 1 lw 4 lc 1
+'figs/single-rod-slice-00.1.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 7 , \
+'figs/single-rod-slice-00.3.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 6 , \
+'figs/single-rod-slice-00.6.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 5 , \
+'figs/single-rod-slice-01.0.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 3 , \
+'figs/single-rod-slice-01.6.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 2 , \
+'figs/single-rod-slice-02.0.dat' u ($1/nm):(4*(1-$3)) notitle with lines ls 1 , \
+'figs/hughes-single-rod-slice-00.1.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 7 , \
+'figs/hughes-single-rod-slice-00.3.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 6 , \
+'figs/hughes-single-rod-slice-00.6.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 5 , \
+'figs/hughes-single-rod-slice-01.0.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 3 , \
+'figs/hughes-single-rod-slice-01.6.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 2 , \
+'figs/hughes-single-rod-slice-02.0.dat' u ($1/nm):(4*(1-$3)) notitle with dots ls 1
+

@@ -1,4 +1,4 @@
-\documentclass[twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\documentclass[twocolumn,amsmath,amssymb,prl]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -45,6 +45,102 @@ We develop an improved version of our old functional.
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+\fixme{Some stuff about water}.  An important aspects of water is its
+ability to form hydrogen bonds.  Each water molecule contains two
+hydrogen bond donor sites and two acceptor sites.
+
+One promising approach for an efficient continuum description of water
+is that of classical density-functional theory (DFT), which is an
+approach for evaluating the free energy and thermally averaged density
+of fluids in an arbitrary external potential~\cite{ebner1976density}.
+The foundation of classical DFT is the Mermin
+theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
+theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
+stating that
+\begin{equation}
+  \Omega (T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int (V_\textit{ext}(\rr) +\mu)n(\rr)
+d\rr\right\},
+\end{equation}
+where $\Omega (T)$ is the grand potential of a system in the external
+potential $V_\textit{ext}$ at temperature $T$, $n(\rr)$ is the density
+of atoms or molecules, $\mu$ is the chemical potential and
+$F[n(\rr),T]$ is a universal free-energy functional for the fluid,
+which is independent of the external potential $V_\textit{ext}$.
+Classical DFT is a natural framework for creating a more flexible
+theory of hydrophobicity that can readily describe interaction of
+water with arbitrary external potentials---such as potentials
+describing strong interactions with solutes or surfaces.
+
+\subsection{Statistical Associating Fluid Theory}
+
+Statistical Associating Fluid Theory (SAFT) is a theory describing
+complex fluids in which hydrogen bonding plays a significant
+role\cite{chapman1989saft, muller2001molecular}.  SAFT is used to
+accurately model the equations of state of both pure fluids and
+mixtures over a wide range of temperatures and pressures.  SAFT is
+based on Wertheim's first-order thermodynamic perturbation theory
+(TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
+  wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
+account for strong associative interactions between molecules.
+
+The SAFT Helmholtz free energy is composed of five terms:
+\begin{equation} \label{eq:SAFT-free-energy}
+  F = F_\textit{id} + F_\textit{hs} + F_\textit{disp} +
+  F_\textit{assoc} + F_\textit{chain},
+\end{equation}
+where the first three terms---ideal gas, hard-sphere repulsion and
+dispersion---encompass the \emph{monomer} contribution
+to the free energy, the fourth is the \emph{association} free energy,
+describing hydrogen bonds, and the final term is the chain formation
+energy for fluids that are chain polymers. In our model, we use a hard
+sphere reference fluid which renders $F_\textit{chain}$ irrelivant for
+our functional.
+
+In a recent paper \cite{hughes2013classical}, Hughes \emph{et al}
+constructed a classical density functional theory for water which used
+Clark \emph{et al}'s \cite{clark2006developing} five fitting
+paramenters for an optimal cDFT for water.  In addition, they
+introduced a parameter for the length scale over which the dispersion
+interaction is correlated
+
+\section{Method}
+
+Schulte \emph{et al}\cite{schulte2012using} derived expressions for
+the correlation fucntoin at contact based on the White Bear version of
+FMT. They found their $g_{\sigma}^A$ to agree with Monte Carlo
+simulation than Yu and Wu's which we was used in Hughes \emph{et al}'s
+paper.  We use Hughs \emph{et al}'s functional and replace the
+correlation with Schulte \emph{et al}'s, which we will call
+$g_{\sigma}$. \fixme{expand this}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/surface-tension}
+\end{center}
+\caption{Comparison of Surface tension versus temperature for theoretical and
+  experimental data. The experimental data is taken from NIST.\cite{nistwater}
+  The length-scaling parameter $s_d$ is fit so that the theoretical surface 
+  tension will match the experimental surface tension near room temperature.}
+\label{fig:surface-tension}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/single-rod-X-plot}
+\end{center}
+\caption{ The average number of hydrogen bonding per molecule at
+  distances from the center of a hydrophobic rod for various
+  radii. The solid lines are the results from using the older
+  $g_{\sigma}$, while the dotted lines are from Schulte \emph{et al}'s
+  asymmetric $g_{\sigma}$.}
+\label{fig:single-rod-X}
+\end{figure}
+
+\clearpage
+
 \section{Introduction}
 
 A large fraction of interesting chemistry---including all of molecular
@@ -162,7 +258,7 @@ have recently been produced that are based on Statistical Associating
 Fluid Theory (SAFT)\cite{ segura1997associating, segura1998comparison,
   yu2002fmt-dft-inhomogeneous-associating,
   fu2005vapor-liquid-dft,gloor2002saft,muller2001molecular,
-  clark2006developing, gloor2007prediction, gloor2004accurate,
+ clark2006developing, gloor2007prediction, gloor2004accurate,
   gross2009density, kahl2008modified, blas2001examination}.  These
 functionals are based on a perturbative thermodynamic expansion, and
 do reproduce the temperature-dependence of water's properties.
@@ -501,16 +597,16 @@ functional of Yu and Wu\cite{yu2002fmt-dft-inhomogeneous-associating}:
 
 \subsection{Determining the empirical parameters}\label{sec:empirical}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/surface-tension}
-\end{center}
-\caption{Comparison of Surface tension versus temperature for theoretical and
-  experimental data. The experimental data is taken from NIST.\cite{nistwater}
-  The length-scaling parameter $\lscale$ is fit so that the theoretical surface 
-  tension will match the experimental surface tension near room temperature.}
-\label{fig:surface-tension}
-\end{figure}
+%% \begin{figure}
+%% \begin{center}
+%% \includegraphics[width=3.5in]{figs/surface-tension}
+%% \end{center}
+%% \caption{Comparison of Surface tension versus temperature for theoretical and
+%%   experimental data. The experimental data is taken from NIST.\cite{nistwater}
+%%   The length-scaling parameter $\lscale$ is fit so that the theoretical surface 
+%%   tension will match the experimental surface tension near room temperature.}
+%% \label{fig:surface-tension}
+%% \end{figure}
 
 The majority of the empirical parameters used in our functional are
 taken from the paper of Clark \emph{et al} on developing an optimal
@@ -738,7 +834,6 @@ good agreement for rods larger than 0.5~nm in radius.  This free
 energy plot is qualitatively similar to that predicted by the LCW
 theory~\cite{lum1999hydrophobicity}, with the difference that we find
 no significant barrier to the association of four rods.
-
 
 \subsection{Hydration energy of hard-sphere solutes}
 
