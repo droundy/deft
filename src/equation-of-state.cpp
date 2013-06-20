@@ -252,7 +252,7 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax,
     ntry = 0.5*(n1+n2);
     ftry = f(kT, -kT*log(ntry));
     ptry = pressure(f, kT, ntry);
-    if (isnan(ftry) || isnan(ptry)) {
+    if ((ftry != ftry) || (ptry != ptry)) { // check if one of them is a NaN!
       n2 = ntry;
     } else if (ptry < 0) {
       // If it's got a negative pressure, it's definitely got too low
@@ -270,7 +270,7 @@ double saturated_liquid(Functional f, double kT, double nmin, double nmax,
         n2 = ntry;
       }
     }
-  } while (fabs(n2-n1)/n2 > 1e-12 || isnan(ftry));
+  } while (fabs(n2-n1)/n2 > 1e-12 || (ftry != ftry)); // the latter is essentially isnan (but more portable)
   //printf("pl = %g\tpv = %g\n", pressure(f, kT, (n2+n1)*0.5), pressure(f, kT, ngtry));
   return (n2+n1)*0.5;
 }
@@ -280,8 +280,8 @@ void saturated_liquid_vapor(Functional f, double kT,
                             const double nmin, const double ncrit, const double nmax,
                             double *nl_ptr, double *nv_ptr, double *mu_ptr,
                             const double fraccuracy) {
-  if (isnan(*nl_ptr) || *nl_ptr < ncrit || *nl_ptr > nmax) *nl_ptr = 0.5*(nmax + ncrit);
-  if (isnan(*nv_ptr) || *nv_ptr < nmin || *nv_ptr > ncrit) *nv_ptr = 0.5*(nmin + ncrit);
+  if ((*nl_ptr != *nl_ptr) || *nl_ptr < ncrit || *nl_ptr > nmax) *nl_ptr = 0.5*(nmax + ncrit);
+  if ((*nv_ptr != *nv_ptr) || *nv_ptr < nmin || *nv_ptr > ncrit) *nv_ptr = 0.5*(nmin + ncrit);
   // Our starting guess for mu is chosen such that there should always
   // be two minima, one on each side of ncrit, provided ncrit is
   // between the two inflection points which themselves are between
