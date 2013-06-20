@@ -20,7 +20,7 @@ autoheader
 automake --add-missing
 autoconf
 
-WARNINGEXCEPTIONS=' -Wno-unused-variable -Wno-unused-parameter -Wno-return-type '
+WARNINGEXCEPTIONS=' -Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs '
 
 export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2 -DNDEBUG"
 export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2"
