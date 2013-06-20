@@ -35,7 +35,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","old","simple"]
+versions = ["fischer","nA","simple"]
 for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
@@ -46,6 +46,9 @@ plt.xlim([2,9])
 plt.legend(versions+['mc'], loc='upper right')
 
 xlim(3, 10)
+
+plotname = "dadz.pdf"
+savefig(plotname)
 
 plt.show()
 
