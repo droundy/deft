@@ -44,3 +44,4 @@ cited-papers
 cleanups.txt
 .DS_Store
 .metadata
+*.trs
