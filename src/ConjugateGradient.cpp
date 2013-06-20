@@ -60,7 +60,7 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy();
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {
@@ -115,7 +115,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy();
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {

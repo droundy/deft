@@ -159,5 +159,5 @@ public:
 };
 
 inline bool better(double a, double b) {
-  return a < b || isnan(b);
+  return a < b || (b != b); // changed isnan for mac
 }

@@ -314,7 +314,7 @@ void Grid::epsNative1d(const char *fname, Cartesian xmin, Cartesian xmax, double
     for (double x=0; x<=1; x += mydx/myxrange) {
       Cartesian here(xmin + (xmax-xmin)*x);
       double fhere = (*this)(gd.fineLat.round(here));
-      if (isnan(fhere)) {
+      if (fhere != fhere) { // is it a nan?
         fprintf(out, "%% %g\t%g\tL\n", (here-xmin).norm(), fhere);
       } else {
         fprintf(out, "%g\t%g\tL\n", (here-xmin).norm(), fhere);
@@ -446,7 +446,7 @@ void Grid::epsRadial1d(const char *fname, double rmin, double rmax, double yscal
     
     fprintf(out, "%g %g M\n", rmin, fRs[0]);
     for (int ir=1; ir<Rs.rows(); ir++) {
-      if (isnan(fRs[ir])) {
+      if (fRs[ir] != fRs[ir]) { // is it a nan?
         fprintf(out, "%% %g\t%g\tL\n", Rs[ir], fRs[ir]);
       } else {
         fprintf(out, "%g\t%g\tL\n", Rs[ir], fRs[ir]);

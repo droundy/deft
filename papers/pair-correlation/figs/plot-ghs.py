@@ -6,16 +6,19 @@ from __future__ import division
 import matplotlib
 #matplotlib.use('Agg')
 
-import pylab, numpy, sys
-import Scientific.Functions.LeastSquares as ls
-#if len(sys.argv) != 2:
-#    print("Usage:  " + sys.argv[0] + " out-filename.pdf")
-#    exit(1)
+import pylab, numpy, sys, random
+#import Scientific.Functions.LeastSquares as ls
 
-#pdffilename = sys.argv[1]
+from scipy.optimize import leastsq
+
+if len(sys.argv) != 2:
+   print("Usage:  " + sys.argv[0] + " out-filename.pdf")
+   exit(1)
+
+pdffilename = sys.argv[1]
 
 pylab.figure(1)
-pylab.title('$g_{HS}(r)$')
+pylab.title('$g_{HS}(r)$') #radial distribution for hard spheres
 pylab.axvline(x=1, color='k', linestyle=':')
 pylab.axhline(y=1, color='k', linestyle=':')
 
@@ -37,60 +40,10 @@ x[4] = .331
 x[5] = 4.560
 x[6] = 3.319
 
-def dist(x, ind):
-    gsig, r = ind
-    gsig -= 1
-    # function with x[i] as constants to be determined
-    h0 = gsig # was x[0]*gsig
-    f0 = numpy.exp(-x[0]*r)
+colors = ['r', 'g', 'b', 'c', 'm']
+ff = [.1, .2, .3, .4, .5]
 
-    h1 = x[1]*gsig
-    f1 = numpy.sin(x[2]*r) * numpy.exp(-x[3]*r)
 
-    h2 = -x[4]*gsig**(2)
-    f2 = numpy.sin(x[5]*r) * numpy.exp(-x[6]*r)
-
-    g = 1 + h0*f0 + h1*f1 + h2*f2
-    return g
-
-def distWeighted(x, ind):
-    gsig, r = ind
-    gsig -= 1
-    # function with x[i] as constants to be determined
-    h0 = gsig # was x[0]*gsig
-    f0 = numpy.exp(-x[1]*r)
-
-    h1 = x[2]*gsig
-    f1 = numpy.sin(x[3]*r) * numpy.exp(-x[4]*r)
-
-    h2 = x[5]*gsig**(2)
-    f2 = numpy.sin(x[6]*r) * numpy.exp(-x[7]*r)
-
-    g = 1 + h0*f0 + h1*f1 + h2*f2
-    return g*r**(-4)
-
-def plotdatag(x, ind):
-    gsig, r = ind
-    #gsig -= 1
-
-    # function with x[i] as constants to be determined
-    h0 = x[0]*gsig**2
-    f0 = numpy.exp(-x[1]*r - x[2])
-
-    h1 = x[3]*gsig
-    f1 = numpy.cos(x[4]*r - x[5]) * numpy.exp(-x[6]*r)
-
-    h2 = x[7]*gsig**(-1)
-    f2 = numpy.cos(x[8]*r - x[9]) * numpy.exp(-x[10]*r)
-
-    h3 = x[11]*gsig**(2)
-    f3 = numpy.cos(x[12]*r - x[13]) * numpy.exp(-x[14]*r)
-
-#    h4 = x[15]*gsig**(-2)
-#    f4 = numpy.cos(x[16]*r - x[17]) * numpy.exp(-x[18]*r)
-
-    g = 1 + h0*f0 + h1*f1 + h2*f2 + h3*f3 #+ h4*f4
-    return g, h0*f0, h1*f1, h2*f2, h3*f3
 
 def read_ghs(base, ff):
     mcdatafilename = "%s-0.%d0.dat" % (base, 10*ff)
@@ -101,22 +54,17 @@ def read_ghs(base, ff):
     ghs = n_mc/ff
     return r_mc, ghs
 
-colors = ['r', 'g', 'b', 'c']
-ff = [.1, .3, .4, .5]
 
 # READ DATA
-ghs = [0]*4
-#ghslores = [0]*4
-gsig = [0]*4
+ghs = [0]*len(ff)
+#ghslores = [0]*len(ff)
+gsig = [0]*len(ff)
 i = 0
-while (i < 4):
+while (i < len(ff)):
     r_mc, ghs[i] = read_ghs("gr", ff[i])
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
-
     pylab.figure(1)
-    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='filling fraction %.1f'%ff[i])
-    #pylab.plot(r_mclores, ghslores[i], colors[i]+":")
-
+    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.1f'%ff[i])
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -130,70 +78,71 @@ while (i < 4):
     r = (r_mc)/2 - 1 # "diameter units", shifted to x = 0 at d = 1
     i += 1
 
-# make g2 = g(sig, r) = [g(sig1, r1), g(sig1, r2), ..., g(sig2, r2), ...]
-g2 = numpy.concatenate((ghs[0], ghs[1], ghs[2], ghs[3]))
-#g2 = numpy.concatenate((ghslores[0], ghslores[1], ghslores[2], ghslores[3]))
+def dist(x):
+    # function with x[i] as constants to be determined
+    g = numpy.zeros_like(gsigconcatenated)
+    for i in range(len(g)):
+        gsigma = gsigconcatenated[i] - 1
+        h0 = gsigma # was x[0]*gsig
+        f0 = numpy.exp(-x[0]*rconcatenated[i])
+        h1 = x[1]*gsigma
+        f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
+        h2 = -x[4]*gsigma**(2)
+        f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
+        g[i] = 1 + h0*f0 + h1*f1 + h2*f2
+    return g
 
-ind = [0]*len(r)*len(gsig)
+def dist2(x):
+    return dist(x) - ghsconcatenated
+
+
+ghsconcatenated = numpy.concatenate((ghs[0], ghs[1], ghs[2], ghs[3], ghs[4]))
+
+gsigconcatenated = [0]*len(r)*len(gsig)
 j = 0
 while (j < len(gsig)):   # makes ind an array of pairs, ind = [(sig1, r1), (sig1, r2), ..., (sig2, r2), ...]
     i = 0
     while (i < len(r)):
-        ind[i + j*len(r)] = (gsig[j], r[i])
+        gsigconcatenated[i + j*len(r)] = gsig[j]
         i += 1
     j += 1
 
+rconcatenated = [0]*len(r)*len(gsig)
+j = 0
+while (j < len(gsig)):   # makes ind an array of pairs, ind = [(sig1, r1), (sig1, r2), ..., (sig2, r2), ...]
+    i = 0
+    while (i < len(r)):
+        rconcatenated[i + j*len(r)] = r[i]
+        i += 1
+    j += 1
+
+
+
 vals = [0]*numParams
-valsw = [0]*numParams
-#vals, cov = curve_fit(dist, r, ghs, x, sig)
-
-i = 0
-data = [0]*len(r)*len(gsig)
-#dataW = [0]*len(r)*len(gsig)
-
-while (i < len(r)*len(gsig)):
-    data[i] = (ind[i], g2[i])
-#    dataW[i] = (ind[i], g2[i], (ind[i][1]+1)**4)
-#    dataW[i] = ((ind[i][0], ind[i][1]+1), g2[i]*(ind[i][1]+1)**(-4))
-#    print "ind[i] + (0,1): " + str((ind[i][0], ind[i][1]+1)) + "r: " + str((ind[i][1]+1)) + ", r^-4: " + str((ind[i][1]+1)**(-4)) + ", gW: " + str(g2[i]*(ind[i][1]+1)**(-4))
-    i += 1
 
 print "beginning least squares fit..."
-vals, cov = ls.leastSquaresFit(dist, x, data)
+vals, cov = leastsq(dist2, x)
 print "original fit complete, cov: " + str(cov)
 i = 0
+
 while (i < len(vals)):
     print 'x[' + str(i) + ']: ' + str(vals[i])
     i += 1
 
-# valsw, cov = ls.leastSquaresFit(dist, x, dataW)
-# print "weighted fit complete, cov: " + str(cov)
-# i = 0
-# while (i < len(vals)):
-#     print 'x[' + str(i) + ']: ' + str(valsw[i])
-#     i += 1
+g = dist(vals)
+gdifference = dist2(vals)
+# for i in g:
+#     print dist(vals, ind)[i]
 
-
-i = 0
-g = numpy.zeros(len(r)*len(gsig))
-gw = numpy.zeros(len(r)*len(gsig))
-while (i < len(r)*len(gsig)):
-    #g[i], g0[i], g1[i], g2[i], g3[i] = plotdatag(vals, ind[i])
-    g[i] = dist(vals, ind[i])
-    gw[i] = dist(valsw, ind[i])
-#    gw[i] = distWeighted(valsw, (ind[i][0], ind[i][1]+1))*(ind[i][1] + 1)**(4)
-    i += 1
-
-for (color,i) in [('r', 0), ('g', 1), ('b', 2), ('c', 3)]:
-#for (color,i) in [('r', 0), ('g', 1), ('b', 2)]:
+for i in range(len(ff)):
     pylab.figure(1)
-    pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], color+'--')
-#    pylab.plot(r_mc, gw[i*len(r):(i+1)*len(r)], color+'--.')
+    pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %f'%ff[i])
 
-#    pylab.plot(r_mc, g0[i*len(r):(i+1)*len(r)]+g3[i*len(r):(i+1)*len(r)]+1, color+'--.')
     pylab.figure(2)
-    pylab.plot(r_mc, numpy.abs(numpy.asarray(g[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'-')
-#    pylab.plot(r_mc, numpy.abs(numpy.asarray(gw[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'--')
+    pylab.plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
+    pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
+    #pylab.plot(r_mc, numpy.abs(numpy.asarray(ghsconcatenated[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'-')
+
 
 
 pylab.figure(1)
@@ -208,9 +157,15 @@ pylab.legend(loc='best').get_frame().set_alpha(0.5)
 
 pylab.figure(2)
 pylab.xlim(2,6.5)
-pylab.ylim(0, .1)
+#pylab.ylim(0, 2.0)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("|ghs - g|")
 #pylab.legend(loc='best').get_frame().set_alpha(0.5)
 
+#plotname = "ghs.pdf"
+#savefig(plotname)
+
 pylab.show()
+
+
+

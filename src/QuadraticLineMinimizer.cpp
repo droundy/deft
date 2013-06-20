@@ -2,6 +2,7 @@
 
 #include "LineMinimizer.h"
 #include <stdio.h>
+#include <float.h>
 
 class QuadraticLineMinimizerType : public MinimizerInterface {
 private:
@@ -33,7 +34,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     printf("\t\tQuad: E0 = %25.15g", E0);
     fflush(stdout);
   }
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {
@@ -42,7 +43,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
     return false;
   }
-  if (isinf(E0)) {
+  if (E0 >= DBL_MAX || E0 <= DBL_MIN) {
     // There is no point continuing, since we've got an infinite result.  :(
     // So we may as well quit here.
     if (verbose) {
@@ -51,7 +52,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
     return false;
   }
-  if (isnan(slope)) {
+  if (slope != slope) {
     // The slope here is a NaN, so there is no point continuing!
     // So we may as well quit here.
     if (verbose) {
@@ -97,7 +98,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       break;
     }
     Etried = energy();
-  } while (energy() > E0 || isnan(energy()));
+  } while (better(E0,energy()));
   
   const double E1 = energy();
 
@@ -155,7 +156,7 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
       invalidate_cache();
       step1 = 0;
       printf("\t\tQuad: failed to find any improvement!  :(\n");
-    } else if (isnan(energy())) {
+    } else if (energy() != energy()) {
       printf("\t\tQuad: found NaN with smallest possible step!!!\n");
       *x -= step1*direction;
       invalidate_cache();
