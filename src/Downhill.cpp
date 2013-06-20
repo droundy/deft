@@ -54,7 +54,7 @@ bool DownhillType::improve_energy(bool verbose) {
   Grid newx(gd, *x - nu*g);
   double newE = f.integral(kT, newx);
   int num_tries = 0;
-  while (newE > old_energy || isnan(newE)) {
+  while (better(old_energy,newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
     newE = f.integral(kT, newx);
@@ -90,7 +90,7 @@ bool PreconditionedDownhillType::improve_energy(bool verbose) {
   Grid newx(gd, *x - nu*g);
   double newE = f.integral(kT, newx);
   int num_tries = 0;
-  while (newE > old_energy || isnan(newE)) {
+  while (better(old_energy,newE)) {
     nu *= 0.5;
     newx = *x - nu*g;
     newE = f.integral(kT, newx);

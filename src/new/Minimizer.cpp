@@ -1,8 +1,9 @@
 #include "Minimizer.h"
 #include <math.h>
+#include <float.h>
 
 inline bool better(double a, double b) {
-  return a < b || isnan(b);
+  return a < b || b != b;
 }
 
 bool Minimizer::improve_energy(Verbosity v) {
@@ -10,7 +11,7 @@ bool Minimizer::improve_energy(Verbosity v) {
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy(v);
   const double old_deltaE = deltaE;
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (v >= verbose) {
@@ -62,7 +63,7 @@ bool Minimizer::improve_energy(Verbosity v) {
       printf("\t\tQuad: s0 = %25.15g  E0 = %25.15g", 0.0, E0);
       fflush(stdout);
     }
-    if (isnan(E0)) {
+    if (E0 != E0) {
       // There is no point continuing, since we're starting with a NaN!
       // So we may as well quit here.
       if (v >= verbose) {
@@ -71,7 +72,7 @@ bool Minimizer::improve_energy(Verbosity v) {
       }
       return false;
     }
-    if (isinf(E0)) {
+    if (E0 >= DBL_MAX || E0 <= DBL_MIN) {
       // There is no point continuing, since we've got an infinite result.  :(
       // So we may as well quit here.
       if (v >= verbose) {
@@ -80,7 +81,7 @@ bool Minimizer::improve_energy(Verbosity v) {
       }
       return false;
     }
-    if (isnan(slope)) {
+    if (slope != slope) {
       // The slope here is a NaN, so there is no point continuing!
       // So we may as well quit here.
       if (v >= verbose) {
@@ -126,7 +127,7 @@ bool Minimizer::improve_energy(Verbosity v) {
         break;
       }
       Etried = energy(v);
-    } while (energy(v) > E0 || isnan(energy(v)));
+    } while (better(E0,energy(v)));
   
     const double E1 = energy(v);
 
@@ -186,7 +187,7 @@ bool Minimizer::improve_energy(Verbosity v) {
         invalidate_cache();
         step1 = 0;
         printf("\t\tQuad: failed to find any improvement!  :(\n");
-      } else if (isnan(energy(v))) {
+      } else if (energy(v) != energy(v)) {
         printf("\t\tQuad: found NaN with smallest possible step!!!\n");
         *x -= step1*direction;
         invalidate_cache();

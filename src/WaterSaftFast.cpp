@@ -10,7 +10,7 @@ public:
 WaterSaft_type(double R_arg, double epsilon_association_arg, double kappa_association_arg, double epsilon_dispersion_arg, double lambda_dispersion_arg, double length_scaling_arg, double mu_arg) : R(R_arg), epsilon_association(epsilon_association_arg), kappa_association(kappa_association_arg), epsilon_dispersion(epsilon_dispersion_arg), lambda_dispersion(lambda_dispersion_arg), length_scaling(length_scaling_arg), mu(mu_arg)  {
 	have_integral = true;
 	// TODO: code to evaluate Fourier transforms goes here
-	oldkT = 0.0/0.0;  // initialize to NaN so we'll have to define transforms
+	oldkT = sqrt(-1.0);  // initialize to NaN so we'll have to define transforms
 
 }
 ~WaterSaft_type() {

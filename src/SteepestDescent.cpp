@@ -47,7 +47,7 @@ bool SteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running SteepestDescent::improve_energy\n");
   const double E0 = energy();
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {
@@ -82,7 +82,7 @@ bool PreconditionedSteepestDescentType::improve_energy(bool verbose) {
   iter++;
   //printf("I am running PreconditionedSteepestDescent::improve_energy\n");
   const double E0 = energy();
-  if (isnan(E0)) {
+  if (E0 != E0) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {
