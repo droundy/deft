@@ -40,5 +40,5 @@ pylab.plot(r-3, den2)
 pylab.title('density(z), $ff = %g$' %(ff))
 pylab.xlabel("z")
 pylab.ylabel("density (balls/unit$^3$)")
-
+pylab.legend(['mc', 'deft'], loc='best')
 pylab.show()

@@ -43,7 +43,7 @@ double eta_step = 0.65/num_eta;
 double * g = new double[1300*(int(num_eta)+1)];
 
 // The functions for different ways of computing the pair distribution function.
-double pairdist_simple(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
@@ -51,10 +51,10 @@ double pairdist_simple(const Grid &gsigma, const Grid &density, const Grid &nA, 
 double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)/nA(r1))
-    /(1/nA(r0) + 1/nA(r1));
+  return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)
+          /nA(r1))/(1/nA(r0) + 1/nA(r1));
 }
-double pairdist_mc(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
@@ -72,15 +72,13 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 }
 
 const char *fun[] = {
-  "simple",
-  "nA",
-  "mc",
+  "this_work",
+  "gross",
   "fischer"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
-  pairdist_simple,
-  pairdist_nA,
-  pairdist_mc,
+  pairdist_this_work,
+  pairdist_gross,
   pairdist_fischer
 };
 const int numplots = sizeof fun/sizeof fun[0];
@@ -93,13 +91,20 @@ const double spacing = 3; // space on each side
 
 double radial_distribution(double gsigma, double r) {
   // Constants determined by fit to monte-carlo data by plot-ghs.py
-  const double a0 = 6.203,
-               a1 = .4154,
-               a2 = 6.449,
-               a3 = 2.061,
-               a4 = .3287,
-               a5 = 4.555,
-               a6 = 3.312;
+  // const double a0 = 6.203,
+  //              a1 = .4154,
+  //              a2 = 6.449,
+  //              a3 = 2.061,
+  //              a4 = .3287,
+  //              a5 = 4.555,
+  //              a6 = 3.312;
+  const double a0 = 10.117,
+               a1 = 0.309,
+               a2 = 7.378,
+               a3 = 1.569,
+               a4 = 0.098,
+               a5 = 6.053,
+               a6 = 2.858;
   double d = r/2 - 1;
   if (d < 0)
     return 0;
@@ -198,18 +203,18 @@ double notinwall(Cartesian r) {
 }
 
 static void took(const char *name) {
-  assert(name); // so it'll count as being used...
-  static clock_t last_time = clock();
-  clock_t t = clock();
-  double peak = peak_memory()/1024.0/1024;
-  double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
-  if (seconds > 120) {
-    printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
-  } else {
-    printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
-  }
-  fflush(stdout);
-  last_time = t;
+//   assert(name); // so it'll count as being used...
+//   static clock_t last_time = clock();
+//   clock_t t = clock();
+//   double peak = peak_memory()/1024.0/1024;
+//   double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+//   if (seconds > 120) {
+//     printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+//   } else {
+//     printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
+//   }
+//   fflush(stdout);
+//   last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor2(1.0);
@@ -231,11 +236,6 @@ void z_plot(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
     double chere = c(x,y,z);
     fprintf(out, "%g\t%g\t%g\t%g\n", here[2], ahere, bhere, chere);
   }
-  // hypothetical loop
-  //for (double z=0; z<gd.Lat.a3().z(); z+= 0.015) {
-  //  double ahere = a(Cartesian(0,0,z));
-  //  printf("a(%g) = %g\n", z, ahere);
-  //}
   fclose(out);
 }
 
@@ -298,8 +298,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
-      sprintf(plotname, "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
-              name, fun[version], eta, z0-3);
+      sprintf(plotname,
+              "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f-%1.2f.dat",
+              name, fun[version], eta, z0-3, dx);
       FILE *out = fopen(plotname, "w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname);
@@ -317,19 +318,20 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "\n");
       }
       fclose(out);
-      //took(plotname);
+      took(plotname);
     }
   }
   delete[] plotname;
   took("Dumping the pair dist plots");
   //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
   //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
-  printf("Starting the a1 integrals now!!\n");
+  took("Making 2d plots");
+  //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (double delta_r = 2.0; delta_r <= 3.0; delta_r++){
+    for (double delta_r = 2.1; delta_r <= 4.0; delta_r += 0.1){
       const double dv = 0.01;
       char *plotname_a = new char [1024];
-      sprintf(plotname_a, "papers/pair-correlation/figs/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
+      sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
       FILE *out = fopen(plotname_a,"w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname_a);
@@ -413,7 +415,7 @@ int main(int, char **) {
   read_mc();
   printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
-  for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
+  for (double this_eta = 0.1; this_eta < 0.55; this_eta += 0.1) {
     run_walls(this_eta, "WB", WB);
   }
   // Just create this file so make knows we have run.

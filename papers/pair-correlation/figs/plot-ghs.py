@@ -11,12 +11,6 @@ import pylab, numpy, sys, random
 
 from scipy.optimize import leastsq
 
-if len(sys.argv) != 2:
-   print("Usage:  " + sys.argv[0] + " out-filename.pdf")
-   exit(1)
-
-pdffilename = sys.argv[1]
-
 pylab.figure(1)
 pylab.title('$g_{HS}(r)$') #radial distribution for hard spheres
 pylab.axvline(x=1, color='k', linestyle=':')
@@ -151,8 +145,8 @@ pylab.xlim(2,6.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("$g(r)$")
 pylab.legend(loc='best').get_frame().set_alpha(0.5)
-#pylab.savefig(pdffilename)
-
+plotname1 = "ghs-g.pdf"
+pylab.savefig(plotname1)
 
 
 pylab.figure(2)
@@ -162,8 +156,8 @@ pylab.xlabel(r"$r/R$")
 pylab.ylabel("|ghs - g|")
 #pylab.legend(loc='best').get_frame().set_alpha(0.5)
 
-#plotname = "ghs.pdf"
-#savefig(plotname)
+plotname2 = "ghs-g-ghs.pdf"
+pylab.savefig(plotname2)
 
 pylab.show()
 
