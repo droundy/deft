@@ -72,7 +72,7 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 }
 
 const char *fun[] = {
-  "this_work",
+  "this-work",
   "gross",
   "fischer"
 };
@@ -299,8 +299,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
       sprintf(plotname,
-              "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f-%1.2f.dat",
-              name, fun[version], eta, z0-3, dx);
+              "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
+              name, fun[version], eta, z0-3);
       FILE *out = fopen(plotname, "w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname);
@@ -328,7 +328,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   took("Making 2d plots");
   //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (double delta_r = 2.1; delta_r <= 4.0; delta_r += 0.1){
+    for (double delta_r = 2.0; delta_r <= 4.0; delta_r += 0.1){
       const double dv = 0.01;
       char *plotname_a = new char [1024];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);

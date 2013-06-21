@@ -4,7 +4,7 @@ from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 import pylab, numpy, sys, random
 #import Scientific.Functions.LeastSquares as ls
@@ -55,7 +55,7 @@ ghs = [0]*len(ff)
 gsig = [0]*len(ff)
 i = 0
 while (i < len(ff)):
-    r_mc, ghs[i] = read_ghs("gr", ff[i])
+    r_mc, ghs[i] = read_ghs("figs/gr", ff[i])
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     pylab.figure(1)
     pylab.plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.1f'%ff[i])
@@ -145,8 +145,8 @@ pylab.xlim(2,6.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("$g(r)$")
 pylab.legend(loc='best').get_frame().set_alpha(0.5)
-plotname1 = "ghs-g.pdf"
-pylab.savefig(plotname1)
+
+pylab.savefig("figs/ghs-g.pdf")
 
 
 pylab.figure(2)
@@ -156,8 +156,7 @@ pylab.xlabel(r"$r/R$")
 pylab.ylabel("|ghs - g|")
 #pylab.legend(loc='best').get_frame().set_alpha(0.5)
 
-plotname2 = "ghs-g-ghs.pdf"
-pylab.savefig(plotname2)
+pylab.savefig("figs/ghs-g-ghs.pdf")
 
 pylab.show()
 
