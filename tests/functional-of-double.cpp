@@ -178,12 +178,6 @@ int main(int, char *argv[]) {
     retval += test_functional("chemical potential of V", f(n), -kT*log(1e-3), 1e-12);
   }
 
-  {
-    Functional f = gSigmaA(2.0);
-    retval += test_functional("contact density sphere", f, 0.02, 1e-12);
-    retval += test_functional("contact density sphere", f, 0.01, 1e-12);
-  }
-
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
   } else {

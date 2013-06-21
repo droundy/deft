@@ -1,8 +1,7 @@
 import HughesSaft ( saft_fluid, saft_entropy, saft_association, saft_dispersion )
 import WhiteBear ( whitebear, tensorwhitebear, whitebear_m2, gSigmaA, gSigmaS, gSigmaA_m2 )
-import Quantum
 import Latex
-import Expression ( (===), grad, joinFFTs, integrate )
+import Expression ( (===), grad, joinFFTs )
 import System.Environment ( getArgs )
 import System.Process ( rawSystem )
 import System.Exit ( ExitCode(ExitSuccess) )
@@ -37,4 +36,3 @@ main =
      pdf "doc/SimpGradDispersion.pdf" $ latexOptimizedExpression $ "grad" === (joinFFTs $ grad "x" saft_dispersion)
      pdf "doc/GradAssociation.pdf" $ latexEasy $ "grad" === (grad "x" saft_association)
      pdf "doc/JoinedGradAssociation.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" saft_association)
-     pdf "doc/JoinedGradHydrogen.pdf" $ latexEasy $ "grad" === (joinFFTs $ grad "x" (integrate (oneElectron hydrogenPotential)))

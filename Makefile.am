@@ -27,7 +27,7 @@ CONTACT_CODE = $(GENERIC_CODE) \
 #	src/HardSpheresFast.cpp src/HardSpheresWBFast.cpp src/HardSpheresWBm2Fast.cpp \
 #	src/HardSpheresNoTensorFast.cpp
 
-HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp src/HydrogenFast.cpp \
+HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
 	src/TensorWhiteBearFast.cpp src/WhiteBearMarkIIFast.cpp \
 	src/TensorDensityXXFast.cpp src/VectorDensityXFast.cpp src/n2DensityFast.cpp \
 	src/YuWuCorrelationFast.cpp src/SaftFluid2Fast.cpp \
@@ -129,7 +129,6 @@ check_PROGRAMS = \
 	tests/functional-arithmetic.test \
 	tests/functional-of-double.test \
 	tests/surface-tension.test \
-	tests/hydrogen-atom.test \
 	tests/fftinverse.test \
 	tests/eps.test
 
@@ -148,7 +147,6 @@ tests_precision_test_SOURCES = tests/precision.cpp $(ALL_CODE)
 tests_functional_arithmetic_test_SOURCES = tests/functional-arithmetic.cpp $(GENERIC_CODE)
 tests_functional_of_double_test_SOURCES = tests/functional-of-double.cpp $(ALL_CONTACT_CODE)
 tests_surface_tension_test_SOURCES = tests/surface-tension.cpp $(GENERIC_CODE)
-tests_hydrogen_atom_test_SOURCES = tests/hydrogen-atom.cpp $(ALL_CODE)
 tests_fftinverse_test_SOURCES = tests/fftinverse.cpp $(ALL_CODE)
 tests_eps_test_SOURCES = tests/eps.cpp $(ALL_CODE)
 tests_eos_test_SOURCES = tests/eos.cpp $(ALL_CODE)

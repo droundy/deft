@@ -23,7 +23,7 @@ autoconf
 WARNINGEXCEPTIONS=' -Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs '
 
 export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2 -DNDEBUG"
-export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2"
+export CXXFLAGS="-ansi -W -Wall $WARNINGEXCEPTIONS -Werror -pipe -O2 -g"
 # if env | grep CCACHE_; then
 #     echo Using ccache to speed up compilation.
 #     CXX='ccache g++' ./configure

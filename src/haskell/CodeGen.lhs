@@ -3,7 +3,8 @@
 
 module CodeGen (module Statement,
                 module Expression,
-                generateHeader, defineFunctional, defineFunctionalNoGradient )
+                generateHeader, -- generateHeader is deprecated, and will soon be removed!
+                defineFunctional, defineFunctionalNoGradient, defineTransformation )
     where
 
 import Statement
@@ -408,6 +409,118 @@ defineFunctionalNoGradient e arg n =
            "",
            "",
            scalarClassNoGradient e arg (n ++ "_type"),
+           "",
+           "",
+           "Functional " ++ n ++"(" ++ codeA arg ++ ") {",
+           "\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");",
+           "}",
+           ""]
+    where codeA [] = ""
+          codeA a = foldl1 (\x y -> x ++ ", " ++ y ) (map ("double " ++) a)
+          codeA' [] = ""
+          codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
+
+
+
+
+transformationClass :: Expression RealSpace -> [String] -> String -> String
+transformationClass ewithtransforms arg n =
+  unlines
+  ["class " ++ n ++ " : public FunctionalInterface {",
+   "public:",
+   "" ++ n ++ codeA arg ++ "  {",
+   "\thave_integral = true;",
+   definetransforms,
+   "}",
+   "",
+   functionCode "I_have_analytic_grad" "bool" [] "\treturn false;",
+   functionCode "integral" "double" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")]
+    (unlines ["\tassert(0);"]),
+   functionCode "transform" "VectorXd" [("const GridDescription", "&gd"), ("double", "kT"), ("const VectorXd", "&x")] 
+   (unlines ["\tVectorXd output(gd.NxNyNz);",
+             codeStatements codeVTransform  ++ "\t// " ++ show (countFFT codeVTransform) ++ " Fourier transform used.",
+             "\t// " ++ show (peakMem codeVTransform),
+             "\treturn output;\n"]),
+   functionCode "transform" "double" [("double", "kT"), ("double", "x")]
+    (unlines ["\tdouble output = 0;",
+              "\t" ++ codeStatements codeDTransform,
+              "\treturn output;", ""]),
+   functionCode "append_to_name" "bool" [("", "std::string")] "\treturn false;",
+   functionCode "derive" "double" [("double", "kT"), ("double", "x")]
+    (unlines ["\tassert(0);"]),
+   functionCode "d_by_dT" "double" [("double", ""), ("double", "")]
+    (unlines ["\tassert(0); // fail", "\treturn 0;", ""]),
+   functionCode "grad" "Functional" [("const Functional", "&ingrad"), ("const Functional", "&x"), ("bool", "")]
+    "\tassert(0);",
+   functionCode "grad_T" "Functional" [("const Functional", "&ingradT")] "\tassert(0);",
+   functionCode "grad" "void"
+     [("const GridDescription", "&gd"),
+      ("double", "kT"),
+      ("const VectorXd", "&x"),
+      ("const VectorXd", "&ingrad"),
+      ("VectorXd", "*outgrad"),
+      ("VectorXd", "*outpgrad")]
+     (unlines ["\tassert(0); // fail"]),
+   functionCode "print_summary" "void" [("const char", "*prefix"), ("double", "energy"), ("std::string", "name")]
+    (unlines $ ["\tprintf(\"Nothing to say\");"]),
+  "private:",
+  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)
+    ++ "\t// TODO: add declaration of spherical fourier transform data here\n"
+    ++ declaretransforms
+  ++"}; // End of " ++ n ++ " class"
+  ]
+    where
+      defineGrid = substitute dVscalar (s_var "gd.dvolume") .
+                   substitute dr (s_var "gd.dvolume" ** (1.0/3))
+      codeVTransform = reuseVar $ freeVectors (st ++ [Assign (ER (r_var "output")) e'])
+          where (st, [e']) = optimize [mkExprn $ factorize $ joinFFTs $ defineGrid e]
+      codeDTransform = freeVectors (st ++ [Assign (ES (s_var "output")) e'])
+          where (st, [e']) = optimize [mkExprn $ makeHomogeneous e]
+      codeA [] = "()"
+      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> x ++ "(" ++ x ++ "_arg)") a)
+      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ x ++ ";") a
+      codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
+      -- The following is needed to handle spherical fourier
+      -- transforms that we store on 1D grids.
+      declaretransforms = unlines $ map (\(t,_,_) -> "\tdouble *" ++ t ++ ";") transforms
+      chomp str = case reverse str of '\n':rstr -> reverse rstr
+                                      _ -> str
+      definetransforms = chomp $ concat $ map definet transforms
+        where definet (t,s,r) =
+                unlines ["\t" ++ t ++ " = new double[" ++ nk ++ "];",
+                         "\tfor (int i=0; i<" ++ nk ++"; i++) {",
+                         "\t\tconst double k = i*" ++ show (dk s) ++ ";",
+                         "\t\t" ++ t ++ "[i] = 0;",
+                         "\t\tfor (double r="++halfdr++"; r<" ++ code (rmax s) ++"; r+=" ++ mydr ++ ") {",
+                         "\t\t\tconst double rlo = r - " ++ halfdr ++ ";",
+                         "\t\t\tconst double rhi = r + " ++ halfdr ++ ";",
+                         "\t\t\t" ++ t ++ "[i] += " ++ code r ++ "*sin(k*r)*4*M_PI/3*(rhi*rhi*rhi-rlo*rlo*rlo);",
+                         "\t\t}",
+                         "I think this bit of old code in CodeGen.lhs is broken and is never used.  If it is, this will cause the compiler to fail.",
+                         "\t}"]
+                  where nk = show (round (kmax s/dk s) :: Int)
+                        mydr = code (rresolution s)
+                        halfdr = code (rresolution s/2)
+      (transforms, e) = mktransforms [1 :: Int ..] (findTransforms ewithtransforms) ewithtransforms
+      mktransforms _ [] ee = ([], ee)
+      mktransforms (nn:ns) (ft@(Expression (SphericalFourierTransform s r)):ts) ee =
+        case mktransforms ns ts ee of
+          (xs,ee') -> ((varname, s, r):xs, substitute ft evaluateme ee')
+          where varname = "ft" ++ show nn
+                evaluateme = setkzero (s_var (varname ++ "[0]")) $
+                             s_var (varname ++ "[int(" ++ code k ++ "*" ++ show (1/dk s) ++ "+0.5)]")
+      mktransforms _ (z:_) _ = error ("Not a transform: " ++ show z)
+
+defineTransformation :: Expression RealSpace -> [String] -> String -> String
+defineTransformation e arg n =
+  unlines ["// -*- mode: C++; -*-",
+           "",
+           "#include \"MinimalFunctionals.h\"",
+           "#include \"utilities.h\"",
+           "#include \"handymath.h\"",
+           "",
+           "",
+           transformationClass e arg (n ++ "_type"),
            "",
            "",
            "Functional " ++ n ++"(" ++ codeA arg ++ ") {",

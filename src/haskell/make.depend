@@ -4,11 +4,11 @@
 # Makefile itself, or find-deps.pl.                                     #
 #########################################################################
 
-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Optimize.o Quantum.o SFMT.o Statement.o WaterSaft.o WhiteBear.o functionals.o 
+functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o LatexDouble.o Optimize.o SFMT.o Statement.o WaterSaft.o WhiteBear.o functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
-latex-functionals.exe: CodeGen.o Expression.o FMT.o HughesSaft.o IdealGas.o Latex.o LatexDouble.o Optimize.o Quantum.o Statement.o WhiteBear.o latex-functionals.o 
+latex-functionals.exe: Expression.o FMT.o HughesSaft.o IdealGas.o Latex.o LatexDouble.o Optimize.o Statement.o WhiteBear.o latex-functionals.o 
 	ghc $(GHCFLAGS) -o $@ $^
 
 
@@ -37,15 +37,15 @@ HughesSaft.o : Expression.hi
 HughesSaft.o : IdealGas.hi
 HughesSaft.o : WhiteBear.hi
 HughesSaft.o : FMT.hi
-SFMT.o : SFMT.hs
-SFMT.o : FMT.hi
-SFMT.o : WhiteBear.hi
-SFMT.o : Expression.hi
 WaterSaft.o : WaterSaft.hs
 WaterSaft.o : Expression.hi
 WaterSaft.o : IdealGas.hi
 WaterSaft.o : WhiteBear.hi
 WaterSaft.o : FMT.hi
+SFMT.o : SFMT.hs
+SFMT.o : FMT.hi
+SFMT.o : WhiteBear.hi
+SFMT.o : Expression.hi
 Statement.o : Statement.lhs
 Statement.o : Expression.hi
 Optimize.o : Optimize.hs
@@ -55,6 +55,11 @@ Latex.o : Latex.hs
 Latex.o : Optimize.hi
 Latex.o : Statement.hi
 Latex.o : Expression.hi
+latex-functionals.o : latex-functionals.hs
+latex-functionals.o : Expression.hi
+latex-functionals.o : Latex.hi
+latex-functionals.o : WhiteBear.hi
+latex-functionals.o : HughesSaft.hi
 NewCode.o : NewCode.lhs
 NewCode.o : Optimize.hi
 NewCode.o : Expression.hi
@@ -66,16 +71,7 @@ CodeGen.o : CodeGen.lhs
 CodeGen.o : Optimize.hi
 CodeGen.o : Expression.hi
 CodeGen.o : Statement.hi
-Quantum.o : Quantum.hs
-Quantum.o : CodeGen.hi
-latex-functionals.o : latex-functionals.hs
-latex-functionals.o : Expression.hi
-latex-functionals.o : Latex.hi
-latex-functionals.o : Quantum.hi
-latex-functionals.o : WhiteBear.hi
-latex-functionals.o : HughesSaft.hi
 functionals.o : functionals.hs
-functionals.o : Quantum.hi
 functionals.o : WhiteBear.hi
 functionals.o : SFMT.hi
 functionals.o : FMT.hi
