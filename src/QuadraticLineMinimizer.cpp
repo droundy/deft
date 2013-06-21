@@ -2,7 +2,6 @@
 
 #include "LineMinimizer.h"
 #include <stdio.h>
-#include <float.h>
 
 class QuadraticLineMinimizerType : public MinimizerInterface {
 private:
@@ -43,9 +42,9 @@ bool QuadraticLineMinimizerType::improve_energy(bool verbose) {
     }
     return false;
   }
-  if (E0 >= DBL_MAX || E0 <= DBL_MIN) {
+  if (E0 > 1e307 || E0 < -1e307) {
     // There is no point continuing, since we've got an infinite result.  :(
-    // So we may as well quit here.
+    // (or close enough) So we may as well quit here.
     if (verbose) {
       printf(" which is infinite, so I'm quitting early.\n");
       fflush(stdout);
