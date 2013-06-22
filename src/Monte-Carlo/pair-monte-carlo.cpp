@@ -19,11 +19,9 @@ double distXYZ(Vector3d a, Vector3d b);
 const double dr = 0.1;
 const double dz = 0.1;
 
-
-
 // resolution info for the a1 histogram / integral
-const double a1_dr = 0.1;
-const double a1_dz = 0.1;
+const double a1_dr = 0.01;
+const double a1_dz = 0.01;
 
 bool has_x_wall = false;
 bool has_y_wall = false;
