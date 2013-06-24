@@ -76,6 +76,7 @@ def dist(x):
     # function with x[i] as constants to be determined
     g = numpy.zeros_like(gsigconcatenated)
     for i in range(len(g)):
+        # note: using rconcatenated = r-2, so it returns exactly gsigma at contact
         gsigma = gsigconcatenated[i] - 1
         h0 = gsigma # was x[0]*gsig
         f0 = numpy.exp(-x[0]*rconcatenated[i])

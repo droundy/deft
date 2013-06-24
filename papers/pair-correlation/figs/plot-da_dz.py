@@ -13,18 +13,17 @@ eta = sys.argv[1]
 eta = float(eta)
 delta_r = sys.argv[2]
 delta_r = float(delta_r)
+dz = 0.01
 
-plt.title('$da/dz$')
-plt.gca().set_color_cycle(['red', 'green', 'blue', 'yellow'])
+plt.title('$da/dz,$ $\eta = %g,$  $\Delta r = %g$' %(eta, delta_r))
+plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta'])
 
 def read_a1_mc():
   filename = "figs/mc/wallsMC-pair-%02.1f-a1.dat" % eta
   print 'Using', filename
   data = loadtxt(filename)
-  minr = delta_r - 3*0.01
-  maxr = delta_r + 3*0.01
-  row_min = floor(minr/0.1 + .05)
-  row_max = floor(maxr/0.1 + .05)
+  row_min = floor(delta_r/dz-dz/2)
+  row_max = row_min+2
   return sum(data[row_min:row_max], axis=0)/(row_max-row_min)
 
 def read_da_dz(version):
@@ -35,19 +34,17 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","gross","this-work"]
+versions = ["fischer","gross","this-work", "this-work-mc"]
 
 for version in versions:
   z0, da_dz = read_da_dz(version)
   plt.plot(z0, da_dz)
 
 mc = read_a1_mc();
-
-plt.plot(arange(3.05,3.05+len(mc)*0.1,.1), mc, 'k')
-plt.xlim([2,9])
+plt.plot(arange(3.05,3.05+len(mc)*dz,dz), mc, 'k')
+plt.xlim([3,10])
 plt.legend(versions+['mc'], loc='upper right')
 
-xlim(3, 10)
 #plotname = "dadz-3-4.pdf"
 plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
 savefig(plotname)

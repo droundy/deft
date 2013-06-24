@@ -45,10 +45,6 @@ def plot1d():
     gslice[i].set_data(numpy.linspace(0, rlen, num), zi)
     i += 1
 
-colors = ['k', 'b', 'r', 'g']
-plots = ['mc', 'this-work', 'fischer', 'gross']
-numplots = 4
-
 def plot():
   global ax, CS
   i = 0
