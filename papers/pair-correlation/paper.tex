@@ -51,6 +51,9 @@ hard-sphere system an important quantity.
 
 \section{What has been done before?}
 \subsection{Gloor simple method, problematic}
+Gil-Villegas\cite{gil1997statistical} approximates the first order inverse tenpurature Helmholtz Free energy term, which involves an integral of a potential multiplied by a radial distribution function $g^{HS}(r,\eta)$, by first taking the distribution function out of the integral and evaluating it at the correct mean distance $\zeta$, according to the mean value theorem.  They then approximate the pair correlation function $g^{HS}(\zeta,\eta)$ with the correlation at contact and at a effective $\eta_{eff}$.  The $\eta_{eff}$ is found by fitting a general function form to correct energy solutions $a_1$ with depenedent variable $\eta$ and 
+
+
 \subsection{Fischer accurate but slow}
 
 \section{Triplet correlation function?}
@@ -68,16 +71,20 @@ Figure~\ref{fig:radial-distribution} shows...
 \subsection{Pair distribution function}
 Figure~\ref{fig:pair-distribution} shows...
 \begin{figure}
-  \includegraphics[width=6cm]{figs/pair-correlation-2-395-5}
+  %%\includegraphics[width=6cm]{figs/pair-correlation-2-395-0.pdf}
+  \includegraphics[width=6cm]{figs/pair-correlation-2-395-5.pdf}
+  %%\includegraphics[width=6cm]{figs/pair-correlation-2-395-10.pdf}
   \caption{Plot of the pair distribution function near a hard wall.
-    How do we plot this?}\label{fig:pair-distribution}
+    In the interest of space and memeory, we should look at the function and decided which data to add?}\label{fig:pair-distribution}
 \end{figure}
 
 \section{How well does it work?}
 Figure~\ref{fig:dadz} shows...
 \begin{figure}
-  \includegraphics[width=3cm]{figs/dadz-3-2}
-  \includegraphics[width=3cm]{figs/dadz-3-3}
+  \includegraphics[width=3cm]{figs/dadz-3-2.pdf}
+  \includegraphics[width=3cm]{figs/dadz-3-3.pdf}
+  \includegraphics[width=3cm]{figs/dadz-2-2.pdf}
+  \includegraphics[width=3cm]{figs/dadz-2-3.pdf}
   %%\includegraphics[width=3cm]{figs/dadz-4-3}
   \caption{Plot of $\frac{da_1}{dz}$ near a hard
     wall. For what $\Phi$?}\label{fig:dadz}
@@ -101,7 +108,9 @@ something similar.
 Plischke and Henderson worked out the pair correlation function near a
 hard wall using Percus-Yevick, and compare with Monte Carlo
 results\cite{plischke1986pair}.  They plot the pair correlation
-function along interesting paths.
+function along interesting paths.  \fixme{Jeff read this paper for a
+  while and does not understand what they do in oder to find the pair
+  correlation function as compared to the radial distribution function}
 
 Lado recently introduced a new and improved efficient algorithm for
 implementing integral equation theory for inhomogeneous fluids, which
@@ -122,12 +131,33 @@ formula
 They go on to further approximate the radial distribution function,
 but we can just stop here.
 
-Gloor et al \cite{gloor2007prediction} uses average density of two points and the uses
-bulk radial distribution for the reference system (hard spheres) at
-this density, in order to approximate pair correlation.
+Gloor et al \cite{gloor2007prediction} uses average density of two points:
+\begin{align}
+\overline{\rho} &\equiv \frac{\rho(\rr)+\rho(\rr')}{2}
+\end{align}
+and the uses bulk radial distribution for the reference system (hard
+spheres) at this density, in order to approximate pair correlation.
 
-Gross \cite{gross2009density} does the same as Gloor et al except that
-he uses a hard chain reference fluid.
+Evans \cite{evans1992density}perscribes to use the same approximation but with an unspecified 'mean denisty':
+
+\begin{align}
+g^{(2)}(\rr_1,\rr_2) &\equiv g_r(\rho^m,\rr_{12})
+\end{align}
+
+Gross \cite{gross2009density} uses a hard chain reference fluid.  In
+his functional he needs a pair correlation beween the different
+segments of chains.  He approximates this function with the radial
+distribution given by the Carnahan Starling at a density that is the
+average density of the segment positions $\rr$ and $\rr'$:
+
+\begin{align}
+\overline{\rho} &\equiv \frac{\rho(\rr)+\rho(\rr')}{2}
+\end{align}
+
+Fu and Wu \cite{fu2005vapor} do I think the same as Gloor et al but maybe you (Dr. Roundy)
+should take a look at it.  They reference Tang \cite{tang2008accurate} which I've
+mentioned below in the Appendix.
+
 
 Sokolowski and Fischer \cite{sokolowski1992role} do the same as Gloor et al except that instead of
 taking the exact densities $\rho(\mathbf{r_1})$ and $\rho(\mathbf{r_2})$ to

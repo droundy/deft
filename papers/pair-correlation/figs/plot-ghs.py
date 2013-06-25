@@ -34,14 +34,14 @@ x[4] = .331
 x[5] = 4.560
 x[6] = 3.319
 
-colors = ['r', 'g', 'b', 'c', 'm']
-ff = [.1, .2, .3, .4, .5]
+colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
+ff = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
 
 
 
 def read_ghs(base, ff):
-    mcdatafilename = "%s-0.%d0.dat" % (base, 10*ff)
-    print 'Using', mcdatafilename
+    mcdatafilename = "%s-0.%02d.dat" % (base, 100*ff)
+    print 'Using', mcdatafilename, 'for filling fraction', ff
     mcdata = numpy.loadtxt(mcdatafilename)
     r_mc = mcdata[:,0]
     n_mc = mcdata[:,1]
@@ -58,7 +58,7 @@ while (i < len(ff)):
     r_mc, ghs[i] = read_ghs("figs/gr", ff[i])
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     pylab.figure(1)
-    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.1f'%ff[i])
+    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.2f'%ff[i])
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -89,8 +89,9 @@ def dist(x):
 def dist2(x):
     return dist(x) - ghsconcatenated
 
-
-ghsconcatenated = numpy.concatenate((ghs[0], ghs[1], ghs[2], ghs[3], ghs[4]))
+ghsconcatenated = ghs[0]
+for i in range(1,len(ff)):
+    ghsconcatenated = numpy.concatenate((ghsconcatenated, ghs[i]))
 
 gsigconcatenated = [0]*len(r)*len(gsig)
 j = 0
@@ -130,7 +131,7 @@ gdifference = dist2(vals)
 
 for i in range(len(ff)):
     pylab.figure(1)
-    pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %f'%ff[i])
+    pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
 
     pylab.figure(2)
     pylab.plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
@@ -155,7 +156,6 @@ pylab.xlim(2,6.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("|ghs - g|")
 #pylab.legend(loc='best').get_frame().set_alpha(0.5)
-
 pylab.savefig("figs/ghs-g-ghs.pdf")
 
 pylab.show()

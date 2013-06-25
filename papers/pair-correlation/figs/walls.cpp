@@ -48,12 +48,6 @@ double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &n
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
 }
-double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
-  const Cartesian r01 = Cartesian(r0 - r1);
-  const double r = sqrt(r01.dot(r01));
-  return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)
-          /nA(r1))/(1/nA(r0) + 1/nA(r1));
-}
 double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
