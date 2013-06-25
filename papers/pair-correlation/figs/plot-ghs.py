@@ -21,7 +21,7 @@ pylab.axhline(y=1, color='k', linestyle=':')
 #pylab.axhline(y=0, color='k', linestyle='-')
 
 toFit = 4
-numParams = 7
+numParams = 7+3
 x = [1]*numParams
 # x[0] = 1.0 # 1.15
 x[0] = 6.134
@@ -33,6 +33,10 @@ x[3] = 2.058
 x[4] = .331
 x[5] = 4.560
 x[6] = 3.319
+
+x[7] = .0331
+x[8] = 4.560
+x[9] = 3.319
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
 ff = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
@@ -76,14 +80,16 @@ def dist(x):
     # function with x[i] as constants to be determined
     g = numpy.zeros_like(gsigconcatenated)
     for i in range(len(g)):
-        gsigma = gsigconcatenated[i] - 1
-        h0 = gsigma # was x[0]*gsig
+        hsigma = gsigconcatenated[i] - 1
+        h0 = hsigma # was x[0]*gsig
         f0 = numpy.exp(-x[0]*rconcatenated[i])
-        h1 = x[1]*gsigma
+        h1 = x[1]*hsigma
         f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
-        h2 = -x[4]*gsigma**(2)
+        h2 = -x[4]*hsigma**(2)
         f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
-        g[i] = 1 + h0*f0 + h1*f1 + h2*f2
+        h3 = -x[7]*hsigma**(3)
+        f3 = numpy.sin(x[8]*rconcatenated[i]) * numpy.exp(-x[9]*rconcatenated[i])
+        g[i] = 1 + h0*f0 + 0*h1*f1 + 0*h2*f2 + 0*h3*f3
     return g
 
 def dist2(x):
@@ -113,13 +119,20 @@ while (j < len(gsig)):   # makes ind an array of pairs, ind = [(sig1, r1), (sig1
 
 
 
-vals = [0]*numParams
+vals = [1]*numParams
 
 print "beginning least squares fit..."
 vals, cov = leastsq(dist2, x)
 print "original fit complete, cov: " + str(cov)
-i = 0
 
+i = 0
+while (i < len(vals)):
+    print 'vals[' + str(i) + ']: ' + str(vals[i])
+    i += 1
+
+for i in numpy.arange(len(vals)):
+    vals[i] = round(vals[i],2)
+i=0
 while (i < len(vals)):
     print 'x[' + str(i) + ']: ' + str(vals[i])
     i += 1
