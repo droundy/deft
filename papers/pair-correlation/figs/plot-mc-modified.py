@@ -11,13 +11,19 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.widgets import Slider, RadioButtons
 #from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+# these are the things to set
 colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gross']
 numplots = 4
+dx = 0.1
+############################
+
+
 z0 = 0.95
 theta = numpy.pi/2
 ff = 0.3
-dx = 0.1
+dx =.1
+
 if len(sys.argv) != 4:
     print("Usage:  " + sys.argv[0] + " ff z0 theta/pi")
     exit(1)
@@ -40,6 +46,7 @@ def plot1d():
   else:
     z1 = -zmax
     r1 = (z1-z0)*numpy.tan(theta)
+
   rlen = numpy.sqrt((z1-z0)**2 + r1**2)
   z0coord = zvals*(z0-0.05)/zmax
   z1coord = zvals*(z1)/zmax
@@ -49,6 +56,7 @@ def plot1d():
   ax[4].set_title('$z_0 = %g$, $ff = %g$, $\\theta = %g$' %(z0, ff, theta))
 
   i = 0
+  ax[4].set_title('%s, $z_0 = %g$, $ff = %g$ $theta = %g\pi$' %(plots[i], z0, ff, theta/numpy.pi))
   while i < numplots:
     zi = scipy.ndimage.map_coordinates(g2[i], numpy.vstack((x,y)), order = 1)
     angline[i].set_data([z0, z1], [0, r1])
@@ -73,7 +81,7 @@ def plot():
     CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap, extend='both')
     CS.cmap.set_over('k')
     CS2.cmap.set_over('k')
-    ax[i].set_title('%s' %(plots[i]))
+    ax[i].set_title('%s, $z_0 = %g$, $ff = %g$' %(plots[i], z0, ff))
     i += 1
   plot1d()
   pylab.draw()

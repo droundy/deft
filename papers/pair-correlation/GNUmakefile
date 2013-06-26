@@ -36,8 +36,9 @@ clean:
 	rm -f arxiv/*
 	mkdir arxiv/figs
 
-ALL_FIGURES= figs/pair-correlation-2-395-5.pdf \
-	figs/dadz-3-2.pdf figs/dadz-3-3.pdf \
+ALL_FIGURES= figs/pair-correlation-2-395-0.pdf figs/pair-correlation-2-395-5.pdf \
+	figs/pair-correlation-2-395-10.pdf \
+	figs/dadz-3-2.pdf figs/dadz-3-3.pdf figs/dadz-2-2.pdf figs/dadz-2-3.pdf\
 	figs/ghs-g.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -63,8 +64,23 @@ figs/dadz-3-2.pdf: figs/plot-da_dz.py
 figs/dadz-3-3.pdf: figs/plot-da_dz.py
 	python figs/plot-da_dz.py .3 3.0
 
+figs/dadz-2-2.pdf: figs/plot-da_dz.py
+	python figs/plot-da_dz.py .2 2.0
+
+figs/dadz-2-3.pdf: figs/plot-da_dz.py
+	python figs/plot-da_dz.py .2 3.0
+
+figs/pair-correlation-2-395-0.pdf: figs/plot-mc-modified.py
+	python figs/plot-mc-modified.py .2 3.95 0.0
+
 figs/pair-correlation-2-395-5.pdf: figs/plot-mc-modified.py
 	python figs/plot-mc-modified.py .2 3.95 0.50
+
+figs/pair-correlation-2-395-10.pdf: figs/plot-mc-modified.py
+	python figs/plot-mc-modified.py .2 3.95 1.0
+
+
+
 
 
 arxiv/figs/%: figs/%

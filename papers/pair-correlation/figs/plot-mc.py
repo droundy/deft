@@ -182,7 +182,8 @@ z0_slider.on_changed(update)
 # angle slider
 angle_valinit = numpy.pi/3
 angax = pylab.axes([0.25, 0.035, 0.5, 0.025], axisbg='slategray')
-angslider = Slider(angax, 'theta', 0, numpy.pi/2, valinit = angle_valinit)
+angslider = Slider(angax, 'theta', 0, numpy.pi, valinit = 0)
+
 
 def upangle(val):
   global theta
