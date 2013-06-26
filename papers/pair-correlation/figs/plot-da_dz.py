@@ -56,12 +56,12 @@ mc = read_a1_mc();
 print able_to_read_file
 
 if (able_to_read_file == False):
-    plt.plot(arange(0,10,1), [0]*10, 'k')
-    plt.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=20)
+  plt.plot(arange(0,10,1), [0]*10, 'k')
+  plt.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=20)
 else:
-    plt.plot(arange(3.05,3.05+len(mc)*dz,dz), mc, 'k')
-    plt.xlim([3,10])
-    plt.legend(versions+['mc'], loc='best')
+  plt.plot(arange(3+dz/2,3+dz/2+len(mc)*dz,dz), mc, 'k')
+  plt.xlim([2,9])
+  plt.legend(versions+['mc'], loc='upper right')
 
 plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
 savefig(plotname)

@@ -57,8 +57,6 @@ double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid
   const double eta0 = c0/(pow(6.0, 2.0/3.0)*gs0) + 1.0/(pow(6.0, 1.0/3.0)*c0) + 1.0;
   const double c1 = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs1*gs1*gs1*gs1 - 2.0*gs1*gs1*gs1)-9.0*gs1*gs1), 1.0/3.0);
   const double eta1 = c1/(pow(6.0, 2.0/3.0)*gs1) + 1.0/(pow(6.0, 1.0/3.0)*c1) + 1.0;
-  //printf("gsigma0: %g, gsigma1: %g, eta0: %g, eta1: %g, c0: %g\n", gs0, gs1, eta0, eta1, c0);
-  //fflush(stdout);
   return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
 double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {

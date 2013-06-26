@@ -14,6 +14,7 @@ from matplotlib.widgets import Slider, RadioButtons
 colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gross']
 numplots = 4
+dx = 0.1
 z0 = 0.95
 theta = numpy.pi/2
 ff = 0.3
