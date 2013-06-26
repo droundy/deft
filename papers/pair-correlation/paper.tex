@@ -100,7 +100,8 @@ distance limit.
 The function has the form:
 
 \begin{align}
-  g(|\rr|) = 1 + g_{sigma}e^{-x_0r} + x_1g_{sigma}sin(x_2r)e^{-x_3r} -x_4g_{sigma}^2sin(x_5r)e^(-x_6r)
+  g(|\rr|) &= 1 + g_{sigma}e^{-x_0(r-\sigma)} + x_1g_{sigma}sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
+  &~~-x_4g_{\sigma}^2sin(x_5(r-\sigma))e^(-x_6(r-\sigma))
 \end{align}
 
 The finalalized form of our pair correlation function is:
