@@ -51,7 +51,7 @@ hard-sphere system an important quantity.
 
 \section{What has been done before?}
 \subsection{Gloor simple method, problematic}
-Gil-Villegas\cite{gil1997statistical} approximates the first order inverse tenpurature Helmholtz Free energy term, which involves an integral of a potential multiplied by a radial distribution function $g^{HS}(r,\eta)$, by first taking the distribution function out of the integral and evaluating it at the correct mean distance $\zeta$, according to the mean value theorem.  They then approximate the pair correlation function $g^{HS}(\zeta,\eta)$ with the correlation at contact and at a effective $\eta_{eff}$.  The $\eta_{eff}$ is found by fitting a general function form to correct energy solutions $a_1$ with depenedent variable $\eta$ and 
+Gil-Villegas\cite{gil1997statistical} approximates the first order inverse tenpurature Helmholtz Free energy term, which involves an integral of a potential multiplied by a radial distribution function $g^{HS}(r,\eta)$, by first taking the distribution function out of the integral and evaluating it at the correct mean distance $\zeta$, according to the mean value theorem.  They then approximate the pair correlation function $g^{HS}(\zeta,\eta)$ with the correlation at contact and at a effective $\eta_{eff}$.  The $\eta_{eff}$ is found by fitting a general function form to correct energy solutions $a_1$ with depenedent variable $\eta$ and
 
 
 \subsection{Fischer accurate but slow}
@@ -59,7 +59,80 @@ Gil-Villegas\cite{gil1997statistical} approximates the first order inverse tenpu
 \section{Triplet correlation function?}
 
 \section{What is our new idea?}
+We approximate the pair correlation with the average of two radial
+distribution functions, evaluated at the distance between the two
+points, that are themselves functions of our published pair
+correlation at contact $g_{sigma}$ evaluated at the two points.
 
+\begin{dmath}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+\end{dmath}
+
+In the previous approaches mentioned above, function forms of radial
+distributions (used to approximate pair correlation) were dependent
+upon independent variables $\eta$, the density, wether at single
+points or averaged over sourrounding volumes.  We can achieve more
+accuracy by using instead a function dependent upon our $g_{\sigma}$,
+which holds more information about an inhomogeneous system
+then an average $\eta$ does.  We therefore need a function form for
+our radial distribution that is dependent upon $g_{\sigma}$ and that
+will approach the correct solution in the homogeneous limit and also
+in the limit of contact distance between the two points.
+
+The demand that our solution is correct in the homogeneous limit forms
+the basis of the derivation of our radial distribtuion's function
+form. We use the well known and very successful Carnahan Starling
+equation to calculated $g_{\sigma}$ and then simple monte-carlo
+simulations to calculate values of the homogeneous radial distribution
+function at varying distance perameter $r$ (Our previously published
+$g_{\sigma}$ approaches the Carnahan Starling version in the
+homogeneous limit and it's simplest to use an analytical expression
+for this calculation).  We then construct our radial distribution
+function that has the form of an expansion of powers of $h_{\sigma} =
+g_{\sigma}-1$ and perform a least squares fit to the monte-carlo
+solution to find the needed constant perameters.  The function is
+constructed in such a way as to appoach $g_{\sigma}$ in the limit of
+contact distance between the particles.  After this process we have a
+radial distribution function that is dependent only on $g_{\sigma}$
+and that gives the correct solution in the homogeneous and contact
+distance limit.
+
+The function has the form:
+
+\begin{align}
+  g(|\rr|) = 1 + g_{sigma}e^{-x_0r} + x_1g_{sigma}sin(x_2r)e^{-x_3r} -x_4g_{sigma}^2sin(x_5r)e^(-x_6r)
+\end{align}
+
+The finalalized form of our pair correlation function is:
+
+\begin{dmath}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+\end{dmath}
+
+
+
+%% gsigma = gsigconcatenated[i] - 1
+%%         h0 = gsigma # was x[0]*gsig
+%%         f0 = numpy.exp(-x[0]*rconcatenated[i])
+%%         h1 = x[1]*gsigma
+%%         f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
+%%         h2 = -x[4]*gsigma**(2)
+%%         f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
+%%         g[i] = 1 + h0*f0 + h1*f1 + h2*f2
+%%     return g
+
+%% The homogeneoues limit $g_{sigm}$ can be calculated using the well
+%% known and very successful Carnahan Starling equation while the
+%% homogeneous limit radial distribution function can be calculated using
+%% Monte-Carlo methods.  We used these calculations in a least squares
+%% fit along the data points at increasing radial distances in order to
+%% fit the perameters of our more general pair correlation function.  Our
+%% function will therefore approach the most accurate solution possible
+%% in the homogeneous limit.  Created a function that has the form of an
+%% expansion in powers of $g_{sigma}$.  $g_{sigm}$ in the homogeneous
+%% limit can be calculated using the well known and very successful
+%% Carnahan Starling equation.  has a well known and Perameters in the
+%% expansion where fit
 \section{What does it look like (graphs that show the function itself)?}
 \subsection{Fit to radial distribution function}
 Figure~\ref{fig:radial-distribution} shows...
