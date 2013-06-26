@@ -4,6 +4,7 @@ from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
 import matplotlib
+
 matplotlib.use('Agg')
 
 import pylab, numpy, sys, random
@@ -40,13 +41,18 @@ x[9] = 3.319
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
 ff = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
-
+able_to_read_file = True
 
 
 def read_ghs(base, ff):
     mcdatafilename = "%s-0.%02d.dat" % (base, 100*ff)
+    try:
+        mcdata = numpy.loadtxt(mcdatafilename)
+    except IOError:
+        global able_to_read_file
+        able_to_read_file = False
+        return 0,0
     print 'Using', mcdatafilename, 'for filling fraction', ff
-    mcdata = numpy.loadtxt(mcdatafilename)
     r_mc = mcdata[:,0]
     n_mc = mcdata[:,1]
     ghs = n_mc/ff
@@ -60,6 +66,8 @@ gsig = [0]*len(ff)
 i = 0
 while (i < len(ff)):
     r_mc, ghs[i] = read_ghs("figs/gr", ff[i])
+    if able_to_read_file == False:
+        break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     pylab.figure(1)
     pylab.plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.2f'%ff[i])
@@ -76,6 +84,13 @@ while (i < len(ff)):
     r = (r_mc)/2 - 1 # "diameter units", shifted to x = 0 at d = 1
     i += 1
 
+if able_to_read_file == False:
+    matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+    matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+    pylab.savefig("figs/ghs-g.pdf")
+    pylab.savefig("figs/ghs-g-ghs.pdf")
+    exit(0)
+
 def dist(x):
     # function with x[i] as constants to be determined
     g = numpy.zeros_like(gsigconcatenated)
@@ -87,13 +102,14 @@ def dist(x):
         f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
         h2 = -x[4]*hsigma**(2)
         f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
-        h3 = -x[7]*hsigma**(3)
-        f3 = numpy.sin(x[8]*rconcatenated[i]) * numpy.exp(-x[9]*rconcatenated[i])
-        g[i] = 1 + h0*f0 + 0*h1*f1 + 0*h2*f2 + 0*h3*f3
+        #h3 = -x[7]*hsigma**(3)
+        #f3 = numpy.sin(x[8]*rconcatenated[i]) * numpy.exp(-x[9]*rconcatenated[i])
+        g[i] = 1 + h0*f0 + h1*f1 + h2*f2 #+ h3*f3
     return g
 
 def dist2(x):
     return dist(x) - ghsconcatenated
+
 
 ghsconcatenated = ghs[0]
 for i in range(1,len(ff)):

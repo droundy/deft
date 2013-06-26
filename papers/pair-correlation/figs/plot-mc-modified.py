@@ -15,10 +15,10 @@ colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gross']
 numplots = 4
 dx = 0.1
+able_to_read_file = True
 z0 = 0.95
 theta = numpy.pi/2
 ff = 0.3
-dx =.1
 
 if len(sys.argv) != 4:
     print("Usage:  " + sys.argv[0] + " ff z0 theta/pi")
@@ -64,6 +64,9 @@ def plot():
   while i < numplots:
     ax[i].collections = []
     g2[i] = read_walls(ff, z0, plots[i])
+    global able_to_read_file
+    if able_to_read_file == False:
+        break
 
     rmax = len(g2[i][:,0])*dx
     zmax = len(g2[i][0,:])*dx
@@ -82,16 +85,24 @@ def plot():
   pylab.draw()
 
 def read_walls(ff, z0, fun):
-  if fun == 'mc':
-    filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
-  else:
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  print 'Using', filename
-  if (os.path.isfile(filename) == False):
-    print "File does not exist."
-    sys.exit(1)
-  data = numpy.loadtxt(filename)
-  return data
+    if fun == 'mc':
+        filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
+        try:
+            data = numpy.loadtxt(filename)
+        except IOError:
+            global able_to_read_file
+            able_to_read_file = False
+            return 0
+    else:
+        filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+        try:
+            data = numpy.loadtxt(filename)
+        except IOError:
+            global able_to_read_file
+            able_to_read_file = False
+            return 0
+    print 'Using', filename
+    return data
 
 # COLORS
 cdict = {'red':  ((0.0, 0.0, 0.0),
@@ -125,6 +136,18 @@ rmax = len(g2[0][:,0])*dx
 zmax = len(g2[0][0,:])*dx
 
 print rmax, zmax
+
+if able_to_read_file == False:
+    matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+    matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+    savedfilename = "figs/pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0*100)) + "-" + str(int(10*theta/numpy.pi)) + ".pdf"
+    pylab.savefig(savedfilename)
+    exit(0)
+
+zbins = len(g2[0][0,:])
+rbins = len(g2[0][:,0])
+dr = rmax/rbins
+dz = zmax/zbins
 
 r = numpy.arange(0, rmax, dx)
 z = numpy.arange(0, zmax, dx)
@@ -172,6 +195,12 @@ ax[4].axhline(y=1, linestyle='--', color='slategray')
 
 plot()
 
+if able_to_read_file == False:
+    matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+    matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+    savedfilename = "figs/pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0*100)) + "-" + str(int(10*theta/numpy.pi)) + ".pdf"
+    pylab.savefig(savedfilename)
+    exit(0)
 
 savedfilename = "figs/pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0*100)) + "-" + str(int(10*theta/numpy.pi)) + ".pdf"
 pylab.savefig(savedfilename)
