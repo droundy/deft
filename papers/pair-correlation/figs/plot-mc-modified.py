@@ -11,14 +11,9 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.widgets import Slider, RadioButtons
 #from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-# these are the things to set
 colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gross']
 numplots = 4
-dx = 0.1
-############################
-
-
 z0 = 0.95
 theta = numpy.pi/2
 ff = 0.3
@@ -46,13 +41,13 @@ def plot1d():
   else:
     z1 = -zmax
     r1 = (z1-z0)*numpy.tan(theta)
-
   rlen = numpy.sqrt((z1-z0)**2 + r1**2)
   z0coord = zvals*(z0-0.05)/zmax
   z1coord = zvals*(z1)/zmax
   r0coord = 0
   r1coord = rvals*(r1)//rmax
   y, x = numpy.linspace(z0coord, z1coord, num), numpy.linspace(r0coord, r1coord, num)
+  ax[4].set_title('$z_0 = %g$, $ff = %g$, $\\theta = %g$' %(z0, ff, theta))
 
   i = 0
   ax[4].set_title('%s, $z_0 = %g$, $ff = %g$ $theta = %g\pi$' %(plots[i], z0, ff, theta/numpy.pi))
@@ -84,10 +79,6 @@ def plot():
     i += 1
   plot1d()
   pylab.draw()
-
-
-zmax = 20
-rmax = 10
 
 def read_walls(ff, z0, fun):
   if fun == 'mc':
@@ -129,13 +120,13 @@ levels = numpy.linspace(0, 4, 49)
 g2 = [0]*numplots
 g2[0] = read_walls(ff, z0, 'mc')
 
-zbins = len(g2[0][0,:])
-rbins = len(g2[0][:,0])
-dr = rmax/rbins
-dz = zmax/zbins
+rmax = len(g2[0][:,0])*dx
+zmax = len(g2[0][0,:])*dx
 
-r = numpy.arange(0, rmax, dr)
-z = numpy.arange(0, zmax, dz)
+print rmax, zmax
+
+r = numpy.arange(0, rmax, dx)
+z = numpy.arange(0, zmax, dx)
 Z, R = numpy.meshgrid(z, r)
 
 #fig = pylab.figure(1)
@@ -158,6 +149,8 @@ ax[4] = pylab.axes([left+hspace+width, top-height, width*2+hspace, height])
 i = 0
 while i < numplots:
   ax[i].set_aspect('equal')
+  ax[i].set_xlim(0, 20)
+  ax[i].set_ylim(-10,10)
   i += 1
 
 num = 1000

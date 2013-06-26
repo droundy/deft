@@ -17,6 +17,9 @@ plots = ['mc', 'this-work', 'fischer', 'gross']
 numplots = 4
 dx = 0.1
 ############################
+z0 = 0.05
+theta = 0
+ff = 0.3
 
 def plot1d():
   global g2, ax
@@ -68,14 +71,11 @@ def plot():
   plot1d()
   pylab.draw()
 
-ff = 0.3
-z0 = 0.05
-
 def read_walls(ff, z0, fun):
   if fun == 'mc':
     filename = "mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
   else:
-    filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f-%1.2f.dat" %(fun, ff, z0, dx)
+    filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   print 'Using', filename
   if (os.path.isfile(filename) == False):
     print "File does not exist."
@@ -110,7 +110,6 @@ levels = numpy.linspace(0, 4, 49)
 
 g2 = [0]*numplots
 g2[0] = read_walls(ff, z0, 'mc')
-theta = 0
 
 rmax = len(g2[0][:,0])*dx
 zmax = len(g2[0][0,:])*dx
