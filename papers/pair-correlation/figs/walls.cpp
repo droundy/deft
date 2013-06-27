@@ -48,11 +48,16 @@ double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &n
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
 }
-double pairdist_nA(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  return (radial_distribution(gsigma(r0), r)/nA(r0) + radial_distribution(gsigma(r1), r)
-          /nA(r1))/(1/nA(r0) + 1/nA(r1));
+  const double gs0 = gsigma(r0);
+  const double gs1 = gsigma(r1);
+  const double c0 = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs0*gs0*gs0*gs0 - 2.0*gs0*gs0*gs0)-9.0*gs0*gs0), 1.0/3.0);
+  const double eta0 = c0/(pow(6.0, 2.0/3.0)*gs0) + 1.0/(pow(6.0, 1.0/3.0)*c0) + 1.0;
+  const double c1 = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs1*gs1*gs1*gs1 - 2.0*gs1*gs1*gs1)-9.0*gs1*gs1), 1.0/3.0);
+  const double eta1 = c1/(pow(6.0, 2.0/3.0)*gs1) + 1.0/(pow(6.0, 1.0/3.0)*c1) + 1.0;
+  return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
 double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
@@ -73,11 +78,13 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 
 const char *fun[] = {
   "this-work",
+  "this-work-mc",
   "gross",
   "fischer"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
+  pairdist_this_work_mc,
   pairdist_gross,
   pairdist_fischer
 };
@@ -91,20 +98,20 @@ const double spacing = 3; // space on each side
 
 double radial_distribution(double gsigma, double r) {
   // Constants determined by fit to monte-carlo data by plot-ghs.py
-  // const double a0 = 6.203,
-  //              a1 = .4154,
-  //              a2 = 6.449,
-  //              a3 = 2.061,
-  //              a4 = .3287,
-  //              a5 = 4.555,
-  //              a6 = 3.312;
-  const double a0 = 10.117,
-               a1 = 0.309,
-               a2 = 7.378,
-               a3 = 1.569,
-               a4 = 0.098,
-               a5 = 6.053,
-               a6 = 2.858;
+  const double a0 = 6.203,
+               a1 = .4154,
+               a2 = 6.449,
+               a3 = 2.061,
+               a4 = .3287,
+               a5 = 4.555,
+               a6 = 3.312;
+  // const double a0 = 10.117,
+  //              a1 = 0.309,
+  //              a2 = 7.378,
+  //              a3 = 1.569,
+  //              a4 = 0.098,
+  //              a5 = 6.053,
+  //              a6 = 2.858;
   double d = r/2 - 1;
   if (d < 0)
     return 0;
