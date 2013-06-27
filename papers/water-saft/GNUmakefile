@@ -1,5 +1,5 @@
 .SUFFIXES: .tex .dvi .ps .bib .bbl .pdf .fig .eps .aux .jpg .png .svg \
-		.gp .mf .2602gf .pl .xgr
+		.gp .py .mf .2602gf .pl .xgr
 .tex.pdf:
 	pdflatex $<
 .ps.pdf:
@@ -23,6 +23,8 @@
 
 .gp.eps:
 	gnuplot $<
+.py.eps:
+	python $<
 .xgr.eps:
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
@@ -39,21 +41,22 @@ ALL_FIGURES=\
 	figs/pressure-with-isotherms-truncated.gp\
 	figs/surface-tension.gp\
 	figs/energy-vs-diameter.gp\
-	figs/density-single-rod.gp\
 	figs/density-rods-in-water.gp\
 	figs/rods-energy-vs-distance.gp\
 	figs/four-rods-energy-vs-distance.gp\
 	figs/density-four-rods.gp\
 	figs/sphere-energy-vs-diameter.gp\
 	figs/density-sphere.gp\
-	figs/single-rod-X-plot.gp
+	figs/density-compare.py\
+	figs/single-rod-X-plot.py
 
 
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.gp,%.eps, \
 						$(patsubst %.xgr,%.eps, \
-						$(patsubst %.pl,%.eps, $(ALL_FIGURES)))))
+						$(patsubst %.py,%.eps, \
+						$(patsubst %.pl,%.eps, $(ALL_FIGURES))))))
 FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
 ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%, \
@@ -87,11 +90,14 @@ figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.4nm.dat \
 	figs/four-rods-in-water-00.8nm.dat figs/four-rods-in-water-01.2nm.dat \
 	figs/four-rods-in-water-01.6nm.dat figs/four-rods-in-water-02.0nm.dat \
 	figs/four-rods-in-water-02.4nm.dat
-figs/density-single-rod.eps: figs/single-rod-slice-00.1.dat \
+figs/density-compare.eps: figs/single-rod-slice-00.1.dat \
 		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
 		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
 		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
-		figs/single-rods-calculated-density.dat
+		figs/hughes-single-rod-slice-00.1.dat \
+		figs/hughes-single-rod-slice-00.3.dat figs/hughes-single-rod-slice-00.6.dat \
+		figs/hughes-single-rod-slice-01.0.dat figs/hughes-single-rod-slice-01.6.dat \
+		figs/hughes-single-rod-slice-02.0.dat figs/hughes-single-rod-slice-00.6.dat
 figs/single-rod-X-plot.eps: figs/single-rod-slice-00.1.dat \
 		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
 		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
@@ -106,6 +112,9 @@ figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@
 figs/single-rods-calculated-density.dat: figs/density_calc.py figs/single-rod-in-water.dat
 	python figs/density_calc.py
+hughesSingleRodEnergies := $(wildcard figs/hughes-single-rod-*nm-energy.dat)
+figs/hughes-single-rod-in-water.dat: $(hughesSingleRodEnergies)
+	cat $^ > $@
 
 figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
 sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)

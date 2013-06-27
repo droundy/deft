@@ -20,6 +20,13 @@
 \newcommand{\xx}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
+\newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
+\newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
+\newcommand\epsilonassoc{\ensuremath{\epsilon_\textit{a}}}
+\newcommand\kappaassoc{\ensuremath{\kappa_\textit{a}}}
+\newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
+\newcommand\lscale{\ensuremath{s_d}}
+
 % fixme is intended to prioritize stuff that needs fixing.
 \newcommand{\fixme}[1]{\textcolor{red}{[\emph{#1}]}}
 
@@ -73,8 +80,6 @@ theory of hydrophobicity that can readily describe interaction of
 water with arbitrary external potentials---such as potentials
 describing strong interactions with solutes or surfaces.
 
-\subsection{Statistical Associating Fluid Theory}
-
 Statistical Associating Fluid Theory (SAFT) is a theory describing
 complex fluids in which hydrogen bonding plays a significant
 role\cite{chapman1989saft, muller2001molecular}.  SAFT is used to
@@ -85,35 +90,89 @@ based on Wertheim's first-order thermodynamic perturbation theory
   wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
 account for strong associative interactions between molecules.
 
-The SAFT Helmholtz free energy is composed of five terms:
-\begin{equation} \label{eq:SAFT-free-energy}
-  F = F_\textit{id} + F_\textit{hs} + F_\textit{disp} +
-  F_\textit{assoc} + F_\textit{chain},
-\end{equation}
-where the first three terms---ideal gas, hard-sphere repulsion and
-dispersion---encompass the \emph{monomer} contribution
-to the free energy, the fourth is the \emph{association} free energy,
-describing hydrogen bonds, and the final term is the chain formation
-energy for fluids that are chain polymers. In our model, we use a hard
-sphere reference fluid which renders $F_\textit{chain}$ irrelivant for
-our functional.
+\fixme{Talk about Wertheim's TPT}
 
 In a recent paper \cite{hughes2013classical}, Hughes \emph{et al}
-constructed a classical density functional theory for water which used
-Clark \emph{et al}'s \cite{clark2006developing} five fitting
-paramenters for an optimal cDFT for water.  In addition, they
-introduced a parameter for the length scale over which the dispersion
-interaction is correlated
+constructed a classical density functional theory for water which uses
+SAFT as a basis for their free energy functional.  Hughes employed Clark
+\emph{et al}'s \cite{clark2006developing} five fitting parameters for
+an optimal cDFT for water and, in addition, introduces a parameter for
+the length scale over which the dispersion interaction is correlated.
+Clark found that the four association site model works best to
+describe water, which is physically accurate since each water molecule
+has four hydrogen bonding sites.
+
+Schulte \emph{et al}\cite{schulte2012using} derived two expressions
+for the correlation function at contact for inhomogeneous fluids based
+on the White Bear version of fundamental measure theory (FMT). One
+expression was labeled as ``symmetric'' and found the average number
+of spheres touching a point $\rr$. The other expression, labeled
+``assymetric,'' sets $\rr$ at the center of a sphere, and finds the
+average spheres touching the solvent accessable surface.  They found
+the asymmetric correlation function, $g_{\sigma}^A$, to agree
+closely with Monte Carlo simulation.
 
 \section{Method}
 
-Schulte \emph{et al}\cite{schulte2012using} derived expressions for
-the correlation fucntoin at contact based on the White Bear version of
-FMT. They found their $g_{\sigma}^A$ to agree with Monte Carlo
-simulation than Yu and Wu's which we was used in Hughes \emph{et al}'s
-paper.  We use Hughs \emph{et al}'s functional and replace the
-correlation with Schulte \emph{et al}'s, which we will call
-$g_{\sigma}$. \fixme{expand this}.
+We modify Hughes \emph{et al}'s method of creating a classical DFT
+based on SAFT using Clark's four site model with five fitting
+parameters and the added fitting parameter for the correlation
+distance of the dispersion interaction.  Hughe's association free
+energy term is modified to use Schulte's $g_{\sigma}^A$ rather than Yu
+and Wu's.  The association free energy for our four-site model has the
+form \fixme{I copy/pasted and modified these equations, but they still
+  require a number of other equations to come before.  Maybe only show
+  the $g_\sigma^A$?}
+\begin{align}
+  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) \zeta(\xx)
+  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx,
+\end{align}
+where the factor of $4$ comes from the four association sites per
+molecule, the functional $X$ is the fraction of association sites
+\emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
+measure of the density inhomogeneity.
+\begin{align}
+  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{n_2^2}.
+\end{align}
+%
+The fraction $X$ is determined by the quadratic equation
+\begin{align}
+  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)
+      \Delta(\xx)} - 1}
+  {4 n_0(\xx)\zeta(\xx)
+    \Delta(\xx)}, \label{eq:X}
+\end{align}a
+where the functional $\Delta$ is a measure of hydrogen-bonding
+probability, given by
+\begin{align}
+  \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
+  \left(e^{-\beta\epsilonassoc} - 1\right) \\
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{A}_\sigma(\xx) +
+  \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
+  \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW},
+\end{align}
+% This is equation 77 of gil-villegas-1997-SAFT-VR
+where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
+contact for a hard-sphere fluid with a square-well dispersion
+potential, and $a_1$ and $a_2$ are the two terms in the dispersion
+free energy.  The correlation function $g^\textit{SW}_\sigma$ is
+written as a perturbative correction to the hard-sphere fluid
+correlation function $g^\textit{A}_\sigma$, for which we use the
+functional of Schulte \emph{et al}\cite{schulte2012using}:
+\begin{align}
+  g_\sigma^{A}(\rr) &= \frac{1}{n(\rr)n_A(\rr)}\frac{1}{k_B T 4 \pi
+    (2r)^2}\frac{\delta F_{hs}}{\delta R(\rr)} 
+\end{align}
+where the $n_A(\rr)$ is the density of spheres that are touching a
+sphere that is located at point $\rr$.\fixme{The equation for
+$g_\sigma^A$ requires finidng convolutions of local derivative of
+the free energy, aking this formulation computationally more
+expensive than the free energy itself.}
+
+We used Clark's five empirical parameters, and fit the calculated
+surface tension to experimental surface tension at ambient
+conditions.  This fit was found by choosing the value of the
+$\lscale$, which we found to be 0.454 for this new functional.
 
 \begin{figure}
 \begin{center}
@@ -126,18 +185,35 @@ $g_{\sigma}$. \fixme{expand this}.
 \label{fig:surface-tension}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/density-compare}
+\end{center}
+\caption{ Density profiles for single rods of different
+  radii from old and new functionals.}
+\label{fig:density-single-rod}
+\end{figure}  
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=3.5in]{figs/single-rod-X-plot}
 \end{center}
-\caption{ The average number of hydrogen bonding per molecule at
-  distances from the center of a hydrophobic rod for various
-  radii. The solid lines are the results from using the older
-  $g_{\sigma}$, while the dotted lines are from Schulte \emph{et al}'s
-  asymmetric $g_{\sigma}$.}
+\caption{ The average number of hydrogen bonds per molecule at
+  distances from the center of hydrophobic rods of various
+  radii. The solid lines are the results from using the assymetric
+  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}$.}
 \label{fig:single-rod-X}
 \end{figure}
+
+\section{Hydrogen bonding near a hydrophobic rod}
+
+We use X from eq. \ref{eq:X} above to find the average number of
+hydrogen bonds per molecule as a function of distance for different
+radius hydrophobic rods.  Figure \ref{fig:single-rod-X} compares our
+new functional with Hughes's functional, \fixme{Physical description
+  for why it looks that way}
+
+\section{Conclusion}
 
 \clearpage
 
@@ -471,12 +547,6 @@ average density at contact distance. For our functional for water, we
 use the hard-sphere diameter of 3.0342~\AA, which was found to be
 optimal by Clark \emph{et al}.\cite{clark2006developing}
 
-\newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
-\newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
-\newcommand\epsilonassoc{\ensuremath{\epsilon_\textit{a}}}
-\newcommand\kappaassoc{\ensuremath{\kappa_\textit{a}}}
-\newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
-\newcommand\lscale{\ensuremath{s_d}}
 \subsection{Dispersion free energy}
 The dispersion free energy includes the van der Waals attraction and
 any orientation-independent interactions. We use a dispersion term
@@ -667,17 +737,6 @@ the inset of Fig.~\ref{fig:energy-vs-diameter}, for rods with very
 small radius (less than about 0.5~\AA) the excess chemical potential
 is proportional to volume, satisfying Equation~\ref{contactvaluethm},
 which results from the contact-value theorem.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/density-single-rod}
-\end{center}
-\caption{ Density profiles for single rods of different radii. The dotted line
-represents the saturated liquid density and the points represent the
-expected contact density derived from the contact value theorem and
-calculated free energy data.}
-\label{fig:density-single-rod}
-\end{figure}
 
 We show in Figure~\ref{fig:density-single-rod} density profiles for
 different radii rods, as well as the prediction for the contact value
