@@ -12,6 +12,7 @@ import math
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gross']
+plots_dft = ['this-work', 'fischer', 'gross']
 dx = 0.1
 ############################
 
@@ -52,16 +53,32 @@ def read_walls(ff, z0, fun):
     print 'Using', filename
     return data
 
+
+def read_walls_path(ff,z0,fun):
+    filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+    try:
+        data = numpy.loadtxt(filename)
+    except IOError:
+        global able_to_read_file
+        able_to_read_file = False
+        return 0
+    print 'Using', filename
+    return data
+
+
 g2 = [0]*len(plots)
+g2_path = [0]*(len(plots_dft))
 
 num = 100
 
 line = [0]*4
+line_path = [0]*3
 fig = plt.figure()
-ax = fig.add_subplot(1,1,1)
+ax = [0]*2
+ax[0] = fig.add_subplot(2,2,1)
+ax[1] = fig.add_subplot(2,2,2)
 
-
-def plot1d():
+def plot():
     global g2, ax, line
     g2[0] = read_walls(ff, z0, 'mc')
     for i in numpy.arange(len(g2)):
@@ -106,13 +123,33 @@ def plot1d():
         z_array = z_array + max(theta)
         x_axis = numpy.concatenate((r_array,theta,z_array))
         y_axis = numpy.concatenate((g2_r_array,g2_of_theta,g2_z_array))
-        line[i], = ax.plot(x_axis,y_axis)
-        ax.set_ylim([0,2.5])
-        ax.set_xlim([1,18])
+        line[i], = ax[0].plot(x_axis,y_axis)
+        ax[0].set_ylim([0,2.5])
+        ax[0].set_xlim([1,18])
 
 
-plot1d()
-ax.legend(line,plots,loc='upper right')
+
+def plot_dft():
+    global g2_path, ax, line
+    for i in numpy.arange(len(g2_path)):
+        print i
+        g2_path[i] = read_walls_path(ff, z0, plots_dft[i])
+        if able_to_read_file == False:
+            matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+            matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+            savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
+            pylab.savefig(savedfilename)
+            exit(0)
+        x_axis = g2_path[i][:,0]
+        y_axis = g2_path[i][:,1]
+        line_path[i], = ax[1].plot(x_axis,y_axis)
+        ax[1].set_ylim([0,2.5])
+        ax[1].set_xlim([1,18])
+
+plot()
+plot_dft()
+ax[0].legend(line,plots,bbox_to_anchor=(0., 1.3, 1.5, .102))
+ax[1].legend(line_path,plots_dft,bbox_to_anchor=(0., 1.3, 1.5, .102))
 savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
 fig.savefig(savedfilename)
 fig.show()
