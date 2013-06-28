@@ -38,7 +38,9 @@ Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
-bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
+bool flat_div = false; // the divisions will be equal and will divide from z wall to z wall
+bool triplet = false; // whether to do the triplet-correlation function, in which case will
+                      // fix a sphere at the origin and use spherical coordinates
 
 bool periodic[3] = {false, false, false};
 const double dxmin = 0.1;
@@ -49,7 +51,6 @@ int main(int argc, char *argv[]){
     printf("usage:  %s Nspheres iterations*N uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
-
   double maxrad = 0;
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
@@ -109,6 +110,9 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
+    } else if (strcmp(argv[a],"triplet") == 0) {
+      triplet = true;
+      a -=1;
     } else {
       printf("Bad argument:  %s\n", argv[a]);
       return 1;
@@ -137,9 +141,12 @@ int main(int argc, char *argv[]){
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  long *histogram = new long[z0bins*rbins*zbins]();
-  long *da_dv_histogram = new long[a1_rbins*a1_zbins]();
-  long *density_histogram = new long[zbins]();
+  const int num_elements = triplet ? rbins*rbins*rbins : z0bins*rbins*zbins;
+  const int a1_num_elements = triplet ? a1_rbins*a1_rbins : a1_rbins*a1_zbins;
+  const int num_density_elements = triplet ? rbins : zbins;
+  long *histogram = new long[num_elements]();
+  long *da_dz_histogram = new long[a1_num_elements]();
+  long *density_histogram = new long[num_density_elements]();
   long numinhistogram = 0;
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
@@ -340,47 +347,64 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          // saving the da_dv data
-          char *da_dv_filename = new char[1024];
-          sprintf(da_dv_filename, "%s-a1.dat", outfilename);
-          FILE *da_dv_out = fopen((const char *)da_dv_filename, "w");
+          // saving the da_dz data
+          char *da_dz_filename = new char[1024];
+          sprintf(da_dz_filename, "%s-a1.dat", outfilename);
+          FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
           for (int i=0; i<a1_rbins; i++) {
-            for (int k=0; k<a1_zbins; k++) {
-              const double a1r = (i+1)*a1_dr;
-              const double slice_volume = lenx*leny*a1_dz;
-              const double da_dv = double(da_dv_histogram[i*a1_zbins + k]*N)/
+            const int kmax = triplet ? a1_rbins : a1_zbins;
+            for (int k=0; k<kmax; k++) {
+              const double a1_r01 = (i+1)*a1_dr;
+              const double a1_r0_max = (k+1)*a1_dr;
+              const double a1_r0_min = k*a1_dr;
+              const double slice_volume = triplet ?
+                4.0/3.0*M_PI*(a1_r0_max*a1_r0_max*a1_r0_max - a1_r0_min*a1_r0_min*a1_r0_min):
+                lenx*leny*a1_dz;
+              const double da_dz = double(da_dz_histogram[i*kmax + k]*N)/
                 slice_volume/a1_dr/double(workingmoves)/2.0;
-              fprintf(da_dv_out, "%g\t", da_dv);
+              fprintf(da_dz_out, "%g\t", da_dz);
             }
-            fprintf(da_dv_out, "\n");
+            fprintf(da_dz_out, "\n");
           }
-          fclose(da_dv_out);
+          fclose(da_dz_out);
           // saving the pair distribution data
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
-          for (int l=0; l<z0bins; l++) {
-            const double z0coord = l*lenz/zbins + dz/2;
-            sprintf(finalfilename, "%s-%1.2f.dat", outfilename, z0coord);
+          const int lmax = triplet ? rbins : z0bins;
+          // in the pair case the loops, and indices, go z0, r1, z1
+          // in the triplet case, they go r0, r01, r1
+          for (int l=0; l<lmax; l++) {
+            const double filename_coord = triplet ? l*lenx/rbins + dr/2 : l*lenz/zbins + dz/2;
+            sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
-            const double z0density = double(density_histogram[l]*N)
-              /double(workingmoves)/lenx/leny/dz;
-            fprintf(densityout, "%g\t%g\n", z0coord, z0density);
+            const double r0min = l*dr;
+            const double r0max = (l+1)*dr;
+            const double shell0_volume = triplet ?
+              4.0/3.0*M_PI*(r0max*r0max*r0max - r0min*r0min*r0min) : lenx*leny*dz;
+            const double density0 = double(density_histogram[l]*N)
+              /double(workingmoves)/shell0_volume;
+            fprintf(densityout, "%g\t%g\n", filename_coord, density0);
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
-              const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
-              for (int k=0; k<zbins; k++) {
-                const double z1density = double(density_histogram[k]*N)
-                  /double(workingmoves)/lenx/leny/dz;
-                const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
+              const double bin1_volume = triplet ?
+                4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min) :
+                M_PI*(r1max*r1max-r1min*r1min)*dz;
+              const int kmax = triplet ? rbins : zbins;
+              for (int k=0; k<kmax; k++) {
+                const double shell1_volume = triplet ?
+                  4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min) : lenx*leny*dz;
+                const double density1 = double(density_histogram[k]*N)
+                  /double(workingmoves)/shell1_volume;
+                const double probability = double(histogram[l*rbins*kmax + i*kmax + k])
                   /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
-                const double n2 = probability/bin1_volume/dz/lenx/leny;
-                const double g = n2/z0density/z1density;
+                const double n2 = probability/bin1_volume/shell0_volume;
+                const double g = n2/density0/density1;
                 fprintf(out, "%g\t", g);
               }
               fprintf(out, "\n");
@@ -389,7 +413,7 @@ int main(int argc, char *argv[]){
           }
           fclose(densityout);
           delete[] densityfilename;
-          delete[] da_dv_filename;
+          delete[] da_dz_filename;
         }
         fflush(stdout);
       }
@@ -451,9 +475,13 @@ int main(int argc, char *argv[]){
         // reflect = +/-1, used to reflect everything if you're past halfway through the box
         // except for the density
         const int z0 = int((reflect*spheres[i].z() + lenz/2)/dz);
-        const int a1_z = int((reflect*spheres[i].z() + lenz/2)/a1_dz);
         const int z0_unreflected = int((spheres[i].z() + lenz/2)/dz);
-        density_histogram[z0_unreflected]++;
+        const int a1_z = int((reflect*spheres[i].z() + lenz/2)/a1_dz);
+
+        const int sph_r0 = int(distXYZ(spheres[i], Vector3d(0,0,0))/dr);
+        const int sph_a1_r0 = int(distXYZ(spheres[i], Vector3d(0,0,0))/a1_dr);
+        const int density_index = triplet ? sph_r0 : z0_unreflected;
+        density_histogram[density_index]++;
         //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
 
         for (int k=0; k<N; k++) {
@@ -461,11 +489,20 @@ int main(int argc, char *argv[]){
             const int z1 = int((reflect*spheres[k].z() + lenz/2)/dz);
             const double rdist = distXY(spheres[k], spheres[i]);
             const int r1 = int(rdist/dr);
-            const int a1_r = int(distXYZ(spheres[k], spheres[i])/a1_dr);
-            if (r1 < rbins) // ignore data past outermost complete cylindrical shell
-              histogram[z0*rbins*zbins + r1*zbins + z1] ++;
-            if (a1_r < a1_rbins)
-              da_dv_histogram[a1_r*a1_zbins + a1_z] ++;
+            const int a1_r01 = int(distXYZ(spheres[k], spheres[i])/a1_dr);
+
+            const int sph_r1 = int(distXYZ(spheres[k], Vector3d(0,0,0))/dr);
+            const int r01 = int(distXYZ(spheres[k], spheres[i])/dr);
+            if (r1 < rbins) { // ignore data past outermost complete cylindrical shell
+              const int index = triplet ? sph_r0*rbins*rbins + r01*rbins + sph_r1
+                                        : z0*rbins*zbins + r1*zbins + z1;
+              histogram[index] ++;
+            }
+            if (a1_r01 < a1_rbins) {
+              const int a1_index = triplet ? a1_r01*a1_rbins + sph_a1_r0
+                                           : a1_r01*a1_zbins + a1_z;
+              da_dz_histogram[a1_index] ++;
+            }
           }
         }
       }
@@ -516,7 +553,7 @@ int main(int argc, char *argv[]){
   delete[] max_move_counter;
   delete[] move_counter;
   delete[] histogram;
-  delete[] da_dv_histogram;
+  delete[] da_dz_histogram;
   delete[] density_histogram;
   delete[] finalfilename;
   fflush(stdout);
