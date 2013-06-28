@@ -286,6 +286,52 @@ void run_walls(double eta, const char *name, Functional fhs) {
            strerror(errno));
     exit(1); // fail immediately with error code
   }
+  char *plotname_path = new char[1024];
+  for (int version = 0; version < numplots; version++) {
+    double z0 = 3.05;
+    sprintf(plotname_path,
+            "papers/pair-correlation/figs/walls/walls%s-path-%s-pair-%04.2f-%1.2f.dat",
+            name, fun[version], eta, z0-3);
+    FILE *out_path = fopen(plotname_path, "w");
+    if (!out_path) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_path);
+      return;
+    }
+    double radius_path = 2.2; //this is the value of radius of the
+                              //particle as it moves around the
+                              //contact sphere on its path
+    int num = 100; //This is the same num that is in plot-path.py,
+                  //splits up the theta part of path just like there
+    const Cartesian r0(0,0,z0);
+    double g2_path;
+    double x_path;
+    for (int i=0; i<int((10.0-radius_path)/dx+0.5) ;i++){
+      x_path = i*dx;
+      const Cartesian r1(10.0-x_path,0,z0);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    for (int i=0; i<num ;i++){
+      double theta = i*M_PI/num/2.0;
+      x_path = i*M_PI/num/2.0 + 8.0;
+      const Cartesian r1(radius_path*cos(theta),0,z0+radius_path*sin(theta));
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      printf("%g\t%g\n",x_path,g2_path);
+      fflush(stdout);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    for (int i=0; i<int(8.0/dx+0.5);i++){
+      double r1z = i*dx;
+      x_path = i*dx + M_PI/2.0 + 8.0;
+      const Cartesian r1(0,0,r1z+radius_path+z0);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      printf("%g\t%g\n",x_path,g2_path);
+      fflush(stdout);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    fclose(out_path);
+  }
+
   // here you choose the values of z0 to use
   //dx is set at beggining of file
   for (double z0 = 3.05; z0 < 13; z0 += dx) {
