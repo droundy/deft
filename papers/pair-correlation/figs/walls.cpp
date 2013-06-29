@@ -37,6 +37,8 @@ const double zmax = 20;
 const double xmax = 10;
 const double dx = 0.1;
 
+const double dz = 0.01;
+
 double mc_r_step;
 double num_eta = 13.0;
 double eta_step = 0.65/num_eta;
@@ -391,7 +393,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
         return;
       }
       delete[] plotname_a;
-      for (double z0 = 2; z0 < 13; z0 += dx) {
+      for (double z0 = 2; z0 < 13; z0 += dz) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);

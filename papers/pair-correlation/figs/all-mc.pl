@@ -9,23 +9,23 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/pair-monte-carlo.cpp"));
 
 system "make monte-carlo";
 
-my $iters  = 999999999999;
+my $iters  = 9999999999999;
 my $acc = 0.001;
 
 my $dd;
-# foreach $dd ([20,193, 0.1], [20,390, 0.2], [20, 589, 0.3], [20, 790, 0.4], [20, 990, 0.5]) {
-foreach $dd ([30,660, 0.1], [30,1335, 0.2], [30, 2015, 0.3], [30, 2703, 0.4], [30, 3387, 0.5]) {
+foreach $dd ([30,656, 0.1], [30,1327, 0.2], [30, 2009, 0.3], [30, 2700, 0.4], [30, 3379, 0.5]) {
     my $len = sprintf("%02.0f", $$dd[0]);
     my $N = sprintf("%03.0f", $$dd[1]);
     my $ff = sprintf("%02.1f", $$dd[2]);
 
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = sprintf "%.0f", 0.025*($N) + 30; # It's a very hokey guess
+    my $memuse = sprintf "%.0f", 0.04*($N) + 50; # It's a very hokey guess
 
     my $scriptname = "$dir/wallsMC-pair-$len-$N.tmp.sh";
 
+    my $da_dz_outfilename = "$dir/mc/a1/wallsMC-a1-pair-$ff";
     my $outfilename = "$dir/mc/wallsMC-pair-$ff";
-    my $command = "./pair-monte-carlo $N $iters $acc $outfilename periodxy $len wallz $len flatdiv";
+    my $command = "./pair-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxy $len wallz $len flatdiv";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
