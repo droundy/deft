@@ -367,7 +367,7 @@ int main(int argc, char *argv[]){
           char *da_dz_filename = new char[1024];
           for (int i=0; i<a1_rbins; i++) {
             const double da_dz_delta_r = i*a1_dr + a1_dr/2;
-            sprintf(da_dz_filename, "%s-$1.3f.dat", da_dz_outfilename);
+            sprintf(da_dz_filename, "%s-%1.3f.dat", da_dz_outfilename, da_dz_delta_r);
             FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
 
             const int kmax = triplet ? a1_rbins : a1_zbins;
