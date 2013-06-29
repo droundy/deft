@@ -13,7 +13,7 @@ from matplotlib.widgets import Slider, RadioButtons
 
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
-plots = ['mc', 'this-work', 'fischer', 'gross']
+plots = ['mc', 'this-work', 'fischer', 'gloor']
 numplots = 4
 dx = 0.1
 ############################

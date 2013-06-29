@@ -59,13 +59,13 @@ figs/ghs-g.pdf: figs/plot-ghs.py
 	python figs/plot-ghs.py
 
 figs/dadz-3-2.pdf: figs/plot-da_dz.py
-	python figs/plot-da_dz.py .3 2.0
+	python figs/plot-da_dz.py .3 2.01
 
 figs/dadz-3-3.pdf: figs/plot-da_dz.py
 	python figs/plot-da_dz.py .3 3.0
 
 figs/dadz-2-2.pdf: figs/plot-da_dz.py
-	python figs/plot-da_dz.py .2 2.0
+	python figs/plot-da_dz.py .2 2.01
 
 figs/dadz-2-3.pdf: figs/plot-da_dz.py
 	python figs/plot-da_dz.py .2 3.0

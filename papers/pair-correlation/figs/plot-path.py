@@ -11,16 +11,13 @@ import math
 
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
-plots = ['mc', 'this-work', 'fischer', 'gross']
-plots_dft = ['this-work', 'fischer', 'gross']
+plots = ['mc', 'this-work', 'fischer', 'gloor']
+plots_dft = ['mc', 'this-work', 'fischer', 'gloor']
 dx = 0.1
 ############################
 
 able_to_read_file = True
-
 z0 = 0.05
-ff = 0.3
-dx =.1
 
 #Careful there may be a difference between mc and other with these
 zmax = 20
@@ -34,34 +31,47 @@ ff = float(sys.argv[1])
 
 
 def read_walls(ff, z0, fun):
+    global able_to_read_file
     if fun == 'mc':
         filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
         try:
             data = numpy.loadtxt(filename)
         except IOError:
-            global able_to_read_file
             able_to_read_file = False
+            print "File not found: ", filename
             return 0
     else:
         filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
         try:
             data = numpy.loadtxt(filename)
         except IOError:
-            global able_to_read_file
             able_to_read_file = False
+            print "File not found: ", filename
             return 0
     print 'Using', filename
     return data
 
 
 def read_walls_path(ff,z0,fun):
+  global able_to_read_file
+  if fun == 'mc':
+    filename = "figs/mc/wallsMC-pair-%1.1f-path.dat" % ff
+    try:
+      data = numpy.loadtxt(filename)
+    except IOError:
+      able_to_read_file = False
+      print "File not found: ", filename
+      return 0
+    print 'Using', filename
+    return data[:,0:2]
+  else:
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
     try:
-        data = numpy.loadtxt(filename)
+      data = numpy.loadtxt(filename)
     except IOError:
-        global able_to_read_file
-        able_to_read_file = False
-        return 0
+      able_to_read_file = False
+      print "File not found: ", filename
+      return 0
     print 'Using', filename
     return data
 
@@ -71,8 +81,8 @@ g2_path = [0]*(len(plots_dft))
 
 num = 100
 
-line = [0]*4
-line_path = [0]*3
+line = [0]*len(plots)
+line_path = [0]*len(plots_dft)
 fig = plt.figure()
 ax = [0]*2
 ax[0] = fig.add_subplot(2,2,1)
@@ -152,5 +162,5 @@ ax[0].legend(line,plots,bbox_to_anchor=(0., 1.3, 1.5, .102))
 ax[1].legend(line_path,plots_dft,bbox_to_anchor=(0., 1.3, 1.5, .102))
 savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
 fig.savefig(savedfilename)
-fig.show()
+pylab.show()
 

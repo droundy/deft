@@ -12,7 +12,7 @@ from matplotlib.widgets import Slider, RadioButtons
 #from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 colors = ['k', 'b', 'r', 'g']
-plots = ['mc', 'this-work', 'fischer', 'gross']
+plots = ['mc', 'this-work', 'fischer', 'gloor']
 numplots = 4
 dx = 0.1
 able_to_read_file = True
