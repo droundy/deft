@@ -533,20 +533,6 @@ int main(int argc, char *argv[]){
     Vector3d temp = move(spheres[j%N],scale);
     count++;
 
-    if(overlap(spheres, temp, N, R, j%N)){
-      if (scale > 0.001 && false) {
-        scale = scale/sqrt(1.02);
-        //printf("Reducing scale to %g\n", scale);
-      }
-      move_counter[j%N]++;
-      if(move_counter[j%N] > max_move_counter[j%N]){
-        max_move_counter[j%N] = move_counter[j%N];
-      }
-      continue;
-    }
-    move_counter[j%N] = 0;
-    spheres[j%N] = temp;
-    workingmoves++;
     // only write out the sphere positions after they've all had a
     // chance to move
     // positions are converted from coordinates to matrix indices,
@@ -621,6 +607,20 @@ int main(int argc, char *argv[]){
         }
       }
     }
+    if(overlap(spheres, temp, N, R, j%N)){
+      if (scale > 0.001 && false) {
+        scale = scale/sqrt(1.02);
+        //printf("Reducing scale to %g\n", scale);
+      }
+      move_counter[j%N]++;
+      if(move_counter[j%N] > max_move_counter[j%N]){
+        max_move_counter[j%N] = move_counter[j%N];
+      }
+      continue;
+    }
+    move_counter[j%N] = 0;
+    spheres[j%N] = temp;
+    workingmoves++;
   }
 
   //////////////////////////////////////////////////////////////////////////////
