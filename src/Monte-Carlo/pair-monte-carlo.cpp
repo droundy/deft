@@ -364,7 +364,7 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          // saving the da_dz data
+          // save the da_dz data
           char *da_dz_filename = new char[1024];
           for (int i=0; i<a1_rbins; i++) {
             const double a1_r01 = 2.0 + (i+1)*a1_dr;
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]){
           for(int i=0; i<path_rbins; i++) {
             const double probability = double(path_histogram[i])
               /double(numinhistogram)/2.0;
-            const double path_density1 = path_density_fraction0/lenx/leny/path_dz/2.0;
+            const double path_density1 = path_density_fraction0/lenx/leny/path_dz;
             const double r1max = (lenx/2.0 - i*path_dz);
             const double r1min = r1max - path_dz;
             const double bin1_volume = M_PI*(r1max*r1max - r1min*r1min)*path_dz;
@@ -450,7 +450,7 @@ int main(int argc, char *argv[]){
           fclose(path_out);
           // ------------------
 
-          // saving the pair distribution data
+          // save the pair distribution data
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
