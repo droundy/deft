@@ -18,10 +18,17 @@ double distXYZ(Vector3d a, Vector3d b);
 
 const double dr = 0.1;
 const double dz = 0.1;
+const double path_dz = 0.01;
+const double path_dr = 0.1;
+const double path_dtheta = M_PI/62; // for path, which calculates g2 along the r-axis,
+// in a quarter circle around z0 at contact, and then along the z-axis.
+// path_dr is the radius of the bins along the z-axis, path_dz is their thickness
+// and the dimensions of the annuli along the r-axis.
 
 // resolution info for the a1 histogram / integral
 const double a1_dr = 0.01;
 const double a1_dz = 0.01;
+const double a1_rmax = 5.0; // max value to store for delta r
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -52,7 +59,7 @@ int main(int argc, char *argv[]){
     return 1;
   }
   double maxrad = 0;
-  for (int a=5; a<argc; a+=2){
+  for (int a=6; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
       spherical_outer_wall = true;
@@ -132,21 +139,31 @@ int main(int argc, char *argv[]){
   const int rbins = lenx/dr/2;
   const int z0bins = zbins/2; // half zbins because half of z0's are reflected
   const int a1_zbins = lenz/a1_dz/2; // again, reflection -> half bins needed
-  const int a1_rbins = lenx/a1_dr/2;
+  const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
+  const int a1_r1bins = lenx/a1_dr/2;
+
+  const int path_rbins = (lenx/2.0 - 2)/path_dz;
+  const int path_thetabins = M_PI/2/path_dtheta;
+  const int path_zbins = (lenz/2.0 - 2)/path_dz;
 
   const char *outfilename = argv[4];
+  const char *da_dz_outfilename = argv[5];
   char *finalfilename = new char[1024];
+  char *pathfilename = new char[1024];
   fflush(stdout);
   const long N = atol(argv[1]);
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
   const int num_elements = triplet ? rbins*rbins*rbins : z0bins*rbins*zbins;
-  const int a1_num_elements = triplet ? a1_rbins*a1_rbins : a1_rbins*a1_zbins;
+  const int a1_num_elements = triplet ? a1_rbins*a1_r1bins : a1_rbins*a1_zbins;
   const int num_density_elements = triplet ? rbins : zbins;
   long *histogram = new long[num_elements]();
   long *da_dz_histogram = new long[a1_num_elements]();
   long *density_histogram = new long[num_density_elements]();
+  long *path_density_histogram = new long[1 + path_thetabins + path_zbins]();
+  const int path_bins = path_rbins + path_thetabins + path_zbins;
+  long *path_histogram = new long[path_bins]();
   long numinhistogram = 0;
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
@@ -347,27 +364,93 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          // saving the da_dz data
+          // save the da_dz data
           char *da_dz_filename = new char[1024];
-          sprintf(da_dz_filename, "%s-a1.dat", outfilename);
-          FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
           for (int i=0; i<a1_rbins; i++) {
+            const double a1_r01 = 2.0 + (i+1)*a1_dr;
+            sprintf(da_dz_filename, "%s-%1.2f.dat", da_dz_outfilename, a1_r01);
+            FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
             const int kmax = triplet ? a1_rbins : a1_zbins;
             for (int k=0; k<kmax; k++) {
-              const double a1_r01 = (i+1)*a1_dr;
               const double a1_r0_max = (k+1)*a1_dr;
               const double a1_r0_min = k*a1_dr;
               const double slice_volume = triplet ?
                 4.0/3.0*M_PI*(a1_r0_max*a1_r0_max*a1_r0_max - a1_r0_min*a1_r0_min*a1_r0_min):
                 lenx*leny*a1_dz;
               const double da_dz = double(da_dz_histogram[i*kmax + k]*N)/
-                slice_volume/a1_dr/double(workingmoves)/2.0;
-              fprintf(da_dz_out, "%g\t", da_dz);
+                slice_volume/a1_dr/double(count)/2.0;
+              const double coord = triplet ? k*a1_dr + a1_dr/2 : k*a1_dz + a1_dz/2;
+              fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
             }
-            fprintf(da_dz_out, "\n");
+            fclose(da_dz_out);
           }
-          fclose(da_dz_out);
-          // saving the pair distribution data
+          // save the path data
+          sprintf(pathfilename, "%s-path.dat", outfilename);
+          FILE *path_out = fopen((const char *)pathfilename, "w");
+          if (path_out == NULL) {
+            printf("Error creating file %s\n", finalfilename);
+            return 1;
+          }
+          fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
+          fprintf(path_out, "# s\tg2\thisto\tdensity histogram\n");
+          const double path_density_fraction0 =
+            double(path_density_histogram[0]*N)/double(count)/2.0;
+          double s = -path_dz/2.0;
+          for(int i=0; i<path_rbins; i++) {
+            const double probability = double(path_histogram[i])
+              /double(numinhistogram)/2.0;
+            const double path_density1 = path_density_fraction0/lenx/leny/path_dz;
+            const double r1max = (lenx/2.0 - i*path_dz);
+            const double r1min = r1max - path_dz;
+            const double bin1_volume = M_PI*(r1max*r1max - r1min*r1min)*path_dz;
+            const double g2 = probability/path_density_fraction0/path_density1/bin1_volume;
+            s += path_dz;
+            fprintf(path_out, "%g\t%g\t%li\t%li\n",
+                    s,g2,path_histogram[i],path_density_histogram[0]);
+          }
+          // finding the difference between the last point coming down and the first
+          // point in the theta band
+          const double x0 = path_dz/2;
+          const double y0 = 2.0 + path_dz/2;
+          const double x1 = (2.0 + path_dz/2)*sin(path_dtheta/2);
+          const double y1 = (2.0 + path_dz/2)*cos(path_dtheta/2);
+          s += sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+          ////
+          s -= (2.0 + path_dz/2)*path_dtheta;
+          for(int i=path_rbins; i<path_rbins+path_thetabins; i++) {
+            const double probability = double(path_histogram[i])
+              /double(numinhistogram)/2.0;
+            const double path_density_fraction1 =
+              double(path_density_histogram[i-path_rbins+1]*N)/double(count)/2.0;
+            const double g2 = probability/path_density_fraction0/path_density_fraction1;
+            s += (2.0 + path_dz/2)*path_dtheta;
+            fprintf(path_out, "%g\t%g\t%li\t%li\n",
+                    s,g2,path_histogram[i],path_density_histogram[i-path_rbins+1]);
+          }
+          // finding the difference between the last point in the theta band and the
+          // first point in the horizontal band
+          const double x2 = (2.0 + path_dz/2)*cos(path_dtheta/2);
+          const double y2 = (2.0 + path_dz/2)*sin(path_dtheta/2);
+          const double x3 = (2.0 + path_dz/2);
+          const double y3 = 0;
+          s += sqrt((x3-x2)*(x3-x2) + (y3-y2)*(y3-y2));
+          ////
+          s -= path_dz;
+          for(int i=path_rbins+path_thetabins; i<path_rbins+path_thetabins+path_zbins; i++){
+            const double probability = double(path_histogram[i])
+              /double(numinhistogram)/2.0;
+            const double path_density1 = double(path_density_histogram[i-path_rbins+1]*N)
+              /double(count)/lenx/leny/path_dz/2.0;
+            const double bin1_volume = M_PI*path_dr*path_dr*path_dz;
+            const double g2 = probability/path_density_fraction0/path_density1/bin1_volume;
+            s += path_dz;
+            fprintf(path_out, "%g\t%g\t%li\t%li\n",
+                    s,g2,path_histogram[i],path_density_histogram[i-path_rbins+1]);
+          }
+          fclose(path_out);
+          // ------------------
+
+          // save the pair distribution data
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
@@ -375,7 +458,7 @@ int main(int argc, char *argv[]){
           // in the pair case the loops, and indices, go z0, r1, z1
           // in the triplet case, they go r0, r01, r1
           for (int l=0; l<lmax; l++) {
-            const double filename_coord = triplet ? l*lenx/rbins + dr/2 : l*lenz/zbins + dz/2;
+            const double filename_coord = triplet ? l*dr + dr/2 : l*dz + dz/2;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
@@ -386,8 +469,9 @@ int main(int argc, char *argv[]){
             const double r0max = (l+1)*dr;
             const double shell0_volume = triplet ?
               4.0/3.0*M_PI*(r0max*r0max*r0max - r0min*r0min*r0min) : lenx*leny*dz;
+
             const double density0 = double(density_histogram[l]*N)
-              /double(workingmoves)/shell0_volume;
+              /double(count)/shell0_volume;
             fprintf(densityout, "%g\t%g\n", filename_coord, density0);
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
@@ -400,7 +484,7 @@ int main(int argc, char *argv[]){
                 const double shell1_volume = triplet ?
                   4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min) : lenx*leny*dz;
                 const double density1 = double(density_histogram[k]*N)
-                  /double(workingmoves)/shell1_volume;
+                  /double(count)/shell1_volume;
                 const double probability = double(histogram[l*rbins*kmax + i*kmax + k])
                   /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
                 const double n2 = probability/bin1_volume/shell0_volume;
@@ -449,6 +533,80 @@ int main(int argc, char *argv[]){
     Vector3d temp = move(spheres[j%N],scale);
     count++;
 
+    // only write out the sphere positions after they've all had a
+    // chance to move
+    // positions are converted from coordinates to matrix indices,
+    // then histogram and density_histogram count spheres at the
+    // appropriate locations
+    if (count%N == 0) {
+      numinhistogram++;
+      for (int i=0; i<N; i++) {
+        const int reflect = 2*(double(spheres[i].z() < 0) - 0.5);
+        // reflect = +/-1, used to reflect everything if you're past halfway through the box
+        // except for the density
+        const double z0 = reflect*spheres[i].z() + lenz/2;
+        const int z0_i = int(z0/dz);
+        const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
+        const int a1_z_i = int(z0/a1_dz);
+
+        const double sph_r0 = distXYZ(spheres[i], Vector3d(0,0,-reflect*lenz/2));
+        const int sph_r0_i = int(sph_r0/dr);
+        const int sph_a1_r0_i = int(sph_r0/a1_dr);
+        const int density_index = triplet ? sph_r0_i : z0_unreflected_i;
+        density_histogram[density_index]++;
+        if (z0 < path_dz) path_density_histogram[0]++;
+        if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
+          const double r0 = distXY(spheres[i], Vector3d(0,0,0));
+          const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
+          path_density_histogram[index] ++;
+        }
+        if (z0 > 2.0) {
+          const int z0_i_shifted = int((z0-2.0)/path_dz);
+          path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
+        }
+        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+
+        for (int k=0; k<N; k++) {
+          if (i != k) { // don't look at a sphere in relation to itself
+            const double z1 = reflect*spheres[k].z() + lenz/2;
+            const int z1_i = int(z1/dz);
+            const double r1 = distXY(spheres[k], spheres[i]);
+            const int r1_i = int(r1/dr);
+            const double r01 = distXYZ(spheres[k], spheres[i]);
+            const int r01_i = int(r01/dr);
+            const int a1_r01_i = int((r01 - 2.0 - a1_dr/2)/a1_dr);
+            // want a1_r01_i to be 0 for r01 in (2+dr/2, 2+dr*3/2) so that we get bins
+            // centered around rounded numbers.
+
+            const double sph_r1 = distXYZ(spheres[k], Vector3d(0,0,-reflect*lenz/2));
+            const int sph_r1_i = int(sph_r1/dr);
+            if (r1_i < rbins) { // ignore data past outermost complete cylindrical shell
+              const int index = triplet ? sph_r0_i*rbins*rbins + r01_i*rbins + sph_r1_i
+                                        : z0_i*rbins*zbins + r1_i*zbins + z1_i;
+              histogram[index] ++;
+            }
+            if (a1_r01_i < a1_rbins) {
+              const int a1_index = triplet ? a1_r01_i*a1_r1bins + sph_a1_r0_i
+                                           : a1_r01_i*a1_zbins + a1_z_i;
+              da_dz_histogram[a1_index] ++;
+            }
+            if (z0 < path_dz)
+            {
+              if (z1 < path_dz && r1 < lenx/2.0) {
+                const int index = (lenx/2.0 - r1)/path_dz;
+                path_histogram[index] ++;
+              } if (r01 < 2.0 + path_dz) {
+                const int index = path_rbins + acos(r1/r01)/path_dtheta;
+                path_histogram[index] ++;
+              } if (r1 < path_dr) {
+                const int index = path_rbins + path_thetabins + (z1 - 2.0)/path_dz;
+                path_histogram[index] ++;
+              }
+            }
+          }
+        }
+      }
+    }
     if(overlap(spheres, temp, N, R, j%N)){
       if (scale > 0.001 && false) {
         scale = scale/sqrt(1.02);
@@ -463,50 +621,6 @@ int main(int argc, char *argv[]){
     move_counter[j%N] = 0;
     spheres[j%N] = temp;
     workingmoves++;
-    // only write out the sphere positions after they've all had a
-    // chance to move
-    // positions are converted from coordinates to matrix indices,
-    // then histogram and density_histogram count spheres at the
-    // appropriate locations
-    if (workingmoves%N == 0) {
-      numinhistogram++;
-      for (int i=0; i<N; i++) {
-        const int reflect = 2*(double(spheres[i].z() < 0) - 0.5);
-        // reflect = +/-1, used to reflect everything if you're past halfway through the box
-        // except for the density
-        const int z0 = int((reflect*spheres[i].z() + lenz/2)/dz);
-        const int z0_unreflected = int((spheres[i].z() + lenz/2)/dz);
-        const int a1_z = int((reflect*spheres[i].z() + lenz/2)/a1_dz);
-
-        const int sph_r0 = int(distXYZ(spheres[i], Vector3d(0,0,0))/dr);
-        const int sph_a1_r0 = int(distXYZ(spheres[i], Vector3d(0,0,0))/a1_dr);
-        const int density_index = triplet ? sph_r0 : z0_unreflected;
-        density_histogram[density_index]++;
-        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-
-        for (int k=0; k<N; k++) {
-          if (i != k) { // don't look at a sphere in relation to itself
-            const int z1 = int((reflect*spheres[k].z() + lenz/2)/dz);
-            const double rdist = distXY(spheres[k], spheres[i]);
-            const int r1 = int(rdist/dr);
-            const int a1_r01 = int(distXYZ(spheres[k], spheres[i])/a1_dr);
-
-            const int sph_r1 = int(distXYZ(spheres[k], Vector3d(0,0,0))/dr);
-            const int r01 = int(distXYZ(spheres[k], spheres[i])/dr);
-            if (r1 < rbins) { // ignore data past outermost complete cylindrical shell
-              const int index = triplet ? sph_r0*rbins*rbins + r01*rbins + sph_r1
-                                        : z0*rbins*zbins + r1*zbins + z1;
-              histogram[index] ++;
-            }
-            if (a1_r01 < a1_rbins) {
-              const int a1_index = triplet ? a1_r01*a1_rbins + sph_a1_r0
-                                           : a1_r01*a1_zbins + a1_z;
-              da_dz_histogram[a1_index] ++;
-            }
-          }
-        }
-      }
-    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
