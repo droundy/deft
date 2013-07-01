@@ -8,11 +8,9 @@
 #include <vector>
 using std::vector;
 
-long shell(Vector3d v, long div, double *radius, double *sections);
 double countOverLaps(Vector3d *spheres, long n, double R);
 double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
-Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell);
 double distXY(Vector3d a, Vector3d b);
 double distXYZ(Vector3d a, Vector3d b);
 
@@ -367,7 +365,7 @@ int main(int argc, char *argv[]){
           // save the da_dz data
           char *da_dz_filename = new char[1024];
           for (int i=0; i<a1_rbins; i++) {
-            const double a1_r01 = 2.0 + (i+1)*a1_dr;
+            const double a1_r01 = 2.0 + (i+0.5)*a1_dr;
             sprintf(da_dz_filename, "%s-%1.2f.dat", da_dz_outfilename, a1_r01);
             FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
             const int kmax = triplet ? a1_rbins : a1_zbins;
@@ -574,7 +572,7 @@ int main(int argc, char *argv[]){
             const int r1_i = int(r1/dr);
             const double r01 = distXYZ(spheres[k], spheres[i]);
             const int r01_i = int(r01/dr);
-            const int a1_r01_i = int((r01 - 2.0 - a1_dr/2)/a1_dr);
+            const int a1_r01_i = int((r01 - 2.0)/a1_dr);
             // want a1_r01_i to be 0 for r01 in (2+dr/2, 2+dr*3/2) so that we get bins
             // centered around rounded numbers.
 
@@ -884,123 +882,21 @@ Vector3d move(Vector3d v, double scale){
 
 double distXY(Vector3d a, Vector3d b)
 {
-  const double xdist = std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x())));
-  const double ydist = std::min(fabs(b.y()-a.y()), (lenx-fabs(b.y()-a.y())));
+  const double xdist = periodic[0] ?
+    std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
+  const double ydist = periodic[1] ?
+    std::min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
   return sqrt(xdist*xdist + ydist*ydist);
 }
 double distXYZ(Vector3d a, Vector3d b)
 {
-  const double xdist = std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x())));
-  const double ydist = std::min(fabs(b.y()-a.y()), (lenx-fabs(b.y()-a.y())));
-  const double zdist = b.z()-a.z();
+  const double xdist = periodic[0] ?
+    std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
+  const double ydist = periodic[1] ?
+    std::min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
+  const double zdist = periodic[2] ?
+    std::min(fabs(b.z()-a.z()), (lenz-fabs(b.z()-a.z()))) : b.z()-a.z();
   return sqrt(xdist*xdist + ydist*ydist + zdist*zdist);
-}
-
-
-Vector3d halfwayBetween(Vector3d w, Vector3d v, double oShell){
-  const double dvw = distance(v,w);
-  // The following is a hack to avoid doing many distance calculations
-  // in cases where we can be certain that periodic boundaries
-  // couldn't be allowing these two spheres to touch.  It makes a
-  // shocking difference in the overall speed, when we have periodic
-  // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return (w + v)/2;
-  if (dvw < 2*oShell) return (w + v)/2;
-
-  // Now we check for all the possible ways the two spheres could
-  // touch across the cell in periodic directions...
-  //return false;
-  for (long k=0; k<3; k++){
-    if (periodic[k]){
-      if (distance(v,w+lat[k]) < 2*oShell) return fixPeriodic((v + w + lat[k])/2);
-      if (distance(v,w-lat[k]) < 2*oShell) return fixPeriodic((v + w - lat[k])/2);
-      for (long m=k+1; m<3; m++){
-        if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell)
-            return fixPeriodic((v+w+lat[k]+lat[m])/2);
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell)
-            return fixPeriodic((v+w-lat[k]-lat[m])/2);
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell)
-            return fixPeriodic((v+w+lat[k]-lat[m])/2);
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell)
-            return fixPeriodic((v+w-lat[k]+lat[m])/2);
-        }
-      }
-    }
-  }
-  if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return fixPeriodic((v+w+latx+laty+latz)/2);
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return fixPeriodic((v+w+latx+laty-latz)/2);
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return fixPeriodic((v+w+latx-laty+latz)/2);
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return fixPeriodic((v+w-latx+laty+latz)/2);
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return fixPeriodic((v+w-latx-laty+latz)/2);
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return fixPeriodic((v+w-latx+laty-latz)/2);
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return fixPeriodic((v+w+latx-laty-latz)/2);
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return fixPeriodic((v+w-latx-laty-latz)/2);
-  }
-  printf("BUGHHHH@!:\n");
-  exit(1);
-}
-
-bool touch(Vector3d w, Vector3d v, double oShell){
-  const double dvw = distance(v,w);
-  if (dvw < 2*oShell) return true;
-  // The following is a hack to avoid doing many distance calculations
-  // in cases where we can be certain that periodic boundaries
-  // couldn't be allowing these two spheres to touch.  It makes a
-  // shocking difference in the overall speed, when we have periodic
-  // boundary conditions in all three directions!
-  if (dvw < lenx - 2*oShell &&
-      dvw < leny - 2*oShell &&
-      dvw < lenz - 2*oShell) return false;
-
-  // Now we check for all the possible ways the two spheres could
-  // touch across the cell in periodic directions...
-  //return false;
-  for (long k=0; k<3; k++){
-    if (periodic[k]){
-      if (distance(v,w+lat[k]) < 2*oShell) return true;
-      if (distance(v,w-lat[k]) < 2*oShell) return true;
-      for (long m=k+1; m<3; m++){
-        if (periodic[m]){
-          if (distance(v,w+lat[k]+lat[m]) < 2*oShell) return true;
-          if (distance(v,w-lat[k]-lat[m]) < 2*oShell) return true;
-          if (distance(v,w+lat[k]-lat[m]) < 2*oShell) return true;
-          if (distance(v,w-lat[k]+lat[m]) < 2*oShell) return true;
-        }
-      }
-    }
-  }
-  if (periodic[0] && periodic[1] && periodic[2]){
-    if (distance(v,w+latx+laty+latz) < 2*oShell) return true;
-    if (distance(v,w+latx+laty-latz) < 2*oShell) return true;
-    if (distance(v,w+latx-laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx+laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx-laty+latz) < 2*oShell) return true;
-    if (distance(v,w-latx+laty-latz) < 2*oShell) return true;
-    if (distance(v,w+latx-laty-latz) < 2*oShell) return true;
-    if (distance(v,w-latx-laty-latz) < 2*oShell) return true;
-  }
-  return false;
-}
-
-
-
-long shell(Vector3d v, long div, double *radius, double *sections){
-  if (!flat_div){
-    double temp = distance(v,Vector3d(0,0,0));
-    for(long count = 0; count<div; count++){
-      if(temp<radius[count+1]) return count;
-    }
-  } else {
-    double temp = v[2];
-    for(long count = 0; count<div; count++){
-      if(temp < sections[count+1]) return count;
-    }
-  }
-  return div-1;
 }
 
 double ran(){
@@ -1008,7 +904,6 @@ double ran(){
   static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
   return my_mtrand.randExc(); // which is the range of [0,1)
 }
-
 
 Vector3d ran3(){
   double x, y, r2;
