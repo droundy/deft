@@ -35,6 +35,13 @@ def read_gs(ff):
 den = read_walls(ff)
 r, den2 = read_gs(ff)
 
+
+N = sum(den[:,1])/len(den[:,1])*30*30*30
+Ndft = sum(den2)/(len(den2)-3/.01)*30*30*30
+print N, Ndft
+
+
+pylab.xlim(0,15)
 pylab.plot(den[:,0], den[:,1])
 pylab.plot(r-3, den2)
 pylab.title('density(z), $ff = %g$' %(ff))

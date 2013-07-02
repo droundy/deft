@@ -37,6 +37,8 @@ const double zmax = 20;
 const double xmax = 10;
 const double dx = 0.1;
 
+const double dz = 0.01;
+
 double mc_r_step;
 const int num_eta = 10;
 const double eta_step = 0.5/num_eta;
@@ -64,7 +66,7 @@ double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid
   const double eta1 = gsigma_to_eta(gsigma(r1));
   return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
-double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_gloor(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
@@ -83,14 +85,14 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 
 const char *fun[] = {
   "this-work",
-  "this-w-mc",
-  "gross",
+  "this-work-mc",
+  "gloor",
   "fischer"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
   pairdist_this_work_mc,
-  pairdist_gross,
+  pairdist_gloor,
   pairdist_fischer
 };
 const int numplots = sizeof fun/sizeof fun[0];
@@ -377,13 +379,11 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   delete[] plotname;
   took("Dumping the pair dist plots");
-
-  //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
-  //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
-  took("Making 2d plots");
+  //This is the begginning of the integral to get a1.
   //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (double delta_r = 2.0; delta_r <= 4.0; delta_r += 0.1){
+    for (int i=0; i < 5; i++){
+      const double delta_r = i==0 ? 2.01 : 2.0 + 0.5*i;
       const double dv = 0.01;
       char *plotname_a = new char [4096];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
@@ -393,7 +393,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
         return;
       }
       delete[] plotname_a;
-      for (double z0 = 2; z0 < 13; z0 += dx) {
+      for (double z0 = 2; z0 < 13; z0 += dz) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
