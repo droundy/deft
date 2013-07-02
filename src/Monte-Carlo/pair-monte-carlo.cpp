@@ -390,7 +390,7 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s\tg2\thisto\tdensity histogram\n");
+          fprintf(path_out, "# s\tg2\tz\tr\thisto \tden histogram\n");
           const double path_density_fraction0 =
             double(path_density_histogram[0]*N)/double(count)/2.0;
           double s = -path_dz/2.0;
@@ -403,8 +403,10 @@ int main(int argc, char *argv[]){
             const double bin1_volume = M_PI*(r1max*r1max - r1min*r1min)*path_dz;
             const double g2 = probability/path_density_fraction0/path_density1/bin1_volume;
             s += path_dz;
-            fprintf(path_out, "%g\t%g\t%li\t%li\n",
-                    s,g2,path_histogram[i],path_density_histogram[0]);
+            const double zcoord = path_dz/2.0;
+            const double rcoord = lenx/2.0 - s;
+            fprintf(path_out, "%g \t%g \t%g \t%g \t%li \t%li\n",s,g2,zcoord,rcoord,
+                    path_histogram[i],path_density_histogram[0]);
           }
           // finding the difference between the last point coming down and the first
           // point in the theta band
@@ -422,8 +424,11 @@ int main(int argc, char *argv[]){
               double(path_density_histogram[i-path_rbins+1]*N)/double(count)/2.0;
             const double g2 = probability/path_density_fraction0/path_density_fraction1;
             s += (2.0 + path_dz/2)*path_dtheta;
-            fprintf(path_out, "%g\t%g\t%li\t%li\n",
-                    s,g2,path_histogram[i],path_density_histogram[i-path_rbins+1]);
+            const double theta = (i - path_rbins + 0.5)*path_dtheta;
+            const double rcoord = (2*R + path_dz/2.0)*cos(theta);
+            const double zcoord = (2*R + path_dz/2.0)*sin(theta);
+            fprintf(path_out, "%g \t%g \t%g \t%g \t%li \t%li\n",s,g2,zcoord,rcoord,
+                    path_histogram[i],path_density_histogram[i-path_rbins+1]);
           }
           // finding the difference between the last point in the theta band and the
           // first point in the horizontal band
@@ -442,8 +447,10 @@ int main(int argc, char *argv[]){
             const double bin1_volume = M_PI*path_dr*path_dr*path_dz;
             const double g2 = probability/path_density_fraction0/path_density1/bin1_volume;
             s += path_dz;
-            fprintf(path_out, "%g\t%g\t%li\t%li\n",
-                    s,g2,path_histogram[i],path_density_histogram[i-path_rbins+1]);
+            const double rcoord = path_dr/2.0;
+            const double zcoord = 2*R + (i-path_rbins-path_thetabins + 0.5)*path_dz;
+            fprintf(path_out, "%g \t%g \t%g \t%g \t%li \t%li\n",s,g2,zcoord,rcoord,
+                    path_histogram[i],path_density_histogram[i-path_rbins+1]);
           }
           fclose(path_out);
           // ------------------
@@ -659,7 +666,6 @@ int main(int argc, char *argv[]){
   printf("Total number of attempted moves = %ld\n",count);
   printf("Total number of successful moves = %ld\n",workingmoves);
   printf("Acceptance rate = %g\n", workingmoves/double(count));
-  //delete[] shells;  //delete[] density;
   fflush(stdout);
   delete[] spheres;
   delete[] max_move_counter;
