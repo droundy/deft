@@ -317,7 +317,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
       return;
     }
-    double radius_path = 2.5; //this is the value of radius of the
+
+    double radius_path = 2.005; //this is the value of radius of the
                               //particle as it moves around the
                               //contact sphere on its path
     int num = 100; //This is the same num that is in plot-path.py,
@@ -333,7 +334,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     for (int i=0; i<num ;i++){
       double theta = i*M_PI/num/2.0;
-      x_path = i*radius_path*M_PI/num/2.0 + 10.0-radius_path;
+      x_path = i*M_PI/num/2.0*radius_path + 8.0;
       const Cartesian r1(radius_path*cos(theta),0,z0+radius_path*sin(theta));
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
@@ -349,7 +350,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   
   // here you choose the values of z0 to use
-  //dx is set at beggining of file
+  // dx is set at beggining of file
   for (double z0 = 3.05; z0 < 13; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
@@ -382,11 +383,10 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //This is the begginning of the integral to get a1.
   //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (int i=0; i < 5; i++){
-      const double delta_r = i==0 ? 2.01 : 2.0 + 0.5*i;
+    for (double delta_r=2.005; delta_r<4.5; delta_r+=0.5){
       const double dv = 0.01;
       char *plotname_a = new char [4096];
-      sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
+      sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%1.3f.dat", name, fun[version], eta, delta_r);
       FILE *out = fopen(plotname_a,"w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname_a);

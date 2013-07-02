@@ -11,7 +11,7 @@ import math
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-colors = ['k', 'b', 'r', 'g']
+colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'gloor', 'fischer']
 dx = 0.1
 ############################
@@ -32,20 +32,15 @@ ff = float(sys.argv[1])
 def read_walls_path(ff,z0,fun):
   if fun == 'mc':
     filename = "figs/mc/wallsMC-pair-%1.1f-path.dat" % ff
-    try:
-        data = numpy.loadtxt(filename)
-    except IOError:
-        return pylab.zeros((10,10))*pylab.nan # just return NaNs for unknown data
-    #print 'Using', filename
-    return data[:,0:2]
   else:
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-    try:
-      data = numpy.loadtxt(filename)
-    except IOError:
-       return pylab.zeros((10,10))*pylab.nan # just return NaNs for unknown data
-    #print 'Using', filename
-    return data
+  if (os.path.isfile(filename) == False):
+    print "File does not exist:", filename
+    return pylab.zeros((10,10))*pylab.nan # just return NaNs for unknown data
+  data=numpy.loadtxt(filename)
+  if fun == 'mc':
+    data[:,0]-=4.995
+  return data[:,0:2]
 
 def read_walls(ff, z0, fun):
   if fun == 'mc':
@@ -65,7 +60,7 @@ pylab.figure(figsize=(10,5))
 
 gmax = 1.0
 pylab.subplot(1,2,2)
-for i in range(1,len(plots)):
+for i in range(0,len(plots)):
     g2_path = read_walls_path(ff, z0, plots[i])
     if able_to_read_file == False:
         matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
@@ -74,7 +69,7 @@ for i in range(1,len(plots)):
         pylab.savefig(savedfilename)
         exit(0)
     gmax = max(gmax, g2_path[:,1].max())
-    pylab.plot(g2_path[:,0],g2_path[:,1], label=plots[i])
+    pylab.plot(g2_path[:,0],g2_path[:,1], label=plots[i], color=colors[i])
 
 g2nice = read_walls_path(ff, z0, 'this-work')
 def g2pathfunction(x):
@@ -84,7 +79,7 @@ rA = 3.9
 rE = 4.0
 rpath = 2.0
 xBoff = 8
-xDoff = 9.6
+xDoff = xBoff+numpy.pi/2*2.005
 xAoff = xBoff - rA + rpath
 xEoff = xDoff + rE - rpath
 pylab.axvline(xBoff, color='k')
