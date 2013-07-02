@@ -363,7 +363,7 @@ int main(int argc, char *argv[]){
               const double slice_volume = 4.0/3.0*M_PI
                 *(a1_r0_max*a1_r0_max*a1_r0_max - a1_r0_min*a1_r0_min*a1_r0_min);
               const double da_dr = double(da_dr_histogram[i*a1_rbins + k]*N)/
-                slice_volume/a1_dr/double(count)/2.0;
+                slice_volume/a1_dr/double(count);
               const double coord = (k + 0.5)*a1_dr;
               fprintf(da_dr_out, "%g\t%g\n", coord, da_dr);
             }
@@ -454,21 +454,17 @@ int main(int argc, char *argv[]){
             }
             const double r0min = l*dr;
             const double r0max = (l+1)*dr;
-            const double shell0_volume =
+            const double bin0_volume =
               4.0/3.0*M_PI*(r0max*r0max*r0max - r0min*r0min*r0min);
-
             for (int i=0; i<rbins; i++) {
-              const double r1min = i*dr;
-              const double r1max = (i+1)*dr;
+              for (int k=0; k<rbins; k++) {
+              const double r1min = k*dr;
+              const double r1max = (k+1)*dr;
               const double bin1_volume =
                 4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
-              for (int k=0; k<rbins; k++) {
-                const double shell1_volume =
-                  4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
-                //fixme : formulae
                 const double probability = double(histogram[l*rbins*rbins + i*rbins + k])
                   /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
-                const double n3 = probability/bin1_volume/shell0_volume;
+                const double n3 = probability/bin0_volume/bin1_volume/(4.0/3.0*M_PI*dr*dr*dr);
                 const double g = n3/dens/dens/dens;
                 fprintf(out, "%g\t", g);
               }
