@@ -78,7 +78,7 @@ def read_walls(ff, z0, fun):
     filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   print 'Using', filename
   if (os.path.isfile(filename) == False):
-    print "File does not exist."
+    print "File does not exist:", filename
     sys.exit(1)
   data = numpy.loadtxt(filename)
   return data
