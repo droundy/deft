@@ -38,9 +38,11 @@ const double xmax = 10;
 const double dx = 0.1;
 
 double mc_r_step;
-double num_eta = 13.0;
-double eta_step = 0.65/num_eta;
-double * g = new double[1300*(int(num_eta)+1)];
+const int num_eta = 10;
+const double eta_step = 0.5/num_eta;
+const int num_r_in_gmc = 1300;
+const int gsize = num_r_in_gmc*(num_eta+1);
+double * g = new double[gsize];
 
 // The functions for different ways of computing the pair distribution function.
 double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
@@ -48,15 +50,18 @@ double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &n
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
 }
+
+double gsigma_to_eta(const double gs) {
+  if (gs <= 1) return 0;
+  const double c = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs*gs*gs*gs - 2.0*gs*gs*gs)-9.0*gs*gs), 1.0/3.0);
+  return c/(pow(6.0, 2.0/3.0)*gs) + 1.0/(pow(6.0, 1.0/3.0)*c) + 1.0;
+}
+
 double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  const double gs0 = gsigma(r0);
-  const double gs1 = gsigma(r1);
-  const double c0 = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs0*gs0*gs0*gs0 - 2.0*gs0*gs0*gs0)-9.0*gs0*gs0), 1.0/3.0);
-  const double eta0 = c0/(pow(6.0, 2.0/3.0)*gs0) + 1.0/(pow(6.0, 1.0/3.0)*c0) + 1.0;
-  const double c1 = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs1*gs1*gs1*gs1 - 2.0*gs1*gs1*gs1)-9.0*gs1*gs1), 1.0/3.0);
-  const double eta1 = c1/(pow(6.0, 2.0/3.0)*gs1) + 1.0/(pow(6.0, 1.0/3.0)*c1) + 1.0;
+  const double eta0 = gsigma_to_eta(gsigma(r0));
+  const double eta1 = gsigma_to_eta(gsigma(r1));
   return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
 double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
@@ -78,7 +83,7 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
 
 const char *fun[] = {
   "this-work",
-  "this-work-mc",
+  "this-w-mc",
   "gross",
   "fischer"
 };
@@ -120,7 +125,7 @@ double radial_distribution(double gsigma, double r) {
 }
 
 void read_mc() {
-  char *fname = new char[1024];
+  char *fname = new char[4096];
   sprintf(fname, "papers/pair-correlation/figs/gr-0.10.dat");
   FILE *in = fopen(fname, "r");
   if (!in) {
@@ -140,11 +145,11 @@ void read_mc() {
   mc_r_step = 2*(num2 - num1);
   delete[] fname;
   fclose(in);
-  for (int i=0; i<1300; i++) {
+  for (int i=0; i<num_r_in_gmc; i++) {
     g[i] = 1.0;
   }
   for (double eta = eta_step; eta < 0.5001; eta += eta_step) {
-    char *fname = new char[1024];
+    char *fname = new char[4096];
     sprintf(fname, "papers/pair-correlation/figs/gr-%2.2f.dat", eta);
     FILE *in = fopen(fname, "r");
     if (!in) {
@@ -154,11 +159,11 @@ void read_mc() {
     }
     int i=0;
     while (fscanf(in, " %*g %lg", &num1) == 1) {
-      g[int(floor(1300*(eta/eta_step)))+i] = num1/eta;
+      g[int(floor(num_r_in_gmc*(eta/eta_step)))+i] = num1/eta;
       i++;
     }
-    if (i!=1300) {
-      printf("There  are not 1300 lines in papers/pair-correlation/figs/gr-%2.2f.dat which is a problem in walls.cpp\n", eta);
+    if (i!=num_r_in_gmc) {
+      printf("There  are not num_r_in_gmc lines in papers/pair-correlation/figs/gr-%2.2f.dat which is a problem in walls.cpp\n", eta);
       exit(1);
     }
     delete[] fname;
@@ -166,7 +171,7 @@ void read_mc() {
   }
 }
 
-double mc (double local_eta, double r, double r_step, double g[]) {
+double mc(double local_eta, double r, double r_step, double g[]) {
   int low_eta_i = floor(local_eta/eta_step);
   int high_eta_i = low_eta_i + 1;
   double g_low_eta;
@@ -174,27 +179,27 @@ double mc (double local_eta, double r, double r_step, double g[]) {
   double fac;
   int j=0;
   double r_floor;
-  if (local_eta > num_eta*eta_step) {
-    //fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g\n", local_eta, num_eta*eta_step);
-    return NAN;
-  }
   if (r < 2) {
     return 0;
   }
+  if (high_eta_i > num_eta) {
+    //fprintf(stderr, "Error. Trying to interpolate to eta = %g, but our max is %g\n", local_eta, num_eta*eta_step);
+    return NAN;
+  }
   if (r < 2 +(r_step/2.0)) {
     fac = (r-2.0)/(0.5*r_step);
-    g_low_eta = (1-fac)*g[low_eta_i*1300]+fac*g[low_eta_i*1300 + 1];
-    g_high_eta = (1-fac)*g[high_eta_i*1300]+fac*g[high_eta_i*1300 + 1];
+    g_low_eta = (1-fac)*g[low_eta_i*num_r_in_gmc]+fac*g[low_eta_i*num_r_in_gmc + 1];
+    g_high_eta = (1-fac)*g[high_eta_i*num_r_in_gmc]+fac*g[high_eta_i*num_r_in_gmc + 1];
   } else if (r > 14.985) {
     return 1.0;
   } else {
     j = floor((r-2.0+0.5*r_step)/r_step);
     r_floor = 2+(j-0.5)*r_step;
     fac = (r-r_floor)/r_step;
-    g_low_eta = (1-fac)*g[low_eta_i*1300+j] + fac*g[low_eta_i*1300+j+1];
-    g_high_eta = (1-fac)*g[high_eta_i*1300+j] + fac*g[high_eta_i*1300+j+1];
+    g_low_eta = (1-fac)*g[low_eta_i*num_r_in_gmc+j] + fac*g[low_eta_i*num_r_in_gmc+j+1];
+    g_high_eta = (1-fac)*g[high_eta_i*num_r_in_gmc+j] + fac*g[high_eta_i*num_r_in_gmc+j+1];
   }
-  //printf("low_eta_i = %d and high_eta_i = %d\n", low_eta_i*1300+j, high_eta_i*1300+j);
+  //printf("low_eta_i = %d and high_eta_i = %d\n", low_eta_i*num_r_in_gmc+j, high_eta_i*num_r_in_gmc+j);
   //fflush(stdout);
   fac = (local_eta-(low_eta_i)*eta_step)/eta_step;
   double ghere = (1-fac)*g_low_eta + fac*g_high_eta;
@@ -210,18 +215,18 @@ double notinwall(Cartesian r) {
 }
 
 static void took(const char *name) {
-//   assert(name); // so it'll count as being used...
-//   static clock_t last_time = clock();
-//   clock_t t = clock();
-//   double peak = peak_memory()/1024.0/1024;
-//   double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
-//   if (seconds > 120) {
-//     printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
-//   } else {
-//     printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
-//   }
-//   fflush(stdout);
-//   last_time = t;
+  // assert(name); // so it'll count as being used...
+  // static clock_t last_time = clock();
+  // clock_t t = clock();
+  // double peak = peak_memory()/1024.0/1024;
+  // double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+  // if (seconds > 120) {
+  //   printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+  // } else {
+  //   printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
+  // }
+  // fflush(stdout);
+  // last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor2(1.0);
@@ -284,7 +289,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
-  char *plotname = new char[1024];
+  char *plotname = new char[4096];
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
@@ -299,9 +304,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
            strerror(errno));
     exit(1); // fail immediately with error code
   }
-  char *plotname_path = new char[1024];
+  char *plotname_path = new char[4096];
   for (int version = 0; version < numplots; version++) {
-    double z0 = 3.05;
+    const double z0 = 3.05;
     sprintf(plotname_path,
             "papers/pair-correlation/figs/walls/walls%s-path-%s-pair-%04.2f-%1.2f.dat",
             name, fun[version], eta, z0-3);
@@ -310,7 +315,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
       return;
     }
-    double radius_path = 2.2; //this is the value of radius of the
+    double radius_path = 2.5; //this is the value of radius of the
                               //particle as it moves around the
                               //contact sphere on its path
     int num = 100; //This is the same num that is in plot-path.py,
@@ -326,25 +331,21 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     for (int i=0; i<num ;i++){
       double theta = i*M_PI/num/2.0;
-      x_path = i*M_PI/num/2.0 + 8.0;
+      x_path = i*radius_path*M_PI/num/2.0 + 10.0-radius_path;
       const Cartesian r1(radius_path*cos(theta),0,z0+radius_path*sin(theta));
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      printf("%g\t%g\n",x_path,g2_path);
-      fflush(stdout);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
     }
     for (int i=0; i<int(8.0/dx+0.5);i++){
       double r1z = i*dx;
-      x_path = i*dx + M_PI/2.0 + 8.0;
+      x_path = i*dx + radius_path*M_PI/2.0 + 10.0-radius_path;
       const Cartesian r1(0,0,r1z+radius_path+z0);
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      printf("%g\t%g\n",x_path,g2_path);
-      fflush(stdout);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
     }
     fclose(out_path);
   }
-
+  
   // here you choose the values of z0 to use
   //dx is set at beggining of file
   for (double z0 = 3.05; z0 < 13; z0 += dx) {
@@ -371,11 +372,12 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "\n");
       }
       fclose(out);
-      took(plotname);
+      //took(plotname);
     }
   }
   delete[] plotname;
   took("Dumping the pair dist plots");
+
   //This is the begginning of the integral to get a1.  It takes way to long (finished about an eighth of it when I left
   //it running over night.  So I'm wondering - Can this be fixed? Should we put it in a different file?
   took("Making 2d plots");
@@ -383,7 +385,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   for (int version = 0; version < numplots; version++) {
     for (double delta_r = 2.0; delta_r <= 4.0; delta_r += 0.1){
       const double dv = 0.01;
-      char *plotname_a = new char [1024];
+      char *plotname_a = new char [4096];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%04.2f.dat", name, fun[version], eta, delta_r);
       FILE *out = fopen(plotname_a,"w");
       if (!out) {
@@ -422,9 +424,10 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "%g %g\n",z0,da_dz);
       }
       fclose(out);
-      char z0_string[50];
+      char *z0_string = new char[4096];
       sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
       took(z0_string);
+      delete[] z0_string;
     }
   }
   {
@@ -466,7 +469,6 @@ int main(int, char **) {
   FILE *fout = fopen("papers/pair-correlation/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
   read_mc();
-  printf("the last g = %g\n", g[10*1300+1300+1]);
   printf("Done with read\n");
   for (double this_eta = 0.1; this_eta < 0.55; this_eta += 0.1) {
     run_walls(this_eta, "WB", WB);

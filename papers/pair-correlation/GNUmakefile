@@ -39,6 +39,11 @@ clean:
 ALL_FIGURES= figs/pair-correlation-2-395-0.pdf figs/pair-correlation-2-395-5.pdf \
 	figs/pair-correlation-2-395-10.pdf \
 	figs/dadz-3-2.pdf figs/dadz-3-3.pdf figs/dadz-2-2.pdf figs/dadz-2-3.pdf\
+	figs/pair-correlation-path-1.pdf \
+	figs/pair-correlation-path-2.pdf \
+	figs/pair-correlation-path-3.pdf \
+	figs/pair-correlation-path-4.pdf \
+	figs/pair-correlation-path-5.pdf \
 	figs/ghs-g.pdf \
 
 LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
@@ -79,7 +84,20 @@ figs/pair-correlation-2-395-5.pdf: figs/plot-mc-modified.py
 figs/pair-correlation-2-395-10.pdf: figs/plot-mc-modified.py
 	python figs/plot-mc-modified.py .2 3.95 1.0
 
+figs/pair-correlation-path-1.pdf: figs/plot-path.py $(wildcard figs/*.dat)
+	python figs/plot-path.py 0.1
 
+figs/pair-correlation-path-2.pdf: figs/plot-path.py $(wildcard figs/*.dat)
+	python figs/plot-path.py 0.2
+
+figs/pair-correlation-path-3.pdf: figs/plot-path.py $(wildcard figs/*.dat)
+	python figs/plot-path.py 0.3
+
+figs/pair-correlation-path-4.pdf: figs/plot-path.py $(wildcard figs/*.dat)
+	python figs/plot-path.py 0.4
+
+figs/pair-correlation-path-5.pdf: figs/plot-path.py $(wildcard figs/*.dat)
+	python figs/plot-path.py 0.5
 
 
 
