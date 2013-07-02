@@ -45,7 +45,7 @@ ALL_CODE = $(GENERIC_CODE) $(HASKELL_CODE)
 
 ALL_CONTACT_CODE = $(CONTACT_CODE) $(HASKELL_CODE)
 
-bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo radial-distribution-monte-carlo # electrostatic-monte-carlo
+bin_PROGRAMS = deft monte-carlo soft-monte-carlo pair-monte-carlo triplet-monte-carlo radial-distribution-monte-carlo # electrostatic-monte-carlo
 deft_SOURCES = src/deft.cpp $(ALL_CODE)
 tests_newcode_test_SOURCES = $(NEW_CODE)
 monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
@@ -53,6 +53,8 @@ monte_carlo_SOURCES = src/Monte-Carlo/monte-carlo.cpp \
 soft_monte_carlo_SOURCES = src/Monte-Carlo/soft-monte-carlo.cpp \
 	src/utilities.cpp
 pair_monte_carlo_SOURCES = src/Monte-Carlo/pair-monte-carlo.cpp \
+	src/utilities.cpp
+triplet_monte_carlo_SOURCES = src/Monte-Carlo/triplet-monte-carlo.cpp \
 	src/utilities.cpp
 radial_distribution_monte_carlo_SOURCES = src/Monte-Carlo/radial-distribution-monte-carlo.cpp \
 	src/utilities.cpp
