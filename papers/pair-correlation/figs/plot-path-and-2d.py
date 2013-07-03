@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 from __future__ import division
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib, sys
+if len(sys.argv) < 3 or sys.argv[2] != "show":
+  matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import pylab, numpy, sys, scipy.ndimage
+import pylab, numpy, scipy.ndimage
 import os.path
 import math
 
@@ -25,14 +26,14 @@ zmax = 20
 rmax = 10
 
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
 
 def read_walls_path(ff,z0,fun):
   if fun == 'mc':
-    filename = "figs/mc/wallsMC-pair-%1.1f-path.dat" % ff
+    filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
   else:
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
