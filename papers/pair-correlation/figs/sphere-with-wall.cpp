@@ -29,17 +29,11 @@
 int count =0;
 
 // Maximum and spacing values for plotting
-const double zmax = 20;
-const double xmax = 10;
-const double dx = 0.1;
-
-
-const int num_eta = 10;
-const double eta_step = 0.5/num_eta;
 
 // Here we set up the lattice.
 static double width = 20;
 const double dw = 0.001;
+const double dx = 0.1;
 const double spacing = 3; // space on each side
 
 
@@ -57,24 +51,72 @@ double notinwall_or_sphere(Cartesian r) {
   return 1;
 }
 
-void z_plot(const char *fname, const Grid &a) {
+void pair_plot(const char *fname_debug, const char *fname, const Grid &density) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
     // don't just abort?
     return;
   }
-  const GridDescription gd = a.description();
+  FILE *out_debug = fopen(fname_debug, "w");
+  if (!out_debug) {
+    fprintf(stderr, "Unable to create file %s!\n", fname_debug);
+    // don't just abort?
+    return;
+  }
+  const GridDescription gd = density.description();
   const int x = 0;
   for (int y=0; y<gd.Nz/2; y++) {
-    for (int z=0; z<gd.Nz/2; z++) {
+    for (int z=spacing; z<gd.Nz/2; z++) {
       Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
-      double density = a(x,y,z);
-      double pair_correlation = a(x,y,z)/a(x,y,-z);/*this is density
+      double pair_correlation = density(x,y,z)/density(x,y,gd.Nz-z);/*this is density
       on the sphere side divided by the density the same distance from
       the wall on the other side (where there is no sphere)*/
-      fprintf(out, "%g\t%g\t%g\t%g\n", here[2], here[1], density,
-              pair_correlation); }
+      fprintf(out_debug, "%g\t%g\t%g\t%g\n", here[2], here[1], density(x,y,gd.Nz-z),
+              pair_correlation);
+      fprintf(out, "%g\t", pair_correlation);
+    }
+    fprintf(out,"\n");
+  }
+  fclose(out_debug);
+  fclose(out);
+}
+
+void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
+  FILE *out = fopen(fname, "w");
+  if (!out) {
+    fprintf(stderr, "Unable to create file %s!\n", fname);
+    // don't just abort?
+    return;
+  }
+  const GridDescription gd = density.description();
+  const double z0 = spacing +0.05;
+  double radius_path = 2.005;
+  int num = 100;
+  double g2_path;
+  double x_path;
+  for (int i=0; i<int((10.0-radius_path)/dx+0.5); i++){
+    x_path = i*dx;
+    Cartesian r = Cartesian(10.0-x_path,0,z0);
+    Cartesian r_opp_side = Cartesian(10.0-x_path,0,gd.Nz*dx-z0);
+    g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
+    fprintf(out,"%g\t%g\n",x_path,g2_path);
+  }
+  for (int i=0; i<num ;i++){
+    double theta = i*M_PI/num/2.0;
+    x_path = i*M_PI/num/2.0*radius_path + 8.0;
+    Cartesian r = Cartesian(radius_path*cos(theta),0,z0+radius_path*sin(theta));
+    Cartesian r_opp_side = Cartesian(radius_path*cos(theta),0,gd.Nz*dx-z0-radius_path*sin(theta));
+    g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
+    fprintf(out,"%g\t%g\n",x_path,g2_path);
+  }
+  for (int i=0; i<int(8.0/dx+0.5);i++){
+    double r1z = i*dx;
+    x_path = i*dx + radius_path*M_PI/2.0 + 10.0-radius_path;
+    Cartesian r = Cartesian(0,0,r1z+radius_path+z0);
+    Cartesian r_opp_side = Cartesian(0,0,gd.Nz*dx-r1z-radius_path-z0);
+    g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
+    fprintf(out,"%g\t%g\n",x_path,g2_path);
   }
   fclose(out);
 }
@@ -94,7 +136,7 @@ int main(int, char **) {
                              + ChemicalPotential(mu));
 
     Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,width+2*spacing));
-    GridDescription gd(lat, 0.1); // the resolution here dramatically affects our memory use
+    GridDescription gd(lat, dx); // the resolution here dramatically affects our memory use
 
     Grid potential(gd);
     Grid constraint(gd);
@@ -130,7 +172,15 @@ int main(int, char **) {
 
     char *plotname = new char[1024];
     sprintf(plotname, "papers/pair-correlation/figs/wallsWB-with-sphere-%04.2f.dat", eta);
-    z_plot(plotname, density);
+    char *plotname_debug = new char[1024];
+    sprintf(plotname_debug, "papers/pair-correlation/figs/wallsWB-with-sphere-debug%04.2f.dat", eta);
+    pair_plot(plotname, plotname_debug, density);
+    delete[] plotname;
+    delete[] plotname_debug;
+
+    char *plotname_path = new char[1024];
+    sprintf(plotname_path, "papers/pair-correlation/figs/wallsWB-with-sphere-path-%04.2f.dat", eta);
+    path_plot(plotname_path, density, constraint);
     delete[] plotname;
 
     {
