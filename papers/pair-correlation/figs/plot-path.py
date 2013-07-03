@@ -109,7 +109,7 @@ def plot():
         theta = numpy.linspace(0, numpy.pi/2, num)
         g2_of_theta = numpy.zeros(len(theta))
         for j in range(len(theta)):
-            radius_path=2.5
+            radius_path=2.005
             r = radius_path*numpy.cos(theta[j])
             z = radius_path*numpy.sin(theta[j])
             g2_rz = g2[numpy.floor(r/dx),numpy.floor(z/dx)]
