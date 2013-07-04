@@ -3,9 +3,10 @@
 # Takes z0 and filling fraction as arguments.
 
 from __future__ import division
-import matplotlib
-matplotlib.use('Agg')
-import pylab, numpy, sys, scipy.ndimage
+import matplotlib, sys
+if len(sys.argv) < 5 or sys.argv[4] != "show":
+  matplotlib.use('Agg')
+import pylab, numpy, scipy.ndimage
 import os.path
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.widgets import Slider, RadioButtons
@@ -20,7 +21,7 @@ z0 = 0.95
 theta = numpy.pi/2
 ff = 0.3
 
-if len(sys.argv) != 4:
+if len(sys.argv) < 4:
     print("Usage:  " + sys.argv[0] + " ff z0 theta/pi")
     exit(1)
 ff = float(sys.argv[1])
@@ -59,12 +60,11 @@ def plot1d():
         i += 1
 
 def plot():
-    global ax, CS
+    global ax, CS, able_to_read_file
     i = 0
     while i < numplots:
         ax[i].collections = []
         g2[i] = read_walls(ff, z0, plots[i])
-        global able_to_read_file
         if able_to_read_file == False:
             break
 
@@ -85,12 +85,12 @@ def plot():
     pylab.draw()
 
 def read_walls(ff, z0, fun):
+    global able_to_read_file
     if fun == 'mc':
         filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
         try:
             data = numpy.loadtxt(filename)
         except IOError:
-            global able_to_read_file
             able_to_read_file = False
             return 0
     else:
@@ -98,7 +98,6 @@ def read_walls(ff, z0, fun):
         try:
             data = numpy.loadtxt(filename)
         except IOError:
-            global able_to_read_file
             able_to_read_file = False
             return 0
     print 'Using', filename

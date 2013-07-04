@@ -19,7 +19,7 @@ figure(3)
 title('nA')
 
 def read_gs(ff):
-  filename = "wallsWB-0.%d0.dat" % (10*ff)
+  filename = "figs/wallsWB-0.%d0.dat" % (10*ff)
   print 'Using', filename
   data = loadtxt(filename)
   r = data[:,0]

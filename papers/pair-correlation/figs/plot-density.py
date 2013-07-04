@@ -14,17 +14,18 @@ if (len(sys.argv) > 1):
     ff = float(sys.argv[1])
 
 def read_walls(ff):
-    filename = "mc/wallsMC-pair-0.%d-density.dat" % (10*ff)
-    print 'Using', filename
+    filename = "figs/mc/wallsMC-pair-%02.1f-density.dat" % ff
     if (os.path.isfile(filename) == False):
-        print "File does not exist. Try a different values for ff or leave it blank to use defaults, or generate more monte carlo data."
+        print "File %s does not exist" %filename
         sys.exit(1)
     data = numpy.loadtxt(filename)
     return data
 
 def read_gs(ff):
-  filename = "wallsWB-0.%d0.dat" % (10*ff)
-  print 'Using', filename
+  filename = "figs/wallsWB-%03.2f.dat" % ff
+  if (os.path.isfile(filename) == False):
+    print "File %s does not exist" %filename
+    sys.exit(1)
   data = pylab.loadtxt(filename)
   r = data[:,0]
   density = data[:,1]

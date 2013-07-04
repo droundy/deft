@@ -73,9 +73,9 @@ def plot():
 
 def read_walls(ff, z0, fun):
   if fun == 'mc':
-    filename = "mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
+    filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
   else:
-    filename = "walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   print 'Using', filename
   if (os.path.isfile(filename) == False):
     print "File does not exist:", filename
@@ -203,5 +203,5 @@ def updateff(label):
 ffbutt.on_clicked(updateff)
 
 savedfilename = "pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0_valinit*10)) + "-" + str(int(10*angle_valinit/numpy.pi)) + ".pdf"
-pylab.savefig(savedfilename)
+#pylab.savefig(savedfilename)
 pylab.show()
