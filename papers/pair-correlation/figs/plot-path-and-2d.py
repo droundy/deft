@@ -21,10 +21,11 @@ dx = 0.1
 able_to_read_file = True
 z0 = 0.05
 
-#Careful there may be a difference between mc and other with these
-zmax = 20
-rmax = 10
-
+# Set the max parameters for plotting.
+zmax = 6
+zmin = -.5
+rmax = 4.1
+############################
 
 if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
@@ -110,12 +111,19 @@ pylab.legend(loc='best')
 
 pylab.subplot(1,2,1).set_aspect('equal')
 g2mc = read_walls(ff, z0, 'mc')
+rbins = round(2*rmax/dx)
+zposbins = round(zmax/dx)
+znegbins = round(-zmin/dx)
+zbins = zposbins + znegbins
+g22 = numpy.zeros((rbins, zbins))
+g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2,:zposbins]
+g22[:rbins/2, znegbins:zbins] = numpy.flipud(g2mc[:rbins/2,:zposbins])
+g2mc = g22
 gmax = g2mc.max()
 dx = 0.1
-rmax = len(g2mc[:,0])*dx
-zmax = len(g2mc[0,:])*dx
-r = numpy.arange(0, rmax, dx)
-z = numpy.arange(0, zmax, dx)
+
+r = numpy.arange(0-rmax, rmax, dx)
+z = numpy.arange(zmin, zmax, dx)
 Z, R = numpy.meshgrid(z, r)
 
 levels = numpy.linspace(0, gmax, gmax*100)
@@ -146,16 +154,7 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
-# pylab.contourf(Z-1, R, 0*g2mc, levels, cmap=cmap, extend='both')
-# pylab.contourf(Z-1, 1-2*R, 0*g2mc, levels, cmap=cmap, extend='both')
-# CS = pylab.contourf(Z, R, g2mc, levels, cmap=cmap, extend='both')
-# pylab.contourf(Z, -R, g2mc, levels, cmap=cmap, extend='both')
-
-
-pylab.pcolor(Z-1, R, 0*g2mc, vmin=0, vmax=gmax, cmap=cmap)
-pylab.pcolor(Z-1, 1-2*R, 0*g2mc, vmin=0, vmax=gmax, cmap=cmap)
 CS = pylab.pcolor(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
-pylab.pcolor(Z, -R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = numpy.arange(0, numpy.floor(2.0*gmax)/2 + 0.1, 0.5)
 pylab.colorbar(CS, extend='neither', ticks=myticks)
@@ -169,6 +168,7 @@ for theta in pylab.arange(0, pylab.pi/2 + dtheta/2, dtheta):
     xs.append(rpath*pylab.sin(theta))
     ys.append(rpath*pylab.cos(theta))
 xs.append(2*ymax)
+
 ys.append(0)
 pylab.plot(xs, ys, 'w-', linewidth=2)
 pylab.plot(xs, ys, 'k--', linewidth=2)
