@@ -13,8 +13,10 @@ double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 double distXY(Vector3d a, Vector3d b);
 double distXYZ(Vector3d a, Vector3d b);
+Vector3d periodicDiff(Vector3d a, Vector3d b);
 
-const double dr = 0.1;
+const double dz = 0.1;
+const double dx = 0.1;
 
 // const double path_dr = 0.1;
 // const double path_dtheta = M_PI/62; // for path, which calculates g2 along the r-axis,
@@ -24,7 +26,8 @@ const double dr = 0.1;
 
 // resolution info for the a1 histogram / integral
 const double a1_dr = 0.01;
-const double a1_rmax = 5.0; // max value to store for delta r
+const double a1_dz = 0.01;
+const double a1_rmax = 5.0; // max value to store for delta x
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -126,16 +129,18 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const int rbins = lenx/dr/2;
+  const int zbins = lenx/dz/2.0;
+  const int xbins = lenx/dx/2.0;
+  const int a1_zbins = lenz/a1_dz/2.0;
   const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
-  const int a1_r1bins = lenx/a1_dr/2;
+
 
   // const int path_rbins = (lenx/2.0 - 2)/path_dz;
   // const int path_thetabins = M_PI/2/path_dtheta;
   // const int path_zbins = (lenz/2.0 - 2)/path_dz;
 
   const char *outfilename = argv[4];
-  const char *da_dr_outfilename = argv[5];
+  const char *da_dz_outfilename = argv[5];
   char *finalfilename = new char[1024];
   char *pathfilename = new char[1024];
   fflush(stdout);
@@ -144,11 +149,10 @@ int main(int argc, char *argv[]){
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  const int num_elements = rbins*rbins*rbins;
-  const int a1_num_elements = a1_rbins*a1_r1bins;
 
-  long *histogram = new long[num_elements]();
-  long *da_dr_histogram = new long[a1_num_elements]();
+
+  long *histogram = new long[zbins*xbins*zbins]();
+  long *da_dz_histogram = new long[a1_rbins*a1_zbins]();
   // const int path_bins = path_rbins + path_thetabins + path_zbins;
   // long *path_histogram = new long[path_bins]();
   long numinhistogram = 0;
@@ -351,23 +355,19 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          // save the da_dr data
-          char *da_dr_filename = new char[1024];
+          // save the da_dz data
+          char *da_dz_filename = new char[1024];
           for (int i=0; i<a1_rbins; i++) {
-            const double a1_r01 = 2.0 + (i+0.5)*a1_dr;
-            sprintf(da_dr_filename, "%s-%1.2f.dat", da_dr_outfilename, a1_r01);
-            FILE *da_dr_out = fopen((const char *)da_dr_filename, "w");
-            for (int k=0; k<a1_rbins; k++) {
-              const double a1_r0_max = (k+1)*a1_dr;
-              const double a1_r0_min = k*a1_dr;
-              const double slice_volume = 4.0/3.0*M_PI
-                *(a1_r0_max*a1_r0_max*a1_r0_max - a1_r0_min*a1_r0_min*a1_r0_min);
-              const double da_dr = double(da_dr_histogram[i*a1_rbins + k]*N)/
-                slice_volume/a1_dr/double(count);
-              const double coord = (k + 0.5)*a1_dr;
-              fprintf(da_dr_out, "%g\t%g\n", coord, da_dr);
+            const double a1_r12 = 2.0 + (i+0.5)*a1_dr;
+            sprintf(da_dz_filename, "%s-%1.2f.dat", da_dz_outfilename, a1_r12);
+            FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
+            for (int k=0; k<a1_zbins; k++) {
+              const double da_dz = double(da_dz_histogram[i*a1_zbins + k]*N)/
+                lenx/leny/lenz/a1_dr/double(count);
+              const double coord = (k + 0.5)*a1_dz;
+              fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
             }
-            fclose(da_dr_out);
+            fclose(da_dz_out);
           }
           // save the path data
           // sprintf(pathfilename, "%s-path.dat", outfilename);
@@ -443,36 +443,36 @@ int main(int argc, char *argv[]){
           // ------------------
 
           // save the pair distribution data
-          // the indices go r0, r01, r1
-          for (int l=0; l<rbins; l++) {
-            const double filename_coord = (l + 0.5)*dr;
+          for (int l=0; l<zbins; l++) {
+            const double filename_coord = (l + 0.5)*dz;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
-            const double r0min = l*dr;
-            const double r0max = (l+1)*dr;
-            const double bin0_volume =
-              4.0/3.0*M_PI*(r0max*r0max*r0max - r0min*r0min*r0min);
-            for (int i=0; i<rbins; i++) {
-              for (int k=0; k<rbins; k++) {
-              const double r1min = k*dr;
-              const double r1max = (k+1)*dr;
-              const double bin1_volume =
-                4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
-                const double probability = double(histogram[l*rbins*rbins + i*rbins + k])
-                  /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
-                const double n3 = probability/bin0_volume/bin1_volume/(4.0/3.0*M_PI*dr*dr*dr);
+            const double r0min = l*dx;
+            const double r0max = (l+1)*dx;
+            const double volume0 = lenx*leny*lenz;
+            for (int i=0; i<xbins; i++) {
+              const double r1min = i*dx;
+              const double r1max = (i+1)*dx;
+              const double volume1 = 4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
+              for (int k=0; k<zbins; k++) {
+              const double x2min = k*dx;
+              const double x2max = (k+1)*dx;
+              const double volume2 = M_PI*(x2max*x2max - x2min*x2min);
+                const double probability = double(histogram[l*xbins*zbins + i*zbins + k])
+                  /double(numinhistogram);
+                const double n3 = probability/volume0/volume1/volume2;
                 const double g = n3/dens/dens/dens;
                 fprintf(out, "%g\t", g);
               }
               fprintf(out, "\n");
             }
-            fclose(out);
+          fclose(out);
           }
-          delete[] da_dr_filename;
+          delete[] da_dz_filename;
         }
         fflush(stdout);
       }
@@ -518,9 +518,11 @@ int main(int argc, char *argv[]){
       for (int l=0; l<N; l++) {
         for (int i=0; i<N; i++) {
           if (i != l) {
-            const double r0 = distXYZ(spheres[i], spheres[l]);
-            const int r0_i = int(r0/dr);
-            const int a1_r0_i = int(r0/a1_dr);
+            const Vector3d r01 = periodicDiff(spheres[i], spheres[l]);
+            const Vector3d zhat = r01.normalized();
+            const double z1 = r01.norm();
+            const int z1_i = int(z1/dz);
+            const int a1_z1_i = int(z1/a1_dz);
             // path stuff
             // if (z0 < path_dz) path_density_histogram[0]++;
             // if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
@@ -535,17 +537,21 @@ int main(int argc, char *argv[]){
             //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
             for (int k=0; k<N; k++) {
               if (k != i && k != l) { // don't look at a sphere in relation to itself
-                const double r1 = distXYZ(spheres[k], spheres[l]);
-                const double r01 = distXYZ(spheres[k], spheres[i]);
-                const int r1_i = int(r1/dr);
-                const int r01_i = int(r01/dr);
-                const int a1_r01_i = int((r01 - 2.0)/a1_dr);
+                const Vector3d r02 = periodicDiff(spheres[k], spheres[l]);
+                const double z2 = r02.dot(zhat);
+                const int z2_i = int(z2/dz);
+                const double x2 = periodicDiff(r02, z2*zhat).norm();
+                const int x2_i = int(x2/dx);
 
-                if (r1_i < rbins && r0_i < rbins && r01_i < rbins)
-                  histogram[r0_i*rbins*rbins + r01_i*rbins + r1_i] ++;
+                const double r12 = distXYZ(spheres[k], spheres[i]);
+                const int a1_r12_i = int(r12/a1_dr);
 
-                if (a1_r0_i < rbins && a1_r01_i < rbins)
-                  da_dr_histogram[a1_r01_i*a1_r1bins + a1_r0_i] ++;
+
+                if (z1_i < zbins && x2_i < xbins && z2_i < zbins)
+                  histogram[z1_i*xbins*zbins + x2_i*zbins + z2_i] ++;
+
+                if (a1_r12_i < a1_rbins && a1_z1_i < a1_zbins)
+                  da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
                 // if (z0 < path_dz)
                 //     {
                 //       if (z1 < path_dz && r1 < lenx/2.0) {
@@ -580,7 +586,7 @@ int main(int argc, char *argv[]){
     move_counter[j%N] = 0;
     spheres[j%N] = temp;
     workingmoves++;
-  }
+    }
 
   //////////////////////////////////////////////////////////////////////////////
   // End main program loop
@@ -625,7 +631,7 @@ int main(int argc, char *argv[]){
   delete[] max_move_counter;
   delete[] move_counter;
   delete[] histogram;
-  delete[] da_dr_histogram;
+  delete[] da_dz_histogram;
   delete[] finalfilename;
   fflush(stdout);
   fclose(countout);
@@ -837,16 +843,14 @@ Vector3d move(Vector3d v, double scale){
   return fixPeriodic(newv);
 }
 
-double distXY(Vector3d a, Vector3d b)
-{
+double distXY(Vector3d a, Vector3d b){
   const double xdist = periodic[0] ?
     std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
   const double ydist = periodic[1] ?
     std::min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
   return sqrt(xdist*xdist + ydist*ydist);
 }
-double distXYZ(Vector3d a, Vector3d b)
-{
+double distXYZ(Vector3d a, Vector3d b){
   const double xdist = periodic[0] ?
     std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
   const double ydist = periodic[1] ?
@@ -854,6 +858,20 @@ double distXYZ(Vector3d a, Vector3d b)
   const double zdist = periodic[2] ?
     std::min(fabs(b.z()-a.z()), (lenz-fabs(b.z()-a.z()))) : b.z()-a.z();
   return sqrt(xdist*xdist + ydist*ydist + zdist*zdist);
+}
+
+Vector3d periodicDiff(Vector3d b, Vector3d a){
+  Vector3d v;
+  if (periodic[0] && lenx-fabs(b.x()-a.x()) < fabs(b.x()-a.x()))
+      v[0] = b.x()-a.x();
+  else v[0] = b.x()-a.x();
+  if (periodic[1] && leny-fabs(b.y()-a.y()) < fabs(b.y()-a.y()))
+      v[1] = b.y()-a.y();
+  else v[1] = b.y()-a.y();
+  if (periodic[2] && lenz-fabs(b.z()-a.z()) < fabs(b.z()-a.z()))
+      v[2] = b.z()-a.z();
+  else v[2] = b.z()-a.z();
+  return v;
 }
 
 double ran(){
