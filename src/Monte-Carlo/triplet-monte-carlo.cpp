@@ -18,11 +18,9 @@ Vector3d periodicDiff(Vector3d a, Vector3d b);
 const double dz = 0.1;
 const double dx = 0.1;
 
-// const double path_dr = 0.1;
-// const double path_dtheta = M_PI/62; // for path, which calculates g2 along the r-axis,
-// in a quarter circle around z0 at contact, and then along the z-axis.
-// path_dr is the radius of the bins along the z-axis, path_dz is their thickness
-// and the dimensions of the annuli along the r-axis.
+const double path_dz = 0.01;
+const double path_dx = 0.1;
+const double path_dtheta = M_PI/62;
 
 // resolution info for the a1 histogram / integral
 const double a1_dr = 0.01;
@@ -442,7 +440,7 @@ int main(int argc, char *argv[]){
           // fclose(path_out);
           // ------------------
 
-          // save the pair distribution data
+          // save the triplet distribution data
           for (int l=0; l<zbins; l++) {
             const double filename_coord = (l + 0.5)*dz;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
@@ -523,17 +521,6 @@ int main(int argc, char *argv[]){
             const double z1 = r01.norm();
             const int z1_i = int(z1/dz);
             const int a1_z1_i = int(z1/a1_dz);
-            // path stuff
-            // if (z0 < path_dz) path_density_histogram[0]++;
-            // if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
-            //   const double r0 = distXY(spheres[i], Vector3d(0,0,0));
-            //   const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
-            //   path_density_histogram[index] ++;
-            // }
-            // if (z0 > 2.0) {
-            //   const int z0_i_shifted = int((z0-2.0)/path_dz);
-            //   path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
-            // }
             //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
             for (int k=0; k<N; k++) {
               if (k != i && k != l) { // don't look at a sphere in relation to itself
@@ -552,21 +539,15 @@ int main(int argc, char *argv[]){
 
                 if (a1_r12_i < a1_rbins && a1_z1_i < a1_zbins)
                   da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
-                // if (z0 < path_dz)
-                //     {
-                //       if (z1 < path_dz && r1 < lenx/2.0) {
-                //         const int index = (lenx/2.0 - r1)/path_dz;
-                //         path_histogram[index] ++;
-                //       } if (r01 < 2.0 + path_dz) {
-                //         const int index = path_rbins + acos(r1/r01)/path_dtheta;
-                //         path_histogram[index] ++;
-                //       } if (r1 < path_dr) {
-                //         const int index = path_rbins + path_thetabins + (z1 - 2.0)/path_dz;
+                // if (z1 < 2*R + path_dz) {
+                //       if (x2 < path_dx && z2 < lenz/2.0) {
+                //         const int index = (lenz/2.0 - z2)/path_dz;
                 //         path_histogram[index] ++;
                 //       }
+                      
                 //     }
-                // }
-              }
+                //}
+            }
             }
           }
         }
@@ -861,16 +842,13 @@ double distXYZ(Vector3d a, Vector3d b){
 }
 
 Vector3d periodicDiff(Vector3d b, Vector3d a){
-  Vector3d v;
+  Vector3d v = b - a;
   if (periodic[0] && lenx-fabs(b.x()-a.x()) < fabs(b.x()-a.x()))
-      v[0] = b.x()-a.x();
-  else v[0] = b.x()-a.x();
+    v[0] -= lenx;
   if (periodic[1] && leny-fabs(b.y()-a.y()) < fabs(b.y()-a.y()))
-      v[1] = b.y()-a.y();
-  else v[1] = b.y()-a.y();
+    v[1] -= leny;
   if (periodic[2] && lenz-fabs(b.z()-a.z()) < fabs(b.z()-a.z()))
-      v[2] = b.z()-a.z();
-  else v[2] = b.z()-a.z();
+    v[2] -= lenz;
   return v;
 }
 
