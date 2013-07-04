@@ -1,7 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 project (deft)
+include(cmake/flags.cmake)
 
-include(haskellcode.cmake)
+include(cmake/haskellcode.cmake)
 haskell_functionals(
   src/HardSpheresNoTensor2Fast.cpp
 	src/TensorWhiteBearFast.cpp
@@ -58,7 +59,7 @@ include_directories(src)
 add_executable(monte-carlo src/Monte-Carlo/monte-carlo.cpp src/utilities.cpp)
 add_executable(pair-monte-carlo src/Monte-Carlo/pair-monte-carlo.cpp src/utilities.cpp)
 
-include(tests.cmake)
+include(cmake/tests.cmake)
 
 add_test(run-pair-monte-carlo pair-monte-carlo 10 1000000
   0.01 /tmp/foo /tmp/dafoo periodxy 20 wallz 20 flatdiv)
