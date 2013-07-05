@@ -299,6 +299,48 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
   }
   took("Dumping the triplet dist plots");
+  char *plotname_path = new char[4096];
+  for (int version = 0; version < numplots; version++) {
+    sprintf(plotname_path,
+            "papers/pair-correlation/figs/walls/wallsWB-path-%s-triplet-%04.2f.dat",
+            fun[version], eta);
+    FILE *out_path = fopen(plotname_path, "w");
+    if (!out_path) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_path);
+      return;
+    }
+
+    double radius_path = 2.005; //this is the value of radius of the
+                              //particle as it moves around the
+                              //contact sphere on its path
+    int num = 100; //This is the same num that is in plot-path.py,
+                  //splits up the theta part of path just like there
+    const Cartesian r0(0,0,radius_path);
+    double g2_path;
+    double x_path;
+    const double max_theta = asin(radius_path/2.0/2.0)+M_PI/2.0;
+    for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5) ;i++){
+      x_path = i*dx;
+      const Cartesian r1(width/2.0-x_path,0,0);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    for (int i=0; i<num ;i++){
+      double theta = i*max_theta/num;
+      x_path = i*max_theta/num*radius_path + width/2.0-2*radius_path;
+      const Cartesian r1(radius_path*(1+cos(theta)),0,radius_path*sin(theta));
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5); i++){
+      double r1z = i*dx;
+      x_path = i*dx + 2.0*cos(max_theta-M_PI/2.0) + max_theta*radius_path + width/2.0-2*radius_path;
+      const Cartesian r1(2.0*sin(max_theta-M_PI/2.0), 0, r1z + 2.0*cos(max_theta-M_PI/2.0));
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    }
+    fclose(out_path);
+  }
 }
 
 int main(int, char **) {
