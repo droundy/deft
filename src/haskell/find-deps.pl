@@ -12,11 +12,14 @@ print "#########################################################################
 my %mainfiles;
 my $makefile = ".make.depend1";
 
+my $objpath = $ENV{HASDIR};
+
 open(MAKEFILE, $makefile) or die "oops $!";
 while (<MAKEFILE>) {
   if (/(.*).o : (.*hs)/) {
     my $fn = $1;
-    if (open(HSFILE, "$2")) {
+    my $sourcename = $2;
+    if (open(HSFILE, $sourcename)) {
       my $line;
       foreach $line (<HSFILE>) {
         if ($line =~/^main/) {
@@ -24,7 +27,12 @@ while (<MAKEFILE>) {
         }
       }
       close(HSFILE);
+      if (not defined($mainfiles{$fn})) {
+        print "\$(HASDIR)$fn.o : $sourcename\n";
+      }
     }
+  } elsif (/(.*.o) : (.*hi)/) {
+    print "\$(HASDIR)$1 : \$(HASDIR)$2\n";
   }
 }
 close(MAKEFILE);
@@ -52,15 +60,15 @@ foreach $main (sort keys %mainfiles) {
     close(MAKEFILE);
   }
 
-  print "\n$main.exe: ";
+  print "\n\$(HASDIR)$main.exe: ";
   my $name;
   foreach $name (sort keys %deps) {
     if ($name eq "") {
     } else {
-      print "$name.o ";
+      print "\$(HASDIR)$name.o ";
     }
   }
 
   print "\n";
-	print "\tghc \$(GHCFLAGS) -o \$@ \$^\n\n";
+	print "\tghc \$(GHCFLAGS) -o \$@ \$^\n";
 }

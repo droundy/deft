@@ -1,6 +1,6 @@
 .SUFFIXES : .o .hs .hi .lhs
 
-all: depend test.exe functionals.exe latex-functionals.exe newfunctionals.exe
+all: depend $(HASDIR)test.exe $(HASDIR)functionals.exe $(HASDIR)latex-functionals.exe $(HASDIR)newfunctionals.exe
 
 clean:
 	rm -f *.hi *.o *.exe
@@ -9,16 +9,11 @@ GHCFLAGS=-Wall -fno-warn-unused-do-bind -fspec-constr-count=20 -O2 -package proc
 
 .o.hi:
 	@:
-.lhs.o:
-	ghc -c $< $(GHCFLAGS)
-.hs.o:
-	ghc -c $< $(GHCFLAGS)
+$(HASDIR)%.o: %.hs
+	ghc -c $< -o $@ $(GHCFLAGS) -odir $(HASDIR). -hidir $(HASDIR). -i$(HASDIR).
 
-depend: make.depend
-
-make.depend: find-deps.pl $(wildcard *hs)
+depend: find-deps.pl $(wildcard *hs)
 	ghc -dep-makefile .make.depend1 -M $(GHCFLAGS) $(wildcard *hs)
-	perl find-deps.pl > .make.depend2
-	cat .make.depend2 .make.depend1 > make.depend
+	perl find-deps.pl > $(HASDIR)make.depend
 
-include make.depend
+include $(HASDIR)make.depend

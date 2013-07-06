@@ -1,7 +1,3 @@
-The statement type allows us to string together a sequence of
-definitions and assignments.
-
-\begin{code}
 {-# LANGUAGE PatternGuards #-}
 
 module Statement ( Statement(..),
@@ -116,4 +112,3 @@ reuseVar ((Initialize (EK iivar@(Var IsTemp _ _ _ Nothing))) :
     | otherwise = error "KS initialize error: "
 reuseVar (x:xs) = x : (reuseVar xs)
 reuseVar [] = []
-\end{code}

@@ -38,8 +38,8 @@ def read_walls_path(ff,z0,fun):
   else:
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
-    print "File does not exist:", filename
-    return pylab.zeros((10,10)) # just return zeros for unknown data
+    # Just use walls data if we do not have the MC (need to be careful!)
+    filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
   data=numpy.loadtxt(filename)
   if fun == 'mc':
     data[:,0]-=4.995
@@ -52,10 +52,9 @@ def read_walls(ff, z0, fun):
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   #print 'Using', filename
   if (os.path.isfile(filename) == False):
-    print "File does not exist:", filename
-    x = pylab.arange(0,10,1)
-    X,Y = pylab.meshgrid(x,x)
-    return X # return bogus values for unknown data
+    # Just use walls data if we do not have the MC (need to be careful!)
+    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
+    pylab.title("Using this work instead of MC!")
   data = numpy.loadtxt(filename)
   return data
 

@@ -1,4 +1,3 @@
-\begin{code}
 import System.Directory ( createDirectoryIfMissing )
 import CodeGen
 import Optimize ( optimize, findToDo )
@@ -404,6 +403,5 @@ latexfile xs = "\\documentclass{article}\n\\usepackage{amsmath}\n\\begin{documen
         x = r_var "x"
         cleanup = substitute (k**2) (kk**2) . substitute (shell x) (r_var "n2x")
 
-\end{code}
 
 

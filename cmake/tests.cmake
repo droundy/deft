@@ -1,5 +1,6 @@
 enable_testing()
 
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests/generated-haskell)
 macro (add_simple_tests_for library)
   foreach(name ${ARGN})
     add_executable(tests/${name}.test tests/${name}.cpp)

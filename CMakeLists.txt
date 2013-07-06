@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 project (deft)
 include(cmake/flags.cmake)
 
+#add_subdirectory(src/haskell)
+
 include(cmake/haskellcode.cmake)
 haskell_functionals(
   src/HardSpheresNoTensor2Fast.cpp
@@ -55,9 +57,78 @@ target_link_libraries(deftallcontact defthaskell)
 
 include_directories(include)
 include_directories(src)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/tests)
 
 add_executable(monte-carlo src/Monte-Carlo/monte-carlo.cpp src/utilities.cpp)
 add_executable(pair-monte-carlo src/Monte-Carlo/pair-monte-carlo.cpp src/utilities.cpp)
+
+
+include(cmake/papers.cmake)
+
+# the following are pretty quick programs that we automatically rerun
+# on building papers, to ensure our figures are up-to-date.
+add_papers_dat_using(deftallcontact
+  water-saft/figs/surface-tension
+  water-saft/figs/equation-of-state
+  water-saft/figs/pressure-with-isotherms
+
+  hughes-saft/figs/surface-tension
+  hughes-saft/figs/equation-of-state
+  hughes-saft/figs/single-rod-in-water-low-res
+  hughes-saft/figs/pressure-with-isotherms
+
+  contact/figs/free-energy
+  contact/figs/walls
+
+  pair-correlation/figs/walls
+)
+
+# the following are slow programs that we do not automatically rerun
+# on building papers
+add_papers_mkdat_using(deftallcontact
+  water-saft/figs/rods-in-water
+  water-saft/figs/single-rod
+  water-saft/figs/hughes-single-rod
+  water-saft/figs/sphere
+
+  hughes-saft/figs/rods-in-water
+  hughes-saft/figs/four-rods-in-water
+  hughes-saft/figs/single-rod-in-water-high-res
+  hughes-saft/figs/single-rod
+  hughes-saft/figs/sphere
+
+  contact/figs/gHS-vs-n
+  contact/figs/sphere
+  contact/figs/test-particle-wall
+  contact/figs/inner-sphere
+
+  pair-correlation/figs/sphere-with-wall
+
+  fuzzy-fmt/figs/walls
+)
+
+add_custom_target(
+  papers make
+  WORKING_DIRECTORY papers
+  DEPENDS ${PAPER_DATS}
+)
+
+doc_pdf(
+  doc/Association.pdf
+  doc/WhiteBear.pdf
+  doc/TensorWhiteBear.pdf
+	doc/WhiteBearMarkII.pdf
+  doc/Dispersion.pdf
+  doc/SaftFluid.pdf
+	doc/SimpDispersion.pdf
+  doc/EntropySaftFluid.pdf
+	doc/CorrelationS.pdf
+  doc/CorrelationA.pdf
+  doc/CorrelationAm2.pdf
+	doc/GradDispersion.pdf
+  doc/JoinedGradDispersion.pdf
+  doc/SimpGradDispersion.pdf
+)
 
 include(cmake/tests.cmake)
 
@@ -71,7 +142,7 @@ add_simple_tests_for (defthaskell
   print-iter convolve-finite-difference
 )
 add_simple_tests_for (deftnewhaskell new-hard-spheres)
-add_simple_tests_for (deftallcontact memory functional-of-double)
+add_simple_tests_for (deftallcontact functional-of-double) # not memory, since that requires some data files
 add_simple_tests_for (deftnew new-code)
 
 add_executable(tests/convolve.test tests/convolve.cpp
@@ -82,12 +153,13 @@ add_test(convolve tests/convolve.test)
 # Rules for generated-code.test, which requires some rules to generate
 # test code.
 add_custom_command(
-  OUTPUT tests/generated-haskell/nice-sum.h
-  COMMAND test -d tests/generated-haskell || mkdir tests/generated-haskell
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tests/generated-haskell/nice-sum.h
+  COMMAND test -d tests/generated-haskell || mkdir -p tests/generated-haskell
   COMMAND rm -f tests/generated-haskell/*
-  COMMAND src/haskell/test.exe codegen
-  DEPENDS src/haskell/functionals.exe
+  COMMAND haskell/test.exe codegen
+  DEPENDS haskell/functionals.exe
 )
+
 add_executable(tests/generated-code.test tests/generated-code.cpp
   src/TensorWhiteBearFast.cpp tests/generated-haskell/nice-sum.h)
 target_link_libraries(tests/generated-code.test deftgeneric)

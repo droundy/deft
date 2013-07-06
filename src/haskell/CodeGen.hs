@@ -1,4 +1,3 @@
-\begin{code}
 {-# LANGUAGE PatternGuards #-}
 
 module CodeGen (module Statement,
@@ -531,4 +530,3 @@ defineTransformation e arg n =
           codeA a = foldl1 (\x y -> x ++ ", " ++ y ) (map ("double " ++) a)
           codeA' [] = ""
           codeA' a = foldl1 (\x y -> x ++ ", " ++ y ) a
-\end{code}

@@ -1,4 +1,3 @@
-\begin{code}
 {-# LANGUAGE PatternGuards #-}
 
 module NewCode (module Statement,
@@ -341,4 +340,3 @@ createCppFile e variables n headername =
       xxx [] = ""
       xxx iii = foldl1 (\x y -> x ++ " + " ++ y) iii ++";"
 
-\end{code}
