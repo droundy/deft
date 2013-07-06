@@ -22,6 +22,8 @@ const double path_dtheta = M_PI/62; // for path, which calculates g2 along the r
 // in a quarter circle around z0 at contact, and then along the z-axis.
 // path_dr is the radius of the bins along the z-axis, path_dz is their thickness
 // and the dimensions of the annuli along the r-axis.
+const int path_num_refs = 15; // the number of points in the x and y directions
+// to look at to gather density information for the path calculation.
 
 // resolution info for the a1 histogram / integral
 const double a1_dr = 0.01;
@@ -44,8 +46,6 @@ Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; // the divisions will be equal and will divide from z wall to z wall
-bool triplet = false; // whether to do the triplet-correlation function, in which case will
-                      // fix a sphere at the origin and use spherical coordinates
 
 bool periodic[3] = {false, false, false};
 const double dxmin = 0.1;
@@ -115,9 +115,6 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
-    } else if (strcmp(argv[a],"triplet") == 0) {
-      triplet = true;
-      a -=1;
     } else {
       printf("Bad argument:  %s\n", argv[a]);
       return 1;
@@ -153,9 +150,9 @@ int main(int argc, char *argv[]){
   const long iterations = long(atol(argv[2])/N*rad*rad*rad/10/10/10);
   const double uncertainty_goal = atof(argv[3]);
   Vector3d *spheres = new Vector3d[N];
-  const int num_elements = triplet ? rbins*rbins*rbins : z0bins*rbins*zbins;
-  const int a1_num_elements = triplet ? a1_rbins*a1_r1bins : a1_rbins*a1_zbins;
-  const int num_density_elements = triplet ? rbins : zbins;
+  const int num_elements = z0bins*rbins*zbins;
+  const int a1_num_elements = a1_rbins*a1_zbins;
+  const int num_density_elements = zbins;
   long *histogram = new long[num_elements]();
   long *da_dz_histogram = new long[a1_num_elements]();
   long *density_histogram = new long[num_density_elements]();
@@ -368,16 +365,13 @@ int main(int argc, char *argv[]){
             const double a1_r01 = 2.0 + (i+0.5)*a1_dr;
             sprintf(da_dz_filename, "%s-%1.3f.dat", da_dz_outfilename, a1_r01);
             FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
-            const int kmax = triplet ? a1_rbins : a1_zbins;
-            for (int k=0; k<kmax; k++) {
+            for (int k=0; k<a1_zbins; k++) {
               const double a1_r0_max = (k+1)*a1_dr;
               const double a1_r0_min = k*a1_dr;
-              const double slice_volume = triplet ?
-                4.0/3.0*M_PI*(a1_r0_max*a1_r0_max*a1_r0_max - a1_r0_min*a1_r0_min*a1_r0_min):
-                lenx*leny*a1_dz;
-              const double da_dz = double(da_dz_histogram[i*kmax + k]*N)/
+              const double slice_volume = lenx*leny*a1_dz;
+              const double da_dz = double(da_dz_histogram[i*a1_zbins + k]*N)/
                 slice_volume/a1_dr/double(count)/2.0;
-              const double coord = triplet ? k*a1_dr + a1_dr/2 : k*a1_dz + a1_dz/2;
+              const double coord = k*a1_dz + a1_dz/2;
               fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
             }
             fclose(da_dz_out);
@@ -421,7 +415,8 @@ int main(int argc, char *argv[]){
             const double probability = double(path_histogram[i])
               /double(numinhistogram)/2.0;
             const double path_density_fraction1 =
-              double(path_density_histogram[i-path_rbins+1]*N)/double(count)/2.0;
+              double(path_density_histogram[i-path_rbins+1]*N)/double(count)/2.0
+              /double(path_num_refs*path_num_refs);
             const double g2 = probability/path_density_fraction0/path_density_fraction1;
             s += (2.0 + path_dz/2)*path_dtheta;
             const double theta = (i - path_rbins + 0.5)*path_dtheta;
@@ -459,11 +454,9 @@ int main(int argc, char *argv[]){
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
-          const int lmax = triplet ? rbins : z0bins;
-          // in the pair case the loops, and indices, go z0, r1, z1
-          // in the triplet case, they go r0, r01, r1
-          for (int l=0; l<lmax; l++) {
-            const double filename_coord = triplet ? l*dr + dr/2 : l*dz + dz/2;
+
+          for (int l=0; l<z0bins; l++) {
+            const double filename_coord = (l + 0.5)*dz;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
@@ -472,8 +465,7 @@ int main(int argc, char *argv[]){
             }
             const double r0min = l*dr;
             const double r0max = (l+1)*dr;
-            const double shell0_volume = triplet ?
-              4.0/3.0*M_PI*(r0max*r0max*r0max - r0min*r0min*r0min) : lenx*leny*dz;
+            const double shell0_volume = lenx*leny*dz;
 
             const double density0 = double(density_histogram[l]*N)
               /double(count)/shell0_volume;
@@ -481,16 +473,12 @@ int main(int argc, char *argv[]){
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
-              const double bin1_volume = triplet ?
-                4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min) :
-                M_PI*(r1max*r1max-r1min*r1min)*dz;
-              const int kmax = triplet ? rbins : zbins;
-              for (int k=0; k<kmax; k++) {
-                const double shell1_volume = triplet ?
-                  4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min) : lenx*leny*dz;
+              const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
+              for (int k=0; k<zbins; k++) {
+                const double shell1_volume = lenx*leny*dz;
                 const double density1 = double(density_histogram[k]*N)
                   /double(count)/shell1_volume;
-                const double probability = double(histogram[l*rbins*kmax + i*kmax + k])
+                const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
                   /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
                 const double n2 = probability/bin1_volume/shell0_volume;
                 const double g = n2/density0/density1;
@@ -554,17 +542,23 @@ int main(int argc, char *argv[]){
         const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
         const int a1_z_i = int(z0/a1_dz);
 
-        const double sph_r0 = distXYZ(spheres[i], Vector3d(0,0,-reflect*lenz/2));
-        const int sph_r0_i = int(sph_r0/dr);
-        const int sph_a1_r0_i = int(sph_r0/a1_dr);
-        const int density_index = triplet ? sph_r0_i : z0_unreflected_i;
+        const int density_index = z0_unreflected_i;
         density_histogram[density_index]++;
+
         if (z0 < path_dz) path_density_histogram[0]++;
-        if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
-          const double r0 = distXY(spheres[i], Vector3d(0,0,0));
-          const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
-          path_density_histogram[index] ++;
+        for (int xn = 0; xn < path_num_refs;  xn++) {
+          for (int yn = 0; yn < path_num_refs;  yn++) {
+            const double xref = lenx/path_num_refs*xn - lenx/2.0;
+            const double yref = leny/path_num_refs*yn - leny/2.0;
+            const double sph_r0 = distXYZ(spheres[i], Vector3d(xref,yref,-reflect*lenz/2));
+            if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
+              const double r0 = distXY(spheres[i], Vector3d(xref,yref,0));
+              const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
+              path_density_histogram[index] ++;
+            }
+          }
         }
+
         if (z0 > 2.0) {
           const int z0_i_shifted = int((z0-2.0)/path_dz);
           path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
@@ -586,13 +580,11 @@ int main(int argc, char *argv[]){
             const double sph_r1 = distXYZ(spheres[k], Vector3d(0,0,-reflect*lenz/2));
             const int sph_r1_i = int(sph_r1/dr);
             if (r1_i < rbins) { // ignore data past outermost complete cylindrical shell
-              const int index = triplet ? sph_r0_i*rbins*rbins + r01_i*rbins + sph_r1_i
-                                        : z0_i*rbins*zbins + r1_i*zbins + z1_i;
+              const int index = z0_i*rbins*zbins + r1_i*zbins + z1_i;
               histogram[index] ++;
             }
             if (a1_r01_i < a1_rbins) {
-              const int a1_index = triplet ? a1_r01_i*a1_r1bins + sph_a1_r0_i
-                                           : a1_r01_i*a1_zbins + a1_z_i;
+              const int a1_index = a1_r01_i*a1_zbins + a1_z_i;
               da_dz_histogram[a1_index] ++;
             }
             if (z0 < path_dz)
