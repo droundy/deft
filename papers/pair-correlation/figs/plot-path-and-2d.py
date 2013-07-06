@@ -62,7 +62,7 @@ def read_walls(ff, z0, fun):
 
 pylab.figure(figsize=(10,5))
 
-pylab.subplot(1,2,2)
+ax = pylab.subplot(1,2,2)
 for i in range(len(plots)):
     g2_path = read_walls_path(ff, z0, plots[i])
     if able_to_read_file == False:
@@ -102,9 +102,21 @@ pylab.annotate('$E$', xy=(xEoff,g2pathfunction(xEoff)), xytext=(xEoff+0.7,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
+ax.set_xticks((xBoff - 4,
+               xBoff - 3,
+               xBoff - 2,
+               xBoff - 1,
+               xBoff,
+               xDoff,
+               xDoff + 1,
+               xDoff + 2,
+               xDoff + 3,
+               xDoff + 4))
+ax.set_xticklabels((6, 5, 4, 3, 2, 2, 3, 4, 5, 6))
+
 pylab.ylim(0)
 pylab.xlim(xAoff - rpath,xEoff + rpath)
-pylab.xlabel('path distance')
+pylab.xlabel('$|\mathbf{r}_{12}|$')
 pylab.ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
 pylab.legend(loc='best')
 
