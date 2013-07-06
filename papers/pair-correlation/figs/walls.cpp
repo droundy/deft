@@ -348,7 +348,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     fclose(out_path);
   }
-  
+
   // here you choose the values of z0 to use
   // dx is set at beggining of file
   for (double z0 = 3.05; z0 < 13; z0 += dx) {
