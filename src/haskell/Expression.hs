@@ -1,4 +1,3 @@
-\begin{code}
 {-# LANGUAGE PatternGuards, Rank2Types #-}
 
 module Expression (Exprn(..),
@@ -920,17 +919,8 @@ imag_part :: Expression KSpace -> Expression Scalar
 imag_part x = case break_real_from_imag x of
                 Expression (Complex _ i) -> i
                 _ -> error "oopsies"
-\end{code}
 
-The \verb!ReciprocalSpaceField! data type describes a field in real space.
 
-\begin{code}
-\end{code}
-
-The \verb!Expression! data type describes an expression with a given
-type.
-
-\begin{code}
 -- IsTemp is a boolean type for telling whether a variable is temporary or not.
 data IsTemp = IsTemp | CannotBeFreed
             deriving (Eq, Ord, Show)
@@ -1990,4 +1980,3 @@ nameTensor :: Type a => String -> Tensor a -> Tensor a
 nameTensor n (SymmetricTensor xx yy zz xy yz zx) = SymmetricTensor (nn "xx" xx) (nn "yy" yy) (nn "zz" zz)
                                                                    (nn "xy" xy) (nn "yz" yz) (nn "zx" zx)
   where nn a s = (n++a) === s
-\end{code}

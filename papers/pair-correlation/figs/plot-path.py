@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 from __future__ import division
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib, sys
+if len(sys.argv) < 3 or sys.argv[2] != "show":
+  matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import pylab, numpy, sys, scipy.ndimage
+import pylab, numpy, scipy.ndimage
 import os.path
 import math
 
@@ -24,7 +25,7 @@ zmax = 20
 rmax = 10
 
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
@@ -109,7 +110,7 @@ def plot():
         theta = numpy.linspace(0, numpy.pi/2, num)
         g2_of_theta = numpy.zeros(len(theta))
         for j in range(len(theta)):
-            radius_path=2.5
+            radius_path=2.005
             r = radius_path*numpy.cos(theta[j])
             z = radius_path*numpy.sin(theta[j])
             g2_rz = g2[numpy.floor(r/dx),numpy.floor(z/dx)]

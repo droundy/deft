@@ -3,11 +3,12 @@
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-import matplotlib
+import matplotlib, sys
 
-matplotlib.use('Agg')
-
-import pylab, numpy, sys, random
+if len(sys.argv) < 2 or sys.argv[1]!="show" :
+  matplotlib.use('Agg')
+import pylab, numpy, random
+from pylab import *
 #import Scientific.Functions.LeastSquares as ls
 
 from scipy.optimize import leastsq
@@ -25,19 +26,19 @@ toFit = 4
 numParams = 7+3
 x = [1]*numParams
 # x[0] = 1.0 # 1.15
-x[0] = 6.134
+x[0] = 7.9
 
-x[1] = .413
-x[2] = 6.449
-x[3] = 2.058
+x[1] = .33
+x[2] = 7.13
+x[3] = 1.71
 
-x[4] = .331
-x[5] = 4.560
-x[6] = 3.319
+x[4] = .18
+x[5] = 5.52
+x[6] = 3.39
 
-x[7] = .0331
-x[8] = 4.560
-x[9] = 3.319
+# x[7] = .03
+# x[8] = 4.56
+# x[9] = 3.32
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
 ff = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
@@ -91,20 +92,26 @@ if able_to_read_file == False:
     pylab.savefig("figs/ghs-g-ghs.pdf")
     exit(0)
 
+def evalg(x, gsigma, r):
+  hsigma_rolloff = 5.0
+  hsigma = gsigma - 1 # (1 - 0.5*eta)/(1-eta)**3 - 1
+  h0 = hsigma # was x[0]*gsig
+  f0 = numpy.exp(-x[0]*r)
+  h1 = x[1]*hsigma
+  h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
+  f1 = numpy.sin(x[2]*r) * numpy.exp(-x[3]*r)
+  h2 = -x[4]*hsigma**(2)
+  h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
+  f2 = numpy.sin(x[5]*r) * numpy.exp(-x[6]*r)
+  #h3 = -x[7]*hsigma**(3)
+  #f3 = numpy.sin(x[8]*r) * numpy.exp(-x[9]*r)
+  return 1 + h0*f0 + h1*f1 + h2*f2#+ h3*f3
+
 def dist(x):
     # function with x[i] as constants to be determined
     g = numpy.zeros_like(gsigconcatenated)
     for i in range(len(g)):
-        hsigma = gsigconcatenated[i] - 1
-        h0 = hsigma # was x[0]*gsig
-        f0 = numpy.exp(-x[0]*rconcatenated[i])
-        h1 = x[1]*hsigma
-        f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
-        h2 = -x[4]*hsigma**(2)
-        f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
-        #h3 = -x[7]*hsigma**(3)
-        #f3 = numpy.sin(x[8]*rconcatenated[i]) * numpy.exp(-x[9]*rconcatenated[i])
-        g[i] = 1 + h0*f0 + h1*f1 + h2*f2 #+ h3*f3
+      g[i] = evalg(x, gsigconcatenated[i], rconcatenated[i])
     return g
 
 def dist2(x):
@@ -187,6 +194,13 @@ pylab.ylabel("|ghs - g|")
 #pylab.legend(loc='best').get_frame().set_alpha(0.5)
 pylab.savefig("figs/ghs-g-ghs.pdf")
 
+pylab.figure()
+for eta in [.5, .6, .7, .8]:
+  gsigma = (1-eta/2)/(1-eta)**3
+  pylab.plot(r_mc, evalg(vals, gsigma, r), label='eta %g  gsig %g'%(eta, gsigma))
+axhline(y=0)
+pylab.xlim(2,6.5)
+pylab.legend(loc='best')
 pylab.show()
 
 

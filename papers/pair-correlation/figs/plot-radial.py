@@ -4,7 +4,8 @@
 
 from __future__ import division
 import matplotlib
-#matplotlib.use('Agg')
+if len(sys.argv) < 4 or sys.argv[3] != "show":
+  matplotlib.use('Agg')
 import pylab, numpy, sys
 import os.path
 import matplotlib.colors as mcolors
@@ -20,7 +21,7 @@ zmax = 20
 rmax = 10
 
 def read_walls(ff, z0):
-    filename = "mc/wallsMC-pair-0.%d-%1.2f.dat" % (10*ff, z0)
+    filename = "figs/mc/wallsMC-pair-0.%d-%1.2f.dat" % (10*ff, z0)
     print 'Using', filename
     if (os.path.isfile(filename) == False):
         print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
@@ -48,3 +49,4 @@ pylab.ylabel("g")
 
 plotname = "radial-" + str(10*ff) + "-" + str(z0) + ".pdf"
 pylab.savefig(plotname)
+pylab.show()

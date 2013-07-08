@@ -35,6 +35,11 @@ case "$TEST" in
         echo Testing everything!
         ./autogen.sh
         time make -j $USING check pdf papers
+        mkdir build
+        cd build
+        ../cmake/release
+        make # -j $USING #is parallel build buggy?
+        ctest -j $USING
         echo Compile successful, papers successfully built, and all tests passed!
         ;;
 esac

@@ -21,7 +21,7 @@ plt.title('$da/dz,$ $\eta = %g,$  $\Delta r = %g$' %(eta, delta_r))
 plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta'])
 
 def read_a1_mc():
-  filename = "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.2f.dat" %(eta,delta_r)
+  filename = "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
   #print 'Using', filename
   try:
     data = loadtxt(filename)
@@ -33,7 +33,7 @@ def read_a1_mc():
   return data[:,0], data[:,1]
 
 def read_da_dz(version):
-  filename = "figs/walls/walls_daWB-%s-%04.2f-%04.2f.dat" % (version,eta,delta_r) #0.%d0
+  filename = "figs/walls/walls_daWB-%s-%04.2f-%1.3f.dat" % (version,eta,delta_r) #0.%d0
   #print 'Using', filename
   try:
     data = loadtxt(filename)
