@@ -26,7 +26,7 @@ foreach $dd ( 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.9, 0.8,
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type END
 ##SBATCH --mail-user daveroundy\@gmail.com
-#SBATCH --output single-$d.out
+#SBATCH --output hughes-single-$d.out
 
 set -ev
 

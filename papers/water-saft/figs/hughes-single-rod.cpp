@@ -40,7 +40,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
+void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -54,7 +54,8 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
-    fprintf(out, "%g\t%g\t%g\n", here[1], ahere, bhere);
+    double chere = c(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere);
   }
   fclose(out);
 }
@@ -106,10 +107,10 @@ int main(int argc, char **argv) {
 						hughes_water_prop.epsilon_dispersion,
 						hughes_water_prop.lambda_dispersion,
 						hughes_water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, hughes_water_prop.kT, atmospheric_pressure,
+  double n_1atm = pressure_to_density(f, new_water_prop.kT, atmospheric_pressure,
 					      0.001, 0.01);
 
-  double mu_satp = find_chemical_potential(f, hughes_water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, new_water_prop.kT, n_1atm);
 
   f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
 				     hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
@@ -123,7 +124,7 @@ int main(int argc, char **argv) {
                         hughes_water_prop.lambda_dispersion,
                         hughes_water_prop.length_scaling, mu_satp);
 
-  const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
+  const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*diameter*diameter)*width;
 
@@ -143,7 +144,7 @@ int main(int argc, char **argv) {
   potential = hughes_water_prop.liquid_density*constraint
     + 200*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
   //potential = hughes_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-  potential = -hughes_water_prop.kT*potential.cwise().log();
+  potential = -new_water_prop.kT*potential.cwise().log();
   
   const double surface_tension = 5e-5; // crude guess from memory...
   const double surfprecision = 1e-5*M_PI*diameter*width*surface_tension; // five digits accuracy
@@ -152,7 +153,7 @@ int main(int argc, char **argv) {
   //printf("Precision limit from surface tension is to %g based on %g and %g\n",
   //       precision, surfprecision, bulkprecision);
   Minimizer min = Precision(precision,
-                            PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT,
+                            PreconditionedConjugateGradient(f, gd, new_water_prop.kT,
                                                             &potential,
                                                             QuadraticLineMinimizer));
     
@@ -161,7 +162,7 @@ int main(int argc, char **argv) {
   const int numiters = 200;
   for (int i=0;i<numiters && min.improve_energy(true);i++) {
     fflush(stdout);
-    //Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
+    //Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
      
     //density.epsNativeSlice("papers/hughes-saft/figs/single-rod-in-water.eps", 
     //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -175,7 +176,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
+  Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
   //printf("The bulk energy per cell should be %g\n", EperCell);
   //printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
   //printf("Number of water molecules is %g\n", density.integrate());
@@ -196,10 +197,10 @@ int main(int argc, char **argv) {
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 
-  Grid X_values(gd, X(hughes_water_prop.kT, gd, density));
+  Grid X_values(gd, X(new_water_prop.kT, gd, density));
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/hughes-single-rod-slice-%04.1f.dat", diameter/nm);
-  plot_grids_y_direction(plotname, density, X_values);
+  sprintf(plotname, "papers/water-saft/figs/hughes-single-rod-slice-%04.2f.dat", diameter/nm);
+  plot_grids_y_direction(plotname, density, X_values, constraint);
   free(plotname);
 
   {

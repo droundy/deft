@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 
   Grid X_values(gd, X(new_water_prop.kT, gd, density));
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/single-rod-slice-%04.1f.dat", diameter/nm);
+  sprintf(plotname, "papers/water-saft/figs/single-rod-slice-%04.2f.dat", diameter/nm);
   plot_grids_y_direction(plotname, density, X_values);
   free(plotname);
 

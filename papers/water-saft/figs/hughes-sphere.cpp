@@ -74,41 +74,42 @@ int main(int argc, char *argv[]) {
   xmax = ymax = zmax = diameter + 2*padding;
 
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "papers/water-saft/figs/sphere-%04.2fnm-energy.dat", diameter/nm);
+  sprintf(datname, "papers/water-saft/figs/hughes-sphere-%04.2fnm-energy.dat", diameter/nm);
   
-  Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-						new_water_prop.epsilonAB, new_water_prop.kappaAB,
-						new_water_prop.epsilon_dispersion,
-						new_water_prop.lambda_dispersion,
-						new_water_prop.length_scaling, 0));
-  double n_1atm = pressure_to_density(f, new_water_prop.kT, atmospheric_pressure,
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+						hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+						hughes_water_prop.epsilon_dispersion,
+						hughes_water_prop.lambda_dispersion,
+						hughes_water_prop.length_scaling, 0));
+  double n_1atm = pressure_to_density(f, hughes_water_prop.kT, atmospheric_pressure,
 				      0.001, 0.01);
 
-  double mu_satp = find_chemical_potential(f, new_water_prop.kT, n_1atm);
+  double mu_satp = find_chemical_potential(f, hughes_water_prop.kT, n_1atm);
 
-  f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-				     new_water_prop.epsilonAB, new_water_prop.kappaAB,
-				     new_water_prop.epsilon_dispersion,
-				     new_water_prop.lambda_dispersion,
-				     new_water_prop.length_scaling, mu_satp));
+  f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+				     hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+				     hughes_water_prop.epsilon_dispersion,
+				     hughes_water_prop.lambda_dispersion,
+				     hughes_water_prop.length_scaling, mu_satp));
+
+  Functional X = WaterX(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu_satp);
+
+  Functional S = OfEffectivePotential(EntropySaftFluid2(hughes_water_prop.lengthscale,
+                                                        hughes_water_prop.epsilonAB,
+                                                        hughes_water_prop.kappaAB,
+                                                        hughes_water_prop.epsilon_dispersion,
+                                                        hughes_water_prop.lambda_dispersion,
+                                                        hughes_water_prop.length_scaling));
   
-  Functional S = OfEffectivePotential(EntropySaftFluid2(new_water_prop.lengthscale,
-                                                        new_water_prop.epsilonAB,
-                                                        new_water_prop.kappaAB,
-                                                        new_water_prop.epsilon_dispersion,
-                                                        new_water_prop.lambda_dispersion,
-                                                        new_water_prop.length_scaling));
-  
-  const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
+  const double EperVolume = f(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
-  const double SperNumber = S(new_water_prop.kT, -new_water_prop.kT*log(n_1atm))/n_1atm;
+  const double SperNumber = S(hughes_water_prop.kT, -hughes_water_prop.kT*log(n_1atm))/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
 
-  //Functional X = Xassociation(new_water_prop.lengthscale, new_water_prop.epsilonAB, 
-	//		      new_water_prop.kappaAB, new_water_prop.epsilon_dispersion,
-	//		      new_water_prop.lambda_dispersion,
-	//		      new_water_prop.length_scaling);
-  
   //for (diameter=0*nm; diameter<3.0*nm; diameter+= .1*nm) {
     Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
     GridDescription gd(lat, 0.2);
@@ -117,28 +118,21 @@ int main(int argc, char *argv[]) {
     Grid constraint(gd);
     constraint.Set(notinwall);
     
-    f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-				       new_water_prop.epsilonAB, new_water_prop.kappaAB,
-				       new_water_prop.epsilon_dispersion,
-				       new_water_prop.lambda_dispersion,
-				       new_water_prop.length_scaling, mu_satp));
-
-    Functional X = WaterX(new_water_prop.lengthscale,
-                        new_water_prop.epsilonAB, new_water_prop.kappaAB,
-                        new_water_prop.epsilon_dispersion,
-                        new_water_prop.lambda_dispersion,
-                        new_water_prop.length_scaling, mu_satp);
-
+    f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+				       hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+				       hughes_water_prop.epsilon_dispersion,
+				       hughes_water_prop.lambda_dispersion,
+				       hughes_water_prop.length_scaling, mu_satp));
     f = constrain(constraint, f);
-    //constraint.epsNativeSlice("papers/water-saft/figs/sphere-constraint.eps",
+    //constraint.epsNativeSlice("papers/hughes-saft/figs/sphere-constraint.eps",
     // 			      Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
     // 			      Cartesian(0,ymax/2,zmax/2));
     //printf("Constraint has become a graph!\n");
    
-    potential = new_water_prop.liquid_density*constraint
-      + 100*new_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-    //potential = new_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-    potential = -new_water_prop.kT*potential.cwise().log();
+    potential = hughes_water_prop.liquid_density*constraint
+      + 100*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
+    //potential = hughes_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
+    potential = -hughes_water_prop.kT*potential.cwise().log();
     
     double energy;
     {
@@ -147,7 +141,7 @@ int main(int argc, char *argv[]) {
       const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision for small spheres
       const double precision = bulkprecision + surfprecision;
       Minimizer min = Precision(precision,
-                                PreconditionedConjugateGradient(f, gd, new_water_prop.kT, 
+                                PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT, 
                                                                 &potential,
                                                                 QuadraticLineMinimizer));
       
@@ -156,9 +150,9 @@ int main(int argc, char *argv[]) {
       const int numiters = 200;
       for (int i=0;i<numiters && min.improve_energy(true);i++) {
         //fflush(stdout);
-        //Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
+        //Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
         
-        //density.epsNativeSlice("papers/water-saft/figs/sphere.eps", 
+        //density.epsNativeSlice("papers/hughes-saft/figs/sphere.eps", 
         //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
         //			     Cartesian(0,ymax/2,zmax/2));
         
@@ -184,41 +178,41 @@ int main(int argc, char *argv[]) {
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
     }
 
-    double entropy = S.integral(new_water_prop.kT, potential);
-    Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
+    double entropy = S.integral(hughes_water_prop.kT, potential);
+    Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
     printf("Number of water molecules is %g\n", density.integrate());
     printf("The bulk energy per cell should be %g\n", EperCell);
     printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
     printf("The bulk entropy is %g/N\n", SperNumber);
-    Functional otherS = EntropySaftFluid2(new_water_prop.lengthscale,
-                                          new_water_prop.epsilonAB,
-                                          new_water_prop.kappaAB,
-                                          new_water_prop.epsilon_dispersion,
-                                          new_water_prop.lambda_dispersion,
-                                          new_water_prop.length_scaling);
-    printf("The bulk entropy (haskell) = %g/N\n", otherS(new_water_prop.kT, n_1atm)/n_1atm);
+    Functional otherS = EntropySaftFluid2(hughes_water_prop.lengthscale,
+                                          hughes_water_prop.epsilonAB,
+                                          hughes_water_prop.kappaAB,
+                                          hughes_water_prop.epsilon_dispersion,
+                                          hughes_water_prop.lambda_dispersion,
+                                          hughes_water_prop.length_scaling);
+    printf("The bulk entropy (haskell) = %g/N\n", otherS(hughes_water_prop.kT, n_1atm)/n_1atm);
     //printf("My entropy is %g when I would expect %g\n", entropy, entropy - SperNumber*density.integrate());
-    double hentropy = otherS.integral(new_water_prop.kT, density);
+    double hentropy = otherS.integral(hughes_water_prop.kT, density);
     otherS.print_summary("   ", hentropy, "total entropy");
     printf("My haskell entropy is %g, when I would expect = %g, difference is %g\n", hentropy,
-           otherS(new_water_prop.kT, n_1atm)*density.integrate()/n_1atm,
-           hentropy - otherS(new_water_prop.kT, n_1atm)*density.integrate()/n_1atm);
+           otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm,
+           hentropy - otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm);
 
     FILE *o = fopen(datname, "w");
     //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
     fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
-            new_water_prop.kT*(entropy - SperNumber*density.integrate()),
-            new_water_prop.kT*(hentropy - otherS(new_water_prop.kT, n_1atm)*density.integrate()/n_1atm));
+            hughes_water_prop.kT*(entropy - SperNumber*density.integrate()),
+            hughes_water_prop.kT*(hentropy - otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm));
     fclose(o);
 
+    Grid X_values(gd, X(hughes_water_prop.kT, gd, density));
     char *plotname = (char *)malloc(1024);
-    Grid X_values(gd, X(new_water_prop.kT, gd, density));
-    sprintf(plotname, "papers/water-saft/figs/sphere-%04.2f.dat", diameter/nm);
+    sprintf(plotname, "papers/water-saft/figs/hughes-sphere-%04.2f.dat", diameter/nm);
     plot_grids_y_direction(plotname, density, X_values);
 
     free(plotname);
 
-    //density.epsNativeSlice("papers/water-saft/figs/sphere.eps",
+    //density.epsNativeSlice("papers/hughes-saft/figs/sphere.eps",
 		//	   Cartesian(0,ymax,0), Cartesian(0,0,zmax),
 		//	   Cartesian(0,ymax/2,zmax/2));
     
@@ -227,7 +221,7 @@ int main(int argc, char *argv[]) {
   
     double oldN = density.integrate();
     density = n_1atm*VectorXd::Ones(gd.NxNyNz);;
-    double hentropyb = otherS.integral(new_water_prop.kT, density);
+    double hentropyb = otherS.integral(hughes_water_prop.kT, density);
     printf("bulklike thingy has %g molecules\n", density.integrate());
     otherS.print_summary("   ", hentropyb, "bulk-like entropy");
     printf("entropy difference is %g\n", hentropy - hentropyb*oldN/density.integrate());
