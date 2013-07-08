@@ -48,7 +48,8 @@ ALL_FIGURES=\
 	figs/sphere-energy-vs-diameter.gp\
 	figs/density-sphere.gp\
 	figs/density-compare.py\
-	figs/single-rod-X-plot.py
+	figs/single-rod-X-plot.py\
+	figs/spheres-X-plot.py
 
 
 
@@ -90,22 +91,28 @@ figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.4nm.dat \
 	figs/four-rods-in-water-00.8nm.dat figs/four-rods-in-water-01.2nm.dat \
 	figs/four-rods-in-water-01.6nm.dat figs/four-rods-in-water-02.0nm.dat \
 	figs/four-rods-in-water-02.4nm.dat
-figs/density-compare.eps: figs/single-rod-slice-00.1.dat \
-		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
-		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
-		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
-		figs/hughes-single-rod-slice-00.1.dat \
-		figs/hughes-single-rod-slice-00.3.dat figs/hughes-single-rod-slice-00.6.dat \
-		figs/hughes-single-rod-slice-01.0.dat figs/hughes-single-rod-slice-01.6.dat \
-		figs/hughes-single-rod-slice-02.0.dat figs/hughes-single-rod-slice-00.6.dat
-figs/single-rod-X-plot.eps: figs/single-rod-slice-00.1.dat \
-		figs/single-rod-slice-00.3.dat figs/single-rod-slice-00.6.dat \
-		figs/single-rod-slice-01.0.dat figs/single-rod-slice-01.6.dat \
-		figs/single-rod-slice-02.0.dat figs/single-rod-slice-00.6.dat \
-		figs/hughes-single-rod-slice-00.1.dat \
-		figs/hughes-single-rod-slice-00.3.dat figs/hughes-single-rod-slice-00.6.dat \
-		figs/hughes-single-rod-slice-01.0.dat figs/hughes-single-rod-slice-01.6.dat \
-		figs/hughes-single-rod-slice-02.0.dat figs/hughes-single-rod-slice-00.6.dat
+figs/density-compare.eps: figs/single-rod-slice-0.10.dat \
+		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
+		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
+		figs/single-rod-slice-2.00.dat \
+		figs/hughes-single-rod-slice-0.10.dat \
+		figs/hughes-single-rod-slice-0.30.dat figs/hughes-single-rod-slice-0.60.dat \
+		figs/hughes-single-rod-slice-1.00.dat figs/hughes-single-rod-slice-1.60.dat \
+		figs/hughes-single-rod-slice-2.00.dat
+figs/single-rod-X-plot.eps: figs/single-rod-slice-0.10.dat \
+		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
+		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
+		figs/single-rod-slice-2.00.dat figs/single-rod-slice-0.40.dat\
+		figs/hughes-single-rod-slice-0.10.dat \
+		figs/hughes-single-rod-slice-0.30.dat figs/hughes-single-rod-slice-0.60.dat \
+		figs/hughes-single-rod-slice-1.00.dat figs/hughes-single-rod-slice-1.60.dat \
+		figs/hughes-single-rod-slice-2.00.dat	figs/hughes-single-rod-slice-0.40.dat
+figs/spheres-X-plot.eps: figs/sphere-0.20.dat figs/sphere-0.40.dat \
+		figs/sphere-0.80.dat figs/sphere-1.00.dat figs/sphere-1.20.dat \
+		figs/sphere-1.40.dat figs/sphere-1.60.dat figs/sphere-2.00.dat \
+		figs/hughes-sphere-0.20.dat figs/hughes-sphere-0.40.dat \
+		figs/hughes-sphere-0.80.dat figs/hughes-sphere-1.00.dat figs/hughes-sphere-1.20.dat \
+		figs/hughes-sphere-1.40.dat figs/hughes-sphere-1.60.dat figs/hughes-sphere-2.00.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)

@@ -90,39 +90,46 @@ based on Wertheim's first-order thermodynamic perturbation theory
   wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
 account for strong associative interactions between molecules.
 
-\fixme{Talk about Wertheim's TPT}
+Wertheim's thermodynamic perturbation theory \fixme{expand/correct this}
 
 In a recent paper \cite{hughes2013classical}, Hughes \emph{et al}
-constructed a classical density functional theory for water which uses
-SAFT as a basis for their free energy functional.  Hughes employed Clark
-\emph{et al}'s \cite{clark2006developing} five fitting parameters for
-an optimal cDFT for water and, in addition, introduces a parameter for
-the length scale over which the dispersion interaction is correlated.
-Clark found that the four association site model works best to
-describe water, which is physically accurate since each water molecule
-has four hydrogen bonding sites.
+constructed a classical DFT for water which uses SAFT as a basis for
+their free energy functional.  Hughes employed Clark \emph{et al}'s
+\cite{clark2006developing} five fitting parameters for an optimal cDFT
+for water and, in addition, introduces a parameter for the length
+scale over which the dispersion interaction is correlated.  Clark
+found that the four association site model works best to describe
+water, which is physically accurate since each water molecule has four
+hydrogen bonding sites.
 
-Schulte \emph{et al}\cite{schulte2012using} derived two expressions
-for the correlation function at contact for inhomogeneous fluids based
-on the White Bear version of fundamental measure theory (FMT). One
-expression was labeled as ``symmetric'' and found the average number
-of spheres touching a point $\rr$. The other expression, labeled
-``assymetric,'' sets $\rr$ at the center of a sphere, and finds the
-average spheres touching the solvent accessable surface.  They found
-the asymmetric correlation function, $g_{\sigma}^A$, to agree
-closely with Monte Carlo simulation.
+This functional was successful in \fixme{list stuff}. However, the
+correlation function for hard spheres from Yu and
+Wu\cite{yu2002fmt-dft-inhomogeneous-associating} that is used in the
+association free energy term was \fixme{untested}.
+
+Schulte \emph{et al}\cite{schulte2012using} derived two approximate
+expressions for the correlation function at contact for and
+inhomogeneous hard sphere fluid based on the White Bear version of
+fundamental measure theory (FMT). One of Schulte's expression found
+the average number of spheres touching a point $\rr$ and is referred
+to as a ``symmetric'' correlation functoin, $g_\sigma^S$ . The other
+expression sets $\rr$ at the center of a sphere and find the average
+spheres touching the solvent accessable surface, which could be
+considered an ``asymmetric'' correlation function, $g_{\sigma}^A$. The
+asymmetric function agreed closely with Monte Carlo simulation, and
+much better than Yu and Wu's.
 
 \section{Method}
 
 We modify Hughes \emph{et al}'s method of creating a classical DFT
 based on SAFT using Clark's four site model with five fitting
 parameters and the added fitting parameter for the correlation
-distance of the dispersion interaction.  Hughe's association free
-energy term is modified to use Schulte's $g_{\sigma}^A$ rather than Yu
-and Wu's.  The association free energy for our four-site model has the
-form \fixme{I copy/pasted and modified these equations, but they still
-  require a number of other equations to come before.  Maybe only show
-  the $g_\sigma^A$?}
+distance of the dispersion interaction.  We modify Hughes's
+association free energy term to use Schulte's $g_{\sigma}^A$ rather
+than Yu and Wu's.  The association free energy for our four-site model
+has the form \fixme{I copy/pasted and modified these equations, but
+  they still require a number of other equations to come before.
+  Maybe only show the $g_\sigma^A$?}
 \begin{align}
   F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) \zeta(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx,
@@ -161,18 +168,19 @@ correlation function $g^\textit{A}_\sigma$, for which we use the
 functional of Schulte \emph{et al}\cite{schulte2012using}:
 \begin{align}
   g_\sigma^{A}(\rr) &= \frac{1}{n(\rr)n_A(\rr)}\frac{1}{k_B T 4 \pi
-    (2r)^2}\frac{\delta F_{hs}}{\delta R(\rr)} 
+    (2R)^2}\frac{\delta F_{hs}}{\delta R(\rr)} 
 \end{align}
 where the $n_A(\rr)$ is the density of spheres that are touching a
-sphere that is located at point $\rr$.\fixme{The equation for
-$g_\sigma^A$ requires finidng convolutions of local derivative of
-the free energy, aking this formulation computationally more
-expensive than the free energy itself.}
+sphere that is located at point $\rr$. The modification to Hughes's
+functional appers here where we have replaced $g_\sigma^{HS}$ with
+$g_\sigma^A$. \fixme{The equation for $g_\sigma^A$ requires finding
+  convolutions of local derivative of the free energy, aking this
+  formulation computationally more expensive than the free energy
+  itself.}
 
-We used Clark's five empirical parameters, and fit the calculated
-surface tension to experimental surface tension at ambient
-conditions.  This fit was found by choosing the value of the
-$\lscale$, which we found to be 0.454 for this new functional.
+We use Clark's five empirical parameters, and fit the calculated
+surface tension to experimental surface tension at ambient conditions.
+We find these agree when $\lscale$ is 0.454.
 
 \begin{figure}
 \begin{center}
@@ -180,7 +188,7 @@ $\lscale$, which we found to be 0.454 for this new functional.
 \end{center}
 \caption{Comparison of Surface tension versus temperature for theoretical and
   experimental data. The experimental data is taken from NIST.\cite{nistwater}
-  The length-scaling parameter $s_d$ is fit so that the theoretical surface 
+  The length-scaling parameter $\lscale$ is fit so that the theoretical surface 
   tension will match the experimental surface tension near room temperature.}
 \label{fig:surface-tension}
 \end{figure}
@@ -190,7 +198,9 @@ $\lscale$, which we found to be 0.454 for this new functional.
 \includegraphics[width=3.5in]{figs/density-compare}
 \end{center}
 \caption{ Density profiles for single rods of different
-  radii from old and new functionals.}
+  radii for the new functional (top) and the old functional
+  (bottom). Each separately colored line represents a density profile
+  for a rod; the black dotted line is the bulk density.}
 \label{fig:density-single-rod}
 \end{figure}  
 
@@ -201,17 +211,40 @@ $\lscale$, which we found to be 0.454 for this new functional.
 \caption{ The average number of hydrogen bonds per molecule at
   distances from the center of hydrophobic rods of various
   radii. The solid lines are the results from using the assymetric
-  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}$.}
+  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}^{HS}$.}
 \label{fig:single-rod-X}
 \end{figure}
 
 \section{Hydrogen bonding near a hydrophobic rod}
 
-We use X from eq. \ref{eq:X} above to find the average number of
-hydrogen bonds per molecule as a function of distance for different
-radius hydrophobic rods.  Figure \ref{fig:single-rod-X} compares our
-new functional with Hughes's functional, \fixme{Physical description
-  for why it looks that way}
+We first simulate a single hydrophobic rod immersed in water. The
+density profile of the water with our functional is compared with that
+of Hughes in Fig. \ref{fig:density-single-rod}.  For small rods, the
+water densities are attenuated near the rods for our functional as
+compared to Hughes's.   Since we have changed the association term in
+the functional, a noticeable change might occur in the aveerage number
+of hydrogen bonds in a given system.  We compare the hydrogen bonds
+with the new and old functional for rods of a few different radii
+(Fig. \ref{fig:single-rod-X}) and find that there is a very noticeable
+difference.  This is not suprising since $g_\sigma^A$ is antisymmetric
+and $g\sigma^{HS}$ is symmetric.  \fixme{Physical description for why
+  it looks that way}
+
+\section{Hydrogen bonding near hard-sphere solutes}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/spheres-X-plot}
+\end{center}
+\caption{ The average number of hydrogen bonds per molecule at
+  distances from the center of spherical cavities of various
+  radii. The solid lines are the results from using the assymetric
+  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}$.}
+\label{fig:spheres-X}
+\end{figure}
+
+
+\fixme{More stuff here for spheres}
 
 \section{Conclusion}
 
