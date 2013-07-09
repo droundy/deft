@@ -554,10 +554,8 @@ int main(int argc, char *argv[]){
                   da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
 
                 if (z1 < 2*R + path_dr && z2 > 0) {
-                  if (z2 < lenx/2.0 && x2 < path_dx) {
-                    const double deltaz = max(z2-z1, 2.0001*R);// correction because z2-z1
-                                            // could be ever so slightly less than 2R
-                    const int index = path_zbins - (deltaz-2*R)/path_dr;
+                  if (z2 > z1+2*R && z2 < lenx/2.0 && x2 < path_dx) {
+                    const int index = path_zbins - (z2-z1-2*R)/path_dr;
                     if (index < 0 || index >= path_zbins)
                       fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                     path_histogram[index] ++;
