@@ -366,8 +366,6 @@ int main(int argc, char *argv[]){
             sprintf(da_dz_filename, "%s-%1.3f.dat", da_dz_outfilename, a1_r01);
             FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
             for (int k=0; k<a1_zbins; k++) {
-              const double a1_r0_max = (k+1)*a1_dr;
-              const double a1_r0_min = k*a1_dr;
               const double slice_volume = lenx*leny*a1_dz;
               const double da_dz = double(da_dz_histogram[i*a1_zbins + k]*N)/
                 slice_volume/a1_dr/double(count)/2.0;
@@ -383,7 +381,7 @@ int main(int argc, char *argv[]){
             printf("Error creating file %s\n", finalfilename);
             return 1;
           }
-          fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
+          fprintf(path_out, "# Working moves: %li, total moves: %li, numinhist: %li\n", workingmoves, count, numinhistogram);
           fprintf(path_out, "# s\tg2\tz\tr\thisto \tden histogram\n");
           const double path_density_fraction0 =
             double(path_density_histogram[0]*N)/double(count)/2.0;
