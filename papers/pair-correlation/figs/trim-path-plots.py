@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from pylab import *
 import os
 # Trims the path data to be used for git storage

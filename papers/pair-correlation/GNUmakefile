@@ -88,13 +88,13 @@ figs/pair-correlation-2-395-5.pdf: figs/plot-mc-modified.py
 figs/pair-correlation-2-395-10.pdf: figs/plot-mc-modified.py
 	python figs/plot-mc-modified.py .2 3.95 1.0
 
-figs/pair-correlation-pretty-1.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat)
+figs/pair-correlation-pretty-1.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat) $(wildcard figs/mc/*.dat)
 	python figs/plot-path-and-2d.py 0.1
-figs/pair-correlation-pretty-2.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat)
+figs/pair-correlation-pretty-2.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat) $(wildcard figs/mc/*.dat)
 	python figs/plot-path-and-2d.py 0.2
-figs/pair-correlation-pretty-3.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat)
+figs/pair-correlation-pretty-3.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat) $(wildcard figs/mc/*.dat)
 	python figs/plot-path-and-2d.py 0.3
-figs/pair-correlation-pretty-4.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat)
+figs/pair-correlation-pretty-4.pdf: figs/plot-path-and-2d.py $(wildcard figs/*.dat) $(wildcard figs/mc/*.dat)
 	python figs/plot-path-and-2d.py 0.4
 
 figs/pair-correlation-path-1.pdf: figs/plot-path.py $(wildcard figs/*.dat)

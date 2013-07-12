@@ -71,7 +71,14 @@ for i in range(len(plots)):
         savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
         pylab.savefig(savedfilename)
         exit(0)
-    pylab.plot(g2_path[:,0],g2_path[:,1], label=titles[i], color=colors[i])
+    # FIXME:  once we have sufficient data, we will want to remove this smoothing...
+    old = 1.0*g2_path[:,1]
+    averaged = 1.0*old
+    averaged[1:] += old[:len(averaged)-1]
+    averaged[:len(averaged)-1] += old[1:]
+    averaged /= 3;
+    pylab.plot(g2_path[:,0],averaged, label=titles[i], color=colors[i])
+    #pylab.plot(g2_path[:,0],g2_path[:,1], label=titles[i], color=colors[i])
 
 g2nice = read_walls_path(ff, z0, 'this-work')
 def g2pathfunction(x):
