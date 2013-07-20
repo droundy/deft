@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Deft README
-permalink: README.html
 ---
 
 About deft
