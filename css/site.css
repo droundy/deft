@@ -86,7 +86,7 @@ p {
 }
 
 #header {
-    height: 75px;
+    /* height: 75px; */
     background: #D6F4FF;
     border-radius: 10px;
     border: 1px solid #c2e0eb;
@@ -100,7 +100,7 @@ p {
 }
 
 #navigation {
-    height: 40px;
+    /* height: 40px; */
     background: #ADECFF;
     border-radius: 10px;
     border: 1px solid #99d8eb;
