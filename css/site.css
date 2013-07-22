@@ -50,10 +50,12 @@ table {
 
 /* REAL STUFF */
 h1 {
+    margin: 10px;
     font-weight: bold;
     font-size: 20px;
 }
 h2 {
+    margin: 10px;
     font-weight: bold;
     font-size: 18px;
 }
@@ -62,6 +64,7 @@ body {
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 13px;
     color:#333
+    line-height: 1.5;
 }
 
 p {
