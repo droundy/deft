@@ -29,9 +29,6 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
     display: block;
 }
-body {
-    line-height: 1;
-}
 ol, ul {
     list-style: none;
 }
@@ -65,6 +62,10 @@ body {
     font-size: 13px;
     color:#333
     line-height: 1.5;
+}
+
+pre {
+    margin: 30px;
 }
 
 p {
