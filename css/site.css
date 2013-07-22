@@ -98,7 +98,7 @@ p {
     background: #D6F4FF;
     border-radius: 10px;
     border: 1px solid #c2e0eb;
-    margin: 5px;
+    margin: 5px 5px 0px 5px;
     text-align: center;
 }
 
@@ -113,7 +113,7 @@ p {
     background: #ADECFF;
     border-radius: 10px;
     border: 1px solid #99d8eb;
-    margin: 5px;
+    margin: 5px 5px 0px 5px;
 }
 
 #contentliquid {
