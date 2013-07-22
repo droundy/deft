@@ -30,7 +30,8 @@ footer, header, hgroup, menu, nav, section {
     display: block;
 }
 ol, ul {
-    list-style: none;
+    list-style: disk;
+    margin: 15px;
 }
 blockquote, q {
     quotes: none;
@@ -142,6 +143,6 @@ p {
     background: #33CCFF;
     border-radius: 10px;
     border: 1px solid #1fb8eb;
-    margin: 15px;
+    margin: 5px;
 }
 
