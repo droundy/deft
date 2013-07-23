@@ -1,6 +1,7 @@
-Deft frequently asked questions.
-
-[[!toc ]]
+---
+title: Deft frequently asked questions.
+layout: page
+---
 
 
 ## How do I add a new C++ file to the deft core?

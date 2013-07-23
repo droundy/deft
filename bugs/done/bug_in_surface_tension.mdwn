@@ -1,7 +1,0 @@
-There is a disagreement between the surface_tension function and the
-version used in the test suite.  See `tests/surface-tension.cpp`.
-
-> It turned out that the problem was just that I changed the
-  resolution, causing the computed surface tension to change
-  dramatically.  Increasing the resolution brought the two approaches
-  into much better agreement.

@@ -1,5 +1,7 @@
-The `src/` directory
-====================
+---
+title: The `src/` directory
+layout: page
+---
 
 This is where most of our core code is located.
 

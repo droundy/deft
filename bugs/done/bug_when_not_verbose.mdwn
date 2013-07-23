@@ -1,7 +1,0 @@
-There is a wrong-answer bug that is triggered when verbosity is
-disabled in the "liquid" portion of `tests/surface-tension.cpp`.
-
-> As it turns out, the trouble was a checksum collision, and making
-  the checksum slightly more tricky seems to have solved it.  Ideally
-  I'd like to move to more than a 32-bit checksum, and ideally even
-  use one that I haven't thrown together myself.

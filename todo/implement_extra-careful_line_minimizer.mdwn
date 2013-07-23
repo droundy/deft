@@ -1,3 +1,0 @@
-For when we've got functions like log(1-x) that can return NaNs.
-
-> I implemented this, so it is now [[done]].

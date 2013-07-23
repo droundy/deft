@@ -204,31 +204,17 @@ papers_fuzzy_fmt_figs_walls_mkdat_SOURCES = papers/fuzzy-fmt/figs/walls.cpp $(AL
 
 #noinst_PROGRAMS = optest
 
-#BUILT_SOURCES = patchlevel.h
-
-#patchlevel.h: update_patchlevel.sh @DARCS_INVENTORY@ $(DFT_SOURCES) $(CMND_SOURCES)
-#	sh update_patchlevel.sh
-# Build static html docs suitable for being shipped in the software
-# package. This depends on ikiwiki being installed to build the docs.
-
-# ifeq ($(shell which ikiwiki),)
-# IKIWIKI=echo "** ikiwiki not found" >&2 ; echo ikiwiki
-# else
-# IKIWIKI=ikiwiki
-# endif
-
 pdf: doc/Association.pdf doc/WhiteBear.pdf doc/TensorWhiteBear.pdf \
 	doc/WhiteBearMarkII.pdf doc/Dispersion.pdf doc/SaftFluid.pdf \
 	doc/SimpDispersion.pdf doc/EntropySaftFluid.pdf \
 	doc/CorrelationS.pdf doc/CorrelationA.pdf doc/CorrelationAm2.pdf \
 	doc/GradDispersion.pdf doc/JoinedGradDispersion.pdf doc/SimpGradDispersion.pdf
 
-html: pdf
-	ikiwiki `pwd` html -v --wikiname Deft --plugin=goodstuff \
-		--exclude=html --exclude=Makefile.am
+html: pdf papers
+	jekyll build
 
 clean-local:
-	rm -rf .ikiwiki html
+	rm -rf html
 	cd papers && $(MAKE) clean
 	cd src/haskell && $(MAKE) clean
 

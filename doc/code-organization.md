@@ -1,3 +1,8 @@
+---
+title: Code organization
+layout: page
+---
+
 Here is the beginning of a map for the source code.  At the top level
 (in your `deft/` directory), there are a number of files, as well as a
 few directories.
@@ -24,16 +29,12 @@ There are several directories that hold most of the interesting files:
 
 1. [src][] is the directory where most of our core code is located.
 
-[src]: ../../src/src (`src/`)
-
 2. [tests][] is where we keep test programs, that verify that our code
    behaves as we desire.
 
    You can run the tests by running:
 
        srun -p debian -c4 make -j4 check
-
-[tests]: ../../tests/tests (`tests/`)
 
 3. [papers][] is where we keep LaTeX source for papers that use Deft.
    These directory also contain the specific code needed to generate
@@ -42,4 +43,8 @@ There are several directories that hold most of the interesting files:
 
        srun -p debian -c4 make -j4 papers
 
-[papers]: ../../papers/papers (`papers/`)
+[src]: ../src/src.html (`src/`)
+
+[tests]: ../tests/tests.html (`tests/`)
+
+[papers]: ../papers/papers.html (`papers/`)

@@ -1,1 +1,0 @@
-Eventually we'll need to input external potentials.  We could do this in C++ as we currently do, but we also might like to be able to construct V(r) (or V(k)?) in haskell code that generates the C++ code.

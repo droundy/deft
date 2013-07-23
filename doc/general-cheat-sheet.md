@@ -1,6 +1,11 @@
-Hello?
+---
+title: General cheat sheet
+layout: page
+---
+
 
 Terminal commands:
+-----------------
 
     2>&1 
 takes the stderr of your program (one of the types of output) and puts it in stdout, along with what would also be in stdout.  The idea is that the "2" represents the stderr and the "&1" represents the fact that "1" is a file descriptor and "1" itself is the stdout.

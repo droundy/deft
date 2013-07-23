@@ -1,4 +1,0 @@
-Implement huge repulsive external potential, to make sure we can look
-at a hard-surface cavity.
-
-> I implemented this, so it is now [[done]].

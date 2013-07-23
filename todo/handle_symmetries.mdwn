@@ -1,1 +1,0 @@
-It would be great to be able (in the new version of the code) to automagically recognize symmetries that are present, and only store unique data points in real space and in reciprocal space.  This could be a bit tricky, since we'd need to construct a mapping between the two grids.
