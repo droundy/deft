@@ -36,6 +36,9 @@
 
 #include "handymath.h"
 
+Functional gSigmaA_automagic(double R);
+Functional gSigmaA_by_hand(double R);
+
 int errors = 0;
 
 double a = 5;
@@ -152,6 +155,8 @@ int main(int, char **argv) {
   compare_functionals(NicePhi3(R), phi3, myT, n, 1e-13, 0.001, 1e-14);
 
   compare_functionals(TensorWhiteBear(R), HardSpheresWB(R), myT, n, 1e-13, 0.0001, 1e-13);
+
+  compare_functionals(gSigmaA_by_hand(R), gSigmaA_automagic(R), myT, n, 1e-13, 0.0001, 1e-13);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);
   else printf("\n%s fails %d tests!\n", argv[0], errors);

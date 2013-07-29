@@ -23,6 +23,7 @@ haskell_functionals(
   src/HughesXFast.cpp
   # the following are only needed for tests
   src/TensorDensityXXFast.cpp src/VectorDensityXFast.cpp src/n2DensityFast.cpp
+  src/gSigmaA_by_handFast.cpp src/gSigmaA_automagicFast.cpp
 )
 
 new_haskell_functionals(
@@ -162,6 +163,6 @@ add_custom_command(
 
 add_executable(tests/generated-code.test tests/generated-code.cpp
   src/TensorWhiteBearFast.cpp tests/generated-haskell/nice-sum.h)
-target_link_libraries(tests/generated-code.test deftgeneric)
+target_link_libraries(tests/generated-code.test defthaskell)
 add_test(generated-code tests/generated-code.test)
 

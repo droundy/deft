@@ -2,7 +2,7 @@
 functional for the excess free energy of the hard sphere fluid. -}
 
 module WhiteBear
-       ( kT, whitebear, gSigmaS, gSigmaA,
+       ( kT, whitebear, gSigmaS, gSigmaA, gSigmaA_automagic, gSigmaA_by_hand,
          tensorThirdTerm, phi3t,
          tensorwhitebear,
          whitebear_m2, gSigmaS_m2, gSigmaA_m2,
@@ -75,12 +75,31 @@ double_shell x = ifft ( deltak * fft x)
   where deltak = var "delta2k" "\\delta_2(k)" $ smear * (4*pi) * (2*rad) * sin (2*kR) / k
 
 gSigmaA :: Expression RealSpace
-gSigmaA = var "gSigmaA" "g_{\\sigma}^{A}" $
-                   gSigmaA_helper phitot
+gSigmaA = gSigmaA_automagic
+
+gSigmaA_automagic :: Expression RealSpace
+gSigmaA_automagic = var "gSigmaA" "g_{\\sigma}^{A}" $
+                    gSigmaA_helper phitot
 
 gSigmaA_m2 :: Expression RealSpace
 gSigmaA_m2 = var "gSigmaA" "g_{\\sigma,m2}^{A}" $
                       gSigmaA_helper phitot_m2
+
+gSigmaA_by_hand :: Expression RealSpace
+gSigmaA_by_hand = dAdR/(kT * n*shell_diam n )
+    where dAdR = var "dAdR" "\\frac{dA}{dR}" $ factorize $
+                 kT*n*( shell (dphi_dn3 - dphi_dn1/(4*pi*rad**2) - dphi_dn0/(2*pi*rad**3))
+                        - shellPrime (dphi_dn2 + dphi_dn1/(4*pi*rad) + dphi_dn0/(4*pi*rad**2))
+                        + vshellPrimedot (dphi_dn2v + 1/(4*pi*rad) .* dphi_dn1v)
+                        + vshelldot (1/(4*pi*rad**2) .* dphi_dn1v) )
+          dphi_dn0 = -log(1-n3)
+          dphi_dn1 = n2/(1-n3)
+          dphi_dn2 = n1/(1-n3) + (3*n2**2 - 3*sqr_n2v)*(n3+(1-n3)**2*log(1-n3))/(36*pi*n3**2*(1-n3)**2)
+          dphi_dn3 = n0/(1-n3) + (n1*n2- n1v_dot_n2v)/(1-n3)**2 +
+                     vectorThirdTerm*(1 - 2*(1-n3)*log(1-n3) - (1-n3))/(36*pi*n3**2*(1-n3)**2) -
+                     vectorThirdTerm*(n3+(1-n3)**2*log(1-n3))/(36*pi*n3**2*(1-n3)**2)**2*(36*pi)*(2*n3*(1-n3)**2 - 2*n3**2*(1-n3))
+          dphi_dn1v = -1/(1-n3) .* n2v
+          dphi_dn2v = -1/(1-n3) .* n1v - 6*n2*(n3+(1-n3)**2*log(1-n3))/(36*pi*n3**2*(1-n3)**2) .* n2v
 
 gSigmaA_helper :: Expression RealSpace -> Expression RealSpace
 gSigmaA_helper phit = dAdR/(kT * n*shell_diam n )

@@ -5,7 +5,7 @@ import IdealGas ( idealgas )
 import FMT ( n, n2, n2mxx, n2x )
 import SFMT ( sfmt )
 import WhiteBear ( whitebear, tensorwhitebear, whitebear_m2, correlation_gross, gSigmaA, gSigmaS,
-                   gSigmaA_m2, gSigmaS_m2 )
+                   gSigmaA_m2, gSigmaS_m2, gSigmaA_by_hand, gSigmaA_automagic )
 import System.Environment ( getArgs )
 
 main :: IO ()
@@ -36,6 +36,11 @@ main =
        defineTransformation gSigmaS ["R"] "gSigmaS"
      gen "src/gSigmaAFast.cpp" $
        defineTransformation gSigmaA ["R"] "gSigmaA"
+
+     gen "src/gSigmaA_by_handFast.cpp" $
+       generateHeader gSigmaA_by_hand ["R"] "gSigmaA_by_hand"
+     gen "src/gSigmaA_automagicFast.cpp" $
+       generateHeader gSigmaA_automagic ["R"] "gSigmaA_automagic"
 
      gen "src/gSigmaSm2Fast.cpp" $
        defineTransformation gSigmaS_m2 ["R"] "gSigmaSm2"

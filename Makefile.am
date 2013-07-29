@@ -17,7 +17,6 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/compute-surface-tension.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
-	src/WaterSaftFast.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
 CONTACT_CODE = $(GENERIC_CODE) \
@@ -34,6 +33,8 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
 	src/EntropySaftFluid2Fast.cpp src/CorrelationGrossCorrectFast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
 	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
+	src/gSigmaA_automagicFast.cpp src/gSigmaA_by_handFast.cpp \
+	src/WaterSaftFast.cpp \
 	src/SoftFluidFast.cpp src/HardFluidFast.cpp \
 	src/WaterXFast.cpp src/HughesXFast.cpp
 
@@ -127,6 +128,7 @@ check_PROGRAMS = \
 	tests/print-iter.test \
 	tests/ideal-gas.test \
 	tests/convolve.test \
+	tests/compare-gsigmas.test \
 	tests/convolve-finite-difference.test \
 	tests/precision.test \
 	tests/functional-arithmetic.test \
@@ -138,11 +140,14 @@ check_PROGRAMS = \
 TESTS = tests/null.sh tests/print-iter.sh src/haskell/test.exe \
 			$(check_PROGRAMS)
 tests_saft_test_SOURCES = tests/saft.cpp $(ALL_CODE)
-tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE) src/TensorWhiteBearFast.cpp
+tests_generated_code_test_SOURCES = tests/generated-code.cpp $(GENERIC_CODE) \
+	src/TensorWhiteBearFast.cpp src/gSigmaA_by_handFast.cpp src/gSigmaA_automagicFast.cpp
 tests_new_generated_code_test_SOURCES = tests/new-generated-code.cpp $(GENERIC_CODE)
 tests_new_hard_spheres_test_SOURCES = tests/new-hard-spheres.cpp $(GENERIC_CODE) $(NEWHASKELL_CODE)
 tests_print_iter_test_SOURCES = tests/print-iter.cpp $(ALL_CODE)
 tests_memory_test_SOURCES = tests/memory.cpp $(ALL_CONTACT_CODE)
+tests_compare_gsigmas_test_SOURCES = tests/compare-gsigmas.cpp $(GENERIC_CODE) \
+			src/gSigmaA_by_handFast.cpp src/gSigmaA_automagicFast.cpp
 tests_convolve_test_SOURCES = tests/convolve.cpp $(GENERIC_CODE) \
 			src/TensorDensityXXFast.cpp src/VectorDensityXFast.cpp src/n2DensityFast.cpp
 tests_convolve_finite_difference_test_SOURCES = tests/convolve-finite-difference.cpp $(ALL_CODE)
