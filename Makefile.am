@@ -2,7 +2,7 @@
 
 EXTRA_DIST = autogen.sh
 
-NEW_CODE = src/new/test.cpp src/new/Minimizer.cpp
+NEW_CODE = src/new/test.cpp src/new/Minimize.cpp
 
 FUNCTIONAL_CODE = src/lattice.cpp src/utilities.cpp \
 	src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp \

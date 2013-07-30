@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Functional.h"
+#include "new/NewFunctional.h"
 #include "handymath.h"
 #include <stdio.h>
 #include <math.h>
@@ -10,9 +10,9 @@
 
 const Verbosity min_details = chatty;
 
-class Minimizer {
+class Minimize {
 public:
-  Minimizer(const Functional *myf, Vector *data)
+  Minimize(const NewFunctional *myf, Vector *data)
     : f(myf), x(data) {
     iter = 0;
     maxiter = 10000000;
@@ -37,10 +37,10 @@ public:
     dEdn = 0;
     log_dEdn_ratio_average = 0;
   }
-  ~Minimizer() {
+  ~Minimize() {
     invalidate_cache();
   }
-  void minimize(const Functional *newf, Vector *newx = 0) {
+  void minimize(const NewFunctional *newf, Vector *newx = 0) {
     f = newf;
     iter = 0;
     num_energy_calcs = 0;
@@ -152,7 +152,7 @@ public:
     last_energy = 0;
   }
 private:
-  const Functional *f;
+  const NewFunctional *f;
   Vector *x; // Note that we don't own this data!
   int iter, maxiter;
 

@@ -10,7 +10,7 @@ struct EnergyGradAndPrecond {
   Vector grad, precond;
 };
 
-// A Functional is a very simple type: it defines an energy function
+// A NewFunctional is a very simple type: it defines an energy function
 // and a gradient function.  Each of these takes a Vector as input,
 // and each takes some additional input to determine its behavior.
 
@@ -21,10 +21,10 @@ struct EnergyGradAndPrecond {
 // certain degrees of freedom in sequence (if that were more
 // efficient).
 
-// The class "Functional" is an abstract class.  To use a Functional,
-// you need to create a new class with Functional as its parent.
+// The class "NewFunctional" is an abstract class.  To use a NewFunctional,
+// you need to create a new class with NewFunctional as its parent.
 
-class Functional {
+class NewFunctional {
 public:
   // The following is the "energy" function, which must be defined by
   // any real functionals.

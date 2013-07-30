@@ -1,11 +1,11 @@
 // -*- mode: C++; -*-
 
-#include "new/Functional.h"
+#include "new/NewFunctional.h"
 #include "utilities.h"
 #include "handymath.h"
 
 
-class WhiteBear : public Functional {
+class WhiteBear : public NewFunctional {
 public:
 WhiteBear(double R_arg) : R(R_arg)  {
 }

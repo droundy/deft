@@ -1,4 +1,4 @@
-#include "Minimizer.h"
+#include "Minimize.h"
 #include <math.h>
 #include <float.h>
 
@@ -6,7 +6,7 @@ inline bool better(double a, double b) {
   return a < b || b != b;
 }
 
-bool Minimizer::improve_energy(Verbosity v) {
+bool Minimize::improve_energy(Verbosity v) {
   iter++;
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy(v);
@@ -118,10 +118,10 @@ bool Minimizer::improve_energy(Verbosity v) {
       invalidate_cache();
       if (energy(v) == Etried) {
         if (v >= verbose) {
-          printf("\tThis is silly in QuadraticLineMinimizerType::improve_energy: %g (%g vs %g)\n",
+          printf("\tThis is silly in QuadraticLineMinimizeType::improve_energy: %g (%g vs %g)\n",
                  step1, energy(v), Etried);
           //Grid foo(gd, *x);
-          //f.run_finite_difference_test("In QuadraticLineMinimizerType", kT, foo, &direction);
+          //f.run_finite_difference_test("In QuadraticLineMinimizeType", kT, foo, &direction);
           //fflush(stdout);
         }
         break;
@@ -284,7 +284,7 @@ bool Minimizer::improve_energy(Verbosity v) {
   }
 }
 
-void Minimizer::print_info(const char *prefix, bool with_iteration) const {
+void Minimize::print_info(const char *prefix, bool with_iteration) const {
   if (with_iteration) printf("\n%s==== Iteration %d ====\n", prefix, iter);
   f->printme(prefix);
   printf("%s total energy =", prefix);

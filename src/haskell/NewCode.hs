@@ -29,7 +29,7 @@ functionDeclaration n t a =
 scalarClass :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
 scalarClass e arg variables n =
   unlines $
-  ["class " ++ n ++ " : public Functional {",
+  ["class " ++ n ++ " : public NewFunctional {",
    "public:",
    "" ++ n ++ codeA arg ++ "  {",
    "}",
@@ -167,7 +167,7 @@ defineFunctional :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
 defineFunctional e arg variables n =
   unlines ["// -*- mode: C++; -*-",
            "",
-           "#include \"new/Functional.h\"",
+           "#include \"new/NewFunctional.h\"",
            "#include \"utilities.h\"",
            "#include \"handymath.h\"",
            "",
@@ -180,12 +180,12 @@ createHeader e arg n =
   unlines $
   ["// -*- mode: C++; -*-",
    "",
-   "#include \"new/Functional.h\"",
+   "#include \"new/NewFunctional.h\"",
    "#include \"utilities.h\"",
    "#include \"handymath.h\"",
    "",
    "",
-   "class " ++ n ++ " : public Functional {",
+   "class " ++ n ++ " : public NewFunctional {",
    "public:",
    "" ++ n ++ codeA arg ++ "  {",
    "}",

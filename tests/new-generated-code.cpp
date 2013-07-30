@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include "new/Functional.h"
+#include "new/NewFunctional.h"
 #include "new-generated-haskell/volume_minus_one_sqr.h"
 #include "new-generated-haskell/integrate_sqr.h"
 #include "new-generated-haskell/WhiteBear.h"
@@ -24,7 +24,7 @@ int errors = 0;
 
 double a = 5;
 
-class volminusonesqr : public Functional {
+class volminusonesqr : public NewFunctional {
 public:
   volminusonesqr() {}
   double energy(const Vector &x) const {
@@ -55,7 +55,7 @@ private:
 	mutable double V;
 };
 
-class nsqr : public Functional {
+class nsqr : public NewFunctional {
 public:
   nsqr() {}
   double energy(const Vector &x) const {
@@ -103,7 +103,7 @@ public:
 };
 
 void compare_functionals(const char *name,
-                         const Functional &f1, const Functional &f2, Vector v,
+                         const NewFunctional &f1, const NewFunctional &f2, Vector v,
                          double fraccuracy = 1e-15) {
   printf("\n************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");

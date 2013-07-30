@@ -24,6 +24,7 @@ README
 configure
 *.cache
 *.log
+*.failed
 aclocal.m4
 config.*
 *.eps
@@ -51,4 +52,6 @@ CTestTestfile.cmake
 Testing
 cmake_install.cmake
 build
-
+.scons*
+*.fls
+*.pyc

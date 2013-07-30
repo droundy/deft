@@ -1,4 +1,4 @@
-#include "Minimizer.h"
+#include "new/Minimize.h"
 #include <stdio.h>
 
 inline double spring(int i) {
@@ -6,7 +6,7 @@ inline double spring(int i) {
   return 1.0;
 }
 
-class SqrSum : public Functional {
+class SqrSum : public NewFunctional {
   double energy(const Vector &x) const {
     const int sz = x.get_size();
     double out = 0;
@@ -56,7 +56,7 @@ int main() {
       foo[i] = i*0.1;
     }
     SqrSum sqr;
-    Minimizer min(&sqr, &foo);
+    Minimize min(&sqr, &foo);
     printf("Starting energy is %g\n\n", min.energy());
     while (min.improve_energy(quiet)) {
     }
@@ -76,7 +76,7 @@ int main() {
       foo[i] = i*0.1;
     }
     SqrSum sqr;
-    Minimizer min(&sqr, &foo);
+    Minimize min(&sqr, &foo);
     const double prec = 1e-9;
     min.set_precision(prec);
     printf("Starting energy is %g\n\n", min.energy());
@@ -105,7 +105,7 @@ int main() {
       foo[i] = i*0.1;
     }
     SqrSum sqr;
-    Minimizer min(&sqr, &foo);
+    Minimize min(&sqr, &foo);
     const double prec = 1e-9;
     min.set_precision(prec);
     min.precondition(true);

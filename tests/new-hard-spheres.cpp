@@ -19,7 +19,7 @@
 #include "new/WhiteBearFast.h"
 
 int check_functional_value(const char *name,
-                            const Functional &f, Vector v,
+                            const NewFunctional &f, Vector v,
                             double energy,
                             double fraccuracy = 1e-15) {
   int errors = 0;
