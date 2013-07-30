@@ -93,12 +93,12 @@ plot [:1.05] [0.01:150] \
 'figs/equation-of-state.dat' u ($4/gpermL):($2/atm) notitle with lines ls 1 , \
 'figs/experimental-equation-of-state.dat' u ($3/gpermL):($2/atm) title 'expt' with lines ls 2 , \
 'figs/experimental-equation-of-state.dat' u ($4/gpermL):($2/atm) notitle with lines ls 2 , \
-'figs/pressure-298K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 3 , \
-'figs/pressure-348K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 18 , \
-'figs/pressure-398K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 14 , \
-'figs/pressure-448K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 13 , \
-'figs/pressure-498K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 19 , \
-'figs/pressure-598K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 15# , \
+'../hughes-saft/figs/pressure-298K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 3 , \
+'../hughes-saft/figs/pressure-348K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 18 , \
+'../hughes-saft/figs/pressure-398K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 14 , \
+'../hughes-saft/figs/pressure-448K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 13 , \
+'../hughes-saft/figs/pressure-498K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 19 , \
+'../hughes-saft/figs/pressure-598K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lines ls 15# , \
 #'figs/pressure-698K.dat' u ($3*molperltobohr3/gpermL):($2*MPatoHtrperbohr3/atm) notitle with lp ls 16 
 #'figs/pressure-with-isotherms.dat' u ($1/gpermL):($19/atm) title 'T = 698K' with lines ls 12, \
 #'figs/pressure-with-isotherms.dat' u ($1/gpermL):($21/atm) title 'T = 748K' with lines ls 4 , \
