@@ -1,5 +1,7 @@
 import os, time
 
+CacheDir(os.environ['HOME'] + '/.cache/scons')
+
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3'])
 env.MergeFlags('-Wall -Werror -ansi')
@@ -109,13 +111,12 @@ generic_sources = Split("""
   src/IdealGas.cpp src/ChemicalPotential.cpp
   src/HardSpheres.cpp src/ExternalPotential.cpp
   src/Functional.cpp src/ContactDensity.cpp
-  src/Gaussian.cpp src/Pow.cpp
+  src/Gaussian.cpp src/Pow.cpp  src/WaterSaftFast.cpp
   src/EffectivePotentialToDensity.cpp
   src/equation-of-state.cpp src/water-constants.cpp
   src/compute-surface-tension.cpp
   src/Minimizer.cpp src/Downhill.cpp
   src/Precision.cpp src/ConjugateGradient.cpp
-  src/WaterSaftFast.cpp
   src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
  """)
