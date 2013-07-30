@@ -1,4 +1,4 @@
-import os, time
+import os, time, string, glob
 
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
@@ -156,6 +156,17 @@ for paperfile in Glob('papers/*/paper.tex'):
                 env.Command(target = basefile + ".pdf",
                             source = outfile,
                             action = 'epstopdf $SOURCE')
+
+env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
+            source = ['papers/hughes-saft/figs/density_calc.py',
+                      'papers/hughes-saft/figs/single-rod-in-water.dat'],
+            action = 'python figs/density_calc.py',
+            chdir = 'papers/hughes-saft')
+env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
+            source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
+            action = string.join(['cat '] +
+                                 glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
+                                 [' > $TARGET']))
 
 for mkdat in Split("""
 	papers/water-saft/figs/surface-tension
