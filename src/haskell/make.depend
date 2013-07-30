@@ -29,6 +29,11 @@ $(HASDIR)SFMT.o : SFMT.hs
 $(HASDIR)SFMT.o : $(HASDIR)FMT.hi
 $(HASDIR)SFMT.o : $(HASDIR)WhiteBear.hi
 $(HASDIR)SFMT.o : $(HASDIR)Expression.hi
+$(HASDIR)WaterSaftByHand.o : WaterSaftByHand.hs
+$(HASDIR)WaterSaftByHand.o : $(HASDIR)Expression.hi
+$(HASDIR)WaterSaftByHand.o : $(HASDIR)IdealGas.hi
+$(HASDIR)WaterSaftByHand.o : $(HASDIR)WhiteBear.hi
+$(HASDIR)WaterSaftByHand.o : $(HASDIR)FMT.hi
 $(HASDIR)Statement.o : Statement.hs
 $(HASDIR)Statement.o : $(HASDIR)Expression.hi
 $(HASDIR)Optimize.o : Optimize.hs
