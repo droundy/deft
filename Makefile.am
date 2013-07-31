@@ -15,6 +15,7 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/EffectivePotentialToDensity.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
+	src/WaterSaftFast.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
@@ -34,7 +35,6 @@ HASKELL_CODE = src/HardSpheresNoTensor2Fast.cpp \
 	src/gSigmaSm2Fast.cpp src/gSigmaAm2Fast.cpp \
 	src/gSigmaSFast.cpp src/gSigmaAFast.cpp \
 	src/gSigmaA_automagicFast.cpp src/gSigmaA_by_handFast.cpp \
-	src/WaterSaftFast.cpp \
 	src/SoftFluidFast.cpp src/HardFluidFast.cpp \
 	src/WaterXFast.cpp src/HughesXFast.cpp
 
