@@ -9,11 +9,11 @@ import matplotlib.pyplot as pyplot
 import numpy
 import pylab
 
-#newdata = pylab.loadtxt('figs/single-rod-in-water.dat')
+#newdata = pylab.loadtxt('figs/sphere.dat')
 hugdata = pylab.loadtxt('figs/hughes-sphere.dat')
 #rnew = newdata[:,0]
 rhug = hugdata[:,0]
-#newbrokenHB = newdata[:,2]
+#newbrokenHB = newdata[:,5]
 hugbrokenHB = hugdata[:,5]
 #pylab.plot(rhug, newbrokenHB, color = 'red', linestyle='-')
 pylab.plot(rhug, hugbrokenHB, color = 'blue', linestyle='--')

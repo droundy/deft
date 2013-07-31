@@ -22,12 +22,11 @@
 #include "utilities.h"
 #include "handymath.h"
 
-const double nmtobohr = 18.8972613; // Converts nm to bohr
-const double nm = 18.8972613;
+const double nm = 18.8972613; // 1 nm in units of bohr
 // Here we set up the lattice.
 //const double zmax = 5*nm;
 //const double ymax = 5*nm;
-const double width = 0.0001;
+const double width = 0.0001; // bohr radii
 double diameter = 1.0*nm;
 double dr = 0.04*nm;
 
@@ -193,13 +192,14 @@ int main(int argc, char **argv) {
   //printf("Energy is %.15g\n", energy);
   Grid X_values(gd, X(new_water_prop.kT, gd, density));
   Grid H_bonds_grid(gd, zeroed_out_density.cwise()*(4*(VectorXd::Ones(gd.NxNyNz)-X_values)));
-  const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds_grid.integrate();
+  const double broken_H_bonds_per_cell = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds_grid.integrate();
+  const double broken_H_bonds_per_nm = broken_H_bonds_per_cell*(1*nm/width);
 
   char *datname = new char[1024];
   sprintf(datname, "papers/water-saft/figs/single-rod-%04.2fnm-energy.dat", diameter/nm);
   FILE *o = fopen(datname, "w");
   delete[] datname;
-  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds);
+  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds_per_nm);
   fclose(o);
 
   {
