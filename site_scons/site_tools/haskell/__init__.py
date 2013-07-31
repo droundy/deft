@@ -32,7 +32,6 @@ from SCons.Scanner import Scanner
 from SCons.Script  import *
 import re
 
-module_regexp = re.compile(r"module[\s]+([\w]+).*")
 impdecl_regexp = re.compile(r"[\s]*import[\s]*(qualified)?[\s]*([\w\.]*).*")
 foreign_decl_regexp = re.compile(r"[\s]*foreign[\s]*(export|import)[\s]*ccall(.*\"[\s]*wrapper[\s]*\")?.*::.*")
 
@@ -48,8 +47,7 @@ def find_foreign_declarations_that_require_stubs(node):
 def ghc_emitter(target, source, env):
         src_name = str(source[0])
         hi_name = src_name.replace(source[0].suffix, ".hi")
-        env.SideEffect(hi_name, target)
-        env.Clean(target, hi_name)
+        target.append(hi_name) # mark .hi file as a target, just like .o file!
         stubs = []
         if find_foreign_declarations_that_require_stubs(source[0]):
                 stub_name = str(source[0]).replace(source[0].suffix, "_stub")

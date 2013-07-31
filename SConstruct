@@ -1,4 +1,6 @@
-import os, time
+import os, time, string, glob
+
+CacheDir(os.environ['HOME'] + '/.cache/scons')
 
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3'])
@@ -21,7 +23,7 @@ def test_function(target, source, env):
     name = testfile[6:len(testfile)-5]
     failfile = "tests/%s.failed" % name
     command = "%s > %s 2>&1" % (testfile, failfile)
-    print command
+    #print command
     start = time.clock()
     retval = os.system(command)
     end = time.clock()
@@ -32,7 +34,8 @@ def test_function(target, source, env):
     else:
         failed_tests += 1
         print "%sFAIL: %s (%g seconds)%s" % (FAIL, name, end - start, ENDC)
-test_runner = Builder(action = test_function, suffix = '.log', src_suffix = '.test')
+test_runner = Builder(action = Action(test_function, '$SOURCE'),
+                      suffix = '.log', src_suffix = '.test')
 def check_function(target, source, env):
     global passed_tests, failed_tests
     run_tests = passed_tests + failed_tests
@@ -66,6 +69,19 @@ def BuildTest(env, test, depends):
     Depends('check', test)
     return test
 AddMethod(Environment, BuildTest)
+
+def SVG(env, filename):
+    filename = str(filename)
+    if len(filename)>4 and filename[len(filename)-4:] == ".svg":
+        filename = filename[:len(filename)-4]
+    env.Command(target = filename+'.eps',
+                source = filename+'.svg',
+                action = 'inkscape --export-eps $TARGET $SOURCE')
+    env.Command(target = filename+'.pdf',
+                source = filename+'.eps',
+                action = 'epstopdf $SOURCE')
+AddMethod(Environment, SVG)
+svgbuilder = Builder(action = 'in')
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       triplet-monte-carlo radial-distribution-monte-carlo """):
@@ -109,31 +125,16 @@ generic_sources = Split("""
   src/IdealGas.cpp src/ChemicalPotential.cpp
   src/HardSpheres.cpp src/ExternalPotential.cpp
   src/Functional.cpp src/ContactDensity.cpp
-  src/Gaussian.cpp src/Pow.cpp
+  src/Gaussian.cpp src/Pow.cpp  src/WaterSaftFast.cpp
   src/EffectivePotentialToDensity.cpp
   src/equation-of-state.cpp src/water-constants.cpp
   src/compute-surface-tension.cpp
   src/Minimizer.cpp src/Downhill.cpp
   src/Precision.cpp src/ConjugateGradient.cpp
-  src/WaterSaftFast.cpp
   src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp
 
  """)
 all_sources = generic_sources + generated_sources
-
-for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
-                      compare-gsigmas
-                      convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
-    env.BuildTest(test, all_sources)
-
-for test in Split(""" functional-arithmetic surface-tension new-generated-code """):
-    env.BuildTest(test, generic_sources)
-
-for test in Split(""" newcode """):
-    env.BuildTest(test, ['src/new/Minimize.cpp'])
-
-for test in Split(""" new-hard-spheres """):
-    env.BuildTest(test, all_sources + newgenerated_sources)
 
 # Here we have rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
@@ -155,6 +156,55 @@ for paperfile in Glob('papers/*/paper.tex'):
                 env.Command(target = basefile + ".pdf",
                             source = outfile,
                             action = 'epstopdf $SOURCE')
+    for svgfile in Glob(paperdir + '/figs/*.svg'):
+        env.SVG(svgfile)
+
+#################### papers/hughes-saft ##################################################
+env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
+            source = ['papers/hughes-saft/figs/density_calc.py',
+                      'papers/hughes-saft/figs/single-rod-in-water.dat'],
+            action = 'python figs/density_calc.py',
+            chdir = 'papers/hughes-saft')
+env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
+            source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
+            action = string.join(['cat '] +
+                                 glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
+                                 [' > $TARGET']))
+
+#################### papers/contact ##################################################
+
+#################### papers/fuzzy-fmt ##################################################
+
+env.Command(target = ['papers/fuzzy-fmt/figs/walls-10.pdf',
+                      'papers/fuzzy-fmt/figs/walls-20.pdf',
+                      'papers/fuzzy-fmt/figs/walls-30.pdf',
+                      'papers/fuzzy-fmt/figs/walls-40.pdf',
+                      'papers/fuzzy-fmt/figs/walls-50.pdf'],
+            source = ['papers/fuzzy-fmt/figs/plot-walls.py'] +
+                     Glob('papers/fuzzy-fmt/figs/mcwalls-*.dat'),
+            action = 'python figs/plot-walls.py',
+            chdir = 'papers/fuzzy-fmt')
+env.Command(target = ['papers/fuzzy-fmt/figs/radial-distribution-10.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-20.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-30.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-40.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-50.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-60.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-70.pdf',
+                      'papers/fuzzy-fmt/figs/radial-distribution-80.pdf'],
+            source = ['papers/fuzzy-fmt/figs/radial-distribution.py'] +
+                     Glob('papers/fuzzy-fmt/figs/mc-*.gradial'),
+            action = 'python figs/radial-distribution.py',
+            chdir = 'papers/fuzzy-fmt')
+env.Command(target = ['papers/fuzzy-fmt/figs/p-vs-packing.pdf'],
+            source = ['papers/fuzzy-fmt/figs/homogeneous.py'] +
+                     Glob('papers/fuzzy-fmt/figs/mc-*.prs'),
+            action = 'python figs/homogeneous.py',
+            chdir = 'papers/fuzzy-fmt')
+env.Command(target = 'papers/fuzzy-fmt/figs/w2convolves.pdf',
+            source = 'papers/fuzzy-fmt/figs/functions_plot.py',
+            action = 'python figs/functions_plot.py',
+            chdir = 'papers/fuzzy-fmt')
 
 for mkdat in Split("""
 	papers/water-saft/figs/surface-tension
@@ -222,3 +272,19 @@ haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h',
                           'tests/new-generated-haskell/integrate_sqr.h',
                           'tests/new-generated-haskell/volume_minus_one_sqr.h'],
                 source = 'src/haskell/newfunctionals.exe', action = '$SOURCE tests')
+
+################# Now do the test suite ##################################################
+env.CacheDir(None) # do not cache test suite results (so we can rerun tests)
+for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
+                      compare-gsigmas
+                      convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
+    env.BuildTest(test, all_sources)
+
+for test in Split(""" functional-arithmetic surface-tension new-generated-code """):
+    env.BuildTest(test, generic_sources)
+
+for test in Split(""" newcode """):
+    env.BuildTest(test, ['src/new/Minimize.cpp'])
+
+for test in Split(""" new-hard-spheres """):
+    env.BuildTest(test, all_sources + newgenerated_sources)
