@@ -49,7 +49,9 @@ ALL_FIGURES=\
 	figs/density-sphere.gp\
 	figs/density-compare.py\
 	figs/single-rod-X-plot.py\
-	figs/spheres-X-plot.py
+	figs/spheres-X-plot.py\
+	figs/single-rod-broken-HB.py\
+	figs/sphere-broken-HB.py
 
 
 
@@ -114,15 +116,15 @@ figs/spheres-X-plot.eps: figs/sphere-0.20.dat figs/sphere-0.40.dat \
 		figs/hughes-sphere-0.80.dat figs/hughes-sphere-1.00.dat figs/hughes-sphere-1.20.dat \
 		figs/hughes-sphere-1.40.dat figs/hughes-sphere-1.60.dat figs/hughes-sphere-2.00.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
-figs/single-rod-broken-HB.pdf: figs/single-rod-in-water.dat \
+figs/single-rod-broken-HB.eps: figs/single-rod-in-water.dat \
 figs/hughes-single-rod-in-water.dat
+figs/sphere-broken-HB.eps: figs/hughes-sphere.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@
 figs/single-rods-calculated-density.dat: figs/density_calc.py figs/single-rod-in-water.dat
 	python figs/density_calc.py
-hughesSingleRodEnergies := $(wildcard figs/hughes-single-rod-*nm-energy.dat)
-figs/hughes-single-rod-in-water.dat: $(hughesSingleRodEnergies)
+figs/hughes-single-rod-in-water.dat: $(wildcard figs/hughes-single-rod-*nm-energy.dat)
 	cat $^ > $@
 
 figs/sphere-energy-vs-diameter.eps: figs/sphere.dat
@@ -130,6 +132,9 @@ sphereEnergies := $(wildcard figs/sphere-*nm-energy.dat)
 figs/sphere.dat: $(sphereEnergies)
 	cat $(sphereEnergies) > $@
 figs/density-sphere.eps: $(wildcard figs/sphere-*.dat) $(wildcard figs/grsp*.dat)
+hughesSphereEnergies := $(wildcard figs/hughes-sphere-*nm-energy.dat)
+figs/hughes-sphere.dat: $(hughesSphereEnergies)
+	cat $(hughesSphereEnergies) > $@
 
 arxiv/figs/%: figs/%
 	mkdir -p arxiv/figs

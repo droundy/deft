@@ -9,21 +9,6 @@ import matplotlib.pyplot as pyplot
 import numpy
 import pylab
 
-# def plot_X(fin, radius, col, lin):
-#     # data = pylab.loadtxt('filename')
-#     nm = 18.8972613
-#     x = []
-#     y = []
-#     for line in fin:
-#         current = str(line)
-#         pieces = current.split('\t')
-#         x.append(float(pieces[0])/nm)
-#         y.append(4.0*(1-float(pieces[2])))
-#     pyplot.plot(x, y, color = col, linestyle = lin)
-#     pyplot.vlines(x = radius, ymin = 0, ymax = 4, color=col, linestyles=':')
-
-#colors for plot
-#col1 = "#441155"
 colors = ["#990022", "#dd6622", "#eecc22", "#22b544", "#3333bb"]
 radii = [0.2, 0.6, 1.0]
 

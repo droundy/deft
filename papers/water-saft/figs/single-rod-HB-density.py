@@ -2,12 +2,15 @@
 
 #need this to run without xserver
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 import math
 import matplotlib.pyplot as pyplot
 import numpy
 import pylab
+
+newcalc = ""
+hughescalc = "hughes-"
 
 nm = 18.8972613
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
@@ -21,14 +24,21 @@ for i in range(len(radii)):
     rnew = newdata[:,0]/nm
     rhug = hugdata[:,0]/nm
     newdensity = newdata[:,1]/gpermL
-    hugdensity = hugdata[:,1]/gpermL
-    pylab.plot(rnew, newdensity, color = colors[i], linestyle='-')
-    pylab.plot(rhug, hugdensity, color = colors[i], linestyle='--')
-
-pyplot.hlines(1, 0, 1.3, 'k', '--')
+    newHB = 4*(1-newdata[:,2])
+    #hugHB = 4*(1-hugdata[:,2])
+    bulkHB = 4*(1-newdata[len(newdata) - 2,2])
+    #brokenHB = (bulkHB - newHB)*newdensity
+    #brokenHB[newdensity<0.01] = 0
+    newdenstotal = 0
+    #for j in range(len(rnew)):
+    #    newdenstotal += math.pi*(rnew[j+1]**2 - rnew[j]**2)*newdensity
+    pylab.plot(rnew, brokenHB, color = colors[i], linestyle='-')
+    #pylab.plot(rnew, newdensity, color = colors[i], linestyle='--')
+    #pylab.plot(rhug, hugHB*hugdensity, color = colors[i], linestyle='--')
 
 #plot properties
-pyplot.ylabel('                                      Density (g/mL)')
+pyplot.ylabel('')
 pyplot.xlabel('Radius (nm)')
 pyplot.xlim(0, 1.3)
-pyplot.savefig('figs/density-compare.eps')
+pyplot.savefig('figs/single-rod-HB-density.pdf')
+pyplot.show()

@@ -10,7 +10,7 @@ import numpy
 import pylab
 
 colors = ["#990022", "#dd6622", "#eecc22", "#22b544", "#3333bb", "#000000"]
-radii = [0.1, 0.4, 0.6, 0.8, 1.0]
+radii = [0.2, 0.6, 1.0]
 
 nm = 18.8972613
 hardsphereR = 3.03420/2/10 # from Clark et al, in nm

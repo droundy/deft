@@ -125,6 +125,12 @@ int main(int argc, char **argv) {
                         new_water_prop.lambda_dispersion,
                         new_water_prop.length_scaling, mu_satp);
   
+  Functional HB = HughesHB(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu_satp);
+  
   const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
   const double EperCell = EperVolume*(zmax*ymax - 0.25*M_PI*diameter*diameter)*width;
@@ -178,18 +184,22 @@ int main(int argc, char **argv) {
   }
 
   Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
+  Grid zeroed_out_density(gd, density.cwise()*constraint); // this is zero inside the rod!  :;
   //printf("The bulk energy per cell should be %g\n", EperCell);
   //printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
   //printf("Number of water molecules is %g\n", density.integrate());
   double energy = (min.energy() - EperCell)/width;
   energy = (min.energy() - EperNumber*density.integrate())/width;
   //printf("Energy is %.15g\n", energy);
+  Grid X_values(gd, X(new_water_prop.kT, gd, density));
+  Grid H_bonds_grid(gd, zeroed_out_density.cwise()*(4*(VectorXd::Ones(gd.NxNyNz)-X_values)));
+  const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds_grid.integrate();
 
   char *datname = new char[1024];
   sprintf(datname, "papers/water-saft/figs/single-rod-%04.2fnm-energy.dat", diameter/nm);
   FILE *o = fopen(datname, "w");
   delete[] datname;
-  fprintf(o, "%g\t%.15g\n", diameter/nm, energy);
+  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds);
   fclose(o);
 
   {
@@ -197,16 +207,14 @@ int main(int argc, char **argv) {
     //double current = current_memory()/1024.0/1024;
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
-
-  Grid X_values(gd, X(new_water_prop.kT, gd, density));
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/water-saft/figs/single-rod-slice-%04.2f.dat", diameter/nm);
   plot_grids_y_direction(plotname, density, X_values);
   free(plotname);
 
   {
-    //double peak = peak_memory()/1024.0/1024;
-    //double current = current_memory()/1024.0/1024;
-    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 }

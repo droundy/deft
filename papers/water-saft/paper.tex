@@ -54,9 +54,9 @@ We develop an improved version of our old functional.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-\fixme{Some stuff about water}.  An important aspects of water is its
-ability to form hydrogen bonds.  Each water molecule contains two
-hydrogen bond donor sites and two acceptor sites.
+Water \fixme{stuff about water}.  An important aspects of water
+is its ability to form hydrogen bonds.  Each water molecule contains
+two hydrogen bond donor sites and two acceptor sites.
 
 One promising approach for an efficient continuum description of water
 is that of classical density-functional theory (DFT), which is an
@@ -64,17 +64,7 @@ approach for evaluating the free energy and thermally averaged density
 of fluids in an arbitrary external potential~\cite{ebner1976density}.
 The foundation of classical DFT is the Mermin
 theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature,
-stating that
-\begin{equation}
-  \Omega (T) = \underset{n(\rr)}{min}\left\{ F[n(\rr),T] + \int (V_\textit{ext}(\rr) +\mu)n(\rr)
-d\rr\right\},
-\end{equation}
-where $\Omega (T)$ is the grand potential of a system in the external
-potential $V_\textit{ext}$ at temperature $T$, $n(\rr)$ is the density
-of atoms or molecules, $\mu$ is the chemical potential and
-$F[n(\rr),T]$ is a universal free-energy functional for the fluid,
-which is independent of the external potential $V_\textit{ext}$.
+theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
 Classical DFT is a natural framework for creating a more flexible
 theory of hydrophobicity that can readily describe interaction of
 water with arbitrary external potentials---such as potentials
@@ -82,79 +72,68 @@ describing strong interactions with solutes or surfaces.
 
 Statistical Associating Fluid Theory (SAFT) is a theory describing
 complex fluids in which hydrogen bonding plays a significant
-role\cite{chapman1989saft, muller2001molecular}.  SAFT is used to
+role\cite{chapman1989saft, muller2001molecular}. SAFT is used to
 accurately model the equations of state of both pure fluids and
-mixtures over a wide range of temperatures and pressures.  SAFT is
-based on Wertheim's first-order thermodynamic perturbation theory
-(TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
+mixtures over a wide range of temperatures and pressures. In a recent
+paper \cite{hughes2013classical}, we constructed a classical DFT for
+water which uses SAFT as a basis for a free energy functional. We
+used Clark \emph{et al}'s \cite{clark2006developing} five fitting
+parameters for an optimal cDFT for water and, in addition, introduced
+a parameter for the length scale over which the dispersion interaction
+is correlated.
+
+SAFT is based on Wertheim's first-order thermodynamic perturbation
+theory (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
   wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
-account for strong associative interactions between molecules.
-
-Wertheim's thermodynamic perturbation theory \fixme{expand/correct this}
-
-In a recent paper \cite{hughes2013classical}, Hughes \emph{et al}
-constructed a classical DFT for water which uses SAFT as a basis for
-their free energy functional.  Hughes employed Clark \emph{et al}'s
-\cite{clark2006developing} five fitting parameters for an optimal cDFT
-for water and, in addition, introduces a parameter for the length
-scale over which the dispersion interaction is correlated.  Clark
-found that the four association site model works best to describe
-water, which is physically accurate since each water molecule has four
-hydrogen bonding sites.
-
-This functional was successful in \fixme{list stuff}. However, the
-correlation function for hard spheres from Yu and
-Wu\cite{yu2002fmt-dft-inhomogeneous-associating} that is used in the
-association free energy term was \fixme{untested}.
-
-Schulte \emph{et al}\cite{schulte2012using} derived two approximate
-expressions for the correlation function at contact for and
-inhomogeneous hard sphere fluid based on the White Bear version of
-fundamental measure theory (FMT). One of Schulte's expression found
-the average number of spheres touching a point $\rr$ and is referred
-to as a ``symmetric'' correlation functoin, $g_\sigma^S$ . The other
-expression sets $\rr$ at the center of a sphere and find the average
-spheres touching the solvent accessable surface, which could be
-considered an ``asymmetric'' correlation function, $g_{\sigma}^A$. The
-asymmetric function agreed closely with Monte Carlo simulation, and
-much better than Yu and Wu's.
+account for strong associative interactions between
+molecules. Wertheim's thermodynamic perturbation theory uses a
+hard-sphere reference fluid where each sphere has a number of
+association sites on the surface. The association sites have an
+effective range and a small energy contribution when a site is within
+range of another hard-sphere's site. The free energy due to this
+association depends on the radial distribution function
+$g_\sigma^\text{HS}(\rr)$. Our previous water functional used Yu and
+Wu's radial distribution function
+\cite{yu2002fmt-dft-inhomogeneous-associating}, which was found to
+agree less with hard-sphere Monte-Carlo simulation than a distribution
+function developed by us in a recent paper.\cite{schulte2012using} In
+our paper, we developed an approximation for correlation at
+contact to describe the hard-sphere fluid.
 
 \section{Method}
 
-We modify Hughes \emph{et al}'s method of creating a classical DFT
-based on SAFT using Clark's four site model with five fitting
-parameters and the added fitting parameter for the correlation
-distance of the dispersion interaction.  We modify Hughes's
-association free energy term to use Schulte's $g_{\sigma}^A$ rather
-than Yu and Wu's.  The association free energy for our four-site model
-has the form \fixme{I copy/pasted and modified these equations, but
-  they still require a number of other equations to come before.
-  Maybe only show the $g_\sigma^A$?}
+We modify our previous the association free energy term to use our
+$g_{\sigma}^A$ rather than Yu and Wu's $g_\sigma^{YuWu}$.  The
+association free energy for our four-site model has the form:
 \begin{align}
-  F_\text{assoc}[n] &= 4 k_BT \int n_0(\xx) \zeta(\xx)
-  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx,
+  F_\text{assoc}[n] &= k_BT \int n_\text{site}(\xx)
+  \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
-where the factor of $4$ comes from the four association sites per
-molecule, the functional $X$ is the fraction of association sites
-\emph{not} hydrogen-bonded, and $\zeta(\xx)$ is a dimensionless
-measure of the density inhomogeneity.
+where
 \begin{align}
-  \zeta(\xx) &= 1 - \frac{\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{n_2^2}.
+  n_\text{site}(\rr) &=
+  \begin{cases}
+    4 n(\rr) & \text{this work}\\
+    4 n_0(\rr) \zeta(\rr) & \text{previous paper}.
+  \end{cases} 
 \end{align}
-%
-The fraction $X$ is determined by the quadratic equation
+The four in $n_{site}(\rr)$ comes from the four hydrogen bond sites
+and, $n_o(\rr)$ is the average density at contact, and $\zeta(\xx)$ is
+a dimensionless measure of the density inhomogeneity from Yu and
+Wu. \cite{yu2002fmt-dft-inhomogeneous-associating} The functional
+$X(\rr)$ is the fraction of association sites \emph{not}
+hydrogen-bonded, which is determined by the quadratic equation
 \begin{align}
   X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)
-      \Delta(\xx)} - 1}
+      \kappaassoc g^\textit{SW}_\sigma(\xx)
+  \left(e^{-\beta\epsilonassoc} - 1\right)} - 1}
   {4 n_0(\xx)\zeta(\xx)
-    \Delta(\xx)}, \label{eq:X}
-\end{align}a
-where the functional $\Delta$ is a measure of hydrogen-bonding
-probability, given by
+    \kappaassoc g^\textit{SW}_\sigma(\xx)
+  \left(e^{-\beta\epsilonassoc} - 1\right)}, \label{eq:X}
+\end{align}
+where
 \begin{align}
-  \Delta(\xx) &= \kappaassoc g^\textit{SW}_\sigma(\xx)
-  \left(e^{-\beta\epsilonassoc} - 1\right) \\
-  g^\textit{SW}_\sigma(\xx) &= g^\textit{A}_\sigma(\xx) +
+  g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
   \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW},
 \end{align}
@@ -162,21 +141,11 @@ probability, given by
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
-free energy.  The correlation function $g^\textit{SW}_\sigma$ is
+free energy.  The radial distribution function $g^\textit{SW}_\sigma$ is
 written as a perturbative correction to the hard-sphere fluid
-correlation function $g^\textit{A}_\sigma$, for which we use the
-functional of Schulte \emph{et al}\cite{schulte2012using}:
-\begin{align}
-  g_\sigma^{A}(\rr) &= \frac{1}{n(\rr)n_A(\rr)}\frac{1}{k_B T 4 \pi
-    (2R)^2}\frac{\delta F_{hs}}{\delta R(\rr)} 
-\end{align}
-where the $n_A(\rr)$ is the density of spheres that are touching a
-sphere that is located at point $\rr$. The modification to Hughes's
-functional appers here where we have replaced $g_\sigma^{HS}$ with
-$g_\sigma^A$. \fixme{The equation for $g_\sigma^A$ requires finding
-  convolutions of local derivative of the free energy, aking this
-  formulation computationally more expensive than the free energy
-  itself.}
+correlation function $g^\textit{HS}_\sigma$. Four our old functional
+we used Yu and Wu's radial distribution function, and for this paper we
+use our $g^\textit{A}_\sigma$.
 
 We use Clark's five empirical parameters, and fit the calculated
 surface tension to experimental surface tension at ambient conditions.
@@ -215,20 +184,27 @@ We find these agree when $\lscale$ is 0.454.
 \label{fig:single-rod-X}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/single-rod-broken-HB}
+\end{center}
+\caption{ Broken hydrogen bonds broken when rods are placed in
+  homogeneous water.  \fixme{Our old and new functional are both plotted here}}
+\label{fig:single-rod-broken-HB}
+\end{figure}
+
 \section{Hydrogen bonding near a hydrophobic rod}
 
 We first simulate a single hydrophobic rod immersed in water. The
 density profile of the water with our functional is compared with that
-of Hughes in Fig. \ref{fig:density-single-rod}.  For small rods, the
-water densities are attenuated near the rods for our functional as
-compared to Hughes's.   Since we have changed the association term in
-the functional, a noticeable change might occur in the aveerage number
-of hydrogen bonds in a given system.  We compare the hydrogen bonds
-with the new and old functional for rods of a few different radii
-(Fig. \ref{fig:single-rod-X}) and find that there is a very noticeable
-difference.  This is not suprising since $g_\sigma^A$ is antisymmetric
-and $g\sigma^{HS}$ is symmetric.  \fixme{Physical description for why
-  it looks that way}
+of Hughes in Fig. \ref{fig:density-single-rod}. The density at contact
+with the rods are nearly identical, even more so for larger radius
+rods. Since we have changed the association term in the functional, a
+difference will occur in the average number of hydrogen bonds in a
+given system. We compare the hydrogen bonds with the new and old
+functional for rods of a few different radii
+(Fig. \ref{fig:single-rod-X}) and find that there is a notable
+difference.
 
 \section{Hydrogen bonding near hard-sphere solutes}
 
@@ -243,10 +219,21 @@ and $g\sigma^{HS}$ is symmetric.  \fixme{Physical description for why
 \label{fig:spheres-X}
 \end{figure}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/sphere-broken-HB}
+\end{center}
+\caption{ \fixme{spheres!}}
+\label{fig:spheres-broken-HB}
+\end{figure}
 
-\fixme{More stuff here for spheres}
+We continue our study into three dimensions with a hard sphere solute
+in water.\fixme{stuff}.
 
 \section{Conclusion}
+
+We have modified a classical DFT for water with a more accurate radial
+distribution function which changes the way that the molecules assosciate.
 
 \clearpage
 

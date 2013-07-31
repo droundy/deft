@@ -9,7 +9,8 @@
 module HughesSaft
        ( yuwu_zeta, yuwu_correlation,
          eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, saft_fluid, saft_entropy, hughes_X, mu )
+         saft_dispersion, saft_association, saft_fluid, saft_entropy, hughes_X, 
+         mu, hughes_HB )
        where
 
 import FMT ( rad, n, n0, n2, n3, sqr_n2v )
@@ -66,11 +67,13 @@ kappa_association, epsilon_association :: Type a => Expression a
 kappa_association = s_tex "kappa_association" "\\kappa_a"
 epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 
-hughes_X, deltasaft, a1, a2 :: Expression RealSpace
+hughes_X, deltasaft, a1, a2, hughes_HB:: Expression RealSpace
 hughes_X = "X" === (sqrt(1 + 8*n0*yuwu_zeta*deltasaft) - 1) / (4*n0*yuwu_zeta*deltasaft)
 
 deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
   where boltz = "boltz" === exp(epsilon_association/kT)-1
+
+hughes_HB = "hughes_HB" === n0*yuwu_zeta*4*(1-hughes_X)
 
 gSW :: Expression RealSpace
 gSW = "gSW" ===

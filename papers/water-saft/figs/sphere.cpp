@@ -128,6 +128,12 @@ int main(int argc, char *argv[]) {
                         new_water_prop.epsilon_dispersion,
                         new_water_prop.lambda_dispersion,
                         new_water_prop.length_scaling, mu_satp);
+  
+    Functional HB = HughesHB(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu_satp);
 
     f = constrain(constraint, f);
     //constraint.epsNativeSlice("papers/water-saft/figs/sphere-constraint.eps",
@@ -186,6 +192,10 @@ int main(int argc, char *argv[]) {
 
     double entropy = S.integral(new_water_prop.kT, potential);
     Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
+    Grid zeroed_out_density(gd, density.cwise()*constraint); // this is zero inside the sphere!
+    Grid X_values(gd, X(new_water_prop.kT, gd, density));
+    Grid H_bonds_grid(gd, zeroed_out_density.cwise()*(4*(VectorXd::Ones(gd.NxNyNz)-X_values)));
+    const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds_grid.integrate();
     printf("Number of water molecules is %g\n", density.integrate());
     printf("The bulk energy per cell should be %g\n", EperCell);
     printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
@@ -206,13 +216,12 @@ int main(int argc, char *argv[]) {
 
     FILE *o = fopen(datname, "w");
     //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
-    fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
+    fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\t%g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
             new_water_prop.kT*(entropy - SperNumber*density.integrate()),
-            new_water_prop.kT*(hentropy - otherS(new_water_prop.kT, n_1atm)*density.integrate()/n_1atm));
+            new_water_prop.kT*(hentropy - otherS(new_water_prop.kT, n_1atm)*density.integrate()/n_1atm), broken_H_bonds);
     fclose(o);
 
     char *plotname = (char *)malloc(1024);
-    Grid X_values(gd, X(new_water_prop.kT, gd, density));
     sprintf(plotname, "papers/water-saft/figs/sphere-%04.2f.dat", diameter/nm);
     plot_grids_y_direction(plotname, density, X_values);
 

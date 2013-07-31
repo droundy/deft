@@ -40,7 +40,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
+void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -54,7 +54,8 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere);
+    double chere = c(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\t%g\n", here[0], here[1], here[2], ahere, bhere, chere);
   }
   fclose(out);
 }
@@ -93,6 +94,12 @@ int main(int argc, char *argv[]) {
 				     hughes_water_prop.length_scaling, mu_satp));
 
   Functional X = WaterX(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu_satp);
+  
+  Functional HB = HughesHB(hughes_water_prop.lengthscale,
                         hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
                         hughes_water_prop.epsilon_dispersion,
                         hughes_water_prop.lambda_dispersion,
@@ -144,18 +151,18 @@ int main(int argc, char *argv[]) {
                                 PreconditionedConjugateGradient(f, gd, hughes_water_prop.kT, 
                                                                 &potential,
                                                                 QuadraticLineMinimizer));
-      
+
       printf("\nDiameter of sphere = %g bohr (%g nm)\n", diameter, diameter/nm);
-      
+
       const int numiters = 200;
       for (int i=0;i<numiters && min.improve_energy(true);i++) {
         //fflush(stdout);
         //Grid density(gd, EffectivePotentialToDensity()(hughes_water_prop.kT, gd, potential));
-        
+
         //density.epsNativeSlice("papers/hughes-saft/figs/sphere.eps", 
         //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
         //			     Cartesian(0,ymax/2,zmax/2));
-        
+
         //sleep(3);
 
         double peak = peak_memory()/1024.0/1024;
@@ -169,6 +176,7 @@ int main(int argc, char *argv[]) {
       
       energy = min.energy();
       printf("Total energy is %.15g\n", energy);
+      Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
       // Here we free the minimizer with its associated data structures.
     }
 
@@ -198,17 +206,13 @@ int main(int argc, char *argv[]) {
            otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm,
            hentropy - otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm);
 
-    FILE *o = fopen(datname, "w");
-    //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
-    fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
-            hughes_water_prop.kT*(entropy - SperNumber*density.integrate()),
-            hughes_water_prop.kT*(hentropy - otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm));
-    fclose(o);
-
+    Grid zeroed_out_density(gd, density.cwise()*constraint); // this is zero inside the sphre!  :
     Grid X_values(gd, X(hughes_water_prop.kT, gd, density));
+    Grid H_bonds(gd, HB(new_water_prop.kT, gd, zeroed_out_density));
+    const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds.integrate();
     char *plotname = (char *)malloc(1024);
     sprintf(plotname, "papers/water-saft/figs/hughes-sphere-%04.2f.dat", diameter/nm);
-    plot_grids_y_direction(plotname, density, X_values);
+    plot_grids_y_direction(plotname, density, X_values, H_bonds);
 
     free(plotname);
 
@@ -226,6 +230,14 @@ int main(int argc, char *argv[]) {
     otherS.print_summary("   ", hentropyb, "bulk-like entropy");
     printf("entropy difference is %g\n", hentropy - hentropyb*oldN/density.integrate());
   // }
+
+    FILE *o = fopen(datname, "w");
+    //fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
+    fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\t%g\n", diameter/nm, energy - EperNumber*density.integrate(), energy - EperCell,
+            hughes_water_prop.kT*(entropy - SperNumber*density.integrate()),
+            hughes_water_prop.kT*(hentropy - otherS(hughes_water_prop.kT, n_1atm)*density.integrate()/n_1atm), broken_H_bonds);
+    fclose(o);
+
   clock_t end_time = clock();
   double seconds = (end_time - start_time)/double(CLOCKS_PER_SEC);
   double hours = seconds/60/60;

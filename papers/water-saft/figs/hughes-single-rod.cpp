@@ -40,7 +40,7 @@ double notinwall(Cartesian r) {
   return 1;
 }
 
-void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c) {
+void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, const Grid &c, const Grid &d) {
   FILE *out = fopen(fname, "w");
   if (!out) {
     fprintf(stderr, "Unable to create file %s!\n", fname);
@@ -55,7 +55,8 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b, con
     double ahere = a(x,y,z);
     double bhere = b(x,y,z);
     double chere = c(x,y,z);
-    fprintf(out, "%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere);
+    double dhere = d(x,y,z);
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\n", here[1], ahere, bhere, chere, dhere);
   }
   fclose(out);
 }
@@ -123,6 +124,12 @@ int main(int argc, char **argv) {
                         hughes_water_prop.epsilon_dispersion,
                         hughes_water_prop.lambda_dispersion,
                         hughes_water_prop.length_scaling, mu_satp);
+  
+  Functional HB = HughesHB(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu_satp);
 
   const double EperVolume = f(new_water_prop.kT, -new_water_prop.kT*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
@@ -152,60 +159,67 @@ int main(int argc, char **argv) {
   const double precision = bulkprecision + surfprecision;
   //printf("Precision limit from surface tension is to %g based on %g and %g\n",
   //       precision, surfprecision, bulkprecision);
-  Minimizer min = Precision(precision,
-                            PreconditionedConjugateGradient(f, gd, new_water_prop.kT,
-                                                            &potential,
-                                                            QuadraticLineMinimizer));
+  double energy;  // initialized below!
+  {
+    Minimizer min = Precision(precision,
+                              PreconditionedConjugateGradient(f, gd, new_water_prop.kT,
+                                                              &potential,
+                                                              QuadraticLineMinimizer));
     
-  //printf("\nDiameter of rod = %g bohr (%g nm), dr = %g nm\n", diameter, diameter/nm, dr/nm);
+    //printf("\nDiameter of rod = %g bohr (%g nm), dr = %g nm\n", diameter, diameter/nm, dr/nm);
     
-  const int numiters = 200;
-  for (int i=0;i<numiters && min.improve_energy(true);i++) {
-    fflush(stdout);
-    //Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
-     
-    //density.epsNativeSlice("papers/hughes-saft/figs/single-rod-in-water.eps", 
-    //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-    //			     Cartesian(0,ymax/2,zmax/2));
+    const int numiters = 200;
+    for (int i=0;i<numiters && min.improve_energy(true);i++) {
+      fflush(stdout);
+      //Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
       
-    // sleep(3);
-    {
-      double peak = peak_memory()/1024.0/1024;
-      double current = current_memory()/1024.0/1024;
-      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      //density.epsNativeSlice("papers/hughes-saft/figs/single-rod-in-water.eps", 
+      //			     Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+      //			     Cartesian(0,ymax/2,zmax/2));
+      
+      // sleep(3);
+      {
+        double peak = peak_memory()/1024.0/1024;
+        double current = current_memory()/1024.0/1024;
+        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      }
     }
-  }
+    
+    //energy = (min.energy() - EperCell)/width;
+    Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
+    energy = (min.energy() - EperNumber*density.integrate())/width;
+    //printf("Energy is %.15g\n", energy);
+  } // At this point "min" is freed, saving some memory.
 
   Grid density(gd, EffectivePotentialToDensity()(new_water_prop.kT, gd, potential));
   //printf("The bulk energy per cell should be %g\n", EperCell);
   //printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
   //printf("Number of water molecules is %g\n", density.integrate());
-  double energy = (min.energy() - EperCell)/width;
-  energy = (min.energy() - EperNumber*density.integrate())/width;
-  //printf("Energy is %.15g\n", energy);
-
-  char *datname = new char[1024];
-  sprintf(datname, "papers/water-saft/figs/hughes-single-rod-%04.2fnm-energy.dat", diameter/nm);
-  FILE *o = fopen(datname, "w");
-  delete[] datname;
-  fprintf(o, "%g\t%.15g\n", diameter/nm, energy);
-  fclose(o);
-
   {
     //double peak = peak_memory()/1024.0/1024;
     //double current = current_memory()/1024.0/1024;
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 
+  Grid zeroed_out_density(gd, density.cwise()*constraint); // this is zero inside the rod!  :)
   Grid X_values(gd, X(new_water_prop.kT, gd, density));
+  Grid H_bonds(gd, HB(new_water_prop.kT, gd, zeroed_out_density));
+  const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds.integrate();
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/water-saft/figs/hughes-single-rod-slice-%04.2f.dat", diameter/nm);
-  plot_grids_y_direction(plotname, density, X_values, constraint);
+  plot_grids_y_direction(plotname, density, X_values, H_bonds, constraint);
   free(plotname);
 
+  char *datname = new char[1024];
+  sprintf(datname, "papers/water-saft/figs/hughes-single-rod-%04.2fnm-energy.dat", diameter/nm);
+  FILE *o = fopen(datname, "w");
+  delete[] datname;
+  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds);
+  fclose(o);
+
   {
-    //double peak = peak_memory()/1024.0/1024;
-    //double current = current_memory()/1024.0/1024;
-    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 }

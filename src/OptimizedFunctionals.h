@@ -21,6 +21,9 @@ Functional WaterX(double R, double epsilon_association, double kappa_association
 Functional HughesX(double R, double epsilon_association, double kappa_association,
                    double epsilon_dispersion, double lambda_dispersion,
                    double length_scaling, double mu);
+Functional HughesHB(double R, double epsilon_association, double kappa_association,
+                   double epsilon_dispersion, double lambda_dispersion,
+                   double length_scaling, double mu);
 
 Functional TensorWhiteBear(double radius);
 Functional WhiteBearMarkII(double radius);
