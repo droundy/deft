@@ -69,6 +69,19 @@ def BuildTest(env, test, depends):
     return test
 AddMethod(Environment, BuildTest)
 
+def SVG(env, filename):
+    filename = str(filename)
+    if len(filename)>4 and filename[len(filename)-4:] == ".svg":
+        filename = filename[:len(filename)-4]
+    env.Command(target = filename+'.eps',
+                source = filename+'.svg',
+                action = 'inkscape --export-eps $TARGET $SOURCE')
+    env.Command(target = filename+'.pdf',
+                source = filename+'.eps',
+                action = 'epstopdf $SOURCE')
+AddMethod(Environment, SVG)
+svgbuilder = Builder(action = 'in')
+
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       triplet-monte-carlo radial-distribution-monte-carlo """):
     env.Program(
@@ -157,6 +170,7 @@ for paperfile in Glob('papers/*/paper.tex'):
                             source = outfile,
                             action = 'epstopdf $SOURCE')
 
+#################### papers/hughes-saft ##################################################
 env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
             source = ['papers/hughes-saft/figs/density_calc.py',
                       'papers/hughes-saft/figs/single-rod-in-water.dat'],
@@ -167,6 +181,12 @@ env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
             action = string.join(['cat '] +
                                  glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
                                  [' > $TARGET']))
+
+#################### papers/contact ##################################################
+env.SVG('papers/contact/figs/high-density.svg')
+env.SVG('papers/contact/figs/low-density.svg')
+env.SVG('papers/contact/figs/nA.svg')
+env.SVG('papers/contact/figs/n0.svg')
 
 for mkdat in Split("""
 	papers/water-saft/figs/surface-tension
