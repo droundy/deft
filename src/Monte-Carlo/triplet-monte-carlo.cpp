@@ -18,7 +18,7 @@ Vector3d periodicDiff(Vector3d a, Vector3d b);
 const double dz = 0.1;
 const double dx = 0.1;
 
-const double path_dr = 0.01;
+const double path_dr = 0.1; //fixme should be .01
 const double path_dx = 0.1;
 const double path_dtheta = 2.0/3.0*M_PI/42.0;
 
@@ -134,9 +134,8 @@ int main(int argc, char *argv[]){
   const int a1_zbins = lenx/2.0/a1_dz;
   const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
 
-
   const int path_zbins = (lenx/2.0 - 4*R)/path_dr;
-  const int path_thetabins = 2.0/3.0*M_PI/path_dtheta;
+  const int path_thetabins = int(2.0/3.0*M_PI/path_dtheta);
   const int path_xbins = (lenx/2.0 - R)/path_dr;
 
   const char *outfilename = argv[4];
@@ -553,17 +552,19 @@ int main(int argc, char *argv[]){
                   da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
 
                 if (z1 < 2*R + path_dr && z2 > 0) {
-                  if (z2 > z1+2*R && z2 < lenx/2.0 && x2 < path_dx) {
+                  const double z_cent = z1/2.0;
+                  const double theta = acos(r12_v.dot(zhat)/r12);
+                  if (z2 < lenx/2.0 && x2 < path_dx) {
                     const int index = path_zbins - (z2-z1-2*R)/path_dr;
                     if (index < 0 || index >= path_zbins)
                       fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                     path_histogram[index] ++;
-                  } if (r12 < 2*R + path_dr) {
-                    const int index = path_zbins + acos(r12_v.dot(zhat)/r12)/path_dtheta;
+                  } if (r12 < 2*R + path_dr && theta < 2.0/3.0*M_PI) {
+                    const int index = path_zbins + theta/path_dtheta;
                     if (index < path_zbins || index >= path_zbins + path_thetabins)
                       fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                     path_histogram[index] ++;
-                  } if (z2 < path_dr && x2 < lenx/2.0) {
+                  } if (fabs(z2-z_cent) < path_dr && x2 < lenx/2.0) {
                     const double xmin = sqrt(3)*R;
                     const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_dr);
                     if (index < path_zbins+path_thetabins || index >= path_bins)
