@@ -54,33 +54,59 @@ We develop an improved version of our old functional.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Water \fixme{stuff about water}.  An important aspects of water
-is its ability to form hydrogen bonds.  Each water molecule contains
-two hydrogen bond donor sites and two acceptor sites.
+Water, the universal solvent, is of critical practical importance, and
+a continuum description of water is in high demand for a solvation
+model.  A number of recent attempts to develop improved solvation
+models for water have built on the approach of classical
+density-functional theory (DFT)~\fixme{add citations here,
+  particularly Jeanmairet 2013 and his citations 35-44, possibly
+  cutting non-acqueous papers from that list}.
+Classical DFT is based on a description of a fluid written as a free
+energy functional of the density distribution.  There are two
+approaches used to construct a classical DFT for water.  The first is
+to choose a functional form that is fit to properties of the bulk
+liquid at a given temperature and pressure~\fixme{cite Jeanmairet and
+  similar}.  Using this approach, it is possible to construct a
+functional that reproduces the exact second-order response function of
+the liquid under the fitted conditions.  This class of functional,
+however, will be less accurate at other temperatures or
+pressures---and in the inhomogeneous scenarios in which solvation
+models are applied.  The second approach is construct a functional by
+applying liquid-state theory to a model system, and then fit the model
+to experimental data such as the equation of state.
 
-One promising approach for an efficient continuum description of water
-is that of classical density-functional theory (DFT), which is an
-approach for evaluating the free energy and thermally averaged density
-of fluids in an arbitrary external potential~\cite{ebner1976density}.
-The foundation of classical DFT is the Mermin
-theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
-Classical DFT is a natural framework for creating a more flexible
-theory of hydrophobicity that can readily describe interaction of
-water with arbitrary external potentials---such as potentials
-describing strong interactions with solutes or surfaces.
+%% \fixme{stuff about water}.  An important aspects of water
+%% is its ability to form hydrogen bonds.  Each water molecule contains
+%% two hydrogen bond donor sites and two acceptor sites.
+%% %
+%% One promising approach for an efficient continuum description of water
+%% is that of classical density-functional theory (DFT), which is an
+%% approach for evaluating the free energy and thermally averaged density
+%% of fluids in an arbitrary external potential~\cite{ebner1976density}.
+%% The foundation of classical DFT is the Mermin
+%% theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
+%% theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
+%% Classical DFT is a natural framework for creating a more flexible
+%% theory of hydrophobicity that can readily describe interaction of
+%% water with arbitrary external potentials---such as potentials
+%% describing strong interactions with solutes or surfaces.
 
-Statistical Associating Fluid Theory (SAFT) is a theory describing
-complex fluids in which hydrogen bonding plays a significant
+A widely used family of models used in the development of classical
+density functionals is based on Statistical Associating Fluid Theory
+(SAFT).
+%
+SAFT is a theory for fluids in which hydrogen bonding plays a significant
 role\cite{chapman1989saft, muller2001molecular}. SAFT is used to
 accurately model the equations of state of both pure fluids and
-mixtures over a wide range of temperatures and pressures. In a recent
-paper \cite{hughes2013classical}, we constructed a classical DFT for
-water which uses SAFT as a basis for a free energy functional. We
-used Clark \emph{et al}'s \cite{clark2006developing} five fitting
-parameters for an optimal cDFT for water and, in addition, introduced
-a parameter for the length scale over which the dispersion interaction
-is correlated.
+mixtures over a wide range of temperatures and pressures.
+\fixme{Talk about and cite papers using SAFT to build DFTs.}
+%
+In a recent paper \cite{hughes2013classical}, we constructed a
+classical DFT for water which uses SAFT as a basis for a free energy
+functional. We used Clark \emph{et al}'s \cite{clark2006developing}
+five fitting parameters for an optimal cDFT for water and, in
+addition, introduced a parameter for the length scale over which the
+dispersion interaction is correlated.
 
 SAFT is based on Wertheim's first-order thermodynamic perturbation
 theory (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
