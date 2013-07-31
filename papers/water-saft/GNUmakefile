@@ -114,6 +114,8 @@ figs/spheres-X-plot.eps: figs/sphere-0.20.dat figs/sphere-0.40.dat \
 		figs/hughes-sphere-0.80.dat figs/hughes-sphere-1.00.dat figs/hughes-sphere-1.20.dat \
 		figs/hughes-sphere-1.40.dat figs/hughes-sphere-1.60.dat figs/hughes-sphere-2.00.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
+figs/single-rod-broken-HB.pdf: figs/single-rod-in-water.dat \
+figs/hughes-single-rod-in-water.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@
