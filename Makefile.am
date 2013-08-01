@@ -15,7 +15,7 @@ GENERIC_CODE = $(FUNCTIONAL_CODE) \
 	src/EffectivePotentialToDensity.cpp \
 	src/equation-of-state.cpp src/water-constants.cpp \
 	src/compute-surface-tension.cpp \
-	src/WaterSaftFast.cpp \
+	src/WaterSaftFast.cpp src/WaterSaft_by_handFast.cpp \
 	src/Minimizer.cpp src/Downhill.cpp \
 	src/Precision.cpp src/ConjugateGradient.cpp \
 	src/QuadraticLineMinimizer.cpp src/SteepestDescent.cpp

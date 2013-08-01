@@ -8,12 +8,12 @@
 
 module WaterSaft
        ( eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
-         saft_dispersion, saft_association, water_saft, water_entropy, 
-         water_X, mu)
+         saft_dispersion, saft_association, water_saft, water_entropy,
+         water_X, mu, water_saft_by_hand )
        where
 
 import FMT ( rad, n )
-import WhiteBear ( whitebear, kT, gSigmaA, nA )
+import WhiteBear ( whitebear, kT, gSigmaA, gSigmaA_by_hand, nA )
 import IdealGas ( idealgas )
 import Expression
 
@@ -75,3 +75,23 @@ water_saft = "FSAFT" === (idealgas + whitebear + saft_association + saft_dispers
 water_entropy :: Expression Scalar
 water_entropy = "SSAFT" === (d "Sig" idealgas + d "Shs" whitebear + d "Sass" saft_association + d "Sdisp" saft_dispersion)
   where d nn f = nn === - scalarderive (ES kT) f
+
+
+
+
+saft_association_by_hand :: Expression Scalar
+saft_association_by_hand = "Fassoc" === integrate (4*kT*n*(log water_X_by_hand - water_X_by_hand/2 + 1/2))
+
+water_X_by_hand, deltasaft_by_hand :: Expression RealSpace
+water_X_by_hand = "X" === (sqrt(1 + 8*nA*deltasaft_by_hand) - 1) / (4*nA*deltasaft_by_hand)
+deltasaft_by_hand = var "deltasaft" "{\\Delta}" $ gSW_by_hand*kappa_association*boltz
+  where boltz = "boltz" === exp(epsilon_association/kT)-1
+
+gSW_by_hand :: Expression RealSpace
+gSW_by_hand = "gSW" ===
+      gSigmaA_by_hand
+      + (1/4/kT)*(da1_detad - lambda_dispersion/(3*eta_for_dispersion)*da1_dlambda)
+
+
+water_saft_by_hand :: Expression Scalar
+water_saft_by_hand = "FSAFT" === (idealgas + whitebear + saft_association_by_hand + saft_dispersion + integrate (n*mu))

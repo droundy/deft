@@ -125,7 +125,7 @@ generic_sources = Split("""
   src/IdealGas.cpp src/ChemicalPotential.cpp
   src/HardSpheres.cpp src/ExternalPotential.cpp
   src/Functional.cpp src/ContactDensity.cpp
-  src/Gaussian.cpp src/Pow.cpp  src/WaterSaftFast.cpp
+  src/Gaussian.cpp src/Pow.cpp src/WaterSaftFast.cpp src/WaterSaft_by_handFast.cpp
   src/EffectivePotentialToDensity.cpp
   src/equation-of-state.cpp src/water-constants.cpp
   src/compute-surface-tension.cpp
