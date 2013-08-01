@@ -21,4 +21,4 @@ pylab.plot(rhug, hugbrokenHB, color = 'blue', linestyle='--')
 #plot properties
 pyplot.ylabel('Broken bonds?')
 pyplot.xlabel('Radius (nm)')
-pyplot.savefig('figs/sphere-broken-HB.eps')
+pyplot.savefig('figs/sphere-broken-HB.pdf')

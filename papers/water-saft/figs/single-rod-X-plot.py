@@ -35,4 +35,4 @@ for i in range(len(radii)):
 pyplot.ylabel('Number of hydrogen bonds')
 pyplot.xlabel('Radius (nm)')
 pyplot.xlim(0, 1.3)
-pyplot.savefig('figs/single-rod-X-plot.eps')
+pyplot.savefig('figs/single-rod-X-plot.pdf')
