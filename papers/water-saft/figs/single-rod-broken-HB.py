@@ -17,11 +17,12 @@ rnew = newdata[:,0] - hardsphereR
 rhug = hugdata[:,0] - hardsphereR
 newbrokenHB = newdata[:,2]
 hugbrokenHB = hugdata[:,2]
-pylab.plot(rhug, newbrokenHB, color = 'red', linestyle='-')
-pylab.plot(rhug, hugbrokenHB, color = 'blue', linestyle='--')
+pylab.plot(rnew, newbrokenHB/2, color = '#990022', linestyle = '-')  #'r-')
+pylab.plot(rhug, hugbrokenHB/2, color = '#220099', linestyle = '--') #'k--')
 
 #plot properties
-pyplot.ylabel('Broken bonds?')
-pyplot.xlabel('Radius (nm)')
-pyplot.xlim(0, 1.6)
+pyplot.ylabel('Broken bonds per nm')
+pyplot.xlabel('Radius of rod (nm)')
+pyplot.xlim(0, 1.5)
+pyplot.ylim(0, 10)
 pyplot.savefig('figs/single-rod-broken-HB.eps')

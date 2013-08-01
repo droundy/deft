@@ -204,7 +204,8 @@ int main(int argc, char **argv) {
   Grid zeroed_out_density(gd, density.cwise()*constraint); // this is zero inside the rod!  :)
   Grid X_values(gd, X(new_water_prop.kT, gd, density));
   Grid H_bonds(gd, HB(new_water_prop.kT, gd, zeroed_out_density));
-  const double broken_H_bonds = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds.integrate();
+  const double broken_H_bonds_per_cell = (HB(new_water_prop.kT, n_1atm)/n_1atm)*zeroed_out_density.integrate() - H_bonds.integrate();
+  const double broken_H_bonds_per_nm = broken_H_bonds_per_cell*(1*nm/width);
   char *plotname = (char *)malloc(1024);
   sprintf(plotname, "papers/water-saft/figs/hughes-single-rod-slice-%04.2f.dat", diameter/nm);
   plot_grids_y_direction(plotname, density, X_values, H_bonds, constraint);
@@ -214,7 +215,7 @@ int main(int argc, char **argv) {
   sprintf(datname, "papers/water-saft/figs/hughes-single-rod-%04.2fnm-energy.dat", diameter/nm);
   FILE *o = fopen(datname, "w");
   delete[] datname;
-  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds);
+  fprintf(o, "%g\t%.15g\t%g\n", diameter/nm, energy, broken_H_bonds_per_nm);
   fclose(o);
 
   {

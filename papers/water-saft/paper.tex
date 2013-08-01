@@ -58,22 +58,25 @@ Water, the universal solvent, is of critical practical importance, and
 a continuum description of water is in high demand for a solvation
 model.  A number of recent attempts to develop improved solvation
 models for water have built on the approach of classical
-density-functional theory (DFT)~\fixme{add citations here,
-  particularly Jeanmairet 2013 and his citations 35-44, possibly
-  cutting non-acqueous papers from that list}.
-Classical DFT is based on a description of a fluid written as a free
-energy functional of the density distribution.  There are two
-approaches used to construct a classical DFT for water.  The first is
-to choose a functional form that is fit to properties of the bulk
-liquid at a given temperature and pressure~\fixme{cite Jeanmairet and
-  similar}.  Using this approach, it is possible to construct a
-functional that reproduces the exact second-order response function of
-the liquid under the fitted conditions.  This class of functional,
-however, will be less accurate at other temperatures or
-pressures---and in the inhomogeneous scenarios in which solvation
-models are applied.  The second approach is construct a functional by
-applying liquid-state theory to a model system, and then fit the model
-to experimental data such as the equation of state.
+density-functional theory (DFT)\cite{jeanmairet2013molecular,
+  zhao2011molecular, zhao2011new, ramirez2005direct,
+  ramirez2005density, levesque2012solvation, levesque2012scalar}
+~\fixme{add citations here, particularly Jeanmairet 2013 and his
+  citations 35-44, possibly cutting non-acqueous papers from that
+  list}.  Classical DFT is based on a description of a fluid written
+as a free energy functional of the density distribution.  There are
+two approaches used to construct a classical DFT for water.  The first
+is to choose a functional form that is fit to properties of the bulk
+liquid at a given temperature and pressure
+\cite{jeanmairet2013molecular} ~\fixme{cite Jeanmairet and similar}.
+Using this approach, it is possible to construct a functional that
+reproduces the exact second-order response function of the liquid
+under the fitted conditions.  This class of functional, however, will
+be less accurate at other temperatures or pressures---and in the
+inhomogeneous scenarios in which solvation models are applied.  The
+second approach is construct a functional by applying liquid-state
+theory to a model system, and then fit the model to experimental data
+such as the equation of state.
 
 %% \fixme{stuff about water}.  An important aspects of water
 %% is its ability to form hydrogen bonds.  Each water molecule contains
@@ -140,24 +143,33 @@ where
   n_\text{site}(\rr) &=
   \begin{cases}
     4 n(\rr) & \text{this work}\\
-    4 n_0(\rr) \zeta(\rr) & \text{previous paper}.
+    4 n_0(\rr) \zeta(\rr) & \text{Ref.~\citenum{hughes2013classical}}
   \end{cases} 
 \end{align}
-The four in $n_{site}(\rr)$ comes from the four hydrogen bond sites
-and, $n_o(\rr)$ is the average density at contact, and $\zeta(\xx)$ is
-a dimensionless measure of the density inhomogeneity from Yu and
-Wu. \cite{yu2002fmt-dft-inhomogeneous-associating} The functional
-$X(\rr)$ is the fraction of association sites \emph{not}
+is the density of bonding sites at position~$\rr$.  The four in
+$n_\text{site}(\rr)$ comes from the four hydrogen bond sites,
+$n_0(\rr)$ is the average density contacting point $\rr$, and
+$\zeta(\xx)$ is a dimensionless measure of the density inhomogeneity
+from Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  The
+functional $X(\rr)$ is the fraction of association sites \emph{not}
 hydrogen-bonded, which is determined by the quadratic equation
 \begin{align}
-  X(\xx) &= \frac{\sqrt{1 + 8n_0(\xx)\zeta(\xx)
+  X(\xx) &= \frac{\sqrt{1 + 2n_\text{site}'(\rr)
       \kappaassoc g^\textit{SW}_\sigma(\xx)
   \left(e^{-\beta\epsilonassoc} - 1\right)} - 1}
-  {4 n_0(\xx)\zeta(\xx)
+  {n_\text{site}'(\rr)
     \kappaassoc g^\textit{SW}_\sigma(\xx)
   \left(e^{-\beta\epsilonassoc} - 1\right)}, \label{eq:X}
 \end{align}
 where
+\begin{align}
+  n_\text{site}'(\rr) &=
+  \begin{cases}
+    \frac{4}{\pi\sigma^2} \int n(\rr')\delta(\sigma - |\rr-\rr'|) d\rr' & \text{this work}\\
+    4 n_0(\rr) \zeta(\rr) & \text{Ref.~\citenum{hughes2013classical}}
+  \end{cases} 
+\end{align}
+is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)$, and
 \begin{align}
   g^\textit{SW}_\sigma(\xx) &= g^\textit{HS}_\sigma(\xx) +
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
@@ -197,18 +209,9 @@ We find these agree when $\lscale$ is 0.454.
   (bottom). Each separately colored line represents a density profile
   for a rod; the black dotted line is the bulk density.}
 \label{fig:density-single-rod}
-\end{figure}  
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/single-rod-X-plot}
-\end{center}
-\caption{ The average number of hydrogen bonds per molecule at
-  distances from the center of hydrophobic rods of various
-  radii. The solid lines are the results from using the assymetric
-  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}^{HS}$.}
-\label{fig:single-rod-X}
 \end{figure}
+
+\section{Hydrogen bonding near a hydrophobic rod}
 
 \begin{figure}
 \begin{center}
@@ -218,8 +221,6 @@ We find these agree when $\lscale$ is 0.454.
   homogeneous water.  \fixme{Our old and new functional are both plotted here}}
 \label{fig:single-rod-broken-HB}
 \end{figure}
-
-\section{Hydrogen bonding near a hydrophobic rod}
 
 We first simulate a single hydrophobic rod immersed in water. The
 density profile of the water with our functional is compared with that
@@ -233,17 +234,6 @@ functional for rods of a few different radii
 difference.
 
 \section{Hydrogen bonding near hard-sphere solutes}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/spheres-X-plot}
-\end{center}
-\caption{ The average number of hydrogen bonds per molecule at
-  distances from the center of spherical cavities of various
-  radii. The solid lines are the results from using the assymetric
-  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}$.}
-\label{fig:spheres-X}
-\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -262,8 +252,29 @@ We have modified a classical DFT for water with a more accurate radial
 distribution function which changes the way that the molecules assosciate.
 
 \clearpage
-
+  
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/single-rod-X-plot}
+\end{center}
+\caption{ The average number of hydrogen bonds per molecule at
+  distances from the center of hydrophobic rods of various
+  radii. The solid lines are the results from using the assymetric
+  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}^{HS}$.}
+\label{fig:single-rod-X}
+\end{figure}
 \section{Introduction}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/spheres-X-plot}
+\end{center}
+\caption{ The average number of hydrogen bonds per molecule at
+  distances from the center of spherical cavities of various
+  radii. The solid lines are the results from using the assymetric
+  $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}$.}
+\label{fig:spheres-X}
+\end{figure}
 
 A large fraction of interesting chemistry---including all of molecular
 biology---takes place in aqueous solution.  However, while quantum
