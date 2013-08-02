@@ -9,6 +9,13 @@ from pylab import *
 from scipy.special import erf
 import os
 
+if len(sys.argv) != 2:
+    print("Usage:  " + sys.argv[0] + ' filling-fraction')
+    exit(1)
+
+ff = float(sys.argv[1])
+#arg ff = [10, 20, 30, 40, 50, 60, 70, 80]
+
 #Constants and variables
 #k_b = 8.6173324*10**(-5) # in eV
 dT = .001
@@ -29,24 +36,23 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 
 colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
 
-for ff in arange(0.1,0.81, 0.1):
-  figure()
-  density = ff/(4*pi/3)
-  phs = density*(1+ff+ff**2)/(1-ff)**3
-  for temp in [0.1, 0.01, 0.001, 0.0001]:
-    fname = 'figs/mc-%.4f-%.4f.dat.gradial' % (ff, temp)
-    if os.path.exists(fname):
-      print 'found', fname
-      g = loadtxt(fname)
-      plot(g[:,0], g[:,1], colors[temp] + '-', label='T = %g' % temp)
-      xlim(xmax=floor(max(g[:,0])))
-    else:
-      print 'could not find', fname
+density = (ff/100)/(4*pi/3)
+phs = density*(1+(ff/100)+(ff/100)**2)/(1-(ff/100))**3
+for temp in [0.1, 0.01, 0.001, 0.0001]:
+  # input: 'figs/mc-0.%02d00-*.dat.gradial' % (ff)
+  fname = 'figs/mc-0.%02d00-%.4f.dat.gradial' % (ff, temp)
+  if os.path.exists(fname):
+    print 'found', fname
+    g = loadtxt(fname)
+    plot(g[:,0], g[:,1], colors[temp] + '-', label='T = %g' % temp)
+    xlim(xmax=floor(max(g[:,0])))
+  else:
+    print 'could not find', fname
 
-  title('Radial distribution function at packing fraction %g' % ff)
-  xlabel('radius')
-  ylabel('g')
-  legend(loc = 'best')
-  savefig('figs/radial-distribution-%02.0f.pdf' % (ff*100), bbox_inches=0)
+title('Radial distribution function at packing fraction %g' % (ff/100))
+xlabel('radius')
+ylabel('g')
+legend(loc = 'best')
+savefig('figs/radial-distribution-%02d.pdf' % (ff), bbox_inches=0)
 
 show()

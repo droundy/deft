@@ -143,9 +143,10 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                 source = ['papers/' + paper + '/paper.tex'])
     Default(p)
 
-paper = Environment(tools=['gnuplot'])
+paper = Environment(tools=['gnuplot', 'matplotlib'])
 for paperfile in Glob('papers/*/paper.tex'):
     paperdir = str(paperfile)[:len(str(paperfile))-len('/paper.tex')]
+    # first let's handle all gnuplot files
     for gpfile in Glob(paperdir + '/figs/*.gp'):
         gpfile = str(gpfile)[:len(str(gpfile))-3]
         x = paper.GplotGraph(gpfile, gp_chdir=paperdir)
@@ -156,55 +157,83 @@ for paperfile in Glob('papers/*/paper.tex'):
                 env.Command(target = basefile + ".pdf",
                             source = outfile,
                             action = 'epstopdf $SOURCE')
+    # and now let's handle all python files
+    for pyfile in Glob(paperdir + '/figs/*.py'):
+        pyfile = str(pyfile)[:len(str(pyfile))-3]
+        paper.Matplotlib(pyfile, py_chdir=paperdir)
+    # and now we'll handle all svg files
     for svgfile in Glob(paperdir + '/figs/*.svg'):
         env.SVG(svgfile)
 
-#################### papers/hughes-saft ##################################################
-env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
-            source = ['papers/hughes-saft/figs/density_calc.py',
-                      'papers/hughes-saft/figs/single-rod-in-water.dat'],
-            action = 'python figs/density_calc.py',
-            chdir = 'papers/hughes-saft')
-env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
-            source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
-            action = string.join(['cat '] +
-                                 glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
-                                 [' > $TARGET']))
+# #################### papers/hughes-saft ##################################################
+# env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
+#             source = ['papers/hughes-saft/figs/density_calc.py',
+#                       'papers/hughes-saft/figs/single-rod-in-water.dat'],
+#             action = 'cd papers/hughes-saft && python figs/density_calc.py')
+# env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
+#             source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
+#             action = string.join(['cat '] +
+#                                  glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
+#                                  [' > $TARGET']))
 
-#################### papers/contact ##################################################
+# #################### papers/contact #######################################################
 
-#################### papers/fuzzy-fmt ##################################################
+# #################### papers/water-saft ####################################################
 
-env.Command(target = ['papers/fuzzy-fmt/figs/walls-10.pdf',
-                      'papers/fuzzy-fmt/figs/walls-20.pdf',
-                      'papers/fuzzy-fmt/figs/walls-30.pdf',
-                      'papers/fuzzy-fmt/figs/walls-40.pdf',
-                      'papers/fuzzy-fmt/figs/walls-50.pdf'],
-            source = ['papers/fuzzy-fmt/figs/plot-walls.py'] +
-                     Glob('papers/fuzzy-fmt/figs/mcwalls-*.dat'),
-            action = 'python figs/plot-walls.py',
-            chdir = 'papers/fuzzy-fmt')
-env.Command(target = ['papers/fuzzy-fmt/figs/radial-distribution-10.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-20.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-30.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-40.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-50.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-60.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-70.pdf',
-                      'papers/fuzzy-fmt/figs/radial-distribution-80.pdf'],
-            source = ['papers/fuzzy-fmt/figs/radial-distribution.py'] +
-                     Glob('papers/fuzzy-fmt/figs/mc-*.gradial'),
-            action = 'python figs/radial-distribution.py',
-            chdir = 'papers/fuzzy-fmt')
-env.Command(target = ['papers/fuzzy-fmt/figs/p-vs-packing.pdf'],
-            source = ['papers/fuzzy-fmt/figs/homogeneous.py'] +
-                     Glob('papers/fuzzy-fmt/figs/mc-*.prs'),
-            action = 'python figs/homogeneous.py',
-            chdir = 'papers/fuzzy-fmt')
-env.Command(target = 'papers/fuzzy-fmt/figs/w2convolves.pdf',
-            source = 'papers/fuzzy-fmt/figs/functions_plot.py',
-            action = 'python figs/functions_plot.py',
-            chdir = 'papers/fuzzy-fmt')
+# paper.Matplotlib('papers/water-saft/figs/sphere-broken-HB.py', py_chdir = 'papers/water-saft')
+
+# #################### papers/pair-correlation ##############################################
+
+# for z_and_rad in [(3,2), (3,3), (2,2), (2,3)]:
+#     env.Command(target = "papers/pair-correlation/figs/dadz-%d-%d.pdf" % z_and_rad,
+#                 source = ["papers/pair-correlation/figs/plot-da_dz.py",
+#                           "papers/pair-correlation/figs/walls.dat"]+
+#                          Glob("papers/pair-correlation/figs/wallsMC-a1-pair*.dat") +
+#                          Glob("papers/pair-correlation/figs/walls_daWB-*.dat"),
+#                 action = "cd papers/pair-correlation && python figs/plot-da_dz.py .%d %d.005" % z_and_rad)
+
+# for f in [1,2,3,4]:
+#     env.Command(target = 'papers/pair-correlation/figs/pair-correlation-pretty-%d.pdf' % f,
+#                 source = ['papers/pair-correlation/figs/plot-path-and-2d.py',
+#                           'papers/pair-correlation/figs/walls.dat'] +
+#                          Glob('papers/pair-correlation/figs/*.dat') +
+#                          Glob('papers/pair-correlation/figs/mc/*.dat'),
+#                 action = 'cd papers/pair-correlation && python figs/plot-path-and-2d.py 0.%d' % f)
+
+# env.Command(target = ['papers/pair-correlation/figs/ghs-g.pdf',
+#                       'papers/pair-correlation/figs/ghs-g-ghs.pdf'],
+#             source = ['papers/pair-correlation/figs/plot-ghs.py'] +
+#                      Glob('papers/pair-correlation/figs/gr*.dat'),
+#             action = 'cd papers/pair-correlation && python figs/plot-ghs.py')
+
+# #################### papers/fuzzy-fmt ##################################################
+
+# env.Command(target = ['papers/fuzzy-fmt/figs/walls-10.pdf',
+#                       'papers/fuzzy-fmt/figs/walls-20.pdf',
+#                       'papers/fuzzy-fmt/figs/walls-30.pdf',
+#                       'papers/fuzzy-fmt/figs/walls-40.pdf',
+#                       'papers/fuzzy-fmt/figs/walls-50.pdf'],
+#             source = ['papers/fuzzy-fmt/figs/plot-walls.py'] +
+#                      Glob('papers/fuzzy-fmt/figs/mcwalls-*.dat'),
+#             action = 'cd papers/fuzzy-fmt && python figs/plot-walls.py')
+# env.Command(target = ['papers/fuzzy-fmt/figs/radial-distribution-10.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-20.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-30.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-40.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-50.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-60.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-70.pdf',
+#                       'papers/fuzzy-fmt/figs/radial-distribution-80.pdf'],
+#             source = ['papers/fuzzy-fmt/figs/radial-distribution.py'] +
+#                      Glob('papers/fuzzy-fmt/figs/mc-*.gradial'),
+#             action = 'cd papers/fuzzy-fmt && python figs/radial-distribution.py')
+# env.Command(target = ['papers/fuzzy-fmt/figs/p-vs-packing.pdf'],
+#             source = ['papers/fuzzy-fmt/figs/homogeneous.py'] +
+#                      Glob('papers/fuzzy-fmt/figs/mc-*.prs'),
+#             action = 'cd papers/fuzzy-fmt && python figs/homogeneous.py')
+# env.Command(target = 'papers/fuzzy-fmt/figs/w2convolves.pdf',
+#             source = 'papers/fuzzy-fmt/figs/functions_plot.py',
+#             action = 'cd papers/fuzzy-fmt && python figs/functions_plot.py')
 
 for mkdat in Split("""
 	papers/water-saft/figs/surface-tension
