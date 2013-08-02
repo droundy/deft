@@ -9,9 +9,12 @@ matplotlib.use('Agg')
 import pylab, numpy, sys, os, glob
 from pylab import pi
 
-if len(sys.argv) != 1:
-    print("Usage:  " + sys.argv[0])
+if len(sys.argv) != 2:
+    print("Usage:  " + sys.argv[0] + ' filling-fraction')
     exit(1)
+
+ff = int(sys.argv[1])
+#arg ff = [10, 20, 30, 40, 50]
 
 def smooth(x, N):
     '''
@@ -28,29 +31,30 @@ def smooth(x, N):
         y += x[i::N, :]
     return y/N
 
-def plotff(ff):
-    pylab.figure()
-    data = []
-    names = []
-    for kT in [0.0, 0.01, 0.02, 0.03]:
-        fname = "figs/walls-%04.2f-T%05.3f.dat" % (ff, kT)
-        if os.path.exists(fname):
-            names.append('kT = %4.2f' % kT)
-            data.append(numpy.loadtxt(fname))
-    for i in range(len(data)):
-        pylab.plot(data[i][:,0]-3, data[i][:,1]*(4*pi/3), label=names[i])
+pylab.figure()
+data = []
+names = []
+# eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
+for kT in [0.0, 0.01, 0.02, 0.03]:
+    # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
+    fname = "figs/walls-0.%02d-T%05.3f.dat" % (ff, kT)
+    if os.path.exists(fname):
+        names.append('kT = %4.2f' % kT)
+        data.append(numpy.loadtxt(fname))
+    else:
+        print fname, 'does not exist'
+for i in range(len(data)):
+    pylab.plot(data[i][:,0]-3, data[i][:,1]*(4*pi/3), label=names[i])
 
-    for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
-        print 'looking for', 'figs/mcwalls-%.4f-%.4f*.dat' % (ff, kT)
-        for fname in glob.glob('figs/mcwalls-%.4f-%.4f*.dat' % (ff, kT)):
-            print 'examining', fname
-            d = numpy.loadtxt(fname)
-            d = smooth(d, 10)
-            pylab.plot(d[:,0], d[:,1]*(4*pi/3), label=fname)
-    pylab.title('Packing fraction = %.1f' % ff)
-    pylab.legend()
-    pylab.xlim(xmax=14)
-    pylab.savefig('figs/walls-%02d.pdf' % (ff*100))
-
-for ff in [0.1, 0.2, 0.3, 0.4, 0.5]:
-    plotff(ff)
+for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
+    # input: "figs/mcwalls-0.%02d-*.dat" % (ff)
+    print 'looking for', 'figs/mcwalls-0.%02d00-%.4f*.dat' % (ff, kT)
+    for fname in glob.glob('figs/mcwalls-0.%02d00-%.4f*.dat' % (ff, kT)):
+        print 'examining', fname
+        d = numpy.loadtxt(fname)
+        d = smooth(d, 10)
+        pylab.plot(d[:,0], d[:,1]*(4*pi/3), label=fname)
+pylab.title('Packing fraction = 0.%f' % (ff/10.0))
+pylab.legend()
+pylab.xlim(xmax=14)
+pylab.savefig('figs/walls-%02d.pdf' % (ff))
