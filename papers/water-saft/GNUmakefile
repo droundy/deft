@@ -88,14 +88,8 @@ figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.4nm.dat \
 	figs/four-rods-in-water-00.8nm.dat figs/four-rods-in-water-01.2nm.dat \
 	figs/four-rods-in-water-01.6nm.dat figs/four-rods-in-water-02.0nm.dat \
 	figs/four-rods-in-water-02.4nm.dat
-figs/density-compare.pdf: figs/single-rod-slice-0.10.dat \
-		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
-		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
-		figs/single-rod-slice-2.00.dat \
-		figs/hughes-single-rod-slice-0.10.dat \
-		figs/hughes-single-rod-slice-0.30.dat figs/hughes-single-rod-slice-0.60.dat \
-		figs/hughes-single-rod-slice-1.00.dat figs/hughes-single-rod-slice-1.60.dat \
-		figs/hughes-single-rod-slice-2.00.dat
+figs/density-compare.pdf: figs/single-rod-slice-0.40.dat \
+		figs/hughes-single-rod-slice-0.40.dat figs/density-compare.py
 figs/single-rod-X-plot.pdf: figs/single-rod-slice-0.10.dat \
 		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
 		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
@@ -112,8 +106,9 @@ figs/spheres-X-plot.pdf: figs/sphere-0.20.dat figs/sphere-0.40.dat \
 		figs/hughes-sphere-1.40.dat figs/hughes-sphere-1.60.dat figs/hughes-sphere-2.00.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
 figs/single-rod-broken-HB.pdf: figs/single-rod-in-water.dat \
-figs/hughes-single-rod-in-water.dat
-figs/sphere-broken-HB.pdf: figs/hughes-sphere.dat figs/sphere.dat
+		figs/hughes-single-rod-in-water.dat figs/single-rod-broken-HB.py
+figs/sphere-broken-HB.pdf: figs/hughes-sphere.dat figs/sphere.dat\
+		figs/sphere-broken-HB.py
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@

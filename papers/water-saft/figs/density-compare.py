@@ -14,30 +14,17 @@ nm = 18.8972613
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 
 grey = '#999999'
-blueish = '#55dae0'
-
-#colors = ["#44dd55", "#3377aa", "#002288"]
-#radii = [ 0.2, 0.6, 1.0 ]
-
-# for i in range(len(radii)):
-#     newdata = pylab.loadtxt('figs/single-rod-slice-%04.2f.dat' % (2*radii[i]))
-#     hugdata = pylab.loadtxt('figs/hughes-single-rod-slice-%04.2f.dat' % (2*radii[i]))
-#     rnew = newdata[:,0]/nm
-#     rhug = hugdata[:,0]/nm
-#     newdensity = newdata[:,1]/gpermL
-#     hugdensity = hugdata[:,1]/gpermL
-#     pylab.plot(rnew, newdensity, color = colors[i], linestyle='-')
-#     pylab.plot(rhug, hugdensity, color = colors[i], linestyle='--')
+blueish = '#99cccc'#'#aadddd' #'#55dae0'
 
 hugdata = pylab.loadtxt('figs/hughes-single-rod-slice-0.40.dat')
 rhug = hugdata[:,0]/nm
 hugdensity = hugdata[:,1]/gpermL
-pylab.plot(rhug, hugdensity, color = '#2222aa', linestyle='--')
+pylab.plot(rhug, hugdensity, color = '#3333aa', linestyle='--')
 
 newdata = pylab.loadtxt('figs/single-rod-slice-0.40.dat')
 rnew = newdata[:,0]/nm
 newdensity = newdata[:,1]/gpermL
-pylab.plot(rnew, newdensity, color = '#118844', linestyle='-')
+pylab.plot(rnew, newdensity, color = '#dd6677', linestyle='-')
 
 pyplot.hlines(1, 0, 1.3, 'black', ':')
 
