@@ -96,7 +96,7 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 30;
+static double width = 20;
 const double dw = 0.001;
 const double spacing = 3; // space on each side
 
@@ -209,7 +209,7 @@ double notinsphere(Cartesian r) {
   const double x = r.x();
   const double y = r.y();
   const double z = r.z();
-  const double dis = sqrt(z*z+y*y*+x*x);
+  const double dis = sqrt(z*z+y*y+x*x);
   if (dis<2) {
     return 0;
   }
@@ -218,6 +218,22 @@ double notinsphere(Cartesian r) {
 
 Functional WB = HardSpheresNoTensor2(1.0);
 
+static void took(const char *name) {
+  // assert(name); // so it'll count as being used...
+  // static clock_t last_time = clock();
+  // clock_t t = clock();
+  // double peak = peak_memory()/1024.0/1024;
+  // double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+  // if (seconds > 120) {
+  //   printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+  // } else {
+  //   printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
+  // }
+  // fflush(stdout);
+  // last_time = t;
+}
+
+
 
 void run_walls(double eta, const char *name, Functional fhs) {
   // Generates a data file for the pair distribution function, for filling fraction eta
@@ -225,42 +241,67 @@ void run_walls(double eta, const char *name, Functional fhs) {
   // columns are x values and rows are z1 values.
   printf("Now starting run_walls with eta = %g name = %s\n",
          eta, name);
-
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
   f = OfEffectivePotential(fhs + IdealGas()
                            + ChemicalPotential(mu));
-
   Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,width));
-  GridDescription gd(lat, 0.05);
-
+  GridDescription gd(lat, 0.1);
   Grid potential(gd);
   Grid constraint(gd);
   constraint.Set(notinsphere);
+  printf("Hello???one\n");
+  fflush(stdout);
   f = constrain(constraint, f);
-
+  printf("Hello???two\n");
+  fflush(stdout);
   potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
+  printf("Hello???three\n");
+  fflush(stdout);
   potential = -potential.cwise().log();
+  printf("Hello???four\n");
+  fflush(stdout);
 
   const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*dw*dw*width;
-  const double precision = fabs(approx_energy*1e-4);
+  printf("Hello???five\n");
+  fflush(stdout);
+  const double precision = fabs(approx_energy*1e-1);//1e-4);
+  printf("Hello???six\n");
+  fflush(stdout);
   //printf("Minimizing to %g absolute precision...\n", precision);
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, 1,
                                                             &potential,
                                                             QuadraticLineMinimizer));
-  for (int i=0;min.improve_energy(false) && i<100;i++) {
+  printf("Hello???seven\n");
+  fflush(stdout);
+  for (int i=0;min.improve_energy(true) && i<100;i++) {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    fflush(stdout);
   }
+  printf("Hello???eight\n");
+  fflush(stdout);
   took("Doing the minimization");
-
+  printf("Hello???nine\n");
+  fflush(stdout);
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
-
+  printf("Hello???ten\n");
+  fflush(stdout);
   char *plotname = new char[4096];
+  printf("Hello???one\n");
+  fflush(stdout);
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
+  printf("Hello???two\n");
+  fflush(stdout);
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
+  printf("Hello???three\n");
+  fflush(stdout);
   Grid n3(gd, StepConvolve(1)(1, density));
-
+  printf("Hello???four\n");
+  fflush(stdout);
   // Create the walls directory if it doesn't exist.
   if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
     // We failed to create the directory, and it doesn't exist.
@@ -271,6 +312,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
   // here you choose the values of z0 to use
   //dx is set at beggining of file
+  printf("Hello???five\n");
+  fflush(stdout);
   for (double z0 = 0.0; z0 < width/2; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
@@ -295,9 +338,11 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "\n");
       }
       fclose(out);
-      delete[] plotname;
     }
   }
+  delete[] plotname;
+  printf("Hello???six\n");
+  fflush(stdout);
   took("Dumping the triplet dist plots");
   char *plotname_path = new char[4096];
   for (int version = 0; version < numplots; version++) {
@@ -318,28 +363,30 @@ void run_walls(double eta, const char *name, Functional fhs) {
     const Cartesian r0(0,0,radius_path);
     double g2_path;
     double x_path;
-    const double max_theta = asin(radius_path/2.0/2.0)+M_PI/2.0;
+    const double max_theta = M_PI/6.0+M_PI/2.0;
     for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5) ;i++){
       x_path = i*dx;
-      const Cartesian r1(width/2.0-x_path,0,0);
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      const Cartesian r1(0,0,width/2.0-x_path);
+      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
     }
     for (int i=0; i<num ;i++){
       double theta = i*max_theta/num;
       x_path = i*max_theta/num*radius_path + width/2.0-2*radius_path;
-      const Cartesian r1(radius_path*(1+cos(theta)),0,radius_path*sin(theta));
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      const Cartesian r1(radius_path*sin(theta),0,radius_path*(1+cos(theta)));
+      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
     }
     for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5); i++){
-      double r1z = i*dx;
+      double r1x = i*dx;
       x_path = i*dx + 2.0*cos(max_theta-M_PI/2.0) + max_theta*radius_path + width/2.0-2*radius_path;
-      const Cartesian r1(2.0*sin(max_theta-M_PI/2.0), 0, r1z + 2.0*cos(max_theta-M_PI/2.0));
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      const Cartesian r1(radius_path*sin(max_theta)+ r1x, 0, radius_path*(1+cos(max_theta)));
+      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
       fprintf(out_path,"%g\t%g\n",x_path,g2_path);
     }
     fclose(out_path);
+    printf("Hello???seven\n");
+    fflush(stdout);
   }
 }
 
@@ -358,17 +405,3 @@ int main(int, char **) {
     return 0;
 }
 
-static void took(const char *name) {
-  // assert(name); // so it'll count as being used...
-  // static clock_t last_time = clock();
-  // clock_t t = clock();
-  // double peak = peak_memory()/1024.0/1024;
-  // double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
-  // if (seconds > 120) {
-  //   printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
-  // } else {
-  //   printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
-  // }
-  // fflush(stdout);
-  // last_time = t;
-}
