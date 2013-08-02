@@ -89,6 +89,7 @@ noinst_PROGRAMS =  \
 	papers/contact/figs/walls.mkdat \
 	papers/pair-correlation/figs/walls.mkdat \
 	papers/pair-correlation/figs/sphere-with-wall.mkdat \
+	papers/pair-correlation/figs/triplet-dft.mkdat \
 	papers/fuzzy-fmt/figs/walls.mkdat
 
 haskell: src/haskell/functionals.exe src/haskell/test.exe
@@ -207,6 +208,7 @@ papers_contact_figs_walls_mkdat_SOURCES = papers/contact/figs/walls.cpp $(ALL_CO
 
 papers_pair_correlation_figs_walls_mkdat_SOURCES = papers/pair-correlation/figs/walls.cpp $(ALL_CONTACT_CODE)
 papers_pair_correlation_figs_sphere_with_wall_mkdat_SOURCES = papers/pair-correlation/figs/sphere-with-wall.cpp $(ALL_CONTACT_CODE)
+papers_pair_correlation_figs_triplet_dft_mkdat_SOURCES = papers/pair-correlation/figs/triplet-dft.cpp $(ALL_CONTACT_CODE)
 
 papers_fuzzy_fmt_figs_walls_mkdat_SOURCES = papers/fuzzy-fmt/figs/walls.cpp $(ALL_CODE)
 

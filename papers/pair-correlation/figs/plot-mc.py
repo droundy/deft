@@ -9,12 +9,18 @@ import pylab, numpy, sys, scipy.ndimage
 import os.path
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.widgets import Slider, RadioButtons
-#from mpl_toolkits.axes_grid1 import make_axes_locatable
+#from mpl_toolkits.axes_grid1 import make_axes_locatab
 
+at_wall = True
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
 plots = ['mc', 'this-work', 'fischer', 'gloor']
 numplots = 4
+if at_wall == True:
+  colors = ['k', 'b', 'r', 'g']
+  plots = ['mc', 'this-work', 'fischer', 'sphere-dft']
+  numplots = 4
+
 dx = 0.1
 ############################
 z0 = 0.05
@@ -57,6 +63,7 @@ def plot():
 
     rmax = len(g2[i][:,0])*dx
     zmax = len(g2[i][0,:])*dx
+    print "zmax len is = %d and zmax is = %g" % (len(g2[i][0,:]), zmax)
 
     r = numpy.arange(0, rmax, dx)
     z = numpy.arange(0, zmax, dx)
@@ -74,6 +81,8 @@ def plot():
 def read_walls(ff, z0, fun):
   if fun == 'mc':
     filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
+  elif fun == 'sphere-dft':
+    filename = "figs/wallsWB-with-sphere-%04.2f.dat" % ff
   else:
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   print 'Using', filename
@@ -119,7 +128,7 @@ z = numpy.arange(0, zmax, dx)
 Z, R = numpy.meshgrid(z, r)
 
 fig = pylab.figure(1)
-ax=[0]*5
+ax=[0]*(numplots+1)
 left = .05
 right = .95
 bottom = .1

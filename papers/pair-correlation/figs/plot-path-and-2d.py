@@ -11,10 +11,15 @@ import math
 
 from matplotlib.colors import NoNorm
 
+at_wall = False
+
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'fischer'] # , 'gloor'
 titles = ['Monte Carlo', 'this work', 'Fischer et al'] # , 'gloor'
+if at_wall:
+  plots = ['mc', 'this-work', 'sphere-dft', 'fischer'] # , 'gloor'
+  titles = ['Monte Carlo', 'this work', 'sphere-dft', 'Fischer et al'] # , 'gloor'
 dx = 0.1
 ############################
 
@@ -35,6 +40,8 @@ ff = float(sys.argv[1])
 def read_walls_path(ff,z0,fun):
   if fun == 'mc':
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
+  elif fun == 'sphere-dft':
+    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
