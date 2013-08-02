@@ -33,5 +33,5 @@ pyplot.ylabel('Number of hydrogen bonds')
 pyplot.xlabel('Radius (nm)')
 pyplot.ylim(0, 4)
 pyplot.xlim(0, 1.4)
-pyplot.savefig('figs/spheres-X-plot.eps')
+pyplot.savefig('figs/spheres-X-plot.pdf')
 

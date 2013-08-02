@@ -23,19 +23,17 @@
 
 .gp.eps:
 	gnuplot $<
-.py.eps:
+.py.pdf:
 	python $<
 .xgr.eps:
 	gracebat -printfile $@ -hdevice EPS $<
 .mf.2602gf:
 	mf $<
-all :  paper.pdf arxiv.tar.gz submit.tar.gz
+all :  paper.pdf
 
 clean:
 	rm -f *.aux *.dvi *.ps *.log *.pdf *.2602gf feynfile*.mf */*.eps */*.pdf
 	rm -f paper/figs/*.tmp.sh
-	rm -rf arxiv arxiv.tar.gz
-	rm -rf submit submit.tar.gz
 
 ALL_FIGURES=\
 	figs/pressure-with-isotherms-truncated.gp\
@@ -62,9 +60,6 @@ LESS_CANONICAL_FIGURES= $(patsubst %.svg,%.eps, \
 						$(patsubst %.pl,%.eps, $(ALL_FIGURES))))))
 FIGURES=$(patsubst %.eps,%.pdf, \
 			$(LESS_CANONICAL_FIGURES))
-ARXIV_FIGURES=$(patsubst figs/%,arxiv/figs/%, \
-	$(patsubst %.pdf,%.ps, $(LESS_CANONICAL_FIGURES)))
-SUBMIT_FIGURES=$(patsubst figs/%,submit/figs/%, $(LESS_CANONICAL_FIGURES))
 
 paper.pdf: paper.tex paper.bib $(FIGURES)
 	pdflatex $< && pdflatex $< && bibtex $* && pdflatex $< && pdflatex $<
@@ -93,7 +88,7 @@ figs/four-rods-energy-vs-distance.eps: figs/four-rods-in-water-00.4nm.dat \
 	figs/four-rods-in-water-00.8nm.dat figs/four-rods-in-water-01.2nm.dat \
 	figs/four-rods-in-water-01.6nm.dat figs/four-rods-in-water-02.0nm.dat \
 	figs/four-rods-in-water-02.4nm.dat
-figs/density-compare.eps: figs/single-rod-slice-0.10.dat \
+figs/density-compare.pdf: figs/single-rod-slice-0.10.dat \
 		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
 		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
 		figs/single-rod-slice-2.00.dat \
@@ -101,7 +96,7 @@ figs/density-compare.eps: figs/single-rod-slice-0.10.dat \
 		figs/hughes-single-rod-slice-0.30.dat figs/hughes-single-rod-slice-0.60.dat \
 		figs/hughes-single-rod-slice-1.00.dat figs/hughes-single-rod-slice-1.60.dat \
 		figs/hughes-single-rod-slice-2.00.dat
-figs/single-rod-X-plot.eps: figs/single-rod-slice-0.10.dat \
+figs/single-rod-X-plot.pdf: figs/single-rod-slice-0.10.dat \
 		figs/single-rod-slice-0.30.dat figs/single-rod-slice-0.60.dat \
 		figs/single-rod-slice-1.00.dat figs/single-rod-slice-1.60.dat \
 		figs/single-rod-slice-2.00.dat figs/single-rod-slice-0.40.dat\
@@ -109,16 +104,16 @@ figs/single-rod-X-plot.eps: figs/single-rod-slice-0.10.dat \
 		figs/hughes-single-rod-slice-0.30.dat figs/hughes-single-rod-slice-0.60.dat \
 		figs/hughes-single-rod-slice-1.00.dat figs/hughes-single-rod-slice-1.60.dat \
 		figs/hughes-single-rod-slice-2.00.dat	figs/hughes-single-rod-slice-0.40.dat
-figs/spheres-X-plot.eps: figs/sphere-0.20.dat figs/sphere-0.40.dat \
+figs/spheres-X-plot.pdf: figs/sphere-0.20.dat figs/sphere-0.40.dat \
 		figs/sphere-0.80.dat figs/sphere-1.00.dat figs/sphere-1.20.dat \
 		figs/sphere-1.40.dat figs/sphere-1.60.dat figs/sphere-2.00.dat \
 		figs/hughes-sphere-0.20.dat figs/hughes-sphere-0.40.dat \
 		figs/hughes-sphere-0.80.dat figs/hughes-sphere-1.00.dat figs/hughes-sphere-1.20.dat \
 		figs/hughes-sphere-1.40.dat figs/hughes-sphere-1.60.dat figs/hughes-sphere-2.00.dat
 figs/energy-vs-diameter.eps: figs/single-rod-in-water.dat
-figs/single-rod-broken-HB.eps: figs/single-rod-in-water.dat \
+figs/single-rod-broken-HB.pdf: figs/single-rod-in-water.dat \
 figs/hughes-single-rod-in-water.dat
-figs/sphere-broken-HB.eps: figs/hughes-sphere.dat figs/sphere.dat
+figs/sphere-broken-HB.pdf: figs/hughes-sphere.dat figs/sphere.dat
 singleRodEnergies := $(wildcard figs/single-rod-*nm-energy.dat)
 figs/single-rod-in-water.dat: $(singleRodEnergies)
 	cat $^ > $@
@@ -135,23 +130,3 @@ figs/density-sphere.eps: $(wildcard figs/sphere-*.dat) $(wildcard figs/grsp*.dat
 hughesSphereEnergies := $(wildcard figs/hughes-sphere-*nm-energy.dat)
 figs/hughes-sphere.dat: $(hughesSphereEnergies)
 	cat $(hughesSphereEnergies) > $@
-
-arxiv/figs/%: figs/%
-	mkdir -p arxiv/figs
-	cp $< $@
-
-arxiv.tar.gz: paper.pdf $(ARXIV_FIGURES)
-	cp paper.tex paper.bbl arxiv/
-	tar cvzf arxiv.tar.gz arxiv
-
-submit/figs/%: figs/%
-	mkdir -p submit/figs
-	cp $< $@
-
-submit.tar.gz: paper.pdf change-format-for-submission.pl $(SUBMIT_FIGURES)
-	perl change-format-for-submission.pl
-	cp paper.bbl submit/
-	tar cvzf submit.tar.gz submit
-	zip -r submit submit
-	cd submit && latex paper && latex paper
-	mv submit/paper.dvi submit.dvi
