@@ -34,7 +34,7 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
     py_chdir = str(py_chdir)
     if py_chdir == "" or py_chdir == ".":
         act = "python %s %s" % (str(pyfile), args)
-        print "build", outputs, 'from', inputs, 'with', act
+        #print "build", outputs, 'from', inputs, 'with', act
         env.Command(target = outputs,
                     source = [pyfile] + inputs,
                     action = act)
@@ -44,7 +44,7 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
         goodoutputs = [py_chdir + '/' + o for o in outputs]
         okinputs = [py_chdir + '/' + i for i in inputs]
         goodinputs = [glob.glob(py_chdir + '/' + i) for i in inputs]
-        print "build", goodoutputs, 'from', goodinputs, okinputs, 'with', act
+        #print "build", goodoutputs, 'from', goodinputs, okinputs, 'with', act
         env.Command(target = goodoutputs,
                     source = [pyfile] + goodinputs,
                     action = act)
@@ -59,7 +59,6 @@ changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.+\))")
 def Matplotlib(env, source, py_chdir = ""):
     if len(source) < 4 or source[len(source)-3:] != ".py":
         source = source + '.py'
-    print 'examining', source
     node = File(source)
     contents = node.get_text_contents()
 
@@ -70,13 +69,10 @@ def Matplotlib(env, source, py_chdir = ""):
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents)
         cinputs = changing_input.findall(contents)
-        print 'coutputs is', coutputs
-        print 'cinputs is', cinputs
         allvalues = [{}]
         commandlineformat = ""
         commandlineargs = []
         for arg in argvals:
-            print 'arg is', arg
             commandlineformat += " %s"
             commandlineargs.append(arg[0])
             newallvalues = []
@@ -86,22 +82,16 @@ def Matplotlib(env, source, py_chdir = ""):
                     newav[arg[0]] = v
                     newallvalues.append(newav)
             allvalues = newallvalues
-        print 'allvalues', allvalues
         for a in allvalues:
             aa = commandlineformat % eval('(' + string.join(commandlineargs, ",") + ')', a)
-            print 'arguments', aa
             extrainputs = []
             extraoutputs = []
             for i in cinputs:
-                print 'i is', i
                 fname = i[0] % eval(i[1], a)
                 extrainputs.append(fname)
-                print 'fname', fname
             for o in coutputs:
-                print 'o is', o
                 fname = o[0] % eval(o[1], a)
                 extraoutputs.append(fname)
-                print 'fname', fname
             runpython(env, source, aa, inputs + extrainputs, outputs + extraoutputs, py_chdir)
     else:
         runpython(env, source, "", inputs, outputs, py_chdir)
