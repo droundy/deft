@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 if len(sys.argv) < 3:
     print("Usage:  " + sys.argv[0] + " eta delta_r")
     exit(1)
-eta = sys.argv[1]
-eta = float(eta)
-delta_r = sys.argv[2]
-delta_r = float(delta_r)
+eta = float(sys.argv[1])
+#arg eta = [.2,.3]
+delta_r = float(sys.argv[2])
+#arg delta_r = [2.005, 3.005]
 dz = 0.01
 able_to_read_file = True
 
@@ -21,6 +21,7 @@ plt.title('$da/dz,$ $\eta = %g,$  $\Delta r = %g$' %(eta, delta_r))
 plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta'])
 
 def read_a1_mc():
+  # input: "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
   filename = "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
   #print 'Using', filename
   try:
@@ -33,6 +34,8 @@ def read_a1_mc():
   return data[:,0], data[:,1]
 
 def read_da_dz(version):
+  # input: "figs/walls.dat" ()
+  # input: "figs/walls/walls_daWB-*-%04.2f-%1.3f.dat" % (eta,delta_r)
   filename = "figs/walls/walls_daWB-%s-%04.2f-%1.3f.dat" % (version,eta,delta_r) #0.%d0
   #print 'Using', filename
   try:
@@ -63,7 +66,7 @@ else:
   plt.xlim([2,9])
   plt.legend(versions+['mc'], loc='upper right')
 
-plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
-savefig(plotname)
+#plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
+savefig("figs/dadz-%d-%d.pdf" % (int(eta*10), int(delta_r)))
 
 plt.show()

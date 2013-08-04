@@ -27,7 +27,7 @@ Tool specific initialization for python scripts using matplotlib.
 
 __docformat__ = "restructuredText"
 
-import re, glob
+import re, glob, string
 from SCons.Script import *
 
 def runpython(env, pyfile, args, inputs, outputs, py_chdir):
@@ -49,13 +49,12 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
                     source = [pyfile] + goodinputs,
                     action = act)
 
-
 fixed_output = re.compile(r"savefig\(['\"](.*)['\"](\s*,[\w\s=]+)*\)")
-changing1_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*\(\s*(\w+)\s*\)(\s*,[\w\s=]+)*\)")
+changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.+\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_input = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\)", re.M)
-changing1_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*\(\s*(\w+)\s*\)")
+changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.+\))")
 
 def Matplotlib(env, source, py_chdir = ""):
     if len(source) < 4 or source[len(source)-3:] != ".py":
@@ -67,23 +66,43 @@ def Matplotlib(env, source, py_chdir = ""):
     outputs = fixed_output.findall(contents)
     outputs = [x[0] for x in outputs]
     inputs = fixed_input.findall(contents)
-    if len(outputs) == 0:
-        outputs1 = changing1_output.findall(contents)
-        if outputs1 > 0:
-            inputs1 = changing1_input.findall(contents)
-            print 'inputs1 is', inputs1
-            values = arguments.findall(contents)
-            vmap = dict(values)
-            if len(values) == 1:
-                for v in eval(values[0][1]):
-                    myinputs = []
-                    myoutputs = []
-                    print outputs1
-                    for o in outputs1:
-                        myoutputs.append(o[0] % v)
-                    for i in inputs1:
-                        myinputs.append(i[0] % v)
-                    runpython(env, source, v, inputs + myinputs, outputs+myoutputs, py_chdir)
+    argvals = arguments.findall(contents)
+    if len(argvals) > 0:
+        coutputs = changing_output.findall(contents)
+        cinputs = changing_input.findall(contents)
+        print 'coutputs is', coutputs
+        print 'cinputs is', cinputs
+        allvalues = [{}]
+        commandlineformat = ""
+        commandlineargs = []
+        for arg in argvals:
+            print 'arg is', arg
+            commandlineformat += " %s"
+            commandlineargs.append(arg[0])
+            newallvalues = []
+            for v in eval(arg[1]):
+                for av in allvalues:
+                    newav = av.copy()
+                    newav[arg[0]] = v
+                    newallvalues.append(newav)
+            allvalues = newallvalues
+        print 'allvalues', allvalues
+        for a in allvalues:
+            aa = commandlineformat % eval('(' + string.join(commandlineargs, ",") + ')', a)
+            print 'arguments', aa
+            extrainputs = []
+            extraoutputs = []
+            for i in cinputs:
+                print 'i is', i
+                fname = i[0] % eval(i[1], a)
+                extrainputs.append(fname)
+                print 'fname', fname
+            for o in coutputs:
+                print 'o is', o
+                fname = o[0] % eval(o[1], a)
+                extraoutputs.append(fname)
+                print 'fname', fname
+            runpython(env, source, aa, inputs + extrainputs, outputs + extraoutputs, py_chdir)
     else:
         runpython(env, source, "", inputs, outputs, py_chdir)
 
