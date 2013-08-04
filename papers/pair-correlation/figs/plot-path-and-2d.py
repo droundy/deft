@@ -36,13 +36,17 @@ if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
+#arg ff = [0.1, 0.2, 0.3, 0.4]
 
 def read_walls_path(ff,z0,fun):
   if fun == 'mc':
+    # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
   elif fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
+    # input: "figs/walls.dat"
+    # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
     # Just use walls data if we do not have the MC (need to be careful!)
@@ -54,8 +58,10 @@ def read_walls_path(ff,z0,fun):
 
 def read_walls(ff, z0, fun):
   if fun == 'mc':
+    # input: "figs/mc/wallsMC-pair-%1.1f-*.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
   else:
+    # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   #print 'Using', filename
   if (os.path.isfile(filename) == False):
@@ -207,8 +213,7 @@ pylab.annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, widt
 pylab.xlim(-0.5, 1.5*ymax)
 pylab.ylim(-ymax, ymax)
 
-savedfilename = "figs/pair-correlation-pretty-" + str(int(ff*10)) + ".pdf"
 pylab.title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
-pylab.savefig(savedfilename)
+pylab.savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 pylab.show()
 
