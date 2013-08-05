@@ -81,8 +81,8 @@ for i in range(len(ff)):
 if able_to_read_file == False:
   plot(arange(0,10,1), [0]*10, 'k')
   suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
-  savefig("figs/ghs-g.pdf")
-  savefig("figs/ghs-g-ghs.pdf")
+  savefig("figs/ghs-g2.pdf")
+  savefig("figs/ghs-g-ghs2.pdf")
   exit(0)
 
 def evalg(x, gsigma, r):
@@ -222,7 +222,7 @@ xlabel(r"$r/R$")
 ylabel("$g(r)$")
 legend(loc='best').get_frame().set_alpha(0.5)
 
-savefig("figs/ghs-g.pdf")
+savefig("figs/ghs-g2.pdf")
 
 
 figure(2)
@@ -231,7 +231,7 @@ xlim(2,6.5)
 xlabel(r"$r/R$")
 ylabel("|ghs - g|")
 #legend(loc='best').get_frame().set_alpha(0.5)
-savefig("figs/ghs-g-ghs.pdf")
+savefig("figs/ghs-g-ghs2.pdf")
 
 figure(3)
 for eta in [.5, .6, .7, .8]:
