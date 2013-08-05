@@ -63,8 +63,10 @@ env.AlwaysBuild('check')
 def BuildTest(env, test, depends):
     global total_tests
     env.Program(target = 'tests/' + test + '.test', source = ['tests/' + test + '.cpp']+depends)
-    env.Append(BUILDERS = {'RunTest': test_runner})
-    test = env.RunTest(target = 'tests/' + test + '.log', source = 'tests/' + test + '.test')
+    testenv = env.Clone()
+    testenv.CacheDir(None) # do not cache test results (which could be semi-random)
+    testenv.Append(BUILDERS = {'RunTest': test_runner})
+    test = testenv.RunTest(target = 'tests/' + test + '.log', source = 'tests/' + test + '.test')
     total_tests += 1
     Depends('check', test)
     return test
@@ -81,7 +83,6 @@ def SVG(env, filename):
                 source = filename+'.eps',
                 action = 'epstopdf $SOURCE')
 AddMethod(Environment, SVG)
-svgbuilder = Builder(action = 'in')
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       triplet-monte-carlo radial-distribution-monte-carlo """):
@@ -186,23 +187,34 @@ env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
 # #################### papers/fuzzy-fmt ##################################################
 
 
+# The following programs generate a single .dat file that may be cached.
 for mkdat in Split("""
 	papers/water-saft/figs/surface-tension
-	papers/water-saft/figs/equation-of-state
 	papers/water-saft/figs/pressure-with-isotherms
 	papers/hughes-saft/figs/surface-tension
-	papers/hughes-saft/figs/equation-of-state
-	papers/hughes-saft/figs/single-rod-in-water-low-res
 	papers/hughes-saft/figs/pressure-with-isotherms
 	papers/contact/figs/gHS-vs-n
 	papers/contact/figs/free-energy
+      """):
+    env.Program(target = mkdat + '.mkdat',
+                source = [mkdat + '.cpp'] + all_sources)
+    env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE')
+
+# The following programs generate several .dat files with different
+# names, and therefore are unsafe to cache, since we do not list all
+# these files here.
+for mkdat in Split("""
+	papers/water-saft/figs/equation-of-state
+	papers/hughes-saft/figs/equation-of-state
+	papers/hughes-saft/figs/single-rod-in-water-low-res
 	papers/contact/figs/walls
 	papers/pair-correlation/figs/walls
       """):
     env.Program(target = mkdat + '.mkdat',
                 source = [mkdat + '.cpp'] + all_sources)
-    env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE')
-    NoCache(mkdat + '.dat') # because other files may also need to be produced
+    # Do not cache output of mkdat, because other files also need to
+    # be produced.
+    NoCache(env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE'))
 
 for mkdat in Split("""
 	papers/water-saft/figs/rods-in-water
@@ -256,7 +268,6 @@ haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h',
                 source = 'src/haskell/newfunctionals.exe', action = '$SOURCE tests')
 
 ################# Now do the test suite ##################################################
-env.CacheDir(None) # do not cache test suite results (so we can rerun tests)
 for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
                       compare-gsigmas
                       convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
