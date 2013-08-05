@@ -42,19 +42,25 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
         pyrel = str(pyfile)[len(py_chdir)+1:]
         act = "cd %s && python %s %s" % (str(py_chdir), pyrel, args)
         goodoutputs = [py_chdir + '/' + o for o in outputs]
-        okinputs = [py_chdir + '/' + i for i in inputs]
         goodinputs = [glob.glob(py_chdir + '/' + i) for i in inputs]
-        #print "build", goodoutputs, 'from', goodinputs, okinputs, 'with', act
+        goodinputs = []
+        for i in inputs:
+            globi = glob.glob(py_chdir + '/' + i)
+            if len(globi) > 0:
+                goodinputs.append(globi)
+            elif not '*' in i and not '?' in i:
+                goodinputs.append(py_chdir + '/' + i)
+        #print "build", goodoutputs, 'from', goodinputs, 'with', act
         env.Command(target = goodoutputs,
                     source = [pyfile] + goodinputs,
                     action = act)
 
 fixed_output = re.compile(r"savefig\(['\"](.*)['\"](\s*,[\w\s=]+)*\)")
-changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.+\))(\s*,[\w\s=]+)*\s*\)")
+changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_input = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\)", re.M)
-changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.+\))")
+changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.*\))")
 
 def Matplotlib(env, source, py_chdir = ""):
     if len(source) < 4 or source[len(source)-3:] != ".py":
