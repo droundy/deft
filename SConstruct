@@ -204,8 +204,6 @@ for mkdat in Split("""
 # names, and therefore are unsafe to cache, since we do not list all
 # these files here.
 for mkdat in Split("""
-	papers/water-saft/figs/equation-of-state
-	papers/hughes-saft/figs/equation-of-state
 	papers/hughes-saft/figs/single-rod-in-water-low-res
 	papers/contact/figs/walls
 	papers/pair-correlation/figs/walls
@@ -217,6 +215,8 @@ for mkdat in Split("""
     NoCache(env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE'))
 
 for mkdat in Split("""
+	papers/water-saft/figs/equation-of-state
+	papers/hughes-saft/figs/equation-of-state
 	papers/water-saft/figs/rods-in-water
 	papers/water-saft/figs/four-rods-in-water
 	papers/water-saft/figs/single-rod
@@ -235,6 +235,15 @@ for mkdat in Split("""
       """):
     env.Program(target = mkdat + '.mkdat',
                 source = [mkdat + '.cpp'] + all_sources)
+
+env.Command(target = ['papers/water-saft/figs/equation-of-state.dat',
+                      'papers/water-saft/figs/experimental-equation-of-state.dat'],
+            source = ['papers/water-saft/figs/equation-of-state.mkdat'],
+            action = './$SOURCE')
+env.Command(target = ['papers/hughes-saft/figs/equation-of-state.dat',
+                      'papers/hughes-saft/figs/experimental-equation-of-state.dat'],
+            source = ['papers/hughes-saft/figs/equation-of-state.mkdat'],
+            action = './$SOURCE')
 
 
 # Here we have rules to build the haskell code
