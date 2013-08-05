@@ -1,6 +1,6 @@
 import os, time, string, glob
 
-#CacheDir(os.environ['HOME'] + '/.cache/scons')
+CacheDir(os.environ['HOME'] + '/.cache/scons')
 
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3'])
@@ -136,7 +136,7 @@ generic_sources = Split("""
  """)
 all_sources = generic_sources + generated_sources
 
-# Here we have rules for our papers
+# Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                        polyhedra """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
@@ -202,6 +202,7 @@ for mkdat in Split("""
     env.Program(target = mkdat + '.mkdat',
                 source = [mkdat + '.cpp'] + all_sources)
     env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE')
+    NoCache(mkdat + '.dat') # because other files may also need to be produced
 
 for mkdat in Split("""
 	papers/water-saft/figs/rods-in-water
@@ -222,6 +223,7 @@ for mkdat in Split("""
       """):
     env.Program(target = mkdat + '.mkdat',
                 source = [mkdat + '.cpp'] + all_sources)
+
 
 # Here we have rules to build the haskell code
 

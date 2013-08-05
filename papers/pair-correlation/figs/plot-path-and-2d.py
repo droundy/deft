@@ -45,7 +45,7 @@ def read_walls_path(ff,z0,fun):
   elif fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
-    # input: "figs/walls.dat"
+    # input: "figs/walls.dat" % ()
     # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
