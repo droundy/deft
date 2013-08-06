@@ -3,11 +3,8 @@
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{color}
-\usepackage{breqn}
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
-\newcommand{\blue}[1]{{\bf \color{blue} #1}}
-\newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
@@ -16,47 +13,163 @@
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 
-% needsworklater is used to annotate bits that need work, but that we
-% can postpone for a while.
-\newcommand{\needsworklater}[1]{\emph{[#1]}}
-% needsworknow is intended to prioritize stuff that needs fixing.
-\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
-
 \begin{document}
-\title{Using Fundamental Measure Theory to treat the two-point pair
-  distribution function of the Inhomogeneous Hard-Sphere Fluid}
+\title{Using Fundamental Measure Theory to treat the Pair
+  Distribution Function of the Inhomogeneous Hard-Sphere Fluid}
 
-\author{Paho}
-\author{???}
+\author{Paho Lurie-Gregg}
+\author{Jeff B. Schulte}
 \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 %\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-  We develop and test an efficient approximation for the two-point
-  pair distribution function of an inhomogeneous hard-sphere fluid.
+  We have developed an approximation for the pair distribution
+  function of hard spheres, which is based on the average value of the
+  pair distribution function at contact described in
+  Section~\ref{sec:contact}.  Our pair distribution is constructed so
+  as to be computable with only single-site convolutions and to
+  accurately reproduce the averaged distribution function at contact.
+  This results in a functional that is efficient to compute, and
+  predicts the pair distribution function as well as the most accurate
+  existing analytical approximation.
 \end{abstract}
 
-\section{Why does pair distribution matter?}
-\subsection{Interfaces are important}
-\subsection{cDFT theory enables treatment of inhomogeneous systems}
-\subsection{Pair distribution function is key input in thermodynamic perturbation theory}
-The pair distribution function is a key input into thermodynamic
-perturbation theory, which is widely used for treating dispersion
-interactions in fluids.  In most cases, the hard-sphere fluid is used
-as the reference system, making the pair distribution function of the
-hard-sphere system an important quantity.
-\subsection{Explain what the $a_1$ in thermodynamic perturbation theory is}
+\maketitle
 
-\section{What has been done before?}
-\subsection{Gloor simple method, problematic}
-Gil-Villegas\cite{gil1997statistical} approximates the first order inverse tenpurature Helmholtz Free energy term, which involves an integral of a potential multiplied by a radial distribution function $g^{HS}(r,\eta)$, by first taking the distribution function out of the integral and evaluating it at the correct mean distance $\zeta$, according to the mean value theorem.  They then approximate the pair correlation function $g^{HS}(\zeta,\eta)$ with the correlation at contact and at a effective $\eta_{eff}$.  The $\eta_{eff}$ is found by fitting a general function form to correct energy solutions $a_1$ with depenedent variable $\eta$ and
+\newcommand\saftlocaldft{}
+% The following are papers that use a SAFT-based classical DFT with
+% all the terms that should be non-local being non-local.
+\newcommand\saftnonlocaldft{}
+
+The standard approach in liquid state theory is to treat a liquid as a
+hard-sphere reference fluid with attractive interactions that are
+treated perturbatively~\cite{hansen2006theory}.  Recently there have
+been considerable advances in the development of classical density
+functionals \fixme{introduce DFT first} have been based on the
+application of these theoretical approaches to inhomogeneous
+densities~\cite{ jain2007modified, gloor2007prediction, gross2009density,
+  %felipe2001examination, gloor2002saft,
+  %gloor2004accurate, clark2006developing,
+  kahl2008modified,
+  % yu2002fmt-dft-inhomogeneous-associating,
+  %fu2005vapor-liquid-dft, bryk2006density,
+  hughes2013classical,
+  %segura1998comparison, felipe2001examination,
+  %gloor2002saft, gloor2004accurate, fu2005vapor-liquid-dft,
+  bryk2006density, clark2006developing,
+  kahl2008modified, gross2009density,
+  %yu2002fmt-dft-inhomogeneous-associating,
+  sundararaman2012computationally, marshall2013density}.  The
+perturbation theory treatment of intermolecular interactions relies on
+the pair distribution function of the reference fluid:
+$g^{(2)}(\rr_1,\rr_2)$.  Unlike the radial distribution function of a
+homogeneous fluid, there does not currently exist a tractable form for
+the pair distribution function of an inhomogeneous hard-sphere fluid,
+suitable for use in constructing a density
+functional~\cite{gloor2007prediction, jain2007modified}.
+
+\fixme{explain a bit of perturbation theory here?}
+
+\section{Theoretical approaches}
+
+The classic (and earliest) approach for computing the pair
+distribution function is to use Percus' trick of treating one sphere
+as an external field, and using the resultant equilibrium density to
+find the pair distribution function~\cite{hansen2006theory}.  This
+elegant approach lends itself to DFT, and can be used to compute and
+plot the pair distribution function, but requires a full free-energy
+minimization \emph{for each position} $\rr_1$ in
+$g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
+a tool in constructing a free energy functional.
+
+The first canonical inhomogeneous configuration for the hard-sphere
+fluid is the system consisting of a hard spheres at a hard wall.  In
+1986, Plischke and Henderson solved the pair distribution function of
+this system using integral equation theory under the Percus-Yevick
+approximation~\cite{plischke1986pair}.  Ten years later,
+G{\"o}tzelmann \emph{et al.} found the pair distribution function near
+a hard wall using classical DFT by finding the direct correlation
+function by taking a functional derivative of the free energy
+functional and then solving the Ornstein-Zernicke
+equation~\cite{gotzelmann1996structure}.  The approach of solving the
+Ornstein-Zernicke equation for an inhomogeneous system is
+computationally challenging~\cite{paul2003variational}.
+
+A second inhomogeneous configuration that is of interest is the
+test-particle configuration, in which one hard sphere is fixed in the
+otherwise homogeneous fluid.  Where the hard-wall is a surface with no
+curvature, the test-particle configuration has a surface with
+curvature at the molecular length scale.  In this case, the density
+gives the pair distribution function---this is just Percus'
+trick---and the pair distribution function gives the triplet
+distribution function.  The triplet distribution function was computed
+by Gonz\'alez \emph{et al.} using the test-particle approach with
+\emph{two} spheres fixed~\cite{gonzalez1999test}.
+
+Lado recently introduced a new and improved efficient algorithm for
+implementing integral equation theory for inhomogeneous fluids, which
+computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
+approach is two orders of magnitude more efficient than previous
+implementations, it remains a computationally expensive approach, and
+unsuitable for repeated evaluation within a free-energy minimization.
+
+\section{Analytic approximations}
+There are few analytic approximations for the inhomogeneous pair
+distribution function, which extend the radial distribution function
+to inhomogeneous scenarios.  These works differ in what density they
+use to evaluate $g(r)$.
+
+Several recent works have cited a
+mean-density approximation:
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \frac{\pi\sigma^3}{6}\tfrac12
+  (n(\rr_1)+n(\rr_2))\right)
+\end{align}
+where $g(r,\eta)$ is the radial distribution function as a function of
+radius and packing fraction $\eta$~\cite{gloor2007prediction,
+  gross2009density}.  These works did not however use this approach,
+which fails dramatically at higher densities, as the packing fraction
+found from the mean density exceeds unity.
+
+Approaches that do not diverge use an average of the density over some
+volume. Fischer and Methfessel~\cite{fischer1980born} introduce the
+approximation
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, n_3\left(\tfrac12
+  (\rr_1+\rr_2)\right)\right)
+  \label{eq:fischer}
+\end{align}
+where $n_3$ is one of the fundamental measures defined in Fundamental
+Measure Theory~\cite{rosenfeld1989free}, which is an integral of the
+density over a spherical volume:
+\begin{align}
+  n_3(\rr) = \int n(\rr')\Theta(\tfrac12 \sigma - |\rr-\rr'|) d\rr'
+\end{align}
+where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
+is computationally awkward, because it relies on the midpoint
+$\tfrac12(\rr_1+\rr_2)$.  For this reason Sokolowski and Fischer
+modified this approach to use averages centered on the two points
+$\rr_1$ and $\rr_2$:
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12},
+  \tfrac12(\bar{n}(\rr_1)+\bar{n}(\rr_2))\right)
+  \label{eq:sokolowski}
+\end{align}
+where
+\begin{align}
+  \bar{n}(\rr) = \frac{3}{4\pi (0.8\sigma)^3}\int n(\rr')\Theta(0.8\sigma - |\rr-\rr'|) d\rr'
+\end{align}
+is the density averaged over a sphere with diameter
+$0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
+was arrived at by fitting to Monte Carlo simulation.  Although
+Eq.~\ref{eq:sokolowski} has the advantages of only involving density
+averages at the points at which the pair distribution function is
+desired, cannot be written as a single-site convolution, since the
+convolution kernel depends on both points.
 
 
-\subsection{Fischer accurate but slow}
-
-\section{Triplet correlation function?}
 
 \section{What is our new idea?}
 We approximate the pair correlation with the average of two radial
@@ -64,9 +177,9 @@ distribution functions, evaluated at the distance between the two
 points, that are themselves functions of our published pair
 correlation at contact $g_{sigma}$ evaluated at the two points.
 
-\begin{dmath}
+\begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
-\end{dmath}
+\end{align}
 
 In the previous approaches mentioned above, function forms of radial
 distributions (used to approximate pair correlation) were dependent
@@ -106,9 +219,9 @@ The function has the form:
 
 The finalalized form of our pair correlation function is:
 
-\begin{dmath}
+\begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
-\end{dmath}
+\end{align}
 
 
 
@@ -134,14 +247,16 @@ The finalalized form of our pair correlation function is:
 %% limit can be calculated using the well known and very successful
 %% Carnahan Starling equation.  has a well known and Perameters in the
 %% expansion where fit
-\section{What does it look like (graphs that show the function itself)?}
-\subsection{Fit to radial distribution function}
-Figure~\ref{fig:radial-distribution} shows...
 \begin{figure}
-  \includegraphics[width=3cm]{figs/ghs-g}
-  \includegraphics[width=3cm]{figs/ghs-g-ghs}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/ghs-g}\\
+  \includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
+\section{What does it look like (graphs that show the function itself)?}
+\subsection{Separable fit to the radial distribution function}
+Figure~\ref{fig:radial-distribution} shows...
+
 \subsection{Pair distribution function}
 %% Figure~\ref{fig:pair-distribution} shows...
 %% \begin{figure}
@@ -252,37 +367,45 @@ average density of the segment positions $\rr$ and $\rr'$:
 \overline{\rho} &\equiv \frac{\rho(\rr)+\rho(\rr')}{2}
 \end{align}
 
-Fu and Wu \cite{fu2005vapor} do I think the same as Gloor et al but maybe you (Dr. Roundy)
-should take a look at it.  They reference Tang \cite{tang2008accurate} which I've
-mentioned below in the Appendix.
+Fu and Wu \cite{fu2005vapor} do I think the same as Gloor et al but
+maybe you (Dr. Roundy) should take a look at it.  They reference Tang
+\cite{tang2008accurate} which I've mentioned below in the Appendix.
+\fixme{DJR: Not same as Gloor, they do a WDA approximation.}
 
 
-Sokolowski and Fischer \cite{sokolowski1992role} do the same as Gloor et al except that instead of
-taking the exact densities $\rho(\mathbf{r_1})$ and $\rho(\mathbf{r_2})$ to
-average he takes an integral $\int_{V_{sphere}} \rho(\mathbf{r})d\mathbf{r}$
-over a sphere of some radius centered at each point.  It's
-these two averaged densities that he takes the average of.
+Sokolowski and Fischer \cite{sokolowski1992role} do the same as Gloor
+et al except that instead of taking the exact densities
+$\rho(\mathbf{r_1})$ and $\rho(\mathbf{r_2})$ to average he takes an
+integral $\int_{V_{sphere}} \rho(\mathbf{r})d\mathbf{r}$ over a sphere
+of some radius centered at each point.  It's these two averaged
+densities that he takes the average of.
 
-Fischer and Methfessel \cite{fischer1980born}, in a paper that is cited by Sokolowski and Fischer (above) do the same thing (the originate the idea of the spherical average density.  Their Introduction has a very good discussion of the different averaging methods to get to $g(\mathbf{r})$ tried up until then (paper is written in 1980).
-
-Fu and Wu \cite{fu2005vapor} do I think the same as Gloor et al but maybe you (Dr. Roundy)
-should take a look at it.  They reference Tang \cite{tang2008accurate} which I've
-mentioned below in the Appendix.
-
-McCabe and Kiselev \cite{mccabe2004application} model a square well potential.  One of their terms uses a radial
-distribution function that once again is taken to be the bulk function evaluated at an
-effective density.  They reference a source that calculates this effective density (or filling fraction) to be
-$\eta_{effective} = c_1\eta + c_2\eta^2 + c_3\eta^3$ where the coeffecients are gotten
-from three coupled polynomial equations with $1,\lambda$, and $\lambda^2$, where $\lambda$
-is a measure of the model's potential range.  They reference another source who calculates
-the effective density in a similar (but more complicated) way.  I can look more at these
-if you'd like.  They also use a different first order expansion formula for the ditribution
-at contact in the chain term.
+Fischer and Methfessel \cite{fischer1980born}, in a paper that is
+cited by Sokolowski and Fischer (above) do the same thing (the
+originate the idea of the spherical average density.  Their
+Introduction has a very good discussion of the different averaging
+methods to get to $g(\mathbf{r})$ tried up until then (paper is
+written in 1980).
 
 
-Toxvaerd \cite{toxvaerd1976hydrostatic}approximates the radial distribution as the radial distribution
-of the bulk at the same density.  Uses the first two terms in a tempurature
-expansion.  First term is just Carnahan Starling derived, second is empirical.
+McCabe and Kiselev \cite{mccabe2004application} model a square well
+potential.  One of their terms uses a radial distribution function
+that once again is taken to be the bulk function evaluated at an
+effective density.  They reference a source that calculates this
+effective density (or filling fraction) to be $\eta_{effective} =
+c_1\eta + c_2\eta^2 + c_3\eta^3$ where the coeffecients are gotten
+from three coupled polynomial equations with $1,\lambda$, and
+$\lambda^2$, where $\lambda$ is a measure of the model's potential
+range.  They reference another source who calculates the effective
+density in a similar (but more complicated) way.  I can look more at
+these if you'd like.  They also use a different first order expansion
+formula for the ditribution at contact in the chain term.
+
+
+Toxvaerd \cite{toxvaerd1976hydrostatic}approximates the radial
+distribution as the radial distribution of the bulk at the same
+density.  Uses the first two terms in a tempurature expansion.  First
+term is just Carnahan Starling derived, second is empirical.
 
 
 \section{Pair distribution function with inhomogeneity}
@@ -351,24 +474,24 @@ for an average of the value of the pair distribution function at
 contact $g_\sigma(\rr)$, which itself can be computed in $O(N\log N)$
 time.
 
-\begin{dmath}
+\begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, \eta(g_\sigma(\rr_1))) + g(|r_{12}|, \eta(g_\sigma(\rr_2)))}{2}
-\end{dmath}
+\end{align}
 Bad:
-\begin{dmath}
+\begin{align}
   g^{(2)}(\rr_1,\rr_2) = g\left(|r_{12}|, \frac{\eta(g_\sigma(\rr_1)) + \eta(g_\sigma(\rr_2))}{2}\right)
-\end{dmath}
+\end{align}
 
 The general idea is to write
-\begin{dmath}
+\begin{align}
   g^{(2)}(\rr_1,\rr_2) = \Theta(r_{12}-\sigma)
   \left(1 + \sum_{\alpha} \frac{f_{\alpha}(g_\sigma(\rr_1)) + f_{\alpha}(g_\sigma(\rr_2))}{2}g_{\alpha}(r_{12})\right)\label{eq:gpair-approx}
-\end{dmath}
+\end{align}
 where $f_{\alpha}$ and $g_{\alpha}$ are a set of functions that
 satisfy the following constraint:
-\begin{dmath}\label{eq:definealpha}
+\begin{align}\label{eq:definealpha}
   \sum_{\alpha} f_{\alpha}(g_\sigma(\eta)) g_{\alpha}(r) \approx g(r; \eta)
-\end{dmath}
+\end{align}
 which ensures that our pair distribution function reduces
 (approximately) to the radial distribution function in the homogeneous
 limit.  Equation~\ref{eq:gpair-approx} is constructed such that
@@ -439,15 +562,34 @@ integral equation theory...
 \appendix
 
 \section*{Appendix}
-\cite{jin2011perturbative} Combines hard sphere (white bear) with attraction that is not mean field but rather uses two other correltation expressions given in  -\cite{tang2008accurate} and \cite{hlushak2009direct}
-
-Tang \cite{tang2008accurate}Derives the direct correltation for a SW and Yukawa and LJ potentials by first getting the radial distribution function through a method I don't really understand.  Composes fourier transforms $c(k)$ and $h(k)$ of these complicated functions that depend on filling fraction and the potential in an integral. Uses first order mean spherical approximation.  This is just square potential well around particle but the radial distribution function takes only the first order in an expansion in... (high temp?).
-
+\cite{jin2011perturbative} Combines hard sphere (white bear) with
+attraction that is not mean field but rather uses two other
+correltation expressions given in -\cite{tang2008accurate} and
 \cite{hlushak2009direct}
-Cites \cite{tang2008accurate} (above) and does largely the same thing but then adds a complication for $2 < \lambda \leq 3$
 
-\cite{levesque2012scalar}
-Uses direct correlation funtion that's gotten from a radial distribution function of a homogeneous density.  The direct correlation itself is only dependent on distance.  The $\rho_0$ that they use is the same $\rho_0$ that the used in the reference HS term in their functional.  The use the Carnahan Starling or the Perkis Yevick for these hard sphere free energies.  The other terms involve $\delta\rho$ so the change is a variation from the reference density.  They further modify it by looking at molecular dynamic simulations of a certain model of water molecules and looking at the oxygen-oxygen correlation.
+Tang \cite{tang2008accurate}Derives the direct correltation for a SW
+and Yukawa and LJ potentials by first getting the radial distribution
+function through a method I don't really understand.  Composes fourier
+transforms $c(k)$ and $h(k)$ of these complicated functions that
+depend on filling fraction and the potential in an integral. Uses
+first order mean spherical approximation.  This is just square
+potential well around particle but the radial distribution function
+takes only the first order in an expansion in... (high temp?).
+
+\cite{hlushak2009direct} Cites \cite{tang2008accurate} (above) and
+does largely the same thing but then adds a complication for $2 <
+\lambda \leq 3$
+
+\cite{levesque2012scalar} Uses direct correlation funtion that's
+gotten from a radial distribution function of a homogeneous density.
+The direct correlation itself is only dependent on distance.  The
+$\rho_0$ that they use is the same $\rho_0$ that the used in the
+reference HS term in their functional.  The use the Carnahan Starling
+or the Perkis Yevick for these hard sphere free energies.  The other
+terms involve $\delta\rho$ so the change is a variation from the
+reference density.  They further modify it by looking at molecular
+dynamic simulations of a certain model of water molecules and looking
+at the oxygen-oxygen correlation.
 
 
 
@@ -456,3 +598,78 @@ Uses direct correlation funtion that's gotten from a radial distribution functio
 
 
 \end{document}
+
+
+%% G{\"o}tzelmann \emph{et al.} worked out the pair distribution function near a hard
+%% wall by finding the direct correlation function by taking a functional
+%% derivative of the free energy functional and then solving the
+%% Ornstein-Zernicke equation~\cite{gotzelmann1996structure}.  They have plots like our pretty plots,
+%% but with the fixed sphere one radius away from touching.
+%% Interestingly, they plot the second bit as $z$, which enables them to
+%% have just two axis values.  I think I prefer our ``total distance''
+%% method, but there is a certain elegance to just plotting $z$ for the
+%% curvy part as well as the straight-away part.  They found poor
+%% quantitative agreement, particularly at contact.  They also studied
+%% the pair correlation function in a hard slit~\cite{gotzelmann1997density}.
+
+%% Integrating the Ornstein-Zernicke equation is challenging, requiring a
+%% variational minimization itself~\cite{paul2003variational}.
+
+%% Attard worked out the triplet correlation function, which is something
+%% that we can access from the pair distribution function, if we consider
+%% the pair correlation near a single hard sphere
+%% solute\cite{attard1989spherically}.  Gonz\'alez \emph{et al.} wrote an
+%% interesting paper using DFT (test-particle approach of Percus) and
+%% Monte Carlo to compute the three-particle distribution function (same
+%% as the triplet correlation function)\cite{gonzalez1999test}.  Their
+%% theory compares favorably with the ``superposition approximation'',
+%% and we could probably do something similar.
+
+%% Plischke and Henderson worked out the pair correlation function near a
+%% hard wall using Percus-Yevick, and compare with Monte Carlo
+%% results\cite{plischke1986pair}.  They plot the pair correlation
+%% function along interesting paths.  \fixme{Jeff read this paper for a
+%%   while and does not understand what they do in oder to find the pair
+%%   correlation function as compared to the radial distribution function}
+
+%% Lado recently introduced a new and improved efficient algorithm for
+%% implementing integral equation theory for inhomogeneous fluids, which
+%% computes $g^{(2)}(\rr_1,\rr_2)$ among other
+%% things\cite{lado2009efficient}.  Lado's work looks pretty awkward to
+%% use, and their example is limited to 1D systems.  And the scaling is
+%% still (so far as I can tell) $O(N^2)$, since their improvement is in
+%% the prefactor, by developing a nice basis set.
+
+%% Gloor \emph{et al} explain that little is known of the pair
+%% distribution function of the hard-sphere fluid, and therefore use the
+%% formula
+%% \begin{align}
+%%   g^{(2)}(\rr_1,\rr_2) \approx g\left(|\rr_1-\rr_2|, \frac{\rho(\rr_1)+\rho(\rr_2)}2\right)
+%% \end{align}
+%% They go on to further approximate the radial distribution function,
+%% but we can just stop here.
+
+%% Gloor et al \cite{gloor2007prediction} uses average density of two points:
+%% \begin{align}
+%% \overline{\rho} &\equiv \frac{\rho(\rr)+\rho(\rr')}{2}
+%% \end{align}
+%% and the uses bulk radial distribution for the reference system (hard
+%% spheres) at this density, in order to approximate pair correlation.
+
+
+
+%% \section{What has been done before?}
+%% \subsection{Gloor simple method, problematic}
+%% Gil-Villegas\cite{gil1997statistical} approximates the first order
+%% inverse tenpurature Helmholtz Free energy term, which involves an
+%% integral of a potential multiplied by a radial distribution function
+%% $g^{HS}(r,\eta)$, by first taking the distribution function out of the
+%% integral and evaluating it at the correct mean distance $\zeta$,
+%% according to the mean value theorem.  They then approximate the pair
+%% correlation function $g^{HS}(\zeta,\eta)$ with the correlation at
+%% contact and at a effective $\eta_{eff}$.  The $\eta_{eff}$ is found by
+%% fitting a general function form to correct energy solutions $a_1$ with
+%% depenedent variable $\eta$ and
+
+
+%% \subsection{Fischer accurate but slow}
