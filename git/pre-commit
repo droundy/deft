@@ -19,22 +19,9 @@ case "$TEST" in
     none)
         echo Skipping all tests.
         ;;
-    compile)
-        echo Testing compile only.
-        ./autogen.sh
-        time make -j $USING recheck
-        echo Compile successful!
-        ;;
-    build)
-        echo Testing build only.
-        ./autogen.sh
-        time make -j $USING recheck pdf papers
-        echo Compile successful, and papers successfully built!
-        ;;
     *)
         echo Testing everything!
-        ./autogen.sh
-        time make -j $USING check pdf papers
+        scons -j $USING
         echo Compile successful, papers successfully built, and all tests passed!
         ;;
 esac
