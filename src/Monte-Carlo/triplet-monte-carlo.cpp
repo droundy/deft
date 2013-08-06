@@ -18,7 +18,7 @@ Vector3d periodicDiff(Vector3d a, Vector3d b);
 const double dz = 0.1;
 const double dx = 0.1;
 
-const double path_dr = 0.1; //fixme should be .01
+const double path_dr = 0.01;
 const double path_dx = 0.1;
 const double path_dtheta = 2.0/3.0*M_PI/42.0;
 
@@ -554,7 +554,7 @@ int main(int argc, char *argv[]){
                 if (z1 < 2*R + path_dr && z2 > 0) {
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
-                  if (z2 < lenx/2.0 && x2 < path_dx) {
+                  if (z2 < lenx/2.0 && x2 < path_dx && z2 > 3*R) {
                     const int index = path_zbins - (z2-z1-2*R)/path_dr;
                     if (index < 0 || index >= path_zbins)
                       fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);

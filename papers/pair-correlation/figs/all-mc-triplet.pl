@@ -7,7 +7,7 @@ use File::Slurp qw(read_file);
 my $dir = "papers/pair-correlation/figs";
 my $sha1code = sha1_hex(read_file("src/Monte-Carlo/triplet-monte-carlo.cpp"));
 
-system "make monte-carlo";
+system "scons triplet-monte-carlo";
 
 my $iters  = 9999999999999;
 my $acc = 0.001;
@@ -21,17 +21,17 @@ foreach $dd ([30,645, 0.1], [30,1289, 0.2], [30, 1934, 0.3], [30, 2578, 0.4], [3
     # Here I estimate the amount of memory that will be needed...
     my $memuse = sprintf "%.0f", 0.04*($N) + 50; # It's a very hokey guess
 
-    my $scriptname = "$dir/wallsMC-triplet-$len-$N.tmp.sh";
+    my $scriptname = "$dir/tripletMC-$len-$N.tmp.sh";
 
-    my $da_dz_outfilename = "$dir/mc/triplet/a1/wallsMC-a1-triplet-$ff";
-    my $outfilename = "$dir/mc/triplet/wallsMC-triplet-$ff";
+    my $da_dz_outfilename = "$dir/mc/triplet/a1/tripletMC-a1-$ff";
+    my $outfilename = "$dir/mc/triplet/tripletMC-$ff";
     my $command = "./triplet-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxyz $len flatdiv";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type ALL
-#SBATCH --output wallsMC-triplet-$len-$N.out
+#SBATCH --output tripletMC-$len-$N.out
 
 set -ev
 

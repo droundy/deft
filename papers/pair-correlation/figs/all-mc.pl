@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Digest::SHA1 qw(sha1_hex);
+use Digest::SHA qw(sha1_hex);
 use File::Slurp qw(read_file);
 
 my $dir = "papers/pair-correlation/figs";
 my $sha1code = sha1_hex(read_file("src/Monte-Carlo/pair-monte-carlo.cpp"));
 
-system "make monte-carlo";
+system "scons pair-monte-carlo";
 
 my $iters  = 9999999999999;
 my $acc = 0.001;
