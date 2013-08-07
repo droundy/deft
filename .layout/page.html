@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{{ page.title }}</title>
-<style> {% include style.css %}</style>
+  <title>{{ page.title }}</title>
+  <link rel="stylesheet" href="${base}../.layout/style.css">
 </head>
 <body>
   <div id="wrapper">
@@ -19,14 +19,13 @@
     <div id="contentliquid">
       <div id="contentwrap">
         <div id="content">
-          {{ content }}
+          $content
         </div>
       </div>
     </div>
     <div id="leftcolumnwrap">
       <div id="leftcolumn">
-        {% capture sidebar %}{% include sidebar.md %}{% endcapture %}
-        {{ sidebar | markdownify }}
+        $sidebar
       </div>
     </div>
   </div>

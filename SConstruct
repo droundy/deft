@@ -144,7 +144,7 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                 source = ['papers/' + paper + '/paper.tex'])
     Default(p)
 
-paper = Environment(tools=['gnuplot', 'matplotlib'])
+paper = Environment(tools=['gnuplot', 'matplotlib', 'mkdown'])
 for paperfile in Glob('papers/*/paper.tex'):
     paperdir = str(paperfile)[:len(str(paperfile))-len('/paper.tex')]
     # first let's handle all gnuplot files
@@ -244,6 +244,10 @@ env.Command(target = ['papers/hughes-saft/figs/equation-of-state.dat',
                       'papers/hughes-saft/figs/experimental-equation-of-state.dat'],
             source = ['papers/hughes-saft/figs/equation-of-state.mkdat'],
             action = './$SOURCE')
+
+########################### Now let's build the website! ##################################
+
+Default(paper.Markdown('index.md'))
 
 
 # Here we have rules to build the haskell code
