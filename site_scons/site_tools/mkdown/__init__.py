@@ -47,6 +47,7 @@ def mkdown(target, source, env):
     else:
         mkstr = title[0][1]
         title = mmdd.markdown(title[0][0])
+        title = title[3:len(title)-4]
     mkstr = string.Template(mkstr).safe_substitute(base = base)
     sidebar = string.Template(source[1].get_text_contents()).safe_substitute(base = base)
     template = string.Template(source[2].get_text_contents())
@@ -61,25 +62,41 @@ def mkdown(target, source, env):
 
 linkre = re.compile(r"\[[^\]]*\]\(([^)]*)\)")
 
-def Markdown(env, source):
+def Markdown(env, source, sofar = set()):
+    # sofar is the set of files we have already figured out how to
+    # build.
     if len(source) < 4 or source[len(source)-3:] != ".md":
         source = source + '.md'
+    if source in sofar:
+        return [] # we already handled this!
     relto = os.path.dirname(source)
     node = File(source)
     contents = node.get_text_contents()
 
     links = linkre.findall(contents)
+
+    sblinks = linkre.findall(string.Template(File('.layout/sidebar.md').get_text_contents()
+                                             ).safe_substitute(base = ''))
     deps = []
+    sofar.add(source)
     for link in links:
+        link = os.path.normpath(os.path.join(relto,link))
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
-        if len(link) > 4 and link[len(link)-4:] == '.pdf':
+        if (len(link) > 4 and link[len(link)-4:] == '.pdf'):
             deps = deps # nothing to do
         else:
-            deps += Markdown(env, os.path.join(relto,link))
+            deps += Markdown(env, link, sofar)
+    for link in sblinks:
+        if len(link) > 5 and link[len(link)-5:] == '.html':
+            link = link[:len(link)-5]
+        if (len(link) > 4 and link[len(link)-4:] == '.pdf'):
+            deps = deps # nothing to do
+        else:
+            deps += Markdown(env, link, sofar)
     return env.Command(target = source[:len(source)-3]+'.html',
-                       source = [source, '.layout/sidebar.md', '.layout/page.html'] + deps,
-                       action = mkdown)
+                       source = [source, '.layout/sidebar.md', '.layout/page.html'],
+                       action = mkdown) + deps
 
 def generate(env):
     """Add Builders and construction variables to the Environment"""
