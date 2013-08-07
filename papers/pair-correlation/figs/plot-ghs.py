@@ -28,8 +28,8 @@ x = [1]*numParams
 # x[0] = 1.0 # 1.15
 x[0] = 7.9
 
-x[1] = .33
-x[2] = 7.13
+x[1] = -.13
+x[2] = 7.13/2
 x[3] = 1.71
 
 x[4] = .18
@@ -97,11 +97,18 @@ def evalg(x, gsigma, r):
   hsigma = gsigma - 1 # (1 - 0.5*eta)/(1-eta)**3 - 1
   h0 = hsigma # was x[0]*gsig
   f0 = numpy.exp(-x[0]*r)
+
+  # the slope dghs/dr should be = -hsigma - 0.7*hsigma**2 according my fit (by eye)
+  # but our "r" is r/2, so our slope is twice that.
+  # -2*hsigma - 1.4*hsigma**2 = -x[0]*hsigma -amplitude[4]*x[5]
+  # thus amplitude[4] = (hsigma*(2-x[0]) + 1.4*hsigma**2)/x[5]
+
   h1 = x[1]*hsigma
-  h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
-  f1 = numpy.sin(x[2]*r) * numpy.exp(-x[3]*r)
-  h2 = -x[4]*hsigma**(2)
-  h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
+  #h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
+  f1 = numpy.sin(x[2]*r)**2 * numpy.exp(-x[3]*r)
+  h2 = -x[4]*(hsigma + hsigma**2)
+  h2 = (hsigma*(-2+x[0]) -2*hsigma**2)/x[5]
+  #h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
   f2 = numpy.sin(x[5]*r) * numpy.exp(-x[6]*r)
   #h3 = -x[7]*hsigma**(3)
   #f3 = numpy.sin(x[8]*r) * numpy.exp(-x[9]*r)
@@ -146,6 +153,7 @@ vals = [1]*numParams
 
 print "beginning least squares fit..."
 vals, cov = leastsq(dist2, x)
+#vals = x
 print "original fit complete, cov: " + str(cov)
 
 i = 0

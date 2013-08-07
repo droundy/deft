@@ -1,7 +1,4 @@
----
-title: Deft papers
-layout: page
----
+# Deft papers
 
 Here you can access several papers that present results obtained
 using the Deft code.  The code that generated the results for each of

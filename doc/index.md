@@ -1,7 +1,4 @@
----
-title: Deft documentation
-layout: page
----
+# Deft documentation
 
 Documentation for deft.  Please add more documentation!
 

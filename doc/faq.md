@@ -1,7 +1,4 @@
----
-title: Deft frequently asked questions.
-layout: page
----
+# Deft frequently asked questions.
 
 
 ## How do I add a new C++ file to the deft core?

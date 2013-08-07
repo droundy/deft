@@ -1,7 +1,4 @@
----
-title: General cheat sheet
-layout: page
----
+# General cheat sheet
 
 
 Terminal commands:

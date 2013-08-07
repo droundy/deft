@@ -1,7 +1,4 @@
----
-title: Configuring your editor
-layout: page
----
+# Configuring your editor
 
 You can use any text editor to work on deft, but there are some common
 mistakes that you can avoid by appropriately configuring your text

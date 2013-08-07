@@ -26,22 +26,40 @@ Tool specific initialization for creating website with markdown
 
 __docformat__ = "restructuredText"
 
-import re, string
+import re, string, os
 import markdown as mmdd
 from SCons.Script import *
 
+
 def mkdown(target, source, env):
     base = 'doc/'
-    if str(source[0])[:4] == base:
+    sourcename = str(source[0])
+    sourcedirname = os.path.dirname(sourcename)
+    if sourcename[:4] == base:
         base = ''
+    elif sourcedirname != '':
+        base = '../doc/'
+        sourcedirname = os.path.dirname(sourcedirname)
+        while sourcedirname != '':
+            base = '../' + base
+            sourcedirname = os.path.dirname(sourcedirname)
 
-    mkstr = string.Template(source[0].get_text_contents()).safe_substitute(base = base)
+    mkstr = source[0].get_text_contents()
+    titlere = re.compile(r"^\s*#\s*([^\n]*)(.*)", re.DOTALL)
+    title = titlere.findall(mkstr)
+    if len(title) == 0:
+        title = "Deft"
+    else:
+        mkstr = title[0][1]
+        title = mmdd.markdown(title[0][0])
+    mkstr = string.Template(mkstr).safe_substitute(base = base)
     sidebar = string.Template(source[1].get_text_contents()).safe_substitute(base = base)
     template = string.Template(source[2].get_text_contents())
 
     htmlfile = str(target[0])
     f = open(str(target[0]), 'w')
     f.write(template.safe_substitute(base = base,
+                                     title = title,
                                      content = mmdd.markdown(mkstr),
                                      sidebar = mmdd.markdown(sidebar)))
     f.close()
@@ -63,7 +81,10 @@ def Markdown(env, source):
     for link in wikilinks + links:
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
-        nodes += Markdown(env, 'doc/' + link)
+        if len(link) > 4 and link[len(link)-4:] == '.pdf':
+            nodes = nodes # nothing to do
+        else:
+            nodes += Markdown(env, 'doc/' + link)
     return nodes
 
 def generate(env):

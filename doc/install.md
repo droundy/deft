@@ -1,7 +1,4 @@
----
-title: Installing deft
-layout: page
----
+# Installing deft
 
 Getting deft
 ============

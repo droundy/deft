@@ -1,7 +1,4 @@
----
-title: Deft LaTeX tricks.
-layout: page
----
+# Deft LaTeX tricks.
 
 ## How do I do something cool?
 
