@@ -83,14 +83,14 @@ def Markdown(env, source, sofar = set()):
         link = os.path.normpath(os.path.join(relto,link))
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
-        if (len(link) > 4 and link[len(link)-4:] == '.pdf'):
+        if (len(link) > 4 and link[len(link)-4:] == '.pdf') or ':' in link:
             deps = deps # nothing to do
         else:
             deps += Markdown(env, link, sofar)
     for link in sblinks:
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
-        if (len(link) > 4 and link[len(link)-4:] == '.pdf'):
+        if (len(link) > 4 and link[len(link)-4:] == '.pdf') or ':' in link:
             deps = deps # nothing to do
         else:
             deps += Markdown(env, link, sofar)
