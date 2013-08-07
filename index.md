@@ -2,4 +2,4 @@
 
 Deft is a classical density-functional theory code. This is its website.
 
-See the [documentation](index) for more information. See [[faq]]
+See the [documentation](doc/index) for more information.

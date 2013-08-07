@@ -1,7 +1,7 @@
-[home](${base}../index.html)
+[home](${base}index.html)
 
-**[install](${base}install.html)**
+**[install](${base}doc/install.html)**
 
-[documentation](${base}index.html)
+[documentation](${base}doc/index.html)
 
-[papers](${base}../papers/papers.html)
+[papers](${base}papers/papers.html)

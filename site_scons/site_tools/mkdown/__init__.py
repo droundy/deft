@@ -32,17 +32,12 @@ from SCons.Script import *
 
 
 def mkdown(target, source, env):
-    base = 'doc/'
+    base = ''
     sourcename = str(source[0])
     sourcedirname = os.path.dirname(sourcename)
-    if sourcename[:4] == base:
-        base = ''
-    elif sourcedirname != '':
-        base = '../doc/'
+    while sourcedirname != '':
+        base = '../' + base
         sourcedirname = os.path.dirname(sourcedirname)
-        while sourcedirname != '':
-            base = '../' + base
-            sourcedirname = os.path.dirname(sourcedirname)
 
     mkstr = source[0].get_text_contents()
     titlere = re.compile(r"^\s*#\s*([^\n]*)(.*)", re.DOTALL)
@@ -64,28 +59,27 @@ def mkdown(target, source, env):
                                      sidebar = mmdd.markdown(sidebar)))
     f.close()
 
-wikilinkre = re.compile(r"\[\[([^\]]*)\]\]")
 linkre = re.compile(r"\[[^\]]*\]\(([^)]*)\)")
 
 def Markdown(env, source):
     if len(source) < 4 or source[len(source)-3:] != ".md":
         source = source + '.md'
+    relto = os.path.dirname(source)
     node = File(source)
     contents = node.get_text_contents()
 
-    wikilinks = wikilinkre.findall(contents)
     links = linkre.findall(contents)
-    nodes = env.Command(target = source[:len(source)-3]+'.html',
-                        source = [source, '.layout/sidebar.md', '.layout/page.html'],
-                        action = mkdown)
-    for link in wikilinks + links:
+    deps = []
+    for link in links:
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
         if len(link) > 4 and link[len(link)-4:] == '.pdf':
-            nodes = nodes # nothing to do
+            deps = deps # nothing to do
         else:
-            nodes += Markdown(env, 'doc/' + link)
-    return nodes
+            deps += Markdown(env, os.path.join(relto,link))
+    return env.Command(target = source[:len(source)-3]+'.html',
+                       source = [source, '.layout/sidebar.md', '.layout/page.html'] + deps,
+                       action = mkdown)
 
 def generate(env):
     """Add Builders and construction variables to the Environment"""
