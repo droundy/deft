@@ -16,9 +16,7 @@ Building deft
 
 To build, just run:
 
-    sh autogen.sh
-    ./configure
-    make
+    scons
 
 Building on Ubuntu Precise Pangolin
 ===================================
@@ -35,18 +33,14 @@ You need ...
     gnuplot
     python-matplotlib
     python-scipy
+    python-markdown # for the documentation
 
 Running the test suite
 ======================
 
 You can run the tests with
 
-    make check
-
-If a test fails, and you want to just rerun it to see if you fixed it,
-you can rerun only those tests that failed with
-
-    make recheck
+    scons check
 
 To write a new test
 -------------------
@@ -55,14 +49,14 @@ Create a new file such as
 
     tests/my-new-feature.cpp
 
-Then add that test to `Makefile.am`
+Then add that test to `SConstruct`
 
-    check_PROGRAMS = \
-        tests/my-new-feature.test \
-    ...
-    tests_my_new_feature_test_SOURCES = tests/my-new-feature.cpp $(GENERIC_CODE)
+    for test in Split(""" memory saft eos  ... my-new-feature  """):
+        env.BuildTest(test, all_sources)
     
-At this point, `make check` should do what you want.
+At this point, `scons check` should do what you want.  There are
+several such `for` loops, so that you can choose one that lists the
+sources required, in order to minimize the build time for your test.
 
 
 Using the git pre-commit hook
