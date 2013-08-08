@@ -10,6 +10,6 @@ for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
     print "File does not exist: ", filename
     continue
   data = loadtxt(filename)
-  trimmed_data = data[800:1900,0:2]
+  trimmed_data = data[800:1900,0:4]
   savetxt("figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" %eta, trimmed_data, fmt='%g')
 

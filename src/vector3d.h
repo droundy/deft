@@ -46,7 +46,7 @@ class vector3d {
     coords[0] /= scalar; coords[1] /= scalar; coords[2] /= scalar; return *this; }
 
   double &operator[](const unsigned int i) { return coords[i]; }
-  const double &operator[](const unsigned int i) const { return coords[i]; }
+  const double operator[](const unsigned int i) const { return coords[i]; }
 
   double dot(const vector3d &v) const {
     return coords[0]*v.coords[0] + coords[1]*v.coords[1] + coords[2]*v.coords[2]; }
@@ -68,6 +68,7 @@ class vector3d {
 
 const vector3d operator*(const double scalar, const vector3d &v) {
   return v*scalar; }
+
 
 class quaternion {
  public:

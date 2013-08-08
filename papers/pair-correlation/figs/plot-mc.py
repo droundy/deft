@@ -18,7 +18,8 @@ plots = ['mc', 'this-work', 'fischer', 'gloor']
 numplots = 4
 if at_wall == True:
   colors = ['k', 'b', 'r', 'g']
-  plots = ['mc', 'this-work', 'fischer', 'sphere-dft']
+  #plots = ['mc', 'this-work', 'fischer', 'sphere-dft']
+  plots = ['mc', 'this-work', 'fischer', 'sokolowski']
   numplots = 4
 
 dx = 0.1
@@ -69,10 +70,10 @@ def plot():
     z = numpy.arange(0, zmax, dx)
     Z, R = numpy.meshgrid(z, r)
 
-    CS = ax[i].contourf(Z, R, g2[i], levels, cmap=cmap, extend='both')
-    CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap, extend='both')
-    CS.cmap.set_over('k')
-    CS2.cmap.set_over('k')
+    CS = ax[i].contourf(Z, R, g2[i], levels, cmap=cmap)
+    CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap)
+    #CS.cmap.set_over('k')
+    #CS2.cmap.set_over('k')
     ax[i].set_title('%s, $z_0 = %g$, $ff = %g$' %(plots[i], z0, ff))
     i += 1
   plot1d()
@@ -92,30 +93,33 @@ def read_walls(ff, z0, fun):
   data = numpy.loadtxt(filename)
   return data
 
-# COLORS
-cdict = {'red':  ((0.0, 0.0, 0.0),
-                  (0.25,0.56, 0.2),
-                  (0.5, 1.0, 1.0),
-                  (0.75,1.0, 1.0),
-                  (1.0, 1.0, 0.0)),
+gmax = 4
+xlo = 0.85/gmax
+xhi = 1.15/gmax
+xhier = (1+xhi)/2.0
 
-        'green': ((0.0, 0.0, 0.0),
-                  (0.25,1.0, 1.0),
-                  (0.5, 0.0, 0.0),
-                  (0.75,0.0, 0.0),
-                  (1.0, 1.0, 0.0)),
+cdict = {'red':   [(0.0,  0.0, 0.0),
+                   (xlo,  1.0, 1.0),
+                   (1.0/gmax,  1.0, 1.0),
+                   (xhi,  0.0, 0.0),
+                   (xhier,0.0, 0.0),
+                   (1.0,  1.0, 1.0)],
 
-        'blue':  ((0.0, 0.0, 0.0),
-                  (0.25,0.6, 1.0),
-                  (0.5, 1.0, 1.0),
-                  (0.75,0.0, 0.0),
-                  (1.0, 1.0, 0.0))
-        }
-map = LinearSegmentedColormap('map', cdict)
-pylab.register_cmap(cmap = map)
-cmap = pylab.get_cmap('map')
+         'green': [(0.0, 0.0, 0.0),
+                   (xlo,  0.1, 0.1),
+                   (1.0/gmax, 1.0, 1.0),
+                   (xhi, 0.0, 0.0),
+                   (xhier,1.0, 1.0),
+                   (1.0, 1.0, 1.0)],
 
-levels = numpy.linspace(0, 4, 49)
+         'blue':  [(0.0,  0.0, 0.0),
+                   (xlo,  0.1, 0.1),
+                   (1.0/gmax,  1.0, 1.0),
+                   (xhi,  1.0, 1.0),
+                   (xhier,0.0, 0.0),
+                   (1.0,  0.0, 0.0)]}
+cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
+levels = numpy.linspace(0, gmax, gmax*100)
 
 g2 = [0]*numplots
 g2[0] = read_walls(ff, z0, 'mc')

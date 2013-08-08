@@ -11,11 +11,11 @@ Minimizer QuadraticLineMinimizer(Functional f, const GridDescription &gd, double
                                  const VectorXd &direction, double gradDotDirection, double *step);
 
 Minimizer SteepestDescent(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
-                          LineMinimizer lm, double stepsize = 0.1);
+                          LineMinimizer lm, double stepsize = 1.0);
 Minimizer PreconditionedSteepestDescent(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
-                                        LineMinimizer lm, double stepsize = 0.1);
+                                        LineMinimizer lm, double stepsize = 1.0);
 
 Minimizer ConjugateGradient(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
-                            LineMinimizer lm, double stepsize = 0.1);
+                            LineMinimizer lm, double stepsize = 1.0);
 Minimizer PreconditionedConjugateGradient(Functional f, const GridDescription &gdin, double kT, VectorXd *data,
-                                          LineMinimizer lm, double stepsize = 0.1);
+                                          LineMinimizer lm, double stepsize = 1.0);
