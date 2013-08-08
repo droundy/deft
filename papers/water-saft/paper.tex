@@ -45,28 +45,24 @@
 \affiliation{Department of Physics, Oregon State University,
   Corvallis, OR 97331, USA}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 We develop an improved version of our old functional.
 \end{abstract}
 \maketitle
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 Water, the universal solvent, is of critical practical importance, and
 a continuum description of water is in high demand for a solvation
 model.  A number of recent attempts to develop improved solvation
 models for water have built on the approach of classical
-density-functional theory (DFT)\cite{jeanmairet2013molecular,
+density-functional theory (DFT)~\cite{jeanmairet2013molecular,
   zhao2011molecular, zhao2011new, ramirez2005direct,
-  ramirez2005density, levesque2012solvation, levesque2012scalar}
-~\fixme{add citations here, particularly Jeanmairet 2013 and his
-  citations 35-44, possibly cutting non-acqueous papers from that
-  list}.  Classical DFT is based on a description of a fluid written
-as a free energy functional of the density distribution.  There are
-two approaches used to construct a classical DFT for water.  The first
-is to choose a functional form that is fit to properties of the bulk
+  ramirez2005density, levesque2012solvation, levesque2012scalar}.
+Classical DFT is based on a description of a fluid written as a free
+energy functional of the density distribution.  There are two
+approaches used to construct a classical DFT for water.  The first is
+to choose a functional form that is fit to properties of the bulk
 liquid at a given temperature and pressure
 \cite{jeanmairet2013molecular} ~\fixme{cite Jeanmairet and similar}.
 Using this approach, it is possible to construct a functional that
@@ -78,32 +74,32 @@ second approach is construct a functional by applying liquid-state
 theory to a model system, and then fit the model to experimental data
 such as the equation of state.
 
-%% \fixme{stuff about water}.  An important aspects of water
-%% is its ability to form hydrogen bonds.  Each water molecule contains
-%% two hydrogen bond donor sites and two acceptor sites.
-%% %
-%% One promising approach for an efficient continuum description of water
-%% is that of classical density-functional theory (DFT), which is an
-%% approach for evaluating the free energy and thermally averaged density
-%% of fluids in an arbitrary external potential~\cite{ebner1976density}.
-%% The foundation of classical DFT is the Mermin
-%% theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
-%% theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
-%% Classical DFT is a natural framework for creating a more flexible
-%% theory of hydrophobicity that can readily describe interaction of
-%% water with arbitrary external potentials---such as potentials
-%% describing strong interactions with solutes or surfaces.
+\fixme{stuff about water}.  An important aspects of water
+is its ability to form hydrogen bonds.  Each water molecule contains
+two hydrogen bond donor sites and two acceptor sites.
+%
+One promising approach for an efficient continuum description of water
+is that of classical density-functional theory (DFT), which is an
+approach for evaluating the free energy and thermally averaged density
+of fluids in an arbitrary external potential~\cite{ebner1976density}.
+The foundation of classical DFT is the Mermin
+theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
+theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
+Classical DFT is a natural framework for creating a more flexible
+theory of hydrophobicity that can readily describe interaction of
+water with arbitrary external potentials---such as potentials
+describing strong interactions with solutes or surfaces.
 
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
 (SAFT).
-%
+
 SAFT is a theory for fluids in which hydrogen bonding plays a significant
 role\cite{chapman1989saft, muller2001molecular}. SAFT is used to
 accurately model the equations of state of both pure fluids and
 mixtures over a wide range of temperatures and pressures.
 \fixme{Talk about and cite papers using SAFT to build DFTs.}
-%
+
 In a recent paper \cite{hughes2013classical}, we constructed a
 classical DFT for water which uses SAFT as a basis for a free energy
 functional. We used Clark \emph{et al}'s \cite{clark2006developing}
@@ -125,14 +121,14 @@ $g_\sigma^\text{HS}(\rr)$. Our previous water functional used Yu and
 Wu's radial distribution function
 \cite{yu2002fmt-dft-inhomogeneous-associating}, which was found to
 agree less with hard-sphere Monte-Carlo simulation than a distribution
-function developed by us in a recent paper.\cite{schulte2012using} In
+function developed by us in a recent paper \cite{schulte2012using}. In
 our paper, we developed an approximation for correlation at
 contact to describe the hard-sphere fluid.
 
 \section{Method}
 
-We modify our previous the association free energy term to use our
-$g_{\sigma}^A$ rather than Yu and Wu's $g_\sigma^{YuWu}$.  The
+We modify our previous association free energy term to use our
+$g_{\sigma}^\textit{A}$ rather than Yu and Wu's $g_\sigma$.  The
 association free energy for our four-site model has the form:
 \begin{align}
   F_\text{assoc}[n] &= k_BT \int n_\text{site}(\xx)
@@ -175,7 +171,7 @@ is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)
   \frac{1}{4}\beta\left(\frac{\partial a_1}{\partial \etadisp(\xx)} -
   \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW},
 \end{align}
-% This is equation 77 of gil-villegas-1997-SAFT-VR
+%This is equation 77 of gil-villegas-1997-SAFT-VR
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
@@ -205,11 +201,11 @@ We find these agree when $\lscale$ is 0.454.
 \includegraphics[width=3.5in]{figs/density-compare}
 \end{center}
 \caption{ Density profiles for a water around a single hydrophobic
-  rod. The solid red profile is the density using our new functional
+  rod of radius 0.2 nm. The solid red profile is the density using our new functional
   and the dashed blue profile the result of our old functional.  For
   comparison, under the profiles is a cartoon of a string of hard
   spheres touching in one dimension. The horizontal black dotted line
-  is the bulk density.}
+  is the bulk density for water.}
 \label{fig:density-single-rod}
 \end{figure}
 
@@ -231,7 +227,7 @@ density profile of the water with our new functional is compared
 agains our previous results in Fig. \ref{fig:density-single-rod}. The
 density at contact with the rods are similar and there are slight
 difference in density, particularly near the first peak after contact;
-all rods we tested exhibited this sharp peak near one diamater form
+all rods we tested exhibited this sharp peak near one diamater from
 contact. Since we have changed the association term in the functional,
 a difference will occur in the average number of hydrogen bonds. We
 compare the hydrogen bonds per length with the new and old functionals
@@ -252,17 +248,24 @@ differs between the two methods.
 \label{fig:spheres-broken-HB}
 \end{figure}
 
-We continue our study into three dimensions with a hard sphere solute
-in water. Unlike the single rod, the number of hydrogen bonds does not appear to increase
-linearly with the sphere radii we used. \fixme{When the size of
-each rodis increase, the surface area increases proportional to radius.
-However, when we increase the radius of each sphere, the surface area
-increases as $R^2$.}
+A common test case for studying hydrophobic solutes in water is the
+hard-sphere solute. We continue our study in three dimensions by
+creating a hydrophobic spherical cavity in water. Similar to the
+single rods, we see a decrease in the number of broken hydrogen bonds
+for spheres of the same radius compared to our previous
+functional. The number of broken hydrogen bonds increases linearly
+with rod radius for large enough rods, where for spheres we don't see
+this linearity (Fig. \ref{fig:spheres-broken-HB}). \fixme{When the
+  size of each rod is increased, the surface area increases
+  proportional to radius.  However, when sphere radius increase, the
+  surface area increases as $R^2$.}
 
 \section{Conclusion}
 
 We have modified a classical DFT for water with a more accurate radial
-distribution function which changes the way that the molecules assosciate.
+distribution function which modifies assosciation between water
+molecules. This modification predicts less broken hydrogen bonds due
+to a hard rod, and solutes placed in water than the previous theory.
 
 \clearpage
   
@@ -299,21 +302,21 @@ computational cost of \emph{ab initio} molecular
 dynamics~\cite{car1985, grossman2004}.  The current state-of-the art
 in \emph{ab initio} molecular dynamics is limited to a few hundred
 water molecules per unit cell~\cite{lewis2011doesnitric}.
-%
+
 On top of this, traditional density-functional theory (DFT) methods
 without the use of dispersion corrections strongly over-structure
 water, to the point that ice melts at over 120$^\circ$C\cite{yoo2009phase}!
-%
+
 There has been a flurry of recent
 publications implicating van der Waals effects (i.e. dispersion
 corrections) as significant in
 reducing this over-structuring\cite{lin2009importance,
   wang2011density, mogelhoj2011ab, jonchiere2011van}.
-%
+
 However, one particular study found that water modeled using a
 hybrid functional with dispersion corrections \emph{still} has a
 melting point over 80$^\circ$C\cite{yoo2011}.
-%
+
 It has also
 been found that the inclusion of nuclear quantum effects can provide
 similar improvements \cite{morrone2008nuclear}.  Each of these
@@ -408,7 +411,7 @@ Fluid Theory (SAFT)\cite{ segura1997associating, segura1998comparison,
   gross2009density, kahl2008modified, blas2001examination}.  These
 functionals are based on a perturbative thermodynamic expansion, and
 do reproduce the temperature-dependence of water's properties.
-% 
+
 We should give special mention to Sundararaman \emph{et al} who
 recently introduced a classical density functional for water using a
 model in which a water molecule is treated as a hard sphere attached to
