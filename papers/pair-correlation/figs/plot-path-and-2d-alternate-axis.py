@@ -69,7 +69,7 @@ def read_walls(ff, z0, fun):
   if (os.path.isfile(filename) == False):
     # Just use walls data if we do not have the MC (need to be careful!)
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-    pylab.title("Using this work instead of MC!")
+    title("Using this work instead of MC!")
   data = loadtxt(filename)
   return data
 
@@ -83,10 +83,14 @@ zplot = xplot.twiny()
 twod_plot = fig.add_subplot(1,2,1)
 
 xplot.set_xlim(6, -4)
-xplot.set_xticks([6, 4, 2, 0])
+xplot.set_xticks([6, 4, 2, 0, -2, -4])
+xplot.set_xticklabels([6, 4, "2 0", 2, 4, 6])
 zplot.set_xlim(-4, 6)
-zplot.set_xticks([0, 2, 4, 6])
-xplot.set_ylim(0, 3.5)
+zplot.set_xticks([])
+#xplot.set_ylim(0)
+
+figtext(.613, .01, "$x$")
+figtext(.794, .01, "$z$")
 
 twod_plot.set_xlim(-0.5, 1.5*ymax)
 twod_plot.set_ylim(-ymax, ymax)
@@ -96,7 +100,7 @@ fig.subplots_adjust(hspace=0.001)
 for i in range(len(plots)):
     g2_path = read_walls_path(ff, z0, plots[i])
     if able_to_read_file == False:
-        plot(numpy.arange(0,10,1), [0]*10, 'k')
+        plot(arange(0,10,1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
         savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
         savefig(savedfilename)
@@ -120,7 +124,6 @@ for i in range(len(plots)):
     zplot.plot(g2_path[coord-1:,2],averaged[coord-1:], label=titles[i], color=colors[i])
 
 g2nice = read_walls_path(ff, z0, 'this-work')
-p = 90
 
 def g2pathfunction_x(x):
     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
@@ -158,23 +161,8 @@ zplot.annotate('$E$', xy=(zEoff,g2pathfunction_z(zEoff)),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-# ax.set_xticks((xBoff - 4,
-#                xBoff - 3,
-#                xBoff - 2,
-#                xBoff - 1,
-#                xBoff,
-#                xDoff,
-#                xDoff + 1,
-#                xDoff + 2,
-#                xDoff + 3,
-#                xDoff + 4))
-# ax.set_xticklabels((6, 5, 4, 3, 2, 2, 3, 4, 5, 6))
-
-# pylab.ylim(0)
-# pylab.xlim(xAoff - rpath,xEoff + rpath)
-xlabel('$|\mathbf{r}_{12}|$')
-ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc='best')
+zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
+zplot.legend(loc=3, ncol=2)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls(ff, z0, 'mc')
@@ -220,12 +208,12 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
-CS = pcolor(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
-ylabel('$x_2$');
-xlabel('$z_2$');
+twod_plot.set_ylabel('$x_2$');
+twod_plot.set_xlabel('$z_2$');
 
 xs = [0, 0]
 ys = [ymax, rpath]
@@ -245,9 +233,8 @@ annotate('$C$', xy=(rpath/sqrt(2.0),rpath/sqrt(2.0)), xytext=(2.3,2.0), arrowpro
 annotate('$D$', xy=(rpath,0), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
-xplot.set_xlabel('$x$')
-zplot.set_xlabel('$z$')
-title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
+
+twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
 savefig("figs/pair-correlation-pretty-alt-%d.pdf" % (int(ff*10)))
 show()
 
