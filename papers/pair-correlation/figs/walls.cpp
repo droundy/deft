@@ -47,7 +47,7 @@ const int gsize = num_r_in_gmc*(num_eta+1);
 double * g = new double[gsize];
 
 // The functions for different ways of computing the pair distribution function.
-double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
@@ -59,22 +59,22 @@ double gsigma_to_eta(const double gs) {
   return c/(pow(6.0, 2.0/3.0)*gs) + 1.0/(pow(6.0, 1.0/3.0)*c) + 1.0;
 }
 
-double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta0 = gsigma_to_eta(gsigma(r0));
   const double eta1 = gsigma_to_eta(gsigma(r1));
-  return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
+  return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2.0;
 }
-double pairdist_gloor(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_gloor(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
-  const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
+  const double eta = 4.0/3.0*M_PI*1*1*1*(n(r0) + n(r1))/2.0;
   return mc(eta, r,mc_r_step,g);
 }
-double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   // This implements the pair distribution function of Fischer and
-  // Methfessel from the 1980 paper.  The py_rdf below should be the
+  // Methfessel from the 1980 paper.  The mc below should be the
   // true radial distribution function for a homogeneous hard-sphere
   // fluid with packing fraction eta.
   const Cartesian r01 = Cartesian(r0 - r1);
@@ -82,18 +82,32 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
   const double eta = n3(Cartesian(0.5*(r0+r1)));
   return mc(eta, r, mc_r_step, g);
 }
+double pairdist_sokolowski(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
+  // This implements the pair distribution function of Sokolowski and
+  // Fischer from the 1992 paper.
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+
+  const double eta0 = nbar_sokolowski(r0)*(4.0/3.0*M_PI);
+  const double eta1 = nbar_sokolowski(r1)*(4.0/3.0*M_PI);
+  const double eta = (eta0 + eta1)/2.0;
+
+  return mc(eta, r, mc_r_step, g);
+}
 
 const char *fun[] = {
   "this-work",
   "this-work-mc",
   "gloor",
-  "fischer"
+  "fischer",
+  "sokolowski"
 };
-double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
+double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
   pairdist_this_work_mc,
   pairdist_gloor,
-  pairdist_fischer
+  pairdist_fischer,
+  pairdist_sokolowski
 };
 const int numplots = sizeof fun/sizeof fun[0];
 
@@ -295,6 +309,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
+  Grid nbar_sokolowski(gd, StepConvolve(1.6)(1, density));
+  nbar_sokolowski /= (4.0/3.0*M_PI*ipow(1.6, 3));
+
 
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
@@ -325,26 +342,33 @@ void run_walls(double eta, const char *name, Functional fhs) {
                   //splits up the theta part of path just like there
     const Cartesian r0(0,0,z0);
     double g2_path;
-    double x_path;
-    for (int i=0; i<int((10.0-radius_path)/dx+0.5) ;i++){
-      x_path = i*dx;
-      const Cartesian r1(10.0-x_path,0,z0);
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+    double s_path;
+    fprintf(out_path, "# s\tg2\tz\tx\n");
+    for (int i=0; i<int((10.0-radius_path)/dx+0.5); i++){
+      s_path = i*dx;
+      const double z_path = z0;
+      const double x_path = 10.0 - s_path;
+      const Cartesian r1(x_path, 0, z_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", s_path, g2_path, z_path, x_path);
     }
-    for (int i=0; i<num ;i++){
+    for (int i=0; i<num; i++){
       double theta = i*M_PI/num/2.0;
-      x_path = i*M_PI/num/2.0*radius_path + 8.0;
-      const Cartesian r1(radius_path*cos(theta),0,z0+radius_path*sin(theta));
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+      s_path = i*M_PI/num/2.0*radius_path + 8.0;
+      const double z_path = z0+radius_path*sin(theta);
+      const double x_path = radius_path*cos(theta);
+      const Cartesian r1(x_path, 0, z_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", s_path, g2_path, z_path, x_path);
     }
     for (int i=0; i<int(8.0/dx+0.5);i++){
       double r1z = i*dx;
-      x_path = i*dx + radius_path*M_PI/2.0 + 10.0-radius_path;
-      const Cartesian r1(0,0,r1z+radius_path+z0);
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+      s_path = i*dx + radius_path*M_PI/2.0 + 10.0-radius_path;
+      const double z_path = r1z+radius_path+z0;
+      const double x_path = 0.0;
+      const Cartesian r1(x_path, 0, z_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", s_path, g2_path, z_path, x_path);
     }
     fclose(out_path);
   }
@@ -369,7 +393,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       for (double x = 0; x < xmax - dx/2; x += dx) {
         for (double z1 = 3; z1 < zmax + 3 - dx/2; z1 += dx) {
           const Cartesian r1(x,0,z1);
-          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           fprintf(out, "%g\t", g2);
         }
         fprintf(out, "\n");
@@ -412,13 +436,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
             const Cartesian r1(delta_r*cos(phi)*sintheta,
                                delta_r*sin(phi)*sintheta,
                                z0 + delta_r*costheta);
-            double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+            double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
             da_dz += density(r0)*density(r1)*g2*darea;
           }
           */
           const double darea = delta_r*delta_r*dcostheta*2*M_PI;
           const Cartesian r1(delta_r*sintheta, 0, z0 + delta_r*costheta);
-          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           da_dz += density(r0)*density(r1)*g2*darea;
         }
         fprintf(out, "%g %g\n",z0,da_dz);

@@ -18,7 +18,7 @@ dz = 0.01
 able_to_read_file = True
 
 plt.title('$da/dz,$ $\eta = %g,$  $\Delta r = %g$' %(eta, delta_r))
-plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta'])
+plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta', 'cyan'])
 
 def read_a1_mc():
   # input: "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
@@ -49,7 +49,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","gloor","this-work", "this-work-mc"]
+versions = ["fischer","gloor","this-work", "this-work-mc", 'sokolowski']
 
 for version in versions:
   z0, da_dz = read_da_dz(version)

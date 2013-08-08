@@ -15,8 +15,8 @@ at_wall = False
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
-plots = ['mc', 'this-work', 'fischer'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al'] # , 'gloor'
+plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
+titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
 if at_wall:
   plots = ['mc', 'this-work', 'sphere-dft', 'fischer'] # , 'gloor'
   titles = ['Monte Carlo', 'this work', 'sphere-dft', 'Fischer et al'] # , 'gloor'
@@ -87,9 +87,9 @@ for i in range(len(plots)):
     # FIXME:  once we have sufficient data, we will want to remove this smoothing...
     old = 1.0*g2_path[:,1]
     averaged = 1.0*old
-    averaged[1:] += old[:len(averaged)-1]
-    averaged[:len(averaged)-1] += old[1:]
-    averaged /= 3;
+    # averaged[1:] += old[:len(averaged)-1]
+    # averaged[:len(averaged)-1] += old[1:]
+    # averaged /= 3;
     pylab.plot(g2_path[:,0],averaged, label=titles[i], color=colors[i])
     #pylab.plot(g2_path[:,0],g2_path[:,1], label=titles[i], color=colors[i])
 

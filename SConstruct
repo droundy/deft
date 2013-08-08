@@ -85,7 +85,8 @@ def SVG(env, filename):
 AddMethod(Environment, SVG)
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
-                      triplet-monte-carlo radial-distribution-monte-carlo """):
+                      triplet-monte-carlo polyhedra-monte-carlo
+                      radial-distribution-monte-carlo """):
     env.Program(
         target=name,
         source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp'])

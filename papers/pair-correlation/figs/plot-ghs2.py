@@ -19,21 +19,34 @@ axvline(x=sigma, color='k', linestyle=':')
 axhline(y=1, color='k', linestyle=':')
 
 x = rand(6)*5
-# x[0] = 0.435
-# x[1] = 3.552
-# x[2] = 0.870
+x[0] = 0.435
+x[1] = 3.552
+x[2] = 0.870
 
-# x[3] = 0.329
-# x[4] = 2.540
-# x[5] = 1.940
+x[3] = 0.329
+x[4] = 2.540
+x[5] = 1.940
 
-# x[0] = 3.3
-# x[3] = 0
-# x[2] = 1.87
-# x[1] = .01
+x[0] = 3.3
+x[1] = .01
+x[2] = 1.87
+x[3] = 0
+
+
+
+x[0] = 1.096
+x[1] = 1.651
+x[2] = 0.331
+x[3] = 0.072
+x[4] = 1.966
+x[5] = 0.495
+
+
+
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
 ff = array([.1, .2, .3])
+#ff = array([.05, .1, .15, .2, .25, .3, .35, .4, .45, .5])
 able_to_read_file = True
 
 
@@ -108,24 +121,35 @@ def evalg2(xnew, eta, r):
   density = 3/4/pi*eta
   rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)/3
 
-  x0 = x[0]
+  x0 = xnew[0]
   x1 = xnew[1]
-  x2 = x[2]
+  x2 = xnew[2]
   x3 = xnew[3]
   x4 = xnew[4]
-  x5 = x[5]
+  x5 = xnew[5]
+
+  x3 = (-hsigma - hsigma**2 + hsigma*x0)/x4
 
   int_h0 = 4*pi*hsigma*(2 + sigma*x0*(2 + sigma*x0))/x0**3
 
-  int_h1_over_amp = 4*pi*hsigma*x1* \
-      (sigma**2*x1**4 + 2*x1**2* \
-         (-1 + sigma*x2*(2 + sigma*x2)) + x2**2*(6 + sigma*x2*(4 + sigma*x2))) \
-         /(x1**2 + x2**2)**3
+  # int_h1_over_amp = 4*pi*hsigma*x1* \
+  #     (sigma**2*x1**4 + 2*x1**2* \
+  #        (-1 + sigma*x2*(2 + sigma*x2)) + x2**2*(6 + sigma*x2*(4 + sigma*x2))) \
+  #        /(x1**2 + x2**2)**3
 
-  int_h2 = 4*pi*hsigma*x3*x4* \
+  # With sin^2:
+  int_h1_over_amp = 8*pi*hsigma*x1**2*(8*x1**2*x2**2*(1 + sigma*x2)*(3 + sigma*x2) \
+                  + 16*x1**4*(2 + sigma*x2*(2 + sigma*x2)) \
+                  + x2**4*(12 + sigma*x2*(6 + sigma*x2)))/(4*x1**2*x2 + x2**3)**3
+
+  int_h2 = -4*pi*x3*x4* \
       (sigma**2*x4**4 + 2*x4**2* \
          (-1 + sigma*x5*(2 + sigma*x5)) + x5**2*(6 + sigma*x5*(4 + sigma*x5))) \
          /(x4**2 + x5**2)**3
+
+  # int_h3 = 8*pi*hsigma**2*x6*x7**2*(8*x7**2*x8**2*(1 + sigma*x8)*(3 + sigma*x8) \
+  #                 + 16*x7**4*(2 + sigma*x8*(2 + sigma*x8)) \
+  #                 + x8**4*(12 + sigma*x8*(6 + sigma*x8)))
 
   a0 = ((rhs-1)/density - int_h0 - int_h2)/int_h1_over_amp
 
@@ -134,18 +158,18 @@ def evalg2(xnew, eta, r):
     toprint = False
 
   f0 = hsigma
-  j0 = exp(-x[0]*z)
+  j0 = exp(-x0*z)
 
   f1 = a0*hsigma
-  j1 = sin(xnew[1]*z)*exp(-x[2]*z)
+  j1 = sin(x1*z)**2*exp(-x2*z)
 
-  f2 = -xnew[3]*hsigma**2
-  j2 = sin(xnew[4]*z)**2*exp(-x[5]*z)
+  f2 = -x3
+  j2 = sin(x4*z)*exp(-x5*z)
 
-  #f3 = -xnew[6]*hsigma**3
-  #j3 = sin(xnew[7]*r)*exp(-xnew[8]*r)
+  # f3 = x6*hsigma**2
+  # j3 = sin(x7*r)**2*exp(-x8*r)
 
-  return 1 + f0*j0 + f1*j1 + f2*j2# + f3*j3
+  return 1 + f0*j0 + f1*j1 + f2*j2 #+ f3*j3
 
 def dist(x):
   # function with x[i] as constants to be determined
@@ -183,8 +207,9 @@ while (j < len(eta)):
 vals = zeros_like(x)
 
 print "beginning least squares fit..."
-vals, cov = leastsq(dist2, x)
-print "original fit complete, cov: " + str(cov)
+vals, mesg = leastsq(dist2, x)
+chi2 = sum(dist2(vals)**2)
+print "original fit complete, chi^2: %.3f" % chi2
 
 toprint = True
 for i in range(len(x)):
@@ -217,7 +242,7 @@ for i in range(len(ff)):
 
 figure(1)
 xlim(2,6.5)
-#ylim(0.5, 3.5)
+ylim(0., 3.5)
 xlabel(r"$r/R$")
 ylabel("$g(r)$")
 legend(loc='best').get_frame().set_alpha(0.5)
@@ -227,20 +252,17 @@ savefig("figs/ghs-g2.pdf")
 
 figure(2)
 xlim(2,6.5)
-#ylim(0, 2.0)
+ylim(-.25, .25)
 xlabel(r"$r/R$")
 ylabel("|ghs - g|")
 #legend(loc='best').get_frame().set_alpha(0.5)
 savefig("figs/ghs-g-ghs2.pdf")
 
-figure(3)
-for eta in [.5, .6, .7, .8]:
-  gsigma = (1-eta/2)/(1-eta)**3
-  plot(r_mc, evalg2(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
+# figure(3)
+# for eta in [.5, .6, .7, .8]:
+#   gsigma = (1-eta/2)/(1-eta)**3
+#   plot(r_mc, evalg2(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
 axhline(y=0)
 xlim(2,6.5)
 legend(loc='best')
 show()
-
-
-
