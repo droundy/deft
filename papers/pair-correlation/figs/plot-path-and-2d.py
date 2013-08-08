@@ -141,50 +141,53 @@ pylab.ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
 pylab.legend(loc='best')
 
 pylab.subplot(1,2,1).set_aspect('equal')
-g2mc = read_walls(ff, z0, 'mc')
-rbins = round(2*rmax/dx)
-zposbins = round(zmax/dx)
-znegbins = round(-zmin/dx)
-zbins = zposbins + znegbins
-g22 = numpy.zeros((rbins, zbins))
-g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2,:zposbins]
-g22[:rbins/2, znegbins:zbins] = numpy.flipud(g2mc[:rbins/2,:zposbins])
-g2mc = g22
-gmax = g2mc.max()
-dx = 0.1
 
-r = numpy.arange(0-rmax, rmax, dx)
-z = numpy.arange(zmin, zmax, dx)
-Z, R = numpy.meshgrid(z, r)
+def read_g2_and_prepare_plot(zmin, zmax, rmax, centered = True):
+  g2mc = read_walls(ff, z0, 'mc')
+  rbins = 2*round(rmax/dx)
+  if not centered:
+    rbins = round(rmax/dx)
+  zposbins = round(zmax/dx)
+  znegbins = round(-zmin/dx)
+  zbins = zposbins + znegbins
+  g22 = numpy.zeros((rbins, zbins))
+  if centered:
+    g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2,:zposbins]
+    g22[:rbins/2, znegbins:zbins] = numpy.flipud(g2mc[:rbins/2,:zposbins])
+    g2mc = g22
+  gmax = g2mc.max()
 
-levels = numpy.linspace(0, gmax, gmax*100)
-xlo = 0.85/gmax
-xhi = 1.15/gmax
-xhier = (1 + xhi)/2.0
-ymax = 4
+  r = numpy.linspace(0-rmax, rmax, rbins)
+  z = numpy.linspace(zmin, zmax, zbins)
+  Z, R = numpy.meshgrid(z, r)
 
-cdict = {'red':   [(0.0,  0.0, 0.0),
-                   (xlo,  1.0, 1.0),
-                   (1.0/gmax,  1.0, 1.0),
-                   (xhi,  0.0, 0.0),
-                   (xhier,0.0, 0.0),
-                   (1.0,  1.0, 1.0)],
+  levels = numpy.linspace(0, gmax, gmax*100)
+  xlo = 0.85/gmax
+  xhi = 1.15/gmax
+  xhier = (1 + xhi)/2.0
 
-         'green': [(0.0, 0.0, 0.0),
-                   (xlo,  0.1, 0.1),
-                   (1.0/gmax, 1.0, 1.0),
-                   (xhi, 0.0, 0.0),
-                   (xhier,1.0, 1.0),
-                   (1.0, 1.0, 1.0)],
+  cdict = {'red':   [(0.0,  0.0, 0.0),
+                     (xlo,  1.0, 1.0),
+                     (1.0/gmax,  1.0, 1.0),
+                     (xhi,  0.0, 0.0),
+                     (xhier,0.0, 0.0),
+                     (1.0,  1.0, 1.0)],
+           'green': [(0.0, 0.0, 0.0),
+                     (xlo,  0.1, 0.1),
+                     (1.0/gmax, 1.0, 1.0),
+                     (xhi, 0.0, 0.0),
+                     (xhier,1.0, 1.0),
+                     (1.0, 1.0, 1.0)],
+           'blue':  [(0.0,  0.0, 0.0),
+                     (xlo,  0.1, 0.1),
+                     (1.0/gmax,  1.0, 1.0),
+                     (xhi,  1.0, 1.0),
+                     (xhier,0.0, 0.0),
+                     (1.0,  0.0, 0.0)]}
+  cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
+  return Z, R, g2mc, cmap, gmax
 
-         'blue':  [(0.0,  0.0, 0.0),
-                   (xlo,  0.1, 0.1),
-                   (1.0/gmax,  1.0, 1.0),
-                   (xhi,  1.0, 1.0),
-                   (xhier,0.0, 0.0),
-                   (1.0,  0.0, 0.0)]}
-cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
-
+Z, R, g2mc, cmap, gmax = read_g2_and_prepare_plot(zmin, zmax, rmax)
 CS = pylab.pcolor(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = numpy.arange(0, numpy.floor(2.0*gmax)/2 + 0.1, 0.5)
@@ -192,6 +195,7 @@ pylab.colorbar(CS, extend='neither', ticks=myticks)
 pylab.ylabel('$x_2$');
 pylab.xlabel('$z_2$');
 
+ymax = 4
 xs = [0, 0]
 ys = [ymax, rpath]
 dtheta = pylab.pi/80
@@ -215,5 +219,19 @@ pylab.ylim(-ymax, ymax)
 
 pylab.title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
 pylab.savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
+
+pylab.figure(figsize=(10,5))
+pylab.subplot(1,1,1).set_aspect('equal')
+
+Z, R, g2mc, cmap, gmax = read_g2_and_prepare_plot(zmin, 20, 10.0)
+zbins = Z.shape[0]
+nzmin = round(zbins/2)
+pylab.contourf(Z[:nzmin,:], R[:nzmin,:], g2mc[:nzmin,:], 100, vmax=gmax, vmin=0, cmap=cmap)
+pylab.axes().get_xaxis().set_visible(False)
+pylab.axes().get_yaxis().set_visible(False)
+pylab.title('')
+pylab.subplots_adjust(left=0, right=1, top=1, bottom=0)
+pylab.savefig("figs/pretty-%d.svg" % (int(ff*10)))
+
 pylab.show()
 
