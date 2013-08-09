@@ -140,7 +140,6 @@ int main(int argc, char *argv[]){
 
   const char *outfilename = argv[4];
   const char *da_dz_outfilename = argv[5];
-  char *finalfilename = new char[1024];
   char *pathfilename = new char[1024];
   fflush(stdout);
   const long N = atol(argv[1]);
@@ -375,7 +374,7 @@ int main(int argc, char *argv[]){
           sprintf(pathfilename, "%s-path.dat", outfilename);
           FILE *path_out = fopen((const char *)pathfilename, "w");
           if (path_out == NULL) {
-            printf("Error creating file %s\n", finalfilename);
+            printf("Error creating file %s\n", pathfilename);
             return 1;
           }
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
@@ -456,12 +455,14 @@ int main(int argc, char *argv[]){
           // save the triplet distribution data
           const double volume0 = lenx*leny*lenz;
           for (double  z1=2*R+dz/2.0; z1<lenx/2.0; z1+=dz) {
+            char *finalfilename = new char[1024];
             sprintf(finalfilename, "%s-%05.2f.dat", outfilename, z1);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
+            delete[] finalfilename;
             const double r1min = z1-dz/2.0;
             const double r1max = z1+dz/2.0;
             const double volume1 = 4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
@@ -628,7 +629,6 @@ int main(int argc, char *argv[]){
   delete[] histogram;
   delete[] da_dz_histogram;
   delete[] path_histogram;
-  delete[] finalfilename;
   fflush(stdout);
   fclose(countout);
 }
