@@ -9,6 +9,9 @@ import scipy.ndimage
 import os.path
 import math
 
+from matplotlib import rc
+rc('text', usetex=True)
+
 from matplotlib.colors import NoNorm
 
 at_wall = False
@@ -89,8 +92,10 @@ zplot.set_xlim(-4, 6)
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-figtext(.613, .01, "$x$")
-figtext(.794, .01, "$z$")
+figtext(.613, .04, r"$\underbrace{\hspace{9em}}$", horizontalalignment='center')
+figtext(.613, .01, r"$x$", horizontalalignment='center')
+figtext(.796, .04, r"$\underbrace{\hspace{13.1em}}$", horizontalalignment='center')
+figtext(.796, .01, r"$z$", horizontalalignment='center')
 
 twod_plot.set_xlim(-0.5, 1.5*ymax)
 twod_plot.set_ylim(-ymax, ymax)

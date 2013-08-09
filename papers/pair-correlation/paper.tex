@@ -3,8 +3,6 @@
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{color}
-\usepackage{tikz}
-\usetikzlibrary{arrows,decorations.pathreplacing}
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\rr}{\textbf{r}}
@@ -270,47 +268,23 @@ Figure~\ref{fig:radial-distribution} shows...
 %% \end{figure}
 
 \begin{figure}
-  \begin{tikzpicture}
-    \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-1.pdf}};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (4.75, .75) node(a){} -- (5.95, .75) node(b){};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (5.99, .75) node(a){} -- (7.83, .75) node(b){};
-  \end{tikzpicture}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-1.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-1}
 \end{figure}
 
 \begin{figure}
-  \begin{tikzpicture}
-    \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-2.pdf}};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (4.75, .75) node(a){} -- (5.95, .75) node(b){};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (5.99, .75) node(a){} -- (7.83, .75) node(b){};
-  \end{tikzpicture}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-2.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-2}
 \end{figure}
 \begin{figure}
-  \begin{tikzpicture}
-    \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-3.pdf}};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (4.75, .75) node(a){} -- (5.95, .75) node(b){};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (5.99, .75) node(a){} -- (7.83, .75) node(b){};
-  \end{tikzpicture}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-3.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-3}
 \end{figure}
 \begin{figure}
-  \begin{tikzpicture}
-    \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-4.pdf}};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (4.75, .75) node(a){} -- (5.95, .75) node(b){};
-    \draw [decorate, decoration = {brace, mirror, raise=0.5cm}]
-    (5.99, .75) node(a){} -- (7.83, .75) node(b){};
-  \end{tikzpicture}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-4.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-4}
 \end{figure}
