@@ -5,28 +5,20 @@
   <link rel="stylesheet" href="${base}.layout/style.css">
 </head>
 <body>
-  <div id="wrapper">
-    <div id="headerwrap">
-      <div id="header">
-        <p><h1>Deft:  Classical Density Functional Theory</h1></p>
-      </div>
+  <div id="container">
+    <div id="header">
+      <h1>Deft:  Classical Density Functional Theory</h1>
+      <h2>$title</h2>
     </div>
-    <div id="navigationwrap">
-      <div id="navigation">
-        <p><h2>$title</h2></p>
-      </div>
-    </div>
-    <div id="contentliquid">
-      <div id="contentwrap">
-        <div id="content">
-          $content
-        </div>
-      </div>
-    </div>
-    <div id="leftcolumnwrap">
-      <div id="leftcolumn">
+    <div id="main">
+      <aside>
         $sidebar
+      </aside>
+      <div id="primary">
+        $content
       </div>
+    </div>
+    <div id="footer">
     </div>
   </div>
 </body>
