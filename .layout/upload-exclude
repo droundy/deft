@@ -1,0 +1,15 @@
+.git/*
+*~
+*.mkdat
+*.test
+*.o
+*.exe
+*.hi
+*.dat
+*.pyc
+.scons*
+*.debug
+*.dat.*
+monte-carlo*
+*.out
+*.log
