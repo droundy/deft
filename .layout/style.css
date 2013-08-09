@@ -31,10 +31,12 @@ footer, header, hgroup, menu, nav, section {
 }
 ol, ul {
     list-style: disk;
-    margin: 15px;
+    margin: 0em;
+    margin-left: 1em;
 }
 li {
-    margin: 0px 0px 0px 15px
+    margin: 0em;
+    padding-left: 0em;
 }
 i, em {
     font-style: italic;
@@ -58,7 +60,9 @@ table {
 /* REAL STUFF */
 body {
     background-image: url(../papers/pair-correlation/figs/pretty-3.svg);
-    background-size: cover;
+    background-size: 100em 50em;
+    background-repeat: no-repeat;
+    width: 100%;
     font-family: Verdana, Arial, Helvetica, sans-serif;
     color:#333
     line-height: 1.5;
@@ -100,92 +104,61 @@ a:visited {
     color: #000077;
 }
 
-#wrapper {
-    width: 100%;
-    min-width: 10em;
-    max-width: 70em;
+#container {
+    max-width: 62.5em;
+    min-width: 48em;
     margin: 0 auto;
+    /* background: yellow; */
+    position: relative;
+    height: 100%;
 }
-
-#headerwrap {
-    width: 100%;
-    float: left;
-    margin: 0 auto;
-}
-
 #header {
-    /* background: #D6F4FF; */
-    /* border-radius: 1em; */
-    /* border: 1px solid #c2e0eb; */
-    margin: 0.3em 0.3em 0em 0.3em;
+    /* background: purple; */
+    /* color: white; */
     text-align: center;
+    padding: 10px;
 }
-
-#navigationwrap {
-    width: 100%;
-    float: left;
-    margin: 0 auto;
+#main {
+    overflow: hidden;
+    position: relative;
 }
-
-#navigation {
-    /* background: #ADECFF; */
-    /* border-radius: 1em; */
-    /* border: 1px solid #99d8eb; */
-    margin: 0em 0.3em 0em 0.3em;
-    padding: 0em 0em 0em 1em;
-    text-align: center;
-}
-
-#contentliquid {
-    float: left;
-    width: 100%;
-}
-
-#contentwrap {
-    margin-left: 11em;
-    float: left;
-}
-
-#content {
-    border-radius: 1em;
-    border: 1px solid #ebebeb;
-    margin: 0.3em;
-    font-size: 1.0em;
-}
-
-#leftcolumnwrap {
+aside {
+    /* background: blue; */
     width: 11em;
-    margin-left: -100%;
-    float: left;
-}
-
-/* #leftcolumn { */
-/*     background: #33CCFF; */
-/*     border-radius: 1em; */
-/*     border: 1px solid #1fb8eb; */
-/*     margin: 0.3em; */
-/* } */
-
-#leftcolumn {
-    clear:left;
+    color: white;
     float:left;
-    margin:0.3em 0 1em 0;
-    padding:0;
-    font-size:1.0em;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+}
+#primary {
+    /* background: red; */
+    width: auto;
+    padding: 1em;
+    padding-top: 0em;
+    margin: 0em;
+    margin-left: 11em;
+}
+#footer {
+    /* background: green; */
+    /* color: white; */
+    padding: 0em;
 }
 
-#leftcolumn ul{
+aside ul{
     list-style:none;
     margin:0 0 0.1em 0;
     padding:0;
     font-size:1.1em;
 }
 
-#leftcolumn li{
+aside li{
+    margin: 0.5em;
+    padding-left: 0.5em;
     margin-bottom:0.2em;
 }
 
-#leftcolumn li a{
+aside li a{
     font-weight:bold;
     height:1.2em;
     text-decoration:none;
@@ -196,7 +169,7 @@ a:visited {
     border-left:0.3em solid #cccccc;
 }
 
-#leftcolumn li a:hover{
+aside li a:hover{
     background:#eaeaea;
     color:#286ea0;
     border-left:0.3em solid #286ea0;

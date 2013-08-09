@@ -36,7 +36,7 @@ if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
-#arg ff = [0.1, 0.2, 0.3, 0.4]
+#arg ff = [0.1, 0.2, 0.3, 0.4, 0.5]
 
 def read_walls_path(ff,z0,fun):
   if fun == 'mc':
@@ -230,7 +230,7 @@ pylab.contourf(Z[:nzmin,:], R[:nzmin,:], g2mc[:nzmin,:], 100, vmax=gmax, vmin=0,
 pylab.axes().get_xaxis().set_visible(False)
 pylab.axes().get_yaxis().set_visible(False)
 pylab.title('')
-pylab.subplots_adjust(left=0, right=1, top=1, bottom=0)
+pylab.subplots_adjust(left=-0.01, right=1.02, top=1.02, bottom=0)
 pylab.savefig("figs/pretty-%d.svg" % (int(ff*10)))
 
 pylab.show()
