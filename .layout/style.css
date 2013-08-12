@@ -60,7 +60,6 @@ table {
 /* REAL STUFF */
 body {
     background-image: url(../papers/pair-correlation/figs/pretty-4.svg);
-    background-size: 100em 50em;
     background-repeat: no-repeat;
     width: 100%;
     font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -115,8 +114,11 @@ a:visited {
 #header {
     /* background: purple; */
     /* color: white; */
+    background-color:rgba(255,255,255,0.8);
     text-align: center;
     padding: 10px;
+    margin-left: 11em;
+    margin-right: 11 em;
 }
 #main {
     overflow: hidden;
@@ -133,6 +135,7 @@ aside {
 }
 #primary {
     /* background: red; */
+    background-color:rgba(255,255,255,0.8);
     width: auto;
     padding: 1em;
     padding-top: 0em;

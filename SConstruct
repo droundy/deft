@@ -145,6 +145,8 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                 source = ['papers/' + paper + '/paper.tex'])
     Default(p)
 
+Depends('index.html', 'papers/pair-correlation/figs/pretty-4.svg')
+
 paper = Environment(tools=['gnuplot', 'matplotlib', 'mkdown'])
 for paperfile in Glob('papers/*/paper.tex'):
     paperdir = str(paperfile)[:len(str(paperfile))-len('/paper.tex')]

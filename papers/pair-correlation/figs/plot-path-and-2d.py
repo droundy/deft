@@ -220,18 +220,5 @@ pylab.ylim(-ymax, ymax)
 pylab.title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
 pylab.savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 
-pylab.figure(figsize=(10,5))
-pylab.subplot(1,1,1).set_aspect('equal')
-
-Z, R, g2mc, cmap, gmax = read_g2_and_prepare_plot(zmin, 20, 10.0)
-zbins = Z.shape[0]
-nzmin = round(zbins/2)
-pylab.contourf(Z[:nzmin,:], R[:nzmin,:], g2mc[:nzmin,:], 100, vmax=gmax, vmin=0, cmap=cmap)
-pylab.axes().get_xaxis().set_visible(False)
-pylab.axes().get_yaxis().set_visible(False)
-pylab.title('')
-pylab.subplots_adjust(left=-0.01, right=1.02, top=1.02, bottom=0)
-pylab.savefig("figs/pretty-%d.svg" % (int(ff*10)))
-
 pylab.show()
 
