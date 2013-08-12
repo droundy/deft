@@ -58,7 +58,7 @@ def check_function(target, source, env):
 check_runner = Builder(action = check_function)
 env.Append(BUILDERS = {'Check': check_runner})
 env.Check(target = 'check', source = 'monte-carlo')
-env.AlwaysBuild('check')
+env.Default('check')
 
 def BuildTest(env, test, depends):
     global total_tests
@@ -269,6 +269,7 @@ for program in Split("functionals newfunctionals test latex-functionals"):
                            source = ['src/haskell/' + program  + '.hs'] + haskell_source)
 
 haskell.Command(target = ['tests/generated-haskell/nice-sum.h',
+                          'tests/generated-haskell/nice-sqrt.h',
                           'tests/generated-haskell/nice-quad.h',
                           'tests/generated-haskell/nice-phi1.h',
                           'tests/generated-haskell/nice-phi2.h',
