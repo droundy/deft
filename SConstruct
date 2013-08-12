@@ -177,13 +177,23 @@ env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat
 env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
             source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
             action = string.join(['cat '] +
-                                 glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat') +
+                                 sorted(glob.glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat')) +
                                  [' > $TARGET']))
 
 
 # #################### papers/contact #######################################################
 
 # #################### papers/water-saft ####################################################
+env.Command(target = 'papers/water-saft/figs/single-rod-in-water.dat',
+            source = Glob('papers/water-saft/figs/single-rod-*nm-energy.dat'),
+            action = string.join(['cat '] +
+                                 sorted(glob.glob('papers/water-saft/figs/single-rod-*nm-energy.dat')) +
+                                 [' > $TARGET']))
+env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
+            source = Glob('papers/water-saft/figs/hughes-single-rod-*nm-energy.dat'),
+            action = string.join(['cat '] +
+                                 sorted(glob.glob('papers/water-saft/figs/hughes-single-rod-*nm-energy.dat')) +
+                                 [' > $TARGET']))
 
 # #################### papers/pair-correlation ##############################################
 

@@ -72,32 +72,22 @@ be less accurate at other temperatures or pressures---and in the
 inhomogeneous scenarios in which solvation models are applied.  The
 second approach is construct a functional by applying liquid-state
 theory to a model system, and then fit the model to experimental data
-such as the equation of state.
+such as the equation of state.  Classical DFT is a natural framework
+for creating a more flexible theory of hydrophobicity that can readily
+describe interaction of water with arbitrary external
+potentials---such as potentials describing strong interactions with
+solutes or surfaces.
 
-\fixme{stuff about water}.  An important aspects of water
+An important aspects of water
 is its ability to form hydrogen bonds.  Each water molecule contains
 two hydrogen bond donor sites and two acceptor sites.
-%
-One promising approach for an efficient continuum description of water
-is that of classical density-functional theory (DFT), which is an
-approach for evaluating the free energy and thermally averaged density
-of fluids in an arbitrary external potential~\cite{ebner1976density}.
-The foundation of classical DFT is the Mermin
-theorem\cite{mermin1965thermal}, which extends the Hohenberg-Kohn
-theorem\cite{hohenberg1964inhomogeneous} to non-zero temperature.
-Classical DFT is a natural framework for creating a more flexible
-theory of hydrophobicity that can readily describe interaction of
-water with arbitrary external potentials---such as potentials
-describing strong interactions with solutes or surfaces.
 
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
-(SAFT).
-
-SAFT is a theory for fluids in which hydrogen bonding plays a significant
-role\cite{chapman1989saft, muller2001molecular}. SAFT is used to
-accurately model the equations of state of both pure fluids and
-mixtures over a wide range of temperatures and pressures.
+(SAFT). SAFT is a theory for fluids in which hydrogen bonding plays a
+significant role\cite{chapman1989saft, muller2001molecular}. SAFT is
+used to accurately model the equations of state of both pure fluids
+and mixtures over a wide range of temperatures and pressures.
 \fixme{Talk about and cite papers using SAFT to build DFTs.}
 
 In a recent paper \cite{hughes2013classical}, we constructed a
@@ -780,25 +770,12 @@ small solutes.
 
 \subsection{One hydrophobic rod}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/energy-vs-diameter}
-\end{center}
-\caption{ Excess chemical potential per area versus radius for a single
-hydrophobic rod immersed in water. This should have an asymptote equal
-to the surface tension at room temperature, and it agrees well with
-the surface tension in Figure~\ref{fig:surface-tension}. The inset for
-rods with a very small radius shows the linear relationship expected based on
-Equation~\ref{contactvaluethm}.}
-\label{fig:energy-vs-diameter}
-\end{figure}
-
 We begin by studying a single hydrophobic rod immersed in water.
 % We
 % model the density on a grid with spacing of about 0.01~nm, which gives
 % the free energy of hydration to a precision of better than a percent,
 % and the density at contact to a few percent precision.
-In Figure~\ref{fig:energy-vs-diameter} we show the excess chemical
+In Figure\fixme{deleted} we show the excess chemical
 potential at room temperature, scaled by the solvent accessible
 surface area of the hard rod, plotted as a function of hard-rod
 radius.  We define the hard-rods radius as the radius from which water
@@ -806,7 +783,7 @@ is excluded.  For rods with radius larger than 0.5~nm or so, this
 reaches a maximum value of 75~mN/m, which is slightly higher than
 macroscopic surface tension.  In the limit of very large rods, this
 value will decrease and approach the macroscopic value.  As seen in
-the inset of Fig.~\ref{fig:energy-vs-diameter}, for rods with very
+the inset of Fig.~\fixme{deleted}, for rods with very
 small radius (less than about 0.5~\AA) the excess chemical potential
 is proportional to volume, satisfying Equation~\ref{contactvaluethm},
 which results from the contact-value theorem.
@@ -815,7 +792,7 @@ We show in Figure~\ref{fig:density-single-rod} density profiles for
 different radii rods, as well as the prediction for the contact value
 of the density as a function of rod radius, as computed from the
 excess chemical potentials plotted in
-Figure~\ref{fig:energy-vs-diameter}.  The agreement between these
+Figure~\fixme{deleted}.  The agreement between these
 curves confirms that our functional satisfies the contact-value
 theorem and that our minimization is well converged.  As expected, as
 the radius of the rods becomes zero the contact density approaches the
