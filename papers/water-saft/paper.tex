@@ -78,10 +78,6 @@ describe interaction of water with arbitrary external
 potentials---such as potentials describing strong interactions with
 solutes or surfaces.
 
-An important aspects of water
-is its ability to form hydrogen bonds.  Each water molecule contains
-two hydrogen bond donor sites and two acceptor sites.
-
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
 (SAFT). SAFT is a theory for fluids in which hydrogen bonding plays a
@@ -90,30 +86,29 @@ used to accurately model the equations of state of both pure fluids
 and mixtures over a wide range of temperatures and pressures.
 \fixme{Talk about and cite papers using SAFT to build DFTs.}
 
+SAFT is based on Wertheim's first-order thermodynamic perturbation
+theory (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
+  wertheim1986fluidsIII, wertheim1986fluidsIV}, which models
+\fixme{fluids} as hard-spheres with strong associative interactions at
+sites on the surfaces of the spheres. This is ideal for water, since
+its four hydrogen bond sites can be represented by these association
+sites. The association sites have an effective range and a small
+energy contribution when a site is within range of another
+hard-sphere's site. The free energy due to this association depends on
+the radial distribution function $g_\sigma^\text{HS}(\rr)$. Our
+previous water functional used Yu and Wu's radial distribution
+function \cite{yu2002fmt-dft-inhomogeneous-associating}, which was
+found to agree less with hard-sphere Monte-Carlo simulation than a
+distribution function developed by us in a recent paper
+\cite{schulte2012using}. In our paper, we developed an approximation
+for correlation at contact to describe the hard-sphere fluid.
+
 In a recent paper \cite{hughes2013classical}, we constructed a
 classical DFT for water which uses SAFT as a basis for a free energy
 functional. We used Clark \emph{et al}'s \cite{clark2006developing}
 five fitting parameters for an optimal cDFT for water and, in
 addition, introduced a parameter for the length scale over which the
 dispersion interaction is correlated.
-
-SAFT is based on Wertheim's first-order thermodynamic perturbation
-theory (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
-  wertheim1986fluidsIII, wertheim1986fluidsIV}, which allows it to
-account for strong associative interactions between
-molecules. Wertheim's thermodynamic perturbation theory uses a
-hard-sphere reference fluid where each sphere has a number of
-association sites on the surface. The association sites have an
-effective range and a small energy contribution when a site is within
-range of another hard-sphere's site. The free energy due to this
-association depends on the radial distribution function
-$g_\sigma^\text{HS}(\rr)$. Our previous water functional used Yu and
-Wu's radial distribution function
-\cite{yu2002fmt-dft-inhomogeneous-associating}, which was found to
-agree less with hard-sphere Monte-Carlo simulation than a distribution
-function developed by us in a recent paper \cite{schulte2012using}. In
-our paper, we developed an approximation for correlation at
-contact to describe the hard-sphere fluid.
 
 \section{Method}
 
