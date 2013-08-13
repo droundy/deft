@@ -20,6 +20,9 @@ hugbrokenHB = hugdata[:,5]
 pylab.plot(rnew, newbrokenHB/2, color = '#990022', linestyle = '-')  #'r-')
 pylab.plot(rhug, hugbrokenHB/2, color = '#220099', linestyle = '--')  #'r--')
 
+#pylab.plot(rnew, newbrokenHB/2/(4*pylab.pi*(rnew+hardsphereR)**2), color = '#990022', linestyle = '-')  #'r-')
+#pylab.plot(rhug, hugbrokenHB/2/(4*pylab.pi*(rhug+hardsphereR)**2), color = '#220099', linestyle = '--')  #'r--')
+
 #plot properties
 pyplot.ylabel('Numer of broken bonds')
 pyplot.xlabel('Radius of sphere(nm)')
