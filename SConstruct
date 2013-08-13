@@ -34,8 +34,6 @@ def test_function(target, source, env):
     else:
         failed_tests += 1
         print "%sFAIL: %s (%g seconds)%s" % (FAIL, name, end - start, ENDC)
-test_runner = Builder(action = Action(test_function, '$SOURCE'),
-                      suffix = '.log', src_suffix = '.test')
 def check_function(target, source, env):
     global passed_tests, failed_tests
     run_tests = passed_tests + failed_tests
@@ -62,11 +60,13 @@ env.Default('check')
 
 def BuildTest(env, test, depends):
     global total_tests
-    env.Program(target = 'tests/' + test + '.test', source = ['tests/' + test + '.cpp']+depends)
+    env.Program(target = 'tests/' + test + '.test',
+                source = ['tests/' + test + '.cpp']+depends)
     testenv = env.Clone()
     testenv.CacheDir(None) # do not cache test results (which could be semi-random)
-    testenv.Append(BUILDERS = {'RunTest': test_runner})
-    test = testenv.RunTest(target = 'tests/' + test + '.log', source = 'tests/' + test + '.test')
+    test = testenv.Command(target = 'tests/' + test + '.log',
+                           source = 'tests/' + test + '.test',
+                           action = Action(test_function, '$SOURCE'))
     total_tests += 1
     Depends('check', test)
     return test
