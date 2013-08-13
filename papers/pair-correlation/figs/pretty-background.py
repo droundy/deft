@@ -43,7 +43,7 @@ def read_g2_and_prepare_plot(zmin, zmax, rmax, centered = True):
   rbins = 2*round(rmax/dx)
   if not centered:
     rbins = round(rmax/dx)
-  zbins = len(g2mc[0,:])
+  zbins = round((zmax-zmin)/dx)
   zposbins = round(zmax/dx)
   znegbins = zbins - zposbins
   g22 = numpy.zeros((rbins, zbins) )
@@ -91,14 +91,14 @@ pylab.figure(figsize=(21,15 + 10*dx))
 pylab.subplot(1,1,1).set_aspect('equal')
 
 Z, R, g2mc, cmap, gmax = read_g2_and_prepare_plot(zmin, 21, 15.0)
-zbins = Z.shape[0]
-nzmin = round(zbins/2) + 10
+rbins = Z.shape[0]
+nrmin = round(rbins/2) + 10
 levels = pylab.concatenate([pylab.linspace(0, .85, 10),
                             pylab.linspace(.855, 0.99, 10),
                             pylab.linspace(1.01, 1.15, 10),
                             pylab.linspace(1.2, gmax, 10)])
 g2mc = (1+pylab.tanh((R+10)/2))/2*(g2mc-1) + 1
-pylab.contourf(Z[:nzmin,:], R[:nzmin,:], g2mc[:nzmin,:], levels, vmax=gmax*.5, vmin=0, cmap=cmap)
+pylab.contourf(Z[:nrmin,:], R[:nrmin,:], g2mc[:nrmin,:], levels, vmax=gmax*.5, vmin=0, cmap=cmap)
 pylab.axes().get_xaxis().set_visible(False)
 pylab.axes().get_yaxis().set_visible(False)
 pylab.title('')
