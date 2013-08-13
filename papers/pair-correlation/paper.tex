@@ -47,7 +47,7 @@ The standard approach in liquid state theory is to treat a liquid as a
 hard-sphere reference fluid with attractive interactions that are
 treated perturbatively~\cite{hansen2006theory}.  Recently there have
 been considerable advances in the development of classical density
-functionals \fixme{introduce DFT first} have been based on the
+functionals have been based on the
 application of these theoretical approaches to inhomogeneous
 densities~\cite{ jain2007modified, gloor2007prediction, gross2009density,
   %felipe2001examination, gloor2002saft,
@@ -70,7 +70,24 @@ the pair distribution function of an inhomogeneous hard-sphere fluid,
 suitable for use in constructing a density
 functional~\cite{gloor2007prediction, jain2007modified}.
 
-\fixme{explain a bit of perturbation theory here?}
+At its core, thermodynamic perturbation theory---sometimes referred to
+as the cluster, or high-temperature expansion---is an expansion of the
+free energy in powers of a small parameter, which typically is a
+pairwise attractive interaction:
+\begin{align}
+  F &= F_0 + F_1 + \beta F_2 + \mathcal{O}(\beta^2)
+\end{align}
+where the terms $F_n$ are corrections to the free energy at order $n$
+in the small interaction.  The first and largest term in this
+expansion is
+\begin{align}
+  F_1 &= \tfrac12 \int g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|) d\rr_1d\rr_2
+\end{align}
+where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
+the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
+In this paper, we will introduce an approximation for the hard-sphere
+pair distribution function which is suitable for use in the creation
+of classical density functionals based on a cluster expansion.
 
 \section{Theoretical approaches}
 
