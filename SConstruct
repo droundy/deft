@@ -8,6 +8,15 @@ env.MergeFlags('-Wall -Werror -ansi')
 env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs')
 env.MergeFlags('-O3')
 
+# Configure git to run the test suite:
+Default(env.Command(target = '.git/hooks/commit-msg',
+                    source = 'git/commit-msg',
+                    action = Copy("$TARGET", "$SOURCE")))
+Default(env.Command(target = '.git/hooks/pre-commit',
+                    source = 'git/pre-commit',
+                    action = Copy("$TARGET", "$SOURCE")))
+
+# Now we define utility functions for the tests.
 passed_tests = 0
 failed_tests = 0
 total_tests = 0
@@ -63,7 +72,7 @@ def BuildTest(env, test, depends):
     env.Program(target = 'tests/' + test + '.test',
                 source = ['tests/' + test + '.cpp']+depends)
     testenv = env.Clone()
-    testenv.CacheDir(None) # do not cache test results (which could be semi-random)
+    #testenv.CacheDir(None) # we probably should not cache test results (which could be semi-random), but do
     test = testenv.Command(target = 'tests/' + test + '.log',
                            source = 'tests/' + test + '.test',
                            action = Action(test_function, '$SOURCE'))
