@@ -54,7 +54,7 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
         print 'examining', fname
         d = numpy.loadtxt(fname)
         d = smooth(d, 1)
-        pylab.plot(d[:,0], d[:,1]*(4*pi/3), label=fname)
+        pylab.plot(abs(d[:,0]), d[:,1]*(4*pi/3), label=fname)
 pylab.title('Packing fraction = %f' % (ff/100.0))
 pylab.legend()
 # pylab.xlim(xmax=14)
