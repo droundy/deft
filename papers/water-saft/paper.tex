@@ -60,55 +60,65 @@ density-functional theory (DFT)~\cite{jeanmairet2013molecular,
   zhao2011molecular, zhao2011new, ramirez2005direct,
   ramirez2005density, levesque2012solvation, levesque2012scalar}.
 Classical DFT is based on a description of a fluid written as a free
-energy functional of the density distribution.  There are two
+energy functional of the density distribution.  There are two general
 approaches used to construct a classical DFT for water.  The first is
-to choose a functional form that is fit to properties of the bulk
-liquid at a given temperature and pressure
-\cite{jeanmairet2013molecular} ~\fixme{cite Jeanmairet and similar}.
-Using this approach, it is possible to construct a functional that
-reproduces the exact second-order response function of the liquid
-under the fitted conditions.  This class of functional, however, will
-be less accurate at other temperatures or pressures---and in the
-inhomogeneous scenarios in which solvation models are applied.  The
-second approach is construct a functional by applying liquid-state
-theory to a model system, and then fit the model to experimental data
-such as the equation of state.  Classical DFT is a natural framework
-for creating a more flexible theory of hydrophobicity that can readily
-describe interaction of water with arbitrary external
+to choose a convenient functional form which is then fit to properties
+of the bulk liquid at a given temperature and pressure
+\cite{jeanmairet2013molecular, lischner2010classical} ~\fixme{cite
+  Jeanmairet and similar}.  Using this approach, it is possible to
+construct a functional that reproduces the exact second-order response
+function of the liquid under the fitted conditions.  However, this
+class of functional will be less accurate at other temperatures or
+pressures---and in the inhomogeneous scenarios in which solvation
+models are applied.  The second approach is construct a functional by
+applying liquid-state theory to a model system, and then fit the model
+to experimental data such as the equation of
+state~\cite{hughes2013classical, clark2006developing, gloor2002saft,
+  gloor2004accurate, gloor2007prediction, Jaqaman2004, chuev2006,
+  fu2005vapor-liquid-dft,kiselev2006new, blas2001examination,
+  sundararaman2012computationally}.  Classical DFT is a natural
+framework for creating a more flexible theory of hydrophobicity that
+can readily describe interaction of water with arbitrary external
 potentials---such as potentials describing strong interactions with
 solutes or surfaces.
 
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
-(SAFT). SAFT is a theory for fluids in which hydrogen bonding plays a
-significant role\cite{chapman1989saft, muller2001molecular}. SAFT is
-used to accurately model the equations of state of both pure fluids
-and mixtures over a wide range of temperatures and pressures.
-\fixme{Talk about and cite papers using SAFT to build DFTs.}
+(SAFT)~\cite{chapman1989saft}.  SAFT is a theory based on a model of
+hard sphere with weak dispersion interactions and hydrogen-bonding
+association sites, which has been used to accurately model the
+equations of state of both pure fluids and mixtures over a wide range
+of temperatures and pressures~\cite{muller2001molecular,
+  tan2008recent}.  The association term in SAFT is based on Wertheim's
+first-order thermodynamic perturbation theory, which models fluids as
+hard-spheres with strong associative interactions at specific sites on
+the surfaces of the spheres~\cite{wertheim1984fluidsI,
+  wertheim1984fluidsII, wertheim1986fluidsIII, wertheim1986fluidsIV}.
+These association sites have an attractive interaction at contact, and
+rely on the hard-sphere radial distribution function at contact
+$g_\sigma^\text{HS}$ in order to determine the extent of association.
+While this function is well-known for the homogeneous hard-sphere
+fluid, it is less well-known for inhomogeneous systems, such as occur
+at liquid interfaces.  In a recent paper, we examined this function at
+a variety of hard-sphere interfaces~\cite{schulte2012using}.  We
+tested the accuracy of existing approximations for the distribution
+function at contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
+  gross2009density}, and derived a significantly improved
+approximation for the averaged distribution function at contact.
 
-SAFT is based on Wertheim's first-order thermodynamic perturbation
-theory (TPT1)\cite{wertheim1984fluidsI, wertheim1984fluidsII,
-  wertheim1986fluidsIII, wertheim1986fluidsIV}, which models
-\fixme{fluids} as hard-spheres with strong associative interactions at
-sites on the surfaces of the spheres. This is ideal for water, since
-its four hydrogen bond sites can be represented by these association
-sites. The association sites have an effective range and a small
-energy contribution when a site is within range of another
-hard-sphere's site. The free energy due to this association depends on
-the radial distribution function $g_\sigma^\text{HS}(\rr)$. Our
-previous water functional used Yu and Wu's radial distribution
-function \cite{yu2002fmt-dft-inhomogeneous-associating}, which was
-found to agree less with hard-sphere Monte-Carlo simulation than a
-distribution function developed by us in a recent paper
-\cite{schulte2012using}. In our paper, we developed an approximation
-for correlation at contact to describe the hard-sphere fluid.
-
-In a recent paper \cite{hughes2013classical}, we constructed a
-classical DFT for water which uses SAFT as a basis for a free energy
-functional. We used Clark \emph{et al}'s \cite{clark2006developing}
-five fitting parameters for an optimal cDFT for water and, in
-addition, introduced a parameter for the length scale over which the
-dispersion interaction is correlated.
+We will apply this improved $g_\sigma^{HS}(\rr)$ to a SAFT-based
+classical density functional for water~\cite{hughes2013classical}.
+This functional was constructed so as to reproduce in the homogeneous
+limit the 4-site optimal SAFT model for water developed by Clark
+\emph{et al.}~\cite{clark2006developing}.  The DFT of
+Ref.~\citenum{hughes2013classical} uses the association free energy
+functional of Yu and
+Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, which is based on a
+$g_\sigma^{HS}$ that we have since found to be
+inaccurate~\cite{schulte2012using}.  In this paper, we will examine
+the result of using the improved functional for $g_\sigma^{HS}$
+developed in Ref.~\citenum{schulte2012using} to construct an
+association free energy functional.
 
 \section{Method}
 
@@ -119,21 +129,22 @@ association free energy for our four-site model has the form:
   F_\text{assoc}[n] &= k_BT \int n_\text{site}(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
 \end{align}
-where
+where $n_\text{site}(\rr)$ is the density of bonding sites at
+position~$\rr$:
 \begin{align}
   n_\text{site}(\rr) &=
   \begin{cases}
     4 n(\rr) & \text{this work}\\
     4 n_0(\rr) \zeta(\rr) & \text{Ref.~\citenum{hughes2013classical}}
-  \end{cases} 
+  \end{cases}
 \end{align}
-is the density of bonding sites at position~$\rr$.  The four in
-$n_\text{site}(\rr)$ comes from the four hydrogen bond sites,
+where the factor of four comes from the four hydrogen bond sites,
 $n_0(\rr)$ is the average density contacting point $\rr$, and
 $\zeta(\xx)$ is a dimensionless measure of the density inhomogeneity
 from Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  The
 functional $X(\rr)$ is the fraction of association sites \emph{not}
-hydrogen-bonded, which is determined by the quadratic equation
+hydrogen-bonded, which is determined for our 4-site model by the
+quadratic equation
 \begin{align}
   X(\xx) &= \frac{\sqrt{1 + 2n_\text{site}'(\rr)
       \kappaassoc g^\textit{SW}_\sigma(\xx)
@@ -160,11 +171,12 @@ is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)
 where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
-free energy.  The radial distribution function $g^\textit{SW}_\sigma$ is
-written as a perturbative correction to the hard-sphere fluid
-correlation function $g^\textit{HS}_\sigma$. Four our old functional
-we used Yu and Wu's radial distribution function, and for this paper we
-use our $g^\textit{A}_\sigma$.
+free energy.  The radial distribution function of the square-well
+fluid $g^\textit{SW}_\sigma$ is written as a perturbative correction
+to the hard-sphere fluid correlation function
+$g^\textit{HS}_\sigma$. For \fixme{our} old functional we used Yu and Wu's
+radial distribution function, and for this paper we use our
+$g^\textit{A}_\sigma$.
 
 \begin{figure}
 \begin{center}
@@ -207,7 +219,7 @@ hydrophobic cases of hard rods and the hard spherical solutes.
 
 We will first discuss the case of a single hydrophobic rod immersed in
 water. Figure~\ref{fig:density-single-rod} shows the density profile
-of water near a rod with radius~0.1\AA\fixme{Eric, please figure this
+of water near a rod with radius~0.1~\AA\fixme{Eric, please figure this
   radius out}.  The density computed using the functional of this
 paper is qualitatively similar to that from
 Ref.~\citenum{hughes2013classical}, with a comparable density at
