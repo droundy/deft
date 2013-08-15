@@ -30,8 +30,10 @@ x[4] = 0.329
 x[5] = 2.540
 x[6] = 1.940
 
+sigma = 2.0
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
 ff = array([.05, .1, .15, .2, .25, .3, .35, .4, .45, .5])
+ff = array([.1, .2, .3, .4])
 able_to_read_file = True
 
 
@@ -73,7 +75,7 @@ for i in range(len(ff)):
     # distribution function at contact.  This is approximate, but it
     # is a good approximation.
     eta[i] = ff[i]
-    r = r_mc - 2 # shift to x = 0 at contact
+    r = r_mc
 
 if able_to_read_file == False:
     plot(arange(0,10,1), [0]*10, 'k')
@@ -84,27 +86,27 @@ if able_to_read_file == False:
 
 def evalg(x, eta, r):
   hsigma_rolloff = 5.0
+  z = r - sigma
   hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
-  h0 = hsigma # was x[0]*gsig
 
-  f0 = exp(-x[0]*r)
+  a0 = x[0]
+  a1 = x[1]
+  a2 = x[2]
+  a3 = x[3]
+  a4 = x[4]
+  a5 = x[5]
+  a6 = x[6]
 
-  # the slope dghs/dr should be = -hsigma - 0.7*hsigma**2 according my fit (by eye)
-  # but our "r" is r/2, so our slope is twice that.
-  # -2*hsigma - 1.4*hsigma**2 = -x[0]*hsigma -amplitude[4]*x[5]
-  # thus amplitude[4] = (hsigma*(2-x[0]) + 1.4*hsigma**2)/x[5]
+  f0 = hsigma
+  j0 = exp(-a0*z)
 
-  h1 = x[1]*hsigma
-  #h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
-  f1 = sin(x[2]*r)**2 * exp(-x[3]*r)
-  h2 = -x[4]*(hsigma + hsigma**2)
-  h2 = (hsigma*(-2+x[0]) -2*hsigma**2)/x[5]
-  #h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
-  f2 = sin(x[5]*r) * exp(-x[6]*r)
+  f1 = a1*hsigma
+  j1 = sin(a2*z)*exp(-a3*z)
 
-  #h3 = -x[7]*hsigma**(3)
-  #f3 = sin(x[8]*r) * exp(-x[9]*r)
-  return 1 + h0*f0 + h1*f1 + h2*f2 #+ h3*f3
+  f2 = -a4*hsigma**2
+  j2 = sin(a5*z)*exp(-a6*z)
+
+  return 1 + f0*j0 + f1*j1 + f2*j2
 
 def dist(x):
     # function with x[i] as constants to be determined
