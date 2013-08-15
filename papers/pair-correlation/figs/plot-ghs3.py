@@ -32,38 +32,20 @@ x[2] = 1.567
 x[4] = 0.675
 x[5] = 0.463
 
-x[0] = 1.854
-x[1] = 1.436
-x[2] = 1.445
-x[4] = 0.424
-x[5] = 0.330
-
-x[0] = 2.033
-x[1] = 1.584
-x[2] = 1.503
-x[4] = 0.329
-x[5] = 0.269
-
-x[0] = 2.143
-x[1] = 1.588
-x[2] = 1.422
-x[4] = 0.268
-x[5] = 0.227
+x[0] = 2.02935591552239458
+x[1] = 1.27551885181493185
+x[2] = 1.90841843855194071
+x[3] = 0
+x[4] = 0.000754210447615419831
+x[5] = 0.945627953245035791
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
-ff = array([0.05, .1, 0.15, .2, .25, .3, .35,  .4, .45])
-ff = array([.1, .2, .3, .4])
-able_to_read_file = True
-
+ff = array([0.05, .1, 0.15, .2, .25, .3, .35,  .4])
+#ff = array([.1, .2, .3, .4])
 
 def read_ghs(base, ff):
+  # input: "figs/gr-*.dat" % ()
   mcdatafilename = "%s-%4.2f.dat" % (base, ff)
-  if (os.path.isfile(mcdatafilename) == False):
-    print "File does not exist: ", mcdatafilename
-    global able_to_read_file
-    able_to_read_file = False
-    return 0, 0
-
   mcdata = loadtxt(mcdatafilename)
   print 'Using', mcdatafilename, 'for filling fraction', ff
   r_mc = mcdata[:,0]
@@ -73,15 +55,13 @@ def read_ghs(base, ff):
 
 
 # READ DATA
-ghs = [0]*len(ff)
-#ghslores = [0]*len(ff)
-eta = [0]*len(ff)
+eta = zeros(len(ff))
 
+r_mc,_ = read_ghs("figs/gr", ff[0])
+ghs = zeros((len(ff), len(r_mc)))
 
 for i in range(len(ff)):
     r_mc, ghs[i] = read_ghs("figs/gr", ff[i])
-    if able_to_read_file == False:
-        break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     figure(1)
     plot(r_mc, ghs[i], colors[i]+":",label='$\eta = %.2f$'%ff[i])
@@ -97,14 +77,7 @@ for i in range(len(ff)):
     eta[i] = ff[i]
     r = r_mc # shift to x = 0 at contact
 
-if able_to_read_file == False:
-  plot(arange(0,10,1), [0]*10, 'k')
-  suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
-  savefig("figs/ghs-g3.pdf")
-  savefig("figs/ghs-g-ghs3.pdf")
-  exit(1)
-
-toprint = True
+toprint = False
 def evalg2(xnew, eta, r):
   global toprint
   z = r - sigma
@@ -135,16 +108,16 @@ def evalg2(xnew, eta, r):
       / (int_h1_over_A - x1/x4*int_h2_over_B)
   B = ((x0-1)*hsigma - hsigma**2)/x4 - A*x1/x4
 
-  if toprint:
-    print eta, A, B
-    toprint = False
-
   f0 = hsigma
-  j0 = exp(-x[0]*z)
+  j0 = exp(-x0*z)
 
-  j1 = A*sin(xnew[1]*z)*exp(-x[2]*z)
+  j1 = A*sin(x1*z)*exp(-x2*z)
 
-  j2 = B*sin(xnew[4]*z)*exp(-x[5]*z)
+  j2 = B*sin(x4*z)*exp(-x5*z)
+
+  if toprint:
+    print eta, A, B, f0, j0, j1, j2
+    toprint = False
 
   #f3 = -xnew[6]*hsigma**3
   #j3 = sin(xnew[7]*r)*exp(-xnew[8]*r)
@@ -153,63 +126,40 @@ def evalg2(xnew, eta, r):
 
 def dist(x):
   # function with x[i] as constants to be determined
-  g = zeros_like(etaconcatenated)
-  for i in range(len(g)):
-    g[i] = evalg2(x, etaconcatenated[i], rconcatenated[i])
-  return g
+  R, ETA = meshgrid(r, eta)
+  g = zeros_like(ETA)
+  g = evalg2(x, ETA, R)
+  return reshape(g, len(eta)*len(r))
 
 def dist2(x):
-  return dist(x) - ghsconcatenated
-
-ghsconcatenated = ghs[0]
-for i in range(1,len(ff)):
-  ghsconcatenated = concatenate((ghsconcatenated, ghs[i]))
-
-etaconcatenated = [0]*len(r)*len(eta)
-j = 0
-while (j < len(eta)):
-  i = 0
-  while (i < len(r)):
-    etaconcatenated[i + j*len(r)] = eta[j]
-    i += 1
-  j += 1
-
-rconcatenated = [0]*len(r)*len(eta)
-j = 0
-while (j < len(eta)):
-  i = 0
-  while (i < len(r)):
-    rconcatenated[i + j*len(r)] = r[i]
-    i += 1
-  j += 1
-
-chi2initially = sum(dist2(x)**2)
-print "chi^2 (initial guess, initially) =", chi2initially
+  return dist(x) - reshape(ghs, len(eta)*len(r))
 
 vals = zeros_like(x)
 
-if True:
+if 'skipmin' in sys.argv:
+  print "skipping the least squares fit..."
+  vals = x
+else:
   print "beginning least squares fit..."
   vals, cov = leastsq(dist2, x)
   print "original fit complete, cov: " + str(cov)
-else:
-  print "skipping the least squares fit..."
-  vals = x
 
-toprint = True
+toprint = False
 for i in range(len(x)):
-  print "vals[%i]: %.3f\t x[%i]: %g" %(i, vals[i], i, x[i])
+  print "vals[%i]: %.17g\t x[%i]: %g" %(i, vals[i], i, x[i])
+for i in range(len(x)):
+  print "x[%i] = %.3g" %(i, vals[i])
 
-g = dist(vals)
+g = reshape(dist(vals), (len(eta), len(r)))
 valsrounded = zeros_like(vals)
 for i in range(len(valsrounded)):
-  valsrounded[i] = float("%.3f" % vals[i])
-grounded = dist(valsrounded)
-gdifference = dist2(vals)
+  valsrounded[i] = float("%.3g" % vals[i])
+grounded = reshape(dist(valsrounded), (len(eta), len(r)))
+gdifference = reshape(dist2(vals), (len(eta), len(r)))
 
 print "chi^2 (initial guess) =", sum(dist2(x)**2)
 print "chi^2 =", sum(dist2(vals)**2)
-toprint = True
+toprint = False
 chi2rounded = sum(dist2(valsrounded)**2)
 print "chi^2 (rounded) =", chi2rounded
 
@@ -217,22 +167,14 @@ print "chi^2 (rounded) =", chi2rounded
 #     print dist(vals, ind)[i]
 
 for i in range(len(ff)):
+  print "Plotting ff", ff[i]
   figure(1)
-  #plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
-  plot(r_mc, grounded[i*len(r):(i+1)*len(r)], colors[i]+'-')
-  hsigma = (1 - 0.5*ff[i])/(1-ff[i])**3 - 1
-  density = 4/3*pi*ff[i]
-  rhs = (1-ff[i])**4/(1+4*ff[i]+4*ff[i]**2-4*ff[i]**3+ff[i]**4)/3
-  #integral = hsigma*(1/a + x[0]*x[1]/())
+  #plot(r_mc, g[i], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
+  plot(r_mc, grounded[i], colors[i]+'-')
 
-
-
-  #print density, integral, rhs
-  #print "ff: %.2f\t thing: %g" %(ff[i], 1 - rho*integral - rhs)
   figure(2)
-  plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
-  plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
-  #plot(r_mc, numpy.abs(numpy.asarray(ghsconcatenated[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'-')
+  plot(r_mc, gdifference[i], colors[i]+'--')
+  plot(r_mc, g[i] - ghs[i], colors[i]+'-')
 
 figure(1)
 xlim(2,6.5)

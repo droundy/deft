@@ -289,6 +289,7 @@ for program in Split("functionals newfunctionals test latex-functionals"):
 
 haskell.Command(target = ['tests/generated-haskell/nice-sum.h',
                           'tests/generated-haskell/nice-sqrt.h',
+                          'tests/generated-haskell/nice-sqrtandmore.h',
                           'tests/generated-haskell/nice-quad.h',
                           'tests/generated-haskell/nice-phi1.h',
                           'tests/generated-haskell/nice-phi2.h',
