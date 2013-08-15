@@ -18,25 +18,41 @@ title('$g_{HS}(r)$') #radial distribution for hard spheres
 axvline(x=sigma, color='k', linestyle=':')
 axhline(y=1, color='k', linestyle=':')
 
-x = rand(6)*5
-x[0] = 1.8
+x = zeros(6)
 
-x[1] = 1.
-x[2] = 1.3
+x[0] = 1.5
+x[1] = 1.5
+x[2] = 1.6
+x[4] = 1e-5
+x[5] = 0.8
 
-x[3] = -.2
-x[4] = 2.540
-x[5] = 1.9
+x[0] = 1.706
+x[1] = 1.358
+x[2] = 1.567
+x[4] = 0.675
+x[5] = 0.463
 
+x[0] = 1.854
+x[1] = 1.436
+x[2] = 1.445
+x[4] = 0.424
+x[5] = 0.330
 
+x[0] = 2.033
+x[1] = 1.584
+x[2] = 1.503
+x[4] = 0.329
+x[5] = 0.269
 
-#x[0] = 3.3
-#x[3] = 0
-#x[2] = 1.87
-#x[1] = .01
+x[0] = 2.143
+x[1] = 1.588
+x[2] = 1.422
+x[4] = 0.268
+x[5] = 0.227
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
-ff = array([.1, .2, .3])
+ff = array([0.05, .1, 0.15, .2, .25, .3, .35,  .4, .45])
+ff = array([.1, .2, .3, .4])
 able_to_read_file = True
 
 
@@ -68,7 +84,7 @@ for i in range(len(ff)):
         break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     figure(1)
-    plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.2f'%ff[i])
+    plot(r_mc, ghs[i], colors[i]+":",label='$\eta = %.2f$'%ff[i])
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -86,22 +102,7 @@ if able_to_read_file == False:
   suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
   savefig("figs/ghs-g3.pdf")
   savefig("figs/ghs-g-ghs3.pdf")
-  exit(0)
-
-def evalg(x, gsigma, r):
-  hsigma_rolloff = 5.0
-  hsigma = gsigma - 1 # (1 - 0.5*eta)/(1-eta)**3 - 1
-  h0 = hsigma # was x[0]*gsig
-  f0 = exp(-x[0]*r)
-  h1 = x[1]*hsigma
-  h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
-  f1 = sin(x[2]*r) * exp(-x[3]*r)
-  h2 = -x[4]*hsigma**(2)
-  h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
-  f2 = sin(x[5]*r) * exp(-x[6]*r)
-  #h3 = -x[7]*hsigma**(3)
-  #f3 = numpy.sin(x[8]*r) * numpy.exp(-x[9]*r)
-  return 1 + h0*f0 + h1*f1 + h2*f2 #+ h3*f3
+  exit(1)
 
 toprint = True
 def evalg2(xnew, eta, r):
@@ -114,41 +115,41 @@ def evalg2(xnew, eta, r):
   x0 = xnew[0]
   x1 = xnew[1]
   x2 = xnew[2]
-  x3 = xnew[3]
   x4 = xnew[4]
   x5 = xnew[5]
 
   int_h0 = 4*pi*hsigma*(2 + sigma*x0*(2 + sigma*x0))/x0**3
 
-  int_h1_over_amp = 4*pi*hsigma*x1* \
-      (sigma**2*x1**4 + 2*x1**2* \
-         (-1 + sigma*x2*(2 + sigma*x2)) + x2**2*(6 + sigma*x2*(4 + sigma*x2))) \
-         /(x1**2 + x2**2)**3
+  int_h1_over_A = 4*pi*x1* \
+      (sigma**2*x1**4 + \
+         2*x1**2*(-1 + sigma*x2*(2 + sigma*x2)) + \
+         x2**2*(6 + sigma*x2*(4 + sigma*x2)) \
+         )/(x1**2 + x2**2)**3
 
-  int_h2 = 4*pi*hsigma*x3*x4* \
+  int_h2_over_B = 4*pi*x4* \
       (sigma**2*x4**4 + 2*x4**2* \
          (-1 + sigma*x5*(2 + sigma*x5)) + x5**2*(6 + sigma*x5*(4 + sigma*x5))) \
          /(x4**2 + x5**2)**3
 
-  a0 = ((rhs-1)/density - int_h0 - int_h2)/int_h1_over_amp
+  A = ((rhs-1)/density - int_h0 - ((x0-1)*hsigma-hsigma**2)/x4*int_h2_over_B) \
+      / (int_h1_over_A - x1/x4*int_h2_over_B)
+  B = ((x0-1)*hsigma - hsigma**2)/x4 - A*x1/x4
 
   if toprint:
-    print a0
+    print eta, A, B
     toprint = False
 
   f0 = hsigma
   j0 = exp(-x[0]*z)
 
-  f1 = a0*hsigma
-  j1 = sin(xnew[1]*z)*exp(-x[2]*z)
+  j1 = A*sin(xnew[1]*z)*exp(-x[2]*z)
 
-  f2 = -xnew[3]*hsigma**2
-  j2 = sin(xnew[4]*z)*exp(-x[5]*z)
+  j2 = B*sin(xnew[4]*z)*exp(-x[5]*z)
 
   #f3 = -xnew[6]*hsigma**3
   #j3 = sin(xnew[7]*r)*exp(-xnew[8]*r)
 
-  return 1 + f0*j0 + f1*j1 + f2*j2# + f3*j3
+  return 1 + f0*j0 + j1 + j2# + f3*j3
 
 def dist(x):
   # function with x[i] as constants to be determined
@@ -159,7 +160,6 @@ def dist(x):
 
 def dist2(x):
   return dist(x) - ghsconcatenated
-
 
 ghsconcatenated = ghs[0]
 for i in range(1,len(ff)):
@@ -183,27 +183,43 @@ while (j < len(eta)):
     i += 1
   j += 1
 
+chi2initially = sum(dist2(x)**2)
+print "chi^2 (initial guess, initially) =", chi2initially
+
 vals = zeros_like(x)
 
-print "beginning least squares fit..."
-#vals, cov = leastsq(dist2, x)
-print "original fit complete, cov: " + str(cov)
-
-vals = x
+if True:
+  print "beginning least squares fit..."
+  vals, cov = leastsq(dist2, x)
+  print "original fit complete, cov: " + str(cov)
+else:
+  print "skipping the least squares fit..."
+  vals = x
 
 toprint = True
 for i in range(len(x)):
   print "vals[%i]: %.3f\t x[%i]: %g" %(i, vals[i], i, x[i])
 
 g = dist(vals)
+valsrounded = zeros_like(vals)
+for i in range(len(valsrounded)):
+  valsrounded[i] = float("%.3f" % vals[i])
+grounded = dist(valsrounded)
 gdifference = dist2(vals)
+
+print "chi^2 (initial guess) =", sum(dist2(x)**2)
+print "chi^2 =", sum(dist2(vals)**2)
+toprint = True
+chi2rounded = sum(dist2(valsrounded)**2)
+print "chi^2 (rounded) =", chi2rounded
 
 # for i in g:
 #     print dist(vals, ind)[i]
 
 for i in range(len(ff)):
   figure(1)
-  plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
+  #plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
+  plot(r_mc, grounded[i*len(r):(i+1)*len(r)], colors[i]+'-')
   hsigma = (1 - 0.5*ff[i])/(1-ff[i])**3 - 1
   density = 4/3*pi*ff[i]
   rhs = (1-ff[i])**4/(1+4*ff[i]+4*ff[i]**2-4*ff[i]**3+ff[i]**4)/3
@@ -218,14 +234,18 @@ for i in range(len(ff)):
   plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
   #plot(r_mc, numpy.abs(numpy.asarray(ghsconcatenated[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'-')
 
-
-
 figure(1)
 xlim(2,6.5)
 #ylim(0.5, 3.5)
 xlabel(r"$r/R$")
 ylabel("$g(r)$")
 legend(loc='best').get_frame().set_alpha(0.5)
+
+#axvline(sigma + pi/vals[1], color='r')
+#axvline(sigma + pi/vals[4], color='b')
+
+#axvline(sigma + 2*pi/vals[1], color='r')
+#axvline(sigma + 2*pi/vals[4], color='b')
 
 savefig("figs/ghs-g3.pdf")
 
