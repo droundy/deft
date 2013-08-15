@@ -249,7 +249,7 @@ int main(int argc, char *argv[]){
     // The following should give us approaximately uncertainty_goal
     // uncertainty in the density in each bin, assuming all the bins
     // have an equal volume.
-    iterations += 1.0/(N*(dx_goal/maxrad)*uncertainty_goal*uncertainty_goal);
+    iterations += 1.0/((dx_goal/maxrad)*uncertainty_goal*uncertainty_goal);
   }
   printf("Running for a total of %ld iterations.\n", iterations);
 
