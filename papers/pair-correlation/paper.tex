@@ -1,4 +1,4 @@
-\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -263,8 +263,8 @@ The finalalized form of our pair correlation function is:
 %% expansion where fit
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-g}\\
-  \includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
+  \includegraphics[width=\columnwidth]{figs/ghs-g}% \\
+  %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
 \section{What does it look like (graphs that show the function itself)?}
@@ -305,6 +305,29 @@ Figure~\ref{fig:radial-distribution} shows...
 
 \section{How well does it work?}
 Figure~\ref{fig:dadz} shows...
+
+\appendix
+
+\section{Properties of $g_\sigma$}
+We begin with some definitions of basic quantities, looking at the
+homogeneous hard-sphere fluid.  I am ignoring here the distinction
+between $N$ and $N-1$, which is unimportant in the thermodynamic limit
+$N\gg 1$.
+\begin{align}
+  Z(\sigma) &= \iiiint d\rr_1\cdots d\rr_N \prod_{i<j} \Theta(r_{ij}-\sigma)
+  \\
+  n^{(2)}(\rr_1,\rr_2) &= \frac{N^2}{Z}\iiiint d\rr_3\cdots d\rr_N \prod_{i<j} \Theta(r_{ij}-\sigma)
+\end{align}
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) &=
+  \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
+  \\
+  &= \frac{V^2}{Z}\iiiint d\rr_3\cdots d\rr_N \prod_{i<j}
+  \Theta(r_{ij}-\sigma)
+  \label{eq:g2-integral-defn}
+\end{align}
+
+
 \begin{figure}
   \includegraphics[width=3cm]{figs/dadz-3-2.pdf}
   \includegraphics[width=3cm]{figs/dadz-3-3.pdf}
@@ -314,6 +337,134 @@ Figure~\ref{fig:dadz} shows...
   \caption{Plot of $\frac{da_1}{dz}$ near a hard
     wall. For what $\Phi$?}\label{fig:dadz}
 \end{figure}
+
+At this point we consider the effect of increasing the diameter
+$\sigma$ of all our spheres.  This will reduce the number of available
+states, thus reducing the partition function $Z$, which we will
+ultimately relate to a change in free energy.
+\begin{align}
+  Z(\sigma+\delta) &= \iiiint d\rr_1\cdots d\rr_N \prod_{i<j} \Theta(r_{ij}-\sigma-\delta)
+  \\
+  &= \iiiint d\rr_1\cdots d\rr_N \prod_{i<j} \Theta(r_{ij}-\sigma)(1-\Theta(\sigma+\delta-r_{ij}))
+\end{align}
+I have written $Z(\sigma+\delta)$ in such a way that it is clear that
+it is equal to $Z(\sigma)$ plus a small quantity, provided $\delta$ is
+small.  We will now investigate that small quantity, which we will
+write as a power series in $\delta$.  We begin by expanding the
+product of $(1-\Theta(\sigma+\delta-r_{ij}))$:
+\begin{multline}
+    \prod_{i<j}(1-\Theta(\sigma+\delta-r_{ij})) =
+    1 - \sum_{i<j} \Theta(\sigma+\delta-r_{ij}) \\
+    + \mathop{\mathop{\sum_{i<j}}_{k<}}_{kl \ne ij}
+    \Theta(\sigma+\delta-r_{ij}) \Theta(\sigma+\delta-r_{kl})
+    \\ + \cdots.
+\end{multline}
+Given this expansion, we can readily expand the partition function:
+\begin{multline}
+  Z(\sigma+\delta) = Z(\sigma) \\ -
+  \sum_{k<l} \iiiint \Theta(\sigma+\delta-r_{kl}) \prod_{i<j}
+  \Theta(r_{ij}-\sigma) \\
+  + \mathop{\mathop{\sum_{k<l}}_{m<n}}_{kl\ne mn}
+  \iiiint \Theta(\sigma+\delta-r_{kl}) \Theta(\sigma+\delta-r_{mn}) \prod_{i<j}
+  \Theta(r_{ij}-\sigma) \\
+  + \cdots.\label{eq:z-power-series}
+\end{multline}
+Our challenge now is to manipulate this into forms involving $g(r)$,
+which we can then simplify using a Taylor expansion around
+$r=\sigma$.  We will begin by taking advantage of the fact that the
+summations in Eq.~\ref{eq:z-power-series} are mostly of identical
+terms, since the integrals are over all coordinates.
+\begin{multline}
+  Z(\sigma)-Z(\sigma+\delta) =
+  N^2\iiiint \Theta(\sigma+\delta-r_{12})
+  \prod_{i<j} \Theta(r_{ij}-\sigma) \\
+  - \frac{N^3}{2}\iiiint
+  \Theta(\sigma+\delta-r_{12})
+  \Theta(\sigma+\delta-r_{34})
+  \prod_{i<j} \Theta(r_{ij}-\sigma) \\
+  + \cdots \label{eq:z-expansion}
+\end{multline}
+At this point we are ready to connect with $g(r)$, which we can do by
+considering an integral of the pair distribution function, from
+Eq.~\ref{eq:g2-integral-defn}.
+\begin{multline}
+  \int_{\sigma}^{\sigma+\delta} g(r) d\rr\\
+  \shoveleft{\quad= \int g^{(2)}(\rr_1,\rr_2)
+  \Theta(\sigma+\delta-r_{12})d\rr_2} \\
+  \shoveleft{\quad= \frac{1}{V}\int g^{(2)}(\rr_1,\rr_2)
+  \Theta(\sigma+\delta-r_{12})d\rr_1d\rr_2} \\
+  \shoveleft{\quad= \frac{V}{Z}\iiiint d\rr_1\cdots d\rr_N
+  \Theta(\sigma+\delta-r_{12})}\\
+  \prod_{i<j} \Theta(r_{ij}-\sigma)
+  \label{eq:g-shell-integral}
+\end{multline}
+Looking back at Eq.~\ref{eq:z-expansion}, we can see that the first
+term is easily related to Eq.~\ref{eq:g-shell-integral}.  The second
+term has two shell $\delta$ functions, and is thus a bit trickier.
+Fortunately, in a very large system, $\rr_3$ and $\rr_4$ are
+vanishingly seldom near $\rr_1$ or $\rr_2$, so we can write the second
+term as a product.
+\begin{multline}
+  \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)}\\
+  \shoveleft{\quad= nN \int_{\sigma}^{\sigma+\delta} g(r) d\rr }
+  - \frac{n^2N}{2} \left(\int_{\sigma}^{\sigma+\delta} g(r)
+  d\rr\right)^2
+  \\
+  + \frac{n^3N}{6} \left(\int_{\sigma}^{\sigma+\delta} g(r)
+  d\rr\right)^3 + \cdots
+  \label{eq:zdiff-g}
+\end{multline}
+Now let us look at how this integral relates to $g(r)$ evaluated at
+contact.  I'll skip a few steps doing this integral...
+\begin{equation}
+   \int_{\sigma}^{\sigma+\delta} g(r)
+  d\rr = 4\pi\sigma^2\left(g_\sigma\delta + \left(\tfrac12g_\sigma' +
+  \tfrac1{\sigma}\right) + \cdots \right)
+\end{equation}
+Putting this together with the above we find
+\begin{multline}
+  \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)} =
+  4\pi\sigma^2 n g_\sigma \delta +
+  4\pi\sigma^2 n \left(\tfrac{g_\sigma'}{2} + \tfrac{2}{\sigma}\right)
+  \delta^2 \\
+  - \tfrac{1}{2}\left(4\pi\sigma^2ng_\sigma\right)^2\delta^2 + \mathcal{O}(\delta^3)
+\end{multline}
+But by considering a Taylor expansion, we can also see that
+\begin{multline}
+  \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)} =
+  -\frac{\partial Z}{\partial \sigma} \delta
+  -\frac12 \frac{\partial^2 Z}{\partial \sigma^2} \delta^2  + \mathcal{O}(\delta^3)
+\end{multline}
+from which we can extract relationships for the derivatives of $Z$
+with respect to $\sigma$.  Which if we knew what those derivatives
+were, would tell us about $g_\sigma'$ and $g_\sigma$, which is what we
+are after here.  We find this out by considering the Helmholtz free
+energy.
+\begin{equation}
+  F = -kT \ln Z
+\end{equation}
+The derivatives are then given by
+\begin{equation}
+  \frac{\partial F}{\partial \sigma} = -\frac{kT}{Z} \frac{\partial
+    Z}{\partial \sigma}
+\end{equation}
+and
+\begin{equation}
+  \frac{\partial^2 F}{\partial \sigma^2} =
+  \frac{1}{kT}\left(\frac{\partial F}{\partial \sigma}\right)^2
+  -\frac{kT}{Z} \frac{\partial^2
+    Z}{\partial \sigma^2}.
+\end{equation}
+With a bunch more work, we find out that
+\begin{equation}
+  g_\sigma' = \frac{\frac{\partial^2 F}{\partial
+      \sigma^2}}{4\pi\sigma^2nkT}
+  - \frac{2g_\sigma}{\sigma}
+\end{equation}
+except that there is a mistake in here.  I can tell because $F$ is
+extensive and $g_\sigma'$ is not.  This tracks back to
+Eq.~\ref{eq:zdiff-g}, which is correct in this \LaTeX, but is wrong on
+my scratch paper.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
