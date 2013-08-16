@@ -62,6 +62,10 @@ class vector3d {
   vector3d normalize() const {
     return *this/this->norm(); }
 
+  void tostr(char str[]) const {
+    sprintf(str, "(%6.2f, %6.2f, %6.2f)", coords[0], coords[1], coords[2]);
+  }
+
  private:
   double coords[3];
 };
@@ -73,12 +77,14 @@ const vector3d operator*(const double scalar, const vector3d &v) {
 class quaternion {
  public:
   quaternion() {
-    coords[0] = coords[1] = coords[2] = coords[3] = 0; }
+    coords[0] = 1.0; coords[1] = coords[2] = coords[3] = 0; }
   quaternion(const double w, const double x, const double y, const double z) {
     coords[0] = w; coords[1] = x; coords[2] = y; coords[3] = z; }
   quaternion(const quaternion &q) {
     coords[0] = q.coords[0]; coords[1] = q.coords[1];
     coords[2] = q.coords[2]; coords[3] = q.coords[3]; }
+  quaternion(const double w, const vector3d &v) {
+    coords[0] = w; coords[1] = v[0]; coords[2] = v[1]; coords[3] = v[2]; }
 
   double w() const { return coords[0]; }
   double x() const { return coords[1]; }
@@ -161,6 +167,9 @@ class quaternion {
     const double norm = sqrt(coords[1]*coords[1] + coords[2]*coords[2] +
                              coords[3]*coords[3]);
     return quaternion(coords[0], coords[1]/norm, coords[2]/norm, coords[3]/norm); }
+
+  void tostr(char str[]) const {
+    sprintf(str, "[%5.2f, (%5.2f, %5.2f, %5.2f)]", coords[0], coords[1], coords[2], coords[3]); }
 
  private:
   double coords[4]; // coords[0] = scalar part, rest is vector part
