@@ -59,7 +59,7 @@ class vector3d {
     return sqrt(coords[0]*coords[0] + coords[1]*coords[1] + coords[2]*coords[2]); }
   double normsquared() const {
     return coords[0]*coords[0] + coords[1]*coords[1] + coords[2]*coords[2]; }
-  vector3d normalize() const {
+  vector3d normalized() const {
     return *this/this->norm(); }
 
   void tostr(char str[]) const {
@@ -134,15 +134,7 @@ class quaternion {
                       coords[0]*q.coords[3] + coords[1]*q.coords[2] -
                       coords[2]*q.coords[1] + coords[3]*q.coords[0]); }
   quaternion operator*=(const quaternion &q) {
-    coords[0] = coords[0]*q.coords[0] - coords[1]*q.coords[1] -
-      coords[2]*q.coords[2] - coords[3]*q.coords[3];
-    coords[1] = coords[0]*q.coords[1] + coords[1]*q.coords[0] +
-      coords[2]*q.coords[3] - coords[3]*q.coords[2];
-    coords[2] = coords[0]*q.coords[2] - coords[1]*q.coords[3] +
-      coords[2]*q.coords[0] + coords[3]*q.coords[1];
-    coords[3] = coords[0]*q.coords[3] + coords[1]*q.coords[2] -
-      coords[2]*q.coords[1] + coords[3]*q.coords[0];
-    return *this; }
+    *this = (*this)*q; return *this; }
 
   quaternion operator/(const double scalar) const {
     return quaternion(coords[0]/scalar, coords[1]/scalar,
@@ -150,6 +142,12 @@ class quaternion {
   quaternion operator/=(const double scalar) {
     coords[0]/=scalar; coords[1]/=scalar; coords[2]/=scalar; coords[3]/=scalar;
     return *this; }
+
+  bool operator ==(const quaternion &q) const {
+    return ((coords[0] == q.coords[0]) && (coords[1] == q.coords[1]) &&
+            (coords[2] == q.coords[2]) && (coords[3] == q.coords[3])); }
+  bool operator !=(const quaternion &q) const {
+    return !(*this == q); }
 
   double &operator[](const unsigned int i) { return coords[i]; }
   const double &operator[](const unsigned int i) const { return coords[i]; }
@@ -163,10 +161,13 @@ class quaternion {
   double normsquared() const {
     return coords[0]*coords[0] + coords[1]*coords[1] +
                 coords[2]*coords[2] + coords[3]*coords[3]; }
-  quaternion normalize_vector() const {
+  quaternion normalized_vector() const {
     const double norm = sqrt(coords[1]*coords[1] + coords[2]*coords[2] +
                              coords[3]*coords[3]);
     return quaternion(coords[0], coords[1]/norm, coords[2]/norm, coords[3]/norm); }
+  quaternion normalized() const {
+    return *this/this->norm();
+  }
 
   void tostr(char str[]) const {
     sprintf(str, "[%5.2f, (%5.2f, %5.2f, %5.2f)]", coords[0], coords[1], coords[2], coords[3]); }

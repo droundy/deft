@@ -30,7 +30,7 @@ struct polyhedron {
 };
 
 // Global Constants
-const bool debug = false; // prints out a lot of extra information
+const bool debug = true; // prints out a lot of extra information
                          // also perform extra computation
                          // should be false except when something is wrong
 
@@ -51,7 +51,7 @@ double scale = 0.005;
 double theta_scale = 0.005;
 
 
-// ALL the shapes:
+// All the shapes (defined at the beginning of main):
 poly_shape cube;
 poly_shape tetrahedron;
 poly_shape truncated_tetrahedron;
@@ -101,6 +101,7 @@ static void print_bad(const polyhedron p[]);
 
 // States how long it's been since last took call.
 static void took(const char *name);
+
 
 
 
@@ -290,14 +291,16 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
+  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   // BEGIN MAIN PROGRAM LOOP ////////////////////////////////////////////////////////
   for(long iteration=1; iteration<=iterations; iteration++) {
-    //print_bad(polyhedra);
-    if (iteration%1000 == 0) took("One thousand iterations");
-    if (iteration%10000 == 0) print_all(polyhedra);
+    if (debug) {
+      //print_bad(polyhedra);
+      if (iteration%1000 == 0) took("One thousand iterations");
+      if (iteration%10000 == 0) print_all(polyhedra);
+    }
 
     // MOVING SHAPES ------------------------------------------------------
     for(int i=0; i<N; i++) {
@@ -312,9 +315,9 @@ int main(int argc, const char *argv[]) {
       for (int j=0; j<N; j++) {
         if (j != i)
           {
-          if(overlap(temp, polyhedra[j])) {
-            keep = false;
-            break;
+            if(overlap(temp, polyhedra[j])) {
+              keep = false;
+              break;
           }
         }
       }
@@ -324,7 +327,13 @@ int main(int argc, const char *argv[]) {
       }
     }
     // STOP and go to next iteration if we don't want to store data yet
-    if (iteration < start_keeping) continue;
+    if (iteration <= start_keeping) {
+      if (iteration == start_keeping) {
+        took("Initial movements");
+        printf("Data will now be tracked, %li iterations complete.\n", iteration);
+      }
+      continue;
+    }
 
     // ADDING DATA TO HISTOGRAM(S) ----------------------------------------
     for(int i=0; i<N; i++) {
@@ -340,34 +349,38 @@ int main(int argc, const char *argv[]) {
         output_period *= 2;
       else if (output_period < max_output_period)
         output_period = max_output_period;
-      double secs_done = double(now)/CLOCKS_PER_SEC;
-      int seconds = int(secs_done) % 60;
-      int minutes = int(secs_done / 60) % 60;
-      int hours = int(secs_done / 3600) % 24;
-      int days = int(secs_done / 86400);
+      const double secs_done = double(now)/CLOCKS_PER_SEC;
+      const int seconds = int(secs_done) % 60;
+      const int minutes = int(secs_done / 60) % 60;
+      const int hours = int(secs_done / 3600) % 24;
+      const int days = int(secs_done / 86400);
       printf("Saving data after %i days, %02i:%02i:%02i, %li iterations complete.\n",
              days, hours, minutes, seconds, iteration);
 
+      const long count = N*(iteration - start_keeping);
+      char *headerinfo = new char[4048];
+      sprintf(headerinfo, "# dim: (%5.2f, %5.2f, %5.2f), period: (%i, %i, %i), \
+walls: (%i, %i, %i), dw: %g, seed: %li\n# R0: %f, scale: %g, theta_scale: %g, \
+start_keeping: %i, real_walls: %i\n# num counts: %li, iteration: %li, \
+workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
+              len[0], len[1], len[2], periodic[0], periodic[1], periodic[2],
+              walls[0], walls[1], walls[2], dw_density, seed, R,
+              scale, theta_scale, start_keeping, real_walls, count,
+              iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
       // saving density
       char *density_filename = new char[1024];
       sprintf(density_filename, "%s-density-%s-%i.dat", filename, shape->name, N);
       FILE *densityout = fopen((const char *)density_filename, "w");
-      fprintf(densityout, "# dim: (%5.2f, %5.2f, %5.2f), period: (%i, %i, %i), \
-walls: (%i, %i, %i), dw: %g, seed: %li\n# R0: %f, scale: %g, theta_scale: %g, \
-start_keeping: %i, real_walls: %i\n",
-              len[0], len[1], len[2], periodic[0], periodic[1], periodic[2],
-              walls[0], walls[1], walls[2], dw_density, seed, polyhedra[0].R,
-              scale, theta_scale, start_keeping, real_walls);
-      fprintf(densityout, "# iteration: %li, workingmoves: %li, totalmoves: %li, \
-acceptance rate: %g\n", iteration, workingmoves, totalmoves,
-              double(workingmoves)/totalmoves);
+      fprintf(densityout, headerinfo);
       for(int z_i = 0; z_i < density_bins; z_i ++) {
         const double z = (z_i + 0.5)*dw_density;
         const double shell_volume = len[0]*len[1]*dw_density;
-        const double density = density_histogram[z_i]/iteration/shell_volume;
+        const double density = density_histogram[z_i]*N/count/shell_volume;
         fprintf(densityout, "%5.2f %7.5f %li\n", z, density, density_histogram[z_i]);
       }
       fclose(densityout);
+
+      delete headerinfo;
     }
   }
   print_bad(polyhedra);
@@ -486,27 +499,43 @@ vector3d move(const vector3d &v, double scale) {
 }
 
 quaternion rotate(const quaternion &q, double scale) {
-  double halftheta, x, y, z, r;
+  double x, y, z, r2, sintheta;
   do {
-    x = 2*ran() - 1;
-    halftheta = 2*ran() - 1;
-    r = x*x + halftheta*halftheta;
-  } while (r >= 1 || r == 0);
-  double fac = sqrt(-2*log(r)/r);
-  halftheta = halftheta*fac*scale/2.0;
+    do {
+      x = 2*ran() - 1;
+      y = 2*ran() - 1;
+      r2 = x*x + y*y;
+    } while (r2 >= 1 || r2 == 0);
+    const double fac = sqrt(-2*log(r2)/r2);
+    sintheta = fac*x*scale;
+  } while (sintheta <= -1 or sintheta >= 1);
+  const double costheta = sqrt(1 - sintheta*sintheta);
   do {
     x = 2*ran() - 1;
     y = 2*ran() - 1;
     z = 2*ran() - 1;
-    r = x*x + y*y + z*z;
-  } while(r >= 1 || r == 0);
-  double vfac = sin(halftheta)/r;
-  return quaternion(cos(halftheta), x*vfac, y*vfac, z*vfac)*q;
+    r2 = x*x + y*y + z*z;
+  } while(r2 >= 1 || r2 == 0);
+  const double vfac = sintheta/sqrt(r2);
+  const quaternion rot(costheta, x*vfac, y*vfac, z*vfac);
+  if (debug) {
+    quaternion totalrot = rot*q;
+    if (abs(1.0-rot.normsquared()) > 1e-15 || totalrot[0] > 1 || totalrot[0] < -1) {
+      printf("%g\n", 1.0 - rot.normsquared());
+      char rotstr[1024];
+      rot.tostr(rotstr);
+      double theta = 2*acos(rot[0]);
+      printf("Rot: %s, theta: %4.2f, n: %.1f ", rotstr, theta, rot.norm());
+      totalrot.tostr(rotstr);
+      theta = 2*acos(totalrot[0]);
+      printf("Total: %s, theta: %4.2f, n: %.1f\n", rotstr, theta, totalrot.norm());
+    }
+  }
+  return rot*q;
 }
 
 vector3d rotate_vector(const vector3d &v, const quaternion &q) {
-  const quaternion p(0, v[0], v[1], v[2]);
-  const quaternion product = q*p*q.conj();
+  const quaternion product = q*quaternion(0, v)*q.conj();
   return vector3d(product[1], product[2], product[3]);
 }
 
@@ -582,18 +611,16 @@ static void print_bad(const polyhedron p[]) {
   }
 }
 static void took(const char *name) {
-  if (debug) {
     assert(name); // so it'll count as being used...
     static clock_t last_time = clock();
     clock_t t = clock();
     double peak = peak_memory()/1024.0/1024;
     double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
     if (seconds > 120) {
-      printf("%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+      printf("%s took %.0f minutes and %g M memory.\n", name, seconds/60, peak);
     } else {
-      printf("%s took %g seconds and %g M memory\n", name, seconds, peak);
+      printf("%s took %g seconds and %g M memory.\n", name, seconds, peak);
     }
     fflush(stdout);
     last_time = t;
-  }
 }
