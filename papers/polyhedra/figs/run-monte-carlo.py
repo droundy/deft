@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from __future__ import division
 import os
 
@@ -24,7 +25,7 @@ def run_walls(ff, N, shape):
     fname = '%s/mc/wallsMC-%4.2f' % (figsdir, ff)
     jobID = "polyhedra-%4.2f-%i-%s" %(ff, N, shape)
     command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s wallz periodx periody R %g dimensions %g %g %g start_keeping %i scale %g theta_scale %g" %(bindir, N, iterations, fname, R, dim, dim, dim, start_keeping, scale, theta_scale)
-    os.system("srun --mem=%g -J %s %s", %(memory, jobID, command))
+    os.system("srun --mem=%g -J %s %s" %(memory, jobID, command))
 
 
 
