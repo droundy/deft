@@ -30,7 +30,7 @@ struct polyhedron {
 };
 
 // Global Constants
-const bool debug = true; // prints out a lot of extra information
+const bool debug = false; // prints out a lot of extra information
                          // also perform extra computation
                          // should be false except when something is wrong
 
@@ -38,7 +38,6 @@ const bool debug = true; // prints out a lot of extra information
 long unsigned int seed = 0; // for randum number generator
 
 int iterations = 1000;
-int start_keeping = 100;
 int N = 100;
 bool periodic[3] = {false, false, false};
 bool walls[3] = {false, false, false};
@@ -57,10 +56,15 @@ poly_shape tetrahedron;
 poly_shape truncated_tetrahedron;
 
 
-
+inline double min(double a, double b) { return (a < b)? a : b; }
+inline double max(double a, double b) { return (a > b)? a : b; }
 
 // Check whether two polyhedra overlap
 bool overlap(const polyhedron &a, const polyhedron &b);
+
+// Check whether a polyhedron overlaps with any in the array, except for
+// the nth one. Useful for post-move testing with a temporary polyhedron.
+bool overlaps_with_any(const polyhedron &p, const polyhedron polys[], int n);
 
 // Check if polyhedron is outside its allowed locations
 bool in_cell(const polyhedron &p);
@@ -152,7 +156,7 @@ int main(int argc, const char *argv[]) {
     printf("\nUse: %s N iterations filename\n", argv[0]);
     printf("Additional optional parameters:\n\t\tperiodx, periody, periodz, wallx, wally, wallz,\n");
     printf("\t\tdimensions {LENX LENY LENZ}, dw_density {VAL}, seed {VAL}, shape {POLY},\n");
-    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, start_keeping {VAL}, fake_walls\n");
+    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls\n");
     printf("Anything in brackets means to put values there.\n");
     printf("Available shapes currently include: cube.\n");
     return 1;
@@ -210,10 +214,6 @@ int main(int argc, const char *argv[]) {
       seed = atol(argv[i+1]);
       printf("Setting random seed to %lu.\n", seed);
       i += 1;
-    } else if (strcmp(argv[i], "start_keeping") == 0) {
-      start_keeping = atol(argv[i+1]);
-      printf("Not keeping data until iteration %i.\n", start_keeping);
-      i += 1;
     } else if (strcmp(argv[i], "fake_walls") == 0) {
       real_walls = false;
       printf("Using fake walls. Intersections will only be determined based on centers of polyhedra and not vertices.");
@@ -230,7 +230,7 @@ int main(int argc, const char *argv[]) {
       }
       i += 1;
     } else {
-      printf("Invalid parameter: %s\n.", argv[i]);
+      printf("Invalid parameter: %s.\n", argv[i]);
       return 1;
     }
   }
@@ -294,10 +294,12 @@ int main(int argc, const char *argv[]) {
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
+  bool store_data = false;
+  long start_keeping = 0;
   // BEGIN MAIN PROGRAM LOOP ////////////////////////////////////////////////////////
   for(long iteration=1; iteration<=iterations; iteration++) {
     if (debug) {
-      //print_bad(polyhedra);
+      print_bad(polyhedra);
       if (iteration%1000 == 0) took("One thousand iterations");
       if (iteration%10000 == 0) print_all(polyhedra);
     }
@@ -311,30 +313,35 @@ int main(int argc, const char *argv[]) {
       temp.rot = rotate(polyhedra[i].rot, theta_scale);
       temp.R = polyhedra[i].R;
       temp.mypoly = polyhedra[i].mypoly;
-      if (!in_cell(temp)) continue;
-      for (int j=0; j<N; j++) {
-        if (j != i)
-          {
-            if(overlap(temp, polyhedra[j])) {
-              keep = false;
-              break;
-          }
-        }
-      }
-      if (keep) {
+      if (in_cell(temp) && !overlaps_with_any(temp, polyhedra, i)) {
         polyhedra[i] = temp;
         workingmoves ++;
       }
     }
     // STOP and go to next iteration if we don't want to store data yet
-    if (iteration <= start_keeping) {
-      if (iteration == start_keeping) {
-        took("Initial movements");
-        printf("Data will now be tracked, %li iterations complete.\n", iteration);
+    // Since more start at lower z-values, once there are more at higher values
+    // We should be ready
+    if (!store_data) {
+      if (iteration%10000 == 0) {
+        int count1 = 0, count2 = 0;
+        for(int i=0; i<N; i++) {
+          if (polyhedra[i].pos[2] < len[2]/2.0)
+            count1 ++;
+          else
+            count2 ++;
+        }
+        if (count1 > count2) {
+          printf("Not ready to start storing data yet -- count1: %i, count2: %i, iteration: %li, acceptance rate: %g\n", count1, count2, iteration, double(workingmoves)/totalmoves);
+        }
+        else {
+          printf("2\n");
+          store_data = true;
+          printf("Time to start data collection! count1: %i, count2: %i, iteration: %li\n", count1, count2, iteration);
+          took("Initial movements");
+        }
       }
       continue;
     }
-
     // ADDING DATA TO HISTOGRAM(S) ----------------------------------------
     for(int i=0; i<N; i++) {
       // Density histogram:
@@ -358,14 +365,14 @@ int main(int argc, const char *argv[]) {
              days, hours, minutes, seconds, iteration);
 
       const long count = N*(iteration - start_keeping);
-      char *headerinfo = new char[4048];
+      char *headerinfo = new char[4096];
       sprintf(headerinfo, "# dim: (%5.2f, %5.2f, %5.2f), period: (%i, %i, %i), \
-walls: (%i, %i, %i), dw: %g, seed: %li\n# R0: %f, scale: %g, theta_scale: %g, \
-start_keeping: %i, real_walls: %i\n# num counts: %li, iteration: %li, \
+walls: (%i, %i, %i), dw: %g, seed: %li\n# R: %f, scale: %g, theta_scale: %g, \
+real_walls: %i\n# num counts: %li, iteration: %li, \
 workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
               len[0], len[1], len[2], periodic[0], periodic[1], periodic[2],
               walls[0], walls[1], walls[2], dw_density, seed, R,
-              scale, theta_scale, start_keeping, real_walls, count,
+              scale, theta_scale, real_walls, count,
               iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
       // saving density
       char *density_filename = new char[1024];
@@ -455,6 +462,74 @@ bool overlap(const polyhedron &a, const polyhedron &b) {
   return true;
 }
 
+bool overlaps_with_any(const polyhedron &a, const polyhedron bs[], int n) {
+  // construct axes from a and a's projection onto them
+  vector3d aaxes[a.mypoly->nfaces];
+  double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
+  for (int i=0; i<a.mypoly->nfaces; i++) {
+    aaxes[i] = rotate_vector(a.mypoly->faces[i], a.rot);
+    double projection = aaxes[i].dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+    amins[i] = projection, amaxes[i] = projection;
+    for (int j=1; j< a.mypoly->nvertices; j++) {
+      projection = aaxes[i].dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+      amins[i] = min(projection, amins[i]);
+      amaxes[i] = max(projection, amaxes[i]);
+    }
+  }
+  for (int k=0; k<N; k++) {
+    if (k != n) {
+      const vector3d ab = periodic_diff(a.pos, bs[k].pos);
+      if (ab.normsquared() > (a.R + bs[k].R)*(a.R + bs[k].R))
+        continue;
+      bool overlap = true; // assume overlap until we prove otherwise or fail
+      // check bs against a's axes
+      for (int i=0; i<a.mypoly->nfaces; i++) {
+        double projection = aaxes[i].dot
+          (rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R, bs[k].rot) + ab);
+        double bmin = projection, bmax = projection;
+        for (int j=1; j<bs[k].mypoly->nvertices; j++) {
+          projection = aaxes[i].dot
+            (rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R, bs[k].rot) + ab);
+          bmin = min(projection, bmin);
+          bmax = max(projection, bmax);
+        }
+        if (amins[i] > bmax || bmin > amaxes[i]) {
+          overlap = false;
+          i = a.mypoly->nfaces; // no overlap, move on to next
+        }
+      }
+      if (overlap) { // still need to check against bs' axes
+        for (int i=0; i<bs[k].mypoly->nfaces; i++) {
+          const vector3d axis = rotate_vector(bs[k].mypoly->faces[i], bs[k].rot);
+          double projection = axis.dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+          double amin = projection, amax = projection;
+          for (int j=1; j<a.mypoly->nvertices; j++) {
+            projection = axis.dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+            amin = min(projection, amin);
+            amax = max(projection, amax);
+          }
+          projection = axis.dot
+            (rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R, bs[k].rot) + ab);
+          double bmin = projection, bmax = projection;
+          for (int j=1; j<bs[k].mypoly->nvertices; j++) {
+            projection = axis.dot
+              (rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R, bs[k].rot) + ab);
+            bmin = min(projection, bmin);
+            bmax = max(projection, bmax);
+
+          }
+          if (amin > bmax || bmin > amax) {
+            overlap = false;
+            i = bs[k].mypoly->nfaces; //no overlap, move on to next
+          }
+        }
+      }
+      if (overlap) return true;
+    }
+  }
+  return false;
+}
+
 bool in_cell(const polyhedron &p) {
   for (int i=0; i<3; i++) {
     if (walls[i]) {
@@ -520,7 +595,7 @@ quaternion rotate(const quaternion &q, double scale) {
   const quaternion rot(costheta, x*vfac, y*vfac, z*vfac);
   if (debug) {
     quaternion totalrot = rot*q;
-    if (abs(1.0-rot.normsquared()) > 1e-15 || totalrot[0] > 1 || totalrot[0] < -1) {
+    if (fabs(1.0-rot.normsquared()) > 1e-15 || totalrot[0] > 1 || totalrot[0] < -1) {
       printf("%g\n", 1.0 - rot.normsquared());
       char rotstr[1024];
       rot.tostr(rotstr);
@@ -581,6 +656,8 @@ static void print_all(const polyhedron p[]) {
       printf("%s %4i: (%6.2f, %6.2f, %6.2f)  [%5.2f, (%5.2f, %5.2f, %5.2f)] R: %4.2f\n", p[i].mypoly->name, i, p[i].pos[0], p[i].pos[1], p[i].pos[2], p[i].rot[0], p[i].rot[1], p[i].rot[2], p[i].rot[3], p[i].R);
       if (!in_cell(p[i]))
         printf("\t  Outside cell!\n");
+      if (fabs(p[i].rot.normsquared() - 1.0) > 10e-15)
+        printf("\t  Quaternion off! Normsquared - 1: %g", (p[i].rot.normsquared()-1.0));
       for (int j=i+1; j<N; j++)
         if (overlap(p[i], p[j]))
           printf("\t  Overlaps with %i!!!\n", j);
