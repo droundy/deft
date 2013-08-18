@@ -291,6 +291,7 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
+  fflush(stdout);
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
@@ -302,6 +303,7 @@ int main(int argc, const char *argv[]) {
       print_bad(polyhedra);
       if (iteration%1000 == 0) took("One thousand iterations");
       if (iteration%10000 == 0) print_all(polyhedra);
+      fflush(stdout);
     }
 
     // MOVING SHAPES ------------------------------------------------------
@@ -339,6 +341,7 @@ int main(int argc, const char *argv[]) {
           printf("Time to start data collection! count1: %i, count2: %i, iteration: %li\n", count1, count2, iteration);
           took("Initial movements");
         }
+        fflush(stdout);
       }
       continue;
     }
@@ -363,6 +366,7 @@ int main(int argc, const char *argv[]) {
       const int days = int(secs_done / 86400);
       printf("Saving data after %i days, %02i:%02i:%02i, %li iterations complete.\n",
              days, hours, minutes, seconds, iteration);
+      fflush(stdout);
 
       const long count = N*(iteration - start_keeping);
       char *headerinfo = new char[4096];
@@ -604,6 +608,7 @@ quaternion rotate(const quaternion &q, double scale) {
       totalrot.tostr(rotstr);
       theta = 2*acos(totalrot[0]);
       printf("Total: %s, theta: %4.2f, n: %.1f\n", rotstr, theta, totalrot.norm());
+      fflush(stdout);
     }
   }
   return rot*q;
@@ -663,6 +668,7 @@ static void print_all(const polyhedron p[]) {
           printf("\t  Overlaps with %i!!!\n", j);
     }
   }
+  fflush(stdout);
 }
 
 static void print_bad(const polyhedron p[]) {
@@ -685,7 +691,8 @@ static void print_bad(const polyhedron p[]) {
           }
       }
     }
-  }
+   }
+   fflush(stdout);
 }
 static void took(const char *name) {
     assert(name); // so it'll count as being used...

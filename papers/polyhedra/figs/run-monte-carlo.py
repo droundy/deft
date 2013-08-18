@@ -20,7 +20,7 @@ os.system("time scons %s/polyhedra-monte-carlo" %(bindir))
 
 memory = 10 # fixme: better guess
 def run_walls(ff, N, shape):
-  name = "polyhedraMC-walls-$4.2f-%i-%s" %(ff, N, shape)
+  name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
   scriptname = "%s/%s.tmp.sh" %(figsdir, name)
   outname = "%s/%s.out" %(bindir, name)
   filename = '%s/mc/polyhedraMC-walls-%4.2f' % (figsdir, ff)
