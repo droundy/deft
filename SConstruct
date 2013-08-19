@@ -31,6 +31,7 @@ def test_function(target, source, env):
     logfile = str(target[0])
     name = testfile[6:len(testfile)-5]
     failfile = "tests/%s.failed" % name
+    time.sleep(1) # work around sporadic race condition with "Text file busy" error.
     command = "%s > %s 2>&1" % (testfile, failfile)
     #print command
     start = time.clock()
@@ -291,11 +292,15 @@ NoCache(
     haskell.Command(target = ['tests/generated-haskell/nice-sum.h',
                               'tests/generated-haskell/whitebear.tex',
                               'tests/generated-haskell/math.tex'],
-                    source = 'src/haskell/test.exe', action = '$SOURCE codegen'))
+                    source = 'src/haskell/test.exe',
+                    # work around sporadic race condition giving "Text file busy" error.
+                    action = 'sleep 1 && $SOURCE codegen'))
 
 NoCache(
     haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h'],
-                    source = 'src/haskell/newfunctionals.exe', action = '$SOURCE tests'))
+                    source = 'src/haskell/newfunctionals.exe',
+                    # work around sporadic race condition giving "Text file busy" error.
+                    action = 'sleep 1 && $SOURCE tests'))
 
 ################# Now do the test suite ##################################################
 for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
