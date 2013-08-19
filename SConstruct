@@ -287,24 +287,15 @@ for program in Split("functionals newfunctionals test latex-functionals"):
     haskell.HaskellProgram(target = 'src/haskell/' + program + '.exe',
                            source = ['src/haskell/' + program  + '.hs'] + haskell_source)
 
-haskell.Command(target = ['tests/generated-haskell/nice-sum.h',
-                          'tests/generated-haskell/nice-sqrt.h',
-                          'tests/generated-haskell/nice-sqrtandmore.h',
-                          'tests/generated-haskell/nice-quad.h',
-                          'tests/generated-haskell/nice-phi1.h',
-                          'tests/generated-haskell/nice-phi2.h',
-                          'tests/generated-haskell/nice-phi3.h',
-                          'tests/generated-haskell/nice-log.h',
-                          'tests/generated-haskell/nice-logandsqr.h',
-                          'tests/generated-haskell/nice-n2xsqr.h',
-                          'tests/generated-haskell/whitebear.tex',
-                          'tests/generated-haskell/math.tex'],
-                source = 'src/haskell/test.exe', action = '$SOURCE codegen')
+NoCache(
+    haskell.Command(target = ['tests/generated-haskell/nice-sum.h',
+                              'tests/generated-haskell/whitebear.tex',
+                              'tests/generated-haskell/math.tex'],
+                    source = 'src/haskell/test.exe', action = '$SOURCE codegen'))
 
-haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h',
-                          'tests/new-generated-haskell/integrate_sqr.h',
-                          'tests/new-generated-haskell/volume_minus_one_sqr.h'],
-                source = 'src/haskell/newfunctionals.exe', action = '$SOURCE tests')
+NoCache(
+    haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h'],
+                    source = 'src/haskell/newfunctionals.exe', action = '$SOURCE tests'))
 
 ################# Now do the test suite ##################################################
 for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
