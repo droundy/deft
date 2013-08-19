@@ -112,6 +112,7 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
                         TensorDensityXXFast n2DensityFast VectorDensityXFast
                         YuWuCorrelationFast SaftFluid2Fast EntropySaftFluid2Fast CorrelationGrossCorrectFast
                         gSigmaSm2Fast gSigmaAm2Fast gSigmaSFast gSigmaAFast
+                        HughesHBFast
                         SoftFluidFast HardFluidFast WaterXFast HughesXFast """):
     filename = 'src/' + source + '.cpp'
     generated_sources.append(filename)
@@ -256,8 +257,8 @@ for mkdat in Split("""
 	papers/pair-correlation/figs/sphere-with-wall
 	papers/fuzzy-fmt/figs/walls
       """):
-    env.Program(target = mkdat + '.mkdat',
-                source = [mkdat + '.cpp'] + all_sources)
+    Default(env.Program(target = mkdat + '.mkdat',
+                        source = [mkdat + '.cpp'] + all_sources))
 
 env.Command(target = ['papers/water-saft/figs/equation-of-state.dat',
                       'papers/water-saft/figs/experimental-equation-of-state.dat'],
