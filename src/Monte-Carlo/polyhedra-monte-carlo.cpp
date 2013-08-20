@@ -382,7 +382,7 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
       char *density_filename = new char[1024];
       sprintf(density_filename, "%s-density-%s-%i.dat", filename, shape->name, N);
       FILE *densityout = fopen((const char *)density_filename, "w");
-      fprintf(densityout, headerinfo);
+      fprintf(densityout, "%s", headerinfo);
       for(int z_i = 0; z_i < density_bins; z_i ++) {
         const double z = (z_i + 0.5)*dw_density;
         const double shell_volume = len[0]*len[1]*dw_density;
