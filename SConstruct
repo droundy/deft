@@ -155,7 +155,8 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                        polyhedra """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
-    Default(p)
+    Alias('papers', p)
+Default('papers')
 
 Depends('index.html', 'papers/pair-correlation/figs/pretty-4.svg')
 
@@ -275,8 +276,8 @@ env.Command(target = ['papers/hughes-saft/figs/equation-of-state.dat',
 
 ########################### Now let's build the website! ##################################
 
-Default(paper.Markdown('index.md'))
-
+Alias('webpage', paper.Markdown('index.md'))
+Default('webpage')
 
 # Here we have rules to build the haskell code
 
