@@ -9,12 +9,15 @@ env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno
 env.MergeFlags('-O3')
 
 # Configure git to run the test suite:
-Default(env.Command(target = '.git/hooks/commit-msg',
-                    source = 'git/commit-msg',
-                    action = Copy("$TARGET", "$SOURCE")))
-Default(env.Command(target = '.git/hooks/pre-commit',
-                    source = 'git/pre-commit',
-                    action = Copy("$TARGET", "$SOURCE")))
+Alias('git configuration',
+      env.Command(target = '.git/hooks/commit-msg',
+                  source = 'git/commit-msg',
+                  action = Copy("$TARGET", "$SOURCE")))
+Alias('git configuration',
+      env.Command(target = '.git/hooks/pre-commit',
+                  source = 'git/pre-commit',
+                  action = Copy("$TARGET", "$SOURCE")))
+Default('git configuration')
 
 # Now we define utility functions for the tests.
 passed_tests = 0
