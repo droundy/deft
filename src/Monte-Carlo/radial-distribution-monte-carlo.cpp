@@ -11,9 +11,9 @@ double countOverLaps(Vector3d *spheres, long n, double R);
 double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 
-const double lenx = 30;
-const double leny = 30;
-const double lenz = 30;
+const double lenx = 60;
+const double leny = 60;
+const double lenz = 60;
 const double innerRad = 2;  //of inner spherical "solute"
 const double R = 1;
 const Vector3d latx = Vector3d(lenx,0,0);
