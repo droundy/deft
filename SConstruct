@@ -100,7 +100,8 @@ for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
     env.Program(
         target=name,
         source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp'])
-    Default(name)
+    Alias('executables', name)
+Default('executables')
 
 # Generate source code (and pdfs) from haskell:
 
@@ -220,8 +221,9 @@ for mkdat in Split("""
 	papers/contact/figs/gHS-vs-n
 	papers/contact/figs/free-energy
       """):
-    env.Program(target = mkdat + '.mkdat',
-                source = [mkdat + '.cpp'] + all_sources)
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + all_sources))
     env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE')
 
 # The following programs generate several .dat files with different
@@ -232,8 +234,9 @@ for mkdat in Split("""
 	papers/contact/figs/walls
 	papers/pair-correlation/figs/walls
       """):
-    env.Program(target = mkdat + '.mkdat',
-                source = [mkdat + '.cpp'] + all_sources)
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + all_sources))
     # Do not cache output of mkdat, because other files also need to
     # be produced.
     NoCache(env.Command(mkdat + '.dat', mkdat + '.mkdat', './$SOURCE'))
@@ -257,8 +260,9 @@ for mkdat in Split("""
 	papers/pair-correlation/figs/sphere-with-wall
 	papers/fuzzy-fmt/figs/walls
       """):
-    Default(env.Program(target = mkdat + '.mkdat',
-                        source = [mkdat + '.cpp'] + all_sources))
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + all_sources))
 
 env.Command(target = ['papers/water-saft/figs/equation-of-state.dat',
                       'papers/water-saft/figs/experimental-equation-of-state.dat'],
