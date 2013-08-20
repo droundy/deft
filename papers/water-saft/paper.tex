@@ -122,6 +122,22 @@ association free energy functional.
 
 \section{Method}
 
+The classical density functional for water from
+Reference~\citenum{hughes2013classical} consists of four terms:
+\begin{align}
+  F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)]
+  + F_{\text{disp}}[n(\rr)] + F_{\text{assoc}}[n(\rr)]
+\end{align}
+where $F_{\text{ideal}}$ is the ideal gas free energy and
+$F_{\text{HS}}$ is the hard-sphere excess free energy, for which we
+use the White Bear functional~\cite{roth2002whitebear}.
+$F_{\text{disp}}$ is the free energy contribution due to the
+square-well dispersion interaction.  The dispersion term of the free
+energy contains one empirical parameter, which is used to fit the
+surface tension of water near one atmosphere.  Finally,
+$F_{\text{assoc}}$ is the free energy contribution due to association,
+which is the term that we examine in this paper.
+
 We modify our previous association free energy term to use our
 $g_{\sigma}^\textit{A}$ rather than Yu and Wu's $g_\sigma$.  The
 association free energy for our four-site model has the form:
