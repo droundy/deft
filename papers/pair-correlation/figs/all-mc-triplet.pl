@@ -25,7 +25,7 @@ foreach $dd ([30,645, 0.1], [30,1289, 0.2], [30, 1934, 0.3], [30, 2578, 0.4], [3
 
     my $da_dz_outfilename = "$dir/mc/triplet/a1/tripletMC-a1-$ff";
     my $outfilename = "$dir/mc/triplet/tripletMC-$ff";
-    my $command = "./triplet-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxyz $len flatdiv";
+    my $command = "./triplet-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxyz $len flatdiv path";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
