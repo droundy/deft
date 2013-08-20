@@ -662,7 +662,7 @@ int main(int argc, char *argv[]){
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
                   if (which_path == 0 && z2 > 0) {
-                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > 4*R) {
+                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
                       const int index = path_zbins - ceil((z2-z1-2*R)/path_dr);
                       if (index < 0 || index >= path_zbins)
                         fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
@@ -681,7 +681,7 @@ int main(int argc, char *argv[]){
                     }
                   }
                   else if (which_path == 1 && z2 > 0) {
-                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > 6*R) {
+                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
                       const int index = path2_zbins - ceil((z2-z1-2*R)/path_dr);
                       if (index < 0 || index >= path_zbins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
