@@ -397,7 +397,7 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s       g3         z         x         vol2      histogram\n");
+          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
           const double path_vol0 = lenx*leny*lenz;
           const double path_r1max = 2.0*R + path_dr;
           const double path_r1min = 2.0*R;
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]){
             s += path_dr;
             const double z2 = (path_zbins - i)*path_dr + 4*R;
             const double x2 = path_dx/2.0;
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # horizontal leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point coming over and the first
@@ -441,7 +441,7 @@ int main(int argc, char *argv[]){
 
             const double z2 = (2*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
             const double x2 = (2*R + path_dr/2.0)*sin(theta);
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # theta leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point in the theta band and the
@@ -465,7 +465,7 @@ int main(int argc, char *argv[]){
             const double g3 = n3/density/density/density;
             s += path_dr;
             const double z2 = (2*R + path_dr/2.0)/2.0;
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # vertical leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           fclose(path_out);
@@ -479,7 +479,7 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path2_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s       g3         z         x         vol2      histogram\n");
+          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
           const double path2_vol0 = lenx*leny*lenz;
           const double path2_r1max = 4.0*R + path_dr;
           const double path2_r1min = 4.0*R;
@@ -495,7 +495,7 @@ int main(int argc, char *argv[]){
             s += path_dr;
             const double z2 = (path2_zbins - i)*path_dr + 6*R;
             const double x2 = path_dx/2.0;
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # horizontal leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
           // finding the difference between the last point coming over and the first
@@ -523,7 +523,7 @@ int main(int argc, char *argv[]){
 
             const double z2 = (4*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
             const double x2 = (2*R + path_dr/2.0)*sin(theta);
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # theta leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
           // finding the difference between the last point in the theta band and the
@@ -549,7 +549,7 @@ int main(int argc, char *argv[]){
             const double g3 = n3/density/density/density;
             s += path_dr;
             const double z2 = (2*R + path_dr);
-            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %6.3f    %li # vertical leg\n",
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
           fclose(path2_out);
