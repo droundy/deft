@@ -662,7 +662,7 @@ int main(int argc, char *argv[]){
 
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
-                  if (which_path == 0 && z2 > 0) {
+                  if (which_path == 0 && z2 > z_cent) {
                     if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
                       const int index = path_zbins - ceil((z2-z1-2*R)/path_dr);
                       if (index < 0 || index >= path_zbins)
@@ -673,7 +673,7 @@ int main(int argc, char *argv[]){
                       if (index < path_zbins || index >= path_zbins + path_thetabins)
                         fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
-                    } if (fabs(z2-z_cent) < path_dr && x2 < lenx/2.0) {
+                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
                       const double xmin = sqrt(3)*R;
                       const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_dr);
                       if (index < path_zbins+path_thetabins || index >= path_bins)
@@ -681,7 +681,7 @@ int main(int argc, char *argv[]){
                       path_histogram[index] ++;
                     }
                   }
-                  else if (which_path == 1 && z2 > 0) {
+                  else if (which_path == 1 && z2 > z_cent) {
                     if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
                       const int index = path2_zbins - ceil((z2-z1-2*R)/path_dr);
                       if (index < 0 || index >= path_zbins)
@@ -692,7 +692,7 @@ int main(int argc, char *argv[]){
                       if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (fabs(z2-z_cent) < path_dr && x2 < lenx/2.0) {
+                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
                       const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
                       if (index < path2_zbins+path2_thetabins || index >= path2_bins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
