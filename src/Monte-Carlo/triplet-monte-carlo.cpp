@@ -692,7 +692,7 @@ int main(int argc, char *argv[]){
                       if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (z2 < z1 && z2 > z1 - path_dr && x2 < lenx/2.0) {
+                    } if (z2 < z1 - 2*R && z2 > z1 - 2*R - path_dr && x2 < lenx/2.0) {
                       const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
                       if (index < path2_zbins+path2_thetabins || index >= path2_bins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
