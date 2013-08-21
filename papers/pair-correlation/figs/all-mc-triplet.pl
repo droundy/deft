@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Digest::SHA1 qw(sha1_hex);
+use Digest::SHA qw(sha1_hex);
 use File::Slurp qw(read_file);
 
 my $dir = "papers/pair-correlation/figs";
@@ -9,7 +9,7 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/triplet-monte-carlo.cpp"));
 
 system "scons triplet-monte-carlo";
 
-my $iters  = 9999999999999;
+my $iters  = 9999999999999999;
 my $acc = 0.001;
 
 my $dd;
@@ -25,7 +25,7 @@ foreach $dd ([30,645, 0.1], [30,1289, 0.2], [30, 1934, 0.3], [30, 2578, 0.4], [3
 
     my $da_dz_outfilename = "$dir/mc/triplet/a1/tripletMC-a1-$ff";
     my $outfilename = "$dir/mc/triplet/tripletMC-$ff";
-    my $command = "./triplet-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxyz $len flatdiv";
+    my $command = "./triplet-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxyz $len flatdiv path";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh

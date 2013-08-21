@@ -25,9 +25,9 @@ able_to_read_file = True
 z0 = 0.05
 
 # Set the max parameters for plotting.
-zmax = 8
-zmin = 0
-rmax = 4
+zmax = 9.0
+zmin = 1.0
+rmax = 4.1
 ############################
 
 if len(sys.argv) < 2:
@@ -38,8 +38,8 @@ ff = float(sys.argv[1])
 
 def read_triplet_path(ff,z0,fun):
   if fun == 'mc':
-    # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+    # input:  "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
   # elif fun == 'sphere-dft':
   #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   # else:
@@ -59,8 +59,8 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-2.05.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-4.05.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-04.05.dat" % (ff)
   # else:
   #   # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
@@ -72,6 +72,7 @@ def read_triplet(ff, z0, fun):
   data = loadtxt(filename)
   return data
 
+
 fig = figure(figsize=(10,5))
 
 xplot = fig.add_subplot(1,2,2)
@@ -79,22 +80,26 @@ zplot = xplot.twiny()
 #zplot = fig.add_subplot(1,3,3, sharey=xplot)
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(4+sqrt(3), -6+sqrt(3))
-#xplot.set_xticks([6, 4, 2, 0, -2, -4])
-#xplot.set_xticklabels([6, 4, "2 0", 2, 4, 6])
-zplot.set_xlim(-3, 7)
-#zplot.set_xticks([])
+xplot.set_xlim(6, -8)
+xplot.set_xticks([6, 4, 2, 0, -2, -4, -6, -8])
+xplot.set_xticklabels([-6, -4, -2, "0 2", 4, 6, 8, 10])
+zplot.set_xlim(-4, 10)
+zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-xplot.axvline(x=sqrt(3), color='k')
-zplot.axvline(x=4, color='k')
+xplot.axvline(x=0, color='k')
+zplot.axvline(x=6, color='k')
 
+xloc = .620
+zloc = .800
+figtext(xloc, .04, r"$\underbrace{\hspace{9.0em}}$", horizontalalignment='center')
+figtext(xloc, .01, r"$x$", horizontalalignment='center')
+figtext(zloc, .04, r"$\underbrace{\hspace{12.9em}}$", horizontalalignment='center')
+figtext(zloc, .01, r"$z$", horizontalalignment='center')
 
-figtext(.613, .04, r"$\underbrace{\hspace{9em}}$", horizontalalignment='center')
-figtext(.613, .01, r"$x$", horizontalalignment='center')
-figtext(.796, .04, r"$\underbrace{\hspace{13.1em}}$", horizontalalignment='center')
-figtext(.796, .01, r"$z$", horizontalalignment='center')
-
+xmin = 1.0
+xmax = 9.0
+ymax = 6.0
 
 twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
@@ -125,7 +130,7 @@ for i in range(len(plots)):
       z_final = g2_path[coord,2]
 
     xplot.plot(g2_path[:coord,3],averaged[:coord], label=titles[i], color=colors[i])
-    zplot.plot(g2_path[coord-1:,2],averaged[coord-1:], label=titles[i], color=colors[i])
+    zplot.plot(g2_path[coord:,2],averaged[coord:], label=titles[i], color=colors[i])
 
 # g2nice = read_triplet_path(ff, z0, 'this-work')
 
@@ -165,8 +170,7 @@ zEoff = 3.8
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc=3, ncol=2)
-
+zplot.legend(loc=1, ncol=2)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, z0, 'mc')
@@ -219,11 +223,11 @@ colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
 
-xs = [1, 1]
-ys = [zmax, sqrt(3)]
+xs = [rpath, rpath]
+ys = [-zmax, 0]
 dtheta = pi/80
-for theta in arange(2*pi/3, -dtheta/2, -dtheta):
-    xs.append(rpath + rpath*cos(theta))
+for theta in arange(pi, -dtheta/2, -dtheta):
+    xs.append(rpath*(2 + cos(theta)))
     ys.append(rpath*sin(theta))
 xs.append(2*zmax)
 
@@ -239,6 +243,6 @@ plot(xs, ys, 'k--', linewidth=2)
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
-savefig("figs/triplet-correlation-alt-%d.pdf" % (int(ff*10)))
+savefig("figs/triplet-correlation-2-alt-%d.pdf" % (int(ff*10)))
 show()
 

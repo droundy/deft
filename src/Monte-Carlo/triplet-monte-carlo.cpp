@@ -6,14 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include "utilities.h"
 using std::vector;
 
-double countOverLaps(Vector3d *spheres, long n, double R);
-double countOneOverLap(Vector3d *spheres, long n, long j, double R);
-bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
-double distXY(Vector3d a, Vector3d b);
-double distXYZ(Vector3d a, Vector3d b);
-Vector3d periodicDiff(Vector3d a, Vector3d b);
+inline double countOverLaps(Vector3d *spheres, long n, double R);
+inline double countOneOverLap(Vector3d *spheres, long n, long j, double R);
+inline bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
+inline double distXY(Vector3d a, Vector3d b);
+inline double distXYZ(Vector3d a, Vector3d b);
+inline Vector3d periodicDiff(Vector3d a, Vector3d b);
+static void took(const char *name);
 
 const double dz = 0.1;
 const double dx = 0.1;
@@ -27,6 +29,8 @@ const double a1_dr = 0.01;
 const double a1_dz = 0.01;
 const double a1_rmax = 5.0; // max value to store for delta x
 
+bool path = false; // only look at where |z1-z0| = 2 and |z1-z0| = 4
+                   // which are the distances where we store path info
 bool has_x_wall = false;
 bool has_y_wall = false;
 bool has_z_wall = false;
@@ -47,6 +51,7 @@ bool flat_div = true; // the divisions will be equal and will divide from z wall
 bool periodic[3] = {false, false, false};
 const double dxmin = 0.1;
 inline double max(double a, double b) { return (a>b)? a : b; }
+inline double min(double a, double b) { return (a<b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 5) {
@@ -109,6 +114,9 @@ int main(int argc, char *argv[]){
       lenz = atof(argv[a+1]);
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
+    } else if (strcmp(argv[a],"path") == 0) {
+      path = true;
+      a -= 1;
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
@@ -127,16 +135,20 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const int zbins = lenx/2.0/dz;
+  const int zbins = path ? 2 : lenx/2.0/dz;
   const int xbins = lenx/2.0/dx;
   const int z2bins = lenx/2.0/dz;
 
   const int a1_zbins = lenx/2.0/a1_dz;
-  const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
+  const int a1_rbins = path ? 2 : (a1_rmax - 2.0)/a1_dr;
 
   const int path_zbins = (lenx/2.0 - 4*R)/path_dr;
-  const int path_thetabins = int(2.0/3.0*M_PI/path_dtheta);
+  const int path_thetabins = 2.0/3.0*M_PI/path_dtheta;
   const int path_xbins = (lenx/2.0 - R)/path_dr;
+
+  const int path2_zbins = (lenx/2.0 - 6*R)/path_dr;
+  const int path2_thetabins = M_PI/path_dtheta;
+  const int path2_xbins = (lenx/2.0)/path_dr;
 
   const char *outfilename = argv[4];
   const char *da_dz_outfilename = argv[5];
@@ -152,7 +164,9 @@ int main(int argc, char *argv[]){
   long *histogram = new long[zbins*xbins*z2bins]();
   long *da_dz_histogram = new long[a1_rbins*a1_zbins]();
   const int path_bins = path_xbins + path_thetabins + path_zbins;
+  const int path2_bins = path2_xbins + path2_thetabins + path2_zbins;
   long *path_histogram = new long[path_bins]();
+  long *path2_histogram = new long[path2_bins]();
   long numinhistogram = 0;
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
@@ -308,9 +322,14 @@ int main(int argc, char *argv[]){
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
+  took("Setting up");
   // Begin main program loop
   //////////////////////////////////////////////////////////////////////////////
   for (long j=0; j<iterations; j++){
+    // if (j%(N*1000) == 0) {
+    //   took("One thousand iterations");
+    //   printf("count: %li\n", count);
+    // }
 	  num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
@@ -354,8 +373,8 @@ int main(int argc, char *argv[]){
           // save the da_dz data
           char *da_dz_filename = new char[1024];
           for (int i=0; i<a1_rbins; i++) {
-            const double a1_r12 = 2*R + (i+0.5)*a1_dr;
-            sprintf(da_dz_filename, "%s-%05.3f.dat", da_dz_outfilename, a1_r12);
+            const double a1_r12 = path ? 2*R*(i+1) + 0.5*a1_dr : 2*R + (i+0.5)*a1_dr;
+            sprintf(da_dz_filename, "%s-%5.3f.dat", da_dz_outfilename, a1_r12);
             FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
             for (int k=0; k<a1_zbins; k++) {
               const double a1_z1_max = (k+1)*a1_dr;
@@ -370,7 +389,7 @@ int main(int argc, char *argv[]){
             fclose(da_dz_out);
           }
           delete[] da_dz_filename;
-          // save the path data
+          // // save the path data
           sprintf(pathfilename, "%s-path.dat", outfilename);
           FILE *path_out = fopen((const char *)pathfilename, "w");
           if (path_out == NULL) {
@@ -378,7 +397,7 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s       g3        z         x         histogram\n");
+          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
           const double path_vol0 = lenx*leny*lenz;
           const double path_r1max = 2.0*R + path_dr;
           const double path_r1min = 2.0*R;
@@ -394,10 +413,10 @@ int main(int argc, char *argv[]){
             s += path_dr;
             const double z2 = (path_zbins - i)*path_dr + 4*R;
             const double x2 = path_dx/2.0;
-            fprintf(path_out, "%06.3f    %06.4f    %06.3f    %06.3f    %li\n",
-                    s,g3,z2,x2,path_histogram[i]);
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
+                    s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
-          // finding the difference between the last point coming down and the first
+          // finding the difference between the last point coming over and the first
           // point in the theta band
           const double z0 = path_dr + 4*R;
           const double x0 = path_dx/2.0;
@@ -408,7 +427,7 @@ int main(int argc, char *argv[]){
           s -= (2.0 + path_dr/2)*path_dtheta;
           for(int i=path_zbins; i<path_zbins+path_thetabins; i++) {
             const double probability = double(path_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double rmax = 2.0*R + path_dr;
             const double rmin = 2.0*R;
             const double theta = (i - path_zbins + 0.5)*path_dtheta;
@@ -422,11 +441,11 @@ int main(int argc, char *argv[]){
 
             const double z2 = (2*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
             const double x2 = (2*R + path_dr/2.0)*sin(theta);
-            fprintf(path_out, "%06.3f    %06.4f    %06.3f    %06.3f    %li\n",
-                    s,g3,z2,x2,path_histogram[i]);
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
+                    s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point in the theta band and the
-          // first point in the horizontal band
+          // first point in the vertical band
           const double theta_m = (path_thetabins - 0.5)*path_dtheta;
           const double z2 = (2.0 + path_dr/2.0)*(1.0 + cos(theta_m));
           const double x2 = (2*R + path_dr/2.0)*sin(theta_m);
@@ -437,7 +456,7 @@ int main(int argc, char *argv[]){
           s -= path_dr;
           for(int i=path_zbins+path_thetabins; i<path_zbins+path_thetabins+path_xbins; i++){
             const double probability = double(path_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double x2 = (i-path_zbins-path_thetabins+0.5)*path_dr + sqrt(3)*R;
             const double rmax = x2 + path_dr/2.0;
             const double rmin = x2 - path_dr/2.0;
@@ -446,15 +465,100 @@ int main(int argc, char *argv[]){
             const double g3 = n3/density/density/density;
             s += path_dr;
             const double z2 = (2*R + path_dr/2.0)/2.0;
-            fprintf(path_out, "%06.3f    %06.4f    %06.3f    %06.3f    %li\n",
-                    s,g3,z2,x2,path_histogram[i]);
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
+                    s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           fclose(path_out);
-          // ------------------
+          // // ------------------
+
+          // save the path2 data ----------------------------------------------
+          sprintf(pathfilename, "%s-path2.dat", outfilename);
+          FILE *path2_out = fopen((const char *)pathfilename, "w");
+          if (path2_out == NULL) {
+            printf("Error creating file %s\n", pathfilename);
+            return 1;
+          }
+          fprintf(path2_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
+          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
+          const double path2_vol0 = lenx*leny*lenz;
+          const double path2_r1max = 4.0*R + path_dr;
+          const double path2_r1min = 4.0*R;
+          const double path2_vol1 = 4.0/3.0*M_PI*(path2_r1max*path2_r1max*path2_r1max -
+                                                 path2_r1min*path2_r1min*path2_r1min);
+          s = -path_dr/2.0;
+          for(int i=0; i<path2_zbins; i++) {
+            const double probability = double(path2_histogram[i])
+              /double(numinhistogram);
+            const double path2_vol2 = M_PI*path_dx*path_dx*path_dr;
+            const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
+            const double g3 = n3/density/density/density;
+            s += path_dr;
+            const double z2 = (path2_zbins - i)*path_dr + 6*R;
+            const double x2 = path_dx/2.0;
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
+                    s, g3, z2, x2, path2_vol2, path2_histogram[i]);
+          }
+          // finding the difference between the last point coming over and the first
+          // point in the theta band
+          const double z4 = path_dr + 6*R;
+          const double x4 = path_dx/2.0;
+          const double z5 = (4.0*R + path_dr/2.0) + (2.0*R + path_dr/2.0)*cos(path_dtheta/2.0);
+          const double x5 = (2.0*R + path_dr/2.0)*sin(path_dtheta/2.0);
+          s += sqrt((x5-x4)*(x5-x4) + (z5-z4)*(z5-z4));
+          ////
+          s -= (2.0 + path_dr/2.0)*path_dtheta;
+          for(int i=path2_zbins; i<path2_zbins+path2_thetabins; i++) {
+            const double probability = double(path2_histogram[i])
+              /double(numinhistogram);
+            const double rmax = 2.0*R + path_dr;
+            const double rmin = 2.0*R;
+            const double theta = (i - path2_zbins + 0.5)*path_dtheta;
+            const double theta_min = theta - path_dtheta/2.0;
+            const double theta_max = theta + path_dtheta/2.0;
+            const double path2_vol2 = 2.0/3.0*M_PI*(rmax*rmax*rmax - rmin*rmin*rmin)*
+              (cos(theta_min) - cos(theta_max));
+            const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
+            const double g3 = n3/density/density/density;
+            s += (2.0 + path_dr/2.0)*path_dtheta;
+
+            const double z2 = (4*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
+            const double x2 = (2*R + path_dr/2.0)*sin(theta);
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
+                    s, g3, z2, x2, path2_vol2, path2_histogram[i]);
+          }
+          // finding the difference between the last point in the theta band and the
+          // first point in the vertical band
+          const double theta_max = (path2_thetabins - 0.5)*path_dtheta;
+          const double z6 = (4*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta_max);
+          const double x6 = (2*R + path_dr/2.0)*sin(theta_max);
+          const double z7 = (2*R + path_dr);
+          const double x7 = -path_dr/2.0; // minus sign so the distance is as though
+          // we circle around z1 and go through, but we don't actually have do do that
+          // because of symmetry
+          s += sqrt((z7-z6)*(z7-z6) + (x7-x6)*(x7-x6));
+          ////
+          s -= path_dr;
+          for(int i=path2_zbins+path2_thetabins; i<path2_zbins+path2_thetabins+path2_xbins; i++){
+            const double probability = double(path2_histogram[i])
+              /double(numinhistogram);
+            const double x2 = (i-path2_zbins-path2_thetabins+0.5)*path_dr;
+            const double rmax = x2 + path_dr/2.0;
+            const double rmin = x2 - path_dr/2.0;
+            const double path2_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_dr;
+            const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
+            const double g3 = n3/density/density/density;
+            s += path_dr;
+            const double z2 = (2*R + path_dr);
+            fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
+                    s, g3, z2, x2, path2_vol2, path2_histogram[i]);
+          }
+          fclose(path2_out);
+          // --------------------------------------------------------------------
 
           // save the triplet distribution data
           const double volume0 = lenx*leny*lenz;
-          for (double  z1=2*R+dz/2.0; z1<lenx/2.0; z1+=dz) {
+          for (int z1_i=0; z1_i<zbins; z1_i++) {
+            const double z1 = path ? 2*R*(z1_i+1) + dz/2.0 : 2*R + (z1_i + 0.5)*dz;
             char *finalfilename = new char[1024];
             sprintf(finalfilename, "%s-%05.2f.dat", outfilename, z1);
             FILE *out = fopen((const char *)finalfilename, "w");
@@ -472,7 +576,7 @@ int main(int argc, char *argv[]){
                 const double x2max = x2+dx/2.0;
                 const double volume2 = M_PI*(x2max*x2max - x2min*x2min)*dz;
                 const double probability =
-                  double(histogram[int(z1/dz)*xbins*z2bins + int(x2/dx)*z2bins +
+                  double(histogram[z1_i*xbins*z2bins + int(x2/dx)*z2bins +
                                    int(z2/dz)])/double(numinhistogram);
                 const double n3 = probability/volume0/volume1/volume2;
                 const double g3 = n3/density/density/density;
@@ -528,49 +632,72 @@ int main(int argc, char *argv[]){
         for (int i=0; i<N; i++) {
           if (i != l) {
             const Vector3d r01 = periodicDiff(spheres[i], spheres[l]);
-            const Vector3d zhat = r01.normalized();
             const double z1 = r01.norm();
-            const int z1_i = int(z1/dz);
-            const int a1_z1_i = int(z1/a1_dz);
-            //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-            for (int k=0; k<N; k++) {
-              if (k != i && k != l) { // don't look at a sphere in relation to itself
-                const Vector3d r02 = periodicDiff(spheres[k], spheres[l]);
-                const double z2 = r02.dot(zhat);
-                const int z2_i = floor(z2/dz);
-                const double x2 = (r02 - z2*zhat).norm();
-                const int x2_i = int(x2/dx);
+            int which_path = -1; // -1 if no path, 0 if touching path, 1 if path between
+            if (z1 < 2*R + path_dr) which_path = 0;
+            else if (z1 > 4*R && z1 < 4*R + path_dr) which_path = 1;
+            if(!path || which_path > -1) {
+              const Vector3d zhat = r01.normalized();
+              const int z1_i = path ? which_path : int(z1/dz);
+              const int a1_z1_i = int(z1/a1_dz);
+              //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+              for (int k=0; k<N; k++) {
+                if (k != i && k != l) { // don't look at a sphere in relation to itself
+                  const Vector3d r02 = periodicDiff(spheres[k], spheres[l]);
+                  const double z2 = r02.dot(zhat);
+                  const int z2_i = floor(z2/dz);
+                  const double x2 = (r02 - z2*zhat).norm();
+                  const int x2_i = int(x2/dx);
 
-                const Vector3d r12_v = periodicDiff(spheres[k], spheres[i]);
-                const double r12 = r12_v.norm();
-                const int a1_r12_i = int((r12-2.0)/a1_dr);
+                  const Vector3d r12_v = periodicDiff(spheres[k], spheres[i]);
+                  const double r12 = r12_v.norm();
+                  const int a1_r12_i = path ? which_path : int((r12-2.0)/a1_dr);
 
-                if (z1_i < zbins && x2_i < xbins && z2_i >= 0
-                    && z2_i < z2bins && r02.norm() < lenx/2.0)
-                  histogram[z1_i*xbins*z2bins + x2_i*z2bins + z2_i] ++;
+                  if (z1_i < zbins && x2_i < xbins && z2_i >= 0
+                      && z2_i < z2bins && r02.norm() < lenx/2.0)
+                    histogram[z1_i*xbins*z2bins + x2_i*z2bins + z2_i] ++;
 
-                if (a1_r12_i < a1_rbins && a1_z1_i < a1_zbins)
-                  da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
+                  if (a1_r12_i < a1_rbins && a1_z1_i < a1_zbins)
+                    da_dz_histogram[a1_r12_i*a1_zbins + a1_z1_i] ++;
 
-                if (z1 < 2*R + path_dr && z2 > 0) {
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
-                  if (z2 < lenx/2.0 && x2 < path_dx && z2 > 3*R) {
-                    const int index = path_zbins - ceil((z2-z1-2*R)/path_dr);
-                    if (index < 0 || index >= path_zbins)
-                      fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
-                    path_histogram[index] ++;
-                  } if (r12 < 2*R + path_dr && theta < 2.0/3.0*M_PI) {
-                    const int index = path_zbins + theta/path_dtheta;
-                    if (index < path_zbins || index >= path_zbins + path_thetabins)
-                      fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
-                    path_histogram[index] ++;
-                  } if (fabs(z2-z_cent) < path_dr && x2 < lenx/2.0) {
-                    const double xmin = sqrt(3)*R;
-                    const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_dr);
-                    if (index < path_zbins+path_thetabins || index >= path_bins)
-                      fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
-                    path_histogram[index] ++;
+                  if (which_path == 0 && z2 > z_cent) {
+                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
+                      const int index = path_zbins - ceil((z2-z1-2*R)/path_dr);
+                      if (index < 0 || index >= path_zbins)
+                        fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path_histogram[index] ++;
+                    } if (r12 < 2*R + path_dr && theta < 2.0/3.0*M_PI) {
+                      const int index = path_zbins + theta/path_dtheta;
+                      if (index < path_zbins || index >= path_zbins + path_thetabins)
+                        fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path_histogram[index] ++;
+                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
+                      const double xmin = sqrt(3)*R;
+                      const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_dr);
+                      if (index < path_zbins+path_thetabins || index >= path_bins)
+                        fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path_histogram[index] ++;
+                    }
+                  }
+                  else if (which_path == 1 && z2 > z_cent) {
+                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
+                      const int index = path2_zbins - ceil((z2-z1-2*R)/path_dr);
+                      if (index < 0 || index >= path_zbins)
+                        fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path2_histogram[index] ++;
+                    } if (r12 < 2*R + path_dr) {
+                      const int index = path2_zbins + theta/path_dtheta;
+                      if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
+                        fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path2_histogram[index] ++;
+                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
+                      const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
+                      if (index < path2_zbins+path2_thetabins || index >= path2_bins)
+                        fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                      path2_histogram[index] ++;
+                    }
                   }
                 }
               }
@@ -633,7 +760,7 @@ int main(int argc, char *argv[]){
   fclose(countout);
 }
 
-double countOneOverLap(Vector3d *spheres, long n, long j, double R){
+inline double countOneOverLap(Vector3d *spheres, long n, long j, double R){
   double num = 0;
   for(long i = 0; i < n; i++){
     if(i != j && distance(spheres[i],spheres[j])<2*R){
@@ -729,7 +856,7 @@ double countOneOverLap(Vector3d *spheres, long n, long j, double R){
   return num;
 }
 
-double countOverLaps(Vector3d *spheres, long n, double R){
+inline double countOverLaps(Vector3d *spheres, long n, double R){
   double num = 0;
   for(long j = 0; j<n; j++){
     num += countOneOverLap(spheres, n, j, R);
@@ -737,7 +864,7 @@ double countOverLaps(Vector3d *spheres, long n, double R){
   return num;
 }
 
-bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
+inline bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   if (spherical_outer_wall){
     if (distance(v,Vector3d(0,0,0)) > rad) return true;
   }
@@ -834,29 +961,29 @@ inline Vector3d fixPeriodic(Vector3d newv){
   return newv;
 }
 
-Vector3d move(Vector3d v, double scale){
+inline Vector3d move(Vector3d v, double scale){
   Vector3d newv = v+scale*ran3();
   return fixPeriodic(newv);
 }
 
-double distXY(Vector3d a, Vector3d b){
+inline double distXY(Vector3d a, Vector3d b){
   const double xdist = periodic[0] ?
-    std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
+    min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
   const double ydist = periodic[1] ?
-    std::min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
+    min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
   return sqrt(xdist*xdist + ydist*ydist);
 }
-double distXYZ(Vector3d a, Vector3d b){
+inline double distXYZ(Vector3d a, Vector3d b){
   const double xdist = periodic[0] ?
-    std::min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
+    min(fabs(b.x()-a.x()), (lenx-fabs(b.x()-a.x()))) : b.x()-a.x();
   const double ydist = periodic[1] ?
-    std::min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
+    min(fabs(b.y()-a.y()), (leny-fabs(b.y()-a.y()))) : b.y()-a.y();
   const double zdist = periodic[2] ?
-    std::min(fabs(b.z()-a.z()), (lenz-fabs(b.z()-a.z()))) : b.z()-a.z();
+    min(fabs(b.z()-a.z()), (lenz-fabs(b.z()-a.z()))) : b.z()-a.z();
   return sqrt(xdist*xdist + ydist*ydist + zdist*zdist);
 }
 
-Vector3d periodicDiff(Vector3d b, Vector3d a){
+inline Vector3d periodicDiff(Vector3d b, Vector3d a){
   Vector3d v = b - a;
   if (periodic[0]) {
     while (v.x() > lenx/2.0)
@@ -879,13 +1006,13 @@ Vector3d periodicDiff(Vector3d b, Vector3d a){
   return v;
 }
 
-double ran(){
+inline double ran(){
   const long unsigned int x = 0;
   static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
   return my_mtrand.randExc(); // which is the range of [0,1)
 }
 
-Vector3d ran3(){
+inline Vector3d ran3(){
   double x, y, r2;
   do{
     x = 2 * ran() - 1;
@@ -902,4 +1029,19 @@ Vector3d ran3(){
   fac = sqrt(-2*log(r2)/r2);
   out[2]=x*fac;
   return out;
+}
+
+static void took(const char *name) {
+    assert(name); // so it'll count as being used...
+    static clock_t last_time = clock();
+    clock_t t = clock();
+    double peak = peak_memory()/1024.0/1024;
+    double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+    if (seconds > 120) {
+      printf("%s took %.0f minutes and %g M memory.\n", name, seconds/60, peak);
+    } else {
+      printf("%s took %g seconds and %g M memory.\n", name, seconds, peak);
+    }
+    fflush(stdout);
+    last_time = t;
 }

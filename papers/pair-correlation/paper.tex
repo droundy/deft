@@ -8,7 +8,7 @@
 \newcommand{\rr}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
-\newcommand{\fixme}[1]{\red{[#1]}}
+\newcommand{\fixme}[1]{\text{\red{[#1]}}}
 
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
@@ -270,6 +270,49 @@ The finalalized form of our pair correlation function is:
 \section{What does it look like (graphs that show the function itself)?}
 \subsection{Separable fit to the radial distribution function}
 Figure~\ref{fig:radial-distribution} shows...
+
+We here construct a separable fit to the radial distribution function
+$g(r, g_\sigma)$, which is a function of the radius $r$ and its value
+at contact $g_\sigma$.  We could convert this to a more conventional
+function of the packing fraction $\eta$ by inverting the
+Carnahan-Starling formula for $g_\sigma$
+\begin{equation}
+  g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}
+\end{equation}
+but that would add an unnecessary step in the use of $g(r)$, since the
+averaged value of $g_\sigma$ is what we can directly compute for the
+inhomogeneous system.
+
+We construct $g(r, g_\sigma)$ using several constraints.  Naturally,
+\begin{equation}
+  g(\sigma, g_\sigma) = g_\sigma.
+\end{equation}
+In addition, we know that
+\begin{equation}
+  \begin{split}
+  \int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
+  &= \eta \eta \cdots \fixme{fill in, double-check}
+  \end{split}
+\end{equation}
+where $\chi_T$ is the isothermal compressibility, for which we use the
+Carnahan-Starling equation of state.
+
+
+An additional constraint that we use sets the slope of $g(r,
+g_\sigma)$ at $r=\sigma$.  \fixme{explain this}
+
+Given these constraints, we use a functional form of
+\begin{equation}
+  g(r,g_\sigma) = 1 + A e^{-a(r-\sigma)}
+  + B (r-\sigma) e^{-b(r-\sigma)} + C (r-\sigma)^2 e^{-c(r-\sigma)}
+\end{equation}
+where $A$, $B$, and $C$ are amplitudes determined by the above
+constraints, and $a$, $b$, and $c$ are parameters fit to Monte Carlo
+simulations of the hard-sphere radial distribution function.
+
+\fixme{add paragraphs and equations with $A$, $B$ and $C$}
+
+\fixme{add table with parameters}
 
 \subsection{Pair distribution function}
 %% Figure~\ref{fig:pair-distribution} shows...

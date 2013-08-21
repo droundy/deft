@@ -5,11 +5,31 @@ import os
 # Trims the path data to be used for git storage
 
 for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
-  filename = "figs/mc/wallsMC-pair-%02.1f-path.dat" %eta
+  filename = "figs/mc/wallsMC-pair-%03.1f-path.dat" %eta
   if (os.path.isfile(filename) == False):
-    print "File does not exist: ", filename
+    print("File does not exist: ", filename)
     continue
   data = loadtxt(filename)
   trimmed_data = data[800:1900,0:4]
-  savetxt("figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" %eta, trimmed_data, fmt='%g')
+  savetxt("figs/mc/wallsMC-pair-%03.1f-path-trimmed.dat" %eta, trimmed_data, fmt='%g')
+  print("%s trimmed." %filename)
 
+  # now triplet:
+  filename = "figs/mc/triplet/tripletMC-%03.1f-path.dat" %eta
+  if (os.path.isfile(filename) == False):
+    print("File does not exist: ", filename)
+    continue
+  data = loadtxt(filename)
+  trimmed_data = data[800:1900, 0:4]
+  savetxt("figs/mc/triplet/tripletMC-%3.1f-path-trimmed.dat" %eta, trimmed_data, fmt='%g')
+  print("%s trimmed." %filename)
+
+  # now triplet 2:
+  filename = "figs/mc/triplet/tripletMC-%03.1f-path2.dat" %eta
+  if (os.path.isfile(filename) == False):
+    print("File does not exist: ", filename)
+    continue
+  data = loadtxt(filename)
+  trimmed_data = data[400:1700, 0:4]
+  savetxt("figs/mc/triplet/tripletMC-%3.1f-path2-trimmed.dat" %eta, trimmed_data, fmt='%g')
+  print("%s trimmed." %filename)
