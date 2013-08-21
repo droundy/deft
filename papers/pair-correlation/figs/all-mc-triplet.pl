@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Digest::SHA1 qw(sha1_hex);
+use Digest::SHA qw(sha1_hex);
 use File::Slurp qw(read_file);
 
 my $dir = "papers/pair-correlation/figs";
@@ -9,7 +9,7 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/triplet-monte-carlo.cpp"));
 
 system "scons triplet-monte-carlo";
 
-my $iters  = 9999999999999;
+my $iters  = 9999999999999999;
 my $acc = 0.001;
 
 my $dd;
