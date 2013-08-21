@@ -9,6 +9,13 @@ env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno
 env.MergeFlags('-O3')
 #env.AppendUnique(LINKFLAGS=['-flto'], CFLAGS=['-flto'])
 
+# The following flags enable gcc to eliminate unused code from the
+# final executable.  This reduces the size of the executable, and I
+# hope it also means that executables are less likely to change when
+# we add new code to deft that they do not use.
+env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections'],
+                 CXXFLAGS=['-fdata-sections','-ffunction-sections'])
+
 # Configure git to run the test suite:
 Alias('git configuration',
       env.Command(target = '.git/hooks/commit-msg',
