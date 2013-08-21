@@ -7,6 +7,7 @@ env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3'])
 env.MergeFlags('-Wall -Werror -ansi')
 env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs')
 env.MergeFlags('-O3')
+#env.AppendUnique(LINKFLAGS=['-flto'], CFLAGS=['-flto'])
 
 # Configure git to run the test suite:
 Default(env.Command(target = '.git/hooks/commit-msg',
