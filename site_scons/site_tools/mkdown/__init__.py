@@ -31,6 +31,28 @@ import markdown as mmdd
 from SCons.Script import *
 
 
+toupload = set()
+def Upload(env, source):
+    source = str(source)
+    global toupload
+    toupload.add('.layout/style.css')
+    toupload.add('papers/pair-correlation/figs/pretty-4.svg') # background
+    toupload.add(source)
+    Depends('upload', source)
+
+def doupload(target, source, env):
+    host = 'science.oregonstate.edu'
+    path = 'public_html/deft'
+    os.system('ssh %s rm -rf %s' % (host, path))
+    madedir = set()
+    for f in toupload:
+        dirname = os.path.join(path, os.path.dirname(f))
+        if not dirname in madedir:
+            print 'creating directory', dirname
+            os.system('ssh %s mkdir -p %s' % (host, dirname))
+            madedir.add(dirname)
+        os.system('scp %s %s:%s/' % (f, host, os.path.join(path, os.path.dirname(f))))
+
 def mkdown(target, source, env):
     base = ''
     sourcename = str(source[0])
@@ -56,11 +78,12 @@ def mkdown(target, source, env):
     f = open(str(target[0]), 'w')
     f.write(template.safe_substitute(base = base,
                                      title = title,
-                                     content = mmdd.markdown(mkstr),
-                                     sidebar = mmdd.markdown(sidebar)))
+                                     content = mmdd.markdown(mkstr, extensions=['mathjax']),
+                                     sidebar = mmdd.markdown(sidebar, extensions=['mathjax'])))
     f.close()
 
 linkre = re.compile(r"\[[^\]]*\]\(([^)]*)\)")
+imgre = re.compile(r"<\s*[iI][mM][gG]\s+[sS][rR][cC]='([^']+)'")
 
 def Markdown(env, source, sofar = set()):
     # sofar is the set of files we have already figured out how to
@@ -79,28 +102,39 @@ def Markdown(env, source, sofar = set()):
                                              ).safe_substitute(base = ''))
     deps = []
     sofar.add(source)
-    for link in links:
-        link = os.path.normpath(os.path.join(relto,link))
+    for link in sblinks + [os.path.normpath(os.path.join(relto,l)) for l in links]:
+        origlink = link
         if len(link) > 5 and link[len(link)-5:] == '.html':
             link = link[:len(link)-5]
-        if (len(link) > 4 and link[len(link)-4:] == '.pdf') or ':' in link:
+        if ':' in link:
             deps = deps # nothing to do
+        elif (len(link) > 4 and (link[len(link)-4:] == '.pdf' or link[len(link)-4:] == '.svg')):
+            env.Upload(origlink)
         else:
             deps += Markdown(env, link, sofar)
-    for link in sblinks:
-        if len(link) > 5 and link[len(link)-5:] == '.html':
-            link = link[:len(link)-5]
-        if (len(link) > 4 and link[len(link)-4:] == '.pdf') or ':' in link:
+
+    for img in imgre.findall(contents):
+        if ':' in img:
             deps = deps # nothing to do
         else:
-            deps += Markdown(env, link, sofar)
+            deps += [img]
+            env.Upload(img)
+
+    env.Upload(source[:len(source)-3]+'.html')
     return env.Command(target = source[:len(source)-3]+'.html',
-                       source = [source, '.layout/sidebar.md', '.layout/page.html'],
+                       source = [source,
+                                 '.layout/sidebar.md',
+                                 '.layout/page.html',
+                                 'site_scons/mdx_mathjax.py'],
                        action = mkdown) + deps
 
 def generate(env):
     """Add Builders and construction variables to the Environment"""
+    env.AddMethod(Upload)
     env.AddMethod(Markdown)
+    AlwaysBuild(env.Command(target = 'upload',
+                            source = [],
+                            action = doupload))
 
 def exists(env):
     return True
