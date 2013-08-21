@@ -427,7 +427,7 @@ int main(int argc, char *argv[]){
           s -= (2.0 + path_dr/2)*path_dtheta;
           for(int i=path_zbins; i<path_zbins+path_thetabins; i++) {
             const double probability = double(path_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double rmax = 2.0*R + path_dr;
             const double rmin = 2.0*R;
             const double theta = (i - path_zbins + 0.5)*path_dtheta;
@@ -456,7 +456,7 @@ int main(int argc, char *argv[]){
           s -= path_dr;
           for(int i=path_zbins+path_thetabins; i<path_zbins+path_thetabins+path_xbins; i++){
             const double probability = double(path_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double x2 = (i-path_zbins-path_thetabins+0.5)*path_dr + sqrt(3)*R;
             const double rmax = x2 + path_dr/2.0;
             const double rmin = x2 - path_dr/2.0;
@@ -509,7 +509,7 @@ int main(int argc, char *argv[]){
           s -= (2.0 + path_dr/2.0)*path_dtheta;
           for(int i=path2_zbins; i<path2_zbins+path2_thetabins; i++) {
             const double probability = double(path2_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double rmax = 2.0*R + path_dr;
             const double rmin = 2.0*R;
             const double theta = (i - path2_zbins + 0.5)*path_dtheta;
@@ -540,7 +540,7 @@ int main(int argc, char *argv[]){
           s -= path_dr;
           for(int i=path2_zbins+path2_thetabins; i<path2_zbins+path2_thetabins+path2_xbins; i++){
             const double probability = double(path2_histogram[i])
-              /double(numinhistogram)/2.0;
+              /double(numinhistogram);
             const double x2 = (i-path2_zbins-path2_thetabins+0.5)*path_dr;
             const double rmax = x2 + path_dr/2.0;
             const double rmin = x2 - path_dr/2.0;
