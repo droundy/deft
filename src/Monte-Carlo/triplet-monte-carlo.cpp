@@ -371,24 +371,26 @@ int main(int argc, char *argv[]){
         }
         if (flat_div){
           // save the da_dz data
-          char *da_dz_filename = new char[1024];
-          for (int i=0; i<a1_rbins; i++) {
-            const double a1_r12 = path ? 2*R*(i+1) + 0.5*a1_dr : 2*R + (i+0.5)*a1_dr;
-            sprintf(da_dz_filename, "%s-%5.3f.dat", da_dz_outfilename, a1_r12);
-            FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
-            for (int k=0; k<a1_zbins; k++) {
-              const double a1_z1_max = (k+1)*a1_dr;
-              const double a1_z1_min = k*a1_dr;
-              const double slice_volume = 4.0/3.0*M_PI*(a1_z1_max*a1_z1_max*a1_z1_max -
-                                                       a1_z1_min*a1_z1_min*a1_z1_min);
-              const double da_dz = double(da_dz_histogram[i*a1_zbins + k])/
-                slice_volume/a1_dr/double(count);
-              const double coord = (k + 0.5)*a1_dz;
-              fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
+          if(!path) {
+            char *da_dz_filename = new char[1024];
+            for (int i=0; i<a1_rbins; i++) {
+              const double a1_r12 = path ? 2*R*(i+1) + 0.5*a1_dr : 2*R + (i+0.5)*a1_dr;
+              sprintf(da_dz_filename, "%s-%5.3f.dat", da_dz_outfilename, a1_r12);
+              FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
+              for (int k=0; k<a1_zbins; k++) {
+                const double a1_z1_max = (k+1)*a1_dr;
+                const double a1_z1_min = k*a1_dr;
+                const double slice_volume = 4.0/3.0*M_PI*(a1_z1_max*a1_z1_max*a1_z1_max -
+                                                          a1_z1_min*a1_z1_min*a1_z1_min);
+                const double da_dz = double(da_dz_histogram[i*a1_zbins + k])/
+                  slice_volume/a1_dr/double(count);
+                const double coord = (k + 0.5)*a1_dz;
+                fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
+              }
+              fclose(da_dz_out);
             }
-            fclose(da_dz_out);
+            delete[] da_dz_filename;
           }
-          delete[] da_dz_filename;
           // // save the path data
           sprintf(pathfilename, "%s-path.dat", outfilename);
           FILE *path_out = fopen((const char *)pathfilename, "w");
@@ -574,7 +576,8 @@ int main(int argc, char *argv[]){
               for (double z2=dz/2.0; z2<lenx/2.0; z2+=dz) {
                 const double x2min = x2-dx/2.0;
                 const double x2max = x2+dx/2.0;
-                const double volume2 = M_PI*(x2max*x2max - x2min*x2min)*dz;
+                const double volume2 = path ? M_PI*(x2max*x2max - x2min*x2min)*path_dr
+                                            : M_PI*(x2max*x2max - x2min*x2min)*dz;
                 const double probability =
                   double(histogram[z1_i*xbins*z2bins + int(x2/dx)*z2bins +
                                    int(z2/dz)])/double(numinhistogram);
@@ -635,7 +638,7 @@ int main(int argc, char *argv[]){
             const double z1 = r01.norm();
             int which_path = -1; // -1 if no path, 0 if touching path, 1 if path between
             if (z1 < 2*R + path_dr) which_path = 0;
-            else if (z1 > 4*R && z1 < 4*R + path_dr) which_path = 1;
+            else if (z1 > 4*R + path_dr && z1 < 4*R + 2*path_dr) which_path = 1;
             if(!path || which_path > -1) {
               const Vector3d zhat = r01.normalized();
               const int z1_i = path ? which_path : int(z1/dz);
@@ -692,7 +695,7 @@ int main(int argc, char *argv[]){
                       if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
+                    } if (z2 < z1 - 2*R && z2 > z1 - 2*R - path_dr && x2 < lenx/2.0) {
                       const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
                       if (index < path2_zbins+path2_thetabins || index >= path2_bins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);

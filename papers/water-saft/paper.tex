@@ -70,7 +70,7 @@ construct a functional that reproduces the exact second-order response
 function of the liquid under the fitted conditions.  However, this
 class of functional will be less accurate at other temperatures or
 pressures---and in the inhomogeneous scenarios in which solvation
-models are applied.  The second approach is construct a functional by
+models are applied.  The second approach is to construct a functional by
 applying liquid-state theory to a model system, and then fit the model
 to experimental data such as the equation of
 state~\cite{hughes2013classical, clark2006developing, gloor2002saft,
@@ -85,7 +85,7 @@ solutes or surfaces.
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
 (SAFT)~\cite{chapman1989saft}.  SAFT is a theory based on a model of
-hard sphere with weak dispersion interactions and hydrogen-bonding
+hard spheres with weak dispersion interactions and hydrogen-bonding
 association sites, which has been used to accurately model the
 equations of state of both pure fluids and mixtures over a wide range
 of temperatures and pressures~\cite{muller2001molecular,
@@ -106,7 +106,7 @@ function at contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
   gross2009density}, and derived a significantly improved
 approximation for the averaged distribution function at contact.
 
-We will apply this improved $g_\sigma^{HS}(\rr)$ to a SAFT-based
+We will apply this improved $g_\sigma^{HS}$ to a SAFT-based
 classical density functional for water~\cite{hughes2013classical}.
 This functional was constructed so as to reproduce in the homogeneous
 limit the 4-site optimal SAFT model for water developed by Clark
@@ -138,9 +138,7 @@ surface tension of water near one atmosphere.  Finally,
 $F_{\text{assoc}}$ is the free energy contribution due to association,
 which is the term that we examine in this paper.
 
-We modify our previous association free energy term to use our
-$g_{\sigma}^\textit{A}$ rather than Yu and Wu's $g_\sigma$.  The
-association free energy for our four-site model has the form:
+The association free energy for our four-site model has the form:
 \begin{align}
   F_\text{assoc}[n] &= k_BT \int n_\text{site}(\xx)
   \left(\ln X(\xx) - \frac{X(\xx)}{2} + \frac12\right) d\xx
@@ -189,10 +187,7 @@ contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
 free energy.  The radial distribution function of the square-well
 fluid $g^\textit{SW}_\sigma$ is written as a perturbative correction
-to the hard-sphere fluid correlation function
-$g^\textit{HS}_\sigma$. For \fixme{our} old functional we used Yu and Wu's
-radial distribution function, and for this paper we use our
-$g^\textit{A}_\sigma$.
+to the hard-sphere fluid correlation function $g^\textit{HS}_\sigma$.
 
 \begin{figure}
 \begin{center}
@@ -242,8 +237,8 @@ Ref.~\citenum{hughes2013classical}, with a comparable density at
 contact---consistent with having made only a moderate change in the
 free energy.  The first density peak near the surface is consistently
 higher than that from Ref.~\citenum{hughes2013classical}, and the peak
-is not smooth.  This results from the improved accurately of the
-$g_\sigma$ from Ref.~\citenum{schulte2012using}, since beyond the
+is not smooth.  This results from the improved accuracy of the
+$g_\sigma^\textit{HS}$ from Ref.~\citenum{schulte2012using}, since beyond the
 first peak water molecules are unable to touch---or hydrogen bond
 to---molecules at the surface of the hard rod.
 

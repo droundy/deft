@@ -83,7 +83,7 @@ def evalg2(xnew, eta, r):
   z = r - sigma
   hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
   density = 3/4/pi*eta
-  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)/3
+  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)
 
   x0 = xnew[0]
   x1 = xnew[1]
@@ -104,7 +104,7 @@ def evalg2(xnew, eta, r):
          (-1 + sigma*x5*(2 + sigma*x5)) + x5**2*(6 + sigma*x5*(4 + sigma*x5))) \
          /(x4**2 + x5**2)**3
 
-  A = ((rhs-1)/density - int_h0 - ((x0-1)*hsigma-hsigma**2)/x4*int_h2_over_B) \
+  A = ((rhs-1)/density + (4*pi/3)*sigma**3 - int_h0 - ((x0-1)*hsigma-hsigma**2)/x4*int_h2_over_B) \
       / (int_h1_over_A - x1/x4*int_h2_over_B)
   B = ((x0-1)*hsigma - hsigma**2)/x4 - A*x1/x4
 
@@ -167,7 +167,6 @@ print "chi^2 (rounded) =", chi2rounded
 #     print dist(vals, ind)[i]
 
 for i in range(len(ff)):
-  print "Plotting ff", ff[i]
   figure(1)
   #plot(r_mc, g[i], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
   plot(r_mc, grounded[i], colors[i]+'-')
