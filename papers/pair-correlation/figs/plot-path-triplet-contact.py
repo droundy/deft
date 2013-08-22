@@ -25,9 +25,9 @@ able_to_read_file = True
 z0 = 0.05
 
 # Set the max parameters for plotting.
-zmax = 9.0
-zmin = 1.0
-rmax = 4.1
+zmax = 8
+zmin = 0
+rmax = 4
 ############################
 
 if len(sys.argv) < 2:
@@ -38,13 +38,13 @@ ff = float(sys.argv[1])
 
 def read_triplet_path(ff,z0,fun):
   if fun == 'mc':
-    # input:  "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
+    # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
   # elif fun == 'sphere-dft':
   #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   # else:
   #   # input: "figs/walls.dat" % ()
-  #   # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
+  #   # inp ut: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   # if (os.path.isfile(filename) == False):
   #   # Just use walls data if we do not have the MC (need to be careful!)
@@ -59,19 +59,13 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-4.05.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-04.05.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
   # else:
-  #   # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
+  #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  if (os.path.isfile(filename) == False):
-    # Just use walls data if we do not have the MC (need to be careful!)
-    print("warning! %s not found. 2d plot will be bad." %filename)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-    title("Using this work for pair instead of MC!")
   data = loadtxt(filename)
   return data
-
 
 fig = figure(figsize=(10,5))
 
@@ -80,26 +74,23 @@ zplot = xplot.twiny()
 #zplot = fig.add_subplot(1,3,3, sharey=xplot)
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(6, -8)
-xplot.set_xticks([6, 4, 2, 0, -2, -4, -6, -8])
-xplot.set_xticklabels([-6, -4, -2, "0 2", 4, 6, 8, 10])
-zplot.set_xlim(-4, 10)
+xplot.set_xlim(6, -6+sqrt(3))
+zplot.set_xlim(-5+sqrt(3), 7)
+xplot.set_xticks([6, 4, sqrt(3), sqrt(3)-3, sqrt(3)-6])
+xplot.set_xticklabels([6, 4, "$\sqrt3$ 1", 4, 7])
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-xplot.axvline(x=0, color='k')
-zplot.axvline(x=6, color='k')
+xplot.axvline(x=sqrt(3), color='k')
+zplot.axvline(x=4, color='k')
 
-xloc = .620
-zloc = .800
-figtext(xloc, .04, r"$\underbrace{\hspace{9.0em}}$", horizontalalignment='center')
+xloc = .621
+zloc = .802
+figtext(xloc, .04, r"$\underbrace{\hspace{9.3em}}$", horizontalalignment='center')
 figtext(xloc, .01, r"$x$", horizontalalignment='center')
-figtext(zloc, .04, r"$\underbrace{\hspace{12.9em}}$", horizontalalignment='center')
+figtext(zloc, .04, r"$\underbrace{\hspace{12.3em}}$", horizontalalignment='center')
 figtext(zloc, .01, r"$z$", horizontalalignment='center')
 
-xmin = 1.0
-xmax = 9.0
-ymax = 6.0
 
 twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
@@ -130,7 +121,7 @@ for i in range(len(plots)):
       z_final = g2_path[coord,2]
 
     xplot.plot(g2_path[:coord,3],averaged[:coord], label=titles[i], color=colors[i])
-    zplot.plot(g2_path[coord:,2],averaged[coord:], label=titles[i], color=colors[i])
+    zplot.plot(g2_path[coord-1:,2],averaged[coord-1:], label=titles[i], color=colors[i])
 
 # g2nice = read_triplet_path(ff, z0, 'this-work')
 
@@ -141,7 +132,7 @@ for i in range(len(plots)):
 
 rA = 3.9
 rE = 4.0
-rpath = 2.01
+rpath = 2.005
 xAoff = 3.8
 xBoff = 2.0
 zCoff = 1.0
@@ -169,8 +160,9 @@ zEoff = 3.8
 #                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-#zplot.legend(loc=1, ncol=2)
+zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
+#zplot.legend(loc=3, ncol=2)
+
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, z0, 'mc')
@@ -185,9 +177,11 @@ g2mc = g22
 gmax = g2mc.max()
 dx = 0.1
 
+
 r = arange(0-rmax, rmax+2*dx, dx)
 z = arange(zmin, zmax+dx, dx)
 Z, R = meshgrid(z, r)
+
 
 levels = linspace(0, gmax, gmax*100)
 xlo = 0.85/gmax
@@ -216,10 +210,10 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
-CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 sphere0 = Circle((0, 0), 1, color='slategray')
-sphere1 = Circle((4, 0), 1, color='slategray')
+sphere1 = Circle((2, 0), 1, color='slategray')
 twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
@@ -228,11 +222,11 @@ colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
 
-xs = [rpath, rpath]
-ys = [-zmax, 0]
+xs = [1, 1]
+ys = [zmax, sqrt(3)]
 dtheta = pi/80
-for theta in arange(pi, -dtheta/2, -dtheta):
-    xs.append(rpath*(2 + cos(theta)))
+for theta in arange(2*pi/3, -dtheta/2, -dtheta):
+    xs.append(rpath + rpath*cos(theta))
     ys.append(rpath*sin(theta))
 xs.append(2*zmax)
 
@@ -247,7 +241,7 @@ plot(xs, ys, 'k--', linewidth=3)
 # annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
-savefig("figs/triplet-correlation-2-alt-%d.pdf" % (int(ff*10)))
+twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
+savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
 
