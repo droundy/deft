@@ -14,15 +14,16 @@ rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
-at_wall = False
+at_wall = True
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
 titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
 if at_wall:
-  plots = ['mc', 'this-work', 'sphere-dft', 'fischer'] # , 'gloor'
-  titles = ['Monte Carlo', 'this work', 'sphere-dft', 'Fischer et al'] # , 'gloor'
+  plots = ['mc', 'this-work', 'sphere-dft', 'fischer', 'sokolowski'] # , 'gloor'
+  titles = ['Monte Carlo', 'this work', 'sphere-dft', 'Fischer et al','Sokolowski'] # , 'gloor'
+  colors = ['k', 'b', 'g', 'r','m']
 dx = 0.1
 ############################
 
@@ -46,7 +47,7 @@ def read_walls_path(ff,z0,fun):
     # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
   elif fun == 'sphere-dft':
-    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
+    filename = "figs/walls/wallsWB-sphere-dft-path-%1.2f.dat" % ff
   else:
     # input: "figs/walls.dat" % ()
     # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
@@ -65,6 +66,8 @@ def read_walls(ff, z0, fun):
   if fun == 'mc':
     # input: "figs/mc/wallsMC-pair-%1.1f-*.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
+  elif fun == 'sphere-dft':
+    filename = "figs/walls/wallsWB-sphere-dft-%1.2f.dat" % ff
   else:
     # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
@@ -121,6 +124,8 @@ for i in range(len(plots)):
     z_beg = g2_path[0,2]
     coord = 0
     z_final = z_beg
+    print g2_path[:,2]
+    print plots[i]
     while z_final == z_beg:
       coord += 1
       z_final = g2_path[coord,2]

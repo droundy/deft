@@ -479,21 +479,29 @@ contact.  I'll skip a few steps doing this integral...
 \begin{equation}
    \int_{\sigma}^{\sigma+\delta} g(r)
   d\rr = 4\pi\sigma^2\left(g_\sigma\delta + \left(\tfrac12g_\sigma' +
-  \tfrac1{\sigma}\right) + \cdots \right)
+  \frac{g_\sigma}{\sigma}\right)\delta^2 + \cdots \right)
 \end{equation}
 Putting this together with the above we find
 \begin{multline}
   \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)} =
-  4\pi\sigma^2 n g_\sigma \delta +
-  4\pi\sigma^2 n \left(\tfrac{g_\sigma'}{2} + \tfrac{2}{\sigma}\right)
+  2\pi\sigma^2 n N g_\sigma \delta +
+  \pi\sigma n N  \left(g_\sigma'\sigma + 2g\right)
   \delta^2 \\
-  - \tfrac{1}{2}\left(4\pi\sigma^2ng_\sigma\right)^2\delta^2 + \mathcal{O}(\delta^3)
+  - 2\pi^2\sigma^4n^2N^2\sigma^4g_\sigma^2\delta^2 + \mathcal{O}(\delta^3)
 \end{multline}
 But by considering a Taylor expansion, we can also see that
 \begin{multline}
-  \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)} =
+  Z(\sigma)-Z(\sigma+\delta) =
   -\frac{\partial Z}{\partial \sigma} \delta
   -\frac12 \frac{\partial^2 Z}{\partial \sigma^2} \delta^2  + \mathcal{O}(\delta^3)
+\end{multline}
+So that
+\begin{multline}
+  \frac{\partial Z}{\partial \sigma} =
+  -2ZnN\pi\sigma^2g_\sigma\\
+  \frac{\partial^2 Z}{\partial \sigma^2} =
+  -2ZnN\pi\sigma\left(g_\sigma'\sigma + 2g\sigma \right)
+  +4Zn^2N^2\sigma^4g^2
 \end{multline}
 from which we can extract relationships for the derivatives of $Z$
 with respect to $\sigma$.  Which if we knew what those derivatives
@@ -518,7 +526,7 @@ and
 With a bunch more work, we find out that
 \begin{equation}
   g_\sigma' = \frac{\frac{\partial^2 F}{\partial
-      \sigma^2}}{4\pi\sigma^2nkT}
+      \sigma^2}}{2\pi\sigma^2nkT}
   - \frac{2g_\sigma}{\sigma}
 \end{equation}
 except that there is a mistake in here.  I can tell because $F$ is

@@ -11,7 +11,7 @@ import math
 
 from matplotlib.colors import NoNorm
 
-at_wall = False
+at_wall = True
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
@@ -43,7 +43,7 @@ def read_walls_path(ff,z0,fun):
     # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
   elif fun == 'sphere-dft':
-    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
+    filename = "figs/walls/wallsWB-sphere-dft-path-%1.2f.dat" % ff
   else:
     # input: "figs/walls.dat" % ()
     # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
@@ -60,6 +60,8 @@ def read_walls(ff, z0, fun):
   if fun == 'mc':
     # input: "figs/mc/wallsMC-pair-%1.1f-*.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f.dat" % (ff, z0)
+  elif fun == 'sphere-dft':
+    filename = "figs/walls/wallsWB-sphere-dft-%1.2f.dat" % ff
   else:
     # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
@@ -138,7 +140,7 @@ pylab.ylim(0)
 pylab.xlim(xAoff - rpath,xEoff + rpath)
 pylab.xlabel('$|\mathbf{r}_{12}|$')
 pylab.ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-pylab.legend(loc='best')
+pylab.legend(loc='lower center')
 
 pylab.subplot(1,2,1).set_aspect('equal')
 
@@ -218,6 +220,7 @@ pylab.xlim(-0.5, 1.5*ymax)
 pylab.ylim(-ymax, ymax)
 
 pylab.title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
+print "Saved file = figs/pair-correlation-pretty-%d.pdf" % (int(ff*10))
 pylab.savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 
 pylab.show()
