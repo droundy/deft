@@ -44,11 +44,6 @@ const int gsize = num_r_in_gmc*(num_eta+1);
 double * g = new double[gsize];
 
 // The functions for different ways of computing the pair distribution function.
-double triplet_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
-  const Cartesian r01 = Cartesian(r0 - r1);
-  const double r = sqrt(r01.dot(r01));
-  return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
-}
 
 double gsigma_to_eta(const double gs) {
   if (gs <= 1) return 0;
@@ -56,20 +51,26 @@ double gsigma_to_eta(const double gs) {
   return c/(pow(6.0, 2.0/3.0)*gs) + 1.0/(pow(6.0, 1.0/3.0)*c) + 1.0;
 }
 
-double triplet_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+  return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
+}
+
+double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta0 = gsigma_to_eta(gsigma(r0));
   const double eta1 = gsigma_to_eta(gsigma(r1));
   return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
-double triplet_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
   return mc(eta, r,mc_r_step,g);
 }
-double triplet_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
   // This implements the pair distribution function of Fischer and
   // Methfessel from the 1980 paper.  The py_rdf below should be the
   // true radial distribution function for a homogeneous hard-sphere
@@ -82,21 +83,21 @@ double triplet_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const 
 
 const char *fun[] = {
   "this-work",
-  "this-w-mc",
+  "this-work-mc",
   "gross",
   "fischer"
 };
-double (*triplets[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
-  triplet_this_work,
-  triplet_this_work_mc,
-  triplet_gross,
-  triplet_fischer
+double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
+  pairdist_this_work,
+  pairdist_this_work_mc,
+  pairdist_gross,
+  pairdist_fischer
 };
 const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 20;
+static double width = 10;
 const double dw = 0.001;
 const double spacing = 3; // space on each side
 
@@ -250,58 +251,28 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid potential(gd);
   Grid constraint(gd);
   constraint.Set(notinsphere);
-  printf("Hello???one\n");
-  fflush(stdout);
   f = constrain(constraint, f);
-  printf("Hello???two\n");
-  fflush(stdout);
   potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
-  printf("Hello???three\n");
-  fflush(stdout);
   potential = -potential.cwise().log();
-  printf("Hello???four\n");
-  fflush(stdout);
 
   const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*dw*dw*width;
-  printf("Hello???five\n");
-  fflush(stdout);
   const double precision = fabs(approx_energy*1e-1);//1e-4);
-  printf("Hello???six\n");
-  fflush(stdout);
   //printf("Minimizing to %g absolute precision...\n", precision);
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, 1,
                                                             &potential,
                                                             QuadraticLineMinimizer));
-  printf("Hello???seven\n");
-  fflush(stdout);
   for (int i=0;min.improve_energy(true) && i<100;i++) {
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-    fflush(stdout);
   }
-  printf("Hello???eight\n");
-  fflush(stdout);
   took("Doing the minimization");
-  printf("Hello???nine\n");
-  fflush(stdout);
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
-  printf("Hello???ten\n");
-  fflush(stdout);
-  char *plotname = new char[4096];
-  printf("Hello???one\n");
-  fflush(stdout);
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
-  printf("Hello???two\n");
-  fflush(stdout);
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
-  printf("Hello???three\n");
-  fflush(stdout);
   Grid n3(gd, StepConvolve(1)(1, density));
-  printf("Hello???four\n");
-  fflush(stdout);
   // Create the walls directory if it doesn't exist.
   if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
     // We failed to create the directory, and it doesn't exist.
@@ -312,28 +283,25 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
   // here you choose the values of z0 to use
   //dx is set at beggining of file
-  printf("Hello???five\n");
-  fflush(stdout);
-  for (double z0 = 0.0; z0 < width/2; z0 += dx) {
+  char *plotname = new char[4096];
+  for (double z0 = 0; z0 < width/2.0; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
       sprintf(plotname,
-              "papers/pair-correlation/figs/walls/walls%s-%s-triplet-%04.2f-%1.2f.dat",
+              "papers/pair-correlation/figs/triplet%s-%s-%04.2f-%1.2f.dat",
               name, fun[version], eta, z0);
-      FILE *out = fopen(plotname, "w");
-      if (!out) {
-        fprintf(stderr, "Unable to create file %s!\n", plotname);
-        return;
-      }
+      FILE *out = fopen(plotname,"w");
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
       for (double x = 0; x < width/2; x += dx) {
         for (double z1 = -width/2.0; z1 < width/2.0; z1 += dx) {
           const Cartesian r1(x,0,z1);
-          double g2 = triplets[version](gsigma, density, nA, n3, r0, r1);
-          fprintf(out, "%g\t", g2);
+          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          double n_bulk = (3.0/4.0/M_PI)*eta;
+          double g3 = g2*density(r0)*density(r1)/n_bulk/n_bulk;
+          fprintf(out, "%g\t", g3);
         }
         fprintf(out, "\n");
       }
@@ -341,14 +309,12 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
   }
   delete[] plotname;
-  printf("Hello???six\n");
-  fflush(stdout);
   took("Dumping the triplet dist plots");
   char *plotname_path = new char[4096];
   for (int version = 0; version < numplots; version++) {
     sprintf(plotname_path,
-            "papers/pair-correlation/figs/walls/wallsWB-path-%s-triplet-%04.2f.dat",
-            fun[version], eta);
+            "papers/pair-correlation/figs/triplet%s-path-%s-%04.2f.dat",
+            name, fun[version], eta);
     FILE *out_path = fopen(plotname_path, "w");
     if (!out_path) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
@@ -367,41 +333,40 @@ void run_walls(double eta, const char *name, Functional fhs) {
     for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5) ;i++){
       x_path = i*dx;
       const Cartesian r1(0,0,width/2.0-x_path);
-      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, width/2.0-x_path, 0.0);
     }
     for (int i=0; i<num ;i++){
       double theta = i*max_theta/num;
       x_path = i*max_theta/num*radius_path + width/2.0-2*radius_path;
       const Cartesian r1(radius_path*sin(theta),0,radius_path*(1+cos(theta)));
-      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, radius_path*(1+cos(theta)), radius_path*sin(theta));
     }
     for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5); i++){
       double r1x = i*dx;
       x_path = i*dx + 2.0*cos(max_theta-M_PI/2.0) + max_theta*radius_path + width/2.0-2*radius_path;
       const Cartesian r1(radius_path*sin(max_theta)+ r1x, 0, radius_path*(1+cos(max_theta)));
-      g2_path = triplets[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\n",x_path,g2_path);
+      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, radius_path*(1+cos(max_theta)), radius_path*sin(max_theta)+r1x);
     }
     fclose(out_path);
-    printf("Hello???seven\n");
-    fflush(stdout);
   }
 }
 
 int main(int, char **) {
-    read_mc();
-    printf("Done with read\n");
-    for (double this_eta = 0.3; this_eta < 0.35; this_eta += 0.1) {
-      run_walls(this_eta, "WB", WB);
-    }
-    // Just create this file so make knows we have run.
-    if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
-      printf("Error creating walls.dat!\n");
-      return 1;
-    }
-    fflush(stdout);
-    return 0;
+  printf("Did this work?\n");
+  read_mc();
+  printf("Done with read\n");
+  for (double this_eta = 0.3; this_eta < 0.35; this_eta += 0.1) {
+    run_walls(this_eta, "WB", WB);
+  }
+  // Just create this file so make knows we have run.
+  if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
+    printf("Error creating walls.dat!\n");
+    return 1;
+  }
+  fflush(stdout);
+  return 0;
 }
 
