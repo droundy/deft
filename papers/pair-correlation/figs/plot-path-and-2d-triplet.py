@@ -59,7 +59,7 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # inp ut: "figs/mc/triplet/tripletMC-%3.1f-2.05.dat" % (ff)
+    # input:  "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
   # else:
   #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
@@ -165,7 +165,7 @@ zEoff = 3.8
 
 
 zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
-#zplot.legend(loc=3, ncol=2)
+zplot.legend(loc='best', ncol=2)
 
 
 twod_plot.set_aspect('equal')
@@ -188,27 +188,29 @@ Z, R = meshgrid(z, r)
 
 
 levels = linspace(0, gmax, gmax*100)
-xlo = 0.85/gmax
-xhi = 1.15/gmax
+gsigma = (1 - ff/2)/(1-ff)**3
+xlo = 0.85*gsigma/gmax
+xhi = 1.15*gsigma/gmax
+xwhite = 1.0*gsigma/gmax
 xhier = (1 + xhi)/2.0
 
 cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
                    (xhier,0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax, 1.0, 1.0),
+                   (xwhite, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
                    (xhier,1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
                    (xhier,0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
@@ -222,7 +224,7 @@ twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
-colorbar(CS, extend='neither', ticks=myticks)
+colorbar(CS, extend='neither') # , ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
 
