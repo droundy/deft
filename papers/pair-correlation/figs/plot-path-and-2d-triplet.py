@@ -44,7 +44,7 @@ def read_triplet_path(ff,z0,fun):
   #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   # else:
   #   # input: "figs/walls.dat" % ()
-  #   # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
+  #   # inp ut: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   # if (os.path.isfile(filename) == False):
   #   # Just use walls data if we do not have the MC (need to be careful!)
@@ -59,10 +59,10 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-2.05.dat" % (ff)
+    # inp ut: "figs/mc/triplet/tripletMC-%3.1f-2.05.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
   # else:
-  #   # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
+  #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
   if (os.path.isfile(filename) == False):
     # Just use walls data if we do not have the MC (need to be careful!)
@@ -164,7 +164,7 @@ zEoff = 3.8
 #                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
+zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
 zplot.legend(loc=3, ncol=2)
 
 
@@ -238,7 +238,7 @@ plot(xs, ys, 'k--', linewidth=2)
 # annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
+twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
 savefig("figs/triplet-correlation-alt-%d.pdf" % (int(ff*10)))
 show()
 
