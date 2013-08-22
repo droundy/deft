@@ -288,14 +288,23 @@ We construct $g(r, g_\sigma)$ using several constraints.  Naturally,
   g(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
 In addition, we know that
+\begin{align}
+  1 + n\int\left[g(r)-1\right]d\rr &= nkT\chi_T
+\end{align}
 \begin{equation}
   \begin{split}
-    1 + n\int\left[g(r)-1\right]d\rr = nkT\chi_T\\
-    \chi_T  = -\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_T
+    \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_T
     = - \left(V\left(\frac{\partial p}{\partial V}\right)_T\right)^{-1}\\
-    p = \frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\Longrightarrow \left(\frac{\partial p}{\partial V}\right)_T = \frac{dp}{d\eta}\frac{d\eta}{dV}\\
-    \eta = \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}\\
-    \left(\frac{\partial p}{\partial V}\right)_T = -\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
+    p &= nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\\
+    \left(\frac{\partial p}{\partial V}\right)_T &= \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}\\
+    n &= \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}\\
+    \eta &= \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}\\
+    \left(\frac{\partial p}{\partial V}\right)_T &= -nkT\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
+    &  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
+    &= -nkT\frac{\eta}{V}\left[\frac{(1+2\eta-3\eta^2)(1-\eta) + 3 + 3\eta + 3\eta^2 - 3\eta^3}{(1-\eta)^4}\right]\\
+    &  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
+    &= -\frac{kT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
+    nkT\chi_T &= \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
   %\int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
   %&= \eta \eta \cdots \fixme{fill in, double-check}
   \end{split}
