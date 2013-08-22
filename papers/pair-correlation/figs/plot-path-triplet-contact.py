@@ -59,16 +59,11 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input:  "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
   # else:
   #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  if (os.path.isfile(filename) == False):
-    # Just use walls data if we do not have the MC (need to be careful!)
-    print("warning! %s not found. 2d plot will be bad." %filename)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-    title("Using this work for pair instead of MC!")
   data = loadtxt(filename)
   return data
 
@@ -89,11 +84,12 @@ zplot.set_xticks([])
 xplot.axvline(x=sqrt(3), color='k')
 zplot.axvline(x=4, color='k')
 
-
-figtext(.613, .04, r"$\underbrace{\hspace{9em}}$", horizontalalignment='center')
-figtext(.613, .01, r"$x$", horizontalalignment='center')
-figtext(.796, .04, r"$\underbrace{\hspace{13.1em}}$", horizontalalignment='center')
-figtext(.796, .01, r"$z$", horizontalalignment='center')
+xloc = .621
+zloc = .802
+figtext(xloc, .04, r"$\underbrace{\hspace{9.3em}}$", horizontalalignment='center')
+figtext(xloc, .01, r"$x$", horizontalalignment='center')
+figtext(zloc, .04, r"$\underbrace{\hspace{12.3em}}$", horizontalalignment='center')
+figtext(zloc, .01, r"$z$", horizontalalignment='center')
 
 
 twod_plot.set_xlim(zmin, zmax)
@@ -248,6 +244,6 @@ plot(xs, ys, 'k--', linewidth=3)
 
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
-savefig("figs/triplet-correlation-alt-%d.pdf" % (int(ff*10)))
+savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
 
