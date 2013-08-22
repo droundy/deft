@@ -635,7 +635,7 @@ int main(int argc, char *argv[]){
             const double z1 = r01.norm();
             int which_path = -1; // -1 if no path, 0 if touching path, 1 if path between
             if (z1 < 2*R + path_dr) which_path = 0;
-            else if (z1 > 4*R && z1 < 4*R + path_dr) which_path = 1;
+            else if (z1 > 4*R + path_dr && z1 < 4*R + 2*path_dr) which_path = 1;
             if(!path || which_path > -1) {
               const Vector3d zhat = r01.normalized();
               const int z1_i = path ? which_path : int(z1/dz);
@@ -692,7 +692,7 @@ int main(int argc, char *argv[]){
                       if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
+                    } if (z2 < z1 - 2*R && z2 > z1 - 2*R - path_dr && x2 < lenx/2.0) {
                       const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
                       if (index < path2_zbins+path2_thetabins || index >= path2_bins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
