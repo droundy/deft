@@ -25,7 +25,7 @@ foreach $dd ([30,655, 0.1], [30,1327, 0.2], [30, 2009, 0.3], [30, 2696, 0.4], [3
 
     my $da_dz_outfilename = "$dir/mc/a1/wallsMC-a1-pair-$ff";
     my $outfilename = "$dir/mc/wallsMC-pair-$ff";
-    my $command = "./pair-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxy $len wallz $len flatdiv";
+    my $command = "./pair-monte-carlo $N $iters $acc $outfilename $da_dz_outfilename periodxy $len wallz $len flatdiv path";
 
     open SCRIPT, ">$scriptname" or die $!;
     print SCRIPT "#!/bin/sh
