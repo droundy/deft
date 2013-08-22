@@ -417,7 +417,7 @@ product of $(1-\Theta(\sigma+\delta-r_{ij}))$:
 \begin{multline}
     \prod_{i<j}(1-\Theta(\sigma+\delta-r_{ij})) =
     1 - \sum_{i<j} \Theta(\sigma+\delta-r_{ij}) \\
-    + \mathop{\mathop{\sum_{i<j}}_{k<}}_{kl \ne ij}
+    + \frac{1}{2}\mathop{\mathop{\sum_{i<j}}_{k<l}}_{kl \ne ij}
     \Theta(\sigma+\delta-r_{ij}) \Theta(\sigma+\delta-r_{kl})
     \\ + \cdots.
 \end{multline}
@@ -426,7 +426,7 @@ Given this expansion, we can readily expand the partition function:
   Z(\sigma+\delta) = Z(\sigma) \\ -
   \sum_{k<l} \iiiint \Theta(\sigma+\delta-r_{kl}) \prod_{i<j}
   \Theta(r_{ij}-\sigma) \\
-  + \mathop{\mathop{\sum_{k<l}}_{m<n}}_{kl\ne mn}
+  + \frac{1}{2}\mathop{\mathop{\sum_{k<l}}_{m<n}}_{kl\ne mn}
   \iiiint \Theta(\sigma+\delta-r_{kl}) \Theta(\sigma+\delta-r_{mn}) \prod_{i<j}
   \Theta(r_{ij}-\sigma) \\
   + \cdots.\label{eq:z-power-series}
@@ -438,9 +438,9 @@ summations in Eq.~\ref{eq:z-power-series} are mostly of identical
 terms, since the integrals are over all coordinates.
 \begin{multline}
   Z(\sigma)-Z(\sigma+\delta) =
-  N^2\iiiint \Theta(\sigma+\delta-r_{12})
+  \frac{N^2}{2}\iiiint \Theta(\sigma+\delta-r_{12})
   \prod_{i<j} \Theta(r_{ij}-\sigma) \\
-  - \frac{N^3}{2}\iiiint
+  - \frac{N^4}{8}\iiiint
   \Theta(\sigma+\delta-r_{12})
   \Theta(\sigma+\delta-r_{34})
   \prod_{i<j} \Theta(r_{ij}-\sigma) \\
@@ -468,12 +468,10 @@ vanishingly seldom near $\rr_1$ or $\rr_2$, so we can write the second
 term as a product.
 \begin{multline}
   \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)}\\
-  \shoveleft{\quad= nN \int_{\sigma}^{\sigma+\delta} g(r) d\rr }
-  - \frac{n^2N}{2} \left(\int_{\sigma}^{\sigma+\delta} g(r)
+  \shoveleft{\quad= \frac{nN}{2} \int_{\sigma}^{\sigma+\delta} g(r) d\rr }
+  - \frac{n^2N^2}{8} \left(\int_{\sigma}^{\sigma+\delta} g(r)
   d\rr\right)^2
-  \\
-  + \frac{n^3N}{6} \left(\int_{\sigma}^{\sigma+\delta} g(r)
-  d\rr\right)^3 + \cdots
+  + \cdots
   \label{eq:zdiff-g}
 \end{multline}
 Now let us look at how this integral relates to $g(r)$ evaluated at

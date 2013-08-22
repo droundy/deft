@@ -141,7 +141,7 @@ for i in range(len(plots)):
 
 rA = 3.9
 rE = 4.0
-rpath = 2.005
+rpath = 2.01
 xAoff = 3.8
 xBoff = 2.0
 zCoff = 1.0
@@ -170,7 +170,7 @@ zEoff = 3.8
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc=1, ncol=2)
+#zplot.legend(loc=1, ncol=2)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, z0, 'mc')
@@ -218,6 +218,11 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
+sphere0 = Circle((0, 0), 1, color='slategray')
+sphere1 = Circle((4, 0), 1, color='slategray')
+twod_plot.add_artist(sphere0)
+twod_plot.add_artist(sphere1)
+
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
@@ -232,8 +237,8 @@ for theta in arange(pi, -dtheta/2, -dtheta):
 xs.append(2*zmax)
 
 ys.append(0)
-plot(xs, ys, 'w-', linewidth=2)
-plot(xs, ys, 'k--', linewidth=2)
+plot(xs, ys, 'w-', linewidth=3)
+plot(xs, ys, 'k--', linewidth=3)
 
 # annotate('$A$', xy=(0,rA), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 # annotate('$B$', xy=(0,rpath), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))

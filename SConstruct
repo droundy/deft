@@ -270,6 +270,7 @@ for mkdat in Split("""
 	papers/contact/figs/inner-sphere
 	papers/contact/figs/test-particle-wall
 	papers/pair-correlation/figs/sphere-with-wall
+	papers/pair-correlation/figs/triplet-dft
 	papers/fuzzy-fmt/figs/walls
       """):
     Alias('executables',

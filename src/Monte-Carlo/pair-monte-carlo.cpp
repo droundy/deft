@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include "utilities.h"
 using std::vector;
 
 double countOverLaps(Vector3d *spheres, long n, double R);
@@ -13,6 +14,7 @@ double countOneOverLap(Vector3d *spheres, long n, long j, double R);
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 double distXY(Vector3d a, Vector3d b);
 double distXYZ(Vector3d a, Vector3d b);
+inline void took(const char *name);
 
 const double dr = 0.1;
 const double dz = 0.1;
@@ -29,6 +31,9 @@ const int path_num_refs = 15; // the number of points in the x and y directions
 const double a1_dr = 0.01;
 const double a1_dz = 0.01;
 const double a1_rmax = 5.0; // max value to store for delta r
+
+bool path = false; // only look at z0 = 0
+                   // which is where we take the path data
 
 bool has_x_wall = false;
 bool has_y_wall = false;
@@ -112,6 +117,8 @@ int main(int argc, char *argv[]){
       lenz = atof(argv[a+1]);
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
+    } else if (strcmp(argv[a],"path") == 0) {
+      path = true;
     } else if (strcmp(argv[a],"flatdiv") == 0) {
       flat_div = true; //otherwise will default to radial divisions
       a -= 1;
@@ -123,6 +130,7 @@ int main(int argc, char *argv[]){
   printf("flatdiv = %s\n", flat_div ? "true" : "false");
   printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
   printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
+  printf("path: %s\n", path ? "true" : "false");
   latx = Vector3d(lenx,0,0);
   laty = Vector3d(0,leny,0);
   latz = Vector3d(0,0,lenz);
@@ -132,7 +140,7 @@ int main(int argc, char *argv[]){
 
   const int zbins = lenz/dz;
   const int rbins = lenx/dr/2;
-  const int z0bins = zbins/2; // half zbins because half of z0's are reflected
+  const int z0bins = path ? 1 : zbins/2; // half zbins because half of z0's are reflected
   const int a1_zbins = lenz/a1_dz/2; // again, reflection -> half bins needed
   const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
   const int a1_r1bins = lenx/a1_dr/2;
@@ -319,6 +327,10 @@ int main(int argc, char *argv[]){
   // Begin main program loop
   //////////////////////////////////////////////////////////////////////////////
   for (long j=0; j<iterations; j++){
+    if (j%(N*1000) == 0) {
+      took("One thousand iterations");
+      printf("count: %li\n", count);
+    }
 	  num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
@@ -359,20 +371,23 @@ int main(int argc, char *argv[]){
           }
         }
         if (flat_div){
-          // save the da_dz data
-          char *da_dz_filename = new char[1024];
-          for (int i=0; i<a1_rbins; i++) {
-            const double a1_r01 = 2.0 + (i+0.5)*a1_dr;
-            sprintf(da_dz_filename, "%s-%1.3f.dat", da_dz_outfilename, a1_r01);
-            FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
-            for (int k=0; k<a1_zbins; k++) {
-              const double slice_volume = lenx*leny*a1_dz;
-              const double da_dz = double(da_dz_histogram[i*a1_zbins + k]*N)/
-                slice_volume/a1_dr/double(count)/2.0;
-              const double coord = k*a1_dz + a1_dz/2;
-              fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
+          if (!path) {
+            // save the da_dz data
+            char *da_dz_filename = new char[1024];
+            for (int i=0; i<a1_rbins; i++) {
+              const double a1_r01 = 2.0 + (i+0.5)*a1_dr;
+              sprintf(da_dz_filename, "%s-%1.3f.dat", da_dz_outfilename, a1_r01);
+              FILE *da_dz_out = fopen((const char *)da_dz_filename, "w");
+              for (int k=0; k<a1_zbins; k++) {
+                const double slice_volume = lenx*leny*a1_dz;
+                const double da_dz = double(da_dz_histogram[i*a1_zbins + k]*N)/
+                  slice_volume/a1_dr/double(count)/2.0;
+                const double coord = k*a1_dz + a1_dz/2;
+                fprintf(da_dz_out, "%g\t%g\n", coord, da_dz);
+              }
+              fclose(da_dz_out);
             }
-            fclose(da_dz_out);
+            delete[] da_dz_filename;
           }
           // save the path data
           sprintf(pathfilename, "%s-path.dat", outfilename);
@@ -473,7 +488,7 @@ int main(int argc, char *argv[]){
               const double r1max = (i+1)*dr;
               const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
               for (int k=0; k<zbins; k++) {
-                const double shell1_volume = lenx*leny*dz;
+                const double shell1_volume = path ? lenx*leny*path_dz : lenx*leny*dz;
                 const double density1 = double(density_histogram[k]*N)
                   /double(count)/shell1_volume;
                 const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
@@ -488,7 +503,6 @@ int main(int argc, char *argv[]){
           }
           fclose(densityout);
           delete[] densityfilename;
-          delete[] da_dz_filename;
         }
         fflush(stdout);
       }
@@ -536,67 +550,69 @@ int main(int argc, char *argv[]){
         // reflect = +/-1, used to reflect everything if you're past halfway through the box
         // except for the density
         const double z0 = reflect*spheres[i].z() + lenz/2;
-        const int z0_i = int(z0/dz);
-        const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
-        const int a1_z_i = int(z0/a1_dz);
+        if (!path || z0 < path_dz) {
+          const int z0_i = int(z0/dz);
+          const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
+          const int a1_z_i = int(z0/a1_dz);
 
-        const int density_index = z0_unreflected_i;
-        density_histogram[density_index]++;
+          const int density_index = z0_unreflected_i;
+          density_histogram[density_index]++;
 
-        if (z0 < path_dz) path_density_histogram[0]++;
-        for (int xn = 0; xn < path_num_refs;  xn++) {
-          for (int yn = 0; yn < path_num_refs;  yn++) {
-            const double xref = lenx/path_num_refs*xn - lenx/2.0;
-            const double yref = leny/path_num_refs*yn - leny/2.0;
-            const double sph_r0 = distXYZ(spheres[i], Vector3d(xref,yref,-reflect*lenz/2));
-            if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
-              const double r0 = distXY(spheres[i], Vector3d(xref,yref,0));
-              const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
-              path_density_histogram[index] ++;
+          if (z0 < path_dz) path_density_histogram[0]++;
+          for (int xn = 0; xn < path_num_refs;  xn++) {
+            for (int yn = 0; yn < path_num_refs;  yn++) {
+              const double xref = lenx/path_num_refs*xn - lenx/2.0;
+              const double yref = leny/path_num_refs*yn - leny/2.0;
+              const double sph_r0 = distXYZ(spheres[i], Vector3d(xref,yref,-reflect*lenz/2));
+              if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
+                const double r0 = distXY(spheres[i], Vector3d(xref,yref,0));
+                const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
+                path_density_histogram[index] ++;
+              }
             }
           }
-        }
 
-        if (z0 > 2.0) {
-          const int z0_i_shifted = int((z0-2.0)/path_dz);
-          path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
-        }
-        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+          if (z0 > 2.0) {
+            const int z0_i_shifted = int((z0-2.0)/path_dz);
+            path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
+          }
+          //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
 
-        for (int k=0; k<N; k++) {
-          if (i != k) { // don't look at a sphere in relation to itself
-            const double z1 = reflect*spheres[k].z() + lenz/2;
-            const int z1_i = int(z1/dz);
-            const double r1 = distXY(spheres[k], spheres[i]);
-            const int r1_i = int(r1/dr);
-            const double r01 = distXYZ(spheres[k], spheres[i]);
-            const int r01_i = int(r01/dr);
-            const int a1_r01_i = int((r01 - 2.0)/a1_dr);
-            // want a1_r01_i to be 0 for r01 in (2+dr/2, 2+dr*3/2) so that we get bins
-            // centered around rounded numbers.
+          for (int k=0; k<N; k++) {
+            if (i != k) { // don't look at a sphere in relation to itself
+              const double z1 = reflect*spheres[k].z() + lenz/2;
+              const int z1_i = int(z1/dz);
+              const double r1 = distXY(spheres[k], spheres[i]);
+              const int r1_i = int(r1/dr);
+              const double r01 = distXYZ(spheres[k], spheres[i]);
+              const int r01_i = int(r01/dr);
+              const int a1_r01_i = int((r01 - 2.0)/a1_dr);
+              // want a1_r01_i to be 0 for r01 in (2+dr/2, 2+dr*3/2) so that we get bins
+              // centered around rounded numbers.
 
-            const double sph_r1 = distXYZ(spheres[k], Vector3d(0,0,-reflect*lenz/2));
-            const int sph_r1_i = int(sph_r1/dr);
-            if (r1_i < rbins) { // ignore data past outermost complete cylindrical shell
-              const int index = z0_i*rbins*zbins + r1_i*zbins + z1_i;
-              histogram[index] ++;
-            }
-            if (a1_r01_i < a1_rbins) {
-              const int a1_index = a1_r01_i*a1_zbins + a1_z_i;
-              da_dz_histogram[a1_index] ++;
-            }
-            if (z0 < path_dz)
-            {
-              if (z1 < path_dz && r1 < lenx/2.0) {
-                const int index = (lenx/2.0 - r1)/path_dz;
-                path_histogram[index] ++;
-              } if (r01 < 2.0 + path_dz) {
-                const int index = path_rbins + acos(r1/r01)/path_dtheta;
-                path_histogram[index] ++;
-              } if (r1 < path_dr) {
-                const int index = path_rbins + path_thetabins + (z1 - 2.0)/path_dz;
-                path_histogram[index] ++;
+              const double sph_r1 = distXYZ(spheres[k], Vector3d(0,0,-reflect*lenz/2));
+              const int sph_r1_i = int(sph_r1/dr);
+              if (r1_i < rbins) { // ignore data past outermost complete cylindrical shell
+                const int index = z0_i*rbins*zbins + r1_i*zbins + z1_i;
+                histogram[index] ++;
               }
+              if (a1_r01_i < a1_rbins) {
+                const int a1_index = a1_r01_i*a1_zbins + a1_z_i;
+                da_dz_histogram[a1_index] ++;
+              }
+              if (z0 < path_dz)
+                {
+                  if (z1 < path_dz && r1 < lenx/2.0) {
+                    const int index = (lenx/2.0 - r1)/path_dz;
+                    path_histogram[index] ++;
+                  } if (r01 < 2.0 + path_dz) {
+                    const int index = path_rbins + acos(r1/r01)/path_dtheta;
+                    path_histogram[index] ++;
+                  } if (r1 < path_dr) {
+                    const int index = path_rbins + path_thetabins + (z1 - 2.0)/path_dz;
+                    path_histogram[index] ++;
+                  }
+                }
             }
           }
         }
@@ -918,4 +934,18 @@ Vector3d ran3(){
   fac = sqrt(-2*log(r2)/r2);
   out[2]=x*fac;
   return out;
+}
+
+inline void took(const char *name) {
+    assert(name); // so it'll count as being used...
+    static clock_t last_time = clock();
+    clock_t t = clock();
+    double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+    if (seconds > 120) {
+      printf("%s took %.0f minutes.\n", name, seconds/60);
+    } else {
+      printf("%s took %g seconds.\n", name, seconds);
+    }
+    fflush(stdout);
+    last_time = t;
 }
