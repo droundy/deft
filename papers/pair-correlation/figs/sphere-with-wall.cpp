@@ -89,10 +89,10 @@ void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
   printf("Hello 4\n");
   fflush(stdout);
   const GridDescription gd = density.description();
-  const double z0 = spacing + 0.05;
+  const double z0 = spacing + dx;
   double radius_path = 2.005;
   int num = 100;
-  for (int i=0; i<int((10.0-radius_path)/dx+0.5); i++){
+  for (int i=0; i<int((width/2.0-radius_path)/dx+0.5); i++){
     const double x_path = i*dx;
     Cartesian r = Cartesian(width/2-x_path,0,z0);
     Cartesian r_opp_side = Cartesian(width/2-x_path,0,gd.Nz*dx-z0);
