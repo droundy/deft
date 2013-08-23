@@ -16,19 +16,11 @@ title('$g_{HS}(r)$') #radial distribution for hard spheres
 axvline(x=1, color='k', linestyle=':')
 axhline(y=1, color='k', linestyle=':')
 
-x = zeros(7)
+x = zeros(3)
 
-x[1] = -.13
-x[2] = 7.13/2
-x[3] = 1.71
-
-x[1] = 0.435
-x[2] = 3.552
-x[3] = 0.870
-
-x[4] = 0.329
-x[5] = 2.540
-x[6] = 1.940
+x[0] = 1.220
+x[1] = 2.125
+x[2] = 2.132
 
 sigma = 2.0
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
@@ -64,7 +56,7 @@ for i in range(len(ff)):
         break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     figure(1)
-    plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.2f'%ff[i])
+    plot(r_mc, ghs[i], colors[i]+":")
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -84,39 +76,52 @@ if able_to_read_file == False:
     savefig("figs/ghs-g-ghs.pdf")
     exit(0)
 
-def evalg(x, eta, r):
-  hsigma_rolloff = 5.0
+def evalg(xnew, eta, r):
   z = r - sigma
-  hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
+  hsigma = (1 - 0.5*eta)/(1 - eta)**3 - 1
+  density = 3/4/pi*eta
+  rhs = (1-eta)**4/(1 + 4*eta + 4*eta**2 - 4*eta**3 + eta**4)
 
-  a0 = x[0]
-  a1 = x[1]
-  a2 = x[2]
-  a3 = x[3]
-  a4 = x[4]
-  a5 = x[5]
-  a6 = x[6]
+  a0 = xnew[0]
+  a1 = 0
+  a2 = xnew[1]
+  a3 = 0
+  a4 = xnew[2]
+
+  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
+
+  int_h1_over_a1 = 4*pi*(6 + sigma*a2*(4 + sigma*a2))/a2**4
+
+  int_h2_over_a3 = 8*pi*(12 + sigma*a4*(6 + sigma*a4))/a4**5
+
+  A = (rhs-1)/density - int_h0
+  B = int_h2_over_a3
+  C = int_h1_over_a1
+
+  a1 = hsigma*(a0 - 1 - hsigma) # sets slope at sigma
+
+  a3 = (A - C*a1)/B # sets integral
 
   f0 = hsigma
   j0 = exp(-a0*z)
 
-  f1 = a1*hsigma
-  j1 = sin(a2*z)*exp(-a3*z)
+  f1 = a1
+  j1 = z*exp(-a2*z)
 
-  f2 = -a4*hsigma**2
-  j2 = sin(a5*z)*exp(-a6*z)
+  f2 = a3
+  j2 = z**2*exp(-a4*z)
 
   return 1 + f0*j0 + f1*j1 + f2*j2
 
 def dist(x):
-    # function with x[i] as constants to be determined
-    g = zeros_like(etaconcatenated)
-    for i in range(len(g)):
-      g[i] = evalg(x, etaconcatenated[i], rconcatenated[i])
-    return g
+  # function with x[i] as constants to be determined
+  R, ETA = meshgrid(r, eta)
+  g = zeros_like(ETA)
+  g = evalg(x, ETA, R)
+  return reshape(g, len(eta)*len(r))
 
 def dist2(x):
-    return dist(x) - ghsconcatenated
+  return dist(x) - reshape(ghs, len(eta)*len(r))
 
 
 ghsconcatenated = ghs[0]
@@ -160,7 +165,7 @@ gdifference = dist2(vals)
 
 for i in range(len(ff)):
     figure(1)
-    plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
+    plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'-',label='$\eta=%.1f$'%ff[i])
     figure(2)
     plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
     plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
@@ -169,11 +174,12 @@ for i in range(len(ff)):
 
 
 figure(1)
-xlim(2,6.5)
+xlim(2,5)
 #ylim(0.5, 3.5)
 xlabel(r"$r/R$")
 ylabel("$g(r)$")
-legend(loc='best').get_frame().set_alpha(0.5)
+legend(loc='best')
+#legend(loc='best').get_frame().set_alpha(0.5)
 
 savefig("figs/ghs-g.pdf")
 
@@ -186,13 +192,12 @@ ylabel("|ghs - g|")
 #legend(loc='best').get_frame().set_alpha(0.5)
 savefig("figs/ghs-g-ghs.pdf")
 
-figure(3)
-for eta in [.5, .6, .7, .8]:
-  gsigma = (1-eta/2)/(1-eta)**3
-  plot(r_mc, evalg(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
-axhline(y=0)
-xlim(2,6.5)
-legend(loc='best')
+# figure(3)
+# for eta in [.5, .6, .7, .8]:
+#   gsigma = (1-eta/2)/(1-eta)**3
+#   plot(r_mc, evalg(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
+# axhline(y=0)
+# xlim(2,6.5)
 show()
 
 

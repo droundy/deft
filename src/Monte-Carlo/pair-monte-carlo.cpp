@@ -467,7 +467,12 @@ int main(int argc, char *argv[]){
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
-
+          const double shell0_volume = lenx*leny*dz;
+          for (int l=0; l<zbins; l++) {
+            const double density = double(density_histogram[l]*N)
+              /double(count)/shell0_volume;
+            fprintf(densityout, "%g\t%g\n", (l+0.5)*dz, density);
+          }
           for (int l=0; l<z0bins; l++) {
             const double filename_coord = (l + 0.5)*dz;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
@@ -478,11 +483,9 @@ int main(int argc, char *argv[]){
             }
             const double r0min = l*dr;
             const double r0max = (l+1)*dr;
-            const double shell0_volume = lenx*leny*dz;
 
             const double density0 = double(density_histogram[l]*N)
               /double(count)/shell0_volume;
-            fprintf(densityout, "%g\t%g\n", filename_coord, density0);
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
