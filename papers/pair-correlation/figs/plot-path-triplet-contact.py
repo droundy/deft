@@ -16,8 +16,8 @@ from matplotlib.colors import NoNorm
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
-plots = ['mc']#, 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'fischer', 'gross']#, 'sphere-dft'] # , 'gloor'
+titles = plots#['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
 dx = 0.1
 ############################
 
@@ -40,21 +40,21 @@ def read_triplet_path(ff,z0,fun):
   if fun == 'mc':
     # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
-  # elif fun == 'sphere-dft':
-  #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
-  # else:
-  #   # input: "figs/walls.dat" % ()
-  #   # inp ut: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  # if (os.path.isfile(filename) == False):
-  #   # Just use walls data if we do not have the MC (need to be careful!)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-  data = loadtxt(filename)
-  if fun == 'mc':
-    data =  flipud(data)
-    data[:,0]-=4.995
+  elif fun == 'sphere-dft':
+    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
-    data[:,2]-=3
+    # input: "figs/tripletWB-path-*-%1.2f.dat" %(ff)
+    filename = "figs/tripletWB-path-%s-%1.2f.dat" %(fun, ff)
+  if (os.path.isfile(filename) == False):
+    # MC data is in repo, but dft isn't, so just use that for now so it will build.
+    # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+
+  data = loadtxt(filename)
+  data =  flipud(data)
+  if fun == 'mc':
+    data[:,0]-=4.995
+  else: data[:,1]*=3 # fixme: this is just done so they kinda match up, but clearly isn't right
   return data[:,0:4]
 
 def read_triplet(ff, z0, fun):
