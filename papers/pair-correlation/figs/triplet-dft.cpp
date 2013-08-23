@@ -334,21 +334,27 @@ void run_walls(double eta, const char *name, Functional fhs) {
       x_path = i*dx;
       const Cartesian r1(0,0,width/2.0-x_path);
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, width/2.0-x_path, 0.0);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, width/2.0-x_path, 0.0);
     }
     for (int i=0; i<num ;i++){
       double theta = i*max_theta/num;
       x_path = i*max_theta/num*radius_path + width/2.0-2*radius_path;
       const Cartesian r1(radius_path*sin(theta),0,radius_path*(1+cos(theta)));
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, radius_path*(1+cos(theta)), radius_path*sin(theta));
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, radius_path*(1+cos(theta)), radius_path*sin(theta));
     }
     for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5); i++){
       double r1x = i*dx;
       x_path = i*dx + 2.0*cos(max_theta-M_PI/2.0) + max_theta*radius_path + width/2.0-2*radius_path;
       const Cartesian r1(radius_path*sin(max_theta)+ r1x, 0, radius_path*(1+cos(max_theta)));
       g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g2_path, radius_path*(1+cos(max_theta)), radius_path*sin(max_theta)+r1x);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, radius_path*(1+cos(max_theta)), radius_path*sin(max_theta)+r1x);
     }
     fclose(out_path);
   }
