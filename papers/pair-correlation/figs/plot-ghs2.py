@@ -18,34 +18,27 @@ title('$g_{HS}(r)$') #radial distribution for hard spheres
 axvline(x=sigma, color='k', linestyle=':')
 axhline(y=1, color='k', linestyle=':')
 
-x = rand(6)*5
-x[0] = 0.435
-x[1] = 3.552
-x[2] = 0.870
 
-x[3] = 0.329
-x[4] = 2.540
-x[5] = 1.940
+def evalg(xnew, eta, r):
+  return evalg_quadratic(xnew, eta, r)
 
-x[0] = 3.3
-x[1] = .01
-x[2] = 1.87
-x[3] = 0
+x = rand(3)*5
 
+# # Linear:
+# x[0] = 2.079
+# x[1] = -1.234
+# x[2] = 1.990
+# x[3] = 1.705
+# x[4] = 0
 
-
-x[0] = 1.096
-x[1] = 1.651
-x[2] = 0.331
-x[3] = 0.072
-x[4] = 1.966
-x[5] = 0.495
-
-
+# Quadratic:
+x[0] = 0.609
+x[1] = 0.978
+x[2] = 1.344
 
 
 colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']*2
-ff = array([.1, .2, .3])
+ff = array([.1, .2, .3, .4])
 #ff = array([.05, .1, .15, .2, .25, .3, .35, .4, .45, .5])
 able_to_read_file = True
 
@@ -89,7 +82,7 @@ for i in range(len(ff)):
     # distribution function at contact.  This is approximate, but it
     # is a good approximation.
     eta[i] = ff[i]
-    r = r_mc # shift to x = 0 at contact
+    r = r_mc
 
 if able_to_read_file == False:
   plot(arange(0,10,1), [0]*10, 'k')
@@ -98,89 +91,195 @@ if able_to_read_file == False:
   savefig("figs/ghs-g-ghs2.pdf")
   exit(0)
 
-def evalg(x, gsigma, r):
-  hsigma_rolloff = 5.0
-  hsigma = gsigma - 1 # (1 - 0.5*eta)/(1-eta)**3 - 1
-  h0 = hsigma # was x[0]*gsig
-  f0 = exp(-x[0]*r)
-  h1 = x[1]*hsigma
-  h1 = x[1]*hsigma_rolloff*(1-exp(-hsigma/hsigma_rolloff))
-  f1 = sin(x[2]*r) * exp(-x[3]*r)
-  h2 = -x[4]*hsigma**(2)
-  h2 = -x[4]*hsigma_rolloff**2*(1-exp(-hsigma**2/hsigma_rolloff**2))
-  f2 = sin(x[5]*r) * exp(-x[6]*r)
-  #h3 = -x[7]*hsigma**(3)
-  #f3 = numpy.sin(x[8]*r) * numpy.exp(-x[9]*r)
-  return 1 + h0*f0 + h1*f1 + h2*f2 #+ h3*f3
+def evalg_quadratic(xnew, eta, r):
+  z = r - sigma
+  hsigma = (1 - 0.5*eta)/(1 - eta)**3 - 1
+  density = 3/4/pi*eta
+  rhs = (1-eta)**4/(1 + 4*eta + 4*eta**2 - 4*eta**3 + eta**4)
 
-toprint = True
-def evalg2(xnew, eta, r):
+  a0 = xnew[0]
+  a1 = 0
+  a2 = xnew[1]
+  a3 = 0
+  a4 = xnew[2]
+
+  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
+
+  int_h1_over_a1 = 4*pi*(6 + sigma*a2*(4 + sigma*a2))/a2**4
+
+  int_h2_over_a3 = 8*pi*(12 + sigma*a4*(6 + sigma*a4))/a4**5
+
+  A = (rhs-1)/density - int_h0
+  B = int_h2_over_a3
+  C = int_h1_over_a1
+
+  a1 = hsigma*(a0 - 1 - hsigma) # sets slope at sigma
+
+  a3 = (A - C*a1)/B # sets integral
+
+  f0 = hsigma
+  j0 = exp(-a0*z)
+
+  f1 = a1
+  j1 = z*exp(-a2*z)
+
+  f2 = a3
+  j2 = z**2*exp(-a4*z)
+
+  return 1 + f0*j0 + f1*j1 + f2*j2
+
+
+def evalg_nosquare(xnew, eta, r):
   global toprint
   z = r - sigma
   hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
   density = 3/4/pi*eta
-  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)/3
+  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)
 
-  x0 = xnew[0]
-  x1 = xnew[1]
-  x2 = xnew[2]
-  x3 = xnew[3]
-  x4 = xnew[4]
-  x5 = xnew[5]
+  a0 = xnew[0]
+  a1 = 0 # this parameter is constrained via integral
+  a2 = xnew[1]
+  a3 = xnew[2]
+  a4 = 0
+  a5 = xnew[3]
+  a6 = xnew[4]
 
-  x3 = (-hsigma - hsigma**2 + hsigma*x0)/x4
+  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
 
-  int_h0 = 4*pi*hsigma*(2 + sigma*x0*(2 + sigma*x0))/x0**3
+  int_h1_over_a1 = 4*pi*a2* \
+      (sigma**2*a2**4 + 2*a2**2* \
+         (-1 + sigma*a3*(2 + sigma*a3)) + a3**2*(6 + sigma*a3*(4 + sigma*a3))) \
+         /(a2**2 + a3**2)**3
 
-  # int_h1_over_amp = 4*pi*hsigma*x1* \
-  #     (sigma**2*x1**4 + 2*x1**2* \
-  #        (-1 + sigma*x2*(2 + sigma*x2)) + x2**2*(6 + sigma*x2*(4 + sigma*x2))) \
-  #        /(x1**2 + x2**2)**3
+  int_h2_over_a4 = 4*pi*a5* \
+      (sigma**2*a5**4 + 2*a5**2* \
+         (-1 + sigma*a6*(2 + sigma*a6)) + a6**2*(6 + sigma*a6*(4 + sigma*a6))) \
+         /(a5**2 + a6**2)**3
 
-  # With sin^2:
-  int_h1_over_amp = 8*pi*hsigma*x1**2*(8*x1**2*x2**2*(1 + sigma*x2)*(3 + sigma*x2) \
-                  + 16*x1**4*(2 + sigma*x2*(2 + sigma*x2)) \
-                  + x2**4*(12 + sigma*x2*(6 + sigma*x2)))/(4*x1**2*x2 + x2**3)**3
+  A = (rhs-1)/density - int_h0
+  B = int_h2_over_a4
+  C = int_h1_over_a1
 
-  int_h2 = -4*pi*x3*x4* \
-      (sigma**2*x4**4 + 2*x4**2* \
-         (-1 + sigma*x5*(2 + sigma*x5)) + x5**2*(6 + sigma*x5*(4 + sigma*x5))) \
-         /(x4**2 + x5**2)**3
+  a1 = (A/C - B*hsigma/C/a5*(-1-hsigma + a0))/(1 - B*a2/C/a5)
 
-  # int_h3 = 8*pi*hsigma**2*x6*x7**2*(8*x7**2*x8**2*(1 + sigma*x8)*(3 + sigma*x8) \
-  #                 + 16*x7**4*(2 + sigma*x8*(2 + sigma*x8)) \
-  #                 + x8**4*(12 + sigma*x8*(6 + sigma*x8)))
+  a4 = hsigma/a5*(-1 - hsigma + a0 - a1*a2/hsigma) # this matches slope at x = sigma
 
-  a0 = ((rhs-1)/density - int_h0 - int_h2)/int_h1_over_amp
 
   if toprint:
-    print a0
+    print "a1: %.3f, a4: %.3f" %(a1, a4)
     toprint = False
 
   f0 = hsigma
-  j0 = exp(-x0*z)
+  j0 = exp(-a0*z)
 
-  f1 = a0*hsigma
-  j1 = sin(x1*z)**2*exp(-x2*z)
+  f1 = a1
+  j1 = sin(a2*z)*exp(-a3*z)
 
-  f2 = -x3
-  j2 = sin(x4*z)*exp(-x5*z)
+  f2 = a4
+  j2 = sin(a5*z)*exp(-a6*z)
 
-  # f3 = x6*hsigma**2
-  # j3 = sin(x7*r)**2*exp(-x8*r)
+  return 1 + f0*j0 + f1*j1 + f2*j2
 
-  return 1 + f0*j0 + f1*j1 + f2*j2 #+ f3*j3
+def evalg_linear(xnew, eta, r):
+  global toprint
+  z = r - sigma
+  hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
+  density = 3/4/pi*eta
+  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)
+
+  a0 = xnew[0]
+  a1 = 0 # this parameter is constrained via integral
+  a2 = xnew[1]
+  a3 = xnew[2]
+  a4 = 0
+  a5 = xnew[3]
+
+  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
+
+  int_h1_over_a1 = 4*pi*a2* \
+      (sigma**2*a2**4 + 2*a2**2* \
+         (-1 + sigma*a3*(2 + sigma*a3)) + a3**2*(6 + sigma*a3*(4 + sigma*a3))) \
+         /(a2**2 + a3**2)**3
+
+  int_h2_over_a4 = 4*pi*a5*(6 + sigma*a5*(4 + sigma*a5))/a5**4
+
+  A = (rhs-1)/density - int_h0
+  B = int_h2_over_a4
+  C = int_h1_over_a1
+
+  a1 = (A - B*hsigma*a0 + B*hsigma + B*hsigma**2)/(C - B*a2)
+
+  a4 = hsigma*a0 - a1*a2 - hsigma - hsigma**2
+
+  f0 = hsigma
+  j0 = exp(-a0*z)
+
+  f1 = a1
+  j1 = sin(a2*z)*exp(-a3*z)
+
+  f2 = a4
+  j2 = z*exp(-a5*z)
+
+  return 1 + f0*j0 + f1*j1 + f2*j2
+
+def evalg_cubic(xnew, eta, r):
+  global toprint
+  z = r - sigma
+  hsigma = (1 - 0.5*eta)/(1-eta)**3 - 1
+  density = 3/4/pi*eta
+  rhs = (1-eta)**4/(1+4*eta+4*eta**2-4*eta**3+eta**4)
+
+  a0 = xnew[0]
+  a1 = 0
+  a2 = xnew[1]
+  a3 = 0
+  a4 = xnew[2]
+  a5 = xnew[3]
+  a6 = xnew[4]
+
+  # a6 = a0
+  # a4 = a0
+  # a2 = a0
+
+  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
+
+  int_h1_over_a1 = 4*pi*(6 + sigma*a2*(4 + sigma*a2))
+
+  int_h2_over_a3 = 8*pi*(12 + sigma*a4*(6 + sigma*a4))/a4**5
+
+  int_h3 = a5*24*pi*(20 + sigma*a6*(8 + sigma*a6))/a6**6
+
+  A = (rhs-1)/density - int_h0 - int_h3
+  B = int_h2_over_a3
+  C = int_h1_over_a1
+
+  a1 = hsigma*(a0 - 1 - hsigma) # sets slope at sigma
+
+  a3 = (A - C*a1)/B # sets integral
+
+  f0 = hsigma
+  j0 = exp(-a0*z)
+
+  f1 = a1
+  j1 = z*exp(-a2*z)
+
+  f2 = a3
+  j2 = z**2*exp(-a4*z)
+
+  f3 = a5
+  j3 = z**3*exp(-a6*z)
+
+  return 1 + f0*j0 + f1*j1 + f2*j2 + f3*j3
 
 def dist(x):
   # function with x[i] as constants to be determined
-  g = zeros_like(etaconcatenated)
-  for i in range(len(g)):
-    g[i] = evalg2(x, etaconcatenated[i], rconcatenated[i])
-  return g
+  R, ETA = meshgrid(r, eta)
+  g = zeros_like(ETA)
+  g = evalg(x, ETA, R)
+  return reshape(g, len(eta)*len(r))
 
 def dist2(x):
-  return dist(x) - ghsconcatenated
-
+  return dist(x) - reshape(ghs, len(eta)*len(r))
 
 ghsconcatenated = ghs[0]
 for i in range(1,len(ff)):
@@ -206,7 +305,8 @@ while (j < len(eta)):
 
 vals = zeros_like(x)
 
-print "beginning least squares fit..."
+chi2 = sum(dist2(x)**2)
+print "beginning least squares fit, chi^2 initial: %g" %chi2
 vals, mesg = leastsq(dist2, x)
 chi2 = sum(dist2(vals)**2)
 print "original fit complete, chi^2: %.3f" % chi2
@@ -234,8 +334,19 @@ for i in range(len(ff)):
   #print density, integral, rhs
   #print "ff: %.2f\t thing: %g" %(ff[i], 1 - rho*integral - rhs)
   figure(2)
-  plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
+  #plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
   plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
+  # calculating integral:
+  #mc:
+  r_mc, ghs[i]
+  integrand_mc = 4*pi*r_mc*r_mc*ghs[i]
+  integrand_ours = 4*pi*r_mc*r_mc*g[i*len(r):(i+1)*len(r)]
+  integral_mc = sum(integrand_mc)/len(integrand_mc)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
+  integral_ours = sum(integrand_ours)/len(integrand_ours)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
+  print("Int_mc: %6.3f, Int_ours: %6.3f, Diff: %6.3f" %(integral_mc, integral_ours, integral_ours-integral_mc))
+
+
+
   #plot(r_mc, numpy.abs(numpy.asarray(ghsconcatenated[i*len(r):(i+1)*len(r)]) - ghs[i]), color+'-')
 
 
@@ -261,7 +372,7 @@ savefig("figs/ghs-g-ghs2.pdf")
 # figure(3)
 # for eta in [.5, .6, .7, .8]:
 #   gsigma = (1-eta/2)/(1-eta)**3
-#   plot(r_mc, evalg2(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
+#   plot(r_mc, evalg(vals, eta, r), label='eta %g  gsig %g'%(eta, gsigma))
 axhline(y=0)
 xlim(2,6.5)
 legend(loc='best')
