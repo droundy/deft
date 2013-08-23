@@ -106,11 +106,11 @@ function at contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
   gross2009density}, and derived a significantly improved
 approximation for the averaged distribution function at contact.
 
-We will apply this improved $g_\sigma^{HS}$ to a SAFT-based
-classical density functional for water~\cite{hughes2013classical}.
-This functional was constructed so as to reproduce in the homogeneous
-limit the 4-site optimal SAFT model for water developed by Clark
-\emph{et al.}~\cite{clark2006developing}.  The DFT of
+We will apply this improved $g_\sigma^{HS}$ to a SAFT-based classical
+density functional for water~\cite{hughes2013classical}.  This
+functional was constructed to reduce in the homogeneous limit
+to the 4-site optimal SAFT model for water developed by Clark \emph{et
+  al.}~\cite{clark2006developing}.  The DFT of
 Ref.~\citenum{hughes2013classical} uses the association free energy
 functional of Yu and
 Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, which is based on a
@@ -217,12 +217,13 @@ hydrophobic cases of hard rods and the hard spherical solutes.
 \begin{center}
 \includegraphics[width=3.5in]{figs/density-compare}
 \end{center}
-\caption{ Density profiles for a water around a single hydrophobic
-  rod of radius 0.2 nm. The solid red profile is the density using our new functional
-  and the dashed blue profile the result of our old functional.  For
-  scale, under the profiles is a cartoon of a string of hard
-  spheres touching in one dimension. The horizontal black dotted line
-  is the bulk density for water.}
+\caption{ Density profiles for a water around a single hydrophobic rod
+  of radius 0.1 nm. The solid red profile is from the functional
+  developed in this paper and the dashed blue profile is the result
+  from Ref. \cite{hughes2013classical}.  For scale, under the profiles
+  is a cartoon of a string of hard spheres touching in one
+  dimension. The horizontal black dotted line is the bulk density for
+  water and the vertical line on the left represents the wall of the rod.}
 \label{fig:density-single-rod}
 \end{figure}
 
@@ -230,8 +231,7 @@ hydrophobic cases of hard rods and the hard spherical solutes.
 
 We will first discuss the case of a single hydrophobic rod immersed in
 water. Figure~\ref{fig:density-single-rod} shows the density profile
-of water near a rod with radius~0.1~\AA\fixme{Eric, please figure this
-  radius out}.  The density computed using the functional of this
+of water near a rod with radius~1~\AA.  The density computed using the functional of this
 paper is qualitatively similar to that from
 Ref.~\citenum{hughes2013classical}, with a comparable density at
 contact---consistent with having made only a moderate change in the
@@ -246,10 +246,11 @@ to---molecules at the surface of the hard rod.
 \begin{center}
 \includegraphics[width=3.5in]{figs/single-rod-broken-HB}
 \end{center}
-\caption{Broken hydrogen bonds per nanometer for various hydrophobic rods
-  immeresed in water.  The solid red line uses our new functional
-  while the dashed blue line uses the old one. For large enough rods,
-  the graph increases linearly for both functionals.}
+\caption{Broken hydrogen bonds per nanometer for hydrophobic rods
+  immeresed in water.  The solid red line uses the functional developd
+  in this paper while the dashed blue line uses the functional from
+  Ref. \cite{hughes2013classical}. For large enough rods, the graph
+  increases linearly for both functionals.}
 \label{fig:single-rod-broken-HB}
 \end{figure}
 
@@ -270,9 +271,10 @@ water~\cite{chandler2005}.
 \begin{center}
 \includegraphics[width=3.5in]{figs/sphere-broken-HB}
 \end{center}
-\caption{Broken hydrogen bonds per for various hard spheres
-  immeresed in water.  The solid red line uses our new functional
-  while the dashed blue line uses the old one.}
+\caption{Broken hydrogen bonds for hard spheres immeresed in water.
+  The solid red line uses our the functional developd in this paper
+  while the dashed blue line is from
+  Ref. \cite{hughes2013classical}l.}
 \label{fig:spheres-broken-HB}
 \end{figure}
 

@@ -12,12 +12,12 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
-plots = ['this-work', 'fischer', 'gloor']
-numplots = 1
+plots = ['mc', 'this-work', 'fischer', 'this-work-mc']
+numplots = 4
 dx = 0.1
 ############################
-#z0 = 6.05
-z0 = float(sys.argv[1])
+z0 = 2.05
+#z0 = float(sys.argv[1])
 theta = 0
 ff = 0.3
 
@@ -49,31 +49,71 @@ def plot1d():
     i += 1
 
 def make_plots():
-  global ax, CS
+  global ax, CS, CB
   i = 0
+
   while i < numplots:
     ax[i].collections = []
-    g2[i] = read_walls(ff, z0, plots[i])
+    g2[i] = read_triplet(ff, z0, plots[i])
 
     rmax = len(g2[i][:,0])*dx-dx
     zmax = len(g2[i][0,:])*dx-dx
 
-    r = arange(0, rmax, dx)
-    z = arange(0, zmax, dx)
+    r = arange(0, rmax+dx/2, dx)
+    z = arange(0, zmax+dx/2, dx)
     Z, R = meshgrid(z, r)
-    print Z.shape
-    print R.shape
-    print g2[i].shape
-    CS = ax[i].contourf(Z, R, g2[i], levels, cmap=cmap)
-    CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap)
+    if i == 0:
+      # colormap
+      gmax = max(g2[0].max(axis=0))
+      white = g2[0][-1,0]
+      print white, gmax
+      xlo = 0.85*white/gmax
+      xhi = 1.15*white/gmax
+      xhier = (1+xhi)/2.0
+
+      cdict = {'red':   [(0.0,  0.0, 0.0),
+                         (xlo,  1.0, 1.0),
+                         (white/gmax,  1.0, 1.0),
+                         (xhi,  0.0, 0.0),
+                         (xhier,0.0, 0.0),
+                         (1.0,  1.0, 1.0)],
+
+               'green': [(0.0, 0.0, 0.0),
+                         (xlo,  0.1, 0.1),
+                         (white/gmax, 1.0, 1.0),
+                         (xhi, 0.0, 0.0),
+                         (xhier,1.0, 1.0),
+                         (1.0, 1.0, 1.0)],
+
+               'blue':  [(0.0,  0.0, 0.0),
+                         (xlo,  0.1, 0.1),
+                         (white/gmax,  1.0, 1.0),
+                         (xhi,  1.0, 1.0),
+                         (xhier,0.0, 0.0),
+                         (1.0,  0.0, 0.0)]}
+
+      cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
+      levels = linspace(0, gmax, gmax*21)
+    #######################
+
+    #CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+    CS = ax[i].pcolormesh(Z, R, g2[i], vmax=gmax, vmin=0, cmap=cmap)
+    CS2 = ax[i].pcolormesh(Z, -R, g2[i], vmax=gmax, vmin=0, cmap=cmap)
+    #CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap)
+
     ax[i].set_title('%s, $z_0 = %g$, $ff = %g$' %(plots[i], z0, ff))
     i += 1
-  #plot1d()
+  plot1d()
+  # colorbar
+  cax.collections = []
+  CB = colorbar(CS, cax=cax)
+
   draw()
 
-def read_walls(ff, z0, fun):
+def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    filename = "figs/mc/tripletWB-this-w-mc-%03.1f-%05.2f.dat" % (ff, z0)
+    #filename = "figs/mc/tripletWB-this-w-mc-%03.1f-%05.2f.dat" % (ff, z0)
+    filename = "figs/mc/triplet/tripletMC-%03.1f-%05.2f.dat" % (ff, z0)
   else:
     filename = "figs/tripletWB-%s-%1.2f-%1.1f0.dat" %(fun, ff, z0)
   print 'Using', filename
@@ -83,38 +123,40 @@ def read_walls(ff, z0, fun):
   data = loadtxt(filename)
   return data
 
-gmax = 4
-xlo = 0.85/gmax
-xhi = 1.15/gmax
-xhier = (1+xhi)/2.0
 
-cdict = {'red':   [(0.0,  0.0, 0.0),
-                   (xlo,  1.0, 1.0),
-                   (1.0/gmax,  1.0, 1.0),
-                   (xhi,  0.0, 0.0),
-                   (xhier,0.0, 0.0),
-                   (1.0,  1.0, 1.0)],
-
-         'green': [(0.0, 0.0, 0.0),
-                   (xlo,  0.1, 0.1),
-                   (1.0/gmax, 1.0, 1.0),
-                   (xhi, 0.0, 0.0),
-                   (xhier,1.0, 1.0),
-                   (1.0, 1.0, 1.0)],
-
-         'blue':  [(0.0,  0.0, 0.0),
-                   (xlo,  0.1, 0.1),
-                   (1.0/gmax,  1.0, 1.0),
-                   (xhi,  1.0, 1.0),
-                   (xhier,0.0, 0.0),
-                   (1.0,  0.0, 0.0)]}
-cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
-levels = linspace(0, gmax, gmax*20)
-levels = linspace(0,4, 100);
+g2 = range(numplots)
+g2[0] = read_triplet(ff, z0, 'mc')
 
 
-g2 = [0]*numplots
-g2[0] = read_walls(ff, z0, 'mc')
+gmax = max(g2[0].max(axis=0))
+# white = 1
+# xlo = 0.85*white/gmax
+# xhi = 1.15*white/gmax
+# xhier = (1+xhi)/2.0
+
+# cdict = {'red':   [(0.0,  0.0, 0.0),
+#                    (xlo,  1.0, 1.0),
+#                    (white/gmax,  1.0, 1.0),
+#                    (xhi,  0.0, 0.0),
+#                    (xhier,0.0, 0.0),
+#                    (1.0,  1.0, 1.0)],
+
+#          'green': [(0.0, 0.0, 0.0),
+#                    (xlo,  0.1, 0.1),
+#                    (white/gmax, 1.0, 1.0),
+#                    (xhi, 0.0, 0.0),
+#                    (xhier,1.0, 1.0),
+#                    (1.0, 1.0, 1.0)],
+
+#          'blue':  [(0.0,  0.0, 0.0),
+#                    (xlo,  0.1, 0.1),
+#                    (white/gmax,  1.0, 1.0),
+#                    (xhi,  1.0, 1.0),
+#                    (xhier,0.0, 0.0),
+#                    (1.0,  0.0, 0.0)]}
+# cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
+# levels = linspace(0, gmax, gmax*20)
+# levels = linspace(0,4, 100);
 
 rmax = len(g2[0][:,0])*dx
 zmax = len(g2[0][0,:])*dx
@@ -149,6 +191,7 @@ while i < numplots:
 
 num = 1000
 
+
 angline = [0]*numplots
 gslice = [0]*numplots
 i = 0
@@ -163,15 +206,22 @@ ax[4].set_ylim(0, 4)
 legend(plots)
 ax[4].axhline(y=1, linestyle='--', color='slategray')
 
-make_plots()
 #tight_layout()
+
+
+#CS = ax[i].contourf([[0]], [[0]], [[0]])
 
 # colorbar
 divider = make_axes_locatable(ax[0])
 cax = divider.append_axes("right", "5%", pad="3%")
-ticks = linspace(0, 5, 11)
+
+make_plots()
+
+ticks = arange(0, gmax+1, 0.5)
 CB = colorbar(CS, cax=cax)
 CB.set_ticks(ticks)
+
+make_plots()
 
 # slider
 z0_valinit = 2.05

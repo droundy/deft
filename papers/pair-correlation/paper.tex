@@ -288,10 +288,25 @@ We construct $g(r, g_\sigma)$ using several constraints.  Naturally,
   g(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
 In addition, we know that
+\begin{align}
+  1 + n\int\left[g(r)-1\right]d\rr &= nkT\chi_T
+\end{align}
 \begin{equation}
   \begin{split}
-  \int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
-  &= \eta \eta \cdots \fixme{fill in, double-check}
+    \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_T
+    = - \left(V\left(\frac{\partial p}{\partial V}\right)_T\right)^{-1}\\
+    p &= nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\\
+    \left(\frac{\partial p}{\partial V}\right)_T &= \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}\\
+    n &= \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}\\
+    \eta &= \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}\\
+    \left(\frac{\partial p}{\partial V}\right)_T &= -nkT\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
+    &  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
+    &= -nkT\frac{\eta}{V}\left[\frac{(1+2\eta-3\eta^2)(1-\eta) + 3 + 3\eta + 3\eta^2 - 3\eta^3}{(1-\eta)^4}\right]\\
+    &  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
+    &= -\frac{kT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
+    nkT\chi_T &= \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
+  %\int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
+  %&= \eta \eta \cdots \fixme{fill in, double-check}
   \end{split}
 \end{equation}
 where $\chi_T$ is the isothermal compressibility, for which we use the
@@ -325,23 +340,23 @@ simulations of the hard-sphere radial distribution function.
 %% \end{figure}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-1.pdf}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-1.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-1}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-2.pdf}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-2.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-2}
 \end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-3.pdf}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-3.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-3}
 \end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-alt-4.pdf}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-4.pdf}
   \caption{Pretty plot of the pair distribution function near a hard
     wall.}\label{fig:pair-distribution-4}
 \end{figure}
@@ -353,15 +368,39 @@ Fig.~\ref{fig:triplet-distribution-4} we can see the triplet
 distribution computed using Monte Carlo.
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/triplet-correlation-alt-3.pdf}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
   \caption{The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ plotted when $\rr_1$ and $\rr_2$ are
-    in contact.}\label{fig:triplet-distribution-3}
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
+    shows the triplet distribution function, with white corresponding
+    to the contact value of the \emph{pair} distribution function.
+    The plot on the right shows the value of $g^{(3)}$ along the path
+    shown as a dotted lin on the plot to the
+    left.}\label{fig:triplet-distribution-3}
 \end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/triplet-correlation-alt-4.pdf}
-  \caption{Pretty plot of the pair distribution function near a hard
-    wall.}\label{fig:triplet-distribution-4}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
+    shows the triplet distribution function, with white corresponding
+    to the contact value of the \emph{pair} distribution function.
+    The plot on the right shows the value of $g^{(3)}$ along the path
+    shown as a dotted lin on the plot to the
+    left.}\label{fig:triplet-distribution-4}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ plotted when $\rr_1$ and $\rr_2$ are
+    separated by the diameter of one sphere.}\label{fig:triplet-gap-distribution-3}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-inbetween-4.pdf}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ plotted when $\rr_1$ and $\rr_2$ are
+    separated by the diameter of one sphere.}\label{fig:triplet-gap-distribution-4}
 \end{figure}
 
 

@@ -16,8 +16,8 @@ from matplotlib.colors import NoNorm
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
-plots = ['mc']#, 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'fischer', 'gross']#, 'sphere-dft'] # , 'gloor'
+titles = plots#['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
 dx = 0.1
 ############################
 
@@ -40,35 +40,30 @@ def read_triplet_path(ff,z0,fun):
   if fun == 'mc':
     # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
-  # elif fun == 'sphere-dft':
-  #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
-  # else:
-  #   # input: "figs/walls.dat" % ()
-  #   # inp ut: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  # if (os.path.isfile(filename) == False):
-  #   # Just use walls data if we do not have the MC (need to be careful!)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-  data = loadtxt(filename)
-  if fun == 'mc':
-    data =  flipud(data)
-    data[:,0]-=4.995
+  elif fun == 'sphere-dft':
+    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
-    data[:,2]-=3
+    # input: "figs/tripletWB-path-*-%1.2f.dat" %(ff)
+    filename = "figs/tripletWB-path-%s-%1.2f.dat" %(fun, ff)
+  if (os.path.isfile(filename) == False):
+    # MC data is in repo, but dft isn't, so just use that for now so it will build.
+    # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
+
+  data = loadtxt(filename)
+  data =  flipud(data)
+  if fun == 'mc':
+    data[:,0]-=4.995
+  else: data[:,1]*=3 # fixme: this is just done so they kinda match up, but clearly isn't right
   return data[:,0:4]
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # inp ut: "figs/mc/triplet/tripletMC-%3.1f-2.05.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
   # else:
   #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  if (os.path.isfile(filename) == False):
-    # Just use walls data if we do not have the MC (need to be careful!)
-    print("warning! %s not found. 2d plot will be bad." %filename)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-    title("Using this work for pair instead of MC!")
   data = loadtxt(filename)
   return data
 
@@ -89,11 +84,12 @@ zplot.set_xticks([])
 xplot.axvline(x=sqrt(3), color='k')
 zplot.axvline(x=4, color='k')
 
-
-figtext(.613, .04, r"$\underbrace{\hspace{9em}}$", horizontalalignment='center')
-figtext(.613, .01, r"$x$", horizontalalignment='center')
-figtext(.796, .04, r"$\underbrace{\hspace{13.1em}}$", horizontalalignment='center')
-figtext(.796, .01, r"$z$", horizontalalignment='center')
+xloc = .621
+zloc = .802
+figtext(xloc, .04, r"$\underbrace{\hspace{9.3em}}$", horizontalalignment='center')
+figtext(xloc, .01, r"$x$", horizontalalignment='center')
+figtext(zloc, .04, r"$\underbrace{\hspace{12.3em}}$", horizontalalignment='center')
+figtext(zloc, .01, r"$z$", horizontalalignment='center')
 
 
 twod_plot.set_xlim(zmin, zmax)
@@ -165,7 +161,7 @@ zEoff = 3.8
 
 
 zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
-#zplot.legend(loc=3, ncol=2)
+zplot.legend(loc='best', ncol=2)
 
 
 twod_plot.set_aspect('equal')
@@ -188,27 +184,29 @@ Z, R = meshgrid(z, r)
 
 
 levels = linspace(0, gmax, gmax*100)
-xlo = 0.85/gmax
-xhi = 1.15/gmax
+gsigma = (1 - ff/2)/(1-ff)**3
+xlo = 0.85*gsigma/gmax
+xhi = 1.15*gsigma/gmax
+xwhite = 1.0*gsigma/gmax
 xhier = (1 + xhi)/2.0
 
 cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
                    (xhier,0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax, 1.0, 1.0),
+                   (xwhite, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
                    (xhier,1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
                    (xhier,0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
@@ -222,7 +220,7 @@ twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
-colorbar(CS, extend='neither', ticks=myticks)
+colorbar(CS, extend='neither') # , ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
 
@@ -246,6 +244,6 @@ plot(xs, ys, 'k--', linewidth=3)
 
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
-savefig("figs/triplet-correlation-alt-%d.pdf" % (int(ff*10)))
+savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
 

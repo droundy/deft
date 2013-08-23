@@ -59,16 +59,11 @@ def read_triplet_path(ff,z0,fun):
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-4.05.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-04.05.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % (ff)
   # else:
   #   # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  if (os.path.isfile(filename) == False):
-    # Just use walls data if we do not have the MC (need to be careful!)
-    print("warning! %s not found. 2d plot will be bad." %filename)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-    title("Using this work for pair instead of MC!")
   data = loadtxt(filename)
   return data
 
@@ -247,7 +242,7 @@ plot(xs, ys, 'k--', linewidth=3)
 # annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
-savefig("figs/triplet-correlation-2-alt-%d.pdf" % (int(ff*10)))
+twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
+savefig("figs/triplet-correlation-pretty-inbetween-%d.pdf" % (int(ff*10)))
 show()
 
