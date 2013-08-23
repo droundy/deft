@@ -14,15 +14,11 @@ rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
-at_wall = False
-
 # these are the things to set
-colors = ['k', 'b', 'g', 'r']
-plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
-if at_wall:
-  plots = ['mc', 'this-work', 'sphere-dft', 'fischer'] # , 'gloor'
-  titles = ['Monte Carlo', 'this work', 'sphere-dft', 'Fischer et al'] # , 'gloor'
+colors = ['k', 'b', 'g', 'r', 'm']
+plots = ['mc', 'this-work', 'sphere-dft', 'fischer', 'sokolowski'] # , 'gloor'
+titles = ['Monte Carlo', 'this work', 'test particle', 'Fischer et al', 'Sokolowski'] # , 'gloor'
+
 dx = 0.1
 ############################
 
@@ -46,7 +42,7 @@ def read_walls_path(ff,z0,fun):
     # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
   elif fun == 'sphere-dft':
-    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
+    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
     # input: "figs/walls.dat" % ()
     # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
@@ -58,11 +54,19 @@ def read_walls_path(ff,z0,fun):
     data[:,2]-=3
   return data[:,0:4]
 
-def read_walls_mc(ff, z0, fun):
+def read_walls_mc(ff, z0):
   # input: "figs/mc/wallsMC-pair-%1.1f-0.05-trimmed.dat" % (ff)
   filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f-trimmed.dat" % (ff, z0)
   data = loadtxt(filename)
   return data
+
+def read_walls_dft(ff, z0, fun):
+  if fun == 'sphere-dft':
+    filename = "figs/wallsWB-with-sphere-%1.2f-trimmed.dat" % 0.3 # ff FIXME others don't exist in repo yet
+  else:
+    # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
+    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+  return loadtxt(filename)
 
 ymax = 4
 
@@ -158,7 +162,7 @@ zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
 zplot.legend(loc=3, ncol=2)
 
 twod_plot.set_aspect('equal')
-g2mc = read_walls_mc(ff, z0, 'mc')
+g2mc = read_walls_mc(ff, z0)
 rbins = round(2*rmax/dx)
 zposbins = round(zmax/dx)
 znegbins = round(-zmin/dx)

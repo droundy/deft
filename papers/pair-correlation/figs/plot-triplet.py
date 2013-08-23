@@ -12,11 +12,12 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # these are the things to set
 colors = ['k', 'b', 'r', 'g']
-plots = ['mc']#, 'this-work', 'fischer', 'gloor']
+plots = ['this-work', 'fischer', 'gloor']
 numplots = 1
 dx = 0.1
 ############################
-z0 = 2.05
+#z0 = 6.05
+z0 = float(sys.argv[1])
 theta = 0
 ff = 0.3
 
@@ -54,12 +55,15 @@ def make_plots():
     ax[i].collections = []
     g2[i] = read_walls(ff, z0, plots[i])
 
-    rmax = len(g2[i][:,0])*dx
-    zmax = len(g2[i][0,:])*dx
+    rmax = len(g2[i][:,0])*dx-dx
+    zmax = len(g2[i][0,:])*dx-dx
 
     r = arange(0, rmax, dx)
     z = arange(0, zmax, dx)
     Z, R = meshgrid(z, r)
+    print Z.shape
+    print R.shape
+    print g2[i].shape
     CS = ax[i].contourf(Z, R, g2[i], levels, cmap=cmap)
     CS2 = ax[i].contourf(Z, -R, g2[i], levels, cmap=cmap)
     ax[i].set_title('%s, $z_0 = %g$, $ff = %g$' %(plots[i], z0, ff))
@@ -69,9 +73,9 @@ def make_plots():
 
 def read_walls(ff, z0, fun):
   if fun == 'mc':
-    filename = "figs/mc/triplet/wallsMC-triplet-%03.1f-%05.2f.dat" % (ff, z0)
+    filename = "figs/mc/tripletWB-this-w-mc-%03.1f-%05.2f.dat" % (ff, z0)
   else:
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+    filename = "figs/tripletWB-%s-%1.2f-%1.1f0.dat" %(fun, ff, z0)
   print 'Using', filename
   if (os.path.isfile(filename) == False):
     print "File does not exist:", filename
@@ -105,7 +109,8 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xhier,0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
-levels = linspace(0, gmax, gmax*21)
+levels = linspace(0, gmax, gmax*20)
+levels = linspace(0,4, 100);
 
 
 g2 = [0]*numplots
@@ -114,9 +119,9 @@ g2[0] = read_walls(ff, z0, 'mc')
 rmax = len(g2[0][:,0])*dx
 zmax = len(g2[0][0,:])*dx
 
-r = arange(0, rmax, dx)
-z = arange(-zmax, zmax/2, dx)
-Z, R = meshgrid(z, r)
+# r = arange(0, rmax, dx)
+# z = arange(-zmax, zmax/2, dx)
+# Z, R = meshgrid(z, r)
 
 fig = figure(1)
 ax=[0]*5
