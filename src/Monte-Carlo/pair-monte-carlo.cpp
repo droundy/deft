@@ -486,9 +486,10 @@ int main(int argc, char *argv[]){
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
-              const double bin1_volume = M_PI*(r1max*r1max-r1min*r1min)*dz;
+              const double bin1_volume = path ? M_PI*(r1max*r1max-r1min*r1min)*path_dz
+                                              : M_PI*(r1max*r1max-r1min*r1min)*dz;
               for (int k=0; k<zbins; k++) {
-                const double shell1_volume = path ? lenx*leny*path_dz : lenx*leny*dz;
+                const double shell1_volume = lenx*leny*dz;
                 const double density1 = double(density_histogram[k]*N)
                   /double(count)/shell1_volume;
                 const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
