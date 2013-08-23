@@ -550,34 +550,32 @@ int main(int argc, char *argv[]){
         // reflect = +/-1, used to reflect everything if you're past halfway through the box
         // except for the density
         const double z0 = reflect*spheres[i].z() + lenz/2;
-        if (!path || z0 < path_dz) {
-          const int z0_i = int(z0/dz);
-          const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
-          const int a1_z_i = int(z0/a1_dz);
+        const int z0_i = int(z0/dz);
+        const int z0_unreflected_i = int((spheres[i].z() + lenz/2)/dz);
+        const int a1_z_i = int(z0/a1_dz);
 
-          const int density_index = z0_unreflected_i;
-          density_histogram[density_index]++;
-
-          if (z0 < path_dz) path_density_histogram[0]++;
-          for (int xn = 0; xn < path_num_refs;  xn++) {
-            for (int yn = 0; yn < path_num_refs;  yn++) {
-              const double xref = lenx/path_num_refs*xn - lenx/2.0;
-              const double yref = leny/path_num_refs*yn - leny/2.0;
-              const double sph_r0 = distXYZ(spheres[i], Vector3d(xref,yref,-reflect*lenz/2));
-              if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
-                const double r0 = distXY(spheres[i], Vector3d(xref,yref,0));
-                const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
-                path_density_histogram[index] ++;
-              }
+        const int density_index = z0_unreflected_i;
+        density_histogram[density_index]++;
+        if (z0 < path_dz) path_density_histogram[0]++;
+        for (int xn = 0; xn < path_num_refs;  xn++) {
+          for (int yn = 0; yn < path_num_refs;  yn++) {
+            const double xref = lenx/path_num_refs*xn - lenx/2.0;
+            const double yref = leny/path_num_refs*yn - leny/2.0;
+            const double sph_r0 = distXYZ(spheres[i], Vector3d(xref,yref,-reflect*lenz/2));
+            if (sph_r0 > 2.0 && sph_r0 < 2.0 + path_dz) {
+              const double r0 = distXY(spheres[i], Vector3d(xref,yref,0));
+              const int index = 1 + int(acos(r0/sph_r0)/path_dtheta);
+              path_density_histogram[index] ++;
             }
           }
+        }
 
-          if (z0 > 2.0) {
-            const int z0_i_shifted = int((z0-2.0)/path_dz);
-            path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
-          }
-          //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-
+        if (z0 > 2.0) {
+          const int z0_i_shifted = int((z0-2.0)/path_dz);
+          path_density_histogram[1+path_thetabins+z0_i_shifted] ++;
+        }
+        //printf("Sphere at %.1f %.1f %.1f\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+        if (!path || z0 < path_dz) {
           for (int k=0; k<N; k++) {
             if (i != k) { // don't look at a sphere in relation to itself
               const double z1 = reflect*spheres[k].z() + lenz/2;
