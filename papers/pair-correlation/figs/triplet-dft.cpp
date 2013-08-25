@@ -34,7 +34,12 @@ double mc (double local_eta, double r, double r_step, double g[]);
 
 // Maximum and spacing values for plotting
 
-const double dx = 0.1;
+//const double dx = 0.1;
+const double dx = .1/1.5;//This is a bit smaller than 1/sqrt(2),
+                          //which allows for a speration delta of 1
+                          //when going around the circular wall and
+                          //not having to worry about a gridpoint
+                          //being within the wall.
 
 double mc_r_step;
 const int num_eta = 10;
@@ -97,7 +102,7 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 10;
+static double width = 20;
 const double dw = 0.001;
 const double spacing = 3; // space on each side
 
@@ -321,40 +326,38 @@ void run_walls(double eta, const char *name, Functional fhs) {
       return;
     }
 
-    double radius_path = 2.005; //this is the value of radius of the
+    const double delta = 0.1; //this is the value of radius of the
                               //particle as it moves around the
                               //contact sphere on its path
     int num = 100; //This is the same num that is in plot-path.py,
                   //splits up the theta part of path just like there
-    const Cartesian r0(0,0,radius_path);
-    double g2_path;
-    double x_path;
-    const double max_theta = M_PI/6.0+M_PI/2.0;
-    for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5) ;i++){
-      x_path = i*dx;
+    const Cartesian r0(0,0, 2.0+delta);
+    const double max_theta = M_PI - acos((1.0+delta/2.0)/(2.0+delta));
+    for (int i=0; i<int((width/2.0 - (3.0+2*delta) )/dx+0.5) ;i++){
+      double x_path = i*dx;
       const Cartesian r1(0,0,width/2.0-x_path);
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, width/2.0-x_path, 0.0);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
     }
     for (int i=0; i<num ;i++){
       double theta = i*max_theta/num;
-      x_path = i*max_theta/num*radius_path + width/2.0-2*radius_path;
-      const Cartesian r1(radius_path*sin(theta),0,radius_path*(1+cos(theta)));
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      double x_path = theta*(1.0+delta) + width/2.0 - (3.0+2*delta);
+      const Cartesian r1((1.0+delta)*sin(theta), 0, (3.0+2*delta)+(1.0+delta)*cos(theta));
+      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, radius_path*(1+cos(theta)), radius_path*sin(theta));
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
     }
-    for (int i=0; i<int((width/2.0-2*radius_path)/dx+0.5); i++){
+    for (int i=0; i<int((width/2.0-(1.0+delta)*sin(max_theta))/dx+0.5); i++){
       double r1x = i*dx;
-      x_path = i*dx + 2.0*cos(max_theta-M_PI/2.0) + max_theta*radius_path + width/2.0-2*radius_path;
-      const Cartesian r1(radius_path*sin(max_theta)+ r1x, 0, radius_path*(1+cos(max_theta)));
-      g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+      double x_path = i*dx + max_theta*(1.0+delta) + width/2.0 - (3.0+2*delta);
+      const Cartesian r1(sin(max_theta)*(1.0+delta)+ r1x, 0, 1.0+delta/2.0);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, radius_path*(1+cos(max_theta)), radius_path*sin(max_theta)+r1x);
+      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
     }
     fclose(out_path);
   }
