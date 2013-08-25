@@ -326,7 +326,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       return;
     }
 
-    const double delta = 0.1; //this is the value of radius of the
+    const double delta = .1; //this is the value of radius of the
                               //particle as it moves around the
                               //contact sphere on its path
     int num = 100; //This is the same num that is in plot-path.py,
@@ -343,17 +343,17 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     for (int i=0; i<num ;i++){
       double theta = i*max_theta/num;
-      double x_path = theta*(1.0+delta) + width/2.0 - (3.0+2*delta);
-      const Cartesian r1((1.0+delta)*sin(theta), 0, (3.0+2*delta)+(1.0+delta)*cos(theta));
+      double x_path = theta*(2.0+delta) + width/2.0 - (3.0+2*delta);
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (3.0+2*delta)+(2.0+delta)*cos(theta));
       double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
     }
-    for (int i=0; i<int((width/2.0-(1.0+delta)*sin(max_theta))/dx+0.5); i++){
+    for (int i=0; i<int((width/2.0-(2.0+delta)*sin(max_theta))/dx+0.5); i++){
       double r1x = i*dx;
-      double x_path = i*dx + max_theta*(1.0+delta) + width/2.0 - (3.0+2*delta);
-      const Cartesian r1(sin(max_theta)*(1.0+delta)+ r1x, 0, 1.0+delta/2.0);
+      double x_path = i*dx + max_theta*(2.0+delta) + width/2.0 - (3.0+2*delta);
+      const Cartesian r1(sin(max_theta)*(2.0+delta)+ r1x, 0, 1.0+delta/2.0);
       double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
