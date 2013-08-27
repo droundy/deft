@@ -92,7 +92,7 @@ of temperatures and pressures~\cite{muller2001molecular,
   tan2008recent}.  The association term in SAFT is based on Wertheim's
 first-order thermodynamic perturbation theory, which models fluids as
 hard-spheres with strong associative interactions at specific sites on
-the surfaces of the spheres~\cite{wertheim1984fluidsI,
+the surface of each sphere~\cite{wertheim1984fluidsI,
   wertheim1984fluidsII, wertheim1986fluidsIII, wertheim1986fluidsIV}.
 These association sites have an attractive interaction at contact, and
 rely on the hard-sphere radial distribution function at contact
@@ -125,18 +125,18 @@ association free energy functional.
 The classical density functional for water from
 Reference~\citenum{hughes2013classical} consists of four terms:
 \begin{align}
-  F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)]
+  F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)] 
   + F_{\text{disp}}[n(\rr)] + F_{\text{assoc}}[n(\rr)]
 \end{align}
 where $F_{\text{ideal}}$ is the ideal gas free energy and
 $F_{\text{HS}}$ is the hard-sphere excess free energy, for which we
 use the White Bear functional~\cite{roth2002whitebear}.
 $F_{\text{disp}}$ is the free energy contribution due to the
-square-well dispersion interaction.  The dispersion term of the free
-energy contains one empirical parameter, which is used to fit the
-surface tension of water near one atmosphere.  Finally,
-$F_{\text{assoc}}$ is the free energy contribution due to association,
-which is the term that we examine in this paper.
+square-well dispersion interaction; this term contains one empirical
+parameter, $\lscale$, which is used to fit the surface tension of water near one
+atmosphere.  Finally, $F_{\text{assoc}}$ is the free energy
+contribution due to association, which is the term that we examine in
+this paper.
 
 The association free energy for our four-site model has the form:
 \begin{align}
@@ -187,7 +187,11 @@ contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
 free energy.  The radial distribution function of the square-well
 fluid $g^\textit{SW}_\sigma$ is written as a perturbative correction
-to the hard-sphere fluid correlation function $g^\textit{HS}_\sigma$.
+to the hard-sphere radial distribution function
+$g^\textit{HS}_\sigma$, which comes from Yu and Wu
+\cite{yu2002fmt-dft-inhomogeneous-associating} for
+Ref.~\citenum{hughes2013classical} and we have previously
+derived \cite{schulte2012using} for this work.
 
 \begin{figure}
 \begin{center}
@@ -218,12 +222,13 @@ hydrophobic cases of hard rods and the hard spherical solutes.
 \includegraphics[width=3.5in]{figs/density-compare}
 \end{center}
 \caption{ Density profiles for a water around a single hydrophobic rod
-  of radius 0.1 nm. The solid red profile is from the functional
+  of radius 0.1~nm. The solid red profile is from the functional
   developed in this paper and the dashed blue profile is the result
   from Ref. \cite{hughes2013classical}.  For scale, under the profiles
   is a cartoon of a string of hard spheres touching in one
   dimension. The horizontal black dotted line is the bulk density for
-  water and the vertical line on the left represents the wall of the rod.}
+  water and the vertical line on the left at 0.1~nm represents the
+  rod wall.}
 \label{fig:density-single-rod}
 \end{figure}
 
@@ -274,7 +279,7 @@ water~\cite{chandler2005}.
 \caption{Broken hydrogen bonds for hard spheres immeresed in water.
   The solid red line uses our the functional developd in this paper
   while the dashed blue line is from
-  Ref. \cite{hughes2013classical}l.}
+  Ref. \cite{hughes2013classical}.}
 \label{fig:spheres-broken-HB}
 \end{figure}
 
