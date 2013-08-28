@@ -34,9 +34,9 @@ def read_a1_mc():
   return data[:,0], data[:,1]
 
 def read_da_dz(version):
-  # input: "figs/walls.dat" ()
-  # input: "figs/walls/walls_daWB-*-%04.2f-%1.3f.dat" % (eta,delta_r)
-  filename = "figs/walls/walls_daWB-%s-%04.2f-%1.3f.dat" % (version,eta,delta_r) #0.%d0
+  # input: "figs/walls.dat" % ()
+  # input: "figs/walls/walls_daWB-*-%04.2f-%05.3f.dat" % (eta,delta_r)
+  filename = "figs/walls/walls_daWB-%s-%04.2f-%05.3f.dat" % (version,eta,delta_r) #0.%d0
   #print 'Using', filename
   try:
     data = loadtxt(filename)

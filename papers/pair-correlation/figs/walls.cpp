@@ -114,7 +114,7 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 // Here we set up the lattice.
 static double width = 30;
-const double dw = 0.001;
+const double dw = 0.0001;
 const double spacing = 3; // space on each side
 
 double radial_distribution(double gsigma, double r) {
@@ -281,7 +281,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
                            + ChemicalPotential(mu));
 
   Lattice lat(Cartesian(dw,0,0), Cartesian(0,dw,0), Cartesian(0,0,width+2*spacing));
-  GridDescription gd(lat, 0.01);
+  GridDescription gd(lat, 0.001);
 
   Grid potential(gd);
   Grid constraint(gd);
@@ -325,9 +325,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   char *plotname_path = new char[4096];
   for (int version = 0; version < numplots; version++) {
-    const double z0 = 3.05;
+    const double z0 = 3.005;
     sprintf(plotname_path,
-            "papers/pair-correlation/figs/walls/walls%s-path-%s-pair-%04.2f-%1.2f.dat",
+            "papers/pair-correlation/figs/walls/walls%s-path-%s-pair-%04.2f-%05.3f.dat",
             name, fun[version], eta, z0-3);
     FILE *out_path = fopen(plotname_path, "w");
     if (!out_path) {
@@ -407,7 +407,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //This is the begginning of the integral to get a1.
   //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
-    for (double delta_r=2.005; delta_r<4.5; delta_r+=0.5){
+    for (double delta_r=2.005; delta_r<3.5; delta_r+=1.0){
       const double dv = 0.01;
       char *plotname_a = new char [4096];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%1.3f.dat", name, fun[version], eta, delta_r);
@@ -417,7 +417,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
         return;
       }
       delete[] plotname_a;
-      for (double z0 = 2; z0 < 13; z0 += dz) {
+      for (double z0 = 2; z0 < 9; z0 += dz) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
@@ -494,7 +494,7 @@ int main(int, char **) {
   fclose(fout);
   read_mc();
   printf("Done with read\n");
-  for (double this_eta = 0.1; this_eta < 0.55; this_eta += 0.1) {
+  for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
     run_walls(this_eta, "WB", WB);
   }
   // Just create this file so make knows we have run.

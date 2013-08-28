@@ -17,13 +17,12 @@ from matplotlib.colors import NoNorm
 # these are the things to set
 colors = ['k', 'b', 'g', 'r', 'm']
 plots = ['mc', 'this-work', 'sphere-dft', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'test particle', 'Fischer et al', 'Sokolowski'] # , 'gloor'
+titles = ['Monte Carlo', 'this work', 'test particle', 'Fischer et al.', 'Sokolowski'] # , 'gloor'
 
 dx = 0.1
 ############################
 
 able_to_read_file = True
-z0 = 0.05
 
 # Set the max parameters for plotting.
 zmax = 6
@@ -37,7 +36,7 @@ if len(sys.argv) < 2:
 ff = float(sys.argv[1])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
-def read_walls_path(ff,z0,fun):
+def read_walls_path(ff, fun):
   if fun == 'mc':
     # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % ff
@@ -45,8 +44,8 @@ def read_walls_path(ff,z0,fun):
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
     # input: "figs/walls.dat" % ()
-    # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
-    filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+    # input: "figs/walls/wallsWB-path-*-pair-%1.2f-0.005.dat" %(ff)
+    filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
   data = loadtxt(filename)
   if fun == 'mc':
     data[:,0]-=4.995
@@ -54,18 +53,16 @@ def read_walls_path(ff,z0,fun):
     data[:,2]-=3
   return data[:,0:4]
 
-def read_walls_mc(ff, z0):
-  # input: "figs/mc/wallsMC-pair-%1.1f-0.05-trimmed.dat" % (ff)
-  filename = "figs/mc/wallsMC-pair-%1.1f-%1.2f-trimmed.dat" % (ff, z0)
-  data = loadtxt(filename)
-  return data
+def read_walls_mc(ff):
+  # The 0.05 below is deceptive (ask Paho).
+  return loadtxt("figs/mc/wallsMC-pair-%1.1f-0.05-trimmed.dat" % ff)
 
-def read_walls_dft(ff, z0, fun):
+def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-%1.2f-trimmed.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
+    # input: "figs/walls/wallsWB-*-pair-%1.2f-0.005.dat" %(ff)
+    filename = "figs/walls/wallsWB-%s-pair-%1.2f-0.005.dat" %(fun, ff)
   return loadtxt(filename)
 
 ymax = 4
@@ -95,32 +92,29 @@ twod_plot.set_ylim(-ymax, ymax)
 fig.subplots_adjust(hspace=0.001)
 
 for i in range(len(plots)):
-    g2_path = read_walls_path(ff, z0, plots[i])
+    g2_path = read_walls_path(ff, plots[i])
     if able_to_read_file == False:
         plot(arange(0,10,1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
         savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
         savefig(savedfilename)
         exit(0)
-    # FIXME:  once we have sufficient data, we will want to remove this smoothing...
-    old = 1.0*g2_path[:,1]
-    averaged = 1.0*old
-    # averaged[1:] += old[:len(averaged)-1]
-    # averaged[:len(averaged)-1] += old[1:]
-    # averaged /= 3;
+    x = g2_path[:,3]
+    z = g2_path[:,2]
+    g = g2_path[:,1]
+    zcontact = z.min()
+    xcontact = 2.0051
 
-    # Find x-portion:
-    z_beg = g2_path[0,2]
-    coord = 0
-    z_final = z_beg
-    while z_final == z_beg:
-      coord += 1
-      z_final = g2_path[coord,2]
+    if plots[i] == 'fischer':
+      # Fischer et al only predict pair distribution function in
+      # contact.  We do this using "&" below which means "and".
+      incontact = (x<xcontact) & (z<2)
+      zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
+    else:
+      xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
+      zplot.plot(z[x<xcontact],g[x<xcontact], label=titles[i], color=colors[i])
 
-    xplot.plot(g2_path[:coord,3],averaged[:coord], label=titles[i], color=colors[i])
-    zplot.plot(g2_path[coord-1:,2],averaged[coord-1:], label=titles[i], color=colors[i])
-
-g2nice = read_walls_path(ff, z0, 'this-work')
+g2nice = read_walls_path(ff, 'this-work')
 
 def g2pathfunction_x(x):
     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
@@ -162,7 +156,7 @@ zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
 zplot.legend(loc=3, ncol=2)
 
 twod_plot.set_aspect('equal')
-g2mc = read_walls_mc(ff, z0)
+g2mc = read_walls_mc(ff)
 rbins = round(2*rmax/dx)
 zposbins = round(zmax/dx)
 znegbins = round(-zmin/dx)
