@@ -60,6 +60,8 @@ changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_input = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\)", re.M)
+changing_loadtxt_noparens = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*([^\)]*)\)", re.M)
+changing_loadtxt = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*(\(.*\))\)", re.M)
 changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.*\))")
 
 def Matplotlib(env, source, py_chdir = ""):
@@ -75,6 +77,8 @@ def Matplotlib(env, source, py_chdir = ""):
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents)
         cinputs = changing_input.findall(contents)
+        cinputs += changing_loadtxt.findall(contents)
+        cinputs += changing_loadtxt_noparens.findall(contents)
         allvalues = [{}]
         commandlineformat = ""
         commandlineargs = []
