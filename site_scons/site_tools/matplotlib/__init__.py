@@ -60,9 +60,16 @@ changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_input = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\)", re.M)
-changing_loadtxt_noparens = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*([^\)]*)\)", re.M)
-changing_loadtxt = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*(\(.*\))\)", re.M)
+changing_loadtxt_noparens = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*([^\(\)]*)\)", re.M)
+changing_loadtxt = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
 changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.*\))")
+
+def friendly_eval(code, context, local = None):
+    try:
+        return eval(code, local)
+    except:
+        print ("\nError evaluating '%s' from file %s" % (code, context))
+        raise
 
 def Matplotlib(env, source, py_chdir = ""):
     if len(source) < 4 or source[len(source)-3:] != ".py":
@@ -86,21 +93,22 @@ def Matplotlib(env, source, py_chdir = ""):
             commandlineformat += " %s"
             commandlineargs.append(arg[0])
             newallvalues = []
-            for v in eval(arg[1]):
+            for v in friendly_eval(arg[1], source):
                 for av in allvalues:
                     newav = av.copy()
                     newav[arg[0]] = v
                     newallvalues.append(newav)
             allvalues = newallvalues
         for a in allvalues:
-            aa = commandlineformat % eval('(' + string.join(commandlineargs, ",") + ')', a)
+            aa = commandlineformat % friendly_eval('(' + string.join(commandlineargs, ",") + ')', 'file '+ source, a)
             extrainputs = []
             extraoutputs = []
             for i in cinputs:
-                fname = i[0] % eval(i[1], a)
+                #print 'examining input:', i[0], '%', '"%s"' % i[1]
+                fname = i[0] % friendly_eval(i[1], source, a)
                 extrainputs.append(fname)
             for o in coutputs:
-                fname = o[0] % eval(o[1], a)
+                fname = o[0] % friendly_eval(o[1], source, a)
                 extraoutputs.append(fname)
             runpython(env, source, aa, inputs + extrainputs, outputs + extraoutputs, py_chdir)
     else:
