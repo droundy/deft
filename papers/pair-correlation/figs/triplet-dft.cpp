@@ -350,7 +350,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     const Cartesian r0(0,0, 2.0+delta);
     const double max_theta = M_PI*2.0/3;
     const double ds = 0.001; // step size to use in path plots
-    for (double z = 7; z >= 2*(2.0 + delta); z-=ds) {
+    for (double z = 7; z >= 3*(2.0 + delta); z-=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
@@ -359,7 +359,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     const double dtheta = ds/2;
     for (double theta = 0; theta <= max_theta; theta += dtheta){
-      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(2+cos(theta)));
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
