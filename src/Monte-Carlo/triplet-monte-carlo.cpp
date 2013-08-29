@@ -424,14 +424,14 @@ int main(int argc, char *argv[]){
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
             const double g3 = n3/density/density/density;
             s += path_width;
-            const double z2 = (path_zbins - i - 1)*path_width + path_radius;
+            const double z2 = (path_zbins - i - 1)*path_width + 2.0*path_radius;
             const double x2 = path_cyl_dr/2.0;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point coming over and the first
           // point in the theta band
-          const double z0 = path_radius;
+          const double z0 = 2.0*path_radius;
           const double x0 = path_cyl_dr/2.0;
           const double z1 = path_radius + path_radius*cos(path_dtheta/2);
           const double x1 = path_radius*sin(path_dtheta/2);
@@ -463,14 +463,15 @@ int main(int argc, char *argv[]){
           const double x2 = path_radius*sin(theta_m);
 
           const double z3 = path_radius/2.0;
-          const double x3 = sqrt(3)*R + path_width/2.0;
+          const double xmin = sqrt(3.0)*path_radius/2.0;
+          const double x3 = xmin + path_width/2.0;
           s += sqrt((z3-z2)*(z3-z2) + (x3-x2)*(x3-x2));
           ////
           s -= path_width/2.0;
           for(int i=path_zbins+path_thetabins; i<path_zbins+path_thetabins+path_xbins; i++){
             const double probability = double(path_histogram[i])
               /double(numinhistogram);
-            const double x2 = (i-path_zbins-path_thetabins+0.5)*path_width + sqrt(3)*R;
+            const double x2 = (i-path_zbins-path_thetabins+0.5)*path_width + xmin;
             const double path_vol2 = M_PI*(path_maxrad*path_maxrad -
                                            path_minrad*path_minrad)*path_width;
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
