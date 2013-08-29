@@ -3,6 +3,11 @@
 #pragma once
 
 #include <stdio.h>
+#include "Faddeeva.hh"
+
+inline double erfi(double x) {
+  return Faddeeva::erfi(x);
+}
 
 inline double sqr(double x) { return x*x; }
 

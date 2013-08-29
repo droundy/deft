@@ -145,7 +145,7 @@ for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispe
 # Here we have ordinary source code:
 
 generic_sources = Split("""
-  src/lattice.cpp src/utilities.cpp
+  src/lattice.cpp src/utilities.cpp src/Faddeeva.cc
   src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
   src/IdealGas.cpp src/ChemicalPotential.cpp
   src/HardSpheres.cpp src/ExternalPotential.cpp
