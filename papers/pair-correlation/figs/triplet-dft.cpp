@@ -113,7 +113,7 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 30;
+static double width = 20;
 const double dw = 0.001;
 
 double radial_distribution(double gsigma, double r) {
@@ -251,11 +251,11 @@ static void took(const char *name) {
 
 
 
-void run_walls(double eta, const char *name, Functional fhs) {
+void run_with_eta(double eta, const char *name, Functional fhs) {
   // Generates a data file for the pair distribution function, for filling fraction eta
   // and distance of first sphere from wall of z0. Data saved in a table such that the
   // columns are x values and rows are z1 values.
-  printf("Now starting run_walls with eta = %g name = %s\n",
+  printf("Now starting run_with_eta with eta = %g name = %s\n",
          eta, name);
   Functional f = OfEffectivePotential(fhs + IdealGas());
   double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
@@ -330,6 +330,10 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
   delete[] plotname;
   took("Dumping the triplet dist plots");
+  const double ds = 0.01; // step size to use in path plots, FIXME increase for publication!
+  const double delta = .1; //this is the value of radius of the
+                           //particle as it moves around the contact
+                           //sphere on its path
   char *plotname_path = new char[4096];
   for (int version = 0; version < numplots; version++) {
     sprintf(plotname_path,
@@ -342,15 +346,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     fprintf(out_path, "# unused\tg3\tz\tx\n");
 
-    const double delta = .1; //this is the value of radius of the
-                              //particle as it moves around the
-                              //contact sphere on its path
-    int num = 100; //This is the same num that is in plot-path.py,
-                  //splits up the theta part of path just like there
     const Cartesian r0(0,0, 2.0+delta);
     const double max_theta = M_PI*2.0/3;
-    const double ds = 0.001; // step size to use in path plots
-    for (double z = 7; z >= 3*(2.0 + delta); z-=ds) {
+    for (double z = 7; z >= 2*(2.0 + delta); z-=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
@@ -359,7 +357,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     const double dtheta = ds/2;
     for (double theta = 0; theta <= max_theta; theta += dtheta){
-      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(2+cos(theta)));
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
@@ -385,14 +383,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     fprintf(out_path, "# unused\tg3\tz\tx\n");
 
-    const double delta = .1; //this is the value of radius of the
-                              //particle as it moves around the
-                              //contact sphere on its path
-    int num = 100; //This is the same num that is in plot-path.py,
-                  //splits up the theta part of path just like there
     const Cartesian r0(0,0, 4.0+2*delta);
     const double max_theta = M_PI;
-    const double ds = 0.001; // step size to use in path plots
     for (double z = 10; z >= 3*(2.0 + delta); z-=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
@@ -402,7 +394,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     const double dtheta = ds/2;
     for (double theta = 0; theta <= max_theta; theta += dtheta){
-      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(2+cos(theta)));
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
@@ -420,10 +412,18 @@ void run_walls(double eta, const char *name, Functional fhs) {
   delete[] plotname_path;
 }
 
-int main(int, char **) {
+int main(int argc, char **argv) {
   read_mc();
-  for (double this_eta = 0.3; this_eta < 0.45; this_eta += 0.1) {
-    run_walls(this_eta, "WB", WB);
+  double this_eta = 0;
+  if (argc > 1) {
+    sscanf(argv[1], "%lg", &this_eta);
+  }
+  if (this_eta > 0) {
+    run_with_eta(this_eta, "WB", WB);
+  } else {
+    for (double this_eta = 0.3; this_eta < 0.45; this_eta += 0.1) {
+      run_with_eta(this_eta, "WB", WB);
+    }
   }
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
