@@ -273,16 +273,19 @@ void run_walls(double eta, const char *name, Functional fhs) {
   const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*dw*dw*width;
   const double precision = fabs(approx_energy*1e-1);//1e-4);
   //printf("Minimizing to %g absolute precision...\n", precision);
-  Minimizer min = Precision(precision,
-                            PreconditionedConjugateGradient(f, gd, 1,
-                                                            &potential,
-                                                            QuadraticLineMinimizer));
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
-    double peak = peak_memory()/1024.0/1024;
-    double current = current_memory()/1024.0/1024;
-    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+  { // Put mimizer in block so as to free it when we finish minimizing to save memory.
+    Minimizer min = Precision(precision,
+                              PreconditionedConjugateGradient(f, gd, 1,
+                                                              &potential,
+                                                              QuadraticLineMinimizer));
+    for (int i=0;min.improve_energy(true) && i<100;i++) {
+      double peak = peak_memory()/1024.0/1024;
+      double current = current_memory()/1024.0/1024;
+      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+      fflush(stdout);
+    }
+    took("Doing the minimization");
   }
-  took("Doing the minimization");
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
@@ -371,6 +374,50 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     fclose(out_path);
   }
+  for (int version = 0; version < numplots; version++) {
+    sprintf(plotname_path,
+            "papers/pair-correlation/figs/triplet-path-inbetween-%s-%04.2f.dat",
+            fun[version], eta);
+    FILE *out_path = fopen(plotname_path, "w");
+    if (!out_path) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_path);
+      return;
+    }
+    fprintf(out_path, "# unused\tg3\tz\tx\n");
+
+    const double delta = .1; //this is the value of radius of the
+                              //particle as it moves around the
+                              //contact sphere on its path
+    int num = 100; //This is the same num that is in plot-path.py,
+                  //splits up the theta part of path just like there
+    const Cartesian r0(0,0, 4.0+2*delta);
+    const double max_theta = M_PI;
+    const double ds = 0.001; // step size to use in path plots
+    for (double z = 10; z >= 3*(2.0 + delta); z-=ds) {
+      const Cartesian r1(0,0,z);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
+    const double dtheta = ds/2;
+    for (double theta = 0; theta <= max_theta; theta += dtheta){
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
+    for (double x = 0; x<=6; x+=ds){
+      const Cartesian r1(x, 0, 2.0+delta);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
+    fclose(out_path);
+  }
+  delete[] plotname_path;
 }
 
 int main(int, char **) {
