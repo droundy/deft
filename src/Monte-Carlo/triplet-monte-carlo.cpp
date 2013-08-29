@@ -586,8 +586,7 @@ int main(int argc, char *argv[]){
             for (double x2=dx/2.0; x2<lenx/2.0; x2+=dx) {
                 const double x2min = x2 - dz/2.0;
                 const double x2max = x2 + dz/2.0;
-                const double volume2 = path ? M_PI*(x2max*x2max - x2min*x2min)*path_width
-                                            : M_PI*(x2max*x2max - x2min*x2min)*dz;
+                const double volume2 = M_PI*(x2max*x2max - x2min*x2min)*dz;
               for (double z2=dz/2.0; z2<lenx/2.0; z2+=dz) {
                 const double probability =
                   double(histogram[z1_i*xbins*z2bins + int(x2/dx)*z2bins +
