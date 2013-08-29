@@ -17,12 +17,25 @@ inline double distXYZ(Vector3d a, Vector3d b);
 inline Vector3d periodicDiff(Vector3d a, Vector3d b);
 static void took(const char *name);
 
+const double R = 1.0;
+
 const double dz = 0.1;
 const double dx = 0.1;
 
-const double path_dr = 0.01;
-const double path_dx = 0.1;
-const double path_dtheta = 2.0/3.0*M_PI/42.0;
+const double path_contact_delta = 0.1;
+const double path_width = 0.01;
+const double path_cyl_dr = 0.1; // radius of the cylinders that go along
+// the z-axis, larger than the normal path width because the statistics are worst
+// here and resolution in this dimension is least important.
+
+
+const double path_radius = 2*R + path_contact_delta;
+const double path_dtheta = 2.0/3.0*M_PI/ceil(2.0/3.0*M_PI/(path_width/path_radius));
+             // makes path_dtheta as close as possible to path_width,
+             // while forcing an integer number of bins
+
+const double path_minrad = 2*R + path_contact_delta - path_width/2.0;
+const double path_maxrad = 2*R + path_contact_delta + path_width/2.0;
 
 // resolution info for the a1 histogram / integral
 const double a1_dr = 0.01;
@@ -41,7 +54,7 @@ double leny = 20;
 double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
-double R = 1;
+
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
@@ -142,13 +155,13 @@ int main(int argc, char *argv[]){
   const int a1_zbins = lenx/2.0/a1_dz;
   const int a1_rbins = path ? 2 : (a1_rmax - 2.0)/a1_dr;
 
-  const int path_zbins = (lenx/2.0 - 4*R)/path_dr;
+  const int path_zbins = (lenx/2.0 - 4*R)/path_width;
   const int path_thetabins = 2.0/3.0*M_PI/path_dtheta;
-  const int path_xbins = (lenx/2.0 - R)/path_dr;
+  const int path_xbins = (lenx/2.0 - R)/path_width;
 
-  const int path2_zbins = (lenx/2.0 - 6*R)/path_dr;
+  const int path2_zbins = (lenx/2.0 - 6*R)/path_width;
   const int path2_thetabins = M_PI/path_dtheta;
-  const int path2_xbins = (lenx/2.0)/path_dr;
+  const int path2_xbins = (lenx/2.0)/path_width;
 
   const char *outfilename = argv[4];
   const char *da_dz_outfilename = argv[5];
@@ -399,79 +412,76 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
+          fprintf(path_out, "# s        g3        z          x         vol2       histogram\n");
           const double path_vol0 = lenx*leny*lenz;
-          const double path_r1max = 2.0*R + path_dr;
-          const double path_r1min = 2.0*R;
-          const double path_vol1 = 4.0/3.0*M_PI*(path_r1max*path_r1max*path_r1max -
-                                                 path_r1min*path_r1min*path_r1min);
-          double s = -path_dr/2.0;
+          const double path_vol1 = 4.0/3.0*M_PI*(path_maxrad*path_maxrad*path_maxrad -
+                                                 path_minrad*path_minrad*path_minrad);
+          double s = -path_width/2.0;
           for(int i=0; i<path_zbins; i++) {
             const double probability = double(path_histogram[i])
               /double(numinhistogram);
-            const double path_vol2 = M_PI*path_dx*path_dx*path_dr;
+            const double path_vol2 = M_PI*path_cyl_dr*path_cyl_dr*path_width;
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
             const double g3 = n3/density/density/density;
-            s += path_dr;
-            const double z2 = (path_zbins - i)*path_dr + 4*R;
-            const double x2 = path_dx/2.0;
+            s += path_width;
+            const double z2 = (path_zbins - i - 1)*path_width + path_radius;
+            const double x2 = path_cyl_dr/2.0;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point coming over and the first
           // point in the theta band
-          const double z0 = path_dr + 4*R;
-          const double x0 = path_dx/2.0;
-          const double z1 = (2.0*R + path_dr/2.0) + (2.0*R + path_dr/2.0)*cos(path_dtheta/2);
-          const double x1 = (2.0*R + path_dr/2.0)*sin(path_dtheta/2);
+          const double z0 = path_radius;
+          const double x0 = path_cyl_dr/2.0;
+          const double z1 = path_radius + path_radius*cos(path_dtheta/2);
+          const double x1 = path_radius*sin(path_dtheta/2);
           s += sqrt((x1-x0)*(x1-x0) + (z1-z0)*(z1-z0));
           ////
-          s -= (2.0 + path_dr/2)*path_dtheta;
+          s -= path_radius*path_dtheta/2.0;
           for(int i=path_zbins; i<path_zbins+path_thetabins; i++) {
             const double probability = double(path_histogram[i])
               /double(numinhistogram);
-            const double rmax = 2.0*R + path_dr;
-            const double rmin = 2.0*R;
             const double theta = (i - path_zbins + 0.5)*path_dtheta;
             const double theta_min = theta - path_dtheta/2.0;
             const double theta_max = theta + path_dtheta/2.0;
-            const double path_vol2 = 2.0/3.0*M_PI*(rmax*rmax*rmax - rmin*rmin*rmin)*
+            const double path_vol2 = 2.0/3.0*M_PI*
+              (path_maxrad*path_maxrad*path_maxrad - path_minrad*path_minrad*path_minrad)*
               (cos(theta_min) - cos(theta_max));
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
             const double g3 = n3/density/density/density;
-            s += (2.0 + path_dr/2)*path_dtheta;
+            s += path_radius*path_dtheta;
 
-            const double z2 = (2*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
-            const double x2 = (2*R + path_dr/2.0)*sin(theta);
+            const double z2 = path_radius + path_radius*cos(theta);
+            const double x2 = path_radius*sin(theta);
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           // finding the difference between the last point in the theta band and the
           // first point in the vertical band
           const double theta_m = (path_thetabins - 0.5)*path_dtheta;
-          const double z2 = (2.0 + path_dr/2.0)*(1.0 + cos(theta_m));
-          const double x2 = (2*R + path_dr/2.0)*sin(theta_m);
-          const double z3 = (2*R + path_dr/2.0)/2.0;
-          const double x3 = sqrt(3)*R + path_dr/2.0;
+          const double z2 = path_radius + path_radius*cos(theta_m);
+          const double x2 = path_radius*sin(theta_m);
+
+          const double z3 = path_radius/2.0;
+          const double x3 = sqrt(3)*R + path_width/2.0;
           s += sqrt((z3-z2)*(z3-z2) + (x3-x2)*(x3-x2));
           ////
-          s -= path_dr;
+          s -= path_width/2.0;
           for(int i=path_zbins+path_thetabins; i<path_zbins+path_thetabins+path_xbins; i++){
             const double probability = double(path_histogram[i])
               /double(numinhistogram);
-            const double x2 = (i-path_zbins-path_thetabins+0.5)*path_dr + sqrt(3)*R;
-            const double rmax = x2 + path_dr/2.0;
-            const double rmin = x2 - path_dr/2.0;
-            const double path_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_dr;
+            const double x2 = (i-path_zbins-path_thetabins+0.5)*path_width + sqrt(3)*R;
+            const double path_vol2 = M_PI*(path_maxrad*path_maxrad -
+                                           path_minrad*path_minrad)*path_width;
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
             const double g3 = n3/density/density/density;
-            s += path_dr;
-            const double z2 = (2*R + path_dr/2.0)/2.0;
+            s += path_width;
+            const double z2 = path_radius/2.0;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
                     s,g3,z2,x2,path_vol2,path_histogram[i]);
           }
           fclose(path_out);
-          // // ------------------
+          // ------------------
 
           // save the path2 data ----------------------------------------------
           sprintf(pathfilename, "%s-path2.dat", outfilename);
@@ -481,76 +491,75 @@ int main(int argc, char *argv[]){
             return 1;
           }
           fprintf(path2_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
-          fprintf(path_out, "# s       g3         z         x         vol2        histogram\n");
+          fprintf(path_out, "# s        g3        z          x         vol2       histogram\n");
           const double path2_vol0 = lenx*leny*lenz;
-          const double path2_r1max = 4.0*R + path_dr;
-          const double path2_r1min = 4.0*R;
+          const double path2_r1max = 2*path_maxrad;
+          const double path2_r1min = 2*path_minrad;
           const double path2_vol1 = 4.0/3.0*M_PI*(path2_r1max*path2_r1max*path2_r1max -
                                                  path2_r1min*path2_r1min*path2_r1min);
-          s = -path_dr/2.0;
+          s = -path_width/2.0;
           for(int i=0; i<path2_zbins; i++) {
             const double probability = double(path2_histogram[i])
               /double(numinhistogram);
-            const double path2_vol2 = M_PI*path_dx*path_dx*path_dr;
+            const double path2_vol2 = M_PI*path_cyl_dr*path_cyl_dr*path_width;
             const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
             const double g3 = n3/density/density/density;
-            s += path_dr;
-            const double z2 = (path2_zbins - i)*path_dr + 6*R;
-            const double x2 = path_dx/2.0;
+            s += path_width;
+            const double z2 = (path2_zbins - i - 1)*path_width + path_radius*3.0;
+            const double x2 = path_cyl_dr/2.0;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # horizontal leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
           // finding the difference between the last point coming over and the first
           // point in the theta band
-          const double z4 = path_dr + 6*R;
-          const double x4 = path_dx/2.0;
-          const double z5 = (4.0*R + path_dr/2.0) + (2.0*R + path_dr/2.0)*cos(path_dtheta/2.0);
-          const double x5 = (2.0*R + path_dr/2.0)*sin(path_dtheta/2.0);
-          s += sqrt((x5-x4)*(x5-x4) + (z5-z4)*(z5-z4));
-          ////
-          s -= (2.0 + path_dr/2.0)*path_dtheta;
+          const double z4 = path_radius*3.0;
+          const double x4 = path_cyl_dr/2.0;
+          // const double z5 = (4.0*R + path_dr/2.0) + (2.0*R + path_dr/2.0)*cos(path_dtheta/2.0);
+          // const double x5 = (2.0*R + path_dr/2.0)*sin(path_dtheta/2.0);
+          // s += sqrt((x5-x4)*(x5-x4) + (z5-z4)*(z5-z4));
+          // ////
+          s -= path_radius*path_dtheta/2.0;
           for(int i=path2_zbins; i<path2_zbins+path2_thetabins; i++) {
             const double probability = double(path2_histogram[i])
               /double(numinhistogram);
-            const double rmax = 2.0*R + path_dr;
-            const double rmin = 2.0*R;
             const double theta = (i - path2_zbins + 0.5)*path_dtheta;
             const double theta_min = theta - path_dtheta/2.0;
             const double theta_max = theta + path_dtheta/2.0;
-            const double path2_vol2 = 2.0/3.0*M_PI*(rmax*rmax*rmax - rmin*rmin*rmin)*
+            const double path2_vol2 = 2.0/3.0*M_PI*
+              (path_maxrad*path_maxrad*path_maxrad - path_minrad*path_minrad*path_minrad)*
               (cos(theta_min) - cos(theta_max));
             const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
             const double g3 = n3/density/density/density;
-            s += (2.0 + path_dr/2.0)*path_dtheta;
+            s += path_radius*path_dtheta;
 
-            const double z2 = (4*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta);
-            const double x2 = (2*R + path_dr/2.0)*sin(theta);
+            const double z2 = 2*path_radius + path_radius*cos(theta);
+            const double x2 = path_radius*sin(theta);
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # theta leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
           // finding the difference between the last point in the theta band and the
           // first point in the vertical band
           const double theta_max = (path2_thetabins - 0.5)*path_dtheta;
-          const double z6 = (4*R + path_dr/2.0) + (2*R + path_dr/2.0)*cos(theta_max);
-          const double x6 = (2*R + path_dr/2.0)*sin(theta_max);
-          const double z7 = (2*R + path_dr);
-          const double x7 = -path_dr/2.0; // minus sign so the distance is as though
+          const double z6 = 2*path_radius + path_radius*cos(theta_max);
+          const double x6 = path_radius*sin(theta_max);
+          const double z7 = path_radius;
+          const double x7 = -path_width/2.0; // minus sign so the distance is as though
           // we circle around z1 and go through, but we don't actually have do do that
           // because of symmetry
           s += sqrt((z7-z6)*(z7-z6) + (x7-x6)*(x7-x6));
           ////
-          s -= path_dr;
+          s -= path_width/2.0;
           for(int i=path2_zbins+path2_thetabins; i<path2_zbins+path2_thetabins+path2_xbins; i++){
             const double probability = double(path2_histogram[i])
               /double(numinhistogram);
-            const double x2 = (i-path2_zbins-path2_thetabins+0.5)*path_dr;
-            const double rmax = x2 + path_dr/2.0;
-            const double rmin = x2 - path_dr/2.0;
-            const double path2_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_dr;
+            const double x2 = (i-path2_zbins-path2_thetabins+0.5)*path_width;
+            const double rmax = x2 + path_width/2.0;
+            const double rmin = x2 - path_width/2.0;
+            const double path2_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_width;
             const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
             const double g3 = n3/density/density/density;
-            s += path_dr;
-            const double z2 = (2*R + path_dr);
+            s += path_width;
+            const double z2 = 2*path_radius;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
@@ -560,7 +569,7 @@ int main(int argc, char *argv[]){
           // save the triplet distribution data
           const double volume0 = lenx*leny*lenz;
           for (int z1_i=0; z1_i<zbins; z1_i++) {
-            const double z1 = path ? 2*R*(z1_i+1) + dz/2.0 : 2*R + (z1_i + 0.5)*dz;
+            const double z1 = path ? path_radius*(z1_i+1) : 2*R + (z1_i + 0.5)*dz;
             char *finalfilename = new char[1024];
             sprintf(finalfilename, "%s-%05.2f.dat", outfilename, z1);
             FILE *out = fopen((const char *)finalfilename, "w");
@@ -576,7 +585,7 @@ int main(int argc, char *argv[]){
               for (double z2=dz/2.0; z2<lenx/2.0; z2+=dz) {
                 const double x2min = x2-dx/2.0;
                 const double x2max = x2+dx/2.0;
-                const double volume2 = path ? M_PI*(x2max*x2max - x2min*x2min)*path_dr
+                const double volume2 = path ? M_PI*(x2max*x2max - x2min*x2min)*path_width
                                             : M_PI*(x2max*x2max - x2min*x2min)*dz;
                 const double probability =
                   double(histogram[z1_i*xbins*z2bins + int(x2/dx)*z2bins +
@@ -637,8 +646,10 @@ int main(int argc, char *argv[]){
             const Vector3d r01 = periodicDiff(spheres[i], spheres[l]);
             const double z1 = r01.norm();
             int which_path = -1; // -1 if no path, 0 if touching path, 1 if path between
-            if (z1 < 2*R + path_dr) which_path = 0;
-            else if (z1 > 4*R + path_dr && z1 < 4*R + 2*path_dr) which_path = 1;
+            if (z1 > path_minrad && z1 < path_maxrad)
+              which_path = 0;
+            else if (z1 > 2*path_minrad && z1 < 2*path_maxrad)
+              which_path = 1;
             if(!path || which_path > -1) {
               const Vector3d zhat = r01.normalized();
               const int z1_i = path ? which_path : int(z1/dz);
@@ -665,38 +676,38 @@ int main(int argc, char *argv[]){
 
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
+                  const double xmin = path_radius/2.0*sqrt(3.0);
                   if (which_path == 0 && z2 > z_cent) {
-                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
-                      const int index = path_zbins - ceil((z2-z1-2*R)/path_dr);
+                    if (z2 < lenx/2.0 && x2 < path_cyl_dr && z2 > z1 + path_minrad) {
+                      const int index = path_zbins - ceil((z2-z1-path_minrad)/path_width);
                       if (index < 0 || index >= path_zbins)
                         fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
-                    } if (r12 < 2*R + path_dr && theta < 2.0/3.0*M_PI) {
+                    } if (r12 > path_minrad && r12 < path_maxrad && theta < 2.0/3.0*M_PI) {
                       const int index = path_zbins + theta/path_dtheta;
                       if (index < path_zbins || index >= path_zbins + path_thetabins)
                         fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
-                    } if (z2-z_cent < path_dr && x2 < lenx/2.0) {
-                      const double xmin = sqrt(3)*R;
-                      const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_dr);
-                      if (index < path_zbins+path_thetabins || index >= path_bins)
-                        fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                    } if (z2-z_cent < path_width && x2 < lenx/2.0 && x2 > xmin) {
+                        const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_width);
+                        if (index < path_zbins+path_thetabins || index >= path_bins)
+                          fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
                     }
                   }
                   else if (which_path == 1 && z2 > z_cent) {
-                    if (z2 < lenx/2.0 && x2 < path_dx && z2 > z1 + 2*R) {
-                      const int index = path2_zbins - ceil((z2-z1-2*R)/path_dr);
+                    if (z2 < lenx/2.0 && x2 < path_cyl_dr && z2 > z1 + path_minrad) {
+                      const int index = path2_zbins - ceil((z2-z1-path_minrad)/path_width);
                       if (index < 0 || index >= path_zbins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (r12 < 2*R + path_dr) {
+                    } if (r12 > path_minrad && r12 < path_maxrad) {
                       const int index = path2_zbins + theta/path_dtheta;
                       if (index < path2_zbins || index >= path2_zbins + path2_thetabins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
-                    } if (z2 < z1 - 2*R && z2 > z1 - 2*R - path_dr && x2 < lenx/2.0) {
-                      const int index = path2_zbins + path2_thetabins + int(x2/path_dr);
+                    } if (z2-z_cent <  path_width && x2 < lenx/2.0) {
+                      const int index = path2_zbins + path2_thetabins + int(x2/path_width);
                       if (index < path2_zbins+path2_thetabins || index >= path2_bins)
                         fprintf(stderr,"Index2 out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path2_histogram[index] ++;
