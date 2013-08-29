@@ -33,11 +33,11 @@ double mc (double local_eta, double r, double r_step, double g[]);
 
 
 // Maximum and spacing values for plotting
-const double zmax = 20;
-const double xmax = 10;
+const double zmax = 6;
+const double xmax = 4;
 const double dx = 0.1;
 
-const double dz = 0.01;
+const double dz = 0.1;
 
 double mc_r_step;
 const int num_eta = 10;
@@ -315,6 +315,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
   sprintf(plotname, "papers/pair-correlation/figs/walls%s-%04.2f.dat", name, eta);
   z_plot(plotname, density, gsigma, nA);
+  took("z density plot");
 
   // Create the walls directory if it doesn't exist.
   if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
@@ -372,10 +373,11 @@ void run_walls(double eta, const char *name, Functional fhs) {
     }
     fclose(out_path);
   }
+  took("path output");
 
   // here you choose the values of z0 to use
   // dx is set at beggining of file
-  for (double z0 = 3.05; z0 < 13; z0 += dx) {
+  for (double z0 = 3.05; z0 < 3 + zmax - 2; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
@@ -387,6 +389,11 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(stderr, "Unable to create file %s!\n", plotname);
         return;
       }
+      // Output files containing the x and z coordinates, for easy
+      // reading and plotting (and to keep knowledge of our grid out
+      // of the python plotting scripts).
+      FILE *xfile = fopen("papers/pair-correlation/figs/walls/x.dat", "w");
+      FILE *zfile = fopen("papers/pair-correlation/figs/walls/z.dat", "w");
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
@@ -395,10 +402,16 @@ void run_walls(double eta, const char *name, Functional fhs) {
           const Cartesian r1(x,0,z1);
           double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           fprintf(out, "%g\t", g2);
+          fprintf(xfile, "%g\t", x);
+          fprintf(zfile, "%g\t", z1-3); // set z=0 at contact with wall
         }
         fprintf(out, "\n");
+        fprintf(xfile, "\n");
+        fprintf(zfile, "\n");
       }
       fclose(out);
+      fclose(xfile);
+      fclose(zfile);
       //took(plotname);
     }
   }
@@ -448,12 +461,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(out, "%g %g\n",z0,da_dz);
       }
       fclose(out);
-      char *z0_string = new char[4096];
-      sprintf(z0_string,"%s a1 integral, dv = %g, delta_r = %g",fun[version],dv,delta_r);
-      took(z0_string);
-      delete[] z0_string;
     }
   }
+  took("a1 integrals");
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();
@@ -481,9 +491,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
   }
 
   {
-    //double peak = peak_memory()/1024.0/1024;
-    //double current = current_memory()/1024.0/1024;
-    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    // double peak = peak_memory()/1024.0/1024;
+    // double current = current_memory()/1024.0/1024;
+    // printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 
   took("Plotting stuff");
