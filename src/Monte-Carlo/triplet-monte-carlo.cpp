@@ -580,15 +580,15 @@ int main(int argc, char *argv[]){
               return 1;
             }
             delete[] finalfilename;
-            const double r1min = z1-dz/2.0;
-            const double r1max = z1+dz/2.0;
+            const double r1min = path ? path_minrad*(z1_i+1) : z1-dz/2.0;
+            const double r1max = path ? path_maxrad*(z1_i+1) : z1+dz/2.0;
             const double volume1 = 4.0/3.0*M_PI*(r1max*r1max*r1max - r1min*r1min*r1min);
             for (double x2=dx/2.0; x2<lenx/2.0; x2+=dx) {
-              for (double z2=dz/2.0; z2<lenx/2.0; z2+=dz) {
-                const double x2min = x2-dx/2.0;
-                const double x2max = x2+dx/2.0;
+                const double x2min = x2 - dz/2.0;
+                const double x2max = x2 + dz/2.0;
                 const double volume2 = path ? M_PI*(x2max*x2max - x2min*x2min)*path_width
                                             : M_PI*(x2max*x2max - x2min*x2min)*dz;
+              for (double z2=dz/2.0; z2<lenx/2.0; z2+=dz) {
                 const double probability =
                   double(histogram[z1_i*xbins*z2bins + int(x2/dx)*z2bins +
                                    int(z2/dz)])/double(numinhistogram);
