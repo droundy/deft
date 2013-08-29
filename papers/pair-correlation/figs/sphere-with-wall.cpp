@@ -59,7 +59,6 @@ void pair_plot(const char *fname, const Grid &density) {
     // don't just abort?
     return;
   }
-  printf("Hello 1\n");
   fflush(stdout);
   const GridDescription gd = density.description();
   const int x = 0;
@@ -72,13 +71,11 @@ void pair_plot(const char *fname, const Grid &density) {
     }
     fprintf(out,"\n");
   }
-  printf("Hello 2\n");
   fflush(stdout);
   fclose(out);
 }
 
 void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
-  printf("Hello 3");
   fflush(stdout);
   FILE *out = fopen(fname, "w");
   if (!out) {
@@ -86,7 +83,6 @@ void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
     // don't just abort?
     return;
   }
-  printf("Hello 4\n");
   fflush(stdout);
   const GridDescription gd = density.description();
   const double z0 = spacing + dx;
@@ -99,7 +95,6 @@ void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
     const double g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
     fprintf(out,"%g\t%g\t%g\t%g\n", x_path, g2_path, z0, width/2-x_path);
   }
-  printf("Hello 5\n");
   fflush(stdout);
   for (int i=0; i<num ;i++){
     double theta = i*M_PI/num/2.0;
@@ -109,7 +104,6 @@ void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
     const double g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
     fprintf(out,"%g\t%g\t%g\t%g\n", x_path, g2_path, z0+radius_path*sin(theta), radius_path*cos(theta));
   }
-  printf("Hello 6\n");
   fflush(stdout);
   for (int i=0; i<int(8.0/dx+0.5);i++){
     double r1z = i*dx;
@@ -119,7 +113,6 @@ void path_plot(const char *fname, const Grid &density, const Grid &constraint) {
     const double g2_path = density(r)*constraint(r_opp_side)/density(r_opp_side)/constraint(r);
     fprintf(out,"%g\t%g\t%g\t%g\n", x_path, g2_path, r1z+radius_path+z0, 0.0);
   }
-  printf("Hello 7\n");
   fflush(stdout);
   fclose(out);
 }
@@ -134,7 +127,6 @@ int main(int, char **) {
     printf("Now starting sphere_with_wall with eta = %g\n",eta);
     Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,width+2*spacing));
     GridDescription gd(lat, dx); //the resolution here dramatically affects our memory use
-    printf("gd.Nz/2 = %d\n",gd.Nz/2);
 
     Functional f = OfEffectivePotential(WB + IdealGas());
     double mu = find_chemical_potential(f, 1, eta/(4*M_PI/3));
@@ -186,7 +178,6 @@ int main(int, char **) {
     sprintf(plotname_path, "papers/pair-correlation/figs/walls/wallsWB-sphere-dft-path-%04.2f.dat", eta);
     path_plot(plotname_path, density, constraint);
     delete[] plotname_path;
-    printf("Hello 8\n");
     fflush(stdout);
     {
       double peak = peak_memory()/1024.0/1024;
@@ -194,17 +185,14 @@ int main(int, char **) {
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
       fflush(stdout);
     }
-    printf("Hello 9\n");
     fflush(stdout);
   }
-  printf("Hello 10\n");
     fflush(stdout);
   // Just create this file so make knows we have run.
   if (!fopen("papers/pair-correlation/figs/walls_sphere.dat", "w")) {
     printf("Error creating walls.dat!\n");
     return 1;
   }
-  printf("Hello 11\n");
   fflush(stdout);
   return 1;
 }

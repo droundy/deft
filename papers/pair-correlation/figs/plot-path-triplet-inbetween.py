@@ -223,17 +223,13 @@ colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
 
-xs = [rpath, rpath]
-ys = [-zmax, 0]
-dtheta = pi/80
-for theta in arange(pi, -dtheta/2, -dtheta):
-    xs.append(rpath*(2 + cos(theta)))
-    ys.append(rpath*sin(theta))
-xs.append(2*zmax)
-
-ys.append(0)
-plot(xs, ys, 'w-', linewidth=3)
-plot(xs, ys, 'k--', linewidth=3)
+# Here we plot the paths on the 2d plot.  The mc plot should align
+# with the dft one.
+g3_path = read_triplet_path(ff, z0, 'mc')
+xmc = g3_path[:,3]
+zmc = g3_path[:,2]
+plot(zmc,xmc, 'w-', linewidth=3)
+plot(zmc,xmc, 'k--', linewidth=3)
 
 # annotate('$A$', xy=(0,rA), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 # annotate('$B$', xy=(0,rpath), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
