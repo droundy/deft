@@ -19,14 +19,18 @@ colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'fischer', 'sokolowski']#, 'sphere-dft'] # , 'gloor'
 titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski et al.'] # , 'gloor'
 dx = 0.1
+sigma = 2.0
+contact_delta = 0.1
 ############################
+radius = sigma + contact_delta
+
 
 able_to_read_file = True
 z0 = 0.05
 
 # Set the max parameters for plotting.
 zmax = 8
-zmin = 0
+zmin = 0 # minimum 0 without some further changes
 rmax = 4
 ############################
 
@@ -40,8 +44,6 @@ def read_triplet_path(ff,z0,fun):
   if fun == 'mc':
     # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
-  elif fun == 'sphere-dft':
-    filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
   else:
     # input: "figs/tripletWB-path-*-%1.2f.dat" %(ff)
     filename = "figs/tripletWB-path-%s-%1.2f.dat" %(fun, ff)
@@ -51,17 +53,14 @@ def read_triplet_path(ff,z0,fun):
     filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
 
   data = loadtxt(filename)
-  data =  flipud(data)
   if fun == 'mc':
     data[:,0]-=4.995
-  else:
-    data[:,2] += 0 # no need to offset z coordinate
   return data[:,0:4]
 
 def read_triplet(ff, z0, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-02.05-trimmed.dat" % (ff)
+    # input: "figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % (ff)
+    filename = "figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % (ff)
   # else:
   #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
   #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
@@ -72,18 +71,17 @@ fig = figure(figsize=(10,5))
 
 xplot = fig.add_subplot(1,2,2)
 zplot = xplot.twiny()
-#zplot = fig.add_subplot(1,3,3, sharey=xplot)
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(6, -6+sqrt(3))
-zplot.set_xlim(-5+sqrt(3), 7)
-xplot.set_xticks([6, 4, sqrt(3), sqrt(3)-3, sqrt(3)-6])
+xmin = radius/2*sqrt(3)
+xplot.set_xlim(6, -6+xmin)
+zplot.set_xlim(-5+xmin, 7)
+xplot.set_xticks([6, 4, xmin, xmin-3, xmin-6])
 xplot.set_xticklabels([6, 4, "$\sqrt3$ 1", 4, 7])
 zplot.set_xticks([])
-#xplot.set_ylim(0)
 
-xplot.axvline(x=sqrt(3), color='k')
-zplot.axvline(x=4, color='k')
+xplot.axvline(x=xmin, color='k')
+zplot.axvline(x=2*radius, color='k')
 
 xloc = .621
 zloc = .802
@@ -110,11 +108,11 @@ for i in range(len(plots)):
     z = g3_path[:,2]
     g = g3_path[:,1]
     zcontact = z.min()
+    incontact = x**2 + (z-radius)**2 < (radius + .01)**2
 
     if plots[i] == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
-      incontact = x**2 + (z-2.1)**2 < 2.11**2
       zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
     else:
       xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
@@ -172,7 +170,6 @@ g22[rbins/2:rbins, 0:zbins] = g2mc[:rbins/2, zminbin:zmaxbin]
 g22[:rbins/2, 0:zbins] = flipud(g2mc[:rbins/2, zminbin:zmaxbin])
 g2mc = g22
 gmax = g2mc.max()
-dx = 0.1
 
 
 r = arange(0-rmax, rmax+2*dx, dx)
@@ -212,7 +209,7 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 sphere0 = Circle((0, 0), 1, color='slategray')
-sphere1 = Circle((2, 0), 1, color='slategray')
+sphere1 = Circle((radius, 0), 1, color='slategray')
 twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 

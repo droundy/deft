@@ -19,7 +19,10 @@ colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
 titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski et al.'] # , 'gloor'
 dx = 0.1
+sigma = 2.0
+contact_delta = 0.1
 ############################
+radius = sigma + contact_delta
 
 able_to_read_file = True
 
@@ -38,35 +41,39 @@ ff = float(sys.argv[1])
 def read_triplet_path(ff, fun):
   if fun == 'mc':
     data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
-    data =  flipud(data)
     data[:,0]-=4.995
   else:
     # input: "figs/triplet-path-inbetween-*-%4.2f.dat" % (ff)
     filename = "figs/triplet-path-inbetween-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
+    z = data[:,2]
+    x = data[:,3]
+    zcontact = z.min()
+    x[z == zcontact] *= -1
+    data[:,3] = x
+
   return data[:,0:4]
 
 def read_triplet(ff, fun):
   if fun == 'mc':
-    return loadtxt("figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % ff)
+    return loadtxt("figs/mc/triplet/tripletMC-%3.1f-04.20-trimmed.dat" % ff)
 
 
 fig = figure(figsize=(10,5))
 
 xplot = fig.add_subplot(1,2,2)
 zplot = xplot.twiny()
-#zplot = fig.add_subplot(1,3,3, sharey=xplot)
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(6, -8)
-xplot.set_xticks([6, 4, 2, 0, -2, -4, -6, -8])
-xplot.set_xticklabels([-6, -4, -2, "0 2", 4, 6, 8, 10])
-zplot.set_xlim(-4, 10)
+xplot.set_xlim(-6, 8)
+zplot.set_xlim(-4+contact_delta, 10+contact_delta)
+xplot.set_xticks([-4, -2, 0, 2, 4, 6])
+xplot.set_xticklabels([-4, -2, "0 2", 4, 6, 8])
 zplot.set_xticks([])
-#xplot.set_ylim(0)
 
-xplot.axvline(x=0, color='k')
-zplot.axvline(x=6, color='k')
+
+zplot.axvline(x=radius, color='k')
+zplot.axvline(x=3*radius, color='k')
 
 xloc = .620
 zloc = .800
@@ -100,14 +107,13 @@ for i in range(len(plots)):
     if plots[i] == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
-      incontact = x**2 + (z-4.1)**2 < 2.11**2
+      incontact = x**2 + (z-2*radius)**2 < (radius + 0.01)**2
       zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
     else:
       xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
       zplot.plot(z[z>zcontact],g[z>zcontact], label=titles[i], color=colors[i])
 
 # g2nice = read_triplet_path(ff, 'this-work')
-
 # def g2pathfunction_x(x):
 #     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
 # def g2pathfunction_z(z):
@@ -144,7 +150,7 @@ zEoff = 3.8
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-#zplot.legend(loc=1, ncol=2)
+zplot.legend(loc=1, ncol=2)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, 'mc')
@@ -193,7 +199,7 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 sphere0 = Circle((0, 0), 1, color='slategray')
-sphere1 = Circle((4, 0), 1, color='slategray')
+sphere1 = Circle((2*radius, 0), 1, color='slategray')
 twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
