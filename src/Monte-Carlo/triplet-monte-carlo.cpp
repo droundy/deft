@@ -555,8 +555,8 @@ int main(int argc, char *argv[]){
             const double probability = double(path2_histogram[i])
               /double(numinhistogram);
             const double x2 = -(i-path2_zbins-path2_thetabins+0.5)*path_width;
-            const double rmax = x2 + path_width/2.0;
-            const double rmin = x2 - path_width/2.0;
+            const double rmax = x2 - path_width/2.0;
+            const double rmin = x2 + path_width/2.0;
             const double path2_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_width;
             const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
             const double g3 = n3/density/density/density;
