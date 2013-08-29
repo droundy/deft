@@ -56,26 +56,23 @@ double gsigma_to_eta(const double gs) {
   return c/(pow(6.0, 2.0/3.0)*gs) + 1.0/(pow(6.0, 1.0/3.0)*c) + 1.0;
 }
 
-double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3,
+                        const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   return (radial_distribution(gsigma(r0), r) + radial_distribution(gsigma(r1), r))/2;
 }
 
-double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_this_work_mc(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3,
+                             const Grid &nbar_sokolowski,  Cartesian r0, Cartesian r1) {
   const Cartesian r01 = Cartesian(r0 - r1);
   const double r = sqrt(r01.dot(r01));
   const double eta0 = gsigma_to_eta(gsigma(r0));
   const double eta1 = gsigma_to_eta(gsigma(r1));
   return (mc(eta0, r, mc_r_step, g) + mc(eta1, r, mc_r_step, g))/2;
 }
-double pairdist_gross(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
-  const Cartesian r01 = Cartesian(r0 - r1);
-  const double r = sqrt(r01.dot(r01));
-  const double eta = 4.0/3*M_PI*1*1*1*(n(r0) + n(r1))/2;
-  return mc(eta, r,mc_r_step,g);
-}
-double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) {
+double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3,
+                        const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
   // This implements the pair distribution function of Fischer and
   // Methfessel from the 1980 paper.  The py_rdf below should be the
   // true radial distribution function for a homogeneous hard-sphere
@@ -85,26 +82,39 @@ double pairdist_fischer(const Grid &gsigma, const Grid &n, const Grid &nA, const
   const double eta = n3(Cartesian(0.5*(r0+r1)));
   return mc(eta, r, mc_r_step, g);
 }
+double pairdist_sokolowski(const Grid &gsigma, const Grid &n, const Grid &nA, const Grid &n3,
+                           const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) {
+  // This implements the pair distribution function of Sokolowski and
+  // Fischer from the 1992 paper.
+  const Cartesian r01 = Cartesian(r0 - r1);
+  const double r = sqrt(r01.dot(r01));
+
+  const double eta0 = nbar_sokolowski(r0)*(4.0/3.0*M_PI);
+  const double eta1 = nbar_sokolowski(r1)*(4.0/3.0*M_PI);
+  const double eta = (eta0 + eta1)/2.0;
+
+  return mc(eta, r, mc_r_step, g);
+}
 
 const char *fun[] = {
   "this-work",
   "this-work-mc",
-  "gross",
+  "sokolowski",
   "fischer"
 };
-double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, Cartesian r0, Cartesian r1) = {
+double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3,
+                      const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
   pairdist_this_work_mc,
-  pairdist_gross,
+  pairdist_sokolowski,
   pairdist_fischer
 };
 const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 20;
+static double width = 30;
 const double dw = 0.001;
-const double spacing = 3; // space on each side
 
 double radial_distribution(double gsigma, double r) {
   // Constants determined by fit to monte-carlo data by plot-ghs.py
@@ -278,6 +288,8 @@ void run_walls(double eta, const char *name, Functional fhs) {
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
+  Grid nbar_sokolowski(gd, StepConvolve(1.6)(1, density));
+  nbar_sokolowski /= (4.0/3.0*M_PI*ipow(1.6, 3));
   // Create the walls directory if it doesn't exist.
   if (mkdir("papers/pair-correlation/figs/walls", 0777) != 0 && errno != EEXIST) {
     // We failed to create the directory, and it doesn't exist.
@@ -303,7 +315,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       for (double x = 0; x < width/2; x += dx) {
         for (double z1 = -width/2.0; z1 < width/2.0; z1 += dx) {
           const Cartesian r1(x,0,z1);
-          double g2 = pairdists[version](gsigma, density, nA, n3, r0, r1);
+          double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           double n_bulk = (3.0/4.0/M_PI)*eta;
           double g3 = g2*density(r0)*density(r1)/n_bulk/n_bulk;
           fprintf(out, "%g\t", g3);
@@ -325,6 +337,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
       return;
     }
+    fprintf(out_path, "# unused\tg3\tz\tx\n");
 
     const double delta = .1; //this is the value of radius of the
                               //particle as it moves around the
@@ -332,42 +345,37 @@ void run_walls(double eta, const char *name, Functional fhs) {
     int num = 100; //This is the same num that is in plot-path.py,
                   //splits up the theta part of path just like there
     const Cartesian r0(0,0, 2.0+delta);
-    const double max_theta = M_PI - acos((1.0+delta/2.0)/(2.0+delta));
-    for (int i=0; i<int((width/2.0 - (3.0+2*delta) )/dx+0.5) ;i++){
-      double x_path = i*dx;
-      const Cartesian r1(0,0,width/2.0-x_path);
-      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+    const double max_theta = M_PI*2.0/3;
+    const double ds = 0.001; // step size to use in path plots
+    for (double z = 7; z >= 2*(2.0 + delta); z-=ds) {
+      const Cartesian r1(0,0,z);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
-    for (int i=0; i<num ;i++){
-      double theta = i*max_theta/num;
-      double x_path = theta*(2.0+delta) + width/2.0 - (3.0+2*delta);
-      const Cartesian r1((2.0+delta)*sin(theta), 0, (3.0+2*delta)+(2.0+delta)*cos(theta));
-      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+    const double dtheta = ds/2;
+    for (double theta = 0; theta <= max_theta; theta += dtheta){
+      const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
-    for (int i=0; i<int((width/2.0-(2.0+delta)*sin(max_theta))/dx+0.5); i++){
-      double r1x = i*dx;
-      double x_path = i*dx + max_theta*(2.0+delta) + width/2.0 - (3.0+2*delta);
-      const Cartesian r1(sin(max_theta)*(2.0+delta)+ r1x, 0, 1.0+delta/2.0);
-      double g2_path = pairdists[version](gsigma, density, nA, n3, r0, r1);
+    for (double x = (2.0+delta)*sqrt(3)/2; x<=6; x+=ds){
+      const Cartesian r1(x, 0, 1.0+delta/2);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
-      fprintf(out_path,"%g\t%g\t%g\t%g\n", x_path, g3, r1[2], r1[0]);
+      fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
     fclose(out_path);
   }
 }
 
 int main(int, char **) {
-  printf("Did this work?\n");
   read_mc();
-  printf("Done with read\n");
-  for (double this_eta = 0.3; this_eta < 0.35; this_eta += 0.1) {
+  for (double this_eta = 0.3; this_eta < 0.45; this_eta += 0.1) {
     run_walls(this_eta, "WB", WB);
   }
   // Just create this file so make knows we have run.
