@@ -148,20 +148,20 @@ int main(int argc, char *argv[]){
   lat[1] = laty;
   lat[2] = latz;
 
-  const int zbins = path ? 2 : lenx/2.0/dz;
-  const int xbins = lenx/2.0/dx;
-  const int z2bins = lenx/2.0/dz;
+  const int zbins = path ? 2 : round(lenx/2.0/dz);
+  const int xbins = round(lenx/2.0/dx);
+  const int z2bins = round(lenx/2.0/dz);
 
-  const int a1_zbins = lenx/2.0/a1_dz;
-  const int a1_rbins = path ? 2 : (a1_rmax - 2.0)/a1_dr;
+  const int a1_zbins = round(lenx/2.0/a1_dz);
+  const int a1_rbins = path ? 2 : round((a1_rmax - 2.0)/a1_dr);
 
-  const int path_zbins = (lenx/2.0 - 4*R)/path_width;
-  const int path_thetabins = 2.0/3.0*M_PI/path_dtheta;
-  const int path_xbins = (lenx/2.0 - R)/path_width;
+  const int path_zbins = round((lenx/2.0 - 4*R)/path_width);
+  const int path_thetabins = round(2.0/3.0*M_PI/path_dtheta);
+  const int path_xbins = round((lenx/2.0 - R)/path_width);
 
-  const int path2_zbins = (lenx/2.0 - 6*R)/path_width;
-  const int path2_thetabins = M_PI/path_dtheta;
-  const int path2_xbins = (lenx/2.0)/path_width;
+  const int path2_zbins = round((lenx/2.0 - 6*R)/path_width);
+  const int path2_thetabins = round(M_PI/path_dtheta);
+  const int path2_xbins = round((lenx/2.0)/path_width);
 
   const char *outfilename = argv[4];
   const char *da_dz_outfilename = argv[5];
