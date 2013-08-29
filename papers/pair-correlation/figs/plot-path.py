@@ -21,6 +21,7 @@ titles = ['Monte Carlo', 'this work', 'test particle', 'Fischer et al.', 'Sokolo
 
 dx = 0.1
 ############################
+rpath = 2.005
 
 able_to_read_file = True
 
@@ -114,46 +115,12 @@ for i in range(len(plots)):
       xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
       zplot.plot(z[x<xcontact],g[x<xcontact], label=titles[i], color=colors[i])
 
-g2nice = read_walls_path(ff, 'this-work')
-
-def g2pathfunction_x(x):
-    return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
-def g2pathfunction_z(z):
-    return interp(z, g2nice[:,2], g2nice[:,1])
-
-rA = 3.9
-rE = 4.0
-rpath = 2.005
-xAoff = 3.8
-xBoff = 2.0
-zCoff = 1.0
-zDoff = 2.0
-zEoff = 3.8
-
 zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
-hw = 4 # headwidth of arrows
-
-xplot.annotate('$A$', xy=(xAoff, g2pathfunction_x(xAoff)),
-               xytext=(xAoff+1,1.3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('$B$', xy=(xBoff,g2pathfunction_x(xBoff)),
-               xytext=(xBoff+1, g2pathfunction_x(xBoff)-0.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$C$', xy=(zCoff,g2pathfunction_z(zCoff)),
-               xytext=(zCoff,g2pathfunction_z(zCoff)-0.5),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$D$', xy=(zDoff,g2pathfunction_z(zDoff)),
-               xytext=(zDoff+1,g2pathfunction_z(zDoff)-0.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$E$', xy=(zEoff,g2pathfunction_z(zEoff)),
-               xytext=(zEoff+0.7,1.3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc=3, ncol=2)
+zplot.legend(loc=1, ncol=2, bbox_to_anchor=(1.25, 1.05), fontsize = 8)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
@@ -218,11 +185,48 @@ ys.append(0)
 plot(xs, ys, 'w-', linewidth=2)
 plot(xs, ys, 'k--', linewidth=2)
 
-annotate('$A$', xy=(0,rA), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$B$', xy=(0,rpath), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$C$', xy=(rpath/sqrt(2.0),rpath/sqrt(2.0)), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$D$', xy=(rpath,0), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+Ax = 3.9
+Az = 0
+Bx = rpath
+Bz = 0
+Cx = rpath/sqrt(2.0)
+Cz = rpath/sqrt(2.0)
+Dx = 0
+Dz = rpath
+Ex = 0
+Ez = 4.0
+
+hw = 4 # headwidth of arrows
+
+g2nice = read_walls_path(ff, 'this-work')
+def g2pathfunction_x(x):
+    return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
+def g2pathfunction_z(z):
+    return interp(z, g2nice[:,2], g2nice[:,1])
+
+# Annotations on 2d plot
+annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+
+# Annotations on 1d plot
+xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
+               xytext=(Ax+1,1.3),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
+               xytext=(Bx+1, g2pathfunction_x(Bx)-0.2),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
+               xytext=(Cz,g2pathfunction_z(Cz)-0.5),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
+               xytext=(Dz+1,g2pathfunction_z(Dz)-0.2),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
+               xytext=(Ez+0.7,1.3),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)

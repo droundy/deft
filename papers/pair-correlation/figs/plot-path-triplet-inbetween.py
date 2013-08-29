@@ -22,7 +22,7 @@ dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
 ############################
-radius = sigma + contact_delta
+rpath = sigma + contact_delta
 
 able_to_read_file = True
 
@@ -45,19 +45,23 @@ def read_triplet_path(ff, fun):
   else:
     # input: "figs/triplet-path-inbetween-*-%4.2f.dat" % (ff)
     filename = "figs/triplet-path-inbetween-%s-%4.2f.dat" % (fun, ff)
-    data = loadtxt(filename)
-    z = data[:,2]
-    x = data[:,3]
-    zcontact = z.min()
-    x[z == zcontact] *= -1
-    data[:,3] = x
-
+    if os.path.isfile(filename) == False:
+      data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
+    else:
+      data = loadtxt(filename)
+      z = data[:,2]
+      x = data[:,3]
+      zcontact = z.min()
+      x[z == zcontact] *= -1
+      data[:,3] = x
   return data[:,0:4]
 
 def read_triplet(ff, fun):
   if fun == 'mc':
     return loadtxt("figs/mc/triplet/tripletMC-%3.1f-04.20-trimmed.dat" % ff)
 
+def read_gr(ff):
+  return loadtxt("figs/gr-%04.2f.dat" % ff)
 
 fig = figure(figsize=(10,5))
 
@@ -65,15 +69,22 @@ xplot = fig.add_subplot(1,2,2)
 zplot = xplot.twiny()
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(-6, 8)
-zplot.set_xlim(-4+contact_delta, 10+contact_delta)
-xplot.set_xticks([-4, -2, 0, 2, 4, 6])
-xplot.set_xticklabels([-4, -2, "0 2", 4, 6, 8])
+xlow = -6
+xhigh = 8
+xplot.set_xlim(xlow, xhigh)
+zplot.set_xlim(xlow + rpath, xhigh + rpath)
+
+xticks = [-6, -4, -2, 0]
+zticks = [4, 6, 8, 10]
+
+plotticks = xticks + [z-rpath for z in zticks]
+xplot.set_xticks(plotticks)
+xplot.set_xticklabels(xticks + zticks)
 zplot.set_xticks([])
 
 
-zplot.axvline(x=radius, color='k')
-zplot.axvline(x=3*radius, color='k')
+zplot.axvline(x=rpath, color='k')
+zplot.axvline(x=3*rpath, color='k')
 
 xloc = .620
 zloc = .800
@@ -107,50 +118,15 @@ for i in range(len(plots)):
     if plots[i] == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
-      incontact = x**2 + (z-2*radius)**2 < (radius + 0.01)**2
+      incontact = x**2 + (z-2*rpath)**2 < (rpath + 0.01)**2
       zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
     else:
       xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
       zplot.plot(z[z>zcontact],g[z>zcontact], label=titles[i], color=colors[i])
 
-# g2nice = read_triplet_path(ff, 'this-work')
-# def g2pathfunction_x(x):
-#     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
-# def g2pathfunction_z(z):
-#     return interp(z, g2nice[:,2], g2nice[:,1])
-
-rA = 3.9
-rE = 4.0
-rpath = 2.01
-xAoff = 3.8
-xBoff = 2.0
-zCoff = 1.0
-zDoff = 2.0
-zEoff = 3.8
-
-
-
-# hw = 4 # headwidth of arrows
-
-# xplot.annotate('$A$', xy=(xAoff, g2pathfunction_x(xAoff)),
-#                xytext=(xAoff+1,1.3),
-#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# xplot.annotate('$B$', xy=(xBoff,g2pathfunction_x(xBoff)),
-#                xytext=(xBoff+1, g2pathfunction_x(xBoff)-0.2),
-#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# zplot.annotate('$C$', xy=(zCoff,g2pathfunction_z(zCoff)),
-#                xytext=(zCoff,g2pathfunction_z(zCoff)-0.5),
-#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# zplot.annotate('$D$', xy=(zDoff,g2pathfunction_z(zDoff)),
-#                xytext=(zDoff+1,g2pathfunction_z(zDoff)-0.2),
-#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# zplot.annotate('$E$', xy=(zEoff,g2pathfunction_z(zEoff)),
-#                xytext=(zEoff+0.7,1.3),
-#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc=1, ncol=2)
+zplot.legend(loc=1, ncol=2, bbox_to_anchor=(1.2, 1.05), fontsize = 8)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, 'mc')
@@ -170,27 +146,30 @@ z = arange(zmin, zmax+dx, dx)
 Z, R = meshgrid(z, r)
 
 levels = linspace(0, gmax, gmax*100)
-xlo = 0.85/gmax
-xhi = 1.15/gmax
+gr = read_gr(ff)
+ginf = interp(2*rpath, gr[:,0], gr[:,1]/ff)
+xlo = 0.85*ginf/gmax
+xhi = 1.15*ginf/gmax
+xwhite = 1.0*ginf/gmax
 xhier = (1 + xhi)/2.0
 
 cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
                    (xhier,0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax, 1.0, 1.0),
+                   (xwhite, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
                    (xhier,1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
-                   (1.0/gmax,  1.0, 1.0),
+                   (xwhite,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
                    (xhier,0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
@@ -199,7 +178,7 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 
 sphere0 = Circle((0, 0), 1, color='slategray')
-sphere1 = Circle((2*radius, 0), 1, color='slategray')
+sphere1 = Circle((2*rpath, 0), 1, color='slategray')
 twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
@@ -220,11 +199,53 @@ plot(zmc,xmc, 'w-', linewidth=3)
 plot(zmc,xmc, 'k--', linewidth=3)
 plot(zdft,xdft, 'c--', linewidth=3)
 
-# annotate('$A$', xy=(0,rA), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# annotate('$B$', xy=(0,rpath), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# annotate('$C$', xy=(rpath/sqrt(2.0),rpath/sqrt(2.0)), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# annotate('$D$', xy=(rpath,0), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-# annotate('$E$', xy=(rE,0), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+Ax = -3.9
+Az = rpath
+Bx = 0
+Bz = rpath
+Cx = rpath
+Cz = rpath*2
+Dx = 0
+Dz = rpath*3
+Ex = 0
+Ez = 8
+
+hw = 4 # headwidth of arrows
+
+g3nice = read_triplet_path(ff, 'this-work')
+znice = g3nice[:,2]
+xnice = g3nice[:,3]
+gnice = g3nice[:,1]
+znicecontact = znice.min()
+def g3pathfunction_x(x):
+    return interp(x, flipud(xnice[znice == znicecontact]), flipud(gnice[znice == znicecontact]))
+def g3pathfunction_z(z):
+    return interp(z, flipud(znice), flipud(gnice))
+
+# Annotations on 2d plot
+annotate('$A$', xy=(Az, Ax), xytext=(1.2,-3.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$B$', xy=(Bz, Bx), xytext=(1.5,1.8), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$C$', xy=(Cz, Cx), xytext=(rpath*2,3.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$D$', xy=(Dz, Dx), xytext=(6.7,0.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+annotate('$E$', xy=(Ez, Ex), xytext=(8.5,0.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+
+
+# Annotations on 1d plot
+xplot.annotate('$A$', xy=(Ax, g3pathfunction_x(Ax)),
+               xytext=(Ax-0.5,0.7),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+xplot.annotate('$B$', xy=(Bx,g3pathfunction_x(Bx)),
+               xytext=(Bx+1, g3pathfunction_x(Bx)),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$C$', xy=(Cz,g3pathfunction_z(Cz)),
+               xytext=(Cz,g3pathfunction_z(Cz)-0.5),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$D$', xy=(Dz,g3pathfunction_z(Dz)),
+               xytext=(Dz+1,g3pathfunction_z(Dz)-0.2),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+zplot.annotate('$E$', xy=(Ez,g3pathfunction_z(Ez)),
+               xytext=(Ez-0.5,1.3),
+               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
