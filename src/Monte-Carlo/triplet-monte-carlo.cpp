@@ -411,8 +411,8 @@ int main(int argc, char *argv[]){
           fprintf(path_out, "# Working moves: %li, total moves: %li\n", workingmoves, count);
           fprintf(path_out, "# s        g3        z          x         vol2       histogram\n");
           const double path_vol0 = lenx*leny*lenz;
-          const double path_vol1 = 4.0/3.0*M_PI*(path_minrad*path_minrad*path_minrad -
-                                                 path_maxrad*path_maxrad*path_maxrad);
+          const double path_vol1 = 4.0/3.0*M_PI*(path_maxrad*path_maxrad*path_maxrad -
+                                                 path_minrad*path_minrad*path_minrad);
           double s = -path_width/2.0;
           for(int i=0; i<path_zbins; i++) {
             const double probability = double(path_histogram[i])
