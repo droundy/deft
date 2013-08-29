@@ -16,13 +16,12 @@ from matplotlib.colors import NoNorm
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r']
-plots = ['mc']#, 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al', 'Sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
+titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski et al.'] # , 'gloor'
 dx = 0.1
 ############################
 
 able_to_read_file = True
-z0 = 0.05
 
 # Set the max parameters for plotting.
 zmax = 9.0
@@ -36,36 +35,20 @@ if len(sys.argv) < 2:
 ff = float(sys.argv[1])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
-def read_triplet_path(ff,z0,fun):
+def read_triplet_path(ff, fun):
   if fun == 'mc':
-    # input:  "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % (ff)
-  # elif fun == 'sphere-dft':
-  #   filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % ff
-  # else:
-  #   # input: "figs/walls.dat" % ()
-  #   # input: "figs/walls/wallsWB-path-*-pair-%1.2f-*.dat" %(ff)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  # if (os.path.isfile(filename) == False):
-  #   # Just use walls data if we do not have the MC (need to be careful!)
-  #   filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-%1.2f.dat" %('this-work', ff, z0)
-  data = loadtxt(filename)
-  if fun == 'mc':
+    data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
     data =  flipud(data)
     data[:,0]-=4.995
   else:
-    data[:,2]-=3
+    # input: "figs/triplet-path-inbetween-*-%4.2f.dat" % (ff)
+    filename = "figs/triplet-path-inbetween-%s-%4.2f.dat" % (fun, ff)
+    data = loadtxt(filename)
   return data[:,0:4]
 
-def read_triplet(ff, z0, fun):
+def read_triplet(ff, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % (ff)
-  # else:
-  #   # input: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
-  #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  data = loadtxt(filename)
-  return data
+    return loadtxt("figs/mc/triplet/tripletMC-%3.1f-04.05-trimmed.dat" % ff)
 
 
 fig = figure(figsize=(10,5))
@@ -102,32 +85,28 @@ twod_plot.set_ylim(-rmax, rmax)
 fig.subplots_adjust(hspace=0.001)
 
 for i in range(len(plots)):
-    g2_path = read_triplet_path(ff, z0, plots[i])
+    g3_path = read_triplet_path(ff, plots[i])
     if able_to_read_file == False:
         plot(arange(0,10,1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
         savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
         savefig(savedfilename)
         exit(0)
-    # FIXME:  once we have sufficient data, we will want to remove this smoothing...
-    old = 1.0*g2_path[:,1]
-    averaged = 1.0*old
-    # averaged[1:] += old[:len(averaged)-1]
-    # averaged[:len(averaged)-1] += old[1:]
-    # averaged /= 3;
+    x = g3_path[:,3]
+    z = g3_path[:,2]
+    g = g3_path[:,1]
+    zcontact = z.min()
 
-    # Find x-portion:
-    z_beg = g2_path[0,2]
-    coord = 0
-    z_final = z_beg
-    while z_final == z_beg:
-      coord += 1
-      z_final = g2_path[coord,2]
+    if plots[i] == 'fischer':
+      # Fischer et al only predict pair distribution function in
+      # contact.  We do this using "&" below which means "and".
+      incontact = x**2 + (z-4.1)**2 < 2.11**2
+      zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
+    else:
+      xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
+      zplot.plot(z[z>zcontact],g[z>zcontact], label=titles[i], color=colors[i])
 
-    xplot.plot(g2_path[:coord,3],averaged[:coord], label=titles[i], color=colors[i])
-    zplot.plot(g2_path[coord:,2],averaged[coord:], label=titles[i], color=colors[i])
-
-# g2nice = read_triplet_path(ff, z0, 'this-work')
+# g2nice = read_triplet_path(ff, 'this-work')
 
 # def g2pathfunction_x(x):
 #     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
@@ -168,7 +147,7 @@ zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
 #zplot.legend(loc=1, ncol=2)
 
 twod_plot.set_aspect('equal')
-g2mc = read_triplet(ff, z0, 'mc')
+g2mc = read_triplet(ff, 'mc')
 rbins = round(2*rmax/dx) + 2
 zminbin = round(zmin/dx)
 zmaxbin = round(zmax/dx) + 1
@@ -225,11 +204,15 @@ twod_plot.set_xlabel('$z_2$');
 
 # Here we plot the paths on the 2d plot.  The mc plot should align
 # with the dft one.
-g3_path = read_triplet_path(ff, z0, 'mc')
+g3_path = read_triplet_path(ff, 'mc')
 xmc = g3_path[:,3]
 zmc = g3_path[:,2]
+g3_path = read_triplet_path(ff, 'this-work')
+xdft = g3_path[:,3]
+zdft = g3_path[:,2]
 plot(zmc,xmc, 'w-', linewidth=3)
 plot(zmc,xmc, 'k--', linewidth=3)
+plot(zdft,xdft, 'c--', linewidth=3)
 
 # annotate('$A$', xy=(0,rA), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 # annotate('$B$', xy=(0,rpath), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
