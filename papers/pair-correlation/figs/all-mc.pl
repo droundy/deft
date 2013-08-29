@@ -9,11 +9,11 @@ my $sha1code = sha1_hex(read_file("src/Monte-Carlo/pair-monte-carlo.cpp"));
 
 system "scons pair-monte-carlo";
 
-my $iters  = 9999999999999;
+my $iters  = 999999999999999;
 my $acc = 0.001;
 
 my $dd;
-foreach $dd ([30,655, 0.1], [30,1327, 0.2], [30, 2009, 0.3], [30, 2696, 0.4], [30, 3381, 0.5]) {
+foreach $dd ([30,655, 0.1], [30,1327, 0.2], [30, 2009, 0.3], [30, 2696, 0.4]) {#, [30, 3381, 0.5]) {
     my $len = sprintf("%02.0f", $$dd[0]);
     my $N = sprintf("%03.0f", $$dd[1]);
     my $ff = sprintf("%02.1f", $$dd[2]);

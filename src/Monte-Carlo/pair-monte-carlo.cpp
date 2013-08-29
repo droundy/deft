@@ -327,10 +327,10 @@ int main(int argc, char *argv[]){
   // Begin main program loop
   //////////////////////////////////////////////////////////////////////////////
   for (long j=0; j<iterations; j++){
-    if (j%(N*1000) == 0) {
-      took("One thousand iterations");
-      printf("count: %li\n", count);
-    }
+    // if (j%(N*1000) == 0) {
+    //   took("One thousand iterations");
+    //   printf("count: %li\n", count);
+    // }
 	  num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
@@ -474,7 +474,7 @@ int main(int argc, char *argv[]){
             fprintf(densityout, "%g\t%g\n", (l+0.5)*dz, density);
           }
           for (int l=0; l<z0bins; l++) {
-            const double filename_coord = (l + 0.5)*dz;
+            const double filename_coord = path ? (l + 0.5)*path_dz : (l + 0.5)*dz;
             sprintf(finalfilename, "%s-%1.2f.dat", outfilename, filename_coord);
             FILE *out = fopen((const char *)finalfilename, "w");
             if (out == NULL) {
