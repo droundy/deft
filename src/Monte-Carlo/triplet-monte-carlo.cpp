@@ -472,8 +472,9 @@ int main(int argc, char *argv[]){
             const double probability = double(path_histogram[i])
               /double(numinhistogram);
             const double x2 = (i-path_zbins-path_thetabins+0.5)*path_width + xmin;
-            const double path_vol2 = M_PI*(path_maxrad*path_maxrad -
-                                           path_minrad*path_minrad)*path_width;
+            const double rmax = x2 + path_width/2.0;
+            const double rmin = x2 - path_width/2.0;\
+            const double path_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_width;
             const double n3 = probability/path_vol0/path_vol1/path_vol2;
             const double g3 = n3/density/density/density;
             s += path_width;
@@ -553,14 +554,14 @@ int main(int argc, char *argv[]){
           for(int i=path2_zbins+path2_thetabins; i<path2_zbins+path2_thetabins+path2_xbins; i++){
             const double probability = double(path2_histogram[i])
               /double(numinhistogram);
-            const double x2 = (i-path2_zbins-path2_thetabins+0.5)*path_width;
+            const double x2 = -(i-path2_zbins-path2_thetabins+0.5)*path_width;
             const double rmax = x2 + path_width/2.0;
             const double rmin = x2 - path_width/2.0;
             const double path2_vol2 = M_PI*(rmax*rmax - rmin*rmin)*path_width;
             const double n3 = probability/path2_vol0/path2_vol1/path2_vol2;
             const double g3 = n3/density/density/density;
             s += path_width;
-            const double z2 = 2*path_radius;
+            const double z2 = path_radius;
             fprintf(path_out, "%6.3f    %7.4f    %6.3f    %6.3f    %8.5f    %li # vertical leg\n",
                     s, g3, z2, x2, path2_vol2, path2_histogram[i]);
           }
