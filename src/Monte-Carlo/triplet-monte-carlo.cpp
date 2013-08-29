@@ -30,7 +30,10 @@ const double path_cyl_dr = 0.1; // radius of the cylinders that go along
 
 
 const double path_radius = 2*R + path_contact_delta;
-const double path_dtheta = path_width/path_radius;
+const double path_dtheta = 2.0/3.0*M_PI/ceil(2.0/3.0*M_PI/(path_width/path_radius));
+             // makes path_dtheta as close as possible to path_width,
+             // while forcing an integer number of bins
+
 const double path_minrad = 2*R + path_contact_delta - path_width/2.0;
 const double path_maxrad = 2*R + path_contact_delta + path_width/2.0;
 
@@ -673,6 +676,7 @@ int main(int argc, char *argv[]){
 
                   const double z_cent = z1/2.0;
                   const double theta = acos(r12_v.dot(zhat)/r12);
+                  const double xmin = path_radius/2.0*sqrt(3.0);
                   if (which_path == 0 && z2 > z_cent) {
                     if (z2 < lenx/2.0 && x2 < path_cyl_dr && z2 > z1 + path_minrad) {
                       const int index = path_zbins - ceil((z2-z1-path_minrad)/path_width);
@@ -684,11 +688,10 @@ int main(int argc, char *argv[]){
                       if (index < path_zbins || index >= path_zbins + path_thetabins)
                         fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
-                    } if (z2-z_cent < path_width && x2 < lenx/2.0) {
-                      const double xmin = sqrt(3)*R;
-                      const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_width);
-                      if (index < path_zbins+path_thetabins || index >= path_bins)
-                        fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
+                    } if (z2-z_cent < path_width && x2 < lenx/2.0 && x2 > xmin) {
+                        const int index = path_zbins + path_thetabins + int((x2 - xmin)/path_width);
+                        if (index < path_zbins+path_thetabins || index >= path_bins)
+                          fprintf(stderr,"Index out of bounds: %i, z1: %.2f, z2: %.2f, x2: %.2f\n",index,z1,z2,x2);
                       path_histogram[index] ++;
                     }
                   }
