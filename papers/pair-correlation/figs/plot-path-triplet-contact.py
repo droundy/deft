@@ -29,7 +29,7 @@ able_to_read_file = True
 
 # Set the max parameters for plotting.
 zmax = 8
-zmin = 0 # minimum 0 without some further changes
+zmin = -3 # minimum 0 without some further changes
 rmax = 4
 ############################
 
@@ -56,24 +56,30 @@ def read_triplet_path(ff, fun):
     data[:,0]-=4.995
   return data[:,0:4]
 
+def read_triplet_back(ff, fun):
+  if fun == 'mc':
+    print 'bad read_triplet_back'
+    exit(1)
+  else:
+    # input: "figs/triplet-back-contact-*-%4.2f.dat" % (ff)
+    filename = "figs/triplet-back-contact-%s-%4.2f.dat" % (fun, ff)
+    data = loadtxt(filename)
+  return data[:,0:4]
+
 def read_triplet(ff, fun):
   if fun == 'mc':
-    # input: "figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % (ff)
-    filename = "figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % (ff)
-  # else:
-  #   # in put: "figs/walls/wallsWB-*-pair-%1.2f-*.dat" %(ff)
-  #   filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  data = loadtxt(filename)
-  return data
+    return loadtxt("figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % ff)
+  elif fun == 'this-work':
+    return loadtxt("figs/tripletWB-this-work-%4.2f-2.10.dat" % ff)
 
 def read_gr(ff):
   return loadtxt("figs/gr-%04.2f.dat" % ff)
 
-fig = figure(figsize=(10,5))
+fig = figure(figsize=(10,4))
 
-xplot = fig.add_subplot(1,2,2)
+xplot = subplot2grid((1,3), (0,2))
 zplot = xplot.twiny()
-twod_plot = fig.add_subplot(1,2,1)
+twod_plot = subplot2grid((1,3), (0,0), colspan=2)
 
 xmin = rpath/2*sqrt(3)
 xlow = 6
@@ -128,28 +134,45 @@ for i in range(len(plots)):
       zplot.plot(z[z>zcontact],g[z>zcontact], label=titles[i], color=colors[i])
 
 
+for i in range(len(plots)):
+  if plots[i] in ['this-work', 'sokolowski']:
+    g3_path = read_triplet_back(ff, plots[i])
+    x = g3_path[:,3]
+    z = g3_path[:,2]
+    g = g3_path[:,1]
+    zcontact = z.max()
+    z = zcontact + (zcontact - z)
+    incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
-zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
-zplot.legend(loc='best', ncol=2).get_frame().set_alpha(0.5)
+    xplot.plot(x[z==zcontact],g[z==zcontact], colors[i]+'--')
+    zplot.plot(z[z>zcontact],g[z>zcontact], colors[i]+'--')
+
+xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r}_2)$')
+xplot.legend(loc='best', ncol=1).get_frame().set_alpha(0.5)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, 'mc')
-rbins = round(2*rmax/dx) + 2
+rbins = round(rmax/dx) + 1
 zminbin = round(zmin/dx)
+zcenterbin = round((1.0+contact_delta)/dx)
 zmaxbin = round(zmax/dx) + 1
 zbins = zmaxbin - zminbin
 g22 = zeros((rbins, zbins))
-g22[rbins/2:rbins, 0:zbins] = g2mc[:rbins/2, zminbin:zmaxbin]
-g22[:rbins/2, 0:zbins] = flipud(g2mc[:rbins/2, zminbin:zmaxbin])
+if zminbin < 0:
+  g22[:, -zminbin:zbins] = g2mc[:rbins, 0:zmaxbin]
+  g22[:, 0:-zminbin] = g2mc[:rbins, 2*zcenterbin-zminbin:2*zcenterbin:-1]
+else:
+  g22[:, :] = g2mc[:rbins, zminbin:zmaxbin]
 g2mc = g22
 gmax = g2mc.max()
 
-
-
-r = arange(0-rmax, rmax+2*dx, dx)
+r = arange(0, rmax+dx/2, dx)
 z = arange(zmin, zmax+dx, dx)
 Z, R = meshgrid(z, r)
 
+g2dft = read_triplet(ff, 'this-work')
+zdft = loadtxt("figs/triplet-z.dat")
+xdft = loadtxt("figs/triplet-x.dat")
 
 levels = linspace(0, gmax, gmax*100)
 gr = read_gr(ff)
@@ -182,6 +205,11 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
+plot([zmin,zmax], [0,0], 'k-', linewidth=2)
+
+text(-3, -3.5, 'this work')
+text(-3, 2, 'monte carlo')
 
 sphere0 = Circle((0, 0), 1, color='slategray')
 sphere1 = Circle((rpath, 0), 1, color='slategray')
@@ -202,10 +230,14 @@ zmc = g3_path[:,2]
 g3_path = read_triplet_path(ff, 'this-work')
 xdft = g3_path[:,3]
 zdft = g3_path[:,2]
+g3_back = read_triplet_back(ff, 'this-work')
+xback = g3_back[:,3]
+zback = g3_back[:,2]
 plot(zmc,xmc, 'w-', linewidth=3)
 plot(zdft,xdft, 'w-', linewidth=3)
 plot(zmc,xmc, 'k--', linewidth=3)
 plot(zdft,xdft, 'c--', linewidth=3)
+plot(zback,xback, 'm--', linewidth=3)
 
 
 Ax = 3.9

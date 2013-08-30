@@ -34,13 +34,6 @@ double mc (double local_eta, double r, double r_step, double g[]);
 
 // Maximum and spacing values for plotting
 
-//const double dx = 0.1;
-const double dx = .1/1.5;//This is a bit smaller than 1/sqrt(2),
-                          //which allows for a speration delta of 1
-                          //when going around the circular wall and
-                          //not having to worry about a gridpoint
-                          //being within the wall.
-
 double mc_r_step;
 const int num_eta = 10;
 const double eta_step = 0.5/num_eta;
@@ -113,8 +106,11 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static double width = 20;
-const double dw = 0.001;
+static const double width = 10;
+static const double dx = .1/1.5;
+//This resolution is a bit smaller than 1/sqrt(2), which allows for a
+//speration delta of 1 when going around the circular wall and not
+//having to worry about a gridpoint being within the wall.
 
 double radial_distribution(double gsigma, double r) {
   // Constants determined by fit to monte-carlo data by plot-ghs.py
@@ -262,7 +258,7 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
   f = OfEffectivePotential(fhs + IdealGas()
                            + ChemicalPotential(mu));
   Lattice lat(Cartesian(width,0,0), Cartesian(0,width,0), Cartesian(0,0,width));
-  GridDescription gd(lat, 0.1);
+  GridDescription gd(lat, dx);
   Grid potential(gd);
   Grid constraint(gd);
   constraint.Set(notinsphere);
@@ -270,8 +266,8 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
   potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
   potential = -potential.cwise().log();
 
-  const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*dw*dw*width;
-  const double precision = fabs(approx_energy*1e-1);//1e-4);
+  const double approx_energy = (fhs + IdealGas() + ChemicalPotential(mu))(1, eta/(4*M_PI/3))*uipow(width,3);
+  const double precision = fabs(approx_energy*1e-10);
   //printf("Minimizing to %g absolute precision...\n", precision);
   { // Put mimizer in block so as to free it when we finish minimizing to save memory.
     Minimizer min = Precision(precision,
@@ -287,7 +283,6 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
     took("Doing the minimization");
   }
   Grid density(gd, EffectivePotentialToDensity()(1, gd, potential));
-  //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
   Grid gsigma(gd, gSigmaA(1.0)(1, gd, density));
   Grid nA(gd, ShellConvolve(2)(1, density)/(4*M_PI*4));
   Grid n3(gd, StepConvolve(1)(1, density));
@@ -302,9 +297,9 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
   }
 
   // here you choose the values of z0 to use
-  //dx is set at beggining of file
+  // dx is the resolution at which we compute the density.
   char *plotname = new char[4096];
-  for (double z0 = 0; z0 < width/2.0; z0 += dx) {
+  for (double z0 = 2.1; z0 < 4.5; z0 += 2.1) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
@@ -312,20 +307,28 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
               "papers/pair-correlation/figs/triplet%s-%s-%04.2f-%1.2f.dat",
               name, fun[version], eta, z0);
       FILE *out = fopen(plotname,"w");
+      FILE *xfile = fopen("papers/pair-correlation/figs/triplet-x.dat","w");
+      FILE *zfile = fopen("papers/pair-correlation/figs/triplet-z.dat","w");
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
-      for (double x = 0; x < width/2; x += dx) {
-        for (double z1 = -width/2.0; z1 < width/2.0; z1 += dx) {
+      for (double x = 0; x < 4; x += dx) {
+        for (double z1 = -4; z1 <= 9; z1 += dx) {
           const Cartesian r1(x,0,z1);
           double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           double n_bulk = (3.0/4.0/M_PI)*eta;
           double g3 = g2*density(r0)*density(r1)/n_bulk/n_bulk;
           fprintf(out, "%g\t", g3);
+          fprintf(xfile, "%g\t", x);
+          fprintf(zfile, "%g\t", z1);
         }
         fprintf(out, "\n");
+        fprintf(xfile, "\n");
+        fprintf(zfile, "\n");
       }
       fclose(out);
+      fclose(xfile);
+      fclose(zfile);
     }
   }
   delete[] plotname;
@@ -344,7 +347,17 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
       return;
     }
+
+    sprintf(plotname_path,
+            "papers/pair-correlation/figs/triplet-back-contact-%s-%04.2f.dat",
+            fun[version], eta);
+    FILE *out_back = fopen(plotname_path, "w");
+    if (!out_back) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_path);
+      return;
+    }
     fprintf(out_path, "# unused\tg3\tz\tx\n");
+    fprintf(out_back, "# unused\tg3\tz\tx\n");
 
     const Cartesian r0(0,0, 2.0+delta);
     const double max_theta = M_PI*2.0/3;
@@ -355,6 +368,13 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
+    for (double z = -7; z >= -(2.0 + delta); z+=ds) {
+      const Cartesian r1(0,0,z);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
     const double dtheta = ds/2;
     for (double theta = 0; theta <= max_theta; theta += dtheta){
       const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(1+cos(theta)));
@@ -363,14 +383,23 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
+    for (double theta = 0; theta <= max_theta; theta += dtheta){
+      const Cartesian r1((2.0+delta)*sin(theta), 0,-(2.0+delta)*cos(theta));
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
     for (double x = (2.0+delta)*sqrt(3)/2; x<=6; x+=ds){
       const Cartesian r1(x, 0, 1.0+delta/2);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
     fclose(out_path);
+    fclose(out_back);
   }
   for (int version = 0; version < numplots; version++) {
     sprintf(plotname_path,
@@ -381,7 +410,16 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
       return;
     }
+    sprintf(plotname_path,
+            "papers/pair-correlation/figs/triplet-back-inbetween-%s-%04.2f.dat",
+            fun[version], eta);
+    FILE *out_back = fopen(plotname_path, "w");
+    if (!out_back) {
+      fprintf(stderr, "Unable to create file %s!\n", plotname_path);
+      return;
+    }
     fprintf(out_path, "# unused\tg3\tz\tx\n");
+    fprintf(out_back, "# unused\tg3\tz\tx\n");
 
     const Cartesian r0(0,0, 4.0+2*delta);
     const double max_theta = M_PI;
@@ -392,6 +430,13 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
+    for (double z = -10; z >= -(2.0 + delta); z+=ds) {
+      const Cartesian r1(0,0,z);
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
     const double dtheta = ds/2;
     for (double theta = 0; theta <= max_theta; theta += dtheta){
       const Cartesian r1((2.0+delta)*sin(theta), 0, (2.0+delta)*(2+cos(theta)));
@@ -400,14 +445,23 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
-    for (double x = 0; x<=6; x+=ds){
+    for (double theta = 0; theta <= max_theta; theta += dtheta){
+      const Cartesian r1((2.0+delta)*sin(theta), 0, -(2.0+delta)*cos(theta));
+      double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+      double n_bulk = (3.0/4.0/M_PI)*eta;
+      double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+    }
+    for (double x = 0; x>=-6; x-=ds){
       const Cartesian r1(x, 0, 2.0+delta);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
+      fprintf(out_back,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
     fclose(out_path);
+    fclose(out_back);
   }
   delete[] plotname_path;
 }
