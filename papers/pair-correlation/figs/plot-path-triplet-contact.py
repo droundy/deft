@@ -130,8 +130,7 @@ for i in range(len(plots)):
 
 
 zplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$')
-zplot.legend(loc=1, ncol=2, bbox_to_anchor=(1.2, 1.05), fontsize = 8)
-
+zplot.legend(loc='best', ncol=2).get_frame().set_alpha(0.5)
 
 twod_plot.set_aspect('equal')
 g2mc = read_triplet(ff, 'mc')
