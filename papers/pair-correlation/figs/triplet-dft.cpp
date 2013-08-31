@@ -106,7 +106,7 @@ const int numplots = sizeof fun/sizeof fun[0];
 
 
 // Here we set up the lattice.
-static const double width = 10;
+static const double width = 20;
 static const double dx = .1/1.5;
 //This resolution is a bit smaller than 1/sqrt(2), which allows for a
 //speration delta of 1 when going around the circular wall and not
