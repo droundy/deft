@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from __future__ import division
+from numpy import *
 import os
 
 iterations = 100000000
@@ -19,8 +20,8 @@ if os.path.isdir('figs'):
 
 os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
-memory = N/80 # fixme: better guess
 def run_walls(ff, N, shape):
+  memory = N/100 # fixme: better guess
   name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
   scriptname = "%s/%s.tmp.sh" %(figsdir, name)
   outname = "%s/%s.out" %(bindir, name)
@@ -42,7 +43,6 @@ def run_walls(ff, N, shape):
   script.close()
 
   os.system("sbatch -J %s %s\n" %(name, scriptname))
-  os.system("rm %s" %(scriptname))
 
 
 

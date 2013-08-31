@@ -342,6 +342,15 @@ int main(int argc, const char *argv[]) {
     // Since more start at lower z-values, once there are more at higher values
     // We should be ready
     if (initial_phase) {
+      // fine-tuning scale so that the acceptance rate will be reasonable
+      const double acceptance_rate = (double)workingmoves/totalmoves;
+      if (acceptance_rate < 0.6) {
+        scale /= 1.002;
+        theta_scale /= 1.002;
+      } else if (acceptance_rate > 0.9) {
+        scale *= 1.002;
+        theta_scale *= 1.002;
+      }
       if (iteration%1000 == 0) {
         int count1 = 0, count2 = 0;
         for(int i=0; i<N; i++) {
@@ -351,7 +360,7 @@ int main(int argc, const char *argv[]) {
             count2 ++;
         }
         if (count1 >= count2) {
-          printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, double(workingmoves)/totalmoves);
+          printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, acceptance_rate);
         }
         else {
           initial_phase = false;
@@ -407,7 +416,7 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
           const double z = (z_i + 0.5)*dw_density;
           const double shell_volume = len[0]*len[1]*dw_density;
           const double density = (double)density_histogram[z_i]*N/count/shell_volume;
-          fprintf(densityout, "%5.2f   %07.5f   %li\n", z, density, density_histogram[z_i]);
+          fprintf(densityout, "%6.3f   %07.5f   %li\n", z, density, density_histogram[z_i]);
         }
         fclose(densityout);
 
