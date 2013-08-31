@@ -3,11 +3,12 @@ from __future__ import division
 import os
 
 iterations = 100000000
-R = 1.7320508075688772
+R = sqrt(3)/2
 dim = 20
+dw_density = 0.01
 
 scale = .05
-theta_scale = .005
+theta_scale = .05
 
 
 figsdir = 'papers/polyhedra/figs'
@@ -18,15 +19,16 @@ if os.path.isdir('figs'):
 
 os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
-memory = 10 # fixme: better guess
+memory = N/80 # fixme: better guess
 def run_walls(ff, N, shape):
   name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
   scriptname = "%s/%s.tmp.sh" %(figsdir, name)
   outname = "%s/%s.out" %(bindir, name)
   filename = '%s/mc/polyhedraMC-walls-%4.2f' % (figsdir, ff)
-  command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s wallz periodx periody \
-R %g dimensions %g %g %g scale %g theta_scale %g" %(bindir, N, iterations, filename,
-                                                    R, dim, dim, dim, scale, theta_scale)
+  command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s periodx periody wallz\
+ R %g dimensions %g %g %g scale %g theta_scale %g shape %s dw_density %g" \
+      %(bindir, N, iterations, filename, R, dim, dim, dim, scale, theta_scale,
+        shape, dw_density)
   script = open(scriptname, 'w')
   script.write("#!/bin/bash\n")
   script.write("#SBATCH --mem-per-cpu=%i\n" %memory)
@@ -44,5 +46,9 @@ R %g dimensions %g %g %g scale %g theta_scale %g" %(bindir, N, iterations, filen
 
 
 
-
-run_walls(.6, 600, 'cube')
+run_walls(.3, 2400, 'cube')
+run_walls(.4, 3200, 'cube')
+run_walls(.5, 4000, 'cube')
+run_walls(.6, 4800, 'cube')
+run_walls(.7, 5600, 'cube')
+run_walls(.8, 6400, 'cube')

@@ -27,9 +27,18 @@ struct polyhedron {
 };
 
 // Global Constants
-const bool debug = false; // prints out a lot of extra information
-                         // also performs extra computation
-                         // should be false except when something is wrong
+
+// prints out a lot of extra information and performs extra computation
+// should be false except when something is wrong
+// makes the program run much much slower!
+const bool debug = false;
+
+// if two polyhedra, a and b, are closer than a.R + b.R + neighborR,
+// then they are neighbors. We only need to check overlaps with neighbors,
+// but we need to update neighbor tables as soon as a polyhedra moves more
+// than a distance of neighborR
+const double neighborR = 2.0;
+
 
 // Global "Constants" -- set at runtime then unchanged
 long unsigned int seed = 0; // for random number generator
@@ -59,12 +68,17 @@ inline double max(double a, double b) { return (a > b)? a : b; }
 // Sets up the vertices, faces, etc. for each polyhedron. Only run once.
 void define_shapes();
 
+
+// Populates the neighbor tables. Any polyhedra a and b that are within a distance
+// of a.R + b.R + neighborR are neighbors.
+inline void populate_neighbor_tables(const polyhedron *p, bool *neighbor_tables);
+
 // Check whether two polyhedra overlap
 inline bool overlap(const polyhedron &a, const polyhedron &b);
 
 // Check whether a polyhedron overlaps with any in the array, except for
 // the nth one. Useful for post-move testing with a temporary polyhedron.
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n);
+inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, const bool *neighbor_tables);
 
 // Check if polyhedron is outside its allowed locations
 inline bool in_cell(const polyhedron &p);
@@ -113,9 +127,7 @@ inline void print_bad(const polyhedron *p);
 
 int main(int argc, const char *argv[]) {
   define_shapes();
-
-  poly_shape *shape;
-  shape = &cube;
+  poly_shape *shape = &cube;
   // input parameters
   const int minparams = 4;
   if (argc < minparams) {
@@ -206,8 +218,8 @@ int main(int argc, const char *argv[]) {
   const int density_bins = len[2]/dw_density;
   long *density_histogram = new long[density_bins]();
   polyhedron *polyhedra = new polyhedron[N];
-  polyhedron initialpolys[N];
-  double displacement[N];
+  bool *neighbor_tables = new bool[N*N];
+  vector3d *initial_poly_pos = new vector3d[N];
   long totalmoves = 0, workingmoves = 0;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -234,11 +246,7 @@ int main(int argc, const char *argv[]) {
     polyhedra[i].pos[1] = (y + 0.5)*yspace;
     polyhedra[i].pos[2] = (z + 0.5)*zspace;
 
-    initialpolys[i].mypoly = shape;
-    initialpolys[i].R = R;
-    initialpolys[i].pos[0] = (x + 0.5)*xspace;
-    initialpolys[i].pos[1] = (y + 0.5)*yspace;
-    initialpolys[i].pos[2] = (z + 0.5)*zspace;
+    initial_poly_pos[i] = polyhedra[i].pos;
 
     x ++;
     if (x >= nx) {
@@ -266,9 +274,9 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
+  populate_neighbor_tables(polyhedra, neighbor_tables);
   fflush(stdout);
-  // fixme: multiply output_period by 60
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
+  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   bool initial_phase = true;
@@ -277,16 +285,8 @@ int main(int argc, const char *argv[]) {
   for(long iteration=1; iteration<=iterations; iteration++) {
     if (debug) {
       print_bad(polyhedra);
-      if (iteration%10000 == 0) {
+      if (iteration%10000 == 0)
         print_all(polyhedra);
-        double maxdis = 0, mindis = 1000000, sumdis = 0;
-        for(int i=0; i<N; i++) {
-          maxdis = max(maxdis, displacement[i]);
-          mindis = min(mindis, displacement[i]);
-          sumdis += displacement[i];
-        }
-        printf("biggest displacement: %4.2f, smallest: %4.2f, mean: %4.2f\n", maxdis, mindis, sumdis/N);
-      }
       if (iteration%1000 == 0) {
         char *iter = new char[1024];
         sprintf(iter, "One thousand iterations (current iteration: %li)", iteration);
@@ -295,6 +295,13 @@ int main(int argc, const char *argv[]) {
         fflush(stdout);
       }
     }
+    // if (iteration%100 == 0) {
+    //   char *iter = new char[1024];
+    //   sprintf(iter, "One hundred iterations (current iteration: %li)", iteration);
+    //   took(iter);
+    //   delete[] iter;
+    //   fflush(stdout);
+    // }
 
     // MOVING SHAPES ------------------------------------------------------
     for(int i=0; i<N; i++) {
@@ -305,12 +312,29 @@ int main(int argc, const char *argv[]) {
       temp.R = polyhedra[i].R;
       temp.mypoly = polyhedra[i].mypoly;
       if (in_cell(temp)) {
-        const bool overlaps = overlaps_with_any(temp, polyhedra, i);
+        const bool overlaps = overlaps_with_any(temp, polyhedra, i, neighbor_tables);
+        if (debug) {
+          bool test_overlap = false;
+          for(int j=0; j<N; j++) {
+            if (j != i && overlap(temp, polyhedra[j])) {
+              test_overlap = true;
+              break;
+            }
+          }
+          if (test_overlap != overlaps) {
+            printf("Error error! We do not have agreement on whether or not they overlap!\n");
+            print_bad(polyhedra);
+          }
+        }
         if (!overlaps) {
           polyhedra[i] = temp;
           workingmoves ++;
-          if (debug)
-            displacement[i] = (polyhedra[i].pos-initialpolys[i].pos).norm();
+          if (periodic_diff(polyhedra[i].pos, initial_poly_pos[i]).normsquared()
+              > neighborR*neighborR) {
+            populate_neighbor_tables(polyhedra, neighbor_tables);
+            for(int j=0; j<N; j++)
+              initial_poly_pos[j] = polyhedra[j].pos;
+          }
         }
       }
     }
@@ -395,6 +419,8 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
   // END MAIN PROGRAM LOOP //////////////////////////////////////////////////////////
 
   delete[] polyhedra;
+  delete[] neighbor_tables;
+  delete[] initial_poly_pos;
   delete[] density_histogram;
   return 0;
 }
@@ -462,7 +488,7 @@ inline bool overlap(const polyhedron &a, const polyhedron &b) {
   return true;
 }
 
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n) {
+inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, const bool *neighbor_tables) {
   // construct axes from a and a's projection onto them
   vector3d aaxes[a.mypoly->nfaces];
   double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
@@ -477,7 +503,7 @@ inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n) 
     }
   }
   for (int k=0; k<N; k++) {
-    if (k != n) {
+    if (neighbor_tables[n*N + k]) {
       const vector3d ab = periodic_diff(a.pos, bs[k].pos);
       if (ab.normsquared() < (a.R + bs[k].R)*(a.R + bs[k].R)) {
         bool overlap = true; // assume overlap until we prove otherwise or fail to
@@ -703,6 +729,15 @@ static void took(const char *name) {
   }
   fflush(stdout);
   last_time = t;
+}
+
+inline void populate_neighbor_tables(const polyhedron *p, bool *neighbor_tables) {
+  for(int i=0; i<N; i++) {
+    for(int j=0; j<N; j++) {
+      neighbor_tables[i*N + j] = (i != j) &&
+        (periodic_diff(p[i].pos, p[j].pos).normsquared() < (p[i].R + p[j].R + neighborR)*(p[i].R + p[j].R + neighborR));
+    }
+  }
 }
 
 void define_shapes() {
