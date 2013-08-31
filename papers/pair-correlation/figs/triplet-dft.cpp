@@ -368,7 +368,7 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
-    for (double z = -7; z >= -(2.0 + delta); z+=ds) {
+    for (double z = -7; z <= -(2.0 + delta); z+=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
@@ -423,14 +423,14 @@ void run_with_eta(double eta, const char *name, Functional fhs) {
 
     const Cartesian r0(0,0, 4.0+2*delta);
     const double max_theta = M_PI;
-    for (double z = 10; z >= 3*(2.0 + delta); z-=ds) {
+    for (double z = 11; z >= 3*(2.0 + delta); z-=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;
       double g3 = g2_path*density(r0)*density(r1)/n_bulk/n_bulk;
       fprintf(out_path,"0\t%g\t%g\t%g\n", g3, r1[2], r1[0]);
     }
-    for (double z = -10; z >= -(2.0 + delta); z+=ds) {
+    for (double z = -10; z <= -(2.0 + delta); z+=ds) {
       const Cartesian r1(0,0,z);
       double g2_path = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
       double n_bulk = (3.0/4.0/M_PI)*eta;

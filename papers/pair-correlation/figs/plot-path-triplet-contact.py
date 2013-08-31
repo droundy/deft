@@ -225,10 +225,13 @@ g3_back = read_triplet_back(ff, 'this-work')
 xback = g3_back[:,3]
 zback = g3_back[:,2]
 plot(zmc,xmc, 'w-', linewidth=3)
+plot(zdft,-xdft, 'w-', linewidth=3)
+plot(zback,-xback, 'w-', linewidth=3)
 plot(zdft,xdft, 'w-', linewidth=3)
-plot(zmc,xmc, 'k--', linewidth=3)
-plot(zdft,xdft, 'c--', linewidth=3)
-plot(zback,xback, 'm--', linewidth=3)
+plot(zmc,xmc, colors[plots.index('mc')]+'--', linewidth=3)
+plot(zdft,-xdft, colors[plots.index('this-work')]+'--', linewidth=3)
+plot(zback[zback<zback.max()],-xback[zback<zback.max()],
+     colors[plots.index('this-work')]+'--', linewidth=3)
 
 
 Ax = 3.9

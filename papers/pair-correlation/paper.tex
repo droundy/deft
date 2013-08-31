@@ -361,11 +361,10 @@ simulations of the hard-sphere radial distribution function.
     wall.}\label{fig:pair-distribution-4}
 \end{figure}
 
-\subsection{Triplet distribution function}
+Discuss the pair distribution function here, explaining plots
+  and discussing results and comparison.
 
-In Fig.~\ref{fig:triplet-distribution-3} and
-Fig.~\ref{fig:triplet-distribution-4} we can see the triplet
-distribution computed using Monte Carlo.
+\subsection{Triplet distribution function}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
@@ -376,7 +375,7 @@ distribution computed using Monte Carlo.
     to the contact value of the \emph{pair} distribution function.
     The plot on the right shows the value of $g^{(3)}$ along the path
     shown as a dotted lin on the plot to the
-    left.}\label{fig:triplet-distribution-3}
+    left.}\label{fig:triplet-contact-distribution-3}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
@@ -387,20 +386,52 @@ distribution computed using Monte Carlo.
     to the contact value of the \emph{pair} distribution function.
     The plot on the right shows the value of $g^{(3)}$ along the path
     shown as a dotted lin on the plot to the
-    left.}\label{fig:triplet-distribution-4}
+    left.}\label{fig:triplet-contact-distribution-4}
 \end{figure}
+
+Just as the radial distribution function of a homogeneous fluid may be
+computed from the density of an inhomogeneous one using Percus'
+test-particle trick, the triplet distribution function of a
+homogeneous system can be computed using an approximation of the pair
+distribution for an inhomogeneous fluid, such as we have developed.
+\begin{align}
+  g^{(3)}(\rr_1,\rr_2,\rr_3) &= \frac{n_{\textrm{TP}(\rr_1)}(\rr_2)
+  n_{\textrm{TP}(\rr_1)}(\rr_3)}{n^2}
+  g^{(2)}_{\textrm{TP}(\rr_1)}(\rr_2,\rr_3)
+\end{align}
+where $g^{(3)}(\rr_1,\rr_2,\rr_3)$ is the triplet distribution
+function of a homogeneous fluid with density $n$, and the
+$\textrm{TP}(\rr_1)$ subscript indicates quantities computed for the
+inhomogeneous density configuration in which one sphere is fixed at
+position $\rr_1$.  This method treats one of the three positions---the
+location of the test particle---differently from the others, which
+means that a poor approximation to the pair distribution function may
+beak the symmetry which is present in the true triplet distribution
+function.
+
+Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
+compare the triplet distribution function computed using our
+approximation to $g^{(2)}$ with results from Monte Carlo simulation.
+In each figure $\rr_1$ and $\rr_2$ are held fixed, while the third
+position $\rr_3$ is varied.  The test-particle position in each case
+is $\rr_1$, which is on the left-hand side of the figure.  In the
+color plot on the left, the first and second spheres are displayed in
+grey.  On the bottom half of each left-hand plot is the triplet
+correlation function as computed using the approximation presented in
+this work.  The top half displays the triplet correlation function
+from Monte Carlo.  On the right, we display 
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
   \caption{The triplet distribution function
     $g^{(3)}(\rr_1,\rr_2,\rr_3)$ plotted when $\rr_1$ and $\rr_2$ are
-    separated by the diameter of one sphere.}\label{fig:triplet-gap-distribution-3}
+    separated by the diameter of one sphere.}\label{fig:triplet-inbetween-distribution-3}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-inbetween-4.pdf}
   \caption{The triplet distribution function
     $g^{(3)}(\rr_1,\rr_2,\rr_3)$ plotted when $\rr_1$ and $\rr_2$ are
-    separated by the diameter of one sphere.}\label{fig:triplet-gap-distribution-4}
+    separated by the diameter of one sphere.}\label{fig:triplet-inbetween-distribution-4}
 \end{figure}
 
 
