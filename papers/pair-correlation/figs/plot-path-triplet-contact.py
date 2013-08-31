@@ -8,7 +8,7 @@ from pylab import *
 import scipy.ndimage
 import os.path
 import math
-
+import matplotlib.patheffects
 from matplotlib import rc
 rc('text', usetex=True)
 
@@ -23,13 +23,14 @@ sigma = 2.0
 contact_delta = 0.1
 ############################
 rpath = sigma + contact_delta
+center = rpath/2
 
 
 able_to_read_file = True
 
 # Set the max parameters for plotting.
 zmax = 8
-zmin = -3 # minimum 0 without some further changes
+zmin = -3
 rmax = 4
 ############################
 
@@ -151,26 +152,15 @@ xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mat
 xplot.legend(loc='best', ncol=1).get_frame().set_alpha(0.5)
 
 twod_plot.set_aspect('equal')
-g2mc = read_triplet(ff, 'mc')
-rbins = round(rmax/dx) + 1
-zminbin = round(zmin/dx)
-zcenterbin = round((1.0+contact_delta)/dx)
-zmaxbin = round(zmax/dx) + 1
-zbins = zmaxbin - zminbin
-g22 = zeros((rbins, zbins))
-if zminbin < 0:
-  g22[:, -zminbin:zbins] = g2mc[:rbins, 0:zmaxbin]
-  g22[:, 0:-zminbin] = g2mc[:rbins, 2*zcenterbin-zminbin:2*zcenterbin:-1]
-else:
-  g22[:, :] = g2mc[:rbins, zminbin:zmaxbin]
-g2mc = g22
-gmax = g2mc.max()
-
-r = arange(0, rmax+dx/2, dx)
-z = arange(zmin, zmax+dx, dx)
+g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
+rpoints = len(g3mc[:,0])
+zpoints = len(g3mc[0,:])
+r = arange(0, rpoints*dx, dx)
+z = arange(center, center+zpoints*dx, dx)
 Z, R = meshgrid(z, r)
+gmax = g3mc.max()
 
-g2dft = read_triplet(ff, 'this-work')
+g3dft = read_triplet(ff, 'this-work')
 zdft = loadtxt("figs/triplet-z.dat")
 xdft = loadtxt("figs/triplet-x.dat")
 
@@ -204,12 +194,13 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
-CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
-twod_plot.pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
+CS = twod_plot.pcolormesh(Z, R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
 plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
-text(-3, -3.5, 'this work')
-text(-3, 2, 'monte carlo')
+text(-2.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+text(-2.7, 3.5, 'monte carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 sphere0 = Circle((0, 0), 1, color='slategray')
 sphere1 = Circle((rpath, 0), 1, color='slategray')
@@ -264,27 +255,38 @@ def g3pathfunction_z(z):
     return interp(z, flipud(znice), flipud(gnice))
 
 # Annotations on 2d plot
-annotate('$A$', xy=(Az, Ax), xytext=(0.2,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$B$', xy=(Bz, Bx), xytext=(rpath,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$C$', xy=(Cz, Cx), xytext=(4.3,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$D$', xy=(Dz, Dx), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$E$', xy=(Ez, Ex), xytext=(6,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-
+texteff = [matplotlib.patheffects.withStroke(linewidth=2, foreground="w")]
+arroweff = [matplotlib.patheffects.withStroke(linewidth=3, foreground="w")]
+annotate('A', xy=(Az, Ax), xytext=(0.2,3),
+         path_effects=texteff,
+         arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
+annotate('B', xy=(Bz, Bx), xytext=(rpath,3),
+         path_effects=texteff,
+         arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
+annotate('C', xy=(Cz, Cx), xytext=(4.3,2.5),
+         path_effects=texteff,
+         arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
+annotate('D', xy=(Dz, Dx), xytext=(5,1),
+         path_effects=texteff,
+         arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
+annotate('E', xy=(Ez, Ex), xytext=(6,1),
+         path_effects=texteff,
+         arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
 
 # Annotations on 1d plot
-xplot.annotate('$A$', xy=(Ax, g3pathfunction_x(Ax)),
+xplot.annotate('A', xy=(Ax, g3pathfunction_x(Ax)),
                xytext=(Ax+1,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('$B$', xy=(Bx,g3pathfunction_x(Bx)),
+xplot.annotate('B', xy=(Bx,g3pathfunction_x(Bx)),
                xytext=(Bx+1, g3pathfunction_x(Bx)-1.0),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$C$', xy=(Cz,g3pathfunction_z(Cz)),
+zplot.annotate('C', xy=(Cz,g3pathfunction_z(Cz)),
                xytext=(Cz,g3pathfunction_z(Cz)-2.0),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$D$', xy=(Dz,g3pathfunction_z(Dz)),
+zplot.annotate('D', xy=(Dz,g3pathfunction_z(Dz)),
                xytext=(Dz+1,g3pathfunction_z(Dz)-0.2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$E$', xy=(Ez,g3pathfunction_z(Ez)),
+zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
                xytext=(Ez+0.5,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
