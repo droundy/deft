@@ -330,7 +330,7 @@ int main(int argc, const char *argv[]) {
           polyhedra[i] = temp;
           workingmoves ++;
           if (periodic_diff(polyhedra[i].pos, initial_poly_pos[i]).normsquared()
-              > neighborR*neighborR) {
+              > neighborR*neighborR/4) {
             populate_neighbor_tables(polyhedra, neighbor_tables);
             for(int j=0; j<N; j++)
               initial_poly_pos[j] = polyhedra[j].pos;

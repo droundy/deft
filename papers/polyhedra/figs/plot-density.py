@@ -18,12 +18,19 @@ def read_mc(ff, poly, N):
   return data[:,0], data[:,1]
 
 z, density = read_mc(ff, poly, N)
-length = z[-1] + z[0]
+dz = z[2] - z[1]
+length = len(z)*dz
+zmid = length/2
 print sum(density)/len(density)*length**3
-plot(z, density, label="%s, %i" %(poly, N))
-
+plot(z[z<zmid], density[z<zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
+plot(length-z[z>zmid], density[z>zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
+if poly == 'cube':
+  axvline(x = 0.5, linestyle='--')
+  axvline(x = sqrt(2)/2, linestyle='--')
+  axvline(x = sqrt(3)/2, linestyle='--')
 legend(loc='best')
 
+#xlim(0, 4)
 title("density")
 savefig("figs/density-%4.2f-%s.pdf" %(ff, poly))
 show()
