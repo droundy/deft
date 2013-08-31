@@ -16,7 +16,7 @@ if os.path.isdir('figs'):
     figsdir = 'figs'
     bindir = '../..'
 
-os.system("time scons %s/polyhedra-monte-carlo" %(bindir))
+os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
 memory = 10 # fixme: better guess
 def run_walls(ff, N, shape):
@@ -36,6 +36,7 @@ R %g dimensions %g %g %g scale %g theta_scale %g" %(bindir, N, iterations, filen
 
   script.write("echo \"Starting polyhedra-monte-carlo with estimated memory use: %i.\"\n\n" %memory)
   script.write("%s\n" %(command))
+
   script.close()
 
   os.system("sbatch -J %s %s\n" %(name, scriptname))
