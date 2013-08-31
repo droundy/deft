@@ -296,7 +296,7 @@ Default('webpage')
 haskell = Environment(tools=['haskell'],
                       HSSEARCHPATH = ["src/haskell"],
                       HSPACKAGES = ["containers", "process", "HUnit"],
-                      HSCFLAGS = ['-O2'])
+                      HSCFLAGS = ['-O2', '-Wall', '-Werror'])
 haskell_source = []
 for m in Split(""" LatexDouble Latex Expression CodeGen Statement HughesSaft WaterSaft Optimize
                    FMT WhiteBear IdealGas SFMT NewCode """):
