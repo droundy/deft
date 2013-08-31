@@ -55,14 +55,14 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
                     source = [pyfile] + goodinputs,
                     action = act)
 
-fixed_output = re.compile(r"savefig\(['\"](.*)['\"](\s*,[\w\s=]+)*\)")
-changing_output = re.compile(r"savefig\(['\"](.*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
+fixed_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"](\s*,[\w\s=]+)*\)")
+changing_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
-fixed_input = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\)", re.M)
-changing_loadtxt_noparens = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*([^\(\)]*)\)", re.M)
-changing_loadtxt = re.compile(r"^[^#]*loadtxt\(['\"](.*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
-changing_input = re.compile(r"input:\s*['\"](.*)['\"]\s*%\s*(\(.*\))")
+fixed_input = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\)", re.M)
+changing_loadtxt_noparens = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*([^\(\)\n]*)\s*\)", re.M)
+changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
+changing_input = re.compile(r"input:\s*['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))")
 
 def friendly_eval(code, context, local = None):
     try:
