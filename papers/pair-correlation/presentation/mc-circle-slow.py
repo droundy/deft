@@ -129,6 +129,19 @@ elif 'gsigma' in sys.argv:
 def init():
   return 0
 
+def setup():
+  global circles
+  for i in xrange(N):
+    keep = True
+    temp = move(circles[i])
+    if temp[0] - r < 0 or temp[0] + r > lenx:
+      keep = False
+    else:
+      for j in xrange(N):
+        if j != i and touch(temp, circles[j]):
+          keep = False
+          break
+    if keep: circles[i] = temp
 
 defaultc = (0,.7,1,1)
 highlightc = (0,0,1,1)
@@ -255,13 +268,14 @@ fig.tight_layout()
 ax.set_aspect('equal')
 ax.set_ylim(-2*edge, leny+2*edge)
 
+for p in xrange(500):
+  setup()
+
 if show:
   anim = animation.FuncAnimation(fig, animate, init_func=init)
   pylab.show()
 
 else:
-  for p in xrange(5*N):
-    animate(p)
   count = 0
   success = 0
   print('Saving animation images.')
