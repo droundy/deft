@@ -108,7 +108,9 @@ for i in xrange(int(nx_setup)):
 # Plotting
 fig = figure()
 ax2 = fig.add_subplot(111)
+ax2.xaxis.set_visible(False)
 ax = ax2.twinx()
+ax.yaxis.set_visible(False)
 
 ax.set_xlim(-edge, lenx+edge)
 ax.set_ylim(-edge, leny+edge)
