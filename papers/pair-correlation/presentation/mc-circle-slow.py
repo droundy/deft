@@ -5,21 +5,16 @@ from matplotlib.collections import PolyCollection
 from matplotlib.colors import colorConverter
 import matplotlib.animation as animation
 
-if len(sys.argv) > 1 and sys.argv[1] == 'show':
+if 'show' in sys.argv:
   show = True
 else:
   show = False
 
 ff = .4
 
-# setup parameters
-x0_setup = 1.2
-y0_setup = 1.2
-dx_setup = 2.8
-dy_setup = 2.5
-
 
 r = 1
+delta_contact = 0.03
 area = pi*r**2
 
 # box
@@ -27,12 +22,19 @@ lenx = 20
 leny = 10
 edge = 1
 
-n = int(round(ff*lenx*leny/area))
+N = int(round(ff*lenx*leny/area))
 
 # density
-dx = 0.1
+dx = 0.2
 histogram = zeros(lenx/dx)
-xcoords = arange(0, lenx, dx) + dx/2
+
+xcoords_doubled = zeros(2*len(histogram))
+for i in xrange(len(histogram)):
+  xcoords_doubled[2*i] = i*dx
+  xcoords_doubled[2*i+1] = (i+1)*dx
+histogram_doubled = zeros_like(xcoords_doubled)
+contact_histogram = zeros_like(xcoords_doubled)
+nA_histogram = zeros_like(xcoords_doubled)
 
 # Movement
 scale = 0.5
@@ -65,84 +67,126 @@ def touch(a, b):
   if (distsq(a, b) < 4*r*r):
     return True
   return False
+
+def almost_touch(a, b):
+  if (distsq(a, b) < 4*(r+delta_contact)*(r+delta_contact)):
+    return True
+  return False
 ##########################
 
 
-circles = zeros((n+1, 2))
-circles[n] = array([-100,-100])
-colors = zeros(n+1)
+circles = zeros((N+1, 2))
+circles[N] = array([-100,-100])
+colors = zeros(N+1)
 
-# initial setup
-x_setup = x0_setup
-y_setup = y0_setup
+# setup parameters
+dx_setup = sqrt((lenx-2)*leny/N)
+nx_setup = ceil((lenx-2)/dx_setup)
+ny_setup = ceil(leny/dx_setup)
+n_setup = nx_setup*ny_setup
+x_setup = linspace(dx_setup/2, lenx-dx_setup/2, nx_setup)
+y_setup = linspace(dx_setup/2, leny-dx_setup/2, ny_setup)
+X_setup, Y_setup = meshgrid(x_setup, y_setup)
 
-for i in xrange(n):
-  circles[i, 0] = x_setup
-  circles[i, 1] = y_setup
-  x_setup += dx_setup
-  if (x_setup + r > lenx):
-    x_setup = x0_setup
-    y_setup += dy_setup
+occupied_setup = ones((nx_setup,ny_setup))
+while sum(occupied_setup) > N:
+  occupied_setup[floor(nx_setup*rand()), floor(ny_setup*rand())] = 0
 
+i_setup = 0
+for i in xrange(int(nx_setup)):
+  for j in xrange(int(ny_setup)):
+    if occupied_setup[i,j]:
+      rndx = 0*(2*rand()-1)*(dx_setup-2)/4
+      rndy = 0*(2*rand()-1)*(dx_setup-2)/4
+      circles[i_setup, 0] = x_setup[i] + rndx
+      circles[i_setup, 1] = y_setup[j] + rndy
+      binnum = round(circles[i_setup][0]/dx) % len(histogram)
+      histogram_doubled[2*binnum] += 1 # add another count to histogram
+      histogram_doubled[2*binnum+1] += 1 # add another count to histogram
+      i_setup += 1
 
 # Plotting
 fig = figure()
-ax = fig.add_subplot(111)
+ax2 = fig.add_subplot(111)
+ax = ax2.twinx()
 
 ax.set_xlim(-edge, lenx+edge)
 ax.set_ylim(-edge, leny+edge)
 
-
-#line, = ax2.plot(xcoords, histogram)
-#ax2.set_xlim(-edge, lenx+edge)
-line2 = ax.arrow(-10, -10, -10, -10)
+if 'density' in sys.argv:
+  line, = ax2.plot(xcoords_doubled, histogram_doubled)
+  ax2.set_ylabel('packing fraction $\eta(x)$')
+  ax2.axvline(x=0, linestyle='-', color='k', linewidth=3)
+  ax2.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
+  ax2.set_ylim(0, 2)
+elif 'gsigma' in sys.argv:
+  line, = ax2.plot(xcoords_doubled, contact_histogram)
+  ax2.set_ylabel('$g_\sigma$')
+  ax2.axvline(x=0, linestyle='-', color='k', linewidth=3)
+  ax2.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
+  ax2.set_ylim(0, 2)
 
 def init():
   return 0
-  #coll = PolyCollection(coords)
-  #ax.add_collection(coll)
-  #line.set_ydata(histogram)
-
 
 
 defaultc = (0,.7,1,1)
 highlightc = (0,0,1,1)
-goodc = (.3,1,.5,1)
+if 'gsigma' in sys.argv:
+  goodc = defaultc
+  rejectc = defaultc
+  contactc = (0,0,0.5)
+else:
+  goodc = (.3,1,.5,1)
+  rejectc = (.6,.1,.1,1)
 badc = (1,0,0,1)
-rejectc = (.6,.1,.1,1)
 tempc = (.1,1,.1,1)
 count = 0
 success = 0
 skip = 1
 i = 0
 
-colors = [defaultc]*(n+1)
+colors = [defaultc]*(N+1)
 
 def animate(p):
-  global count, circles, skip, colors, histogram, i, line2, success
-  if (i >= n):
+  global count, circles, skip, colors, histogram, i, success
+  if (i >= N):
     i = 0
   keep = True
   temp = move(circles[i])
   if temp[0] - r < 0 or temp[0] + r > lenx:
     keep = False
   else:
-    for j in xrange(n):
+    for j in xrange(N):
       if j != i and touch(temp, circles[j]):
         keep = False
         break
   count += 1
   if keep:
     success += 1
-    colors[n] = tempc
+    colors[N] = tempc
   else:
-    colors[n] = badc
-  circles[n] = temp
-  colors[i] = highlightc
+    colors[N] = badc
+  circles[N] = temp
 
+  binnum = round(circles[i][0]/dx) % len(histogram)
+  histogram_doubled[2*binnum] += 1 # add another count to histogram
+  histogram_doubled[2*binnum+1] += 1 # add another count to histogram
+  if 'density' in sys.argv:
+    line.set_ydata(N*area*histogram_doubled/sum(histogram_doubled)/dx/leny)
+  colors[i] = highlightc
+  for j in xrange(len(histogram)):
+    xjp = j*dx + dx
+    xjm = j*dx
+    if abs(xjp - circles[i][0]) <= 2 and abs(xjm - circles[i][0]) <= 2:
+      lineseg = abs(sqrt(4 - (xjp-circles[i][0])**2) -  sqrt(4 - (xjm-circles[i][0])**2))
+      nA_histogram[2*j] += lineseg
+      nA_histogram[2*j+1] += lineseg
+  if 'nA' in sys.argv:
+    line.set_ydata(100*N*nA_histogram/sum(histogram_doubled))
 
   ax.cla()
-  for j in xrange(n+1):
+  for j in xrange(N+1):
     for shift in [0, -leny, leny]:
       circ = Circle(circles[j]-(0, shift), r, color=colors[j])
       if shift != 0:
@@ -173,14 +217,39 @@ def animate(p):
   fig.tight_layout()
   if keep:
     circles[i] = temp
-    colors[i] = goodc
+
+  if 'gsigma' in sys.argv:
+    colors = [defaultc]*(N+1)
+    inc = zeros(N)
+    for j in xrange(N):
+      for k in xrange(j):
+        if almost_touch(circles[k], circles[j]):
+          colors[k] = contactc
+          colors[j] = contactc
+          inc[k] = 1
+          inc[j] = 1
+    for j in xrange(N):
+      if inc[j]:
+        binnum = round(circles[j][0]/dx) % len(histogram)
+        contact_histogram[2*binnum] += 1
+        contact_histogram[2*binnum+1] += 1
+
+    # FIXME: off by a constant factor below
+    gsigma = contact_histogram/(histogram_doubled+0.01)/nA_histogram/delta_contact
+    if 'nA' in sys.argv:
+      line.set_ydata(nA_histogram/sum(histogram_doubled))
+    else:
+      line.set_ydata(gsigma)
   else:
-    colors[i] = rejectc
-  if (i == n-1):
-    colors = [defaultc]*(n+1)
+    if keep:
+      colors[i] = goodc
+    else:
+      colors[i] = rejectc
+    if (i == N-1):
+      colors = [defaultc]*(N+1)
   i += 1
   if show:
-    time.sleep(.3)
+    time.sleep(.01)
 
 fig.tight_layout()
 ax.set_aspect('equal')
@@ -191,12 +260,17 @@ if show:
   pylab.show()
 
 else:
-  for p in xrange(5*n):
+  for p in xrange(5*N):
     animate(p)
   count = 0
   success = 0
   print('Saving animation images.')
   for p in xrange(101):
     animate(p)
-    savefig("presentation/anim/mc-slow-%03i.pdf" %p)
+    if 'density' in sys.argv:
+      savefig("presentation/anim/mc-density-%03i.pdf" %p)
+    if 'gsigma' in sys.argv:
+      savefig("presentation/anim/mc-gsigma-%03i.pdf" %p)
+    else:
+      savefig("presentation/anim/mc-slow-%03i.pdf" %p)
 
