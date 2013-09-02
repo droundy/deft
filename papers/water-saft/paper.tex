@@ -29,6 +29,10 @@
 
 % fixme is intended to prioritize stuff that needs fixing.
 \newcommand{\fixme}[1]{\textcolor{red}{[\emph{#1}]}}
+%\newcommand\hughesetal{Ref.~\citenum{hughes2013classical}}
+\newcommand\hughesetal{Hughes \emph{et al.}}
+
+\newcommand\hughesetalcite{Hughes \emph{et al.}~\cite{hughes2013classical}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -77,11 +81,12 @@ model system, and then fit the model to experimental data such as the
 equation of state~\cite{hughes2013classical, clark2006developing,
   gloor2002saft, gloor2004accurate, gloor2007prediction, Jaqaman2004,
   chuev2006, fu2005vapor-liquid-dft,kiselev2006new,
-  blas2001examination, sundararaman2012computationally}.  Classical
-DFT is a natural framework for creating a more flexible theory of
-hydrophobicity that can readily describe interaction of water with
-arbitrary external potentials---such as potentials describing strong
-interactions with solutes or surfaces.
+  blas2001examination, sundararaman2012computationally}.
+%%  Classical
+%% DFT is a natural framework for creating a more flexible theory of
+%% hydrophobicity that can readily describe interaction of water with
+%% arbitrary external potentials---such as potentials describing strong
+%% interactions with solutes or surfaces.
 
 A widely used family of models used in the development of classical
 density functionals is based on Statistical Associating Fluid Theory
@@ -90,41 +95,42 @@ hard spheres with weak dispersion interactions and hydrogen-bonding
 association sites, which has been used to accurately model the
 equations of state of both pure fluids and mixtures over a wide range
 of temperatures and pressures~\cite{muller2001molecular,
-  tan2008recent}.  The association term in SAFT is based on Wertheim's
-first-order thermodynamic perturbation theory, which models fluids as
-hard-spheres with strong associative interactions at specific sites on
-the surface of each sphere~\cite{wertheim1984fluidsI,
+  tan2008recent}.  The association term in SAFT uses Wertheim's
+first-order thermodynamic perturbation theory do describe an
+associating fluid as hard-spheres with strong associative interactions
+at specific sites on the surface of each sphere~\cite{wertheim1984fluidsI,
   wertheim1984fluidsII, wertheim1986fluidsIII, wertheim1986fluidsIV}.
 These association sites have an attractive interaction at contact, and
 rely on the hard-sphere radial distribution function at contact
 $g_\sigma^\text{HS}$ in order to determine the extent of association.
-While this function is well-known for the homogeneous hard-sphere
-fluid, it is less well-known for inhomogeneous systems, such as occur
-at liquid interfaces.  In a recent paper, we examined this function at
-a variety of hard-sphere interfaces~\cite{schulte2012using}.  We
-tested the accuracy of existing approximations for the distribution
-function at contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
-  gross2009density}, and derived a significantly improved
-approximation for the averaged distribution function at contact.
+While this function is known for the homogeneous hard-sphere
+fluid, it must be approximated for inhomogeneous systems, such as occur
+at liquid interfaces.
 
-We will apply this improved $g_\sigma^{HS}$ to a SAFT-based classical
-density functional for water~\cite{hughes2013classical}.  This
-functional was constructed to reduce in the homogeneous limit
-to the 4-site optimal SAFT model for water developed by Clark \emph{et
-  al.}~\cite{clark2006developing}.  The DFT of
-Ref.~\citenum{hughes2013classical} uses the association free energy
-functional of Yu and
-Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, which is based on a
-$g_\sigma^{HS}$ that we have since found to be
+In a recent paper, we examined the pair distribution function at
+contact at a variety of hard-sphere
+interfaces~\cite{schulte2012using}.  We tested the accuracy of
+existing approximations for the distribution function at
+contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
+  gross2009density}, and derived a significantly improved
+approximation for the averaged distribution function at contact.  In
+this paper we apply this improved $g_\sigma^{HS}$ to the SAFT-based
+classical density functional for water developed by Hughes \emph{et
+  al.}~\cite{hughes2013classical}.  This functional was constructed to
+reduce in the homogeneous limit to the 4-site optimal SAFT model for
+water developed by Clark \emph{et al.}~\cite{clark2006developing}.
+The DFT of \hughesetal\ uses the association free energy functional of
+Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}, which is
+based on a $g_\sigma^{HS}$ that we have since found to be
 inaccurate~\cite{schulte2012using}.  In this paper, we will examine
 the result of using the improved functional for $g_\sigma^{HS}$
-developed in Ref.~\citenum{schulte2012using} to construct an
-association free energy functional.
+developed in \hughesetal\ to construct an association free energy
+functional.
 
 \section{Method}
 
-The classical density functional for water from
-Reference~\citenum{hughes2013classical} consists of four terms:
+The classical density functional for water of \hughesetal\ consists of
+four terms:
 \begin{align}
   F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)] 
   + F_{\text{disp}}[n(\rr)] + F_{\text{assoc}}[n(\rr)]
@@ -139,6 +145,24 @@ atmosphere.  Finally, $F_{\text{assoc}}$ is the free energy
 contribution due to association, which is the term that we examine in
 this paper.
 
+\subsection{Dispersion}
+
+\fixme{Explain the dispersion term here.}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/surface-tension}
+\end{center}
+\caption{Comparison of Surface tension versus temperature for
+  theoretical and experimental data. The experimental data is taken
+  from NIST~\cite{nistwater}.  The length-scaling parameter $\lscale$
+  is fit so that the theoretical surface tension will match the
+  experimental surface tension near room temperature.}
+\label{fig:surface-tension}
+\end{figure}
+
+\subsection{Association}
+
 The association free energy for our four-site model has the form:
 \begin{align}
   F_\text{assoc}[n] &= k_BT \int n_\text{site}(\xx)
@@ -150,7 +174,7 @@ position~$\rr$:
   n_\text{site}(\rr) &=
   \begin{cases}
     4 n(\rr) & \text{this work}\\
-    4 n_0(\rr) \zeta(\rr) & \text{Ref.~\citenum{hughes2013classical}}
+    4 n_0(\rr) \zeta(\rr) & \text{\hughesetalcite}
   \end{cases}
 \end{align}
 where the factor of four comes from the four hydrogen bond sites,
@@ -173,7 +197,7 @@ where
   n_\text{site}'(\rr) &=
   \begin{cases}
     \frac{4}{\pi\sigma^2} \int n(\rr')\delta(\sigma - |\rr-\rr'|) d\rr' & \text{this work}\\
-    4 n_0(\rr) \zeta(\rr) & \text{Ref.~\citenum{hughes2013classical}}
+    4 n_0(\rr) \zeta(\rr) & \text{\hughesetal}
   \end{cases} 
 \end{align}
 is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)$, and
@@ -183,39 +207,27 @@ is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)
   \frac{\lambdadisp}{3 \etadisp}\frac{\partial a_1}{\partial \lambdadisp}\right)\label{eq:gSW},
 \end{align}
 %This is equation 77 of gil-villegas-1997-SAFT-VR
-where $g^\textit{SW}_\sigma$ is the correlation function evaluated at
+where $g^\textit{HS}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
 free energy.  The radial distribution function of the square-well
 fluid $g^\textit{SW}_\sigma$ is written as a perturbative correction
 to the hard-sphere radial distribution function
-$g^\textit{HS}_\sigma$, which comes from Yu and Wu
-\cite{yu2002fmt-dft-inhomogeneous-associating} for
-Ref.~\citenum{hughes2013classical} and we have previously
-derived \cite{schulte2012using} for this work.
+$g^\textit{HS}_\sigma$.  The functional of \hughesetal\ uses the
+$g_\sigma^\textit{HS}$ from Yu and Wu
+\cite{yu2002fmt-dft-inhomogeneous-associating}.  In this work, we use
+the $g_\sigma^\textit{HS}$ derived by Schulte~\emph{et~al.}~\cite{schulte2012using}.
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/surface-tension}
-\end{center}
-\caption{Comparison of Surface tension versus temperature for
-  theoretical and experimental data. The experimental data is taken
-  from NIST~\cite{nistwater}.  The length-scaling parameter $\lscale$
-  is fit so that the theoretical surface tension will match the
-  experimental surface tension near room temperature.}
-\label{fig:surface-tension}
-\end{figure}
-
-As in Ref.~\citenum{hughes2013classical}, we use Clark's five
+As in \hughesetal, we use Clark's five
 empirical parameters, and fit the calculated surface tension to
 experimental surface tension at ambient conditions by tuning the
 parameter $\lscale$, which adjusts the length-scale of the average
 density used for the dispersion interaction.  With the improved
 association term, we find these agree when $\lscale$ is 0.454, which
-is an increase from the value of 0.353 found in
-Ref.~\citenum{hughes2013classical}.  In order to explore further the
+is an increase from the value of 0.353 found by
+\hughesetal.  In order to explore further the
 change made by the improved association term, we compared the new
-functional with that of Ref.~\citenum{hughes2013classical} for the two
+functional with that of \hughesetal\ for the two
 hydrophobic cases of hard rods and the hard spherical solutes.
 
 \begin{figure}
@@ -225,7 +237,7 @@ hydrophobic cases of hard rods and the hard spherical solutes.
 \caption{ Density profiles for a water around a single hydrophobic rod
   of radius 0.1~nm. The solid red profile is from the functional
   developed in this paper and the dashed blue profile is the result
-  from Ref. \cite{hughes2013classical}.  For scale, under the profiles
+  from \hughesetal.  For scale, under the profiles
   is a cartoon of a string of hard spheres touching in one
   dimension. The horizontal black dotted line is the bulk density for
   water and the vertical line on the left at 0.1~nm represents the
@@ -239,12 +251,12 @@ We will first discuss the case of a single hydrophobic rod immersed in
 water. Figure~\ref{fig:density-single-rod} shows the density profile
 of water near a rod with radius~1~\AA.  The density computed using the functional of this
 paper is qualitatively similar to that from
-Ref.~\citenum{hughes2013classical}, with a comparable density at
+\hughesetal, with a comparable density at
 contact---consistent with having made only a moderate change in the
-free energy.  The first density peak near the surface is consistently
-higher than that from Ref.~\citenum{hughes2013classical}, and the peak
-is not smooth.  This results from the improved accuracy of the
-$g_\sigma^\textit{HS}$ from Ref.~\citenum{schulte2012using}, since beyond the
+free energy.  The first density peak near the surface is
+higher than that from \hughesetal, and the peak
+is has a kink at the top.  This reflects the improved accuracy of the
+$g_\sigma^\textit{HS}$ from \hughesetal, since beyond the
 first peak water molecules are unable to touch---or hydrogen bond
 to---molecules at the surface of the hard rod.
 
@@ -255,19 +267,21 @@ to---molecules at the surface of the hard rod.
 \caption{Broken hydrogen bonds per nanometer for hydrophobic rods
   immeresed in water.  The solid red line uses the functional developed
   in this paper while the dashed blue line uses the functional from
-  Ref. \cite{hughes2013classical}. For large enough rods, the graph
+  \hughesetal. For large enough rods, the graph
   increases linearly for both functionals.}
 \label{fig:single-rod-broken-HB}
 \end{figure}
 
+\fixme{Talk about Fig.~\ref{fig:single-rod-broken-HB}}
+
 A common test case for studying hydrophobic solutes in water is the
 hard-sphere solute.  Figure~\ref{fig:spheres-broken-HB} shows results
-for the number of broken hydrogen bonds caused by a hard-sphere soute,
+for the number of broken hydrogen bonds caused by a hard-sphere solute,
 as a function of the solute radius.  As in
 Fig.~\ref{fig:single-rod-broken-HB}, the number of broken bonds scales
 with surface area for large solutes, and the number of broken bonds is
 about four times smaller than the number from the functional of
-Ref.~\citenum{hughes2013classical}.  For solutes smaller than
+\hughesetal.  For solutes smaller than
 3~\AA\ in radius, there is less than a tenth of a hydrogen bond
 broken. This is consistent with the well-known fact that small solutes
 (unlike large solutes) do not disrupt the hydrogen-bonding network of
@@ -280,7 +294,7 @@ water~\cite{chandler2005}.
 \caption{Broken hydrogen bonds for hard spheres immeresed in water.
   The solid red line uses our the functional developd in this paper
   while the dashed blue line is from
-  Ref. \cite{hughes2013classical}.}
+  \hughesetal.}
 \label{fig:spheres-broken-HB}
 \end{figure}
 
