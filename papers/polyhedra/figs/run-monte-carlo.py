@@ -25,17 +25,18 @@ def run_walls(ff, N, shape):
   name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
   scriptname = "%s/%s.tmp.sh" %(figsdir, name)
   outname = "%s/%s.out" %(bindir, name)
-  filename = '%s/mc/polyhedraMC-walls-%4.2f' % (figsdir, ff)
-  command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s periodx periody wallz\
+  directory = '%s/mc' % figsdir
+  filename = 'polyhedraMC-walls-%4.2f' % ff
+  command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s %s periodx periody wallz\
  R %g dimensions %g %g %g scale %g theta_scale %g shape %s dw_density %g" \
-      %(bindir, N, iterations, filename, R, dim, dim, dim, scale, theta_scale,
+      %(bindir, N, iterations, directory, filename, R, dim, dim, dim, scale, theta_scale,
         shape, dw_density)
   script = open(scriptname, 'w')
   script.write("#!/bin/bash\n")
-  script.write("#SBATCH --mem-per-cpu=%i\n" %memory)
+  script.write("#SBATCH --mem-per-cpu=%i\n" % memory)
   script.write("##SBATCH --mail-type ALL\n")
   script.write("##SBATCH --mail-user paho@paholg.com\n")
-  script.write("#SBATCH --output %s\n\n" %outname)
+  script.write("#SBATCH --output %s\n\n" % outname)
 
   script.write("echo \"Starting polyhedra-monte-carlo with estimated memory use: %i.\"\n\n" %memory)
   script.write("%s\n" %(command))
