@@ -169,6 +169,9 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
     Alias('papers', p)
 Default('papers')
 
+Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
+Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
+
 Depends('index.html', 'papers/pair-correlation/figs/pretty-4.svg')
 
 paper = Environment(tools=['gnuplot', 'matplotlib', 'mkdown'])
@@ -222,23 +225,23 @@ env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
 # #################### papers/pair-correlation ##############################################
 
 animations = []
-animations += env.Command(target = ['papers/pair-correlation/presentation/anim/mc-slow-%03i.pdf' % i
-                                    for i in xrange(101)],
-                          source = 'papers/pair-correlation/presentation/mc-circle-slow.py',
-                          action = 'cd papers/pair-correlation && python presentation/mc-circle-slow.py')
-animations += env.Command(target = ['papers/pair-correlation/presentation/anim/mc-density-%03i.pdf' % i
-                                    for i in xrange(101)],
-                          source = 'papers/pair-correlation/presentation/mc-circle-slow.py',
-                          action = 'cd papers/pair-correlation && python presentation/mc-circle-slow.py density')
-animations += env.Command(target = ['papers/pair-correlation/presentation/anim/mc-pair-%03i.pdf' % i
-                                    for i in xrange(101)],
-                          source = 'papers/pair-correlation/presentation/mc-circle-slow.py',
-                          action = 'cd papers/pair-correlation && python presentation/mc-circle-slow.py pair')
-animations += env.Command(target = ['papers/pair-correlation/presentation/anim/mc-gsigma-%03i.pdf' % i
-                                    for i in xrange(101)],
-                          source = 'papers/pair-correlation/presentation/mc-circle-slow.py',
-                          action = 'cd papers/pair-correlation && python presentation/mc-circle-slow.py gsigma')
-presentation = env.PDF(['papers/pair-correlation/presentation/presentation.tex'])
+animations += env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
+                                    for i in xrange(61)],
+                          source = 'talks/colloquium/mc-circle-slow.py',
+                          action = 'cd talks/colloquium && python mc-circle-slow.py')
+animations += env.Command(target = ['talks/colloquium/anim/mc-density-%03i.pdf' % i
+                                    for i in xrange(61)],
+                          source = 'talks/colloquium/mc-circle-slow.py',
+                          action = 'cd talks/colloquium && python mc-circle-slow.py density')
+animations += env.Command(target = ['talks/colloquium/anim/mc-pair-%03i.pdf' % i
+                                    for i in xrange(61)],
+                          source = 'talks/colloquium/mc-circle-slow.py',
+                          action = 'cd talks/colloquium && python mc-circle-slow.py pair')
+animations += env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' % i
+                                    for i in xrange(61)],
+                          source = 'talks/colloquium/mc-circle-slow.py',
+                          action = 'cd talks/colloquium && python mc-circle-slow.py gsigma')
+presentation = env.PDF(['talks/colloquium/slides.tex'])
 Depends(presentation, animations)
 Default(presentation)
 
