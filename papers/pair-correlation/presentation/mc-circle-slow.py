@@ -1,14 +1,14 @@
 from __future__ import division
-import time, sys, pylab
+import time, sys, matplotlib
+
+if not ('show' in sys.argv):
+  matplotlib.use('Agg')
+
 from pylab import *
+import pylab
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import colorConverter
 import matplotlib.animation as animation
-
-if 'show' in sys.argv:
-  show = True
-else:
-  show = False
 
 ff = .4
 
@@ -236,14 +236,14 @@ def animate(p):
   if count % plotmoves == 0:
     ax.cla()
     if 'pair' in sys.argv:
-      if count >= 50:
-        plotmoves = N
-      if count >= 100:
-        plotmoves = 2*N
-      if count >= 200:
-        plotmoves = 4*N
-      if count >= 500:
-        plotmoves = 40*N
+      # if count >= 50:
+      #   plotmoves = N
+      # if count >= 100:
+      #   plotmoves = 2*N
+      # if count >= 200:
+      #   plotmoves = 4*N
+      # if count >= 500:
+      #   plotmoves = 40*N
       pairplot = pcolormesh(XXX, YYY, pairdensity/sum(pairdensity), cmap='hot')
     if plotmoves == 1:
       circleplotnum = N+1
@@ -326,10 +326,10 @@ ax.set_ylim(-2*edge, leny+2*edge)
 for p in xrange(500):
   setup()
 
-if show:
+if 'show' in sys.argv:
+  print 'oops'
   anim = animation.FuncAnimation(fig, animate, init_func=init)
   pylab.show()
-
 else:
   count = 0
   success = 0
