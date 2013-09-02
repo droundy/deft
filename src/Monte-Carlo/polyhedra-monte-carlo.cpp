@@ -24,6 +24,7 @@ struct polyhedron {
   quaternion rot;
   double R;
   poly_shape *mypoly;
+  bool *neighbors;
 };
 
 // Global Constants
@@ -36,7 +37,7 @@ const bool debug = false;
 // if two polyhedra, a and b, are closer than a.R + b.R + neighborR,
 // then they are neighbors. We only need to check overlaps with neighbors,
 // but we need to update neighbor tables as soon as a polyhedra moves more
-// than a distance of neighborR
+// than a distance of neighborR/2
 const double neighborR = 2.0;
 
 
@@ -48,12 +49,15 @@ bool periodic[3] = {false, false, false};
 bool walls[3] = {false, false, false};
 bool real_walls = true; // true means shapes can't overlap wall at all,
                         // false means just centers can't overlap wall
+bool save_vertices = false;
 double len[3] = {20, 20, 20};
 double dw_density = 0.1;
 double R = 1.0;
 double scale = 0.005;
 double theta_scale = 0.005;
 
+// for debugging purposes
+bool testcase = false;
 
 // All the shapes:
 poly_shape cube;
@@ -68,17 +72,16 @@ inline double max(double a, double b) { return (a > b)? a : b; }
 // Sets up the vertices, faces, etc. for each polyhedron. Only run once.
 void define_shapes();
 
-
 // Populates the neighbor tables. Any polyhedra a and b that are within a distance
 // of a.R + b.R + neighborR are neighbors.
-inline void populate_neighbor_tables(const polyhedron *p, bool *neighbor_tables);
+inline void populate_neighbor_tables(const polyhedron *p);
 
 // Check whether two polyhedra overlap
 inline bool overlap(const polyhedron &a, const polyhedron &b);
 
 // Check whether a polyhedron overlaps with any in the array, except for
 // the nth one. Useful for post-move testing with a temporary polyhedron.
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, const bool *neighbor_tables);
+inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, bool trust_neighbors);
 
 // Check if polyhedron is outside its allowed locations
 inline bool in_cell(const polyhedron &p);
@@ -110,6 +113,9 @@ inline vector3d fix_periodic(vector3d newv);
 // States how long it's been since last took call.
 static void took(const char *name);
 
+// Saves the vertices of all polyhedra to a file.
+void save_config(const polyhedron *p, const char *fname, const char *header);
+
 
 
 // The following functions only do anything if debug is true:
@@ -129,24 +135,25 @@ int main(int argc, const char *argv[]) {
   define_shapes();
   poly_shape *shape = &cube;
   // input parameters
-  const int minparams = 4;
+  const int minparams = 5;
   if (argc < minparams) {
-    printf("\nUse: %s N iterations filename\n", argv[0]);
+    printf("\nUse: %s N iterations directory filename\n", argv[0]);
     printf("Additional optional parameters:\n\t\tperiodx, periody, periodz, wallx, wally, wallz,\n");
     printf("\t\tdimensions {LENX LENY LENZ}, dw_density {VAL}, seed {VAL}, shape {POLY},\n");
-    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls\n");
+    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls, save_vertices\n");
     printf("Anything in brackets means to put values there.\n");
-    printf("Available shapes currently include: cube.\n");
+    printf("Available shapes currently include: cube and tetrahedron.\n");
     return 1;
   }
   N = atoi(argv[1]);
   const long iterations = atol(argv[2]);
-  const char *filename = argv[3];
+  const char *dir = argv[3];
+  const char *filename = argv[4];
   printf("----------------------------------------------------------------------\n");
   printf("Running %s with the following parameters:\n", argv[0]);
   printf("Setting number of polyhedra to %i\n", N);
   printf("Running for %4.2e iterations\n", double(iterations));
-  printf("Saving data to: %s\n", filename);
+  printf("Saving data to: %s/%s\n", dir, filename);
   for (int i=minparams; i<argc; i++) {
     if (strcmp(argv[i], "dimensions") == 0) {
       len[0] = atof(argv[i+1]);
@@ -178,7 +185,7 @@ int main(int argc, const char *argv[]) {
       i += 1;
     } else if (strcmp(argv[i], "R") == 0) {
       R = atof(argv[i+1]);
-      printf("Setting radius of the circumscribed sphere to %g.\n", R);
+      printf("Setting radius of the circumscribing sphere to %g.\n", R);
       i += 1;
     } else if (strcmp(argv[i], "scale") == 0) {
       scale = atof(argv[i+1]);
@@ -195,6 +202,9 @@ int main(int argc, const char *argv[]) {
     } else if (strcmp(argv[i], "fake_walls") == 0) {
       real_walls = false;
       printf("Using fake walls. Intersections will only be determined based on centers of polyhedra.\n");
+    } else if (strcmp(argv[i], "save_vertices") == 0) {
+      save_vertices = true;
+      printf("Will save the coordinates of the vertices of all shapes every time data is saved.\n");
     } else if (strcmp(argv[i], "shape") == 0) {
       if (strcmp(argv[i+1], "cube") == 0) {
         shape = &cube;
@@ -203,7 +213,7 @@ int main(int argc, const char *argv[]) {
         shape = &tetrahedron;
         printf("Using cubes.\n");
       } else {
-        printf("Invalid shape: %s\n.", argv[i+1]);
+        printf("Invalid shape: %s.\n", argv[i+1]);
         return 1;
       }
       i += 1;
@@ -218,7 +228,6 @@ int main(int argc, const char *argv[]) {
   const int density_bins = len[2]/dw_density;
   long *density_histogram = new long[density_bins]();
   polyhedron *polyhedra = new polyhedron[N];
-  bool *neighbor_tables = new bool[N*N];
   vector3d *initial_poly_pos = new vector3d[N];
   long totalmoves = 0, workingmoves = 0;
 
@@ -230,29 +239,58 @@ int main(int argc, const char *argv[]) {
   // and if there's enough room to fit the shapes without rotation.
   // A better version, that is shape-dependent, will be required for higher
   // filling fractions.
+  for(int i=0; i<N; i++) {
+      polyhedra[i].mypoly = shape;
+      polyhedra[i].R = R;
+      polyhedra[i].neighbors = new bool[N]();
+  }
   const int nx = ceil(pow(N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
   const int ny = ceil((len[1]/len[0])*nx);
   const int nz = ceil(N/double(nx*ny));
   const double xspace = len[0]/double(nx);
   const double yspace = len[1]/double(ny);
   const double zspace = len[2]/double(nz);
-  if(debug) printf("n polyhdra: (%i, %i, %i), with space: (%g, %g, %g)\n",
+  if(debug) printf("n polyhedra: (%i, %i, %i), with space: (%g, %g, %g)\n",
                    nx, ny, nz, xspace, yspace, zspace);
-  int x = 0, y = 0, z = 0;
-  for(int i=0; i<N; i++) {
-    polyhedra[i].mypoly = shape;
-    polyhedra[i].R = R;
-    polyhedra[i].pos[0] = (x + 0.5)*xspace;
-    polyhedra[i].pos[1] = (y + 0.5)*yspace;
-    polyhedra[i].pos[2] = (z + 0.5)*zspace;
+  if (shape == &cube) {
+    int x = 0, y = 0, z = 0;
+    for(int i=0; i<N; i++) {
+      polyhedra[i].pos[0] = (x + 0.5)*xspace;
+      polyhedra[i].pos[1] = (y + 0.5)*yspace;
+      polyhedra[i].pos[2] = (z + 0.5)*zspace;
 
-    initial_poly_pos[i] = polyhedra[i].pos;
+      initial_poly_pos[i] = polyhedra[i].pos;
 
-    x ++;
-    if (x >= nx) {
-      x = 0; y ++;
-      if (y >= ny) {
-        y = 0; z ++;
+      x ++;
+      if (x >= nx) {
+        x = 0; y ++;
+        if (y >= ny) {
+          y = 0; z ++;
+        }
+      }
+    }
+  }
+  if (shape == &tetrahedron || shape == &truncated_tetrahedron) {
+    int x = 0, y = 0, z = 0, phi=0;
+    bool alt = false;
+    const vector3d axis(0,0,1);
+    for(int i=0; i<N; i++) {
+      polyhedra[i].pos[0] = (x + 0.5)*xspace;
+      polyhedra[i].pos[1] = (y + 0.5)*yspace + alt*R*(1.0/3.0);
+      polyhedra[i].pos[2] = (z + 0.5)*zspace;
+      polyhedra[i].rot = quaternion(cos(phi/2.0), sin(phi/2.0)*axis);
+
+      initial_poly_pos[i] = polyhedra[i].pos;
+
+      x ++;
+      alt = !alt;
+      phi = M_PI*alt;
+
+      if (x >= nx) {
+        x = 0; y ++;
+        if (y >= ny) {
+          y = 0; z ++;
+        }
       }
     }
   }
@@ -270,23 +308,27 @@ int main(int argc, const char *argv[]) {
       if (overlap(polyhedra[i], polyhedra[j])) {
         printf("ERROR in intial placement. We have overlaps!!!\n");
         printf("AHHHHHH I DON'T KNOW WHAT TO DO!@!!!!1111\n");
+        char *vertices_fname = new char[1024];
+        sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+        save_config(polyhedra, vertices_fname, "");
+        delete[] vertices_fname;
         return 1;
       }
     }
   }
-  populate_neighbor_tables(polyhedra, neighbor_tables);
+  populate_neighbor_tables(polyhedra);
   fflush(stdout);
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   bool initial_phase = true;
   long start_keeping = 0;
+  long oldworkingmoves = 0, oldtotalmoves = 0;
   // BEGIN MAIN PROGRAM LOOP ////////////////////////////////////////////////////////
+  int frame = 0;
   for(long iteration=1; iteration<=iterations; iteration++) {
     if (debug) {
       print_bad(polyhedra);
-      if (iteration%10000 == 0)
-        print_all(polyhedra);
       if (iteration%1000 == 0) {
         char *iter = new char[1024];
         sprintf(iter, "One thousand iterations (current iteration: %li)", iteration);
@@ -311,8 +353,22 @@ int main(int argc, const char *argv[]) {
       temp.rot = rotate(polyhedra[i].rot, theta_scale);
       temp.R = polyhedra[i].R;
       temp.mypoly = polyhedra[i].mypoly;
+      temp.neighbors = polyhedra[i].neighbors;
       if (in_cell(temp)) {
-        const bool overlaps = overlaps_with_any(temp, polyhedra, i, neighbor_tables);
+        // if we've moved too far, then neighbor tables can no longer be
+        // trusted so we won't use them for the overlap test, and will
+        // repopulate neighbor tables if the move is successful
+        const bool trust_neighbors =
+          (periodic_diff(temp.pos, initial_poly_pos[i]).normsquared() <
+           neighborR*neighborR/4.0);
+        if (debug) {
+          if (totalmoves == 83550) {
+            testcase = true;
+            printf("trust: %i\n", trust_neighbors);
+          }
+          else testcase = false;
+        }
+        const bool overlaps = overlaps_with_any(temp, polyhedra, i, trust_neighbors);
         if (debug) {
           bool test_overlap = false;
           for(int j=0; j<N; j++) {
@@ -322,16 +378,21 @@ int main(int argc, const char *argv[]) {
             }
           }
           if (test_overlap != overlaps) {
-            printf("Error error! We do not have agreement on whether or not they overlap!\n");
-            print_bad(polyhedra);
+            printf("\n\nError error! We do not have agreement on whether or not they overlap!\ndebug says: %i but normal test says: %i for shape: %i.\nMove: %li.\n\n", test_overlap, overlaps, i, totalmoves);
+            polyhedra[i] = temp;
+            print_all(polyhedra);
+            char *vertices_fname = new char[1024];
+            sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+            save_config(polyhedra, vertices_fname, "");
+            delete[] vertices_fname;
+            return(1);
           }
         }
         if (!overlaps) {
           polyhedra[i] = temp;
           workingmoves ++;
-          if (periodic_diff(polyhedra[i].pos, initial_poly_pos[i]).normsquared()
-              > neighborR*neighborR/4) {
-            populate_neighbor_tables(polyhedra, neighbor_tables);
+          if (!trust_neighbors) {
+            populate_neighbor_tables(polyhedra);
             for(int j=0; j<N; j++)
               initial_poly_pos[j] = polyhedra[j].pos;
           }
@@ -343,14 +404,7 @@ int main(int argc, const char *argv[]) {
     // We should be ready
     if (initial_phase) {
       // fine-tuning scale so that the acceptance rate will be reasonable
-      const double acceptance_rate = (double)workingmoves/totalmoves;
-      if (acceptance_rate < 0.6) {
-        scale /= 1.002;
-        theta_scale /= 1.002;
-      } else if (acceptance_rate > 0.9) {
-        scale *= 1.002;
-        theta_scale *= 1.002;
-      }
+      // fixme: needs work
       if (iteration%1000 == 0) {
         int count1 = 0, count2 = 0;
         for(int i=0; i<N; i++) {
@@ -360,9 +414,8 @@ int main(int argc, const char *argv[]) {
             count2 ++;
         }
         if (count1 >= count2) {
-          printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, acceptance_rate);
-        }
-        else {
+          printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, (double)workingmoves/totalmoves);
+        } else {
           initial_phase = false;
           start_keeping = iteration;
           printf("\nTime to start data collection! c1: %i, c2: %i, iteration: %li\n", count1, count2, iteration);
@@ -370,6 +423,18 @@ int main(int argc, const char *argv[]) {
           printf("\n");
         }
         fflush(stdout);
+        const double acceptance_rate =
+          (double)(workingmoves-oldworkingmoves)/(totalmoves-oldtotalmoves);
+        oldworkingmoves = workingmoves;
+        oldtotalmoves = totalmoves;
+        if (acceptance_rate < 0.5) {
+          scale /= 1.01;
+          theta_scale /= 1.01;
+        } else if (acceptance_rate > 0.7) {
+          scale *= 1.01;
+          theta_scale *= 1.01;
+        }
+        printf("scale: %g, acc: %g\n", scale, acceptance_rate);
       }
     }
     else {
@@ -383,6 +448,7 @@ int main(int argc, const char *argv[]) {
       const clock_t now = clock();
       if ((now > last_output + output_period) || iteration==iterations) {
         last_output = now;
+        assert(last_output);
         if (output_period < max_output_period/2)
           output_period *= 2;
         else if (output_period < max_output_period)
@@ -406,10 +472,20 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
                 walls[0], walls[1], walls[2], dw_density, seed, R,
                 scale, theta_scale, real_walls, count,
                 iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
+
+        // save shape locations
+        if (save_vertices) {
+          char *vertices_fname = new char[1024];
+          sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
+          save_config(polyhedra, vertices_fname, headerinfo);
+          delete[] vertices_fname;
+          frame ++;
+        }
         // saving density
         char *density_filename = new char[1024];
-        sprintf(density_filename, "%s-density-%s-%i.dat", filename, shape->name, N);
+        sprintf(density_filename, "%s/%s-density-%s-%i.dat", dir, filename, shape->name, N);
         FILE *densityout = fopen((const char *)density_filename, "w");
+        delete[] density_filename;
         fprintf(densityout, "%s", headerinfo);
         fprintf(densityout, "\n# z     density   histogram\n");
         for(int z_i = 0; z_i < density_bins; z_i ++) {
@@ -427,8 +503,9 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
   print_bad(polyhedra);
   // END MAIN PROGRAM LOOP //////////////////////////////////////////////////////////
 
+  for(int i=0; i<N; i++)
+    delete[] polyhedra[i].neighbors;
   delete[] polyhedra;
-  delete[] neighbor_tables;
   delete[] initial_poly_pos;
   delete[] density_histogram;
   return 0;
@@ -497,7 +574,7 @@ inline bool overlap(const polyhedron &a, const polyhedron &b) {
   return true;
 }
 
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, const bool *neighbor_tables) {
+inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, bool trust_neighbors) {
   // construct axes from a and a's projection onto them
   vector3d aaxes[a.mypoly->nfaces];
   double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
@@ -512,10 +589,10 @@ inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs, int n, 
     }
   }
   for (int k=0; k<N; k++) {
-    if (neighbor_tables[n*N + k]) {
+    if (a.neighbors[k] || (!trust_neighbors && n != k)) {
       const vector3d ab = periodic_diff(a.pos, bs[k].pos);
       if (ab.normsquared() < (a.R + bs[k].R)*(a.R + bs[k].R)) {
-        bool overlap = true; // assume overlap until we prove otherwise or fail to
+        bool overlap = true; // assume overlap until we prove otherwise or fail to.
         // check projection of b against a's axes
         for (int i=0; i<a.mypoly->nfaces; i++) {
           double projection = aaxes[i].dot
@@ -693,10 +770,10 @@ inline void print_all(const polyhedron *p) {
         printf("\t  Quaternion off! Normsquared - 1: %g\n", (p[i].rot.normsquared()-1.0));
       for (int j=i+1; j<N; j++)
         if (overlap(p[i], p[j]))
-          printf("\t  Overlaps with %i!!!\n", j);
+          printf("\t  Overlaps with %i!!! Neighbor value: %i.\n", j, p[i].neighbors[j]);
     }
+    fflush(stdout);
   }
-  fflush(stdout);
 }
 
 inline void print_bad(const polyhedron *p) {
@@ -740,13 +817,38 @@ static void took(const char *name) {
   last_time = t;
 }
 
-inline void populate_neighbor_tables(const polyhedron *p, bool *neighbor_tables) {
+inline void populate_neighbor_tables(const polyhedron *p) {
   for(int i=0; i<N; i++) {
-    for(int j=0; j<N; j++) {
-      neighbor_tables[i*N + j] = (i != j) &&
-        (periodic_diff(p[i].pos, p[j].pos).normsquared() < (p[i].R + p[j].R + neighborR)*(p[i].R + p[j].R + neighborR));
+    for(int j=i+1; j<N; j++) {
+      const bool value = (periodic_diff(p[i].pos, p[j].pos).normsquared() <
+                          (p[i].R + p[j].R + neighborR)*(p[i].R + p[j].R + neighborR));
+      p[i].neighbors[j] = value;
+      p[j].neighbors[i] = value;
     }
   }
+  if (debug) {
+    for(int i=0; i<N; i++) {
+      for(int j=0; j<N; j++) {
+        if (i == j && (p[i].neighbors[j]))
+          printf("problem: thing %i neighbors itself.\n", i);
+        if (p[i].neighbors[j] != p[j].neighbors[i])
+          printf("Problem: assymetry. p[%i].neighbors[%i]: %i, but  p[%i].neighbors[%i]: %i.\n", i, j, p[i].neighbors[j], j, i, p[j].neighbors[i]);
+      }
+    }
+  }
+}
+
+void save_config(const polyhedron *p, const char *fname, const char *header) {
+  FILE *out = fopen((const char *)fname, "w");
+  for(int i=0; i<N; i++) {
+    for(int j=0; j<p[i].mypoly->nvertices; j++) {
+      const vector3d vertex =
+        rotate_vector(p[i].mypoly->vertices[j]*p[i].R, p[i].rot) + p[i].pos;
+      fprintf(out, "%6.2f %6.2f %6.2f ", vertex[0], vertex[1], vertex[2]);
+    }
+    fprintf(out, "\n");
+  }
+  fclose(out);
 }
 
 void define_shapes() {
@@ -755,33 +857,36 @@ void define_shapes() {
   cube.nfaces = 3;
   sprintf(cube.name, "cube");
   const double v_cube = 1.0/sqrt(3.0);
-  cube.vertices[0] = vector3d(v_cube, v_cube, v_cube);
-  cube.vertices[1] = vector3d(-v_cube, v_cube, v_cube);
-  cube.vertices[2] = vector3d(-v_cube, -v_cube, v_cube);
-  cube.vertices[3] = vector3d(v_cube, -v_cube, v_cube);
-  cube.vertices[4] = vector3d(v_cube, v_cube, -v_cube);
-  cube.vertices[5] = vector3d(-v_cube, v_cube, -v_cube);
+  cube.vertices[0] = vector3d( v_cube,  v_cube,  v_cube);
+  cube.vertices[1] = vector3d(-v_cube,  v_cube,  v_cube);
+  cube.vertices[2] = vector3d(-v_cube, -v_cube,  v_cube);
+  cube.vertices[3] = vector3d( v_cube, -v_cube,  v_cube);
+  cube.vertices[4] = vector3d( v_cube,  v_cube, -v_cube);
+  cube.vertices[5] = vector3d(-v_cube,  v_cube, -v_cube);
   cube.vertices[6] = vector3d(-v_cube, -v_cube, -v_cube);
-  cube.vertices[7] = vector3d(v_cube, -v_cube, -v_cube);
+  cube.vertices[7] = vector3d( v_cube, -v_cube, -v_cube);
 
-  cube.faces[0] = vector3d(1.0, 0, 0);
-  cube.faces[1] = vector3d(0, 1.0, 0);
-  cube.faces[2] = vector3d(0, 0, 1.0);
+  cube.faces[0] = vector3d(1, 0, 0);
+  cube.faces[1] = vector3d(0, 1, 0);
+  cube.faces[2] = vector3d(0, 0, 1);
 
 
-
+  // Tetrahedron is oriented so that it has a face parallel to the xy-plane
+  // and an edge parallel to the x-axis.
   tetrahedron.nvertices = 4;
   tetrahedron.nfaces = 4;
   sprintf(tetrahedron.name, "tetrahedron");
-  tetrahedron.vertices[0] = vector3d(sqrt(2.0/3.0), 0, -sqrt(3.0));
-  tetrahedron.vertices[1] = vector3d(-sqrt(2.0/3.0), 0, -sqrt(3.0));
-  tetrahedron.vertices[2] = vector3d(0, sqrt(2.0/3.0), sqrt(3.0));
-  tetrahedron.vertices[3] = vector3d(0, -sqrt(2.0/3.0), sqrt(3.0));
 
-  tetrahedron.faces[0] = vector3d();
-  tetrahedron.faces[1] = vector3d();
-  tetrahedron.faces[2] = vector3d();
-  tetrahedron.faces[3] = vector3d();
+  tetrahedron.vertices[0] = vector3d( sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
+  tetrahedron.vertices[1] = vector3d(-sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
+  tetrahedron.vertices[2] = vector3d(             0, 2.0*sqrt(2.0)/3.0, -1.0/3.0);
+  tetrahedron.vertices[3] = vector3d(             0,                 0,      1.0);
+
+
+  tetrahedron.faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
+  tetrahedron.faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
+  tetrahedron.faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0));
+  tetrahedron.faces[3] = vector3d(         0,          0,             1);
 
 
 
