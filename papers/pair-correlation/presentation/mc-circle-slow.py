@@ -23,6 +23,7 @@ leny = 10
 edge = 1
 
 N = int(round(ff*lenx*leny/area))
+plotmoves = 1
 
 # density
 dx = 0.2
@@ -168,10 +169,11 @@ def setup():
 
 defaultc = (0,.7,1,1)
 highlightc = (0,0,1,1)
-if 'gsigma' in sys.argv:
+if 'gsigma' in sys.argv or 'pair' in sys.argv:
   goodc = defaultc
   rejectc = defaultc
   contactc = (0,0,0.5)
+  highlightc = defaultc
 else:
   goodc = (.3,1,.5,1)
   rejectc = (.6,.1,.1,1)
@@ -188,7 +190,7 @@ if 'pair' in sys.argv:
   colors[0] = fixedc
 
 def animate(p):
-  global count, circles, skip, colors, histogram, i, success
+  global count, circles, skip, colors, histogram, i, success, plotmoves
   if (i >= N):
     if 'pair' in sys.argv:
       i = 1
@@ -231,40 +233,53 @@ def animate(p):
   if 'nA' in sys.argv:
     line.set_ydata(100*N*nA_histogram/sum(histogram_doubled))
 
-  ax.cla()
-  if 'pair' in sys.argv:
-    pairplot = pcolormesh(XXX, YYY, pairdensity/sum(pairdensity), cmap='hot')
-  for j in xrange(N+1):
-    for shift in [0, -leny, leny]:
-      if 'pair' in sys.argv and j != 0:
-        circ = Circle(circles[j]-(0, shift), r, color=colors[j], fill=False, linewidth=3)
-      else:
-        circ = Circle(circles[j]-(0, shift), r, color=colors[j])
-      if shift != 0:
-        circ.set_alpha(0.2)
-      else:
-        circ.set_alpha(0.75)
-      ax.add_artist(circ)
-
-  ax.set_title("Attempted moves: %i, Successful moves: %i" %(count, success))
-  ax.axhline(y=0, linestyle='--', linewidth=3, color='b')
-  ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange')
-  ax.axvline(x=0, linestyle='-', color='k', linewidth=3)
-  ax.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
+  if count % plotmoves == 0:
+    ax.cla()
+    if 'pair' in sys.argv:
+      if count >= 50:
+        plotmoves = N
+      if count >= 100:
+        plotmoves = 2*N
+      if count >= 200:
+        plotmoves = 4*N
+      if count >= 500:
+        plotmoves = 40*N
+      pairplot = pcolormesh(XXX, YYY, pairdensity/sum(pairdensity), cmap='hot')
+    if plotmoves == 1:
+      circleplotnum = N+1
+    else:
+      circleplotnum = N
+    for j in xrange(circleplotnum):
+      for shift in [0, -leny, leny]:
+        if 'pair' in sys.argv and j != 0:
+          circ = Circle(circles[j]-(0, shift), r, color=colors[j], fill=False, linewidth=3)
+        else:
+          circ = Circle(circles[j]-(0, shift), r, color=colors[j])
+          if shift != 0:
+            circ.set_alpha(0.2)
+          else:
+            circ.set_alpha(0.75)
+        ax.add_artist(circ)
+    ax.set_title("Attempted moves: %i, Successful moves: %i" %(count, success))
+    ax.axhline(y=0, linestyle='--', linewidth=3, color='b')
+    ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange')
+    ax.axvline(x=0, linestyle='-', color='k', linewidth=3)
+    ax.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
 
   arlen = .5
   arwidth = .5
-  for shift in [0, -leny, leny]:
-    delta = periodic_diff(circles[i], temp)
-    deltax = temp[0]-circles[i,0]
-    deltay = temp[1]-circles[i,1]
-    if shift == 0:
-      alpha = 1
-    else:
-      alpha = 0.5
-    ax.arrow(circles[i,0], circles[i,1]+shift, delta[0],
-                     delta[1], head_width=arwidth,
-                     head_length=arlen, linewidth=2, facecolor='gray', alpha = alpha)
+  if plotmoves == 1:
+    for shift in [0, -leny, leny]:
+      delta = periodic_diff(circles[i], temp)
+      deltax = temp[0]-circles[i,0]
+      deltay = temp[1]-circles[i,1]
+      if shift == 0:
+        alpha = 1
+      else:
+        alpha = 0.5
+      ax.arrow(circles[i,0], circles[i,1]+shift, delta[0],
+               delta[1], head_width=arwidth,
+               head_length=arlen, linewidth=2, facecolor='gray', alpha = alpha)
   fig.tight_layout()
   if keep:
     circles[i] = temp
@@ -301,8 +316,8 @@ def animate(p):
       if 'pair' in sys.argv:
         colors[0] = fixedc
   i += 1
-  if show:
-    time.sleep(0.01)
+  #if show:
+  #  time.sleep(0.01)
 
 fig.tight_layout()
 ax.set_aspect('equal')
@@ -323,8 +338,10 @@ else:
     animate(p)
     if 'density' in sys.argv:
       savefig("presentation/anim/mc-density-%03i.pdf" %p)
-    if 'gsigma' in sys.argv:
+    elif 'gsigma' in sys.argv:
       savefig("presentation/anim/mc-gsigma-%03i.pdf" %p)
+    elif 'pair' in sys.argv:
+      savefig("presentation/anim/mc-pair-%03i.pdf" %p)
     else:
       savefig("presentation/anim/mc-slow-%03i.pdf" %p)
 
