@@ -146,8 +146,44 @@ contribution due to association, which is the term that we examine in
 this paper.
 
 \subsection{Dispersion}
+The dispersion free energy includes the van der Waals attraction and
+any orientation-independent interactions. Following \hughesetal, we
+use a dispersion term based on the SAFT-VR
+approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
+parameters (taken from Clark~\emph{et al}\cite{clark2006developing}):
+an interaction energy $\epsilondisp$ and a length scale $\lambdadisp
+R$.
 
-\fixme{Explain the dispersion term here.}
+The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+\begin{align}
+  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx,
+\end{align}
+where $a_1$ and $a_2$ are the first two terms in a high-temperature
+perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
+the mean-field dispersion interaction. The second term, $a_2$, describes the
+effect of fluctuations resulting from compression of the fluid due
+to the dispersion interaction itself, and is approximated
+using the local compressibility approximation (LCA), which
+assumes the energy fluctuation is simply related to the
+compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
+
+The form of $a_1$ and $a_2$ for SAFT-VR is given in
+reference~\cite{gil-villegas-1997-SAFT-VR}, expressed in terms
+of the packing fraction.  In order to apply this form to an
+\emph{inhomogeneous} density distribution, we construct an effective local
+packing fraction for dispersion $\etadisp$, given by a Gaussian
+convolution of the density:
+\begin{align}
+  \etadisp(\xx) &= \frac{1}{6\sqrt{\pi} \lambdadisp^3\lscale^3}
+  \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
+      \lscale R)^2}}\right)d\xx'.\label{eq:packing-fraction}
+\end{align}
+This effective packing fraction is used throughout the dispersion
+functional, and represents a packing fraction averaged over the
+effective range of the dispersive interaction.
+Eq.~\ref{eq:packing-fraction} contains an additional empirical
+parameter $\lscale$ introduced by \hughesetal, which modifies the
+length scale over which the dispersion interaction is correlated.
 
 \begin{figure}
 \begin{center}
@@ -218,17 +254,16 @@ $g_\sigma^\textit{HS}$ from Yu and Wu
 \cite{yu2002fmt-dft-inhomogeneous-associating}.  In this work, we use
 the $g_\sigma^\textit{HS}$ derived by Schulte~\emph{et~al.}~\cite{schulte2012using}.
 
-As in \hughesetal, we use Clark's five
-empirical parameters, and fit the calculated surface tension to
-experimental surface tension at ambient conditions by tuning the
-parameter $\lscale$, which adjusts the length-scale of the average
-density used for the dispersion interaction.  With the improved
-association term, we find these agree when $\lscale$ is 0.454, which
-is an increase from the value of 0.353 found by
-\hughesetal.  In order to explore further the
-change made by the improved association term, we compared the new
-functional with that of \hughesetal\ for the two
-hydrophobic cases of hard rods and the hard spherical solutes.
+As in \hughesetal, we use Clark's five empirical parameters, and fit
+the calculated surface tension to experimental surface tension at
+ambient conditions by tuning the parameter $\lscale$, which adjusts
+the length-scale of the average density used for the dispersion
+interaction.  With the improved association term, we find these agree
+when $\lscale$ is 0.454, which is an increase from the value of 0.353
+found by \hughesetal.  In order to explore further the change made by
+the improved association term, we compared the new functional with
+that of \hughesetal\ for the two hydrophobic cases of hard rods and
+the hard spherical solutes.
 
 \begin{figure}
 \begin{center}
@@ -272,7 +307,24 @@ to---molecules at the surface of the hard rod.
 \label{fig:single-rod-broken-HB}
 \end{figure}
 
-\fixme{Talk about Fig.~\ref{fig:single-rod-broken-HB}}
+In addition to the density, we examine the number of hydrogen bonds
+which are broken due to the presence of a hard rod.  We define this
+quantity as
+\begin{align}
+  N_{\text{broken HB}} &= 2 \int (X(\rr) - X_{\text{bulk}})n_{\text{site}}(\rr) d\rr
+\end{align}
+where $X_{\text{bulk}} = 0.1?$ \fixme{get this number} is the fraction
+of unbonded association sites in the bulk.  The factor of 2 is chosen
+to account for the four association sites per molecule, and the fact
+that each hydrogen bond is twice---once for each of the molecules
+involved.  In Fig.~\ref{fig:single-rod-broken-HB} we show the number
+of hydrogen bonds broken by a hard rod per nanometer length, as
+predicted by the functional of \hughesetal\ (dashed line) and this
+work (solid line), as a function of the radius of the hard rod.  In
+each case in the limit of large rods, the number of broken bonds is
+proportional to the surface area, which is what one would expect.  At
+every radius, the functional of \hughesetal\ predicts approximately
+four times as many broken hydrogen bonds as the improved functional.
 
 A common test case for studying hydrophobic solutes in water is the
 hard-sphere solute.  Figure~\ref{fig:spheres-broken-HB} shows results
@@ -310,6 +362,8 @@ density profiles, it predicts fewer broken hydrogen bonds around
 hydrophobic solutes and at aqueous interfaces.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
 
 \clearpage
 
