@@ -36,6 +36,12 @@ histogram_doubled = zeros_like(xcoords_doubled)
 contact_histogram = zeros_like(xcoords_doubled)
 nA_histogram = zeros_like(xcoords_doubled)
 
+pairdx = 0.5
+xxx = arange(0, lenx+pairdx/2, pairdx)
+yyy = arange(0, leny+pairdx/2, pairdx)
+XXX, YYY = meshgrid(xxx, yyy)
+pairdensity = zeros_like(XXX)
+
 # Movement
 scale = 0.5
 
@@ -96,20 +102,32 @@ i_setup = 0
 for i in xrange(int(nx_setup)):
   for j in xrange(int(ny_setup)):
     if occupied_setup[i,j]:
-      rndx = 0*(2*rand()-1)*(dx_setup-2)/4
-      rndy = 0*(2*rand()-1)*(dx_setup-2)/4
-      circles[i_setup, 0] = x_setup[i] + rndx
-      circles[i_setup, 1] = y_setup[j] + rndy
+      circles[i_setup, 0] = x_setup[i]
+      circles[i_setup, 1] = y_setup[j]
       binnum = round(circles[i_setup][0]/dx) % len(histogram)
       histogram_doubled[2*binnum] += 1 # add another count to histogram
       histogram_doubled[2*binnum+1] += 1 # add another count to histogram
       i_setup += 1
+if 'pair' in sys.argv:
+  oldzerox = circles[0,0]
+  oldzeroy = circles[0,1]
+  circles[0,0] = 1
+  circles[0,1] = leny/2
+  for i in xrange(1, N):
+    if touch(circles[i], circles[0]):
+      circles[i,0] = oldzerox
+      circles[i,1] = oldzeroy
+      break
 
 # Plotting
 fig = figure()
-ax2 = fig.add_subplot(111)
-ax2.xaxis.set_visible(False)
-ax = ax2.twinx()
+if 'pair' in sys.argv:
+  ax = fig.add_subplot(111)
+  ax.xaxis.set_visible(False)
+else:
+  ax2 = fig.add_subplot(111)
+  ax2.xaxis.set_visible(False)
+  ax = ax2.twinx()
 ax.yaxis.set_visible(False)
 
 ax.set_xlim(-edge, lenx+edge)
@@ -127,13 +145,16 @@ elif 'gsigma' in sys.argv:
   ax2.axvline(x=0, linestyle='-', color='k', linewidth=3)
   ax2.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
   ax2.set_ylim(0, 2)
+elif 'pair' in sys.argv:
+  pairdensity[0,0] = 0.01
+  pcolormesh(XXX, YYY, pairdensity/sum(pairdensity), cmap='hot')
 
 def init():
   return 0
 
 def setup():
   global circles
-  for i in xrange(N):
+  for i in xrange(1,N):
     keep = True
     temp = move(circles[i])
     if temp[0] - r < 0 or temp[0] + r > lenx:
@@ -156,17 +177,23 @@ else:
   rejectc = (.6,.1,.1,1)
 badc = (1,0,0,1)
 tempc = (.1,1,.1,1)
+fixedc = (.9,.9,.9)
 count = 0
 success = 0
 skip = 1
-i = 0
+i = 1
 
 colors = [defaultc]*(N+1)
+if 'pair' in sys.argv:
+  colors[0] = fixedc
 
 def animate(p):
   global count, circles, skip, colors, histogram, i, success
   if (i >= N):
-    i = 0
+    if 'pair' in sys.argv:
+      i = 1
+    else:
+      i = 0
   keep = True
   temp = move(circles[i])
   if temp[0] - r < 0 or temp[0] + r > lenx:
@@ -187,6 +214,10 @@ def animate(p):
   binnum = round(circles[i][0]/dx) % len(histogram)
   histogram_doubled[2*binnum] += 1 # add another count to histogram
   histogram_doubled[2*binnum+1] += 1 # add another count to histogram
+  if keep:
+    pairdensity[floor(temp[1]/pairdx), floor(temp[0]/pairdx)] += 1
+  else:
+    pairdensity[floor(circles[i][1]/pairdx), floor(circles[i][0]/pairdx)] += 1
   if 'density' in sys.argv:
     line.set_ydata(N*area*histogram_doubled/sum(histogram_doubled)/dx/leny)
   colors[i] = highlightc
@@ -201,9 +232,14 @@ def animate(p):
     line.set_ydata(100*N*nA_histogram/sum(histogram_doubled))
 
   ax.cla()
+  if 'pair' in sys.argv:
+    pairplot = pcolormesh(XXX, YYY, pairdensity/sum(pairdensity), cmap='hot')
   for j in xrange(N+1):
     for shift in [0, -leny, leny]:
-      circ = Circle(circles[j]-(0, shift), r, color=colors[j])
+      if 'pair' in sys.argv and j != 0:
+        circ = Circle(circles[j]-(0, shift), r, color=colors[j], fill=False, linewidth=3)
+      else:
+        circ = Circle(circles[j]-(0, shift), r, color=colors[j])
       if shift != 0:
         circ.set_alpha(0.2)
       else:
@@ -262,9 +298,11 @@ def animate(p):
       colors[i] = rejectc
     if (i == N-1):
       colors = [defaultc]*(N+1)
+      if 'pair' in sys.argv:
+        colors[0] = fixedc
   i += 1
   if show:
-    time.sleep(.01)
+    time.sleep(0.01)
 
 fig.tight_layout()
 ax.set_aspect('equal')
