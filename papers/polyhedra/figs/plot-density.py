@@ -14,7 +14,11 @@ N = int(sys.argv[3])
 
 
 def read_mc(ff, poly, N):
-  data = loadtxt("figs/mc/polyhedraMC-walls-%4.2f-density-%s-%i.dat" %(ff, poly, N))
+  fname = "figs/mc/polyhedraMC-walls-%4.2f-density-%s-%i.dat" %(ff, poly, N)
+  if (not os.path.isfile(fname)):
+    print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
+    exit(1)
+  data = loadtxt(fname)
   return data[:,0], data[:,1]
 
 z, density = read_mc(ff, poly, N)
@@ -25,9 +29,9 @@ print sum(density)/len(density)*length**3
 plot(z[z<zmid], density[z<zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
 plot(length-z[z>zmid], density[z>zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
 if poly == 'cube':
-  axvline(x = 0.5, linestyle='--')
-  axvline(x = sqrt(2)/2, linestyle='--')
-  axvline(x = sqrt(3)/2, linestyle='--')
+  axvline(x = 0.5, linestyle=':')
+  axvline(x = sqrt(2)/2, linestyle=':')
+  axvline(x = sqrt(3)/2, linestyle=':')
 legend(loc='best')
 
 #xlim(0, 4)

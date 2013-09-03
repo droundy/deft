@@ -176,7 +176,7 @@ class quaternion {
   }
 
   void tostr(char str[]) const {
-    sprintf(str, "[%5.2f, (%5.2f, %5.2f, %5.2f)]", coords[0], coords[1], coords[2], coords[3]); }
+    sprintf(str, "[%6.2f, (%6.2f, %6.2f, %6.2f)]", coords[0], coords[1], coords[2], coords[3]); }
 
  private:
   double coords[4]; // coords[0] = scalar part, rest is vector part
