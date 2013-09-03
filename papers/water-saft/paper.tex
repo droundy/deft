@@ -96,21 +96,21 @@ association sites, which has been used to accurately model the
 equations of state of both pure fluids and mixtures over a wide range
 of temperatures and pressures~\cite{muller2001molecular,
   tan2008recent}.  The association term in SAFT uses Wertheim's
-first-order thermodynamic perturbation theory do describe an
+first-order thermodynamic perturbation theory to describe an
 associating fluid as hard-spheres with strong associative interactions
 at specific sites on the surface of each sphere~\cite{wertheim1984fluidsI,
   wertheim1984fluidsII, wertheim1986fluidsIII, wertheim1986fluidsIV}.
 These association sites have an attractive interaction at contact, and
-rely on the hard-sphere radial distribution function at contact
+rely on the hard-sphere pair distribution function at contact
 $g_\sigma^\text{HS}$ in order to determine the extent of association.
 While this function is known for the homogeneous hard-sphere
 fluid, it must be approximated for inhomogeneous systems, such as occur
 at liquid interfaces.
 
 In a recent paper, we examined the pair distribution function at
-contact at a variety of hard-sphere
-interfaces~\cite{schulte2012using}.  We tested the accuracy of
-existing approximations for the distribution function at
+contact in various inhomogeneous
+configurations~\cite{schulte2012using}.  We tested the accuracy of
+existing approximations for the pair distribution function at
 contact~\cite{yu2002fmt-dft-inhomogeneous-associating,
   gross2009density}, and derived a significantly improved
 approximation for the averaged distribution function at contact.  In
@@ -132,7 +132,7 @@ functional.
 The classical density functional for water of \hughesetal\ consists of
 four terms:
 \begin{align}
-  F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)] 
+  F[n(\rr)] &= F_{\text{ideal}}[n(\rr)] + F_{\text{HS}}[n(\rr)]
   + F_{\text{disp}}[n(\rr)] + F_{\text{assoc}}[n(\rr)]
 \end{align}
 where $F_{\text{ideal}}$ is the ideal gas free energy and
@@ -146,17 +146,18 @@ contribution due to association, which is the term that we examine in
 this paper.
 
 \subsection{Dispersion}
-The dispersion free energy includes the van der Waals attraction and
-any orientation-independent interactions. Following \hughesetal, we
-use a dispersion term based on the SAFT-VR
-approach\cite{gil-villegas-1997-SAFT-VR}, which has two free
-parameters (taken from Clark~\emph{et al}\cite{clark2006developing}):
-an interaction energy $\epsilondisp$ and a length scale $\lambdadisp
-R$.
+The dispersion term in the free energy includes the van
+der Waals attraction and any orientation-independent
+interactions. Following \hughesetal, we use a dispersion term based on
+the SAFT-VR approach\cite{gil-villegas-1997-SAFT-VR}, which has two
+free parameters (taken from Clark~\emph{et
+  al}\cite{clark2006developing}): an interaction energy $\epsilondisp$
+and a length scale $\lambdadisp R$.
 
 The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
 \begin{align}
-  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx,
+  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx
+  \label{eq:dispersion-term}
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
 perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
@@ -213,11 +214,12 @@ position~$\rr$:
     4 n_0(\rr) \zeta(\rr) & \text{\hughesetalcite}
   \end{cases}
 \end{align}
-where the factor of four comes from the four hydrogen bond sites,
-$n_0(\rr)$ is the average density contacting point $\rr$, and
-$\zeta(\xx)$ is a dimensionless measure of the density inhomogeneity
-from Yu and Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  The
-functional $X(\rr)$ is the fraction of association sites \emph{not}
+where the factor of four comes from the four hydrogen bond sites, the
+fundamental measure $n_0(\rr)$ is the average density contacting point
+$\rr$, and $\zeta(\xx)$ is a dimensionless measure of the density
+inhomogeneity from Yu and
+Wu~\cite{yu2002fmt-dft-inhomogeneous-associating}.  The functional
+$X(\rr)$ is the fraction of association sites \emph{not}
 hydrogen-bonded, which is determined for our 4-site model by the
 quadratic equation
 \begin{align}
@@ -246,7 +248,7 @@ is the density of bonding sites that could bond to the sites~$n_\text{site}(\rr)
 where $g^\textit{HS}_\sigma$ is the correlation function evaluated at
 contact for a hard-sphere fluid with a square-well dispersion
 potential, and $a_1$ and $a_2$ are the two terms in the dispersion
-free energy.  The radial distribution function of the square-well
+free energy defined below Eq.~\ref{eq:dispersion-term}.  The radial distribution function of the square-well
 fluid $g^\textit{SW}_\sigma$ is written as a perturbative correction
 to the hard-sphere radial distribution function
 $g^\textit{HS}_\sigma$.  The functional of \hughesetal\ uses the
@@ -284,16 +286,18 @@ the hard spherical solutes.
 
 We will first discuss the case of a single hydrophobic rod immersed in
 water. Figure~\ref{fig:density-single-rod} shows the density profile
-of water near a rod with radius~1~\AA.  The density computed using the functional of this
-paper is qualitatively similar to that from
-\hughesetal, with a comparable density at
-contact---consistent with having made only a moderate change in the
-free energy.  The first density peak near the surface is
-higher than that from \hughesetal, and the peak
-is has a kink at the top.  This reflects the improved accuracy of the
-$g_\sigma^\textit{HS}$ from \hughesetal, since beyond the
-first peak water molecules are unable to touch---or hydrogen bond
-to---molecules at the surface of the hard rod.
+of water near a rod with radius~1~\AA.  The density computed using the
+functional of this paper is qualitatively similar to that from
+\hughesetal, with a comparable density at contact---consistent with
+having made only a moderate change in the free energy.  The first
+density peak near the surface is higher than that from \hughesetal,
+and the peak has a kink at the top.  This reflects the improved
+accuracy of the $g_\sigma^\textit{HS}$ from \hughesetal, since beyond
+the first peak water molecules are unable to touch---or hydrogen bond
+to---molecules at the surface of the hard rod. This is illustrated
+under the profiles in Figure~\ref{fig:density-single-rod} by a cartoon
+of adjacent hard spheres that are increasingly distant from the hard
+rod surface.
 
 \begin{figure}
 \begin{center}
@@ -316,15 +320,16 @@ quantity as
 where $X_{\text{bulk}} = 0.1?$ \fixme{get this number} is the fraction
 of unbonded association sites in the bulk.  The factor of 2 is chosen
 to account for the four association sites per molecule, and the fact
-that each hydrogen bond is twice---once for each of the molecules
-involved.  In Fig.~\ref{fig:single-rod-broken-HB} we show the number
-of hydrogen bonds broken by a hard rod per nanometer length, as
-predicted by the functional of \hughesetal\ (dashed line) and this
-work (solid line), as a function of the radius of the hard rod.  In
-each case in the limit of large rods, the number of broken bonds is
-proportional to the surface area, which is what one would expect.  At
-every radius, the functional of \hughesetal\ predicts approximately
-four times as many broken hydrogen bonds as the improved functional.
+that each broken hydrogen bond must be represented twice---once for
+each of the molecules involved.  In
+Fig.~\ref{fig:single-rod-broken-HB} we show the number of hydrogen
+bonds broken by a hard rod per nanometer length, as predicted by the
+functional of \hughesetal\ (dashed line) and this work (solid line),
+as a function of the radius of the hard rod.  In each case in the
+limit of large rods, the number of broken bonds is proportional to the
+surface area.  At every radius, the functional of
+\hughesetal\ predicts approximately four times as many broken hydrogen
+bonds as the improved functional.
 
 A common test case for studying hydrophobic solutes in water is the
 hard-sphere solute.  Figure~\ref{fig:spheres-broken-HB} shows results
