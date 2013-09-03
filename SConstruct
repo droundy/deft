@@ -97,12 +97,9 @@ def SVG(env, filename):
     filename = str(filename)
     if len(filename)>4 and filename[len(filename)-4:] == ".svg":
         filename = filename[:len(filename)-4]
-    env.Command(target = filename+'.eps',
-                source = filename+'.svg',
-                action = 'inkscape --export-eps $TARGET $SOURCE')
     env.Command(target = filename+'.pdf',
-                source = filename+'.eps',
-                action = 'epstopdf $SOURCE')
+                source = filename+'.svg',
+                action = 'inkscape --export-pdf $TARGET $SOURCE')
 AddMethod(Environment, SVG)
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
@@ -224,6 +221,19 @@ env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
 
 # #################### papers/pair-correlation ##############################################
 
+# #################### papers/fuzzy-fmt ##################################################
+
+# #################### talks ##################################################
+
+
+# and now we'll handle all svg files
+for svgfile in Glob('talks/*/*/*.svg'):
+    env.SVG(svgfile)
+# and all py files
+for pyfile in Glob('talks/colloquium/*/*.py'):
+    pyfile = str(pyfile)[:len(str(pyfile))-3]
+    paper.Matplotlib(pyfile, py_chdir='talks/colloquium')
+
 animations = []
 animations += env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
                                     for i in xrange(31)],
@@ -243,9 +253,10 @@ animations += env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' %
                           action = 'cd talks/colloquium && python mc-circle-slow.py gsigma')
 presentation = env.PDF(['talks/colloquium/slides.tex'])
 Depends(presentation, animations)
+Depends(presentation, Split(""" talks/colloquium/figs/energy-solid.pdf
+                                talks/colloquium/figs/energy-solid-gas-liquid.pdf
+                                talks/colloquium/figs/energy-solid-gas.pdf """))
 Default(presentation)
-
-# #################### papers/fuzzy-fmt ##################################################
 
 
 # The following programs generate a single .dat file that may be cached.
@@ -267,7 +278,6 @@ for mkdat in Split("""
 # these files here.
 for mkdat in Split("""
 	papers/hughes-saft/figs/single-rod-in-water-low-res
-	papers/contact/figs/walls
 	papers/pair-correlation/figs/walls
       """):
     Alias('executables',
@@ -296,10 +306,19 @@ for mkdat in Split("""
 	papers/pair-correlation/figs/sphere-with-wall
 	papers/pair-correlation/figs/triplet-dft
 	papers/fuzzy-fmt/figs/walls
+	papers/contact/figs/walls
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
                       source = [mkdat + '.cpp'] + all_sources))
+
+env.Command(target = ['papers/contact/figs/walls.dat',
+                      'papers/contact/figs/wallsWB-0.10.dat',
+                      'papers/contact/figs/wallsWB-0.20.dat',
+                      'papers/contact/figs/wallsWB-0.30.dat',
+                      'papers/contact/figs/wallsWB-0.40.dat'],
+            source = ['papers/contact/figs/walls.mkdat'],
+            action = './$SOURCE')
 
 env.Command(target = ['papers/water-saft/figs/equation-of-state.dat',
                       'papers/water-saft/figs/experimental-equation-of-state.dat'],

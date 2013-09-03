@@ -1,0 +1,154 @@
+\section{Theory of Liquids}
+\subsection*{What is a liquid?}
+\begin{frame}
+  \frametitle{What is a liquid?}
+  \framesubtitle{Elementary school definition}
+  \begin{center}
+    \includegraphics[width=7cm]{figs/solid-liquid-gas}
+  \end{center}
+  \begin{description}
+  \item[Solid] Does not take the shape of its container
+  \item[Gas] Takes the shape of its container and fills it
+  \item[Liquid] Takes the shape of a container, but doesn't fill it
+  \end{description}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a liquid?}
+  %\framesubtitle{Phase diagram}
+  \begin{center}
+    \includegraphics[width=8.8cm]{figs/water-phase-diagram}
+  \end{center}
+  \vspace{-1em}
+  \hfill \tiny figure from Wikipedia
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a liquid?}
+  \framesubtitle{Energy versus entropy}
+  \begin{center}
+    \includegraphics<1>[width=7cm]{figs/energy-solid}
+    \includegraphics<2>[width=7cm]{figs/energy-solid-gas}
+    \includegraphics<3->[width=7cm]{figs/energy-solid-gas-liquid}
+  \end{center}
+  \begin{description}
+  \item[Solid] Energy dominates, entropy is a small perturbation
+  \item<2->[Gas] Entropy dominates, energy is a small perturbation
+  \item<3->[Liquid] Energy and entropy are balanced
+  \end{description}
+  \begin{block}{Perturbation theory}<4->
+    \begin{itemize}
+    \item<5-> An ``easy'' problem we know how to solve
+    \item<6-> A ``hard'' correction that is small
+    \item<7-> We construct a power series to solve combined problem
+    \end{itemize}
+  \end{block}
+  %% \begin{enumerate}
+  %% \item Solid and gas perturbation expansion
+  %% \item No easy perturbation for liquid
+  %% \item Ice floats
+  %% \item Critical point
+  %% \item Below the triple point
+  %% \end{enumerate}
+\end{frame}
+
+%% \section[SAFT]{Understanding water using Statistical Associating
+%%   Fluid Theory}
+
+%% \subsection*{Simple liquids}
+%% \begin{frame}
+%%   \frametitle{Dense fluids}
+%%   In order to use a perturbative approach, we need a ``solved''
+%%   problem that is similar to a liquid.
+
+%%   \begin{block}{Correlation function}<2->
+%%     \vspace{-3em}
+%%     \hfill \includegraphics[width=5cm, angle=270]{figs/correlation}\\
+%%     %\vspace{-1em}
+%%     \hfill\mycite{Soper}{J. Chem. Phys.}{2000}\\
+%%     The correlation function $g(r)$ tells us how likely we are to find
+%%     an atom at a given distance from any other atom.
+%%   \end{block}
+%% \end{frame}
+
+\begin{frame}
+  \frametitle{Dense fluids}
+  In order to use a perturbative approach, we need a ``solved''
+  problem that is similar to a liquid.
+  \begin{block}{Hard-sphere fluid}<2->
+    \begin{itemize}
+    \item Captures the repulsive portion of the structure
+    \item Still no energy!
+    \item Not actually a liquid
+    \end{itemize}
+    \begin{center}
+      \includegraphics[width=8cm]{figs/hard-spheres}
+    \end{center}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Simple liquids}
+  \begin{itemize}
+  \item Perturbative attraction added to hard spheres
+  \item ``High T expansion''
+    \[
+    F_\text{disp} = \left(a_1(n) + a_2(n)\beta + \mathcal{O}(\beta^2)\right)n,
+    \quad \quad \beta \equiv \frac{1}{k_BT}
+    \]
+
+    \vspace{1em} The temperature-independent $a_1$ term corresponds to
+    a mean-field approximation, and incorporates correlations present
+    in the hard-sphere fluid.
+    \vspace{1em}
+
+    The $a_2$ term incorporates---to first order---correlations due to
+    the attraction itself.
+  \end{itemize}
+\end{frame}
+
+%\subsection{Hydrogen bonding (Association)}
+\begin{frame}
+  \frametitle{Hydrogen bonds (Association)}
+  \vspace{-2em}
+  \hfill\includegraphics[width=7cm]{figs/hydrogen-bonds}\hspace{-3em}
+  \vspace{-2em}
+  \begin{itemize}
+  \item Highly directional bonds
+  \item Not a ``small'' interaction (around $4k_BT$)
+  \item Small volume of interaction
+  \item Wertheim's Thermodynamic Perturbation Theory\\ \hfill
+    \mycite{Wertheim}{J. Stat. Phys.}{1984,1986}
+  \item How often do hard spheres touch?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Statistical Associating Fluid Theory (SAFT)}
+  The above terms combined describe a well-established
+  theory for homogeneous liquids such as water.
+  \begin{center}
+    \vspace{-1em}
+    \includegraphics[height=6cm]{../../papers/water-saft/figs/pressure-with-isotherms-truncated}
+  \end{center}
+  \hfill Clark \emph{et al}, \emph{Mol. Phys.}
+  (2006)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Interfaces:  Classical Density Functional Theory}
+  In order to describe liquid \emph{interfaces} we need a theory that
+  can handle \emph{inhomogeneous} configurations.
+  \begin{block}{Classical Density Functional Theory (cDFT)}
+    \[\Omega = \min_{n(\rr)} \left\{ F[n(\rr), T] + \int (V(\rr)-\mu) n(\rr)d\rr \right\}
+    \]
+    \begin{itemize}
+    \item $\Omega$ is grand potential
+    \item $n(\rr)$ is number density of atoms or molecules
+    \item $V(\rr)$ is an arbitrary external potential energy
+    \item $\mu$ is the chemical potential
+    \item $F[n(\rr),T]$ is a functional that depends only on the
+      liquid in question
+    \end{itemize}
+  \end{block}
+\end{frame}

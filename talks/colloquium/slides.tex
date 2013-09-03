@@ -1,15 +1,18 @@
 \documentclass{beamer}
 %\usepackage{beamerthemelined}
-\usepackage{pstricks}
-\usepackage{amsfonts,amssymb,amsmath,amsthm}
+\usepackage{amsfonts,amssymb,amsmath}
 \usepackage{graphicx}
 \usepackage[draft]{animate}
-%\setbeamertemplate{navigation symbols}{}
-\beamertemplatenavigationsymbolsempty
 
 \usetheme{Boadilla}
 \usecolortheme{whale}
+\beamertemplatenavigationsymbolsempty
 \setbeamertemplate{itemize items}[triangle]
+\setbeamertemplate{footline}[frame number]
+
+\newcommand\myciteetal[3]{{\small #1 \emph{et al}, \textit{#2} (#3)}}
+\newcommand\mycite[3]{{\small #1, \textit{#2} (#3)}}
+\newcommand\rr{\mathbf{r}}
 
 \title{A Tale of Two E's}
 \subtitle{Energy and Entropy in liquid interfaces}
@@ -18,34 +21,41 @@
 
 \begin{document}
 
+{
+%\usebackgroundtemplate{\includegraphics[height=\paperheight]{photos/montage}}%
+\begin{frame}
+  \titlepage
+  %\vfill
+
+  %\hfill \includegraphics[width=4cm]{figs/nsf-due-0837829}
+\end{frame}
+}
+
+\begin{frame}
+  \frametitle{How are energy and entropy involved?}
+  \vspace{-1em}
+  \[F = U - TS\]
+  \begin{center}
+    \includegraphics[height=6cm]{figs/hydration-plot-nice}
+  \end{center}
+  ``The energy and entropy of hydration of organic compounds''
+  \\ \hfill \mycite{Butler}{Transactions of the Faraday Society}{1937}
+\end{frame}
+
+%\section*{Outline}
+\begin{frame}
+  \frametitle{Outline}
+  \tableofcontents
+\end{frame}
+
+\input{theory-of-liquids}
+
+\input{contact}
+
 \section{Monte Carlo}
 
 \begin{frame}
-  \frametitle{Monte Carlo simulation}
-  \begin{figure}[h]
-    \centering
-    \animategraphics[width=100mm,autoplay,final]{.6}{anim/mc-slow-}{000}{30}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Monte Carlo Example}
-  \begin{figure}[h]
-    \centering
-    \animategraphics[width=100mm,autoplay,final]{.6}{anim/mc-density-}{000}{30}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Monte Carlo Example}
-  \begin{figure}[h]
-    \centering
-    \animategraphics[width=100mm,autoplay,final]{.6}{anim/mc-gsigma-}{000}{30}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Monte Carlo Example}
+  \frametitle{Finding the pair distribution function}
   \begin{figure}[h]
     \centering
     \animategraphics[width=100mm,autoplay,final]{.6}{anim/mc-pair-}{000}{30}
