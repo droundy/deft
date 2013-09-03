@@ -278,7 +278,6 @@ for mkdat in Split("""
 # these files here.
 for mkdat in Split("""
 	papers/hughes-saft/figs/single-rod-in-water-low-res
-	papers/pair-correlation/figs/walls
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -303,10 +302,11 @@ for mkdat in Split("""
 	papers/contact/figs/sphere
 	papers/contact/figs/inner-sphere
 	papers/contact/figs/test-particle-wall
+	papers/contact/figs/walls
 	papers/pair-correlation/figs/sphere-with-wall
 	papers/pair-correlation/figs/triplet-dft
+	papers/pair-correlation/figs/walls
 	papers/fuzzy-fmt/figs/walls
-	papers/contact/figs/walls
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -318,6 +318,14 @@ env.Command(target = ['papers/contact/figs/walls.dat',
                       'papers/contact/figs/wallsWB-0.30.dat',
                       'papers/contact/figs/wallsWB-0.40.dat'],
             source = ['papers/contact/figs/walls.mkdat'],
+            action = './$SOURCE')
+
+env.Command(target = ['papers/pair-correlation/figs/walls.dat',
+                      'papers/pair-correlation/figs/wallsWB-0.10.dat',
+                      'papers/pair-correlation/figs/wallsWB-0.20.dat',
+                      'papers/pair-correlation/figs/wallsWB-0.30.dat',
+                      'papers/pair-correlation/figs/wallsWB-0.40.dat'],
+            source = ['papers/pair-correlation/figs/walls.mkdat'],
             action = './$SOURCE')
 
 env.Command(target = ['papers/water-saft/figs/equation-of-state.dat',
