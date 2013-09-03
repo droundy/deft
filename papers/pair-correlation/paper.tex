@@ -571,9 +571,9 @@ Putting this together with the above we find
 \begin{multline}
   \frac{Z(\sigma)-Z(\sigma+\delta)}{Z(\sigma)} =
   2\pi\sigma^2 n N g_\sigma \delta +
-  \pi\sigma n N  \left(g_\sigma'\sigma + 2g\right)
+  \pi\sigma n N  \left(g_\sigma'\sigma + 2g_\sigma\right)
   \delta^2 \\
-  - 2\pi^2\sigma^4n^2N^2\sigma^4g_\sigma^2\delta^2 + \mathcal{O}(\delta^3)
+  - 2\pi^2\sigma^4n^2N^2g_\sigma^2\delta^2 + \mathcal{O}(\delta^3)
 \end{multline}
 But by considering a Taylor expansion, we can also see that
 \begin{multline}
@@ -586,8 +586,8 @@ So that
   \frac{\partial Z}{\partial \sigma} =
   -2ZnN\pi\sigma^2g_\sigma\\
   \frac{\partial^2 Z}{\partial \sigma^2} =
-  -2ZnN\pi\sigma\left(g_\sigma'\sigma + 2g\sigma \right)
-  +4Zn^2N^2\sigma^4g^2
+  -2ZnN\pi\sigma\left(g_\sigma'\sigma + 2g_\sigma \right)
+  +4Zn^2N^2\pi^2\sigma^4{g_\sigma}^2
 \end{multline}
 from which we can extract relationships for the derivatives of $Z$
 with respect to $\sigma$.  Which if we knew what those derivatives
@@ -612,7 +612,7 @@ and
 With a bunch more work, we find out that
 \begin{equation}
   g_\sigma' = \frac{\frac{\partial^2 F}{\partial
-      \sigma^2}}{2\pi\sigma^2nkT}
+      \sigma^2}}{2\pi\sigma^2nNkT}
   - \frac{2g_\sigma}{\sigma}
 \end{equation}
 except that there is a mistake in here.  I can tell because $F$ is
