@@ -98,8 +98,14 @@ def SVG(env, filename):
     if len(filename)>4 and filename[len(filename)-4:] == ".svg":
         filename = filename[:len(filename)-4]
     env.Command(target = filename+'.pdf',
+                source = filename+'.eps',
+                action = 'epstopdf --outfile $TARGET $SOURCE')
+    env.Command(target = filename+'.eps',
                 source = filename+'.svg',
-                action = 'inkscape --export-pdf $TARGET $SOURCE')
+                action = 'inkscape --export-eps $TARGET $SOURCE')
+    # env.Command(target = filename+'.pdf',
+    #             source = filename+'.svg',
+    #             action = 'inkscape --export-pdf $TARGET $SOURCE')
 AddMethod(Environment, SVG)
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
