@@ -7,12 +7,13 @@ if not ('show' in sys.argv):
   matplotlib.use('Agg')
 
 from pylab import *
+seed(0) # seed random number generator
 import pylab
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import colorConverter
 import matplotlib.animation as animation
 
-ff = .4
+ff = .5
 
 
 r = 1
@@ -26,6 +27,8 @@ edge = 1
 
 N = int(round(ff*lenx*leny/area))
 plotmoves = 1
+if 'pair' in sys.argv or 'gsigma' in sys.argv or 'density' in sys.argv:
+  plotmoves = 30
 
 # density
 dx = 0.2
@@ -107,9 +110,6 @@ for i in xrange(int(nx_setup)):
     if occupied_setup[i,j]:
       circles[i_setup, 0] = x_setup[i]
       circles[i_setup, 1] = y_setup[j]
-      binnum = round(circles[i_setup][0]/dx) % len(histogram)
-      histogram_doubled[2*binnum] += 1 # add another count to histogram
-      histogram_doubled[2*binnum+1] += 1 # add another count to histogram
       i_setup += 1
 if 'pair' in sys.argv:
   oldzerox = circles[0,0]
@@ -131,6 +131,8 @@ else:
   ax2 = fig.add_subplot(111)
   ax2.xaxis.set_visible(False)
   ax = ax2.twinx()
+if 'gsigma' in sys.argv:
+  ax2.set_yticks([])
 ax.yaxis.set_visible(False)
 
 ax.set_xlim(-edge, lenx+edge)
@@ -192,7 +194,7 @@ if 'pair' in sys.argv:
   colors[0] = fixedc
 
 def animate(p):
-  global count, circles, skip, colors, histogram, i, success, plotmoves
+  global count, circles, skip, colors, i, success, plotmoves
   for moves in xrange(plotmoves):
     if (i >= N):
       if 'pair' in sys.argv:
@@ -230,37 +232,33 @@ def animate(p):
         lineseg = abs(sqrt(4 - (xjp-circles[i][0])**2) -  sqrt(4 - (xjm-circles[i][0])**2))
         nA_histogram[2*j] += lineseg
         nA_histogram[2*j+1] += lineseg
-    if 'gsigma' in sys.argv:
-      inc = zeros(N)
-      for j in xrange(N):
-        for k in xrange(j):
-          if almost_touch(circles[k], circles[j]):
-            inc[k] = 1
-            inc[j] = 1
-      for j in xrange(N):
-        if inc[j]:
-          binnum = round(circles[j][0]/dx) % len(histogram)
-          contact_histogram[2*binnum] += 1
-          contact_histogram[2*binnum+1] += 1
     oldpos = array([circles[i,0], circles[i,1]])
     if keep:
       circles[i] = temp
+    inc = zeros(N)
+    for j in xrange(N):
+      for k in xrange(j):
+        if almost_touch(circles[k], circles[j]):
+          inc[k] = 1
+          inc[j] = 1
+    for j in xrange(N):
+      if inc[j]:
+        binnum = int(round(circles[j][0]/dx)) % len(histogram)
+        contact_histogram[2*binnum] += 1
+        contact_histogram[2*binnum+1] += 1
     i += 1
   i -= 1
 
   if keep:
     colors[i] = goodc
-  else:
-    circles[N] = temp
-    colors[N] = badc
   if 'nA' in sys.argv:
     line.set_ydata(100*N*nA_histogram/sum(histogram_doubled))
 
   ax.cla()
   if 'pair' in sys.argv or 'gsigma' in sys.argv or 'density' in sys.argv:
     # The following is a hokey heuristic to accelerate the clock as we go.
-    if str(count).count('0') == len(str(count))-1 and count > 10*plotmoves:
-      plotmoves = int(count/2)
+    if str(count).count('0') == len(str(count))-1 and count > 9*plotmoves:
+      plotmoves = int(count)
   if 'pair' in sys.argv:
     pairplot = pcolormesh(XXX, YYY, -pairdensity/sum(pairdensity), cmap='hot')
     ax.set_xlim(-edge, lenx+edge)
@@ -270,6 +268,22 @@ def animate(p):
   else:
     circleplotnum = N
     colors[i] = defaultc
+  if plotmoves > 1:
+    colors = [defaultc]*(N+1)
+    if 'pair' in sys.argv:
+      colors[0] = fixedc
+  else:
+    if not keep:
+      colors[N] = badc
+      circles[N] = temp
+      colors[i] = highlightc
+  if 'gsigma' in sys.argv:
+    colors = [defaultc]*(N+1)
+    for j in xrange(N):
+      for k in xrange(j):
+        if almost_touch(circles[k], circles[j]):
+          colors[k] = contactc
+          colors[j] = contactc
   for j in xrange(circleplotnum):
     for shift in [0, -leny, leny]:
       if 'pair' in sys.argv and j != 0:
@@ -301,25 +315,6 @@ def animate(p):
       ax.arrow(oldpos[0], oldpos[1]+shift, delta[0],
                delta[1], head_width=arwidth,
                head_length=arlen, linewidth=2, facecolor='gray', alpha = alpha)
-    fig.tight_layout()
-  else:
-    colors = [defaultc]*(N+1)
-
-  if 'gsigma' in sys.argv:
-    colors = [defaultc]*(N+1)
-    for j in xrange(N):
-      for k in xrange(j):
-        if almost_touch(circles[k], circles[j]):
-          colors[k] = contactc
-          colors[j] = contactc
-
-    # FIXME: off by a constant factor below
-    gsigma = contact_histogram/(histogram_doubled+0.01)/nA_histogram/delta_contact
-    if 'nA' in sys.argv:
-      line.set_ydata(nA_histogram/sum(histogram_doubled))
-    else:
-      line.set_ydata(gsigma)
-  else:
     if keep:
       colors[i] = goodc
     else:
@@ -328,30 +323,39 @@ def animate(p):
       colors = [defaultc]*(N+1)
       if 'pair' in sys.argv:
         colors[0] = fixedc
+  if 'nA' in sys.argv:
+    line.set_ydata(nA_histogram/sum(histogram_doubled))
+  if 'gsigma' in sys.argv:
+    # FIXME: off by a constant factor below
+    gsigma = sum(nA_histogram)*contact_histogram/(histogram_doubled+0.01)/nA_histogram/delta_contact/80000
+    line.set_ydata(gsigma)
   if show:
-    time.sleep(0.001)
+    time.sleep(1.001)
   i += 1
 
-fig.tight_layout()
 ax.set_aspect('equal')
 ax.set_ylim(-2*edge, leny+2*edge)
 
 for p in xrange(500):
   setup()
 
+for i in xrange(N):
+  binnum = round(circles[i][0]/dx) % len(histogram)
+  histogram_doubled[2*binnum] += 1 # add another count to histogram
+  histogram_doubled[2*binnum+1] += 1 # add another count to histogram
+
 def mysavefig(f):
   savefig(f)
-  #print 'saved', f, 'with plotmoves', plotmoves, 'and count', count
+  print 'saved', f, 'with plotmoves', plotmoves, 'and count', count
 
 if 'show' in sys.argv:
-  print 'oops'
   anim = animation.FuncAnimation(fig, animate, init_func=init)
   pylab.show()
 else:
   count = 0
   success = 0
-  print('Saving animation images.')
-  for p in xrange(61):
+  #print('Saving animation images.')
+  for p in xrange(31):
     animate(p)
     if 'density' in sys.argv:
       mysavefig("anim/mc-density-%03i.pdf" %p)

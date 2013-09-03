@@ -226,19 +226,19 @@ env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
 
 animations = []
 animations += env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
-                                    for i in xrange(61)],
+                                    for i in xrange(31)],
                           source = 'talks/colloquium/mc-circle-slow.py',
                           action = 'cd talks/colloquium && python mc-circle-slow.py')
 animations += env.Command(target = ['talks/colloquium/anim/mc-density-%03i.pdf' % i
-                                    for i in xrange(61)],
+                                    for i in xrange(31)],
                           source = 'talks/colloquium/mc-circle-slow.py',
                           action = 'cd talks/colloquium && python mc-circle-slow.py density')
 animations += env.Command(target = ['talks/colloquium/anim/mc-pair-%03i.pdf' % i
-                                    for i in xrange(61)],
+                                    for i in xrange(31)],
                           source = 'talks/colloquium/mc-circle-slow.py',
                           action = 'cd talks/colloquium && python mc-circle-slow.py pair')
 animations += env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' % i
-                                    for i in xrange(61)],
+                                    for i in xrange(31)],
                           source = 'talks/colloquium/mc-circle-slow.py',
                           action = 'cd talks/colloquium && python mc-circle-slow.py gsigma')
 presentation = env.PDF(['talks/colloquium/slides.tex'])
