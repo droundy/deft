@@ -293,21 +293,37 @@ In addition, we know that
 \end{align}
 \begin{equation}
   \begin{split}
-    \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_T
-    = - \left(V\left(\frac{\partial p}{\partial V}\right)_T\right)^{-1}\\
-    p &= nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\\
-    \left(\frac{\partial p}{\partial V}\right)_T &= \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}\\
-    n &= \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}\\
-    \eta &= \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}\\
+    \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial
+      p}\right)_T \\
+    &= - \left(V\left(\frac{\partial p}{\partial
+      V}\right)_T\right)^{-1}
+  \end{split}
+\end{equation}
+\begin{equation}
+    p = nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}
+\end{equation}
+\begin{equation}
+    \left(\frac{\partial p}{\partial V}\right)_T = \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}
+\end{equation}
+\begin{equation}
+    n = \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}
+\end{equation}
+\begin{equation}
+    \eta = \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}
+\end{equation}
+\begin{equation}
+  \begin{split}
     \left(\frac{\partial p}{\partial V}\right)_T &= -nkT\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
-    &  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
+    &\quad  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
     &= -nkT\frac{\eta}{V}\left[\frac{(1+2\eta-3\eta^2)(1-\eta) + 3 + 3\eta + 3\eta^2 - 3\eta^3}{(1-\eta)^4}\right]\\
-    &  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
-    &= -\frac{kT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
-    nkT\chi_T &= \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
+    &\quad  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
+    &= -\frac{nkT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
+  \end{split}
+\end{equation}
+\begin{equation}
+    nkT\chi_T = \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
   %\int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
   %&= \eta \eta \cdots \fixme{fill in, double-check}
-  \end{split}
 \end{equation}
 where $\chi_T$ is the isothermal compressibility, for which we use the
 Carnahan-Starling equation of state.
