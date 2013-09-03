@@ -140,7 +140,7 @@ ax.set_ylim(-edge, leny+edge)
 
 if 'density' in sys.argv:
   line, = ax2.plot(xcoords_doubled, histogram_doubled)
-  ax2.set_ylabel('packing fraction $\eta(x)$')
+  ax2.set_ylabel('density $n(x)$')
   ax2.axvline(x=0, linestyle='-', color='k', linewidth=3)
   ax2.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
   ax2.set_ylim(0, 2)
@@ -225,27 +225,28 @@ def animate(p):
       pairdensity[floor(circles[i][1]/pairdx), floor(circles[i][0]/pairdx)] += 1
     if 'density' in sys.argv:
       line.set_ydata(N*area*histogram_doubled/sum(histogram_doubled)/dx/leny)
-    for j in xrange(len(histogram)):
-      xjp = j*dx + dx
-      xjm = j*dx
-      if abs(xjp - circles[i][0]) <= 2 and abs(xjm - circles[i][0]) <= 2:
-        lineseg = abs(sqrt(4 - (xjp-circles[i][0])**2) -  sqrt(4 - (xjm-circles[i][0])**2))
-        nA_histogram[2*j] += lineseg
-        nA_histogram[2*j+1] += lineseg
     oldpos = array([circles[i,0], circles[i,1]])
     if keep:
       circles[i] = temp
-    inc = zeros(N)
-    for j in xrange(N):
-      for k in xrange(j):
-        if almost_touch(circles[k], circles[j]):
-          inc[k] = 1
-          inc[j] = 1
-    for j in xrange(N):
-      if inc[j]:
-        binnum = int(round(circles[j][0]/dx)) % len(histogram)
-        contact_histogram[2*binnum] += 1
-        contact_histogram[2*binnum+1] += 1
+    if 'gsigma' in sys.argv:
+      for j in xrange(len(histogram)):
+        xjp = j*dx + dx
+        xjm = j*dx
+        if abs(xjp - circles[i][0]) <= 2 and abs(xjm - circles[i][0]) <= 2:
+          lineseg = abs(sqrt(4 - (xjp-circles[i][0])**2) -  sqrt(4 - (xjm-circles[i][0])**2))
+          nA_histogram[2*j] += lineseg
+          nA_histogram[2*j+1] += lineseg
+      inc = zeros(N)
+      for j in xrange(N):
+        for k in xrange(j):
+          if almost_touch(circles[k], circles[j]):
+            inc[k] = 1
+            inc[j] = 1
+      for j in xrange(N):
+        if inc[j]:
+          binnum = int(round(circles[j][0]/dx)) % len(histogram)
+          contact_histogram[2*binnum] += 1
+          contact_histogram[2*binnum+1] += 1
     i += 1
   i -= 1
 
