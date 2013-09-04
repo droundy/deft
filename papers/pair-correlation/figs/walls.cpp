@@ -397,7 +397,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
-      const double resolution_2d = 0.01;
+      const double resolution_2d = 0.025;
       for (double x = 0; x < xmax + resolution_2d/2; x += resolution_2d) {
         for (double z1 = 3; z1 < zmax + 3 - resolution_2d/2; z1 += resolution_2d) {
           const Cartesian r1(x,0,z1);
