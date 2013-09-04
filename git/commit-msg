@@ -6,13 +6,10 @@ case "$TEST" in
     none)
         echo Tests skipped! >> "$1"
         ;;
-    compile)
-        echo Tested compile only! >> "$1"
-        ;;
-    build)
-        echo Tested only compile and papers. >> "$1"
+    slow)
+        echo Tested with cache disabled on `hostname`.  Took `cat time.txt`. >> "$1"
         ;;
     *)
-        echo Tested everything on `hostname`. >> "$1"
+        echo Tested on `hostname`.  Took `cat time.txt`. >> "$1"
         ;;
 esac

@@ -19,10 +19,15 @@ case "$TEST" in
     none)
         echo Skipping all tests.
         ;;
+    slow)
+        echo Testing very carefully!
+        /usr/bin/time -f '%E' -o time.txt scons -j $USING --cache-disable
+        echo Tests successful, took `cat time.txt`
+        ;;
     *)
         echo Testing everything!
-        scons -j $USING
-        echo Compile successful, papers successfully built, and all tests passed!
+        /usr/bin/time -f '%E' -o time.txt scons -j $USING
+        echo Tests successful, took `cat time.txt`
         ;;
 esac
 
