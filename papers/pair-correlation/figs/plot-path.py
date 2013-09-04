@@ -6,6 +6,7 @@ if len(sys.argv) < 3 or sys.argv[2] != "show":
   matplotlib.use('Agg')
 from pylab import *
 import scipy.ndimage
+import matplotlib.patheffects
 import os.path
 import math
 
@@ -16,8 +17,8 @@ from matplotlib.colors import NoNorm
 
 # these are the things to set
 colors = ['k', 'b', 'g', 'r', 'm']
-plots = ['mc', 'this-work', 'sphere-dft', 'fischer', 'sokolowski'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'test particle', 'Fischer et al.', 'Sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor' sphere-dft
+titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski'] # , 'gloor' test particle
 
 dx = 0.1
 ############################
@@ -44,8 +45,9 @@ def read_walls_path(ff, fun):
   elif fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "figs/walls.dat" % ()
-    # input: "figs/walls/wallsWB-path-*-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-this-work-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-fischer-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-sokolowski-pair-%1.2f-0.005.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
   data = loadtxt(filename)
   if fun == 'mc':
@@ -62,8 +64,8 @@ def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-%1.2f-trimmed.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "figs/walls/wallsWB-*-pair-%1.2f-0.005.dat" %(ff)
-    filename = "figs/walls/wallsWB-%s-pair-%1.2f-0.005.dat" %(fun, ff)
+    # input: "figs/walls/wallsWB-this-work-pair-%1.2f-0.05.dat" %(ff)
+    filename = "figs/walls/wallsWB-%s-pair-%1.2f-0.05.dat" %(fun, ff)
   return loadtxt(filename)
 
 ymax = 4
@@ -124,20 +126,24 @@ zplot.legend(loc='best', ncol=2).get_frame().set_alpha(0.5)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
-rbins = round(2*rmax/dx)
+rbins = round(rmax/dx)
 zposbins = round(zmax/dx)
 znegbins = round(-zmin/dx)
 zbins = zposbins + znegbins
 g22 = zeros((rbins, zbins))
-g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2,:zposbins]
-g22[:rbins/2, znegbins:zbins] = flipud(g2mc[:rbins/2,:zposbins])
+g22[:, znegbins:zbins] = g2mc[:rbins,:zposbins]
+#g22[:rbins/2, znegbins:zbins] = flipud(g2mc[:rbins/2,:zposbins])
 g2mc = g22
 gmax = g2mc.max()
 dx = 0.1
 
-r = arange(0-rmax, rmax, dx)
+r = arange(0, rmax, dx)
 z = arange(zmin, zmax, dx)
 Z, R = meshgrid(z, r)
+
+g2dft = read_walls_dft(ff, 'this-work')
+zdft = loadtxt("figs/walls/z.dat")
+xdft = loadtxt("figs/walls/x.dat")
 
 levels = linspace(0, gmax, gmax*100)
 xlo = 0.85/gmax
@@ -166,12 +172,18 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
+zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax,rmax, rmax/2))
+contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
 CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x_2$');
 twod_plot.set_xlabel('$z_2$');
+
+text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 xs = [0, 0]
 ys = [ymax, rpath]

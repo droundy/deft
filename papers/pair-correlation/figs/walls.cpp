@@ -397,7 +397,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
-      for (double x = 0; x < xmax - dx/2; x += dx) {
+      for (double x = 0; x < xmax + dx/2; x += dx) {
         for (double z1 = 3; z1 < zmax + 3 - dx/2; z1 += dx) {
           const Cartesian r1(x,0,z1);
           double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
