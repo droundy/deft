@@ -9,6 +9,29 @@
 #include "utilities.h"
 #include "handymath.h"
 
+// Global Constants
+
+// prints out a lot of extra information and performs extra computation
+// should be false except when something is wrong
+// NOTE: This can slow things down VERY much, depending on how much debug
+// code is active
+const bool debug = false;
+
+// Prints time information. Useful for testing optimizations,
+// or seeing how much adding complexity affects runtime.
+const bool totime = false;
+
+// Def: iff two polyhedra, a and b, are closer than a.R + b.R + neighborR,
+// then they are neighbors.
+
+// We only need to check overlaps with neighbors, but we need to update
+// neighbor tables as soon as a polyhedron moves more than a distance of
+// neighborR/2.0.
+const double neighborR = 0.5;
+
+
+
+
 // We make one poly_shape for each shape we care about (cube, tetrahedron, etc.)
 // We then point to it from our polyhedra to identify that they are that shape,
 // and to be able to find vertices, etc.
@@ -48,27 +71,6 @@ struct polyhedron {
   int num_neighbors;
 };
 
-// Global Constants
-
-// prints out a lot of extra information and performs extra computation
-// should be false except when something is wrong
-// NOTE: This can slow things down VERY much, depending on how much debug
-// code is active
-const bool debug = false;
-
-// Prints time information. Useful for testing optimizations,
-// or seeing how much adding complexity affects runtime.
-const bool totime = true;
-
-// Def: iff two polyhedra, a and b, are closer than a.R + b.R + neighborR,
-// then they are neighbors.
-
-// We only need to check overlaps with neighbors, but we need to update
-// neighbor tables as soon as a polyhedron moves more than a distance of
-// neighborR/2.0.
-const double neighborR = 0.5;
-
-
 // Global "Constants" -- set at runtime then unchanged
 long unsigned int seed = 0; // for random number generator
 int iterations;
@@ -78,6 +80,7 @@ bool walls[3] = {false, false, false};
 bool real_walls = true; // true means shapes can't overlap wall at all,
                         // false means just centers can't overlap wall
 bool save_vertices = false;
+int vertex_save_per_iters;
 double len[3] = {20, 20, 20};
 double dw_density = 0.1;
 double R = 1.0;
@@ -156,7 +159,7 @@ inline vector3d fix_periodic(vector3d newv);
 static void took(const char *name);
 
 // Saves the vertices of all polyhedra to a file.
-void save_config(const polyhedron *p, const char *fname, const char *header);
+void save_locations(const polyhedron *p, const char *fname);
 
 
 
@@ -184,7 +187,7 @@ int main(int argc, const char *argv[]) {
     printf("\nUse: %s N iterations directory filename\n", argv[0]);
     printf("Additional optional parameters:\n\t\tperiodx, periody, periodz, wallx, wally, wallz,\n");
     printf("\t\tdimensions {LENX LENY LENZ}, dw_density {VAL}, seed {VAL}, shape {POLY},\n");
-    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls, save_vertices\n");
+    printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls, save_vertices {ITERS}\n");
     printf("Anything in brackets means to put values there.\n");
     printf("Available shapes currently include: cube and tetrahedron.\n");
     return 11;
@@ -248,7 +251,9 @@ int main(int argc, const char *argv[]) {
       printf("Using fake walls. Intersections will only be determined based on centers of polyhedra.\n");
     } else if (strcmp(argv[i], "save_vertices") == 0) {
       save_vertices = true;
-      printf("Will save the coordinates of the vertices of all shapes every time data is saved.\n");
+      vertex_save_per_iters = atoi(argv[i+1]);
+      printf("Will save the coordinates of the vertices of all shapes every %i iterations.\n", vertex_save_per_iters);
+      i += 1;
     } else if (strcmp(argv[i], "shape") == 0) {
       if (strcmp(argv[i+1], "cube") == 0) {
         shape = &cube;
@@ -271,7 +276,7 @@ int main(int argc, const char *argv[]) {
   else printf("Debug mode disabled.\n");
   printf("----------------------------------------------------------------------\n\n");
   const int density_bins = len[2]/dw_density;
-  long *density_histogram = new long[density_bins]();
+  long *density_histogram = new long[3*density_bins]();
   polyhedron *polyhedra = new polyhedron[N];
   vector3d *neighborsphere_centers = new vector3d[N];
   long totalmoves = 0, workingmoves = 0;
@@ -304,7 +309,7 @@ int main(int argc, const char *argv[]) {
   const double xspace = len[0]/double(nx);
   const double yspace = len[1]/double(ny);
   const double zspace = len[2]/double(nz);
-  if(debug) printf("n polyhedra: (%i, %i, %i), with space: (%g, %g, %g)\n",
+  printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g).\n",
                    nx, ny, nz, xspace, yspace, zspace);
   if (shape == &cube) {
     int x = 0, y = 0, z = 0;
@@ -367,13 +372,16 @@ int main(int argc, const char *argv[]) {
   }
   print_all(polyhedra);
   print_bad(polyhedra);
-  took("Initial placement");
   printf("\n\n");
   // Make sure none are overlapping:
   for(int i=0; i<N; i++) {
     if (!in_cell(polyhedra[i])) {
       printf("Oops, this is embarassing. I seem to have placed some things outside our cell.\n");
       printf("You might want to look into that.\n");
+      char *vertices_fname = new char[1024];
+      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+      save_locations(polyhedra, vertices_fname);
+      delete[] vertices_fname;
       return 17;
     }
     for(int j=i+1; j<N; j++) {
@@ -382,7 +390,7 @@ int main(int argc, const char *argv[]) {
         printf("AHHHHHH I DON'T KNOW WHAT TO DO!@!!!!1111\n");
         char *vertices_fname = new char[1024];
         sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
-        save_config(polyhedra, vertices_fname, "");
+        save_locations(polyhedra, vertices_fname);
         delete[] vertices_fname;
         return 19;
       }
@@ -399,6 +407,13 @@ int main(int argc, const char *argv[]) {
   long oldworkingmoves = 0, oldtotalmoves = 0;
   long neighbor_updates = 0, neighbor_informs = 0;
   double avg_neighbors = 0;
+  int most_neighbors = 0;
+
+
+
+
+
+
   // BEGIN MAIN PROGRAM LOOP ////////////////////////////////////////////////////////
   int frame = 0;
   for(long iteration=1; iteration<=iterations; iteration++) {
@@ -415,13 +430,15 @@ int main(int argc, const char *argv[]) {
         const long checks_without_tables = totalmoves*N;
         if (initial_phase) {
           int total_neighbors = 0;
-          for(int i=0; i<N; i++)
+          for(int i=0; i<N; i++) {
             total_neighbors += polyhedra[i].num_neighbors;
+            most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
+          }
           avg_neighbors = double(total_neighbors)/N;
         }
         const long checks_with_tables = totalmoves*avg_neighbors + N*neighbor_updates;
-        printf("We've done about %.3g%% the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
-        printf("Note: This percentage does not scale monotonically with runtime.\nNumber of informs must also be accounted for.\n");
+        printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
+        printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n", max_neighbors, most_neighbors);
         printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n", neighborR, avg_neighbors);
         delete[] iter;
         fflush(stdout);
@@ -460,6 +477,10 @@ int main(int argc, const char *argv[]) {
             temp.neighbors = new int[max_neighbors];
             update_neighbors(temp, polyhedra, i, neighborsphere_centers);
             neighbor_updates ++;
+            // However, for this check (and this check only), we don't need to
+            // look at all of our neighbors, only our new ones.
+            //int *new_neighbors = new int[max_neighbors];
+            
             overlaps = overlaps_with_any(temp, polyhedra);
             bool test2 = overlaps;
             if (test1 != test2) {
@@ -500,7 +521,7 @@ int main(int argc, const char *argv[]) {
             print_all(polyhedra);
             char *vertices_fname = new char[1024];
             sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
-            save_config(polyhedra, vertices_fname, "");
+            save_locations(polyhedra, vertices_fname);
             delete[] vertices_fname;
             return 154;
           }
@@ -545,7 +566,7 @@ int main(int argc, const char *argv[]) {
         if (count1 >= count2) {
           if (iteration % 1000 == 0) {
             printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, (double)workingmoves/totalmoves);
-            printf("scale: %g, acc: %g\n", scale, acceptance_rate);
+            printf("scale: %g, acc: %g\n\n", scale, acceptance_rate);
           }
         } else {
           initial_phase = false;
@@ -561,8 +582,10 @@ int main(int argc, const char *argv[]) {
       // ADDING DATA TO HISTOGRAM(S) ----------------------------------------
       for(int i=0; i<N; i++) {
         // Density histogram:
-        const int z_i = floor(polyhedra[i].pos[2]/dw_density);
-        density_histogram[z_i] ++;
+        for(int j=0; j<3; j++) {
+          const int e_i = floor(polyhedra[i].pos[j]/dw_density);
+          density_histogram[j*density_bins + e_i] ++;
+        }
       }
       // SAVING TO FILE -----------------------------------------------------
       const clock_t now = clock();
@@ -592,31 +615,35 @@ workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
                 walls[0], walls[1], walls[2], dw_density, seed, R,
                 scale, theta_scale, real_walls, count,
                 iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
-
-        // save shape locations
-        if (save_vertices) {
-          char *vertices_fname = new char[1024];
-          sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
-          save_config(polyhedra, vertices_fname, headerinfo);
-          delete[] vertices_fname;
-          frame ++;
+        // saving 3 densities, one in each dimension
+        for(int i=0; i<3; i++) {
+          const char dim = i==0 ? 'x' : i==1 ? 'y' : 'z';
+          char *density_filename = new char[1024];
+          sprintf(density_filename, "%s/%s-%cdensity-%s-%i.dat", dir, filename, dim, shape->name, N);
+          FILE *densityout = fopen((const char *)density_filename, "w");
+          delete[] density_filename;
+          fprintf(densityout, "%s", headerinfo);
+          fprintf(densityout, "\n# %c     density   histogram\n", dim);
+          for(int e_i = 0; e_i < density_bins; e_i ++) {
+            const double e = (e_i + 0.5)*dw_density;
+            const double shell_volume = len[(i+1)%3]*len[(i+2)%3]*dw_density;
+            const double density = (double)density_histogram[i*density_bins + e_i]*N/count/shell_volume;
+            fprintf(densityout, "%6.3f   %07.5f   %li\n", e, density,
+                    density_histogram[i*density_bins + e_i]);
+          }
+          fclose(densityout);
         }
-        // saving density
-        char *density_filename = new char[1024];
-        sprintf(density_filename, "%s/%s-density-%s-%i.dat", dir, filename, shape->name, N);
-        FILE *densityout = fopen((const char *)density_filename, "w");
-        delete[] density_filename;
-        fprintf(densityout, "%s", headerinfo);
-        fprintf(densityout, "\n# z     density   histogram\n");
-        for(int z_i = 0; z_i < density_bins; z_i ++) {
-          const double z = (z_i + 0.5)*dw_density;
-          const double shell_volume = len[0]*len[1]*dw_density;
-          const double density = (double)density_histogram[z_i]*N/count/shell_volume;
-          fprintf(densityout, "%6.3f   %07.5f   %li\n", z, density, density_histogram[z_i]);
-        }
-        fclose(densityout);
 
         delete[] headerinfo;
+      }
+      // save shape locations if we're doing that
+      if (save_vertices && iteration % vertex_save_per_iters == 0) {
+        printf("Saving vertex locations! Frame: %i. Iteration: %li.\n", frame, iteration);
+        char *vertices_fname = new char[1024];
+        sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
+        save_locations(polyhedra, vertices_fname);
+        delete[] vertices_fname;
+        frame ++;
       }
     }
   }
@@ -1113,7 +1140,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void save_config(const polyhedron *p, const char *fname, const char *header) {
+void save_locations(const polyhedron *p, const char *fname) {
   FILE *out = fopen((const char *)fname, "w");
   for(int i=0; i<N; i++) {
     for(int j=0; j<p[i].mypoly->nvertices; j++) {

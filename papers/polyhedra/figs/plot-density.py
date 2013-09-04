@@ -13,21 +13,29 @@ poly = sys.argv[2]
 N = int(sys.argv[3])
 
 
-def read_mc(ff, poly, N):
-  fname = "figs/mc/polyhedraMC-walls-%4.2f-density-%s-%i.dat" %(ff, poly, N)
+def read_mc(ff, poly, N, dim):
+  fname = "figs/mc/polyhedraMC-walls-%4.2f-%cdensity-%s-%i.dat" %(ff, dim, poly, N)
+  print "using", fname
   if (not os.path.isfile(fname)):
     print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
     exit(1)
   data = loadtxt(fname)
   return data[:,0], data[:,1]
 
-z, density = read_mc(ff, poly, N)
-dz = z[2] - z[1]
-length = len(z)*dz
-zmid = length/2
-print sum(density)/len(density)*length**3
-plot(z[z<zmid], density[z<zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
-plot(length-z[z>zmid], density[z>zmid], label="%s, $\\eta = %04.2f$,  $N = %i$" %(poly, ff, N))
+dims = ['x', 'y', 'z']
+#dims = ['z']
+colors = ['r', 'b', 'k']
+for dim, color in zip(dims, colors):
+  coord, density = read_mc(ff, poly, N, dim)
+  dw = coord[2] - coord[1]
+  length = len(coord)*dw
+  mid = length/2
+  print "Integral: ", sum(density)/len(density)*length**3
+  #plot(coord, density)
+  plot(coord[coord<mid], density[coord<mid], label="$%c$" %dim, color=color, linestyle='-')
+  plot(length-coord[coord>mid], density[coord>mid], color=color, linestyle='--')
+
+
 if poly == 'cube':
   axvline(x = 0.5, linestyle=':')
   axvline(x = sqrt(2)/2, linestyle=':')
@@ -35,6 +43,6 @@ if poly == 'cube':
 legend(loc='best')
 
 #xlim(0, 4)
-title("density")
+title("density, %s, $\\eta = %04.2f$, $N = %i$." %(poly, ff, N))
 savefig("figs/density-%4.2f-%s.pdf" %(ff, poly))
 show()
