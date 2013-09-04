@@ -95,17 +95,18 @@ hard spheres with weak dispersion interactions and hydrogen-bonding
 association sites, which has been used to accurately model the
 equations of state of both pure fluids and mixtures over a wide range
 of temperatures and pressures~\cite{muller2001molecular,
-  tan2008recent}.  The association term in SAFT uses Wertheim's
-first-order thermodynamic perturbation theory to describe an
-associating fluid as hard-spheres with strong associative interactions
-at specific sites on the surface of each sphere~\cite{wertheim1984fluidsI,
-  wertheim1984fluidsII, wertheim1986fluidsIII, wertheim1986fluidsIV}.
-These association sites have an attractive interaction at contact, and
-rely on the hard-sphere pair distribution function at contact
-$g_\sigma^\text{HS}$ in order to determine the extent of association.
-While this function is known for the homogeneous hard-sphere
-fluid, it must be approximated for inhomogeneous systems, such as occur
-at liquid interfaces.
+  tan2008recent}. The association contribution to the free energy uses
+Wertheim's first-order thermodynamic perturbation theory to describe
+an associating fluid as hard-spheres with strong associative
+interactions at specific sites on the surface of each
+sphere~\cite{wertheim1984fluidsI, wertheim1984fluidsII,
+  wertheim1986fluidsIII, wertheim1986fluidsIV}.  These association
+sites have an attractive interaction at contact, and rely on the
+hard-sphere pair distribution function at contact $g_\sigma^\text{HS}$
+in order to determine the extent of association.  While this function
+is known for the homogeneous hard-sphere fluid, it must be
+approximated for inhomogeneous systems, such as occur at liquid
+interfaces.
 
 In a recent paper, we examined the pair distribution function at
 contact in various inhomogeneous
@@ -264,8 +265,8 @@ interaction.  With the improved association term, we find these agree
 when $\lscale$ is 0.454, which is an increase from the value of 0.353
 found by \hughesetal.  In order to explore further the change made by
 the improved association term, we compared the new functional with
-that of \hughesetal\ for the two hydrophobic cases of hard rods and
-the hard spherical solutes.
+that of \hughesetal\ for the two hydrophobic cases of the hard rod and
+the hard spherical solute.
 
 \begin{figure}
 \begin{center}
@@ -317,19 +318,18 @@ quantity as
 \begin{align}
   N_{\text{broken HB}} &= 2 \int (X(\rr) - X_{\text{bulk}})n_{\text{site}}(\rr) d\rr
 \end{align}
-where $X_{\text{bulk}} = 0.1?$ \fixme{get this number} is the fraction
-of unbonded association sites in the bulk.  The factor of 2 is chosen
-to account for the four association sites per molecule, and the fact
-that each broken hydrogen bond must be represented twice---once for
-each of the molecules involved.  In
-Fig.~\ref{fig:single-rod-broken-HB} we show the number of hydrogen
-bonds broken by a hard rod per nanometer length, as predicted by the
-functional of \hughesetal\ (dashed line) and this work (solid line),
-as a function of the radius of the hard rod.  In each case in the
-limit of large rods, the number of broken bonds is proportional to the
-surface area.  At every radius, the functional of
-\hughesetal\ predicts approximately four times as many broken hydrogen
-bonds as the improved functional.
+where $X_{\text{bulk}} = 0.13$ is the fraction of unbonded
+association sites in the bulk.  The factor of 2 is chosen to account
+for the four association sites per molecule, and the fact that each
+broken hydrogen bond must be represented twice---once for each of the
+molecules involved.  In Fig.~\ref{fig:single-rod-broken-HB} we show
+the number of hydrogen bonds broken by a hard rod per nanometer
+length, as predicted by the functional of \hughesetal\ (dashed line)
+and this work (solid line), as a function of the radius of the hard
+rod.  In each case in the limit of large rods, the number of broken
+bonds is proportional to the surface area.  At every radius, the
+functional of \hughesetal\ predicts approximately four times as many
+broken hydrogen bonds as the improved functional.
 
 A common test case for studying hydrophobic solutes in water is the
 hard-sphere solute.  Figure~\ref{fig:spheres-broken-HB} shows results
