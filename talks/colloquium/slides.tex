@@ -19,6 +19,14 @@
 \author{David Roundy}
 \date{2013}
 
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
 \begin{document}
 
 {
@@ -52,14 +60,9 @@
 
 \input{contact}
 
-\section{Monte Carlo}
+\input{pair-distribution}
 
-\begin{frame}
-  \frametitle{Finding the pair distribution function}
-  \begin{figure}[h]
-    \centering
-    \animategraphics[width=100mm,autoplay,final]{.6}{anim/mc-pair-}{000}{30}
-  \end{figure}
-\end{frame}
+\input{water}
+
 
 \end{document}
