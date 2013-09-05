@@ -338,7 +338,7 @@ int main(int argc, const char *argv[]) {
   // A better version, that is shape-dependent, will be required for higher
   // filling fractions.
 
-  // NOTE: All initialization assumes that we do not have a mixture,
+  // NOTE: All setup assumes that we do not have a mixture,
   // but only one polyhedron.
 
   // Approximate the maximum number of neighbors a polyhedron could have
@@ -452,8 +452,9 @@ int main(int argc, const char *argv[]) {
   // ---------------------------------------------------------------------------
   // Initialization of cell
   // ---------------------------------------------------------------------------
-  // Exits once initialization condition is met, but will never run for more than
-  // one tenth the total number of iterations
+  printf("// ---------------------------------------------------------------\n");
+  printf("Beginning the initialization.\n");
+  printf("// ---------------------------------------------------------------\n");
   long iteration = 1;
   long oldtotalmoves = 0, oldworkingmoves = 0;
   bool initialization = true;
@@ -538,6 +539,9 @@ int main(int argc, const char *argv[]) {
     }
     iteration ++;
   }
+  printf("// ---------------------------------------------------------------\n");
+  printf("Initialization complete!\n");
+  printf("// ---------------------------------------------------------------\n");
 
   // ---------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -1192,6 +1196,7 @@ static void took(const char *name) {
 void save_locations(const polyhedron *p, const char *fname) {
   FILE *out = fopen((const char *)fname, "w");
   for(int i=0; i<N; i++) {
+    fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[0], p[i].pos[1], p[i].pos[2]);
     for(int j=0; j<p[i].mypoly->nvertices; j++) {
       const vector3d vertex =
         rotate_vector(p[i].mypoly->vertices[j]*p[i].R, p[i].rot) + p[i].pos;

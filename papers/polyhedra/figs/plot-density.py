@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from __future__ import division
 import matplotlib, sys, os
+import common
 
 if len(sys.argv) < 4:
   print("Use: %s ff shape N")
@@ -13,27 +14,18 @@ poly = sys.argv[2]
 N = int(sys.argv[3])
 
 
-def read_mc(ff, poly, N, dim):
-  fname = "figs/mc/polyhedraMC-walls-%4.2f-%cdensity-%s-%i.dat" %(ff, dim, poly, N)
-  print "using", fname
-  if (not os.path.isfile(fname)):
-    print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
-    exit(1)
-  data = loadtxt(fname)
-  return data[:,0], data[:,1]
-
+e, densities = common.read_mc_density(ff, poly, N, 'walls')
+length = common.read_mc_dimensions(ff, poly, N, 'walls')
+print length
 dims = ['x', 'y', 'z']
-#dims = ['z']
 colors = ['r', 'b', 'k']
-for dim, color in zip(dims, colors):
-  coord, density = read_mc(ff, poly, N, dim)
-  dw = coord[2] - coord[1]
-  length = len(coord)*dw
-  mid = length/2
-  print "Integral: ", sum(density)/len(density)*length**3
-  #plot(coord, density)
-  plot(coord[coord<mid], density[coord<mid], label="$%c$" %dim, color=color, linestyle='-')
-  plot(length-coord[coord>mid], density[coord>mid], color=color, linestyle='--')
+for i in xrange(3):
+  coord = e[i]
+  density = densities[i]
+  mid = length[i]/2
+  print("Integral %c: %g" %(dims[i], sum(density)/len(density)*length[0]*length[1]*length[2]))
+  plot(coord[coord<mid], density[coord<mid], label="$%c$" %dims[i], color=colors[i], linestyle='-')
+  plot(length[i]-coord[coord>mid], density[coord>mid], color=colors[i], linestyle='--')
 
 
 if poly == 'cube':

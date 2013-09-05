@@ -6,7 +6,7 @@ import os
 iterations = 100000000
 R = sqrt(3)/2
 dim = 20
-dw_density = 0.01
+de_density = 0.01
 
 scale = .05
 theta_scale = .05
@@ -23,14 +23,14 @@ os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 def run_walls(ff, N, shape):
   memory = N/100 # fixme: better guess
   name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
-  scriptname = "%s/%s.tmp.sh" %(figsdir, name)
+  filename = 'walls-%4.2f' % ff
+  scriptname = "%s/%s-%i-%s.tmp.sh" %(figsdir, filename, N, shape)
   outname = "%s/%s.out" %(bindir, name)
   directory = '%s/mc' % figsdir
-  filename = 'walls-%4.2f' % ff
   command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s %s periodx periody wallz\
- R %g dimensions %g %g %g scale %g theta_scale %g shape %s dw_density %g" \
+ R %g dimensions %g %g %g scale %g theta_scale %g shape %s de_density %g" \
       %(bindir, N, iterations, directory, filename, R, dim, dim, dim, scale, theta_scale,
-        shape, dw_density)
+        shape, de_density)
   script = open(scriptname, 'w')
   script.write("#!/bin/bash\n")
   script.write("#SBATCH --mem-per-cpu=%i\n" % memory)
