@@ -1,4 +1,4 @@
-\documentclass[twocolumn,amsmath,amssymb,prl]{revtex4-1}
+\documentclass[twocolumn,amsmath,amssymb,jcp]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -37,8 +37,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\title{Improved Association in a Classical Density-Functional Theory
-  for Water}
+\title{Improved association in a classical density functional theory
+  for water}
 
 \author{Eric J. Krebs}
 \affiliation{Department of Physics, Oregon State University,
@@ -51,14 +51,27 @@
   Corvallis, OR 97331, USA}
 
 \begin{abstract}
-We present a modification to the classical density-functional theory
-(DFT) for water by Hughes \emph{et al.} which uses Statistical
-Associating Fluid Theory(SAFT-VR) for attractive interactions. We
-modify the association contribution to the free energy to use an
-improved radial distribution function $g_\sigma^{HS}$. We study the
-difference between the two functionals density profile, number
-of broken hydrogen bonds for hard rods in water, and the number of
-broked hydrogen bonds for a hard sphere in water.
+We present a modification to our recently published classical
+density functional theory for water.  Both the modified and original
+functionals reduces to the statistical associating fluid theory with
+variable attractive range (SAFT-VR) equation of state in the
+homogeneous limit.
+%
+We have recently developed and tested a functional for the averaged
+radial distribution function at contact of the hard-sphere fluid,
+which is dramatically more accurate at interfaces than earlier
+approximations.
+%
+We now incorporate this improved functional into the association term
+of our free energy functional for water, which improves the
+description of hydrogen bonding.
+%
+We examine the effect of this improvement by studying the cases of a
+hard hydrophobic rods in water.  Our results show that there is a
+moderate change in the density profile near a hard rot, and the number
+of broken hydrogen bonds is decreased by approximately a factor of
+four.  Examination of a hard sphere solute reveals a similarly large
+chage in the number of broken hydrogen bonds.
 \end{abstract}
 \maketitle
 
@@ -68,7 +81,7 @@ Water, the universal solvent, is of critical practical importance, and
 a continuum description of water is in high demand for a solvation
 model.  A number of recent attempts to develop improved solvation
 models for water have built on the approach of classical
-density-functional theory (DFT)~\cite{jeanmairet2013molecular,
+density functional theory (DFT)~\cite{jeanmairet2013molecular,
   zhao2011molecular, zhao2011new, ramirez2005direct,
   ramirez2005density, levesque2012solvation, levesque2012scalar}.
 Classical DFT is based on a description of a fluid written as a free
