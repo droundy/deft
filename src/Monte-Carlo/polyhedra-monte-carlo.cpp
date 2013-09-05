@@ -9,36 +9,43 @@
 #include "utilities.h"
 #include "handymath.h"
 
-// Global Constants
-
-// prints out a lot of extra information and performs extra computation
-// should be false except when something is wrong
-// NOTE: This can slow things down VERY much, depending on how much debug
-// code is active
-const bool debug = false;
-
-// Prints time information. Useful for testing optimizations,
-// or seeing how much adding complexity affects runtime.
-const bool totime = false;
-
-// Def: iff two polyhedra, a and b, are closer than a.R + b.R + neighborR,
+// -----------------------------------------------------------------------------
+// Notes on conventions and definitions used
+// -----------------------------------------------------------------------------
+//
+// All coordinates are (presently) cartesion.
+//
+// The coordinates x, y, z are always floating point numbers that refer to real
+// locations within the cell.
+//
+// The coordinates x_i, y_i, z_i are always integers that refer to the bin number
+// of the respective coordinate such that x_i refers to a bin of thickness dx
+// centered at x.
+//
+// The symbols e, e_i, and de are used as general coordinates.
+//
+// Def: Iff two objects, a and b, are closer than a.R + b.R + neighborR + dn,
 // then they are neighbors.
+//
+// Neighbors are used to drastically reduce the number of collision tests needed.
+//
+// Def: The neighborsphere of an object, a, is the sphere within which
+// everything is a neighbor of a.
+// Note that this sphere has a well defined center, but it does not have
+// a well defined radius unless all obects are circumscribed by spheres of
+// the same radius, but this does not affect anything.
 
-// We only need to check overlaps with neighbors, but we need to update
-// neighbor tables as soon as a polyhedron moves more than a distance of
-// neighborR/2.0.
-const double neighborR = 0.5;
-
-
-
+// -----------------------------------------------------------------------------
+// Structs defined
+// -----------------------------------------------------------------------------
 
 // We make one poly_shape for each shape we care about (cube, tetrahedron, etc.)
 // We then point to it from our polyhedra to identify that they are that shape,
 // and to be able to find vertices, etc.
 
 // Note: faces is a list of normal vectors perpendicular to the actual faces.
-// The sign of this vector is unimportant, so any two parallel faces are only
-// counted as one face.
+// The sign of this vector is unimportant for the collision detection algorithm
+// used, so any two parallel faces are only counted as one face.
 struct poly_shape {
   int nvertices;
   int nfaces;
@@ -62,6 +69,8 @@ struct poly_shape {
   }
 };
 
+// This contains all of the information about a given polyhedron.
+// We create and use an array of these.
 struct polyhedron {
   vector3d pos;
   quaternion rot;
@@ -69,9 +78,31 @@ struct polyhedron {
   poly_shape *mypoly;
   int *neighbors;
   int num_neighbors;
+  vector3d neighbor_center;
 };
 
+// -----------------------------------------------------------------------------
+// Global Constants
+// -----------------------------------------------------------------------------
+
+// prints out a lot of extra information and performs extra computation
+// should be false except when something is wrong
+// NOTE: This can slow things down VERY much, depending on how much debug
+// code is active
+const bool debug = false;
+
+// Prints time information. Useful for testing optimizations,
+// or seeing how much adding complexity affects runtime.
+const bool totime = false;
+
+// We only need to check overlaps with neighbors, but we need to update
+// neighbor tables as soon as a polyhedron moves more than a distance of
+// neighborR/2.0.
+const double neighborR = 0.5;
+
+// -----------------------------------------------------------------------------
 // Global "Constants" -- set at runtime then unchanged
+// -----------------------------------------------------------------------------
 long unsigned int seed = 0; // for random number generator
 int iterations;
 int N;
@@ -82,44 +113,50 @@ bool real_walls = true; // true means shapes can't overlap wall at all,
 bool save_vertices = false;
 int vertex_save_per_iters;
 double len[3] = {20, 20, 20};
-double dw_density = 0.1;
+double de_density = 0.1;
 double R = 1.0;
 double scale = 0.005;
 double theta_scale = 0.005;
 
-// the most neighbors that any polyhedron could have
-// not an exact number, but an over approximation based on volumes
-// used for length of neighbors arrays
+// The most neighbors that any polyhedron could have.
+// Not an exact value, but an over approximation based on volumes.
+// Used for length of neighbors arrays
 int max_neighbors;
 
-// for debugging purposes
-bool testcase = false;
-
-// All the shapes to use:
+// All of the shapes to use:
 poly_shape cube(8, 3, "cube");
 poly_shape tetrahedron(4, 4, "tetrahedron");
 poly_shape truncated_tetrahedron(18, 4, "truncated tetrahedron");
 
-// Functions:
+// -----------------------------------------------------------------------------
+// Global variables -- try to avoid making any more of these
+// -----------------------------------------------------------------------------
+long neighbor_updates = 0, neighbor_informs = 0;
+long totalmoves = 0, workingmoves = 0;
+
+
+// for debugging purposes
+bool testcase = false;
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
 
 // Sets up the vertices, faces, etc. for each polyhedron. Only run once.
 void define_shapes();
 
-// Finds the neighbors of a. Any new neighbors of a will have a added
-// to their neighbor table, and any old neighbors of a that are no longer
-// neighbors will have a removed from their neighbor table.
-// n is a's location in the polyhedron array.
-// DEPRECATED AND BUGGY DON'T USE
-//inline void update_neighbor_table(polyhedron &a, polyhedron *bs, int n, const vector3d *);
-
 // Find's the neighbors of a by comparing a's position to the center of
 // everyone else's neighborsphere, where n is the index of a in bs.
-inline void update_neighbors(polyhedron &a, const polyhedron *bs, int n, const vector3d *neighborsphere_centers);
+inline void update_neighbors(polyhedron &a, const polyhedron *bs, int n);
 
 // Removes n from the neighbor table of anyone neighboring oldp but not newp.
 // Adds n to the neighbor table of anyone neighboring newp but not oldp.
 // Keeps the neighbor tables sorted.
 inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int n, polyhedron *p);
+
+// Attempts to move each polyhedron once. Updates the global variables
+// totalmoves and workingmoves.
+inline void move_all(polyhedron *p);
 
 // Check whether two polyhedra overlap
 inline bool overlap(const polyhedron &a, const polyhedron &b);
@@ -169,6 +206,10 @@ void save_locations(const polyhedron *p, const char *fname);
 // As well as if any overlap or are outside the cell.
 inline void print_all(const polyhedron *p);
 
+// Same as print_all, but only prints information for one polyhedron,
+// and does not do overlap tests.
+inline void print_one(const polyhedron &p, int id);
+
 // Only print those shapes that overlap or are outside the cell
 // Also prints those they overlap with
 inline void print_bad(const polyhedron *p);
@@ -179,14 +220,19 @@ inline void check_neighbor_symmetry(const polyhedron *p);
 
 
 int main(int argc, const char *argv[]) {
+  // Setup all the basic types of polyhedra
   define_shapes();
+  // create a generic poly_shape that each polyhedron will point to
+  // (assuming we don't have a mixture)
   poly_shape *shape = &cube;
-  // input parameters
+  // ---------------------------------------------------------------------------
+  // Set values from parameters
+  // ---------------------------------------------------------------------------
   const int minparams = 5;
   if (argc < minparams) {
     printf("\nUse: %s N iterations directory filename\n", argv[0]);
     printf("Additional optional parameters:\n\t\tperiodx, periody, periodz, wallx, wally, wallz,\n");
-    printf("\t\tdimensions {LENX LENY LENZ}, dw_density {VAL}, seed {VAL}, shape {POLY},\n");
+    printf("\t\tdimensions {LENX LENY LENZ}, de_density {VAL}, seed {VAL}, shape {POLY},\n");
     printf("\t\tR {VAL}, scale {VAL}, theta_scale {VAL}, fake_walls, save_vertices {ITERS}\n");
     printf("Anything in brackets means to put values there.\n");
     printf("Available shapes currently include: cube and tetrahedron.\n");
@@ -226,9 +272,9 @@ int main(int argc, const char *argv[]) {
     } else if (strcmp(argv[i], "wallz") == 0) {
       printf("Turning on walls in the z dimension.\n");
       walls[2] = true;
-    } else if (strcmp(argv[i], "dw_density") == 0) {
-      dw_density = atof(argv[i+1]);
-      printf("Setting density resolution to %g.\n", dw_density);
+    } else if (strcmp(argv[i], "de_density") == 0) {
+      de_density = atof(argv[i+1]);
+      printf("Setting density resolution to %g.\n", de_density);
       i += 1;
     } else if (strcmp(argv[i], "R") == 0) {
       R = atof(argv[i+1]);
@@ -271,15 +317,16 @@ int main(int argc, const char *argv[]) {
       return 15;
     }
   }
+  printf("Neighbor radius is %g.\n", neighborR);
   if (totime) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
   else printf("Debug mode disabled.\n");
   printf("----------------------------------------------------------------------\n\n");
-  const int density_bins = len[2]/dw_density;
+
+  // Create arrays
+  const int density_bins = round((len[0] + len[1] + len[2])/de_density);
   long *density_histogram = new long[3*density_bins]();
   polyhedron *polyhedra = new polyhedron[N];
-  vector3d *neighborsphere_centers = new vector3d[N];
-  long totalmoves = 0, workingmoves = 0;
 
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +365,7 @@ int main(int argc, const char *argv[]) {
       polyhedra[i].pos[1] = (y + 0.5)*yspace;
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
 
-      neighborsphere_centers[i] = polyhedra[i].pos;
+      polyhedra[i].neighbor_center = polyhedra[i].pos;
 
       x ++;
       if (x >= nx) {
@@ -339,7 +386,7 @@ int main(int argc, const char *argv[]) {
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
       polyhedra[i].rot = quaternion(cos(phi/2.0), sin(phi/2.0)*axis);
 
-      neighborsphere_centers[i] = polyhedra[i].pos;
+      polyhedra[i].neighbor_center = polyhedra[i].pos;
 
       x ++;
       alt = !alt;
@@ -370,6 +417,7 @@ int main(int argc, const char *argv[]) {
     if (debug)
       printf("Polyhedron %i has %i neighbors.\n", i, polyhedra[i].num_neighbors);
   }
+
   print_all(polyhedra);
   print_bad(polyhedra);
   printf("\n\n");
@@ -396,30 +444,35 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
-
-
   fflush(stdout);
-  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
-  clock_t last_output = clock(); // when we last output data
-  bool initial_phase = true;
-  long start_keeping = 0;
-  long oldworkingmoves = 0, oldtotalmoves = 0;
-  long neighbor_updates = 0, neighbor_informs = 0;
+
   double avg_neighbors = 0;
   int most_neighbors = 0;
 
-
-
-
-
-
-  // BEGIN MAIN PROGRAM LOOP ////////////////////////////////////////////////////////
-  int frame = 0;
-  for(long iteration=1; iteration<=iterations; iteration++) {
+  // ---------------------------------------------------------------------------
+  // Initialization of cell
+  // ---------------------------------------------------------------------------
+  // Exits once initialization condition is met, but will never run for more than
+  // one tenth the total number of iterations
+  long iteration = 1;
+  long oldtotalmoves = 0, oldworkingmoves = 0;
+  bool initialization = true;
+  while (initialization) {
     if (debug) {
       print_bad(polyhedra);
     }
+    // ---------------------------------------------------------------
+    // Move each polyhedron once
+    // ---------------------------------------------------------------
+    move_all(polyhedra);
+
+    if (debug && testcase) {
+      printf("totalmoves = %li.\n", totalmoves);
+      return 22;
+    }
+    // ---------------------------------------------------------------
+    // Print timing information if desired
+    // ---------------------------------------------------------------
     if (totime) {
       const int numtotime = 1000;
       if (iteration % numtotime == 0) {
@@ -428,14 +481,12 @@ int main(int argc, const char *argv[]) {
         took(iter);
         printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n", 1000.0*neighbor_updates/totalmoves, 1000.0*neighbor_informs/totalmoves, (double)neighbor_informs/neighbor_updates);
         const long checks_without_tables = totalmoves*N;
-        if (initial_phase) {
-          int total_neighbors = 0;
-          for(int i=0; i<N; i++) {
-            total_neighbors += polyhedra[i].num_neighbors;
-            most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
-          }
-          avg_neighbors = double(total_neighbors)/N;
+        int total_neighbors = 0;
+        for(int i=0; i<N; i++) {
+          total_neighbors += polyhedra[i].num_neighbors;
+          most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
         }
+        avg_neighbors = double(total_neighbors)/N;
         const long checks_with_tables = totalmoves*avg_neighbors + N*neighbor_updates;
         printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
         printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n", max_neighbors, most_neighbors);
@@ -444,221 +495,160 @@ int main(int argc, const char *argv[]) {
         fflush(stdout);
       }
     }
-
-    // MOVING SHAPES ------------------------------------------------------
-    for(int i=0; i<N; i++) {
-      totalmoves++;
-      if (debug) {
-        if (totalmoves == -1) {
-          testcase = true;
-          printf("move: %li\n", totalmoves);
-        }
-        else testcase = false;
+    // ---------------------------------------------------------------
+    // fine-tune scale so that the acceptance rate will be reasonable
+    // ---------------------------------------------------------------
+    if (iteration % 100 == 0) {
+      const double acceptance_rate =
+        (double)(workingmoves-oldworkingmoves)/(totalmoves-oldtotalmoves);
+      oldworkingmoves = workingmoves;
+      oldtotalmoves = totalmoves;
+      if (acceptance_rate < 0.5) {
+        scale /= 1.01;
+        theta_scale /= 1.01;
+      } else if (acceptance_rate > 0.7) {
+        scale *= 1.01;
+        theta_scale *= 1.01;
       }
-      polyhedron temp;
-      temp.pos = move(polyhedra[i].pos, scale);
-      temp.rot = rotate(polyhedra[i].rot, theta_scale);
-      temp.R = polyhedra[i].R;
-      temp.mypoly = polyhedra[i].mypoly;
-      temp.neighbors = polyhedra[i].neighbors;
-      temp.num_neighbors = polyhedra[i].num_neighbors;
-      if (in_cell(temp)) {
-        bool overlaps = overlaps_with_any(temp, polyhedra);
-        bool test1 = overlaps;
-        if (!overlaps) {
-          const bool get_new_neighbors =
-            (periodic_diff(temp.pos, neighborsphere_centers[i]).normsquared() >
-             sqr(neighborR/2.0));
-          if (get_new_neighbors) {
-            // If we've moved too far, then the overlap test may have given a false
-            // negative. So we'll find our new neighbors, and check against them.
-            // If we still don't overlap, then we'll have to update the tables
-            // of our neighbors that have changed.
-            temp.neighbors = new int[max_neighbors];
-            update_neighbors(temp, polyhedra, i, neighborsphere_centers);
-            neighbor_updates ++;
-            // However, for this check (and this check only), we don't need to
-            // look at all of our neighbors, only our new ones.
-            //int *new_neighbors = new int[max_neighbors];
-            
-            overlaps = overlaps_with_any(temp, polyhedra);
-            bool test2 = overlaps;
-            if (test1 != test2) {
-              printf("OOGA BOOGA BBQ!!!\n\n\n\n\n");
-              //return 57;
-            }
-            if (!overlaps) {
-              // Okay, we've checked twice, just like Santa Clause, so we're definitely
-              // keeping this move and need to tell our neighbors where we are now.
-              neighborsphere_centers[i] = temp.pos;
-              if (debug && false) printf("moves: %li\n", totalmoves);
-              inform_neighbors(temp, polyhedra[i], i, polyhedra);
-              neighbor_informs ++;
-              delete[] polyhedra[i].neighbors;
-            } else {
-              // We don't have to move!
-              // We can throw away the new table and don't have to talk to the neighbors.
-              delete[] temp.neighbors;
-            }
-          }
-          if (!overlaps) {
-            polyhedra[i] = temp;
-            workingmoves ++;
-          }
-        }
-        // debug tests ////////////////////////////////////////
-        if (debug) {
-          bool test_overlap = false;
-          for(int j=0; j<N; j++) {
-            if (j != i && overlap(temp, polyhedra[j])) {
-              test_overlap = true;
-              break;
-            }
-          }
-          if (test_overlap != overlaps) {
-            printf("\n\nError error! We do not have agreement on whether or not they overlap!\ndebug says: %i but normal test says: %i for shape: %i.\nMove: %li.\n\n", test_overlap, overlaps, i, totalmoves);
-            polyhedra[i] = temp;
-            print_all(polyhedra);
-            char *vertices_fname = new char[1024];
-            sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
-            save_locations(polyhedra, vertices_fname);
-            delete[] vertices_fname;
-            return 154;
-          }
-        }
-        // done with debug tests //////////////////////////////
-      }
-      if (debug) {
-        check_neighbor_symmetry(polyhedra);
-        if (testcase) {
-          print_all(polyhedra);
-          return 111;
-        }
-      }
+      if (iteration % 1000 == 0)
+        printf("scale: %g, acc: %g\n\n", scale, acceptance_rate);
     }
-    // Done moving --------------------------------------------------------
-
-    // STOP and go to next iteration if we don't want to store data yet
-    // Since more start at lower z-values, once there are more at higher values
-    // We should be ready
-    if (initial_phase) {
-      // fine-tuning scale so that the acceptance rate will be reasonable
-      if (iteration%100 == 0) {
-        const double acceptance_rate =
-          (double)(workingmoves-oldworkingmoves)/(totalmoves-oldtotalmoves);
-        oldworkingmoves = workingmoves;
-        oldtotalmoves = totalmoves;
-        if (acceptance_rate < 0.5) {
-          scale /= 1.01;
-          theta_scale /= 1.01;
-        } else if (acceptance_rate > 0.7) {
-          scale *= 1.01;
-          theta_scale *= 1.01;
-        }
-
-        int count1 = 0, count2 = 0;
-        for(int i=0; i<N; i++) {
-          if (polyhedra[i].pos[2] < len[2]/2.0)
-            count1 ++;
-          else
-            count2 ++;
-        }
-        if (count1 >= count2) {
-          if (iteration % 1000 == 0) {
-            printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, (double)workingmoves/totalmoves);
-            printf("scale: %g, acc: %g\n\n", scale, acceptance_rate);
-          }
-        } else {
-          initial_phase = false;
-          start_keeping = iteration;
-          printf("\nTime to start data collection! c1: %i, c2: %i, iteration: %li\n", count1, count2, iteration);
-          took("Initial movements");
-          printf("\n");
-        }
-        fflush(stdout);
-      }
-    }
-    else {
-      // ADDING DATA TO HISTOGRAM(S) ----------------------------------------
+    // ---------------------------------------------------------------
+    // Figure out if we're done with initialization.
+    // Since more start at lower z-values, once there are more at
+    // higher values, we should be readyish.
+    // ---------------------------------------------------------------
+    if (iteration % 1000 == 0) {
+      int count1 = 0, count2 = 0;
       for(int i=0; i<N; i++) {
-        // Density histogram:
-        for(int j=0; j<3; j++) {
-          const int e_i = floor(polyhedra[i].pos[j]/dw_density);
-          density_histogram[j*density_bins + e_i] ++;
-        }
+        if (polyhedra[i].pos[2] < len[2]/2.0)
+          count1 ++;
+        else
+          count2 ++;
       }
-      // SAVING TO FILE -----------------------------------------------------
-      const clock_t now = clock();
-      if ((now > last_output + output_period) || iteration==iterations) {
-        last_output = now;
-        assert(last_output);
-        if (output_period < max_output_period/2)
-          output_period *= 2;
+      if (count1 >= count2) {
+          printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, (double)workingmoves/totalmoves);
+      } else {
+        printf("\nTime to start data collection! c1: %i, c2: %i, iteration: %li\n", count1, count2, iteration);
+        took("Initial movements");
+        printf("\n");
+        initialization = false;
+      }
+      fflush(stdout);
+    }
+    iteration ++;
+  }
+
+  // ---------------------------------------------------------------------------
+  // MAIN PROGRAM LOOP
+  // ---------------------------------------------------------------------------
+  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
+  clock_t last_output = clock(); // when we last output data
+
+  int frame = 0;
+  totalmoves = 0;
+  workingmoves = 0;
+  for(long iteration=1; iteration<=iterations; iteration++) {
+    // ---------------------------------------------------------------
+    // Move each polyhedron once
+    // ---------------------------------------------------------------
+    move_all(polyhedra);
+    // ---------------------------------------------------------------
+    // Add data to historams
+    // ---------------------------------------------------------------
+    for(int i=0; i<N; i++) {
+      // Density histogram:
+      const int x_i = floor(polyhedra[i].pos[0]/de_density);
+      const int y_i = floor(polyhedra[i].pos[1]/de_density);
+      const int z_i = floor(polyhedra[i].pos[2]/de_density);
+      density_histogram[x_i] ++;
+      density_histogram[int(round(len[0]/de_density)) + y_i] ++;
+      density_histogram[int(round((len[0] + len[1])/de_density)) + z_i] ++;
+    }
+    // ---------------------------------------------------------------
+    // Save to file
+    // ---------------------------------------------------------------
+    const clock_t now = clock();
+    if ((now > last_output + output_period) || iteration==iterations) {
+      last_output = now;
+      assert(last_output);
+      if (output_period < max_output_period/2)
+        output_period *= 2;
         else if (output_period < max_output_period)
           output_period = max_output_period;
-        const double secs_done = double(now)/CLOCKS_PER_SEC;
-        const int seconds = int(secs_done) % 60;
-        const int minutes = int(secs_done / 60) % 60;
-        const int hours = int(secs_done / 3600) % 24;
-        const int days = int(secs_done / 86400);
-        printf("Saving data after %i days, %02i:%02i:%02i, %li iterations complete.\n",
-               days, hours, minutes, seconds, iteration);
-        fflush(stdout);
+      const double secs_done = double(now)/CLOCKS_PER_SEC;
+      const int seconds = int(secs_done) % 60;
+      const int minutes = int(secs_done / 60) % 60;
+      const int hours = int(secs_done / 3600) % 24;
+      const int days = int(secs_done / 86400);
+      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations complete.\n",
+             days, hours, minutes, seconds, iteration);
+      fflush(stdout);
 
-        const long count = N*(iteration - start_keeping);
-        char *headerinfo = new char[4096];
-        sprintf(headerinfo, "# dim: (%5.2f, %5.2f, %5.2f), period: (%i, %i, %i), \
-walls: (%i, %i, %i), dw: %g, seed: %li\n# R: %f, scale: %g, theta_scale: %g, \
-real_walls: %i\n# num counts: %li, iteration: %li, \
-workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
-                len[0], len[1], len[2], periodic[0], periodic[1], periodic[2],
-                walls[0], walls[1], walls[2], dw_density, seed, R,
-                scale, theta_scale, real_walls, count,
-                iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
-        // saving 3 densities, one in each dimension
-        for(int i=0; i<3; i++) {
-          const char dim = i==0 ? 'x' : i==1 ? 'y' : 'z';
-          char *density_filename = new char[1024];
-          sprintf(density_filename, "%s/%s-%cdensity-%s-%i.dat", dir, filename, dim, shape->name, N);
-          FILE *densityout = fopen((const char *)density_filename, "w");
-          delete[] density_filename;
-          fprintf(densityout, "%s", headerinfo);
-          fprintf(densityout, "\n# %c     density   histogram\n", dim);
-          for(int e_i = 0; e_i < density_bins; e_i ++) {
-            const double e = (e_i + 0.5)*dw_density;
-            const double shell_volume = len[(i+1)%3]*len[(i+2)%3]*dw_density;
-            const double density = (double)density_histogram[i*density_bins + e_i]*N/count/shell_volume;
-            fprintf(densityout, "%6.3f   %07.5f   %li\n", e, density,
-                    density_histogram[i*density_bins + e_i]);
-          }
-          fclose(densityout);
-        }
+      char *headerinfo = new char[4096];
+      sprintf(headerinfo, "# dim: (%5.2f, %5.2f, %5.2f), period: (%i, %i, %i), \
+walls: (%i, %i, %i), de_density: %g, seed: %li\n# R: %f, scale: %g, theta_scale: %g, \
+real_walls: %i\n# iteration: %li, workingmoves: %li, totalmoves: %li, acceptance \
+rate: %g\n",
+              len[0], len[1], len[2], periodic[0], periodic[1], periodic[2],
+              walls[0], walls[1], walls[2], de_density, seed, R,
+              scale, theta_scale, real_walls, iteration, workingmoves,
+              totalmoves, double(workingmoves)/totalmoves);
 
-        delete[] headerinfo;
+      // Saving density in each of the x, y, z dimensions
+      char *density_filename = new char[1024];
+      sprintf(density_filename, "%s/%s-density-%s-%i.dat", dir, filename, shape->name, N);
+      FILE *densityout = fopen((const char *)density_filename, "w");
+      delete[] density_filename;
+      fprintf(densityout, "%s", headerinfo);
+      fprintf(densityout, "\n#e       xdensity   ydensity   zdensity   histograms in x,y,z order\n");
+      const int xbins = round(len[0]/de_density);
+      const int ybins = round(len[1]/de_density);
+      const int zbins = round(len[2]/de_density);
+      int maxbin = max(max(xbins, ybins), zbins);
+      for(int e_i = 0; e_i < maxbin; e_i ++) {
+        const double e = (e_i + 0.5)*de_density;
+        const double xshell_volume = len[1]*len[2]*de_density;
+        const double yshell_volume = len[0]*len[2]*de_density;
+        const double zshell_volume = len[0]*len[1]*de_density;
+        const long xhist = e_i>=xbins ? -long(nan) : density_histogram[e_i];
+        const long yhist = e_i>=ybins ? -long(nan) : density_histogram[xbins + e_i];
+        const long zhist = e_i>=zbins ? -long(nan) : density_histogram[xbins + ybins + e_i];
+        const double xdensity = (double)xhist*N/totalmoves/xshell_volume;
+        const double ydensity = (double)yhist*N/totalmoves/yshell_volume;
+        const double zdensity = (double)zhist*N/totalmoves/zshell_volume;
+        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n", e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
       }
-      // save shape locations if we're doing that
-      if (save_vertices && iteration % vertex_save_per_iters == 0) {
-        printf("Saving vertex locations! Frame: %i. Iteration: %li.\n", frame, iteration);
-        char *vertices_fname = new char[1024];
-        sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
-        save_locations(polyhedra, vertices_fname);
-        delete[] vertices_fname;
-        frame ++;
-      }
+      fclose(densityout);
+      delete[] headerinfo;
+    }
+    // ---------------------------------------------------------------
+    // Save locations of vertices if desired
+    // ---------------------------------------------------------------
+    if (save_vertices && iteration % vertex_save_per_iters == 0) {
+      printf("Saving vertex locations. Frame: %i. Iteration: %li.\n", frame, iteration);
+      char *vertices_fname = new char[1024];
+      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
+      save_locations(polyhedra, vertices_fname);
+      delete[] vertices_fname;
+      frame ++;
     }
   }
+  // ---------------------------------------------------------------------------
+  // END OF MAIN PROGRAM LOOP
+  // ---------------------------------------------------------------------------
   print_bad(polyhedra);
-  // END MAIN PROGRAM LOOP //////////////////////////////////////////////////////////
 
   for(int i=0; i<N; i++)
     delete[] polyhedra[i].neighbors;
   delete[] polyhedra;
-  delete[] neighborsphere_centers;
   delete[] density_histogram;
   return 0;
 }
-// END OF MAIN **********************************************************************
-
+// -----------------------------------------------------------------------------
+// END OF MAIN
+// -----------------------------------------------------------------------------
 
 
 
@@ -906,16 +896,32 @@ inline vector3d fix_periodic(vector3d newv) {
   return newv;
 }
 
-inline void update_neighbors(polyhedron &a, const polyhedron *bs, int n, const vector3d *neighborsphere_centers) {
-  if (debug && false)
-    printf("updating: %i\n", n);
+inline void update_neighbors(polyhedron &a, const polyhedron *bs, int n) {
+  bool report = false;
+  if (debug && (n == 0 || n == 6) && totalmoves > 6380 && false) {
+    report = true;
+    printf("updating: %i, r = %g\n", n, (R + R + neighborR));
+  }
   a.num_neighbors = 0;
   for(int i=0; i<N; i++) {
-    if ((i!=n) && (periodic_diff(a.pos, neighborsphere_centers[i]).normsquared() <
+    if ((i!=n) && (periodic_diff(a.pos, bs[i].neighbor_center).normsquared() <
          sqr(a.R + bs[i].R + neighborR))) {
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors ++;
     }
+  }
+  if (debug && report) {
+    printf("%i has %i neighbors.\n", n, a.num_neighbors);
+    for(int i=0; i<N; i++){
+      char *pos = new char[1024];
+      bs[i].neighbor_center.tostr(pos);
+      printf("%i is %g from %i's neighborcenter at %s.\n", n, periodic_diff(a.pos, bs[i].neighbor_center).norm(), i, pos);
+      delete[] pos;
+    }
+    print_one(a, n);
+    printf("exiting update_neighbors.\n");
+    if (totalmoves > 6385)
+      testcase = true;
   }
 }
 
@@ -925,7 +931,8 @@ inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int
     print_all(p);
   }
   int new_index = 0, old_index = 0;
-  bool checknew = true, checkold = true;
+  bool checknew = newp.num_neighbors > 0;
+  bool checkold = oldp.num_neighbors > 0;
   while (checknew || checkold) {
     if (debug && false) {
       if (checknew)
@@ -979,76 +986,97 @@ inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int
     if (debug) {
       if(new_index > newp.num_neighbors || old_index > oldp.num_neighbors) {
         printf("We have a problem. Inform neighbors not working as intended.\n\tNew index: %i, num new neighbors: %i, old index: %i, old num neighbors: %i.\n", new_index, newp.num_neighbors, old_index, oldp.num_neighbors);
+        testcase = true;
       }
     }
   }
 }
 
-// THIS FUNCTION IS DEPRECATED AND BAD. DON'T USE IT.
-// inline void update_neighbor_table(polyhedron &a, polyhedron *bs, int n, const vector3d *neighborhood_centers) {
-//   // We care about what neighbors we used to have, so we save that information
-//   // and setup a new array for our new neighbors.
-//   // As we go through to find new neighbors, we see if they were also old neighbors.
-//   // If they were, then great. If not, then we have to add ourselves to the table
-//   // of each new neighbor.
-//   // If we skip any of our old neighbors (i.e. they are no longer neighbors),
-//   // then we have to remove ourselves from their neighbor list.
-//   // For this reason, we need to keep neighbor lists sorted.
+inline void move_all(polyhedron *p) {
+  for(int i=0; i<N; i++) {
+    if (debug && testcase)
+      return;
+    totalmoves ++;
+    polyhedron temp;
+    temp.pos = move(p[i].pos, scale);
+    temp.rot = rotate(p[i].rot, theta_scale);
+    temp.R = p[i].R;
+    temp.mypoly = p[i].mypoly;
+    temp.neighbors = p[i].neighbors;
+    temp.num_neighbors = p[i].num_neighbors;
+    temp.neighbor_center = p[i].neighbor_center;
+    if (in_cell(temp)) {
+      bool overlaps = overlaps_with_any(temp, p);
+      if (!overlaps) {
+        const bool get_new_neighbors =
+          (periodic_diff(temp.pos, p[i].neighbor_center).normsquared() >
+           sqr(neighborR/2.0));
+        if (get_new_neighbors) {
+          // If we've moved too far, then the overlap test may have given a false
+          // negative. So we'll find our new neighbors, and check against them.
+          // If we still don't overlap, then we'll have to update the tables
+          // of our neighbors that have changed.
+          temp.neighbors = new int[max_neighbors];
+          update_neighbors(temp, p, i);
+          if (debug) check_neighbor_symmetry(p);
+          neighbor_updates ++;
+          // However, for this check (and this check only), we don't need to
+          // look at all of our neighbors, only our new ones.
+          // fixme: do this!
+          //int *new_neighbors = new int[max_neighbors];
 
-//   if (debug && testcase) {
-//     printf("updating: %i\n", n);
-//     print_all(bs);
-//     //for(int i=0; i<)
-//   }
-//   int *old_neighbors = a.neighbors;
-//   int old_index = 0;
-//   a.neighbors = new int[max_neighbors]();
-//   a.num_neighbors = 0;
-//   for(int i=0; i<N; i++) {
-//     if(i != n) {
-//       if (periodic_diff(a.pos, neighborhood_centers[i]).normsquared() <
-//           sqr(a.R + bs[i].R + neighborR)) {
-//         // We found a neighbor! Let's see if it's an old neighbor or if we've skipped
-//         // any of the old neighbors (i.e. they are no longer neighbors) so we know
-//         // if we have to update any other neighbor tables.
-//         if (i < old_neighbors[old_index]) {
-//           // We have a new neighbor! Let's add ourselves to their neighbor table.
-//           // Remember to do the neighborly thing and keep their table sorted.
-//           int bindex = bs[i].num_neighbors - 1;
-//           while(bindex >= 0 && bs[i].neighbors[bindex] > n) {
-//             bs[i].neighbors[bindex + 1] = bs[i].neighbors[bindex];
-//             bindex --;
-//           }
-//           bs[i].neighbors[bindex + 1] = n;
-//           bs[i].num_neighbors ++;
-//         } else if (i == old_neighbors[old_index]) {
-//           // We've kept this neighbor. We don't have to touch their table at all.
-//           // But we also don't care about them anymore, so let's update the index
-//           // of our old neighbor table.
-//           old_index ++;
-//         } else { // i > old_neighbors[old_index]
-//           // How sad, we've lost a neighbor. Let's go ahead and remove ourselves
-//           // from their table.
-//           int bindex = 0;
-//           // First let's find where we are on their table:
-//           while(bindex < bs[i].num_neighbors && bs[i].neighbors[bindex] < n)
-//             bindex ++;
-//           // Now let's shift everyone higher than us over one:
-//           while(bindex < bs[i].num_neighbors - 1) {
-//             bs[i].neighbors[bindex] = bs[i].neighbors[bindex+1];
-//             bindex ++;
-//           }
-//           bs[i].num_neighbors --;
-//           old_index ++;
-//         }
-//         // Okay, we've updated everyone else's table, now ours:
-//         a.neighbors[a.num_neighbors] = i;
-//         a.num_neighbors ++;
-//       }
-//     }
-//   }
-//   delete[] old_neighbors;
-// }
+          overlaps = overlaps_with_any(temp, p);
+          if (!overlaps) {
+            // Okay, we've checked twice, just like Santa Clause, so we're definitely
+            // keeping this move and need to tell our neighbors where we are now.
+            temp.neighbor_center = temp.pos;
+            if (debug && testcase) print_one(p[i], -i);
+            inform_neighbors(temp, p[i], i, p);
+            neighbor_informs ++;
+            delete[] p[i].neighbors;
+          } else {
+            // We don't have to move! We can throw away the new table as we don't
+            // have any new neighbors.
+            delete[] temp.neighbors;
+          }
+        }
+        if (!overlaps) {
+          p[i] = temp;
+          workingmoves ++;
+        }
+      }
+      // -----------------------------------------------------------------------
+      // debug tests
+      // -----------------------------------------------------------------------
+      if (debug) {
+        bool test_overlap = false;
+        for(int j=0; j<N; j++) {
+          if (j != i && overlap(temp, p[j])) {
+            test_overlap = true;
+            break;
+          }
+        }
+        if (test_overlap != overlaps) {
+          printf("\n\nError error! We do not have agreement on whether or not they overlap!\ndebug says: %i but normal test says: %i for shape: %i.\n\n", test_overlap, overlaps, i);
+          p[i] = temp;
+          print_all(p);
+          // char *vertices_fname = new char[1024];
+          // sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+          // save_locations(p, vertices_fname);
+          // delete[] vertices_fname;
+          testcase = true;
+          return;
+        }
+      }
+      // -----------------------------------------------------------------------
+      // done with debug tests
+      // -----------------------------------------------------------------------
+    }
+  }
+}
+
+
+
 
 inline void print_all(const polyhedron *p) {
   if (debug) {
@@ -1074,6 +1102,27 @@ inline void print_all(const polyhedron *p) {
     printf("\n");
     fflush(stdout);
   }
+}
+
+inline void print_one(const polyhedron &p, int id) {
+  if (debug) {
+    char *pos = new char[1024];
+    char *rot = new char[1024];
+    p.pos.tostr(pos);
+    p.rot.tostr(rot);
+    printf("%4i: %s, R: %4.2f, %i neighbors: ", id, p.mypoly->name, p.R, p.num_neighbors);
+    for(int j=0; j<min(10, p.num_neighbors); j++)
+      printf("%i ", p.neighbors[j]);
+    if (p.num_neighbors > 10)
+      printf("...");
+    printf("\n      pos:          %s\n      rot: %s\n", pos, rot);
+    if (!in_cell(p))
+      printf("----  Outside cell!\n");
+    if (fabs(p.rot.normsquared() - 1.0) > 10e-15)
+      printf("$$$$  Quaternion off! Normsquared - 1: %g\n", (p.rot.normsquared()-1.0));
+  }
+  printf("\n");
+  fflush(stdout);
 }
 
 inline void print_bad(const polyhedron *p) {
@@ -1172,8 +1221,8 @@ void define_shapes() {
   cube.faces[2] = vector3d(0, 0, 1);
 
 
-  // Tetrahedron is oriented so that it has a face parallel to the xy-plane
-  // and an edge parallel to the x-axis.
+  // Tetrahedron and truncated tetrahedron are oriented so that they have
+  // a face parallel to the xy-plane and an edge parallel to the x-axis.
   tetrahedron.volume = 1.0/3.0;
   tetrahedron.vertices[0] = vector3d( sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
   tetrahedron.vertices[1] = vector3d(-sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);

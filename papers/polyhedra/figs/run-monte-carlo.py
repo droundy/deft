@@ -26,7 +26,7 @@ def run_walls(ff, N, shape):
   scriptname = "%s/%s.tmp.sh" %(figsdir, name)
   outname = "%s/%s.out" %(bindir, name)
   directory = '%s/mc' % figsdir
-  filename = 'polyhedraMC-walls-%4.2f' % ff
+  filename = 'walls-%4.2f' % ff
   command = "time nice -19 %s/polyhedra-monte-carlo %i %i %s %s periodx periody wallz\
  R %g dimensions %g %g %g scale %g theta_scale %g shape %s dw_density %g" \
       %(bindir, N, iterations, directory, filename, R, dim, dim, dim, scale, theta_scale,
