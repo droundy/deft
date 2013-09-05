@@ -35,7 +35,7 @@ def plotit(dftdata, mcdata):
     n_plt.yaxis.set_major_locator(pylab.MaxNLocator(6,steps=[1,5,10],prune='upper'))
     pylab.ylim(ymin=0)
     pylab.xlim(-1/2,9/2)
-    pylab.xlabel("$r$/$\sigma$")
+    pylab.xlabel("$z/\sigma$")
     pylab.ylabel("$n(\mathbf{r})$")
     n_plt.axvline(x=0, color='k', linestyle=':')
 
