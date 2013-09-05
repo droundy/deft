@@ -200,7 +200,7 @@ twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
 plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
 text(-2.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
-text(-2.7, 3.5, 'monte carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+text(-2.7, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 sphere0 = Circle((0, 0), 1, color='slategray')
 sphere1 = Circle((rpath, 0), 1, color='slategray')

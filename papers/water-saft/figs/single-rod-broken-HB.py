@@ -27,3 +27,5 @@ pyplot.xlim(0, 1.5)
 pyplot.ylim(0, 10)
 pyplot.legend([p2,p1],["Hughes, et al", "This work"], loc = 2)
 pyplot.savefig('figs/single-rod-broken-HB.pdf')
+
+pyplot.show()

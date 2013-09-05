@@ -132,11 +132,11 @@ approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
 
-\section{Analytic approximations}
+\section{Approximations to the pair distribution function}
 There are few analytic approximations for the inhomogeneous pair
 distribution function, which extend the radial distribution function
 to inhomogeneous scenarios.  These works differ in what density they
-use to evaluate $g(r)$.
+use when evaluating the radial distribution function $g(r,\eta)$.
 
 Several recent works have cited a
 mean-density approximation:
@@ -145,10 +145,11 @@ mean-density approximation:
   (n(\rr_1)+n(\rr_2))\right)
 \end{align}
 where $g(r,\eta)$ is the radial distribution function as a function of
-radius and packing fraction $\eta$~\cite{gloor2007prediction,
-  gross2009density}.  These works did not however use this approach,
-which fails dramatically at higher densities, as the packing fraction
-found from the mean density exceeds unity.
+radius and packing fraction $\eta$, and $\sigma$ is the hard-sphere
+diameter~\cite{gloor2007prediction, gross2009density}.  These works
+did not however use this approach, which fails dramatically at higher
+densities, as the packing fraction found from the mean density exceeds
+unity.
 
 Approaches that do not diverge use an average of the density over some
 volume. Fischer and Methfessel~\cite{fischer1980born} introduce the
@@ -166,9 +167,13 @@ density over a spherical volume:
 \end{align}
 where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
 is computationally awkward, because it relies on the midpoint
-$\tfrac12(\rr_1+\rr_2)$.  For this reason Sokolowski and Fischer
-modified this approach to use averages centered on the two points
-$\rr_1$ and $\rr_2$:
+$\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
+Methfessel predicts the pair distribution function only at contact,
+when the distance between $\rr_1$ and $\rr_2$ is a hard-sphere
+diameter.
+
+For these reasons Sokolowski and Fischer modified this approach to use
+averages centered on the two points $\rr_1$ and $\rr_2$:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12},
   \tfrac12(\bar{n}(\rr_1)+\bar{n}(\rr_2))\right)
@@ -184,23 +189,23 @@ was arrived at by fitting to Monte Carlo simulation.  Although
 Eq.~\ref{eq:sokolowski} has the advantages of only involving density
 averages at the points at which the pair distribution function is
 desired, cannot be written as a single-site convolution, since the
-convolution kernel depends on both points.
+convolution kernel depends on both points.  This limits the accuracy.
 
 
 
-\section{What is our new idea?}
+\section{Our approach}
 We approximate the pair correlation with the average of two radial
 distribution functions, evaluated at the distance between the two
 points, that are themselves functions of our published pair
-correlation at contact $g_{\sigma}$ evaluated at the two points.
-
+correlation at contact $g_{\sigma}(\rr)$ evaluated at the two
+points~\cite{schulte2012using}.
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 \end{align}
 
 In the previous approaches mentioned above, function forms of radial
 distributions (used to approximate pair correlation) were dependent
-upon independent variables $\eta$, the density, wether at single
+upon independent variables $\eta$, the density, whether at single
 points or averaged over sourrounding volumes.  We can achieve more
 accuracy by using instead a function dependent upon our $g_{\sigma}$,
 which holds more information about an inhomogeneous system
@@ -267,7 +272,6 @@ The finalalized form of our pair correlation function is:
   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
-\section{What does it look like (graphs that show the function itself)?}
 \subsection{Separable fit to the radial distribution function}
 Figure~\ref{fig:radial-distribution} shows...
 
@@ -345,36 +349,39 @@ simulations of the hard-sphere radial distribution function.
 
 \fixme{add table with parameters}
 
+\section{Results}
 \subsection{Pair distribution function}
-%% Figure~\ref{fig:pair-distribution} shows...
-%% \begin{figure}
-%%   %%\includegraphics[width=6cm]{figs/pair-correlation-2-395-0.pdf}
-%%   \includegraphics[width=6cm]{figs/pair-correlation-2-395-5.pdf}
-%%   %%\includegraphics[width=6cm]{figs/pair-correlation-2-395-10.pdf}
-%%   \caption{Plot of the pair distribution function near a hard wall.
-%%     In the interest of space and memeory, we should look at the function and decided which data to add?}\label{fig:pair-distribution}
-%% \end{figure}
+
+\newcommand\paircaption[1]{ The pair distribution function near a hard
+  wall, with a packing fraction of #1, with $\rr_1$ in contact with
+  the hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$
+  as $\rr_2$ varies.  The top half of this figure shows the result of
+  Monte Carlo simulation, while the bottom half shows the result of
+  the appproximation developed in this work.  On the right is a plot
+  of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the figure to
+  the left.  This plot compares the Monte Carlo results (black) with
+  those of this work (color?), Sokolowski and Fischer
+  (color?)~\cite{sokolowski1992role}, and Fischer and Methfessel
+  (color?)~\cite{fischer1980born}.  The latter is only plotted at
+  contact, where it is defined.  }
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-1.pdf}
-  \caption{Pretty plot of the pair distribution function near a hard
-    wall.}\label{fig:pair-distribution-1}
+  \caption{ \paircaption{0.1}
+  }\label{fig:pair-distribution-1}
 \end{figure}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-2.pdf}
-  \caption{Pretty plot of the pair distribution function near a hard
-    wall.}\label{fig:pair-distribution-2}
+  \caption{\paircaption{0.2}}\label{fig:pair-distribution-2}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-3.pdf}
-  \caption{Pretty plot of the pair distribution function near a hard
-    wall.}\label{fig:pair-distribution-3}
+  \caption{\paircaption{0.3}}\label{fig:pair-distribution-3}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-4.pdf}
-  \caption{Pretty plot of the pair distribution function near a hard
-    wall.}\label{fig:pair-distribution-4}
+  \caption{\paircaption{0.4}}\label{fig:pair-distribution-4}
 \end{figure}
 
 Discuss the pair distribution function here, explaining plots
