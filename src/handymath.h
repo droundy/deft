@@ -3,6 +3,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <string.h>
 #include "Faddeeva.hh"
 
 inline double erfi(double x) {
