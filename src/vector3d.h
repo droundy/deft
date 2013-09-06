@@ -111,7 +111,7 @@ class vector3d {
   }
 };
 
-const vector3d operator*(const double scalar, const vector3d &v) {
+inline vector3d operator*(const double scalar, const vector3d &v) {
   return v*scalar; }
 
 class rotation {
@@ -313,5 +313,5 @@ class quaternion {
     sprintf(str, "[%6.2f, (%6.2f, %6.2f, %6.2f)]", w, x, y, z); }
 };
 
-const quaternion operator*(const double scalar, const quaternion &q) {
+inline quaternion operator*(const double scalar, const quaternion &q) {
   return q*scalar; }

@@ -3,7 +3,7 @@ import os, time, string, glob, numpy
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
 # First, we want to set up the flags
-env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3'])
+env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
 env.MergeFlags('-Wall -Werror -ansi')
 env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs')
 env.MergeFlags('-O3')
@@ -13,7 +13,7 @@ env.MergeFlags('-O3')
 # final executable.  This reduces the size of the executable, and I
 # hope it also means that executables are less likely to change when
 # we add new code to deft that they do not use.
-env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections,-lpopt'],
+env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections'],
                  CXXFLAGS=['-fdata-sections','-ffunction-sections'])
 
 # Configure git to run the test suite:
@@ -113,7 +113,7 @@ for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       radial-distribution-monte-carlo """):
     env.Program(
         target=name,
-        source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp'])
+        source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp'])
     Alias('executables', name)
 Default('executables')
 
@@ -148,6 +148,7 @@ for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispe
 # Here we have ordinary source code:
 
 generic_sources = Split("""
+
   src/lattice.cpp src/utilities.cpp src/Faddeeva.cc
   src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
   src/IdealGas.cpp src/ChemicalPotential.cpp

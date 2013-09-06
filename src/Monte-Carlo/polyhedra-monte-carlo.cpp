@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <time.h>
-#include "vector3d.h"
 #include <cassert>
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
-#include "handymath.h"
 #include <popt.h>
+#include "handymath.h"
+#include "vector3d.h"
+#include "Monte-Carlo/polyhedra.h"
+
 
 // -----------------------------------------------------------------------------
 // Notes on conventions and definitions used
 // -----------------------------------------------------------------------------
 //
-// All coordinates are (presently) cartesion.
+// All coordinates are cartesion.
 //
 // The coordinates x, y, z are always floating point numbers that refer to real
 // locations within the cell.
@@ -34,45 +35,6 @@
 // a well defined radius unless all obects are circumscribed by spheres of
 // the same radius, but this does not affect anything.
 
-// -----------------------------------------------------------------------------
-// Structs defined
-// -----------------------------------------------------------------------------
-
-// We make one poly_shape for each shape we care about (cube, tetrahedron, etc.)
-// We then point to it from our polyhedra to identify that they are that shape,
-// and to be able to find vertices, etc.
-
-// Note: faces is a list of normal vectors perpendicular to the actual faces.
-// The sign of this vector is unimportant for the collision detection algorithm
-// used, so any two parallel faces are only counted as one face.
-struct poly_shape {
-  int nvertices;
-  int nfaces;
-  vector3d *vertices;
-  vector3d *faces;
-  double volume;
-  char *name;
-
-  poly_shape(const char *set_name);
-
-  ~poly_shape() {
-    delete[] vertices;
-    delete[] faces;
-    delete[] name;
-  }
-};
-
-// This contains all of the information about a given polyhedron.
-// We create and use an array of these.
-struct polyhedron {
-  vector3d pos;
-  rotation rot;
-  double R;
-  const poly_shape *mypoly;
-  int *neighbors;
-  int num_neighbors;
-  vector3d neighbor_center;
-};
 
 // -----------------------------------------------------------------------------
 // Global Constants
@@ -84,10 +46,6 @@ struct polyhedron {
 // code is active
 const bool debug = false;
 
-// Prints time information. Useful for testing optimizations,
-// or seeing how much adding complexity affects runtime.
-const bool totime = false;
-
 // for debugging purposes
 bool testcase = false;
 
@@ -95,52 +53,11 @@ bool testcase = false;
 // Functions
 // -----------------------------------------------------------------------------
 
-// Sets up the vertices, faces, etc. for each polyhedron. Only run once.
-void define_shapes();
-
-// Find's the neighbors of a by comparing a's position to the center of
-// everyone else's neighborsphere, where n is the index of a in bs.
-inline void update_neighbors(polyhedron &a, int n, const polyhedron *bs, int N, double neighborR, double periodic[3]);
-
-// Removes n from the neighbor table of anyone neighboring oldp but not newp.
-// Adds n to the neighbor table of anyone neighboring newp but not oldp.
-// Keeps the neighbor tables sorted.
-inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int n, polyhedron *p, int N);
-
-// Attempts to move each polyhedron once. Returns the number of successful moves.
-inline int move_all(polyhedron *p, int N, double periodic[3], double walls[3], bool real_walls, double neighborR, double scale, double theta_scale, int max_neighbors);
-
-// Check whether two polyhedra overlap
-inline bool overlap(const polyhedron &a, const polyhedron &b, double periodic[3]);
-
-// Check whether a polyhedron overlaps with any in the array, except for
-// Useful for post-move testing with a temporary polyhedron.
-// If count is true, it will return the total number of overlaps, otherwise
-// it returns 1 if there is at least one overlap, 0 if there are none.
-inline int overlaps_with_any(const polyhedron &a, const polyhedron *bs, double periodic[3], bool count=false, double dr=0);
-
-// Check if polyhedron is outside its allowed locations
-inline bool in_cell(const polyhedron &p, double walls[3], bool real_walls);
-
-// Return the vector pointing from a to b, accounting for periodic
-// boundaries
-inline vector3d periodic_diff(const vector3d &a, const vector3d  &b, double periodic[3]);
-
-// Move v in a random direction by a distance determined by a gaussian distribution
-inline vector3d move(const vector3d &v, double scale, const double len[3]);
-
-// If v is outside the cell, and there are periodic boundary condition(s), it is
-// moved (appropriately) into the cell
-inline vector3d fix_periodic(vector3d newv, const double len[3]);
-
 // States how long it's been since last took call.
 static void took(const char *name);
 
 // Saves the vertices of all polyhedra to a file.
 void save_locations(const polyhedron *p, int N, const char *fname, long iteration = -1);
-
-
-
 
 // The following functions only do anything if debug is true:
 
@@ -192,6 +109,7 @@ int main(int argc, const char *argv[]) {
   double neighborR = 0.5;
   double dr = 0.01;
   double de_density = 0.01;
+  bool totime = false;
   // scale and theta_scale aren't quite "constants" -- they are adjusted
   // during the initialization so that we have a reasonable acceptance rate
   double scale = 0.05;
@@ -217,7 +135,8 @@ information on the number and type of polyhedra, as well as file extensions", "n
     {"dir", 'd', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Directory to save to", "dir"},
     {"shape", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &shape_name, 0,
-     "Type of polyhedra to use. Can be one of [cube, tetrahedron, truncated_tetrahedron]", "shape"},
+     "Type of polyhedra to use. Can be one of [cube, tetrahedron, truncated_tetrahedron]",
+     "shape"},
     {"R", 'R', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &R, 0,
      "Size of the sphere that circumscribes each polyhedron", "R"},
     {"neighborR", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &neighborR, 0,
@@ -235,12 +154,13 @@ information on the number and type of polyhedra, as well as file extensions", "n
     {"save_vertices", 'v', POPT_ARG_INT, &vertex_period, 0,
      "Periodically saves the vertex locations of the polyhedra, where period is a number \
 of iterations", "period"},
+    {"time", 't', POPT_ARG_NONE, &totime, 0, "Timing information will be displayed"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
   optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of polyhedra and periodicity/dimensions \
-are not set by default and are required.\n");
+  poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of polyhedra and \
+periodicity/dimensions are not set by default and are required.\n");
 
   int c = 0;
   // go through options, sets them based on optionsTable
@@ -459,9 +379,11 @@ are not set by default and are required.\n");
     // ---------------------------------------------------------------
     // Move each polyhedron once
     // ---------------------------------------------------------------
-    totalmoves += N;
-    workingmoves += move_all(polyhedra, N, periodic, walls, real_walls,
-                             neighborR, scale, theta_scale, max_neighbors);
+    for(int i=0; i<N; i++) {
+      totalmoves ++;
+      workingmoves += move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
+                                          neighborR, scale, theta_scale, max_neighbors);
+    }
 
     if (debug && testcase) {
       printf("totalmoves = %li.\n", totalmoves);
@@ -535,9 +457,9 @@ are not set by default and are required.\n");
     }
     iteration ++;
   }
-  printf("---------------------------------------------------------------\n");
-  printf("Initialization complete!\n");
-  printf("---------------------------------------------------------------\n");
+  // printf("---------------------------------------------------------------\n");
+  // printf("Initialization complete!\n");
+  // printf("---------------------------------------------------------------\n");
 
   // ---------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -553,9 +475,11 @@ are not set by default and are required.\n");
     // ---------------------------------------------------------------
     // Move each polyhedron once
     // ---------------------------------------------------------------
-    totalmoves += N;
-    workingmoves += move_all(polyhedra, N, periodic, walls, real_walls,
-                             neighborR, scale, theta_scale, max_neighbors);
+    for(int i=0; i<N; i++) {
+      totalmoves ++;
+      workingmoves += move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
+                                          neighborR, scale, theta_scale, max_neighbors);
+    }
     // ---------------------------------------------------------------
     // Add data to historams
     // ---------------------------------------------------------------
@@ -659,364 +583,44 @@ are not set by default and are required.\n");
 
 
 
-// Uses the seperating axis theorem. Not the fastest algorithm, but simple to implement.
-// Theorem: Two convex objects do not overlap iff there exists a line onto which their
-// 1d projections do not overlap.
-// In three dimensions, if such a line exists, then the normal line to one of the
-// faces of one of the shapes will be such a line.
-inline bool overlap(const polyhedron &a, const polyhedron &b, double periodic[3]) {
-  const vector3d ab = periodic_diff(a.pos, b.pos, periodic);
-  if (ab.normsquared() > (a.R + b.R)*(a.R + b.R))
-    return false;
-  // construct axes from a
-  // project a and b to each axis
-  for (int i=0; i<a.mypoly->nfaces; i++) {
-    const vector3d axis = a.rot.rotate_vector(a.mypoly->faces[i]);
-    double projection = axis.dot(a.rot.rotate_vector((a.mypoly->vertices[0])*a.R));
-    double mina = projection, maxa = projection;
-    for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
-      if (projection < mina) mina = projection;
-      else if (projection > maxa) maxa = projection;
-    }
-    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
-    double minb = projection, maxb = projection;
-    for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
-      if (projection < minb) minb = projection;
-      else if (projection > maxb) maxb = projection;
-    }
-    if (mina > maxb || minb > maxa) {
-      return false;
-    }
-  }
-  // construct axes from b
-  // project a and b to each axis
-  for (int i=0; i<b.mypoly->nfaces; i++) {
-    const vector3d axis = b.rot.rotate_vector(b.mypoly->faces[i]);
-    double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
-    double mina = projection, maxa = projection;
-    for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
-      if (projection < mina) mina = projection;
-      else if (projection > maxa) maxa = projection;
-    }
-    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
-    double minb = projection, maxb = projection;
-    for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
-      if (projection < minb) minb = projection;
-      else if (projection > maxb) maxb = projection;
-    }
-    if (mina > maxb || minb > maxa) {
-      return false;
-    }
-  }
-  return true;
-}
-
-inline int overlaps_with_any(const polyhedron &a, const polyhedron *bs, double periodic[3], bool count, double dr) {
-  // construct axes from a and a's projection onto them
-  vector3d aaxes[a.mypoly->nfaces];
-  double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
-  for (int i=0; i<a.mypoly->nfaces; i++) {
-    aaxes[i] = a.rot.rotate_vector(a.mypoly->faces[i]);
-    double projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
-    amins[i] = projection, amaxes[i] = projection;
-    for (int j=1; j< a.mypoly->nvertices; j++) {
-      projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
-      amins[i] = min(projection, amins[i]);
-      amaxes[i] = max(projection, amaxes[i]);
-    }
-  }
-  int num_overlaps = 0;
-  for (int l=0; l<a.num_neighbors; l++) {
-    const int k = a.neighbors[l];
-    const vector3d ab = periodic_diff(a.pos, bs[k].pos, periodic);
-    if (ab.normsquared() < (a.R + bs[k].R)*(a.R + bs[k].R)) {
-      bool overlap = true; // assume overlap until we prove otherwise or fail to.
-      // check projection of b against a's axes
-      for (int i=0; i<a.mypoly->nfaces; i++) {
-        double projection = aaxes[i].dot
-          (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
-        double bmin = projection, bmax = projection;
-        for (int j=1; j<bs[k].mypoly->nvertices; j++) {
-          projection = aaxes[i].dot
-            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
-          bmin = min(projection, bmin);
-          bmax = max(projection, bmax);
-        }
-        if (amins[i] > bmax || bmin > amaxes[i]) {
-          overlap = false;
-          i = a.mypoly->nfaces; // no overlap, move on to next
-        }
-      }
-      if (overlap) { // still need to check against b's axes
-        for (int i=0; i<bs[k].mypoly->nfaces; i++) {
-          const vector3d axis = bs[k].rot.rotate_vector(bs[k].mypoly->faces[i]);
-          double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
-          double amin = projection, amax = projection;
-          for (int j=1; j<a.mypoly->nvertices; j++) {
-            projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
-            amin = min(projection, amin);
-            amax = max(projection, amax);
-          }
-          projection = axis.dot
-            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
-          double bmin = projection, bmax = projection;
-          for (int j=1; j<bs[k].mypoly->nvertices; j++) {
-            projection = axis.dot
-              (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
-            bmin = min(projection, bmin);
-            bmax = max(projection, bmax);
-
-          }
-          if (amin > bmax || bmin > amax) {
-            overlap = false;
-            i = bs[k].mypoly->nfaces; //no overlap, move on to next
-          }
-        }
-      }
-      if (overlap) {
-        if(!count)
-          return 1;
-        num_overlaps ++;
-      }
-    }
-  }
-  return num_overlaps;
-}
-
-inline bool in_cell(const polyhedron &p, double walls[3], bool real_walls) {
-  if(real_walls) {
-    for (int i=0; i<3; i++) {
-      if (walls[i] > 0) {
-        if (p.pos[i] - p.R > 0.0 && p.pos[i] + p.R < walls[i]) {
-          continue;
-        }
-        double coord = (p.rot.rotate_vector(p.mypoly->vertices[0]*p.R) + p.pos)[i];
-        double pmin = coord, pmax = coord;
-        for (int j=1; j<p.mypoly->nvertices; j++) {
-          coord = (p.rot.rotate_vector(p.mypoly->vertices[j]*p.R) + p.pos)[i];
-          pmin = min(coord, pmin);
-          pmax = max(coord, pmax);
-        }
-        if (pmin < 0.0 || pmax > walls[i])
-          return false;
-      }
-    }
-  }
-  return true;
-}
-
-inline vector3d periodic_diff(const vector3d &a, const vector3d &b, double periodic[3]) {
-  vector3d v = b - a;
-  for (int i=0; i<3; i++) {
-    if (periodic[i] > 0) {
-      while (v[i] > periodic[i]/2.0)
-        v[i] -= periodic[i];
-      while (v[i] < -periodic[i]/2.0)
-        v[i] += periodic[i];
-    }
-  }
-  return v;
-}
-
-inline vector3d move(const vector3d &v, double scale, const double len[3]) {
-  const vector3d newv = v + vector3d::ran(scale);
-  return fix_periodic(newv, len);
-}
-
-inline vector3d fix_periodic(vector3d newv, const double len[3]) {
-  for (int i=0; i<3; i++) {
-    while (newv[i] > len[i])
-      newv[i] -= len[i];
-    while (newv[i] < 0.0)
-      newv[i] += len[i];
-    }
-  return newv;
-}
-
-inline void update_neighbors(polyhedron &a, int n, const polyhedron *bs, int N, double neighborR, double periodic[3]) {
-  a.num_neighbors = 0;
-  for(int i=0; i<N; i++) {
-    if ((i!=n) && (periodic_diff(a.pos, bs[i].neighbor_center, periodic).normsquared() <
-         sqr(a.R + bs[i].R + neighborR))) {
-      a.neighbors[a.num_neighbors] = i;
-      a.num_neighbors ++;
-    }
-  }
-}
-
-inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int n, polyhedron *p, int N) {
-  if (debug && false) {
-    printf("informing: %i\n", n);
-  }
-  int new_index = 0, old_index = 0;
-
-  // while (1) {
-  //   if (new_index >= newlen) {
-  //     handle olds;
-  //     return;
-  //   }
-  //   if (old_index >= oldlen) {
-  //     handle news;
-  //     return;
-  //   }
-  //   if (oldindex >= oldlen || new[new_index] == old[old_index]) {
-  //   } else if (new[index] < ) {
-  //     handle new;
-  //     new_index++;
-  //   } else {
-  //     handle old;
-  //     old_index++;
-  //   }
-  // }
-  bool checknew = newp.num_neighbors > 0;
-  bool checkold = oldp.num_neighbors > 0;
-  while (checknew || checkold) {
-    if (debug && false) {
-      if (checknew)
-        printf("new[%i]: %i\t", new_index, newp.neighbors[new_index]);
-      else
-        printf("           \t");
-      if (checkold)
-        printf("old[%i]: %i", old_index, oldp.neighbors[old_index]);
-      printf("\n");
-    }
-    if (checkold &&
-        (!checknew || oldp.neighbors[old_index] < newp.neighbors[new_index])) {
-      //printf("old[%i]: %i\n", old_index, oldp.neighbors[old_index]);
-      // We had a neighbor that we moved away from, so it's time to remove ourselves
-      // from his table and never speak to him again.
-      const int i = oldp.neighbors[old_index];
-      int pindex = p[i].num_neighbors - 1;
-      int temp = p[i].neighbors[pindex];
-      while (temp != n) {
-        pindex --;
-        const int temp2 = temp;
-        temp = p[i].neighbors[pindex];
-        p[i].neighbors[pindex] = temp2;
-      }
-      p[i].num_neighbors --;
-      old_index ++;
-    } else if (checknew &&
-               (!checkold || newp.neighbors[new_index] < oldp.neighbors[old_index])) {
-      // We have a new neighbor! Time to insert ourselves into his list
-      // so we can be invited over for dinner.
-      // We only increment the new index here.
-      const int i = newp.neighbors[new_index];
-      int pindex = p[i].num_neighbors - 1;
-      int temp = p[i].neighbors[pindex];
-      p[i].num_neighbors ++;
-      while  (temp > n) {
-        p[i].neighbors[pindex + 1] = temp;
-        pindex --;
-        temp = p[i].neighbors[pindex];
-      }
-      p[i].neighbors[pindex+1] = n;
-      new_index ++;
-    } else {// (newp.neighbors[new_index] == oldp.neighbors[old_index])
-      // This new neighbor was also an old neighbor, so we don't have to do anything
-      // but increment.
-      new_index ++;
-      old_index ++;
-    }
-    checknew = new_index < newp.num_neighbors;
-    checkold = old_index < oldp.num_neighbors;
-    if (debug) {
-      if(new_index > newp.num_neighbors || old_index > oldp.num_neighbors) {
-        printf("We have a problem. Inform neighbors not working as intended.\n\tNew index: %i, num new neighbors: %i, old index: %i, old num neighbors: %i.\n", new_index, newp.num_neighbors, old_index, oldp.num_neighbors);
-        testcase = true;
-      }
-    }
-  }
-}
-
-inline int move_all(polyhedron *p, int N, double periodic[3], double walls[3], bool real_walls, double neighborR, double scale, double theta_scale, int max_neighbors) {
-  int workingmoves = 0;
-  for(int i=0; i<N; i++) {
-    if (debug && testcase)
-      return -1;
-    polyhedron temp;
-    const double len[3] = {periodic[0]+walls[0], periodic[1]+walls[1], periodic[2]+walls[2]};
-    temp.pos = move(p[i].pos, scale, len);
-    temp.rot = rotation::ran(theta_scale)*p[i].rot;
-    temp.R = p[i].R;
-    temp.mypoly = p[i].mypoly;
-    temp.neighbors = p[i].neighbors;
-    temp.num_neighbors = p[i].num_neighbors;
-    temp.neighbor_center = p[i].neighbor_center;
-    if (in_cell(temp, walls, real_walls)) {
-      bool overlaps = overlaps_with_any(temp, p, periodic);
-      if (!overlaps) {
-        const bool get_new_neighbors =
-          (periodic_diff(temp.pos, p[i].neighbor_center, periodic).normsquared() >
-           sqr(neighborR/2.0));
-        if (get_new_neighbors) {
-          // If we've moved too far, then the overlap test may have given a false
-          // negative. So we'll find our new neighbors, and check against them.
-          // If we still don't overlap, then we'll have to update the tables
-          // of our neighbors that have changed.
-          temp.neighbors = new int[max_neighbors];
-          update_neighbors(temp, i, p, N, neighborR, periodic);
-          if (debug) check_neighbor_symmetry(p, N);
-          // However, for this check (and this check only), we don't need to
-          // look at all of our neighbors, only our new ones.
-          // fixme: do this!
-          //int *new_neighbors = new int[max_neighbors];
-
-          overlaps = overlaps_with_any(temp, p, periodic);
-          if (!overlaps) {
-            // Okay, we've checked twice, just like Santa Clause, so we're definitely
-            // keeping this move and need to tell our neighbors where we are now.
-            temp.neighbor_center = temp.pos;
-            if (debug && testcase) print_one(p[i], -i, p, N, periodic);
-            inform_neighbors(temp, p[i], i, p, N);
-            delete[] p[i].neighbors;
-          } else {
-            // We don't have to move! We can throw away the new table as we don't
-            // have any new neighbors.
-            delete[] temp.neighbors;
-          }
-        }
-        if (!overlaps) {
-          p[i] = temp;
-          workingmoves ++;
-        }
-      }
-      // -----------------------------------------------------------------------
-      // debug tests
-      // -----------------------------------------------------------------------
-      if (debug) {
-        bool test_overlap = false;
-        for(int j=0; j<N; j++) {
-          if (j != i && overlap(temp, p[j], periodic)) {
-            test_overlap = true;
-            break;
-          }
-        }
-        if (test_overlap != overlaps) {
-          printf("\n\nError error! We do not have agreement on whether or not they overlap!\ndebug says: %i but normal test says: %i for shape: %i.\n\n", test_overlap, overlaps, i);
-          p[i] = temp;
-          print_all(p, N, periodic);
-          // char *vertices_fname = new char[1024];
-          // sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
-          // save_locations(p, vertices_fname);
-          // delete[] vertices_fname;
-          testcase = true;
-          return -1;
-        }
-      }
-      // -----------------------------------------------------------------------
-      // done with debug tests
-      // -----------------------------------------------------------------------
-    }
-  }
-  return workingmoves;
-}
 
 
+
+// inline int move_all(polyhedron *p, int N, double periodic[3], double walls[3], bool real_walls, double neighborR, double scale, double theta_scale, int max_neighbors) {
+//   int workingmoves = 0;
+//   for(int i=0; i<N; i++) {
+//     if (debug && testcase)
+//       return -1;
+//       // -----------------------------------------------------------------------
+//       // debug tests
+//       // -----------------------------------------------------------------------
+//       if (debug) {
+//         bool test_overlap = false;
+//         for(int j=0; j<N; j++) {
+//           if (j != i && overlap(temp, p[j], periodic)) {
+//             test_overlap = true;
+//             break;
+//           }
+//         }
+//         if (test_overlap != overlaps) {
+//           printf("\n\nError error! We do not have agreement on whether or not they overlap!\ndebug says: %i but normal test says: %i for shape: %i.\n\n", test_overlap, overlaps, i);
+//           p[i] = temp;
+//           print_all(p, N, periodic);
+//           // char *vertices_fname = new char[1024];
+//           // sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+//           // save_locations(p, vertices_fname);
+//           // delete[] vertices_fname;
+//           testcase = true;
+//           return -1;
+//         }
+//       }
+//       // -----------------------------------------------------------------------
+//       // done with debug tests
+//       // -----------------------------------------------------------------------
+//     }
+//   }
+//   return workingmoves;
+// }
 
 
 inline void print_all(const polyhedron *p, int N, double periodic[3]) {
@@ -1145,72 +749,4 @@ void save_locations(const polyhedron *p, int N, const char *fname, long iteratio
     fprintf(out, "\n");
   }
   fclose(out);
-}
-
-poly_shape::poly_shape(const char *set_name) {
-  if (strcmp(set_name, "cube") == 0) {
-    nvertices = 8;
-    nfaces = 3;
-    volume = 1.0;
-    vertices = new vector3d[nvertices];
-    faces = new vector3d[nfaces];
-    name = new char[4];
-    sprintf(name, "cube");
-
-    const double v_cube = 1.0/sqrt(3.0);
-    vertices[0] = vector3d( v_cube,  v_cube,  v_cube);
-    vertices[1] = vector3d(-v_cube,  v_cube,  v_cube);
-    vertices[2] = vector3d(-v_cube, -v_cube,  v_cube);
-    vertices[3] = vector3d( v_cube, -v_cube,  v_cube);
-    vertices[4] = vector3d( v_cube,  v_cube, -v_cube);
-    vertices[5] = vector3d(-v_cube,  v_cube, -v_cube);
-    vertices[6] = vector3d(-v_cube, -v_cube, -v_cube);
-    vertices[7] = vector3d( v_cube, -v_cube, -v_cube);
-
-    faces[0] = vector3d(1, 0, 0);
-    faces[1] = vector3d(0, 1, 0);
-    faces[2] = vector3d(0, 0, 1);
-  }
-  else if (strcmp(set_name, "tetrahedron") == 0) {
-    nvertices = 4;
-    nfaces = 4;
-    volume = 1.0/3.0;
-    vertices = new vector3d[nvertices];
-    faces = new vector3d[nfaces];
-    name = new char[11];
-    sprintf(name, "tetrahedron");
-
-    vertices[0] = vector3d( sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
-    vertices[1] = vector3d(-sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
-    vertices[2] = vector3d(             0, 2.0*sqrt(2.0)/3.0, -1.0/3.0);
-    vertices[3] = vector3d(             0,                 0,      1.0);
-
-    faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
-    faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[3] = vector3d(         0,          0,             1);
-  }
-  else if (strcmp(set_name, "truncated_tetrahedron") == 0) {
-    nvertices = 18;
-    nfaces = 4;
-    volume = 0; //fixme
-    vertices = new vector3d[nvertices];
-    faces = new vector3d[nfaces];
-    name = new char[21];
-    sprintf(name, "truncated_tetrahedron");
-
-    faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
-    faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[3] = vector3d(         0,          0,             1);
-  }
-  else {
-    nvertices = 0;
-    nfaces = 0;
-    volume = 0;
-    vertices = NULL;
-    faces = NULL;
-    name = new char[13];
-    sprintf(name, "invalid shape");
-  }
 }
