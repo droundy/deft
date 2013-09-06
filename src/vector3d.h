@@ -146,7 +146,14 @@ class rotation {
     return !(*this == q); }
 
   vector3d rotate_vector(const vector3d &v) const {
-    const rotation product = (*this)*rotation(0, v.x, v.y, v.z)*this->conj();
+    const rotation p( v.x*x + v.y*y + v.z*z,
+                      v.x*w - v.y*z + v.z*y,
+                      v.x*z + v.y*w - v.z*x,
+                     -v.x*y + v.y*x + v.z*w);
+    const rotation product(w*p.w - x*p.x - y*p.y - z*p.z,
+                           w*p.x + x*p.w + y*p.z - z*p.y,
+                           w*p.y - x*p.z + y*p.w + z*p.x,
+                           w*p.z + x*p.y - y*p.x + z*p.w);
     return vector3d(product.x, product.y, product.z); }
 
   void tostr(char str[]) const {

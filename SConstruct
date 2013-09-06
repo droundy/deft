@@ -13,7 +13,7 @@ env.MergeFlags('-O3')
 # final executable.  This reduces the size of the executable, and I
 # hope it also means that executables are less likely to change when
 # we add new code to deft that they do not use.
-env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections'],
+env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections,-lpopt'],
                  CXXFLAGS=['-fdata-sections','-ffunction-sections'])
 
 # Configure git to run the test suite:
