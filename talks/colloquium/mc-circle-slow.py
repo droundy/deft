@@ -359,7 +359,7 @@ for i in xrange(N):
   histogram_doubled[2*binnum+1] += 1 # add another count to histogram
 
 def mysavefig(f):
-  savefig(f)
+  savefig(f, transparent=True)
   print 'saved', f, 'with plotmoves', plotmoves, 'and count', count
 
 if 'show' in sys.argv:

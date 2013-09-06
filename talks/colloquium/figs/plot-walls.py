@@ -85,7 +85,7 @@ mcdata40 = numpy.loadtxt('../../papers/contact/figs/mc-walls-20-817.dat')
 dftdata40 = numpy.loadtxt('../../papers/contact/figs/wallsWB-0.40.dat')
 
 plotit(dftdata10, mcdata10)
-pylab.savefig('figs/walls-10.pdf')
+pylab.savefig('figs/walls-10.pdf', transparent=True)
 
 plotit(dftdata40, mcdata40)
-pylab.savefig('figs/walls-40.pdf')
+pylab.savefig('figs/walls-40.pdf', transparent=True)
