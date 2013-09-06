@@ -56,3 +56,6 @@ build
 *.fls
 *.pyc
 *.html
+*.vdx
+*.tbx
+*.fgx
