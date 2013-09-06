@@ -4,10 +4,29 @@
 \subsection{}
 
 \begin{frame}
+  \frametitle{High temperature expansion}
+\end{frame}
+
+\begin{frame}
   \frametitle{Finding the pair distribution function $g^{(2)}(\rr_1,\rr_2)$}
-  \begin{figure}[h]
-    \centering
-    \animategraphics[width=100mm,autoplay,final]{2.0}{anim/mc-pair-}{000}{30}
-  \end{figure}
+  \vspace{-0.8em}
+  \begin{center}
+    \animategraphics[height=20em,autoplay]{2.0}{anim/mc-pair-}{000}{30}\\
+    \vspace{-4.0em}
+    $n^{(2)}(0,\rr_2)$ for hard circles between two walls
+  \end{center}
+  \begin{align*}
+    g^{(2)}(\rr_1,\rr_2) &= \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Monte Carlo: $g^{(2)}(\rr_1,\rr_2)$ for spheres near a wall}
+  \includegraphics[width=\columnwidth]{figs/pair-mc-30}
+\end{frame}
+
+\begin{frame}
+  \frametitle{DFT: $g^{(2)}(\rr_1,\rr_2)$ for spheres near a wall}
+  \includegraphics[width=\columnwidth]{figs/pair-30}
 \end{frame}
 

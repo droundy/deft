@@ -109,6 +109,7 @@ def Matplotlib(env, source, py_chdir = ""):
                 extrainputs.append(fname)
             for o in coutputs:
                 fname = o[0] % friendly_eval(o[1], source, a)
+                #print 'generate', fname, 'from', aa
                 extraoutputs.append(fname)
             runpython(env, source, aa, inputs + extrainputs, outputs + extraoutputs, py_chdir)
     else:
