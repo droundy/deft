@@ -4,10 +4,13 @@
 #pragma once
 
 struct random {
-  static void seed(unsigned long seedval) { my_mtrand = MTRand(seedval); }
-  static double ran() {return my_mtrand.randExc(); }
+  //static void seed(unsigned long seedval) { x = seedval; }
+  static double ran() {
+    const long unsigned int x = 0;
+    static MTRand my_mtrand(x);
+    return my_mtrand.randExc(); }
 private:
-  static MTRand my_mtrand;
+  static long unsigned int x;
 };
 
 class vector3d {
@@ -113,13 +116,16 @@ const vector3d operator*(const double scalar, const vector3d &v) {
 
 class rotation {
  public:
-  double w;
-  double x;
-  double y;
-  double z;
-
   rotation() { w = 1.0; x = y = z = 0; }
   rotation(const rotation &q) { w = q.w; x = q.x; y = q.y; z = q.z; }
+  rotation(const double angle, const vector3d &axis) {
+    w = cos(angle/2.0);
+    const vector3d goodaxis = axis.normalized();
+    const double sinangle_over2 = sin(angle/2.0);
+    x = goodaxis.x*sinangle_over2;
+    y = goodaxis.y*sinangle_over2;
+    z = goodaxis.z*sinangle_over2;
+  }
 
   rotation operator=(const rotation &q) {
     w = q.w; x = q.x; y = q.y; z = q.z;
@@ -139,8 +145,8 @@ class rotation {
   bool operator !=(const rotation &q) const {
     return !(*this == q); }
 
-  vector3d rotate_vector(const vector3d &v) {
-    const rotation product = (*this)*rotation(0, v)*this->conj();
+  vector3d rotate_vector(const vector3d &v) const {
+    const rotation product = (*this)*rotation(0, v.x, v.y, v.z)*this->conj();
     return vector3d(product.x, product.y, product.z); }
 
   void tostr(char str[]) const {
@@ -157,8 +163,7 @@ class rotation {
       z = 2*random::ran() - 1;
       r2 = x*x + y*y + z*z;
     } while(r2 >= 1 || r2 == 0);
-    const rotation rot(cos(theta/2), vector3d(x, y, z)*sin(theta/2)/sqrt(r2));
-    return rot.normalized();
+    return rotation(theta, vector3d(x, y, z));
   }
 
   static rotation ran(double angwidth) {
@@ -185,10 +190,13 @@ class rotation {
   }
 
  private:
+  double w;
+  double x;
+  double y;
+  double z;
+
   rotation(const double neww, const double newx, const double newy, const double newz) {
     w = neww; x = newx; y = newy; z = newz; }
-  rotation(const double neww, const vector3d &v) {
-    w = neww; x = v.x; y = v.y; z = v.z; }
 
   rotation operator/(const double scalar) const {
     return rotation(w/scalar, x/scalar, y/scalar, z/scalar); }
