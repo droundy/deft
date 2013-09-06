@@ -73,7 +73,7 @@ struct poly_shape {
 // We create and use an array of these.
 struct polyhedron {
   vector3d pos;
-  quaternion rot;
+  rotation rot;
   double R;
   poly_shape *mypoly;
   int *neighbors;
@@ -115,8 +115,10 @@ int vertex_save_per_iters;
 double len[3] = {20, 20, 20};
 double de_density = 0.1;
 double R = 1.0;
+double dr = 0.01;
 double scale = 0.005;
 double theta_scale = 0.005;
+
 
 // The most neighbors that any polyhedron could have.
 // Not an exact value, but an over approximation based on volumes.
@@ -162,8 +164,10 @@ inline void move_all(polyhedron *p);
 inline bool overlap(const polyhedron &a, const polyhedron &b);
 
 // Check whether a polyhedron overlaps with any in the array, except for
-// the nth one. Useful for post-move testing with a temporary polyhedron.
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs);
+// Useful for post-move testing with a temporary polyhedron.
+// If count is true, it will return the total number of overlaps, otherwise
+// it returns 1 if there is at least one overlap, 0 if there are none.
+inline int overlaps_with_any(const polyhedron &a, const polyhedron *bs, bool count=false, double dr=0);
 
 // Check if polyhedron is outside its allowed locations
 inline bool in_cell(const polyhedron &p);
@@ -174,19 +178,6 @@ inline vector3d periodic_diff(const vector3d &a, const vector3d  &b);
 
 // Move v in a random direction by a distance determined by a gaussian distribution
 inline vector3d move(const vector3d &v, double scale);
-
-// Rotate q in a random direction by an amount determined by a gaussian distribution
-inline quaternion rotate(const quaternion &q, double scale);
-
-// Rotate the vector v about the axis of vector part of q
-// by an amount equal to the scalar part of q
-inline vector3d rotate_vector(const vector3d &v, const quaternion &q);
-
-// Generate a random number in the range [0, 1) using a fixed seed
-inline double ran();
-
-// Generate a random point in a gaussian distribution
-inline vector3d ran3();
 
 // If v is outside the cell, and there are periodic boundary condition(s), it is
 // moved (appropriately) into the cell
@@ -280,6 +271,10 @@ int main(int argc, const char *argv[]) {
       R = atof(argv[i+1]);
       printf("Setting radius of the circumscribing sphere to %g.\n", R);
       i += 1;
+    } else if (strcmp(argv[i], "dr") == 0) {
+      dr = atof(argv[i+1]);
+      printf("Setting radius of the circumscribing sphere to %g.\n", dr);
+      i += 1;
     } else if (strcmp(argv[i], "scale") == 0) {
       scale = atof(argv[i+1]);
       printf("Setting movement scale to %g.\n", scale);
@@ -328,6 +323,8 @@ int main(int argc, const char *argv[]) {
   long *density_histogram = new long[3*density_bins]();
   polyhedron *polyhedra = new polyhedron[N];
 
+  // Initialize the random number generator with our seed so we get repreducable
+  // results.
 
   ////////////////////////////////////////////////////////////////////////////////
   // Start by arranging the shapes in a grid.
@@ -346,35 +343,36 @@ int main(int argc, const char *argv[]) {
   max_neighbors = min(N, neighbor_sphere_vol / shape->volume);
 
   for(int i=0; i<N; i++) {
-      polyhedra[i].mypoly = shape;
-      polyhedra[i].R = R;
-      polyhedra[i].neighbors = new int[max_neighbors]();
+    polyhedra[i].mypoly = shape;
+    polyhedra[i].R = R;
+    polyhedra[i].neighbors = new int[max_neighbors]();
   }
   const int nx = ceil(pow(N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
-  const int ny = ceil((len[1]/len[0])*nx);
-  const int nz = ceil(N/double(nx*ny));
+  const int ny = nx;
+  const int nz = ny;
   const double xspace = len[0]/double(nx);
   const double yspace = len[1]/double(ny);
   const double zspace = len[2]/double(nz);
   printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g).\n",
                    nx, ny, nz, xspace, yspace, zspace);
   if (shape == &cube) {
-    int x = 0, y = 0, z = 0;
+    bool *spot_used = new bool[nx*ny*nz]();
     for(int i=0; i<N; i++) {
-      polyhedra[i].pos[0] = (x + 0.5)*xspace;
+      int x, y, z;
+      do {
+        x = floor(random::ran()*nx);
+        y = floor(random::ran()*ny);
+        z = floor(random::ran()*nz);
+      } while(spot_used[x*ny*nz + y*nz + z]);
+      spot_used[x*ny*nz + y*nz + z] = true;
+
+      polyhedra[i].pos[0] = (x)*xspace;
       polyhedra[i].pos[1] = (y + 0.5)*yspace;
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
 
       polyhedra[i].neighbor_center = polyhedra[i].pos;
-
-      x ++;
-      if (x >= nx) {
-        x = 0; y ++;
-        if (y >= ny) {
-          y = 0; z ++;
-        }
-      }
     }
+    delete[] spot_used;
   }
   if (shape == &tetrahedron || shape == &truncated_tetrahedron) {
     int x = 0, y = 0, z = 0, phi=0;
@@ -384,7 +382,7 @@ int main(int argc, const char *argv[]) {
       polyhedra[i].pos[0] = (x + 0.5)*xspace;
       polyhedra[i].pos[1] = (y + 0.5)*yspace + alt*R*(1.0/3.0);
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
-      polyhedra[i].rot = quaternion(cos(phi/2.0), sin(phi/2.0)*axis);
+      polyhedra[i].rot = rotation(phi, axis);
 
       polyhedra[i].neighbor_center = polyhedra[i].pos;
 
@@ -527,7 +525,7 @@ int main(int argc, const char *argv[]) {
         else
           count2 ++;
       }
-      if (count1 >= count2) {
+      if (count1 > count2) {
           printf("Not ready to start storing data yet - c1: %i, c2: %i, iteration: %li, acceptance rate: %4.2f\n", count1, count2, iteration, (double)workingmoves/totalmoves);
       } else {
         printf("\nTime to start data collection! c1: %i, c2: %i, iteration: %li\n", count1, count2, iteration);
@@ -546,7 +544,7 @@ int main(int argc, const char *argv[]) {
   // ---------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ---------------------------------------------------------------------------
-  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
+  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute fixme
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
 
@@ -616,9 +614,11 @@ rate: %g\n",
         const double xshell_volume = len[1]*len[2]*de_density;
         const double yshell_volume = len[0]*len[2]*de_density;
         const double zshell_volume = len[0]*len[1]*de_density;
-        const long xhist = e_i>=xbins ? -long(nan) : density_histogram[e_i];
-        const long yhist = e_i>=ybins ? -long(nan) : density_histogram[xbins + e_i];
-        const long zhist = e_i>=zbins ? -long(nan) : density_histogram[xbins + ybins + e_i];
+        // If we have a non-cubic cell, then this makes the density negative
+        // in the dimensions where it does not exist.
+        const long xhist = e_i>=xbins ? -totalmoves : density_histogram[e_i];
+        const long yhist = e_i>=ybins ? -totalmoves : density_histogram[xbins + e_i];
+        const long zhist = e_i>=zbins ? -totalmoves : density_histogram[xbins + ybins + e_i];
         const double xdensity = (double)xhist*N/totalmoves/xshell_volume;
         const double ydensity = (double)yhist*N/totalmoves/yshell_volume;
         const double zdensity = (double)zhist*N/totalmoves/zshell_volume;
@@ -671,18 +671,18 @@ inline bool overlap(const polyhedron &a, const polyhedron &b) {
   // construct axes from a
   // project a and b to each axis
   for (int i=0; i<a.mypoly->nfaces; i++) {
-    const vector3d axis = rotate_vector(a.mypoly->faces[i], a.rot);
-    double projection = axis.dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+    const vector3d axis = a.rot.rotate_vector(a.mypoly->faces[i]);
+    double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
     double mina = projection, maxa = projection;
     for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
       if (projection < mina) mina = projection;
       else if (projection > maxa) maxa = projection;
     }
-    projection = axis.dot(rotate_vector(b.mypoly->vertices[0]*b.R, b.rot) + ab);
+    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
     double minb = projection, maxb = projection;
     for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(rotate_vector(b.mypoly->vertices[j]*b.R, b.rot) + ab);
+      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
       if (projection < minb) minb = projection;
       else if (projection > maxb) maxb = projection;
     }
@@ -693,18 +693,18 @@ inline bool overlap(const polyhedron &a, const polyhedron &b) {
   // construct axes from b
   // project a and b to each axis
   for (int i=0; i<b.mypoly->nfaces; i++) {
-    const vector3d axis = rotate_vector(b.mypoly->faces[i], b.rot);
-    double projection = axis.dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+    const vector3d axis = b.rot.rotate_vector(b.mypoly->faces[i]);
+    double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
     double mina = projection, maxa = projection;
     for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
       if (projection < mina) mina = projection;
       else if (projection > maxa) maxa = projection;
     }
-    projection = axis.dot(rotate_vector(b.mypoly->vertices[0]*b.R, b.rot) + ab);
+    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
     double minb = projection, maxb = projection;
     for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(rotate_vector(b.mypoly->vertices[j]*b.R, b.rot) + ab);
+      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
       if (projection < minb) minb = projection;
       else if (projection > maxb) maxb = projection;
     }
@@ -715,20 +715,21 @@ inline bool overlap(const polyhedron &a, const polyhedron &b) {
   return true;
 }
 
-inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs) {
+inline int overlaps_with_any(const polyhedron &a, const polyhedron *bs, bool count, double dr) {
   // construct axes from a and a's projection onto them
   vector3d aaxes[a.mypoly->nfaces];
   double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
   for (int i=0; i<a.mypoly->nfaces; i++) {
-    aaxes[i] = rotate_vector(a.mypoly->faces[i], a.rot);
-    double projection = aaxes[i].dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+    aaxes[i] = a.rot.rotate_vector(a.mypoly->faces[i]);
+    double projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
     amins[i] = projection, amaxes[i] = projection;
     for (int j=1; j< a.mypoly->nvertices; j++) {
-      projection = aaxes[i].dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+      projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
       amins[i] = min(projection, amins[i]);
       amaxes[i] = max(projection, amaxes[i]);
     }
   }
+  int num_overlaps = 0;
   for (int l=0; l<a.num_neighbors; l++) {
     const int k = a.neighbors[l];
     const vector3d ab = periodic_diff(a.pos, bs[k].pos);
@@ -737,11 +738,11 @@ inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs) {
       // check projection of b against a's axes
       for (int i=0; i<a.mypoly->nfaces; i++) {
         double projection = aaxes[i].dot
-          (rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R, bs[k].rot) + ab);
+          (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
         double bmin = projection, bmax = projection;
         for (int j=1; j<bs[k].mypoly->nvertices; j++) {
           projection = aaxes[i].dot
-            (rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R, bs[k].rot) + ab);
+            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
           bmin = min(projection, bmin);
           bmax = max(projection, bmax);
         }
@@ -752,20 +753,20 @@ inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs) {
       }
       if (overlap) { // still need to check against b's axes
         for (int i=0; i<bs[k].mypoly->nfaces; i++) {
-          const vector3d axis = rotate_vector(bs[k].mypoly->faces[i], bs[k].rot);
-          double projection = axis.dot(rotate_vector(a.mypoly->vertices[0]*a.R, a.rot));
+          const vector3d axis = bs[k].rot.rotate_vector(bs[k].mypoly->faces[i]);
+          double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
           double amin = projection, amax = projection;
           for (int j=1; j<a.mypoly->nvertices; j++) {
-            projection = axis.dot(rotate_vector(a.mypoly->vertices[j]*a.R, a.rot));
+            projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
             amin = min(projection, amin);
             amax = max(projection, amax);
           }
           projection = axis.dot
-            (rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R, bs[k].rot) + ab);
+            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
           double bmin = projection, bmax = projection;
           for (int j=1; j<bs[k].mypoly->nvertices; j++) {
             projection = axis.dot
-              (rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R, bs[k].rot) + ab);
+              (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
             bmin = min(projection, bmin);
             bmax = max(projection, bmax);
 
@@ -776,10 +777,14 @@ inline bool overlaps_with_any(const polyhedron &a, const polyhedron *bs) {
           }
         }
       }
-      if (overlap) return true;
+      if (overlap) {
+        if(!count)
+          return 1;
+        num_overlaps ++;
+      }
     }
   }
-  return false;
+  return num_overlaps;
 }
 
 inline bool in_cell(const polyhedron &p) {
@@ -789,10 +794,10 @@ inline bool in_cell(const polyhedron &p) {
         if (p.pos[i] - p.R > 0.0 && p.pos[i] + p.R < len[i]) {
           continue;
         }
-        double coord = (rotate_vector(p.mypoly->vertices[0]*p.R, p.rot) + p.pos)[i];
+        double coord = (p.rot.rotate_vector(p.mypoly->vertices[0]*p.R) + p.pos)[i];
         double pmin = coord, pmax = coord;
         for (int j=1; j<p.mypoly->nvertices; j++) {
-          coord = (rotate_vector(p.mypoly->vertices[j]*p.R, p.rot) + p.pos)[i];
+          coord = (p.rot.rotate_vector(p.mypoly->vertices[j]*p.R) + p.pos)[i];
           pmin = min(coord, pmin);
           pmax = max(coord, pmax);
         }
@@ -818,74 +823,8 @@ inline vector3d periodic_diff(const vector3d &a, const vector3d &b) {
 }
 
 inline vector3d move(const vector3d &v, double scale) {
-  const vector3d newv = v + scale*ran3();
+  const vector3d newv = v + vector3d::ran(scale);
   return fix_periodic(newv);
-}
-
-inline quaternion rotate(const quaternion &q, double scale) {
-  double x, y, z, r2, sintheta;
-  do {
-    do {
-      x = 2*ran() - 1;
-      y = 2*ran() - 1;
-      r2 = x*x + y*y;
-    } while (r2 >= 1 || r2 == 0);
-    const double fac = sqrt(-2*log(r2)/r2);
-    sintheta = fac*x*scale;
-  } while (sintheta <= -1 or sintheta >= 1);
-  const double costheta = sqrt(1 - sintheta*sintheta);
-  do {
-    x = 2*ran() - 1;
-    y = 2*ran() - 1;
-    z = 2*ran() - 1;
-    r2 = x*x + y*y + z*z;
-  } while(r2 >= 1 || r2 == 0);
-  const double vfac = sintheta/sqrt(r2);
-  const quaternion rot(costheta, x*vfac, y*vfac, z*vfac);
-  if (debug) {
-    quaternion totalrot = rot*q;
-    if (fabs(1.0-rot.normsquared()) > 1e-15 || totalrot[0] > 1 || totalrot[0] < -1) {
-      printf("%g\n", 1.0 - rot.normsquared());
-      char rotstr[1024];
-      rot.tostr(rotstr);
-      double theta = 2*acos(rot[0]);
-      printf("Rot: %s, theta: %4.2f, n: %.1f ", rotstr, theta, rot.norm());
-      totalrot.tostr(rotstr);
-      theta = 2*acos(totalrot[0]);
-      printf("Total: %s, theta: %4.2f, n: %.1f\n", rotstr, theta, totalrot.norm());
-      fflush(stdout);
-    }
-  }
-  return (rot*q).normalized();
-}
-
-inline vector3d rotate_vector(const vector3d &v, const quaternion &q) {
-  const quaternion product = q*quaternion(0, v)*q.conj();
-  return vector3d(product[1], product[2], product[3]);
-}
-
-inline double ran() {
-  static MTRand my_mtrand(seed); // always use the same random number generator (for debugging)!
-  return my_mtrand.randExc(); // which is the range of [0,1)
-}
-
-inline vector3d ran3() {
-  double x, y, r2;
-  do {
-    x = 2*ran() - 1;
-    y = 2*ran() - 1;
-    r2 = x*x + y*y;
-  } while(r2 >= 1 || r2 == 0);
-  double fac = sqrt(-2*log(r2)/r2);
-  vector3d out(x*fac, y*fac, 0);
-  do {
-    x = 2*ran() - 1;
-    y = 2*ran() - 1;
-    r2 = x*x + y*y;
-  } while(r2 >= 1 || r2 == 0);
-  fac = sqrt(-2*log(r2)/r2);
-  out[2]=x*fac;
-  return out;
 }
 
 inline vector3d fix_periodic(vector3d newv) {
@@ -935,6 +874,25 @@ inline void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int
     print_all(p);
   }
   int new_index = 0, old_index = 0;
+
+  // while (1) {
+  //   if (new_index >= newlen) {
+  //     handle olds;
+  //     return;
+  //   }
+  //   if (old_index >= oldlen) {
+  //     handle news;
+  //     return;
+  //   }
+  //   if (oldindex >= oldlen || new[new_index] == old[old_index]) {
+  //   } else if (new[index] < ) {
+  //     handle new;
+  //     new_index++;
+  //   } else {
+  //     handle old;
+  //     old_index++;
+  //   }
+  // }
   bool checknew = newp.num_neighbors > 0;
   bool checkold = oldp.num_neighbors > 0;
   while (checknew || checkold) {
@@ -1003,7 +961,7 @@ inline void move_all(polyhedron *p) {
     totalmoves ++;
     polyhedron temp;
     temp.pos = move(p[i].pos, scale);
-    temp.rot = rotate(p[i].rot, theta_scale);
+    temp.rot = rotation::ran(theta_scale)*p[i].rot;
     temp.R = p[i].R;
     temp.mypoly = p[i].mypoly;
     temp.neighbors = p[i].neighbors;
@@ -1097,8 +1055,6 @@ inline void print_all(const polyhedron *p) {
       printf("\n      pos:          %s\n      rot: %s\n", pos, rot);
       if (!in_cell(p[i]))
         printf("----  Outside cell!\n");
-      if (fabs(p[i].rot.normsquared() - 1.0) > 10e-15)
-        printf("$$$$  Quaternion off! Normsquared - 1: %g\n", (p[i].rot.normsquared()-1.0));
       for (int j=i+1; j<N; j++)
         if (overlap(p[i], p[j]))
           printf("****  Overlaps with %i!!!.\n", j);
@@ -1122,8 +1078,6 @@ inline void print_one(const polyhedron &p, int id) {
     printf("\n      pos:          %s\n      rot: %s\n", pos, rot);
     if (!in_cell(p))
       printf("----  Outside cell!\n");
-    if (fabs(p.rot.normsquared() - 1.0) > 10e-15)
-      printf("$$$$  Quaternion off! Normsquared - 1: %g\n", (p.rot.normsquared()-1.0));
   }
   printf("\n");
   fflush(stdout);
@@ -1140,15 +1094,23 @@ inline void print_bad(const polyhedron *p) {
         }
       }
       if (!incell || overlaps) {
-        printf("%s %4i: (%6.2f, %6.2f, %6.2f)  [%5.2f, (%5.2f, %5.2f, %5.2f)] R: %4.2f\n", p[i].mypoly->name, i, p[i].pos[0], p[i].pos[1], p[i].pos[2], p[i].rot[0], p[i].rot[1], p[i].rot[2], p[i].rot[3], p[i].R);
+        char *pos = new char[1024];
+        char *rot = new char[1024];
+        p[i].pos.tostr(pos);
+        p[i].rot.tostr(rot);
+        printf("%s %4i: %s   %s R: %4.2f\n", p[i].mypoly->name, i, pos, rot, p[i].R);
         if (!incell)
           printf("\t  Outside cell!\n");
         for (int j=0; j<N; j++) {
           if (j != i && overlap(p[i], p[j])) {
+            p[j].pos.tostr(pos);
+            p[j].rot.tostr(rot);
             printf("\t  Overlaps with %i", j);
-            printf(": (%6.2f, %6.2f, %6.2f)  [%5.2f, (%5.2f, %5.2f, %5.2f)]\n", p[j].pos[0], p[j].pos[1], p[j].pos[2], p[j].rot[0], p[j].rot[1], p[j].rot[2], p[j].rot[3]);
+            printf(": %s   %s\n", pos, rot);
           }
         }
+        delete[] pos;
+        delete[] rot;
       }
     }
   }
@@ -1195,11 +1157,12 @@ static void took(const char *name) {
 
 void save_locations(const polyhedron *p, const char *fname) {
   FILE *out = fopen((const char *)fname, "w");
+  fprintf(out, "# saved every %i iterations, totalmoves: %li.\n", vertex_save_per_iters, totalmoves);
   for(int i=0; i<N; i++) {
     fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[0], p[i].pos[1], p[i].pos[2]);
     for(int j=0; j<p[i].mypoly->nvertices; j++) {
       const vector3d vertex =
-        rotate_vector(p[i].mypoly->vertices[j]*p[i].R, p[i].rot) + p[i].pos;
+        p[i].rot.rotate_vector(p[i].mypoly->vertices[j]*p[i].R) + p[i].pos;
       fprintf(out, "%6.2f %6.2f %6.2f ", vertex[0], vertex[1], vertex[2]);
     }
     fprintf(out, "\n");
