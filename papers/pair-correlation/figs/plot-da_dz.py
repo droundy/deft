@@ -49,7 +49,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","gloor","this-work", "this-work-mc", 'sokolowski']
+versions = ["fischer","this-work", 'sokolowski']
 
 for version in versions:
   z0, da_dz = read_da_dz(version)

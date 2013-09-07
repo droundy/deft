@@ -37,8 +37,6 @@ const double zmax = 6;
 const double xmax = 4;
 const double dx = 0.1;
 
-const double dz = 0.1;
-
 double mc_r_step;
 const int num_eta = 10;
 const double eta_step = 0.5/num_eta;
@@ -97,15 +95,15 @@ double pairdist_sokolowski(const Grid &gsigma, const Grid &n, const Grid &nA, co
 
 const char *fun[] = {
   "this-work",
-  "this-work-mc",
-  "gloor",
+  // "this-work-mc",
+  // "gloor",
   "fischer",
   "sokolowski"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
-  pairdist_this_work_mc,
-  pairdist_gloor,
+  // pairdist_this_work_mc,
+  // pairdist_gloor,
   pairdist_fischer,
   pairdist_sokolowski
 };
@@ -397,7 +395,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       // the +1 for z0 and z1 are to shift the plot over, so that a sphere touching the wall
       // is at z = 0, to match with the monte carlo data
       const Cartesian r0(0,0,z0);
-      const double resolution_2d = 0.025;
+      const double resolution_2d = 0.05;
       for (double x = 0; x < xmax + resolution_2d/2; x += resolution_2d) {
         for (double z1 = 3; z1 < zmax + 3 - resolution_2d/2; z1 += resolution_2d) {
           const Cartesian r1(x,0,z1);
@@ -422,6 +420,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
   //printf("Starting the a1 integrals now!!\n");
   for (int version = 0; version < numplots; version++) {
     for (double delta_r=2.005; delta_r<3.5; delta_r+=1.0){
+      const double dz = 0.02;
       const double dv = 0.01;
       char *plotname_a = new char [4096];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/walls_da%s-%s-%04.2f-%1.3f.dat", name, fun[version], eta, delta_r);
