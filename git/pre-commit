@@ -26,7 +26,7 @@ case "$TEST" in
         ;;
     *)
         echo Testing everything!
-        /usr/bin/time -f '%E' -o /tmp/time.txt scons -j $USING
+        /usr/bin/time -f '%E' -o /tmp/time.txt scons -j $USING --tree=prune
         echo Tests successful, took `cat /tmp/time.txt`
         ;;
 esac
