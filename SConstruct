@@ -165,12 +165,23 @@ generic_sources = Split("""
  """)
 all_sources = generic_sources + generated_sources
 
+env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                        polyhedra """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
+    NoCache(p)
     Alias('papers', p)
+    env.Tar(target = 'papers/' + paper + '/arxiv.tar.gz',
+            source = ['papers/' + paper + '/paper.tex',
+                      'papers/' + paper + '/paper.bbl'] +
+                     Glob('papers/' + paper + '/figs/*.pdf') +
+                     Glob('papers/' + paper + '/figs/*.jpg') +
+                     Glob('papers/' + paper + '/figs/*.png'))
+    Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.pdf')
+    Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.bbl')
+    Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
 Default('papers')
 
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
