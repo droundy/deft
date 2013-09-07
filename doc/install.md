@@ -27,6 +27,7 @@ You need ...
     emacs-goodies-el # optional, but handy for markdown-mode
     scons
     fftw3-dev
+    libpopt-dev # for command-line argument processing
     g++
     haskell-platform
     texlive-full
