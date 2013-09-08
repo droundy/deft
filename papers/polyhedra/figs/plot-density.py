@@ -1,22 +1,32 @@
 #!/usr/bin/python
 from __future__ import division
-import matplotlib, sys, os
+import matplotlib, sys, os, argparse
 import common
 
-if len(sys.argv) < 4:
-  print("Use: %s ff shape N")
-if len(sys.argv) < 5 or sys.argv[4] != "show":
+parser = argparse.ArgumentParser(description='Plot density of polyhedra.')
+parser.add_argument('ff', metavar='ff', type=float, help='filling fraction')
+parser.add_argument('N', metavar='N', type=int, help='number of polyhedra')
+parser.add_argument('shape', metavar='shape', help='type of polyhedra', default='cube', choices=['cube', 'tetrahedron', 'truncated_tetrahedron'])
+parser.add_argument('-p', '--periodic', help='will use periodic cell - defaults to walls otherwise', action='store_true')
+parser.add_argument('-s', '--show', help='will display the plot instead of just saving it', action='store_true')
+args = parser.parse_args()
+
+N = args.N
+ff = args.ff
+polyhedron = args.shape
+
+if args.periodic:
+  celltype = 'periodic'
+else:
+  celltype = 'walls'
+
+if not args.show:
   matplotlib.use('Agg')
 from pylab import *
 
-ff = float(sys.argv[1])
-poly = sys.argv[2]
-N = int(sys.argv[3])
-
-
-e, densities = common.read_mc_density(ff, poly, N, 'walls')
-length = common.read_mc_dimensions(ff, poly, N, 'walls')
-print length
+e, densities = common.read_mc_density(ff, polyhedron, N, celltype)
+length = common.read_mc_dimensions(ff, polyhedron, N, celltype)
+print 'cell shape: ', length
 dims = ['x', 'y', 'z']
 colors = ['r', 'b', 'k']
 for i in xrange(3):
@@ -28,13 +38,13 @@ for i in xrange(3):
   plot(length[i]-coord[coord>mid], density[coord>mid], color=colors[i], linestyle='--')
 
 
-if poly == 'cube':
+if polyhedron == 'cube' and celltype == 'walls':
   axvline(x = 0.5, linestyle=':')
   axvline(x = sqrt(2)/2, linestyle=':')
   axvline(x = sqrt(3)/2, linestyle=':')
 legend(loc='best')
 
 #xlim(0, 4)
-title("density, %s, $\\eta = %04.2f$, $N = %i$." %(poly, ff, N))
-savefig("figs/density-%4.2f-%s.pdf" %(ff, poly))
+title("$%s,$ $density,$ $%s,$ $\\eta = %04.2f$, $N = %i$." %(celltype, polyhedron, ff, N))
+savefig("figs/%s-density-%4.2f-%s.pdf" %(celltype, ff, polyhedron))
 show()

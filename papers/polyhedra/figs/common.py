@@ -1,7 +1,7 @@
 import os
 from numpy import *
 
-def read_mc_density(ff, poly, N, celltype='walls'):
+def read_mc_density(ff, poly, N, celltype):
   fname = "figs/mc/%s-%4.2f-density-%s-%i.dat" %(celltype, ff, poly, N)
   print "using", fname
   if (not os.path.isfile(fname)):
@@ -19,7 +19,7 @@ def read_mc_density(ff, poly, N, celltype='walls'):
   zdens = zdens[zdens >= 0]
   return [x, y ,z], [xdens, ydens, zdens]
 
-def read_mc_dimensions(ff, poly, N, celltype='walls'):
+def read_mc_dimensions(ff, poly, N, celltype):
   e, garbage= read_mc_density(ff, poly, N, celltype)
 
   length = empty(3)

@@ -44,7 +44,7 @@
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
 // code is active
-const bool debug = true;
+const bool debug = false;
 
 const poly_shape cube("cube");
 const poly_shape tetrahedron("tetrahedron");
@@ -448,11 +448,11 @@ periodicity/dimensions are not set by default and are required.\n");
       oldworkingmoves = workingmoves;
       oldtotalmoves = totalmoves;
       if (acceptance_rate < 0.5) {
-        scale /= 1.01;
-        theta_scale /= 1.01;
+        scale /= 1.1;
+        theta_scale /= 1.1;
       } else if (acceptance_rate > 0.7) {
-        scale *= 1.01;
-        theta_scale *= 1.01;
+        scale *= 1.1;
+        theta_scale *= 1.1;
       }
     }
     // ---------------------------------------------------------------
