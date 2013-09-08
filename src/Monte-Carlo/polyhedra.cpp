@@ -1,84 +1,69 @@
+#include <stdlib.h>
 #include "Monte-Carlo/polyhedra.h"
 #include "handymath.h"
+
+const poly_shape empty_shape;
 
 
 void update_neighbors(polyhedron &a, int n, const polyhedron *bs, int N,
                       double neighborR, const double periodic[3]) {
   a.num_neighbors = 0;
   for(int i=0; i<N; i++) {
-    if ((i!=n) && (periodic_diff(a.pos, bs[i].neighbor_center, periodic).normsquared() <
-                   sqr(a.R + bs[i].R + neighborR))) {
+    if ((i!=n) &&
+        (periodic_diff(a.pos, bs[i].neighbor_center, periodic).normsquared()
+         < sqr(a.R + bs[i].R + neighborR))) {
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors ++;
     }
   }
 }
 
-void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int n,
-                      polyhedron *p, int N) {
-  int new_index = 0, old_index = 0;
+inline void add_new_neighbor(int new_n, polyhedron *p, int id) {
+  int pindex = p[id].num_neighbors - 1;
+  p[id].num_neighbors ++;
+  while (pindex >= 0 && p[id].neighbors[pindex] > new_n) {
+    p[id].neighbors[pindex + 1] = p[id].neighbors[pindex];
+    pindex --;
+  }
+  p[id].neighbors[pindex+1] = new_n;
+}
 
-  // while (1) {
-  //   if (new_index >= newlen) {
-  //     handle olds;
-  //     return;
-  //   }
-  //   if (old_index >= oldlen) {
-  //     handle news;
-  //     return;
-  //   }
-  //   if (oldindex >= oldlen || new[new_index] == old[old_index]) {
-  //   } else if (new[index] < ) {
-  //     handle new;
-  //     new_index++;
-  //   } else {
-  //     handle old;
-  //     old_index++;
-  //   }
-  // }
-  bool checknew = newp.num_neighbors > 0;
-  bool checkold = oldp.num_neighbors > 0;
-  while (checknew || checkold) {
-    if (checkold &&
-        (!checknew || oldp.neighbors[old_index] < newp.neighbors[new_index])) {
-      //printf("old[%i]: %i\n", old_index, oldp.neighbors[old_index]);
-      // We had a neighbor that we moved away from, so it's time to remove ourselves
-      // from his table and never speak to him again.
-      const int i = oldp.neighbors[old_index];
-      int pindex = p[i].num_neighbors - 1;
-      int temp = p[i].neighbors[pindex];
-      while (temp != n) {
-        pindex --;
-        const int temp2 = temp;
-        temp = p[i].neighbors[pindex];
-        p[i].neighbors[pindex] = temp2;
-      }
-      p[i].num_neighbors --;
-      old_index ++;
-    } else if (checknew &&
-               (!checkold || newp.neighbors[new_index] < oldp.neighbors[old_index])) {
-      // We have a new neighbor! Time to insert ourselves into his list
-      // so we can be invited over for dinner.
-      // We only increment the new index here.
-      const int i = newp.neighbors[new_index];
-      int pindex = p[i].num_neighbors - 1;
-      int temp = p[i].neighbors[pindex];
-      p[i].num_neighbors ++;
-      while  (temp > n) {
-        p[i].neighbors[pindex + 1] = temp;
-        pindex --;
-        temp = p[i].neighbors[pindex];
-      }
-      p[i].neighbors[pindex+1] = n;
+inline void remove_old_neighbor(int old_n, polyhedron *p, int id) {
+  int pindex = p[id].num_neighbors - 1;
+  int temp = p[id].neighbors[pindex];
+  while (temp != old_n) {
+    pindex --;
+    const int temp2 = temp;
+    temp = p[id].neighbors[pindex];
+    p[id].neighbors[pindex] = temp2;
+  }
+  p[id].num_neighbors --;
+}
+
+void inform_neighbors(const polyhedron &newp, const polyhedron &oldp, int n,
+                      polyhedron *p) {
+  int new_index = 0, old_index = 0;
+  while (true) {
+    if (new_index >= newp.num_neighbors) {
+      for(int i=old_index; i<oldp.num_neighbors; i++)
+        remove_old_neighbor(n, p, oldp.neighbors[i]);
+      return;
+    }
+    if (old_index >= oldp.num_neighbors) {
+      for(int i=new_index; i<newp.num_neighbors; i++)
+        add_new_neighbor(n, p, newp.neighbors[i]);
+      return;
+    }
+    if (newp.neighbors[new_index] < oldp.neighbors[old_index]) {
+      add_new_neighbor(n, p, newp.neighbors[new_index]);
       new_index ++;
-    } else {// (newp.neighbors[new_index] == oldp.neighbors[old_index])
-      // This new neighbor was also an old neighbor, so we don't have to do anything
-      // but increment.
+    } else if (oldp.neighbors[old_index] < newp.neighbors[new_index]) {
+      remove_old_neighbor(n, p, oldp.neighbors[old_index]);
+      old_index ++;
+    } else { // (newp.neighbors[new_index] == oldp.neighbors[old_index])
       new_index ++;
       old_index ++;
     }
-    checknew = new_index < newp.num_neighbors;
-    checkold = old_index < oldp.num_neighbors;
   }
 }
 
@@ -253,7 +238,7 @@ bool in_cell(const polyhedron &p, const double walls[3], bool real_walls) {
 }
 
 
-polyhedron move_polyhedron_randomly(const polyhedron &original, double size,
+polyhedron random_move(const polyhedron &original, double size,
                                     double angwidth, const double len[3]) {
   polyhedron temp = original;
   temp.pos = fix_periodic(temp.pos + vector3d::ran(size), len);
@@ -265,7 +250,7 @@ bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
                          double dist, double angwidth, int max_neighbors) {
   const double len[3] = {periodic[0]+walls[0], periodic[1]+walls[1], periodic[2]+walls[2]};
-  polyhedron temp = move_polyhedron_randomly(p[id], dist, angwidth, len);
+  polyhedron temp = random_move(p[id], dist, angwidth, len);
   if (in_cell(temp, walls, real_walls)) {
     bool overlaps = overlaps_with_any(temp, p, periodic);
     if (!overlaps) {
@@ -289,13 +274,10 @@ bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
           // Okay, we've checked twice, just like Santa Clause, so we're definitely
           // keeping this move and need to tell our neighbors where we are now.
           temp.neighbor_center = temp.pos;
-          inform_neighbors(temp, p[id], id, p, N);
+          inform_neighbors(temp, p[id], id, p);
           delete[] p[id].neighbors;
-        } else {
-          // We don't have to move! We can throw away the new table as we don't
-          // have any new neighbors.
-          delete[] temp.neighbors;
         }
+        else delete[] temp.neighbors;
       }
       if (!overlaps) {
         p[id] = temp;
@@ -306,6 +288,38 @@ bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
   return false;
 }
 
+int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,
+                               int max_neighbors, const double periodic[3]) {
+  int most_neighbors = 0;
+  for(int i=0; i<N; i++) {
+    p[i].neighbors = new int[max_neighbors];
+    p[i].num_neighbors = 0;
+    for(int j=0; j<N; j++) {
+      const bool is_neighbor = (i != j) &&
+        (periodic_diff(p[i].pos, p[j].pos, periodic).normsquared() <
+         uipow(p[i].R + p[j].R + neighborR, 2));
+      if (is_neighbor) {
+        const int index = p[i].num_neighbors;
+        p[i].num_neighbors ++;
+        if (p[i].num_neighbors > max_neighbors) return -1;
+        p[i].neighbors[index] = j;
+      }
+    }
+    most_neighbors = max(most_neighbors, p[i].num_neighbors);
+  }
+  return most_neighbors;
+}
+
+poly_shape::poly_shape() {
+  nvertices = 0;
+  nfaces = 0;
+  volume = 0;
+  vertices = NULL;
+  faces = NULL;
+  name = new char[6];
+  sprintf(name, "empty");
+}
+
 poly_shape::poly_shape(const char *set_name) {
   if (strcmp(set_name, "cube") == 0) {
     nvertices = 8;
@@ -313,7 +327,7 @@ poly_shape::poly_shape(const char *set_name) {
     volume = 1.0;
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
-    name = new char[4];
+    name = new char[5];
     sprintf(name, "cube");
 
     const double v_cube = 1.0/sqrt(3.0);
@@ -336,7 +350,7 @@ poly_shape::poly_shape(const char *set_name) {
     volume = 1.0/3.0;
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
-    name = new char[11];
+    name = new char[13];
     sprintf(name, "tetrahedron");
 
     vertices[0] = vector3d( sqrt(2.0/3.0),    -sqrt(2.0)/3.0, -1.0/3.0);
@@ -355,8 +369,8 @@ poly_shape::poly_shape(const char *set_name) {
     volume = 0; //fixme
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
-    name = new char[21];
-    sprintf(name, "truncated_tetrahedron");
+    name = new char[22];
+    sprintf(name, "truncated tetrahedron");
 
     faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
     faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
@@ -369,7 +383,7 @@ poly_shape::poly_shape(const char *set_name) {
     volume = 0;
     vertices = NULL;
     faces = NULL;
-    name = new char[13];
+    name = new char[14];
     sprintf(name, "invalid shape");
   }
 }
@@ -379,3 +393,38 @@ poly_shape::~poly_shape() {
   delete[] faces;
   delete[] name;
 }
+
+polyhedron::polyhedron() {
+  pos = vector3d();
+  rot = rotation();
+  R = 0;
+  mypoly = &empty_shape;
+  neighbors = new int[0];
+  num_neighbors = 0;
+  neighbor_center = vector3d();
+}
+
+polyhedron::polyhedron(const polyhedron &p) {
+  pos = p.pos;
+  rot = p.rot;
+  R = p.R;
+  mypoly = p.mypoly;
+  neighbors = p.neighbors;
+  num_neighbors = p.num_neighbors;
+  neighbor_center = p.neighbor_center;
+}
+
+polyhedron polyhedron::operator=(const polyhedron &p) {
+  pos = p.pos;
+  rot = p.rot;
+  R = p.R;
+  mypoly = p.mypoly;
+  neighbors = p.neighbors;
+  num_neighbors = p.num_neighbors;
+  neighbor_center = p.neighbor_center;
+  return *this;
+}
+
+// polyhedron::~polyhedron() {
+//   delete[] neighbors;
+// }

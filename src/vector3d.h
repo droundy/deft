@@ -98,14 +98,14 @@ class vector3d {
       y = 2*random::ran() - 1;
       r2 = x*x + y*y;
     } while(r2 >= 1 || r2 == 0);
-    double fac = sqrt(-2*log(r2)/r2);
+    double fac = scale*sqrt(-2*log(r2)/r2);
     vector3d out(x*fac, y*fac, 0);
     do {
       x = 2*random::ran() - 1;
       y = 2*random::ran() - 1;
       r2 = x*x + y*y;
     } while(r2 >= 1 || r2 == 0);
-    fac = sqrt(-2*log(r2)/r2);
+    fac = scale*sqrt(-2*log(r2)/r2);
     out[2]=x*fac;
     return out;
   }
@@ -137,7 +137,7 @@ class rotation {
                     w*q.y - x*q.z + y*q.w + z*q.x,
                     w*q.z + x*q.y - y*q.x + z*q.w).normalized(); }
   rotation operator*=(const rotation &q) {
-    *this = (*this)*q; return *this; }
+    *this = q*(*this); return *this; }
 
   bool operator ==(const rotation &q) const {
     return ((w == q.w) && (x == q.x) &&

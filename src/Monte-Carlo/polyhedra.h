@@ -1,6 +1,10 @@
 #include "vector3d.h"
 #pragma once
 
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&);               \
+  void operator=(const TypeName&)
+
 struct poly_shape {
   int nvertices;
   int nfaces;
@@ -9,10 +13,17 @@ struct poly_shape {
   double volume;
   char *name;
 
-  poly_shape(const char *set_name);
+  poly_shape();
+  explicit poly_shape(const char *set_name);
   ~poly_shape();
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(poly_shape);
 };
 
+// Note: once assigned, the poly_shape of a polyhedron is never cleared
+// It is expected that there are only a few poly_shapes which many polyhedra
+// pointing to each
 struct polyhedron {
   vector3d pos;
   rotation rot;
@@ -21,9 +32,23 @@ struct polyhedron {
   int *neighbors;
   int num_neighbors;
   vector3d neighbor_center;
+
+  polyhedron();
+  polyhedron(const polyhedron &p);
+
+  polyhedron operator=(const polyhedron &p);
+  //  ~polyhedron();
+private:
+  //  DISALLOW_COPY_AND_ASSIGN(polyhedron);
 };
 
 // struct polyhedron; fixme: forward declare
+
+// Create and initialize the neighbor tables for polyhedra p.
+// Returns the maximum number of neighbors that any polyhedron has,
+// or -1 if that number is larger than max_neighbors.
+int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,
+                               int max_neighbors, const double periodic[3]);
 
 // Find's the neighbors of a by comparing a's position to the center of
 // everyone else's neighborsphere, where id is the index of a in p.
@@ -67,7 +92,7 @@ bool in_cell(const polyhedron &p, const double walls[3], bool real_walls);
 // respective standard deviations dist and angwidth
 polyhedron random_move(const polyhedron &original, double dist, double angwidth, const double len[3]);
 
-// Attempt to move polyhedron of id in p.
+// Attempt to move polyhedron of id in p, while paying attention to collisions and walls
 // Return true if the move is successful, false otherwise
 bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
