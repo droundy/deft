@@ -10,6 +10,9 @@
 \setbeamertemplate{itemize items}[triangle]
 \setbeamertemplate{footline}[frame number]
 
+\newcounter{conclusion}
+\newcommand\conclude{\addtocounter{conclusion}{1}Conclusion \#\arabic{conclusion}}
+
 \newcommand\myciteetal[3]{{\small #1 \emph{et al}, \textit{#2} (#3)}}
 \newcommand\mycite[3]{{\small #1, \textit{#2} (#3)}}
 \newcommand\rr{\mathbf{r}}

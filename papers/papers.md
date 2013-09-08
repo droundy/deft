@@ -5,6 +5,10 @@ using the Deft code.  The code that generated the results for each of
 these papers is available in the Deft repository, and can serve as an
 example of how to use Deft.
 
+"Improved association in a classical density functional theory for
+  water", E. J. Krebs, J. B. Sculte and D. Roundy, *submitted to
+  J. Chem. Phys.* [(pdf)](water-saft/paper.pdf)
+
 "A classical density-functional theory for describing water
 interfaces", J. Hughes, E. J. Krebs, D. Roundy, *J. Chem. Phys.*
 (2013). [(pdf)](hughes-saft/paper.pdf)

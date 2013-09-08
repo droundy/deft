@@ -4,7 +4,25 @@
 \subsection{}
 
 \begin{frame}
-  \frametitle{High temperature expansion}
+  \frametitle{Thermodynamic perturbation theory}
+  \begin{block}{High $T$ expansion for the dispersion interaction}
+    Free energy contribution due to weak pairwise interaction $\Phi(r)$:
+    \[
+    F_\text{disp} = N\left(a_1(n) + a_2(n)\beta + \mathcal{O}(\beta^2)\right)
+    \]
+  \end{block}
+  \begin{block}{}
+    \vspace{-1em}
+    \begin{align*}
+      a_1 &= \frac1{N}\iint n^{(2)}_{\text{HS}}(\rr_1,\rr_2)\Phi(|\rr_1-\rr_2|)d\rr_1d\rr_2
+      \\
+      &= \frac1{N}\iint n(\rr_1)n(\rr_2)g^{(2)}_{\text{HS}}(\rr_1,\rr_2)\Phi(|\rr_1-\rr_2|)d\rr_1d\rr_2
+    \end{align*}
+  \end{block}
+  \begin{center}
+    \includegraphics[height=3cm]{figs/paho}
+    \includegraphics[height=3cm]{figs/SchulteJeff}
+  \end{center}
 \end{frame}
 
 \begin{frame}
@@ -21,12 +39,72 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Monte Carlo: $g^{(2)}(\rr_1,\rr_2)$ for spheres near a wall}
+  \frametitle{Monte Carlo: $g^{(2)}(\langle 0,0,0\rangle,\rr_2)$ for spheres near a wall}
   \includegraphics[width=\columnwidth]{figs/pair-mc-30}
+  \begin{align*}
+    g^{(2)}(\rr_1,\rr_2) &= \frac{n^{(2)}(\rr_1,\rr_2)}{n(\rr_1)n(\rr_2)}
+  \end{align*}
 \end{frame}
 
 \begin{frame}
-  \frametitle{DFT: $g^{(2)}(\rr_1,\rr_2)$ for spheres near a wall}
+  \frametitle{Theoretical approach for $g^{(2)}(\rr_1,\rr_2)$}
+  \begin{block}{}
+    \begin{itemize}
+    \item enforce correct answer for $a_1$ at contact (i.e. $\Phi(r)
+      \propto \delta(r-\sigma)$):
+      \begin{multline*}
+        \iint n(\rr_1) n(\rr_2) g_\sigma(\rr_1)
+        \delta(|\rr_1-\rr_2|-\sigma)
+        d\rr_1 d\rr_2
+        =\\
+        \iint n(\rr_1) n(\rr_2) g^{(2)}(\rr_1, \rr_2)
+        \delta(|\rr_1-\rr_2|-\sigma)
+        d\rr_1 d\rr_2
+      \end{multline*}
+    \item enable computation of $a_1$ with single-center convolutions
+    \item simplest approach:
+      \begin{equation*}
+        g^{(2)}(\rr_1,\rr_2) = \frac{g(r_{12}, g_\sigma(\rr_1)) +
+          g(r_{12}, g_\sigma(\rr_2))}{2}
+      \end{equation*}
+    \item $g(r,g_\sigma)$ is a separable fit to the HS radial
+      distribution function
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{DFT: $g^{(2)}(\langle 0,0,0\rangle,\rr_2)$ for spheres near a wall}
   \includegraphics[width=\columnwidth]{figs/pair-30}
+\end{frame}
+
+\begin{frame}
+  \frametitle{$a_1$ near a hard wall}
+  \[ a_1 = \int \frac{da_1}{dz} dz \]
+  \vspace{-3em}
+  \begin{columns}
+    \begin{column}{0.5\columnwidth}
+      \begin{center}
+        \includegraphics[width=1.1\columnwidth]{figs/dadz-3-2.pdf}
+      \end{center}
+    \end{column}
+    \begin{column}{0.5\columnwidth}
+      \begin{center}
+        \includegraphics[width=1.1\columnwidth]{figs/dadz-3-3.pdf}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\conclude}
+  \begin{center}
+    \includegraphics[height=4cm]{figs/pair-30}
+  \end{center}
+  \begin{itemize}
+  \item Derived and tested functional for the pair correlation
+    function of hard spheres
+  \item Reasonably efficient: scales like the hard sphere free energy
+  \end{itemize}
 \end{frame}
 
