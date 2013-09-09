@@ -8,32 +8,43 @@ import common
 
 parser = argparse.ArgumentParser(description='Plot density of polyhedra.')
 parser.add_argument('ff', metavar='ff', type=float, help='filling fraction')
-parser.add_argument('N', metavar='N', type=int, help='number of polyhedra')
-parser.add_argument('shape', metavar='shape', help='type of polyhedra',
-                    default='cube', choices=['cube', 'tetrahedron', 'truncated_tetrahedron'])
-parser.add_argument('-p', '--periodic',help='will use periodic cell - defaults to walls',
-                    action='store_true')
-parser.add_argument('-s', '--save', help='will save animation frames as pdfs',
-                    action='store_true')
-parser.add_argument('-d', '--delay', type=int, help='time in ms to pause between frames. Minimum 10', default=10)
-parser.add_argument('-f', '--frames', metavar='frames', type=int,
-                    help='number of frames to animate', default=10000)
-parser.add_argument('--hide', help='will not call show', action='store_true')
-parser.add_argument('-o', '--one_frame', metavar='fnumber', type=int, help='Instead of animating, view the specific frame', default=-100)
-parser.add_argument('-b', '--begin', metavar='frame', type=int, help='start at this frame instead of frame 0', default=0)
-parser.add_argument('--show_only', metavar='fraction', type=double, help='will only render a fraction of the polyhedra', default=0)
-parser.add_argument('--skip', metavar='N', type=int, help='only play every N frames', default=1)
-parser.add_argument('-m', '--mixture', action='store_true',
-                    help='signals that the system may have multiple different shapes \
-The default assumption is that it does not, which allows faster runtime')
-parser.add_argument('--talk', action='store_true', help='instead of performing normal \
-function, generate figures for talk')
-parser.add_argument('--alpha', type=double, help='sets the alpha of the polyhedra', default=1)
-parser.add_argument('--hide_walls', help='won\'t draw walls', action='store_true')
+parser.add_argument('-N', '--N', metavar='N', type=int, default=0,
+                    help="""number of polyhedra, if not supplied then the first file
+                            with the proper filling fraction will be used""")
+parser.add_argument('-s','--shape', metavar='S', default='truncated_tetrahedron',
+                    choices=['cube', 'tetrahedron', 'truncated_tetrahedron'],
+                    help='type of polyhedra')
+parser.add_argument('-d','--delay', metavar='N', type=int, default=10,
+                    help='time in ms to pause between frames. Minimum 10')
+parser.add_argument('-f','--frames', metavar='N', type=int, default=10000,
+                    help='number of frames to animate')
+parser.add_argument('-o','--one_frame', metavar='N', type=int, default=-100,
+                    help='Instead of animating, view the specific frame')
+parser.add_argument('-b','--begin', metavar='N', type=int, default=0,
+                    help='start at this frame instead of frame 0')
+parser.add_argument('-n','--show_only', metavar='F', type=double, default=0,
+                    help='will only render a fraction of the polyhedra')
+parser.add_argument('-k','--skip', metavar='N', type=int, default=1,
+                    help='only play every N frames')
+parser.add_argument('-a','--alpha', metavar='F', type=double,
+                    help='sets the alpha of the polyhedra', default=1)
+
+parser.add_argument('-i','--hide', action='store_true', help='will not call show')
+parser.add_argument('-p','--periodic', action='store_true',
+                    help='will use periodic cell - defaults to walls otherwise')
+parser.add_argument('-v','--save', action='store_true',
+                    help='will save animation frames as pdfs')
+parser.add_argument('-m','--mixture', action='store_true',
+                    help="""signals that the system may have multiple different shapes.
+                            The default assumption is that it does not, which allows
+                            faster runtime""")
+parser.add_argument('-t','--talk', action='store_true',
+                    help='instead of performing normal function, generate figures for talk')
+parser.add_argument('-w','--hide_walls', action='store_true', help='won\'t draw walls')
+
 
 args = parser.parse_args()
 
-N = args.N
 ff = args.ff
 polyhedron = args.shape
 save = args.save
@@ -43,7 +54,14 @@ if args.periodic:
   celltype = 'periodic'
 else:
   celltype = 'walls'
-print celltype
+print ("Using %s with %s" %(polyhedron, celltype))
+
+if args.N == 0:
+  N = common.get_N("figs/mc/vertices/%s-%4.2f-vertices-%s" %(celltype, ff, polyhedron))
+  if N == 0:
+    exit(1)
+else: N = args.N
+
 
 
 # returns the distance from the point p to the plane defined by 3 points
@@ -154,7 +172,7 @@ if args.one_frame > -100:
   f = args.one_frame
 else:
   f = args.begin
-dim, centers, shape_array = common.read_vertices(ff, polyhedron, N, celltype, f)
+dim, centers, shape_array, iteration = common.read_vertices(ff, polyhedron, N, celltype, f)
 
 if args.show_only > 0:
   shape_array = shape_array[:N*args.show_only]
@@ -178,11 +196,6 @@ shapedim = shape_array[0].shape
 
 ncols = 5
 cvals = tile(linspace(0, 1, ncols), ceil(N/ncols))[:N]
-colors = shape_array[0]*0 + cvals[0]
-
-cmod = (2*numpy.random.random_sample(shapedim) - 1)*.4
-colors += cmod
-colors = numpy.random.random_sample(shape_array[0].shape)
 
 face0 = get_faces(shape_array[0])
 faces = empty((0, len(face0[0])))
@@ -206,6 +219,14 @@ s = mlab.pipeline.surface(src, colormap='jet', vmin=0, vmax=1, opacity=args.alph
 
 #colormaps: prism, flag, gist_rainbow, gist_ncar
 mlab.orientation_axes(figure=figure, name='bob')
+words = [polyhedron,
+        celltype,
+        'ff = %g' %ff,
+        'N = %i' %N,
+        '                                       ']
+text = "\n".join(words)
+mlab.text(.8, .9, text, figure=figure, width=.2)
+itertext = mlab.text(.02, .95, "%08i" %iteration, figure=figure, width=.2)
 
 
 
@@ -218,7 +239,7 @@ cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), lin
 #                  [0, dim[1], dim[2]]])
 #   sheet_connections = array([[0, 1, 2, 3], [4, 5, 6, 7]])
 #   sheetmesh = tvtk.PolyData(points=sheet_points, polys=sheet_connections)
-#   mlab.pipeline.surface(sheetmesh, opacity=.2, color=(.44,.5,.56))
+#   mlab.pipeline.surface(sheetmesh, opacity=.3, color=(.44,.5,.56))
 
 if(celltype == 'walls'and not args.hide_walls):
   nbars = 11
@@ -248,20 +269,19 @@ else:
 def anim():
   global f, dim
   while f < frames:
-    print f
     if not common.check_vertices(ff, polyhedron, N, celltype, f):
       if save:
         print("All out of dat files.")
         exit(0)
       f = 0
       print("Looping!")
-    newdim, newcenters, newshapes = common.read_vertices(ff, polyhedron, N, celltype, f)
+    newdim, newcenters, newshapes, iteration = common.read_vertices(ff, polyhedron, N, celltype, f)
+    itertext.set(text="%08i" %iteration)
     if args.show_only>0:
       newshapes = newshapes[:N*args.show_only]
     shapes[:] = newshapes.reshape((nvertices, 3))
     src.update()
     if newdim[0] != dim[0]:
-      print 'yo'
       dim = newdim
       cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), line_width=3)
     #cell.mlab_source.extent=[0, dim[0], 0, dim[1], 0, dim[2]]

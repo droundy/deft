@@ -5,13 +5,13 @@ import common
 
 parser = argparse.ArgumentParser(description='Plot density of polyhedra.')
 parser.add_argument('ff', metavar='ff', type=float, help='filling fraction')
-parser.add_argument('N', metavar='N', type=int, help='number of polyhedra')
-parser.add_argument('shape', metavar='shape', help='type of polyhedra', default='cube', choices=['cube', 'tetrahedron', 'truncated_tetrahedron'])
+parser.add_argument('-N', metavar='', type=int, help='number of polyhedra, if not supplied then the first file with the proper filling fraction will be used', default=0)
+parser.add_argument('-s', '--shape', metavar='', help='type of polyhedron, defaults to truncated_tetrahedron', default='truncated_tetrahedron', choices=['cube', 'tetrahedron', 'truncated_tetrahedron'])
 parser.add_argument('-p', '--periodic', help='will use periodic cell - defaults to walls otherwise', action='store_true')
-parser.add_argument('-s', '--show', help='will display the plot instead of just saving it', action='store_true')
+parser.add_argument('--hide', help='will just save the plot and won\'t display it', action='store_true')
 args = parser.parse_args()
 
-N = args.N
+
 ff = args.ff
 polyhedron = args.shape
 
@@ -20,11 +20,19 @@ if args.periodic:
 else:
   celltype = 'walls'
 
-if not args.show:
+if args.N == 0:
+  N = common.get_N("figs/mc/%s-%4.2f-density-%s" %(celltype, ff, polyhedron))
+  if N == 0:
+    exit(1)
+else: N = args.N
+
+if args.hide:
   matplotlib.use('Agg')
 from pylab import *
 
 e, densities = common.read_mc_density(ff, polyhedron, N, celltype)
+if e == 0:
+  exit(1)
 length = common.read_mc_dimensions(ff, polyhedron, N, celltype)
 print 'cell shape: ', length
 dims = ['x', 'y', 'z']

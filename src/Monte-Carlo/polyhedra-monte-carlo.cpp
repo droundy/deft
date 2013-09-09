@@ -94,7 +94,7 @@ int main(int argc, const char *argv[]) {
   // -----------------------------------------------------------------------------
   double periodic[3] = {0, 0, 0};
   double walls[3] = {0, 0, 0};
-  bool fake_walls = true;
+  bool fake_walls = false;
   unsigned long int seed = 0;
   int vertex_period = 0;
   char *shape_name = new char[1024];
