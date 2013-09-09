@@ -26,13 +26,13 @@ for eta in [0.1, 0.2, 0.3, 0.4]:
     print("Trimmed: %s." %filename)
 
   # pair 2d:
-  filename = "figs/mc/wallsMC-pair-%03.1f-0.05.dat" %eta
+  filename = "figs/mc/wallsMC-pair-%03.1f-0.01.dat" %eta
   if (os.path.isfile(filename) == False):
     print("File does not exist: %s" %filename)
   else:
     data = loadtxt(filename)
     trimmed_data = data[:50, :70]
-    savetxt("figs/mc/wallsMC-pair-%03.1f-0.05-trimmed.dat" %eta, trimmed_data, fmt='%.3f')
+    savetxt("figs/mc/wallsMC-pair-%03.1f-0.01-trimmed.dat" %eta, trimmed_data, fmt='%.3f')
     print("Trimmed: %s." %filename)
 
   # pair test-particle 2d:
@@ -51,7 +51,7 @@ for eta in [0.1, 0.2, 0.3, 0.4]:
     print("File does not exist: %s" %filename)
   else:
     data = loadtxt(filename)
-    trimmed_data = data[700:2100, 0:4]
+    trimmed_data = data[700:2400, 0:4]
     savetxt("figs/mc/triplet/tripletMC-%3.1f-path-trimmed.dat" %eta, trimmed_data, fmt='%.3f')
     print("Trimmed: %s." %filename)
 
@@ -71,7 +71,7 @@ for eta in [0.1, 0.2, 0.3, 0.4]:
     print("File does not exist: %s" %filename)
   else:
     data = loadtxt(filename)
-    trimmed_data = data[400:2300, 0:4]
+    trimmed_data = data[400:2500, 0:4]
     savetxt("figs/mc/triplet/tripletMC-%3.1f-path2-trimmed.dat" %eta, trimmed_data, fmt='%.3f')
     print("Trimmed: %s." %filename)
 
