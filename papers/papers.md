@@ -18,6 +18,10 @@ the inhomogeneous hard-sphere fluid", J. B. Schulte, P. A. Kreitzberg,
 C. V. Haglund, D. Roundy, *Phys. Rev. E*
 (2013). [(pdf)](contact/paper.pdf)
 
+You may also be interested in the
+[slides](../talks/colloquium/slides.pdf) for a colloquium introducing
+the main results of the above three papers.
+
 
 # Information for Deft developers
 
