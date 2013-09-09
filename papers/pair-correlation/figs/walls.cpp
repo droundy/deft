@@ -31,7 +31,7 @@ double radial_distribution(double gsigma, double r);
 double py_rdf (double eta, double r);
 double mc (double local_eta, double r, double r_step, double g[]);
 
-
+const double sigma = 2.0;
 // Maximum and spacing values for plotting
 const double zmax = 6;
 const double xmax = 4;
@@ -115,27 +115,63 @@ static double width = 30;
 const double dw = 0.0001;
 const double spacing = 3; // space on each side
 
+// double radial_distribution(double gsigma, double r) {
+//   // Constants determined by fit to monte-carlo data by plot-ghs.py
+//   const double a0 = 6.203,
+//                a1 = .4154,
+//                a2 = 6.449,
+//                a3 = 2.061,
+//                a4 = .3287,
+//                a5 = 4.555,
+//                a6 = 3.312;
+//   // const double a0 = 10.117,
+//   //              a1 = 0.309,
+//   //              a2 = 7.378,
+//   //              a3 = 1.569,
+//   //              a4 = 0.098,
+//   //              a5 = 6.053,
+//   //              a6 = 2.858;
+//   double d = r/2 - 1;
+//   if (d < 0)
+//     return 0;
+//   return 1 + (gsigma-1)*exp(-a0*d) + a1*(gsigma-1)*sin(a2*d)*exp(-a3*d)
+//            - a4*(gsigma-1)*(gsigma-1)*sin(a5*d)*exp(-a6*d);
+// }
+
 double radial_distribution(double gsigma, double r) {
+  if (r < sigma) return 0;
+  const double eta = gsigma_to_eta(gsigma);
+  const double z = r - 2.0;
+  const double hsigma = gsigma - 1.0;
   // Constants determined by fit to monte-carlo data by plot-ghs.py
-  const double a0 = 6.203,
-               a1 = .4154,
-               a2 = 6.449,
-               a3 = 2.061,
-               a4 = .3287,
-               a5 = 4.555,
-               a6 = 3.312;
-  // const double a0 = 10.117,
-  //              a1 = 0.309,
-  //              a2 = 7.378,
-  //              a3 = 1.569,
-  //              a4 = 0.098,
-  //              a5 = 6.053,
-  //              a6 = 2.858;
-  double d = r/2 - 1;
-  if (d < 0)
-    return 0;
-  return 1 + (gsigma-1)*exp(-a0*d) + a1*(gsigma-1)*sin(a2*d)*exp(-a3*d)
-           - a4*(gsigma-1)*(gsigma-1)*sin(a5*d)*exp(-a6*d);
+  const double a0 = 1.220,
+               a2 = 2.125,
+               a4 = 2.132;
+
+  const double density = 3.0/4.0/M_PI*eta;
+  const double rhs = uipow(1-eta, 4)/(1 + 4*eta + 4*uipow(eta, 2) - 4*uipow(eta, 3) + uipow(eta, 4));
+  const double integral_h0 = 4*M_PI*hsigma*(2 + sigma*a0*(2 + sigma*a0))/uipow(a0, 3) - 4.0/3.0*M_PI*uipow(sigma, 3);
+  const double integral_h1_over_a1 = 4*M_PI*(6 + sigma*a2*(4 + sigma*a2))/uipow(a2, 4);
+  const double integral_h2_over_a3 = 8*M_PI*(12 + sigma*a4*(6 + sigma*a4))/uipow(a4, 5);
+
+  const double A = (rhs-1)/density - integral_h0;
+  const double B = integral_h2_over_a3;
+  const double C = integral_h1_over_a1;
+
+  // this sets the slope at contact. It is based on g'(sigma) = -hsigma - hsigma^2,
+  // which has good agreement with mc data, but, ideally, will be replaced with
+  // a formula with a theoretical derivation.
+  const double a1 = hsigma*(a0 - 1 - hsigma);
+
+  // This forces g(r) to integrate correctly, as per the equation on page 35 of
+  // Theory of Simple Liquids
+  const double a3 = (A - C*a1)/B;
+
+  const double h0 = hsigma*exp(-a0*z);
+  const double h1 = a1*z*exp(-a2*z);
+  const double h2 = a3*z*z*exp(-a4*z);
+
+  return 1 + h0 + h1 + h2;
 }
 
 void read_mc() {
