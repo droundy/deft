@@ -4,9 +4,9 @@
 #pragma once
 
 struct random {
-  //static void seed(unsigned long seedval) { x = seedval; }
+  static void seed(unsigned long seedval) { x = seedval; }
   static double ran() {
-    const long unsigned int x = 0;
+    //const long unsigned int x = 0;
     static MTRand my_mtrand(x);
     return my_mtrand.randExc(); }
 private:

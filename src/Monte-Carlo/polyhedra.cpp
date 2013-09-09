@@ -324,7 +324,7 @@ poly_shape::poly_shape(const char *set_name) {
   if (strcmp(set_name, "cube") == 0) {
     nvertices = 8;
     nfaces = 3;
-    volume = 1.0;
+    volume = 8.0/sqrt(27.0);
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
     name = new char[5];
@@ -347,7 +347,7 @@ poly_shape::poly_shape(const char *set_name) {
   else if (strcmp(set_name, "tetrahedron") == 0) {
     nvertices = 4;
     nfaces = 4;
-    volume = 1.0/3.0;
+    volume = 8.0/9.0/sqrt(3.0);
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
     name = new char[13];
@@ -364,18 +364,37 @@ poly_shape::poly_shape(const char *set_name) {
     faces[3] = vector3d(         0,          0,             1);
   }
   else if (strcmp(set_name, "truncated_tetrahedron") == 0) {
-    nvertices = 18;
+    nvertices = 12;
     nfaces = 4;
-    volume = 0; //fixme
+    volume = 184.0/33.0/sqrt(11.0);
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
     name = new char[22];
-    sprintf(name, "truncated tetrahedron");
+    sprintf(name, "truncated_tetrahedron");
 
-    faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
-    faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[3] = vector3d(         0,          0,             1);
+    vertices[0]  = vector3d( 3,  1,  1);
+    vertices[1]  = vector3d( 1,  3,  1);
+    vertices[2]  = vector3d( 1,  1,  3);
+
+
+    vertices[3]  = vector3d(-3, -1,  1);
+    vertices[4]  = vector3d(-1, -3,  1);
+    vertices[5]  = vector3d(-1, -1,  3);
+
+    vertices[6]  = vector3d(-3,  1, -1);
+    vertices[7]  = vector3d(-1,  3, -1);
+    vertices[8]  = vector3d(-1,  1, -3);
+\
+    vertices[9]  = vector3d( 3, -1, -1);
+    vertices[10] = vector3d( 1, -3, -1);
+    vertices[11] = vector3d( 1, -1, -3);
+
+    for(int i=0; i<nvertices; i++) vertices[i]/=sqrt(11);
+
+    faces[0] = vector3d( 1,  1,  1);
+    faces[1] = vector3d( 1,  1, -1);
+    faces[2] = vector3d( 1, -1,  1);
+    faces[3] = vector3d(-1,  1,  1);
   }
   else {
     nvertices = 0;
@@ -424,7 +443,3 @@ polyhedron polyhedron::operator=(const polyhedron &p) {
   neighbor_center = p.neighbor_center;
   return *this;
 }
-
-// polyhedron::~polyhedron() {
-//   delete[] neighbors;
-// }

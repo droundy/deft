@@ -35,7 +35,6 @@ def run_walls(ff, N, dim, shape):
                 "--periodx %g" %dim,
                 "--periody %g" %dim,
                 "--wallz %g" %dim,
-                "--real_walls",
                 "--shape %s" %shape,
                 "--R %g" %R,
                 "--neighborR %g" %neighborR,
@@ -69,4 +68,6 @@ run_walls(.5, 4000, 20, 'cube')
 run_walls(.6, 4800, 20, 'cube')
 run_walls(.7, 5600, 20, 'cube')
 run_walls(.73, 5832, 20, 'cube')
-run_walls(.8, 6400, 20, 'cube')
+run_walls(.30, 2197, 20, 'truncated_tetrahedron')
+run_walls(.37, 2744, 20, 'truncated_tetrahedron')
+run_walls(.46, 3375, 20, 'truncated_tetrahedron')

@@ -37,9 +37,6 @@ struct polyhedron {
   polyhedron(const polyhedron &p);
 
   polyhedron operator=(const polyhedron &p);
-  //  ~polyhedron();
-private:
-  //  DISALLOW_COPY_AND_ASSIGN(polyhedron);
 };
 
 // struct polyhedron; fixme: forward declare

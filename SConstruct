@@ -113,7 +113,7 @@ for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       radial-distribution-monte-carlo """):
     env.Program(
         target=name,
-        source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp'])
+        source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp', 'src/vector3d.cpp'])
     Alias('executables', name)
 Default('executables')
 

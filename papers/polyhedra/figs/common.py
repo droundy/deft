@@ -6,7 +6,8 @@ def read_mc_density(ff, poly, N, celltype):
   print "using", fname
   if (not os.path.isfile(fname)):
     print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
-    exit(1)
+    bad = array([0,10])
+    return 0,0
   data = loadtxt(fname)
   xdens = data[:,1]
   ydens = data[:,2]
@@ -21,7 +22,9 @@ def read_mc_density(ff, poly, N, celltype):
 
 def read_mc_dimensions(ff, poly, N, celltype):
   e, garbage= read_mc_density(ff, poly, N, celltype)
-
+  if e == 0:
+    print("getting dimensions from density file didn't work, making some up")
+    return ones(3)*5
   length = empty(3)
   for i in xrange(3):
     de = e[i][2] - e[i][1]
@@ -34,7 +37,8 @@ def check_vertices(ff, shape, N, celltype, f):
 
 def read_vertices(ff, shape, N, celltype, f):
   fname = "figs/mc/vertices/%s-%04.2f-vertices-%s-%i-%i.dat" %(celltype, ff, shape, N, f)
-  data = loadtxt(fname)
+  data = genfromtxt(fname, skip_header=2)
+  dim = loadtxt(fname)[0]
   center = data[:, :3]
   verts = data[:, 3:]
-  return center, reshape(verts, (N, len(verts[0])/3, 3))
+  return dim, center, reshape(verts, (N, len(verts[0])/3, 3))
