@@ -16,9 +16,9 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-colors = ['k', 'b', 'g', 'r', 'm']
-plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor' sphere-dft
-titles = ['MC', 'this work', 'Fischer', 'Sokolowski'] # , 'gloor' test particle
+colors = ['k', 'b', 'r', 'g', 'm']
+plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
+titles = ['MC', 'this work', 'Sokolowski', 'Fischer'] # , 'gloor' test particle
 
 dx = 0.1
 ############################

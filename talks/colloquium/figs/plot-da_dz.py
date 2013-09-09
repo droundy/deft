@@ -34,9 +34,14 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["this-work", "fischer","sokolowski"]
-names = ['this work', 'Fischer', 'Sokolowski']
-colors = ['b', 'g', 'r']
+versions = ["this-work","sokolowski", "fischer"]
+names = ['this work', 'Sokolowski', 'Fischer']
+colors = ['b', 'r', 'g']
+if delta_r > 2.1:
+  fischeri = versions.index('fischer')
+  versions.remove('fischer')
+  names.pop(fischeri)
+  colors.pop(fischeri)
 
 mc_z0, mc_da_dz = read_a1_mc();
 plt.plot(mc_z0/2, np.pi*delta_r**2*mc_da_dz, 'k.', label='MC')
