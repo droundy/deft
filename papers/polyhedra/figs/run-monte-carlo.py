@@ -42,7 +42,7 @@ def run_walls(ff, N, dim, shape):
                 "--de_density %g" %de_density,
                 "--scale %g" %scale,
                 "--theta_scale %g" %theta_scale ]
-  command = "scons polyhedra-monte-carlo && time nice -19 %s/polyhedra-monte-carlo" %bindir
+  command = "time nice -19 %s/polyhedra-monte-carlo" %bindir
   script = open(scriptname, 'w')
   script.write("#!/bin/bash\n")
   script.write("#SBATCH --mem-per-cpu=%i\n" % memory)
