@@ -8,8 +8,8 @@
   \end{center}
   \begin{description}
   \item[Solid] Does not take the shape of its container
-  \item[Gas] Takes the shape of its container and fills it
   \item[Liquid] Takes the shape of a container, but doesn't fill it
+  \item[Gas] Takes the shape of its container and fills it
   \end{description}
 \end{frame}
 
@@ -31,14 +31,14 @@
   \end{center}
   \begin{description}
   \item[Solid] Energy dominates, entropy is a small perturbation
-  \item<2->[Gas] Entropy dominates, energy is a small perturbation
   \item<3->[Liquid] Energy and entropy are balanced
+  \item<2->[Gas] Entropy dominates, energy is a small perturbation
   \end{description}
   \begin{block}{Perturbation theory}<4->
     \begin{itemize}
-    \item<5-> An ``easy'' problem we know how to solve
-    \item<6-> A ``hard'' correction that is small
-    \item<7-> We construct a power series to solve combined problem
+    \item An ``easy'' problem we know how to solve
+    \item A ``hard'' correction that is small
+    \item We construct a power series to solve combined problem
     \end{itemize}
   \end{block}
   %% \begin{enumerate}
@@ -70,13 +70,13 @@
 %% \end{frame}
 
 \begin{frame}
-  \frametitle{Dense fluids}
+  \frametitle{Dense fluids (Hard spheres)}
   In order to use a perturbative approach, we need a ``solved''
   problem that is similar to a liquid.
-  \begin{block}{Hard-sphere fluid}<2->
+  \begin{block}{Hard-sphere fluid}
     \begin{itemize}
     \item Captures the repulsive portion of the structure
-    \item Still no energy!
+    \item All entropy, no energy!
     \item Not actually a liquid
     \end{itemize}
     \begin{center}
@@ -121,9 +121,9 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Putting it all together}
+  \frametitle{Putting it all together:  SAFT for water}
   All these terms combined describe SAFT, a well-established theory
-  for \emph{homogeneous} liquids such as water.
+  for \emph{homogeneous} liquids.
   \begin{center}
     \vspace{-1em}
     \includegraphics[height=6cm]{../../papers/water-saft/figs/pressure-with-isotherms-truncated}
@@ -140,12 +140,12 @@
     \[\Omega = \min_{n(\rr)} \left\{ F[n(\rr), T] + \int (V(\rr)-\mu) n(\rr)d\rr \right\}
     \]
     \begin{itemize}
-    \item $\Omega$ is grand potential
-    \item $n(\rr)$ is number density of atoms or molecules
-    \item $V(\rr)$ is an arbitrary external potential energy
-    \item $\mu$ is the chemical potential
-    \item $F[n(\rr),T]$ is a functional that depends only on the
-      liquid in question
+    %% \item $\Omega$ is grand potential
+    %% \item $n(\rr)$ is number density of atoms or molecules
+    %% \item $V(\rr)$ is an arbitrary external potential energy
+    %% \item $\mu$ is the chemical potential
+    \item minimize the grand potential $\Omega$
+    \item $F[n(\rr),T]$ is a universal functional for a given fluid
     \end{itemize}
   \end{block}
 \end{frame}

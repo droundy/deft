@@ -8,6 +8,9 @@ matplotlib.use('Agg')
 
 import pylab, numpy, sys
 
+xmin = -.2
+xmax = 2.5
+
 def plotit(dftdata, mcdata):
     dft_len = len(dftdata[:,0])
     dft_dr = dftdata[2,0] - dftdata[1,0]
@@ -29,7 +32,7 @@ def plotit(dftdata, mcdata):
     n_plt.plot(mcdata[:,0]/2+mcoffset,mcdata[:,1]*4*numpy.pi/3,"b-",label='$n$ Monte Carlo')
     n_plt.yaxis.set_major_locator(pylab.MaxNLocator(6,steps=[1,5,10],prune='upper'))
     pylab.ylim(ymin=0)
-    pylab.xlim(-0.2,3)
+    pylab.xlim(xmin, xmax)
     pylab.xlabel("$z/\sigma$")
     pylab.ylabel("$n(\mathbf{r})$")
     n_plt.axvline(x=0, color='k', linestyle=':')
@@ -51,7 +54,7 @@ def plotit(dftdata, mcdata):
     A_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True,prune='upper'))
     pylab.ylim(ymin=0)
     pylab.ylabel("$g_\sigma^A$")
-    pylab.xlim(-0.2,3)
+    pylab.xlim(xmin, xmax)
 
     n0mc[0]=1
     mcdata[0,10]=1
@@ -59,7 +62,7 @@ def plotit(dftdata, mcdata):
     S_plt.axvline(x=0, color='k', linestyle=':')
     S_plt.plot(mcdata[:,0]/2+mcoffset,mcdata[:,3+2*off]/n0mc,"g-",label="$g_\sigma^S$ Monte Carlo")
     S_plt.yaxis.set_major_locator(pylab.MaxNLocator(5,integer=True,prune='upper'))
-    pylab.xlim(-0.2,3)
+    pylab.xlim(xmin, xmax)
     pylab.ylim(ymin=0)
     pylab.ylabel("$g_\sigma^S$")
 

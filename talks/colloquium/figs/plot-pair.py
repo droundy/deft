@@ -269,29 +269,29 @@ def g2pathfunction_x(x):
 def g2pathfunction_z(z):
     return interp(z, g2nice[:,2], g2nice[:,1])
 
-# Annotations on 2d plot
-annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# # Annotations on 2d plot
+# annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
-# Annotations on 1d plot
-xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
-               xytext=(Ax+1,1.3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
-               xytext=(Bx+1, g2pathfunction_x(Bx)-0.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
-               xytext=(Cz,g2pathfunction_z(Cz)-0.5),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
-               xytext=(Dz+1,g2pathfunction_z(Dz)-0.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
-               xytext=(Ez+0.7,1.3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# # Annotations on 1d plot
+# xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
+#                xytext=(Ax+1,1.3),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
+#                xytext=(Bx+1, g2pathfunction_x(Bx)-0.2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
+#                xytext=(Cz,g2pathfunction_z(Cz)-0.5),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
+#                xytext=(Dz+1,g2pathfunction_z(Dz)-0.2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
+#                xytext=(Ez+0.7,1.3),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
