@@ -171,7 +171,7 @@ of iterations", "period"},
 periodicity/dimensions are not set by default and are required.\n");
 
   int c = 0;
-  // go through options, sets them based on optionsTable
+  // go through arguments, set them based on optionsTable
   while((c = poptGetNextOpt(optCon)) >= 0);
   if (c < -1) {
     fprintf(stderr, "\n%s: %s\n", poptBadOption(optCon, 0), poptStrerror(c));
@@ -196,7 +196,7 @@ periodicity/dimensions are not set by default and are required.\n");
     fprintf(stderr, "\nInvalid shape.\n");
     return 1;
   }
-  if (N <= 0 || iterations <= 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0 ||
+  if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0 ||
       theta_scale < 0 || vertex_period < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
@@ -215,7 +215,6 @@ periodicity/dimensions are not set by default and are required.\n");
   const double eta = (double)N*shape->volume*R*R*R/len[0]/len[1]/len[2];
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many polyhedra into the cell. They will never fit. Filling fraction: %g\n", eta);
-    return 1;
   }
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
@@ -289,37 +288,72 @@ periodicity/dimensions are not set by default and are required.\n");
       polyhedra[i].pos[0] = (x + 0.5)*xspace;
       polyhedra[i].pos[1] = (y + 0.5)*yspace;
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
-
-      polyhedra[i].neighbor_center = polyhedra[i].pos;
     }
     delete[] spot_used;
   }
   else if (shape == &truncated_tetrahedron) {
+    // form a lattice that will be able to give us the maximum filling fraction
+    // which is 207/208
+    // Based on the paper Crystalline Assemblies... by Damasceno et al.
+
+    const double fac = R/sqrt(11.0)/3.0*1.1;
+    // lattice vectors:
+    const vector3d e1 = vector3d(-4, 8, 12)*fac;
+    const vector3d e2 = vector3d(12, -4, 8)*fac;
+    const vector3d e3 = vector3d(8, 12, -4)*fac;
+
+    const vector3d offset = vector3d(6, 6, 6)*fac;
+    nx *= 2;
+    ny *= 2;
+    nz *= 2;
     bool *spot_used = new bool[nx*ny*nz]();
-    for(int i=0; i<N; i++) {
-      int x, y, z;
+    int x=0, y=0, z=0;
+    for(int i=0; i<N; i+=2) {
       do {
-        x = floor(random::ran()*nx);
-        y = floor(random::ran()*ny);
-        z = floor(random::ran()*nz);
-      } while(spot_used[x*ny*nz + y*nz + z]);
-      spot_used[x*ny*nz + y*nz + z] = true;
+        do {
+          x = floor(random::ran()*nx);
+          y = floor(random::ran()*ny);
+          z = floor(random::ran()*nz);
+        } while (spot_used[x*ny*nz + y*nz + z]);
+        spot_used[x*ny*nz + y*nz + z] = true;
 
-      polyhedra[i].pos[0] = (x + 0.5)*xspace;
-      polyhedra[i].pos[1] = (y + 0.5)*yspace;
-      polyhedra[i].pos[2] = (z + 0.6)*zspace;
-
-      const double interior = acos(1.0/3.0);
-      polyhedra[i].rot *= rotation((.25)*M_PI, vector3d(0, 0, 1));
-      polyhedra[i].rot *= rotation(M_PI, vector3d(0, 1, 0));
-      polyhedra[i].rot *= rotation(3*M_PI/2.0 + interior/2.0, vector3d(1, 0, 0));
-      polyhedra[i].rot *= rotation(-M_PI/4.0, vector3d(0, 0, 1));
-
-      polyhedra[i].neighbor_center = polyhedra[i].pos;
+        x -= nx/2;
+        y -= ny/2;
+        z -= nz/2;
+        polyhedra[i].pos = offset + x*e1 + y*e2 + z*e3;
+        if (i < N-1) {
+          polyhedra[i+1].pos = x*e1 + y*e2 + z*e3;
+          polyhedra[i+1].rot = rotation(M_PI, vector3d(1, 1, 0));
+        }
+      } while((x*e1 + y*e2 + z*e3 + offset)[0] + R > len[0] || (x*e1 + y*e2 + z*e3 + offset)[1] + R > len[1] || (x*e1 + y*e2 + z*e3 + offset)[2] + R > len[2] || (x*e1 + y*e2 + z*e3)[0] < 0 || (x*e1 + y*e2 + z*e3)[1] < 0 || (x*e1 + y*e2 + z*e3)[2] - R < 0);
     }
     delete[] spot_used;
-    //polyhedra[0].rot *= rotation(M_PI/2.0, vector3d(0, 0, 1));
   }
+  // else if (shape == &truncated_tetrahedron) {
+  //   bool *spot_used = new bool[nx*ny*nz]();
+  //   for(int i=0; i<N; i++) {
+  //     int x, y, z;
+  //     do {
+  //       x = floor(random::ran()*nx);
+  //       y = floor(random::ran()*ny);
+  //       z = floor(random::ran()*nz);
+  //     } while(spot_used[x*ny*nz + y*nz + z]);
+  //     spot_used[x*ny*nz + y*nz + z] = true;
+
+  //     polyhedra[i].pos[0] = (x + 0.5)*xspace;
+  //     polyhedra[i].pos[1] = (y + 0.5)*yspace;
+  //     polyhedra[i].pos[2] = (z + 0.6)*zspace;
+
+  //     const double interior = acos(1.0/3.0);
+  //     polyhedra[i].rot *= rotation((.25)*M_PI, vector3d(0, 0, 1));
+  //     polyhedra[i].rot *= rotation(M_PI, vector3d(0, 1, 0));
+  //     polyhedra[i].rot *= rotation(3*M_PI/2.0 + interior/2.0, vector3d(1, 0, 0));
+  //     polyhedra[i].rot *= rotation(-M_PI/4.0, vector3d(0, 0, 1));
+
+  //   }
+  //   delete[] spot_used;
+  //   //polyhedra[0].rot *= rotation(M_PI/2.0, vector3d(0, 0, 1));
+  // }
   else if (shape == &tetrahedron) {
     bool *spot_used = new bool[nx*ny*nz]();
     for(int i=0; i<N; i++) {
@@ -335,7 +369,6 @@ periodicity/dimensions are not set by default and are required.\n");
       polyhedra[i].pos[1] = (y + 0.5)*yspace;
       polyhedra[i].pos[2] = (z + 0.5)*zspace;
 
-      polyhedra[i].neighbor_center = polyhedra[i].pos;
       bool overlaps = false;
       int attempt_counter = 0;
       //polyhedra[i].rot = rotation::ran();
@@ -370,7 +403,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // Make sure no polyhedra are overlapping
   // ---------------------------------------------------------------------------
   for(int i=0; i<N; i++) {
-    if (!in_cell(polyhedra[i], walls, fake_walls)) {
+    if (!in_cell(polyhedra[i], walls, real_walls)) {
       printf("Oops, this is embarassing. I seem to have placed some things outside our cell.\n");
       printf("You might want to look into that.\n");
       return 17;
@@ -407,7 +440,7 @@ periodicity/dimensions are not set by default and are required.\n");
     for(int i=0; i<N; i++) {
       totalmoves ++;
       workingmoves +=
-        move_one_polyhedron(i, polyhedra, N, periodic, walls, fake_walls,
+        move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
                             neighborR, scale, theta_scale, max_neighbors);
     }
     // ---------------------------------------------------------------
@@ -706,37 +739,34 @@ void save_locations(const polyhedron *p, int N, const char *fname, const double 
 }
 
 int generate_talk_figs() {
-  int N = 3;
+  int N = 7;
   polyhedron *p = new polyhedron[N];
 
   const double len[3] = {20, 20, 20};
   for(int i=0; i<N; i++) {
     p[i].R = 1;
   }
-  p[0].mypoly = &cube;
-  p[0].pos = vector3d(-2, 0, 0);
-  p[1].mypoly = &tetrahedron;
-  p[2].mypoly = &truncated_tetrahedron;
-  p[2].pos = vector3d(2, 0, 0);
-
-  // for(int i=0; i<N; i++) {
-  //   p[i].R = sqrt(3.0)/2.0;
-  //   p[i].rot = rotation::ran();
-  // }
   // p[0].mypoly = &cube;
   // p[0].pos=vector3d(3.8,-2.5,6);
+
   // p[1].mypoly = &cube;
-  // p[1].pos = vector3d(4.5, .75, .5);
-  // p[2].mypoly = &tetrahedron;
-  // p[2].pos = vector3d(-2.5, 3.75, -.2);
-  // p[3].mypoly = &tetrahedron;
-  // p[3].rot *= rotation(M_PI/2, vector3d(1, 0, 0));
-  // p[3].rot *= rotation(M_PI/4, vector3d(0, 1, 0));
+  // p[1].pos = vector3d(2.5, -2.75, .5);
+  // p[1].rot = rotation(M_PI/4, vector3d(-1, 1, -1));
+
+  // p[2].mypoly = &truncated_tetrahedron;
+  // p[2].pos = vector3d(1.5, -4.2, -.2);
+
+  // p[3].mypoly = &truncated_tetrahedron;
   // p[3].pos = vector3d(4, -2, -2);
+  // p[3].rot = rotation(M_PI/4.0, vector3d(0, 0, 1));
+  // p[3].rot = rotation(M_PI/6.0, vector3d(1, 0, 0));
+
   // p[4].mypoly = &tetrahedron;
-  // p[4].pos = vector3d(-4.7, -1.3, 0);
+  // p[4].pos = vector3d(-2.7, -1.8, 0);
   // p[4].rot = rotation::ran();
-  // printf("%s\n", p[5].mypoly->name);
+
+  //p[5].rot = rotation(vector3d());
+  //  printf("%s\n", p[5].mypoly->name);
 
   // for(int i=0; i<N; i++) {
   //   p[i] = random_move(p[i], .1, M_PI, len);
@@ -745,6 +775,37 @@ int generate_talk_figs() {
   //   printf("Error creating talk.dat!\n");
   //   return 1;
   // }
+
+  p[0].mypoly = &truncated_tetrahedron;
+  p[1].mypoly = &cube;
+  p[2].mypoly = &truncated_tetrahedron;
+  p[3].mypoly = &tetrahedron;
+  p[4].mypoly = &cube;
+  p[5].mypoly = &truncated_tetrahedron;
+  p[6].mypoly = &tetrahedron;
+
+  const double periodic[3] = {0, 0, 0};
+  const double walls[3] = {5, 5, 5};
+  const bool real_walls = true;
+  const int max_neighbors = N;
+  const double scale = 1.5;
+  const double theta_scale = M_PI/4.0;
+  const double neighborR = .5;
+
+  for(int i=0; i<N; i++) {
+    p[i].pos = vector3d(random::ran(), random::ran(), random::ran())*3;
+  }
+  initialize_neighbor_tables(p, N, neighborR, max_neighbors, periodic);
+
+  for(int j=0; j<100; j++) {
+    for(int i=0; i<N; i++) {
+      move_one_polyhedron(i, p, N, periodic, walls, real_walls,
+                          neighborR, scale, theta_scale, max_neighbors);
+    }
+  }
+  for(int i=0; i<N; i++) {
+    p[i].pos += vector3d(1, -4, 0);
+  }
   save_locations(p, N, "talks/polyhedra/dat/background.dat", len);
   delete[] p;
   return 0;

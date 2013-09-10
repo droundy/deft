@@ -56,7 +56,7 @@ else:
   celltype = 'walls'
 print ("Using %s with %s" %(polyhedron, celltype))
 
-if args.N == 0:
+if args.N == 0 and not args.talk:
   N = common.get_N("figs/mc/vertices/%s-%4.2f-vertices-%s" %(celltype, ff, polyhedron))
   if N == 0:
     exit(1)
@@ -141,25 +141,25 @@ if args.talk:
   f.close()
   data = [np.array(map(double, line.split())) for line in lines]
   N = len(data)
-  colors = rand(N, 3)
-  # colors[0] = [1,0,0]
-  # colors[1] = [0,1,0]
-  # colors[2] = [0,0,1]
-  # colors[3] = [1,0,1]
-  # colors[4] = [.4, 0, .2]
+
+  ncols = N
+  cvals = tile(linspace(0, 1, ncols), ceil(N/ncols))[:N]
+
   shape_list = range(N)
   nvertices = sum([(len(data[i])-3)/3 for i in xrange(N)])
   for i in xrange(N):
     data[i] = data[i][3:]
     shape_list[i] = reshape(data[i], (len(data[i])/3, 3))
 
-  for shape, color in zip(shape_list, colors):
-    if (max(color) > 1):
-      color /= 255
+  for shape, cval in zip(shape_list, cvals):
+    shapedim = shape.shape
+    color = ones(shapedim)*cval + (2*numpy.random.random_sample(shapedim)-1)*0.15
     faces = get_faces(shape)
     mesh = tvtk.PolyData(points=shape, polys=faces)
+    mesh.point_data.scalars = color
+    mesh.point_data.scalars.name = 'color'
     src = mlab.pipeline.add_dataset(mesh)
-    mlab.pipeline.surface(src, color=tuple(color))
+    mlab.pipeline.surface(src, colormap='jet', vmin=0, vmax=1)
   mlab.view(azimuth=0, elevation=0, distance=20, focalpoint=(0,0,0))
   figure.scene.save("../../talks/polyhedra/figs/background.png")
   if not args.hide:
@@ -273,7 +273,7 @@ def anim():
       if save:
         print("All out of dat files.")
         exit(0)
-      f = 0
+      f = args.begin
       print("Looping!")
     newdim, newcenters, newshapes, iteration = common.read_vertices(ff, polyhedron, N, celltype, f)
     itertext.set(text="%08i" %iteration)

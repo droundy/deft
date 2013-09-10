@@ -292,6 +292,9 @@ int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,
                                int max_neighbors, const double periodic[3]) {
   int most_neighbors = 0;
   for(int i=0; i<N; i++) {
+    p[i].neighbor_center = p[i].pos;
+  }
+  for(int i=0; i<N; i++) {
     p[i].neighbors = new int[max_neighbors];
     p[i].num_neighbors = 0;
     for(int j=0; j<N; j++) {
@@ -389,7 +392,7 @@ poly_shape::poly_shape(const char *set_name) {
     vertices[10] = vector3d( 1, -3, -1);
     vertices[11] = vector3d( 1, -1, -3);
 
-    for(int i=0; i<nvertices; i++) vertices[i]/=sqrt(11);
+    for(int i=0; i<nvertices; i++) vertices[i]/=sqrt(11.0);
 
     faces[0] = vector3d( 1,  1,  1);
     faces[1] = vector3d( 1,  1, -1);
