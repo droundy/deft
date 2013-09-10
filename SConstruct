@@ -248,33 +248,45 @@ env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
 for svgfile in Glob('talks/*/*/*.svg'):
     env.SVG(svgfile)
 # and all py files
-for pyfile in Glob('talks/colloquium/*/*.py'):
-    pyfile = str(pyfile)[:len(str(pyfile))-3]
-    paper.Matplotlib(pyfile, py_chdir='talks/colloquium')
+for talkdir in glob.glob('talks/*'):
+    for pyfile in Glob(talkdir + '/*/*.py'):
+        pyfile = str(pyfile)[:len(str(pyfile))-3]
+        paper.Matplotlib(pyfile, py_chdir=talkdir)
+    env.PDF(talkdir+'/slides.tex')
+    #Alias('talks', talkdir+'/slides.pdf')
 
-animations = []
-animations += env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
-                                    for i in xrange(31)],
-                          source = 'talks/colloquium/mc-circle-slow.py',
-                          action = 'cd talks/colloquium && python mc-circle-slow.py')
-animations += env.Command(target = ['talks/colloquium/anim/mc-density-%03i.pdf' % i
-                                    for i in xrange(31)],
-                          source = 'talks/colloquium/mc-circle-slow.py',
-                          action = 'cd talks/colloquium && python mc-circle-slow.py density')
-animations += env.Command(target = ['talks/colloquium/anim/mc-pair-%03i.pdf' % i
-                                    for i in xrange(31)],
-                          source = 'talks/colloquium/mc-circle-slow.py',
-                          action = 'cd talks/colloquium && python mc-circle-slow.py pair')
-animations += env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' % i
-                                    for i in xrange(31)],
-                          source = 'talks/colloquium/mc-circle-slow.py',
-                          action = 'cd talks/colloquium && python mc-circle-slow.py gsigma')
-presentation = env.PDF(['talks/colloquium/slides.tex'])
-Depends(presentation, animations)
-Depends(presentation, Split(""" talks/colloquium/figs/energy-solid.pdf
-                                talks/colloquium/figs/energy-solid-gas-liquid.pdf
-                                talks/colloquium/figs/energy-solid-gas.pdf """))
-Default(presentation)
+Alias('talks', 'talks/colloquium/slides.pdf')
+
+###################### dependencies for polyhedra talk ####################
+
+###################### dependencies for colloquium ########################
+
+Depends('talks/colloquium/slides.pdf',
+        Split(""" talks/colloquium/figs/energy-solid.pdf
+                  talks/colloquium/figs/energy-solid-gas-liquid.pdf
+                  talks/colloquium/figs/energy-solid-gas.pdf """))
+Depends('talks/colloquium/slides.pdf',
+        env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
+                              for i in xrange(31)],
+                    source = 'talks/colloquium/mc-circle-slow.py',
+                    action = 'cd talks/colloquium && python mc-circle-slow.py'))
+Depends('talks/colloquium/slides.pdf',
+        env.Command(target = ['talks/colloquium/anim/mc-density-%03i.pdf' % i
+                              for i in xrange(31)],
+                    source = 'talks/colloquium/mc-circle-slow.py',
+                    action = 'cd talks/colloquium && python mc-circle-slow.py density'))
+Depends('talks/colloquium/slides.pdf',
+        env.Command(target = ['talks/colloquium/anim/mc-pair-%03i.pdf' % i
+                              for i in xrange(31)],
+                    source = 'talks/colloquium/mc-circle-slow.py',
+                    action = 'cd talks/colloquium && python mc-circle-slow.py pair'))
+Depends('talks/colloquium/slides.pdf',
+        env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' % i
+                              for i in xrange(31)],
+                    source = 'talks/colloquium/mc-circle-slow.py',
+                    action = 'cd talks/colloquium && python mc-circle-slow.py gsigma'))
+
+Default('talks')
 
 
 # The following programs generate a single .dat file that may be cached.
