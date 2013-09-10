@@ -467,11 +467,17 @@ int main(int argc, char *argv[]){
           char *densityfilename = new char[1024];
           sprintf(densityfilename, "%s-density.dat", outfilename);
           FILE *densityout = fopen((const char *)densityfilename, "w");
-          const double shell0_volume = lenx*leny*dz;
-          for (int l=0; l<zbins; l++) {
-            const double density = double(density_histogram[l]*N)
-              /double(count)/shell0_volume;
-            fprintf(densityout, "%g\t%g\n", (l+0.5)*dz, density);
+          // these two volumes are difference for the path because for the density
+          // we have a resolution of path_dz but for the probability histogram it's
+          // always dz
+          const double density_shell0_volume = path ? lenx*leny*path_dz : lenx*leny*dz;
+          const double n2_shell0_volume = lenx*leny*dz;
+          if(!path) {
+            for (int l=0; l<zbins; l++) {
+              const double density = double(density_histogram[l]*N)
+                /double(count)/density_shell0_volume;
+              fprintf(densityout, "%g\t%g\n", (l+0.5)*dz, density);
+            }
           }
           for (int l=0; l<z0bins; l++) {
             const double filename_coord = path ? (l + 0.5)*path_dz : (l + 0.5)*dz;
@@ -484,8 +490,9 @@ int main(int argc, char *argv[]){
             const double r0min = l*dr;
             const double r0max = (l+1)*dr;
 
-            const double density0 = double(density_histogram[l]*N)
-              /double(count)/shell0_volume;
+            const double density0 = path
+              ? double(path_density_histogram[l]*N)/double(count)/density_shell0_volume/2.0
+              : double(density_histogram[l]*N)/double(count)/density_shell0_volume;
             for (int i=0; i<rbins; i++) {
               const double r1min = i*dr;
               const double r1max = (i+1)*dr;
@@ -497,7 +504,7 @@ int main(int argc, char *argv[]){
                   /double(count)/shell1_volume;
                 const double probability = double(histogram[l*rbins*zbins + i*zbins + k])
                   /double(numinhistogram)/2.0; // the 2 because reflecting -> double counting
-                const double n2 = probability/bin1_volume/shell0_volume;
+                const double n2 = probability/bin1_volume/n2_shell0_volume;
                 const double g = n2/density0/density1;
                 fprintf(out, "%g\t", g);
               }
