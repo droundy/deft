@@ -52,7 +52,7 @@ for i in xrange(len(versions)):
 
 plt.xlim([-.2,1.5])
 #plt.ylabel(r'$da_1/dz$')
-plt.xlabel(r'$r/\sigma$')
+plt.xlabel(r'$z/\sigma$')
 plt.legend(loc='best').draw_frame(False)
 
 #plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"

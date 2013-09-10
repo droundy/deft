@@ -50,17 +50,19 @@
   \frametitle{Theoretical approach for $g^{(2)}(\rr_1,\rr_2)$}
   \begin{block}{}
     \begin{itemize}
-    \item enforce correct answer for $a_1$ at contact (i.e. $\Phi(r)
-      \propto \delta(r-\sigma)$):
-      \begin{multline*}
-        \iint n(\rr_1) n(\rr_2) g_\sigma(\rr_1)
-        \delta(|\rr_1-\rr_2|-\sigma)
-        d\rr_1 d\rr_2
-        =\\
-        \iint n(\rr_1) n(\rr_2) g^{(2)}(\rr_1, \rr_2)
-        \delta(|\rr_1-\rr_2|-\sigma)
-        d\rr_1 d\rr_2
-      \end{multline*}
+    \item enforce correct answer for $a_1$ for $\Phi(r) =$
+      \raisebox{-3em}{
+        \includegraphics[height=6em]{figs/phi-delta}
+      }
+      %% \begin{multline*}
+      %%   \iint n(\rr_1) n(\rr_2) g_\sigma(\rr_1)
+      %%   \delta(|\rr_1-\rr_2|-\sigma)
+      %%   d\rr_1 d\rr_2
+      %%   =\\
+      %%   \iint n(\rr_1) n(\rr_2) g^{(2)}(\rr_1, \rr_2)
+      %%   \delta(|\rr_1-\rr_2|-\sigma)
+      %%   d\rr_1 d\rr_2
+      %% \end{multline*}
     \item enable computation of $a_1$ with single-center convolutions
     \item simplest approach:
       \begin{equation*}
@@ -69,6 +71,14 @@
       \end{equation*}
     \item $g(r,g_\sigma)$ is a separable fit to the HS radial
       distribution function
+    \item fit exact for $\Phi(r)=$
+      \raisebox{-3em}{
+        \includegraphics[height=6em]{figs/phi-delta-off}
+      }
+      and
+      \raisebox{-3em}{
+        \includegraphics[height=6em]{figs/phi-flat}
+      }
     \end{itemize}
   \end{block}
 \end{frame}
@@ -102,8 +112,8 @@
     \includegraphics[height=4cm]{figs/pair-30}
   \end{center}
   \begin{itemize}
-  \item Derived and tested functional for the pair correlation
-    function of hard spheres
+  \item Developed and tested functional for the pair distribution
+    function
   \item Reasonably efficient: scales like the hard sphere free energy
   \end{itemize}
 \end{frame}
