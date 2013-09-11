@@ -198,7 +198,7 @@ int main(int argc, char *argv[]){
   {
     // First we'll run the simulation a while to get to a decent
     // starting point...
-    long paranoia = 20; // How careful must we be to wait a long time while initializing.
+    long paranoia = 50; // How careful must we be to wait a long time while initializing.
     double oldPE = potentialEnergy(spheres,N,R);
     double newPE = oldPE, olderPE;
     long counter = 0;
@@ -342,16 +342,17 @@ int main(int argc, char *argv[]){
           long mins_done = secs_done / 60;
           long hours_done = mins_done / 60;
           mins_done = mins_done % 60;
+          long percent_complete = j/iterations*100;
           if (hours_done > 50) {
-            printf("Saved data after %ld hours\n", hours_done);
+            printf("Saved data after %ld hours\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", hours_done, j, iterations, percent_complete);
           } else if (mins_done < 1) {
-            printf("Saved data after %.1f seconds\n", secs_done);
+            printf("Saved data after %.1f seconds\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", secs_done, j, iterations, percent_complete);
           } else if (hours_done < 1) {
-            printf("Saved data after %ld minutes\n", mins_done);
+            printf("Saved data after %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", mins_done, j, iterations, percent_complete);
           } else if (hours_done < 2) {
-            printf("Saved data after %ld minutes\n", mins_done);
+            printf("Saved data after %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", mins_done, j, iterations, percent_complete);
           } else {
-            printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
+            printf("Saved data after %ld hours, %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", hours_done, mins_done, j, iterations, percent_complete);
           }
         }
         for (long i=0; i<div; i++) {
