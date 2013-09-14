@@ -137,7 +137,7 @@ newgenerated_sources = []
 for source in Split(""" WhiteBearFast """):
     filename = 'src/new/' + source + '.cpp'
     newgenerated_sources.append(filename)
-    generate.Functional(target = filename, source = 'src/haskell/newfunctionals.exe')
+    generate.Functional(target = [filename, 'src/new/'+source+'.h'], source = 'src/haskell/newfunctionals.exe')
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion
@@ -391,14 +391,14 @@ haskell = Environment(tools=['haskell'],
                       HSSEARCHPATH = ["src/haskell"],
                       HSPACKAGES = ["containers", "process", "HUnit"],
                       HSCFLAGS = ['-O2', '-Wall', '-Werror'])
-haskell_source = []
+
 for m in Split(""" LatexDouble Latex Expression CodeGen Statement HughesSaft WaterSaft Optimize
                    FMT WhiteBear IdealGas SFMT NewCode """):
-    haskell_source.append("src/haskell/" + m + ".hs")
+    haskell.HaskellObject('src/haskell/' + m + '.hs')
 
 for program in Split("functionals newfunctionals test latex-functionals"):
-    haskell.HaskellProgram(target = 'src/haskell/' + program + '.exe',
-                           source = ['src/haskell/' + program  + '.hs'] + haskell_source)
+    haskell.HaskellMake(target = 'src/haskell/' + program + '.exe',
+                        source = ['src/haskell/' + program  + '.hs'])
 
 NoCache(
     haskell.Command(target = ['tests/generated-haskell/nice-sum.h',

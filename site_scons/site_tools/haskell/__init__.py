@@ -85,6 +85,25 @@ def ghc_scanner_function(node, env, path):
                                 break
         return interfaces
 
+
+def ghc_make_scanner_function(node, env, path):
+        from os.path import dirname, exists
+        imports = impdecl_regexp.findall(node.get_contents())
+        modules = map(lambda (qualified, module) : module, imports)
+        interfaces = []
+        for module in modules:
+                module = module.replace(".", "/")
+                interface = module + ".hi"
+                o = module + ".o"
+                hs_file   = module + ".hs"
+                lhs_file  = module + ".lhs"
+                for dir in path:
+                        if exists(join(dir, hs_file)) or exists(join(dir, lhs_file)):
+                                interfaces.append(interface)
+                                interfaces.append(o)
+                                break
+        return interfaces
+
 def exists(env):
         return WhereIs("ghc")
 
@@ -112,6 +131,11 @@ def generate(env):
                 skeys = [".hs", ".lhs"],
                 path_function = ghc_path_function
                 )
+        ghc_make_scanner = Scanner(
+                function = ghc_make_scanner_function,
+                skeys = [".hs", ".lhs"],
+                path_function = ghc_path_function
+                )
 
         ghc_c_compiler = Builder(
                 action = "$HSC $HSCFLAGS -c -o $TARGET $SOURCE",
@@ -126,7 +150,7 @@ def generate(env):
                 suffix = ".o",
                 single_source = True,
                 emitter = ghc_emitter,
-                source_scanner = ghc_scanner
+                source_scanner = ghc_make_scanner
                 )
 
         ghc_linker = Builder(
@@ -142,7 +166,7 @@ def generate(env):
                 suffix = "",
                 single_source = True,
                 emitter = ghc_make_emitter,
-                source_scanner = ghc_scanner
+                source_scanner = ghc_make_scanner
                 )
 
         env.Append( BUILDERS = {
