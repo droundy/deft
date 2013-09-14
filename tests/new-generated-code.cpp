@@ -149,9 +149,11 @@ int main(int, char **argv) {
 
   Vector n(1000);
   for (int i=0;i<1000;i++) n[i] = 0.5;
-  Vector x = integrate_sqr().createInput(10,10,10,
-                                         5, 5, 5,
-                                         n);
+  Vector x = integrate_sqr().allocInput(10,10,10);
+  integrate_sqr().a1(x) = 5;
+  integrate_sqr().a2(x) = 5;
+  integrate_sqr().a3(x) = 5;
+  integrate_sqr().nn(x) = n;
   compare_functionals("integrate_sqr", nsqr(), integrate_sqr(), x, 1e-10);
 
   if (errors == 0) printf("\n%s passes!\n", argv[0]);

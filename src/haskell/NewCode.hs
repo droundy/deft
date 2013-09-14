@@ -53,6 +53,7 @@ createHeader e0 arg0 n =
    functionDeclaration "denergy_per_volume_dx" "double" [("const Vector", "&xxx")],
    functionDeclaration "grad" "Vector" [("const Vector", "&xxx")],
    functionDeclaration "printme" "void" [("const char *", "prefix")],
+   functionDeclaration "allocInput" "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")],
    functionDeclaration "createInput" "Vector" (codeInputArgs (inputs e0))] ++
   map setarg (inputs e0) ++
  ["private:",
@@ -119,6 +120,12 @@ createCppFile e variables n headername =
       (unlines $ map printEnergy $
        filter (`notElem` ["dV", "dr", "volume"]) $
        (Set.toList (findNamedScalars e))),
+   functionCode (n++"::allocInput") "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]
+      (unlines ["\tVector out(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "\tout[0] = Nx;",
+                "\tout[1] = Ny;",
+                "\tout[2] = Nz;",
+                "\treturn out;"]),
    functionCode (n++"::createInput") "Vector" (codeInputArgs (inputs e))
       (unlines $ ["\tconst int newsize = " ++
                   xxx (map getsize $ inputs e),
@@ -134,6 +141,9 @@ createCppFile e variables n headername =
       initializeOut x@(ES _) = concat ["\tout[sofar] = ",nameE x,";\n\tsofar += 1;"]
       initializeOut x = concat ["\tout.slice(sofar,", getsize x, ") = ",nameE x,";\n\t",
                                 "sofar += ",getsize x,";"]
+      actualsize (ES _) = 1 :: Expression Scalar
+      actualsize (ER _) = s_var "Nx" * s_var "Ny" * s_var "Nz"
+      actualsize (EK _) = s_var "varNx" * s_var "varNy" * s_var "varNz"
       getsize (ES _) = "1"
       getsize ee = nameE ee ++ ".get_size()"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"

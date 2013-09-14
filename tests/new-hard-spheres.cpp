@@ -53,7 +53,12 @@ int main(int, char **argv) {
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
   const double energy = 42.53522950699669281;
   printf("about to create input\n");
-  Vector inp = wb.createInput(Nx, Nx, Nx, R, a, a, a, Vector(Nx*Nx*Nx), kT);
+  Vector inp = wb.allocInput(Nx, Nx, Nx);
+  wb.R(inp) = R;
+  wb.a1(inp) = a;
+  wb.a2(inp) = a;
+  wb.a3(inp) = a;
+  wb.kT(inp) = kT;
   wb.x(inp) = nval;
   retval += check_functional_value("WhiteBear", wb, inp, energy);
 
