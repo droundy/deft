@@ -53,8 +53,7 @@ createHeader e0 arg0 n =
    functionDeclaration "denergy_per_volume_dx" "double" [("const Vector", "&xxx")],
    functionDeclaration "grad" "Vector" [("const Vector", "&xxx")],
    functionDeclaration "printme" "void" [("const char *", "prefix")],
-   functionDeclaration "allocInput" "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")],
-   functionDeclaration "createInput" "Vector" (codeInputArgs (inputs e0))] ++
+   functionDeclaration "allocInput" "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]] ++
   map setarg (inputs e0) ++
  ["private:",
   ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
@@ -87,7 +86,6 @@ createHeader e0 arg0 n =
       codeA :: [Exprn] -> String
       codeA [] = "()"
       codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ nameE x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> nameE x ++ "(" ++ nameE x ++ "_arg)") a)
-      codeInputArgs = map (\x -> (newdeclareE x, nameE x))
       codeArgInit a = unlines $ map (\x -> "\tdouble " ++ nameE x ++ ";") a
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
@@ -125,27 +123,15 @@ createCppFile e variables n headername =
                 "\tout[0] = Nx;",
                 "\tout[1] = Ny;",
                 "\tout[2] = Nz;",
-                "\treturn out;"]),
-   functionCode (n++"::createInput") "Vector" (codeInputArgs (inputs e))
-      (unlines $ ["\tconst int newsize = " ++
-                  xxx (map getsize $ inputs e),
-                  "\tVector out(newsize);",
-                  "\tint sofar = 0;"] ++
-                 map initializeOut (inputs e) ++
-                 ["\treturn out;"])] ++
+                "\treturn out;"])] ++
  ["// End of " ++ n ++ " class",
   "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
   "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
   ]
     where
-      initializeOut x@(ES _) = concat ["\tout[sofar] = ",nameE x,";\n\tsofar += 1;"]
-      initializeOut x = concat ["\tout.slice(sofar,", getsize x, ") = ",nameE x,";\n\t",
-                                "sofar += ",getsize x,";"]
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "Nx" * s_var "Ny" * s_var "Nz"
       actualsize (EK _) = s_var "varNx" * s_var "varNy" * s_var "varNz"
-      getsize (ES _) = "1"
-      getsize ee = nameE ee ++ ".get_size()"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"
       createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -200,7 +186,4 @@ createCppFile e variables n headername =
               isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
               isns _ = False
               ns = findNamedScalars e
-      codeInputArgs = map (\x -> (newdeclareE x, nameE x))
-      xxx [] = ""
-      xxx iii = foldl1 (\x y -> x ++ " + " ++ y) iii ++";"
 
