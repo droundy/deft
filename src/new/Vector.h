@@ -74,7 +74,7 @@ public:
   }
   void operator=(double x) {
     for (int i=0; i<size; i++) {
-      data[i] = x;
+      data[i + offset] = x;
     }
   }
 

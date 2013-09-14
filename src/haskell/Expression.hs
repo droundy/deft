@@ -20,7 +20,7 @@ module Expression (Exprn(..),
                    makeHomogeneous, isConstant,
                    setZero, cleanvars, factorize, factorOut,
                    initializeE, freeE, newinitializeE, newfreeE,
-                   nameE, newdeclareE,
+                   nameE, newdeclareE, newreferenceE,
                    sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
                    product2pairs, pairs2product, product2denominator,
                    hasActualFFT, hasFFT, hasexpression, hasExprn, hasK,
@@ -31,7 +31,7 @@ module Expression (Exprn(..),
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE,
                    mapExprn,
-                   mapExpressionShortcut, -- just to avoid unused warning
+                   mapExpressionShortcut, mapExpression', -- just to avoid unused warning
                    countVars, varSet)
     where
 
@@ -1170,6 +1170,11 @@ newdeclareE :: Exprn -> String
 newdeclareE (ES e) = newdeclare e
 newdeclareE (EK e) = newdeclare e
 newdeclareE (ER e) = newdeclare e
+
+newreferenceE :: Exprn -> String
+newreferenceE (ES e) = newdeclare e ++ " &"
+newreferenceE (EK e) = newdeclare e
+newreferenceE (ER e) = newdeclare e
 
 nameE :: Exprn -> String
 nameE (ES (Var _ _ v _ Nothing)) = v

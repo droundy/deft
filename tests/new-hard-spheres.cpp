@@ -29,7 +29,9 @@ int check_functional_value(const char *name,
   for (unsigned i=0;i<strlen(name);i++) printf("*");
   printf("************\n\n");
 
+  printf("findiing energy\n");
   double fv = f.energy(v);
+  printf("found energy\n");
   print_double("Energy of Vector:  ", fv);
   printf("\n");
   f.printme("  ");
@@ -50,8 +52,9 @@ int main(int, char **argv) {
   const int Nx = 100;
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
   const double energy = 42.53522950699669281;
+  printf("about to create input\n");
   Vector inp = wb.createInput(Nx, Nx, Nx, R, a, a, a, Vector(Nx*Nx*Nx), kT);
-  wb.get_x(inp) = wb.get_x(inp)*0 + nval;
+  wb.x(inp) = nval;
   retval += check_functional_value("WhiteBear", wb, inp, energy);
 
   if (retval == 0) {
