@@ -90,25 +90,25 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b, const double perio
   return v;
 }
 
-bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3]) {
+bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3], double dr) {
   const vector3d ab = periodic_diff(a.pos, b.pos, periodic);
-  if (ab.normsquared() > (a.R + b.R)*(a.R + b.R))
+  if (ab.normsquared() > sqr(a.R + b.R + 2*dr))
     return false;
   // construct axes from a
   // project a and b to each axis
   for (int i=0; i<a.mypoly->nfaces; i++) {
     const vector3d axis = a.rot.rotate_vector(a.mypoly->faces[i]);
-    double projection = axis.dot(a.rot.rotate_vector((a.mypoly->vertices[0])*a.R));
+    double projection = axis.dot(a.rot.rotate_vector((a.mypoly->vertices[0])*(a.R+dr)));
     double mina = projection, maxa = projection;
     for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
+      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*(a.R+dr)));
       if (projection < mina) mina = projection;
       else if (projection > maxa) maxa = projection;
     }
-    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
+    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*(b.R+dr)) + ab);
     double minb = projection, maxb = projection;
     for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
+      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*(b.R+dr)) + ab);
       if (projection < minb) minb = projection;
       else if (projection > maxb) maxb = projection;
     }
@@ -120,17 +120,17 @@ bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3])
   // project a and b to each axis
   for (int i=0; i<b.mypoly->nfaces; i++) {
     const vector3d axis = b.rot.rotate_vector(b.mypoly->faces[i]);
-    double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
+    double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*(a.R+dr)));
     double mina = projection, maxa = projection;
     for (int j=1; j<a.mypoly->nvertices; j++) {
-      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
+      projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*(a.R+dr)));
       if (projection < mina) mina = projection;
       else if (projection > maxa) maxa = projection;
     }
-    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*b.R) + ab);
+    projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[0]*(b.R+dr)) + ab);
     double minb = projection, maxb = projection;
     for (int j=1; j<b.mypoly->nvertices; j++) {
-      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*b.R) + ab);
+      projection = axis.dot(b.rot.rotate_vector(b.mypoly->vertices[j]*(b.R+dr)) + ab);
       if (projection < minb) minb = projection;
       else if (projection > maxb) maxb = projection;
     }
@@ -149,10 +149,10 @@ int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
   double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
   for (int i=0; i<a.mypoly->nfaces; i++) {
     aaxes[i] = a.rot.rotate_vector(a.mypoly->faces[i]);
-    double projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
+    double projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[0]*(a.R+dr)));
     amins[i] = projection, amaxes[i] = projection;
     for (int j=1; j< a.mypoly->nvertices; j++) {
-      projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
+      projection = aaxes[i].dot(a.rot.rotate_vector(a.mypoly->vertices[j]*(a.R+dr)));
       amins[i] = min(projection, amins[i]);
       amaxes[i] = max(projection, amaxes[i]);
     }
@@ -161,16 +161,16 @@ int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
   for (int l=0; l<a.num_neighbors; l++) {
     const int k = a.neighbors[l];
     const vector3d ab = periodic_diff(a.pos, bs[k].pos, periodic);
-    if (ab.normsquared() < (a.R + bs[k].R)*(a.R + bs[k].R)) {
+    if (ab.normsquared() < sqr(a.R + bs[k].R + 2*dr)) {
       bool overlap = true; // assume overlap until we prove otherwise or fail to.
       // check projection of b against a's axes
       for (int i=0; i<a.mypoly->nfaces; i++) {
         double projection = aaxes[i].dot
-          (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
+          (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*(bs[k].R+dr)) + ab);
         double bmin = projection, bmax = projection;
         for (int j=1; j<bs[k].mypoly->nvertices; j++) {
           projection = aaxes[i].dot
-            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
+            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*(bs[k].R+dr)) + ab);
           bmin = min(projection, bmin);
           bmax = max(projection, bmax);
         }
@@ -182,19 +182,19 @@ int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
       if (overlap) { // still need to check against b's axes
         for (int i=0; i<bs[k].mypoly->nfaces; i++) {
           const vector3d axis = bs[k].rot.rotate_vector(bs[k].mypoly->faces[i]);
-          double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*a.R));
+          double projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[0]*(a.R+dr)));
           double amin = projection, amax = projection;
           for (int j=1; j<a.mypoly->nvertices; j++) {
-            projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*a.R));
+            projection = axis.dot(a.rot.rotate_vector(a.mypoly->vertices[j]*(a.R+dr)));
             amin = min(projection, amin);
             amax = max(projection, amax);
           }
           projection = axis.dot
-            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*bs[k].R) + ab);
+            (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[0]*(bs[k].R+dr)) + ab);
           double bmin = projection, bmax = projection;
           for (int j=1; j<bs[k].mypoly->nvertices; j++) {
             projection = axis.dot
-              (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*bs[k].R) + ab);
+              (bs[k].rot.rotate_vector(bs[k].mypoly->vertices[j]*(bs[k].R+dr)) + ab);
             bmin = min(projection, bmin);
             bmax = max(projection, bmax);
 
@@ -215,17 +215,17 @@ int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
   return num_overlaps;
 }
 
-bool in_cell(const polyhedron &p, const double walls[3], bool real_walls) {
+bool in_cell(const polyhedron &p, const double walls[3], bool real_walls, double dr) {
   if(real_walls) {
     for (int i=0; i<3; i++) {
       if (walls[i] > 0) {
-        if (p.pos[i] - p.R > 0.0 && p.pos[i] + p.R < walls[i]) {
+        if (p.pos[i] - p.R - dr > 0.0 && p.pos[i] + p.R + dr < walls[i]) {
           continue;
         }
-        double coord = (p.rot.rotate_vector(p.mypoly->vertices[0]*p.R) + p.pos)[i];
+        double coord = (p.rot.rotate_vector(p.mypoly->vertices[0]*(p.R+dr)) + p.pos)[i];
         double pmin = coord, pmax = coord;
         for (int j=1; j<p.mypoly->nvertices; j++) {
-          coord = (p.rot.rotate_vector(p.mypoly->vertices[j]*p.R) + p.pos)[i];
+          coord = (p.rot.rotate_vector(p.mypoly->vertices[j]*(p.R+dr)) + p.pos)[i];
           pmin = min(coord, pmin);
           pmax = max(coord, pmax);
         }
@@ -246,11 +246,12 @@ polyhedron random_move(const polyhedron &original, double size,
   return temp;
 }
 
-bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
+int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
-                         double dist, double angwidth, int max_neighbors) {
+                        double dist, double angwidth, int max_neighbors, double dr) {
   const double len[3] = {periodic[0]+walls[0], periodic[1]+walls[1], periodic[2]+walls[2]};
   polyhedron temp = random_move(p[id], dist, angwidth, len);
+  int returnval = 0;
   if (in_cell(temp, walls, real_walls)) {
     bool overlaps = overlaps_with_any(temp, p, periodic);
     if (!overlaps) {
@@ -263,7 +264,8 @@ bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
         // If we still don't overlap, then we'll have to update the tables
         // of our neighbors that have changed.
         temp.neighbors = new int[max_neighbors];
-        update_neighbors(temp, id, p, N, neighborR, periodic);
+        update_neighbors(temp, id, p, N, neighborR + 2*dr, periodic);
+        returnval += 2;
         // However, for this check (and this check only), we don't need to
         // look at all of our neighbors, only our new ones.
         // fixme: do this!
@@ -275,17 +277,18 @@ bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
           // keeping this move and need to tell our neighbors where we are now.
           temp.neighbor_center = temp.pos;
           inform_neighbors(temp, p[id], id, p);
+          returnval += 4;
           delete[] p[id].neighbors;
         }
         else delete[] temp.neighbors;
       }
       if (!overlaps) {
         p[id] = temp;
-        return true;
+        return returnval + 1; //move successful
       }
     }
   }
-  return false;
+  return returnval; //move unsucessful
 }
 
 int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,

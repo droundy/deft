@@ -74,23 +74,27 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b, const double perio
 // Check whether two polyhedra overlap
 // Note: this function (intentionally) does not make use of neighbor tables
 // It is slow, and should only be used for debugging purposes
-bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3]);
+bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3], double dr=0);
 
 // Check whether polyhedron overlaps with any of its neighbors in p.
 // If count is true, it will return the total number of overlaps, otherwise
 // it returns 1 if there is at least one overlap, 0 if there are none.
 // If dr is nonzero, then each polyhedron is treated as having a radius R + dr
-int overlaps_with_any(const polyhedron &a, const polyhedron *p, const double periodic[3], bool count=false, double dr=0);
+int overlaps_with_any(const polyhedron &a, const polyhedron *p, const double periodic[3],
+                      bool count=false, double dr=0);
 
 // Return true if p doesn't intersect walls
-bool in_cell(const polyhedron &p, const double walls[3], bool real_walls);
+bool in_cell(const polyhedron &p, const double walls[3], bool real_walls, double dr=0);
 
 // Move and rotate the polyhedron by a random amount, in a gaussian distribution with
 // respective standard deviations dist and angwidth
 polyhedron random_move(const polyhedron &original, double dist, double angwidth, const double len[3]);
 
 // Attempt to move polyhedron of id in p, while paying attention to collisions and walls
-// Return true if the move is successful, false otherwise
-bool move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
+// Returns the sum of:
+// 1 if the move was successful
+// 2 if the neighbor table was updated
+// 4 if, after updating the neighbor table, neighbors were informed
+int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
-                         double dist, double angwidth, int max_neighbors);
+                        double dist, double angwidth, int max_neighbors, double dr);

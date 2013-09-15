@@ -4,7 +4,7 @@ from numpy import *
 import os
 
 iterations = 100000000
-R = sqrt(3)/2
+R = 1
 neighborR = 0.5
 de_density = 0.01
 dr = 0.01
@@ -21,20 +21,24 @@ if os.path.isdir('figs'):
 
 os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
-def run_walls(ff, N, dim, shape):
+def run_mc(ff, N, dim, shape, celltype="periodic"):
   memory = N/100 # fixme: better guess
-  name = "polyhedraMC-walls-%4.2f-%i-%s" %(ff, N, shape)
-  filename = 'walls-%4.2f' % ff
+  name = "polyhedraMC-%s-%4.2f-%i-%s" %(celltype, ff, N, shape)
+  filename = '%s-%4.2f' %(celltype, ff)
   scriptname = "%s/%s-%i-%s.tmp.sh" %(figsdir, filename, N, shape)
   outname = "%s/%s-%i-%s.out" %(bindir, filename, N, shape)
   directory = '%s/mc' % figsdir
+  if celltype == "periodic":
+    cellparam = "--periodz %g" %dim
+  else:
+    cellparam = "--wallz %g" %dim
   parameters = ["--dir %s" %directory,
                 "--filename %s" %filename,
                 "--N %i" %N,
                 "--iterations %li" %iterations,
                 "--periodx %g" %dim,
                 "--periody %g" %dim,
-                "--wallz %g" %dim,
+                cellparam,
                 "--shape %s" %shape,
                 "--R %g" %R,
                 "--neighborR %g" %neighborR,
@@ -61,13 +65,7 @@ def run_walls(ff, N, dim, shape):
   os.system("sbatch -J %s %s\n" %(name, scriptname))
 
 
+run_mc(.58, 2744, 20, 'truncated_tetrahedron', 'periodic')
+run_mc(.46, 2197, 20, 'truncated_tetrahedron', 'periodic')
+run_mc(.36, 1728, 20, 'truncated_tetrahedron', 'periodic')
 
-run_walls(.3, 2400, 20, 'cube')
-run_walls(.4, 3200, 20, 'cube')
-run_walls(.5, 4000, 20, 'cube')
-run_walls(.6, 4800, 20, 'cube')
-run_walls(.7, 5600, 20, 'cube')
-run_walls(.73, 5832, 20, 'cube')
-run_walls(.30, 2197, 20, 'truncated_tetrahedron')
-run_walls(.37, 2744, 20, 'truncated_tetrahedron')
-run_walls(.46, 3375, 20, 'truncated_tetrahedron')
