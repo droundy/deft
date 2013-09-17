@@ -48,7 +48,7 @@ int check_functional_value(const char *name,
 int main(int, char **argv) {
   int retval = 0;
 
-  WhiteBear wb(1);
+  WhiteBear wb;
   const int Nx = 100;
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
   const double energy = 42.53522950699669281;

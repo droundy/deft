@@ -11,8 +11,8 @@ import Optimize ( optimize )
 import qualified Data.Set as Set
 
 
-defineFunctional :: Expression Scalar -> [Exprn] -> [Exprn] -> String -> String
-defineFunctional e arg variables n = createHeader e arg n ++ implementation
+defineFunctional :: Expression Scalar -> [Exprn] -> String -> String
+defineFunctional e variables n = createHeader e n ++ implementation
   where implementation = unlines $ drop 4 $ lines $ createCppFile e variables n ""
 
 
@@ -33,8 +33,8 @@ functionDeclaration n t a =
   "\t" ++ t ++ " " ++ n ++ "(" ++ functionDeclaration "" "" a ++ ") const;"
 
 
-createHeader :: Expression Scalar -> [Exprn] -> String -> String
-createHeader e0 arg0 n =
+createHeader :: Expression Scalar -> String -> String
+createHeader e0 n =
   unlines $
   ["// -*- mode: C++; -*-",
    "",
@@ -45,8 +45,7 @@ createHeader e0 arg0 n =
    "",
    "class " ++ n ++ " : public NewFunctional {",
    "public:",
-   "" ++ n ++ codeA arg ++ "  {",
-   "}",
+   "\t" ++ n ++ "() {};",
    "",
    functionDeclaration "energy" "double" [("const Vector", "&xxx")],
    functionDeclaration "energy_per_volume" "double" [("const Vector", "&xxx")],
@@ -56,15 +55,11 @@ createHeader e0 arg0 n =
    functionDeclaration "allocInput" "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]] ++
   map setarg (inputs e0) ++
  ["private:",
-  ""++ codeArgInit arg ++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
+  ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
     where
       e = mapExpression' renameVar e0
-      arg = map renameExprn arg0
       renameVar (Var CannotBeFreed a b c x) = Var CannotBeFreed ("var"++a) ("var"++b) c x
       renameVar x = x
-      renameExprn (ES x) = ES $ mapExpression' renameVar x
-      renameExprn (EK x) = EK $ mapExpression' renameVar x
-      renameExprn (ER x) = ER $ mapExpression' renameVar x
       -- setarg creates a method that will get a reference to a given
       -- input argument's value.
       setarg :: Exprn -> String
@@ -83,10 +78,6 @@ createHeader e0 arg0 n =
       sizeE (EK _) = error "no sizeE for EK yet"
       inputs :: Expression Scalar -> [Exprn]
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
-      codeA :: [Exprn] -> String
-      codeA [] = "()"
-      codeA a = "(" ++ foldl1 (\x y -> x ++ ", " ++ y ) (map (\x -> "double " ++ nameE x ++ "_arg") a) ++ ") : " ++ foldl1 (\x y -> x ++ ", " ++ y) (map (\x -> nameE x ++ "(" ++ nameE x ++ "_arg)") a)
-      codeArgInit a = unlines $ map (\x -> "\tdouble " ++ nameE x ++ ";") a
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
 
