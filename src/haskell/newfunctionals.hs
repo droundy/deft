@@ -1,6 +1,7 @@
 import NewCode
 import WhiteBear ( whitebear )
 import System.Environment ( getArgs )
+import FMT ( n )
 
 a1, a2, a3 :: Vector Scalar
 a1 = t_var "a1"
@@ -18,7 +19,8 @@ main =
      let gentest f x = if "tests" `elem` todo
                    then writeFile f x
                    else return ()
-     headerAndCpp "new/WhiteBearFast" whitebear [ER $ r_var "x"] "WhiteBear"
+     let whitebearn = substitute n (r_var "n") whitebear
+     headerAndCpp "new/WhiteBearFast" whitebearn [ER $ r_var "n"] "WhiteBear"
      gentest "tests/new-generated-haskell/WhiteBear.h" $
        defineFunctional whitebear [ER $ r_var "x"] "WhiteBear"
      gentest "tests/new-generated-haskell/integrate_sqr.h" $

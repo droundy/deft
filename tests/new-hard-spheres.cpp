@@ -59,7 +59,7 @@ int main(int, char **argv) {
   wb.a2(inp) = a;
   wb.a3(inp) = a;
   wb.kT(inp) = kT;
-  wb.x(inp) = nval;
+  wb.n(inp) = nval;
   retval += check_functional_value("WhiteBear", wb, inp, energy);
 
   if (retval == 0) {
