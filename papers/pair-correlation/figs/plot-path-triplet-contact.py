@@ -9,15 +9,15 @@ import scipy.ndimage
 import os.path
 import math
 import matplotlib.patheffects
+import bracket # our handy bracket function
+import styles # our preferred line styles
 from matplotlib import rc
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-colors = ['k', 'b', 'g', 'r']
 plots = ['mc', 'this-work', 'fischer', 'sokolowski']#, 'sphere-dft'] # , 'gloor'
-titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski et al.'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -89,31 +89,26 @@ xplot.set_xlim(xlow, xhigh)
 zplot.set_xlim(rpath/2 - xlow + xmin, rpath/2 - xhigh + xmin)
 
 xticks = [6, 4, 2]
-zticks = [2, 4, 6]
+zticks = [0, 2, 4, 6]
 
-plotticks = xticks + [-z+rpath/2+xmin for z in zticks]
+plotticks = xticks + [-z+xmin for z in zticks]
 xplot.set_xticks(plotticks)
-xplot.set_xticklabels(xticks + zticks)
+xplot.set_xticklabels(xticks[:-1] + ["20"] + [""] + zticks[1:])
 zplot.set_xticks([])
 
 xplot.axvline(x=xmin, color='k')
 zplot.axvline(x=2*rpath, color='k')
 
-xloc = .621
-zloc = .802
-figtext(xloc, .04, r"$\underbrace{\hspace{9.3em}}$", horizontalalignment='center')
-figtext(xloc, .01, r"$x$", horizontalalignment='center')
-figtext(zloc, .04, r"$\underbrace{\hspace{12.3em}}$", horizontalalignment='center')
-figtext(zloc, .01, r"$z$", horizontalalignment='center')
-
+bracket.bracket(xplot, 0, (xlow - 2)/(xlow - xhigh), -.06, .04, r'$x$')
+bracket.bracket(xplot, (xlow - xmin)/(xlow - xhigh), 1.0, -.06, .04, r'$z$')
 
 twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
 
 fig.subplots_adjust(hspace=0.001)
 
-for i in range(len(plots)):
-    g3_path = read_triplet_path(ff, plots[i])
+for name in plots:
+    g3_path = read_triplet_path(ff, name)
     if able_to_read_file == False:
         plot(arange(0,10,1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
@@ -126,18 +121,18 @@ for i in range(len(plots)):
     zcontact = z.min()
     incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
-    if plots[i] == 'fischer':
+    if name == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
-      zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
+      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
     else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
-      zplot.plot(z[z>zcontact],g[z>zcontact], label=titles[i], color=colors[i])
+      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
+      zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot[name], label=styles.title[name])
 
 
-for i in range(len(plots)):
-  if plots[i] in ['this-work', 'sokolowski']:
-    g3_path = read_triplet_back(ff, plots[i])
+for name in plots:
+  if name in ['this-work', 'sokolowski']:
+    g3_path = read_triplet_back(ff, name)
     x = g3_path[:,3]
     z = g3_path[:,2]
     g = g3_path[:,1]
@@ -145,11 +140,11 @@ for i in range(len(plots)):
     z = zcontact + (zcontact - z)
     incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
-    xplot.plot(x[z==zcontact],g[z==zcontact], colors[i]+'--')
-    zplot.plot(z[z>zcontact],g[z>zcontact], colors[i]+'--')
+    xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot_back[name])
+    zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
 
 xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r}_2)$')
-xplot.legend(loc='best', ncol=1).get_frame().set_alpha(0.5)
+xplot.legend(loc='best', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
@@ -225,13 +220,13 @@ g3_back = read_triplet_back(ff, 'this-work')
 xback = g3_back[:,3]
 zback = g3_back[:,2]
 plot(zmc,xmc, 'w-', linewidth=3)
-plot(zdft,-xdft, 'w-', linewidth=3)
-plot(zback,-xback, 'w-', linewidth=3)
-plot(zdft,xdft, 'w-', linewidth=3)
-plot(zmc,xmc, colors[plots.index('mc')]+'--', linewidth=3)
-plot(zdft,-xdft, colors[plots.index('this-work')]+'--', linewidth=3)
-plot(zback[zback<zback.max()],-xback[zback<zback.max()],
-     colors[plots.index('this-work')]+'--', linewidth=3)
+#plot(zdft,-xdft, 'w-', linewidth=3)
+#plot(zback,-xback, 'w-', linewidth=3)
+#plot(zdft,xdft, 'w-', linewidth=3)
+plot(zmc,xmc, styles.color['mc']+'--', linewidth=3)
+#plot(zdft,-xdft, colors[plots.index('this-work')]+'--', linewidth=3)
+#plot(zback[zback<zback.max()],-xback[zback<zback.max()],
+#     colors[plots.index('this-work')]+'--', linewidth=3)
 
 
 Ax = 3.9

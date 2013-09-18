@@ -3,6 +3,7 @@
 from __future__ import division
 import matplotlib
 import sys
+import styles # for our style choices for these plots
 if not(len(sys.argv) >= 4 and sys.argv[3] == "show"):
   matplotlib.use('Agg')
 from pylab import *
@@ -49,22 +50,18 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["fischer","this-work", 'sokolowski']
+versions = ["this-work", 'sokolowski', "fischer"]
 
 for version in versions:
   z0, da_dz = read_da_dz(version)
-  plt.plot(z0, da_dz)
+  plt.plot(z0 - 3, da_dz, styles.plot[version], label=styles.title[version])
 
 mc_z0, mc_da_dz = read_a1_mc();
 
 
-if able_to_read_file == False:
-  plt.plot(arange(0,10,1), [0]*10, 'k')
-  plt.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=20)
-else:
-  plt.plot(mc_z0 + 3.0, mc_da_dz, 'k')
-  plt.xlim([2,9])
-  plt.legend(versions+['mc'], loc='upper right')
+plt.plot(mc_z0, mc_da_dz, styles.plot['mc'], label=styles.title[version])
+plt.xlim([-.5,4])
+plt.legend(loc='best').draw_frame(False)
 
 #plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
 savefig("figs/dadz-%d-%d.pdf" % (int(eta*10), int(delta_r)))

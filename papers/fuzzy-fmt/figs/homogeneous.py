@@ -33,6 +33,7 @@ Temp = 0.00001
 eta = density*4*pi/3
 #P_cs = density*(1+eta+eta**2-eta**3)/(1-eta)**3
 P_cs = density*(1+eta+eta**2)/(1-eta)**3
+P_cs = density
 while Temp <= .011:
   betaV0 = V0/Temp
   gamma = betaV0*(4+sqrt((4+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)**2-4*pi**3/betaV0)+4*sqrt(pi/betaV0)-2*pi*sqrt(pi/betaV0)+pi/betaV0)/(2*pi**2)
@@ -73,6 +74,7 @@ while Temp <= .011:
 for ff in arange(0.1,0.81, 0.1):
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
+  phs = density
   for temp in [0.1, 0.01, 0.001, 0.0001]:
     fname = 'figs/mc-%.4f-%.4f.dat.prs' % (ff, temp)
     if os.path.exists(fname):
@@ -84,7 +86,8 @@ for ff in arange(0.1,0.81, 0.1):
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
 
-xlim(xmax=0.8)
+ylim(1,4.0)
+xlim(xmax=0.31)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
 xlabel('packing fraction')

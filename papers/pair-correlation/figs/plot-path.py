@@ -9,6 +9,8 @@ import scipy.ndimage
 import matplotlib.patheffects
 import os.path
 import math
+import bracket # our handy bracket function
+import styles # our preferred line styles
 
 from matplotlib import rc
 rc('text', usetex=True)
@@ -16,9 +18,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-colors = ['k', 'b', 'g', 'r', 'm']
-plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor' sphere-dft
-titles = ['Monte Carlo', 'this work', 'Fischer et al.', 'Sokolowski'] # , 'gloor' test particle
+plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
 
 dx = 0.1
 ############################
@@ -77,25 +77,25 @@ zplot = xplot.twiny()
 #zplot = fig.add_subplot(1,3,3, sharey=xplot)
 twod_plot = fig.add_subplot(1,2,1)
 
-xplot.set_xlim(6, -4)
+zmax_lineplot = 6.
+xmax_lineplot = 4.
+xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
 xplot.set_xticklabels([6, 4, "2 0", 2, 4, 6])
-zplot.set_xlim(-4, 6)
+zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-figtext(.613, .04, r"$\underbrace{\hspace{9em}}$", horizontalalignment='center')
-figtext(.613, .01, r"$x$", horizontalalignment='center')
-figtext(.796, .04, r"$\underbrace{\hspace{13.1em}}$", horizontalalignment='center')
-figtext(.796, .01, r"$z$", horizontalalignment='center')
+bracket.bracket(xplot, 0, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .04, r'$x$')
+bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.0, -.06, .04, r'$z$')
 
 twod_plot.set_xlim(-0.5, 1.5*ymax)
 twod_plot.set_ylim(-ymax, ymax)
 
 fig.subplots_adjust(hspace=0.001)
 
-for i in range(len(plots)):
-    g2_path = read_walls_path(ff, plots[i])
+for name in plots:
+    g2_path = read_walls_path(ff, name)
     if able_to_read_file == False:
         plot(arange(0,10,1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
@@ -108,21 +108,21 @@ for i in range(len(plots)):
     zcontact = z.min()
     xcontact = 2.0051
 
-    if plots[i] == 'fischer':
+    if name == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
       incontact = (x<xcontact) & (z<2)
-      zplot.plot(z[incontact],g[incontact], label=titles[i], color=colors[i])
+      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
     else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], label=titles[i], color=colors[i])
-      zplot.plot(z[x<xcontact],g[x<xcontact], label=titles[i], color=colors[i])
+      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
+      zplot.plot(z[x<xcontact],g[x<xcontact], styles.plot[name], label=styles.title[name])
 
 zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc='best', ncol=2).get_frame().set_alpha(0.5)
+zplot.legend(loc='best', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)

@@ -55,6 +55,8 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
                     source = [pyfile] + goodinputs,
                     action = act)
 
+import_re = re.compile(r"^import\s+(\w+)", re.M)
+
 fixed_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"](\s*,[\w\s=]+)*\)")
 changing_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
@@ -77,9 +79,16 @@ def Matplotlib(env, source, py_chdir = ""):
     node = File(source)
     contents = node.get_text_contents()
 
+    inputs = fixed_input.findall(contents)
+
+    imports = import_re.findall(contents)
+    for i in imports:
+        ipath = os.path.join(os.path.dirname(source), i+'.py')
+        if os.path.exists(ipath):
+            inputs.append(os.path.relpath(ipath, py_chdir))
+
     outputs = fixed_output.findall(contents)
     outputs = [x[0] for x in outputs]
-    inputs = fixed_input.findall(contents)
     argvals = arguments.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents)
