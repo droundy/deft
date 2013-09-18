@@ -6,8 +6,7 @@ CacheDir(os.environ['HOME'] + '/.cache/scons')
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
 env.MergeFlags('-Wall -Werror -ansi')
 env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs')
-env.MergeFlags('-O3')
-#env.AppendUnique(LINKFLAGS=['-flto'], CFLAGS=['-flto'])
+env.MergeFlags('-O3') # add -g here to enable debugging
 
 # The following flags enable gcc to eliminate unused code from the
 # final executable.  This reduces the size of the executable, and I

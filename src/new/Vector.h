@@ -61,12 +61,14 @@ public:
   void operator=(const Vector &a) {
     // I should note that the semantics of assignment are a little
     // tricky.
-    if (!references_count) {
+    if (!references_count && a.size) {
       size = a.size;
       offset = a.offset;
       data = a.data;
       references_count = a.references_count;
       *references_count += 1;
+    } else if (!references_count) {
+      size = 0;
     } else {
       assert(size == a.size);
       memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?

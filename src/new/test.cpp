@@ -7,34 +7,32 @@ inline double spring(int i) {
 }
 
 class SqrSum : public NewFunctional {
-  double energy(const Vector &x) const {
-    const int sz = x.get_size();
+public:
+  SqrSum(Vector v) {
+    data = v;
+  }
+  double true_energy() const {
+    const int sz = data.get_size();
     double out = 0;
     for (int i=0; i<sz; i++) {
-      out += spring(i)*x[i]*x[i];
+      out += spring(i)*data[i]*data[i];
     }
     return out;
   }
-  double energy_per_volume(const Vector &x) const {
-    return 0;
-  }
-  double denergy_per_volume_dx(const Vector &x) const {
-    return 0;
-  }
-  Vector grad(const Vector &x) const {
-    const int sz = x.get_size();
+  Vector grad() const {
+    const int sz = data.get_size();
     Vector out(sz);
     for (int i=0; i<sz; i++) {
-      out[i] = spring(i)*2*x[i];
+      out[i] = spring(i)*2*data[i];
     }
     return out;
   }
-  EnergyGradAndPrecond energy_grad_and_precond(const Vector &x) const {
+  EnergyGradAndPrecond energy_grad_and_precond() const {
     EnergyGradAndPrecond egpg;
-    egpg.energy = energy(x);
-    egpg.grad = grad(x);
-    egpg.precond = grad(x);
-    const int sz = x.get_size();
+    egpg.energy = energy();
+    egpg.grad = grad();
+    egpg.precond = grad();
+    const int sz = data.get_size();
     for (int i=0; i<sz; i++) {
       egpg.precond[i] /= spring(i);
     }
@@ -55,8 +53,8 @@ int main() {
     for (int i=0;i<N;i++) {
       foo[i] = i*0.1;
     }
-    SqrSum sqr;
-    Minimize min(&sqr, &foo);
+    SqrSum sqr(foo);
+    Minimize min(&sqr);
     printf("Starting energy is %g\n\n", min.energy());
     while (min.improve_energy(quiet)) {
     }
@@ -75,8 +73,8 @@ int main() {
     for (int i=0;i<N;i++) {
       foo[i] = i*0.1;
     }
-    SqrSum sqr;
-    Minimize min(&sqr, &foo);
+    SqrSum sqr(foo);
+    Minimize min(&sqr);
     const double prec = 1e-9;
     min.set_precision(prec);
     printf("Starting energy is %g\n\n", min.energy());
@@ -104,8 +102,8 @@ int main() {
     for (int i=0;i<N;i++) {
       foo[i] = i*0.1;
     }
-    SqrSum sqr;
-    Minimize min(&sqr, &foo);
+    SqrSum sqr(foo);
+    Minimize min(&sqr);
     const double prec = 1e-9;
     min.set_precision(prec);
     min.precondition(true);

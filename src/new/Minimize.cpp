@@ -110,11 +110,11 @@ bool Minimize::improve_energy(Verbosity v) {
     // that the energy drops a tad.  This hopefully will give us a
     // reasonable starting guess.
     double step1 = step;
-    *x += step1*direction; // Step away a bit...
+    *f += step1*direction; // Step away a bit...
     double Etried = -137;
     do {
       step1 *= 0.5;
-      *x -= step1*direction; // and then step back a bit less...
+      *f -= step1*direction; // and then step back a bit less...
       invalidate_cache();
       if (energy(v) == Etried) {
         if (v >= verbose) {
@@ -151,7 +151,7 @@ bool Minimize::improve_energy(Verbosity v) {
       if (better(E0, E1)) {
         // It doesn't look to be working, so let's panic!
         invalidate_cache();
-        *x -= step1*direction;
+        *f -= step1*direction;
         if (v >= verbose) printf("\t\tQuadratic linmin not working properly!!!\n");
         //assert(!"Quadratic linmin not working well!!!\n");
         return false;
@@ -162,41 +162,41 @@ bool Minimize::improve_energy(Verbosity v) {
         while (energy(v) <= Ebest) {
           Ebest = energy(v);
           if (Ebest != E1 && v >= verbose) printf("\t\tQuad: Ei = %25.15g\n", Ebest);
-          *x += step1*direction;
+          *f += step1*direction;
           invalidate_cache();
           step1 *= 2;
         }
         step1 *= 0.5;
-        *x -= step1*direction;
+        *f -= step1*direction;
         step = step1;
       }
     } else if (E1 == E0) {
       if (v >= verbose) {
-        printf("\t\tNo change in energy... step1 is %g, direction has mag %g pos is %g\n",
-               step1, direction.norm(), x->norm());
+        printf("\t\tNo change in energy... step1 is %g, direction has mag %g\n",
+               step1, direction.norm());
         fflush(stdout);
       }
       do {
         invalidate_cache();
-        *x -= step1*direction;
+        *f -= step1*direction;
         step1 *= 2;
-        *x += step1*direction;
+        *f += step1*direction;
       } while (energy(v) == E0);
       if (energy(v) > E0) {
-        *x -= step1*direction;
+        *f -= step1*direction;
         invalidate_cache();
         step1 = 0;
         printf("\t\tQuad: failed to find any improvement!  :(\n");
       } else if (energy(v) != energy(v)) {
         printf("\t\tQuad: found NaN with smallest possible step!!!\n");
-        *x -= step1*direction;
+        *f -= step1*direction;
         invalidate_cache();
         step1 = 0;
       }
     } else {
       step = step2; // output the stepsize for later reuse.
       invalidate_cache();
-      *x += (step2-step1)*direction; // and move to the expected minimum.
+      *f += (step2-step1)*direction; // and move to the expected minimum.
       if (v >= verbose) {
         printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(v));
         fflush(stdout);
@@ -209,12 +209,12 @@ bool Minimize::improve_energy(Verbosity v) {
         // The first try was better, so let's go with that one!
         if (v >= verbose) printf("\t\tGoing back to the first try...\n");
         invalidate_cache();
-        *x -= (step2-step1)*direction;
+        *f -= (step2-step1)*direction;
         step = step1;
       } else if (energy(v) > E0) {
         const double E2 = energy(v);
         invalidate_cache();
-        *x -= step2*direction;
+        *f -= step2*direction;
         if (v >= verbose) {
           printf("\t\tQuadratic linmin not working well!!! (E2 = %14.7g, E0 = %14.7g)\n",
                  E2, energy(v));

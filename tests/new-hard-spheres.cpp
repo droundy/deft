@@ -19,7 +19,7 @@
 #include "new/WhiteBearFast.h"
 
 int check_functional_value(const char *name,
-                            const NewFunctional &f, Vector v,
+                            const NewFunctional &f,
                             double energy,
                             double fraccuracy = 1e-15) {
   int errors = 0;
@@ -30,7 +30,7 @@ int check_functional_value(const char *name,
   printf("************\n\n");
 
   printf("findiing energy\n");
-  double fv = f.energy(v);
+  double fv = f.energy();
   printf("found energy\n");
   print_double("Energy of Vector:  ", fv);
   printf("\n");
@@ -53,14 +53,14 @@ int main(int, char **argv) {
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
   const double energy = 42.53522950699669281;
   printf("about to create input\n");
-  Vector inp = wb.allocInput(Nx, Nx, Nx);
-  wb.R(inp) = R;
-  wb.a1(inp) = a;
-  wb.a2(inp) = a;
-  wb.a3(inp) = a;
-  wb.kT(inp) = kT;
-  wb.n(inp) = nval;
-  retval += check_functional_value("WhiteBear", wb, inp, energy);
+  wb.alloc(Nx, Nx, Nx);
+  wb.R() = R;
+  wb.a1() = a;
+  wb.a2() = a;
+  wb.a3() = a;
+  wb.kT() = kT;
+  wb.n() = nval;
+  retval += check_functional_value("WhiteBear", wb, energy);
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);

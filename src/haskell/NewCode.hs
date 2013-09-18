@@ -47,12 +47,10 @@ createHeader e0 n =
    "public:",
    "\t" ++ n ++ "() {};",
    "",
-   functionDeclaration "energy" "double" [("const Vector", "&xxx")],
-   functionDeclaration "energy_per_volume" "double" [("const Vector", "&xxx")],
-   functionDeclaration "denergy_per_volume_dx" "double" [("const Vector", "&xxx")],
-   functionDeclaration "grad" "Vector" [("const Vector", "&xxx")],
+   functionDeclaration "true_energy" "double" [],
+   functionDeclaration "grad" "Vector" [],
    functionDeclaration "printme" "void" [("const char *", "prefix")],
-   functionDeclaration "allocInput" "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]] ++
+   functionDeclaration "alloc" "void" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]] ++
   map setarg (inputs e0) ++
  ["private:",
   ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
@@ -63,13 +61,13 @@ createHeader e0 n =
       -- setarg creates a method that will get a reference to a given
       -- input argument's value.
       setarg :: Exprn -> String
-      setarg ee = functionCode (nameE ee) (newreferenceE ee) [("Vector", "xxx")] $
+      setarg ee = functionCode (nameE ee) (newreferenceE ee) [] $
                   unlines ("\tint sofar = 0;" : initme (inputs e0) )
-                    where initme (xx@(ES _):_) | xx == ee = ["\treturn xxx[sofar];"]
-                          initme (xx:_) | xx == ee = ["\treturn xxx.slice(sofar," ++ sizeE ee ++ ");"]
+                    where initme (xx@(ES _):_) | xx == ee = ["\treturn data[sofar];"]
+                          initme (xx:_) | xx == ee = ["\treturn data.slice(sofar," ++ sizeE ee ++ ");"]
                           initme (xx@(ES _):rr)
                             | nameE xx `elem` ["Nx","Ny","Nz"] =
-                              ("\tconst double "++nameE xx++" = xxx[sofar++];") : initme rr
+                              ("\tconst double "++nameE xx++" = data[sofar++];") : initme rr
                           initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
                           initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
                           initme _ = error "bug inin setarg initme"
@@ -89,32 +87,22 @@ createCppFile e variables n headername =
    "#include \"" ++ headername ++ "\"",
    "",
    "",
-   functionCode (n++"::energy") "double" [("const Vector", "&xxx")]
+   functionCode (n++"::true_energy") "double" []
       (unlines $
        ["\tint sofar = 0;"] ++
        map createInput (inputs e) ++
        [newcodeStatements (fst energy),
        "\treturn " ++ newcode (snd energy) ++ ";\n"]),
-   functionCode (n++"::energy_per_volume") "double" [("const Vector", "&xxx")]
-      (unlines $
-       ["\tint sofar = 0;"] ++
-       map createInput (inputs $ makeHomogeneous e) ++
-       [newcodeStatements (fst energy_per_volume),
-       "\treturn " ++ newcode (snd energy_per_volume) ++ ";\n"]),
-   functionCode (n++"::denergy_per_volume_dx") "double" [("const Vector", "&xxx")]
-    (newcodeStatements (fst denergy_per_volume_dx) ++
-     "\treturn " ++ newcode (snd denergy_per_volume_dx) ++ ";\n"),
-   functionCode (n++"::grad") "Vector" [("const Vector", "&xxx")] (evalv grade),
+   functionCode (n++"::grad") "Vector" [] (evalv grade),
    functionCode (n++"::printme") "void" [("const char *", "prefix")]
       (unlines $ map printEnergy $
        filter (`notElem` ["dV", "dr", "volume"]) $
        (Set.toList (findNamedScalars e))),
-   functionCode (n++"::allocInput") "Vector" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]
-      (unlines ["\tVector out(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
-                "\tout[0] = Nx;",
-                "\tout[1] = Ny;",
-                "\tout[2] = Nz;",
-                "\treturn out;"])] ++
+   functionCode (n++"::alloc") "void" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]
+      (unlines ["\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "\tdata[0] = Nx;",
+                "\tdata[1] = Ny;",
+                "\tdata[2] = Nz;"])] ++
  ["// End of " ++ n ++ " class",
   "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
   "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
@@ -123,13 +111,13 @@ createCppFile e variables n headername =
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "Nx" * s_var "Ny" * s_var "Nz"
       actualsize (EK _) = s_var "varNx" * s_var "varNy" * s_var "varNz"
-      createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar]; sofar += 1;"
-      createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
+      createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
+      createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = xxx[sofar];\n" ++
-                                     "\tVector grad_" ++ nameE ee ++ " = xxx.slice(sofar,1); " ++
+      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar];\n" ++
+                                     "\tVector grad_" ++ nameE ee ++ " = data.slice(sofar,1); " ++
                                      "sofar += 1;"
-      createInputAndGrad ee@(ER _) = "\tVector " ++ nameE ee ++ " = xxx.slice(sofar,Nx*Ny*Nz);\n"++
+      createInputAndGrad ee@(ER _) = "\tVector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);\n"++
                                      "\tVector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
                                      "sofar += Nx*Ny*Nz;"
       createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -142,8 +130,6 @@ createCppFile e variables n headername =
                       "\tprint_double(\"\", " ++ v ++ ");\n" ++
                       "\tprintf(\"\\n\");"
       energy = codex e
-      energy_per_volume = codex (makeHomogeneous e)
-      denergy_per_volume_dx = codex (derive (s_var "xxx" :: Expression Scalar) 1 $ makeHomogeneous e)
       the_actual_gradients = map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
                                                                 ("grad_"++nameE (mkExprn x)) $
                                                   derive x 1 e)) variables
@@ -162,8 +148,8 @@ createCppFile e variables n headername =
       justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
       justvarname _ = error "bad in justvarname"
       evalv :: ([Statement], [Exprn]) -> String
-      evalv (st,ee) = unlines (["\tVector output(xxx.get_size());",
-                                "\tfor (int i=0;i<xxx.get_size();i++) {",
+      evalv (st,ee) = unlines (["\tVector output(data.get_size());",
+                                "\tfor (int i=0;i<data.get_size();i++) {",
                                 "\t\toutput[i] = 0;",
                                 "\t}"]++
                                "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++

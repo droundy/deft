@@ -12,8 +12,7 @@ const Verbosity min_details = chatty;
 
 class Minimize {
 public:
-  Minimize(const NewFunctional *myf, Vector *data)
-    : f(myf), x(data) {
+  Minimize(NewFunctional *myf) : f(myf) {
     iter = 0;
     maxiter = 10000000;
     num_energy_calcs = 0;
@@ -40,13 +39,12 @@ public:
   ~Minimize() {
     invalidate_cache();
   }
-  void minimize(const NewFunctional *newf, Vector *newx = 0) {
+  void minimize(NewFunctional *newf) {
     f = newf;
     iter = 0;
     num_energy_calcs = 0;
     num_grad_calcs = 0;
     invalidate_cache();
-    if (newx) x = newx;
   }
 
   // The following allow you to configure the algorithm used by the
@@ -89,7 +87,7 @@ public:
     if (last_energy == 0) {
       const clock_t start = clock();
 
-      last_energy = new double(f->energy(*x));
+      last_energy = new double(f->energy());
       if (v >= louder(min_details)) { // we need to get really paranoid before we print each energy...
         const clock_t end = clock();
         if (end > start + 10) {
@@ -108,7 +106,7 @@ public:
   }
   const Vector &grad() const {
     if (!last_grad.get_size()) {
-      last_grad = f->grad(*x);
+      last_grad = f->grad();
       num_grad_calcs++;
     }
     return last_grad;
@@ -118,7 +116,7 @@ public:
       if (use_preconditioning && f->have_preconditioner()) {
         invalidate_cache();
         const clock_t start = clock();
-        EnergyGradAndPrecond foo = f->energy_grad_and_precond(*x);
+        EnergyGradAndPrecond foo = f->energy_grad_and_precond();
         if (v >= louder(min_details)) { // we need to get really paranoid before we print each energy...
           const clock_t end = clock();
           if (end > start + 10) {
@@ -152,8 +150,7 @@ public:
     last_energy = 0;
   }
 private:
-  const NewFunctional *f;
-  Vector *x; // Note that we don't own this data!
+  NewFunctional *f;
   int iter, maxiter;
 
   mutable int num_energy_calcs, num_grad_calcs;
