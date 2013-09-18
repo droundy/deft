@@ -34,7 +34,14 @@ functionDeclaration n t a =
 
 
 createHeader :: Expression Scalar -> String -> String
-createHeader e0 n =
+createHeader e = if any is_nonscalar (findOrderedInputs e)
+                 then create3dHeader e
+                 else create0dHeader e
+  where is_nonscalar (ES _) = False
+        is_nonscalar _ = True
+
+create3dHeader :: Expression Scalar -> String -> String
+create3dHeader e0 n =
   unlines $
   ["// -*- mode: C++; -*-",
    "",
@@ -79,8 +86,122 @@ createHeader e0 n =
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
 
+create0dHeader :: Expression Scalar -> String -> String
+create0dHeader e0 n =
+  unlines $
+  ["// -*- mode: C++; -*-",
+   "",
+   "#include \"new/NewFunctional.h\"",
+   "#include \"utilities.h\"",
+   "#include \"handymath.h\"",
+   "",
+   "",
+   "class " ++ n ++ " : public NewFunctional {",
+   "public:",
+   "\t" ++ n ++ "() { data = Vector(" ++ show (length $ findOrderedInputs e) ++ "); };",
+   "",
+   functionDeclaration "true_energy" "double" [],
+   functionDeclaration "grad" "Vector" [],
+   functionDeclaration "printme" "void" [("const char *", "prefix")]]++
+  map setarg (findOrderedInputs e0) ++
+ ["private:",
+  ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
+    where
+      e = mapExpression' renameVar e0
+      renameVar (Var CannotBeFreed a b c x) = Var CannotBeFreed ("var"++a) ("var"++b) c x
+      renameVar x = x
+      -- setarg creates a method that will get a reference to a given
+      -- input argument's value.
+      setarg :: Exprn -> String
+      setarg ee = functionCode (nameE ee) (newreferenceE ee) [] $
+                  unlines ("\tint sofar = 0;" : initme (findOrderedInputs e0) )
+                    where initme (xx@(ES _):rr)
+                            | xx == ee = ["\treturn data[sofar];"]
+                            | otherwise = ("\tsofar += 1; // " ++ nameE xx) : initme rr
+                          initme _ = error "bug inin setarg initme"
+      codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
+
+
 createCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
-createCppFile e variables n headername =
+createCppFile e = if any is_nonscalar (findOrderedInputs e)
+                  then create3dCppFile e
+                  else create0dCppFile e
+  where is_nonscalar (ES _) = False
+        is_nonscalar _ = True
+
+create0dCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
+create0dCppFile e variables n headername =
+  unlines $
+  ["// -*- mode: C++; -*-",
+   "",
+   "#include \"" ++ headername ++ "\"",
+   "",
+   "",
+   functionCode (n++"::true_energy") "double" []
+      (unlines $
+       ["\tint sofar = 0;"] ++
+       map createInput (findOrderedInputs e) ++
+       [newcodeStatements (fst energy),
+       "\treturn " ++ newcode (snd energy) ++ ";\n"]),
+   functionCode (n++"::grad") "Vector" [] (evalv grade),
+   functionCode (n++"::printme") "void" [("const char *", "prefix")]
+      (unlines $ map printEnergy $
+       filter (`notElem` ["dV", "dr", "volume"]) $
+       (Set.toList (findNamedScalars e)))] ++
+ ["// End of " ++ n ++ " class",
+  "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
+  "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
+  ]
+    where
+      createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
+      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      createInputAndGrad ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar];\n" ++
+                                     "\tVector actual_grad_" ++ nameE ee ++ " = data.slice(sofar,1); " ++
+                                     "sofar += 1;"
+      createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
+      pad nn s | nn <= length s = s
+      pad nn s = ' ' : pad (nn-1) s
+      printEnergy v = "\tprintf(\"%s" ++ pad maxlen v ++ " =\", prefix);\n" ++
+                      "\tprint_double(\"\", " ++ v ++ ");\n" ++
+                      "\tprintf(\"\\n\");"
+      energy = codex e
+      the_actual_gradients = map (\(ES x) ->
+                                   ES $ var ("grad_"++nameE (mkExprn x))
+                                            ("grad_"++nameE (mkExprn x)) $derive x 1 e) variables
+      grade :: ([Statement], [Exprn])
+      grade = if variables == []
+              then ([],[])
+              else case optimize the_actual_gradients of
+                (st0, es) -> let st = filter (not . isns) st0
+                                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+                                 isns _ = False
+                                 ns = findNamedScalars e
+                                 _:revst = reverse $ reuseVar $ freeVectors $ st ++ map (\e' -> Assign (justvarname e') e') es
+                             in (reverse revst, es)
+      justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
+      justvarname _ = error "bad in justvarname"
+      evalv :: ([Statement], [Exprn]) -> String
+      evalv (st,ee) = unlines (["\tVector output(data.get_size());",
+                                "\toutput = 0;"]++
+                               "\tint sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
+                               [newcodeStatements (st ++ concatMap assignit ee),
+                                "\treturn output;"])
+        where assignit eee = [Assign (ES $ Var CannotBeFreed
+                                      ("actual_"++nameE eee++"[0]")
+                                      ("actual_"++nameE eee++"[0]")
+                                      ("actual_"++nameE eee) Nothing) eee]
+      codex :: Expression Scalar -> ([Statement], Exprn)
+      codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
+        where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
+              st = filter (not . isns) st0
+              isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+              isns _ = False
+              ns = findNamedScalars e
+
+
+create3dCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
+create3dCppFile e variables n headername =
   unlines $
   ["// -*- mode: C++; -*-",
    "",

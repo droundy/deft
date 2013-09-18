@@ -20,7 +20,9 @@ main =
                    then writeFile f x
                    else return ()
      let whitebearn = substitute n (r_var "n") whitebear
+         homogeneous_whitebear = makeHomogeneous whitebearn
      headerAndCpp "new/WhiteBearFast" whitebearn [ER $ r_var "n"] "WhiteBear"
+     headerAndCpp "new/HomogeneousWhiteBearFast" homogeneous_whitebear [ES $ s_var "n"] "HomogeneousWhiteBear"
      gentest "tests/new-generated-haskell/WhiteBear.h" $
        defineFunctional whitebear [ER $ r_var "x"] "WhiteBear"
      gentest "tests/new-generated-haskell/integrate_sqr.h" $
