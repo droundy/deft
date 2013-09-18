@@ -662,6 +662,88 @@ this will be a good approach.  After all, I'm interested in $\beta V_0
 \gg 1$, which means that the Mayer function is essentially flat in
 Equation~\ref{eq:ftrytwo} for $r<0$.
 
+\section{Erf model (scratch notes)}
+If we consider that
+\begin{align}
+  f'(r) \approx \frac{1}{\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
+\end{align}
+then we conclude that
+\begin{align}
+  f(r) \approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 ).
+\end{align}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/erf}
+  \caption{Comparison of erf approximation with $f'(r)$ for our
+    harmonic potential.}
+\end{figure}
+This matches all right, if we choose to match the first couple of
+terms in a power series expansion around $\sigma$, in which case we
+find that
+\begin{align}
+  V(\sigma) &= k_BT \ln 2 \\
+  V'(\sigma) &= \frac{k_BT}{a}
+\end{align}
+This gives us an approximate model that we could apply to any
+potential $V(r)$, with $\sigma$ being a function of temperature.  If
+we do this, we can analytically solve for $w_2(r)$ and $w_3(r)$.
+\begin{align}
+  w_2(r) &= ? e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
+  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) )
+\end{align}
+This is presented in Reference \citenum{schmidt2000fluid}.  The
+Fourier transform of $w_3$ is surprisingly simple, although
+Mathematica cannot handle it.
+\begin{align}
+  \tilde{w}_3(k) &= -\frac{?}{ik} \int_0^\infty r w_3(r) \sin(kr) dr
+  \\
+  &=  -\frac{?}{2ik} \int_0^\infty ( 1 -
+  \mathrm{erf}((r-\sigma/2)/a) ) r \sin(kr) dr
+  \\
+  &=  -\frac{?}{2ik} \left(
+  \int_0^\infty r \sin(kr) dr
+  -
+  \int_0^\infty \mathrm{erf}((r-\sigma/2)/a) r \sin(kr) dr
+  \right)
+\end{align}
+At this point, we can integrate by parts the second bit.
+\begin{align}
+  u &= \mathrm{erf}((r-\sigma/2)/a) \\
+  du &= \frac{2}{\sqrt{\pi}a^2} e^{-\frac{(r-\sigma/2)^2}{a^2}} du \\
+  dv &= r \sin(kr) dr \\
+  v &= \frac{\sin(kr) - kr \cos(kr)}{k^2}
+\end{align}
+Putting these in we get
+\begin{align}
+  \tilde{w}_3(k)
+  &=  -\frac{?}{2ik} \Big(
+  \int_0^\infty r \sin(kr) dr\\ &\quad\quad
+  -
+  \left.\mathrm{erf}((r-\sigma/2)/a)\frac{\sin(kr) - kr
+    \cos(kr)}{k^2}\right|_0^\infty\\ &\quad\quad
+  +
+  \int_0^\infty \frac{\sin(kr) - kr \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2} e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
+  \Big)
+\end{align}
+At this stage things look a bit scary, since the second term is not
+well defined.  Fortunately, the first and second terms exactly cancel,
+as you can see by doing both integrals prior to taking the limit to
+infinity.  So we get
+\begin{align}
+  \tilde{w}_3(k)
+  &=  -\frac{?}{2ik}\int_0^\infty \frac{\sin(kr) - kr
+    \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2}
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
+\end{align}
+which is still a little bit scary, and is not yet something
+Mathematica can handle.  Fortunately, the terms can be broken down
+into simpler definite integrals that Mathematica \emph{can} handle
+such as
+\begin{align}
+  \int_{-\infty}^\infty \cos(a u)e^{-u^2}du
+\end{align}
+and others that are zero by symmetry (where we assume the gaussian
+drops to zero before reaching the origin).
+
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
