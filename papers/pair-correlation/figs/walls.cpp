@@ -139,6 +139,7 @@ const double spacing = 3; // space on each side
 // }
 
 double radial_distribution(double gsigma, double r) {
+  if (gsigma <= 1) return 1; // handle roundoff error okay
   if (r < sigma) return 0;
   const double eta = gsigma_to_eta(gsigma);
   const double z = r - 2.0;
@@ -265,18 +266,18 @@ double notinwall(Cartesian r) {
 }
 
 static void took(const char *name) {
-  // assert(name); // so it'll count as being used...
-  // static clock_t last_time = clock();
-  // clock_t t = clock();
-  // double peak = peak_memory()/1024.0/1024;
-  // double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
-  // if (seconds > 120) {
-  //   printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
-  // } else {
-  //   printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
-  // }
-  // fflush(stdout);
-  // last_time = t;
+  assert(name); // so it'll count as being used...
+  static clock_t last_time = clock();
+  clock_t t = clock();
+  double peak = peak_memory()/1024.0/1024;
+  double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+  if (seconds > 120) {
+    printf("\t\t%s took %.0f minutes and %g M memory\n", name, seconds/60, peak);
+  } else {
+    printf("\t\t%s took %g seconds and %g M memory\n", name, seconds, peak);
+  }
+  fflush(stdout);
+  last_time = t;
 }
 
 Functional WB = HardSpheresNoTensor2(1.0);
@@ -363,7 +364,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
     const double z0 = 3.005;
     sprintf(plotname_path,
             "papers/pair-correlation/figs/walls/walls%s-path-%s-pair-%04.2f-%05.3f.dat",
-            name, fun[version], eta, z0-3);
+            name, fun[version], eta, z0-spacing);
     FILE *out_path = fopen(plotname_path, "w");
     if (!out_path) {
       fprintf(stderr, "Unable to create file %s!\n", plotname_path);
@@ -411,13 +412,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
 
   // here you choose the values of z0 to use
   // dx is set at beggining of file
-  for (double z0 = 3.05; z0 < 3 + zmax - 2; z0 += dx) {
+  for (double z0 = spacing + 0.05; z0 < spacing + zmax - 2; z0 += dx) {
     // For each z0, we now pick one of our methods for computing the
     // pair distribution function:
     for (int version = 0; version < numplots; version++) {
       sprintf(plotname,
               "papers/pair-correlation/figs/walls/walls%s-%s-pair-%04.2f-%1.2f.dat",
-              name, fun[version], eta, z0-3);
+              name, fun[version], eta, z0-spacing);
       FILE *out = fopen(plotname, "w");
       if (!out) {
         fprintf(stderr, "Unable to create file %s!\n", plotname);
@@ -433,12 +434,12 @@ void run_walls(double eta, const char *name, Functional fhs) {
       const Cartesian r0(0,0,z0);
       const double resolution_2d = 0.05;
       for (double x = 0; x < xmax + resolution_2d/2; x += resolution_2d) {
-        for (double z1 = 3; z1 < zmax + 3 - resolution_2d/2; z1 += resolution_2d) {
+        for (double z1 = spacing; z1 < zmax + spacing - resolution_2d/2; z1 += resolution_2d) {
           const Cartesian r1(x,0,z1);
           double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           fprintf(out, "%g\t", g2);
           fprintf(xfile, "%g\t", x);
-          fprintf(zfile, "%g\t", z1-3); // set z=0 at contact with wall
+          fprintf(zfile, "%g\t", z1-spacing); // set z=0 at contact with wall
         }
         fprintf(out, "\n");
         fprintf(xfile, "\n");
@@ -465,8 +466,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(stderr, "Unable to create file %s!\n", plotname_a);
         return;
       }
-      delete[] plotname_a;
-      for (double z0 = 2; z0 < 9; z0 += dz) {
+      for (double z0 = 2; z0 <= 7; z0 += dz) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
@@ -474,32 +474,55 @@ void run_walls(double eta, const char *name, Functional fhs) {
           const double sintheta = sin(theta);
           const double costheta = cos(theta);
           const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
-          /*
-            // Integrating around phi is not strictly needed, since
-            // the system has a cylindrical symmetry, but could be
-            // nice, as it give us an average over grid points.
-
-          const double dphi = 2*M_PI/ceil(delta_r*2*M_PI/dv);
-          const double darea = delta_r*delta_r*dcostheta*dphi;
-          for (double phi = dphi/2; phi < 2*M_PI; phi += dphi) {
-            const Cartesian r1(delta_r*cos(phi)*sintheta,
-                               delta_r*sin(phi)*sintheta,
-                               z0 + delta_r*costheta);
-            double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
-            da_dz += density(r0)*density(r1)*g2*darea;
-          }
-          */
           const double darea = delta_r*delta_r*dcostheta*2*M_PI;
           const Cartesian r1(delta_r*sintheta, 0, z0 + delta_r*costheta);
           double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
           da_dz += density(r0)*density(r1)*g2*darea;
         }
-        fprintf(out, "%g %g\n",z0,da_dz);
+        fprintf(out, "%g %g\n",z0-spacing,da_dz);
       }
       fclose(out);
+      took(plotname_a + strlen("papers/pair-correlation/figs/"));
+      delete[] plotname_a;
+    }
+    if (fabs(eta - 0.3) < 0.0001 and strcmp(fun[version], "fischer")) {
+      // Now we'll do a square-well test, equivalent to dispersion of
+      // Clark et al.  No need to user fischer here, since fischer is
+      // only defined at contact.
+      const double lambda=1.790;
+      const double dz = 0.1;
+      const double dv = 0.01;
+      const double well_volume = 4*M_PI/3*(uipow(2*lambda, 3) - uipow(2.0, 3));
+      char *plotname_a = new char [4096];
+      sprintf(plotname_a, "papers/pair-correlation/figs/walls/square-well-dadz-%s-%04.2f-%.3f.dat",
+              fun[version], eta, lambda);
+      FILE *out = fopen(plotname_a,"w");
+      if (!out) {
+        fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+        return;
+      }
+      for (double z0 = spacing + dz/2; z0 <= spacing + 4; z0 += dz) {
+        double da_dz = 0;
+        const Cartesian r0(0,0,z0);
+        for (double r = 2 + dv/2; r <= lambda*2; r += dv) {
+          const double dtheta = M_PI/ceil(r/dv*M_PI);
+          for (double theta = dtheta/2; theta <= M_PI; theta += dtheta) {
+            const double sintheta = sin(theta);
+            const double costheta = cos(theta);
+            const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
+            const double dvolume = 2*M_PI*(uipow(r+dv/2, 3) - uipow(r-dv/2, 3))*dcostheta;
+            const Cartesian r1(r*sintheta, 0, z0 + r*costheta);
+            double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+            da_dz += density(r0)*density(r1)*g2*dvolume;
+          }
+        }
+        fprintf(out, "%g %g\n",z0-spacing,da_dz/well_volume);
+      }
+      fclose(out);
+      took(plotname_a + strlen("papers/pair-correlation/figs/"));
+      delete[] plotname_a;
     }
   }
-  took("a1 integrals");
   {
     GridDescription gdj = density.description();
     double sep =  gdj.dz*gdj.Lat.a3().norm();

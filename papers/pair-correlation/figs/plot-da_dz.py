@@ -15,23 +15,12 @@ eta = float(sys.argv[1])
 #arg eta = [.2,.3]
 delta_r = float(sys.argv[2])
 #arg delta_r = [2.005, 3.005]
-dz = 0.01
 able_to_read_file = True
 
 plt.title('$da/dz,$ $\eta = %g,$  $\Delta r = %g$' %(eta, delta_r))
-plt.gca().set_color_cycle(['red', 'green', 'blue', 'magenta', 'cyan'])
 
 def read_a1_mc():
-  # input: "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
-  filename = "figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r)
-  #print 'Using', filename
-  try:
-    data = loadtxt(filename)
-  except IOError:
-    global able_to_read_file
-    able_to_read_file = False
-    print "File not found: ", filename
-    return 0,0
+  data = loadtxt("figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r))
   return data[:,0], data[:,1]
 
 def read_da_dz(version):
@@ -54,12 +43,12 @@ versions = ["this-work", 'sokolowski', "fischer"]
 
 for version in versions:
   z0, da_dz = read_da_dz(version)
-  plt.plot(z0 - 3, da_dz, styles.plot[version], label=styles.title[version])
+  plt.plot(z0, da_dz, styles.plot[version], label=styles.title[version])
 
 mc_z0, mc_da_dz = read_a1_mc();
 
 
-plt.plot(mc_z0, mc_da_dz, styles.plot['mc'], label=styles.title[version])
+plt.plot(mc_z0, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
 plt.xlim([-.5,4])
 plt.legend(loc='best').draw_frame(False)
 
