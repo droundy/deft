@@ -37,6 +37,17 @@ def read_mc_density(ff, poly, N, celltype):
   zdens = zdens[zdens >= 0]
   return [x, y ,z], [xdens, ydens, zdens]
 
+def read_mc_order(ff, poly, N, celltype):
+  fname = "figs/mc/%s-%4.2f-order-%s-%i.dat" %(celltype, ff, poly, N)
+  print "using", fname
+  if (not os.path.isfile(fname)):
+    print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
+    bad = array([0,10])
+    return 0
+  data = transpose(loadtxt(fname))
+  #data = loadtxt(fname)
+  return data
+
 def read_mc_pressure(ff, poly, N, celltype):
   fname = "figs/mc/%s-%4.2f-pressure-%s-%i.dat" %(celltype, ff, poly, N)
   print "using", fname

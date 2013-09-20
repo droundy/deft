@@ -1,5 +1,8 @@
+#!/usr/bin/python
 from __future__ import division
-import time
+import time, sys, matplotlib
+if 'show' not in sys.argv:
+  matplotlib.use('Agg')
 from pylab import *
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import colorConverter
@@ -24,10 +27,10 @@ area = (sqrt(3)/2*l)*(l/2)/2*6
 # box
 lenx = 20
 leny = 10
-edge = 1
+xedge = 1.5
+yedge = 4.5
 
 n = int(ff*lenx*leny/area)
-print n
 
 
 # density
@@ -65,26 +68,24 @@ def turn(angle):
   return angle + fac*phi_m*x
 
 # Functions
-def distsq(pos2, pos1):
-  x = pos2[0] - pos1[0]
-  if abs(pos2[1] - pos1[1]) < leny - abs(pos2[1] - pos1[1]):
-    y = pos2[1] - pos1[1]
-  else:
-    y = leny - abs(pos2[1] - pos1[1])
-  return x*x + y*y
+def distsq(a, b):
+  v = periodic_diff(a, b)
+  return v[0]*v[0] + v[1]*v[1]
 
-def periodicDiff(pos2, pos1):
-  if abs(pos2[1] - pos1[1]) < leny - abs(pos2[1] - pos1[1]):
-    return pos2-pos1
-  return array([pos2[0]-pos1[0], pos2[1]-pos1[1]-leny])
+def periodic_diff(a, b):
+  v = b - a
+  while v[1] > leny/2: v[1] -= leny
+  while v[1] < -leny/2: v[1] += leny
+  return v
+
 
 def touch(pos1, pos2, phi1, phi2):
   if (distsq(pos2, pos1) > 4*l*l):
     return False
   if (distsq(pos2, pos1) < l*l):
     return True
-  v1 = verts(pos1, phi1)
-  v2 = verts(pos2, phi2)
+  v1 = verts([0,0], phi1)
+  v2 = verts(periodic_diff(pos1, pos2), phi2)
   for i in range(3):
     p1 = v1[i-1]
     p2 = v1[i]
@@ -190,19 +191,12 @@ coords = zeros((n+1, 4, 2))
 coords2 = zeros((n+1, 4, 2))
 extras = zeros((n+1, 4, 2))
 extras2 = zeros((n+1, 4, 2))
-for i in range(n+1):
-  coords[i], coords2[i], extras[i], extras2[i] = chop(verts(centers[i], angles[i]))
 
 # Plotting
 fig = figure()
 ax = fig.add_subplot(111)
-ax2 = fig.add_subplot(111)
 
-ax.set_ylim(-edge, leny+edge)
-ax.set_xlim(-edge, lenx+edge)
 
-#line, = ax2.plot(xcoords, histogram)
-#ax2.set_xlim(-edge, lenx+edge)
 line2 = ax.arrow(-10, -10, -10, -10)
 
 def init():
@@ -212,6 +206,7 @@ def init():
   return ax, line2
 
 
+alpha = .75
 defaultc = (0,.7,1,1)
 highlightc = (0,0,1,1)
 goodc = (.3,1,.5,1)
@@ -224,15 +219,30 @@ skip = 1
 i = 0
 
 colors = [defaultc]*(n+1)
+def initialize():
+  global centers, angles
+  for i in xrange(n):
+    keep = True
+    temp = move(centers[i])
+    tempa = turn(angles[i])
+    xs = verts(temp, tempa)[:,0]
+    if max(xs) > lenx or min(xs) < 0:
+      keep = False
+    else:
+      for j in xrange(n):
+        if j != i and touch(temp, centers[j], tempa, angles[j]):
+          keep = False
+          break
+    if keep:
+      centers[i] = temp
+      angles[i] = tempa
 
 def animate(p):
   global count, centers, angles, coords, extras, skip, colors, histogram, i, line2, success
   if (i >= n):
     i = 0
   keep = True
-  line2.remove()
-  while len(ax.lines) > 0:
-    ax.lines.remove(ax.lines[-1])
+  ax.cla()
   temp = move(centers[i])
   tempa = turn(angles[i])
   coords[n], coords2[n], extras[n], extras2[n] = chop(verts(temp, tempa))
@@ -240,7 +250,7 @@ def animate(p):
   if max(xs) > lenx or min(xs) < 0:
     keep = False
   else:
-    for j in range(n):
+    for j in xrange(n):
       if j != i and touch(temp, centers[j], tempa, angles[j]):
         keep = False
         break
@@ -253,19 +263,25 @@ def animate(p):
     colors[n] = badc
 
 
-  for k in range(n+1):
-    for j in range(len(extras[k,:])):
-      lines = plot([extras[k,j-1,0], extras[k,j,0]], [extras[k,j-1,1], extras[k,j,1]], '--', color=colors[k], linewidth=2)
-      lines = plot([extras2[k,j-1,0], extras2[k,j,0]], [extras2[k,j-1,1], extras2[k,j,1]], '--', color=colors[k], linewidth=2)
+  # for k in range(n+1):
+  #   for j in range(len(extras[k,:])):
+  #     lines = plot([extras[k,j-1,0], extras[k,j,0]], [extras[k,j-1,1], extras[k,j,1]], '--', color=colors[k], linewidth=2, alpha=alpha)
+  #     lines = plot([extras2[k,j-1,0], extras2[k,j,0]], [extras2[k,j-1,1], extras2[k,j,1]], '--', color=colors[k], linewidth=2, alpha=alpha)
 
   colors[i] = highlightc
   # swap things around so the moving triangles are always on top
   c = concatenate((coords, coords2), axis=0)
+  c_extra = concatenate((extras, extras2), axis=0)
+
   cols = colors + colors
 
   swap = c[-2]
+  swap_extra = c_extra[-2]
   c[-2] = c[n]
+  c_extra[-2] = c_extra[n]
   c[n] = swap
+  c_extra[n] = swap_extra
+
   swap = cols[-2]
   cols[-2] = cols[n]
   cols[n] = swap
@@ -273,23 +289,33 @@ def animate(p):
   coll = PolyCollection(c)
 
   coll.set_color(cols)
+  coll.set_alpha(alpha)
+
+  coll_extra = PolyCollection(c_extra)
+  coll_extra.set_color(cols)
+  coll_extra.set_alpha(.2)
   #coll.set_color([cm.jet(x) for x in cols])
 
   ax.collections=[]
+  ax.add_collection(coll_extra)
   ax.add_collection(coll)
   ax.set_title("Attempted moves: %i, Successful moves: %i" %(count, success))
-  ax.axhline(y=0, linestyle='--', linewidth=3, color='b')
-  ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange')
-  ax.axvline(x=0, linestyle='-', color='k', linewidth=3)
-  ax.axvline(x=lenx, linestyle='-', color='k', linewidth=3)
+  ax.axhline(y=0, linestyle='--', linewidth=3, color='b', zorder=1)
+  ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange', zorder=1)
+  ax.axvline(x=0, linestyle='-', color='k', linewidth=3, zorder=1)
+  ax.axvline(x=lenx, linestyle='-', color='k', linewidth=3, zorder=1)
 
   arlen = .5
   arwidth = .5
-  deltax = temp[0]-centers[i,0]
-  deltay = temp[1]-centers[i,1]
-  line2 = ax.arrow(centers[i,0], centers[i,1], deltax,
-                   deltay, head_width=arwidth,
-                   head_length=arlen, linewidth=2, facecolor='black')
+  delta = periodic_diff(centers[i], temp)
+  for shift in [0, -leny, leny]:
+    if shift == 0:
+      aralpha = 1
+    else:
+      aralpha = .5
+    line2 = ax.arrow(centers[i,0], centers[i,1]+shift, delta[0],
+                     delta[1], head_width=arwidth, head_length=arlen,
+                     linewidth=2, facecolor='slategray', zorder=3, alpha=aralpha)
   fig.tight_layout()
   if keep:
     centers[i] = temp
@@ -301,23 +327,30 @@ def animate(p):
   if (i == n-1):
     colors = [defaultc]*(n+1)
   i += 1
-  #time.sleep(1)
   return ax, line2
 
 fig.tight_layout()
 ax.set_aspect('equal')
-ax.set_ylim(-2*edge, leny+2*edge)
 
-#anim = animation.FuncAnimation(fig, animate, init_func=init)
-#fig.set_size_inches(8,4)
+ax.set_xlim(-xedge, lenx+xedge)
+ax.set_ylim(-yedge, leny+yedge)
+ax.get_xaxis().set_visible(False)
+ax.get_yaxis().set_visible(False)
 
-for p in range(5*n):
-  print p
-  animate(p)
+print("Generating mc-tri-slow animation images for polyhedra paper.")
+for p in xrange(50):
+  initialize()
+
 count = 0
 success = 0
-for p in range(201):
-  print p
+for i in xrange(n+1):
+  coords[i], coords2[i], extras[i], extras2[i] = chop(verts(centers[i], angles[i]))
+
+# anim = animation.FuncAnimation(fig, animate, init_func=init)
+# fig.set_size_inches(8,4)
+# show()
+
+for p in xrange(30):
   animate(p)
   savefig("anim/mc-slow-%03i.pdf" %p)
-show()
+

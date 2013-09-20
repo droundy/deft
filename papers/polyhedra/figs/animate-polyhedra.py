@@ -3,7 +3,7 @@ from __future__ import division
 import scipy, sys, time, os, argparse, numpy.random
 from pylab import *
 
-import common
+import read
 # ------------------------------------------------------------------------------
 # Argument parsing
 # ------------------------------------------------------------------------------
@@ -43,9 +43,16 @@ parser.add_argument('-m','--mixture', action='store_true',
 parser.add_argument('-t','--talk', action='store_true',
                     help='instead of performing normal function, generate figures for talk')
 parser.add_argument('-w','--hide_walls', action='store_true', help='won\'t draw walls')
+parser.add_argument('--xmin', type=double, default=0, help='minimum x-value')
+parser.add_argument('--xmax', type=double, default=1000, help='maximum x-value')
+parser.add_argument('--ymin', type=double, default=0, help='minimum y-value')
+parser.add_argument('--ymax', type=double, default=1000, help='maximum y-value')
+parser.add_argument('--zmin', type=double, default=0, help='minimum z-value')
+parser.add_argument('--zmax', type=double, default=1000, help='maximum z-value')
 
 
-args = parser.parse_args()
+
+vargs = parser.parse_args()
 
 ff = args.ff
 polyhedron = args.shape
@@ -59,10 +66,15 @@ else:
 print ("Using %s with %s" %(polyhedron, celltype))
 
 if args.N == 0 and not args.talk:
-  N = common.get_N("figs/mc/vertices/%s-%4.2f-vertices-%s" %(celltype, ff, polyhedron))
+  N = read.get_N("figs/mc/vertices/%s-%4.2f-vertices-%s" %(celltype, ff, polyhedron))
   if N == 0:
     exit(1)
 else: N = args.N
+
+if (args.xmin == 0 and args.xmax == 1000 and args.ymin == 0 and args.ymax == 1000 and
+   args.zmin == 0 and args.zmax == 1000):
+  partial_cell = False
+else: partial_cell = True
 
 # ------------------------------------------------------------------------------
 # Define functions
@@ -385,9 +397,9 @@ if args.talk:
       bondsrc.update()
       yield
   if not args.hide:
-    surf1, wires1 = plot_tet(src1, 0)
+    surf1, wires1 = plot_tet(src1, .5)
     surf2, wires2 = plot_tet(src2, 0)
-    mlab.view(azimuth=-141, elevation=49, roll=150, distance=16, focalpoint=(.3, .3, .3))
+    mlab.view(azimuth=-90, elevation=59, roll=-142, distance=16, focalpoint=(.3, .3, .3))
     a = anim()
     mlab.show()
   exit(0)
@@ -401,8 +413,11 @@ if args.one_frame > -100:
   f = args.one_frame
 else:
   f = args.begin
-dim, centers, shape_array, iteration = common.read_vertices(ff, polyhedron, N, celltype, f)
-
+dim, centers, shape_array, iteration = read.read_vertices(ff, polyhedron, N, celltype, f)
+if partial_cell:
+  dim[0] = min(dim[0], args.xmax)
+  dim[1] = min(dim[1], args.ymax)
+  dim[2] = min(dim[2], args.zmax)
 if args.show_only > 0:
   shape_array = shape_array[:N*args.show_only]
 
@@ -410,7 +425,7 @@ src, shapes = create_plot_data(shape_array, 5, args.mixture)
 nvertices = len(shapes)
 s =  mlab.pipeline.surface(src, colormap='jet', vmin=0, vmax=1, opacity=args.alpha)
 
-mlab.view(azimuth=30, elevation=65, distance=50, focalpoint=(dim[0]/2,dim[1]/2,dim[2]/2))
+mlab.view(azimuth=30, elevation=65, distance=70, focalpoint=(dim[0]/2,dim[1]/2,dim[2]/2))
 
 words = [polyhedron,
         celltype,
@@ -427,33 +442,33 @@ mlab.orientation_axes(figure=figure, name='bob')
 # Draw the cell
 cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), line_width=3)
 
-# if(celltype == 'walls' and not args.hide_walls):
-#   sheet_points = array([[0, 0, 0], [dim[0], 0, 0], [dim[0], dim[1], 0], [0, dim[1], 0],
-#                  [0, 0, dim[2]], [dim[0], 0, dim[2]], [dim[0], dim[1], dim[2]],
-#                  [0, dim[1], dim[2]]])
-#   sheet_connections = array([[0, 1, 2, 3], [4, 5, 6, 7]])
-#   sheetmesh = tvtk.PolyData(points=sheet_points, polys=sheet_connections)
-#   mlab.pipeline.surface(sheetmesh, opacity=.3, color=(.44,.5,.56))
+if(celltype == 'walls' and not args.hide_walls):
+  sheet_points = array([[0, 0, 0], [dim[0], 0, 0], [dim[0], dim[1], 0], [0, dim[1], 0],
+                 [0, 0, dim[2]], [dim[0], 0, dim[2]], [dim[0], dim[1], dim[2]],
+                 [0, dim[1], dim[2]]])
+  sheet_connections = array([[0, 1, 2, 3], [4, 5, 6, 7]])
+  sheetmesh = tvtk.PolyData(points=sheet_points, polys=sheet_connections)
+  mlab.pipeline.surface(sheetmesh, opacity=.6, color=(1,1,1))
 
-if(celltype == 'walls'and not args.hide_walls):
-  nbars = 11
-  x = tile(repeat(linspace(0, dim[0], nbars), 2), 2)
-  y = tile(array([0, dim[1]]), 2*nbars)
-  z = hstack((zeros(nbars*2), ones(nbars*2)*dim[2]))
-  s = ones(nbars*4)
-  bar_points = zeros((nbars*4, 3))
-  bar_points[:,0] = x
-  bar_points[:,1] = y
-  bar_points[:,2] = z
+# if(celltype == 'walls'and not args.hide_walls):
+#   nbars = 11
+#   x = tile(repeat(linspace(0, dim[0], nbars), 2), 2)
+#   y = tile(array([0, dim[1]]), 2*nbars)
+#   z = hstack((zeros(nbars*2), ones(nbars*2)*dim[2]))
+#   s = ones(nbars*4)
+#   bar_points = zeros((nbars*4, 3))
+#   bar_points[:,0] = x
+#   bar_points[:,1] = y
+#   bar_points[:,2] = z
 
-  bar_connections = empty((2*nbars, 2))
-  for i in xrange(2*nbars):
-    bar_connections[i,:] = array([2*i, 2*i+1])
+#   bar_connections = empty((2*nbars, 2))
+#   for i in xrange(2*nbars):
+#     bar_connections[i,:] = array([2*i, 2*i+1])
 
-  bar_src = mlab.pipeline.scalar_scatter(x, y, z, s)
-  bar_src.mlab_source.dataset.lines = bar_connections
-  bars = mlab.pipeline.stripper(bar_src)
-  mlab.pipeline.surface(bars, color=(0,0,0), line_width=3, opacity=.7)
+#   bar_src = mlab.pipeline.scalar_scatter(x, y, z, s)
+#   bar_src.mlab_source.dataset.lines = bar_connections
+#   bars = mlab.pipeline.stripper(bar_src)
+#   mlab.pipeline.surface(bars, color=(0,0,0), line_width=3, opacity=.7)
 
 
 # ------------------------------------------------------------------------------
@@ -463,19 +478,30 @@ if(celltype == 'walls'and not args.hide_walls):
 @mlab.animate(delay=args.delay, ui=False)
 def anim():
   global f, dim
-  while f < frames:
-    if not common.check_vertices(ff, polyhedron, N, celltype, f):
+  while f <= frames:
+    if (not read.check_vertices(ff, polyhedron, N, celltype, f)) or f == frames:
       if save:
-        print("All out of dat files.")
+        print("All done.")
         exit(0)
       f = args.begin
       print("Looping!")
-    newdim, newcenters, newshapes, iteration = common.read_vertices(ff, polyhedron, N, celltype, f)
+    newdim, newcenters, newshapes, iteration = read.read_vertices(ff, polyhedron, N, celltype, f)
     itertext.set(text="%08i" %iteration)
     if args.show_only>0:
       newshapes = newshapes[:N*args.show_only]
+    if partial_cell:
+      for i in xrange(N):
+        if (newcenters[i,0] < args.xmin or newcenters[i,0] > args.xmax or
+            newcenters[i,1] < args.ymin or newcenters[i,1] > args.ymax or
+            newcenters[i,2] < args.zmin or newcenters[i,2] > args.zmax):
+          newshapes[i] = zeros_like(newshapes[i])
+
     shapes[:] = newshapes.reshape((nvertices, 3))
     src.update()
+    if partial_cell:
+      newdim[0] = min(dim[0], args.xmax)
+      newdim[1] = min(dim[1], args.ymax)
+      newdim[2] = min(dim[2], args.zmax)
     if newdim[0] != dim[0]:
       dim = newdim
       cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), line_width=3)

@@ -249,7 +249,13 @@ periodicity/dimensions are not set by default and are required.\n");
   // Define variables
   // ---------------------------------------------------------------------------
   const int density_bins = round((len[0] + len[1] + len[2])/de_density);
-  long *density_histogram = new long[3*density_bins]();
+  long *density_histogram = new long[density_bins]();
+  // this order parameter is the absolute value of the dot product of normal vector
+  // to the side most aligned with the z-axis with zhat.
+  const int order_bins = len[2]/de_density;
+  const double dcostheta = 1.0/order_bins;
+
+  long *order_parameter_histogram = new long[(int)round(len[2]/de_density)*order_bins]();
   polyhedron *polyhedra = new polyhedron[N];
   long dZ = 0;
 
@@ -507,7 +513,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ---------------------------------------------------------------------------
-  clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
+  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
 
@@ -536,15 +542,25 @@ periodicity/dimensions are not set by default and are required.\n");
       density_histogram[x_i] ++;
       density_histogram[int(round(len[0]/de_density)) + y_i] ++;
       density_histogram[int(round((len[0] + len[1])/de_density)) + z_i] ++;
+
+      // Order parameter:
+      double costheta = 0;
+      for(int j=0; j<polyhedra[i].mypoly->nfaces; j++) {
+        const double new_costheta = polyhedra[i].rot.rotate_vector(polyhedra[i].mypoly->faces[j])[2];
+        costheta = max(costheta, fabs(new_costheta));
+      }
+      const int costheta_i = costheta/dcostheta;
+      order_parameter_histogram[z_i*order_bins + costheta_i] ++;
     }
     // ---------------------------------------------------------------
     // Get pressure info - this is slow, might want to do it less often
+    // fixme - disabled for now
     // ---------------------------------------------------------------
-    for(int i=0; i<N; i++) {
-      dZ += overlaps_with_any(polyhedra[i], polyhedra, periodic, true, dr);
-    }
-    dZ /= 2; // since we check each thing against each of its neighbors, we end up
-             // double counting. Ideally, we would count half as much instead of dividing
+    // for(int i=0; i<N; i++) {
+    //   dZ += overlaps_with_any(polyhedra[i], polyhedra, periodic, true, dr);
+    // }
+    // dZ /= 2; // since we check each thing against each of its neighbors, we end up
+    //          // double counting. Ideally, we would count half as much instead of dividing
     // ---------------------------------------------------------------
     // Save to file
     // ---------------------------------------------------------------
@@ -600,7 +616,20 @@ periodicity/dimensions are not set by default and are required.\n");
         fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n", e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
       }
       fclose(densityout);
-      delete[] headerinfo;
+      // Save order paramter
+      char *order_fname = new char[1024];
+      sprintf(order_fname, "%s/%s-order-%s-%i.dat", dir, filename, shape->name, N);
+      FILE *order_out = fopen((const char *)order_fname, "w");
+      delete[] order_fname;
+      fprintf(order_out, "%s", headerinfo);
+      for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
+        for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
+          const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
+          fprintf(order_out, "%4.2f ", costheta);
+        }
+        fprintf(order_out, "\n");
+      }
+      fclose(order_out);
 
       // Save pressure
       char *pressure_fname = new char[1024];
@@ -613,6 +642,8 @@ periodicity/dimensions are not set by default and are required.\n");
       old_totalmoves = totalmoves;
       dZ = 0;
       fclose(pressureout);
+
+      delete[] headerinfo;
     }
     // ---------------------------------------------------------------
     // Save locations of vertices if desired
@@ -740,6 +771,7 @@ inline void check_neighbor_symmetry(const polyhedron *p, int N) {
     }
   }
 }
+
 static void took(const char *name) {
   assert(name); // so it'll count as being used...
   static clock_t last_time = clock();
@@ -788,7 +820,7 @@ int generate_talk_figs() {
   p[6].mypoly = &tetrahedron;
 
   const double periodic[3] = {0, 0, 0};
-  const double walls[3] = {5, 5, 5};
+  const double walls[3] = {6.5, 4, 5};
   const bool real_walls = true;
   const int max_neighbors = N;
   const double scale = 1.5;
@@ -807,7 +839,7 @@ int generate_talk_figs() {
     }
   }
   for(int i=0; i<N; i++) {
-    p[i].pos += vector3d(1, -4, 0);
+    p[i].pos += vector3d(0, -4.5, 0);
   }
   save_locations(p, N, "talks/polyhedra/dat/background.dat", len);
 
@@ -817,7 +849,7 @@ int generate_talk_figs() {
   int ny = 3;
   int nz = 3;
 
-  N = 80;
+  N = 26;
   p = new polyhedron[N];
 
 
@@ -836,7 +868,7 @@ int generate_talk_figs() {
   nx = 6;
   ny = 6;
   nz = 6;
-  double rad = 3.5;
+  double rad = 2.5;
   bool *spot_used = new bool[nx*ny*nz]();
   for(int i=0; i<N; i+=2) {
     int x, y, z;

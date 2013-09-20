@@ -1,11 +1,17 @@
+#!/usr/bin/python
 from __future__ import division
-import time
+import time, sys, matplotlib, numpy
+if 'show' not in sys.argv:
+  matplotlib.use('Agg')
 from pylab import *
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import colorConverter
 import matplotlib.animation as animation
 
 ff = .5
+
+cdefault = .3
+cspecial = .9
 
 # setup parameters
 x0_setup = 1
@@ -27,11 +33,10 @@ leny = 10
 edge = 1
 
 n = int(ff*lenx*leny/area)
-print n
 
 
 # density
-dx = 0.1
+dx = 0.25
 histogram = zeros(lenx/dx)
 angle_histogram = zeros(lenx/dx)
 xcoords = arange(0, lenx, dx) + dx/2
@@ -71,32 +76,37 @@ def turn(angle):
   return ang
 
 # Functions
-def distsq(pos2, pos1):
-  x = pos2[0] - pos1[0]
-  if abs(pos2[1] - pos1[1]) < leny - abs(pos2[1] - pos1[1]):
-    y = pos2[1] - pos1[1]
-  else:
-    y = leny - abs(pos2[1] - pos1[1])
-  return x*x + y*y
+def make_square(xs, ys):
+  dx = xs[2] - xs[1]
+  new_ys = repeat(ys, 2)
+  new_xs = repeat(xs, 2)
+  new_xs += (dx/2.0)
+  new_xs[::2] -= dx
+  return new_xs, new_ys
 
-def periodicDiff(pos2, pos1):
-  if abs(pos2[1] - pos1[1]) < leny - abs(pos2[1] - pos1[1]):
-    return pos2-pos1
-  return array([pos2[0]-pos1[0], pos2[1]-pos1[1]-leny])
+def distsq(a, b):
+  v = periodic_diff(a, b)
+  return v[0]*v[0] + v[1]*v[1]
+
+def periodic_diff(a, b):
+  v = b - a
+  while v[1] > leny/2: v[1] -= leny
+  while v[1] < -leny/2: v[1] += leny
+  return v
 
 def touch(pos1, pos2, phi1, phi2):
   if (distsq(pos2, pos1) > 4*l*l):
     return False
   if (distsq(pos2, pos1) < l*l):
     return True
-  v1 = verts(pos1, phi1)
-  v2 = verts(pos2, phi2)
-  for i in range(3):
+  v1 = verts([0,0], phi1)
+  v2 = verts(periodic_diff(pos1, pos2), phi2)
+  for i in xrange(3):
     p1 = v1[i-1]
     p2 = v1[i]
     m1 = (p2[1]-p1[1])/(p2[0]-p1[0])
     b1 = p1[1]-m1*p1[0]
-    for j in range(3):
+    for j in xrange(3):
       p3 = v2[j-1]
       p4 = v2[j]
       m2 = (p4[1]-p3[1])/(p4[0]-p3[0])
@@ -130,7 +140,7 @@ colors = zeros(n+1)
 x_setup = x0_setup
 y_setup = y0_setup
 phi_setup = 0
-for i in range(n):
+for i in xrange(n):
   centers[i, 0] = x_setup
   centers[i, 1] = y_setup
   angles[i] = phi_setup
@@ -145,14 +155,41 @@ for i in range(n):
   x_setup += dx_setup
 
 coords = zeros((n, 3, 2))
-for i in range(n):
+for i in xrange(n):
   coords[i] = verts(centers[i], angles[i])
 # Plotting
 fig = figure()
 ax = fig.add_subplot(221)
 ax2 = fig.add_subplot(222, sharex=ax)
 ax3 = fig.add_subplot(223, sharex=ax)
-setp(ax.get_xticklabels(), visible=False)
+ax4 = fig.add_subplot(224, sharex=ax, sharey=ax)
+
+
+# diagrams on fourth plot:
+temp = l
+l = 3
+tri = array((3,0))
+tri_coords = verts(tri, 0)
+ang = -pi/6
+new_tri_coords = verts(tri, ang)
+l = temp
+
+ax4.axis('off')
+ax4.add_patch(Polygon(tri_coords, fill=False))
+ax4.add_patch(Polygon(new_tri_coords, alpha = .5, color=cm.jet(cdefault)))
+
+line_len = 7
+ax4.plot([tri[0], tri[0]], [tri[1], tri[1]+line_len], '-k')
+ax4.plot([tri[0], tri[0]+line_len*sin(ang)], [tri[1], tri[1]+line_len*cos(ang)], '--k')
+
+phis = arange(0, ang, -.01)
+circ_r = 4
+ax4.plot(tri[0] + circ_r*sin(phis), tri[1] + circ_r*cos(phis), '-k')
+
+ax4.annotate('$\\varphi$', xy=(tri[0] + 6*sin(ang/2)-.5, tri[1] + 6*cos(ang/2)), fontsize=20)
+
+
+ax4.annotate(r'$n(x) = \frac{\mathrm{counts\ in\ slice}}{\mathrm{total\ counts}}\cdot\frac{N}{A}$', xy=(3, 10), fontsize=20)
 #fig, (ax, ax2, ax3) = subplots(3,2, sharex=True)
 #fig2 = figure(2)
 #ax3 = fig2.add_subplot(111)
@@ -166,29 +203,63 @@ ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange')
 
 ax.set_ylim(-edge, leny+edge)
 ax.set_xlim(-edge, lenx+edge)
-ax2.set_title("density")
-ax3.set_title("average angle")
-line, = ax2.plot(xcoords, histogram)
-angline, = ax3.plot(xcoords, angle_histogram)
+ax2.set_title("number density, $n$")
+ax3.set_title("average angle, $\\varphi$")
+
+ax.get_xaxis().set_visible(False)
+ax.get_yaxis().set_visible(False)
+ax2.get_xaxis().set_visible(False)
+ax3.get_xaxis().set_visible(False)
+ax4.get_xaxis().set_visible(False)
+ax4.get_yaxis().set_visible(False)
+
+
+xnew, density = make_square(xcoords, histogram)
+xnew, ang_vals = make_square(xcoords, angle_histogram)
+line, = ax2.plot(xnew, density)
+angline, = ax3.plot(xnew, ang_vals)
 ax2.set_xlim(-edge, lenx+edge)
+
+
+ax3.set_ylim(-1/4, 1/4)
+ax3.set_yticks((-1/4, -1/6, -1/12, 0, 1/12, 1/6, 1/4))
+ax3.set_yticklabels(('$-\\frac{\\pi}{4}$', '$-\\frac{\\pi}{6}$', '0', '$\\frac{\\pi}{6}$', '$\\frac{\\pi}{4}$'))
+ax3.set_yticklabels(('$-\\pi/4$', '$-\\pi/6$', '$-\\pi/12$', '$0$', '$\\pi/12$', '$\\pi/6$', '$\\pi/4$'))
 
 def init():
   coll = PolyCollection(coords)
   ax.add_collection(coll)
-  line.set_ydata(histogram)
-  angline.set_ydata(angle_histogram)
+  line.set_ydata(density)
+  angline.set_ydata(ang_vals)
   return line, ax2
 
-cdefault = .3
-cspecial = .9
 count = 0
 success = 0
 skip = 100
+
+def initialize():
+  global centers, angles
+  for i in xrange(n):
+    keep = True
+    temp = move(centers[i])
+    tempa = turn(angles[i])
+    xs = verts(temp, tempa)[:,0]
+    if max(xs) > lenx or min(xs) < 0:
+      keep = False
+    else:
+      for j in xrange(n):
+        if j != i and touch(temp, centers[j], tempa, angles[j]):
+          keep = False
+          break
+    if keep:
+      centers[i] = temp
+      angles[i] = tempa
+
 def mc():
   global count, centers, angles, coords, skip, colors, histogram, success, angle_histogram
-  for j in range(skip):
+  for j in xrange(skip):
     count += 1
-    for i in range(n):
+    for i in xrange(n):
       keep = True
       temp = move(centers[i])
       tempa = turn(angles[i])
@@ -196,31 +267,35 @@ def mc():
       if max(xs) > lenx or min(xs) < 0:
         keep = False
       else:
-        for j in range(n):
+        for j in xrange(n):
           if j != i and touch(temp, centers[j], tempa, angles[j]):
             keep = False
             break
       if keep:
         centers[i] = temp
         angles[i] = tempa
-        coords[i] = verts(centers[i], angles[i])
-        colors[i] += 1/skip
       if keep:
         success += 1
-    for i in range(n):
+    # add histogram counts:
+    bins = linspace(0, lenx, len(histogram)+1)
+    histogram += numpy.histogram(centers[:,0], bins=bins)[0]
+    for i in xrange(n):
       x = int(centers[i,0]/dx)
-      if x >= 0 and x < len(histogram):
-        histogram[x] += 1
+      if x >=0 and x < len(angle_histogram):
         angle_histogram[x] += angles[i] - pi/3
 
 def animate(p):
   global count, centers, angles, coords, skip, colors, histogram, success, angle_histogram
   mc()
   density = histogram/leny/dx/count
+  xnew, density = make_square(xcoords, density)
   line.set_ydata(density)
-  angline.set_ydata(angle_histogram/count)
+  xnew, ang_vals = make_square(xcoords, angle_histogram/count)
+  ang_vals /= pi
+  angline.set_ydata(ang_vals)
   ax2.set_ylim(0, 0.8)
-  ax3.set_ylim(-.4, .4)
+  for i in xrange(n):
+    coords[i] = verts(centers[i], angles[i])
   coll = PolyCollection(coords)
 
   colors = zeros(n) + cdefault
@@ -228,23 +303,24 @@ def animate(p):
   coll.set_color([cm.jet(x) for x in colors])
   ax.collections=[]
   ax.add_collection(coll)
-  ax.set_title("Attempted moves: %i, Successful moves: %i" %(count*n, success))
+  ax.set_title("Attempted: %6i, Successful: %6i" %(count*n, success))
   fig.tight_layout()
-  #time.sleep(3)
   return line, ax2, ax3
 
 fig.tight_layout()
 ax.set_aspect('equal')
 ax.set_ylim(-edge, leny+edge)
 
-#anim = animation.FuncAnimation(fig, animate, init_func=init)
-fig.set_size_inches(12,7)
+#fig.set_size_inches(12,7)
 
-# for i in range(1000):
-#   print i
-#   mc()
-for p in range(1000):
-  print p
+if 'show' in sys.argv:
+  anim = animation.FuncAnimation(fig, animate, init_func=init)
+  show()
+  exit(0)
+
+print("Generating mc-tri animation images for polyhedra paper.")
+for i in xrange(30):
+  initialize()
+for p in xrange(30):
   animate(p)
   savefig("anim/mc100-%4.2f-%03i.pdf" %(ff, p))
-show()
