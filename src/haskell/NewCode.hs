@@ -45,30 +45,25 @@ create3dHeader e0 n =
    "",
    "",
    "class " ++ n ++ " : public NewFunctional {",
-   "public:",
-   "\t" ++ n ++ "(int Nx, int Ny, int Nz);",
-   "",
-   functionDeclaration "true_energy" "double" [],
-   functionDeclaration "grad" "Vector" [],
-   functionDeclaration "printme" "void" [("const char *", "prefix")]]++
-  map setarg (inputs e0) ++
+   "public:"] ++ map (declare . strip_type) (create3dMethods e0 [] n) ++
+  map (newcode . setarg) (inputs e0) ++
  ["private:",
   ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
     where
+      strip_type f = f { name = drop (length n+2) $ name f }
       e = mapExpression' renameVar e0
       renameVar (Var CannotBeFreed a b c x) = Var CannotBeFreed ("var"++a) ("var"++b) c x
       renameVar x = x
       -- setarg creates a method that will get a reference to a given
       -- input argument's value.
-      setarg :: Exprn -> String
-      setarg ee =
-        newcode $ CFunction {
-          name = nameE ee,
-          returnType = Reference (ctype ee),
-          constness = "const",
-          args = [],
-          contents = "\tint sofar = 0;" : initme (inputs e0)
-          }
+      setarg :: Exprn -> CFunction
+      setarg ee = CFunction {
+        name = nameE ee,
+        returnType = Reference (ctype ee),
+        constness = "const",
+        args = [],
+        contents = "\tint sofar = 0;" : initme (inputs e0)
+        }
         where initme (xx@(ES _):_) | xx == ee = ["\treturn data[sofar];"]
               initme (xx:_) | xx == ee = ["\treturn data.slice(sofar," ++ sizeE ee ++ ");"]
               initme (xx@(ES _):rr)
@@ -131,38 +126,37 @@ create0dHeader e0 n =
 
 
 createCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
-createCppFile e = if any is_nonscalar (findOrderedInputs e)
-                  then create3dCppFile e
-                  else create0dCppFile e
+createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
+                                                    "",
+                                                    "#include \"" ++ headername ++ "\"",
+                                                    "",
+                                                    ""] ++ map newcode methods
   where is_nonscalar (ES _) = False
         is_nonscalar _ = True
+        methods = if any is_nonscalar (findOrderedInputs e)
+                  then create3dMethods e variables n
+                  else create0dMethods e variables n
 
-create0dCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
-create0dCppFile e variables n headername =
-  unlines $
-  ["// -*- mode: C++; -*-",
-   "",
-   "#include \"" ++ headername ++ "\"",
-   "",
-   "",
-   newcode $ CFunction {
-     name = n++"::true_energy",
-     returnType = Double,
-     constness = "const",
-     args = [],
-     contents = ["\tint sofar = 0;"] ++
-                map createInput (findOrderedInputs e) ++
-                [newcodeStatements (fst energy),
-                 "\treturn " ++ newcode (snd energy) ++ ";\n"]
-     },
-   newcode $ CFunction {
+create0dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+create0dMethods e variables n =
+  [CFunction {
+      name = n++"::true_energy",
+      returnType = Double,
+      constness = "const",
+      args = [],
+      contents = ["\tint sofar = 0;"] ++
+                 map createInput (findOrderedInputs e) ++
+                 [newcodeStatements (fst energy),
+                  "\treturn " ++ newcode (snd energy) ++ ";\n"]
+      },
+   CFunction {
      name = n++"::grad",
      returnType = Vector,
      constness = "const",
      args = [],
      contents = evalv grade
      },
-   newcode $ CFunction {
+   CFunction {
      name = n++"::printme",
      returnType = Void,
      constness = "const",
@@ -170,11 +164,7 @@ create0dCppFile e variables n headername =
      contents = map printEnergy $
                 filter (`notElem` ["dV", "dr", "volume"]) $
                 (Set.toList (findNamedScalars e))
-     }] ++
- ["// End of " ++ n ++ " class",
-  "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
-  "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
-  ]
+     }]
     where
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -222,33 +212,26 @@ create0dCppFile e variables n headername =
               isns _ = False
               ns = findNamedScalars e
 
-
-create3dCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
-create3dCppFile e variables n headername =
-  unlines $
-  ["// -*- mode: C++; -*-",
-   "",
-   "#include \"" ++ headername ++ "\"",
-   "",
-   "",
-   newcode $ CFunction {
-     name = n++"::true_energy",
-     returnType = Double,
-     constness = "const",
-     args = [],
-     contents = ["\tint sofar = 0;"] ++
-                map createInput (inputs e) ++
-                [newcodeStatements (fst energy),
-                 "\treturn " ++ newcode (snd energy) ++ ";\n"]
-     },
-   newcode $ CFunction {
+create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+create3dMethods e variables n =
+  [CFunction {
+      name = n++"::true_energy",
+      returnType = Double,
+      constness = "const",
+      args = [],
+      contents = ["\tint sofar = 0;"] ++
+                 map createInput (inputs e) ++
+                 [newcodeStatements (fst energy),
+                  "\treturn " ++ newcode (snd energy) ++ ";\n"]
+      },
+   CFunction {
      name = n++"::grad",
      returnType = Vector,
      constness = "const",
      args = [],
      contents = evalv grade
      },
-   newcode $ CFunction {
+   CFunction {
      name = n++"::printme",
      returnType = Void,
      constness = "const",
@@ -257,7 +240,7 @@ create3dCppFile e variables n headername =
                 filter (`notElem` ["dV", "dr", "volume"]) $
                 (Set.toList (findNamedScalars e))
      },
-   newcode $ CFunction {
+   CFunction {
      name = n++"::"++n,
      returnType = None,
      constness = "",
@@ -266,11 +249,7 @@ create3dCppFile e variables n headername =
                 "\tNx() = myNx;",
                 "\tNy() = myNy;",
                 "\tNz() = myNz; // good"]
-     }] ++
- ["// End of " ++ n ++ " class",
-  "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
-  "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
-  ]
+     }]
     where
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"

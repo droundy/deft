@@ -1,4 +1,4 @@
-module C ( Type(..), CFunction(..) ) where
+module C ( declare, Type(..), CFunction(..) ) where
 
 import Expression ( Code(..) )
 
@@ -43,6 +43,11 @@ instance Code CFunction where
     map ("\t"++) (contents f) ++
     ["}"]
   latexPrec _ _ = error "latexPrec not implemented for CFunction"
+
+declare :: CFunction -> String
+declare f | constness f == "" = newcode (returnType f) ++ name f ++ "(" ++ showargs (args f) ++ ");"
+declare f = newcode (returnType f) ++ name f ++ "(" ++ showargs (args f) ++ ") " ++ constness f ++ ";"
+
 
 showargs :: [(Type, String)] -> String
 showargs [] = ""
