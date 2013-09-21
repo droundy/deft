@@ -98,9 +98,15 @@ def ghc_make_scanner_function(node, env, path):
                 hs_file   = module + ".hs"
                 lhs_file  = module + ".lhs"
                 for dir in path:
-                        if exists(join(dir, hs_file)) or exists(join(dir, lhs_file)):
+                        if exists(join(dir, hs_file)):
                                 interfaces.append(interface)
                                 interfaces.append(o)
+                                interfaces += ghc_make_scanner_function(File(join(dir,hs_file)), env, path)
+                                break
+                        if exists(join(dir, lhs_file)):
+                                interfaces.append(interface)
+                                interfaces.append(o)
+                                interfaces += ghc_make_scanner_function(File(join(dir,lhs_file)), env, path)
                                 break
         return interfaces
 
@@ -150,7 +156,7 @@ def generate(env):
                 suffix = ".o",
                 single_source = True,
                 emitter = ghc_emitter,
-                source_scanner = ghc_make_scanner
+                source_scanner = ghc_scanner
                 )
 
         ghc_linker = Builder(

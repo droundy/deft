@@ -393,9 +393,8 @@ haskell = Environment(tools=['haskell'],
                       HSPACKAGES = ["containers", "process", "HUnit"],
                       HSCFLAGS = ['-O2', '-Wall', '-Werror'])
 
-for m in Split(""" LatexDouble Latex Expression CodeGen Statement HughesSaft WaterSaft Optimize
-                   FMT WhiteBear IdealGas SFMT NewCode """):
-    haskell.HaskellObject('src/haskell/' + m + '.hs')
+for hs in Glob("src/haskell/[A-Z]*.hs"):
+    haskell.HaskellObject(hs)
 
 for program in Split("functionals newfunctionals test latex-functionals"):
     haskell.HaskellMake(target = 'src/haskell/' + program + '.exe',
