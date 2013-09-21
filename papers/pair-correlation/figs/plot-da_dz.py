@@ -41,16 +41,24 @@ def read_da_dz(version):
 
 versions = ["this-work", 'sokolowski', "fischer"]
 
+plt.figure(figsize=(5,3))
+
 for version in versions:
   z0, da_dz = read_da_dz(version)
-  plt.plot(z0, da_dz, styles.plot[version], label=styles.title[version])
+  plt.plot(z0/2, da_dz, styles.plot[version], label=styles.title[version])
 
 mc_z0, mc_da_dz = read_a1_mc();
 
 
-plt.plot(mc_z0, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
-plt.xlim([-.5,4])
+plt.plot(mc_z0/2, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
+plt.xlim([-.5/2.,6/2.])
 plt.legend(loc='best').draw_frame(False)
+
+plt.xlabel('$z/\sigma$')
+plt.ylabel(r'$\frac{da_1}{dz}$')
+plt.yticks([])
+plt.xticks([0,1,2,3])
+plt.tight_layout()
 
 #plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
 savefig("figs/dadz-%d-%d.pdf" % (int(eta*10), int(delta_r)))

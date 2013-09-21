@@ -26,12 +26,21 @@ tw_z0, tw_dadz = data[:,0], data[:,1]
 data = loadtxt("figs/walls/square-well-dadz-sokolowski-%04.2f-1.790.dat" % eta)
 s_z0, s_dadz = data[:,0], data[:,1]
 
-plt.plot(tw_z0, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])
-plt.plot(s_z0, s_dadz, styles.plot['sokolowski'], label=styles.title['sokolowski'])
+plt.figure(figsize=(5,3))
 
-plt.plot(mc_z0, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
-plt.xlim([-.5,4])
+plt.plot(tw_z0/2, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])
+plt.plot(s_z0/2, s_dadz, styles.plot['sokolowski'], label=styles.title['sokolowski'])
+
+plt.plot(mc_z0/2, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
+plt.xlim([-.5/2,6/2.])
 plt.legend(loc='best').draw_frame(False)
+
+plt.xlabel('$z/\sigma$')
+plt.ylabel(r'$\frac{da_1}{dz}$')
+plt.yticks([])
+plt.xticks([0,1,2,3])
+
+plt.tight_layout()
 
 savefig("figs/dadz-square-well-%d.pdf" % (int(eta*10)))
 
