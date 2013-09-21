@@ -70,8 +70,8 @@ epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 hughes_X, deltasaft, a1, a2, hughes_HB:: Expression RealSpace
 hughes_X = "X" === (sqrt(1 + 8*n0*yuwu_zeta*deltasaft) - 1) / (4*n0*yuwu_zeta*deltasaft)
 
-deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
-  where boltz = "boltz" === exp(epsilon_association/kT)-1
+deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*fmayer
+  where fmayer = "fmayer" === exp(epsilon_association/kT)-1
 
 hughes_HB = "hughes_HB" === n0*yuwu_zeta*4*(1-hughes_X)
 
