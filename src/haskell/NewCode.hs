@@ -5,6 +5,7 @@ module NewCode (module Statement,
                 defineFunctional, createCppFile, createHeader )
     where
 
+import C
 import Statement
 import Expression
 import Optimize ( optimize )
@@ -15,13 +16,6 @@ defineFunctional :: Expression Scalar -> [Exprn] -> String -> String
 defineFunctional e variables n = createHeader e n ++ implementation
   where implementation = unlines $ drop 4 $ lines $ createCppFile e variables n ""
 
-
-functionCode :: String -> String -> [(String, String)] -> String -> String
-functionCode "" "" [] "" = ""
-functionCode "" "" (x:xs) "" = if xs == []
-                               then fst x ++ " " ++ snd x
-                               else fst x ++ " " ++ snd x ++ ", " ++ functionCode "" "" xs ""
-functionCode n t a b = t ++ " " ++ n ++ "(" ++ functionCode "" "" a "" ++ ") const {\n" ++ b ++ "}\n"
 
 functionDeclaration :: String -> String -> [(String, String)] -> String
 functionDeclaration "" "" [] = ""
@@ -52,12 +46,11 @@ create3dHeader e0 n =
    "",
    "class " ++ n ++ " : public NewFunctional {",
    "public:",
-   "\t" ++ n ++ "() {};",
+   "\t" ++ n ++ "(int Nx, int Ny, int Nz);",
    "",
    functionDeclaration "true_energy" "double" [],
    functionDeclaration "grad" "Vector" [],
-   functionDeclaration "printme" "void" [("const char *", "prefix")],
-   functionDeclaration "alloc" "void" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]] ++
+   functionDeclaration "printme" "void" [("const char *", "prefix")]]++
   map setarg (inputs e0) ++
  ["private:",
   ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
@@ -68,16 +61,22 @@ create3dHeader e0 n =
       -- setarg creates a method that will get a reference to a given
       -- input argument's value.
       setarg :: Exprn -> String
-      setarg ee = functionCode (nameE ee) (newreferenceE ee) [] $
-                  unlines ("\tint sofar = 0;" : initme (inputs e0) )
-                    where initme (xx@(ES _):_) | xx == ee = ["\treturn data[sofar];"]
-                          initme (xx:_) | xx == ee = ["\treturn data.slice(sofar," ++ sizeE ee ++ ");"]
-                          initme (xx@(ES _):rr)
-                            | nameE xx `elem` ["Nx","Ny","Nz"] =
-                              ("\tconst double "++nameE xx++" = data[sofar++];") : initme rr
-                          initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
-                          initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
-                          initme _ = error "bug inin setarg initme"
+      setarg ee =
+        newcode $ CFunction {
+          name = nameE ee,
+          returnType = Reference (ctype ee),
+          constness = "const",
+          args = [],
+          contents = "\tint sofar = 0;" : initme (inputs e0)
+          }
+        where initme (xx@(ES _):_) | xx == ee = ["\treturn data[sofar];"]
+              initme (xx:_) | xx == ee = ["\treturn data.slice(sofar," ++ sizeE ee ++ ");"]
+              initme (xx@(ES _):rr)
+                | nameE xx `elem` ["Nx","Ny","Nz"] =
+                  ("\tconst double "++nameE xx++" = data[sofar++];") : initme rr
+              initme (xx@(ES _):rr) = ("\tsofar += 1; // " ++ nameE xx) : initme rr
+              initme (xx@(ER _):rr) = ("\tsofar += Nx*Ny*Nz; // " ++ nameE xx) : initme rr
+              initme _ = error "bug inin setarg initme"
       sizeE (ES _) = "1"
       sizeE (ER _) = "Nx*Ny*Nz"
       sizeE (EK _) = error "no sizeE for EK yet"
@@ -85,6 +84,9 @@ create3dHeader e0 n =
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
+ctype :: Exprn -> C.Type
+ctype (ES _) = Double
+ctype _ = Vector
 
 create0dHeader :: Expression Scalar -> String -> String
 create0dHeader e0 n =
@@ -113,12 +115,18 @@ create0dHeader e0 n =
       -- setarg creates a method that will get a reference to a given
       -- input argument's value.
       setarg :: Exprn -> String
-      setarg ee = functionCode (nameE ee) (newreferenceE ee) [] $
-                  unlines ("\tint sofar = 0;" : initme (findOrderedInputs e0) )
-                    where initme (xx@(ES _):rr)
-                            | xx == ee = ["\treturn data[sofar];"]
-                            | otherwise = ("\tsofar += 1; // " ++ nameE xx) : initme rr
-                          initme _ = error "bug inin setarg initme"
+      setarg ee =
+        newcode $ CFunction {
+          name = nameE ee,
+          returnType = Reference (ctype ee),
+          constness = "const",
+          args = [],
+          contents = "\tint sofar = 0;" : initme (findOrderedInputs e0)
+          }
+        where initme (xx@(ES _):rr)
+                | xx == ee = ["\treturn data[sofar];"]
+                | otherwise = ("\tsofar += 1; // " ++ nameE xx) : initme rr
+              initme _ = error "bug inin setarg initme"
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
 
@@ -137,17 +145,32 @@ create0dCppFile e variables n headername =
    "#include \"" ++ headername ++ "\"",
    "",
    "",
-   functionCode (n++"::true_energy") "double" []
-      (unlines $
-       ["\tint sofar = 0;"] ++
-       map createInput (findOrderedInputs e) ++
-       [newcodeStatements (fst energy),
-       "\treturn " ++ newcode (snd energy) ++ ";\n"]),
-   functionCode (n++"::grad") "Vector" [] (evalv grade),
-   functionCode (n++"::printme") "void" [("const char *", "prefix")]
-      (unlines $ map printEnergy $
-       filter (`notElem` ["dV", "dr", "volume"]) $
-       (Set.toList (findNamedScalars e)))] ++
+   newcode $ CFunction {
+     name = n++"::true_energy",
+     returnType = Double,
+     constness = "const",
+     args = [],
+     contents = ["\tint sofar = 0;"] ++
+                map createInput (findOrderedInputs e) ++
+                [newcodeStatements (fst energy),
+                 "\treturn " ++ newcode (snd energy) ++ ";\n"]
+     },
+   newcode $ CFunction {
+     name = n++"::grad",
+     returnType = Vector,
+     constness = "const",
+     args = [],
+     contents = evalv grade
+     },
+   newcode $ CFunction {
+     name = n++"::printme",
+     returnType = Void,
+     constness = "const",
+     args = [(ConstCharPtr, "prefix")],
+     contents = map printEnergy $
+                filter (`notElem` ["dV", "dr", "volume"]) $
+                (Set.toList (findNamedScalars e))
+     }] ++
  ["// End of " ++ n ++ " class",
   "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
   "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
@@ -181,12 +204,12 @@ create0dCppFile e variables n headername =
                              in (reverse revst, es)
       justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
       justvarname _ = error "bad in justvarname"
-      evalv :: ([Statement], [Exprn]) -> String
-      evalv (st,ee) = unlines (["\tVector output(data.get_size());",
-                                "\toutput = 0;"]++
-                               "\tint sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
-                               [newcodeStatements (st ++ concatMap assignit ee),
-                                "\treturn output;"])
+      evalv :: ([Statement], [Exprn]) -> [String]
+      evalv (st,ee) = ["\tVector output(data.get_size());",
+                       "\toutput = 0;"]++
+                      "\tint sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
+                      [newcodeStatements (st ++ concatMap assignit ee),
+                       "\treturn output;"]
         where assignit eee = [Assign (ES $ Var CannotBeFreed
                                       ("actual_"++nameE eee++"[0]")
                                       ("actual_"++nameE eee++"[0]")
@@ -208,30 +231,50 @@ create3dCppFile e variables n headername =
    "#include \"" ++ headername ++ "\"",
    "",
    "",
-   functionCode (n++"::true_energy") "double" []
-      (unlines $
-       ["\tint sofar = 0;"] ++
-       map createInput (inputs e) ++
-       [newcodeStatements (fst energy),
-       "\treturn " ++ newcode (snd energy) ++ ";\n"]),
-   functionCode (n++"::grad") "Vector" [] (evalv grade),
-   functionCode (n++"::printme") "void" [("const char *", "prefix")]
-      (unlines $ map printEnergy $
-       filter (`notElem` ["dV", "dr", "volume"]) $
-       (Set.toList (findNamedScalars e))),
-   functionCode (n++"::alloc") "void" [("int", "Nx"), ("int", "Ny"), ("int", "Nz")]
-      (unlines ["\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
-                "\tdata[0] = Nx;",
-                "\tdata[1] = Ny;",
-                "\tdata[2] = Nz;"])] ++
+   newcode $ CFunction {
+     name = n++"::true_energy",
+     returnType = Double,
+     constness = "const",
+     args = [],
+     contents = ["\tint sofar = 0;"] ++
+                map createInput (inputs e) ++
+                [newcodeStatements (fst energy),
+                 "\treturn " ++ newcode (snd energy) ++ ";\n"]
+     },
+   newcode $ CFunction {
+     name = n++"::grad",
+     returnType = Vector,
+     constness = "const",
+     args = [],
+     contents = evalv grade
+     },
+   newcode $ CFunction {
+     name = n++"::printme",
+     returnType = Void,
+     constness = "const",
+     args = [(ConstCharPtr, "prefix")],
+     contents = map printEnergy $
+                filter (`notElem` ["dV", "dr", "volume"]) $
+                (Set.toList (findNamedScalars e))
+     },
+   newcode $ CFunction {
+     name = n++"::"++n,
+     returnType = None,
+     constness = "",
+     args = [(Int, "myNx"), (Int, "myNy"), (Int, "myNz")],
+     contents =["\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "\tNx() = myNx;",
+                "\tNy() = myNy;",
+                "\tNz() = myNz; // good"]
+     }] ++
  ["// End of " ++ n ++ " class",
   "// Total " ++ (show $ (countFFT (fst energy) + countFFT (fst grade))) ++ " Fourier transform used.",
   "// peak memory used: " ++ (show $ maximum $ map peakMem [fst energy, fst grade])
   ]
     where
       actualsize (ES _) = 1 :: Expression Scalar
-      actualsize (ER _) = s_var "Nx" * s_var "Ny" * s_var "Nz"
-      actualsize (EK _) = s_var "varNx" * s_var "varNy" * s_var "varNz"
+      actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
+      actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
       createInput ee@(ES _) = "\tdouble " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
       createInput ee@(ER _) = "\tVector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -268,14 +311,14 @@ create3dCppFile e variables n headername =
       justvarname (ER (Var a b c d _)) = ER $ Var a b c d Nothing
       justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
       justvarname _ = error "bad in justvarname"
-      evalv :: ([Statement], [Exprn]) -> String
-      evalv (st,ee) = unlines (["\tVector output(data.get_size());",
-                                "\tfor (int i=0;i<data.get_size();i++) {",
-                                "\t\toutput[i] = 0;",
-                                "\t}"]++
-                               "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
-                               [newcodeStatements (st ++ concatMap assignit ee),
-                                "\treturn output;"])
+      evalv :: ([Statement], [Exprn]) -> [String]
+      evalv (st,ee) = ["\tVector output(data.get_size());",
+                       "\tfor (int i=0;i<data.get_size();i++) {",
+                       "\t\toutput[i] = 0;",
+                       "\t}"]++
+                      "\tint sofar = 0;" : map createInputAndGrad (inputs e) ++
+                      [newcodeStatements (st ++ concatMap assignit ee),
+                       "\treturn output;"]
         where assignit eee = [Assign (justvarname eee) eee]
       codex :: Expression Scalar -> ([Statement], Exprn)
       codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
