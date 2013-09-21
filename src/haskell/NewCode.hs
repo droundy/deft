@@ -215,6 +215,32 @@ create0dMethods e variables n =
 create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 create3dMethods e variables n =
   [CFunction {
+     name = n++"::"++n,
+     returnType = None,
+     constness = "",
+     args = [(Int, "myNx"), (Int, "myNy"), (Int, "myNz")],
+     contents =["\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "\tNx() = myNx;",
+                "\tNy() = myNy;",
+                "\tNz() = myNz;"]
+     },
+   CFunction {
+     name = n++"::"++n,
+     returnType = None,
+     constness = "",
+     args = [(Double, "ax"), (Double, "ay"), (Double, "az"), (Double, "dx")],
+     contents =["\tint myNx = int(ceil(ax/dx));",
+                "\tint myNy = int(ceil(ay/dx));",
+                "\tint myNz = int(ceil(az/dx));",
+                "\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "\tNx() = myNx;",
+                "\tNy() = myNy;",
+                "\tNz() = myNz;",
+                "\ta1() = ax;",
+                "\ta2() = ay;",
+                "\ta3() = az;"]
+     },
+   CFunction {
       name = n++"::true_energy",
       returnType = Double,
       constness = "const",
@@ -239,16 +265,6 @@ create3dMethods e variables n =
      contents = map printEnergy $
                 filter (`notElem` ["dV", "dr", "volume"]) $
                 (Set.toList (findNamedScalars e))
-     },
-   CFunction {
-     name = n++"::"++n,
-     returnType = None,
-     constness = "",
-     args = [(Int, "myNx"), (Int, "myNy"), (Int, "myNz")],
-     contents =["\tdata = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
-                "\tNx() = myNx;",
-                "\tNy() = myNy;",
-                "\tNz() = myNz; // good"]
      }]
     where
       actualsize (ES _) = 1 :: Expression Scalar
