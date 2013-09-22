@@ -25,7 +25,8 @@ module Expression (Exprn(..),
                    product2pairs, pairs2product, product2denominator,
                    hasActualFFT, hasFFT, hasexpression, hasExprn, hasK,
                    searchExpression, searchExpressionDepthFirst,
-                   findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
+                   findRepeatedSubExpression, findNamedScalars, findNamed,
+                   findOrderedInputs, findInputs,
                    findTransforms, transform, Symmetry(..),
                    MkBetter(..), Monoid(..), mconcat,
                    countexpression, substitute, countAfterRemoval,
@@ -215,9 +216,9 @@ instance Type RealSpace where
              newcodes (1 :: Int) e,
              "\t}"]
       where newcodes n x = case findRepeatedSubExpression x of
-              MB (Just (_,x')) -> "\tconst double t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
+              MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
                                   newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
-              MB Nothing -> "\t" ++ newcode a ++ op ++ newcode (cleanvars x) ++ ";"
+              MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode (cleanvars x) ++ ";"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
   initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
@@ -1805,6 +1806,11 @@ searchMonoid f x@(Expression e) = f x `mappend` searchHelper (searchMonoid f) e
 findNamedScalars :: Type b => Expression b -> Set.Set String
 findNamedScalars = searchMonoid helper
   where helper (Var _ _ b _ (Just e)) | ES _ <- mkExprn e = Set.singleton b
+        helper _ = Set.empty
+
+findNamed :: Type b => Expression b -> Set.Set (String, Exprn)
+findNamed = searchMonoid helper
+  where helper e@(Var _ _ c _ (Just _)) = Set.singleton (c, mkExprn e)
         helper _ = Set.empty
 
 findOrderedInputs :: Type a => Expression a -> [Exprn]

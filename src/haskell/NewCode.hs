@@ -63,14 +63,15 @@ create3dHeader e0 n =
               initme _ = error "bug inin setarg initme"
       sizeE (ES _) = "1"
       sizeE (ER _) = "Nx*Ny*Nz"
-      sizeE (EK _) = error "no sizeE for EK yet"
+      sizeE (EK _) = "Nx*Ny*(int(Nz)/2+1)"
       inputs :: Expression Scalar -> [Exprn]
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
 ctype :: Exprn -> C.Type
 ctype (ES _) = Double
-ctype _ = Vector
+ctype (ER _) = Vector
+ctype (EK _) = ComplexVector
 
 create0dHeader :: Expression Scalar -> String -> String
 create0dHeader e0 n =
@@ -131,8 +132,7 @@ create0dMethods e variables n =
       args = [],
       contents = ["int sofar = 0;"] ++
                  map createInput (findOrderedInputs e) ++
-                 [newcodeStatements (fst energy),
-                  "return " ++ newcode (snd energy) ++ ";\n"]
+                 [newcodeStatements (eval_scalar e)]
       },
    CFunction {
      name = n++"::grad",
@@ -149,7 +149,7 @@ create0dMethods e variables n =
      contents = map printEnergy $
                 filter (`notElem` ["dV", "dr", "volume"]) $
                 (Set.toList (findNamedScalars e))
-     }]
+     }] ++ map getIntermediate (Set.toList $ findNamed e)
     where
       createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
       createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
@@ -163,7 +163,6 @@ create0dMethods e variables n =
       printEnergy v = "printf(\"%s" ++ pad maxlen v ++ " =\", prefix);\n" ++
                       "print_double(\"\", " ++ v ++ ");\n" ++
                       "printf(\"\\n\");"
-      energy = codex e
       the_actual_gradients = map (\(ES x) ->
                                    ES $ var ("grad_"++nameE (mkExprn x))
                                             ("grad_"++nameE (mkExprn x)) $derive x 1 e) variables
@@ -189,13 +188,17 @@ create0dMethods e variables n =
                                       ("actual_"++nameE eee++"[0]")
                                       ("actual_"++nameE eee++"[0]")
                                       ("actual_"++nameE eee) Nothing) eee]
-      codex :: Expression Scalar -> ([Statement], Exprn)
-      codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
-        where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
-              st = filter (not . isns) st0
-              isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
-              isns _ = False
-              ns = findNamedScalars e
+      getIntermediate :: (String, Exprn) -> CFunction
+      getIntermediate ("", _) = error "empty string in getIntermediate"
+      getIntermediate (rsname, a) = CFunction {
+        name = n++"::get_"++rsname,
+        returnType = ctype a,
+        constness = "const",
+        args = [],
+        contents = ["int sofar = 0;"] ++
+                   map createInput (findOrderedInputs e) ++
+                   [newcodeStatements $ eval_named (""++rsname) a]
+        }
 
 create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 create3dMethods e variables n =
@@ -204,7 +207,7 @@ create3dMethods e variables n =
      returnType = None,
      constness = "",
      args = [(Int, "myNx"), (Int, "myNy"), (Int, "myNz")],
-     contents =["data = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+     contents =["data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
                 "Nz() = myNz;"]
@@ -217,7 +220,7 @@ create3dMethods e variables n =
      contents =["int myNx = int(ceil(ax/dx));",
                 "int myNy = int(ceil(ay/dx));",
                 "int myNz = int(ceil(az/dx));",
-                "data = Vector(int(" ++ code (sum $ map actualsize $ inputs e) ++ "));",
+                "data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
                 "Nz() = myNz;",
@@ -231,9 +234,8 @@ create3dMethods e variables n =
       constness = "const",
       args = [],
       contents = ["int sofar = 0;"] ++
-                 map createInput (inputs e) ++
-                 [newcodeStatements (fst energy),
-                  "return " ++ newcode (snd energy) ++ ";\n"]
+                 map createInput (findOrderedInputs e) ++
+                 [newcodeStatements (eval_scalar e)]
       },
    CFunction {
      name = n++"::grad",
@@ -250,7 +252,7 @@ create3dMethods e variables n =
      contents = map printEnergy $
                 filter (`notElem` ["dV", "dr", "volume"]) $
                 (Set.toList (findNamedScalars e))
-     }]
+     }] ++ map getIntermediate (Set.toList $ findNamed e)
     where
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
@@ -265,15 +267,12 @@ create3dMethods e variables n =
                                      "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
                                      "sofar += Nx*Ny*Nz;"
       createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      inputs :: Expression Scalar -> [Exprn]
-      inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
       pad nn s = ' ' : pad (nn-1) s
       printEnergy v = "printf(\"%s" ++ pad maxlen v ++ " =\", prefix);\n" ++
                       "print_double(\"\", " ++ v ++ ");\n" ++
                       "printf(\"\\n\");"
-      energy = codex e
       the_actual_gradients = map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
                                                                 ("grad_"++nameE (mkExprn x)) $
                                                   derive x 1 e)) variables
@@ -296,15 +295,48 @@ create3dMethods e variables n =
                        "for (int i=0;i<data.get_size();i++) {",
                        "\toutput[i] = 0;",
                        "}"]++
-                      "int sofar = 0;" : map createInputAndGrad (inputs e) ++
+                      "int sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
                       [newcodeStatements (st ++ concatMap assignit ee),
                        "return output;"]
         where assignit eee = [Assign (justvarname eee) eee]
-      codex :: Expression Scalar -> ([Statement], Exprn)
-      codex x = (init $ reuseVar $ freeVectors $ st ++ [Assign e' e'], e')
-        where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
-              st = filter (not . isns) st0
-              isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
-              isns _ = False
-              ns = findNamedScalars e
+      getIntermediate :: (String, Exprn) -> CFunction
+      getIntermediate ("", _) = error "empty string in getIntermediate"
+      getIntermediate (rsname, a) = CFunction {
+        name = n++"::get_"++rsname,
+        returnType = ctype a,
+        constness = "const",
+        args = [],
+        contents = ["int sofar = 0;"] ++
+                   map createInput (findOrderedInputs e) ++
+                   [newcodeStatements $ eval_named (""++rsname) a]
+        }
 
+eval_scalar :: Expression Scalar -> [Statement]
+eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']
+  where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
+        st = filter (not . isns) st0
+        isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+        isns _ = False
+        ns = findNamedScalars x
+
+eval_named :: String -> Exprn -> [Statement]
+eval_named outname (ER x) = reuseVar $ freeVectors $ st ++ [Initialize outvar, Assign outvar e', Return outvar]
+  where (st0, [e']) = optimize [ER $ factorize $ joinFFTs x]
+        st = filter (not . isns) st0
+        isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+        isns _ = False
+        ns = findNamedScalars x
+        outvar = ER $ Var IsTemp (outname++"[i]") outname outname Nothing
+eval_named outname (EK x) = reuseVar $ freeVectors $ st ++ [Initialize outvar, Assign outvar e', Return outvar]
+  where (st0, [e']) = optimize [EK $ factorize $ joinFFTs x]
+        st = filter (not . isns) st0
+        isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+        isns _ = False
+        ns = findNamedScalars x
+        outvar = EK $ Var IsTemp (outname++"[i]") outname outname Nothing
+eval_named _ (ES x) = reuseVar $ freeVectors $ st ++ [Return e']
+  where (st0, [e']) = optimize [ES $ factorize $ joinFFTs x]
+        st = filter (not . isns) st0
+        isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+        isns _ = False
+        ns = findNamedScalars x
