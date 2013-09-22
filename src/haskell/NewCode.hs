@@ -124,81 +124,7 @@ createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
                   else create0dMethods e variables n
 
 create0dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
-create0dMethods e variables n =
-  [CFunction {
-      name = n++"::true_energy",
-      returnType = Double,
-      constness = "const",
-      args = [],
-      contents = ["int sofar = 0;"] ++
-                 map createInput (findOrderedInputs e) ++
-                 [newcodeStatements (eval_scalar e)]
-      },
-   CFunction {
-     name = n++"::grad",
-     returnType = Vector,
-     constness = "const",
-     args = [],
-     contents = evalv grade
-     },
-   CFunction {
-     name = n++"::printme",
-     returnType = Void,
-     constness = "const",
-     args = [(ConstCharPtr, "prefix")],
-     contents = map printEnergy $
-                filter (`notElem` ["dV", "dr", "volume"]) $
-                (Set.toList (findNamedScalars e))
-     }] ++ map getIntermediate (Set.toList $ findNamed e)
-    where
-      createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
-      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar];\n" ++
-                                     "Vector actual_grad_" ++ nameE ee ++ " = data.slice(sofar,1); " ++
-                                     "sofar += 1;"
-      createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
-      pad nn s | nn <= length s = s
-      pad nn s = ' ' : pad (nn-1) s
-      printEnergy v = "printf(\"%s" ++ pad maxlen v ++ " =\", prefix);\n" ++
-                      "print_double(\"\", " ++ v ++ ");\n" ++
-                      "printf(\"\\n\");"
-      the_actual_gradients = map (\(ES x) ->
-                                   ES $ var ("grad_"++nameE (mkExprn x))
-                                            ("grad_"++nameE (mkExprn x)) $derive x 1 e) variables
-      grade :: ([Statement], [Exprn])
-      grade = if variables == []
-              then ([],[])
-              else case optimize the_actual_gradients of
-                (st0, es) -> let st = filter (not . isns) st0
-                                 isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
-                                 isns _ = False
-                                 ns = findNamedScalars e
-                                 _:revst = reverse $ reuseVar $ freeVectors $ st ++ map (\e' -> Assign (justvarname e') e') es
-                             in (reverse revst, es)
-      justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
-      justvarname _ = error "bad in justvarname"
-      evalv :: ([Statement], [Exprn]) -> [String]
-      evalv (st,ee) = ["Vector output(data.get_size());",
-                       "output = 0;"]++
-                      "int sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
-                      [newcodeStatements (st ++ concatMap assignit ee),
-                       "return output;"]
-        where assignit eee = [Assign (ES $ Var CannotBeFreed
-                                      ("actual_"++nameE eee++"[0]")
-                                      ("actual_"++nameE eee++"[0]")
-                                      ("actual_"++nameE eee) Nothing) eee]
-      getIntermediate :: (String, Exprn) -> CFunction
-      getIntermediate ("", _) = error "empty string in getIntermediate"
-      getIntermediate (rsname, a) = CFunction {
-        name = n++"::get_"++rsname,
-        returnType = ctype a,
-        constness = "const",
-        args = [],
-        contents = ["int sofar = 0;"] ++
-                   map createInput (findOrderedInputs e) ++
-                   [newcodeStatements $ eval_named (""++rsname) a]
-        }
+create0dMethods e variables n = createAnydMethods e variables n
 
 create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 create3dMethods e variables n =
@@ -227,8 +153,15 @@ create3dMethods e variables n =
                 "a1() = ax;",
                 "a2() = ay;",
                 "a3() = az;"]
-     },
-   CFunction {
+     }] ++ createAnydMethods e variables n
+    where
+      actualsize (ES _) = 1 :: Expression Scalar
+      actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
+      actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
+
+createAnydMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+createAnydMethods e variables n =
+  [CFunction {
       name = n++"::true_energy",
       returnType = Double,
       constness = "const",
@@ -245,71 +178,60 @@ create3dMethods e variables n =
      contents = evalv grade
      },
    CFunction {
-     name = n++"::printme",
-     returnType = Void,
-     constness = "const",
-     args = [(ConstCharPtr, "prefix")],
-     contents = map printEnergy $
-                filter (`notElem` ["dV", "dr", "volume"]) $
-                (Set.toList (findNamedScalars e))
-     }] ++ map getIntermediate (Set.toList $ findNamed e)
-    where
-      actualsize (ES _) = 1 :: Expression Scalar
-      actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
-      actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
-      createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
-      createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
-      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      createInputAndGrad ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar];\n" ++
-                                     "Vector grad_" ++ nameE ee ++ " = data.slice(sofar,1); " ++
-                                     "sofar += 1;"
-      createInputAndGrad ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);\n"++
-                                     "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz); " ++
-                                     "sofar += Nx*Ny*Nz;"
-      createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      name = n++"::printme",
+      returnType = Void,
+      constness = "const",
+      args = [(ConstCharPtr, "prefix")],
+      contents = concatMap printEnergy $
+                 filter (`notElem` ["dV", "dr", "volume"]) $
+                 (Set.toList (findNamedScalars e))
+      }] ++ map getIntermediate (Set.toList $ findNamed e)
+  where
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
       pad nn s = ' ' : pad (nn-1) s
-      printEnergy v = "printf(\"%s" ++ pad maxlen v ++ " =\", prefix);\n" ++
-                      "print_double(\"\", " ++ v ++ ");\n" ++
-                      "printf(\"\\n\");"
-      the_actual_gradients = map (mapExprn (\x -> mkExprn $ var ("grad_"++nameE (mkExprn x))
-                                                                ("grad_"++nameE (mkExprn x)) $
-                                                  derive x 1 e)) variables
-      grade :: ([Statement], [Exprn])
+      printEnergy v = ["printf(\"%s" ++ pad maxlen v ++ " =\", prefix);",
+                       "print_double(\"\", " ++ v ++ ");",
+                       "printf(\"\\n\");"]
+      createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
+      createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
+      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      getIntermediate :: (String, Exprn) -> CFunction
+      getIntermediate ("", _) = error "empty string in getIntermediate"
+      getIntermediate (rsname, a) = CFunction {
+      name = n++"::get_"++rsname,
+      returnType = ctype a,
+      constness = "const",
+      args = [],
+      contents = ["int sofar = 0;"] ++
+                 map createInput (findOrderedInputs e) ++
+                 [newcodeStatements $ eval_named (""++rsname) a]
+      }
+      createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
+                                      "double *grad_" ++ nameE ee ++ " = &data[sofar++];"]
+      createInputAndGrad ee@(ER _) = ["Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);",
+                                      "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz);",
+                                      "sofar += Nx*Ny*Nz;"]
+      createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
+      the_gradients = map (mapExprn (\x -> ("grad_"++nameE (mkExprn x), mkExprn $ derive x 1 e))) variables
+      grade :: [Statement]
       grade = if variables == []
-              then ([],[])
-              else case optimize the_actual_gradients of
+              then []
+              else case optimize $ map snd the_gradients of
                 (st0, es) -> let st = filter (not . isns) st0
                                  isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
                                  isns _ = False
                                  ns = findNamedScalars e
-                                 _:revst = reverse $ reuseVar $ freeVectors $ st ++ map (\e' -> Assign (justvarname e') e') es
-                             in (reverse revst, es)
-      justvarname (ES (Var a b c d _)) = ES $ Var a (b++"[0]") c d Nothing
-      justvarname (ER (Var a b c d _)) = ER $ Var a b c d Nothing
-      justvarname (EK (Var a b c d _)) = EK $ Var a b c d Nothing
-      justvarname _ = error "bad in justvarname"
-      evalv :: ([Statement], [Exprn]) -> [String]
-      evalv (st,ee) = ["Vector output(data.get_size());",
-                       "for (int i=0;i<data.get_size();i++) {",
-                       "\toutput[i] = 0;",
-                       "}"]++
-                      "int sofar = 0;" : map createInputAndGrad (findOrderedInputs e) ++
-                      [newcodeStatements (st ++ concatMap assignit ee),
-                       "return output;"]
-        where assignit eee = [Assign (justvarname eee) eee]
-      getIntermediate :: (String, Exprn) -> CFunction
-      getIntermediate ("", _) = error "empty string in getIntermediate"
-      getIntermediate (rsname, a) = CFunction {
-        name = n++"::get_"++rsname,
-        returnType = ctype a,
-        constness = "const",
-        args = [],
-        contents = ["int sofar = 0;"] ++
-                   map createInput (findOrderedInputs e) ++
-                   [newcodeStatements $ eval_named (""++rsname) a]
-        }
+                             in reuseVar $ freeVectors $ st ++ zipWith Assign (map varn the_gradients) es
+      varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
+      varn (vnam, ER _) = ER $ Var CannotBeFreed vnam ("grad_"++vnam++"[i]") vnam Nothing
+      varn (vnam, EK _) = EK $ Var CannotBeFreed vnam (vnam++"[i]") vnam Nothing
+      evalv :: [Statement] -> [String]
+      evalv st = ["Vector output(data.get_size());",
+                  "output = 0;"]++
+                  "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
+                  [newcodeStatements st,
+                   "return output;"]
 
 eval_scalar :: Expression Scalar -> [Statement]
 eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']
