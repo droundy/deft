@@ -1,7 +1,6 @@
 import os, glob
 from numpy import *
 
-# if N=0 is supplied to these functions, then the first appropriate file is used
 def get_N(basename):
   # if "vertices" in basename:
   names = glob.glob('%s*' %(basename))

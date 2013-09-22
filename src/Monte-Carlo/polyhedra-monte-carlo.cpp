@@ -44,6 +44,13 @@ const poly_shape cube("cube");
 const poly_shape tetrahedron("tetrahedron");
 const poly_shape truncated_tetrahedron("truncated_tetrahedron");
 
+const poly_shape cuboid_quarter("cuboid", .25);
+const poly_shape cuboid_half("cuboid", .5);
+const poly_shape cuboid_2("cuboid", 2);
+const poly_shape cuboid_4("cuboid", 4);
+const poly_shape cuboid_8("cuboid", 8);
+
+
 // prints out a lot of extra information and performs extra computation
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
@@ -138,7 +145,9 @@ int main(int argc, const char *argv[]) {
      "Will cause collisions to occur with walls based on centers only", 0},
     {"iterations", 'i', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations, 0,
      "Number of iterations to run for", "iter"},
-    {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &initialize_iterations, 0, "Number of iterations to run the initialization for", "iter"},
+    {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+     &initialize_iterations, 0,
+     "Number of iterations to run the initialization for", "iter"},
     {"filename", 'f', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of filename. Many files will be generated, and will automatically contain \
 information on the number and type of polyhedra, as well as file extensions", "name"},
@@ -200,6 +209,11 @@ periodicity/dimensions are not set by default and are required.\n");
   if (strcmp(shape_name, "cube") == 0) shape = &cube;
   else if (strcmp(shape_name, "tetrahedron") == 0) shape = &tetrahedron;
   else if (strcmp(shape_name, "truncated_tetrahedron") == 0) shape = &truncated_tetrahedron;
+  else if (strcmp(shape_name, "cuboid_quarter") == 0) shape = &cuboid_quarter;
+  else if (strcmp(shape_name, "cuboid_half") == 0) shape = &cuboid_half;
+  else if (strcmp(shape_name, "cuboid_2") == 0) shape = &cuboid_2;
+  else if (strcmp(shape_name, "cuboid_4") == 0) shape = &cuboid_4;
+  else if (strcmp(shape_name, "cuboid_8") == 0) shape = &cuboid_8;
   else {
     fprintf(stderr, "\nInvalid shape.\n");
     return 1;
@@ -275,21 +289,23 @@ periodicity/dimensions are not set by default and are required.\n");
     polyhedra[i].mypoly = shape;
     polyhedra[i].R = R;
   }
-  int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
-  int ny = ceil((double)len[1]/len[0]*nx);
-  int nz = ceil((double)len[2]/len[0]*nx);
-  while (nx*ny*nz < N) {
-    nx ++;
-    ny ++;
-    nz ++;
-  }
-  const double xspace = len[0]/double(nx);
-  const double yspace = len[1]/double(ny);
-  const double zspace = len[2]/double(nz);
-  printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g)\n",
-         nx, ny, nz, xspace, yspace, zspace);
   int max_attempts = 1;
+  // cube
   if (shape == &cube) {
+    int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
+    int ny = ceil((double)len[1]/len[0]*nx);
+    int nz = ceil((double)len[2]/len[0]*nx);
+    while (nx*ny*nz < N) {
+      nx ++;
+      ny ++;
+      nz ++;
+    }
+    const double xspace = len[0]/double(nx);
+    const double yspace = len[1]/double(ny);
+    const double zspace = len[2]/double(nz);
+    printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g)\n",
+           nx, ny, nz, xspace, yspace, zspace);
+
     bool *spot_used = new bool[nx*ny*nz]();
     for(int i=0; i<N; i++) {
       int x, y, z;
@@ -306,6 +322,41 @@ periodicity/dimensions are not set by default and are required.\n");
     }
     delete[] spot_used;
   }
+  // non-cube cuboids
+  else if (shape->nvertices == 8) {
+    printf("yoyo\n");
+    const double xlen = fabs(2*shape->vertices[0][0]);
+    const double ylen = fabs(2*shape->vertices[0][1]);
+    const double zlen = fabs(2*shape->vertices[0][2]);
+
+    const double ratio = zlen/len[2]/xlen*len[0];
+
+    // want N_adj in the form a*a*a*ratio
+    const int N_adjusted = round(ratio*ratio*uipow(ceil(pow(N/ratio/ratio, 1.0/3.0)), 3));
+
+    int nx = round(pow(N_adjusted/ratio/ratio, 1.0/3.0)*ratio);
+    int ny = round(pow(N_adjusted/ratio/ratio, 1.0/3.0)*ratio);
+    int nz = round(pow(N_adjusted/ratio/ratio, 1.0/3.0));
+
+    const double xspace = len[0]/nx;
+    const double yspace = len[1]/ny;
+    const double zspace = len[2]/nz;
+    bool *spot_used = new bool[nx*ny*nz]();
+
+    printf("%i, %i, %i, %i, %g, %g, %g\n", N_adjusted, nx, ny, nz, xspace, yspace, zspace);
+
+    for(int i=0; i<N; i++) {
+      int x, y, z;
+      do {
+        x = floor(random::ran()*nx);
+        y = floor(random::ran()*ny);
+        z = floor(random::ran()*nz);
+      } while (spot_used[x*ny*nz + y*nz + z]);
+      spot_used[x*ny*nz + y*nz + z] = true;
+      polyhedra[i].pos = vector3d(x*xspace + xlen/2, y*yspace + ylen/2, z*zspace + zlen/2);
+    }
+  }
+  // truncated tetrahedra
   else if (shape == &truncated_tetrahedron) {
     if (strcmp(structure, "arsenic") == 0) {
       // form a lattice that will be able to give us the maximum filling fraction
@@ -319,9 +370,11 @@ periodicity/dimensions are not set by default and are required.\n");
       const vector3d e3 = vector3d(8, 12, -4)*fac;
 
       const vector3d offset = vector3d(6, 6, 6)*fac;
-      nx *= 2;
-      ny *= 2;
-      nz *= 2;
+
+      int nx = 2*ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
+      int ny = 2*ceil((double)len[1]/len[0]*nx);
+      int nz = 2*ceil((double)len[2]/len[0]*nx);
+
       bool *spot_used = new bool[nx*ny*nz]();
       int x=0, y=0, z=0;
       for(int i=0; i<N; i+=2) {
@@ -365,7 +418,6 @@ periodicity/dimensions are not set by default and are required.\n");
       const double fraction = pow((double)N_adjusted/ne1/ne2/ne3, 1.0/3.0);
 
       const double space = (ne1_doub + ne2_doub + ne3_doub)/(ne1 + ne2 + ne3)/fraction;
-      printf("%i, %g, %g, %g, %g, %g\n", N_adjusted, ne1_doub, ne2_doub, ne3_doub, space, fraction);
 
       e1 *= space;
       e2 *= space;
