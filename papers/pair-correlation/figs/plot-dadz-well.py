@@ -31,7 +31,7 @@ plt.figure(figsize=(5,3))
 plt.plot(tw_z0/2, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])
 plt.plot(s_z0/2, s_dadz, styles.plot['sokolowski'], label=styles.title['sokolowski'])
 
-plt.plot(mc_z0/2, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
+plt.plot(mc_z0[::10]/2, mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 plt.xlim([-.5/2,6/2.])
 plt.legend(loc='best').draw_frame(False)
 

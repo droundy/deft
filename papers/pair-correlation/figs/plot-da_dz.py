@@ -50,7 +50,7 @@ for version in versions:
 mc_z0, mc_da_dz = read_a1_mc();
 
 
-plt.plot(mc_z0/2, mc_da_dz, styles.plot['mc'], label=styles.title['mc'])
+plt.plot(mc_z0[::10]/2, mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 plt.xlim([-.5/2.,6/2.])
 plt.legend(loc='best').draw_frame(False)
 
