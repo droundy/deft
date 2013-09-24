@@ -133,7 +133,9 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
 
 newgenerated_sources = []
-for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast """):
+for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast
+                        WaterSaftFast WaterSaftByHandFast
+                        HomogeneousWaterSaftFast HomogeneousWaterSaftByHandFast """):
     filename = 'src/new/' + source + '.cpp'
     newgenerated_sources.append(filename)
     generate.Functional(target = [filename, 'src/new/'+source+'.h'], source = 'src/haskell/newfunctionals.exe')
