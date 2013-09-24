@@ -61,8 +61,8 @@ epsilon_association = s_tex "epsilon_association" "\\epsilon_a"
 water_X, deltasaft, a1, a2 :: Expression RealSpace
 water_X = "X" === (sqrt(1 + 8*nA*deltasaft) - 1) / (4*nA*deltasaft)
 
-deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*boltz
-  where boltz = "boltz" === exp(epsilon_association/kT)-1
+deltasaft = var "deltasaft" "{\\Delta}" $ gSW*kappa_association*fmayer
+  where fmayer = "fmayer" === exp(epsilon_association/kT)-1
 
 gSW :: Expression RealSpace
 gSW = "gSW" ===

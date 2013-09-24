@@ -133,7 +133,9 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
 
 newgenerated_sources = []
-for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast """):
+for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast
+                        WaterSaftFast WaterSaftByHandFast
+                        HomogeneousWaterSaftFast HomogeneousWaterSaftByHandFast """):
     filename = 'src/new/' + source + '.cpp'
     newgenerated_sources.append(filename)
     generate.Functional(target = [filename, 'src/new/'+source+'.h'], source = 'src/haskell/newfunctionals.exe')
@@ -394,9 +396,8 @@ haskell = Environment(tools=['haskell'],
                       HSPACKAGES = ["containers", "process", "HUnit"],
                       HSCFLAGS = ['-O2', '-Wall', '-Werror'])
 
-for m in Split(""" LatexDouble Latex Expression CodeGen Statement HughesSaft WaterSaft Optimize
-                   FMT WhiteBear IdealGas SFMT NewCode """):
-    haskell.HaskellObject('src/haskell/' + m + '.hs')
+for hs in Glob("src/haskell/[A-Z]*.hs"):
+    haskell.HaskellObject(hs)
 
 for program in Split("functionals newfunctionals test latex-functionals"):
     haskell.HaskellMake(target = 'src/haskell/' + program + '.exe',

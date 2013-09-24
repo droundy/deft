@@ -15,6 +15,9 @@ struct poly_shape {
 
   poly_shape();
   explicit poly_shape(const char *set_name);
+  // this constructor is used for cuboids, with sides AxAxB where ratio = B/A
+  // oriented with the edge of length B parallel to the z-axis
+  explicit poly_shape(const char *set_name, double ratio);
   ~poly_shape();
 
 private:

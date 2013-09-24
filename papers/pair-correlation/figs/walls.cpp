@@ -510,13 +510,13 @@ void run_walls(double eta, const char *name, Functional fhs) {
             const double sintheta = sin(theta);
             const double costheta = cos(theta);
             const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
-            const double dvolume = 2*M_PI*(uipow(r+dv/2, 3) - uipow(r-dv/2, 3))*dcostheta;
+            const double dvolume = 2*M_PI*(uipow(r+dv/2, 3) - uipow(r-dv/2, 3))*dcostheta/3;
             const Cartesian r1(r*sintheta, 0, z0 + r*costheta);
             double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
             da_dz += density(r0)*density(r1)*g2*dvolume;
           }
         }
-        fprintf(out, "%g %g\n",z0-spacing,da_dz/well_volume);
+        fprintf(out, "%g %g\n",z0-spacing,da_dz);
       }
       fclose(out);
       took(plotname_a + strlen("papers/pair-correlation/figs/"));

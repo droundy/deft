@@ -17,22 +17,34 @@ import Data.List ( nubBy, partition, (\\) )
 data Statement = Assign Exprn Exprn
                | Initialize Exprn
                | Free Exprn
+               | Return Exprn
+               deriving ( Eq )
 
 instance Show Statement where
   showsPrec _ (Assign x y) = showsPrec 0 x . showString " := " . showsPrec 0 y
   showsPrec _ (Initialize x) = showString "Initialize " . showsPrec 0 x
   showsPrec _ (Free x) = showString "Free " . showsPrec 0 x
+  showsPrec _ (Return x) = showString "Return " . showsPrec 0 x
 
 instance Code Statement where
   codePrec _ (Assign x y) = showString ("\t" ++ codeStatementE x " = " y)
   codePrec _ (Initialize e) = showString ("\t" ++ initializeE e)
   codePrec _ (Free e) = showString ("\t" ++ freeE e)
+  codePrec _ (Return e) =
+    case take 3 $ reverse $ code e of
+      "]i[" -> showString ("\treturn " ++ reverse (drop 3 $ reverse $ code e) ++ ";")
+      _ -> showString ("\treturn " ++ code e ++ ";")
   newcodePrec _ (Assign x y) = showString ("\t" ++ newcodeStatementE x " = " y)
   newcodePrec _ (Initialize e) = showString ("\t" ++ newinitializeE e)
   newcodePrec _ (Free e) = showString ("\t" ++ newfreeE e)
+  newcodePrec _ (Return e) =
+    case take 3 $ reverse $ newcode e of
+      "]i[" -> showString ("\treturn " ++ reverse (drop 3 $ reverse $ newcode e) ++ ";")
+      _ -> showString ("\treturn " ++ newcode e ++ ";")
   latexPrec _ (Assign x y) = latexPrec 0 x . showString " = " . mapExprn (latexPrec 0 . cleanvars) y
   latexPrec _ (Initialize e) = showString (initializeE e)
   latexPrec _ (Free e) = showString (freeE e)
+  latexPrec _ (Return e) = showString ("return " ++ latex e)
 
 latexStatements :: [Statement] -> String
 latexStatements x = unlines $ map (\e -> "\n\\begin{dmath}\n" ++ latex e ++ "\n\\end{dmath}") x
@@ -53,6 +65,7 @@ substituteS :: Type a => Expression a -> Expression a -> Statement -> Statement
 substituteS x y (Assign s e) = Assign s (substituteE x y e)
 substituteS x y (Initialize e) = Initialize (substituteE x y e)
 substituteS x y (Free e) = Free (substituteE x y e)
+substituteS x y (Return e) = Return (substituteE x y e)
 
 countFFT :: [Statement] -> Int
 countFFT = sum . map helper
@@ -80,6 +93,7 @@ hasE :: Exprn -> [Statement] -> Bool
 hasE _ [] = False
 hasE e (Assign _ a:_) | hasExprn e a = True
 hasE e (Free a:_) | e == a = True
+hasE e (Return a:_) | hasExprn e a = True
 hasE e (_:rest) = hasE e rest
 
 -- FIXME: This freeVectors uses O(n^2) calls to hasexpression, which
@@ -91,10 +105,11 @@ freeVectors = freeHelper []
     where freeHelper :: [Exprn] -> [Statement] -> [Statement]
           freeHelper vs (xnn@(Free v):xs) = [xnn] ++ freeHelper (vs \\ [v]) xs
           freeHelper vs (xnn@(Initialize v):xs) | istemp v = [xnn] ++ freeHelper (v:vs) xs
-                                                 | otherwise = [xnn] ++ freeHelper vs xs
+                                                | otherwise = [xnn] ++ freeHelper vs xs
           freeHelper vs (xnn@(Assign _ _):xs) = xnn : freeme ++ freeHelper vs' xs
             where (vs', vsfree) = partition (`hasE` xs) vs
                   freeme = map Free vsfree
+          freeHelper _ (xnn@(Return _):_) = [xnn] -- once we return, we are done
           freeHelper _ [] = []
           istemp (ES (Var IsTemp _ _ _ Nothing)) = True
           istemp (EK (Var IsTemp _ _ _ Nothing)) = True
@@ -102,8 +117,9 @@ freeVectors = freeHelper []
           istemp _ = False
 
 reuseVar :: [Statement] -> [Statement]
-reuseVar ((Initialize (ER iivar@(Var IsTemp _ _ _ Nothing))) :
-          (Assign n e):(Free (ER ffvar@(Var IsTemp _ _ _ Nothing))) : xs)
+reuseVar (Initialize (ER iivar@(Var IsTemp _ _ _ Nothing)) :
+          Assign n e :
+          Free (ER ffvar@(Var IsTemp _ _ _ Nothing)) : xs)
     | ER iivar == n = (Assign (ER ffvar) e) : reuseVar (map (substituteS iivar ffvar) xs)
     | otherwise = error "RS initialize error: "
 reuseVar ((Initialize (EK iivar@(Var IsTemp _ _ _ Nothing))) :

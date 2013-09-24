@@ -413,6 +413,44 @@ poly_shape::poly_shape(const char *set_name) {
   }
 }
 
+poly_shape::poly_shape(const char *set_name, double ratio) {
+  if (strcmp(set_name, "cuboid") == 0) {
+    // calculated so that x^2 + y^2 + z^2 = 1, x = y, and z = ratio*x
+    const double x = 1/sqrt(2 + sqr(ratio));
+    const double y = x;
+    const double z = ratio*x;
+
+    nvertices = 8;
+    nfaces = 3;
+    volume = 8*x*y*z;
+    vertices = new vector3d[nvertices];
+    faces = new vector3d[nfaces];
+    name = new char[5];
+    sprintf(name, "cuboid_%04.2f", ratio);
+
+    vertices[0] = vector3d( x,  y,  z);
+    vertices[1] = vector3d(-x,  y,  z);
+    vertices[2] = vector3d(-x, -y,  z);
+    vertices[3] = vector3d( x, -y,  z);
+    vertices[4] = vector3d( x,  y, -z);
+    vertices[5] = vector3d(-x,  y, -z);
+    vertices[6] = vector3d(-x, -y, -z);
+    vertices[7] = vector3d( x, -y, -z);
+
+    faces[0] = vector3d(1, 0, 0);
+    faces[1] = vector3d(0, 1, 0);
+    faces[2] = vector3d(0, 0, 1);
+  }
+  else {
+    nvertices = 0;
+    nfaces = 0;
+    volume = 0;
+    vertices = NULL;
+    faces = NULL;
+    name = new char[14];
+    sprintf(name, "invalid shape");
+  }
+}
 poly_shape::~poly_shape() {
   delete[] vertices;
   delete[] faces;

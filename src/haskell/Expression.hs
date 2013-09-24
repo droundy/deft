@@ -25,7 +25,8 @@ module Expression (Exprn(..),
                    product2pairs, pairs2product, product2denominator,
                    hasActualFFT, hasFFT, hasexpression, hasExprn, hasK,
                    searchExpression, searchExpressionDepthFirst,
-                   findRepeatedSubExpression, findNamedScalars, findOrderedInputs, findInputs,
+                   findRepeatedSubExpression, findNamedScalars, findNamed,
+                   findOrderedInputs, findInputs,
                    findTransforms, transform, Symmetry(..),
                    MkBetter(..), Monoid(..), mconcat,
                    countexpression, substitute, countAfterRemoval,
@@ -382,7 +383,14 @@ instance Type KSpace where
                     Expression (Complex r 0) ->
                             "\t\tconst double t"++ show n ++ " = " ++ newcode r ++ ";\n" ++
                             newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
-                    _ -> error "don't hanld e complex well"
+                    Expression (Complex 0 i) ->
+                            "\t\tdouble it"++ show n ++ " = " ++ newcode i ++ ";\n" ++
+                            newcodes (n+1) (substitute x' (complex 0 (s_var ("it"++show n))) x)
+                    Expression (Complex r i) ->
+                            "\t\tstd::complex<double> t"++ show n ++ " = std::complex<double>(" ++
+                                 newcode r ++ ", " ++ newcode i ++ ");\n" ++
+                            newcodes (n+1) (substitute x' (complex (s_var ("t"++show n++".real()")) (s_var ("t"++show n++".imag()"))) x)
+                    _ -> error "oopsies?!"
               MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
                             "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
             setzero = case newcode $ setKequalToZero e of
@@ -1805,6 +1813,11 @@ searchMonoid f x@(Expression e) = f x `mappend` searchHelper (searchMonoid f) e
 findNamedScalars :: Type b => Expression b -> Set.Set String
 findNamedScalars = searchMonoid helper
   where helper (Var _ _ b _ (Just e)) | ES _ <- mkExprn e = Set.singleton b
+        helper _ = Set.empty
+
+findNamed :: Type b => Expression b -> Set.Set (String, Exprn)
+findNamed = searchMonoid helper
+  where helper e@(Var _ _ c _ (Just _)) = Set.singleton (c, mkExprn e)
         helper _ = Set.empty
 
 findOrderedInputs :: Type a => Expression a -> [Exprn]

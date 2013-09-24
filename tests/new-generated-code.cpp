@@ -102,8 +102,7 @@ int main(int, char **argv) {
 
   Vector n(1000);
   n = 0.5;
-  integrate_sqr haskell_generated;
-  haskell_generated.alloc(10,10,10);
+  integrate_sqr haskell_generated(10,10,10);
   haskell_generated.a1() = 5;
   haskell_generated.a2() = 5;
   haskell_generated.a3() = 5;

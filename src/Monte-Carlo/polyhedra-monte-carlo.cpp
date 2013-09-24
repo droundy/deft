@@ -44,6 +44,13 @@ const poly_shape cube("cube");
 const poly_shape tetrahedron("tetrahedron");
 const poly_shape truncated_tetrahedron("truncated_tetrahedron");
 
+const poly_shape cuboid_quarter("cuboid", .25);
+const poly_shape cuboid_half("cuboid", .5);
+const poly_shape cuboid_2("cuboid", 2);
+const poly_shape cuboid_4("cuboid", 4);
+const poly_shape cuboid_8("cuboid", 8);
+
+
 // prints out a lot of extra information and performs extra computation
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
@@ -138,7 +145,9 @@ int main(int argc, const char *argv[]) {
      "Will cause collisions to occur with walls based on centers only", 0},
     {"iterations", 'i', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations, 0,
      "Number of iterations to run for", "iter"},
-    {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &initialize_iterations, 0, "Number of iterations to run the initialization for", "iter"},
+    {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+     &initialize_iterations, 0,
+     "Number of iterations to run the initialization for", "iter"},
     {"filename", 'f', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of filename. Many files will be generated, and will automatically contain \
 information on the number and type of polyhedra, as well as file extensions", "name"},
@@ -200,6 +209,11 @@ periodicity/dimensions are not set by default and are required.\n");
   if (strcmp(shape_name, "cube") == 0) shape = &cube;
   else if (strcmp(shape_name, "tetrahedron") == 0) shape = &tetrahedron;
   else if (strcmp(shape_name, "truncated_tetrahedron") == 0) shape = &truncated_tetrahedron;
+  else if (strcmp(shape_name, "cuboid_quarter") == 0) shape = &cuboid_quarter;
+  else if (strcmp(shape_name, "cuboid_half") == 0) shape = &cuboid_half;
+  else if (strcmp(shape_name, "cuboid_2") == 0) shape = &cuboid_2;
+  else if (strcmp(shape_name, "cuboid_4") == 0) shape = &cuboid_4;
+  else if (strcmp(shape_name, "cuboid_8") == 0) shape = &cuboid_8;
   else {
     fprintf(stderr, "\nInvalid shape.\n");
     return 1;
@@ -223,6 +237,7 @@ periodicity/dimensions are not set by default and are required.\n");
   const double eta = (double)N*shape->volume*R*R*R/len[0]/len[1]/len[2];
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many polyhedra into the cell. They will never fit. Filling fraction: %g\n", eta);
+    return 7;
   }
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
@@ -274,21 +289,23 @@ periodicity/dimensions are not set by default and are required.\n");
     polyhedra[i].mypoly = shape;
     polyhedra[i].R = R;
   }
-  int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
-  int ny = ceil((double)len[1]/len[0]*nx);
-  int nz = ceil((double)len[2]/len[0]*nx);
-  while (nx*ny*nz < N) {
-    nx ++;
-    ny ++;
-    nz ++;
-  }
-  const double xspace = len[0]/double(nx);
-  const double yspace = len[1]/double(ny);
-  const double zspace = len[2]/double(nz);
-  printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g)\n",
-         nx, ny, nz, xspace, yspace, zspace);
   int max_attempts = 1;
+  // cube
   if (shape == &cube) {
+    int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
+    int ny = ceil((double)len[1]/len[0]*nx);
+    int nz = ceil((double)len[2]/len[0]*nx);
+    while (nx*ny*nz < N) {
+      nx ++;
+      ny ++;
+      nz ++;
+    }
+    const double xspace = len[0]/double(nx);
+    const double yspace = len[1]/double(ny);
+    const double zspace = len[2]/double(nz);
+    printf("Setting up grid with polyhedra: (%i, %i, %i) and space: (%g, %g, %g)\n",
+           nx, ny, nz, xspace, yspace, zspace);
+
     bool *spot_used = new bool[nx*ny*nz]();
     for(int i=0; i<N; i++) {
       int x, y, z;
@@ -305,6 +322,41 @@ periodicity/dimensions are not set by default and are required.\n");
     }
     delete[] spot_used;
   }
+  // non-cube cuboids
+  else if (shape->nvertices == 8) {
+    printf("yoyo\n");
+    const double xlen = fabs(2*shape->vertices[0][0]);
+    const double ylen = fabs(2*shape->vertices[0][1]);
+    const double zlen = fabs(2*shape->vertices[0][2]);
+
+    const double ratio = zlen/len[2]/xlen*len[0];
+
+    // want N_adj in the form a*a*a*ratio
+    const int N_adjusted = round(ratio*ratio*uipow(ceil(pow(N/ratio/ratio, 1.0/3.0)), 3));
+
+    int nx = round(pow(N_adjusted/ratio/ratio, 1.0/3.0)*ratio);
+    int ny = round(pow(N_adjusted/ratio/ratio, 1.0/3.0)*ratio);
+    int nz = round(pow(N_adjusted/ratio/ratio, 1.0/3.0));
+
+    const double xspace = len[0]/nx;
+    const double yspace = len[1]/ny;
+    const double zspace = len[2]/nz;
+    bool *spot_used = new bool[nx*ny*nz]();
+
+    printf("%i, %i, %i, %i, %g, %g, %g\n", N_adjusted, nx, ny, nz, xspace, yspace, zspace);
+
+    for(int i=0; i<N; i++) {
+      int x, y, z;
+      do {
+        x = floor(random::ran()*nx);
+        y = floor(random::ran()*ny);
+        z = floor(random::ran()*nz);
+      } while (spot_used[x*ny*nz + y*nz + z]);
+      spot_used[x*ny*nz + y*nz + z] = true;
+      polyhedra[i].pos = vector3d(x*xspace + xlen/2, y*yspace + ylen/2, z*zspace + zlen/2);
+    }
+  }
+  // truncated tetrahedra
   else if (shape == &truncated_tetrahedron) {
     if (strcmp(structure, "arsenic") == 0) {
       // form a lattice that will be able to give us the maximum filling fraction
@@ -318,9 +370,11 @@ periodicity/dimensions are not set by default and are required.\n");
       const vector3d e3 = vector3d(8, 12, -4)*fac;
 
       const vector3d offset = vector3d(6, 6, 6)*fac;
-      nx *= 2;
-      ny *= 2;
-      nz *= 2;
+
+      int nx = 2*ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
+      int ny = 2*ceil((double)len[1]/len[0]*nx);
+      int nz = 2*ceil((double)len[2]/len[0]*nx);
+
       bool *spot_used = new bool[nx*ny*nz]();
       int x=0, y=0, z=0;
       for(int i=0; i<N; i+=2) {
@@ -345,50 +399,64 @@ periodicity/dimensions are not set by default and are required.\n");
       delete[] spot_used;
     }
     else if (strcmp(structure, "ice") == 0) {
-      const double fac = R/sqrt(11.0)*1.1;
+      const double fac = R/sqrt(11.0);
       // lattice vectors:
-      const vector3d e1 = vector3d(0, 4, 4)*fac;
-      const vector3d e2 = vector3d(4, 0, 4)*fac;
-      const vector3d e3 = vector3d(4, 4, 0)*fac;
+      vector3d e1 = vector3d(0, 4, 4)*fac;
+      vector3d e2 = vector3d(4, 0, 4)*fac;
+      vector3d e3 = vector3d(4, 4, 0)*fac;
 
-      const vector3d offset = vector3d(2, 2, 2)*fac;
-      bool out_of_cell;
-      int x=0, y=0, z=0;
-      nx *= 4;
-      ny *= 4;
-      nz *= 4;
-      bool *spot_used = new bool[nx*ny*nz]();
+
+      // now we want to resize the lattice vectors so we'll have even spacing
+      const double ne1_doub = sqrt(sqr(len[1]) + sqr(len[2]))/e1.norm();
+      const int ne1 = int(ne1_doub);
+      const double ne2_doub = sqrt(sqr(len[0]) + sqr(len[2]))/e2.norm();
+      const int ne2 = int(ne2_doub);
+      const double ne3_doub = sqrt(sqr(len[0]) + sqr(len[1]))/e3.norm();
+      const int ne3 = int(ne3_doub);
+      // N_adjusted is the smallest even cube that is at least as large as N
+      const int N_adjusted = uipow(ceil(pow(N + N%2, 1.0/3.0)), 3);
+      const double fraction = pow((double)N_adjusted/ne1/ne2/ne3, 1.0/3.0);
+
+      const double space = (ne1_doub + ne2_doub + ne3_doub)/(ne1 + ne2 + ne3)/fraction;
+
+      e1 *= space;
+      e2 *= space;
+      e3 *= space;
+      const vector3d offset = vector3d(2, 2, 2)*fac*space;
+      int i=0;
+      bool *spot_used = new bool[8*ne1*ne2*ne3]();
       for(int i=0; i<N; i+=2) {
-        int attempt_counter = 0;
+        int e1_i, e2_i, e3_i;
+        vector3d pos;
+        bool good_spot;
         do {
-          x = floor(random::ran()*nx);
-          y = floor(random::ran()*ny);
-          z = floor(random::ran()*nz);
-          const vector3d pos = (x-nx/2)*e1 + (y-ny/2)*e2 + (z-nz/2)*e3;
-          out_of_cell = false;
-          for(int j=0; j<3; j++) {
-            if (pos[j] < 0 || pos[j] + offset[j] > len[j] - R)
-              out_of_cell = true;
+          e1_i = floor(random::ran()*2*ne1 - ne1);
+          e2_i = floor(random::ran()*2*ne2 - ne2);
+          e3_i = floor(random::ran()*2*ne3 - ne3);
+          pos = e1_i*e1 + e2_i*e2 + e3_i*e3;
+          good_spot = true;
+          if (spot_used[(e1_i+ne1)*4*ne2*ne3 + (e2_i+ne2)*2*ne3 + e3_i+ne3])
+            good_spot = false;
+          else {
+            for(int j=0; j<3; j++){
+              if(pos[j] < 0 || pos[j] + offset[j] > len[j]) {
+                good_spot = false;
+                break;
+              }
+            }
           }
-          attempt_counter ++;
-        } while(spot_used[x*ny*nz + y*nz + z] || out_of_cell);
-        spot_used[x*ny*nz + y*nz + z] = true;
-        x = x - nx/2;
-        y = y - ny/2;
-        z = z - nz/2;
-        polyhedra[i].pos = x*e1 + y*e2 + z*e3;
+        } while(!good_spot);
+        polyhedra[i].pos = pos;
         polyhedra[i].rot = rotation(M_PI, vector3d(1, 1, 0));
-        if(i < N-1) {
-          polyhedra[i+1].pos = offset + x*e1 + y*e2 + z*e3;
-        }
-        bool overlaps = false;
-        max_attempts = max(attempt_counter, max_attempts);
-        if (attempt_counter > 10000)
-          printf("Polyhedron %i took %i attempts to place.\n", i, attempt_counter);
+        if(i < N-1) polyhedra[i+1].pos = offset + pos;
+        spot_used[(e1_i+ne1)*4*ne2*ne3 + (e2_i+ne2)*2*ne3 + e3_i+ne3] = true;
       }
       delete[] spot_used;
+
+      for(int i=0; i<N; i++) {
+        polyhedra[i].pos = fix_periodic(polyhedra[i].pos, len);
+      }
     }
-    //polyhedra[1].rot = rotation(M_PI/4, vector3d(1, 1, 0));
   }
   took("Placement");
   printf("The most attempts for a polyhedron was %i.\n", max_attempts);
@@ -544,13 +612,15 @@ periodicity/dimensions are not set by default and are required.\n");
       density_histogram[int(round((len[0] + len[1])/de_density)) + z_i] ++;
 
       // Order parameter:
-      double costheta = 0;
-      for(int j=0; j<polyhedra[i].mypoly->nfaces; j++) {
-        const double new_costheta = polyhedra[i].rot.rotate_vector(polyhedra[i].mypoly->faces[j])[2];
-        costheta = max(costheta, fabs(new_costheta));
+      if (strcmp(shape->name, "cube") == 0) {
+        double costheta = 0;
+        for(int j=0; j<polyhedra[i].mypoly->nfaces; j++) {
+          const double new_costheta = polyhedra[i].rot.rotate_vector(polyhedra[i].mypoly->faces[j])[2];
+          costheta = max(costheta, fabs(new_costheta));
+        }
+        const int costheta_i = costheta/dcostheta;
+        order_parameter_histogram[z_i*order_bins + costheta_i] ++;
       }
-      const int costheta_i = costheta/dcostheta;
-      order_parameter_histogram[z_i*order_bins + costheta_i] ++;
     }
     // ---------------------------------------------------------------
     // Get pressure info - this is slow, might want to do it less often
@@ -617,19 +687,21 @@ periodicity/dimensions are not set by default and are required.\n");
       }
       fclose(densityout);
       // Save order paramter
-      char *order_fname = new char[1024];
-      sprintf(order_fname, "%s/%s-order-%s-%i.dat", dir, filename, shape->name, N);
-      FILE *order_out = fopen((const char *)order_fname, "w");
-      delete[] order_fname;
-      fprintf(order_out, "%s", headerinfo);
-      for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
-        for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
-          const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
-          fprintf(order_out, "%4.2f ", costheta);
+      if (strcmp(shape->name, "cube") == 0) {
+        char *order_fname = new char[1024];
+        sprintf(order_fname, "%s/%s-order-%s-%i.dat", dir, filename, shape->name, N);
+        FILE *order_out = fopen((const char *)order_fname, "w");
+        delete[] order_fname;
+        fprintf(order_out, "%s", headerinfo);
+        for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
+          for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
+            const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
+            fprintf(order_out, "%4.2f ", costheta);
+          }
+          fprintf(order_out, "\n");
         }
-        fprintf(order_out, "\n");
+        fclose(order_out);
       }
-      fclose(order_out);
 
       // Save pressure
       char *pressure_fname = new char[1024];
@@ -664,7 +736,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   print_bad(polyhedra, N, periodic);
 
-  delete[] polyhedra;
+  //delete[] polyhedra; fixme
   delete[] density_histogram;
   return 0;
 }
@@ -845,9 +917,6 @@ int generate_talk_figs() {
 
   delete[] p;
   // Generate image of ice structure
-  int nx = 3;
-  int ny = 3;
-  int nz = 3;
 
   N = 26;
   p = new polyhedron[N];
@@ -864,33 +933,46 @@ int generate_talk_figs() {
   const vector3d e3 = vector3d(4, 4, 0)*fac;
   const vector3d offset = vector3d(2, 2, 2)*fac;
 
-  int x=0, y=0, z=0;
-  nx = 6;
-  ny = 6;
-  nz = 6;
-  double rad = 2.5;
-  bool *spot_used = new bool[nx*ny*nz]();
-  for(int i=0; i<N; i+=2) {
-    int x, y, z;
-    do {
-      x = floor(random::ran()*nx);
-      y = floor(random::ran()*ny);
-      z = floor(random::ran()*nz);
-    } while(spot_used[x*ny*nz + y*nz + z] || ((x-nx/2)*e1 + (y-ny/2)*e2 + (z-nz/2)*e3).norm() > rad);
-    spot_used[x*ny*nz + y*nz + z] = true;
-    x = x - nx/2;
-    y = y - ny/2;
-    z = z - nz/2;
-    p[i].pos = x*e1 + y*e2 + z*e3;
-    p[i].rot = rotation(M_PI, vector3d(1, 1, 0));
-    if(i < N-1) {
-      p[i+1].pos = offset + x*e1 + y*e2 + z*e3;
+  double rad = 3.5;
+  int nx=10, ny=10, nz=10;
+  int x=-nx/2, y=-ny/2, z=-nz/2;
+  int i=0;
+  while(i < N-1) {
+    if((x*e1 + y*e2 + z*e3).norm() < rad) {
+      p[i].pos = x*e1 + y*e2 + z*e3;
+      p[i].rot = rotation(M_PI, vector3d(1, 1, 0));
+      if(i < N-1) p[i+1].pos = offset + x*e1 + y*e2 + z*e3;
+      else break;
+      i += 2;
+    }
+    x++;
+    if(x >= nx/2) {
+      x = -nx/2;
+      y++;
+      if(y >= ny/2) {
+        y = -ny/2;
+        z++;
+        if(z >= nz/2) break;
+      }
     }
   }
   save_locations(p, N, "talks/polyhedra/dat/ice-structure.dat", len);
 
-  delete[] spot_used;
   delete[] p;
+
+  // tetrahedra images
+  p = new polyhedron[1];
+  rotation *rots = new rotation[3];
+  rots[1] = rotation(M_PI/4, vector3d(0, 1, 0));
+  rots[2] = rotation(M_PI/3, vector3d(1, 0, 0));
+  for(int i=0; i<3; i++) {
+    p[0].R = R;
+    p[0].mypoly = &truncated_tetrahedron;
+    p[0].rot = rots[i];
+    char *fname = new char[1024];
+    sprintf(fname, "talks/polyhedra/dat/tet-%i.dat", i);
+    save_locations(p, 1, fname, len);
+  }
 
   return 0;
 }
