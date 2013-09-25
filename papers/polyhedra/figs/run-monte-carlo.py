@@ -5,7 +5,7 @@ import os, sys, argparse
 
 import arguments
 
-iterations = 100000000
+iterations = 10000000
 dim = 20
 
 N = 1000

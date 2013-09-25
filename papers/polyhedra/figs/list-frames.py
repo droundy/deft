@@ -6,32 +6,35 @@ bases = [name[:-6] for name in names]
 
 info = []
 for base in bases:
-  frames = len(glob.glob(base+"*")) - 1
+  frames = 0
+  for i in glob.glob(base+"*"):
+    if len(i.split('-')) == 6: #number is positive
+      frames += 1
   name = base.split('-')
   celltype = name[0].split('/')[-1]
   ff = name[1]
   polyhedron = name[3]
   N = name[4]
-  info.append([celltype, polyhedron, ff, N, frames])
+  info.append(dict(celltype=celltype, name=polyhedron, ff=ff, N=N, frames=frames))
 
 
-info.sort(key=lambda x: (x[1], x[0], x[2], x[3], x[4]))
+info.sort(key=lambda x: (x['name'], x['celltype'], x['ff'], x['N'], x['frames']))
 
-namelen = max([len(item[1]) for item in info])
-cellen = max([len(item[0]) for item in info])
-Nlen = max([len(item[3]) for item in info])
-fflen = max([len(item[2]) for item in info])
+namelen = max([len(item['name']) for item in info])
+cellen = max([len(item['celltype']) for item in info])
+Nlen = max([len(item['N']) for item in info])
+fflen = max([len(item['ff']) for item in info])
 
 print("Setup frame only:")
 print("%*s    %*s    %*s    %*s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N"))
 print("-------------------------------------------------")
 for f in info:
-  if f[4] == 0:
-    print("%*s    %*s    %*s    %*s" %(namelen, f[1], cellen, f[0], fflen, f[2], Nlen, f[3]))
+  if f['frames'] == 0:
+    print("%*s    %*s    %*s    %*s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N']))
 
 print("\nAnimations:")
 print("%*s    %*s    %*s    %*s    %s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N", "frames"))
 print("-----------------------------------------------------------")
 for f in info:
-  if f[4] > 0:
-    print("%*s    %*s    %*s    %*s    %6s" %(namelen, f[1], cellen, f[0], fflen, f[2], Nlen, f[3], f[4]))
+  if f['frames'] > 0:
+    print("%*s    %*s    %*s    %*s    %6s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N'], f['frames']))

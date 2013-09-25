@@ -105,7 +105,7 @@ int main(int argc, const char *argv[]) {
   sprintf(structure, "ice");
   int N = 0;
   long iterations = 100000000000;
-  long initialize_iterations = 50000;
+  long initialize_iterations = 500000;
   double acceptance_goal = .4;
   double R = 0;
   double ff = 0;
@@ -333,6 +333,7 @@ periodicity/dimensions are not set by default and are required.\n");
   int max_attempts = 1;
   // cube
   if (shape.type == CUBE) {
+    sprintf(structure, "cubic");
     int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
     int ny = ceil((double)len[1]/len[0]*nx);
     int nz = ceil((double)len[2]/len[0]*nx);
@@ -365,6 +366,7 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   // non-cube cuboids
   else if (shape.nvertices == 8) {
+    sprintf(structure, "cubic");
     const double xlen = fabs(2*shape.vertices[0][0]);
     const double ylen = fabs(2*shape.vertices[0][1]);
     const double zlen = fabs(2*shape.vertices[0][2]);
@@ -606,6 +608,27 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   took("Initialization");
 
+  // ---------------------------------------------------------------------------
+  // Save the post-initialization configuration for troubleshooting
+  // ---------------------------------------------------------------------------
+  vertices_fname = new char[1024];
+  sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, -2);
+  save_locations(polyhedra, N, vertices_fname, len);
+  delete[] vertices_fname;
+
+  // ---------------------------------------------------------------------------
+  // Generate header info to put in save files
+  // ---------------------------------------------------------------------------
+  char *headerinfo = new char[4096];
+  sprintf(headerinfo, "\
+# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), de_density: %g, de_g: %g\n\
+# dr_g: %g, seed: %li, R: %f, scale: %g, theta_scale: %g, real_walls: %i\n\
+# initialize_iterations: %li, initial structure: %s, neighborR: %g, dr: %g\n",
+          periodic[0], periodic[1], periodic[2], walls[0], walls[1], walls[2],
+          de_density, de_g, dr_g, seed, R, scale, theta_scale, real_walls,
+          initialize_iterations, structure, neighborR, dr);
+
+
   // fixme: to use this again, make it so file stays open and is fflushed
   // so that the name only appears once
   // // ---------------------------------------------------------------
@@ -771,15 +794,11 @@ periodicity/dimensions are not set by default and are required.\n");
              days, hours, minutes, seconds, iteration);
       fflush(stdout);
 
-      char *headerinfo = new char[4096];
-      sprintf(headerinfo, "\
-# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), de_density: %g\n\
-# seed: %li, R: %f, scale: %g, theta_scale: %g, real_walls: %i\n\
+      char *countinfo = new char[4096];
+      sprintf(countinfo, "\
 # iteration: %li, workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
-              periodic[0], periodic[1], periodic[2],
-              walls[0], walls[1], walls[2], de_density, seed, R,
-              scale, theta_scale, real_walls, iteration, workingmoves,
-              totalmoves, double(workingmoves)/totalmoves);
+              iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
+
 
       // Saving density in each of the x, y, z dimensions
       char *density_fname = new char[1024];
@@ -787,6 +806,7 @@ periodicity/dimensions are not set by default and are required.\n");
       FILE *densityout = fopen((const char *)density_fname, "w");
       delete[] density_fname;
       fprintf(densityout, "%s", headerinfo);
+      fprintf(densityout, "%s", countinfo);
       fprintf(densityout, "\n#e       xdensity   ydensity   zdensity   histograms in x,y,z order\n");
       const int xbins = round(len[0]/de_density);
       const int ybins = round(len[1]/de_density);
@@ -816,6 +836,7 @@ periodicity/dimensions are not set by default and are required.\n");
       FILE *g_out = fopen((const char *)g_fname, "w");
       delete[] g_fname;
       fprintf(g_out, "%s", headerinfo);
+      fprintf(g_out, "%s", countinfo);
       fprintf(g_out, "\ne       ");
       const double density = N/len[0]/len[1]/len[2];
       const double vol0 = len[0]*len[1]*len[2];
@@ -842,6 +863,7 @@ periodicity/dimensions are not set by default and are required.\n");
       //   FILE *order_out = fopen((const char *)order_fname, "w");
       //   delete[] order_fname;
       //   fprintf(order_out, "%s", headerinfo);
+      //   fprintf(order_out, "%s", countinfo);
       //   for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
       //     for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
       //       const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
@@ -864,14 +886,21 @@ periodicity/dimensions are not set by default and are required.\n");
       // dZ = 0;
       // fclose(pressureout);
 
-      delete[] headerinfo;
+      delete[] countinfo;
+      // ---------------------------------------------------------------------------
+      // Save the configuration for troubleshooting
+      // ---------------------------------------------------------------------------
+      vertices_fname = new char[1024];
+      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, -3);
+      save_locations(polyhedra, N, vertices_fname, len);
+      delete[] vertices_fname;
     }
     // ---------------------------------------------------------------
     // Save locations of vertices if desired
     // ---------------------------------------------------------------
     if (vertex_period > 0 && iteration % vertex_period == 0) {
       printf("Saving vertex locations. Frame: %i. Iteration: %li.\n", frame, iteration);
-      char *vertices_fname = new char[1024];
+      vertices_fname = new char[1024];
       sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, frame);
       char *comment = new char[1024];
       sprintf(comment, "period: %i, iteration: %li", vertex_period, iteration);
@@ -911,6 +940,8 @@ periodicity/dimensions are not set by default and are required.\n");
   //delete[] polyhedra; fixme
   delete[] density_histogram;
   delete[] g_histogram;
+
+  delete[] headerinfo;
   return 0;
 }
 // -----------------------------------------------------------------------------

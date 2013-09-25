@@ -113,7 +113,7 @@ def dist_to_plane(point, plane):
 
 # new method, look at all possible triplets of vertices, then reject those that have
 # other vertices on both sides of the plane that they span
-def get_faces(verts, pad = 0, acc = 0.01):
+def get_faces(verts, pad = 0, acc = 0.1):
   # find the distance between neighbors. Assumes all neighbors are equidistant
   faces = []
   for i in xrange(len(verts)):
