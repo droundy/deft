@@ -1,7 +1,9 @@
 #!/usr/bin/python
 from __future__ import division
 from numpy import *
-import os
+import os, sys, argparse
+
+import arguments
 
 iterations = 100000000
 neighborR = 0.5
@@ -71,10 +73,27 @@ def run_mc(ff, shape, celltype="periodic", ratio=1):
 
   os.system("sbatch -J %s %s\n" %(name, scriptname))
 
+if(len(sys.argv) == 1):
+  run_mc(.3, "cube")
+  run_mc(.5, "cube")
+  run_mc(.7, "cube")
+  run_mc(.3, "cuboid", ratio=2)
+  run_mc(.5, "cuboid", ratio=2)
+  run_mc(.7, "cuboid", ratio=2)
 
-run_mc(.3, "cube")
-run_mc(.5, "cube")
-run_mc(.7, "cube")
-run_mc(.3, "cuboid", ratio=2)
-run_mc(.5, "cuboid", ratio=2)
-run_mc(.7, "cuboid", ratio=2)
+else:
+  parser = argparse.ArgumentParser(
+    description='Plot density of polyhedra.', parents = [arguments.parser])
+
+  args = parser.parse_args()
+
+  ff = args.ff
+  polyhedron = args.shape
+  ratio = args.ratio
+
+  if args.periodic:
+    celltype = 'periodic'
+  else:
+    celltype = 'walls'
+
+  run_mc(ff, polyhedron, ratio=ratio, celltype=celltype)
