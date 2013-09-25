@@ -24,14 +24,14 @@ fflen = max([len(item[2]) for item in info])
 
 print("Setup frame only:")
 print("%*s    %*s    %*s    %*s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N"))
-print("------------------------------------------------------------")
+print("-------------------------------------------------")
 for f in info:
   if f[4] == 0:
     print("%*s    %*s    %*s    %*s" %(namelen, f[1], cellen, f[0], fflen, f[2], Nlen, f[3]))
 
 print("\nAnimations:")
 print("%*s    %*s    %*s    %*s    %s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N", "frames"))
-print("------------------------------------------------------------")
+print("-----------------------------------------------------------")
 for f in info:
   if f[4] > 0:
-    print("%*s    %*s    %*s    %*s    %s" %(namelen, f[1], cellen, f[0], fflen, f[2], Nlen, f[3], f[4]))
+    print("%*s    %*s    %*s    %*s    %6s" %(namelen, f[1], cellen, f[0], fflen, f[2], Nlen, f[3], f[4]))

@@ -2,7 +2,6 @@ import os, glob
 from numpy import *
 
 def get_N(basename):
-  # if "vertices" in basename:
   names = glob.glob('%s*' %(basename))
   if len(names) == 0:
     print('No files of the form "%s-*.dat" found.' %(basename))
@@ -35,6 +34,23 @@ def read_mc_density(ff, poly, N, celltype):
   ydens = ydens[ydens >= 0]
   zdens = zdens[zdens >= 0]
   return [x, y ,z], [xdens, ydens, zdens]
+
+def read_mc_g(ff, poly, N, celltype):
+  fname = "figs/mc/%s-%4.2f-g-%s-%i.dat" %(celltype, ff, poly, N)
+  print "using", fname
+  if (not os.path.isfile(fname)):
+    print("\n%s is not a file.\n\nPerhaps you have the wrong number of %ss?" %(fname, poly))
+    bad = array([0,10])
+    return 0,0
+  f = open(fname)
+  l = f.readline()
+  while(l[0] != 'e'):
+    l = f.readline()
+  names = l.split()
+  f.close()
+  data = genfromtxt(fname)
+  return names, data[1:]
+
 
 def read_mc_order(ff, poly, N, celltype):
   fname = "figs/mc/%s-%4.2f-order-%s-%i.dat" %(celltype, ff, poly, N)

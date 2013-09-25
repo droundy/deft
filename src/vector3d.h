@@ -30,6 +30,10 @@ class vector3d {
     x = v.x; y = v.y; z = v.z;
     return *this; }
 
+  vector3d operator-() const {
+    return vector3d(-x, -y, -z);
+  }
+
   vector3d operator+(const vector3d &v) const {
     return vector3d(x+v.x, y+v.y, z+v.z); }
   vector3d operator+=(const vector3d &v) {
@@ -145,6 +149,9 @@ class rotation {
   bool operator !=(const rotation &q) const {
     return !(*this == q); }
 
+  rotation conj() const {
+    return rotation(w, -x, -y, -z); }
+
   vector3d rotate_vector(const vector3d &v) const {
     const rotation p( v.x*x + v.y*y + v.z*z,
                       v.x*w - v.y*z + v.z*y,
@@ -210,9 +217,6 @@ class rotation {
   rotation operator/=(const double scalar) {
     w/=scalar; x/=scalar; y/=scalar; z/=scalar;
     return *this; }
-
-  rotation conj() const {
-    return rotation(w, -x, -y, -z); }
 
   rotation normalized() const {
     return *this/sqrt(w*w + x*x + y*y + z*z);

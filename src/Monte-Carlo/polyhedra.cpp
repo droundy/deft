@@ -317,6 +317,7 @@ int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,
 }
 
 poly_shape::poly_shape() {
+  type = NONE;
   nvertices = 0;
   nfaces = 0;
   volume = 0;
@@ -326,8 +327,18 @@ poly_shape::poly_shape() {
   sprintf(name, "empty");
 }
 
-poly_shape::poly_shape(const char *set_name) {
+poly_shape::poly_shape(const char *set_name, double ratio) {
+  // vertices should be in an order such that the second half are a reflection of
+  // the first half for polyhedra with inversion symmetry (i.e. not tetrahedra)
+  //
+  // All face vectors should be normalized
+  //
+  // For tetrahedra, the faces should all be oriented so as to point outward
+  // And for truncated tetrahedra, outward from the large face
+  //
+  // This is for constructing distribution functions nicely
   if (strcmp(set_name, "cube") == 0) {
+    type = CUBE;
     nvertices = 8;
     nfaces = 3;
     volume = 8.0/sqrt(27.0);
@@ -339,18 +350,49 @@ poly_shape::poly_shape(const char *set_name) {
     const double v_cube = 1.0/sqrt(3.0);
     vertices[0] = vector3d( v_cube,  v_cube,  v_cube);
     vertices[1] = vector3d(-v_cube,  v_cube,  v_cube);
-    vertices[2] = vector3d(-v_cube, -v_cube,  v_cube);
-    vertices[3] = vector3d( v_cube, -v_cube,  v_cube);
-    vertices[4] = vector3d( v_cube,  v_cube, -v_cube);
+    vertices[2] = vector3d( v_cube, -v_cube,  v_cube);
+    vertices[3] = vector3d( v_cube,  v_cube, -v_cube);
+
+    vertices[4] = vector3d(-v_cube, -v_cube,  v_cube);
     vertices[5] = vector3d(-v_cube,  v_cube, -v_cube);
     vertices[6] = vector3d(-v_cube, -v_cube, -v_cube);
     vertices[7] = vector3d( v_cube, -v_cube, -v_cube);
 
-    faces[0] = vector3d(1, 0, 0);
-    faces[1] = vector3d(0, 1, 0);
-    faces[2] = vector3d(0, 0, 1);
+    faces[0] = vector3d(1, 0, 0).normalized();
+    faces[1] = vector3d(0, 1, 0).normalized();
+    faces[2] = vector3d(0, 0, 1).normalized();
+  }
+  else if (strcmp(set_name, "cuboid") == 0) {
+    // calculated so that x^2 + y^2 + z^2 = 1, x = y, and z = ratio*x
+    const double x = 1/sqrt(2 + sqr(ratio));
+    const double y = x;
+    const double z = ratio*x;
+
+    type = CUBOID;
+    nvertices = 8;
+    nfaces = 3;
+    volume = 8*x*y*z;
+    vertices = new vector3d[nvertices];
+    faces = new vector3d[nfaces];
+    name = new char[5];
+    sprintf(name, "cuboid_%05.2f", ratio);
+
+    vertices[0] = vector3d( x,  y,  z);
+    vertices[1] = vector3d(-x,  y,  z);
+    vertices[2] = vector3d( x, -y,  z);
+    vertices[3] = vector3d( x,  y, -z);
+
+    vertices[4] = vector3d(-x, -y,  z);
+    vertices[5] = vector3d(-x,  y, -z);
+    vertices[6] = vector3d(-x, -y, -z);
+    vertices[7] = vector3d( x, -y, -z);
+
+    faces[0] = vector3d(1, 0, 0).normalized();
+    faces[1] = vector3d(0, 1, 0).normalized();
+    faces[2] = vector3d(0, 0, 1).normalized();
   }
   else if (strcmp(set_name, "tetrahedron") == 0) {
+    type = TETRAHEDRON;
     nvertices = 4;
     nfaces = 4;
     volume = 8.0/9.0/sqrt(3.0);
@@ -364,12 +406,13 @@ poly_shape::poly_shape(const char *set_name) {
     vertices[2] = vector3d(             0, 2.0*sqrt(2.0)/3.0, -1.0/3.0);
     vertices[3] = vector3d(             0,                 0,      1.0);
 
-    faces[0] = vector3d(         0, -sqrt(2.0),           0.5);
-    faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0));
-    faces[3] = vector3d(         0,          0,             1);
+    faces[0] = vector3d(         0, -sqrt(2.0),           0.5).normalized();
+    faces[1] = vector3d( sqrt(3.0),        1.0, 1.0/sqrt(2.0)).normalized();
+    faces[2] = vector3d(-sqrt(3.0),        1.0, 1.0/sqrt(2.0)).normalized();
+    faces[3] = vector3d(         0,          0,            -1).normalized();
   }
   else if (strcmp(set_name, "truncated_tetrahedron") == 0) {
+    type = TRUNCATED_TETRAHEDRON;
     nvertices = 12;
     nfaces = 4;
     volume = 184.0/33.0/sqrt(11.0);
@@ -382,7 +425,6 @@ poly_shape::poly_shape(const char *set_name) {
     vertices[1]  = vector3d( 1,  3,  1);
     vertices[2]  = vector3d( 1,  1,  3);
 
-
     vertices[3]  = vector3d(-3, -1,  1);
     vertices[4]  = vector3d(-1, -3,  1);
     vertices[5]  = vector3d(-1, -1,  3);
@@ -390,19 +432,20 @@ poly_shape::poly_shape(const char *set_name) {
     vertices[6]  = vector3d(-3,  1, -1);
     vertices[7]  = vector3d(-1,  3, -1);
     vertices[8]  = vector3d(-1,  1, -3);
-\
+
     vertices[9]  = vector3d( 3, -1, -1);
     vertices[10] = vector3d( 1, -3, -1);
     vertices[11] = vector3d( 1, -1, -3);
 
     for(int i=0; i<nvertices; i++) vertices[i]/=sqrt(11.0);
 
-    faces[0] = vector3d( 1,  1,  1);
-    faces[1] = vector3d( 1,  1, -1);
-    faces[2] = vector3d( 1, -1,  1);
-    faces[3] = vector3d(-1,  1,  1);
+    faces[0] = vector3d(-1, -1, -1).normalized();
+    faces[1] = vector3d( 1,  1, -1).normalized();
+    faces[2] = vector3d( 1, -1,  1).normalized();
+    faces[3] = vector3d(-1,  1,  1).normalized();
   }
   else {
+    type=NONE;
     nvertices = 0;
     nfaces = 0;
     volume = 0;
@@ -413,44 +456,6 @@ poly_shape::poly_shape(const char *set_name) {
   }
 }
 
-poly_shape::poly_shape(const char *set_name, double ratio) {
-  if (strcmp(set_name, "cuboid") == 0) {
-    // calculated so that x^2 + y^2 + z^2 = 1, x = y, and z = ratio*x
-    const double x = 1/sqrt(2 + sqr(ratio));
-    const double y = x;
-    const double z = ratio*x;
-
-    nvertices = 8;
-    nfaces = 3;
-    volume = 8*x*y*z;
-    vertices = new vector3d[nvertices];
-    faces = new vector3d[nfaces];
-    name = new char[5];
-    sprintf(name, "cuboid_%04.2f", ratio);
-
-    vertices[0] = vector3d( x,  y,  z);
-    vertices[1] = vector3d(-x,  y,  z);
-    vertices[2] = vector3d(-x, -y,  z);
-    vertices[3] = vector3d( x, -y,  z);
-    vertices[4] = vector3d( x,  y, -z);
-    vertices[5] = vector3d(-x,  y, -z);
-    vertices[6] = vector3d(-x, -y, -z);
-    vertices[7] = vector3d( x, -y, -z);
-
-    faces[0] = vector3d(1, 0, 0);
-    faces[1] = vector3d(0, 1, 0);
-    faces[2] = vector3d(0, 0, 1);
-  }
-  else {
-    nvertices = 0;
-    nfaces = 0;
-    volume = 0;
-    vertices = NULL;
-    faces = NULL;
-    name = new char[14];
-    sprintf(name, "invalid shape");
-  }
-}
 poly_shape::~poly_shape() {
   delete[] vertices;
   delete[] faces;

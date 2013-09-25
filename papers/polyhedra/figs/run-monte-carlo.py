@@ -4,10 +4,12 @@ from numpy import *
 import os
 
 iterations = 100000000
-R = 1
 neighborR = 0.5
 de_density = 0.01
 dr = 0.01
+dim = 20
+
+N = 1000
 
 scale = .05
 theta_scale = .05
@@ -21,7 +23,7 @@ if os.path.isdir('figs'):
 
 os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
-def run_mc(ff, N, dim, shape, celltype="periodic"):
+def run_mc(ff, shape, celltype="periodic", ratio=1):
   memory = N/100 # fixme: better guess
   name = "polyhedraMC-%s-%4.2f-%i-%s" %(celltype, ff, N, shape)
   filename = '%s-%4.2f' %(celltype, ff)
@@ -30,22 +32,27 @@ def run_mc(ff, N, dim, shape, celltype="periodic"):
   directory = '%s/mc' % figsdir
   if celltype == "periodic":
     cellparam = "--periodz %g" %dim
-  else:
+  elif celltype == "walls":
     cellparam = "--wallz %g" %dim
-  parameters = ["--dir %s" %directory,
-                "--filename %s" %filename,
-                "--N %i" %N,
-                "--iterations %li" %iterations,
-                "--periodx %g" %dim,
-                "--periody %g" %dim,
-                cellparam,
-                "--shape %s" %shape,
-                "--R %g" %R,
-                "--neighborR %g" %neighborR,
-                "--dr %g" %dr,
-                "--de_density %g" %de_density,
-                "--scale %g" %scale,
-                "--theta_scale %g" %theta_scale ]
+  else:
+    print("invalid cell type")
+    exit(1)
+  parameters = [
+    "--dir %s" %directory,
+    "--filename %s" %filename,
+    "--N %i" %N,
+    "--iterations %li" %iterations,
+    "--periodx %g" %dim,
+    "--periody %g" %dim,
+    cellparam,
+    "--shape %s" %shape,
+    "--ff %g" %ff,
+    "--neighborR %g" %neighborR,
+    "--dr %g" %dr,
+    "--de_density %g" %de_density,
+    "--ratio %g" %ratio
+  ]
+
   command = "time nice -19 %s/polyhedra-monte-carlo" %bindir
   script = open(scriptname, 'w')
   script.write("#!/bin/bash\n")
@@ -65,7 +72,9 @@ def run_mc(ff, N, dim, shape, celltype="periodic"):
   os.system("sbatch -J %s %s\n" %(name, scriptname))
 
 
-run_mc(.58, 2744, 20, 'truncated_tetrahedron', 'periodic')
-run_mc(.46, 2197, 20, 'truncated_tetrahedron', 'periodic')
-run_mc(.36, 1728, 20, 'truncated_tetrahedron', 'periodic')
-
+run_mc(.3, "cube")
+run_mc(.5, "cube")
+run_mc(.7, "cube")
+run_mc(.3, "cuboid", ratio=2)
+run_mc(.5, "cuboid", ratio=2)
+run_mc(.7, "cuboid", ratio=2)

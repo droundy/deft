@@ -5,6 +5,12 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+const int NONE=0;
+const int CUBE=1;
+const int TETRAHEDRON=2;
+const int TRUNCATED_TETRAHEDRON=3;
+const int CUBOID=4;
+
 struct poly_shape {
   int nvertices;
   int nfaces;
@@ -12,12 +18,10 @@ struct poly_shape {
   vector3d *faces;
   double volume;
   char *name;
+  int type;
 
   poly_shape();
-  explicit poly_shape(const char *set_name);
-  // this constructor is used for cuboids, with sides AxAxB where ratio = B/A
-  // oriented with the edge of length B parallel to the z-axis
-  explicit poly_shape(const char *set_name, double ratio);
+  explicit poly_shape(const char *set_name, double ratio=1);
   ~poly_shape();
 
 private:

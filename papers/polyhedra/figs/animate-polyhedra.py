@@ -71,7 +71,7 @@ args = parser.parse_args()
 
 ff = args.ff
 if args.ratio != 0:
-  polyhedron = args.shape + "_%4.2f" %args.ratio
+  polyhedron = args.shape + "_%05.2f" %args.ratio
 else:
   polyhedron = args.shape
 save = args.save
@@ -113,7 +113,7 @@ def dist_to_plane(point, plane):
 
 # new method, look at all possible triplets of vertices, then reject those that have
 # other vertices on both sides of the plane that they span
-def get_faces(verts, pad = 0, acc = 0.1):
+def get_faces(verts, pad = 0, acc = 0.01):
   # find the distance between neighbors. Assumes all neighbors are equidistant
   faces = []
   for i in xrange(len(verts)):

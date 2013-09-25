@@ -40,17 +40,6 @@
 // Global Constants
 // -----------------------------------------------------------------------------
 
-const poly_shape cube("cube");
-const poly_shape tetrahedron("tetrahedron");
-const poly_shape truncated_tetrahedron("truncated_tetrahedron");
-
-const poly_shape cuboid_quarter("cuboid", .25);
-const poly_shape cuboid_half("cuboid", .5);
-const poly_shape cuboid_2("cuboid", 2);
-const poly_shape cuboid_4("cuboid", 4);
-const poly_shape cuboid_8("cuboid", 8);
-
-
 // prints out a lot of extra information and performs extra computation
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
@@ -107,7 +96,6 @@ int main(int argc, const char *argv[]) {
   int vertex_period = 0;
   char *shape_name = new char[1024];
   sprintf(shape_name, "truncated_tetrahedron");
-  const poly_shape *shape = &truncated_tetrahedron;
 
   char *dir = new char[1024];
   sprintf(dir, "papers/polyhedra/figs/mc");
@@ -118,10 +106,15 @@ int main(int argc, const char *argv[]) {
   int N = 0;
   long iterations = 100000000000;
   long initialize_iterations = 50000;
+  double acceptance_goal = .4;
   double R = 1;
+  double ff = 0;
+  double ratio = 1;
   double neighborR = 0.5;
   double dr = 0.01;
   double de_density = 0.01;
+  double de_g = 0.01;
+  double dr_g = 0;
   int totime = 0;
   bool talk = false;
   // scale and theta_scale aren't quite "constants" -- they are adjusted
@@ -141,7 +134,7 @@ int main(int argc, const char *argv[]) {
     {"wallx", '\0', POPT_ARG_DOUBLE, &walls[0], 0, "Walls in x", "lenx"},
     {"wally", '\0', POPT_ARG_DOUBLE, &walls[1], 0, "Walls in y", "leny"},
     {"wallz", '\0', POPT_ARG_DOUBLE, &walls[2], 0, "Walls in z\n", "lenz"},
-    {"fake_walls", 'r', POPT_ARG_NONE, &fake_walls, 0,
+    {"fake_walls", '\0', POPT_ARG_NONE, &fake_walls, 0,
      "Will cause collisions to occur with walls based on centers only", 0},
     {"iterations", 'i', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations, 0,
      "Number of iterations to run for", "iter"},
@@ -154,16 +147,21 @@ information on the number and type of polyhedra, as well as file extensions", "n
     {"dir", 'd', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Directory to save to", "dir"},
     {"shape", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &shape_name, 0,
-     "Type of polyhedra to use. Can be one of [cube | tetrahedron | truncated_tetrahedron]",
-     "shape"},
+     "Type of polyhedra to use. Can be one of [cube | tetrahedron | truncated_tetrahedron | cuboid]", "shape"},
+    {"ratio", 'r', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &ratio, 0, "Ratio of sides of cuboid. For a cuboid of sides AxAxB, ratio = B/A.", "ratio"},
     {"R", 'R', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &R, 0,
      "Size of the sphere that circumscribes each polyhedron", "R"},
+    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, R is set so that the filling fraction will be accurate."},
     {"neighborR", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &neighborR, 0,
      "Neighbor radius, used to drastically reduce collision detections", "neighborR"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
      "Differential radius change used in pressure calculation", "dr"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_density, 0,
      "Resolution of density file", "de"},
+    {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
+     "Resolution of distribution functions", "de"},
+    {"dr_g", '\0', POPT_ARG_DOUBLE, &dr_g, 0,
+     "Radius of cylinder used in distribtution functions. Defaults to the radius of a circle inscribed on a side", "dr"},
     {"scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &scale, 0,
      "Standard deviation for translations of polyhedra", "scale"},
     {"theta_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &theta_scale, 0,
@@ -175,6 +173,8 @@ information on the number and type of polyhedra, as well as file extensions", "n
 of iterations", "period"},
     {"time", 't', POPT_ARG_INT, &totime, 0,
      "Timing information will be displayed", "interval"},
+    {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &acceptance_goal, 0, "Goal to set the acceptance rate", "goal"},
     {"talk", '\0', POPT_ARG_NONE, &talk, 0,
      "Generate figures for talk. Will not perform a normal run."},
     {"structure", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &structure, 0,
@@ -206,17 +206,15 @@ periodicity/dimensions are not set by default and are required.\n");
   const bool real_walls = !fake_walls;
   const double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
                          periodic[2] + walls[2]};
-  if (strcmp(shape_name, "cube") == 0) shape = &cube;
-  else if (strcmp(shape_name, "tetrahedron") == 0) shape = &tetrahedron;
-  else if (strcmp(shape_name, "truncated_tetrahedron") == 0) shape = &truncated_tetrahedron;
-  else if (strcmp(shape_name, "cuboid_quarter") == 0) shape = &cuboid_quarter;
-  else if (strcmp(shape_name, "cuboid_half") == 0) shape = &cuboid_half;
-  else if (strcmp(shape_name, "cuboid_2") == 0) shape = &cuboid_2;
-  else if (strcmp(shape_name, "cuboid_4") == 0) shape = &cuboid_4;
-  else if (strcmp(shape_name, "cuboid_8") == 0) shape = &cuboid_8;
-  else {
+
+  const poly_shape shape(shape_name, ratio);
+  if (shape.type == NONE) {
     fprintf(stderr, "\nInvalid shape.\n");
     return 1;
+  }
+  if(ff != 0) {
+    R = pow(ff*len[0]*len[1]*len[2]/N/shape.volume, 1.0/3.0);
+    printf("\nFilling fraction was specified, so adjusting radius to %g.\n", R);
   }
   if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0 ||
       theta_scale < 0 || vertex_period < 0) {
@@ -234,10 +232,15 @@ periodicity/dimensions are not set by default and are required.\n");
       return 1;
     }
   }
-  const double eta = (double)N*shape->volume*R*R*R/len[0]/len[1]/len[2];
+  const double eta = (double)N*shape.volume*R*R*R/len[0]/len[1]/len[2];
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many polyhedra into the cell. They will never fit. Filling fraction: %g\n", eta);
     return 7;
+  }
+
+  if (dr_g == 0) {
+    //no value was selected
+    dr_g = R/2.0;
   }
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
@@ -265,12 +268,37 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   const int density_bins = round((len[0] + len[1] + len[2])/de_density);
   long *density_histogram = new long[density_bins]();
-  // this order parameter is the absolute value of the dot product of normal vector
-  // to the side most aligned with the z-axis with zhat.
-  const int order_bins = len[2]/de_density;
-  const double dcostheta = 1.0/order_bins;
 
-  long *order_parameter_histogram = new long[(int)round(len[2]/de_density)*order_bins]();
+  const double min_len = min(len[0], min(len[1], len[2]));
+
+  const int n_gfuncs = 4;
+  const char *g_names[] = {"radial", "plebian", "special", "corner"};
+  int n_cylinders[n_gfuncs] = {1, 0, 0, shape.nvertices};
+  if(shape.type == CUBOID) {
+    n_cylinders[1] = 4;
+    n_cylinders[2] = 2;
+  } else if(shape.type == TRUNCATED_TETRAHEDRON) {
+    n_cylinders[1] = 4;
+    n_cylinders[2] = 4;
+  } else if(shape.type == TETRAHEDRON) {
+    n_cylinders[1] = 4;
+    n_cylinders[2] = 0;
+  } else {
+    n_cylinders[1] = shape.nfaces*2;
+    n_cylinders[2] = 0;
+  }
+
+  const int g_bins = round(min_len/2/de_g);
+  long *g_histogram = new long[n_gfuncs*g_bins]();
+
+  // // this order parameter is the absolute value of the dot product of normal vector
+  // // to the side most aligned with the z-axis with zhat.
+  // const int order_bins = len[2]/de_density;
+  // const double dcostheta = 1.0/order_bins;
+
+  // long *order_parameter_histogram = new long[(int)round(len[2]/de_density)*order_bins]();
+
+
   polyhedron *polyhedra = new polyhedron[N];
   long dZ = 0;
 
@@ -282,16 +310,16 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   // Approximate the maximum number of neighbors a polyhedron could have
   // hokey guess, but it should always be high enough
-  const double neighbor_sphere_vol = 4.0/3.0*M_PI*uipow(2.5*R+neighborR, 3) - shape->volume;
-  int max_neighbors = min(N, neighbor_sphere_vol / shape->volume);
+  const double neighbor_sphere_vol = 4.0/3.0*M_PI*uipow(2.5*R+neighborR, 3) - shape.volume;
+  int max_neighbors = min(N, neighbor_sphere_vol / shape.volume);
 
   for(int i=0; i<N; i++) {
-    polyhedra[i].mypoly = shape;
+    polyhedra[i].mypoly = &shape;
     polyhedra[i].R = R;
   }
   int max_attempts = 1;
   // cube
-  if (shape == &cube) {
+  if (shape.type == CUBE) {
     int nx = ceil(pow((double)N*len[0]*len[0]/len[1]/len[2], 1.0/3.0));
     int ny = ceil((double)len[1]/len[0]*nx);
     int nz = ceil((double)len[2]/len[0]*nx);
@@ -323,11 +351,10 @@ periodicity/dimensions are not set by default and are required.\n");
     delete[] spot_used;
   }
   // non-cube cuboids
-  else if (shape->nvertices == 8) {
-    printf("yoyo\n");
-    const double xlen = fabs(2*shape->vertices[0][0]);
-    const double ylen = fabs(2*shape->vertices[0][1]);
-    const double zlen = fabs(2*shape->vertices[0][2]);
+  else if (shape.nvertices == 8) {
+    const double xlen = fabs(2*shape.vertices[0][0]);
+    const double ylen = fabs(2*shape.vertices[0][1]);
+    const double zlen = fabs(2*shape.vertices[0][2]);
 
     const double ratio = zlen/len[2]/xlen*len[0];
 
@@ -357,7 +384,7 @@ periodicity/dimensions are not set by default and are required.\n");
     }
   }
   // truncated tetrahedra
-  else if (shape == &truncated_tetrahedron) {
+  else if (shape.type == TRUNCATED_TETRAHEDRON) {
     if (strcmp(structure, "arsenic") == 0) {
       // form a lattice that will be able to give us the maximum filling fraction
       // which is 207/208
@@ -465,7 +492,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // Save the initial configuration for troubleshooting
   // ---------------------------------------------------------------------------
   char *vertices_fname = new char[1024];
-  sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, -1);
+  sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, -1);
   save_locations(polyhedra, N, vertices_fname, len);
   delete[] vertices_fname;
 
@@ -506,6 +533,8 @@ periodicity/dimensions are not set by default and are required.\n");
   long neighbor_updates = 0, neighbor_informs = 0;
   double avg_neighbors = 0;
 
+  double dscale = .1;
+
   for(long iteration=1; iteration<=initialize_iterations; iteration++) {
     // ---------------------------------------------------------------
     // Move each polyhedron once
@@ -519,20 +548,24 @@ periodicity/dimensions are not set by default and are required.\n");
       neighbor_informs += (move_val & 4) > 0;
     }
     // ---------------------------------------------------------------
-    // fine-tune scale so that the acceptance rate will be reasonable
+    // fine-tune scale so that the acceptance rate will reach the goal
     // ---------------------------------------------------------------
-    if (iteration % 100 == 0) {
+    if (iteration % 1000 == 0) {
       const double acceptance_rate =
         (double)(workingmoves-old_workingmoves)/(totalmoves-old_totalmoves);
       old_workingmoves = workingmoves;
       old_totalmoves = totalmoves;
-      if (acceptance_rate < 0.5) {
-        scale /= 1.1;
-        theta_scale /= 1.1;
-      } else if (acceptance_rate > 0.7) {
-        scale *= 1.1;
-        theta_scale *= 1.1;
+      if (acceptance_rate < acceptance_goal) {
+        scale /= (1+dscale);
+        theta_scale /= (1+scale);
+      } else {
+        scale *= (1+dscale);
+        theta_scale *= (1+scale);
       }
+      // hokey heuristic for tuning dscale
+      const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
+      if(closeness > 0.5) dscale *= 2;
+      else if(closeness < dscale*2) dscale/=2;
     }
     // ---------------------------------------------------------------
     // Print out timing information if desired
@@ -560,23 +593,19 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   took("Initialization");
 
-  // ---------------------------------------------------------------
-  // Clear the pressure file
-  // ---------------------------------------------------------------
-  char *pressure_fname = new char[1024];
-  sprintf(pressure_fname, "%s/%s-pressure-%s-%i.dat", dir, filename, shape->name, N);
-  FILE *pressureout = fopen((const char *)pressure_fname, "w");
-  fprintf(pressureout, "\
-# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), de_density: %g\n\
-# seed: %li, R: %f, scale: %g, theta_scale: %g, real_walls: %i\n",
-          periodic[0], periodic[1], periodic[2],
-          walls[0], walls[1], walls[2], de_density, seed, R,
-          scale, theta_scale, real_walls);
-  const double dV = N*shape->volume*(uipow(R+dr, 3) - uipow(R, 3));
-  fprintf(pressureout, "0 0 %g #dV\n", dV);
-  fprintf(pressureout, "# total moves    pressure     dZ\n");
-  delete[] pressure_fname;
-  fclose(pressureout);
+  // fixme: to use this again, make it so file stays open and is fflushed
+  // so that the name only appears once
+  // // ---------------------------------------------------------------
+  // // Clear the pressure file
+  // // ---------------------------------------------------------------
+  // char *pressure_fname = new char[1024];
+  // sprintf(pressure_fname, "%s/%s-pressure-%s-%i.dat", dir, filename, shape.name, N);
+  // FILE *pressureout = fopen((const char *)pressure_fname, "w");
+  // const double dV = N*shape.volume*(uipow(R+dr, 3) - uipow(R, 3));
+  // fprintf(pressureout, "0 0 %g #dV\n", dV);
+  // fprintf(pressureout, "# total moves    pressure     dZ\n");
+  // delete[] pressure_fname;
+  // fclose(pressureout);
 
   // ---------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -611,15 +640,95 @@ periodicity/dimensions are not set by default and are required.\n");
       density_histogram[int(round(len[0]/de_density)) + y_i] ++;
       density_histogram[int(round((len[0] + len[1])/de_density)) + z_i] ++;
 
-      // Order parameter:
-      if (strcmp(shape->name, "cube") == 0) {
-        double costheta = 0;
-        for(int j=0; j<polyhedra[i].mypoly->nfaces; j++) {
-          const double new_costheta = polyhedra[i].rot.rotate_vector(polyhedra[i].mypoly->faces[j])[2];
-          costheta = max(costheta, fabs(new_costheta));
+      // // Order parameter:
+      // if (shape.type == CUBE) {
+      //   double costheta = 0;
+      //   for(int j=0; j<polyhedra[i].mypoly->nfaces; j++) {
+      //     const double new_costheta = polyhedra[i].rot.rotate_vector(polyhedra[i].mypoly->faces[j])[2];
+      //     costheta = max(costheta, fabs(new_costheta));
+      //   }
+      //   const int costheta_i = costheta/dcostheta;
+      //   order_parameter_histogram[z_i*order_bins + costheta_i] ++;
+      // }
+    }
+    // Distribution histogram:
+    // g_names = {"radial", "plebian", "special", "corner"}
+
+    // unrot lets us work with treating the first polyhedron as sitting at the origin,
+    // unrotated
+
+    // this is an O(N^2) calculation, so we're only going to do it every N^2 moves
+    if(iteration %N == 0) {
+      for(int i=0; i<N; i++) {
+        const rotation unrot = polyhedra[i].rot.conj();
+        for(int j=0; j<N; j++) {
+          if(i != j) {
+            // note: be careful about orientation when adding that
+            const vector3d pos2 = unrot.rotate_vector
+              (periodic_diff(polyhedra[i].pos, polyhedra[j].pos, periodic));
+            // radial
+            const double r = pos2.norm();
+            const int r_i = floor(r/de_g);
+            if(r_i < g_bins) g_histogram[r_i] ++;
+
+            // plebian face
+            // for cuboids, this is +-xhat and +-yhat
+            // for truncated_tetrahedra, this is the face vectors
+            // for everythig else, this is all the faces
+            if(shape.type == CUBOID) {
+              const vector3d faces[] = {vector3d(1,0,0), vector3d(0,1,0)};
+              for(int k=0; k<2; k++) {
+                const double e = pos2[k];
+                const double dist = (pos2 - e*faces[k]).norm();
+                if (dist < dr_g) {
+                  const int e_i = floor(fabs(e/de_g));
+                  if (e_i < g_bins) g_histogram[g_bins + e_i] ++;
+                }
+              }
+            } else {
+              for(int k=0; k<shape.nfaces; k++) {
+                double e = pos2.dot(shape.faces[k]);
+                const double dist = (pos2 - e*shape.faces[k]).norm();
+                if (dist < dr_g) {
+                  if(shape.type != TETRAHEDRON && shape.type != TRUNCATED_TETRAHEDRON)
+                    e = fabs(e);
+                  const int e_i = floor(e/de_g);
+                  if(e_i >= 0 && e_i < g_bins) g_histogram[g_bins + e_i] ++;
+                }
+              }
+            }
+            // special face
+            // for cuboids, this is +- zhat
+            // for truncated tetrahedra, this is the negative of the face vectors
+            // for everything else, this is nothing
+            if(shape.type == CUBOID) {
+              const double z = pos2[2];
+              const double zdist = (pos2 - z*vector3d(0,0,1)).norm();
+              if (zdist < dr_g) {
+                const int z_i = floor(fabs(z/de_g));
+                if(z_i < g_bins) g_histogram[2*g_bins + z_i] ++;
+              }
+            } else if (shape.type == TRUNCATED_TETRAHEDRON) {
+              for(int k=0; k<shape.nfaces; k++) {
+                double e = pos2.dot(-shape.faces[k]);
+                const double dist = (pos2 + e*shape.faces[k]).norm();
+                if (dist < dr_g) {
+                  const int e_i = floor(e/de_g);
+                  if(e_i >= 0 && e_i < g_bins) g_histogram[2*g_bins + e_i] ++;
+                }
+              }
+            }
+            // vertices
+            for(int k=0; k<shape.nvertices; k++) {
+              const double e = pos2.dot(shape.vertices[k]);
+              const double dist = (pos2 - e*shape.vertices[k]).norm();
+              if (dist < dr_g) {
+                const int e_i = floor(e/de_g);
+                if(e_i >= 0 && e_i < g_bins) g_histogram[3*g_bins + e_i] ++;
+              }
+            }
+          }
         }
-        const int costheta_i = costheta/dcostheta;
-        order_parameter_histogram[z_i*order_bins + costheta_i] ++;
       }
     }
     // ---------------------------------------------------------------
@@ -661,7 +770,7 @@ periodicity/dimensions are not set by default and are required.\n");
 
       // Saving density in each of the x, y, z dimensions
       char *density_fname = new char[1024];
-      sprintf(density_fname, "%s/%s-density-%s-%i.dat", dir, filename, shape->name, N);
+      sprintf(density_fname, "%s/%s-density-%s-%i.dat", dir, filename, shape.name, N);
       FILE *densityout = fopen((const char *)density_fname, "w");
       delete[] density_fname;
       fprintf(densityout, "%s", headerinfo);
@@ -686,34 +795,61 @@ periodicity/dimensions are not set by default and are required.\n");
         fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n", e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
       }
       fclose(densityout);
-      // Save order paramter
-      if (strcmp(shape->name, "cube") == 0) {
-        char *order_fname = new char[1024];
-        sprintf(order_fname, "%s/%s-order-%s-%i.dat", dir, filename, shape->name, N);
-        FILE *order_out = fopen((const char *)order_fname, "w");
-        delete[] order_fname;
-        fprintf(order_out, "%s", headerinfo);
-        for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
-          for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
-            const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
-            fprintf(order_out, "%4.2f ", costheta);
-          }
-          fprintf(order_out, "\n");
-        }
-        fclose(order_out);
-      }
 
-      // Save pressure
-      char *pressure_fname = new char[1024];
-      sprintf(pressure_fname, "%s/%s-pressure-%s-%i.dat", dir, filename, shape->name, N);
-      FILE *pressureout = fopen((const char *)pressure_fname, "a");
-      delete[] pressure_fname;
-      const double dV = N*shape->volume*(uipow(R+dr, 3) - uipow(R, 3));
-      const double pressure = dZ/dV/totalmoves;
-      fprintf(pressureout, "%li %g %li\n", totalmoves, pressure, dZ);
-      old_totalmoves = totalmoves;
-      dZ = 0;
-      fclose(pressureout);
+      // Save distribution funtions
+      // fixme: assumes homogeneous for density
+      char *g_fname = new char[1024];
+      sprintf(g_fname, "%s/%s-g-%s-%i.dat", dir, filename, shape.name, N);
+      FILE *g_out = fopen((const char *)g_fname, "w");
+      delete[] g_fname;
+      fprintf(g_out, "%s", headerinfo);
+      fprintf(g_out, "\ne       ");
+      const double density = N/len[0]/len[1]/len[2];
+      const double vol0 = len[0]*len[1]*len[2];
+      for(int i=0; i<n_gfuncs; i++) fprintf(g_out, "%8s  ", g_names[i]);
+      fprintf(g_out, "\n");
+      for(int e_i=0; e_i<g_bins; e_i++) {
+        const double e = (e_i + 0.5)*de_g;
+        fprintf(g_out, "%6.3f  ", e);
+        for(int i=0; i<n_gfuncs; i++) {
+          const double vol1 = i==0 ? 4.0/3.0*M_PI*(uipow(e+de_g/2, 3) - uipow(e-de_g/2, 3))
+                                   : M_PI*sqr(dr_g)*de_g;
+          const double probability = (double)g_histogram[i*g_bins + e_i]/totalmoves;
+          const double n2 = probability/vol0/vol1;
+          const double g = n2/density/density*N*N/n_cylinders[i];
+          fprintf(g_out, "%8.5f  ", g);
+        }
+        fprintf(g_out, "\n");
+      }
+      fclose(g_out);
+      // // Save order paramter
+      // if (shape.type == CUBE) {
+      //   char *order_fname = new char[1024];
+      //   sprintf(order_fname, "%s/%s-order-%s-%i.dat", dir, filename, shape.name, N);
+      //   FILE *order_out = fopen((const char *)order_fname, "w");
+      //   delete[] order_fname;
+      //   fprintf(order_out, "%s", headerinfo);
+      //   for(int z_i=0; z_i<round(len[2]/de_density); z_i++) {
+      //     for(int costheta_i=0; costheta_i<order_bins; costheta_i++) {
+      //       const double costheta = (double)order_parameter_histogram[z_i*order_bins + costheta_i]*N/density_histogram[xbins + ybins + z_i]/dcostheta;
+      //       fprintf(order_out, "%4.2f ", costheta);
+      //     }
+      //     fprintf(order_out, "\n");
+      //   }
+      //   fclose(order_out);
+      // }
+
+      // // Save pressure
+      // char *pressure_fname = new char[1024];
+      // sprintf(pressure_fname, "%s/%s-pressure-%s-%i.dat", dir, filename, shape.name, N);
+      // FILE *pressureout = fopen((const char *)pressure_fname, "a");
+      // delete[] pressure_fname;
+      // const double dV = N*shape.volume*(uipow(R+dr, 3) - uipow(R, 3));
+      // const double pressure = dZ/dV/totalmoves;
+      // fprintf(pressureout, "%li %g %li\n", totalmoves, pressure, dZ);
+      // old_totalmoves = totalmoves;
+      // dZ = 0;
+      // fclose(pressureout);
 
       delete[] headerinfo;
     }
@@ -723,12 +859,35 @@ periodicity/dimensions are not set by default and are required.\n");
     if (vertex_period > 0 && iteration % vertex_period == 0) {
       printf("Saving vertex locations. Frame: %i. Iteration: %li.\n", frame, iteration);
       char *vertices_fname = new char[1024];
-      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape->name, N, frame);
+      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, frame);
       char *comment = new char[1024];
       sprintf(comment, "period: %i, iteration: %li", vertex_period, iteration);
       save_locations(polyhedra, N, vertices_fname, len, comment);
       delete[] vertices_fname;
       frame ++;
+    }
+    // ---------------------------------------------------------------
+    // Print out timing information if desired
+    // ---------------------------------------------------------------
+    if (totime > 0 && iteration % totime == 0) {
+      char *iter = new char[1024];
+      sprintf(iter, "%i iterations", totime);
+      took(iter);
+      delete[] iter;
+      printf("Iteration %li, acceptance rate of %g, scale: %g.\n", iteration, (double)workingmoves/totalmoves, scale);
+      printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n", 1000.0*neighbor_updates/totalmoves, 1000.0*neighbor_informs/totalmoves, (double)neighbor_informs/neighbor_updates);
+      const long checks_without_tables = totalmoves*N;
+      int total_neighbors = 0;
+      for(int i=0; i<N; i++) {
+        total_neighbors += polyhedra[i].num_neighbors;
+        most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
+      }
+      avg_neighbors = double(total_neighbors)/N;
+      const long checks_with_tables = totalmoves*avg_neighbors + N*neighbor_updates;
+      printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
+      printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n", max_neighbors, most_neighbors);
+      printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n", neighborR, avg_neighbors);
+      fflush(stdout);
     }
   }
   // ---------------------------------------------------------------------------
@@ -738,6 +897,7 @@ periodicity/dimensions are not set by default and are required.\n");
 
   //delete[] polyhedra; fixme
   delete[] density_histogram;
+  delete[] g_histogram;
   return 0;
 }
 // -----------------------------------------------------------------------------
@@ -875,6 +1035,10 @@ void save_locations(const polyhedron *p, int N, const char *fname, const double 
 }
 
 int generate_talk_figs() {
+  const poly_shape cube("cube");
+  const poly_shape truncated_tetrahedron("truncated_tetrahedron");
+  const poly_shape tetrahedron("tetrahedron");
+
   // Generate background image for title slide
   int N = 7;
   polyhedron *p = new polyhedron[N];

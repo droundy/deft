@@ -5,13 +5,16 @@ import read, arguments
 
 parser = argparse.ArgumentParser(
   description='Plot density of polyhedra.', parents = [arguments.parser])
+parser.add_argument(
+  '--reflect', action='store_true',
+  help='will reflect plots halfway across cell')
 
 args = parser.parse_args()
 
 
 ff = args.ff
 if args.ratio != 0:
-  polyhedron = args.shape + "_%4.2f" %args.ratio
+  polyhedron = args.shape + "_%05.2f" %args.ratio
 else:
   polyhedron = args.shape
 
@@ -40,10 +43,14 @@ colors = ['r', 'b', 'k']
 for i in xrange(3):
   coord = e[i]
   density = densities[i]
-  mid = length[i]/2
+  if args.reflect:
+    mid = length[i]/2
+  else:
+    mid = len(coord)
   print("Integral %c: %g" %(dims[i], sum(density)/len(density)*length[0]*length[1]*length[2]))
   plot(coord[coord<mid], density[coord<mid], label="$%c$" %dims[i], color=colors[i], linestyle='-')
-  plot(length[i]-coord[coord>mid], density[coord>mid], color=colors[i], linestyle='--')
+  if args.reflect:
+    plot(length[i]-coord[coord>mid], density[coord>mid], color=colors[i], linestyle='--')
 
 
 if polyhedron == 'cube' and celltype == 'walls':
@@ -53,6 +60,6 @@ if polyhedron == 'cube' and celltype == 'walls':
 legend(loc='best')
 
 #xlim(0, 4)
-title("$%s,$ $density,$ $%s,$ $\\eta = %04.2f$, $N = %i$." %(celltype, polyhedron, ff, N))
+title("density, %s, %s, $\\eta = %04.2f$, $N = %i$." %(celltype, polyhedron, ff, N))
 savefig("figs/%s-density-%4.2f-%s.pdf" %(celltype, ff, polyhedron))
 show()
