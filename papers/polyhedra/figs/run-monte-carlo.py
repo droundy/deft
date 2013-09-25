@@ -25,9 +25,11 @@ os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 def run_mc(ff, shape, celltype="periodic", ratio=1):
   memory = N/40 # fixme: better guess
   filename = '%s-%4.2f' %(celltype, ff)
-  name = "poly-%s-%s-%i" %(filename, shape, N)
-  scriptname = "%s/%s-%s-%i.tmp.sh" %(figsdir, filename, shape, N)
-  outname = "%s/%s-%s-%i.out" %(bindir, filename, shape, N)
+  if ratio == 1: ratio_name = ""
+  else: ratio_name = "_%05.2f" %ratio
+  name = "poly-%s-%s%s-%i" %(filename, shape, ratio_name, N)
+  scriptname = "%s/%s-%s%s-%i.tmp.sh" %(figsdir, filename, shape, ratio_name, N)
+  outname = "%s/%s-%s%s-%i.out" %(bindir, filename, shape, ratio_name, N)
   if celltype == "periodic":
     cellparam = "--periodz %g" %(dim*ratio)
   elif celltype == "walls":
@@ -84,7 +86,8 @@ else:
 
   ff = args.ff
   polyhedron = args.shape
-  ratio = args.ratio
+  if args.ratio == 0: ratio = 1
+  else: ratio = args.ratio
 
   if args.periodic:
     celltype = 'periodic'
