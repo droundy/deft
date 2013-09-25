@@ -331,6 +331,9 @@ poly_shape::poly_shape(const char *set_name, double ratio) {
   // vertices should be in an order such that the second half are a reflection of
   // the first half for polyhedra with inversion symmetry (i.e. not tetrahedra)
   //
+  // Also, the first two vertices should be along the same edge, so that edge length
+  // can be easily calculated
+  //
   // All face vectors should be normalized
   //
   // For tetrahedra, the faces should all be oriented so as to point outward

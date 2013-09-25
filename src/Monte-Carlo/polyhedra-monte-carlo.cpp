@@ -107,7 +107,7 @@ int main(int argc, const char *argv[]) {
   long iterations = 100000000000;
   long initialize_iterations = 50000;
   double acceptance_goal = .4;
-  double R = 1;
+  double R = 0;
   double ff = 0;
   double ratio = 1;
   double neighborR = 0.5;
@@ -149,9 +149,9 @@ information on the number and type of polyhedra, as well as file extensions", "n
     {"shape", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &shape_name, 0,
      "Type of polyhedra to use. Can be one of [cube | tetrahedron | truncated_tetrahedron | cuboid]", "shape"},
     {"ratio", 'r', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &ratio, 0, "Ratio of sides of cuboid. For a cuboid of sides AxAxB, ratio = B/A.", "ratio"},
-    {"R", 'R', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &R, 0,
-     "Size of the sphere that circumscribes each polyhedron", "R"},
-    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, R is set so that the filling fraction will be accurate."},
+    {"R", 'R', POPT_ARG_DOUBLE, &R, 0,
+     "Size of the sphere that circumscribes each polyhedron. Defaults to setting edge length to 1", "R"},
+    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the cell dimensions are adjusted accordingly, without changing the shape of the cell."},
     {"neighborR", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &neighborR, 0,
      "Neighbor radius, used to drastically reduce collision detections", "neighborR"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
@@ -204,7 +204,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // Verify we have reasonable arguments and set secondary parameters
   // ---------------------------------------------------------------------------
   const bool real_walls = !fake_walls;
-  const double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
+  double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
                          periodic[2] + walls[2]};
 
   const poly_shape shape(shape_name, ratio);
@@ -212,9 +212,22 @@ periodicity/dimensions are not set by default and are required.\n");
     fprintf(stderr, "\nInvalid shape.\n");
     return 1;
   }
+  if(R == 0) {
+    R = 1/(shape.vertices[1] - shape.vertices[0]).norm();
+    printf("\nRadius was not specified, so setting radius to %g.\n", R);
+  }
   if(ff != 0) {
-    R = pow(ff*len[0]*len[1]*len[2]/N/shape.volume, 1.0/3.0);
-    printf("\nFilling fraction was specified, so adjusting radius to %g.\n", R);
+    // R^3*V*N/(Lx*Ly*Lz) = ff
+    // Lx*Ly*Lz = R^3*V*N/ff
+    // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
+    const double fac = R*pow(shape.volume*N/ff/len[0]/len[1]/len[2], 1.0/3.0);
+    for(int i=0; i<3; i++) {
+      periodic[i] *= fac;
+      walls[i] *= fac;
+      len[i] *= fac;
+    }
+    printf("\nFilling fraction was specified, so setting cell dimensions to (%g, %g, %g).\n", len[0], len[1], len[2]);
+
   }
   if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0 ||
       theta_scale < 0 || vertex_period < 0) {

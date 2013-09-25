@@ -6,9 +6,6 @@ import os, sys, argparse
 import arguments
 
 iterations = 100000000
-neighborR = 0.5
-de_density = 0.01
-dr = 0.01
 dim = 20
 
 N = 1000
@@ -26,12 +23,11 @@ if os.path.isdir('figs'):
 os.system("scons %s/polyhedra-monte-carlo" %(bindir))
 
 def run_mc(ff, shape, celltype="periodic", ratio=1):
-  memory = N/100 # fixme: better guess
-  name = "polyhedraMC-%s-%4.2f-%i-%s" %(celltype, ff, N, shape)
+  memory = N/40 # fixme: better guess
   filename = '%s-%4.2f' %(celltype, ff)
-  scriptname = "%s/%s-%i-%s.tmp.sh" %(figsdir, filename, N, shape)
-  outname = "%s/%s-%i-%s.out" %(bindir, filename, N, shape)
-  directory = '%s/mc' % figsdir
+  name = "poly-%s-%s-%i" %(filename, shape, N)
+  scriptname = "%s/%s-%s-%i.tmp.sh" %(figsdir, filename, shape, N)
+  outname = "%s/%s-%s-%i.out" %(bindir, filename, shape, N)
   if celltype == "periodic":
     cellparam = "--periodz %g" %dim
   elif celltype == "walls":
@@ -40,8 +36,6 @@ def run_mc(ff, shape, celltype="periodic", ratio=1):
     print("invalid cell type")
     exit(1)
   parameters = [
-    "--dir %s" %directory,
-    "--filename %s" %filename,
     "--N %i" %N,
     "--iterations %li" %iterations,
     "--periodx %g" %dim,
@@ -49,9 +43,6 @@ def run_mc(ff, shape, celltype="periodic", ratio=1):
     cellparam,
     "--shape %s" %shape,
     "--ff %g" %ff,
-    "--neighborR %g" %neighborR,
-    "--dr %g" %dr,
-    "--de_density %g" %de_density,
     "--ratio %g" %ratio
   ]
 
@@ -75,15 +66,19 @@ def run_mc(ff, shape, celltype="periodic", ratio=1):
 
 if(len(sys.argv) == 1):
   run_mc(.3, "cube")
+  run_mc(.4, "cube")
   run_mc(.5, "cube")
+  run_mc(.6, "cube")
   run_mc(.7, "cube")
   run_mc(.3, "cuboid", ratio=2)
+  run_mc(.4, "cuboid", ratio=2)
   run_mc(.5, "cuboid", ratio=2)
+  run_mc(.6, "cuboid", ratio=2)
   run_mc(.7, "cuboid", ratio=2)
 
 else:
   parser = argparse.ArgumentParser(
-    description='Plot density of polyhedra.', parents = [arguments.parser])
+    description='Create batch script and run monte carlo simulation(s) using sbatch.', parents = [arguments.parser])
 
   args = parser.parse_args()
 
