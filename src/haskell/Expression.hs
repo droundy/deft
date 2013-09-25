@@ -383,7 +383,14 @@ instance Type KSpace where
                     Expression (Complex r 0) ->
                             "\t\tconst double t"++ show n ++ " = " ++ newcode r ++ ";\n" ++
                             newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
-                    _ -> error "don't hanld e complex well"
+                    Expression (Complex 0 i) ->
+                            "\t\tdouble it"++ show n ++ " = " ++ newcode i ++ ";\n" ++
+                            newcodes (n+1) (substitute x' (complex 0 (s_var ("it"++show n))) x)
+                    Expression (Complex r i) ->
+                            "\t\tstd::complex<double> t"++ show n ++ " = std::complex<double>(" ++
+                                 newcode r ++ ", " ++ newcode i ++ ");\n" ++
+                            newcodes (n+1) (substitute x' (complex (s_var ("t"++show n++".real()")) (s_var ("t"++show n++".imag()"))) x)
+                    _ -> error "oopsies?!"
               MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
                             "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
             setzero = case newcode $ setKequalToZero e of

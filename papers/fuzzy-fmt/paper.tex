@@ -743,8 +743,28 @@ such as
 \end{align}
 and others that are zero by symmetry (where we assume the gaussian
 drops to zero before reaching the origin).
-
+\begin{widetext}
+Beginning with $\tilde{w}_3(k)$ from above and letting $u = (r-\sigma/2)/a,$
+  \begin{align}
+    \tilde{w}_3(k)
+    &=  \frac{?}{i\sqrt{\pi}ak^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
+      - k(au + \frac{\sigma}{2}) \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du
+  \end{align}
+We can take the lower limit to $-\infty$ since the gaussian should go
+to zero well before that. Using mathematica,
+  \begin{align}
+    \tilde{w}_3(k)
+      &= \frac{?}{i\sqrt{\pi}ak^3}
+    \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
+      \sin{\frac{k\sigma}{2}} \right) \left( \frac{k}{2}
+      \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
+          \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}
+          \right] \right) \\
+      &= \frac{?}{i2ak^2}\sin{\frac{k
+          \sigma}{2}}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
+          \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}\right]
+  \end{align}
+\end{widetext}
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
-

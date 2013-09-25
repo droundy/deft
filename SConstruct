@@ -133,7 +133,9 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
 
 newgenerated_sources = []
-for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast """):
+for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast
+                        WaterSaftFast WaterSaftByHandFast
+                        HomogeneousWaterSaftFast HomogeneousWaterSaftByHandFast """):
     filename = 'src/new/' + source + '.cpp'
     newgenerated_sources.append(filename)
     generate.Functional(target = [filename, 'src/new/'+source+'.h'], source = 'src/haskell/newfunctionals.exe')
@@ -183,14 +185,15 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
     Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
 Default('papers')
 
+Alias('papers', NoCache(env.PDF('papers/thesis-hughes/project.tex')))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
 
 Depends('index.html', 'papers/pair-correlation/figs/pretty-4.svg')
 
 paper = Environment(tools=['gnuplot', 'matplotlib', 'mkdown'])
-for paperfile in Glob('papers/*/paper.tex'):
-    paperdir = str(paperfile)[:len(str(paperfile))-len('/paper.tex')]
+for paperfile in Glob('papers/*/paper.tex') + Glob('papers/*/project.tex'):
+    paperdir = os.path.dirname(str(paperfile))
     # first let's handle all gnuplot files
     for gpfile in Glob(paperdir + '/figs/*.gp'):
         gpfile = str(gpfile)[:len(str(gpfile))-3]
