@@ -29,9 +29,9 @@ def run_mc(ff, shape, celltype="periodic", ratio=1):
   scriptname = "%s/%s-%s-%i.tmp.sh" %(figsdir, filename, shape, N)
   outname = "%s/%s-%s-%i.out" %(bindir, filename, shape, N)
   if celltype == "periodic":
-    cellparam = "--periodz %g" %dim
+    cellparam = "--periodz %g" %(dim*ratio)
   elif celltype == "walls":
-    cellparam = "--wallz %g" %dim
+    cellparam = "--wallz %g" %(dim*ratio)
   else:
     print("invalid cell type")
     exit(1)
