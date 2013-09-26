@@ -753,18 +753,18 @@ Beginning with $\tilde{w}_3(k)$ from above and letting $u = (r-\sigma/2)/a,$
 We can take the lower limit to $-\infty$ since the gaussian should go
 to zero well before that. Using mathematica,
   \begin{align}
-    \tilde{w}_3(k)
-      &= \frac{?}{i\sqrt{\pi}ak^3}
+    \tilde{w}_3(k) &= \frac{?}{i\sqrt{\pi}ak^3}
     \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
-      \sin{\frac{k\sigma}{2}} \right) \left( \frac{k}{2}
-      \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
-          \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}
-          \right] \right) \\
-      &= \frac{?}{i2ak^2}\sin{\frac{k
-          \sigma}{2}}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
-          \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}\right]
+    \sin{\frac{k\sigma}{2}} \right) - \left( \frac{k}{2}
+    \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
+      \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}
+      \right] \right) \\ &=
+    \frac{?}{iak^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^3}{2} \right)  
+      \sin{\frac{k\sigma}{2}} - \frac{k}{2} \sigma\cos{\frac{k \sigma}{2}}  \right]
   \end{align}
 \end{widetext}
+\fixme{This bothers me, though, because it is now purely imaginary}
+For 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
