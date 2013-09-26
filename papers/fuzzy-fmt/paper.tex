@@ -764,7 +764,38 @@ to zero well before that. Using mathematica,
   \end{align}
 \end{widetext}
 \fixme{This bothers me, though, because it is now purely imaginary}
-For 
+
+For the $w_2$,
+\begin{align}
+  \tilde{w}_2(k) &= ?\int e^{-\frac{(r-\sigma/2)^2}{a^2}} e^{i \mathbf{k} \cdot
+    \rr} \textrm{d} \rr \\
+  &= ? 2\pi \int_0^\infty \int_{-1}^1 r^2 e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  e^{ikr\cos{\theta}} \textrm{drd}\cos{\theta} \\
+  &= \frac{?2\pi}{ik} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  \left(e^{ikr} - e^{-ikr}\right) \textrm{dr} \\
+  &= \frac{?4\pi}{k} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  \sin{kr} ~\textrm{dr} \\
+  &= \frac{?a4\pi}{k} \int_{-\sigma/2a}^\infty \left(au +
+  \frac{\sigma}{2}\right) e^{-u^2} \sin{k\left(au +
+  \frac{\sigma}{2}\right)} ~\textrm{du}
+\end{align}
+where, again, we take the lower limit to $-\infty$ since the gaussian
+should to zero well before the lower limit. Using mathematica, I get
+\begin{widetext}
+\begin{align}
+  \tilde{w}_2(k) &=\frac{?a4\pi}{k}\frac{\sqrt{\pi}}{2}
+  e^{-\left(\frac{ak}{2} \right)^2} \left(a^2 k
+  \cos{\frac{k\sigma}{2}} +\sigma \sin{\frac{k\sigma}{2}} \right)
+\end{align}
+\end{widetext}
+$w_1$ will have a similar integral, but without the stray $r$, so we
+get
+\begin{align}
+  \tilde{w}_1{k}&= \frac{?a}{k} \int_{-\infty}^\infty e^{-u^2} \sin{k\left(au +
+  \frac{\sigma}{2}\right)} ~\textrm{du} \\
+  &= \frac{?a}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin{\frac{k\sigma}{2}}
+\end{align}
+
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
