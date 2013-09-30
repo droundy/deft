@@ -9,6 +9,7 @@ latexDouble x
   | Just (n,d,p) <- double2powfrac x 1 = latexPowRat (n,"",d,"",p)
   | Just (n,d,p) <- double2powfrac x pi = latexPowRat (n,"\\pi",d,"",p)
   | Just (n,d,p) <- double2powfrac x (1/pi) = latexPowRat (n,"",d,"\\pi",p)
+  | Just (n,d,p) <- double2powfrac x (pi**1.5) = latexPowRat (n,"\\pi^{3/2}",d,"",p)
   | otherwise = show x
 
 latexPowRat :: (Int, String, Int, String, Double) -> String
@@ -20,7 +21,7 @@ latexPowRat (n,ns,d,ds,p) = "\\left(" ++ latexRat (n,ns,d,ds) ++ "\\right)^{" ++
 latexRat :: (Int, String, Int, String) -> String
 latexRat (n,ns,1,"") = latexProd (n,ns)
 latexRat (n,"",d,"")
-  | n < 10 && d < 10 = "\\frac" ++ show n ++ show d
+  | n < 10 && d < 10 = "\\tfrac" ++ show n ++ show d
 latexRat (n,ns,d,ds) = "\\frac{" ++ latexProd (n,ns) ++ "}{" ++ latexProd (d,ds) ++ "}"
 
 latexProd :: (Int, String) -> String
