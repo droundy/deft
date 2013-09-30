@@ -359,19 +359,21 @@ int main(int argc, char *argv[]){
           const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
           radial_distribution[i] = radial_distributon_histogram[i]*volume/(Vi*density_saved_count*N*(N-1));
         }
+        const double number_spheres_in_density = density_saved_count*double(N);
         if (!flat_div){
           for(long i=0; i<div; i++){
             double rmax = radius[i+1];
             double rmin = radius[i];
-            density[i]=shells[i]/(((4/3.*M_PI*rmax*rmax*rmax)-(4/3.*M_PI*rmin*rmin*rmin)))/((j+1)/double(N));
+            const double dvolume = 4/3.*M_PI*rmax*rmax*rmax - 4/3.*M_PI*rmin*rmin*rmin;
+            density[i]=shells[i]/dvolume/number_spheres_in_density;
           }
         } else {
+          const double dvolume = lenx*leny*lenz/div;
           for(long i=0; i<div; i++){
-            density[i]=shells[i]/(lenx*leny*lenz/div)/((j+1)/double(N));
+            density[i]=shells[i]/dvolume/number_spheres_in_density;
           }
         }
-        
-	
+
         FILE *out = fopen(outfilename,"w");
         if (out == NULL) {
           printf("Error creating file %s\n", outfilename);
