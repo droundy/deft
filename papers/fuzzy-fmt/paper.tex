@@ -781,13 +781,11 @@ For the $w_2$,
 \end{align}
 where, again, we take the lower limit to $-\infty$ since the gaussian
 should to zero well before the lower limit. Using mathematica, I get
-\begin{widetext}
 \begin{align}
   \tilde{w}_2(k) &=\frac{?a4\pi}{k}\frac{\sqrt{\pi}}{2}
   e^{-\left(\frac{ak}{2} \right)^2} \left(a^2 k
   \cos{\frac{k\sigma}{2}} +\sigma \sin{\frac{k\sigma}{2}} \right)
 \end{align}
-\end{widetext}
 $w_1$ will have a similar integral, but without the stray $r$, so we
 get
 \begin{align}
@@ -795,6 +793,22 @@ get
   \frac{\sigma}{2}\right)} ~\textrm{du} \\
   &= \frac{?a}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin{\frac{k\sigma}{2}}
 \end{align}
+
+$w_0$ is quite a bit trickier.  I won't go through all the math here,
+but essentially we have
+\begin{align}
+  \tilde{w}_0(k) &= \frac{?}{k}\int_0^\infty
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr}
+\end{align}
+Since the gaussian should, again, go to zero before r = 0, then we can
+take this to negative infinity so \fixme{without all the details}:
+\begin{align}
+  \tilde{w}_0(k) &= \frac{?}{k}\int_{-\infty}^\infty
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr} \\
+  &= \frac{?\sqrt{\pi}}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
+  e^{-\frac{t}{4}} \cos{\frac{\sigma t}{2a}}\textrm{dt}
+\end{align}
+So we have a closed form, but we will still have to do this numerically
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
