@@ -665,11 +665,14 @@ Equation~\ref{eq:ftrytwo} for $r<0$.
 \section{Erf model (scratch notes)}
 If we consider that
 \begin{align}
-  f'(r) \approx \frac{1}{\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
+  f'(r) \approx \frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
 \end{align}
 then we conclude that
 \begin{align}
-  f(r) \approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 ).
+  f(r) &= e^{-\beta V(r)} - 1 \\
+  &\approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 ) \\
+  e^{-\beta V(r)} &\approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 ) \\
+  V(r) &\approx -kT\ln\left(\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )\right).
 \end{align}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/erf}
@@ -680,16 +683,23 @@ This matches all right, if we choose to match the first couple of
 terms in a power series expansion around $\sigma$, in which case we
 find that
 \begin{align}
-  V(\sigma) &= k_BT \ln 2 \\
-  V'(\sigma) &= -?\frac{k_BT}{a}
+  V(\sigma) &\approx -kT\ln\left(\tfrac12\right) \\
+  &= k_BT \ln 2
+\end{align}
+and setting the slope equal at $r=\sigma$ we find
+\begin{align}
+  V'(r) &= -kT \frac{f'(r)}{f(r)+1} \\
+  &\approx -kT \frac{\frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}}{\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )}
+  \\
+  V'(\sigma) &= -\frac{2k_BT}{a\sqrt{\pi}}
 \end{align}
 Thus for our harmonic potential, we find that something like...
 \begin{align}
   V(r) &= V_0 \left(1-\frac{r^2}{4R^2}\right)\\
-  \left(1 - \frac{\sigma^2}{4R^2}\right) &= \frac{k_BT}{V_0} \\
-  \sigma &= 2R\left(1 - \frac{k_BT}{V_0}\right) \\
-  a &= ?\frac{k_BT}{V_0}\frac{\sigma}{2R^2} \\
-  &= ?\frac{k_BT}{V_0}\left(1 - \frac{k_BT}{V_0}\right)\frac{1}{R} \\
+  \left(1 - \frac{\sigma^2}{4R^2}\right) &= \frac{k_BT}{V_0}\ln 2 \\
+  \sigma &= 2R\sqrt{1 - \frac{k_BT}{V_0}\ln 2} \\
+  a &= \frac{2}{\sqrt\pi}\frac{k_BT}{V_0}\frac{\sigma}{2R^2} \\
+  &= \frac{2}{\sqrt\pi}\frac{k_BT}{V_0}\frac{1}{R}\sqrt{1 - \frac{k_BT}{V_0}\ln2}
 \end{align}
 
 This gives us an approximate model that we could apply to any
