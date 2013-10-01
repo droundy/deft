@@ -2,6 +2,7 @@
 
 module NewCode (module Statement,
                 module Expression,
+                createHeaderAndCppFiles,
                 defineFunctional, createCppFile, createHeader )
     where
 
@@ -11,10 +12,15 @@ import Expression
 import Optimize ( optimize )
 import qualified Data.Set as Set
 
-
 defineFunctional :: Expression Scalar -> [Exprn] -> String -> String
 defineFunctional e variables n = createHeader e n ++ implementation
   where implementation = unlines $ drop 4 $ lines $ createCppFile e variables n ""
+
+createHeaderAndCppFiles :: Expression Scalar -> [Exprn] -> String -> IO ()
+createHeaderAndCppFiles functional inputs cname =
+  do let fn = "new/" ++ cname ++ "Fast"
+     writeFile ("src/"++fn++".h") $ createHeader functional cname
+     writeFile ("src/"++fn++".cpp") $ createCppFile functional inputs cname (fn++".h")
 
 createHeader :: Expression Scalar -> String -> String
 createHeader e = if any is_nonscalar (findOrderedInputs e)

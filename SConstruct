@@ -26,6 +26,11 @@ Alias('git configuration',
                   action = Copy("$TARGET", "$SOURCE")))
 Default('git configuration')
 
+haskell = Environment(tools=['haskell'],
+                      HSSEARCHPATH = ["src/haskell"],
+                      HSPACKAGES = ["containers", "process", "HUnit"],
+                      HSCFLAGS = ['-O2', '-Wall', '-Werror'])
+
 # Now we define utility functions for the tests.
 passed_tests = 0
 failed_tests = 0
@@ -133,12 +138,28 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
 
 newgenerated_sources = []
-for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast
-                        WaterSaftFast WaterSaftByHandFast
-                        HomogeneousWaterSaftFast HomogeneousWaterSaftByHandFast """):
-    filename = 'src/new/' + source + '.cpp'
-    newgenerated_sources.append(filename)
-    generate.Functional(target = [filename, 'src/new/'+source+'.h'], source = 'src/haskell/newfunctionals.exe')
+for name, module, hsfunctional, inputs in [
+    ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[ES $ s_var "n"]'),
+    ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
+    ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
+    ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
+    ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[ES $ s_var "n"]'),
+    ("HomogeneousWaterSaftByHand", "WaterSaft", "homogeneous_water_saft_by_hand_n", '[ES $ s_var "n"]')]:
+    # I'm sloppy and just recreate the generate_%s.hs files every time
+    f = open('src/haskell/generate_%s.hs' % name, "w")
+    f.write("""import NewCode
+import %s ( %s )
+
+main :: IO ()
+main = createHeaderAndCppFiles %s %s "%s"
+""" % (module, hsfunctional, hsfunctional, inputs, name))
+    f.close()
+    haskell.HaskellMake(target = 'src/haskell/generate_%s.exe' % name,
+                        source = 'src/haskell/generate_%s.hs' % name)
+    env.Command(target = ['src/new/%sFast.cpp' % name, 'src/new/%sFast.h' % name],
+                source = 'src/haskell/generate_%s.exe' % name,
+                action = './$SOURCE')
+    newgenerated_sources += ['src/new/%sFast.cpp' % name]
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion
@@ -392,15 +413,10 @@ Default('webpage')
 
 # Here we have rules to build the haskell code
 
-haskell = Environment(tools=['haskell'],
-                      HSSEARCHPATH = ["src/haskell"],
-                      HSPACKAGES = ["containers", "process", "HUnit"],
-                      HSCFLAGS = ['-O2', '-Wall', '-Werror'])
-
 for hs in Glob("src/haskell/[A-Z]*.hs"):
     haskell.HaskellObject(hs)
 
-for program in Split("functionals newfunctionals test latex-functionals"):
+for program in Split("functionals test latex-functionals"):
     haskell.HaskellMake(target = 'src/haskell/' + program + '.exe',
                         source = ['src/haskell/' + program  + '.hs'])
 
@@ -412,19 +428,13 @@ NoCache(
                     # work around sporadic race condition giving "Text file busy" error.
                     action = 'sleep 1 && $SOURCE codegen'))
 
-NoCache(
-    haskell.Command(target = ['tests/new-generated-haskell/WhiteBear.h'],
-                    source = 'src/haskell/newfunctionals.exe',
-                    # work around sporadic race condition giving "Text file busy" error.
-                    action = 'sleep 1 && $SOURCE tests'))
-
 ################# Now do the test suite ##################################################
 for test in Split(""" memory saft eos print-iter convolve-finite-difference precision
                       compare-gsigmas
                       convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
     env.BuildTest(test, all_sources)
 
-for test in Split(""" functional-arithmetic surface-tension new-generated-code """):
+for test in Split(""" functional-arithmetic surface-tension """):
     env.BuildTest(test, generic_sources)
 
 for test in Split(""" newcode """):

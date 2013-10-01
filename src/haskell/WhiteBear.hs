@@ -2,7 +2,8 @@
 functional for the excess free energy of the hard sphere fluid. -}
 
 module WhiteBear
-       ( kT, whitebear, gSigmaS, gSigmaA, gSigmaA_automagic, gSigmaA_by_hand,
+       ( whitebear_n, homogeneous_whitebear,
+         kT, whitebear, gSigmaS, gSigmaA, gSigmaA_automagic, gSigmaA_by_hand,
          tensorThirdTerm, phi3t,
          tensorwhitebear,
          whitebear_m2, gSigmaS_m2, gSigmaA_m2,
@@ -15,6 +16,10 @@ import FMT ( n, n0, n1, n2, n3, n1v, n2v, n2m,
              shellPrime, vshellPrimedot,
              rad, smear, kR,
              sqr_n2v, n1v_dot_n2v )
+
+whitebear_n, homogeneous_whitebear :: Expression Scalar
+whitebear_n = substitute n (r_var "n") whitebear
+homogeneous_whitebear = makeHomogeneous whitebear_n
 
 kT :: Type a => Expression a
 kT = s_tex "kT" "kT"

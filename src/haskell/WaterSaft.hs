@@ -9,7 +9,8 @@
 module WaterSaft
        ( eta_for_dispersion, lambda_dispersion, a1, a2, eta_effective,
          saft_dispersion, saft_association, water_saft, water_entropy,
-         water_X, mu, water_saft_by_hand )
+         water_X, mu, water_saft_by_hand,
+         water_saft_n, water_saft_by_hand_n, homogeneous_water_saft_n, homogeneous_water_saft_by_hand_n)
        where
 
 import FMT ( rad, n )
@@ -17,6 +18,12 @@ import WhiteBear ( whitebear, kT, gSigmaA, gSigmaA_by_hand, nA )
 import IdealGas ( idealgas )
 import Expression
 
+water_saft_n, water_saft_by_hand_n, homogeneous_water_saft_n, homogeneous_water_saft_by_hand_n :: Expression Scalar
+water_saft_n = substitute n (r_var "n") water_saft
+water_saft_by_hand_n = substitute n (r_var "n") water_saft_by_hand
+
+homogeneous_water_saft_n = makeHomogeneous water_saft_n
+homogeneous_water_saft_by_hand_n = makeHomogeneous water_saft_by_hand_n
 
 mu :: Type a => Expression a
 mu = s_tex "mu" "\\mu"
