@@ -18,10 +18,16 @@ sfmt :: Expression Scalar
 sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
 
 betaV0 :: Type a => Expression a
-betaV0 = s_var "V0"/s_var "kT"
+betaV0 = s_var "V0"/kT
 
 kR :: Expression KSpace
 kR = k * rad
+
+a :: Expression KSpace
+a = "a" === 1/betaV0*(1 - 1/betaV0)/rad
+
+sigma :: Type a => Expression a
+sigma = var "sigma" "\\sigma" (2*rad*(1 - 1/betaV0))
 
 n, n3, n2, n1, n0, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"
@@ -84,7 +90,8 @@ w1 x = ifft ( w1k * fft x)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
-  where w2k = transform mys $ b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)
+  where w2k = var "deltak" "\\delta(k)" $
+              a*2*pi**(3/2)*exp(-(a*k/2)**2)*(a**2*cos(k*sigma/2) + sigma*sin(k*sigma/2)/k)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vifft ( w2vk *. fft x)

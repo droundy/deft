@@ -142,9 +142,10 @@ for source in Split(""" WhiteBearFast HomogeneousWhiteBearFast
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion
-                     SimpGradDispersion """):
+                     SimpGradDispersion SFMT """):
     generate.Functional(target = 'doc/' + pdf + '.pdf', source = 'src/haskell/latex-functionals.exe')
     Alias('pdf', 'doc/' + pdf + '.pdf')
+Default('pdf')
 
 # Here we have ordinary source code:
 

@@ -9,6 +9,7 @@ latexDouble x
   | Just (n,d,p) <- double2powfrac x 1 = latexPowRat (n,"",d,"",p)
   | Just (n,d,p) <- double2powfrac x pi = latexPowRat (n,"\\pi",d,"",p)
   | Just (n,d,p) <- double2powfrac x (1/pi) = latexPowRat (n,"",d,"\\pi",p)
+  | Just (n,d,p) <- double2powfrac x (pi**0.5) = latexPowRat (n,"\\sqrt{\\pi}",d,"",p)
   | Just (n,d,p) <- double2powfrac x (pi**1.5) = latexPowRat (n,"\\pi^{3/2}",d,"",p)
   | otherwise = show x
 

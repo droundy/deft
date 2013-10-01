@@ -681,8 +681,17 @@ terms in a power series expansion around $\sigma$, in which case we
 find that
 \begin{align}
   V(\sigma) &= k_BT \ln 2 \\
-  V'(\sigma) &= \frac{k_BT}{a}
+  V'(\sigma) &= -?\frac{k_BT}{a}
 \end{align}
+Thus for our harmonic potential, we find that something like...
+\begin{align}
+  V(r) &= V_0 \left(1-\frac{r^2}{4R^2}\right)\\
+  \left(1 - \frac{\sigma^2}{4R^2}\right) &= \frac{k_BT}{V_0} \\
+  \sigma &= 2R\left(1 - \frac{k_BT}{V_0}\right) \\
+  a &= ?\frac{k_BT}{V_0}\frac{\sigma}{2R^2} \\
+  &= ?\frac{k_BT}{V_0}\left(1 - \frac{k_BT}{V_0}\right)\frac{1}{R} \\
+\end{align}
+
 This gives us an approximate model that we could apply to any
 potential $V(r)$, with $\sigma$ being a function of temperature.  If
 we do this, we can analytically solve for $w_2(r)$ and $w_3(r)$.
