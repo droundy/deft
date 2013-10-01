@@ -90,7 +90,7 @@ w1 x = ifft ( w1k * fft x)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
-  where w2k = var "deltak" "\\delta(k)" $
+  where w2k = var "deltak" "\\tilde\\delta(k)" $
               a*2*pi**(3/2)*exp(-(a*k/2)**2)*(a**2*cos(k*sigma/2) + sigma*sin(k*sigma/2)/k)
 
 w2v :: Expression RealSpace -> Vector RealSpace
