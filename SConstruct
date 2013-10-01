@@ -186,7 +186,7 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
     Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
 Default('papers')
 
-Alias('papers', NoCache(env.PDF('papers/thesis-hughes/project.tex')))
+Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
 
