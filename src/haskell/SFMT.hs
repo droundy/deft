@@ -75,10 +75,9 @@ r = s_var "r"
 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
-  where w3k = transform mys $ -1/(sqrt(pi*gammax)-1)*(
-            1 - exp(-gammax*(1-r/rad)**2) - sqrt(pi*gammax)*erf(sqrt gammax*(1-r/rad))
-          )
-        gammax = 360.38
+  where w3k = var "softstep" "\\tilde\\Theta(k)" $
+              1/(a*k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
+        ksigmao2 = k*sigma/2
 
 w0 :: Expression RealSpace -> Expression RealSpace
 w0 x = ifft ( w0k * fft x)
