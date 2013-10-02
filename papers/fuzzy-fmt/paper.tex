@@ -706,19 +706,19 @@ This gives us an approximate model that we could apply to any
 potential $V(r)$, with $\sigma$ being a function of temperature.  If
 we do this, we can analytically solve for $w_2(r)$ and $w_3(r)$.
 \begin{align}
-  w_2(r) &= ? e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
+  w_2(r) &= \frac{1}{a\sqrt{\pi}} e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
   w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) )
 \end{align}
 This is presented in Reference \citenum{schmidt2000fluid}.  The
 Fourier transform of $w_3$ is surprisingly simple, although
 Mathematica cannot handle it.
 \begin{align}
-  \tilde{w}_3(k) &= -\frac{?}{ik} \int_0^\infty r w_3(r) \sin(kr) dr
+  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr
   \\
-  &=  -\frac{?}{2ik} \int_0^\infty ( 1 -
+  &=  \frac{2\pi}{k} \int_0^\infty ( 1 -
   \mathrm{erf}((r-\sigma/2)/a) ) r \sin(kr) dr
   \\
-  &=  -\frac{?}{2ik} \left(
+  &=  \frac{2\pi}{k} \left(
   \int_0^\infty r \sin(kr) dr
   -
   \int_0^\infty \mathrm{erf}((r-\sigma/2)/a) r \sin(kr) dr
@@ -732,13 +732,11 @@ At this point, we can integrate by parts the second bit.
   v &= \frac{\sin(kr) - kr \cos(kr)}{k^2}
 \end{align}
 Putting these in we get
-\begin{align}
-  \tilde{w}_3(k)
-  &=  -\frac{?}{2ik} \Big(
-  \int_0^\infty r \sin(kr) dr\\ &\quad\quad
-  -
-  \left.\mathrm{erf}((r-\sigma/2)/a)\frac{\sin(kr) - kr
-    \cos(kr)}{k^2}\right|_0^\infty\\ &\quad\quad
+\begin{align} 
+ \tilde{w}_3(k)
+  &=  \frac{2\pi}{k} \Big( \int_0^\infty r \sin(kr) dr \notag \\ 
+ &\quad\quad - \left.\mathrm{erf}((r-\sigma/2)/a)\frac{\sin(kr) - kr
+    \cos(kr)}{k^2}\right|_0^\infty \notag \\ &\quad\quad
   +
   \int_0^\infty \frac{\sin(kr) - kr \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2} e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
   \Big)
@@ -749,7 +747,7 @@ as you can see by doing both integrals prior to taking the limit to
 infinity.  So we get
 \begin{align}
   \tilde{w}_3(k)
-  &=  -\frac{?}{2ik}\int_0^\infty \frac{\sin(kr) - kr
+  &=  \frac{2\pi}{k}\int_0^\infty \frac{\sin(kr) - kr
     \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2}
   e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
 \end{align}
@@ -766,65 +764,67 @@ drops to zero before reaching the origin).
 Beginning with $\tilde{w}_3(k)$ from above and letting $u = (r-\sigma/2)/a,$
   \begin{align}
     \tilde{w}_3(k)
-    &=  \frac{?}{i\sqrt{\pi}ak^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
+    &=  \frac{4\sqrt{\pi}}{ak^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
       - k(au + \frac{\sigma}{2}) \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du
   \end{align}
 We can take the lower limit to $-\infty$ since the gaussian should go
 to zero well before that. Using mathematica,
   \begin{align}
-    \tilde{w}_3(k) &= \frac{?}{i\sqrt{\pi}ak^3}
-    \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
+    \tilde{w}_3(k) &= \frac{4\sqrt{\pi}}{ak^3}
+    \left[ \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
     \sin{\frac{k\sigma}{2}} \right) - \left( \frac{k}{2}
     \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
       \cos{\frac{k \sigma}{2}} - a^2 k \sin{\frac{k \sigma}{2}}
-      \right] \right) \\ &=
-    \frac{?}{iak^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^2}{2} \right)
+      \right] \right)\right] \\ &=
+    \frac{4\pi}{ak^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^2}{2} \right)
       \sin{\frac{k\sigma}{2}} - \frac{k}{2} \sigma\cos{\frac{k \sigma}{2}}  \right]
   \end{align}
 \end{widetext}
-\fixme{This bothers me, though, because it is now purely imaginary}
 
 For the $w_2$,
 \begin{align}
-  \tilde{w}_2(k) &= \int e^{-\frac{(r-\sigma/2)^2}{a^2}} e^{i \mathbf{k} \cdot
+  \tilde{w}_2(k) &= \int w_2(r) e^{-i \mathbf{k} \cdot
     \rr} \textrm{d} \rr \\
-  &= 2\pi \int_0^\infty \int_{-1}^1 r^2 e^{-\frac{(r-\sigma/2)^2}{a^2}}
-  e^{ikr\cos{\theta}} \textrm{drd}\cos{\theta} \\
-  &= \frac{2\pi}{ik} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  &= \frac{1}{a\sqrt{\pi}}\int e^{-\frac{(r-\sigma/2)^2}{a^2}} e^{-i \mathbf{k} \cdot
+    \rr} \textrm{d} \rr \\
+  &= \frac{2\pi}{a\sqrt{\pi}}\int_0^\infty \int_{-1}^1 r^2 e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  e^{-ikr\cos{\theta}} \textrm{drd}\cos{\theta} \\
+  &= \frac{2\sqrt{\pi}}{iak} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
   \left(e^{ikr} - e^{-ikr}\right) \textrm{dr} \\
-  &= \frac{4\pi}{k} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  &= \frac{4\sqrt{\pi}}{ak} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
   \sin{kr} ~\textrm{dr} \\
-  &= \frac{a4\pi}{k} \int_{-\sigma/2a}^\infty \left(au +
+  &= \frac{4\sqrt{\pi}}{k} \int_{-\sigma/2a}^\infty \left(au +
   \frac{\sigma}{2}\right) e^{-u^2} \sin{k\left(au +
   \frac{\sigma}{2}\right)} ~\textrm{du}
 \end{align}
 where, again, we take the lower limit to $-\infty$ since the gaussian
 should to zero well before the lower limit. Using mathematica, I get
 \begin{align}
-  \tilde{w}_2(k) &=\frac{a4\pi}{k}\frac{\sqrt{\pi}}{2}
-  e^{-\left(\frac{ak}{2} \right)^2} \left(a^2 k
+  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2} \left(a^2 k
   \cos{\frac{k\sigma}{2}} +\sigma \sin{\frac{k\sigma}{2}} \right)
 \end{align}
-$w_1$ will have a similar integral, but without the stray $r$, so we
-get
+
+$w_1(r) = \frac{w_2(r)}{4\pi r}$, so $w_1$ will have a similar
+integral, but without the stray $r$, so we get
 \begin{align}
-  \tilde{w}_1{k}&= \frac{a}{k} \int_{-\infty}^\infty e^{-u^2} \sin{k\left(au +
+  \tilde{w}_1(k)&= \frac{4\sqrt{\pi}}{k} \int_{-\infty}^\infty e^{-u^2} \sin{k\left(au +
   \frac{\sigma}{2}\right)} ~\textrm{du} \\
-  &= \frac{a}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin{\frac{k\sigma}{2}}
+  &= \frac{4\pi}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin{\frac{k\sigma}{2}}
 \end{align}
 
-$w_0$ is quite a bit trickier.  I won't go through all the math here,
-but essentially we have
+$w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes$w_0$ is quite a bit
+trickier.  I won't go through all the math here, but essentially we
+have
 \begin{align}
-  \tilde{w}_0(k) &= \frac{1}{k}\int_0^\infty
+  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_0^\infty
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr}
 \end{align}
 Since the gaussian should, again, go to zero before r = 0, then we can
 take this to negative infinity so \fixme{without all the details}:
 \begin{align}
-  \tilde{w}_0(k) &= \frac{1}{k}\int_{-\infty}^\infty
+  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr} \\
-  &= \frac{\sqrt{\pi}}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
+  &= \frac{4\pi}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
   e^{-\frac{t}{4}} \cos{\frac{\sigma t}{2a}}\textrm{dt}
 \end{align}
 So we have a closed form, but we will still have to do this numerically
