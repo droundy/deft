@@ -35,15 +35,7 @@ n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
 n0 = "n0" === w0 n
-{-
---These are temporary names for the soft weighted densities
-soft_n, soft_n3, soft_n2, soft_n1, soft_n0 :: Expression RealSpace
-soft_n "soft_n" === r_var "x"
-soft_n3 "soft_n3" === soft_w3 soft_n
-soft_n2 "soft_n2" === soft_w2 soft_n
-soft_n1 "soft_n1" === soft_w1 soft_n
-soft_n0 "soft_n0" === soft_w0 soft_n
--}
+
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
 n1v = "n1v" `nameVector` w1v n
@@ -53,7 +45,7 @@ n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` 
 
 gamma, b :: Type a => Expression a
 b = 2*gamma/(sqrt(pi*gamma)-1)/rad**2
-gamma = "gamma" === 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
+gamma = var "gamma" "\\gamma" $ 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
 
 mydr :: Expression Scalar
 mydr = 0.001
@@ -75,7 +67,7 @@ r = s_var "r"
 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
-  where w3k = var "softstep" "\\tilde\\Theta(k)" $
+  where w3k = var "w3k" "\\tilde{w_3}(k)" $
               1/(a*k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
         ksigmao2 = k*sigma/2
 
@@ -89,7 +81,7 @@ w1 x = ifft ( w1k * fft x)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
-  where w2k = var "deltak" "\\tilde\\delta(k)" $
+  where w2k = var "w2k" "\\tilde{w_2}(k)" $
               a*2*pi**(3/2)*exp(-(a*k/2)**2)*(a**2*cos(k*sigma/2) + sigma*sin(k*sigma/2)/k)
 
 w2v :: Expression RealSpace -> Vector RealSpace
@@ -99,16 +91,3 @@ w2v x = vifft ( w2vk *. fft x)
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vifft ( w1vk *. fft x)
   where w1vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r**2))
-{-
-soft_w2 ::Expression RealSpace -> Expression RealSpace
-soft_w2 x = ifft ( stepk * fft x)
-  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
-
-soft_w1 ::Expression RealSpace -> Expression RealSpace
-soft_w1 x = ifft ( stepk * fft x)
-  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
-
-soft_w0 ::Expression RealSpace -> Expression RealSpace
-soft_w0 x = ifft ( stepk * fft x)
-  where stepk = protect "step" "\\Theta(k)" $ smear * (4*pi) * (sin kR - kR * cos kR) / k**3
--}
