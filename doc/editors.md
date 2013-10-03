@@ -37,7 +37,6 @@ You configure emacs by editing the .emacs file in your home
 directory.  The most relevant lines you will want to add are:
 
     (setq-default indent-tabs-mode nil)
-    (setq-default tab-width 2)
     (setq-default show-trailing-whitespace t)
 
 By default, emacs will warn you if you try to edit a buffer for a file

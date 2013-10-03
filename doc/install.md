@@ -11,6 +11,11 @@ On the OSU Physics cluster, you can get the code with:
 
     git clone /home/droundy/git/deft.git
 
+Or if you have an account on the OSU Physics cluster, you can get the
+code onto your own computer with:
+
+    git clone quipu.physics.oregonstate.edu:/home/droundy/git/deft.git
+
 Building deft
 -------------
 
