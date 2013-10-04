@@ -359,18 +359,17 @@ int main(int argc, char *argv[]){
           const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
           radial_distribution[i] = radial_distributon_histogram[i]*volume/(Vi*density_saved_count*N*(N-1));
         }
-        const double number_spheres_in_density = density_saved_count*double(N);
         if (!flat_div){
           for(long i=0; i<div; i++){
             double rmax = radius[i+1];
             double rmin = radius[i];
             const double dvolume = 4/3.*M_PI*rmax*rmax*rmax - 4/3.*M_PI*rmin*rmin*rmin;
-            density[i]=shells[i]/dvolume/number_spheres_in_density;
+            density[i]=shells[i]/dvolume/density_saved_count;
           }
         } else {
           const double dvolume = lenx*leny*lenz/div;
           for(long i=0; i<div; i++){
-            density[i]=shells[i]/dvolume/number_spheres_in_density;
+            density[i]=shells[i]/dvolume/density_saved_count;
           }
         }
 
@@ -446,57 +445,57 @@ int main(int argc, char *argv[]){
 
       spheres[j%N] = temp;
       workingmoves++;
+    }
     
-      // only write out the sphere positions after they've all had a
-      // chance to move
-      if (j%N == 0) {
-        density_saved_count++;
-        for (long s=0;s<N;s++) {
-          shells[shell(spheres[s], div, radius, sections)]++;
-          for (long i=0; i<N; i++){
-            for (long k=0; k<div; k++) {
-              Vector3d vri = spheres[i]-spheres[s];
-              vri = fixPeriodic(vri);
-              const double ri = distance(vri,Vector3d(0,0,0));
-              if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
-                radial_distributon_histogram[k]++;
-              }
+    // only write out the sphere positions after they've all had a
+    // chance to move
+    if (j%N == 0) {
+      density_saved_count++;
+      for (long s=0;s<N;s++) {
+        shells[shell(spheres[s], div, radius, sections)]++;
+        for (long i=0; i<N; i++){
+          for (long k=0; k<div; k++) {
+            Vector3d vri = spheres[i]-spheres[s];
+            vri = fixPeriodic(vri);
+            const double ri = distance(vri,Vector3d(0,0,0));
+            if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
+              radial_distributon_histogram[k]++;
             }
           }
         }
       }
-      if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
-        double newpress = calcPressure(spheres, N, volume);
-        const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
-        if (newpress != newpress) {
-          printf("Got NaN trouble.\n");
-          exit(1);
-        }
-        printf("Pressure is %g (excess pressure: %g), energy is %g\n",
-               newpress, excpress, potentialEnergy(spheres,N,R));
-        pressure_sum += calcPressure(spheres, N, volume);
-        num_pressures_in_sum += 1;
+    }
+    if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
+      double newpress = calcPressure(spheres, N, volume);
+      const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
+      if (newpress != newpress) {
+        printf("Got NaN trouble.\n");
+        exit(1);
       }
-
-
-      if(j % (iterations/100)==0 && j != 0){
-        double secs_to_go = secs_per_iteration*(iterations - j);
-        long mins_to_go = secs_to_go / 60;
-        long hours_to_go = mins_to_go / 60;
-        mins_to_go = mins_to_go % 60;
-        if (hours_to_go > 5) {
-          printf("%.0f%% complete... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
-        } else if (mins_to_go < 1) {
-          printf("%.0f%% complete... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
-        } else if (hours_to_go < 1) {
-          printf("%.0f%% complete... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
-        } else if (hours_to_go < 2) {
-          printf("%.0f%% complete... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
-        } else {
-          printf("%.0f%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
-        }
-        fflush(stdout);
+      printf("Pressure is %g (excess pressure: %g), energy is %g\n",
+             newpress, excpress, potentialEnergy(spheres,N,R));
+      pressure_sum += calcPressure(spheres, N, volume);
+      num_pressures_in_sum += 1;
+    }
+    
+    
+    if(j % (iterations/100)==0 && j != 0){
+      double secs_to_go = secs_per_iteration*(iterations - j);
+      long mins_to_go = secs_to_go / 60;
+      long hours_to_go = mins_to_go / 60;
+      mins_to_go = mins_to_go % 60;
+      if (hours_to_go > 5) {
+        printf("%.0f%% complete... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+      } else if (mins_to_go < 1) {
+        printf("%.0f%% complete... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
+      } else if (hours_to_go < 1) {
+        printf("%.0f%% complete... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else if (hours_to_go < 2) {
+        printf("%.0f%% complete... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+      } else {
+        printf("%.0f%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
       }
+      fflush(stdout);
     }
   }
   //////////////////////////////////////////////////////////////////////////////////////////
