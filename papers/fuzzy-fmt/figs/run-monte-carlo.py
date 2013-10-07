@@ -9,6 +9,9 @@ if os.path.isdir('figs'):
     figsdir = 'figs/'
     bindir = '../..'
 
+# always remember to build the executable before running it
+system('scons -U')
+
 def run_homogeneous(fillingfraction, temperature):
     nspheres = round(fillingfraction*30**3/(4*pi/3))
     filename = '%s/mc-%.4f-%.4f' % (figsdir, fillingfraction, temperature)
