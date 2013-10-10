@@ -858,14 +858,14 @@ after the transform, we can dot both sides with $\mathbf{\hat{k}}$.
     \right] \mathrm{dr} \\
   &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{-1}{ikr}\left(
-    e^{ikr\cos{\theta}} + e^{-ikr\cos{\theta}} \right) +
+    e^{ikr} + e^{-ikr} \right) +
     \frac{1}{(ikr)^2}e^{-ikr\cos{\theta}} \bigg{|}_0^\pi \right]
   \mathrm{dr} \\
   &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{-1}{ikr}\left(
-    e^{ikr\cos{\theta}} + e^{-ikr\cos{\theta}} \right)
-    +\frac{-1}{(kr)^2} \left(e^{ikr\cos{\theta}} -
-    e^{-ikr\cos{\theta}}\right)\right] \mathrm{dr} \\
+    e^{ikr} + e^{-ikr} \right)
+    +\frac{-1}{(kr)^2} \left(e^{ikr} -
+    e^{-ikr}\right)\right] \mathrm{dr} \\
   &= \frac{-2 \sqrt{\pi}}{a}\int_0^\infty r^3
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{2\cos{kr}}{ikr}
     +\frac{2i\sin{kr}}{(kr)^2}\right] \mathrm{dr} \\
