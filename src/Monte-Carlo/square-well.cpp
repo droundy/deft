@@ -146,14 +146,14 @@ bool overlap(const ball &a, const ball &b, const double periodic[3], double dr) 
 
 
 int overlaps_with_any(const ball &a, const ball *p,
-                      const double periodic[3], bool count, double dr) {
-  int overlapCount = 0;
+                      const double periodic[3], double dr) {
   for (int i = 0; i < a.num_neighbors; i++) {
     if (overlap(a,p[a.neighbors[i]],periodic,dr))
-      overlapCount ++;
+      return true;
   }
-  return count ? overlapCount : (overlapCount > 0);
+  return false;
 }
+
 bool in_cell(const ball &p, const double walls[3], bool has_walls, double dr) {
   if(has_walls) {
     for (int i = 0; i < 3; i++) {
