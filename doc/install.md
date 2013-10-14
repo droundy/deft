@@ -40,11 +40,16 @@ You need ...
     python-matplotlib
     python-scipy
     python-markdown # for the documentation
+    inkscape # for the documentation
 
 Running the test suite
 ----------------------
 
-You can run the tests with
+Our test suite is run automatically when necessary when you run
+
+    scons
+
+or you can explicitly request that the tests be run by typing
 
     scons check
 
