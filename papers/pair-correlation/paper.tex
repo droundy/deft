@@ -8,7 +8,7 @@
 \newcommand{\rr}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
-\newcommand{\fixme}[1]{\text{\red{[#1]}}}
+\newcommand{\fixme}[1]{\red{[#1]}}
 
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
@@ -349,8 +349,6 @@ simulations of the hard-sphere radial distribution function.
 
 \fixme{add table with parameters}
 
-\section{Results}
-\subsection{Pair distribution function}
 
 \newcommand\paircaption[1]{ The pair distribution function near a hard
   wall, with a packing fraction of #1, with $\rr_1$ in contact with
@@ -365,29 +363,89 @@ simulations of the hard-sphere radial distribution function.
   (color?)~\cite{fischer1980born}.  The latter is only plotted at
   contact, where it is defined.  }
 
+\section{Results}
+
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-1.pdf}
   \caption{ \paircaption{0.1}
   }\label{fig:pair-distribution-1}
 \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-2.pdf}
-  \caption{\paircaption{0.2}}\label{fig:pair-distribution-2}
-\end{figure}
+\subsection{Pair distribution function}
+
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-2.pdf}
+%%   \caption{\paircaption{0.2}}\label{fig:pair-distribution-2}
+%% \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-3.pdf}
   \caption{\paircaption{0.3}}\label{fig:pair-distribution-3}
 \end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-4.pdf}
-  \caption{\paircaption{0.4}}\label{fig:pair-distribution-4}
-\end{figure}
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-4.pdf}
+%%   \caption{\paircaption{0.4}}\label{fig:pair-distribution-4}
+%% \end{figure}
 
-Discuss the pair distribution function here, explaining plots
-  and discussing results and comparison.
+We begin by examining the pair distribution function near a hard wall,
+with a focus on the case where one of the two spheres is in contact
+with the hard wall.  Figure~\ref{fig:pair-distribution-1}a
+and~\ref{fig:pair-distribution-3}a compare the results of our
+approximate functional with Monte Carlo simulation at packing
+fractions of 0.1 and 0.3 respectively.  We see reasonable agreement at
+the lower density, with some reduced oscillations at larger distances,
+and a flatter angular dependence when the two spheres are in contact.
+At the higher density, we see significant structure developing in the
+simulation results that is not reflected in our approximation.
+
+Figure~\ref{fig:pair-distribution-1}b
+and~\ref{fig:pair-distribution-3}b show the pair distribution function
+as plotted along a path illustrated in
+Fig.~\ref{fig:pair-distribution-1}a.  These plots compare this work
+with Monte Carlo results, as well as the approximations of Sokolowski
+and Fischer~\cite{sokolowski1992role} and that of Fischer and
+Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
+The approach of Fischer and Methfessel is only valid when the two
+spheres are in contact, and is therefore only plotted on that segment
+of the path.  As an input to both previous approximations we use the
+hard sphere radial distribution function found using Monte Carlo
+simulation, interpolated as necessary.  We find that both previous
+approximations to the pair distribution function predict the
+qualtitative angular dependence of the pair distribution function at
+contact better than this work.  However, in each case the pair
+distribution function has a systematic error at contact---either too
+high or too low.  Thus while our approximation is smoother than either
+of the existing approaches, its errors will have a tendancy to cancel
+when used in a perturbation expansion.  At higher densities, the
+approximation of Fischer and Methfessel requires evaluating the radial
+distribution function at densities significantly higher than the
+freezing density, which poses numerical difficulties when using the
+radial distribution function from simulation.  When the two points are
+more than a radius away from contact, we find that any of these
+approaches gives a reasonable prediction, with our approach
+underestimating the oscillations in $g^(2)$, as expected based on our
+fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
+
+Just as the radial distribution function of a homogeneous fluid may be
+computed from the density of an inhomogeneous one using Percus'
+test-particle trick, the triplet distribution function of a
+homogeneous system can be computed using an approximation of the pair
+distribution for an inhomogeneous fluid, such as we have developed.
+\begin{align}
+  g^{(3)}(\rr_1,\rr_2,\rr_3) &= \frac{n_{\textrm{TP}(\rr_1)}(\rr_2)
+  n_{\textrm{TP}(\rr_1)}(\rr_3)}{n^2}
+  g^{(2)}_{\textrm{TP}(\rr_1)}(\rr_2,\rr_3)
+\end{align}
+where $g^{(3)}(\rr_1,\rr_2,\rr_3)$ is the triplet distribution
+function of a homogeneous fluid with density $n$, and the
+$\textrm{TP}(\rr_1)$ subscript indicates quantities computed for the
+inhomogeneous density configuration in which one sphere is fixed at
+position $\rr_1$.  This method treats one of the three positions---the
+location of the test particle---differently from the others, which
+means that a poor approximation to the pair distribution function may
+beak the symmetry which is present in the true triplet distribution
+function.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
@@ -411,26 +469,6 @@ Discuss the pair distribution function here, explaining plots
     shown as a dotted lin on the plot to the
     left.}\label{fig:triplet-contact-distribution-4}
 \end{figure}
-
-Just as the radial distribution function of a homogeneous fluid may be
-computed from the density of an inhomogeneous one using Percus'
-test-particle trick, the triplet distribution function of a
-homogeneous system can be computed using an approximation of the pair
-distribution for an inhomogeneous fluid, such as we have developed.
-\begin{align}
-  g^{(3)}(\rr_1,\rr_2,\rr_3) &= \frac{n_{\textrm{TP}(\rr_1)}(\rr_2)
-  n_{\textrm{TP}(\rr_1)}(\rr_3)}{n^2}
-  g^{(2)}_{\textrm{TP}(\rr_1)}(\rr_2,\rr_3)
-\end{align}
-where $g^{(3)}(\rr_1,\rr_2,\rr_3)$ is the triplet distribution
-function of a homogeneous fluid with density $n$, and the
-$\textrm{TP}(\rr_1)$ subscript indicates quantities computed for the
-inhomogeneous density configuration in which one sphere is fixed at
-position $\rr_1$.  This method treats one of the three positions---the
-location of the test particle---differently from the others, which
-means that a poor approximation to the pair distribution function may
-beak the symmetry which is present in the true triplet distribution
-function.
 
 Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
 compare the triplet distribution function computed using our
