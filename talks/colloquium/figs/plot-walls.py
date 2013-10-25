@@ -44,17 +44,20 @@ def plotit(dftdata, mcdata):
 
 #pylab.twinx()
 
+    dftr = dftdata[:,0]/2+offset
+    thiswork = dftdata[:,5]
+    gross = dftdata[:,7]
     stop_here = int(dft_len - 1/dft_dr)
     print stop_here
     start_here = int(2.5/dft_dr)
     off = 1
-    me = 55
+    me = 40
 
     A_plt = pylab.subplot(3,1,1)
     A_plt.axvline(x=0, color='k', linestyle=':')
     A_plt.plot(mcdata[:,0]/2+mcoffset,mcdata[:,2+2*off]/nAmc,"r-",label="$g_\sigma^A$ Monte Carlo")
-    A_plt.plot(dftdata[start_here:stop_here,0]/2+offset,dftdata[start_here:stop_here,5],"ro",markevery=me,label="$g_\sigma^A$ this work")
-    A_plt.plot(dftdata[:,0]/2+offset,dftdata[:,7],"rx",markevery=me,label="Gross",
+    A_plt.plot(dftr[dftr>=0],thiswork[dftr>=0],"ro",markevery=me*.8,label="$g_\sigma^A$ this work")
+    A_plt.plot(dftr[dftr>=0],gross[dftr>=0],"rx",markevery=me,label="Gross",
                markerfacecolor='none',markeredgecolor='red', markeredgewidth=1)
     A_plt.legend(loc='best', ncol=1).draw_frame(False) #.get_frame().set_alpha(0.5)
     A_plt.yaxis.set_major_locator(pylab.MaxNLocator(integer=True,prune='upper'))
