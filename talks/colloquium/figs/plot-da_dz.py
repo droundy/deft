@@ -48,7 +48,7 @@ plt.plot(mc_z0/2, np.pi*delta_r**2*mc_da_dz, 'k.', label='MC')
 
 for i in xrange(len(versions)):
   z0, da_dz = read_da_dz(versions[i])
-  plt.plot((z0-3.0)/2, np.pi*delta_r**2*da_dz, colors[i]+'-', label=names[i])
+  plt.plot(z0/2, np.pi*delta_r**2*da_dz, colors[i]+'-', label=names[i])
 
 plt.xlim([-.2,1.5])
 #plt.ylabel(r'$da_1/dz$')
