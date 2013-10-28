@@ -1,6 +1,8 @@
 #include "vector3d.h"
 #pragma once
 
+double iRatio = 1.2;
+
 struct ball {
   vector3d pos;
   double R;
@@ -67,3 +69,10 @@ ball random_move(const ball &original, double size, const double len[3]);
 int move_one_ball(int id, ball *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
                         double dist, double angwidth, int max_neighbors, double dr);
+
+// Used for determining initial configuration of balls; need about (and at least) N
+// Return number of positions in a periodic face-fentered cubic grid nx by ny by nz
+int fcc_faces(int nx, int ny, int nz);
+int fcc_inner_corners(int nx, int ny, int nz);
+int fcc_outer_corners(int nx, int ny, int nz);
+int fcc_total(int nx, int ny, int nz);

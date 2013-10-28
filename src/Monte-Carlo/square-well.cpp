@@ -4,7 +4,7 @@
 
 ball::ball() {
   pos = vector3d();
-  R = 0;
+  R = 1;
   neighbors = new int[0];
   num_neighbors = 0;
   neighbor_center = vector3d();
@@ -216,4 +216,22 @@ int move_one_ball(int id, ball *p, int N, const double periodic[3],
     }
   }
   return return_val; //move unsucessful
+}
+
+int fcc_faces(int nx, int ny, int nz) {
+  return 3*nx*ny*nz;
+}
+
+int fcc_inner_corner_spots(int nx, int ny, int nz) {
+  return (nx-1)*(ny-1)*(nz-1);
+}
+
+int fcc_boundary_corners(int nx, int ny, int nz) {
+  return nx*(ny-1)+ny*(nz-1)+nz*(nx-1)+1;
+}
+
+int fcc_total(int nx, int ny, int nz) {
+  return fcc_faces(nx,ny,nz) \
+    + fcc_inner_corner_spots(nx,ny,nz) \
+    + fcc_boundary_corners(nx,ny,nz);
 }
