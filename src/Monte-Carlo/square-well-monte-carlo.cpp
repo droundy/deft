@@ -6,7 +6,7 @@
 #include <popt.h>
 #include "handymath.h"
 #include "vector3d.h"
-#include "Monte-Carlo/balls.h"
+#include "Monte-Carlo/square-well.h"
 
 #define X 0
 #define Y 1
@@ -61,13 +61,9 @@ bool testcase = false;
 // States how long it's been since last took call.
 static void took(const char *name);
 
-// Saves the vertices of all balls to a file.
+// Saves the locations of all balls to a file.
 inline void save_locations(const ball *p, int N, const char *fname,
                            const double len[3], const char *comment="");
-
-// Generates all of the figures for the talk instead of performing a normal run
-// returns 0 unless there's an error
-inline int generate_talk_figs();
 
 // The following functions only do anything if debug is true:
 
@@ -146,8 +142,6 @@ int main(int argc, const char *argv[]) {
 information on the number and type of balls, as well as file extensions", "name"},
     {"dir", 'd', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Directory to save to", "dir"},
-    {"shape", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &shape_name, 0,
-     "Type of balls to use. Can be one of [cube | tetrahedron | truncated_tetrahedron | cuboid]", "shape"},
     {"ratio", 'r', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &ratio, 0, "Ratio of sides of cuboid. For a cuboid of sides AxAxB, ratio = B/A.", "ratio"},
     {"R", 'R', POPT_ARG_DOUBLE, &R, 0,
      "Size of the sphere that circumscribes each ball. Defaults to setting edge length to 1", "R"},
@@ -164,22 +158,12 @@ information on the number and type of balls, as well as file extensions", "name"
      "Radius of cylinder used in distribtution functions. Defaults to the radius of a circle inscribed on a side", "dr"},
     {"scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &scale, 0,
      "Standard deviation for translations of balls", "scale"},
-    {"theta_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &theta_scale, 0,
-     "Standard deviation for rotations of balls", "theta"},
     {"seed", 's', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "seed"},
-    {"save_vertices", 'v', POPT_ARG_INT, &vertex_period, 0,
-     "Periodically saves the vertex locations of the balls, where period is a number \
-of iterations", "period"},
     {"time", 't', POPT_ARG_INT, &totime, 0,
      "Timing information will be displayed", "interval"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "goal"},
-    {"talk", '\0', POPT_ARG_NONE, &talk, 0,
-     "Generate figures for talk. Will not perform a normal run."},
-    {"structure", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &structure, 0,
-     "Structure to use for truncated tetrahedra. Does nothing for other shapes. \
-Can be one of [ice | arsenic]"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -196,10 +180,6 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   poptFreeContext(optCon);
 
-  if (talk) {
-    printf("Generating data for presentation figures.\n");
-    return generate_talk_figs();
-  }
   // ---------------------------------------------------------------------------
   // Verify we have reasonable arguments and set secondary parameters
   // ---------------------------------------------------------------------------
@@ -207,20 +187,11 @@ periodicity/dimensions are not set by default and are required.\n");
   double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
                    periodic[2] + walls[2]};
 
-  const poly_shape shape(shape_name, ratio);
-  if (shape.type == NONE) {
-    fprintf(stderr, "\nInvalid shape.\n");
-    return 1;
-  }
-  if(R == 0) {
-    R = 1/(shape.vertices[1] - shape.vertices[0]).norm();
-    printf("\nRadius was not specified, so setting radius to %g.\n", R);
-  }
   if(ff != 0) {
     // R^3*V*N/(Lx*Ly*Lz) = ff
     // Lx*Ly*Lz = R^3*V*N/ff
     // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
-    const double fac = R*pow(shape.volume*N/ff/len[X]/len[Y]/len[Z], 1.0/3.0);
+    const double fac = R*pow(4.0/3.0*M_PI*uipow(R,3)*N/ff/len[X]/len[Y]/len[Z], 1.0/3.0);
     for(int i = 0; i < 3; i++) {
       periodic[i] *= fac;
       walls[i] *= fac;
@@ -230,8 +201,7 @@ periodicity/dimensions are not set by default and are required.\n");
     printf("so setting cell dimensions to (%g, %g, %g).\n", len[X], len[Y], len[Z]);
 
   }
-  if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0 ||
-      theta_scale < 0 || vertex_period < 0) {
+  if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
@@ -246,7 +216,7 @@ periodicity/dimensions are not set by default and are required.\n");
       return 1;
     }
   }
-  const double eta = (double)N*shape.volume*R*R*R/len[X]/len[Y]/len[Z];
+  const double eta = (double)N*(4.0/3.0*M_PI*uipow(R,3))*R*R*R/len[X]/len[Y]/len[Z];
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. They will never fit. Filling fraction: %g\n", eta);
     return 7;
@@ -267,7 +237,7 @@ periodicity/dimensions are not set by default and are required.\n");
   printf("----------------------------------------------------------------------\n");
   printf("Running %s with parameters:\n", argv[0]);
   int cond = 0;
-  for(int i=1; i<argc; i++) {
+  for(int i = 1; i < argc; i++) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
   }
@@ -300,13 +270,13 @@ periodicity/dimensions are not set by default and are required.\n");
   // Approximate the maximum number of neighbors a ball could have
   // hokey guess, but it should always be high enough
   const double neighbor_sphere_vol = 4.0/3.0*M_PI*(uipow(2.5*R+neighborR,3)-uipow(R,3));
-  int max_neighbors = min(N, neighbor_sphere_vol / shape.volume);
+  int max_neighbors = min(N, neighbor_sphere_vol / (4.0/3.0*M_PI*uipow(R,3)));
 
   for(int i = 0; i < N; i++)
     balls[i].R = R;
 
   // Start with some lower bound for grid size
-  int nx = floor(pow(N*len[X]*len[X]/(3*len[Y]*len[Z]),1/3));
+  int nx = floor(pow(N*len[X]*len[X]/(3*len[Y]*len[Z]),1.0/3.0));
   int ny = ceil(len[Y]/len[X]*nx);
   int nz = ceil(len[Z]/len[X]*nx);
   // Increase size until grid large enough to fit all balls
@@ -317,11 +287,15 @@ periodicity/dimensions are not set by default and are required.\n");
     int nz = ceil(len[Z]/len[X]*nx);
   }
 
+  double xspace = len[0]/(double)nx;
+  double yspace = len[1]/(double)ny;
+  double zspace = len[2]/(double)nz;
+
   // Reserve some spots at random to be vacant
   int free_spots = fcc_total(nx,ny,nz)-N;
   bool *spot_vacant = new bool[fcc_total(nx,ny,nz)]();
   int p; // Position index
-  for(i = 0; i < free_spots; i++) {
+  for(int i = 0; i < free_spots; i++) {
     p = floor(random::ran()*fcc_total(nx,ny,nz)); // Pick a random position index
     if(spot_vacant[p] == false)
       spot_vacant[p] = true;
@@ -331,7 +305,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // Set all remaining balls in remaining spots, keeping track of and skipping vacancies
   int encountered_vacancies = 0;
   p = 0;
-  for(i = 0; i < N; i++) {
+  for(int i = 0; i < N; i++) {
     if(spot_vacant[i+encountered_vacancies])
       encountered_vacancies++;
     p = i + encountered_vacancies;
@@ -343,8 +317,8 @@ periodicity/dimensions are not set by default and are required.\n");
 
     // If p is larger than the total number of outer and inner corner spots on grid,
     //   modulate p down to within the number of face positions (subset 1)
-    if(p > fcc_boundary_corners(nx,ny,nz) + fcc_inner_corner_spots(nx,ny,nz)) {
-      p -= fcc_boundary_corners(nx,ny,nz) + fcc_inner_corner_spots(nx,ny,nz);
+    if(p > fcc_outer_corners(nx,ny,nz) + fcc_inner_corners(nx,ny,nz)) {
+      p -= fcc_outer_corners(nx,ny,nz) + fcc_inner_corners(nx,ny,nz);
       // Simplify problem to asking in which grid cell to position the ball
       //   and on which face of the grid cell (m)
       int m = 0;
@@ -373,8 +347,8 @@ periodicity/dimensions are not set by default and are required.\n");
       // If p is larger than the number of outer corner positions on the grid,
       //  but smaller than the sum of the outer and inner corner positions,
       //  modulate p down to within the number of inner corners (subset 2)
-    } else if(p > fcc_boundary_corners(nx,ny,nz)) {
-      p -= fcc_boundary_corners(nx,ny,nz);
+    } else if(p > fcc_outer_corners(nx,ny,nz)) {
+      p -= fcc_outer_corners(nx,ny,nz);
       // For convenience, use the number of lattice positions in each dimension
       //   instead of grid positions
       nx -= 1;
@@ -407,7 +381,7 @@ periodicity/dimensions are not set by default and are required.\n");
       balls[i].pos[Z] = 0;
       // If p == 0, put it on the cell's corner
     } else {
-      for(j = 0; j < 3; j++)
+      for(int j = 0; j < 3; j++)
         balls[i].pos[j] = 0;
     }
   }
@@ -467,7 +441,7 @@ periodicity/dimensions are not set by default and are required.\n");
     for(int i = 0; i < N; i++) {
       totalmoves ++;
       int move_val = move_one_ball(i, balls, N, periodic, walls, real_walls,
-                                   neighborR, scale, theta_scale, max_neighbors, dr);
+                                   neighborR, scale, max_neighbors, dr);
       workingmoves += move_val & 1;
       neighbor_updates += (move_val & 2) > 0;
       neighbor_informs += (move_val & 4) > 0;
@@ -520,14 +494,6 @@ periodicity/dimensions are not set by default and are required.\n");
   took("Initialization");
 
   // ---------------------------------------------------------------------------
-  // Save the post-initialization configuration for troubleshooting
-  // ---------------------------------------------------------------------------
-  vertices_fname = new char[1024];
-  sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat", dir, filename, shape.name, N, -2);
-  save_locations(balls, N, vertices_fname, len);
-  delete[] vertices_fname;
-
-  // ---------------------------------------------------------------------------
   // Generate header info to put in save files
   // ---------------------------------------------------------------------------
   char *headerinfo = new char[4096];
@@ -572,7 +538,7 @@ periodicity/dimensions are not set by default and are required.\n");
     for(int i = 0; i < N; i++) {
       totalmoves ++;
       int move_val = move_one_ball(i, balls, N, periodic, walls, real_walls,
-                                   neighborR, scale, theta_scale, max_neighbors, dr);
+                                   neighborR, scale, max_neighbors, dr);
       workingmoves += move_val & 1;
     }
     // ---------------------------------------------------------------
@@ -587,58 +553,6 @@ periodicity/dimensions are not set by default and are required.\n");
       density_histogram[int(round(len[X]/de_density)) + y_i] ++;
       density_histogram[int(round((len[X] + len[Y])/de_density)) + z_i] ++;
     }
-
-
-    /*****************************************************************************/
-    // TODO: ASK PAHO: WHAT IS THIS CODE DOING?
-    /*****************************************************************************/
-    // this is an O(N^2) calculation, so we're only going to do it every N^2 moves
-    if(iteration % sqr(N) == 0) {
-      for(int i = 0; i < N; i++) {
-        const rotation unrot = balls[i].rot.conj();
-        for(int j=0; j<N; j++) {
-          if(i != j) {
-            // note: be careful about orientation when adding that
-            const vector3d pos2 = unrot.rotate_vector
-              (periodic_diff(balls[i].pos, balls[j].pos, periodic));
-            // radial
-            const double r = pos2.norm();
-            const int r_i = floor(r/de_g);
-            if(r_i < g_bins) g_histogram[r_i] ++;
-
-            // plebian face
-            // for cuboids, this is +-xhat and +-yhat
-            // for truncated_tetrahedra, this is the face vectors
-            // for everythig else, this is all the faces
-            if(shape.type == CUBOID) {
-              const vector3d faces[] = {vector3d(1,0,0), vector3d(0,1,0)};
-              for(int k=0; k<2; k++) {
-                const double e = pos2[k];
-                const double dist = (pos2 - e*faces[k]).norm();
-                if (dist < dr_g) {
-                  const int e_i = floor(fabs(e/de_g));
-                  if (e_i < g_bins) g_histogram[g_bins + e_i] ++;
-                }
-              }
-            } else {
-              for(int k=0; k<shape.nfaces; k++) {
-                double e = pos2.dot(shape.faces[k]);
-                const double dist = (pos2 - e*shape.faces[k]).norm();
-                if (dist < dr_g) {
-                  if(shape.type != TETRAHEDRON && shape.type != TRUNCATED_TETRAHEDRON)
-                    e = fabs(e);
-                  const int e_i = floor(e/de_g);
-                  if(e_i >= 0 && e_i < g_bins) g_histogram[g_bins + e_i] ++;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    /*****************************************************************************/
-    /*****************************************************************************/
-
 
     // ---------------------------------------------------------------
     // Get pressure info - this is slow, might want to do it less often
@@ -675,7 +589,7 @@ periodicity/dimensions are not set by default and are required.\n");
 
       // Saving density in each of the x, y, z dimensions
       char *density_fname = new char[1024];
-      sprintf(density_fname, "%s/%s-density-%s-%i.dat", dir, filename, shape.name, N);
+      sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
       FILE *densityout = fopen((const char *)density_fname, "w");
       delete[] density_fname;
       fprintf(densityout, "%s", headerinfo);
@@ -705,7 +619,7 @@ periodicity/dimensions are not set by default and are required.\n");
       // Save distribution funtions
       // fixme: assumes homogeneous for density
       char *g_fname = new char[1024];
-      sprintf(g_fname, "%s/%s-g-%s-%i.dat", dir, filename, shape.name, N);
+      sprintf(g_fname, "%s/%s-g-%i.dat", dir, filename, N);
       FILE *g_out = fopen((const char *)g_fname, "w");
       delete[] g_fname;
       fprintf(g_out, "%s", headerinfo);
@@ -713,42 +627,19 @@ periodicity/dimensions are not set by default and are required.\n");
       fprintf(g_out, "\ne       ");
       const double density = N/len[X]/len[Y]/len[Z];
       const double vol0 = len[X]*len[Y]*len[Z];
-      for(int i = 0; i<n_gfuncs; i++) fprintf(g_out, "%8s  ", g_names[i]);
       fprintf(g_out, "\n");
-      for(int e_i = 0; e_i<g_bins; e_i++) {
+      for(int e_i = 0; e_i < g_bins; e_i++) {
         const double e = (e_i + 0.5)*de_g;
         fprintf(g_out, "%6.3f  ", e);
         const double vol1 = 4.0/3.0*M_PI*(uipow(e+de_g/2, 3) - uipow(e-de_g/2, 3));
         const double probability = (double)g_histogram[e_i]/totalmoves;
         const double n2 = probability/vol0/vol1;
-        const double g = n2/sqr(density)*N*N
+        const double g = n2/sqr(density)*N*N;
           fprintf(g_out, "%8.5f \n", g);
       }
       fclose(g_out);
 
       delete[] countinfo;
-      // ---------------------------------------------------------------------------
-      // Save the configuration for troubleshooting
-      // ---------------------------------------------------------------------------
-      vertices_fname = new char[1024];
-      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat",
-              dir, filename, shape.name, N, -3);
-      save_locations(balls, N, vertices_fname, len);
-      delete[] vertices_fname;
-    }
-    // ---------------------------------------------------------------
-    // Save locations of vertices if desired
-    // ---------------------------------------------------------------
-    if (vertex_period > 0 && iteration % vertex_period == 0) {
-      printf("Saving vertex locations. Frame: %i. Iteration: %li.\n", frame, iteration);
-      vertices_fname = new char[1024];
-      sprintf(vertices_fname, "%s/vertices/%s-vertices-%s-%i-%i.dat",
-              dir, filename, shape.name, N, frame);
-      char *comment = new char[1024];
-      sprintf(comment, "period: %i, iteration: %li", vertex_period, iteration);
-      save_locations(balls, N, vertices_fname, len, comment);
-      delete[] vertices_fname;
-      frame ++;
     }
     // ---------------------------------------------------------------
     // Print out timing information if desired
@@ -795,15 +686,13 @@ inline void print_all(const ball *p, int N, double periodic[3]) {
   if (debug) {
     for (int i = 0; i < N; i++) {
       char *pos = new char[1024];
-      char *rot = new char[1024];
       p[i].pos.tostr(pos);
-      p[i].rot.tostr(rot);
-      printf("%4i: %s, R: %4.2f, %i neighbors: ", i, p[i].mypoly->name, p[i].R, p[i].num_neighbors);
-      for(int j=0; j<min(10, p[i].num_neighbors); j++)
+      printf("%4i: R: %4.2f, %i neighbors: ", i, p[i].R, p[i].num_neighbors);
+      for(int j = 0; j < min(10, p[i].num_neighbors); j++)
         printf("%i ", p[i].neighbors[j]);
       if (p[i].num_neighbors > 10)
         printf("...");
-      printf("\n      pos:          %s\n      rot: %s\n", pos, rot);
+      printf("\n      pos:          %s\n", pos);
     }
     printf("\n");
     fflush(stdout);
@@ -813,21 +702,18 @@ inline void print_all(const ball *p, int N, double periodic[3]) {
 inline void print_one(const ball &a, int id, const ball *p, int N, double periodic[3]) {
   if (debug) {
     char *pos = new char[1024];
-    char *rot = new char[1024];
     a.pos.tostr(pos);
-    a.rot.tostr(rot);
-    printf("%4i: %s, R: %4.2f, %i neighbors: ", id, a.mypoly->name, a.R, a.num_neighbors);
+    printf("%4i: R: %4.2f, %i neighbors: ", id, a.R, a.num_neighbors);
     for(int j=0; j<min(10, a.num_neighbors); j++)
       printf("%i ", a.neighbors[j]);
     if (a.num_neighbors > 10)
       printf("...");
-    printf("\n      pos:          %s\n      rot: %s\n", pos, rot);
+    printf("\n      pos:          %s\n", pos);
     for (int j=0; j<N; j++) {
       if (j != id && overlap(a, p[j], periodic)) {
         p[j].pos.tostr(pos);
-        p[j].rot.tostr(rot);
         printf("\t  Overlaps with %i", j);
-        printf(": %s   %s\n", pos, rot);
+        printf(": %s\n", pos);
       }
     }
   }
@@ -848,22 +734,18 @@ inline void print_bad(const ball *p, int N, double periodic[3]) {
       }
       if (!incell || overlaps) {
         char *pos = new char[1024];
-        char *rot = new char[1024];
         p[i].pos.tostr(pos);
-        p[i].rot.tostr(rot);
-        printf("%s %4i: %s   %s R: %4.2f\n", p[i].mypoly->name, i, pos, rot, p[i].R);
+        printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
         if (!incell)
           printf("\t  Outside cell!\n");
         for (int j=0; j<N; j++) {
           if (j != i && overlap(p[i], p[j], periodic)) {
             p[j].pos.tostr(pos);
-            p[j].rot.tostr(rot);
             printf("\t  Overlaps with %i", j);
-            printf(": %s   %s\n", pos, rot);
+            printf(": %s\n", pos);
           }
         }
         delete[] pos;
-        delete[] rot;
       }
     }
   }
@@ -911,119 +793,7 @@ void save_locations(const ball *p, int N, const char *fname, const double len[3]
   fprintf(out, "%g %g %g\n", len[X], len[Y], len[Z]);
   for(int i = 0; i < N; i++) {
     fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[X], p[i].pos[Y], p[i].pos[Z]);
-    for(int j=0; j<p[i].mypoly->nvertices; j++) {
-      const vector3d vertex =
-        p[i].rot.rotate_vector(p[i].mypoly->vertices[j]*p[i].R) + p[i].pos;
-      fprintf(out, "%6.2f %6.2f %6.2f ", vertex[0], vertex[1], vertex[2]);
-    }
     fprintf(out, "\n");
   }
   fclose(out);
-}
-
-int generate_talk_figs() {
-  const poly_shape cube("cube");
-  const poly_shape truncated_tetrahedron("truncated_tetrahedron");
-  const poly_shape tetrahedron("tetrahedron");
-
-  // Generate background image for title slide
-  int N = 7;
-  ball *p = new ball[N];
-  const double len[3] = {20, 20, 20};
-  const double R = 1;
-  for(int i = 0; i < N; i++) {
-    p[i].R = R;
-  }
-  p[0].mypoly = &truncated_tetrahedron;
-  p[1].mypoly = &cube;
-  p[2].mypoly = &truncated_tetrahedron;
-  p[3].mypoly = &tetrahedron;
-  p[4].mypoly = &cube;
-  p[5].mypoly = &truncated_tetrahedron;
-  p[6].mypoly = &tetrahedron;
-
-  const double periodic[3] = {0, 0, 0};
-  const double walls[3] = {6.5, 4, 5};
-  const bool real_walls = true;
-  const int max_neighbors = N;
-  const double scale = 1.5;
-  const double theta_scale = M_PI/4.0;
-  const double neighborR = .5;
-
-  for(int i = 0; i < N; i++) {
-    p[i].pos = vector3d(random::ran(), random::ran(), random::ran())*3;
-  }
-  initialize_neighbor_tables(p, N, neighborR, max_neighbors, periodic);
-
-  for(int j=0; j<100; j++) {
-    for(int i = 0; i < N; i++) {
-      move_one_ball(i, p, N, periodic, walls, real_walls,
-                          neighborR, scale, theta_scale, max_neighbors, 0);
-    }
-  }
-  for(int i = 0; i < N; i++) {
-    p[i].pos += vector3d(0, -4.5, 0);
-  }
-  save_locations(p, N, "talks/balls/dat/background.dat", len);
-
-  delete[] p;
-  // Generate image of ice structure
-
-  N = 26;
-  p = new ball[N];
-
-
-  for(int i = 0; i < N; i++) {
-    p[i].R = R;
-    p[i].mypoly = &truncated_tetrahedron;
-  }
-  const double fac = R/sqrt(11.0)*1.05;
-  // lattice vectors:
-  const vector3d e1 = vector3d(0, 4, 4)*fac;
-  const vector3d e2 = vector3d(4, 0, 4)*fac;
-  const vector3d e3 = vector3d(4, 4, 0)*fac;
-  const vector3d offset = vector3d(2, 2, 2)*fac;
-
-  double rad = 3.5;
-  int nx=10, ny=10, nz=10;
-  int x=-nx/2, y=-ny/2, z=-nz/2;
-  int i = 0;
-  while(i < N-1) {
-    if((x*e1 + y*e2 + z*e3).norm() < rad) {
-      p[i].pos = x*e1 + y*e2 + z*e3;
-      p[i].rot = rotation(M_PI, vector3d(1, 1, 0));
-      if(i < N-1) p[i+1].pos = offset + x*e1 + y*e2 + z*e3;
-      else break;
-      i += 2;
-    }
-    x++;
-    if(x >= nx/2) {
-      x = -nx/2;
-      y++;
-      if(y >= ny/2) {
-        y = -ny/2;
-        z++;
-        if(z >= nz/2) break;
-      }
-    }
-  }
-  save_locations(p, N, "talks/balls/dat/ice-structure.dat", len);
-
-  delete[] p;
-
-  // tetrahedra images
-  p = new ball[1];
-  rotation *rots = new rotation[3];
-  rots[1] = rotation(M_PI/4, vector3d(0, 1, 0));
-  rots[2] = rotation(M_PI/3, vector3d(1, 0, 0));
-  for(int i = 0; i < 3; i++) {
-    p[0].R = R;
-    p[0].mypoly = &truncated_tetrahedron;
-    p[0].rot = rots[i];
-    char *fname = new char[1024];
-    sprintf(fname, "talks/balls/dat/tet-%i.dat", i);
-    save_locations(p, 1, fname, len);
-  }
-
-  return 0;
 }

@@ -180,7 +180,7 @@ int move_one_ball(int id, ball *p, int N, const double periodic[3],
   ball temp = random_move(p[id], dist, len);
   int return_val = 0;
   if (in_cell(temp, walls, real_walls)) {
-    bool overlaps = overlaps_with_any(temp, p, periodic);
+    bool overlaps = overlaps_with_any(temp, p, periodic, dr);
     if (!overlaps) {
       const bool get_new_neighbors =
         (tmp_periodic_diff(temp.pos, temp.neighbor_center,
@@ -198,7 +198,7 @@ int move_one_ball(int id, ball *p, int N, const double periodic[3],
         // fixme: do this!
         //int *new_neighbors = new int[max_neighbors];
 
-        overlaps = overlaps_with_any(temp, p, periodic);
+        overlaps = overlaps_with_any(temp, p, periodic, dr);
         if (!overlaps) {
           // Okay, we've checked twice, just like Santa Clause, so we're definitely
           // keeping this move and need to tell our neighbors where we are now.
@@ -222,16 +222,16 @@ int fcc_faces(int nx, int ny, int nz) {
   return 3*nx*ny*nz;
 }
 
-int fcc_inner_corner_spots(int nx, int ny, int nz) {
+int fcc_inner_corners(int nx, int ny, int nz) {
   return (nx-1)*(ny-1)*(nz-1);
 }
 
-int fcc_boundary_corners(int nx, int ny, int nz) {
+int fcc_outer_corners(int nx, int ny, int nz) {
   return nx*(ny-1)+ny*(nz-1)+nz*(nx-1)+1;
 }
 
 int fcc_total(int nx, int ny, int nz) {
   return fcc_faces(nx,ny,nz) \
-    + fcc_inner_corner_spots(nx,ny,nz) \
-    + fcc_boundary_corners(nx,ny,nz);
+    + fcc_inner_corners(nx,ny,nz) \
+    + fcc_outer_corners(nx,ny,nz);
 }
