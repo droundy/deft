@@ -1031,6 +1031,52 @@ instance (Type a, Code a) => Code (Expression a) where
                            else show f ++ "*" ++ codePrec 7 e ""
           addup rest (1,e) = codePrec 6 e (showString " + " $ rest)
           addup rest (f,e) = show f ++ "*" ++ codePrec 7 e (showString " + " $ rest)
+
+  newcodePrec _ (Var _ c _ _ Nothing) = showString c
+  newcodePrec p (Var _ _ _ _ (Just e)) = newcodePrec p e
+  newcodePrec p (Scalar x) = newcodePrec p x
+  newcodePrec p (Expression x) = newcodePrec p x
+  newcodePrec _ (F Heaviside x) = showString "heaviside(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Cos x) = showString "cos(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Sin x) = showString "sin(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Erfi x) = showString "erfi(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Exp x) = showString "exp(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Erf x) = showString "erf(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Log x) = showString "log(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Abs x) = showString "fabs(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Signum _) = undefined
+  newcodePrec _ (Product p i) | Product p i == 1 = showString "1.0"
+  newcodePrec pree (Product p _) = showParen (pree > 7) $
+                           if den == 1
+                           then newcodesimple num
+                           else newcodesimple num . showString "/" . newcodePrec 8 den
+    where newcodesimple [] = showString "1.0"
+          newcodesimple [(a,n)] = newcodee a n
+          newcodesimple [(a,n),(b,m)] = newcodee a n . showString "*" . newcodee b m
+          newcodesimple ((a,n):es) = newcodee a n . showString "*" . newcodesimple es
+          num = product2numerator_pairs p
+          den = product2denominator p
+          newcodee _ 0 = showString "1.0" -- this shouldn't happen...
+          newcodee _ n | n < 0 = error "shouldn't have negative power here"
+          newcodee x 1 = newcodePrec 7 x
+          newcodee x 0.5 = showString "sqrt(" . newcodePrec 0 x . showString ")"
+          newcodee x nn
+            | fromInteger n2 == 2*nn && odd n2 = newcodee x 0.5 . showString "*" . newcodee x (nn-0.5)
+            | fromInteger n == nn && odd n = newcodee x 1 . showString "*" . newcodee x (nn-1)
+            | fromInteger n == nn =
+              showParen (nn/2>1) (newcodee x (nn / 2)) . showString "*" . showParen (nn/2>1) (newcodee x (nn / 2))
+            where n2 = floor (2*nn)
+                  n = floor nn
+          newcodee x n = showString "pow(" . newcodePrec 0 x . showString (", " ++ show n ++ ")")
+  newcodePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
+  newcodePrec p (Sum s _) = showParen (p > 6) (showString me)
+    where me = foldl addup "" $ sum2pairs s
+          addup "" (1,e) = newcodePrec 6 e ""
+          addup "" (f,e) = if e == 1
+                           then show f
+                           else show f ++ "*" ++ newcodePrec 7 e ""
+          addup rest (1,e) = newcodePrec 6 e (showString " + " $ rest)
+          addup rest (f,e) = show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
   latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
   latexPrec _ (Var _ _ c "" _) = showString c
   latexPrec _ (Var _ _ _ t _) = showString t
