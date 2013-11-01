@@ -1072,11 +1072,17 @@ instance (Type a, Code a) => Code (Expression a) where
   newcodePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
           addup "" (1,e) = newcodePrec 6 e ""
+          addup "" (-1,e) = "-" ++ newcodePrec 6 e ""
           addup "" (f,e) = if e == 1
                            then show f
-                           else show f ++ "*" ++ newcodePrec 7 e ""
+                           else case isConstant e of
+                                Just c -> show (f*c)
+                                Nothing -> show f ++ "*" ++ newcodePrec 7 e ""
           addup rest (1,e) = newcodePrec 6 e (showString " + " $ rest)
-          addup rest (f,e) = show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
+          addup rest (f,e) =
+             case isConstant e of
+             Nothing -> show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
+             Just c -> show (f*c) ++ (showString " + " rest)
   latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
   latexPrec _ (Var _ _ c "" _) = showString c
   latexPrec _ (Var _ _ _ t _) = showString t
