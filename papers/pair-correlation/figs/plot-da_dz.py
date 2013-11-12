@@ -58,9 +58,14 @@ plt.xlabel('$z/\sigma$')
 plt.ylabel(r'$\frac{da_1}{dz}$')
 plt.yticks([])
 plt.xticks([0,1,2,3])
+
+if 2 < delta_r and delta_r < 2.01:
+  plt.title('$\Phi(r) = \delta(\sigma - r + \delta)$     $\eta = %g$' % eta)
+else:
+  plt.title('$\Phi(r) = \delta(%g\sigma - r)$     $\eta = %g$' % (delta_r/2, eta))
+
 plt.tight_layout()
 
-#plotname = "figs/dadz-" + str(int(eta*10)) + "-" + str(int(delta_r)) + ".pdf"
 savefig("figs/dadz-%d-%d.pdf" % (int(eta*10), int(delta_r)))
 
 plt.show()

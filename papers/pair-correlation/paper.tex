@@ -81,7 +81,7 @@ where the terms $F_n$ are corrections to the free energy at order $n$
 in the small interaction.  The first and largest term in this
 expansion is
 \begin{align}
-  F_1 &= \tfrac12 \int g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|) d\rr_1d\rr_2
+  F_1 &= \tfrac12 \iint g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|) d\rr_1d\rr_2
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
@@ -168,7 +168,7 @@ density over a spherical volume:
 where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
 is computationally awkward, because it relies on the midpoint
 $\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
-Methfessel predicts the pair distribution function only at contact,
+Methfessel is intended to the pair distribution function only at contact,
 when the distance between $\rr_1$ and $\rr_2$ is a hard-sphere
 diameter.
 
@@ -189,7 +189,7 @@ was arrived at by fitting to Monte Carlo simulation.  Although
 Eq.~\ref{eq:sokolowski} has the advantages of only involving density
 averages at the points at which the pair distribution function is
 desired, cannot be written as a single-site convolution, since the
-convolution kernel depends on both points.  This limits the accuracy.
+convolution kernel depends on both points.
 
 
 
@@ -273,19 +273,18 @@ The finalalized form of our pair correlation function is:
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
 \subsection{Separable fit to the radial distribution function}
-Figure~\ref{fig:radial-distribution} shows...
 
-We here construct a separable fit to the radial distribution function
-$g(r, g_\sigma)$, which is a function of the radius $r$ and its value
-at contact $g_\sigma$.  We could convert this to a more conventional
-function of the packing fraction $\eta$ by inverting the
+We have constructed a separable fit to the radial distribution
+function $g(r, g_\sigma)$, which is a function of the radius $r$ and
+its value at contact $g_\sigma$.  We could convert this to a more
+conventional function of the packing fraction $\eta$ by inverting the
 Carnahan-Starling formula for $g_\sigma$
 \begin{equation}
   g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}
 \end{equation}
 but that would add an unnecessary step in the use of $g(r)$, since the
 averaged value of $g_\sigma$ is what we can directly compute for the
-inhomogeneous system.
+inhomogeneous system~\cite{schulte2012using}.
 
 We construct $g(r, g_\sigma)$ using several constraints.  Naturally,
 \begin{equation}
@@ -349,6 +348,9 @@ simulations of the hard-sphere radial distribution function.
 
 \fixme{add table with parameters}
 
+
+Figure~\ref{fig:radial-distribution} shows our function
+$g(r,g_\sigma)$ plotted against the $g(r)$ found from simulation.
 
 \newcommand\paircaption[1]{ The pair distribution function near a hard
   wall, with a packing fraction of #1, with $\rr_1$ in contact with
@@ -427,6 +429,29 @@ fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
 
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
+    shows the triplet distribution function, with white corresponding
+    to the contact value of the \emph{pair} distribution function.
+    The plot on the right shows the value of $g^{(3)}$ along the path
+    shown as a dotted line on the plot to the
+    left.}\label{fig:triplet-contact-distribution-3}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
+    shows the triplet distribution function, with white corresponding
+    to the contact value of the \emph{pair} distribution function.
+    The plot on the right shows the value of $g^{(3)}$ along the path
+    shown as a dotted line on the plot to the
+    left.}\label{fig:triplet-contact-distribution-4}
+\end{figure}
+
 Just as the radial distribution function of a homogeneous fluid may be
 computed from the density of an inhomogeneous one using Percus'
 test-particle trick, the triplet distribution function of a
@@ -448,40 +473,6 @@ means that a poor approximation to the pair distribution function may
 beak the symmetry which is present in the true triplet distribution
 function.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
-  \caption{The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
-    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
-    shows the triplet distribution function, with white corresponding
-    to the contact value of the \emph{pair} distribution function.
-    The plot on the right shows the value of $g^{(3)}$ along the path
-    shown as a dotted lin on the plot to the
-    left.}\label{fig:triplet-contact-distribution-3}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
-  \caption{The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
-    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
-    shows the triplet distribution function, with white corresponding
-    to the contact value of the \emph{pair} distribution function.
-    The plot on the right shows the value of $g^{(3)}$ along the path
-    shown as a dotted lin on the plot to the
-    left.}\label{fig:triplet-contact-distribution-4}
-\end{figure}
-
-Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
-compare the triplet distribution function computed using our
-approximation to $g^{(2)}$ with results from Monte Carlo simulation.
-In each figure $\rr_1$ and $\rr_2$ are held fixed, while the third
-position $\rr_3$ is varied.  The test-particle position in each case
-is $\rr_1$, which is on the left-hand side of the figure.  In the
-color plot on the left, the first and second spheres are displayed in
-grey.  On the bottom half of each left-hand plot is the triplet
-correlation function as computed using the approximation presented in
-this work.  The top half displays the triplet correlation function
-from Monte Carlo.  On the right, we display 
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
@@ -496,9 +487,49 @@ from Monte Carlo.  On the right, we display
     separated by the diameter of one sphere.}\label{fig:triplet-inbetween-distribution-4}
 \end{figure}
 
+Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
+compare the triplet distribution function computed using our
+approximation to $g^{(2)}$ with results from Monte Carlo simulation.
+In each figure $\rr_1$ and $\rr_2$ are held fixed, while the third
+position $\rr_3$ is varied.  The test-particle position in each case
+is $\rr_1$, which is on the left-hand side of the figure.  In the
+color plot on the left, the first and second spheres are displayed in
+grey.  On the bottom half of each left-hand plot is the triplet
+correlation function as computed using the approximation presented in
+this work.  The top half displays the triplet correlation function
+from Monte Carlo.  On the right, we display 
 
-\section{How well does it work?}
-Figure~\ref{fig:dadz} shows...
+
+\section{Performance in thermodynamic perturbation theory}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
+  %\includegraphics[width=\columnwidth]{figs/dadz-3-3.pdf}
+  %\includegraphics[width=\columnwidth]{figs/dadz-2-2.pdf}
+  \includegraphics[width=\columnwidth]{figs/dadz-square-well-3.pdf}
+  %%\includegraphics[width=3cm]{figs/dadz-4-3}
+  \caption{Plot of $\frac{da_1}{dz}$ near a hard
+    wall. For what $\Phi$?}\label{fig:dadz}
+\end{figure}
+
+The most relevant quantitative test of a pair distribution function is
+how well it predicts the interaction energy due to a pair potential.
+To this end, we have computed the error in the first term in a
+high-temperature perturbation expansion $a_1$ for several pair
+potentials.  In order to focus on effects at the interface, we have
+defined a position-dependent pair interaction energy as
+\begin{align}
+  \frac{dF_1}{dz} &=
+  \tfrac12 \int g^{(2)}_{HS}(\rr,\rr')n(\rr)n(\rr')\Phi(|\rr-\rr'|)
+  d\rr'\, dxdy
+\end{align}
+which gives the contribution to the mean-field free energy due to
+molecules located at position $z$.  We plot in Figure~\ref{fig:dadz}
+this quantity for two pair potentials.
+
+\section{Conclusion}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
 
 \appendix
 
@@ -521,16 +552,6 @@ $N\gg 1$.
   \label{eq:g2-integral-defn}
 \end{align}
 
-
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
-  %\includegraphics[width=\columnwidth]{figs/dadz-3-3.pdf}
-  \includegraphics[width=\columnwidth]{figs/dadz-2-2.pdf}
-  \includegraphics[width=\columnwidth]{figs/dadz-square-well-3.pdf}
-  %%\includegraphics[width=3cm]{figs/dadz-4-3}
-  \caption{Plot of $\frac{da_1}{dz}$ near a hard
-    wall. For what $\Phi$?}\label{fig:dadz}
-\end{figure}
 
 At this point we consider the effect of increasing the diameter
 $\sigma$ of all our spheres.  This will reduce the number of available
@@ -666,7 +687,7 @@ extensive and $g_\sigma'$ is not.  This tracks back to
 Eq.~\ref{eq:zdiff-g}, which is correct in this \LaTeX, but is wrong on
 my scratch paper.
 
-\bibliography{paper}% Produces the bibliography via BibTeX.
+\end{document}
 
 \section{THE END OF THE PAPER}
 

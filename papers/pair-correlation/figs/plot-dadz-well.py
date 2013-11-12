@@ -40,6 +40,8 @@ plt.ylabel(r'$\frac{da_1}{dz}$')
 plt.yticks([])
 plt.xticks([0,1,2,3])
 
+plt.title('$\Phi(r) = \Theta(1.79\sigma - r)$     $\eta = %g$' % eta)
+
 plt.tight_layout()
 
 savefig("figs/dadz-square-well-%d.pdf" % (int(eta*10)))
