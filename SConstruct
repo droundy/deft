@@ -237,10 +237,6 @@ for paperfile in Glob('papers/*/paper.tex') + Glob('papers/*/project.tex'):
         env.SVG(svgfile)
 
 # #################### papers/hughes-saft ##################################################
-env.Command(target = 'papers/hughes-saft/figs/single-rods-calculated-density.dat',
-            source = ['papers/hughes-saft/figs/density_calc.py',
-                      'papers/hughes-saft/figs/single-rod-in-water.dat'],
-            action = 'cd papers/hughes-saft && python figs/density_calc.py')
 env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
             source = Glob('papers/hughes-saft/figs/single-rod-*nm-energy.dat'),
             action = string.join(['cat '] +
