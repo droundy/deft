@@ -8,10 +8,6 @@
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
 
-#define X 0
-#define Y 1
-#define Z 2
-
 // -----------------------------------------------------------------------------
 // Notes on conventions and definitions used
 // -----------------------------------------------------------------------------
@@ -47,9 +43,11 @@
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
 // code is active
-const bool debug = false;
+const bool debug = true;
 
-
+const int x = 0;
+const int y = 1;
+const int z = 2;
 
 // for debugging purposes
 bool testcase = false;
@@ -97,8 +95,6 @@ int main(int argc, const char *argv[]) {
   sprintf(dir, "papers/square-well/figs/mc");
   char *filename = new char[1024];
   sprintf(filename, "[walls/periodic]-FF");
-  char *structure = new char[1024];
-  sprintf(structure, "ice");
   int N = 0;
   long iterations = 100000000000;
   long initialize_iterations = 500000;
@@ -106,17 +102,16 @@ int main(int argc, const char *argv[]) {
   double R = 1;
   double ff = 0;
   double ratio = 1;
-  double neighborR = 0.5;
+  double neighborR = 2;
   double dr = 0.01;
   double de_density = 0.01;
   double de_g = 0.01;
   double dr_g = 0;
   int totime = 0;
   bool talk = false;
-  // scale and theta_scale aren't quite "constants" -- they are adjusted
-  // during the initialization so that we have a reasonable acceptance rate
+  // scale is not a quite "constant" -- it is adjusted during the initialization
+  //  so that we have a reasonable acceptance rate
   double scale = 0.05;
-  double theta_scale = 0.05;
 
   poptContext optCon;
   // ---------------------------------------------------------------------------
@@ -191,14 +186,14 @@ periodicity/dimensions are not set by default and are required.\n");
     // R^3*V*N/(Lx*Ly*Lz) = ff
     // Lx*Ly*Lz = R^3*V*N/ff
     // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
-    const double fac = R*pow(4.0/3.0*M_PI*uipow(R,3)*N/ff/len[X]/len[Y]/len[Z], 1.0/3.0);
+    const double fac = R*pow(4.0/3.0*M_PI*uipow(R,3)*N/ff/len[x]/len[y]/len[z], 1.0/3.0);
     for(int i = 0; i < 3; i++) {
       periodic[i] *= fac;
       walls[i] *= fac;
       len[i] *= fac;
     }
     printf("\nFilling fraction was specified,");
-    printf("so setting cell dimensions to (%g, %g, %g).\n", len[X], len[Y], len[Z]);
+    printf("so setting cell dimensions to (%g, %g, %g).\n", len[x], len[y], len[z]);
 
   }
   if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0 || scale < 0) {
@@ -216,7 +211,7 @@ periodicity/dimensions are not set by default and are required.\n");
       return 1;
     }
   }
-  const double eta = (double)N*(4.0/3.0*M_PI*uipow(R,3))*R*R*R/len[X]/len[Y]/len[Z];
+  const double eta = (double)N*(4.0/3.0*M_PI*uipow(R,3))*R*R*R/len[x]/len[y]/len[z];
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. They will never fit. Filling fraction: %g\n", eta);
     return 7;
@@ -250,10 +245,10 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   // Define variables
   // ---------------------------------------------------------------------------
-  const int density_bins = round((len[X] + len[Y] + len[Z])/de_density);
+  const int density_bins = round((len[x] + len[y] + len[z])/de_density);
   long *density_histogram = new long[density_bins]();
 
-  const double min_len = min(len[X], min(len[Y], len[Z]));
+  const double min_len = min(len[x], min(len[y], len[z]));
 
   const int g_bins = round(min_len/2/de_g);
   long *g_histogram = new long[g_bins]();
@@ -267,125 +262,73 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ---------------------------------------------------------------------------
-  // Approximate the maximum number of neighbors a ball could have
-  // hokey guess, but it should always be high enough
-  const double neighbor_sphere_vol = 4.0/3.0*M_PI*(uipow(2.5*R+neighborR,3)-uipow(R,3));
+  // Find the upper limit to the maximum number of neighbors a ball could have
+  const double neighbor_sphere_vol = 4.0/3.0*M_PI*(uipow(R+neighborR,3) - uipow(R,3));
   int max_neighbors = min(N, neighbor_sphere_vol / (4.0/3.0*M_PI*uipow(R,3)));
 
-  for(int i = 0; i < N; i++)
+  for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
 
-  // Start with some lower bound for grid size
-  int nx = floor(pow(N*len[X]*len[X]/(3*len[Y]*len[Z]),1.0/3.0));
-  int ny = ceil(len[Y]/len[X]*nx);
-  int nz = ceil(len[Z]/len[X]*nx);
-  // Increase size until grid large enough to fit all balls
-  //   with face-centered cubic packing
-  while(fcc_total(nx,ny,nz) < N) {
-    nx++;
-    int ny = ceil(len[Y]/len[X]*nx);
-    int nz = ceil(len[Z]/len[X]*nx);
+  // Balls will be initially placed on a face centered cubic grid
+  // Note that the unit cells need not be (and most likely will not be) actually "cubic",
+  //   rather some rectangular prism
+  const int spots_per_cell = 4; // spots in each fcc periodic unit cell
+  const int cells_floor = ceil(N/spots_per_cell); // minimum number of cells needed
+  int cells[3]; // array to contain number of cells in x, y, and z dimensions
+  cells[x] = ceil(pow(cells_floor*len[x]*len[x]/(len[y]*len[z]),1.0/3.0));
+  cells[y] = ceil(pow(cells_floor*len[y]*len[y]/(len[z]*len[x]),1.0/3.0));
+  cells[z] = ceil(pow(cells_floor*len[z]*len[z]/(len[x]*len[y]),1.0/3.0));
+
+  // Increase number of cells until all balls can be accomodated
+  int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
+  int i = 0;
+  while(total_spots < N) {
+    if(cells[i%3] >= cells[(i+1)%3] && cells[i%3] >= cells[(i+2)%3]) {
+      cells[i%3] += 1;
+      total_spots += spots_per_cell*cells[(i+1)%3]*cells[(i+2)%3];
+    }
+    i++;
   }
 
-  double xspace = len[0]/(double)nx;
-  double yspace = len[1]/(double)ny;
-  double zspace = len[2]/(double)nz;
+  // It is usefull to know our cell dimensions
+  double cell_width[3];
+  for(int i = 0; i < 3; i++)
+    cell_width[i] = len[i]/cells[i];
+
+  // Define ball positions relative to cell position
+  vector3d* offset = new vector3d[4]();
+  offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
+  offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
+  offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
 
   // Reserve some spots at random to be vacant
-  int free_spots = fcc_total(nx,ny,nz)-N;
-  bool *spot_vacant = new bool[fcc_total(nx,ny,nz)]();
-  int p; // Position index
-  for(int i = 0; i < free_spots; i++) {
-    p = floor(random::ran()*fcc_total(nx,ny,nz)); // Pick a random position index
-    if(spot_vacant[p] == false)
-      spot_vacant[p] = true;
+  bool *spot_reserved = new bool[total_spots]();
+  int p; // spot index
+  for(int i = 0; i < total_spots-N; i++) {
+    p = floor(random::ran()*total_spots); // Pick a random spot index
+    if(spot_reserved[p] == false) // If it's not already reserved, reserve it
+      spot_reserved[p] = true;
     else
       i--;
   }
-  // Set all remaining balls in remaining spots, keeping track of and skipping vacancies
-  int encountered_vacancies = 0;
-  p = 0;
-  for(int i = 0; i < N; i++) {
-    if(spot_vacant[i+encountered_vacancies])
-      encountered_vacancies++;
-    p = i + encountered_vacancies;
 
-    // Divide the positioning problem into three subsets of all possible positions:
-    //  1) The faces of the grid cells on the entire periodic cell
-    //  2) The grid cell corners (the lattice) inside the entire periodic cell
-    //  3) The grid cell corners on boundary of the entire periodic cell
-
-    // If p is larger than the total number of outer and inner corner spots on grid,
-    //   modulate p down to within the number of face positions (subset 1)
-    if(p > fcc_outer_corners(nx,ny,nz) + fcc_inner_corners(nx,ny,nz)) {
-      p -= fcc_outer_corners(nx,ny,nz) + fcc_inner_corners(nx,ny,nz);
-      // Simplify problem to asking in which grid cell to position the ball
-      //   and on which face of the grid cell (m)
-      int m = 0;
-      while(p > fcc_faces(nx,ny,nz)/3) { // Modulate p to within the number of grid cells
-        p -= fcc_faces(nx,ny,nz)/3;
-        m++; // Keep track how many times it has been modulated,
-             //   which uniquely determines in which face to place the ball
+  // Place all balls in remaining spots
+  int b = 0;
+  vector3d cell_pos;
+  for(int i = 0; i < cells[x]; i++) {
+    for(int j = 0; j < cells[y]; j++) {
+      for(int k = 0; k < cells[z]; k++) {
+        for(int l = 0; l < 4; l++) {
+          if(!spot_reserved[i*(4*cells[z]*cells[y]) + j*(4*cells[z]) + k*4 + l]) {
+            balls[b].pos = vector3d((i+0.5)*cell_width[x],(j+0.5)*cell_width[y],
+                                    (k+0.5)*cell_width[z]) + offset[l];
+            b++;
+          }
+        }
       }
-      // Set ball position in the center of a cubic grid cell
-      balls[i].pos[Z] = (floor(p/(nx*ny))+0.5)*zspace;
-      p = p%(nx*ny);
-      balls[i].pos[Y] = (floor(p/nx)+0.5)*yspace;
-      p = p%nx;
-      balls[i].pos[X] = (p-1+0.5)*xspace;
-      // Correct position to be on face of grid cell
-      if(m == 0) { // In an x-y face of grid cell
-        balls[i].pos[Z] -= 0.5*zspace;
-      }
-      if(m == 1) { // In a y-z face of grid cell
-        balls[i].pos[X] -= 0.5*xspace;
-      }
-      if(m == 2) { // In a z-x face of grid cell
-
-        balls[i].pos[Y] -= 0.5*yspace;
-      }
-      // If p is larger than the number of outer corner positions on the grid,
-      //  but smaller than the sum of the outer and inner corner positions,
-      //  modulate p down to within the number of inner corners (subset 2)
-    } else if(p > fcc_outer_corners(nx,ny,nz)) {
-      p -= fcc_outer_corners(nx,ny,nz);
-      // For convenience, use the number of lattice positions in each dimension
-      //   instead of grid positions
-      nx -= 1;
-      ny -= 1;
-      nz -= 1;
-      // Set position on inner lattice
-      balls[i].pos[Z] = ceil(p/(nx*ny))*zspace;
-      p = p%(nx*ny);
-      balls[i].pos[Y] = ceil(p/nx)*yspace;
-      p = p%nx;
-      balls[i].pos[X] = p*xspace;
-
-      // If p is within the number of outer corner positions on the grid (subset 3),
-      //   split all remaining positions into four further subsets
-      //   along each plane (constant: y, x, z) on the boundary of the entire cell
-      //   and the periodic cell's corner
-    } else if(p > nx*(ny-1)+ny*(nz-1)) { // Place in y plane boundary
-      p -= nx*(ny-1)+ny*(nz-1);
-      balls[i].pos[X] = (p%nz)*xspace;
-      balls[i].pos[Y] = 0;
-      balls[i].pos[Z] = (p%(nx-1))*zspace;
-    } else if(p > nx*(ny-1)) { // Place in x plane boundary
-      p -= nx*(ny-1);
-      balls[i].pos[X] = 0;
-      balls[i].pos[Y] = (p%(nz-1))*yspace;
-      balls[i].pos[Z] = (p%ny)*zspace;
-    } else if(p > 0) { // Place in constant z plane boundary
-      balls[i].pos[X] = (p%(ny-1))*xspace;
-      balls[i].pos[Y] = (p%nx)*yspace;
-      balls[i].pos[Z] = 0;
-      // If p == 0, put it on the cell's corner
-    } else {
-      for(int j = 0; j < 3; j++)
-        balls[i].pos[j] = 0;
     }
   }
-  delete[] spot_vacant;
+  delete[] spot_reserved;
   took("Placement");
 
   // ---------------------------------------------------------------------------
@@ -398,12 +341,13 @@ periodicity/dimensions are not set by default and are required.\n");
             max_neighbors);
     return 1;
   }
-  printf("Neighbor tables initialized.");
+  printf("Neighbor tables initialized.\n");
   printf("The most neighbors is %i, whereas the max allowed is %i.\n",
          most_neighbors, max_neighbors);
 
-  print_all(balls, N, periodic);
-  print_bad(balls, N, periodic);
+  //fixme: uncomment
+  //print_all(balls, N, periodic);
+  //print_bad(balls, N, periodic);
 
   // ---------------------------------------------------------------------------
   // Make sure no balls are overlapping
@@ -434,7 +378,7 @@ periodicity/dimensions are not set by default and are required.\n");
 
   double dscale = .1;
 
-  for(long iteration=1; iteration<=initialize_iterations; iteration++) {
+  for(long iteration = 1; iteration <= initialize_iterations; iteration++) {
     // ---------------------------------------------------------------
     // Move each ball once
     // ---------------------------------------------------------------
@@ -454,13 +398,10 @@ periodicity/dimensions are not set by default and are required.\n");
         (double)(workingmoves-old_workingmoves)/(totalmoves-old_totalmoves);
       old_workingmoves = workingmoves;
       old_totalmoves = totalmoves;
-      if (acceptance_rate < acceptance_goal) {
+      if (acceptance_rate < acceptance_goal)
         scale /= (1+dscale);
-        theta_scale /= (1+scale);
-      } else {
+      else
         scale *= (1+dscale);
-        theta_scale *= (1+scale);
-      }
       // hokey heuristic for tuning dscale
       const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
       if(closeness > 0.5) dscale *= 2;
@@ -499,11 +440,11 @@ periodicity/dimensions are not set by default and are required.\n");
   char *headerinfo = new char[4096];
   sprintf(headerinfo, "\
 # period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), de_density: %g, de_g: %g\n\
-# dr_g: %g, seed: %li, R: %f, scale: %g, theta_scale: %g, real_walls: %i\n\
-# initialize_iterations: %li, initial structure: %s, neighborR: %g, dr: %g\n",
+# dr_g: %g, seed: %li, R: %f, scale: %g, real_walls: %i\n\
+# initialize_iterations: %li, neighborR: %g, dr: %g\n",
           periodic[0], periodic[1], periodic[2], walls[0], walls[1], walls[2],
-          de_density, de_g, dr_g, seed, R, scale, theta_scale, real_walls,
-          initialize_iterations, structure, neighborR, dr);
+          de_density, de_g, dr_g, seed, R, scale, real_walls,
+          initialize_iterations, neighborR, dr);
 
 
   // fixme: to use this again, make it so file stays open and is fflushed
@@ -546,12 +487,12 @@ periodicity/dimensions are not set by default and are required.\n");
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       // Density histogram:
-      const int x_i = floor(balls[i].pos[X]/de_density);
-      const int y_i = floor(balls[i].pos[Y]/de_density);
-      const int z_i = floor(balls[i].pos[Z]/de_density);
+      const int x_i = floor(balls[i].pos[x]/de_density);
+      const int y_i = floor(balls[i].pos[y]/de_density);
+      const int z_i = floor(balls[i].pos[z]/de_density);
       density_histogram[x_i] ++;
-      density_histogram[int(round(len[X]/de_density)) + y_i] ++;
-      density_histogram[int(round((len[X] + len[Y])/de_density)) + z_i] ++;
+      density_histogram[int(round(len[x]/de_density)) + y_i] ++;
+      density_histogram[int(round((len[x] + len[y])/de_density)) + z_i] ++;
     }
 
     // ---------------------------------------------------------------
@@ -586,7 +527,6 @@ periodicity/dimensions are not set by default and are required.\n");
 # iteration: %li, workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
               iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
 
-
       // Saving density in each of the x, y, z dimensions
       char *density_fname = new char[1024];
       sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
@@ -595,15 +535,15 @@ periodicity/dimensions are not set by default and are required.\n");
       fprintf(densityout, "%s", headerinfo);
       fprintf(densityout, "%s", countinfo);
       fprintf(densityout, "\n#e       xdensity   ydensity   zdensity   histograms in x,y,z order\n");
-      const int xbins = round(len[X]/de_density);
-      const int ybins = round(len[Y]/de_density);
-      const int zbins = round(len[Z]/de_density);
+      const int xbins = round(len[x]/de_density);
+      const int ybins = round(len[y]/de_density);
+      const int zbins = round(len[z]/de_density);
       int maxbin = max(max(xbins, ybins), zbins);
       for(int e_i = 0; e_i < maxbin; e_i ++) {
         const double e = (e_i + 0.5)*de_density;
-        const double xshell_volume = len[Y]*len[Z]*de_density;
-        const double yshell_volume = len[X]*len[Z]*de_density;
-        const double zshell_volume = len[X]*len[Y]*de_density;
+        const double xshell_volume = len[y]*len[z]*de_density;
+        const double yshell_volume = len[x]*len[z]*de_density;
+        const double zshell_volume = len[x]*len[y]*de_density;
         // If we have a non-cubic cell, then this makes the density negative
         // in the dimensions where it does not exist.
         const long xhist = e_i>=xbins ? -totalmoves : density_histogram[e_i];
@@ -612,7 +552,8 @@ periodicity/dimensions are not set by default and are required.\n");
         const double xdensity = (double)xhist*N/totalmoves/xshell_volume;
         const double ydensity = (double)yhist*N/totalmoves/yshell_volume;
         const double zdensity = (double)zhist*N/totalmoves/zshell_volume;
-        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n", e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
+        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n",
+                e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
       }
       fclose(densityout);
 
@@ -625,8 +566,8 @@ periodicity/dimensions are not set by default and are required.\n");
       fprintf(g_out, "%s", headerinfo);
       fprintf(g_out, "%s", countinfo);
       fprintf(g_out, "\ne       ");
-      const double density = N/len[X]/len[Y]/len[Z];
-      const double vol0 = len[X]*len[Y]*len[Z];
+      const double density = N/len[x]/len[y]/len[z];
+      const double vol0 = len[x]*len[y]*len[z];
       fprintf(g_out, "\n");
       for(int e_i = 0; e_i < g_bins; e_i++) {
         const double e = (e_i + 0.5)*de_g;
@@ -635,7 +576,7 @@ periodicity/dimensions are not set by default and are required.\n");
         const double probability = (double)g_histogram[e_i]/totalmoves;
         const double n2 = probability/vol0/vol1;
         const double g = n2/sqr(density)*N*N;
-          fprintf(g_out, "%8.5f \n", g);
+        fprintf(g_out, "%8.5f \n", g);
       }
       fclose(g_out);
 
@@ -790,9 +731,9 @@ static void took(const char *name) {
 void save_locations(const ball *p, int N, const char *fname, const double len[3], const char *comment) {
   FILE *out = fopen((const char *)fname, "w");
   fprintf(out, "# %s\n", comment);
-  fprintf(out, "%g %g %g\n", len[X], len[Y], len[Z]);
+  fprintf(out, "%g %g %g\n", len[x], len[y], len[z]);
   for(int i = 0; i < N; i++) {
-    fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[X], p[i].pos[Y], p[i].pos[Z]);
+    fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[x], p[i].pos[y], p[i].pos[z]);
     fprintf(out, "\n");
   }
   fclose(out);
