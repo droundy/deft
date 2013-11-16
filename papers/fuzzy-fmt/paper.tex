@@ -813,22 +813,50 @@ integral, but without the stray $r$, so we get
   &= \frac{4\pi}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin{\frac{k\sigma}{2}}
 \end{align}
 
-$w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes$w_0$ is quite a bit
+$w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes $w_0$ is quite a bit
 trickier.  I won't go through all the math here, but essentially we
 have
 \begin{align}
   \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_0^\infty
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr}
 \end{align}
-Since the gaussian should, again, go to zero before r = 0, then we can
-take this to negative infinity so \fixme{without all the details}:
+We'll let $r = \frac{\sigma}{2}(1 + u) $ so that
 \begin{align}
-  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
-  e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr} \\
-  &= \frac{4\pi}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
-  e^{-\frac{t}{4}} \cos{\frac{\sigma t}{2a}}\textrm{dt}
+  \frac{1}{r} &= \frac{1}{\frac{\sigma}{2}(1 + u)} \\
+  &\approx \frac{2}{\sigma}\left(1 - u + u^2 - u^3 + u^4 -+\cdots \right)
 \end{align}
-So we have a closed form, but we will still have to do this numerically
+We also extend the lower limit on the integral so that
+\begin{align}
+  \tilde{w}_0(k) &\approx \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  e^{-\frac{(\sigma u/2)^2}{a^2}} \sin{\left( \frac{k\sigma}{2}(1+u)
+    \right)} \notag\\
+  &\times \frac{2}{\sigma} \left(1 - u + u^2 - u^3 + u^4 -+\cdots
+  \right) \frac{\sigma}{2}\textrm{du} \\
+  &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  e^{-\left(\frac{\sigma}{2a} \right)^2 u^2} \sin{\left( \frac{k\sigma}{2}(1+u)
+    \right)} \notag\\
+  &\times \left(1 - u + u^2 - u^3 + u^4 -+\cdots \right) \textrm{du}
+\end{align}
+now let $x = \sigma u /2a$, then
+\begin{align}
+  \tilde{w}_0(k) &\approx \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  e^{-x^2} \sin{k(ax+\frac{\sigma}{2})} \notag\\
+  &\times \left(1 - \frac{2a}{\sigma}x +
+  \left(\frac{2a}{\sigma}\right)^2 x^2 -+\cdots \right) \frac{2a}{\sigma}\textrm{dx} \\
+  &= \frac{8a\sqrt{\pi}}{k\sigma}\int_{-\infty}^\infty
+  e^{-x^2} \sin{k(ax+\frac{\sigma}{2})}
+  \sum_{n=0}^{\infty} \left(\frac{-2a}{\sigma}\right)^n x^n \textrm{dx}
+\end{align}
+%% Since the gaussian should, again, go to zero before r = 0, then we can
+%% take this to negative infinity so 
+%% \fixme{without all the details}:
+%% \begin{align}
+%%   \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+%%   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr} \\
+%%   &= \frac{4\pi}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
+%%   e^{-\frac{t}{4}} \cos{\frac{\sigma t}{2a}}\textrm{dt}
+%% \end{align}
+%% So we have a closed form, but we will still have to do this numerically
 
 Now we'll want to do the vector transforms. $\mathbf{w}_{2V}(\rr) = w_2(r)\rr$ so
 \begin{align}

@@ -165,14 +165,14 @@ instance Type a => Num (Vector a) where
 instance Code RealSpace where
   codePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(gd, " ++ksp++ ")")
   codePrec _ (IFFT ke) = showString "ifft(gd, " . codePrec 0 ke . showString ")"
-  codePrec _ Rx = showString "rx"
-  codePrec _ Ry = showString "ry"
-  codePrec _ Rz = showString "rz"
+  codePrec _ Rx = showString "r_i[0]"
+  codePrec _ Ry = showString "r_i[1]"
+  codePrec _ Rz = showString "r_i[2]"
   newcodePrec _ (IFFT (Var _ _ ksp _ Nothing)) = showString ("ifft(" ++ksp++ ")")
   newcodePrec _ (IFFT ke) = showString "ifft(" . codePrec 0 ke . showString ")"
-  newcodePrec _ Rx = showString "rx"
-  newcodePrec _ Ry = showString "ry"
-  newcodePrec _ Rz = showString "rz"
+  newcodePrec _ Rx = showString "r_i[0]"
+  newcodePrec _ Ry = showString "r_i[1]"
+  newcodePrec _ Rz = showString "r_i[2]"
   latexPrec _ (IFFT ke) = showString "\\text{ifft}\\left(" . latexPrec 0 ke . showString "\\right)"
   latexPrec _ Rx = showString "\\textbf{r_x}"
   latexPrec _ Ry = showString "\\textbf{r_y}"
@@ -198,13 +198,25 @@ instance Type RealSpace where
     error ("It is a bug to generate code for a non-var input to ifft\n"++ latex e)
   codeStatementHelper a op (Var _ _ _ _ (Just e)) = codeStatementHelper a op e
   codeStatementHelper a op e =
-    unlines ["for (int i=0; i<gd.NxNyNz; i++) {",
-             codes (1 :: Int) e,
-             "\t}"]
+    unlines $ ["for (int i=0; i<gd.NxNyNz; i++) {"] ++ initialize_position ++
+              [codes (1 :: Int) e,
+               "\t}"]
       where codes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ code x' ++ ";\n" ++
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ code a ++ op ++ code x ++ ";"
+            initialize_position =
+              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              then ["\t\tconst int z_real = i % gd.Nz;",
+                    "\t\tconst int n_real = (i-z_real)/gd.Nz;",
+                    "\t\tconst int y_real = n_real % gd.Ny;",
+                    "\t\tconst int x_real = (n_real-y_real)/gd.Ny;",
+                    "\t\tconst Relative rvec((x_real>gd.Nx/2) ? x_real - gd.Nx : x_real,",
+                    "\t\t                    (y_real>gd.Ny/2) ? y_real - gd.Ny : y_real,",
+                    "\t\t                    (z_real>gd.Nz/2) ? z_real - gd.Nz : z_real);",
+                    "\t\tconst Cartesian r_i = gd.Lat.toCartesian(rvec);"]
+              else []
+
   --
   newcodeStatementHelper (Var _ _ a _ _) op (Expression (IFFT (Var _ _ v _ Nothing))) =
     a ++ op ++ "ifft(Nx,Ny,Nz,dV," ++ v ++ ");\n"
@@ -212,13 +224,25 @@ instance Type RealSpace where
     error ("It is a bug to generate newcode for a non-var input to ifft\n"++ latex e)
   newcodeStatementHelper a op (Var _ _ _ _ (Just e)) = newcodeStatementHelper a op e
   newcodeStatementHelper a op e =
-    unlines ["for (int i=0; i<Nx*Ny*Nz; i++) {",
-             newcodes (1 :: Int) e,
-             "\t}"]
+    unlines $ ["for (int i=0; i<Nx*Ny*Nz; i++) {"] ++
+              initialize_position ++
+              [newcodes (1 :: Int) e,
+               "\t}"]
       where newcodes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) -> "\t\tconst double t"++ show n ++ " = " ++ newcode x' ++ ";\n" ++
                                   newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode (cleanvars x) ++ ";"
+            initialize_position =
+              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              then ["\t\tint _z = i % int(Nz);",
+                    "\t\tconst int _n = (i-_z)/int(Nz);",
+                    "\t\tint _y = _n % int(Ny);",
+                    "\t\tint _x = (_n-_y)/int(Ny);",
+                    "\t\tif (_x > int(Nx)/2) _x -= int(Nx);",
+                    "\t\tif (_y > int(Ny)/2) _y -= int(Ny);",
+                    "\t\tif (_z > int(Nz)/2) _z -= int(Nz);",
+                    "\t\tconst Vector r_i = Vector(_x*a1/Nx, _y*a2/Ny, _z*a3/Nz);"]
+              else ["\t\t// No vec r dependence!"]
   initialize (Var IsTemp _ x _ Nothing) = "VectorXd " ++ x ++ "(gd.NxNyNz);"
   initialize _ = error "VectorXd output(gd.NxNyNz);"
   free (Var IsTemp _ x _ Nothing) = x ++ ".resize(0); // Realspace"
@@ -366,8 +390,10 @@ instance Type KSpace where
              "\tfor (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {",
              "\t\tconst int _z = i % (int(Nz)/2+1);",
              "\t\tconst int _n = (i-_z)/(int(Nz)/2+1);",
-             "\t\tconst int _y = _n % int(Ny);",
-             "\t\tconst int _x = (_n-_y)/int(Ny);",
+             "\t\tint _y = _n % int(Ny);",
+             "\t\tint _x = (_n-_y)/int(Ny);",
+             "\t\tif (_x > int(Nx)/2) _x -= int(Nx);",
+             "\t\tif (_y > int(Ny)/2) _y -= int(Ny);",
              "\t\tconst Vector k_i = Vector(" ++ code (xhat `dot` k_i) ++ ", " ++
                                                  code (yhat `dot` k_i) ++ ", " ++
                                                  code (zhat `dot` k_i) ++ ");",
@@ -687,9 +713,22 @@ instance Type Scalar where
 
   newcodeStatementHelper a " = " (Var _ _ _ _ (Just e)) = newcodeStatementHelper a " = " e
   newcodeStatementHelper a " = " (Expression (Summate e)) =
-    newcode a ++ " = 0;\n\tfor (int i=0; i<Nx*Ny*Nz; i++) {\n\t\t" ++
-    newcode a ++ " += " ++ newcode e ++
+    newcode a ++ " = 0;\n\tfor (int i=0; i<Nx*Ny*Nz; i++) {\n" ++
+    unlines initialize_position ++
+    "\t\t"++ newcode a ++ " += " ++ newcode e ++
     ";\n\t}\n"
+    where initialize_position =
+              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              then ["\t\tint _z = i % int(Nz);",
+                    "\t\tconst int _n = (i-_z)/int(Nz);",
+                    "\t\tint _y = _n % int(Ny);",
+                    "\t\tint _x = (_n-_y)/int(Ny);",
+                    "\t\tif (_x > int(Nx)/2) _x -= int(Nx);",
+                    "\t\tif (_y > int(Ny)/2) _y -= int(Ny);",
+                    "\t\tif (_z > int(Nz)/2) _z -= int(Nz);",
+                    "\t\tconst Vector r_i = Vector(_x*a1/Nx, _y*a2/Ny, _z*a3/Nz);"]
+              else []
+
   newcodeStatementHelper _ op (Expression (Summate _)) = error ("Haven't implemented "++op++" for integrate...")
   newcodeStatementHelper a op e = newcode a ++ op ++ newcode e ++ ";"
   initialize (Var _ _ x _ Nothing) = "double " ++ x ++ " = 0;\n"
@@ -1031,6 +1070,58 @@ instance (Type a, Code a) => Code (Expression a) where
                            else show f ++ "*" ++ codePrec 7 e ""
           addup rest (1,e) = codePrec 6 e (showString " + " $ rest)
           addup rest (f,e) = show f ++ "*" ++ codePrec 7 e (showString " + " $ rest)
+
+  newcodePrec _ (Var _ c _ _ Nothing) = showString c
+  newcodePrec p (Var _ _ _ _ (Just e)) = newcodePrec p e
+  newcodePrec p (Scalar x) = newcodePrec p x
+  newcodePrec p (Expression x) = newcodePrec p x
+  newcodePrec _ (F Heaviside x) = showString "heaviside(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Cos x) = showString "cos(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Sin x) = showString "sin(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Erfi x) = showString "erfi(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Exp x) = showString "exp(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Erf x) = showString "erf(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Log x) = showString "log(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Abs x) = showString "fabs(" . newcodePrec 0 x . showString ")"
+  newcodePrec _ (F Signum _) = undefined
+  newcodePrec _ (Product p i) | Product p i == 1 = showString "1.0"
+  newcodePrec pree (Product p _) = showParen (pree > 7) $
+                           if den == 1
+                           then newcodesimple num
+                           else newcodesimple num . showString "/" . newcodePrec 8 den
+    where newcodesimple [] = showString "1.0"
+          newcodesimple [(a,n)] = newcodee a n
+          newcodesimple [(a,n),(b,m)] = newcodee a n . showString "*" . newcodee b m
+          newcodesimple ((a,n):es) = newcodee a n . showString "*" . newcodesimple es
+          num = product2numerator_pairs p
+          den = product2denominator p
+          newcodee _ 0 = showString "1.0" -- this shouldn't happen...
+          newcodee _ n | n < 0 = error "shouldn't have negative power here"
+          newcodee x 1 = newcodePrec 7 x
+          newcodee x 0.5 = showString "sqrt(" . newcodePrec 0 x . showString ")"
+          newcodee x nn
+            | fromInteger n2 == 2*nn && odd n2 = newcodee x 0.5 . showString "*" . newcodee x (nn-0.5)
+            | fromInteger n == nn && odd n = newcodee x 1 . showString "*" . newcodee x (nn-1)
+            | fromInteger n == nn =
+              showParen (nn/2>1) (newcodee x (nn / 2)) . showString "*" . showParen (nn/2>1) (newcodee x (nn / 2))
+            where n2 = floor (2*nn)
+                  n = floor nn
+          newcodee x n = showString "pow(" . newcodePrec 0 x . showString (", " ++ show n ++ ")")
+  newcodePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
+  newcodePrec p (Sum s _) = showParen (p > 6) (showString me)
+    where me = foldl addup "" $ sum2pairs s
+          addup "" (1,e) = newcodePrec 6 e ""
+          addup "" (-1,e) = "-" ++ newcodePrec 6 e ""
+          addup "" (f,e) = if e == 1
+                           then show f
+                           else case isConstant e of
+                                Just c -> show (f*c)
+                                Nothing -> show f ++ "*" ++ newcodePrec 7 e ""
+          addup rest (1,e) = newcodePrec 6 e (showString " + " $ rest)
+          addup rest (f,e) =
+             case isConstant e of
+             Nothing -> show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
+             Just c -> show (f*c) ++ (showString " + " rest)
   latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
   latexPrec _ (Var _ _ c "" _) = showString c
   latexPrec _ (Var _ _ _ t _) = showString t

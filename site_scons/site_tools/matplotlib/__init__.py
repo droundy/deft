@@ -57,10 +57,12 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
 
 import_re = re.compile(r"^import\s+(\w+)", re.M)
 
+fixed_open = re.compile(r"=\s*open\(['\"]([^'\"]*)['\"]\s*,['\"]w['\"]\)")
 fixed_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"](\s*,[\w\s=]+)*\)")
 changing_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
+fixed_open_input = re.compile(r"=\s*open\(['\"]([^'\"]*)['\"]\s*,['\"]r['\"]\)")
 fixed_input = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\)", re.M)
 changing_loadtxt_noparens = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*([^\(\)\n]*)\s*\)", re.M)
 changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
@@ -80,6 +82,7 @@ def Matplotlib(env, source, py_chdir = ""):
     contents = node.get_text_contents()
 
     inputs = fixed_input.findall(contents)
+    inputs += fixed_open_input.findall(contents)
 
     imports = import_re.findall(contents)
     for i in imports:
@@ -89,6 +92,7 @@ def Matplotlib(env, source, py_chdir = ""):
 
     outputs = fixed_output.findall(contents)
     outputs = [x[0] for x in outputs]
+    outputs += fixed_open.findall(contents) # add any files created with open(...)
     argvals = arguments.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents)
