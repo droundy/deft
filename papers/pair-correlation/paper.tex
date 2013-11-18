@@ -5,6 +5,7 @@
 \usepackage{color}
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\rr}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
@@ -12,6 +13,8 @@
 
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+\newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
+\newcommand{\jeffsays}[1]{{\color{red} [\green{Jeff:} \emph{#1}]}}
 
 \begin{document}
 \title{The Pair Distribution Function of the Inhomogeneous Hard-Sphere
@@ -214,23 +217,23 @@ our radial distribution that is dependent upon $g_{\sigma}$ and that
 will approach the correct solution in the homogeneous limit and also
 in the limit of contact distance between the two points.
 
-The demand that our solution is correct in the homogeneous limit forms
-the basis of the derivation of our radial distribtuion's function
-form. We use the well known and very successful Carnahan Starling
-equation to calculated $g_{\sigma}$ and then simple monte-carlo
-simulations to calculate values of the homogeneous radial distribution
-function at varying distance perameter $r$ (Our previously published
-$g_{\sigma}$ approaches the Carnahan Starling version in the
-homogeneous limit and it's simplest to use an analytical expression
-for this calculation).  We then construct our radial distribution
-function that has the form of an expansion of powers of $h_{\sigma} =
-g_{\sigma}-1$ and perform a least squares fit to the monte-carlo
-solution to find the needed constant perameters.  The function is
-constructed in such a way as to appoach $g_{\sigma}$ in the limit of
-contact distance between the particles.  After this process we have a
-radial distribution function that is dependent only on $g_{\sigma}$
-and that gives the correct solution in the homogeneous and contact
-distance limit.
+We construct our function's form in terms of an expansion of powers of
+$h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
+in the contact distance limit, leaving our function with tunable
+constant perameters.  We run a simple monte-carlo simulations to
+calculate values of the homogeneous radial distribution function at
+varying distance perameter $r$.  We then tune our function's constant
+perameters by matching our function's results against the monte-carlo
+data, using a least squares fit method.  During this process it is
+simplest to use an analytic expression for $g_{\sigma}$ in our
+function and so we use the well known and very successful Carnahan
+Starling equation to calculate $g_{\sigma}$.  This is appropriate
+since that our published $g_{\sigma}$ approaches the Carnahan Starling
+version in the homogeneous limit and it's this limit, along with the
+contact limit, that we would like our constructed radial distribution
+function to get right.  After this process we have an appropriate
+radial distribution function that is dependent only on $r$ and
+$g_{\sigma}$.
 
 The function has the form:
 \begin{align}
@@ -273,6 +276,11 @@ The finalalized form of our pair correlation function is:
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
 \subsection{Separable fit to the radial distribution function}
+
+\jeffsays{I'm confused by this next part.  Are we just saying that
+  instead of using our published $g_{\sigma}$ we could have used a
+  Carnahan Starling derived $g_{\sigma}$? Don't understand why that
+  would add an unnecessary step in using g(r).}
 
 We have constructed a separable fit to the radial distribution
 function $g(r, g_\sigma)$, which is a function of the radius $r$ and
