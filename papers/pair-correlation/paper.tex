@@ -236,129 +236,154 @@ radial distribution function that is dependent only on $r$ and
 $g_{\sigma}$.
 
 The function has the form:
-\begin{align}
-  g(|\rr|) &= 1 + g_{\sigma}e^{-x_0(r-\sigma)} + x_1g_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
-  &~~-x_4g_{\sigma}^2\sin(x_5(r-\sigma))e^(-x_6(r-\sigma))
-\end{align}
+\begin{multline}
+  g(|\rr|) = 1 + g_{\sigma}e^{-x_0(r-\sigma)} \\+ x_1g_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
+  -x_4g_{\sigma}^2\sin(x_5(r-\sigma))e^(-x_6(r-\sigma))
+\end{multline}
 The finalalized form of our pair correlation function is:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 \end{align}
 
-
-
-%% gsigma = gsigconcatenated[i] - 1
-%%         h0 = gsigma # was x[0]*gsig
-%%         f0 = numpy.exp(-x[0]*rconcatenated[i])
-%%         h1 = x[1]*gsigma
-%%         f1 = numpy.sin(x[2]*rconcatenated[i]) * numpy.exp(-x[3]*rconcatenated[i])
-%%         h2 = -x[4]*gsigma**(2)
-%%         f2 = numpy.sin(x[5]*rconcatenated[i]) * numpy.exp(-x[6]*rconcatenated[i])
-%%         g[i] = 1 + h0*f0 + h1*f1 + h2*f2
-%%     return g
-
-%% The homogeneoues limit $g_{sigm}$ can be calculated using the well
-%% known and very successful Carnahan Starling equation while the
-%% homogeneous limit radial distribution function can be calculated using
-%% Monte-Carlo methods.  We used these calculations in a least squares
-%% fit along the data points at increasing radial distances in order to
-%% fit the perameters of our more general pair correlation function.  Our
-%% function will therefore approach the most accurate solution possible
-%% in the homogeneous limit.  Created a function that has the form of an
-%% expansion in powers of $g_{\sigma}$.  $g_{sigm}$ in the homogeneous
-%% limit can be calculated using the well known and very successful
-%% Carnahan Starling equation.  has a well known and Perameters in the
-%% expansion where fit
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-g}% \\
+  \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 \end{figure}
 \subsection{Separable fit to the radial distribution function}
 
-\jeffsays{I'm confused by this next part.  Are we just saying that
-  instead of using our published $g_{\sigma}$ we could have used a
-  Carnahan Starling derived $g_{\sigma}$? Don't understand why that
-  would add an unnecessary step in using g(r).}
-
-We have constructed a separable fit to the radial distribution
-function $g(r, g_\sigma)$, which is a function of the radius $r$ and
-its value at contact $g_\sigma$.  We could convert this to a more
-conventional function of the packing fraction $\eta$ by inverting the
-Carnahan-Starling formula for $g_\sigma$
+In contrast to the previous work, which are based on the homogeneous
+radial distribution function $g(r,\eta)$ expressed as a function of
+distance and packing fraction, we have constructed our separable
+approximation for the radial distribution function as $g(r,
+g_\sigma)$, which is a function of the radius $r$ and its value at
+contact $g_\sigma$.  One can convert between these two representation
+using the Carnahan-Starling formula for $g_\sigma(\eta)$
 \begin{equation}
-  g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}
+  g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}.
 \end{equation}
-but that would add an unnecessary step in the use of $g(r)$, since the
-averaged value of $g_\sigma$ is what we can directly compute for the
-inhomogeneous system~\cite{schulte2012using}.
+The form $g(r, g_\sigma)$ is more convenient for treating the
+inhomogeneous case, because we can directly compute the averaged value
+of $g_\sigma$ for an inhomogeneous system~\cite{schulte2012using}.
 
-We construct $g(r, g_\sigma)$ using several constraints.  Naturally,
+We construct $g(r, g_\sigma)$ to satisfy several constraints.  Naturally,
 \begin{equation}
   g(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
-In addition, we know that
+A second constraint applies to the integral of the total correlation
+function
 \begin{align}
-  1 + n\int\left[g(r)-1\right]d\rr &= nkT\chi_T
+  1 + n\int h(r)d\rr &= nkT\chi_T \label{eq:total-constraint}
 \end{align}
+where $h(r) = g(r) - 1$ is the total correlation function.
+A final constraint is that the slope of the radial distribution
+function at contact is given to a very good approximation by
+\begin{align}
+  g'(\sigma) \approx - h_\sigma g_\sigma
+\end{align}
+where $h_\sigma = g_\sigma - 1$ is the total correlation function.
+Under these two constraints, we applied a least-squares fit to
+simulation data for the radial distribution function at packing
+fractions from 0.05 to 0.4 by steps of 0.05.  Our fitted radial
+distribution function is given by
+\newcommand\kappaa{\kappa_0}
+\newcommand\kappab{\kappa_1}
+\newcommand\kappac{\kappa_2}
+\begin{multline}
+  h(r,g_\sigma) = h_\sigma e^{-\kappaa z} \\
+  + h_\sigma(\kappaa - g_\sigma) ze^{-\kappab z} \\
+  + \frac{\frac{(1-\eta)^4}{1+4\eta + 4\eta^2 - 4\eta^3 +
+      \eta^4}\frac{1}{n}
+    - I_0  -I_1(\kappaa - g_\sigma)}{I_2} z^2e^{-\kappac z}
+\end{multline}
 \begin{equation}
-  \begin{split}
-    \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial
-      p}\right)_T \\
-    &= - \left(V\left(\frac{\partial p}{\partial
-      V}\right)_T\right)^{-1}
-  \end{split}
+  I_0 = \frac{4\pi h_\sigma (2 + \sigma \kappaa (2 + \sigma \kappaa))}{\kappaa^3}
+  - \frac{4\pi}{3} \sigma^3
 \end{equation}
 \begin{equation}
-    p = nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}
+  I_1 = \frac{4\pi h_\sigma (6 + \sigma \kappab (4 + \sigma \kappab))}{\kappab^4}
 \end{equation}
 \begin{equation}
-    \left(\frac{\partial p}{\partial V}\right)_T = \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}
+  I_2 = \frac{8\pi h_\sigma (12 + \sigma \kappac (6 + \sigma \kappac))}{\kappac^5}
 \end{equation}
 \begin{equation}
-    n = \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}
+  z = r - \sigma
 \end{equation}
-\begin{equation}
-    \eta = \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}
-\end{equation}
-\begin{equation}
-  \begin{split}
-    \left(\frac{\partial p}{\partial V}\right)_T &= -nkT\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
-    &\quad  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
-    &= -nkT\frac{\eta}{V}\left[\frac{(1+2\eta-3\eta^2)(1-\eta) + 3 + 3\eta + 3\eta^2 - 3\eta^3}{(1-\eta)^4}\right]\\
-    &\quad  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
-    &= -\frac{nkT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
-  \end{split}
-\end{equation}
-\begin{equation}
-    nkT\chi_T = \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
-  %\int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
-  %&= \eta \eta \cdots \fixme{fill in, double-check}
-\end{equation}
-where $\chi_T$ is the isothermal compressibility, for which we use the
-Carnahan-Starling equation of state.
+\davidsays{Can someone check the above equations for correctness
+  against the python code, in plot-ghs2.py.  We'll want to
+  ensure the C++ code agrees with this as well.}
+This function includes three fitted parameters, $\kappaa$, $\kappab$,
+and $\kappac$, which are given in Table~\ref{tab:fit-parameters}.
+The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
+figure, it is apparent how the on the integral of $h(r)$ from
+Eq.~\ref{eq:total-constraint} results in cancelling errors at large
+distances.  The maximum error in $g(r)$ at packing fractions of less
+than 0.4 is \fixme{get a number}.
+
+\begin{table}
+  \begin{tabular}{cc}
+    $\kappaa$ & 1 \\
+    $\kappab$ & 1 \\
+    $\kappac$ & 1 \\
+  \end{tabular}
+  \caption{Fit parameters \fixme{... put them here and format this nicely}}
+  \label{tab:fit-parameters}
+\end{table}
+
+%% In addition, we know that
+%% \begin{align}
+%%   1 + n\int\left[g(r)-1\right]d\rr &= nkT\chi_T
+%% \end{align}
+%% \begin{equation}
+%%   \begin{split}
+%%     \chi_T  &= -\frac{1}{V}\left(\frac{\partial V}{\partial
+%%       p}\right)_T \\
+%%     &= - \left(V\left(\frac{\partial p}{\partial
+%%       V}\right)_T\right)^{-1}
+%%   \end{split}
+%% \end{equation}
+%% \begin{equation}
+%%     p = nkT\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}
+%% \end{equation}
+%% \begin{equation}
+%%     \left(\frac{\partial p}{\partial V}\right)_T = \frac{\partial p}{\partial\eta}\frac{\partial\eta}{\partial V} + \frac{\partial p}{\partial n}\frac{\partial n}{\partial V}
+%% \end{equation}
+%% \begin{equation}
+%%     n = \frac{N}{V}\Longrightarrow \frac{\partial n}{\partial V} = -\frac{N}{V^2} = -\frac{n}{V}
+%% \end{equation}
+%% \begin{equation}
+%%     \eta = \frac{4\pi R^3N}{3V}\Longrightarrow \frac{d\eta}{dV} = -\frac{\eta}{V}
+%% \end{equation}
+%% \begin{equation}
+%%   \begin{split}
+%%     \left(\frac{\partial p}{\partial V}\right)_T &= -nkT\frac{\eta}{V}\left[\frac{1 + 2\eta - 3\eta^2}{(1-\eta)^3} + 3\frac{1 + \eta + \eta^2 - \eta^3}{(1-\eta)^4}\right]\\
+%%     &\quad  - \frac{nkT}{V}\left[\frac{1+\eta+\eta^2-\eta^3}{(1-\eta)^3}\right]\\
+%%     &= -nkT\frac{\eta}{V}\left[\frac{(1+2\eta-3\eta^2)(1-\eta) + 3 + 3\eta + 3\eta^2 - 3\eta^3}{(1-\eta)^4}\right]\\
+%%     &\quad  - \frac{nkT}{V}\left[\frac{(1+\eta+\eta^2-\eta^3)(1-\eta)}{(1-\eta)^4}\right]\\
+%%     &= -\frac{nkT}{V}\left[\frac{4\eta + 4\eta^2 - 2\eta^3}{(1-\eta)^4} + \frac{1 - 2\eta^3 + \eta^4}{(1-\eta)^4}\right]\\
+%%   \end{split}
+%% \end{equation}
+%% \begin{equation}
+%%     nkT\chi_T = \frac{(1-\eta)^4}{1 + 4\eta + 4\eta^2 - 4\eta^3 + \eta^4}
+%%   %\int (g(r)-1)d\rr &= \frac{\chi_T}{kT} \\
+%%   %&= \eta \eta \cdots \fixme{fill in, double-check}
+%% \end{equation}
+%% where $\chi_T$ is the isothermal compressibility, for which we use the
+%% Carnahan-Starling equation of state.
 
 
-An additional constraint that we use sets the slope of $g(r,
-g_\sigma)$ at $r=\sigma$.  \fixme{explain this}
+%% An additional constraint that we use sets the slope of $g(r,
+%% g_\sigma)$ at $r=\sigma$.  \fixme{explain this}
 
-Given these constraints, we use a functional form of
-\begin{equation}
-  g(r,g_\sigma) = 1 + A e^{-a(r-\sigma)}
-  + B (r-\sigma) e^{-b(r-\sigma)} + C (r-\sigma)^2 e^{-c(r-\sigma)}
-\end{equation}
-where $A$, $B$, and $C$ are amplitudes determined by the above
-constraints, and $a$, $b$, and $c$ are parameters fit to Monte Carlo
-simulations of the hard-sphere radial distribution function.
-
-\fixme{add paragraphs and equations with $A$, $B$ and $C$}
-
-\fixme{add table with parameters}
-
-
-Figure~\ref{fig:radial-distribution} shows our function
-$g(r,g_\sigma)$ plotted against the $g(r)$ found from simulation.
+%% Given these constraints, we use a functional form of
+%% \begin{equation}
+%%   g(r,g_\sigma) = 1 + A e^{-a(r-\sigma)}
+%%   + B (r-\sigma) e^{-b(r-\sigma)} + C (r-\sigma)^2 e^{-c(r-\sigma)}
+%% \end{equation}
+%% where $A$, $B$, and $C$ are amplitudes determined by the above
+%% constraints, and $a$, $b$, and $c$ are parameters fit to Monte Carlo
+%% simulations of the hard-sphere radial distribution function.
 
 \newcommand\paircaption[1]{ The pair distribution function near a hard
   wall, with a packing fraction of #1, with $\rr_1$ in contact with

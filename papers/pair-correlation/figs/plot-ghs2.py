@@ -13,8 +13,7 @@ from scipy.optimize import leastsq
 
 sigma = 2
 
-figure(1)
-title('$g_{HS}(r)$') #radial distribution for hard spheres
+figure(1, figsize=(5,4))
 axvline(x=sigma, color='k', linestyle=':')
 axhline(y=1, color='k', linestyle=':')
 
@@ -71,7 +70,7 @@ for i in range(len(ff)):
         break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     figure(1)
-    plot(r_mc, ghs[i], colors[i]+"-",label='ghs at filling fraction %.2f'%ff[i])
+    plot(r_mc, ghs[i], colors[i]+"-",label='$\eta = %.1f$'%ff[i])
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -323,7 +322,7 @@ gdifference = dist2(vals)
 
 for i in range(len(ff)):
   figure(1)
-  plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--',label='g at filling fraction %.2f'%ff[i])
+  plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--')
   hsigma = (1 - 0.5*ff[i])/(1-ff[i])**3 - 1
   density = 4/3*pi*ff[i]
   rhs = (1-ff[i])**4/(1+4*ff[i]+4*ff[i]**2-4*ff[i]**3+ff[i]**4)/3
@@ -352,12 +351,13 @@ for i in range(len(ff)):
 
 
 figure(1)
-xlim(2,6.5)
+xlim(0,6.5)
 ylim(0., 3.5)
 xlabel(r"$r/R$")
 ylabel("$g(r)$")
 legend(loc='best').get_frame().set_alpha(0.5)
 
+tight_layout()
 savefig("figs/ghs-g2.pdf")
 
 
