@@ -21,13 +21,13 @@ case "$TEST" in
         ;;
     slow)
         echo Testing very carefully!
-        /usr/bin/time -f '%E' -o /tmp/time.txt scons -j $USING --cache-disable
-        echo Tests successful, took `cat /tmp/time.txt`
+        /usr/bin/time -f '%E' -o /tmp/time-$USER.txt scons -j $USING --cache-disable
+        echo Tests successful, took `cat /tmp/time-$USER.txt`
         ;;
     *)
         echo Testing everything!
         /usr/bin/time -f '%E' -o /tmp/time.txt scons # -j $USING
-        echo Tests successful, took `cat /tmp/time.txt`
+        echo Tests successful, took `cat /tmp/time-$USER.txt`
         ;;
 esac
 

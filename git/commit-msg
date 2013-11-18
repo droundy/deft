@@ -7,9 +7,9 @@ case "$TEST" in
         echo Tests skipped! >> "$1"
         ;;
     slow)
-        echo Tested with cache disabled on `hostname`.  Took `cat /tmp/time.txt`. >> "$1"
+        echo Tested with cache disabled on `hostname`.  Took `cat /tmp/time-$USER.txt`. >> "$1"
         ;;
     *)
-        echo Tested on `hostname`.  Took `cat /tmp/time.txt`. >> "$1"
+        echo Tested on `hostname`.  Took `cat /tmp/time-$USER.txt`. >> "$1"
         ;;
 esac
