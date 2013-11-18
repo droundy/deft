@@ -17,10 +17,10 @@ struct ball {
 };
 
 // Modulates v to within the periodic boundaries of the cell
-vector3d fix_periodic(vector3d v, const double len[3]);
+vector3d sq_fix_periodic(vector3d v, const double len[3]);
 
 // Return the vector pointing from a to b, accounting for periodic boundaries
-vector3d periodic_diff(const vector3d &a, const vector3d  &b,
+vector3d sq_periodic_diff(const vector3d &a, const vector3d  &b,
                        const double periodic[3]);
 
 // Create and initialize the neighbor tables for all balls (p).
@@ -69,10 +69,3 @@ ball random_move(const ball &original, double size, const double len[3]);
 int move_one_ball(int id, ball *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
                         double dist, int max_neighbors, double dr);
-
-// Used for determining initial configuration of balls; need about (and at least) N
-// Return number of positions in a periodic face-fentered cubic grid nx by ny by nz
-int fcc_faces(int nx, int ny, int nz);
-int fcc_inner_corners(int nx, int ny, int nz);
-int fcc_outer_corners(int nx, int ny, int nz);
-int fcc_total(int nx, int ny, int nz);
