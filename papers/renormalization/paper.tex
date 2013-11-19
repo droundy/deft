@@ -1,0 +1,125 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{color}
+
+\newcommand{\fixme}[1]{{\bf\color{red}{[#1]}}}
+\newcommand{\rr}{\mathbf{r}}
+
+\begin{document}
+\title{Renormalization}
+
+\author{Daniel ?. Roth}
+\author{Michael ?. Perlin}
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+\begin{abstract}
+  We present an analysis of the convergence properties of
+  renormalization group theory  when applied to the square-well
+  liquid.
+\end{abstract}
+
+\maketitle
+
+Long-wavelength fluctuations lead to significant changes in fluid
+behavior in two scenarios: near the critical point, and at
+liquid-vapor interfaces.  The failing of perturbation theory near the
+critical point is well-understood, and is commonly treated in the
+homogeneous case using either renormalization group
+theory~\cite{white2000global, white2001global, del2002vapour,
+  kiselev2002computer, reiner2002hierarchical, mi2004renormalization,
+  mi2004improved, fu2006study, giacometti2009liquid, jiuxun2005simple,
+  forte2011application, el2008integral, ramana2012generalized}, or
+crossover theory~\cite{kiselev1999crossover, kiselev2000crossover,
+  kiselev2001crossover, kiselev2000simplified, hu2003crossover,
+  hu2003back, mccabe2004crossover, llovell2006global}.  The
+liquid-vapor interface is beset by long-wavelength fluctuations in the
+form of capillary waves~\cite{buff1965interfacial,
+  weeks1989consistency}, which are handled---when treated at all---as
+an analytic correction to the surface tension computed using density
+functional theory~\cite{wadewitz2000application, winkelmann2001liquid,
+  gross2009density}.  These corrections to the surface tension involve
+an ad hoc cutoff wavelength, and do not correct the prediction of the
+interfacial density profile.  The effect of capillary waves on surface
+tension is largest near the critical point.  Together, these effects
+suggest that a density functional theory directly incorporating
+long-wavelength fluctuations would be a major gain for the study of
+liquid interfaces.
+
+I plan to develop such a functional using renormalization group theory
+(RGT).  Implementation of RGT in an inhomogeneous system will be
+computationally challenging, because it is an inherently recursive
+theory.  This results in long-range fluctuations (and correlations)
+near the critical point, which will be reflected in a long-range
+density functional.  It will be more computationally
+intensive than existing density functionals, but at the same time will
+enable far greater predictive power, over a wide range of
+temperatures, pressures, and density distributions.
+
+There has been one study of the effect of critical behavior on surface
+tension using a renormalization approach, which used the Density
+Gradient Theory (DGT) rather than DFT due to its easier integration
+with renormalization group theory~\cite{fu2006study}.  The use of DGT,
+which is not self-consistent, puts a major limitation the power of the
+method, particularly when applied to diverse interfaces.
+
+
+We will study a hard-sphere fluid with a square well attractive
+potential.  This is a widely used model fluid within the SAFT
+community~\cite{mi2004renormalization, mi2004improved, fu2006study,
+  forte2011application} as well as in the study of the critical
+behavior of fluids~\cite{white2000global, white2001global,
+  del2002vapour, kiselev2002computer, reiner2002hierarchical,
+  mi2004renormalization, mi2004improved, fu2006study,
+  giacometti2009liquid, jiuxun2005simple, forte2011application,
+  el2008integral, ramana2012generalized}. This model is particularly
+suitable for testing over a wide range of temperatures and pressures
+due to its ease of computation.  Because the set of energy levels is
+discrete, this system is suitable for the use of histogram-based Monte
+Carlo methods~\cite{ferrenberg1988histogram, lee1993new, de1998broad}.
+These approaches accelerate the computation of thermodynamic
+properties over a range of temperatures, and are particularly helpful
+near phase transitions and critical points.  There has been a recent
+Monte Carlo study of phase behavior of the the square-well
+fluid~\cite{liu2005direct}, which did not take advantage of the
+histogram family of Monte Carlo methods, although it did use the
+aggregation volume bias sampling method to accelerate sampling of
+bonded and non-bonded configurations~\cite{chen2000novel}.
+
+We will begin by studying the simple square-well liquid already
+introduced in a previous paragraph.  This liquid is a standard test
+case for theories of critical behavior, although its critical behavior
+at the liquid-vapor interface has not yet been examined.  We will
+closely follow the approach recently developed by Forte \emph{et al.}
+who constructed a SAFT-VR equation of state using
+RGT~\cite{forte2011application}.  Their approach to RGT is expressed
+in terms of the pair distribution function
+$g^{(2)}_{HS}(\rr_1,\rr_2)$, which will enable us to leverage our
+earlier work (from the previous paragraph) to construct a
+renormalization group classical density functional theory for the
+inhomogeneous fluid.  Once we have developed a RGT density functional,
+we will test it against Monte Carlo simulations of the surface
+tension, as well as a fluid near the critical point at a hard wall.
+%
+Future work will include applying this approach to associating fluids.
+
+
+\section{Methods}
+
+\subsection{Renormalization Group Theory}
+
+\fixme{Here we will explain the RGT that we use, and how it works
+  out.}
+
+\subsection{Monte Carlo}
+
+\fixme{Here we will explain our Monte Carlo simulations.}
+
+\section{Results}
+
+\section{Conclusion}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
