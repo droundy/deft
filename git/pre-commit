@@ -26,7 +26,7 @@ case "$TEST" in
         ;;
     *)
         echo Testing everything!
-        /usr/bin/time -f '%E' -o /tmp/time.txt scons # -j $USING
+        /usr/bin/time -f '%E' -o /tmp/time-$USER.txt scons # -j $USING
         echo Tests successful, took `cat /tmp/time-$USER.txt`
         ;;
 esac
