@@ -206,7 +206,7 @@ instance Type RealSpace where
                                   codes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ code a ++ op ++ code x ++ ";"
             initialize_position =
-              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              if hasexpression (Expression Rx) e || hasexpression (Expression Ry) e || hasexpression (Expression Rz) e
               then ["\t\tconst int z_real = i % gd.Nz;",
                     "\t\tconst int n_real = (i-z_real)/gd.Nz;",
                     "\t\tconst int y_real = n_real % gd.Ny;",
@@ -233,7 +233,7 @@ instance Type RealSpace where
                                   newcodes (n+1) (substitute x' (s_var ("t"++show n)) x)
               MB Nothing -> "\t\t" ++ newcode a ++ op ++ newcode (cleanvars x) ++ ";"
             initialize_position =
-              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              if hasexpression (Expression Rx) e || hasexpression (Expression Ry) e || hasexpression (Expression Rz) e
               then ["\t\tint _z = i % int(Nz);",
                     "\t\tconst int _n = (i-_z)/int(Nz);",
                     "\t\tint _y = _n % int(Ny);",
@@ -718,7 +718,7 @@ instance Type Scalar where
     "\t\t"++ newcode a ++ " += " ++ newcode e ++
     ";\n\t}\n"
     where initialize_position =
-              if hasexpression rx e || hasexpression ry e || hasexpression rz e
+              if hasexpression (Expression Rx) e || hasexpression (Expression Ry) e || hasexpression (Expression Rz) e
               then ["\t\tint _z = i % int(Nz);",
                     "\t\tconst int _n = (i-_z)/int(Nz);",
                     "\t\tint _y = _n % int(Ny);",
@@ -806,13 +806,13 @@ rvec :: Vector RealSpace
 rvec = Vector rx ry rz
 
 rx :: Expression RealSpace
-rx = Expression Rx
+rx = "rx" === Expression Rx
 
 ry :: Expression RealSpace
-ry = Expression Ry
+ry = "ry" === Expression Ry
 
 rz :: Expression RealSpace
-rz = Expression Rz
+rz = "rz" === Expression Rz
 
 kx :: Expression KSpace
 kx = Expression Kx
