@@ -209,6 +209,7 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
 Default('papers')
 
 Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
+Alias('papers', env.PDF('papers/pair-correlation/notes.tex'))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
 
@@ -229,7 +230,7 @@ for paperfile in Glob('papers/*/paper.tex') + Glob('papers/*/project.tex'):
                             source = outfile,
                             action = 'epstopdf $SOURCE')
     # and now let's handle all python files
-    for pyfile in Glob(paperdir + '/figs/*.py'):
+    for pyfile in Glob(paperdir + '/figs/*.py') + Glob(paperdir + '/*.py'):
         pyfile = str(pyfile)[:len(str(pyfile))-3]
         paper.Matplotlib(pyfile, py_chdir=paperdir)
     # and now we'll handle all svg files
