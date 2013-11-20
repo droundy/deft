@@ -64,7 +64,8 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
     // There is no point continuing, since we're starting with a NaN!
     // So we may as well quit here.
     if (verbose) {
-      printf("The initial energy is a NaN, so I'm quitting early.\n");
+      printf("The initial energy is a NaN, so I'm quitting early from ConjugateGradientType::improve_energy.\n");
+      f.print_summary("has nan:", E0);
       fflush(stdout);
     }
     return false;
@@ -120,6 +121,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
     // So we may as well quit here.
     if (verbose) {
       printf("The initial energy is a NaN, so I'm quitting early.\n");
+      f.print_summary("has nan:", E0);
       fflush(stdout);
     }
     return false;

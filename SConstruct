@@ -345,6 +345,7 @@ for mkdat in Split("""
 	papers/water-saft/figs/single-rod
 	papers/water-saft/figs/hughes-single-rod
 	papers/water-saft/figs/sphere
+	papers/water-saft/figs/lj-atom
 	papers/hughes-saft/figs/rods-in-water
 	papers/hughes-saft/figs/four-rods-in-water
 	papers/hughes-saft/figs/single-rod
