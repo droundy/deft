@@ -96,34 +96,32 @@ def evalg_quadratic(xnew, eta, r):
   density = 3/4/pi*eta
   rhs = (1-eta)**4/(1 + 4*eta + 4*eta**2 - 4*eta**3 + eta**4)
 
-  a0 = xnew[0]
-  a1 = 0
-  a2 = xnew[1]
-  a3 = 0
-  a4 = xnew[2]
+  K0 = xnew[0]
+  K1 = xnew[1]
+  K2 = xnew[2]
 
-  int_h0 = 4*pi*hsigma*(2 + sigma*a0*(2 + sigma*a0))/a0**3 - 4/3*pi*sigma**3
+  int_h0 = 4*pi*hsigma*(2 + sigma*K0*(2 + sigma*K0))/K0**3 - 4/3*pi*sigma**3
 
-  int_h1_over_a1 = 4*pi*(6 + sigma*a2*(4 + sigma*a2))/a2**4
+  int_h1_over_a1 = 4*pi*(6 + sigma*K1*(4 + sigma*K1))/K1**4
 
-  int_h2_over_a3 = 8*pi*(12 + sigma*a4*(6 + sigma*a4))/a4**5
+  int_h2_over_a3 = 8*pi*(12 + sigma*K2*(6 + sigma*K2))/K2**5
 
   A = (rhs-1)/density - int_h0
   B = int_h2_over_a3
   C = int_h1_over_a1
 
-  a1 = hsigma*(a0 - 1 - hsigma) # sets slope at sigma
+  a1 = hsigma*(K0 - 1 - hsigma) # sets slope at sigma
 
   a3 = (A - C*a1)/B # sets integral
 
   f0 = hsigma
-  j0 = exp(-a0*z)
+  j0 = exp(-K0*z)
 
   f1 = a1
-  j1 = z*exp(-a2*z)
+  j1 = z*exp(-K1*z)
 
   f2 = a3
-  j2 = z**2*exp(-a4*z)
+  j2 = z**2*exp(-K2*z)
 
   return 1 + f0*j0 + f1*j1 + f2*j2
 
@@ -316,6 +314,82 @@ for i in range(len(x)):
 
 g = dist(vals)
 gdifference = dist2(vals)
+
+chisq = (gdifference**2).sum()
+maxerr = abs(gdifference).max()
+etamaxerr = 0
+rmaxerr = 0
+for i in xrange(len(gdifference)):
+  if abs(gdifference[i]) == maxerr:
+    etamaxerr = etaconcatenated[i]
+    rmaxerr = rconcatenated[i]
+K0 = x[0]
+K1 = x[1]
+K2 = x[2]
+
+outfile = open('figs/fit-parameters.h', 'w')
+outfile.write("""
+// Chi squared = %(chisq)g
+// Maximum error = %(maxerr)g
+
+const double K0 = %(K0)g;
+const double K1 = %(K1)g;
+const double K2 = %(K2)g;
+
+inline double gsigma_to_eta(const double gs) {
+  if (gs <= 1) return 0;
+  const double c = -pow(fabs(sqrt(3.0)*sqrt(27.0*gs*gs*gs*gs - 2.0*gs*gs*gs)-9.0*gs*gs), 1.0/3.0);
+  return c/(pow(6.0, 2.0/3.0)*gs) + 1.0/(pow(6.0, 1.0/3.0)*c) + 1.0;
+}
+
+inline double radial_distribution(double gsigma, double r) {
+  const double sigma = 2.0;
+  if (gsigma <= 1) return 1; // handle roundoff error okay
+  if (r < sigma) return 0;
+  const double eta = gsigma_to_eta(gsigma);
+  const double z = r - 2.0;
+  const double hsigma = gsigma - 1.0;
+  // Constants determined by fit to monte-carlo data by plot-ghs.py
+
+  const double density = 3.0/4.0/M_PI*eta;
+  const double rhs = uipow(1-eta, 4)/(1 + 4*eta + 4*uipow(eta, 2) - 4*uipow(eta, 3) + uipow(eta, 4));
+  const double integral_h0 = 4*M_PI*hsigma*(2 + sigma*K0*(2 + sigma*K0))/uipow(K0, 3) - 4.0/3.0*M_PI*uipow(sigma, 3);
+  const double integral_h1_over_a1 = 4*M_PI*(6 + sigma*K1*(4 + sigma*K1))/uipow(K1, 4);
+  const double integral_h2_over_a3 = 8*M_PI*(12 + sigma*K2*(6 + sigma*K2))/uipow(K2, 5);
+
+  const double A = (rhs-1)/density - integral_h0;
+  const double B = integral_h2_over_a3;
+  const double C = integral_h1_over_a1;
+
+  // this sets the slope at contact. It is based on g'(sigma) = -hsigma - hsigma^2,
+  // which has good agreement with mc data, but, ideally, will be replaced with
+  // a formula with a theoretical derivation.
+  const double a1 = hsigma*(K0 - 1 - hsigma);
+
+  // This forces g(r) to integrate correctly, as per the equation on page 35 of
+  // Theory of Simple Liquids
+  const double a3 = (A - C*a1)/B;
+
+  const double h0 = hsigma*exp(-K0*z);
+  const double h1 = a1*z*exp(-K1*z);
+  const double h2 = a3*z*z*exp(-K2*z);
+
+  return 1 + h0 + h1 + h2;
+}
+""" % locals())
+outfile.close()
+
+outfile = open('figs/fit-parameters.tex', 'w')
+outfile.write(r"""
+\newcommand\maxerr{%(maxerr).2g}
+\newcommand\etamaxerr{%(etamaxerr)g}
+\newcommand\rmaxerr{%(rmaxerr).2g}
+\newcommand\chisq{%(chisq).2g}
+\newcommand\kappazero{%(K0)g}
+\newcommand\kappaone{%(K1)g}
+\newcommand\kappatwo{%(K2)g}
+""" % locals())
+outfile.close()
 
 # for i in g:
 #     print dist(vals, ind)[i]

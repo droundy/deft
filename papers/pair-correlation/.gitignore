@@ -3,3 +3,5 @@ figs/pretty-?.svg
 *.dat.sum
 *Info.txt
 *.debug
+notes-content.tex
+figs/fit-parameters.*
