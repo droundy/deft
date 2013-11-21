@@ -29,7 +29,7 @@ center = rpath/2
 able_to_read_file = True
 
 # Set the max parameters for plotting.
-zmax = 8
+zmax = 7
 zmin = -3
 rmax = 4
 ############################
@@ -162,8 +162,8 @@ xdft = loadtxt("figs/triplet-x.dat")
 levels = linspace(0, gmax, gmax*100)
 gr = read_gr(ff)
 ginf = interp(rpath, gr[:,0], gr[:,1]/ff)
-xlo = 0.85*ginf/gmax
-xhi = 1.15*ginf/gmax
+xlo = 0.5*ginf/gmax
+xhi = 1.5*ginf/gmax
 xwhite = 1.0*ginf/gmax
 xhier = (1 + xhi)/2.0
 

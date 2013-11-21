@@ -146,8 +146,10 @@ zdft = loadtxt("figs/walls/z.dat")
 xdft = loadtxt("figs/walls/x.dat")
 
 levels = linspace(0, gmax, gmax*100)
-xlo = 0.85/gmax
-xhi = 1.15/gmax
+xlo = 0.25/gmax
+xhi = 1.25/gmax
+if xhi > (1+2.0/gmax)/3:
+  xhi = (1+2.0/gmax)/3
 xhier = (1 + xhi)/2.0
 
 cdict = {'red':   [(0.0,  0.0, 0.0),

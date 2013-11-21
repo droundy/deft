@@ -160,8 +160,8 @@ xdft = loadtxt("figs/triplet-x.dat")
 levels = linspace(0, gmax, gmax*100)
 gr = read_gr(ff)
 ginf = interp(2*rpath, gr[:,0], gr[:,1]/ff)
-xlo = 0.85*ginf/gmax
-xhi = 1.15*ginf/gmax
+xlo = 0.5*ginf/gmax
+xhi = 1.5*ginf/gmax
 xwhite = 1.0*ginf/gmax
 xhier = (1 + xhi)/2.0
 
@@ -264,7 +264,7 @@ annotate('C', xy=(Cz, Cx), xytext=(rpath*2,3.0),
 annotate('D', xy=(Dz, Dx), xytext=(6.7,0.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-annotate('E', xy=(Ez, Ex), xytext=(8.5,0.5),
+annotate('E', xy=(Ez, Ex), xytext=(8.0,0.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
 
