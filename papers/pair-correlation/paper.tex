@@ -286,7 +286,7 @@ function at contact is given to a very good approximation by
   g'(\sigma) \approx - h_\sigma g_\sigma
 \end{align}
 where $h_\sigma = g_\sigma - 1$ is the total correlation function.
-Under these two constraints, we applied a least-squares fit to
+Under these three constraints, we applied a least-squares fit to
 simulation data for the radial distribution function at packing
 fractions from 0.05 to 0.4 by steps of 0.05.  Our fitted radial
 distribution function is given by
@@ -294,7 +294,7 @@ distribution function is given by
 \newcommand\kappab{\kappa_1}
 \newcommand\kappac{\kappa_2}
 \begin{multline}
-  h(r,g_\sigma) = h_\sigma e^{-\kappaa z} \\
+  h(r,g_\sigma) = 1 + h_\sigma e^{-\kappaa z} \\
   + h_\sigma(\kappaa - g_\sigma) ze^{-\kappab z} \\
   + \frac{\frac{(1-\eta)^4}{1+4\eta + 4\eta^2 - 4\eta^3 +
       \eta^4}\frac{1}{n}
@@ -308,7 +308,7 @@ distribution function is given by
   I_1 = \frac{4\pi h_\sigma (6 + \sigma \kappab (4 + \sigma \kappab))}{\kappab^4}
 \end{equation}
 \begin{equation}
-  I_2 = \frac{8\pi h_\sigma (12 + \sigma \kappac (6 + \sigma \kappac))}{\kappac^5}
+  I_2 = \frac{8\pi (12 + \sigma \kappac (6 + \sigma \kappac))}{\kappac^5}
 \end{equation}
 \begin{equation}
   z = r - \sigma
