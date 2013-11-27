@@ -3,6 +3,7 @@
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{color}
+\usepackage{subcaption} % provides subfigure
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
@@ -540,31 +541,64 @@ from Monte Carlo.  On the right, we display
 \section{Performance in thermodynamic perturbation theory}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
-  %\includegraphics[width=\columnwidth]{figs/dadz-3-3.pdf}
-  %\includegraphics[width=\columnwidth]{figs/dadz-2-2.pdf}
-  \includegraphics[width=\columnwidth]{figs/dadz-square-well-3.pdf}
-  %%\includegraphics[width=3cm]{figs/dadz-4-3}
+  \begin{subfigure}{\columnwidth}
+    \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
+    \vspace{-0.8cm}
+    \caption{Sticky hard-sphere fluid}\label{fig:dadz-delta}
+  \end{subfigure}
+  \begin{subfigure}{\columnwidth}
+    \includegraphics[width=\columnwidth]{figs/dadz-square-well-3.pdf}
+    \vspace{-0.8cm}
+    \caption{Hard-core square well fluid}\label{fig:dadz-square-well}
+  \end{subfigure}
   \caption{Plot of $\frac{da_1}{dz}$ near a hard
-    wall. For what $\Phi$?}\label{fig:dadz}
+    wall.}\label{fig:dadz}
 \end{figure}
 
-The most relevant quantitative test of a pair distribution function is
-how well it predicts the interaction energy due to a pair potential.
-To this end, we have computed the error in the first term in a
-high-temperature perturbation expansion $a_1$ for several pair
+A particularly relevant quantitative test of a pair distribution
+function is how well it predicts the interaction energy due to a pair
+potential.  To this end, we have computed the error in the first term
+in a high-temperature perturbation expansion $a_1$ for several pair
 potentials.  In order to focus on effects at the interface, we have
 defined a position-dependent pair interaction energy as
 \begin{align}
   \frac{dF_1}{dz} &=
   \tfrac12 \int g^{(2)}_{HS}(\rr,\rr')n(\rr)n(\rr')\Phi(|\rr-\rr'|)
-  d\rr'\, dxdy
+  d\rr'\, dxdy\label{eq:da1}
 \end{align}
 which gives the contribution to the mean-field free energy due to
-molecules located at position $z$.  We plot in Figure~\ref{fig:dadz}
-this quantity for two pair potentials.
+molecules located at position $z$.
+
+We plot in Fig.~\ref{fig:dadz} this quantity for two pair potentials
+near a hard wall.  Figure~\ref{fig:dadz-delta} shows the results for a
+delta-function interaction at contact, which represents a so-called
+``sticky hard-sphere fluid.''  Our pair distribution function is
+constructed to produce this result exactly, provided the averaged pair
+distribution function at contact from Ref.~\citenum{schulte2012using}
+is exact.  As expected, we see excellent agreement with the Monte
+Carlo simulation results, while the approximations of Fischer and
+Sokolowski each show deviations near the interface.
+Figure~\ref{fig:dadz-square-well} shows the same curve from
+Eq.~\ref{eq:da1} for a square-well fluid.  We have chosen a square
+well fluid with a potential range of 1.79, which is the optimal value
+found for a SAFT-based model of water~\cite{clark2006developing}.
+This potential stresses our approximation to the radial distribution
+function, which results in less satisfactory results near a
+hard-sphere diameter from the wall.  We see that over these length
+scales, Sokolowski's approximation is very accurate.
 
 \section{Conclusion}
+
+We have introduced and tested an approximation for the pair
+distribution function of the inhomogeneous hard-sphere fluid.  Our
+approximation is suitable for use in the development of classical
+density functionals based constructed using perturbation theory, and
+may be computed using exclusively single-center convolutions.  We have
+tested this function at a hard wall and near a single fixed hard
+sphere, and find that it gives qualitatively reasonable results.
+Tests of the pair distribution function in integrals that arise in
+thermodynamic perturbation theory suggest that our approximation gives
+good results for both short-range and long-range attractions.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
