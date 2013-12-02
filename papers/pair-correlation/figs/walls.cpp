@@ -402,7 +402,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(stderr, "Unable to create file %s!\n", plotname_a);
         return;
       }
-      for (double z0 = 2; z0 <= 7; z0 += dz) {
+      for (double z0 = 2; z0 <= spacing + 6; z0 += dz) {
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         const double dtheta = M_PI/ceil(delta_r/dv*M_PI);
@@ -426,7 +426,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       // Clark et al.  No need to user fischer here, since fischer is
       // only defined at contact.
       const double lambda=1.790;
-      const double dz = 0.1;
+      double dz = 0.01;
       const double dv = 0.01;
       const double well_volume = 4*M_PI/3*(uipow(2*lambda, 3) - uipow(2.0, 3));
       char *plotname_a = new char [4096];
@@ -437,7 +437,9 @@ void run_walls(double eta, const char *name, Functional fhs) {
         fprintf(stderr, "Unable to create file %s!\n", plotname_a);
         return;
       }
-      for (double z0 = spacing + dz/2; z0 <= spacing + 4; z0 += dz) {
+      for (double z0 = spacing + dz/2; z0 <= spacing + 6; z0 += dz) {
+        if (z0 > spacing + 3) dz = 0.2;
+        else if (z0 > spacing + 0.1) dz = 0.1;
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         for (double r = 2 + dv/2; r <= lambda*2; r += dv) {
@@ -450,6 +452,45 @@ void run_walls(double eta, const char *name, Functional fhs) {
             const Cartesian r1(r*sintheta, 0, z0 + r*costheta);
             double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
             da_dz += density(r0)*density(r1)*g2*dvolume;
+          }
+        }
+        fprintf(out, "%g %g\n",z0-spacing,da_dz);
+      }
+      fclose(out);
+      took(plotname_a + strlen("papers/pair-correlation/figs/"));
+      delete[] plotname_a;
+    }
+    if (fabs(eta - 0.3) < 0.0001 and strcmp(fun[version], "fischer")) {
+      // Now we'll do an inverse r^6 test, as in London dispersion (at
+      // long distance).  No need to user fischer here, since fischer
+      // is only defined at contact.
+      double dz = 0.01;
+      const double dv = 0.01;
+      const double rmax = 5.0;
+      char *plotname_a = new char [4096];
+      sprintf(plotname_a,
+              "papers/pair-correlation/figs/walls/inverse-sixth-dadz-%s-%04.2f-rmax-%g.dat",
+              fun[version], eta, rmax);
+      FILE *out = fopen(plotname_a,"w");
+      if (!out) {
+        fprintf(stderr, "Unable to create file %s!\n", plotname_a);
+        return;
+      }
+      for (double z0 = spacing + dz/2; z0 <= spacing + 6; z0 += dz) {
+        if (z0 > spacing + 3) dz = 0.2;
+        else if (z0 > spacing + 0.1) dz = 0.1;
+        double da_dz = 0;
+        const Cartesian r0(0,0,z0);
+        for (double r = 2 + dv/2; r <= rmax; r += dv) {
+          const double dtheta = M_PI/ceil(r/dv*M_PI);
+          for (double theta = dtheta/2; theta <= M_PI; theta += dtheta) {
+            const double sintheta = sin(theta);
+            const double costheta = cos(theta);
+            const double dcostheta = cos(theta - dtheta/2) - cos(theta + dtheta/2);
+            const double dvolume = 2*M_PI*(uipow(r+dv/2, 3) - uipow(r-dv/2, 3))*dcostheta/3;
+            const Cartesian r1(r*sintheta, 0, z0 + r*costheta);
+            double g2 = pairdists[version](gsigma, density, nA, n3, nbar_sokolowski, r0, r1);
+            da_dz += density(r0)*density(r1)*g2*dvolume/uipow(r,6);
           }
         }
         fprintf(out, "%g %g\n",z0-spacing,da_dz);

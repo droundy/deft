@@ -378,6 +378,8 @@ env.Command(target = ['papers/contact/figs/walls.dat',
 env.Command(target = ['papers/pair-correlation/figs/walls.dat',
                       'papers/pair-correlation/figs/walls/x.dat',
                       'papers/pair-correlation/figs/walls/z.dat',
+                      'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-0.30-rmax-5.dat',
+                      'papers/pair-correlation/figs/walls/inverse-sixth-dadz-sokolowski-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-this-work-0.30-1.790.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-sokolowski-0.30-1.790.dat']+
             ['papers/pair-correlation/figs/wallsWB-%04.2f.dat' % ff
