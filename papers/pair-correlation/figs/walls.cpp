@@ -439,7 +439,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       }
       for (double z0 = spacing + dz/2; z0 <= spacing + 6; z0 += dz) {
         if (z0 > spacing + 3) dz = 0.2;
-        else if (z0 > spacing + 0.1) dz = 0.1;
+        else if (z0 > spacing + 0.1) dz = 0.05;
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         for (double r = 2 + dv/2; r <= lambda*2; r += dv) {
@@ -478,7 +478,7 @@ void run_walls(double eta, const char *name, Functional fhs) {
       }
       for (double z0 = spacing + dz/2; z0 <= spacing + 6; z0 += dz) {
         if (z0 > spacing + 3) dz = 0.2;
-        else if (z0 > spacing + 0.1) dz = 0.1;
+        else if (z0 > spacing + 0.1) dz = 0.05;
         double da_dz = 0;
         const Cartesian r0(0,0,z0);
         for (double r = 2 + dv/2; r <= rmax; r += dv) {

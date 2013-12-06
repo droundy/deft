@@ -574,23 +574,30 @@ defined a position-dependent pair interaction energy as
 which gives the contribution to the mean-field free energy due to
 molecules located at position $z$.
 
-We plot in Fig.~\ref{fig:dadz} this quantity for two pair potentials
-near a hard wall.  Figure~\ref{fig:dadz-delta} shows the results for a
-delta-function interaction at contact, which represents a so-called
-``sticky hard-sphere fluid.''  Our pair distribution function is
-constructed to produce this result exactly, provided the averaged pair
-distribution function at contact from Ref.~\citenum{schulte2012using}
-is exact.  As expected, we see excellent agreement with the Monte
-Carlo simulation results, while the approximations of Fischer and
-Sokolowski each show deviations near the interface.
-Figure~\ref{fig:dadz-square-well} shows the same curve from
-Eq.~\ref{eq:da1} for a square-well fluid.  We have chosen a square
-well fluid with a potential range of 1.79, which is the optimal value
-found for a SAFT-based model of water~\cite{clark2006developing}.
+We plot in Fig.~\ref{fig:dadz} this quantity for hard-core fluids with
+three representative pair potentials near a hard wall.  We have chosen
+to illustrate a delta-function ineraction at contact (i.e. ``sticky
+hard spheres''), a hard-core square-well fluid, with the length-scale
+of interaction taken from the optimal SAFT model for water found by
+Clark \emph{et al.}~\cite{clark2006developing}, and a $1/r^6$
+power-law attraction.  These pair potentials represent a short-range
+interaction, a medium-range discontinuous interaction, and a
+long-range smooth interaction.
+
+Figure~\ref{fig:dadz-delta} shows the results for the sticky
+hard-sphere fluid.  Our pair distribution function is constructed to
+produce this result exactly, provided the averaged pair distribution
+function at contact from Ref.~\citenum{schulte2012using} is exact.  As
+expected, we see excellent agreement with the Monte Carlo simulation
+results, while the approximations of Fischer and Sokolowski each show
+deviations near the interface.  Figure~\ref{fig:dadz-square-well}
+shows the same curve from Eq.~\ref{eq:da1} for the square-well fluid.
 This potential stresses our approximation to the radial distribution
-function, which results in less satisfactory results near a
-hard-sphere diameter from the wall.  We see that over these length
-scales, Sokolowski's approximation is very accurate.
+function, since the edge of the attraction occurs at the dip in the
+radial distribution function at this density, which poor results for
+the bulk fluid.  We see that over these length scales, Sokolowski's
+approximation is very accurate.  Finally, in the case of the power-law
+attraction both approximations work very well.
 
 \section{Conclusion}
 
