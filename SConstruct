@@ -258,6 +258,18 @@ env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
             action = string.join(['cat '] +
                                  sorted(glob.glob('papers/water-saft/figs/hughes-single-rod-*nm-energy.dat')) +
                                  [' > $TARGET']))
+for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
+    env.Command(target = 'papers/water-saft/figs/lj-%s.dat' % atom,
+                source = Glob('papers/water-saft/figs/lj-%s-*K-energy.dat' % atom),
+                action = string.join(['cat '] +
+                                     sorted(glob.glob('papers/water-saft/figs/lj-%s-*K-energy.dat' % atom)) +
+                                     [' > $TARGET']))
+for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
+    env.Command(target = 'papers/water-saft/figs/hughes-lj-%s.dat' % atom,
+                source = Glob('papers/water-saft/figs/hughes-lj-%s-*K-energy.dat' % atom),
+                action = string.join(['cat '] +
+                                     sorted(glob.glob('papers/water-saft/figs/hughes-lj-%s-*K-energy.dat' % atom)) +
+                                     [' > $TARGET']))
 
 # #################### papers/pair-correlation ##############################################
 
@@ -347,6 +359,7 @@ for mkdat in Split("""
 	papers/water-saft/figs/hughes-single-rod
 	papers/water-saft/figs/sphere
 	papers/water-saft/figs/lj-atom
+	papers/water-saft/figs/hughes-lj-atom
 	papers/hughes-saft/figs/rods-in-water
 	papers/hughes-saft/figs/four-rods-in-water
 	papers/hughes-saft/figs/single-rod

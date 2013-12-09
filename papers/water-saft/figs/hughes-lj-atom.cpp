@@ -35,7 +35,7 @@ double temperature; // temperature in Hartree
 const char* elements[] = {"Ne", "Ar", "Kr", "Xe"};
 const double sigmas[] = { 3.10*angstrom, 3.29*angstrom, 3.42*angstrom, 3.57*angstrom }; // in Bohr radii
 //from Dzublella, Swanson, and McCammon
-const double epsilons[] = { .3156*kJpermol, .8176*kJpermol, .9518*kJpermol, 1.0710*kJpermol }; // in Hartree
+const double epsilons[] = { .3171*kJpermol, .8220*kJpermol, .9558*kJpermol, 1.0773*kJpermol }; // in Hartree
 const int numelements = sizeof(elements)/sizeof(char *);
 
 double epsilon, sigma; // actual values
@@ -47,7 +47,7 @@ double externalpotentialfunction(Cartesian r) {
   const double dist = sqrt(x*x+y*y+z*z);
   const double oodist6 = 1.0/uipow(dist/sigma, 6);
   const double pot = 4*epsilon*(oodist6*oodist6 - oodist6);
-  const double max_pot = 50*temperature;
+  const double max_pot = 5*temperature;
   if (pot < max_pot) return pot;
   return max_pot;
 }
@@ -96,30 +96,30 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "papers/water-saft/figs/lj-%s-%gK-energy-hires.dat", argv[1], temperature/kB);
+  sprintf(datname, "papers/water-saft/figs/hughes-lj-%s-%gK-energy.dat", argv[1], temperature/kB);
   
-  Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-                                                new_water_prop.epsilonAB, new_water_prop.kappaAB,
-                                                new_water_prop.epsilon_dispersion,
-                                                new_water_prop.lambda_dispersion,
-                                                new_water_prop.length_scaling, 0));
+  Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                                hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                                hughes_water_prop.epsilon_dispersion,
+                                                hughes_water_prop.lambda_dispersion,
+                                                hughes_water_prop.length_scaling, 0));
   double n_1atm = pressure_to_density(f, temperature, lj_pressure,
                                       0.001, 0.01);
 
   double mu = find_chemical_potential(f, temperature, n_1atm);
 
-  f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-                                     new_water_prop.epsilonAB, new_water_prop.kappaAB,
-                                     new_water_prop.epsilon_dispersion,
-                                     new_water_prop.lambda_dispersion,
-                                     new_water_prop.length_scaling, mu));
+  f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                     hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                     hughes_water_prop.epsilon_dispersion,
+                                     hughes_water_prop.lambda_dispersion,
+                                     hughes_water_prop.length_scaling, mu));
   
-  Functional S = OfEffectivePotential(EntropySaftFluid2(new_water_prop.lengthscale,
-                                                        new_water_prop.epsilonAB,
-                                                        new_water_prop.kappaAB,
-                                                        new_water_prop.epsilon_dispersion,
-                                                        new_water_prop.lambda_dispersion,
-                                                        new_water_prop.length_scaling));
+  Functional S = OfEffectivePotential(EntropySaftFluid2(hughes_water_prop.lengthscale,
+                                                        hughes_water_prop.epsilonAB,
+                                                        hughes_water_prop.kappaAB,
+                                                        hughes_water_prop.epsilon_dispersion,
+                                                        hughes_water_prop.lambda_dispersion,
+                                                        hughes_water_prop.length_scaling));
   
   const double EperVolume = f(temperature, -temperature*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
@@ -127,23 +127,23 @@ int main(int argc, char *argv[]) {
   const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*sigma*sigma*sigma);
   
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.12);
+  GridDescription gd(lat, 0.20);
     
   Grid potential(gd);
   Grid externalpotential(gd);
   externalpotential.Set(externalpotentialfunction);
     
-  f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
-                                     new_water_prop.epsilonAB, new_water_prop.kappaAB,
-                                     new_water_prop.epsilon_dispersion,
-                                     new_water_prop.lambda_dispersion,
-                                     new_water_prop.length_scaling, mu) + ExternalPotential(externalpotential));
+  f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
+                                     hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                                     hughes_water_prop.epsilon_dispersion,
+                                     hughes_water_prop.lambda_dispersion,
+                                     hughes_water_prop.length_scaling, mu) + ExternalPotential(externalpotential));
 
-  Functional X = WaterX(new_water_prop.lengthscale,
-                        new_water_prop.epsilonAB, new_water_prop.kappaAB,
-                        new_water_prop.epsilon_dispersion,
-                        new_water_prop.lambda_dispersion,
-                        new_water_prop.length_scaling, mu);
+  Functional X = WaterX(hughes_water_prop.lengthscale,
+                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
+                        hughes_water_prop.epsilon_dispersion,
+                        hughes_water_prop.lambda_dispersion,
+                        hughes_water_prop.length_scaling, mu);
   
   Functional HB = HughesHB(hughes_water_prop.lengthscale,
                            hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
@@ -151,14 +151,13 @@ int main(int argc, char *argv[]) {
                            hughes_water_prop.lambda_dispersion,
                            hughes_water_prop.length_scaling, mu);
 
-  externalpotential.epsNativeSlice("papers/water-saft/figs/lj-potential-hires.eps",
+  externalpotential.epsNativeSlice("papers/water-saft/figs/hughes-lj-potential.eps",
                                    Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                                    Cartesian(0,ymax/2,zmax/2));
-  printf("Done outputting lj-potential-hires.eps\n");
+  printf("Done outputting hughes-lj-potential.eps\n");
 
-  potential = externalpotential - temperature*log(n_1atm)*VectorXd::Ones(gd.NxNyNz); // ???
-  // plot_grids_y_direction("papers/water-saft/figs/lj-potential.dat", externalpotential, potential);
-
+  potential = 0*externalpotential - temperature*log(n_1atm)*VectorXd::Ones(gd.NxNyNz); // ???
+    
   double energy;
   {
     const double surface_tension = 5e-5; // crude guess from memory...
@@ -166,11 +165,11 @@ int main(int argc, char *argv[]) {
     const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision
     const double precision = bulkprecision + surfprecision;
     Minimizer min = Precision(precision,
-                              PreconditionedConjugateGradient(f, gd, temperature,
+                              PreconditionedConjugateGradient(f, gd, temperature, 
                                                               &potential,
                                                               QuadraticLineMinimizer));
-
-
+      
+      
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
       double peak = peak_memory()/1024.0/1024;
@@ -195,7 +194,7 @@ int main(int argc, char *argv[]) {
     }
     {
       char* name = new char[1000];
-      sprintf(name, "papers/water-saft/figs/lj-%s-%gK-density-hires.eps", argv[1], temperature/kB);
+      sprintf(name, "papers/water-saft/figs/hughes-lj-%s-%gK-density.eps", argv[1], temperature/kB);
       Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
       density.epsNativeSlice(name,
                              Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -219,7 +218,7 @@ int main(int argc, char *argv[]) {
   Grid gradient(gd, potential);
   gradient *= 0;
   f.integralgrad(temperature, potential, &gradient);
-  gradient.epsNativeSlice("papers/water-saft/figs/lj-gradient-hires.eps",
+  gradient.epsNativeSlice("papers/water-saft/figs/hughes-lj-gradient.eps",
                           Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                           Cartesian(0,ymax/2,zmax/2));
 
@@ -233,12 +232,12 @@ int main(int argc, char *argv[]) {
   printf("The bulk energy per cell should be %g\n", EperCell);
   printf("The bulk energy based on number should be %g\n", EperNumber*density.integrate());
   printf("The bulk entropy is %g/N\n", SperNumber);
-  Functional otherS = EntropySaftFluid2(new_water_prop.lengthscale,
-                                        new_water_prop.epsilonAB,
-                                        new_water_prop.kappaAB,
-                                        new_water_prop.epsilon_dispersion,
-                                        new_water_prop.lambda_dispersion,
-                                        new_water_prop.length_scaling);
+  Functional otherS = EntropySaftFluid2(hughes_water_prop.lengthscale,
+                                        hughes_water_prop.epsilonAB,
+                                        hughes_water_prop.kappaAB,
+                                        hughes_water_prop.epsilon_dispersion,
+                                        hughes_water_prop.lambda_dispersion,
+                                        hughes_water_prop.length_scaling);
   printf("The bulk entropy (haskell) = %g/N\n", otherS(temperature, n_1atm)/n_1atm);
   //printf("My entropy is %g when I would expect %g\n", entropy, entropy - SperNumber*density.integrate());
   double hentropy = otherS.integral(temperature, density);
@@ -254,7 +253,7 @@ int main(int argc, char *argv[]) {
   fclose(o);
 
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/lj-%s-%gK-hires.dat", argv[1], temperature/kB);
+  sprintf(plotname, "papers/water-saft/figs/hughes-lj-%s-%gK.dat", argv[1], temperature/kB);
   //plot_grids_y_direction(plotname, density, X_values);
   plot_grids_y_direction(plotname, density, gradient);
 
