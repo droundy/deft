@@ -360,6 +360,7 @@ for mkdat in Split("""
 	papers/water-saft/figs/sphere
 	papers/water-saft/figs/lj-atom
 	papers/water-saft/figs/hughes-lj-atom
+	papers/water-saft/figs/hughes-lj-atom-hs-density
 	papers/hughes-saft/figs/rods-in-water
 	papers/hughes-saft/figs/four-rods-in-water
 	papers/hughes-saft/figs/single-rod
