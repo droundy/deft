@@ -102,7 +102,7 @@ bool ConjugateGradientType::improve_energy(bool verbose) {
   if (verbose) {
     //lm->print_info();
     print_info();
-    printf("grad*oldgrad = %g\n", grad().dot(direction)/gdotd);
+    printf("grad*dir/oldgrad*dir = %g\n", grad().dot(direction)/gdotd);
   }
   return (energy() < E0);
 }
@@ -154,7 +154,7 @@ bool PreconditionedConjugateGradientType::improve_energy(bool verbose) {
   if (verbose) {
     //lm->print_info();
     print_info();
-    printf("grad*oldgrad = %g\n", grad().dot(direction)/gdotd);
+    printf("grad*dir/oldgrad*dir = %g\n", grad().dot(direction)/gdotd);
   }
   return (energy() < E0 || beta != 0);
 }

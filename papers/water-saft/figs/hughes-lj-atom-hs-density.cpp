@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
   printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
   const double padding = 1*nm;
-  xmax = ymax = zmax = diameter + 2*padding;
+  // xmax = ymax = zmax = diameter + 2*padding;
 
   Functional f_sphere = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
 						hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
