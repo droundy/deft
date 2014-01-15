@@ -7,8 +7,8 @@ my $a;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-foreach $a ( "Xe" ) { #"Ne", "Ar", "Kr",  "Xe" ) {
-  foreach $t ( 300, 325, 350 ) {
+foreach $a ( "Kr" ) { #"Ne", "Ar", "Kr",  "Xe" ) {
+  foreach $t ( 278, 320 ) {
     my $atom = sprintf("%s", $a);
     my $temperature = sprintf("%04.2f", $t);
 

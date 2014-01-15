@@ -78,6 +78,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("%s compiled on %s at %s\n", argv[0], __DATE__, __TIME__);
   clock_t start_time = clock();
   if (argc == 2) {
     if (sscanf(argv[1], "%lg", &temperature) != 1) {
@@ -112,7 +113,7 @@ int main(int argc, char *argv[]) {
   const double EperCell_sphere = EperVolume_sphere*(zmax*ymax*xmax - (4*M_PI/3)*uipow(sigma, 3));
 
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.1);
+  GridDescription gd(lat, 0.13);
 
   Grid potential(gd);
   Grid sphere_constraint(gd);
@@ -236,7 +237,7 @@ int main(int argc, char *argv[]) {
     const double surface_tension = 5e-5; // crude guess from memory...
     const double surfprecision = 1e-4*M_PI*sigma*sigma*surface_tension; // four digits precision
     const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision
-    const double precision = bulkprecision + surfprecision;
+    const double precision = (bulkprecision + surfprecision)*1e-3;
     Minimizer min = Precision(precision,
                               PreconditionedConjugateGradient(f, gd, temperature, 
                                                               &potential,
@@ -249,12 +250,28 @@ int main(int argc, char *argv[]) {
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
       fflush(stdout);
-      // char* name = new char[1000];
-      // sprintf(name, "papers/water-saft/figs/lj-%s-%d-density-big.eps", argv[1], i);
-      // Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      // density.epsNativeSlice(name,
-      //                        Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-      //                        Cartesian(0,ymax/2,zmax/2));
+      {
+        char* name = new char[1000];
+        sprintf(name, "papers/water-saft/figs/hughes-lj-%gK-Xe-density-hs-%d.eps", temperature/kB, i);
+        Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+        density.epsNativeSlice(name,
+                               Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                               Cartesian(0,ymax/2,zmax/2));
+      }
+      Grid gradient(gd, potential);
+      gradient *= 0;
+      f.integralgrad(temperature, potential, &gradient);
+      char* gradname = new char[1000];
+      sprintf(gradname, "papers/water-saft/figs/hughes-lj-Xe-%gK-gradient-hs-pot-%d.eps", temperature/kB, i);
+      gradient.epsNativeSlice(gradname,
+                              Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                              Cartesian(0,ymax/2,zmax/2));
+
+      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+      char *plotname = (char *)malloc(1024);
+      sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot-%d.dat",  temperature/kB, i);
+      plot_grids_y_direction(plotname, density, gradient);
+
       // Grid gradient(gd, potential);
       // gradient *= 0;
       // f.integralgrad(temperature, potential, &gradient);
@@ -263,16 +280,9 @@ int main(int argc, char *argv[]) {
       //                         Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
       //                         Cartesian(0,ymax/2,zmax/2));
       // sprintf(name, "papers/water-saft/figs/lj-%s-%d-big.dat", argv[1], i);
-      // plot_grids_y_direction(name, density, gradient);
+      // plot_grids_y_direction(name, density, gradient);      
+
     }
-    {
-      char* name = new char[1000];
-      sprintf(name, "papers/water-saft/figs/hughes-lj-Xe-%gK-density-hs-pot.eps", temperature/kB);
-      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      density.epsNativeSlice(name,
-                             Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-                             Cartesian(0,ymax/2,zmax/2));
-    } 
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
@@ -291,7 +301,7 @@ int main(int argc, char *argv[]) {
   Grid gradient(gd, potential);
   gradient *= 0;
   f.integralgrad(temperature, potential, &gradient);
-  gradient.epsNativeSlice("papers/water-saft/figs/hughes-lj-gradient-hs-pot.eps",
+  gradient.epsNativeSlice("papers/water-saft/figs/hughes-lj-gradient-hs-pot-final.eps",
                           Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                           Cartesian(0,ymax/2,zmax/2));
 
@@ -326,7 +336,7 @@ int main(int argc, char *argv[]) {
   fclose(o);
 
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot.dat",  temperature/kB);
+  sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot-final.dat",  temperature/kB);
   plot_grids_y_direction(plotname, density, gradient);
 
   free(plotname);
