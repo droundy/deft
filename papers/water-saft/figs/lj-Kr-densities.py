@@ -17,8 +17,8 @@ nm = 18.8972613
 gpermL=4.9388942e-3/0.996782051315 # conversion from atomic units to mass density
 rmax = 1.3
 
-grey = '#999999'
-blueish = '#99cccc'
+redish = '#990022'
+blueish = '#220099'
 
 temps = [  278, 320 ]
 for t in temps:
@@ -29,8 +29,8 @@ for t in temps:
     r_hughes = data_hughes[:,1]/nm
     density = data[:,3]/gpermL
     dens_hughes = data_hughes[:,3]/gpermL
-    pylab.plot(r_hughes*10, dens_hughes, color = grey, linestyle='--', label='Hughes, et al')
-    pylab.plot(r*10, density, color = '#3333aa', linestyle='-', label='This work')
+    pylab.plot(r_hughes*10, dens_hughes, color = blueish, linestyle='--', label='Hughes, et al')
+    pylab.plot(r*10, density, color = redish, linestyle='-', label='This work')
 
     if t == 320:
         pylab.plot(Bowron_Kr_320K.r, Bowron_Kr_320K.g, 'k:', label='experiment')

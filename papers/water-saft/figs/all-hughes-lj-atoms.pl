@@ -8,7 +8,7 @@ my $a;
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
 foreach $a ( "Kr" ) { #"Ne", "Ar", "Kr",  "Xe" ) {
-  foreach $t ( 278, 320 ) {
+  foreach $t ( 278 ) {
     my $atom = sprintf("%s", $a);
     my $temperature = sprintf("%04.2f", $t);
 
@@ -25,7 +25,7 @@ foreach $a ( "Kr" ) { #"Ne", "Ar", "Kr",  "Xe" ) {
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type ALL
 ##SBATCH --mail-user daveroundy\@gmail.com
-#SBATCH --output hughes-lj-$a-$t-hires.out
+#SBATCH --output hughes-lj-$a-$t.out
 
 set -ev
 
