@@ -63,15 +63,17 @@ We now incorporate this improved functional into the association term
 of our free energy functional for water, improving its description of
 hydrogen bonding.
 %
-We examine the effect of this improvement by studying two hard solutes(a
-hard hydrophobic rod and a hard sphere) \fixme{and a Lennard-Jones solute.}
+We examine the effect of this improvement by studying two hard solutes
+(a
+hard hydrophobic rod and a hard sphere) and a Lennard-Jones
+approximation of a krypton atom solute.
 %
 The improved functional leads to a moderate change in the density
 profile and a large decrease in the number of hydrogen bonds broken in
 the vicinity of the hard solutes.  
 %
-We find an improvement of the radial distribution for a Lennard-Jones
-Krypton atom in water.
+We find an improvement of the partial radial distribution for a
+krypton atom in water when compared with experiment.
 \end{abstract}
 \maketitle
 
@@ -377,8 +379,16 @@ water~\cite{chandler2005}.
 \end{figure}
 
 Finally, in order to compare with experimental results, we examined
-the hydration of Krypton.  Figure~\ref{fig:g-Kr} shows... demonstrate
-an improved agreement with experiment.  \fixme{describe this}
+the hydration of Krypton.  We use a Lennard-Jones potential with
+values $\epsilon = .9518$\fixme{units} and $\sigma = 3.42 \AA$ with mixing rules
+and values from\cite{paschek2004temperature} where the water
+parameters are based on SPC calculations. Figure~\ref{fig:g-Kr} shows a
+comparison of the krypton-oxygen partial radial
+distribution($g_{Kr-O}$) from the functional in this work and on
+created from the functional of \hughesetal\ with experiment
+\cite{bowron1998hydrophobic}.  The new functional shows an improvement
+in the height of the first peak, and the general shape of $g_{O-Kr}$
+compare to that of \hughesetal \
 
 %% \section{New stuff}
 
@@ -412,10 +422,14 @@ an improved agreement with experiment.  \fixme{describe this}
 \begin{center}
 \includegraphics[width=3.5in]{figs/Kr-278K-densities}
 \end{center}
-\caption{ $g$ for Kr and water at low temperature ($5^\circ$ C) and high
-  pressure (110 bar).}
+\caption{ The Kr-O partial radial distribution function at low
+  temperature ($5^\circ$ C) and high pressure (110 bar) in the limit
+  of low concentration of krypton in water. The dashed blue line is
+  computed using using the functional from \hughesetal, the solid red
+  line is this work, and the black dotted line is from experiment
+  \cite{bowron1998hydrophobic}. }
 \label{fig:g-Kr}
-\end{figure}
+\end{figure} 
 
 We have modified the classical DFT for water developed by
 Hughes~\emph{et al.}~\cite{hughes2013classical} with the more accurate
@@ -424,8 +438,11 @@ radial distribution function at contact developed by Schulte~\emph{et
 bonding between water molecules.  We found that while this
 modification has a relatively mild effect on the free energy and
 density profiles, it predicts fewer broken hydrogen bonds around
-hard hydrophobic solutes and at aqueous interfaces.  \fixme{add in
-  improvement demonstrated...}
+hard hydrophobic solutes and at aqueous interfaces.
+%
+The improved functional does indeed show better agreement with
+experiment when used to compute the partial radial distribution
+function of a krypton atom dissolved in water.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
