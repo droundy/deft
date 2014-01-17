@@ -36,7 +36,7 @@ for t in temps:
         pylab.plot(Bowron_Kr_320K.r, Bowron_Kr_320K.g, 'k:', label='experiment')
     if t == 278:
         pylab.plot(Bowron_Kr_278K.r, Bowron_Kr_278K.g, 'k:', label='experiment')
-    pylab.title('Kr at %g K and 100 bars' % t)
+    pylab.title('Kr at %g K and 110 bars' % t)
 
     pyplot.ylabel('$g_{O-Kr}$')
     pyplot.xlabel(r'Radius ($\AA$)')
