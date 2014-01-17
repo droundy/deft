@@ -173,9 +173,7 @@ ball random_move(const ball &p, double size, const double len[3]) {
 
 int move_one_ball(int id, ball *p, int N, const double periodic[3],
                   const double walls[3], bool real_walls, double neighborR,
-                  double dist, int max_neighbors, double dr, bool test) {
-  if(test)
-    printf("moving 1... ");
+                  double dist, int max_neighbors, double dr) {
   const double len[3] = {periodic[0]+walls[0], periodic[1]+walls[1], \
                          periodic[2]+walls[2]};
   ball temp = random_move(p[id], dist, len);
@@ -184,8 +182,8 @@ int move_one_ball(int id, ball *p, int N, const double periodic[3],
     bool overlaps = overlaps_with_any(temp, p, periodic, dr);
     if (!overlaps) {
       const bool get_new_neighbors =
-        (sq_periodic_diff(temp.pos, temp.neighbor_center,
-                           periodic).normsquared() > sqr(neighborR/2.0));
+        (sq_periodic_diff(temp.pos, temp.neighbor_center, periodic)
+         .normsquared() > sqr(neighborR/2.0));
       if (get_new_neighbors) {
         // If we've moved too far, then the overlap test may have given a false
         // negative. So we'll find our new neighbors, and check against them.
@@ -211,14 +209,10 @@ int move_one_ball(int id, ball *p, int N, const double periodic[3],
         else delete[] temp.neighbors;
       }
       if (!overlaps) {
-        if(test)
-          printf("moving end... ");
         p[id] = temp;
         return return_val + 1; //move successful
       }
     }
   }
-  if(test)
-    printf("moving end... ");
   return return_val; //move unsucessful
 }
