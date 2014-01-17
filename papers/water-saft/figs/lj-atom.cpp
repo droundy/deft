@@ -22,7 +22,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-static const double lj_pressure = 100000*3.3989316e-14; // 0.1 MPa in Hartree/bohr^3
+static const double lj_pressure = 10000000*3.3989316e-14; // 100 bar in Hartree/bohr^3
 static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 const double nm = 18.8972613;
 const double angstrom = .1*nm;
@@ -47,7 +47,7 @@ double externalpotentialfunction(Cartesian r) {
   const double dist = sqrt(x*x+y*y+z*z);
   const double oodist6 = 1.0/uipow(dist/sigma, 6);
   const double pot = 4*epsilon*(oodist6*oodist6 - oodist6);
-  const double max_pot = 50*temperature;
+  const double max_pot = 30*temperature;
   if (pot < max_pot) return pot;
   return max_pot;
 }
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   char *datname = (char *)malloc(1024);
-  sprintf(datname, "papers/water-saft/figs/lj-%s-%gK-energy-hires.dat", argv[1], temperature/kB);
+  sprintf(datname, "papers/water-saft/figs/lj-%s-%gK-energy-new-precond.dat", argv[1], temperature/kB);
   
   Functional f = OfEffectivePotential(WaterSaft(new_water_prop.lengthscale,
                                                 new_water_prop.epsilonAB, new_water_prop.kappaAB,
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
   const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*sigma*sigma*sigma);
   
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.12);
+  GridDescription gd(lat, 0.20);
     
   Grid potential(gd);
   Grid externalpotential(gd);
@@ -151,12 +151,12 @@ int main(int argc, char *argv[]) {
                            hughes_water_prop.lambda_dispersion,
                            hughes_water_prop.length_scaling, mu);
 
-  externalpotential.epsNativeSlice("papers/water-saft/figs/lj-potential-hires.eps",
+  externalpotential.epsNativeSlice("papers/water-saft/figs/lj-potential-new-precond.eps",
                                    Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                                    Cartesian(0,ymax/2,zmax/2));
-  printf("Done outputting lj-potential-hires.eps\n");
+  printf("Done outputting lj-potential-new-precond.eps\n");
 
-  potential = externalpotential - temperature*log(n_1atm)*VectorXd::Ones(gd.NxNyNz); // ???
+  potential = externalpotential - temperature*log(n_1atm)*VectorXd::Ones(gd.NxNyNz);
   // plot_grids_y_direction("papers/water-saft/figs/lj-potential.dat", externalpotential, potential);
 
   double energy;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
     }
     {
       char* name = new char[1000];
-      sprintf(name, "papers/water-saft/figs/lj-%s-%gK-density-hires.eps", argv[1], temperature/kB);
+      sprintf(name, "papers/water-saft/figs/lj-%s-%gK-density-new-precond.eps", argv[1], temperature/kB);
       Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
       density.epsNativeSlice(name,
                              Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
   Grid gradient(gd, potential);
   gradient *= 0;
   f.integralgrad(temperature, potential, &gradient);
-  gradient.epsNativeSlice("papers/water-saft/figs/lj-gradient-hires.eps",
+  gradient.epsNativeSlice("papers/water-saft/figs/lj-gradient-new-precond.eps",
                           Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                           Cartesian(0,ymax/2,zmax/2));
 
@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
   fclose(o);
 
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/lj-%s-%gK-hires.dat", argv[1], temperature/kB);
+  sprintf(plotname, "papers/water-saft/figs/lj-%s-%gK-new-precond.dat", argv[1], temperature/kB);
   //plot_grids_y_direction(plotname, density, X_values);
   plot_grids_y_direction(plotname, density, gradient);
 

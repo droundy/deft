@@ -22,7 +22,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-static const double lj_pressure = 100000*3.3989316e-14; // 0.1 MPa in Hartree/bohr^3
+static const double lj_pressure = 10000000*3.3989316e-14; // 100 bar in Hartree/bohr^3
 static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 const double nm = 18.8972613;
 const double angstrom = .1*nm;
@@ -47,7 +47,7 @@ double externalpotentialfunction(Cartesian r) {
   const double dist = sqrt(x*x+y*y+z*z);
   const double oodist6 = 1.0/uipow(dist/sigma, 6);
   const double pot = 4*epsilon*(oodist6*oodist6 - oodist6);
-  const double max_pot = 5*temperature;
+  const double max_pot = 30*temperature;
   if (pot < max_pot) return pot;
   return max_pot;
 }
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   const double EperVolume = f(temperature, -temperature*log(n_1atm));
   const double EperNumber = EperVolume/n_1atm;
   const double SperNumber = S(temperature, -temperature*log(n_1atm))/n_1atm;
-  const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*sigma*sigma*sigma);
+  const double EperCell = EperVolume*(zmax*ymax*xmax - (4*M_PI/3)*sigma*sigma*sigma);
   
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, 0.20);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     const double surface_tension = 5e-5; // crude guess from memory...
     const double surfprecision = 1e-4*M_PI*sigma*sigma*surface_tension; // four digits precision
     const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision
-    const double precision = bulkprecision + surfprecision;
+    const double precision = (bulkprecision + surfprecision)*1e-6;
     Minimizer min = Precision(precision,
                               PreconditionedConjugateGradient(f, gd, temperature, 
                                                               &potential,
@@ -176,12 +176,28 @@ int main(int argc, char *argv[]) {
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
       fflush(stdout);
-      // char* name = new char[1000];
-      // sprintf(name, "papers/water-saft/figs/lj-%s-%d-density-big.eps", argv[1], i);
-      // Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      // density.epsNativeSlice(name,
-      //                        Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-      //                        Cartesian(0,ymax/2,zmax/2));
+      {
+        char* name = new char[1000];
+        sprintf(name, "papers/water-saft/figs/hughes-lj-%s-%gK-density-%d.eps", argv[1], temperature/kB, i);
+        Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+        density.epsNativeSlice(name,
+                               Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                               Cartesian(0,ymax/2,zmax/2));
+      }
+      Grid gradient(gd, potential);
+      gradient *= 0;
+      f.integralgrad(temperature, potential, &gradient); 
+      char* gradname = new char[1000];
+      sprintf(gradname, "papers/water-saft/figs/hughes-lj-%s-%gK-gradient-%d.eps", argv[1], temperature/kB, i);
+      gradient.epsNativeSlice(gradname,
+                              Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                              Cartesian(0,ymax/2,zmax/2));
+
+      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+      char *plotname = (char *)malloc(1024);
+      sprintf(plotname, "papers/water-saft/figs/hughes-lj-%s-%gK-%d.dat", argv[1], temperature/kB, i);
+      plot_grids_y_direction(plotname, density, gradient);
+
       // Grid gradient(gd, potential);
       // gradient *= 0;
       // f.integralgrad(temperature, potential, &gradient);
@@ -192,14 +208,6 @@ int main(int argc, char *argv[]) {
       // sprintf(name, "papers/water-saft/figs/lj-%s-%d-big.dat", argv[1], i);
       // plot_grids_y_direction(name, density, gradient);
     }
-    {
-      char* name = new char[1000];
-      sprintf(name, "papers/water-saft/figs/hughes-lj-%s-%gK-density.eps", argv[1], temperature/kB);
-      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      density.epsNativeSlice(name,
-                             Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-                             Cartesian(0,ymax/2,zmax/2));
-    } 
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);

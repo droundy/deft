@@ -35,8 +35,8 @@ public:
     return f.I_have_analytic_grad();
   }
 
-  VectorXd transform(const GridDescription &gd, double kT, const VectorXd &data) const {
-    return f(gd, kT, (data/(-kT)).cwise().exp());
+  VectorXd transform(const GridDescription &gd, double kT, const VectorXd &Veff) const {
+    return f(gd, kT, (Veff/(-kT)).cwise().exp());
   }
   double integral(const GridDescription &gd, double kT, const VectorXd &x) const {
     return f.integral(gd, kT, (x/(-kT)).cwise().exp());
@@ -59,19 +59,22 @@ public:
   Functional grad_T(const Functional &ingradT) const {
     return OfEffectivePotential(f.grad_T(ingradT));
   }
-  void grad(const GridDescription &gd, double kT, const VectorXd &data,
+  void grad(const GridDescription &gd, double kT, const VectorXd &Veff,
             const VectorXd &ingrad, VectorXd *outgrad, VectorXd *outpgrad) const {
     if (outpgrad) {
       Grid g(gd);
       g.setZero();
-      f.grad(gd, kT, (data/(-kT)).cwise().exp(), ingrad, &g, 0);
-      *outgrad += (data/(-kT)).cwise().exp().cwise()*g/(-kT);
-      *outpgrad += g/(-kT);
+      f.grad(gd, kT, (Veff/(-kT)).cwise().exp(), ingrad, &g, 0);
+      *outgrad += (Veff/(-kT)).cwise().exp().cwise()*g/(-kT);
+      //*outpgrad += g/(-kT);
+      // we think the above should be:
+      *outpgrad += g.cwise()/(Veff - VectorXd::Ones(gd.NxNyNz)*kT);
+      // for (int i=0; i<N; i++) outgrad[i] += g[i]/(1-Veff[i]/kT);
     } else {
       Grid g(gd);
       g.setZero();
-      f.grad(gd, kT, (data/(-kT)).cwise().exp(), ingrad, &g, 0);
-      *outgrad += (data/(-kT)).cwise().exp().cwise()*g/(-kT);
+      f.grad(gd, kT, (Veff/(-kT)).cwise().exp(), ingrad, &g, 0);
+      *outgrad += (Veff/(-kT)).cwise().exp().cwise()*g/(-kT);
     }
   }
   void print_summary(const char *prefix, double e, std::string name) const {

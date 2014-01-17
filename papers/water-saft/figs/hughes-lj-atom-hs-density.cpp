@@ -35,7 +35,6 @@ double temperature; // temperature in Hartree
 const double sigma = 3.57*angstrom; // in Bohr radii Xe in water
 //from Dzublella, Swanson, and McCammon
 const double epsilon = 1.0773*kJpermol; // in Hartree for Xe in water
-double diameter = 0.714*nm;
 
 double externalpotentialfunction(Cartesian r) {
   const double z = r.z();
@@ -53,7 +52,7 @@ double notinwall(Cartesian r) {
   const double z = r.z();
   const double y = r.y();
   const double x = r.x();
-  if (sqrt(sqr(z)+sqr(y)+sqr(x)) < diameter/2) {
+  if (sqrt(sqr(z)+sqr(y)+sqr(x)) < sigma) {
       return 0; 
   }
   return 1;
@@ -79,6 +78,7 @@ void plot_grids_y_direction(const char *fname, const Grid &a, const Grid &b) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("%s compiled on %s at %s\n", argv[0], __DATE__, __TIME__);
   clock_t start_time = clock();
   if (argc == 2) {
     if (sscanf(argv[1], "%lg", &temperature) != 1) {
@@ -92,17 +92,13 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  printf("Diameter is %g bohr = %g nm\n", diameter, diameter/nm);
-  const double padding = 1*nm;
-  // xmax = ymax = zmax = diameter + 2*padding;
-
   Functional f_sphere = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
 						hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
 						hughes_water_prop.epsilon_dispersion,
 						hughes_water_prop.lambda_dispersion,
 						hughes_water_prop.length_scaling, 0));
   double n_sphere = pressure_to_density(f_sphere, temperature, lj_pressure,
-				      0.001, 0.01);
+                                        0.001, 0.01);
 
   double mu_sphere = find_chemical_potential(f_sphere, temperature, n_sphere);
 
@@ -111,138 +107,71 @@ int main(int argc, char *argv[]) {
 				     hughes_water_prop.epsilon_dispersion,
 				     hughes_water_prop.lambda_dispersion,
 				     hughes_water_prop.length_scaling, mu_sphere));
-
-  Functional X_sphere = WaterX(hughes_water_prop.lengthscale,
-                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-                        hughes_water_prop.epsilon_dispersion,
-                        hughes_water_prop.lambda_dispersion,
-                        hughes_water_prop.length_scaling, mu_sphere);
-  
-  Functional HB_sphere = HughesHB(hughes_water_prop.lengthscale,
-                        hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-                        hughes_water_prop.epsilon_dispersion,
-                        hughes_water_prop.lambda_dispersion,
-                        hughes_water_prop.length_scaling, mu_sphere);
-
-  Functional S_sphere = OfEffectivePotential(EntropySaftFluid2(hughes_water_prop.lengthscale,
-                                                        hughes_water_prop.epsilonAB,
-                                                        hughes_water_prop.kappaAB,
-                                                        hughes_water_prop.epsilon_dispersion,
-                                                        hughes_water_prop.lambda_dispersion,
-                                                        hughes_water_prop.length_scaling));
   
   const double EperVolume_sphere = f_sphere(temperature, -temperature*log(n_sphere));
   const double EperNumber_sphere = EperVolume_sphere/n_sphere;
-  const double SperNumber_sphere = S_sphere(temperature, -temperature*log(n_sphere))/n_sphere;
-  const double EperCell_sphere = EperVolume_sphere*(zmax*ymax*xmax - (M_PI/6)*diameter*diameter*diameter);
+  const double EperCell_sphere = EperVolume_sphere*(zmax*ymax*xmax - (4*M_PI/3)*uipow(sigma, 3));
 
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
-  GridDescription gd(lat, 0.1);
+  GridDescription gd(lat, 0.13);
 
-  Grid sphere_potential(gd);
+  Grid potential(gd);
   Grid sphere_constraint(gd);
   sphere_constraint.Set(notinwall);
 
-  f_sphere = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
-				       hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
-				       hughes_water_prop.epsilon_dispersion,
-				       hughes_water_prop.lambda_dispersion,
-				       hughes_water_prop.length_scaling, mu_sphere));
   f_sphere = constrain(sphere_constraint, f_sphere);
 
-  sphere_potential = hughes_water_prop.liquid_density*sphere_constraint
+  potential = hughes_water_prop.liquid_density*sphere_constraint
       + 100*hughes_water_prop.vapor_density*VectorXd::Ones(gd.NxNyNz);
-  sphere_potential = -temperature*sphere_potential.cwise().log();
+  potential = -temperature*potential.cwise().log();
 
   double energy_sphere;
-    {
-      const double surface_tension = 5e-5; // crude guess from memory...
-      const double surfprecision = 1e-4*M_PI*diameter*diameter*surface_tension; // four digits precision
-      const double bulkprecision = 1e-12*fabs(EperCell_sphere); // but there's a limit on our precision for small spheres
-      const double precision = bulkprecision + surfprecision;
-      Minimizer min = Precision(precision,
-                                PreconditionedConjugateGradient(f_sphere, gd, temperature, 
-                                                                &sphere_potential,
-                                                                QuadraticLineMinimizer));
-
-      printf("\nDiameter of sphere = %g bohr (%g nm)\n", diameter, diameter/nm);
-
-      const int numiters = 200;
-      for (int i=0;i<numiters && min.improve_energy(true);i++) {
-
-        double peak = peak_memory()/1024.0/1024;
-        double current = current_memory()/1024.0/1024;
-        printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-      }
-
+  {
+    const double surface_tension = 5e-5; // crude guess from memory...
+    const double surfprecision = 1e-4*M_PI*uipow(sigma,2)*surface_tension; // four digits precision
+    const double bulkprecision = 1e-12*fabs(EperCell_sphere); // but there's a limit on our precision for small spheres
+    const double precision = bulkprecision + surfprecision;
+    Minimizer min = Precision(precision,
+                              PreconditionedConjugateGradient(f_sphere, gd, temperature, 
+                                                              &potential,
+                                                              QuadraticLineMinimizer));
+    const int numiters = 200;
+    for (int i=0;i<numiters && min.improve_energy(true);i++) {
       double peak = peak_memory()/1024.0/1024;
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+    }
+
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
       
-      energy_sphere = min.energy();
-      printf("Total energy is %.15g\n", energy_sphere);
-      Grid sphere_density(gd, EffectivePotentialToDensity()(temperature, gd, sphere_potential));
-      // Here we free the minimizer with its associated data structures.
-    }
+    energy_sphere = min.energy();
+    printf("Total energy is %.15g\n", energy_sphere);
+    Grid sphere_density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+    // Here we free the minimizer with its associated data structures.
+  }
 
-    {
-      double peak = peak_memory()/1024.0/1024;
-      double current = current_memory()/1024.0/1024;
-      printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-    }
+  {
+    double peak = peak_memory()/1024.0/1024;
+    double current = current_memory()/1024.0/1024;
+    printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+  }
 
-    double entropy_sphere = S_sphere.integral(temperature, sphere_potential);
-    Grid sphere_density(gd, EffectivePotentialToDensity()(temperature, gd, sphere_potential));
-    {
+  Grid sphere_density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+  {
     printf("Number of water molecules is %g\n", sphere_density.integrate());
     printf("The bulk energy per cell should be %g\n", EperCell_sphere);
     printf("The bulk energy based on number should be %g\n", EperNumber_sphere*sphere_density.integrate());
-    printf("The bulk entropy is %g/N\n", SperNumber_sphere);
-    Functional otherS_sphere = EntropySaftFluid2(hughes_water_prop.lengthscale,
-                                          hughes_water_prop.epsilonAB,
-                                          hughes_water_prop.kappaAB,
-                                          hughes_water_prop.epsilon_dispersion,
-                                          hughes_water_prop.lambda_dispersion,
-                                          hughes_water_prop.length_scaling);
-    printf("The bulk entropy (haskell) = %g/N\n", otherS_sphere(temperature, n_sphere)/n_sphere);
-    //printf("My entropy is %g when I would expect %g\n", entropy, entropy - SperNumber*sphere_density.integrate());
-    double hentropy_sphere = otherS_sphere.integral(temperature, sphere_density);
-    otherS_sphere.print_summary("   ", hentropy_sphere, "total entropy");
-    printf("My haskell entropy is %g, when I would expect = %g, difference is %g\n", hentropy_sphere,
-           otherS_sphere(temperature, n_sphere)*sphere_density.integrate()/n_sphere,
-           hentropy_sphere - otherS_sphere(temperature, n_sphere)*sphere_density.integrate()/n_sphere);
 
-    Grid zeroed_out_density(gd, sphere_density.cwise()*sphere_constraint); // this is zero inside the sphre!  :
-    //char *plotname = (char *)malloc(1024);
-    //sprintf(plotname, "papers/water-saft/figs/hughes-sphere-%04.2f.dat", diameter/nm);
-    //plot_grids_y_direction(plotname, sphere_density, X_values, H_bonds);
-
-    //free(plotname);
-
-    //sphere_density.epsNativeSlice("papers/hughes-saft/figs/sphere.eps",
-		//	   Cartesian(0,ymax,0), Cartesian(0,0,zmax),
-		//	   Cartesian(0,ymax/2,zmax/2));
-    
     double peak = peak_memory()/1024.0/1024;
     printf("Peak memory use is %g M\n", peak);
 
     double oldN = sphere_density.integrate();
     sphere_density = n_sphere*VectorXd::Ones(gd.NxNyNz);
-    double hentropyb_sphere = otherS_sphere.integral(temperature, sphere_density);
-    // printf("bulklike thingy has %g molecules\n", sphere_density.integrate());
-    otherS_sphere.print_summary("   ", hentropyb_sphere, "bulk-like entropy");
-    printf("entropy difference is %g\n", hentropy_sphere - hentropyb_sphere*oldN/sphere_density.integrate());
-    }
-  // }
+  }
 
-    // FILE *o = fopen(datname, "w");
-    // fprintf(o, "%g\t%.15g\n", diameter/nm, energy - EperCell);
-    // fprintf(o, "%g\t%.15g\t%.15g\t%.15g\t%.15g\t%g\n", diameter/nm, energy - EperNumber*sphere_density.integrate(), energy - EperCell,
-    //        temperature*(entropy - SperNumber*sphere_density.integrate()),
-    //        temperature*(hentropy - otherS(temperature, n_sphere)*sphere_density.integrate()/n_sphere), broken_H_bonds);
-    // fclose(o);
-
-///////////////////Lennard-Jones stuff////////////////////////////////////
+  ///////////////////Lennard-Jones stuff////////////////////////////////////
 
   char *datname = (char *)malloc(1024);
   sprintf(datname, "papers/water-saft/figs/hughes-lj-XE-%gK-energy-hs.dat", temperature/kB);
@@ -254,8 +183,10 @@ int main(int argc, char *argv[]) {
                                                 hughes_water_prop.length_scaling, 0));
   double n_lj = pressure_to_density(f, temperature, lj_pressure,
                                       0.001, 0.01);
+  assert(n_lj == n_sphere);
 
   double mu_lj = find_chemical_potential(f, temperature, n_lj);
+  assert(mu_lj == mu_sphere);
 
   f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
                                      hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
@@ -273,9 +204,8 @@ int main(int argc, char *argv[]) {
   const double EperVolume = f(temperature, -temperature*log(n_lj));
   const double EperNumber = EperVolume/n_lj;
   const double SperNumber = S(temperature, -temperature*log(n_lj))/n_lj;
-  const double EperCell = EperVolume*(zmax*ymax*xmax - (M_PI/6)*sigma*sigma*sigma);
+  const double EperCell = EperVolume*(zmax*ymax*xmax - (4*M_PI/3)*sigma*sigma*sigma);
     
-  Grid potential(gd);
   Grid externalpotential(gd);
   externalpotential.Set(externalpotentialfunction);
     
@@ -301,20 +231,18 @@ int main(int argc, char *argv[]) {
                                    Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                                    Cartesian(0,ymax/2,zmax/2));
   printf("Done outputting hughes-lj-potential-hs.eps\n");
-
-  potential = sphere_density; // ???
     
   double energy;
   {
     const double surface_tension = 5e-5; // crude guess from memory...
     const double surfprecision = 1e-4*M_PI*sigma*sigma*surface_tension; // four digits precision
     const double bulkprecision = 1e-12*fabs(EperCell); // but there's a limit on our precision
-    const double precision = bulkprecision + surfprecision;
+    const double precision = (bulkprecision + surfprecision)*1e-3;
     Minimizer min = Precision(precision,
                               PreconditionedConjugateGradient(f, gd, temperature, 
                                                               &potential,
                                                               QuadraticLineMinimizer));
-      
+    min.print_info("initially:\t");
       
     const int numiters = 200;
     for (int i=0;i<numiters && min.improve_energy(true);i++) {
@@ -322,12 +250,28 @@ int main(int argc, char *argv[]) {
       double current = current_memory()/1024.0/1024;
       printf("Peak memory use is %g M (current is %g M)\n", peak, current);
       fflush(stdout);
-      // char* name = new char[1000];
-      // sprintf(name, "papers/water-saft/figs/lj-%s-%d-density-big.eps", argv[1], i);
-      // Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      // density.epsNativeSlice(name,
-      //                        Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-      //                        Cartesian(0,ymax/2,zmax/2));
+      {
+        char* name = new char[1000];
+        sprintf(name, "papers/water-saft/figs/hughes-lj-%gK-Xe-density-hs-%d.eps", temperature/kB, i);
+        Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+        density.epsNativeSlice(name,
+                               Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                               Cartesian(0,ymax/2,zmax/2));
+      }
+      Grid gradient(gd, potential);
+      gradient *= 0;
+      f.integralgrad(temperature, potential, &gradient);
+      char* gradname = new char[1000];
+      sprintf(gradname, "papers/water-saft/figs/hughes-lj-Xe-%gK-gradient-hs-pot-%d.eps", temperature/kB, i);
+      gradient.epsNativeSlice(gradname,
+                              Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
+                              Cartesian(0,ymax/2,zmax/2));
+
+      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+      char *plotname = (char *)malloc(1024);
+      sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot-%d.dat",  temperature/kB, i);
+      plot_grids_y_direction(plotname, density, gradient);
+
       // Grid gradient(gd, potential);
       // gradient *= 0;
       // f.integralgrad(temperature, potential, &gradient);
@@ -336,16 +280,9 @@ int main(int argc, char *argv[]) {
       //                         Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
       //                         Cartesian(0,ymax/2,zmax/2));
       // sprintf(name, "papers/water-saft/figs/lj-%s-%d-big.dat", argv[1], i);
-      // plot_grids_y_direction(name, density, gradient);
+      // plot_grids_y_direction(name, density, gradient);      
+
     }
-    {
-      char* name = new char[1000];
-      sprintf(name, "papers/water-saft/figs/hughes-lj-Xe-%gK-density-hs-pot.eps", temperature/kB);
-      Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
-      density.epsNativeSlice(name,
-                             Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
-                             Cartesian(0,ymax/2,zmax/2));
-    } 
     double peak = peak_memory()/1024.0/1024;
     double current = current_memory()/1024.0/1024;
     printf("Peak memory use is %g M (current is %g M)\n", peak, current);
@@ -364,7 +301,7 @@ int main(int argc, char *argv[]) {
   Grid gradient(gd, potential);
   gradient *= 0;
   f.integralgrad(temperature, potential, &gradient);
-  gradient.epsNativeSlice("papers/water-saft/figs/hughes-lj-gradient-hs-pot.eps",
+  gradient.epsNativeSlice("papers/water-saft/figs/hughes-lj-gradient-hs-pot-final.eps",
                           Cartesian(0,ymax,0), Cartesian(0,0,zmax), 
                           Cartesian(0,ymax/2,zmax/2));
 
@@ -399,7 +336,7 @@ int main(int argc, char *argv[]) {
   fclose(o);
 
   char *plotname = (char *)malloc(1024);
-  sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot.dat",  temperature/kB);
+  sprintf(plotname, "papers/water-saft/figs/hughes-lj-Xe-%gK-hs-pot-final.dat",  temperature/kB);
   plot_grids_y_direction(plotname, density, gradient);
 
   free(plotname);

@@ -7,8 +7,8 @@ my $a;
 # We do the largest diameters first, so the small calculations won't
 # be scheduled on big-memory nodes leaving the big ones to wait for
 # them to finish.
-foreach $a ( "Xe" ) {#"Ne", "Ar", "Kr", "Xe" ) {
-  foreach $t ( 275, 300, 325, 350 ) {
+foreach $a ( "Kr" ) {#"Ne", "Ar", "Kr", "Xe" ) {
+  foreach $t ( 278 ) {
     my $temperature = sprintf("%04.2f", $t);
     my $atom = sprintf("%s", $a);
 
@@ -17,7 +17,7 @@ foreach $a ( "Xe" ) {#"Ne", "Ar", "Kr", "Xe" ) {
     my $resolution = 0.2; # spacing of grid points in nm.
 
     # Here I estimate the amount of memory that will be needed...
-    my $memuse = 32000; #sprintf "%.0f", 2750*((($d + 2*$padding)/1.9)*(0.2/$resolution))**3;
+    my $memuse = 6000; #sprintf "%.0f", 2750*((($d + 2*$padding)/1.9)*(0.2/$resolution))**3;
 
     my $scriptname = "papers/water-saft/figs/lj-$atom-$temperature.tmp.sh";
     open SCRIPT, ">$scriptname" or die $!;
@@ -25,7 +25,8 @@ foreach $a ( "Xe" ) {#"Ne", "Ar", "Kr", "Xe" ) {
 #SBATCH --mem-per-cpu=$memuse
 ##SBATCH --mail-type ALL
 ##SBATCH --mail-user daveroundy\@gmail.com
-#SBATCH --output lj-$a-$t-hires.out
+#SBATCH --output lj-$a-$t.out
+#SBATCH --partition=bigmem
 
 set -ev
 

@@ -1,4 +1,4 @@
-\documentclass[twocolumn,amsmath,amssymb]{revtex4-1}
+\documentclass[preprint,amsmath,amssymb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
@@ -63,12 +63,17 @@ We now incorporate this improved functional into the association term
 of our free energy functional for water, improving its description of
 hydrogen bonding.
 %
-We examine the effect of this improvement by studying two hard solutes: a
-hard hydrophobic rod and a hard sphere.
+We examine the effect of this improvement by studying two hard solutes
+(a
+hard hydrophobic rod and a hard sphere) and a Lennard-Jones
+approximation of a krypton atom solute.
 %
 The improved functional leads to a moderate change in the density
 profile and a large decrease in the number of hydrogen bonds broken in
-the vicinity of the solutes.
+the vicinity of the hard solutes.  
+%
+We find an improvement of the partial radial distribution for a
+krypton atom in water when compared with experiment.
 \end{abstract}
 \maketitle
 
@@ -290,7 +295,7 @@ the hard spherical solute.
 \begin{center}
 \includegraphics[width=3.5in]{figs/density-compare}
 \end{center}
-\caption{ Density profiles for a water around a single hydrophobic rod
+\caption{ Density profiles for a water around a single hard rod
   of radius 0.1~nm. The solid red profile is from the functional
   developed in this paper and the dashed blue profile is the result
   from \hughesetal.  For scale, under the profiles
@@ -303,7 +308,7 @@ the hard spherical solute.
 
 \section{Results}
 
-We will first discuss the case of a single hydrophobic rod immersed in
+We will first discuss the case of a single hard rod immersed in
 water. Figure~\ref{fig:density-single-rod} shows the density profile
 of water near a rod with radius~1~\AA.  The density computed using the
 functional of this paper is qualitatively similar to that from
@@ -322,7 +327,7 @@ rod surface.
 \begin{center}
 \includegraphics[width=3.5in]{figs/single-rod-broken-HB}
 \end{center}
-\caption{Broken hydrogen bonds per nanometer for hydrophobic rods
+\caption{Broken hydrogen bonds per nanometer for hard rods
   immeresed in water.  The solid red line uses the functional developed
   in this paper while the dashed blue line uses the functional from
   \hughesetal. For large enough rods, the graph
@@ -373,7 +378,58 @@ water~\cite{chandler2005}.
 \label{fig:spheres-broken-HB}
 \end{figure}
 
+Finally, in order to compare with experimental results, we examined
+the hydration of Krypton.  We use a Lennard-Jones potential with
+values $\epsilon = .9518$\fixme{units} and $\sigma = 3.42 \AA$ with mixing rules
+and values from \cite{paschek2004temperature} where the water
+parameters are based on SPC calculations. Figure~\ref{fig:g-Kr} shows a
+comparison of the krypton-oxygen partial radial
+distribution($g_{Kr-O}$) from the functional in this work and on
+created from the functional of \hughesetal\ with experiment
+\cite{bowron1998hydrophobic}.  The new functional shows an improvement
+in the height of the first peak, and the general shape of $g_{O-Kr}$
+compare to that of \hughesetal \
+
+%% \section{New stuff}
+
+%% \begin{figure}
+%%   \begin{center}
+%%     \includegraphics[width=3.5in]{figs/lj-Xe-energy}
+%%   \end{center}
+%%   \caption{Here is xenon.}
+%%   \label{fig:xe-energy}
+%% \end{figure}
+
+%% Excess free energy for single Lennard-Jones atoms in water \fixme{are
+%%   shown} and compared with simulation of other water theories
+%% \cite{paschek2004temperature}and experiment in \fixme{a figure}.
+
+%% \begin{center}
+%%   \begin{tabular}{|l|l|l|l|}
+%%     \hline
+%%     & $\epsilon ~\textrm{(kJ/mol)}$ & $\sigma ~\textrm{(\AA)}$ & OK
+%%     with reference? \\ \hline
+%%     Ne & 0.317098 & 3.1003 & \\ \hline
+%%     Ar & 0.822039 & 3.2903 & \\ \hline
+%%     Kr & 0.955831 & 3.4203 & \\ \hline
+%%     Xe & 1.077342 & 3.5703 & \\ \hline
+%%   \end{tabular}
+%% \end{center}
+
 \section{Conclusion}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/Kr-278K-densities}
+\end{center}
+\caption{ The Kr-O partial radial distribution function at low
+  temperature ($5^\circ$ C) and high pressure (110 bar) in the limit
+  of low concentration of krypton in water. The dashed blue line is
+  computed using using the functional from \hughesetal, the solid red
+  line is this work, and the black dotted line is from experiment
+  \cite{bowron1998hydrophobic}. }
+\label{fig:g-Kr}
+\end{figure} 
 
 We have modified the classical DFT for water developed by
 Hughes~\emph{et al.}~\cite{hughes2013classical} with the more accurate
@@ -382,7 +438,11 @@ radial distribution function at contact developed by Schulte~\emph{et
 bonding between water molecules.  We found that while this
 modification has a relatively mild effect on the free energy and
 density profiles, it predicts fewer broken hydrogen bonds around
-hydrophobic solutes and at aqueous interfaces.
+hard hydrophobic solutes and at aqueous interfaces.
+%
+The improved functional does indeed show better agreement with
+experiment when used to compute the partial radial distribution
+function of a krypton atom dissolved in water.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
@@ -397,7 +457,7 @@ hydrophobic solutes and at aqueous interfaces.
 \includegraphics[width=3.5in]{figs/single-rod-X-plot}
 \end{center}
 \caption{ The average number of hydrogen bonds per molecule at
-  distances from the center of hydrophobic rods of various
+  distances from the center of hard rods of various
   radii. The solid lines are the results from using the assymetric
   $g_{\sigma}^A$, while the dotted lines are from Yu and Wu's $g_{\sigma}^{HS}$.}
 \label{fig:single-rod-X}
