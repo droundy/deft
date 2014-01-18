@@ -47,7 +47,7 @@ def test_function(target, source, env):
     name = testfile[6:len(testfile)-5]
     failfile = "tests/%s.failed" % name
     time.sleep(1) # work around sporadic race condition with "Text file busy" error.
-    command = "%s > %s 2>&1" % (testfile, failfile)
+    command = "%s 2>&1 > %s" % (testfile, failfile)
     #print command
     start = time.clock()
     retval = os.system(command)
