@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "new/WhiteBearFast.h"
+#include "new/HomogeneousWhiteBearFast.h"
 
 int check_functional_value(const char *name,
                             const NewFunctional &f,
@@ -36,9 +37,9 @@ int check_functional_value(const char *name,
   printf("\n");
   f.printme("  ");
 
-  if (fabs(fv/energy - 1) > fraccuracy) {
-    printf("fv = %g\n", fv);
-    printf("expected = %g\n", energy);
+  if (!(fabs(fv/energy - 1) < fraccuracy)) {
+    printf("fv = %.15g\n", fv);
+    printf("expected = %.15g\n", energy);
     printf("FAIL: Error in f(n) is %g\n", fv/energy - 1);
     errors++;
   }
@@ -48,7 +49,7 @@ int check_functional_value(const char *name,
 int main(int, char **argv) {
   int retval = 0;
 
-  const int Nx = 100;
+  const int Nx = 20;
   const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
   const double energy = 42.53522950699669281;
   printf("about to create input\n");
@@ -59,7 +60,21 @@ int main(int, char **argv) {
   wb.a3() = a;
   wb.kT() = kT;
   wb.n() = nval;
-  retval += check_functional_value("WhiteBear", wb, energy);
+  retval += check_functional_value("WhiteBear", wb, energy, 2e-11);
+  printf("n0 = %g\n", wb.get_n0()[0]);
+  printf("n1 = %g\n", wb.get_n1()[0]);
+  printf("n2 = %g\n", wb.get_n2()[0]);
+  printf("n3 = %g\n", wb.get_n3()[0]);
+
+  HomogeneousWhiteBear hwb;
+  hwb.R() = R;
+  hwb.kT() = kT;
+  hwb.n() = nval;
+  retval += check_functional_value("HomogeneousWhiteBear", hwb, energy/uipow(a,3), 2e-11);
+  printf("n0 = %g\n", hwb.get_n0());
+  printf("n1 = %g\n", hwb.get_n1());
+  printf("n2 = %g\n", hwb.get_n2());
+  printf("n3 = %g\n", hwb.get_n3());
 
   if (retval == 0) {
     printf("\n%s passes!\n", argv[0]);
