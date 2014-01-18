@@ -32,7 +32,7 @@
   We have developed an approximation for the pair distribution
   function of hard spheres, which is based on the average value of the
   pair distribution function at contact described in
-  Section~\ref{sec:contact}.  Our pair distribution is constructed so
+  Section~\ref{sec:contact}.  Our pair distribution function is constructed so
   as to be computable with only single-site convolutions and to
   accurately reproduce the averaged distribution function at contact.
   This results in a functional that is efficient to compute, and
@@ -51,7 +51,7 @@ The standard approach in liquid state theory is to treat a liquid as a
 hard-sphere reference fluid with attractive interactions that are
 treated perturbatively~\cite{hansen2006theory}.  Recently there have
 been considerable advances in the development of classical density
-functionals have been based on the
+functionals based on the
 application of these theoretical approaches to inhomogeneous
 densities~\cite{ jain2007modified, gloor2007prediction, gross2009density,
   %felipe2001examination, gloor2002saft,
@@ -106,7 +106,7 @@ $g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
 a tool in constructing a free energy functional.
 
 The first canonical inhomogeneous configuration for the hard-sphere
-fluid is the system consisting of a hard spheres at a hard wall.  In
+fluid is the system consisting of a hard sphere at a hard wall.  In
 1986, Plischke and Henderson solved the pair distribution function of
 this system using integral equation theory under the Percus-Yevick
 approximation~\cite{plischke1986pair}.  Ten years later,
@@ -172,8 +172,8 @@ density over a spherical volume:
 where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
 is computationally awkward, because it relies on the midpoint
 $\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
-Methfessel is intended to the pair distribution function only at contact,
-when the distance between $\rr_1$ and $\rr_2$ is a hard-sphere
+Methfessel is intended to approximate the pair distribution function only
+at contact, when the distance between $\rr_1$ and $\rr_2$ is a hard-sphere
 diameter.
 
 For these reasons Sokolowski and Fischer modified this approach to use
@@ -192,7 +192,7 @@ $0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
 was arrived at by fitting to Monte Carlo simulation.  Although
 Eq.~\ref{eq:sokolowski} has the advantages of only involving density
 averages at the points at which the pair distribution function is
-desired, cannot be written as a single-site convolution, since the
+desired, it cannot be written as a single-site convolution, since the
 convolution kernel depends on both points.
 
 
@@ -221,15 +221,15 @@ in the limit of contact distance between the two points.
 We construct our function's form in terms of an expansion of powers of
 $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
 in the contact distance limit, leaving our function with tunable
-constant perameters.  We run a simple monte-carlo simulations to
+constant perameters.  We run a simple monte-carlo simulation to
 calculate values of the homogeneous radial distribution function at
 varying distance perameter $r$.  We then tune our function's constant
-perameters by matching our function's results against the monte-carlo
+parameters by matching our function's results against the monte-carlo
 data, using a least squares fit method.  During this process it is
 simplest to use an analytic expression for $g_{\sigma}$ in our
 function and so we use the well known and very successful Carnahan
 Starling equation to calculate $g_{\sigma}$.  This is appropriate
-since that our published $g_{\sigma}$ approaches the Carnahan Starling
+since our published $g_{\sigma}$ approaches the Carnahan Starling
 version in the homogeneous limit and it's this limit, along with the
 contact limit, that we would like our constructed radial distribution
 function to get right.  After this process we have an appropriate
@@ -238,10 +238,10 @@ $g_{\sigma}$.
 
 The function has the form:
 \begin{multline}
-  g(|\rr|) = 1 + g_{\sigma}e^{-x_0(r-\sigma)} \\+ x_1g_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
-  -x_4g_{\sigma}^2\sin(x_5(r-\sigma))e^(-x_6(r-\sigma))
+  g(|\rr|) = 1 + h_{\sigma}e^{-x_0(r-\sigma)} \\+ x_1h_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
+  -x_4h_{\sigma}^2\sin(x_5(r-\sigma))e^{-x_6(r-\sigma)}
 \end{multline}
-The finalalized form of our pair correlation function is:
+The finalized form of our pair correlation function is:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 \end{align}
@@ -257,7 +257,7 @@ The finalalized form of our pair correlation function is:
 
 \subsection{Separable fit to the radial distribution function}
 
-In contrast to the previous work, which are based on the homogeneous
+In contrast to the previous works, which are based on the homogeneous
 radial distribution function $g(r,\eta)$ expressed as a function of
 distance and packing fraction, we have constructed our separable
 approximation for the radial distribution function as $g(r,
@@ -320,10 +320,10 @@ distribution function is given by
 This function includes three fitted parameters, $\kappaa$, $\kappab$,
 and $\kappac$, which are given in Table~\ref{tab:fit-parameters}.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
-figure, it is apparent how the on the integral of $h(r)$ from
+figure, it is apparent that the integral of $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
-distances.  The maximum error in $g(r)$ at packing fractions of less
-than 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
+distances.  The maximum error in $g(r)$ at packing fractions up to
+0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
 \begin{table}
@@ -444,10 +444,10 @@ Fig.~\ref{fig:pair-distribution-1}a.  These plots compare this work
 with Monte Carlo results, as well as the approximations of Sokolowski
 and Fischer~\cite{sokolowski1992role} and that of Fischer and
 Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
-The approach of Fischer and Methfessel is only valid when the two
+The approach of Fischer and Methfessel is only defined when the two
 spheres are in contact, and is therefore only plotted on that segment
 of the path.  As an input to both previous approximations we use the
-hard sphere radial distribution function found using Monte Carlo
+hard sphere radial distribution function found with Monte Carlo
 simulation, interpolated as necessary.  We find that both previous
 approximations to the pair distribution function predict the
 qualtitative angular dependence of the pair distribution function at
@@ -462,7 +462,7 @@ freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points are
 more than a radius away from contact, we find that any of these
 approaches gives a reasonable prediction, with our approach
-underestimating the oscillations in $g^(2)$, as expected based on our
+underestimating the oscillations in $g^{(2)}$, as expected based on our
 fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
@@ -481,7 +481,7 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
   \caption{The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.4, plotted when
     $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
     shows the triplet distribution function, with white corresponding
     to the contact value of the \emph{pair} distribution function.
@@ -528,7 +528,7 @@ function.
 Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
 compare the triplet distribution function computed using our
 approximation to $g^{(2)}$ with results from Monte Carlo simulation.
-In each figure $\rr_1$ and $\rr_2$ are held fixed, while the third
+In each figure, $\rr_1$ and $\rr_2$ are held fixed, while the third
 position $\rr_3$ is varied.  The test-particle position in each case
 is $\rr_1$, which is on the left-hand side of the figure.  In the
 color plot on the left, the first and second spheres are displayed in
@@ -594,7 +594,7 @@ deviations near the interface.  Figure~\ref{fig:dadz-square-well}
 shows the same curve from Eq.~\ref{eq:da1} for the square-well fluid.
 This potential stresses our approximation to the radial distribution
 function, since the edge of the attraction occurs at the dip in the
-radial distribution function at this density, which poor results for
+radial distribution function at this density, with poor results for
 the bulk fluid.  We see that over these length scales, Sokolowski's
 approximation is very accurate.  Finally, in the case of the power-law
 attraction both approximations work very well.
