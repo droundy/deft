@@ -68,4 +68,4 @@ ball random_move(const ball &original, double size, const double len[3]);
 // 4 if, after updating the neighbor table, neighbors were informed
 int move_one_ball(int id, ball *p, int N, const double periodic[3],
                   const double walls[3], bool real_walls, double neighborR,
-                  double dist, int max_neighbors, double dr, bool test=false);
+                  double dist, int max_neighbors, double dr);

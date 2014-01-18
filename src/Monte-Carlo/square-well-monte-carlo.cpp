@@ -285,7 +285,7 @@ int main(int argc, const char *argv[]) {
   // Find the upper limit to the maximum number of neighbors a ball could have
   const double neighbor_sphere_vol = 4.0/3.0*M_PI*(uipow(R+neighborR,3)
                                                    - uipow(R,3));
-  int max_neighbors = min(N, neighbor_sphere_vol / (4.0/3.0*M_PI*uipow(R,3)));
+  int max_neighbors = 2*neighbor_sphere_vol / (4.0/3.0*M_PI*uipow(R,3));
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -401,21 +401,16 @@ int main(int argc, const char *argv[]) {
   double dscale = .1;
 
   for(long iteration = 1; iteration <= initialize_iterations; iteration++) {
-    printf("iteration: %li\n",iteration);
     // ---------------------------------------------------------------
     // Move each ball once
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
-      if(iteration == 353)
-        printf("  moving ball %i of %i... ",i,N);
       totalmoves ++;
       int move_val = move_one_ball(i, balls, N, periodic, walls, real_walls,
-                                   neighborR, scale, max_neighbors, dr,(iteration == 353));
+                                   neighborR, scale, max_neighbors, dr);
       workingmoves += move_val & 1;
       neighbor_updates += (move_val & 2) > 0;
       neighbor_informs += (move_val & 4) > 0;
-      if(iteration == 353)
-        printf("success\n");
     }
     // ---------------------------------------------------------------
     // fine-tune scale so that the acceptance rate will reach the goal
@@ -671,7 +666,7 @@ int main(int argc, const char *argv[]) {
              neighborR, avg_neighbors);
       fflush(stdout);
     }
- }
+  }
   // ----------------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
