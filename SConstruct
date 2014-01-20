@@ -455,5 +455,5 @@ for test in Split(""" functional-arithmetic surface-tension """):
 for test in Split(""" newcode """):
     env.BuildTest(test, ['src/new/Minimize.cpp'])
 
-for test in Split(""" new-hard-spheres """):
+for test in Split(""" new-hard-spheres new-water-saft """):
     env.BuildTest(test, all_sources + newgenerated_sources)

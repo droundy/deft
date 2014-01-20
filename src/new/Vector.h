@@ -223,9 +223,9 @@ inline Vector operator*(double a, const Vector &b) {
 }
 
 inline ComplexVector fft(int Nx, int Ny, int Nz, double dV, Vector f) {
-  assert(!(Nx&1)); // We want an odd number of grid points in each direction.
-  assert(!(Ny&1)); // We want an odd number of grid points in each direction.
-  assert(!(Nz&1)); // We want an odd number of grid points in each direction.
+  assert(!(Nx&1)); // We want an even number of grid points in each direction.
+  assert(!(Ny&1)); // We want an even number of grid points in each direction.
+  assert(!(Nz&1)); // We want an even number of grid points in each direction.
   ComplexVector out(Nx*Ny*(int(Nz)/2 + 1));
   fftw_plan p = fftw_plan_dft_r2c_3d(Nx, Ny, Nz, (double *)f.data+f.offset, (fftw_complex *)out.data, FFTW_WISDOM_ONLY);
   if (!p) {
@@ -251,25 +251,21 @@ inline Vector ifft(int Nx, int Ny, int Nz, double dV, ComplexVector f) {
   assert(!(Nx&1)); // We want an even number of grid points in each direction.
   assert(!(Ny&1)); // We want an even number of grid points in each direction.
   assert(!(Nz&1)); // We want an even number of grid points in each direction.
+  // Allocate a scratch array, since FFTW always overwrites its input
+  // when performing a c2r transform.
+  fftw_complex *c = (fftw_complex *)fftw_malloc(Nx*Ny*(int(Nz)/2+2)*sizeof(fftw_complex));
+  memcpy(c, f.data+f.offset, 2*f.size*sizeof(double)); // faster than manual loop?
   Vector out(Nx*Ny*Nz); // create output vector
-  fftw_plan p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, (fftw_complex *)(f.data+f.offset), (double *)out.data, FFTW_WISDOM_ONLY);
+  fftw_plan p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c, (double *)out.data, FFTW_WISDOM_ONLY);
   if (!p) {
-    fftw_complex *c = (fftw_complex *)fftw_malloc(Nx*Ny*(int(Nz)/2+2)*sizeof(fftw_complex));
-    // First we make and destroy a plan with optimally aligned memory access...
-    fftw_destroy_plan(fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c, (double *)out.data, FFTW_MEASURE));
-    // Then we do the same with a poorly aligned array, so we're prepared for anything!
-    fftw_destroy_plan(fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c + 1, (double *)out.data, FFTW_MEASURE));
-    fftw_free(c);
-    p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, (fftw_complex *)(f.data+f.offset), (double *)out.data, FFTW_WISDOM_ONLY);
+    // We need measurements!
+    p = fftw_plan_dft_c2r_3d(Nx, Ny, Nz, c, (double *)out.data, FFTW_MEASURE);
+    // Now recopy data, which was trashed above
+    memcpy(c, f.data+f.offset, 2*f.size*sizeof(double)); // faster than manual loop?
   }
   fftw_execute(p);
-  // FFTW overwrites the input on a c2r transform, so let's throw it
-  // away so we don't accidentally try to reuse an invalid array! An
-  // alternative approach would be to copy it first into a scratch
-  // array.  If we saved that scratch array, we could even keep
-  // reusing the same plan.
-  f.free();
   fftw_destroy_plan(p);
+  fftw_free(c);
   out *= 1.0/(Nx*Ny*Nz*dV);
   return out;
 }
