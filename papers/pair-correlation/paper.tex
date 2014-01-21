@@ -72,7 +72,7 @@ $g^{(2)}(\rr_1,\rr_2)$.  Unlike the radial distribution function of a
 homogeneous fluid, there does not currently exist a tractable form for
 the pair distribution function of an inhomogeneous hard-sphere fluid,
 suitable for use in constructing a density
-functional~\cite{gloor2007prediction, jain2007modified}.
+functional~\cite{gloor2007prediction, jain2007modified}. \fixme{We need to say what a density functional is}
 
 At its core, thermodynamic perturbation theory---sometimes referred to
 as the cluster, or high-temperature expansion---is an expansion of the
@@ -99,13 +99,13 @@ The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
 as an external field, and using the resultant equilibrium density to
 find the pair distribution function~\cite{hansen2006theory}.  This
-elegant approach lends itself to DFT, and can be used to compute and
+elegant approach lends itself to DFT \fixme{Define DFT earlier!}, and can be used to compute and
 plot the pair distribution function, but requires a full free-energy
 minimization \emph{for each position} $\rr_1$ in
 $g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
 a tool in constructing a free energy functional.
 
-The first canonical inhomogeneous configuration for the hard-sphere
+The canonical inhomogeneous configuration for the hard-sphere
 fluid is the system consisting of a hard sphere at a hard wall.  In
 1986, Plischke and Henderson solved the pair distribution function of
 this system using integral equation theory under the Percus-Yevick
@@ -118,14 +118,14 @@ equation~\cite{gotzelmann1996structure}.  The approach of solving the
 Ornstein-Zernicke equation for an inhomogeneous system is
 computationally challenging~\cite{paul2003variational}.
 
-A second inhomogeneous configuration that is of interest is the
+Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed in the
 otherwise homogeneous fluid.  Where the hard-wall is a surface with no
 curvature, the test-particle configuration has a surface with
 curvature at the molecular length scale.  In this case, the density
 gives the pair distribution function---this is just Percus'
 trick---and the pair distribution function gives the triplet
-distribution function.  The triplet distribution function was computed
+distribution function.  The triplet distribution function has been computed
 by Gonz\'alez \emph{et al.} using the test-particle approach with
 \emph{two} spheres fixed~\cite{gonzalez1999test}.
 
@@ -135,6 +135,7 @@ computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
 approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
+\fixme{When we introduce DFT, we should talk about minimization.}
 
 \section{Approximations to the pair distribution function}
 There are few analytic approximations for the inhomogeneous pair
@@ -173,7 +174,7 @@ where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
 is computationally awkward, because it relies on the midpoint
 $\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
 Methfessel is intended to approximate the pair distribution function only
-at contact, when the distance between $\rr_1$ and $\rr_2$ is a hard-sphere
+at contact, when the distance between $\rr_1$ and $\rr_2$ is the hard-sphere
 diameter.
 
 For these reasons Sokolowski and Fischer modified this approach to use
@@ -195,7 +196,11 @@ averages at the points at which the pair distribution function is
 desired, it cannot be written as a single-site convolution, since the
 convolution kernel depends on both points.
 
-
+\fixme{Add a paragraph here explaining the work of Schulte {\em et
+    al.}  In particular, we want to emphasize that we have an accurate
+representation for an \emph{average} of the pair distribution function
+\emph{at contact}.  Then we can cite this in the ``Our Approach''
+section.}
 
 \section{Our approach}
 We approximate the pair correlation with the average of two radial
@@ -207,13 +212,13 @@ points~\cite{schulte2012using}.
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 \end{align}
 
-In the previous approaches mentioned above, function forms of radial
+In the approaches mentioned above, function forms of radial
 distributions (used to approximate pair correlation) were dependent
 upon independent variables $\eta$, the density, whether at single
-points or averaged over sourrounding volumes.  We can achieve more
+points or averaged over sourrounding volumes.  We can achieve greater
 accuracy by using instead a function dependent upon our $g_{\sigma}$,
 which holds more information about an inhomogeneous system
-then an average $\eta$ does.  We therefore need a function form for
+then a simple convolution of the density does.  We therefore seek a function form for
 our radial distribution that is dependent upon $g_{\sigma}$ and that
 will approach the correct solution in the homogeneous limit and also
 in the limit of contact distance between the two points.
@@ -464,7 +469,7 @@ freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points are
 more than a radius away from contact, we find that any of these
 approaches gives a reasonable prediction, with our approach
-underestimating the oscillations in $g^{(2)}$, as expected based on our
+underestimating the oscillations in $g^{(2)}$, as expected based on the
 fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
@@ -527,6 +532,9 @@ function.
     separated by the diameter of one sphere.}\label{fig:triplet-inbetween-distribution-4}
 \end{figure}
 
+\fixme{The following paragraph needs to be rewritten when we've
+  reorganized the figures. (Obviously.)}
+
 Figures~\ref{fig:triplet-contact-distribution-3}-\ref{fig:triplet-inbetween-distribution-4}
 compare the triplet distribution function computed using our
 approximation to $g^{(2)}$ with results from Monte Carlo simulation.
@@ -534,11 +542,25 @@ In each figure, $\rr_1$ and $\rr_2$ are held fixed, while the third
 position $\rr_3$ is varied.  The test-particle position in each case
 is $\rr_1$, which is on the left-hand side of the figure.  In the
 color plot on the left, the first and second spheres are displayed in
-grey.  On the bottom half of each left-hand plot is the triplet
+grey.  On the bottom half of figures \fixme{b,d,etc?} is the triplet
 correlation function as computed using the approximation presented in
-this work.  The top half displays the triplet correlation function
-from Monte Carlo.  On the right, we display \fixme{this needs to be finished...}
+this work.  The top half of those figures displays the triplet
+correlation function from Monte Carlo.  Figures~\fixme{a,c,e?} show
+the triplet distribution function along the paths illustrated in the
+corresponding 2D plots.
 
+Figures~\fixme{which} and~\fixme{which} show the triplet distribution
+function when two of the positions $\rr_1$ and $\rr_2$ are in contact.
+The triplet distribution function predicted by this work is slightly
+asymmetric, indicating a failure in thermodynamic consistency.  Once
+again, we observe the lack of oscillations at large distances.
+Figures~\fixme{which} and~\fixme{which} show the triplet distribution
+function when two of the positions $\rr_1$ and $\rr_2$ are spaced so
+that the third could just fit between them.  Again, the triplet
+distribution function predicted by this work is slightly asymmetric,
+and lacks the oscillations seen in the Monte Carlo simulations at
+large distances.  In both cases, our agreement with simulation is
+comparable to that of previous approximations.
 
 \section{Performance in thermodynamic perturbation theory}
 
