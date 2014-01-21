@@ -70,12 +70,12 @@ def read_walls_dft(ff, fun):
 
 ymax = 4
 
-fig = figure(figsize=(10,5))
+fig = figure(figsize=(6,10))
 
-xplot = fig.add_subplot(1,2,2)
+xplot = fig.add_subplot(2,1,2)
 zplot = xplot.twiny()
 #zplot = fig.add_subplot(1,3,3, sharey=xplot)
-twod_plot = fig.add_subplot(1,2,1)
+twod_plot = fig.add_subplot(2,1,1)
 
 zmax_lineplot = 6.
 xmax_lineplot = 4.
@@ -121,7 +121,7 @@ zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
+zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
 zplot.legend(loc='best', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
@@ -181,8 +181,8 @@ pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
-twod_plot.set_ylabel('$x_2$');
-twod_plot.set_xlabel('$z_2$');
+twod_plot.set_ylabel('$x$');
+twod_plot.set_xlabel('$z$');
 
 text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -243,7 +243,7 @@ zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
+twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()
 

@@ -76,11 +76,14 @@ def read_triplet(ff, fun):
 def read_gr(ff):
   return loadtxt("figs/gr-%04.2f.dat" % ff)
 
-fig = figure(figsize=(10,4))
+#fig = figure(figsize=(10,4))
+fig = figure(figsize=(6,7))
 
-xplot = subplot2grid((1,3), (0,2))
+#xplot = subplot2grid((1,3), (0,2))
+xplot = fig.add_subplot(2,1,2)
 zplot = xplot.twiny()
-twod_plot = subplot2grid((1,3), (0,0), colspan=2)
+#twod_plot = subplot2grid((1,3), (0,0), colspan=2)
+twod_plot = fig.add_subplot(2,1,1)
 
 xmin = rpath/2*sqrt(3)
 xlow = 6
@@ -143,7 +146,7 @@ for name in plots:
     xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot_back[name])
     zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
 
-xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r}_2)$')
+xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r})$')
 xplot.legend(loc='best', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
@@ -204,8 +207,8 @@ twod_plot.add_artist(sphere1)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither') # , ticks=myticks)
-twod_plot.set_ylabel('$x_2$');
-twod_plot.set_xlabel('$z_2$');
+twod_plot.set_ylabel('$x$');
+twod_plot.set_xlabel('$z$');
 
 
 # Here we plot the paths on the 2d plot.  The mc plot should align
@@ -289,7 +292,7 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
-twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
+twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
 savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
 

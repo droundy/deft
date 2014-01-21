@@ -282,7 +282,7 @@ function
 \end{align}
 where $h(r) = g(r) - 1$ is the total correlation function.
 A final constraint is that the slope of the radial distribution
-function at contact is given to a very good approximation by
+function at contact is given to a very good approximation by \fixme{fix dimensions below}
 \begin{align}
   g'(\sigma) \approx - h_\sigma g_\sigma
 \end{align}
@@ -317,10 +317,11 @@ distribution function is given by
 \davidsays{Can someone check the above equations for correctness
   against the python code, in plot-ghs2.py.  We'll want to
   ensure the C++ code agrees with this as well.}
+\fixme{Clean up the above equations, if possible.}
 This function includes three fitted parameters, $\kappaa$, $\kappab$,
 and $\kappac$, which are given in Table~\ref{tab:fit-parameters}.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
-figure, it is apparent that the integral of $h(r)$ from
+figure, it is apparent that the integral f $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
 distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
@@ -332,7 +333,7 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
     $\kappab$ & \kappaone \\
     $\kappac$ & \kappatwo
   \end{tabular}
-  \caption{Fit parameters \fixme{... put them here and format this nicely}}
+  \caption{Fit parameters \fixme{... put them here and format this nicely}\fixme{add dimensions here}}
   \label{tab:fit-parameters}
 \end{table}
 
@@ -405,11 +406,12 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 \section{Results}
 
-\begin{figure}
+\begin{figure*}
   \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-1.pdf}
-  \caption{ \paircaption{0.1}
+  \includegraphics[width=\columnwidth]{figs/pair-correlation-pretty-3.pdf}
+  \caption{ \paircaption{0.1} \fixme{Fix *ALL* plots to specify units of distance $x/R$.}
   }\label{fig:pair-distribution-1}
-\end{figure}
+\end{figure*}
 
 \subsection{Pair distribution function}
 
@@ -467,9 +469,9 @@ fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
 
-\begin{figure}
+\begin{figure*}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
-  \caption{The triplet distribution function
+  \caption{\fixme{Put all triplets together here.  Tweak spacing, add a, b, c, etc.} The triplet distribution function
     $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
     $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
     shows the triplet distribution function, with white corresponding
@@ -477,7 +479,7 @@ fit in Fig.~\ref{fig:radial-distribution}.
     The plot on the right shows the value of $g^{(3)}$ along the path
     shown as a dotted line on the plot to the
     left.}\label{fig:triplet-contact-distribution-3}
-\end{figure}
+\end{figure*}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/triplet-correlation-pretty-contact-4.pdf}
   \caption{The triplet distribution function
@@ -535,7 +537,7 @@ color plot on the left, the first and second spheres are displayed in
 grey.  On the bottom half of each left-hand plot is the triplet
 correlation function as computed using the approximation presented in
 this work.  The top half displays the triplet correlation function
-from Monte Carlo.  On the right, we display 
+from Monte Carlo.  On the right, we display \fixme{this needs to be finished...}
 
 
 \section{Performance in thermodynamic perturbation theory}
