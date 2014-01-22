@@ -28,7 +28,7 @@ able_to_read_file = True
 
 # Set the max parameters for plotting.
 zmax = 6
-zmin = -.5
+zmin = -1
 rmax = 4.1
 ############################
 
@@ -57,8 +57,8 @@ def read_walls_path(ff, fun):
   return data[:,0:4]
 
 def read_walls_mc(ff):
-  # The 0.05 below is deceptive (ask Paho).
-  return loadtxt("figs/mc/wallsMC-pair-%1.1f-0.05-trimmed.dat" % ff)
+  # The 0.01 is really 0.005, but is only saved to 2 digits of precision
+  return loadtxt("figs/mc/wallsMC-pair-%1.1f-0.01-trimmed.dat" % ff)
 
 def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
@@ -70,29 +70,36 @@ def read_walls_dft(ff, fun):
 
 ymax = 4
 
-fig = figure(figsize=(6,10))
+fig = figure(figsize=(12,4))
+2/5
+gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[2,4])
 
-xplot = fig.add_subplot(2,1,2)
+# xplot = fig.add_subplot(1,2,2)
+# zplot = xplot.twiny()
+# twod_plot = fig.add_subplot(1,2,1)
+
+xplot = subplot(gs[1])
 zplot = xplot.twiny()
-#zplot = fig.add_subplot(1,3,3, sharey=xplot)
-twod_plot = fig.add_subplot(2,1,1)
+twod_plot = subplot(gs[0])
 
 zmax_lineplot = 6.
 xmax_lineplot = 4.
 xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
-xplot.set_xticklabels([6, 4, "2 0", 2, 4, 6])
+xplot.set_xticklabels(["$6$", "$4$", "$2$   $0$", "$2$", "$4$", "$6$"])
 zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-bracket.bracket(xplot, 0, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .04, r'$x$')
-bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.0, -.06, .04, r'$z$')
+bracket.bracket(xplot, 0, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .04, r'$x/R$')
+bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.0, -.06, .04, r'$z/R$')
 
-twod_plot.set_xlim(-0.5, 1.5*ymax)
+twod_plot.set_xlim(-1, 1.5*ymax)
 twod_plot.set_ylim(-ymax, ymax)
+sphere = Circle((0, 0), 1, color='slategray')
+twod_plot.add_artist(sphere)
 
-fig.subplots_adjust(hspace=0.001)
+#fig.subplots_adjust(hspace=0.001)
 
 for name in plots:
     g2_path = read_walls_path(ff, name)
@@ -181,8 +188,8 @@ pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
-twod_plot.set_ylabel('$x$');
-twod_plot.set_xlabel('$z$');
+twod_plot.set_ylabel('$x/R$');
+twod_plot.set_xlabel('$z/R$');
 
 text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -198,6 +205,7 @@ xs.append(2*ymax)
 ys.append(0)
 plot(xs, ys, 'w-', linewidth=2)
 plot(xs, ys, 'k--', linewidth=2)
+
 
 Ax = 3.9
 Az = 0
@@ -244,6 +252,7 @@ zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
+fig.tight_layout()
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()
 
