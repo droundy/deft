@@ -70,9 +70,15 @@ def read_walls_dft(ff, fun):
 
 ymax = 4
 
-fig = figure(figsize=(12,4))
-2/5
-gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[2,4])
+# widths given in height units (such that the figure height is 1)
+# twod_width should be a constant based on figure dimensions, oned_width
+# is adjustible
+twod_width = 1.1
+oned_width = 1.9
+
+scale = 4
+fig = figure(figsize=(scale*(twod_width + oned_width), scale))
+gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
 
 # xplot = fig.add_subplot(1,2,2)
 # zplot = xplot.twiny()
@@ -86,15 +92,15 @@ zmax_lineplot = 6.
 xmax_lineplot = 4.
 xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
-xplot.set_xticklabels(["$6$", "$4$", "$2$   $0$", "$2$", "$4$", "$6$"])
+xplot.set_xticklabels(["$6$", "$4$", "$2~~0$", "$2$", "$4$", "$6$"])
 zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-bracket.bracket(xplot, 0, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .04, r'$x/R$')
-bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.0, -.06, .04, r'$z/R$')
+bracket.bracket(xplot, -.01, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .06, r'$x/R$')
+bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.01, -.06, .06, r'$z/R$')
 
-twod_plot.set_xlim(-1, 1.5*ymax)
+twod_plot.set_xlim(-1, 6)
 twod_plot.set_ylim(-ymax, ymax)
 sphere = Circle((0, 0), 1, color='slategray')
 twod_plot.add_artist(sphere)
@@ -129,7 +135,7 @@ zplot.axvline(x=0, color='k')
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
-zplot.legend(loc='best', ncol=1).draw_frame(False)
+zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
@@ -183,8 +189,8 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax,rmax, rmax/2))
 contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
-CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
-pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
+CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
+pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
@@ -235,24 +241,24 @@ annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, 
 
 # Annotations on 1d plot
 xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
-               xytext=(Ax+1,1.3),
+               xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
-               xytext=(Bx+1, g2pathfunction_x(Bx)-0.2),
+               xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
-               xytext=(Cz,g2pathfunction_z(Cz)-0.5),
+               xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
-               xytext=(Dz+1,g2pathfunction_z(Dz)-0.2),
+               xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
-               xytext=(Ez+0.7,1.3),
+               xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
-fig.tight_layout()
+fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()
 
