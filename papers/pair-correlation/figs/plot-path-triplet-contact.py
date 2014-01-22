@@ -301,7 +301,7 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
 
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
-fig.tight_layout(rect=[0, .03, 1, 1])
+#fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
 

@@ -258,7 +258,7 @@ zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
 
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
-fig.tight_layout(rect=[0, .03, 1, 1])
+#fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()
 
