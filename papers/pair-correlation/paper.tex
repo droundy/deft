@@ -415,7 +415,7 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
   \centering
   \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-1.pdf}\\
   \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-3.pdf}
-  \caption{ \paircaption{0.1} \fixme{Fix *ALL* plots to specify units of distance $x/R$.}
+  \caption{ \paircaption{0.1} \fixme{Do we want to label the y-axis for the 1d plots?}
   }\label{fig:pair-distribution-1}
 \end{figure*}
 
@@ -478,7 +478,7 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Put all triplets together here.  Tweak spacing, add a, b, c, etc.} The triplet distribution function
+  \caption{\fixme{Tweak spacing, add a, b, c, etc. The 1d plots still have two curves for this work, do we want to remove one?} The triplet distribution function
     $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
     $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
     shows the triplet distribution function, with white corresponding
@@ -583,7 +583,9 @@ comparable to that of previous approximations.
     \caption{Hard-core inverse-sixth fluid}\label{fig:dadz-inverse-sixth}
   \end{subfigure}
   \caption{Plot of $\frac{da_1}{dz}$ near a hard
-    wall.}\label{fig:dadz}
+    wall.\fixme{Do we want y-axis ticks or no? Also, why does the data start
+      at $z = 0$?}}
+  \label{fig:dadz}
 \end{figure}
 
 A particularly relevant quantitative test of a pair distribution
