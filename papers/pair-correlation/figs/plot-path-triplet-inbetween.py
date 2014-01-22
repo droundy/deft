@@ -197,9 +197,9 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 
-CS = twod_plot.pcolormesh(Z, R, g3mc, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
-twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
-twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
+CS = twod_plot.pcolormesh(Z, R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
 plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
 text(-3.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])

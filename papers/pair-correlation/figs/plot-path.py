@@ -189,8 +189,8 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax,rmax, rmax/2))
 contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
-CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
-pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap, edgecolors='face')
+CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
