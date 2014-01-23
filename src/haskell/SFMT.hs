@@ -2,7 +2,7 @@
 soft fundamental measure theory. -}
 
 module SFMT
-       ( sfmt, n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v, w1v )
+       ( sfmt, n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v )
        where
 
 import Expression
@@ -23,7 +23,7 @@ betaV0 = s_var "V0"/kT
 kR :: Expression KSpace
 kR = k * rad
 
-a :: Expression KSpace
+a :: Type a => Expression a
 a = "a" === 2/sqrt pi/betaV0*sqrt(1 - sqrt 2/betaV0)/rad
 
 sigma :: Type a => Expression a
@@ -34,7 +34,7 @@ n = "n" === r_var "x"
 n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
-n0 = "n0" === w0 n
+n0 = "n0" === 4*a/sigma*(n1 - n2/sigma)
 
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
@@ -43,27 +43,6 @@ n1v = "n1v" `nameVector` w1v n
 sqr_n2v = var "n2vsqr" "{\\left|\\vec{n}_{2v}\\right|^2}" (n2v `dot` n2v)
 n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` n1v)
 
-gamma, b :: Type a => Expression a
-b = 2*gamma/(sqrt(pi*gamma)-1)/rad**2
-gamma = var "gamma" "\\gamma" $ 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
-
-mydr :: Expression Scalar
-mydr = 0.001
-
-mydk :: Double
-mydk = 0.1
-
-mykmax :: Double
-mykmax = 1000
-
-mys :: Symmetry
-mys = Spherical { dk = mydk, kmax = mykmax, rresolution = mydr*rad, rmax = rad }
-
-myvs :: Symmetry
-myvs = VectorS { dk = mydk, kmax = mykmax, rresolution = mydr*rad, rmax = rad }
-
-r :: Expression Scalar
-r = s_var "r"
 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
@@ -71,13 +50,10 @@ w3 x = ifft ( w3k * fft x)
               1/(a*k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
         ksigmao2 = k*sigma/2
 
-w0 :: Expression RealSpace -> Expression RealSpace
-w0 x = ifft ( w0k * fft x)
-  where w0k = transform mys $ b*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r)
-
 w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
-  where w1k = transform mys $ b*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi)
+  where w1k = var "w1k" "\\tilde{w_1}(k)" $
+              4*pi*sqrt pi/k*exp(-(a*k/2)**2)*sin(k*sigma/2)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
@@ -86,8 +62,9 @@ w2 x = ifft ( w2k * fft x)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vifft ( w2vk *. fft x)
-  where w2vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/r)
+  where w2vk = kvec *. (-2*pi*exp(-(a*k/2)**2)*((a**4*k**2+sigma**2)/2*cos(k*sigma/2)+
+                                               (a**2*k+1/k)*sigma*sin(k*sigma/2))/k**2)
 
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vifft ( w1vk *. fft x)
-  where w1vk = kvec *. transform myvs (b*r*exp(-gamma*(1-r/rad)**2)*heaviside(rad - r)/(4*pi*r**2))
+  where w1vk = kvec *. (4*pi*exp(-(a*k/2)**2)*(sigma/2*cos(k*sigma/2)-(a**2*k/2+1/k)*sin(k*sigma/2))/k**2)
