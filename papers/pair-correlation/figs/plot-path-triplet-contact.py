@@ -17,7 +17,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'fischer', 'sokolowski']#, 'sphere-dft'] # , 'gloor'
+plots = ['mc', 'this-work', 'sokolowski', 'fischer']#, 'sphere-dft'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -79,8 +79,8 @@ def read_gr(ff):
 # widths given in height units (such that the figure height is 1)
 # twod_width should be a constant based on figure dimensions, oned_width
 # is adjustible
-twod_width = 1.4
-oned_width = 1.6
+twod_width = 1.3
+oned_width = 1.7
 
 scale = 4
 fig = figure(figsize=(scale*(twod_width + oned_width), scale))
@@ -90,8 +90,7 @@ xplot = subplot(gs[1])
 zplot = xplot.twiny()
 twod_plot = subplot(gs[0])
 
-
-
+fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.05)
 
 xmin = rpath/2*sqrt(3)
 xlow = 6
@@ -155,7 +154,7 @@ for name in plots:
     zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
 
 #xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r})$')
-xplot.legend(loc='upper left', ncol=1).draw_frame(False)
+zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
@@ -299,6 +298,8 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
                xytext=(Ez+0.5,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
+ylim = xplot.get_ylim()
+xplot.set_ylim(0, ylim[1])
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
 #fig.tight_layout(rect=[0, .03, 1, 1])

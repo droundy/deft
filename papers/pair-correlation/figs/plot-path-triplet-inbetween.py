@@ -17,7 +17,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -74,8 +74,8 @@ def read_gr(ff):
 # widths given in height units (such that the figure height is 1)
 # twod_width should be a constant based on figure dimensions, oned_width
 # is adjustible
-twod_width = 1.75
-oned_width = 1.25
+twod_width = 1.6
+oned_width = 1.4
 
 scale = 4
 fig = figure(figsize=(scale*(twod_width + oned_width), scale))
@@ -84,6 +84,8 @@ gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
 xplot = subplot(gs[1])
 zplot = xplot.twiny()
 twod_plot = subplot(gs[0])
+
+fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.05)
 
 xlow = -6
 xhigh = 8
@@ -102,7 +104,7 @@ zplot.set_xticks([])
 zplot.axvline(x=rpath, color='k')
 zplot.axvline(x=3*rpath, color='k')
 
-bracket.bracket(xplot, 0.01, -xlow/(xhigh - xlow), -.06, .06, r'$x/R$')
+bracket.bracket(xplot, -0.01, -xlow/(xhigh - xlow), -.06, .06, r'$x/R$')
 bracket.bracket(xplot, -xlow/(xhigh - xlow), 1.01, -.06, .06, r'$z/R$')
 
 xmin = 1.0
@@ -151,7 +153,7 @@ for name in plots:
 
 
 #xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$')
-xplot.legend(loc='upper left', ncol=1).draw_frame(False)
+zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
@@ -294,6 +296,8 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
                xytext=(Ez-0.5,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
+ylim = xplot.get_ylim()
+xplot.set_ylim(0, ylim[1])
 
 twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
 #fig.tight_layout(rect=[0, .03, 1, 1])

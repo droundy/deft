@@ -396,27 +396,36 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 %% constraints, and $a$, $b$, and $c$ are parameters fit to Monte Carlo
 %% simulations of the hard-sphere radial distribution function.
 
-\newcommand\paircaption[1]{ The pair distribution function near a hard
-  wall, with a packing fraction of #1, with $\rr_1$ in contact with
+\newcommand\paircaption{The pair distribution function near a hard
+  wall, with packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with
   the hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$
-  as $\rr_2$ varies.  The top half of this figure shows the result of
+  as $\rr_2$ varies.  The top half of this figure shows the result of the
   Monte Carlo simulation, while the bottom half shows the result of
   the appproximation developed in this work.  On the right is a plot
   of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the figure to
   the left.  This plot compares the Monte Carlo results (black) with
-  those of this work (color?), Sokolowski and Fischer
-  (color?)~\cite{sokolowski1992role}, and Fischer and Methfessel
-  (color?)~\cite{fischer1980born}.  The latter is only plotted at
+  those of this work (blue), Sokolowski and Fischer
+  (red)~\cite{sokolowski1992role}, and Fischer and Methfessel
+  (green)~\cite{fischer1980born}.  The latter is only plotted at
   contact, where it is defined.  }
 
 \section{Results}
 
 \begin{figure*}
-  \centering
-  \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-1.pdf}\\
-  \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-3.pdf}
-  \caption{ \paircaption{0.1} \fixme{Do we want to label the y-axis for the 1d plots?}
-  }\label{fig:pair-distribution-1}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-1.pdf}
+    \vspace{-0.6cm}
+    \caption{Pair distribution function near a hard wall with $\eta = 0.1$.}
+    \label{fig:pair-distribution-1}
+  \end{subfigure}
+  \begin{subfigure}{\textwidth}
+    \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-3.pdf}
+    \vspace{-0.6cm}
+    \caption{Pair distribution function near a hard wall with $\eta = 0.3$.}
+    \label{fig:pair-distribution-3}
+  \end{subfigure}
+  \caption{ \paircaption \fixme{Do we want to label the y-axis for the 1d plots?}
+  }\label{fig:pair-distribution}
 \end{figure*}
 
 \subsection{Pair distribution function}

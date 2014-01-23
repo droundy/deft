@@ -73,8 +73,8 @@ ymax = 4
 # widths given in height units (such that the figure height is 1)
 # twod_width should be a constant based on figure dimensions, oned_width
 # is adjustible
-twod_width = 1.1
-oned_width = 1.9
+twod_width = 1.0
+oned_width = 2.0
 
 scale = 4
 fig = figure(figsize=(scale*(twod_width + oned_width), scale))
@@ -87,6 +87,8 @@ gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
 xplot = subplot(gs[1])
 zplot = xplot.twiny()
 twod_plot = subplot(gs[0])
+
+fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.1)
 
 zmax_lineplot = 6.
 xmax_lineplot = 4.
@@ -135,7 +137,8 @@ zplot.axvline(x=0, color='k')
 
 
 zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
-zplot.legend(loc='upper left', ncol=1).draw_frame(False)
+legendloc = 'lower left' if ff < 0.2 else 'upper left'
+zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
@@ -256,6 +259,8 @@ zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
                xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
+ylim = xplot.get_ylim()
+xplot.set_ylim(0, ylim[1])
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
 #fig.tight_layout(rect=[0, .03, 1, 1])
