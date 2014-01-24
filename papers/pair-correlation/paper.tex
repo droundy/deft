@@ -424,7 +424,8 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
     \caption{Pair distribution function near a hard wall with $\eta = 0.3$.}
     \label{fig:pair-distribution-3}
   \end{subfigure}
-  \caption{ \paircaption \fixme{Do we want to label the y-axis for the 1d plots?}
+  \caption{ \paircaption \fixme{Do we want to label the y-axis for the
+      1d plots? } \davidsays{I think so...}
   }\label{fig:pair-distribution}
 \end{figure*}
 
@@ -487,7 +488,11 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Tweak spacing, add a, b, c, etc. The 1d plots still have two curves for this work, do we want to remove one?} The triplet distribution function
+  \caption{\fixme{Tweak spacing, add a, b, c, etc. The 1d plots still
+      have two curves for this work, do we want to remove one?
+      \davidsays{I'm not sure, I might be tempted to keep both,
+        although if we do we should explain the difference between
+        them. (left-right mirror image)}} The triplet distribution function
     $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
     $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
     shows the triplet distribution function, with white corresponding
@@ -591,9 +596,14 @@ comparable to that of previous approximations.
     \vspace{-0.8cm}
     \caption{Hard-core inverse-sixth fluid}\label{fig:dadz-inverse-sixth}
   \end{subfigure}
-  \caption{Plot of $\frac{da_1}{dz}$ near a hard
-    wall.\fixme{Do we want y-axis ticks or no? Also, why does the data start
-      at $z = 0$?}}
+  \caption{Plot of $\frac{da_1}{dz}$ near a hard wall.\fixme{Do we
+      want y-axis ticks or no? Also, why does the data start at $z =
+      0$? \davidsays{I think ticks on the vertical axis aren't needed
+        because we are not including the scale (which depends on
+        prefactors).  I think data starting at $z=0$ is a result of a
+        (poor?) choice of where to define $z=0$.  It's the same
+        definition we use in Fig. 2, so I think the two should stay
+        consistent...}}}
   \label{fig:dadz}
 \end{figure}
 
