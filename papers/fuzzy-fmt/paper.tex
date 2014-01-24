@@ -843,13 +843,21 @@ now let $x = \sigma u /2a$, then
   e^{-x^2} \sin\left(k(ax+\frac{\sigma}{2})\right) \notag\\
   &\times \left(1 - \frac{2a}{\sigma}x +
   \left(\frac{2a}{\sigma}\right)^2 x^2 -+\cdots \right) \frac{2a}{\sigma}\textrm{dx} \\
-  &= \frac{8a\sqrt{\pi}}{k\sigma}\int_{-\infty}^\infty
-  e^{-x^2} \sin\left(k(ax+\frac{\sigma}{2})\right)
-  \sum_{n=0}^{\infty} \left(\frac{-2a}{\sigma}\right)^n x^n \textrm{dx}
+  &= \frac{8a\sqrt{\pi}}{k\sigma}\sum_{n=0}^{\infty}
+  \left(\frac{-2a}{\sigma}\right)^n \int_{-\infty}^\infty e^{-x^2} 
+  \sin\left(k(ax+\frac{\sigma}{2})\right) x^n \textrm{dx}
 \end{align}
-We can make the substitution 
+If we take only the first two terms of the series then
 \begin{align}
-  \sin \left(a + b\right) = \cos(a)\sin(b) + \cos(b)\sin(a)
+  \tilde{w}_0(k) &\approx \frac{2a}{\sigma}\Bigg{\{}\frac{4\sqrt{\pi}}{k}
+  \bigg[\int_{-\infty}^{\infty}
+    e^{-x^2}\sin\left(k(ax+\frac{\sigma}{2})\right) \notag \\
+    &\; -\frac{2a}{\sigma}\int_{-\infty}^{\infty} x e^{-x^2}
+    \sin\left(k(ax+\frac{\sigma}{2})\right) \bigg]\Bigg{\}} \\
+  &=\frac{2a}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma} \left(
+    \tilde{w}_2(k) - \frac{\sigma}{2}\tilde{w}_1(k)\right)\right] \\
+  &=\frac{4a}{\sigma}\left[\tilde{w}_1(k) -
+    \frac{1}{\sigma}\tilde{w}_2(k) \right]
 \end{align}
 %% Since the gaussian should, again, go to zero before r = 0, then we can
 %% take this to negative infinity so 
