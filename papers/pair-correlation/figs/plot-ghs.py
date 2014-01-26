@@ -55,8 +55,21 @@ v = dict((elem, sympy.symbols(elem)) for elem in l+base)
 
 h_sigma_expr = (1 - v['eta']/2)/(1 - v['eta'])**3 - 1
 h_sigma_equation = sympy.Eq(v['h_sigma'], h_sigma_expr)
-eta_expr = sympy.solve(h_sigma_equation, v['eta'])[0]
-#eta_expr = v['h_sigma']*23231 # fixme
+# this will return 3 expressions, 2 of which are complex
+eta_expressions = sympy.solve(h_sigma_equation, v['eta'], minimal=True)
+
+eta_expr = eta_expressions[0]
+
+# get the real eta:
+for i in xrange(len(eta_expressions)):
+  # fixme: this is an incredibly hokey way of determining which expression is real,
+  # and would fail if 'I' appeared anywhere in the expression as something other than
+  # the imaginary i. None of the sympy checking if things are real seem to work on
+  # expressions, so I'm not sure of a nice way to do this.
+  if 'I' not in str(eta_expressions[i]):
+    eta_expr = eta_expressions[i]
+    break
+
 for i in xrange(len(expr)):
   latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(v[l[i]], expr[i]())) + '\n\\end{dmath}\n'
 
@@ -68,7 +81,7 @@ latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(v['h_sigma'], h_sigma_ex
 for i in reversed(xrange(len(expr))):
   temp = v[l[i]]
   v[l[i]] = expr[i]()
-  # v[l[i]] = sympy.simplify(expr[i]()
+  # v[l[i]] = sympy.simplify(expr[i]() this makes it take way too long
   latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(temp, v[l[i]])) + '\n\\end{dmath}\n'
 
 
@@ -213,7 +226,13 @@ inline double radial_distribution(double gsigma, double r) {
 
 latex_code += r"""
 \begin{dmath}
-\kappa_0 = %g,\quad\kappa_1 = %g,\quad \kappa_2 = %g
+\kappa_0 = %g
+\end{dmath}
+\begin{dmath}
+\kappa_1 = %g
+\end{dmath}
+\begin{dmath}
+\kappa_2 = %g
 \end{dmath}
 \end{document}
 """ %(K0, K1, K2)
