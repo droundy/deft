@@ -28,7 +28,7 @@ area = (sqrt(3)/2*l)*(l/2)/2*6
 lenx = 20
 leny = 10
 xedge = 1.5
-yedge = 4.5
+yedge = 6
 
 n = int(ff*lenx*leny/area)
 

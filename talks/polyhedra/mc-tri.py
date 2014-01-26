@@ -37,8 +37,10 @@ n = int(ff*lenx*leny/area)
 
 # density
 dx = 0.25
-histogram = zeros(lenx/dx)
-angle_histogram = zeros(lenx/dx)
+dtheta = 2*pi/3/lenx*dx
+histogram = zeros(round(lenx/dx))
+angle_histogram = zeros((round(2*pi/3/dtheta), round(lenx/dx)))
+
 xcoords = arange(0, lenx, dx) + dx/2
 
 # Movement
@@ -146,9 +148,10 @@ for i in xrange(n):
   angles[i] = phi_setup
 
   if max(verts(centers[i], angles[i])[:,0]) > lenx:
-    x_setup = x0_setup + (pi - phi_setup)/pi*x0_setup
-    y_setup += (pi - phi_setup)/pi*dy_setup + phi_setup/pi*dy2_setup
-    phi_setup = pi - phi_setup
+    ang = pi/3
+    x_setup = x0_setup + (ang - phi_setup)/ang*x0_setup
+    y_setup += (ang - phi_setup)/ang*dy_setup + phi_setup/ang*dy2_setup
+    phi_setup = ang - phi_setup
     centers[i, 0] = x_setup
     centers[i, 1] = y_setup
     angles[i] = phi_setup
@@ -165,31 +168,56 @@ ax3 = fig.add_subplot(223, sharex=ax)
 ax4 = fig.add_subplot(224, sharex=ax, sharey=ax)
 
 
-# diagrams on fourth plot:
+ax3.set_ylim(-1/3, 1/3)
+ax3.set_yticks((-1/3, -1/6, 0, 1/6, 1/3))
+ax3.set_yticklabels((r'$-\pi/3$', r'$-\pi/6$', '0', r'$\pi/6$', r'$\pi/3$'))
+ax3.set_yticklabels(['   .   ']*5)
+
+ax5 = ax3.twiny()
+ax5.set_xticklabels([])
+#ax5.set_yticklabels([])
+ax5.set_aspect('equal')
+#print ax5.set_ylim(ax3.get_ylim())
+
+# rotated triangle pictures:
+pic_x = -.03
+pic_l = .04
+pic_angles = array([-pi/3, -pi/6, 0, pi/6, pi/3])
+pic_centers = array([[pic_x, i] for i in pic_angles/pi])
+
 temp = l
-l = 3
-tri = array((3,0))
-tri_coords = verts(tri, 0)
-ang = -pi/6
-new_tri_coords = verts(tri, ang)
+l = pic_l
+pic_coords = [verts(pic_centers[i], -pic_angles[i]) for i in xrange(len(pic_centers))]
 l = temp
 
+coll = PolyCollection(pic_coords, clip_on=False, color=cm.jet(cdefault))
+ax5.add_collection(coll)
+
+# diagrams on fourth plot:
+# temp = l
+# l = 3
+# tri = array((3,0))
+# tri_coords = verts(tri, 0)
+# ang = -pi/6
+# new_tri_coords = verts(tri, ang)
+# l = temp
+
 ax4.axis('off')
-ax4.add_patch(Polygon(tri_coords, fill=False))
-ax4.add_patch(Polygon(new_tri_coords, alpha = .5, color=cm.jet(cdefault)))
+# ax4.add_patch(Polygon(tri_coords, fill=False))
+# ax4.add_patch(Polygon(new_tri_coords, alpha = .5, color=cm.jet(cdefault)))
 
-line_len = 7
-ax4.plot([tri[0], tri[0]], [tri[1], tri[1]+line_len], '-k')
-ax4.plot([tri[0], tri[0]+line_len*sin(ang)], [tri[1], tri[1]+line_len*cos(ang)], '--k')
+# line_len = 7
+# ax4.plot([tri[0], tri[0]], [tri[1], tri[1]+line_len], '-k')
+# ax4.plot([tri[0], tri[0]+line_len*sin(ang)], [tri[1], tri[1]+line_len*cos(ang)], '--k')
 
-phis = arange(0, ang, -.01)
-circ_r = 4
-ax4.plot(tri[0] + circ_r*sin(phis), tri[1] + circ_r*cos(phis), '-k')
+# phis = arange(0, ang, -.01)
+# circ_r = 4
+# ax4.plot(tri[0] + circ_r*sin(phis), tri[1] + circ_r*cos(phis), '-k')
 
-ax4.annotate('$\\varphi$', xy=(tri[0] + 6*sin(ang/2)-.5, tri[1] + 6*cos(ang/2)), fontsize=20)
+# ax4.annotate('$\\varphi$', xy=(tri[0] + 6*sin(ang/2)-.5, tri[1] + 6*cos(ang/2)), fontsize=20)
 
 
-ax4.annotate(r'$n(x) = \frac{\mathrm{counts\ in\ slice}}{\mathrm{total\ counts}}\cdot\frac{N}{A}$', xy=(3, 10), fontsize=20)
+ax4.annotate(r'$n(x) = \frac{\mathrm{counts\ in\ slice}}{\mathrm{total\ counts}}\cdot\frac{N}{A}$', xy=(2, 5), fontsize=20)
 #fig, (ax, ax2, ax3) = subplots(3,2, sharex=True)
 #fig2 = figure(2)
 #ax3 = fig2.add_subplot(111)
@@ -204,38 +232,36 @@ ax.axhline(y=leny, linestyle='--', linewidth=3, color='orange')
 ax.set_ylim(-edge, leny+edge)
 ax.set_xlim(-edge, lenx+edge)
 ax2.set_title("number density, $n$")
-ax3.set_title("average angle, $\\varphi$")
+ax3.set_title("angle")
 
 ax.get_xaxis().set_visible(False)
 ax.get_yaxis().set_visible(False)
 ax2.get_xaxis().set_visible(False)
+ax2.get_yaxis().set_visible(False)
 ax3.get_xaxis().set_visible(False)
 ax4.get_xaxis().set_visible(False)
 ax4.get_yaxis().set_visible(False)
 
 
 xnew, density = make_square(xcoords, histogram)
-xnew, ang_vals = make_square(xcoords, angle_histogram)
+x = arange(0, lenx, dx)
+theta = arange(-1/3, 1/3, dtheta/pi)
+x,theta = meshgrid(x, theta)
+
 line, = ax2.plot(xnew, density)
-angline, = ax3.plot(xnew, ang_vals)
+#angplot = ax3.pcolormesh(x, theta, angle_histogram, vmin=0, vmax=.01)
 ax2.set_xlim(-edge, lenx+edge)
 
-
-ax3.set_ylim(-1/4, 1/4)
-ax3.set_yticks((-1/4, -1/6, -1/12, 0, 1/12, 1/6, 1/4))
-ax3.set_yticklabels(('$-\\frac{\\pi}{4}$', '$-\\frac{\\pi}{6}$', '0', '$\\frac{\\pi}{6}$', '$\\frac{\\pi}{4}$'))
-ax3.set_yticklabels(('$-\\pi/4$', '$-\\pi/6$', '$-\\pi/12$', '$0$', '$\\pi/12$', '$\\pi/6$', '$\\pi/4$'))
 
 def init():
   coll = PolyCollection(coords)
   ax.add_collection(coll)
   line.set_ydata(density)
-  angline.set_ydata(ang_vals)
   return line, ax2
 
 count = 0
 success = 0
-skip = 100
+skip = 150
 
 def initialize():
   global centers, angles
@@ -279,10 +305,17 @@ def mc():
     # add histogram counts:
     bins = linspace(0, lenx, len(histogram)+1)
     histogram += numpy.histogram(centers[:,0], bins=bins)[0]
+    xmax = 0
+    thetamax = 0
     for i in xrange(n):
       x = int(centers[i,0]/dx)
-      if x >=0 and x < len(angle_histogram):
-        angle_histogram[x] += angles[i] - pi/3
+      theta = int(angles[i]/dtheta)
+      xmax = max(x, xmax)
+      thetamax = max(theta, thetamax)
+      angle_histogram[theta, x] += 1
+
+#fig.subplots_adjust(right=0.8)
+cbar_ax = fig.add_axes([0.517, 0.05, 0.02, 0.4])
 
 def animate(p):
   global count, centers, angles, coords, skip, colors, histogram, success, angle_histogram
@@ -290,9 +323,14 @@ def animate(p):
   density = histogram/leny/dx/count
   xnew, density = make_square(xcoords, density)
   line.set_ydata(density)
-  xnew, ang_vals = make_square(xcoords, angle_histogram/count)
-  ang_vals /= pi
-  angline.set_ydata(ang_vals)
+  ang_vals = angle_histogram/count/pi
+  ax3.collections = []
+  angplot = ax3.pcolormesh(x, theta, ang_vals, vmin=0, vmax=.01, edgecolors='face', cmap=cm.hot_r)
+  #angplot = ax3.contourf(x, theta, ang_vals, levels=arange(0, .0105, .001), extend="max", rasterized=True)
+  cbar_ax.collections = []
+  cs = fig.colorbar(angplot, cax=cbar_ax, ticks=[])
+  cs.cmap.set_over('k')
+  cs.set_clim([0, .01])
   ax2.set_ylim(0, 0.8)
   for i in xrange(n):
     coords[i] = verts(centers[i], angles[i])
@@ -300,11 +338,12 @@ def animate(p):
 
   colors = zeros(n) + cdefault
   colors[0] = cspecial
-  coll.set_color([cm.jet(x) for x in colors])
+  coll.set_color([cm.jet(val) for val in colors])
   ax.collections=[]
   ax.add_collection(coll)
   ax.set_title("Attempted: %6i, Successful: %6i" %(count*n, success))
-  fig.tight_layout()
+  #fig.tight_layout()
+  print p
   return line, ax2, ax3
 
 fig.tight_layout()
@@ -323,4 +362,4 @@ for i in xrange(30):
   initialize()
 for p in xrange(30):
   animate(p)
-  savefig("anim/mc100-%4.2f-%03i.pdf" %(ff, p))
+  savefig("anim/mc100-%4.2f-%03i.png" %(ff, p))

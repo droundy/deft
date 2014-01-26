@@ -568,7 +568,15 @@ words = [polyhedron,
 text = "\n".join(words)
 if not args.notext:
   mlab.text(.8, .9, text, figure=figure, width=.2)
-  itertext = mlab.text(.02, .95, "%08i" %iteration, figure=figure, width=.2)
+  if iteration == -1:
+    iterword = 'initial grid'
+  elif iteration == -2:
+    iterword = 'post initialization'
+  elif iteration == -3:
+    iterword = 'latest save'
+  else:
+    iterword = '%08i' %iteration
+  itertext = mlab.text(.02, .95, iterword, figure=figure, width=.2)
 
 if not args.notext:
   mlab.orientation_axes(figure=figure, name='bob')
