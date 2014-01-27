@@ -192,7 +192,7 @@ all_sources = generic_sources + generated_sources
 env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
-                       polyhedra renormalization """):
+                       square-well-liquid polyhedra renormalization """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
     NoCache(p)
