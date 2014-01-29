@@ -699,8 +699,8 @@ Thus for our harmonic potential, we find that something like...
   V(r) &= V_0 \left(1-\frac{r^2}{4R^2}\right)\\
   \left(1 - \frac{\sigma^2}{4R^2}\right) &= \frac{k_BT}{V_0}\ln 2 \\
   \sigma &= 2R\sqrt{1 - \frac{k_BT}{V_0}\ln 2} \\
-  a &= \frac{2}{\sqrt\pi}\frac{k_BT}{V_0}\frac{\sigma}{2R^2} \\
-  &= \frac{2}{\sqrt\pi}\frac{k_BT}{V_0}\frac{1}{R}\sqrt{1 - \frac{k_BT}{V_0}\ln2}
+  a &= \frac{4k_BTR^2}{V_0 \sigma \sqrt{\pi}}\\
+  &= \frac{2k_BTR}{V_0 \sqrt{\pi \left(1-\frac{k_BT}{V_0}\ln 2 \right)}}
 \end{align}
 
 This gives us an approximate model that we could apply to any
@@ -728,7 +728,7 @@ Mathematica cannot handle it.
 At this point, we can integrate by parts the second bit.
 \begin{align}
   u &= \mathrm{erf}((r-\sigma/2)/a) \\
-  du &= \frac{2}{\sqrt{\pi}a^2} e^{-\frac{(r-\sigma/2)^2}{a^2}} du \\
+  du &= \frac{2}{\sqrt{\pi}a} e^{-\frac{(r-\sigma/2)^2}{a^2}} du \\
   dv &= r \sin(kr) dr \\
   v &= \frac{\sin(kr) - kr \cos(kr)}{k^2}
 \end{align}
@@ -739,7 +739,7 @@ Putting these in we get
  &\quad\quad - \left.\mathrm{erf}((r-\sigma/2)/a)\frac{\sin(kr) - kr
     \cos(kr)}{k^2}\right|_0^\infty \notag \\ &\quad\quad
   +
-  \int_0^\infty \frac{\sin(kr) - kr \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2} e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
+  \int_0^\infty \frac{\sin(kr) - kr \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a} e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
   \Big)
 \end{align}
 At this stage things look a bit scary, since the second term is not
@@ -749,7 +749,7 @@ infinity.  So we get
 \begin{align}
   \tilde{w}_3(k)
   &=  \frac{2\pi}{k}\int_0^\infty \frac{\sin(kr) - kr
-    \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a^2}
+    \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a}
   e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
 \end{align}
 which is still a little bit scary, and is not yet something
@@ -765,19 +765,19 @@ drops to zero before reaching the origin).
 Beginning with $\tilde{w}_3(k)$ from above and letting $u = (r-\sigma/2)/a,$
   \begin{align}
     \tilde{w}_3(k)
-    &=  \frac{4\sqrt{\pi}}{ak^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
+    &=  \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
       - k(au + \frac{\sigma}{2}) \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du
   \end{align}
 We can take the lower limit to $-\infty$ since the gaussian should go
 to zero well before that. Using mathematica,
   \begin{align}
-    \tilde{w}_3(k) &= \frac{4\sqrt{\pi}}{ak^3}
+    \tilde{w}_3(k) &= \frac{4\sqrt{\pi}}{k^3}
     \left[ \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
     \sin\left(\frac{k\sigma}{2}\right) \right) - \left( \frac{k}{2}
     \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
       \cos\left(\frac{k \sigma}{2}\right) - a^2 k \sin\left(\frac{k \sigma}{2}\right)
       \right] \right)\right] \\ 
-    &= \frac{4\pi}{ak^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^2}{2} \right)
+    &= \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^2}{2} \right)
       \sin\left(\frac{k\sigma}{2}\right) - \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right)  \right]
   \end{align}
 \end{widetext}
@@ -808,16 +808,16 @@ should to zero well before the lower limit. Using mathematica, I get
 $w_1(r) = \frac{w_2(r)}{4\pi r}$, so $w_1$ will have a similar
 integral, but without the stray $r$, so we get
 \begin{align}
-  \tilde{w}_1(k)&= \frac{4\sqrt{\pi}}{k} \int_{-\infty}^\infty e^{-u^2} \sin\left(k\left(au +
+  \tilde{w}_1(k)&= \frac{4\sqrt{\pi}}{4\pi k} \int_{-\infty}^\infty e^{-u^2} \sin\left(k\left(au +
   \frac{\sigma}{2}\right)\right) ~\textrm{du} \\
-  &= \frac{4\pi}{k}\sqrt{\pi}e^{-\left(\frac{ak}{2} \right)^2} \sin\left(\frac{k\sigma}{2}\right)
+  &= \frac{\sqrt{\pi}}{k}e^{-\left(\frac{ak}{2} \right)^2} \sin\left(\frac{k\sigma}{2}\right)
 \end{align}
 
 $w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes $w_0$ is quite a bit
 trickier.  I won't go through all the math here, but essentially we
 have
 \begin{align}
-  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_0^\infty
+  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{4\sqrt{\pi}ak}\int_0^\infty
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin(kr)}{r}\textrm{dr}
 \end{align}
 We'll let $r = \frac{\sigma}{2}(1 + u) $ so that
@@ -827,36 +827,36 @@ We'll let $r = \frac{\sigma}{2}(1 + u) $ so that
 \end{align}
 We also extend the lower limit on the integral so that
 \begin{align}
-  \tilde{w}_0(k) &\approx \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  \tilde{w}_0(k) &\approx \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
   e^{-\frac{(\sigma u/2)^2}{a^2}} \sin{\left( \frac{k\sigma}{2}(1+u)
     \right)} \notag\\
   &\times \frac{2}{\sigma} \left(1 - u + u^2 - u^3 + u^4 -+\cdots
   \right) \frac{\sigma}{2}\textrm{du} \\
-  &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  &= \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
   e^{-\left(\frac{\sigma}{2a} \right)^2 u^2} \sin{\left( \frac{k\sigma}{2}(1+u)
     \right)} \notag\\
   &\times \left(1 - u + u^2 - u^3 + u^4 -+\cdots \right) \textrm{du}
 \end{align}
 now let $x = \sigma u /2a$, then
 \begin{align}
-  \tilde{w}_0(k) &\approx \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+  \tilde{w}_0(k) &\approx \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
   e^{-x^2} \sin\left(k(ax+\frac{\sigma}{2})\right) \notag\\
   &\times \left(1 - \frac{2a}{\sigma}x +
   \left(\frac{2a}{\sigma}\right)^2 x^2 -+\cdots \right) \frac{2a}{\sigma}\textrm{dx} \\
-  &= \frac{8a\sqrt{\pi}}{k\sigma}\sum_{n=0}^{\infty}
+  &= \frac{2}{k\sigma \sqrt{\pi}}\sum_{n=0}^{\infty}
   \left(\frac{-2a}{\sigma}\right)^n \int_{-\infty}^\infty e^{-x^2} 
   \sin\left(k(ax+\frac{\sigma}{2})\right) x^n \textrm{dx}
 \end{align}
 If we take only the first two terms of the series then
 \begin{align}
-  \tilde{w}_0(k) &\approx \frac{2a}{\sigma}\Bigg{\{}\frac{4\sqrt{\pi}}{k}
+  \tilde{w}_0(k) &\approx \frac{2}{\sigma}\Bigg{\{}\frac{1}{k\sqrt{\pi}}
   \bigg[\int_{-\infty}^{\infty}
     e^{-x^2}\sin\left(k(ax+\frac{\sigma}{2})\right) \notag \\
     &\; -\frac{2a}{\sigma}\int_{-\infty}^{\infty} x e^{-x^2}
     \sin\left(k(ax+\frac{\sigma}{2})\right) \bigg]\Bigg{\}} \\
-  &=\frac{2a}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma} \left(
+  &=\frac{2}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma} \left(
     \tilde{w}_2(k) - \frac{\sigma}{2}\tilde{w}_1(k)\right)\right] \\
-  &=\frac{4a}{\sigma}\left[\tilde{w}_1(k) -
+  &=\frac{4}{\sigma}\left[\tilde{w}_1(k) -
     \frac{1}{\sigma}\tilde{w}_2(k) \right]
 \end{align}
 %% Since the gaussian should, again, go to zero before r = 0, then we can

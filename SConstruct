@@ -332,6 +332,7 @@ for mkdat in Split("""
 	papers/hughes-saft/figs/pressure-with-isotherms
 	papers/contact/figs/gHS-vs-n
 	papers/contact/figs/free-energy
+        papers/fuzzy-fmt/figs/homogeneous
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -379,6 +380,30 @@ for mkdat in Split("""
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
                       source = [mkdat + '.cpp'] + all_sources))
+
+env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.50.dat'],
+            source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
+            action = './$SOURCE')
 
 env.Command(target = ['papers/contact/figs/walls.dat',
                       'papers/contact/figs/wallsWB-0.10.dat',

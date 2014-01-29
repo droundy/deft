@@ -24,7 +24,7 @@ kR :: Expression KSpace
 kR = k * rad
 
 a :: Type a => Expression a
-a = "a" === 2/sqrt pi/betaV0*sqrt(1 - sqrt 2/betaV0)/rad
+a = "a" === 2*rad/betaV0/sqrt(pi *(1 - log 2/betaV0))
 
 sigma :: Type a => Expression a
 sigma = var "sigma" "\\sigma" (2*rad*sqrt(1 - log 2/betaV0))
@@ -47,18 +47,18 @@ n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
   where w3k = var "w3k" "\\tilde{w_3}(k)" $
-              1/(a*k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
+              1/(k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
         ksigmao2 = k*sigma/2
 
 w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
   where w1k = var "w1k" "\\tilde{w_1}(k)" $
-              4*pi*sqrt pi/k*exp(-(a*k/2)**2)*sin(k*sigma/2)
+              sqrt pi/k*exp(-(a*k/2)**2)*sin(k*sigma/2)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
   where w2k = var "w2k" "\\tilde{w_2}(k)" $
-              a*2*pi**(3/2)*exp(-(a*k/2)**2)*(a**2*cos(k*sigma/2) + sigma*sin(k*sigma/2)/k)
+              2*pi*exp(-(a*k/2)**2)*(a**2*cos(k*sigma/2) + sigma*sin(k*sigma/2)/k)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vifft ( w2vk *. fft x)

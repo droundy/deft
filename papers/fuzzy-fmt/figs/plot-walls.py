@@ -36,16 +36,6 @@ pylab.figure()
 data = []
 names = []
 # eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
-for kT in [0.0, 0.01, 0.02, 0.03]:
-    # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
-    fname = "figs/walls-0.%02d-T%05.3f.dat" % (ff, kT)
-    if os.path.exists(fname):
-        names.append('kT = %4.2f' % kT)
-        data.append(numpy.loadtxt(fname))
-    else:
-        print fname, 'does not exist'
-for i in range(len(data)):
-    pylab.plot(data[i][:,0]-3, data[i][:,1]*(4*pi/3), label=names[i])
 
 for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
     # input: "figs/mcwalls-0.%02d00-*.dat" % (ff)
@@ -55,8 +45,25 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
         d = numpy.loadtxt(fname)
         d = smooth(d, 1)
         pylab.plot(abs(d[:,0]), d[:,1]*(4*pi/3), label=fname)
+
+names.append('DFT kT = 0')
+data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, ff*0.01)))
+
+for kT in [0.01, 0.02, 0.03]:
+    # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
+    fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, ff*0.01)
+    if os.path.exists(fname):
+        names.append('DFT kT = %4.2f' % kT)
+        data.append(numpy.loadtxt(fname))
+        print 'found', fname
+    else:
+        print fname, 'does not exist'
+for i in range(len(data)):
+    print 'plotting', names[i]
+    pylab.plot(data[i][:,0]-1.5, data[i][:,1], label=names[i])
+
 pylab.title('Packing fraction = %f' % (ff/100.0))
-pylab.xlabel('Radii from center in the Z direction')
+pylab.xlabel('$z/R$')
 pylab.ylabel('Local Filling Fraction')
 pylab.legend(loc = 'best')
 # pylab.xlim(xmax=14)
