@@ -281,8 +281,11 @@ int main(int argc, const char *argv[]) {
   const int density_bins = round((len[x] + len[y] + len[z])/de_density);
   long *density_histogram = new long[density_bins]();
 
-  const double min_len = min(len[x], min(len[y], len[z]));
+  const int energy_levels = N/2 * (uipow(R*(2+interaction_scale),3)
+                                   / uipow(R,3) - 1);
+  long *energy_histogram = new long[energy_levels];
 
+  const double min_len = min(len[x], min(len[y], len[z]));
   const int g_bins = round(min_len/2/de_g);
   long *g_histogram = new long[g_bins]();
 
@@ -300,7 +303,7 @@ int main(int argc, const char *argv[]) {
   // Find the upper limit to the maximum number of neighbors a ball could have
   const double neighbor_sphere_vol =
     4.0/3.0*M_PI*(uipow(R+neighborR,3) - uipow(R,3));
-  int max_neighbors = uipow(2*R+neighborR,3) / uipow(R,3);
+  int max_neighbors = uipow(2*R+neighborR,3) / uipow(R,3) - 1;
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -517,8 +520,20 @@ int main(int argc, const char *argv[]) {
       workingmoves += move_val & 1;
     }
     // ---------------------------------------------------------------
-    // Count number of interactions
+    // Add data to historams
     // ---------------------------------------------------------------
+
+    // Density histogram
+    for(int i = 0; i < N; i++) {
+      const int x_i = floor(balls[i].pos[x]/de_density);
+      const int y_i = floor(balls[i].pos[y]/de_density);
+      const int z_i = floor(balls[i].pos[z]/de_density);
+      density_histogram[x_i] ++;
+      density_histogram[int(round(len[x]/de_density)) + y_i] ++;
+      density_histogram[int(round((len[x] + len[y])/de_density)) + z_i] ++;
+    }
+
+    // Count number of interactions, add to energy histogram
     // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_scale
     interactions = 0;
     for(int i = 0; i < N; i++) {
@@ -529,22 +544,11 @@ int main(int argc, const char *argv[]) {
           interactions++;
       }
     }
-    // ---------------------------------------------------------------
-    // Add data to historams
-    // ---------------------------------------------------------------
-    for(int i = 0; i < N; i++) {
-      // Density histogram:
-      const int x_i = floor(balls[i].pos[x]/de_density);
-      const int y_i = floor(balls[i].pos[y]/de_density);
-      const int z_i = floor(balls[i].pos[z]/de_density);
-      density_histogram[x_i] ++;
-      density_histogram[int(round(len[x]/de_density)) + y_i] ++;
-      density_histogram[int(round((len[x] + len[y])/de_density)) + z_i] ++;
-    }
+    energy_histogram[interactions]++;
 
     // Radial distribution
     // This is an O(N^2) calculation, so we're only going to do it every N^2 moves
-    if(iteration %N == 0) {
+    if(iteration % N == 0) {
       for(int i = 0; i < N; i++) {
         for(int j = 0; j < N; j++) {
           if(i != j) {
@@ -555,7 +559,6 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
-
     // ---------------------------------------------------------------
     // Save to file
     // ---------------------------------------------------------------
@@ -614,6 +617,18 @@ int main(int argc, const char *argv[]) {
       }
       fclose(densityout);
 
+      // Save energy histogram
+      char *e_fname = new char[1024];
+      sprintf(e_fname, "%s/%s-E-%i.dat", dir, filename, N);
+      FILE *e_out = fopen((const char *)e_fname, "w");
+      delete[] e_fname;
+      fprintf(e_out, "%s", headerinfo);
+      fprintf(e_out, "%s", countinfo);
+      fprintf(e_out, "\n#interactions  count\n");
+      for(int i = 0; i < energy_levels; i++)
+        fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
+      fclose(e_out);
+
       // Save distribution funtions
       // fixme: assumes homogeneous for density
       char *g_fname = new char[1024];
@@ -622,10 +637,9 @@ int main(int argc, const char *argv[]) {
       delete[] g_fname;
       fprintf(g_out, "%s", headerinfo);
       fprintf(g_out, "%s", countinfo);
-      fprintf(g_out, "\n#e       ");
+      fprintf(g_out, "\n#e       \n");
       const double density = N/len[x]/len[y]/len[z];
       const double vol0 = len[x]*len[y]*len[z];
-      fprintf(g_out, "\n");
       for(int e_i = 0; e_i < g_bins; e_i++) {
         const double e = (e_i + 0.5)*de_g;
         fprintf(g_out, "%6.3f  ", e);
