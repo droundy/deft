@@ -28,8 +28,8 @@ Functional HardFluid(double radius, double mu);
 
 // Here we set up the lattice.
 static double width = 15;
-const double dx = 0.01;
-const double dw = 0.01;
+const double dx = 0.001;
+const double dw = 0.001;
 const double spacing = 1.5; // space on each side
 
 double notinwall(Cartesian r) {
@@ -90,7 +90,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   // We reuse the potential, which should give us a better starting
   // guess on each calculation.
   static Grid *potential = 0;
-  if (strcmp(name, "hard") == 0) {
+  if (strcmp(name, "hard") == 0 || true) {
     // start over for each potential
     delete potential;
     potential = 0;
@@ -113,14 +113,14 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
                                                             potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(false) && i<100;i++) {
+  for (int i=0;min.improve_energy(true) && i<100;i++) {
   }
   took("Doing the minimization");
   min.print_info();
 
   Grid density(gd, EffectivePotentialToDensity()(kT, gd, *potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
-  
+
   char *plotname = (char *)malloc(1024);
 
   sprintf(plotname, "papers/fuzzy-fmt/figs/walls%s-%06.4f-%04.2f.dat", name, teff, eta);
@@ -139,26 +139,26 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
       Ntot_per_A += density(0,0,j)*sep;
       mydist += sep;
     }
-    
+
     double Extra_per_A = Ntot_per_A - eta/(4.0/3.0*M_PI)*width/2;
-    
+
     FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "a");
     fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n",
 	    name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
-    
+
     int wallslen = 20;
     double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);  
     fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", eta, wallslen, Extra_spheres);
-    
+
     fclose(fout); 
   }
-  
+
   {
     //double peak = peak_memory()/1024.0/1024;
     //double current = current_memory()/1024.0/1024;
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
-  
+
   took("Plotting stuff");
   printf("density %g gives ff %g for eta = %g and T = %g\n", density(0,0,gd.Nz/2),
          density(0,0,gd.Nz/2)*4*M_PI/3, eta, teff);
@@ -168,9 +168,9 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
 int main(int, char **) {
   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-  const double etas[] = { 0.1, 0.4 };
+  const double etas[] = { 0.1, 0.2, 0.4 };
   const double temps[] = { 0.0, 0.01, 0.02, 0.03 };
-  for (double eta = 0.4; eta > 0; eta-=0.3) {
+  for (double eta = 0.5; eta > 0; eta-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
       Functional f = HardFluid(1,0);

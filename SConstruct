@@ -47,7 +47,7 @@ def test_function(target, source, env):
     name = testfile[6:len(testfile)-5]
     failfile = "tests/%s.failed" % name
     time.sleep(1) # work around sporadic race condition with "Text file busy" error.
-    command = "%s > %s 2>&1" % (testfile, failfile)
+    command = "%s 2>&1 > %s" % (testfile, failfile)
     #print command
     start = time.clock()
     retval = os.system(command)
@@ -192,7 +192,7 @@ all_sources = generic_sources + generated_sources
 env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
-                       polyhedra renormalization """):
+                       square-well-liquid polyhedra renormalization """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
     NoCache(p)
@@ -210,6 +210,7 @@ Default('papers')
 
 Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
 Alias('papers', env.PDF('papers/pair-correlation/notes.tex'))
+Alias('papers', env.PDF('papers/pair-correlation/figs/ghs-analytics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
 
@@ -331,6 +332,7 @@ for mkdat in Split("""
 	papers/hughes-saft/figs/pressure-with-isotherms
 	papers/contact/figs/gHS-vs-n
 	papers/contact/figs/free-energy
+        papers/fuzzy-fmt/figs/homogeneous
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -378,6 +380,30 @@ for mkdat in Split("""
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
                       source = [mkdat + '.cpp'] + all_sources))
+
+env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.50.dat'],
+            source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
+            action = './$SOURCE')
 
 env.Command(target = ['papers/contact/figs/walls.dat',
                       'papers/contact/figs/wallsWB-0.10.dat',
@@ -455,5 +481,5 @@ for test in Split(""" functional-arithmetic surface-tension """):
 for test in Split(""" newcode """):
     env.BuildTest(test, ['src/new/Minimize.cpp'])
 
-for test in Split(""" new-hard-spheres """):
+for test in Split(""" new-hard-spheres new-water-saft """):
     env.BuildTest(test, all_sources + newgenerated_sources)

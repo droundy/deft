@@ -21,6 +21,7 @@
 #include "Functionals.h"
 #include "OptimizedFunctionals.h"
 #include "ContactDensity.h"
+#include "equation-of-state.h"
 
 void took(const char *action) {
   static clock_t start = 0;
@@ -30,7 +31,7 @@ void took(const char *action) {
 }
 
 int test_functional(const char *name, Functional f, double n, double fraccuracy=1e-14) {
-  const double kT = 1e-3;
+  const double kT = new_water_prop.kT; // use this value to reproduce new-water-saft.test result
 
   printf("\n**************************");
   for (unsigned i=0;i<strlen(name);i++) printf("*");
@@ -40,13 +41,16 @@ int test_functional(const char *name, Functional f, double n, double fraccuracy=
 
   // Here we set up the lattice.
   Lattice lat(Cartesian(4.2,0,-0.1), Cartesian(0.1,5.2,0), Cartesian(0,0,5));
+  // Use the Lattice below to conveniently output data to compare with
+  // new-water-saft.test...
+  //Lattice lat(Cartesian(1,0,0), Cartesian(0,1,0), Cartesian(0,0,1));
   double resolution = 0.2;
   GridDescription gd(lat, resolution);
   Grid nr(gd, n*VectorXd::Ones(gd.NxNyNz));
 
   const double Edouble = f(kT, n);
   took("Evaluating functional of a double");
-  printf("Edouble = %g\n", Edouble);
+  printf("Edouble = %.16g\n", Edouble);
   const double Egrid = f.integral(kT, nr)/gd.Lat.volume();
   took("Evaluating functional of a 20x20x20 grid");
 
@@ -143,11 +147,11 @@ int main(int, char *argv[]) {
     retval += test_functional("OfEffectivePotential(sqr(StepConvolve(1)))",
                               OfEffectivePotential(sqr(StepConvolve(1))), 0, 3e-14);
 
-    retval += test_functional("HardSpheres(2,1e-3)", HardSpheres(2), 1e-5, 1e-13);
+    retval += test_functional("HardSpheres(2,1e-5)", HardSpheres(2), 1e-5, 2e-13);
     //retval += test_functional("HardSpheresWBnotensor(...)",
     //                          HardSpheresWBnotensor(2)(n), Veff, 1e-13);
     retval += test_functional("HardSpheresNoTensor2(...)",
-                              HardSpheresNoTensor2(2)(n), Veff, 2e-13);
+                              HardSpheresNoTensor2(2)(n), Veff, 3e-13);
     retval += test_functional("IdealGasOfVeff", IdealGasOfVeff(), Veff, 2e-13);
     retval += test_functional("SaftFluid2(...)",
                               SaftFluid2(2,1e-2,0.02, 1e-4, 1.8, 0.7,0), 1e-4, 4e-13);
@@ -157,6 +161,15 @@ int main(int, char *argv[]) {
     //                          OfEffectivePotential(SaftFluidSlow(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 2e-13);
     retval += test_functional("OfEffectivePotential(SaftFluid2(...))",
                               OfEffectivePotential(SaftFluid2(2,1e-2,0.02, 1e-4, 1.8, 0.7,0)), Veff, 4e-13);
+
+    retval += test_functional("WaterSaft(...)",
+                              WaterSaft(new_water_prop.lengthscale,
+                                        new_water_prop.epsilonAB,
+                                        new_water_prop.kappaAB,
+                                        new_water_prop.epsilon_dispersion,
+                                        new_water_prop.lambda_dispersion,
+                                        new_water_prop.length_scaling, 0),
+                              1.1*new_water_prop.liquid_density, 4e-13);
 
     retval += test_functional("x*x)", x*x, 0.1, 1e-13);
     retval += test_functional("3*x*x)", 3*x*x, 0.1, 1e-13); 

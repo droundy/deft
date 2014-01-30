@@ -328,57 +328,43 @@ poly_shape::poly_shape() {
 }
 
 poly_shape::poly_shape(const char *set_name, double ratio) {
-  // vertices should be in an order such that the second half are a reflection of
-  // the first half for polyhedra with inversion symmetry (i.e. not tetrahedra)
+  // vertices and edges should be in an order such that the second
+  // half are a reflection of the first half for polyhedra with
+  // inversion symmetry (i.e. not tetrahedra)
   //
-  // Also, the first two vertices should be along the same edge, so that edge length
-  // can be easily calculated
+  // Also, the first two vertices should be along the same edge, so
+  // that edge length can be easily calculated
   //
   // All face vectors should be normalized
   //
-  // For tetrahedra, the faces should all be oriented so as to point outward
-  // And for truncated tetrahedra, outward from the large face
+  // For tetrahedra, the faces should all be oriented so as to point
+  // outward And for truncated tetrahedra, outward from the large face
   //
   // This is for constructing distribution functions nicely
-  if (strcmp(set_name, "cube") == 0) {
-    type = CUBE;
-    nvertices = 8;
-    nfaces = 3;
-    volume = 8.0/sqrt(27.0);
-    vertices = new vector3d[nvertices];
-    faces = new vector3d[nfaces];
-    name = new char[5];
-    sprintf(name, "cube");
+  if (strcmp(set_name, "cube") == 0 || strcmp(set_name, "cuboid") == 0) {
+    if (strcmp(set_name, "cube") == 0) {
+      type = CUBE;
+      ratio = 1;
+      name = new char[5];
+      sprintf(name, "cube");
+    }
+    else {
+      type = CUBOID;
+      name = new char[13];
+      sprintf(name, "cuboid_%05.2f", ratio);
+    }
 
-    const double v_cube = 1.0/sqrt(3.0);
-    vertices[0] = vector3d( v_cube,  v_cube,  v_cube);
-    vertices[1] = vector3d(-v_cube,  v_cube,  v_cube);
-    vertices[2] = vector3d( v_cube, -v_cube,  v_cube);
-    vertices[3] = vector3d( v_cube,  v_cube, -v_cube);
-
-    vertices[4] = vector3d(-v_cube, -v_cube,  v_cube);
-    vertices[5] = vector3d(-v_cube,  v_cube, -v_cube);
-    vertices[6] = vector3d(-v_cube, -v_cube, -v_cube);
-    vertices[7] = vector3d( v_cube, -v_cube, -v_cube);
-
-    faces[0] = vector3d(1, 0, 0).normalized();
-    faces[1] = vector3d(0, 1, 0).normalized();
-    faces[2] = vector3d(0, 0, 1).normalized();
-  }
-  else if (strcmp(set_name, "cuboid") == 0) {
-    // calculated so that x^2 + y^2 + z^2 = 1, x = y, and z = ratio*x
     const double x = 1/sqrt(2 + sqr(ratio));
     const double y = x;
     const double z = ratio*x;
 
-    type = CUBOID;
     nvertices = 8;
     nfaces = 3;
-    volume = 8*x*y*z;
+    nedges = 12;
+    volume = 8.0*x*y*z;
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
-    name = new char[5];
-    sprintf(name, "cuboid_%05.2f", ratio);
+    edges = new vector3d[nedges];
 
     vertices[0] = vector3d( x,  y,  z);
     vertices[1] = vector3d(-x,  y,  z);
@@ -393,14 +379,31 @@ poly_shape::poly_shape(const char *set_name, double ratio) {
     faces[0] = vector3d(1, 0, 0).normalized();
     faces[1] = vector3d(0, 1, 0).normalized();
     faces[2] = vector3d(0, 0, 1).normalized();
+
+
+    edges[0]  = vector3d( 1,  1,  0).normalized();
+    edges[1]  = vector3d( 1, -1,  0).normalized();
+    edges[2]  = vector3d( 1,  0,  1).normalized();
+    edges[3]  = vector3d( 1,  0, -1).normalized();
+    edges[4]  = vector3d( 0,  1,  1).normalized();
+    edges[5]  = vector3d( 0,  1, -1).normalized();
+
+    edges[6]  = vector3d(-1,  1,  0).normalized();
+    edges[7]  = vector3d(-1, -1,  0).normalized();
+    edges[8]  = vector3d(-1,  0,  1).normalized();
+    edges[9]  = vector3d(-1,  0, -1).normalized();
+    edges[10] = vector3d( 0, -1,  1).normalized();
+    edges[11] = vector3d( 0, -1, -1).normalized();
   }
   else if (strcmp(set_name, "tetrahedron") == 0) {
     type = TETRAHEDRON;
     nvertices = 4;
     nfaces = 4;
+    nedges = 6;
     volume = 8.0/9.0/sqrt(3.0);
     vertices = new vector3d[nvertices];
     faces = new vector3d[nfaces];
+    edges = new vector3d[nedges];
     name = new char[13];
     sprintf(name, "tetrahedron");
 
@@ -451,17 +454,26 @@ poly_shape::poly_shape(const char *set_name, double ratio) {
     type=NONE;
     nvertices = 0;
     nfaces = 0;
+    nedges = 0;
     volume = 0;
     vertices = NULL;
     faces = NULL;
+    edges = NULL;
     name = new char[14];
     sprintf(name, "invalid shape");
   }
+  // Define edges:
+  // fixme: nfaces isn't actual number of faces so can't use this
+  nedges = nfaces + nvertices - 2;
+  edges = new vector3d[nedges];
+
+  
 }
 
 poly_shape::~poly_shape() {
   delete[] vertices;
   delete[] faces;
+  delete[] edges;
   delete[] name;
 }
 

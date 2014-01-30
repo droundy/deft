@@ -130,7 +130,19 @@ createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
                   else create0dMethods e variables n
 
 create0dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
-create0dMethods e variables n = createAnydMethods e variables n
+create0dMethods e variables n =
+  [CFunction {
+     name = n++"::"++n,
+     returnType = None,
+     constness = "",
+     args = [],
+     contents =["data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));"]
+     }] ++
+  createAnydMethods e variables n
+    where
+      actualsize (ES _) = 1 :: Expression Scalar
+      actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
+      actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
 
 create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 create3dMethods e variables n =

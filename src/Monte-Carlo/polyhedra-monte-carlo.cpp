@@ -217,9 +217,6 @@ periodicity/dimensions are not set by default and are required.\n");
     printf("\nRadius was not specified, so setting radius to %g.\n", R);
   }
   if(ff != 0) {
-    // R^3*V*N/(Lx*Ly*Lz) = ff
-    // Lx*Ly*Lz = R^3*V*N/ff
-    // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
     const double fac = R*pow(shape.volume*N/ff/len[0]/len[1]/len[2], 1.0/3.0);
     for(int i=0; i<3; i++) {
       periodic[i] *= fac;
@@ -461,6 +458,8 @@ periodicity/dimensions are not set by default and are required.\n");
 
       const double space = (ne1_doub + ne2_doub + ne3_doub)/(ne1 + ne2 + ne3)/fraction;
 
+      printf("%i, %i, %i\n", ne1, ne2, ne3);
+      printf("%g, %g, %g\n", ne1_doub, ne2_doub, ne3_doub);
       e1 *= space;
       e2 *= space;
       e3 *= space;
@@ -471,6 +470,7 @@ periodicity/dimensions are not set by default and are required.\n");
         int e1_i, e2_i, e3_i;
         vector3d pos;
         bool good_spot;
+        int attempts = 0;
         do {
           e1_i = floor(random::ran()*2*ne1 - ne1);
           e2_i = floor(random::ran()*2*ne2 - ne2);
@@ -487,7 +487,9 @@ periodicity/dimensions are not set by default and are required.\n");
               }
             }
           }
+          attempts ++;
         } while(!good_spot);
+        max_attempts = max(attempts, max_attempts);
         polyhedra[i].pos = pos;
         polyhedra[i].rot = rotation(M_PI, vector3d(1, 1, 0));
         if(i < N-1) polyhedra[i+1].pos = offset + pos;

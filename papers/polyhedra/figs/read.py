@@ -92,12 +92,12 @@ def check_vertices(ff, shape, N, celltype, f):
 def read_vertices(ff, shape, N, celltype, f):
   fname = "figs/mc/vertices/%s-%04.2f-vertices-%s-%i-%i.dat" %(celltype, ff, shape, N, f)
   data = genfromtxt(fname, skip_header=2)
-  f = open(fname)
-  line = f.readline()
-  f.close
+  file_in = open(fname)
+  line = file_in.readline()
+  file_in.close
   if "iteration" in line:
     iteration =  int(line.split(":")[-1])
-  else: iteration = -1
+  else: iteration = f
   dim = loadtxt(fname)[0]
   center = data[:, :3]
   verts = data[:, 3:]

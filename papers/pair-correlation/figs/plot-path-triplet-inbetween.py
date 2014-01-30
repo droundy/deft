@@ -17,7 +17,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'fischer', 'sokolowski'] # , 'gloor'
+plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -71,11 +71,21 @@ def read_triplet(ff, fun):
 def read_gr(ff):
   return loadtxt("figs/gr-%04.2f.dat" % ff)
 
-fig = figure(figsize=(10,4))
+# widths given in height units (such that the figure height is 1)
+# twod_width should be a constant based on figure dimensions, oned_width
+# is adjustible
+twod_width = 1.6
+oned_width = 1.4
 
-xplot = subplot2grid((1,3), (0,2))
+scale = 4
+fig = figure(figsize=(scale*(twod_width + oned_width), scale))
+gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
+
+xplot = subplot(gs[1])
 zplot = xplot.twiny()
-twod_plot = subplot2grid((1,3), (0,0), colspan=2)
+twod_plot = subplot(gs[0])
+
+fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.05)
 
 xlow = -6
 xhigh = 8
@@ -94,8 +104,8 @@ zplot.set_xticks([])
 zplot.axvline(x=rpath, color='k')
 zplot.axvline(x=3*rpath, color='k')
 
-bracket.bracket(xplot, 0, -xlow/(xhigh - xlow), -.06, .04, r'$x$')
-bracket.bracket(xplot, -xlow/(xhigh - xlow), 1.0, -.06, .04, r'$z$')
+bracket.bracket(xplot, -0.01, -xlow/(xhigh - xlow), -.06, .06, r'$x/R$')
+bracket.bracket(xplot, -xlow/(xhigh - xlow), 1.01, -.06, .06, r'$z/R$')
 
 xmin = 1.0
 xmax = 9.0
@@ -104,7 +114,7 @@ ymax = 6.0
 twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
 
-fig.subplots_adjust(hspace=0.001)
+#fig.subplots_adjust(hspace=0.001)
 
 for name in plots:
     g3_path = read_triplet_path(ff, name)
@@ -141,8 +151,9 @@ for name in plots:
     xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot_back[name])
     zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
 
-xplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-xplot.legend(loc='best', ncol=1).draw_frame(False)
+
+#xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$')
+zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
@@ -203,8 +214,8 @@ twod_plot.add_artist(sphere1)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
-twod_plot.set_ylabel('$x_2$');
-twod_plot.set_xlabel('$z_2$');
+twod_plot.set_ylabel('$x/R$');
+twod_plot.set_xlabel('$z/R$');
 
 # Here we plot the paths on the 2d plot.  The mc plot should align
 # with the dft one.
@@ -285,8 +296,11 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
                xytext=(Ez-0.5,1.3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
+ylim = xplot.get_ylim()
+xplot.set_ylim(0, ylim[1])
 
-twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.2\sigma\right>,\mathbf{r}_2)$ at $\eta = %g$' % ff)
+twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
+#fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/triplet-correlation-pretty-inbetween-%d.pdf" % (int(ff*10)))
 show()
 

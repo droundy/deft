@@ -28,7 +28,7 @@ able_to_read_file = True
 
 # Set the max parameters for plotting.
 zmax = 6
-zmin = -.5
+zmin = -1
 rmax = 4.1
 ############################
 
@@ -57,8 +57,8 @@ def read_walls_path(ff, fun):
   return data[:,0:4]
 
 def read_walls_mc(ff):
-  # The 0.05 below is deceptive (ask Paho).
-  return loadtxt("figs/mc/wallsMC-pair-%1.1f-0.05-trimmed.dat" % ff)
+  # The 0.01 is really 0.005, but is only saved to 2 digits of precision
+  return loadtxt("figs/mc/wallsMC-pair-%1.1f-0.01-trimmed.dat" % ff)
 
 def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
@@ -70,29 +70,44 @@ def read_walls_dft(ff, fun):
 
 ymax = 4
 
-fig = figure(figsize=(10,5))
+# widths given in height units (such that the figure height is 1)
+# twod_width should be a constant based on figure dimensions, oned_width
+# is adjustible
+twod_width = 1.0
+oned_width = 2.0
 
-xplot = fig.add_subplot(1,2,2)
+scale = 4
+fig = figure(figsize=(scale*(twod_width + oned_width), scale))
+gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
+
+# xplot = fig.add_subplot(1,2,2)
+# zplot = xplot.twiny()
+# twod_plot = fig.add_subplot(1,2,1)
+
+xplot = subplot(gs[1])
 zplot = xplot.twiny()
-#zplot = fig.add_subplot(1,3,3, sharey=xplot)
-twod_plot = fig.add_subplot(1,2,1)
+twod_plot = subplot(gs[0])
+
+fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.1)
 
 zmax_lineplot = 6.
 xmax_lineplot = 4.
 xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
-xplot.set_xticklabels([6, 4, "2 0", 2, 4, 6])
+xplot.set_xticklabels(["$6$", "$4$", "$2~~0$", "$2$", "$4$", "$6$"])
 zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
-bracket.bracket(xplot, 0, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .04, r'$x$')
-bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.0, -.06, .04, r'$z$')
+bracket.bracket(xplot, -.01, xmax_lineplot/(xmax_lineplot+zmax_lineplot), -.06, .06, r'$x/R$')
+bracket.bracket(zplot, xmax_lineplot/(xmax_lineplot+zmax_lineplot), 1.01, -.06, .06, r'$z/R$')
 
-twod_plot.set_xlim(-0.5, 1.5*ymax)
+twod_plot.set_xlim(-1, 6)
 twod_plot.set_ylim(-ymax, ymax)
+sphere = Circle((0, 0), 1, color='slategray')
+twod_plot.add_artist(sphere)
 
-fig.subplots_adjust(hspace=0.001)
+#fig.subplots_adjust(hspace=0.001)
 
 for name in plots:
     g2_path = read_walls_path(ff, name)
@@ -121,8 +136,9 @@ zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r}_2)$')
-zplot.legend(loc='best', ncol=1).draw_frame(False)
+zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
+legendloc = 'lower left' if ff < 0.2 else 'upper left'
+zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
@@ -181,8 +197,8 @@ pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
 colorbar(CS, extend='neither', ticks=myticks)
-twod_plot.set_ylabel('$x_2$');
-twod_plot.set_xlabel('$z_2$');
+twod_plot.set_ylabel('$x/R$');
+twod_plot.set_xlabel('$z/R$');
 
 text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -198,6 +214,7 @@ xs.append(2*ymax)
 ys.append(0)
 plot(xs, ys, 'w-', linewidth=2)
 plot(xs, ys, 'k--', linewidth=2)
+
 
 Ax = 3.9
 Az = 0
@@ -227,23 +244,26 @@ annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, 
 
 # Annotations on 1d plot
 xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
-               xytext=(Ax+1,1.3),
+               xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
-               xytext=(Bx+1, g2pathfunction_x(Bx)-0.2),
+               xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
-               xytext=(Cz,g2pathfunction_z(Cz)-0.5),
+               xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
-               xytext=(Dz+1,g2pathfunction_z(Dz)-0.2),
+               xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
-               xytext=(Ez+0.7,1.3),
+               xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
+ylim = xplot.get_ylim()
+xplot.set_ylim(0, ylim[1])
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x_2, 0, z_2\right>)$ at $\eta = %g$' % ff)
+twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
+#fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()
 

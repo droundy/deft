@@ -22,7 +22,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-static const double lj_pressure = 10000000*3.3989316e-14; // 100 bar in Hartree/bohr^3
+static const double lj_pressure = 11000000*3.3989316e-14; // 110 bar in Hartree/bohr^3
 static const double kB = 3.16681539628059e-6; // This is Boltzmann's constant in Hartree/Kelvin
 const double nm = 18.8972613;
 const double angstrom = .1*nm;

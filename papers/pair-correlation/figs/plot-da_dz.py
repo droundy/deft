@@ -41,23 +41,23 @@ def read_da_dz(version):
 
 versions = ["this-work", 'sokolowski', "fischer"]
 
-plt.figure(figsize=(5,3))
+plt.figure(figsize=(6,4))
+
+mc_z0, mc_da_dz = read_a1_mc();
+plt.plot(mc_z0[::10], mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 
 for version in versions:
   z0, da_dz = read_da_dz(version)
-  plt.plot(z0/2, da_dz, styles.plot[version], label=styles.title[version])
-
-mc_z0, mc_da_dz = read_a1_mc();
+  plt.plot(z0, da_dz, styles.plot[version], label=styles.title[version])
 
 
-plt.plot(mc_z0[::10]/2, mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
-plt.xlim([-.5/2.,6/2.])
-plt.legend(loc='best').draw_frame(False)
+plt.xlim([-.5,6])
+plt.legend(loc='upper right').draw_frame(False)
 
-plt.xlabel('$z/\sigma$')
-plt.ylabel(r'$\frac{da_1}{dz}$')
+plt.xlabel('$z/R$')
+plt.ylabel(r'$da_1/dz$')
 plt.yticks([])
-plt.xticks([0,1,2,3])
+#plt.xticks([0,1,2,3])
 
 if 2 < delta_r and delta_r < 2.01:
   plt.title('$\Phi(r) = \delta(\sigma - r + \delta)$     $\eta = %g$' % eta)

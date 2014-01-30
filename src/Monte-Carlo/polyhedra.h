@@ -12,10 +12,16 @@ const int TRUNCATED_TETRAHEDRON=3;
 const int CUBOID=4;
 
 struct poly_shape {
+  // faces are unit vectors normal to the actual faces. In the case of
+  // parallel faces, only one of them is used
+
+  // edges are unit vectors to the center of the edges
   int nvertices;
   int nfaces;
+  int nedges;
   vector3d *vertices;
   vector3d *faces;
+  vector3d *edges;
   double volume;
   char *name;
   int type;
@@ -28,9 +34,9 @@ private:
   DISALLOW_COPY_AND_ASSIGN(poly_shape);
 };
 
-// Note: once assigned, the poly_shape of a polyhedron is never cleared
-// It is expected that there are only a few poly_shapes which many polyhedra
-// pointing to each
+// Note: once assigned, the poly_shape of a polyhedron is never
+// cleared. It is expected that there are only a few poly_shapes with
+// many polyhedra pointing to each
 struct polyhedron {
   vector3d pos;
   rotation rot;
@@ -48,9 +54,9 @@ struct polyhedron {
 
 // struct polyhedron; fixme: forward declare
 
-// Create and initialize the neighbor tables for polyhedra p.
-// Returns the maximum number of neighbors that any polyhedron has,
-// or -1 if that number is larger than max_neighbors.
+// Create and initialize the neighbor tables for polyhedra p.  Returns
+// the maximum number of neighbors that any polyhedron has, or -1 if
+// that number is larger than max_neighbors.
 int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,
                                int max_neighbors, const double periodic[3]);
 
