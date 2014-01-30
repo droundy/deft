@@ -43,7 +43,7 @@
 // should be false except when something is wrong
 // NOTE: This can slow things down VERY much, depending on how much debug
 // code is active
-const bool debug = true;
+bool debug;
 
 const int x = 0;
 const int y = 1;
@@ -89,6 +89,7 @@ int main(int argc, const char *argv[]) {
   double periodic[3] = {0, 0, 0};
   double walls[3] = {0, 0, 0};
   bool fake_walls = false;
+  bool homogenous_box = false;
   unsigned long int seed = 0;
 
   char *dir = new char[1024];
@@ -102,7 +103,6 @@ int main(int argc, const char *argv[]) {
   double R = 1;
   double interaction_scale = 1.3;
   double ff = 0;
-  double ratio = 1;
   double neighborR = 2;
   double dr = 0.01;
   double de_density = 0.01;
@@ -119,29 +119,36 @@ int main(int argc, const char *argv[]) {
   // Set values from parameters
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
+    {"debug", '\0', POPT_ARG_NONE, &debug, 0,
+     "Debug mode", "BOOLEAN"},
     {"N", 'N', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
-    {"periodx", '\0', POPT_ARG_DOUBLE, &periodic[0], 0, "Periodic in x", "lenx"},
-    {"periody", '\0', POPT_ARG_DOUBLE, &periodic[1], 0, "Periodic in y", "leny"},
-    {"periodz", '\0', POPT_ARG_DOUBLE, &periodic[2], 0, "Periodic in z", "lenz"},
-    {"wallx", '\0', POPT_ARG_DOUBLE, &walls[0], 0, "Walls in x", "lenx"},
-    {"wally", '\0', POPT_ARG_DOUBLE, &walls[1], 0, "Walls in y", "leny"},
-    {"wallz", '\0', POPT_ARG_DOUBLE, &walls[2], 0, "Walls in z", "lenz"},
+    {"periodx", '\0', POPT_ARG_DOUBLE, &periodic[0], 0,
+     "Periodic cell size in x", "DOUBLE"},
+    {"periody", '\0', POPT_ARG_DOUBLE, &periodic[1], 0,
+     "Periodic cell size in y", "DOUBLE"},
+    {"periodz", '\0', POPT_ARG_DOUBLE, &periodic[2], 0,
+     "Periodic cell size in z", "DOUBLE"},
+    {"periodxyz", '\0', POPT_ARG_NONE, &homogenous_box, 0,
+     "Periodic in all directions", "BOOLEAN"},
+    {"wallx", '\0', POPT_ARG_DOUBLE, &walls[0], 0,
+     "Walled cell size in x","DOUBLE"},
+    {"wally", '\0', POPT_ARG_DOUBLE, &walls[1], 0,
+     "Walled cell size in y","DOUBLE"},
+    {"wallz", '\0', POPT_ARG_DOUBLE, &walls[2], 0,
+     "Walled cell size in z","DOUBLE"},
     {"fake_walls", '\0', POPT_ARG_NONE, &fake_walls, 0,
      "Will cause collisions to occur with walls based on centers only", 0},
     {"iterations", 'i', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
-     0, "Number of iterations to run for", "iter"},
+     0, "Number of iterations to run for", "INT"},
     {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
      &initialize_iterations, 0,
-     "Number of iterations to run the initialization for", "iter"},
+     "Number of iterations to run the initialization for", "INT"},
     {"filename", 'f', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of filename. Many files will be generated, and will automatically "
      "contain information on the number and type of balls, as well as file "
-     "extensions", "name"},
+     "extensions", "STRING"},
     {"dir", 'd', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Directory to save to", "dir"},
-    {"ratio", 'r', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &ratio, 0,
-     "Ratio of sides of cuboid. For a cuboid of sides AxAxB, ratio = B/A.",
-     "ratio"},
     {"R", 'R', POPT_ARG_DOUBLE, &R, 0,
      "Size of the sphere that circumscribes each ball. "
      "Defaults to setting edge length to 1", "DOUBLE"},
@@ -152,25 +159,25 @@ int main(int argc, const char *argv[]) {
      "cell dimensions are adjusted accordingly, without changing the shape of "
      "the cell."},
     {"neighborR", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &neighborR,
-     0, "Neighbor radius, used to drastically reduce collision detections",
-     "neighborR"},
+     0, "Neighbor sphere radius, used to drastically reduce collision "
+     "detections","DOUBLE"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
      "Differential radius change used in pressure calculation", "dr"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &de_density, 0, "Resolution of density file", "de"},
+     &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
-     "Resolution of distribution functions", "de"},
+     "Resolution of distribution functions", "DOUBLE"},
     {"dr_g", '\0', POPT_ARG_DOUBLE, &dr_g, 0, "Radius of cylinder used in "
      "distribtution functions. "
-     "Defaults to the radius of a circle inscribed on a side", "dr"},
+     "Defaults to the radius of a circle inscribed on a side", "DOUBLE"},
     {"scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &scale, 0,
-     "Standard deviation for translations of balls", "scale"},
+     "Standard deviation for translations of balls", "DOUBLE"},
     {"seed", 's', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
-     "Seed for the random number generator", "seed"},
+     "Seed for the random number generator", "INT"},
     {"time", 't', POPT_ARG_INT, &totime, 0,
-     "Timing information will be displayed", "interval"},
+     "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &acceptance_goal, 0, "Goal to set the acceptance rate", "goal"},
+     &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -191,6 +198,9 @@ int main(int argc, const char *argv[]) {
   // Verify we have reasonable arguments and set secondary parameters
   // ----------------------------------------------------------------------------
   const bool real_walls = !fake_walls;
+  if(homogenous_box){
+    for(int i = 0; i < 3; i++) periodic[i] = 1;
+  }
   double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
                    periodic[2] + walls[2]};
 
@@ -241,8 +251,13 @@ int main(int argc, const char *argv[]) {
   }
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
-    if (walls[0] + walls[1] + walls[2] > 0) // has walls in some dimension
+    if (walls[0] + walls[1] + walls[2] > 0){ // has walls in some dimension
+      if(homogenous_box){
+        printf("\nA homogenous box cannot have walls.");
+        return 255;
+      }
       sprintf(filename, "walls-%04.2f", eta);
+    }
     else
       sprintf(filename, "periodic-%04.2f", eta);
     printf("\nNo filename selected, so using the default: %s\n", filename);
@@ -283,9 +298,9 @@ int main(int argc, const char *argv[]) {
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
   // Find the upper limit to the maximum number of neighbors a ball could have
-  const double neighbor_sphere_vol = 4.0/3.0*M_PI*(uipow(R+neighborR,3)
-                                                   - uipow(R,3));
-  int max_neighbors = 2*neighbor_sphere_vol / (4.0/3.0*M_PI*uipow(R,3));
+  const double neighbor_sphere_vol =
+    4.0/3.0*M_PI*(uipow(R+neighborR,3) - uipow(R,3));
+  int max_neighbors = uipow(2*R+neighborR,3) / uipow(R,3);
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -296,9 +311,10 @@ int main(int argc, const char *argv[]) {
   const int spots_per_cell = 4; // spots in each fcc periodic unit cell
   const int cells_floor = ceil(N/spots_per_cell); // minimum number of cells
   int cells[3]; // array to contain number of cells in x, y, and z dimensions
-  cells[x] = ceil(pow(cells_floor*len[x]*len[x]/(len[y]*len[z]),1.0/3.0));
-  cells[y] = ceil(pow(cells_floor*len[y]*len[y]/(len[z]*len[x]),1.0/3.0));
-  cells[z] = ceil(pow(cells_floor*len[z]*len[z]/(len[x]*len[y]),1.0/3.0));
+  for(int i = 0; i < 3; i++){
+    cells[i] = ceil(pow(cells_floor*len[i]*len[i]
+                        /(len[(i+1)%3]*len[(i+2)%3]),1.0/3.0));
+  }
 
   // Increase number of cells until all balls can be accomodated
   int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
@@ -478,21 +494,6 @@ int main(int argc, const char *argv[]) {
           de_density, de_g, dr_g, seed, R, interaction_scale, scale, real_walls,
           initialize_iterations, neighborR, dr);
 
-  // fixme: to use this again, make it so file stays open and is fflushed
-  // so that the name only appears once
-  // // ---------------------------------------------------------------
-  // // Clear the pressure file
-  // // ---------------------------------------------------------------
-  // char *pressure_fname = new char[1024];
-  // sprintf(pressure_fname, "%s/%s-pressure-%s-%i.dat", dir, filename,
-  //         shape.name, N);
-  // FILE *pressureout = fopen((const char *)pressure_fname, "w");
-  // const double dV = N*shape.volume*(uipow(R+dr, 3) - uipow(R, 3));
-  // fprintf(pressureout, "0 0 %g #dV\n", dV);
-  // fprintf(pressureout, "# total moves    pressure     dZ\n");
-  // delete[] pressure_fname;
-  // fclose(pressureout);
-
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
@@ -518,6 +519,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Count number of interactions
     // ---------------------------------------------------------------
+    // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_scale
     interactions = 0;
     for(int i = 0; i < N; i++) {
       for(int j = 0; j < balls[i].num_neighbors; j++) {
@@ -539,16 +541,21 @@ int main(int argc, const char *argv[]) {
       density_histogram[int(round(len[x]/de_density)) + y_i] ++;
       density_histogram[int(round((len[x] + len[y])/de_density)) + z_i] ++;
     }
-    // ---------------------------------------------------------------
-    // Get pressure info - this is slow, might want to do it less often
-    // fixme - disabled for now
-    // ---------------------------------------------------------------
-    // for(int i = 0; i < N; i++) {
-    //   dZ += overlaps_with_any(balls[i], balls, periodic, true, dr);
-    // }
-    // dZ /= 2; // since we check each thing against each of its neighbors, we
-    //          // end up double counting. Ideally, we would count half as much
-    //          // instead of dividing
+
+    // Radial distribution
+    // This is an O(N^2) calculation, so we're only going to do it every N^2 moves
+    if(iteration %N == 0) {
+      for(int i = 0; i < N; i++) {
+        for(int j = 0; j < N; j++) {
+          if(i != j) {
+            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos, periodic);
+            const int r_i = floor(r.norm()/de_g);
+            if(r_i < g_bins) g_histogram[r_i] ++;
+          }
+        }
+      }
+    }
+
     // ---------------------------------------------------------------
     // Save to file
     // ---------------------------------------------------------------
@@ -571,8 +578,7 @@ int main(int argc, const char *argv[]) {
       char *countinfo = new char[4096];
       sprintf(countinfo,
               "# iteration: %li, workingmoves: %li, totalmoves: %li, "
-              "interactions: %i, acceptance rate: %g\n",
-              iteration, workingmoves, totalmoves, interactions,
+              "acceptance rate: %g\n", iteration, workingmoves, totalmoves,
               double(workingmoves)/totalmoves);
 
       // Saving density in each of the x, y, z dimensions
@@ -616,7 +622,7 @@ int main(int argc, const char *argv[]) {
       delete[] g_fname;
       fprintf(g_out, "%s", headerinfo);
       fprintf(g_out, "%s", countinfo);
-      fprintf(g_out, "\ne       ");
+      fprintf(g_out, "\n#e       ");
       const double density = N/len[x]/len[y]/len[z];
       const double vol0 = len[x]*len[y]*len[z];
       fprintf(g_out, "\n");
@@ -672,7 +678,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   print_bad(balls, N, periodic);
 
-  //delete[] balls; fixme
+  delete[] balls;
   delete[] density_histogram;
   delete[] g_histogram;
 
