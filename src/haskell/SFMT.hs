@@ -34,7 +34,7 @@ n = "n" === r_var "x"
 n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
-n0 = "n0" === 4*a/sigma*(n1 - n2/sigma)
+n0 = "n0" === 2/sigma*(2*n1 - n2/(2*pi*sigma))
 
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
@@ -47,7 +47,7 @@ n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
   where w3k = var "w3k" "\\tilde{w_3}(k)" $
-              1/(k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
+              4*pi/(k**2)*exp(-(a*k/2)**2)*((1+a**2*k**2/2)*sin ksigmao2/k - sigma/2*cos ksigmao2)
         ksigmao2 = k*sigma/2
 
 w1 :: Expression RealSpace -> Expression RealSpace

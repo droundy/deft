@@ -851,13 +851,14 @@ If we take only the first two terms of the series then
 \begin{align}
   \tilde{w}_0(k) &\approx \frac{2}{\sigma}\Bigg{\{}\frac{1}{k\sqrt{\pi}}
   \bigg[\int_{-\infty}^{\infty}
-    e^{-x^2}\sin\left(k(ax+\frac{\sigma}{2})\right) \notag \\
+    e^{-x^2}\sin\left(k(ax+\frac{\sigma}{2})\right) \textrm{dx}\notag \\
     &\; -\frac{2a}{\sigma}\int_{-\infty}^{\infty} x e^{-x^2}
-    \sin\left(k(ax+\frac{\sigma}{2})\right) \bigg]\Bigg{\}} \\
-  &=\frac{2}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma} \left(
-    \tilde{w}_2(k) - \frac{\sigma}{2}\tilde{w}_1(k)\right)\right] \\
-  &=\frac{4}{\sigma}\left[\tilde{w}_1(k) -
-    \frac{1}{\sigma}\tilde{w}_2(k) \right]
+    \sin\left(k(ax+\frac{\sigma}{2})\right) \textrm{dx}\bigg]\Bigg{\}} \\
+  &=\frac{2}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma\sqrt{\pi}} \left(
+    \frac{1}{4\sqrt{\pi}}\tilde{w}_2(k) - \frac{\sqrt{\pi} \sigma}{2}
+    \tilde{w}_1(k)\right)\right] \\
+  &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
+      \sigma}\tilde{w}_2(k) \right]
 \end{align}
 %% Since the gaussian should, again, go to zero before r = 0, then we can
 %% take this to negative infinity so 
