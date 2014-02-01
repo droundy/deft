@@ -67,16 +67,16 @@ inline void save_locations(const ball *p, int N, const char *fname,
 
 // Prints the location and radius of every ball
 // As well as whether any overlap or are outside the cell.
-inline void print_all(const ball *p, int N, double periodic[3]);
+inline void print_all(const ball *p, int N, double len[3]);
 
 // Same as print_all, but only prints information for one ball,
 // and does not do overlap tests.
 inline void print_one(const ball &a, int id, const ball *p, int N,
-                      double periodic[3]);
+                      double len[3], int num_walls);
 
 // Only print those balls that overlap or are outside the cell
 // Also prints those they overlap with
-inline void print_bad(const ball *p, int N, double periodic[3]);
+inline void print_bad(const ball *p, int N, double len[3], int num_walls);
 
 // Checks to make sure that every ball is his neighbor's neighbor.
 inline void check_neighbor_symmetry(const ball *p, int N);
@@ -86,11 +86,10 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define "Constants" -- set from arguments then unchanged
   // ----------------------------------------------------------------------------
-  double periodic[3] = {0, 0, 0};
-  double walls[3] = {0, 0, 0};
-  int wall_dim = 0;
-  bool fake_walls = false;
-  bool homogenous_box = false;
+  bool cubic_cell = false;
+  double len[3] = {1, 1, 1};
+  int num_walls = 0;
+  int wall_dim = 1;
   unsigned long int seed = 0;
 
   char *dir = new char[1024];
@@ -99,7 +98,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "[walls/periodic]-FF");
   int N = 0;
   long iterations = 100000000000;
-  long initialize_iterations = 500000;
+  long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
   double interaction_scale = 1.3;
@@ -119,37 +118,25 @@ int main(int argc, const char *argv[]) {
   // Set values from parameters
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
-    {"debug", '\0', POPT_ARG_NONE, &debug, 0,
-     "Debug mode", "BOOLEAN"},
-    {"N", 'N', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
-    {"periodxyz", '\0', POPT_ARG_NONE, &homogenous_box, 0,
-     "Wall only in z direction", "BOOLEAN"},
-    {"periodx", '\0', POPT_ARG_DOUBLE, &periodic[x], 0,
-     "Periodic cell size in x", "DOUBLE"},
-    {"periody", '\0', POPT_ARG_DOUBLE, &periodic[y], 0,
-     "Periodic cell size in y", "DOUBLE"},
-    {"periodz", '\0', POPT_ARG_DOUBLE, &periodic[z], 0,
-     "Periodic cell size in z", "DOUBLE"},
-    {"wallx", '\0', POPT_ARG_DOUBLE, &walls[x], 0,
-     "Walled cell size in x","DOUBLE"},
-    {"wally", '\0', POPT_ARG_DOUBLE, &walls[y], 0,
-     "Walled cell size in y","DOUBLE"},
-    {"wallz", '\0', POPT_ARG_DOUBLE, &walls[z], 0,
-     "Walled cell size in z","DOUBLE"},
-    {"fake_walls", '\0', POPT_ARG_NONE, &fake_walls, 0,
-     "Will cause collisions to occur with walls based on centers only", 0},
-    {"iterations", 'i', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
+    {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
+    {"N", '\0', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
+    {"cubic_cell", '\0', POPT_ARG_NONE, &cubic_cell, 0,"Make cell cubic",
+     "BOOLEAN"},
+    {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0, "Cell size in x", "DOUBLE"},
+    {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0, "Cell size in y", "DOUBLE"},
+    {"lenz", '\0', POPT_ARG_DOUBLE, &len[z], 0, "Cell size in z", "DOUBLE"},
+    {"num_walls", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &num_walls, 0,
+     "Number of walled dimensions (max = 3)", "INT"},
+    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
      0, "Number of iterations to run for", "INT"},
-    {"initialize_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
-     &initialize_iterations, 0,
+    {"initialization_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+     &initialization_iterations, 0,
      "Number of iterations to run the initialization for", "INT"},
     {"filename", 'f', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
-     "Base of filename. Many files will be generated, and will automatically "
-     "contain information on the number and type of balls, as well as file "
-     "extensions", "STRING"},
-    {"dir", 'd', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
+     "Base of output file names", "STRING"},
+    {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Directory to save to", "dir"},
-    {"R", 'R', POPT_ARG_DOUBLE, &R, 0,
+    {"R", '\0', POPT_ARG_DOUBLE, &R, 0,
      "Size of the sphere that circumscribes each ball. "
      "Defaults to setting edge length to 1", "DOUBLE"},
     {"interaction_scale", '\0', POPT_ARG_DOUBLE, &interaction_scale, 0,
@@ -179,8 +166,8 @@ int main(int argc, const char *argv[]) {
     POPT_TABLEEND
   };
   optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of balls and periodicity/"
-                         "dimensions are not set by default and are required.");
+  poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of balls and filling "
+                         "fraction or cell dimensions are required arguments.");
 
   int c = 0;
   // go through arguments, set them based on optionsTable
@@ -194,12 +181,10 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Verify we have reasonable arguments and set secondary parameters
   // ----------------------------------------------------------------------------
-  const bool real_walls = !fake_walls;
-  if(homogenous_box){
-    for(int i = 0; i < 3; i++) periodic[i] = 1;
+
+  if(cubic_cell){
+    for(int i = 0; i < 3; i++) len[i] = 1;
   }
-  double len[3] = {periodic[0] + walls[0], periodic[1] + walls[1],
-                   periodic[2] + walls[2]};
 
   if(ff != 0) {
     // R^3*V*N/(Lx*Ly*Lz) = ff
@@ -207,33 +192,17 @@ int main(int argc, const char *argv[]) {
     // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
     const double fac = R*pow(4.0/3.0*M_PI*uipow(R,3)*N/ff/len[x]/len[y]/len[z],
                              1.0/3.0);
-    for(int i = 0; i < 3; i++) {
-      periodic[i] *= fac;
-      walls[i] *= fac;
-      len[i] *= fac;
-    }
+    for(int i = 0; i < 3; i++) len[i] *= fac;
     printf("\nFilling fraction was specified,");
     printf("so setting cell dimensions to (%g, %g, %g).\n",
            len[x], len[y], len[z]);
   }
   if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0
-      || scale < 0) {
+      || scale < 0 || len[x] < 0 || len[y] < 0 || len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
-  for(int i = 0; i < 3; i++) {
-    const char dim = i == 0 ? 'x' : i == 1 ? 'y' : 'z';
-    if (periodic[i] != 0 && walls[i] != 0) {
-      fprintf(stderr, "\nThe cell can't both be periodic and have walls in the "
-              "%c dimension!\n", dim);
-      return 1;
-    }
-    if (periodic[i] + walls[i] <= 0) {
-      fprintf(stderr, "\nThe cell needs to have some size in the %c "
-              "dimension!\n", dim);
-      return 1;
-    }
-  }
+
   const double eta = (double)N*(4.0/3.0*M_PI*uipow(R,3))
     *uipow(R,3)/len[x]/len[y]/len[z];
   if (eta > 1) {
@@ -244,15 +213,8 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
-    if (walls[0] + walls[1] + walls[2] > 0){ // has walls in some dimension
-      if(homogenous_box){
-        printf("\nA homogenous box cannot have walls.");
-        return 255;
-      }
-      sprintf(filename, "walls-%04.2f", eta);
-    }
-    else
-      sprintf(filename, "periodic-%04.2f", eta);
+    if (num_walls != 0) sprintf(filename, "walls-%04.2f", eta);
+    else sprintf(filename, "periodic-%04.2f", eta);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
   printf("------------------------------------------------------------------\n");
@@ -271,18 +233,15 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define variables
   // ----------------------------------------------------------------------------
-  const int has_walls = bool(walls[x])+bool(walls[y])+bool(walls[z]);
-  if(has_walls >= 2){
-    printf("Code cannot handle walls in more than one dimension.\n");
+  if(num_walls >= 2){
+    printf("Code cannot currently handle walls in more than one dimension.\n");
     return 254;
-  }
-  for(int i = 0; i < 3; i++){
-    if(walls[i]) wall_dim = i;
   }
 
   const int energy_levels = N/2 * (uipow(R*(2+interaction_scale),3)
                                    / uipow(R,3) - 1);
-  long *energy_histogram = new long[energy_levels];
+  long *energy_histogram = new long[energy_levels]();
+  int energy;
 
   const int density_bins = round((len[x] + len[y] + len[z])/de_density);
   long *density_histogram = new long[energy_levels*density_bins]();
@@ -292,7 +251,6 @@ int main(int argc, const char *argv[]) {
   long *g_histogram = new long[energy_levels*g_bins]();
 
   ball *balls = new ball[N];
-  int interactions;
   double interaction_scale_squared = uipow(interaction_scale,2);
   long dZ = 0;
 
@@ -377,8 +335,8 @@ int main(int argc, const char *argv[]) {
   // Save the initial configuration for troubleshooting
   // ----------------------------------------------------------------------------
   int most_neighbors =
-    initialize_neighbor_tables(balls, N, neighborR + 2*dr, max_neighbors,
-                               periodic);
+    initialize_neighbor_tables(balls, N, neighborR + 2*dr, max_neighbors, len,
+                               num_walls);
   if (most_neighbors < 0) {
     fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
             max_neighbors);
@@ -388,21 +346,21 @@ int main(int argc, const char *argv[]) {
   printf("The most neighbors is %i, whereas the max allowed is %i.\n",
          most_neighbors, max_neighbors);
   //fixme: uncomment
-  //print_all(balls, N, periodic);
-  //print_bad(balls, N, periodic);
+  //print_all(balls, N, len, num_walls);
+  //print_bad(balls, N, len, num_walls);
 
   // ----------------------------------------------------------------------------
   // Make sure no balls are overlapping
   // ----------------------------------------------------------------------------
   for(int i = 0; i < N; i++) {
-    if (!in_cell(balls[i], walls, real_walls)) {
+    if (!in_cell(balls[i], len, num_walls, dr)) {
       printf("Oops, this is embarassing.\n");
       printf("I seem to have placed some things outside our cell.\n");
       printf("You might want to look into that.\n");
       return 17;
     }
     for(int j = i+1; j < N; j++) {
-      if (overlap(balls[i], balls[j], periodic)) {
+      if (overlap(balls[i], balls[j], len, num_walls)) {
         printf("ERROR in initial placement. We have overlaps!!!\n");
         printf("AHHHHHH I DON'T KNOW WHAT TO DO!@!!!!1111\n");
         return 19;
@@ -421,14 +379,14 @@ int main(int argc, const char *argv[]) {
 
   double dscale = .1;
 
-  for(long iteration = 1; iteration <= initialize_iterations; iteration++) {
+  for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
     // ---------------------------------------------------------------
     // Move each ball once
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       totalmoves ++;
-      int move_val = move_one_ball(i, balls, N, periodic, walls, real_walls,
-                                   neighborR, scale, max_neighbors, dr);
+      int move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
+                                   scale, max_neighbors, dr);
       workingmoves += move_val & 1;
       neighbor_updates += (move_val & 2) > 0;
       neighbor_informs += (move_val & 4) > 0;
@@ -491,14 +449,14 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
-          "# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), "
-          "de_density: %g, de_g: %g\n# seed: %li, R: %f, "
-          "interaction_scale: %g, scale: %g, real_walls: %i\n"
-          "# initialize_iterations: %li, neighborR: %g, dr: %g, "
-          "energy levels: %i\n",
-          periodic[0], periodic[1], periodic[2], walls[0], walls[1], walls[2],
-          de_density, de_g, seed, R, interaction_scale, scale, real_walls,
-          initialize_iterations, neighborR, dr, energy_levels);
+          "# cell dimensions: (%5.2f, %5.2f, %5.2f), number of walls: %i,"
+          " de_density: %g, de_g: %g\n# seed: %li, R: %f,"
+          " interaction_scale: %g, scale: %g\n"
+          "# initialization_iterations: %li, neighborR: %g, dr: %g,"
+          " energy levels: %i\n",
+          len[0], len[1], len[2], num_walls, de_density, de_g, seed, R,
+          interaction_scale, scale, initialization_iterations, neighborR, dr,
+          energy_levels);
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -518,8 +476,8 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       totalmoves ++;
-      int move_val = move_one_ball(i, balls, N, periodic, walls, real_walls,
-                                   neighborR, scale, max_neighbors, dr);
+      int move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
+                                   scale, max_neighbors, dr);
       workingmoves += move_val & 1;
     }
     // ---------------------------------------------------------------
@@ -527,34 +485,36 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Count number of interactions, add to energy histogram
     // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_scale
-    interactions = 0;
+    energy = 0;
     for(int i = 0; i < N; i++) {
       for(int j = 0; j < balls[i].num_neighbors; j++) {
         if(i < balls[i].neighbors[j]
-           && (balls[i].pos - balls[balls[i].neighbors[j]].pos).normsquared()
+           && sq_periodic_diff(balls[i].pos,
+                               balls[balls[i].neighbors[j]].pos,
+                               len, num_walls).normsquared()
            >= interaction_scale_squared)
-          interactions++;
+          energy++;
       }
     }
-    energy_histogram[interactions]++;
+    energy_histogram[energy]++;
 
     // Density histogram
-    if(has_walls){
+    if(num_walls){
       for(int i = 0; i < N; i++) {
-        density_histogram[interactions*density_bins
+        density_histogram[energy*density_bins
                           + int(floor(balls[i].pos[wall_dim]/de_density))] ++;
       }
     }
 
     // Radial distribution
-    if(!has_walls){
+    if(!num_walls){
       for(int i = 0; i < N; i++) {
         for(int j = 0; j < N; j++) {
           if(i != j) {
-            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos,
-                                                periodic);
+            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos, len,
+                                                num_walls);
             const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[interactions*g_bins + r_i]++;
+            if(r_i < g_bins) g_histogram[energy*g_bins + r_i]++;
           }
         }
       }
@@ -591,14 +551,14 @@ int main(int argc, const char *argv[]) {
       delete[] e_fname;
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "\n#energy   counts\n");
+      fprintf(e_out, "\n# energy   counts\n");
       for(int energy = 0; energy < energy_levels; energy++)
         if(energy_histogram[energy] != 0)
           fprintf(e_out, "%i  %li\n",energy,energy_histogram[energy]);
       fclose(e_out);
 
       // Saving density data
-      if(has_walls){
+      if(num_walls){
         char *density_fname = new char[1024];
         sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
         FILE *densityout = fopen((const char *)density_fname, "w");
@@ -627,7 +587,7 @@ int main(int argc, const char *argv[]) {
 
       // Save distribution funtions
       // fixme: assumes homogeneous for density
-      if(!has_walls){
+      if(!num_walls){
         char *g_fname = new char[1024];
         sprintf(g_fname, "%s/%s-g-%i.dat", dir, filename, N);
         FILE *g_out = fopen((const char *)g_fname, "w");
@@ -697,7 +657,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
-  print_bad(balls, N, periodic);
+  print_bad(balls, N, len, num_walls);
 
   delete[] balls;
   delete[] g_histogram;
@@ -710,7 +670,7 @@ int main(int argc, const char *argv[]) {
 // END OF MAIN
 // ------------------------------------------------------------------------------
 
-inline void print_all(const ball *p, int N, double periodic[3]) {
+inline void print_all(const ball *p, int N) {
   if (debug) {
     for (int i = 0; i < N; i++) {
       char *pos = new char[1024];
@@ -728,7 +688,7 @@ inline void print_all(const ball *p, int N, double periodic[3]) {
 }
 
 inline void print_one(const ball &a, int id, const ball *p, int N,
-                      double periodic[3]) {
+                      double len[3], int num_walls) {
   if (debug) {
     char *pos = new char[1024];
     a.pos.tostr(pos);
@@ -739,7 +699,7 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
       printf("...");
     printf("\n      pos:          %s\n", pos);
     for (int j=0; j<N; j++) {
-      if (j != id && overlap(a, p[j], periodic)) {
+      if (j != id && overlap(a, p[j], len, num_walls)) {
         p[j].pos.tostr(pos);
         printf("\t  Overlaps with %i", j);
         printf(": %s\n", pos);
@@ -750,13 +710,13 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
   fflush(stdout);
 }
 
-inline void print_bad(const ball *p, int N, double periodic[3]) {
+inline void print_bad(const ball *p, int N, double len[3], int num_walls) {
   if (debug) {
     for (int i = 0; i < N; i++) {
       bool incell = true; //in_cell(p[i], walls, real_walls); fixme
       bool overlaps = false;
       for (int j=0; j<N; j++) {
-        if (j != i && overlap(p[i], p[j], periodic)) {
+        if (j != i && overlap(p[i], p[j], len, num_walls)) {
           overlaps = true;
           break;
         }
@@ -768,7 +728,7 @@ inline void print_bad(const ball *p, int N, double periodic[3]) {
         if (!incell)
           printf("\t  Outside cell!\n");
         for (int j=0; j<N; j++) {
-          if (j != i && overlap(p[i], p[j], periodic)) {
+          if (j != i && overlap(p[i], p[j], len, num_walls)) {
             p[j].pos.tostr(pos);
             printf("\t  Overlaps with %i", j);
             printf(": %s\n", pos);
