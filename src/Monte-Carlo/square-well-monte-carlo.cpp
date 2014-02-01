@@ -615,26 +615,21 @@ int main(int argc, const char *argv[]) {
         delete[] density_fname;
         fprintf(densityout, "%s", headerinfo);
         fprintf(densityout, "%s", countinfo);
-        fprintf(densityout, "\n# e    density\n");
         fprintf(densityout, "\n# data table containing densities in slabs "
-                "of thickness de_density away from a wall");
-        fprintf(densityout, "\n# column number corresponds to energy level");
-        fprintf(densityout, "\n# row number rn corresponds to distance d "
-                "from wall given by d = (rn + 0.5) * de_density");
+                "(bins) of thickness de_density away from a wall");
+        fprintf(densityout, "\n# row number corresponds to energy level");
+        fprintf(densityout, "\n# column number rn (counting from zero) "
+                "corresponds to distance d from wall given by "
+                "d = (rn + 0.5) * de_density");
         const int bins = round(len[wall_dim]/de_density);
-        for(int i = 0; i < energy_levels; i++){
+        const double bin_volume = len[x]*len[y]*len[z]/len[wall_dim]*de_density;
+        for(int energy = 0; energy < energy_levels; energy++){
           fprintf(densityout, "\n");
-          for(int e_i = 0; e_i < bins; e_i ++) {
-            long slab_hist = 0;
-            for(int i = 0; i < energy_levels; i++) {
-              slab_hist += density_histogram[i*density_bins + e_i];
-            }
-            const double e = (e_i + 0.5)*de_density;
-            const double slab_volume =
-              len[x]*len[y]*len[z]/len[wall_dim]*de_density;
-            const double slab_density =
-              (double)slab_hist*N/totalmoves/slab_volume;
-            fprintf(densityout, "%8.5f ", slab_density);
+          for(int bin = 0; bin < bins; bin++) {
+            const double bin_density =
+              (double)density_histogram[energy*density_bins + bin]
+              *N/totalmoves/bin_volume;
+            fprintf(densityout, "%8.5f ", bin_density);
           }
         }
         fclose(densityout);
@@ -650,22 +645,25 @@ int main(int argc, const char *argv[]) {
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
         fprintf(g_out, "\n# data table containing values of g");
-        fprintf(g_out, "\n# column number corresponds to energy level");
-        fprintf(g_out, "\n# row number rn corresponds to radius r given by "
+        fprintf(g_out, "\n# first column reserved for specifying energy level");
+        fprintf(g_out, "\n# column number rn (starting from the second column, "
+                "counting from zero) corresponds to radius r given by "
                 "r = (rn + 0.5) * de_g");
         const double density = N/len[x]/len[y]/len[z];
         const double total_vol = len[x]*len[y]*len[z];
-        for(int i = 0; i < energy_levels; i++) {
-          fprintf(g_out, "\n");
-          for(int rn = 0; rn < g_bins; rn++) {
-            const double r = (rn + 0.5) * de_g;
-            const double shell_vol =
-              4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-            const double probability =
-              (double)g_histogram[i*g_bins + rn]/totalmoves;
-            const double n2 = probability/total_vol/shell_vol;
-            const double g = n2/sqr(density)*N*N;
-            fprintf(g_out, "%8.5f ", g);
+        for(int energy = 0; energy < energy_levels; energy++) {
+          if(energy_histogram[energy] != 0){
+            fprintf(g_out, "\n%i",energy);
+            for(int rn = 0; rn < g_bins; rn++) {
+              const double r = (rn + 0.5) * de_g;
+              const double shell_vol =
+                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
+              const double probability =
+                (double)g_histogram[energy*g_bins + rn]/totalmoves;
+              const double n2 = probability/total_vol/shell_vol;
+              const double g = n2/sqr(density)*N*N;
+              fprintf(g_out, " %8.5f", g);
+            }
           }
         }
       fclose(g_out);
