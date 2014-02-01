@@ -88,6 +88,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   double periodic[3] = {0, 0, 0};
   double walls[3] = {0, 0, 0};
+  int wall_dim = 0;
   bool fake_walls = false;
   bool homogenous_box = false;
   unsigned long int seed = 0;
@@ -122,19 +123,19 @@ int main(int argc, const char *argv[]) {
     {"debug", '\0', POPT_ARG_NONE, &debug, 0,
      "Debug mode", "BOOLEAN"},
     {"N", 'N', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
-    {"periodx", '\0', POPT_ARG_DOUBLE, &periodic[0], 0,
-     "Periodic cell size in x", "DOUBLE"},
-    {"periody", '\0', POPT_ARG_DOUBLE, &periodic[1], 0,
-     "Periodic cell size in y", "DOUBLE"},
-    {"periodz", '\0', POPT_ARG_DOUBLE, &periodic[2], 0,
-     "Periodic cell size in z", "DOUBLE"},
     {"periodxyz", '\0', POPT_ARG_NONE, &homogenous_box, 0,
-     "Periodic in all directions", "BOOLEAN"},
-    {"wallx", '\0', POPT_ARG_DOUBLE, &walls[0], 0,
+     "Wall only in z direction", "BOOLEAN"},
+    {"periodx", '\0', POPT_ARG_DOUBLE, &periodic[x], 0,
+     "Periodic cell size in x", "DOUBLE"},
+    {"periody", '\0', POPT_ARG_DOUBLE, &periodic[y], 0,
+     "Periodic cell size in y", "DOUBLE"},
+    {"periodz", '\0', POPT_ARG_DOUBLE, &periodic[z], 0,
+     "Periodic cell size in z", "DOUBLE"},
+    {"wallx", '\0', POPT_ARG_DOUBLE, &walls[x], 0,
      "Walled cell size in x","DOUBLE"},
-    {"wally", '\0', POPT_ARG_DOUBLE, &walls[1], 0,
+    {"wally", '\0', POPT_ARG_DOUBLE, &walls[y], 0,
      "Walled cell size in y","DOUBLE"},
-    {"wallz", '\0', POPT_ARG_DOUBLE, &walls[2], 0,
+    {"wallz", '\0', POPT_ARG_DOUBLE, &walls[z], 0,
      "Walled cell size in z","DOUBLE"},
     {"fake_walls", '\0', POPT_ARG_NONE, &fake_walls, 0,
      "Will cause collisions to occur with walls based on centers only", 0},
@@ -278,16 +279,25 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define variables
   // ----------------------------------------------------------------------------
-  const int density_bins = round((len[x] + len[y] + len[z])/de_density);
-  long *density_histogram = new long[density_bins]();
+  const int has_walls = bool(walls[x])+bool(walls[y])+bool(walls[z]);
+  if(has_walls >= 2){
+    printf("Code cannot handle walls in more than one dimension.\n");
+    return 254;
+  }
+  for(int i = 0; i < 3; i++){
+    if(walls[i]) wall_dim = i;
+  }
 
   const int energy_levels = N/2 * (uipow(R*(2+interaction_scale),3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels];
 
+  const int density_bins = round((len[x] + len[y] + len[z])/de_density);
+  long *density_histogram = new long[energy_levels*density_bins]();
+
   const double min_len = min(len[x], min(len[y], len[z]));
   const int g_bins = round(min_len/2/de_g);
-  long *g_histogram = new long[g_bins]();
+  long *g_histogram = new long[energy_levels*g_bins]();
 
   ball *balls = new ball[N];
   int interactions;
@@ -490,12 +500,13 @@ int main(int argc, const char *argv[]) {
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), "
-          "de_density: %g, de_g: %g\n dr_g: %g, seed: %li, R: %f, "
+          "de_density: %g, de_g: %g\n# dr_g: %g, seed: %li, R: %f, "
           "interaction_scale: %g, scale: %g, real_walls: %i\n"
-          "# initialize_iterations: %li, neighborR: %g, dr: %g\n",
+          "# initialize_iterations: %li, neighborR: %g, dr: %g, "
+          "energy levels: %i\n",
           periodic[0], periodic[1], periodic[2], walls[0], walls[1], walls[2],
           de_density, de_g, dr_g, seed, R, interaction_scale, scale, real_walls,
-          initialize_iterations, neighborR, dr);
+          initialize_iterations, neighborR, dr, energy_levels);
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -522,17 +533,6 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Add data to historams
     // ---------------------------------------------------------------
-
-    // Density histogram
-    for(int i = 0; i < N; i++) {
-      const int x_i = floor(balls[i].pos[x]/de_density);
-      const int y_i = floor(balls[i].pos[y]/de_density);
-      const int z_i = floor(balls[i].pos[z]/de_density);
-      density_histogram[x_i] ++;
-      density_histogram[int(round(len[x]/de_density)) + y_i] ++;
-      density_histogram[int(round((len[x] + len[y])/de_density)) + z_i] ++;
-    }
-
     // Count number of interactions, add to energy histogram
     // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_scale
     interactions = 0;
@@ -546,15 +546,26 @@ int main(int argc, const char *argv[]) {
     }
     energy_histogram[interactions]++;
 
-    // Radial distribution
-    // This is an O(N^2) calculation, so we're only going to do it every N^2 moves
-    if(iteration % N == 0) {
+    // Density histogram
+    if(has_walls){
       for(int i = 0; i < N; i++) {
-        for(int j = 0; j < N; j++) {
-          if(i != j) {
-            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos, periodic);
-            const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[r_i] ++;
+        density_histogram[interactions*density_bins
+                          + int(floor(balls[i].pos[wall_dim]/de_density))] ++;
+      }
+    }
+
+    // Radial distribution
+    // This is an O(N^2) calculation, so only do it every N^2 moves
+    if(!has_walls){
+      if(iteration % N == 0) {
+        for(int i = 0; i < N; i++) {
+          for(int j = 0; j < N; j++) {
+            if(i != j) {
+              const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos,
+                                                  periodic);
+              const int r_i = floor(r.norm()/de_g);
+              if(r_i < g_bins) g_histogram[density_bins*g_bins + r_i] ++;
+            }
           }
         }
       }
@@ -581,41 +592,8 @@ int main(int argc, const char *argv[]) {
       char *countinfo = new char[4096];
       sprintf(countinfo,
               "# iteration: %li, workingmoves: %li, totalmoves: %li, "
-              "acceptance rate: %g\n", iteration, workingmoves, totalmoves,
+              "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
               double(workingmoves)/totalmoves);
-
-      // Saving density in each of the x, y, z dimensions
-      char *density_fname = new char[1024];
-      sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
-      FILE *densityout = fopen((const char *)density_fname, "w");
-      delete[] density_fname;
-      fprintf(densityout, "%s", headerinfo);
-      fprintf(densityout, "%s", countinfo);
-      fprintf(densityout, "\n#e       xdensity   ydensity   zdensity   "
-              "histograms in x,y,z order\n");
-      const int xbins = round(len[x]/de_density);
-      const int ybins = round(len[y]/de_density);
-      const int zbins = round(len[z]/de_density);
-      int maxbin = max(max(xbins, ybins), zbins);
-      for(int e_i = 0; e_i < maxbin; e_i ++) {
-        const double e = (e_i + 0.5)*de_density;
-        const double xshell_volume = len[y]*len[z]*de_density;
-        const double yshell_volume = len[x]*len[z]*de_density;
-        const double zshell_volume = len[x]*len[y]*de_density;
-        // If we have a non-cubic cell, then this makes the density negative
-        // in the dimensions where it does not exist.
-        const long xhist = e_i>=xbins ? -totalmoves : density_histogram[e_i];
-        const long yhist = e_i>=ybins ? -totalmoves
-          : density_histogram[xbins + e_i];
-        const long zhist = e_i>=zbins ? -totalmoves
-          : density_histogram[xbins + ybins + e_i];
-        const double xdensity = (double)xhist*N/totalmoves/xshell_volume;
-        const double ydensity = (double)yhist*N/totalmoves/yshell_volume;
-        const double zdensity = (double)zhist*N/totalmoves/zshell_volume;
-        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n",
-                e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
-      }
-      fclose(densityout);
 
       // Save energy histogram
       char *e_fname = new char[1024];
@@ -624,33 +602,74 @@ int main(int argc, const char *argv[]) {
       delete[] e_fname;
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "\n#interactions  count\n");
+      fprintf(e_out, "\n#interactions   histogram\n");
       for(int i = 0; i < energy_levels; i++)
         fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
       fclose(e_out);
 
+      // Saving density data
+      if(has_walls){
+        char *density_fname = new char[1024];
+        sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
+        FILE *densityout = fopen((const char *)density_fname, "w");
+        delete[] density_fname;
+        fprintf(densityout, "%s", headerinfo);
+        fprintf(densityout, "%s", countinfo);
+        fprintf(densityout, "\n# e    density\n");
+        fprintf(densityout, "\n# data table containing densities in slabs "
+                "of thickness de_density away from a wall");
+        fprintf(densityout, "\n# column number corresponds to energy level");
+        fprintf(densityout, "\n# row number rn corresponds to distance d "
+                "from wall given by d = (rn + 0.5) * de_density");
+        const int bins = round(len[wall_dim]/de_density);
+        for(int i = 0; i < energy_levels; i++){
+          fprintf(densityout, "\n");
+          for(int e_i = 0; e_i < bins; e_i ++) {
+            long slab_hist = 0;
+            for(int i = 0; i < energy_levels; i++) {
+              slab_hist += density_histogram[i*density_bins + e_i];
+            }
+            const double e = (e_i + 0.5)*de_density;
+            const double slab_volume =
+              len[x]*len[y]*len[z]/len[wall_dim]*de_density;
+            const double slab_density =
+              (double)slab_hist*N/totalmoves/slab_volume;
+            fprintf(densityout, "%8.5f ", slab_density);
+          }
+        }
+        fclose(densityout);
+      }
+
       // Save distribution funtions
       // fixme: assumes homogeneous for density
-      char *g_fname = new char[1024];
-      sprintf(g_fname, "%s/%s-g-%i.dat", dir, filename, N);
-      FILE *g_out = fopen((const char *)g_fname, "w");
-      delete[] g_fname;
-      fprintf(g_out, "%s", headerinfo);
-      fprintf(g_out, "%s", countinfo);
-      fprintf(g_out, "\n#e       \n");
-      const double density = N/len[x]/len[y]/len[z];
-      const double vol0 = len[x]*len[y]*len[z];
-      for(int e_i = 0; e_i < g_bins; e_i++) {
-        const double e = (e_i + 0.5)*de_g;
-        fprintf(g_out, "%6.3f  ", e);
-        const double vol1 = 4.0/3.0*M_PI*(uipow(e+de_g/2, 3)
-                                          - uipow(e-de_g/2, 3));
-        const double probability = (double)g_histogram[e_i]/totalmoves;
-        const double n2 = probability/vol0/vol1;
-        const double g = n2/sqr(density)*N*N;
-        fprintf(g_out, "%8.5f \n", g);
-      }
+      if(!has_walls){
+        char *g_fname = new char[1024];
+        sprintf(g_fname, "%s/%s-g-%i.dat", dir, filename, N);
+        FILE *g_out = fopen((const char *)g_fname, "w");
+        delete[] g_fname;
+        fprintf(g_out, "%s", headerinfo);
+        fprintf(g_out, "%s", countinfo);
+        fprintf(g_out, "\n# data table containing values of g");
+        fprintf(g_out, "\n# column number corresponds to energy level");
+        fprintf(g_out, "\n# row number rn corresponds to radius r given by "
+                "r = (rn + 0.5) * de_g");
+        const double density = N/len[x]/len[y]/len[z];
+        const double total_vol = len[x]*len[y]*len[z];
+        for(int i = 0; i < energy_levels; i++) {
+          fprintf(g_out, "\n");
+          for(int rn = 0; rn < g_bins; rn++) {
+            const double r = (rn + 0.5) * de_g;
+            const double shell_vol =
+              4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
+            const double probability =
+              (double)g_histogram[i*g_bins + rn]/totalmoves;
+            const double n2 = probability/total_vol/shell_vol;
+            const double g = n2/sqr(density)*N*N;
+            fprintf(g_out, "%8.5f ", g);
+          }
+        }
       fclose(g_out);
+      }
 
       delete[] countinfo;
     }
@@ -693,8 +712,8 @@ int main(int argc, const char *argv[]) {
   print_bad(balls, N, periodic);
 
   delete[] balls;
-  delete[] density_histogram;
   delete[] g_histogram;
+  delete[] density_histogram;
 
   delete[] headerinfo;
   return 0;
