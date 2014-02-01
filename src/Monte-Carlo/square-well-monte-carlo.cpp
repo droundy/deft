@@ -108,7 +108,6 @@ int main(int argc, const char *argv[]) {
   double dr = 0.01;
   double de_density = 0.01;
   double de_g = 0.01;
-  double dr_g = 0;
   int totime = 0;
   bool talk = false;
   // scale is not a quite "constant" -- it is adjusted during the initialization
@@ -168,9 +167,6 @@ int main(int argc, const char *argv[]) {
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
-    {"dr_g", '\0', POPT_ARG_DOUBLE, &dr_g, 0, "Radius of cylinder used in "
-     "distribtution functions. "
-     "Defaults to the radius of a circle inscribed on a side", "DOUBLE"},
     {"scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &scale, 0,
      "Standard deviation for translations of balls", "DOUBLE"},
     {"seed", 's', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
@@ -246,10 +242,6 @@ int main(int argc, const char *argv[]) {
     return 7;
   }
 
-  if (dr_g == 0) {
-    //no value was selected
-    dr_g = R/2.0;
-  }
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
     if (walls[0] + walls[1] + walls[2] > 0){ // has walls in some dimension
@@ -500,12 +492,12 @@ int main(int argc, const char *argv[]) {
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# period: (%5.2f, %5.2f, %5.2f), walls: (%5.2f, %5.2f, %5.2f), "
-          "de_density: %g, de_g: %g\n# dr_g: %g, seed: %li, R: %f, "
+          "de_density: %g, de_g: %g\n# seed: %li, R: %f, "
           "interaction_scale: %g, scale: %g, real_walls: %i\n"
           "# initialize_iterations: %li, neighborR: %g, dr: %g, "
           "energy levels: %i\n",
           periodic[0], periodic[1], periodic[2], walls[0], walls[1], walls[2],
-          de_density, de_g, dr_g, seed, R, interaction_scale, scale, real_walls,
+          de_density, de_g, seed, R, interaction_scale, scale, real_walls,
           initialize_iterations, neighborR, dr, energy_levels);
 
   // ----------------------------------------------------------------------------
@@ -555,17 +547,14 @@ int main(int argc, const char *argv[]) {
     }
 
     // Radial distribution
-    // This is an O(N^2) calculation, so only do it every N^2 moves
     if(!has_walls){
-      if(iteration % N == 0) {
-        for(int i = 0; i < N; i++) {
-          for(int j = 0; j < N; j++) {
-            if(i != j) {
-              const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos,
-                                                  periodic);
-              const int r_i = floor(r.norm()/de_g);
-              if(r_i < g_bins) g_histogram[density_bins*g_bins + r_i] ++;
-            }
+      for(int i = 0; i < N; i++) {
+        for(int j = 0; j < N; j++) {
+          if(i != j) {
+            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos,
+                                                periodic);
+            const int r_i = floor(r.norm()/de_g);
+            if(r_i < g_bins) g_histogram[interactions*g_bins + r_i]++;
           }
         }
       }
@@ -602,9 +591,10 @@ int main(int argc, const char *argv[]) {
       delete[] e_fname;
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "\n#interactions   histogram\n");
-      for(int i = 0; i < energy_levels; i++)
-        fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
+      fprintf(e_out, "\n#energy   counts\n");
+      for(int energy = 0; energy < energy_levels; energy++)
+        if(energy_histogram[energy] != 0)
+          fprintf(e_out, "%i  %li\n",energy,energy_histogram[energy]);
       fclose(e_out);
 
       // Saving density data
@@ -618,9 +608,9 @@ int main(int argc, const char *argv[]) {
         fprintf(densityout, "\n# data table containing densities in slabs "
                 "(bins) of thickness de_density away from a wall");
         fprintf(densityout, "\n# row number corresponds to energy level");
-        fprintf(densityout, "\n# column number rn (counting from zero) "
+        fprintf(densityout, "\n# column number dn (counting from zero) "
                 "corresponds to distance d from wall given by "
-                "d = (rn + 0.5) * de_density");
+                "d = (dn + 0.5) * de_density");
         const int bins = round(len[wall_dim]/de_density);
         const double bin_volume = len[x]*len[y]*len[z]/len[wall_dim]*de_density;
         for(int energy = 0; energy < energy_levels; energy++){
@@ -628,7 +618,7 @@ int main(int argc, const char *argv[]) {
           for(int bin = 0; bin < bins; bin++) {
             const double bin_density =
               (double)density_histogram[energy*density_bins + bin]
-              *N/totalmoves/bin_volume;
+              *N/energy_histogram[energy]/bin_volume;
             fprintf(densityout, "%8.5f ", bin_density);
           }
         }
@@ -654,12 +644,12 @@ int main(int argc, const char *argv[]) {
         for(int energy = 0; energy < energy_levels; energy++) {
           if(energy_histogram[energy] != 0){
             fprintf(g_out, "\n%i",energy);
-            for(int rn = 0; rn < g_bins; rn++) {
-              const double r = (rn + 0.5) * de_g;
+            for(int bin = 0; bin < g_bins; bin++) {
+              const double r = (bin + 0.5) * de_g;
               const double shell_vol =
                 4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-              const double probability =
-                (double)g_histogram[energy*g_bins + rn]/totalmoves;
+              const double probability = (double)g_histogram[energy*g_bins + bin]
+                / energy_histogram[energy];
               const double n2 = probability/total_vol/shell_vol;
               const double g = n2/sqr(density)*N*N;
               fprintf(g_out, " %8.5f", g);
