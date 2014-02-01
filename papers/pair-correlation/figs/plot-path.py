@@ -109,36 +109,6 @@ twod_plot.add_artist(sphere)
 
 #fig.subplots_adjust(hspace=0.001)
 
-for name in plots:
-    g2_path = read_walls_path(ff, name)
-    if able_to_read_file == False:
-        plot(arange(0,10,1), [0]*10, 'k')
-        suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
-        savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
-        savefig(savedfilename)
-        exit(0)
-    x = g2_path[:,3]
-    z = g2_path[:,2]
-    g = g2_path[:,1]
-    zcontact = z.min()
-    xcontact = 2.0051
-
-    if name == 'fischer':
-      # Fischer et al only predict pair distribution function in
-      # contact.  We do this using "&" below which means "and".
-      incontact = (x<xcontact) & (z<2)
-      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
-    else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
-      zplot.plot(z[x<xcontact],g[x<xcontact], styles.plot[name], label=styles.title[name])
-
-zplot.axvline(x=2, color='k')
-zplot.axvline(x=0, color='k')
-
-
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
-legendloc = 'lower left' if ff < 0.2 else 'upper left'
-zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
@@ -191,14 +161,66 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax,rmax, rmax/2))
-contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
-CS = pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
-pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
+CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
+twod_plot.pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
-colorbar(CS, extend='neither', ticks=myticks)
+fig.colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x/R$');
 twod_plot.set_xlabel('$z/R$');
+
+
+
+for name in plots:
+    g2_path = read_walls_path(ff, name)
+    if able_to_read_file == False:
+        plot(arange(0,10,1), [0]*10, 'k')
+        suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+        savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
+        savefig(savedfilename)
+        exit(0)
+    x = g2_path[:,3]
+    z = g2_path[:,2]
+    g = g2_path[:,1]
+    zcontact = z.min()
+    xcontact = 2.0051
+    # insert zoomed subplot for eta = 0.1 only
+    if ff == 0.1:
+      incontact = (x<xcontact) & (z<2)
+      suba = axes([.65, .28, .3, .3])
+      suba.set_xlabel('$z/R$')
+      suba.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+      suba.set_yticks([1, 1.1, 1.2, 1.3, 1.4])
+      suba.set_ylim(1, suba.get_ylim()[1])
+
+
+    if name == 'fischer':
+      # Fischer et al only predict pair distribution function in
+      # contact.  We do this using "&" below which means "and".
+      incontact = (x<xcontact) & (z<2)
+      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+    else:
+      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
+      zplot.plot(z[x<xcontact],g[x<xcontact], styles.plot[name], label=styles.title[name])
+
+zplot.axvline(x=2, color='k')
+zplot.axvline(x=0, color='k')
+
+
+zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
+legendloc = 'lower left' if ff < 0.2 else 'upper left'
+zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
+
+
+
+
+
+
+
+
+
+
 
 text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -212,8 +234,8 @@ for theta in arange(0, pi/2 + dtheta/2, dtheta):
 xs.append(2*ymax)
 
 ys.append(0)
-plot(xs, ys, 'w-', linewidth=2)
-plot(xs, ys, 'k--', linewidth=2)
+twod_plot.plot(xs, ys, 'w-', linewidth=2)
+twod_plot.plot(xs, ys, 'k--', linewidth=2)
 
 
 Ax = 3.9
@@ -236,11 +258,11 @@ def g2pathfunction_z(z):
     return interp(z, g2nice[:,2], g2nice[:,1])
 
 # Annotations on 2d plot
-annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 # Annotations on 1d plot
 xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
@@ -261,6 +283,7 @@ zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
 
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
+
 
 twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
 #fig.tight_layout(rect=[0, .03, 1, 1])
