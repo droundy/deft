@@ -39,18 +39,9 @@
 // Global Constants
 // ------------------------------------------------------------------------------
 
-// prints out a lot of extra information and performs extra computation
-// should be false except when something is wrong
-// NOTE: This can slow things down VERY much, depending on how much debug
-// code is active
-bool debug;
-
 const int x = 0;
 const int y = 1;
 const int z = 2;
-
-// for debugging purposes
-bool testcase = false;
 
 // ------------------------------------------------------------------------------
 // Functions
@@ -86,6 +77,10 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define "Constants" -- set from arguments then unchanged
   // ----------------------------------------------------------------------------
+
+  // NOTE: debug can slow things down VERY much
+  bool debug = 0;
+
   bool cubic_cell = false;
   double len[3] = {1, 1, 1};
   int num_walls = 0;
@@ -238,7 +233,8 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  const int energy_levels = N/2 * (uipow(R*(2+interaction_scale),3)
+  const double interaction_distance = R*(1+interaction_scale);
+  const int energy_levels = N/2 * (uipow(interaction_distance,3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
   int energy;
@@ -251,8 +247,6 @@ int main(int argc, const char *argv[]) {
   long *g_histogram = new long[energy_levels*g_bins]();
 
   ball *balls = new ball[N];
-  double interaction_scale_squared = uipow(interaction_scale,2);
-  long dZ = 0;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -345,9 +339,6 @@ int main(int argc, const char *argv[]) {
   printf("Neighbor tables initialized.\n");
   printf("The most neighbors is %i, whereas the max allowed is %i.\n",
          most_neighbors, max_neighbors);
-  //fixme: uncomment
-  //print_all(balls, N, len, num_walls);
-  //print_bad(balls, N, len, num_walls);
 
   // ----------------------------------------------------------------------------
   // Make sure no balls are overlapping
@@ -484,15 +475,16 @@ int main(int argc, const char *argv[]) {
     // Add data to historams
     // ---------------------------------------------------------------
     // Count number of interactions, add to energy histogram
-    // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_scale
+    // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_distance
+
     energy = 0;
     for(int i = 0; i < N; i++) {
       for(int j = 0; j < balls[i].num_neighbors; j++) {
         if(i < balls[i].neighbors[j]
-           && sq_periodic_diff(balls[i].pos,
+           && periodic_diff(balls[i].pos,
                                balls[balls[i].neighbors[j]].pos,
-                               len, num_walls).normsquared()
-           >= interaction_scale_squared)
+                               len, num_walls).norm()
+           <= interaction_distance)
           energy++;
       }
     }
@@ -511,7 +503,7 @@ int main(int argc, const char *argv[]) {
       for(int i = 0; i < N; i++) {
         for(int j = 0; j < N; j++) {
           if(i != j) {
-            const vector3d r = sq_periodic_diff(balls[i].pos, balls[j].pos, len,
+            const vector3d r = periodic_diff(balls[i].pos, balls[j].pos, len,
                                                 num_walls);
             const int r_i = floor(r.norm()/de_g);
             if(r_i < g_bins) g_histogram[energy*g_bins + r_i]++;
@@ -671,39 +663,35 @@ int main(int argc, const char *argv[]) {
 // ------------------------------------------------------------------------------
 
 inline void print_all(const ball *p, int N) {
-  if (debug) {
-    for (int i = 0; i < N; i++) {
-      char *pos = new char[1024];
-      p[i].pos.tostr(pos);
-      printf("%4i: R: %4.2f, %i neighbors: ", i, p[i].R, p[i].num_neighbors);
-      for(int j = 0; j < min(10, p[i].num_neighbors); j++)
-        printf("%i ", p[i].neighbors[j]);
-      if (p[i].num_neighbors > 10)
-        printf("...");
-      printf("\n      pos:          %s\n", pos);
-    }
-    printf("\n");
-    fflush(stdout);
+  for (int i = 0; i < N; i++) {
+    char *pos = new char[1024];
+    p[i].pos.tostr(pos);
+    printf("%4i: R: %4.2f, %i neighbors: ", i, p[i].R, p[i].num_neighbors);
+    for(int j = 0; j < min(10, p[i].num_neighbors); j++)
+      printf("%i ", p[i].neighbors[j]);
+    if (p[i].num_neighbors > 10)
+      printf("...");
+    printf("\n      pos:          %s\n", pos);
   }
+  printf("\n");
+  fflush(stdout);
 }
 
 inline void print_one(const ball &a, int id, const ball *p, int N,
                       double len[3], int num_walls) {
-  if (debug) {
-    char *pos = new char[1024];
-    a.pos.tostr(pos);
-    printf("%4i: R: %4.2f, %i neighbors: ", id, a.R, a.num_neighbors);
-    for(int j=0; j<min(10, a.num_neighbors); j++)
-      printf("%i ", a.neighbors[j]);
-    if (a.num_neighbors > 10)
-      printf("...");
-    printf("\n      pos:          %s\n", pos);
-    for (int j=0; j<N; j++) {
-      if (j != id && overlap(a, p[j], len, num_walls)) {
-        p[j].pos.tostr(pos);
-        printf("\t  Overlaps with %i", j);
-        printf(": %s\n", pos);
-      }
+  char *pos = new char[1024];
+  a.pos.tostr(pos);
+  printf("%4i: R: %4.2f, %i neighbors: ", id, a.R, a.num_neighbors);
+  for(int j=0; j<min(10, a.num_neighbors); j++)
+    printf("%i ", a.neighbors[j]);
+  if (a.num_neighbors > 10)
+    printf("...");
+  printf("\n      pos:          %s\n", pos);
+  for (int j=0; j<N; j++) {
+    if (j != id && overlap(a, p[j], len, num_walls)) {
+      p[j].pos.tostr(pos);
+      printf("\t  Overlaps with %i", j);
+      printf(": %s\n", pos);
     }
   }
   printf("\n");
@@ -711,53 +699,48 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
 }
 
 inline void print_bad(const ball *p, int N, double len[3], int num_walls) {
-  if (debug) {
-    for (int i = 0; i < N; i++) {
-      bool incell = true; //in_cell(p[i], walls, real_walls); fixme
-      bool overlaps = false;
+  for (int i = 0; i < N; i++) {
+    bool incell = true; //in_cell(p[i], walls, real_walls); fixme
+    bool overlaps = false;
+    for (int j=0; j<N; j++) {
+      if (j != i && overlap(p[i], p[j], len, num_walls)) {
+        overlaps = true;
+        break;
+      }
+    }
+    if (!incell || overlaps) {
+      char *pos = new char[1024];
+      p[i].pos.tostr(pos);
+      printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
+      if (!incell)
+        printf("\t  Outside cell!\n");
       for (int j=0; j<N; j++) {
         if (j != i && overlap(p[i], p[j], len, num_walls)) {
-          overlaps = true;
-          break;
+          p[j].pos.tostr(pos);
+          printf("\t  Overlaps with %i", j);
+          printf(": %s\n", pos);
         }
       }
-      if (!incell || overlaps) {
-        char *pos = new char[1024];
-        p[i].pos.tostr(pos);
-        printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
-        if (!incell)
-          printf("\t  Outside cell!\n");
-        for (int j=0; j<N; j++) {
-          if (j != i && overlap(p[i], p[j], len, num_walls)) {
-            p[j].pos.tostr(pos);
-            printf("\t  Overlaps with %i", j);
-            printf(": %s\n", pos);
-          }
-        }
-        delete[] pos;
-      }
+      delete[] pos;
     }
   }
   fflush(stdout);
 }
 
 inline void check_neighbor_symmetry(const ball *p, int N) {
-  if (debug) {
-    for(int i = 0; i < N; i++) {
-      for(int j=0; j<p[i].num_neighbors; j++) {
-        const int k = p[i].neighbors[j];
-        bool is_neighbor = false;
-        for (int l=0; l<p[k].num_neighbors; l++) {
-          if (p[k].neighbors[l] == i) {
-            is_neighbor = true;
-            break;
-          }
+  for(int i = 0; i < N; i++) {
+    for(int j=0; j<p[i].num_neighbors; j++) {
+      const int k = p[i].neighbors[j];
+      bool is_neighbor = false;
+      for (int l=0; l<p[k].num_neighbors; l++) {
+        if (p[k].neighbors[l] == i) {
+          is_neighbor = true;
+          break;
         }
-        if(!is_neighbor) {
-          printf("NEIGHBOR TABLE ERROR: %i has %i as a neighbor, but %i does "
-                 "not reciprocate!!!\n", i, k, k);
-          testcase = true;
-        }
+      }
+      if(!is_neighbor) {
+        printf("NEIGHBOR TABLE ERROR: %i has %i as a neighbor, but %i does "
+               "not reciprocate!!!\n", i, k, k);
       }
     }
   }
@@ -772,7 +755,7 @@ static void took(const char *name) {
     printf("%s took %.0f minutes and %g seconds.\n", name, seconds/60,
            fmod(seconds,60));
   } else {
-    printf("%s took %g seconds..\n", name, seconds);
+    printf("%s took %g seconds...\n", name, seconds);
   }
   fflush(stdout);
   last_time = t;

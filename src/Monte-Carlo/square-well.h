@@ -1,8 +1,6 @@
 #include "vector3d.h"
 #pragma once
 
-const double iRatio = 1.2;
-
 struct ball {
   vector3d pos;
   double R;
@@ -17,10 +15,10 @@ struct ball {
 };
 
 // Modulates v to within the periodic boundaries of the cell
-vector3d sq_fix_periodic(vector3d v, const double len[3]);
+vector3d sw_fix_periodic(vector3d v, const double len[3]);
 
 // Return the vector pointing from a to b, accounting for periodic boundaries
-vector3d sq_periodic_diff(const vector3d &a, const vector3d  &b,
+vector3d periodic_diff(const vector3d &a, const vector3d  &b,
                           const double len[3], int num_walls);
 
 // Create and initialize the neighbor tables for all balls (p).

@@ -27,7 +27,7 @@ ball ball::operator=(const ball &p) {
   return *this;
 }
 
-vector3d sq_fix_periodic(vector3d v, const double len[3]) {
+vector3d sw_fix_periodic(vector3d v, const double len[3]) {
   for (int i = 0; i < 3; i++) {
     while (v[i] > len[i])
       v[i] -= len[i];
@@ -37,7 +37,7 @@ vector3d sq_fix_periodic(vector3d v, const double len[3]) {
   return v;
 }
 
-vector3d sq_periodic_diff(const vector3d &a, const vector3d  &b,
+vector3d periodic_diff(const vector3d &a, const vector3d  &b,
                           const double len[3], const int num_walls) {
   vector3d v = b - a;
   for (int i = 0; i < 3; i++) {
@@ -63,7 +63,7 @@ int initialize_neighbor_tables(ball *p, int N, double neighborR,
     p[i].num_neighbors = 0;
     for (int j = 0; j < N; j++) {
       const bool is_neighbor = (i != j) &&
-        (sq_periodic_diff(p[i].pos, p[j].pos, len, num_walls).normsquared() <
+        (periodic_diff(p[i].pos, p[j].pos, len, num_walls).normsquared() <
          sqr(p[i].R + p[j].R + neighborR));
       if (is_neighbor) {
         const int index = p[i].num_neighbors;
@@ -82,7 +82,7 @@ void update_neighbors(ball &a, int n, const ball *bs, int N,
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++) {
     if ((i != n) &&
-        (sq_periodic_diff(a.pos, bs[i].neighbor_center, len,
+        (periodic_diff(a.pos, bs[i].neighbor_center, len,
                           num_walls).normsquared()
          < sqr(a.R + bs[i].R + neighborR))) {
       a.neighbors[a.num_neighbors] = i;
@@ -141,7 +141,7 @@ void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n) {
 
 bool overlap(const ball &a, const ball &b, const double len[3], int num_walls,
              double dr) {
-  const vector3d ab = sq_periodic_diff(a.pos, b.pos, len, num_walls);
+  const vector3d ab = periodic_diff(a.pos, b.pos, len, num_walls);
   return (ab.normsquared() < sqr(a.R + b.R + 2*dr));
 }
 
@@ -165,7 +165,7 @@ bool in_cell(const ball &p, const double len[3], const int num_walls,
 
 ball random_move(const ball &p, double size, const double len[3]) {
   ball temp = p;
-  temp.pos = sq_fix_periodic(temp.pos + vector3d::ran(size), len);
+  temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(size), len);
   return temp;
 }
 
@@ -178,7 +178,7 @@ int move_one_ball(int id, ball *p, int N, double len[3],
     bool overlaps = overlaps_with_any(temp, p, len, num_walls, dr);
     if (!overlaps) {
       const bool get_new_neighbors =
-        (sq_periodic_diff(temp.pos, temp.neighbor_center, len, num_walls)
+        (periodic_diff(temp.pos, temp.neighbor_center, len, num_walls)
          .normsquared() > sqr(neighborR/2.0));
       if (get_new_neighbors) {
         // If we've moved too far, then the overlap test may have given a false
