@@ -26,10 +26,10 @@ Functional HardFluid(double radius, double mu);
 
 int main(int, char **) {
   FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous.dat", "w");
-  const double temps[] = { 0.0, 0.01, 0.02, 0.03 };
+  const double temps[] = { 0.0, 0.01, 0.02, 0.03, .1, .2, .3, .4 };
   fprintf(out, "# eta");
   for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-    fprintf(out, "\t%g", temps[i]);
+    fprintf(out, "\tp(kT=%g)/nkT", temps[i]);
   }
   fprintf(out, "\n");
   for (double eta = 0.001; eta <= 0.5; eta *= 1.001) {
@@ -38,8 +38,10 @@ int main(int, char **) {
       const double temp = temps[i];
       Functional f = HardFluid(1,0);
       if (temp > 0) f = SoftFluid(1, 1, 0);
-      
-      fprintf(out, "\t%g", pressure(f, temp, eta/(4*M_PI/3)));
+      double usekT = temp;
+      if (temp == 0) usekT = 1.0;
+      const double n = eta/(4*M_PI/3);
+      fprintf(out, "\t%g", pressure(OfEffectivePotential(f), usekT, n)/(n*usekT));
     }
     fprintf(out, "\n");
   }

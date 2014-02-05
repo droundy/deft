@@ -67,6 +67,15 @@ while Temp <= .011:
   plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%g' %Temp)
   Temp = Temp*10 # sqrt(10)
 
+erfdata = loadtxt('figs/homogeneous.dat')
+erftemps = arange(0.01, 0.03, 0.01)
+erfeta = erfdata[:,0]
+erf_density = erfeta/(4*pi/3)
+for j in arange(1,len(erfdata[0,:])):
+  erfpressure = erfdata[:,j]
+  plot(erfeta,erfpressure, '--', label='kT=%g' % (0.01*(j-1)))
+  
+
 for ff in arange(0.1,0.81, 0.1):
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
@@ -81,7 +90,7 @@ for ff in arange(0.1,0.81, 0.1):
       print 'could not find', fname
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
-
+erfdata = loadtxt('figs/homogeneous.dat')
 ylim(1,15.0)
 xlim(xmax=0.51)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')

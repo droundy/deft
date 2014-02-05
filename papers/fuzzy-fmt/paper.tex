@@ -810,14 +810,14 @@ integral, but without the stray $r$, so we get
 \begin{align}
   \tilde{w}_1(k)&= \frac{4\sqrt{\pi}}{4\pi k} \int_{-\infty}^\infty e^{-u^2} \sin\left(k\left(au +
   \frac{\sigma}{2}\right)\right) ~\textrm{du} \\
-  &= \frac{\sqrt{\pi}}{k}e^{-\left(\frac{ak}{2} \right)^2} \sin\left(\frac{k\sigma}{2}\right)
+  &= \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2} \sin\left(\frac{k\sigma}{2}\right)
 \end{align}
 
 $w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes $w_0$ is quite a bit
 trickier.  I won't go through all the math here, but essentially we
 have
 \begin{align}
-  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{4\sqrt{\pi}ak}\int_0^\infty
+  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{4\pi ak}\int_0^\infty
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin(kr)}{r}\textrm{dr}
 \end{align}
 We'll let $r = \frac{\sigma}{2}(1 + u) $ so that
@@ -829,12 +829,12 @@ We also extend the lower limit on the integral so that
 \begin{align}
   \tilde{w}_0(k) &\approx \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
   e^{-\frac{(\sigma u/2)^2}{a^2}} \sin{\left( \frac{k\sigma}{2}(1+u)
-    \right)} \notag\\
+    \right)} \notag \\
   &\times \frac{2}{\sigma} \left(1 - u + u^2 - u^3 + u^4 -+\cdots
   \right) \frac{\sigma}{2}\textrm{du} \\
   &= \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
-  e^{-\left(\frac{\sigma}{2a} \right)^2 u^2} \sin{\left( \frac{k\sigma}{2}(1+u)
-    \right)} \notag\\
+  e^{-\left(\frac{\sigma u}{2a} \right)^2} \sin{\left( \frac{k\sigma}{2}(1+u)
+    \right)} \notag \\
   &\times \left(1 - u + u^2 - u^3 + u^4 -+\cdots \right) \textrm{du}
 \end{align}
 now let $x = \sigma u /2a$, then
@@ -844,7 +844,7 @@ now let $x = \sigma u /2a$, then
   &\times \left(1 - \frac{2a}{\sigma}x +
   \left(\frac{2a}{\sigma}\right)^2 x^2 -+\cdots \right) \frac{2a}{\sigma}\textrm{dx} \\
   &= \frac{2}{k\sigma \sqrt{\pi}}\sum_{n=0}^{\infty}
-  \left(\frac{-2a}{\sigma}\right)^n \int_{-\infty}^\infty e^{-x^2} 
+  \left(\frac{-2a}{\sigma}\right)^n \int_{-\infty}^\infty e^{-x^2}
   \sin\left(k(ax+\frac{\sigma}{2})\right) x^n \textrm{dx}
 \end{align}
 If we take only the first two terms of the series then
@@ -924,7 +924,7 @@ after the transform, we can dot both sides with $\mathbf{\hat{k}}$.
 \end{align}
 
 so
-\begin{align} 
+\begin{align}
   \tilde{\mathbf{w}}_{2V}(\kk) = \frac{2 \pi}{ik}e^{-a^2k^2/4}\left[ \left(\frac{a^4k^2 +
       \sigma^2}{2} \right) \cos\left(\frac{k\sigma}{2}\right) +
     \left(a^2k + \frac{1}{k} \right)\sigma \sin\left(\frac{k\sigma}{2}\right)
