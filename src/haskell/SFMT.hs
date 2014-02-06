@@ -53,7 +53,7 @@ w3 x = ifft ( w3k * fft x)
 w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
   where w1k = var "w1k" "\\tilde{w_1}(k)" $
-              sqrt pi/k*exp(-(a*k/2)**2)*sin(k*sigma/2)
+              1/k*exp(-(a*k/2)**2)*sin(k*sigma/2)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
