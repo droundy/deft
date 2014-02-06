@@ -26,9 +26,9 @@ variables = ['r', 'h_sigma', 'g_sigma']
 positive_variables = ['kappa_0', 'kappa_1', 'kappa_2']
 # expressions is a list of tuples, where each tuple is the name of a variable followed by the
 # expression it is equal two, in terms of lambda expressions of the dict v.
+print 'i got here'
 expressions = [
-  ('g_HS', lambda: 1 + v['h_sigma']*exp(-v['kappa_0']*v['xi'])
-   + v['a_1']*v['xi']*exp(-v['kappa_1']*v['xi']) + v['a_3']*v['xi']**2*exp(-v['kappa_2']*v['xi'])),
+  ('g_HS', lambda: 1 + v['h_sigma']*exp(-v['kappa_0']*v['xi']) + v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])*v['xi']*exp(-v['kappa_1']*v['xi']) + v['a_3']*v['xi']**2*exp(-v['kappa_2']*v['xi'])),
   ('a_3', lambda: ((v['rhs']-1)/v['n'] - v['I_0'] - v['C']*v['a_1'])/v['I_2']), # sets integral
   ('I_2', lambda: sympy.simplify(8*pi*(12*(v['sigma']/2)**2 + v['sigma']*v['kappa_2']*(6*v['sigma']/2 + v['sigma']*v['kappa_2']))/v['kappa_2']**5*v['sigma']/2)),
   ('C', lambda: 4*pi*v['h_sigma']*(2 + v['sigma']*v['kappa_0']*(2 +v['sigma']*v['kappa_0']))/v['kappa_0']**3
@@ -38,51 +38,58 @@ expressions = [
   ('rhs', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
   ('n', lambda: 3/(4*pi)*v['eta']/v['R']**3), # n is the number density
   ('a_1', lambda: v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])), # sets slope at g_sigma
+  # ('B', lambda: k2**5*((-1 + v['chi'])/(24*v['eta']*(3+k2)*(3+k2)) -
+  #                      (v['h_sigma']*(k1**4+2*k0*k1**4+2*k0**2*k1**4-v['g_sigma']*k0**3*(3+2*k1*(2+k1)) + k0**4*(3+2*k1*(2+k1))))/(4*k0**3*k1**4*(3+k2)*(3+k2)))),
+  # ('chi', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
   ('eta', lambda: eta_expr),
+  ('g_sigma', lambda: v['h_sigma'] + 1),
   ('xi', lambda: (v['r'] - v['sigma'])/v['R']),
   ('R', lambda: v['sigma']/2),
   ('sigma', lambda: sympy.S(sigma))
 ]
+print 'i got here'
 l = []
 expr = []
 for x in expressions:
   l.append(x[0])
   expr.append(x[1])
+print 'i got here'
 
 v1 = dict((elem, sympy.symbols(elem)) for elem in l+variables)
 v2 = dict((elem, sympy.symbols(elem, positive=True)) for elem in positive_variables)
+print 'i got here'
 v = dict(v1, **v2)
+k2 = sympy.symbols('kappa_2')
+k1 = sympy.symbols('kappa_1')
+k0 = sympy.symbols('kappa_0')
 
 h_sigma_expr = (1 - v['eta']/2)/(1 - v['eta'])**3 - 1
 h_sigma_equation = sympy.Eq(v['h_sigma'], h_sigma_expr)
 
 # this will return 3 expressions, 2 of which are complex
-eta_expressions = sympy.solve(h_sigma_equation, v['eta'], minimal=True)
+# eta_expressions = sympy.solve(h_sigma_equation, v['eta'], minimal=True)
 
-# get the real eta:
-eta_expr = None
-for i in xrange(len(eta_expressions)):
-  if sympy.ask(sympy.Q.real(eta_expressions[i].subs('h_sigma', 1))): # the 1 is arbitrary
-    eta_expr = eta_expressions[i]
-    break
+# # get the real eta:
+# eta_expr = None
+# for i in xrange(len(eta_expressions)):
+#   if sympy.ask(sympy.Q.real(eta_expressions[i].subs('h_sigma', 1))): # the 1 is arbitrary
+#     eta_expr = eta_expressions[i]
+#     break
 
-if eta_expr == None:
-  print 'Error: no real solutions for eta(h_sigma) found.'
-  exit(1)
+# if eta_expr == None:
+#   print 'Error: no real solutions for eta(h_sigma) found.'
+#   exit(1)
+
+k = (6*(9*v['g_sigma']**2 - sympy.sqrt(3*(27*v['g_sigma']**4 - 2*v['g_sigma']**3))))**(sympy.S(1)/3)
+eta_expr = 1 - 1/k - k/(6*v['g_sigma'])
+
+##################3
 
 
 
-# BLAHHHHHHHHHHHHHHHHHHHHHHH
-### Calculate integral 
-print h_sigma_expr
-ghs_s = expr[0]()#.subs('h_sigma', h_sigma_expr)
-integrand = 4*pi*v['r']**2*(ghs_s-1)
-print integrand
-latex_code += '\\begin{dmath}\n' + 'integrand = ' + sympy.latex(integrand) + '\n\\end{dmath}\n'
-int_ghs = 1 + v['n']*sympy.integrate(integrand, (v['r'], sigma, sympy.oo)).subs('h_sigma', h_sigma_expr)
-
-############################################
-
+f = open('figs/ghs-analytics.tex', 'w')
+f.write(latex_code)
+f.close()
 
 
 for i in xrange(len(expr)):
@@ -100,13 +107,8 @@ for i in reversed(xrange(len(expr))):
   else:
     temp = v[l[i]]
     v[l[i]] = expr[i]()
-    int_ghs = int_ghs.subs(l[i], v[l[i]])
     # v[l[i]] = sympy.simplify(expr[i]() this makes it take way too long
     latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(temp, v[l[i]])) + '\n\\end{dmath}\n'
-
-int_ghs = int_ghs.subs('h_sigma', h_sigma_expr)
-print int_ghs, '\n\n'
-#print int_ghs.simplify(), '\n\n'
 
 ghs_s = expr[0]()
 
@@ -129,29 +131,10 @@ latex_code += '\\begin{dmath}\n' + 'g\'(\sigma) = ' + sympy.latex(gprimesigma) +
 
 ###################333333333333333
 
-#latex_code += '\\begin{dmath}\n' + 'integral = ' + sympy.latex(int_ghs) + '\n\\end{dmath}\n'
-cor = 'correct' if int_ghs == v['rhs'] else 'INCORRECT'
-print '\tIntegral over all space is ' + cor + ': 1 + n*int h(r)d^3r =', int_ghs
-
-
-##################3
-
-
-
-
-
-
-
-
-# integrand = v['r']**2*(ghs_s-1)
-# latex_code += '\\begin{dmath}\n' + 'integrand = ' + sympy.latex(integrand) + '\n\\end{dmath}\n'
-# int_ghs = 1 + v['n']*4*pi*sympy.integrate(integrand, v['r'])
-# cor = 'correct' if int_ghs == v['rhs'] else 'incorrect'
-# print '\tIntegral over all space is ' + cor + ': 1 + n*int h\(r)d^3r =', int_ghs
-
 # now let's substitute in eta:
-v['eta'] = expr[eta_i]()
-ghs_s = ghs_s.subs('eta', v['eta'])
+v['eta'] = eta_expr
+ghs_s = ghs_s.subs('eta', v['eta']).subs('g_sigma', v['g_sigma'])
+print '**********************\nghs_s is', ghs_s
 
 #################################################################################################
 
@@ -276,9 +259,9 @@ const double kappa_0 = %g;
 const double kappa_1 = %g;
 const double kappa_2 = %g;
 
-inline double gsigma_to_eta(const double gs) {
-  if (gs <= 1) return 0;
-  const double h_sigma = gs - 1;
+inline double gsigma_to_eta(const double g_sigma) {
+  if (g_sigma <= 1) return 0;
+  const double h_sigma = g_sigma - 1;
   return %s;
 }
 
