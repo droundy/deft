@@ -48,7 +48,7 @@ bool overlap(const ball &a, const ball &b, const double len[3],
              int num_walls, double dr = 0);
 
 // Check whether ball a overlaps with any of its neighbors in p.
-// If count is true, it will return the total number of overlaps, otherwise
+// If count is true, it will return the total number of overlaps, otherwise constant
 // it returns 1 if there is at least one overlap, 0 if there are none.
 // If dr is nonzero, then each ball is treated as having a radius R + dr
 int overlaps_with_any(const ball &a, const ball *p, const double len[3],
@@ -56,7 +56,7 @@ int overlaps_with_any(const ball &a, const ball *p, const double len[3],
 
 // Return true if p doesn't intersect walls
 bool in_cell(const ball &p, const double len[3], const int num_walls,
-             double dr);
+             double dr = 0);
 
 // Move the ball by a random amount, in a gaussian distribution with
 // respective standard deviations dist and angwidth
@@ -70,3 +70,7 @@ ball random_move(const ball &original, double size, const double len[3]);
 int move_one_ball(int id, ball *p, int N, double len[3],
                   int num_walls, double neighborR,
                   double dist, int max_neighbors, double dr);
+
+// Count the number of interactions a given ball has
+int count_interactions(int id, ball *p, double interaction_distance,
+                       double len[3], int num_walls);

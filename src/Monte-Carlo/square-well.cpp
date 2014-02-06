@@ -210,5 +210,17 @@ int move_one_ball(int id, ball *p, int N, double len[3],
       }
     }
   }
-  return return_val; //move unsucessful
+  return return_val; // move unsucessful
+}
+
+int count_interactions(int id, ball *p, double interaction_distance,
+                       double len[3], int num_walls) {
+  int interactions = 0;
+  for(int i = 0; i < p[id].num_neighbors; i++) {
+    if(periodic_diff(p[id].pos, p[p[id].neighbors[i]].pos,
+                     len, num_walls).normsquared()
+       <= uipow(interaction_distance,2))
+      interactions++;
+  }
+  return interactions;
 }

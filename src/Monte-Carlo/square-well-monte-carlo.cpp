@@ -92,13 +92,13 @@ int main(int argc, const char *argv[]) {
   char *filename = new char[1024];
   sprintf(filename, "[walls/periodic]-FF");
   int N = 0;
-  long iterations = 100000000000;
+  long iterations = 1000000000;
   long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
   double interaction_scale = 1.3;
   double ff = 0;
-  double neighborR = 2;
+  double neighbor_scale = 2;
   double dr = 0.01;
   double de_density = 0.01;
   double de_g = 0.01;
@@ -117,43 +117,45 @@ int main(int argc, const char *argv[]) {
     {"N", '\0', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
     {"cubic_cell", '\0', POPT_ARG_NONE, &cubic_cell, 0,"Make cell cubic",
      "BOOLEAN"},
-    {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0, "Cell size in x", "DOUBLE"},
-    {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0, "Cell size in y", "DOUBLE"},
-    {"lenz", '\0', POPT_ARG_DOUBLE, &len[z], 0, "Cell size in z", "DOUBLE"},
-    {"num_walls", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &num_walls, 0,
-     "Number of walled dimensions (max = 3)", "INT"},
-    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
+    {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0,
+     "Relative cell size in x dimension", "DOUBLE"},
+    {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0,
+     "Relative cell size in y dimension", "DOUBLE"},
+    {"lenz", '\0', POPT_ARG_DOUBLE, &len[z], 0,
+     "Relative cell size in z dimension", "DOUBLE"},
+    {"num_walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &num_walls, 0,
+     "Number of walled dimensions (dimension order: x,y,z)", "INT"},
+    {"iterations", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
      0, "Number of iterations to run for", "INT"},
-    {"initialization_iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+    {"initialization_iterations", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
      &initialization_iterations, 0,
-     "Number of iterations to run the initialization for", "INT"},
-    {"filename", 'f', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
+     "Number of iterations to run for initialization", "INT"},
+    {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
-     "Directory to save to", "dir"},
-    {"R", '\0', POPT_ARG_DOUBLE, &R, 0,
-     "Size of the sphere that circumscribes each ball. "
-     "Defaults to setting edge length to 1", "DOUBLE"},
-    {"interaction_scale", '\0', POPT_ARG_DOUBLE, &interaction_scale, 0,
-     "Ratio of square well width (from ball center) to ball radius. "
-     "Defaults to 1.3.", "DOUBLE"},
+     "Save directory", "dir"},
+    {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &R, 0, "Ball radius", "DOUBLE"},
+    {"interaction_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &interaction_scale, 0,
+     "Ratio of square well width to ball diameter.", "DOUBLE"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly, without changing the shape of "
      "the cell."},
-    {"neighborR", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &neighborR,
-     0, "Neighbor sphere radius, used to drastically reduce collision "
-     "detections","DOUBLE"},
+    {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &neighbor_scale, 0, "Ratio of neighbor sphere radius to ball radius. "
+     "Used to drastically reduce collision detections","DOUBLE"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
-     "Differential radius change used in pressure calculation", "dr"},
+     "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &scale, 0,
      "Standard deviation for translations of balls", "DOUBLE"},
-    {"seed", 's', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
+    {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
-    {"time", 't', POPT_ARG_INT, &totime, 0,
+    {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
@@ -192,7 +194,7 @@ int main(int argc, const char *argv[]) {
     printf("so setting cell dimensions to (%g, %g, %g).\n",
            len[x], len[y], len[z]);
   }
-  if (N <= 0 || iterations < 0 || R <= 0 || neighborR <= 0 || dr <= 0
+  if (N <= 0 || iterations < 0 || R <= 0 || neighbor_scale <= 0 || dr <= 0
       || scale < 0 || len[x] < 0 || len[y] < 0 || len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
@@ -228,12 +230,14 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define variables
   // ----------------------------------------------------------------------------
+  double neighborR = neighbor_scale*R;
+
   if(num_walls >= 2){
     printf("Code cannot currently handle walls in more than one dimension.\n");
     return 254;
   }
 
-  const double interaction_distance = R*(1+interaction_scale);
+  const double interaction_distance = 2*R*interaction_scale;
   const int energy_levels = N/2 * (uipow(interaction_distance,3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
@@ -255,8 +259,6 @@ int main(int argc, const char *argv[]) {
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
   // Find the upper limit to the maximum number of neighbors a ball could have
-  const double neighbor_sphere_vol =
-    4.0/3.0*M_PI*(uipow(R+neighborR,3) - uipow(R,3));
   int max_neighbors = uipow(2*R+neighborR,3) / uipow(R,3) - 1;
 
   for(int i = 0; i < N; i++) // initialize ball radii
@@ -314,8 +316,8 @@ int main(int argc, const char *argv[]) {
       for(int k = 0; k < cells[z]; k++) {
         for(int l = 0; l < 4; l++) {
           if(!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
-            balls[b].pos = vector3d((i+0.5)*cell_width[x],(j+0.5)*cell_width[y],
-                                    (k+0.5)*cell_width[z]) + offset[l];
+            balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
+                                    k*cell_width[z]) + offset[l];
             b++;
           }
         }
@@ -341,23 +343,35 @@ int main(int argc, const char *argv[]) {
          most_neighbors, max_neighbors);
 
   // ----------------------------------------------------------------------------
-  // Make sure no balls are overlapping
+  // Make sure initial placement is valid
   // ----------------------------------------------------------------------------
+
+  bool error = false, error_cell = false, error_overlap = false;
   for(int i = 0; i < N; i++) {
     if (!in_cell(balls[i], len, num_walls, dr)) {
-      printf("Oops, this is embarassing.\n");
-      printf("I seem to have placed some things outside our cell.\n");
-      printf("You might want to look into that.\n");
-      return 17;
+      error_cell = true;
+      error = true;
     }
-    for(int j = i+1; j < N; j++) {
+    for(int j = 0; j < i; j++) {
       if (overlap(balls[i], balls[j], len, num_walls)) {
-        printf("ERROR in initial placement. We have overlaps!!!\n");
-        printf("AHHHHHH I DON'T KNOW WHAT TO DO!@!!!!1111\n");
-        return 19;
+        error_overlap = true;
+        error = true;
+        break;
       }
     }
+    if (error) break;
   }
+  if (error_cell){
+    printf("Oops, this is embarassing.\n");
+    printf("I seem to have placed some things outside our cell.\n");
+    printf("You might want to look into that.\n");
+  }
+  if (error_overlap) {
+    printf("ERROR in initial placement. We have overlaps!!!\n");
+    printf("AHHHHHH I DON'T KNOW WHAT TO DO!@!!!!1111\n");
+  }
+  if (error_cell || error_overlap) print_bad(balls, N, len, num_walls);
+
   fflush(stdout);
 
   // ----------------------------------------------------------------------------
@@ -383,7 +397,7 @@ int main(int argc, const char *argv[]) {
       neighbor_informs += (move_val & 4) > 0;
     }
     // ---------------------------------------------------------------
-    // fine-tune scale so that the acceptance rate will reach the goal
+    // Fine-tune scale so that the acceptance rate will reach the goal
     // ---------------------------------------------------------------
     if (iteration % 1000 == 0) {
       const double acceptance_rate =
@@ -441,11 +455,11 @@ int main(int argc, const char *argv[]) {
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# cell dimensions: (%5.2f, %5.2f, %5.2f), number of walls: %i,"
-          " de_density: %g, de_g: %g\n# seed: %li, R: %f,"
+          " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
           " interaction_scale: %g, scale: %g\n"
           "# initialization_iterations: %li, neighborR: %g, dr: %g,"
           " energy levels: %i\n",
-          len[0], len[1], len[2], num_walls, de_density, de_g, seed, R,
+          len[0], len[1], len[2], num_walls, de_density, de_g, seed, N, R,
           interaction_scale, scale, initialization_iterations, neighborR, dr,
           energy_levels);
 
@@ -461,35 +475,42 @@ int main(int argc, const char *argv[]) {
   totalmoves = 0, workingmoves = 0, old_totalmoves = 0, old_workingmoves = 0;
   neighbor_updates = 0, neighbor_informs = 0;
 
-  for(long iteration=1; iteration<=iterations; iteration++) {
+  int move_val, old_interaction_count, new_interaction_count;
+
+  // Count initial number of interactions
+  // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_distance
+  energy = 0;
+  for(int i = 0; i < N; i++) {
+    for(int j = 0; j < balls[i].num_neighbors; j++) {
+      if(i < balls[i].neighbors[j]
+         && periodic_diff(balls[i].pos,
+                          balls[balls[i].neighbors[j]].pos,
+                          len, num_walls).norm()
+         <= interaction_distance)
+        energy++;
+    }
+  }
+
+  for(long iteration = 1; iteration <= iterations; iteration++) {
     // ---------------------------------------------------------------
-    // Move each ball once
+    // Move each ball once, add to energy histogram each time
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
-      totalmoves ++;
-      int move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
-                                   scale, max_neighbors, dr);
+      old_interaction_count = count_interactions(i, balls, interaction_distance,
+                                                 len, num_walls);
+      move_val = move_one_ball(i, balls, N, len, num_walls, neighborR, scale,
+                               max_neighbors, dr);
+      new_interaction_count = count_interactions(i, balls, interaction_distance,
+                                                 len, num_walls);
+      energy += new_interaction_count - old_interaction_count;
+      energy_histogram[energy]++;
+
       workingmoves += move_val & 1;
+      totalmoves ++;
     }
     // ---------------------------------------------------------------
-    // Add data to historams
+    // Add data density and RDF histograms
     // ---------------------------------------------------------------
-    // Count number of interactions, add to energy histogram
-    // Sum over i < j for all |ball[i].pos - ball[j].pos| < interaction_distance
-
-    energy = 0;
-    for(int i = 0; i < N; i++) {
-      for(int j = 0; j < balls[i].num_neighbors; j++) {
-        if(i < balls[i].neighbors[j]
-           && periodic_diff(balls[i].pos,
-                               balls[balls[i].neighbors[j]].pos,
-                               len, num_walls).norm()
-           <= interaction_distance)
-          energy++;
-      }
-    }
-    energy_histogram[energy]++;
-
     // Density histogram
     if(num_walls){
       for(int i = 0; i < N; i++) {
@@ -504,7 +525,7 @@ int main(int argc, const char *argv[]) {
         for(int j = 0; j < N; j++) {
           if(i != j) {
             const vector3d r = periodic_diff(balls[i].pos, balls[j].pos, len,
-                                                num_walls);
+                                             num_walls);
             const int r_i = floor(r.norm()/de_g);
             if(r_i < g_bins) g_histogram[energy*g_bins + r_i]++;
           }
@@ -515,7 +536,7 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
     const clock_t now = clock();
-    if ((now > last_output + output_period) || iteration==iterations) {
+    if ((now > last_output + output_period) || iteration == iterations) {
       last_output = now;
       assert(last_output);
       if (output_period < max_output_period/2) output_period *= 2;
@@ -649,7 +670,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
-  print_bad(balls, N, len, num_walls);
 
   delete[] balls;
   delete[] g_histogram;
@@ -700,10 +720,10 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
 
 inline void print_bad(const ball *p, int N, double len[3], int num_walls) {
   for (int i = 0; i < N; i++) {
-    bool incell = true; //in_cell(p[i], walls, real_walls); fixme
+    bool incell = in_cell(p[i], len, num_walls);
     bool overlaps = false;
-    for (int j=0; j<N; j++) {
-      if (j != i && overlap(p[i], p[j], len, num_walls)) {
+    for (int j = 0; j < i; j++) {
+      if (overlap(p[i], p[j], len, num_walls)) {
         overlaps = true;
         break;
       }
@@ -714,8 +734,8 @@ inline void print_bad(const ball *p, int N, double len[3], int num_walls) {
       printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
       if (!incell)
         printf("\t  Outside cell!\n");
-      for (int j=0; j<N; j++) {
-        if (j != i && overlap(p[i], p[j], len, num_walls)) {
+      for (int j = 0; j < i; j++) {
+        if (overlap(p[i], p[j], len, num_walls)) {
           p[j].pos.tostr(pos);
           printf("\t  Overlaps with %i", j);
           printf(": %s\n", pos);
