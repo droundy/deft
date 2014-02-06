@@ -113,7 +113,6 @@ int main(int argc, const char *argv[]) {
   // Set values from parameters
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
-    {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     {"N", '\0', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
     {"cubic_cell", '\0', POPT_ARG_NONE, &cubic_cell, 0,"Make cell cubic",
      "BOOLEAN"},
@@ -159,6 +158,8 @@ int main(int argc, const char *argv[]) {
      "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
+    {"R", '\0', POPT_ARG_DOUBLE, &R, 0, "Ball radius", "DOUBLE"},
+    {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -183,25 +184,18 @@ int main(int argc, const char *argv[]) {
     for(int i = 0; i < 3; i++) len[i] = 1;
   }
 
-  if(ff != 0) {
-    // R^3*V*N/(Lx*Ly*Lz) = ff
-    // Lx*Ly*Lz = R^3*V*N/ff
-    // fac^3 = R^3*V*N/ff/Lx/Ly/Lz
-    const double fac = R*pow(4.0/3.0*M_PI*uipow(R,3)*N/ff/len[x]/len[y]/len[z],
-                             1.0/3.0);
-    for(int i = 0; i < 3; i++) len[i] *= fac;
-    printf("\nFilling fraction was specified,");
-    printf("so setting cell dimensions to (%g, %g, %g).\n",
-           len[x], len[y], len[z]);
-  }
+  // Adjust cell dimensions for desired filling fraction
+  const double fac = R*pow(4.0/3.0*M_PI*N/(ff*len[x]*len[y]*len[z]), 1.0/3.0);
+  for(int i = 0; i < 3; i++) len[i] *= fac;
+  printf("\nSetting cell dimensions to (%g, %g, %g).\n",
+         len[x], len[y], len[z]);
   if (N <= 0 || iterations < 0 || R <= 0 || neighbor_scale <= 0 || dr <= 0
       || scale < 0 || len[x] < 0 || len[y] < 0 || len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
 
-  const double eta = (double)N*(4.0/3.0*M_PI*uipow(R,3))
-    *uipow(R,3)/len[x]/len[y]/len[z];
+  const double eta = (double)N*4.0/3.0*M_PI*R*R*R/(len[x]*len[y]*len[z]);
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. "
             "They will never fit. Filling fraction: %g\n", eta);
@@ -210,8 +204,8 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "[walls/periodic]-FF") == 0) {
-    if (num_walls != 0) sprintf(filename, "walls-%04.2f", eta);
-    else sprintf(filename, "periodic-%04.2f", eta);
+    if (num_walls == 0) sprintf(filename, "periodic-%04.2f", eta);
+    else sprintf(filename, "walls-%i-%04.2f", num_walls, eta);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
   printf("------------------------------------------------------------------\n");
