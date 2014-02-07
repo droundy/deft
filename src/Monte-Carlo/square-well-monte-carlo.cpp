@@ -258,9 +258,9 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
 
-  // Balls will be initially placed on a face centered cubic grid
-  // Note that the unit cells need not be (and most likely will not be) actually
-  //   "cubic", rather some rectangular prism
+  // Balls will be initially placed on a face centered cubic (fcc) grid
+  // Note that the unit cells need not be actually "cubic", but the fcc grid will
+  //   be stretched to cell dimensions
   const int spots_per_cell = 4; // spots in each fcc periodic unit cell
   const int cells_floor = ceil(N/spots_per_cell); // minimum number of cells
   int cells[3]; // array to contain number of cells in x, y, and z dimensions
@@ -273,7 +273,8 @@ int main(int argc, const char *argv[]) {
   int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
   int i = 0;
   while(total_spots < N) {
-    if(cells[i%3] >= cells[(i+1)%3] && cells[i%3] >= cells[(i+2)%3]) {
+    if(cells[i%3]/len[i%3] >= cells[(i+1)%3]/len[(i+1)%3] &&
+       cells[i%3]/len[(i+1)%3] >= cells[(i+2)%3]/len[(i+2)%3]) {
       cells[i%3] += 1;
       total_spots += spots_per_cell*cells[(i+1)%3]*cells[(i+2)%3];
     }
@@ -282,8 +283,7 @@ int main(int argc, const char *argv[]) {
 
   // It is usefull to know our cell dimensions
   double cell_width[3];
-  for(int i = 0; i < 3; i++)
-    cell_width[i] = len[i]/cells[i];
+  for(int i = 0; i < 3; i++) cell_width[i] = len[i]/cells[i];
 
   // Define ball positions relative to cell position
   vector3d* offset = new vector3d[4]();
