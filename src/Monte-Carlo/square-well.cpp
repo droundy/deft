@@ -163,9 +163,9 @@ bool in_cell(const ball &p, const double len[3], const int num_walls,
   return true;
 }
 
-ball random_move(const ball &p, double size, const double len[3]) {
+ball random_move(const ball &p, double move_scale, const double len[3]) {
   ball temp = p;
-  temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(size), len);
+  temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(move_scale), len);
   return temp;
 }
 
