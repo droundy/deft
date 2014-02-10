@@ -525,8 +525,8 @@ int main(int argc, const char *argv[]) {
 
   // Initial guess for energy weights
   for(int i = 0; i < energy_levels; i++){
-    if(energy_histogram[i] != 0)
-      ln_energy_weights[i] = (N*initialization_iterations)/energy_histogram[i];
+    ln_energy_weights[i] = (N*initialization_iterations) /
+      (energy_histogram[i] > 0 ? energy_histogram[i] : 1);
   }
 
   // Reset energy histogram
@@ -556,16 +556,18 @@ int main(int argc, const char *argv[]) {
       totalmoves ++;
     }
     // ---------------------------------------------------------------
-    // Update energy weights
+    // Update density of states and energy weights
     // ---------------------------------------------------------------
+    // fixme: implement keeping track of the density of states,
+    //   resetting the energy histogram here as well
     if(iteration % int(uipow(2,weight_updates)) == 0){
       for(int i = 0; i < energy_levels; i++){
         const int top = i < energy_levels-1 ? i+1 : i;
         const int bottom = i > 0 ? i-1 : i;
-        const int dE = top-bottom;
-        const double df_dE =
-          (double(walkers_plus[top])/double(walkers_total[top])
-           - double(walkers_plus[bottom])/double(walkers_total[bottom])) / (top-bottom);
+        const double df = double(walkers_plus[top]) / walkers_total[top]
+          - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+        const int dE = bottom-top; // Interactions and energy are opposites
+        const double df_dE = (df > 0 ? df : double(1)/walkers_total[bottom]) / dE;
         ln_energy_weights[i] +=
           (log(df_dE) - log(walkers_total[i]/totalmoves))/2.0;
       }
