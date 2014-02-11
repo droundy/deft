@@ -26,34 +26,42 @@ variables = ['r', 'h_sigma', 'g_sigma']
 positive_variables = ['kappa_0', 'kappa_1', 'kappa_2']
 # expressions is a list of tuples, where each tuple is the name of a variable followed by the
 # expression it is equal two, in terms of lambda expressions of the dict v.
-print 'i got here'
 expressions = [
-  ('g_HS', lambda: 1 + v['h_sigma']*exp(-v['kappa_0']*v['xi']) + v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])*v['xi']*exp(-v['kappa_1']*v['xi']) + v['a_3']*v['xi']**2*exp(-v['kappa_2']*v['xi'])),
-  ('a_3', lambda: ((v['rhs']-1)/v['n'] - v['I_0'] - v['C']*v['a_1'])/v['I_2']), # sets integral
-  ('I_2', lambda: sympy.simplify(8*pi*(12*(v['sigma']/2)**2 + v['sigma']*v['kappa_2']*(6*v['sigma']/2 + v['sigma']*v['kappa_2']))/v['kappa_2']**5*v['sigma']/2)),
-  ('C', lambda: 4*pi*v['h_sigma']*(2 + v['sigma']*v['kappa_0']*(2 +v['sigma']*v['kappa_0']))/v['kappa_0']**3
-   - 4*pi*v['sigma']**3/3),
-  ('I_0', lambda: sympy.simplify(4*pi*v['h_sigma']*(v['sigma']/2)*(2*(v['sigma']/2)**2 + v['sigma']*v['kappa_0']*(v['sigma'] + v['sigma']*v['kappa_0'])))
-   /v['kappa_0']**3 - 4*pi*v['sigma']**3/3),
-  ('rhs', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
-  ('n', lambda: 3/(4*pi)*v['eta']/v['R']**3), # n is the number density
-  ('a_1', lambda: v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])), # sets slope at g_sigma
-  # ('B', lambda: k2**5*((-1 + v['chi'])/(24*v['eta']*(3+k2)*(3+k2)) -
-  #                      (v['h_sigma']*(k1**4+2*k0*k1**4+2*k0**2*k1**4-v['g_sigma']*k0**3*(3+2*k1*(2+k1)) + k0**4*(3+2*k1*(2+k1))))/(4*k0**3*k1**4*(3+k2)*(3+k2)))),
-  # ('chi', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
+  ('g_HS', lambda: 1 + v['h_sigma']*exp(-v['kappa_0']*v['xi']) + v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])*v['xi']*exp(-v['kappa_1']*v['xi']) + v['B']*v['xi']**2*exp(-v['kappa_2']*v['xi'])),
+('B', lambda: k2**5*((-1 + v['chi'])/(24*v['eta']*(3+k2*(3+k2))) -
+                     (v['h_sigma']*(k1**4+2*k0*k1**4+2*k0**2*k1**4-v['g_sigma']*k0**3*(3+2*k1*(2+k1)) + k0**4*(3+2*k1*(2+k1))))/(4*k0**3*k1**4*(3+k2*(3+k2))))),
+  ('B', lambda: k2**5*((-1 + v['chi'])/(24*v['eta']*(k2**2 + 3*k2 + 3)) - v['h_sigma']*(1 + 2*k0 + 2*k0**2)/(4*k0**3*(k2**2 + 3*k2 + 3)) - v['h_sigma']*(k0 - v['g_sigma'])*(2*k1**2 + 4*k1 + 3)/(4*k1**4*(k2**2 + 3*k2 + 3))       )      ),
+  ('B', lambda: k2**5*( (v['chi'] - 1)/(24*v['eta']*(3 + 3*k2 + k2**2))
+                        - v['h_sigma']/(4*(3 + 3*k2 + k2**2))*((1 + 2*k0 + 2*k0**2)/k0**3 + (k0 - v['g_sigma'])*(3 + 4*k1 + 2*k1**2)/k1**4))),
+  ('chi', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
   ('eta', lambda: eta_expr),
   ('g_sigma', lambda: v['h_sigma'] + 1),
   ('xi', lambda: (v['r'] - v['sigma'])/v['R']),
   ('R', lambda: v['sigma']/2),
   ('sigma', lambda: sympy.S(sigma))
 ]
-print 'i got here'
+# expressions = [
+#   ('g_HS', lambda: 1 + v['h_sigma']*exp(-v['kappa_0']*v['xi']) + v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])*v['xi']*exp(-v['kappa_1']*v['xi']) + v['a_3']*v['xi']**2*exp(-v['kappa_2']*v['xi'])),
+#   ('a_3', lambda: ((v['chi']-1)/v['n'] - v['I_0'] - v['C']*v['a_1'])/v['I_2']), # sets integral
+#   ('I_2', lambda: sympy.simplify(8*pi*(12*(v['sigma']/2)**2 + v['sigma']*v['kappa_2']*(6*v['sigma']/2 + v['sigma']*v['kappa_2']))/v['kappa_2']**5*v['sigma']/2)),
+#   ('C', lambda: 4*pi*v['h_sigma']*(2 + v['sigma']*v['kappa_0']*(2 +v['sigma']*v['kappa_0']))/v['kappa_0']**3
+#    - 4*pi*v['sigma']**3/3),
+#   ('I_0', lambda: sympy.simplify(4*pi*v['h_sigma']*(v['sigma']/2)*(2*(v['sigma']/2)**2 + v['sigma']*v['kappa_0']*(v['sigma'] + v['sigma']*v['kappa_0'])))
+#    /v['kappa_0']**3 - 4*pi*v['sigma']**3/3),
+#   ('n', lambda: 3/(4*pi)*v['eta']/v['R']**3), # n is the number density
+#   ('a_1', lambda: v['h_sigma']*(v['kappa_0'] - 1 - v['h_sigma'])), # sets slope at g_sigma
+#   ('chi', lambda: (1-v['eta'])**4/(1 + 4*v['eta'] + 4*v['eta']**2 - 4*v['eta']**3 + v['eta']**4)),
+#   ('eta', lambda: eta_expr),
+#   ('g_sigma', lambda: v['h_sigma'] + 1),
+#   ('xi', lambda: (v['r'] - v['sigma'])/v['R']),
+#   ('R', lambda: v['sigma']/2),
+#   ('sigma', lambda: sympy.S(sigma))
+# ]
 l = []
 expr = []
 for x in expressions:
   l.append(x[0])
   expr.append(x[1])
-print 'i got here'
 
 v1 = dict((elem, sympy.symbols(elem)) for elem in l+variables)
 v2 = dict((elem, sympy.symbols(elem, positive=True)) for elem in positive_variables)
