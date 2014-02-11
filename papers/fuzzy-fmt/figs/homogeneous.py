@@ -68,12 +68,11 @@ while Temp <= .011:
   Temp = Temp*10 # sqrt(10)
 
 erfdata = loadtxt('figs/homogeneous.dat')
-erftemps = arange(0.01, 0.03, 0.01)
+erftemp = erfdata[0,:]
 erfeta = erfdata[:,0]
-erf_density = erfeta/(4*pi/3)
 for j in arange(1,len(erfdata[0,:])):
   erfpressure = erfdata[:,j]
-  plot(erfeta,erfpressure, '--', label='kT=%g' % (0.01*(j-1)))
+  plot(erfeta,erfpressure, '--', label='kT=%g' % erftemp[j])
   
 
 for ff in arange(0.1,0.81, 0.1):
