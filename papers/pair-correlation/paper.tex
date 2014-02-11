@@ -296,25 +296,49 @@ Under these three constraints, we applied a least-squares fit to
 simulation data for the radial distribution function at packing
 fractions from 0.05 to 0.4 by steps of 0.05.  Our fitted radial
 distribution function is given by
-\newcommand\kappaa{\kappa_0}
-\newcommand\kappab{\kappa_1}
-\newcommand\kappac{\kappa_2}
+\newcommand\kappaO{c_0}
+\newcommand\kappaI{c_1}
+\newcommand\kappaZ{c_2}
 \begin{multline}
-  h(r,g_\sigma) = 1 + h_\sigma e^{-\kappaa z} \\
-  + h_\sigma(\kappaa - g_\sigma) ze^{-\kappab z} \\
-  + \frac{\frac{(1-\eta)^4}{1+4\eta + 4\eta^2 - 4\eta^3 +
-      \eta^4}\frac{1}{n}
-    - I_0  -I_1(\kappaa - g_\sigma)}{I_2} z^2e^{-\kappac z}
+  g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
+  + h_\sigma(\kappaO - g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
+  + B  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
 \end{multline}
 \begin{equation}
-  I_0 = \frac{4\pi h_\sigma (2 + \sigma \kappaa (2 + \sigma \kappaa))}{\kappaa^3}
+  B = \kappaZ^5 \frac{
+    \frac{\chi-1}{24\eta} - h_\sigma \frac{(\kappaO-2
+      g_\sigma)(\kappaI^2 + 4 \kappaI + 6)}{\kappaI^4}
+    - h_\sigma\frac{\kappaO^2 + 2\kappaO + 2}{\kappaO}
+  }{2 \kappaZ^2 + 12 \kappaZ + 24}
+\end{equation}
+\begin{equation}
+  \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
+\end{equation}
+\newcommand\nastyetacuberoot{\sqrt[3]{54 g_\sigma^2 -
+    6\sqrt{81g_\sigma^4 - 6g_\sigma^3}}}
+\begin{equation}
+  \eta = 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}
+\end{equation}
+\davidsays{The above is a sketch of how we might want to write our
+  equations.  I think it matches up with the python now.  Below is the
+old (presumably wrong) version.}
+
+\begin{multline}
+  h(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO z} \\
+  + h_\sigma(\kappaO - 2 g_\sigma) \xi e^{-\kappaI \xi} \\
+  + \frac{\frac{(1-\eta)^4}{1+4\eta + 4\eta^2 - 4\eta^3 +
+      \eta^4}\frac{1}{n}
+    - I_0  -I_1(\kappaO - g_\sigma)}{I_2} z^2e^{-\kappaZ z}
+\end{multline}
+\begin{equation}
+  I_0 = \frac{4\pi h_\sigma (2 + \sigma \kappaO (2 + \sigma \kappaO))}{\kappaO^3}
   - \frac{4\pi}{3} \sigma^3
 \end{equation}
 \begin{equation}
-  I_1 = \frac{4\pi h_\sigma (6 + \sigma \kappab (4 + \sigma \kappab))}{\kappab^4}
+  I_1 = \frac{4\pi h_\sigma (6 + \sigma \kappaI (4 + \sigma \kappaI))}{\kappaI^4}
 \end{equation}
 \begin{equation}
-  I_2 = \frac{8\pi (12 + \sigma \kappac (6 + \sigma \kappac))}{\kappac^5}
+  I_2 = \frac{8\pi (12 + \sigma \kappaZ (6 + \sigma \kappaZ))}{\kappaZ^5}
 \end{equation}
 \begin{equation}
   z = r - \sigma
@@ -323,8 +347,8 @@ distribution function is given by
   against the python code, in plot-ghs2.py.  We'll want to
   ensure the C++ code agrees with this as well.}
 \fixme{Clean up the above equations, if possible.}
-This function includes three fitted parameters, $\kappaa$, $\kappab$,
-and $\kappac$, which are given in Table~\ref{tab:fit-parameters}.
+This function includes three fitted parameters, $\kappaO$, $\kappaI$,
+and $\kappaZ$, which are given in Table~\ref{tab:fit-parameters}.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
 figure, it is apparent that the integral f $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
@@ -334,9 +358,9 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 \begin{table}
   \begin{align*}
-    \kappaa &= \kappazero \\
-    \kappab &= \kappaone \\
-    \kappac &= \kappatwo
+    \kappaO &= \kappazero \\
+    \kappaI &= \kappaone \\
+    \kappaZ &= \kappatwo
   \end{align*}
   \caption{Fit parameters \fixme{... put them here and format this nicely}\fixme{add dimensions here}}
   \label{tab:fit-parameters}
