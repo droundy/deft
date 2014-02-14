@@ -24,10 +24,10 @@ kR :: Expression KSpace
 kR = k * rad
 
 a :: Type a => Expression a
-a = "a" === 2*rad/betaV0/sqrt(pi *(1 - log 2/betaV0))
+a = "a" === 2*rad/sqrt(betaV0*pi*log 2)
 
 sigma :: Type a => Expression a
-sigma = var "sigma" "\\sigma" (2*rad*sqrt(1 - log 2/betaV0))
+sigma = var "sigma" "\\sigma" (2*rad*(1 - sqrt(log 2/betaV0)))
 
 n, n3, n2, n1, n0, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"

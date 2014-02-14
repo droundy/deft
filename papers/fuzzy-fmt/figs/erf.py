@@ -23,14 +23,14 @@ figure()
 plot(r, V)
 title('$V(r)$')
 
-kT = 0.1*V0
+kT = 0.2*V0
 beta = 1/kT
 f = exp(-beta*V) - 1
 
 
 sigma = diameter*(1 - sqrt(kT/V0*log(2)))
-Vprime_sigma = 2*V0*(1-sigma/diameter)*(-1/diameter)
-delta_r = 2*abs(kT/Vprime_sigma)/sqrt(pi)
+#Vprime_sigma = 2*V0*(1-sigma/diameter)*(-1/diameter)
+delta_r = diameter*sqrt(kT/V0/log(2)/pi)
 C = 0.5
 
 figure()
@@ -53,5 +53,13 @@ xlim(0, 1.1*diameter)
 legend(loc='best').draw_frame(False)
 title("$f'(r)$")
 savefig('figs/erf.pdf')
+
+figure()
+plot(r, -kT*log(0.5*(erf((r-sigma)/delta_r)+1)), label='erf approximation')
+plot(r[r<2*R], V0*(1 - r[r<2*R]/(2*R))**2, label='harmonic potential')
+axvline(sigma, color='k', linestyle=':')
+axhline(kT*log(2), color='k', linestyle=':')
+ylim(0, 4*kT)
+savefig('figs/erf-potential.pdf')
 
 show()

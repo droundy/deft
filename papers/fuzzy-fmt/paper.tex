@@ -696,11 +696,11 @@ and setting the slope equal at $r=\sigma$ we find
 \end{align}
 Thus for our harmonic potential, we find that something like...
 \begin{align}
-  V(r) &= V_0 \left(1-\frac{r^2}{4R^2}\right)\\
-  \left(1 - \frac{\sigma^2}{4R^2}\right) &= \frac{k_BT}{V_0}\ln 2 \\
-  \sigma &= 2R\sqrt{1 - \frac{k_BT}{V_0}\ln 2} \\
-  a &= \frac{4k_BTR^2}{V_0 \sigma \sqrt{\pi}}\\
-  &= \frac{2k_BTR}{V_0 \sqrt{\pi \left(1-\frac{k_BT}{V_0}\ln 2 \right)}}
+  V(r) &= V_0 \left(1-\frac{r}{2R}\right)^2\\
+  \left(1 - \frac{\sigma}{2R}\right)^2 &= \frac{k_BT}{V_0}\ln 2 \\
+  \sigma &= 2R\left( 1 - \sqrt{\frac{k_BT \ln 2}{V_0}}\right) \\
+  a &= \frac{4k_BTR^2}{\sqrt{\pi}V_0(2R-\sigma)}
+  &= 2R\sqrt{\frac{kT}{\pi V_0 \ln 2}}
 \end{align}
 
 This gives us an approximate model that we could apply to any

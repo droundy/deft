@@ -90,7 +90,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   // We reuse the potential, which should give us a better starting
   // guess on each calculation.
   static Grid *potential = 0;
-  if (strcmp(name, "hard") == 0 || true) {
+  static double old_temperature = 0;
+  if (strcmp(name, "hard") == 0) {
     // start over for each potential
     delete potential;
     potential = 0;
@@ -99,6 +100,10 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     potential = new Grid(gd);
     *potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
     *potential = -kT*potential->cwise().log();
+  } else {
+    // Adjust the potential so the initial guess for density is the
+    // same as we just found in our last simulation.
+    *potential *= kT/old_temperature;
   }
 
   // FIXME below I use the HS energy because of issues with the actual
@@ -159,6 +164,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
   }
 
+  old_temperature = kT;
+
   took("Plotting stuff");
   printf("density %g gives ff %g for eta = %g and T = %g\n", density(0,0,gd.Nz/2),
          density(0,0,gd.Nz/2)*4*M_PI/3, eta, teff);
@@ -176,7 +183,7 @@ int main(int, char **) {
       Functional f = HardFluid(1,0);
       if (temp > 0) f = SoftFluid(1, 1, 0);
       const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, eta/(4*M_PI/3));
-      printf("mu is %g\n", mu);
+      printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
       if (temp > 0) f = SoftFluid(1, 1, mu);
       else f = HardFluid(1, mu);
 

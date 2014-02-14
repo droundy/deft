@@ -25,7 +25,7 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 
 
-colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
+colors = { 0.6: 'r',0.4: 'y', 0.2: 'k', 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g', 0.0: 'k' }
 
 Temp = 0.00001
 eta = density*4*pi/3
@@ -72,7 +72,7 @@ erftemp = erfdata[0,:]
 erfeta = erfdata[:,0]
 for j in arange(1,len(erfdata[0,:])):
   erfpressure = erfdata[:,j]
-  plot(erfeta,erfpressure, '--', label='kT=%g' % erftemp[j])
+  plot(erfeta,erfpressure, colors[erftemp[j]]+'--', label='kT=%g' % erftemp[j])
   
 
 for ff in arange(0.1,0.81, 0.1):
@@ -95,7 +95,7 @@ xlim(xmax=0.51)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
 xlabel('packing fraction')
-ylabel('pressure / hard-sphere pressure')
+ylabel('pressure / ideal gas pressure')
 legend(loc = 'best')
 savefig('figs/p-vs-packing.pdf', bbox_inches=0)
 show()
