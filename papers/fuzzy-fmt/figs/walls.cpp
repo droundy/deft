@@ -103,6 +103,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   } else {
     // Adjust the potential so the initial guess for density is the
     // same as we just found in our last simulation.
+
     *potential *= kT/old_temperature;
   }
 
@@ -118,7 +119,12 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
                                                             potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  if (strcmp(name, "hard") != 0) {
+    printf("For now, SoftFluid doesn't work properly, so we're skipping the\n");
+    printf("minimization at temperature %g.\n", teff);
+  } else {
+    for (int i=0;min.improve_energy(false) && i<100;i++) {
+    }
   }
   took("Doing the minimization");
   min.print_info();
@@ -162,6 +168,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     //double peak = peak_memory()/1024.0/1024;
     //double current = current_memory()/1024.0/1024;
     //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
+
   }
 
   old_temperature = kT;
