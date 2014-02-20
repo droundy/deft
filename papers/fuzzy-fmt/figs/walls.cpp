@@ -110,7 +110,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   // FIXME below I use the HS energy because of issues with the actual
   // functional.
   const double approx_energy = fhs(kT, eta/(4*M_PI/3))*dw*dw*width;
-  const double precision = fabs(approx_energy*1e-5);
+  const double precision = fabs(approx_energy*1e-8);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, kT);
   fflush(stdout);
 
@@ -119,7 +119,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
                                                             potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
-  if (strcmp(name, "hard") != 0) {
+  if (strcmp(name, "hard") != 0 && false) {
     printf("For now, SoftFluid doesn't work properly, so we're skipping the\n");
     printf("minimization at temperature %g.\n", teff);
   } else {
