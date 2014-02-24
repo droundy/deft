@@ -81,6 +81,8 @@ int main(int argc, const char *argv[]) {
   // NOTE: debug can slow things down VERY much
   bool debug = false;
 
+  bool weights = false;
+
   bool cubic_cell = false;
   double len[3] = {1, 1, 1};
   int num_walls = 0;
@@ -97,7 +99,7 @@ int main(int argc, const char *argv[]) {
   double acceptance_goal = .4;
   double R = 1;
   double interaction_scale = 1.3;
-  double ff = 0;
+  double ff = 0.3;
   double neighbor_scale = 2;
   double dr = 0.01;
   double de_density = 0.01;
@@ -152,14 +154,14 @@ int main(int argc, const char *argv[]) {
      "Resolution of distribution functions", "DOUBLE"},
     {"translation_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &translation_scale, 0,
-     "Standard deviation for translations of balls", "DOUBLE"},
+     "Standard deviation for translations of balls, relative to ball radius",
+     "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
-    {"R", '\0', POPT_ARG_DOUBLE, &R, 0, "Ball radius", "DOUBLE"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -185,7 +187,9 @@ int main(int argc, const char *argv[]) {
     printf("Code cannot currently handle walls in more than one dimension.\n");
     return 254;
   }
+  dr *= R;
 
+  // Make cell dimensions uniform if appropriate
   if(cubic_cell){
     for(int i = 0; i < 3; i++) len[i] = 1;
   }
@@ -233,6 +237,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   double neighborR = neighbor_scale*R;
+  double translation_distance = translation_scale*R;
 
   // Energy histogram
   const double interaction_distance = 2*R*interaction_scale;
@@ -421,7 +426,7 @@ int main(int argc, const char *argv[]) {
       old_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, num_walls);
       move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
-                               translation_scale, max_neighbors, dr);
+                               translation_distance, max_neighbors, dr);
       new_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, num_walls);
       interactions += new_interaction_count - old_interaction_count;
@@ -441,9 +446,9 @@ int main(int argc, const char *argv[]) {
       old_workingmoves = workingmoves;
       old_totalmoves = totalmoves;
       if (acceptance_rate < acceptance_goal)
-        translation_scale /= (1+dscale);
+        translation_distance /= 1+dscale;
       else
-        translation_scale *= (1+dscale);
+        translation_distance *= 1+dscale;
       // hokey heuristic for tuning dscale
       const double closeness = fabs(acceptance_rate - acceptance_goal)
         / acceptance_rate;
@@ -458,8 +463,8 @@ int main(int argc, const char *argv[]) {
       sprintf(iter, "%i iterations", totime);
       took(iter);
       delete[] iter;
-      printf("Iteration %li, acceptance rate of %g, translation_scale: %g.\n",
-             iteration, (double)workingmoves/totalmoves, translation_scale);
+      printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
+             iteration, (double)workingmoves/totalmoves, translation_distance);
       printf("We've had %g updates per kilomove and %g informs per kilomove, "
              "for %g informs per update.\n",
              1000.0*neighbor_updates/totalmoves,
@@ -492,13 +497,13 @@ int main(int argc, const char *argv[]) {
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
-          "# cell dimensions: (%5.2f, %5.2f, %5.2f), number of walls: %i,"
+          "# cell dimensions: (%5.2f, %5.2f, %5.2f), num_walls: %i,"
           " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-          " interaction_scale: %g, translation_scale: %g\n"
+          " interaction_scale: %g, translation_distance: %g\n"
           "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
-          " energy levels: %i\n",
+          " energy_levels: %i\n",
           len[0], len[1], len[2], num_walls, de_density, de_g, seed, N, R,
-          interaction_scale, translation_scale, initialization_iterations,
+          interaction_scale, translation_distance, initialization_iterations,
           neighbor_scale, dr, energy_levels);
 
   char *e_fname = new char[1024];
@@ -541,7 +546,7 @@ int main(int argc, const char *argv[]) {
       old_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, num_walls);
       move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
-                               translation_scale, max_neighbors, dr);
+                               translation_distance, max_neighbors, dr);
       new_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, num_walls);
       interactions += new_interaction_count - old_interaction_count;
@@ -629,7 +634,7 @@ int main(int argc, const char *argv[]) {
       fprintf(e_out, "\n# interactions   counts\n");
       for(int i = 0; i < energy_levels; i++)
         if(energy_histogram[i] != 0)
-          fprintf(e_out, "%i  %li\n",interactions,energy_histogram[i]);
+          fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
       fclose(e_out);
 
       // Saving density data
@@ -696,8 +701,8 @@ int main(int argc, const char *argv[]) {
       sprintf(iter, "%i iterations", totime);
       took(iter);
       delete[] iter;
-      printf("Iteration %li, acceptance rate of %g, translation_scale: %g.\n",
-             iteration, (double)workingmoves/totalmoves, translation_scale);
+      printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
+             iteration, (double)workingmoves/totalmoves, translation_distance);
       const long checks_without_tables = totalmoves*N;
       int total_neighbors = 0;
       for(int i = 0; i < N; i++) {
