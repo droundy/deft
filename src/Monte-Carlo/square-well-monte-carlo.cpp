@@ -162,6 +162,8 @@ int main(int argc, const char *argv[]) {
      "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
+    {"weights", '\0', POPT_ARG_NONE, &debug, 0, "Choose to weigh diffrent "
+     "energies so that states of low entropy get better statistics", "BOOLEAN"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -244,6 +246,7 @@ int main(int argc, const char *argv[]) {
   const int energy_levels = N/2 * (uipow(interaction_distance,3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
+
 
   // Walkers
   bool current_walker_plus = false;
@@ -402,6 +405,12 @@ int main(int argc, const char *argv[]) {
 
   double dscale = .1;
 
+  if(weights){
+    for(int i = 0; i < energy_levels; i++){
+      ln_energy_weights[i] = 1;
+    }
+  }
+
   // Count initial number of interactions
   // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
   for(int i = 0; i < N; i++) {
@@ -420,9 +429,6 @@ int main(int argc, const char *argv[]) {
     // Move each ball once
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
-      // fixme: make move_one_ball always move a ball and
-      //   return the difference in number of interactions
-      //   make try_ball_move for initialization and tuning
       old_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, num_walls);
       move_val = move_one_ball(i, balls, N, len, num_walls, neighborR,
@@ -454,6 +460,34 @@ int main(int argc, const char *argv[]) {
         / acceptance_rate;
       if(closeness > 0.5) dscale *= 2;
       else if(closeness < dscale*2) dscale/=2;
+    }
+    // ---------------------------------------------------------------
+    // Update weights
+    // ---------------------------------------------------------------
+    if(weights){
+      if(iteration == N){
+        // Initial guess for energy weights
+        for(int i = 0; i < energy_levels; i++){
+          ln_energy_weights[i] = log((N*initialization_iterations) /
+                                     (energy_histogram[i] > 0 ?
+                                      energy_histogram[i] : 0.1));
+        }
+        weight_updates++;
+      }
+      if(iteration % int(uipow(2,weight_updates)) == 0){
+        for(int i = 0; i < energy_levels; i++){
+          const int top = i < energy_levels-1 ? i+1 : i;
+          const int bottom = i > 0 ? i-1 : i;
+          const double df = double(walkers_plus[top]) / walkers_total[top]
+            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+          const int dE = bottom-top; // Interactions and energy are opposites
+          const double df_dE = (df > 0 ? df :
+                                double(1)/walkers_total[bottom]) / dE;
+          ln_energy_weights[i] +=
+            (log(df_dE) - log(walkers_total[i]/totalmoves))/2.0;
+        }
+        weight_updates++;
+      }
     }
     // ---------------------------------------------------------------
     // Print out timing information if desired
@@ -527,13 +561,6 @@ int main(int argc, const char *argv[]) {
   int frame = 0;
   totalmoves = 0, workingmoves = 0;
 
-
-  // Initial guess for energy weights
-  for(int i = 0; i < energy_levels; i++){
-    ln_energy_weights[i] = (N*initialization_iterations) /
-      (energy_histogram[i] > 0 ? energy_histogram[i] : 1);
-  }
-
   // Reset energy histogram
   for(int i = 0; i < energy_levels; i++)
     energy_histogram[i] = 0;
@@ -559,24 +586,6 @@ int main(int argc, const char *argv[]) {
 
       workingmoves += move_val & 1;
       totalmoves ++;
-    }
-    // ---------------------------------------------------------------
-    // Update density of states and energy weights
-    // ---------------------------------------------------------------
-    // fixme: implement keeping track of the density of states,
-    //   resetting the energy histogram here as well
-    if(iteration % int(uipow(2,weight_updates)) == 0){
-      for(int i = 0; i < energy_levels; i++){
-        const int top = i < energy_levels-1 ? i+1 : i;
-        const int bottom = i > 0 ? i-1 : i;
-        const double df = double(walkers_plus[top]) / walkers_total[top]
-          - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-        const int dE = bottom-top; // Interactions and energy are opposites
-        const double df_dE = (df > 0 ? df : double(1)/walkers_total[bottom]) / dE;
-        ln_energy_weights[i] +=
-          (log(df_dE) - log(walkers_total[i]/totalmoves))/2.0;
-      }
-      weight_updates++;
     }
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -661,7 +670,6 @@ int main(int argc, const char *argv[]) {
       }
 
       // Save RDF
-      // fixme: assumes homogeneous for density
       if(!num_walls){
         FILE *g_out = fopen((const char *)g_fname, "w");
         fprintf(g_out, "%s", headerinfo);
