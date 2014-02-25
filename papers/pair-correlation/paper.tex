@@ -49,11 +49,13 @@
 
 The standard approach in liquid state theory is to treat a liquid as a
 hard-sphere reference fluid with attractive interactions that are
-treated perturbatively~\cite{hansen2006theory}.  Recently there have
-been considerable advances in the development of classical density
-functionals based on the
-application of these theoretical approaches to inhomogeneous
-densities~\cite{ jain2007modified, gloor2007prediction, gross2009density,
+treated perturbatively~\cite{hansen2006theory}.  Recent advances have
+extended these perturbative approaches to inhomogeneous density
+distributions---that is, liquid interfaces---through the use of
+classical density functional theory (DFT), in which the grand free
+energy is found by minimizing a free energy functional of the
+density~\cite{ jain2007modified, gloor2007prediction,
+  gross2009density,
   %felipe2001examination, gloor2002saft,
   %gloor2004accurate, clark2006developing,
   kahl2008modified,
@@ -72,7 +74,7 @@ $g^{(2)}(\rr_1,\rr_2)$.  Unlike the radial distribution function of a
 homogeneous fluid, there does not currently exist a tractable form for
 the pair distribution function of an inhomogeneous hard-sphere fluid,
 suitable for use in constructing a density
-functional~\cite{gloor2007prediction, jain2007modified}. \fixme{We need to say what a density functional is}
+functional~\cite{gloor2007prediction, jain2007modified}.
 
 At its core, thermodynamic perturbation theory---sometimes referred to
 as the cluster, or high-temperature expansion---is an expansion of the
@@ -99,7 +101,7 @@ The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
 as an external field, and using the resultant equilibrium density to
 find the pair distribution function~\cite{hansen2006theory}.  This
-elegant approach lends itself to DFT \fixme{Define DFT earlier!}, and can be used to compute and
+elegant approach lends itself to DFT, and can be used to compute and
 plot the pair distribution function, but requires a full free-energy
 minimization \emph{for each position} $\rr_1$ in
 $g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
@@ -135,7 +137,6 @@ computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
 approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
-\fixme{When we introduce DFT, we should talk about minimization.}
 
 \section{Approximations to the pair distribution function}
 There are few analytic approximations for the inhomogeneous pair
@@ -156,7 +157,7 @@ did not however use this approach, which fails dramatically at higher
 densities, as the packing fraction found from the mean density exceeds
 unity.
 
-Approaches that do not diverge use an average of the density over some
+Non-divergent approaches use an average of the density over some
 volume. Fischer and Methfessel~\cite{fischer1980born} introduce the
 approximation
 \begin{align}
@@ -177,8 +178,9 @@ Methfessel is intended to approximate the pair distribution function only
 at contact, when the distance between $\rr_1$ and $\rr_2$ is the hard-sphere
 diameter.
 
-For these reasons Sokolowski and Fischer modified this approach to use
-averages centered on the two points $\rr_1$ and $\rr_2$:
+Sokolowski and Fischer addressed the shortcomings of the theory of
+Fischer and Methfessel by modifying this approach to use
+averages, centered on the two points $\rr_1$ and $\rr_2$:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12},
   \tfrac12(\bar{n}(\rr_1)+\bar{n}(\rr_2))\right)
@@ -196,32 +198,54 @@ averages at the points at which the pair distribution function is
 desired, it cannot be written as a single-site convolution, since the
 convolution kernel depends on both points.
 
-\fixme{Add a paragraph here explaining the work of Schulte {\em et
-    al.}  In particular, we want to emphasize that we have an accurate
-representation for an \emph{average} of the pair distribution function
-\emph{at contact}.  Then we can cite this in the ``Our Approach''
-section.}
+In a previous paper~\cite{schulte2012using}, we have introduced a
+functional that gives a good approximation for the pair distribution
+function averaged over positions $\rr_2$ that are in contact with
+$\rr_1$, defined as:
+\begin{align}
+  g_\sigma(\rr_1) &\equiv \frac{ \int g^{(2)}(\rr_1,\rr_2) \delta(\sigma -|\rr_1-\rr_2|)n(\rr_2)
+    d\rr_2 }{ \tilde{n}(\rr_1)  }
+\end{align}
+where the averaged density $\tilde{n}(\rr_1)$ is defined by
+\begin{align}
+  \tilde{n}(\rr_1) &\equiv \int \delta(\sigma -|\rr_1 - \rr_2|)n(\rr_2) d\rr_2.
+\end{align}
+We use the contact-value theorem to derive the exact formula:
+\begin{align}
+  g_\sigma(\rr)% &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
+  &= \frac12 \frac{1}{k_BT n(\rr) \tilde{n}(\rr)} \frac{\delta
+    A}{\delta \sigma(\mathbf{r})} \label{eq:gsigma-exact}
+\end{align}
+where $\sigma(\rr)$ is the diameter of hard spheres located at
+position $\rr$, and $A$ is the Helmholtz free energy of the
+hard-sphere fluid.  Our approximation is obtained by using the White
+Bear functional for Helmholtz free energy of the hard-sphere
+fluid~\cite{roth2002whitebear} in Eq.~\ref{eq:gsigma-exact}.  This
+provides an excellent approximation for this averaged value of the
+pair distribution function for a variety of interfaces, and over a
+wide range of densities.
 
 \section{Our approach}
 We approximate the pair correlation with the average of two radial
 distribution functions, evaluated at the distance between the two
-points, that are themselves functions of our published pair
-correlation at contact $g_{\sigma}(\rr)$ evaluated at the two
-points~\cite{schulte2012using}.
+points, that are themselves functions of the averaged pair correlation
+at contact $g_{\sigma}(\rr)$ discussed above~\cite{schulte2012using},
+evaluated at the two points.
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 \end{align}
 
-In the approaches mentioned above, function forms of radial
-distributions (used to approximate pair correlation) were dependent
-upon independent variables $\eta$, the density, whether at single
-points or averaged over sourrounding volumes.  We can achieve greater
-accuracy by using instead a function dependent upon our $g_{\sigma}$,
-which holds more information about an inhomogeneous system
-then a simple convolution of the density does.  We therefore seek a function form for
-our radial distribution that is dependent upon $g_{\sigma}$ and that
-will approach the correct solution in the homogeneous limit and also
-in the limit of contact distance between the two points.
+In the approaches for the pair distribution function mentioned above,
+function forms of radial distributions (used to approximate pair
+correlation) were dependent upon independent variables $\eta$, the
+density, whether at single points or averaged over sourrounding
+volumes.  We can achieve greater accuracy by using instead a function
+dependent upon our $g_{\sigma}$, which holds more information about an
+inhomogeneous system then a simple convolution of the density does.
+We therefore seek a function form for our radial distribution that is
+dependent upon $g_{\sigma}$ and that will approach the correct
+solution in the homogeneous limit and also in the limit of contact
+distance between the two points.
 
 We construct our function's form in terms of an expansion of powers of
 $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
@@ -242,8 +266,10 @@ radial distribution function that is dependent only on $r$ and
 $g_{\sigma}$.
 
 The function has the form:
+\davidsays{fix below to match next section... or should we just delete it,
+and express the concept in words? It seems maybe redundant.}
 \begin{multline}
-  g(|\rr|) = 1 + h_{\sigma}e^{-x_0(r-\sigma)} \\+ x_1h_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
+  g(|\rr|) = 1 + h_{\sigma}e^{-\kappa_0\left(\frac{r}{\sigma}-1\right)} \\+ x_1h_{\sigma}\sin(x_2(r-\sigma))e^{-x_3(r-\sigma)}\\
   -x_4h_{\sigma}^2\sin(x_5(r-\sigma))e^{-x_6(r-\sigma)}
 \end{multline}
 The finalized form of our pair correlation function is:
