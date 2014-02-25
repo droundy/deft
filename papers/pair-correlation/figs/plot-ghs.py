@@ -287,6 +287,19 @@ f = open('figs/ghs-analytics.h', 'w')
 f.write(c_code)
 f.close()
 
+# save fit parameters
+outfile = open('figs/fit-parameters.tex', 'w')
+outfile.write(r"""
+\newcommand\maxerr{%(maxerr).2g}
+\newcommand\etamaxerr{%(etamaxerr)g}
+\newcommand\rmaxerr{%(rmaxerr).2g}
+\newcommand\chisq{%(chisq).2g}
+\newcommand\kappazero{%(K0)g}
+\newcommand\kappaone{%(K1)g}
+\newcommand\kappatwo{%(K2)g}
+""" % locals())
+outfile.close()
+
 # now let's plot the fit
 for i in range(len(ff)):
   pylab.figure(1)
