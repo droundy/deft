@@ -913,22 +913,20 @@ after the transform, we can dot both sides with $\mathbf{\hat{k}}$.
   &= \frac{4i \sqrt{\pi}}{a}\int_0^\infty r^3
   e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{\cos(kr)}{kr}
     -\frac{\sin(kr)}{(kr)^2}\right] \mathrm{dr} \\
-  &= \frac{4i \sqrt{\pi}}{k} \frac{\sqrt{\pi}} {2}e^{-a^2k^2/4}\left[
-    \frac{1}{2} \left(2a^2-a^4k^2-\sigma^2 \right)
-    \cos\left(\frac{k\sigma}{2}\right) - a^2k\sigma \sin\left(\frac{k\sigma}{2}\right) -
-    \frac{1}{k}\left( a^2k\cos\left(\frac{k\sigma}{2}\right) + \sigma
-    \sin\left(\frac{k\sigma}{2}\right) \right) \right] \\
-  &= \frac{2 \pi}{ik}e^{-a^2k^2/4}\left[ \left(\frac{a^4k^2 +
-      \sigma^2}{2} \right) \cos\left(\frac{k\sigma}{2}\right) +
-    \left(a^2k + \frac{1}{k} \right)\sigma \sin\left(\frac{k\sigma}{2}\right) \right]
+  &= \frac{4i \sqrt{\pi}}{a} \frac{a \sqrt{\pi}} {4k^2}e^{-a^2k^2/4}\left[
+    k \left(\sigma^2 -a^4k^2\right)\cos\left(\frac{k\sigma}{2}\right)
+    - 2\sigma \left( 1+a^2k^2 \right) \sin\left( \frac{k\sigma}{2}\right) \right]\\
+   &= \frac{i \pi}{k}e^{-a^2k^2/4}\left[ \left(\sigma^2 -
+       a^4k^2\right) \cos\left(\frac{k\sigma}{2}\right) -
+     2\sigma \left(a^2k + \frac{1}{k} \right)\sin\left(\frac{k\sigma}{2}\right) \right]
 \end{align}
 
 so
 \begin{align}
-  \tilde{\mathbf{w}}_{2V}(\kk) = \frac{2 \pi}{ik}e^{-a^2k^2/4}\left[ \left(\frac{a^4k^2 +
-      \sigma^2}{2} \right) \cos\left(\frac{k\sigma}{2}\right) +
-    \left(a^2k + \frac{1}{k} \right)\sigma \sin\left(\frac{k\sigma}{2}\right)
-    \right] \mathbf{\hat{k}}
+  \tilde{\mathbf{w}}_{2V}(\kk) = \frac{i \pi}{k}e^{-a^2k^2/4}\left[ \left(\sigma^2 -
+       a^4k^2\right) \cos\left(\frac{k\sigma}{2}\right) -
+     2\sigma \left(a^2k + \frac{1}{k}
+     \right)\sin\left(\frac{k\sigma}{2}\right) \right] \mathbf{\hat{k}}
 \end{align}
 We will have a similar relation for $\tilde{\mathbf{w}}_{2V}(\kk)$
 since $\mathbf{w}_{1V}(\rr) = w_1(r)\rr$.  I'll skip some step since

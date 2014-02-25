@@ -62,8 +62,8 @@ w2 x = ifft ( w2k * fft x)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vifft ( w2vk *. fft x)
-  where w2vk = kvec *. (-2*pi*exp(-(a*k/2)**2)*((a**4*k**2+sigma**2)/2*cos(k*sigma/2)+
-                                               (a**2*k+1/k)*sigma*sin(k*sigma/2))/k**2)
+  where w2vk = kvec *. (pi*exp(-(a*k/2)**2)*((sigma**2-a**4*k**2)*cos(k*sigma/2)-
+                                               2*sigma*(a**2*k+1/k)*sin(k*sigma/2))/k**2)
 
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vifft ( w1vk *. fft x)
