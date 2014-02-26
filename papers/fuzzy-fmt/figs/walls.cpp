@@ -24,7 +24,7 @@
 #include "handymath.h"
 
 Functional SoftFluid(double radius, double V0, double mu);
-Functional HardFluid(double radius, double mu);
+Functional HardRosenfeldFluid(double radius, double mu);
 
 // Here we set up the lattice.
 static double width = 15;
@@ -184,12 +184,12 @@ int main(int, char **) {
   for (double eta = 0.4; eta > 0.05; eta-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
-      Functional f = HardFluid(1,0);
+      Functional f = HardRosenfeldFluid(1,0);
       if (temp > 0) f = SoftFluid(1, 1, 0);
       const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, eta/(4*M_PI/3));
       printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
       if (temp > 0) f = SoftFluid(1, 1, mu);
-      else f = HardFluid(1, mu);
+      else f = HardRosenfeldFluid(1, mu);
 
       const char *name = "hard";
       if (temp > 0) name = "soft";
