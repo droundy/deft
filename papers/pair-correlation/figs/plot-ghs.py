@@ -7,7 +7,7 @@ if len(sys.argv) < 2 or sys.argv[1] != "show":
   matplotlib.use('Agg')
 from scipy.optimize import leastsq
 from sympy import pi, exp
-import pylab
+import pylab, string
 
 sigma = 2
 
@@ -245,6 +245,59 @@ K0 = vals[0]
 K1 = vals[1]
 K2 = vals[2]
 
+def next_comma(ccode):
+  """ returns next comma not counting commas within parentheses """
+  deepness = 0
+  for i in xrange(len(ccode)):
+    if ccode[i] == ')':
+      if deepness == 0:
+        return -1
+      else:
+        deepness -= 1
+    elif ccode[i] == '(':
+      deepness += 1
+    elif ccode[i] == ',' and deepness == 0:
+      return i
+
+def next_right_paren(ccode):
+  """ returns next ")" not counting matching parentheses """
+  deepness = 0
+  for i in xrange(len(ccode)):
+    if ccode[i] == ')':
+      if deepness == 0:
+        return i
+      else:
+        deepness -= 1
+    elif ccode[i] == '(':
+      deepness += 1
+
+def fix_pows(ccode):
+  """ A pointless optimization to remove unneeded calls to "pow()".
+  It turns out not to make a difference in the speed of walls.mkdat,
+  but I'm leaving it in, becuase this way we can easily check if this
+  makes a difference (since I thought that it might). """
+  n = string.find(ccode, 'pow(')
+  if n > 0:
+    return ccode[:n] + fix_pows(ccode[n:])
+  if n == -1:
+    return ccode
+  ccode = ccode[4:] # skip 'pow('
+  icomma = next_comma(ccode)
+  arg1 = fix_pows(ccode[:icomma])
+  ccode = ccode[icomma+1:]
+  iparen = next_right_paren(ccode)
+  arg2 = fix_pows(ccode[:iparen])
+  ccode = fix_pows(ccode[iparen+1:])
+  if arg2 == ' 2':
+    return '((%s)*(%s))%s' % (arg1, arg1, ccode)
+  if arg2 == ' 3':
+    return '((%s)*(%s)*(%s))%s' % (arg1, arg1, arg1, ccode)
+  if arg2 == ' 4':
+    return '((%s)*(%s)*(%s)*(%s))%s' % (arg1, arg1, arg1, arg1, ccode)
+  if arg2 == ' 5':
+    return '((%s)*(%s)*(%s)*(%s)*(%s))%s' % (arg1, arg1, arg1, arg1, arg1, ccode)
+  return 'pow(%s, %s)%s' % (arg1, arg2, ccode)
+
 # finish printing to latex and c++ with the constants
 c_code += r"""
 const double kappa_0 = %.*f;
@@ -258,13 +311,13 @@ inline double gsigma_to_eta(const double g_sigma) {
 }
 
 
-inline double radial_distribution(double gsigma, double r) {
-  if (gsigma <= 1) return 1; // handle roundoff error okay
+inline double radial_distribution(double g_sigma, double r) {
+  if (g_sigma <= 1) return 1; // handle roundoff error okay
   if (r < %i) return 0;
-  const double h_sigma = gsigma - 1;
+  const double h_sigma = g_sigma - 1;
   return %s;
 }
-""" %(digits, K0, digits, K1, digits, K2, sympy.ccode(v['eta']), v['sigma'], sympy.ccode(ghs_s))
+""" %(digits, K0, digits, K1, digits, K2, fix_pows(sympy.ccode(v['eta'])), v['sigma'], fix_pows(sympy.ccode(ghs_s)))
 
 latex_code += r"""
 \begin{dmath}
