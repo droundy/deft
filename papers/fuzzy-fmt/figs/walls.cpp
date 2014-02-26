@@ -96,7 +96,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     delete potential;
     potential = 0;
   }
-  if (!potential) {
+  if (!potential || true) {
     potential = new Grid(gd);
     *potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
     *potential = -kT*potential->cwise().log();
@@ -107,10 +107,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     *potential *= kT/old_temperature;
   }
 
-  // FIXME below I use the HS energy because of issues with the actual
-  // functional.
   const double approx_energy = fhs(kT, eta/(4*M_PI/3))*dw*dw*width;
-  const double precision = fabs(approx_energy*1e-8);
+  const double precision = fabs(approx_energy*1e-14);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, kT);
   fflush(stdout);
 
@@ -182,9 +180,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
 int main(int, char **) {
   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-  const double etas[] = { 0.1, 0.2, 0.4 };
   const double temps[] = { 0.0, 0.01, 0.02, 0.03 };
-  for (double eta = 0.5; eta > 0; eta-=0.1) {
+  for (double eta = 0.4; eta > 0.05; eta-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
       Functional f = HardFluid(1,0);
