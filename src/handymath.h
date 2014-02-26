@@ -13,13 +13,30 @@ inline double erfi(double x) {
 inline double sqr(double x) { return x*x; }
 
 inline double uipow(double x, unsigned int n) {
-  double sofar = 1.0;
-  while (n > 0) {
-    if (n & 1) sofar *= x;
-    x *= x;
-    n = n >> 1;
+  switch (n) {
+  case 0:
+    return 1;
+  case 1:
+    return x;
+  case 2:
+    return x*x;
+  case 3:
+    return x*x*x;
+  case 4:
+    return (x*x)*(x*x);
+  case 5:
+    return x*(x*x)*(x*x);
+  default:
+    {
+      double sofar = 1.0;
+      while (n > 0) {
+        if (n & 1) sofar *= x;
+        x *= x;
+        n = n >> 1;
+      }
+      return sofar;
+    }
   }
-  return sofar;
 }
 
 inline double min(double a, double b) { return (a<b) ? a : b; }

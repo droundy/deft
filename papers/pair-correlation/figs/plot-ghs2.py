@@ -379,17 +379,17 @@ inline double radial_distribution(double gsigma, double r) {
 """ % locals())
 outfile.close()
 
-outfile = open('figs/fit-parameters.tex', 'w')
-outfile.write(r"""
-\newcommand\maxerr{%(maxerr).2g}
-\newcommand\etamaxerr{%(etamaxerr)g}
-\newcommand\rmaxerr{%(rmaxerr).2g}
-\newcommand\chisq{%(chisq).2g}
-\newcommand\kappazero{%(K0)g}
-\newcommand\kappaone{%(K1)g}
-\newcommand\kappatwo{%(K2)g}
-""" % locals())
-outfile.close()
+# outfile = dontopen('figs/fit-parameters.tex', 'w')
+# outfile.write(r"""
+# \newcommand\maxerr{%(maxerr).2g}
+# \newcommand\etamaxerr{%(etamaxerr)g}
+# \newcommand\rmaxerr{%(rmaxerr).2g}
+# \newcommand\chisq{%(chisq).2g}
+# \newcommand\kappazero{%(K0)g}
+# \newcommand\kappaone{%(K1)g}
+# \newcommand\kappatwo{%(K2)g}
+# """ % locals())
+# outfile.close()
 
 # for i in g:
 #     print dist(vals, ind)[i]
