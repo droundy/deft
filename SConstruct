@@ -133,7 +133,7 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
                         YuWuCorrelationFast SaftFluid2Fast EntropySaftFluid2Fast CorrelationGrossCorrectFast
                         gSigmaSm2Fast gSigmaAm2Fast gSigmaSFast gSigmaAFast
                         HughesHBFast
-                        SoftFluidFast HardFluidFast WaterXFast HughesXFast """):
+                        SoftFluidFast HardFluidFast HardRosenfeldFluidFast WaterXFast HughesXFast """):
     filename = 'src/' + source + '.cpp'
     generated_sources.append(filename)
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
@@ -386,7 +386,7 @@ env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.20.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.30.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
+                      #'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
@@ -398,10 +398,10 @@ env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.40.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.50.dat'],
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat'],
+                      #'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
+                      #'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
+                      #'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.50.dat'],
             source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
             action = './$SOURCE')
 
@@ -477,6 +477,9 @@ for test in Split(""" memory saft eos print-iter convolve-finite-difference prec
 
 for test in Split(""" functional-arithmetic surface-tension """):
     env.BuildTest(test, generic_sources)
+
+for test in Split(""" sfmt """):
+    env.BuildTest(test, generic_sources + ['src/SoftFluidFast.cpp'])
 
 for test in Split(""" newcode """):
     env.BuildTest(test, ['src/new/Minimize.cpp'])

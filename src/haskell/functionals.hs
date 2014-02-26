@@ -4,6 +4,7 @@ import WaterSaft ( water_saft, water_entropy, water_X, mu, water_saft_by_hand )
 import IdealGas ( idealgas )
 import FMT ( n, n2, n2mxx, n2x )
 import SFMT ( sfmt )
+import Rosenfeld ( fmt )
 import WhiteBear ( whitebear, tensorwhitebear, whitebear_m2, correlation_gross, gSigmaA, gSigmaS,
                    gSigmaA_m2, gSigmaS_m2, gSigmaA_by_hand, gSigmaA_automagic )
 import System.Environment ( getArgs )
@@ -19,6 +20,8 @@ main =
        defineFunctional (idealgas + sfmt + nmu) ["R", "V0", "mu"] "SoftFluid"
      gen "src/HardFluidFast.cpp" $
        defineFunctional (idealgas + whitebear + nmu) ["R", "mu"] "HardFluid"
+     gen "src/HardRosenfeldFluidFast.cpp" $
+       defineFunctional (idealgas + fmt + nmu) ["R", "mu"] "HardRosenfeldFluid"
      
      gen "src/HardSpheresNoTensor2Fast.cpp" $
        defineFunctional whitebear ["R"] "HardSpheresNoTensor2"

@@ -12,7 +12,7 @@ module Expression (Exprn(..),
                    tplus,
                    tensor_xx, tensor_yy, tensor_zz, tensor_xy, tensor_yz, tensor_zx,
                    erf, erfi, heaviside,
-                   nameVector, vfft, vifft,
+                   nameVector, vfft, vector_convolve,
                    nameTensor, tfft, tifft,
                    fft, ifft, integrate, grad, derive, scalarderive, deriveVector, realspaceGradient,
                    Expression(..), joinFFTs, (===), var, vvar, tvar,
@@ -860,8 +860,16 @@ ifft ke | ke == 0 = 0
 vfft :: Vector RealSpace -> Vector KSpace
 vfft (Vector x y z) = Vector (fft x) (fft y) (fft z)
 
-vifft :: Vector KSpace -> Vector RealSpace
-vifft (Vector x y z) = Vector (ifft x) (ifft y) (ifft z)
+-- vifft :: Vector KSpace -> Vector RealSpace
+-- vifft (Vector x y z) = Vector (ifft x) (ifft y) (ifft z)
+
+vector_convolve :: Vector KSpace -> Expression RealSpace -> Vector RealSpace
+vector_convolve (Vector wkx wky wkz) n = if real_part wkx /= 0 || real_part wky /= 0 || real_part wkz /= 0 
+                                         then error "Cannot convolve with a real k-space vector weighting function"
+                                         else Vector (ifft (wkx*nk)) (ifft (wky*nk)) (ifft (wkz*nk))
+  where nk = fft n
+  
+
 
 tfft :: Tensor RealSpace -> Tensor KSpace
 tfft (SymmetricTensor a b c d e f) = SymmetricTensor (fft a) (fft b) (fft c) (fft d) (fft e) (fft f)
