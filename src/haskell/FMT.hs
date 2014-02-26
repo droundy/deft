@@ -60,14 +60,14 @@ step_diam x = ifft ( stepk * fft x)
   where stepk = var "stepdiam" "\\Theta_{2R}(k)" $ smear * (4*pi) * (sin(2*kR) - 2*kR * cos(2*kR)) / k**3
 
 vshell, vshellPrime :: Expression RealSpace -> Vector RealSpace
-vshell x = vifft $ deltav *. fft x
+vshell x = vector_convolve deltav x
   where deltav = vvar "delta" (\i -> "\\delta_" ++ i ++ "(k)") $
                  smear * (4*pi) * imaginary * (rad * cos kR - sin kR/k)/k**2 .* kvec
 
 shellPrime x = ifft ( delta' * fft x)
   where delta' = var "deltaprime" "\\delta'(k)" $
                  smear * (4*pi) * ( -sin kR/k - rad * cos kR)
-vshellPrime x = vifft ( delta' *. fft x)
+vshellPrime x = vector_convolve delta' x
   where delta' = vvar "deltaprime" (\i -> "\\delta_"++i++"'(k)") $
                  smear * (4*pi) * imaginary * ( rad * sin kR)/k .* kvec
 
