@@ -9,11 +9,11 @@ parser.add_argument(
 		'-N', metavar='INT', type=int, default=1000, help='Number of balls')
 
 parser.add_argument(
-		'-initialization_iterations', metavar='INT', type=int, default=1000,
+		'-initialize', metavar='INT', type=int, default=500000,
 		help='Number of iterations to run for initialization')
 
 parser.add_argument(
-		'-iterations', metavar='INT', type=int, default=1000,
+		'-iterations', metavar='INT', type=int, default=2500000,
 		help='Number of simulation iterations')
 
 parser.add_argument(

@@ -93,8 +93,8 @@ int main(int argc, const char *argv[]) {
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   int N = 1000;
-  long iterations = 1000;
-  long initialization_iterations = 1000;
+  long iterations = 2500000;
+  long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
   double interaction_scale = 1.3;
@@ -128,7 +128,7 @@ int main(int argc, const char *argv[]) {
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"iterations", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
      0, "Number of iterations to run for", "INT"},
-    {"initialization_iterations", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
+    {"initialize", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
      &initialization_iterations, 0,
      "Number of iterations to run for initialization", "INT"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
