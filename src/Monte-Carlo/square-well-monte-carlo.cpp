@@ -89,7 +89,7 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *dir = new char[1024];
-  sprintf(dir, "papers/square-well/figs/mc");
+  sprintf(dir, "papers/square-well/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   int N = 1000;
@@ -641,6 +641,36 @@ int main(int argc, const char *argv[]) {
           fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
       fclose(e_out);
 
+      // Save RDF
+      if(!walls){
+        FILE *g_out = fopen((const char *)g_fname, "w");
+        fprintf(g_out, "%s", headerinfo);
+        fprintf(g_out, "%s", countinfo);
+        fprintf(g_out, "\n# data table containing values of g");
+        fprintf(g_out, "\n# first column reserved for specifying energy level");
+        fprintf(g_out, "\n# column number rn (starting from the second column, "
+                "counting from zero) corresponds to radius r given by "
+                "r = (rn + 0.5) * de_g");
+        const double density = N/len[x]/len[y]/len[z];
+        const double total_vol = len[x]*len[y]*len[z];
+        for(int i = 0; i < energy_levels; i++) {
+          if(g_histogram[(i+1)*g_bins - 1] > 0){
+            fprintf(g_out, "\n%i",i);
+            for(int bin = 0; bin < g_bins; bin++) {
+              const double probability = (double)g_histogram[i*g_bins + bin]
+                / energy_histogram[i];
+              const double r = (bin + 0.5) * de_g;
+              const double shell_vol =
+                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
+              const double n2 = probability/total_vol/shell_vol;
+              const double g = n2/sqr(density)*N*N;
+              fprintf(g_out, " %8.5f", g);
+            }
+          }
+        }
+        fclose(g_out);
+      }
+
       // Saving density data
       if(walls){
         FILE *densityout = fopen((const char *)density_fname, "w");
@@ -662,36 +692,6 @@ int main(int argc, const char *argv[]) {
           }
         }
         fclose(densityout);
-      }
-
-      // Save RDF
-      if(!walls){
-        FILE *g_out = fopen((const char *)g_fname, "w");
-        fprintf(g_out, "%s", headerinfo);
-        fprintf(g_out, "%s", countinfo);
-        fprintf(g_out, "\n# data table containing values of g");
-        fprintf(g_out, "\n# first column reserved for specifying energy level");
-        fprintf(g_out, "\n# column number rn (starting from the second column, "
-                "counting from zero) corresponds to radius r given by "
-                "r = (rn + 0.5) * de_g");
-        const double density = N/len[x]/len[y]/len[z];
-        const double total_vol = len[x]*len[y]*len[z];
-        for(int i = 0; i < energy_levels; i++) {
-          if(energy_histogram[i] != 0){
-            fprintf(g_out, "\n%i",i);
-            for(int bin = 0; bin < g_bins; bin++) {
-              const double r = (bin + 0.5) * de_g;
-              const double shell_vol =
-                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-              const double probability = (double)g_histogram[i*g_bins + bin]
-                / energy_histogram[i];
-              const double n2 = probability/total_vol/shell_vol;
-              const double g = n2/sqr(density)*N*N;
-              fprintf(g_out, " %8.5f", g);
-            }
-          }
-        }
-        fclose(g_out);
       }
 
       delete[] countinfo;

@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 from __future__ import division
 from numpy import *
-import os, sys, argparse
+import os, sys, argparse, socket
 import subprocess as sp
 
 import arguments
@@ -15,11 +15,10 @@ args = parser.parse_args()
 
 # useful directories
 thisdir = os.path.dirname(os.path.realpath(__file__))
-figdir = thisdir
-jobdir = figdir+'/jobs'
+jobdir = thisdir+'/jobs'
 
-# Assumes this script is placed in [deft]/papers/square-well/figs/
-projectdir = os.path.realpath(thisdir+'../../../..')
+# Assumes this script is placed in [deft]/papers/square-well/
+projectdir = os.path.realpath(thisdir+'../../..')
 
 # build monte carlo code
 simname = 'square-well-monte-carlo'
@@ -38,7 +37,7 @@ for ff in args.ff:
     script = open(scriptname,'w')
     script.write("#!/bin/bash\n")
     script.write("#SBATCH --mem-per-cpu=%i\n" % memory)
-    script.write("#SBATCH --output %s\n\n" % outname)
+    script.write("#SBATCH --output %s\n" % outname)
     script.write("#SBATCH --error %s\n\n" % errname)
     script.write("echo \"Starting job with ID: %s, "
                  "Estimated memory use: %i MB.\"\n\n" %(jobname,memory))
@@ -50,4 +49,8 @@ for ff in args.ff:
         script.write(" \\\n --" + arg + "=" + str(val))
     script.close()
 
-    sp.Popen(["sbatch", "-J", jobname, scriptname])
+
+    if socket.gethostname() == 'MAPHost': # if on my own computer
+        sp.Popen(["bash", scriptname])
+    else:
+        sp.Popen(["sbatch", "-J", jobname, scriptname])
