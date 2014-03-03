@@ -15,7 +15,7 @@ if len(sys.argv) < 2:
     exit(1)
 
 ff = int(sys.argv[1])
-#arg ff = [10, 20, 30, 40, 50]
+#arg ff = [10, 20, 30, 40]
 
 def smooth(x, N):
     '''

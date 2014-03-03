@@ -2,12 +2,13 @@
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-import matplotlib, sys, os.path, sympy, numpy
+import matplotlib, sys, os.path
 if len(sys.argv) < 2 or sys.argv[1] != "show":
   matplotlib.use('Agg')
+import sympy
 from scipy.optimize import leastsq
 from sympy import pi, exp
-import pylab, string
+import pylab, string, numpy
 
 sigma = 2
 
