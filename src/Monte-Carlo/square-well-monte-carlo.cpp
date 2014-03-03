@@ -89,7 +89,7 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *dir = new char[1024];
-  sprintf(dir, "papers/square-well/data");
+  sprintf(dir, "papers/square-well-liquid/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   int N = 1000;

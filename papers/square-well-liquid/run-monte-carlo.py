@@ -17,7 +17,7 @@ args = parser.parse_args()
 thisdir = os.path.dirname(os.path.realpath(__file__))
 jobdir = thisdir+'/jobs'
 
-# Assumes this script is placed in [deft]/papers/square-well/
+# Assumes this script is placed in [deft]/papers/square-well-liquid/
 projectdir = os.path.realpath(thisdir+'../../..')
 
 # build monte carlo code
