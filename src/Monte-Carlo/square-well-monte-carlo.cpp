@@ -103,7 +103,7 @@ int main(int argc, const char *argv[]) {
   double dr = 0.01;
   double de_density = 0.01;
   double de_g = 0.01;
-  int totime = 0;
+  int totime = -1;
   bool talk = false;
   // scale is not a quite "constant" -- it is adjusted during the initialization
   //  so that we have a reasonable acceptance rate
@@ -265,6 +265,7 @@ int main(int argc, const char *argv[]) {
   long *density_histogram = new long[energy_levels*density_bins]();
 
   ball *balls = new ball[N];
+  if(totime < 0) totime = 10*N;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -437,6 +438,7 @@ int main(int argc, const char *argv[]) {
       workingmoves += move_val & 1;
       neighbor_updates += (move_val & 2) > 0;
       neighbor_informs += (move_val & 4) > 0;
+      totalmoves++;
     }
     // ---------------------------------------------------------------
     // Fine-tune translation scale to reach acceptance goal
@@ -573,14 +575,15 @@ int main(int argc, const char *argv[]) {
                                                  len, walls);
       interactions += new_interaction_count - old_interaction_count;
       energy_histogram[interactions]++;
-
-      walkers_total[interactions]++;
-      if(interactions >= walker_minus_threshold) current_walker_plus = false;
-      else if(interactions <= walker_plus_threshold) current_walker_plus = true;
-      if(current_walker_plus) walkers_plus[interactions]++;
-
       workingmoves += move_val & 1;
       totalmoves ++;
+
+      if(weights){
+        walkers_total[interactions]++;
+        if(interactions >= walker_minus_threshold) current_walker_plus = false;
+        else if(interactions <= walker_plus_threshold) current_walker_plus = true;
+        if(current_walker_plus) walkers_plus[interactions]++;
+      }
     }
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -695,34 +698,6 @@ int main(int argc, const char *argv[]) {
       }
 
       delete[] countinfo;
-    }
-    // ---------------------------------------------------------------
-    // Print out timing information if desired
-    // ---------------------------------------------------------------
-    if (totime > 0 && iteration % totime == 0) {
-      char *iter = new char[1024];
-      sprintf(iter, "%i iterations", totime);
-      took(iter);
-      delete[] iter;
-      printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
-             iteration, (double)workingmoves/totalmoves, translation_distance);
-      const long checks_without_tables = totalmoves*N;
-      int total_neighbors = 0;
-      for(int i = 0; i < N; i++) {
-        total_neighbors += balls[i].num_neighbors;
-        most_neighbors = max(balls[i].num_neighbors, most_neighbors);
-      }
-      avg_neighbors = double(total_neighbors)/N;
-      const long checks_with_tables = totalmoves*avg_neighbors
-        + N*neighbor_updates;
-      printf("We've done about %.3g%% of the distance calculations we would "
-             "have done without tables.\n",
-             100.0*checks_with_tables/checks_without_tables);
-      printf("The max number of neighbors is %i, whereas the most we've seen is "
-             "%i.\n", max_neighbors, most_neighbors);
-      printf("Neighbor scale is %g and avg. number of neighbors is %g.\n\n",
-             neighbor_scale, avg_neighbors);
-      fflush(stdout);
     }
   }
   // ----------------------------------------------------------------------------
