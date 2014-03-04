@@ -29,8 +29,15 @@ if exitStatus != 0:
 
 for ff in args.ff:
     for interaction_scale in args.interaction_scale:
+
         memory = args.N # fixme: better guess
-        jobname = "sw-%iN-%iw-%4.2fff" %(args.N,args.walls,ff)
+        if args.walls == 0: wall_tag = 'periodic'
+        elif args.walls == 1: wall_tag = 'walls'
+        elif args.walls == 2: wall_tag = 'tube'
+        elif args.walls == 3: wall_tag = 'box'
+        weight_tag = '' if args.weights == False else 'nw'
+        jobname = "sw-%s-ff%04.2f-is%03.1f-N%i-%s" \
+          %(wall_tag,ff,interaction_scale,args.N,weight_tag)
         basename = "%s/%s" %(jobdir, jobname)
         scriptname = basename + '.sh'
         outname = basename + '.out'
@@ -44,7 +51,8 @@ for ff in args.ff:
         script.write("#SBATCH --output %s\n" % outname)
         script.write("#SBATCH --error %s\n\n" % errname)
         script.write("echo \"Starting job with ID: %s, "
-                    "Estimated memory use: %i MB.\"\n\n" %(jobname,memory))
+                    "Estimated memory use: %i MB.\"\n\n"
+                    %(jobname,memory))
         script.write("cd %s\n" %projectdir)
         script.write(command)
         for (arg,val) in [ ("N",args.N), ("ff",ff),("walls",args.walls),

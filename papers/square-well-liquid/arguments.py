@@ -27,5 +27,9 @@ parser.add_argument(
     help='Number of walls')
 
 parser.add_argument(
+		'-weights', metavar='BOOL', type=bool, default=False,
+    choices=[0,1,2,3],help='Use energy weights?')
+
+parser.add_argument(
 		'--hide', action='store_true',
     help='Don\'t display plots when saved')
