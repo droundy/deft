@@ -38,6 +38,8 @@ if len(sys.argv) < 2:
 ff = float(sys.argv[1])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
+plot_labels = ['a)', 'b)'] if ff == 0.1 else ['c)', 'd)']
+
 def read_walls_path(ff, fun):
   if fun == 'mc':
     # input:  "figs/mc/wallsMC-pair-%02.1f-path-trimmed.dat" % (ff)
@@ -208,7 +210,6 @@ zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
-zplot.set_ylabel(r'$g^{(2)}(\left< 0,0,0\right>,\mathbf{r})$')
 legendloc = 'lower left' if ff < 0.2 else 'upper left'
 zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
@@ -285,7 +286,14 @@ ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
 
 
-twod_plot.set_title(r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$ at $\eta = %g$' % ff)
+title = r'$g^{(2)}(\left< 0,0,0\right>, \left<x, 0, z\right>)$'
+twod_plot.set_title(title +  r' at $\eta = %g$' % ff)
+xplot.set_ylabel(title)
+
+# add figure labels
+twod_plot.text(-2.0, ymax, plot_labels[0])
+xplot.text(6.7, ylim[1], plot_labels[1])
+
 #fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
 show()

@@ -97,7 +97,8 @@ zticks = [4, 6, 8, 10]
 
 plotticks = xticks + [z-rpath for z in zticks]
 xplot.set_xticks(plotticks)
-xplot.set_xticklabels(xticks + zticks)
+xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ['$0$ $0$'] +
+                      ['$%i$' %tick for tick in zticks])
 zplot.set_xticks([])
 
 
@@ -133,10 +134,13 @@ for name in plots:
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
       incontact = x**2 + (z-2*rpath)**2 < (rpath + 0.01)**2
-      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+      zplot.plot(z[incontact], g[incontact], styles.plot[name],
+                 label=styles.title[name])
     else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
-      zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot[name], label=styles.title[name])
+      xplot.plot(x[x < 0], g[x < 0], styles.plot[name],
+                 label=styles.title[name])
+      zplot.plot(z[abs(z-zcontact) > 0.0], g[abs(z-zcontact) > 0.0],
+                 styles.plot[name], label=styles.title[name])
 
 for name in plots:
   if name in ['this-work', 'sokolowski']:
@@ -299,7 +303,14 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
 
-twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
+plot_labels=['c)', 'd)']
+# add figure labels
+twod_plot.text(twod_plot.get_xlim()[0]-1, twod_plot.get_ylim()[1], plot_labels[0])
+xplot.text(-7.5, ylim[1], plot_labels[1])
+
+title = r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$'
+twod_plot.set_title(title +  ' at $\eta = %g$' % ff)
+xplot.set_ylabel(title)
 #fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/triplet-correlation-pretty-inbetween-%d.pdf" % (int(ff*10)))
 show()

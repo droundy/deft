@@ -374,18 +374,13 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
   \begin{subfigure}{\textwidth}
     \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-1.pdf}
     \vspace{-0.6cm}
-    \caption{Pair distribution function near a hard wall with $\eta = 0.1$.}
-    \label{fig:pair-distribution-1}
   \end{subfigure}
   \begin{subfigure}{\textwidth}
     \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-3.pdf}
     \vspace{-0.6cm}
-    \caption{Pair distribution function near a hard wall with $\eta = 0.3$.}
-    \label{fig:pair-distribution-3}
   \end{subfigure}
-  \caption{ \paircaption \fixme{Do we want to label the y-axis for the
-      1d plots? } \davidsays{I think so... also add a) b) c) d)}
-  }\label{fig:pair-distribution}
+  \caption{\paircaption}
+  \label{fig:pair-distribution}
 \end{figure*}
 
 \subsection{Pair distribution function}
@@ -405,8 +400,8 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 We begin by examining the pair distribution function near a hard wall,
 with a focus on the case where one of the two spheres is in contact
-with the hard wall.  Figure~\ref{fig:pair-distribution-1}a
-and~\ref{fig:pair-distribution-3}a compare the results of our
+with the hard wall.  Figure~\ref{fig:pair-distribution}a
+and~\ref{fig:pair-distribution}a compare the results of our
 approximate functional with Monte Carlo simulation at packing
 fractions of 0.1 and 0.3 respectively.  We see reasonable agreement at
 the lower density, with some reduced oscillations at larger distances,
@@ -414,10 +409,10 @@ and a flatter angular dependence when the two spheres are in contact.
 At the higher density, we see significant structure developing in the
 simulation results that is not reflected in our approximation.
 
-Figure~\ref{fig:pair-distribution-1}b
-and~\ref{fig:pair-distribution-3}b show the pair distribution function
+Figure~\ref{fig:pair-distribution}b
+and~\ref{fig:pair-distribution}b show the pair distribution function
 as plotted along a path illustrated in
-Fig.~\ref{fig:pair-distribution-1}a.  These plots compare this work
+Fig.~\ref{fig:pair-distribution}a.  These plots compare this work
 with Monte Carlo results, as well as the approximations of Sokolowski
 and Fischer~\cite{sokolowski1992role} and that of Fischer and
 Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
@@ -447,17 +442,13 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Tweak spacing, add a, b, c, etc. The 1d plots still
-      have two curves for this work, do we want to remove one?
-      \davidsays{I'm not sure, I might be tempted to keep both,
-        although if we do we should explain the difference between
-        them. (left-right mirror image)}} The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
-    $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
-    shows the triplet distribution function, with white corresponding
-    to the contact value of the \emph{pair} distribution function.
-    The plot on the right shows the value of $g^{(3)}$ along the path
-    shown as a dotted line on the plot to the
+  \caption{\fixme{Remove one of, or make a note of, the two curves for this
+      work} The triplet distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at
+    packing fraction 0.3, plotted when $\rr_1$ and $\rr_2$ are in contact.  The
+    color plot on the left shows the triplet distribution function, with white
+    corresponding to the contact value of the \emph{pair} distribution function.
+    The plot on the right shows the value of $g^{(3)}$ along the path shown as a
+    dotted line on the plot to the
     left.}\label{fig:triplet-contact-distribution}
 \end{figure*}
 
