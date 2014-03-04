@@ -103,7 +103,8 @@ zticks = [0, 2, 4, 6]
 
 plotticks = xticks + [-z+xmin for z in zticks]
 xplot.set_xticks(plotticks)
-xplot.set_xticklabels(xticks[:-1] + ["20"] + [""] + zticks[1:])
+xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ["$2$ $0$"] + [""] +
+                      ['$%i$' %tick for tick in zticks[1:]])
 zplot.set_xticks([])
 
 xplot.axvline(x=xmin, color='k')
@@ -301,7 +302,14 @@ zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
 
-twod_plot.set_title(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r})$ at $\eta = %g$' % ff)
+plot_labels=['a)', 'b)']
+# add figure labels
+twod_plot.text(twod_plot.get_xlim()[0]-1, twod_plot.get_ylim()[1], plot_labels[0])
+xplot.text(6.8, ylim[1], plot_labels[1])
+
+title = r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,\sigma\right>,\mathbf{r})$'
+twod_plot.set_title(title + ' at $\eta = %g$' % ff)
+xplot.set_ylabel(title)
 #fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/triplet-correlation-pretty-contact-%d.pdf" % (int(ff*10)))
 show()
