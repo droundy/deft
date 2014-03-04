@@ -126,9 +126,9 @@ int main(int argc, const char *argv[]) {
      "Relative cell size in z dimension", "DOUBLE"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    {"iterations", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
+    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
      0, "Number of iterations to run for", "INT"},
-    {"initialize", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
+    {"initialize", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
      &initialization_iterations, 0,
      "Number of iterations to run for initialization", "INT"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
@@ -186,7 +186,10 @@ int main(int argc, const char *argv[]) {
     printf("Code cannot currently handle walls in more than one dimension.\n");
     return 254;
   }
-  dr *= R;
+  if(walls > 3){
+    printf("You cannot have walls in more than three dimensions.\n");
+    return 254;
+  }
 
   // Adjust cell dimensions for desired filling fraction
   const double fac = R*pow(4.0/3.0*M_PI*N/(ff*len[x]*len[y]*len[z]), 1.0/3.0);
@@ -199,6 +202,7 @@ int main(int argc, const char *argv[]) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
+  dr *= R;
 
   const double eta = (double)N*4.0/3.0*M_PI*R*R*R/(len[x]*len[y]*len[z]);
   if (eta > 1) {
@@ -209,10 +213,14 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   char *weight_tag = new char[2];
+  char *wall_tag = new char[8];
+  if(walls == 0) sprintf(wall_tag,"periodic");
+  else if(walls == 1) sprintf(wall_tag,"wall");
+  else if(walls == 2) sprintf(wall_tag,"tube");
+  else if(walls == 3) sprintf(wall_tag,"box");
   sprintf(weight_tag, (weights ? "w" : "nw"));
   if (strcmp(filename, "default_filename") == 0) {
-    if (walls == 0) sprintf(filename, "periodic-%04.2f-%s", eta, weight_tag);
-    else sprintf(filename, "walls-%i-%04.2f-%s", walls, eta, weight_tag);
+    sprintf(filename, "%s-%04.2f-%s", wall_tag, eta, weight_tag);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
 
@@ -258,6 +266,7 @@ int main(int argc, const char *argv[]) {
   const double min_len = min(len[x], min(len[y], len[z]));
   const int g_bins = round(min_len/2/de_g);
   long *g_histogram = new long[energy_levels*g_bins]();
+  long *g_energy_histogram = new long[energy_levels]();
 
   // Density histogram
   const int density_bins = round(len[wall_dim]/de_density);
@@ -590,7 +599,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Density histogram
     if(walls){
-      for(int i = 0; i < N; i++) {
+      for(int i = 0; i < N; i++){
         density_histogram[interactions*density_bins
                           + int(floor(balls[i].pos[wall_dim]/de_density))] ++;
       }
@@ -598,9 +607,10 @@ int main(int argc, const char *argv[]) {
 
     // RDF
     if(!walls){
-      for(int i = 0; i < N; i++) {
-        for(int j = 0; j < N; j++) {
-          if(i != j) {
+      g_energy_histogram[interactions]++;
+      for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+          if(i != j){
             const vector3d r = periodic_diff(balls[i].pos, balls[j].pos, len,
                                              walls);
             const int r_i = floor(r.norm()/de_g);
@@ -656,17 +666,17 @@ int main(int argc, const char *argv[]) {
                 "r = (rn + 0.5) * de_g");
         const double density = N/len[x]/len[y]/len[z];
         const double total_vol = len[x]*len[y]*len[z];
-        for(int i = 0; i < energy_levels; i++) {
-          if(g_histogram[(i+1)*g_bins - 1] > 0){
+        for(int i = 0; i < energy_levels; i++){
+          if(g_histogram[(i+1)*g_bins - 1] > 0){ // if we have RDF data at this energy
             fprintf(g_out, "\n%i",i);
-            for(int bin = 0; bin < g_bins; bin++) {
-              const double probability = (double)g_histogram[i*g_bins + bin]
-                / energy_histogram[i];
-              const double r = (bin + 0.5) * de_g;
+            for(int r_i = 0; r_i < g_bins; r_i++) {
+              const double probability = (double)g_histogram[i*g_bins + r_i]
+                / g_energy_histogram[i];
+              const double r = (r_i + 0.5) * de_g;
               const double shell_vol =
                 4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
               const double n2 = probability/total_vol/shell_vol;
-              const double g = n2/sqr(density)*N*N;
+              const double g = n2/sqr(density);
               fprintf(g_out, " %8.5f", g);
             }
           }
@@ -687,9 +697,9 @@ int main(int argc, const char *argv[]) {
                 "d = (dn + 0.5) * de_density");
         for(int i = 0; i < energy_levels; i++){
           fprintf(densityout, "\n");
-          for(int bin = 0; bin < density_bins; bin++) {
+          for(int r_i = 0; r_i < density_bins; r_i++) {
             const double bin_density =
-              (double)density_histogram[i*density_bins + bin]
+              (double)density_histogram[i*density_bins + r_i]
               *N/energy_histogram[i]/bin_volume;
             fprintf(densityout, "%8.5f ", bin_density);
           }

@@ -22,7 +22,10 @@ projectdir = os.path.realpath(thisdir+'../../..')
 
 # build monte carlo code
 simname = 'square-well-monte-carlo'
-sp.call(["scons","-C",projectdir,simname])
+exitStatus = sp.call(["scons","-C",projectdir,simname])
+if exitStatus != 0:
+    print "Build failed"
+    exit(exitStatus)
 
 for ff in args.ff:
     memory = args.N # fixme: better guess

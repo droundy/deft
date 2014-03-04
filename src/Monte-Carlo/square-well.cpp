@@ -38,10 +38,10 @@ vector3d sw_fix_periodic(vector3d v, const double len[3]) {
 }
 
 vector3d periodic_diff(const vector3d &a, const vector3d  &b,
-                          const double len[3], const int num_walls) {
+                          const double len[3], const int walls) {
   vector3d v = b - a;
-  for (int i = 0; i < 3; i++) {
-    if (i < num_walls && len[i] > 0) {
+  for (int i = 0; i < 3; i++){
+    if (i >= walls && len[i] > 0){
       while (v[i] > len[i]/2.0)
         v[i] -= len[i];
       while (v[i] < -len[i]/2.0)
