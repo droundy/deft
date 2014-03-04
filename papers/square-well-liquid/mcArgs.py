@@ -3,12 +3,12 @@ import argparse
 parser = argparse.ArgumentParser(add_help = False)
 
 parser.add_argument(
-		'-ff', metavar='ff', type=float, nargs='+', default=[],
+		'-ff', metavar='FLOAT', type=float, nargs='+', default=[],
     help='Filling fraction(s)')
 
 parser.add_argument(
-		'-interaction_scale', metavar='interaction_scale',
-        type=float, nargs='+', default=[], help='Interaction scale(s)')
+		'-ww', metavar='FLOAT', type=float, nargs='+', default=[],
+    help='Well width(s) relative to ball diameter')
 
 parser.add_argument(
 		'-N', metavar='INT', type=int, default=1000,
@@ -23,13 +23,8 @@ parser.add_argument(
 		help='Number of simulation iterations')
 
 parser.add_argument(
-		'-walls', metavar='INT', type=int, default=0,
+		'-walls', metavar='INT', type=int, default=0, choices=[0,1,2,3],
     help='Number of walls')
 
 parser.add_argument(
-		'-weights', metavar='BOOL', type=bool, default=False,
-    choices=[0,1,2,3],help='Use energy weights?')
-
-parser.add_argument(
-		'--hide', action='store_true',
-    help='Don\'t display plots when saved')
+		'--weights', action='store_true', help='Use energy weights?')

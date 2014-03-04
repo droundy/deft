@@ -97,7 +97,7 @@ int main(int argc, const char *argv[]) {
   long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
-  double interaction_scale = 1.3;
+  double well_width = 1.3;
   double ff = 0.3;
   double neighbor_scale = 2;
   double dr = 0.01;
@@ -115,8 +115,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
     {"N", '\0', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
-    {"interaction_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &interaction_scale, 0,
+    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
      "Ratio of square well width to ball diameter", "DOUBLE"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
@@ -128,6 +127,12 @@ int main(int argc, const char *argv[]) {
      "Number of iterations to run for initialization", "INT"},
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
      0, "Number of iterations to run for", "INT"},
+    {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
+     "Resolution of distribution functions", "DOUBLE"},
+    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
+     "Differential radius change used in pressure calculation", "DOUBLE"},
+    {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0,
@@ -141,12 +146,6 @@ int main(int argc, const char *argv[]) {
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
-    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
-     "Differential radius change used in pressure calculation", "DOUBLE"},
-    {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &de_density, 0, "Resolution of density file", "DOUBLE"},
-    {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
-     "Resolution of distribution functions", "DOUBLE"},
     {"translation_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &translation_scale, 0,
      "Standard deviation for translations of balls, relative to ball radius",
@@ -191,7 +190,7 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  if(interaction_scale < 1){
+  if(well_width < 1){
     printf("Interaction scale should be greater than (or equal to) 1.\n");
     return 254;
   }
@@ -225,8 +224,8 @@ int main(int argc, const char *argv[]) {
   else if(walls == 3) sprintf(wall_tag,"box");
   sprintf(weight_tag, (weights ? "" : "nw"));
   if (strcmp(filename, "default_filename") == 0) {
-    sprintf(filename, "%s-ff%04.2f-is%03.1f-N%i-%s",
-            wall_tag, eta, interaction_scale, N, weight_tag);
+    sprintf(filename, "%s-ff%04.2f-ww%03.1f-N%i-%s",
+            wall_tag, eta, well_width, N, weight_tag);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
 
@@ -251,10 +250,10 @@ int main(int argc, const char *argv[]) {
   double translation_distance = translation_scale*R;
 
   // neighbor radius should scale with radius and interaction scale
-  double neighbor_R = neighbor_scale*R*interaction_scale;
+  double neighbor_R = neighbor_scale*R*well_width;
 
   // Energy histogram
-  const double interaction_distance = 2*R*interaction_scale;
+  const double interaction_distance = 2*R*well_width;
   const int energy_levels = N/2 * (uipow(interaction_distance,3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
@@ -547,11 +546,11 @@ int main(int argc, const char *argv[]) {
   sprintf(headerinfo,
           "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
           " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-          " interaction_scale: %g, translation_distance: %g\n"
+          " well_width: %g, translation_distance: %g\n"
           "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
           " energy_levels: %i\n",
           len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
-          interaction_scale, translation_distance, initialization_iterations,
+          well_width, translation_distance, initialization_iterations,
           neighbor_scale, dr, energy_levels);
 
   char *e_fname = new char[1024];

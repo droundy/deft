@@ -3,7 +3,16 @@ from __future__ import division
 import matplotlib as mp
 #mp.use('Agg')
 from pylab import *
-import os, glob, socket
+import os, sys, glob, socket, argparse
+
+import figArgs
+
+# parse arguments
+parser = argparse.ArgumentParser(
+  description='Generate figures from Monte Carlo data.',
+  parents = [figArgs.parser])
+
+args = parser.parse_args()
 
 # directories, flags
 datadir = './data/'
@@ -46,35 +55,49 @@ def newFig():
 # single simulation figures
 for file in files:
     name = os.path.basename(file)
-    data = loadtxt(file,ndmin=2)
-    fig, ax = newFig()
 
-    # energy histograms
-    if '-E-' in file:
-        plot(-data[:,0],data[:,1]/sum(data[:,1]),'.')
-        xlim(-data[-1,0],-data[1,0])
+    if (args.ff,args.ww,args.i) == (0,0,0) and '-E' in file:
+        # energy probability density plots
+        data = loadtxt(file)
+        energy = -data[:,0][::-1]
+        PDF = data[:,1]/sum(data[:,1])
+        fig, ax = newFig()
+        plot(energy,PDF,'.')
+        xlim(energy[0],energy[-1])
         xlabel('Energy')
         ylabel('Probability')
         tight_layout(pad=0.1)
         savefig(figdir+name.replace(dataflag,figformat))
         close()
 
-    elif '-g-' in file:
-        radii = len(data[0,:])-1
-        with open(file,'r') as f:
-            first_line = f.readline().split(' ')
+    elif (args.ff,args.ww,args.i) != (0,0,0) \
+      and '-g' in file \
+        and 'ff'+('%4.2f'%args.ff) in file \
+        and 'ww'+('%i'%args.ww) in file:
+        # RDF plots
+        data = loadtxt(file)
+        energies = data[:,0]
+        gs = data[:,1:]
+        with open(file,'r') as stream:
+            first_line = stream.readline().split(' ')
         for i in range(len(first_line)):
             if 'de_g' in first_line[i]:
                 de_g = float(first_line[i+1])
                 break
-        radius = (array(range(0,radii))+0.5)*de_g
-        for i in range(0, len(data[:,0]), 10):
-            plot(radius,data[i,1:])
-            xlim(0,max_RDF_radius)
-            xlabel('$r/R$')
-            ylabel('$g(r)$')
-            tight_layout(pad=0.1)
-            savefig(figdir \
-                    + name.replace(dataflag,
-                                   '-i-'+str(int(data[i,0]))+figformat))
-            close()
+        radius = ((array(range(0,len(gs[0,:])))+0.5)*de_g)/2
+        for i in range(len(energies)):
+            if energies[i] >= args.i:
+                plot(radius,gs[i,:],'.')
+                axvline(1,color='k',linestyle=':')
+                axvline(args.ww,color='k',linestyle=':')
+                xlim(0,max_RDF_radius/2)
+                xlabel('$r/\\sigma$')
+                ylabel('$g(r)$')
+                tight_layout(pad=0.1)
+                savefig(figdir
+                        + name.replace(dataflag,'-i'+str(args.i))
+                        + figformat)
+                if args.show:
+                    show()
+                close()
+                exit(0)

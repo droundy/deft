@@ -4,12 +4,12 @@ from numpy import *
 import os, sys, argparse, socket
 import subprocess as sp
 
-import arguments
+import mcArgs
 
 # parse arguments
 parser = argparse.ArgumentParser(
   description='Run monte carlo simulation(s) using sbatch.',
-  parents = [arguments.parser])
+  parents = [mcArgs.parser])
 
 args = parser.parse_args()
 
@@ -28,16 +28,15 @@ if exitStatus != 0:
     exit(exitStatus)
 
 for ff in args.ff:
-    for interaction_scale in args.interaction_scale:
-
+    for ww in args.ww:
         memory = args.N # fixme: better guess
         if args.walls == 0: wall_tag = 'periodic'
         elif args.walls == 1: wall_tag = 'walls'
         elif args.walls == 2: wall_tag = 'tube'
         elif args.walls == 3: wall_tag = 'box'
-        weight_tag = '' if args.weights == False else 'nw'
-        jobname = "sw-%s-ff%04.2f-is%03.1f-N%i-%s" \
-          %(wall_tag,ff,interaction_scale,args.N,weight_tag)
+        weight_tag = '' if args.weights == True else '-nw'
+        jobname = "sw-%s-ff%04.2f-ww%03.1f-N%i%s" \
+          %(wall_tag,ff,ww,args.N,weight_tag)
         basename = "%s/%s" %(jobdir, jobname)
         scriptname = basename + '.sh'
         outname = basename + '.out'
@@ -55,8 +54,8 @@ for ff in args.ff:
                     %(jobname,memory))
         script.write("cd %s\n" %projectdir)
         script.write(command)
-        for (arg,val) in [ ("N",args.N), ("ff",ff),("walls",args.walls),
-                           ("interaction_scale",interaction_scale),
+        for (arg,val) in [ ("N",args.N), ("ff",ff), ("ww",ww),
+                           ("walls",args.walls),
                            ("initialize",args.initialize),
                            ("iterations",args.iterations)]:
             script.write(" \\\n --" + arg + "=" + str(val))
