@@ -10,10 +10,15 @@ line = { 'mc': '.',
          'fischer': '-.',
          'sokolowski': '--'}
 
+forward_line = { 'mc': '.',
+                 'this-work': '->',
+                 'fischer': '-.',
+                 'sokolowski': '-->'}
+
 back_line = { 'mc': '.',
-              'this-work': '-',
+              'this-work': '-<',
               'fischer': '-.',
-              'sokolowski': '--'}
+              'sokolowski': '--<'}
 
 title = { 'mc': 'Monte Carlo',
           'this-work': 'this work',
@@ -27,3 +32,7 @@ for k in color:
 plot_back = {}
 for k in color:
     plot_back[k] = color[k] + back_line[k]
+
+plot_forward = {}
+for k in color:
+    plot_forward[k] = color[k] + forward_line[k]

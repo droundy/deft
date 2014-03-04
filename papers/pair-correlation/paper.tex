@@ -355,10 +355,11 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
-\newcommand\paircaption{The pair distribution function near a hard
-  wall, with packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with
-  the hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$
-  as $\rr_2$ varies.  The top half of this figure shows the result of the
+\newcommand\paircaption{\fixme{Look into smoothing the top plot on
+    right.} The pair distribution function near a hard wall, with
+  packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the
+  hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as
+  $\rr_2$ varies.  The top half of this figure shows the result of the
   Monte Carlo simulation, while the bottom half shows the result of
   the appproximation developed in this work.  On the right is a plot
   of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the figure to
@@ -442,14 +443,15 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Remove one of, or make a note of, the two curves for this
-      work} The triplet distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at
-    packing fraction 0.3, plotted when $\rr_1$ and $\rr_2$ are in contact.  The
-    color plot on the left shows the triplet distribution function, with white
-    corresponding to the contact value of the \emph{pair} distribution function.
-    The plot on the right shows the value of $g^{(3)}$ along the path shown as a
-    dotted line on the plot to the
-    left.}\label{fig:triplet-contact-distribution}
+  \caption{\fixme{Remove one of, or make a note of, the two curves for
+      this work}\fixme{Fix MC issue here (volume wrong?)} The triplet
+    distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing
+    fraction 0.3, plotted when $\rr_1$ and $\rr_2$ are in contact.
+    The color plot on the left shows the triplet distribution
+    function, with white corresponding to the contact value of the
+    \emph{pair} distribution function.  The plot on the right shows
+    the value of $g^{(3)}$ along the path shown as a dotted line on
+    the plot to the left.}\label{fig:triplet-contact-distribution}
 \end{figure*}
 
 Just as the radial distribution function of a homogeneous fluid may be
@@ -508,17 +510,17 @@ large distances.  In both cases, our agreement with simulation is
 comparable to that of previous approximations.
 
 \begin{figure}
-  \begin{subfigure}{0.5\columnwidth}
+  \begin{subfigure}{1.0\columnwidth}
     \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
     \vspace{-0.8cm}
     \caption{Sticky hard-sphere fluid}\label{fig:dadz-delta}
   \end{subfigure}
-  \begin{subfigure}{0.5\columnwidth}
+  \begin{subfigure}{1.0\columnwidth}
     \includegraphics[width=\columnwidth]{figs/dadz-square-well-3.pdf}
     \vspace{-0.8cm}
     \caption{Hard-core square well fluid}\label{fig:dadz-square-well}
   \end{subfigure}
-  \begin{subfigure}{0.5\columnwidth}
+  \begin{subfigure}{1.0\columnwidth}
     \includegraphics[width=\columnwidth]{figs/dadz-inverse-sixth-3.pdf}
     \vspace{-0.8cm}
     \caption{Hard-core inverse-sixth fluid}\label{fig:dadz-inverse-sixth}

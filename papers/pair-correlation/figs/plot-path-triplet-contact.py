@@ -118,6 +118,8 @@ twod_plot.set_ylim(-rmax, rmax)
 
 #fig.subplots_adjust(hspace=0.001)
 
+me = 160
+
 for name in plots:
     g3_path = read_triplet_path(ff, name)
     if able_to_read_file == False:
@@ -135,10 +137,20 @@ for name in plots:
     if name == 'fischer':
       # Fischer et al only predict pair distribution function in
       # contact.  We do this using "&" below which means "and".
-      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+      zplot.plot(z[incontact],g[incontact], styles.plot_forward[name], label=styles.title[name])
     else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
-      zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot[name], label=styles.title[name])
+      myme = me
+      start = 0
+      if name == 'mc':
+        myme = 10;
+      if name == 'sokolowski':
+        start = 3*me//4
+      xplot.plot(x[z==zcontact][start:],g[z==zcontact][start:], styles.plot_forward[name],
+                 label=styles.title[name],
+                 markevery=myme, mec='none')
+      zplot.plot(z[z>zcontact][start:],g[z>zcontact][start:], styles.plot_forward[name],
+                 label=styles.title[name],
+                 markevery=myme, mec='none')
 
 
 for name in plots:
@@ -151,8 +163,13 @@ for name in plots:
     z = zcontact + (zcontact - z)
     incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
-    xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot_back[name])
-    zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
+    start = me//2
+    if name == 'sokolowski':
+      start = me//4
+    xplot.plot(x[z==zcontact][start:],g[z==zcontact][start:], styles.plot_back[name],
+               markevery=me, mec='none')
+    zplot.plot(z[z>zcontact][start:],g[z>zcontact][start:], styles.plot_back[name],
+               markevery=me, mec='none')
 
 #xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r})$')
 zplot.legend(loc='upper left', ncol=1).draw_frame(False)

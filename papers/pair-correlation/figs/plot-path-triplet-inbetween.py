@@ -117,6 +117,8 @@ twod_plot.set_ylim(-rmax, rmax)
 
 #fig.subplots_adjust(hspace=0.001)
 
+me = 160
+
 for name in plots:
     g3_path = read_triplet_path(ff, name)
     if able_to_read_file == False:
@@ -137,10 +139,13 @@ for name in plots:
       zplot.plot(z[incontact], g[incontact], styles.plot[name],
                  label=styles.title[name])
     else:
-      xplot.plot(x[x < 0], g[x < 0], styles.plot[name],
-                 label=styles.title[name])
+      myme = me
+      if name == 'mc':
+        myme = 10;
+      xplot.plot(x[x < 0], g[x < 0], styles.plot_forward[name],
+                 label=styles.title[name], markevery=myme)
       zplot.plot(z[abs(z-zcontact) > 0.0], g[abs(z-zcontact) > 0.0],
-                 styles.plot[name], label=styles.title[name])
+                 styles.plot_forward[name], label=styles.title[name], markevery=myme)
 
 for name in plots:
   if name in ['this-work', 'sokolowski']:
@@ -152,8 +157,8 @@ for name in plots:
     z = zcontact + (zcontact - z)
     incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
-    xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot_back[name])
-    zplot.plot(z[z>zcontact],g[z>zcontact], styles.plot_back[name])
+    xplot.plot(x[z==zcontact][me//2:],g[z==zcontact][me//2:], styles.plot_back[name], markevery=me)
+    zplot.plot(z[z>zcontact][me//2:],g[z>zcontact][me//2:], styles.plot_back[name], markevery=me)
 
 
 #xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$')
