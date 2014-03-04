@@ -23,7 +23,7 @@
 //
 // The symbols e, e_i, and de are used as general coordinates.
 //
-// Def: If two objects, a and b, are closer than a.R + b.R + neighborR + dn,
+// Def: If two objects, a and b, are closer than a.R + b.R + neighbor_R + dn,
 // then they are neighbors.
 //
 // Neighbors are used to drastically reduce the number of collision tests needed.
@@ -115,34 +115,32 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
     {"N", '\0', POPT_ARG_INT, &N, 0, "Number of balls to simulate", "INT"},
+    {"interaction_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &interaction_scale, 0,
+     "Ratio of square well width to ball diameter", "DOUBLE"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell."},
+     "the cell"},
+    {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &walls, 0,
+     "Number of walled dimensions (dimension order: x,y,z)", "INT"},
+    {"initialize", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+     &initialization_iterations, 0,
+     "Number of iterations to run for initialization", "INT"},
+    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
+     0, "Number of iterations to run for", "INT"},
     {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0,
      "Relative cell size in y dimension", "DOUBLE"},
     {"lenz", '\0', POPT_ARG_DOUBLE, &len[z], 0,
      "Relative cell size in z dimension", "DOUBLE"},
-    {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &walls, 0,
-     "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
-     0, "Number of iterations to run for", "INT"},
-    {"initialize", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
-     &initialization_iterations, 0,
-     "Number of iterations to run for initialization", "INT"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Save directory", "dir"},
-    {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &R, 0, "Ball radius", "DOUBLE"},
-    {"interaction_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &interaction_scale, 0,
-     "Ratio of square well width to ball diameter.", "DOUBLE"},
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &neighbor_scale, 0, "Ratio of neighbor sphere radius to ball radius. "
-     "Used to drastically reduce collision detections","DOUBLE"},
+     &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
+     "times ball radius. Drastically reduces collision detections","DOUBLE"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
      "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -155,12 +153,14 @@ int main(int argc, const char *argv[]) {
      "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
-    {"time", '\0', POPT_ARG_INT, &totime, 0,
-     "Timing of display information (seconds)", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
     {"weights", '\0', POPT_ARG_NONE, &weights, 0, "Weigh diffrent energies so "
      "that states of low entropy get better statistics", "BOOLEAN"},
+    {"time", '\0', POPT_ARG_INT, &totime, 0,
+     "Timing of display information (seconds)", "INT"},
+    {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -191,6 +191,11 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  if(interaction_scale < 1){
+    printf("Interaction scale should be greater than (or equal to) 1.\n");
+    return 254;
+  }
+
   // Adjust cell dimensions for desired filling fraction
   const double fac = R*pow(4.0/3.0*M_PI*N/(ff*len[x]*len[y]*len[z]), 1.0/3.0);
   for(int i = 0; i < 3; i++) len[i] *= fac;
@@ -218,9 +223,10 @@ int main(int argc, const char *argv[]) {
   else if(walls == 1) sprintf(wall_tag,"wall");
   else if(walls == 2) sprintf(wall_tag,"tube");
   else if(walls == 3) sprintf(wall_tag,"box");
-  sprintf(weight_tag, (weights ? "w" : "nw"));
+  sprintf(weight_tag, (weights ? "" : "nw"));
   if (strcmp(filename, "default_filename") == 0) {
-    sprintf(filename, "%s-%04.2f-%s", wall_tag, eta, weight_tag);
+    sprintf(filename, "%s-ff%04.2f-is%03.1f-N%i-%s",
+            wall_tag, eta, interaction_scale, N, weight_tag);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
 
@@ -241,15 +247,17 @@ int main(int argc, const char *argv[]) {
   // Define variables
   // ----------------------------------------------------------------------------
 
-  double neighborR = neighbor_scale*R;
+  // translation distance should scale with ball radius
   double translation_distance = translation_scale*R;
+
+  // neighbor radius should scale with radius and interaction scale
+  double neighbor_R = neighbor_scale*R*interaction_scale;
 
   // Energy histogram
   const double interaction_distance = 2*R*interaction_scale;
   const int energy_levels = N/2 * (uipow(interaction_distance,3)
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
-
 
   // Walkers
   bool current_walker_plus = false;
@@ -358,7 +366,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   int most_neighbors =
-    initialize_neighbor_tables(balls, N, neighborR + 2*dr, max_neighbors, len,
+    initialize_neighbor_tables(balls, N, neighbor_R + 2*dr, max_neighbors, len,
                                walls);
   if (most_neighbors < 0) {
     fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
@@ -436,7 +444,7 @@ int main(int argc, const char *argv[]) {
     for(int i = 0; i < N; i++) {
       old_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, walls);
-      move_val = move_one_ball(i, balls, N, len, walls, neighborR,
+      move_val = move_one_ball(i, balls, N, len, walls, neighbor_R,
                                translation_distance, max_neighbors, dr);
       new_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, walls);
@@ -547,13 +555,13 @@ int main(int argc, const char *argv[]) {
           neighbor_scale, dr, energy_levels);
 
   char *e_fname = new char[1024];
-  sprintf(e_fname, "%s/%s-E-%i.dat", dir, filename, N);
+  sprintf(e_fname, "%s/%s-E.dat", dir, filename);
 
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
 
   char *g_fname = new char[1024];
-  sprintf(g_fname, "%s/%s-g-%i.dat", dir, filename, N);
+  sprintf(g_fname, "%s/%s-g.dat", dir, filename);
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -578,7 +586,7 @@ int main(int argc, const char *argv[]) {
     for(int i = 0; i < N; i++) {
       old_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, walls);
-      move_val = move_one_ball(i, balls, N, len, walls, neighborR,
+      move_val = move_one_ball(i, balls, N, len, walls, neighbor_R,
                                translation_distance, max_neighbors, dr);
       new_interaction_count = count_interactions(i, balls, interaction_distance,
                                                  len, walls);

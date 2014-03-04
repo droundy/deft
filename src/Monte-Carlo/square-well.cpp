@@ -51,7 +51,7 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b,
   return v;
 }
 
-int initialize_neighbor_tables(ball *p, int N, double neighborR,
+int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
                                int max_neighbors, const double len[3],
                                int num_walls) {
   int most_neighbors = 0;
@@ -64,7 +64,7 @@ int initialize_neighbor_tables(ball *p, int N, double neighborR,
     for (int j = 0; j < N; j++) {
       const bool is_neighbor = (i != j) &&
         (periodic_diff(p[i].pos, p[j].pos, len, num_walls).normsquared() <
-         sqr(p[i].R + p[j].R + neighborR));
+         sqr(p[i].R + p[j].R + neighbor_R));
       if (is_neighbor) {
         const int index = p[i].num_neighbors;
         p[i].num_neighbors++;
@@ -78,13 +78,13 @@ int initialize_neighbor_tables(ball *p, int N, double neighborR,
 }
 
 void update_neighbors(ball &a, int n, const ball *bs, int N,
-                      double neighborR, const double len[3], int num_walls) {
+                      double neighbor_R, const double len[3], int num_walls) {
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++) {
     if ((i != n) &&
         (periodic_diff(a.pos, bs[i].neighbor_center, len,
                           num_walls).normsquared()
-         < sqr(a.R + bs[i].R + neighborR))) {
+         < sqr(a.R + bs[i].R + neighbor_R))) {
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors++;
     }
@@ -170,7 +170,7 @@ ball random_move(const ball &p, double move_scale, const double len[3]) {
 }
 
 int move_one_ball(int id, ball *p, int N, double len[3],
-                  int num_walls, double neighborR,
+                  int num_walls, double neighbor_R,
                   double dist, int max_neighbors, double dr) {
   ball temp = random_move(p[id], dist, len);
   int return_val = 0;
@@ -179,14 +179,14 @@ int move_one_ball(int id, ball *p, int N, double len[3],
     if (!overlaps) {
       const bool get_new_neighbors =
         (periodic_diff(temp.pos, temp.neighbor_center, len, num_walls)
-         .normsquared() > sqr(neighborR/2.0));
+         .normsquared() > sqr(neighbor_R/2.0));
       if (get_new_neighbors) {
         // If we've moved too far, then the overlap test may have given a false
         // negative. So we'll find our new neighbors, and check against them.
         // If we still don't overlap, then we'll have to update the tables
         // of our neighbors that have changed.
         temp.neighbors = new int[max_neighbors];
-        update_neighbors(temp, id, p, N, neighborR + 2*dr, len, num_walls);
+        update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, num_walls);
         return_val += 2;
         // However, for this check (and this check only), we don't need to
         // look at all of our neighbors, only our new ones.
