@@ -4,12 +4,12 @@ from numpy import *
 import os, sys, argparse, socket
 import subprocess as sp
 
-import mcArgs
+import args_mc
 
 # parse arguments
 parser = argparse.ArgumentParser(
   description='Run monte carlo simulation(s) using sbatch.',
-  parents = [mcArgs.parser])
+  parents = [args_mc.parser])
 
 args = parser.parse_args()
 
@@ -54,7 +54,7 @@ for ff in args.ff:
                     %(jobname,memory))
         script.write("cd %s\n" %projectdir)
         script.write(command)
-        for (arg,val) in [ ("N",args.N), ("ff",ff), ("ww",ww),
+        for (arg,val) in [ ("N",args.N), ("ww",ww), ("ff",ff),
                            ("walls",args.walls),
                            ("initialize",args.initialize),
                            ("iterations",args.iterations)]:
