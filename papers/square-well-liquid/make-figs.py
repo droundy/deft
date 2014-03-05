@@ -5,12 +5,12 @@ import matplotlib as mp
 from pylab import *
 import os, sys, glob, socket, argparse
 
-import figArgs
+import args_figs
 
 # parse arguments
 parser = argparse.ArgumentParser(
   description='Generate figures from Monte Carlo data.',
-  parents = [figArgs.parser])
+  parents = [args_figs.parser])
 
 args = parser.parse_args()
 
@@ -22,6 +22,8 @@ figformat = '.pdf'
 
 # figure options
 max_RDF_radius = 10
+dkte = args.ktemax / 1000
+kte = arange(dkte,args.ktemax+dkte,dkte)
 
 # load all data files
 files = sort(glob.glob(datadir+'*'+dataflag))
@@ -45,21 +47,28 @@ rcParams['axes.color_cycle'] = ['k','b','g','r','c','m','y']
 def newFig():
     fig = figure(figsize=(xSize/2.54,ySize/2.54))
     ax = fig.add_subplot(1,1,1)
-    fmt = mp.ticker.ScalarFormatter(useMathText=True)
+    fmt = mp.ticker.ScalarFormatter(useMathText=True,useOffset=False)
     fmt.set_scientific(True)
     fmt.set_powerlimits((0,3))
     ax.yaxis.set_major_formatter(fmt)
     ax.xaxis.set_major_formatter(fmt)
     return fig, ax
 
-# single simulation figures
-for file in files:
-    name = os.path.basename(file)
+# interntal energy
+def U(kte,energy,PDF):
+    output = zeros(len(kte))
+    for i in range(len(kte)):
+        output[i] = sum(PDF*energy*exp(-energy/kte[i])) \
+          / sum(exp(-energy/kte[i]))
+    return output
 
-    if (args.ff,args.ww,args.i) == (0,0,0) and '-E' in file:
-        # energy probability density plots
+# probability density and heat capacity plots
+if (args.ww,args.ff,args.i) == (0,0,0) or args.all:
+    # probability density over energy
+    for file in [ file for file in files if '-E' in file ]:
         data = loadtxt(file)
         energy = -data[:,0][::-1]
+        energy -= min(energy)
         PDF = data[:,1]/sum(data[:,1])
         fig, ax = newFig()
         plot(energy,PDF,'.')
@@ -67,14 +76,45 @@ for file in files:
         xlabel('Energy')
         ylabel('Probability')
         tight_layout(pad=0.1)
-        savefig(figdir+name.replace(dataflag,figformat))
+        savename = figdir \
+          + os.path.basename(file).replace(dataflag,figformat)
+        savefig(savename)
         close()
 
-    elif (args.ff,args.ww,args.i) != (0,0,0) \
-      and '-g' in file \
-        and 'ff'+('%4.2f'%args.ff) in file \
-        and 'ww'+('%i'%args.ww) in file:
-        # RDF plots
+    # heat capacity
+    wws = []
+    for file in files:
+        ww = [ ww for ww in file.split('-') \
+               if 'ww' in ww ][0].replace('ww','')
+        if ww not in wws: wws.append(ww)
+    for ww in wws:
+        fig, ax = newFig()
+        for file in [ file for file in files
+                      if '-ww'+ww in file and '-E' in file ]:
+            ids = os.path.basename(file).split('-')
+            N = [ n for n in ids if 'N' in n][0].replace('N','')
+            ff = [ ff for ff in ids if 'ff' in ff ][0].replace('ff','')
+            data = loadtxt(file)
+            energy = -data[:,0][::-1]
+            energy -= min(energy)
+            PDF = data[:,1]/sum(data[:,1])
+            cv = (U(kte+dkte,energy,PDF) - U(kte-dkte,energy,PDF)) \
+              / (2 * dkte) / int(N)
+            plot(kte,cv,label='$\eta='+ff+'$')
+            savename = '-'.join([ id for id in file.split('-')
+                                  if 'ff' not in id ][:-1])
+        savename = figdir+os.path.basename(savename)+'-cv'+figformat
+        xlabel('$kT/\epsilon$')
+        ylabel('$c_V/k$')
+        xlim(0,args.ktemax+dkte)
+        legend(loc=0)
+        tight_layout(pad=0.1)
+        savefig(savename)
+        close()
+
+# RDF plots
+if (args.ww != 0 and args.ff != 0 and args.i != 0):
+    for file in [ file for file in files if '-g' in file ]:
         data = loadtxt(file)
         energies = data[:,0]
         gs = data[:,1:]
@@ -94,10 +134,9 @@ for file in files:
                 xlabel('$r/\\sigma$')
                 ylabel('$g(r)$')
                 tight_layout(pad=0.1)
-                savefig(figdir
-                        + name.replace(dataflag,'-i'+str(args.i))
+                savefig(figdir \
+                        + name.replace(dataflag,'-i'+str(args.i)) \
                         + figformat)
-                if args.show:
-                    show()
+                if args.show: show()
                 close()
                 exit(0)

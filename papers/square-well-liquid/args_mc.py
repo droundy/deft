@@ -3,16 +3,16 @@ import argparse
 parser = argparse.ArgumentParser(add_help = False)
 
 parser.add_argument(
-		'-ff', metavar='FLOAT', type=float, nargs='+', default=[],
-    help='Filling fraction(s)')
+		'-N', metavar='INT', type=int, default=1000,
+    help='Number of balls')
 
 parser.add_argument(
 		'-ww', metavar='FLOAT', type=float, nargs='+', default=[],
     help='Well width(s) relative to ball diameter')
 
 parser.add_argument(
-		'-N', metavar='INT', type=int, default=1000,
-    help='Number of balls')
+		'-ff', metavar='FLOAT', type=float, nargs='+', default=[],
+    help='Filling fraction(s)')
 
 parser.add_argument(
 		'-initialize', metavar='INT', type=int, default=500000,

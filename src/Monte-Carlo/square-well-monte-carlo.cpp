@@ -224,8 +224,8 @@ int main(int argc, const char *argv[]) {
   else if(walls == 3) sprintf(wall_tag,"box");
   sprintf(weight_tag, (weights ? "" : "nw"));
   if (strcmp(filename, "default_filename") == 0) {
-    sprintf(filename, "%s-ff%04.2f-ww%03.1f-N%i-%s",
-            wall_tag, eta, well_width, N, weight_tag);
+    sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i-%s",
+            wall_tag, well_width, eta, N, weight_tag);
     printf("\nNo filename selected, so using the default: %s\n", filename);
   }
 
