@@ -73,6 +73,7 @@ for file in [ file for file in files if '-E' in file ]:
 # if an parameter isn't given, assume all possible values are wanted
 if args.ww == []: args.ww = wws
 if args.ff == []: args.ff = ffs
+if args.ff == []: args.N = Ns
 
 # figure label format
 def figLabel(p,option=''):
@@ -91,33 +92,33 @@ def newFig():
     return fig, ax
 
 # interntal energy relative to well depth
-def Ue(kte,counts,PDF):
+def Ue(kte,counts,DS):
     output = zeros(len(kte))
     for i in range(len(kte)):
-        output[i] = sum(counts*PDF*exp(-counts/kte[i])) \
-          / sum(PDF*exp(-counts/kte[i]))
+        output[i] = sum(counts*DS*exp(-counts/kte[i])) \
+          / sum(DS*exp(-counts/kte[i]))
     return output
 
 # probability density over energy
-print("Generating probability distribution plots")
+print("Generating density of states figures")
 for ww in args.ww:
     fig, ax = newFig()
     for p in [ p for p in paramList
                if p.ww == ww and p.ff in args.ff ]:
         data = loadtxt(p.Efile,ndmin=2)
         energy = -data[:,0][::-1]/p.N
-        PDF = data[:,1]/sum(data[:,1])
-        p.max_index = argmax(PDF)
-        plot(energy,PDF,'.',label=figLabel(p,'N'))
+        DS = data[:,1]/sum(data[:,1])
+        p.max_index = argmax(DS)
+        plot(energy,log(DS),'.',label=figLabel(p,'N'))
     xlabel('$E/N\epsilon$')
-    ylabel('$P$')
+    ylabel('$\ln(D)$')
     legend(loc=0)
     tight_layout(pad=0.1)
-    savefig(figdir+p.name()+'-pd'+figformat)
+    savefig(figdir+p.name()+'-dos'+figformat)
     close()
 
 # heat capacity
-print("Generating heat capacity plots")
+print("Generating heat capacity figures")
 for ww in args.ww:
     fig, ax = newFig()
     for p in [ p for p in paramList
@@ -125,8 +126,8 @@ for ww in args.ww:
         data = loadtxt(p.Efile,ndmin=2)
         counts = data[:,0][::-1]
         counts -= min(counts)
-        PDF = data[:,1]
-        cv = (Ue(kte+dkte/2,counts,PDF) - Ue(kte-dkte/2,counts,PDF)) \
+        DS = data[:,1]
+        cv = (Ue(kte+dkte/2,counts,DS) - Ue(kte-dkte/2,counts,DS)) \
           / dkte / p.N
         plot(kte,cv,label=figLabel(p,'N'))
     xlabel('$kT/\epsilon$')
@@ -134,13 +135,12 @@ for ww in args.ww:
     xlim(0,args.ktemax)
     legend(loc=0)
     tight_layout(pad=0.1)
-    savefig(figdir+p.name()+'-cv'+figformat)
+    savefig(figdir+p.name()+'-hc'+figformat)
     close()
 
 # radial distribution function
-print("Generating radial distribution plots")
-for p in [ p for p in paramList
-           if p.ww in args.ww and p.ff in args.ff and p.N in args.N ]:
+print("Generating radial distribution figures")
+for p in paramList:
     gs = loadtxt(p.gfile,ndmin=2)[:,1:]
     with open(p.gfile,'r') as stream:
         first_line = stream.readline().split(' ')
@@ -156,5 +156,5 @@ for p in [ p for p in paramList
     xlabel('$r/\\sigma$')
     ylabel('$g(r)$')
     tight_layout(pad=0.1)
-    savefig(figdir+p.name('N')+figformat)
+    savefig(figdir+p.name('N')+'-rd'+figformat)
     close()

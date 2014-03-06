@@ -12,7 +12,7 @@ parser.add_argument(
     help='Filling fraction(s)')
 
 parser.add_argument(
-		'-N', metavar='INT', type=int, nargs='+', default=[1000],
+		'-N', metavar='INT', type=int, nargs='+', default=[],
     help='Number(s) of balls')
 
 parser.add_argument(
