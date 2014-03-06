@@ -17,7 +17,7 @@ parser.add_argument(
 
 parser.add_argument(
 		'-ktemax', metavar='FLOAT', type=float, default=30,
-    help='Maximum kt in heat capacity plot')
+    help='Maximum kt/e in heat capacity plot')
 
 args = parser.parse_args()
 
@@ -98,77 +98,63 @@ def Ue(kte,counts,PDF):
           / sum(PDF*exp(-counts/kte[i]))
     return output
 
-if args.i == []:
-    # probability density over energy
-    print("Generating probability distribution plots")
-    for ww in args.ww:
-        fig, ax = newFig()
-        for p in [ p for p in paramList
-                   if p.ww == ww
-                   and p.ff in args.ff ]:
-            data = loadtxt(p.Efile,ndmin=2)
-            energy = -data[:,0][::-1]/p.N
-            PDF = data[:,1]/sum(data[:,1])
-            plot(energy,PDF,'.',label=figLabel(p,'N'))
-        xlabel('$E/N\epsilon$')
-        ylabel('$P$')
-        legend(loc=0)
-        tight_layout(pad=0.1)
-        savefig(figdir+p.name()+'-pd'+figformat)
-        close()
+# probability density over energy
+print("Generating probability distribution plots")
+for ww in args.ww:
+    fig, ax = newFig()
+    for p in [ p for p in paramList
+               if p.ww == ww and p.ff in args.ff ]:
+        data = loadtxt(p.Efile,ndmin=2)
+        energy = -data[:,0][::-1]/p.N
+        PDF = data[:,1]/sum(data[:,1])
+        p.max_index = argmax(PDF)
+        plot(energy,PDF,'.',label=figLabel(p,'N'))
+    xlabel('$E/N\epsilon$')
+    ylabel('$P$')
+    legend(loc=0)
+    tight_layout(pad=0.1)
+    savefig(figdir+p.name()+'-pd'+figformat)
+    close()
 
-    # heat capacity
-    print("Generating heat capacity plots")
-    for ww in args.ww:
-        fig, ax = newFig()
-        for p in [ p for p in paramList
-                   if p.ww == ww
-                   and p.ff in args.ff ]:
-            data = loadtxt(p.Efile,ndmin=2)
-            counts = data[:,0][::-1]
-            counts -= min(counts)
-            PDF = data[:,1]
-            cv = (Ue(kte+dkte/2,counts,PDF)
-                  - Ue(kte-dkte/2,counts,PDF)) \
-                  / dkte / p.N
-            plot(kte,cv,label=figLabel(p,'N'))
-        xlabel('$kT/\epsilon$')
-        ylabel('$C_V/Nk$')
-        xlim(0,args.ktemax)
-        legend(loc=0)
-        tight_layout(pad=0.1)
-        savefig(figdir+p.name()+'-cv'+figformat)
-        close()
+# heat capacity
+print("Generating heat capacity plots")
+for ww in args.ww:
+    fig, ax = newFig()
+    for p in [ p for p in paramList
+               if p.ww == ww and p.ff in args.ff ]:
+        data = loadtxt(p.Efile,ndmin=2)
+        counts = data[:,0][::-1]
+        counts -= min(counts)
+        PDF = data[:,1]
+        cv = (Ue(kte+dkte/2,counts,PDF) - Ue(kte-dkte/2,counts,PDF)) \
+          / dkte / p.N
+        plot(kte,cv,label=figLabel(p,'N'))
+    xlabel('$kT/\epsilon$')
+    ylabel('$C_V/Nk$')
+    xlim(0,args.ktemax)
+    legend(loc=0)
+    tight_layout(pad=0.1)
+    savefig(figdir+p.name()+'-cv'+figformat)
+    close()
 
 # radial distribution function
-for energy in args.i:
-    print("Generating radial distribution plots for",
-          energy,"interactions")
-    for ww in args.ww:
-        for ff in args.ff:
-            for N in args.N:
-                for p in [ p for p in paramList
-                           if p.ww == ww and p.ff == ff and p.N == N ]:
-                    data = loadtxt(p.gfile)
-                    energies = data[:,0]
-                    gs = data[:,1:]
-                    with open(p.gfile,'r') as stream:
-                        first_line = stream.readline().split(' ')
-                    for i in range(len(first_line)):
-                        if 'de_g' in first_line[i]:
-                            de_g = float(first_line[i+1])
-                            break
-                    radius = (array(range(0,len(gs[0,:])))+0.5) \
-                              * de_g/2
-                    for i in range(len(energies)):
-                        if energies[i] >= energy:
-                            plot(radius,gs[i,:],'.')
-                            break
-                    axvline(1,color='k',linestyle=':')
-                    axvline(ww,color='k',linestyle=':')
-                    xlim(0,max_RDF_radius/2)
-                    xlabel('$r/\\sigma$')
-                    ylabel('$g(r)$')
-                    tight_layout(pad=0.1)
-                    savefig(figdir+p.name('N',energy)+figformat)
-                    close()
+print("Generating radial distribution plots")
+for p in [ p for p in paramList
+           if p.ww in args.ww and p.ff in args.ff and p.N in args.N ]:
+    gs = loadtxt(p.gfile,ndmin=2)[:,1:]
+    with open(p.gfile,'r') as stream:
+        first_line = stream.readline().split(' ')
+    for i in range(len(first_line)):
+        if 'de_g' in first_line[i]:
+            de_g = float(first_line[i+1])
+            break
+    radius = (array(range(0,len(gs[0,:])))+0.5) * de_g/2
+    plot(radius,gs[p.max_index,:],'.')
+    axvline(1,color='k',linestyle=':')
+    axvline(p.ww,color='k',linestyle=':')
+    xlim(0,max_RDF_radius/2)
+    xlabel('$r/\\sigma$')
+    ylabel('$g(r)$')
+    tight_layout(pad=0.1)
+    savefig(figdir+p.name('N')+figformat)
+    close()
