@@ -2,9 +2,6 @@ import argparse
 
 parser = argparse.ArgumentParser(add_help = False)
 
-parser.add_argument(
-		'-N', metavar='INT', type=int, nargs='+', default=[],
-    help='Number(s) of balls')
 
 parser.add_argument(
 		'-ww', metavar='FLOAT', type=float, nargs='+', default=[],
@@ -13,6 +10,10 @@ parser.add_argument(
 parser.add_argument(
 		'-ff', metavar='FLOAT', type=float, nargs='+', default=[],
     help='Filling fraction(s)')
+
+parser.add_argument(
+		'-N', metavar='INT', type=int, nargs='+', default=[1000],
+    help='Number(s) of balls')
 
 parser.add_argument(
 		'-walls', metavar='INT', type=int, default=0,

@@ -16,12 +16,8 @@ parser.add_argument(
     help='Number(s) of interactions')
 
 parser.add_argument(
-		'-ktemax', metavar='FLOAT', type=float, default=150,
+		'-ktemax', metavar='FLOAT', type=float, default=30,
     help='Maximum kt in heat capacity plot')
-
-parser.add_argument(
-		'--show', action='store_true',
-    help='Show generated RDF figure')
 
 args = parser.parse_args()
 
@@ -77,7 +73,6 @@ for file in [ file for file in files if '-E' in file ]:
 # if an parameter isn't given, assume all possible values are wanted
 if args.ww == []: args.ww = wws
 if args.ff == []: args.ff = ffs
-if args.N == []: args.N = Ns
 
 # figure label format
 def figLabel(p,option=''):
@@ -99,9 +94,8 @@ def newFig():
 def Ue(kte,counts,PDF):
     output = zeros(len(kte))
     for i in range(len(kte)):
-        if kte[i] != 0:
-            output[i] = sum(counts*PDF*exp(-counts/kte[i])) \
-              / sum(PDF*exp(-counts/kte[i]))
+        output[i] = sum(counts*PDF*exp(-counts/kte[i])) \
+          / sum(PDF*exp(-counts/kte[i]))
     return output
 
 if args.i == []:
@@ -113,15 +107,14 @@ if args.i == []:
                    if p.ww == ww
                    and p.ff in args.ff ]:
             data = loadtxt(p.Efile,ndmin=2)
-            energy = -data[:,0][::-1]
-            energy -= min(energy)
+            energy = -data[:,0][::-1]/p.N
             PDF = data[:,1]/sum(data[:,1])
             plot(energy,PDF,'.',label=figLabel(p,'N'))
-        xlabel('Energy ($\epsilon/N$)')
-        ylabel('Probability')
+        xlabel('$E/N\epsilon$')
+        ylabel('$P$')
         legend(loc=0)
         tight_layout(pad=0.1)
-        savefig(figdir+p.name()+'-PDF'+figformat)
+        savefig(figdir+p.name()+'-pd'+figformat)
         close()
 
     # heat capacity
@@ -134,13 +127,14 @@ if args.i == []:
             data = loadtxt(p.Efile,ndmin=2)
             counts = data[:,0][::-1]
             counts -= min(counts)
-            PDF = data[:,1]/sum(data[:,1])
-            cv = (Ue(kte+dkte,counts,PDF) - Ue(kte-dkte,counts,PDF)) \
-              / (2 * dkte) / int(N)
+            PDF = data[:,1]
+            cv = (Ue(kte+dkte/2,counts,PDF)
+                  - Ue(kte-dkte/2,counts,PDF)) \
+                  / dkte / p.N
             plot(kte,cv,label=figLabel(p,'N'))
         xlabel('$kT/\epsilon$')
-        ylabel('$c_v/k$')
-        xlim(0,args.ktemax+dkte)
+        ylabel('$C_V/Nk$')
+        xlim(0,args.ktemax)
         legend(loc=0)
         tight_layout(pad=0.1)
         savefig(figdir+p.name()+'-cv'+figformat)

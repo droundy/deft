@@ -44,7 +44,7 @@ for ww in args.ww:
 
 for p in paramList:
     memory = p.N # fixme: better guess
-    jobname = 'sw-'+p.name('N')
+    jobname = p.name('N')
     basename = "%s/%s" %(jobdir, jobname)
     scriptname = basename + '.sh'
     outname = basename + '.out'
