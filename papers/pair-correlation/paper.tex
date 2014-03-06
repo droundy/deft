@@ -31,13 +31,13 @@
 \begin{abstract}
   We have developed an approximation for the pair distribution
   function of hard spheres, which is based on the average value of the
-  pair distribution function at contact described in
-  Section~\ref{sec:contact}.  Our pair distribution function is constructed so
-  as to be computable with only single-site convolutions and to
-  accurately reproduce the averaged distribution function at contact.
-  This results in a functional that is efficient to compute, and
-  predicts the pair distribution function as well as the most accurate
-  existing analytical approximation.
+  pair distribution function at contact we recently developed.  Our
+  pair distribution function is constructed so as to be computable
+  with only single-site convolutions and to accurately reproduce the
+  averaged distribution function at contact.  This results in a
+  functional that is efficient to compute, and predicts the pair
+  distribution function as well as the most accurate existing
+  analytical approximation.  \fixme{needs special attention.}
 \end{abstract}
 
 \maketitle
@@ -107,18 +107,18 @@ minimization \emph{for each position} $\rr_1$ in
 $g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
 a tool in constructing a free energy functional.
 
-The canonical inhomogeneous configuration for the hard-sphere
-fluid is the system consisting of a hard sphere at a hard wall.  In
-1986, Plischke and Henderson solved the pair distribution function of
-this system using integral equation theory under the Percus-Yevick
+The canonical inhomogeneous configuration for the hard-sphere fluid is
+the system consisting of a hard sphere at a hard wall.  In 1986,
+Plischke and Henderson solved the pair distribution function of this
+system using integral equation theory under the Percus-Yevick
 approximation~\cite{plischke1986pair}.  Ten years later,
 G{\"o}tzelmann \emph{et al.} found the pair distribution function near
-a hard wall using classical DFT by finding the direct correlation
-function by taking a functional derivative of the free energy
-functional and then solving the Ornstein-Zernicke
-equation~\cite{gotzelmann1996structure}.  The approach of solving the
-Ornstein-Zernicke equation for an inhomogeneous system is
-computationally challenging~\cite{paul2003variational}.
+a hard wall by solving the Ornstein-Zernicke equation using the direct
+correlation function found from a functional derivative of a classical
+DFT free energy functional~\cite{gotzelmann1996structure}.
+Unfortunately, solving the inhomogeneous Ornstein-Zernicke equation is
+computationally challenging, although more efficient approximate
+algorithms have been developed~\cite{paul2003variational}.
 
 Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed in the
@@ -139,25 +139,28 @@ implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
 
 \section{Approximations to the pair distribution function}
-There are few analytic approximations for the inhomogeneous pair
+There are several analytic approximations for the inhomogeneous pair
 distribution function, which extend the radial distribution function
-to inhomogeneous scenarios.  These works differ in what density they
-use when evaluating the radial distribution function $g(r,\eta)$.
+to inhomogeneous scenarios.  These works differ in what density is
+used when evaluating the radial distribution function $g(r,\eta)$.
 
-Several recent works have cited a
-mean-density approximation:
+Several recent works have assumed a mean-density approximation for
+the pair distribution function:
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \frac{\pi\sigma^3}{6}\tfrac12
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \tfrac{\pi\sigma^3}{6}\tfrac12
   (n(\rr_1)+n(\rr_2))\right)
 \end{align}
 where $g(r,\eta)$ is the radial distribution function as a function of
 radius and packing fraction $\eta$, and $\sigma$ is the hard-sphere
-diameter~\cite{gloor2007prediction, gross2009density}.  These works
-did not however use this approach, which fails dramatically at higher
-densities, as the packing fraction found from the mean density exceeds
-unity.
+diameter~\cite{gloor2007prediction, gross2009density}.  This approach,
+however, cannot be applied to highly inhomogeneous systems such as a
+dense fluid at a solid surface.  These systems exhibit large density
+oscillations that lead to mean packing fractions greater than unity,
+which cannot occur in the bulk reference system that defines $g(r,
+\eta)$.  The above papers restricted themselves to the liquid-vapor
+interface, which does not exhibit this pathology.
 
-Non-divergent approaches use an average of the density over some
+Non-pathological approaches use an average of the density over some
 volume. Fischer and Methfessel~\cite{fischer1980born} introduce the
 approximation
 \begin{align}
@@ -172,7 +175,7 @@ density over a spherical volume:
   n_3(\rr) = \int n(\rr')\Theta(\tfrac12 \sigma - |\rr-\rr'|) d\rr'
 \end{align}
 where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
-is computationally awkward, because it relies on the midpoint
+is computationally awkward, because it treats as special the midpoint
 $\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
 Methfessel is intended to approximate the pair distribution function only
 at contact, when the distance between $\rr_1$ and $\rr_2$ is the hard-sphere
@@ -226,26 +229,31 @@ pair distribution function for a variety of interfaces, and over a
 wide range of densities.
 
 \section{Our approach}
+%% We approximate the pair correlation with the average of two radial
+%% distribution functions, evaluated at the distance between the two
+%% points, that are themselves functions of the averaged pair correlation
+%% at contact $g_{\sigma}(\rr)$ discussed above~\cite{schulte2012using},
+%% evaluated at the two points.
+In the approaches for the pair distribution function mentioned above,
+the radial distribution function used to approximate pair correlation
+was dependent upon the density averaged over some volume.  We seek to
+achieve greater accuracy by using instead a function dependent upon
+our averaged $g_{\sigma}(\rr)$ discussed above, which holds more
+information about an inhomogeneous system than does a simple
+convolution of the density.
+%
 We approximate the pair correlation with the average of two radial
 distribution functions, evaluated at the distance between the two
 points, that are themselves functions of the averaged pair correlation
-at contact $g_{\sigma}(\rr)$ discussed above~\cite{schulte2012using},
-evaluated at the two points.
+at contact $g_{\sigma}(\rr)$ evaluated at the two points:
+%
+%% We therefore seek a function form
+%% for our radial distribution that is dependent upon $g_{\sigma}(\rr)$
+%% and that will approach the correct solution in the homogeneous limit
+%% and also in the limit of contact distance between the two points.
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}.
 \end{align}
-
-In the approaches for the pair distribution function mentioned above,
-function forms of radial distributions (used to approximate pair
-correlation) were dependent upon independent variables $\eta$, the
-density, whether at single points or averaged over sourrounding
-volumes.  We can achieve greater accuracy by using instead a function
-dependent upon our $g_{\sigma}$, which holds more information about an
-inhomogeneous system then a simple convolution of the density does.
-We therefore seek a function form for our radial distribution that is
-dependent upon $g_{\sigma}$ and that will approach the correct
-solution in the homogeneous limit and also in the limit of contact
-distance between the two points.
 
 We construct our function's form in terms of an expansion of powers of
 $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
@@ -270,8 +278,6 @@ $g_{\sigma}$.
 \newcommand\kappaZ{\kappa_2}
 
 The function has the form:
-\davidsays{fix below to match next section... or should we just delete it,
-and express the concept in words? It seems maybe redundant.}
 \begin{multline}
   g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
   + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
