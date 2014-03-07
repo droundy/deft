@@ -217,7 +217,7 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   char *weight_tag = new char[2];
-  char *wall_tag = new char[8];
+  char *wall_tag = new char[10];
   if(walls == 0) sprintf(wall_tag,"periodic");
   else if(walls == 1) sprintf(wall_tag,"wall");
   else if(walls == 2) sprintf(wall_tag,"tube");
