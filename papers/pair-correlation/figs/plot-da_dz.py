@@ -39,7 +39,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["this-work", 'sokolowski', "fischer"]
+versions = ["this-work", 'this-work-mc', 'sokolowski', "fischer"]
 
 plt.figure(figsize=(6,4))
 
