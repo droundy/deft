@@ -87,7 +87,10 @@ where the terms $F_n$ are corrections to the free energy at order $n$
 in the small interaction.  The first and largest term in this
 expansion is
 \begin{align}
-  F_1 &= \tfrac12 \iint g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|) d\rr_1d\rr_2
+  F_1 &= \tfrac12 \iint
+  g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
+  d\rr_1d\rr_2
+  \label{eq:mean-field}
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
@@ -252,50 +255,75 @@ at contact $g_{\sigma}(\rr)$ evaluated at the two points:
 %% and that will approach the correct solution in the homogeneous limit
 %% and also in the limit of contact distance between the two points.
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}.
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) +
+    g(|r_{12}|, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
+This approximation is constructed to reproduce the exact value for the
+integral$ \int n(\rr_1)n(\rr_2)
+g^{(2)}(\rr_1,\rr_2)\delta(|\rr_1-\rr_2|-\sigma)d\rr_1d\rr_2$.  This
+approximation (described in Eq.~\ref{eq:g2-our-mean}) requires the
+radial distribution function as a function of $r$ and $g_\sigma$.  One
+approach is to compute $\eta$ from $g_\sigma$ and then find
+$g(r,\eta)$ either using some approximate functional form
+(e.g. Percus-Yevick) or using Monte Carlo simulation results.  In this
+paper we use the latter (also for evaluating the approximations of
+earlier works), and refer to this approximation (with an exact
+$g(r,g_\sigma)$) as ``this work MC.''
 
-We construct our function's form in terms of an expansion of powers of
-$h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
-in the contact distance limit, leaving our function with tunable
-constant perameters.  We run a simple monte-carlo simulation to
-calculate values of the homogeneous radial distribution function at
-varying distance perameter $r$.  We then tune our function's constant
-parameters by matching our function's results against the monte-carlo
-data, using a least squares fit method.  During this process it is
-simplest to use an analytic expression for $g_{\sigma}$ in our
-function and so we use the well known and very successful Carnahan
-Starling equation to calculate $g_{\sigma}$.  This is appropriate
-since our published $g_{\sigma}$ approaches the Carnahan Starling
-version in the homogeneous limit and it's this limit, along with the
-contact limit, that we would like our constructed radial distribution
-function to get right.  After this process we have an appropriate
-radial distribution function that is dependent only on $r$ and
-$g_{\sigma}$.
+Equation~\ref{eq:g2-our-mean} is a reasonable approximation, but
+cannot be computed efficiently with single-center convolutions as
+written.  In order to ease computational application of this pair
+distribution function in classical density functionals, we have
+developed a separable appoximation for the function $g(r,g_\sigma)$.
+\begin{align}
+  g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+\end{align}
+This separable approximation allows the mean field contribution to
+the free energy (Eq.~\ref{eq:mean-field}) to be computed with only
+single-center convolutions, which can be efficiently computed using
+fast Fourier transforms.
+
+%% We construct our function's form in terms of an expansion of powers of
+%% $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
+%% in the contact distance limit, leaving our function with tunable
+%% constant perameters.  We run a simple monte-carlo simulation to
+%% calculate values of the homogeneous radial distribution function at
+%% varying distance perameter $r$.  We then tune our function's constant
+%% parameters by matching our function's results against the monte-carlo
+%% data, using a least squares fit method.  During this process it is
+%% simplest to use an analytic expression for $g_{\sigma}$ in our
+%% function and so we use the well known and very successful Carnahan
+%% Starling equation to calculate $g_{\sigma}$.  This is appropriate
+%% since our published $g_{\sigma}$ approaches the Carnahan Starling
+%% version in the homogeneous limit and it's this limit, along with the
+%% contact limit, that we would like our constructed radial distribution
+%% function to get right.  After this process we have an appropriate
+%% radial distribution function that is dependent only on $r$ and
+%% $g_{\sigma}$.
+
+%% The function has the form:
+%% \begin{multline}
+%%   g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
+%%   + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
+%%   + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
+%% \end{multline}
+%% where $\kappaO$,$\kappaI$, and $\kappaZ$ are fitted constants and
+%% $I(g_\sigma)$ is a function of $g_\sigma$.
+
+%% The finalized form of our pair correlation function is:
+%% \begin{align}
+%%   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+%% \end{align}
+%% \begin{figure}
+%%   \centering
+%%   \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
+%%   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
+%%   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
+%% \end{figure}
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
 \newcommand\kappaZ{\kappa_2}
-
-The function has the form:
-\begin{multline}
-  g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
-  + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
-  + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
-\end{multline}
-where $\kappaO$,$\kappaI$, and $\kappaZ$ are fitted constants and
-$I(g_\sigma)$ is a function of $g_\sigma$.
-
-The finalized form of our pair correlation function is:
-\begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
-\end{align}
-\begin{figure}
-  \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
-  %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
-  \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
-\end{figure}
 
 \input{figs/fit-parameters}
 

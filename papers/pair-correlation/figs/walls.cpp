@@ -91,14 +91,14 @@ double pairdist_sokolowski(const Grid &gsigma, const Grid &n, const Grid &nA, co
 
 const char *fun[] = {
   "this-work",
-  // "this-work-mc",
+  "this-work-mc",
   // "gloor",
   "fischer",
   "sokolowski"
 };
 double (*pairdists[])(const Grid &gsigma, const Grid &density, const Grid &nA, const Grid &n3, const Grid &nbar_sokolowski, Cartesian r0, Cartesian r1) = {
   pairdist_this_work,
-  // pairdist_this_work_mc,
+  pairdist_this_work_mc,
   // pairdist_gloor,
   pairdist_fischer,
   pairdist_sokolowski
@@ -540,7 +540,7 @@ int main(int, char **) {
   fclose(fout);
   read_mc();
   printf("Done with read\n");
-  for (double this_eta = 0.1; this_eta < 0.45; this_eta += 0.1) {
+  for (double this_eta = 0.1; this_eta < 0.35; this_eta += 0.1) {
     run_walls(this_eta, "WB", WB);
   }
   // Just create this file so make knows we have run.
