@@ -2,26 +2,31 @@
 
 color = { 'mc': 'k',
           'this-work': 'b',
+          'this-work-mc': 'k',
           'fischer': 'g',
           'sokolowski': 'r'}
 
 line = { 'mc': '.',
          'this-work': '-',
+         'this-work-mc': ':',
          'fischer': '-.',
          'sokolowski': '--'}
 
 forward_line = { 'mc': '.',
                  'this-work': '->',
+                 'this-work-mc': ':>',
                  'fischer': '-.',
                  'sokolowski': '-->'}
 
 back_line = { 'mc': '.',
               'this-work': '-<',
+              'this-work-mc': ':<',
               'fischer': '-.',
               'sokolowski': '--<'}
 
 title = { 'mc': 'Monte Carlo',
           'this-work': 'this work',
+          'this-work-mc': 'this work MC',
           'fischer': 'Fischer',
           'sokolowski': 'Sokolowski'}
 

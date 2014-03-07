@@ -18,7 +18,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
 
 dx = 0.1
 ############################
