@@ -24,7 +24,7 @@ def simple(func,a,b):
     return integral
 
 # Trapezoidal rule
-def trap(func,a,b,n):
+def trapezoid(func,a,b,n):
     '''func is a function of x
     [a,b] are the limits of integration
     n is the number of segments desired'''
@@ -63,12 +63,15 @@ def testfunc_antideriv(x):
 def anal(func,a,b):
     return testfunc(b) - testfunc(a)
 
-n = 1000
-print 'test e^x from [0,2],%d points'%n
-print '  simple:',simple(testfunc,0,2)
-print '    err:', (simple(testfunc,0,2) - anal(testfunc,0,2))/anal(testfunc,0,2)
-print '  trapezoid:',trap(testfunc,0,2,n)
-print '    err:',(trap(testfunc,0,2,n) - anal(testfunc,0,2))/anal(testfunc,0,2)
-print '  simpson:',simpson(testfunc,0,2,n)
-print '    err:',(simpson(testfunc,0,2,n) - anal(testfunc,0,2))/anal(testfunc,0,2)
-print '  anal:',anal(testfunc,0,2)
+# n = 1000
+# print 'test e^x from [0,2],%d points'%n
+# print '  simple:',simple(testfunc,0,2)
+# errsimple = (simple(testfunc,0,2) - anal(testfunc,0,2))/anal(testfunc,0,2)
+# print '    err:', errsimple
+# print '  trapezoid:',trapezoid(testfunc,0,2,n)
+# errtrap = (trapezoid(testfunc,0,2,n) - anal(testfunc,0,2))/anal(testfunc,0,2)
+# print '    err:', errtrap
+# print '  simpson:',simpson(testfunc,0,2,n)
+# errsimpson = (simpson(testfunc,0,2,n) - anal(testfunc,0,2))/anal(testfunc,0,2)
+# print '    err:',errsimpson
+# print '  anal:',anal(testfunc,0,2)
