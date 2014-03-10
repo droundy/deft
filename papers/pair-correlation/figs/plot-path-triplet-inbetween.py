@@ -99,10 +99,9 @@ zticks = [4, 6, 8, 10]
 
 plotticks = xticks + [z-rpath for z in zticks]
 xplot.set_xticks(plotticks)
-xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ['$0$ $0$'] +
+xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ['$0$ $2$'] +
                       ['$%i$' %tick for tick in zticks])
 zplot.set_xticks([])
-
 
 zplot.axvline(x=rpath, color='k')
 zplot.axvline(x=3*rpath, color='k')

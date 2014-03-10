@@ -101,16 +101,18 @@ xplot.set_xlim(xlow, xhigh)
 zplot.set_xlim(rpath/2 - xlow + xmin, rpath/2 - xhigh + xmin)
 
 xticks = [6, 4, 2]
-zticks = [0, 2, 4, 6]
+zticks = [1, 3, 5, 7]
 
-plotticks = xticks + [-z+xmin for z in zticks]
+plotticks = xticks + [rpath/2 - z + xmin for z in zticks]
+xplot.set_xticks(xticks)
+zplot.set_xticks(zticks)
 xplot.set_xticks(plotticks)
-xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ["$2$ $0$"] + [""] +
-                      ['$%i$' %tick for tick in zticks[1:]])
+xplot.set_xticklabels(['$%i$' %tick for tick in xticks] +
+                       ['$%i$' %tick for tick in zticks])
 zplot.set_xticks([])
 
-bracket.bracket(xplot, -.01, (xlow - 2)/(xlow - xhigh), -.06, .06, r'$x/R$')
-bracket.bracket(xplot, (xlow - xmin)/(xlow - xhigh), 1.01, -.06, .06, r'$z/R$')
+bracket.bracket(xplot, -.01, (xlow - 2)/(xlow - xhigh) + 0.007, -.06, .06, r'$x/R$')
+bracket.bracket(xplot, (xlow - xmin)/(xlow - xhigh) - 0.013, 1.01, -.06, .06, r'$z/R$')
 
 twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
