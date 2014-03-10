@@ -258,18 +258,29 @@ at contact $g_{\sigma}(\rr)$ evaluated at the two points:
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) +
     g(|r_{12}|, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
-This approximation is constructed to reproduce the exact value for the
-integral$ \int n(\rr_1)n(\rr_2)
-g^{(2)}(\rr_1,\rr_2)\delta(|\rr_1-\rr_2|-\sigma)d\rr_1d\rr_2$.  This
-approximation (described in Eq.~\ref{eq:g2-our-mean}) requires the
+$g^{(2)}(\rr_1,\rr_2)$ above is constructed to reproduce the exact
+value for the integral$ \int n(\rr_1)n(\rr_2)
+g^{(2)}(\rr_1,\rr_2)\delta(|\rr_1-\rr_2|-\sigma)d\rr_1d\rr_2$.  \par
+The approximation described in Eq.~\ref{eq:g2-our-mean} requires the
 radial distribution function as a function of $r$ and $g_\sigma$.  One
-approach is to compute $\eta$ from $g_\sigma$ and then find
-$g(r,\eta)$ either using some approximate functional form
-(e.g. Percus-Yevick) or using Monte Carlo simulation results.  In this
-paper we use the latter (also for evaluating the approximations of
-earlier works), and refer to this approximation (with an exact
-$g(r,g_\sigma)$) as ``this work MC.''  \fixme{We should develop
-  separate acroyms for each method.}
+approach to constructing $g(r,g_\sigma)$ is to compute $\eta$ from
+$g_\sigma$ and then find $g(r,\eta)$ either using some approximate
+functional form (e.g. Percus-Yevick) or using Monte Carlo simulation
+results.  In this paper we first use the Monte Carlo results (which
+are also used in evaluating the approximations of earlier works), and
+refer to this approximation (which has an exact $g(r,g_\sigma)$) as
+``MCRD.''  \jeffsays{I thought maybe for Monte Carlo Radial
+  Distribution} We will then construct our own, more computationally
+efficient radial distribution approximation, which is addressed in the
+following section.
+
+\newcommand\kappaO{\kappa_0}
+\newcommand\kappaI{\kappa_1}
+\newcommand\kappaZ{\kappa_2}
+
+\input{figs/fit-parameters}
+
+\subsection{Separable fit to the radial distribution function}
 
 Equation~\ref{eq:g2-our-mean} is a reasonable approximation, but
 cannot be computed efficiently with single-center convolutions as
@@ -322,27 +333,23 @@ fast Fourier transforms.
 %%   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
 %% \end{figure}
 
-\newcommand\kappaO{\kappa_0}
-\newcommand\kappaI{\kappa_1}
-\newcommand\kappaZ{\kappa_2}
 
-\input{figs/fit-parameters}
-
-\subsection{Separable fit to the radial distribution function}
-
-In contrast to the previous works, which are based on the homogeneous
-radial distribution function $g(r,\eta)$ expressed as a function of
-distance and packing fraction, we have constructed our separable
-approximation for the radial distribution function as $g(r,
-g_\sigma)$, which is a function of the radius $r$ and its value at
-contact $g_\sigma$.  One can convert between these two representation
-using the Carnahan-Starling formula for $g_\sigma(\eta)$
-\begin{equation}
-  g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}.
-\end{equation}
-The form $g(r, g_\sigma)$ is more convenient for treating the
-inhomogeneous case, because we can directly compute the averaged value
-of $g_\sigma$ for an inhomogeneous system~\cite{schulte2012using}.
+%% In contrast to the previous works, which are based on the homogeneous
+%% radial distribution function $g(r,\eta)$ expressed as a function of
+%% distance and packing fraction, we have constructed our separable
+%% approximation for the radial distribution function as $g(r,
+%% g_\sigma)$, which is a function of the radius $r$ and its value at
+%% contact $g_\sigma$.  One can convert between these two representation
+%% using the Carnahan-Starling formula for $g_\sigma(\eta)$
+%% \begin{equation}
+%%   g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}.
+%% \end{equation}
+%% The form $g(r, g_\sigma)$ is more convenient for treating the
+%% inhomogeneous case, because we can directly compute the averaged value
+%% of $g_\sigma$ for an inhomogeneous system~\cite{schulte2012using}.
+\jeffsays{I just commented out a whole paragraph that it seems to me
+  has become reduntant.  In it was the Carnahan-Starling
+  approximation.  Do we need to put this back in?}
 
 We construct $g(r, g_\sigma)$ to satisfy several constraints.  Naturally,
 \begin{equation}
@@ -388,7 +395,7 @@ This function includes three fitted parameters, $\kappaO =
 \kappazero$, $\kappaI = \kappaone$,
 and $\kappaZ = \kappatwo$.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
-figure, it is apparent that the integral f $h(r)$ from
+figure, it is apparent that the integral of $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
 distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
@@ -440,8 +447,8 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 We begin by examining the pair distribution function near a hard wall,
 with a focus on the case where one of the two spheres is in contact
-with the hard wall.  Figure~\ref{fig:pair-distribution}a
-and~\ref{fig:pair-distribution}a compare the results of our
+with the hard wall.  Figures~\ref{fig:pair-distribution}a,\ref{fig:pair-distribution}b
+and Figures~\ref{fig:pair-distribution}c,\ref{fig:pair-distribution}d compare the results of our
 approximate functional with Monte Carlo simulation at packing
 fractions of 0.1 and 0.3 respectively.  We see reasonable agreement at
 the lower density, with some reduced oscillations at larger distances,
@@ -449,12 +456,12 @@ and a flatter angular dependence when the two spheres are in contact.
 At the higher density, we see significant structure developing in the
 simulation results that is not reflected in our approximation.
 
-Figure~\ref{fig:pair-distribution}b
-and~\ref{fig:pair-distribution}b show the pair distribution function
-as plotted along a path illustrated in
-Fig.~\ref{fig:pair-distribution}a.  These plots compare this work
-with Monte Carlo results, as well as the approximations of Sokolowski
-and Fischer~\cite{sokolowski1992role} and that of Fischer and
+Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
+show the pair distribution function as plotted along paths
+illustrated in Figures~\ref{fig:pair-distribution}a and
+\ref{fig:pair-distribution}c.  These plots compare this work with
+Monte Carlo results, as well as the approximations of Sokolowski and
+Fischer~\cite{sokolowski1992role} and that of Fischer and
 Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
 The approach of Fischer and Methfessel is only defined when the two
 spheres are in contact, and is therefore only plotted on that segment
@@ -462,7 +469,7 @@ of the path.  As an input to both previous approximations we use the
 hard sphere radial distribution function found with Monte Carlo
 simulation, interpolated as necessary.  We find that both previous
 approximations to the pair distribution function predict the
-qualtitative angular dependence of the pair distribution function at
+qualitative angular dependence of the pair distribution function at
 contact better than this work.  However, in each case the pair
 distribution function has a systematic error at contact---either too
 high or too low.  Thus while our approximation is smoother than either
@@ -474,8 +481,8 @@ freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points are
 more than a radius away from contact, we find that any of these
 approaches gives a reasonable prediction, with our approach
-underestimating the oscillations in $g^{(2)}$, as expected based on the
-fit in Fig.~\ref{fig:radial-distribution}.
+underestimating the oscillations in $g^{(2)}$, as expected based on
+the fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
 
@@ -589,7 +596,10 @@ defined a position-dependent pair interaction energy as
   d\rr'\, dxdy\label{eq:da1}
 \end{align}
 which gives the contribution to the mean-field free energy due to
-molecules located at position $z$.
+molecules located at position $z$.  \jeffsays{About this last
+  sentence: this is molecules in the plane $z$, right?  Wanted to make
+  sure that's the case before changing to something like 'in the
+  plane'.  Saying the position z makes it seem that there's only one.}
 
 We plot in Fig.~\ref{fig:dadz} this quantity for hard-core fluids with
 three representative pair potentials near a hard wall.  We have chosen
