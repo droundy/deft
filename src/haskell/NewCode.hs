@@ -172,10 +172,27 @@ create3dMethods e variables n =
                 "a2() = ay;",
                 "a3() = az;"]
      }] ++ createAnydMethods e variables n
+        ++ map getIntermediate [("rx", ER rx), ("ry", ER ry), ("rz", ER rz)]
     where
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
       actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
+      getIntermediate :: (String, Exprn) -> CFunction
+      getIntermediate ("", _) = error "empty string in getIntermediate"
+      getIntermediate (rsname, a) = CFunction {
+          name = n++"::get_"++rsname,
+          returnType = ctype a,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     [newcodeStatements $ eval_named (""++rsname) a]
+      }
+
+createInput :: Exprn -> String
+createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
+createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
+createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
 
 createAnydMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 createAnydMethods e variables n =
@@ -211,19 +228,16 @@ createAnydMethods e variables n =
       printEnergy v = ["printf(\"%s" ++ pad maxlen v ++ " =\", prefix);",
                        "print_double(\"\", " ++ v ++ ");",
                        "printf(\"\\n\");"]
-      createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
-      createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
-      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
       getIntermediate :: (String, Exprn) -> CFunction
       getIntermediate ("", _) = error "empty string in getIntermediate"
       getIntermediate (rsname, a) = CFunction {
-      name = n++"::get_"++rsname,
-      returnType = ctype a,
-      constness = "const",
-      args = [],
-      contents = ["int sofar = 0;"] ++
-                 map createInput (findOrderedInputs e) ++
-                 [newcodeStatements $ eval_named (""++rsname) a]
+          name = n++"::get_"++rsname,
+          returnType = ctype a,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     [newcodeStatements $ eval_named (""++rsname) a]
       }
       createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
                                       "double *grad_" ++ nameE ee ++ " = &data[sofar++];"]

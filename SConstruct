@@ -142,6 +142,7 @@ newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[ES $ s_var "n"]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
+    ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[ES $ s_var "n"]'),
