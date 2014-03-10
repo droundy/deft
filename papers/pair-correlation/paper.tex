@@ -283,11 +283,12 @@ following section.
 
 \subsection{Separable fit to the radial distribution function}
 
-Equation~\ref{eq:g2-our-mean} is a reasonable approximation, but
-cannot be computed efficiently with single-center convolutions as
-written.  In order to ease computational application of this pair
-distribution function in classical density functionals, we have
-developed a separable appoximation for the function $g(r,g_\sigma)$.
+The approximation described in Eq.~\ref{eq:g2-our-mean} is reasonably
+accurate, but cannot be computed efficiently with single-center
+convolutions as written.  In order to ease computational application
+of this pair distribution function in classical density functionals,
+we have developed a separable appoximation for the function
+$g(r,g_\sigma)$.
 \begin{align}
   g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
@@ -327,31 +328,13 @@ fast Fourier transforms.
 %% \begin{align}
 %%   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 %% \end{align}
-\pahosays{Was plotting the radial distribution function meant to be commented?}
-%% \begin{figure}
-%%   \centering
-%%   \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
-%%   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
-%%   \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
-%% \end{figure}
-
-
-%% In contrast to the previous works, which are based on the homogeneous
-%% radial distribution function $g(r,\eta)$ expressed as a function of
-%% distance and packing fraction, we have constructed our separable
-%% approximation for the radial distribution function as $g(r,
-%% g_\sigma)$, which is a function of the radius $r$ and its value at
-%% contact $g_\sigma$.  One can convert between these two representation
-%% using the Carnahan-Starling formula for $g_\sigma(\eta)$
-%% \begin{equation}
-%%   g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}.
-%% \end{equation}
-%% The form $g(r, g_\sigma)$ is more convenient for treating the
-%% inhomogeneous case, because we can directly compute the averaged value
-%% of $g_\sigma$ for an inhomogeneous system~\cite{schulte2012using}.
-\jeffsays{I just commented out a whole paragraph that it seems to me
-  has become reduntant.  In it was the Carnahan-Starling
-  approximation.  Do we need to put this back in?}
+\begin{figure}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
+  %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
+  \caption{Plot of the hard-sphere radial distribution function, with
+    our fit.}\label{fig:radial-distribution}
+\end{figure}
 
 We construct $g(r, g_\sigma)$ to satisfy several constraints.  Naturally,
 \begin{equation}
@@ -388,11 +371,15 @@ distribution function is given by
 \begin{equation}
   \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
 \end{equation}
+Finally, we can convert between the packing fraction $\eta$ and the
+radial distribution function at contact $g_\sigma$ using the
+Carnahan-Starling approximation for $g_\sigma$:
 \newcommand\nastyetacuberoot{\sqrt[3]{54 g_\sigma^2 -
     6\sqrt{81g_\sigma^4 - 6g_\sigma^3}}}
-\begin{equation}
-  \eta = 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}
-\end{equation}
+\begin{align}
+  g_\sigma &= \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}\text{, and its inverse} \\
+  \eta &= 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}.
+\end{align}
 This function includes three fitted parameters, $\kappaO =
 \kappazero$, $\kappaI = \kappaone$,
 and $\kappaZ = \kappatwo$.
