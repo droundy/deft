@@ -16,6 +16,7 @@
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 \newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
 \newcommand{\jeffsays}[1]{{\color{red} [\green{Jeff:} \emph{#1}]}}
+\newcommand{\pahosays}[1]{{\color{red} [\green{Paho:} \emph{#1}]}}
 
 \begin{document}
 \title{The Pair Distribution Function of the Inhomogeneous Hard-Sphere
@@ -394,19 +395,18 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
-\newcommand\paircaption{\fixme{Look into smoothing the top plot on
-    right.} The pair distribution function near a hard wall, with
-  packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the
-  hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as
-  $\rr_2$ varies.  The top half of this figure shows the result of the
-  Monte Carlo simulation, while the bottom half shows the result of
-  the appproximation developed in this work.  On the right is a plot
-  of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the figure to
-  the left.  This plot compares the Monte Carlo results (black) with
-  those of this work (blue), Sokolowski and Fischer
+\newcommand\paircaption{\pahosays{The MC has one point that jumps up at the
+    beginning of the incontact region.} The pair distribution function near a
+  hard wall, with packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with
+  the hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as $\rr_2$
+  varies.  The top half of this figure shows the result of the Monte Carlo
+  simulation, while the bottom half shows the result of the appproximation
+  developed in this work.  On the right is a plot of $g^{(2)}(\rr_1,\rr_2)$ on
+  the path illustrated in the figure to the left.  This plot compares the Monte
+  Carlo results (black) with those of this work (blue), Sokolowski and Fischer
   (red)~\cite{sokolowski1992role}, and Fischer and Methfessel
-  (green)~\cite{fischer1980born}.  The latter is only plotted at
-  contact, where it is defined.  }
+  (green)~\cite{fischer1980born}.  The latter is only plotted at contact, where
+  it is defined.  }
 
 \section{Results}
 
@@ -482,14 +482,14 @@ fit in Fig.~\ref{fig:radial-distribution}.
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Remove one of, or make a note of, the two curves for
-      this work}\fixme{Fix MC issue here (volume wrong?)} The triplet
-    distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing
-    fraction 0.3, plotted when $\rr_1$ and $\rr_2$ are in contact.
-    The color plot on the left shows the triplet distribution
-    function, with white corresponding to the contact value of the
-    \emph{pair} distribution function.  The plot on the right shows
-    the value of $g^{(3)}$ along the path shown as a dotted line on
+  \caption{\fixme{Remove one of, or make a note of, the two curves for this
+      work}\fixme{Fix MC issue here (volume wrong?)} \fixme{Add backward curve
+      for this work mc?}\fixme{z-axis wrong}The triplet
+    distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3,
+    plotted when $\rr_1$ and $\rr_2$ are in contact.  The color plot on the left
+    shows the triplet distribution function, with white corresponding to the
+    contact value of the \emph{pair} distribution function.  The plot on the
+    right shows the value of $g^{(3)}$ along the path shown as a dotted line on
     the plot to the left.}\label{fig:triplet-contact-distribution}
 \end{figure*}
 

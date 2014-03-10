@@ -55,6 +55,7 @@ def read_triplet_path(ff, fun):
   data = loadtxt(filename)
   if fun == 'mc':
     data[:,0]-=4.995
+  #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
   return data[:,0:4]
 
 def read_triplet_back(ff, fun):
@@ -65,6 +66,7 @@ def read_triplet_back(ff, fun):
     # input: "figs/triplet-back-contact-*-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-contact-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
+  #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
   return data[:,0:4]
 
 def read_triplet(ff, fun):
@@ -107,9 +109,6 @@ xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ["$2$ $0$"] + [""
                       ['$%i$' %tick for tick in zticks[1:]])
 zplot.set_xticks([])
 
-xplot.axvline(x=xmin, color='k')
-zplot.axvline(x=2*rpath, color='k')
-
 bracket.bracket(xplot, -.01, (xlow - 2)/(xlow - xhigh), -.06, .06, r'$x/R$')
 bracket.bracket(xplot, (xlow - xmin)/(xlow - xhigh), 1.01, -.06, .06, r'$z/R$')
 
@@ -117,62 +116,6 @@ twod_plot.set_xlim(zmin, zmax)
 twod_plot.set_ylim(-rmax, rmax)
 
 #fig.subplots_adjust(hspace=0.001)
-
-me = 160
-
-for name in plots:
-    g3_path = read_triplet_path(ff, name)
-    if able_to_read_file == False:
-        plot(arange(0,10,1), [0]*10, 'k')
-        suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
-        savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
-        savefig(savedfilename)
-        exit(0)
-    x = g3_path[:,3]
-    z = g3_path[:,2]
-    g = g3_path[:,1]
-    zcontact = z.min()
-    incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
-
-    if name == 'fischer':
-      # Fischer et al only predict pair distribution function in
-      # contact.  We do this using "&" below which means "and".
-      zplot.plot(z[incontact],g[incontact], styles.plot_forward[name], label=styles.title[name])
-    else:
-      myme = me
-      start = 0
-      if name == 'mc':
-        myme = 10;
-      if name == 'sokolowski':
-        start = 3*me//4
-      xplot.plot(x[z==zcontact][start:],g[z==zcontact][start:], styles.plot_forward[name],
-                 label=styles.title[name],
-                 markevery=myme, mec='none')
-      zplot.plot(z[z>zcontact][start:],g[z>zcontact][start:], styles.plot_forward[name],
-                 label=styles.title[name],
-                 markevery=myme, mec='none')
-
-
-for name in plots:
-  if name in ['this-work', 'sokolowski']:
-    g3_path = read_triplet_back(ff, name)
-    x = g3_path[:,3]
-    z = g3_path[:,2]
-    g = g3_path[:,1]
-    zcontact = z.max()
-    z = zcontact + (zcontact - z)
-    incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
-
-    start = me//2
-    if name == 'sokolowski':
-      start = me//4
-    xplot.plot(x[z==zcontact][start:],g[z==zcontact][start:], styles.plot_back[name],
-               markevery=me, mec='none')
-    zplot.plot(z[z>zcontact][start:],g[z>zcontact][start:], styles.plot_back[name],
-               markevery=me, mec='none')
-
-#xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r})$')
-zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
@@ -220,10 +163,10 @@ cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 CS = twod_plot.pcolormesh(Z, R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
-plot([zmin,zmax], [0,0], 'k-', linewidth=2)
+twod_plot.plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
-text(-2.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
-text(-2.7, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(-2.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(-2.7, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 sphere0 = Circle((0, 0), 1, color='slategray')
 sphere1 = Circle((rpath, 0), 1, color='slategray')
@@ -231,7 +174,7 @@ twod_plot.add_artist(sphere0)
 twod_plot.add_artist(sphere1)
 
 myticks = arange(0, floor(2.0*gmax)/2 + 0.1, 0.5)
-colorbar(CS, extend='neither') # , ticks=myticks)
+fig.colorbar(CS, extend='neither') # , ticks=myticks)
 twod_plot.set_ylabel('$x/R$');
 twod_plot.set_xlabel('$z/R$');
 
@@ -255,6 +198,153 @@ plot(zmc,xmc, styles.color['mc']+'--', linewidth=3)
 #plot(zdft,-xdft, colors[plots.index('this-work')]+'--', linewidth=3)
 #plot(zback[zback<zback.max()],-xback[zback<zback.max()],
 #     colors[plots.index('this-work')]+'--', linewidth=3)
+
+# takes two arrays, and averages points so that a plot of x vs y
+# will have points separated by a distance dpath
+# returns (x, y)
+def avg_points(x, y, dpath):
+  new_y = array([])
+  new_x = array([])
+  old_i = 0
+  for i in xrange(1, len(x)):
+    dist = sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
+    if dist >= dpath or i == len(x) - 1:
+      avg_x = average(x[old_i:i])
+      avg_y = average(y[old_i:i])
+
+      new_x = append(new_x, avg_x)
+      new_y = append(new_y, avg_y)
+      old_i = i
+  return (new_x, new_y)
+
+for name in plots:
+  g3_path = read_triplet_path(ff, name)
+  if able_to_read_file == False:
+    plot(arange(0,10,1), [0]*10, 'k')
+    suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
+    savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
+    savefig(savedfilename)
+    exit(0)
+  x = g3_path[:,3]
+  z = g3_path[:,2]
+  g = g3_path[:,1]
+  zcontact = z.min()
+  incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
+
+  g_x = g[z==zcontact]
+  x_x = x[z==zcontact]
+
+  g_c = g[incontact][:-1]
+  z_c = z[incontact][:-1]
+
+  g_z = g[z>rpath*2]
+  z_z = z[z>rpath*2]
+
+  if name == 'mc':
+    # do point averaging, so that points are fixed path distance apart
+    dpath = 0.3
+    x_x, g_x = avg_points(x_x, g_x, dpath)
+    z_c, g_c = avg_points(z_c, g_c, dpath)
+    z_z, g_z = avg_points(z_z, g_z, dpath)
+
+  zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
+  if name != 'fisher':
+    # Fischer et al only predict pair distribution function in contact
+    xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
+    zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
+
+  # insert zoomed-in subplot
+  suba = axes([.73, .59, .23, .28])
+  suba.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
+  sub_ylim = (3.5, 5)
+  suba.set_yticks(arange(sub_ylim[0], sub_ylim[1]+0.25, 0.5))
+  suba.set_ylim(sub_ylim)
+  sub_xlim = (1.5, z_c.max())
+  suba.set_xlim(sub_xlim)
+
+  zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                            sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0], facecolor='none',
+                            linewidth=2))
+  for i in suba.spines.itervalues():
+    i.set_linewidth(2)
+
+xplot.axvline(x=xmin, color='k')
+zplot.axvline(x=2*rpath, color='k')
+
+
+def get_closest(x, y, xref, space):
+  xnew = zeros_like(xref)
+  ynew = zeros_like(xref)
+  for i in xrange(len(xnew)):
+    cond = abs((x - xref[i]) - space) == abs((x - xref[i]) - space).min()
+    xnew[i] = x[cond][0]
+    ynew[i] = y[cond][0]
+  return (xnew, ynew)
+
+# add triangles to show direction of plots
+spacing = 2
+
+# Make reference points
+x_ref = arange(xmin + 0.1, xlow, spacing)
+z_ref = arange(rpath/2 + 0.1 + spacing/2, 6+spacing, spacing)
+
+for name in ['this-work', 'this-work-mc', 'sokolowski']:
+  # forward arrows
+  g3_path = read_triplet_path(ff, name)
+  x = g3_path[:,3]
+  z = g3_path[:,2]
+  g = g3_path[:,1]
+  zcontact = z.min()
+
+  g_x = g[z==zcontact]
+  x_x = x[z==zcontact]
+  g_z = g[z>zcontact][::-1]
+  z_z = z[z>zcontact][::-1]
+
+  start = styles.start[name]*spacing
+  x_x, g_x = get_closest(x_x, g_x, x_ref, start)
+  xplot.plot(x_x, g_x, styles.plot_forward[name], mec='none')
+  #if name == 'this-work': print z_z
+  z_z, g_z = get_closest(z_z, g_z, z_ref, start)
+  #print name, z_z
+  zplot.plot(z_z, g_z, styles.plot_forward[name], mec='none')
+  suba.plot(z_z, g_z, styles.plot_forward[name], mec='none')
+
+for name in ['this-work', 'sokolowski']:
+  # backward arrows
+  g3_path = read_triplet_back(ff, name)
+  x = g3_path[:,3]
+  z = g3_path[:,2]
+  g = g3_path[:,1]
+  zcontact = z.max()
+  z = zcontact + (zcontact - z)
+
+  g_x = g[z==zcontact]
+  x_x = x[z==zcontact]
+  g_z = g[z>zcontact]
+  z_z = z[z>zcontact]
+
+  start = styles.start[name]*spacing + 0.5*spacing
+
+  xplot.plot(x_x, g_x, styles.plot[name])
+  x_x, g_x = get_closest(x_x, g_x, x_ref, start)
+  xplot.plot(x_x, g_x, styles.plot_back[name], mec='none')
+
+  start = styles.start[name]*spacing - 0.5*spacing
+
+  zplot.plot(z_z, g_z, styles.plot[name])
+  suba.plot(z_z, g_z, styles.plot[name])
+  z_z, g_z = get_closest(z_z, g_z, z_ref, start)
+  zplot.plot(z_z, g_z, styles.plot_back[name], mec='none')
+  suba.plot(z_z, g_z, styles.plot_back[name], mec='none')
+
+
+
+
+
+
+#xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,1.1\sigma\right>,\mathbf{r})$')
+xplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 
 Ax = 3.9

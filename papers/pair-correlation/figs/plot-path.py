@@ -172,6 +172,23 @@ fig.colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x/R$');
 twod_plot.set_xlabel('$z/R$');
 
+# takes two arrays, and averages points so that a plot of x vs y
+# will have points separated by a distance dpath
+# returns (x, y)
+def avg_points(x, y, dpath):
+  new_y = array([])
+  new_x = array([])
+  old_i = 0
+  for i in xrange(1, len(x)):
+    dist = sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
+    if dist >= dpath or i == len(x) - 1:
+      avg_x = average(x[old_i:i])
+      avg_y = average(y[old_i:i])
+
+      new_x = append(new_x, avg_x)
+      new_y = append(new_y, avg_y)
+      old_i = i
+  return (new_x, new_y)
 
 
 for name in plots:
@@ -187,31 +204,52 @@ for name in plots:
     g = g2_path[:,1]
     zcontact = z.min()
     xcontact = 2.0051
+    incontact = (x<xcontact) & (z<2)
+
+    g_x = g[z==zcontact]
+    x_x = x[z==zcontact]
+
+    g_c = g[incontact]
+    z_c = z[incontact]
+
+    g_z = g[(x<xcontact) & (z>2.005)]
+    z_z = z[(x<xcontact) & (z>2.005)]
+
+    if name == 'mc':
+      # do point averaging, so that points are fixed path distance apart
+      dpath = 0.2
+      x_x, g_x = avg_points(x_x, g_x, dpath)
+      # z_c, g_c = avg_points(z_c, g_c, dpath)
+      z_z, g_z = avg_points(z_z, g_z, dpath)
+
+    zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
+    if name != 'fisher':
+      # Fischer et al only predict pair distribution function in contact
+      xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
+      zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
+
     # insert zoomed subplot for eta = 0.1 only
     if ff == 0.1:
-      incontact = (x<xcontact) & (z<2)
-      suba = axes([.65, .28, .3, .3])
-      suba.set_xlabel('$z/R$')
-      suba.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+      suba = axes([.65, .23, .3, .35])
+      suba.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
       suba.set_yticks([1, 1.1, 1.2, 1.3, 1.4])
-      suba.set_ylim(1, suba.get_ylim()[1])
+      sub_ylim = (1, suba.get_ylim()[1])
+      suba.set_ylim(sub_ylim)
+      sub_xlim = suba.get_xlim()
 
+      zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                                sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0], facecolor='none',
+                                linewidth=2))
+      for i in suba.spines.itervalues():
+        i.set_linewidth(2)
 
-    if name == 'fischer':
-      # Fischer et al only predict pair distribution function in
-      # contact.  We do this using "&" below which means "and".
-      incontact = (x<xcontact) & (z<2)
-      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
-    else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
-      zplot.plot(z[x<xcontact],g[x<xcontact], styles.plot[name], label=styles.title[name])
 
 zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
 legendloc = 'lower left' if ff < 0.2 else 'upper left'
-zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
+xplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 
 
