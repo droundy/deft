@@ -368,19 +368,19 @@ def g3pathfunction_z(z):
 # Annotations on 2d plot
 texteff = [matplotlib.patheffects.withStroke(linewidth=2, foreground="w")]
 arroweff = [matplotlib.patheffects.withStroke(linewidth=3, foreground="w")]
-annotate('A', xy=(Az, Ax), xytext=(1.2,-3.5),
+twod_plot.annotate('A', xy=(Az, Ax), xytext=(1.2,-3.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-annotate('B', xy=(Bz, Bx), xytext=(1.5,1.8),
+twod_plot.annotate('B', xy=(Bz, Bx), xytext=(1.5,1.8),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-annotate('C', xy=(Cz, Cx), xytext=(rpath*2,3.0),
+twod_plot.annotate('C', xy=(Cz, Cx), xytext=(rpath*2,3.0),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-annotate('D', xy=(Dz, Dx), xytext=(6.7,0.5),
+twod_plot.annotate('D', xy=(Dz, Dx), xytext=(6.7,0.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-annotate('E', xy=(Ez, Ex), xytext=(8.0,0.5),
+twod_plot.annotate('E', xy=(Ez, Ex), xytext=(8.0,0.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
 
