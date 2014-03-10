@@ -13,6 +13,8 @@ import bracket # our handy bracket function
 import styles # our preferred line styles
 
 from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
@@ -203,7 +205,7 @@ for name in plots:
     z = g2_path[:,2]
     g = g2_path[:,1]
     zcontact = z.min()
-    xcontact = 2.0051
+    xcontact = 2.0 if name == 'mc' else 2.0051
     incontact = (x<xcontact) & (z<2)
 
     g_x = g[z==zcontact]
@@ -219,7 +221,7 @@ for name in plots:
       # do point averaging, so that points are fixed path distance apart
       dpath = 0.2
       x_x, g_x = avg_points(x_x, g_x, dpath)
-      # z_c, g_c = avg_points(z_c, g_c, dpath)
+      z_c, g_c = avg_points(z_c, g_c, dpath)
       z_z, g_z = avg_points(z_z, g_z, dpath)
 
     zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
@@ -237,11 +239,14 @@ for name in plots:
       suba.set_ylim(sub_ylim)
       sub_xlim = suba.get_xlim()
 
-      zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
-                                sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0], facecolor='none',
-                                linewidth=2))
       for i in suba.spines.itervalues():
         i.set_linewidth(2)
+      if name == 'this-work': # only want to draw rectangle once
+        zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                                  sub_xlim[1]-sub_xlim[0],
+                                  sub_ylim[1]-sub_ylim[0], facecolor='none',
+                                  linewidth=2))
+
 
 
 zplot.axvline(x=2, color='k')

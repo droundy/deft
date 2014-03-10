@@ -12,6 +12,8 @@ import matplotlib.patheffects
 import bracket # our handy bracket function
 import styles # our preferred line styles
 from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
@@ -261,14 +263,14 @@ for name in plots:
   sub_ylim = (3.5, 5)
   suba.set_yticks(arange(sub_ylim[0], sub_ylim[1]+0.25, 0.5))
   suba.set_ylim(sub_ylim)
-  sub_xlim = (1.5, z_c.max())
+  sub_xlim = (1.8, z_c.max())
   suba.set_xlim(sub_xlim)
-
-  zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
-                            sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0], facecolor='none',
-                            linewidth=2))
   for i in suba.spines.itervalues():
     i.set_linewidth(2)
+  if name == 'this-work': # only want to draw rectangle once
+    zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                              sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0],
+                              facecolor='none', linewidth=2))
 
 xplot.axvline(x=xmin, color='k')
 zplot.axvline(x=2*rpath, color='k')
@@ -349,7 +351,7 @@ for name in ['this-work', 'sokolowski']:
 xplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 
-Ax = 3.9
+Ax = 3.7
 Az = rpath/2
 Bx = xmin
 Bz = rpath/2
@@ -393,19 +395,19 @@ twod_plot.annotate('E', xy=(Ez, Ex), xytext=(6,1),
 
 # Annotations on 1d plot
 xplot.annotate('A', xy=(Ax, g3pathfunction_x(Ax)),
-               xytext=(Ax+1,1.3),
+               xytext=(Ax+0.25,1.),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 xplot.annotate('B', xy=(Bx,g3pathfunction_x(Bx)),
-               xytext=(Bx+1, g3pathfunction_x(Bx)-1.0),
+               xytext=(Bx+0.5, g3pathfunction_x(Bx)-0.5),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('C', xy=(Cz,g3pathfunction_z(Cz)),
-               xytext=(Cz,g3pathfunction_z(Cz)-2.0),
+               xytext=(Cz+0.5,g3pathfunction_z(Cz)-1.7),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('D', xy=(Dz,g3pathfunction_z(Dz)),
-               xytext=(Dz+1,g3pathfunction_z(Dz)-0.2),
+               xytext=(Dz+0.5,g3pathfunction_z(Dz)-0.2),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
-               xytext=(Ez+0.5,1.3),
+               xytext=(Ez,1.),
                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 ylim = xplot.get_ylim()

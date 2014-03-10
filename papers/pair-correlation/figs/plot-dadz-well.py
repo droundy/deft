@@ -11,6 +11,12 @@ import matplotlib.pyplot as plt
 if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " eta")
     exit(1)
+
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
+
 eta = float(sys.argv[1])
 #arg eta = [.2,.3]
 able_to_read_file = True

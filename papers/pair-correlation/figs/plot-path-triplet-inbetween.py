@@ -12,6 +12,8 @@ import bracket # our handy bracket function
 import styles # our preferred line styles
 import matplotlib.patheffects
 from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
@@ -241,6 +243,12 @@ for name in plots:
   g_c = g[incontact]
   z_c = z[incontact]
 
+  if name == 'mc':
+    # trim some bad mc data, that is due to bins overlapping the center sphere
+    # and so giving incorrect counts
+    g_c = g_c[z_c > 2.11]
+    z_c = z_c[z_c > 2.11]
+
   g_z = g[z>rpath*3]
   z_z = z[z>rpath*3]
 
@@ -266,11 +274,13 @@ for name in plots:
   sub_xlim = (2.5, z_c.max())
   suba.set_xlim(sub_xlim)
 
-  zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
-                            sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0], facecolor='none',
-                            linewidth=2))
   for i in suba.spines.itervalues():
     i.set_linewidth(2)
+  if name == 'this-work': # only want to draw rectangle once
+    zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                              sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0],
+                              facecolor='none', linewidth=2))
+
 
 def get_closest(x, y, xref, space):
   xnew = zeros_like(xref)
