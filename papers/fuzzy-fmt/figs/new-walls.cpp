@@ -64,7 +64,7 @@ int main(int, char **) {
       hf.n() = eta/(4*M_PI/3);
       hf.mu() = 0;
       // set mu based on derivative of hf
-      const double derivative = hf.grad()[2];
+      const double derivative = hf.grad()[4];
       hf.mu() = derivative; // set eta to be the equilibrium density
       printf("bulk energy is %g\n", hf.energy());
       hf.printme("XXX:\t");
