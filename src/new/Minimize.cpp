@@ -20,6 +20,7 @@ bool Minimize::improve_energy(Verbosity v) {
     }
     return false;
   }
+  //f->run_finite_difference_test("functional");
   double gdotd;
   {
     const Vector pg = pgrad(v);
@@ -72,7 +73,7 @@ bool Minimize::improve_energy(Verbosity v) {
       }
       return false;
     }
-    if (E0 >= DBL_MAX || E0 <= DBL_MIN) {
+    if (E0 >= DBL_MAX || E0 <= -DBL_MAX) {
       // There is no point continuing, since we've got an infinite result.  :(
       // So we may as well quit here.
       if (v >= verbose) {
@@ -161,14 +162,16 @@ bool Minimize::improve_energy(Verbosity v) {
         double Ebest = E0;
         while (energy(v) <= Ebest) {
           Ebest = energy(v);
-          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: Ei = %25.15g\n", Ebest);
+          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: si = %25.15g  Ei = %25.15g\n", step1, Ebest);
           *f += step1*direction;
           invalidate_cache();
           step1 *= 2;
         }
+        if (v >= verbose) printf("\t\tQuad: sb = %25.15g  Eb = %25.15g\n", step1, energy(v));
         step1 *= 0.5;
         *f -= step1*direction;
         step = step1;
+        invalidate_cache();
       }
     } else if (E1 == E0) {
       if (v >= verbose) {
