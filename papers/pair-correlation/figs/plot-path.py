@@ -14,7 +14,8 @@ import styles # our preferred line styles
 
 from matplotlib import rc
 
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+#rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('font', family='serif', serif ='Computer Modern')
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
@@ -94,12 +95,17 @@ twod_plot = subplot(gs[0])
 
 fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.1)
 
+def z_to_x(z):
+  return 2 - z
+def x_to_z(x):
+  return 2 - x
+
 zmax_lineplot = 6.
 xmax_lineplot = 4.
 xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
 xplot.set_xticklabels(["$6$", "$4$", "$2~~0$", "$2$", "$4$", "$6$"])
-zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
+zplot.set_xlim(x_to_z(xplot.get_xlim()[0]), x_to_z(xplot.get_xlim()[1]))
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
@@ -293,6 +299,9 @@ Dz = rpath
 Ex = 0
 Ez = 4.0
 
+zplot.set_xticks([x_to_z(Ax), Bz, Cz, Dz, Ez])
+zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
+
 hw = 4 # headwidth of arrows
 
 g2nice = read_walls_path(ff, 'this-work')
@@ -309,21 +318,21 @@ twod_plot.annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01,
 twod_plot.annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 # Annotations on 1d plot
-xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
-               xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
-               xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
-               xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
-               xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
-               xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
+#                xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
+#                xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
+#                xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
+#                xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
+#                xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
