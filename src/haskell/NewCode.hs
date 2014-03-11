@@ -161,9 +161,9 @@ create3dMethods e variables n =
      returnType = None,
      constness = "",
      args = [(Double, "ax"), (Double, "ay"), (Double, "az"), (Double, "dx")],
-     contents =["int myNx = int(ceil(ax/dx));",
-                "int myNy = int(ceil(ay/dx));",
-                "int myNz = int(ceil(az/dx));",
+     contents =["int myNx = int(ceil(ax/dx/2))*2;",
+                "int myNy = int(ceil(ay/dx/2))*2;",
+                "int myNz = int(ceil(az/dx/2))*2;",
                 "data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
@@ -240,7 +240,7 @@ createAnydMethods e variables n =
                      [newcodeStatements $ eval_named (""++rsname) a]
       }
       createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
-                                      "double *grad_" ++ nameE ee ++ " = &data[sofar++];"]
+                                      "double *grad_" ++ nameE ee ++ " = &output[sofar++];"]
       createInputAndGrad ee@(ER _) = ["Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);",
                                       "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz);",
                                       "sofar += Nx*Ny*Nz;"]
@@ -256,8 +256,8 @@ createAnydMethods e variables n =
                                  ns = findNamedScalars e
                              in reuseVar $ freeVectors $ st ++ zipWith Assign (map varn the_gradients) es
       varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
-      varn (vnam, ER _) = ER $ Var CannotBeFreed vnam ("grad_"++vnam++"[i]") vnam Nothing
-      varn (vnam, EK _) = EK $ Var CannotBeFreed vnam (vnam++"[i]") vnam Nothing
+      varn (vnam, ER _) = ER $ Var CannotBeFreed (vnam++"[i]") vnam vnam Nothing
+      varn (_, EK _) = error "unhandled type k-space in varn"
       evalv :: [Statement] -> [String]
       evalv st = ["Vector output(data.get_size());",
                   "output = 0;"]++
