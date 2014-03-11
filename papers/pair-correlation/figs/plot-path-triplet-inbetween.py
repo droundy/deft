@@ -19,7 +19,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor'
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski']#, 'fischer'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -91,15 +91,20 @@ twod_plot = subplot(gs[0])
 
 fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.05)
 
+def z_to_x(z):
+  return z - rpath
+def x_to_z(x):
+  return x + rpath
+
 xlow = -6
 xhigh = 8
 xplot.set_xlim(xlow, xhigh)
-zplot.set_xlim(xlow + rpath, xhigh + rpath)
+zplot.set_xlim(x_to_z(xlow), x_to_z(xhigh))
 
 xticks = [-6, -4, -2, 0]
 zticks = [4, 6, 8, 10]
 
-plotticks = xticks + [z-rpath for z in zticks]
+plotticks = xticks + [z_to_x(z) for z in zticks]
 xplot.set_xticks(plotticks)
 xplot.set_xticklabels(['$%i$' %tick for tick in xticks[:-1]] + ['$0$ $2$'] +
                       ['$%i$' %tick for tick in zticks])
@@ -362,6 +367,8 @@ Dz = rpath*3
 Ex = 0
 Ez = 8
 
+zplot.set_xticks([x_to_z(Ax), Bz, Cz, Dz, Ez])
+zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
 hw = 4 # headwidth of arrows
 
 g3nice = read_triplet_path(ff, 'this-work')
@@ -394,29 +401,29 @@ twod_plot.annotate('E', xy=(Ez, Ex), xytext=(8.0,0.5),
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
 
 # Annotations on 1d plot
-xplot.annotate('A', xy=(Ax, g3pathfunction_x(Ax)),
-               xytext=(Ax-0.5,0.7),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('B', xy=(Bx,g3pathfunction_x(Bx)),
-               xytext=(Bx+1, g3pathfunction_x(Bx)),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('C', xy=(Cz,g3pathfunction_z(Cz)),
-               xytext=(Cz,g3pathfunction_z(Cz)-0.5),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('D', xy=(Dz,g3pathfunction_z(Dz)),
-               xytext=(Dz+1,g3pathfunction_z(Dz)-0.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
-               xytext=(Ez-0.5,1.3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('A', xy=(Ax, g3pathfunction_x(Ax)),
+#                xytext=(Ax-0.5,0.7),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('B', xy=(Bx,g3pathfunction_x(Bx)),
+#                xytext=(Bx+1, g3pathfunction_x(Bx)),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('C', xy=(Cz,g3pathfunction_z(Cz)),
+#                xytext=(Cz,g3pathfunction_z(Cz)-0.5),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('D', xy=(Dz,g3pathfunction_z(Dz)),
+#                xytext=(Dz+1,g3pathfunction_z(Dz)-0.2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('E', xy=(Ez,g3pathfunction_z(Ez)),
+#                xytext=(Ez-0.5,1.3),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])
 
 plot_labels=['c)', 'd)']
 # add figure labels
-twod_plot.text(twod_plot.get_xlim()[0]-1, twod_plot.get_ylim()[1], plot_labels[0])
-xplot.text(-7.5, ylim[1], plot_labels[1])
+twod_plot.text(twod_plot.get_xlim()[0]-1, twod_plot.get_ylim()[1], plot_labels[0], fontsize=16)
+xplot.text(-7.5, ylim[1], plot_labels[1], fontsize=16)
 
 title = r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$'
 twod_plot.set_title(title +  ' at $\eta = %g$' % ff)
