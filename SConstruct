@@ -143,6 +143,9 @@ for name, module, hsfunctional, inputs in [
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[ES $ s_var "n"]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
+    ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[ER $ r_var "n"]'),
+    ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff", '[ER $ r_var "Veff"]'),
+    ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[ES $ s_var "n"]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[ES $ s_var "n"]'),
@@ -381,6 +384,15 @@ for mkdat in Split("""
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
                       source = [mkdat + '.cpp'] + all_sources))
+
+for mkdat in Split("""
+	papers/fuzzy-fmt/figs/new-walls
+      """):
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + generic_sources +
+                      ['src/new/Minimize.cpp', 'src/new/NewFunctional.cpp', 'src/new/SFMTFluidFast.cpp',
+                       'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
 
 env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',
