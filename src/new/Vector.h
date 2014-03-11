@@ -154,6 +154,15 @@ public:
   }
   friend Vector operator*(double a, const Vector &b);
 
+  Vector operator/(double a) const {
+    Vector out(size);
+    const double *p2 = data + offset;
+    for (int i=0; i<size; i++) {
+      out.data[i] = p2[i]/a;
+    }
+    return out;
+  }
+
   void operator+=(const Vector &a) {
     assert(size == a.size);
     double *p1 = data + offset;
@@ -174,6 +183,12 @@ public:
     double *p1 = data + offset;
     for (int i=0; i<size; i++) {
       p1[i] *= a;
+    }
+  }
+  void operator/=(double a) {
+    double *p1 = data + offset;
+    for (int i=0; i<size; i++) {
+      p1[i] /= a;
     }
   }
   double sum() const {
