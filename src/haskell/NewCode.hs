@@ -221,6 +221,7 @@ createAnydMethods e variables n =
                  filter (`notElem` ["dV", "dr", "volume"]) $
                  (Set.toList (findNamedScalars e))
       }] ++ map getIntermediate (Set.toList $ findNamed e)
+         ++ concatMap getScalarDerivative (findOrderedInputs e)
   where
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
@@ -239,6 +240,24 @@ createAnydMethods e variables n =
                      map createInput (findOrderedInputs e) ++
                      [newcodeStatements $ eval_named (""++rsname) a]
       }
+      getScalarDerivative :: Exprn -> [CFunction]
+      getScalarDerivative (ES v) = [CFunction {
+          name = n++"::d_by_d"++nameE (ES v),
+          returnType = Double,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     -- the cleanallvars is needed for when we have a
+                     -- bad interaction where e is defined using some
+                     -- derivatives, and we end up with two separate
+                     -- definitions of those derivatives which have
+                     -- the same variable name.  I expect there exists
+                     -- a better solution, but this is the one that I
+                     -- came up with.
+                     [newcodeStatements (eval_scalar_derivative $ derive v 1 $ cleanallvars e)]
+      }]
+      getScalarDerivative _ = [] -- not a scalar
       createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
                                       "double *grad_" ++ nameE ee ++ " = &output[sofar++];"]
       createInputAndGrad ee@(ER _) = ["Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);",
@@ -272,6 +291,10 @@ eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']
         isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
         isns _ = False
         ns = findNamedScalars x
+
+eval_scalar_derivative :: Expression Scalar -> [Statement]
+eval_scalar_derivative x = reuseVar $ freeVectors $ st ++ [Return e']
+  where (st, [e']) = optimize [ES $ factorize $ joinFFTs x]
 
 eval_named :: String -> Exprn -> [Statement]
 eval_named outname (ER x) = reuseVar $ freeVectors $ st ++ [Initialize outvar, Assign outvar e', Return outvar]

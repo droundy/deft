@@ -140,15 +140,15 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
 
 newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
-    ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[ES $ s_var "n"]'),
+    ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
     ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[ER $ r_var "n"]'),
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff", '[ER $ r_var "Veff"]'),
-    ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[ES $ s_var "n"]'),
+    ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
-    ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[ES $ s_var "n"]'),
+    ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
     ("HomogeneousWaterSaftByHand", "WaterSaft", "homogeneous_water_saft_by_hand_n", '[ES $ s_var "n"]')]:
     # I'm sloppy and just recreate the generate_%s.hs files every time
     f = open('src/haskell/generate_%s.hs' % name, "w")
