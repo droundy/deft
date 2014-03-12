@@ -17,12 +17,10 @@ class paramID:
             if 'g' in file: self.gfile = file
     def __repr__(self):
         return str((self.walls,self.ww,self.ff,self.N))
-    def name(self,option='',interactions=None):
+    def name(self,option=''):
         out = self.walls + '-ww' + '%03.1f'%float(self.ww)
         if option:
             out += '-ff' + '%04.2f'%float(self.ff)
         if option == 'N':
             out += '-N' + str(self.N)
-            if interactions != None:
-                out += '-i' + str(interactions)
         return out + ('-nw' if not self.weights else '')
