@@ -495,7 +495,7 @@ for test in Split(""" memory saft eos print-iter convolve-finite-difference prec
                       convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
     env.BuildTest(test, all_sources)
 
-for test in Split(""" functional-arithmetic surface-tension """):
+for test in Split(""" new-fftinverse functional-arithmetic surface-tension """):
     env.BuildTest(test, generic_sources)
 
 for test in Split(""" sfmt """):
