@@ -8,6 +8,14 @@ inline bool better(double a, double b) {
 
 bool Minimize::improve_energy(Verbosity v) {
   iter++;
+  if (iter >= maxiter) {
+    if (v >= verbose) {
+      printf("We reached the maximum number of iterations: %d with uncertainty %g remaining.\n",
+             maxiter, error_estimate);
+      fflush(stdout);
+    }
+    return false;
+  }
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy(v);
   const double old_deltaE = deltaE;
@@ -261,7 +269,7 @@ bool Minimize::improve_energy(Verbosity v) {
     error_guess = precision + fabs(newE);
   }
 
-  const double error_estimate = 2*error_guess; // Just a bit of paranoia...
+  error_estimate = 2*error_guess; // Just a bit of paranoia...
 
   if (deltaE == 0 && old_deltaE == 0) {
     if (v >= verbose) printf("We got no change twice in a row, so we're done!\n");
