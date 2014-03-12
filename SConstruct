@@ -447,9 +447,6 @@ env.Command(target = ['papers/pair-correlation/figs/walls.dat',
              for ff in [0.1, 0.2, 0.3]
              for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']
              for z0 in numpy.arange(0.05, 3.95, 0.1)] +
-            ['papers/pair-correlation/figs/tripletWB-path-%s-%04.2f-0.005.dat' % (method,ff)
-             for ff in [0.1, 0.2, 0.3]
-             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']] +
             ['papers/pair-correlation/figs/walls/wallsWB-path-%s-pair-%04.2f-0.005.dat' % (method,ff)
              for ff in [0.1, 0.2, 0.3]
              for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']],
