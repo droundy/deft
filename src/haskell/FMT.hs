@@ -13,6 +13,7 @@ module FMT
        where
 
 import Expression
+import IdealGas ( n )
 
 rad :: Type a => Expression a
 rad = s_var "R"
@@ -26,8 +27,7 @@ kR = k * rad
 smear :: Expression KSpace
 smear = exp (-6.0*kdr*kdr)
 
-n, n3, n2, n1, n0, n2p, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
-n = "n" === r_var "x"
+n3, n2, n1, n0, n2p, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n3 = "n3" === step n
 n2 = "n2" === shell n
 n2p = "n2p" === shellPrime n

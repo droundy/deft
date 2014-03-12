@@ -2,28 +2,37 @@
 
 color = { 'mc': 'k',
           'this-work': 'b',
+          'this-work-mc': 'k',
           'fischer': 'g',
           'sokolowski': 'r'}
 
 line = { 'mc': '.',
          'this-work': '-',
+         'this-work-mc': ':',
          'fischer': '-.',
          'sokolowski': '--'}
 
 forward_line = { 'mc': '.',
-                 'this-work': '->',
+                 'this-work': '>',
+                 'this-work-mc': '>',
                  'fischer': '-.',
-                 'sokolowski': '-->'}
+                 'sokolowski': '>'}
 
 back_line = { 'mc': '.',
-              'this-work': '-<',
+              'this-work': '<',
+              'this-work-mc': '<',
               'fischer': '-.',
-              'sokolowski': '--<'}
+              'sokolowski': '<'}
 
 title = { 'mc': 'Monte Carlo',
-          'this-work': 'this work',
+          'this-work': 'CVA-S',
+          'this-work-mc': 'CVA',
           'fischer': 'Fischer',
           'sokolowski': 'Sokolowski'}
+
+start = { 'this-work' : 0,
+          'this-work-mc' : 1/6.,
+          'sokolowski' : 1/3.}
 
 plot = {}
 for k in color:

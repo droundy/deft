@@ -1,10 +1,8 @@
 module IdealGas
-       ( idealgas, of_effective_potential )
+       ( idealgas, n, kT, of_effective_potential )
        where
 
 import Expression
-import FMT ( n )
-import WhiteBear ( kT )
 
 nQ :: Expression RealSpace
 nQ = (mass*kT/2/pi)**1.5
@@ -17,3 +15,9 @@ idealgas = "Fideal" === integrate (kT*n*(log(n/nQ) - 1))
 of_effective_potential :: Expression Scalar -> Expression Scalar
 of_effective_potential = substitute (r_var "veff") (r_var "x") .
                          substitute (r_var "x") (exp (- r_var "veff" / kT))
+
+kT :: Type a => Expression a
+kT = s_tex "kT" "kT"
+
+n :: Expression RealSpace
+n = "n" === r_var "x"

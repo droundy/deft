@@ -25,11 +25,12 @@
 
 Functional SoftFluid(double radius, double V0, double mu);
 Functional HardRosenfeldFluid(double radius, double mu);
+Functional HardFluid(double radius, double mu);
 
 // Here we set up the lattice.
 static double width = 15;
-const double dx = 0.001;
-const double dw = 0.001;
+const double dx = 0.01;
+const double dw = 0.01;
 const double spacing = 1.5; // space on each side
 
 double notinwall(Cartesian r) {
@@ -66,7 +67,7 @@ void z_plot(const char *fname, const Grid &a) {
   for (int z=0; z<gd.Nz/2; z++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
-    fprintf(out, "%g\t%g\n", here[2], ahere);
+    fprintf(out, "%g\t%g\n", here[2] - spacing, ahere);
   }
   fclose(out);
 }
@@ -91,12 +92,12 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   // guess on each calculation.
   static Grid *potential = 0;
   static double old_temperature = 0;
-  if (strcmp(name, "hard") == 0) {
+  if (strcmp(name, "hard") == 0 || kT == 0.03 || true) {
     // start over for each potential
     delete potential;
     potential = 0;
   }
-  if (!potential || true) {
+  if (!potential) {
     potential = new Grid(gd);
     *potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
     *potential = -kT*potential->cwise().log();
@@ -108,7 +109,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   }
 
   const double approx_energy = fhs(kT, eta/(4*M_PI/3))*dw*dw*width;
-  const double precision = fabs(approx_energy*1e-14);
+  const double precision = fabs(approx_energy*1e-11);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, kT);
   fflush(stdout);
 
@@ -180,8 +181,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
 int main(int, char **) {
   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-  const double temps[] = { 0.0, 0.01, 0.02, 0.03 };
-  for (double eta = 0.4; eta > 0.05; eta-=0.1) {
+  const double temps[] = { 0.03, 0.01, 0.001, 0.0 };
+  for (double eta = 0.4; eta >= 0.05; eta-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
       Functional f = HardRosenfeldFluid(1,0);

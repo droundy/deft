@@ -18,7 +18,7 @@ module Expression (Exprn(..),
                    Expression(..), joinFFTs, (===), var, vvar, tvar,
                    Type(..), Code(..), IsTemp(..),
                    makeHomogeneous, isConstant,
-                   setZero, cleanvars, factorize, factorOut,
+                   setZero, cleanvars, cleanallvars, factorize, factorOut,
                    initializeE, freeE, newinitializeE, newfreeE,
                    nameE, newdeclareE, newreferenceE,
                    sum2pairs, pairs2sum, codeStatementE, newcodeStatementE,
@@ -582,6 +582,12 @@ cleanvars = mapExpression' helper
     where helper :: Type a => Expression a -> Expression a
           helper (Var IsTemp b c d (Just e)) | ES _ <- mkExprn e = Var IsTemp b c d (Just e)
                                              | otherwise = e
+          helper e = e
+
+cleanallvars :: Type a => Expression a -> Expression a
+cleanallvars = mapExpression' helper
+    where helper :: Type a => Expression a -> Expression a
+          helper (Var IsTemp _ _ _ (Just e)) = e
           helper e = e
 
 isEven :: (Type a) => Exprn -> Expression a -> Double

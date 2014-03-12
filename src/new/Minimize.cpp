@@ -8,6 +8,14 @@ inline bool better(double a, double b) {
 
 bool Minimize::improve_energy(Verbosity v) {
   iter++;
+  if (iter >= maxiter) {
+    if (v >= verbose) {
+      printf("We reached the maximum number of iterations: %d with uncertainty %g remaining.\n",
+             maxiter, error_estimate);
+      fflush(stdout);
+    }
+    return false;
+  }
   //printf("I am running ConjugateGradient::improve_energy\n");
   const double E0 = energy(v);
   const double old_deltaE = deltaE;
@@ -20,6 +28,7 @@ bool Minimize::improve_energy(Verbosity v) {
     }
     return false;
   }
+  //f->run_finite_difference_test("functional");
   double gdotd;
   {
     const Vector pg = pgrad(v);
@@ -72,7 +81,7 @@ bool Minimize::improve_energy(Verbosity v) {
       }
       return false;
     }
-    if (E0 >= DBL_MAX || E0 <= DBL_MIN) {
+    if (E0 >= DBL_MAX || E0 <= -DBL_MAX) {
       // There is no point continuing, since we've got an infinite result.  :(
       // So we may as well quit here.
       if (v >= verbose) {
@@ -161,14 +170,16 @@ bool Minimize::improve_energy(Verbosity v) {
         double Ebest = E0;
         while (energy(v) <= Ebest) {
           Ebest = energy(v);
-          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: Ei = %25.15g\n", Ebest);
+          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: si = %25.15g  Ei = %25.15g\n", step1, Ebest);
           *f += step1*direction;
           invalidate_cache();
           step1 *= 2;
         }
+        if (v >= verbose) printf("\t\tQuad: sb = %25.15g  Eb = %25.15g\n", step1, energy(v));
         step1 *= 0.5;
         *f -= step1*direction;
         step = step1;
+        invalidate_cache();
       }
     } else if (E1 == E0) {
       if (v >= verbose) {
@@ -258,7 +269,7 @@ bool Minimize::improve_energy(Verbosity v) {
     error_guess = precision + fabs(newE);
   }
 
-  const double error_estimate = 2*error_guess; // Just a bit of paranoia...
+  error_estimate = 2*error_guess; // Just a bit of paranoia...
 
   if (deltaE == 0 && old_deltaE == 0) {
     if (v >= verbose) printf("We got no change twice in a row, so we're done!\n");

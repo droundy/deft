@@ -11,6 +11,12 @@ import matplotlib.pyplot as plt
 if len(sys.argv) < 3:
     print("Usage:  " + sys.argv[0] + " eta delta_r")
     exit(1)
+
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
+
 eta = float(sys.argv[1])
 #arg eta = [.2,.3]
 delta_r = float(sys.argv[2])
@@ -39,7 +45,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["this-work", 'sokolowski', "fischer"]
+versions = ["this-work", 'this-work-mc', 'sokolowski', "fischer"]
 
 plt.figure(figsize=(6,4))
 

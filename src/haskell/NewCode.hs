@@ -161,9 +161,9 @@ create3dMethods e variables n =
      returnType = None,
      constness = "",
      args = [(Double, "ax"), (Double, "ay"), (Double, "az"), (Double, "dx")],
-     contents =["int myNx = int(ceil(ax/dx));",
-                "int myNy = int(ceil(ay/dx));",
-                "int myNz = int(ceil(az/dx));",
+     contents =["int myNx = int(ceil(ax/dx/2))*2;",
+                "int myNy = int(ceil(ay/dx/2))*2;",
+                "int myNz = int(ceil(az/dx/2))*2;",
                 "data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
@@ -172,10 +172,27 @@ create3dMethods e variables n =
                 "a2() = ay;",
                 "a3() = az;"]
      }] ++ createAnydMethods e variables n
+        ++ map getIntermediate [("rx", ER rx), ("ry", ER ry), ("rz", ER rz)]
     where
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
       actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
+      getIntermediate :: (String, Exprn) -> CFunction
+      getIntermediate ("", _) = error "empty string in getIntermediate"
+      getIntermediate (rsname, a) = CFunction {
+          name = n++"::get_"++rsname,
+          returnType = ctype a,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     [newcodeStatements $ eval_named (""++rsname) a]
+      }
+
+createInput :: Exprn -> String
+createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
+createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
+createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
 
 createAnydMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
 createAnydMethods e variables n =
@@ -204,6 +221,7 @@ createAnydMethods e variables n =
                  filter (`notElem` ["dV", "dr", "volume"]) $
                  (Set.toList (findNamedScalars e))
       }] ++ map getIntermediate (Set.toList $ findNamed e)
+         ++ concatMap getScalarDerivative (findOrderedInputs e)
   where
       maxlen = 1 + maximum (map length $ "total energy" : Set.toList (findNamedScalars e))
       pad nn s | nn <= length s = s
@@ -211,22 +229,37 @@ createAnydMethods e variables n =
       printEnergy v = ["printf(\"%s" ++ pad maxlen v ++ " =\", prefix);",
                        "print_double(\"\", " ++ v ++ ");",
                        "printf(\"\\n\");"]
-      createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
-      createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
-      createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
       getIntermediate :: (String, Exprn) -> CFunction
       getIntermediate ("", _) = error "empty string in getIntermediate"
       getIntermediate (rsname, a) = CFunction {
-      name = n++"::get_"++rsname,
-      returnType = ctype a,
-      constness = "const",
-      args = [],
-      contents = ["int sofar = 0;"] ++
-                 map createInput (findOrderedInputs e) ++
-                 [newcodeStatements $ eval_named (""++rsname) a]
+          name = n++"::get_"++rsname,
+          returnType = ctype a,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     [newcodeStatements $ eval_named (""++rsname) a]
       }
+      getScalarDerivative :: Exprn -> [CFunction]
+      getScalarDerivative (ES v) = [CFunction {
+          name = n++"::d_by_d"++nameE (ES v),
+          returnType = Double,
+          constness = "const",
+          args = [],
+          contents = ["int sofar = 0;"] ++
+                     map createInput (findOrderedInputs e) ++
+                     -- the cleanallvars is needed for when we have a
+                     -- bad interaction where e is defined using some
+                     -- derivatives, and we end up with two separate
+                     -- definitions of those derivatives which have
+                     -- the same variable name.  I expect there exists
+                     -- a better solution, but this is the one that I
+                     -- came up with.
+                     [newcodeStatements (eval_scalar_derivative $ derive v 1 $ cleanallvars e)]
+      }]
+      getScalarDerivative _ = [] -- not a scalar
       createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
-                                      "double *grad_" ++ nameE ee ++ " = &data[sofar++];"]
+                                      "double *grad_" ++ nameE ee ++ " = &output[sofar++];"]
       createInputAndGrad ee@(ER _) = ["Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz);",
                                       "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz);",
                                       "sofar += Nx*Ny*Nz;"]
@@ -242,8 +275,8 @@ createAnydMethods e variables n =
                                  ns = findNamedScalars e
                              in reuseVar $ freeVectors $ st ++ zipWith Assign (map varn the_gradients) es
       varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
-      varn (vnam, ER _) = ER $ Var CannotBeFreed vnam ("grad_"++vnam++"[i]") vnam Nothing
-      varn (vnam, EK _) = EK $ Var CannotBeFreed vnam (vnam++"[i]") vnam Nothing
+      varn (vnam, ER _) = ER $ Var CannotBeFreed (vnam++"[i]") vnam vnam Nothing
+      varn (_, EK _) = error "unhandled type k-space in varn"
       evalv :: [Statement] -> [String]
       evalv st = ["Vector output(data.get_size());",
                   "output = 0;"]++
@@ -258,6 +291,10 @@ eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']
         isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
         isns _ = False
         ns = findNamedScalars x
+
+eval_scalar_derivative :: Expression Scalar -> [Statement]
+eval_scalar_derivative x = reuseVar $ freeVectors $ st ++ [Return e']
+  where (st, [e']) = optimize [ES $ factorize $ joinFFTs x]
 
 eval_named :: String -> Exprn -> [Statement]
 eval_named outname (ER x) = reuseVar $ freeVectors $ st ++ [Initialize outvar, Assign outvar e', Return outvar]

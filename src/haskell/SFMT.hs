@@ -2,11 +2,12 @@
 soft fundamental measure theory. -}
 
 module SFMT
-       ( sfmt, n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v )
+       ( sfmt, sfmt_fluid_n, sfmt_fluid_Veff, homogeneous_sfmt_fluid,
+         n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v )
        where
 
 import Expression
-import WhiteBear ( kT )
+import IdealGas ( kT, idealgas )
 import FMT ( rad )
 
 phi1, phi2, phi3 :: Expression Scalar
@@ -17,6 +18,18 @@ phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*(n2**3/3 - sqr_n2v*n2)/(8*pi*(1-n3)
 sfmt :: Expression Scalar
 sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
 
+sfmt_fluid_n :: Expression Scalar
+sfmt_fluid_n = substitute n (r_var "n") $
+               sfmt + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+
+sfmt_fluid_Veff :: Expression Scalar
+sfmt_fluid_Veff = substitute n ("n" === exp(- r_var "Veff"/kT)) $
+                  sfmt + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+
+homogeneous_sfmt_fluid :: Expression Scalar
+homogeneous_sfmt_fluid = makeHomogeneous $ substitute n (r_var "n") $
+                         sfmt + idealgas - integrate (n * s_var "mu")
+
 betaV0 :: Type a => Expression a
 betaV0 = s_var "V0"/kT
 
@@ -24,10 +37,10 @@ kR :: Expression KSpace
 kR = k * rad
 
 a :: Type a => Expression a
-a = "a" === 2*rad/sqrt(betaV0*pi*log 2)
+a = Scalar $ "a" === 2*rad/sqrt(betaV0*pi*log 2)
 
 sigma :: Type a => Expression a
-sigma = var "sigma" "\\sigma" (2*rad*(1 - sqrt(log 2/betaV0)))
+sigma = Scalar $ var "sigma" "\\sigma" (2*rad*(1 - sqrt(log 2/betaV0)))
 
 n, n3, n2, n1, n0, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"

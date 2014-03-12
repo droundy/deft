@@ -10,6 +10,12 @@ import matplotlib.pyplot as plt
 if len(sys.argv) < 3:
     print("Usage:  " + sys.argv[0] + " eta delta_r")
     exit(1)
+
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
+
 eta = sys.argv[1]
 eta = float(eta)
 delta_r = sys.argv[2]

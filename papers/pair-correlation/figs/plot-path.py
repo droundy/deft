@@ -13,12 +13,15 @@ import bracket # our handy bracket function
 import styles # our preferred line styles
 
 from matplotlib import rc
+
+#rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('font', family='serif', serif ='Computer Modern')
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
 
 dx = 0.1
 ############################
@@ -48,6 +51,7 @@ def read_walls_path(ff, fun):
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
     # input: "figs/walls/wallsWB-path-this-work-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-this-work-mc-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-fischer-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-sokolowski-pair-%1.2f-0.005.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
@@ -92,12 +96,17 @@ twod_plot = subplot(gs[0])
 
 fig.subplots_adjust(left=0.05, right=0.975, bottom=0.15, top=0.9, wspace=0.1)
 
+def z_to_x(z):
+  return 2 - z
+def x_to_z(x):
+  return 2 - x
+
 zmax_lineplot = 6.
 xmax_lineplot = 4.
 xplot.set_xlim(zmax_lineplot, -xmax_lineplot)
 xplot.set_xticks([6, 4, 2, 0, -2, -4])
 xplot.set_xticklabels(["$6$", "$4$", "$2~~0$", "$2$", "$4$", "$6$"])
-zplot.set_xlim(-xmax_lineplot, zmax_lineplot)
+zplot.set_xlim(x_to_z(xplot.get_xlim()[0]), x_to_z(xplot.get_xlim()[1]))
 zplot.set_xticks([])
 #xplot.set_ylim(0)
 
@@ -172,6 +181,23 @@ fig.colorbar(CS, extend='neither', ticks=myticks)
 twod_plot.set_ylabel('$x/R$');
 twod_plot.set_xlabel('$z/R$');
 
+# takes two arrays, and averages points so that a plot of x vs y
+# will have points separated by a distance dpath
+# returns (x, y)
+def avg_points(x, y, dpath):
+  new_y = array([])
+  new_x = array([])
+  old_i = 0
+  for i in xrange(1, len(x)):
+    dist = sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
+    if dist >= dpath or i == len(x) - 1:
+      avg_x = average(x[old_i:i])
+      avg_y = average(y[old_i:i])
+
+      new_x = append(new_x, avg_x)
+      new_y = append(new_y, avg_y)
+      old_i = i
+  return (new_x, new_y)
 
 
 for name in plots:
@@ -186,32 +212,56 @@ for name in plots:
     z = g2_path[:,2]
     g = g2_path[:,1]
     zcontact = z.min()
-    xcontact = 2.0051
+    xcontact = 2.0 if name == 'mc' else 2.0051
+    incontact = (x<xcontact) & (z<2)
+
+    g_x = g[z==zcontact]
+    x_x = x[z==zcontact]
+
+    g_c = g[incontact]
+    z_c = z[incontact]
+
+    g_z = g[(x<xcontact) & (z>2.005)]
+    z_z = z[(x<xcontact) & (z>2.005)]
+
+    if name == 'mc':
+      # do point averaging, so that points are fixed path distance apart
+      dpath = 0.2
+      x_x, g_x = avg_points(x_x, g_x, dpath)
+      z_c, g_c = avg_points(z_c, g_c, dpath)
+      z_z, g_z = avg_points(z_z, g_z, dpath)
+
+    zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
+    if name != 'fisher':
+      # Fischer et al only predict pair distribution function in contact
+      xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
+      zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
+
     # insert zoomed subplot for eta = 0.1 only
     if ff == 0.1:
-      incontact = (x<xcontact) & (z<2)
-      suba = axes([.65, .28, .3, .3])
-      suba.set_xlabel('$z/R$')
-      suba.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
+      suba = axes([.65, .23, .3, .35])
+      suba.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
       suba.set_yticks([1, 1.1, 1.2, 1.3, 1.4])
-      suba.set_ylim(1, suba.get_ylim()[1])
+      sub_ylim = (1, suba.get_ylim()[1])
+      suba.set_ylim(sub_ylim)
+      sub_xlim = suba.get_xlim()
+
+      for i in suba.spines.itervalues():
+        i.set_linewidth(2)
+      if name == 'this-work': # only want to draw rectangle once
+        zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
+                                  sub_xlim[1]-sub_xlim[0],
+                                  sub_ylim[1]-sub_ylim[0], facecolor='none',
+                                  linewidth=2))
 
 
-    if name == 'fischer':
-      # Fischer et al only predict pair distribution function in
-      # contact.  We do this using "&" below which means "and".
-      incontact = (x<xcontact) & (z<2)
-      zplot.plot(z[incontact],g[incontact], styles.plot[name], label=styles.title[name])
-    else:
-      xplot.plot(x[z==zcontact],g[z==zcontact], styles.plot[name], label=styles.title[name])
-      zplot.plot(z[x<xcontact],g[x<xcontact], styles.plot[name], label=styles.title[name])
 
 zplot.axvline(x=2, color='k')
 zplot.axvline(x=0, color='k')
 
 
 legendloc = 'lower left' if ff < 0.2 else 'upper left'
-zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
+xplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 
 
@@ -250,6 +300,9 @@ Dz = rpath
 Ex = 0
 Ez = 4.0
 
+zplot.set_xticks([x_to_z(Ax), Bz, Cz, Dz, Ez])
+zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
+
 hw = 4 # headwidth of arrows
 
 g2nice = read_walls_path(ff, 'this-work')
@@ -266,21 +319,21 @@ twod_plot.annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01,
 twod_plot.annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 # Annotations on 1d plot
-xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
-               xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
-               xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
-               xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
-               xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
-               xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
-               arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),
+#                xytext=(Ax-0.2, g2pathfunction_x(Ax) + ff),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# xplot.annotate('$B$', xy=(Bx,g2pathfunction_x(Bx)),
+#                xytext=(Bx+.8, g2pathfunction_x(Bx)-ff/3),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$C$', xy=(Cz,g2pathfunction_z(Cz)),
+#                xytext=(Cz,g2pathfunction_z(Cz)-3*ff+.2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$D$', xy=(Dz,g2pathfunction_z(Dz)),
+#                xytext=(Dz+.7,g2pathfunction_z(Dz)+ff/2),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+# zplot.annotate('$E$', xy=(Ez,g2pathfunction_z(Ez)),
+#                xytext=(Ez+0.5,g2pathfunction_z(Ez)-ff),
+#                arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 ylim = xplot.get_ylim()
 xplot.set_ylim(0, ylim[1])

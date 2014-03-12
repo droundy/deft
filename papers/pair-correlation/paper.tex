@@ -16,10 +16,11 @@
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 \newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
 \newcommand{\jeffsays}[1]{{\color{red} [\green{Jeff:} \emph{#1}]}}
+\newcommand{\pahosays}[1]{{\color{red} [\green{Paho:} \emph{#1}]}}
 
 \begin{document}
-\title{The Pair Distribution Function of the Inhomogeneous Hard-Sphere
-  Fluid}
+\title{The contact value approximation for the pair distribution function of the inhomogeneous hard-sphere
+  fluid}
 
 \author{Paho Lurie-Gregg}
 \author{Jeff B. Schulte}
@@ -38,6 +39,7 @@
   functional that is efficient to compute, and predicts the pair
   distribution function as well as the most accurate existing
   analytical approximation.  \fixme{needs special attention.}
+  \fixme{add acronym, and discuss separable vs. non}
 \end{abstract}
 
 \maketitle
@@ -87,7 +89,10 @@ where the terms $F_n$ are corrections to the free energy at order $n$
 in the small interaction.  The first and largest term in this
 expansion is
 \begin{align}
-  F_1 &= \tfrac12 \iint g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|) d\rr_1d\rr_2
+  F_1 &= \tfrac12 \iint
+  g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
+  d\rr_1d\rr_2
+  \label{eq:mean-field}
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
@@ -228,7 +233,7 @@ provides an excellent approximation for this averaged value of the
 pair distribution function for a variety of interfaces, and over a
 wide range of densities.
 
-\section{Our approach}
+\section{Contact value approximation}
 %% We approximate the pair correlation with the average of two radial
 %% distribution functions, evaluated at the distance between the two
 %% points, that are themselves functions of the averaged pair correlation
@@ -252,68 +257,84 @@ at contact $g_{\sigma}(\rr)$ evaluated at the two points:
 %% and that will approach the correct solution in the homogeneous limit
 %% and also in the limit of contact distance between the two points.
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}.
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) +
+    g(|r_{12}|, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
-
-We construct our function's form in terms of an expansion of powers of
-$h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
-in the contact distance limit, leaving our function with tunable
-constant perameters.  We run a simple monte-carlo simulation to
-calculate values of the homogeneous radial distribution function at
-varying distance perameter $r$.  We then tune our function's constant
-parameters by matching our function's results against the monte-carlo
-data, using a least squares fit method.  During this process it is
-simplest to use an analytic expression for $g_{\sigma}$ in our
-function and so we use the well known and very successful Carnahan
-Starling equation to calculate $g_{\sigma}$.  This is appropriate
-since our published $g_{\sigma}$ approaches the Carnahan Starling
-version in the homogeneous limit and it's this limit, along with the
-contact limit, that we would like our constructed radial distribution
-function to get right.  After this process we have an appropriate
-radial distribution function that is dependent only on $r$ and
-$g_{\sigma}$.
+$g^{(2)}(\rr_1,\rr_2)$ above is constructed to reproduce the exact
+value for the integral$ \int n(\rr_1)n(\rr_2)
+g^{(2)}(\rr_1,\rr_2)\delta(|\rr_1-\rr_2|-\sigma)d\rr_1d\rr_2$.  \par
+The approximation described in Eq.~\ref{eq:g2-our-mean} requires the
+radial distribution function as a function of $r$ and $g_\sigma$.  One
+approach to constructing $g(r,g_\sigma)$ is to compute $\eta$ from
+$g_\sigma$ and then find $g(r,\eta)$ either using some approximate
+functional form (e.g. Percus-Yevick) or using Monte Carlo simulation
+results.  In this paper we first use the Monte Carlo results (which
+are also used in evaluating the approximations of earlier works), and
+refer to this approximation (which has an exact $g(r,g_\sigma)$) as
+the ``contact value approximation'' (CVA).  \fixme{Should we mention
+  this earlier?}
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
 \newcommand\kappaZ{\kappa_2}
 
-The function has the form:
-\begin{multline}
-  g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
-  + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
-  + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
-\end{multline}
-where $\kappaO$,$\kappaI$, and $\kappaZ$ are fitted constants and
-$I(g_\sigma)$ is a function of $g_\sigma$.
+\input{figs/fit-parameters}
 
-The finalized form of our pair correlation function is:
+\section{Separable radial distribution function for the CVA}
+
+The contact value approximation (described in
+Eq.~\ref{eq:g2-our-mean}) is reasonably accurate, but cannot be
+computed efficiently with single-center convolutions as written.  In
+order to ease computational application of this pair distribution
+function in classical density functionals, we have developed a
+separable appoximation for the function $g(r,g_\sigma)$.
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+  g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
+This separable contact value approximation (CVA-S) allows the mean
+field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
+computed with only single-center convolutions, which can be
+efficiently computed using fast Fourier transforms.  \fixme{Comb paper
+  for places to say CVA-S and CVA.}
+
+%% We construct our function's form in terms of an expansion of powers of
+%% $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
+%% in the contact distance limit, leaving our function with tunable
+%% constant perameters.  We run a simple monte-carlo simulation to
+%% calculate values of the homogeneous radial distribution function at
+%% varying distance perameter $r$.  We then tune our function's constant
+%% parameters by matching our function's results against the monte-carlo
+%% data, using a least squares fit method.  During this process it is
+%% simplest to use an analytic expression for $g_{\sigma}$ in our
+%% function and so we use the well known and very successful Carnahan
+%% Starling equation to calculate $g_{\sigma}$.  This is appropriate
+%% since our published $g_{\sigma}$ approaches the Carnahan Starling
+%% version in the homogeneous limit and it's this limit, along with the
+%% contact limit, that we would like our constructed radial distribution
+%% function to get right.  After this process we have an appropriate
+%% radial distribution function that is dependent only on $r$ and
+%% $g_{\sigma}$.
+
+%% The function has the form:
+%% \begin{multline}
+%%   g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
+%%   + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
+%%   + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
+%% \end{multline}
+%% where $\kappaO$,$\kappaI$, and $\kappaZ$ are fitted constants and
+%% $I(g_\sigma)$ is a function of $g_\sigma$.
+
+%% The finalized form of our pair correlation function is:
+%% \begin{align}
+%%   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
+%% \end{align}
 \begin{figure}
   \centering
   \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
-  \caption{Plot of the radial distribution function, with our fit.}\label{fig:radial-distribution}
+  \caption{Plot of the hard-sphere radial distribution function, with
+    our fit.}\label{fig:radial-distribution}
 \end{figure}
-
-\input{figs/fit-parameters}
-
-\subsection{Separable fit to the radial distribution function}
-
-In contrast to the previous works, which are based on the homogeneous
-radial distribution function $g(r,\eta)$ expressed as a function of
-distance and packing fraction, we have constructed our separable
-approximation for the radial distribution function as $g(r,
-g_\sigma)$, which is a function of the radius $r$ and its value at
-contact $g_\sigma$.  One can convert between these two representation
-using the Carnahan-Starling formula for $g_\sigma(\eta)$
-\begin{equation}
-  g_\sigma = \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}.
-\end{equation}
-The form $g(r, g_\sigma)$ is more convenient for treating the
-inhomogeneous case, because we can directly compute the averaged value
-of $g_\sigma$ for an inhomogeneous system~\cite{schulte2012using}.
 
 We construct $g(r, g_\sigma)$ to satisfy several constraints.  Naturally,
 \begin{equation}
@@ -328,9 +349,8 @@ where $h(r) = g(r) - 1$ is the total correlation function.
 A final constraint is that the slope of the radial distribution
 function at contact is given to a very good approximation by
 \begin{align}
-  g'(\sigma) \approx - h_\sigma g_\sigma
+  g'(\sigma) \approx - g_\sigma (g_\sigma - 1).
 \end{align}
-where $h_\sigma = g_\sigma - 1$ is the total correlation function.
 Under these three constraints, we applied a least-squares fit to
 simulation data for the radial distribution function at packing
 fractions from 0.05 to 0.4 by steps of 0.05.  Our fitted radial
@@ -350,34 +370,36 @@ distribution function is given by
 \begin{equation}
   \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
 \end{equation}
+Finally, we can convert between the packing fraction $\eta$ and the
+radial distribution function at contact $g_\sigma$ using the
+Carnahan-Starling approximation for $g_\sigma$:
 \newcommand\nastyetacuberoot{\sqrt[3]{54 g_\sigma^2 -
     6\sqrt{81g_\sigma^4 - 6g_\sigma^3}}}
-\begin{equation}
-  \eta = 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}
-\end{equation}
+\begin{align}
+  g_\sigma &= \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}\text{, and its inverse} \\
+  \eta &= 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}.
+\end{align}
 This function includes three fitted parameters, $\kappaO =
 \kappazero$, $\kappaI = \kappaone$,
 and $\kappaZ = \kappatwo$.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
-figure, it is apparent that the integral f $h(r)$ from
+figure, it is apparent that the integral of $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
 distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
-\newcommand\paircaption{\fixme{Look into smoothing the top plot on
-    right.} The pair distribution function near a hard wall, with
-  packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the
-  hard wall.  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as
-  $\rr_2$ varies.  The top half of this figure shows the result of the
-  Monte Carlo simulation, while the bottom half shows the result of
-  the appproximation developed in this work.  On the right is a plot
-  of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the figure to
-  the left.  This plot compares the Monte Carlo results (black) with
+\newcommand\paircaption{The pair distribution function near a hard wall, with
+  packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the hard wall.
+  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as $\rr_2$ varies.  The top
+  half of this figure shows the result of the Monte Carlo simulation, while the
+  bottom half shows the result of the appproximation developed in this work.  On
+  the right is a plot of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the
+  figure to the left.  This plot compares the Monte Carlo results (black) with
   those of this work (blue), Sokolowski and Fischer
   (red)~\cite{sokolowski1992role}, and Fischer and Methfessel
-  (green)~\cite{fischer1980born}.  The latter is only plotted at
-  contact, where it is defined.  }
+  (green)~\cite{fischer1980born}.  The latter is only plotted at contact, where
+  it is defined.  }
 
 \section{Results}
 
@@ -411,8 +433,8 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 We begin by examining the pair distribution function near a hard wall,
 with a focus on the case where one of the two spheres is in contact
-with the hard wall.  Figure~\ref{fig:pair-distribution}a
-and~\ref{fig:pair-distribution}a compare the results of our
+with the hard wall.  Figures~\ref{fig:pair-distribution}a,\ref{fig:pair-distribution}b
+and Figures~\ref{fig:pair-distribution}c,\ref{fig:pair-distribution}d compare the results of our
 approximate functional with Monte Carlo simulation at packing
 fractions of 0.1 and 0.3 respectively.  We see reasonable agreement at
 the lower density, with some reduced oscillations at larger distances,
@@ -420,12 +442,12 @@ and a flatter angular dependence when the two spheres are in contact.
 At the higher density, we see significant structure developing in the
 simulation results that is not reflected in our approximation.
 
-Figure~\ref{fig:pair-distribution}b
-and~\ref{fig:pair-distribution}b show the pair distribution function
-as plotted along a path illustrated in
-Fig.~\ref{fig:pair-distribution}a.  These plots compare this work
-with Monte Carlo results, as well as the approximations of Sokolowski
-and Fischer~\cite{sokolowski1992role} and that of Fischer and
+Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
+show the pair distribution function as plotted along paths
+illustrated in Figures~\ref{fig:pair-distribution}a and
+\ref{fig:pair-distribution}c.  These plots compare this work with
+Monte Carlo results, as well as the approximations of Sokolowski and
+Fischer~\cite{sokolowski1992role} and that of Fischer and
 Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
 The approach of Fischer and Methfessel is only defined when the two
 spheres are in contact, and is therefore only plotted on that segment
@@ -433,7 +455,7 @@ of the path.  As an input to both previous approximations we use the
 hard sphere radial distribution function found with Monte Carlo
 simulation, interpolated as necessary.  We find that both previous
 approximations to the pair distribution function predict the
-qualtitative angular dependence of the pair distribution function at
+qualitative angular dependence of the pair distribution function at
 contact better than this work.  However, in each case the pair
 distribution function has a systematic error at contact---either too
 high or too low.  Thus while our approximation is smoother than either
@@ -445,23 +467,22 @@ freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points are
 more than a radius away from contact, we find that any of these
 approaches gives a reasonable prediction, with our approach
-underestimating the oscillations in $g^{(2)}$, as expected based on the
-fit in Fig.~\ref{fig:radial-distribution}.
+underestimating the oscillations in $g^{(2)}$, as expected based on
+the fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Remove one of, or make a note of, the two curves for
-      this work}\fixme{Fix MC issue here (volume wrong?)} The triplet
-    distribution function $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing
-    fraction 0.3, plotted when $\rr_1$ and $\rr_2$ are in contact.
-    The color plot on the left shows the triplet distribution
-    function, with white corresponding to the contact value of the
-    \emph{pair} distribution function.  The plot on the right shows
-    the value of $g^{(3)}$ along the path shown as a dotted line on
-    the plot to the left.}\label{fig:triplet-contact-distribution}
+  \caption{\fixme{Make note of the double curves}\fixme{Add backward curve for
+      this work mc?}The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when $\rr_1$
+    and $\rr_2$ are in contact.  The color plot on the left shows the triplet
+    distribution function, with white corresponding to the contact value of the
+    \emph{pair} distribution function.  The plot on the right shows the value of
+    $g^{(3)}$ along the path shown as a dotted line on the plot to the
+    left.}\label{fig:triplet-contact-distribution}
 \end{figure*}
 
 Just as the radial distribution function of a homogeneous fluid may be
@@ -560,7 +581,7 @@ defined a position-dependent pair interaction energy as
   d\rr'\, dxdy\label{eq:da1}
 \end{align}
 which gives the contribution to the mean-field free energy due to
-molecules located at position $z$.
+molecules located in a plane of fixed $z$.
 
 We plot in Fig.~\ref{fig:dadz} this quantity for hard-core fluids with
 three representative pair potentials near a hard wall.  We have chosen

@@ -453,7 +453,7 @@ int main(int argc, char **argv) {
     }
   }
   // Just create this file so make knows we have run.
-  if (!fopen("papers/pair-correlation/figs/walls.dat", "w")) {
+  if (!fopen("papers/pair-correlation/figs/triplet-dft.dat", "w")) {
     printf("Error creating walls.dat!\n");
     return 1;
   }

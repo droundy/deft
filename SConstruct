@@ -140,11 +140,15 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
 
 newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
-    ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[ES $ s_var "n"]'),
+    ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
+    ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
+    ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[ER $ r_var "n"]'),
+    ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff", '[ER $ r_var "Veff"]'),
+    ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
-    ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[ES $ s_var "n"]'),
+    ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
     ("HomogeneousWaterSaftByHand", "WaterSaft", "homogeneous_water_saft_by_hand_n", '[ES $ s_var "n"]')]:
     # I'm sloppy and just recreate the generate_%s.hs files every time
     f = open('src/haskell/generate_%s.hs' % name, "w")
@@ -381,23 +385,37 @@ for mkdat in Split("""
           env.Program(target = mkdat + '.mkdat',
                       source = [mkdat + '.cpp'] + all_sources))
 
+for mkdat in Split("""
+	papers/fuzzy-fmt/figs/new-walls
+      """):
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + generic_sources +
+                      ['src/new/Minimize.cpp', 'src/new/NewFunctional.cpp', 'src/new/SFMTFluidFast.cpp',
+                       'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
+env.Command(target = ["papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat" % (ff, kT)
+                      for kT in [0.01, 0.02, 0.03]
+                      for ff in [0.1, 0.2, 0.3, 0.4]],
+            source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
+            action = './$SOURCE')
+
 env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.20.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.30.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.40.dat',
                       #'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.30.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.40.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.30.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.30.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.40.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat'],
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
@@ -419,22 +437,24 @@ env.Command(target = ['papers/pair-correlation/figs/walls.dat',
                       'papers/pair-correlation/figs/walls/x.dat',
                       'papers/pair-correlation/figs/walls/z.dat',
                       'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-0.30-rmax-5.dat',
+                      'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-mc-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/inverse-sixth-dadz-sokolowski-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-this-work-0.30-1.790.dat',
+                      'papers/pair-correlation/figs/walls/square-well-dadz-this-work-mc-0.30-1.790.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-sokolowski-0.30-1.790.dat']+
             ['papers/pair-correlation/figs/wallsWB-%04.2f.dat' % ff
-             for ff in [0.1, 0.2, 0.3, 0.4]] +
+             for ff in [0.1, 0.2, 0.3]] +
             ['papers/pair-correlation/figs/walls/walls_daWB-%s-%04.2f-%05.3f.dat' % (method,ff,r)
-             for ff in [0.1, 0.2, 0.3, 0.4]
-             for method in ['this-work', 'sokolowski', 'fischer']
+             for ff in [0.1, 0.2, 0.3]
+             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']
              for r in [2.005, 3.005]] +
             ['papers/pair-correlation/figs/walls/wallsWB-%s-pair-%04.2f-%04.2f.dat' % (method,ff,z0)
-             for ff in [0.1, 0.2, 0.3, 0.4]
-             for method in ['this-work', 'sokolowski', 'fischer']
+             for ff in [0.1, 0.2, 0.3]
+             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']
              for z0 in numpy.arange(0.05, 3.95, 0.1)] +
             ['papers/pair-correlation/figs/walls/wallsWB-path-%s-pair-%04.2f-0.005.dat' % (method,ff)
-             for ff in [0.1, 0.2, 0.3, 0.4]
-             for method in ['this-work', 'sokolowski', 'fischer']],
+             for ff in [0.1, 0.2, 0.3]
+             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']],
             source = ['papers/pair-correlation/figs/walls.mkdat'],
             action = './$SOURCE')
 
@@ -475,7 +495,7 @@ for test in Split(""" memory saft eos print-iter convolve-finite-difference prec
                       convolve functional-of-double ideal-gas eps fftinverse generated-code  """):
     env.BuildTest(test, all_sources)
 
-for test in Split(""" functional-arithmetic surface-tension """):
+for test in Split(""" new-fftinverse functional-arithmetic surface-tension """):
     env.BuildTest(test, generic_sources)
 
 for test in Split(""" sfmt """):

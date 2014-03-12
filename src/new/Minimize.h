@@ -35,6 +35,7 @@ public:
     deltaE = 0;
     dEdn = 0;
     log_dEdn_ratio_average = 0;
+    error_estimate = 0;
   }
   ~Minimize() {
     invalidate_cache();
@@ -167,4 +168,5 @@ private:
   double oldgradsqr;
 
   double precision, relative_precision, deltaE, dEdn, log_dEdn_ratio_average;
+  double error_estimate;
 };
