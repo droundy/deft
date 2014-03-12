@@ -46,7 +46,10 @@ def read_triplet_path(ff, fun):
     data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
     data[:,0]-=4.995
   else:
-    # input: "figs/triplet-path-inbetween-*-%4.2f.dat" % (ff)
+    # input: "figs/triplet-path-inbetween-fischer-%4.2f.dat" % (ff)
+    # input: "figs/triplet-path-inbetween-sokolowski-%4.2f.dat" % (ff)
+    # input: "figs/triplet-path-inbetween-this-work-%4.2f.dat" % (ff)
+    # input: "figs/triplet-path-inbetween-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-path-inbetween-%s-%4.2f.dat" % (fun, ff)
     if os.path.isfile(filename) == False:
       data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
@@ -60,7 +63,10 @@ def read_triplet_back(ff, fun):
     print 'bad read_triplet_back'
     exit(1)
   else:
-    # input: "figs/triplet-back-inbetween-*-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-inbetween-fischer-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-inbetween-sokolowski-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-inbetween-this-work-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-inbetween-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-inbetween-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
   #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
@@ -324,7 +330,7 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   zplot.plot(z_z, g_z, styles.plot_forward[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_forward[name], mec='none')
 
-for name in ['this-work', 'sokolowski']:
+for name in ['this-work', 'this-work-mc', 'sokolowski']:
   # backward arrows
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]

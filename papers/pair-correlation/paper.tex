@@ -19,8 +19,8 @@
 \newcommand{\pahosays}[1]{{\color{red} [\green{Paho:} \emph{#1}]}}
 
 \begin{document}
-\title{The Pair Distribution Function of the Inhomogeneous Hard-Sphere
-  Fluid}
+\title{The contact value approximation for the pair distribution function of the inhomogeneous hard-sphere
+  fluid}
 
 \author{Paho Lurie-Gregg}
 \author{Jeff B. Schulte}
@@ -39,6 +39,7 @@
   functional that is efficient to compute, and predicts the pair
   distribution function as well as the most accurate existing
   analytical approximation.  \fixme{needs special attention.}
+  \fixme{add acronym, and discuss separable vs. non}
 \end{abstract}
 
 \maketitle
@@ -232,7 +233,7 @@ provides an excellent approximation for this averaged value of the
 pair distribution function for a variety of interfaces, and over a
 wide range of densities.
 
-\section{Our approach}
+\section{Contact value approximation}
 %% We approximate the pair correlation with the average of two radial
 %% distribution functions, evaluated at the distance between the two
 %% points, that are themselves functions of the averaged pair correlation
@@ -270,10 +271,8 @@ functional form (e.g. Percus-Yevick) or using Monte Carlo simulation
 results.  In this paper we first use the Monte Carlo results (which
 are also used in evaluating the approximations of earlier works), and
 refer to this approximation (which has an exact $g(r,g_\sigma)$) as
-``MCRD.''  \jeffsays{I thought maybe for Monte Carlo Radial
-  Distribution} We will then construct our own, more computationally
-efficient radial distribution approximation, which is addressed in the
-following section.
+the ``contact value approximation'' (CVA).  \fixme{Should we mention
+  this earlier?}
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
@@ -281,21 +280,22 @@ following section.
 
 \input{figs/fit-parameters}
 
-\subsection{Separable fit to the radial distribution function}
+\section{Separable radial distribution function for the CVA}
 
-The approximation described in Eq.~\ref{eq:g2-our-mean} is reasonably
-accurate, but cannot be computed efficiently with single-center
-convolutions as written.  In order to ease computational application
-of this pair distribution function in classical density functionals,
-we have developed a separable appoximation for the function
-$g(r,g_\sigma)$.
+The contact value approximation (described in
+Eq.~\ref{eq:g2-our-mean}) is reasonably accurate, but cannot be
+computed efficiently with single-center convolutions as written.  In
+order to ease computational application of this pair distribution
+function in classical density functionals, we have developed a
+separable appoximation for the function $g(r,g_\sigma)$.
 \begin{align}
   g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
-This separable approximation allows the mean field contribution to
-the free energy (Eq.~\ref{eq:mean-field}) to be computed with only
-single-center convolutions, which can be efficiently computed using
-fast Fourier transforms.
+This separable contact value approximation (CVA-S) allows the mean
+field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
+computed with only single-center convolutions, which can be
+efficiently computed using fast Fourier transforms.  \fixme{Comb paper
+  for places to say CVA-S and CVA.}
 
 %% We construct our function's form in terms of an expansion of powers of
 %% $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
@@ -581,10 +581,7 @@ defined a position-dependent pair interaction energy as
   d\rr'\, dxdy\label{eq:da1}
 \end{align}
 which gives the contribution to the mean-field free energy due to
-molecules located at position $z$.  \jeffsays{About this last
-  sentence: this is molecules in the plane $z$, right?  Wanted to make
-  sure that's the case before changing to something like 'in the
-  plane'.  Saying the position z makes it seem that there's only one.}
+molecules located in a plane of fixed $z$.
 
 We plot in Fig.~\ref{fig:dadz} this quantity for hard-core fluids with
 three representative pair potentials near a hard wall.  We have chosen

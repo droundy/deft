@@ -47,7 +47,10 @@ def read_triplet_path(ff, fun):
     # input:  "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
     filename = "figs/mc/triplet/tripletMC-%03.1f-path-trimmed.dat" % (ff)
   else:
-    # input: "figs/tripletWB-path-*-%1.2f.dat" %(ff)
+    # input: "figs/tripletWB-path-fischer-%4.2f.dat" % (ff)
+    # input: "figs/tripletWB-path-sokolowski-%4.2f.dat" % (ff)
+    # input: "figs/tripletWB-path-this-work-%4.2f.dat" % (ff)
+    # input: "figs/tripletWB-path-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/tripletWB-path-%s-%1.2f.dat" %(fun, ff)
   if (os.path.isfile(filename) == False):
     # MC data is in repo, but dft isn't, so just use that for now so it will build.
@@ -65,7 +68,10 @@ def read_triplet_back(ff, fun):
     print 'bad read_triplet_back'
     exit(1)
   else:
-    # input: "figs/triplet-back-contact-*-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-contact-fischer-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-contact-sokolowski-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-contact-this-work-%4.2f.dat" % (ff)
+    # input: "figs/triplet-back-contact-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-contact-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
   #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
@@ -319,7 +325,7 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   zplot.plot(z_z, g_z, styles.plot_forward[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_forward[name], mec='none')
 
-for name in ['this-work', 'sokolowski']:
+for name in ['this-work', 'this-work-mc', 'sokolowski']:
   # backward arrows
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]

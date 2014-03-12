@@ -25,8 +25,8 @@ back_line = { 'mc': '.',
               'sokolowski': '<'}
 
 title = { 'mc': 'Monte Carlo',
-          'this-work': 'this work',
-          'this-work-mc': 'this work MC',
+          'this-work': 'CVA-S',
+          'this-work-mc': 'CVA',
           'fischer': 'Fischer',
           'sokolowski': 'Sokolowski'}
 

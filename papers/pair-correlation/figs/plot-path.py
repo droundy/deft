@@ -51,6 +51,7 @@ def read_walls_path(ff, fun):
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
     # input: "figs/walls/wallsWB-path-this-work-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-this-work-mc-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-fischer-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-sokolowski-pair-%1.2f-0.005.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
