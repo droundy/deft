@@ -49,6 +49,9 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
 names.append('DFT kT = 0')
 data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, ff*0.01)))
 
+names.append('new kT = 0.01')
+data.append(numpy.loadtxt("figs/new-data/wall-%4.2f-00000.01.dat" % (ff*0.01)))
+
 for kT in [0.001, 0.01, 0.03]:
     # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
     fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, ff*0.01)
@@ -60,7 +63,7 @@ for kT in [0.001, 0.01, 0.03]:
         print fname, 'does not exist'
 for i in range(len(data)):
     print 'plotting', names[i]
-    pylab.plot(data[i][:,0]-1.5, data[i][:,1], '-', label=names[i])
+    pylab.plot(data[i][:,0], data[i][:,1], '-', label=names[i])
 
 pylab.title('Packing fraction = %f' % (ff/100.0))
 pylab.xlabel('$z/R$')

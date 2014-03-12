@@ -67,7 +67,7 @@ void z_plot(const char *fname, const Grid &a) {
   for (int z=0; z<gd.Nz/2; z++) {
     Cartesian here = gd.fineLat.toCartesian(Relative(x,y,z));
     double ahere = a(x,y,z);
-    fprintf(out, "%g\t%g\n", here[2], ahere);
+    fprintf(out, "%g\t%g\n", here[2] - spacing, ahere);
   }
   fclose(out);
 }

@@ -393,6 +393,11 @@ for mkdat in Split("""
                       source = [mkdat + '.cpp'] + generic_sources +
                       ['src/new/Minimize.cpp', 'src/new/NewFunctional.cpp', 'src/new/SFMTFluidFast.cpp',
                        'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
+env.Command(target = ["papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat" % (ff, kT)
+                      for kT in [0.01, 0.02, 0.03]
+                      for ff in [0.1, 0.2, 0.3, 0.4]],
+            source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
+            action = './$SOURCE')
 
 env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',

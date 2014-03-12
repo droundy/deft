@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/stat.h>
 #include "new/SFMTFluidFast.h"
 #include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
@@ -38,16 +39,32 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_walls(double eta, NewFunctional *f, double kT) {
+void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
-  min.set_relative_precision(0);
-  min.set_maxiter(25);
+  min.set_relative_precision(1e-12);
+  min.set_maxiter(50);
 
-  while (min.improve_energy(min_details)) {
+  while (min.improve_energy(quiet)) {
   }
   took("Doing the minimization");
   min.print_info();
-  exit(1);
+
+  char *fname = new char[5000];
+  mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
+  snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat", eta, kT);
+  FILE *o = fopen(fname, "w");
+  if (!o) {
+    fprintf(stderr, "error creating file %s\n", fname);
+    exit(1);
+  }
+  delete[] fname;
+  const int Nz = f->Nz();
+  Vector rz = f->get_rz();
+  Vector n = f->get_n();
+  for (int i=0;i<Nz/2;i++) {
+    fprintf(o, "%g\t%g\n", rz[i] - spacing, n[i]);
+  }
+  fclose(o);
 }
 
 int main(int, char **) {
@@ -65,7 +82,7 @@ int main(int, char **) {
       hf.mu() = 0;
       hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
       printf("bulk energy is %g\n", hf.energy());
-      hf.printme("XXX:\t");
+      //hf.printme("XXX:");
       printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
 
       SFMTFluidVeff f(dw, dw, width + spacing, dx);
@@ -82,7 +99,7 @@ int main(int, char **) {
         for (int i=0; i<Ntot; i++) {
           if (fabs(rz[i]) < spacing) {
             f.Vext()[i] = 100*temp; // this is "infinity" for our wall
-            f.Veff()[i] = -temp*log(hf.n());
+            f.Veff()[i] = -temp*log(1e-2*hf.n());
           } else {
             f.Veff()[i] = -temp*log(hf.n());
           }
@@ -92,11 +109,6 @@ int main(int, char **) {
 
       run_walls(eta, &f, temp);
     }
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/fuzzy-fmt/figs/new-walls.dat", "w")) {
-    printf("Error creating walls.dat!\n");
-    return 1;
   }
   return 0;
 }
