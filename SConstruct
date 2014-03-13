@@ -138,8 +138,14 @@ for source in Split(""" HardSpheresNoTensor2Fast TensorWhiteBearFast WhiteBearMa
     generated_sources.append(filename)
     generate.Functional(target = filename, source = 'src/haskell/functionals.exe')
 
+newgeneric_sources = Split(""" src/new/Minimize.cpp src/new/NewFunctional.cpp """)
+
 newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
+    # The following are just for testing purposes
+    ("Quadratic", "Quadratic", "quadratic", '[ER $ r_var "x"]'),
+    ("QuadraticN0", "QuadraticN0", "quadratic_n0", '[ER $ r_var "x"]'),
+    # The rest are "real" functionals of sorts
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
@@ -390,8 +396,8 @@ for mkdat in Split("""
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
-                      source = [mkdat + '.cpp'] + generic_sources +
-                      ['src/new/Minimize.cpp', 'src/new/NewFunctional.cpp', 'src/new/SFMTFluidFast.cpp',
+                      source = [mkdat + '.cpp'] + generic_sources + newgeneric_sources +
+                      ['src/new/SFMTFluidFast.cpp',
                        'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
 env.Command(target = ["papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat" % (ff, kT)
                       for kT in [0.01, 0.02, 0.03]
@@ -502,7 +508,7 @@ for test in Split(""" sfmt """):
     env.BuildTest(test, generic_sources + ['src/SoftFluidFast.cpp'])
 
 for test in Split(""" newcode """):
-    env.BuildTest(test, ['src/new/Minimize.cpp'])
+    env.BuildTest(test, newgeneric_sources)
 
-for test in Split(""" new-hard-spheres new-water-saft """):
-    env.BuildTest(test, all_sources + newgenerated_sources)
+for test in Split(""" new-hard-spheres new-water-saft new-generated """):
+    env.BuildTest(test, all_sources + newgeneric_sources + newgenerated_sources)
