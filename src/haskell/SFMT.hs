@@ -3,6 +3,7 @@ soft fundamental measure theory. -}
 
 module SFMT
        ( sfmt, sfmt_fluid_n, sfmt_fluid_Veff, homogeneous_sfmt_fluid,
+         phi1, phi2, phi3,
          n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v )
        where
 

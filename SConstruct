@@ -143,8 +143,17 @@ newgeneric_sources = Split(""" src/new/Minimize.cpp src/new/NewFunctional.cpp ""
 newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
     # The following are just for testing purposes
+    ("ExternalPotentialTest", "ExternalPotentialTest", "external_potential", '[ER $ r_var "n"]'),
     ("Quadratic", "Quadratic", "quadratic", '[ER $ r_var "x"]'),
     ("QuadraticN0", "QuadraticN0", "quadratic_n0", '[ER $ r_var "x"]'),
+    ("QuadraticGaussian", "QuadraticGaussian", "quadratic_gaussian", '[ER $ r_var "x"]'),
+    ("LogN0", "LogN0", "log_n0", '[ER $ r_var "x"]'),
+    ("Phi1", "WhiteBear", "kTphi1", '[ER $ r_var "x"]'),
+    ("Phi2", "WhiteBear", "kTphi2", '[ER $ r_var "x"]'),
+    ("Phi3", "WhiteBear", "kTphi3", '[ER $ r_var "x"]'),
+    ("SPhi1", "SFMT", "phi1", '[ER $ r_var "x"]'),
+    ("SPhi2", "SFMT", "phi2", '[ER $ r_var "x"]'),
+    ("SPhi3", "SFMT", "phi3", '[ER $ r_var "x"]'),
     # The rest are "real" functionals of sorts
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),

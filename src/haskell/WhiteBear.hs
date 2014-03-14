@@ -7,6 +7,7 @@ module WhiteBear
          tensorThirdTerm, phi3t,
          tensorwhitebear,
          whitebear_m2, gSigmaS_m2, gSigmaA_m2,
+         kTphi1, kTphi2, kTphi3,
          correlation_gross, phi1, phi2, phi3, nA )
        where
 
