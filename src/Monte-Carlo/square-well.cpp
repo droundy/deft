@@ -27,6 +27,8 @@ ball ball::operator=(const ball &p) {
   return *this;
 }
 
+move_info::move_info(){}
+
 vector3d sw_fix_periodic(vector3d v, const double len[3]) {
   for (int i = 0; i < 3; i++) {
     while (v[i] > len[i])
@@ -53,7 +55,7 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b,
 
 int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
                                int max_neighbors, const double len[3],
-                               int num_walls) {
+                               int walls) {
   int most_neighbors = 0;
   for (int i = 0; i < N; i++) {
     p[i].neighbor_center = p[i].pos;
@@ -63,7 +65,7 @@ int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
     p[i].num_neighbors = 0;
     for (int j = 0; j < N; j++) {
       const bool is_neighbor = (i != j) &&
-        (periodic_diff(p[i].pos, p[j].pos, len, num_walls).normsquared() <
+        (periodic_diff(p[i].pos, p[j].pos, len, walls).normsquared() <
          sqr(p[i].R + p[j].R + neighbor_R));
       if (is_neighbor) {
         const int index = p[i].num_neighbors;
@@ -78,12 +80,12 @@ int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
 }
 
 void update_neighbors(ball &a, int n, const ball *bs, int N,
-                      double neighbor_R, const double len[3], int num_walls) {
+                      double neighbor_R, const double len[3], int walls) {
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++) {
     if ((i != n) &&
         (periodic_diff(a.pos, bs[i].neighbor_center, len,
-                          num_walls).normsquared()
+                          walls).normsquared()
          < sqr(a.R + bs[i].R + neighbor_R))) {
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors++;
@@ -139,24 +141,24 @@ void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n) {
   }
 }
 
-bool overlap(const ball &a, const ball &b, const double len[3], int num_walls,
+bool overlap(const ball &a, const ball &b, const double len[3], int walls,
              double dr) {
-  const vector3d ab = periodic_diff(a.pos, b.pos, len, num_walls);
+  const vector3d ab = periodic_diff(a.pos, b.pos, len, walls);
   return (ab.normsquared() < sqr(a.R + b.R + 2*dr));
 }
 
 int overlaps_with_any(const ball &a, const ball *p,
-                      const double len[3], int num_walls, double dr) {
+                      const double len[3], int walls, double dr) {
   for (int i = 0; i < a.num_neighbors; i++) {
-    if (overlap(a,p[a.neighbors[i]],len,num_walls,dr))
+    if (overlap(a,p[a.neighbors[i]],len,walls,dr))
       return true;
   }
   return false;
 }
 
-bool in_cell(const ball &p, const double len[3], const int num_walls,
+bool in_cell(const ball &p, const double len[3], const int walls,
              double dr) {
-  for (int i = 0; i < num_walls; i++) {
+  for (int i = 0; i < walls; i++) {
     if (p.pos[i]-p.R-dr < 0.0 || p.pos[i]+p.R+dr > len[i])
       return false;
   }
@@ -169,16 +171,20 @@ ball random_move(const ball &p, double move_scale, const double len[3]) {
   return temp;
 }
 
-int move_one_ball(int id, ball *p, int N, double len[3],
-                  int num_walls, double neighbor_R,
-                  double dist, int max_neighbors, double dr) {
-  ball temp = random_move(p[id], dist, len);
-  int return_val = 0;
-  if (in_cell(temp, len, num_walls, dr)) {
-    bool overlaps = overlaps_with_any(temp, p, len, num_walls, dr);
+void move_one_ball(int id, ball *p, int N, double len[3], int walls,
+                   double neighbor_R, double translation_distance,
+                   double interaction_distance, int max_neighbors, double dr,
+                   move_info &move_attempt, double *ln_energy_weights) {
+  move_attempt.old_count =
+    count_interactions(id, p, interaction_distance, len, walls);
+  ball temp = random_move(p[id], translation_distance, len);
+  move_attempt.new_count =
+    count_interactions(id, p, interaction_distance, len, walls);
+  if (in_cell(temp, len, walls, dr)) {
+    bool overlaps = overlaps_with_any(temp, p, len, walls, dr);
     if (!overlaps) {
       const bool get_new_neighbors =
-        (periodic_diff(temp.pos, temp.neighbor_center, len, num_walls)
+        (periodic_diff(temp.pos, temp.neighbor_center, len, walls)
          .normsquared() > sqr(neighbor_R/2.0));
       if (get_new_neighbors) {
         // If we've moved too far, then the overlap test may have given a false
@@ -186,39 +192,41 @@ int move_one_ball(int id, ball *p, int N, double len[3],
         // If we still don't overlap, then we'll have to update the tables
         // of our neighbors that have changed.
         temp.neighbors = new int[max_neighbors];
-        update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, num_walls);
-        return_val += 2;
+        update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, walls);
+        move_attempt.updates++;
         // However, for this check (and this check only), we don't need to
         // look at all of our neighbors, only our new ones.
         // fixme: do this!
         //int *new_neighbors = new int[max_neighbors];
 
-        overlaps = overlaps_with_any(temp, p, len, num_walls, dr);
+        overlaps = overlaps_with_any(temp, p, len, walls, dr);
         if (!overlaps) {
           // Okay, we've checked twice, just like Santa Clause, so we're definitely
           // keeping this move and need to tell our neighbors where we are now.
           temp.neighbor_center = temp.pos;
           inform_neighbors(temp, p[id], p, id);
-          return_val += 4;
+          move_attempt.informs++;
           delete[] p[id].neighbors;
         }
         else delete[] temp.neighbors;
       }
       if (!overlaps) {
         p[id] = temp;
-        return return_val + 1; //move successful
+        move_attempt.success = true;
+        return;
       }
     }
   }
-  return return_val; // move unsucessful
+  move_attempt.success = false;
+  return;
 }
 
 int count_interactions(int id, ball *p, double interaction_distance,
-                       double len[3], int num_walls) {
+                       double len[3], int walls) {
   int interactions = 0;
   for(int i = 0; i < p[id].num_neighbors; i++) {
     if(periodic_diff(p[id].pos, p[p[id].neighbors[i]].pos,
-                     len, num_walls).normsquared()
+                     len, walls).normsquared()
        <= uipow(interaction_distance,2))
       interactions++;
   }
