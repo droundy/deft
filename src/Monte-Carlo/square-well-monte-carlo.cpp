@@ -216,18 +216,21 @@ int main(int argc, const char *argv[]) {
   }
 
   // If a filename was not selected, make a default
-  char *weight_tag = new char[2];
-  char *wall_tag = new char[10];
-  if(walls == 0) sprintf(wall_tag,"periodic");
-  else if(walls == 1) sprintf(wall_tag,"wall");
-  else if(walls == 2) sprintf(wall_tag,"tube");
-  else if(walls == 3) sprintf(wall_tag,"box");
-  sprintf(weight_tag, (weights ? "" : "nw"));
   if (strcmp(filename, "default_filename") == 0) {
-    sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i-%s",
+    char *weight_tag = new char[2];
+    char *wall_tag = new char[10];
+    if(walls == 0) sprintf(wall_tag,"periodic");
+    else if(walls == 1) sprintf(wall_tag,"wall");
+    else if(walls == 2) sprintf(wall_tag,"tube");
+    else if(walls == 3) sprintf(wall_tag,"box");
+    sprintf(weight_tag, (weights ? "" : "-nw"));
+    sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
-    printf("\nNo filename selected, so using the default: %s\n", filename);
+    printf("\nUsing default file name: ");
   }
+  else
+    printf("\nUsing given file name: ");
+  printf("%s\n",filename);
 
   printf("------------------------------------------------------------------\n");
   printf("Running %s with parameters:\n", argv[0]);
@@ -270,10 +273,11 @@ int main(int argc, const char *argv[]) {
   double *state_density = new double[energy_levels]();
 
   // Radial distribution function (RDF) histogram
-  const double min_len = min(len[x], min(len[y], len[z]));
-  const int g_bins = round(min_len/2/de_g);
-  long *g_histogram = new long[energy_levels*g_bins]();
   long *g_energy_histogram = new long[energy_levels]();
+  const int g_bins = round(min(len[x],min(len[y],len[z])) / de_g / 2);
+  long **g_histogram = new long*[energy_levels];
+  for(int i = 0; i < energy_levels; i++)
+    g_histogram[i] = new long[g_bins]();
 
   // Density histogram
   const int density_bins = round(len[wall_dim]/de_density);
@@ -479,7 +483,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     if(weights){
       if(iteration == N){
-        // Initial guess for energy weights
+        // initial guess for energy weights
         for(int i = 0; i < energy_levels; i++){
           ln_energy_weights[i] = log((N*initialization_iterations) /
                                      (energy_histogram[i] > 0 ?
@@ -493,14 +497,55 @@ int main(int argc, const char *argv[]) {
           const int bottom = i > 0 ? i-1 : i;
           const double df = double(walkers_plus[top]) / walkers_total[top]
             - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-          const int dE = bottom-top; // Interactions and energy are opposites
-          const double df_dE = (df > 0 ? df :
-                                double(1)/walkers_total[bottom]) / dE;
+          const int dE = bottom-top; // interactions and energy are opposites
+          const double df_dE =
+            (df > 0 ? df : double(1)/walkers_total[bottom]) / dE;
           ln_energy_weights[i] +=
             (log(df_dE) - log(walkers_total[i]/totalmoves))/2.0;
         }
         weight_updates++;
       }
+
+      // -------------------------------------------------------------------
+      // ----------------------------- TESTING -----------------------------
+      // ------------- print weight histogram to test convergence-----------
+      // -------------------------------------------------------------------
+
+      char *w_headerinfo = new char[4096];
+      sprintf(w_headerinfo,
+              "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
+              " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
+              " well_width: %g, translation_distance: %g\n"
+              "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
+              " energy_levels: %i\n",
+              len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
+              well_width, translation_distance, initialization_iterations,
+              neighbor_scale, dr, energy_levels);
+
+      char *w_countinfo = new char[4096];
+      sprintf(w_countinfo,
+              "# iteration: %li, workingmoves: %li, totalmoves: %li, "
+              "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
+              double(workingmoves)/totalmoves);
+
+      char *w_testdir = new char[16];
+      sprintf(w_testdir,"weights");
+
+      char *w_fname = new char[1024];
+      sprintf(w_fname, "%s/%s/%s-w%02i.dat",
+              dir, w_testdir, filename, weight_updates);
+      FILE *w_out = fopen((const char *)w_fname, "w");
+      fprintf(w_out, "%s", w_headerinfo);
+      fprintf(w_out, "%s", w_countinfo);
+      fprintf(w_out, "\n# interactions   value\n");
+      for(int i = 0; i < energy_levels; i++)
+        if(energy_histogram[i] != 0)
+          fprintf(w_out, "%i  %f\n",i,ln_energy_weights[i]);
+      fclose(w_out);
+      // -------------------------------------------------------------------
+      // ----------------------------- TESTING -----------------------------
+      // -------------------------------------------------------------------
+
     }
     // ---------------------------------------------------------------
     // Print out timing information if desired
@@ -621,7 +666,7 @@ int main(int argc, const char *argv[]) {
             const vector3d r = periodic_diff(balls[i].pos, balls[j].pos, len,
                                              walls);
             const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[interactions*g_bins + r_i]++;
+            if(r_i < g_bins) g_histogram[interactions][r_i]++;
           }
         }
       }
@@ -674,10 +719,10 @@ int main(int argc, const char *argv[]) {
         const double density = N/len[x]/len[y]/len[z];
         const double total_vol = len[x]*len[y]*len[z];
         for(int i = 0; i < energy_levels; i++){
-          if(g_histogram[(i+1)*g_bins - 1] > 0){ // if we have RDF data at this energy
+          if(g_histogram[i][g_bins-1] > 0){ // if we have RDF data at this energy
             fprintf(g_out, "\n%i",i);
             for(int r_i = 0; r_i < g_bins; r_i++) {
-              const double probability = (double)g_histogram[i*g_bins + r_i]
+              const double probability = (double)g_histogram[i][r_i]
                 / g_energy_histogram[i];
               const double r = (r_i + 0.5) * de_g;
               const double shell_vol =

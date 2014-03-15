@@ -21,7 +21,7 @@ parser.add_argument(
 
 parser.add_argument(
 		'-kteplot', metavar='INT', type=int, nargs='+',
-    default=[15,30,45,60],
+    default=[3,10,30],
     help='Value(s) of kt/e to plot for radial distribution function')
 
 parser.add_argument(
@@ -56,15 +56,15 @@ kte = arange(args.ktemin+dkte,args.ktemax,dkte)
 xSize = 15 # cm
 ySize = 10 # cm
 fontSize = 12 # pt
-lineWidth = 1 # pt
 rcParams['font.size'] = fontSize
 rcParams['font.size'] = fontSize
 rcParams['axes.titlesize'] = fontSize
 rcParams['legend.fontsize'] = fontSize
-rcParams['legend.numpoints'] = 1
+rcParams['legend.numpoints'] = 3
 rcParams['xtick.labelsize'] = fontSize
 rcParams['ytick.labelsize'] = fontSize
-rcParams['lines.linewidth'] = lineWidth
+rcParams['lines.linewidth'] = 1
+rcParams['lines.markersize'] = 2
 
 # load all data files
 files = sort(glob.glob(datadir+'*'+dataflag))
@@ -180,39 +180,41 @@ def g(gs,kte,counts,DS):
 # radial distribution function
 if args.rd:
     print("Generating radial distribution figures")
-    for p in paramList:
-        if args.print: print('  trial:',p.name('N'))
-        g_data = loadtxt(p.gfile,ndmin=2)
-        g_counts = g_data[:,0][::-1]
-        gs = g_data[:,1:]
+    for ww in args.ww:
+        for p in [ p for p in paramList
+                   if p.ww == ww and p.ff in args.ff ]:
+            if args.print: print('  trial:',p.name('N'))
+            g_data = loadtxt(p.gfile,ndmin=2)
+            g_counts = g_data[:,0][::-1]
+            gs = g_data[:,1:]
 
-        E_data = loadtxt(p.Efile,ndmin=2)
-        counts = E_data[:,0][::-1]
-        use_counts = [ i for i in range(len(counts))
-                       if counts[i] in g_counts ]
-        counts = counts[use_counts]
-        counts -= min(counts)
-        DS = E_data[use_counts,1]
-        DS /= sum(DS)
+            E_data = loadtxt(p.Efile,ndmin=2)
+            counts = E_data[:,0][::-1]
+            use_counts = [ i for i in range(len(counts))
+                           if counts[i] in g_counts ]
+            counts = counts[use_counts]
+            counts -= min(counts)
+            DS = E_data[use_counts,1]
+            DS /= sum(DS)
 
-        with open(p.gfile,'r') as stream:
-            first_line = stream.readline().split(' ')
-        for i in range(len(first_line)):
-            if 'de_g' in first_line[i]:
-                de_g = float(first_line[i+1])
-                break
-        radius = (array(range(0,len(gs[0,:])))+0.5) * de_g/2
+            with open(p.gfile,'r') as stream:
+                first_line = stream.readline().split(' ')
+            for i in range(len(first_line)):
+                if 'de_g' in first_line[i]:
+                    de_g = float(first_line[i+1])
+                    break
+            radius = (array(range(0,len(gs[0,:])))+0.5) * de_g/2
 
-        for kte in args.kteplot:
-            if args.print: print('    kT/e:',kte)
             fig, ax = newFig()
-            plot(radius,g(gs,kte,counts,DS),'.')
+            for kte in args.kteplot:
+                plot(radius,g(gs,kte,counts,DS),'.',
+                     label='$kT/\epsilon='+str(kte)+'$')
             axvline(1,color='k',linestyle=':')
             axvline(p.ww,color='k',linestyle=':')
             xlim(0,max_RDF_radius/2)
             xlabel('$r/\\sigma$')
             ylabel('$g(r)$')
+            legend(loc=0)
             tight_layout(pad=0.1)
-            savefig(figdir+p.name('N')+'-rd-kte-'+str(kte) \
-                    +figformat)
+            savefig(figdir+p.name('N')+'-rd'+figformat)
             close()
