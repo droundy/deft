@@ -265,7 +265,6 @@ int main(int argc, const char *argv[]) {
   bool current_walker_plus = false;
   int walker_plus_threshold = 0, walker_minus_threshold = 0;
   long *walkers_plus = new long[energy_levels]();
-  long *walkers_total = new long[energy_levels]();
 
   // Energy weights, state density
   int weight_updates = 0;
@@ -282,9 +281,13 @@ int main(int argc, const char *argv[]) {
   // Density histogram
   const int density_bins = round(len[wall_dim]/de_density);
   const double bin_volume = len[x]*len[y]*len[z]/len[wall_dim]*de_density;
-  long *density_histogram = new long[energy_levels*density_bins]();
+  long **density_histogram = new long*[energy_levels];
+  for(int i = 0; i < energy_levels; i++)
+    density_histogram[i] = new long[density_bins]();
 
   ball *balls = new ball[N];
+  move_info move_attempt;
+
   if(totime < 0) totime = 10*N;
 
   // Initialize the random number generator with our seed
@@ -417,15 +420,8 @@ int main(int argc, const char *argv[]) {
   long neighbor_updates = 0, neighbor_informs = 0;
   double avg_neighbors = 0;
   int interactions = 0;
-  int move_val, old_interaction_count, new_interaction_count;
 
   double dscale = .1;
-
-  if(weights){
-    for(int i = 0; i < energy_levels; i++){
-      ln_energy_weights[i] = 1;
-    }
-  }
 
   // Count initial number of interactions
   // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
@@ -445,20 +441,22 @@ int main(int argc, const char *argv[]) {
     // Move each ball once
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
-      old_interaction_count = count_interactions(i, balls, interaction_distance,
-                                                 len, walls);
-      move_val = move_one_ball(i, balls, N, len, walls, neighbor_R,
-                               translation_distance, max_neighbors, dr);
-      new_interaction_count = count_interactions(i, balls, interaction_distance,
-                                                 len, walls);
-      interactions += new_interaction_count - old_interaction_count;
+      move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
+                    interaction_distance, max_neighbors, dr, move_attempt,
+                    ln_energy_weights);
+      interactions += move_attempt.new_count - move_attempt.old_count;
       energy_histogram[interactions]++;
-      walkers_total[interactions]++;
 
-      workingmoves += move_val & 1;
-      neighbor_updates += (move_val & 2) > 0;
-      neighbor_informs += (move_val & 4) > 0;
+      workingmoves += move_attempt.success;
+      neighbor_updates += move_attempt.updates;
+      neighbor_informs += move_attempt.informs;
       totalmoves++;
+
+      if(weights){
+        if(interactions >= walker_minus_threshold) current_walker_plus = false;
+        else if(interactions <= walker_plus_threshold) current_walker_plus = true;
+        if(current_walker_plus) walkers_plus[interactions]++;
+      }
     }
     // ---------------------------------------------------------------
     // Fine-tune translation scale to reach acceptance goal
@@ -487,65 +485,63 @@ int main(int argc, const char *argv[]) {
         for(int i = 0; i < energy_levels; i++){
           ln_energy_weights[i] = log((N*initialization_iterations) /
                                      (energy_histogram[i] > 0 ?
-                                      energy_histogram[i] : 0.1));
+                                      energy_histogram[i] : 0.01));
         }
         weight_updates++;
       }
-      if(iteration % int(uipow(2,weight_updates)) == 0){
+      if(iteration >= N && (iteration-N) % int(uipow(2,weight_updates)) == 0){
         for(int i = 0; i < energy_levels; i++){
           const int top = i < energy_levels-1 ? i+1 : i;
           const int bottom = i > 0 ? i-1 : i;
-          const double df = double(walkers_plus[top]) / walkers_total[top]
-            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+          const double df = double(walkers_plus[top]) / energy_histogram[top]
+            - (double(walkers_plus[bottom]) / energy_histogram[bottom]);
           const int dE = bottom-top; // interactions and energy are opposites
           const double df_dE =
-            (df > 0 ? df : double(1)/walkers_total[bottom]) / dE;
-          ln_energy_weights[i] +=
-            (log(df_dE) - log(walkers_total[i]/totalmoves))/2.0;
+            (df > 0 ? df : double(0.01)/energy_histogram[bottom]) / dE;
+          //ln_energy_weights[i] +=
+          //  (log(df_dE) - log(energy_histogram[i]/totalmoves))/2.0;
         }
         weight_updates++;
-      }
 
-      // -------------------------------------------------------------------
-      // ----------------------------- TESTING -----------------------------
-      // ------------- print weight histogram to test convergence-----------
-      // -------------------------------------------------------------------
+        // -----------------------------------------------------------------
+        // ----------------------------- TESTING ---------------------------
+        // ------------- print weight histogram to test convergence---------
+        // -----------------------------------------------------------------
 
-      char *w_headerinfo = new char[4096];
-      sprintf(w_headerinfo,
-              "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
-              " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-              " well_width: %g, translation_distance: %g\n"
-              "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
-              " energy_levels: %i\n",
-              len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
-              well_width, translation_distance, initialization_iterations,
-              neighbor_scale, dr, energy_levels);
+        char *w_headerinfo = new char[4096];
+        sprintf(w_headerinfo,
+                "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
+                " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
+                " well_width: %g, translation_distance: %g\n"
+                "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
+                " energy_levels: %i\n",
+                len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
+                well_width, translation_distance, initialization_iterations,
+                neighbor_scale, dr, energy_levels);
 
-      char *w_countinfo = new char[4096];
-      sprintf(w_countinfo,
-              "# iteration: %li, workingmoves: %li, totalmoves: %li, "
-              "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
-              double(workingmoves)/totalmoves);
+        char *w_countinfo = new char[4096];
+        sprintf(w_countinfo,
+                "# iteration: %li, workingmoves: %li, totalmoves: %li, "
+                "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
+                double(workingmoves)/totalmoves);
 
-      char *w_testdir = new char[16];
-      sprintf(w_testdir,"weights");
+        char *w_testdir = new char[16];
+        sprintf(w_testdir,"weights");
 
-      char *w_fname = new char[1024];
-      sprintf(w_fname, "%s/%s/%s-w%02i.dat",
-              dir, w_testdir, filename, weight_updates);
-      FILE *w_out = fopen((const char *)w_fname, "w");
-      fprintf(w_out, "%s", w_headerinfo);
-      fprintf(w_out, "%s", w_countinfo);
-      fprintf(w_out, "\n# interactions   value\n");
-      for(int i = 0; i < energy_levels; i++)
-        if(energy_histogram[i] != 0)
+        char *w_fname = new char[1024];
+        sprintf(w_fname, "%s/%s/%s-w%02i.dat",
+                dir, w_testdir, filename, weight_updates);
+        FILE *w_out = fopen((const char *)w_fname, "w");
+        fprintf(w_out, "%s", w_headerinfo);
+        fprintf(w_out, "%s", w_countinfo);
+        fprintf(w_out, "\n# interactions   value\n");
+        for(int i = 0; i < energy_levels; i++)
           fprintf(w_out, "%i  %f\n",i,ln_energy_weights[i]);
-      fclose(w_out);
+        fclose(w_out);
       // -------------------------------------------------------------------
       // ----------------------------- TESTING -----------------------------
       // -------------------------------------------------------------------
-
+      }
     }
     // ---------------------------------------------------------------
     // Print out timing information if desired
@@ -628,23 +624,14 @@ int main(int argc, const char *argv[]) {
     // Move each ball once, add to energy and walker histograms
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
-      old_interaction_count = count_interactions(i, balls, interaction_distance,
-                                                 len, walls);
-      move_val = move_one_ball(i, balls, N, len, walls, neighbor_R,
-                               translation_distance, max_neighbors, dr);
-      new_interaction_count = count_interactions(i, balls, interaction_distance,
-                                                 len, walls);
-      interactions += new_interaction_count - old_interaction_count;
+      move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
+                    interaction_distance, max_neighbors, dr, move_attempt,
+                    ln_energy_weights);
+      interactions += move_attempt.new_count - move_attempt.old_count;
       energy_histogram[interactions]++;
-      workingmoves += move_val & 1;
-      totalmoves ++;
 
-      if(weights){
-        walkers_total[interactions]++;
-        if(interactions >= walker_minus_threshold) current_walker_plus = false;
-        else if(interactions <= walker_plus_threshold) current_walker_plus = true;
-        if(current_walker_plus) walkers_plus[interactions]++;
-      }
+      workingmoves += move_attempt.success;
+      totalmoves ++;
     }
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -652,8 +639,8 @@ int main(int argc, const char *argv[]) {
     // Density histogram
     if(walls){
       for(int i = 0; i < N; i++){
-        density_histogram[interactions*density_bins
-                          + int(floor(balls[i].pos[wall_dim]/de_density))] ++;
+        density_histogram[interactions]
+          [int(floor(balls[i].pos[wall_dim]/de_density))] ++;
       }
     }
 
@@ -751,7 +738,7 @@ int main(int argc, const char *argv[]) {
           fprintf(densityout, "\n");
           for(int r_i = 0; r_i < density_bins; r_i++) {
             const double bin_density =
-              (double)density_histogram[i*density_bins + r_i]
+              (double)density_histogram[i][r_i]
               *N/energy_histogram[i]/bin_volume;
             fprintf(densityout, "%8.5f ", bin_density);
           }
