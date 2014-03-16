@@ -417,8 +417,10 @@ instance Type KSpace where
                                  newcode r ++ ", " ++ newcode i ++ ");\n" ++
                             newcodes (n+1) (substitute x' (complex (s_var ("t"++show n++".real()")) (s_var ("t"++show n++".imag()"))) x)
                     _ -> error "oopsies?!"
-              MB Nothing -> "\t\t" ++ a ++ "[i].real()" ++ op ++ newcode (real_part x) ++ ";\n" ++
-                            "\t\t" ++ a ++ "[i].imag()" ++ op ++ newcode (imag_part x) ++ ";"
+              MB Nothing -> "\t\tconst double real_bit = " ++ newcode (real_part x) ++ ";\n" ++
+                            "\t\tconst double imag_bit = " ++ newcode (imag_part x) ++ ";\n" ++
+                            "\t\t" ++ a ++ "[i].real()" ++ op ++ "real_bit;\n" ++
+                            "\t\t" ++ a ++ "[i].imag()" ++ op ++ "imag_bit;"
             setzero = case newcode $ setKequalToZero e of
                       "0.0" -> a ++ "[0]" ++ op ++ "0;\n"
                       k0newcode -> unlines ["{",

@@ -26,6 +26,8 @@
 #include "new/SPhi1Fast.h"
 #include "new/SPhi2Fast.h"
 #include "new/SPhi3Fast.h"
+#include "new/SFMTFluidFast.h"
+#include "new/HomogeneousSFMTFluidFast.h"
 #include "new/ExternalPotentialTestFast.h"
 #include "handymath.h"
 
@@ -59,7 +61,7 @@ int check_functional_value(const char *name,
 int main(int, char **argv) {
   int retval = 0;
   const int run_slow_tests = 1;
-  const int run_failing_tests = 0;
+  //const int run_failing_tests = 1;
 
   int Nx = 100;
   double a = 2;
@@ -77,34 +79,44 @@ int main(int, char **argv) {
     retval += q.run_finite_difference_test("Quadratic");
   }
   if (run_slow_tests) {
-    QuadraticN0 q0(Nx, Nx, Nx);
-    q0.a1() = a;
-    q0.R() = 1;
-    q0.a2() = a;
-    q0.a3() = a;
-    q0.konst() = 1;
-    q0.meanval() = 1;
-    q0.x() = 1.5;
-    double energy = 0.5*q0.konst()*a*a*a*sqr(q0.x()[0]-q0.meanval());
-    retval += check_functional_value("Quadratic n0", q0, energy, 2e-11);
-    retval += q0.run_finite_difference_test("Quadratic n0");
-    for (int i=0; i<Nx*Nx*Nx/2; i++) q0.x()[i] *= 0;
-    retval += q0.run_finite_difference_test("Quadratic n0 inhomogeneous");
+    QuadraticN0 f(Nx, Nx, Nx);
+    f.a1() = a;
+    f.R() = 1;
+    f.a2() = a;
+    f.a3() = a;
+    f.konst() = 1;
+    f.meanval() = 1;
+    f.x() = 1.5;
+    double energy = 0.5*f.konst()*a*a*a*sqr(f.x()[0]-f.meanval());
+    retval += check_functional_value("Quadratic n0", f, energy, 2e-11);
+    retval += f.run_finite_difference_test("Quadratic n0");
+    Vector z = f.get_rz();
+    for (int i=0; i<z.get_size(); i++) {
+      if (z[i] > 0) {
+        f.x()[i] *= 0.0001;
+      }
+    }
+    retval += f.run_finite_difference_test("Quadratic n0 inhomogeneous");
   }
   if (run_slow_tests) {
-    QuadraticGaussian qg(Nx, Nx, Nx);
-    qg.a1() = a;
-    qg.a2() = a;
-    qg.a3() = a;
-    qg.sigma() = 1.0;
-    qg.konst() = 1;
-    qg.meanval() = 1;
-    qg.x() = 1.5;
-    double energy = 0.5*qg.konst()*a*a*a*sqr(qg.x()[0]-qg.meanval());
-    retval += check_functional_value("Quadratic gaussian", qg, energy, 2e-11);
-    retval += qg.run_finite_difference_test("Quadratic gaussian");
-    for (int i=0; i<Nx*Nx*Nx/2; i++) qg.x()[i] *= 0;
-    retval += qg.run_finite_difference_test("Quadratic gaussian inhomogeneous");
+    QuadraticGaussian f(Nx, Nx, Nx);
+    f.a1() = a;
+    f.a2() = a;
+    f.a3() = a;
+    f.sigma() = 1.0;
+    f.konst() = 1;
+    f.meanval() = 1;
+    f.x() = 1.5;
+    double energy = 0.5*f.konst()*a*a*a*sqr(f.x()[0]-f.meanval());
+    retval += check_functional_value("Quadratic gaussian", f, energy, 2e-11);
+    retval += f.run_finite_difference_test("Quadratic gaussian");
+    Vector z = f.get_rz();
+    for (int i=0; i<z.get_size(); i++) {
+      if (z[i] > 0) {
+        f.x()[i] *= 0.0001;
+      }
+    }
+    retval += f.run_finite_difference_test("Quadratic gaussian inhomogeneous");
   }
   if (run_slow_tests) {
     LogN0 L0(Nx, Nx, Nx);
@@ -119,22 +131,27 @@ int main(int, char **argv) {
     for (int i=0; i<Nx*Nx*Nx/2; i++) L0.x()[i] *= 0.01;
     retval += L0.run_finite_difference_test("Log n0 inhomogeneous");
   }
-  if (run_slow_tests) {
-    SPhi1 sphi1(Nx, Nx, Nx);
-    sphi1.R() = 1;
-    sphi1.kT() = 1;
-    sphi1.V0() = 1;
-    sphi1.a1() = a;
-    sphi1.a2() = a;
-    sphi1.a3() = a;
-    sphi1.x() = 0.1;
-    //double energy = a*a*a*log(sphi1.x()[0]);
-    //retval += check_functional_value("SPhi1", sphi1, energy, 2e-11);
-    retval += sphi1.run_finite_difference_test("SPhi1");
-    for (int i=0; i<Nx*Nx*Nx/2; i++) sphi1.x()[i] *= 0.1;
-    retval += sphi1.run_finite_difference_test("SPhi1 inhomogeneous");
+  if (run_slow_tests || 1) {
+    SPhi1 f(Nx, Nx, Nx);
+    f.R() = 1;
+    f.kT() = 1;
+    f.V0() = 1;
+    f.a1() = a;
+    f.a2() = a;
+    f.a3() = a;
+    f.x() = 0.1;
+    //double energy = a*a*a*log(f.x()[0]);
+    //retval += check_functional_value("SPhi1", f, energy, 2e-11);
+    retval += f.run_finite_difference_test("SPhi1");
+    Vector z = f.get_rz();
+    for (int i=0; i<z.get_size(); i++) {
+      if (z[i] > 0) {
+        f.x()[i] *= 0.0001;
+      }
+    }
+    retval += f.run_finite_difference_test("SPhi1 inhomogeneous");
   }
-  if (run_failing_tests) {
+  if (run_slow_tests) {
     SPhi2 sphi2(Nx, Nx, Nx);
     sphi2.R() = 1;
     sphi2.kT() = 1;
@@ -149,7 +166,7 @@ int main(int, char **argv) {
     for (int i=0; i<Nx*Nx*Nx/2; i++) sphi2.x()[i] *= 0.1;
     retval += sphi2.run_finite_difference_test("SPhi2 inhomogeneous");
   }
-  if (run_failing_tests) {
+  if (run_slow_tests) {
     SPhi3 sphi3(Nx, Nx, Nx);
     sphi3.R() = 1;
     sphi3.kT() = 1;
@@ -179,7 +196,7 @@ int main(int, char **argv) {
     for (int i=0; i<Nx*Nx*Nx/2; i++) phi1.x()[i] *= 0.1;
     retval += phi1.run_finite_difference_test("Phi1 inhomogeneous");
   }
-  if (run_failing_tests) {
+  if (run_slow_tests) {
     Phi2 phi2(Nx, Nx, Nx);
     phi2.R() = 1;
     phi2.kT() = 1;
@@ -193,7 +210,7 @@ int main(int, char **argv) {
     for (int i=0; i<Nx*Nx*Nx/2; i++) phi2.x()[i] *= 0.1;
     retval += phi2.run_finite_difference_test("Phi2 inhomogeneous");
   }
-  if (run_failing_tests) {
+  if (run_slow_tests) {
     Phi3 phi3(Nx, Nx, Nx);
     phi3.R() = 1;
     phi3.kT() = 1;
@@ -222,6 +239,36 @@ int main(int, char **argv) {
       ep.V()[i] = i;
     }
     retval += ep.run_finite_difference_test("ExternalPotentialTest inhomogeneous");
+  }
+  if (run_slow_tests) {
+    HomogeneousSFMTFluid hf;
+    hf.R() = 1;
+    hf.V0() = 1;
+    hf.kT() = 0.001;
+    hf.n() = 0.3/(4*M_PI/3);
+    hf.mu() = 0;
+    hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
+
+    SFMTFluid f(2, 2, Nx);
+    f.a1() = a*2/Nx;
+    f.a2() = a*2/Nx;
+    f.a3() = a;
+    f.R() = hf.R();
+    f.V0() = hf.V0();
+    f.kT() = hf.kT();
+    f.n() = hf.n();
+    f.mu() = hf.mu();
+    f.Vext() = 0;
+    double energy = f.get_volume()*hf.energy();
+    retval += check_functional_value("SFMTFluid", f, energy, 2e-11);
+    //retval += f.run_finite_difference_test("SFMTFluid");
+    Vector z = f.get_rz();
+    for (int i=0; i<z.get_size(); i++) {
+      if (z[i] > 0) {
+        f.n()[i] *= 0.0001;
+      }
+    }
+    retval += f.run_finite_difference_test("SFMTFluid inhomogeneous");
   }
 
   if (retval == 0) {

@@ -50,8 +50,8 @@ int main(int, char **argv) {
   int retval = 0;
 
   const int Nx = 20;
-  const double R = 1.0, a = 5.0, kT = 1, nval = 0.1;
-  const double energy = 42.53522950699669281;
+  const double R = 1.0, a = 2.0, kT = 1, nval = 0.1;
+  const double energy = 2.72225468848892;
   printf("about to create input\n");
   WhiteBear wb(Nx, Nx, Nx);
   wb.R() = R;
@@ -65,6 +65,10 @@ int main(int, char **argv) {
   printf("n1 = %g\n", wb.get_n1()[0]);
   printf("n2 = %g\n", wb.get_n2()[0]);
   printf("n3 = %g\n", wb.get_n3()[0]);
+
+  for (int i=0;i<Nx*Nx*Nx/2;i++) wb.n()[i] = 0.1*nval;
+  //FIXME:  the following test OUGHT to pass, but currently fails.  :(
+  //retval += wb.run_finite_difference_test("WhiteBear");
 
   HomogeneousWhiteBear hwb;
   hwb.R() = R;
