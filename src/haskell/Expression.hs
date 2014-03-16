@@ -422,10 +422,9 @@ instance Type KSpace where
             setzero = case newcode $ setKequalToZero e of
                       "0.0" -> a ++ "[0]" ++ op ++ "0;\n"
                       k0newcode -> unlines ["{",
-                                         "\t\tconst int i = 0;",
-                                         "\t\t" ++ a ++ "[0]" ++ op ++ k0newcode ++ ";",
-                                         "\t\t" ++ a ++ "[1]" ++ op ++ "0;",
-                                         "\t}"]
+                                            "\t\tconst int i = 0;",
+                                            "\t\t" ++ a ++ "[0]" ++ op ++ k0newcode ++ ";",
+                                            "\t}"]
 
   newcodeStatementHelper _ _ _ = error "Illegal input to newcodeStatementHelper for kspace"
   initialize (Var IsTemp _ x _ Nothing) = "VectorXcd " ++ x ++ "(gd.NxNyNzOver2);"
