@@ -39,7 +39,7 @@ if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
-#arg ff = [0.1, 0.2, 0.3, 0.4]
+#arg ff = [0.1, 0.2, 0.3]
 
 plot_labels = ['a)', 'b)'] if ff == 0.1 else ['c)', 'd)']
 

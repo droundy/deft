@@ -39,7 +39,7 @@ if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + " ff")
     exit(1)
 ff = float(sys.argv[1])
-#arg ff = [0.1, 0.2, 0.3, 0.4]
+#arg ff = [0.3]
 
 def read_triplet_path(ff, fun):
   if fun == 'mc':
@@ -55,7 +55,6 @@ def read_triplet_path(ff, fun):
       data = loadtxt("figs/mc/triplet/tripletMC-%03.1f-path2-trimmed.dat" % ff)
     else:
       data = loadtxt(filename)
-  #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
   return data[:,0:4]
 
 def read_triplet_back(ff, fun):
@@ -69,7 +68,6 @@ def read_triplet_back(ff, fun):
     # input: "figs/triplet-back-inbetween-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-inbetween-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
-  #data[:,0:4][:,1] = data[:,0:4][:,1]*0 + 1 # fixme remove
   return data[:,0:4]
 
 def read_triplet(ff, fun):
