@@ -42,9 +42,14 @@ static void took(const char *name) {
 void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(1e-12);
-  min.set_maxiter(50);
+  min.set_maxiter(250);
+  min.set_miniter(6);
 
+  printf("======================================\n");
+  printf("| Working on eta = %g and kT = %g |\n", eta, kT);
+  printf("======================================\n");
   while (min.improve_energy(quiet)) {
+    //f->run_finite_difference_test("SFMT");
   }
   took("Doing the minimization");
   min.print_info();
@@ -61,8 +66,9 @@ void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   const int Nz = f->Nz();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
+  Vector n3 = f->get_n3();
   for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", rz[i] - spacing, n[i]);
+    fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]*(4*M_PI/3), n3[i]);
   }
   fclose(o);
 }
@@ -98,8 +104,8 @@ int main(int, char **) {
         const Vector rz = f.get_rz();
         for (int i=0; i<Ntot; i++) {
           if (fabs(rz[i]) < spacing) {
-            f.Vext()[i] = 100*temp; // this is "infinity" for our wall
-            f.Veff()[i] = -temp*log(1e-2*hf.n());
+            f.Vext()[i] = 10*temp; // this is "infinity" for our wall
+            f.Veff()[i] = -temp*log(hf.n());
           } else {
             f.Veff()[i] = -temp*log(hf.n());
           }
