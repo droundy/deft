@@ -117,6 +117,23 @@ int main(int, char **argv) {
       }
     }
     retval += f.run_finite_difference_test("Quadratic gaussian inhomogeneous");
+    f.x() = 0;
+    f.x()[0] = 1;
+    Vector g = f.get_gaussian();
+    Vector rx = f.get_rx();
+    Vector ry = f.get_ry();
+    Vector rz = f.get_rz();
+    const double norm = 1/(sqrt(M_PI)*sqrt(M_PI)*sqrt(M_PI));
+    for (int i=0; i<rx.get_size(); i++) {
+      double r = sqrt(rx[i]*rx[i] + ry[i]*ry[i] + rz[i]*rz[i]);
+      double expected = norm*exp(-r*r/2);
+      if (fabs(g[i] - expected) > 0.01) {
+        // retval += 1; FIXME!!!
+        printf("r = %g  g = %g vs should be %g\n", r, g[i], expected);
+      } else {
+        printf("****** r = %g  g = %g vs should be %g\n", r, g[i], expected);
+      }
+    }
   }
   if (run_slow_tests) {
     LogN0 L0(Nx, Nx, Nx);

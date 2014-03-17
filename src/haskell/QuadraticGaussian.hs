@@ -10,7 +10,8 @@ quadratic_gaussian = integrate $ 0.5*konst*(gaussian-meanval)**2
         konst = s_var "konst"
 
 gaussian :: Expression RealSpace
-gaussian = ifft ( gaussiank * fft x)
+gaussian = "gaussian" === ifft ( gaussiank * nk)
   where gaussiank = exp(-(k*sigma)**2/2)
         sigma = s_var "sigma"
         x = r_var "x"
+        nk = "nk" === fft x
