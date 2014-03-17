@@ -170,12 +170,13 @@ bool Minimize::improve_energy(Verbosity v) {
         double Ebest = E0;
         while (energy(v) <= Ebest) {
           Ebest = energy(v);
-          if (Ebest != E1 && v >= verbose) printf("\t\tQuad: si = %25.15g  Ei = %25.15g\n", step1, Ebest);
+          if (Ebest != E1 && v >= min_details)
+            printf("\t\tQuad: si = %25.15g  Ei = %25.15g\n", step1, Ebest);
           *f += step1*direction;
           invalidate_cache();
           step1 *= 2;
         }
-        if (v >= verbose) printf("\t\tQuad: sb = %25.15g  Eb = %25.15g\n", step1, energy(v));
+        if (v >= min_details) printf("\t\tQuad: sb = %25.15g  Eb = %25.15g\n", step1, energy(v));
         step1 *= 0.5;
         *f -= step1*direction;
         step = step1;
@@ -208,7 +209,7 @@ bool Minimize::improve_energy(Verbosity v) {
       step = step2; // output the stepsize for later reuse.
       invalidate_cache();
       *f += (step2-step1)*direction; // and move to the expected minimum.
-      if (v >= verbose) {
+      if (v >= min_details) {
         printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(v));
         fflush(stdout);
       }
@@ -273,6 +274,7 @@ bool Minimize::improve_energy(Verbosity v) {
 
   if (deltaE == 0 && old_deltaE == 0) {
     if (v >= verbose) printf("We got no change twice in a row, so we're done!\n");
+    if (iter < miniter) return true;
     return false;
   }
   if (!(error_estimate < precision) && !(error_estimate < relative_precision*fabs(newE))) {
@@ -291,6 +293,7 @@ bool Minimize::improve_energy(Verbosity v) {
     return true;
   } else {
     if (v >= verbose) printf("Converged with precision of %g!\n", error_estimate);
+    if (iter < miniter) return true;
     return false;
   }
 }

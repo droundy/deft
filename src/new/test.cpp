@@ -77,6 +77,7 @@ int main() {
     Minimize min(&sqr);
     const double prec = 1e-9;
     min.set_precision(prec);
+    min.set_miniter(0);
     printf("Starting energy is %g\n\n", min.energy());
     while (min.improve_energy(quiet)) {
     }
@@ -106,6 +107,7 @@ int main() {
     Minimize min(&sqr);
     const double prec = 1e-9;
     min.set_precision(prec);
+    min.set_miniter(0);
     min.precondition(true);
     printf("Starting energy is %g\n\n", min.energy());
     while (min.improve_energy(louder(min_details))) {

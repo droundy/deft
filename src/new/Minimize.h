@@ -15,6 +15,7 @@ public:
   Minimize(NewFunctional *myf) : f(myf) {
     iter = 0;
     maxiter = 10000000;
+    miniter = 6;
     num_energy_calcs = 0;
     num_grad_calcs = 0;
     precision = 0;
@@ -58,6 +59,9 @@ public:
   }
   void set_maxiter(int mx) {
     maxiter = mx;
+  }
+  void set_miniter(int mn) {
+    miniter = mn;
   }
   int get_iteration_count() const {
     return iter;
@@ -152,7 +156,7 @@ public:
   }
 private:
   NewFunctional *f;
-  int iter, maxiter;
+  int iter, maxiter, miniter;
 
   mutable int num_energy_calcs, num_grad_calcs;
   mutable Vector last_grad, last_pgrad;
