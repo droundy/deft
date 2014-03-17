@@ -1983,9 +1983,9 @@ lat2 = Vector 0 (s_var "a2") 0
 lat3 = Vector 0 0 (s_var "a3")
 
 
-rlat1 = (lat2 `cross` lat3) /. (lat1 `dot` (lat2 `cross` lat3))
-rlat2 = (lat3 `cross` lat1) /. (lat1 `dot` (lat2 `cross` lat3))
-rlat3 = (lat1 `cross` lat2) /. (lat1 `dot` (lat2 `cross` lat3))
+rlat1 = 2*pi .* (lat2 `cross` lat3) /. (lat1 `dot` (lat2 `cross` lat3))
+rlat2 = 2*pi .* (lat3 `cross` lat1) /. (lat1 `dot` (lat2 `cross` lat3))
+rlat3 = 2*pi .* (lat1 `cross` lat2) /. (lat1 `dot` (lat2 `cross` lat3))
 
 nameVector :: Type a => String -> Vector a -> Vector a
 nameVector n (Vector x y z) = Vector (nn "x" x) (nn "y" y) (nn "z" z)
