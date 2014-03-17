@@ -172,7 +172,8 @@ create3dMethods e variables n =
                 "a2() = ay;",
                 "a3() = az;"]
      }] ++ createAnydMethods e variables n
-        ++ map getIntermediate [("rx", ER rx), ("ry", ER ry), ("rz", ER rz)]
+        ++ map getIntermediate [("rx", ER rx), ("ry", ER ry), ("rz", ER rz), ("r", ER rmag),
+                                ("kx", EK kx), ("ky", EK ky), ("kz", EK kz), ("k", EK k)]
     where
       actualsize (ES _) = 1 :: Expression Scalar
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
