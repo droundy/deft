@@ -7,6 +7,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Definitions
 
+% 1/k_B/T
+\newcommand{\kt}{k_BT}
+
+% special values for n
+\newcommand{\npart}{n_{particular}}
+\newcommand{\nliq}{n_{liquid}}
+\newcommand{\nvap}{n_{vapor}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -41,17 +48,61 @@ Renormalization group (RG) theory is an iterative procedure that was
 developed to deal with large-scale fluctuations of the order parameter
 near the critical point of a system.
 
+The free energy density for each iteration is given by
+\[
+  f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)\ .
+\]
+
+The total free energy density is obtained when one takes the
+iterations to infinity and adds in the attractive component:
+\[
+  f(T,n) = \lim_{i \to \infty} f_i(T,n) + f_{att}(T,n)\ .
+\]
+
+The initial free energy density, $f_0$ depends on the liquid model of study. For this work, I use the square well model:
+\[
+  f_0(T,n) = f_{id}(T,n) + f_{HS}(T,n) + a_2^{SW}(T,n)\ ,
+\]
+where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kt$.~\cite{Gil-Villegas97}
+
+\subsection{Coexistence Curve Algorithm}
+Coexistence curves are found by modifying the chemical potential $\mu$
+in the grand free energy per volume $\Phi/V$. Grand free energy
+density is defined as
+\begin{align*}
+  \frac{\Phi}{V} &= \phi \\
+                 &= f(T,n) - n\mu \\
+                 &= f(T,n) - n\frac{d}{dn}f(T,\npart)\ .
+\end{align*}
+It is the value $\npart$ that we adjust to find coexistence curves.
+
+The grand free energy density generally has two distinct minima when
+plotted versus density. The liquid will be in liquid-vapor equilibrium
+when those minima have the same value for $\phi$. There is a local
+maximum between those minima, and the value of the density at that
+maximum is used for $\npart$. Find this value at a given temperature
+then plot $\phi$ vs $n$ at slightly higher temperature. Find the new
+value for $\npart$ such that the two minima have the same value for
+$\phi$. (It is helpful to note that if $\npart$ is increased,
+$\phi(\nliq)$ increases, and $\phi(\nliq)$ decreases if $\npart$ is
+decresed.) The program I wrote (npart.py) uses the previous
+temperature's $\npart$ as a ``first guess,'' maximizing
+$\phi(T,\npart)$. From there, the program adjusts $\npart$
+until $\phi(T,\nvap) = \phi(T,\nliq)$. When that condition is met, it
+uses this new value of $\npart$ as the ``first guess'' at the next
+higher temperature.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
 
-\includegraphics[width=\columnwidth]{figs/combined-coexistence-plot}
+% \includegraphics[width=\columnwidth]{figs/combined-coexistence-plot}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusion}
 
 \bibliographystyle{unsrt}
-\bibliography{refs}% Produces the bibliography via BibTeX.
+\bibliography{project} % Produces the bibliography via BibTeX.
 
 \end{document}
 

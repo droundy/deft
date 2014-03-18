@@ -41,7 +41,7 @@ da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
 # Total free energy per volume
 # NB: Gil-Villegas also includes a Chain term; we do not deal with chains, so I leave it off
 def f(T,n):
-    return fid(T,n) + fmono(T,n)
+    return fid(T,n) + fmono(T,n) + fhs(T,n)
 
 # Grand free energy per volume
 def phi(T,n,nparticular):
@@ -61,6 +61,34 @@ def df_dn(T,n):
 ## It only serves to add a constant to the free energy; we absorb this later into the chemical potential
 def fid(T,n):
     return n*k_B*T*(np.log(n) - 1)
+
+# Hard-sphere free energy
+# based on Hughes
+def fhs(T,n):
+    # Phi 1
+    Phi1 = -n0(n)*np.log(1-n3(n))
+
+    # Phi 2
+    Phi2 = (n1(n)*n2(n))/(1-n3(n))
+
+    # Phi 3
+    Phi3 = n2(n)**3*((n3(n)+(1-n3(n))**2*np.log(1-n3(n)))/(36*np.pi*n3(n)**2*(1-n3(n))**2))
+
+    # free energy
+    return k_B*T*(Phi1 + Phi2 + Phi3)
+
+# Fundamental measure densities
+def n0(n):
+    return n
+
+def n1(n):
+    return n*R
+
+def n2(n):
+    return n*R**2*4*np.pi
+
+def n3(n):
+    return n*R**3*(4/3)*np.pi
 
 # Monomer
 # Hughes calls this Dispersion, Gil-Villegas calls it Monomer

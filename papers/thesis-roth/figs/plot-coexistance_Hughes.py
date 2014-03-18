@@ -3,7 +3,7 @@
 import pylab
 
 # Read in data
-data = pylab.loadtxt('npart_Hughes-out.txt')
+data = pylab.loadtxt('npart_Hughes-out.dat')
 
 T = data[:,0]
 nvapor = data[:,1]
