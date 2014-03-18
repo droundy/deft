@@ -3,7 +3,8 @@ module C ( declare, Type(..), CFunction(..) ) where
 import Expression ( Code(..) )
 
 -- Type None means it is a constructor or destructor
-data Type = Void | Double | Int | Vector | ComplexVector | ConstCharPtr | None | Reference Type
+data Type = Void | Double | Int | Vector | ComplexVector | ConstCharPtr |
+            Bool | EnergyGradAndPrecond | None | Reference Type
 
 instance Code Type where
   codePrec _ Void = showString "void "
@@ -11,6 +12,8 @@ instance Code Type where
   codePrec _ Int = showString "int "
   codePrec _ Vector = showString "Vector "
   codePrec _ ComplexVector = showString "ComplexVector "
+  codePrec _ Bool = showString "bool "
+  codePrec _ EnergyGradAndPrecond = showString "EnergyGradAndPrecond "
   codePrec _ None = showString ""
   codePrec _ _ = error "codePrec Type incomplete"
   newcodePrec _ Void = showString "void "
@@ -18,6 +21,8 @@ instance Code Type where
   newcodePrec _ Int = showString "int "
   newcodePrec _ Vector = showString "Vector "
   newcodePrec _ ComplexVector = showString "ComplexVector "
+  newcodePrec _ Bool = showString "bool "
+  newcodePrec _ EnergyGradAndPrecond = showString "EnergyGradAndPrecond "
   newcodePrec _ None = showString ""
   newcodePrec _ ConstCharPtr = showString "const char *"
   newcodePrec _ (Reference Double) = showString "double &"
@@ -29,6 +34,8 @@ instance Code Type where
   latexPrec _ Int = showString "\\textrm{int}"
   latexPrec _ Vector = showString "\\textrm{Vector}"
   latexPrec _ ComplexVector = showString "\\textrm{ComplexVector}"
+  latexPrec _ Bool = showString "\\textrm{bool}"
+  latexPrec _ EnergyGradAndPrecond = showString "\\textrm{EnergyGradAndPrecond}"
   latexPrec _ None = showString ""
   latexPrec _ _ = error "latexPrec Type incomplete"
 

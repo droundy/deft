@@ -143,28 +143,29 @@ newgeneric_sources = Split(""" src/new/Minimize.cpp src/new/NewFunctional.cpp ""
 newgenerated_sources = []
 for name, module, hsfunctional, inputs in [
     # The following are just for testing purposes
-    ("ExternalPotentialTest", "ExternalPotentialTest", "external_potential", '[ER $ r_var "n"]'),
-    ("Quadratic", "Quadratic", "quadratic", '[ER $ r_var "x"]'),
-    ("QuadraticN0", "QuadraticN0", "quadratic_n0", '[ER $ r_var "x"]'),
-    ("QuadraticGaussian", "QuadraticGaussian", "quadratic_gaussian", '[ER $ r_var "x"]'),
-    ("LogN0", "LogN0", "log_n0", '[ER $ r_var "x"]'),
-    ("Phi1", "WhiteBear", "kTphi1", '[ER $ r_var "x"]'),
-    ("Phi2", "WhiteBear", "kTphi2", '[ER $ r_var "x"]'),
-    ("Phi3", "WhiteBear", "kTphi3", '[ER $ r_var "x"]'),
-    ("SPhi1", "SFMT", "phi1", '[ER $ r_var "x"]'),
-    ("SPhi2", "SFMT", "phi2", '[ER $ r_var "x"]'),
-    ("SPhi3", "SFMT", "phi3", '[ER $ r_var "x"]'),
+    ("ExternalPotentialTest", "ExternalPotentialTest", "external_potential", '[(ER $ r_var "n", ER 1)]'),
+    ("Quadratic", "Quadratic", "quadratic", '[(ER $ r_var "x", ER 1)]'),
+    ("QuadraticN0", "QuadraticN0", "quadratic_n0", '[(ER $ r_var "x", ER 1)]'),
+    ("QuadraticGaussian", "QuadraticGaussian", "quadratic_gaussian", '[(ER $ r_var "x", ER 1)]'),
+    ("LogN0", "LogN0", "log_n0", '[(ER $ r_var "x", ER 1)]'),
+    ("Phi1", "WhiteBear", "kTphi1", '[(ER $ r_var "x", ER 1)]'),
+    ("Phi2", "WhiteBear", "kTphi2", '[(ER $ r_var "x", ER 1)]'),
+    ("Phi3", "WhiteBear", "kTphi3", '[(ER $ r_var "x", ER 1)]'),
+    ("SPhi1", "SFMT", "phi1", '[(ER $ r_var "x", ER 1)]'),
+    ("SPhi2", "SFMT", "phi2", '[(ER $ r_var "x", ER 1)]'),
+    ("SPhi3", "SFMT", "phi3", '[(ER $ r_var "x", ER 1)]'),
     # The rest are "real" functionals of sorts
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
-    ("WhiteBear", "WhiteBear", "whitebear_n", '[ER $ r_var "n"]'),
-    ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[ER $ r_var "n"]'),
-    ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[ER $ r_var "n"]'),
-    ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff", '[ER $ r_var "Veff"]'),
+    ("WhiteBear", "WhiteBear", "whitebear_n", '[(ER $ r_var "n", ER 1)]'),
+    ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[(ER $ r_var "n", ER 1)]'),
+    ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[(ER $ r_var "n", ER 1)]'),
+    ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
+           '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
-    ("HomogeneousWaterSaftByHand", "WaterSaft", "homogeneous_water_saft_by_hand_n", '[ES $ s_var "n"]')]:
+    ("HomogeneousWaterSaftByHand", "WaterSaft", "homogeneous_water_saft_by_hand_n", '[]')]:
     # I'm sloppy and just recreate the generate_%s.hs files every time
     f = open('src/haskell/generate_%s.hs' % name, "w")
     f.write("""import NewCode
@@ -409,11 +410,12 @@ for mkdat in Split("""
                       source = [mkdat + '.cpp'] + generic_sources + newgeneric_sources +
                       ['src/new/SFMTFluidFast.cpp',
                        'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
-env.Command(target = ["papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat" % (ff, kT)
-                      for kT in [0.01, 0.02, 0.03]
-                      for ff in [0.1, 0.2, 0.3, 0.4]],
-            source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
-            action = './$SOURCE')
+# rules for how to run fuzzy-fmt/figs/new-walls.mkdat:
+for kT in [0.00001, 0.0001, 0.001, 0.01, 0.02, 0.03]:
+    for ff in [0.1, 0.2, 0.3, 0.4]:
+        env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%08.5g.dat" % (ff, kT),
+                    source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
+                    action = './$SOURCE %g %g' % (ff, kT))
 
 env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',

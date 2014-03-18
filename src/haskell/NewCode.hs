@@ -12,11 +12,11 @@ import Expression
 import Optimize ( optimize )
 import qualified Data.Set as Set
 
-defineFunctional :: Expression Scalar -> [Exprn] -> String -> String
+defineFunctional :: Expression Scalar -> [(Exprn, Exprn)] -> String -> String
 defineFunctional e variables n = createHeader e n ++ implementation
   where implementation = unlines $ drop 4 $ lines $ createCppFile e variables n ""
 
-createHeaderAndCppFiles :: Expression Scalar -> [Exprn] -> String -> IO ()
+createHeaderAndCppFiles :: Expression Scalar -> [(Exprn, Exprn)] -> String -> IO ()
 createHeaderAndCppFiles functional inputs cname =
   do let fn = "new/" ++ cname ++ "Fast"
      writeFile ("src/"++fn++".h") $ createHeader functional cname
@@ -117,7 +117,7 @@ create0dHeader e0 n =
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
 
 
-createCppFile :: Expression Scalar -> [Exprn] -> String -> String -> String
+createCppFile :: Expression Scalar -> [(Exprn, Exprn)] -> String -> String -> String
 createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
                                                     "",
                                                     "#include \"" ++ headername ++ "\"",
@@ -129,7 +129,7 @@ createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
                   then create3dMethods e variables n
                   else create0dMethods e variables n
 
-create0dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+create0dMethods :: Expression Scalar -> [(Exprn, Exprn)] -> String -> [CFunction]
 create0dMethods e variables n =
   [CFunction {
      name = n++"::"++n,
@@ -144,7 +144,7 @@ create0dMethods e variables n =
       actualsize (ER _) = s_var "myNx" * s_var "myNy" * s_var "myNz"
       actualsize (EK _) = error "need to compute size of EK in actualsize of NewCode"
 
-create3dMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+create3dMethods :: Expression Scalar -> [(Exprn, Exprn)] -> String -> [CFunction]
 create3dMethods e variables n =
   [CFunction {
      name = n++"::"++n,
@@ -195,7 +195,7 @@ createInput ee@(ES _) = "double " ++ nameE ee ++ " = data[sofar]; sofar += 1;"
 createInput ee@(ER _) = "Vector " ++ nameE ee ++ " = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;"
 createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
 
-createAnydMethods :: Expression Scalar -> [Exprn] -> String -> [CFunction]
+createAnydMethods :: Expression Scalar -> [(Exprn, Exprn)] -> String -> [CFunction]
 createAnydMethods e variables n =
   [CFunction {
       name = n++"::true_energy",
@@ -211,7 +211,34 @@ createAnydMethods e variables n =
      returnType = Vector,
      constness = "const",
      args = [],
-     contents = evalv grade
+     contents = ["Vector output(data.get_size());",
+                 "output = 0;"]++
+                "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
+                [newcodeStatements grade,
+                 "return output;"]
+     },
+   CFunction {
+     name = n++"::have_preconditioner",
+     returnType = Bool,
+     constness = "const",
+     args = [],
+     contents = ["return true;"]
+     },
+   CFunction {
+     name = n++"::energy_grad_and_precond",
+     returnType = EnergyGradAndPrecond,
+     constness = "const",
+     args = [],
+     contents = ["EnergyGradAndPrecond egp;",
+                 "egp.energy = energy();",
+                 "egp.grad = grad();",
+                 "egp.precond = Vector(data.get_size());",
+                 "egp.precond = egp.grad;",
+                 "Vector output(egp.precond); // output is identical to egp.precond",
+                  "output = 0;"]++
+                  "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
+                  [newcodeStatements precond,
+                   "return egp;"]
      },
    CFunction {
       name = n++"::printme",
@@ -265,7 +292,7 @@ createAnydMethods e variables n =
                                       "Vector grad_" ++ nameE ee ++ " = output.slice(sofar,Nx*Ny*Nz);",
                                       "sofar += Nx*Ny*Nz;"]
       createInputAndGrad ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
-      the_gradients = map (mapExprn (\x -> ("grad_"++nameE (mkExprn x), mkExprn $ derive x 1 e))) variables
+      the_gradients = map (mapExprn (\x -> ("grad_"++nameE (mkExprn x), mkExprn $ derive x 1 e))) (map fst variables)
       grade :: [Statement]
       grade = if variables == []
               then []
@@ -275,15 +302,23 @@ createAnydMethods e variables n =
                                  isns _ = False
                                  ns = findNamedScalars e
                              in reuseVar $ freeVectors $ st ++ zipWith Assign (map varn the_gradients) es
+      precond :: [Statement]
+      precond = if variables == []
+                then []
+                else case optimize $ map snd variables of
+                  (st0, es) -> let st = filter (not . isns) st0
+                                   isns (Initialize (ES (Var _ _ s _ Nothing))) = Set.member s ns
+                                   isns _ = False
+                                   ns = findNamedScalars e
+                                   precondme (ER v) (ER p)
+                                     | p == 1 = []
+                                     | otherwise = [Assign (ER v) (ER $ v / p)]
+                                   precondme _ _ = []
+                               in reuseVar $ freeVectors $ st ++
+                                             concat (zipWith precondme (map varn the_gradients) es)
       varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
       varn (vnam, ER _) = ER $ Var CannotBeFreed (vnam++"[i]") vnam vnam Nothing
       varn (_, EK _) = error "unhandled type k-space in varn"
-      evalv :: [Statement] -> [String]
-      evalv st = ["Vector output(data.get_size());",
-                  "output = 0;"]++
-                  "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
-                  [newcodeStatements st,
-                   "return output;"]
 
 eval_scalar :: Expression Scalar -> [Statement]
 eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']

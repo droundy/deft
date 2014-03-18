@@ -105,7 +105,7 @@ bool Minimize::improve_energy(Verbosity v) {
       // improve things.  Or possibly we're at the minimum to numerical
       // precision.
       if (v >= verbose) {
-        printf(" which means we've arrived at the minimum!\n");
+        printf("\nslope = %g which means we've arrived at the minimum!\n", slope);
         fflush(stdout);
       }
       return false;
@@ -253,7 +253,7 @@ bool Minimize::improve_energy(Verbosity v) {
   const double newE = energy(v);
   deltaE = newE - E0;
   
-  const double w = 0.1; // weighting for windowed average
+  const double w = 0.01; // weighting for windowed average
   dEdn = (1-w)*dEdn + w*deltaE;
   dEdn = max(deltaE, old_deltaE);
 
@@ -272,6 +272,9 @@ bool Minimize::improve_energy(Verbosity v) {
 
   error_estimate = 2*error_guess; // Just a bit of paranoia...
 
+  if (known_true_energy && v >= verbose) {
+    printf("True error is:  %10g\n", energy() - known_true_energy);
+  }
   if (deltaE == 0 && old_deltaE == 0) {
     if (v >= verbose) printf("We got no change twice in a row, so we're done!\n");
     if (iter < miniter) return true;

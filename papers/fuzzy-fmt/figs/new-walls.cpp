@@ -41,9 +41,11 @@ static void took(const char *name) {
 
 void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
-  min.set_relative_precision(1e-12);
+  min.set_relative_precision(0);
   min.set_maxiter(250);
   min.set_miniter(6);
+  min.precondition(false); // FIXME:  preconditioning is buggy
+  if (eta == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243168271e-07);
 
   printf("======================================\n");
   printf("| Working on eta = %g and kT = %g |\n", eta, kT);
@@ -73,48 +75,48 @@ void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   fclose(o);
 }
 
-int main(int, char **) {
-  FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
-  fclose(fout);
-  const double temps[] = { 0.01, 0.02, 0.03 };
-  for (double eta = 0.4; eta > 0.05; eta-=0.1) {
-    for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-      const double temp = temps[i];
-      HomogeneousSFMTFluid hf;
-      hf.R() = 1;
-      hf.V0() = 1;
-      hf.kT() = temp;
-      hf.n() = eta/(4*M_PI/3);
-      hf.mu() = 0;
-      hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
-      printf("bulk energy is %g\n", hf.energy());
-      //hf.printme("XXX:");
-      printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
+int main(int argc, char **argv) {
+  double eta, temp;
+  if (argc != 3) {
+    printf("usage: %s eta kT\n", argv[0]);
+    return 1;
+  }
+  sscanf(argv[1], "%lg", &eta);
+  sscanf(argv[2], "%lg", &temp);
 
-      SFMTFluidVeff f(dw, dw, width + spacing, dx);
-      f.R() = hf.R();
-      f.V0() = hf.V0();
-      f.kT() = hf.kT();
-      f.Veff() = 0;
-      f.mu() = hf.mu();
-      f.Vext() = 0;
+  HomogeneousSFMTFluid hf;
+  hf.R() = 1;
+  hf.V0() = 1;
+  hf.kT() = temp;
+  hf.n() = eta/(4*M_PI/3);
+  hf.mu() = 0;
+  hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
+  printf("bulk energy is %g\n", hf.energy());
+  //hf.printme("XXX:");
+  printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
 
-      {
-        const int Ntot = f.Nx()*f.Ny()*f.Nz();
-        const Vector rz = f.get_rz();
-        for (int i=0; i<Ntot; i++) {
-          if (fabs(rz[i]) < spacing) {
-            f.Vext()[i] = 10*temp; // this is "infinity" for our wall
-            f.Veff()[i] = -temp*log(hf.n());
-          } else {
-            f.Veff()[i] = -temp*log(hf.n());
-          }
-        }
+  SFMTFluidVeff f(dw, dw, width + spacing, dx);
+  f.R() = hf.R();
+  f.V0() = hf.V0();
+  f.kT() = hf.kT();
+  f.Veff() = 0;
+  f.mu() = hf.mu();
+  f.Vext() = 0;
+
+  {
+    const int Ntot = f.Nx()*f.Ny()*f.Nz();
+    const Vector rz = f.get_rz();
+    for (int i=0; i<Ntot; i++) {
+      if (fabs(rz[i]) < spacing) {
+        f.Vext()[i] = 10*temp; // this is "infinity" for our wall
+        f.Veff()[i] = 10*temp - temp*log(hf.n());
+      } else {
+        f.Veff()[i] = -temp*log(hf.n());
       }
-      printf("my energy is %g\n", f.energy());
-
-      run_walls(eta, &f, temp);
     }
   }
+  printf("my energy is %g\n", f.energy());
+
+  run_walls(eta, &f, temp);
   return 0;
 }

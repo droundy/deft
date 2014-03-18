@@ -21,6 +21,7 @@ public:
     precision = 0;
     
     last_energy = 0;
+    known_true_energy = 0;
 
     use_preconditioning = false;
     use_conjugate_gradient = false;
@@ -65,6 +66,9 @@ public:
   }
   int get_iteration_count() const {
     return iter;
+  }
+  void set_known_true_energy(double e) {
+    known_true_energy = e;
   }
   void precondition(bool u) {
     use_preconditioning = u;
@@ -173,4 +177,5 @@ private:
 
   double precision, relative_precision, deltaE, dEdn, log_dEdn_ratio_average;
   double error_estimate;
+  double known_true_energy; // used for checking how well the minimization is working
 };
