@@ -264,17 +264,10 @@ legendloc = 'lower left' if ff < 0.2 else 'upper left'
 xplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 
-
-
-
-
-
-
-
-
-
-text(2.1, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
-text(2.1, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(2.1, -3.8, styles.title['this-work'],
+     path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(2.1, 3.5, styles.title['mc'],
+     path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 xs = [0, 0]
 ys = [ymax, rpath]
