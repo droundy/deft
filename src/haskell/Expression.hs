@@ -399,9 +399,7 @@ instance Type KSpace where
                                                  code (zhat `dot` k_i) ++ ");",
              newcodes (1 :: Int) e,
              "\t}"]
-      where k_i = cleanvec $ s_var "_x" / s_var "Nx" .* rlat1 +
-                             s_var "_y" / s_var "Ny" .* rlat2 +
-                             s_var "_z" / s_var "Nz" .* rlat3
+      where k_i = cleanvec $ s_var "_x" .* rlat1 + s_var "_y" .* rlat2 + s_var "_z" .* rlat3
             cleanvec (Vector ea eb ec) = vector (cleanvars ea) (cleanvars eb) (cleanvars ec)
             newcodes n x = case findRepeatedSubExpression x of
               MB (Just (_,x')) ->

@@ -48,7 +48,7 @@ void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   printf("======================================\n");
   printf("| Working on eta = %g and kT = %g |\n", eta, kT);
   printf("======================================\n");
-  while (min.improve_energy(quiet)) {
+  while (min.improve_energy(verbose)) {
     //f->run_finite_difference_test("SFMT");
   }
   took("Doing the minimization");
