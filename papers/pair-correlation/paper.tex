@@ -49,7 +49,7 @@
 % all the terms that should be non-local being non-local.
 \newcommand\saftnonlocaldft{}
 
-The standard approach in liquid state theory is to treat a liquid as a
+The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
 treated perturbatively~\cite{hansen2006theory}.  Recent advances have
 extended these perturbative approaches to inhomogeneous density
@@ -80,12 +80,12 @@ functional~\cite{gloor2007prediction, jain2007modified}.
 
 At its core, thermodynamic perturbation theory---sometimes referred to
 as the cluster, or high-temperature expansion---is an expansion of the
-free energy in powers of a small parameter, which typically is a
+free energy in powers of a small parameter, which is typically a
 pairwise attractive interaction:
 \begin{align}
   F &= F_0 + F_1 + \beta F_2 + \mathcal{O}(\beta^2)
 \end{align}
-where the terms $F_n$ are corrections to the free energy at order $n$
+where the terms $F_n$ are corrections to the free energy of order $n$
 in the small interaction.  The first and largest term in this
 expansion is
 \begin{align}
@@ -96,11 +96,19 @@ expansion is
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
-In this paper, we will introduce an approximation for the hard-sphere
-pair distribution function which is suitable for use in the creation
-of classical density functionals based on a cluster expansion.
+In this paper, we will introduce the contact value approximation (CVA)
+for the hard-sphere pair distribution function which is suitable for
+use in the creation of classical density functionals based on a
+cluster expansion. We will then introduce the separable contact value
+approximation (CVA-S), which is based on a radial distribution
+function that is separable in terms of position and local
+density.\pahosays{this could be phrased better, not quite sure the
+  best way}
 
 \section{Theoretical approaches}
+\pahosays{retitle this ``Past theoretical approaches'' or ``current
+  theoretical approaches'' or something to show that ours isn't
+  included?}
 
 The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
@@ -179,12 +187,11 @@ density over a spherical volume:
 \begin{align}
   n_3(\rr) = \int n(\rr')\Theta(\tfrac12 \sigma - |\rr-\rr'|) d\rr'
 \end{align}
-where $\sigma$ is the hard-sphere diameter.  Equation~\ref{eq:fischer}
-is computationally awkward, because it treats as special the midpoint
-$\tfrac12(\rr_1+\rr_2)$.  Moreover, the approach of Fischer and
-Methfessel is intended to approximate the pair distribution function only
-at contact, when the distance between $\rr_1$ and $\rr_2$ is the hard-sphere
-diameter.
+Equation~\ref{eq:fischer} is computationally awkward, because it
+treats as special the midpoint $\tfrac12(\rr_1+\rr_2)$.  Moreover, the
+approach of Fischer and Methfessel is intended to approximate the pair
+distribution function only at contact, when the distance between
+$\rr_1$ and $\rr_2$ is the hard-sphere diameter.
 
 Sokolowski and Fischer addressed the shortcomings of the theory of
 Fischer and Methfessel by modifying this approach to use
@@ -226,12 +233,12 @@ We use the contact-value theorem to derive the exact formula:
 \end{align}
 where $\sigma(\rr)$ is the diameter of hard spheres located at
 position $\rr$, and $A$ is the Helmholtz free energy of the
-hard-sphere fluid.  Our approximation is obtained by using the White
-Bear functional for Helmholtz free energy of the hard-sphere
-fluid~\cite{roth2002whitebear} in Eq.~\ref{eq:gsigma-exact}.  This
-provides an excellent approximation for this averaged value of the
-pair distribution function for a variety of interfaces, and over a
-wide range of densities.
+hard-sphere fluid.  The contact value approximation is obtained by
+using the White Bear functional for Helmholtz free energy of the
+hard-sphere fluid~\cite{roth2002whitebear} in
+Eq.~\ref{eq:gsigma-exact}.  This provides an excellent approximation
+for this averaged value of the pair distribution function at contact
+for a variety of interfaces, and over a wide range of densities.
 
 \section{Contact value approximation}
 %% We approximate the pair correlation with the average of two radial
@@ -247,10 +254,10 @@ our averaged $g_{\sigma}(\rr)$ discussed above, which holds more
 information about an inhomogeneous system than does a simple
 convolution of the density.
 %
-We approximate the pair correlation with the average of two radial
-distribution functions, evaluated at the distance between the two
-points, that are themselves functions of the averaged pair correlation
-at contact $g_{\sigma}(\rr)$ evaluated at the two points:
+We construct the CVA with the average of two radial distribution
+functions, evaluated at the distance between the two points, that are
+themselves functions of the averaged pair correlation at contact
+$g_{\sigma}(\rr)$ evaluated at the two points:
 %
 %% We therefore seek a function form
 %% for our radial distribution that is dependent upon $g_{\sigma}(\rr)$
@@ -261,18 +268,23 @@ at contact $g_{\sigma}(\rr)$ evaluated at the two points:
     g(|r_{12}|, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
 $g^{(2)}(\rr_1,\rr_2)$ above is constructed to reproduce the exact
-value for the integral$ \int n(\rr_1)n(\rr_2)
-g^{(2)}(\rr_1,\rr_2)\delta(|\rr_1-\rr_2|-\sigma)d\rr_1d\rr_2$.  \par
-The approximation described in Eq.~\ref{eq:g2-our-mean} requires the
-radial distribution function as a function of $r$ and $g_\sigma$.  One
-approach to constructing $g(r,g_\sigma)$ is to compute $\eta$ from
-$g_\sigma$ and then find $g(r,\eta)$ either using some approximate
-functional form (e.g. Percus-Yevick) or using Monte Carlo simulation
-results.  In this paper we first use the Monte Carlo results (which
-are also used in evaluating the approximations of earlier works), and
-refer to this approximation (which has an exact $g(r,g_\sigma)$) as
-the ``contact value approximation'' (CVA).  \fixme{Should we mention
-  this earlier?}
+value for the integral:
+\begin{align}
+  \label{eq:1}
+  \int n(\rr_1)n(\rr_2)g_{HS}^{(2)}(\rr_1,\rr_2)\Phi(|\rr_1 -
+  \rr_2|-\sigma)d\rr_1d\rr_2
+\end{align}
+\pahosays{give this integral a name so it's an equation?}
+\par
+The CVA requires the radial distribution function as a function of $r$
+and $g_\sigma$.  One approach to constructing $g(r,g_\sigma)$ is to
+compute $\eta$ from $g_\sigma$ and then find $g(r,\eta)$ either using
+some approximate functional form (e.g. Percus-Yevick) or using Monte
+Carlo simulation results.  In this paper we first use the Monte Carlo
+results (which are also used in evaluating the approximations of
+earlier works). We then use an approximation to the radial
+distribution function that is separable in terms of $r$ and
+$g_\sigma$.
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
@@ -282,20 +294,21 @@ the ``contact value approximation'' (CVA).  \fixme{Should we mention
 
 \section{Separable radial distribution function for the CVA}
 
-The contact value approximation (described in
-Eq.~\ref{eq:g2-our-mean}) is reasonably accurate, but cannot be
-computed efficiently with single-center convolutions as written.  In
-order to ease computational application of this pair distribution
-function in classical density functionals, we have developed a
-separable appoximation for the function $g(r,g_\sigma)$.
+The CVA is reasonably accurate, but cannot be computed efficiently
+with single-center convolutions as written.  In order to ease
+computational application of this pair distribution function in
+classical density functionals, we have developed a separable
+approximation for the function $g(r,g_\sigma)$:
+
+\pahosays{would it make sense to call this $g_s(r,g_\sigma)$ or
+  something similar?}
 \begin{align}
   g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
 This separable contact value approximation (CVA-S) allows the mean
 field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
 computed with only single-center convolutions, which can be
-efficiently computed using fast Fourier transforms.  \fixme{Comb paper
-  for places to say CVA-S and CVA.}
+efficiently computed using fast Fourier transforms.
 
 %% We construct our function's form in terms of an expansion of powers of
 %% $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
@@ -336,24 +349,25 @@ efficiently computed using fast Fourier transforms.  \fixme{Comb paper
     our fit.}\label{fig:radial-distribution}
 \end{figure}
 
-We construct $g(r, g_\sigma)$ to satisfy several constraints.  Naturally,
+We construct $g(r, g_\sigma)$ to satisfy several constraints.
+Naturally, we match the value at contact:
 \begin{equation}
   g(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
 A second constraint applies to the integral of the total correlation
-function
+function, $h(r) = g(r) - 1$:
 \begin{align}
   1 + n\int h(r)d\rr &= nkT\chi_T \label{eq:total-constraint}
 \end{align}
-where $h(r) = g(r) - 1$ is the total correlation function.
-A final constraint is that the slope of the radial distribution
-function at contact is given to a very good approximation by
+We have found that the slope of the radial distribution function at
+contact is given to a very good approximation by:
 \begin{align}
-  g'(\sigma) \approx - g_\sigma (g_\sigma - 1).
+  g'(\sigma) \approx - g_\sigma (g_\sigma - 1)
 \end{align}
+and we apply this as a final constraint.\par
 Under these three constraints, we applied a least-squares fit to
 simulation data for the radial distribution function at packing
-fractions from 0.05 to 0.4 by steps of 0.05.  Our fitted radial
+fractions from 0.05 to 0.4 in steps of 0.05.  Our fitted radial
 distribution function is given by
 \begin{multline}
   g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
@@ -389,17 +403,15 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
-\newcommand\paircaption{The pair distribution function near a hard wall, with
-  packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the hard wall.
-  On the left is a 2D plot of $g^{(2)}(\rr_1,\rr_2)$ as $\rr_2$ varies.  The top
-  half of this figure shows the result of the Monte Carlo simulation, while the
-  bottom half shows the result of the appproximation developed in this work.  On
-  the right is a plot of $g^{(2)}(\rr_1,\rr_2)$ on the path illustrated in the
-  figure to the left.  This plot compares the Monte Carlo results (black) with
-  those of this work (blue), Sokolowski and Fischer
-  (red)~\cite{sokolowski1992role}, and Fischer and Methfessel
-  (green)~\cite{fischer1980born}.  The latter is only plotted at contact, where
-  it is defined.  }
+\newcommand{\plotcomp}[1]{The top halves of these figures show the
+  results of Monte Carlo simulations, while the bottom halves show the
+  CVA-S.  On the right are plots of #1 on the paths illustrated in the
+  figures to the left.  These plots compare the CVA-S (blue) and CVA
+  (\fixme{color: change from black?}) with Monte Carlo results (black)
+  and the results of Sokolowski and Fischer
+  (red)~\cite{sokolowski1992role}, and those of Fischer and Methfessel
+  (green)~\cite{fischer1980born}.  The latter is only plotted at
+  contact, where it is defined}
 
 \section{Results}
 
@@ -412,7 +424,10 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
     \includegraphics[width=\linewidth]{figs/pair-correlation-pretty-3.pdf}
     \vspace{-0.6cm}
   \end{subfigure}
-  \caption{\paircaption}
+  \caption{The pair distribution function near a hard wall, with
+    packing fractions of 0.1 and 0.3 and $\rr_1$ in contact with the
+    hard wall.  On the left are 2D plots of $g^{(2)}(\rr_1,\rr_2)$ as
+    $\rr_2$ varies. \plotcomp{$g^{(2)}(\rr_1,\rr_2)$}.}
   \label{fig:pair-distribution}
 \end{figure*}
 
@@ -433,28 +448,28 @@ distances.  The maximum error in $g(r)$ at packing fractions up to
 
 We begin by examining the pair distribution function near a hard wall,
 with a focus on the case where one of the two spheres is in contact
-with the hard wall.  Figures~\ref{fig:pair-distribution}a,\ref{fig:pair-distribution}b
-and Figures~\ref{fig:pair-distribution}c,\ref{fig:pair-distribution}d compare the results of our
-approximate functional with Monte Carlo simulation at packing
-fractions of 0.1 and 0.3 respectively.  We see reasonable agreement at
-the lower density, with some reduced oscillations at larger distances,
-and a flatter angular dependence when the two spheres are in contact.
-At the higher density, we see significant structure developing in the
-simulation results that is not reflected in our approximation.
+with the hard wall.  Figures~\ref{fig:pair-distribution}a
+and~\ref{fig:pair-distribution}c compare the results of the CVA-S with
+Monte Carlo simulation at packing fractions of 0.1 and 0.3
+respectively. We see reasonable agreement at the lower density, with
+some reduced oscillations at larger distances, and a flatter angular
+dependence when the two spheres are in contact.  At the higher
+density, we see significant structure developing in the simulation
+results that is not reflected in our approximation.
 
 Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
-show the pair distribution function as plotted along paths
-illustrated in Figures~\ref{fig:pair-distribution}a and
-\ref{fig:pair-distribution}c.  These plots compare this work with
-Monte Carlo results, as well as the approximations of Sokolowski and
-Fischer~\cite{sokolowski1992role} and that of Fischer and
+show the pair distribution function as plotted along paths illustrated
+in Figures~\ref{fig:pair-distribution}a
+and~\ref{fig:pair-distribution}c.  These plots compare the CVA and
+CVA-S with Monte Carlo results, as well as the approximations of
+Sokolowski and Fischer~\cite{sokolowski1992role} and of Fischer and
 Methfessel~\cite{fischer1980born} at packing fractions of 0.1 and 0.3.
 The approach of Fischer and Methfessel is only defined when the two
 spheres are in contact, and is therefore only plotted on that segment
-of the path.  As an input to both previous approximations we use the
-hard sphere radial distribution function found with Monte Carlo
-simulation, interpolated as necessary.  We find that both previous
-approximations to the pair distribution function predict the
+of the path.  As an input to both previous approximations and to the
+CVA, we use the hard sphere radial distribution function found with
+Monte Carlo simulation, interpolated as necessary. We find that both
+previous approximations to the pair distribution function predict the
 qualitative angular dependence of the pair distribution function at
 contact better than this work.  However, in each case the pair
 distribution function has a systematic error at contact---either too
@@ -466,79 +481,79 @@ distribution function at densities significantly higher than the
 freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points are
 more than a radius away from contact, we find that any of these
-approaches gives a reasonable prediction, with our approach
+approaches gives a reasonable prediction, with the CVA-S
 underestimating the oscillations in $g^{(2)}$, as expected based on
 the fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
 
 \begin{figure*}
-  \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}\\
+  \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-contact-3.pdf}
+\\
   \includegraphics[width=\textwidth]{figs/triplet-correlation-pretty-inbetween-3.pdf}
-  \caption{\fixme{Make note of the double curves}\fixme{Add backward curve for
-      this work mc?}The triplet distribution function
-    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when $\rr_1$
-    and $\rr_2$ are in contact.  The color plot on the left shows the triplet
-    distribution function, with white corresponding to the contact value of the
-    \emph{pair} distribution function.  The plot on the right shows the value of
-    $g^{(3)}$ along the path shown as a dotted line on the plot to the
-    left.}\label{fig:triplet-contact-distribution}
+  \caption{The triplet distribution function
+    $g^{(3)}(\rr_1,\rr_2,\rr_3)$ at packing fraction 0.3, plotted when
+    $\rr_1$ and $\rr_2$ are in contact (a,b) and when $\rr_1$ and
+    $\rr_2$ are separated by a distance $2.1\sigma$ (c,d). On the left
+    are 2D plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ as $\rr_3$
+    varies. \plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}. Note that an
+    asymmetry is introduced in the theoretical results, so their
+    values along a mirrored path are also shown, with arrows along the
+    curve indicating the path
+    direction.} \label{fig:triplet-contact-distribution}
 \end{figure*}
 
 Just as the radial distribution function of a homogeneous fluid may be
 computed from the density of an inhomogeneous one using Percus'
 test-particle trick, the triplet distribution function of a
 homogeneous system can be computed using an approximation of the pair
-distribution for an inhomogeneous fluid, such as we have developed.
+distribution for an inhomogeneous fluid, such as we have
+developed. The triplet distribution function of a homogeneous fluid
+with density $n$ is given by:
 \begin{multline}
     g^{(3)}(\rr_1,\rr_2,\rr_3) =\\
     \frac{n_{\textrm{TP}(\rr_1)}(\rr_2)
       n_{\textrm{TP}(\rr_1)}(\rr_3)}{n^2}
     g^{(2)}_{\textrm{TP}(\rr_1)}(\rr_2,\rr_3)
 \end{multline}
-where $g^{(3)}(\rr_1,\rr_2,\rr_3)$ is the triplet distribution
-function of a homogeneous fluid with density $n$, and the
-$\textrm{TP}(\rr_1)$ subscript indicates quantities computed for the
-inhomogeneous density configuration in which one sphere is fixed at
-position $\rr_1$.  This method treats one of the three positions---the
-location of the test particle---differently from the others, which
-means that a poor approximation to the pair distribution function may
-beak the symmetry which is present in the true triplet distribution
-function.
+where the $\textrm{TP}(\rr_1)$ subscript indicates quantities computed for
+the inhomogeneous density configuration in which one sphere is fixed
+at position $\rr_1$.  This method treats one of the three
+positions---the location of the test particle---differently from the
+others, which means that a poor approximation to the pair distribution
+function may beak the symmetry which is present in the true triplet
+distribution function.
 
 Figure~\ref{fig:triplet-contact-distribution} compares the triplet
-distribution function at a packing fraction of 0.3 computed using our
-approximation to $g^{(2)}$ with results from Monte Carlo simulation.
-In each subfigure, $\rr_1$ and $\rr_2$ are held fixed, while the third
-position $\rr_3$ is varied.  The test-particle position in each case
-is $\rr_1$, which is on the left-hand side of the figure.  In the
-color plot on the left, the first and second spheres are displayed in
-grey.  On the bottom half of
-figures~\ref{fig:triplet-contact-distribution}a and
-\ref{fig:triplet-contact-distribution}c is the triplet distribution
-function as computed using the approximation presented in this work.
-The top half of those figures displays the triplet distribution
-function from Monte Carlo.
-Figures~\ref{fig:triplet-contact-distribution}b
+distribution function at a packing fraction of 0.3 computed using the
+CVA-S with results from Monte Carlo simulation.  In each subfigure,
+$\rr_1$ and $\rr_2$ are held fixed, while the third position $\rr_3$
+is varied.  The test-particle position in each case is $\rr_1$, which
+is on the left-hand side of the figure.  In the color plots on the
+left, the first and second spheres are displayed in grey.  On the
+bottom half of figures~\ref{fig:triplet-contact-distribution}a
+and~\ref{fig:triplet-contact-distribution}c is the triplet
+distribution function as computed using the CVA-S.  The top half of
+those figures displays the triplet distribution function from Monte
+Carlo simulations.  Figures~\ref{fig:triplet-contact-distribution}b
 and~\ref{fig:triplet-contact-distribution}d show the triplet
 distribution function along the paths illustrated in the corresponding
 2D plots.
 
 Figures~\ref{fig:triplet-contact-distribution}a
 and~\ref{fig:triplet-contact-distribution}b show the triplet
-distribution
-function when two of the positions $\rr_1$ and $\rr_2$ are in contact.
-The triplet distribution function predicted by this work is slightly
-asymmetric, indicating a failure in thermodynamic consistency.  Once
-again, we observe the lack of oscillations at large distances.
-Figures~\ref{fig:triplet-contact-distribution}c
-and~\ref{fig:triplet-contact-distribution}d show the triplet distribution
-function when two of the positions $\rr_1$ and $\rr_2$ are spaced so
-that the third could just fit between them.  Again, the triplet
-distribution function predicted by this work is slightly asymmetric,
-and lacks the oscillations seen in the Monte Carlo simulations at
-large distances.  In both cases, our agreement with simulation is
-comparable to that of previous approximations.
+distribution function when two of the positions $\rr_1$ and $\rr_2$
+are in contact.  The triplet distribution function predicted by the
+CVA-S is slightly asymmetric, indicating a failure in thermodynamic
+consistency.  Once again, we observe the lack of oscillations at large
+distances.  Figures~\ref{fig:triplet-contact-distribution}c
+and~\ref{fig:triplet-contact-distribution}d show the triplet
+distribution function when two of the positions $\rr_1$ and $\rr_2$
+are spaced so that the third could just fit between them.  Again, the
+triplet distribution function predicted by the CVA-S is slightly
+asymmetric, and lacks the oscillations seen in the Monte Carlo
+simulations at large distances.  In both cases, our agreement with
+simulation is comparable to that of previous approximations.
 
 \begin{figure}
   \begin{subfigure}{1.0\columnwidth}
@@ -572,9 +587,12 @@ comparable to that of previous approximations.
 A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
 potential.  To this end, we have computed the error in the first term
-in a high-temperature perturbation expansion $a_1$ for several pair
-potentials.  In order to focus on effects at the interface, we have
-defined a position-dependent pair interaction energy as
+in a high-temperature perturbation expansion $a_1$
+\pahosays{we sometimes call this $a_1$ and sometimes $F_1$. Should we
+  change it to $F_1$ everywhere?}
+for several pair potentials.  In order to focus on effects at the
+interface, we have defined a position-dependent pair interaction
+energy as
 \begin{align}
   \frac{dF_1}{dz} &=
   \tfrac12 \int g^{(2)}_{HS}(\rr,\rr')n(\rr)n(\rr')\Phi(|\rr-\rr'|)
@@ -583,43 +601,48 @@ defined a position-dependent pair interaction energy as
 which gives the contribution to the mean-field free energy due to
 molecules located in a plane of fixed $z$.
 
-We plot in Fig.~\ref{fig:dadz} this quantity for hard-core fluids with
-three representative pair potentials near a hard wall.  We have chosen
-to illustrate a delta-function ineraction at contact (i.e. ``sticky
-hard spheres''), a hard-core square-well fluid, with the length-scale
-of interaction taken from the optimal SAFT model for water found by
-Clark \emph{et al.}~\cite{clark2006developing}, and a $1/r^6$
-power-law attraction.  These pair potentials represent a short-range
-interaction, a medium-range discontinuous interaction, and a
-long-range smooth interaction.
+We plot this quantity for hard-core fluids with three representative
+pair potentials near a hard wall in Fig.~\ref{fig:dadz}.  We have
+chosen to illustrate a delta-function ineraction at contact
+(i.e. ``sticky hard spheres''); a hard-core square-well fluid, with
+the length-scale of interaction taken from the optimal SAFT model for
+water found by Clark \emph{et al.}~\cite{clark2006developing}; and a
+$1/r^6$ power-law attraction.  These pair potentials represent a
+short-range interaction, a medium-range discontinuous interaction, and
+a long-range smooth interaction.
 
 Figure~\ref{fig:dadz-delta} shows the results for the sticky
-hard-sphere fluid.  Our pair distribution function is constructed to
-produce this result exactly, provided the averaged pair distribution
-function at contact from Ref.~\citenum{schulte2012using} is exact.  As
-expected, we see excellent agreement with the Monte Carlo simulation
-results, while the approximations of Fischer and Sokolowski each show
+hard-sphere fluid.  The CVA and CVA-S are constructed to produce this
+result exactly, provided the averaged pair distribution function at
+contact from Ref.~\citenum{schulte2012using} is exact.  As expected,
+we see excellent agreement with the Monte Carlo simulation results,
+while the approximations of Fischer and Sokolowski each show
 deviations near the interface.  Figure~\ref{fig:dadz-square-well}
 shows the same curve from Eq.~\ref{eq:da1} for the square-well fluid.
-This potential stresses our approximation to the radial distribution
-function, since the edge of the attraction occurs at the dip in the
-radial distribution function at this density, with poor results for
-the bulk fluid.  We see that over these length scales, Sokolowski's
-approximation is very accurate.  Finally, in the case of the power-law
-attraction both approximations work very well.
+This potential stresses the CVA-S, since the edge of the
+attraction occurs at the dip in the radial distribution function at
+this density, with poor results for the bulk fluid.  We see that over
+these length scales, Sokolowski's approximation is very accurate.
+Finally, in the case of the power-law attraction both approximations
+work very well.
 
 \section{Conclusion}
 
-We have introduced and tested an approximation for the pair
+We have introduced and tested the contact value approximation for the pair
 distribution function of the inhomogeneous hard-sphere fluid.  Our
 approximation is suitable for use in the development of classical
-density functionals based constructed using perturbation theory, and
+density functionals constructed using perturbation theory, and
 may be computed using exclusively single-center convolutions.  We have
 tested this function at a hard wall and near a single fixed hard
 sphere, and find that it gives qualitatively reasonable results.
 Tests of the pair distribution function in integrals that arise in
 thermodynamic perturbation theory suggest that our approximation gives
 good results for both short-range and long-range attractions.
+
+\pahosays{Sometimes we call the pair distribution function
+  $g^{(2)}_{HS}(\rr_1,\rr_2)$ and sometimes $g^{(2)}(\rr_1,\rr_2)$. I feel
+  like we should stick to one for consistency, but I don't know
+  which.}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

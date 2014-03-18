@@ -178,8 +178,10 @@ twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
-twod_plot.text(-2.7, -3.9, 'this work', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
-twod_plot.text(-2.7, 3.5, 'Monte Carlo', path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(-2.7, -3.9, styles.title['this-work'],
+               path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
+twod_plot.text(-2.7, 3.5, styles.title['mc'],
+               path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 
 sphere0 = Circle((0, 0), 1, color='slategray')
 sphere1 = Circle((rpath, 0), 1, color='slategray')
