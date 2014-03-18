@@ -1,7 +1,7 @@
 from __future__ import division
 import SW
 import sys
-import minmax_SW as minmax
+import minmax
 import numpy as np
 import pylab
 
@@ -13,7 +13,7 @@ import pylab
 # 1) Find nparticular at an easy temp (say, 300k) by hand
 # ___
 # |2) Using that nparticular, find maximum in Phi
-# |3) The density at the maximum (which should be similar to the prefac used)
+# |3) The density at the maximum (which should be similar to the nparticular used)
 # |   is your first guess for the nparticular at a slightly higher temperature
 # |4) Starting from that guess, adjust the nparticular until the two minima in Phi are equal
 # |    4a) npart inc. --> right-side minimum inc.

@@ -1,6 +1,6 @@
 from __future__ import division
 import Hughes as H
-import minmax_SW
+import minmax
 import numpy as np
 
 """Find the optimal 'prefac' to get the chemical potenential for coexistance in the function Hughes.Phi"""
@@ -42,8 +42,8 @@ fout = open('figs/npart_Hughes-out.dat','w')
 fout.write('#T    nvapor(g/ml)    nliquid(g/mL)    phi(nvap)(atm)    phi(nliq)(atm)    nparticular')
 
 # Do first temperature before the loop
-leftmin_n,leftmin_phi = minmax_SW.minimize(H.Phi_alt,T,a_vap,b_vap,nparticular)
-rightmin_n,rightmin_phi = minmax_SW.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
+leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,a_vap,b_vap,nparticular)
+rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
 
 # fout.write('\n')
 # fout.write(str(T))
@@ -64,15 +64,15 @@ print T,'kelvin done'
 while T < 800:
     fout.flush()
     # Starting point for new nparticular is abscissa of max H.Phi_alt with old nparticular
-    nparticular = minmax_SW.maximize(H.Phi_alt,T,leftmin_n, rightmin_n, nparticular)
+    nparticular = minmax.maximize(H.Phi_alt,T,leftmin_n, rightmin_n, nparticular)
     tol_nparticular = 1e-2/H.conv_n
 
 
     # I'm looking at the minima of H.Phi_alt
     b_vap = nparticular
     a_liq = nparticular
-    leftmin_n,leftmin_phi = minmax_SW.minimize(H.Phi_alt,T,b_vap,a_vap,nparticular)
-    rightmin_n,rightmin_phi = minmax_SW.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
+    leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,b_vap,a_vap,nparticular)
+    rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
     tol_min = 0.5/H.conv_p
 
     # Compare the two minima in H.Phi_alt
@@ -81,10 +81,10 @@ while T < 800:
         def newphi(T, n, npart):
             return H.Phi_alt(T, n, npart) - delta_mu*n
         oldnparticular = nparticular
-        nparticular = minmax_SW.maximize(newphi,T,leftmin_n,rightmin_n,nparticular)
+        nparticular = minmax.maximize(newphi,T,leftmin_n,rightmin_n,nparticular)
 
-        leftmin_n,leftmin_phi = minmax_SW.minimize(H.Phi_alt,T,a_vap,b_vap,nparticular)
-        rightmin_n,rightmin_phi = minmax_SW.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
+        leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,a_vap,b_vap,nparticular)
+        rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,b_liq,nparticular)
 
     fout.write('\n')
     fout.write(str(T))
