@@ -44,8 +44,8 @@ void run_walls(double eta, SFMTFluidVeff *f, double kT) {
   min.set_relative_precision(0);
   min.set_maxiter(250);
   min.set_miniter(6);
-  min.precondition(false); // FIXME:  preconditioning is buggy
-  if (eta == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243168271e-07);
+  min.precondition(true);
+  if (eta == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
 
   printf("======================================\n");
   printf("| Working on eta = %g and kT = %g |\n", eta, kT);

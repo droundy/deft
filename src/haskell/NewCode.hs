@@ -234,8 +234,7 @@ createAnydMethods e variables n =
                  "egp.grad = grad();",
                  "egp.precond = Vector(data.get_size());",
                  "egp.precond = egp.grad;",
-                 "Vector output(egp.precond); // output is identical to egp.precond",
-                  "output = 0;"]++
+                 "Vector output(egp.precond); // output is identical to egp.precond"]++
                   "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
                   [newcodeStatements precond,
                    "return egp;"]

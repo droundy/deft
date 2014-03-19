@@ -245,6 +245,8 @@ bool Minimize::improve_energy(Verbosity v) {
              // computing just the grad...
     printf("\t\tfinal stepsize: = %g\n", step);
     if (v >= min_details) printf("\t\tgrad*direction = %g\n", grad().dot(direction)/gdotd);
+    if (v >= min_details && use_preconditioning)
+      printf("\t\tpgrad*direction = %g\n", pgrad().dot(direction)/gdotd);
     print_info("");
   }
 
