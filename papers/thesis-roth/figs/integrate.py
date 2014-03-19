@@ -40,7 +40,9 @@ def trapezoid(func,a,b,n):
 
 # Midpoint rule
 def midpoint(func,a,b,n):
-    ''' asdjflk;'''
+    ''' func is a function of x
+    [a,b] are the limits of integration
+    n is the number of segments desired '''
     dx = (b-a)/n
     s = 0
     for i in xrange(n):

@@ -127,7 +127,3 @@ def df_dn(T,n,i):
     # step size
     dn = 1e-6*n
     return (ftot(T,n + dn/2,i) - ftot(T,n - dn/2,i))/dn
-
-# print 'ftot, i=1',ftot(0.1,0.1,1)
-# print 'phi =',phi(0.1,0.1,0.1,0),'i=0'
-# print 'phi =',phi(0.1,0.1,0.1,1),'i=1'
