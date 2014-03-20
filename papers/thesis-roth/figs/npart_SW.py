@@ -27,17 +27,23 @@ import pylab
 # T = 0.001 # SW units
 # nparticular = 0.14566 # I found this by hand
 
-T = 0.07
-nparticular = 0.0146971318221
+#T = 0.07
+#nparticular = 0.0146971318221
+
+T = 0.1
+nparticular = 0.05/(SW.sigma**3*np.pi/6)
+N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
+Tc = 1.33
+Tlow = T
 
 # Bounds of minimization.
 # Use range that works for many temperatures
 # Left (vapor)
-a_vap = 1e-10
-c_vap = 0.02
+a_vap = 1e-10/(SW.sigma**3*np.pi/6)
+c_vap = nparticular
 # Right (liquid)
-a_liq = 0.02
-c_liq = 0.55
+a_liq = nparticular
+c_liq = 0.55/(SW.sigma**3*np.pi/6)
 ###############################
 
 # Open file for output
@@ -58,7 +64,11 @@ sys.stdout.flush()
 print '   first nl', nliquid, 'first nv', nvapor, 'first np', nparticular, 'first dphi', phi_vapor - phi_liquid
 
 print T
-while T < 8.64:
+
+#while T < 1.4:
+for i in xrange(0,N+1):
+    T = (Tc - Tlow)*(1 - ((N-i)/N)**4) + Tlow
+
     fout.flush()
     # Starting point for new nparticular is abscissa of max SW.phi with old nparticular
     nparticular = minmax.maximize(SW.phi,T,nvapor, nliquid, nparticular)
@@ -114,7 +124,8 @@ while T < 8.64:
 #    fout.write('  ')
 #    fout.write(str(phi_avg))
     sys.stdout.flush();
-    print T
+    print T,nvapor/(SW.sigma**3*np.pi/6),nliquid/(SW.sigma**3*np.pi/6)
 
     # Set temp slightly higher
-    T += np.exp(-T)
+#    T += np.exp(-T)
+    T += 0.01

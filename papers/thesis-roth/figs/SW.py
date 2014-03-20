@@ -41,7 +41,7 @@ da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
 # Total free energy per volume
 # NB: Gil-Villegas also includes a Chain term; we do not deal with chains, so I leave it off
 def f(T,n):
-    return fid(T,n) + fmono(T,n) #+ fhs(T,n)
+    return fid(T,n) + fmono(T,n) + fhs(T,n)
 
 # Grand free energy per volume
 def phi(T,n,nparticular):

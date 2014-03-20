@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 
 # Plot f vs n
 R = 1 # HS radius
-nmax = np.sqrt(2)/R # max density is that of close-packed spheres of radius R
+#nmax = np.sqrt(2)/R # max density is that of close-packed spheres of radius R
+nmax = 0.4/(SW.sigma**3*np.pi/6)
 n = nmax*np.exp(np.arange(-15, 0, 1e-3))
 
 def plotPhi(T,npart):
-    plt.plot(n,SW.phi(T,n,npart))
+    plt.plot(n*SW.sigma**3*np.pi/6,SW.phi(T,n,npart))
     plt.ylabel(r'$\phi$ (SW units)')
 
-    plt.xlabel('n (SW units)')
+    plt.xlabel(r'$\eta$')
 
 def plotF(T):
     plt.subplot(211)
@@ -28,6 +29,7 @@ def plotF(T):
 
 # plt.show()
 
-T = 3.85
-plotPhi(T, 0.0670937256798)
+T = 0.01
+plotPhi(T, 0.05/(SW.sigma**3*np.pi/6))
 plt.savefig('SW-T%0.2f.pdf'%T)
+plt.show()
