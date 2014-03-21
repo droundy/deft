@@ -1,4 +1,14 @@
 #!/usr/bin/python3
+import os
+
+# useful directories
+thisdir = os.path.dirname(os.path.realpath(__file__))
+jobdir = thisdir+'/jobs'
+
+# Assumes this script is placed in [deft]/papers/square-well-liquid/
+projectdir = os.path.realpath(thisdir+'../../..')
+simname = 'square-well-monte-carlo'
+
 
 # parameter ID class
 class paramID:

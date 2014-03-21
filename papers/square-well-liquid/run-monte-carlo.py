@@ -3,7 +3,8 @@ from numpy import *
 import os, sys, argparse, socket
 import subprocess as sp
 
-import arguments, paramID
+import arguments
+from paramID import *
 
 # parse arguments
 parser = argparse.ArgumentParser(
@@ -20,15 +21,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-# useful directories
-thisdir = os.path.dirname(os.path.realpath(__file__))
-jobdir = thisdir+'/jobs'
-
-# Assumes this script is placed in [deft]/papers/square-well-liquid/
-projectdir = os.path.realpath(thisdir+'../../..')
-
 # build monte carlo code
-simname = 'square-well-monte-carlo'
 exitStatus = sp.call(["scons","-C",projectdir,simname])
 if exitStatus != 0:
     print "Build failed"
@@ -40,7 +33,7 @@ for ww in args.ww:
     for ff in args.ff:
         for N in args.N:
             paramList.append(
-                paramID.paramID(args.walls,ww,ff,N,args.weights))
+                paramID(args.walls,ww,ff,N,args.weights))
 
 for p in paramList:
     memory = p.N # fixme: better guess
