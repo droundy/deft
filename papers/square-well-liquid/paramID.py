@@ -1,8 +1,18 @@
 #!/usr/bin/python3
+import os
+
+# useful directories
+thisdir = os.path.dirname(os.path.realpath(__file__))
+jobdir = thisdir+'/jobs'
+
+# Assumes this script is placed in [deft]/papers/square-well-liquid/
+projectdir = os.path.realpath(thisdir+'../../..')
+simname = 'square-well-monte-carlo'
+
 
 # parameter ID class
 class paramID:
-    def __init__(self,walls,ww,ff,N,weights,files=[]):
+    def __init__(self,walls,ww,ff,N,nw,files=[]):
         if walls == 0: self.walls = 'periodic'
         elif walls == 1: self.walls = 'walls'
         elif walls == 2: self.walls = 'tube'
@@ -10,7 +20,7 @@ class paramID:
         self.ww = ww
         self.ff = ff
         self.N = N
-        self.weights = weights
+        self.nw = nw
         for file in [ file for file in files
                       if self.name('N') in file ]:
             if 'E' in file: self.Efile = file
@@ -23,4 +33,4 @@ class paramID:
             out += '-ff' + '%04.2f'%float(self.ff)
         if option == 'N':
             out += '-N' + str(self.N)
-        return out + ('-nw' if not self.weights else '')
+        return out + ('-nw' if self.nw else '')

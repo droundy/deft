@@ -4,7 +4,8 @@ mp.use('Agg')
 from pylab import *
 import os, sys, glob, socket, argparse
 
-import arguments, paramID
+import arguments
+from paramID import *
 
 # parse arguments
 parser = argparse.ArgumentParser(
@@ -65,10 +66,10 @@ rcParams['xtick.labelsize'] = fontSize
 rcParams['ytick.labelsize'] = fontSize
 rcParams['lines.linewidth'] = 1
 rcParams['lines.markersize'] = 2
+rcParams['axes.color_cycle'] = ['k','b','g','r','c','m','y']
 
 # load all data files
 files = sort(glob.glob(datadir+'*'+dataflag))
-rcParams['axes.color_cycle'] = ['k','b','g','r','c','m','y']
 
 # deside which figures to generate
 if not args.dos and not args.hc and not args.rd:
@@ -93,7 +94,7 @@ for file in [ file for file in files if '-E' in file ]:
         ffs.append(ff)
     if N not in Ns:
         Ns.append(N)
-    p = paramID.paramID(args.walls,ww,ff,N,args.weights,files)
+    p = paramID(args.walls,ww,ff,N,args.nw,files)
     if p not in paramList: paramList.append(p)
 
 # if an parameter isn't given, assume all possible values are wanted
