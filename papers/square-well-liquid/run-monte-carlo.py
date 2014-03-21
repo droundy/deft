@@ -33,7 +33,7 @@ for ww in args.ww:
     for ff in args.ff:
         for N in args.N:
             paramList.append(
-                paramID(args.walls,ww,ff,N,args.weights))
+                paramID(args.walls,ww,ff,N,args.nw))
 
 for p in paramList:
     memory = p.N # fixme: better guess
@@ -60,7 +60,7 @@ for p in paramList:
                        ("initialize",args.initialize),
                        ("iterations",args.iterations) ]:
         script.write(" \\\n --" + arg + "=" + str(val))
-    if p.weights: script.write(" \\\n --weights")
+    if p.nw: script.write(" \\\n --nw")
     script.close()
 
     if socket.gethostname() == 'MAPHost':

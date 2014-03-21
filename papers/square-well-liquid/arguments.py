@@ -21,4 +21,4 @@ parser.add_argument(
     help='Number(s) of dimensions in which to have walls')
 
 parser.add_argument(
-		'--weights', action='store_true', help='Use energy weights')
+		'--nw', action='store_true', help="Don't use energy weights")

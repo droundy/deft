@@ -94,7 +94,7 @@ for file in [ file for file in files if '-E' in file ]:
         ffs.append(ff)
     if N not in Ns:
         Ns.append(N)
-    p = paramID(args.walls,ww,ff,N,args.weights,files)
+    p = paramID(args.walls,ww,ff,N,args.nw,files)
     if p not in paramList: paramList.append(p)
 
 # if an parameter isn't given, assume all possible values are wanted

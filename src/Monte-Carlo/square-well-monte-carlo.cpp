@@ -81,7 +81,7 @@ int main(int argc, const char *argv[]) {
   // NOTE: debug can slow things down VERY much
   bool debug = false;
 
-  bool weights = false;
+  bool no_weights = false;
 
   double len[3] = {1, 1, 1};
   int walls = 0;
@@ -154,8 +154,8 @@ int main(int argc, const char *argv[]) {
      "Seed for the random number generator", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
-    {"weights", '\0', POPT_ARG_NONE, &weights, 0, "Weigh diffrent energies so "
-     "that states of low entropy get better statistics", "BOOLEAN"},
+    {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
+     "to get better statistics on low entropy states", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -223,7 +223,7 @@ int main(int argc, const char *argv[]) {
     else if(walls == 1) sprintf(wall_tag,"wall");
     else if(walls == 2) sprintf(wall_tag,"tube");
     else if(walls == 3) sprintf(wall_tag,"box");
-    sprintf(weight_tag, (weights ? "" : "-nw"));
+    sprintf(weight_tag, (no_weights ? "-nw" : ""));
     sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
     printf("\nUsing default file name: ");
@@ -444,7 +444,7 @@ int main(int argc, const char *argv[]) {
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
 
-      if(weights){
+      if(!no_weights){
         walkers_total[interactions]++;
         if(interactions >= walker_minus_threshold) current_walker_plus = false;
         else if(interactions <= walker_plus_threshold) current_walker_plus = true;
@@ -473,7 +473,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Update weights
     // ---------------------------------------------------------------
-    if(weights){
+    if(!no_weights){
       if(iteration == N){
         // initial guess for energy weights
         for(int i = 0; i < energy_levels; i++){
