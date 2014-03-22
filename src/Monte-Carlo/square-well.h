@@ -16,7 +16,10 @@ struct ball {
 
 // Struct to store all information about an appempt to move one ball
 struct move_info {
-  bool success;
+  long total_old;
+  long total;
+  long working_old;
+  long working;
   int updates;
   int informs;
   int old_count;
@@ -80,7 +83,7 @@ ball random_move(const ball &original, double size, const double len[3]);
 void move_one_ball(int id, ball *p, int N, double len[3], int walls,
                    double neighborR, double translation_distance,
                    double interaction_distance, int max_neighbors, double dr,
-                   move_info &move_attempt, double *ln_energy_weights);
+                   move_info &move, double *ln_energy_weights);
 
 // Count the number of interactions a given ball has
 int count_interactions(int id, ball *p, double interaction_distance,

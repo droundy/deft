@@ -5,7 +5,7 @@ CacheDir(os.environ['HOME'] + '/.cache/scons')
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
 env.MergeFlags('-Wall -Werror -ansi')
-env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type -Wno-unused-local-typedefs')
+env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type')
 env.MergeFlags('-O3') # add -g and possibly -fno-inline here to enable debugging
 
 # The following flags enable gcc to eliminate unused code from the

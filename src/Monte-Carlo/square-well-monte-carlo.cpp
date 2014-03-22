@@ -81,7 +81,7 @@ int main(int argc, const char *argv[]) {
   // NOTE: debug can slow things down VERY much
   bool debug = false;
 
-  bool weights = false;
+  bool no_weights = false;
 
   double len[3] = {1, 1, 1};
   int walls = 0;
@@ -154,8 +154,8 @@ int main(int argc, const char *argv[]) {
      "Seed for the random number generator", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
-    {"weights", '\0', POPT_ARG_NONE, &weights, 0, "Weigh diffrent energies so "
-     "that states of low entropy get better statistics", "BOOLEAN"},
+    {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
+     "to get better statistics on low entropy states", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -223,7 +223,7 @@ int main(int argc, const char *argv[]) {
     else if(walls == 1) sprintf(wall_tag,"wall");
     else if(walls == 2) sprintf(wall_tag,"tube");
     else if(walls == 3) sprintf(wall_tag,"box");
-    sprintf(weight_tag, (weights ? "" : "-nw"));
+    sprintf(weight_tag, (no_weights ? "-nw" : ""));
     sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
     printf("\nUsing default file name: ");
@@ -265,6 +265,7 @@ int main(int argc, const char *argv[]) {
   bool current_walker_plus = false;
   int walker_plus_threshold = 0, walker_minus_threshold = 0;
   long *walkers_plus = new long[energy_levels]();
+  long *walkers_total = new long[energy_levels]();
 
   // Energy weights, state density
   int weight_updates = 0;
@@ -286,7 +287,7 @@ int main(int argc, const char *argv[]) {
     density_histogram[i] = new long[density_bins]();
 
   ball *balls = new ball[N];
-  move_info move_attempt;
+  move_info moves;
 
   if(totime < 0) totime = 10*N;
 
@@ -415,12 +416,8 @@ int main(int argc, const char *argv[]) {
   // Initialization of cell
   // ----------------------------------------------------------------------------
 
-  long totalmoves = 0, workingmoves = 0, old_totalmoves = 0,
-    old_workingmoves = 0;
-  long neighbor_updates = 0, neighbor_informs = 0;
   double avg_neighbors = 0;
   int interactions = 0;
-
   double dscale = .1;
 
   // Count initial number of interactions
@@ -442,17 +439,13 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
-                    interaction_distance, max_neighbors, dr, move_attempt,
+                    interaction_distance, max_neighbors, dr, moves,
                     ln_energy_weights);
-      interactions += move_attempt.new_count - move_attempt.old_count;
+      interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
 
-      workingmoves += move_attempt.success;
-      neighbor_updates += move_attempt.updates;
-      neighbor_informs += move_attempt.informs;
-      totalmoves++;
-
-      if(weights){
+      if(!no_weights){
+        walkers_total[interactions]++;
         if(interactions >= walker_minus_threshold) current_walker_plus = false;
         else if(interactions <= walker_plus_threshold) current_walker_plus = true;
         if(current_walker_plus) walkers_plus[interactions]++;
@@ -463,9 +456,10 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     if (iteration % N == 0) {
       const double acceptance_rate =
-        (double)(workingmoves-old_workingmoves)/(totalmoves-old_totalmoves);
-      old_workingmoves = workingmoves;
-      old_totalmoves = totalmoves;
+        (double)(moves.working-moves.working_old)
+        /(moves.total-moves.total_old);
+      moves.working_old = moves.working;
+      moves.total_old = moves.total;
       if (acceptance_rate < acceptance_goal)
         translation_distance /= 1+dscale;
       else
@@ -479,7 +473,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Update weights
     // ---------------------------------------------------------------
-    if(weights){
+    if(!no_weights){
       if(iteration == N){
         // initial guess for energy weights
         for(int i = 0; i < energy_levels; i++){
@@ -493,15 +487,17 @@ int main(int argc, const char *argv[]) {
         for(int i = 0; i < energy_levels; i++){
           const int top = i < energy_levels-1 ? i+1 : i;
           const int bottom = i > 0 ? i-1 : i;
-          const double df = double(walkers_plus[top]) / energy_histogram[top]
-            - (double(walkers_plus[bottom]) / energy_histogram[bottom]);
           const int dE = bottom-top; // interactions and energy are opposites
-          const double df_dE =
-            (df > 0 ? df : double(0.01)/energy_histogram[bottom]) / dE;
-          //ln_energy_weights[i] +=
-          //  (log(df_dE) - log(energy_histogram[i]/totalmoves))/2.0;
+          const double df = double(walkers_plus[top]) / walkers_total[top]
+            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+          const double df_dE = (isnan(df) ? 1 : df/dE);
+          const double walker_density = (walkers_total[i] != 0 ?
+                                         walkers_total[i] : 0.01) / moves.total;
+          ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
         }
         weight_updates++;
+        for(int i = 0; i < energy_levels; i++)
+          walkers_total[i] = 0;
 
         // -----------------------------------------------------------------
         // ----------------------------- TESTING ---------------------------
@@ -521,9 +517,10 @@ int main(int argc, const char *argv[]) {
 
         char *w_countinfo = new char[4096];
         sprintf(w_countinfo,
-                "# iteration: %li, workingmoves: %li, totalmoves: %li, "
-                "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
-                double(workingmoves)/totalmoves);
+                "# iteration: %li, working moves: %li, total moves: %li, "
+                "acceptance rate: %g\n",
+                iteration, moves.working, moves.total,
+                double(moves.working)/moves.total);
 
         char *w_testdir = new char[16];
         sprintf(w_testdir,"weights");
@@ -538,9 +535,9 @@ int main(int argc, const char *argv[]) {
         for(int i = 0; i < energy_levels; i++)
           fprintf(w_out, "%i  %f\n",i,ln_energy_weights[i]);
         fclose(w_out);
-      // -------------------------------------------------------------------
-      // ----------------------------- TESTING -----------------------------
-      // -------------------------------------------------------------------
+        // -------------------------------------------------------------------
+        // ----------------------------- TESTING -----------------------------
+        // -------------------------------------------------------------------
       }
     }
     // ---------------------------------------------------------------
@@ -552,21 +549,22 @@ int main(int argc, const char *argv[]) {
       took(iter);
       delete[] iter;
       printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
-             iteration, (double)workingmoves/totalmoves, translation_distance);
-      printf("We've had %g updates per kilomove and %g informs per kilomove, "
+             iteration, (double)moves.working/moves.total,
+             translation_distance);
+      printf("We've had %g updates per kilomove and %g informs per kilomoves, "
              "for %g informs per update.\n",
-             1000.0*neighbor_updates/totalmoves,
-             1000.0*neighbor_informs/totalmoves,
-             (double)neighbor_informs/neighbor_updates);
-      const long checks_without_tables = totalmoves*N;
+             1000.0*moves.updates/moves.total,
+             1000.0*moves.informs/moves.total,
+             (double)moves.informs/moves.updates);
+      const long checks_without_tables = moves.total*N;
       int total_neighbors = 0;
       for(int i = 0; i < N; i++) {
         total_neighbors += balls[i].num_neighbors;
         most_neighbors = max(balls[i].num_neighbors, most_neighbors);
       }
       avg_neighbors = double(total_neighbors)/N;
-      const long checks_with_tables = totalmoves*avg_neighbors
-        + N*neighbor_updates;
+      const long checks_with_tables = moves.total*avg_neighbors
+        + N*moves.updates;
       printf("We've done about %.3g%% of the distance calculations we would "
              "have done without tables.\n",
              100.0*checks_with_tables/checks_without_tables);
@@ -613,7 +611,8 @@ int main(int argc, const char *argv[]) {
   clock_t last_output = clock(); // when we last output data
 
   int frame = 0;
-  totalmoves = 0, workingmoves = 0;
+  moves.total = 0;
+  moves.working = 0;
 
   // Reset energy histogram
   for(int i = 0; i < energy_levels; i++)
@@ -625,13 +624,10 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
-                    interaction_distance, max_neighbors, dr, move_attempt,
+                    interaction_distance, max_neighbors, dr, moves,
                     ln_energy_weights);
-      interactions += move_attempt.new_count - move_attempt.old_count;
+      interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
-
-      workingmoves += move_attempt.success;
-      totalmoves ++;
     }
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -679,9 +675,10 @@ int main(int argc, const char *argv[]) {
 
       char *countinfo = new char[4096];
       sprintf(countinfo,
-              "# iteration: %li, workingmoves: %li, totalmoves: %li, "
-              "acceptance rate: %g\n", iteration,workingmoves,totalmoves,
-              double(workingmoves)/totalmoves);
+              "# iteration: %li, working moves: %li, total moves: %li, "
+              "acceptance rate: %g\n",
+              iteration, moves.working, moves.total,
+              double(moves.working)/moves.total);
 
       // Save energy histogram
       FILE *e_out = fopen((const char *)e_fname, "w");

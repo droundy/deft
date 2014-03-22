@@ -49,31 +49,29 @@ developed to deal with large-scale fluctuations of the order parameter
 near the critical point of a system.
 
 The free energy density for each iteration is given by
-\[
+\begin{equation}
   f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)\ .
-\]
-
+\end{equation}
 The total free energy density is obtained when one takes the
 iterations to infinity and adds in the attractive component:
-\[
+\begin{equation}
   f(T,n) = \lim_{i \to \infty} f_i(T,n) + f_{att}(T,n)\ .
-\]
-
+\end{equation}
 The initial free energy density, $f_0$ depends on the liquid model of study. For this work, I use the square well model:
-\[
+\begin{equation}
   f_0(T,n) = f_{id}(T,n) + f_{HS}(T,n) + a_2^{SW}(T,n)\ ,
-\]
+\end{equation}
 where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kt$.~\cite{Gil-Villegas97}
 
 \subsection{Coexistence Curve Algorithm}
 Coexistence curves are found by modifying the chemical potential $\mu$
 in the grand free energy per volume $\Phi/V$. Grand free energy
 density is defined as
-\begin{align*}
-  \frac{\Phi}{V} &= \phi \\
-                 &= f(T,n) - n\mu \\
+\begin{align}
+  \frac{\Phi}{V} &= \phi \nonumber \\
+                 &= f(T,n) - n\mu \nonumber \\
                  &= f(T,n) - n\frac{d}{dn}f(T,\npart)\ .
-\end{align*}
+\end{align}
 It is the value $\npart$ that we adjust to find coexistence curves.
 
 The grand free energy density generally has two distinct minima when
@@ -95,7 +93,8 @@ higher temperature.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
 
-% \includegraphics[width=\columnwidth]{figs/combined-coexistence-plot}
+\includegraphics[width=\columnwidth]{figs/coexistance_SW}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
