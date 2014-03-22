@@ -609,7 +609,7 @@ int main(int argc, const char *argv[]) {
 
   clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
   // top out at one hour interval
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60;
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30;
   clock_t last_output = clock(); // when we last output data
 
   int frame = 0;
@@ -662,7 +662,7 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
     const clock_t now = clock();
-    if ((now > last_output + output_period) || iteration == iterations) {
+    if ((now - last_output > output_period) || iteration == iterations) {
       last_output = now;
       assert(last_output);
       if (output_period < max_output_period/2) output_period *= 2;

@@ -322,7 +322,7 @@ int main(int argc, char *argv[]){
   for (int i=0;i<N;i++){move_counter[i]=0;}
 
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at a half hour interval
   clock_t last_output = clock(); // when we last output data
   // Begin main program loop
   //////////////////////////////////////////////////////////////////////////////
@@ -346,7 +346,7 @@ int main(int argc, char *argv[]){
         num_to_time = long(60/secs_per_iteration);
       }
       start = now;
-      if ((now > last_output + output_period) || j==(iterations-1)) {
+      if ((now - last_output > output_period) || j==(iterations-1)) {
         last_output = now;
         if (output_period < max_output_period/2) {
           output_period *= 2;

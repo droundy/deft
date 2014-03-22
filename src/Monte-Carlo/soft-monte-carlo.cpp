@@ -311,7 +311,7 @@ int main(int argc, char *argv[]){
 
 
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60; // top out at one hour interval
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   for (long j=0; j<iterations; j++){
     num_timed = num_timed + 1;
@@ -329,7 +329,7 @@ int main(int argc, char *argv[]){
         num_to_time = long(60/secs_per_iteration);
       }
       start = now;
-      if (now > last_output + output_period || j == iterations-1) {
+      if (now - last_output > output_period || j == iterations-1) {
         last_output = now;
         const double increase_ratio = 1.2;
         if (output_period < max_output_period/increase_ratio) {
