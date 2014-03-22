@@ -289,6 +289,8 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < energy_levels; i++)
     density_histogram[i] = new long[density_bins]();
 
+  printf("memory use estimate = %gG\n\n", 8*double((6 + g_bins + density_bins)*energy_levels)/1024/1024/1024);
+
   ball *balls = new ball[N];
   move_info moves;
 
