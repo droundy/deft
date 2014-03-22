@@ -188,9 +188,8 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
   moves->total++;
   moves->old_count =
     count_interactions(id, p, interaction_distance, len, walls);
+  moves->new_count = moves->old_count;
   ball temp = random_move(p[id], translation_distance, len);
-  moves->new_count =
-    count_interactions(id, p, interaction_distance, len, walls);
   if (in_cell(temp, len, walls, dr)){
     bool overlaps = overlaps_with_any(temp, p, len, walls, dr);
     if (!overlaps){
@@ -224,6 +223,11 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
       if (!overlaps){
         p[id] = temp;
         moves->working++;
+        // Now that we know that we are keeping the new move, and
+        // after we have updated the neighbor tables if needed, we can
+        // compute the new interaction count.
+        moves->new_count =
+          count_interactions(id, p, interaction_distance, len, walls);
         return;
       }
     }
