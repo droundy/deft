@@ -444,7 +444,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
-                    interaction_distance, max_neighbors, dr, moves,
+                    interaction_distance, max_neighbors, dr, &moves,
                     ln_energy_weights);
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
@@ -636,7 +636,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
-                    interaction_distance, max_neighbors, dr, moves,
+                    interaction_distance, max_neighbors, dr, &moves,
                     ln_energy_weights);
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;

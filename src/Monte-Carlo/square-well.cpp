@@ -181,12 +181,12 @@ ball random_move(const ball &p, double move_scale, const double len[3]){
 void move_one_ball(int id, ball *p, int N, double len[3], int walls,
                    double neighbor_R, double translation_distance,
                    double interaction_distance, int max_neighbors, double dr,
-                   move_info &moves, double *ln_energy_weights){
-  moves.total++;
-  moves.old_count =
+                   move_info *moves, double *ln_energy_weights){
+  moves->total++;
+  moves->old_count =
     count_interactions(id, p, interaction_distance, len, walls);
   ball temp = random_move(p[id], translation_distance, len);
-  moves.new_count =
+  moves->new_count =
     count_interactions(id, p, interaction_distance, len, walls);
   if (in_cell(temp, len, walls, dr)){
     bool overlaps = overlaps_with_any(temp, p, len, walls, dr);
@@ -201,7 +201,7 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
         // of our neighbors that have changed.
         temp.neighbors = new int[max_neighbors];
         update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, walls);
-        moves.updates++;
+        moves->updates++;
         // However, for this check (and this check only), we don't need to
         // look at all of our neighbors, only our new ones.
         // fixme: do this!
@@ -213,14 +213,14 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
           // keeping this move and need to tell our neighbors where we are now.
           temp.neighbor_center = temp.pos;
           inform_neighbors(temp, p[id], p, id);
-          moves.informs++;
+          moves->informs++;
           delete[] p[id].neighbors;
         }
         else delete[] temp.neighbors;
       }
       if (!overlaps){
         p[id] = temp;
-        moves.working++;
+        moves->working++;
         return;
       }
     }
