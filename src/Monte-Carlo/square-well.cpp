@@ -77,7 +77,10 @@ int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
       if (is_neighbor){
         const int index = p[i].num_neighbors;
         p[i].num_neighbors++;
-        if (p[i].num_neighbors > max_neighbors) return -1;
+        if (p[i].num_neighbors > max_neighbors) {
+          printf("Found too many neighbors: %d > %d\n", p[i].num_neighbors, max_neighbors);
+          return -1;
+        }
         p[i].neighbors[index] = j;
       }
     }

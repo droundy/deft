@@ -304,7 +304,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Find the upper limit to the maximum number of neighbors a ball could have
-  int max_neighbors = uipow(2+neighbor_scale,3) - 1;
+  int max_neighbors = uipow(2+2*neighbor_scale,3) - 1;
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
