@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <popt.h>
+#include <sys/stat.h>
 #include "handymath.h"
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
@@ -524,13 +525,20 @@ int main(int argc, const char *argv[]) {
                 iteration, moves.working, moves.total,
                 double(moves.working)/moves.total);
 
-        char *w_testdir = new char[16];
-        sprintf(w_testdir,"weights");
+        const char *w_testdir = "weights";
 
         char *w_fname = new char[1024];
+        mkdir(dir, 0777); // create "dir" directory, ignore error that happens if it already exists.
+        sprintf(w_fname, "%s/%s",
+                dir, w_testdir);
+        mkdir(w_fname, 0777); // create "weights" directory
         sprintf(w_fname, "%s/%s/%s-w%02i.dat",
                 dir, w_testdir, filename, weight_updates);
-        FILE *w_out = fopen((const char *)w_fname, "w");
+        FILE *w_out = fopen(w_fname, "w");
+        if (!w_out) {
+          fprintf(stderr, "Unable to create %s!\n", w_fname);
+          exit(1);
+        }
         fprintf(w_out, "%s", w_headerinfo);
         fprintf(w_out, "%s", w_countinfo);
         fprintf(w_out, "\n# interactions   value\n");
