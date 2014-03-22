@@ -541,8 +541,11 @@ int main(int argc, const char *argv[]) {
           fprintf(stderr, "Unable to create %s!\n", w_fname);
           exit(1);
         }
+        delete[] w_fname;
         fprintf(w_out, "%s", w_headerinfo);
+        delete[] w_headerinfo;
         fprintf(w_out, "%s", w_countinfo);
+        delete[] w_countinfo;
         fprintf(w_out, "\n# interactions   value\n");
         for(int i = 0; i < energy_levels; i++)
           fprintf(w_out, "%i  %f\n",i,ln_energy_weights[i]);
