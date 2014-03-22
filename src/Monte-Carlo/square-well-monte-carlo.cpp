@@ -227,6 +227,8 @@ int main(int argc, const char *argv[]) {
     sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
     printf("\nUsing default file name: ");
+    delete[] weight_tag;
+    delete[] wall_tag;
   }
   else
     printf("\nUsing given file name: ");
@@ -771,6 +773,7 @@ inline void print_all(const ball *p, int N) {
     if (p[i].num_neighbors > 10)
       printf("...");
     printf("\n      pos:          %s\n", pos);
+    delete[] pos;
   }
   printf("\n");
   fflush(stdout);
@@ -793,6 +796,7 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
       printf(": %s\n", pos);
     }
   }
+  delete[] pos;
   printf("\n");
   fflush(stdout);
 }
