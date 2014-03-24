@@ -2,7 +2,7 @@
 
 color = { 'mc': 'k',
           'this-work': 'b',
-          'this-work-mc': 'k',
+          'this-work-mc': 'c',
           'fischer': 'g',
           'sokolowski': 'r'}
 
