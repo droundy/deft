@@ -61,7 +61,7 @@ plt.xlim([-.5,6])
 plt.legend(loc='upper right').draw_frame(False)
 
 plt.xlabel('$z/R$')
-plt.ylabel(r'$da_1/dz$')
+plt.ylabel(r'$dF_1/dz$')
 plt.yticks([])
 #plt.xticks([0,1,2,3])
 

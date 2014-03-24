@@ -96,19 +96,16 @@ expansion is
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
-In this paper, we will introduce the contact value approximation (CVA)
-for the hard-sphere pair distribution function which is suitable for
-use in the creation of classical density functionals based on a
-cluster expansion. We will then introduce the separable contact value
-approximation (CVA-S), which is based on a radial distribution
-function that is separable in terms of position and local
-density.\pahosays{this could be phrased better, not quite sure the
-  best way}
+In this paper, we introduce a contact value approximation (CVA) for
+the hard-sphere pair distribution function which is suitable for use
+in the creation of classical density functionals based on
+thermodynamic perturbation theory. We then demonstrate a more
+computationally efficient separable version of the contact
+value approximation (CVA-S), which is based on a fit to the radial
+distribution function that is separable in terms of position and local
+density.
 
-\section{Theoretical approaches}
-\pahosays{retitle this ``Past theoretical approaches'' or ``current
-  theoretical approaches'' or something to show that ours isn't
-  included?}
+\section{Previous theoretical approaches}
 
 The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
@@ -267,24 +264,28 @@ $g_{\sigma}(\rr)$ evaluated at the two points:
   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) +
     g(|r_{12}|, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
-$g^{(2)}(\rr_1,\rr_2)$ above is constructed to reproduce the exact
-value for the integral:
+This contact value approximation for $g^{(2)}(\rr_1,\rr_2)$ is
+constructed to reproduce the exact value for the integral:
 \begin{align}
-  \label{eq:1}
-  \int n(\rr_1)n(\rr_2)g_{HS}^{(2)}(\rr_1,\rr_2)\Phi(|\rr_1 -
-  \rr_2|-\sigma)d\rr_1d\rr_2
+  F_1^{\text{contact}} &= \tfrac12 \iint
+  g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\delta(|\rr_1-\rr_2|-\sigma)
+  d\rr_1d\rr_2
+  \label{eq:mean-field-contact}
 \end{align}
-\pahosays{give this integral a name so it's an equation?}
-\par
+which is the mean-field correction to the free energy (see
+Eq.~\ref{eq:mean-field}) for a purely contact interaction.
+
 The CVA requires the radial distribution function as a function of $r$
 and $g_\sigma$.  One approach to constructing $g(r,g_\sigma)$ is to
 compute $\eta$ from $g_\sigma$ and then find $g(r,\eta)$ either using
 some approximate functional form (e.g. Percus-Yevick) or using Monte
 Carlo simulation results.  In this paper we first use the Monte Carlo
-results (which are also used in evaluating the approximations of
-earlier works). We then use an approximation to the radial
+results, which are also used in evaluating the approximations of
+earlier works.  This approximation we will refer to as CVA in the
+remainder of the text.  We then use an approximation to the radial
 distribution function that is separable in terms of $r$ and
-$g_\sigma$.
+$g_\sigma$, and additional approximation that we will refer to as
+CVA-S, which we will describe in the next section.
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
@@ -299,11 +300,8 @@ with single-center convolutions as written.  In order to ease
 computational application of this pair distribution function in
 classical density functionals, we have developed a separable
 approximation for the function $g(r,g_\sigma)$:
-
-\pahosays{would it make sense to call this $g_s(r,g_\sigma)$ or
-  something similar?}
 \begin{align}
-  g(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+  g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
 This separable contact value approximation (CVA-S) allows the mean
 field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
@@ -346,13 +344,16 @@ efficiently computed using fast Fourier transforms.
   \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the hard-sphere radial distribution function, with
-    our fit.}\label{fig:radial-distribution}
+    our separable fit.  The solid lines show the true radial
+    distribution function $g(r)$, and the dashed lines show our
+    separable fit to the radial distribution functions
+    $g_S(r)$.}\label{fig:radial-distribution}
 \end{figure}
 
-We construct $g(r, g_\sigma)$ to satisfy several constraints.
+We construct $g_S(r, g_\sigma)$ to satisfy several constraints.
 Naturally, we match the value at contact:
 \begin{equation}
-  g(\sigma, g_\sigma) = g_\sigma.
+  g_S(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
 A second constraint applies to the integral of the total correlation
 function, $h(r) = g(r) - 1$:
@@ -370,7 +371,7 @@ simulation data for the radial distribution function at packing
 fractions from 0.05 to 0.4 in steps of 0.05.  Our fitted radial
 distribution function is given by
 \begin{multline}
-  g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
+  g_S(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
   + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
   + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
 \end{multline}
@@ -399,7 +400,7 @@ and $\kappaZ = \kappatwo$.
 The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
 figure, it is apparent that the integral of $h(r)$ from
 Eq.~\ref{eq:total-constraint} results in cancelling errors at large
-distances.  The maximum error in $g(r)$ at packing fractions up to
+distances.  The maximum error in $g_S(r)$ at packing fractions up to
 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 \rmaxerr$.
 
@@ -571,7 +572,7 @@ simulation is comparable to that of previous approximations.
     \vspace{-0.8cm}
     \caption{Hard-core inverse-sixth fluid}\label{fig:dadz-inverse-sixth}
   \end{subfigure}
-  \caption{Plot of $\frac{da_1}{dz}$ near a hard wall.  (a) shows a
+  \caption{Plot of $\frac{dF_1}{dz}$ near a hard wall.  (a) shows a
     sticky hard-sphere fluid defined by a pair potential
     $\delta(\sigma-r+\delta)$ where $\sigma$ is the hard-sphere
     diameter, and $\delta$ is an infinitesimal distance; (b) shows a
@@ -587,9 +588,7 @@ simulation is comparable to that of previous approximations.
 A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
 potential.  To this end, we have computed the error in the first term
-in a high-temperature perturbation expansion $a_1$
-\pahosays{we sometimes call this $a_1$ and sometimes $F_1$. Should we
-  change it to $F_1$ everywhere?}
+in a high-temperature perturbation expansion $F_1$
 for several pair potentials.  In order to focus on effects at the
 interface, we have defined a position-dependent pair interaction
 energy as
@@ -643,6 +642,12 @@ good results for both short-range and long-range attractions.
   $g^{(2)}_{HS}(\rr_1,\rr_2)$ and sometimes $g^{(2)}(\rr_1,\rr_2)$. I feel
   like we should stick to one for consistency, but I don't know
   which.}
+\davidsays{The reason for the distinction is that when we consider a
+  real liquid, then the true $g(r)$ is different from $g_{HS}(r)$, so
+  the mean-field equations ought to specify that they use the
+  hard-sphere pair distribution function.  But when we're talking
+  about the hard-sphere fluid, $g(r) = g_{HS}(r)$ and it's clumsy to
+  always have the HS present. }
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
