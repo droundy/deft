@@ -190,49 +190,58 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
     count_interactions(id, p, interaction_distance, len, walls);
   moves->new_count = moves->old_count;
   ball temp = random_move(p[id], translation_distance, len);
-  if (in_cell(temp, len, walls, dr)){
-    bool overlaps = overlaps_with_any(temp, p, len, walls, dr);
-    if (!overlaps){
-      const bool get_new_neighbors =
-        (periodic_diff(temp.pos, temp.neighbor_center, len, walls)
-         .normsquared() > sqr(neighbor_R/2.0));
-      if (get_new_neighbors){
-        // If we've moved too far, then the overlap test may have given a false
-        // negative. So we'll find our new neighbors, and check against them.
-        // If we still don't overlap, then we'll have to update the tables
-        // of our neighbors that have changed.
-        temp.neighbors = new int[max_neighbors];
-        update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, walls);
-        moves->updates++;
-        // However, for this check (and this check only), we don't need to
-        // look at all of our neighbors, only our new ones.
-        // fixme: do this!
-        //int *new_neighbors = new int[max_neighbors];
+  if (!in_cell(temp, len, walls, dr)) return; // bad move!
+  if (overlaps_with_any(temp, p, len, walls, dr)) return; // bad move!
+  const bool get_new_neighbors =
+    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared() > sqr(neighbor_R/2.0));
+  if (get_new_neighbors){
+    // If we've moved too far, then the overlap test may have given a false
+    // negative. So we'll find our new neighbors, and check against them.
+    // If we still don't overlap, then we'll have to update the tables
+    // of our neighbors that have changed.
+    temp.neighbors = new int[max_neighbors];
+    update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, walls);
+    moves->updates++;
+    // However, for this check (and this check only), we don't need to
+    // look at all of our neighbors, only our new ones.
+    // fixme: do this!
+    //int *new_neighbors = new int[max_neighbors];
 
-        overlaps = overlaps_with_any(temp, p, len, walls, dr);
-        if (!overlaps){
-          // Okay, we've checked twice, just like Santa Clause, so we're definitely
-          // keeping this move and need to tell our neighbors where we are now.
-          temp.neighbor_center = temp.pos;
-          inform_neighbors(temp, p[id], p, id);
-          moves->informs++;
-          delete[] p[id].neighbors;
-        }
-        else delete[] temp.neighbors;
-      }
-      if (!overlaps){
-        p[id] = temp;
-        moves->working++;
-        // Now that we know that we are keeping the new move, and
-        // after we have updated the neighbor tables if needed, we can
-        // compute the new interaction count.
-        moves->new_count =
-          count_interactions(id, p, interaction_distance, len, walls);
-        return;
-      }
+    if (overlaps_with_any(temp, p, len, walls, dr)) {
+      // turns out we overlap after all.  :(
+      delete[] temp.neighbors;
+      return;
     }
   }
-  return;
+  // Now that we know that we are keeping the new move, and after we
+  // have updated the neighbor tables if needed, we can compute the
+  // new interaction count.
+  ball pid = p[id]; // save a copy
+  p[id] = temp; // temporarily update the position
+  moves->new_count = count_interactions(id, p, interaction_distance, len, walls);
+  p[id] = pid;
+  // Now we can check if we actually want to do this move based on the
+  // new energy.
+  const double lnPmove = ln_energy_weights[moves->new_count] - ln_energy_weights[moves->old_count];
+  if (lnPmove < 0) {
+    const double Pmove = exp(lnPmove);
+    if (random::ran() > Pmove) {
+      // We want to reject this move because it is too improbable
+      // based on our weights.
+      moves->new_count = moves->old_count; // undo the energy change
+      return;
+    }
+  }
+  if (get_new_neighbors) {
+    // Okay, we've checked twice, just like Santa Clause, so we're definitely
+    // keeping this move and need to tell our neighbors where we are now.
+    temp.neighbor_center = temp.pos;
+    inform_neighbors(temp, p[id], p, id);
+    moves->informs++;
+    delete[] p[id].neighbors;
+  }
+  p[id] = temp; // Yay, we have a successful move!
+  moves->working++;
 }
 
 int count_interactions(int id, ball *p, double interaction_distance,
