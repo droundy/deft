@@ -1,0 +1,37 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{color}
+
+\begin{document}
+\title{Applying a clever histogram method to the square-well liquid}
+
+\author{Michael MI? Perlin}
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+\begin{abstract}
+  We have applied the clever histogram method to the square-well liquid.
+\end{abstract}
+
+\maketitle
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww13-ff30-N200-E.pdf}\
+  \includegraphics[width=\columnwidth]{figs/periodic-ww30-ff30-N200-E.pdf}
+  \caption{A histogram plot demonstrating the difficulty of using
+    canonical Monte Carlo to simulate a system.  A simulation at a
+    give temperature only provides information fo a small number of
+    energy states.\label{fig:histograms}}
+\end{figure}
+
+As shown in Fig.~\ref{fig:histograms}, there are several difficulties
+encountered when running Monte Carlo simulations at a fixed
+temperature.  On the top plot, which shows three simulations run at
+$\lambda = 1.3$, it is apparent that each given canonical simulation
+only provides statistical information for a small number of energy
+states.  The bottom plot shows an even more serious issue:  when
+running a simulation at a fixed temperature, it is possible to become
+frozen in a state that is far from the ground state, as happened in
+the $kT=0.1\epsilon$ simulation.
+
+\end{document}

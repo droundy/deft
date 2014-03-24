@@ -83,6 +83,7 @@ int main(int argc, const char *argv[]) {
   bool debug = false;
 
   bool no_weights = false;
+  double fix_kT = 0;
 
   double len[3] = {1, 1, 1};
   int walls = 0;
@@ -157,6 +158,8 @@ int main(int argc, const char *argv[]) {
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
     {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
      "to get better statistics on low entropy states", "BOOLEAN"},
+    {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
+     " rather than adjusted weights", "DOUBLE"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -195,6 +198,7 @@ int main(int argc, const char *argv[]) {
     printf("Interaction scale should be greater than (or equal to) 1.\n");
     return 254;
   }
+  if (fix_kT > 0) no_weights = true;
 
   // Adjust cell dimensions for desired filling fraction
   const double fac = R*pow(4.0/3.0*M_PI*N/(ff*len[x]*len[y]*len[z]), 1.0/3.0);
@@ -225,6 +229,7 @@ int main(int argc, const char *argv[]) {
     else if(walls == 2) sprintf(wall_tag,"tube");
     else if(walls == 3) sprintf(wall_tag,"box");
     sprintf(weight_tag, (no_weights ? "-nw" : ""));
+    if (fix_kT) sprintf(weight_tag, "-kT%g", fix_kT);
     sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
     printf("\nUsing default file name: ");
@@ -273,6 +278,12 @@ int main(int argc, const char *argv[]) {
   // Energy weights, state density
   int weight_updates = 0;
   double *ln_energy_weights = new double[energy_levels]();
+  if (fix_kT) {
+    for(int i = 0; i < energy_levels; i++){
+      ln_energy_weights[i] = i/fix_kT;
+    }
+  }
+
   double *state_density = new double[energy_levels]();
 
   // Radial distribution function (RDF) histogram
