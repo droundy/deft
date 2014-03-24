@@ -167,7 +167,6 @@ int main(int argc, char *argv[]) {
     double peak = peak_memory()/1024.0/1024;
     printf("Peak memory use is %g M\n", peak);
 
-    double oldN = sphere_density.integrate();
     sphere_density = n_sphere*VectorXd::Ones(gd.NxNyNz);
   }
 

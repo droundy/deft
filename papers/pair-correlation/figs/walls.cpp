@@ -189,7 +189,6 @@ double mc(double local_eta, double r, double r_step, double g[]) {
   //printf("low_eta_i = %d and high_eta_i = %d\n", low_eta_i*num_r_in_gmc+j, high_eta_i*num_r_in_gmc+j);
   //fflush(stdout);
   fac = (local_eta-(low_eta_i)*eta_step)/eta_step;
-  double ghere = (1-fac)*g_low_eta + fac*g_high_eta;
   return (1-fac)*g_low_eta + fac*g_high_eta;
 }
 
@@ -428,7 +427,6 @@ void run_walls(double eta, const char *name, Functional fhs) {
       const double lambda=1.790;
       double dz = 0.01;
       const double dv = 0.01;
-      const double well_volume = 4*M_PI/3*(uipow(2*lambda, 3) - uipow(2.0, 3));
       char *plotname_a = new char [4096];
       sprintf(plotname_a, "papers/pair-correlation/figs/walls/square-well-dadz-%s-%04.2f-%.3f.dat",
               fun[version], eta, lambda);

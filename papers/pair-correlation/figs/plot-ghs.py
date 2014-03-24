@@ -312,7 +312,6 @@ const double kappa_2 = %.*f;
 
 inline double gsigma_to_eta(const double g_sigma) {
   if (g_sigma <= 1) return 0;
-  const double h_sigma = g_sigma - 1;
   return %s;
 }
 

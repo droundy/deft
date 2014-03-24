@@ -38,12 +38,13 @@ create3dHeader e0 n =
    "#include \"utilities.h\"",
    "#include \"handymath.h\"",
    "",
-   "",
+   "#pragma GCC diagnostic ignored \"-Wunused-variable\"",
    "class " ++ n ++ " : public NewFunctional {",
    "public:"] ++ map (declare . strip_type) (create3dMethods e0 [] n) ++
   map (newcode . setarg) (inputs e0) ++
  ["private:",
-  ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"]
+  ""++ codeMutableData (Set.toList $ findNamedScalars e)  ++"}; // End of " ++ n ++ " class"] ++
+   ["#pragma GCC diagnostic pop"]
     where
       strip_type f = f { name = drop (length n+2) $ name f }
       e = mapExpression' renameVar e0
@@ -122,7 +123,7 @@ createCppFile e variables n headername = unlines $ ["// -*- mode: C++; -*-",
                                                     "",
                                                     "#include \"" ++ headername ++ "\"",
                                                     "",
-                                                    ""] ++ map newcode methods
+                                                    "#pragma GCC diagnostic ignored \"-Wunused-variable\""] ++ map newcode methods
   where is_nonscalar (ES _) = False
         is_nonscalar _ = True
         methods = if any is_nonscalar (findOrderedInputs e)

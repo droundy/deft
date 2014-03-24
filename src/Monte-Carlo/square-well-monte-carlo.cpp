@@ -106,7 +106,6 @@ int main(int argc, const char *argv[]) {
   double de_density = 0.01;
   double de_g = 0.01;
   int totime = -1;
-  bool talk = false;
   // scale is not a quite "constant" -- it is adjusted during the initialization
   //  so that we have a reasonable acceptance rate
   double translation_scale = 0.05;
@@ -242,7 +241,6 @@ int main(int argc, const char *argv[]) {
 
   printf("------------------------------------------------------------------\n");
   printf("Running %s with parameters:\n", argv[0]);
-  int cond = 0;
   for(int i = 1; i < argc; i++) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
@@ -283,8 +281,6 @@ int main(int argc, const char *argv[]) {
       ln_energy_weights[i] = i/fix_kT;
     }
   }
-
-  double *state_density = new double[energy_levels]();
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[energy_levels]();
@@ -637,7 +633,6 @@ int main(int argc, const char *argv[]) {
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30;
   clock_t last_output = clock(); // when we last output data
 
-  int frame = 0;
   moves.total = 0;
   moves.working = 0;
 

@@ -136,7 +136,6 @@ int main(int argc, char *argv[]){
   double *density = new double[div];
 
   /////////////////////////////////////////////////////////////////////////////
-  int hours_now = 1;
   num_to_time = 1000;
   start = clock();
   num_timed = 0;

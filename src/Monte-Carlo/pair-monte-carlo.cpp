@@ -143,7 +143,6 @@ int main(int argc, char *argv[]){
   const int z0bins = path ? 1 : zbins/2; // half zbins because half of z0's are reflected
   const int a1_zbins = lenz/a1_dz/2; // again, reflection -> half bins needed
   const int a1_rbins = (a1_rmax - 2.0)/a1_dr;
-  const int a1_r1bins = lenx/a1_dr/2;
 
   const int path_rbins = (lenx/2.0 - 2)/path_dz;
   const int path_thetabins = M_PI/2/path_dtheta;
@@ -310,7 +309,6 @@ int main(int argc, char *argv[]){
   double *density = new double[div];
 
   /////////////////////////////////////////////////////////////////////////////
-  int hours_now = 1;
   num_to_time = 1000;
   start = clock();
   num_timed = 0;
@@ -487,8 +485,6 @@ int main(int argc, char *argv[]){
               printf("Error creating file %s\n", finalfilename);
               return 1;
             }
-            const double r0min = l*dr;
-            const double r0max = (l+1)*dr;
 
             const double density0 = path
               ? double(path_density_histogram[l]*N)/double(count)/density_shell0_volume/2.0
@@ -594,13 +590,10 @@ int main(int argc, char *argv[]){
               const double r1 = distXY(spheres[k], spheres[i]);
               const int r1_i = int(r1/dr);
               const double r01 = distXYZ(spheres[k], spheres[i]);
-              const int r01_i = int(r01/dr);
               const int a1_r01_i = int((r01 - 2.0)/a1_dr);
               // want a1_r01_i to be 0 for r01 in (2+dr/2, 2+dr*3/2) so that we get bins
               // centered around rounded numbers.
 
-              const double sph_r1 = distXYZ(spheres[k], Vector3d(0,0,-reflect*lenz/2));
-              const int sph_r1_i = int(sph_r1/dr);
               if (r1_i < rbins) { // ignore data past outermost complete cylindrical shell
                 const int index = z0_i*rbins*zbins + r1_i*zbins + z1_i;
                 histogram[index] ++;

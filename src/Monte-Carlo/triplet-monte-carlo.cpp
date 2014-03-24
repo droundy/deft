@@ -321,7 +321,6 @@ int main(int argc, char *argv[]){
   for (long l=0; l<div; l++) shells[l] = 0;
 
   /////////////////////////////////////////////////////////////////////////////
-  int hours_now = 1;
   num_to_time = 1000;
   start = clock();
   num_timed = 0;
@@ -514,12 +513,6 @@ int main(int argc, char *argv[]){
           }
           // finding the difference between the last point coming over and the first
           // point in the theta band
-          const double z4 = path_radius*3.0;
-          const double x4 = path_cyl_dr/2.0;
-          // const double z5 = (4.0*R + path_dr/2.0) + (2.0*R + path_dr/2.0)*cos(path_dtheta/2.0);
-          // const double x5 = (2.0*R + path_dr/2.0)*sin(path_dtheta/2.0);
-          // s += sqrt((x5-x4)*(x5-x4) + (z5-z4)*(z5-z4));
-          // ////
           s -= path_radius*path_dtheta/2.0;
           for(int i=path2_zbins; i<path2_zbins+path2_thetabins; i++) {
             const double probability = double(path2_histogram[i])

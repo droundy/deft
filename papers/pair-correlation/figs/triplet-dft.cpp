@@ -186,7 +186,6 @@ double mc(double local_eta, double r, double r_step, double g[]) {
   //printf("low_eta_i = %d and high_eta_i = %d\n", low_eta_i*num_r_in_gmc+j, high_eta_i*num_r_in_gmc+j);
   //fflush(stdout);
   fac = (local_eta-(low_eta_i)*eta_step)/eta_step;
-  double ghere = (1-fac)*g_low_eta + fac*g_high_eta;
   return (1-fac)*g_low_eta + fac*g_high_eta;
 }
 

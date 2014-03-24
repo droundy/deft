@@ -35,7 +35,6 @@ Functional f = /*IdealGasOfVeff() + */ 1e6*sqr(n0 - Functional(hughes_water_prop
 
 int main(int, char **argv) {
   int retval = 0;
-  const double kB = 3.16681539628059e-6; // Boltzmann's constant in Hartree/Kelvin
   LiquidProperties prop = hughes_water_prop;
   prop.lengthscale = 2;
   double criten = 0;

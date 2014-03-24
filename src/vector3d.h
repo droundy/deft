@@ -1,5 +1,6 @@
 #include <math.h>
 #include "MersenneTwister.h"
+#include <cassert>
 
 #pragma once
 
@@ -70,6 +71,7 @@ class vector3d {
     case 1: return y;
     case 2: return z;
     }
+    assert(0);
   }
   const double operator[](const unsigned int i) const {
     switch(i) {
@@ -77,6 +79,7 @@ class vector3d {
     case 1: return y;
     case 2: return z;
     }
+    assert(0);
   }
 
   double dot(const vector3d &v) const {

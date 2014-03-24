@@ -4,8 +4,18 @@ CacheDir(os.environ['HOME'] + '/.cache/scons')
 
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
-env.MergeFlags('-Wall -Werror -ansi')
-env.MergeFlags('-Wno-unused-variable -Wno-unused-parameter -Wno-return-type')
+env.MergeFlags('-Werror -ansi')
+
+# The following is approximately equal to -Wall, but we use a additive
+# set of statements, since the set of warnings encompased in -Wall
+# sometimes changes in ways that cause incompatibilities.
+env.MergeFlags('-Waddress -Warray-bounds -Wc++11-compat -Wchar-subscripts ' +
+               '-Wenum-compare -Wcomment -Wformat -Wmaybe-uninitialized -Wmissing-braces ' +
+               '-Wnonnull -Wparentheses -Wreorder -Wreturn-type ' +
+               '-Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 ' +
+               '-Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function ' +
+               '-Wunused-label -Wunused-value -Wunused-variable')
+
 env.MergeFlags('-O3') # add -g and possibly -fno-inline here to enable debugging
 
 # The following flags enable gcc to eliminate unused code from the

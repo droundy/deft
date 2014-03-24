@@ -60,8 +60,6 @@ int run_walls(double eta, double temp) {
 }
 
 int main(int, char **argv) {
-  const double kT = 0.01; // room temperature in Hartree, approximately
-
   int retval = 0;
 
   retval += run_walls(0.4, 0.01);

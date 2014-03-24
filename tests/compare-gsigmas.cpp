@@ -26,7 +26,6 @@ double my_density(Cartesian r) {
   const Cartesian center(1, 0, 0);
   const Cartesian dr(r - center);
   const double width = 1;
-  const double drmag = sqrt(dr*dr);
   //if (drmag > 2*width) return 0;
   const double max_density = 1/(4*M_PI/3.0);
   const double min_density = 1e-8*max_density;

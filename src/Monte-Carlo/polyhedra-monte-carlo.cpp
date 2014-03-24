@@ -262,7 +262,6 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   printf("----------------------------------------------------------------------\n");
   printf("Running %s with parameters:\n", argv[0]);
-  int cond = 0;
   for(int i=1; i<argc; i++) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
@@ -310,7 +309,7 @@ periodicity/dimensions are not set by default and are required.\n");
 
 
   polyhedron *polyhedra = new polyhedron[N];
-  long dZ = 0;
+  // long dZ = 0;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -464,7 +463,6 @@ periodicity/dimensions are not set by default and are required.\n");
       e2 *= space;
       e3 *= space;
       const vector3d offset = vector3d(2, 2, 2)*fac*space;
-      int i=0;
       bool *spot_used = new bool[8*ne1*ne2*ne3]();
       for(int i=0; i<N; i+=2) {
         int e1_i, e2_i, e3_i;

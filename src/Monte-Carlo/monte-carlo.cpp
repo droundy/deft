@@ -289,7 +289,6 @@ int main(int argc, char *argv[]){
     ScenConShells[l]=0;McenConShells[l]=0;LcenConShells[l]=0;GcenConShells[l]=0;
   }
   /////////////////////////////////////////////////////////////////////////////
-  int hours_now = 1;
   num_to_time = 1000;
   start = clock();
   num_timed = 0;
