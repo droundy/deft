@@ -19,27 +19,27 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [200, 1000]
 
-plt.title('histogram with well width %g and filling fraction %g' % (ww, ff))
+plt.title('Histogram with well width %g and filling fraction %g' % (ww, ff))
 
 data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N))
 energy = -data[:,0]/N
 DS = data[:,1]
 DS /= sum(DS)
-plt.semilogy(energy,DS,'.', label='$kT = \infty$')
+plt.semilogy(energy,DS,'.', label='$kT = \infty$ and $N=%d$' % N)
 
 
 data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, 1))
 energy = -data[:,0]/N
 DS = data[:,1]
 DS /= sum(DS)
-plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$' % 1)
+plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$ and $N=%d$' % (1, N))
 
 
 data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, 0.1))
 energy = -data[:,0]/N
 DS = data[:,1]
 DS /= sum(DS)
-plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$' % 0.1)
+plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$ and $N=%d$' % (0.1, N))
 
 
 plt.xlabel('$E/N\epsilon$')
