@@ -38,8 +38,8 @@
   averaged distribution function at contact.  This results in a
   functional that is efficient to compute, and predicts the pair
   distribution function as well as the most accurate existing
-  analytical approximation.  \fixme{needs special attention.}
-  \fixme{add acronym, and discuss separable vs. non}
+  analytical approximation.  \davidsays{Jeff will rewrite this
+    abstract.}
 \end{abstract}
 
 \maketitle
@@ -48,6 +48,13 @@
 % The following are papers that use a SAFT-based classical DFT with
 % all the terms that should be non-local being non-local.
 \newcommand\saftnonlocaldft{}
+
+\davidsays{Everyone reads a print copy of the the paper by Tuesday
+  evening.  Then Paho submits!}
+
+\davidsays{Paho volunteered to check over and figure out what to do
+  with the $HS$ in $g$.  Can we get away with $HS$ everywhere?
+  Defining two macros so that we can go back and forth.}
 
 The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
@@ -72,7 +79,7 @@ density~\cite{ jain2007modified, gloor2007prediction,
   sundararaman2012computationally, marshall2013density}.  The
 perturbation theory treatment of intermolecular interactions relies on
 the pair distribution function of the reference fluid:
-$g^{(2)}(\rr_1,\rr_2)$.  Unlike the radial distribution function of a
+$g_{HS}^{(2)}(\rr_1,\rr_2)$.  Unlike the radial distribution function of a
 homogeneous fluid, there does not currently exist a tractable form for
 the pair distribution function of an inhomogeneous hard-sphere fluid,
 suitable for use in constructing a density
