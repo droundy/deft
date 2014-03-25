@@ -30,16 +30,23 @@
 %\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-  We have developed an approximation for the pair distribution
-  function of hard spheres, which is based on the average value of the
-  pair distribution function at contact we recently developed.  Our
-  pair distribution function is constructed so as to be computable
-  with only single-site convolutions and to accurately reproduce the
-  averaged distribution function at contact.  This results in a
-  functional that is efficient to compute, and predicts the pair
-  distribution function as well as the most accurate existing
-  analytical approximation.  \davidsays{Jeff will rewrite this
-    abstract.}
+We introduce an approximation for the pair distribution function of
+the inhomogeneous hard sphere fluid. Instead of relying on simple
+convolutions of density, our approximation incorporates a radial
+distribution function that is dependant upon a recently published
+averaged pair distribution function at contact which has been shown to
+give good results. We develop a separable form of this radial
+distribution function that achieves greater computational efficiency
+by allowing for the use of fast Fourier transforms. We compare results
+for this separable version of our pair distribution approximation with
+a Monte-Carlo based version, two previously published works, and
+Monte-Carlo simulation, showing favorable results.  \jeffsays{In this
+  I refer to the 'radial distribution function at contact'.  In the
+  text (and in our previous paper) this is refered to using
+  'correlation' versus 'distribution'.  I'm confused about how we
+  switch back and forth in this paper.  Is it that we always refer to
+  the contact pair function as correlation but the others as
+  distribution?  Otherwise I didn't see any problems with the text.}
 \end{abstract}
 
 \maketitle
