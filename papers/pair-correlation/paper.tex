@@ -40,13 +40,7 @@ distribution function that achieves greater computational efficiency
 by allowing for the use of fast Fourier transforms. We compare results
 for this separable version of our pair distribution approximation with
 a Monte-Carlo based version, two previously published works, and
-Monte-Carlo simulation, showing favorable results.  \jeffsays{In this
-  I refer to the 'radial distribution function at contact'.  In the
-  text (and in our previous paper) this is refered to using
-  'correlation' versus 'distribution'.  I'm confused about how we
-  switch back and forth in this paper.  Is it that we always refer to
-  the contact pair function as correlation but the others as
-  distribution?  Otherwise I didn't see any problems with the text.}
+Monte-Carlo simulation, showing favorable results.
 \end{abstract}
 
 \maketitle
@@ -252,13 +246,8 @@ for this averaged value of the pair distribution function at contact
 for a variety of interfaces, and over a wide range of densities.
 
 \section{Contact value approximation}
-%% We approximate the pair correlation with the average of two radial
-%% distribution functions, evaluated at the distance between the two
-%% points, that are themselves functions of the averaged pair correlation
-%% at contact $g_{\sigma}(\rr)$ discussed above~\cite{schulte2012using},
-%% evaluated at the two points.
 In the approaches for the pair distribution function mentioned above,
-the radial distribution function used to approximate pair correlation
+the radial distribution function used in the approximation
 was dependent upon the density averaged over some volume.  We seek to
 achieve greater accuracy by using instead a function dependent upon
 our averaged $g_{\sigma}(\rr)$ discussed above, which holds more
@@ -267,7 +256,7 @@ convolution of the density.
 %
 We construct the CVA with the average of two radial distribution
 functions, evaluated at the distance between the two points, that are
-themselves functions of the averaged pair correlation at contact
+themselves functions of the averaged pair distribution function at contact
 $g_{\sigma}(\rr)$ evaluated at the two points:
 %
 %% We therefore seek a function form
@@ -306,6 +295,17 @@ CVA-S, which we will describe in the next section.
 \newcommand\kappaZ{\kappa_2}
 
 \input{figs/fit-parameters}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
+  %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
+  \caption{Plot of the hard-sphere radial distribution function, with
+    our separable fit.  The solid lines show the true radial
+    distribution function $g(r)$, and the dashed lines show our
+    separable fit to the radial distribution functions
+    $g_S(r)$.}\label{fig:radial-distribution}
+\end{figure}
 
 \section{Separable radial distribution function for the CVA}
 
@@ -353,16 +353,6 @@ efficiently computed using fast Fourier transforms.
 %% \begin{align}
 %%   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
 %% \end{align}
-\begin{figure}
-  \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-g2}% \\
-  %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
-  \caption{Plot of the hard-sphere radial distribution function, with
-    our separable fit.  The solid lines show the true radial
-    distribution function $g(r)$, and the dashed lines show our
-    separable fit to the radial distribution functions
-    $g_S(r)$.}\label{fig:radial-distribution}
-\end{figure}
 
 We construct $g_S(r, g_\sigma)$ to satisfy several constraints.
 Naturally, we match the value at contact:
