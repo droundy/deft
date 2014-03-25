@@ -434,6 +434,6 @@ title = r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$'
 twod_plot.set_title(title +  ' at $\eta = %g$' % ff)
 xplot.set_ylabel(title)
 #fig.tight_layout(rect=[0, .03, 1, 1])
-savefig("figs/triplet-correlation-pretty-inbetween-%d.pdf" % (int(ff*10)))
+savefig("figs/triplet-correlation-pretty-inbetween-%d.pdf" % (int(ff*10)), transparent=True)
 show()
 
