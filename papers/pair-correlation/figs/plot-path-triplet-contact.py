@@ -277,11 +277,11 @@ for name in plots:
   sub_xlim = (1.8, z_c.max())
   suba.set_xlim(sub_xlim)
   for i in suba.spines.itervalues():
-    i.set_linewidth(2)
+    i.set_linewidth(1)
   if name == 'this-work': # only want to draw rectangle once
     zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
                               sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0],
-                              facecolor='none', linewidth=2))
+                              facecolor='none', edgecolor='#cccccc', linewidth=1))
 
 xplot.axvline(x=xmin, color='k')
 zplot.axvline(x=2*rpath, color='k')

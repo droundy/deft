@@ -39,8 +39,8 @@ plt.figure(figsize=(6,4))
 
 plt.plot(mc_z0[::10], mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 plt.plot(tw_z0, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])
-plt.plot(s_z0, s_dadz, styles.plot['sokolowski'], label=styles.title['sokolowski'])
 plt.plot(twmc_z0, twmc_dadz, styles.plot['this-work-mc'], label=styles.title['this-work-mc'])
+plt.plot(s_z0, s_dadz, styles.plot['sokolowski'], label=styles.title['sokolowski'])
 
 plt.xlim([-.5, 6])
 plt.legend(loc='best').draw_frame(False)

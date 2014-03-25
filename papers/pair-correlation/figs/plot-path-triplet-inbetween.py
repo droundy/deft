@@ -278,17 +278,18 @@ for name in plots:
   suba = axes([.77, .59, .195, .28])
   suba.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
   sub_ylim = (1.8, 2.5)
+  suba.set_xticks([2, 3, 4, 5, 6])
   suba.set_yticks([2, 2.5])
   suba.set_ylim(sub_ylim)
   sub_xlim = (2.5, z_c.max())
   suba.set_xlim(sub_xlim)
 
   for i in suba.spines.itervalues():
-    i.set_linewidth(2)
+    i.set_linewidth(1)
   if name == 'this-work': # only want to draw rectangle once
     zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
                               sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0],
-                              facecolor='none', linewidth=2))
+                              facecolor='none', edgecolor='#cccccc', linewidth=1))
 
 
 def get_closest(x, y, xref, space):
