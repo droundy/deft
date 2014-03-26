@@ -2,11 +2,15 @@
 \usepackage{graphicx}% Include figure files
 \usepackage{color}
 
+\newcommand\xx{\mathbf{x}}
+\newcommand\rr{\mathbf{x}}
+\newcommand\fixme[1]{\textcolor{red}{\textbf{[#1]}}}
+
 \begin{document}
 \title{Classical density functional theory for the square-well liquid}
 
 \author{Student One}
-\author{Student Two}
+\author{Michael MI? Perlin}
 \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
@@ -15,6 +19,111 @@
 \end{abstract}
 
 \maketitle
+
+The SAFT Helmholtz free energy is composed of five terms:
+\begin{equation} \label{eq:SAFT-free-energy}
+  F = F_\textit{id} + F_\textit{hs} + F_\textit{disp} +
+  F_\textit{assoc} + F_\textit{chain},
+\end{equation}
+where the first three terms---ideal gas, hard-sphere repulsion and
+dispersion---encompass the \emph{monomer} contribution
+to the free energy, the fourth is the \emph{association} free energy,
+describing hydrogen bonds, and the final term is the chain formation
+energy for fluids that are chain polymers.  While a
+number of formulations of SAFT have been published, we will focus on
+SAFT-VR\cite{gil-villegas-1997-SAFT-VR}.
+
+\newcommand\etadisp{\ensuremath{\eta_\textit{d}}}
+\newcommand\epsilondisp{\ensuremath{\epsilon_\textit{d}}}
+\newcommand\lambdadisp{\ensuremath{\lambda_\textit{d}}}
+\newcommand\lscale{\ensuremath{s_d}}
+
+
+\section{Theory}
+
+\subsection{Thermodynamic perturbation theory}
+
+\fixme{Add here an introduction to thermodyamic perturbation theory,
+  explaining $a_1$ and $a_2$ and their ``exact'' formulas that we wish
+  to approximate.}
+
+
+
+\subsection{Square well contribution in homogeneous case}
+The square well contribution to the free energy is based on
+thermodynamic perturbation theory (sometimes known as the ``high
+temperature expansion'').  We use a dispersion term based on the
+SAFT-VR approach\cite{gil-villegas-1997-SAFT-VR}, which has two
+parameters an interaction energy $\epsilondisp$ and a length scale
+$\lambdadisp R$.
+
+The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
+\begin{align}
+  F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx,
+\end{align}
+where $a_1$ and $a_2$ are the first two terms in a high-temperature
+perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
+the mean-field dispersion interaction. The second term, $a_2$, describes the
+effect of fluctuations resulting from compression of the fluid due
+to the dispersion interaction itself, and is approximated
+using the local compressibility approximation (LCA), which
+assumes the energy fluctuation is simply related to the
+compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
+
+\fixme{Add here a complete exposition of this functional form,
+  reproducing what Gil Villegas says.}
+
+\subsection{A simple weighted density approach}
+
+Hughes \emph{et al.} used a simple weighted density approach to
+approximate the square-well contribution to the free energy, which we
+will describe here~\cite{hughes2013classical}.
+
+The form of $a_1$ and $a_2$ for SAFT-VR is given in
+reference~\cite{gil-villegas-1997-SAFT-VR}, expressed in terms
+of the packing fraction.  In order to apply this form to an
+\emph{inhomogeneous} density distribution, we construct an effective local
+packing fraction for dispersion $\etadisp$, given by a Gaussian
+convolution of the density:
+\begin{align}
+%    ((4/3.0*M_PI)*Pow(3)(R)*GaussianConvolve(2*lambdainput*lscale*radius,
+%                                             2*lambdaE*length_scalingE*Rexpr)
+%  \etadisp(\xx) &= \color{red}
+%  \int \frac{\Theta(2\lambdadisp\lscale R - \left|\xx-\xx'\right|)}{
+%             \left(2\lambdadisp\lscale\right)^3} n(\xx') d\xx'.
+  \etadisp(\xx) &= \frac{1}{6\sqrt{\pi} \lambdadisp^3\lscale^3}
+  \int n(\xx')\exp\left({-\frac{|\xx-\xx'|^2}{2(2 \lambdadisp
+      \lscale R)^2}}\right)d\xx'.
+\end{align}
+This effective packing fraction is used throughout the dispersion
+functional, and represents a packing fraction averaged over the
+effective range of the dispersive interaction.  Here we have
+introduced an additional empirical parameter $\lscale$ which modifies
+the length scale over which the dispersion interaction is correlated.
+
+\subsection{Others}
+
+\fixme{Check out what other groups have done, especially Jackson
+  and/or Gross.  Also Arias.}
+
+\subsection{Weighted density approach}
+
+\cite{peng2008meanfield} used by
+\cite{sundararaman2013efficient} and many others.
+
+See also \cite{yu2009novel} which explicitly addresses the square well
+liquid.
+
+Also look up \cite{shen2013hybrid} which might follow Yu above.
+
+\subsection{Using the pair distribution function}
+
+\fixme{We have introduced an approximation to the pair distribution
+  function...}
+
+\section{Simulation}
+
+\fixme{A short explanation of MC methods here?}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/periodic-ww13-ff30-N200-E.pdf}
@@ -25,5 +134,30 @@
   \includegraphics[width=\columnwidth]{figs/periodic-ww30-ff30-N200-E.pdf}
   \caption{A simple DOS plot!}
 \end{figure}
+
+\section{Results}
+
+\subsection{Homogeneous fluid}
+
+\fixme{Here we present the comparison between various theories and in
+  the homogeneous case.  This will mostly be our pair distribution
+  function vs. Gil Villegas.}
+
+\subsection{Hard wall}
+
+\fixme{Here we present the comparison between various theories and
+  simulation for a fluid at a hard wall.}
+
+\subsection{Test particle}
+
+\fixme{Here we present the comparison between various theories and
+  simulation for a test-particle simulation (i.e. the radial
+  distribution function).}
+
+\section{Conclusion}
+
+\fixme{We have an awesome theory.}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
