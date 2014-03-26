@@ -463,11 +463,22 @@ results that is not reflected in our approximation.
     $\rr_1$ and $\rr_2$ are in contact (a,b) and when $\rr_1$ and
     $\rr_2$ are separated by a distance $2.1\sigma$ (c,d). On the left
     are 2D plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ as $\rr_3$
-    varies. \plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}. Note that an
-    asymmetry is introduced in the theoretical results, so their
-    values along a mirrored path are also shown, with arrows along the
-    curve indicating the path direction, as explained in the
-    text.} \label{fig:triplet-contact-distribution}
+    varies. %\plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}.
+%
+    The top halves of these figures show the results of Monte Carlo
+    simulations, while the bottom halves show the CVA-S.  On the right
+    are plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ on the paths illustrated
+    in the figures to the left.
+%
+    We also plot these curves along a left-right mirror image of this
+    path.  The data for the right-hand paths (as shown in the 2D
+    images) are marked with right-pointing triangles, while the
+    left-hand paths are marked with left-pointing triangles.
+%
+    %% The line styles are the same as in
+    %% Fig.~\ref{fig:pair-distribution}.
+  }
+  \label{fig:triplet-contact-distribution}
 \end{figure*}
 
 Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
@@ -519,24 +530,24 @@ the inhomogeneous density configuration in which one sphere (the
 ``test particle'') is fixed
 at position $\rr_1$.  This method treats one of the three
 positions---the location of the test particle---differently from the
-others, which means that a poor approximation to the pair distribution
-function may break the symmetry which is present in the true triplet
-distribution function.
+other two, which means that a poor approximation to the pair distribution
+function may break the symmetry between $\rr_1$ and $\rr_2$ which is
+present in the true triplet distribution function.
 
 Figures~\ref{fig:triplet-contact-distribution}a
 and~\ref{fig:triplet-contact-distribution}c compare the triplet
 distribution function at a packing fraction of 0.3 computed using the
 CVA-S with results from Monte Carlo simulations. In
 Figure~\ref{fig:triplet-contact-distribution}a the spheres at $\rr_1$
-and $\rr_2$ are in contact, in
+and $\rr_2$ are in contact; in
 Figure~\ref{fig:triplet-contact-distribution}c they are spaced so that
-a third sphere can just fit between them, and in both figures $\rr_3$
+a third sphere can just fit between them; and in both figures $\rr_3$
 is varied. The test-particle position for the CVA-S in each case is
 $\rr_1$, which is on the left-hand side of the figure. We see
-reasonable agreement, with flatter oscillations in the CVA-S at larger
-distances. Also, the Monte Carlo results have perfect left-right
+reasonable agreement, with fewer oscillations in the CVA-S at larger
+distances. Also, the Monte Carlo results have the expected left-right
 symmetry, while the CVA-S has an asymmetry introduced with
-the test particle due to imperfections in the pair distribution
+the test particle due to errors in the pair distribution
 function. Most notably, the CVA-S has less angular dependence at
 contact with the test particle than it does with the sphere at
 $\rr_2$.
@@ -545,24 +556,28 @@ Figures~\ref{fig:triplet-contact-distribution}b
 and~\ref{fig:triplet-contact-distribution}d show the triplet
 distribution function as plotted along the paths illustrated in
 Figures~\ref{fig:triplet-contact-distribution}a
-and~\ref{fig:triplet-contact-distribution}c. As the theoretical
-results are asymmetric, they are also plotted along similar paths that
-travel to the left, along the test particle. The different paths are
-indicated by arrows along the curves, with right-facing arrows
+and~\ref{fig:triplet-contact-distribution}c.  We also plot the
+results along a left-right mirror image path, corresponding to
+swapping $\rr_1$ and $\rr_2$. The two mirror-image paths are
+distinguished by arrows (triangles) along the curves, with right-facing arrows
 indicating the paths shown in
 Figures~\ref{fig:triplet-contact-distribution}a and
 \ref{fig:triplet-contact-distribution}c, and left-facing arrows
-indicating paths traveling along the test particle.  As the work of
-Fischer and Methfessel is only defined in contact, it is only plotted
-in Figure~\ref{fig:triplet-contact-distribution}b and only along the
-portion of the path shown that is in contact with $\rr_2$, and arrows
-are omitted. Again, the CVA-S underestimates the oscillations,
-especially in contact with the test particle when the points $\rr_1$
-and $\rr_2$ are separated by a distance of $2.1\sigma$, as seen in
-Figure~\ref{fig:triplet-contact-distribution}d. Otherwise, all methods
-perform similarly, with the method of Fischer and Methfessel giving
-the best results when the spheres at $\rr_1$ and $\rr_2$ are in
-contact.
+indicating the mirror image path.  As the work of
+Fischer and Methfessel is only defined when $\rr_2$ and $\rr_3$ are in
+contact, we only plot it along the
+central portion of the path, which is in contact with $\rr_2$, and arrows
+are omitted.
+%
+All methods perform similarly over this range with one exception.  The
+separable CVA-S method once again underestimates the oscillations on
+the left-hand side of the curve, where $\rr_2$ and $\rr_3$ are
+separated by a large distance.  On the path where $\rr_2$ and $\rr_3$
+are closer, the CVA-S method compares favorably with the other
+approximations.  This is consistent with
+Fig.~\ref{fig:radial-distribution}, which shows that $g_S(r)$ fits
+well the first peak of $g(r)$, but has fewer oscillations at large
+distances.
 
 
 % Figure~\ref{fig:triplet-contact-distribution} compares the triplet

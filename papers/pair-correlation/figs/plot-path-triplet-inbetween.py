@@ -19,7 +19,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski']#, 'fischer'] # , 'gloor'
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor'
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -272,7 +272,7 @@ for name in plots:
   if name != 'fischer':
     # Fischer et al only predict pair distribution function in contact
     xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
-    zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
+    zplot.plot(z_z, g_z, styles.plot[name])
 
   # insert zoomed-in subplot
   suba = axes([.77, .59, .195, .28])
@@ -374,7 +374,7 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
 
 
 #xplot.set_ylabel(r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$')
-xplot.legend(loc='upper left', ncol=1).draw_frame(False)
+zplot.legend(loc='upper left', ncol=1).draw_frame(False)
 
 Ax = -3.9
 Az = rpath
