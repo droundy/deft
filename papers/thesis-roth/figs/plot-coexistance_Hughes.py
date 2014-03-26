@@ -7,21 +7,18 @@ import pylab
 import Hughes
 
 # Read in data
-data = pylab.loadtxt('npart_Hughes-out.dat')
+data = pylab.loadtxt('figs/npart_Hughes-out.dat')
 
 T = data[:,0]
 nvapor = data[:,1]
 nliquid = data[:,2]
 
-etavapor = data[:,1]*pylab.pi*Hughes.sigma**3/6
-etaliquid = data[:,2]*pylab.pi*Hughes.sigma**3/6
-
 # Plot the curve
-pylab.plot(etavapor, T)
-pylab.plot(etaliquid, T)
+pylab.plot(nvapor, T,'.-')
+pylab.plot(nliquid, T,'.-')
 
-pylab.xlabel(r'$\eta$')
+pylab.xlabel('n')
 pylab.ylabel('T (K)')
 
-pylab.savefig('coexistance_Hughes.pdf')
+pylab.savefig('figs/coexistance_Hughes.pdf')
 pylab.show()

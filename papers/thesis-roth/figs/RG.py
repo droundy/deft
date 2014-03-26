@@ -46,9 +46,9 @@ def VD(i):
 # Free energy density, defined by an iterative process
 def fiterative(T,n,i):
     # eqn (55) Forte 2011:
-    fnaught = SW.fid(T,n) + SW.fhs(T,n) + SW.a2(n) # SW (Hughes) a2 is the same as Forte's f2
+    fnaught = SW.fid(T,n) + SW.fhs(T,n) + SW.a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
     # eqn (5) from Forte 2011:
-    for j in range(i+1): # The function range(x) only goes up to x-1; range(x+1) will include x
+    for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
             f = fnaught
         else:
@@ -115,7 +115,7 @@ def u(T,n,lambda_d,i):
 # Total
 # Eqn (32), Forte 2011; f1 = fatt (see paragraph after eqn 55)
 def ftot(T,n,i):
-    return fiterative(T,n,i) + SW.a1SW(n) # SW.a1SW is the same as Forte's f1
+    return fiterative(T,n,i) + SW.a1SW(n)*n # SW.a1SW is the same as Forte's f1
 
 # Grand free energy per volume
 def phi(T,n,nparticular,i):

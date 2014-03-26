@@ -8,7 +8,7 @@
 %% Definitions
 
 % 1/k_B/T
-\newcommand{\kt}{k_BT}
+\newcommand{\kT}{k_BT}
 
 % special values for n
 \newcommand{\npart}{n_{particular}}
@@ -59,9 +59,9 @@ iterations to infinity and adds in the attractive component:
 \end{equation}
 The initial free energy density, $f_0$ depends on the liquid model of study. For this work, I use the square well model:
 \begin{equation}
-  f_0(T,n) = f_{id}(T,n) + f_{HS}(T,n) + a_2^{SW}(T,n)\ ,
+  f_0(T,n) = f_{id}(T,n) + f_{HS}(T,n) + \frac{a_2^{SW}(T,n)}{\kT}\ ,
 \end{equation}
-where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kt$.~\cite{Gil-Villegas97}
+where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kT$.~\cite{Gil-Villegas97}
 
 \subsection{Coexistence Curve Algorithm}
 Coexistence curves are found by modifying the chemical potential $\mu$
@@ -93,7 +93,32 @@ higher temperature.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
 
-\includegraphics[width=\columnwidth]{figs/coexistance_SW}
+When only including $f^{id}$ and $f^{HS}$ terms, SW and SW+RG match up
+nicely. Including the $a_1^{SW}$ and $a_2$ terms doesn't work so
+well...
+
+\begin{figure}
+  \begin{center}
+  \includegraphics[width=\columnwidth]{figs/coexistance_SW}
+  \end{center}
+  \caption{Liquid-vapor coexistance for a square well liquid.}
+  \label{fig:coexistance_SW}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+%  \includegraphics[width=\columnwidth]{figs/SW-RG-compare}
+  \end{center}
+  \caption{Comparison of free energy density for SW and SW+RG at low temperature}
+  \label{fig:SW-RG-compare-loT}
+\end{figure}
+
+%% \begin{figure}
+%%   \begin{center}
+%%   \includegraphics[width=\columnwidth]{figs/}
+%%   \end{center}  \caption{Comaprison of SW and RG near the critical point}
+%%   \label{fig:SW-RG-compare-hiT}
+%% \end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
