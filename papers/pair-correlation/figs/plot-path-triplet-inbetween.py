@@ -309,6 +309,24 @@ x_ref = arange(-spacing/2, xlow-spacing/2, -spacing)
 z_ref = arange(rpath + 0.2 + spacing/2, 10+spacing, spacing)
 
 for name in ['this-work', 'this-work-mc', 'sokolowski']:
+  # backward lines
+  g3_path = read_triplet_back(ff, name)
+  x = g3_path[:,3]
+  z = g3_path[:,2]
+  g = g3_path[:,1]
+  zcontact = z.max()
+  z = zcontact + (zcontact - z)
+
+  g_x = g[z==zcontact]
+  x_x = x[z==zcontact]
+  g_z = g[z>zcontact]
+  z_z = z[z>zcontact]
+
+  xplot.plot(x_x, g_x, styles.plot[name])
+  zplot.plot(z_z, g_z, styles.plot[name])
+  suba.plot(z_z, g_z, styles.plot[name])
+
+for name in ['this-work', 'this-work-mc', 'sokolowski']:
   # forward arrows
   g3_path = read_triplet_path(ff, name)
   x = g3_path[:,3]
@@ -345,14 +363,11 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
 
   start = styles.start[name]*spacing - 0.5*spacing
 
-  xplot.plot(x_x, g_x, styles.plot[name])
   x_x, g_x = get_closest(x_x, g_x, x_ref, start)
   xplot.plot(x_x, g_x, styles.plot_back[name], mec='none')
 
   start = styles.start[name]*spacing - 0.5*spacing
 
-  zplot.plot(z_z, g_z, styles.plot[name])
-  suba.plot(z_z, g_z, styles.plot[name])
   z_z, g_z = get_closest(z_z, g_z, z_ref, start)
   zplot.plot(z_z, g_z, styles.plot_back[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_back[name], mec='none')

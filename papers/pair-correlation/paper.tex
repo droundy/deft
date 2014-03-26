@@ -466,8 +466,8 @@ results that is not reflected in our approximation.
     varies. \plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}. Note that an
     asymmetry is introduced in the theoretical results, so their
     values along a mirrored path are also shown, with arrows along the
-    curve indicating the path
-    direction. \fixme{Explain paths and arrows more.}} \label{fig:triplet-contact-distribution}
+    curve indicating the path direction, as explained in the
+    text.} \label{fig:triplet-contact-distribution}
 \end{figure*}
 
 Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
@@ -496,7 +496,7 @@ radial distribution function from simulation.  When the two points
 $\rr_1$ and $\rr_2$ are both
 more than a radius away from contact, we find that any of these
 approaches gives a reasonable prediction, with the CVA-S
-underestimating the oscillations in $g_{HS}^{(2)}$, as expected based on
+underestimating the oscillations in $g^{(2)}$, as expected based on
 the fit in Fig.~\ref{fig:radial-distribution}.
 
 \subsection{Triplet distribution function}
@@ -523,37 +523,79 @@ others, which means that a poor approximation to the pair distribution
 function may break the symmetry which is present in the true triplet
 distribution function.
 
-Figure~\ref{fig:triplet-contact-distribution} compares the triplet
-distribution function at a packing fraction of 0.3 computed using the
-CVA-S with results from Monte Carlo simulation.  In each subfigure,
-$\rr_1$ and $\rr_2$ are held fixed, while the third position $\rr_3$
-is varied.  The test-particle position in each case is $\rr_1$, which
-is on the left-hand side of the figure.  In the color plots on the
-left, the first and second spheres are displayed in gray.  On the
-bottom half of figures~\ref{fig:triplet-contact-distribution}a
-and~\ref{fig:triplet-contact-distribution}c is the triplet
-distribution function as computed using the CVA-S.  The top half of
-those figures displays the triplet distribution function from Monte
-Carlo simulations.  Figures~\ref{fig:triplet-contact-distribution}b
-and~\ref{fig:triplet-contact-distribution}d show the triplet
-distribution function along the paths illustrated in the corresponding
-2D plots.
-
 Figures~\ref{fig:triplet-contact-distribution}a
-and~\ref{fig:triplet-contact-distribution}b show the triplet
-distribution function when two of the positions $\rr_1$ and $\rr_2$
-are in contact.  The triplet distribution function predicted by the
-CVA-S is slightly asymmetric, indicating a failure in thermodynamic
-consistency.  Once again, we observe the lack of oscillations at large
-distances.  Figures~\ref{fig:triplet-contact-distribution}c
+and~\ref{fig:triplet-contact-distribution}c compare the triplet
+distribution function at a packing fraction of 0.3 computed using the
+CVA-S with results from Monte Carlo simulations. In
+Figure~\ref{fig:triplet-contact-distribution}a the spheres at $\rr_1$
+and $\rr_2$ are in contact, in
+Figure~\ref{fig:triplet-contact-distribution}c they are spaced so that
+a third sphere can just fit between them, and in both figures $\rr_3$
+is varied. The test-particle position for the CVA-S in each case is
+$\rr_1$, which is on the left-hand side of the figure. We see
+reasonable agreement, with flatter oscillations in the CVA-S at larger
+distances. Also, the Monte Carlo results have perfect left-right
+symmetry, while the CVA-S has an asymmetry introduced with
+the test particle due to imperfections in the pair distribution
+function. Most notably, the CVA-S has less angular dependence at
+contact with the test particle than it does with the sphere at
+$\rr_2$.
+
+Figures~\ref{fig:triplet-contact-distribution}b
 and~\ref{fig:triplet-contact-distribution}d show the triplet
-distribution function when two of the positions $\rr_1$ and $\rr_2$
-are spaced so that the third could just fit between them.  Again, the
-triplet distribution function predicted by the CVA-S is slightly
-asymmetric, and lacks the oscillations seen in the Monte Carlo
-simulations at large distances.  \fixme{We need to discuss the plots
-  and the directions and arrows.} In both cases, our agreement with
-simulation is comparable to that of previous approximations.
+distribution function as plotted along the paths illustrated in
+Figures~\ref{fig:triplet-contact-distribution}a
+and~\ref{fig:triplet-contact-distribution}c. As the theoretical
+results are asymmetric, they are also plotted along similar paths that
+travel to the left, along the test particle. The different paths are
+indicated by arrows along the curves, with right-facing arrows
+indicating the paths shown in
+Figures~\ref{fig:triplet-contact-distribution}a and
+\ref{fig:triplet-contact-distribution}c, and left-facing arrows
+indicating paths traveling along the test particle.  As the work of
+Fischer and Methfessel is only defined in contact, it is only plotted
+in Figure~\ref{fig:triplet-contact-distribution}b and only along the
+portion of the path shown that is in contact with $\rr_2$, and arrows
+are omitted. Again, the CVA-S underestimates the oscillations,
+especially in contact with the test particle when the points $\rr_1$
+and $\rr_2$ are separated by a distance of $2.1\sigma$, as seen in
+Figure~\ref{fig:triplet-contact-distribution}d. Otherwise, all methods
+perform similarly, with the method of Fischer and Methfessel giving
+the best results when the spheres at $\rr_1$ and $\rr_2$ are in
+contact.
+
+
+% Figure~\ref{fig:triplet-contact-distribution} compares the triplet
+% distribution function at a packing fraction of 0.3 computed using the
+% CVA-S with results from Monte Carlo simulation.  In each subfigure,
+% $\rr_1$ and $\rr_2$ are held fixed, while the third position $\rr_3$
+% is varied.  The test-particle position in each case is $\rr_1$, which
+% is on the left-hand side of the figure.  In the color plots on the
+% left, the first and second spheres are displayed in gray.  On the
+% bottom half of figures~\ref{fig:triplet-contact-distribution}a
+% and~\ref{fig:triplet-contact-distribution}c is the triplet
+% distribution function as computed using the CVA-S.  The top half of
+% those figures displays the triplet distribution function from Monte
+% Carlo simulations.  Figures~\ref{fig:triplet-contact-distribution}b
+% and~\ref{fig:triplet-contact-distribution}d show the triplet
+% distribution function along the paths illustrated in the corresponding
+% 2D plots.
+
+% Figures~\ref{fig:triplet-contact-distribution}a
+% and~\ref{fig:triplet-contact-distribution}b show the triplet
+% distribution function when two of the positions $\rr_1$ and $\rr_2$
+% are in contact.  The triplet distribution function predicted by the
+% CVA-S is slightly asymmetric, indicating a failure in thermodynamic
+% consistency.  Once again, we observe the lack of oscillations at large
+% distances.  Figures~\ref{fig:triplet-contact-distribution}c
+% and~\ref{fig:triplet-contact-distribution}d show the triplet
+% distribution function when two of the positions $\rr_1$ and $\rr_2$
+% are spaced so that the third could just fit between them.  Again, the
+% triplet distribution function predicted by the CVA-S is slightly
+% asymmetric, and lacks the oscillations seen in the Monte Carlo
+% simulations at large distances.  \fixme{We need to discuss the plots
+%   and the directions and arrows.} In both cases, our agreement with
+% simulation is comparable to that of previous approximations.
 
 \begin{figure}
   \begin{subfigure}{1.0\columnwidth}
