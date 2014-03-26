@@ -14,6 +14,7 @@ def minimize(func,T,a,c,npart,i):
     T is the temp in Kelvin
     a and c are the initial guesses of density (make sure to put into atomic units!)
     npart is the term that determines chemical potential
+    i is the recursion depth
 
     """
 

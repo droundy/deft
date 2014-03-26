@@ -19,13 +19,15 @@ def plotID_ref_integrand(x):
     plt.xlabel('amplitude of wave-packet')
 
 def plotphi(T,n,npart,i):
-    plt.plot(n,RG.phi(T,n,npart,i))
+    plt.plot(n*RG.sigma**3*np.pi/6,RG.phi(T,n,npart,i))
     plt.ylabel(r'$\phi$')
-    plt.xlabel('n')
+    plt.xlabel(r'$\eta$')
 
 # plotID_integrand(amps)
 # plotID_ref_integrand(amps)
 
-plotphi(T,np.linspace(0,5,10000),0.0146971318221,0)
+n = np.linspace(0,0.1,1000)
+
+plotphi(T,n,0.171/(RG.sigma**3*np.pi/6),0)
 
 plt.show()

@@ -35,13 +35,13 @@ c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
 dc3 = -15.0427+2*5.30827*lambdaSW
 
 # derivate of a1VDW wrt eta
-# This is required for fmono
+# This is required for fdisp
 da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
 
 # Total free energy per volume
 # NB: Gil-Villegas also includes a Chain term; we do not deal with chains, so I leave it off
 def f(T,n):
-    return fid(T,n) + fmono(T,n) + fhs(T,n)
+    return fid(T,n) + fdisp(T,n) + fhs(T,n)
 
 # Grand free energy per volume
 def phi(T,n,nparticular):
@@ -90,10 +90,10 @@ def n2(n):
 def n3(n):
     return n*R**3*(4/3)*np.pi
 
-# Monomer
+# Dispersion
 # Hughes calls this Dispersion, Gil-Villegas calls it Monomer
 # This is taken from the code based on Hughes (Hughes.py)
-def fmono(T,n):
+def fdisp(T,n):
     return (a1SW(n) + 1/(k_B*T)*a2(n))*n
 
 # 1st term in High-temp perturbation expansion, for square well potential
