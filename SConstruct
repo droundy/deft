@@ -232,7 +232,8 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                       'papers/' + paper + '/paper.bbl'] +
                      Glob('papers/' + paper + '/figs/*.pdf') +
                      Glob('papers/' + paper + '/figs/*.jpg') +
-                     Glob('papers/' + paper + '/figs/*.png'))
+                     Glob('papers/' + paper + '/figs/*.png') +
+                     Glob('papers/' + paper + '/figs/*.tex'))
     Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.pdf')
     Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.bbl')
     Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
