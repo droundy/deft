@@ -227,7 +227,8 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                 source = ['papers/' + paper + '/paper.tex'])
     NoCache(p)
     Alias('papers', p)
-    env.Tar(target = 'papers/' + paper + '/arxiv.tar.gz',
+    tar_env = Environment(TARFLAGS = r"-c -z --transform 's/papers\///'")
+    tar_env.Tar(target = 'papers/' + paper + '/arxiv.tar.gz',
             source = ['papers/' + paper + '/paper.tex',
                       'papers/' + paper + '/paper.bbl'] +
                      Glob('papers/' + paper + '/figs/*.pdf') +
