@@ -116,10 +116,70 @@ liquid.
 
 Also look up \cite{shen2013hybrid} which might follow Yu above.
 
+\subsection{The contact value approximation for the hard-sphere pair distribution function}
+
+We have recently introduced an efficient approximation for the pair
+distribution function of the inhomogeneous hard-sphere fluid.  This
+approximation takes the form:
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g_S(r_{12}, g_\sigma(\rr_1)) +
+    g_S(r_{12}, g_\sigma(\rr_2))}{2} \label{eq:g2-our-mean}
+\end{align}
+where $g_S(r,g_\sigma)$ is a separable fit to the radial distribution
+function of the homogeneus hard-sphere fluid, and $g_\sigma(\rr)$ is
+an approximation for the pair distribution function of an
+inhomogeneous hard-sphere fluid averaged over contact with a sphere
+located at position $\rr$.
+
+\subsubsection{Separable radial distribution function
+  $g_S(r,g_\sigma)$}
+
+The separable radial distribution function $g_S(r,g_\sigma)$ is given
+by
+\newcommand\kappaO{\kappa_0}
+\newcommand\kappaI{\kappa_1}
+\newcommand\kappaZ{\kappa_2}
+\newcommand\kappazero{3.68}
+\newcommand\kappaone{2.16}
+\newcommand\kappatwo{2.79}
+
+\begin{multline}
+  g_S(r,g_\sigma) = 1 + (g_\sigma-1) e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
+  + (g_\sigma -1)(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
+  + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
+\end{multline}
+\begin{equation}
+  I(g_\sigma) = \kappaZ^5 \frac{
+    \frac{\chi-1}{24\eta} + (1-g_\sigma) \frac{(\kappaO-2
+      g_\sigma)(\kappaI^2 + 4 \kappaI + 6)}{\kappaI^4}
+    + (1-g_\sigma)\frac{\kappaO^2 + 2\kappaO + 2}{\kappaO}
+  }{2 \kappaZ^2 + 12 \kappaZ + 24}
+\end{equation}
+\begin{equation}
+  \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
+\end{equation}
+Finally, we can convert between the packing fraction $\eta$ and the
+radial distribution function at contact $g_\sigma$ using the
+Carnahan-Starling approximation for $g_\sigma$:
+\newcommand\nastyetacuberoot{\sqrt[3]{54 g_\sigma^2 -
+    6\sqrt{81g_\sigma^4 - 6g_\sigma^3}}}
+\begin{align}
+  g_\sigma &= \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}\text{, and its inverse} \\
+  \eta &= 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}.
+\end{align}
+This function includes three fitted parameters, $\kappaO =
+\kappazero$, $\kappaI = \kappaone$,
+and $\kappaZ = \kappatwo$.
+
+
+\subsubsection{Averaged pair distribution  $g_\sigma(\rr)$}
+
 \subsection{Using the pair distribution function}
+
 
 \fixme{We have introduced an approximation to the pair distribution
   function...}
+
 
 \section{Simulation}
 
