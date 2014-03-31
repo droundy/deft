@@ -62,7 +62,7 @@ The SAFT-VR dispersion free energy has the form~\cite{gil-villegas-1997-SAFT-VR}
   F_\text{disp}[n] &= \int \left(a_1(\xx) + \beta a_2(\xx)\right)n(\xx)d\xx,
 \end{align}
 where $a_1$ and $a_2$ are the first two terms in a high-temperature
-perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is 
+perturbation expansion and $\beta=1/k_BT$.  The first term, $a_1$, is
 the mean-field dispersion interaction. The second term, $a_2$, describes the
 effect of fluctuations resulting from compression of the fluid due
 to the dispersion interaction itself, and is approximated
@@ -72,6 +72,21 @@ compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
 \fixme{Add here a complete exposition of this functional form,
   reproducing what Gil Villegas says.}
+
+\fixme{Some notes are as follows:}
+In Gil-Villegas' paper, HS and Dispersion are wrapped up into the \textit{monomer} contribution, expressed in terms of energy densities as:
+\[
+  f_\text{mono} = f_\text{HS} - \frac{\alpha^\text{VDW}n}{kT}
+\]
+with $\alpha^\text{VDW}$ given by
+\[
+  \alpha^\text{VDW} = 2\pi\epsilon\int_\sigma^\infty r^2\phi(r)\,dr
+\]
+Then, the high-temp expansion is an expansion of the monomer term:
+\[
+  f_\text{mono} = f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
+\]
+\fixme{I'm not sure how to express this in terms of $F_\text{disp}[n]$ alone.}
 
 \subsection{A simple weighted density approach}
 
@@ -222,7 +237,7 @@ summarize the key results needed to implement this approximation.
 
 \section{Conclusion}
 
-\fixme{We have an awesome theory.}
+\fixme{We have an awesome theory. You should agree.}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
