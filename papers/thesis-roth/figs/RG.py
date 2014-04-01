@@ -115,15 +115,41 @@ def u(T,n,lambda_d,i):
 # Total
 # Eqn (32), Forte 2011; f1 = fatt (see paragraph after eqn 55)
 def ftot(T,n,i):
-    return fiterative(T,n,i) + SW.a1SW(n)*n # SW.a1SW is the same as Forte's f1
+    return fiterative(T,n,i) + SW.a1SW(n)*n # SW.a1SW*n is the same as Forte's f1
+
+# Pressure
+def P(T,n,i):
+  return n*df_dn(T,n,i) - ftot(T,n,i)
 
 # Grand free energy per volume
 def phi(T,n,nparticular,i):
     mu = df_dn(T,nparticular,i)
     return ftot(T,n,i) - mu*n
 
-# Derivative of free energy wrt number at const temp
-def df_dn(T,n,i):
-    # step size
-    dn = 1e-6*n
-    return (ftot(T,n + dn/2,i) - ftot(T,n - dn/2,i))/dn
+# # Derivative of free energy wrt number at const temp
+# def df_dn(T,n,i):
+#     # step size
+#     dn = 1e-6*n
+#     return (ftot(T,n + dn/2,i) - ftot(T,n - dn/2,i))/dn
+
+# Derivative of free energy wrt number (const. temp)
+# only depents on n (really? not T or i as well?)
+def df_dn(n):
+    # ideal gas term
+    dfid_dn = k*T*np.log(n)
+
+    # Hard sphere term
+    dfhs_dn = n/(1-SW.n3(n))*4/3*np.pi*R**3 - np.log(1 - SW.n3(n)) + SW.n1(n)*SW.n2(n)/(1 - SW.n3(n))**2*4/3*np.pi*R**3 + 1/(1 - SW.n3(n))*(SW.n2(n)*R + SW.n1(n)*4*np.pi*R**2) + SW.n2(n)**3*(SW.n3(n) + (1 - SW.n3(n))**2*np.log(1 - SW.n3(n)))/36/np.pi/(SW.n3(n)**2(1 - SW.n3(n)**2))**2*((1 - SW.n3(n))**2*2*SW.n3(n)*4/3*np.pi*R**3 - SW.n3(n)**2*n*(1 - SW.n3(n))*4/3*np.pi*R**3) + 1/36/np.pi/(1 - SW.n3(n))**2*((SW.n3(n) + (1 - SW.n3(n))**2*np.log(1 - SW.n3(n)))*3*SW.n2(n)**2*4*np.pi*R**2 + SW.n2(n)**3*4/3*np.pi*R**3*(1 - np.log(1 - SW.n3(n))*2*(1 - SW.nw(n)) - (1 - SW.n3(n))))
+
+    # Constants for the next step:
+    c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
+    c2 = -0.669270+1.40049*lambdaSW-0.827739*lambdaSW**2
+    c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
+
+    # Term from derivative SW.a2
+    da2_dn = epsilon/2*(SW.eta(n)*SW.da1SW_deta(n)*(-4/3*np.pi*R**3*(4*(1 - SW.eta(n))**3/(1 + 4*SW.eta(n) + 4*SW.eta(n)**2)) + (1 - SW.eta(n))**4*(4+8*SW.eta(n))/(1 - 4*SW.eta(n) + 4*SW.eta(n)**2)**2) + SW.K(n)*SW.da1SW_deta(n)*(4/3*np.pi*R**3) + SW.K(n)*SW.eta(n)*(-4*epsilon*(lambdaSW**3 - 1)*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4 - 1/2/(1 - SW.eta_eff(n))**3) - 4*epsilon*(lambdaSW**3 - 1)*4/3*np.pi*R**3*(1/2/(1 - SW.eta_eff(n))**3 - 3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4) - 4*epsilon*SW.eta(n)*(lambdaSW**3 - 1)*12*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n)**5)*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3))
+
+    # Term from derivative of SW.a1SW
+    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*SW.gHS_eff(n)*4/3*np.pi*R**3 + SW.a1VDW(n)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3) - 1/2/(1 - SW.eta_eff(n))**3*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3))
+
+    return dfid_nd + dfhs_dn + SW.a2(n)/k_B/T + n/k_B/T*da2_dn + SW.a1SW(n) + n*da1_dn
