@@ -1,0 +1,482 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+%\usepackage{breqn}
+\usepackage{color}
+
+%% \newcommand{\red}[1]{{\bf \color{red} #1}}
+%% \newcommand{\blue}[1]{{\bf \color{blue} #1}}
+%% \newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+%\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
+\newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
+
+% needsworklater is used to annotate bits that need work, but that we
+% can postpone for a while.
+\newcommand{\needsworklater}[1]{\emph{[#1]}}
+% needsworknow is intended to prioritize stuff that needs fixing.
+\newcommand{\needsworknow}[1]{\textcolor{red}{[\emph{#1}]}}
+
+\begin{document}
+\title{A Simple Theory for the Melting of Ice}
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University}
+%\pacs{61.20.Ne, 61.20.Gy, 61.20.Ja}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+  We develop a theory for ice.
+\end{abstract}
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Wertheim's Thermodynamic Pertubation Theory (TPT) provides a formalism
+for treating systems with short-range interactions combined with a
+hard-core repulsion~\cite{wertheim1984fluidsI, *wertheim1984fluidsII,
+  *wertheim1986fluidsIII}.  Various groups have
+applied Wertheim's TPT to four-site systems such as water (see
+\cite{peery2003association} for references).  Peery and Evans (and
+others) applied Wertheim's methods to a four-site model for a
+water-like fluid~\cite{peery2003association}.  Alas, all such models
+studied to date fail to enforce tetrahedral coordination, instead
+allowing the four association sites to float freely on the surface of
+the hard sphere.
+
+\subsection{Equations of state for water}
+
+An interesting paper in which they use a single hydrogen bond to
+``explain'' water, and claim that tetrahedral coordination is not so
+important~\cite{truskett1999single}.
+
+A molecular dynamics paper, in which they  model water using
+Stillinger-Weber, and also talk about Si and
+diamond\cite{molinero2008water, *hujo2011rise}.
+
+A lattice model for water that makes impressive claims, but is a bit
+hard to read at first glance\cite{hakem2007temperature}.  Here is a
+second lattice model that also predicts thermodynamic anomalies, and
+gives what looks like a good discussion of the low-temperature
+properties of water\cite{pretti2004thermodynamic}.
+
+A recent paper that introduces a new model for water to explain
+low-temperature behavior of supercooled water\cite{tu2009anomalies}.
+Has some nice references and explanation of supercooled behavior.
+
+A key early paper in the ``chemical theory'' of associating liquids,
+which is closely aligned to the theory I am
+proposing\cite{heidemann1976van}.
+
+An excellent review article, which outlines and explains the primary
+approaches to modelling associating fluids, in particular giving
+background on non-SAFT approaches such as the ``chemical
+theory''\cite{muller2001molecular}.
+
+\section{Theory}
+
+\subsection{A look at dimers}
+
+We will begin by outlining some aspects Wertheim's Thermodynamic
+Pertubation Theory (TPT)~\cite{wertheim1984fluidsI,
+  *wertheim1984fluidsII, *wertheim1986fluidsIII},
+with a view towards extending it towards tetrahedrally coordinated
+molecules such as water.
+
+\newcommand\nI{\ensuremath{{n^{(1)}}}}
+\newcommand\nII{\ensuremath{{n^{(2)}}}}
+
+\newcommand\PI{\ensuremath{{P^{(1)}}}}
+\newcommand\PII{\ensuremath{{P^{(2)}}}}
+
+The idea of Wertheim's is to construct multiple densities for
+different bonding states of molecules.  One then constructs
+self-consistent equations which are solved for those densities, which
+then appear in the free energy itself.  In Wertheim's approach, the
+density is a ``bonding-state'' density.  We will use a related
+approach in which we consider ``cluster'' densities.  Here, we will
+describe Wertheim's approach with our ``cluster'' language, which will
+be simplest to describe in the case where there is a single
+bonding site on each molecule, so that at most dimers may be formed.
+In this case, we can envision the fluid as composed of two densities,
+a density of unbonded monomers $\nI$ and a density of dimers $\nII$.
+Together they make up the total density:
+\begin{align}
+  n = \nI + 2\nII
+\end{align}
+We find the self-consistent equation for $\nII$ by considering the
+relative probability of finding a dimer, versus finding two monomers
+that are touching in a volume equal to the bonding volume, but in a
+particular wrong orientation.  This ratio is given by a Boltzmann
+factor
+\begin{align}
+  \frac{\PII}{\PI_{\textit{touching}}} &= e^{\beta\epsilon}
+\end{align}
+where $\epsilon$ is the energy difference between the two
+configurations, which by construction have the same entropy.  The
+probability of two spheres touching within a volume $\kappa$ is
+determined by the monomer-monomer distribution function
+\begin{align}
+  \PI_{\textit{touching}} &= \PI \nI\kappa g_{11}(\sigma)
+\end{align}
+Thus, with a little algebra, we find
+\begin{align}
+  \PII &= \PI \nI\kappa g_{11}(\sigma) e^{\beta\epsilon} \\
+  \nII &= \nI^2\kappa g_{11}(\sigma) e^{\beta\epsilon} \\
+  n - \nI &= \nI^2\kappa g_{11}(\sigma) e^{\beta\epsilon} \\
+  \nI\left(1 + \nI\kappa g_{11}(\sigma) e^{\beta\epsilon}\right) &= n \\
+  \nI &= \frac{n}{\left(1 + \nI\kappa g_{11}(\sigma) e^{\beta\epsilon}\right)} \\
+  \PI &= \frac{1}{\left(1 + \nI\kappa g_{11}(\sigma) e^{\beta\epsilon}\right)}
+\end{align}
+This quantity is normally called $X$ in the SAFT literature.  Once we
+have these densities (and related probabilities), we are most of the
+way towards finding the free energy and equation of state.
+
+\subsection{Energies of clumps}
+
+We will treat tetrahedral coordination by examining larger clusters
+than just two, and taking into account the geometry of coordination.
+There are different conformations, but we will begin by focusing on
+just the lowest energy conformations, which are roughly spherical.
+Later, we will consider the highest energy conformations, which are
+linear chains.  The energy is equal to $\epsilon B_s$, where $B_s$ is
+the number of bonds in a cluster of $s$ molecules.  We will
+approximate $B_s$ by assuming that molecules within a specified
+distance of the surface of the sphere have no bonds apart from those
+to molecules on the interior, while the molecules on the interior have
+four bonds each, keeping in mind that each bond is shared by two
+molecules.
+\begin{align}
+  B_s &= 2(s^{\frac13} - 0.45)^3
+\end{align}
+The constant $0.45$ in this formula is reached by fitting the
+thickness of the ``exterior'' in order to produce approximately
+correct results for small values of $s$, as shown in
+Table~\ref{tab:Bs}.
+\begin{table}
+  \begin{tabular}{c|cc}
+    $s$ & $B_s$ & true $B_s$ \\
+    \hline
+    1 & 0.33 & 0 \\
+    2 & 1.06 & 1 \\
+    3 & 1.95 & 2 \\
+    4 & 2.94 & 3 \\
+    5 & 4.00 & 4 \\
+    6 & 5.11 & 5 \\
+    7 & 6.26 & 6 \\
+    8 & 7.45 & 7 \\
+  \end{tabular}
+  \caption{Number of bonds $B_s$ as a function of cluster
+    size.}\label{tab:Bs}
+\end{table}
+
+\section{Theory, take II}
+
+I have another approach that sounds interesting, with a different way
+of describing clusters.  The idea is to describe a cluster (as defined
+aboce) in terms of connected \emph{rigid clusters}.  A rigid cluster
+is a set of molecules any two of which are connected by more than one
+bond.  A rigid cluster should be unable to be rotated at all, beyond
+the amount of flex that comes about because each hydrogen bond has a
+certain volume of give.  The smallest possible rigid cluster will be
+composed of a single molecule, and I believe the next largest will
+have six molecules in it.
+
+The rigid clusters that make up a given cluster will be connected by a
+single hydrogen bond.  Since this bond rotates freely, it will have a
+certain amount of rotational entropy.  Moreover, there can be many
+rigid clusters in a particular cluster, and there may be many ways of
+putting together these rigid clusters (which could really do with a
+better name).
+
+This gives us a way to characterize clusters under several
+parameters.  Hopefully only a smallish number of cluster formations
+will be common, so we don't need an excessive number of terms in our
+summations.
+
+The main idea is that we have two problems to solve in order to
+understand clusters: the rigid cluster problem (relatively easy to
+approximate, I hope), and how to combine rigid clusters together to
+get flexible clusters.  The rigid clusters will have very little
+entropy, and quite a high energy (relatively speaking, not counting
+the single-molecule rigid cluster), while connecting them together
+will give a looser higher-entropy configuration.  Once we understand
+the energy and entropy of each cluster configuration, we are most of
+the way towards an equation of state for the tetrahedrally-coordinated
+fluid.
+
+The missing term will be the interaction between different clusters.
+This interaction is purely entropic (since the only energy term shows
+up within clusters, by their definition), and we will need a plausible
+way to approximate it.  A start for this is to work out the volume of
+each cluster.  Then we could use scaled-particle theory to handle
+their interactions, assuming each cluster is a sphere, which seems
+like a reasonable starting point.  It does require that we come up
+with a reasonable way of defining the volume of a cluster.  We would
+also need to define their area and mean curvature, if we wanted to go
+beyond assuming these things are spheres.
+
+\subsection{Free energy of a rigid cluster}
+
+We can find the entropy of a given cluster configuration pretty easily
+by computing its free energy.  The process is as follows.  The free
+energy can be written as
+\newcommand\dr{d^3r}
+\begin{align}
+  F &= -k_BT \ln Z \\
+  Z &=
+  \frac{1}{N!}
+  \left(\frac{2m}{\beta\hbar^2}\right)^N
+  \left(\frac{2I}{\beta\hbar^2}\right)^N
+  \int \dr_1d\Omega_1\dr_2d\Omega_2\cdots e^{-\beta
+    \Phi(\rr_1,\Omega_1,\cdots)}
+\end{align}
+where $\Omega_i$ is the orientation of molecule $i$, and $\Phi$ is the
+potential energy.  If the molecules had internal degrees of freedom,
+we would need to integrate over those as well.
+
+\subsubsection{Rotational and motional free energy}
+
+We consider a single cluster by setting $N$ to the number of molecules
+in the cluster, and enforcing a constraint that they be attached in
+the desired topology.  We can envision this as a potential that is
+infinite when the cluster is broken.
+
+The first integral $\dr_1$ is unconstrained, and corresponds to the
+translational motion of the cluster.  For a rigid cluster, each of the
+remaining integrals is constrained to a smallish volume.  This volume
+is related to, but not identical to, the ``mutual volume of
+interaction'' $\kappa$, which determines the probability at low
+density of a molecule being bound on a particular site:
+\begin{align}
+  P &= \kappa n
+\end{align}
+The volume in the integrals above may be smaller than this, because
+the location of a given molecule is constrained by that of all the
+molecules it is bound to.
+
+Anyhow, the final result is that we get something that looks
+approximately like (leaving out the $N!$, which we'll include when we
+combine together a bunch of clusters:
+\begin{align}
+  Z &\approx
+  \left(\frac{2m}{\beta\hbar^2}\right)^{3N}
+  \left(\frac{2I}{\beta\hbar^2}\right)^{3N}
+  (V 8\pi^2) (\delta V \delta \Omega)^{N-1}
+  \\
+  &= \frac{V}{\Lambda^3}\frac{8\pi^2}{\Xi}
+  \left(\frac{\delta V \delta \Omega}{\Lambda^3\Xi}\right)^{N-1}
+\end{align}
+where I have defined $\Xi \equiv
+\left(\frac{2I}{\beta\hbar^2}\right)^3$ as an $SO(3)$ ``themal solid
+solid angle''\footnote{I've been very sloppy here, and this $\Xi$
+  needs to be carefully derived.}, which defines the angular
+constriction needed to reduce the entropy of orientation to zero at a
+given temperature.  This partition function does not include the
+energy of interaction, so we can easily relate it to the entropy of
+the cluster:
+\begin{align}
+  F_N &= -k_BT \ln Z_N \\
+  &= -k_BT \ln\left(
+     \frac{V}{\Lambda^3}\frac{8\pi^2}{\Xi}
+     \left(\frac{\delta V \delta \Omega}{\Lambda^3\Xi}\right)^{N-1}
+  \right)
+  \\
+  &= -k_BT \left(
+    \ln\left(
+     \frac{V}{\Lambda^3}\frac{8\pi^2}{\Xi}
+    \right)
+    +
+    (N-1)
+    \ln\left(
+     \frac{\delta V \delta \Omega}{\Lambda^3\Xi}
+    \right)
+  \right)
+\end{align}
+where we can see that the first log is the ideal gas free energy
+corresponding to center-of-mass motion and rotation of the cluster,
+and the second is the free energy of the cluster itself.  We have made
+a simplifying approximation with regard to the amount of volume
+available for each molecule added to the cluster, but this seems like
+a reasonably small approximation (which we can also test).
+
+I again note here that I have omitted the fixed energy of bonding from
+this free energy.
+
+\subsubsection{Configurational free energy}
+To the above free energy, we will need to add the free energy from
+configurational entropy, corresponding to the number of ways we can
+arrange the molecules with a given number of bonds (and thus bonding
+energy) and a given number of molecules.
+
+\subsection{Free energy of a complete connected cluster}
+
+We will now consider a complete connected cluster, which is composed
+of a number of connected rigid clusters, which could themselves be
+composed of a single molecule.  There are bascially two sources of
+entropy for such a cluster.  The first is the configurational entropy,
+which describes the number of distinct ways we could put together such
+a cluster.  The second is the motional and rotational entropy
+corresponding to the wiggle room the rigid clusters have, and their
+ability to rotate around the bonds connecting them.  I note that there
+is an interaction between the two contributions, since the
+configuration (as in, which cluster is bonded to which other cluster)
+will affect how much wiggle room there is, since there could be some
+steric hindrance (i.e. things could bump).  As a first approximation,
+we will neglect interactions between the two contributions, and assume
+that if there is no steric hindrance preventing a given configuration
+from forming, then there will be no steric hindrance preventing each
+bond from rotating freely.
+
+\subsubsection{Rotational and motional entropy}
+
+I will begin with the rotational and motional entropy, since it is
+more closely related to the previously computed entropy (which is
+purely motional) of the rigid cluster.  We will imagine building up a
+complete cluster by connecting together rigid clusters one at a time.
+Each time a cluster is connected, it loses most of its ``center of mass and
+rotation'' degrees of freedom.  Its motion will be restricted to
+essentially the same volume $\delta V$ that the molecules within a
+cluster are restricted to.  The second cluster, however, may freely
+rotate about the bond between the two clusters, which means that it
+will have considerably greater rotational entropy than is present in
+the case of a rigid cluster.  We just need to figure out the amount of
+``solid solid angle'' that is allowed, which will replace the $\delta
+\Omega$ in our formula.  The final result should look something like
+\begin{widetext}
+\begin{align}
+  F &= -k_BT\left(
+    \ln\left(
+     \frac{V}{\Lambda^3}\frac{8\pi^2}{\Xi}
+    \right)
+    +
+    (N_1-1)
+    \ln\left(
+     \frac{\delta V \delta \Omega}{\Lambda^3\Xi}
+    \right)
+    +
+    \sum_{i=2}^{M} \left(
+        \ln\left(\frac{\delta V
+          \delta\Omega_{\textit{rot}}}{\Lambda^3\Xi}\right)
+        +
+        (N_i-1)
+        \ln\left(
+         \frac{\delta V \delta \Omega}{\Lambda^3\Xi}
+        \right)
+    \right)
+  \right)
+\end{align}
+\end{widetext}
+where it is immediately clear that there is considerable
+simplification to be performed.  I have introduced a new variable
+$\delta\Omega_{\textit{rot}}$, which is the amount of ``solid solid
+angle'' that is available to a rigid cluster that is rotating freely
+about a bond.  When we do the obvious simplification ($N = \sum N_i$),
+we get something that looks like:
+\begin{widetext}
+\begin{align}
+  F &= -k_BT\left(
+    \ln\left(
+     \frac{V}{\Lambda^3}\frac{8\pi^2}{\Xi}
+    \right)
+    +
+    (M-1)
+     \ln\left(\frac{\delta V
+       \delta\Omega_{\textit{rot}}}{\Lambda^3\Xi}\right)
+    +
+    (N-M-1)
+    \ln\left(
+      \frac{\delta V \delta \Omega}{\Lambda^3\Xi}
+    \right)
+  \right)
+\end{align}
+\end{widetext}
+which itself could be simplified a bit more, in that the motional and
+rotational bits could be treated separately.  Anyhow, it is
+interesting that when we ignore steric hindrances, the entropy of a
+connected cluster is independent of how it is connected, and in fact
+only depends on the total number of molecules $N$ and the total number
+of rigid clusters $M$.
+
+\subsubsection{Configurational entropy}
+
+The configurational multiplicity will always have a factor of $N!$
+that will come about because of the various permutations that could
+describe the same configuration.  We won't discuss this $N!$ below,
+but must include it in our final answer.
+
+When looking at the configuration entropy, we cannot avoid considering
+steric hindrances, since they prevent many potential configurations
+from forming.  One effect of this steric hindrance is that the number
+of molecules in a cluster $N$ places a constraint on the number of
+rigid sub-clusters in that cluster $M$.For instance, if $N = 6$, we
+can conclude that it must be made of either one rigid cluster (of 6)
+or 6 rigid clusters (each composed of a single molecule).
+Unfortunately, the constraint isn't very limiting, since (almost?) any
+given cluster size (greater than $N=5$) could always be made of either
+a single rigid cluster (e.g. a loop) or a maximum of $M=N$
+single-molecule rigid clusters, arranged in an open-ended chain.
+
+Let's consider the linear chain clusters.  In this case $M=N$, and
+this is a very high entropy configuration, primarily because of its
+maximum value of rotational entropy.  However, the linear chain has no
+configurational entropy.  But there is also a whole family of branched
+chain clusters, still composed of single-molecule rigid clusters, so
+we can view the $M=N$ family as having a resultant configurational
+entropy, which we will estimate here.  When we add a molecule to a
+branched chain made of $N-1$ molecules, we have roughly $2N$ places
+we could put it.  Thus
+\begin{align}
+  g_N &\approx 2N g_{N-1} \\
+  \ln g_N &\approx \ln g_{N-1} + \ln 2 + \ln N \\
+  \ln g_N &\approx N\ln 2 + N\ln N - N \\
+  S_N &\approx k_B\left(N\ln N - (1-\ln 2)N \right)
+\end{align}
+I note that this is a very crude approximation.  It ignores steric
+constraints, which are admittedly smaller for more flexible
+configurations.  In the limit of large $N$, the assumption that the
+number of binding sites is proportional to $N$ is wrong.  In this
+limit there are guaranteed to be major steric effects, since the
+random walk of even a linear chain is likely to overlap with itself.
+Since the mean radius of a random walk in three dimensions scales as
+$\sqrt{N}$, the volume occupied by most of the sites in the random
+walk scales as $N^{3/2}$.
+
+As it turns out, there is a large literature on self-avoiding random
+walks.  According to one paper studying a 3D cubic
+lattice\cite{grassberger1993monte},
+\begin{align}
+  g_N^{\text{cubic}} &= 4.68^N N^{0.16}
+\end{align}
+Actually, it looks like for a diamond lattice it should
+be\cite{chen2002universal}
+\begin{align}
+  g_N^{\text{cubic}} &= 1.24 2.88^N N^{0.16}
+\end{align}
+which gives us a slightly reasonable starting point.  This is the
+degeneracy of a linear chain with length $N$.  The total degeneracy
+including branching configurations will of course be smaller.  The
+radius of gyration is given by
+\begin{align}
+  G_N &= C N^{2\nu} \\
+  &= 0.48 N^{0.59}
+\end{align}
+from which you can see that self-avoidance has some effect, but not a
+dramatic effect.  I'm thinking that we might like to have a
+differently defined self-avoiding random walk, in which the path can't
+come adjascent to another point on the path, which would keep the
+cluster ``flexible'' to a greater degree.
+
+\section{Various other notes to self}
+
+TODO: look at paper from segura et al 1987? for MD and interesting
+results on just the 4-site associating hard spheres.
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}
