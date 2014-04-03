@@ -135,21 +135,44 @@ def phi(T,n,nparticular,i):
 # Derivative of free energy wrt number (const. temp)
 # only depents on n (really? not T or i as well?)
 def df_dn(n):
-    # ideal gas term
-    dfid_dn = k*T*np.log(n)
-
-    # Hard sphere term
-    dfhs_dn = n/(1-SW.n3(n))*4/3*np.pi*R**3 - np.log(1 - SW.n3(n)) + SW.n1(n)*SW.n2(n)/(1 - SW.n3(n))**2*4/3*np.pi*R**3 + 1/(1 - SW.n3(n))*(SW.n2(n)*R + SW.n1(n)*4*np.pi*R**2) + SW.n2(n)**3*(SW.n3(n) + (1 - SW.n3(n))**2*np.log(1 - SW.n3(n)))/36/np.pi/(SW.n3(n)**2(1 - SW.n3(n)**2))**2*((1 - SW.n3(n))**2*2*SW.n3(n)*4/3*np.pi*R**3 - SW.n3(n)**2*n*(1 - SW.n3(n))*4/3*np.pi*R**3) + 1/36/np.pi/(1 - SW.n3(n))**2*((SW.n3(n) + (1 - SW.n3(n))**2*np.log(1 - SW.n3(n)))*3*SW.n2(n)**2*4*np.pi*R**2 + SW.n2(n)**3*4/3*np.pi*R**3*(1 - np.log(1 - SW.n3(n))*2*(1 - SW.nw(n)) - (1 - SW.n3(n))))
-
-    # Constants for the next step:
+    # Constants for eta_eff
+    # Redefine here, rather than using SW.c1 (etc.) in case the value of lambdaSW is different between SW.py and this program
     c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
     c2 = -0.669270+1.40049*lambdaSW-0.827739*lambdaSW**2
     c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
 
+    # Sim. for n1,n2,n3
+    n1 = R*n
+    n2 = R**2*4*np.pi*n
+    n3 = R**3*4/3*np.pi*n
+
+    # These pop up a lot
+    dn3_dn = 4/3*np.pi*R**3 # this is the same as deta_dn for homogeneous case
+    deta_eff_dn = c1 + 2*c2*eta(n)*dn3_dn + 3*c3*eta(n)**2*dn3_dn
+
+    # ideal gas term
+    dfid_dn = k_B*T*np.log(n)
+
+    # Hard sphere term
+    # This gets a bit complicated; bear with me
+    dPhi1_dn = n/(1 - n3)*dn3_dn - np.log(1 - n3)
+    dPhi2_dn = n1*n2/(1 - n3)**2*dn3_dn + 1/(1 - n3)*(n2*R + n1*4*np.pi*R**2)
+    dPhi3_dn = (n2**3*(n3 + (1 - n3)**2*np.log(1 - n3))/36/np.pi/(n3**2*(1 - n3)**2)**2)*dn3_dn*((1 - n3)**2*2*n3 - n3**2*2*(1 - n3)) + 1/36/np.pi/n3**2/(1 - n3)**2*((n3 + (1 - n3)**2*np.log(1 - n3))*3*n2**2*4*np.pi*R**2 + n2**3*dn3_dn*(1 - np.log(1 - n3)*2*(1 - n3) - (1 - n3)))
+    dfhs_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
+
     # Term from derivative SW.a2
-    da2_dn = epsilon/2*(SW.eta(n)*SW.da1SW_deta(n)*(-4/3*np.pi*R**3*(4*(1 - SW.eta(n))**3/(1 + 4*SW.eta(n) + 4*SW.eta(n)**2)) + (1 - SW.eta(n))**4*(4+8*SW.eta(n))/(1 - 4*SW.eta(n) + 4*SW.eta(n)**2)**2) + SW.K(n)*SW.da1SW_deta(n)*(4/3*np.pi*R**3) + SW.K(n)*SW.eta(n)*(-4*epsilon*(lambdaSW**3 - 1)*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4 - 1/2/(1 - SW.eta_eff(n))**3) - 4*epsilon*(lambdaSW**3 - 1)*4/3*np.pi*R**3*(1/2/(1 - SW.eta_eff(n))**3 - 3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4) - 4*epsilon*SW.eta(n)*(lambdaSW**3 - 1)*12*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n)**5)*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3))
+    # This is a bit complicated; just hang in there, you'll make it through!
+    dK_dn = -deta_eff_dn*(4*(1 - eta(n))**3/(1 + 4*eta(n) + 4*eta(n)**2) + (1 - eta(n))**4*(4 + 8*eta(n))/(1 - 4*eta(n) + 4*eta(n)**2)**2)
+    dgHS_eff_dn = deta_eff_dn*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4 - 1/2/(1 - SW.eta_eff(n))**3)
+    dA_dn = deta_eff_dn*12*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**5
+    da1SW_deta_dn = -4*epsilon*(lambdaSW**3 - 1)*dgHS_eff_dn - (1/2/(1 - SW.eta_eff(n))**3 + 3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4)*4*epsilon*(lambdaSW**3 - 1)*dn3_dn - 4*epsilon*(lambdaSW**3 - 1)*eta(n)*dA_dn
+    da2_dn = epsilon/2*(eta(n)*SW.da1SW_deta(n)*dK_dn + SW.K(n)*SW.da1SW_deta(n)*dn3_dn + SW.K(n)*eta(n)*da1SW_deta_dn)
 
     # Term from derivative of SW.a1SW
-    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*SW.gHS_eff(n)*4/3*np.pi*R**3 + SW.a1VDW(n)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3) - 1/2/(1 - SW.eta_eff(n))**3*(c1 + 2*c2*SW.eta(n)*4/3*np.pi*R**3 + 3*c3*SW.eta(n)**2*4/3*np.pi*R**3))
+    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*SW.gHS_eff(n)*dn3_dn + SW.a1VDW(n)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4*deta_eff_dn - 1/2/(1 - SW.eta_eff(n))**3*deta_eff_dn)
 
-    return dfid_nd + dfhs_dn + SW.a2(n)/k_B/T + n/k_B/T*da2_dn + SW.a1SW(n) + n*da1_dn
+    return dfid_dn + dfhs_dn + SW.a2(n)/k_B/T + n/k_B/T*da2_dn + SW.a1SW(n) + n*da1_dn
+
+# Define eta(n) here, rather than using SW.eta(n), in case the value of R is different between SW.py and this program
+def  eta(n):
+    return n*R**3*(4/3)*np.pi
