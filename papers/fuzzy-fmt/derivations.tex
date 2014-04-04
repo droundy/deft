@@ -40,33 +40,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
 \section{Introduction}
 
-The hard-sphere fluid is \emph{the} reference fluid for models of real
-liquids, such as water \fixme{citations?}. The hard sphere fluid is
-widely studied and well understood \fixme{citations}, but has the
-disadvantage of not being physical. ...while step functions and delta
-functions are easily used by hand, they are computationally
-difficult. One way to deal with this difficulty is by ``smearing'' the
-functions so they are not discontinuous; another is to use a theory
-where the spheres themselves are not so hard.
 
-Fundamental Measure Theory~(FMT) is a classic density functional
-theory (cDFT) for the free energy of the hard-sphere fluid developed
-by Rosenfeld~\cite{rosenfeld1989} \fixme{which can deal with
-  inhomogeneity}.  FMT is often used for the hard-sphere portion of
-the total free energy which \fixme{can be used to obtain equations of
-  state, properties of liquids at an interfaces, etc.}.  While this
-has been used to some success to study the behavior of real
-liquids\fixme{citations}, it is not physical as the hard sphere cores
-are never allowed to penetrate.
-
-Schmidt introduced a Soft Fundamental Measure Theory~(SFMT) based on
-FMT~\cite{schmidt1999density} where the spheres can penetrate at a an
-energy cost determined by a pair potential. Schmidt tested SFTM for a
-mixture of soft and hard spheres as well as for star
-polymers~\cite{schmidt2000density, groh2001density}. SFMT was also
-tested in a number of other papers~\cite{rosenfeld2000fluid}
-\fixme{more citations} but not the soft fluid with a harmonic
-potential.
 
 \section{Fundamental-Measure Theory}
 
@@ -688,6 +662,297 @@ to be \emph{effectively} zero for reasonable temperatures, perhaps
 this will be a good approach.  After all, I'm interested in $\beta V_0
 \gg 1$, which means that the Mayer function is essentially flat in
 Equation~\ref{eq:ftrytwo} for $r<0$.
+
+\section{Erf model (scratch notes)}
+If we consider that
+\begin{align}
+  f'(r) \approx \frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
+\end{align}
+then we conclude that
+\begin{align}
+  f(r) &= e^{-\beta V(r)} - 1 \\
+  &\approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 ) \\
+  e^{-\beta V(r)} &\approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 ) \\
+  V(r) &\approx -kT\ln\left(\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )\right).
+\end{align}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/erf}
+  \caption{Comparison of erf approximation with $f'(r)$ for our
+    harmonic potential.}
+\end{figure}
+This matches all right, if we choose to match the first couple of
+terms in a power series expansion around $\sigma$, in which case we
+find that
+\begin{align}
+  V(\sigma) &\approx -kT\ln\left(\tfrac12\right) \\
+  &= k_BT \ln 2
+\end{align}
+and setting the slope equal at $r=\sigma$ we find
+\begin{align}
+  V'(r) &= -kT \frac{f'(r)}{f(r)+1} \\
+  &\approx -kT \frac{\frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}}{\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )}
+  \\
+  V'(\sigma) &= -\frac{2k_BT}{a\sqrt{\pi}}
+\end{align}
+Thus for our harmonic potential, we find that something like...
+\begin{align}
+  V(r) &= V_0 \left(1-\frac{r}{2R}\right)^2\\
+  \left(1 - \frac{\sigma}{2R}\right)^2 &= \frac{k_BT}{V_0}\ln 2 \\
+  \sigma &= 2R\left( 1 - \sqrt{\frac{k_BT \ln 2}{V_0}}\right) \\
+  a &= \frac{4k_BTR^2}{\sqrt{\pi}V_0(2R-\sigma)}
+  &= 2R\sqrt{\frac{kT}{\pi V_0 \ln 2}}
+\end{align}
+
+This gives us an approximate model that we could apply to any
+potential $V(r)$, with $\sigma$ being a function of temperature.  If
+we do this, we can analytically solve for $w_2(r)$ and $w_3(r)$.
+\begin{align}
+  w_2(r) &= \frac{1}{a\sqrt{\pi}} e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
+  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) )
+\end{align}
+This is presented in Reference \citenum{schmidt2000fluid}.  The
+Fourier transform of $w_3$ is surprisingly simple, although
+Mathematica cannot handle it.
+\begin{align}
+  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr
+  \\
+  &=  \frac{2\pi}{k} \int_0^\infty ( 1 -
+  \mathrm{erf}((r-\sigma/2)/a) ) r \sin(kr) dr
+  \\
+  &=  \frac{2\pi}{k} \left(
+  \int_0^\infty r \sin(kr) dr
+  -
+  \int_0^\infty \mathrm{erf}((r-\sigma/2)/a) r \sin(kr) dr
+  \right)
+\end{align}
+At this point, we can integrate by parts the second bit.
+\begin{align}
+  u &= \mathrm{erf}((r-\sigma/2)/a) \\
+  du &= \frac{2}{\sqrt{\pi}a} e^{-\frac{(r-\sigma/2)^2}{a^2}} du \\
+  dv &= r \sin(kr) dr \\
+  v &= \frac{\sin(kr) - kr \cos(kr)}{k^2}
+\end{align}
+Putting these in we get
+\begin{align} 
+ \tilde{w}_3(k)
+  &=  \frac{2\pi}{k} \Big( \int_0^\infty r \sin(kr) dr \notag \\ 
+ &\quad\quad - \left.\mathrm{erf}((r-\sigma/2)/a)\frac{\sin(kr) - kr
+    \cos(kr)}{k^2}\right|_0^\infty \notag \\ &\quad\quad
+  +
+  \int_0^\infty \frac{\sin(kr) - kr \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a} e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
+  \Big)
+\end{align}
+At this stage things look a bit scary, since the second term is not
+well defined.  Fortunately, the first and second terms exactly cancel,
+as you can see by doing both integrals prior to taking the limit to
+infinity.  So we get
+\begin{align}
+  \tilde{w}_3(k)
+  &=  \frac{2\pi}{k}\int_0^\infty \frac{\sin(kr) - kr
+    \cos(kr)}{k^2}\frac{2}{\sqrt{\pi}a}
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} dr
+\end{align}
+which is still a little bit scary, and is not yet something
+Mathematica can handle.  Fortunately, the terms can be broken down
+into simpler definite integrals that Mathematica \emph{can} handle
+such as
+\begin{align}
+  \int_{-\infty}^\infty \cos(a u)e^{-u^2}du
+\end{align}
+and others that are zero by symmetry (where we assume the gaussian
+drops to zero before reaching the origin).
+\begin{widetext}
+Beginning with $\tilde{w}_3(k)$ from above and letting $u = (r-\sigma/2)/a,$
+  \begin{align}
+    \tilde{w}_3(k)
+    &=  \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[ \sin(k(au+\frac{\sigma}{2}))
+      - k(au + \frac{\sigma}{2}) \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du
+  \end{align}
+We can take the lower limit to $-\infty$ since the gaussian should go
+to zero well before that. Using mathematica,
+  \begin{align}
+    \tilde{w}_3(k) &= \frac{4\sqrt{\pi}}{k^3}
+    \left[ \left(\sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2}
+    \sin\left(\frac{k\sigma}{2}\right) \right) - \left( \frac{k}{2}
+    \sqrt{\pi}e^{-\left(\frac{ak}{2}\right)^2} \left[\sigma
+      \cos\left(\frac{k \sigma}{2}\right) - a^2 k \sin\left(\frac{k \sigma}{2}\right)
+      \right] \right)\right] \\ 
+    &= \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 + \frac{a^2k^2}{2} \right)
+      \sin\left(\frac{k\sigma}{2}\right) - \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right)  \right]
+  \end{align}
+\end{widetext}
+
+For the $w_2$,
+\begin{align}
+  \tilde{w}_2(k) &= \int w_2(r) e^{-i \mathbf{k} \cdot
+    \rr} \textrm{d} \rr \\
+  &= \frac{1}{a\sqrt{\pi}}\int e^{-\frac{(r-\sigma/2)^2}{a^2}} e^{-i \mathbf{k} \cdot
+    \rr} \textrm{d} \rr \\
+  &= \frac{2\pi}{a\sqrt{\pi}}\int_0^\infty \int_{-1}^1 r^2 e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  e^{-ikr\cos{\theta}} \textrm{drd}\cos{\theta} \\
+  &= \frac{2\sqrt{\pi}}{iak} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  \left(e^{ikr} - e^{-ikr}\right) \textrm{dr} \\
+  &= \frac{4\sqrt{\pi}}{ak} \int_0^\infty r e^{-\frac{(r-\sigma/2)^2}{a^2}}
+  \sin(kr) ~\textrm{dr} \\
+  &= \frac{4\sqrt{\pi}}{k} \int_{-\sigma/2a}^\infty \left(au +
+  \frac{\sigma}{2}\right) e^{-u^2} \sin\left(k\left(au +
+  \frac{\sigma}{2}\right)\right) ~\textrm{du}
+\end{align}
+where, again, we take the lower limit to $-\infty$ since the gaussian
+should to zero well before the lower limit. Using mathematica, I get
+\begin{align}
+  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2} \left(a^2 k
+  \cos\left(\frac{k\sigma}{2}\right) +\sigma \sin\left(\frac{k\sigma}{2}\right) \right)
+\end{align}
+
+$w_1(r) = \frac{w_2(r)}{4\pi r}$, so $w_1$ will have a similar
+integral, but without the stray $r$, so we get
+\begin{align}
+  \tilde{w}_1(k)&= \frac{4\sqrt{\pi}}{4\pi k} \int_{-\infty}^\infty e^{-u^2} \sin\left(k\left(au +
+  \frac{\sigma}{2}\right)\right) ~\textrm{du} \\
+  &= \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2} \sin\left(\frac{k\sigma}{2}\right)
+\end{align}
+
+$w_0(r) = \frac{w_2(r)}{4\pi r^2}$ which makes $w_0$ is quite a bit
+trickier.  I won't go through all the math here, but essentially we
+have
+\begin{align}
+  \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{4\pi ak}\int_0^\infty
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin(kr)}{r}\textrm{dr}
+\end{align}
+We'll let $r = \frac{\sigma}{2}(1 + u) $ so that
+\begin{align}
+  \frac{1}{r} &= \frac{1}{\frac{\sigma}{2}(1 + u)} \\
+  &\approx \frac{2}{\sigma}\left(1 - u + u^2 - u^3 + u^4 -+\cdots \right)
+\end{align}
+We also extend the lower limit on the integral so that
+\begin{align}
+  \tilde{w}_0(k) &\approx \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
+  e^{-\frac{(\sigma u/2)^2}{a^2}} \sin{\left( \frac{k\sigma}{2}(1+u)
+    \right)} \notag \\
+  &\times \frac{2}{\sigma} \left(1 - u + u^2 - u^3 + u^4 -+\cdots
+  \right) \frac{\sigma}{2}\textrm{du} \\
+  &= \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
+  e^{-\left(\frac{\sigma u}{2a} \right)^2} \sin{\left( \frac{k\sigma}{2}(1+u)
+    \right)} \notag \\
+  &\times \left(1 - u + u^2 - u^3 + u^4 -+\cdots \right) \textrm{du}
+\end{align}
+now let $x = \sigma u /2a$, then
+\begin{align}
+  \tilde{w}_0(k) &\approx \frac{1}{ak\sqrt{\pi}}\int_{-\infty}^\infty
+  e^{-x^2} \sin\left(k(ax+\frac{\sigma}{2})\right) \notag\\
+  &\times \left(1 - \frac{2a}{\sigma}x +
+  \left(\frac{2a}{\sigma}\right)^2 x^2 -+\cdots \right) \frac{2a}{\sigma}\textrm{dx} \\
+  &= \frac{2}{k\sigma \sqrt{\pi}}\sum_{n=0}^{\infty}
+  \left(\frac{-2a}{\sigma}\right)^n \int_{-\infty}^\infty e^{-x^2}
+  \sin\left(k(ax+\frac{\sigma}{2})\right) x^n \textrm{dx}
+\end{align}
+If we take only the first two terms of the series then
+\begin{align}
+  \tilde{w}_0(k) &\approx \frac{2}{\sigma}\Bigg{\{}\frac{1}{k\sqrt{\pi}}
+  \bigg[\int_{-\infty}^{\infty}
+    e^{-x^2}\sin\left(k(ax+\frac{\sigma}{2})\right) \textrm{dx}\notag \\
+    &\; -\frac{2a}{\sigma}\int_{-\infty}^{\infty} x e^{-x^2}
+    \sin\left(k(ax+\frac{\sigma}{2})\right) \textrm{dx}\bigg]\Bigg{\}} \\
+  &=\frac{2}{\sigma}\left[\tilde{w}_1(k) - \frac{2}{\sigma\sqrt{\pi}} \left(
+    \frac{1}{4\sqrt{\pi}}\tilde{w}_2(k) - \frac{\sqrt{\pi} \sigma}{2}
+    \tilde{w}_1(k)\right)\right] \\
+  &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
+      \sigma}\tilde{w}_2(k) \right]
+\end{align}
+%% Since the gaussian should, again, go to zero before r = 0, then we can
+%% take this to negative infinity so 
+%% \fixme{without all the details}:
+%% \begin{align}
+%%   \tilde{w}_0(k) &= \frac{4\sqrt{\pi}}{k}\int_{-\infty}^\infty
+%%   e^{-\frac{(r-\sigma/2)^2}{a^2}} \frac{\sin{kr}}{r}\textrm{dr} \\
+%%   &= \frac{4\pi}{k}\int_0^{\frac{k}{\sqrt{\pi}}}
+%%   e^{-\frac{t}{4}} \cos{\frac{\sigma t}{2a}}\textrm{dt}
+%% \end{align}
+%% So we have a closed form, but we will still have to do this numerically
+
+Now we'll want to do the vector transforms. $\mathbf{w}_{2V}(\rr) = w_2(r)\rr$ so
+\begin{align}
+  \tilde{\mathbf{w}}_{2V}(\kk) &= \int w_2(r)\rr e^{-i\kk \cdot \rr}
+  \textrm{d\rr} \\
+\end{align}
+Since we know this will be sphericallly symmetric in the k-direction
+after the transform, we can dot both sides with $\mathbf{\hat{k}}$.
+\begin{align}
+  \tilde{\mathbf{w}}_{2V}(\kk)\cdot \mathbf{\hat{k}} &= \int w_2(r)\rr e^{-i\kk \cdot \rr}
+  \textrm{d\rr} \cdot \mathbf{\hat{k}} \\
+  \tilde{w}_{2V}(k) &= \int w_2(r)\rr\ \cdot \mathbf{\hat{k}} e^{-i\kk \cdot \rr}
+  \textrm{d\rr} \\
+\end{align}
+\begin{widetext}
+\begin{align}
+  \tilde{w}_{2V}(k) &= \frac{2 \pi}{a\sqrt{\pi}}\int_0^\infty \int_0^\pi r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} e^{-ikr \cos(\theta)} \cos(\theta)
+  \sin(\theta) \mathrm{d \theta dr} \\
+  &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \int_0^\pi \cos(\theta)
+  \sin(\theta)e^{-ikr \cos(\theta)}\mathrm{d \theta dr} \\
+  &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{\cos(\theta)}{ikr}
+    e^{-ikr\cos(\theta)} \bigg{|}_0^\pi + \int_0^\pi
+    \frac{\sin(\theta)}{ikr}e^{-ikr\cos(\theta)} \mathrm{d \theta}
+    \right] \mathrm{dr} \\
+  &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{-1}{ikr}\left(
+    e^{ikr} + e^{-ikr} \right) +
+    \frac{1}{(ikr)^2}e^{-ikr\cos(\theta)} \bigg{|}_0^\pi \right]
+  \mathrm{dr} \\
+  &= \frac{2 \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{-1}{ikr}\left(
+    e^{ikr} + e^{-ikr} \right)
+    +\frac{-1}{(kr)^2} \left(e^{ikr} -
+    e^{-ikr}\right)\right] \mathrm{dr} \\
+  &= \frac{-2 \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{2\cos(kr)}{ikr}
+    +\frac{2i\sin(kr)}{(kr)^2}\right] \mathrm{dr} \\
+  &= \frac{4i \sqrt{\pi}}{a}\int_0^\infty r^3
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{\cos(kr)}{kr}
+    -\frac{\sin(kr)}{(kr)^2}\right] \mathrm{dr} \\
+  &= \frac{4i \sqrt{\pi}}{a} \frac{a \sqrt{\pi}} {4k^2}e^{-a^2k^2/4}\left[
+    k \left(\sigma^2 -a^4k^2\right)\cos\left(\frac{k\sigma}{2}\right)
+    - 2\sigma \left( 1+a^2k^2 \right) \sin\left( \frac{k\sigma}{2}\right) \right]\\
+   &= \frac{i \pi}{k}e^{-a^2k^2/4}\left[ \left(\sigma^2 -
+       a^4k^2\right) \cos\left(\frac{k\sigma}{2}\right) -
+     2\sigma \left(a^2k + \frac{1}{k} \right)\sin\left(\frac{k\sigma}{2}\right) \right]
+\end{align}
+
+so
+\begin{align}
+  \tilde{\mathbf{w}}_{2V}(\kk) = \frac{i \pi}{k}e^{-a^2k^2/4}\left[ \left(\sigma^2 -
+       a^4k^2\right) \cos\left(\frac{k\sigma}{2}\right) -
+     2\sigma \left(a^2k + \frac{1}{k}
+     \right)\sin\left(\frac{k\sigma}{2}\right) \right] \mathbf{\hat{k}}
+\end{align}
+We will have a similar relation for $\tilde{\mathbf{w}}_{2V}(\kk)$
+since $\mathbf{w}_{1V}(\rr) = w_1(r)\rr$.  I'll skip some step since
+I've done most of them for $\tilde{\mathbf{w}}_{2V}(\kk)$.
+\begin{align}
+  \tilde{w}_{1V}(k) &= \frac{1}{4\pi}\int w_2(r)\frac{\rr}{r} \cdot \mathbf{\hat{k}} e^{-i\kk \cdot
+  \rr} \\
+  &= \frac{i}{a\sqrt{\pi}}\int_0^\infty r^2
+  e^{-\frac{(r-\sigma/2)^2}{a^2}} \left[ \frac{\cos(kr)}{kr}
+    - \frac{\sin(kr)}{(kr)^2}\right] \mathrm{dr} \\
+  &= \frac{i}{a\sqrt{\pi}} \frac{a\sqrt{\pi}}{k}e^{-a^2k^2/4} \left[
+    \frac{1}{2} \left( \sigma \cos\left(\frac{k\sigma}{2}\right) - a^2k
+    \sin\left(\frac{k\sigma}{2}\right) \right) -\frac{1}{k}
+    \sin\left(\frac{k\sigma}{2}\right) \right] \\
+  &= \frac{i}{k} e^{-a^2k^2/4} \left[
+    \frac{\sigma}{2} \cos\left(\frac{k\sigma}{2}\right) - \left( \frac{a^2k}{2}
+    + \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \right]
+\end{align}
+so
+\begin{align}
+  \mathbf{\tilde{w}}_{1V}(k)= \frac{i}{k} e^{-a^2k^2/4} \left[
+    \frac{\sigma}{2} \cos\left(\frac{k\sigma}{2}\right) - \left( \frac{a^2k}{2}
+    + \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \right]
+  \mathbf{\hat{k}}
+\end{align}
+\end{widetext}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
