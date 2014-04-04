@@ -52,6 +52,25 @@ struct polyhedron {
   polyhedron operator=(const polyhedron &p);
 };
 
+struct counter {
+  long totalmoves;
+  long workingmoves;
+  long informs;
+  long updates;
+
+  counter() {
+    totalmoves = workingmoves = informs = updates = 0; }
+  counter(const long n_tmoves, const long n_wmoves, const long new_informs, const long new_updates) {
+    totalmoves = n_tmoves; workingmoves = n_wmoves; informs = new_informs; updates = new_updates; }
+  counter(const counter &c) {
+    totalmoves = c.totalmoves; workingmoves = c.workingmoves; informs = c.informs; updates = c.updates; }
+  counter operator+(const counter &c) const {
+    return counter(totalmoves+c.totalmoves, workingmoves+c.workingmoves, informs+c.informs, updates+c.updates); }
+  counter operator+=(const counter &c) {
+    totalmoves += c.totalmoves; workingmoves += c.workingmoves; informs += c.informs; updates += c.updates;
+    return *this; }
+};
+
 // struct polyhedron; fixme: forward declare
 
 // Create and initialize the neighbor tables for polyhedra p.  Returns
@@ -103,11 +122,12 @@ bool in_cell(const polyhedron &p, const double walls[3], bool real_walls, double
 // respective standard deviations dist and angwidth
 polyhedron random_move(const polyhedron &original, double dist, double angwidth, const double len[3]);
 
-// Attempt to move polyhedron of id in p, while paying attention to collisions and walls
-// Returns the sum of:
-// 1 if the move was successful
-// 2 if the neighbor table was updated
-// 4 if, after updating the neighbor table, neighbors were informed
-int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
+// Attempt to move polyhedron of id in p, while paying attention to
+// collisions and walls
+// Returns a counter that indicates:
+//   if the move was successful
+//   if the neighbor table was updated, and
+//   if, after updating the neighbor table, neighbors were informed
+counter move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
                         double dist, double angwidth, int max_neighbors, double dr);

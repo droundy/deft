@@ -62,9 +62,6 @@ static void took(const char *name);
 inline void save_locations(const polyhedron *p, int N, const char *fname,
                            const double len[3], const char *comment="");
 
-// Generates all of the figures for the talk instead of performing a normal run
-// returns 0 unless there's an error
-inline int generate_talk_figs();
 
 // The following functions only do anything if debug is true:
 
@@ -116,7 +113,6 @@ int main(int argc, const char *argv[]) {
   double de_g = 0.01;
   double dr_g = 0;
   int totime = 0;
-  bool talk = false;
   // scale and theta_scale aren't quite "constants" -- they are adjusted
   // during the initialization so that we have a reasonable acceptance rate
   double scale = 0.05;
@@ -175,8 +171,6 @@ of iterations", "period"},
      "Timing information will be displayed", "interval"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "goal"},
-    {"talk", '\0', POPT_ARG_NONE, &talk, 0,
-     "Generate figures for talk. Will not perform a normal run."},
     {"structure", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &structure, 0,
     "Structure to use for truncated tetrahedra. Does nothing for other shapes. \
 Can be one of [ice | arsenic]"},
@@ -196,10 +190,6 @@ periodicity/dimensions are not set by default and are required.\n");
   }
   poptFreeContext(optCon);
 
-  if (talk) {
-    printf("Generating data for polyhedra talk figures.\n");
-    return generate_talk_figs();
-  }
   // ---------------------------------------------------------------------------
   // Verify we have reasonable arguments and set secondary parameters
   // ---------------------------------------------------------------------------
@@ -544,8 +534,7 @@ periodicity/dimensions are not set by default and are required.\n");
   // ---------------------------------------------------------------------------
   // Initialization of cell
   // ---------------------------------------------------------------------------
-  long totalmoves = 0, workingmoves = 0, old_totalmoves = 0, old_workingmoves = 0;
-  long neighbor_updates = 0, neighbor_informs = 0;
+  counter count, old_count;
   double avg_neighbors = 0;
 
   double dscale = .1;
@@ -555,21 +544,16 @@ periodicity/dimensions are not set by default and are required.\n");
     // Move each polyhedron once
     // ---------------------------------------------------------------
     for(int i=0; i<N; i++) {
-      totalmoves ++;
-      int move_val = move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
+      count += move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
                                         neighborR, scale, theta_scale, max_neighbors, dr);
-      workingmoves += move_val & 1;
-      neighbor_updates += (move_val & 2) > 0;
-      neighbor_informs += (move_val & 4) > 0;
     }
     // ---------------------------------------------------------------
     // fine-tune scale so that the acceptance rate will reach the goal
     // ---------------------------------------------------------------
     if (iteration % 1000 == 0) {
       const double acceptance_rate =
-        (double)(workingmoves-old_workingmoves)/(totalmoves-old_totalmoves);
-      old_workingmoves = workingmoves;
-      old_totalmoves = totalmoves;
+        (double)(count.workingmoves-old_count.workingmoves)/(count.totalmoves-old_count.totalmoves);
+      old_count = count;
       if (acceptance_rate < acceptance_goal) {
         scale /= (1+dscale);
         theta_scale /= (1+scale);
@@ -590,19 +574,26 @@ periodicity/dimensions are not set by default and are required.\n");
       sprintf(iter, "%i iterations", totime);
       took(iter);
       delete[] iter;
-      printf("Iteration %li, acceptance rate of %g, scale: %g.\n", iteration, (double)workingmoves/totalmoves, scale);
-      printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n", 1000.0*neighbor_updates/totalmoves, 1000.0*neighbor_informs/totalmoves, (double)neighbor_informs/neighbor_updates);
-      const long checks_without_tables = totalmoves*N;
+      printf("Iteration %li, acceptance rate of %g, scale: %g.\n", iteration,
+             (double)count.workingmoves/count.totalmoves, scale);
+      printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n",
+             1000.0*count.updates/count.totalmoves,
+             1000.0*count.informs/count.totalmoves,
+             (double)count.informs/count.updates);
+      const long checks_without_tables = count.totalmoves*N;
       int total_neighbors = 0;
       for(int i=0; i<N; i++) {
         total_neighbors += polyhedra[i].num_neighbors;
         most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
       }
       avg_neighbors = double(total_neighbors)/N;
-      const long checks_with_tables = totalmoves*avg_neighbors + N*neighbor_updates;
-      printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
-      printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n", max_neighbors, most_neighbors);
-      printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n", neighborR, avg_neighbors);
+      const long checks_with_tables = count.totalmoves*avg_neighbors + N*count.updates;
+      printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n",
+             100.0*checks_with_tables/checks_without_tables);
+      printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n",
+             max_neighbors, most_neighbors);
+      printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n",
+             neighborR, avg_neighbors);
       fflush(stdout);
     }
   }
@@ -651,18 +642,18 @@ periodicity/dimensions are not set by default and are required.\n");
   clock_t last_output = clock(); // when we last output data
 
   int frame = 0;
-  totalmoves = 0, workingmoves = 0, old_totalmoves = 0, old_workingmoves = 0;
-  neighbor_updates = 0, neighbor_informs = 0;
+
+  // reset moves:
+  count = counter();
+  old_count = counter();
 
   for(long iteration=1; iteration<=iterations; iteration++) {
     // ---------------------------------------------------------------
     // Move each polyhedron once
     // ---------------------------------------------------------------
     for(int i=0; i<N; i++) {
-      totalmoves ++;
-      int move_val = move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
+      count += move_one_polyhedron(i, polyhedra, N, periodic, walls, real_walls,
                                          neighborR, scale, theta_scale, max_neighbors, dr);
-      workingmoves += move_val & 1;
     }
     // ---------------------------------------------------------------
     // Add data to historams
@@ -797,7 +788,8 @@ periodicity/dimensions are not set by default and are required.\n");
       char *countinfo = new char[4096];
       sprintf(countinfo, "\
 # iteration: %li, workingmoves: %li, totalmoves: %li, acceptance rate: %g\n",
-              iteration, workingmoves, totalmoves, double(workingmoves)/totalmoves);
+              iteration, count.workingmoves, count.totalmoves,
+              double(count.workingmoves)/count.totalmoves);
 
 
       // Saving density in each of the x, y, z dimensions
@@ -819,13 +811,14 @@ periodicity/dimensions are not set by default and are required.\n");
         const double zshell_volume = len[0]*len[1]*de_density;
         // If we have a non-cubic cell, then this makes the density negative
         // in the dimensions where it does not exist.
-        const long xhist = e_i>=xbins ? -totalmoves : density_histogram[e_i];
-        const long yhist = e_i>=ybins ? -totalmoves : density_histogram[xbins + e_i];
-        const long zhist = e_i>=zbins ? -totalmoves : density_histogram[xbins + ybins + e_i];
-        const double xdensity = (double)xhist*N/totalmoves/xshell_volume;
-        const double ydensity = (double)yhist*N/totalmoves/yshell_volume;
-        const double zdensity = (double)zhist*N/totalmoves/zshell_volume;
-        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n", e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
+        const long xhist = e_i>=xbins ? -count.totalmoves : density_histogram[e_i];
+        const long yhist = e_i>=ybins ? -count.totalmoves : density_histogram[xbins + e_i];
+        const long zhist = e_i>=zbins ? -count.totalmoves : density_histogram[xbins + ybins + e_i];
+        const double xdensity = (double)xhist*N/count.totalmoves/xshell_volume;
+        const double ydensity = (double)yhist*N/count.totalmoves/yshell_volume;
+        const double zdensity = (double)zhist*N/count.totalmoves/zshell_volume;
+        fprintf(densityout, "%6.3f   %8.5f   %8.5f   %8.5f   %li %li %li\n",
+                e, xdensity, ydensity, zdensity, xhist, yhist, zhist);
       }
       fclose(densityout);
 
@@ -848,7 +841,7 @@ periodicity/dimensions are not set by default and are required.\n");
         for(int i=0; i<n_gfuncs; i++) {
           const double vol1 = i==0 ? 4.0/3.0*M_PI*(uipow(e+de_g/2, 3) - uipow(e-de_g/2, 3))
                                    : M_PI*sqr(dr_g)*de_g;
-          const double probability = (double)g_histogram[i*g_bins + e_i]/totalmoves;
+          const double probability = (double)g_histogram[i*g_bins + e_i]/count.totalmoves;
           const double n2 = probability/vol0/vol1;
           const double g = n2/density/density*N*N/n_cylinders[i];
           fprintf(g_out, "%8.5f  ", g);
@@ -916,19 +909,26 @@ periodicity/dimensions are not set by default and are required.\n");
       sprintf(iter, "%i iterations", totime);
       took(iter);
       delete[] iter;
-      printf("Iteration %li, acceptance rate of %g, scale: %g.\n", iteration, (double)workingmoves/totalmoves, scale);
-      printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n", 1000.0*neighbor_updates/totalmoves, 1000.0*neighbor_informs/totalmoves, (double)neighbor_informs/neighbor_updates);
-      const long checks_without_tables = totalmoves*N;
+      printf("Iteration %li, acceptance rate of %g, scale: %g.\n",
+             iteration, (double)count.workingmoves/count.totalmoves, scale);
+      printf("We've had %g updates per kilomove and %g informs per kilomove, for %g informs per update.\n",
+             1000.0*count.updates/count.totalmoves,
+             1000.0*count.informs/count.totalmoves,
+             (double)count.informs/count.updates);
+      const long checks_without_tables = count.totalmoves*N;
       int total_neighbors = 0;
       for(int i=0; i<N; i++) {
         total_neighbors += polyhedra[i].num_neighbors;
         most_neighbors = max(polyhedra[i].num_neighbors, most_neighbors);
       }
       avg_neighbors = double(total_neighbors)/N;
-      const long checks_with_tables = totalmoves*avg_neighbors + N*neighbor_updates;
-      printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n", 100.0*checks_with_tables/checks_without_tables);
-      printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n", max_neighbors, most_neighbors);
-      printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n", neighborR, avg_neighbors);
+      const long checks_with_tables = count.totalmoves*avg_neighbors + N*count.updates;
+      printf("We've done about %.3g%% of the distance calculations we would have done without tables.\n",
+             100.0*checks_with_tables/checks_without_tables);
+      printf("The max number of neighbors is %i, whereas the most we've seen is %i.\n",
+             max_neighbors, most_neighbors);
+      printf("Neighbor radius is %g and avg. number of neighbors is %g.\n\n",
+             neighborR, avg_neighbors);
       fflush(stdout);
     }
   }
@@ -1076,111 +1076,4 @@ void save_locations(const polyhedron *p, int N, const char *fname, const double 
     fprintf(out, "\n");
   }
   fclose(out);
-}
-
-int generate_talk_figs() {
-  const poly_shape cube("cube");
-  const poly_shape truncated_tetrahedron("truncated_tetrahedron");
-  const poly_shape tetrahedron("tetrahedron");
-
-  // Generate background image for title slide
-  int N = 7;
-  polyhedron *p = new polyhedron[N];
-  const double len[3] = {20, 20, 20};
-  const double R = 1;
-  for(int i=0; i<N; i++) {
-    p[i].R = R;
-  }
-  p[0].mypoly = &truncated_tetrahedron;
-  p[1].mypoly = &cube;
-  p[2].mypoly = &truncated_tetrahedron;
-  p[3].mypoly = &tetrahedron;
-  p[4].mypoly = &cube;
-  p[5].mypoly = &truncated_tetrahedron;
-  p[6].mypoly = &tetrahedron;
-
-  const double periodic[3] = {0, 0, 0};
-  const double walls[3] = {6.5, 4, 5};
-  const bool real_walls = true;
-  const int max_neighbors = N;
-  const double scale = 1.5;
-  const double theta_scale = M_PI/4.0;
-  const double neighborR = .5;
-
-  for(int i=0; i<N; i++) {
-    p[i].pos = vector3d(random::ran(), random::ran(), random::ran())*3;
-  }
-  initialize_neighbor_tables(p, N, neighborR, max_neighbors, periodic);
-
-  for(int j=0; j<100; j++) {
-    for(int i=0; i<N; i++) {
-      move_one_polyhedron(i, p, N, periodic, walls, real_walls,
-                          neighborR, scale, theta_scale, max_neighbors, 0);
-    }
-  }
-  for(int i=0; i<N; i++) {
-    p[i].pos += vector3d(0, -4.5, 0);
-  }
-  save_locations(p, N, "talks/polyhedra/dat/background.dat", len);
-
-  delete[] p;
-  // Generate image of ice structure
-
-  N = 26;
-  p = new polyhedron[N];
-
-
-  for(int i=0; i<N; i++) {
-    p[i].R = R;
-    p[i].mypoly = &truncated_tetrahedron;
-  }
-  const double fac = R/sqrt(11.0)*1.05;
-  // lattice vectors:
-  const vector3d e1 = vector3d(0, 4, 4)*fac;
-  const vector3d e2 = vector3d(4, 0, 4)*fac;
-  const vector3d e3 = vector3d(4, 4, 0)*fac;
-  const vector3d offset = vector3d(2, 2, 2)*fac;
-
-  double rad = 3.5;
-  int nx=10, ny=10, nz=10;
-  int x=-nx/2, y=-ny/2, z=-nz/2;
-  int i=0;
-  while(i < N-1) {
-    if((x*e1 + y*e2 + z*e3).norm() < rad) {
-      p[i].pos = x*e1 + y*e2 + z*e3;
-      p[i].rot = rotation(M_PI, vector3d(1, 1, 0));
-      if(i < N-1) p[i+1].pos = offset + x*e1 + y*e2 + z*e3;
-      else break;
-      i += 2;
-    }
-    x++;
-    if(x >= nx/2) {
-      x = -nx/2;
-      y++;
-      if(y >= ny/2) {
-        y = -ny/2;
-        z++;
-        if(z >= nz/2) break;
-      }
-    }
-  }
-  save_locations(p, N, "talks/polyhedra/dat/ice-structure.dat", len);
-
-  delete[] p;
-
-  // tetrahedra images
-  p = new polyhedron[1];
-  rotation *rots = new rotation[3];
-  rots[1] = rotation(M_PI/4, vector3d(0, 1, 0));
-  rots[2] = rotation(M_PI/3, vector3d(1, 0, 0));
-  for(int i=0; i<3; i++) {
-    p[0].R = R;
-    p[0].mypoly = &truncated_tetrahedron;
-    p[0].rot = rots[i];
-    char *fname = new char[1024];
-    sprintf(fname, "talks/polyhedra/dat/tet-%i.dat", i);
-    save_locations(p, 1, fname, len);
-  }
-
-  return 0;
 }

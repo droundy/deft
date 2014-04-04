@@ -1,9 +1,9 @@
 #!/usr/bin/python2
 from __future__ import division
 import matplotlib, sys, os, argparse
-import common
+import read
 
-parser = argparse.ArgumentParser(description='Plot pressure of polyhedra.')
+parser = argparse.ArgumentParser(description='Plot order parameter of polyhedra.')
 parser.add_argument('ff', metavar='ff', type=float, help='filling fraction')
 parser.add_argument('-N', metavar='N', type=int,default=0,
                     help="""number of polyhedra, if not supplied then the first
@@ -15,8 +15,8 @@ parser.add_argument('-p', '--periodic', action='store_true',
                     help='will use periodic cell - defaults to walls otherwise')
 parser.add_argument('--hide', action='store_true',
                     help='will just save the plot and won\'t display it')
-
 args = parser.parse_args()
+
 
 ff = args.ff
 polyhedron = args.shape
@@ -27,7 +27,7 @@ else:
   celltype = 'walls'
 
 if args.N == 0:
-  N = common.get_N("figs/mc/%s-%4.2f-pressure-%s" %(celltype, ff, polyhedron))
+  N = read.get_N("figs/mc/%s-%4.2f-order-%s" %(celltype, ff, polyhedron))
   if N == 0:
     exit(1)
 else: N = args.N
@@ -36,13 +36,25 @@ if args.hide:
   matplotlib.use('Agg')
 from pylab import *
 
-dV, totalmoves, pressure, dZ = common.read_mc_pressure(ff, polyhedron, N, celltype)
+order_parameters = read.read_mc_order(ff, polyhedron, N, celltype)
 
-avgpressure = ones_like(pressure)*(sum(dZ)/dV/totalmoves[-1])
+dim = read.read_mc_dimensions(ff, polyhedron, N, celltype)
+dz = dim[2]/len(order_parameters[0,:])
+dcostheta = 1/len(order_parameters[:,0])
+print dz
+print dcostheta
 
-plot(totalmoves/N, avgpressure, "-", label="avg")
-plot(totalmoves/N, pressure, "o")
+z = arange(0, dim[2], dz)
+costheta = arange(0, 1, dcostheta)
+z, costheta = meshgrid(z, costheta)
 
-title("$%s,$ $pressure,$ $%s,$ $\\eta = %04.2f$, $N = %i$." %(celltype, polyhedron, ff, N))
-savefig("figs/%s-pressure-%4.2f-%s.pdf" %(celltype, ff, polyhedron))
+ylim(cos(arctan(sqrt(2))), 1)
+print order_parameters.shape
+print z.shape
+
+highest = nanmax(order_parameters.flat)
+print highest
+pcolormesh(z, costheta, order_parameters, vmax=highest/10, vmin=0)
+print len(z)
+
 show()

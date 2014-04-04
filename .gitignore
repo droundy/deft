@@ -14,6 +14,7 @@ html
 stamp-*
 *.test
 deft
+polyhedra-talk
 *monte-carlo
 foobar
 install-sh

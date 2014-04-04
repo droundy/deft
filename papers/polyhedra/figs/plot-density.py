@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 from __future__ import division
 import matplotlib, sys, os, argparse
 import read, arguments
