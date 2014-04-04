@@ -246,12 +246,13 @@ polyhedron random_move(const polyhedron &original, double size,
   return temp;
 }
 
-int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
+counter move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
                          const double walls[3], bool real_walls, double neighborR,
                         double dist, double angwidth, int max_neighbors, double dr) {
   const double len[3] = {periodic[0]+walls[0], periodic[1]+walls[1], periodic[2]+walls[2]};
   polyhedron temp = random_move(p[id], dist, angwidth, len);
-  int returnval = 0;
+  counter move;
+  move.totalmoves ++;
   if (in_cell(temp, walls, real_walls)) {
     bool overlaps = overlaps_with_any(temp, p, periodic);
     if (!overlaps) {
@@ -265,7 +266,7 @@ int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
         // of our neighbors that have changed.
         temp.neighbors = new int[max_neighbors];
         update_neighbors(temp, id, p, N, neighborR + 2*dr, periodic);
-        returnval += 2;
+        move.updates ++;
         // However, for this check (and this check only), we don't need to
         // look at all of our neighbors, only our new ones.
         // fixme: do this!
@@ -277,18 +278,19 @@ int move_one_polyhedron(int id, polyhedron *p, int N, const double periodic[3],
           // keeping this move and need to tell our neighbors where we are now.
           temp.neighbor_center = temp.pos;
           inform_neighbors(temp, p[id], id, p);
-          returnval += 4;
+          move.informs ++;
           delete[] p[id].neighbors;
         }
         else delete[] temp.neighbors;
       }
       if (!overlaps) {
         p[id] = temp;
-        return returnval + 1; //move successful
+        move.workingmoves ++; // move sucessful
+        return move;
       }
     }
   }
-  return returnval; //move unsucessful
+  return move; // move unsucessful
 }
 
 int initialize_neighbor_tables(polyhedron *p, int N, double neighborR,

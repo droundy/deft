@@ -123,7 +123,7 @@ def SVG(env, filename):
 AddMethod(Environment, SVG)
 
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
-                      triplet-monte-carlo polyhedra-monte-carlo
+                      triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
                       square-well-monte-carlo
                       radial-distribution-monte-carlo """):
     env.Program(
@@ -344,9 +344,58 @@ for talkdir in glob.glob('talks/*'):
     env.PDF(talkdir+'/slides.tex')
     #Alias('talks', talkdir+'/slides.pdf')
 
-Alias('talks', 'talks/colloquium/slides.pdf')
+Alias('talks', ['talks/colloquium/slides.pdf', 'talks/polyhedra/slides.pdf'])
 
 ###################### dependencies for polyhedra talk ####################
+servernum = 100
+def xserver():
+  # xvfb-run needs to run each command on a unique server,
+  # so using this function for the server number ensures that
+  global servernum
+  servernum -= 1
+  return servernum
+
+Depends('talks/polyhedra/slides.pdf',
+        env.Command(target = ['talks/polyhedra/figs/background.png'] +
+                    ['talks/polyhedra/figs/tet-%i.png' %i for i in xrange(3)] +
+                    ['talks/polyhedra/figs/ice-structure-%i.png' %i for i in xrange(5)],
+                    source = ['talks/polyhedra/generate-figs.py',
+                              'talks/polyhedra/dat/background.dat'] +
+                    ['talks/polyhedra/dat/tet-%i.dat' %i for i in xrange(3)] +
+                    ['talks/polyhedra/dat/ice-structure.dat'],
+                    action = 'cd talks/polyhedra && xvfb-run -n %i --server-args="-screen 0 1024x768x24" ./generate-figs.py' %xserver()))
+Depends('talks/polyhedra/slides.pdf',
+        NoCache(env.Command(target = ['talks/polyhedra/dat/background.dat'],
+                    source = 'polyhedra-talk',
+                    action = './polyhedra-talk')))
+Depends('talks/polyhedra/slides.pdf',
+        env.Command(target = ['talks/polyhedra/anim/mc-slow-%03i.pdf' % i
+                              for i in xrange(30)],
+                    source = 'talks/polyhedra/mc-tri-slow.py',
+                    action = 'cd talks/polyhedra && python mc-tri-slow.py'))
+Depends('talks/polyhedra/slides.pdf',
+        env.Command(target = ['talks/polyhedra/anim/mc100-%4.2f-%03i.png' % (.5, i)
+                              for i in xrange(30)],
+                    source = 'talks/polyhedra/mc-tri.py',
+                    action = 'cd talks/polyhedra && python mc-tri.py'))
+for ff in [0.42, 0.71]:
+  Depends('talks/polyhedra/slides.pdf',
+          env.Command(
+            target = ['papers/polyhedra/figs/anim/periodic-%04.2f-truncated_tetrahedron-216-%i.png' % (ff, i)
+                      for i in xrange(10)],
+            source = ['papers/polyhedra/figs/animate_polyhedra.py'] +
+            ['papers/polyhedra/figs/mc/vertices/periodic-%04.2f-vertices-truncated_tetrahedron-216-%i.dat' %(ff, i)
+             for i in xrange(10)],
+            action = 'cd papers/polyhedra && xvfb-run -n %i --server-args="-screen 0 1024x768x24" ./figs/animate_polyhedra.py %04.2f -p -N 216 -f 10 --save --hide --notext' %(xserver(), ff)))
+  Depends('talks/polyhedra/slides.pdf',
+          env.Command(
+            target = ['papers/polyhedra/figs/mc/vertices/periodic-%04.2f-vertices-truncated_tetrahedron-216-%i.dat'
+                      % (ff, i) for i in xrange(10)],
+                      source = 'polyhedra-monte-carlo',
+                      action = './polyhedra-monte-carlo --ff %04.2f --periodx 20 --periody 20 --periodz 20 --N 216 --iterations 100 --initialize_iterations 1000 --save_vertices 10' %ff))
+
+Default('talks')
+
 
 ###################### dependencies for colloquium ########################
 

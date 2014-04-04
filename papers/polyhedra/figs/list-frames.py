@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 import glob
 
 names = glob.glob("figs/mc/vertices/*--1.dat")
