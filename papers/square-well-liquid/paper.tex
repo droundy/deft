@@ -73,20 +73,62 @@ compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 \fixme{Add here a complete exposition of this functional form,
   reproducing what Gil Villegas says.}
 
-\fixme{Some notes are as follows:}
-In Gil-Villegas' paper, HS and Dispersion are wrapped up into the \textit{monomer} contribution, expressed in terms of energy densities as:
-\begin{equation}
+\fixme{DR -- Some notes are as follows:}
+
+In Gil-Villegas' paper, HS and Dispersion are wrapped up into the
+\textit{monomer} contribution, expressed in terms of energy densities
+as:
+\begin{align}
   f_\text{mono} = f_\text{HS} - \frac{\alpha^\text{VDW}n}{kT}
-\end{equation}
+\end{align}
 with $\alpha^\text{VDW}$ given by
-\begin{equation}
-  \alpha^\text{VDW} = 2\pi\epsilon\int_\sigma^\infty r^2\phi(r)\,dr
-\end{equation}
+\begin{align}
+  \alpha^\text{VDW} &= 2\pi\epsilon\int_\sigma^\infty r^2\phi(r)\,dr \\
+  \intertext{using reduced units of $x = r/\sigma$, we have}
+  &= 2\pi\sigma^3\int_1^\infty x^2\phi(x)\,dx \\
+  &= 3b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)\,dx
+\end{align}
+where $b^\text{VDW}$ is the van der Waals size parameter. It corresponds to the volume excluded by two spherical particles of volume $b$: $b^\text{VDW} = 4b = 4\left(\pi\sigma^3/6\right)$.
 Then, the high-temp expansion is an expansion of the monomer term:
-\begin{equation}
-  f_\text{mono} = f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
-\end{equation}
+\begin{align}
+  f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
+\end{align}
 \fixme{I'm not sure how to express this in terms of $F_\text{disp}[n]$ alone.}
+
+The term $a_1$ is given by
+\begin{align}
+  a_1 &= -2\pi\rho_s\epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
+  &= -3\rho_sb^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
+\end{align}
+If assume a random correlations between the particles' positions, for all distances, we have $g^\text{HS}(r) = 1$. This yields
+\begin{align}
+  a_1^\text{VDW} = -\rho_s\alpha^\text{VDW},
+\end{align}
+the van der Waals mean-field energy.
+
+The second-order term is quite a bit more complicated; one must have
+knowledge of higher-order correlation functions to determine
+$a_2$. This term describes the response of the attractive energy due
+to the compression of the fluid from the attractive well. Gil-Villegas
+\emph{et al.} base their expression on an approximation by Barker and
+Henderson\cite{barker1967-SW-perturbation}. \fixme{Gil-Villegas also
+  cites 2 other Barker and Henderson papers, but I can't find one and
+  the other doesn't seem relevant}. Barker and Henderson's
+approximation considers fluctuations in the number of particles in the
+potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility
+of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial\rho_s/\partial P^\text{HS}\right)_T$, we have:
+\begin{align}
+  a_2 &= -\pi\rho_s\epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial\rho_s g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
+  &= -\pi\rho_s\epsilon^2K^\text{HS}\frac{\partial}{\partial\rho_s}\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2\rho_s g^\text{HS}\,dr\right] \\
+  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial\rho_s}\left[-3\rho_sb^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+\end{align}
+
+We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion\cite{barker1976liquid}:
+\begin{align}
+  K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
+\end{align}
+
+\fixme{End of my comments --DR}
 
 \subsection{A simple weighted density approach}
 
