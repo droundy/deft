@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-import SW
 import integrate
 
 # Author: Dan Roth
@@ -46,7 +45,7 @@ def VD(i):
 # Free energy density, defined by an iterative process
 def fiterative(T,n,i):
     # eqn (55) Forte 2011:
-    fnaught = SW.fid(T,n) + SW.fhs(T,n) + SW.a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
+    fnaught = fid(T,n) + SWfhs(T,n) + a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
     # eqn (5) from Forte 2011:
     for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
@@ -109,13 +108,13 @@ gamma = 1/70*sigma**4*(lambdaSW**7 - 1)/(lambdaSW**3 - 1)
 # Eqn (51), Forte 2011
 ## The paper also includes m, which refers to the number of segments forming a chain; we do not deal with chains, so m = 1
 def u(T,n,lambda_d,i):
-    value = -(n)**2*(SW.gHS_eff(n)*alpha - (4*np.pi**2)/(2**(2*i+1)*L**2)*alpha*omega2 + ((4*np.pi**2)/(2**(2*i+1)*L**2))**2*alpha*gamma)
+    value = -(n)**2*(gHS_eff(n)*alpha - (4*np.pi**2)/(2**(2*i+1)*L**2)*alpha*omega2 + ((4*np.pi**2)/(2**(2*i+1)*L**2))**2*alpha*gamma)
     return value
 
 # Total
 # Eqn (32), Forte 2011; f1 = fatt (see paragraph after eqn 55)
 def ftot(T,n,i):
-    return fiterative(T,n,i) + SW.a1SW(n)*n # SW.a1SW*n is the same as Forte's f1
+    return fiterative(T,n,i) + a1SW(n)*n # a1SW*n is the same as Forte's f1
 
 # Pressure
 def P(T,n,i):
@@ -125,12 +124,6 @@ def P(T,n,i):
 def phi(T,n,nparticular,i):
     mu = df_dn(T,nparticular,i)
     return ftot(T,n,i) - mu*n
-
-# # Derivative of free energy wrt number at const temp
-# def df_dn(T,n,i):
-#     # step size
-#     dn = 1e-6*n
-#     return (ftot(T,n + dn/2,i) - ftot(T,n - dn/2,i))/dn
 
 # Derivative of free energy wrt number (const. temp)
 # only depents on n (really? not T or i as well?)
@@ -160,19 +153,91 @@ def df_dn(n):
     dPhi3_dn = (n2**3*(n3 + (1 - n3)**2*np.log(1 - n3))/36/np.pi/(n3**2*(1 - n3)**2)**2)*dn3_dn*((1 - n3)**2*2*n3 - n3**2*2*(1 - n3)) + 1/36/np.pi/n3**2/(1 - n3)**2*((n3 + (1 - n3)**2*np.log(1 - n3))*3*n2**2*4*np.pi*R**2 + n2**3*dn3_dn*(1 - np.log(1 - n3)*2*(1 - n3) - (1 - n3)))
     dfhs_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
 
-    # Term from derivative SW.a2
-    # This is a bit complicated; just hang in there, you'll make it through!
+    # Term from derivative a2
+    # This is a bit more complicated; just hang in there, you'll make it through!
     dK_dn = -deta_eff_dn*(4*(1 - eta(n))**3/(1 + 4*eta(n) + 4*eta(n)**2) + (1 - eta(n))**4*(4 + 8*eta(n))/(1 - 4*eta(n) + 4*eta(n)**2)**2)
-    dgHS_eff_dn = deta_eff_dn*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4 - 1/2/(1 - SW.eta_eff(n))**3)
-    dA_dn = deta_eff_dn*12*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**5
-    da1SW_deta_dn = -4*epsilon*(lambdaSW**3 - 1)*dgHS_eff_dn - (1/2/(1 - SW.eta_eff(n))**3 + 3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4)*4*epsilon*(lambdaSW**3 - 1)*dn3_dn - 4*epsilon*(lambdaSW**3 - 1)*eta(n)*dA_dn
-    da2_dn = epsilon/2*(eta(n)*SW.da1SW_deta(n)*dK_dn + SW.K(n)*SW.da1SW_deta(n)*dn3_dn + SW.K(n)*eta(n)*da1SW_deta_dn)
+    dgHS_eff_dn = deta_eff_dn*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4 - 1/2/(1 - eta_eff(n))**3)
+    dA_dn = deta_eff_dn*12*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**5
+    da1SW_deta_dn = -4*epsilon*(lambdaSW**3 - 1)*dgHS_eff_dn - (1/2/(1 - eta_eff(n))**3 + 3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4)*4*epsilon*(lambdaSW**3 - 1)*dn3_dn - 4*epsilon*(lambdaSW**3 - 1)*eta(n)*dA_dn
+    da2_dn = epsilon/2*(eta(n)*da1SW_deta(n)*dK_dn + K(n)*da1SW_deta(n)*dn3_dn + K(n)*eta(n)*da1SW_deta_dn)
 
-    # Term from derivative of SW.a1SW
-    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*SW.gHS_eff(n)*dn3_dn + SW.a1VDW(n)*(3*(1 - 0.5*SW.eta_eff(n))/(1 - SW.eta_eff(n))**4*deta_eff_dn - 1/2/(1 - SW.eta_eff(n))**3*deta_eff_dn)
+    # Term from derivative of a1SW
+    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*gHS_eff(n)*dn3_dn + a1VDW(n)*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4*deta_eff_dn - 1/2/(1 - eta_eff(n))**3*deta_eff_dn)
 
-    return dfid_dn + dfhs_dn + SW.a2(n)/k_B/T + n/k_B/T*da2_dn + SW.a1SW(n) + n*da1_dn
+    return dfid_dn + dfhs_dn + a2(n)/k_B/T + n/k_B/T*da2_dn + a1SW(n) + n*da1_dn
 
-# Define eta(n) here, rather than using SW.eta(n), in case the value of R is different between SW.py and this program
+#######################################
+# I define the following functions here, rather than calling from SW.py
+# This so that you can use the functions without worring if (for example) HS radius is set differently between the two programs
+
+# eta is the packing fraction; volume times number density
+# In the homogeneous case, eta is the same as n3(n) (from FMT; see Hughes 2013)
 def  eta(n):
     return n*R**3*(4/3)*np.pi
+
+# effective packing fraction
+# Gil-Villegas eqn (36)
+def eta_eff(n):
+    return c1*eta(n) + c2*eta(n)**2 + c3*eta(n)**3
+
+# 1st term in High-temp perturbation expansion, for square well potential
+# Gil-Villegas eqn (34)
+def a1SW(n):
+    return a1VDW(n)*gHS_eff(n)
+
+# Derivate of a1SW wrt eta
+def da1SW_deta(n):
+
+    # derivate of a1VDW wrt eta
+    da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
+
+    return gHS_eff(n)*da1VDW_deta + a1VDW(n)*dgHS_eff_deta(n)
+
+# Hard sphere correlation function, effective
+# Gil-Villegas eqn (33)
+def gHS_eff(n):
+    return (1-0.5*eta_eff(n))*(1-eta_eff(n))**-3
+
+# derivative of gHS_eff wrt eta_eff
+def dgHS_eff_deta_eff(n):
+    return -0.5/(1-eta_eff(n))**3 + 3*(1-0.5*eta_eff(n))/(1-eta_eff(n))**4
+
+# van der Waals attractive parameter
+# Gil-Villegas eqn (35)
+def a1VDW(n):
+    return -4*eta(n)*epsilon*(lambdaSW**3-1)
+
+# 2nd term in High-temp perturbation expansion, for square well potential
+# Gil-Villegas eqn (38)
+def a2(n):
+    return 0.5*epsilon*K(n)*eta(n)*da1SW_deta(n)
+
+# Isothermal compressibility
+# Gil-Villegas eqn (22)
+def K(n):
+    return (1-eta(n))**4/(1+4*eta(n)+4*eta(n)**2)
+
+# Ideal gas
+# Gil-Villegas eqn (9)
+# NB: In Gil-Villegas, there is a term involving the thermal DeBroglie wavelength (Lambda)
+## I ignore this here, because Lambda does not have any contribution from density.
+## It only serves to add a constant to the free energy; we absorb this later into the chemical potential
+def SWfid(T,n):
+    return n*k_B*T*(np.log(n) - 1)
+
+# Hard-sphere free energy
+# based on Hughes
+def SWfhs(T,n):
+    # Phi 1
+    Phi1 = -n0(n)*np.log(1-n3(n))
+
+    # Phi 2
+    Phi2 = (n1(n)*n2(n))/(1-n3(n))
+
+    # Phi 3
+    Phi3 = n2(n)**3*((n3(n)+(1-n3(n))**2*np.log(1-n3(n)))/(36*np.pi*n3(n)**2*(1-n3(n))**2))
+
+    # free energy
+    return k_B*T*(Phi1 + Phi2 + Phi3)
+
+##########################################
