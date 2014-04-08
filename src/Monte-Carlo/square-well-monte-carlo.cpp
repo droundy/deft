@@ -83,6 +83,7 @@ int main(int argc, const char *argv[]) {
   bool debug = false;
 
   bool no_weights = false;
+  bool flat_histogram = false;
   double fix_kT = 0;
 
   double len[3] = {1, 1, 1};
@@ -159,6 +160,8 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
+    {"flat", '\0', POPT_ARG_NONE, &flat_histogram, 0, "Use a flat histogram method",
+     "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -227,8 +230,19 @@ int main(int argc, const char *argv[]) {
     else if(walls == 1) sprintf(wall_tag,"wall");
     else if(walls == 2) sprintf(wall_tag,"tube");
     else if(walls == 3) sprintf(wall_tag,"box");
-    sprintf(weight_tag, (no_weights ? "-nw" : ""));
-    if (fix_kT) sprintf(weight_tag, "-kT%g", fix_kT);
+    if (fix_kT) {
+      sprintf(weight_tag, "-kT%g", fix_kT);
+    } else if (no_weights) {
+      sprintf(weight_tag, "-nw");
+    } else if (flat_histogram) {
+      sprintf(weight_tag, "-flat");
+    } else {
+      weight_tag[0] = 0; // set weight_tag to the empty string
+    }
+    // check that nonsense options do not exist:
+    assert(!(no_weights && flat_histogram));
+    assert(!(!no_weights && fix_kT));
+    assert(!(flat_histogram && fix_kT));
     sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, weight_tag);
     printf("\nUsing default file name: ");
@@ -490,13 +504,14 @@ int main(int argc, const char *argv[]) {
       if(iteration == N){
         // initial guess for energy weights
         for(int i = 0; i < energy_levels; i++){
-          ln_energy_weights[i] = log((N*initialization_iterations) /
+          ln_energy_weights[i] = log( double(N) /
                                      (energy_histogram[i] > 0 ?
                                       energy_histogram[i] : 0.01));
         }
         weight_updates++;
       }
-      if(iteration >= N && (iteration-N) % int(uipow(2,weight_updates)) == 0){
+      if(iteration >= N && (iteration-N) % int(N*uipow(2,weight_updates)) == 0){
+        printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
         for(int i = 0; i < energy_levels; i++){
           const int top = i < energy_levels-1 ? i+1 : i;
           const int bottom = i > 0 ? i-1 : i;
@@ -507,6 +522,11 @@ int main(int argc, const char *argv[]) {
           const double walker_density = (walkers_total[i] != 0 ?
                                          walkers_total[i] : 0.01) / moves.total;
           ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
+
+          if (flat_histogram) {
+            ln_energy_weights[i] -= log(energy_histogram[i] > 0 ? energy_histogram[i] : 0.01);
+            energy_histogram[i] = 0;
+          }
         }
         weight_updates++;
         for(int i = 0; i < energy_levels; i++)
@@ -618,6 +638,9 @@ int main(int argc, const char *argv[]) {
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", dir, filename);
 
+  char *dos_fname = new char[1024]; // density of states
+  sprintf(dos_fname, "%s/%s-dos.dat", dir, filename);
+
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
 
@@ -709,8 +732,18 @@ int main(int argc, const char *argv[]) {
       fprintf(e_out, "\n# interactions   counts\n");
       for(int i = 0; i < energy_levels; i++)
         if(energy_histogram[i] != 0)
-          fprintf(e_out, "%i  %li\n",i,energy_histogram[i]);
+          fprintf(e_out, "%i  %ld\n",i,energy_histogram[i]);
       fclose(e_out);
+
+      // Save density of states histogram
+      FILE *dos_out = fopen((const char *)dos_fname, "w");
+      fprintf(dos_out, "%s", headerinfo);
+      fprintf(dos_out, "%s", countinfo);
+      fprintf(dos_out, "\n# interactions   counts\n");
+      for(int i = 0; i < energy_levels; i++)
+        if(energy_histogram[i] != 0)
+          fprintf(dos_out, "%i  %g\n",i,energy_histogram[i]*exp(-ln_energy_weights[i]));
+      fclose(dos_out);
 
       // Save RDF
       if(!walls){
