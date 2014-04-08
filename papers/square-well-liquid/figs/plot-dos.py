@@ -27,13 +27,18 @@ DS = data[:,1]
 DS /= sum(DS)
 plt.semilogy(energy,DS,'.', label='$kT = \infty$ and $N=%d$' % N)
 
+data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, 2))
+energy = -data[:,0]/N
+DS = data[:,1]
+DS /= sum(DS)
+plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$ and $N=%d$' % (2, N))
+
 
 data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, 1))
 energy = -data[:,0]/N
 DS = data[:,1]
 DS /= sum(DS)
 plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$ and $N=%d$' % (1, N))
-
 
 data = numpy.loadtxt("data/periodic-ww%03.1f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, 0.1))
 energy = -data[:,0]/N
