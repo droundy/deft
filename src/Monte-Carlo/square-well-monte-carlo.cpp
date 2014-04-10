@@ -432,6 +432,8 @@ int main(int argc, const char *argv[]) {
   double avg_neighbors = 0;
   int interactions = 0;
   double dscale = .1;
+  int top, bottom, dE;
+  double df, df_dE, walker_density;
 
   // Count initial number of interactions
   // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
@@ -490,27 +492,12 @@ int main(int argc, const char *argv[]) {
       if(iteration == N){
         // initial guess for energy weights
         for(int i = 0; i < energy_levels; i++){
-          ln_energy_weights[i] = log((N*initialization_iterations) /
-                                     (energy_histogram[i] > 0 ?
-                                      energy_histogram[i] : 0.01));
+          ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
+                                      energy_histogram[i] : 0.01);
         }
         weight_updates++;
       }
       if(iteration >= N && (iteration-N) % int(uipow(2,weight_updates)) == 0){
-        for(int i = 0; i < energy_levels; i++){
-          const int top = i < energy_levels-1 ? i+1 : i;
-          const int bottom = i > 0 ? i-1 : i;
-          const int dE = bottom-top; // interactions and energy are opposites
-          const double df = double(walkers_plus[top]) / walkers_total[top]
-            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-          const double df_dE = (isnan(df) ? 1 : df/dE);
-          const double walker_density = (walkers_total[i] != 0 ?
-                                         walkers_total[i] : 0.01) / moves.total;
-          ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
-        }
-        weight_updates++;
-        for(int i = 0; i < energy_levels; i++)
-          walkers_total[i] = 0;
 
         // -----------------------------------------------------------------
         // ----------------------------- TESTING ---------------------------
@@ -538,10 +525,10 @@ int main(int argc, const char *argv[]) {
         const char *w_testdir = "weights";
 
         char *w_fname = new char[1024];
-        mkdir(dir, 0777); // create "dir" directory, ignore error that happens if it already exists.
+        mkdir(dir, 0755); // create save directory
         sprintf(w_fname, "%s/%s",
                 dir, w_testdir);
-        mkdir(w_fname, 0777); // create "weights" directory
+        mkdir(w_fname, 0755); // create weights directory
         sprintf(w_fname, "%s/%s/%s-w%02i.dat",
                 dir, w_testdir, filename, weight_updates);
         FILE *w_out = fopen(w_fname, "w");
@@ -556,11 +543,26 @@ int main(int argc, const char *argv[]) {
         delete[] w_countinfo;
         fprintf(w_out, "\n# interactions   value\n");
         for(int i = 0; i < energy_levels; i++)
-          fprintf(w_out, "%i  %f\n",i,ln_energy_weights[i]);
+          fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
         fclose(w_out);
         // -------------------------------------------------------------------
         // ----------------------------- TESTING -----------------------------
         // -------------------------------------------------------------------
+
+        for(int i = 0; i < energy_levels; i++){
+          top = i < energy_levels-1 ? i+1 : i;
+          bottom = i > 0 ? i-1 : i;
+          dE = bottom-top; // interactions and energy are negatives of each other
+          df = double(walkers_plus[top]) / walkers_total[top]
+            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+          df_dE = (isnan(df) ? 1 : df/dE);
+          walker_density = (walkers_total[i] != 0 ?
+                                         walkers_total[i] : 0.01) / moves.total;
+          ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
+        }
+        weight_updates++;
+        for(int i = 0; i < energy_levels; i++)
+          walkers_total[i] = 0;
       }
     }
     // ---------------------------------------------------------------
@@ -604,6 +606,8 @@ int main(int argc, const char *argv[]) {
   // Generate info to put in save files
   // ----------------------------------------------------------------------------
 
+  mkdir(dir, 0755); // create save directory
+
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
@@ -642,7 +646,7 @@ int main(int argc, const char *argv[]) {
 
   for(long iteration = 1; iteration <= iterations; iteration++) {
     // ---------------------------------------------------------------
-    // Move each ball once, add to energy and walker histograms
+    // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
