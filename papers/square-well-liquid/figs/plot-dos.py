@@ -30,6 +30,12 @@ DS = data[:,1]
 DS /= sum(DS)
 plt.semilogy(energy,DS,'.', label='$kT = \infty$ and $N=%d$' % N)
 
+data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N))
+energy = -data[:,0]/N
+DS = data[:,1]
+DS /= sum(DS)
+plt.semilogy(energy,DS,'.', label='flat and $N=%d$' % N)
+
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
 for kT in kTs:
     data = numpy.loadtxt(
