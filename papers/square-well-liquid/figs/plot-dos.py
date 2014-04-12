@@ -6,8 +6,8 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
-if len(sys.argv) != 4:
-    print 'useage: %s ww ff N' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'useage: %s ww ff N kTs' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -19,6 +19,9 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [200, 1000]
 
+kTs = eval(sys.argv[4])
+#arg kTs = [[0.1, 1, 2]]
+
 plt.title('Density of states with well width %g and filling fraction %g' % (ww, ff))
 
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N))
@@ -27,10 +30,8 @@ DS = data[:,1]
 DS /= sum(DS)
 plt.semilogy(energy,DS,'.', label='$kT = \infty$ and $N=%d$' % N)
 
-# input: "data/periodic-ww%04.2f-ff%04.2f-N%i-kT0.1-dos.dat" % (ww, ff, N)
-# input: "data/periodic-ww%04.2f-ff%04.2f-N%i-kT1-dos.dat" % (ww, ff, N)
-# input: "data/periodic-ww%04.2f-ff%04.2f-N%i-kT2-dos.dat" % (ww, ff, N)
-for kT in [ 0.1, 1, 2 ]:
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT2-dos.dat" % (ww, ff, N) for kT in kTs]
+for kT in kTs:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT))
     energy = -data[:,0]/N
