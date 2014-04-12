@@ -510,17 +510,15 @@ int main(int argc, const char *argv[]) {
                                       energy_histogram[i] : 0.01);
         }
         weight_updates++;
-      }
-      else if(iteration >= N
-              && (iteration-N) % int(N*uipow(2,weight_updates)) == 0){
+      } else if(iteration >= N
+                && (iteration-N) % int(N*uipow(2,weight_updates)) == 0){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
         for(int i = 0; i < energy_levels; i++){
           if (flat_histogram) {
             ln_energy_weights[i] -= log(energy_histogram[i] > 0
                                         ? energy_histogram[i] : 0.01);
             energy_histogram[i] = 0;
-          }
-          else {
+          } else {
             const int top = i < energy_levels-1 ? i+1 : i;
             const int bottom = i > 0 ? i-1 : i;
             const int dE = bottom-top; // interactions and energy are opposites
@@ -533,8 +531,9 @@ int main(int argc, const char *argv[]) {
           }
         }
         weight_updates++;
-        for(int i = 0; i < energy_levels; i++)
+        for (int i = 0; i < energy_levels; i++) {
           walkers_total[i] = 0;
+        }
 
         // -----------------------------------------------------------------
         // ----------------------------- TESTING ---------------------------
