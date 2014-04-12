@@ -224,29 +224,29 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *weight_tag = new char[2];
+    char *name_suffix = new char[10];
     char *wall_tag = new char[10];
     if(walls == 0) sprintf(wall_tag,"periodic");
     else if(walls == 1) sprintf(wall_tag,"wall");
     else if(walls == 2) sprintf(wall_tag,"tube");
     else if(walls == 3) sprintf(wall_tag,"box");
     if (fix_kT) {
-      sprintf(weight_tag, "-kT%g", fix_kT);
+      sprintf(name_suffix, "-kT%g", fix_kT);
     } else if (no_weights) {
-      sprintf(weight_tag, "-nw");
+      sprintf(name_suffix, "-nw");
     } else if (flat_histogram) {
-      sprintf(weight_tag, "-flat");
+      sprintf(name_suffix, "-flat");
     } else {
-      weight_tag[0] = 0; // set weight_tag to the empty string
+      name_suffix[0] = 0; // set name_suffix to the empty string
     }
     // check that nonsense options do not exist:
     assert(!(no_weights && flat_histogram));
     assert(!(!no_weights && fix_kT));
     assert(!(flat_histogram && fix_kT));
-    sprintf(filename, "%s-ww%03.1f-ff%04.2f-N%i%s",
-            wall_tag, well_width, eta, N, weight_tag);
+    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
+            wall_tag, well_width, eta, N, name_suffix);
     printf("\nUsing default file name: ");
-    delete[] weight_tag;
+    delete[] name_suffix;
     delete[] wall_tag;
   }
   else
@@ -562,10 +562,10 @@ int main(int argc, const char *argv[]) {
         const char *w_testdir = "weights";
 
         char *w_fname = new char[1024];
-        mkdir(dir, 0755); // create save directory
+        mkdir(dir, 0777); // create save directory
         sprintf(w_fname, "%s/%s",
                 dir, w_testdir);
-        mkdir(w_fname, 0755); // create weights directory
+        mkdir(w_fname, 0777); // create weights directory
         sprintf(w_fname, "%s/%s/%s-w%02i.dat",
                 dir, w_testdir, filename, weight_updates);
         FILE *w_out = fopen(w_fname, "w");
@@ -643,7 +643,7 @@ int main(int argc, const char *argv[]) {
   // Generate info to put in save files
   // ----------------------------------------------------------------------------
 
-  mkdir(dir, 0755); // create save directory
+  mkdir(dir, 0777); // create save directory
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
