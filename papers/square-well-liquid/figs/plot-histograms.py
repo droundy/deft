@@ -36,7 +36,7 @@ DS = data[:,1]
 DS /= sum(DS)
 plt.semilogy(energy,DS,'.', label=r'flat histogram, $N=%d$' % (N))
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT2-E.dat" % (ww, ff, N) for kT in kTs]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT) for kT in kTs]
 for kT in kTs:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT))
