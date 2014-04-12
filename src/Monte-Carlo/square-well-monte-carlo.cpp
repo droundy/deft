@@ -444,23 +444,10 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   double avg_neighbors = 0;
-  int interactions = 0;
+  int interactions = count_all_interactions(balls, N, interaction_distance, len, walls);
   double dscale = .1;
   int top, bottom, dE;
   double df, df_dE, walker_density;
-
-  // Count initial number of interactions
-  // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
-  for(int i = 0; i < N; i++) {
-    for(int j = 0; j < balls[i].num_neighbors; j++) {
-      if(i < balls[i].neighbors[j]
-         && periodic_diff(balls[i].pos,
-                          balls[balls[i].neighbors[j]].pos,
-                          len, walls).norm()
-         <= interaction_distance)
-        interactions++;
-    }
-  }
 
   for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
     // ---------------------------------------------------------------
@@ -469,7 +456,7 @@ int main(int argc, const char *argv[]) {
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
                     interaction_distance, max_neighbors, dr, &moves,
-                    ln_energy_weights);
+                    interactions, ln_energy_weights);
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
 
@@ -480,6 +467,7 @@ int main(int argc, const char *argv[]) {
         if(current_walker_plus) walkers_plus[interactions]++;
       }
     }
+    assert(interactions == count_all_interactions(balls, N, interaction_distance, len, walls));
     // ---------------------------------------------------------------
     // Fine-tune translation scale to reach acceptance goal
     // ---------------------------------------------------------------
@@ -503,22 +491,45 @@ int main(int argc, const char *argv[]) {
     // Update weights
     // ---------------------------------------------------------------
     if(!no_weights){
-      if(iteration == N){
+      const int first_weight_update = min(energy_levels, initialization_iterations*9/10);
+      // don't update until we could at least theoretically have
+      // occupied all energy levels.
+      if(iteration == first_weight_update){
         // initial guess for energy weights
+        int max_entropy = 0;
         for(int i = 0; i < energy_levels; i++){
+          if (energy_histogram[i] > energy_histogram[max_entropy]) max_entropy = i;
+        }
+        for (int i=max_entropy; i< energy_levels; i++) {
           ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
                                       energy_histogram[i] : 0.01);
         }
+        for(int i = 0; i <= max_entropy; i++){
+          ln_energy_weights[i] = ln_energy_weights[max_entropy];
+        }
         weight_updates++;
-      } else if(iteration >= N
-                && (iteration-N) % int(N*uipow(2,weight_updates)) == 0){
+      } else if(iteration >= first_weight_update
+                && (iteration-first_weight_update) % int(first_weight_update*uipow(2,weight_updates)) == 0){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
-        for(int i = 0; i < energy_levels; i++){
-          if (flat_histogram) {
-            ln_energy_weights[i] -= log(energy_histogram[i] > 0
-                                        ? energy_histogram[i] : 0.01);
+        if (flat_histogram) {
+          int max_entropy = 0;
+          for (int i = 0; i < energy_levels; i++) {
+            if (log(energy_histogram[i]) - ln_energy_weights[i]
+                > log(energy_histogram[max_entropy]) - ln_energy_weights[max_entropy]) {
+              max_entropy = i;
+            }
+          }
+          for (int i = max_entropy; i < energy_levels; i++) {
+            if (energy_histogram[i]) printf("flat update[%d] %ld\n", i, energy_histogram[i]);
+            ln_energy_weights[i] -= log(energy_histogram[i] > 0 ? energy_histogram[i] : 0.01);
             energy_histogram[i] = 0;
-          } else {
+          }
+          for (int i = 0; i < max_entropy; i++) {
+            ln_energy_weights[i] = ln_energy_weights[max_entropy];
+            energy_histogram[i] = 0;
+          }
+        } else {
+          for(int i = 0; i < energy_levels; i++){
             const int top = i < energy_levels-1 ? i+1 : i;
             const int bottom = i > 0 ? i-1 : i;
             const int dE = bottom-top; // interactions and energy are opposites
@@ -585,16 +596,18 @@ int main(int argc, const char *argv[]) {
         // ----------------------------- TESTING -----------------------------
         // -------------------------------------------------------------------
 
-        for(int i = 0; i < energy_levels; i++){
-          top = i < energy_levels-1 ? i+1 : i;
-          bottom = i > 0 ? i-1 : i;
-          dE = bottom-top; // interactions and energy are negatives of each other
-          df = double(walkers_plus[top]) / walkers_total[top]
-            - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-          df_dE = (isnan(df) ? 1 : df/dE);
-          walker_density = (walkers_total[i] != 0 ?
-                            walkers_total[i] : 0.01) / moves.total;
-          ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
+        if (!flat_histogram) {
+          for(int i = 0; i < energy_levels; i++){
+            top = i < energy_levels-1 ? i+1 : i;
+            bottom = i > 0 ? i-1 : i;
+            dE = bottom-top; // interactions and energy are negatives of each other
+            df = double(walkers_plus[top]) / walkers_total[top]
+              - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+            df_dE = (isnan(df) ? 1 : df/dE);
+            walker_density = (walkers_total[i] != 0 ?
+                              walkers_total[i] : 0.01) / moves.total;
+            ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
+          }
         }
         weight_updates++;
         for(int i = 0; i < energy_levels; i++)
@@ -690,10 +703,11 @@ int main(int argc, const char *argv[]) {
     for(int i = 0; i < N; i++) {
       move_one_ball(i, balls, N, len, walls, neighbor_R, translation_distance,
                     interaction_distance, max_neighbors, dr, &moves,
-                    ln_energy_weights);
+                    interactions, ln_energy_weights);
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
     }
+    assert(interactions == count_all_interactions(balls, N, interaction_distance, len, walls));
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
     // ---------------------------------------------------------------

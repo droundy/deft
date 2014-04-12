@@ -184,7 +184,7 @@ ball random_move(const ball &p, double move_scale, const double len[3]){
 void move_one_ball(int id, ball *p, int N, double len[3], int walls,
                    double neighbor_R, double translation_distance,
                    double interaction_distance, int max_neighbors, double dr,
-                   move_info *moves, double *ln_energy_weights){
+                   move_info *moves, int interactions, double *ln_energy_weights){
   moves->total++;
   moves->old_count =
     count_interactions(id, p, interaction_distance, len, walls);
@@ -222,7 +222,7 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
   p[id] = pid;
   // Now we can check if we actually want to do this move based on the
   // new energy.
-  const double lnPmove = ln_energy_weights[moves->new_count] - ln_energy_weights[moves->old_count];
+  const double lnPmove = ln_energy_weights[moves->new_count - moves->old_count + interactions] - ln_energy_weights[interactions];
   if (lnPmove < 0) {
     const double Pmove = exp(lnPmove);
     if (random::ran() > Pmove) {
@@ -252,6 +252,23 @@ int count_interactions(int id, ball *p, double interaction_distance,
                      len, walls).normsquared()
        <= uipow(interaction_distance,2))
       interactions++;
+  }
+  return interactions;
+}
+
+int count_all_interactions(ball *balls, int N, double interaction_distance, double len[3], int walls) {
+  // Count initial number of interactions
+  // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
+  int interactions = 0;
+  for(int i = 0; i < N; i++) {
+    for(int j = 0; j < balls[i].num_neighbors; j++) {
+      if(i < balls[i].neighbors[j]
+         && periodic_diff(balls[i].pos,
+                          balls[balls[i].neighbors[j]].pos,
+                          len, walls).norm()
+         <= interaction_distance)
+        interactions++;
+    }
   }
   return interactions;
 }
