@@ -520,7 +520,6 @@ int main(int argc, const char *argv[]) {
             }
           }
           for (int i = max_entropy; i < energy_levels; i++) {
-            if (energy_histogram[i]) printf("flat update[%d] %ld\n", i, energy_histogram[i]);
             ln_energy_weights[i] -= log(energy_histogram[i] > 0 ? energy_histogram[i] : 0.01);
             energy_histogram[i] = 0;
           }
