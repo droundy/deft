@@ -33,7 +33,8 @@ def g(gs,kte,counts,DS):
         output[i] += sum(gs[:,i]*DS*numpy.exp(-counts/kte)) / Z
     return output
 
-plt.title('Radial distribution function for $ww=%g$, $ff=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Radial distribution function for $\lambda=%g$, $\eta=%g$, and $N=%i$'
+          % (ww, ff, N))
 
 # FIXME: would it be better to use data from simulations with fixed kT?
 # input: "data/periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat" % (ww, ff, N)

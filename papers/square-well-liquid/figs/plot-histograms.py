@@ -22,28 +22,25 @@ N = int(sys.argv[3])
 kTs = eval(sys.argv[4])
 #arg kTs = [[0.1, 1, 2]]
 
-plt.title('Histogram with well width %g and filling fraction %g' % (ww, ff))
+def plot_add(data,data_label):
+    energy = -data[:,0]/N
+    DS = data[:,1]
+    DS /= sum(DS)
+    plt.semilogy(energy,DS,'.', label=data_label)
+
+plt.title('Histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N))
-energy = -data[:,0]/N
-DS = data[:,1]
-DS /= sum(DS)
-plt.semilogy(energy,DS,'.', label='$kT = \infty$ and $N=%d$' % N)
+plot_add(data,'$kT = \infty$ and $N=%d$' % N)
 
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-E.dat" % (ww, ff, N))
-energy = -data[:,0]/N
-DS = data[:,1]
-DS /= sum(DS)
-plt.semilogy(energy,DS,'.', label=r'flat histogram, $N=%d$' % (N))
+plot_add(data,'flat histogram, $N=%d$' % N)
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT) for kT in kTs]
 for kT in kTs:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT))
-    energy = -data[:,0]/N
-    DS = data[:,1]
-    DS /= sum(DS)
-    plt.semilogy(energy,DS,'.', label=r'$kT = %g\epsilon$ and $N=%d$' % (kT, N))
+    plot_add(data,'$kT = %g\epsilon$ and $N=%d$' % (kT, N))
 
 plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$D$')
