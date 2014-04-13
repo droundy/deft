@@ -5,33 +5,38 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
-if len(sys.argv) != 3:
-    print 'useage: %s ww N' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'useage: %s ww ff N kTs' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-N = float(sys.argv[2])
+ff = float(sys.argv[2])
+#arg ff = [0.3]
+
+# note: speficic HC should be independent of N, but we have to choose one
+N = float(sys.argv[3])
 #arg N = [200]
 
-# FIXME: figure out how to determine which ffs to use
-ffs = [0.1, 0.2, 0.3]
+kTs = eval(sys.argv[4])
+#arg kTs = [[0.1, 1, 2]]
 
 # FIXME: make these inputs?
-ktemin = 0
-ktemax = 30
-dkte = float(ktemax-ktemin) / 1000
-kte = numpy.arange(ktemin+dkte,ktemax,dkte)
+kTmin = 0
+kTmax = 30
+dkT = float(kTmax-kTmin) / 1000
+kT_range = numpy.arange(kTmin+dkT,kTmax,dkT)
 
 # interntal energy relative to well depth
-def Ue(kte,counts,DS):
-    output = numpy.zeros(len(kte))
+def U(kT_array,counts,DS):
+    output = numpy.zeros(len(kT_array))
     for i in range(len(output)):
-        output[i] = sum(counts*DS*numpy.exp(-counts/kte[i])) \
-          / sum(DS*numpy.exp(-counts/kte[i]))
+        output[i] = sum(counts*DS*numpy.exp(-counts/kT_array[i])) \
+          / sum(DS*numpy.exp(-counts/kT_array[i]))
     return output
 
+# label axes using scientific notation
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 fmt = matplotlib.ticker.ScalarFormatter(useMathText=True)
@@ -40,25 +45,23 @@ fmt.set_scientific(True)
 ax.yaxis.set_major_formatter(fmt)
 ax.xaxis.set_major_formatter(fmt)
 
-plt.title('Heat capacity for well width %g' % (ww))
+# plot curves using density of state data from simulations for all temperatures
+plt.title('Heat capacity for $ww=%g$, $ff=%g$, and $N=%i$' % (ww, ff, N))
+data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
+                     ndmin=2)
+counts = data[:,0][::-1]
+counts -= min(counts)
+DS = data[:,1]
+cv = (U(kT_range+dkT/2,counts,DS)
+      - U(kT_range-dkT/2,counts,DS)) / dkT / N
+plt.plot(kT_range,cv,label=r'$\eta=%g$ and $N=%i$' % (ff, N))
 
-# FIXME: see fixme about ffs
-# input: "data/periodic-ww%04.2f-ff0.10-N%i-nw-dos.dat" % (ww, N)
-# input: "data/periodic-ww%04.2f-ff0.20-N%i-nw-dos.dat" % (ww, N)
-# input: "data/periodic-ww%04.2f-ff0.30-N%i-nw-dos.dat" % (ww, N)
-for ff in ffs:
-    data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
-        ndmin=2)
-    counts = data[:,0][::-1]
-    counts -= min(counts)
-    DS = data[:,1]
-    cv = (Ue(kte+dkte/2,counts,DS)
-          - Ue(kte-dkte/2,counts,DS)) / dkte / N
-    plt.plot(kte,cv,label=r'$\eta=%g$ and $N=%i$' % (ff, N))
+# FIXME: plot points using density of state data from fixed kT simulations
+#   it looks like I need to run two simulations for each point kT, namely
+#     one at kT-dkT/2 and kT+dkT/2, as heat capacity is given by dU/dkT
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.1)
-plt.savefig("figs/periodic-ww%02.0f-hc.pdf" % (ww*100))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))

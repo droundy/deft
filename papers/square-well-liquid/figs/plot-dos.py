@@ -22,7 +22,7 @@ N = int(sys.argv[3])
 kTs = eval(sys.argv[4])
 #arg kTs = [[0.1, 1, 2]]
 
-plt.title('Density of states with well width %g and filling fraction %g' % (ww, ff))
+plt.title('Density of states for $ww=%g$, $ff=%g$, and $N=%i$' % (ww, ff, N))
 
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N))
 energy = -data[:,0]/N
