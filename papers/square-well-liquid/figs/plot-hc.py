@@ -5,14 +5,20 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
-if len(sys.argv) != 2:
-    print 'useage: %s ww' % sys.argv[0]
+if len(sys.argv) != 3:
+    print 'useage: %s ww N' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-# todo: make inputs?
+N = float(sys.argv[2])
+#arg N = [200]
+
+# FIXME: figure out how to determine which ffs to use
+ffs = [0.1, 0.2, 0.3]
+
+# FIXME: make these inputs?
 ktemin = 0
 ktemax = 30
 dkte = float(ktemax-ktemin) / 1000
@@ -36,21 +42,20 @@ ax.xaxis.set_major_formatter(fmt)
 
 plt.title('Heat capacity for well width %g' % (ww))
 
-# todo: figure out how to specify which ff and N to use
-# input: "data/periodic-ww%04.2f-ff0.10-N200-nw-dos.dat" % (ww)
-# input: "data/periodic-ww%04.2f-ff0.20-N200-nw-dos.dat" % (ww)
-# input: "data/periodic-ww%04.2f-ff0.30-N200-nw-dos.dat" % (ww)
-for ff in [ 0.1, 0.2, 0.3 ]:
-    for N in [ 200 ]:
-        data = numpy.loadtxt(
-            "data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
-            ndmin=2)
-        counts = data[:,0][::-1]
-        counts -= min(counts)
-        DS = data[:,1]
-        cv = (Ue(kte+dkte/2,counts,DS)
-              - Ue(kte-dkte/2,counts,DS)) / dkte / N
-        plt.plot(kte,cv,label=r'$\eta=%g$ and $N=%i$' % (ff, N))
+# FIXME: see fixme about ffs
+# input: "data/periodic-ww%04.2f-ff0.10-N%i-nw-dos.dat" % (ww, N)
+# input: "data/periodic-ww%04.2f-ff0.20-N%i-nw-dos.dat" % (ww, N)
+# input: "data/periodic-ww%04.2f-ff0.30-N%i-nw-dos.dat" % (ww, N)
+for ff in ffs:
+    data = numpy.loadtxt(
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
+        ndmin=2)
+    counts = data[:,0][::-1]
+    counts -= min(counts)
+    DS = data[:,1]
+    cv = (Ue(kte+dkte/2,counts,DS)
+          - Ue(kte-dkte/2,counts,DS)) / dkte / N
+    plt.plot(kte,cv,label=r'$\eta=%g$ and $N=%i$' % (ff, N))
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
