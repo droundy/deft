@@ -5,6 +5,7 @@ if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
+import styles
 
 if len(sys.argv) != 5:
     print 'useage: %s ww ff N kTs' % sys.argv[0]
@@ -19,28 +20,20 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [200, 1000]
 
-kTs = eval(sys.argv[4])
-#arg kTs = [[0.1, 1, 2]]
-
-def plot_add(data,data_label):
-    energy = -data[:,0]/N
-    DS = data[:,1]
-    DS /= sum(DS)
-    plt.semilogy(energy,DS,'.', label=data_label)
+print sys.argv[4]
+versions = eval(sys.argv[4])
+#arg versions = [["-flat", "-nw", "-kT2", "-kT1", "-kT0.1"]]
 
 plt.title('Histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N))
-plot_add(data,'$kT = \infty$ and $N=%d$' % N)
-
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-E.dat" % (ww, ff, N))
-plot_add(data,'flat histogram, $N=%d$' % N)
-
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT) for kT in kTs]
-for kT in kTs:
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version) for version in versions]
+for version in versions:
     data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT))
-    plot_add(data,'$kT = %g\epsilon$ and $N=%d$' % (kT, N))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version))
+    energy = -data[:,0]/N
+    DS = data[:,1]
+    DS /= sum(DS)
+    plt.semilogy(energy,DS, styles.dots[version], label=styles.title[version])
 
 plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$D$')

@@ -105,7 +105,7 @@ def Matplotlib(env, source, py_chdir = ""):
         commandlineformat = ""
         commandlineargs = []
         for arg in argvals:
-            commandlineformat += " '%s'"
+            commandlineformat += " \"%s\""
             commandlineargs.append(arg[0])
             newallvalues = []
             for v in friendly_eval(arg[1], source):

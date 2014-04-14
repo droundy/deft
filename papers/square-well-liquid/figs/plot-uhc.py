@@ -5,6 +5,8 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
+import styles
+
 if len(sys.argv) != 5:
     print 'useage: %s ww ff N kTs' % sys.argv[0]
     exit(1)
@@ -59,7 +61,7 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (
 # plot curves from simulations for all temperatures
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
                      ndmin=2)
-plt.plot(kT_range,u(kT_range,data),label='flat histogram')
+plt.plot(kT_range,u(kT_range,data), styles.plot['-flat'], label=styles.title['-flat'])
 
 # plot curves from simulations at fixed temperature
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
@@ -67,7 +69,7 @@ for kT in kTs:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT),
         ndmin=2)
-    plt.plot(kT_range,u(kT_range,data),label='$kT=%g\epsilon$ sim.' % kT)
+    plt.plot(kT_range,u(kT_range,data), styles.plot['-kT%g' % kT], label=styles.title['-kT%g' % kT])
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
@@ -90,7 +92,7 @@ plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww
 # plot curves from simulations for all temperatures
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
                      ndmin=2)
-plt.plot(kT_range,cv(data),label='flat histogram')
+plt.plot(kT_range,cv(data), styles.plot['-flat'], label=styles.title['-flat'])
 
 # plot curves from simulations at fixed temperature
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
@@ -98,7 +100,7 @@ for kT in kTs:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT),
         ndmin=2)
-    plt.plot(kT_range,cv(data),label='$kT=%g\epsilon$ sim.' % kT)
+    plt.plot(kT_range,cv(data), styles.plot['-kT%g' % kT], label=styles.title['-kT%g' % kT])
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
