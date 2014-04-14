@@ -6,10 +6,10 @@ import SW
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Plot f vs n
+# Plot vs n
 R = 1 # HS radius
 eta_conv = SW.sigma**3*np.pi/6
-nmax = 0.4/eta_conv
+nmax = 0.9/eta_conv
 n = nmax*np.exp(np.arange(-15, 0, 1e-3))
 
 def plotPhi(T,npart):
@@ -30,6 +30,6 @@ def plotF(T):
     plt.ylabel(r'$\frac{df}{dn}$ (SW units)')
 
 T = 0.1
-plotPhi(T, 0.06)#/eta_conv)
+plotPhi(T, 0.025)#/eta_conv)
 #plt.savefig('figs/SW-T%0.2f.pdf'%T)
 plt.show()

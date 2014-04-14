@@ -28,13 +28,13 @@ import pylab
 # nparticular = 0.14566 # I found this by hand
 
 T = 0.1
-nparticular = 0.171/(RG.sigma**3*np.pi/6)
+nparticular = 0.025
 N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
 Tc = 1.33
 Tlow = T
 
 # Recursion depth
-i = 0
+iterations = 0
 
 # Bounds of minimization.
 # Use range that works for many temperatures
@@ -53,41 +53,60 @@ fout = open('figs/npart_RG-out.dat','w')
 fout.write('#T     nvapor     nliquid       phi(nvap)        phi(nliq)         nparticular\n')#       phi_avg')
 
 # Do first temperature before the loop
-nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,i)
+nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
 print 'nvap,phi_vap',nvapor,phi_vapor
-nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,i)
+nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
 print 'nliq,phi_liq',nliquid,phi_liquid
 sys.stdout.flush()
 
 
 #while T < 1.4:
-for i in xrange(0,N+1):
-    T = (Tc - Tlow)*(1 - ((N-i)/N)**4) + Tlow
+for j in xrange(0,N+1):
+    print ' Top of for loop; j =',j
+    T = (Tc - Tlow)*(1 - ((N-j)/N)**4) + Tlow
 
     fout.flush()
     # Starting point for new nparticular is abscissa of max RG.phi with old nparticular
-    nparticular = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, nparticular,i)
+    nparticular = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, nparticular,iterations)
+    print '   npart =',nparticular
 
     # I'm looking at the minima of RG.phi
     c_vap = nparticular
     a_liq = nparticular
 
-    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,nparticular,i)
-    nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,i)
+    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,nparticular,iterations)
+    nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
 
     tol = 1e-5
-    fnpart = RG.phi(T, nparticular, nparticular, i)
+    fnpart = RG.phi(T, nparticular, nparticular, iterations)
 
     # Compare the two minima in RG.phi
     while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart) > tol:
-        delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
-        def newphi(T, n, npart, i):
-            return RG.phi(T, n, npart, i) - delta_mu*n
-        nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,i)
-        fnpart = RG.phi(T, nparticular, nparticular, i)
+        print '     in the loop comparing two minima in RG.phi'
 
-        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,i)
-        nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,i)
+        delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
+        if delta_mu > 0:
+            print '     delta_mu is positive'
+        elif delta_mu < 0:
+            print '     delta_mu is negative'
+        else:
+            print '     delta_mu is zero'
+
+        def newphi(T, n, npart, iterations):
+            return RG.phi(T, n, npart, iterations) - delta_mu*n
+
+        print '     finding max in newphi'
+        nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,iterations)
+        print '     new nparticular is',nparticular
+
+        fnpart = RG.phi(T, nparticular, nparticular, iterations)
+        print '     fnpart =',fnpart
+
+        print '     finding new nvapor,phi_vapor'
+        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
+
+        print '     finding new nliquid,phi_liquid'
+        nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
 
     fout.write(str(T))
     fout.write('  ')
@@ -102,7 +121,8 @@ for i in xrange(0,N+1):
     fout.write(str(nparticular))
     fout.write('\n')
     sys.stdout.flush();
-    print T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
+    print '   T, etaVap, etaLiq',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
+    print ' Going back to top of for loop'
 
     # Set temp slightly higher
 #    T += 0.01

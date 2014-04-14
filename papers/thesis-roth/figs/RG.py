@@ -45,7 +45,7 @@ def VD(i):
 # Free energy density, defined by an iterative process
 def fiterative(T,n,i):
     # eqn (55) Forte 2011:
-    fnaught = fid(T,n) + SWfhs(T,n) + a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
+    fnaught = SWfid(T,n) + SWfhs(T,n) + a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
     # eqn (5) from Forte 2011:
     for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
@@ -67,6 +67,7 @@ def integrand_ID(T,x,i):
     return argument
 
 def ID(integrand,T,n,i):
+#    asdf
     value = integrate.midpoint(lambda x: integrand_ID(T,x,i),0,1,1000)
     return value
 
@@ -118,16 +119,16 @@ def ftot(T,n,i):
 
 # Pressure
 def P(T,n,i):
-  return n*df_dn(T,n,i) - ftot(T,n,i)
+  return n*df_dn(T,n) - ftot(T,n,i)
 
 # Grand free energy per volume
 def phi(T,n,nparticular,i):
-    mu = df_dn(T,nparticular,i)
+    mu = df_dn(T,nparticular)
     return ftot(T,n,i) - mu*n
 
 # Derivative of free energy wrt number (const. temp)
-# only depents on n (really? not T or i as well?)
-def df_dn(n):
+def df_dn(T,n):
+
     # Constants for eta_eff
     # Redefine here, rather than using SW.c1 (etc.) in case the value of lambdaSW is different between SW.py and this program
     c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
@@ -178,7 +179,17 @@ def  eta(n):
 # effective packing fraction
 # Gil-Villegas eqn (36)
 def eta_eff(n):
+    c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
+    c2 = -0.669270+1.40049*lambdaSW-0.827739*lambdaSW**2
+    c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
     return c1*eta(n) + c2*eta(n)**2 + c3*eta(n)**3
+
+# derivative of eta_eff wrt eta
+def deta_eff_deta(n):
+    c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
+    c2 = -0.669270+1.40049*lambdaSW-0.827739*lambdaSW**2
+    c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
+    return c1+2*c2*eta(n)+3*c3*eta(n)**2
 
 # 1st term in High-temp perturbation expansion, for square well potential
 # Gil-Villegas eqn (34)
@@ -197,6 +208,10 @@ def da1SW_deta(n):
 # Gil-Villegas eqn (33)
 def gHS_eff(n):
     return (1-0.5*eta_eff(n))*(1-eta_eff(n))**-3
+
+# derivative of gHS_eff wrt eta
+def dgHS_eff_deta(n):
+    return dgHS_eff_deta_eff(n)*deta_eff_deta(n)
 
 # derivative of gHS_eff wrt eta_eff
 def dgHS_eff_deta_eff(n):
@@ -239,5 +254,18 @@ def SWfhs(T,n):
 
     # free energy
     return k_B*T*(Phi1 + Phi2 + Phi3)
+
+# Fundamental measure densities
+def n0(n):
+    return n
+
+def n1(n):
+    return n*R
+
+def n2(n):
+    return n*R**2*4*np.pi
+
+def n3(n):
+    return n*R**3*(4/3)*np.pi
 
 ##########################################

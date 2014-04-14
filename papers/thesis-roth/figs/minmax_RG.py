@@ -81,7 +81,7 @@ def minimize(func,T,a,c,npart,i):
     return nmin,fmin
 
 def maximize(func,T,a,c,npart,i):
-    def negfunc(T,n,x):
-        return -func(T,n,x)
+    def negfunc(T,n,x,i):
+        return -func(T,n,x,i)
     n,phi = minimize(negfunc,T,a,c,npart,i)
     return n

@@ -163,4 +163,6 @@ def a1VDW(n):
 def K(n):
     return (1-eta(n))**4/(1+4*eta(n)+4*eta(n)**2)
 
-
+# Pressure, defined in Hughes' thesis, eqn 38
+def P(T,n):
+    return n*df_dn(T,n) - f(T,n)

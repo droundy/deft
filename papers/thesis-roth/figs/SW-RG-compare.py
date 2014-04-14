@@ -9,7 +9,7 @@ import RG
 
 eta_conv = SW.sigma**3*pylab.pi/6
 
-n = pylab.linspace(0,0.2,10000)
+n = pylab.linspace(1e-8,0.2,10000)
 T = 0.3
 npart = 0.0462316928818
 
