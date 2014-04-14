@@ -73,7 +73,7 @@ compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 \fixme{Add here a complete exposition of this functional form,
   reproducing what Gil Villegas says.}
 
-\fixme{DR -- Some notes are as follows:}
+\fixme{DRoth -- Some notes are as follows:}
 
 In Gil-Villegas' paper, HS and Dispersion are wrapped up into the
 \textit{monomer} contribution, expressed in terms of energy densities
@@ -89,6 +89,7 @@ with $\alpha^\text{VDW}$ given by
   &= 3b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)\,dx
 \end{align}
 where $b^\text{VDW}$ is the van der Waals size parameter. It corresponds to the volume excluded by two spherical particles of volume $b$: $b^\text{VDW} = 4b = 4\left(\pi\sigma^3/6\right)$.
+
 Then, the high-temp expansion is an expansion of the monomer term:
 \begin{align}
   f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
@@ -97,12 +98,12 @@ Then, the high-temp expansion is an expansion of the monomer term:
 
 The term $a_1$ is given by
 \begin{align}
-  a_1 &= -2\pi\rho_s\epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
-  &= -3\rho_sb^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
+  a_1 &= -2\pi\rho\epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
+  &= -3\rho b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
 \end{align}
 If assume a random correlations between the particles' positions, for all distances, we have $g^\text{HS}(r) = 1$. This yields
 \begin{align}
-  a_1^\text{VDW} = -\rho_s\alpha^\text{VDW},
+  a_1^\text{VDW} = -\rho\alpha^\text{VDW},
 \end{align}
 the van der Waals mean-field energy.
 
@@ -116,11 +117,11 @@ Henderson\cite{barker1967-SW-perturbation}. \fixme{Gil-Villegas also
   the other doesn't seem relevant}. Barker and Henderson's
 approximation considers fluctuations in the number of particles in the
 potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility
-of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial\rho_s/\partial P^\text{HS}\right)_T$, we have:
+of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial\rho /\partial P^\text{HS}\right)_T$, we have:
 \begin{align}
-  a_2 &= -\pi\rho_s\epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial\rho_s g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
-  &= -\pi\rho_s\epsilon^2K^\text{HS}\frac{\partial}{\partial\rho_s}\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2\rho_s g^\text{HS}\,dr\right] \\
-  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial\rho_s}\left[-3\rho_sb^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+  a_2 &= -\pi\rho\epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial\rho g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
+  &= -\pi\rho\epsilon^2K^\text{HS}\frac{\partial}{\partial\rho}\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2\rho g^\text{HS}\,dr\right] \\
+  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial\rho}\left[-3\rho b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
 
 We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion\cite{barker1976liquid}:
@@ -128,7 +129,7 @@ We use the isothermal compressibility in terms of packing fraction $\eta$, given
   K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
 \end{align}
 
-\fixme{End of my comments --DR}
+\fixme{End of my comments --DRoth}
 
 \subsection{A simple weighted density approach}
 
