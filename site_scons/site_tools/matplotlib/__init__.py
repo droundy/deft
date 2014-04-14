@@ -67,6 +67,7 @@ fixed_input = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\)", re.M)
 changing_loadtxt_noparens = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*([^\(\)\n]*)\s*\)", re.M)
 changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
 changing_input = re.compile(r"input:\s*['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))")
+list_comprehension_input = re.compile(r"input:\s*(\[.+for.*in.*\])\n")
 
 def friendly_eval(code, context, local = None):
     try:
@@ -96,6 +97,7 @@ def Matplotlib(env, source, py_chdir = ""):
     argvals = arguments.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents)
+        list_inputs = list_comprehension_input.findall(contents)
         cinputs = changing_input.findall(contents)
         cinputs += changing_loadtxt.findall(contents)
         cinputs += changing_loadtxt_noparens.findall(contents)
@@ -103,7 +105,7 @@ def Matplotlib(env, source, py_chdir = ""):
         commandlineformat = ""
         commandlineargs = []
         for arg in argvals:
-            commandlineformat += " %s"
+            commandlineformat += " \"%s\""
             commandlineargs.append(arg[0])
             newallvalues = []
             for v in friendly_eval(arg[1], source):
@@ -116,6 +118,11 @@ def Matplotlib(env, source, py_chdir = ""):
             aa = commandlineformat % friendly_eval('(' + string.join(commandlineargs, ",") + ')', 'file '+ source, a)
             extrainputs = []
             extraoutputs = []
+            for i in list_inputs:
+                #print 'examining input:', i
+                fnames = friendly_eval(i, source, a)
+                #print 'found', fnames
+                extrainputs += fnames
             for i in cinputs:
                 #print 'examining input:', i[0], '%', '"%s"' % i[1]
                 fname = i[0] % friendly_eval(i[1], source, a)
