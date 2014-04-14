@@ -45,13 +45,12 @@ def sci_fig():
 
 # internal energy per ball as a function of kT
 def u(kT_array,data):
-    counts = data[:,0][::-1]
-    counts -= min(counts)
+    energy = -data[:,0]
     DS = data[:,1]
     u_out = numpy.zeros(len(kT_array))
     for i in range(len(u_out)):
-        u_out[i] = sum(counts*DS*numpy.exp(-counts/kT_array[i])) \
-          / sum(DS*numpy.exp(-counts/kT_array[i]))
+        u_out[i] = sum(energy*DS*numpy.exp(-(energy-min(energy))/kT_array[i])) \
+          / sum(DS*numpy.exp(-(energy-min(energy))/kT_array[i]))
     return u_out/N
 
 fig, ax = sci_fig()
