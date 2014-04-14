@@ -63,6 +63,10 @@ data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, f
                      ndmin=2)
 plt.plot(kT_range,u(kT_range,data), styles.plot['-flat'], label=styles.title['-flat'])
 
+data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
+                     ndmin=2)
+plt.plot(kT_range,u(kT_range, data), styles.plot['-nw'], label=styles.title['-nw'])
+
 # plot curves from simulations at fixed temperature
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
 for kT in kTs:
@@ -93,6 +97,10 @@ plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww
 data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
                      ndmin=2)
 plt.plot(kT_range,cv(data), styles.plot['-flat'], label=styles.title['-flat'])
+
+data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
+                     ndmin=2)
+plt.plot(kT_range,cv(data), styles.plot['-nw'], label=styles.title['-nw'])
 
 # plot curves from simulations at fixed temperature
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
