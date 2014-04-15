@@ -27,12 +27,12 @@ Functional SoftFluid(double radius, double V0, double mu);
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.
-double zmax = 25;
-double ymax = 25;
-double xmax = 25;
-double dx = 0.15;
-double V0 = 10;
-double radius = 1;
+double zmax = 10;
+double ymax = zmax;
+double xmax = zmax;
+double dx = 0.1;
+double V0 = 1;
+const double radius = 1;
 double temperature = 0.01; //default temp 
 // double kT = 0.01; //default temp 
 
@@ -42,8 +42,7 @@ double soft_sphere_potential(Cartesian r) {
   const double x = r.x();
   const double distance = sqrt(x*x + y*y + z*z);
   if (distance >= radius*2) return 0;
-  return V0*(1-distance/(2*radius))/temperature;
-  // return V0*(1-distance/(2*radius))/kT;
+  return V0*pow((1-distance/(2*radius)),2);
 }
 
 static void took(const char *name) {
@@ -76,25 +75,29 @@ void z_plot(const char *fname, const Grid &a) {
   fclose(out);
 }
 
-double run_soft_sphere(double eta, Functional fss, double teff) {
+double run_soft_sphere(double eta, double temp) {
+  Functional f = SoftFluid(radius, 1, 0);
+  const double mu = find_chemical_potential(OfEffectivePotential(f), temp, eta/(4*M_PI/3));
+  printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
+
   //printf("Filling fraction is %g with functional %s at temperature %g\n", eta, teff);
   //fflush(stdout);
-  temperature = teff;
+  temperature = temp;
   //if (kT == 0) kT = ;1
-
-  Functional f = OfEffectivePotential(fss);
 
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, dx);
 
   Grid softspherepotential(gd);
   softspherepotential.Set(soft_sphere_potential);
-  
+
+  f = OfEffectivePotential(SoftFluid(radius, 1, mu) + ExternalPotential(softspherepotential));
+
   static Grid *potential = 0;
   potential = new Grid(gd);
-  *potential = softspherepotential - temperature*VectorXd::Ones(gd.NxNyNz); // Bad starting guess 
-  const double approx_energy = fss(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
-  const double precision = fabs(approx_energy*1e-8);
+  *potential = softspherepotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess 
+  const double approx_energy = f(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
+  const double precision = fabs(approx_energy*1e-9);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
   fflush(stdout);
 
@@ -114,35 +117,9 @@ double run_soft_sphere(double eta, Functional fss, double teff) {
 
   char *plotname = (char *)malloc(1024);
 
-  sprintf(plotname, "papers/fuzzy-fmt/figs/soft-sphere%06.4f-%04.2f.dat", teff, eta);
+  sprintf(plotname, "papers/fuzzy-fmt/figs/soft-sphere%06.4f-%04.2f.dat", temp, eta);
   z_plot(plotname, Grid(gd, 4*M_PI*density/3));
   free(plotname);
-
-  // {
-  //   GridDescription gdj = density.description(); 
-  //   double sep =  gdj.dz*gdj.Lat.a3().norm();
-  //   int div = gdj.Nz;
-  //   int mid = int (div/2.0);
-  //   double Ntot_per_V = 0;
-  //   double mydist = 0;
-   
-  //   for (int j=0; j<mid; j++){
-  //     Ntot_per_V += density(0,0,j)*sep;
-  //     mydist += sep;
-  //   }
-
-  //   double Extra_per_V = Ntot_per_V - eta/(4.0/3.0*M_PI);
-
-  //   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "a");
-  //   fprintf(fout, "soft-sphere-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/soft-sphere-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n", eta
-  //           , eta, Extra_per_V, eta, Extra_per_V);
-
-  //   int wallslen = 20;
-  //   double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_V*wallslen*wallslen);  
-  //   fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", eta, wallslen, Extra_spheres);
-
-  //   fclose(fout); 
-  // }
 
   {
     //double peak = peak_memory()/1024.0/1024;
@@ -153,29 +130,20 @@ double run_soft_sphere(double eta, Functional fss, double teff) {
 
   took("Plotting stuff");
   printf("density %g gives ff %g for eta = %g and T = %g\n", density(0,0,gd.Nz/2),
-         density(0,0,gd.Nz/2)*4*M_PI/3, eta, teff);
+         density(0,0,gd.Nz/2)*4*M_PI/3, eta, temp);
   return density(0, 0, gd.Nz/2)*4*M_PI/3; // return bulk filling fraction
 }
 
 int main(int argc, char *argv[]) {
-  FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
-  fclose(fout);
-  const double temps[] = { 0.03, 0.01, 0.001,};
-  for (double eta = 0.4; eta >= 0.05; eta-=0.1) {
-    for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-      const double temp = temps[i];
-      Functional f = SoftFluid(radius, 1, 0);
-      const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, eta/(4*M_PI/3));
-      printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
-      f = SoftFluid(radius, 1, mu);
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s FILLINGFRACTION kT\n", argv[0]);
+    exit(1);
+  }
+  double temp = 0;
+  double eta = 0;
+  sscanf(argv[2], " %lg", &temp);
+  sscanf(argv[1], " %lg", &eta);
 
-      run_soft_sphere(eta, f, temp);
-    }
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/fuzzy-fmt/figs/soft-sphere.dat", "w")) {
-    printf("Error creating soft-sphere.dat!\n");
-    return 1;
-  }
+  run_soft_sphere(eta, temp);
   return 0;
 }
