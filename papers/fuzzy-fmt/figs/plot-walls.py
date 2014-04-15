@@ -10,6 +10,8 @@ if not "show" in sys.argv:
 import pylab, numpy, os, glob
 from pylab import pi
 
+import styles
+
 if len(sys.argv) < 2:
     print("Usage:  " + sys.argv[0] + ' filling-fraction')
     exit(1)
@@ -35,6 +37,7 @@ def smooth(x, N):
 pylab.figure()
 data = []
 names = []
+lines = []
 # eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
 
 for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
@@ -44,22 +47,24 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
         print 'examining', fname
         d = numpy.loadtxt(fname)
         d = smooth(d, 1)
-        pylab.plot(15-abs(d[:,0]), d[:,1]*(4*pi/3), label=fname)
+        pylab.plot(15-abs(d[:,0]), d[:,1]*(4*pi/3), styles.mc[kT], label=fname)
 
 names.append('DFT kT = 0')
 data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, ff*0.01)))
+lines.append(styles.dft[0])
 
 names.append('new kT = 0.1')
 data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.1)))
+lines.append(styles.newdft[0.1])
 
 newdata = numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.01))
 names.append('new kT = 0.01')
 data.append(newdata)
-names.append('new kT = 0.01 n3')
-data.append(newdata[:,::2])
+lines.append(styles.newdft[0.01])
 
 names.append('new kT = 0.001')
 data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.001)))
+lines.append(styles.newdft[0.001])
 
 for kT in [0.001, 0.01, 0.03]:
     # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
@@ -67,12 +72,13 @@ for kT in [0.001, 0.01, 0.03]:
     if os.path.exists(fname):
         names.append('DFT kT = %4.2f' % kT)
         data.append(numpy.loadtxt(fname))
+        lines.append(styles.dft[kT])
         print 'found', fname
     else:
         print fname, 'does not exist'
 for i in range(len(data)):
     print 'plotting', names[i]
-    pylab.plot(data[i][:,0], data[i][:,1], '-', label=names[i])
+    pylab.plot(data[i][:,0], data[i][:,1], lines[i], label=names[i])
 
 pylab.title('Packing fraction = %f' % (ff/100.0))
 pylab.xlabel('$z/R$')

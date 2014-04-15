@@ -9,6 +9,8 @@ from pylab import *
 from scipy.special import erf
 import os
 
+import styles
+
 if len(sys.argv) != 2:
     print("Usage:  " + sys.argv[0] + ' filling-fraction')
     exit(1)
@@ -34,8 +36,6 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 
 
-colors = { 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g' }
-
 density = (ff/100)/(4*pi/3)
 phs = density*(1+(ff/100)+(ff/100)**2)/(1-(ff/100))**3
 for temp in [0.1, 0.01, 0.001, 0.0001]:
@@ -44,7 +44,7 @@ for temp in [0.1, 0.01, 0.001, 0.0001]:
   if os.path.exists(fname):
     print 'found', fname
     g = loadtxt(fname)
-    plot(g[:,0], g[:,1], colors[temp] + '-', label='T = %g' % temp)
+    plot(g[:,0], g[:,1], styles.mc[temp], label='T = %g' % temp)
     #xlim(xmax=floor(max(g[:,0])))
     xlim(xmax=8)
   else:
@@ -57,7 +57,7 @@ for temp in [0.1, 0.01]:
   r = data[:,0]
   nff = data[:,1]
   g = nff/(ff/100.0)
-  plot(r, g, colors[temp] + '.--', label='theory T = %g' % temp)
+  plot(r, g, styles.coarsedft[temp], label='theory T = %g' % temp)
   #xlim(xmax=floor(max(g[:,0])))
 
 title('Radial distribution function at packing fraction %g' % (ff/100))
