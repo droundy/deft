@@ -30,7 +30,7 @@ Functional SoftFluid(double radius, double V0, double mu);
 double zmax = 10;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.2;
+double dx = 0.1;
 double V0 = 1;
 const double radius = 1;
 double temperature = 0.01; //default temp 
@@ -135,6 +135,7 @@ double run_soft_sphere(double eta, double temp) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("dx = %g, xmax = %g\n", dx, xmax);
   if (argc != 3) {
     fprintf(stderr, "Usage: %s FILLINGFRACTION kT\n", argv[0]);
     exit(1);

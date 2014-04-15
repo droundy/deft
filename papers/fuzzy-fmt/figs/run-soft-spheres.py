@@ -7,7 +7,7 @@ from math import pi
 
 figsdir = 'papers/fuzzy-fmt/figs/'
 
-srun = lambda ff, kT: 'srun -p lomem --mem=600 -J ss-%.4f-%.4f time nice -19 ' % (ff, kT)
+srun = lambda ff, kT: 'srun --mem=600 -J ss-%.4f-%.4f time nice -19 ' % (ff, kT)
 
 if os.getcwd()[:5] != '/home' or os.system('srun true') != 0:
     # We are definitely not running on the cluster
