@@ -45,14 +45,26 @@ for temp in [0.1, 0.01, 0.001, 0.0001]:
     print 'found', fname
     g = loadtxt(fname)
     plot(g[:,0], g[:,1], colors[temp] + '-', label='T = %g' % temp)
-    xlim(xmax=floor(max(g[:,0])))
+    #xlim(xmax=floor(max(g[:,0])))
+    xlim(xmax=8)
   else:
     print 'could not find', fname
+
+for temp in [0.1, 0.01]:
+  # in put: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff) % (ff, temp) for temp in [0.1, 0.01]]
+  fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0)
+  data = loadtxt(fname)
+  r = data[:,0]
+  nff = data[:,1]
+  g = nff/(ff/100.0)
+  plot(r, g, colors[temp] + '.--', label='theory T = %g' % temp)
+  #xlim(xmax=floor(max(g[:,0])))
 
 title('Radial distribution function at packing fraction %g' % (ff/100))
 xlabel('radius')
 ylabel('g')
 legend(loc = 'best')
 savefig('figs/radial-distribution-%02d.pdf' % (ff), bbox_inches=0)
+print('figs/radial-distribution-%02d.pdf' % (ff))
 
 show()

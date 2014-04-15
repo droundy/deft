@@ -30,7 +30,7 @@ Functional SoftFluid(double radius, double V0, double mu);
 double zmax = 10;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.1;
+double dx = 0.2;
 double V0 = 1;
 const double radius = 1;
 double temperature = 0.01; //default temp 
