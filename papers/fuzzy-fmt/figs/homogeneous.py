@@ -10,6 +10,8 @@ from pylab import *
 from scipy.special import erf
 import os
 
+import styles
+
 #Constants and variables
 #k_b = 8.6173324*10**(-5) # in eV
 dT = .001
@@ -23,9 +25,6 @@ eta = density*4*pi/3
 #P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
 P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
-
-
-colors = { 0.6: 'r',0.4: 'y', 0.2: 'k', 0.1: 'r', 0.01: 'm', 0.001: 'b', 0.0001: 'c', 0.00001: 'g', 0.0: 'k' }
 
 Temp = 0.00001
 eta = density*4*pi/3
@@ -63,8 +62,8 @@ while Temp <= .011:
   dPhi_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
 
 
-  pressure = Temp*(density*dPhi_dn - Phi) + density*Temp 
-  plot(density*(4*pi/3),pressure/P_cs/Temp, colors[Temp]+'-', label = 'T/V0=%g' %Temp)
+  pressure = Temp*(density*dPhi_dn - Phi) + density*Temp
+  plot(density*(4*pi/3),pressure/P_cs/Temp, styles.dft[Temp], label = 'T/V0=%g' %Temp)
   Temp = Temp*10 # sqrt(10)
 
 erfdata = loadtxt('figs/homogeneous.dat')
@@ -72,8 +71,8 @@ erftemp = erfdata[0,:]
 erfeta = erfdata[:,0]
 for j in arange(1,len(erfdata[0,:])):
   erfpressure = erfdata[:,j]
-  plot(erfeta,erfpressure, colors[erftemp[j]]+'--', label='kT=%g' % erftemp[j])
-  
+  plot(erfeta,erfpressure, styles.color[erftemp[j]]+'-', label='erf kT=%g' % erftemp[j])
+
 
 for ff in arange(0.1,0.81, 0.1):
   density = ff/(4*pi/3)
@@ -84,7 +83,7 @@ for ff in arange(0.1,0.81, 0.1):
     if os.path.exists(fname):
       print 'found', fname
       p = loadtxt(fname)
-      plot(ff, p/temp/phs, colors[temp] + 'o')
+      plot(ff, p/temp/phs, styles.color[temp] + 'o')
     else:
       print 'could not find', fname
 
