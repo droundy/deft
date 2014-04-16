@@ -27,7 +27,7 @@ Functional SoftFluid(double radius, double V0, double mu);
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.
-double zmax = 10;
+double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
 double dx = 0.1;
@@ -40,9 +40,14 @@ double soft_sphere_potential(Cartesian r) {
   const double z = r.z();
   const double y = r.y();
   const double x = r.x();
+  const double V0overKTcutoff = 100;
+  const double Rcutoff = 2*radius*(1-sqrt(V0overKTcutoff/(V0/temperature)));
   const double distance = sqrt(x*x + y*y + z*z);
-  if (distance >= radius*2) return 0;
-  return V0*pow((1-distance/(2*radius)),2);
+  if (distance >= radius*2) { return 0; }
+  else if (distance > Rcutoff) {
+      return V0*pow((1-distance/(2*radius)),2);
+  }
+  return V0overKTcutoff*temperature;
 }
 
 static void took(const char *name) {
