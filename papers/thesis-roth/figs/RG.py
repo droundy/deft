@@ -12,19 +12,16 @@ import integrate
 ## Journal of Chemical Physics 134, 154102 (2011)
 
 # Important constants
-# k_B = 3.16681539628059e-6 # Boltzmann's constant in Hartree/Kelvin
-# angstrom = 1.8897261 # An angstrom in bohr
 k_B = 1 # define Boltzman constant as unity, since we will be working in SW units
 
 # Square Well Parameters: set them all to unity
-# sigma = 3.0342*angstrom # hard-sphere diameter
 sigma = 2 # HS diameter
 epsilon = 1 # depth of well
 lambdaSW = 1.5 # range of well
 R = sigma/2 # HS radius
 
 # Temp
-T = 0.1 # SW Temp
+T = 0.1 # SW Temp units
 
 # nL is the density to which you integrate when integrating over fluctuations
 # See Forte 2011, text after eqn 7
@@ -49,12 +46,25 @@ def fiterative(T,n,i):
     # eqn (5) from Forte 2011:
     for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
-            f = fnaught
+             f = fnaught
         else:
+            print '  iteration j=',j, 'i=', i
             IDvalue = ID(integrand_ID,T,nL,j)
             ID_refvalue = ID_ref(integrand_ID_ref,T,nL,j)
             dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
             f += dfi
+
+    # # Try this, slightly different way of looping;
+    # # take care of the j = 0 case separately
+    # f = fnaught
+    # for j in range(i):
+    #     if j > 0:
+    #         print '  iteration j=',j
+    #         IDvalue = ID(integrand_ID,T,nL,j)
+    #         ID_refvalue = ID_ref(integrand_ID_ref,T,nL,j)
+    #         dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
+    #         f += dfi
+
     return f
 
 # Integral over amplitudes (x) of wave-packet of length lambda_D
@@ -67,7 +77,6 @@ def integrand_ID(T,x,i):
     return argument
 
 def ID(integrand,T,n,i):
-#    asdf
     value = integrate.midpoint(lambda x: integrand_ID(T,x,i),0,1,1000)
     return value
 
@@ -124,7 +133,12 @@ def P(T,n,i):
 # Grand free energy per volume
 def phi(T,n,nparticular,i):
     mu = df_dn(T,nparticular)
+#    mu = alt_dfdn(T,nparticular,i)
     return ftot(T,n,i) - mu*n
+
+def alt_dfdn(T,n,i):
+    dn = 1e-8*n
+    return (ftot(T,n+dn/2,i) - ftot(T,n-dn/2,i))/dn
 
 # Derivative of free energy wrt number (const. temp)
 def df_dn(T,n):

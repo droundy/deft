@@ -41,18 +41,66 @@ da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
 # Total free energy per volume
 # NB: Gil-Villegas also includes a Chain term; we do not deal with chains, so I leave it off
 def f(T,n):
-    return fid(T,n) + fdisp(T,n) + fhs(T,n)
+    return 0*fid(T,n) + 0*fdisp(T,n) + fhs(T,n)
 
 # Grand free energy per volume
 def phi(T,n,nparticular):
-    mu = df_dn(T,nparticular)
+#    mu = df_dn(T,nparticular)
+    mu = alt_df_dn(T,nparticular)
     return f(T,n) - mu*n
 
 # Derivative of free energy wrt number at const temp
-def df_dn(T,n):
+def alt_df_dn(T,n):
     # step size
     dn = 1e-6*n
     return (f(T,n + dn/2) - f(T,n - dn/2))/dn
+
+# Derivative of free energy wrt number (const. temp)
+def df_dn(T,n):
+
+    # Constants for eta_eff
+    # Redefine here, rather than using SW.c1 (etc.) in case the value of lambdaSW is different between SW.py and this program
+    c1 = 2.25855-1.50349*lambdaSW+0.249434*lambdaSW**2
+    c2 = -0.669270+1.40049*lambdaSW-0.827739*lambdaSW**2
+    c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
+
+    # Sim. for n1,n2,n3
+    n1 = R*n
+    n2 = R**2*4*np.pi*n
+    n3 = R**3*4/3*np.pi*n
+
+    # These pop up a lot
+    dn3_dn = 4/3*np.pi*R**3 # this is the same as deta_dn for homogeneous case
+    deta_eff_dn = c1 + 2*c2*eta(n)*dn3_dn + 3*c3*eta(n)**2*dn3_dn
+
+    # ideal gas term
+    dfid_dn = k_B*T*np.log(n)
+
+    # Hard sphere term
+    # This gets a bit complicated; bear with me
+    dPhi1_dn = n/(1 - n3)*dn3_dn - np.log(1 - n3)
+    dPhi2_dn = n1*n2/(1 - n3)**2*dn3_dn + 1/(1 - n3)*(n2*R + n1*4*np.pi*R**2)
+    dPhi3_dn2 = 3*n2**2*((n3+(1-n3)**2*np.log(1-n3))/(36*np.pi*n3**2*(1-n3)**2))
+    dPhi3_dn3 = (n2**3/36*np.pi)*( (1 - 2*(1-n3)*np.log(1-n3) - (1-n3))/(n3**2*(1-n3)**2) -
+                                   (n3+(1-n3)**2*np.log(1-n3))/(n3**2*(1-n3)**2)**2*(2*n3*(1-n3)**2 - 2*n3**2*(1-n3)))
+    dPhi3_dn = dPhi3_dn2*R**2*4*np.pi + dPhi3_dn3*R**3*4/3*np.pi
+    #dPhi3_dn = (n2**3*(n3 + (1 - n3)**2*np.log(1 - n3))/36/np.pi/(n3**2*(1 - n3)**2)**2)*dn3_dn*((1 - n3)**2*2*n3 - n3**2*2*(1 - n3)) + 1/36/np.pi/n3**2/(1 - n3)**2*((n3 + (1 - n3)**2*np.log(1 - n3))*3*n2**2*4*np.pi*R**2 + n2**3*dn3_dn*(1 - np.log(1 - n3)*2*(1 - n3) - (1 - n3)))
+    dfhs_dn = k_B*T*(0*dPhi1_dn + 0*dPhi2_dn + dPhi3_dn)
+
+    # Term from derivative a2
+    # This is a bit more complicated; just hang in there, you'll make it through!
+    dK_dn = -deta_eff_dn*(4*(1 - eta(n))**3/(1 + 4*eta(n) + 4*eta(n)**2) + (1 - eta(n))**4*(4 + 8*eta(n))/(1 - 4*eta(n) + 4*eta(n)**2)**2)
+    dgHS_eff_dn = deta_eff_dn*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4 - 1/2/(1 - eta_eff(n))**3)
+    dA_dn = deta_eff_dn*12*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**5
+    da1SW_deta_dn = -4*epsilon*(lambdaSW**3 - 1)*dgHS_eff_dn - (1/2/(1 - eta_eff(n))**3 + 3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4)*4*epsilon*(lambdaSW**3 - 1)*dn3_dn - 4*epsilon*(lambdaSW**3 - 1)*eta(n)*dA_dn
+    da2_dn = epsilon/2*(eta(n)*da1SW_deta(n)*dK_dn + K(n)*da1SW_deta(n)*dn3_dn + K(n)*eta(n)*da1SW_deta_dn)
+
+    # Term from derivative of a1SW
+    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*gHS_eff(n)*dn3_dn + a1VDW(n)*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4*deta_eff_dn - 1/2/(1 - eta_eff(n))**3*deta_eff_dn)
+
+    dfdisp_dn = a1SW(n) + n*da1_dn + 1/k_B/T*(a2(n) + n*da2_dn)
+
+    return 0*dfid_dn + 0*dfdisp_dn + dfhs_dn
 
 # Ideal gas
 # Gil-Villegas eqn (9)
@@ -75,7 +123,7 @@ def fhs(T,n):
     Phi3 = n2(n)**3*((n3(n)+(1-n3(n))**2*np.log(1-n3(n)))/(36*np.pi*n3(n)**2*(1-n3(n))**2))
 
     # free energy
-    return k_B*T*(Phi1 + Phi2 + Phi3)
+    return k_B*T*(0*Phi1 + 0*Phi2 + Phi3)
 
 # Fundamental measure densities
 def n0(n):

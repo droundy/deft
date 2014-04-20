@@ -14,7 +14,7 @@ def minimize(func,T,a,c,npart,i):
     T is the temp in Kelvin
     a and c are the initial guesses of density (make sure to put into atomic units!)
     npart is the term that determines chemical potential
-    i is the recursion depth
+    i is the iteration depth
 
     """
 
@@ -30,10 +30,10 @@ def minimize(func,T,a,c,npart,i):
         return a, fa
     possible_bs = np.arange(a+dx, c-dx, dx)
     f_possible_bs = func(T, possible_bs, npart,i)
-    for i in xrange(1, len(possible_bs)):
-        if f_possible_bs[i] < fb:
-            b = possible_bs[i]
-            fb = f_possible_bs[i]
+    for bindex in xrange(1, len(possible_bs)):
+        if f_possible_bs[bindex] < fb:
+            b = possible_bs[bindex]
+            fb = f_possible_bs[bindex]
     if fb > fa:
         return a, fa
     if fb > fc:
@@ -81,7 +81,7 @@ def minimize(func,T,a,c,npart,i):
     return nmin,fmin
 
 def maximize(func,T,a,c,npart,i):
-    def negfunc(T,n,x,i):
-        return -func(T,n,x,i)
+    def negfunc(T,n,x,ineg):
+        return -func(T,n,x,ineg)
     n,phi = minimize(negfunc,T,a,c,npart,i)
     return n

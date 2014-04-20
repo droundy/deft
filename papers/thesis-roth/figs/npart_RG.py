@@ -24,8 +24,6 @@ import pylab
 
 ###############################
 # Initial conditions; dependent on you system
-# T = 0.001 # SW units
-# nparticular = 0.14566 # I found this by hand
 
 T = 0.1
 nparticular = 0.025
@@ -92,8 +90,8 @@ for j in xrange(0,N+1):
         else:
             print '     delta_mu is zero'
 
-        def newphi(T, n, npart, iterations):
-            return RG.phi(T, n, npart, iterations) - delta_mu*n
+        def newphi(T, n, npart, i):
+            return RG.phi(T, n, npart, i) - delta_mu*n
 
         print '     finding max in newphi'
         nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,iterations)
@@ -123,6 +121,3 @@ for j in xrange(0,N+1):
     sys.stdout.flush();
     print '   T, etaVap, etaLiq',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
     print ' Going back to top of for loop'
-
-    # Set temp slightly higher
-#    T += 0.01
