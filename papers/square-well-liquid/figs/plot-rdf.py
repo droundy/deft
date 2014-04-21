@@ -49,7 +49,8 @@ use_counts = [ i for i in range(len(counts))
                if counts[i] in g_counts ]
 counts = counts[use_counts]
 counts -= min(counts)
-dos_data = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
+lnw_mean = lnw_hist[:,1].mean()
+dos_data = e_hist[:,1]*numpy.exp(-(lnw_hist[:,1] - lnw_mean))
 dos = dos_data[use_counts]
 dos /= sum(dos)
 
