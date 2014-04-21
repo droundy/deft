@@ -8,7 +8,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 5:
-    print 'useage: %s ww ff N kTs' % sys.argv[0]
+    print 'useage: %s ww ff N versions' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -21,8 +21,10 @@ ff = float(sys.argv[2])
 N = float(sys.argv[3])
 #arg N = [200]
 
-kTs = eval(sys.argv[4])
-#arg kTs = [[0.1, 1, 2]]
+versions = eval(sys.argv[4])
+#arg versions = [["-flat", "-nw", "-kT2", "-kT1", "-kT0.1"]]
+
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
 # FIXME: make these inputs?
 kTmin = 0
@@ -31,50 +33,51 @@ dkT = float(kTmax-kTmin) / 1000
 kT_range = numpy.arange(kTmin+dkT,kTmax,dkT)
 
 # make figure with axes labeled using scientific notation
-def sci_fig():
-    fig = plt.figure()
+def sci_fig(handle):
+    fig = plt.figure(handle)
     ax = fig.add_subplot(1,1,1)
     fmt = matplotlib.ticker.ScalarFormatter(useMathText=True)
     fmt.set_powerlimits((-2,3))
     fmt.set_scientific(True)
     ax.yaxis.set_major_formatter(fmt)
     ax.xaxis.set_major_formatter(fmt)
-    return fig,ax
+    return fig, ax
 
-#############################
-### internal energy plots ###
-#############################
-
-# internal energy per ball as a function of kT
-def u(kT_array,data):
-    energy = -data[:,0]
-    DS = data[:,1]
+# specific internal energy as a function of kT
+def u(kT_array,e_hist,lnw_hist):
+    energy = -e_hist[:,0]
+    dos = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
     u_out = numpy.zeros(len(kT_array))
     for i in range(len(u_out)):
-        u_out[i] = sum(energy*DS*numpy.exp(-(energy-min(energy))/kT_array[i])) \
-          / sum(DS*numpy.exp(-(energy-min(energy))/kT_array[i]))
+        u_out[i] = sum(energy*dos*numpy.exp(-(energy-min(energy))/kT_array[i])) \
+          / sum(dos*numpy.exp(-(energy-min(energy))/kT_array[i]))
     return u_out/N
 
-fig, ax = sci_fig()
+# specific heat capacity as a function of kT
+def cv(e_hist,lnw_hist):
+    return (u(kT_range+dkT/2,e_hist,lnw_hist)
+            - u(kT_range-dkT/2,e_hist,lnw_hist)) / dkT
+
+fig_u, ax_u = sci_fig('u')
 plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-# plot curves from simulations for all temperatures
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
-                     ndmin=2)
-plt.plot(kT_range,u(kT_range,data), styles.plot['-flat'], label=styles.title['-flat'])
+fig_hc, ax_hc = sci_fig('hc')
+plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
-                     ndmin=2)
-plt.plot(kT_range,u(kT_range, data), styles.plot['-nw'], label=styles.title['-nw'])
+for version in versions:
+    e_hist = numpy.loadtxt(
+        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version), ndmin=2)
+    lnw_hist = numpy.loadtxt(
+        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-lnw.dat" % (ww, ff, N, version), ndmin=2)
 
-# plot curves from simulations at fixed temperature
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
-for kT in kTs:
-    data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT),
-        ndmin=2)
-    plt.plot(kT_range,u(kT_range,data), styles.plot['-kT%g' % kT], label=styles.title['-kT%g' % kT])
+    plt.figure('u')
+    plt.plot(kT_range,u(kT_range,e_hist,lnw_hist),
+             styles.dots[version],label=styles.title[version])
 
+    plt.figure('hc')
+    plt.plot(kT_range,cv(e_hist,lnw_hist),styles.plot[version],label=styles.title[version])
+
+plt.figure('u')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
@@ -82,34 +85,7 @@ plt.tight_layout(pad=0.1)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 plt.close()
 
-###########################
-### heat capacity plots ###
-###########################
-
-# specific heat capacity as a function of kT
-def cv(data):
-    return (u(kT_range+dkT/2,data) - u(kT_range-dkT/2,data)) / dkT
-
-fig, ax = sci_fig()
-plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
-
-# plot curves from simulations for all temperatures
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
-                     ndmin=2)
-plt.plot(kT_range,cv(data), styles.plot['-flat'], label=styles.title['-flat'])
-
-data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
-                     ndmin=2)
-plt.plot(kT_range,cv(data), styles.plot['-nw'], label=styles.title['-nw'])
-
-# plot curves from simulations at fixed temperature
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT) for kT in kTs]
-for kT in kTs:
-    data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT),
-        ndmin=2)
-    plt.plot(kT_range,cv(data), styles.plot['-kT%g' % kT], label=styles.title['-kT%g' % kT])
-
+plt.figure('hc')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')

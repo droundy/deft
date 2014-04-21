@@ -320,21 +320,24 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
     for ww in [1.3, 1.5, 2.0, 3.0]:
         for N in [200]:
             env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N),
+                                  datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-lnw.dat" % (ww, ff, N),
                                   datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-dos.dat" % (ww, ff, N),
                                   datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat" % (ww, ff, N)],
                         source = 'square-well-monte-carlo',
-                        action = './square-well-monte-carlo --nw --N %d --initialize=4000 --ff %g --ww %g  --iterations 10000' % (N, ff, ww))
+                        action = './square-well-monte-carlo --nw --N %d --initialize 4000 --ff %g --ww %g  --iterations 10000' % (N, ff, ww))
             env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-flat-E.dat" % (ww, ff, N),
+                                  datadir+"periodic-ww%04.2f-ff%04.2f-N%i-flat-lnw.dat" % (ww, ff, N),
                                   datadir+"periodic-ww%04.2f-ff%04.2f-N%i-flat-dos.dat" % (ww, ff, N),
                                   datadir+"periodic-ww%04.2f-ff%04.2f-N%i-flat-g.dat" % (ww, ff, N)],
                         source = 'square-well-monte-carlo',
-                        action = './square-well-monte-carlo --flat --N %d --initialize=100000 --ff %g --ww %g  --iterations 100000' % (N, ff, ww))
+                        action = './square-well-monte-carlo --flat --N %d --initialize 100000 --ff %g --ww %g  --iterations 100000' % (N, ff, ww))
             for kT in [i*.1 for i in range(1,10)] + range(1,10):
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT),
+                                      datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-lnw.dat" % (ww, ff, N, kT),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-dos.dat" % (ww, ff, N, kT),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-g.dat" % (ww, ff, N, kT)],
                             source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --kT %g --N %d --initialize=10000 --ff %g --ww %g  --iterations 10000' % (kT, N, ff, ww))
+                            action = './square-well-monte-carlo --kT %g --N %d --initialize 10000 --ff %g --ww %g  --iterations 10000' % (kT, N, ff, ww))
 
 
 # #################### talks ##################################################

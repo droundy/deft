@@ -396,7 +396,7 @@ int main(int argc, const char *argv[]) {
   took("Placement");
 
   // ----------------------------------------------------------------------------
-  // Save the initial configuration for troubleshooting
+  // Print info about the initial configuration for troubleshooting
   // ----------------------------------------------------------------------------
 
   int most_neighbors =
@@ -500,7 +500,7 @@ int main(int argc, const char *argv[]) {
         for(int i = 0; i < energy_levels; i++){
           if (energy_histogram[i] > energy_histogram[max_entropy]) max_entropy = i;
         }
-        for (int i=max_entropy; i< energy_levels; i++) {
+        for (int i = max_entropy; i < energy_levels; i++) {
           ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
                                       energy_histogram[i] : 0.01);
         }
@@ -570,19 +570,19 @@ int main(int argc, const char *argv[]) {
 
         const char *w_testdir = "weights";
 
-        char *w_fname = new char[1024];
+        char *w_test_fname = new char[1024];
         mkdir(dir, 0777); // create save directory
-        sprintf(w_fname, "%s/%s",
+        sprintf(w_test_fname, "%s/%s",
                 dir, w_testdir);
-        mkdir(w_fname, 0777); // create weights directory
-        sprintf(w_fname, "%s/%s/%s-w%02i.dat",
+        mkdir(w_test_fname, 0777); // create weights directory
+        sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
                 dir, w_testdir, filename, weight_updates);
-        FILE *w_out = fopen(w_fname, "w");
+        FILE *w_out = fopen(w_test_fname, "w");
         if (!w_out) {
-          fprintf(stderr, "Unable to create %s!\n", w_fname);
+          fprintf(stderr, "Unable to create %s!\n", w_test_fname);
           exit(1);
         }
-        delete[] w_fname;
+        delete[] w_test_fname;
         fprintf(w_out, "%s", w_headerinfo);
         delete[] w_headerinfo;
         fprintf(w_out, "%s", w_countinfo);
@@ -670,8 +670,8 @@ int main(int argc, const char *argv[]) {
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", dir, filename);
 
-  char *dos_fname = new char[1024]; // density of states
-  sprintf(dos_fname, "%s/%s-dos.dat", dir, filename);
+  char *w_fname = new char[1024];
+  sprintf(w_fname, "%s/%s-lnw.dat", dir, filename);
 
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, N);
@@ -768,15 +768,15 @@ int main(int argc, const char *argv[]) {
           fprintf(e_out, "%i  %ld\n",i,energy_histogram[i]);
       fclose(e_out);
 
-      // Save density of states histogram
-      FILE *dos_out = fopen((const char *)dos_fname, "w");
-      fprintf(dos_out, "%s", headerinfo);
-      fprintf(dos_out, "%s", countinfo);
-      fprintf(dos_out, "\n# interactions   counts\n");
+      // Save weights histogram
+      FILE *w_out = fopen((const char *)w_fname, "w");
+      fprintf(w_out, "%s", headerinfo);
+      fprintf(w_out, "%s", countinfo);
+      fprintf(w_out, "\n# interactions   ln(weight)\n");
       for(int i = 0; i < energy_levels; i++)
         if(energy_histogram[i] != 0)
-          fprintf(dos_out, "%i  %g\n",i,energy_histogram[i]*exp(-ln_energy_weights[i]));
-      fclose(dos_out);
+          fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]);
+      fclose(w_out);
 
       // Save RDF
       if(!walls){
