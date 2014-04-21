@@ -72,7 +72,7 @@ for version in versions:
 
     plt.figure('u')
     plt.plot(kT_range,u(kT_range,e_hist,lnw_hist),
-             styles.dots[version],label=styles.title[version])
+             styles.plot[version],label=styles.title[version])
 
     plt.figure('hc')
     plt.plot(kT_range,cv(e_hist,lnw_hist),styles.plot[version],label=styles.title[version])
