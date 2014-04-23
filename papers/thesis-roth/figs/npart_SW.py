@@ -28,7 +28,8 @@ import pylab
 # nparticular = 0.14566 # I found this by hand
 
 T = 0.1
-nparticular = 0.08/(SW.sigma**3*np.pi/6)
+# nparticular = 0.155/(SW.sigma**3*np.pi/6) # using analytic df_nd
+nparticular = 0.08/(SW.sigma**3*np.pi/6) # using finite differences df_dn
 N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
 Tc = 1.33
 Tlow = T
@@ -53,9 +54,6 @@ fout.write('#T     nvapor     nliquid       phi(nvap)        phi(nliq)         n
 nvapor,phi_vapor = minmax.minimize(SW.phi,T,a_vap,c_vap,nparticular)
 nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
 sys.stdout.flush()
-
-print 'df_dn(%g) = %g' % (nparticular, SW.df_dn(Tc, nparticular))
-print 'df_dn(%g) ~ %g' % (nparticular, (SW.f(Tc, nparticular*1.001) - SW.f(Tc, nparticular*0.999))/(0.002*nparticular))
 
 #while T < 1.4:
 for i in xrange(0,N+1):
@@ -82,7 +80,6 @@ for i in xrange(0,N+1):
             return SW.phi(T, n, npart) - delta_mu*n
         nparticular = minmax.maximize(newphi,T,nvapor,nliquid,nparticular)
         fnpart = SW.phi(T, nparticular, nparticular)
-        print '  nparticular =',nparticular
 
         nvapor,phi_vapor = minmax.minimize(SW.phi,T,a_vap,c_vap,nparticular)
         nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
