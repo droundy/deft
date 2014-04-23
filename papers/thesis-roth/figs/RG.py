@@ -48,22 +48,11 @@ def fiterative(T,n,i):
         if j == 0:
              f = fnaught
         else:
-            print '  iteration j=',j, 'i=', i
+#            print '  iteration j=',j, 'i=', i
             IDvalue = ID(integrand_ID,T,nL,j)
             ID_refvalue = ID_ref(integrand_ID_ref,T,nL,j)
             dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
             f += dfi
-
-    # # Try this, slightly different way of looping;
-    # # take care of the j = 0 case separately
-    # f = fnaught
-    # for j in range(i):
-    #     if j > 0:
-    #         print '  iteration j=',j
-    #         IDvalue = ID(integrand_ID,T,nL,j)
-    #         ID_refvalue = ID_ref(integrand_ID_ref,T,nL,j)
-    #         dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
-    #         f += dfi
 
     return f
 
@@ -132,8 +121,8 @@ def P(T,n,i):
 
 # Grand free energy per volume
 def phi(T,n,nparticular,i):
-    mu = df_dn(T,nparticular)
-#    mu = alt_dfdn(T,nparticular,i)
+#    mu = df_dn(T,nparticular)
+    mu = alt_dfdn(T,nparticular,i)
     return ftot(T,n,i) - mu*n
 
 def alt_dfdn(T,n,i):
@@ -150,36 +139,43 @@ def df_dn(T,n):
     c3 = 10.1576-15.0427*lambdaSW+5.30827*lambdaSW**2
 
     # Sim. for n1,n2,n3
+    n0 = n
     n1 = R*n
     n2 = R**2*4*np.pi*n
     n3 = R**3*4/3*np.pi*n
 
+    # n3 compliment
+    n3c = 1 - n3
+
     # These pop up a lot
-    dn3_dn = 4/3*np.pi*R**3 # this is the same as deta_dn for homogeneous case
-    deta_eff_dn = c1 + 2*c2*eta(n)*dn3_dn + 3*c3*eta(n)**2*dn3_dn
+    dn3_dn = 4/3*np.pi*R**3
+    deta_dn = dn3_dn # for homogeneous case deta_dn is the same as dn3_dn
+    deta_eff_dn = deta_dn*(c1 + 2*c2*eta(n) + 3*c3*eta(n)**2)
 
     # ideal gas term
     dfid_dn = k_B*T*np.log(n)
 
     # Hard sphere term
-    # This gets a bit complicated; bear with me
-    dPhi1_dn = n/(1 - n3)*dn3_dn - np.log(1 - n3)
-    dPhi2_dn = n1*n2/(1 - n3)**2*dn3_dn + 1/(1 - n3)*(n2*R + n1*4*np.pi*R**2)
-    dPhi3_dn = (n2**3*(n3 + (1 - n3)**2*np.log(1 - n3))/36/np.pi/(n3**2*(1 - n3)**2)**2)*dn3_dn*((1 - n3)**2*2*n3 - n3**2*2*(1 - n3)) + 1/36/np.pi/n3**2/(1 - n3)**2*((n3 + (1 - n3)**2*np.log(1 - n3))*3*n2**2*4*np.pi*R**2 + n2**3*dn3_dn*(1 - np.log(1 - n3)*2*(1 - n3) - (1 - n3)))
-    dfhs_dn = dPhi1_dn + dPhi2_dn + dPhi3_dn
+    dPhi1_dn = n0/n3c*dn3_dn - np.log(n3c)
+    dPhi2_dn = 1/n3c*(n2*R + n1*4*np.pi*R**2) - n1*n2/n3c**2*dn3_dn
+    dPhi3_dn = 1/36/np.pi/n3**2/n3c**2*((n3 + n3c**2*np.log(n3c))*3*n2**2*4*np.pi*R**2 + n2**3*dn3_dn*(1 - 2*n3c*np.log(n3c) - n3*n3c) - (n2**3*(n3 + n3c**2*np.log(n3c)))/n3/n3c*dn3_dn*(2*n3c - n*n3))
+    dfhs_dn = k_B*T*(dPhi1_dn + dPhi2_dn + dPhi3_dn)
 
     # Term from derivative a2
     # This is a bit more complicated; just hang in there, you'll make it through!
-    dK_dn = -deta_eff_dn*(4*(1 - eta(n))**3/(1 + 4*eta(n) + 4*eta(n)**2) + (1 - eta(n))**4*(4 + 8*eta(n))/(1 - 4*eta(n) + 4*eta(n)**2)**2)
+    dK_dn = -(1 - eta(n))**3/(1 + 4*eta(n) + 4*eta(n)**2)*deta_dn*((1 - eta(n))/(1 + 4*eta(n) + 4*eta(n)**2)*(8*eta(n) + 4) + 4)
     dgHS_eff_dn = deta_eff_dn*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4 - 1/2/(1 - eta_eff(n))**3)
     dA_dn = deta_eff_dn*12*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**5
     da1SW_deta_dn = -4*epsilon*(lambdaSW**3 - 1)*dgHS_eff_dn - (1/2/(1 - eta_eff(n))**3 + 3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4)*4*epsilon*(lambdaSW**3 - 1)*dn3_dn - 4*epsilon*(lambdaSW**3 - 1)*eta(n)*dA_dn
-    da2_dn = epsilon/2*(eta(n)*da1SW_deta(n)*dK_dn + K(n)*da1SW_deta(n)*dn3_dn + K(n)*eta(n)*da1SW_deta_dn)
+    da2_dn = -2*epsilon**2*(lambdaSW**3 - 1)*(eta(n)*dK_dn + K(n)*deta_dn)
 
     # Term from derivative of a1SW
-    da1_dn = -4*epsilon*(lambdaSW**3 - 1)*gHS_eff(n)*dn3_dn + a1VDW(n)*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n))**4*deta_eff_dn - 1/2/(1 - eta_eff(n))**3*deta_eff_dn)
+    da1SW_dn = deta_dn*(a1VDW(n)/(1 - eta_eff(n))**3*(c1 + 2*c2*eta(n) + 3*c3*eta(n)**2)*(3*(1 - 0.5*eta_eff(n))/(1 - eta_eff(n)) - 0.5) - 4*epsilon*(lambdaSW**3 - 1)*gHS_eff(n))
 
-    return dfid_dn + dfhs_dn + a2(n)/k_B/T + n/k_B/T*da2_dn + a1SW(n) + n*da1_dn
+    # Term for derivaitve of dfi
+    ddfi_dn = 0 # I have no idea what do to here
+
+    return dfid_dn + dfhs_dn + a2(n)/k_B/T + n/k_B/T*da2_dn + a1SW(n) + n*da1SW_dn + ddfi_dn
 
 #######################################
 # I define the following functions here, rather than calling from SW.py

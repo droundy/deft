@@ -26,13 +26,14 @@ import pylab
 # Initial conditions; dependent on you system
 
 T = 0.1
-nparticular = 0.025
+# nparticular = 0.155/(RG.sigma**3*np.pi/6) # using analytic df_nd
+nparticular = 0.08/(RG.sigma**3*np.pi/6) # using finite differences df_dn
 N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
 Tc = 1.33
 Tlow = T
 
 # Recursion depth
-iterations = 0
+iterations = 1
 
 # Bounds of minimization.
 # Use range that works for many temperatures
@@ -41,7 +42,7 @@ a_vap = 1e-10/(RG.sigma**3*np.pi/6)
 c_vap = nparticular
 # Right (liquid)
 a_liq = nparticular
-c_liq = 0.55/(RG.sigma**3*np.pi/6)
+c_liq = 0.75/(RG.sigma**3*np.pi/6)
 ###############################
 
 # Open file for output
@@ -55,6 +56,7 @@ nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iteration
 print 'nvap,phi_vap',nvapor,phi_vapor
 nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
 print 'nliq,phi_liq',nliquid,phi_liquid
+print 'npart',nparticular*(RG.sigma**3*np.pi/6)
 sys.stdout.flush()
 
 
@@ -66,7 +68,7 @@ for j in xrange(0,N+1):
     fout.flush()
     # Starting point for new nparticular is abscissa of max RG.phi with old nparticular
     nparticular = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, nparticular,iterations)
-    print '   npart =',nparticular
+    print '   npart =',nparticular*(RG.sigma**3*np.pi/6)
 
     # I'm looking at the minima of RG.phi
     c_vap = nparticular
@@ -80,31 +82,32 @@ for j in xrange(0,N+1):
 
     # Compare the two minima in RG.phi
     while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart) > tol:
-        print '     in the loop comparing two minima in RG.phi'
+#        print '     in the loop comparing two minima in RG.phi'
 
         delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
-        if delta_mu > 0:
-            print '     delta_mu is positive'
-        elif delta_mu < 0:
-            print '     delta_mu is negative'
-        else:
-            print '     delta_mu is zero'
+        # if delta_mu > 0:
+        #     print '      delta_mu is positive'
+        # elif delta_mu < 0:
+        #     print '      delta_mu is negative'
+        # else:
+        #     print '      delta_mu is zero'
 
         def newphi(T, n, npart, i):
             return RG.phi(T, n, npart, i) - delta_mu*n
 
-        print '     finding max in newphi'
         nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,iterations)
-        print '     new nparticular is',nparticular
+#        print '     newphi(nvap),newphi(nliq)',newphi(T,nvapor,nparticular,iterations),newphi(T,nliquid,nparticular,iterations)
+#        print '     new nparticular is',nparticular*(RG.sigma**3*np.pi/6)
+#        print '     delta mu',delta_mu
 
         fnpart = RG.phi(T, nparticular, nparticular, iterations)
-        print '     fnpart =',fnpart
+#        print '      fnpart =',fnpart
 
-        print '     finding new nvapor,phi_vapor'
         nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
-
-        print '     finding new nliquid,phi_liquid'
+#        print '      nvap,phi_vap',nvapor,phi_vapor
         nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
+#        print '      nliquid,phi_liquid',nliquid,phi_liquid
+        print ' nvap,nliq,phivap,philiq',nvapor,nliquid,phi_vapor,phi_liquid
 
     fout.write(str(T))
     fout.write('  ')
@@ -120,4 +123,3 @@ for j in xrange(0,N+1):
     fout.write('\n')
     sys.stdout.flush();
     print '   T, etaVap, etaLiq',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
-    print ' Going back to top of for loop'
