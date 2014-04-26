@@ -698,12 +698,69 @@ int main(int argc, const char *argv[]) {
         best_halfway[i > max_entropy] = i;
       }
     }
-    double s = 2*sqrt(2*log(2))/ (best_halfway[1] - best_halfway[0]);
+    double s = (best_halfway[1]-best_halfway[0])/(2*sqrt(2*log(2)));
     // now set actual energy weights
     for(int i = max_entropy; i < energy_levels; i++)
       ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
     for(int i = 0; i < max_entropy; i++)
       ln_energy_weights[i] = ln_energy_weights[max_entropy];
+
+    // -------------------------------------------------------------------
+    // ----------------------------- TESTING -----------------------------
+    // -------------------------------------------------------------------
+    /*
+    printf("\nmax_entropy: %i\n\n",max_entropy);
+    printf("eh: %i,%li\n",best_halfway[0],energy_histogram[best_halfway[0]]);
+    printf("eh: %i,%li\n",max_entropy,energy_histogram[max_entropy]);
+    printf("eh: %i,%li\n",best_halfway[1],energy_histogram[best_halfway[1]]);
+
+    printf("\nFWHM: %i\n",best_halfway[1]-best_halfway[0]);
+
+
+    char *e_fname = new char[1024];
+    sprintf(e_fname, "%s/%s-E.dat", dir, filename);
+
+    char *w_fname = new char[1024];
+    sprintf(w_fname, "%s/%s-lnw.dat", dir, filename);
+
+    // Save energy histogram
+    FILE *e_out = fopen((const char *)e_fname, "w");
+    fprintf(e_out, "\n# interactions   counts\n");
+    for(int i = max_entropy; i < energy_levels; i++)
+      if(energy_histogram[i] != 0)
+        fprintf(e_out, "%i  %ld\n",i,energy_histogram[i]);
+    fclose(e_out);
+
+    // Save weights histogram
+    FILE *w_out = fopen((const char *)w_fname, "w");
+    fprintf(w_out, "\n# interactions   ln(weight)\n");
+    for(int i = max_entropy; i < energy_levels; i++)
+      if(energy_histogram[i] != 0)
+        fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]);
+    fclose(w_out);
+
+
+    const char *w_testdir = "weights";
+    char *w_test_fname = new char[1024];
+    mkdir(dir, 0777); // create save directory
+    sprintf(w_test_fname, "%s/%s",
+            dir, w_testdir);
+    mkdir(w_test_fname, 0777); // create weights directory
+    sprintf(w_test_fname, "%s/%s/%s.dat", dir, w_testdir, filename);
+    FILE *wdos_out = fopen(w_test_fname, "w");
+    fprintf(wdos_out, "\n# interactions   value\n");
+    for(int i = max_entropy; i < energy_levels; i++)
+      fprintf(wdos_out, "%i  %g\n", i,
+              energy_histogram[max_entropy]*exp(-ln_energy_weights[i]));
+    fclose(wdos_out);
+
+
+    return 0;
+    */
+    // -------------------------------------------------------------------
+    // ----------------------------- TESTING -----------------------------
+    // -------------------------------------------------------------------
+
   }
   took("Initialization");
 

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy
 import styles
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N versions' % sys.argv[0]
+if len(sys.argv) not in [5,6]:
+    print 'useage: %s ww ff N versions show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -37,6 +37,8 @@ for version in versions:
 plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$D$')
 plt.legend(loc='best')
-plt.tight_layout(pad=0.1)
+plt.tight_layout(pad=0.2)
+if 'show' in sys.argv:
+    plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
-
+plt.close()

@@ -7,8 +7,8 @@ import numpy
 
 import styles
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N versions' % sys.argv[0]
+if len(sys.argv) not in [5,6]:
+    print 'useage: %s ww ff N versions show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -23,6 +23,8 @@ N = float(sys.argv[3])
 
 versions = eval(sys.argv[4])
 #arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
+
+max_hc = 3 # upper axis limit when plotting heat capacity
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
@@ -82,13 +84,18 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.1)
+if 'show' in sys.argv:
+    plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 plt.close()
 
 plt.figure('hc')
+plt.ylim(0,max_hc)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.1)
+if 'show' in sys.argv:
+    plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 plt.close()

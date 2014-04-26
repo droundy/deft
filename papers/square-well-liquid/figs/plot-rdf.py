@@ -5,8 +5,8 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N kTs' % sys.argv[0]
+if len(sys.argv) not in [5,6]:
+    print 'useage: %s ww ff N kTs show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -74,4 +74,7 @@ plt.xlabel('$r/\\sigma$')
 plt.ylabel('$g(r)$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.1)
+if 'show' in sys.argv:
+    plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rdf.pdf" % (ww*100, ff*100, N))
+plt.close()
