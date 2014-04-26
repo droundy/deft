@@ -22,7 +22,7 @@ N = float(sys.argv[3])
 #arg N = [200]
 
 versions = eval(sys.argv[4])
-#arg versions = [["-flat", "-nw", "-kT2", "-kT1", "-kT0.1"]]
+#arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 

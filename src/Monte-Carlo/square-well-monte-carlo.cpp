@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
   double dr = 0.01;
   double de_density = 0.01;
   double de_g = 0.01;
-  int totime = -1;
+  int totime = 0;
   // scale is not a quite "constant" -- it is adjusted during the initialization
   //  so that we have a reasonable acceptance rate
   double translation_scale = 0.05;
@@ -677,10 +677,9 @@ int main(int argc, const char *argv[]) {
     }
   }
   if(gaussian_fit){
-    // a gaussian takes the form g(E) = a*exp(-(E-c)^2/(2 s^2))
+    // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
     // we want 1/weights (the DoS with a flat energy histogram) to be gaussian
-    // neglecting constant terms, ln_weights[i] = (i+c)^2/(2s^2)
-    int c = -max_entropy;
+    // neglecting constant terms, ln_weights[i] = (i-max_entropy)^2/(2s^2)
     //   s = 2*sqrt(2 ln2)/FWHM
     // s^2 = 2 ln2 / (FWHM/2)^2
     // we first need to determine FWHM/2, so we need to find i for which:
@@ -697,13 +696,19 @@ int main(int argc, const char *argv[]) {
         smallest_diff = current_diff;
         best_halfway = i;
         // potential bug anticipated if weights are crazy at i ~ energy_levels
-        // and accidentally come very close to target_value
+        //       and we accidentally come very close to target_value
         // this is deemed highly unlikely, but is in principle not impossible
       }
     }
     double ss = 2*log(2) / uipow(max_entropy - best_halfway,2);
+    double mean_lnw = 0;
+    for(int i = 0; i < energy_levels; i++){
+      ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*ss);
+      mean_lnw += ln_energy_weights[i];
+    }
+    mean_lnw /= energy_levels;
     for(int i = 0; i < energy_levels; i++)
-      ln_energy_weights[i] = uipow(i+c,2)/(2*ss);
+      ln_energy_weights[i] -= mean_lnw;
   }
   took("Initialization");
 

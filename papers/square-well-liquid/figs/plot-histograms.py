@@ -8,7 +8,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 5:
-    print 'useage: %s ww ff N kTs' % sys.argv[0]
+    print 'useage: %s ww ff N versions' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -20,9 +20,8 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [200, 1000]
 
-print sys.argv[4]
 versions = eval(sys.argv[4])
-#arg versions = [["-flat", "-nw", "-kT2", "-kT1", "-kT0.1"]]
+#arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
 
 plt.title('Histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
