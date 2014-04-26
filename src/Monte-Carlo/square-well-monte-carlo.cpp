@@ -81,9 +81,12 @@ int main(int argc, const char *argv[]) {
 
   // NOTE: debug can slow things down VERY much
   bool debug = false;
+  bool test_weights = false;
 
   bool no_weights = false;
   bool flat_histogram = false;
+  bool gaussian_fit = false;
+  bool walker_weights = false;
   double fix_kT = 0;
 
   double len[3] = {1, 1, 1};
@@ -149,9 +152,8 @@ int main(int argc, const char *argv[]) {
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
     {"translation_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &translation_scale, 0,
-     "Standard deviation for translations of balls, relative to ball radius",
-     "DOUBLE"},
+     &translation_scale, 0, "Standard deviation for translations of balls, "
+     "relative to ball radius", "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -160,12 +162,18 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
-    {"flat", '\0', POPT_ARG_NONE, &flat_histogram, 0, "Use a flat histogram method",
-     "BOOLEAN"},
+    {"flat", '\0', POPT_ARG_NONE, &flat_histogram, 0,
+     "Use a flat histogram method", "BOOLEAN"},
+    {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
+     "Use gaussian weights for flat histogram", "BOOLEAN"},
+    {"walker", '\0', POPT_ARG_NONE, &walker_weights, 0,
+     "Use a walker optimization weight histogram method", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
+    {"test_weights", '\0', POPT_ARG_NONE, &test_weights, 0,
+     "Periodically print weight histogram during initialization", "BOOLEAN"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -236,13 +244,22 @@ int main(int argc, const char *argv[]) {
       sprintf(name_suffix, "-nw");
     } else if (flat_histogram) {
       sprintf(name_suffix, "-flat");
+    } else if (gaussian_fit) {
+      sprintf(name_suffix, "-gaussian");
+    } else if (walker_weights) {
+      sprintf(name_suffix, "-walker");
     } else {
       name_suffix[0] = 0; // set name_suffix to the empty string
     }
     // check that nonsense options do not exist:
+    assert(no_weights || flat_histogram || gaussian_fit || walker_weights);
     assert(!(no_weights && flat_histogram));
+    assert(!(no_weights && gaussian_fit));
+    assert(!(no_weights && walker_weights));
     assert(!(!no_weights && fix_kT));
     assert(!(flat_histogram && fix_kT));
+    assert(!(gaussian_fit && fix_kT));
+    assert(!(walker_weights && fix_kT));
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, name_suffix);
     printf("\nUsing default file name: ");
@@ -326,7 +343,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Find the upper limit to the maximum number of neighbors a ball could have
-  int max_neighbors = uipow(2+2*neighbor_scale,3) - 1;
+  int max_neighbors = uipow(2+neighbor_scale*well_width,3) - 1;
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -444,9 +461,11 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   double avg_neighbors = 0;
-  int interactions = count_all_interactions(balls, N, interaction_distance, len, walls);
+  int interactions =
+    count_all_interactions(balls, N, interaction_distance, len, walls);
   double dscale = .1;
   int top, bottom, dE;
+  int max_entropy = 0;
   double df, df_dE, walker_density;
 
   for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
@@ -460,14 +479,18 @@ int main(int argc, const char *argv[]) {
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
 
-      if(!no_weights){
+      if(walker_weights){
         walkers_total[interactions]++;
-        if(interactions >= walker_minus_threshold) current_walker_plus = false;
-        else if(interactions <= walker_plus_threshold) current_walker_plus = true;
-        if(current_walker_plus) walkers_plus[interactions]++;
+        if(interactions >= walker_minus_threshold)
+          current_walker_plus = false;
+        else if(interactions <= walker_plus_threshold)
+          current_walker_plus = true;
+        if(current_walker_plus)
+          walkers_plus[interactions]++;
       }
     }
-    assert(interactions == count_all_interactions(balls, N, interaction_distance, len, walls));
+    assert(interactions ==
+           count_all_interactions(balls, N, interaction_distance, len, walls));
     // ---------------------------------------------------------------
     // Fine-tune translation scale to reach acceptance goal
     // ---------------------------------------------------------------
@@ -491,14 +514,16 @@ int main(int argc, const char *argv[]) {
     // Update weights
     // ---------------------------------------------------------------
     if(!no_weights){
-      const int first_weight_update = min(energy_levels, initialization_iterations*9/10);
+      const int first_weight_update =
+        min(energy_levels, initialization_iterations*9/10);
       // don't update until we could at least theoretically have
       // occupied all energy levels.
       if(iteration == first_weight_update){
         // initial guess for energy weights
-        int max_entropy = 0;
+        max_entropy = 0;
         for(int i = 0; i < energy_levels; i++){
-          if (energy_histogram[i] > energy_histogram[max_entropy]) max_entropy = i;
+          if (energy_histogram[i] > energy_histogram[max_entropy])
+            max_entropy = i;
         }
         for (int i = max_entropy; i < energy_levels; i++) {
           ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
@@ -509,25 +534,28 @@ int main(int argc, const char *argv[]) {
         }
         weight_updates++;
       } else if(iteration >= first_weight_update
-                && (iteration-first_weight_update) % int(first_weight_update*uipow(2,weight_updates)) == 0){
+                && ((iteration-first_weight_update)
+                    % int(first_weight_update*uipow(2,weight_updates))) == 0){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
-        if (flat_histogram) {
-          int max_entropy = 0;
+        if (flat_histogram || gaussian_fit) {
+          max_entropy = 0;
           for (int i = 0; i < energy_levels; i++) {
             if (log(energy_histogram[i]) - ln_energy_weights[i]
-                > log(energy_histogram[max_entropy]) - ln_energy_weights[max_entropy]) {
+                > (log(energy_histogram[max_entropy])
+                   - ln_energy_weights[max_entropy])) {
               max_entropy = i;
             }
           }
           for (int i = max_entropy; i < energy_levels; i++) {
-            ln_energy_weights[i] -= log(energy_histogram[i] > 0 ? energy_histogram[i] : 0.01);
+            ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
+                                        energy_histogram[i] : 0.01);
             energy_histogram[i] = 0;
           }
           for (int i = 0; i < max_entropy; i++) {
             ln_energy_weights[i] = ln_energy_weights[max_entropy];
             energy_histogram[i] = 0;
           }
-        } else {
+        } else if(walker_weights) {
           for(int i = 0; i < energy_levels; i++){
             const int top = i < energy_levels-1 ? i+1 : i;
             const int bottom = i > 0 ? i-1 : i;
@@ -539,63 +567,63 @@ int main(int argc, const char *argv[]) {
                                            walkers_total[i] : 0.01)/moves.total;
             ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
           }
+          for (int i = 0; i < energy_levels; i++)
+            walkers_total[i] = 0;
         }
         weight_updates++;
-        for (int i = 0; i < energy_levels; i++) {
-          walkers_total[i] = 0;
-        }
 
         // -----------------------------------------------------------------
         // ----------------------------- TESTING ---------------------------
-        // ------------- print weight histogram to test convergence---------
+        // ---- print weight histogram to test shape and/or convergence ----
         // -----------------------------------------------------------------
+        if(test_weights){
+          char *w_headerinfo = new char[4096];
+          sprintf(w_headerinfo,
+                  "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
+                  " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
+                  " well_width: %g, translation_distance: %g\n"
+                  "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
+                  " energy_levels: %i\n",
+                  len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
+                  well_width, translation_distance, initialization_iterations,
+                  neighbor_scale, dr, energy_levels);
 
-        char *w_headerinfo = new char[4096];
-        sprintf(w_headerinfo,
-                "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
-                " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-                " well_width: %g, translation_distance: %g\n"
-                "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
-                " energy_levels: %i\n",
-                len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
-                well_width, translation_distance, initialization_iterations,
-                neighbor_scale, dr, energy_levels);
+          char *w_countinfo = new char[4096];
+          sprintf(w_countinfo,
+                  "# iteration: %li, working moves: %li, total moves: %li, "
+                  "acceptance rate: %g\n",
+                  iteration, moves.working, moves.total,
+                  double(moves.working)/moves.total);
 
-        char *w_countinfo = new char[4096];
-        sprintf(w_countinfo,
-                "# iteration: %li, working moves: %li, total moves: %li, "
-                "acceptance rate: %g\n",
-                iteration, moves.working, moves.total,
-                double(moves.working)/moves.total);
+          const char *w_testdir = "weights";
 
-        const char *w_testdir = "weights";
-
-        char *w_test_fname = new char[1024];
-        mkdir(dir, 0777); // create save directory
-        sprintf(w_test_fname, "%s/%s",
-                dir, w_testdir);
-        mkdir(w_test_fname, 0777); // create weights directory
-        sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
-                dir, w_testdir, filename, weight_updates);
-        FILE *w_out = fopen(w_test_fname, "w");
-        if (!w_out) {
-          fprintf(stderr, "Unable to create %s!\n", w_test_fname);
-          exit(1);
+          char *w_test_fname = new char[1024];
+          mkdir(dir, 0777); // create save directory
+          sprintf(w_test_fname, "%s/%s",
+                  dir, w_testdir);
+          mkdir(w_test_fname, 0777); // create weights directory
+          sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
+                  dir, w_testdir, filename, weight_updates);
+          FILE *w_out = fopen(w_test_fname, "w");
+          if (!w_out) {
+            fprintf(stderr, "Unable to create %s!\n", w_test_fname);
+            exit(1);
+          }
+          delete[] w_test_fname;
+          fprintf(w_out, "%s", w_headerinfo);
+          delete[] w_headerinfo;
+          fprintf(w_out, "%s", w_countinfo);
+          delete[] w_countinfo;
+          fprintf(w_out, "\n# interactions   value\n");
+          for(int i = 0; i < energy_levels; i++)
+            fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
+          fclose(w_out);
         }
-        delete[] w_test_fname;
-        fprintf(w_out, "%s", w_headerinfo);
-        delete[] w_headerinfo;
-        fprintf(w_out, "%s", w_countinfo);
-        delete[] w_countinfo;
-        fprintf(w_out, "\n# interactions   value\n");
-        for(int i = 0; i < energy_levels; i++)
-          fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
-        fclose(w_out);
         // -------------------------------------------------------------------
         // ----------------------------- TESTING -----------------------------
         // -------------------------------------------------------------------
 
-        if (!flat_histogram) {
+        if (walker_weights) {
           for(int i = 0; i < energy_levels; i++){
             top = i < energy_levels-1 ? i+1 : i;
             bottom = i > 0 ? i-1 : i;
@@ -647,6 +675,35 @@ int main(int argc, const char *argv[]) {
              neighbor_scale, avg_neighbors);
       fflush(stdout);
     }
+  }
+  if(gaussian_fit){
+    // a gaussian takes the form g(E) = a*exp(-(E-c)^2/(2 s^2))
+    // we want 1/weights (the DoS with a flat energy histogram) to be gaussian
+    // neglecting constant terms, ln_weights[i] = (i+c)^2/(2s^2)
+    int c = -max_entropy;
+    //   s = 2*sqrt(2 ln2)/FWHM
+    // s^2 = 2 ln2 / (FWHM/2)^2
+    // we first need to determine FWHM/2, so we need to find i for which:
+    //       dos[i] = dos[max_entropy] / 2
+    // e^(-ln_w[i]) = e^(-ln_w[max_entropy]) / 2
+    //      ln_w[i] = ln_w[max_entropy] + ln2
+    double target_value = ln_energy_weights[max_entropy] + log(2);
+    int best_halfway = 0;
+    double current_diff;
+    double smallest_diff = log(2);
+    for(int i = max_entropy; i < energy_levels; i++){
+      current_diff = abs(ln_energy_weights[i] - target_value);
+      if(current_diff < smallest_diff){
+        smallest_diff = current_diff;
+        best_halfway = i;
+        // potential bug anticipated if weights are crazy at i ~ energy_levels
+        // and accidentally come very close to target_value
+        // this is deemed highly unlikely, but is in principle not impossible
+      }
+    }
+    double ss = 2*log(2) / uipow(max_entropy - best_halfway,2);
+    for(int i = 0; i < energy_levels; i++)
+      ln_energy_weights[i] = uipow(i+c,2)/(2*ss);
   }
   took("Initialization");
 
@@ -706,7 +763,8 @@ int main(int argc, const char *argv[]) {
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
     }
-    assert(interactions == count_all_interactions(balls, N, interaction_distance, len, walls));
+    assert(interactions ==
+           count_all_interactions(balls, N, interaction_distance, len, walls));
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
     // ---------------------------------------------------------------
