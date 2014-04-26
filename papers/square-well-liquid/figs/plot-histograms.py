@@ -23,7 +23,7 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
 
-plt.title('Histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version) for version in versions]
 for version in versions:

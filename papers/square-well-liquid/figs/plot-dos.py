@@ -43,7 +43,7 @@ plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$DOS$')
 plt.title('Density of states for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.legend(loc='best')
-plt.tight_layout(pad=0.1)
+plt.tight_layout(pad=0.2)
 if 'show' in sys.argv:
     plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
