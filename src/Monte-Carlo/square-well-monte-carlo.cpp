@@ -465,7 +465,6 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(balls, N, interaction_distance, len, walls);
   double dscale = .1;
   int top, bottom, dE;
-  int max_entropy = 0;
   double df, df_dE, walker_density;
 
   for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
@@ -513,14 +512,14 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Update weights
     // ---------------------------------------------------------------
-    if(!no_weights){
+    if(!(no_weights || gaussian_fit)){
       const int first_weight_update =
         min(energy_levels, initialization_iterations*9/10);
       // don't update until we could at least theoretically have
       // occupied all energy levels.
       if(iteration == first_weight_update){
         // initial guess for energy weights
-        max_entropy = 0;
+        int max_entropy = 0;
         for(int i = 0; i < energy_levels; i++){
           if (energy_histogram[i] > energy_histogram[max_entropy])
             max_entropy = i;
@@ -537,8 +536,8 @@ int main(int argc, const char *argv[]) {
                 && ((iteration-first_weight_update)
                     % int(first_weight_update*uipow(2,weight_updates))) == 0){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
-        if (flat_histogram || gaussian_fit) {
-          max_entropy = 0;
+        if (flat_histogram) {
+          int max_entropy = 0;
           for (int i = 0; i < energy_levels; i++) {
             if (log(energy_histogram[i]) - ln_energy_weights[i]
                 > (log(energy_histogram[max_entropy])
@@ -678,37 +677,33 @@ int main(int argc, const char *argv[]) {
   }
   if(gaussian_fit){
     // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
-    // we want 1/weights (the DoS with a flat energy histogram) to be gaussian
-    // neglecting constant terms, ln_weights[i] = (i-max_entropy)^2/(2s^2)
-    //   s = 2*sqrt(2 ln2)/FWHM
-    // s^2 = 2 ln2 / (FWHM/2)^2
-    // we first need to determine FWHM/2, so we need to find i for which:
-    //       dos[i] = dos[max_entropy] / 2
-    // e^(-ln_w[i]) = e^(-ln_w[max_entropy]) / 2
-    //      ln_w[i] = ln_w[max_entropy] + ln2
-    double target_value = ln_energy_weights[max_entropy] + log(2);
-    int best_halfway = 0;
-    double current_diff;
-    double smallest_diff = log(2);
-    for(int i = max_entropy; i < energy_levels; i++){
-      current_diff = abs(ln_energy_weights[i] - target_value);
+    // neglecting constant terms, ln_weights = (i-max_entropy)^2/(2 s^2)
+    // here the variance s^2 is given by s = 2*sqrt(2 ln2) / FWHM(dos(E))
+    // for FWHM we also need to find i satisfying dos[i] = dos[max_entropy] / 2
+    // note that as we have not used weights, dos = energy_histogram
+    int max_entropy = 0;
+    for(int i = 0; i < energy_levels; i++){
+      if (energy_histogram[i] > energy_histogram[max_entropy])
+        max_entropy = i;
+    }
+    int target_value = energy_histogram[max_entropy] / 2;
+    int smallest_diff = target_value;
+    int current_diff = 0;
+    int best_halfway[2] = {0,0};
+    for(int i = 0; i < energy_levels; i++){
+      if(i == max_entropy) smallest_diff = target_value;
+      current_diff = abs(energy_histogram[i] - target_value);
       if(current_diff < smallest_diff){
         smallest_diff = current_diff;
-        best_halfway = i;
-        // potential bug anticipated if weights are crazy at i ~ energy_levels
-        //       and we accidentally come very close to target_value
-        // this is deemed highly unlikely, but is in principle not impossible
+        best_halfway[i > max_entropy] = i;
       }
     }
-    double ss = 2*log(2) / uipow(max_entropy - best_halfway,2);
-    double mean_lnw = 0;
-    for(int i = 0; i < energy_levels; i++){
-      ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*ss);
-      mean_lnw += ln_energy_weights[i];
-    }
-    mean_lnw /= energy_levels;
-    for(int i = 0; i < energy_levels; i++)
-      ln_energy_weights[i] -= mean_lnw;
+    double s = 2*sqrt(2*log(2))/ (best_halfway[1] - best_halfway[0]);
+    // now set actual energy weights
+    for(int i = max_entropy; i < energy_levels; i++)
+      ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
+    for(int i = 0; i < max_entropy; i++)
+      ln_energy_weights[i] = ln_energy_weights[max_entropy];
   }
   took("Initialization");
 
