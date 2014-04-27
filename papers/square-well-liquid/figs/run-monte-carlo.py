@@ -14,6 +14,8 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 
 version = str(sys.argv[4])
+if "kt" in version.lower():
+    version = version.lower().replace("kt","kT")
 
 cores = 2 if socket.gethostname() == 'MAPHost' else 8
 
@@ -29,15 +31,17 @@ datadir = swdir+'/data/'
 simname = 'square-well-monte-carlo'
 
 # build monte carlo code
-exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname])
+exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname],
+                     stdout=open(os.devnull,"w"),
+                     stderr=open(os.devnull,"w"))
 if exitStatus != 0:
-    print "Build failed"
+    print "scons failed"
     exit(exitStatus)
 
 # write script to run simulation
 memory = N # fixme: better guess
-jobname = 'periodic-ww%02.0f-ff%02.0f-N%i-%s' \
-  % (ww*100, ff*100, N, version)
+jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' \
+  % (ww, ff, N, version)
 basename = "%s/%s" %(jobdir, jobname)
 scriptname = basename + '.sh'
 outname = basename + '.out'
@@ -58,12 +62,14 @@ for (arg,val) in [ ("ww",ww), ("ff",ff), ("N",N),
                    ("initialize",initialize),
                    ("iterations",iterations) ]:
     script.write(" \\\n --%s %s" %(arg,str(val)))
-script.write(" \\\n --%s"%version)
+script.write(" \\\n --%s"%version.replace("kT","kT "))
 script.close()
 
 # start simulation
 if socket.gethostname() == 'MAPHost':
-#    sp.Popen(["bash", scriptname])
-    None
+    sp.Popen(["bash", scriptname],
+             stdout=open(outname,"w"),stderr=open(errname,"w"))
 else:
     sp.Popen(["sbatch", "-J", jobname, scriptname])
+
+print "job %s started" %jobname
