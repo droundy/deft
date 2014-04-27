@@ -203,12 +203,10 @@ int main(int argc, const char *argv[]) {
     printf("You cannot have walls in more than three dimensions.\n");
     return 254;
   }
-
   if(well_width < 1){
     printf("Interaction scale should be greater than (or equal to) 1.\n");
     return 254;
   }
-  if (fix_kT > 0) no_weights = true;
 
   // Adjust cell dimensions for desired filling fraction
   const double fac = R*pow(4.0/3.0*M_PI*N/(ff*len[x]*len[y]*len[z]), 1.0/3.0);
@@ -252,12 +250,16 @@ int main(int argc, const char *argv[]) {
       name_suffix[0] = 0; // set name_suffix to the empty string
     }
     // check that nonsense options do not exist:
-    assert(no_weights || flat_histogram || gaussian_fit || walker_weights);
+    assert(no_weights || flat_histogram || gaussian_fit || walker_weights
+           || fix_kT);
     assert(!(no_weights && flat_histogram));
     assert(!(no_weights && gaussian_fit));
     assert(!(no_weights && walker_weights));
-    assert(!(!no_weights && fix_kT));
+    assert(!(no_weights && fix_kT));
+    assert(!(flat_histogram && gaussian_fit));
+    assert(!(flat_histogram && walker_weights));
     assert(!(flat_histogram && fix_kT));
+    assert(!(gaussian_fit && walker_weights));
     assert(!(gaussian_fit && fix_kT));
     assert(!(walker_weights && fix_kT));
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
@@ -562,9 +564,9 @@ int main(int argc, const char *argv[]) {
             const double walker_density =
               double(walkers_total[i] != 0 ? walkers_total[i] : 1)/moves.total;
             ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
+            for (int i = 0; i < energy_levels; i++)
+              walkers_total[i] = 0;
           }
-          for (int i = 0; i < energy_levels; i++)
-            walkers_total[i] = 0;
 
           // -----------------------------------------------------------------
           // ----------------------------- TESTING ---------------------------
