@@ -324,7 +324,7 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-g.dat" % (ww, ff, N, method)],
                             source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --N %d --initialize 100000 --ff %g --ww %g --iterations 100000 --%s' % (N, ff, ww, method))
+                            action = './square-well-monte-carlo --N %d --initialize 10000 --ff %g --ww %g --iterations 10000 --%s' % (N, ff, ww, method))
             for kT in [i*.1 for i in range(1,10)] + range(1,10):
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-E.dat" % (ww, ff, N, kT),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-kT%g-lnw.dat" % (ww, ff, N, kT),

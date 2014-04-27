@@ -526,9 +526,8 @@ int main(int argc, const char *argv[]) {
           ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
                                       energy_histogram[i] : 0.01);
         }
-        for(int i = 0; i <= max_entropy; i++){
+        for(int i = 0; i <= max_entropy; i++)
           ln_energy_weights[i] = ln_energy_weights[max_entropy];
-        }
         weight_updates++;
       } else if(iteration >= first_weight_update
                 && ((iteration-first_weight_update)
@@ -617,8 +616,8 @@ int main(int argc, const char *argv[]) {
           // -------------------------------------------------------------------
           // ----------------------------- TESTING -----------------------------
           // -------------------------------------------------------------------
+          weight_updates++;
         }
-        weight_updates++;
       }
     }
     // ---------------------------------------------------------------
