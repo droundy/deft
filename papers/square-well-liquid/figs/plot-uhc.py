@@ -22,11 +22,11 @@ N = float(sys.argv[3])
 #arg N = [200]
 
 versions = eval(sys.argv[4])
-#arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
+#arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
-max_hc = 3 # upper axis limit when plotting heat capacity
+max_hc = 2 # upper axis limit when plotting heat capacity
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
 # FIXME: make these inputs?
 kTmin = 0
@@ -68,9 +68,9 @@ plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww
 
 for version in versions:
     e_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version), ndmin=2)
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version), ndmin=2)
     lnw_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-lnw.dat" % (ww, ff, N, version), ndmin=2)
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version), ndmin=2)
 
     plt.figure('u')
     plt.plot(kT_range,u(kT_range,e_hist,lnw_hist),

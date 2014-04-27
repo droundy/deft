@@ -166,7 +166,7 @@ int main(int argc, const char *argv[]) {
      "Use a flat histogram method", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
-    {"walker", '\0', POPT_ARG_NONE, &walker_weights, 0,
+    {"walkers", '\0', POPT_ARG_NONE, &walker_weights, 0,
      "Use a walker optimization weight histogram method", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
@@ -247,7 +247,7 @@ int main(int argc, const char *argv[]) {
     } else if (gaussian_fit) {
       sprintf(name_suffix, "-gaussian");
     } else if (walker_weights) {
-      sprintf(name_suffix, "-walker");
+      sprintf(name_suffix, "-walkers");
     } else {
       name_suffix[0] = 0; // set name_suffix to the empty string
     }
@@ -464,8 +464,6 @@ int main(int argc, const char *argv[]) {
   int interactions =
     count_all_interactions(balls, N, interaction_distance, len, walls);
   double dscale = .1;
-  int top, bottom, dE;
-  double df, df_dE, walker_density;
 
   for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
     // ---------------------------------------------------------------
@@ -561,83 +559,66 @@ int main(int argc, const char *argv[]) {
             const int dE = bottom-top; // interactions and energy are opposites
             const double df = double(walkers_plus[top]) / walkers_total[top]
               - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-            const double df_dE = (isnan(df) ? 1 : df/dE);
-            const double walker_density = (walkers_total[i] != 0 ?
-                                           walkers_total[i] : 0.01)/moves.total;
-            ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
+            const double df_dE = (df == 0 || isnan(df)) ? 1: df/dE;
+            const double walker_density =
+              double(walkers_total[i] != 0 ? walkers_total[i] : 1)/moves.total;
+            ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
           }
           for (int i = 0; i < energy_levels; i++)
             walkers_total[i] = 0;
+
+          // -----------------------------------------------------------------
+          // ----------------------------- TESTING ---------------------------
+          // ---- print weight histogram to test shape and/or convergence ----
+          // -----------------------------------------------------------------
+          if(test_weights){
+            char *w_headerinfo = new char[4096];
+            sprintf(w_headerinfo,
+                    "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
+                    " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
+                    " well_width: %g, translation_distance: %g\n"
+                    "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
+                    " energy_levels: %i\n",
+                    len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
+                    well_width, translation_distance, initialization_iterations,
+                    neighbor_scale, dr, energy_levels);
+
+            char *w_countinfo = new char[4096];
+            sprintf(w_countinfo,
+                    "# iteration: %li, working moves: %li, total moves: %li, "
+                    "acceptance rate: %g\n",
+                    iteration, moves.working, moves.total,
+                    double(moves.working)/moves.total);
+
+            const char *w_testdir = "weights";
+
+            char *w_test_fname = new char[1024];
+            mkdir(dir, 0777); // create save directory
+            sprintf(w_test_fname, "%s/%s",
+                    dir, w_testdir);
+            mkdir(w_test_fname, 0777); // create weights directory
+            sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
+                    dir, w_testdir, filename, weight_updates);
+            FILE *w_out = fopen(w_test_fname, "w");
+            if (!w_out) {
+              fprintf(stderr, "Unable to create %s!\n", w_test_fname);
+              exit(1);
+            }
+            delete[] w_test_fname;
+            fprintf(w_out, "%s", w_headerinfo);
+            delete[] w_headerinfo;
+            fprintf(w_out, "%s", w_countinfo);
+            delete[] w_countinfo;
+            fprintf(w_out, "\n# interactions   value\n");
+            for(int i = 0; i < energy_levels; i++)
+              fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
+            fclose(w_out);
+          }
+          // -------------------------------------------------------------------
+          // ----------------------------- TESTING -----------------------------
+          // -------------------------------------------------------------------
         }
         weight_updates++;
-
-        // -----------------------------------------------------------------
-        // ----------------------------- TESTING ---------------------------
-        // ---- print weight histogram to test shape and/or convergence ----
-        // -----------------------------------------------------------------
-        if(test_weights){
-          char *w_headerinfo = new char[4096];
-          sprintf(w_headerinfo,
-                  "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
-                  " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-                  " well_width: %g, translation_distance: %g\n"
-                  "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
-                  " energy_levels: %i\n",
-                  len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
-                  well_width, translation_distance, initialization_iterations,
-                  neighbor_scale, dr, energy_levels);
-
-          char *w_countinfo = new char[4096];
-          sprintf(w_countinfo,
-                  "# iteration: %li, working moves: %li, total moves: %li, "
-                  "acceptance rate: %g\n",
-                  iteration, moves.working, moves.total,
-                  double(moves.working)/moves.total);
-
-          const char *w_testdir = "weights";
-
-          char *w_test_fname = new char[1024];
-          mkdir(dir, 0777); // create save directory
-          sprintf(w_test_fname, "%s/%s",
-                  dir, w_testdir);
-          mkdir(w_test_fname, 0777); // create weights directory
-          sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
-                  dir, w_testdir, filename, weight_updates);
-          FILE *w_out = fopen(w_test_fname, "w");
-          if (!w_out) {
-            fprintf(stderr, "Unable to create %s!\n", w_test_fname);
-            exit(1);
-          }
-          delete[] w_test_fname;
-          fprintf(w_out, "%s", w_headerinfo);
-          delete[] w_headerinfo;
-          fprintf(w_out, "%s", w_countinfo);
-          delete[] w_countinfo;
-          fprintf(w_out, "\n# interactions   value\n");
-          for(int i = 0; i < energy_levels; i++)
-            fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
-          fclose(w_out);
-        }
-        // -------------------------------------------------------------------
-        // ----------------------------- TESTING -----------------------------
-        // -------------------------------------------------------------------
-
-        if (walker_weights) {
-          for(int i = 0; i < energy_levels; i++){
-            top = i < energy_levels-1 ? i+1 : i;
-            bottom = i > 0 ? i-1 : i;
-            dE = bottom-top; // interactions and energy are negatives of each other
-            df = double(walkers_plus[top]) / walkers_total[top]
-              - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-            df_dE = (isnan(df) ? 1 : df/dE);
-            walker_density = (walkers_total[i] != 0 ?
-                              walkers_total[i] : 0.01) / moves.total;
-            ln_energy_weights[i] = 0.5*(log(df_dE) - log(walker_density));
-          }
-        }
-        weight_updates++;
-        for(int i = 0; i < energy_levels; i++)
-          walkers_total[i] = 0;
       }
     }
     // ---------------------------------------------------------------
@@ -704,63 +685,6 @@ int main(int argc, const char *argv[]) {
       ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
     for(int i = 0; i < max_entropy; i++)
       ln_energy_weights[i] = ln_energy_weights[max_entropy];
-
-    // -------------------------------------------------------------------
-    // ----------------------------- TESTING -----------------------------
-    // -------------------------------------------------------------------
-    /*
-    printf("\nmax_entropy: %i\n\n",max_entropy);
-    printf("eh: %i,%li\n",best_halfway[0],energy_histogram[best_halfway[0]]);
-    printf("eh: %i,%li\n",max_entropy,energy_histogram[max_entropy]);
-    printf("eh: %i,%li\n",best_halfway[1],energy_histogram[best_halfway[1]]);
-
-    printf("\nFWHM: %i\n",best_halfway[1]-best_halfway[0]);
-
-
-    char *e_fname = new char[1024];
-    sprintf(e_fname, "%s/%s-E.dat", dir, filename);
-
-    char *w_fname = new char[1024];
-    sprintf(w_fname, "%s/%s-lnw.dat", dir, filename);
-
-    // Save energy histogram
-    FILE *e_out = fopen((const char *)e_fname, "w");
-    fprintf(e_out, "\n# interactions   counts\n");
-    for(int i = max_entropy; i < energy_levels; i++)
-      if(energy_histogram[i] != 0)
-        fprintf(e_out, "%i  %ld\n",i,energy_histogram[i]);
-    fclose(e_out);
-
-    // Save weights histogram
-    FILE *w_out = fopen((const char *)w_fname, "w");
-    fprintf(w_out, "\n# interactions   ln(weight)\n");
-    for(int i = max_entropy; i < energy_levels; i++)
-      if(energy_histogram[i] != 0)
-        fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]);
-    fclose(w_out);
-
-
-    const char *w_testdir = "weights";
-    char *w_test_fname = new char[1024];
-    mkdir(dir, 0777); // create save directory
-    sprintf(w_test_fname, "%s/%s",
-            dir, w_testdir);
-    mkdir(w_test_fname, 0777); // create weights directory
-    sprintf(w_test_fname, "%s/%s/%s.dat", dir, w_testdir, filename);
-    FILE *wdos_out = fopen(w_test_fname, "w");
-    fprintf(wdos_out, "\n# interactions   value\n");
-    for(int i = max_entropy; i < energy_levels; i++)
-      fprintf(wdos_out, "%i  %g\n", i,
-              energy_histogram[max_entropy]*exp(-ln_energy_weights[i]));
-    fclose(wdos_out);
-
-
-    return 0;
-    */
-    // -------------------------------------------------------------------
-    // ----------------------------- TESTING -----------------------------
-    // -------------------------------------------------------------------
-
   }
   took("Initialization");
 

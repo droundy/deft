@@ -21,14 +21,14 @@ N = int(sys.argv[3])
 #arg N = [200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
+#arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
 plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
 for version in versions:
     data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
     DS = data[:,1]
     DS /= sum(DS)

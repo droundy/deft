@@ -21,17 +21,17 @@ N = int(sys.argv[3])
 #arg N = [200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["-nw", "-flat", "-gaussian", "-kT2", "-kT1", "-kT0.1"]]
+#arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
 cutoff = 1e-100 # cutoff for plotting data
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
 for version in versions:
     e_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-E.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     lnw_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i%s-lnw.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
     energy = -e_hist[:,0]/N
     lnw_mean = lnw_hist[:,1].mean()
     dos = e_hist[:,1]*numpy.exp(-(lnw_hist[:,1] - lnw_mean))
