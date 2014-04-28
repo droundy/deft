@@ -58,6 +58,7 @@ def u(kT_array,e_hist,lnw_hist):
 
 # specific heat capacity as a function of kT
 def cv(e_hist,lnw_hist):
+    # FIXME: it'd be nice to use an analytic derivative here
     return (u(kT_range+dkT/2,e_hist,lnw_hist)
             - u(kT_range-dkT/2,e_hist,lnw_hist)) / dkT
 
