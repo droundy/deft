@@ -51,8 +51,9 @@ def u(kT_array,e_hist,lnw_hist):
     dos = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
     u_out = numpy.zeros(len(kT_array))
     for i in range(len(u_out)):
-        u_out[i] = sum(energy*dos*numpy.exp(-(energy-min(energy))/kT_array[i])) \
-          / sum(dos*numpy.exp(-(energy-min(energy))/kT_array[i]))
+        lnboltz = numpy.log(e_hist[:,1]) - lnw_hist[:,1] - energy/kT_array[i]
+        lnboltzmax = lnboltz.max()
+        u_out[i] = sum(energy*numpy.exp(lnboltz - lnboltzmax))/sum(numpy.exp(lnboltz - lnboltzmax))
     return u_out/N
 
 # specific heat capacity as a function of kT
