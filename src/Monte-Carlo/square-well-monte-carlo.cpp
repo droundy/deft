@@ -567,59 +567,58 @@ int main(int argc, const char *argv[]) {
             for (int i = 0; i < energy_levels; i++)
               walkers_total[i] = 0;
           }
-
-          // -----------------------------------------------------------------
-          // ----------------------------- TESTING ---------------------------
-          // ---- print weight histogram to test shape and/or convergence ----
-          // -----------------------------------------------------------------
-          if(test_weights){
-            char *w_headerinfo = new char[4096];
-            sprintf(w_headerinfo,
-                    "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
-                    " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-                    " well_width: %g, translation_distance: %g\n"
-                    "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
-                    " energy_levels: %i\n",
-                    len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
-                    well_width, translation_distance, initialization_iterations,
-                    neighbor_scale, dr, energy_levels);
-
-            char *w_countinfo = new char[4096];
-            sprintf(w_countinfo,
-                    "# iteration: %li, working moves: %li, total moves: %li, "
-                    "acceptance rate: %g\n",
-                    iteration, moves.working, moves.total,
-                    double(moves.working)/moves.total);
-
-            const char *w_testdir = "weights";
-
-            char *w_test_fname = new char[1024];
-            mkdir(dir, 0777); // create save directory
-            sprintf(w_test_fname, "%s/%s",
-                    dir, w_testdir);
-            mkdir(w_test_fname, 0777); // create weights directory
-            sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
-                    dir, w_testdir, filename, weight_updates);
-            FILE *w_out = fopen(w_test_fname, "w");
-            if (!w_out) {
-              fprintf(stderr, "Unable to create %s!\n", w_test_fname);
-              exit(1);
-            }
-            delete[] w_test_fname;
-            fprintf(w_out, "%s", w_headerinfo);
-            delete[] w_headerinfo;
-            fprintf(w_out, "%s", w_countinfo);
-            delete[] w_countinfo;
-            fprintf(w_out, "\n# interactions   value\n");
-            for(int i = 0; i < energy_levels; i++)
-              fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
-            fclose(w_out);
-          }
-          // -------------------------------------------------------------------
-          // ----------------------------- TESTING -----------------------------
-          // -------------------------------------------------------------------
-          weight_updates++;
         }
+        // -----------------------------------------------------------------
+        // ----------------------------- TESTING ---------------------------
+        // ---- print weight histogram to test shape and/or convergence ----
+        // -----------------------------------------------------------------
+        if(test_weights){
+          char *w_headerinfo = new char[4096];
+          sprintf(w_headerinfo,
+                  "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
+                  " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
+                  " well_width: %g, translation_distance: %g\n"
+                  "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
+                  " energy_levels: %i\n",
+                  len[0], len[1], len[2], walls, de_density, de_g, seed, N, R,
+                  well_width, translation_distance, initialization_iterations,
+                  neighbor_scale, dr, energy_levels);
+
+          char *w_countinfo = new char[4096];
+          sprintf(w_countinfo,
+                  "# iteration: %li, working moves: %li, total moves: %li, "
+                  "acceptance rate: %g\n",
+                  iteration, moves.working, moves.total,
+                  double(moves.working)/moves.total);
+
+          const char *w_testdir = "weights";
+
+          char *w_test_fname = new char[1024];
+          mkdir(dir, 0777); // create save directory
+          sprintf(w_test_fname, "%s/%s",
+                  dir, w_testdir);
+          mkdir(w_test_fname, 0777); // create weights directory
+          sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
+                  dir, w_testdir, filename, weight_updates);
+          FILE *w_out = fopen(w_test_fname, "w");
+          if (!w_out) {
+            fprintf(stderr, "Unable to create %s!\n", w_test_fname);
+            exit(1);
+          }
+          delete[] w_test_fname;
+          fprintf(w_out, "%s", w_headerinfo);
+          delete[] w_headerinfo;
+          fprintf(w_out, "%s", w_countinfo);
+          delete[] w_countinfo;
+          fprintf(w_out, "\n# interactions   value\n");
+          for(int i = 0; i < energy_levels; i++)
+            fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
+          fclose(w_out);
+        }
+        // -------------------------------------------------------------------
+        // ----------------------------- TESTING -----------------------------
+        // -------------------------------------------------------------------
+        weight_updates++;
       }
     }
     // ---------------------------------------------------------------
