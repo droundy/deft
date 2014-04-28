@@ -31,7 +31,6 @@ for version in versions:
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
     DS = data[:,1]
-    DS /= sum(DS)
     plt.semilogy(energy,DS, styles.dots[version], label=styles.title[version])
 
 plt.xlabel('$E/N\epsilon$')
