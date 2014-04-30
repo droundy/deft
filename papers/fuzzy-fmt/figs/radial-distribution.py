@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
     exit(1)
 
 ff = float(sys.argv[1])
-#arg ff = [10, 20, 30, 40, 50, 60, 70, 80]
+#arg ff = [10, 20, 30, 40, 50, 60]
 
 #Constants and variables
 #k_b = 8.6173324*10**(-5) # in eV
@@ -38,26 +38,26 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 
 density = (ff/100)/(4*pi/3)
 phs = density*(1+(ff/100)+(ff/100)**2)/(1-(ff/100))**3
-for temp in [0.1, 0.01, 0.001, 0.0001]:
+for temp in [0.1, 0.01, 0.001]:#, 0.0001]:
   # input: 'figs/mc-0.%02d00-*.dat.gradial' % (ff)
   fname = 'figs/mc-0.%02d00-%.4f.dat.gradial' % (ff, temp)
   if os.path.exists(fname):
     print 'found', fname
     g = loadtxt(fname)
-    plot(g[:,0], g[:,1], styles.mc[temp], label='T = %g' % temp)
+    plot(g[:,0], g[:,1], styles.mc[temp], label='$kT/V_{max}$ = %g' % temp)
     #xlim(xmax=floor(max(g[:,0])))
     xlim(xmax=8)
   else:
     print 'could not find', fname
 
-for temp in [0.1, 0.01, 0.001, 0.0001]:
+for temp in [0.1, 0.01, 0.001]:#, 0.0001]:
   # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0) for temp in [0.1, 0.01, 0.001, 0.0001]]
   fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0)
   data = loadtxt(fname)
   r = data[:,0]
   nff = data[:,1]
   g = nff/(ff/100.0)
-  plot(r, g, styles.coarsedft[temp], label='theory T = %g' % temp)
+  plot(r, g, styles.coarsedft[temp], label='theory $kT/V_{max}$ = %g' % temp)
   #xlim(xmax=floor(max(g[:,0])))
 
 title('Radial distribution function at packing fraction %g' % (ff/100))

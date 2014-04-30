@@ -19,22 +19,25 @@
 \begin{frame}{Motivation}
   \begin{itemize}
     \item Want a theory that can deal with an inhomogeneous liquid
-    \item The hard-sphere fluid is well studied and understood
+      \begin{block}{Classical density functional theory (cDFT)}
+        \begin{align}
+          \Omega(T) = \underset{n(\rr)}{min} \left\{F[n(\rr),T] + \int
+          \left(V_{ext}(\rr) - \mu \right)n(\rr)d\rr \right\}
+        \end{align}
+        \begin{itemize}
+        \item $n(\rr)$ can be an inhomogeneous particle density
+        \end{itemize}
+      \end{block}
     \item Hard spheres are used as a reference for real liquids
+      \begin{itemize}
+        \item Thermodynamic Perturbation Theory (TPT)
+      \end{itemize}
+    \item The hard-sphere fluid is well studied and understood
       \begin{itemize}
         \item Hard spheres are not very physical
         \item Computationally difficult (deta and step functions)
       \end{itemize}
   \end{itemize}
-  \begin{block}{Classical density functional theory (cDFT)}
-    \begin{align}
-    \Omega(T) = \underset{n(\rr)}{min} \left\{F[n(\rr),T] + \int
-                \left(V_{ext}(\rr) - \mu \right)n(\rr)d\rr \right\}
-    \end{align}
-    \begin{itemize}
-      \item $n(\rr)$ can be an inhomogeneous particle density
-    \end{itemize}
-  \end{block}
 \end{frame}
 
 \begin{frame}{Fundamental measure theory (FMT)}
@@ -68,37 +71,31 @@
 \begin{frame}{Soft fundamental measure theory}
   \begin{itemize}
     \item A modification of FMT to treat penetrating spheres
-    \item Weight functions are modified to be determined by the Mayer
-      Function
-    \item Reduces to hard spheres as $T \to 0$
-      \begin{align}
-        \int_{-\infty}^{\infty}w_2(r')w_2(r - r') dr' = \frac{\partial f(r)}{\partial r}
-      \end{align}
-      \begin{block}{Mayer Function}
+    \item Modified Weight functions are determined by Mayer function
+      \begin{block}{Mayer function}
         \begin{center}
           $f(r) = e^{-\beta V(r)} - 1$ \\
         \end{center}
       \end{block}
+    \item Reduces to hard spheres as $T \to 0$
+      \begin{align}
+        \int_{-\infty}^{\infty}w_2(r')w_2(r - r') dr' = \frac{\partial f(r)}{\partial r}
+      \end{align}
     \item If $w_2$ is known, all weight functions, $w_{\alpha}$'s, can
       be derived
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Choosing a $w_2(\rr)$}
+\begin{frame}{Choosing a Potential}
  \begin{itemize}
    \item Want spheres to overlap slightly at ambient temperatures
    \item We use a harmonic potential for $r < 2R$
      \begin{center}
        \includegraphics[trim = 0 0 0 20, clip, scale = 0.40]{figs/harmonic}
      \end{center}
-   \item However, we could not find a simple analytic solution for $w_2(\rr)$
+   \item However, we could not find an analytic solution for $w_2(\rr)$
+   \item Approximated solution for low density and temperature
  \end{itemize}
-\end{frame}
-
-\begin{frame}{Error function method}
-  \begin{itemize}
-    \item Necessary to discuss this?
-  \end{itemize}
 \end{frame}
 
 \begin{frame}{The homogeneous fluid}
@@ -113,26 +110,27 @@
   \end{center}
 \end{frame}
 
-\begin{frame}{Radial distribution}
+\begin{frame}{Radial distribution: theory vs. MC}
   \begin{itemize}
-    \item Compare radial distribution of homogeneous fluid with MC
-      simulation
-      \item Good agreement, especially in our range of interest
+  \item Good agreement, especially in our range of interest
   \end{itemize}
   \begin{center}
-    \includegraphics[trim = 35 17 35 25, clip, scale = .32]{figs/radial-distribution-10}
-    \includegraphics[trim = 35 17 -1000 25 , clip, scale = .32]{figs/radial-distribution-30}
+    \includegraphics[trim = 35 14 35 25, clip, scale = .32]{figs/radial-distribution-30}
+    \includegraphics[trim = 35 14 35 25 , clip, scale = .32]{figs/radial-distribution-50}
   \end{center}
 \end{frame}
 
 \begin{frame}{Soft-sphere fluid near a hard wall}
-  \begin{itemize}
-    \item We compare filling fraction near a hard wall against MC simulation
-    \item Again we find good agreement.
-  \end{itemize}
   \begin{center}
-    \includegraphics[trim = 0 13 0 25, clip, scale = .40]{figs/walls-30}
+    \includegraphics[trim = 0 13 0 25, clip, scale = .45]{figs/walls-30}
   \end{center}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item Successfully modeled soft-spheres in area of interest
+    \item Need to apply to a real liquid functional: water
+  \end{itemize}
 \end{frame}
 
 \end{document}

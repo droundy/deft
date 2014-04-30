@@ -17,5 +17,5 @@ mc = {}
 for k in color:
     newdft[k] = color[k] + ':'
     dft[k] = color[k] + '--'
-    coarsedft[k] = color[k] + '.--'
-    mc[k] = color[k] + '-'
+    coarsedft[k] = color[k] + '-'
+    mc[k] = color[k] + '.--'
