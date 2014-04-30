@@ -237,7 +237,7 @@ for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
                      Glob('papers/' + paper + '/figs/*.tex'))
     Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.pdf')
     Depends('papers/' + paper + '/arxiv.tar.gz', 'papers/' + paper + '/paper.bbl')
-    Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
+    #Alias('papers', 'papers/' + paper + '/arxiv.tar.gz')
 Default('papers')
 
 Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
