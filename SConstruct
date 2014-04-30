@@ -242,6 +242,7 @@ Default('papers')
 
 Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
 Alias('papers', env.PDF('papers/thesis-roth/project.tex'))
+Alias('papers', env.PDF('papers/fuzzy-fmt/NWAPS-2014.tex'))
 Alias('papers', env.PDF('papers/pair-correlation/notes.tex'))
 Alias('papers', env.PDF('papers/pair-correlation/figs/ghs-analytics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
