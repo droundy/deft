@@ -50,8 +50,8 @@ for temp in [0.1, 0.01, 0.001, 0.0001]:
   else:
     print 'could not find', fname
 
-for temp in [0.1, 0.01]:
-  # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0) for temp in [0.1, 0.01]]
+for temp in [0.1, 0.01, 0.001, 0.0001]:
+  # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0) for temp in [0.1, 0.01, 0.001, 0.0001]]
   fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0)
   data = loadtxt(fname)
   r = data[:,0]
