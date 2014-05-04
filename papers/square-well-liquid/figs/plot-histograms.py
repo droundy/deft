@@ -23,9 +23,10 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
+
 plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
 for version in versions:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
@@ -37,7 +38,7 @@ plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$D$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
+
 if 'show' in sys.argv:
     plt.show()
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
-plt.close()

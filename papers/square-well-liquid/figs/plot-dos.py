@@ -23,9 +23,9 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
-cutoff = 1e-100 # cutoff for plotting data
-
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
+
+cutoff = 1e-100 # cutoff for plotting data
 
 for version in versions:
     e_hist = numpy.loadtxt(
@@ -44,7 +44,7 @@ plt.ylabel('$DOS$')
 plt.title('Density of states for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
+
 if 'show' in sys.argv:
     plt.show()
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
-plt.close()

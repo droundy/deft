@@ -24,14 +24,15 @@ N = float(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
 
-max_hc = 2 # upper axis limit when plotting heat capacity
-
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
+
+# FIXME: it would be better not to have this
+max_hc = 50 # upper axis limit when plotting heat capacity
 
 # FIXME: make these inputs?
 kTmin = 0
 kTmax = 10
-dkT = float(kTmax-kTmin) / 1000
+dkT = float(kTmax-kTmin) * 1e-3
 kT_range = numpy.arange(kTmin+dkT,kTmax,dkT)
 
 # make figure with axes labeled using scientific notation
@@ -45,23 +46,6 @@ def sci_fig(handle):
     ax.xaxis.set_major_formatter(fmt)
     return fig, ax
 
-# specific internal energy as a function of kT
-def u(kT_array,e_hist,lnw_hist):
-    energy = -e_hist[:,0]
-    dos = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
-    u_out = numpy.zeros(len(kT_array))
-    for i in range(len(u_out)):
-        lnboltz = numpy.log(e_hist[:,1]) - lnw_hist[:,1] - energy/kT_array[i]
-        lnboltzmax = lnboltz.max()
-        u_out[i] = sum(energy*numpy.exp(lnboltz - lnboltzmax))/sum(numpy.exp(lnboltz - lnboltzmax))
-    return u_out/N
-
-# specific heat capacity as a function of kT
-def cv(e_hist,lnw_hist):
-    # FIXME: it'd be nice to use an analytic derivative here
-    return (u(kT_range+dkT/2,e_hist,lnw_hist)
-            - u(kT_range-dkT/2,e_hist,lnw_hist)) / dkT
-
 fig_u, ax_u = sci_fig('u')
 plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
@@ -69,35 +53,49 @@ fig_hc, ax_hc = sci_fig('hc')
 plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 for version in versions:
+    # energy histogram file; indexed by [-energy,counts]
     e_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version), ndmin=2)
+    # weight histogram file; indexed by [-energy,ln(weight)]
     lnw_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version), ndmin=2)
 
+    energy = -e_hist[:,0] # array of energies
+
+    # log of DoS(E)*exp(E/kT); indexed by [energy,temperature]
+    ln_dos_boltz = numpy.zeros((len(e_hist),len(kT_range)))
+    for i in range(len(e_hist)):
+        ln_dos_boltz[i,:] = numpy.log(e_hist[i,1]) - lnw_hist[i,1] - energy[i]/kT_range
+
+    Z = numpy.zeros(len(kT_range)) # partition function
+    U = numpy.zeros(len(kT_range)) # internal energy
+    CV = numpy.zeros(len(kT_range)) # heat capacity
+    for i in range(len(kT_range)):
+        dos_boltz = numpy.exp(ln_dos_boltz[:,i] - ln_dos_boltz[:,i].max())
+        Z[i] = sum(dos_boltz)
+        U[i] = sum(energy*dos_boltz)/Z[i]
+        CV[i] = sum((energy/kT_range[i])**2*dos_boltz)/Z[i] - \
+          (sum(energy/kT_range[i]*dos_boltz)/Z[i])**2
+
     plt.figure('u')
-    plt.plot(kT_range,u(kT_range,e_hist,lnw_hist),
-             styles.plot[version],label=styles.title[version])
+    plt.plot(kT_range,U/N,styles.plot[version],label=styles.title[version])
 
     plt.figure('hc')
-    plt.plot(kT_range,cv(e_hist,lnw_hist),styles.plot[version],label=styles.title[version])
+    plt.plot(kT_range,CV/N,styles.plot[version],label=styles.title[version])
 
 plt.figure('u')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
-if 'show' in sys.argv:
-    plt.show()
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
-plt.close()
 
 plt.figure('hc')
-plt.ylim(0,max_hc)
+plt.ylim(0,max_hc/N)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
+
 if 'show' in sys.argv:
     plt.show()
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
-plt.close()
