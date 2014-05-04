@@ -531,43 +531,43 @@ int main(int argc, const char *argv[]) {
         for(int i = 0; i <= max_entropy; i++)
           ln_energy_weights[i] = ln_energy_weights[max_entropy];
         weight_updates++;
-      } else if(iteration >= first_weight_update
+      } else if((iteration >= first_weight_update)
+                && (flat_histogram || walker_weights)
                 && ((iteration-first_weight_update)
-                    % int(first_weight_update*uipow(2,weight_updates))) == 0){
+                    % int(first_weight_update*uipow(2,weight_updates)) == 0)){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
-        if (flat_histogram) {
-          int max_entropy = 0;
-          for (int i = 0; i < energy_levels; i++) {
-            if (log(energy_histogram[i]) - ln_energy_weights[i]
-                > (log(energy_histogram[max_entropy])
-                   - ln_energy_weights[max_entropy])) {
-              max_entropy = i;
-            }
+        int max_entropy = 0;
+        for (int i = 0; i < energy_levels; i++) {
+          if (log(energy_histogram[i]) - ln_energy_weights[i]
+              > (log(energy_histogram[max_entropy])
+                 - ln_energy_weights[max_entropy])) {
+            max_entropy = i;
           }
+        }
+        if (flat_histogram) {
           for (int i = max_entropy; i < energy_levels; i++) {
             ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
                                         energy_histogram[i] : 0.01);
-            energy_histogram[i] = 0;
-          }
-          for (int i = 0; i < max_entropy; i++) {
-            ln_energy_weights[i] = ln_energy_weights[max_entropy];
-            energy_histogram[i] = 0;
           }
         } else if(walker_weights) {
-          for(int i = 0; i < energy_levels; i++){
+          for(int i = max_entropy; i < energy_levels; i++){
             const int top = i < energy_levels-1 ? i+1 : i;
             const int bottom = i > 0 ? i-1 : i;
-            const int dE = bottom-top; // interactions and energy are opposites
+            const int dE = bottom-top; // energy = -interactions
             const double df = double(walkers_plus[top]) / walkers_total[top]
               - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-            const double df_dE = (df == 0 || isnan(df)) ? 1: df/dE;
+            const double df_dE = (df != 0 && !isnan(df)) ? df/dE : 1;
             const double walker_density =
-              double(walkers_total[i] != 0 ? walkers_total[i] : 1)/moves.total;
+              double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
             ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
-            for (int i = 0; i < energy_levels; i++)
-              walkers_total[i] = 0;
           }
+          for (int i = 0; i < energy_levels; i++)
+            walkers_total[i] = 0;
         }
+        for (int i = 0; i < max_entropy; i++)
+          ln_energy_weights[i] = ln_energy_weights[max_entropy];
+        for (int i = 0; i < energy_levels; i++)
+          energy_histogram[i] = 0;
         // -----------------------------------------------------------------
         // ----------------------------- TESTING ---------------------------
         // ---- print weight histogram to test shape and/or convergence ----

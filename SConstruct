@@ -320,12 +320,7 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.3, 1.5, 2.0, 3.0]:
         for N in [200]:
-            env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N),
-                                  datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-lnw.dat" % (ww, ff, N),
-                                  datadir+"periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat" % (ww, ff, N)],
-                        source = 'square-well-monte-carlo',
-                        action = './square-well-monte-carlo --N %d --initialize 10000 --ff %g --ww %g --iterations 100000 --nw' % (N, ff, ww))
-            for method in ["flat","gaussian","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
+            for method in ["nw","flat","gaussian","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method.replace(' ','')),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method.replace(' ','')),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-g.dat" % (ww, ff, N, method.replace(' ',''))],
