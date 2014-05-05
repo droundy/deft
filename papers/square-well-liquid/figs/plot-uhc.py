@@ -96,6 +96,7 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
 if 'show' in sys.argv:
     plt.show()
