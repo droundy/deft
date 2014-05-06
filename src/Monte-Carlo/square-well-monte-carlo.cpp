@@ -80,13 +80,13 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // NOTE: debug can slow things down VERY much
-  bool debug = false;
-  bool test_weights = false;
+  int debug = false;
+  int test_weights = false;
 
-  bool no_weights = false;
-  bool flat_histogram = false;
-  bool gaussian_fit = false;
-  bool walker_weights = false;
+  int no_weights = false;
+  int flat_histogram = false;
+  int gaussian_fit = false;
+  int walker_weights = false;
   double fix_kT = 0;
 
   double len[3] = {1, 1, 1};
@@ -106,9 +106,10 @@ int main(int argc, const char *argv[]) {
   double well_width = 1.3;
   double ff = 0.3;
   double neighbor_scale = 2;
-  double dr = 0.01;
-  double de_density = 0.01;
-  double de_g = 0.01;
+  double dr = 0.1;
+  double de_density = 0.1;
+  double de_g = 0.1;
+  double max_rdf_radius = 10;
   int totime = 0;
   // scale is not a quite "constant" -- it is adjusted during the initialization
   //  so that we have a reasonable acceptance rate
@@ -138,6 +139,8 @@ int main(int argc, const char *argv[]) {
      "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
+    {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &max_rdf_radius, 0, "Set maximum radius for RDF data collection", "DOUBLE"},
     {"lenx", '\0', POPT_ARG_DOUBLE, &len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &len[y], 0,
@@ -317,7 +320,8 @@ int main(int argc, const char *argv[]) {
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[energy_levels]();
-  const int g_bins = round(min(len[x],min(len[y],len[z])) / de_g / 2);
+  const int g_bins = round(min(min(min(len[y],len[z]),len[x]),max_rdf_radius)
+                           / de_g / 2);
   long **g_histogram = new long*[energy_levels];
   for(int i = 0; i < energy_levels; i++)
     g_histogram[i] = new long[g_bins]();
@@ -411,6 +415,7 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
+  delete[] offset;
   delete[] spot_reserved;
   took("Placement");
 

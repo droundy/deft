@@ -27,7 +27,7 @@ versions = eval(sys.argv[4])
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
 # FIXME: it would be better not to have this
-max_hc = 50 # upper axis limit when plotting heat capacity
+max_hc = 1 # upper axis limit when plotting heat capacity
 
 # FIXME: make these inputs?
 kTmin = 0
@@ -91,7 +91,7 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc')
-plt.ylim(0,max_hc/N)
+plt.ylim(0,max_hc)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
