@@ -1,5 +1,4 @@
 #!/usr/bin/python2
-
 import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
@@ -25,7 +24,9 @@ versions = eval(sys.argv[4])
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
-cutoff = 1e-100 # cutoff for plotting data
+cutoff = 1e-100 # cutoff DoS value for plotting data
+min_lnw_hist = -numpy.log(sys.float_info.max) + 20 # prevent overflows
+# FIXME: + 20 is a "good enough" hack
 
 for version in versions:
     e_hist = numpy.loadtxt(
@@ -33,14 +34,16 @@ for version in versions:
     lnw_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
     energy = -e_hist[:,0]/N
-    lnw_mean = lnw_hist[:,1].mean()
-    dos = e_hist[:,1]*numpy.exp(-(lnw_hist[:,1] - lnw_mean))
+    lnw_hist[:,1] -= lnw_hist[:,1].mean()
+    if numpy.min(lnw_hist[:,1]) < min_lnw_hist:
+        lnw_hist[:,1] -= numpy.min(lnw_hist[:,1]) - min_lnw_hist
+    dos = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
     dos /= sum(dos)
     plt.semilogy(energy[dos>cutoff],dos[dos>cutoff],
                  styles.dots[version],label=styles.title[version])
 
-plt.xlabel('$E/N\epsilon$')
-plt.ylabel('$DOS$')
+plt.xlabel('$U/N\epsilon$')
+plt.ylabel('$DoS$')
 plt.title('Density of states for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)

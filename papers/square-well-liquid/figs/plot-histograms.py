@@ -1,5 +1,4 @@
 #!/usr/bin/python2
-
 import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
