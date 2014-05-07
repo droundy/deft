@@ -64,8 +64,8 @@ arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_open_input = re.compile(r"=\s*open\(['\"]([^'\"]*)['\"]\s*,\s*['\"]r['\"]\s*\)")
 fixed_input = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\)", re.M)
-changing_loadtxt_noparens = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*([^\(\)\n]*)\s*\)", re.M)
-changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*(\([^\)]*\))\s*\)", re.M)
+changing_loadtxt_noparens = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*([^\(\)\n]*)(\s*,[\w\s=]+)*\s*\)", re.M)
+changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"]*)['\"]\s*%\s*(\([^\)]*\))(\s*,[\w\s=]+)*\s*\)", re.M)
 changing_input = re.compile(r"input:\s*['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))")
 list_comprehension_input = re.compile(r"input:\s*(\[.+for.*in.*\])\n")
 
