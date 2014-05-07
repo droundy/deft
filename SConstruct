@@ -370,12 +370,12 @@ Alias('talks', ['talks/colloquium/slides.pdf'])
 #         env.Command(target = ['talks/polyhedra/anim/mc-slow-%03i.pdf' % i
 #                               for i in xrange(30)],
 #                     source = 'talks/polyhedra/mc-tri-slow.py',
-#                     action = 'cd talks/polyhedra && python mc-tri-slow.py'))
+#                     action = 'cd talks/polyhedra && python2 mc-tri-slow.py'))
 # Depends('talks/polyhedra/slides.pdf',
 #         env.Command(target = ['talks/polyhedra/anim/mc100-%4.2f-%03i.png' % (.5, i)
 #                               for i in xrange(30)],
 #                     source = 'talks/polyhedra/mc-tri.py',
-#                     action = 'cd talks/polyhedra && python mc-tri.py'))
+#                     action = 'cd talks/polyhedra && python2 mc-tri.py'))
 # for ff in [0.42, 0.71]:
 #   Depends('talks/polyhedra/slides.pdf',
 #           env.Command(
@@ -402,22 +402,22 @@ Depends('talks/colloquium/slides.pdf',
         env.Command(target = ['talks/colloquium/anim/mc-slow-%03i.pdf' % i
                               for i in xrange(31)],
                     source = 'talks/colloquium/mc-circle-slow.py',
-                    action = 'cd talks/colloquium && python mc-circle-slow.py'))
+                    action = 'cd talks/colloquium && python2 mc-circle-slow.py'))
 Depends('talks/colloquium/slides.pdf',
         env.Command(target = ['talks/colloquium/anim/mc-density-%03i.pdf' % i
                               for i in xrange(31)],
                     source = 'talks/colloquium/mc-circle-slow.py',
-                    action = 'cd talks/colloquium && python mc-circle-slow.py density'))
+                    action = 'cd talks/colloquium && python2 mc-circle-slow.py density'))
 Depends('talks/colloquium/slides.pdf',
         env.Command(target = ['talks/colloquium/anim/mc-pair-%03i.pdf' % i
                               for i in xrange(31)],
                     source = 'talks/colloquium/mc-circle-slow.py',
-                    action = 'cd talks/colloquium && python mc-circle-slow.py pair'))
+                    action = 'cd talks/colloquium && python2 mc-circle-slow.py pair'))
 Depends('talks/colloquium/slides.pdf',
         env.Command(target = ['talks/colloquium/anim/mc-gsigma-%03i.pdf' % i
                               for i in xrange(31)],
                     source = 'talks/colloquium/mc-circle-slow.py',
-                    action = 'cd talks/colloquium && python mc-circle-slow.py gsigma'))
+                    action = 'cd talks/colloquium && python2 mc-circle-slow.py gsigma'))
 
 Default('talks')
 

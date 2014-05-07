@@ -517,7 +517,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Update weights
     // ---------------------------------------------------------------
-    if(!(no_weights || gaussian_fit)){
+    if(!(no_weights || gaussian_fit || fix_kT)){
       const int first_weight_update =
         min(energy_levels, initialization_iterations*9/10);
       // don't update until we could at least theoretically have

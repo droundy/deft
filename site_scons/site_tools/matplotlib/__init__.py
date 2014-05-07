@@ -33,14 +33,14 @@ from SCons.Script import *
 def runpython(env, pyfile, args, inputs, outputs, py_chdir):
     py_chdir = str(py_chdir)
     if py_chdir == "" or py_chdir == ".":
-        act = "python %s %s" % (str(pyfile), args)
+        act = "python2 %s %s" % (str(pyfile), args)
         #print "build", outputs, 'from', inputs, 'with', act
         env.Command(target = outputs,
                     source = [pyfile] + inputs,
                     action = act)
     else:
         pyrel = str(pyfile)[len(py_chdir)+1:]
-        act = "cd %s && python %s %s" % (str(py_chdir), pyrel, args)
+        act = "cd %s && python2 %s %s" % (str(py_chdir), pyrel, args)
         goodoutputs = [py_chdir + '/' + o for o in outputs]
         goodinputs = [glob.glob(py_chdir + '/' + i) for i in inputs]
         goodinputs = []
