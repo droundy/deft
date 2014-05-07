@@ -24,23 +24,34 @@ versions = eval(sys.argv[4])
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
-cutoff = 1e-100 # cutoff DoS value for plotting data
-min_lnw_hist = -numpy.log(sys.float_info.max) + 20 # prevent overflows
-# FIXME: + 20 is a "good enough" hack
+minlog = 0
 
 for version in versions:
     e_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
-    lnw_hist = numpy.loadtxt(
+    lnw = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
     energy = -e_hist[:,0]/N
-    lnw_hist[:,1] -= lnw_hist[:,1].mean()
-    if numpy.min(lnw_hist[:,1]) < min_lnw_hist:
-        lnw_hist[:,1] -= numpy.min(lnw_hist[:,1]) - min_lnw_hist
-    dos = e_hist[:,1]*numpy.exp(-lnw_hist[:,1])
-    dos /= sum(dos)
-    plt.semilogy(energy[dos>cutoff],dos[dos>cutoff],
-                 styles.dots[version],label=styles.title[version])
+    log10w = lnw[:,1]*numpy.log10(numpy.exp(1))
+    log10_dos = numpy.log10(e_hist[:,1]) - log10w
+    log10_dos -= log10_dos.max()
+    if log10_dos.min() < minlog:
+        minlog = log10_dos.min()
+    plt.plot(energy, log10_dos, styles.dots[version],label=styles.title[version])
+
+plt.ylim(minlog, 0)
+locs, labels = plt.yticks()
+def tentothe(n):
+    if n == 0:
+        return '1'
+    if n == 10:
+        return '10'
+    if int(n) == n:
+        return r'$10^{%d}$' % n
+    return r'$10^{%g}$' % n
+newlabels = [tentothe(n) for n in locs]
+plt.yticks(locs, newlabels)
+plt.ylim(minlog, 0)
 
 plt.xlabel('$U/N\epsilon$')
 plt.ylabel('$DoS$')
