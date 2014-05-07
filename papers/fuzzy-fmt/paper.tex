@@ -105,11 +105,17 @@ soft potentials. In SFMT, the weight functions are modified but retain:
 the direct correlation in the low-density limit, the exact free energy
 in the zero-dimensional cavity limit \fixme{It looks like we don't to
   this with our harmonic potential}, relation to the generating
-weight function~\cite{schmidt1999density} \fixme{this is an assumption
-  as stated in Schmidt 1999}. From Schmidt\cite{schmidt2000fluid},
+weight function $w_3(\rr)$~\cite{schmidt1999density} \fixme{this is an assumption
+  as stated in Schmidt 1999}.  The new weight functions are also made
+to deconvolve the Mayer function   
+
+\begin{equation}
+f(r) = \exp (-\beta V(r)) - 1
+\end{equation}
+and to give an approximate multi-cavity limit. Schmidt furthur shows that\cite{schmidt2000fluid}
 
 \begin{equation}\label{eq:mayerandw2}
-\frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r')
+\frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
 \end{equation}
 
 %% We have a choice to either start with a pair potential, $V(r)$, and
