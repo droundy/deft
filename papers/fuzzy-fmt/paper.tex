@@ -43,19 +43,17 @@
 The hard-sphere fluid is \emph{the} reference fluid for models of real
 liquids, such as water \fixme{citations?}. The hard sphere fluid is
 widely studied and well understood \fixme{citations}, but has the
-disadvantage of not being physical. ...while step functions and delta
-functions are easily used by hand, they are computationally
-difficult. One way to deal with this difficulty is by ``smearing'' the
-functions so they are not discontinuous; another is to use a theory
-where the spheres themselves are not so hard.
+disadvantage of not being physical since it contains step and delta
+functions which are hard to use in computation. One way to deal with
+this difficulty is by ``smearing'' the functions so they are not
+discontinuous; another is to use a theory where the spheres themselves
+are not so hard.
 
 Fundamental Measure Theory~(FMT) is a classic density functional
 theory (cDFT) for the free energy of the hard-sphere fluid developed
-by Rosenfeld~\cite{rosenfeld1989} \fixme{which can deal with
-  inhomogeneity}.  FMT is often used for the hard-sphere portion of
-the total free energy which \fixme{can be used to obtain equations of
-  state, properties of liquids at an interfaces, etc.}.  While this
-has been used to some success to study the behavior of real
+by Rosenfeld~\cite{rosenfeld1989}.  FMT is often used for the
+hard-sphere portion of the total free energy which \fixme{citations}.
+While this has been used to some success to study the behavior of real
 liquids\fixme{citations}, it is not physical as the hard sphere cores
 are never allowed to penetrate.
 
@@ -66,7 +64,7 @@ mixture of soft and hard spheres as well as for star
 polymers~\cite{schmidt2000density, groh2001density}. SFMT was also
 tested in a number of other papers~\cite{rosenfeld2000fluid}
 \fixme{more citations} but not the soft fluid with a harmonic
-potential.
+potential. We study
 
 \section{Fundamental-Measure Theory}
 
@@ -102,16 +100,22 @@ using the weighted densities
 
 \section{Theory}
 
-We begin by examining the Mayer function:
+Soft Fundamental-Measure Theory~(SFMT) is a generalization of FMT to
+soft potentials. In SFMT, the weight functions are modified but retain:
+the direct correlation in the low-density limit, the exact free energy
+in the zero-dimensional cavity limit \fixme{It looks like we don't to
+  this with our harmonic potential}, relation to the generating
+weight function $w_3(\rr)$~\cite{schmidt1999density} \fixme{this is an assumption
+  as stated in Schmidt 1999}.  The new weight functions are also made
+to deconvolve the Mayer function   
 
 \begin{equation}
-f(r) = \exp (-\beta V(r)) - 1.
+f(r) = \exp (-\beta V(r)) - 1
 \end{equation}
-
-From Schmidt\cite{schmidt2000fluid},
+and to give an approximate multi-cavity limit. Schmidt furthur shows that\cite{schmidt2000fluid}
 
 \begin{equation}\label{eq:mayerandw2}
-\frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r')
+\frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
 \end{equation}
 
 %% We have a choice to either start with a pair potential, $V(r)$, and
@@ -126,72 +130,13 @@ We use a harmonic pair potential
 \begin{align}
   V(r) =
   \begin{cases}
-    V_0 \left ( 1 - \frac{r}{r_0} \right )^2 & 0 \leq r \leq r_0\\
+    V_0 \left ( 1 - \frac{r}{2R} \right )^2 & 0 \leq r \leq r_0\\
     0 & otherwise
   \end{cases}
 \end{align}
-which gives the Mayer function 
-\begin{align}\label{eq:harmonicmayer}
-  f(r) =
-  \begin{cases}
-    e^{-\beta V_0 \left( 1 - \frac{r}{r_0} \right)^2} - 1 & 0 \leq r
-    \leq r_0 \\
-    0 & otherwise.
-  \end{cases} 
-\end{align}
-We use this Mayer function to approximate a $w_2(r)$ by choosing a
-simple form similar to $f(r)$ with fitting parameters. We fit the
-integral of boths sides of equation \ref{eq:mayerandw2} and the
-slope at $r=r_0$ to find our approximate $w_2(r)$: 
-\begin{equation}
-  w_2(r) = \frac{2\gamma r}{(\sqrt{\pi \gamma} - 1)R^2} e^{-\gamma
-    \left ( 1 - \frac{r}{R} \right )^2}\Theta(r) \Theta (R - r)
-\end{equation}
-where
-\begin{equation}
-  \gamma = 2 \left(\frac{\sqrt{\pi \beta V_0} + \sqrt{\pi \beta V_0 -
-    16\sqrt{\beta V_0}}}{8}\right)^2
-\end{equation}
+Where R is the soft sphere radius and $V_0$ is the maximum
+potential at complete overlap.
 
-Comparisons of $w_2(r)\ast w_2(r)$ and $\frac{df}{dr}$ for the harmonic
-pair potential are shown in fig. \ref{fig:w2convolves}.
-
-where B is a constant to be determined by fitting the integral of
-$f'(r)$ with the integral of $w_2(\rr)\ast W_2(\rr)$ and $R =
-\frac{r_0}{2}$.  $\gamma$ is determined by the slope at $r = r_0$.  
-Now we'll first want to convolve $w_2(r)$ with
-itself:
-\begin{align*}
-  w_2 \ast w_2 &= \int dr' w_2 (r')w_2(r - r') \\ 
-     &= \int dr' \left(B r' e^{- \gamma \left (1 - \frac{r}{R} \right )^2}
-                              \Theta_1 (r') \Theta_2 (R - r') \right) \\
-     &\times \left( B (r-r') e^{- \gamma \left(1 - \frac{r-r'}{R}
-                                \right)^2}\Theta_{1'} (r-r') \Theta_{2'} (R -
-                                (r-r')) \right) \\
-     &= \alpha \int dr' r'(r-r') \exp \left [-\frac{2\gamma}{R^2} \left (r' -
-                              \frac{r}{2} \right)^2 \right ] \Theta_1
-                              \Theta_2 \Theta_{1'} \Theta_{2'}
-\end{align*}
-where we have substituted $\alpha = B^2 e^{- 2 \gamma \left(1 -
-  \frac{r}{R} + (\frac{r}{2R})^2 \right )}$. The Theta functions create two separate
-cases to integrate.  The case that is, perhaps, more important for us
-is is when $R \leq r \leq 2R$.  The integral is
-
-\begin{align}
-(w_2 \ast w_2)_{r \geq R} &= \alpha \int_{r - R}^R dr' r'(r-r') \exp \left [ -
-   \frac {2\gamma}{R^2}\left( r' - \frac{r}{2} \right)^2 \right]
-\end{align}
-
-Now, for $ 0 \leq r \leq 2R$
-\begin{align}
-  w_2 \ast w_2 = \frac{\beta V_0}{R} \left( 1 - \frac{r}{2R} \right)
-              e^{-\beta V_0 \left( 1 - \frac{r}{2R} \right)^2}
-\end{align}
-If we integrate $f'(r)$ for the quadratic potential we get
-\begin{align}
-  \int_0^{\infty} f'(r)dr &= f(\infty) - f(0)\\
-                    &= 1 - e^{-\beta V_0}
-\end{align}
 For the $w_2(r)$ convolved with itself,
 \begin{widetext}
 \begin{align*}
