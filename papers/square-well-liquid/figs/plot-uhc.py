@@ -19,7 +19,7 @@ ff = float(sys.argv[2])
 
 # note: speficic HC should be independent of N, but we have to choose one
 N = float(sys.argv[3])
-#arg N = [200]
+#arg N = [100, 200, 1000]
 
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
