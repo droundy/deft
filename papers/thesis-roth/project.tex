@@ -30,7 +30,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-{\textsc{It can't be done}}
 
 %\tableofcontents
 \end{abstract}
@@ -41,9 +40,9 @@
 \section{Introduction}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theory and Methods}
+\section{Theory and Methods}\label{sec:theory}
 
-\subsection{Renormalization Group Theory}
+\subsection{Renormalization Group Theory}\label{subsec:RGT}
 Renormalization group (RG) theory is an iterative procedure that was
 developed to deal with large-scale fluctuations of the order parameter
 near the critical point of a system.
@@ -63,37 +62,58 @@ The initial free energy density, $f_0$ depends on the liquid model of study. For
 \end{equation}
 where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kT$.~\cite{Gil-Villegas97}
 
-\subsection{Coexistence Curve Algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}\label{sec:methods}
+
+\subsection{Coexistence Curve Algorithm}\label{subsec:coexis}
 Coexistence curves are found by modifying the chemical potential $\mu$
-in the grand free energy per volume $\Phi/V$. Grand free energy
+in the grand free energy per volume $\phi(T,n)/V$. Grand free energy
 density is defined as
 \begin{align}
-  \frac{\Phi}{V} &= \phi \nonumber \\
+  \frac{\Phi(T,n)}{V} &= \phi(T,n) \nonumber \\
                  &= f(T,n) - n\mu \nonumber \\
-                 &= f(T,n) - n\frac{d}{dn}f(T,\npart)\ .
+                 &= f(T,n) - n\frac{df(T,n)}{dn}\bigg|_{\npart}\ .
 \end{align}
 It is the value $\npart$ that we adjust to find coexistence curves.
 
 The grand free energy density generally has two distinct minima when
-plotted versus density. The liquid will be in liquid-vapor equilibrium
-when those minima have the same value for $\phi$. There is a local
+plotted versus density. (See fig.~\ref{fig:SW-phi-lowT} for an example.) The liquid will be in liquid-vapor equilibrium
+when those minima have the same value for $\phi(T,n)$. There is a local
 maximum between those minima, and the value of the density at that
 maximum is used for $\npart$. Find this value at a given temperature
-then plot $\phi$ vs $n$ at slightly higher temperature. Find the new
+then plot $\phi(T,n)$ vs $n$ at slightly higher temperature. Find the new
 value for $\npart$ such that the two minima have the same value for
-$\phi$. (It is helpful to note that if $\npart$ is increased,
-$\phi(\nliq)$ increases, and $\phi(\nliq)$ decreases if $\npart$ is
-decresed.) The program I wrote (npart.py) uses the previous
+$\phi(T,n)$. (It is helpful to note that if $\npart$ is increased,
+$\phi(T,\nliq)$ increases, and $\phi(T,\nliq)$ decreases if $\npart$ is
+decresed.) The program I wrote uses the previous
 temperature's $\npart$ as a ``first guess,'' maximizing
 $\phi(T,\npart)$. From there, the program adjusts $\npart$
 until $\phi(T,\nvap) = \phi(T,\nliq)$. When that condition is met, it
-uses this new value of $\npart$ as the ``first guess'' at the next
+uses this new value of $\npart$ as the ``first guess'' at $\npart$ for the next
 higher temperature.
+
+The algorithm is as follows; start at some temperature $T=T_{start}$, with an intial guess for $\npart$.
+\begin{enumerate}
+  \item Calculate $\nvap$ and $\nliq$ by minimizing $\phi(T_{start},n)$ over an appropriate region
+  \item Calculate $\phi(T_{start},\nvap)$ and $\phi(T_{start},\nliq)$ \label{while-start}
+  \item Calculate \[\delta\mu = \frac{\phi(T_{start},\nvap) - \phi(T_{start},\nliq)}{\nliq - \nvap}\]
+  \item Calculate $\phi^*(T_{start},n) = \phi(T_{start},n) + \delta\mu$
+  \item Calculate a new $\npart$, $\npart^*$, based on $\phi^*(T_{start},n)$ by finding the local maximum between $\nvap$ and $\nliq$
+  \item Calculate $\phi(T_{start},\npart^*)$
+  \item Re-caluclate $\nvap$, $\nliq$, $\phi(T_{start},\nvap)$, and $\phi(T_{start},\nliq)$, using $\npart^*$
+  \item Go back to step~\ref{while-start} and repeat until \[ \frac{\phi(T_{start},\nvap - \phi(T_{start},\nliq)}{\phi(T_{start},\npart^*)} > tol  \] where $tol$ is some tolerance (I used $tol=10^{-5}$)
+  \item Increase the temperature to $T = T + \delta T$ and repeat
+\end{enumerate}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/SW-phi-lowT}
+  \caption{Grand free energy per unit volume, SW, low temp}
+  \label{fig:SW-phi-lowT}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}
-
-\textsc{Nope, doens't work!}
 
 \begin{figure}
   \begin{center}
@@ -105,29 +125,25 @@ higher temperature.
 
 \begin{figure}
   \begin{center}
-  \includegraphics[width=\columnwidth]{figs/SW-RG-compare-phi}
+  \includegraphics[width=\columnwidth]{figs/SW-RG-compare-phi-lowT}
   \end{center}
-  \caption{Comparison of free energy density for SW and SW+RG at low temperature}
-  \label{fig:SW-RG-compare-loT}
+  \caption{Free energy density for RG at low temperature}
+  \label{fig:SW-RG-compare-lowT}
 \end{figure}
 
-%% \begin{figure}
-%%   \begin{center}
-%%   \includegraphics[width=\columnwidth]{figs/}
-%%   \end{center}  \caption{Comaprison of SW and RG near the critical point}
-%%   \label{fig:SW-RG-compare-hiT}
-%% \end{figure}
+\begin{figure}
+  \begin{center}
+  \includegraphics[width=\columnwidth]{figs/SW-RG-compare-phi-highT}
+  \end{center}
+  \caption{Free energy density for RG near critical temp}
+  \label{fig:SW-RG-compare-highT}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusion}
 
-\textsc{Forget about it!}
-
-\ldots\textsc{or get a better programmer}
-
-\ldots Maybe I'm just frustrated right now \ldots
 
 \bibliographystyle{unsrt}
 \bibliography{project} % Produces the bibliography via BibTeX.

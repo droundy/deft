@@ -3,29 +3,30 @@
 import matplotlib, sys
 if 'show' not in sys.argv:
   matplotlib.use('Agg')
-import pylab
+import matplotlib.pyplot as plt
+import numpy as np
 import RG
 
-# Read in data
-data = pylab.loadtxt('figs/npart_RG-out.dat')
+# define the colors/symbols
+colors = np.array(['b-','g-','r-'])
 
-T = data[:,0]
-# nvapor = data[:,1]
-# nliquid = data[:,2]
+# normal
+plt.figure()
+for i in range(1):
+  # Read in data
+  data = np.loadtxt('figs/npart_RG-i%d-out.dat'%i)
 
-etapart = data[:,5]*pylab.pi*RG.sigma**3/6
+  T = data[:,0]
+  etavapor = data[:,1]*np.pi*RG.sigma**3/6
+  etaliquid = data[:,2]*np.pi*RG.sigma**3/6
 
-etavapor = data[:,1]*pylab.pi*RG.sigma**3/6
-etaliquid = data[:,2]*pylab.pi*RG.sigma**3/6
+  # Plot the curve
+  plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
+  plt.plot(etaliquid, T, colors[i])
 
-# Plot the curve
-pylab.plot(etavapor, T, 'b-')
-pylab.plot(etaliquid, T, 'b-')
-# pylab.plot(etapart, T, 'r-')
+plt.xlabel(r'$\eta$')
+plt.ylabel('T')
+plt.legend(loc=0)
+plt.title('Liquid-Vapor Coexistence')
 
-pylab.xlabel(r'$\eta$')
-pylab.ylabel('T')
-pylab.title('Liquid-Vapor Coexistence, i=1')
-
-pylab.savefig('figs/coexistance_RG.pdf')
-pylab.show()
+plt.savefig('figs/coexistance-RG.pdf')
