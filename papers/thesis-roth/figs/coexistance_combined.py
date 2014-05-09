@@ -3,29 +3,46 @@
 import matplotlib, sys
 if 'show' not in sys.argv:
   matplotlib.use('Agg')
-import pylab
+import matplotlib.pyplot as plt
+import numpy as np
+import SW
+import RG
 
-# Read in data
-data_Hughes = pylab.loadtxt('figs/npart_Hughes-out.dat')
-data_SW = pylab.loadtxt('figs/npart_SW-out.dat')
+# ### SW ###
 
-T_Hughes = data_Hughes[:,0]
-nvapor_Hughes = data_Hughes[:,1]
-nliquid_Hughes = data_Hughes[:,2]
+# # Read in data
+# data = np.loadtxt('figs/npart_SW-out.dat')
 
-T_SW = data_SW[:,0]
-nvapor_SW = data_SW[:,1]
-nliquid_SW = data_SW[:,2]
+# T = data[:,0]
+# etavapor = data[:,1]*np.pi*SW.sigma**3/6
+# etaliquid = data[:,2]*np.pi*SW.sigma**3/6
 
-# Plot the curve
-pylab.plot(nvapor_Hughes/0.374, T_Hughes/698, 'b-')
-pylab.plot(nliquid_Hughes/0.374, T_Hughes/698, 'b-')
+# # Plot the curve
+# plt.plot(etavapor, T, 'bx',label='SW')
+# plt.plot(etaliquid, T, 'bx')
 
-pylab.plot(nvapor_SW/0.0737, T_SW/8.6, 'r-')
-pylab.plot(nliquid_SW/0.0737, T_SW/8.6, 'r-')
 
-pylab.xlabel(r'$n/n_{crit}$')
-pylab.ylabel(r'$T/T_{crit}$')
+### RG ###
 
-pylab.savefig('figs/combined-coexistence-plot.pdf')
-pylab.show()
+# define the colors/symbols
+colors = np.array(['b-','g-','r-'])
+
+for i in range(2):
+  # Read in data
+  data = np.loadtxt('figs/npart_RG-i%d-out.dat'%i)
+
+  T = data[:,0]
+  etavapor = data[:,1]*np.pi*RG.sigma**3/6
+  etaliquid = data[:,2]*np.pi*RG.sigma**3/6
+
+  # Plot the curve
+  plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
+  plt.plot(etaliquid, T, colors[i])
+
+plt.xlabel(r'$\eta$')
+plt.ylabel('T')
+plt.legend(loc=0)
+plt.title('Liquid-Vapor Coexistence')
+
+plt.savefig('figs/coexistance.pdf')
+plt.show()

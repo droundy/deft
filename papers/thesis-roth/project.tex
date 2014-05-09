@@ -15,6 +15,14 @@
 \newcommand{\nliq}{n_{liquid}}
 \newcommand{\nvap}{n_{vapor}}
 
+% Free energy terms
+\newcommand{\fid}{f_\text{ID}(T,n)}
+\newcommand{\fhs}{f_\text{HS}(T,n)}
+\newcommand{\fdisp}{f_\text{disp}(T,n)}
+\newcommand{\fattr}{f_\text{attr}(T,n)}
+
+\newcommand{\fixme}[1]{\textcolor{red}{\textbf{[#1]}}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -40,27 +48,73 @@
 \section{Introduction}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theory and Methods}\label{sec:theory}
+\section{Theory}\label{sec:theory}
+
+This work applies entirely to the homogeneous case---that is, there are no walls containing our liquid, nor are there any sort of solutes in the liquid. This being the case, the free energy is infinite. Therefore, I work with free energy density:
+\begin{align}
+  f(T,n) &\equiv \frac{F(T,n)}{V}
+\end{align}
 
 \subsection{Renormalization Group Theory}\label{subsec:RGT}
 Renormalization group (RG) theory is an iterative procedure that was
 developed to deal with large-scale fluctuations of the order parameter
-near the critical point of a system.
+near the critical point of a system. The formulation used here is provided by Forte~\textit{et al}\cite{Forte11}.
 
-The free energy density for each iteration is given by
-\begin{equation}
-  f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)\ .
-\end{equation}
-The total free energy density is obtained when one takes the
-iterations to infinity and adds in the attractive component:
-\begin{equation}
-  f(T,n) = \lim_{i \to \infty} f_i(T,n) + f_{att}(T,n)\ .
-\end{equation}
-The initial free energy density, $f_0$ depends on the liquid model of study. For this work, I use the square well model:
-\begin{equation}
-  f_0(T,n) = f_{id}(T,n) + f_{HS}(T,n) + \frac{a_2^{SW}(T,n)}{\kT}\ ,
-\end{equation}
-where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kT$.~\cite{Gil-Villegas97}
+\fixme{Discuss Wilson phase cell}
+
+We begin with a baseline free enrgy $f_0(T,n)$. We assume this baseline accounts for all fluctuations of wavelength $\lambda < \lambda_0$. We then double the size of our phase cell and add a correction to the free energy $\delta f_1(T,n)$. This correction accounts for fluctuations with a wavelength $\lambda = 2\lambda_0$. The new free energy is $f_1(T,n) = f_0(T,n) + \delta f_1(T,n)$. Then double the length scale again; $\delta f_2(T,n)$ accounts for fluctionations with $\lambda = 4\lambda_0$ and $f_2(T,n) = f_1(T,n) + \delta f_2(T,n)$. As we continue this process, the $i^{th}$ correction accounts for fluctuations with $\lambda = 2^i\lambda_0$, and $f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)$. In the end, your free energy is
+\begin{align}
+  f(T,n) = f_0(T,n) + \sum_{i=1}^\infty\delta f_i(T,n) + \fattr
+\end{align}
+
+Where $\fattr$ is the contribution due to the longest-wavelenght density fluctuations. At this stage, I do not entirely understand why Forte splits up $\fattr$.
+
+%% \fixme{The following comes from Forte~\cite{Forte11} and doesn't make a whole lot of sense to me}
+
+%% The free energy for each iteration is given by
+%% \begin{equation}
+%%   f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)\ .
+%% \end{equation}
+%% The total free is obtained when one takes the
+%% iterations to infinity and adds in the attractive component:
+%% \begin{equation}
+%%   f(T,n) = \lim_{i \to \infty} f_i(T,n) + \fattr\ .
+%% \end{equation}
+%% The initial free energy density, $f_0$ depends on the liquid model of study. For this work, I use the square well model:
+%% \begin{equation}
+%%   f_0(T,n) = \fid + \fhs + \frac{a_2^{SW}(T,n)}{\kT}\ ,
+%% \end{equation}
+%% where $a_2^{SW}(T,n)$ is the second-order term in a high-temperature expansion around $1/\kT$. (See ref~\cite{Gil-Villegas97}.)
+%% \fixme{End of Forte confusion}
+
+\subsection{Square well liquid free enrgy}\label{subsec:SW}
+For the baseline, this work is based on the square well liquid free energy\cite{Hughes13}:
+\begin{align}
+  f_0(T,n) &= \fid + \fhs + \left( \fdisp - n a_1(n) \right) \ .
+\end{align}
+The long-range attractive term, $\fattr$ is given by
+\begin{align}
+  \fattr &= n a_1(n) \ .
+\end{align}
+$\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere repulsion, and $\fdisp$ is the attraction. The functions $a_j(n)$ are the first two terms from a high-temperature perturbation expansion. Each function is outlined below.
+
+\subsubsection{Ideal gas}\label{sub2sec:ID}
+\begin{align}
+  \fid &= n\kT\left(\log(n) - 1\right)
+\end{align}
+
+\subsubsection{Hard sphere repulsion}\label{sub2sec:HS}
+
+
+\subsubsection{Attraction}\label{sub2sec:disp}
+The attractive free energy includes van der Waals attraction between hard spheres and is founded in Thermodynamic Perturbation Theory (TPT).
+\begin{align}
+  \fdisp &= n \left( a_1(n) + \frac{1}{\kT}a_2(n) \right)
+\end{align}
+The $a_j(n)$ terms come from TPT, outlined in section~\ref{subsec:TPT}. I give their forms here. \fixme{Pull this from the Square well contribution in homogeneous case section in the SW paper}
+
+\subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
+\fixme{Pull TPT section from SW paper}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}\label{sec:methods}
@@ -94,14 +148,14 @@ higher temperature.
 
 The algorithm is as follows; start at some temperature $T=T_{start}$, with an intial guess for $\npart$.
 \begin{enumerate}
-  \item Calculate $\nvap$ and $\nliq$ by minimizing $\phi(T_{start},n)$ over an appropriate region
+  \item Calculate $\nvap$ and $\nliq$ by calculating the minima in $\phi(T_{start},n)$ over appropriate regions
   \item Calculate $\phi(T_{start},\nvap)$ and $\phi(T_{start},\nliq)$ \label{while-start}
   \item Calculate \[\delta\mu = \frac{\phi(T_{start},\nvap) - \phi(T_{start},\nliq)}{\nliq - \nvap}\]
   \item Calculate $\phi^*(T_{start},n) = \phi(T_{start},n) + \delta\mu$
   \item Calculate a new $\npart$, $\npart^*$, based on $\phi^*(T_{start},n)$ by finding the local maximum between $\nvap$ and $\nliq$
   \item Calculate $\phi(T_{start},\npart^*)$
   \item Re-caluclate $\nvap$, $\nliq$, $\phi(T_{start},\nvap)$, and $\phi(T_{start},\nliq)$, using $\npart^*$
-  \item Go back to step~\ref{while-start} and repeat until \[ \frac{\phi(T_{start},\nvap - \phi(T_{start},\nliq)}{\phi(T_{start},\npart^*)} > tol  \] where $tol$ is some tolerance (I used $tol=10^{-5}$)
+  \item Go back to step~\ref{while-start} and repeat until \[ \frac{\phi(T_{start},\nvap) - \phi(T_{start},\nliq)}{\phi(T_{start},\npart^*)} > tol  \] where $tol$ is some computational tolerance (I used $tol=10^{-5}$)
   \item Increase the temperature to $T = T + \delta T$ and repeat
 \end{enumerate}
 

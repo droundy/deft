@@ -55,8 +55,6 @@ def fiterative(T,n,i):
 # eqn(8), Forte 2011
 def integrand_ID(T,n,x,i):
     argument = np.exp(-VD(i)/k_B/T*(fbarD(T,n,x,i) + ubarD(T,n,x,i)))
-    fbarDvalue = fbarD(T,n,x,i)
-    ubarDvalue =  ubarD(T,n,x,i)
     return argument
 
 def ID(integrand,T,n,i):

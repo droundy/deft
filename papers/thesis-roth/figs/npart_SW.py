@@ -24,12 +24,9 @@ import pylab
 
 ###############################
 # Initial conditions; dependent on you system
-# T = 0.001 # SW units
-# nparticular = 0.14566 # I found this by hand
 
-T = 0.1
-# nparticular = 0.155/(SW.sigma**3*np.pi/6) # using analytic df_nd
-nparticular = 0.08/(SW.sigma**3*np.pi/6) # using finite differences df_dn
+T = 0.68
+nparticular = 0.0414/(SW.sigma**3*np.pi/6) # using finite differences df_dn
 N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
 Tc = 1.33
 Tlow = T

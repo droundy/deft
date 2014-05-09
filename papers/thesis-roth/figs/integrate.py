@@ -65,7 +65,6 @@ def simpson(func,a,b,n):
 
     return h/3*s
 
-
 def testfunc(x):
     return np.exp(x)
 
