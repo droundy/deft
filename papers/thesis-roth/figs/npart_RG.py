@@ -3,7 +3,7 @@ import RG
 import sys
 import minmax_RG
 import numpy as np
-import pylab
+import time
 
 # Author: Dan Roth
 # E-mail: Daniel.Edward.Roth@gmail.com
@@ -23,103 +23,117 @@ import pylab
 # |__
 
 ###############################
-# Initial conditions; dependent on you system
 
-T = 0.1
-# nparticular = 0.155/(RG.sigma**3*np.pi/6) # using analytic df_nd
-nparticular = 0.08/(RG.sigma**3*np.pi/6) # using finite differences df_dn
-N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
-Tc = 1.33
-Tlow = T
+# input iteration depth as a parameter
 
-# Recursion depth
-iterations = 1
+def npart(iterations):
+    # Initial conditions; dependent on you system
 
-# Bounds of minimization.
-# Use range that works for many temperatures
-# Left (vapor)
-a_vap = 1e-10/(RG.sigma**3*np.pi/6)
-c_vap = nparticular
-# Right (liquid)
-a_liq = nparticular
-c_liq = 0.75/(RG.sigma**3*np.pi/6)
-###############################
+    # T = 0.1
+    # nparticular = 0.155/(RG.sigma**3*np.pi/6) # using analytic df_nd
+    # nparticular = 0.08/(RG.sigma**3*np.pi/6) # using finite differences df_dn
 
-# Open file for output
-fout = open('figs/npart_RG-out.dat','w')
+    T = 0.68
+    nparticular = 0.0414/(RG.sigma**3*np.pi/6)
 
-# label the columns of the output
-fout.write('#T     nvapor     nliquid       phi(nvap)        phi(nliq)         nparticular\n')#       phi_avg')
+    N = 15 # For publication plots, make this bigger (40? 80? 100? You decide!)
+    Tc = 1.33
+    Tlow = T
 
-# Do first temperature before the loop
-nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
-print 'nvap,phi_vap',nvapor,phi_vapor
-nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
-print 'nliq,phi_liq',nliquid,phi_liquid
-print 'npart',nparticular*(RG.sigma**3*np.pi/6)
-sys.stdout.flush()
-
-
-#while T < 1.4:
-for j in xrange(0,N+1):
-    print ' Top of for loop; j =',j
-    T = (Tc - Tlow)*(1 - ((N-j)/N)**4) + Tlow
-
-    fout.flush()
-    # Starting point for new nparticular is abscissa of max RG.phi with old nparticular
-    nparticular = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, nparticular,iterations)
-    print '   npart =',nparticular*(RG.sigma**3*np.pi/6)
-
-    # I'm looking at the minima of RG.phi
+    # Bounds of minimization.
+    # Use range that works for many temperatures
+    # Left (vapor)
+    a_vap = 1e-10/(RG.sigma**3*np.pi/6)
     c_vap = nparticular
+    # Right (liquid)
     a_liq = nparticular
+    c_liq = 0.75/(RG.sigma**3*np.pi/6)
+    ###############################
 
-    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,nparticular,iterations)
+    # Open file for output
+    fout = open('figs/npart_RG-i%d-out.dat'%iterations,'w')
+
+    # label the columns of the output
+    fout.write('#T     nvapor     nliquid       phi(nvap)        phi(nliq)         nparticular\n')#       phi_avg')
+    sys.stdout.flush()
+
+    # Do first temperature before the loop
+    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
+    print 'initial nvap,phi_vap',nvapor,phi_vapor
     nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
+    print 'initial nliq,phi_liq',nliquid,phi_liquid
+    print 'initial npart',nparticular*(RG.sigma**3*np.pi/6)
 
-    tol = 1e-5
-    fnpart = RG.phi(T, nparticular, nparticular, iterations)
+    #while T < 1.4:
+    for j in xrange(0,N+1):
+        T = (Tc - Tlow)*(1 - ((N-j)/N)**4) + Tlow
 
-    # Compare the two minima in RG.phi
-    while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart) > tol:
-#        print '     in the loop comparing two minima in RG.phi'
+        fout.flush()
+        # Starting point for new nparticular is abscissa of max RG.phi with old nparticular
+        nparticular = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, nparticular,iterations)
 
-        delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
-        # if delta_mu > 0:
-        #     print '      delta_mu is positive'
-        # elif delta_mu < 0:
-        #     print '      delta_mu is negative'
-        # else:
-        #     print '      delta_mu is zero'
+        # I'm looking at the minima of RG.phi
+        c_vap = nparticular
+        a_liq = nparticular
 
-        def newphi(T, n, npart, i):
-            return RG.phi(T, n, npart, i) - delta_mu*n
-
-        nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,iterations)
-#        print '     newphi(nvap),newphi(nliq)',newphi(T,nvapor,nparticular,iterations),newphi(T,nliquid,nparticular,iterations)
-#        print '     new nparticular is',nparticular*(RG.sigma**3*np.pi/6)
-#        print '     delta mu',delta_mu
-
-        fnpart = RG.phi(T, nparticular, nparticular, iterations)
-#        print '      fnpart =',fnpart
-
-        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
-#        print '      nvap,phi_vap',nvapor,phi_vapor
+        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,nparticular,iterations)
         nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
-#        print '      nliquid,phi_liquid',nliquid,phi_liquid
-        print ' nvap,nliq,phivap,philiq',nvapor,nliquid,phi_vapor,phi_liquid
 
-    fout.write(str(T))
-    fout.write('  ')
-    fout.write(str(nvapor))
-    fout.write('  ')
-    fout.write(str(nliquid))
-    fout.write('  ')
-    fout.write(str(phi_vapor))
-    fout.write('  ')
-    fout.write(str(phi_liquid))
-    fout.write('  ')
-    fout.write(str(nparticular))
-    fout.write('\n')
-    sys.stdout.flush();
-    print '   T, etaVap, etaLiq',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
+        tol = 1e-5
+        fnpart = RG.phi(T, nparticular, nparticular, iterations)
+
+        # Compare the two minima in RG.phi
+        while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart) > tol:
+
+            delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
+
+            def newphi(T, n, npart, i):
+                return RG.phi(T, n, npart, i) - delta_mu*n
+
+            nparticular = minmax_RG.maximize(newphi,T,nvapor,nliquid,nparticular,iterations)
+
+            fnpart = RG.phi(T, nparticular, nparticular, iterations)
+
+            nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,nparticular,iterations)
+            nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,nparticular,iterations)
+
+        fout.write(str(T))
+        fout.write('  ')
+        fout.write(str(nvapor))
+        fout.write('  ')
+        fout.write(str(nliquid))
+        fout.write('  ')
+        fout.write(str(phi_vapor))
+        fout.write('  ')
+        fout.write(str(phi_liquid))
+        fout.write('  ')
+        fout.write(str(nparticular))
+        fout.write('\n')
+        sys.stdout.flush();
+        print '   T, etaVap, etaLiq',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6)
+    fout.close()
+
+if __name__ == '__main__':
+
+    # I also want to know the time it takes
+    timing = open('figs/RG-timing.dat','w')
+    timing.write('# iterations time (s)\n')
+    sys.stdout.flush()
+
+    for i in range(1):
+        print 'running npart_RG for iterations =',i
+        timing.flush()
+        # note current time
+        time0 = time.clock()
+
+        # run npart
+        npart(i)
+
+        # calculate elapsed time
+        elapsed = time.clock() - time0
+
+        # write to file
+        timing.write(str(i)+' '+str(elapsed)+'\n')
+        sys.stdout.flush()
+
+    timing.close()

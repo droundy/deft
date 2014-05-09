@@ -23,11 +23,6 @@ R = sigma/2 # HS radius
 # Temp
 T = 0.1 # SW Temp units
 
-# nL is the density to which you integrate when integrating over fluctuations
-# See Forte 2011, text after eqn 7
-vol = 4/3*np.pi*R**3
-nL = 0.3/vol
-
 # Averaging volume constants
 L = (8.509*(lambdaSW - 1)**2 - 4.078*(lambdaSW - 1) + 4.914)*sigma # reference wavelength; eqn (56), Forte 2011
 
@@ -46,11 +41,10 @@ def fiterative(T,n,i):
     # eqn (5) from Forte 2011:
     for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
-             f = fnaught
+            f = fnaught
         else:
-#            print '  iteration j=',j, 'i=', i
-            IDvalue = ID(integrand_ID,T,nL,j)
-            ID_refvalue = ID_ref(integrand_ID_ref,T,nL,j)
+            IDvalue = ID(integrand_ID,T,n,j)
+            ID_refvalue = ID_ref(integrand_ID_ref,T,n,j)
             dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
             f += dfi
 
@@ -59,42 +53,41 @@ def fiterative(T,n,i):
 # Integral over amplitudes (x) of wave-packet of length lambda_D
 # similar to sum over density fluctuations n_D
 # eqn(8), Forte 2011
-def integrand_ID(T,x,i):
-    argument = np.exp(-VD(i)/k_B/T*(fbarD(T,x,i) + ubarD(T,x,i)))
-    fbarDvalue = fbarD(T,x,i)
-    ubarDvalue =  ubarD(T,x,i)
+def integrand_ID(T,n,x,i):
+    argument = np.exp(-VD(i)/k_B/T*(fbarD(T,n,x,i) + ubarD(T,n,x,i)))
+    fbarDvalue = fbarD(T,n,x,i)
+    ubarDvalue =  ubarD(T,n,x,i)
     return argument
 
 def ID(integrand,T,n,i):
-    value = integrate.midpoint(lambda x: integrand_ID(T,x,i),0,1,1000)
+    value = integrate.midpoint(lambda x: integrand_ID(T,n,x,i),0,1,1000)
     return value
 
 # Reference for ID
 # Evaluated at small enough wavelengths that UbarD should be negligible
 # eqn (9), Forte 2011
-def integrand_ID_ref(T,x,i):
-    return np.exp(-VD(i)/k_B/T*fbarD(T,x,i))
+def integrand_ID_ref(T,n,x,i):
+    return np.exp(-VD(i)/k_B/T*fbarD(T,n,x,i))
 
 def ID_ref(integrand,T,n,i):
-    value = integrate.midpoint(lambda x: integrand_ID_ref(T,x,i),0,1,1000)
+    value = integrate.midpoint(lambda x: integrand_ID_ref(T,n,x,i),0,1,1000)
     return value
 
 # Average within the considered subdomain, based on x
 # eqn (10), Forte 2011
-# For fluctuations in [0,1] (rather than [0,nL]), do nL(1 +/- x) instead of simply (nL +/- x), as it is in Forte
-# This amounts to defining x* = x/nL --> nL-x = nL-(nL x*) = nL(1-x*); then simply writing x (instead of x*) in the program
-def fbarD(T,x,i):
-#    value = (fiterative(T,nL*(1+x),i-1) + fiterative(T,nL*(1-x),i-1))/2 - fiterative(T,nL,i-1)
-    iplusx = fiterative(T,nL*(1+x),i-1)
-    iminusx = fiterative(T,nL*(1-x),i-1)
-    nochangex = fiterative(T,nL,i-1)
+# For fluctuations in [0,1] (rather than [0,n]), do n(1 +/- x) instead of simply (n +/- x), as it is in Forte
+# This amounts to defining x* = x/n --> n-x = n-(n x*) = n(1-x*); then simply writing x (instead of x*) in the program
+def fbarD(T,n,x,i):
+    iplusx = fiterative(T,n*(1+x),i-1)
+    iminusx = fiterative(T,n*(1-x),i-1)
+    nochangex = fiterative(T,n,i-1)
     value = (iplusx + iminusx)/2 - nochangex
     return value
 
 # Averge scaled potential
 # eqn (11), Forte 2011
-def ubarD(T,x,i):
-    value = (u(T,nL*(1+x),lambda_D,i) + u(T,nL*(1-x),lambda_D,i))/2 - u(T,nL,lambda_D,i)
+def ubarD(T,n,x,i):
+    value = (u(T,n*(1+x),lambda_D,i) + u(T,n*(1-x),lambda_D,i))/2 - u(T,n,lambda_D,i)
     return value
 
 # Important values for u

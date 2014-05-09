@@ -47,6 +47,30 @@ SAFT-VR\cite{gil-villegas-1997-SAFT-VR}.
   explaining $a_1$ and $a_2$ and their ``exact'' formulas that we wish
   to approximate.}
 
+\fixme{And introduction to TPT---why do we use it?}
+
+\fixme{For now, the discussion follows entirely from the Simple Liquids book~\cite{simple-liquids}}
+
+The pair potential $V(\rr)$ describes the interaction between two hard spheres. For the square-well model,
+\begin{align}
+  v_\text{SW}(\rr) &=
+    \begin{cases}
+      \infty & r < \sigma \\
+      -\epsilon & \sigma < r < \lambda\sigma \\
+      0 & \lambda\sigma < r
+    \end{cases}
+\end{align}
+
+Now, consider this to be the reference, and add a small perturbation:
+\begin{align}
+  v_\lambda(\rr) &= v_\text{SW}(\rr) + \lambda w(\rr)
+\end{align}
+
+The total potential energy of our system is
+\begin{align}
+  V_N(\lambda) = \sum_\rr v_\lambda(\rr)
+\end{align}
+
 
 
 \subsection{Square well contribution in homogeneous case}
@@ -70,10 +94,8 @@ using the local compressibility approximation (LCA), which
 assumes the energy fluctuation is simply related to the
 compressibility of a hard-sphere reference fluid\cite{barker1976liquid}.
 
-\fixme{Add here a complete exposition of this functional form,
+\fixme{The following hopes to be a complete exposition of this functional form,
   reproducing what Gil Villegas says.}
-
-\fixme{DRoth -- Some notes are as follows:}
 
 In Gil-Villegas' paper, HS and Dispersion are wrapped up into the
 \textit{monomer} contribution, expressed in terms of energy densities
@@ -94,16 +116,15 @@ Then, the high-temp expansion is an expansion of the monomer term:
 \begin{align}
   f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
 \end{align}
-\fixme{I'm not sure how to express this in terms of $F_\text{disp}[n]$ alone.}
 
 The term $a_1$ is given by
 \begin{align}
-  a_1 &= -2\pi\rho\epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
-  &= -3\rho b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
+  a_1 &= -2\pi n \epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
+  &= -3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
 \end{align}
-If assume a random correlations between the particles' positions, for all distances, we have $g^\text{HS}(r) = 1$. This yields
+If we assume random correlations between the particles' positions, for all distances, we have $g^\text{HS}(r) = 1$. This yields
 \begin{align}
-  a_1^\text{VDW} = -\rho\alpha^\text{VDW},
+  a_1^\text{VDW} = - n \alpha^\text{VDW},
 \end{align}
 the van der Waals mean-field energy.
 
@@ -112,24 +133,22 @@ knowledge of higher-order correlation functions to determine
 $a_2$. This term describes the response of the attractive energy due
 to the compression of the fluid from the attractive well. Gil-Villegas
 \emph{et al.} base their expression on an approximation by Barker and
-Henderson\cite{barker1967-SW-perturbation}. \fixme{Gil-Villegas also
-  cites 2 other Barker and Henderson papers, but I can't find one and
-  the other doesn't seem relevant}. Barker and Henderson's
+Henderson\cite{barker1967-SW-perturbation}. Barker and Henderson's
 approximation considers fluctuations in the number of particles in the
-potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility
-of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial\rho /\partial P^\text{HS}\right)_T$, we have:
+potential well. In this way, the fluctuations in $a_2$ are related to
+the pressure and compressibility of the liquid. Given pressure
+$P^\text{HS}$ and isothermal compressibility $K^\text{HS} =
+kT\left(\partial n  /\partial P^\text{HS}\right)_T$, we have:
 \begin{align}
-  a_2 &= -\pi\rho\epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial\rho g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
-  &= -\pi\rho\epsilon^2K^\text{HS}\frac{\partial}{\partial\rho}\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2\rho g^\text{HS}\,dr\right] \\
-  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial\rho}\left[-3\rho b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+  a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
+  &= -\pi n \epsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \\
+  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
 
 We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion\cite{barker1976liquid}:
 \begin{align}
   K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
 \end{align}
-
-\fixme{End of my comments --DRoth}
 
 \subsection{A simple weighted density approach}
 

@@ -14,10 +14,13 @@ n = nmax*np.exp(np.arange(-15, 0, 1e-3))
 
 def plotPhi(T,npart):
     plt.plot(n*eta_conv,SW.phi(T,n,npart))
-    plt.ylabel(r'$\phi$ (SW units)')
+    plt.ylabel(r'$\phi$ /SW units')
 
     plt.xlabel(r'$\eta$')
-    plt.title('T = %0.2f '%T + r'n$_{part}$' +' = %0.2f'%npart)
+    plt.title('SW; T = %0.2f '%T)
+    plt.xlim(0,0.4)
+    plt.ylim(-0.005,0.015)
+    plt.savefig('figs/SW-phi-lowT.pdf')
 
 def plotF(T):
     plt.subplot(211)
@@ -29,7 +32,4 @@ def plotF(T):
     plt.plot(n*eta_conv,SW.df_dn(T,n))
     plt.ylabel(r'$\frac{df}{dn}$ (SW units)')
 
-T = 0.1
-plotPhi(T, 0.025)#/eta_conv)
-#plt.savefig('figs/SW-T%0.2f.pdf'%T)
-plt.show()
+plotPhi(0.94, 0.0386417984268)
