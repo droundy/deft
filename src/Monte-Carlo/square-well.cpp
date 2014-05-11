@@ -193,7 +193,8 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
   if (!in_cell(temp, len, walls, dr)) return; // bad move!
   if (overlaps_with_any(temp, p, len, walls, dr)) return; // bad move!
   const bool get_new_neighbors =
-    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared() > sqr(neighbor_R/2.0));
+    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared()
+     > sqr(neighbor_R/2.0));
   if (get_new_neighbors){
     // If we've moved too far, then the overlap test may have given a false
     // negative. So we'll find our new neighbors, and check against them.
@@ -222,7 +223,9 @@ void move_one_ball(int id, ball *p, int N, double len[3], int walls,
   p[id] = pid;
   // Now we can check if we actually want to do this move based on the
   // new energy.
-  const double lnPmove = ln_energy_weights[moves->new_count - moves->old_count + interactions] - ln_energy_weights[interactions];
+  const double lnPmove =
+    ln_energy_weights[moves->new_count - moves->old_count + interactions]
+    - ln_energy_weights[interactions];
   if (lnPmove < 0) {
     const double Pmove = exp(lnPmove);
     if (random::ran() > Pmove) {
@@ -256,7 +259,8 @@ int count_interactions(int id, ball *p, double interaction_distance,
   return interactions;
 }
 
-int count_all_interactions(ball *balls, int N, double interaction_distance, double len[3], int walls) {
+int count_all_interactions(ball *balls, int N, double interaction_distance,
+                           double len[3], int walls) {
   // Count initial number of interactions
   // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
   int interactions = 0;
@@ -271,4 +275,40 @@ int count_all_interactions(ball *balls, int N, double interaction_distance, doub
     }
   }
   return interactions;
+}
+
+void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
+                          int energy_levels){
+  // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
+  // neglecting constant terms, ln_weights = (i-max_entropy)^2/(2 s^2)
+  // here the variance s^2 is given by s = 2*sqrt(2 ln2) / FWHM(dos(E))
+  // for FWHM we also need to find i satisfying dos[i] = dos[max_entropy] / 2
+  // this function assumess no weighing has been used, so dos = energy_histogram
+  int max_entropy = 0;
+  for(int i = 0; i < energy_levels; i++){
+    if (energy_histogram[i] > energy_histogram[max_entropy])
+      max_entropy = i;
+  }
+  int target_value = energy_histogram[max_entropy] / 2;
+  int smallest_diff = target_value;
+  int current_diff = 0;
+  int best_halfway[2] = {0,0};
+  for(int i = 0; i < energy_levels; i++){
+    if(i == max_entropy) smallest_diff = target_value;
+    current_diff = abs(energy_histogram[i] - target_value);
+    if(current_diff < smallest_diff){
+      smallest_diff = current_diff;
+      best_halfway[i > max_entropy] = i;
+    }
+  }
+  double s = (best_halfway[1]-best_halfway[0])/(2*sqrt(2*log(2)));
+  // set actual energy weights
+  for(int i = max_entropy; i < energy_levels; i++)
+    ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
+  for(int i = 0; i < max_entropy; i++)
+    ln_energy_weights[i] = ln_energy_weights[max_entropy];
+  // resest energy histogram
+  for (int i = 0; i < energy_levels; i++)
+    energy_histogram[i] = 0;
+  return;
 }

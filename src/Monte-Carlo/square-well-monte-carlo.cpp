@@ -86,6 +86,7 @@ int main(int argc, const char *argv[]) {
   int no_weights = false;
   int flat_histogram = false;
   int gaussian_fit = false;
+  int wang_landau = false;
   int walker_weights = false;
   double fix_kT = 0;
 
@@ -108,7 +109,7 @@ int main(int argc, const char *argv[]) {
   double neighbor_scale = 2;
   double dr = 0.1;
   double de_density = 0.1;
-  double de_g = 0.1;
+  double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
   // scale is not a quite "constant" -- it is adjusted during the initialization
@@ -169,6 +170,8 @@ int main(int argc, const char *argv[]) {
      "Use a flat histogram method", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
+    {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
+     "Use Wang-Landau histogram method", "BOOLEAN"},
     {"walkers", '\0', POPT_ARG_NONE, &walker_weights, 0,
      "Use a walker optimization weight histogram method", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
@@ -197,6 +200,13 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Verify we have reasonable arguments and set secondary parameters
   // ----------------------------------------------------------------------------
+
+  // check that only one method is used
+  if(bool(no_weights) + bool(flat_histogram) + bool(gaussian_fit)
+     + bool(wang_landau) + bool(walker_weights) + (fix_kT != 0) != 1){
+    printf("Can only use one histigram method at a time!");
+    return 254;
+  }
 
   if(walls >= 2){
     printf("Code cannot currently handle walls in more than one dimension.\n");
@@ -247,24 +257,13 @@ int main(int argc, const char *argv[]) {
       sprintf(name_suffix, "-flat");
     } else if (gaussian_fit) {
       sprintf(name_suffix, "-gaussian");
+    } else if (wang_landau) {
+      sprintf(name_suffix, "-wl");
     } else if (walker_weights) {
       sprintf(name_suffix, "-walkers");
     } else {
       name_suffix[0] = 0; // set name_suffix to the empty string
     }
-    // check that nonsense options do not exist:
-    assert(no_weights || flat_histogram || gaussian_fit || walker_weights
-           || fix_kT);
-    assert(!(no_weights && flat_histogram));
-    assert(!(no_weights && gaussian_fit));
-    assert(!(no_weights && walker_weights));
-    assert(!(no_weights && fix_kT));
-    assert(!(flat_histogram && gaussian_fit));
-    assert(!(flat_histogram && walker_weights));
-    assert(!(flat_histogram && fix_kT));
-    assert(!(gaussian_fit && walker_weights));
-    assert(!(gaussian_fit && fix_kT));
-    assert(!(walker_weights && fix_kT));
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, N, name_suffix);
     printf("\nUsing default file name: ");
@@ -303,6 +302,9 @@ int main(int argc, const char *argv[]) {
                                    / uipow(R,3) - 1);
   long *energy_histogram = new long[energy_levels]();
 
+  // Wang-Langau factor
+  double ln_wl_factor = 1;
+
   // Walkers
   bool current_walker_plus = false;
   int walker_plus_threshold = 0, walker_minus_threshold = 0;
@@ -340,6 +342,9 @@ int main(int argc, const char *argv[]) {
   move_info moves;
 
   if(totime < 0) totime = 10*N;
+
+  // a guess for the number of iterations to run for initializing the histogram
+  const int first_weight_update = energy_levels;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -472,7 +477,8 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(balls, N, interaction_distance, len, walls);
   double dscale = .1;
 
-  for(long iteration = 1; iteration <= initialization_iterations; iteration++) {
+  for(long iteration = 1;
+      iteration <= initialization_iterations + first_weight_update; iteration++) {
     // ---------------------------------------------------------------
     // Move each ball once
     // ---------------------------------------------------------------
@@ -483,6 +489,16 @@ int main(int argc, const char *argv[]) {
       interactions += moves.new_count - moves.old_count;
       energy_histogram[interactions]++;
 
+      if(wang_landau){
+        ln_energy_weights[interactions] -= ln_wl_factor
+          - log(1-1/(energy_histogram[interactions]+1e-10));
+        // the first term is from wang-langau
+        // the second term is to correct for the fact that wang-landau uses
+        //   a ratio of DoS rather than a ratio of weights to calculate the
+        //   probability of accepting a move
+        // the 1e-10 factor is added for the case energy_histogram[interactions] == 1;
+        //   its effect should otherwise be negligibly small
+      }
       if(walker_weights){
         walkers_total[interactions]++;
         if(interactions >= walker_minus_threshold)
@@ -518,29 +534,27 @@ int main(int argc, const char *argv[]) {
     // Update weights
     // ---------------------------------------------------------------
     if(!(no_weights || gaussian_fit || fix_kT)){
-      const int first_weight_update =
-        min(energy_levels, initialization_iterations*9/10);
-      // don't update until we could at least theoretically have
-      // occupied all energy levels.
       if(iteration == first_weight_update){
-        // initial guess for energy weights
+        // initial guess for energy weights: gaussian
         int max_entropy = 0;
-        for(int i = 0; i < energy_levels; i++){
-          if (energy_histogram[i] > energy_histogram[max_entropy])
+        for (int i = 0; i < energy_levels; i++) {
+          if (log(energy_histogram[i]) - ln_energy_weights[i]
+              > (log(energy_histogram[max_entropy])
+                 - ln_energy_weights[max_entropy])) {
             max_entropy = i;
+          }
         }
         for (int i = max_entropy; i < energy_levels; i++) {
-          ln_energy_weights[i] = -log(energy_histogram[i] > 0 ?
+          ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
                                       energy_histogram[i] : 0.01);
         }
-        for(int i = 0; i <= max_entropy; i++)
-          ln_energy_weights[i] = ln_energy_weights[max_entropy];
         weight_updates++;
-      } else if((iteration >= first_weight_update)
-                && (flat_histogram || walker_weights)
+      } else if((flat_histogram || walker_weights)
+                && (iteration > first_weight_update)
                 && ((iteration-first_weight_update)
                     % int(first_weight_update*uipow(2,weight_updates)) == 0)){
         printf("\nUpdating weights %d!!!\n\n", int(uipow(2,weight_updates)));
+        // find max entropy point
         int max_entropy = 0;
         for (int i = 0; i < energy_levels; i++) {
           if (log(energy_histogram[i]) - ln_energy_weights[i]
@@ -550,11 +564,13 @@ int main(int argc, const char *argv[]) {
           }
         }
         if (flat_histogram) {
+          // update flat histogram
           for (int i = max_entropy; i < energy_levels; i++) {
             ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
                                         energy_histogram[i] : 0.01);
           }
         } else if(walker_weights) {
+          // update walker optimization histogram
           for(int i = max_entropy; i < energy_levels; i++){
             const int top = i < energy_levels-1 ? i+1 : i;
             const int bottom = i > 0 ? i-1 : i;
@@ -569,8 +585,10 @@ int main(int argc, const char *argv[]) {
           for (int i = 0; i < energy_levels; i++)
             walkers_total[i] = 0;
         }
+        // cap energy weights at the weight of the max entropy point
         for (int i = 0; i < max_entropy; i++)
           ln_energy_weights[i] = ln_energy_weights[max_entropy];
+        // reset energy histogram
         for (int i = 0; i < energy_levels; i++)
           energy_histogram[i] = 0;
         // -----------------------------------------------------------------
@@ -661,36 +679,8 @@ int main(int argc, const char *argv[]) {
       fflush(stdout);
     }
   }
-  if(gaussian_fit){
-    // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
-    // neglecting constant terms, ln_weights = (i-max_entropy)^2/(2 s^2)
-    // here the variance s^2 is given by s = 2*sqrt(2 ln2) / FWHM(dos(E))
-    // for FWHM we also need to find i satisfying dos[i] = dos[max_entropy] / 2
-    // note that as we have not used weights, dos = energy_histogram
-    int max_entropy = 0;
-    for(int i = 0; i < energy_levels; i++){
-      if (energy_histogram[i] > energy_histogram[max_entropy])
-        max_entropy = i;
-    }
-    int target_value = energy_histogram[max_entropy] / 2;
-    int smallest_diff = target_value;
-    int current_diff = 0;
-    int best_halfway[2] = {0,0};
-    for(int i = 0; i < energy_levels; i++){
-      if(i == max_entropy) smallest_diff = target_value;
-      current_diff = abs(energy_histogram[i] - target_value);
-      if(current_diff < smallest_diff){
-        smallest_diff = current_diff;
-        best_halfway[i > max_entropy] = i;
-      }
-    }
-    double s = (best_halfway[1]-best_halfway[0])/(2*sqrt(2*log(2)));
-    // now set actual energy weights
-    for(int i = max_entropy; i < energy_levels; i++)
-      ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
-    for(int i = 0; i < max_entropy; i++)
-      ln_energy_weights[i] = ln_energy_weights[max_entropy];
-  }
+  if(gaussian_fit)
+    set_gaussian_weights(energy_histogram,ln_energy_weights,energy_levels);
   took("Initialization");
 
   // ----------------------------------------------------------------------------
@@ -818,8 +808,10 @@ int main(int argc, const char *argv[]) {
       fprintf(w_out, "%s", countinfo);
       fprintf(w_out, "\n# interactions   ln(weight)\n");
       for(int i = 0; i < energy_levels; i++)
-        if(energy_histogram[i] != 0)
-          fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]);
+        if(energy_histogram[i] != 0){
+          fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]
+                  + (wang_landau ? log(energy_histogram[i]) : 0));
+        }
       fclose(w_out);
 
       // Save RDF

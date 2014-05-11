@@ -90,4 +90,9 @@ int count_interactions(int id, ball *p, double interaction_distance,
                        double len[3], int walls);
 
 // Count the interactions of all the balls
-int count_all_interactions(ball *balls, int N, double interaction_distance, double len[3], int walls);
+int count_all_interactions(ball *balls, int N, double interaction_distance,
+                           double len[3], int walls);
+
+// Set weight histogram assuming a gaussian DoS
+void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
+                          int energy_levels);
