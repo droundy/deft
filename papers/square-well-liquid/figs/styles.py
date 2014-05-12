@@ -3,6 +3,7 @@ color = { 'nw': 'r',
           'kT2': 'c',
           'kT0.1': 'g',
           'flat': 'k',
+          'wang_landau': 'g',
           'gaussian': 'm',
           'walkers': 'y'}
 
@@ -11,6 +12,7 @@ line = { 'nw': '--',
          'kT2': ':',
          'kT0.1': '-.',
          'flat': '-',
+         'wang_landau': '-',
          'gaussian': '-',
          'walkers': '-'}
 
@@ -19,6 +21,7 @@ title = { 'nw': '$kT/\epsilon = \infty$ sim.',
           'kT2': '$kT/\epsilon = 2$ sim.',
           'kT0.1': '$kT/\epsilon = 0.1$ sim.',
           'flat': 'flat histogram',
+          'wang_landau': 'Wang-Landau',
           'gaussian': 'gaussian method',
           'walkers': 'walker optimization'}
 
