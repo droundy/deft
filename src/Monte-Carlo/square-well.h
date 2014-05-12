@@ -90,4 +90,31 @@ int count_interactions(int id, ball *p, double interaction_distance,
                        double len[3], int walls);
 
 // Count the interactions of all the balls
-int count_all_interactions(ball *balls, int N, double interaction_distance, double len[3], int walls);
+int count_all_interactions(ball *balls, int N, double interaction_distance,
+                           double len[3], int walls);
+
+// Set weight histogram assuming a gaussian DoS
+void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
+                          int energy_levels);
+
+// Find index of max entropy point
+int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
+                      int energy_levels);
+
+// Consider an fcc lattice broken into cubic cells with a ball at the center of each
+//   and a ball on the center of each edge
+// Choosing one cell as the "center", index each cell by n, m, and l, which correspond
+//   to the number of cells along orthogonal directions a particular cell is from
+//   the "center" cell
+// For example, a cell three cells to the left, one cell forward, and five cells down
+//    from the "center" cell would be indexed n = 3, m = 1, l = -5
+// Denote the sides of a given cell by values of x, y, and z which may be -1, 0, or 1
+// For example, the "forward right" side of a cell has x = 1, y = 1, z = 0,
+//    while the "top left" side would be x = -1, y = 0, z = 1
+// This function finds the distance in from the origin of the ball located at n,m,l,x,y,z,
+//    assuming cells have a side length of 1
+double fcc_dist(int n, int m, int l, double x, double y, double z);
+
+// This function finds the maximum number of balls within a given distance
+//   distance should be normalized to (divided by) ball radius
+int max_balls_within(double radius);
