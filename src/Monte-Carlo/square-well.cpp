@@ -312,3 +312,38 @@ void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
     energy_histogram[i] = 0;
   return;
 }
+
+int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
+                      int energy_levels){
+  int max_entropy = 0;
+  for (int i = 0; i < energy_levels; i++) {
+    if (log(energy_histogram[i]) - ln_energy_weights[i]
+        > (log(energy_histogram[max_entropy])
+           - ln_energy_weights[max_entropy])) {
+      max_entropy = i;
+    }
+  }
+  return max_entropy;
+}
+
+double fcc_dist(int n, int m, int l, double x, double y, double z){
+  return sqrt(sqr(n+x/2) + sqr(m+y/2) + sqr(l+z/2));
+}
+
+int max_balls_within(double distance){
+  distance += 1e-10;
+  double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
+  int c = int(ceil(distance/a));
+  int num = -1; // don't count the ball at the origin
+  for(int n  = -c; n <= c; n++){
+    for(int m = -c; m <= c; m++){
+      for(int l = -c; l <= c; l++){
+        num += (a*fcc_dist(n,m,l,0,0,0) <= distance)
+          + (a*fcc_dist(n,m,l,1,1,0) <= distance)
+          + (a*fcc_dist(n,m,l,1,0,1) <= distance)
+          + (a*fcc_dist(n,m,l,0,1,1) <= distance);
+      }
+    }
+  }
+  return num;
+}

@@ -313,8 +313,7 @@ int main(int argc, const char *argv[]) {
 
   // Energy histogram
   const double interaction_distance = 2*R*well_width;
-  const int energy_levels = N/2 * (uipow(interaction_distance,3)
-                                   / uipow(R,3) - 1);
+  const int energy_levels = N/2*max_balls_within(interaction_distance);
   long *energy_histogram = new long[energy_levels]();
 
   // Walkers
@@ -369,7 +368,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Find the upper limit to the maximum number of neighbors a ball could have
-  int max_neighbors = uipow(2+neighbor_scale*well_width,3) - 1;
+  int max_neighbors = max_balls_within(2+neighbor_scale*well_width);
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -570,14 +569,8 @@ int main(int argc, const char *argv[]) {
                     % int(first_weight_update*uipow(2,weight_updates)) == 0)){
         printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
         // find max entropy point
-        int max_entropy = 0;
-        for (int i = 0; i < energy_levels; i++) {
-          if (log(energy_histogram[i]) - ln_energy_weights[i]
-              > (log(energy_histogram[max_entropy])
-                 - ln_energy_weights[max_entropy])) {
-            max_entropy = i;
-          }
-        }
+        const int max_entropy =
+          max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
         if (flat_histogram) {
           // update flat histogram
           for (int i = max_entropy; i < energy_levels; i++) {
@@ -611,13 +604,16 @@ int main(int argc, const char *argv[]) {
         if(test_weights) print_weights = true;
       }
       else if(wang_landau && (iteration == N*first_weight_update)){
+        const int max_entropy =
+          max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+
         double mean_counts = 0;
-        for(int i = 0; i < energy_levels; i++)
+        for(int i = max_entropy; i < energy_levels; i++)
           mean_counts += energy_histogram[i];
         mean_counts /= energy_levels;
 
         double count_variation = 0;
-        for(int i = 0; i < energy_levels; i++)
+        for(int i = max_entropy; i < energy_levels; i++)
           count_variation += sqr(energy_histogram[i] - mean_counts);
         count_variation = sqrt(count_variation/energy_levels)/mean_counts;
 
@@ -628,16 +624,17 @@ int main(int argc, const char *argv[]) {
         }
         if(wl_factor > wl_cutoff)
           iteration = first_weight_update;
-        printf("\nwl_factor: %g\n",wl_factor);
+        printf("\nweight update: %i\n",weight_updates);
+        printf("  WL factor: %g\n",wl_factor);
         printf("  mean counts: %g\n",mean_counts);
         printf("  count variation: %g\n",count_variation);
 
         weight_updates++;
-        if(test_weights) print_weights = true;
+        if((weight_updates % 10 == 0) && test_weights) print_weights = true;
       }
       if(print_weights){
-        char *w_headerinfo = new char[4096];
-        sprintf(w_headerinfo,
+        char *headerinfo = new char[4096];
+        sprintf(headerinfo,
                 "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
                 " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
                 " well_width: %g, translation_distance: %g\n"
@@ -647,36 +644,49 @@ int main(int argc, const char *argv[]) {
                 well_width, translation_distance, initialization_iterations,
                 neighbor_scale, dr, energy_levels);
 
-        char *w_countinfo = new char[4096];
-        sprintf(w_countinfo,
+        char *countinfo = new char[4096];
+        sprintf(countinfo,
                 "# iteration: %li, working moves: %li, total moves: %li, "
                 "acceptance rate: %g\n",
                 iteration, moves.working, moves.total,
                 double(moves.working)/moves.total);
 
-        const char *w_testdir = "weights";
+        const char *testdir = "test";
 
-        char *w_test_fname = new char[1024];
+        char *w_fname = new char[1024];
+        char *e_fname = new char[1024];
         mkdir(dir, 0777); // create save directory
-        sprintf(w_test_fname, "%s/%s",
-                dir, w_testdir);
-        mkdir(w_test_fname, 0777); // create weights directory
-        sprintf(w_test_fname, "%s/%s/%s-w%02i.dat",
-                dir, w_testdir, filename, weight_updates);
-        FILE *w_out = fopen(w_test_fname, "w");
+        sprintf(w_fname, "%s/%s", dir, testdir);
+        mkdir(w_fname, 0777); // create test directory
+        sprintf(w_fname, "%s/%s/%s-w%02i.dat",
+                dir, testdir, filename, weight_updates);
+        sprintf(e_fname, "%s/%s/%s-E%02i.dat",
+                dir, testdir, filename, weight_updates);
+
+        FILE *w_out = fopen(w_fname, "w");
         if (!w_out) {
-          fprintf(stderr, "Unable to create %s!\n", w_test_fname);
+          fprintf(stderr, "Unable to create %s!\n", w_fname);
           exit(1);
         }
-        delete[] w_test_fname;
-        fprintf(w_out, "%s", w_headerinfo);
-        delete[] w_headerinfo;
-        fprintf(w_out, "%s", w_countinfo);
-        delete[] w_countinfo;
+        fprintf(w_out, "%s", headerinfo);
+        fprintf(w_out, "%s", countinfo);
         fprintf(w_out, "\n# interactions   value\n");
         for(int i = 0; i < energy_levels; i++)
           fprintf(w_out, "%i  %f\n", i, ln_energy_weights[i]);
         fclose(w_out);
+
+        FILE *e_out = fopen((const char *)e_fname, "w");
+        fprintf(e_out, "%s", headerinfo);
+        fprintf(e_out, "%s", countinfo);
+        fprintf(e_out, "\n# interactions   counts\n");
+        for(int i = 0; i < energy_levels; i++)
+          fprintf(e_out, "%i  %ld\n",i,energy_histogram[i]);
+        fclose(e_out);
+
+        delete[] headerinfo;
+        delete[] countinfo;
+        delete[] w_fname;
+        delete[] e_fname;
 
         print_weights = false;
       }
