@@ -1,9 +1,14 @@
 from __future__ import division
 import RG
-import sys
 import minmax_RG
 import numpy as np
 import time
+import matplotlib, sys
+if 'show' not in sys.argv:
+  matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+import forte
 
 # Author: Dan Roth
 # E-mail: Daniel.Edward.Roth@gmail.com
@@ -29,14 +34,14 @@ import time
 def npart(iterations):
     # Initial conditions; dependent on you system
 
-    # T = 0.1
+    T = 0.1
+    nparticular = 0.08/(RG.sigma**3*np.pi/6) # using finite differences df_dn
     # nparticular = 0.155/(RG.sigma**3*np.pi/6) # using analytic df_nd
-    # nparticular = 0.08/(RG.sigma**3*np.pi/6) # using finite differences df_dn
 
-    T = 0.68
-    nparticular = 0.0414/(RG.sigma**3*np.pi/6)
+    # T = 0.68
+    # nparticular = 0.0414/(RG.sigma**3*np.pi/6)
 
-    N = 15 # For publication plots, make this bigger (40? 80? 100? You decide!)
+    N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
     Tc = 1.33
     Tlow = T
 
@@ -120,7 +125,13 @@ if __name__ == '__main__':
     timing.write('# iterations time (s)\n')
     sys.stdout.flush()
 
-    for i in range(1):
+    # Number of iterations desired
+    num_iterations = 2
+
+    # define the colors/symbols for plotting
+    colors = np.array(['b-','g-','r-'])
+
+    for i in range(num_iterations):
         print 'running npart_RG for iterations =',i
         timing.flush()
         # note current time
@@ -135,5 +146,26 @@ if __name__ == '__main__':
         # write to file
         timing.write(str(i)+' '+str(elapsed)+'\n')
         sys.stdout.flush()
+
+        # Plot Coexistence
+        # Read in data
+        data = np.loadtxt('figs/npart_RG-i%d-out.dat'%i)
+
+        T = data[:,0]
+        etavapor = data[:,1]*np.pi*RG.sigma**3/6
+        etaliquid = data[:,2]*np.pi*RG.sigma**3/6
+
+      # Plot Forte's data
+      plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
+      plt.plot(etaliquid, T, colors[i])
+      plt.plot(forte.eta,forte.T, label='Forte')
+
+      # Labels, etc.
+      plt.xlabel(r'$\eta$')
+      plt.ylabel('T')
+      plt.legend(loc=0)
+      plt.title('Liquid-Vapor Coexistence')
+
+      plt.savefig('figs/coexistance-RG.pdf')
 
     timing.close()

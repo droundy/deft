@@ -58,8 +58,12 @@ def integrand_ID(T,n,x,i):
     return argument
 
 def ID(integrand,T,n,i):
-    value = integrate.midpoint(lambda x: integrand_ID(T,n,x,i),0,1,1000)
-    return value
+    maxn = 1/(sigma**3*np.pi/6)
+    # maxx = 1
+    # if maxx*n > maxn:
+    #     maxx = maxn/n
+    maxx = np.minimum(np.ones_like(n),maxn/n)
+    return integrate.midpoint(lambda x: integrand_ID(T,n,x,i),0,maxx,100)
 
 # Reference for ID
 # Evaluated at small enough wavelengths that UbarD should be negligible
@@ -68,8 +72,12 @@ def integrand_ID_ref(T,n,x,i):
     return np.exp(-VD(i)/k_B/T*fbarD(T,n,x,i))
 
 def ID_ref(integrand,T,n,i):
-    value = integrate.midpoint(lambda x: integrand_ID_ref(T,n,x,i),0,1,1000)
-    return value
+    maxn = 1/(sigma**3*np.pi/6)
+    #maxx = 1
+    maxx = np.minimum(np.ones_like(n),maxn/n)
+    # if maxx*n > maxn:
+    #     maxx = maxn/n
+    return integrate.midpoint(lambda x: integrand_ID_ref(T,n,x,i),0,maxx,100)
 
 # Average within the considered subdomain, based on x
 # eqn (10), Forte 2011
