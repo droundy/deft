@@ -133,42 +133,10 @@ We use a harmonic pair potential
     V_0 \left ( 1 - \frac{r}{2R} \right )^2 & 0 \leq r \leq r_0\\
     0 & otherwise
   \end{cases}
+  \label{eq:potential}
 \end{align}
 Where R is the soft sphere radius and $V_0$ is the maximum
 potential at complete overlap.
-
-For the $w_2(r)$ convolved with itself,
-\begin{widetext}
-\begin{align*}
-  w_2\ast w_2 &= \alpha \frac{R}{4}\sqrt{\frac{\pi}{2\gamma}}
-               \left( r^2 - \frac{R^2}{\gamma}
-               \right)\textrm{erf} \left( \sqrt{2\gamma} \left(1 - \frac{r}{2R}
-               \right) \right)%\\
-               %&
-               + \alpha \frac{R^2}{2\gamma} \left( R - \frac{r}{2}
-               \right) e^{-2\gamma \left( 1 - \frac{r}{2R} \right)^2}.
-\end{align*}
-\end{widetext}
-%% We substitute $u = \sqrt{2\gamma}\left( 1 - \frac{r}{2R} \right)$ and
-%% plug in our expression above for $\alpha$ so that,
-\begin{align*}
-  w_2\ast w_2 &= \frac{B^2 R}{\sqrt{2\gamma}} \left[
-               \frac{\sqrt{\pi}}{4} \left( r^2 - \frac{R^2}{\gamma}
-               \right) e^{-u^2} \textrm{erf}(u)
-               + \frac{R^2 u}{\sqrt{2\gamma}}
-               e^{-2u^2} \right]
-\end{align*}
-%% Now we'll need to integrate this and set it to the integral of $f'(r)$
-%% to solve for the constant $B$. Since this expression is only the part
-%% of $w_2(r)$ from $R \leq r \leq 2R$, we need to justify only using
-%% this portion by saying that at low temps (which is our region of
-%% interest), $w_2(r)$ below $R$ (or $\frac{r_0}{2}$) is nearly zero.
-%% This upper part of $w_2(r)$ which we have used above goes to very
-%% small numbers in the region $0 \leq r \leq R$.  Both parts of $w_2(r)$
-%% are nearly zero for $r \leq 0$, so we can carry out the integrate to
-%% $-\infty$ so that the error function integrals are analytic.
-%% Therefore, we can integrate from $-\infty$ to $r_0$ and it is
-%% approximately correct.
 
 \begin{figure}
 \begin{center}
@@ -179,127 +147,44 @@ For the $w_2(r)$ convolved with itself,
 \label{fig:w2convolves}
 \end{figure}
 
-If we do this integration on over $r$, then the limits for $u$ are
-$\infty$ to zero.  I'll set \fixme{for now to save space} $w_2\ast
-w_2 = w_{2c}(u)$. Then,
-\begin{widetext}
+Use of the quadratic potential in SFMT was a non-analytic solution.
+With the quadratic potential, consider that  
 \begin{align}
-\int_{\infty}^0 w_{2c}(u) du &= -\frac{B^2 R^4}{2 \gamma^2}
-           \int_\infty^0 \left[ \frac{\sqrt{\pi}}{2} \left( 4\gamma - 1 -
-           4\sqrt{2\gamma}u + 2 u^2 \right) e^{-u^2} \textrm{erf}(u) +
-           u e^{-2u^2} \right]du \\
-           &= \left[ \frac{B R^2}{2\gamma} (\sqrt{\pi \gamma} -1) \right]^2
+  f'(r) \approx \frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
 \end{align}
-\end{widetext}
-Now, to find B we set
+and approximate the Mayer function as 
 \begin{align}
-  \int_0^{\infty} f'(r)dr &= \int_{-\infty}^0 w_2(r)\ast w_2(r) dr\\
-   1 - e^{-\beta V_0} &= \left[ \frac{B R^2}{2\gamma} (\sqrt{\pi
-      \gamma} -1)  \right]^2
- \end{align}
-To find B, we approximate the integral so that it is from $-\infty$ to $r_0$.
+  f(r) \approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 )
+\end{align}
+then
 \begin{align}
-  \int_{-\infty}^{r_0} f'(r)dr &= 1 \\
-  \implies B &= \frac{2\gamma}{(\sqrt{\pi \gamma}-1)R^2}
+  V(r) \approx -kT\ln\left(\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )\right).
+\end{align}
+Expanding this in a power series gives.
+\begin{align}
+  V(\sigma) &\approx -kT\ln\left(\tfrac12\right) \\
+  &= k_BT \ln 2.
+\end{align}
+Setting the slope equal at $r=\sigma$ ...\fixme{I don't know if all
+  this is necessary so I'm leaving it out for now}
+The approximate weight functions are
+\begin{align}
+  w_2(r) &= \frac{1}{a\sqrt{\pi}} e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
+  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) ).
+\end{align}
+with all other weight functions retaining their relation to $w_2(r)$
+as in FMT.  Solving for $a$ and $\sigma$ by comparing the approximate
+$V(r)$ with the harmonic potential \fixme{explain in more detail?} gives
+\begin{align}
+  \sigma &= 2R\left( 1 - \sqrt{\frac{k_BT \ln 2}{V_0}}\right) \\
+  a &= 2R\sqrt{\frac{kT}{\pi V_0 \ln 2}}.
 \end{align}
 
 \subsection{Weighting functions in real space}
 
-\begin{align}
-  w_2(r) &=\frac{2\gamma r}
-  {(\sqrt{\pi \gamma}-1)R^2}e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
-           \Theta(r) \Theta(R - r )\\
-  w_3(r) &= \int_r^\infty w_2(r') dr'\\
-         &= -B \int_r^R r' e^{-\gamma \left(1- \frac{r'}{R} \right)^2}dr'\\
-         &= \frac{B R^2}{2\gamma}\left[ 1 - e^{-\gamma
-      \left(1-\frac{r}{R} \right)^2} - \sqrt{\pi \gamma} \mathrm{erf} \left[
-        \sqrt{\gamma} \left( 1- \frac{r}{R} \right) \right] \right]\\
-  w_1(r) &= \frac{B}{4\pi}e^{-\gamma \left ( 1 - \frac{r}{R}
-            \right)^2} \Theta_1(r) \Theta_2 (R - r)\\
-  w_0(r) &= \frac{B}{4\pi r}e^{-\gamma \left ( 1 - \frac{r}{R}
-            \right)^2} \Theta_1(r) \Theta_2 (R - r)\\
-  \mathbf{w}_{2V}(\rr) &= B e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
-           \Theta_1(r) \Theta_2 (R - r) \rr\\
-  \mathbf{w}_{1V}(\rr) &= \frac{B}{4\pi r} e^{-\gamma \left ( 1 - \frac{r}{R} \right)^2}
-           \Theta_1(r) \Theta_2 (R - r )\rr
-\end{align}
-
-\subsection{Weighting functions in fourier space}\
-
-\begin{align}
-  \tilde{w}_2(k) &= \frac{4\pi B}{k} \int_{0}^{\infty} r^2 
-   e^{-\gamma \left(1- \frac{r}{R} \right)^2} \sin(kr) dr \\
-  \tilde{w}_3(k) &=
-\end{align}
-\begin{align}
-  \tilde{w}_1(k) &= \int_0^\infty \int_0^{2\pi} \int_{-1}^{1} w_1(r)
-           e^{-ikr\cos\theta} r^2drd\phi d\cos\theta
-    \\
-    &= \frac{4\pi}{k} \int_0^\infty r w_1(r) \sin(kr) dr
-    \\
-    &= -\frac{2\pi}{ik} \int_{-\infty}^\infty r w_1(|r|) e^{-ikr} dr
-    \\
-    &= \frac{2\pi}{k} \int_0^{R} r \frac{B}{4\pi} e^{-\gamma\left(1-\frac{|r|}{R}\right)^2} \sin(kr) dr
-    \\
-    &= -\frac{B}{ik} \int_{-R}^{R} r e^{-\gamma\left(1-\frac{|r|}{R}\right)^2} e^{-ikr} dr
-    \\
-    &= -\frac{B}{ik} \int_{-R}^{R} r
-    e^{-\gamma\left(1-\frac{|r|}{R}\right)^2 - ikr} dr
-    \\
-    x &\equiv \frac{r}{R} \\
-    \\
-    \tilde{w}_1(k) &=
-    -\frac{BR^2}{ik} \int_{-1}^{1} x
-    e^{-\gamma\left(1-|x|\right)^2 - ikRx} dx
-    \\
-    &=
-    -\frac{BR^2}{ik}
-    \bigg(
-    \int_{0}^{1} x e^{-\gamma\left(1-x\right)^2 - ikRx} dx
-    \notag\\&\quad\quad\quad\quad\quad\quad+
-    \int_{-1}^{0} x e^{-\gamma\left(1+x\right)^2 - ikRx} dx
-    \bigg)
-\end{align}
-Eric has checked this, and it looks fine, and looks solvable by
-Mathematica.  The final integral is alternatively solvable by
-completing the square in the exponent.
-\begin{align}
-  \tilde{w}_0(k) &= \frac{B}{k} \int_0^\infty \frac{w_2(r)}{r} \sin(kr) dr
-    \\
-  \mathbf{\tilde{w}}_{2V}(k) &= \\
-  \mathbf{\tilde{w}}_{1V}(k) &= 
-\end{align}
+\subsection{Weighting functions in fourier space}
 
 \subsection{Homogeneous limit}
-
-\begin{align}
-  \int w_3(\rr)d\rr &= \frac{4\pi BR^2}{2\gamma}\int_0^R r^2 \bigg\{1-
-                     e^{-\gamma \left(1-\frac{r}{R} \right)^2} \notag\\
-                    &-\sqrt{\pi \gamma} \mathrm{erf}\left[ \gamma \left(1 - \frac{r}{R}
-                      \right) \right] \bigg\} d\rr\\
-                     &= \frac{\pi R
-                       e^{-\gamma}}{3\gamma^{3/2}(\sqrt{\pi \gamma})}
-                     \bigg\{2\sqrt{\gamma}
-                     \left(8e^\gamma(1+\gamma)-2\gamma -5 \right) \notag\\
-                     &- e^\gamma \sqrt{\pi} \left(4\gamma^2 +12\gamma
-                     +3 \right) \mathrm{erf}(\sqrt{\gamma}) \bigg\}\\
-  \int w_2(\rr)d\rr &= 4\pi B \int_0^R r^3 e^{-\gamma \left ( 1 - \frac{r}{R}
-           \right)^2} dr \\
-        &= \frac{2\pi R^2}{(\sqrt{\pi
-           \gamma} -1)}\big[ \sqrt{\pi \gamma}(2\gamma
-           +3)\mathrm{erf}(\sqrt{\gamma})\notag \\
-           & + 2(\gamma + 1)e^{-\gamma} -6\gamma -2 \big] \\
-  \int w_1(\rr)d\rr &= B\int_0^R r^2 e^{-\gamma \left ( 1 - \frac{r}{R}
-            \right)^2} dr\\
-         &= \frac{R\left[ \sqrt{\pi}(2\gamma + 1)\mathrm{erf}(\sqrt{\gamma})
-          + \sqrt{\gamma}\left(2-4e^{-\gamma}\right)
-          \right]}{2\sqrt{\gamma}( \sqrt{\pi \gamma} -1)} \\
-  \int w_0(\rr)d\rr &= B\int_0^R r e^{-\gamma \left ( 1 - \frac{r}{R}
-            \right)^2} dr\\
-              &= \frac{\sqrt{\gamma}}{\sqrt{\pi \gamma} -1}\left[
-              \sqrt{\pi} \mathrm{erf}(\sqrt{\gamma}) +
-               \frac{e^{-\gamma}-1}{\sqrt{\gamma}} \right]
-\end{align}
  
 \section{Comparison with simulation}
 
@@ -540,99 +425,6 @@ And now it's obvious that the solution is correct, apart from an
 unexplained minus sign in $\tilde{f}$, which I imagine I could find in
 time.  So it looks like we want to assume that the slope of $f(r)$ is
 zero for $r<0$, and therefore that $w_2(r<0)=0$.
-
-\section{Linear soft potential}
-
-Now let's imagine a potential
-\begin{align}
-  V(r) =
-  \begin{cases}
-    V_0 & r < 0 \\
-    V_0\left(1 - \frac{r}{r_0}\right) & r < r_0 \\
-    0 & r \ge r_0
-  \end{cases}
-\end{align}
-This gives us a Mayer $f$ function of
-\begin{align}
-  f(r) &= e^{-\beta V(r)} - 1 \\
-  f'(r) &=
-  \begin{cases}
-    \frac{\beta V_0}{r_0} e^{-\beta V_0(1-r/r_0)} & 0 < r < r_0 \\
-    0 & \text{otherwise}
-  \end{cases} \\
-  \tilde{f'}(k) &= \frac{\beta V_0}{r_0}\int_{0}^{r_0} e^{-\beta
-    V_0(1-r/r_0)}e^{ikr}dr \\
-  &= \frac{\beta V_0}{r_0}e^{-\beta V_0}
-  \int_{0}^{r_0} e^{(\beta V_0/r_0 + ik)r} dr
-  \\
-  &= \frac{\beta V_0}{r_0}e^{-\beta V_0} \frac{1}{\beta V_0/r_0 + ik}\left(
-  e^{\beta V_0+ikr_0} - 1 \right)
-  \\
-  &= \frac{e^{ikr_0} - e^{-\beta V_0}}{1 + \frac{ikr_0}{\beta V_0}}
-  \\
-  &= \tilde{w}_2(k)^2
-\end{align}
-That's just a little bit yucky, and I'm not sure I can solve for it in
-real space.
-
-Now let's imagine a potential that has some interesting (but
-numerically convenient) values for $r<0$
-\begin{align}
-  V(r) =
-  \begin{cases}
-    V_0\left(1 - \frac{r}{r_0}\right) & r < r_0 \\
-    0 & r \ge r_0
-  \end{cases}
-\end{align}
-This gives us a Mayer $f$ function of
-\begin{align}
-  f(r) &= e^{-\beta V(r)} - 1 \label{eq:ftrytwo} \\
-  f'(r) &=
-  \begin{cases}
-    \frac{\beta V_0}{r_0} e^{-\beta V_0(1-r/r_0)} & r < r_0 \\
-    0 & \text{otherwise}
-  \end{cases} \\
-  \tilde{f'}(k) &= \frac{\beta V_0}{r_0}\int_{-\infty}^{r_0} e^{-\beta
-    V_0(1-r/r_0)}e^{ikr}dr \\
-  &= \frac{\beta V_0}{r_0}e^{-\beta V_0}
-  \int_{-\infty}^{r_0} e^{(\beta V_0/r_0 + ik)r} dr
-  \\
-  &= \frac{\beta V_0}{r_0}e^{-\beta V_0} \frac{1}{\beta V_0/r_0 + ik}e^{\beta V_0+ikr_0}
-  \\
-  &= \frac{e^{ikr_0}}{1 + \frac{ikr_0}{\beta V_0}}
-  \\
-  &= \tilde{w}_2(k)^2
-\end{align}
-Now this is nicer.  The top is really easy to square root.  The bottom
-is ever so slightly harder, but not really hard.
-\begin{align}
-  \tilde{w}_2(k) &=
-  \frac1{\sqrt{2}}\frac{e^{ikr_0/2}}{\sqrt{\sqrt{1+\frac{kr_0}{\beta
-          V_0}}+1} +
-      i\sqrt{\sqrt{1+\frac{kr_0}{\beta V_0}}-1}}
-\end{align}
-Okay, that's a bit ugly, and I'm not sure that we can Fourier
-transform it to get a useful result.  We could potentially approximate
-it in the limit that $\beta V_0 \gg 1$, although any simple power
-series expansion would require us to prove that $kr_0\gg1$ is
-unimportant, possibly by arguing that phase cancellation will cause it
-to be unimportant when we evaluate our actual $w_2(r)$.
-\begin{align}
-  w_2(r) &= \int_{-\infty}^\infty \tilde{w}_2(k) \\
- &=
-  \frac1{\sqrt{2}}\frac{e^{ikr_0/2}}{\sqrt{\sqrt{1+\frac{kr_0}{\beta
-          V_0}}+1} +
-      i\sqrt{\sqrt{1+\frac{kr_0}{\beta V_0}}-1}}
-\end{align}
-
-It occurs to me now that Schmidt may have assumed right after his
-Equation~A7 that $w_2(r<0)=0$, in which case this attempt won't work:
-we'll need to make things zero for $r<0$ if we're going to use this
-Fourier transform trick at all.  On the other hand, if this comes out
-to be \emph{effectively} zero for reasonable temperatures, perhaps
-this will be a good approach.  After all, I'm interested in $\beta V_0
-\gg 1$, which means that the Mayer function is essentially flat in
-Equation~\ref{eq:ftrytwo} for $r<0$.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
