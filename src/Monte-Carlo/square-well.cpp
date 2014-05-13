@@ -277,18 +277,52 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
   return interactions;
 }
 
-void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
-                          int energy_levels){
+int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
+                      int energy_levels){
+  int max_entropy = 0;
+  for (int i = 0; i < energy_levels; i++) {
+    if (log(energy_histogram[i]) - ln_energy_weights[i]
+        > (log(energy_histogram[max_entropy])
+           - ln_energy_weights[max_entropy])) {
+      max_entropy = i;
+    }
+  }
+  return max_entropy;
+}
+
+void flush_arrays(long *energy_histogram, double *ln_energy_weights,
+           int energy_levels){
+  int max_entropy =
+    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+  for (int i = 0; i < max_entropy; i++)
+    ln_energy_weights[i] = ln_energy_weights[max_entropy];
+  for (int i = 0; i < energy_levels; i++)
+    energy_histogram[i] = 0;
+  return;
+}
+
+void flat_hist(long *energy_histogram, double *ln_energy_weights,
+               int energy_levels){
+  int max_entropy =
+    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+  for (int i = max_entropy; i < energy_levels; i++) {
+    ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
+                                energy_histogram[i] : 0.01);
+  }
+  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
+
+  return;
+}
+
+void gaussian_hist(long *energy_histogram, double *ln_energy_weights,
+                   int energy_levels){
   // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
   // neglecting constant terms, ln_weights = (i-max_entropy)^2/(2 s^2)
   // here the variance s^2 is given by s = 2*sqrt(2 ln2) / FWHM(dos(E))
   // for FWHM we also need to find i satisfying dos[i] = dos[max_entropy] / 2
   // this function assumess no weighing has been used, so dos = energy_histogram
-  int max_entropy = 0;
-  for(int i = 0; i < energy_levels; i++){
-    if (energy_histogram[i] > energy_histogram[max_entropy])
-      max_entropy = i;
-  }
+  int max_entropy =
+    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   int target_value = energy_histogram[max_entropy] / 2;
   int smallest_diff = target_value;
   int current_diff = 0;
@@ -305,25 +339,47 @@ void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
   // set actual energy weights
   for(int i = max_entropy; i < energy_levels; i++)
     ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
-  for(int i = 0; i < max_entropy; i++)
-    ln_energy_weights[i] = ln_energy_weights[max_entropy];
-  // resest energy histogram
-  for (int i = 0; i < energy_levels; i++)
-    energy_histogram[i] = 0;
+
+  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
   return;
 }
 
-int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
-                      int energy_levels){
-  int max_entropy = 0;
-  for (int i = 0; i < energy_levels; i++) {
-    if (log(energy_histogram[i]) - ln_energy_weights[i]
-        > (log(energy_histogram[max_entropy])
-           - ln_energy_weights[max_entropy])) {
-      max_entropy = i;
-    }
+void walker_hist(long *energy_histogram, double *ln_energy_weights,
+                 int energy_levels, long *walkers_plus,
+                 long *walkers_total, move_info *moves){
+  int max_entropy =
+    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+  for(int i = max_entropy; i < energy_levels; i++){
+    int top = i < energy_levels-1 ? i+1 : i;
+    int bottom = i > 0 ? i-1 : i;
+    int dE = bottom-top; // energy = -interactions
+    double df = double(walkers_plus[top]) / walkers_total[top]
+      - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+    double df_dE = (df != 0 && !isnan(df)) ? df/dE : 1;
+    double walker_density =
+      double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves->total;
+    ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
   }
-  return max_entropy;
+  for (int i = 0; i < energy_levels; i++)
+    walkers_total[i] = 0;
+
+  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
+  return;
+}
+
+double count_variation(long *energy_histogram, double *ln_energy_weights,
+                     int energy_levels){
+  int max_entropy =
+    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+  double mean_counts = 0;
+  for(int i = max_entropy; i < energy_levels; i++)
+    mean_counts += energy_histogram[i];
+  mean_counts /= energy_levels;
+  double variation = 0;
+  for(int i = max_entropy; i < energy_levels; i++)
+    variation += sqr(energy_histogram[i] - mean_counts);
+  variation = sqrt(variation/energy_levels)/mean_counts;
+  return variation;
 }
 
 double fcc_dist(int n, int m, int l, double x, double y, double z){
@@ -331,7 +387,7 @@ double fcc_dist(int n, int m, int l, double x, double y, double z){
 }
 
 int max_balls_within(double distance){
-  distance += 1e-10;
+  distance += 1e-10; // add a tiny, but necessary margin of error
   double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
   int c = int(ceil(distance/a));
   int num = -1; // don't count the ball at the origin

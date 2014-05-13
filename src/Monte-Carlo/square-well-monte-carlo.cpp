@@ -549,89 +549,44 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     if(!(no_weights || gaussian_fit || fix_kT)){
       if(iteration == first_weight_update){
-        // initial guess for energy weights: gaussian
-        int max_entropy = 0;
-        for (int i = 0; i < energy_levels; i++) {
-          if (log(energy_histogram[i]) - ln_energy_weights[i]
-              > (log(energy_histogram[max_entropy])
-                 - ln_energy_weights[max_entropy])) {
-            max_entropy = i;
-          }
-        }
-        for (int i = max_entropy; i < energy_levels; i++) {
-          ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
-                                      energy_histogram[i] : 0.01);
-        }
+        flat_hist(energy_histogram, ln_energy_weights, energy_levels);
         weight_updates++;
       } else if((flat_histogram || walker_weights)
                 && (iteration > first_weight_update)
                 && ((iteration-first_weight_update)
                     % int(first_weight_update*uipow(2,weight_updates)) == 0)){
         printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
-        // find max entropy point
-        const int max_entropy =
-          max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-        if (flat_histogram) {
-          // update flat histogram
-          for (int i = max_entropy; i < energy_levels; i++) {
-            ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
-                                        energy_histogram[i] : 0.01);
-          }
-        } else if(walker_weights) {
-          // update walker optimization histogram
-          for(int i = max_entropy; i < energy_levels; i++){
-            const int top = i < energy_levels-1 ? i+1 : i;
-            const int bottom = i > 0 ? i-1 : i;
-            const int dE = bottom-top; // energy = -interactions
-            const double df = double(walkers_plus[top]) / walkers_total[top]
-              - (double(walkers_plus[bottom]) / walkers_total[bottom]);
-            const double df_dE = (df != 0 && !isnan(df)) ? df/dE : 1;
-            const double walker_density =
-              double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
-            ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
-          }
-          for (int i = 0; i < energy_levels; i++)
-            walkers_total[i] = 0;
+        if (flat_histogram)
+          flat_hist(energy_histogram, ln_energy_weights, energy_levels);
+        else if(walker_weights){
+          walker_hist(energy_histogram, ln_energy_weights, energy_levels,
+                      walkers_plus, walkers_total, &moves);
         }
-        // cap energy weights at the weight of the max entropy point
-        for (int i = 0; i < max_entropy; i++)
-          ln_energy_weights[i] = ln_energy_weights[max_entropy];
-        // reset energy histogram
-        for (int i = 0; i < energy_levels; i++)
-          energy_histogram[i] = 0;
-
         weight_updates++;
         if(test_weights) print_weights = true;
       }
       else if(wang_landau && (iteration == N*first_weight_update)){
-        const int max_entropy =
-          max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-
-        double mean_counts = 0;
-        for(int i = max_entropy; i < energy_levels; i++)
-          mean_counts += energy_histogram[i];
-        mean_counts /= energy_levels;
-
-        double count_variation = 0;
-        for(int i = max_entropy; i < energy_levels; i++)
-          count_variation += sqr(energy_histogram[i] - mean_counts);
-        count_variation = sqrt(count_variation/energy_levels)/mean_counts;
-
-        if(count_variation < wl_threshold){
+        // check whether our histogram is flat enough to update wl_factor
+        if(count_variation(energy_histogram, ln_energy_weights, energy_levels)
+           < wl_threshold){
           wl_factor /= wl_fmod;
-          for(int i = 0; i < energy_levels; i++)
-            energy_histogram[i] = 0;
+          flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
         }
+        // repeat until terminal condition is met
         if(wl_factor > wl_cutoff)
           iteration = first_weight_update;
+
+        // print status text for testing purposes
         printf("\nweight update: %i\n",weight_updates);
         printf("  WL factor: %g\n",wl_factor);
-        printf("  mean counts: %g\n",mean_counts);
-        printf("  count variation: %g\n",count_variation);
+        printf("  count variation: %g\n",
+               count_variation(energy_histogram, ln_energy_weights, energy_levels));
+        fflush(stdout);
 
         weight_updates++;
         if((weight_updates % 10 == 0) && test_weights) print_weights = true;
       }
+      // for testing purposes; prints energy histogram and weight array
       if(print_weights){
         char *headerinfo = new char[4096];
         sprintf(headerinfo,
@@ -727,7 +682,7 @@ int main(int argc, const char *argv[]) {
     }
   }
   if(gaussian_fit)
-    set_gaussian_weights(energy_histogram,ln_energy_weights,energy_levels);
+    gaussian_hist(energy_histogram,ln_energy_weights,energy_levels);
   took("Initialization");
 
   // ----------------------------------------------------------------------------
