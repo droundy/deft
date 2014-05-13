@@ -273,7 +273,7 @@ int main(int argc, const char *argv[]) {
     } else if (gaussian_fit) {
       sprintf(name_suffix, "-gaussian");
     } else if (wang_landau) {
-      sprintf(name_suffix, "-wanlan");
+      sprintf(name_suffix, "-wang_landau");
     } else if (walker_weights) {
       sprintf(name_suffix, "-walkers");
     } else {

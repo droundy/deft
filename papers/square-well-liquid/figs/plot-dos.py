@@ -60,5 +60,31 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
 
+
+plt.figure() # weight functions
+minlog = 0
+for version in versions:
+    lnw = numpy.loadtxt(
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
+    energy = -lnw[:,0]/N
+    log10w = -lnw[:,1]*numpy.log10(numpy.exp(1))
+    log10w -= log10w.max()
+    if log10w.min() < minlog:
+        minlog = log10w.min()
+    plt.plot(energy, log10w, styles.dots[version],label=styles.title[version])
+plt.ylim(minlog, 0)
+locs, labels = plt.yticks()
+newlabels = [tentothe(n) for n in locs]
+plt.yticks(locs, newlabels)
+plt.ylim(minlog, 0)
+
+plt.xlabel('$U/N\epsilon$')
+plt.ylabel('$w$')
+plt.title('Weighting functions for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-weights.pdf" % (ww*100, ff*100, N))
+
+
 if 'show' in sys.argv:
     plt.show()
