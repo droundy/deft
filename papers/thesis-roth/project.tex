@@ -8,19 +8,27 @@
 %% Definitions
 
 % 1/k_B/T
-\newcommand{\kT}{k_BT}
+\newcommand{\kT}{\ensuremath{k_BT}}
+
+% vector
+\newcommand{\rr}{\ensuremath{\bf{r}}}
 
 % special values for n
-\newcommand{\npart}{n_{particular}}
-\newcommand{\nliq}{n_{liquid}}
-\newcommand{\nvap}{n_{vapor}}
+\newcommand{\npart}{\ensuremath{n_{particular}}}
+\newcommand{\nliq}{\ensuremath{n_{liquid}}}
+\newcommand{\nvap}{\ensuremath{n_{vapor}}}
 
 % Free energy terms
-\newcommand{\fid}{f_\text{ID}(T,n)}
-\newcommand{\fhs}{f_\text{HS}(T,n)}
-\newcommand{\fdisp}{f_\text{disp}(T,n)}
-\newcommand{\fattr}{f_\text{attr}(T,n)}
+\newcommand{\fid}{\ensuremath{f_\text{ID}(T,n)}}
+\newcommand{\fhs}{\ensuremath{f_\text{HS}(T,n)}}
+\newcommand{\fdisp}{\ensuremath{f_\text{disp}(T,n)}}
+\newcommand{\fattr}{\ensuremath{f_\text{attr}(T,n)}}
 
+% pair potential
+\newcommand{\1}{\ensuremath{\textbf{r}_1}}
+\newcommand{\2}{\ensuremath{\textbf{r}_2}}
+
+% fixme
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{[#1]}}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,6 +43,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
+Near the critical point of a liquid, there are density \fixme{is saying $g(\rr)$ more accurate?} fluctuations at all length scales. In this regime, mean field theories break down, for obvious reasons. As one approaches the critical point, there becomes less and less of a difference in free energy of the liquid and vapor states; this causes difficulty in modeling liquid-vapor coexistence. This work develops a method for calculating liquid-vapor coexistence, and applies renormalization group theory to the square well liquid.
+
 %\tableofcontents
 \end{abstract}
 
@@ -42,6 +52,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}\label{sec:theory}
@@ -107,10 +118,134 @@ The attractive free energy includes van der Waals attraction between hard sphere
 \begin{align}
   \fdisp &= n \left( a_1(n) + \frac{1}{\kT}a_2(n) \right)
 \end{align}
-The $a_j(n)$ terms come from TPT, outlined in section~\ref{subsec:TPT}. I give their forms here. \fixme{Pull this from the Square well contribution in homogeneous case section in the SW paper}
+The $a_j(n)$ terms come from TPT, outlined in section~\ref{subsec:TPT}.
+
+The first term, $a_1$, is the mean-field dispersion interaction. The second term, $a_2$, describes the effect of fluctuations resulting from compression of the fluid due to the dispersion interaction itself, and is approximated using the local compressibility approximation (LCA), which assumes the energy fluctuation is simply related to the compressibility of a hard-sphere reference fluid\cite{Barker76}.
+
+In Gil-Villegas' paper, HS and Dispersion are wrapped up into the
+\textit{monomer} contribution, expressed in terms of energy densities
+as:
+\begin{align}
+  f_\text{mono} = f_\text{HS} - \frac{\alpha^\text{VDW}n}{kT}
+\end{align}
+with $\alpha^\text{VDW}$ given by
+\begin{align}
+  \alpha^\text{VDW} &= 2\pi\epsilon\int_\sigma^\infty r^2\phi(r)\,dr \\
+  \intertext{using reduced units of $x = r/\sigma$, we have}
+  &= 2\pi\sigma^3\int_1^\infty x^2\phi(x)\,dx \\
+  &= 3b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)\,dx
+\end{align}
+where $b^\text{VDW}$ is the van der Waals size parameter. It corresponds to the volume excluded by two spherical particles of volume $b$: $b^\text{VDW} = 4b = 4\left(\pi\sigma^3/6\right)$.
+
+Then, the high-temp expansion is an expansion of the monomer term:
+\begin{align}
+  f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
+\end{align}
+
+The term $a_1$ is given by
+\begin{align}
+  a_1 &= -2\pi n \epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
+  &= -3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
+\end{align}
+If we assume random correlations between the particles' positions, for all distances, we have $g^\text{HS}(r) = 1$. This yields
+\begin{align}
+  a_1^\text{VDW} = - n \alpha^\text{VDW},
+\end{align}
+the van der Waals mean-field energy.
+
+The second-order term is quite a bit more complicated; one must have knowledge of higher-order correlation functions to determine $a_2$. This term describes the response of the attractive energy due to the compression of the fluid from the attractive well. Gil-Villegas \emph{et al.} base their expression on an approximation by Barker and Henderson\cite{Barker67}. Barker and Henderson's approximation considers fluctuations in the number of particles in the potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial n  /\partial P^\text{HS}\right)_T$, we have:
+\begin{align}
+  a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
+  &= -\pi n \epsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \\
+  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+\end{align}
+
+We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion\cite{Barker76}:
+\begin{align}
+  K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
+\end{align}
 
 \subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
-\fixme{Pull TPT section from SW paper}
+\fixme{Add here an introduction to thermodyamic perturbation theory,
+  explaining $a_1$ and $a_2$ and their ``exact'' formulas that we wish
+  to approximate.}
+
+\fixme{And introduction to TPT---why do we use it?}
+
+\fixme{For now, the discussion follows entirely from the Simple Liquids book~\cite{Hansen06}}
+
+The pair potential $v(\1,\2)$ describes the interaction between two hard spheres. For the square-well model,
+\begin{align}
+  v_\text{SW}(\1,\2) &=
+    \begin{cases}
+      \infty & r < \sigma \\
+      -\epsilon & \sigma < r < \lambda\sigma \\
+      0 & \lambda\sigma < r
+    \end{cases}
+\end{align}
+
+Now, consider this to be the reference, and add a small perturbation:
+\begin{align}
+  v_\lambda(\1,\2) &= v_\text{SW}(\1,\2) + \lambda w(\1,\2) \label{eqn:small-perturbation}
+\end{align}
+
+The total potential energy of our system is
+\begin{align}
+  V_N(\lambda) = \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j)
+\end{align}
+
+Given the \emph{configuration integral} (the potenial energy component of the partition function)
+\begin{align}
+  Z_N &= \int d\mathbf{r}^N\, e^{-\beta V_N}
+\end{align}
+and the excess free energy (i.e.~the non-ideal part; $F = F^\text{id} + F^\text{ex}$)
+\begin{align}
+  F^\text{ex} &= -\kT\ln\left( \frac{Z_N}{V^N} \right)
+\end{align}
+where $V^N$ is the total volume \fixme{I think?}, then the derivative of the excess free energy with respect to the coupling parameter $\lambda$ is
+\begin{align}
+  \frac{\partial F^\text{ex}}{\partial\lambda} &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
+  &= -\kT\frac{1}{Z_N}\int d\mathbf{r}^N\, e^{-\beta V_N}(-\beta)\frac{\partial V_N}{\partial\lambda} \\
+  \hookrightarrow \beta\frac{\partial F^\text{ex}}{\partial\lambda} &= \beta\left\langle V_N^{'}(\lambda) \right\rangle_\lambda \\
+  \hookrightarrow \beta F^\text{ex} &= \beta F^\text{ex}_0 + \beta\int_0^1 d\lambda\, \left\langle V_N^{'}(\lambda) \right\rangle_\lambda
+\end{align}
+where $\left\langle V_N^{'}(\lambda) \right\rangle_\lambda$ is the canonical ensemble average. We can take a series expansion of this average:
+\begin{align}\begin{split} % too long; use split environment, and align to a space (&{})
+  \left\langle V_N^{'}(\lambda) \right\rangle_\lambda = &{} \left\langle V_N^{'}(\lambda)\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda}\bigg|_{\lambda = 0} \\ &{} + \mathcal{O}(\lambda)^2
+\end{split}\end{align}
+The derivative term is
+\begin{align}
+  \frac{\partial}{\partial\lambda}\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda} &= \left\langle V_N^{''} \right\rangle_\lambda - \beta\sigma_\lambda^2
+\end{align}
+where
+\begin{align}
+  \sigma_\lambda^2 &\equiv \left\langle \left[ V_N^{'}(\lambda) \right]^2 \right\rangle_\lambda - \left\langle V_N^{'}(\lambda) \right\rangle^2_\lambda
+\end{align}
+Putting this together, we have
+\begin{align}
+  \begin{split}
+    \beta F^\text{ex} = &{} \beta F^\text{ex}_0 + \beta(1 - 0)\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
+  \end{split} \\
+  \begin{split}
+    =&{}  \beta F^\text{ex}_0 + \beta\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
+  \end{split}
+\end{align}
+Now, we can define the total perturbation energy as
+\begin{align}
+  W_N &= \sum_{i=1}^N\sum_{j>i}^N w_\lambda(\mathbf{r}_i,\mathbf{r}_j)
+\end{align}
+Then, following from equation~\ref{eqn:small-perturbation},
+\begin{align}
+  V_N^{'} &= \frac{\partial}{\partial\lambda}\left(\sum_{i=1}^N\sum_{j>i}^N \lambda w(\mathbf{r}_i,\mathbf{r}_j)\right) \\
+  &= W_N \\
+  \therefore V_N^{''} &= 0
+\end{align}
+With this in mind, we can simplify equation~\ref{eqn:complicated-HTE} to the \emph{high-temperature expansion}, first derived by Zwanzig~\cite{Zwanzig54}:
+\begin{align}
+  \begin{split}
+    \beta F^\text{ex} = &{} \beta F^\text{ex}_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta)^3
+  \end{split}
+\end{align}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}\label{sec:methods}
