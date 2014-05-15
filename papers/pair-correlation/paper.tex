@@ -151,11 +151,17 @@ unsuitable for repeated evaluation within a free-energy minimization.
 \section{Previous approximations to the pair distribution function}
 There are several analytic approximations for the inhomogeneous pair
 distribution function, which extend the radial distribution function
-to inhomogeneous scenarios.  These works differ in what density is
-used when evaluating the radial distribution function $g(r,\eta)$.
+to inhomogeneous scenarios.  Work on these approximations date back to
+Toxvaerd \cite{toxvaerd1973statistical} and have been tested
+rigorously for both functional and non-functional based theories
+\cite{kalos1977structure,osborn1980monotonic,mccoy1981comparison}.
+The approximations differ in what density is used when evaluating the
+radial distribution function $g(r,\eta)$ or in how radial
+distributions evaluated at different densities are combined to yield
+an effective function \cite{toxvaerd1973statistical}.
 
-Several recent works~\cite{gloor2007prediction, gross2009density} have
-assumed a mean-density approximation for the pair distribution
+One common approximation \cite{gloor2007prediction, gross2009density}
+assumes a mean-density approximation for the pair distribution
 function:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \tfrac{\pi\sigma^3}{6}\tfrac12
@@ -172,16 +178,17 @@ which cannot occur in the bulk reference system that defines $g(r,
 interface, which does not exhibit this pathology.
 
 Non-pathological approaches use an average of the density over some
-volume. Fischer and Methfessel~\cite{fischer1980born} introduce the
+volume. Fischer and
+Methfessel~\cite{fischer1980born,harris1987comment} introduce the
 approximation:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, n_3\left(\tfrac12
   (\rr_1+\rr_2)\right)\right)
   \label{eq:fischer}
 \end{align}
-where $n_3$ is one of the fundamental measures defined in Fundamental
-Measure Theory~\cite{rosenfeld1989free}, which is an integral of the
-density over a spherical volume:
+where $n_3$ is an integral of the density over a spherical volume that
+is later defined as one of the fundamental measures in Fundamental
+Measure Theory~\cite{rosenfeld1989free}:
 \begin{align}
   n_3(\rr) = \int n(\rr')\Theta(\tfrac12 \sigma - |\rr-\rr'|) d\rr'
 \end{align}
