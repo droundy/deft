@@ -154,33 +154,40 @@ distribution function, which extend the radial distribution function
 to inhomogeneous scenarios.  Work on these approximations date back to
 Toxvaerd \cite{toxvaerd1973statistical} and have been tested
 rigorously for both functional and non-functional based theories
-\cite{kalos1977structure,osborn1980monotonic,mccoy1981comparison}.
+\cite{kalos1977structure,osborn1980monotonic, mccoy1981comparison}.
 The approximations differ in what density is used when evaluating the
 radial distribution function $g(r,\eta)$ or in how radial
 distributions evaluated at different densities are combined to yield
 an effective function \cite{toxvaerd1973statistical}.
 
-One common approximation \cite{gloor2007prediction,
-  gross2009density,osborn1980monotonic,mccoy1981comparison,barrett2006some}
-assumes a mean-density approximation for the pair distribution
-function:
+One common approximation \cite{gloor2007prediction, gross2009density,
+  osborn1980monotonic, mccoy1981comparison,barrett2006some} assumes a
+mean-density approximation for the pair distribution function:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \tfrac{\pi\sigma^3}{6}\tfrac12
   (n(\rr_1)+n(\rr_2))\right)
 \end{align}
 where $g(r,\eta)$ is the radial distribution function as a function of
 radius and packing fraction $\eta$, and $\sigma$ is the hard-sphere
-diameter.  This approach,
-however, cannot be applied to highly inhomogeneous systems such as a
-dense fluid at a solid surface.  These systems exhibit large density
-oscillations that lead to mean packing fractions greater than unity,
-which cannot occur in the bulk reference system that defines $g(r,
-\eta)$.  The above papers restricted themselves to the liquid-vapor
-interface, which does not exhibit this pathology.
+diameter.
+
+Another approximation uses $g(r,\eta)$ and assumes the density
+evaulated at the position between the two points:
+\begin{align}
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, \tfrac{\pi\sigma^3}{6}
+  n\left(\tfrac12(\rr_1+\rr_2)\right)\right)
+\end{align}
+
+The above two approaches cannot be applied to highly inhomogeneous
+systems such as a dense fluid at a solid surface.  These systems
+exhibit large density oscillations that lead to mean packing fractions
+greater than unity, which cannot occur in the bulk reference system
+that defines $g(r, \eta)$.  The above papers restricted themselves to
+the liquid-vapor interface, which does not exhibit this pathology.
 
 Non-pathological approaches use an average of the density over some
 volume. Fischer and Methfessel introduce the
-approximation~\cite{fischer1980born,harris1987comment,wadewitz2000application,winkelmann2001liquid}:
+approximation~\cite{fischer1980born,harris1987comment}:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, n_3\left(\tfrac12
   (\rr_1+\rr_2)\right)\right)
@@ -196,7 +203,7 @@ Equation~\ref{eq:fischer} is computationally awkward, because it
 treats as special the midpoint $\tfrac12(\rr_1+\rr_2)$.  Moreover, the
 approach of Fischer and Methfessel is intended to approximate the pair
 distribution function only at contact, when the distance between
-$\rr_1$ and $\rr_2$ is the hard-sphere diameter.
+$\rr_1$ and $\rr_2$ is the hard-sphere diameter.  \davidsays{Tang does something similar, but maybe different.\cite{tang1991density}}
 
 Sokolowski and Fischer addressed the shortcomings of the theory of
 Fischer and Methfessel by modifying this approach to use
@@ -211,12 +218,13 @@ where their averaged density $\bar{n}(\rr)$ is given by:
   \bar{n}(\rr) \equiv \frac{3}{4\pi (0.8\sigma)^3}\int n(\rr')\Theta(0.8\sigma - |\rr-\rr'|) d\rr'
 \end{align}
 is the density averaged over a sphere with diameter
-$0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
-was arrived at by fitting to Monte Carlo simulation.  Although
-Eq.~\ref{eq:sokolowski} has the advantages of only involving density
-averages at the points at which the pair distribution function is
-desired, it cannot be written as a single-site convolution, since the
-convolution kernel depends on both points.
+$0.8\sigma$~\cite{sokolowski1992role, wadewitz2000application, winkelmann2001liquid}.  The
+value 0.8 in this formula was arrived at by fitting to Monte Carlo
+simulation.  Although Eq.~\ref{eq:sokolowski} has the advantages of
+only involving density averages at the points at which the pair
+distribution function is desired, it cannot be written as a
+single-site convolution, since the convolution kernel depends on both
+points.
 
 In a previous paper~\cite{schulte2012using}, we introduced a
 functional that gives a good approximation for the pair distribution
