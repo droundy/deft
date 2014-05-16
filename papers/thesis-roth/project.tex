@@ -65,7 +65,7 @@ This work applies entirely to the homogeneous case---that is, there are no walls
 \subsection{Renormalization Group Theory}\label{subsec:RGT}
 Renormalization group (RG) theory is an iterative procedure that was
 developed to deal with large-scale fluctuations of the order parameter
-near the critical point of a system. The formulation used here is provided by Forte~\textit{et al}\cite{Forte11}.
+near the critical point of a system. The formulation used here is provided by Forte~\textit{et al}.\cite{Forte11}
 
 \fixme{Discuss Wilson phase cell}
 
@@ -95,7 +95,7 @@ Where $\fattr$ is the contribution due to the longest-wavelenght density fluctua
 %% \fixme{End of Forte confusion}
 
 \subsection{Square well liquid free enrgy}\label{subsec:SW}
-For the baseline, this work is based on the square well liquid free energy\cite{Hughes13}:
+For the baseline, this work is based on the square well liquid free energy:\cite{Hughes13}
 \begin{align}
   f_0(T,n) &= \fid + \fhs + \left( \fdisp - n a_1(n) \right) \ .
 \end{align}
@@ -103,15 +103,36 @@ The long-range attractive term, $\fattr$ is given by
 \begin{align}
   \fattr &= n a_1(n) \ .
 \end{align}
-$\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere repulsion, and $\fdisp$ is the attraction. The functions $a_j(n)$ are the first two terms from a high-temperature perturbation expansion. Each function is outlined below.
+$\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere repulsion, and $\fdisp$ is the attraction. The function $a_1(n)$ is the first term from a high-temperature perturbation expansion, described in further detail in sections~\ref{sub2sec:disp} and~\ref{subsec:TPT}. Each function is outlined below.
 
 \subsubsection{Ideal gas}\label{sub2sec:ID}
+The ideal gas term is purely local \fixme{whatever that means}:
 \begin{align}
   \fid &= n\kT\left(\log(n) - 1\right)
 \end{align}
 
 \subsubsection{Hard sphere repulsion}\label{sub2sec:HS}
-
+Hard sphere repulsive forces are dealt with by the White Bear version of Fundamental-Mearuse Theory.\cite{Roth02} The hard sphere excess free energy is given in the homogeneous case as
+\begin{align}
+  \fhs &= \kT\left( \Phi_1(n) + \Phi_2(n) + \Phi_3(n) \right)
+\end{align}
+The $\Phi_j(n)$ terms are given as
+\begin{align}
+  \Phi_1(n) &= -n_0\ln(1 - n_3) \\
+  \Phi_2(n) &= \frac{n_1n_2}{1 - n_3} \\
+  \Phi_3(n) &= n_2^3\left( \frac{n_3 + (1 - n_3)^2\ln(1 - n_3)}{36\pi n_3^2(1 - n_3)^2} \right)
+\end{align}
+The \emph{fundamental measure densities} are
+\begin{align}
+  n_0(n) &= \frac{n_2}{4\pi R^2} \nonumber \\
+  &= n \\
+  n_1(n) &= \frac{n_2}{4\pi R} \nonumber \\
+  &= nR \\
+  n_2(n) &= n4\pi R^2 \\
+  n_3(n) &= n\frac{4}{3}\pi R^3 \nonumber \\
+  &= \eta
+\end{align}
+where $\eta$ is the packing fraction.
 
 \subsubsection{Attraction}\label{sub2sec:disp}
 The attractive free energy includes van der Waals attraction between hard spheres and is founded in Thermodynamic Perturbation Theory (TPT).
@@ -120,7 +141,7 @@ The attractive free energy includes van der Waals attraction between hard sphere
 \end{align}
 The $a_j(n)$ terms come from TPT, outlined in section~\ref{subsec:TPT}.
 
-The first term, $a_1$, is the mean-field dispersion interaction. The second term, $a_2$, describes the effect of fluctuations resulting from compression of the fluid due to the dispersion interaction itself, and is approximated using the local compressibility approximation (LCA), which assumes the energy fluctuation is simply related to the compressibility of a hard-sphere reference fluid\cite{Barker76}.
+The first term, $a_1$, is the mean-field dispersion interaction. The second term, $a_2$, describes the effect of fluctuations resulting from compression of the fluid due to the dispersion interaction itself, and is approximated using the local compressibility approximation (LCA), which assumes the energy fluctuation is simply related to the compressibility of a hard-sphere reference fluid.\cite{Barker76}
 
 In Gil-Villegas' paper, HS and Dispersion are wrapped up into the
 \textit{monomer} contribution, expressed in terms of energy densities
@@ -153,14 +174,14 @@ If we assume random correlations between the particles' positions, for all dista
 \end{align}
 the van der Waals mean-field energy.
 
-The second-order term is quite a bit more complicated; one must have knowledge of higher-order correlation functions to determine $a_2$. This term describes the response of the attractive energy due to the compression of the fluid from the attractive well. Gil-Villegas \emph{et al.} base their expression on an approximation by Barker and Henderson\cite{Barker67}. Barker and Henderson's approximation considers fluctuations in the number of particles in the potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial n  /\partial P^\text{HS}\right)_T$, we have:
+The second-order term is quite a bit more complicated; one must have knowledge of higher-order correlation functions to determine $a_2$. This term describes the response of the attractive energy due to the compression of the fluid from the attractive well. Gil-Villegas \emph{et al.} base their expression on an approximation by Barker and Henderson.\cite{Barker67} Barker and Henderson's approximation considers fluctuations in the number of particles in the potential well. In this way, the fluctuations in $a_2$ are related to the pressure and compressibility of the liquid. Given pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} = kT\left(\partial n  /\partial P^\text{HS}\right)_T$, we have:
 \begin{align}
   a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
   &= -\pi n \epsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \\
   &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
 
-We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion\cite{Barker76}:
+We use the isothermal compressibility in terms of packing fraction $\eta$, given by the Percus-Yevick exprssion:\cite{Barker76}
 \begin{align}
   K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
 \end{align}
@@ -172,7 +193,7 @@ We use the isothermal compressibility in terms of packing fraction $\eta$, given
 
 \fixme{And introduction to TPT---why do we use it?}
 
-\fixme{For now, the discussion follows entirely from the Simple Liquids book~\cite{Hansen06}}
+\fixme{For now, the discussion follows entirely from the Simple Liquids book\cite{Hansen06}}
 
 The pair potential $v(\1,\2)$ describes the interaction between two hard spheres. For the square-well model,
 \begin{align}
@@ -198,20 +219,20 @@ Given the \emph{configuration integral} (the potenial energy component of the pa
 \begin{align}
   Z_N &= \int d\mathbf{r}^N\, e^{-\beta V_N}
 \end{align}
-and the excess free energy (i.e.~the non-ideal part; $F = F^\text{id} + F^\text{ex}$)
+and the non-ideal part of the free energy (i.e.~the excess free energy) is
 \begin{align}
-  F^\text{ex} &= -\kT\ln\left( \frac{Z_N}{V^N} \right)
+  F &= -\kT\ln\left( \frac{Z_N}{V^N} \right)
 \end{align}
 where $V^N$ is the total volume \fixme{I think?}, then the derivative of the excess free energy with respect to the coupling parameter $\lambda$ is
 \begin{align}
-  \frac{\partial F^\text{ex}}{\partial\lambda} &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
+  \frac{\partial F}{\partial\lambda} &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
   &= -\kT\frac{1}{Z_N}\int d\mathbf{r}^N\, e^{-\beta V_N}(-\beta)\frac{\partial V_N}{\partial\lambda} \\
-  \hookrightarrow \beta\frac{\partial F^\text{ex}}{\partial\lambda} &= \beta\left\langle V_N^{'}(\lambda) \right\rangle_\lambda \\
-  \hookrightarrow \beta F^\text{ex} &= \beta F^\text{ex}_0 + \beta\int_0^1 d\lambda\, \left\langle V_N^{'}(\lambda) \right\rangle_\lambda
+  \hookrightarrow \beta\frac{\partial F}{\partial\lambda} &= \beta\left\langle V_N^{'}(\lambda) \right\rangle_\lambda \\
+  \hookrightarrow \beta F &= \beta F_0 + \beta\int_0^1 d\lambda\, \left\langle V_N^{'}(\lambda) \right\rangle_\lambda
 \end{align}
 where $\left\langle V_N^{'}(\lambda) \right\rangle_\lambda$ is the canonical ensemble average. We can take a series expansion of this average:
 \begin{align}\begin{split} % too long; use split environment, and align to a space (&{})
-  \left\langle V_N^{'}(\lambda) \right\rangle_\lambda = &{} \left\langle V_N^{'}(\lambda)\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda}\bigg|_{\lambda = 0} \\ &{} + \mathcal{O}(\lambda)^2
+  \left\langle V_N^{'}(\lambda) \right\rangle_\lambda = &{} \left\langle V_N^{'}(\lambda)\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda}\bigg|_{\lambda = 0} \\ &{} + \mathcal{O}(\lambda^2)
 \end{split}\end{align}
 The derivative term is
 \begin{align}
@@ -224,10 +245,10 @@ where
 Putting this together, we have
 \begin{align}
   \begin{split}
-    \beta F^\text{ex} = &{} \beta F^\text{ex}_0 + \beta(1 - 0)\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
+    \beta F = &{} \beta F_0 + \beta(1 - 0)\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
   \end{split} \\
   \begin{split}
-    =&{}  \beta F^\text{ex}_0 + \beta\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
+    =&{}  \beta F_0 + \beta\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
   \end{split}
 \end{align}
 Now, we can define the total perturbation energy as
@@ -236,15 +257,30 @@ Now, we can define the total perturbation energy as
 \end{align}
 Then, following from equation~\ref{eqn:small-perturbation},
 \begin{align}
-  V_N^{'} &= \frac{\partial}{\partial\lambda}\left(\sum_{i=1}^N\sum_{j>i}^N \lambda w(\mathbf{r}_i,\mathbf{r}_j)\right) \\
+  V_N^{'} &= \frac{\partial}{\partial\lambda}\left(\sum_{i=1}^N\sum_{j>i}^N \lambda w(\mathbf{r}_i,\mathbf{r}_j)\right) \nonumber \\
   &= W_N \\
   \therefore V_N^{''} &= 0
 \end{align}
-With this in mind, we can simplify equation~\ref{eqn:complicated-HTE} to the \emph{high-temperature expansion}, first derived by Zwanzig~\cite{Zwanzig54}:
+With this in mind, we can simplify equation~\ref{eqn:complicated-HTE} to the \emph{high-temperature expansion}, first derived by Zwanzig:\cite{Zwanzig54}
 \begin{align}
   \begin{split}
-    \beta F^\text{ex} = &{} \beta F^\text{ex}_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta)^3
+    \beta F = &{} \beta F_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta^3)
   \end{split}
+\end{align}
+Zwanzig further showed that the $n^{th}$ term could be written in terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle W_N\right\rangle_0 \right]^\nu \right\rangle_0$ with $\nu \leq n$.
+
+Writing the statistical averages in terms of the pair density $n_\lambda^{(2)}(\1,\2)$ (i.e. the probability of having a sphere at \1 and \2 \fixme{make this more clear?}) gives us
+\begin{align}
+  \frac{\beta F}{N} &= \frac{\beta F_0}{N} + \frac{\beta}{2N}\int_0^1 d\lambda\, \iint d\1 d\2\, n_\lambda^{(2)}(\1,\2)w(\1,\2) \label{eqn:Henderson5-2-12}
+\end{align}
+The pair density itself can be expanded as
+\begin{align}
+  n_\lambda^{(2)}(\1,\2) &= n_0^{(2)}(\1,\2) + \lambda\frac{\partial n_\lambda^{(2)}(\1,\2)}{\partial\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2)
+\end{align}
+Applying this to the second term in equation~\ref{eqn:Henderson5-2-12}, we have
+\begin{align}
+  \frac{\beta F_1}{N} &= \frac{\beta}{2N}\iint d\1 d\2\, n_0^{(2)}(\1,\2)w(\1,\2) \\
+  &= \frac{\beta n}{2}\int d\mathbf{r}_{12}\, g_0(\1,\2)
 \end{align}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
