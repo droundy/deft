@@ -109,8 +109,241 @@ Future work will include applying this approach to associating fluids.
 
 \subsection{Renormalization Group Theory}
 
-\fixme{Here we will explain the RGT that we use, and how it works
-  out.}
+\subsubsection{Defining our approximation}
+Let's begin by considering the partition function and free energy, as
+computed in the canonical ensemble:
+\begin{align}
+  Z &= \sum_i^{\scriptscriptstyle\begin{array}{c}\text{\tiny all}\\\text{\tiny microstates}\end{array}}
+       e^{-\beta E_i}, & F &= -kT\log Z
+\end{align}
+We now consider a ``smooth'' configuration that contains only
+microstates that are periodic with a given periodicity $2^j\lambda$:
+\begin{align}
+  Z_j &= \sum_i^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny periodic }2^j\lambda\\
+                 \end{array}}
+       e^{-\beta E_i}, & F_j &= -kT\log Z_j
+       \label{eq:Zn}
+\end{align}
+This defines a family of free energies that contain fluctuations with
+a variety of length scales.  For the moment we will assume a simple
+cubic periodicity, although it may be advantageous to select face
+centered cubic (FCC) instead.  So far, we have defined a family of
+free energy functions (each containing longer length-scale
+fluctuations) that we can compute numerically using Monte Carlo, but
+we have not yet constructed a means to approximate these functions.
+Before developing this approximation, let's reorganize this sum over
+periodic states.
+\begin{align}
+  Z_j(N) &= \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta E_{i_1\cdots i_8}^{(j)}}
+\end{align}
+where here $g_{N_1\cdots N_8}$ is a multiplicity factor
+corresponding to the number of ways the cell can be divided into
+subcells with occupancies of $N_1\cdots N_8$.  This is so far only a
+different way of writing Eq.~\ref{eq:Zn}.  At this point, we can
+multiply and divide by a few factors, with a goal of replacing the
+unknown $E_{i_1\cdots i_8}^{(j)}$ with something that is easier to
+approximate.
+\begin{multline}
+  F_j(n) = -kT\log\Bigg(
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \\
+       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta E_{i_1\cdots i_8}^{(j)}}
+  \Bigg)
+\end{multline}
+Now we consider the same free energy computed without accounting for
+the energy in the fluctuations:
+\begin{multline}
+  F_{j-1}(n) = -kT\log\Bigg(
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \\
+       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta \left(E_{i_1}^{(j-1)} + \cdots + E_{i_8}^{(j-1)}\right)}
+  \Bigg)
+\end{multline}
+We can now recognize that each of the octants is just a similar smooth
+system.
+\begin{multline}
+  F_{j-1}(n) = -kT\log\Bigg(
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \\
+       e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
+  \Bigg)
+\end{multline}
+Here I assume that the fluctuations will only be important in so far
+as the affect the free energy directly.  Putting these last two
+equations together, we can find a formula for the energy difference as
+we include the larger fluctuations:
+\begin{multline}
+  F_j(n) - F_{j-1}(n) =\\
+  -kT\log\left(\frac{
+    \sum_{AAN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta E_{i_1\cdots i_8}^{(j)}}
+  }{
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
+  }
+  \right)
+\end{multline}
+At this point, we recognize that we can put anything we like in the
+numerator \emph{and} the denominator, which will help us to prevent
+the exponentials from getting too hairy.  This is really just a shift
+of energy for both the numerator and denominator partition functions.
+\begin{multline}
+  F_j(n) - F_{j-1}(n) =\\
+  -kT\log\left(\frac{
+    \sum_{NN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta \left(E_{i_1\cdots i_8}^{(j)}  - F_{j-1}(n) \right)}
+  }{
+    \sum_{BN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
+  }
+  \right)
+\end{multline}
+At this stage we have still not introduced an uncontrolled
+approximation.  Each $F_{j}$ is exactly defined, and the exact free
+energy is found by taking a limit $j\rightarrow \infty$.  \fixme{I
+  need to clarify the scale of each $F$.  Some of the above are about
+  systems $\frac18$ the volume of others.}
+
+The flavor of the approximation used by White and others in GRG is now
+clarified.  We begin by assuming that we already have an adequate (and
+tractable) approximation for $F_{j-1}$.  Thus the denominator
+partition function is readily computable.  We further simplify the
+numerator by multiplying and dividing by the same quantity, and
+simplify the notation by defining
+\begin{align}
+  F_j(N_1\cdots N_8) &= \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny microstates}\\
+                  \text{\tiny within octants}\\
+                 \end{array}}
+       e^{-\beta E_{i_1\cdots i_8}^{(j)}}
+\end{align}
+and thus rewrite the energy difference as
+\begin{multline}
+  F_j(n) - F_{j-1}(n) =\\
+  -kT\log\left(\frac{
+    \sum_{CN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       e^{-\beta \big(F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) +
+           \big(F_j(N_1\cdots N_8) - F_{j-1}(N_1) - \cdots - F_{j-1}(N_8)\big) \big)}
+  }{
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
+  }
+  \right)
+\end{multline}
+At this point we can recognize and identify two energy differences as
+\begin{align}
+  \bar{F}(N_1\cdots N_8) &= F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \\
+  \bar{U}(N_1\cdots N_8) &= F_j(N_1\cdots N_8)
+  - \left(F_{j-1}(N_1) + \cdots + F_{j-1}(N_8) \right)
+\end{align}
+and using these definitions can rewrite our energy difference in a
+more compact form:
+\begin{multline}
+  F_j(n) - F_{j-1}(n) =\\
+  -kT\log\left(\frac{
+    \sum_{CN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       e^{-\beta \big( \bar{F}(N_1\cdots N_8) + \bar{U}(N_1\cdots N_8)
+         \big)}
+  }{
+    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+                  \text{\tiny occupancies}\\
+                  \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}
+       e^{-\beta \bar{F}(N_1\cdots N_8)}
+  }
+  \right)
+\end{multline}
+At this point, we can recognize $\bar{F}(N_1\cdots N_8)$ as the free
+energy change due to oscillations \emph{if we neglect the actual
+  energy of the oscillations themselves, but instead make a ``local''
+  approximation}.  Meanwhile $\bar{U}(N_1\cdots N_8)$ is the free
+energy change due to the energy of oscillations.
+
+\fixme{I have now ``defined'' the terms used by Forte in his
+  notation of GRG.  On the to-do list: }
+\begin{enumerate}
+\item \fixme{Establish what $g_{N_1\cdots N_8}$ is.}
+\item \fixme{Elaborate on the approximation (ignoring corners) that
+  leads from a $\sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
+    \text{\tiny occupancies}\\ \text{\tiny of octants}\\
+                 \end{array}}
+       g_{N_1\cdots N_8}$ to an integral over density
+       amplitudes.}
+\item \fixme{Develop an approach for approximating $\bar{U}$.  Perhaps
+  is $F_{j-1}$ is expressed as a functional, we can use a non-local
+  DFT to approximate $\bar U_j$?  The standard GRG approach seems to
+  be to use a simple mean-field or thermodynamic perturbation theory
+  approach to approximate $\bar U$, suggesting that a simple
+  (standard) DFT might work just fine for this.}
+\end{enumerate}
 
 \subsection{Monte Carlo}
 
