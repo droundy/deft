@@ -187,15 +187,14 @@ We use the isothermal compressibility in terms of packing fraction $\eta$, given
 \end{align}
 
 \subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
-\fixme{Add here an introduction to thermodyamic perturbation theory,
-  explaining $a_1$ and $a_2$ and their ``exact'' formulas that we wish
-  to approximate.}
+
 
 \fixme{And introduction to TPT---why do we use it?}
+This discussion follows primarily from \textit{Theory of Simple Liquids}, by Hansen and McDonald\cite{Hansen06}.
 
-\fixme{For now, the discussion follows entirely from the Simple Liquids book\cite{Hansen06}}
+Thermodynamic perturbation theory treats the intermolecular potential as separable into two parts, one for short-range repulsion and another for long-range attraction.
 
-The pair potential $v(\1,\2)$ describes the interaction between two hard spheres. For the square-well model,
+The pair potential $v(\1,\2)$ describes the interaction between two hard spheres. For the square-well model, the pair potential is
 \begin{align}
   v_\text{SW}(\1,\2) &=
     \begin{cases}
@@ -365,7 +364,7 @@ The algorithm is as follows; start at some temperature $T=T_{start}$, with an in
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusion}
-I have implemented a the use of renormalization group theory in calculations for the square well liquid. The program is not entirely de-bugged.
+I have implemented a the use of renormalization group theory in calculations for the square well liquid. The program is not entirely de-bugged. I have also developed an algorithm that calculates liqiud-vapor coexistence curves, even close to the critical point.
 
 
 \bibliographystyle{unsrt}
