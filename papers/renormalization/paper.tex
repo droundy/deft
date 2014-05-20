@@ -113,16 +113,18 @@ Future work will include applying this approach to associating fluids.
 Let's begin by considering the partition function and free energy, as
 computed in the canonical ensemble:
 \begin{align}
-  Z &= \sum_i^{\scriptscriptstyle\begin{array}{c}\text{\tiny all}\\\text{\tiny microstates}\end{array}}
+  Z &= \sum_i^{\text{\tiny\begin{minipage}{5em}
+      \begin{center}
+        \tiny all microstates\end{center}\end{minipage}}}
        e^{-\beta E_i}, & F &= -kT\log Z
 \end{align}
 We now consider a ``smooth'' configuration that contains only
 microstates that are periodic with a given periodicity $2^j\lambda$:
+\newcommand\sumstatesperiodic[1]{\sum_i^{\text{\tiny\begin{minipage}{6em}
+      \begin{center}
+        \tiny microstates periodic $#1$\end{center}\end{minipage}}}}
 \begin{align}
-  Z_j &= \sum_i^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny periodic }2^j\lambda\\
-                 \end{array}}
+  Z_j &= \sumstatesperiodic{2^j\lambda}
        e^{-\beta E_i}, & F_j &= -kT\log Z_j
        \label{eq:Zn}
 \end{align}
@@ -135,16 +137,19 @@ fluctuations) that we can compute numerically using Monte Carlo, but
 we have not yet constructed a means to approximate these functions.
 Before developing this approximation, let's reorganize this sum over
 periodic states.
+\newcommand\sumoccupanciesofoctants{
+  \sum_{N_1\cdots N_8}^{\text{\tiny\begin{minipage}{5em}
+      \begin{center}
+      \tiny numbers in octants\end{center}\end{minipage}}}
+}
+\newcommand\summicrostatesofoctants{
+  \sum_{i_1\cdots i_8}^{\text{\tiny\begin{minipage}{4em}
+      \begin{center}
+      \tiny microstates\\within octants\end{center}\end{minipage}}}
+}
 \begin{align}
-  Z_j(N) &= \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
-       g_{N_1\cdots N_8}
-       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+  Z_j(N) &= \sumoccupanciesofoctants g_{N_1\cdots N_8}
+       \summicrostatesofoctants
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
 \end{align}
 where here $g_{N_1\cdots N_8}$ is a multiplicity factor
@@ -156,16 +161,10 @@ unknown $E_{i_1\cdots i_8}^{(j)}$ with something that is easier to
 approximate.
 \begin{multline}
   F_j(n) = -kT\log\Bigg(
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        \\
-       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+       \summicrostatesofoctants
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
   \Bigg)
 \end{multline}
@@ -173,16 +172,10 @@ Now we consider the same free energy computed without accounting for
 the energy in the fluctuations:
 \begin{multline}
   F_{j-1}(n) = -kT\log\Bigg(
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        \\
-       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+       \summicrostatesofoctants
        e^{-\beta \left(E_{i_1}^{(j-1)} + \cdots + E_{i_8}^{(j-1)}\right)}
   \Bigg)
 \end{multline}
@@ -190,10 +183,7 @@ We can now recognize that each of the octants is just a similar smooth
 system.
 \begin{multline}
   F_{j-1}(n) = -kT\log\Bigg(
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        \\
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
@@ -206,21 +196,12 @@ we include the larger fluctuations:
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
-    \sum_{AAN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
-       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+       \summicrostatesofoctants
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
   }{
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
         e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
   }
@@ -233,21 +214,12 @@ of energy for both the numerator and denominator partition functions.
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
-    \sum_{NN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
-       \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+       \summicrostatesofoctants
        e^{-\beta \left(E_{i_1\cdots i_8}^{(j)}  - F_{j-1}(n) \right)}
   }{
-    \sum_{BN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
   }
@@ -266,28 +238,19 @@ partition function is readily computable.  We further simplify the
 numerator by multiplying and dividing by the same quantity, and
 simplify the notation by defining
 \begin{align}
-  F_j(N_1\cdots N_8) &= \sum_{i_1\cdots i_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny microstates}\\
-                  \text{\tiny within octants}\\
-                 \end{array}}
+  F_j(N_1\cdots N_8) &= \summicrostatesofoctants
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
 \end{align}
 and thus rewrite the energy difference as
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
-    \sum_{CN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        e^{-\beta \big(F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) +
            \big(F_j(N_1\cdots N_8) - F_{j-1}(N_1) - \cdots - F_{j-1}(N_8)\big) \big)}
   }{
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
   }
@@ -304,18 +267,12 @@ more compact form:
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
-    \sum_{CN_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        e^{-\beta \big( \bar{F}(N_1\cdots N_8) + \bar{U}(N_1\cdots N_8)
          \big)}
   }{
-    \sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-                  \text{\tiny occupancies}\\
-                  \text{\tiny of octants}\\
-                 \end{array}}
+    \sumoccupanciesofoctants
        g_{N_1\cdots N_8}
        e^{-\beta \bar{F}(N_1\cdots N_8)}
   }
@@ -331,12 +288,19 @@ energy change due to the energy of oscillations.
   notation of GRG.  On the to-do list: }
 \begin{enumerate}
 \item \fixme{Establish what $g_{N_1\cdots N_8}$ is.}
+  \begin{align}
+    g_{N_1\cdots N_8} &=
+    {N \choose N_1} {N - N_1 \choose N_2} {N - N_1 - N_2 \choose N_3}
+    \cdots \\
+    &\propto \sum_{i=1}^{8} N_i!
+    \\
+    &\approx \sum_{i=1}^{8} (N_i-1) e^{N_i}
+  \end{align}
+  This combinatoric term ends up showing up as the ideal gas free
+  energy term.
 \item \fixme{Elaborate on the approximation (ignoring corners) that
-  leads from a $\sum_{N_1\cdots N_8}^{\scriptscriptstyle\begin{array}{c}
-    \text{\tiny occupancies}\\ \text{\tiny of octants}\\
-                 \end{array}}
-       g_{N_1\cdots N_8}$ to an integral over density
-       amplitudes.}
+  leads from a $\sumoccupanciesofoctants g_{N_1\cdots N_8}$ to an
+  integral over density amplitudes.}
 \item \fixme{Develop an approach for approximating $\bar{U}$.  Perhaps
   is $F_{j-1}$ is expressed as a functional, we can use a non-local
   DFT to approximate $\bar U_j$?  The standard GRG approach seems to
