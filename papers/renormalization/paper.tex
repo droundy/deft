@@ -1,6 +1,6 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+
 \usepackage{graphicx}% Include figure files
-\usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{color}
 
 \newcommand{\fixme}[1]{{\bf\color{red}{[#1]}}}
@@ -168,6 +168,9 @@ approximate.
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
   \Bigg)
 \end{multline}
+
+\subsubsection{Free energy of the sub-systems}
+
 Now we consider the same free energy computed without accounting for
 the energy in the fluctuations:
 \begin{multline}
@@ -177,22 +180,45 @@ the energy in the fluctuations:
        \\
        \summicrostatesofoctants
        e^{-\beta \left(E_{i_1}^{(j-1)} + \cdots + E_{i_8}^{(j-1)}\right)}
-  \Bigg)
+  \Bigg)\label{eq:Fjm1}
 \end{multline}
 We can now recognize that each of the octants is just a similar smooth
 system.
+
+The multiplicity term $g_{N_1\cdots N_8}$ that shows up in
+Eq.~\ref{eq:Fjm1} (and elsewhere) originates from the choice made when
+splitting our sum over all microstates into separate sums for
+microstates in each of the octants.  This required us to pick a
+combination of states for each octant, thus the $g_{N_1\cdots N_8}$.
+This multiplicity is given by:
+\begin{align}
+  g_{N_1\cdots N_8} &=
+  {N \choose N_1} {N - N_1 \choose N_2} {N - N_1 - N_2 \choose N_3}
+  \cdots \\
+  &\propto \sum_{i=1}^{8} N_i!
+  \\
+  &\approx \sum_{i=1}^{8} (N_i-1) e^{N_i}
+\end{align}
+Physically, this multiplicity term corresponds to the ideal gas
+contribution to the free energy.  In fact, the ideal gas free energy
+represents \emph{only} the multiplicity and kinetic energy.  Since the
+free energy incorporates the multiplicity, we can simplify
+Eq.~\ref{eq:Fjm1} as:
 \begin{multline}
   F_{j-1}(n) = -kT\log\Bigg(
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
-       \\
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
   \Bigg)
 \end{multline}
-Here I assume that the fluctuations will only be important in so far
-as the affect the free energy directly.  Putting these last two
-equations together, we can find a formula for the energy difference as
-we include the larger fluctuations:
+where I have introduced the confusing notation where $F_{j-1}(n)$
+represents the free energy computed for any density $n$ representable
+in the $2^j\lambda$ cell by averaging over particle distributions
+$N_1\cdots N_8$, while $F_{j-1}(N)$ represents the canonical free
+energy found for a set of microstates with $N$ particles in the cell
+volume.
+
+Putting these last two equations together, we can find a formula for
+the energy difference as we include the larger fluctuations:
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
@@ -202,7 +228,6 @@ we include the larger fluctuations:
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
   }{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
         e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8) \right)}
   }
   \right)
@@ -220,7 +245,6 @@ of energy for both the numerator and denominator partition functions.
        e^{-\beta \left(E_{i_1\cdots i_8}^{(j)}  - F_{j-1}(n) \right)}
   }{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
   }
   \right)
@@ -246,12 +270,10 @@ and thus rewrite the energy difference as
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
        e^{-\beta \big(F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) +
            \big(F_j(N_1\cdots N_8) - F_{j-1}(N_1) - \cdots - F_{j-1}(N_8)\big) \big)}
   }{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
        e^{-\beta \left( F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \right)}
   }
   \right)
@@ -268,12 +290,10 @@ more compact form:
   F_j(n) - F_{j-1}(n) =\\
   -kT\log\left(\frac{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
        e^{-\beta \big( \bar{F}(N_1\cdots N_8) + \bar{U}(N_1\cdots N_8)
          \big)}
   }{
     \sumoccupanciesofoctants
-       g_{N_1\cdots N_8}
        e^{-\beta \bar{F}(N_1\cdots N_8)}
   }
   \right)
@@ -284,20 +304,10 @@ energy change due to oscillations \emph{if we neglect the actual
   approximation}.  Meanwhile $\bar{U}(N_1\cdots N_8)$ is the free
 energy change due to the energy of oscillations.
 
+
 \fixme{I have now ``defined'' the terms used by Forte in her
   notation of GRG.  On the to-do list: }
 \begin{enumerate}
-\item \fixme{Establish what $g_{N_1\cdots N_8}$ is.}
-  \begin{align}
-    g_{N_1\cdots N_8} &=
-    {N \choose N_1} {N - N_1 \choose N_2} {N - N_1 - N_2 \choose N_3}
-    \cdots \\
-    &\propto \sum_{i=1}^{8} N_i!
-    \\
-    &\approx \sum_{i=1}^{8} (N_i-1) e^{N_i}
-  \end{align}
-  This combinatoric term ends up showing up as the ideal gas free
-  energy term.
 \item \fixme{Elaborate on the approximation (ignoring corners) that
   leads from a $\sumoccupanciesofoctants g_{N_1\cdots N_8}$ to an
   integral over density amplitudes.}
