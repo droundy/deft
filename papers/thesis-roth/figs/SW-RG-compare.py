@@ -18,28 +18,28 @@ npart = 0.0462316928818
 
 plt.figure()
 # plt.plot(n*eta_conv,SW.phi(T,n,npart),'g-',label='SW')
-plt.plot(n*eta_conv,RG.phi(T,n,npart,0),'r-',label='i=0')
-#plt.plot(n*eta_conv,RG.phi(T,n,npart,1),'b--',label='i=1')
+plt.plot(n*eta_conv,RG.phi(T,n,npart,0),label='i=0')
+plt.plot(n*eta_conv,RG.phi(T,n,npart,1),label='i=1')
 
 plt.title('T = %0.2f'%T)
 plt.ylabel(r'$\phi$')
 plt.xlabel(r'$\eta$')
 plt.legend(loc=0)
 
-plt.savefig('figs/SW-RG-compare-phi-lowT.pdf')
+plt.savefig('figs/phi-RG-lowT.pdf')
 
-plt.figure()
-# plt.plot(n*eta_conv,SW.f(T,n),'g-',label='SW')
-plt.plot(n*eta_conv,RG.ftot(T,n,0),'r--',label='i=0')
-#plt.plot(n*eta_conv,RG.ftot(T,n,1),'b--',label='i=1')
+# plt.figure()
+# # plt.plot(n*eta_conv,SW.f(T,n),'g-',label='SW')
+# plt.plot(n*eta_conv,RG.ftot(T,n,0),'r--',label='i=0')
+# #plt.plot(n*eta_conv,RG.ftot(T,n,1),'b--',label='i=1')
 
-plt.title('T = %0.2f'%T)
-plt.ylabel(r'$f$')
-plt.xlabel(r'$\eta$')
-plt.legend(loc=0)
+# plt.title('T = %0.2f'%T)
+# plt.ylabel(r'$f$')
+# plt.xlabel(r'$\eta$')
+# plt.legend(loc=0)
 
-plt.savefig('figs/SW-RG-compare-f-lowT.pdf')
-plt.show()
+# plt.savefig('figs/SW-RG-compare-f-lowT.pdf')
+# plt.show()
 
 ### High Temp ###
 
@@ -48,25 +48,29 @@ npart = 0.0360850913603
 
 plt.figure()
 # plt.plot(n*eta_conv,SW.phi(T,n,npart),'g-',label='SW')
-plt.plot(n*eta_conv,RG.phi(T,n,npart,0),'r-',label='i=0')
-#plt.plot(n*eta_conv,RG.phi(T,n,npart,1),'b--',label='i=1')
+plt.plot(n*eta_conv,RG.phi(T,n,npart,0),label='i=0')
+plt.plot(n*eta_conv,RG.phi(T,n,npart,1),label='i=1')
 
 plt.title('T = %0.2f'%T)
 plt.ylabel(r'$\phi$')
 plt.xlabel(r'$\eta$')
 plt.legend(loc=0)
 
-plt.savefig('figs/SW-RG-compare-phi-highT.pdf')
+plt.savefig('figs/phi-RG-highT.pdf')
 
-plt.figure()
-# plt.plot(n*eta_conv,SW.f(T,n),'g-',label='SW')
-plt.plot(n*eta_conv,RG.ftot(T,n,0),'r--',label='i=0')
-#plt.plot(n*eta_conv,RG.ftot(T,n,1),'b--',label='i=1')
+# plt.figure()
+# # plt.plot(n*eta_conv,SW.f(T,n),'g-',label='SW')
+# plt.plot(n*eta_conv,RG.ftot(T,n,0),'r--',label='i=0')
+# #plt.plot(n*eta_conv,RG.ftot(T,n,1),'b--',label='i=1')
 
-plt.title('T = %0.2f'%T)
-plt.ylabel(r'$f$')
-plt.xlabel(r'$\eta$')
-plt.legend(loc=0)
+# plt.title('T = %0.2f'%T)
+# plt.ylabel(r'$f$')
+# plt.xlabel(r'$\eta$')
+# plt.legend(loc=0)
 
-plt.savefig('figs/SW-RG-compare-f-highT.pdf')
-plt.show()
+# plt.savefig('figs/SW-RG-compare-f-highT.pdf')
+
+
+
+
+# plt.show()
