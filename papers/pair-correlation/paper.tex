@@ -228,13 +228,14 @@ where their averaged density $\bar{n}(\rr)$ is given by:
   \bar{n}(\rr) \equiv \frac{3}{4\pi (0.8\sigma)^3}\int n(\rr')\Theta(0.8\sigma - |\rr-\rr'|) d\rr'
 \end{align}
 is the density averaged over a sphere with diameter
-$0.8\sigma$~\cite{sokolowski1992role, wadewitz2000application, winkelmann2001liquid}.  The
-value 0.8 in this formula was arrived at by fitting to Monte Carlo
-simulation.  Although Eq.~\ref{eq:sokolowski} has the advantages of
-only involving density averages at the points at which the pair
-distribution function is desired, it cannot be written as a
-single-site convolution, since the convolution kernel depends on both
-points.
+$0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
+was arrived at by fitting to Monte Carlo simulation.  Although
+Eq.~\ref{eq:sokolowski} has the advantages of only involving density
+averages at the points at which the pair distribution function is
+desired, it cannot be written as a single-site convolution, since the
+convolution kernel depends on both points.  However, this approach has
+been used by two papers to do
+\fixme{what?}~\cite{wadewitz2000application, winkelmann2001liquid}.
 
 In a previous paper~\cite{schulte2012using}, we introduced a
 functional that gives a good approximation for the pair distribution
@@ -256,9 +257,14 @@ We use the contact-value theorem to derive the exact formula:
 \end{align}
 where $\sigma(\rr)$ is the diameter of hard spheres located at
 position $\rr$, and $F_{HS}$ is the Helmholtz free energy of the
-hard-sphere fluid.  The approximation for $g_\sigma(\rr)$ is obtained
-by using the White Bear functional~\cite{roth2002whitebear} for the
-Helmholtz free energy $F_{HS}$ in Eq.~\ref{eq:gsigma-exact}.  This
+hard-sphere fluid.  The functional derivative with of free energy with
+respect to hard-sphere diameter in Eq.~\ref{eq:gsigma-exact} requires
+that we be able to evaluate the change in free energy resulting from a
+change in the diameter of specifically the hard spheres located at
+position $\rr$.  This somewhat unusual construction is mathematically
+straightforward within Fundamental Measure Theory
+(FMT)~\cite{rosenfeld1989free}.  We employ the White Bear variation of
+the FMT free energy functional~\cite{roth2002whitebear}, which
 provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
 over a wide range of densities.
@@ -267,7 +273,7 @@ over a wide range of densities.
 In the approaches for the pair distribution function mentioned above,
 the radial distribution function used in the approximation
 was dependent upon the density averaged over some volume.  We seek to
-achieve greater accuracy by using instead a function dependent upon
+achieve greater accuracy by making use of a function dependent upon
 our averaged $g_{\sigma}(\rr)$ discussed above, which holds more
 information about an inhomogeneous system than does a simple
 convolution of the density.
