@@ -180,9 +180,58 @@ $V(r)$ with the harmonic potential \fixme{explain in more detail?} gives
   a &= 2R\sqrt{\frac{kT}{\pi V_0 \ln 2}}.
 \end{align}
 
-\subsection{Weighting functions in real space}
-
 \subsection{Weighting functions in fourier space}
+
+We Fourier transform our weight functions because simulations are
+carried out in Fourier space.  We find that
+\begin{align}
+  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr \\ 
+  &= \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[
+    \sin(k(au+\frac{\sigma}{2})) - k(au + \frac{\sigma}{2})
+    \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du.
+\end{align}
+This is not an analytic function, but we assume that we are working at
+low enough temperatures so that our function reduces to zero by $u=
+-\frac{\sigma}{2a}$. We extend the lower limit to $-\infty$ then
+\begin{align}
+  \tilde{w}_3(k) &\approx
+  \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 +
+    \frac{a^2k^2}{2} \right) \sin\left(\frac{k\sigma}{2}\right) -
+    \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right) \right]
+\end{align}
+
+We apply the same method to the other weight functions. These are
+\begin{align}
+  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2}
+  \bigg(a^2 k \cos\left(\frac{k\sigma}{2}\right) \notag \\
+  & \hspace{8em}+\sigma \sin\left(\frac{k\sigma}{2}\right) \bigg) \\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \tilde{w}_1(k) &=
+  \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2}
+  \sin\left(\frac{k\sigma}{2}\right) \\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \tilde{\mathbf{w}}_{2V}(\kk) &=
+  \frac{i \pi}{k} e^{-\left(\frac{ak}{2} \right)^2}\bigg[ \left(\sigma^2 - a^4k^2\right)
+    \cos\left(\frac{k\sigma}{2}\right) \notag\\ 
+    & \hspace{5em}- 2\sigma \left(a^2k + \frac{1}{k}
+    \right)\sin\left(\frac{k\sigma}{2}\right) \bigg]
+  \mathbf{\hat{k}} \\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \mathbf{\tilde{w}}_{1V}(k)&= \frac{i}{k}
+   e^{-\left(\frac{ak}{2} \right)^2} \bigg[ \frac{\sigma}{2}
+    \cos\left(\frac{k\sigma}{2}\right) \notag\\
+    & \hspace{6em}- \left( \frac{a^2k}{2} +
+    \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \bigg]
+  \mathbf{\hat{k}}
+\end{align}
+$\tilde{w}_0(k)$ contains a $\frac{1}{r}$ term that expands the
+integrand  as an infinite series. The first two terms were kept and
+could be expressed in terms of $\tilde{w}_1(k)$ and
+$\tilde{w}_2(k)$.
+\begin{align}
+  \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
+      \sigma}\tilde{w}_2(k) \right]
+\end{align}
 
 \subsection{Homogeneous limit}
  

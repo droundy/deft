@@ -93,13 +93,27 @@ int count_interactions(int id, ball *p, double interaction_distance,
 int count_all_interactions(ball *balls, int N, double interaction_distance,
                            double len[3], int walls);
 
-// Set weight histogram assuming a gaussian DoS
-void set_gaussian_weights(long *energy_histogram, double *ln_energy_weights,
-                          int energy_levels);
-
 // Find index of max entropy point
 int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
                       int energy_levels);
+
+// Flatten weights beyond max entropy point and reset energy histogram
+void flush_arrays(long *energy_histogram, double *ln_energy_weights,
+                  int energy_levels);
+
+void flat_hist(long *energy_histogram, double *ln_energy_weights,
+               int energy_levels);
+
+void gaussian_hist(long *energy_histogram, double *ln_energy_weights,
+                   int energy_levels);
+
+void walker_hist(long *energy_histogram, double *ln_energy_weights,
+                 int energy_levels, long *walkers_plus, long *walkers_total,
+                 move_info *moves);
+
+// Variation in histogram values
+double count_variation(long *energy_histogram, double *ln_energy_weights,
+                       int energy_levels);
 
 // Consider an fcc lattice broken into cubic cells with a ball at the center of each
 //   and a ball on the center of each edge
