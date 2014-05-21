@@ -316,7 +316,7 @@ energy change due to the energy of oscillations.
 \begin{figure}
   \centering
   \includegraphics[width=0.8\columnwidth]{figs/interactions}
-  \caption{Interactions between neighboring subdivisions.}\label{fig:interactions}
+  \caption{Interactions between all subdivisions.}\label{fig:interactions}
 \end{figure}
 
 \subsubsection{Interaction between subsystems}
@@ -334,9 +334,43 @@ the heart of the GRG method.
 We desire to simplify the summation over seven independent numbers
 $N_1\cdots N_7$ (with the eighth constrained by $\sum_i N_i = N$) to a
 summation over a single fluctuation amplitude.  As illustrated in
-Fig.~\ref{fig:interactions}, these interactions can be seen as
-a sum of interactions between neighboring subdivisions, combined with
-a many-body correction due to ``corner'' interactions.
+Fig.~\ref{fig:interactions}, these interactions can be seen as a sum
+of interactions between neighboring subdivisions, combined with a
+many-body corrections due to the free energy not being precisely
+separable into additive pairwise contributions (due to for instance
+``corner'' interactions).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\columnwidth]{figs/neighbors}
+  \caption{Interactions between only neighboring subdivisions.}\label{fig:neighbors}
+\end{figure}
+
+If we make this assumption, that the free energy can be separated into
+neighboring contributions, we can write
+\begin{align}
+  F_j(N_1\cdots N_8) &= \alpha \sum_{ij}^{\text{neighbors}} F_j^{\text{neighbor}}(N_i, N_j)
+\end{align}
+where $F_j^{\text{neighbor}}(N_i, N_j)$ is the free energy of the
+system illustrated in Fig.~\ref{fig:neighbors}, which has a slab-like
+density oscillation, and $\alpha$ \fixme{is a prefactor that I need to
+  work out}.
+
+I will note that we have a choice of lattice when defining our
+periodic system.  At this point we can see that a simple cubic lattice
+gives us a flat-slab neighbor system.  If we had chosen a close-packed
+FCC lattice, then each subdivision would interact equally with all the
+other subdivisions (and corners would involve four subdivisions rather
+than all eight), but our slab geometry would have a bumpy interface
+(e.g. if we chose a $\langle 111\rangle$ slab it would have an
+equilateral triangular lattice of bumps).  I will continue thinking in
+terms of a simple cubic interface, with the option to revise this to
+switch lattices.
+
+Once we have rewritten $F_j(N_1\cdots N_8)$ in terms of
+$F_j^{\text{neighbor}}(N_i, N_j)$, we can further simplify our free energy
+difference (and definitions of $\bar{U}$ and $\bar{F}$):
+
 
 \subsection{To do later}
 
