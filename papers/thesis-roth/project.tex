@@ -32,6 +32,7 @@
 
 % fixme
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{[#1]}}}
+\newcommand{\davidsays}[1]{\textcolor{blue}{\textit{[#1]}}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -117,7 +118,14 @@ The long-range attractive term, $\fattr$ is given by
 $\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere repulsion, and $\fdisp$ is the attraction. The function $a_1(n)$ is the first term from a high-temperature perturbation expansion, described in further detail in sections~\ref{sub2sec:disp} and~\ref{subsec:TPT}. Each function is outlined below.
 
 \subsubsection{Ideal gas}\label{sub2sec:ID}
-The ideal gas term is purely local \fixme{whatever that means}:
+The ideal gas term is purely local \fixme{whatever that
+  means}\davidsays{For your purposes, the purely localness isn't
+  really relevant.  It means that when we consider an inhomogeneous
+  configuration, the correct answer is just this free energy
+  integrated.  i.e. you just add up the local contributions to the
+  free energy.  For a homogeneous fluid, the locality isn't really
+  relevant.  Except in so far as how it relates to
+  fluctuations... since fluctuations are inhomogeneities of a sort.}:
 \begin{align}
   \fid &= n\kT\left(\log(n) - 1\right)
 \end{align}
@@ -200,7 +208,13 @@ We use the isothermal compressibility in terms of packing fraction $\eta$, given
 \subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
 
 
-\fixme{And introduction to TPT---why do we use it?}
+\fixme{And introduction to TPT---why do we use it?}\davidsays{We use
+  TPT because it gives a good description of simple liquids, as long
+  as you are far from the critical point.  Thus it covers most of our
+  bases.  It is also an elegant theory, since it comes from a rigorous
+  power series expansion in a small parameter... or one that one hopes
+  is small. }
+
 This discussion follows primarily from \textit{Theory of Simple Liquids}, by Hansen and McDonald\cite{Hansen06}.
 
 Thermodynamic perturbation theory treats the intermolecular potential as separable into two parts, one for short-range repulsion and another for long-range attraction.
@@ -214,7 +228,12 @@ The pair potential $v(\1,\2)$ describes the interaction between two hard spheres
       0 & \lambda\sigma < r
     \end{cases}
 \end{align}
-For this work I use $\lambda = 1.5$.
+For this work I use $\lambda = 1.5$.  \davidsays{I think you've gotten
+things a little confused.  When $v_\lambda$ is derived below, the $w$
+should be the attraction portion, and what appears as $v_{SW}$ should
+just be the hard-sphere potential (without attraction).  That's how
+the TPT works, it is the attraction that is being added in with the
+$\lambda$ proportionality.}
 
 Now, consider this to be the reference, and add a small perturbation:
 \begin{align}
@@ -224,9 +243,10 @@ Now, consider this to be the reference, and add a small perturbation:
 The total potential energy of our system is
 \begin{align}
   V_N(\lambda) = \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j)
+  \label{eq:VN}
 \end{align}
 
-Given the \emph{configuration integral} (the potenial energy component of the partition function)
+Given the \emph{configuration integral} (the potential energy component of the partition function)
 \begin{align}
   Z_N &= \int d\mathbf{r}^N\, e^{-\beta V_N}
 \end{align}
@@ -234,13 +254,29 @@ and the non-ideal part of the free energy (i.e.~the excess free energy) is
 \begin{align}
   F &= -\kT\ln\left( \frac{Z_N}{V^N} \right)
 \end{align}
-where $V^N$ is the total volume \fixme{I think?}, then the derivative of the excess free energy with respect to the coupling parameter $\lambda$ is
+where $V^N$ is the total volume \fixme{I think?}\davidsays{It is the
+  volume taken to the $N^{th}$ power.  It's unfortunate that we have a
+  $V_N$ and a $V^N$ that are such different quantities here!}, then
+the derivative of the excess free energy with respect to the coupling
+parameter $\lambda$ is
 \begin{align}
   \frac{\partial F}{\partial\lambda} &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
-  &= -\kT\frac{1}{Z_N}\int d\mathbf{r}^N\, e^{-\beta V_N}(-\beta)\frac{\partial V_N}{\partial\lambda} \\
+  &= -\kT\frac{1}{Z_N}\int d\mathbf{r}^N\, e^{-\beta V_N}(-\beta)\frac{\partial V_N}{\partial\lambda}
+  \label{eqn:dFdlambda} \\
   \hookrightarrow \beta\frac{\partial F}{\partial\lambda} &= \beta\left\langle V_N^{'}(\lambda) \right\rangle_\lambda \\
   \hookrightarrow \beta F &= \beta F_0 + \beta\int_0^1 d\lambda\, \left\langle V_N^{'}(\lambda) \right\rangle_\lambda
 \end{align}
+\davidsays{In the above you could simplify things a bit by working out
+$dF/d\lambda$ directly (without the $\beta$ factor) which would remove
+all the factors of $\beta$.  I would also mention that the subscript
+$\lambda$ indicates that the average (and derivative) is evaluated at
+$\lambda = \lambda$ (as opposed to $\lambda=0$ which is done later.
+Note that at this stage we have an exact equation.  We just took a
+derivative of $F$ and then integrated that derivative to find $F$
+again.  So far as I can see (and I looked at this derivation a bit
+with Eric, who may also be able to help you), $V'_N = \sum w_{ij}$, which
+means that $\langle V'_N\rangle = \frac12 N^2 \langle w_{12}
+\rangle$, which is potentially a simpler way to look at it.}
 where $\left\langle V_N^{'}(\lambda) \right\rangle_\lambda$ is the canonical ensemble average. We can take a series expansion of this average:
 \begin{align}\begin{split} % too long; use split environment, and align to a space (&{})
   \left\langle V_N^{'}(\lambda) \right\rangle_\lambda = &{} \left\langle V_N^{'}(\lambda)\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda}\bigg|_{\lambda = 0} \\ &{} + \mathcal{O}(\lambda^2)
@@ -253,8 +289,18 @@ where
 \begin{align}
   \sigma_\lambda^2 &\equiv \left\langle \left[ V_N^{'}(\lambda) \right]^2 \right\rangle_\lambda - \left\langle V_N^{'}(\lambda) \right\rangle^2_\lambda
 \end{align}
-\fixme{I don't really understand how this derivative is \ldots derived}
-Putting this together, we have
+\fixme{I don't really understand how this derivative is \ldots
+  derived}\davidsays{This is definitely a spot where you can be more
+  clear (once you understand).  I believe the $V''_N$ term is zero
+  (see above).  Unless I'm severely misunderstanding
+  equations~\ref{eqn:small-perturbation} and~\ref{eq:VN}.  The
+  derivative is (pretty) easy if you write your ensemble average as a
+  multidimensional integral, as in Eq.~\ref{eqn:dFdlambda}.  Write
+  down $dF/d\lambda$ in terms of $Z_N$ and an integral of Boltzmann
+  factors times $V_N'$.  Then when you take a derivative, it hits top
+  and bottom, but each is an integral of an exponential, so those are
+  easy to differentiate.  A little math will give you this variance
+  formula.} Putting this together, we have
 \begin{align}
   \begin{split}
     \beta F = &{} \beta F_0 + \beta(1 - 0)\left\langle V_N^{'}(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle V_N^{''}(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
@@ -273,7 +319,13 @@ Then, following from equation~\ref{eqn:small-perturbation},
   &= W_N \\
   \therefore V_N^{''} &= 0
 \end{align}
-With this in mind, we can simplify equation~\ref{eqn:complicated-HTE} to the \emph{high-temperature expansion}, first derived by Zwanzig:\cite{Zwanzig54}
+\davidsays{Ah ha! Here you do what I mentioned earlier.  I'd tend to
+  put this earlier, so you can throw away the $V_N''$ term sooner.
+  And also talking about $W_N$ with this definition I would find nicer
+  and clearer than all the $V_N'$.}  With this in mind, we can
+simplify equation~\ref{eqn:complicated-HTE} to the
+\emph{high-temperature expansion}, first derived by
+Zwanzig:\cite{Zwanzig54}
 \begin{align}
   \begin{split}
     \beta F = &{} \beta F_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta^3)
@@ -281,15 +333,30 @@ With this in mind, we can simplify equation~\ref{eqn:complicated-HTE} to the \em
 \end{align}
 Zwanzig further showed that the $n^{th}$ term could be written in terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle W_N\right\rangle_0 \right]^\nu \right\rangle_0$ with $\nu \leq n$.
 
-Writing the statistical averages in terms of the pair density $n_\lambda^{(2)}(\1,\2)$ (i.e. the probability of having a sphere at \1 and \2 \fixme{make this more clear?}) gives us
+Writing the statistical averages in terms of the pair density
+$n_\lambda^{(2)}(\1,\2)$ (i.e. the probability of having a sphere at
+\1 and \2 \fixme{make this more clear?}\davidsays{I'd perhaps phrase
+  it as ``probability per volume squared of having one sphere at \1
+  and another at \2''}) gives us
 \begin{align}
   \frac{\beta F}{N} &= \frac{\beta F_0}{N} + \frac{\beta}{2N}\int_0^1 d\lambda\, \iint d\1 d\2\, n_\lambda^{(2)}(\1,\2)w(\1,\2) \label{eqn:Henderson5-2-12}
 \end{align}
-The pair density itself can be expanded as
+\davidsays{Here's another place where all the $N$s on the bottom are
+  muddying things up, I think.  (like the $\beta$s were before).  I
+  also think this discussion is pretty redundant with parts of the
+  previous derivation in terms of $V_N$.}  The pair density itself can
+be expanded as
 \begin{align}
   n_\lambda^{(2)}(\1,\2) &= n_0^{(2)}(\1,\2) + \lambda\frac{\partial n_\lambda^{(2)}(\1,\2)}{\partial\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2)
 \end{align}
-Applying this to the \fixme{0th, 1st or 2nd, depending on how you think of it} term in equation~\ref{eqn:Henderson5-2-12}, we have
+Applying this to the \fixme{0th, 1st or 2nd, depending on how you
+  think of it}\davidsays{it's ``second'' since ``terms'' are things
+  that are added together, while factors are things that are
+  multiplied together.  And in Eq~\ref{eqn:Henderson5-2-12} there are
+  only two things added together.  (I figured this terminology out on
+  my own some time after becoming a professor... it seems to be used,
+  but not taught).} term in equation~\ref{eqn:Henderson5-2-12}, we
+have
 \begin{align}
   \frac{\beta F_1}{N} &= \frac{\beta}{2N}\iint d\1 d\2\, n_0^{(2)}(\1,\2)w(\1,\2) \\
   &= \frac{\beta n}{2}\int d\mathbf{r}_{12}\, g_0(\1,\2)w(\1,\2)
@@ -303,6 +370,17 @@ The second-order $\lambda$ term is quite a bit more complicated:
  \end{align}
 \end{widetext}
 This term requires use to know the form of higher-order correlation functions and the structure function $S_0(k)$ of the reference system. These things are very difficult. Hence, we use approximations, as outlined in section~\ref{sub2sec:disp}.
+
+\davidsays{I'm thinking this whole section should go \emph{before} the
+  section on the square well free energy, since that section uses this
+  method (in approximation).  Then you can say something to the effect
+  of ``in the next section we will see a simple approximation for this
+  term.''  Hansen's explanation of TPT is not very clear, which makes
+  it all the more valuable to make \emph{this} a clear and lucid
+  explanation.  I'd love to see just a couple more steps at key
+  places---largely where you were confused.  Probably it's best to
+  actually talk about this section in person before rewriting.  This
+  has been an excellent first shot, though! }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}\label{sec:methods}
@@ -355,14 +433,17 @@ The algorithm is as follows; start at some temperature $T=T_{start}$, with an in
 \end{enumerate}
 
 \subsection{Free Energies}\label{subsec:free-energies}
-The $a_j(n)$ terms require even more simplification when ``converting'' from the mathematical formulation to Python code, to rid ourselves of troublesome integrals. Gil-Villegas gives us
+The $a_j(n)$ terms require even more simplification when
+``converting'' from the mathematical formulation to Python code, to
+rid ourselves of troublesome integrals. Gil-Villegas gives us
+\newcommand\eff{\textit{eff}}
 \begin{align}
-  a_1^\text{SW}(n) &= a_1^\text{VDW}(n)g^\text{HS}(1;\eta_{eff}) \\
-  &= -4\eta\epsilon(\lambda^3 - 1)\frac{1 - \left( \eta_{eff}/2 \right)}{(1 - \eta_{eff})^3}
+  a_1^\text{SW}(n) &= a_1^\text{VDW}(n)g^\text{HS}(1;\eta_{\eff}) \\
+  &= -4\eta\epsilon(\lambda^3 - 1)\frac{1 - \left( \eta_{\eff}/2 \right)}{(1 - \eta_{\eff})^3}
 \end{align}
 and
 \begin{align}
-  \eta_{eff} &= c_1\eta + c_2\eta^2 + c_3\eta^3
+  \eta_{\eff} &= c_1\eta + c_2\eta^2 + c_3\eta^3
 \end{align}
 with
 \begin{align}

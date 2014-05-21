@@ -38,7 +38,8 @@ plt.savefig('figs/phi-RG-lowT.pdf')
 # plt.xlabel(r'$\eta$')
 # plt.legend(loc=0)
 
-# plt.savefig('figs/SW-RG-compare-f-lowT.pdf')
+# I introduced a misspelling below, so scons won't think this should be built
+# plt.save fig('figs/SW-RG-compare-f-lowT.pdf')
 # plt.show()
 
 ### High Temp ###
@@ -68,7 +69,8 @@ plt.savefig('figs/phi-RG-highT.pdf')
 # plt.xlabel(r'$\eta$')
 # plt.legend(loc=0)
 
-# plt.savefig('figs/SW-RG-compare-f-highT.pdf')
+# I introduced a misspelling below, so scons won't think this should be built
+# plt.save fig('figs/SW-RG-compare-f-highT.pdf')
 
 
 
