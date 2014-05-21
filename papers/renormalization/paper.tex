@@ -137,6 +137,12 @@ fluctuations) that we can compute numerically using Monte Carlo, but
 we have not yet constructed a means to approximate these functions.
 Before developing this approximation, let's reorganize this sum over
 periodic states.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\columnwidth]{figs/divisions}
+  \caption{A cell being subdivided with $N_1\cdots N_8$ particles in
+    each subdivision.}
+\end{figure}
 \newcommand\sumoccupanciesofoctants{
   \sum_{N_1\cdots N_8}^{\text{\tiny\begin{minipage}{5em}
       \begin{center}
@@ -262,9 +268,11 @@ partition function is readily computable.  We further simplify the
 numerator by multiplying and dividing by the same quantity, and
 simplify the notation by defining
 \begin{align}
-  F_j(N_1\cdots N_8) &= \summicrostatesofoctants
+  F_j(N_1\cdots N_8) &= g_{N_1\cdots N_8}
+       \summicrostatesofoctants
        e^{-\beta E_{i_1\cdots i_8}^{(j)}}
 \end{align}
+\begin{widetext}
 and thus rewrite the energy difference as
 \begin{multline}
   F_j(n) - F_{j-1}(n) =\\
@@ -278,6 +286,7 @@ and thus rewrite the energy difference as
   }
   \right)
 \end{multline}
+\end{widetext}
 At this point we can recognize and identify two energy differences as
 \begin{align}
   \bar{F}(N_1\cdots N_8) &= F_{j-1}(N_1) + \cdots F_{j-1}(N_8)  - F_{j-1}(n) \\
@@ -304,8 +313,33 @@ energy change due to oscillations \emph{if we neglect the actual
   approximation}.  Meanwhile $\bar{U}(N_1\cdots N_8)$ is the free
 energy change due to the energy of oscillations.
 
-\fixme{I have now ``defined'' the terms used by Forte in her %% Note: Forte is a woman---needs to be refered to as 'she/her'
-  notation of GRG.  On the to-do list: }
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\columnwidth]{figs/interactions}
+  \caption{Interactions between neighboring subdivisions.}\label{fig:interactions}
+\end{figure}
+
+\subsubsection{Interaction between subsystems}
+At this stage, there is just one term that need be approximated
+(assuming, as always, that we have an acceptable approximation for
+$F_{j-1}$), which is $\bar{U}$.  This is the free energy difference
+between two free energies.  The first, $F_j(N_1\cdots N_8)$, is the
+fully interacting system that is periodic with periodicity
+$2^j\lambda$, and which is constrained to have $N_1\cdots N_8$
+particles in each of the subdivisions of the cell.  The second is the
+sum of $F_{j-1}$ for each of those subdivisions.  This difference
+describes the interaction between the octants of the cell, and is at
+the heart of the GRG method.
+
+We desire to simplify the summation over seven independent numbers
+$N_1\cdots N_7$ (with the eighth constrained by $\sum_i N_i = N$) to a
+summation over a single fluctuation amplitude.  As illustrated in
+Fig.~\ref{fig:interactions}, these interactions can be seen as
+a sum of interactions between neighboring subdivisions, combined with
+a many-body correction due to ``corner'' interactions.
+
+\subsection{To do later}
+
 \begin{enumerate}
 \item \fixme{Elaborate on the approximation (ignoring corners) that
   leads from a $\sumoccupanciesofoctants g_{N_1\cdots N_8}$ to an
@@ -317,6 +351,7 @@ energy change due to the energy of oscillations.
   approach to approximate $\bar U$, suggesting that a simple
   (standard) DFT might work just fine for this.}
 \end{enumerate}
+
 
 \subsection{Monte Carlo}
 
