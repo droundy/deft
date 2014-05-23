@@ -370,6 +370,22 @@ switch lattices.
 Once we have rewritten $F_j(N_1\cdots N_8)$ in terms of
 $F_j^{\text{neighbor}}(N_i, N_j)$, we can further simplify our free energy
 difference (and definitions of $\bar{U}$ and $\bar{F}$):
+\begin{multline}
+  \sumoccupanciesofoctants
+  e^{-\beta \big( \bar{F}(N_1\cdots N_8) + \bar{U}(N_1\cdots N_8)
+         \big)}
+  \\=
+  \sumoccupanciesofoctants
+  e^{-\beta \big( F_j(N_1\cdots N_8) - \sum\cdots
+         \big)}
+  \\\approx
+  \sumoccupanciesofoctants
+  e^{-\beta \big( F_j^{\text{NN}}(N_1, N_2) + F_j^{\text{NN}}(N_1,
+    N_3) + \cdots - \cdots
+         \big)}
+\end{multline}
+Sadly, this does not immediately separate into terms similar to those
+in standard GRG.
 
 
 \subsection{To do later}
