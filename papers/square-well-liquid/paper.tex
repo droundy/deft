@@ -255,6 +255,74 @@ The approximation for the averaged pair distribution $g_\sigma(\rr)$
 is from Schulte \emph{et al.}~\cite{schulte2012using}.  We will here
 summarize the key results needed to implement this approximation.
 
+%%Stuff commented out below was me typing out this section before I
+%%realised we had something like this.  I'm leaving the code here for now.
+
+%% If we take into account
+%% the $\beta$ term then $a_2$ becomes
+%% \begin{align}\label{eq:A2-exact}
+%%   A_2 &= \int \int \textrm{d$\rr_1$
+%%     d$\rr_2$}n(\rr_1)n(\rr_2)g^{(2)}(\rr_1\,\rr_2)\Phi(r_{12})
+%% \end{align}
+%% We want to use our approximation for $g^{(2)}$
+%% written as Eqn. \ref{eq:g2-our-mean}:
+%% \begin{align}
+%%   g^{(2)}(\rr_1,\rr_2) \approx 
+%%   \frac{g_s \left(\rr_{12},g_{\sigma}(\rr_1)\right) + g_s
+%%     \left(\rr_{12},g_{\sigma}(\rr_2)\right)}{2}.
+%% \end{align}
+%% If the look at the homogeneous case then
+%% \begin{align}
+%%   g_s \left(\rr_{12},g_{\sigma}(\rr_1)\right) = g_s
+%%   \left(\rr_{21},g_{\sigma}(\rr_2)\right).
+%% \end{align}
+%% With which we can rewrite equation \ref{eq:A1-exact} to be  
+%% \begin{align}
+%%   A_2 &= \int \int \textrm{d$\rr_1$
+%%     d$\rr_2$}n(\rr_1)n(\rr_2)g_s(\rr_{12}\,g_\sigma(\rr_1))\Phi(r_{12}).
+%% \end{align}
+%% We can write $g_s$ as a sum of functions
+%% \begin{align}\
+%%   g_s(\rr_{12}\,g_\sigma(\rr_1)) = \sum_i f_i(r_{12})G_i(g_\sigma)
+%% \end{align}
+%% where the ith function we assume is a product of two functions that explicitly
+%% depend on $r_{12}$ and $g_\sigma(\rr_1)$ respectively.
+
+\subsection{Local-compressibility approximation}
+
+Barker and Henderson presented two approximations for the second order
+term in the inverse temperature expansion, one of which they name the
+local-compressiblitity
+approximation. \cite{barker2004perturbationSW,barker2004perturbationII}
+%% Our derivation for this looks something like this:
+%% \begin{align}
+%%   A_2 &\approx -\left(\frac{\partial n}{\partial p}\right)
+%%   \int\textrm{d$\rr'$} \notag \\
+%%   &\times \frac{\delta}{\delta n(\rr')} \int \int
+%%   \textrm{d$\rr_1$ d$\rr_2$} \left[n(\rr_1)
+%%   n(\rr_2)g^{(2)}(\rr_1\,\rr_2)\Phi(r_{12})^2 \right]
+%% \end{align}
+%% \begin{align}
+%%   A-A_{ref} &= -kT \ln \left(\frac{Z_a}{Z_{ref}}\right) 
+%%   \\ &= -kT \ln \left( \frac{\sum_i e^{-\beta[E_{ref}(i) + \lambda
+%%         E_a(i)]}} {\sum_i e^{-\beta E_{ref}(i)}} \right) \\
+%% \end{align}
+%% Since our perturbed Energy $E_a$ is caused by some small potential
+%% $u_a$, we can expand $\exp(-\beta \lambda u_a)$ in a power series.
+%% This makes
+%% \begin{align}
+%%   A-A_{ref} &= -kT \ln \bigg{\langle} 1 - \beta
+%%   \lambda u_a + \frac{1}{2} \beta^2 \lambda^2 u_a^2 + \cdots \bigg{\rangle}_0
+%% \end{align}
+%% Here, the average is over the reference energies.  Now we can expand
+%% the the natural log in a series
+%% \begin{align}
+%%   A-A_{ref} &= -kT \ln \bigg{\langle} 1 - \beta
+%%   \lambda u_a + \frac{1}{2} \beta^2 \lambda^2 u_a^2 + \cdots \bigg{\rangle}_0
+%% \end{align}
+
+
+
 \subsection{Using the pair distribution function}
 
 
