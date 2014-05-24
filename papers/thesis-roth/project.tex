@@ -194,68 +194,66 @@ And the non-ideal part of the free energy (i.e.~the excess free energy) and its 
 the total volume taken to the $N^{th}$ power, and
 $\left\langle W_N \right\rangle_\lambda$ is the ensemble
 average of $W_N$, with the subscript indicating some given
-value of $\lambda$. We can simplify this even further by noting
+value of $\lambda$.
+
+\fixme{The following could probably go someplace else}
+We can simplify this even further by noting
 \begin{align}
   \left\langle W_N \right\rangle &= \left\langle \sum_i\sum_jw(\mathbf{r}_i,\mathbf{r}_j) \right\rangle \\
   &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle
   \intertext{which gives us}
   \frac{\partial F}{\partial\lambda} &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle_\lambda
 \end{align}
+\fixme{(end)}
 
-At this point, note that we have an exact equation with no approximation. Now take a series expansion:
-\begin{align}\begin{split} % too long; use split environment, and align to a space (&{})
-  \left\langle W_N(\lambda) \right\rangle_\lambda = &{} \left\langle W_N(\lambda)\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle W_N(\lambda) \right\rangle_{\lambda}\bigg|_{\lambda = 0} \\ &{} + \mathcal{O}(\lambda^2)
-\end{split}\end{align}
+We can integrate this expression over $F\in[F_0,F]$ and $\lambda\in[0,1]$ to obtain
+\begin{align}
+  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda \nonumber \\
+  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda \label{eqn:F-inTermsW}
+\end{align}
+At this point, note that we have an exact equation with no approximation. All we have done was take a derivative, simplify, and integrate. Now take a series expansion:
+\begin{align}
+  \left\langle W_N \right\rangle_\lambda = &{} \left\langle W_N\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda}\bigg|_{\lambda = 0} \nonumber\\
+  &{} + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion}
+\end{align}
 The derivative term is
 \begin{align}
-  \frac{\partial}{\partial\lambda}\left\langle W_N(\lambda) \right\rangle_{\lambda} &= \left\langle V_N^{''} \right\rangle_\lambda - \beta\sigma_\lambda^2
+  \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} =&{} \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N}\right) \\
+  =&{} \frac{1}{Z_N}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta V_N} \right) \nonumber\\
+  &{} - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\frac{\partial}{\partial\lambda}Z_N \\
+  =&{} \frac{1}{Z_N}\int d\rr^N\, \left( e^{-\beta V_N}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta V_N} \right) \nonumber \\
+  &{} - \frac{1}{Z_N^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta V_N} \\
 \end{align}
-where
+Note that $\partial/\partial\lambda W_N = 0$, so we have
 \begin{align}
-  \sigma_\lambda^2 &\equiv \left\langle \left[ W_N(\lambda) \right]^2 \right\rangle_\lambda - \left\langle W_N(\lambda) \right\rangle^2_\lambda
+   \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} =&{} \frac{1}{Z_N}\int d\rr^N (-\beta) W_N^2 e^{-\beta V_N} \nonumber\\
+   &{} - \frac{1}{Z_N^2}\Bigg(\int d\rr^N\, W_N e^{-\beta V_N} \nonumber\\
+   &{} \times \int d\rr^N\, (-\beta)W_Ne^{-\beta V_N}\Bigg) \\
+   =&{} -\beta\Bigg[ \frac{1}{Z_N}\int d\rr^N\, W_N^2e^{-\beta V_N}  \nonumber\\
+   &{} - \left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N} \right)^2 \Bigg] \\
+   =&{} -\beta\left[ \left\langle W_N^2 \right\rangle_\lambda - \left\langle W_N \right\rangle_\lambda^2 \right] \\
+   \equiv &{} -\beta\sigma_\lambda^2
 \end{align}
-Now note that $W_N$ has no dependence on $\lambda$, therefore $W_N' = 0$, and
+Combining this result with equation~\ref{eqn:Wn-expansion} gives us
 \begin{align}
-  \frac{\partial}{\partial\lambda}\left\langle W_N(\lambda) \right\rangle_{\lambda} &= - \beta\sigma_\lambda^2 \\
-  \therefore \left\langle W_N(\lambda) \right\rangle_\lambda &= \left\langle W_N(\lambda)\right\rangle_{\lambda = 0} - \lambda\beta\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2)
+  \left\langle W_N \right\rangle_\lambda &= \left\langle W_N\right\rangle_{\lambda = 0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion-simplified}
 \end{align}
-
-\davidsays{The derivative is (pretty) easy if you write your ensemble
-  average as a multidimensional integral, as in
-  Eq.~\ref{eqn:dFdlambda}.  Write down $dF/d\lambda$ in terms of $Z_N$
-  and an integral of Boltzmann factors times $W_N$.  Then when you
-  take a derivative, it hits top and bottom, but each is an integral
-  of an exponential, so those are easy to differentiate.  A little
-  math will give you this variance formula.}
-
-\fixme{Below this, I have not updated}
-
-Putting this together, we have
+Putting together equations~\ref{eqn:F-inTermsW} and~\ref{eqn:Wn-expansion-simplified}, we have
 \begin{align}
-  \begin{split}
-    \beta F = &{} \beta F_0 + \beta(1 - 0)\left\langle W_N(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
-  \end{split} \\
-  \begin{split}
-    =&{}  \beta F_0 + \beta\left\langle W_N(\lambda) \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
-  \end{split}
+  F &= F_0 + \left\langle W_N \right\rangle_{\lambda=0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2)
 \end{align}
-Now, we can define the total perturbation energy as
-\begin{align}
-  W_N &= \sum_{i=1}^N\sum_{j>i}^N w_\lambda(\mathbf{r}_i,\mathbf{r}_j)
-\end{align}
-Then, following from equation~\ref{eqn:small-perturbation},
-\begin{align}
-  W_N &= \frac{\partial}{\partial\lambda}\left(\sum_{i=1}^N\sum_{j>i}^N \lambda w(\mathbf{r}_i,\mathbf{r}_j)\right) \nonumber \\
-  &= W_N \\
-  \therefore W_N' &= 0
-\end{align}
-\davidsays{Ah ha! Here you do what I mentioned earlier.  I'd tend to
-  put this earlier, so you can throw away the $V_N''$ term sooner.
-  And also talking about $W_N$ with this definition I would find nicer
-  and clearer than all the $V_N'$.}  With this in mind, we can
-simplify equation~\ref{eqn:complicated-HTE} to the
-\emph{high-temperature expansion}, first derived by
+%% \begin{align}
+%%   \begin{split}
+%%     \beta F = &{} \beta F_0 + \beta(1 - 0)\left\langle W_N \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
+%%   \end{split} \\
+%%   \begin{split}
+%%     =&{}  \beta F_0 + \beta\left\langle W_N \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
+%%   \end{split}
+%% \end{align}
+This is the \emph{high-temperature expansion}, first derived by
 Zwanzig:\cite{Zwanzig54}
+\fixme{Zwanzig has a factor of $1/2$ that I'm missing}
+\fixme{Below this point has not been updated}
 \begin{align}
   \begin{split}
     \beta F = &{} \beta F_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta^3)
