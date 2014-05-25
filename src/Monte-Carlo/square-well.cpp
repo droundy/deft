@@ -291,13 +291,15 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 }
 
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-           int energy_levels){
+                  int energy_levels, bool flush_weights = true){
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   for (int i = 0; i < max_entropy; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy];
-  for (int i = 0; i < energy_levels; i++)
-    energy_histogram[i] = 0;
+  if(flush_weights){
+    for (int i = 0; i < energy_levels; i++)
+      energy_histogram[i] = 0;
+  }
   return;
 }
 

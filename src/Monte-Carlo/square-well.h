@@ -99,7 +99,7 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 
 // Flatten weights beyond max entropy point and reset energy histogram
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels);
+                  int energy_levels, bool flush_weights);
 
 void flat_hist(long *energy_histogram, double *ln_energy_weights,
                int energy_levels);

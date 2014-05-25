@@ -93,7 +93,7 @@ int main(int argc, const char *argv[]) {
 
   double wl_factor = 1;
   double wl_fmod = 2;
-  double wl_threshold = 0.5;
+  double wl_threshold = 0.1;
   double wl_cutoff = 1e-8;
 
   double len[3] = {1, 1, 1};
@@ -570,7 +570,8 @@ int main(int argc, const char *argv[]) {
         if(count_variation(energy_histogram, ln_energy_weights, energy_levels)
            < wl_threshold){
           wl_factor /= wl_fmod;
-          flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
+          // for wang-landau, only flush energy histogram; keep weights
+          flush_arrays(energy_histogram, ln_energy_weights, energy_levels, false);
         }
         // repeat until terminal condition is met
         if(wl_factor > wl_cutoff)
