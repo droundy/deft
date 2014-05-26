@@ -299,7 +299,7 @@ int main(int argc, const char *argv[]) {
   if (totime > 0) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
   else printf("Debug mode disabled\n");
-  printf("----------------------------------------------------------------\n\n");
+  printf("------------------------------------------------------------------\n\n");
 
   // ----------------------------------------------------------------------------
   // Define variables
@@ -311,9 +311,12 @@ int main(int argc, const char *argv[]) {
   // neighbor radius should scale with radius and interaction scale
   double neighbor_R = neighbor_scale*R*well_width;
 
+  // Find the upper limit to the maximum number of neighbors a ball could have
+  int max_neighbors = max_balls_within(2+neighbor_scale*well_width);
+
   // Energy histogram
   const double interaction_distance = 2*R*well_width;
-  const int energy_levels = maximum_interactions(N,interaction_distance);
+  const int energy_levels = N/2*max_balls_within(interaction_distance);
   long *energy_histogram = new long[energy_levels]();
 
   // Walkers
@@ -366,9 +369,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
-
-  // Find the upper limit to the maximum number of neighbors a ball could have
-  int max_neighbors = max_balls_within(2+neighbor_scale*well_width);
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;

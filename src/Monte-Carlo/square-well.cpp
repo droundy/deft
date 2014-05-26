@@ -410,7 +410,8 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
   return num;
 }
 
-int maximum_interactions(int N, double distance){
+int maximum_interactions(int N, double interaction_distance, double neighbor_R,
+                         int max_neighbors, double len[3]){
   double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
   double droplet_radius = pow(double(N),1./3); // lower bound for spherical droplet radius
   while(max_balls_within(droplet_radius) > N)
@@ -445,13 +446,27 @@ int maximum_interactions(int N, double distance){
       }
     }
   }
-  int interactions = 0;
-  for(int i = 0; i < num_balls-1; i++){
-    for(int j = i+1; j < num_balls; j++){
-      if((balls[i].pos - balls[j].pos).norm() <= distance)
-        interactions++;
+
+  while(num_balls > N){
+    double max_distance = 0;
+    int max_index = -1; // index of ball that is the furthest out from the droplet
+    for(int i = 0; i < num_balls; i++){
+      if(balls[i].pos.norm() > max_distance){
+        max_distance = balls[i].pos.norm();
+        max_index = i;
+      }
     }
+    balls[max_index].pos = balls[num_balls-1].pos;
+    num_balls--;
   }
+
+  ball *droplet_balls = new ball[N];
+  for(int i = 0; i < N; i++)
+    droplet_balls[i].pos = balls[i].pos;
+
+  initialize_neighbor_tables(droplet_balls,N,neighbor_R,max_neighbors,len,0);
+  int interactions = count_all_interactions(droplet_balls,N,interaction_distance,len,0);
   delete[] balls;
+  delete[] droplet_balls;
   return interactions;
 }
