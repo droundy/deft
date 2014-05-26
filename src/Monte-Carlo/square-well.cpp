@@ -388,11 +388,15 @@ double fcc_dist(int n, int m, int l, double x, double y, double z){
   return sqrt(sqr(n+x/2) + sqr(m+y/2) + sqr(l+z/2));
 }
 
-int max_balls_within(double distance){
+vector3d pos_at(int n, int m, int l, double x, double y, double z, double a){
+  return a*vector3d(n+x/2,m+y/2,l+z/2);
+}
+
+int max_balls_within(double distance){ // distances are all normalized to ball radius
   distance += 1e-10; // add a tiny, but necessary margin of error
-  double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
-  int c = int(ceil(distance/a));
-  int num = -1; // don't count the ball at the origin
+  double a = 2*sqrt(2); // fcc lattice constant
+  int c = int(ceil(distance/a)); // number of cubic fcc cells to go out from center
+  int num = -1; // number of balls within a given radius; don't count the center ball
   for(int n  = -c; n <= c; n++){
     for(int m = -c; m <= c; m++){
       for(int l = -c; l <= c; l++){
@@ -404,4 +408,50 @@ int max_balls_within(double distance){
     }
   }
   return num;
+}
+
+int maximum_interactions(int N, double distance){
+  double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
+  double droplet_radius = pow(double(N),1./3); // lower bound for spherical droplet radius
+  while(max_balls_within(droplet_radius) > N)
+    droplet_radius -= 1; // decrease droplet radius until it is too small
+  while(max_balls_within(droplet_radius) < N)
+    droplet_radius += 0.01; // increase droplet size slowly to fit all balls
+
+  int num_balls = max_balls_within(droplet_radius)+1; // number of balls in droplet
+  int c = int(ceil(droplet_radius/a)); // number of cubic fcc cells to go out from center
+  ball *balls = new ball[num_balls];
+
+  int i = 0;
+  for(int n  = -c; n <= c; n++){
+    for(int m = -c; m <= c; m++){
+      for(int l = -c; l <= c; l++){
+        if(a*fcc_dist(n,m,l,0,0,0) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,0,0,0,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,1,1,0) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,1,1,0,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,1,0,1) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,1,0,1,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,0,1,1) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,0,1,1,a);
+          i++;
+        }
+      }
+    }
+  }
+  int interactions = 0;
+  for(int i = 0; i < num_balls-1; i++){
+    for(int j = i+1; j < num_balls; j++){
+      if((balls[i].pos - balls[j].pos).norm() <= distance)
+        interactions++;
+    }
+  }
+  delete[] balls;
+  return interactions;
 }

@@ -313,7 +313,7 @@ int main(int argc, const char *argv[]) {
 
   // Energy histogram
   const double interaction_distance = 2*R*well_width;
-  const int energy_levels = N/2*max_balls_within(interaction_distance);
+  const int energy_levels = maximum_interactions(N,interaction_distance);
   long *energy_histogram = new long[energy_levels]();
 
   // Walkers
@@ -957,10 +957,10 @@ inline void print_bad(const ball *p, int N, double len[3], int walls) {
 
 inline void check_neighbor_symmetry(const ball *p, int N) {
   for(int i = 0; i < N; i++) {
-    for(int j=0; j<p[i].num_neighbors; j++) {
+    for(int j = 0; j < p[i].num_neighbors; j++) {
       const int k = p[i].neighbors[j];
       bool is_neighbor = false;
-      for (int l=0; l<p[k].num_neighbors; l++) {
+      for (int l = 0; l < p[k].num_neighbors; l++) {
         if (p[k].neighbors[l] == i) {
           is_neighbor = true;
           break;

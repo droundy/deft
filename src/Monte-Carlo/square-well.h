@@ -129,6 +129,12 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
 //    assuming cells have a side length of 1
 double fcc_dist(int n, int m, int l, double x, double y, double z);
 
+// Position of fcc cite n, m, l, x, y, z
+vector3d pos_at(int n, int m, int l, double x, double y, double z, double a);
+
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius
 int max_balls_within(double radius);
+
+// Upper limit on the maximum number of interacions N balls with well width ww could have
+int maximum_interactions(int N, double ww);
