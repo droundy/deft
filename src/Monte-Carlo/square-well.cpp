@@ -384,11 +384,7 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
   return variation;
 }
 
-double fcc_dist(int n, int m, int l, double x, double y, double z){
-  return sqrt(sqr(n+x/2) + sqr(m+y/2) + sqr(l+z/2));
-}
-
-vector3d pos_at(int n, int m, int l, double x, double y, double z, double a){
+vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
 
@@ -405,7 +401,7 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
     for(int m = -c; m <= c; m++){
       for(int l = -c; l <= c; l++){
         for(int k = 0; k < 4; k++)
-          num += (a*fcc_dist(n,m,l,xs[k],ys[k],zs[k]) <= distance);
+          num += (fcc_pos(n,m,l,xs[k],ys[k],zs[k],a).norm() <= distance);
       }
     }
   }
@@ -444,8 +440,8 @@ int maximum_interactions(int N, double interaction_distance, double neighbor_R,
     for(int m = -c; m <= c; m++){
       for(int l = -c; l <= c; l++){
         for(int k = 0; k < 4; k++){
-          if(a*fcc_dist(n,m,l,xs[k],ys[k],zs[k]) <= droplet_radius){
-            balls[i].pos = pos_at(n,m,l,xs[k],ys[k],zs[k],a);
+          if(fcc_pos(n,m,l,xs[k],ys[k],zs[k],a).norm() <= droplet_radius){
+            balls[i].pos = fcc_pos(n,m,l,xs[k],ys[k],zs[k],a);
             i++;
           }
         }
