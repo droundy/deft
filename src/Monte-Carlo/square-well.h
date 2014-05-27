@@ -99,7 +99,7 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 
 // Flatten weights beyond max entropy point and reset energy histogram
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels);
+                  int energy_levels, bool flush_weights);
 
 void flat_hist(long *energy_histogram, double *ln_energy_weights,
                int energy_levels);
@@ -115,11 +115,10 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
 double count_variation(long *energy_histogram, double *ln_energy_weights,
                        int energy_levels);
 
-// Consider an fcc lattice broken into cubic cells with a ball at the center of each
+// Consider an fcc lattice broken into cubic cells with a ball at the center of each cell
 //   and a ball on the center of each edge
-// Choosing one cell as the "center", index each cell by n, m, and l, which correspond
-//   to the number of cells along orthogonal directions a particular cell is from
-//   the "center" cell
+// Choosing one cell as the "center", index each cell by n, m, and l,
+//   along the x, y, and z axis respectively
 // For example, a cell three cells to the left, one cell forward, and five cells down
 //    from the "center" cell would be indexed n = 3, m = 1, l = -5
 // Denote the sides of a given cell by values of x, y, and z which may be -1, 0, or 1
@@ -129,6 +128,16 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
 //    assuming cells have a side length of 1
 double fcc_dist(int n, int m, int l, double x, double y, double z);
 
+// Position of fcc cite n, m, l, x, y, z
+vector3d pos_at(int n, int m, int l, double x, double y, double z, double a);
+
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius
 int max_balls_within(double radius);
+
+// Upper limit on the maximum number of interacions N balls with well width ww could have
+// Makes a spherical droplet with N balls, and counts the interactions in that droplet
+// fixme: currently wrong because it doesn't consider the fact that opposite ends of
+//    the droplet interact in a periodic cell
+int maximum_interactions(int N, double interaction_distance, double neighbor_R,
+                         int max_neighbors, double len[3]);

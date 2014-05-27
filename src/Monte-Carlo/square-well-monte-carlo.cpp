@@ -93,7 +93,7 @@ int main(int argc, const char *argv[]) {
 
   double wl_factor = 1;
   double wl_fmod = 2;
-  double wl_threshold = 0.5;
+  double wl_threshold = 0.1;
   double wl_cutoff = 1e-8;
 
   double len[3] = {1, 1, 1};
@@ -299,7 +299,7 @@ int main(int argc, const char *argv[]) {
   if (totime > 0) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
   else printf("Debug mode disabled\n");
-  printf("----------------------------------------------------------------\n\n");
+  printf("------------------------------------------------------------------\n\n");
 
   // ----------------------------------------------------------------------------
   // Define variables
@@ -310,6 +310,9 @@ int main(int argc, const char *argv[]) {
 
   // neighbor radius should scale with radius and interaction scale
   double neighbor_R = neighbor_scale*R*well_width;
+
+  // Find the upper limit to the maximum number of neighbors a ball could have
+  int max_neighbors = max_balls_within(2+neighbor_scale*well_width);
 
   // Energy histogram
   const double interaction_distance = 2*R*well_width;
@@ -366,9 +369,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
-
-  // Find the upper limit to the maximum number of neighbors a ball could have
-  int max_neighbors = max_balls_within(2+neighbor_scale*well_width);
 
   for(int i = 0; i < N; i++) // initialize ball radii
     balls[i].R = R;
@@ -570,7 +570,8 @@ int main(int argc, const char *argv[]) {
         if(count_variation(energy_histogram, ln_energy_weights, energy_levels)
            < wl_threshold){
           wl_factor /= wl_fmod;
-          flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
+          // for wang-landau, only flush energy histogram; keep weights
+          flush_arrays(energy_histogram, ln_energy_weights, energy_levels, false);
         }
         // repeat until terminal condition is met
         if(wl_factor > wl_cutoff)
@@ -956,10 +957,10 @@ inline void print_bad(const ball *p, int N, double len[3], int walls) {
 
 inline void check_neighbor_symmetry(const ball *p, int N) {
   for(int i = 0; i < N; i++) {
-    for(int j=0; j<p[i].num_neighbors; j++) {
+    for(int j = 0; j < p[i].num_neighbors; j++) {
       const int k = p[i].neighbors[j];
       bool is_neighbor = false;
-      for (int l=0; l<p[k].num_neighbors; l++) {
+      for (int l = 0; l < p[k].num_neighbors; l++) {
         if (p[k].neighbors[l] == i) {
           is_neighbor = true;
           break;

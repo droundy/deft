@@ -291,13 +291,15 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 }
 
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-           int energy_levels){
+                  int energy_levels, bool flush_weights = true){
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   for (int i = 0; i < max_entropy; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy];
-  for (int i = 0; i < energy_levels; i++)
-    energy_histogram[i] = 0;
+  if(flush_weights){
+    for (int i = 0; i < energy_levels; i++)
+      energy_histogram[i] = 0;
+  }
   return;
 }
 
@@ -386,11 +388,15 @@ double fcc_dist(int n, int m, int l, double x, double y, double z){
   return sqrt(sqr(n+x/2) + sqr(m+y/2) + sqr(l+z/2));
 }
 
-int max_balls_within(double distance){
+vector3d pos_at(int n, int m, int l, double x, double y, double z, double a){
+  return a*vector3d(n+x/2,m+y/2,l+z/2);
+}
+
+int max_balls_within(double distance){ // distances are all normalized to ball radius
   distance += 1e-10; // add a tiny, but necessary margin of error
-  double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
-  int c = int(ceil(distance/a));
-  int num = -1; // don't count the ball at the origin
+  double a = 2*sqrt(2); // fcc lattice constant
+  int c = int(ceil(distance/a)); // number of cubic fcc cells to go out from center
+  int num = -1; // number of balls within a given radius; don't count the center ball
   for(int n  = -c; n <= c; n++){
     for(int m = -c; m <= c; m++){
       for(int l = -c; l <= c; l++){
@@ -402,4 +408,65 @@ int max_balls_within(double distance){
     }
   }
   return num;
+}
+
+int maximum_interactions(int N, double interaction_distance, double neighbor_R,
+                         int max_neighbors, double len[3]){
+  double a = 2*sqrt(2); // fcc lattice constant in terms of ball radius
+  double droplet_radius = pow(double(N),1./3); // lower bound for spherical droplet radius
+  while(max_balls_within(droplet_radius) > N)
+    droplet_radius -= 1; // decrease droplet radius until it is too small
+  while(max_balls_within(droplet_radius) < N)
+    droplet_radius += 0.01; // increase droplet size slowly to fit all balls
+
+  int num_balls = max_balls_within(droplet_radius)+1; // number of balls in droplet
+  int c = int(ceil(droplet_radius/a)); // number of cubic fcc cells to go out from center
+  ball *balls = new ball[num_balls];
+
+  int i = 0;
+  for(int n  = -c; n <= c; n++){
+    for(int m = -c; m <= c; m++){
+      for(int l = -c; l <= c; l++){
+        if(a*fcc_dist(n,m,l,0,0,0) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,0,0,0,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,1,1,0) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,1,1,0,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,1,0,1) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,1,0,1,a);
+          i++;
+        }
+        if(a*fcc_dist(n,m,l,0,1,1) <= droplet_radius){
+          balls[i].pos = pos_at(n,m,l,0,1,1,a);
+          i++;
+        }
+      }
+    }
+  }
+
+  while(num_balls > N){
+    double max_distance = 0;
+    int max_index = -1; // index of ball that is the furthest out from the droplet
+    for(int i = 0; i < num_balls; i++){
+      if(balls[i].pos.norm() > max_distance){
+        max_distance = balls[i].pos.norm();
+        max_index = i;
+      }
+    }
+    balls[max_index].pos = balls[num_balls-1].pos;
+    num_balls--;
+  }
+
+  ball *droplet_balls = new ball[N];
+  for(int i = 0; i < N; i++)
+    droplet_balls[i].pos = balls[i].pos;
+
+  initialize_neighbor_tables(droplet_balls,N,neighbor_R,max_neighbors,len,0);
+  int interactions = count_all_interactions(droplet_balls,N,interaction_distance,len,0);
+  delete[] balls;
+  delete[] droplet_balls;
+  return interactions;
 }
