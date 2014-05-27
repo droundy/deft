@@ -294,6 +294,47 @@ Barker and Henderson presented two approximations for the second order
 term in the inverse temperature expansion, one of which they name the
 local-compressiblitity
 approximation. \cite{barker2004perturbationSW,barker2004perturbationII}
+\fixme{below is some perturbation theory stuff}
+We start with the definition for the Helmholtz free energy of the
+reference system and add a correction to the energy due to a perturbation correction:
+\begin{align}
+  A &= A_{ref}+A_a \\
+  &=-kT \ln \left( \sum_i e^{-\beta [E_{ref}(i) + \lambda E_a(i)]}
+  \right).
+\end{align}
+Take the derivative at $\lambda = 0$:
+\begin{align}
+  \frac{\partial A}{\partial \lambda} \bigg{|}_{\lambda = 0} &= -kT
+  \frac{\sum_i -\beta E_a(i) e^{-\beta [E_{ref}(i) + \lambda E_a(i)]}}{\sum_i e^{-\beta
+      [E_{ref}(i) + \lambda E_a(i)]}} \\
+  &= \frac{\sum_i E_a(i) e^{-\beta [E_{ref}(i) + \lambda E_a(i)]}}{\sum_i e^{-\beta
+      [E_{ref}(i) + \lambda E_a(i)]}} \\
+  &= \sum_i E_{a,i}{P_i}|_{\lambda = 0}.
+\end{align}
+Then we take the second derivative;
+\begin{align}
+  \frac{\partial^2 A}{\partial \lambda^2} \bigg{|}_{\lambda = 0} &=
+  \sum_i E_{a,i} \frac{\partial P_i}{\partial
+    \lambda}\bigg{|}_{\lambda = 0} \\
+  &= \sum_i E_{a,i}\Bigg[ \frac{-\beta E_a(i)e^{-\beta [E_{ref}(i) +
+        \lambda E_a(i)]}}{\sum_j e^{-\beta [E_{ref}(j) + \lambda E_a(j)]}}
+  \notag \\
+  &- \frac{e^{-\beta [E_{ref}(i) + \lambda
+        E_a(i)]}\sum_k -\beta E_a(k)e^{-\beta [E_{ref}(k) + \lambda
+        E_a(k)]}}{\left( \sum_j e^{-\beta [E_{ref}(j) + \lambda
+        E_a(j)]} \right)^2} \Bigg] \\
+  &= \sum_i E_a(i)\bigg[ -\beta E_a(i)P_i + \beta P_i \sum_j
+  E_a(j)P_j \bigg] \\
+  &= -\beta \sum_i E_a^2(i)P_i + \beta \sum_i P_i E_a(i)\sum_j E_a(j)
+  P_j \\
+  &= -\beta \sum_i E_a^2(i)P_i + \beta \bigg(\sum_i E_a(i)P_i\bigg)^2
+\end{align}
+Since we set $\lambda = 0$, the probabilities are over the reference state so these become
+averages over those states.
+\begin{align}
+  \frac{\partial^2 A}{\partial \lambda^2} \bigg{|}_{\lambda = 0} &=
+  -\beta \left( \left< E_a^2 \right>_0 - {\langle E_a \rangle}_0^2 \right)
+\end{align}
 %% Our derivation for this looks something like this:
 %% \begin{align}
 %%   A_2 &\approx -\left(\frac{\partial n}{\partial p}\right)
