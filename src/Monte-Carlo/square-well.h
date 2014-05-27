@@ -124,11 +124,8 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
 // Denote the sides of a given cell by values of x, y, and z which may be -1, 0, or 1
 // For example, the "forward right" side of a cell has x = 1, y = 1, z = 0,
 //    while the "top left" side would be x = -1, y = 0, z = 1
-// This function finds the distance in from the origin of the ball located at n,m,l,x,y,z,
-//    assuming cells have a side length of 1
-double fcc_dist(int n, int m, int l, double x, double y, double z);
-
-// Position of fcc cite n, m, l, x, y, z
+// This function finds the position of the ball located at n,m,l,x,y,z,
+//    assuming cells have a side length of a
 vector3d pos_at(int n, int m, int l, double x, double y, double z, double a);
 
 // This function finds the maximum number of balls within a given distance
