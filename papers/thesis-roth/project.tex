@@ -46,14 +46,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-Near the critical point of a liquid, there are density \fixme{is
-  saying $g(\rr)$ more accurate?} fluctuations at all length
-scales. In this regime, mean field theories break down, for obvious
-reasons. As one approaches the critical point, there becomes less and
-less of a difference in free energy of the liquid and vapor states;
-this causes difficulty in modeling liquid-vapor coexistence. This work
-develops a method for calculating liquid-vapor coexistence, and
-applies renormalization group theory to the square well liquid.
+Near the critical point of a liquid, there are density fluctuations at
+all length scales. In this regime, mean field theories break down. As
+the critical point is approached, there becomes less and less of a
+difference in free energy of the liquid and vapor states; this causes
+difficulty in modeling liquid-vapor coexistence. This work develops a
+method for calculating liquid-vapor coexistence, and applies
+renormalization group theory to the square well liquid.
 
 %\tableofcontents
 \end{abstract}
@@ -62,7 +61,17 @@ applies renormalization group theory to the square well liquid.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\fixme{Write introduction; why do we do this? why is it useful? how is this relevant? what is the history?}
+\fixme{Some thoughts:
+  \begin{itemize}
+    \item Liquids are essential for life
+    \item Rust, aqueous environment for biology, etc
+    \item Critical point is important for many industries
+    \item Square well liquid is a good simple model for liquids
+    \item Include lots (or at least plenty) of references
+  \end{itemize}
+}
+
+The square well liquid is an approximation to simple liquids that is widely used.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}\label{sec:theory}
@@ -81,20 +90,31 @@ developed to deal with large-scale fluctuations of the order parameter
 near the critical point of a system. The formulation used here is
 provided by Forte~\textit{et al}.\cite{Forte11}
 
-\fixme{Discuss Wilson phase cell}
+We start by dividing the total volume into cells of volume $V_i$. We
+assume that within a cell $n(\rr)$ varies only slightly, and that the
+cells do not interact with one another. This is refered to as Wilson's
+phase cell method.\cite{Ramana12}
 
-We begin with a baseline free enrgy $f_0(T,n)$. We assume this
+Then consider a baseline free enrgy $f_0(T,n)$. We assume this
 baseline accounts for all fluctuations of wavelength $\lambda <
 \lambda_0$. We then double the size of our phase cell and add a
 correction to the free energy $\delta f_1(T,n)$. This correction
 accounts for fluctuations with a wavelength $\lambda =
-2\lambda_0$. The new free energy is $f_1(T,n) = f_0(T,n) + \delta
-f_1(T,n)$. Then double the length scale again; $\delta f_2(T,n)$
-accounts for fluctionations with $\lambda = 4\lambda_0$ and $f_2(T,n)
-= f_1(T,n) + \delta f_2(T,n)$. As we continue this process, the
-$i^{th}$ correction accounts for fluctuations with $\lambda =
-2^i\lambda_0$, and $f_i(T,n) = f_{i-1}(T,n) + \delta f_i(T,n)$. In the
-end, your free energy is
+2\lambda_0$. The new free energy is
+\begin{align}
+  f_1(T,n) &= f_0(T,n) + \delta f_1(T,n)
+\end{align}
+Then double the length scale again; $\delta f_2(T,n)$ accounts for
+fluctionations with $\lambda = 4\lambda_0$ and
+\begin{align}
+  f_2(T,n) &= f_1(T,n) + \delta f_2(T,n)
+\end{align}
+As we continue this process, the $i^{th}$ correction accounts for
+fluctuations with $\lambda = 2^i\lambda_0$, and
+\begin{align}
+  f_i(T,n) &= f_{i-1}(T,n) + \delta f_i(T,n)
+\end{align}
+In the end, your free energy is
 \begin{align}
   f(T,n) = f_0(T,n) + \sum_{i=1}^\infty\delta f_i(T,n) + \fattr
 \end{align}
@@ -156,21 +176,20 @@ hard spheres. For the square-well model, the pair potential is
       0 & \sigma < r
     \end{cases}
 \end{align}
-\fixme{When $v_\lambda$ is derived below, the $w$
-should be the attraction portion (i.e.~the $-\varepsilon$ between $\sigma$ and $\lambda\sigma$), and $v_{HS}$ should
-just be the hard-sphere potential (without attraction).  That's how
-the TPT works, it is the attraction that is being added in with the
-$\lambda$ proportionality.}
 
-Now, consider this to be the reference, and add a small perturbation:
+We consider this as our referecne, and take a square well attraction as a perturbation:
 \begin{align}
-  v_\lambda(\1,\2) &= v_\text{HS}(\1,\2) + \lambda w(\1,\2) \label{eqn:small-perturbation}
+  v_\lambda(\1,\2) &= v_\text{HS}(\1,\2) + \lambda w^\text{SW}(\1,\2) \label{eqn:small-perturbation}
+\end{align}
+where
+\begin{align}
+  w^\text{SW}(\1,\2) &= - \varepsilon \text{ for } \sigma < r < \lambda\sigma
 \end{align}
 
 The total potential energy of our system and its derivatives with resepect to $\lambda$---which become important later---are
 \begin{align}
   V_N(\lambda) &= \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j) \\ % \label{eq:VN} \\
-  \hookrightarrow \frac{\partial V_N(\lambda)}{\partial\lambda} &= \sum_{i=1}^N\sum_{j>i}^N w(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
+  \hookrightarrow \frac{\partial V_N(\lambda)}{\partial\lambda} &= \sum_{i=1}^N\sum_{j>i}^N w^\text{SW}(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
   &\equiv W_N \\
   \hookrightarrow \frac{\partial^2 V_N(\lambda)}{\partial\lambda^2} &= 0
 \end{align}
@@ -188,7 +207,7 @@ And the non-ideal part of the free energy (i.e.~the excess free energy) and its 
   \hookrightarrow \frac{\partial F}{\partial\lambda} &= \frac{V^N}{Z_N}\frac{\partial}{\partial\lambda}\left( \frac{Z_N}{V^N} \right) \\
   &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
   &= \frac{1}{Z_N} \int d\rr^N\, W_N e^{-\beta V_N(\lambda)}\\
-  &= \left\langle W_N \right\rangle_\lambda
+  &= \left\langle W_N \right\rangle_\lambda \label{eqn:dfdlambda}
 \end{align}
 (where $-\kT$ and $-\beta$ have divided out to $1$). Here, $V^N$ is
 the total volume taken to the $N^{th}$ power, and
@@ -196,112 +215,89 @@ $\left\langle W_N \right\rangle_\lambda$ is the ensemble
 average of $W_N$, with the subscript indicating some given
 value of $\lambda$.
 
-\fixme{The following could probably go someplace else}
-We can simplify this even further by noting
-\begin{align}
-  \left\langle W_N \right\rangle &= \left\langle \sum_i\sum_jw(\mathbf{r}_i,\mathbf{r}_j) \right\rangle \\
-  &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle
-  \intertext{which gives us}
-  \frac{\partial F}{\partial\lambda} &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle_\lambda
-\end{align}
-\fixme{(end)}
+\fixme{The following could probably go someplace else (is it even necessary?):
+  We can simplify this even further by noting
+  \begin{align}
+    \left\langle W_N \right\rangle &= \left\langle \sum_i\sum_jw(\mathbf{r}_i,\mathbf{r}_j) \right\rangle \\
+    &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle
+    \intertext{which gives us}
+    \frac{\partial F}{\partial\lambda} &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle_\lambda
+\end{align}}
 
-We can integrate this expression over $F\in[F_0,F]$ and $\lambda\in[0,1]$ to obtain
+Note that equation~\ref{eqn:dfdlambda} is exact; now take a series expansion:
 \begin{align}
-  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda \nonumber \\
-  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda \label{eqn:F-inTermsW}
-\end{align}
-At this point, note that we have an exact equation with no approximation. All we have done was take a derivative, simplify, and integrate. Now take a series expansion:
-\begin{align}
-  \left\langle W_N \right\rangle_\lambda = &{} \left\langle W_N\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda}\bigg|_{\lambda = 0} \nonumber\\
-  &{} + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion}
+  \left\langle W_N \right\rangle_\lambda &= \left\langle W_N\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion}
 \end{align}
 The derivative term is
-\begin{align}
-  \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} =&{} \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N}\right) \\
-  =&{} \frac{1}{Z_N}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta V_N} \right) \nonumber\\
-  &{} - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\frac{\partial}{\partial\lambda}Z_N \\
-  =&{} \frac{1}{Z_N}\int d\rr^N\, \left( e^{-\beta V_N}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta V_N} \right) \nonumber \\
-  &{} - \frac{1}{Z_N^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta V_N} \\
-\end{align}
-Note that $\partial/\partial\lambda W_N = 0$, so we have
-\begin{align}
-   \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} =&{} \frac{1}{Z_N}\int d\rr^N (-\beta) W_N^2 e^{-\beta V_N} \nonumber\\
-   &{} - \frac{1}{Z_N^2}\Bigg(\int d\rr^N\, W_N e^{-\beta V_N} \nonumber\\
-   &{} \times \int d\rr^N\, (-\beta)W_Ne^{-\beta V_N}\Bigg) \\
-   =&{} -\beta\Bigg[ \frac{1}{Z_N}\int d\rr^N\, W_N^2e^{-\beta V_N}  \nonumber\\
-   &{} - \left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N} \right)^2 \Bigg] \\
-   =&{} -\beta\left[ \left\langle W_N^2 \right\rangle_\lambda - \left\langle W_N \right\rangle_\lambda^2 \right] \\
-   \equiv &{} -\beta\sigma_\lambda^2
-\end{align}
+\begin{widetext}
+  \begin{align}
+    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N}\right) \\
+    &= \frac{1}{Z_N}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta V_N} \right) - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\frac{\partial}{\partial\lambda}Z_N \\
+    &= \frac{1}{Z_N}\int d\rr^N\, \left( e^{-\beta V_N}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta V_N} \right) - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta V_N} \\
+  \end{align}
+\end{widetext}
+
+Noting that $\partial W_N/\partial\lambda = 0$, so we have
+\begin{widetext}
+  \begin{align}
+    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{1}{Z_N}\int d\rr^N (-\beta) W_N^2 e^{-\beta V_N} - \frac{1}{Z_N^2}\left(\int d\rr^N\, W_N e^{-\beta V_N} \right)\left( \int d\rr^N\, (-\beta)W_Ne^{-\beta V_N} \right) \\
+    &= -\beta\left[ \frac{1}{Z_N}\int d\rr^N\, W_N^2e^{-\beta V_N} - \left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N} \right)^2 \right] \\
+    &= -\beta\left[ \left\langle W_N^2 \right\rangle_\lambda - \left\langle W_N \right\rangle_\lambda^2 \right] \\
+    &\equiv -\beta\sigma_\lambda^2
+  \end{align}
+\end{widetext}
+
 Combining this result with equation~\ref{eqn:Wn-expansion} gives us
 \begin{align}
   \left\langle W_N \right\rangle_\lambda &= \left\langle W_N\right\rangle_{\lambda = 0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion-simplified}
 \end{align}
-Putting together equations~\ref{eqn:F-inTermsW} and~\ref{eqn:Wn-expansion-simplified}, we have
+and we can insert this into equation~\ref{eqn:dfdlambda}:
 \begin{align}
-  F &= F_0 + \left\langle W_N \right\rangle_{\lambda=0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2)
+  \frac{\partial F}{\partial\lambda} &= \left\langle W_N\right\rangle_{\lambda = 0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2)
 \end{align}
-%% \begin{align}
-%%   \begin{split}
-%%     \beta F = &{} \beta F_0 + \beta(1 - 0)\left\langle W_N \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}(1 - 0)^2\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right)
-%%   \end{split} \\
-%%   \begin{split}
-%%     =&{}  \beta F_0 + \beta\left\langle W_N \right\rangle_{\lambda = 0} \\ &{} - \beta\frac{1}{2}\left(\left\langle W_N'(\lambda = 0) \right\rangle_{\lambda = 0} - \beta^2\sigma^2_{\lambda = 0} \right) \label{eqn:complicated-HTE}
-%%   \end{split}
-%% \end{align}
-This is the \emph{high-temperature expansion}, first derived by
+
+We can integrate this expression over $F\in[F_0,F]$ and $\lambda\in[0,1]$ to obtain
+\begin{align}
+  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta(1 - 0)^2\sigma_{\lambda=0}^2 \nonumber \\
+  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta\sigma_{\lambda=0}^2 \label{eqn:F-inTermsW}
+\end{align}
+Multiply by $\beta$ and we have the \emph{high-temperature expansion}, first derived by
 Zwanzig:\cite{Zwanzig54}
-\fixme{Zwanzig has a factor of $1/2$ that I'm missing}
-\fixme{Below this point has not been updated}
 \begin{align}
-  \begin{split}
-    \beta F = &{} \beta F_0 + \beta\left\langle W_N \right\rangle_0  \\ &{} - \frac{1}{2}\beta^2\left( \left\langle W_N^2 \right\rangle_0 - \left\langle W_N \right\rangle_0^2 \right) + \mathcal{O}(\beta^3)
-  \end{split}
+  \beta F &= \beta F_0 + \beta \left\langle W_N \right\rangle_{\lambda=0} - \beta^2\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^3)
 \end{align}
-Zwanzig further showed that the $n^{th}$ term could be written in terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle W_N\right\rangle_0 \right]^\nu \right\rangle_0$ with $\nu \leq n$.
 
-Writing the statistical averages in terms of the pair density
-$n_\lambda^{(2)}(\1,\2)$ (i.e. the probability of having a sphere at
-\1 and \2 \fixme{make this more clear?}\davidsays{I'd perhaps phrase
-  it as ``probability per volume squared of having one sphere at \1
-  and another at \2''}) gives us
-\begin{align}
-  \frac{\beta F}{N} &= \frac{\beta F_0}{N} + \frac{\beta}{2N}\int_0^1 d\lambda\, \iint d\1 d\2\, n_\lambda^{(2)}(\1,\2)w(\1,\2) \label{eqn:Henderson5-2-12}
-\end{align}
-\davidsays{Here's another place where all the $N$s on the bottom are
-  muddying things up, I think.  (like the $\beta$s were before).  I
-  also think this discussion is pretty redundant with parts of the
-  previous derivation in terms of $V_N$.}  The pair density itself can
-be expanded as
-\begin{align}
-  n_\lambda^{(2)}(\1,\2) &= n_0^{(2)}(\1,\2) + \lambda\frac{\partial n_\lambda^{(2)}(\1,\2)}{\partial\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2)
-\end{align}
-Applying this to the \fixme{0th, 1st or 2nd, depending on how you
-  think of it}\davidsays{it's ``second'' since ``terms'' are things
-  that are added together, while factors are things that are
-  multiplied together.  And in Eq~\ref{eqn:Henderson5-2-12} there are
-  only two things added together.  (I figured this terminology out on
-  my own some time after becoming a professor... it seems to be used,
-  but not taught).} term in equation~\ref{eqn:Henderson5-2-12}, we
-have
-\begin{align}
-  \frac{\beta F_1}{N} &= \frac{\beta}{2N}\iint d\1 d\2\, n_0^{(2)}(\1,\2)w(\1,\2) \\
-  &= \frac{\beta n}{2}\int d\mathbf{r}_{12}\, g_0(\1,\2)w(\1,\2)
-\end{align}
-The second-order $\lambda$ term is quite a bit more complicated:
-\begin{widetext}
- \begin{align}
-   \begin{split}
-   \frac{\beta F_2}{N} =&{} -\frac{\beta^2}{2}\left[ \frac{n}{2}\int d\2\, g_0(\1,\2)w^2(\1,\2) \right. \\ &{} + n^2 \iint d\2 d\3\, g_0^{(3)}(\1,\2,\3)w(\1,\2)w(\1,\3) \\ &{} \left. + \frac{n^3}{4}\iiint d\2 d\3 d\4\, \left( g_0^{(4)}(\1,\2,\3,\4) - g_0^{(2)}(\1,\2)g_0^{(2)}(\3,\4) \right)w(\1,\2)2(\3,\4) \right] \\ &{} - \frac{1}{4}S_0(0)\left[ \frac{\partial}{\partial n}\left( n^2\int d\2\, g_0(\1,\2)w(\1,\2) \right)^2 \right]
-   \end{split}
- \end{align}
-\end{widetext}
-This term requires use to know the form of higher-order correlation functions and the structure function $S_0(k)$ of the reference system. These things are very difficult. Hence, we use approximations, as outlined in section~\ref{sub2sec:disp}.
+Zwanzig further showed that the $n^{th}$ term could be written in terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle W_N\right\rangle_{\lambda=0} \right]^\nu \right\rangle_{\lambda=0}$ with $\nu \leq n$. This requires us to know the form of higher-order correlation functions of the reference system, which can be quite complicated. In the next section we will see a simple aproximation for the $n=2$ term.
 
-\davidsays{ you can say something to the effect
-  of ``in the next section we will see a simple approximation for this
-  term.''  Hansen's explanation of TPT is not very clear, which makes
+%% Writing the statistical averages in terms of the pair density
+%% $n_\lambda^{(2)}(\1,\2)$ (i.e. the probability per volume squared of having one sphere at \1
+%%   and another at \2) gives us
+%% \begin{align}
+%%   \beta F &=\beta F_0 + \frac{1}{2}\beta\int_0^1 d\lambda\, \iint d\1 d\2\, n_\lambda^{(2)}(\1,\2)w(\1,\2) \label{eqn:Henderson5-2-12}
+%% \end{align}
+%% \davidsays{I think this discussion is pretty redundant with
+%%   parts of the previous derivation in terms of $V_N$.}  The pair
+%% density itself can be expanded as
+%% \begin{align}
+%%   n_\lambda^{(2)}(\1,\2) &= n_0^{(2)}(\1,\2) + \lambda\frac{\partial n_\lambda^{(2)}(\1,\2)}{\partial\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2)
+%% \end{align}
+%% Applying this to the 2nd term in equation~\ref{eqn:Henderson5-2-12}, we
+%% have
+%% \begin{align}
+%%   \frac{\beta F_1}{N} &= \frac{\beta}{2N}\iint d\1 d\2\, n_0^{(2)}(\1,\2)w(\1,\2) \\
+%%   &= \frac{\beta n}{2}\int d\mathbf{r}_{12}\, g_0(\1,\2)w(\1,\2)
+%% \end{align}
+%% The second-order $\lambda$ term is quite a bit more complicated:
+%% \begin{widetext}
+%%  \begin{align}
+%%    \begin{split}
+%%    \frac{\beta F_2}{N} =&{} -\frac{\beta^2}{2}\left[ \frac{n}{2}\int d\2\, g_0(\1,\2)w^2(\1,\2) \right. \\ &{} + n^2 \iint d\2 d\3\, g_0^{(3)}(\1,\2,\3)w(\1,\2)w(\1,\3) \\ &{} \left. + \frac{n^3}{4}\iiint d\2 d\3 d\4\, \left( g_0^{(4)}(\1,\2,\3,\4) - g_0^{(2)}(\1,\2)g_0^{(2)}(\3,\4) \right)w(\1,\2)2(\3,\4) \right] \\ &{} - \frac{1}{4}S_0(0)\left[ \frac{\partial}{\partial n}\left( n^2\int d\2\, g_0(\1,\2)w(\1,\2) \right)^2 \right]
+%%    \end{split}
+%%  \end{align}
+%% \end{widetext}
+%% This term requires use to know the form of higher-order correlation functions and the structure function $S_0(k)$ of the reference system. These things are very difficult. Hence, we use approximations, as outlined in section~\ref{sub2sec:disp}.
+
+\davidsays{Hansen's explanation of TPT is not very clear, which makes
   it all the more valuable to make \emph{this} a clear and lucid
   explanation.  I'd love to see just a couple more steps at key
   places---largely where you were confused. This
@@ -320,8 +316,8 @@ The long-range attractive term, $\fattr$ is given by
 $\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere
 repulsion, and $\fdisp$ is the attraction. The function $a_1(n)$ is
 the first term from a high-temperature perturbation expansion,
-described in further detail in sections~\ref{sub2sec:disp}
-and~\ref{subsec:TPT}. Each function is outlined below.
+described in further detail in sections~\ref{subsec:TPT}
+and~\ref{sub2sec:disp}. Each function is outlined below.
 
 \subsubsection{Ideal gas}\label{sub2sec:ID}
 The ideal gas term is given as
@@ -427,6 +423,7 @@ $\eta$, given by the Percus-Yevick exprssion:\cite{Barker76}
 \begin{align}
   K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
 \end{align}
+This is called the Local Compressibility Approximation (LCA).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}\label{sec:methods}
 
