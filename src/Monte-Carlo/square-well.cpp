@@ -291,12 +291,22 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 }
 
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels, bool flush_weights = true){
+                  int energy_levels, bool flush_histogram = true){
+  // make weights flat at energies above the maximum entropy state
+  // (which correspond to boring "negative" temperatures.
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   for (int i = 0; i < max_entropy; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy];
-  if(flush_weights){
+  // Now let's just add the minimum, so our weights don't get
+  // out of hand (which could lead to increased roundoff errors).
+  double min_weight = ln_energy_weights[0];
+  for (int i = 0; i < max_entropy; i++)
+    min_weight = min(min_weight, ln_energy_weights[i]);
+  for (int i = 0; i < energy_levels; i++)
+    ln_energy_weights[i] -= min_weight;
+  // Finally, if requested, zero out the histogram.
+  if (flush_histogram) {
     for (int i = 0; i < energy_levels; i++)
       energy_histogram[i] = 0;
   }

@@ -571,7 +571,7 @@ int main(int argc, const char *argv[]) {
            < wl_threshold){
           wl_factor /= wl_fmod;
           // for wang-landau, only flush energy histogram; keep weights
-          flush_arrays(energy_histogram, ln_energy_weights, energy_levels, false);
+          flush_arrays(energy_histogram, ln_energy_weights, energy_levels, true);
         }
         // repeat until terminal condition is met
         if(wl_factor > wl_cutoff)
