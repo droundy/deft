@@ -32,3 +32,5 @@ for k in color:
 dots = {}
 for k in color:
     dots[k] = color[k] + '.'
+    if k == 'wang_landau':
+        dots[k] = color[k] + '+'

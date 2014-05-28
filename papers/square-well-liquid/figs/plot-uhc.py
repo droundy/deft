@@ -19,15 +19,12 @@ ff = float(sys.argv[2])
 
 # note: speficic HC should be independent of N, but we have to choose one
 N = float(sys.argv[3])
-#arg N = [100, 200, 1000]
+#arg N = [20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
+#arg versions = [["nw", "flat", "gaussian", "walkers", "kT2", "kT1"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
-
-# FIXME: it would be better not to have this
-max_hc = 1 # upper axis limit when plotting heat capacity
 
 # FIXME: make these inputs?
 kTmin = 0
@@ -91,7 +88,8 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc')
-plt.ylim(0,max_hc)
+plt.ylim(0)
+plt.xlim(0, 5)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')

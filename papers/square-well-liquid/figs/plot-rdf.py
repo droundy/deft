@@ -17,7 +17,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = float(sys.argv[3])
-#arg N = [100, 200, 1000]
+#arg N = [20, 100, 200, 1000]
 
 kTs = eval(sys.argv[4])
 #arg kTs = [[0.1, 1, 2]]
