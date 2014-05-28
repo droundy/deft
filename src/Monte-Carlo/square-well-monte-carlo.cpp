@@ -567,8 +567,8 @@ int main(int argc, const char *argv[]) {
       }
       else if(wang_landau && (iteration == N*first_weight_update)){
         // check whether our histogram is flat enough to update wl_factor
-        if(count_variation(energy_histogram, ln_energy_weights, energy_levels)
-           < wl_threshold){
+        const double variation = count_variation(energy_histogram, ln_energy_weights, energy_levels);
+        if (variation < max(wl_threshold, exp(wl_factor))) {
           wl_factor /= wl_fmod;
           // for wang-landau, only flush energy histogram; keep weights
           flush_arrays(energy_histogram, ln_energy_weights, energy_levels, true);
@@ -580,8 +580,7 @@ int main(int argc, const char *argv[]) {
         // print status text for testing purposes
         printf("\nweight update: %i\n",weight_updates);
         printf("  WL factor: %g\n",wl_factor);
-        printf("  count variation: %g\n",
-               count_variation(energy_histogram, ln_energy_weights, energy_levels));
+        printf("  count variation: %g\n", variation);
         fflush(stdout);
 
         weight_updates++;
