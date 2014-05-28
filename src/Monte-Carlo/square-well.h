@@ -27,6 +27,65 @@ struct move_info {
   move_info();
 };
 
+// This should store all information needed to run a simulation.  Thus
+// we can just pass this struct around to functions that run the
+// simulation.  We do not maintain here any of the histograms except
+// the energy_histogram, since only that histogram is needed to
+// actually run the simulation.  Collecting "real" data is another
+// matter.
+struct simulation_data {
+  long iteration; // the current iteration number
+
+  /* The following describe the current state of the system. */
+
+  ball *balls;
+  int interactions; // i.e. the current energy
+
+  /* The following are constant parameters that describe the physical
+     system, but do not change as we simulate. */
+
+  int N; // number of balls
+  double len[3]; // the size of the cell
+  int walls; // should this be an enum?
+
+  /* The following are constant parameters that describe the details
+     of how we run the computation, and do not change as we
+     simulate. */
+
+  // max_neighbors is the upper limit to the maximum number of
+  // neighbors a ball could have.  It is needed as an imput to
+  // move_one_ball.
+  int max_neighbors;
+  double neighbor_R; // radius of our neighbor sphere
+  double translation_distance; // scale for how far to move balls
+  double dr; // small change in radius used to compute pressure
+  int energy_levels; // total number of energy levels
+
+  /* The following accumulate results of the simulation.  Although
+     ln_energy_weights is a constant except during initialization. */
+
+  int state_of_max_entropy;
+  move_info moves;
+  long *energy_histogram, *ln_energy_weights;
+  long *walkers_plus, *walkers_total;
+
+  // move just one ball, and update the energy, and update the
+  // energy_histogram.
+  void move_one_ball();
+
+  // print the timings (if the time is right)
+  void print_timings(int timings_period) const;
+
+  // initialize the weight array using the Gaussian approximation.
+  void initialize_gaussian();
+
+  // initialize the weight array using the specified temperature.
+  void initialize_canonical(double kT);
+
+  // improve the weight array using the Wang-Landau method.
+  void initialize_wang_landau(double wl_factor, double wl_threshold, double wl_cutoff);
+};
+
 // Modulates v to within the periodic boundaries of the cell
 vector3d sw_fix_periodic(vector3d v, const double len[3]);
 
