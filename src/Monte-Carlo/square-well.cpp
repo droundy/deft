@@ -384,14 +384,38 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   double mean_counts = 0;
-  for(int i = max_entropy; i < energy_levels; i++)
+  double lowest = 1e200, highest = 0;
+  int maxE = 0; // tracks the lowest (largest magnitude) energy yet seen
+  int highest_i = 0; // the most commonly visited energy
+  int lowest_i = 0; // the least commonly visited energy
+  int num_visited = 0; // the total number of distinct energies visited.
+  double total_counts = 0;
+  for(int i = max_entropy; i < energy_levels; i++) {
     mean_counts += energy_histogram[i];
+    if (energy_histogram[i] > 0) {
+      num_visited++;
+      total_counts += energy_histogram[i];
+      if (energy_histogram[i] > highest) {
+        highest = energy_histogram[i];
+        highest_i = i;
+      }
+      if (energy_histogram[i] < lowest) {
+        lowest = energy_histogram[i];
+        lowest_i = i;
+      }
+      maxE = max(maxE, i);
+    }
+  }
   mean_counts /= energy_levels;
   double variation = 0;
   for(int i = max_entropy; i < energy_levels; i++)
     variation += sqr(energy_histogram[i] - mean_counts);
   variation = sqrt(variation/energy_levels)/mean_counts;
-  return variation;
+  printf("Highest/lowest = %.2g (%d) / %.2g (%d)  -- total counts %g\n",
+         highest, highest_i, lowest, lowest_i, total_counts);
+  printf("    (ratio = %g, maxE = %d, visited %d, max_entropy %d)\n",
+         highest/lowest, maxE, num_visited, max_entropy);
+  return variation; // or alternatively highest/lowest;
 }
 
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
