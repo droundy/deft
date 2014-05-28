@@ -442,17 +442,19 @@ int main(int argc, const char *argv[]) {
   // Print info about the initial configuration for troubleshooting
   // ----------------------------------------------------------------------------
 
-  int most_neighbors =
-    initialize_neighbor_tables(balls, N, neighbor_R + 2*dr, max_neighbors, len,
-                               walls);
-  if (most_neighbors < 0) {
-    fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
-            max_neighbors);
-    return 1;
+  {
+    int most_neighbors =
+      initialize_neighbor_tables(balls, N, neighbor_R + 2*dr, max_neighbors, len,
+                                 walls);
+    if (most_neighbors < 0) {
+      fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
+              max_neighbors);
+      return 1;
+    }
+    printf("Neighbor tables initialized.\n");
+    printf("The most neighbors is %i, whereas the max allowed is %i.\n",
+           most_neighbors, max_neighbors);
   }
-  printf("Neighbor tables initialized.\n");
-  printf("The most neighbors is %i, whereas the max allowed is %i.\n",
-         most_neighbors, max_neighbors);
 
   // ----------------------------------------------------------------------------
   // Make sure initial placement is valid
@@ -664,6 +666,7 @@ int main(int argc, const char *argv[]) {
              (double)moves.informs/moves.updates);
       const long checks_without_tables = moves.total*N;
       int total_neighbors = 0;
+      int most_neighbors = 0;
       for(int i = 0; i < N; i++) {
         total_neighbors += balls[i].num_neighbors;
         most_neighbors = max(balls[i].num_neighbors, most_neighbors);
