@@ -19,10 +19,10 @@
 \newcommand{\nvap}{\ensuremath{n_{vapor}}}
 
 % Free energy terms
-\newcommand{\fid}{\ensuremath{f_\text{ID}(T,n)}}
-\newcommand{\fhs}{\ensuremath{f_\text{HS}(T,n)}}
-\newcommand{\fdisp}{\ensuremath{f_\text{disp}(T,n)}}
-\newcommand{\fattr}{\ensuremath{f_\text{attr}(T,n)}}
+\newcommand{\fid}{\ensuremath{F_\text{ID}(T,n)}}
+\newcommand{\fhs}{\ensuremath{F_\text{HS}(T,n)}}
+\newcommand{\fdisp}{\ensuremath{F_\text{disp}(T,n)}}
+\newcommand{\fattr}{\ensuremath{F_\text{attr}(T,n)}}
 
 % pair potential
 \newcommand{\1}{\ensuremath{\textbf{r}_1}}
@@ -61,31 +61,60 @@ renormalization group theory to the square well liquid.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\fixme{Some thoughts:
-  \begin{itemize}
-    \item Liquids are essential for life
-    \item Rust, aqueous environment for biology, etc
-    \item Critical point is important for many industries
-    \item Square well liquid is a good simple model for liquids
-    \item Include lots (or at least plenty) of references
-  \end{itemize}
-}
 
-The square well liquid is an approximation to simple liquids that is widely used.
+Gasses have been accurately modeled since the 19$^{th}$
+century\cite{Lederman92} and the kinetic theory of gasses. With the
+advent of quantum mechanics in the early 20$^{th}$ century, we have
+had a pretty good grasp on solids. A robust model of liquids continues
+to be elusive. Liquids are not periodic structures like solids, but
+neither are they disperse, as are gasses.
+
+However, understanding liquids has both philosophical and economic
+desireability. Liquid water is---as far as we know---essential for
+developing and sustaining life. All celluar processes take place in an
+aqueous environment. Understanding liquids is in many ways a step
+towards understanding the development and existence of life. On the
+economic side of the coin, we recognize liquids to be an important
+part of a wide array of industrial applications.
+
+One particularly troublesome regime is around the so-called ``critical
+point'' of a liquid. At the appropriate density and temperature, the
+distinction between liquid and vapor dissapears. Beyond this point,
+you have a ``supercritical fluid.'' Supercritical fluids are used in
+many industrial processes\cite{Perrut00}. For example (and of personal
+interest), supercritical fluids are used in coffee decaffeination and
+the extraction of hops resins for brewing beer.
+
+The simplest model of a liquid is to consider each molecule to be a
+hard sphere (i.e.~spheres cannot overlap) with a square-well potenial
+between any pair of spheres. This is called the ``square well
+liquid,'' and it is a widely used approximation to simple
+liquids. This is one of the foundations of this work.
+
+We use statistical mechanics to study liquids; this requires large
+sample sizes, long simulation times, or some combination of the
+two. Monte Carlo simulations are exact, if you allow them to run
+``long enough.'' Our models are ultimately compared to these
+simulations, but Monte Carlo simulations are otherwise outside the
+scope of this work. The Roundy group uses classical Density-funtional
+Theory (DFT) to calculate free energies and probability distributions
+of bulk liquids. The end goal of this work is to investigate into
+wheather or not implementing renormalization group theory is
+worthwhile to the Roundy research group.
+
+In section~\ref{sec:theory}, I present some of the main theories I
+deal with: renormalization group theory, thermodynamic perturbation
+theory and the square well liquid free energy. In
+section~\ref{sec:methods} I discuss the the methods used. I cover the
+calculation of liquid-vapor coexistence curves in some detail, as
+caluclating coexistence near the critical point is tricky.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}\label{sec:theory}
 
-This work applies entirely to the homogeneous case---that is, there
-are no walls containing our liquid, nor are there any sort of solutes
-in the liquid. Since our fluid is of infinite extent, the free energy
-is infinite. Therefore, I work with free energy density:
-\begin{align}
-  f(T,n) &\equiv \frac{F(T,n)}{V}
-\end{align}
 
 \subsection{Renormalization Group Theory}\label{subsec:RGT}
-Renormalization group (RG) theory is an iterative procedure that was
+Renormalization group theory (RGT) is an iterative procedure that was
 developed to deal with large-scale fluctuations of the order parameter
 near the critical point of a system. The formulation used here is
 provided by Forte~\textit{et al}.\cite{Forte11}
@@ -95,53 +124,53 @@ assume that within a cell $n(\rr)$ varies only slightly, and that the
 cells do not interact with one another. This is refered to as Wilson's
 phase cell method.\cite{Ramana12}
 
-Then consider a baseline free enrgy $f_0(T,n)$. We assume this
+Then consider a baseline free enrgy $F_0(T,n)$. We assume this
 baseline accounts for all fluctuations of wavelength $\lambda <
 \lambda_0$. We then double the size of our phase cell and add a
-correction to the free energy $\delta f_1(T,n)$. This correction
+correction to the free energy $\delta F_1(T,n)$. This correction
 accounts for fluctuations with a wavelength $\lambda =
 2\lambda_0$. The new free energy is
 \begin{align}
-  f_1(T,n) &= f_0(T,n) + \delta f_1(T,n)
+  F_1(T,n) &= F_0(T,n) + \delta F_1(T,n)
 \end{align}
-Then double the length scale again; $\delta f_2(T,n)$ accounts for
+Then double the length scale again; $\delta F_2(T,n)$ accounts for
 fluctionations with $\lambda = 4\lambda_0$ and
 \begin{align}
-  f_2(T,n) &= f_1(T,n) + \delta f_2(T,n)
+  F_2(T,n) &= F_1(T,n) + \delta F_2(T,n)
 \end{align}
 As we continue this process, the $i^{th}$ correction accounts for
 fluctuations with $\lambda = 2^i\lambda_0$, and
 \begin{align}
-  f_i(T,n) &= f_{i-1}(T,n) + \delta f_i(T,n)
+  F_i(T,n) &= F_{i-1}(T,n) + \delta F_i(T,n)
 \end{align}
 In the end, your free energy is
 \begin{align}
-  f(T,n) = f_0(T,n) + \sum_{i=1}^\infty\delta f_i(T,n) + \fattr
+  F(T,n) = F_0(T,n) + \sum_{i=1}^\infty\delta F_i(T,n) + \fattr
 \end{align}
 
 Where $\fattr$ is the contribution due to the longest-wavelength
 density fluctuations. At this stage, I do not entirely understand why
 Forte splits up $\fattr$.
 
-Forte gives $\delta f_i(T,n)$ as
+Forte gives $\delta F_i(T,n)$ as
+\fixme{Talk about ratio of partition functions}
 \begin{align}
-  \delta f_i(T,n) &= -\frac{\kT}{V_D}\ln\left[ \frac{Z_D(T,n)}{Z_D^*(T,n} \right]
+  \delta F_i(T,n) &= -\frac{\kT}{V_D}\ln\left[ \frac{Z_D(T,n)}{Z_D^*(T,n} \right]
 \end{align}
 where
 \begin{align}
-  Z_D(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\left( \bar{f}_D(T,n) + \bar{u}_D(T,n \right) \right] \\
-  Z_D^*(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\bar{f}_D(T,n) \right]
+  Z_D(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\left( \bar{F}_D(T,n) + \bar{U}_D(T,n \right) \right] \\
+  Z_D^*(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\bar{F}_D(T,n) \right]
 \end{align}
 and
 \begin{align}
-  \bar{f}_D(T,n) &= \frac{f_{i-1}(T,n+x) + f_{i-1}(T,n-x)}{2} - f_{i-1}(T,n) \\
-  \bar{u}_D(T,n) &= \frac{u(T,n+x,\lambda_D) + u(T,n-x,\lambda_D)}{2} - u(T,n,\lambda_D)
+  \bar{F}_D(T,n) &= \frac{F_{i-1}(T,n+x) + F_{i-1}(T,n-x)}{2} - F_{i-1}(T,n) \\
+  \bar{U}_D(T,n) &= \frac{U(T,n+x,\lambda_D) + U(T,n-x,\lambda_D)}{2} - U(T,n,\lambda_D)
 \end{align}
-Finally, $u(T,n)$ is given by
+Finally, $U(T,n)$ is given by
 \begin{align}
-  \begin{split}
-  u(T,n) = &{} g^\text{HS}(n_{eff};\sigma)\alpha - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha\omega^2 \\ &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha\gamma
-  \end{split}
+  U(T,n) = &{} g^\text{HS}(n_{eff};\sigma)\alpha - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha\omega^2 \nonumber \\
+  &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha\gamma
 \end{align}
 with
 \begin{align}
@@ -427,6 +456,14 @@ This is called the Local Compressibility Approximation (LCA).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}\label{sec:methods}
 
+This work applies entirely to the homogeneous case---that is, there
+are no walls containing our liquid, nor are there any sort of solutes
+in the liquid. Since our fluid is of infinite extent, the free energy
+is infinite. Therefore, in the calculations, I work with free energy density:
+\begin{align}
+  f(T,n) &\equiv \frac{F(T,n)}{V}
+\end{align}
+
 \subsection{Coexistence Curve Algorithm}\label{subsec:coexis}
 Coexistence curves are found by modifying the chemical potential $\mu$
 in the grand free energy per volume $\phi(T,n)/V$. Grand free energy
@@ -513,7 +550,7 @@ I use the midpoint method for evaluating the integrals of $\bar{f}_D$
 and $\bar{u}_D$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results and discussion}
+\section{Results and discussion}\label{sec:results}
 
 For this work, I use $\lambda_\text{SW} = 1.5$.
 
@@ -547,12 +584,14 @@ critical point. It is clear that the program is not de-bugged.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}\label{sec:conclusion}
 
-\section{Conclusion}
 I have implemented a the use of renormalization group theory in
 calculations for the square well liquid. The program is not entirely
 de-bugged. I have also developed an algorithm that calculates
 liqiud-vapor coexistence curves, even close to the critical point.
+
+I conclude that it would be worthwhile to further investigate implementing renormalization group theory in the Roundy DFT.
 
 
 \bibliographystyle{unsrt}
