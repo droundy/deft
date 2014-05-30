@@ -19,16 +19,22 @@
 \newcommand{\nvap}{\ensuremath{n_{vapor}}}
 
 % Free energy terms
-\newcommand{\fid}{\ensuremath{F_\text{ID}(T,n)}}
-\newcommand{\fhs}{\ensuremath{F_\text{HS}(T,n)}}
-\newcommand{\fdisp}{\ensuremath{F_\text{disp}(T,n)}}
-\newcommand{\fattr}{\ensuremath{F_\text{attr}(T,n)}}
+\newcommand{\Fattr}{\ensuremath{F_\text{attr}(T,n)}}
+
+\newcommand{\fid}{\ensuremath{f_\text{ID}(T,n)}}
+\newcommand{\fhs}{\ensuremath{f_\text{HS}(T,n)}}
+\newcommand{\fdisp}{\ensuremath{f_\text{disp}(T,n)}}
+\newcommand{\fattr}{\ensuremath{f_\text{attr}(T,n)}}
 
 % pair potential
 \newcommand{\1}{\ensuremath{\textbf{r}_1}}
 \newcommand{\2}{\ensuremath{\textbf{r}_2}}
 \newcommand{\3}{\ensuremath{\textbf{r}_3}}
 \newcommand{\4}{\ensuremath{\textbf{r}_4}}
+
+% RG stuff
+\newcommand{\FbarD}{\ensuremath{\bar{F}_D(T,n)}}
+\newcommand{\UbarD}{\ensuremath{\bar{U}_D(T,n)}}
 
 % fixme
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{[#1]}}}
@@ -145,32 +151,32 @@ fluctuations with $\lambda = 2^i\lambda_0$, and
 \end{align}
 In the end, your free energy is
 \begin{align}
-  F(T,n) = F_0(T,n) + \sum_{i=1}^\infty\delta F_i(T,n) + \fattr
+  F(T,n) = F_0(T,n) + \sum_{i=1}^\infty\delta F_i(T,n) + \Fattr
 \end{align}
 
-Where $\fattr$ is the contribution due to the longest-wavelength
+Where $\Fattr$ is the contribution due to the longest-wavelength
 density fluctuations. At this stage, I do not entirely understand why
-Forte splits up $\fattr$.
+Forte splits up $\Fattr$.
 
-Forte gives $\delta F_i(T,n)$ as
-\fixme{Talk about ratio of partition functions}
+The $\detla F_i(T,n)$ term is a difference in free energies:
 \begin{align}
-  \delta F_i(T,n) &= -\frac{\kT}{V_D}\ln\left[ \frac{Z_D(T,n)}{Z_D^*(T,n} \right]
+  \delta F_i(T,n) &= -\kT\ln Z - \left( -\kT\ln Z^* \right) \\
+  &= -\kT\ln\left[ \frac{Z_D(T,n)}{Z_D^*(T,n} \right]
 \end{align}
-where
+Here, $Z$ is the partition function for the entire system, and $Z^*$ is the partition function of a reference system consisting only of the term $\FbarD$. Forte gives these terms as
 \begin{align}
-  Z_D(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\left( \bar{F}_D(T,n) + \bar{U}_D(T,n \right) \right] \\
-  Z_D^*(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\bar{F}_D(T,n) \right]
+  Z_D(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\left( \FbarD + \bar{U}_D(T,n \right) \right] \\
+  Z_D^*(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\FbarD \right]
 \end{align}
-and
+where $x$ is the amplitude of density fluctuations. $\FbarD$ and $\UbarD$ are formulated similar to averages:
 \begin{align}
-  \bar{F}_D(T,n) &= \frac{F_{i-1}(T,n+x) + F_{i-1}(T,n-x)}{2} - F_{i-1}(T,n) \\
-  \bar{U}_D(T,n) &= \frac{U(T,n+x,\lambda_D) + U(T,n-x,\lambda_D)}{2} - U(T,n,\lambda_D)
+  \FbarD &= \frac{F_{i-1}(T,n+x) + F_{i-1}(T,n-x)}{2} - F_{i-1}(T,n) \\
+  \UbarD &= \frac{U(T,n+x) + U(T,n-x)}{2} - U(T,n)
 \end{align}
-Finally, $U(T,n)$ is given by
+Finally, $U(T,n)$ is given by Forte as
 \begin{align}
   U(T,n) = &{} g^\text{HS}(n_{eff};\sigma)\alpha - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha\omega^2 \nonumber \\
-  &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha\gamma
+  &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha\gamma \label{eqn:URG} % URG! It sounds like it hurt! :P
 \end{align}
 with
 \begin{align}
@@ -178,19 +184,16 @@ with
   \omega^2 &= \frac{1}{5}\sigma^2\frac{\lambda^5 - 1}{\lambda^3 - 1} \\
   \gamma &= \frac{1}{70}\sigma^4\frac{\lambda^7 - 1}{\lambda^3 - 1}
 \end{align}
-
+The pair correlation function $g(n,r)$ tells us how likely we are to find another hard sphere some distance away, given some density. In equation~\ref{eqn:URG} we are considering this quantity at contact ($r = \sigma$) with some effective density.
 
 \subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
 
-\fixme{And introduction to TPT---why do we use it?}\davidsays{We use
-  TPT because it gives a good description of simple liquids, as long
-  as you are far from the critical point.  Thus it covers most of our
-  bases.  It is also an elegant theory, since it comes from a rigorous
-  power series expansion in a small parameter... or one that one hopes
-  is small. }
-
-This discussion follows primarily from \textit{Theory of Simple
-  Liquids}, by Hansen and McDonald\cite{Hansen06}.
+Thermodynamic perturbation theory (TPT) gives a good description of
+simple liquids, as long as you are far from the critical point---which
+is most of where we calculate. TPT is a rigorous power series
+expansion in a small parameter; as long as the parameter is small, the
+theory is valid. This discussion follows primarily from \textit{Theory
+  of Simple Liquids}, by Hansen and McDonald\cite{Hansen06}.
 
 Thermodynamic perturbation theory treats the intermolecular potential
 as separable into two parts, one for short-range repulsion and another
@@ -217,25 +220,25 @@ where
 
 The total potential energy of our system and its derivatives with resepect to $\lambda$---which become important later---are
 \begin{align}
-  V_N(\lambda) &= \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j) \\ % \label{eq:VN} \\
-  \hookrightarrow \frac{\partial V_N(\lambda)}{\partial\lambda} &= \sum_{i=1}^N\sum_{j>i}^N w^\text{SW}(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
+  \widetilde{V} &= \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j) \\ % \label{eq:VN} \\
+  \hookrightarrow \frac{\partial \widetilde{V}}{\partial\lambda} &= \sum_{i=1}^N\sum_{j>i}^N w^\text{SW}(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
   &\equiv W_N \\
-  \hookrightarrow \frac{\partial^2 V_N(\lambda)}{\partial\lambda^2} &= 0
+  \hookrightarrow \frac{\partial^2 \widetilde{V}}{\partial\lambda^2} &= 0
 \end{align}
 
 The \emph{configuration integral} (the potential energy component of the partition function) and its derivative with respect to $\lambda$ are
 \begin{align}
-  Z_N(\lambda) &= \int d\rr^N\, e^{-\beta V_N(\lambda)} \\
-  \hookrightarrow \frac{\partial Z_N(\lambda)}{\partial\lambda} &=  \int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta V_N(\lambda)} \\
-  &= \int d\rr^N\, -\beta\frac{\partial V_N(\lambda)}{\partial\lambda}e^{-\beta V_N(\lambda)} \\
-  &= \int d\rr^N\, -\beta W_N e^{-\beta V_N(\lambda)}
+  Z_\lambda &= \int d\rr^N\, e^{-\beta \widetilde{V}(\lambda)} \\
+  \hookrightarrow \frac{\partial Z_\lambda}{\partial\lambda} &=  \int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}(\lambda)} \\
+  &= \int d\rr^N\, -\beta\frac{\partial \widetilde{V}}{\partial\lambda}e^{-\beta \widetilde{V}(\lambda)} \\
+  &= \int d\rr^N\, -\beta W_N e^{-\beta \widetilde{V}(\lambda)}
 \end{align}
 And the non-ideal part of the free energy (i.e.~the excess free energy) and its derivative are
 \begin{align}
-  F &= -\kT\ln\left( \frac{Z_N}{V^N} \right) \\
-  \hookrightarrow \frac{\partial F}{\partial\lambda} &= \frac{V^N}{Z_N}\frac{\partial}{\partial\lambda}\left( \frac{Z_N}{V^N} \right) \\
-  &= -\kT\left( \frac{1}{Z_N}\frac{\partial Z_N}{\partial\lambda} \right) \\
-  &= \frac{1}{Z_N} \int d\rr^N\, W_N e^{-\beta V_N(\lambda)}\\
+  F &= -\kT\ln\left( \frac{Z_\lambda}{V^N} \right) \\
+  \hookrightarrow \frac{\partial F}{\partial\lambda} &= \frac{V^N}{Z_\lambda}\frac{\partial}{\partial\lambda}\left( \frac{Z_\lambda}{V^N} \right) \\
+  &= -\kT\left( \frac{1}{Z_\lambda}\frac{\partial Z_\lambda}{\partial\lambda} \right) \\
+  &= \frac{1}{Z_\lambda} \int d\rr^N\, W_N e^{-\beta \widetilde{V}(\lambda)}\\
   &= \left\langle W_N \right\rangle_\lambda \label{eqn:dfdlambda}
 \end{align}
 (where $-\kT$ and $-\beta$ have divided out to $1$). Here, $V^N$ is
@@ -260,17 +263,17 @@ Note that equation~\ref{eqn:dfdlambda} is exact; now take a series expansion:
 The derivative term is
 \begin{widetext}
   \begin{align}
-    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N}\right) \\
-    &= \frac{1}{Z_N}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta V_N} \right) - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\frac{\partial}{\partial\lambda}Z_N \\
-    &= \frac{1}{Z_N}\int d\rr^N\, \left( e^{-\beta V_N}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta V_N} \right) - \left( \int d\rr^N\, W_N e^{-\beta V_N} \right)\frac{1}{Z_N^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta V_N} \\
+    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}}\right) \\
+    &= \frac{1}{Z_\lambda}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\frac{\partial}{\partial\lambda}Z_\lambda \\
+    &= \frac{1}{Z_\lambda}\int d\rr^N\, \left( e^{-\beta \widetilde{V}}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}} \\
   \end{align}
 \end{widetext}
 
-Noting that $\partial W_N/\partial\lambda = 0$, so we have
+Noting that $\partial W_N/\partial\lambda = 0$, we have
 \begin{widetext}
   \begin{align}
-    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{1}{Z_N}\int d\rr^N (-\beta) W_N^2 e^{-\beta V_N} - \frac{1}{Z_N^2}\left(\int d\rr^N\, W_N e^{-\beta V_N} \right)\left( \int d\rr^N\, (-\beta)W_Ne^{-\beta V_N} \right) \\
-    &= -\beta\left[ \frac{1}{Z_N}\int d\rr^N\, W_N^2e^{-\beta V_N} - \left( \frac{1}{Z_N}\int d\rr^N\, W_N e^{-\beta V_N} \right)^2 \right] \\
+    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{1}{Z_\lambda}\int d\rr^N (-\beta) W_N^2 e^{-\beta \widetilde{V}} - \frac{1}{Z_\lambda^2}\left(\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\left( \int d\rr^N\, (-\beta)W_Ne^{-\beta \widetilde{V}} \right) \\
+    &= -\beta\left[ \frac{1}{Z_\lambda}\int d\rr^N\, W_N^2e^{-\beta \widetilde{V}} - \left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)^2 \right] \\
     &= -\beta\left[ \left\langle W_N^2 \right\rangle_\lambda - \left\langle W_N \right\rangle_\lambda^2 \right] \\
     &\equiv -\beta\sigma_\lambda^2
   \end{align}
@@ -287,8 +290,8 @@ and we can insert this into equation~\ref{eqn:dfdlambda}:
 
 We can integrate this expression over $F\in[F_0,F]$ and $\lambda\in[0,1]$ to obtain
 \begin{align}
-  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta(1 - 0)^2\sigma_{\lambda=0}^2 \nonumber \\
-  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta\sigma_{\lambda=0}^2 \label{eqn:F-inTermsW}
+  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta(1 - 0)^2\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^2) \nonumber \\
+  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^2) \label{eqn:F-inTermsW}
 \end{align}
 Multiply by $\beta$ and we have the \emph{high-temperature expansion}, first derived by
 Zwanzig:\cite{Zwanzig54}
@@ -305,7 +308,7 @@ Zwanzig further showed that the $n^{th}$ term could be written in terms of the m
 %%   \beta F &=\beta F_0 + \frac{1}{2}\beta\int_0^1 d\lambda\, \iint d\1 d\2\, n_\lambda^{(2)}(\1,\2)w(\1,\2) \label{eqn:Henderson5-2-12}
 %% \end{align}
 %% \davidsays{I think this discussion is pretty redundant with
-%%   parts of the previous derivation in terms of $V_N$.}  The pair
+%%   parts of the previous derivation in terms of $\widetilde{V}$.}  The pair
 %% density itself can be expanded as
 %% \begin{align}
 %%   n_\lambda^{(2)}(\1,\2) &= n_0^{(2)}(\1,\2) + \lambda\frac{\partial n_\lambda^{(2)}(\1,\2)}{\partial\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2)
@@ -325,13 +328,6 @@ Zwanzig further showed that the $n^{th}$ term could be written in terms of the m
 %%  \end{align}
 %% \end{widetext}
 %% This term requires use to know the form of higher-order correlation functions and the structure function $S_0(k)$ of the reference system. These things are very difficult. Hence, we use approximations, as outlined in section~\ref{sub2sec:disp}.
-
-\davidsays{Hansen's explanation of TPT is not very clear, which makes
-  it all the more valuable to make \emph{this} a clear and lucid
-  explanation.  I'd love to see just a couple more steps at key
-  places---largely where you were confused. This
-  has been an excellent first shot, though! }
-
 
 \subsection{Square well liquid free enrgy}\label{subsec:SW}
 For the baseline, this work is based on the square well liquid free energy:\cite{Hughes13}
@@ -442,7 +438,7 @@ pressure and compressibility of the liquid. Given pressure
 $P^\text{HS}$ and isothermal compressibility $K^\text{HS} =
 kT\left(\partial n /\partial P^\text{HS}\right)_T$, we have:
 \begin{align}
-  a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}(r)}{\partial P^\text{HS}}\,dr \\
+  a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}}{\partial P^\text{HS}}(r)\,dr \\
   &= -\pi n \epsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \\
   &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
@@ -461,7 +457,7 @@ are no walls containing our liquid, nor are there any sort of solutes
 in the liquid. Since our fluid is of infinite extent, the free energy
 is infinite. Therefore, in the calculations, I work with free energy density:
 \begin{align}
-  f(T,n) &\equiv \frac{F(T,n)}{V}
+  f(T,n) &\equiv \frac{F}{V}(T,n)
 \end{align}
 
 \subsection{Coexistence Curve Algorithm}\label{subsec:coexis}
@@ -469,15 +465,15 @@ Coexistence curves are found by modifying the chemical potential $\mu$
 in the grand free energy per volume $\phi(T,n)/V$. Grand free energy
 density is defined as
 \begin{align}
-  \frac{\Phi(T,n)}{V} &= \phi(T,n) \nonumber \\
+  \frac{\Phi}{V}(T,n) &= \phi(T,n) \nonumber \\
                  &= f(T,n) - n\mu \nonumber \\
-                 &= f(T,n) - n\frac{df(T,n)}{dn}\bigg|_{\npart}\ .
+                 &= f(T,n) - n\frac{df}{dn}(T,n)\bigg|_{\npart}\ .
 \end{align}
 It is the value $\npart$ that we adjust to find coexistence curves.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/SW-phi-lowT}
+%%  \includegraphics[width=\columnwidth]{figs/SW-phi-lowT}
   \caption{Grand free energy per unit volume, SW, low temp}
   \label{fig:SW-phi-lowT}
 \end{figure}
@@ -546,8 +542,8 @@ with
 \end{align}
 
 \subsection{RG partition functions}\label{subsec:fbar-ubar}
-I use the midpoint method for evaluating the integrals of $\bar{f}_D$
-and $\bar{u}_D$.
+I use the midpoint method for evaluating the integrals of $\FbarD$
+and $\UbarD$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}\label{sec:results}
@@ -556,7 +552,7 @@ For this work, I use $\lambda_\text{SW} = 1.5$.
 
 \begin{figure}
   \begin{center}
-  \includegraphics[width=\columnwidth]{figs/coexistance_SW}
+%%  \includegraphics[width=\columnwidth]{figs/coexistance_SW}
   \end{center}
   \caption{Liquid-vapor coexistance for a square well liquid.}
   \label{fig:coexistance_SW}
@@ -564,7 +560,7 @@ For this work, I use $\lambda_\text{SW} = 1.5$.
 
 \begin{figure}
   \begin{center}
-  \includegraphics[width=\columnwidth]{figs/phi-RG-lowT}
+%%  \includegraphics[width=\columnwidth]{figs/phi-RG-lowT}
   \end{center}
   \caption{Free energy density for RG at low temperature}
   \label{fig:phi-RG-lowT}
@@ -572,7 +568,7 @@ For this work, I use $\lambda_\text{SW} = 1.5$.
 
 \begin{figure}
   \begin{center}
-  \includegraphics[width=\columnwidth]{figs/phi-RG-highT}
+%%  \includegraphics[width=\columnwidth]{figs/phi-RG-highT}
   \end{center}
   \caption{Free energy density for RG near critical temp}
   \label{fig:phi-RG-highT}
