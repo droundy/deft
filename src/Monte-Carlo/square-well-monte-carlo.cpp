@@ -94,7 +94,7 @@ int main(int argc, const char *argv[]) {
   double wl_factor = 1;
   double wl_fmod = 2;
   double wl_threshold = 0.1;
-  double wl_cutoff = 1e-8;
+  double wl_cutoff = 0.1;
 
   double len[3] = {1, 1, 1};
   int walls = 0;
@@ -677,7 +677,7 @@ int main(int argc, const char *argv[]) {
       printf("We've done about %.3g%% of the distance calculations we would "
              "have done without tables.\n",
              100.0*checks_with_tables/checks_without_tables);
-      printf("The max number of neighbors is %i, whereas the most we've seen is "
+      printf("The max number of neighbors is %i, whereas the most we have is "
              "%i.\n", max_neighbors, most_neighbors);
       printf("Neighbor scale is %g and avg. number of neighbors is %g.\n\n",
              neighbor_scale, avg_neighbors);

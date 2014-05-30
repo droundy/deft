@@ -76,6 +76,10 @@ struct simulation_data {
   // print the timings (if the time is right)
   void print_timings(int timings_period) const;
 
+  // iterate long enough to find the max entropy state and initialize
+  // the translation distance.
+  void initialize_max_entropy_and_translation_distance();
+
   // initialize the weight array using the Gaussian approximation.
   void initialize_gaussian();
 

@@ -415,7 +415,7 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
          highest, highest_i, lowest, lowest_i, total_counts);
   printf("    (ratio = %g, maxE = %d, visited %d, max_entropy %d)\n",
          highest/lowest, maxE, num_visited, max_entropy);
-  return variation; // or alternatively highest/lowest;
+  return highest/lowest - 1; // or alternatively variation;
 }
 
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
