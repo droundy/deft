@@ -1,5 +1,5 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
-\usepackage{graphicx}% Include figure files
+\usepackage[demo]{graphicx}% Include figure files. When building at home, use the option [demo] to supress actual need of figures
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{color}
@@ -14,7 +14,7 @@
 \newcommand{\rr}{\ensuremath{\mathbf{r}}}
 
 % special values for n
-\newcommand{\npart}{\ensuremath{n_{particular}}}
+\newcommand{\npart}{\ensuremath{n_{part}}}
 \newcommand{\nliq}{\ensuremath{n_{liquid}}}
 \newcommand{\nvap}{\ensuremath{n_{vapor}}}
 
@@ -25,6 +25,10 @@
 \newcommand{\fhs}{\ensuremath{f_\text{HS}(T,n)}}
 \newcommand{\fdisp}{\ensuremath{f_\text{disp}(T,n)}}
 \newcommand{\fattr}{\ensuremath{f_\text{attr}(T,n)}}
+
+% lambda
+\newcommand{\lambdaSW}{\ensuremath{\lambda_\text{SW}}}
+\newcommand{\lambdaRG}{\ensuremath{\lambda_\text{RG}}}
 
 % pair potential
 \newcommand{\1}{\ensuremath{\textbf{r}_1}}
@@ -53,7 +57,7 @@
 \begin{abstract}
 
 Near the critical point of a liquid, there are density fluctuations at
-all length scales. In this regime, mean field theories break down. As
+all length scales. In this regime, mean field theories break down. \fixme{re-word the next sentence} As
 the critical point is approached, there becomes less and less of a
 difference in free energy of the liquid and vapor states; this causes
 difficulty in modeling liquid-vapor coexistence. This work develops a
@@ -69,7 +73,7 @@ renormalization group theory to the square well liquid.
 \section{Introduction}
 
 Gasses have been accurately modeled since the 19$^{th}$
-century\cite{Lederman92} and the kinetic theory of gasses. With the
+century\cite{Lederman92} and formulation of the kinetic theory of gasses. With the
 advent of quantum mechanics in the early 20$^{th}$ century, we have
 had a pretty good grasp on solids. A robust model of liquids continues
 to be elusive. Liquids are not periodic structures like solids, but
@@ -83,13 +87,23 @@ towards understanding the development and existence of life. On the
 economic side of the coin, we recognize liquids to be an important
 part of a wide array of industrial applications.
 
-One particularly troublesome regime is around the so-called ``critical
-point'' of a liquid. At the appropriate density and temperature, the
+One particularly troublesome regime is around the critical
+point of a liquid. At the appropriate density and temperature, the
 distinction between liquid and vapor dissapears. Beyond this point,
 you have a ``supercritical fluid.'' Supercritical fluids are used in
-many industrial processes\cite{Perrut00}. For example (and of personal
+many industrial processes.\cite{Perrut00} For example (and of personal
 interest), supercritical fluids are used in coffee decaffeination and
 the extraction of hops resins for brewing beer.
+
+It is the aim of renormalization group theory to tackle the critical
+point. The reason that calculations are dificult near the critical
+point is that there are large-scale fluctuations of the density. In
+fact, there are density fluctuations at \emph{all} length
+scales, which is why mean field theories fail. Renormalization group theory is an iterative procedure that
+was developed in th 1950's, and Kenneth Wilson's work with the theory
+in the 1970's won him the 1982 Nobel Prize in physics.\cite{Nobel82}
+
+\fixme{Transition here?}
 
 The simplest model of a liquid is to consider each molecule to be a
 hard sphere (i.e.~spheres cannot overlap) with a square-well potenial
@@ -100,20 +114,26 @@ liquids. This is one of the foundations of this work.
 We use statistical mechanics to study liquids; this requires large
 sample sizes, long simulation times, or some combination of the
 two. Monte Carlo simulations are exact, if you allow them to run
-``long enough.'' Our models are ultimately compared to these
-simulations, but Monte Carlo simulations are otherwise outside the
-scope of this work. The Roundy group uses classical Density-funtional
+``long enough.'' The Roundy group uses classical Density-funtional
 Theory (DFT) to calculate free energies and probability distributions
-of bulk liquids. The end goal of this work is to investigate into
-wheather or not implementing renormalization group theory is
-worthwhile to the Roundy research group.
+of bulk liquids. These calculations are ultimately compared to Monte Carlo simulations.
+
+The end goal of this work is to investigate into whether or not
+implementing renormalization group theory is worthwhile to the Roundy
+Research Group. Many other groups use renormalization group theory,
+but none of them tell the iteration depth used in their
+calculations.\cite{Forte11,Ramana12,Ghobadi13,Wang13,Zhao13} If only
+few iterations are required, then this would certainly be an effective
+tool to use. However, if many iterations are required, the
+computational cost could be unwieldy.
 
 In section~\ref{sec:theory}, I present some of the main theories I
 deal with: renormalization group theory, thermodynamic perturbation
 theory and the square well liquid free energy. In
 section~\ref{sec:methods} I discuss the the methods used. I cover the
 calculation of liquid-vapor coexistence curves in some detail, as
-caluclating coexistence near the critical point is tricky.
+caluclating coexistence near the critical point is tricky. The
+results---such as they are---are covered in section~\ref{sec:results}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}\label{sec:theory}
@@ -126,26 +146,27 @@ near the critical point of a system. The formulation used here is
 provided by Forte~\textit{et al}.\cite{Forte11}
 
 We start by dividing the total volume into cells of volume $V_i$. We
-assume that within a cell $n(\rr)$ varies only slightly, and that the
-cells do not interact with one another. This is refered to as Wilson's
+assume that within a cell the number density $n(\rr)$ varies only slightly, and that the
+cells do not interact with one another. This comes from Wilson's
 phase cell method.\cite{Ramana12}
 
-Then consider a baseline free enrgy $F_0(T,n)$. We assume this
-baseline accounts for all fluctuations of wavelength $\lambda <
-\lambda_0$. We then double the size of our phase cell and add a
-correction to the free energy $\delta F_1(T,n)$. This correction
-accounts for fluctuations with a wavelength $\lambda =
-2\lambda_0$. The new free energy is
+Then consider a baseline free enrgy $F_0(T,n)$, usually based on a
+mean field theory. We assume this baseline accounts for all
+fluctuations of wavelength $\lambdaRG < \lambda_0$. We then
+double the size of our phase cell and add a correction to the free
+energy $\delta F_1(T,n)$. This correction accounts for fluctuations
+with a wavelength $\lambdaRG = 2\lambda_0$. The new free
+energy, $F_1(T,n)$, is
 \begin{align}
   F_1(T,n) &= F_0(T,n) + \delta F_1(T,n)
 \end{align}
 Then double the length scale again; $\delta F_2(T,n)$ accounts for
-fluctionations with $\lambda = 4\lambda_0$ and
+fluctionations with $\lambdaRG = 4\lambda_0$ and
 \begin{align}
   F_2(T,n) &= F_1(T,n) + \delta F_2(T,n)
 \end{align}
 As we continue this process, the $i^{th}$ correction accounts for
-fluctuations with $\lambda = 2^i\lambda_0$, and
+fluctuations with $\lambdaRG = 2^i\lambda_0$, and
 \begin{align}
   F_i(T,n) &= F_{i-1}(T,n) + \delta F_i(T,n)
 \end{align}
@@ -156,41 +177,48 @@ In the end, your free energy is
 
 Where $\Fattr$ is the contribution due to the longest-wavelength
 density fluctuations. At this stage, I do not entirely understand why
-Forte splits up $\Fattr$.
+Forte separates out $\Fattr$.
 
-The $\detla F_i(T,n)$ term is a difference in free energies:
+The $\delta F_i(T,n)$ term is a difference in free energies:
 \begin{align}
-  \delta F_i(T,n) &= -\kT\ln Z - \left( -\kT\ln Z^* \right) \\
-  &= -\kT\ln\left[ \frac{Z_D(T,n)}{Z_D^*(T,n} \right]
+  \delta F_i(T,n) &= -\kT\ln Z - \left( -\kT\ln Z^* \right) \nonumber \\
+  &= -\kT\ln\left[ \frac{Z(T,n)}{Z^*(T,n)} \right]
 \end{align}
-Here, $Z$ is the partition function for the entire system, and $Z^*$ is the partition function of a reference system consisting only of the term $\FbarD$. Forte gives these terms as
+Here, $Z$ is the partition function for the entire system, and $Z^*$
+is the partition function of a reference system consisting only of the
+term $\FbarD$. Forte gives these terms as
 \begin{align}
-  Z_D(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\left( \FbarD + \bar{U}_D(T,n \right) \right] \\
-  Z_D^*(T,n) &= \int dx\, \exp\left[ -\frac{V_D}{\kT}\FbarD \right]
+  Z(T,n) &= \int dx\, \exp\left[ -\frac{V}{\kT}\left( \FbarD + \bar{U}(T,n \right) \right] \label{eqn:Z} \\
+  Z^*(T,n) &= \int dx\, \exp\left[ -\frac{V}{\kT}\FbarD \right] \label{eqn:Zstar}
 \end{align}
 where $x$ is the amplitude of density fluctuations. $\FbarD$ and $\UbarD$ are formulated similar to averages:
 \begin{align}
   \FbarD &= \frac{F_{i-1}(T,n+x) + F_{i-1}(T,n-x)}{2} - F_{i-1}(T,n) \\
-  \UbarD &= \frac{U(T,n+x) + U(T,n-x)}{2} - U(T,n)
+  \UbarD &= \frac{U(T,n+x,\lambdaRG) + U(T,n-x,\lambdaRG)}{2} - U(T,n,\lambdaRG)
 \end{align}
-Finally, $U(T,n)$ is given by Forte as
+Finally, $U(T,n,\lambdaRG)$ is given by Forte as
 \begin{align}
-  U(T,n) = &{} g^\text{HS}(n_{eff};\sigma)\alpha - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha\omega^2 \nonumber \\
-  &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha\gamma \label{eqn:URG} % URG! It sounds like it hurt! :P
+  U(T,n,\lambdaRG) = &{} g^\text{HS}(n_{eff};\sigma)\alpha(\lambdaRG) - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha(\lambdaRG)\omega^2(\lambdaRG) \nonumber \\
+  &{} + \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)^2\alpha(\lambdaRG)\gamma(\lambdaRG) \label{eqn:URG} % URG! It sounds like it hurt! :P
 \end{align}
 with
 \begin{align}
-  \alpha &= \frac{2}{3}\pi\epsilon\sigma^3(\lambda^3 - 1) \\
-  \omega^2 &= \frac{1}{5}\sigma^2\frac{\lambda^5 - 1}{\lambda^3 - 1} \\
-  \gamma &= \frac{1}{70}\sigma^4\frac{\lambda^7 - 1}{\lambda^3 - 1}
+  \alpha(\lambdaRG) &= \frac{2}{3}\pi\epsilon\sigma^3(\lambdaRG^3 - 1) \\
+  \omega^2(\lambdaRG) &= \frac{1}{5}\sigma^2\frac{\lambdaRG^5 - 1}{\lambdaRG^3 - 1} \\
+  \gamma(\lambdaRG) &= \frac{1}{70}\sigma^4\frac{\lambdaRG^7 - 1}{\lambdaRG^3 - 1}
 \end{align}
-The pair correlation function $g(n,r)$ tells us how likely we are to find another hard sphere some distance away, given some density. In equation~\ref{eqn:URG} we are considering this quantity at contact ($r = \sigma$) with some effective density.
+The pair correlation function $g(n,r)$ tells us how likely we are to
+find another hard sphere some distance away, given some density. In
+equation~\ref{eqn:URG} we are considering this quantity at contact ($r
+= \sigma$) with an effective density $n_{eff}$.
+
+\fixme{Transition?}
 
 \subsection{Thermodynamic perturbation theory}\label{subsec:TPT}
 
 Thermodynamic perturbation theory (TPT) gives a good description of
 simple liquids, as long as you are far from the critical point---which
-is most of where we calculate. TPT is a rigorous power series
+is most of the time. TPT is a rigorous power series
 expansion in a small parameter; as long as the parameter is small, the
 theory is valid. This discussion follows primarily from \textit{Theory
   of Simple Liquids}, by Hansen and McDonald\cite{Hansen06}.
@@ -211,95 +239,108 @@ hard spheres. For the square-well model, the pair potential is
 
 We consider this as our referecne, and take a square well attraction as a perturbation:
 \begin{align}
-  v_\lambda(\1,\2) &= v_\text{HS}(\1,\2) + \lambda w^\text{SW}(\1,\2) \label{eqn:small-perturbation}
+  w_\text{SW}(\1,\2) &= - \varepsilon \text{ for } \sigma < r < \lambdaSW\sigma
 \end{align}
-where
+so that we have
 \begin{align}
-  w^\text{SW}(\1,\2) &= - \varepsilon \text{ for } \sigma < r < \lambda\sigma
+  v_\lambda(\1,\2) &= v_\text{HS}(\1,\2) + \lambdaSW w_\text{SW}(\1,\2) \label{eqn:small-perturbation}
 \end{align}
 
-The total potential energy of our system and its derivatives with resepect to $\lambda$---which become important later---are
+The total potential energy of our system and its derivatives with
+resepect to $\lambdaSW$ (which become important later) are
 \begin{align}
   \widetilde{V} &= \sum_{i=1}^N\sum_{j>i}^N v_\lambda(\mathbf{r}_i,\mathbf{r}_j) \\ % \label{eq:VN} \\
-  \hookrightarrow \frac{\partial \widetilde{V}}{\partial\lambda} &= \sum_{i=1}^N\sum_{j>i}^N w^\text{SW}(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
+  \frac{\partial \widetilde{V}}{\partial\lambdaSW} &= \sum_{i=1}^N\sum_{j>i}^N w_\text{SW}(\mathbf{r}_i,\mathbf{r}_j) \nonumber \\
   &\equiv W_N \\
-  \hookrightarrow \frac{\partial^2 \widetilde{V}}{\partial\lambda^2} &= 0
+  \frac{\partial^2 \widetilde{V}}{\partial\lambdaSW^2} &= 0
 \end{align}
 
-The \emph{configuration integral} (the potential energy component of the partition function) and its derivative with respect to $\lambda$ are
+The \emph{configuration integral} (the potential energy component of
+the partition function) and its derivative with respect to $\lambdaSW$
+are
 \begin{align}
-  Z_\lambda &= \int d\rr^N\, e^{-\beta \widetilde{V}(\lambda)} \\
-  \hookrightarrow \frac{\partial Z_\lambda}{\partial\lambda} &=  \int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}(\lambda)} \\
-  &= \int d\rr^N\, -\beta\frac{\partial \widetilde{V}}{\partial\lambda}e^{-\beta \widetilde{V}(\lambda)} \\
-  &= \int d\rr^N\, -\beta W_N e^{-\beta \widetilde{V}(\lambda)}
+  Z_\lambda &= \int d\rr^N\, e^{-\beta \widetilde{V}} \\
+  \frac{\partial Z_\lambda}{\partial\lambdaSW} &=  \int d\rr^N\, \frac{\partial}{\partial\lambdaSW}\left( e^{-\beta \widetilde{V}} \right) \nonumber \\
+  &= \int d\rr^N\, -\beta\frac{\partial \widetilde{V}}{\partial\lambda}e^{-\beta \widetilde{V}} \nonumber \\
+  &= \int d\rr^N\, -\beta W_N e^{-\beta \widetilde{V}}
 \end{align}
-And the non-ideal part of the free energy (i.e.~the excess free energy) and its derivative are
+And the non-ideal part of the free energy (i.e.~the excess free
+energy) and its derivative are
 \begin{align}
   F &= -\kT\ln\left( \frac{Z_\lambda}{V^N} \right) \\
-  \hookrightarrow \frac{\partial F}{\partial\lambda} &= \frac{V^N}{Z_\lambda}\frac{\partial}{\partial\lambda}\left( \frac{Z_\lambda}{V^N} \right) \\
-  &= -\kT\left( \frac{1}{Z_\lambda}\frac{\partial Z_\lambda}{\partial\lambda} \right) \\
-  &= \frac{1}{Z_\lambda} \int d\rr^N\, W_N e^{-\beta \widetilde{V}(\lambda)}\\
-  &= \left\langle W_N \right\rangle_\lambda \label{eqn:dfdlambda}
+  \frac{\partial F}{\partial\lambdaSW} &= \frac{V^N}{Z_\lambda}\frac{\partial}{\partial\lambdaSW}\left( \frac{Z_\lambda}{V^N} \right) \nonumber \\
+  &= -\kT\left( \frac{1}{Z_\lambda}\frac{\partial Z_\lambda}{\partial\lambdaSW} \right) \nonumber \\
+  &= \frac{1}{Z_\lambda} \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \label{eqn:dfdlambda_Z}\\
+  &= \left\langle W_N \right\rangle_{\lambdaSW} \label{eqn:dfdlambda}
 \end{align}
-(where $-\kT$ and $-\beta$ have divided out to $1$). Here, $V^N$ is
-the total volume taken to the $N^{th}$ power, and
-$\left\langle W_N \right\rangle_\lambda$ is the ensemble
-average of $W_N$, with the subscript indicating some given
-value of $\lambda$.
+(where $-\kT$ and $-\beta$ have divided out to $1$ before equation~\ref{eqn:dfdlambda_Z}). Here, $V^N$ is
+the total volume taken to the $N^{th}$ power, and $\left\langle W_N
+\right\rangle_{\lambdaSW}$ is the ensemble average of $W_N$, with the
+subscript indicating some value of $\lambdaSW$.
 
-\fixme{The following could probably go someplace else (is it even necessary?):
-  We can simplify this even further by noting
-  \begin{align}
-    \left\langle W_N \right\rangle &= \left\langle \sum_i\sum_jw(\mathbf{r}_i,\mathbf{r}_j) \right\rangle \\
-    &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle
-    \intertext{which gives us}
-    \frac{\partial F}{\partial\lambda} &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle_\lambda
-\end{align}}
+%% \fixme{The following could probably go someplace else (is it even necessary?):
+%%   We can simplify this even further by noting
+%%   \begin{align}
+%%     \left\langle W_N \right\rangle &= \left\langle \sum_i\sum_jw(\mathbf{r}_i,\mathbf{r}_j) \right\rangle \\
+%%     &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle
+%%     \intertext{which gives us}
+%%     \frac{\partial F}{\partial\lambda} &= \frac{1}{2}N^2\left\langle w(\1,\2) \right\rangle_\lambda
+%% \end{align}}
 
 Note that equation~\ref{eqn:dfdlambda} is exact; now take a series expansion:
-\begin{align}
-  \left\langle W_N \right\rangle_\lambda &= \left\langle W_N\right\rangle_{\lambda = 0} + (\lambda)\frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda}\bigg|_{\lambda = 0} + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion}
-\end{align}
-The derivative term is
 \begin{widetext}
+\begin{align}
+  \left\langle W_N \right\rangle_{\lambdaSW} &= \left\langle W_N\right\rangle_{\lambdaSW = 0} + (\lambdaSW)\frac{\partial\left\langle W_N \right\rangle_{\lambdaSW}}{\partial\lambdaSW}\bigg|_{\lambdaSW = 0} + \mathcal{O}(\lambdaSW^2) \label{eqn:Wn-expansion}
+\end{align}
+%% \end{widetext}
+The derivative term is
+%% \begin{widetext}
   \begin{align}
-    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{\partial}{\partial\lambda}\left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}}\right) \\
-    &= \frac{1}{Z_\lambda}\frac{\partial}{\partial\lambda}\left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\frac{\partial}{\partial\lambda}Z_\lambda \\
-    &= \frac{1}{Z_\lambda}\int d\rr^N\, \left( e^{-\beta \widetilde{V}}\frac{\partial}{\partial\lambda}W_N + W_N\frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\int d\rr^N\, \frac{\partial}{\partial\lambda}e^{-\beta \widetilde{V}} \\
+    \frac{\partial\left\langle W_N \right\rangle_{\lambdaSW}}{\partial\lambdaSW} &= \frac{\partial}{\partial\lambdaSW}\left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}}\right) \nonumber \\
+    &= \frac{1}{Z_\lambda}\frac{\partial}{\partial\lambdaSW}\left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\frac{\partial}{\partial\lambdaSW}Z_\lambda \nonumber \\
+    &= \frac{1}{Z_\lambda}\int d\rr^N\, \left( e^{-\beta \widetilde{V}}\frac{\partial}{\partial\lambdaSW}W_N + W_N\frac{\partial}{\partial\lambdaSW}e^{-\beta \widetilde{V}} \right) - \left( \int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\frac{1}{Z_\lambda^2}\int d\rr^N\, \frac{\partial}{\partial\lambdaSW}e^{-\beta \widetilde{V}}
   \end{align}
-\end{widetext}
+%% \end{widetext}
 
 Noting that $\partial W_N/\partial\lambda = 0$, we have
-\begin{widetext}
+%% \begin{widetext}
   \begin{align}
-    \frac{\partial}{\partial\lambda}\left\langle W_N \right\rangle_{\lambda} &= \frac{1}{Z_\lambda}\int d\rr^N (-\beta) W_N^2 e^{-\beta \widetilde{V}} - \frac{1}{Z_\lambda^2}\left(\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\left( \int d\rr^N\, (-\beta)W_Ne^{-\beta \widetilde{V}} \right) \\
-    &= -\beta\left[ \frac{1}{Z_\lambda}\int d\rr^N\, W_N^2e^{-\beta \widetilde{V}} - \left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)^2 \right] \\
-    &= -\beta\left[ \left\langle W_N^2 \right\rangle_\lambda - \left\langle W_N \right\rangle_\lambda^2 \right] \\
-    &\equiv -\beta\sigma_\lambda^2
+    \frac{\partial\left\langle W_N \right\rangle_{\lambdaSW}}{\partial\lambdaSW} &= \frac{1}{Z_\lambda}\int d\rr^N (-\beta) W_N^2 e^{-\beta \widetilde{V}} - \frac{1}{Z_\lambda^2}\left(\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)\left( \int d\rr^N\, (-\beta)W_Ne^{-\beta \widetilde{V}} \right) \nonumber \\
+    &= -\beta\left[ \frac{1}{Z_\lambda}\int d\rr^N\, W_N^2e^{-\beta \widetilde{V}} - \left( \frac{1}{Z_\lambda}\int d\rr^N\, W_N e^{-\beta \widetilde{V}} \right)^2 \right] \nonumber \\
+    &= -\beta\left[ \left\langle W_N^2 \right\rangle_{\lambdaSW} - \left\langle W_N \right\rangle_{\lambdaSW}^2 \right] \nonumber \\
+    &\equiv -\beta\sigma_{\lambdaSW}^2
   \end{align}
 \end{widetext}
 
 Combining this result with equation~\ref{eqn:Wn-expansion} gives us
 \begin{align}
-  \left\langle W_N \right\rangle_\lambda &= \left\langle W_N\right\rangle_{\lambda = 0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2) \label{eqn:Wn-expansion-simplified}
+  \left\langle W_N \right\rangle_{\lambdaSW} &= \left\langle W_N\right\rangle_{\lambdaSW = 0} - \beta\lambda\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\lambdaSW^2) \label{eqn:Wn-expansion-simplified}
 \end{align}
 and we can insert this into equation~\ref{eqn:dfdlambda}:
 \begin{align}
-  \frac{\partial F}{\partial\lambda} &= \left\langle W_N\right\rangle_{\lambda = 0} - \beta\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\lambda^2)
+  \frac{\partial F}{\partial\lambdaSW} &= \left\langle W_N\right\rangle_{\lambdaSW = 0} - \beta\lambda\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\lambdaSW^2)
 \end{align}
 
-We can integrate this expression over $F\in[F_0,F]$ and $\lambda\in[0,1]$ to obtain
+Now integrate this expression over $F\in[F_0,F]$ (\textsc{N.B.}~this is different than the RGT baseline free energy $F_0(T,n)$ in section~\ref{subsec:RGT}) and $\lambda\in[0,1]$ to obtain
 \begin{align}
-  F - F_0 &= (1-0)\left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta(1 - 0)^2\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^2) \nonumber \\
-  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_\lambda - \frac{1}{2}\beta\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^2) \label{eqn:F-inTermsW}
+  \int_{F_0}^F\, dF &= \int_0^1 d\lambdaSW\, \left\langle W_N\right\rangle_{\lambdaSW = 0} - \beta\lambda\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\lambdaSW^2) \nonumber \\
+  \intertext{\fixme{Do I need that first line?}}
+  \hookrightarrow F - F_0 &= (1-0)\left\langle W_N \right\rangle_{\lambdaSW} - \frac{1}{2}\beta(1 - 0)^2\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\beta^2) \nonumber \\
+  \hookrightarrow F &= F_0 + \left\langle W_N \right\rangle_{\lambdaSW} - \frac{1}{2}\beta\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\beta^2) \label{eqn:F-inTermsW}
 \end{align}
 Multiply by $\beta$ and we have the \emph{high-temperature expansion}, first derived by
 Zwanzig:\cite{Zwanzig54}
 \begin{align}
-  \beta F &= \beta F_0 + \beta \left\langle W_N \right\rangle_{\lambda=0} - \beta^2\lambda\sigma_{\lambda=0}^2 + \mathcal{O}(\beta^3)
+  \beta F &= \beta F_0 + \beta \left\langle W_N \right\rangle_{\lambdaSW=0} - \beta^2\lambda\sigma_{\lambdaSW=0}^2 + \mathcal{O}(\beta^3)
 \end{align}
 
-Zwanzig further showed that the $n^{th}$ term could be written in terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle W_N\right\rangle_{\lambda=0} \right]^\nu \right\rangle_{\lambda=0}$ with $\nu \leq n$. This requires us to know the form of higher-order correlation functions of the reference system, which can be quite complicated. In the next section we will see a simple aproximation for the $n=2$ term.
+Zwanzig further showed that the $n^{th}$ term could be written in
+terms of the mean fluctuations $\left\langle \left[ W_N - \left\langle
+  W_N\right\rangle_{\lambdaSW=0} \right]^\nu \right\rangle_{\lambdaSW=0}$
+with $\nu \leq n$. This requires us to know the form of higher-order
+correlation functions of the reference system, which can be quite
+complicated. In the next section we will see a simple aproximation for
+the $n=2$ term.
 
 %% Writing the statistical averages in terms of the pair density
 %% $n_\lambda^{(2)}(\1,\2)$ (i.e. the probability per volume squared of having one sphere at \1
@@ -330,13 +371,10 @@ Zwanzig further showed that the $n^{th}$ term could be written in terms of the m
 %% This term requires use to know the form of higher-order correlation functions and the structure function $S_0(k)$ of the reference system. These things are very difficult. Hence, we use approximations, as outlined in section~\ref{sub2sec:disp}.
 
 \subsection{Square well liquid free enrgy}\label{subsec:SW}
-For the baseline, this work is based on the square well liquid free energy:\cite{Hughes13}
+\fixme{I need to either note here that I use F/V (see start of section~\ref{sec:methods}), or multiply every term in this section by V}
+For the baseline, this work uses the square well liquid free energy:\cite{Hughes13}
 \begin{align}
   f_0(T,n) &= \fid + \fhs + \left( \fdisp - n a_1(n) \right) \ .
-\end{align}
-The long-range attractive term, $\fattr$ is given by
-\begin{align}
-  \fattr &= n a_1(n) \ .
 \end{align}
 $\fid$ is the ideal gas free energy, $\fhs$ is the hard sphere
 repulsion, and $\fdisp$ is the attraction. The function $a_1(n)$ is
@@ -371,7 +409,7 @@ The \emph{fundamental measure densities} are
   &= nR \\
   n_2(n) &= n4\pi R^2 \\
   n_3(n) &= n\frac{4}{3}\pi R^3 \nonumber \\
-  &= \eta
+  &= \eta \label{eqn:packingFrac}
 \end{align}
 where $\eta$ is the packing fraction.
 
@@ -387,9 +425,9 @@ The $a_j(n)$ terms come from TPT, outlined in section~\ref{subsec:TPT}.
 The first term, $a_1$, is the mean-field dispersion interaction. The
 second term, $a_2$, describes the effect of fluctuations resulting
 from compression of the fluid due to the dispersion interaction
-itself, and is approximated using the local compressibility
+itself. It is approximated using the local compressibility
 approximation (LCA), which assumes the energy fluctuation is simply
-related to the compressibility of a hard-sphere reference
+related \fixme{what precisely does ``simply related'' mean?} to the compressibility of a hard-sphere reference
 fluid.\cite{Barker76}
 
 In Gil-Villegas' paper,\cite{gil-villegas97} HS and Dispersion are wrapped up into the
@@ -400,51 +438,52 @@ as:
 \end{align}
 with $\alpha^\text{VDW}$ given by
 \begin{align}
-  \alpha^\text{VDW} &= 2\pi\epsilon\int_\sigma^\infty r^2\phi(r)\,dr \\
-  \intertext{using reduced units of $x = r/\sigma$, we have}
-  &= 2\pi\sigma^3\int_1^\infty x^2\phi(x)\,dx \\
-  &= 3b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)\,dx
+  \alpha^\text{VDW} &= 2\pi\varepsilon\int_\sigma^\infty r^2\phi(r)\,dr \\
+  \intertext{using reduced units of $x = r/\sigma$ (\textsc{N.B.}~this is unrelated to the RGT amplitude of fluctuations $x$ from section~\ref{subsec:RGT}), we have}
+  &= 2\pi\sigma^3\varepsilon\int_1^\infty x^2\phi(x)\,dx \nonumber \\
+  &= 3b^\text{VDW}\varepsilon\int_1^\infty x^2\phi(x)\,dx
 \end{align}
 where $b^\text{VDW}$ is the van der Waals size parameter. It
 corresponds to the volume excluded by two spherical particles of
 volume $b$: $b^\text{VDW} = 4b = 4\left(\pi\sigma^3/6\right)$.
 
-Then, the high-temp expansion is an expansion of the monomer term:
+Then, the high temperature expansion is an expansion of the monomer term:
 \begin{align}
-  f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \cdots
+  f_\text{mono} &= f_\text{HS} + \beta a_1 + \beta^2 a_2 + \mathcal{O}(\beta^3)
 \end{align}
 
 The term $a_1$ is given by
 \begin{align}
-  a_1 &= -2\pi n \epsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
-  &= -3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
+  a_1 &= -2\pi n \varepsilon\int_\sigma^\infty r^2\phi(r)g^\text{HS}(r)\,dr \\
+  &= -3 n  b^\text{VDW}\varepsilon\int_1^\infty x^2\phi(x)g^\text{HS}(x)\,dx
 \end{align}
 If we assume random correlations between the particles' positions, for
-all distances, we have $g^\text{HS}(r) = 1$. This yields
+all distances, we have $g^\text{HS}(r) = 1$. This yields \fixme{derive this---or at least explain a little bit}
 \begin{align}
   a_1^\text{VDW} = - n \alpha^\text{VDW},
 \end{align}
 the van der Waals mean-field energy.
 
-The second-order term is quite a bit more complicated; one must have
-knowledge of higher-order correlation functions to determine
-$a_2$. This term describes the response of the attractive energy due
-to the compression of the fluid from the attractive well. Gil-Villegas
-\emph{et al.} base their expression on an approximation by Barker and
-Henderson.\cite{Barker67} Barker and Henderson's approximation
-considers fluctuations in the number of particles in the potential
-well. In this way, the fluctuations in $a_2$ are related to the
-pressure and compressibility of the liquid. Given pressure
-$P^\text{HS}$ and isothermal compressibility $K^\text{HS} =
-kT\left(\partial n /\partial P^\text{HS}\right)_T$, we have:
+The second-order term is quite a bit more complicated. As discussed in
+section~\ref{subsec:TPT}, one must have knowledge of higher-order
+correlation functions to determine $a_2$. This term describes the
+response of the attractive energy due to the compression of the fluid
+from the attractive well. Gil-Villegas \emph{et al.} base their
+expression on an approximation by Barker and Henderson.\cite{Barker67}
+Barker and Henderson's approximation considers fluctuations in the
+number of particles in the potential well. In this way, the
+fluctuations in $a_2$ are related to the pressure and compressibility
+of the liquid. Given pressure $P^\text{HS}$ and isothermal
+compressibility $K^\text{HS} = kT\left(\partial n /\partial
+P^\text{HS}\right)_T$, we have:
 \begin{align}
-  a_2 &= -\pi n \epsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}}{\partial P^\text{HS}}(r)\,dr \\
-  &= -\pi n \epsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \\
-  &= \frac{1}{2}\epsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\epsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+  a_2 &= -\pi n \varepsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}}{\partial P^\text{HS}}(r)\,dr \nonumber \\
+  &= -\pi n \varepsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \nonumber \\
+  &= \frac{1}{2}\varepsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\varepsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
 
 We use the isothermal compressibility in terms of packing fraction
-$\eta$, given by the Percus-Yevick exprssion:\cite{Barker76}
+$\eta$ (see equation~\ref{eqn:packingFrac}), given by the Percus-Yevick exprssion:\cite{Barker76}
 \begin{align}
   K^\text{HS} &= \frac{\left(1 - \eta\right)^4}{1 + 4\eta + 4\eta^2}
 \end{align}
@@ -455,9 +494,9 @@ This is called the Local Compressibility Approximation (LCA).
 This work applies entirely to the homogeneous case---that is, there
 are no walls containing our liquid, nor are there any sort of solutes
 in the liquid. Since our fluid is of infinite extent, the free energy
-is infinite. Therefore, in the calculations, I work with free energy density:
+is infinite. Therefore, in the calculations I work with free energy density:
 \begin{align}
-  f(T,n) &\equiv \frac{F}{V}(T,n)
+  f(T,n) &\equiv \frac{F(T,n)}{V}
 \end{align}
 
 \subsection{Coexistence Curve Algorithm}\label{subsec:coexis}
@@ -469,12 +508,12 @@ density is defined as
                  &= f(T,n) - n\mu \nonumber \\
                  &= f(T,n) - n\frac{df}{dn}(T,n)\bigg|_{\npart}\ .
 \end{align}
-It is the value $\npart$ that we adjust to find coexistence curves.
+$\npart$ is some particular density; it is this value that we adjust to find coexistence curves.
 
 \begin{figure}
   \centering
-%%  \includegraphics[width=\columnwidth]{figs/SW-phi-lowT}
-  \caption{Grand free energy per unit volume, SW, low temp}
+  \includegraphics[width=\columnwidth]{figs/SW-phi-lowT}
+  \caption{Grand free energy per unit volume, square well, low temperature}
   \label{fig:SW-phi-lowT}
 \end{figure}
 
@@ -486,9 +525,8 @@ between those minima, and the value of the density at that maximum is
 used for $\npart$. Find this value at a given temperature then plot
 $\phi(T,n)$ vs $n$ at slightly higher temperature. Find the new value
 for $\npart$ such that the two minima have the same value for
-$\phi(T,n)$. (It is helpful to note that if $\npart$ is increased,
-$\phi(T,\nliq)$ increases, and $\phi(T,\nliq)$ decreases if $\npart$
-is decresed.) The program I wrote uses the previous temperature's
+$\phi(T,n)$. [It is helpful to note that if $\npart$ is increased,
+$\phi(T,\nliq)$ increases, and vice-versa.] The program I wrote uses the previous temperature's
 $\npart$ as a ``first guess,'' maximizing $\phi(T,\npart)$. From
 there, the program adjusts $\npart$ until $\phi(T,\nvap) =
 \phi(T,\nliq)$. When that condition is met, it uses this new value of
@@ -496,7 +534,8 @@ $\npart$ as the ``first guess'' at $\npart$ for the next higher
 temperature.
 
 The algorithm is as follows; start at some temperature $T=T_{start}$,
-with an intial guess for $\npart$.
+with an intial guess for $\npart$. This initual guess can be read off
+of a plot, and optimized ``by hand'' with minimal effort.
 \begin{enumerate}
   \item Calculate $\nvap$ and $\nliq$ by calculating the minima in $\phi(T_{start},n)$ over appropriate regions
   \item Calculate $\phi(T_{start},\nvap)$ and $\phi(T_{start},\nliq)$ \label{while-start}
@@ -509,14 +548,22 @@ with an intial guess for $\npart$.
   \item Increase the temperature to $T = T + \delta T$ and repeat
 \end{enumerate}
 
+\begin{figure}
+  \begin{center}
+  \includegraphics[width=\columnwidth]{figs/coexistance_SW}
+  \end{center}
+  \caption{Liquid-vapor coexistance for a square well liquid.}
+  \label{fig:coexistance_SW}
+\end{figure}
+
+Figure~\ref{fig:coexistance_SW} is a demonstration of this algorithm. \fixme{Compare this one to something.}
+
 \subsection{Free Energies}\label{subsec:free-energies}
-The $a_j(n)$ terms require even more simplification when
-``converting'' from the mathematical formulation to Python code, to
-rid ourselves of troublesome integrals. Gil-Villegas gives us
+To minmize calculation of integrals, we follow Gil-Villegas' approximations to the $a_j(n)$ terms.
 \newcommand\eff{\textit{eff}}
 \begin{align}
-  a_1^\text{SW}(n) &= a_1^\text{VDW}(n)g^\text{HS}(1;\eta_{\eff}) \\
-  &= -4\eta\epsilon(\lambda^3 - 1)\frac{1 - \left( \eta_{\eff}/2 \right)}{(1 - \eta_{\eff})^3}
+  a_1^\text{SW}(n) &= a_1^\text{VDW}(n)g^\text{HS}(1;\eta_{\eff}) \nonumber \\
+  &= -4\eta\varepsilon(\lambda^3 - 1)\frac{1 - \left( \eta_{\eff}/2 \right)}{(1 - \eta_{\eff})^3}
 \end{align}
 and
 \begin{align}
@@ -542,25 +589,22 @@ with
 \end{align}
 
 \subsection{RG partition functions}\label{subsec:fbar-ubar}
-I use the midpoint method for evaluating the integrals of $\FbarD$
-and $\UbarD$.
+I use the midpoint method for evaluating the integrals $Z$ and
+$Z^*$ (equations~\ref{eqn:Z} and~\ref{eqn:Zstar}). This method was
+chosen for ease of implementation and low comuptational cost. The approximation is
+\begin{align}
+  \int_a^b dx\, f(x) &\approx dx\sum_{i=0}^{N-1} f(x_i) \\
+  x_i &= a + dx(i+1/2)
+\end{align}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and discussion}\label{sec:results}
 
-For this work, I use $\lambda_\text{SW} = 1.5$.
+For this work, I use $\lambdaSW = 1.5$.
 
 \begin{figure}
   \begin{center}
-%%  \includegraphics[width=\columnwidth]{figs/coexistance_SW}
-  \end{center}
-  \caption{Liquid-vapor coexistance for a square well liquid.}
-  \label{fig:coexistance_SW}
-\end{figure}
-
-\begin{figure}
-  \begin{center}
-%%  \includegraphics[width=\columnwidth]{figs/phi-RG-lowT}
+  \includegraphics[width=\columnwidth]{figs/phi-RG-lowT}
   \end{center}
   \caption{Free energy density for RG at low temperature}
   \label{fig:phi-RG-lowT}
@@ -568,15 +612,31 @@ For this work, I use $\lambda_\text{SW} = 1.5$.
 
 \begin{figure}
   \begin{center}
-%%  \includegraphics[width=\columnwidth]{figs/phi-RG-highT}
+  \includegraphics[width=\columnwidth]{figs/phi-RG-highT}
   \end{center}
   \caption{Free energy density for RG near critical temp}
   \label{fig:phi-RG-highT}
 \end{figure}
 
+\begin{figure}
+  \begin{center}
+  \includegraphics[width=\columnwidth]{figs/coexistence-RG-forte}
+  \end{center}
+  \caption{Liquid-vapor coexistence, comparted with Forte's 2011 data}
+  \label{fig:coexistence-RG-forte}
+\end{figure}
+
 Figures~\ref{fig:phi-RG-lowT} and~\ref{fig:phi-RG-highT} show the
-grand free energy per unit volume at a low temperature, and near the
-critical point. It is clear that the program is not de-bugged.
+grand free energy per unit volume at a low temperature and near the
+critical point, respectively. Results are not particularly clear at
+this point, as the program has not been fully debugged. This is
+evident in figure~\ref{fig:phi-RG-lowT}; one notes that the curve for
+$i=1$ is neither complete nor
+accurate. Figure~\ref{fig:coexistence-RG-forte} gives an even starker
+picture of the shortcomings of my RG implementation. We see that the
+baseline ($i=0$; identical to SW calculations) is reasonable, with
+expected shortcomings near the critical point. However, calculations
+including even one iteration ($i=1$) flat-out fail.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -587,9 +647,11 @@ calculations for the square well liquid. The program is not entirely
 de-bugged. I have also developed an algorithm that calculates
 liqiud-vapor coexistence curves, even close to the critical point.
 
-I conclude that it would be worthwhile to further investigate implementing renormalization group theory in the Roundy DFT.
+We do not yet know if RGT is worth implementing. Since the program has
+not been fully debugged, I am unable to say what the computational
+cost would be to obtain an accurate liquid-vapor coexistene curve.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{unsrt}
 \bibliography{project} % Produces the bibliography via BibTeX.
 
