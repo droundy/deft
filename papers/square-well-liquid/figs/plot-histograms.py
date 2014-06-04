@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw", "flat", "wang_landau", "gaussian", "walkers", "kT2", "kT1", "kT0.1"]]
+#arg versions = [["nw", "flat", "wang_landau", "gaussian", "walkers", "kT2", "kT1"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
 
@@ -35,7 +35,7 @@ for version in versions:
 
 plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$D$')
-plt.legend(loc='best')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
 
