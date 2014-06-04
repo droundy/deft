@@ -44,6 +44,8 @@ Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
+bool LJR = false; //Uses a test particle with Lennard-Jones repulsion
+double sigma = R*pow(2,5.0/6.0);
 
 bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -115,6 +117,13 @@ int main(int argc, char *argv[]){
       maxrad = max(maxrad, lenz);
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
+    } else if (strcmp(argv[a],"potential") == 0){
+      if (strcmp(argv[a+1],"ljr") == 0) {
+        LJR = true;
+        printf("Using Lennard-Jones repulsion potential\n");
+      } else {
+        printf("Using quadratic potential\n");
+      }
     } else {
       printf("Bad argument:  %s\n", argv[a]);
       return 1;
@@ -522,12 +531,9 @@ inline double sqr(double x) {
 
 inline double potential(double r) {
   if (r >= 2*R) return 0;
+  //eps is defined to give the same curvature at r=2R for both potentials
+  if (LJR) return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36;
   return eps*sqr(1-r/(2*R));
-}
-
-inline double force(double r) {
-  if (r >= 2*R) return 0;
-  return eps*(1-r/(2*R))/(2*R);
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
@@ -734,6 +740,8 @@ Vector3d move(Vector3d v,double scale){
 
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
+  //these forces are negative for repulsive forces. no particular reason
+  if (LJR) return -(4*eps*(12*pow(sigma/rij,13) + 6*pow(sigma/rij,7))/(sigma))*rij/36; 
   return (-2*eps/(2*R))*(1-rij/(2*R))*rij;
 }
 
