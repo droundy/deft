@@ -20,7 +20,6 @@ def plotPhi(T,npart):
     plt.title('SW; T = %0.2f '%T)
     plt.xlim(0,0.4)
     plt.ylim(-0.005,0.015)
-    plt.savefig('figs/SW-phi-lowT.pdf')
 
 def plotF(T):
     plt.subplot(211)
