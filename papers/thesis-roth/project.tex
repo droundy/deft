@@ -39,8 +39,8 @@
 \newcommand{\Wtilde}{\ensuremath{\widetilde{W}}}
 
 % RG stuff
-\newcommand{\FbarD}{\ensuremath{\bar{F}_D(T,n,x)}}
-\newcommand{\UbarD}{\ensuremath{\bar{U}_D(T,n,x,\lambdaRG)}}
+\newcommand{\FbarD}{\ensuremath{\bar{F}(T,n,x)}}
+\newcommand{\UbarD}{\ensuremath{\bar{U}(T,n,x,\lambdaRG)}}
 
 % fixme
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{[#1]}}}
@@ -82,7 +82,7 @@ to be elusive. Liquids are not periodic structures like solids, but
 neither are they disperse, as are gasses.
 
 However, understanding liquids has both philosophical and economic
-desireability. Liquid water is---as far as we know---essential for
+desirability. Liquid water is---as far as we know---essential for
 developing and sustaining life. All cellular processes take place in an
 aqueous environment. Understanding liquids is in many ways a step
 towards understanding the development and existence of life. On the
@@ -264,9 +264,14 @@ Now integrate this expression over $\Fex\in[F_\text{ref},\Fex]$ and $\xi\in[0,1]
   \int_{F_\text{ref}}^{\Fex}\, d\Fex &= \int_0^1 d\xi\, \left[ \left\langle \Wtilde\right\rangle_{\xi = 0} - \beta\lambda\sigma_{\xi=0}^2 + \mathcal{O}(\xi^2) \right] \nonumber \\
   \hookrightarrow \Fex - F_\text{ref} &= (1-0)\left\langle \Wtilde \right\rangle_{\xi=0} - \frac{1}{2}\beta(1 - 0)^2\sigma_{\xi=0}^2 + \mathcal{O}(\beta^2) \nonumber \\
   \hookrightarrow \Fex &= F_\text{ref} + \left\langle \Wtilde \right\rangle_{\xi=0} - \frac{1}{2}\beta\sigma_{\xi=0}^2 + \mathcal{O}(\beta^2) \label{eqn:F-inTermsW} \\
-  &\equiv F_\text{ref} + a_1(n) + a_2(n)
+  &= F_\text{ref} + a_1(n) + \beta a_2(n) + \mathcal{O}(\beta^2) \label{eqn:hi-T-exp}
 \end{align}
-This is the \emph{high-temperature expansion}, first derived by
+with
+\begin{align}
+  a_1(n) &= \frac{1}{Z_\xi}\int d\rr^N\, \Wtilde e^{-\beta\Vtilde} \\
+  a_2(n) &= -\frac{\sigma_{\xi=0}^2}{2}
+\end{align}
+Equation~\ref{eqn:hi-T-exp} is the \emph{high-temperature expansion}, first derived by
 Zwanzig\cite{Zwanzig54}. He further showed that the $n^{th}$ term could be written in
 terms of the mean fluctuations $\left\langle \left[ \Wtilde - \left\langle
   \Wtilde\right\rangle_{\xi=0} \right]^\nu \right\rangle_{\xi=0}$
@@ -410,7 +415,7 @@ with
 
 The second-order term is quite a bit more complicated. As discussed in
 section~\ref{subsec:TPT}, one must have knowledge of higher-order
-correlation functions to determine $a_2$. This term describes the
+correlation functions to exactly determine $a_2$. This term describes the
 response of the attractive energy due to the compression of the fluid
 from the attractive well. Gil-Villegas \emph{et al.} base their
 expression on an approximation by Barker and Henderson.\cite{Barker67}
@@ -421,9 +426,10 @@ related to the pressure and compressibility of the liquid. Given
 pressure $P^\text{HS}$ and isothermal compressibility $K^\text{HS} =
 kT\left(\partial n /\partial P^\text{HS}\right)_T$, we have:
 \begin{align}
-  a_2 &= -\pi n \varepsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}}{\partial P^\text{HS}}(r)\,dr \nonumber \\
-  &= -\pi n \varepsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \nonumber \\
-  &= \frac{1}{2}\varepsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\varepsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
+  a_2 &\approx \frac{1}{2}\varepsilon n K^\text{HS}\frac{da_1}{dn}
+  %% a_2 &\approx -\pi n \varepsilon^2kT\int_0^\infty r^2\left[\phi(r)\right]^2\frac{\partial n  g^\text{HS}}{\partial P^\text{HS}}(r)\,dr \nonumber \\
+  %% &= -\pi n \varepsilon^2K^\text{HS}\frac{\partial}{\partial n }\left[\int_\sigma^\infty r^2\left[\phi(r)\right]^2 n  g^\text{HS}\,dr\right] \nonumber \\
+  %% &= \frac{1}{2}\varepsilon K^\text{HS}\frac{\partial}{\partial n }\left[-3 n  b^\text{VDW}\varepsilon\int_1^\infty x^2\left[\phi(x)\right]^2 g^\text{HS}(x)\,dx \right]
 \end{align}
 
 We use the isothermal compressibility in terms of packing fraction
@@ -464,7 +470,7 @@ fluctuations of $2^i\lambda_0$, and
 \end{align}
 In the end, the free energy is
 \begin{align}
-  F(T,n) = F_0(T,n) + \sum_{i=1}^\infty\delta F_i(T,n) + \Fattr
+  F(T,n) = F_0(T,n) + \Fattr + \sum_{i=1}^\infty\delta F_i(T,n)
 \end{align}
 where $\Fattr$ is the contribution due to the longest-wavelength
 density fluctuations. At this stage, I do not entirely understand why
@@ -492,7 +498,7 @@ where $x$ is the amplitude of density fluctuations. $\FbarD$ and $\UbarD$ are fo
   \UbarD = \frac{U(T,n+x,\lambdaRG) + U(T,n-x,\lambdaRG)}{2} \\
   - U(T,n,\lambdaRG)
 \end{multline}
-\FbarD represents the free energy change due to fluctuations if interactions between cells are neglected, and \UbarD is the contrigution of the interactions between cells. Finally, $U(T,n,\lambdaRG)$ is given by Forte as
+\FbarD represents the free energy change due to fluctuations if interactions between cells are neglected, and \UbarD is the contribution of the interactions between cells. Finally, $U(T,n,\lambdaRG)$ is given by Forte as
 \begin{multline}
   U(T,n,\lambdaRG) = g_\sigma^\text{HS}(\neff)\alpha(\lambdaRG) \\
   - \left( \frac{4\pi^2}{2^{2i+1}L^2} \right)\alpha(\lambdaRG)\omega^2(\lambdaRG) \\
@@ -545,9 +551,9 @@ with minimal effort.
   \item Calculate $\phi(T_{start},\nvap)$ and $\phi(T_{start},\nliq)$ \label{while-start}
   \item Calculate an estimated change in chemical potential using the slope \[\delta\mu = \frac{\phi(T_{start},\nvap) - \phi(T_{start},\nliq)}{\nliq - \nvap}\]
   \item Calculate $\phi^*(T_{start},n) = \phi(T_{start},n) + n\delta\mu$
-  \item Calculate a new $\npart$, $\npart^*$, based on $\phi^*(T_{start},n)$ by finding the local maximum between $\nvap$ and $\nliq$
-  \item Re-calculate $\nvap$, $\nliq$, $\phi(T_{start},\nvap)$, and $\phi(T_{start},\nliq)$, using $\npart^*$
-  \item Go back to step~\ref{while-start} and repeat until the grand free energy at liquid and vapor densityies are sufficiently similar. I used a dimensionless computation tolerance of 10$^{-5}$.
+  \item Calculate a new $n$ particular value, $\npart^*$, based on $\phi^*(T_{start},n)$ by finding the local maximum between $\nvap$ and $\nliq$
+  \item Recalculate the minima in the grand free energy using $\npart^*$ to find an improved estimate for \nvap\ and \nliq
+  \item Go back to step~\ref{while-start} and repeat until the grand free energy at liquid and vapor densities are sufficiently similar. I used a dimensionless computation tolerance of 10$^{-5}$.
   \item Increase the temperature to $T = T + \delta T$ and repeat using the final $\npart^*$ as our initial guess for the dividing point between the liquid and vapor free energy minima
 \end{enumerate}
 
