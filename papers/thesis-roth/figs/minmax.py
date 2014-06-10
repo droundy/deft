@@ -6,7 +6,7 @@ import numpy as np
 # E-mail: Daniel.Edward.Roth@gmail.com
 # Date: Nov 2013
 
-def minimize(func,T,a,c,prefac):
+def minimize(func,T,a,c,prefac, tol=1e-14):
 
     """Find the minimum of a function in the range [a,c]; return a tuple (abscissa, ordinate).
 
@@ -48,7 +48,6 @@ def minimize(func,T,a,c,prefac):
         n1 = b - 0.4*(b - a)
         n2 = b
 
-    tol = 1.e-10
     f1 = func(T,n1,prefac)
     f2 = func(T,n2,prefac)
 
@@ -79,8 +78,8 @@ def minimize(func,T,a,c,prefac):
 
     return nmin,fmin
 
-def maximize(func,T,a,c,prefac):
+def maximize(func,T,a,c,prefac, tol=1e-14):
     def negfunc(T,n,x):
         return -func(T,n,x)
-    n,phi = minimize(negfunc,T,a,c,prefac)
+    n,phi = minimize(negfunc,T,a,c,prefac,tol)
     return n
