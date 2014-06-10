@@ -67,11 +67,17 @@ for i in xrange(0,N+1):
     nvapor,phi_vapor = minmax.minimize(SW.phi,T,c_vap,a_vap,nparticular)
     nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
 
+    if abs(T - 0.8) < 0.05:
+        print "\n\nT =", T
+        print 'npart', nparticular
+        print 'nv', nvapor
+        print 'nl', nliquid
+
     tol = 1e-5
     fnpart = SW.phi(T, nparticular, nparticular)
 
     # Compare the two minima in SW.phi
-    while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart) > tol:
+    while np.fabs(phi_vapor - phi_liquid)/np.fabs(fnpart - phi_vapor) > tol:
         delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
         def newphi(T, n, npart):
             return SW.phi(T, n, npart) - delta_mu*n
@@ -80,6 +86,13 @@ for i in xrange(0,N+1):
 
         nvapor,phi_vapor = minmax.minimize(SW.phi,T,a_vap,c_vap,nparticular)
         nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
+        if abs(T - 0.8) < 0.05:
+            print "\nT =", T
+            print 'npart', nparticular
+            print 'nv', nvapor
+            print 'nl', nliquid
+            print 'dphi', phi_vapor - phi_liquid
+            print 'dimensionless dphi', (phi_vapor - phi_liquid)/np.fabs(fnpart - phi_vapor)
 
     fout.write(str(T))
     fout.write('  ')
