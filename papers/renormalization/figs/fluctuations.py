@@ -7,13 +7,14 @@ if 'show' not in sys.argv:
 from pylab import *
 
 from numpy import random
+random.seed(0)
 
 ks = arange(0.0, 1.0, .005)
 ks[ks>0.5] -= 1
 
 kx, ky = meshgrid(ks, ks)
 
-gaus = random.normal(size = kx.shape)/(kx**2 + ky**2)**0.5
+gaus = random.normal(size = kx.shape)/(kx**2 + ky**2)**.7
 
 for i in range(gaus.shape[0]):
     for j in range(gaus.shape[1]):
@@ -37,7 +38,7 @@ data = ifft2(gaus)
 print data.shape, gaus.shape
 xs = arange(0.0, 1.0, 0.005)
 X, Y = meshgrid(xs, xs)
-contourf(X, Y, real(data), 30)
+contourf(X, Y, real(data), 60)
 xlim(0, 0.5)
 ylim(0, 0.5)
 
