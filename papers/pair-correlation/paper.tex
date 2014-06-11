@@ -48,6 +48,8 @@ favorable results.
 
 \section{Introduction}
 
+\fixme{replace approximation with approach}
+
 The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
 treated perturbatively~\cite{hansen2006theory}.  Recent advances have
@@ -104,13 +106,18 @@ value approximation (CVA-S), which is based on a fit to the radial
 distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
-\section{Previous theoretical approaches}
+\fixme{Somewhere above introduce the question of whether g2 is
+  expressed in terms of V or n}
+
+\section{Previous theoretical approaches $g^{(2)}(\rr_1,\rr_2)[V(\rr)]$}
+
+\fixme{introduce this as methods given V}
 
 The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
 as an external field, and to use the resultant equilibrium density to
 find the pair distribution function~\cite{hansen2006theory}.  This
-elegant approach lends itself to DFT, and can be used to compute and
+elegant approach lends itself to computation with DFT, and can be used to compute and
 plot the pair distribution function, but requires a full free-energy
 minimization \emph{for each position} $\rr_1$ in
 $g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
@@ -120,14 +127,18 @@ The canonical inhomogeneous configuration for the hard-sphere fluid is
 the system consisting of a hard sphere at a hard wall.  In 1986,
 Plischke and Henderson solved the pair distribution function of this
 system using integral equation theory under the Percus-Yevick
-approximation~\cite{plischke1986pair}.  Ten years later,
+approximation~\cite{plischke1986pair}.  \fixme{Move the following to
+  the next section} Ten years later,
 G{\"o}tzelmann \emph{et al.} found the pair distribution function near
 a hard wall by solving the Ornstein-Zernike equation using the direct
 correlation function found from a functional derivative of a classical
 DFT free energy functional~\cite{gotzelmann1996structure}.
-Unfortunately, solving the inhomogeneous Ornstein-Zernike equation is
-computationally challenging, although more efficient approximate
-algorithms have been developed~\cite{paul2003variational}.
+Unfortunately, solving the inhomogeneous Ornstein-Zernike equation
+remains computationally challenging, although more efficient
+approximate algorithms have been developed~\cite{paul2003variational}.
+This approach, while appealing, remains unsuitable for use in the
+construction of a classical density functional due to its significant
+computational cost.
 
 Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed.  Where
@@ -148,7 +159,11 @@ approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
 
-\section{Previous approximations to the pair distribution function}
+\section{Previous approximations to the pair distribution function
+  $g^{(2)}(\rr_1,\rr_2)[n(\rr)]$}
+
+\fixme{introduce this as methods given n}
+
 There are several analytic approximations for the inhomogeneous pair
 distribution function, which extend the radial distribution function
 to inhomogeneous scenarios.  The approximations differ in what density
@@ -162,10 +177,10 @@ density at one or two positions to determine the pair distribution
 function.  There are three common approaches:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) &\approx
-  g\left(r_{12};n\left(\frac{\rr_1+\rr_2}{2}\right)\right)
+  g\left(r_{12}, n\left(\frac{\rr_1+\rr_2}{2}\right)\right)
      & \text{midpoint} \\
   g^{(2)}(\rr_1,\rr_2) &\approx
-  g\left(r_{12};\frac{n(\rr_1)+n(\rr_2)}{2}\right)
+  g\left(r_{12}, \frac{n(\rr_1)+n(\rr_2)}{2}\right)
      & \text{mean density} \\
   g^{(2)}(\rr_1,\rr_2) &\approx
   \frac{g(r_{12},n(\rr_1))+g(r_{12},n(\rr_2))}{2}
@@ -269,6 +284,16 @@ provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
 over a wide range of densities.
 
+\davidsays{Please edit!}\fixme{Note that the HS free energy is used
+  for two purposes when applying Eq.~\ref{eq:gsigma-exact} : it is
+  minimized (together with an external potential) to find the density
+  $n(\rr)$.  Then its functional derivative is used to find
+  $g_\sigma(\rr)$.  In application of perturbation theory, the HS
+  functional would only be used alone for the latter purpose, as the
+  density would be determined by the total free energy, which
+  incorporates both the HS free energy and a perturabative
+  contribution.}
+
 \section{Contact value approximation}
 In the approaches for the pair distribution function mentioned above,
 the radial distribution function used in the approximation
@@ -322,8 +347,9 @@ in evaluating the approximations of earlier works.
   %\includegraphics[width=\columnwidth]{figs/ghs-g-ghs}
   \caption{Plot of the hard-sphere radial distribution function, with
     our separable fit.  The solid lines show the true radial
-    distribution function $g(r)$, and the dashed lines show our
-    separable fit to the radial distribution functions
+    distribution function $g(r)$, as found from Monte Carlo
+    simulation, and the dashed lines show our separable fit to the
+    radial distribution functions
     $g_S(r)$.}\label{fig:radial-distribution}
 \end{figure}
 
@@ -410,6 +436,8 @@ distribution function is given by
 \begin{equation}
   \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
 \end{equation}
+where the dimensionless isothermal compressibility $\chi$ is obtained
+from the Carnahan-Starling equation of state.
 Finally, we can convert between the packing fraction $\eta$ and the
 radial distribution function at contact $g_\sigma$ using the
 Carnahan-Starling approximation for $g_\sigma$:
@@ -711,6 +739,10 @@ with poor results for the bulk fluid.  We see that over these length
 scales, both the CVA and Sokolowski's approximation are very accurate.
 Finally, in the case of the power-law attraction all approximations
 tested work very well.
+
+\subsection{Efficiency}
+
+\fixme{Explain why the separable version is efficient.}
 
 \section{Conclusion}
 
