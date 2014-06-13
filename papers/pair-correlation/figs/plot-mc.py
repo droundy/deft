@@ -19,7 +19,7 @@ numplots = 4
 if at_wall == True:
   colors = ['k', 'b', 'r', 'g']
   #plots = ['mc', 'this-work', 'fischer', 'sphere-dft']
-  plots = ['mc', 'this-work', 'fischer', 'sokolowski']
+  plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski']
   numplots = 4
 
 dx = 0.1

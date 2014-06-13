@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
@@ -358,22 +358,115 @@ outfile.write(r"""
 """ % locals())
 outfile.close()
 
+
+### gil-villegas ######################################################
+def eta_effective(eta, r):
+    matrix = numpy.array([
+        [2.25855, -1.50349, 0.249434],
+        [-0.669270, 1.40049, -0.827739],
+        [10.1576, -15.0427, 5.30827]
+    ])
+    cs = numpy.dot(matrix, numpy.array([[1], [r], [r**2]]))
+    eta_eff = numpy.dot(numpy.array([eta, eta**2, eta**3]), cs)
+    return eta_eff[0]
+
+def eta_effective_prime(eta, r):
+    matrix = numpy.array([
+        [2.25855, -1.50349, 0.249434],
+        [-0.669270, 1.40049, -0.827739],
+        [10.1576, -15.0427, 5.30827]
+    ])
+    cs = numpy.dot(matrix, numpy.array([[0], [1], [2*r]]))
+    eta_eff_prime = numpy.dot(numpy.array([eta, eta**2, eta**3]), cs)
+    return eta_eff_prime[0]
+
+def g_gil_villegas(eta, r):
+    r /= sigma
+    eta_eff = eta_effective(eta, r)
+    eta_eff_prime = eta_effective_prime(eta, r)
+    g_sigma = (1 - eta_eff/2)/(1 - eta_eff)**3
+    g_sigma_prime = eta_eff_prime*(-2*eta_eff + 5)/(2*(1 - eta_eff)**4)
+
+    rho = eta / (pi/6*sigma**3)
+    m = 2 # FIXME: I tried random numbers here till I got something close. Not sure what goes here.
+    rho_s = rho*m
+    g = 2*eta/pi/rho_s/sigma**2*(3*g_sigma + (r**3 - 1)/r**2*g_sigma_prime)
+
+    return g
+
+#######################################################################
+
+# takes two arrays, and averages points so that a plot of x vs y
+# will have points separated by a distance dpath
+# returns (x, y)
+def avg_points(x, y, dpath):
+  new_y = numpy.array([])
+  new_x = numpy.array([])
+  old_i = 0
+  for i in xrange(1, len(x)):
+    dist = numpy.sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
+    if dist >= dpath or i == len(x) - 1:
+      avg_x = numpy.average(x[old_i:i])
+      avg_y = numpy.average(y[old_i:i])
+
+      new_x = numpy.append(new_x, avg_x)
+      new_y = numpy.append(new_y, avg_y)
+      old_i = i
+  return (new_x, new_y)
+
+
+fig2 = pylab.figure(2, figsize=(6,6))
+ax1 = fig2.add_subplot(411)
+ax2 = fig2.add_subplot(412)
+ax3 = fig2.add_subplot(413)
+ax4 = fig2.add_subplot(414)
+axs = [ax1, ax2, ax3, ax4]
+
+for ax in axs:
+    ax.axvline(x=sigma, color='gray', linestyle='-')
+    ax.axhline(y=1, color='gray', linestyle='-')
+
+alt_styles = {
+    'gS' : '-b',
+    'mc' : '.k',
+    'gil' : '--m'
+}
 # now let's plot the fit
+legends = []
 for i in range(len(ff)):
   pylab.figure(1)
   pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--')
+
+  # gil-villegas
+  g_gil = numpy.zeros_like(r_mc)
+  for j in range(len(g_gil)):
+    g_gil[j] = g_gil_villegas(ff[i], r_mc[j])
+
+  pylab.plot(r_mc, g_gil, colors[i]+':')
+  ##############
+
   hsigma = (1 - 0.5*ff[i])/(1-ff[i])**3 - 1
   density = 4/3*pi*ff[i]
   rhs = (1-ff[i])**4/(1+4*ff[i]+4*ff[i]**2-4*ff[i]**3+ff[i]**4)/3
   #integral = hsigma*(1/a + x[0]*x[1]/())
 
 
+  # making a second plot to show one eta at a time
+  dpath = 0.2
+  r_mc_avged, g_mc_avged = avg_points(r_mc, ghs[i], dpath)
+  axs[i].plot(r_mc, g[i*len(r):(i+1)*len(r)], alt_styles['gS'], label='$g_S(r)$')
+  axs[i].plot(r_mc, g_gil, alt_styles['gil'], label='gil-villegas')
+  axs[i].plot(r_mc_avged, g_mc_avged, alt_styles['mc'], label='mc')
+  legends.append(axs[i].legend([], loc='upper right', title='$\\eta = %.1f$' %(ff[i])))
+  #axs[i].set_yticks(numpy.arange(0, 10, 0.5))
+  axs[i].set_ylim(min(g_gil)-.1, max(ghs[i])+.1)
+  #axs[i].set_ylabel('$\\eta = %.1f$' %(ff[i]))
 
   #print density, integral, rhs
   #print "ff: %.2f\t thing: %g" %(ff[i], 1 - rho*integral - rhs)
-  pylab.figure(2)
+  #pylab.figure(2)
   #plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
-  pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
+  #pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
   # calculating integral:
   #mc:
   r_mc, ghs[i]
@@ -399,15 +492,31 @@ pylab.legend(loc='best').get_frame().set_alpha(0.5)
 pylab.tight_layout()
 pylab.savefig("figs/ghs-g2.pdf")
 
+ax4.set_xticks([0, 1, 2, 3, 4, 5, 6])
+# ax4.legend(loc='upper center')
+# ax4.add_artist(legends[3])
+ax4.set_xlabel('$r/R$')
+for ax in axs:
+    ax.set_xlim(1.8, 6.5)
 
-pylab.figure(2)
-pylab.xlim(2,6.5)
-pylab.ylim(-.25, .25)
-pylab.xlabel(r"$r/R$")
-pylab.ylabel("|ghs - g|")
-pylab.savefig("figs/ghs-g-ghs2.pdf")
+ax4.set_yticks([.8, 1, 1.2])
+ax3.set_yticks([1, 1.2, 1.4, 1.6, 1.8])
+ax2.set_yticks([.5, 1, 1.5, 2, 2.5])
+ax1.set_yticks([1, 2, 3])
+fig2.tight_layout()
+fig2.subplots_adjust(hspace=0.01)
+fig2.savefig('figs/ghs-alt.pdf')
 
-pylab.axhline(y=0)
-pylab.xlim(2,6.5)
-pylab.legend(loc='best')
+
+
+# pylab.figure(2)
+# pylab.xlim(2,6.5)
+# pylab.ylim(-.25, .25)
+# pylab.xlabel(r"$r/R$")
+# pylab.ylabel("|ghs - g|")
+# pylab.savefig("figs/ghs-g-ghs2.pdf")
+
+# pylab.axhline(y=0)
+# pylab.xlim(2,6.5)
+# pylab.legend(loc='best')
 pylab.show()
