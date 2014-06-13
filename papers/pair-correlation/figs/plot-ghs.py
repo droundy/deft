@@ -189,6 +189,7 @@ if able_to_read_file == False:
   exit(0)
 
 # now do the least squares fit
+fit_rcutoff = 30.6
 def dist(x):
   # function with x[i] as constants to be determined
   R, ETA = pylab.meshgrid(r, eta)
@@ -197,7 +198,15 @@ def dist(x):
   return pylab.reshape(g, len(eta)*len(r))
 
 def dist2(x):
-  return dist(x) - pylab.reshape(ghs, len(eta)*len(r))
+  R, ETA = pylab.meshgrid(r[r<fit_rcutoff], eta)
+  g = pylab.zeros_like(ETA)
+  g = evalg(x, ETA, R)
+  gfit = pylab.reshape(g, len(eta)*len(r[r<fit_rcutoff]))
+  print ghs
+  print '[r]', [r]
+  print 'len(r[r<fit_rcutoff])', len(r[r<fit_rcutoff])
+  return gfit - pylab.reshape([g[r<fit_rcutoff] for g in ghs],
+                              len(eta)*len(r[r<fit_rcutoff]))
 
 ghsconcatenated = ghs[0]
 for i in range(1,len(ff)):
@@ -360,23 +369,19 @@ outfile.close()
 
 
 ### gil-villegas ######################################################
+
+gil_matrix = numpy.matrix([
+    [2.25855, -1.50349, 0.249434],
+    [-0.669270, 1.40049, -0.827739],
+    [10.1576, -15.0427, 5.30827]])
+
 def eta_effective(eta, r):
-    matrix = numpy.array([
-        [2.25855, -1.50349, 0.249434],
-        [-0.669270, 1.40049, -0.827739],
-        [10.1576, -15.0427, 5.30827]
-    ])
-    cs = numpy.dot(matrix, numpy.array([[1], [r], [r**2]]))
+    cs = numpy.dot(gil_matrix, numpy.array([[1], [r], [r**2]]))
     eta_eff = numpy.dot(numpy.array([eta, eta**2, eta**3]), cs)
     return eta_eff[0]
 
 def eta_effective_prime(eta, r):
-    matrix = numpy.array([
-        [2.25855, -1.50349, 0.249434],
-        [-0.669270, 1.40049, -0.827739],
-        [10.1576, -15.0427, 5.30827]
-    ])
-    cs = numpy.dot(matrix, numpy.array([[0], [1], [2*r]]))
+    cs = numpy.dot(gil_matrix, numpy.array([[0], [1], [2*r]]))
     eta_eff_prime = numpy.dot(numpy.array([eta, eta**2, eta**3]), cs)
     return eta_eff_prime[0]
 
@@ -388,11 +393,7 @@ def g_gil_villegas(eta, r):
     g_sigma_prime = eta_eff_prime*(-2*eta_eff + 5)/(2*(1 - eta_eff)**4)
 
     rho = eta / (pi/6*sigma**3)
-    m = 2 # FIXME: I tried random numbers here till I got something close. Not sure what goes here.
-    rho_s = rho*m
-    g = 2*eta/pi/rho_s/sigma**2*(3*g_sigma + (r**3 - 1)/r**2*g_sigma_prime)
-
-    return g
+    return 2*eta/pi/rho/sigma**3*(3*g_sigma + (r**3 - 1)/r**2*g_sigma_prime)
 
 #######################################################################
 
@@ -442,7 +443,8 @@ for i in range(len(ff)):
   for j in range(len(g_gil)):
     g_gil[j] = g_gil_villegas(ff[i], r_mc[j])
 
-  pylab.plot(r_mc, g_gil, colors[i]+':')
+  gil_rcutoff = 3.6
+  pylab.plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff], colors[i]+':')
   ##############
 
   hsigma = (1 - 0.5*ff[i])/(1-ff[i])**3 - 1
@@ -455,7 +457,7 @@ for i in range(len(ff)):
   dpath = 0.2
   r_mc_avged, g_mc_avged = avg_points(r_mc, ghs[i], dpath)
   axs[i].plot(r_mc, g[i*len(r):(i+1)*len(r)], alt_styles['gS'], label='$g_S(r)$')
-  axs[i].plot(r_mc, g_gil, alt_styles['gil'], label='gil-villegas')
+  axs[i].plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff], alt_styles['gil'], label='gil-villegas')
   axs[i].plot(r_mc_avged, g_mc_avged, alt_styles['mc'], label='mc')
   legends.append(axs[i].legend([], loc='upper right', title='$\\eta = %.1f$' %(ff[i])))
   #axs[i].set_yticks(numpy.arange(0, 10, 0.5))

@@ -7,6 +7,8 @@
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\cyan}[1]{{\bf \color{cyan} #1}}
 \newcommand{\rr}{\textbf{r}}
 \newcommand{\refnote}{\red{[ref]}}
 
@@ -15,8 +17,8 @@
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
 \newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
-\newcommand{\jeffsays}[1]{{\color{red} [\green{Jeff:} \emph{#1}]}}
-\newcommand{\pahosays}[1]{{\color{red} [\green{Paho:} \emph{#1}]}}
+\newcommand{\jeffsays}[1]{{\color{red} [\cyan{Jeff:} \emph{#1}]}}
+\newcommand{\pahosays}[1]{{\color{red} [\blue{Paho:} \emph{#1}]}}
 
 \begin{document}
 \title{The contact value approximation for the pair distribution function of the inhomogeneous hard-sphere
@@ -48,7 +50,7 @@ favorable results.
 
 \section{Introduction}
 
-\fixme{replace approximation with approach}
+\fixme{replace approximation with approach}\jeffsays{I'm stuck with this.}
 
 The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
@@ -107,11 +109,12 @@ distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
 \fixme{Somewhere above introduce the question of whether g2 is
-  expressed in terms of V or n}
+  expressed in terms of V or n}\davidsays{I'll take a stab at this}
 
 \section{Previous theoretical approaches $g^{(2)}(\rr_1,\rr_2)[V(\rr)]$}
 
-\fixme{introduce this as methods given V}
+\fixme{introduce this as methods given V}\davidsays{I'll take a stab
+  at this}
 
 The classic (and earliest) approach for computing the pair
 distribution function is to use Percus' trick of treating one sphere
@@ -162,7 +165,7 @@ unsuitable for repeated evaluation within a free-energy minimization.
 \section{Previous approximations to the pair distribution function
   $g^{(2)}(\rr_1,\rr_2)[n(\rr)]$}
 
-\fixme{introduce this as methods given n}
+\fixme{introduce this as methods given n}\davidsays{I'll do this}
 
 There are several analytic approximations for the inhomogeneous pair
 distribution function, which extend the radial distribution function
@@ -249,8 +252,9 @@ Eq.~\ref{eq:sokolowski} has the advantages of only involving density
 averages at the points at which the pair distribution function is
 desired, it cannot be written as a single-site convolution, since the
 convolution kernel depends on both points.  However, this approach has
-been used by two papers to do
-\fixme{what?}~\cite{wadewitz2000application, winkelmann2001liquid}.
+been used by two papers to construct classical density functionals for
+studying the liquid vapor interface~\cite{wadewitz2000application,
+  winkelmann2001liquid}.
 
 In a previous paper~\cite{schulte2012using}, we introduced a
 functional that gives a good approximation for the pair distribution
@@ -284,7 +288,7 @@ provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
 over a wide range of densities.
 
-\davidsays{Please edit!}\fixme{Note that the HS free energy is used
+\davidsays{Please edit!}\jeffsays{I will!}\fixme{Note that the HS free energy is used
   for two purposes when applying Eq.~\ref{eq:gsigma-exact} : it is
   minimized (together with an external potential) to find the density
   $n(\rr)$.  Then its functional derivative is used to find
@@ -752,7 +756,8 @@ tested work very well.
 
 \subsection{Efficiency}
 
-\fixme{Explain why the separable version is efficient.}
+\fixme{Explain why the separable version is efficient.}\davidsays{I'll
+  do it.}
 
 \section{Conclusion}
 
