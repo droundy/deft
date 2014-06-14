@@ -307,8 +307,9 @@ void flush_arrays(long *energy_histogram, double *ln_energy_weights,
     ln_energy_weights[i] -= min_weight;
   // Finally, if requested, zero out the histogram.
   if (flush_histogram) {
-    for (int i = 0; i < energy_levels; i++)
-      energy_histogram[i] = 0;
+    for (int i = 0; i < energy_levels; i++) {
+      if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+    }
   }
   return;
 }
@@ -380,10 +381,9 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
 }
 
 double count_variation(long *energy_histogram, double *ln_energy_weights,
-                     int energy_levels){
+                       int energy_levels){
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-  double mean_counts = 0;
   double lowest = 1e200, highest = 0;
   int maxE = 0; // tracks the lowest (largest magnitude) energy yet seen
   int highest_i = 0; // the most commonly visited energy
@@ -391,7 +391,6 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
   int num_visited = 0; // the total number of distinct energies visited.
   double total_counts = 0;
   for(int i = max_entropy; i < energy_levels; i++) {
-    mean_counts += energy_histogram[i];
     if (energy_histogram[i] > 0) {
       num_visited++;
       total_counts += energy_histogram[i];
@@ -403,19 +402,19 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
         lowest = energy_histogram[i];
         lowest_i = i;
       }
-      maxE = max(maxE, i);
+      maxE = i;
     }
   }
-  mean_counts /= energy_levels;
+  double mean_counts = total_counts / num_visited;
   double variation = 0;
   for(int i = max_entropy; i < energy_levels; i++)
     variation += sqr(energy_histogram[i] - mean_counts);
   variation = sqrt(variation/energy_levels)/mean_counts;
-  printf("Highest/lowest = %.2g (%d) / %.2g (%d)  -- total counts %g\n",
-         highest, highest_i, lowest, lowest_i, total_counts);
+  printf("Highest/lowest = %.2g (%d) / %.2g (%d) mean %.2g\n",
+         highest, highest_i, lowest, lowest_i, mean_counts);
   printf("    (ratio = %g, maxE = %d, visited %d, max_entropy %d)\n",
-         highest/lowest, maxE, num_visited, max_entropy);
-  return highest/lowest - 1; // or alternatively variation;
+         mean_counts/lowest, maxE, num_visited, max_entropy);
+  return mean_counts/lowest - 1; // or alternatively variation;
 }
 
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){

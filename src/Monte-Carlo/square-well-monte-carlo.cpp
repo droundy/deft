@@ -93,10 +93,11 @@ int main(int argc, const char *argv[]) {
 
   double wl_factor = 1;
   double wl_fmod = 2;
-  double wl_threshold = 0.1;
-  double wl_cutoff = 0.1;
+  double wl_threshold = 0.05;
+  double wl_cutoff = 1e-5;
 
   double len[3] = {1, 1, 1};
+
   int walls = 0;
   int wall_dim = 1;
   unsigned long int seed = 0;
@@ -506,14 +507,7 @@ int main(int argc, const char *argv[]) {
       energy_histogram[interactions]++;
 
       if(wang_landau && iteration > first_weight_update){
-        ln_energy_weights[interactions] -= wl_factor
-          - log(1-1/(energy_histogram[interactions]+1e-10));
-        // the first term is from wang-langau
-        // the second term is to correct for the fact that wang-landau uses
-        //   a ratio of DoS rather than a ratio of weights to calculate the
-        //   probability of accepting a move
-        // the 1e-10 factor is added for the case energy_histogram[interactions] == 1;
-        //   its effect should otherwise be negligibly small
+        ln_energy_weights[interactions] -= wl_factor;
       }
       if(walker_weights){
         walkers_total[interactions]++;
@@ -814,8 +808,7 @@ int main(int argc, const char *argv[]) {
       fprintf(w_out, "\n# interactions   ln(weight)\n");
       for(int i = 0; i < energy_levels; i++)
         if(energy_histogram[i] != 0){
-          fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]
-                  + (wang_landau ? log(energy_histogram[i]) : 0));
+          fprintf(w_out, "%i  %g\n",i,ln_energy_weights[i]);
         }
       fclose(w_out);
 

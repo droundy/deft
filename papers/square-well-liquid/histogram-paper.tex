@@ -61,4 +61,59 @@ running a simulation at a fixed temperature, it is possible to become
 frozen in a state that is far from the ground state, as happened in
 the $kT=0.1\epsilon$ simulation.
 
+\section{New ideas for algorithms}
+
+\subsection{Finding maximum probability state}
+
+Technically maximum histogram or maximum entropy.
+
+Loop:
+
+run iterations until we see $N$ energy changes, counting the number of
+returns to the initial energy.  If there are sufficient returns, then
+we are at the maximum, where sufficient returns will be determined by
+a random walk (weighted?) where we compute the expected number of
+returns if the walk is not weighted.  We may want to correct to get
+all the way to the top.
+
+If we are not at the top yet, we try again.  Eventually we will be.
+
+\subsection{Finding variance of the histogram}
+
+I assume we first ran the max-entropy/histogram algorithm, which gives
+us a maximum value of $E_0$.  We then zero the histogram.
+
+We run for a short while, and then compute the mean and standard
+deviation of the energy from the histogram: $\bar E$ and $\sigma$.
+While doing this, we track the number of returns to the initial state
+$n$.  Now the uncertainty in the mean is given by
+\begin{equation}
+  \Delta \bar E \approx \frac{\sigma}{\sqrt{n}}
+\end{equation}
+if $\Delta \bar E \ll (E_0 - \bar E)$ then we can conclude that we are
+certain where the maximum is, and how wide it is.
+
+\subsubsection{Counting frequency of returns!}
+If we are at a local maximum probability, then the frequency of return
+should exceed the zero-bias frequency of return.  If we can figure out
+the zero-bias frequency of return, then when we have a statistically
+significant deviation, we should know what the variance is.
+
+Once we have the variance, we can add to the weights an appropriate
+gaussian to eliminate this maximum in probability.
+
+If the rate of return is significantly smaller than expected for zero
+bias, we conclude this was not actually a maximum, and we go back to
+try again for a probability maximum.  If we fail twice, then maybe
+there is no significant maximum.  There are subtleties here!
+
+\subsection{Pushing down the bubbles again and again}
+Once we've gotten a new set of weights (with the bubble pushed down),
+we can find a new max probability, and then a new variance and push
+down yet another bubble.  In each case, the ``probability'' that we
+are maximizing and finding the variance of is the ratio between the
+density of states and the weight function, so its log is the
+difference between the logs of the density of states and the weight
+function.
+
 \end{document}
