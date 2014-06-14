@@ -202,9 +202,6 @@ def dist2(x):
   g = pylab.zeros_like(ETA)
   g = evalg(x, ETA, R)
   gfit = pylab.reshape(g, len(eta)*len(r[r<fit_rcutoff]))
-  print ghs
-  print '[r]', [r]
-  print 'len(r[r<fit_rcutoff])', len(r[r<fit_rcutoff])
   return gfit - pylab.reshape([g[r<fit_rcutoff] for g in ghs],
                               len(eta)*len(r[r<fit_rcutoff]))
 
