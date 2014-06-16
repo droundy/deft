@@ -27,5 +27,5 @@ pylab.xlabel(r'$\eta$')
 pylab.ylabel('T')
 pylab.title('Liquid-Vapor Coexistence')
 
-pylab.savefig('figs/coexistance_SW.pdf')
+pylab.savefig('figs/coexistence_SW.pdf')
 pylab.show()

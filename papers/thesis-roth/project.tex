@@ -559,7 +559,7 @@ with minimal effort.
 
 \begin{figure}
   \begin{center}
-  \includegraphics[width=0.5\textwidth]{figs/coexistance_SW}
+  \includegraphics[width=0.5\textwidth]{figs/coexistence_SW}
   \end{center}
   \caption{Liquid-vapor coexistence for a square well liquid.}
   \label{fig:coexistance_SW}
@@ -600,7 +600,7 @@ cases. The approximation is
   \begin{center}
   \includegraphics[width=0.5\textwidth]{figs/coexistence-RG-forte}
   \end{center}
-  \caption{Liquid-vapor coexistence, compared with Forte's 2011 data}
+  \caption{Liquid-vapor coexistence, compared with Forte's 2011 data, and with molcular dynamics simulations from White\cite{White00}}
   \label{fig:coexistence-RG-forte}
 \end{figure}
 
@@ -610,11 +610,11 @@ critical point, respectively, for a value of $\lambdaSW = 1.5$. Results are not 
 this point, as the program has not been fully debugged. This is
 evident in figure~\ref{fig:phi-RG-lowT}; one notes that the curve for
 $i=1$ is neither complete nor
-accurate. Figure~\ref{fig:coexistence-RG-forte} gives an even starker
+accurate. Figure~\ref{fig:coexistence-RG-forte} gives another
 picture of the shortcomings of my RG implementation. We see that the
 baseline ($i=0$; identical to SW calculations) is reasonable, with
 expected shortcomings near the critical point. However, calculations
-including even one iteration ($i=1$) flat-out fail.
+including even one iteration ($i=1$) are not included because they flat-out fail.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
