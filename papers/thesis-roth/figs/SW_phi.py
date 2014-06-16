@@ -81,3 +81,35 @@ plotphi(0.8005709375, 0.0400859280435, 'figs/fitting-step2.pdf', 0.0009217793899
 # npart 0.0400859280435
 # nv 0.000921779389983
 # nl 0.0894968306258
+
+### Annotate ###
+n = plt.linspace(1e-8,0.2,20000)
+T = 0.8
+
+## Not equilib ##
+plt.figure()
+plt.plot(n*eta_conv,SW.phi(T,n,0.035),'g-',label='SW')
+
+plt.title(r'$k_BT = $'+'%0.2f'%T+r'$\varepsilon$')
+plt.ylabel(r'$\phi$')
+plt.xlabel(r'$n$')
+plt.ylim(-0.03,0.02)
+plt.xlim(0,0.45)
+
+plt.annotate('vapor',xy=(0.0050704,-0.000922852),xytext=(0.1,-0.01),arrowprops=dict(facecolor='black',width=2,headwidth=4,frac=0.1))
+plt.annotate('liquid',xy=(0.384147, -0.0203133),xytext=(0.37,0.0),arrowprops=dict(facecolor='black',width=2,headwidth=4,frac=0.1))
+plt.savefig('figs/SW-phi-lowT-vapor-liquid-annotation.pdf')
+
+## Equilib ##
+plt.figure()
+plt.plot(n*eta_conv,SW.phi(T,n,0.0400859271143),'g-',label='SW')
+
+plt.title(r'$k_BT = $'+'%0.2f'%T+r'$\varepsilon$')
+plt.ylabel(r'$\phi$')
+plt.xlabel(r'$n$')
+plt.ylim(-0.02,0.03)
+plt.xlim(0,0.45)
+
+plt.annotate('vapor',xy=(0.0038649, -0.000691203),xytext=(0.1,-0.01),arrowprops=dict(facecolor='black',width=2,headwidth=4,frac=0.1))
+plt.annotate('liquid',xy=(0.375181, -0.000707488),xytext=(0.37,0.01),arrowprops=dict(facecolor='black',width=2,headwidth=4,frac=0.1))
+plt.savefig('figs/SW-phi-lowT-equilibrium-vapor-liquid-annotation.pdf')
