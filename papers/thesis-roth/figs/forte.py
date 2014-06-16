@@ -7,17 +7,26 @@ import RG
 
 forte_data = np.loadtxt('figs/forte_data.dat') # not converged
 forte_data_conv = np.loadtxt('figs/forte_data_conv.dat') # Converged
-forte_data_MD = np.loadtxt('figs/forte_data_MD.dat') # MD
+white_MD = np.loadtxt('figs/white_MD.dat') # MD
 
-mrho = 0.8/(504-94)
-brho = -mrho*94
+# Conversion: pixels --> real data
+# Forte
+mrho = (0.8-0.0)/(504-94)
+brho = 0-mrho*94
 
 mT = (0.65-1.85)/(345-52)
 bT = 0.65-mT*345
 
+# White:
+mrhoWhite = (0.7-0.0)/(345-73)
+brhoWhite = 0-mrhoWhite*73
+
+mTWhite = (1.2-0.8)/(76-400)
+bTWhite = 1.2-mTWhite*76
+
 ### Not converged ###
 rhostar_forte = forte_data[:,0]*mrho + brho
-T_forte = forte_data[:,1]*mT + bT + 0.21
+T_forte = forte_data[:,1]*mT + bT
 eta_forte = rhostar_forte*np.pi/6
 
 ### Converged ###
@@ -26,8 +35,8 @@ T_forte_conv = forte_data_conv[:,1]*mT + bT
 eta_conv = rhostar_conv*np.pi/6
 
 ### MD sim ###
-rhostar_MD = forte_data_MD[:,0]*mrho + brho
-T_forte_MD = forte_data_MD[:,1]*mT + bT + 0.22
+rhostar_MD = white_MD[:,0]*mrhoWhite + brhoWhite
+T_MD = white_MD[:,1]*mTWhite + bTWhite
 eta_MD = rhostar_MD*np.pi/6
 
 ### My RGT ###
@@ -55,9 +64,9 @@ if __name__ == '__main__':
   # plt.plot(etavapor1, T1, colors[1],label='RG '+r'$i=1$')
   # plt.plot(etaliquid1, T1, colors[1])
 
-  plt.plot(eta_forte,T_forte,colors[1],label='Forte 2011')
+  plt.plot(eta_forte,T_forte,colors[1],label='Forte 2011, non-converged RGT')
 
-  plt.plot(eta_MD,T_forte_MD,colors[2],label='Elliot 1999')
+  plt.plot(eta_MD,T_MD,colors[2],label='White 2000')
 
   plt.plot(eta_conv,T_forte_conv,colors[3],label='Forte 2011, converged RGT')
 
