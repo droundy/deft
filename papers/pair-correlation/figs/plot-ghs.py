@@ -181,13 +181,6 @@ for i in range(len(ff)):
     eta[i] = ff[i]
     r = r_mc
 
-if able_to_read_file == False:
-  pylab.plot(arange(0,10,1), [0]*10, 'k')
-  suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
-  pylab.savefig("figs/ghs-g2.pdf")
-  pylab.savefig("figs/ghs-g-ghs2.pdf")
-  exit(0)
-
 # now do the least squares fit
 fit_rcutoff = 30.6
 def dist(x):
@@ -506,16 +499,4 @@ fig2.tight_layout()
 fig2.subplots_adjust(hspace=0.01)
 fig2.savefig('figs/ghs-alt.pdf')
 
-
-
-# pylab.figure(2)
-# pylab.xlim(2,6.5)
-# pylab.ylim(-.25, .25)
-# pylab.xlabel(r"$r/R$")
-# pylab.ylabel("|ghs - g|")
-# pylab.savefig("figs/ghs-g-ghs2.pdf")
-
-# pylab.axhline(y=0)
-# pylab.xlim(2,6.5)
-# pylab.legend(loc='best')
 pylab.show()

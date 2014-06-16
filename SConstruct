@@ -242,6 +242,7 @@ Default('papers')
 
 Alias('papers', env.PDF('papers/thesis-hughes/project.tex'))
 Alias('papers', env.PDF('papers/thesis-roth/project.tex'))
+Alias('papers', env.PDF('papers/thesis-roth/slides-v2.tex'))
 Alias('papers', env.PDF('papers/fuzzy-fmt/NWAPS-2014.tex'))
 Alias('papers', env.PDF('papers/pair-correlation/notes.tex'))
 Alias('papers', env.PDF('papers/pair-correlation/figs/ghs-analytics.tex'))
@@ -319,7 +320,7 @@ Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
 for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.3, 1.5, 2.0, 3.0]:
-        for N in [13, 20, 100, 200]:
+        for N in [13, 20, 40, 100, 200]:
             for method in ["nw","flat","gaussian","wang_landau","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method.replace(' ','')),
                                       datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method.replace(' ','')),
