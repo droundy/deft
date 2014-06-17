@@ -20,5 +20,5 @@ pylab.plot(nliquid, T,'.-')
 pylab.xlabel('n')
 pylab.ylabel('T (K)')
 
-pylab.savefig('figs/coexistance_Hughes.pdf')
+pylab.savefig('figs/coexistence_Hughes.pdf')
 pylab.show()
