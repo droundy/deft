@@ -119,43 +119,33 @@ value approximation (CVA-S), which is based on a fit to the radial
 distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
-\section{Previous theoretical approaches $g^{(2)}(\rr_1,\rr_2)[V(\rr)]$}\label{sec:gV}
+\section{Pair distribution from the external potential}\label{sec:gV}
 
-\fixme{introduce this as methods given V}\davidsays{I'll take a stab
-  at this}
-
-The classic (and earliest) approach for computing the pair
-distribution function is to use Percus' trick of treating one sphere
-as an external field, and to use the resultant equilibrium density to
-find the pair distribution function~\cite{hansen2006theory}.  This
-elegant approach lends itself to computation with DFT, and can be used to compute and
-plot the pair distribution function, but requires a full free-energy
-minimization \emph{for each position} $\rr_1$ in
-$g^{(2)}(\rr_1,\rr_2)$, and hence would be prohibitively expensive as
-a tool in constructing a free energy functional.
+Given the external potential $V(\rr)$ felt by a hard-sphere fluid,
+there are several approaches that have been used to compute the pair
+distribution function.  We will review these approaches here.  The
+classic (and earliest) approach for computing the pair distribution
+function given the external potential is Percus' trick of treating one
+sphere as an additional contribution to the external potential, and to
+find the pair distribution function from the resultant equilibrium
+density~\cite{hansen2006theory}.  This elegant approach lends itself
+to computation with DFT, and can be used to compute and plot the pair
+distribution function, but requires a full free-energy minimization
+\emph{for each position} $\rr_1$ in $g^{(2)}(\rr_1,\rr_2)$, and hence
+would be prohibitively expensive as a tool in constructing a free
+energy functional.
 
 The canonical inhomogeneous configuration for the hard-sphere fluid is
 the system consisting of a hard sphere at a hard wall.  In 1986,
 Plischke and Henderson solved the pair distribution function of this
 system using integral equation theory under the Percus-Yevick
-approximation~\cite{plischke1986pair}.  \fixme{Move the following to
-  the next section} Ten years later,
-G{\"o}tzelmann \emph{et al.} found the pair distribution function near
-a hard wall by solving the Ornstein-Zernike equation using the direct
-correlation function found from a functional derivative of a classical
-DFT free energy functional~\cite{gotzelmann1996structure}.
-Unfortunately, solving the inhomogeneous Ornstein-Zernike equation
-remains computationally challenging, although more efficient
-approximate algorithms have been developed~\cite{paul2003variational}.
-This approach, while appealing, remains unsuitable for use in the
-construction of a classical density functional due to its significant
-computational cost.
+approximation~\cite{plischke1986pair}.
 
 Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed.  Where
 the hard-wall is a surface with no curvature, the test-particle
 configuration has a surface with curvature at the molecular length
-scale.  In this case, the density gives the pair distribution
+scale.  In this case, the density gives the radial distribution
 function---this is just Percus' trick---and the pair distribution
 function of this inhomogeneous test-particle system gives the triplet
 distribution function of the homogeneous fluid.  The triplet
@@ -170,14 +160,37 @@ approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
 
-\section{Previous approximations to the pair distribution function
-  $g^{(2)}(\rr_1,\rr_2)[n(\rr)]$}\label{sec:gn}
+\section{Pair distribution from the density}\label{sec:gn}
 
-\fixme{introduce this as methods given n}\davidsays{I'll do this}
+The alternative to specifying the external potential is to specify the
+density distribution $n(\rr)$.  One may move between these
+representations by either computing the external potential
+corresponding to a given density of hard spheres by taking a
+functional derivative of the hard-sphere free energy functional, or by
+minimizing the free energy given an external potential.  However, in
+general it is simplest to use an approach that makes use of the
+natural variables, which in the case of classical density functional
+theory is the density.
 
-There are several analytic approximations for the inhomogeneous pair
-distribution function, which extend the radial distribution function
-to inhomogeneous scenarios.  The approximations differ in what density
+The most direct and rigorous approach to find the pair distribution
+function given the density is to take a second functional derivative
+of the hard-sphere free energy to find the direct correlation
+function.  One can then solve the Ornstein-Zernike equation
+numerically to find the pair distribution function.  This approach was
+used by G{\"o}tzelmann \emph{et al.} to solve for the pair
+distribution function near a hard wall using an early hard-sphere free
+energy functional~\cite{gotzelmann1996structure}.  While this approach
+is rigorous, solving the inhomogeneous Ornstein-Zernike equation
+remains computationally challenging, although more efficient
+approximate algorithms have been developed~\cite{paul2003variational}.
+This approach, while appealing, remains unsuitable for use in the
+construction of a classical density functional due to its significant
+computational cost.
+
+In addition to the above exact approach, there are a number of
+analytic approximations for the inhomogeneous pair distribution
+function, which extend the radial distribution function to
+inhomogeneous scenarios.  These approximations differ in what density
 is used when evaluating the radial distribution function $g(r,\eta)$
 or in how radial distributions evaluated at different densities are
 combined to yield an effective function
@@ -204,7 +217,7 @@ the surface tension of simple fluids~\cite{pressing2003surface,
   osborn1980monotonic, mccoy1981comparison, barrett2006some}.  The
 mean density approximation has also been quoted (as a goal) by recent
 papers that proceed to make further
-approximations~\cite{gloor2007prediction, gross2009density}.  While
+approximations~\cite{gloor2007prediction, gross2009density}.  However,
 these approximations fail dramatically when applied to strongly
 inhomogeneous systems such as a dense fluid at a solid surface.  Such
 systems exhibit a strongly oscillatory density distribution, with
@@ -256,13 +269,14 @@ where their averaged density $\bar{n}(\rr)$ is given by:
 is the density averaged over a sphere with diameter
 $0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
 was arrived at by fitting to Monte Carlo simulation.  Although
-Eq.~\ref{eq:sokolowski} has the advantages of only involving density
-averages at the points at which the pair distribution function is
-desired, it cannot be written as a single-site convolution, since the
-convolution kernel depends on both points.  However, this approach has
-been used by two papers to construct classical density functionals for
-studying the liquid vapor interface~\cite{wadewitz2000application,
-  winkelmann2001liquid}.
+Although Eq.~\ref{eq:sokolowski} has the advantages of only involving
+density averages at the points at which the pair distribution function
+is desired, it remains sufficiently computationally cumbersome that it
+has only been used in two papers studying the liquid vapor
+interface~\cite{wadewitz2000application, winkelmann2001liquid}.
+Because it cannot be written as a single-site convolution, this
+approach is particularly computationally demanding when applied to
+systems featuring inhomogeneity in more than one dimension.
 
 In a previous paper~\cite{schulte2012using}, we introduced a
 functional that gives a good approximation for the pair distribution
@@ -719,7 +733,7 @@ distances.
   \label{fig:dadz}
 \end{figure}
 
-\section{Performance in thermodynamic perturbation theory}
+\section{Accuracy in thermodynamic perturbation theory}
 
 A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
@@ -761,10 +775,33 @@ scales, both the CVA and Sokolowski's approximation are very accurate.
 Finally, in the case of the power-law attraction all approximations
 tested work very well.
 
-\subsection{Efficiency}
+\section{Efficiency in Thermodynamic Perturbation Theory}
 
-\fixme{Explain why the separable version is efficient.}\davidsays{I'll
-  do it.}
+The key insight of the CVA-S is that we can implement
+Eq.~\ref{eq:mean-field} on $\mathcal{O}(N\log N)$ time using Fast
+Fourier Transforms (FFTs) where $N$ is proportional to the volume of
+the system.  We begin by examining the CVA.  The two terms that are
+averaged in Eq.~\ref{eq:CVA} give equal contributions to the integral:
+\begin{align}
+  F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
+  g(r_{12},g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
+  d\rr_1d\rr_2
+\end{align}
+When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
+further simplify this integral as
+\begin{multline}
+  F_1^{\textit{CVA-S}} =
+  \sum_i \tfrac12 \!\! \iint \!\! \bigg( n(\rr_1)  \bigg) \\
+                             \bigg( a_i(r_{12})\Phi(r_{12}) \bigg) \\
+                             \bigg( b_i(g_\sigma(\rr_2))n(\rr_2) \bigg)
+  d\rr_1d\rr_2
+\end{multline}
+where the functional is written as a summation of integrals, each of
+which is an integral of simple convolution in three dimensions.  Thus,
+each of these integrals may be computed in $\mathcal{O}(N\log N)$
+time, which is the same scaling behavior that is common to the most
+common and accurate classical density functional theories, most
+notably FMT.
 
 \section{Conclusion}
 
