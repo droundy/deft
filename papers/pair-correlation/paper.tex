@@ -92,14 +92,25 @@ where the terms $F_n$ are corrections to the free energy of order $n$
 in the small interaction.  The first and largest term in this
 expansion is
 \begin{align}
-  F_1 &= \tfrac12 \iint
+  F_1[n(\rr)] &= \tfrac12 \iint \!\!
   g^{(2)}_{HS}(\rr_1,\rr_2)n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
   d\rr_1d\rr_2
   \label{eq:mean-field}
 \end{align}
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
-In this paper, we introduce a contact value approximation (CVA) for
+Formally, this requires the pair distribution function as a functional
+of the density $n(\rr)$.  In Section~\ref{sec:gV}, we will introduce
+existing theoretical approaches for computing
+$g^{(2)}_{HS}(\rr_1,\rr_2)$ given the external potential felt by the
+hard spheres.  In Section~\ref{sec:gn}, we will introduce existing
+approximations for the hard-sphere pair distribution that are
+expressed as a functional of the density distribution $n(\rr)$, which
+is a form that is more directly useful in the construction of
+classical density functionals---which are themselves expressed as a
+functional of the density.
+
+In this paper, we introduce a new contact value approximation (CVA) for
 the hard-sphere pair distribution function which is suitable for use
 in the creation of classical density functionals based on
 thermodynamic perturbation theory. We then demonstrate a more
@@ -108,10 +119,7 @@ value approximation (CVA-S), which is based on a fit to the radial
 distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
-\fixme{Somewhere above introduce the question of whether g2 is
-  expressed in terms of V or n}\davidsays{I'll take a stab at this}
-
-\section{Previous theoretical approaches $g^{(2)}(\rr_1,\rr_2)[V(\rr)]$}
+\section{Previous theoretical approaches $g^{(2)}(\rr_1,\rr_2)[V(\rr)]$}\label{sec:gV}
 
 \fixme{introduce this as methods given V}\davidsays{I'll take a stab
   at this}
@@ -163,7 +171,7 @@ implementations, it remains a computationally expensive approach, and
 unsuitable for repeated evaluation within a free-energy minimization.
 
 \section{Previous approximations to the pair distribution function
-  $g^{(2)}(\rr_1,\rr_2)[n(\rr)]$}
+  $g^{(2)}(\rr_1,\rr_2)[n(\rr)]$}\label{sec:gn}
 
 \fixme{introduce this as methods given n}\davidsays{I'll do this}
 
