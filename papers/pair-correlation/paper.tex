@@ -110,12 +110,12 @@ is a form that is more directly useful in the construction of
 classical density functionals---which are themselves expressed as a
 functional of the density.
 
-In this paper, we introduce a new contact value approximation (CVA) for
+In this paper, we introduce a new contact value approach (CVA) for
 the hard-sphere pair distribution function which is suitable for use
 in the creation of classical density functionals based on
 thermodynamic perturbation theory. We then demonstrate a more
 computationally efficient separable version of the contact
-value approximation (CVA-S), which is based on a fit to the radial
+value approach (CVA-S), which is based on a fit to the radial
 distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
@@ -310,17 +310,17 @@ provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
 over a wide range of densities.
 
-\davidsays{Please edit!}\jeffsays{I will!}\fixme{Note that the HS free energy is used
-  for two purposes when applying Eq.~\ref{eq:gsigma-exact} : it is
-  minimized (together with an external potential) to find the density
-  $n(\rr)$.  Then its functional derivative is used to find
-  $g_\sigma(\rr)$.  In application of perturbation theory, the HS
-  functional would only be used alone for the latter purpose, as the
-  density would be determined by the total free energy, which
-  incorporates both the HS free energy and a perturabative
-  contribution.}
+\jeffsays{My attempt at this paragraph:} To be clear we note that for
+our purposes in this work we use the hard sphere free energy twice.
+It is first minimized to find $n(\rr)$ and then its functional
+derivative is used to find $g_\sigma(\rr)$.  In actual application of
+perturbation theory the hard sphere free energy would be used only to
+find $g_\sigma(\rr)$, which would in turn be used in the approximation
+for $g^{(2)}(\rr_1,\rr_2)$ that would appear in a perturbation term.
+The free energy that would be minimized to find $n(\rr)$ in this case
+would be the total free energy and not the hard sphere free energy.
 
-\section{Contact value approximation}
+\section{Contact value approach}
 In the approaches for the pair distribution function mentioned above,
 the radial distribution function used in the approximation
 was dependent upon the density averaged over some volume.  We seek to
@@ -342,7 +342,7 @@ $g_{\sigma}(\rr)$ evaluated at the two points:
   g^{(2)}(\rr_1,\rr_2) = \frac{g(r_{12}, g_\sigma(\rr_1)) +
     g(r_{12}, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
-This contact value approximation for $g^{(2)}(\rr_1,\rr_2)$ is
+This contact value approach for $g^{(2)}(\rr_1,\rr_2)$ is
 constructed to reproduce the exact value for the integral:
 \begin{align}
   F_1^{\text{contact}} &= \tfrac12 \iint
@@ -398,7 +398,7 @@ approximation for the function $g(r,g_\sigma)$:
 \begin{align}
   g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
-This separable contact value approximation (CVA-S) allows the mean
+This separable contact value approach (CVA-S) allows the mean
 field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
 computed with only fixed-kernel convolutions, which can be
 efficiently computed using fast Fourier transforms.
@@ -805,10 +805,10 @@ notably FMT.
 
 \section{Conclusion}
 
-We have introduced and tested the contact value approximation for the pair
+We have introduced and tested the contact value approach for the pair
 distribution function of the inhomogeneous hard-sphere fluid.  The
 separable version of the contact value
-approximation is suitable for use in the development of classical
+approach is suitable for use in the development of classical
 density functionals constructed using perturbation theory, as it
 may be efficiently computed using exclusively fixed-kernel convolutions.  We have
 tested this function at a hard wall and near a single fixed hard
