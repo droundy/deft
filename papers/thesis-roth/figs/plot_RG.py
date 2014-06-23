@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Conversions and limits
 eta_conv = RG.sigma**3*np.pi/6
-nmax = 0.5/eta_conv
+nmax = 0.75/eta_conv
 ns = nmax*np.exp(np.arange(-15, 0, 1e-3))
 
 # Plots
@@ -23,7 +23,7 @@ def plotPress(T,n,i):
 T = 0.5
 
 mu = -5.751
-plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+plotphi(T,ns,mu,0,label='mu=%.3f'%mu)
 
 
 ### Titles, etc. ###

@@ -14,9 +14,9 @@ def minimize(func,T,a,c,mu,i):
 
     """Find the minimum of a function in the range [a,c]; return a tuple (abscissa, ordinate).
 
-    func is grand free energy, a function of T, n, and mu
+    func is grand free energy, a function of T, n, and mu (and iteration depth)
     T is the temp in Kelvin
-    a and c are the initial guesses of density (make sure to put into atomic units!)
+    a and c are the initial guesses of density (make sure to put into correct units!)
     i is the iteration depth
 
     """

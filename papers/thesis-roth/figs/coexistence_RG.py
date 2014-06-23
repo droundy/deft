@@ -11,7 +11,7 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 
 # The following is not from the standard library. Find it in:
-# (...)/deft/papers/thesis-roth/figs
+# deft/papers/thesis-roth/figs
 import forte
 
 ##############################################################################################
@@ -41,7 +41,7 @@ def npart(iterations):
     T = 0.5
     mu = -5.751 # I found this by plotting. It is good for T=0.5; i=0
 
-    N = 20 # For publication plots, make this bigger (40? 80? 100? You decide!)
+    N = 80 # For publication plots, make this bigger (40? 80? 100? You decide!)
     Tc = 1.33 # Rough estimate based on previous plots
     Tlow = T
 
@@ -51,7 +51,8 @@ def npart(iterations):
     a_vap = 1e-10/(RG.sigma**3*np.pi/6)
     c_liq = 0.75/(RG.sigma**3*np.pi/6)
     # Use the central max as the inside bound
-    nmid = minmax_RG.maximize(RG.phi,T,a_vap,c_liq,mu,iterations)
+    nmid = 0.2/(RG.sigma**3*np.pi/6) # ad-hoc for now
+    # nmid = minmax_RG.maximize(RG.phi,T,a_vap,c_liq,mu,iterations)
     c_vap = nmid
     a_liq = nmid
 
@@ -66,8 +67,9 @@ def npart(iterations):
 
     # Do first temperature before the loop
     nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,mu,iterations)
-    print '  initial nvap,phi_vap',nvapor,phi_vapor
     nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
+    print '  initial nvap,phi_vap',nvapor,phi_vapor
+    print '  initial nmid,phi_mid',nmid,RG.phi(T,nmid,mu,iterations)
     print '  initial nliq,phi_liq',nliquid,phi_liquid
     print '  initial mu',mu
 
@@ -75,42 +77,49 @@ def npart(iterations):
     for j in xrange(0,N+1):
         # Temp points get closer as we near the critical point
         T = (Tc - Tlow)*(1 - ((N-j)/N)**4) + Tlow
+        print '  T =',T
 
         fout.flush()
-        # Starting point for new nparticular is abscissa of max RG.phi with old nparticular
-        nmid = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, mu,iterations)
 
         # I'm looking at the minima of RG.phi
+        # Use the local max between vapor and liquid to set the boundary for each minimization
+        nmid = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, mu,iterations)
         c_vap = nmid
         a_liq = nmid
 
         nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,mu,iterations)
         nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
-
-        tol = 1e-5
         phi_mid = RG.phi(T, nmid, mu, iterations)
 
+        tol = 1e-5
+
         # Compare the two minima in RG.phi
-        print '    entering while loop'
-        while np.fabs(phi_vapor - phi_liquid)/np.fabs(phi_mid) > tol:
+        # print '    entering while loop'
+        while np.fabs(phi_vapor - phi_liquid)/np.fabs(phi_mid) > tol: # np.fabs casts output as float
+            # print '    whilecond =',np.fabs(phi_vapor - phi_liquid)/np.fabs(phi_mid)
 
             delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
-            print '      delta_mu=',delta_mu
+            # print '      delta_mu=',delta_mu
+
+            # Change mu
+            mu += delta_mu
 
             def newphi(T, n, mu, i):
                 return RG.phi(T, n, mu, i) - delta_mu*n
 
-            nmid = minmax_RG.maximize(newphi,T,nvapor,nliquid,mu,iterations)
-            phi_mid = RG.phi(T, nmid, mu, iterations)
-            print '      nmid,phi(nmid)',nmid,phi_mid
-
+            # find new values for nvap, nmid, nliq and phi_vap, phi_mid, phi_liq
             nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,mu,iterations)
+            nmid, phi_mid = minmax_RG.maximize(RG.phi,T,nvapor,nliquid,mu,iterations), RG.phi(T, nmid, mu, iterations)
             nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
-            print '      nvap,phi(nvap)',nvapor,phi_vapor
-            print '      nliq,phi(nliq)',nliquid,phi_liquid
-            print '\n'
+            # print '      nvap,phi(nvap)',nvapor,phi_vapor
+            # print '        etavap',nvapor*RG.sigma**3*np.pi/6
+            # print '      nmid,phi(nmid)',nmid,phi_mid
+            # print '        etamid',nmid*RG.sigma**3*np.pi/6
+            # print '      nliq,phi(nliq)',nliquid,phi_liquid
+            # print '        etaliq',nliquid*RG.sigma**3*np.pi/6
+            # print '\n'
 
-        print '    left while loop'
+        # print '    left while loop'
         fout.write(str(T))
         fout.write('  ')
         fout.write(str(nvapor))
@@ -128,8 +137,8 @@ def npart(iterations):
         fout.write(str(mu))
         fout.write('\n')
         sys.stdout.flush();
-        print '   T, etaVap, etaLiq, mu',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6),mu
-        print '\n'
+        # print '   T, etaVap, etaLiq, mu',T,nvapor/(RG.sigma**3*np.pi/6),nliquid/(RG.sigma**3*np.pi/6),mu
+        # print '\n'
     fout.close()
 
 if __name__ == '__main__':
@@ -141,7 +150,7 @@ if __name__ == '__main__':
     colors = np.array(['b-','g-','r-'])
 
     for i in range(num_iterations+1): # remember, range(x) only goes up to x-1
-        print 'running npart_RG for iterations =',i
+        print 'running npart_RG for iteration =',i
 
         # run npart
         npart(i)
@@ -154,11 +163,15 @@ if __name__ == '__main__':
         etavapor = data[:,1]*np.pi*RG.sigma**3/6
         etaliquid = data[:,2]*np.pi*RG.sigma**3/6
 
+        # Plot data
+        plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
+        plt.plot(etaliquid, T, colors[i])
+
     # Labels, etc.
     plt.xlabel(r'$\eta$')
     plt.ylabel('T')
     plt.legend(loc=0)
     plt.title('Liquid-Vapor Coexistence')
 
-    # plt.savefig('figs/coexistence-RG-v2.pdf')
+    plt.savefig('figs/coexistence-RG-v2-'+'%d'%N+'N.pdf')
     plt.show()
