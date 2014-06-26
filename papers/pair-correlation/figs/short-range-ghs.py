@@ -385,7 +385,7 @@ def avg_points(x, y, dpath):
   return (new_x, new_y)
 
 
-fig2 = pylab.figure(2, figsize=(6,6))
+fig2 = pylab.figure(2, figsize=(6,8))
 
 # ax.axvline(x=sigma, color='gray', linestyle='-')
 # ax.axhline(y=1, color='gray', linestyle='-')
@@ -397,7 +397,7 @@ alt_styles = {
 }
 
 # now let's plot the fit
-ranges = [(0.9,1.4), (0.8, 1.7), (0.7,2.5), (0.6, 4.3)]
+ranges = [(0.9,1.4), (0.8, 1.8), (0.75, 2.5), (0.6, 4.0)]
 zeros = [-ranges[0][0]]*len(ranges)
 maxes = [ranges[0][1]]*len(ranges)
 mines = [ranges[0][0]]*len(ranges)
@@ -407,6 +407,7 @@ for i in range(1,len(zeros)):
   zeros[i] = zeros[i-1] + maxes[i-1] - ranges[i][0]
 zeros.reverse()
 maxes.reverse()
+mines.reverse()
 assert(len(ranges) == len(ff))
 
 ticks = []
@@ -435,14 +436,23 @@ for i in range(len(ff)):
   r_mc_avged, g_mc_avged = avg_points(r_mc, ghs[i], dpath)
   pylab.figure(2)
   offset = zeros[i]
+  pylab.axhline(zeros[i] + maxes[i], color='k')
+  pylab.axhline(zeros[i] + 1, color='k', ls=':')
   pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] + offset,
              alt_styles['gS'], label='$g_S(r)$')
   pylab.plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff] + offset,
              alt_styles['gil'], label='gil-villegas')
   pylab.plot(r_mc_avged, g_mc_avged + offset,
              alt_styles['mc'], label='mc')
-  pylab.axhline(zeros[i] + maxes[i], color='k')
-  # pylab.axhline(zeros[i], color='r')
+  dg = 0.2
+  if maxes[i] > 2:
+    dg = 0.5
+  for gg in pylab.arange(0, maxes[i] - 0.001, dg):
+    print 'considering g', gg
+    if gg > mines[i] + 0.001:
+      print 'good point', gg, '>', mines[i]
+      ticks.append(zeros[i] + gg)
+      ticklabels.append('%.1f' % gg)
 
   #mc:
   r_mc, ghs[i]
@@ -467,7 +477,12 @@ pylab.legend(loc='best').get_frame().set_alpha(0.5)
 pylab.tight_layout()
 pylab.savefig("figs/short-range-ghs.pdf")
 
-# ax4.set_xticks([0, 1, 2, 3, 4, 5, 6])
+pylab.figure(2)
+pylab.ylim(ymax=zeros[0] + maxes[0])
+pylab.xlim(1.8, 5.5)
+pylab.axvline(2.0, color='k', ls=':')
+pylab.axes().set_yticks(ticks)
+pylab.axes().set_yticklabels(ticklabels)
 # # ax4.legend(loc='upper center')
 # # ax4.add_artist(legends[3])
 # ax4.set_xlabel('$r/R$')
