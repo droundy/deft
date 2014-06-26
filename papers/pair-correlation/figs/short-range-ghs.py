@@ -386,23 +386,31 @@ def avg_points(x, y, dpath):
 
 
 fig2 = pylab.figure(2, figsize=(6,6))
-ax1 = fig2.add_subplot(411)
-ax2 = fig2.add_subplot(412)
-ax3 = fig2.add_subplot(413)
-ax4 = fig2.add_subplot(414)
-axs = [ax1, ax2, ax3, ax4]
 
-for ax in axs:
-    ax.axvline(x=sigma, color='gray', linestyle='-')
-    ax.axhline(y=1, color='gray', linestyle='-')
+# ax.axvline(x=sigma, color='gray', linestyle='-')
+# ax.axhline(y=1, color='gray', linestyle='-')
 
 alt_styles = {
     'gS' : '-b',
     'mc' : '.k',
     'gil' : '--m'
 }
+
 # now let's plot the fit
-legends = []
+ranges = [(0.9,1.4), (0.8, 1.7), (0.7,2.5), (0.6, 4.3)]
+zeros = [-ranges[0][0]]*len(ranges)
+maxes = [ranges[0][1]]*len(ranges)
+mines = [ranges[0][0]]*len(ranges)
+for i in range(1,len(zeros)):
+  mines[i] = ranges[i][0]
+  maxes[i] = ranges[i][1]
+  zeros[i] = zeros[i-1] + maxes[i-1] - ranges[i][0]
+zeros.reverse()
+maxes.reverse()
+assert(len(ranges) == len(ff))
+
+ticks = []
+ticklabels = []
 for i in range(len(ff)):
   pylab.figure(1)
   pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--')
@@ -425,20 +433,17 @@ for i in range(len(ff)):
   # making a second plot to show one eta at a time
   dpath = 0.2
   r_mc_avged, g_mc_avged = avg_points(r_mc, ghs[i], dpath)
-  axs[i].plot(r_mc, g[i*len(r):(i+1)*len(r)], alt_styles['gS'], label='$g_S(r)$')
-  axs[i].plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff], alt_styles['gil'], label='gil-villegas')
-  axs[i].plot(r_mc_avged, g_mc_avged, alt_styles['mc'], label='mc')
-  legends.append(axs[i].legend([], loc='upper right', title='$\\eta = %.1f$' %(ff[i])))
-  #axs[i].set_yticks(numpy.arange(0, 10, 0.5))
-  #axs[i].set_ylim(min(g_gil)-.1, max(ghs[i])+.1)
-  #axs[i].set_ylabel('$\\eta = %.1f$' %(ff[i]))
+  pylab.figure(2)
+  offset = zeros[i]
+  pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] + offset,
+             alt_styles['gS'], label='$g_S(r)$')
+  pylab.plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff] + offset,
+             alt_styles['gil'], label='gil-villegas')
+  pylab.plot(r_mc_avged, g_mc_avged + offset,
+             alt_styles['mc'], label='mc')
+  pylab.axhline(zeros[i] + maxes[i], color='k')
+  # pylab.axhline(zeros[i], color='r')
 
-  #print density, integral, rhs
-  #print "ff: %.2f\t thing: %g" %(ff[i], 1 - rho*integral - rhs)
-  #pylab.figure(2)
-  #plot(r_mc, gdifference[i*len(r):(i+1)*len(r)], colors[i]+'--')
-  #pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] - ghs[i], colors[i]+'-')
-  # calculating integral:
   #mc:
   r_mc, ghs[i]
   integrand_mc = 4*pi*r_mc*r_mc*ghs[i]
@@ -462,13 +467,13 @@ pylab.legend(loc='best').get_frame().set_alpha(0.5)
 pylab.tight_layout()
 pylab.savefig("figs/short-range-ghs.pdf")
 
-ax4.set_xticks([0, 1, 2, 3, 4, 5, 6])
-# ax4.legend(loc='upper center')
-# ax4.add_artist(legends[3])
-ax4.set_xlabel('$r/R$')
-for ax in axs:
-    ax.set_xlim(xmin=1.8, xmax=5)
-    #ax.set_ylim(ymin=0)
+# ax4.set_xticks([0, 1, 2, 3, 4, 5, 6])
+# # ax4.legend(loc='upper center')
+# # ax4.add_artist(legends[3])
+# ax4.set_xlabel('$r/R$')
+# for ax in axs:
+#     ax.set_xlim(xmin=1.8, xmax=5)
+#     #ax.set_ylim(ymin=0)
 
 #ax4.set_yticks([.8, 1, 1.2])
 #ax3.set_yticks([1, 1.2, 1.4, 1.6, 1.8])
