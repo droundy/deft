@@ -212,9 +212,19 @@ for i in xrange(len(gdifference)):
 K21 = vals[0]
 K22 = vals[1]
 K23 = vals[2]
-K31 = vals[3]
-K32 = vals[4]
-K33 = vals[5]
+K24 = vals[3]
+
+K31 = vals[4]
+K32 = vals[5]
+K33 = vals[6]
+K34 = vals[7]
+
+K41 = vals[8]
+K42 = vals[9]
+K43 = vals[10]
+K44 = vals[11]
+
+alpha = vals[12]
 
 def next_comma(ccode):
   """ returns next comma not counting commas within parentheses """
@@ -274,24 +284,36 @@ c_code += r"""
 const double kappa_21 = %.*f;
 const double kappa_22 = %.*f;
 const double kappa_23 = %.*f;
+const double kappa_24 = %.*f;
+
 const double kappa_31 = %.*f;
 const double kappa_32 = %.*f;
 const double kappa_33 = %.*f;
+const double kappa_34 = %.*f;
 
-inline double gsigma_to_eta(const double g_sigma) {
+const double kappa_41 = %.*f;
+const double kappa_42 = %.*f;
+const double kappa_43 = %.*f;
+const double kappa_44 = %.*f;
+
+const double alpha = %.*f;
+
+inline double short_range_gsigma_to_eta(const double g_sigma) {
   if (g_sigma <= 1) return 0;
   return %s;
 }
 
 
-inline double radial_distribution(double g_sigma, double r) {
+inline double short_range_radial_distribution(double g_sigma, double r) {
   if (g_sigma <= 1) return 1; // handle roundoff error okay
   if (r < %i) return 0;
   const double h_sigma = g_sigma - 1;
   return %s;
 }
-""" %(digits, K21, digits, K22, digits, K23,
-      digits, K31, digits, K32, digits, K33,
+""" %(digits, K21, digits, K22, digits, K23, digits, K24,
+      digits, K31, digits, K32, digits, K33, digits, K34,
+      digits, K41, digits, K42, digits, K43, digits, K44,
+      digits, alpha,
       fix_pows(sympy.ccode(v['h_sigma'])), v['sigma'], fix_pows(sympy.ccode(ghs_s)))
 
 latex_code += r"""
