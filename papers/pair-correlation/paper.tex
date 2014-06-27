@@ -381,35 +381,18 @@ in evaluating the approximations of earlier works.
 \newcommand\kappaI{\kappa_1}
 \newcommand\kappaZ{\kappa_2}
 
-\input{figs/fit-parameters}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-g2}
-  \caption{Plot of the hard-sphere radial distribution function, with
-    our separable fit.  The solid lines show the true radial
-    distribution function $g(r)$, as found from Monte Carlo
-    simulation, and the dashed lines show our separable fit to the
-    radial distribution functions
-    $g_S(r)$.}\label{fig:radial-distribution}
-\end{figure}
+\input{figs/short-range-fit-parameters}
 
 \begin{figure}
   \centering
   \includegraphics[width=\columnwidth]{figs/short-range-ghs-alt}
-  \caption{Plot of the hard-sphere radial distribution function, with
-    our short-range separable
-    fit.}\label{fig:short-range-radial-distribution}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\columnwidth]{figs/ghs-alt}
-  \caption{Plot of the hard-sphere radial distribution function. The blue
-    lines show our separable fit, the black dots are Monte Carlo data, and
-    the dashed lines are results of the Gil-Villegas\cite{gil1997statistical}
-    fit.\pahosays{An idea for an alternate version of the radial distribution
-      figure.}}\label{fig:radial-distribution-alt}
+  \caption{Plot of the hard-sphere radial distribution function. The
+    blue lines show our separable fit, the black dots show the true
+    radial distribution function $g(r)$ as found from Monte Carlo
+    simulation, and the dashed lines are results of the
+    Gil-Villegas\cite{gil1997statistical} fit.  The dotted extension
+    of each fitted curve indicates the value of the function outside
+    of the fitted region.  }\label{fig:radial-distribution}
 \end{figure}
 
 \section{Separable radial distribution function for the CVA-S}
@@ -428,94 +411,26 @@ field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
 computed with only fixed-kernel convolutions, which can be
 efficiently computed using fast Fourier transforms.
 
-%% We construct our function's form in terms of an expansion of powers of
-%% $h_{\sigma} = g_{\sigma}-1$, ensuring that it approaches $g_{\sigma}$
-%% in the contact distance limit, leaving our function with tunable
-%% constant perameters.  We run a simple monte-carlo simulation to
-%% calculate values of the homogeneous radial distribution function at
-%% varying distance perameter $r$.  We then tune our function's constant
-%% parameters by matching our function's results against the monte-carlo
-%% data, using a least squares fit method.  During this process it is
-%% simplest to use an analytic expression for $g_{\sigma}$ in our
-%% function and so we use the well known and very successful Carnahan
-%% Starling equation to calculate $g_{\sigma}$.  This is appropriate
-%% since our published $g_{\sigma}$ approaches the Carnahan Starling
-%% version in the homogeneous limit and it's this limit, along with the
-%% contact limit, that we would like our constructed radial distribution
-%% function to get right.  After this process we have an appropriate
-%% radial distribution function that is dependent only on $r$ and
-%% $g_{\sigma}$.
-
-%% The function has the form:
-%% \begin{multline}
-%%   g(r,g_\sigma) = 1 + h_\sigma e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
-%%   + h_\sigma(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
-%%   + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
-%% \end{multline}
-%% where $\kappaO$,$\kappaI$, and $\kappaZ$ are fitted constants and
-%% $I(g_\sigma)$ is a function of $g_\sigma$.
-
-%% The finalized form of our pair correlation function is:
-%% \begin{align}
-%%   g^{(2)}(\rr_1,\rr_2) = \frac{g(|r_{12}|, g_\sigma(\rr_1)) + g(|r_{12}|, g_\sigma(\rr_2))}{2}
-%% \end{align}
-
 We construct $g_S(r, g_\sigma)$ to satisfy several constraints.
 Naturally, we match the value at contact:
 \begin{equation}
   g_S(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
-A second constraint applies to the integral of the total correlation
-function, $h(r) = g(r) - 1$:
+
+\begin{widetext}
 \begin{align}
-  1 + n\int h(r)d\rr &= nkT\chi_T \label{eq:total-constraint}
+  g_S(r,g_\sigma) &=
+  1 + \left(h_\sigma + \sum_{i=2}^{4} \sum_{j=1}^{4} h_\sigma^i
+  \zeta^j\right)e^{-\alpha \zeta}
+  \\
+  &= \kappamatrix
 \end{align}
-where $\chi_T$ is the isothermal compressibility of the hard-sphere fluid.
-We have found that the slope of the radial distribution function at
-contact is given to a very good approximation by:
-\begin{align}
-  g'(\sigma) \approx g_\sigma (1 - g_\sigma)
-\end{align}
-and we apply this as a final constraint.\par
-Under these three constraints, we applied a least-squares fit to
-simulation data for the radial distribution function at packing
-fractions from 0.05 to 0.4 in steps of 0.05.  Our fitted radial
-distribution function is given by
-\begin{multline}
-  g_S(r,g_\sigma) = 1 + (g_\sigma-1) e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
-  + (g_\sigma -1)(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
-  + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
-\end{multline}
-\begin{equation}
-  I(g_\sigma) = \kappaZ^5 \frac{
-    \frac{\chi-1}{24\eta} + (1-g_\sigma) \frac{(\kappaO-2
-      g_\sigma)(\kappaI^2 + 4 \kappaI + 6)}{\kappaI^4}
-    + (1-g_\sigma)\frac{\kappaO^2 + 2\kappaO + 2}{\kappaO}
-  }{2 \kappaZ^2 + 12 \kappaZ + 24}
-\end{equation}
-\begin{equation}
-  \chi = \frac{(1-\eta)^4}{\eta^4 - 4\eta^3 + 4\eta^2 + 4\eta + 1}
-\end{equation}
-where the dimensionless isothermal compressibility $\chi$ is obtained
-from the Carnahan-Starling equation of state.
-Finally, we can convert between the packing fraction $\eta$ and the
-radial distribution function at contact $g_\sigma$ using the
-Carnahan-Starling approximation for $g_\sigma$:
-\newcommand\nastyetacuberoot{\sqrt[3]{54 g_\sigma^2 -
-    6\sqrt{81g_\sigma^4 - 6g_\sigma^3}}}
-\begin{align}
-  g_\sigma &= \frac{1-\tfrac{\eta}{2}}{(1-\eta)^3}\text{, and its inverse} \\
-  \eta &= 1 - \frac{1}{\nastyetacuberoot} - \frac{\nastyetacuberoot}{6g_\sigma}.
-\end{align}
-This function includes three fitted parameters, $\kappaO =
-\kappazero$, $\kappaI = \kappaone$,
-and $\kappaZ = \kappatwo$.
-The fit is displayed in Fig.~\ref{fig:radial-distribution}.  In that
-figure, it is apparent that the constraint on the integral of $h(r)$ from
-Eq.~\ref{eq:total-constraint} results in canceling errors at large
-distances.  The maximum error in $g_S(r)$ at packing fractions up to
-0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
-\rmaxerr R$.
+\end{widetext}
+where $h_\sigma = g_\sigma - 1$ and $\zeta \equiv
+\frac{r}{\sigma}-1$.  \fixme{Why start at $i=2$ rather than $i=1$ for
+  the fitted terms? This seems suboptimal.}
+
+\fixme{Change code to round to a fixed (small) number of digits in fit.}
 
 \newcommand{\plotcomp}[1]{The top halves of these figures show the
   results of Monte Carlo simulations, while the bottom halves show the

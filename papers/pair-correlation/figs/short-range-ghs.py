@@ -354,9 +354,33 @@ outfile.write(r"""
 \newcommand\etamaxerr{%(etamaxerr)g}
 \newcommand\rmaxerr{%(rmaxerr).2g}
 \newcommand\chisq{%(chisq).2g}
+\newcommand\kappamatrix{
+  \begin{pmatrix}
+     1 &
+     h_\sigma &
+     h_\sigma^2 &
+     h_\sigma^3 &
+     h_\sigma^4
+  \end{pmatrix}
+  \begin{pmatrix}
+    1 & 0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 0 & 0 \\
+    0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
+    0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
+    0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
+  \end{pmatrix}
+  \begin{pmatrix}
+     1 \\
+     \zeta \\
+     \zeta^2 \\
+     \zeta^3 \\
+     \zeta^4
+  \end{pmatrix}
+  e^{-%(alpha)g \zeta}
+}
 \newcommand\kappaAA{%(K21)g}
 \newcommand\kappaAB{%(K22)g}
-\newcommand\kappaBC{%(K23)g}
+\newcommand\kappaAC{%(K23)g}
 \newcommand\kappaBA{%(K31)g}
 \newcommand\kappaBB{%(K32)g}
 \newcommand\kappaBC{%(K33)g}
