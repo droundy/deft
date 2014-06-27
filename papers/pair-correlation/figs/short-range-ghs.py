@@ -298,10 +298,10 @@ const double kappa_44 = %.*f;
 
 const double alpha = %.*f;
 
-inline double short_range_gsigma_to_eta(const double g_sigma) {
-  if (g_sigma <= 1) return 0;
-  return %s;
-}
+// inline double short_range_gsigma_to_eta(const double g_sigma) {
+//   if (g_sigma <= 1) return 0;
+//   return %s;
+// }
 
 
 inline double short_range_radial_distribution(double g_sigma, double r) {

@@ -19,7 +19,8 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer']#, 'sphere-dft'] # , 'gloor'
+plots = ['mc', 'this-work', 'this-work-mc', 'this-work-short', 'sokolowski', 'fischer']
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer']
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -255,6 +256,17 @@ for name in plots:
   g_z = g[z>rpath*2]
   z_z = z[z>rpath*2]
 
+  if 'short' in name:
+      g_x = g_x[x_x <= styles.short_range]
+      x_x = x_x[x_x <= styles.short_range]
+
+      g_c = g_c[z_c <= styles.short_range]
+      z_c = z_c[z_c <= styles.short_range]
+
+      g_z = g_z[z_z <= styles.short_range]
+      z_z = z_z[z_z <= styles.short_range]
+
+
   if name == 'mc':
     # do point averaging, so that points are fixed path distance apart
     dpath = 0.3
@@ -304,7 +316,11 @@ spacing = 2
 x_ref = arange(xmin + 0.1, xlow, spacing)
 z_ref = arange(rpath/2 + 0.1 + spacing/2, 6+spacing, spacing)
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+backplots = plots
+backplots.remove('fischer')
+backplots.remove('mc')
+
+for name in backplots:
   # backward lines
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]
@@ -322,7 +338,7 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   zplot.plot(z_z, g_z, styles.plot[name])
   suba.plot(z_z, g_z, styles.plot[name])
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+for name in backplots:
   # forward arrows
   g3_path = read_triplet_path(ff, name)
   x = g3_path[:,3]

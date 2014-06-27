@@ -19,7 +19,8 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor'
+plots = ['mc', 'this-work', 'this-work-mc', 'this-work-short', 'sokolowski', 'fischer']
+plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer']
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
@@ -67,7 +68,10 @@ def read_triplet_back(ff, fun):
     # input: "figs/triplet-back-inbetween-this-work-%4.2f.dat" % (ff)
     # input: "figs/triplet-back-inbetween-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-inbetween-%s-%4.2f.dat" % (fun, ff)
+    print 'name:', fun, filename
     data = loadtxt(filename)
+    print 'name again:', fun
+
   return data[:,0:4]
 
 def read_triplet(ff, fun):
@@ -261,6 +265,17 @@ for name in plots:
   g_z = g[z>rpath*3]
   z_z = z[z>rpath*3]
 
+  if 'short' in name:
+      g_x = g_x[x_x <= styles.short_range]
+      x_x = x_x[x_x <= styles.short_range]
+
+      g_c = g_c[z_c <= styles.short_range]
+      z_c = z_c[z_c <= styles.short_range]
+
+      g_z = g_z[z_z <= styles.short_range]
+      z_z = z_z[z_z <= styles.short_range]
+
+
   if name == 'mc':
     # do point averaging, so that points are fixed path distance apart
     dpath = 0.3
@@ -308,7 +323,11 @@ spacing = 2.5
 x_ref = arange(-spacing/2, xlow-spacing/2, -spacing)
 z_ref = arange(rpath + 0.2 + spacing/2, 10+spacing, spacing)
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+backplots = plots
+backplots.remove('fischer')
+backplots.remove('mc')
+
+for name in backplots:
   # backward lines
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]
@@ -322,11 +341,22 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   g_z = g[z>zcontact]
   z_z = z[z>zcontact]
 
+  if 'short' in name:
+      g_x = g_x[x_x <= styles.short_range]
+      x_x = x_x[x_x <= styles.short_range]
+
+      g_c = g_c[z_c <= styles.short_range]
+      z_c = z_c[z_c <= styles.short_range]
+
+      g_z = g_z[z_z <= styles.short_range]
+      z_z = z_z[z_z <= styles.short_range]
+
+
   xplot.plot(x_x, g_x, styles.plot[name])
   zplot.plot(z_z, g_z, styles.plot[name])
   suba.plot(z_z, g_z, styles.plot[name])
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+for name in backplots:
   # forward arrows
   g3_path = read_triplet_path(ff, name)
   x = g3_path[:,3]
@@ -339,6 +369,17 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   g_z = g[z>zcontact][::-1]
   z_z = z[z>zcontact][::-1]
 
+  if 'short' in name:
+      g_x = g_x[x_x <= styles.short_range]
+      x_x = x_x[x_x <= styles.short_range]
+
+      g_c = g_c[z_c <= styles.short_range]
+      z_c = z_c[z_c <= styles.short_range]
+
+      g_z = g_z[z_z <= styles.short_range]
+      z_z = z_z[z_z <= styles.short_range]
+
+
   start = styles.start[name]*spacing
 
   x_x, g_x = get_closest(x_x, g_x, x_ref, start)
@@ -347,7 +388,7 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   zplot.plot(z_z, g_z, styles.plot_forward[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_forward[name], mec='none')
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+for name in backplots:
   # backward arrows
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]
@@ -360,6 +401,16 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   x_x = x[z==zcontact]
   g_z = g[z>zcontact]
   z_z = z[z>zcontact]
+
+  if 'short' in name:
+      g_x = g_x[x_x <= styles.short_range]
+      x_x = x_x[x_x <= styles.short_range]
+
+      g_c = g_c[z_c <= styles.short_range]
+      z_c = z_c[z_c <= styles.short_range]
+
+      g_z = g_z[z_z <= styles.short_range]
+      z_z = z_z[z_z <= styles.short_range]
 
   start = styles.start[name]*spacing - 0.5*spacing
 

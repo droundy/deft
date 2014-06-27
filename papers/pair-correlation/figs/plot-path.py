@@ -21,7 +21,7 @@ rc('text', usetex=True)
 from matplotlib.colors import NoNorm
 
 # these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
+plots = ['mc', 'this-work', 'this-work-mc', 'this-work-short', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
 
 dx = 0.1
 ############################
@@ -223,6 +223,16 @@ for name in plots:
 
     g_z = g[(x<xcontact) & (z>2.005)]
     z_z = z[(x<xcontact) & (z>2.005)]
+
+    if 'short' in name:
+        g_x = g_x[x_x <= styles.short_range]
+        x_x = x_x[x_x <= styles.short_range]
+
+        g_c = g_c[z_c <= styles.short_range]
+        z_c = z_c[z_c <= styles.short_range]
+
+        g_z = g_z[z_z <= styles.short_range]
+        z_z = z_z[z_z <= styles.short_range]
 
     if name == 'mc':
       # do point averaging, so that points are fixed path distance apart
