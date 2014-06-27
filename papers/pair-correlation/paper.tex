@@ -21,8 +21,8 @@
 \newcommand{\pahosays}[1]{{\color{red} [\blue{Paho:} \emph{#1}]}}
 
 \begin{document}
-\title{The contact value approach for the pair distribution function of the inhomogeneous hard-sphere
-  fluid}
+\title{An efficient contact value approach for the pair distribution
+  function of the inhomogeneous hard-sphere fluid}
 
 \author{Paho Lurie-Gregg}
 \author{Jeff B. Schulte}
@@ -50,7 +50,23 @@ favorable results.
 
 \section{Introduction}
 
-\fixme{replace approximation with approach}\jeffsays{I'm stuck with this.}
+\fixme{
+  TO DO:
+  \begin{itemize}
+  \item \pahosays{Only use short-range CVA-S (in plots, and in walls.cpp)}
+  \item \pahosays{Remove CVA from all plots, but leave it easy to
+    re-add (so we can check what we say in the text).}
+  \item \pahosays{Make all plots not show CVA (new name for CVA-short)
+    outside the fitted range.}
+  \item \davidsays{Rewrite CVA-S section to reflect new fit.}
+  \item \jeffsays{Make certain when proof-reading that other prior
+    formulations cannot work in ``separable'' way.}
+  \item \davidsays{Be sure that we explain the fitted data and fitting
+    process well.}
+  \item \pahosays{Add $\eta=?$ labels and legends to new fit plot.}
+  \item \jeffsays{I will diligently read what you guys write!}
+  \end{itemize}
+}
 
 The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
@@ -342,7 +358,7 @@ $g_{\sigma}(\rr)$ evaluated at the two points:
   g^{(2)}(\rr_1,\rr_2) = \frac{g(r_{12}, g_\sigma(\rr_1)) +
     g(r_{12}, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
-This contact value approach for $g^{(2)}(\rr_1,\rr_2)$ is
+This Contact Value Approach (CVA) for $g^{(2)}(\rr_1,\rr_2)$ is
 constructed to reproduce the exact value for the integral:
 \begin{align}
   F_1^{\text{contact}} &= \tfrac12 \iint
@@ -397,6 +413,7 @@ in evaluating the approximations of earlier works.
 \end{figure}
 
 \section{Separable radial distribution function for the CVA-S}
+\fixme{Section title:  A separable fit for the radial distribution function?}
 
 The CVA is quite accurate, but cannot be computed efficiently
 with fixed-kernel convolutions as written.  In order to ease
@@ -789,7 +806,7 @@ The key insight of the CVA-S is that we can implement
 Eq.~\ref{eq:mean-field} on $\mathcal{O}(N\log N)$ time using Fast
 Fourier Transforms (FFTs) where $N$ is proportional to the volume of
 the system.  We begin by examining the CVA.  The two terms that are
-averaged in Eq.~\ref{eq:CVA} give equal contributions to the integral:
+averaged in Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
 \begin{align}
   F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
   g(r_{12},g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)

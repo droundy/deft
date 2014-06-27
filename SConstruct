@@ -535,23 +535,25 @@ env.Command(target = ['papers/pair-correlation/figs/walls.dat',
                       'papers/pair-correlation/figs/walls/z.dat',
                       'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-mc-0.30-rmax-5.dat',
+                      'papers/pair-correlation/figs/walls/inverse-sixth-dadz-this-work-short-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/inverse-sixth-dadz-sokolowski-0.30-rmax-5.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-this-work-0.30-1.790.dat',
+                      'papers/pair-correlation/figs/walls/square-well-dadz-this-work-short-0.30-1.790.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-this-work-mc-0.30-1.790.dat',
                       'papers/pair-correlation/figs/walls/square-well-dadz-sokolowski-0.30-1.790.dat']+
             ['papers/pair-correlation/figs/wallsWB-%04.2f.dat' % ff
              for ff in [0.1, 0.2, 0.3]] +
             ['papers/pair-correlation/figs/walls/walls_daWB-%s-%04.2f-%05.3f.dat' % (method,ff,r)
              for ff in [0.1, 0.2, 0.3]
-             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']
+             for method in ['this-work', 'this-work-short', 'this-work-mc', 'sokolowski', 'fischer']
              for r in [2.005, 3.005]] +
             ['papers/pair-correlation/figs/walls/wallsWB-%s-pair-%04.2f-%04.2f.dat' % (method,ff,z0)
              for ff in [0.1, 0.2, 0.3]
-             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']
+             for method in ['this-work', 'this-work-short', 'this-work-mc', 'sokolowski', 'fischer']
              for z0 in numpy.arange(0.05, 3.95, 0.1)] +
             ['papers/pair-correlation/figs/walls/wallsWB-path-%s-pair-%04.2f-0.005.dat' % (method,ff)
              for ff in [0.1, 0.2, 0.3]
-             for method in ['this-work', 'this-work-mc', 'sokolowski', 'fischer']],
+             for method in ['this-work', 'this-work-short', 'this-work-mc', 'sokolowski', 'fischer']],
             source = ['papers/pair-correlation/figs/walls.mkdat'],
             action = './$SOURCE')
 

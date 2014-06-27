@@ -298,10 +298,10 @@ const double kappa_44 = %.*f;
 
 const double alpha = %.*f;
 
-inline double short_range_gsigma_to_eta(const double g_sigma) {
-  if (g_sigma <= 1) return 0;
-  return %s;
-}
+// inline double short_range_gsigma_to_eta(const double g_sigma) {
+//   if (g_sigma <= 1) return 0;
+//   return %s;
+// }
 
 
 inline double short_range_radial_distribution(double g_sigma, double r) {
@@ -419,8 +419,10 @@ fig2 = pylab.figure(2, figsize=(6,8))
 
 alt_styles = {
     'gS' : '-b',
+    'gSunfitted' : ':b',
     'mc' : '.k',
-    'gil' : '--m'
+    'gil' : '--m',
+    'gil_unfitted' : ':m'
 }
 
 # now let's plot the fit
@@ -449,6 +451,7 @@ for i in range(len(ff)):
     g_gil[j] = g_gil_villegas(ff[i], r_mc[j])
 
   gil_rcutoff = 3.6
+  gil_rmax = 4.0
   pylab.plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff], colors[i]+':')
   ##############
 
@@ -465,10 +468,16 @@ for i in range(len(ff)):
   offset = zeros[i]
   pylab.axhline(zeros[i] + maxes[i], color='k')
   pylab.axhline(zeros[i] + 1, color='k', ls=':')
-  pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)] + offset,
+  pylab.plot(r_mc[r_mc<fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<fit_rcutoff] + offset,
              alt_styles['gS'], label='$g_S(r)$')
-  pylab.plot(r_mc[r_mc<gil_rcutoff], g_gil[r_mc<gil_rcutoff] + offset,
+  pylab.plot(r_mc[r_mc>fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc>fit_rcutoff] + offset,
+             alt_styles['gSunfitted'], label='$g_S(r)$')
+  r_gil = r_mc[r_mc < gil_rmax]
+  g_gil = g_gil[r_mc < gil_rmax]
+  pylab.plot(r_gil[r_gil<gil_rcutoff], g_gil[r_gil<gil_rcutoff] + offset,
              alt_styles['gil'], label='gil-villegas')
+  pylab.plot(r_gil[r_gil>gil_rcutoff], g_gil[r_gil>gil_rcutoff] + offset,
+             alt_styles['gil_unfitted'], label='gil-villegas')
   pylab.plot(r_mc_avged, g_mc_avged + offset,
              alt_styles['mc'], label='mc')
   dg = 0.2
@@ -503,7 +512,7 @@ pylab.tight_layout()
 pylab.savefig("figs/short-range-ghs.pdf")
 
 pylab.figure(2)
-pylab.ylim(ymax=zeros[0] + maxes[0])
+pylab.ylim(ymin=zeros[-1] + mines[-1], ymax=zeros[0] + maxes[0])
 pylab.xlim(1.8, 5.5)
 pylab.axvline(2.0, color='k', ls=':')
 pylab.axes().set_yticks(ticks)
