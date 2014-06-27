@@ -34,6 +34,8 @@ import forte
 # |__                                                                                        #
 ##############################################################################################
 
+N = 80 # For publication plots, make this bigger (40? 80? 100? You decide!)
+
 # input iteration depth as a parameter
 def npart(iterations):
     # Initial conditions; dependent on you system
@@ -41,7 +43,6 @@ def npart(iterations):
     T = 0.5
     mu = -5.751 # I found this by plotting. It is good for T=0.5; i=0
 
-    N = 80 # For publication plots, make this bigger (40? 80? 100? You decide!)
     Tc = 1.33 # Rough estimate based on previous plots
     Tlow = T
 
@@ -83,7 +84,8 @@ def npart(iterations):
 
         # I'm looking at the minima of RG.phi
         # Use the local max between vapor and liquid to set the boundary for each minimization
-        nmid = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, mu,iterations)
+        #nmid = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, mu,iterations)
+        mu = -RG.df_dn(T, nmid, iterations)
         c_vap = nmid
         a_liq = nmid
 
@@ -173,5 +175,6 @@ if __name__ == '__main__':
     plt.legend(loc=0)
     plt.title('Liquid-Vapor Coexistence')
 
+    # plt.savefig('figs/coexistence-RG-v2-80N.pdf')
     plt.savefig('figs/coexistence-RG-v2-'+'%d'%N+'N.pdf')
     plt.show()
