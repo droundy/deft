@@ -17,7 +17,7 @@ from matplotlib.colors import NoNorm
 
 # these are the things to set
 colors = ['k', 'b', 'r', 'g', 'm']
-plots = ['mc', 'this-work', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
+plots = ['mc', 'this-work-short', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
 titles = ['MC', 'this work', 'Sokolowski', 'Fischer'] # , 'gloor' test particle
 
 dx = 0.1
@@ -45,7 +45,7 @@ def read_walls_path(ff, fun):
   elif fun == 'sphere-dft':
     filename = "../../papers/pair-correlation/figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "../../papers/pair-correlation/figs/walls/wallsWB-path-this-work-pair-%1.2f-0.005.dat" %(ff)
+    # input: "../../papers/pair-correlation/figs/walls/wallsWB-path-this-work-short-pair-%1.2f-0.005.dat" %(ff)
     # input: "../../papers/pair-correlation/figs/walls/wallsWB-path-fischer-pair-%1.2f-0.005.dat" %(ff)
     # input: "../../papers/pair-correlation/figs/walls/wallsWB-path-sokolowski-pair-%1.2f-0.005.dat" %(ff)
     filename = "../../papers/pair-correlation/figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
@@ -64,7 +64,7 @@ def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
     filename = "../../papers/pair-correlation/figs/wallsWB-with-sphere-%1.2f-trimmed.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "../../papers/pair-correlation/figs/walls/wallsWB-this-work-pair-%1.2f-0.05.dat" %(ff)
+    # input: "../../papers/pair-correlation/figs/walls/wallsWB-this-work-short-pair-%1.2f-0.05.dat" %(ff)
     filename = "../../papers/pair-correlation/figs/walls/wallsWB-%s-pair-%1.2f-0.05.dat" %(fun, ff)
   return loadtxt(filename)
 
@@ -194,7 +194,7 @@ r = arange(0, rmax, dx)
 z = arange(zmin, zmax, dx)
 Z, R = meshgrid(z, r)
 
-g2dft = read_walls_dft(ff, 'this-work')
+g2dft = read_walls_dft(ff, 'this-work-short')
 zdft = loadtxt("../../papers/pair-correlation/figs/walls/z.dat")
 xdft = loadtxt("../../papers/pair-correlation/figs/walls/x.dat")
 
@@ -263,7 +263,7 @@ Ez = 4.0
 
 hw = 4 # headwidth of arrows
 
-g2nice = read_walls_path(ff, 'this-work')
+g2nice = read_walls_path(ff, 'this-work-short')
 def g2pathfunction_x(x):
     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
 def g2pathfunction_z(z):

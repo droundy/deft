@@ -20,9 +20,6 @@ rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
-# these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'this-work-short', 'sokolowski', 'fischer'] # , 'gloor' sphere-dft
-
 dx = 0.1
 ############################
 rpath = 2.005
@@ -50,8 +47,7 @@ def read_walls_path(ff, fun):
   elif fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-path-%1.2f.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "figs/walls/wallsWB-path-this-work-pair-%1.2f-0.005.dat" %(ff)
-    # input: "figs/walls/wallsWB-path-this-work-mc-pair-%1.2f-0.005.dat" %(ff)
+    # input: "figs/walls/wallsWB-path-this-work-short-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-fischer-pair-%1.2f-0.005.dat" %(ff)
     # input: "figs/walls/wallsWB-path-sokolowski-pair-%1.2f-0.005.dat" %(ff)
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
@@ -70,7 +66,7 @@ def read_walls_dft(ff, fun):
   if fun == 'sphere-dft':
     filename = "figs/wallsWB-with-sphere-%1.2f-trimmed.dat" % 0.3 # ff FIXME others don't exist in repo yet
   else:
-    # input: "figs/walls/wallsWB-this-work-pair-%1.2f-0.05.dat" %(ff)
+    # input: "figs/walls/wallsWB-this-work-short-pair-%1.2f-0.05.dat" %(ff)
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-0.05.dat" %(fun, ff)
   return loadtxt(filename)
 
@@ -138,9 +134,15 @@ r = arange(0, rmax, dx)
 z = arange(zmin, zmax, dx)
 Z, R = meshgrid(z, r)
 
-g2dft = read_walls_dft(ff, 'this-work')
+g2dft = read_walls_dft(ff, 'this-work-short')
 zdft = loadtxt("figs/walls/z.dat")
 xdft = loadtxt("figs/walls/x.dat")
+
+# get rid of long range:
+g2dft[xdft**2 + zdft**2 > styles.short_range**2] = 1.0
+r = styles.short_range
+phi = linspace(-pi/2, 0, 100)
+twod_plot.plot(r*cos(phi), r*sin(phi), '-k')
 
 levels = linspace(0, gmax, gmax*100)
 xlo = 0.25/gmax
@@ -200,7 +202,7 @@ def avg_points(x, y, dpath):
   return (new_x, new_y)
 
 
-for name in plots:
+for name in styles.plots:
     g2_path = read_walls_path(ff, name)
     if able_to_read_file == False:
         plot(arange(0,10,1), [0]*10, 'k')
@@ -242,7 +244,7 @@ for name in plots:
       z_z, g_z = avg_points(z_z, g_z, dpath)
 
     zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
-    if name != 'fisher':
+    if name != 'fischer':
       # Fischer et al only predict pair distribution function in contact
       xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
       zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
@@ -258,7 +260,7 @@ for name in plots:
 
       for i in suba.spines.itervalues():
         i.set_linewidth(2)
-      if name == 'this-work': # only want to draw rectangle once
+      if name == 'this-work-short': # only want to draw rectangle once
         zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
                                   sub_xlim[1]-sub_xlim[0],
                                   sub_ylim[1]-sub_ylim[0], facecolor='none',
@@ -274,7 +276,7 @@ legendloc = 'lower left' if ff < 0.2 else 'upper left'
 xplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 
-twod_plot.text(2.1, -3.8, styles.title['this-work'],
+twod_plot.text(2.1, -3.8, styles.title['this-work-short'],
      path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 twod_plot.text(2.1, 3.5, styles.title['mc'],
      path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -308,7 +310,7 @@ zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
 
 hw = 4 # headwidth of arrows
 
-g2nice = read_walls_path(ff, 'this-work')
+g2nice = read_walls_path(ff, 'this-work-short')
 def g2pathfunction_x(x):
     return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
 def g2pathfunction_z(z):

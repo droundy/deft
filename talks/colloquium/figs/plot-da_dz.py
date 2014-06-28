@@ -25,7 +25,7 @@ def read_a1_mc():
   return data[:,0], data[:,1]
 
 def read_da_dz(version):
-  # input: "../../papers/pair-correlation/figs/walls/walls_daWB-this-work-%04.2f-%05.3f.dat" % (eta,delta_r)
+  # input: "../../papers/pair-correlation/figs/walls/walls_daWB-this-work-short-%04.2f-%05.3f.dat" % (eta,delta_r)
   # input: "../../papers/pair-correlation/figs/walls/walls_daWB-sokolowski-%04.2f-%05.3f.dat" % (eta,delta_r)
   # input: "../../papers/pair-correlation/figs/walls/walls_daWB-fischer-%04.2f-%05.3f.dat" % (eta,delta_r)
   filename = "../../papers/pair-correlation/figs/walls/walls_daWB-%s-%04.2f-%05.3f.dat" % (version,eta,delta_r) #0.%d0
@@ -34,7 +34,7 @@ def read_da_dz(version):
   da_dz = data[:,1]
   return z0, da_dz
 
-versions = ["this-work","sokolowski", "fischer"]
+versions = ["this-work-short","sokolowski", "fischer"]
 names = ['this work', 'Sokolowski', 'Fischer']
 colors = ['b', 'r', 'g']
 if delta_r > 2.1:

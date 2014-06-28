@@ -18,12 +18,10 @@ rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
 
-# these are the things to set
-plots = ['mc', 'this-work', 'this-work-mc', 'this-work-short', 'sokolowski', 'fischer']
-plots = ['mc', 'this-work', 'this-work-mc', 'sokolowski', 'fischer']
 dx = 0.1
 sigma = 2.0
 contact_delta = 0.1
+r2 = 2.1
 ############################
 rpath = sigma + contact_delta
 center = rpath/2
@@ -50,8 +48,7 @@ def read_triplet_path(ff, fun):
   else:
     # input: "figs/tripletWB-path-fischer-%4.2f.dat" % (ff)
     # input: "figs/tripletWB-path-sokolowski-%4.2f.dat" % (ff)
-    # input: "figs/tripletWB-path-this-work-%4.2f.dat" % (ff)
-    # input: "figs/tripletWB-path-this-work-mc-%4.2f.dat" % (ff)
+    # input: "figs/tripletWB-path-this-work-short-%4.2f.dat" % (ff)
     filename = "figs/tripletWB-path-%s-%1.2f.dat" %(fun, ff)
   if (os.path.isfile(filename) == False):
     # MC data is in repo, but dft isn't, so just use that for now so it will build.
@@ -79,8 +76,8 @@ def read_triplet_back(ff, fun):
 def read_triplet(ff, fun):
   if fun == 'mc':
     return loadtxt("figs/mc/triplet/tripletMC-%3.1f-02.10-trimmed.dat" % ff)
-  elif fun == 'this-work':
-    return loadtxt("figs/tripletWB-this-work-%4.2f-2.10.dat" % ff)
+  elif fun == 'this-work-short':
+    return loadtxt("figs/tripletWB-this-work-short-%4.2f-2.10.dat" % ff)
 
 def read_gr(ff):
   return loadtxt("figs/gr-%04.2f.dat" % ff)
@@ -140,7 +137,7 @@ z = arange(center, center+zpoints*dx, dx)
 Z, R = meshgrid(z, r)
 gmax = g3mc.max()
 
-g3dft = read_triplet(ff, 'this-work')
+g3dft = read_triplet(ff, 'this-work-short')
 zdft = loadtxt("figs/triplet-z.dat")
 xdft = loadtxt("figs/triplet-x.dat")
 
@@ -151,6 +148,13 @@ xlo = 0.5*ginf/gmax
 xhi = 1.5*ginf/gmax
 xwhite = 1.0*ginf/gmax
 xhier = (1 + xhi)/2.0
+
+# get rid of long range:
+g3dft[xdft**2 + (zdft - r2)**2 > styles.short_range**2] = ginf
+r = styles.short_range
+phi = linspace(-pi, 0, 100)
+twod_plot.plot(r*cos(phi) + r2, r*sin(phi), '-k')
+
 
 cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
@@ -179,7 +183,7 @@ twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.plot([zmin,zmax], [0,0], 'k-', linewidth=2)
 
-twod_plot.text(-2.7, -3.9, styles.title['this-work'],
+twod_plot.text(-2.7, -3.9, styles.title['this-work-short'],
                path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
 twod_plot.text(-2.7, 3.5, styles.title['mc'],
                path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -200,10 +204,10 @@ twod_plot.set_xlabel('$z/R$');
 g3_path = read_triplet_path(ff, 'mc')
 xmc = g3_path[:,3]
 zmc = g3_path[:,2]
-g3_path = read_triplet_path(ff, 'this-work')
+g3_path = read_triplet_path(ff, 'this-work-short')
 xdft = g3_path[:,3]
 zdft = g3_path[:,2]
-g3_back = read_triplet_back(ff, 'this-work')
+g3_back = read_triplet_back(ff, 'this-work-short')
 xback = g3_back[:,3]
 zback = g3_back[:,2]
 plot(zmc,xmc, 'w-', linewidth=3)
@@ -233,7 +237,9 @@ def avg_points(x, y, dpath):
       old_i = i
   return (new_x, new_y)
 
-for name in plots:
+suba = axes([.73, .59, .23, .28])
+
+for name in styles.plots:
   g3_path = read_triplet_path(ff, name)
   if able_to_read_file == False:
     plot(arange(0,10,1), [0]*10, 'k')
@@ -257,14 +263,11 @@ for name in plots:
   z_z = z[z>rpath*2]
 
   if 'short' in name:
-      g_x = g_x[x_x <= styles.short_range]
-      x_x = x_x[x_x <= styles.short_range]
+      g_x = g_x[x_x**2 + (r2/2)**2 <= styles.short_range**2]
+      x_x = x_x[x_x**2 + (r2/2)**2 <= styles.short_range**2]
 
-      g_c = g_c[z_c <= styles.short_range]
-      z_c = z_c[z_c <= styles.short_range]
-
-      g_z = g_z[z_z <= styles.short_range]
-      z_z = z_z[z_z <= styles.short_range]
+      g_z = g_z[abs(z_z - r2) <= styles.short_range]
+      z_z = z_z[abs(z_z - r2) <= styles.short_range]
 
 
   if name == 'mc':
@@ -281,7 +284,6 @@ for name in plots:
     zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
 
   # insert zoomed-in subplot
-  suba = axes([.73, .59, .23, .28])
   suba.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
   sub_ylim = (3.5, 5)
   suba.set_yticks([4, 5])
@@ -291,7 +293,7 @@ for name in plots:
   suba.set_xlim(sub_xlim)
   for i in suba.spines.itervalues():
     i.set_linewidth(1)
-  if name == 'this-work': # only want to draw rectangle once
+  if 'this-work' in name: # only want to draw rectangle once
     zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
                               sub_xlim[1]-sub_xlim[0], sub_ylim[1]-sub_ylim[0],
                               facecolor='none', edgecolor='#cccccc', linewidth=1))
@@ -316,11 +318,8 @@ spacing = 2
 x_ref = arange(xmin + 0.1, xlow, spacing)
 z_ref = arange(rpath/2 + 0.1 + spacing/2, 6+spacing, spacing)
 
-backplots = plots
-backplots.remove('fischer')
-backplots.remove('mc')
 
-for name in backplots:
+for name in styles.oriented_plots:
   # backward lines
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]
@@ -334,11 +333,22 @@ for name in backplots:
   g_z = g[z>zcontact]
   z_z = z[z>zcontact]
 
+  if 'short' in name:
+      g_x = g_x[x_x**2 + (r2/2)**2 <= styles.short_range**2]
+      x_x = x_x[x_x**2 + (r2/2)**2 <= styles.short_range**2]
+
+      x = zeros_like(z_z)
+      x[abs(z_z) < rpath] = sqrt(rpath**2 - z_z[abs(z_z) < rpath]**2)
+      d2 = x**2 + z_z**2
+      g_z = g_z[d2 <= styles.short_range**2]
+      z_z = z_z[d2 <= styles.short_range**2]
+
+
   xplot.plot(x_x, g_x, styles.plot[name])
   zplot.plot(z_z, g_z, styles.plot[name])
   suba.plot(z_z, g_z, styles.plot[name])
 
-for name in backplots:
+for name in styles.oriented_plots:
   # forward arrows
   g3_path = read_triplet_path(ff, name)
   x = g3_path[:,3]
@@ -353,14 +363,20 @@ for name in backplots:
 
   start = styles.start[name]*spacing
   x_x, g_x = get_closest(x_x, g_x, x_ref, start)
-  xplot.plot(x_x, g_x, styles.plot_forward[name], mec='none')
-  #if name == 'this-work': print z_z
   z_z, g_z = get_closest(z_z, g_z, z_ref, start)
-  #print name, z_z
+
+  if 'short' in name:
+      g_x = g_x[x_x**2 + 2.1**2 <= styles.short_range**2]
+      x_x = x_x[x_x**2 + 2.1**2 <= styles.short_range**2]
+
+      g_z = g_z[abs(z_z - r2) <= styles.short_range]
+      z_z = z_z[abs(z_z - r2) <= styles.short_range]
+
+  xplot.plot(x_x, g_x, styles.plot_forward[name], mec='none')
   zplot.plot(z_z, g_z, styles.plot_forward[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_forward[name], mec='none')
 
-for name in ['this-work', 'this-work-mc', 'sokolowski']:
+for name in styles.oriented_plots:
   # backward arrows
   g3_path = read_triplet_back(ff, name)
   x = g3_path[:,3]
@@ -375,13 +391,21 @@ for name in ['this-work', 'this-work-mc', 'sokolowski']:
   z_z = z[z>zcontact]
 
   start = styles.start[name]*spacing + 0.5*spacing
-
   x_x, g_x = get_closest(x_x, g_x, x_ref, start)
-  xplot.plot(x_x, g_x, styles.plot_back[name], mec='none')
-
-  start = styles.start[name]*spacing - 0.5*spacing
-
   z_z, g_z = get_closest(z_z, g_z, z_ref, start)
+
+  if 'short' in name:
+      g_x = g_x[x_x**2 + 2.1**2 <= styles.short_range**2]
+      x_x = x_x[x_x**2 + 2.1**2 <= styles.short_range**2]
+
+      x = zeros_like(z_z)
+      x[abs(z_z) < rpath] = sqrt(rpath**2 - z_z[abs(z_z) < rpath]**2)
+      d2 = x**2 + z_z**2
+      g_z = g_z[d2 <= styles.short_range**2]
+      z_z = z_z[d2 <= styles.short_range**2]
+
+
+  xplot.plot(x_x, g_x, styles.plot_back[name], mec='none')
   zplot.plot(z_z, g_z, styles.plot_back[name], mec='none')
   suba.plot(z_z, g_z, styles.plot_back[name], mec='none')
 
@@ -409,7 +433,7 @@ zplot.set_xticks([x_to_z(Ax), Bz, Cz, Dz, Ez])
 zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
 hw = 4 # headwidth of arrows
 
-g3nice = read_triplet_path(ff, 'this-work')
+g3nice = read_triplet_path(ff, 'this-work-short')
 znice = g3nice[:,2]
 xnice = g3nice[:,3]
 gnice = g3nice[:,1]

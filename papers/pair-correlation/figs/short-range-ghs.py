@@ -133,7 +133,8 @@ ghs = [0]*len(ff)
 eta = [0]*len(ff)
 gsigmas = [0]*len(ff)
 
-pylab.figure(1, figsize=(5,4))
+fig1 = pylab.figure(1, figsize=(5,4))
+ax1 = fig1.gca()
 pylab.axvline(x=sigma, color='k', linestyle=':')
 pylab.axhline(y=1, color='k', linestyle=':')
 
@@ -442,6 +443,7 @@ def avg_points(x, y, dpath):
 
 
 fig2 = pylab.figure(2, figsize=(6,8))
+ax2 = fig2.gca()
 
 # ax.axvline(x=sigma, color='gray', linestyle='-')
 # ax.axhline(y=1, color='gray', linestyle='-')
@@ -509,6 +511,7 @@ for i in range(len(ff)):
              alt_styles['gil_unfitted'], label='gil-villegas')
   pylab.plot(r_mc_avged, g_mc_avged + offset,
              alt_styles['mc'], label='mc')
+
   dg = 0.2
   if maxes[i] > 2:
     dg = 0.5
@@ -542,10 +545,18 @@ pylab.savefig("figs/short-range-ghs.pdf")
 
 pylab.figure(2)
 pylab.ylim(ymin=zeros[-1] + mines[-1], ymax=zeros[0] + maxes[0])
-pylab.xlim(1.8, 5.5)
+xlim = [1.8, 5.5]
+pylab.xlim(xlim[0], xlim[1])
 pylab.axvline(2.0, color='k', ls=':')
 pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)
+
+for i in range(len(ff)):
+  pylab.text((xlim[0]+xlim[1])/2, zeros[i]+maxes[i]-0.1, r"$\eta = %.1f$" %(ff[i]), ha='center', va='top')
+
+
+handles, labels = ax2.get_legend_handles_labels()
+ax2.legend(handles[0:5:2], labels[0:5:2], loc='upper right')
 # # ax4.legend(loc='upper center')
 # # ax4.add_artist(legends[3])
 # ax4.set_xlabel('$r/R$')
