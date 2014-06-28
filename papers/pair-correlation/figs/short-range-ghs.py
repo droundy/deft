@@ -12,6 +12,8 @@ import pylab, string, numpy
 
 from matplotlib import rc
 
+import styles
+
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
@@ -100,7 +102,7 @@ def evalg(x, g_sigma, r):
   return lam(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12],
              g_sigma, r)
 
-fit_rcutoff = 4.2
+fit_rcutoff = styles.short_range
 def read_ghs(base, ff):
   global able_to_read_file
   mcdatafilename = "%s-%4.2f.dat" % (base, ff)
@@ -189,7 +191,7 @@ chi2 = sum(dist2(x)**2)
 print "beginning least squares fit, chi^2 initial: ", chi2
 vals, mesg = leastsq(dist2, x)
 # round fitted numbers
-digits = 12
+digits = 3
 vals = pylab.around(vals, digits)
 chi2 = sum(dist2(vals)**2)
 print "original fit complete, chi^2: %g" % chi2
@@ -350,6 +352,7 @@ f.close()
 # save fit parameters
 outfile = open('figs/short-range-fit-parameters.tex', 'w')
 outfile.write(r"""
+\newcommand\maxrfit{%(fit_rcutoff).2g}
 \newcommand\maxerr{%(maxerr).2g}
 \newcommand\etamaxerr{%(etamaxerr)g}
 \newcommand\rmaxerr{%(rmaxerr).2g}
@@ -362,13 +365,15 @@ outfile.write(r"""
      h_\sigma^3 &
      h_\sigma^4
   \end{pmatrix}
-  \begin{pmatrix}
+  \left(
+  \begin{array}{c d{3} d{3} d{3} d{3}}
     1 & 0 & 0 & 0 & 0 \\
     1 & 0 & 0 & 0 & 0 \\
     0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
     0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
     0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
-  \end{pmatrix}
+  \end{array}
+  \right)
   \begin{pmatrix}
      1 \\
      \zeta \\

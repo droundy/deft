@@ -5,6 +5,9 @@
 \usepackage{color}
 \usepackage{subcaption} % provides subfigure
 
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
@@ -431,6 +434,11 @@ where $h_\sigma = g_\sigma - 1$ and $\zeta \equiv
   the fitted terms? This seems suboptimal.}
 
 \fixme{Change code to round to a fixed (small) number of digits in fit.}
+
+The fit is displayed in Fig.~\ref{fig:radial-distribution}.  This
+function is fit to data for $r <= \maxrfit R$.  The maximum error
+within this radius in $g_S(r)$ at packing fractions up to 0.4 is
+\maxerr, which occurs at $\eta = \etamaxerr$ and $r = \rmaxerr R$.
 
 \newcommand{\plotcomp}[1]{The top halves of these figures show the
   results of Monte Carlo simulations, while the bottom halves show the

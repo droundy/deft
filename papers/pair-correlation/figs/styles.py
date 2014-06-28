@@ -52,4 +52,4 @@ for k in color:
     plot_forward[k] = color[k] + forward_line[k]
 
 
-short_range = 4.2
+short_range = 4.0
