@@ -24,7 +24,7 @@
 \newcommand{\pahosays}[1]{{\color{red} [\blue{Paho:} \emph{#1}]}}
 
 \begin{document}
-\title{An efficient contact value approach for the pair distribution
+\title{An efficient contact value approach to approximating the pair distribution
   function of the inhomogeneous hard-sphere fluid}
 
 \author{Paho Lurie-Gregg}
@@ -44,9 +44,9 @@ distributions. We further develop a separable form of this
 approximation that achieves greater computational efficiency by using
 exclusively fixed-kernel convolutions and thus allowing an
 implementation using fast Fourier transforms. We compare results for
-both versions of our pair distribution approximation with two
-previously published works and Monte-Carlo simulation, showing
-favorable results.
+both versions of our pair distribution approximation \jeffsays{Is it
+  still both? Do we want that?} with two previously published works
+and Monte-Carlo simulation, showing favorable results.
 \end{abstract}
 
 \maketitle
@@ -317,7 +317,7 @@ We use the contact-value theorem to derive the exact formula:
 \end{align}
 where $\sigma(\rr)$ is the diameter of hard spheres located at
 position $\rr$, and $F_{HS}$ is the Helmholtz free energy of the
-hard-sphere fluid.  The functional derivative with of free energy with
+hard-sphere fluid.  The functional derivative of the free energy with
 respect to hard-sphere diameter in Eq.~\ref{eq:gsigma-exact} requires
 that we be able to evaluate the change in free energy resulting from a
 change in the diameter of specifically the hard spheres located at
@@ -327,26 +327,32 @@ straightforward within Fundamental Measure Theory
 the FMT free energy functional~\cite{roth2002whitebear}, which
 provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
-over a wide range of densities.
+over a wide range of densities.  \jeffsays{We had a clarifying
+  paragraph below but I don't think it's needed anymore, at least not
+  here.  The explanation up until this point is moving along fine and
+  I don't think it needs clarification.}
+%% \jeffsays{My attempt at this paragraph:} To be
+%% clear we note that for our purposes in this work we use the hard
+%% sphere free energy twice.  It is first minimized to find $n(\rr)$ and
+%% then its functional derivative is used to find $g_\sigma(\rr)$.  In
+%% actual application of perturbation theory the hard sphere free energy
+%% would be used only to find $g_\sigma(\rr)$, which would in turn be
+%% used in the approximation for $g^{(2)}(\rr_1,\rr_2)$ that would appear
+%% in a perturbation term.  The free energy that would be minimized to
+%% find $n(\rr)$ in this case would be the total free energy and not the
+%% hard sphere free energy.
 
-\jeffsays{My attempt at this paragraph:} To be clear we note that for
-our purposes in this work we use the hard sphere free energy twice.
-It is first minimized to find $n(\rr)$ and then its functional
-derivative is used to find $g_\sigma(\rr)$.  In actual application of
-perturbation theory the hard sphere free energy would be used only to
-find $g_\sigma(\rr)$, which would in turn be used in the approximation
-for $g^{(2)}(\rr_1,\rr_2)$ that would appear in a perturbation term.
-The free energy that would be minimized to find $n(\rr)$ in this case
-would be the total free energy and not the hard sphere free energy.
 
 \section{Contact value approach}
-In the approaches for the pair distribution function mentioned above,
-the radial distribution function used in the approximation
-was dependent upon the density averaged over some volume.  We seek to
-achieve greater accuracy by making use of a function dependent upon
-our averaged $g_{\sigma}(\rr)$ discussed above, which holds more
-information about an inhomogeneous system than does a simple
-convolution of the density.
+\jeffsays{In my current version latex's formatting of this and the
+  next section is very poor so we should keep our eye on it as the
+  text develops} In the approaches for the pair distribution function
+mentioned above, the radial distribution function used in the
+approximation was dependent upon the density averaged over some
+volume.  We seek to achieve greater accuracy by making use of a
+function dependent upon our averaged $g_{\sigma}(\rr)$ discussed
+above, which holds more information about an inhomogeneous system than
+does a simple convolution of the density.
 %
 We construct the CVA with the average of two radial distribution
 functions, evaluated at the distance between the two points, that are
@@ -378,7 +384,10 @@ compute $\eta$ from $g_\sigma$ and then find $g(r,\eta)$ using either
 some approximate functional form (e.g. Percus-Yevick) or Monte Carlo
 simulation results.  In this paper we first use the Monte Carlo
 results for the radial distribution function $g(r)$, which we also use
-in evaluating the approximations of earlier works.
+in consturcting and evaluating the approximations of earlier works.
+\jeffsays{With this last sentence: it states that we 'first' use the
+  Monte Carlo version for our radial distribution but then doesn't say
+  what we use afterward.}
 
 \newcommand\kappaO{\kappa_0}
 \newcommand\kappaI{\kappa_1}
@@ -419,6 +428,9 @@ Naturally, we match the value at contact:
 \begin{equation}
   g_S(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
+
+\jeffsays{The rest of the fitting needs to be explained, and
+  discussing the connection with Gill-Viegas}
 
 \begin{widetext}
 \begin{align}
@@ -465,6 +477,11 @@ within this radius in $g_S(r)$ at packing fractions up to 0.4 is
     $\rr_2$ varies. \plotcomp{$g^{(2)}(\rr_1,\rr_2)$}.}
   \label{fig:pair-distribution}
 \end{figure*}
+
+\jeffsays{I've noted this in the penultimate section as well but I
+  think it might be good to include that section after this one.
+  Where that section is now, I feel like it seems we think it's less
+  important.  This is subjective, though.}
 
 \section{Results}
 
@@ -724,6 +741,8 @@ Finally, in the case of the power-law attraction all approximations
 tested work very well.
 
 \section{Efficiency in Thermodynamic Perturbation Theory}
+\jeffsays{I think this ought to be included after the Seperable Fit
+  secction.  It may seem more important that way.}
 
 The key insight of the CVA-S is that we can implement
 Eq.~\ref{eq:mean-field} on $\mathcal{O}(N\log N)$ time using Fast
