@@ -2,8 +2,9 @@
 \usepackage{graphicx}% Include figure files
 \usepackage{color}
 
+\newcommand\kk{\mathbf{k}}
 \newcommand\xx{\mathbf{x}}
-\newcommand\rr{\mathbf{x}}
+\newcommand\rr{\mathbf{r}}
 \newcommand\fixme[1]{\textcolor{red}{\textbf{[#1]}}}
 
 \begin{document}
@@ -50,6 +51,7 @@ SAFT-VR\cite{gil-villegas-1997-SAFT-VR}.
 \fixme{And introduction to TPT---why do we use it?}
 
 \fixme{For now, the discussion follows entirely from the Simple Liquids book~\cite{simple-liquids}}
+
 
 The pair potential $V(\rr)$ describes the interaction between two hard spheres. For the square-well model,
 \begin{align}
@@ -220,7 +222,7 @@ by
 \newcommand\kappaone{2.16}
 \newcommand\kappatwo{2.79}
 
-\begin{multline}
+\begin{multline}\label{eq:gs}
   g_S(r,g_\sigma) = 1 + (g_\sigma-1) e^{-\kappaO \left(\frac{r}{\sigma}-1\right)} \\
   + (g_\sigma -1)(\kappaO - 2g_\sigma)  \left(\frac{r}{\sigma}-1\right)e^{-\kappaI  \left(\frac{r}{\sigma}-1\right)} \\
   + I(g_\sigma)  \left(\frac{r}{\sigma}-1\right)^2e^{-\kappaZ  \left(\frac{r}{\sigma}-1\right)}
@@ -248,7 +250,52 @@ This function includes three fitted parameters, $\kappaO =
 \kappazero$, $\kappaI = \kappaone$,
 and $\kappaZ = \kappatwo$.
 
+\subsubsection{Fourier transform of radial distribution function}
 
+\newcommand\kapovsig[1]{\frac{\kappa_{#1}}{\sigma}}
+
+For or purposes, we want to Fourier transform $g_s(r,g_\sigma)u_{SW}(\rr)$ and
+the square well potential since it is used in the free energy functional.
+\begin{align}
+  \tilde{g_s}(k, g_\sigma) =\int^\infty_{-\infty} g_s(r, g_\sigma)u_{SW}(\rr)e^{-i\kk \cdot \rr}\mathrm{d}^3\rr
+\end{align}
+Since the radial distribution function and potential are radially symmetric, we can
+express the dot product differently so that the transform is
+\begin{align}
+  \tilde{g_s}(k, g_\sigma) &=\int^\infty_{-\infty} g_s(r,
+  g_\sigma)u_{sw}(r)e^{-ikr \cos \theta}\mathrm{d}^3\rr \\
+  &= 2 \pi \int_\sigma^{\lambda \sigma} \int_0^\pi g_s(r, g_\sigma) e^{-ikr \cos
+    \theta} r^2 \sin \theta \, \mathrm{d}r \mathrm{d}\theta \\
+  &= 2\pi\int_\sigma^{\lambda \sigma} \int_{1}^{-1} g_s(r, g_\sigma) e^{-ikr \cos
+    \theta} r^2 \mathrm{d}r \mathrm{d}\cos \theta \\
+  &= 2\pi\int_\sigma^{\lambda \sigma} g_s(r, g_\sigma) \frac{1}{-ikr}\bigg[e^{ikr} -
+    e^{-ikr} \bigg]r^2 \mathrm{d}r \\
+ &= \frac {4\pi}{k}\int_\sigma^{\lambda \sigma} r g_s(r,g_\sigma) \sin (kr) \mathrm{d}r.
+\end{align}
+Now I'll do the separate integrals for each part on the right hand
+side of Eqn. \ref{eq:gs}. The first term is 1, so we are left with
+a delta function.  We will ignore this term, and
+move onto the next one whose integral is
+\begin{align}
+  \int_\sigma^{\lambda \sigma}r(g_\sigma -1) e^{-\kappa_0
+    \left( \frac{r}{\sigma}-1 \right)} \sin(kr)\mathrm{d}r.
+\end{align}
+If we pull out constants and put this into Mathematica,
+\begin{widetext}
+  \begin{align}
+  \int_\sigma^{\lambda
+    \sigma}re^{-\frac{\kappa_0}{\sigma}r}\sin(kr)\mathrm{d}r
+  &= \frac{1}{(k^2 + (\kapovsig{0})^2)^2} \bigg\{ e^{-\kappaO} \left[k
+      \left(2\kapovsig{0} + \sigma (k^2 + (\kapovsig{0})^2) \right)
+      \cos (\sigma k) + \left((\kapovsig{0})^2(1 + \kappaO) +
+      k^2(\kappaO-1)\right) \sin (\sigma k) \right] \notag \\
+  &- e^{-\lambda
+    \kappaO} \left[ k
+      \left(2\kapovsig{0} + \lambda \sigma (k^2 + (\kapovsig{0})^2) \right)
+      \cos (\lambda \sigma k) + \left((\kapovsig{0})^2(1 + \lambda \kappaO) +
+      k^2(\lambda\kappaO-1)\right) \sin (\lambda \sigma k)\right] \bigg\}
+  \end{align}
+\end{widetext}
 \subsubsection{Averaged pair distribution  $g_\sigma(\rr)$}
 
 The approximation for the averaged pair distribution $g_\sigma(\rr)$
