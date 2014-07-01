@@ -44,9 +44,8 @@ distributions. We further develop a separable form of this
 approximation that achieves greater computational efficiency by using
 exclusively fixed-kernel convolutions and thus allowing an
 implementation using fast Fourier transforms. We compare results for
-both versions of our pair distribution approximation \jeffsays{Is it
-  still both? Do we want that?} with two previously published works
-and Monte-Carlo simulation, showing favorable results.
+our pair distribution approximation with two previously published
+works and Monte-Carlo simulation, showing favorable results.
 \end{abstract}
 
 \maketitle
@@ -327,10 +326,13 @@ straightforward within Fundamental Measure Theory
 the FMT free energy functional~\cite{roth2002whitebear}, which
 provides an excellent approximation for this averaged value of the
 pair distribution function at contact for a variety of interfaces, and
-over a wide range of densities.  \jeffsays{We had a clarifying
-  paragraph below but I don't think it's needed anymore, at least not
-  here.  The explanation up until this point is moving along fine and
-  I don't think it needs clarification.}
+over a wide range of densities.
+
+  %% \jeffsays{We had a clarifying paragraph below but I don't think
+  %% it's needed anymore, at least not here.  The explanation up until
+  %% this point is moving along fine and I don't think it needs
+  %% clarification.}
+
 %% \jeffsays{My attempt at this paragraph:} To be
 %% clear we note that for our purposes in this work we use the hard
 %% sphere free energy twice.  It is first minimized to find $n(\rr)$ and
@@ -344,9 +346,7 @@ over a wide range of densities.  \jeffsays{We had a clarifying
 
 
 \section{Contact value approach}
-\jeffsays{In my current version latex's formatting of this and the
-  next section is very poor so we should keep our eye on it as the
-  text develops} In the approaches for the pair distribution function
+In the approaches for the pair distribution function
 mentioned above, the radial distribution function used in the
 approximation was dependent upon the density averaged over some
 volume.  We seek to achieve greater accuracy by making use of a
@@ -382,18 +382,59 @@ The CVA requires the radial distribution function as a function of $r$
 and $g_\sigma$.  One approach to constructing $g(r,g_\sigma)$ is to
 compute $\eta$ from $g_\sigma$ and then find $g(r,\eta)$ using either
 some approximate functional form (e.g. Percus-Yevick) or Monte Carlo
-simulation results.  In this paper we first use the Monte Carlo
-results for the radial distribution function $g(r)$, which we also use
-in consturcting and evaluating the approximations of earlier works.
-\jeffsays{With this last sentence: it states that we 'first' use the
-  Monte Carlo version for our radial distribution but then doesn't say
-  what we use afterward.}
-
-\newcommand\kappaO{\kappa_0}
-\newcommand\kappaI{\kappa_1}
-\newcommand\kappaZ{\kappa_2}
+simulation results.  In this paper we use a fit to Monte Carlo results
+for the radial distribution function $g(r)$, which facilitates
+efficient computation.  When evaluating the approximations of earlier
+works described in Section~\ref{sec:gn}, we use interpolated Monte
+Carlo results for $g(r,n)$.
 
 \input{figs/short-range-fit-parameters}
+
+\section{Making the CVA efficient}
+The CVA as described in the previous section is an incremental
+improvment over existing approaches outlined in Section~\ref{sec:gn}.
+However, as discussed above, these approximations have not been widely
+used in the construction of density functionals based on thermodynamic
+perturbation theory, largely due to their computational complexity.
+We address this issue by developing a \emph{separable} fit to the
+radial distribution function of the hard-sphere fluid (see
+Section~\ref{sec:separable-fit} for details).  The separable fit is of
+the form
+\begin{align}
+  g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+\end{align}
+where the notable aspect is that the radial distribution function is
+written as a sum of terms that are each a simple product of a function
+of radius with a function of $g_\sigma$.  This enables us to write
+typicaly integrals involving the pair distribution function as a
+summation of fixed-kernel convolutions, which may be efficiently
+computed using Fast Fourier Transforms (FFTs), in $\mathcal{O}(N\log
+N)$ time.
+
+We begin by examining the lowest-order correction in TPT, given by
+Eq.~\ref{eq:mean-field}.  The two terms that are averaged in
+Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
+\begin{align}
+  F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
+  g(r_{12},g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
+  d\rr_1d\rr_2
+\end{align}
+When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
+further simplify this integral as
+\begin{multline}
+  F_1^{\textit{CVA-S}} =
+  \sum_i \tfrac12 \!\! \iint \!\! \bigg( n(\rr_1)  \bigg) \\
+                             \bigg( a_i(r_{12})\Phi(r_{12}) \bigg) \\
+                             \bigg( b_i(g_\sigma(\rr_2))n(\rr_2) \bigg)
+  d\rr_1d\rr_2
+\end{multline}
+where the functional is written as a summation of integrals, each of
+which is an integral of simple convolution in three dimensions.  Thus,
+each of these integrals may be computed in $\mathcal{O}(N\log N)$
+time, which is the same scaling behavior that is common to the most
+common and accurate classical density functional theories, most
+notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
+  roth2002whitebear}.
 
 \begin{figure}
   \centering
@@ -407,50 +448,56 @@ in consturcting and evaluating the approximations of earlier works.
     of the fitted region.  }\label{fig:radial-distribution}
 \end{figure}
 
-\section{Separable radial distribution function for the CVA-S}
-\fixme{Section title:  A separable fit for the radial distribution function?}
+\section{A separable fit for the radial distribution function}\label{sec:separable-fit}
 
-The CVA is quite accurate, but cannot be computed efficiently
-with fixed-kernel convolutions as written.  In order to ease
-computational application of this pair distribution function in
-classical density functionals, we have developed a separable
-approximation for the function $g(r,g_\sigma)$:
-\begin{align}
-  g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
-\end{align}
-This separable contact value approach (CVA-S) allows the mean
-field contribution to the free energy (Eq.~\ref{eq:mean-field}) to be
-computed with only fixed-kernel convolutions, which can be
-efficiently computed using fast Fourier transforms.
+We have performed a separable fit to the radial distribution function,
+which we compute using Monte Carlo simulation.  We chose to focus our
+fit on the range of distances $r_{12} < 2\sigma$.  This range of
+distances is relevant to the widely used \fixme{add citations?}
+Statistical Associating Fluid Theory of Variable Range (SAFT-VR) free
+energy with square-well dispersive attraction developed by
+Gil-Villegas \emph{et al.}~\cite{gil1997statistical}.  For comparison,
+we plot in Fig.~\ref{fig:radial-distribution} alongside our the fit to
+the radial distribution function that of Gil-Villegas \emph{et al.},
+which we have extracted from their approximation for the first term in
+the dispersion free energy given by Eq.~\ref{eq:mean-field}.
 
-We construct $g_S(r, g_\sigma)$ to satisfy several constraints.
-Naturally, we match the value at contact:
+For ease of implementation and future extension to larger radii, we
+chose to express our fit using a polynomial fit.  We constrain our
+functional form for $g_S(r, g_\sigma)$ to match the value at contact:
 \begin{equation}
   g_S(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
-
-\jeffsays{The rest of the fitting needs to be explained, and
-  discussing the connection with Gill-Viegas}
-
-\begin{widetext}
+Beyond this constraint, we simply included a polynomial multiplied by
+an exponential decay:
 \begin{align}
   g_S(r,g_\sigma) &=
-  1 + \left(h_\sigma + \sum_{i=2}^{4} \sum_{j=1}^{4} h_\sigma^i
-  \zeta^j\right)e^{-\alpha \zeta}
-  \\
-  &= \kappamatrix
+  1 + \left(\sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} h_\sigma^i
+  \zeta^j\right)e^{-\alpha \zeta} \label{eq:fit-form}
 \end{align}
-\end{widetext}
-where $h_\sigma = g_\sigma - 1$ and $\zeta \equiv
-\frac{r}{\sigma}-1$.  \fixme{Why start at $i=2$ rather than $i=1$ for
-  the fitted terms? This seems suboptimal.}
+where $h_\sigma = g_\sigma - 1$ is the total correlation function at
+contact, and $\zeta \equiv \frac{r}{\sigma}-1$ is a dimensionless
+measure of the distance from contact.
 
-\fixme{Change code to round to a fixed (small) number of digits in fit.}
+\begin{table}
+  \begin{align*}
+    \kappa &= \kappatable
+  \end{align*}
+  \caption{The fitted $\kappa_{ij}$ matrix.  In addition to these 12
+    parameters, we also optimized the exponetial decay constant
+    $\alpha=\alphaval$.
+    %% Note that the first column of $\kappa$ corresponds to $j=1$
+    %% while the first row corresponds to $i=1$ in
+    %% Eq.~\ref{eq:fit-form}.
+  }
+\end{table}
 
-The fit is displayed in Fig.~\ref{fig:radial-distribution}.  This
-function is fit to data for $r <= \maxrfit R$.  The maximum error
-within this radius in $g_S(r)$ at packing fractions up to 0.4 is
-\maxerr, which occurs at $\eta = \etamaxerr$ and $r = \rmaxerr R$.
+The fit is displayed in Fig.~\ref{fig:radial-distribution}, along with
+the radial distribution function fit by Gil-Villegas and Monte Carlo
+simulation results.  This function is fit to data for $r <= \maxrfit
+R$.  The maximum error within this radius in $g_S(r)$ at packing
+fractions up to 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$
+and $r = \rmaxerr R$.
 
 \newcommand{\plotcomp}[1]{The top halves of these figures show the
   results of Monte Carlo simulations, while the bottom halves show the
@@ -477,12 +524,6 @@ within this radius in $g_S(r)$ at packing fractions up to 0.4 is
     $\rr_2$ varies. \plotcomp{$g^{(2)}(\rr_1,\rr_2)$}.}
   \label{fig:pair-distribution}
 \end{figure*}
-
-\jeffsays{I've noted this in the penultimate section as well but I
-  think it might be good to include that section after this one.
-  Where that section is now, I feel like it seems we think it's less
-  important.  This is subjective, though.}
-
 \section{Results}
 
 \subsection{Pair distribution function}
@@ -739,36 +780,6 @@ with poor results for the bulk fluid.  We see that over these length
 scales, both the CVA and Sokolowski's approximation are very accurate.
 Finally, in the case of the power-law attraction all approximations
 tested work very well.
-
-\section{Efficiency in Thermodynamic Perturbation Theory}
-\jeffsays{I think this ought to be included after the Seperable Fit
-  secction.  It may seem more important that way.}
-
-The key insight of the CVA-S is that we can implement
-Eq.~\ref{eq:mean-field} on $\mathcal{O}(N\log N)$ time using Fast
-Fourier Transforms (FFTs) where $N$ is proportional to the volume of
-the system.  We begin by examining the CVA.  The two terms that are
-averaged in Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
-\begin{align}
-  F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
-  g(r_{12},g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
-  d\rr_1d\rr_2
-\end{align}
-When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
-further simplify this integral as
-\begin{multline}
-  F_1^{\textit{CVA-S}} =
-  \sum_i \tfrac12 \!\! \iint \!\! \bigg( n(\rr_1)  \bigg) \\
-                             \bigg( a_i(r_{12})\Phi(r_{12}) \bigg) \\
-                             \bigg( b_i(g_\sigma(\rr_2))n(\rr_2) \bigg)
-  d\rr_1d\rr_2
-\end{multline}
-where the functional is written as a summation of integrals, each of
-which is an integral of simple convolution in three dimensions.  Thus,
-each of these integrals may be computed in $\mathcal{O}(N\log N)$
-time, which is the same scaling behavior that is common to the most
-common and accurate classical density functional theories, most
-notably FMT.
 
 \section{Conclusion}
 

@@ -359,8 +359,8 @@ outfile.write(r"""
 \newcommand\rmaxerr{%(rmaxerr).2g}
 \newcommand\chisq{%(chisq).2g}
 \newcommand\kappamatrix{
+  1 +
   \begin{pmatrix}
-     1 &
      h_\sigma &
      h_\sigma^2 &
      h_\sigma^3 &
@@ -368,7 +368,6 @@ outfile.write(r"""
   \end{pmatrix}
   \left(
   \begin{array}{c d{3} d{3} d{3} d{3}}
-    1 & 0 & 0 & 0 & 0 \\
     1 & 0 & 0 & 0 & 0 \\
     0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
     0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
@@ -384,12 +383,17 @@ outfile.write(r"""
   \end{pmatrix}
   e^{-%(alpha)g \zeta}
 }
-\newcommand\kappaAA{%(K21)g}
-\newcommand\kappaAB{%(K22)g}
-\newcommand\kappaAC{%(K23)g}
-\newcommand\kappaBA{%(K31)g}
-\newcommand\kappaBB{%(K32)g}
-\newcommand\kappaBC{%(K33)g}
+\newcommand\kappatable{
+  \left(
+  \begin{array}{c d{3} d{3} d{3} d{3}}
+    1 & 0 & 0 & 0 & 0 \\
+    0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
+    0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
+    0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
+  \end{array}
+  \right)
+}
+\newcommand\alphaval{%(alpha)g}
 """ % locals())
 outfile.close()
 
