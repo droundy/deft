@@ -507,3 +507,52 @@ int maximum_interactions(int N, double interaction_distance, double neighbor_R,
   delete[] droplet_balls;
   return interactions;
 }
+
+
+// sw_simulation methods
+
+void sw_simulation::move_a_ball() {
+  move_one_ball(iteration, balls, N, len, walls, neighbor_R, translation_distance,
+                interaction_distance, max_neighbors, dr, &moves, interactions,
+                ln_energy_weights);
+  interactions += moves.new_count - moves.old_count;
+  energy_histogram[interactions]++;
+  iteration++; // increment the number of "iterations"
+}
+
+void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
+  int num_up = 0;
+  const int num_moves = 100;
+  const double deviation_allowed = 0.5/sqrt(num_moves);
+  double dscale = 0.1;
+  while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed) {
+    num_up = 0;
+    int num_moved = 0;
+    double mean = 0;
+    while (num_moved < num_moves) {
+      int old_interactions = interactions;
+      move_a_ball();
+      if (interactions != old_interactions) {
+        num_moved++;
+        if (interactions > old_interactions) num_up++;
+      }
+      mean += interactions;
+    }
+    mean /= num_moved;
+    state_of_max_entropy = int(mean + 0.5);
+
+    // update translation distance...
+    const double acceptance_rate =
+      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
+    moves.working_old = moves.working;
+    moves.total_old = moves.total;
+    if (acceptance_rate < acceptance_goal)
+      translation_distance /= 1+dscale;
+    else
+      translation_distance *= 1+dscale;
+    // hokey heuristic for tuning dscale
+    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
+    if(closeness > 0.5) dscale *= 2;
+    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
+  }
+}

@@ -33,7 +33,7 @@ struct move_info {
 // the energy_histogram, since only that histogram is needed to
 // actually run the simulation.  Collecting "real" data is another
 // matter.
-struct simulation_data {
+struct sw_simulation {
   long iteration; // the current iteration number
 
   /* The following describe the current state of the system. */
@@ -47,6 +47,7 @@ struct simulation_data {
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
+  double interaction_distance; // the distance over which balls interact
 
   /* The following are constant parameters that describe the details
      of how we run the computation, and do not change as we
@@ -54,7 +55,7 @@ struct simulation_data {
 
   // max_neighbors is the upper limit to the maximum number of
   // neighbors a ball could have.  It is needed as an imput to
-  // move_one_ball.
+  // move_a_ball.
   int max_neighbors;
   double neighbor_R; // radius of our neighbor sphere
   double translation_distance; // scale for how far to move balls
@@ -66,19 +67,25 @@ struct simulation_data {
 
   int state_of_max_entropy;
   move_info moves;
-  long *energy_histogram, *ln_energy_weights;
+  long *energy_histogram;
+  double *ln_energy_weights;
+
+  /* The following deal with the "optimized ensemble" approach and
+     tracking plus and minus walkers. */
   long *walkers_plus, *walkers_total;
+  bool current_walker_plus;
+  int walker_plus_threshold, walker_minus_threshold;
 
   // move just one ball, and update the energy, and update the
   // energy_histogram.
-  void move_one_ball();
+  void move_a_ball();
 
   // print the timings (if the time is right)
   void print_timings(int timings_period) const;
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance.
-  void initialize_max_entropy_and_translation_distance();
+  void initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
 
   // initialize the weight array using the Gaussian approximation.
   void initialize_gaussian();
