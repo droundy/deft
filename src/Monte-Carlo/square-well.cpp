@@ -512,7 +512,7 @@ int maximum_interactions(int N, double interaction_distance, double neighbor_R,
 // sw_simulation methods
 
 void sw_simulation::move_a_ball() {
-  move_one_ball(iteration, balls, N, len, walls, neighbor_R, translation_distance,
+  move_one_ball(iteration % N, balls, N, len, walls, neighbor_R, translation_distance,
                 interaction_distance, max_neighbors, dr, &moves, interactions,
                 ln_energy_weights);
   interactions += moves.new_count - moves.old_count;
@@ -522,13 +522,16 @@ void sw_simulation::move_a_ball() {
 
 void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   int num_up = 0;
-  const int num_moves = 100;
-  const double deviation_allowed = 0.5/sqrt(num_moves);
+  const int num_moves = 500;
+  const double deviation_allowed = 0.1/sqrt(num_moves);
   double dscale = 0.1;
-  while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed) {
+  const int starting_iterations = iteration;
+  int attempts_to_go = 4; // always try this many times, to get translation_distance right.
+  double variance;
+  while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed || attempts_to_go-- >= 0) {
     num_up = 0;
     int num_moved = 0;
-    double mean = 0;
+    for (int i=0; i<energy_levels; i++) energy_histogram[i] = 0;
     while (num_moved < num_moves) {
       int old_interactions = interactions;
       move_a_ball();
@@ -536,12 +539,22 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
         num_moved++;
         if (interactions > old_interactions) num_up++;
       }
-      mean += interactions;
     }
-    mean /= num_moved;
+    double mean = 0;
+    double counted_in_mean = 0;
+    for (int i=0; i<energy_levels; i++) {
+      counted_in_mean += energy_histogram[i];
+      mean += i*energy_histogram[i];
+    }
+    mean /= counted_in_mean;
+    variance = 0;
+    for (int i=0; i<energy_levels; i++) variance += (i-mean)*(i-mean)*energy_histogram[i];
+    variance /= counted_in_mean;
     state_of_max_entropy = int(mean + 0.5);
 
-    // update translation distance...
+    // ---------------------------------------------------------------
+    // Fine-tune translation scale to reach acceptance goal
+    // ---------------------------------------------------------------
     const double acceptance_rate =
       double(moves.working-moves.working_old)/(moves.total-moves.total_old);
     moves.working_old = moves.working;
@@ -554,5 +567,11 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
     const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
     if(closeness > 0.5) dscale *= 2;
     else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
+
+    // printf("Figure of merit:  %g (state %d)\n",
+    //        (num_up/double(num_moves) - 0.5)/deviation_allowed,
+    //        state_of_max_entropy);
   }
+  printf("Took %ld iterations to find max entropy state:  %d with width %g\n",
+         iteration - starting_iterations, state_of_max_entropy, sqrt(variance));
 }

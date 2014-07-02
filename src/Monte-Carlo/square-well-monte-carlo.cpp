@@ -116,7 +116,7 @@ int main(int argc, const char *argv[]) {
   double well_width = 1.3;
   double ff = 0.3;
   double neighbor_scale = 2;
-  double dr = 0.1;
+  sw.dr = 0.1;
   double de_density = 0.1;
   double de_g = 0.05;
   double max_rdf_radius = 10;
@@ -145,7 +145,7 @@ int main(int argc, const char *argv[]) {
      0, "Number of iterations to run for", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
-    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dr, 0,
+    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.dr, 0,
      "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
@@ -245,12 +245,12 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || initialization_iterations < 0 || iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || dr <= 0 || translation_scale < 0 ||
+      neighbor_scale <= 0 || sw.dr <= 0 || translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
-  dr *= R;
+  sw.dr *= R;
 
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
   if (eta > 1) {
@@ -307,6 +307,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Define sw_simulation variables
   // ----------------------------------------------------------------------------
+
+  sw.iteration = 0; // start at zeroeth iteration
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -447,7 +449,7 @@ int main(int argc, const char *argv[]) {
 
   {
     int most_neighbors =
-      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*dr, sw.max_neighbors, sw.len,
+      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*sw.dr, sw.max_neighbors, sw.len,
                                  sw.walls);
     if (most_neighbors < 0) {
       fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
@@ -465,7 +467,7 @@ int main(int argc, const char *argv[]) {
 
   bool error = false, error_cell = false;
   for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls, dr)) {
+    if (!in_cell(sw.balls[i], sw.len, sw.walls, sw.dr)) {
       error_cell = true;
       error = true;
     }
@@ -492,9 +494,11 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   double avg_neighbors = 0;
-  int interactions =
+  sw.interactions =
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
-  double dscale = .1;
+
+  // First, let us figure out what the max entropy point is.
+  sw.initialize_max_entropy_and_translation_distance();
 
   for(long iteration = 1;
       iteration <= initialization_iterations + first_weight_update; iteration++) {
@@ -503,45 +507,27 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++) {
       move_one_ball(i, sw.balls, sw.N, sw.len, sw.walls, sw.neighbor_R, sw.translation_distance,
-                    sw.interaction_distance, sw.max_neighbors, dr, &sw.moves,
-                    interactions, sw.ln_energy_weights);
-      interactions += sw.moves.new_count - sw.moves.old_count;
-      sw.energy_histogram[interactions]++;
+                    sw.interaction_distance, sw.max_neighbors, sw.dr, &sw.moves,
+                    sw.interactions, sw.ln_energy_weights);
+      sw.interactions += sw.moves.new_count - sw.moves.old_count;
+      sw.energy_histogram[sw.interactions]++;
 
       if(wang_landau && iteration > first_weight_update){
-        sw.ln_energy_weights[interactions] -= wl_factor;
+        sw.ln_energy_weights[sw.interactions] -= wl_factor;
       }
       if(walker_weights){
-        sw.walkers_total[interactions]++;
-        if(interactions >= sw.walker_minus_threshold)
+        sw.walkers_total[sw.interactions]++;
+        if(sw.interactions >= sw.walker_minus_threshold)
           sw.current_walker_plus = false;
-        else if(interactions <= sw.walker_plus_threshold)
+        else if(sw.interactions <= sw.walker_plus_threshold)
           sw.current_walker_plus = true;
         if(sw.current_walker_plus)
-          sw.walkers_plus[interactions]++;
+          sw.walkers_plus[sw.interactions]++;
       }
     }
-    assert(interactions ==
+    assert(sw.interactions ==
            count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls));
-    // ---------------------------------------------------------------
-    // Fine-tune translation scale to reach acceptance goal
-    // ---------------------------------------------------------------
-    if (iteration % sw.N == 0) {
-      const double acceptance_rate =
-        (double)(sw.moves.working-sw.moves.working_old)
-        /(sw.moves.total-sw.moves.total_old);
-      sw.moves.working_old = sw.moves.working;
-      sw.moves.total_old = sw.moves.total;
-      if (acceptance_rate < acceptance_goal)
-        sw.translation_distance /= 1+dscale;
-      else
-        sw.translation_distance *= 1+dscale;
-      // hokey heuristic for tuning dscale
-      const double closeness = fabs(acceptance_rate - acceptance_goal)
-        / acceptance_rate;
-      if(closeness > 0.5) dscale *= 2;
-      else if(closeness < dscale*2) dscale/=2;
-    }
+
     // ---------------------------------------------------------------
     // Update weights
     // ---------------------------------------------------------------
@@ -595,7 +581,7 @@ int main(int argc, const char *argv[]) {
                 " energy_levels: %i\n",
                 sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
                 well_width, sw.translation_distance, initialization_iterations,
-                neighbor_scale, dr, sw.energy_levels);
+                neighbor_scale, sw.dr, sw.energy_levels);
 
         char *countinfo = new char[4096];
         sprintf(countinfo,
@@ -699,7 +685,7 @@ int main(int argc, const char *argv[]) {
           " energy_levels: %i\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
           well_width, sw.translation_distance, initialization_iterations,
-          neighbor_scale, dr, sw.energy_levels);
+          neighbor_scale, sw.dr, sw.energy_levels);
 
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", dir, filename);
@@ -735,12 +721,12 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++) {
       move_one_ball(i, sw.balls, sw.N, sw.len, sw.walls, sw.neighbor_R, sw.translation_distance,
-                    sw.interaction_distance, sw.max_neighbors, dr, &sw.moves,
-                    interactions, sw.ln_energy_weights);
-      interactions += sw.moves.new_count - sw.moves.old_count;
-      sw.energy_histogram[interactions]++;
+                    sw.interaction_distance, sw.max_neighbors, sw.dr, &sw.moves,
+                    sw.interactions, sw.ln_energy_weights);
+      sw.interactions += sw.moves.new_count - sw.moves.old_count;
+      sw.energy_histogram[sw.interactions]++;
     }
-    assert(interactions ==
+    assert(sw.interactions ==
            count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls));
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -748,21 +734,21 @@ int main(int argc, const char *argv[]) {
     // Density histogram
     if(sw.walls){
       for(int i = 0; i < sw.N; i++){
-        density_histogram[interactions]
+        density_histogram[sw.interactions]
           [int(floor(sw.balls[i].pos[wall_dim]/de_density))] ++;
       }
     }
 
     // RDF
     if(!sw.walls){
-      g_energy_histogram[interactions]++;
+      g_energy_histogram[sw.interactions]++;
       for(int i = 0; i < sw.N; i++){
         for(int j = 0; j < sw.N; j++){
           if(i != j){
             const vector3d r = periodic_diff(sw.balls[i].pos, sw.balls[j].pos, sw.len,
                                              sw.walls);
             const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[interactions][r_i]++;
+            if(r_i < g_bins) g_histogram[sw.interactions][r_i]++;
           }
         }
       }
