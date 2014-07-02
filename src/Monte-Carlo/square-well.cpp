@@ -520,6 +520,21 @@ void sw_simulation::move_a_ball() {
   iteration++; // increment the number of "iterations"
 }
 
+// iterate enough times for the energy to change n times.  Return the
+// number of "up" moves.
+int sw_simulation::simulate_energy_changes(int num_moves) {
+  int num_moved = 0, num_up = 0;
+  while (num_moved < num_moves) {
+    int old_interactions = interactions;
+    move_a_ball();
+    if (interactions != old_interactions) {
+      num_moved++;
+      if (interactions > old_interactions) num_up++;
+    }
+  }
+  return num_up;
+}
+
 void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   int num_up = 0;
   const int num_moves = 500;
@@ -529,17 +544,7 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
   int attempts_to_go = 4; // always try this many times, to get translation_distance right.
   double variance;
   while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed || attempts_to_go-- >= 0) {
-    num_up = 0;
-    int num_moved = 0;
-    for (int i=0; i<energy_levels; i++) energy_histogram[i] = 0;
-    while (num_moved < num_moves) {
-      int old_interactions = interactions;
-      move_a_ball();
-      if (interactions != old_interactions) {
-        num_moved++;
-        if (interactions > old_interactions) num_up++;
-      }
-    }
+    num_up = simulate_energy_changes(num_moves);
     double mean = 0;
     double counted_in_mean = 0;
     for (int i=0; i<energy_levels; i++) {
@@ -574,4 +579,43 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
   }
   printf("Took %ld iterations to find max entropy state:  %d with width %g\n",
          iteration - starting_iterations, state_of_max_entropy, sqrt(variance));
+}
+
+// initialize the weight array using the Gaussian approximation.
+void sw_simulation::initialize_gaussian() {
+  double variance = 0, old_variance;
+  double mean = 0, old_mean;
+  int num_energy_moves = 200;
+  const int starting_iterations = iteration;
+  const double fractional_precision_required = 0.005;
+  do {
+    simulate_energy_changes(num_energy_moves);
+    num_energy_moves *= 2; // if we haven't run long enough, run longer next time!
+
+    old_variance = variance;
+    old_mean = mean;
+    double counted_in_mean = 0;
+    for (int i=0; i<energy_levels; i++) {
+      counted_in_mean += energy_histogram[i];
+      mean += i*energy_histogram[i];
+    }
+    mean /= counted_in_mean;
+    variance = 0;
+    for (int i=0; i<energy_levels; i++) variance += (i-mean)*(i-mean)*energy_histogram[i];
+    variance /= counted_in_mean;
+
+    // Keep simulating until the mean has not moved by more than a
+    // tiny fraction of the standard deviation.  Also we keep going if
+    // the standard deviation has changed much.  This is an attempt to
+    // avoid scenarios where we haven't run long enough to adequately
+    // sample the variance.
+    printf("mean is %g with stdev %g\tdifference %g vs %g\n", mean, sqrt(variance),
+           mean - old_mean, fractional_precision_required*sqrt(variance));
+  } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
+           fabs(sqrt(old_variance) - sqrt(variance)) > fractional_precision_required*sqrt(variance));
+
+  for(int i = int(mean); i < energy_levels; i++)
+    ln_energy_weights[i] += uipow(i-mean,2)/(2*variance);
+  printf("Took %ld iterations to find mean and variance for gaussian:  %g with width %g\n",
+         iteration - starting_iterations, mean, sqrt(variance));
 }
