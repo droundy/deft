@@ -391,25 +391,28 @@ Carlo results for $g(r,n)$.
 \input{figs/short-range-fit-parameters}
 
 \section{Making the CVA efficient}
-The CVA as described in the previous section is an incremental
-improvment over existing approaches outlined in Section~\ref{sec:gn}.
-However, as discussed above, these approximations have not been widely
-used in the construction of density functionals based on thermodynamic
+The existing approaches to approximating the pair correlation function
+outlined in Section~\ref{sec:gn} have not been widely used in the
+construction of density functionals based on thermodynamic
 perturbation theory, largely due to their computational complexity.
-We address this issue by developing a \emph{separable} fit to the
-radial distribution function of the hard-sphere fluid (see
-Section~\ref{sec:separable-fit} for details).  The separable fit is of
-the form
+While our CVA as described in the previous section is, in terms of
+accuracy, an incremental improvement over these existing approaches,
+it makes significant gains in terms of computational efficiency,
+allowing for its more managable use in such a construction.  We
+address the issue by developing a \emph{separable} fit to the radial
+distribution function of the hard-sphere fluid (see
+Section~\ref{sec:separable-fit} for details).  This separable fit is
+of the form
 \begin{align}
   g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
 where the notable aspect is that the radial distribution function is
 written as a sum of terms that are each a simple product of a function
 of radius with a function of $g_\sigma$.  This enables us to write
-typicaly integrals involving the pair distribution function as a
-summation of fixed-kernel convolutions, which may be efficiently
-computed using Fast Fourier Transforms (FFTs), in $\mathcal{O}(N\log
-N)$ time.
+typicaly \jeffsays{'typical?' maybe just 'integrals'} integrals
+involving the pair distribution function as a summation of
+fixed-kernel convolutions, which may be efficiently computed using
+Fast Fourier Transforms (FFTs), in $\mathcal{O}(N\log N)$ time.
 
 We begin by examining the lowest-order correction in TPT, given by
 Eq.~\ref{eq:mean-field}.  The two terms that are averaged in
@@ -450,26 +453,26 @@ notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
 
 \section{A separable fit for the radial distribution function}\label{sec:separable-fit}
 
-We have performed a separable fit to the radial distribution function,
-which we compute using Monte Carlo simulation.  We chose to focus our
-fit on the range of distances $r_{12} < 2\sigma$.  This range of
-distances is relevant to the widely used \fixme{add citations?}
-Statistical Associating Fluid Theory of Variable Range (SAFT-VR) free
-energy with square-well dispersive attraction developed by
-Gil-Villegas \emph{et al.}~\cite{gil1997statistical}.  For comparison,
-we plot in Fig.~\ref{fig:radial-distribution} alongside our the fit to
-the radial distribution function that of Gil-Villegas \emph{et al.},
+We have performed a separable fit to the Monte-Carlo simulated radial
+distribution function.  We chose to focus our fit on the range of
+distances $r_{12} < 2\sigma$.  This range of distances is relevant to
+the widely used \fixme{add citations?}  Statistical Associating Fluid
+Theory of Variable Range (SAFT-VR) free energy with square-well
+dispersive attraction developed by Gil-Villegas \emph{et
+  al.}~\cite{gil1997statistical}.  For comparison, in
+Fig.~\ref{fig:radial-distribution} we plot our fit, Monte-Carlo data,
+and the radial distribution function of Gil-Villegas \emph{et al.},
 which we have extracted from their approximation for the first term in
 the dispersion free energy given by Eq.~\ref{eq:mean-field}.
 
 For ease of implementation and future extension to larger radii, we
-chose to express our fit using a polynomial fit.  We constrain our
-functional form for $g_S(r, g_\sigma)$ to match the value at contact:
+chose to express our fit with a polynomial function, multiplied by an
+exponential decay.  We constrain our functional form for $g_S(r,
+g_\sigma)$ to match the value at contact:
 \begin{equation}
   g_S(\sigma, g_\sigma) = g_\sigma.
 \end{equation}
-Beyond this constraint, we simply included a polynomial multiplied by
-an exponential decay:
+Beyond this constraint we have:
 \begin{align}
   g_S(r,g_\sigma) &=
   1 + \left(\sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} h_\sigma^i
@@ -492,12 +495,10 @@ measure of the distance from contact.
   }
 \end{table}
 
-The fit is displayed in Fig.~\ref{fig:radial-distribution}, along with
-the radial distribution function fit by Gil-Villegas and Monte Carlo
-simulation results.  This function is fit to data for $r <= \maxrfit
-R$.  The maximum error within this radius in $g_S(r)$ at packing
-fractions up to 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$
-and $r = \rmaxerr R$.
+The Gil-Villegas function is fit to data for $r <= \maxrfit R$.  The
+maximum error within this radius in $g_S(r)$ at packing fractions up
+to 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
+\rmaxerr R$.
 
 \newcommand{\plotcomp}[1]{The top halves of these figures show the
   results of Monte Carlo simulations, while the bottom halves show the
