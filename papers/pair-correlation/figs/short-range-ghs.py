@@ -127,8 +127,8 @@ def read_ghs(base, ff):
   ghs = n_mc/ff
   return r_mc, ghs
 
-colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y']
-ff = numpy.array([.4, .3, .2, .1])
+colors = ['r', 'g', 'b', 'c', 'm', 'k', 'y', 'g', 'r', 'b']
+ff = numpy.array([.45, .4, .35, .3, .25, .2, .15, .1, .05])
 
 x = numpy.array([0.68, 0.16, 0.79, 1.e-3, 2e-4, 3.e-3, 1.e-3, 2e-4, 3.e-3, 0, 0, 0, 0, 0, 0, 0, 3])
 
@@ -150,7 +150,7 @@ for i in range(len(ff)):
     if able_to_read_file == False:
         break
     pylab.figure(1)
-    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='$\eta = %.1f$'%ff[i])
+    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='$\eta = %.2f$'%ff[i])
     eta[i] = ff[i]
     gsigmas[i] = (1 - ff[i]/2)/(1 - ff[i])**3
     r = r_mc
@@ -479,7 +479,8 @@ alt_styles = {
 }
 
 # now let's plot the fit
-ranges = [(0.9,1.4), (0.8, 1.8), (0.75, 2.5), (0.6, 4.0)]
+ranges = [(0.9,1.2), (0.9,1.4), (0.9,1.7), (0.8, 1.8), (0.8, 2.3),
+          (0.75, 2.5), (0.75, 3.2), (0.6, 4.0), (0.6, 5.0)]
 zeros = [-ranges[0][0]]*len(ranges)
 maxes = [ranges[0][1]]*len(ranges)
 mines = [ranges[0][0]]*len(ranges)
@@ -524,7 +525,7 @@ for i in range(len(ff)):
   pylab.plot(r_mc[r_mc<fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<fit_rcutoff] + offset,
              alt_styles['gS'], label='$g_S(r)$')
   pylab.plot(r_mc[r_mc>fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc>fit_rcutoff] + offset,
-             alt_styles['gSunfitted'], label='$g_S(r)$')
+             alt_styles['gSunfitted'])
   r_gil = r_mc[r_mc < gil_rmax]
   g_gil = g_gil[r_mc < gil_rmax]
   pylab.plot(r_gil[r_gil<gil_rcutoff], g_gil[r_gil<gil_rcutoff] + offset,
@@ -574,7 +575,7 @@ pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)
 
 for i in range(len(ff)):
-  pylab.text((xlim[0]+xlim[1])/2, zeros[i]+maxes[i]-0.1, r"$\eta = %.1f$" %(ff[i]), ha='center', va='top')
+  pylab.text((xlim[0]+xlim[1])/2, zeros[i]+maxes[i]-0.1, r"$\eta = %.2f$" %(ff[i]), ha='center', va='top')
 
 
 handles, labels = ax2.get_legend_handles_labels()

@@ -55,18 +55,12 @@ works and Monte-Carlo simulation, showing favorable results.
 \fixme{
   TO DO:
   \begin{itemize}
-  \item \pahosays{Only use short-range CVA-S (in plots, and in walls.cpp)}\pahosays{DONE}
-  \item \pahosays{Remove CVA from all plots, but leave it easy to
-    re-add (so we can check what we say in the text).}\pahosays{DONE}
-  \item \pahosays{Make all plots not show CVA (new name for CVA-short)
-    outside the fitted range.}\pahosays{DONE}
-  \item \davidsays{Rewrite CVA-S section to reflect new fit.}
-  \item \jeffsays{Make certain when proof-reading that other prior
+  \item \davidsays{Rewrite CVA-S section to reflect new fit.  Still working.}
+  \item \pahosays{Make certain when proof-reading that other prior
     formulations cannot work in ``separable'' way.}
   \item \davidsays{Be sure that we explain the fitted data and fitting
-    process well.}
-  \item \pahosays{Add $\eta=?$ labels and legends to new fit plot.}\pahosays{DONE}
-  \item \jeffsays{I will diligently read what you guys write!}
+    process well.  Still working.}
+  \item \jeffsays{I will repeatedly read what you guys write!}
   \end{itemize}
 }
 
@@ -133,7 +127,7 @@ the hard-sphere pair distribution function which is suitable for use
 in the creation of classical density functionals based on
 thermodynamic perturbation theory. We then demonstrate a more
 computationally efficient separable version of the contact
-value approach (CVA-S), which is based on a fit to the radial
+value approach (CVA-S)\fixme{this needs editing}, which is based on a fit to the radial
 distribution function that is separable in a way that will enable
 efficient evaluation of the integral in Eq.~\ref{eq:mean-field}.
 
@@ -423,7 +417,7 @@ Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
   d\rr_1d\rr_2
 \end{align}
 When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
-further simplify this integral as
+further simplify this integral as\fixme{CVA-S???}
 \begin{multline}
   F_1^{\textit{CVA-S}} =
   \sum_i \tfrac12 \!\! \iint \!\! \bigg( n(\rr_1)  \bigg) \\
@@ -502,7 +496,7 @@ to 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 
 \newcommand{\plotcomp}[1]{The top halves of these figures show the
   results of Monte Carlo simulations, while the bottom halves show the
-  CVA-S.  On the right are plots of #1 on the paths illustrated in the
+  \fixme{CVA}CVA-S.  On the right are plots of #1 on the paths illustrated in the
   figures to the left.  These plots compare the CVA-S (blue solid line) and CVA
   (cyan dotted line) with Monte Carlo results (black circle)
   and the results of Sokolowski and Fischer
@@ -545,7 +539,7 @@ to 0.4 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
 We begin by examining the pair distribution function near a hard wall,
 with a focus on the case where one of the two spheres is in contact
 with the hard wall.  Figures~\ref{fig:pair-distribution}a
-and~\ref{fig:pair-distribution}c compare the results of the CVA-S with
+and~\ref{fig:pair-distribution}c compare the results of the \fixme{CVA}CVA-S with
 Monte Carlo simulations at packing fractions of 0.1 and 0.3
 respectively. We see reasonable agreement at the lower density, with
 some reduced oscillations at larger distances, and a flatter angular
@@ -567,7 +561,7 @@ results that is not reflected in our approximation.
     varies. %\plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}.
 %
     The top halves of these figures show the results of Monte Carlo
-    simulations, while the bottom halves show the CVA-S.  On the right
+    simulations, while the bottom halves show the \fixme{CVA}CVA-S.  On the right
     are plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ on the paths illustrated
     in the figures to the left.
 %
@@ -586,7 +580,7 @@ Figures~\ref{fig:pair-distribution}b and~\ref{fig:pair-distribution}d
 show the pair distribution function as plotted along paths illustrated
 in Figures~\ref{fig:pair-distribution}a
 and~\ref{fig:pair-distribution}c.  These plots compare the CVA and
-CVA-S with Monte Carlo results, as well as the approximations of
+\fixme{CVA}CVA-S with Monte Carlo results, as well as the approximations of
 Sokolowski and Fischer~\cite{sokolowski1992role} and of Fischer and
 Methfessel~\cite{fischer1980born} at the same packing fractions of 0.1 and 0.3.
 The approach of Fischer and Methfessel is only defined when the two
@@ -607,7 +601,7 @@ freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points
 $\rr_1$ and $\rr_2$ are both
 more than a radius away from contact, we find that any of these
-approaches gives a reasonable prediction, with the CVA-S
+approaches gives a reasonable prediction, with the \fixme{CVA}CVA-S
 underestimating the oscillations in $g^{(2)}$, as expected based on
 the fit in Fig.~\ref{fig:radial-distribution}.
 
@@ -638,7 +632,7 @@ present in the true triplet distribution function.
 Figures~\ref{fig:triplet-contact-distribution}a
 and~\ref{fig:triplet-contact-distribution}c compare the triplet
 distribution function at a packing fraction of 0.3 computed using the
-CVA-S with results from Monte Carlo simulations. In
+\fixme{CVA}CVA-S with results from Monte Carlo simulations. In
 Figure~\ref{fig:triplet-contact-distribution}a the spheres at $\rr_1$
 and $\rr_2$ are in contact; in
 Figure~\ref{fig:triplet-contact-distribution}c they are spaced so that
@@ -671,7 +665,7 @@ central portion of the path, which is in contact with $\rr_2$, and arrows
 are omitted.
 %
 All methods perform similarly over this range with one exception.  The
-separable CVA-S method once again underestimates the oscillations on
+separable \fixme{CVA}CVA-S method once again underestimates the oscillations on
 the left-hand side of the curve, where $\rr_2$ and $\rr_3$ are
 separated by a large distance.  On the path where $\rr_2$ and $\rr_3$
 are closer, the CVA-S method compares favorably with the other
@@ -768,7 +762,7 @@ short-range interaction, a medium-range discontinuous interaction, and
 a long-range smooth interaction.
 
 Figure~\ref{fig:dadz-delta} shows the results for the sticky
-hard-sphere fluid.  The CVA and CVA-S are constructed to produce this
+hard-sphere fluid.  The CVA and \fixme{NOT}CVA-S are constructed to produce this
 result exactly, provided the averaged pair distribution function at
 contact from Ref.~\citenum{schulte2012using} is exact.  As expected,
 we see excellent agreement with the Monte Carlo simulation results,
