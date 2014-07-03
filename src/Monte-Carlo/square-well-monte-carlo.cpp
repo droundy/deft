@@ -334,11 +334,6 @@ int main(int argc, const char *argv[]) {
   // Energy weights, state density
   int weight_updates = 0;
   sw.ln_energy_weights = new double[sw.energy_levels]();
-  if (fix_kT) {
-    for(int i = 0; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = i/fix_kT;
-    }
-  }
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
@@ -364,9 +359,6 @@ int main(int argc, const char *argv[]) {
 
   // a guess for the number of iterations to run for initializing the histogram
   int first_weight_update = sw.energy_levels;
-
-  // hokey, very probably temporary way of running wang_landau
-  if(wang_landau) initialization_iterations = sw.N*first_weight_update;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -503,6 +495,10 @@ int main(int argc, const char *argv[]) {
   if (gaussian_fit) {
     sw.initialize_gaussian();
     initialization_iterations = first_weight_update = 0; // we are done initializing!
+  } else if (fix_kT) {
+    sw.initialize_canonical(fix_kT);
+  } else if (wang_landau) {
+    sw.initialize_wang_landau(wl_factor, wl_threshold, wl_cutoff);
   } else {
     for(long iteration = 1;
         iteration <= initialization_iterations + first_weight_update; iteration++) {
@@ -516,9 +512,6 @@ int main(int argc, const char *argv[]) {
         sw.interactions += sw.moves.new_count - sw.moves.old_count;
         sw.energy_histogram[sw.interactions]++;
         
-        if(wang_landau && iteration > first_weight_update){
-          sw.ln_energy_weights[sw.interactions] -= wl_factor;
-        }
         if(walker_weights){
           sw.walkers_total[sw.interactions]++;
           if(sw.interactions >= sw.walker_minus_threshold)
@@ -535,7 +528,7 @@ int main(int argc, const char *argv[]) {
       // ---------------------------------------------------------------
       // Update weights
       // ---------------------------------------------------------------
-      if(!(no_weights || gaussian_fit || fix_kT)){
+      if(!(no_weights || gaussian_fit)){
         if(iteration == first_weight_update){
           flat_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels);
           weight_updates++;
@@ -552,27 +545,6 @@ int main(int argc, const char *argv[]) {
           }
           weight_updates++;
           if(test_weights) print_weights = true;
-        }
-        else if(wang_landau && (iteration == sw.N*first_weight_update)){
-          // check whether our histogram is flat enough to update wl_factor
-          const double variation = count_variation(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels);
-          if (variation < max(wl_threshold, exp(wl_factor))) {
-            wl_factor /= wl_fmod;
-            // for wang-landau, only flush energy histogram; keep weights
-            flush_arrays(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels, true);
-          }
-          // repeat until terminal condition is met
-          if(wl_factor > wl_cutoff)
-            iteration = first_weight_update;
-          
-          // print status text for testing purposes
-          printf("\nweight update: %i\n",weight_updates);
-          printf("  WL factor: %g\n",wl_factor);
-          printf("  count variation: %g\n", variation);
-          fflush(stdout);
-          
-          weight_updates++;
-          if((weight_updates % 10 == 0) && test_weights) print_weights = true;
         }
         // for testing purposes; prints energy histogram and weight array
         if(print_weights){

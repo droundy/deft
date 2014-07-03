@@ -291,11 +291,11 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 }
 
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels, bool flush_histogram = true){
+                  int energy_levels, bool flush_histogram = true, int max_entropy = 0){
   // make weights flat at energies above the maximum entropy state
   // (which correspond to boring "negative" temperatures.
-  int max_entropy =
-    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+  if (max_entropy == 0)
+    max_entropy = max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
   for (int i = 0; i < max_entropy; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy];
   // Now let's just add the minimum, so our weights don't get
@@ -381,9 +381,7 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
 }
 
 double count_variation(long *energy_histogram, double *ln_energy_weights,
-                       int energy_levels){
-  int max_entropy =
-    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
+                       int energy_levels, int max_entropy){
   double lowest = 1e200, highest = 0;
   int maxE = 0; // tracks the lowest (largest magnitude) energy yet seen
   int highest_i = 0; // the most commonly visited energy
@@ -406,15 +404,11 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
     }
   }
   double mean_counts = total_counts / num_visited;
-  double variation = 0;
-  for(int i = max_entropy; i < energy_levels; i++)
-    variation += sqr(energy_histogram[i] - mean_counts);
-  variation = sqrt(variation/energy_levels)/mean_counts;
-  printf("Highest/lowest = %.2g (%d) / %.2g (%d) mean %.2g\n",
-         highest, highest_i, lowest, lowest_i, mean_counts);
+  printf("Highest/lowest = %.2g (%d) / %.2g (%d) mean %.2g    total %g\n",
+         highest, highest_i, lowest, lowest_i, mean_counts, total_counts);
   printf("    (ratio = %g, maxE = %d, visited %d, max_entropy %d)\n",
          mean_counts/lowest, maxE, num_visited, max_entropy);
-  return mean_counts/lowest - 1; // or alternatively variation;
+  return mean_counts/lowest - 1;
 }
 
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
@@ -610,12 +604,56 @@ void sw_simulation::initialize_gaussian() {
     // avoid scenarios where we haven't run long enough to adequately
     // sample the variance.
     printf("mean is %g with stdev %g\tdifference %g vs %g\n", mean, sqrt(variance),
-           mean - old_mean, fractional_precision_required*sqrt(variance));
-  } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
-           fabs(sqrt(old_variance) - sqrt(variance)) > fractional_precision_required*sqrt(variance));
+           variance - old_variance, fractional_precision_required*sqrt(variance));
+  } while (fabs(sqrt(old_variance) - sqrt(variance))
+             > fractional_precision_required*sqrt(variance));
 
   for(int i = int(mean); i < energy_levels; i++)
     ln_energy_weights[i] += uipow(i-mean,2)/(2*variance);
   printf("Took %ld iterations to find mean and variance for gaussian:  %g with width %g\n",
          iteration - starting_iterations, mean, sqrt(variance));
+}
+
+// initialize the weight array using the specified temperature.
+void sw_simulation::initialize_canonical(double kT) {
+  for(int i=0; i < energy_levels; i++){
+    ln_energy_weights[i] = i/kT;
+  }
+}
+
+// improve the weight array using the Wang-Landau method.
+void sw_simulation::initialize_wang_landau(double wl_factor, double wl_threshold,
+                                           double wl_cutoff) {
+  int weight_updates = 0;
+  const int starting_iterations = iteration;
+  while (1) {
+    for (int i=0; i < 100*N*energy_levels; i++) {
+      move_a_ball();
+      ln_energy_weights[interactions] -= wl_factor;
+    }
+
+    // check whether our histogram is flat enough to update wl_factor
+    const double variation = count_variation(energy_histogram, ln_energy_weights, energy_levels,
+                                             state_of_max_entropy);
+
+    // print status text for testing purposes
+    printf("\nweight update: %i\n",weight_updates++);
+    printf("  WL factor: %g\n",wl_factor);
+    printf("  count variation: %g\n", variation);
+    fflush(stdout);
+
+    if (variation > 0 && variation < max(wl_threshold, exp(wl_factor))) {
+      wl_factor /= 2;
+      // for wang-landau, only flush energy histogram; keep weights
+      flush_arrays(energy_histogram, ln_energy_weights, energy_levels, true,
+                   state_of_max_entropy);
+
+      // repeat until terminal condition is met
+      if (wl_factor < wl_cutoff) {
+        printf("Took %ld iterations to initialize with Wang-Landau method\n",
+               iteration - starting_iterations);
+        return;
+      }
+    }
+  }
 }
