@@ -178,9 +178,6 @@ void flush_arrays(long *energy_histogram, double *ln_energy_weights,
 void flat_hist(long *energy_histogram, double *ln_energy_weights,
                int energy_levels);
 
-void gaussian_hist(long *energy_histogram, double *ln_energy_weights,
-                   int energy_levels);
-
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_plus, long *walkers_total,
                  move_info *moves);

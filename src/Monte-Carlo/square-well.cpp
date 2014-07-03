@@ -327,36 +327,6 @@ void flat_hist(long *energy_histogram, double *ln_energy_weights,
   return;
 }
 
-void gaussian_hist(long *energy_histogram, double *ln_energy_weights,
-                   int energy_levels){
-  // a gaussian dos takes the form dos(E) = a*exp(-(E-m)^2/(2 s^2))
-  // neglecting constant terms, ln_weights = (i-max_entropy)^2/(2 s^2)
-  // here the variance s^2 is given by s = 2*sqrt(2 ln2) / FWHM(dos(E))
-  // for FWHM we also need to find i satisfying dos[i] = dos[max_entropy] / 2
-  // this function assumess no weighing has been used, so dos = energy_histogram
-  int max_entropy =
-    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-  int target_value = energy_histogram[max_entropy] / 2;
-  int smallest_diff = target_value;
-  int current_diff = 0;
-  int best_halfway[2] = {0,0};
-  for(int i = 0; i < energy_levels; i++){
-    if(i == max_entropy) smallest_diff = target_value;
-    current_diff = abs(energy_histogram[i] - target_value);
-    if(current_diff < smallest_diff){
-      smallest_diff = current_diff;
-      best_halfway[i > max_entropy] = i;
-    }
-  }
-  double s = (best_halfway[1]-best_halfway[0])/(2*sqrt(2*log(2)));
-  // set actual energy weights
-  for(int i = max_entropy; i < energy_levels; i++)
-    ln_energy_weights[i] = uipow(i-max_entropy,2)/(2*s*s);
-
-  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
-  return;
-}
-
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_plus,
                  long *walkers_total, move_info *moves){
@@ -531,12 +501,12 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 
 void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   int num_up = 0;
-  const int num_moves = 500;
+  const int num_moves = 500*N;
   const double deviation_allowed = 0.1/sqrt(num_moves);
   double dscale = 0.1;
   const int starting_iterations = iteration;
-  int attempts_to_go = 4; // always try this many times, to get translation_distance right.
-  double variance;
+  int attempts_to_go = 10; // always try this many times, to get translation_distance right.
+  double variance = 0;
   while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed || attempts_to_go-- >= 0) {
     num_up = simulate_energy_changes(num_moves);
     double mean = 0;
@@ -567,9 +537,9 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
     if(closeness > 0.5) dscale *= 2;
     else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
 
-    // printf("Figure of merit:  %g (state %d)\n",
-    //        (num_up/double(num_moves) - 0.5)/deviation_allowed,
-    //        state_of_max_entropy);
+    printf("Figure of merit:  %g (state %d) [acceptance rate %g, scale %g]\n",
+           (num_up/double(num_moves) - 0.5)/deviation_allowed,
+           state_of_max_entropy, acceptance_rate, translation_distance);
   }
   printf("Took %ld iterations to find max entropy state:  %d with width %g\n",
          iteration - starting_iterations, state_of_max_entropy, sqrt(variance));
@@ -605,7 +575,8 @@ void sw_simulation::initialize_gaussian() {
     // sample the variance.
     printf("mean is %g with stdev %g\tdifference %g vs %g\n", mean, sqrt(variance),
            variance - old_variance, fractional_precision_required*sqrt(variance));
-  } while (fabs(sqrt(old_variance) - sqrt(variance))
+  } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
+           fabs(sqrt(old_variance) - sqrt(variance))
              > fractional_precision_required*sqrt(variance));
 
   for(int i = int(mean); i < energy_levels; i++)

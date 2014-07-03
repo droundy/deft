@@ -91,10 +91,10 @@ int main(int argc, const char *argv[]) {
   int walker_weights = false;
   int wang_landau = false;
 
-  double wl_factor = 1;
+  double wl_factor = 0.125;
   double wl_fmod = 2;
-  double wl_threshold = 0.05;
-  double wl_cutoff = 1e-5;
+  double wl_threshold = 0.1;
+  double wl_cutoff = 1e-6;
 
   sw_simulation sw;
 
