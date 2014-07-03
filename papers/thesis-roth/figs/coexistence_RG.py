@@ -34,7 +34,7 @@ import forte
 # |__                                                                                        #
 ##############################################################################################
 
-N = 80 # For publication plots, make this bigger (40? 80? 100? You decide!)
+N = 100 # For publication plots, make this bigger (100? 500? 100000? You decide!)
 
 # input iteration depth as a parameter
 def npart(iterations):
@@ -42,8 +42,10 @@ def npart(iterations):
 
     T = 0.5
     mu = -5.751 # I found this by plotting. It is good for T=0.5; i=0
+    nmid = 0.0439651327587 # I found this from running the code with the above mu
+    mu = -RG.df_dn(T, nmid, iterations)
 
-    Tc = 1.33 # Rough estimate based on previous plots
+    Tc = 1.3295 # Rough estimate based on previous plots
     Tlow = T
 
     # Bounds of minimization.
@@ -54,8 +56,6 @@ def npart(iterations):
     # Use the central max as the inside bound
     nmid = 0.2/(RG.sigma**3*np.pi/6) # ad-hoc for now
     # nmid = minmax_RG.maximize(RG.phi,T,a_vap,c_liq,mu,iterations)
-    c_vap = nmid
-    a_liq = nmid
 
     ###############################
 
@@ -67,8 +67,8 @@ def npart(iterations):
     sys.stdout.flush()
 
     # Do first temperature before the loop
-    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,mu,iterations)
-    nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
+    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
+    nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
     print '  initial nvap,phi_vap',nvapor,phi_vapor
     print '  initial nmid,phi_mid',nmid,RG.phi(T,nmid,mu,iterations)
     print '  initial nliq,phi_liq',nliquid,phi_liquid
@@ -86,14 +86,14 @@ def npart(iterations):
         # Use the local max between vapor and liquid to set the boundary for each minimization
         #nmid = minmax_RG.maximize(RG.phi,T,nvapor, nliquid, mu,iterations)
         mu = -RG.df_dn(T, nmid, iterations)
-        c_vap = nmid
-        a_liq = nmid
+        #a_vap = max(nmid - 2.0*(nmid - nvapor), a_vap)
+        #c_liq = nmid + 2.0*(nliquid - nmid)
 
-        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,c_vap,a_vap,mu,iterations)
-        nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
+        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
+        nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
         phi_mid = RG.phi(T, nmid, mu, iterations)
 
-        tol = 1e-5
+        tol = 1e-9
 
         # Compare the two minima in RG.phi
         # print '    entering while loop'
@@ -106,13 +106,10 @@ def npart(iterations):
             # Change mu
             mu += delta_mu
 
-            def newphi(T, n, mu, i):
-                return RG.phi(T, n, mu, i) - delta_mu*n
-
             # find new values for nvap, nmid, nliq and phi_vap, phi_mid, phi_liq
-            nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,c_vap,mu,iterations)
             nmid, phi_mid = minmax_RG.maximize(RG.phi,T,nvapor,nliquid,mu,iterations), RG.phi(T, nmid, mu, iterations)
-            nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,a_liq,c_liq,mu,iterations)
+            nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
+            nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
             # print '      nvap,phi(nvap)',nvapor,phi_vapor
             # print '        etavap',nvapor*RG.sigma**3*np.pi/6
             # print '      nmid,phi(nmid)',nmid,phi_mid
@@ -121,6 +118,22 @@ def npart(iterations):
             # print '        etaliq',nliquid*RG.sigma**3*np.pi/6
             # print '\n'
 
+        if j > N - 20:
+          plt.figure()
+          delta_n = nliquid - nvapor
+          nvals = np.arange(max(nvapor - delta_n, a_vap), min(nliquid + delta_n, c_liq), 0.01*delta_n)
+          phivals = np.zeros_like(nvals)
+          for i in range(len(nvals)):
+            phivals[i] = RG.phi(T,nvals[i],mu,iterations)
+          plt.plot(nvals*np.pi*RG.sigma**3/6, phivals, 'b-')
+          plt.plot(nliquid*np.pi*RG.sigma**3/6, RG.phi(T,nliquid,mu,iterations), 'o')
+          plt.plot(nvapor*np.pi*RG.sigma**3/6, RG.phi(T,nvapor,mu,iterations), 'o')
+          plt.plot(nmid*np.pi*RG.sigma**3/6, RG.phi(T,nmid,mu,iterations), '+')
+          plt.title('T = %.14g' % T)
+
+        if nmid == nvapor or nmid == nliquid:
+          print 'I have achieved silliness!'
+          #break
         # print '    left while loop'
         fout.write(str(T))
         fout.write('  ')
@@ -151,6 +164,7 @@ if __name__ == '__main__':
     # define the colors/symbols for plotting
     colors = np.array(['b-','g-','r-'])
 
+    plt.figure(1)
     for i in range(num_iterations+1): # remember, range(x) only goes up to x-1
         print 'running npart_RG for iteration =',i
 
@@ -163,9 +177,10 @@ if __name__ == '__main__':
 
         T = data[:,0]
         etavapor = data[:,1]*np.pi*RG.sigma**3/6
-        etaliquid = data[:,2]*np.pi*RG.sigma**3/6
+        etaliquid = data[:,3]*np.pi*RG.sigma**3/6
 
         # Plot data
+        plt.figure(1)
         plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
         plt.plot(etaliquid, T, colors[i])
 
@@ -176,5 +191,5 @@ if __name__ == '__main__':
     plt.title('Liquid-Vapor Coexistence')
 
     # plt.savefig('figs/coexistence-RG-v2-80N.pdf')
-    plt.savefig('figs/coexistence-RG-v2-'+'%d'%N+'N.pdf')
+    plt.savefig('figs/coexistence-RG-v2-%dN.pdf'%N)
     plt.show()
