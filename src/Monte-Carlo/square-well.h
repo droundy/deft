@@ -65,7 +65,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation.  Although
      ln_energy_weights is a constant except during initialization. */
 
-  int state_of_max_entropy;
+  int state_of_max_entropy, state_of_max_interactions;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -83,6 +83,13 @@ struct sw_simulation {
   // print the timings (if the time is right)
   void print_timings(int timings_period) const;
 
+  int max_interactions() const {
+    for (int i=energy_levels-1; i>0; i--) {
+      if (energy_histogram[i]) return i;
+    }
+    return 0;
+  }
+
   // iterate long enough to find the max entropy state and initialize
   // the translation distance.
   void initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
@@ -92,7 +99,8 @@ struct sw_simulation {
   int simulate_energy_changes(int num_moves);
 
   // initialize the weight array using the Gaussian approximation.
-  void initialize_gaussian();
+  // Returns the width of the gaussian used.
+  double initialize_gaussian(double scale = 100.0);
 
   // initialize the weight array using the specified temperature.
   void initialize_canonical(double kT);

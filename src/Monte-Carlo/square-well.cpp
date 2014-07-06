@@ -501,15 +501,21 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 
 void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   int num_up = 0;
-  const int num_moves = 500*N;
-  const double deviation_allowed = 0.1/sqrt(num_moves);
+  int num_moves = 500;
+  const double mean_allowance = 1.0;
   double dscale = 0.1;
   const int starting_iterations = iteration;
-  int attempts_to_go = 10; // always try this many times, to get translation_distance right.
+  int attempts_to_go = 4; // always try this many times, to get translation_distance right.
   double variance = 0;
-  while (fabs(num_up/double(num_moves) - 0.5) > deviation_allowed || attempts_to_go-- >= 0) {
+  double last_energy = 0, mean = 100;
+  while (fabs(last_energy - interactions) > max(2,mean_allowance*sqrt(variance)) ||
+         attempts_to_go >= 0) {
+    // printf("It seems %g > %g  or  %d >= 0.\n",
+    //        last_energy - mean, mean_allowance*sqrt(variance), attempts_to_go);
+    attempts_to_go -= 1;
+    last_energy = interactions;
     num_up = simulate_energy_changes(num_moves);
-    double mean = 0;
+    mean = 0;
     double counted_in_mean = 0;
     for (int i=0; i<energy_levels; i++) {
       counted_in_mean += energy_histogram[i];
@@ -517,7 +523,10 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
     }
     mean /= counted_in_mean;
     variance = 0;
-    for (int i=0; i<energy_levels; i++) variance += (i-mean)*(i-mean)*energy_histogram[i];
+    for (int i=0; i<energy_levels; i++) {
+      variance += (i-mean)*(i-mean)*energy_histogram[i];
+      energy_histogram[i] = 0; // clear it out for the next attempt
+    }
     variance /= counted_in_mean;
     state_of_max_entropy = int(mean + 0.5);
 
@@ -537,21 +546,28 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
     if(closeness > 0.5) dscale *= 2;
     else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
 
-    printf("Figure of merit:  %g (state %d) [acceptance rate %g, scale %g]\n",
-           (num_up/double(num_moves) - 0.5)/deviation_allowed,
-           state_of_max_entropy, acceptance_rate, translation_distance);
+    // printf("Figure of merit:  %4.2g (state %.1f from %g(%d), stdev %.1f) [acceptance rate %.2f, scale %.2g]\n",
+    //        (last_energy - interactions)/max(2,mean_allowance*sqrt(variance)), mean, last_energy,
+    //        interactions, sqrt(variance), acceptance_rate, translation_distance);
+    num_moves *= 2;
   }
-  printf("Took %ld iterations to find max entropy state:  %d with width %g\n",
+  for (int i=energy_levels-1; i> state_of_max_interactions; i--) {
+    if (energy_histogram[i]>0) {
+      state_of_max_interactions = i;
+      break;
+    }
+  }
+  printf("Took %ld iterations to find max entropy state:  %d with width %.2g\n",
          iteration - starting_iterations, state_of_max_entropy, sqrt(variance));
 }
 
 // initialize the weight array using the Gaussian approximation.
-void sw_simulation::initialize_gaussian() {
+double sw_simulation::initialize_gaussian(double scale) {
   double variance = 0, old_variance;
   double mean = 0, old_mean;
   int num_energy_moves = 200;
   const int starting_iterations = iteration;
-  const double fractional_precision_required = 0.005;
+  const double fractional_precision_required = 0.2;
   do {
     simulate_energy_changes(num_energy_moves);
     num_energy_moves *= 2; // if we haven't run long enough, run longer next time!
@@ -573,16 +589,26 @@ void sw_simulation::initialize_gaussian() {
     // the standard deviation has changed much.  This is an attempt to
     // avoid scenarios where we haven't run long enough to adequately
     // sample the variance.
-    printf("mean is %g with stdev %g\tdifference %g vs %g\n", mean, sqrt(variance),
-           variance - old_variance, fractional_precision_required*sqrt(variance));
+    //printf("mean is %4.1f with stdev %5.4g\tdifference %.2g vs %.2g\n", mean, sqrt(variance),
+    //       variance - old_variance, fractional_precision_required*sqrt(variance));
   } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
            fabs(sqrt(old_variance) - sqrt(variance))
              > fractional_precision_required*sqrt(variance));
 
-  for(int i = int(mean); i < energy_levels; i++)
-    ln_energy_weights[i] += uipow(i-mean,2)/(2*variance);
+  for (int i = state_of_max_entropy; i < energy_levels; i++)
+    ln_energy_weights[i] -= scale*exp(-uipow(i-mean,2)/(scale*2*variance));
+  for (int i = 0; i < state_of_max_entropy; i++)
+    ln_energy_weights[i] -= scale*exp(-uipow(state_of_max_entropy-mean,2)/(scale*2*variance));
+
+  for (int i=energy_levels-1; i> state_of_max_interactions; i--) {
+    if (energy_histogram[i]>0) {
+      state_of_max_interactions = i;
+      break;
+    }
+  }
   printf("Took %ld iterations to find mean and variance for gaussian:  %g with width %g\n",
          iteration - starting_iterations, mean, sqrt(variance));
+  return sqrt(variance);
 }
 
 // initialize the weight array using the specified temperature.

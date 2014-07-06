@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw", "wang_landau", "gaussian", "walkers", "kT2", "kT1"]]
+#arg versions = [["nw", "wang_landau", "gaussian", "flat", "walkers", "kT2", "kT1"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
 
@@ -31,6 +31,7 @@ for version in versions:
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
     DS = data[:,1]
+    total = DS.sum()
     plt.semilogy(energy,DS, styles.dots[version], label=styles.title[version])
 
 plt.xlabel('$E/N\epsilon$')

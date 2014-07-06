@@ -309,6 +309,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   sw.iteration = 0; // start at zeroeth iteration
+  sw.state_of_max_interactions = 0;
+  sw.state_of_max_entropy = 0;
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -493,8 +495,29 @@ int main(int argc, const char *argv[]) {
   sw.initialize_max_entropy_and_translation_distance();
 
   if (gaussian_fit) {
-    sw.initialize_gaussian();
-    initialization_iterations = first_weight_update = 0; // we are done initializing!
+    sw.initialize_gaussian(10);
+  } else if (flat_histogram) {
+    {
+      sw.initialize_gaussian(log(1e40));
+      const int state_of_max_entropy = sw.state_of_max_entropy;
+      sw.initialize_max_entropy_and_translation_distance();
+      sw.state_of_max_entropy = state_of_max_entropy;
+    }
+    const double scale = log(10);
+    double width;
+    double range;
+    do {
+      width = sw.initialize_gaussian(scale);
+      range = sw.state_of_max_interactions - sw.state_of_max_entropy;
+      // Now shift to the max entropy state...
+      const int state_of_max_entropy = sw.state_of_max_entropy;
+      sw.initialize_max_entropy_and_translation_distance();
+      sw.state_of_max_entropy = state_of_max_entropy;
+      printf("***\n");
+      printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
+             width, range, width/range);
+      printf("***\n");
+    } while (width < 0.25*range);
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
@@ -642,6 +665,14 @@ int main(int argc, const char *argv[]) {
         fflush(stdout);
       }
     }
+  }
+
+  {
+    // Now let's iterate to the point where we are at maximum
+    // probability before we do teh real simulation.
+    const double st = sw.state_of_max_entropy;
+    sw.initialize_max_entropy_and_translation_distance();
+    sw.state_of_max_entropy = st;
   }
   took("Initialization");
 
