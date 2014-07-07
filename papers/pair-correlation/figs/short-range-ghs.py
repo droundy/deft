@@ -481,6 +481,14 @@ alt_styles = {
 # now let's plot the fit
 ranges = [(0.9,1.2), (0.9,1.4), (0.9,1.7), (0.8, 1.8), (0.8, 2.3),
           (0.75, 2.5), (0.75, 3.2), (0.6, 4.0), (0.6, 5.0)]
+
+skip_every_other = True
+indexes = range(len(ff))
+if skip_every_other:
+  indexes = range(1,len(ff),2)
+  for i in range(0,len(ranges),2):
+    ranges[i] = (0,0)
+
 zeros = [-ranges[0][0]]*len(ranges)
 maxes = [ranges[0][1]]*len(ranges)
 mines = [ranges[0][0]]*len(ranges)
@@ -495,7 +503,7 @@ assert(len(ranges) == len(ff))
 
 ticks = []
 ticklabels = []
-for i in range(len(ff)):
+for i in indexes:
   pylab.figure(1)
   pylab.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'--')
 
@@ -574,7 +582,7 @@ pylab.axvline(2.0, color='k', ls=':')
 pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)
 
-for i in range(len(ff)):
+for i in indexes:
   pylab.text((xlim[0]+xlim[1])/2, zeros[i]+maxes[i]-0.1, r"$\eta = %.2f$" %(ff[i]), ha='center', va='top')
 
 
