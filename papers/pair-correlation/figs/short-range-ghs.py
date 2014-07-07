@@ -531,17 +531,17 @@ for i in indexes:
   pylab.axhline(zeros[i] + maxes[i], color='k')
   pylab.axhline(zeros[i] + 1, color='k', ls=':')
   pylab.plot(r_mc[r_mc<fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<fit_rcutoff] + offset,
-             alt_styles['gS'], label='$g_S(r)$')
+             alt_styles['gS'], label='this work $g_S(r)$')
   pylab.plot(r_mc[r_mc<1.1*fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<1.1*fit_rcutoff] + offset,
              alt_styles['gSunfitted'])
   r_gil = r_mc[r_mc < gil_rmax]
   g_gil = g_gil[r_mc < gil_rmax]
   pylab.plot(r_gil[r_gil<gil_rcutoff], g_gil[r_gil<gil_rcutoff] + offset,
-             alt_styles['gil'], label='FIXME gil-villegas')
+             alt_styles['gil'], label="fit by Gil-Villegas")
   pylab.plot(r_gil[r_gil>gil_rcutoff], g_gil[r_gil>gil_rcutoff] + offset,
              alt_styles['gil_unfitted'])
   pylab.plot(r_mc_avged, g_mc_avged + offset,
-             alt_styles['mc'], label='mc')
+             alt_styles['mc'], label='Monte Carlo')
 
   dg = 0.2
   if maxes[i] > 2:
@@ -583,7 +583,7 @@ pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)
 
 for i in indexes:
-  pylab.text((xlim[0]+xlim[1])/2, zeros[i]+maxes[i]-0.1, r"$\eta = %.2f$" %(ff[i]), ha='center', va='top')
+  pylab.text((2*xlim[0]+xlim[1])/3, zeros[i]+maxes[i]-0.1, r"$\eta = %.2f$" %(ff[i]), ha='center', va='top')
 
 
 handles, labels = ax2.get_legend_handles_labels()
