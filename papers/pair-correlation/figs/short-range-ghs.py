@@ -532,7 +532,7 @@ for i in indexes:
   pylab.axhline(zeros[i] + 1, color='k', ls=':')
   pylab.plot(r_mc[r_mc<fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<fit_rcutoff] + offset,
              alt_styles['gS'], label='$g_S(r)$')
-  pylab.plot(r_mc[r_mc>fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc>fit_rcutoff] + offset,
+  pylab.plot(r_mc[r_mc<1.1*fit_rcutoff], g[i*len(r):(i+1)*len(r)][r_mc<1.1*fit_rcutoff] + offset,
              alt_styles['gSunfitted'])
   r_gil = r_mc[r_mc < gil_rmax]
   g_gil = g_gil[r_mc < gil_rmax]
