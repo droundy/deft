@@ -404,7 +404,7 @@ outfile.write(r"""
 \newcommand\kappatable{
   \left(
   \begin{array}{c d{3} d{3} d{3} d{3}}
-    1 & 0 & 0 & 0 & 0 \\
+    1 & %(K11)g & %(K12)g & %(K13)g & %(K14)g \\
     0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
     0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
     0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
