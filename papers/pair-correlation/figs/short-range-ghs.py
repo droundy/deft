@@ -376,38 +376,13 @@ outfile.write(r"""
 \newcommand\etamaxerr{%(etamaxerr)g}
 \newcommand\rmaxerr{%(rmaxerr).2g}
 \newcommand\chisq{%(chisq).2g}
-\newcommand\kappamatrix{
-  1 +
-  \begin{pmatrix}
-     h_\sigma &
-     h_\sigma^2 &
-     h_\sigma^3 &
-     h_\sigma^4
-  \end{pmatrix}
-  \left(
-  \begin{array}{c d{3} d{3} d{3} d{3}}
-    1 & 0 & 0 & 0 & 0 \\
-    0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
-    0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
-    0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
-  \end{array}
-  \right)
-  \begin{pmatrix}
-     1 \\
-     \zeta \\
-     \zeta^2 \\
-     \zeta^3 \\
-     \zeta^4
-  \end{pmatrix}
-  e^{-%(alpha)g \zeta}
-}
 \newcommand\kappatable{
   \left(
   \begin{array}{c d{3} d{3} d{3} d{3}}
-    1 & %(K11)g & %(K12)g & %(K13)g & %(K14)g \\
-    0 & %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
-    0 & %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
-    0 & %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
+    %(K11)g & %(K12)g & %(K13)g & %(K14)g \\
+    %(K21)g & %(K22)g & %(K23)g & %(K24)g \\
+    %(K31)g & %(K32)g & %(K33)g & %(K34)g \\
+    %(K41)g & %(K42)g & %(K43)g & %(K44)g \\
   \end{array}
   \right)
 }
@@ -578,6 +553,8 @@ pylab.figure(2)
 pylab.ylim(ymin=zeros[-1] + mines[-1], ymax=zeros[0] + maxes[0])
 xlim = [1.8, 5.5]
 pylab.xlim(xlim[0], xlim[1])
+pylab.xlabel('$r/R$')
+pylab.ylabel('g(r)')
 pylab.axvline(2.0, color='k', ls=':')
 pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)

@@ -449,7 +449,7 @@ notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
 
 We have performed a separable fit to the Monte-Carlo simulated radial
 distribution function.  We chose to focus our fit on the range of
-distances $r_{12} < 2\sigma$.  This range of distances is relevant to
+distances $r_{12} \le \maxrfit R$.  This range of distances is relevant to
 the widely used \fixme{add citations?}  Statistical Associating Fluid
 Theory of Variable Range (SAFT-VR) free energy with square-well
 dispersive attraction developed by Gil-Villegas \emph{et
@@ -458,23 +458,6 @@ Fig.~\ref{fig:radial-distribution} we plot our fit, Monte-Carlo data,
 and the radial distribution function of Gil-Villegas \emph{et al.},
 which we have extracted from their approximation for the first term in
 the dispersion free energy given by Eq.~\ref{eq:mean-field}.
-
-For ease of implementation and future extension to larger radii, we
-chose to express our fit with a polynomial function, multiplied by an
-exponential decay.  We constrain our functional form for $g_S(r,
-g_\sigma)$ to match the value at contact:
-\begin{equation}
-  g_S(\sigma, g_\sigma) = g_\sigma.
-\end{equation}
-Beyond this constraint we have:
-\begin{align}
-  g_S(r,g_\sigma) &=
-  1 + \left(\sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} h_\sigma^i
-  \zeta^j\right)e^{-\alpha \zeta} \label{eq:fit-form}
-\end{align}
-where $h_\sigma = g_\sigma - 1$ is the total correlation function at
-contact, and $\zeta \equiv \frac{r}{\sigma}-1$ is a dimensionless
-measure of the distance from contact.
 
 \begin{table}
   \begin{align*}
@@ -486,15 +469,28 @@ measure of the distance from contact.
     %% Note that the first column of $\kappa$ corresponds to $j=1$
     %% while the first row corresponds to $i=1$ in
     %% Eq.~\ref{eq:fit-form}.
-  }
+  }\label{tab:kappa}
 \end{table}
 
-The Gil-Villegas function is fit to data for $r <= \maxrfit R$.  The
-maximum error within this radius in $g_S(r)$ at packing fractions up
-to 0.45 is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
-\rmaxerr R$.  We used in this fit Monte Carlo data for the radial
-distribution function at values of packing fraction at increments of
-0.05 from 0.05 to 0.45. Fig.~\ref{fig:radial-distribution} displays
+For ease of implementation and future extension to larger radii, we
+chose to express our fit with a fourth-order polynomial.  We constrain
+our functional form for $g_S(r, g_\sigma)$ to match the value
+$g_\sigma$ at contact and to reproduce $g(r)=1$ in the low-density
+($g_\sigma =1$) limit.  Incorporating these constraints we have the
+functional form:
+\begin{align}
+  g_S(r,g_\sigma) &=
+  g_\sigma + \sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} (g_\sigma - 1)^i
+  \left(\tfrac{r}{\sigma}-1\right)^j.
+  \label{eq:fit-form}
+\end{align}
+where the matrix $\kappa_{ij}$ is determined from our least-squares
+fit to Monte Carlo data for the radial distribution function, over the
+range $2R \le r \le \maxrfit R$, and for packing fractions $\eta \le
+0.45$.  The resulting parameters are displayed in
+Table~\ref{tab:kappa}.  The maximum error in $g_S(r)$ within this
+range is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
+\rmaxerr R$.  Fig.~\ref{fig:radial-distribution} displays
 our approximation at just under half of the densities that were
 included in the fit.
 
