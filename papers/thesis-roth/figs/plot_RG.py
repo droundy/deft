@@ -22,9 +22,17 @@ def plotPress(T,n,i):
 ### Plot stuff ###
 T = 0.5
 
-mu = -5.751
-plotphi(T,ns,mu,0,label='mu=%.3f'%mu)
+mu = -7
+plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
 
+mu = -6
+plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+
+mu = -5
+plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+
+mu = -4
+plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
 
 ### Titles, etc. ###
 plt.title('Grand free energy per unit volume; T=%.2f'%T)
@@ -35,5 +43,5 @@ plt.ylabel(r'$\phi(T,n,\mu)$'+'/SW units')
 # plt.ylim(-0.02,0.0)
 plt.legend(loc=0)
 
-# plt.savefig('figs/mu_comparison.pdf')
-plt.show()
+plt.savefig('figs/mu_comparison-i1.pdf')
+#plt.show()
