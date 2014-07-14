@@ -247,7 +247,7 @@ for name in styles.plots:
     if name != 'fischer':
       # Fischer et al only predict pair distribution function in contact
       xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
-      zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])
+      zplot.plot(z_z, g_z, styles.plot[name])
 
     # insert zoomed subplot for eta = 0.1 only
     if ff == 0.1:
@@ -273,7 +273,7 @@ zplot.axvline(x=0, color='k')
 
 
 legendloc = 'lower left' if ff < 0.2 else 'upper left'
-xplot.legend(loc=legendloc, ncol=1).draw_frame(False)
+zplot.legend(loc=legendloc, ncol=1).draw_frame(False)
 
 
 twod_plot.text(2.1, -3.8, styles.title['this-work-short'],
