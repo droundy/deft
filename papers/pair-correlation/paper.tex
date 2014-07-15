@@ -52,15 +52,6 @@ works and Monte-Carlo simulation, showing favorable results.
 
 \section{Introduction}
 
-\fixme{
-  TO DO:
-  \begin{itemize}
-  \item \jeffsays{still concerned about the use of CVA.  It seems
-    sometimes it's used as an approach and sometimes as the resulting
-    pair-dist function.}
-  \end{itemize}
-}
-
 The standard approach in liquid state theory is to model a liquid as a
 hard-sphere reference fluid with attractive interactions that are
 treated perturbatively~\cite{hansen2006theory}.  Recent advances have
@@ -91,7 +82,7 @@ suitable for use in constructing a density
 functional~\cite{gloor2007prediction, jain2007modified}.
 
 At its core, thermodynamic perturbation theory---sometimes referred to
-as the cluster, or high-temperature expansion---is an expansion of the
+as the high-temperature expansion---is an expansion of the
 free energy in powers of a small parameter, which is typically a
 pairwise attractive interaction:
 \begin{align}
@@ -451,11 +442,18 @@ relevant to the widely used
 \cite{chapman1989saft,muller2001molecular,tan2008recent} Statistical
 Associating Fluid Theory of Variable Range (SAFT-VR) free energy with
 square-well dispersive attraction developed by Gil-Villegas \emph{et
-  al.}~\cite{gil1997statistical}.  For comparison, in
-Fig.~\ref{fig:radial-distribution} we plot our fit, Monte-Carlo data,
-and the radial distribution function of Gil-Villegas \emph{et al.},
-which we have extracted from their approximation for the first term in
-the dispersion free energy given by Eq.~\ref{eq:mean-field}.
+  al.}~\cite{gil1997statistical}.
+%
+Although we consider this range of radii particularly interesting,
+this is not a fundamental limit on the approach, as one could readily
+extend the fit to larger radii by including additional fitting
+parameters.
+%
+For comparison, in Fig.~\ref{fig:radial-distribution} we plot our fit,
+Monte-Carlo data, and the radial distribution function of Gil-Villegas
+\emph{et al.}, which we have extracted from their approximation for
+the first term in the dispersion free energy given by
+Eq.~\ref{eq:mean-field}.
 
 \begin{table}
   \begin{align*}
@@ -669,38 +667,7 @@ consistent with Fig.~\ref{fig:radial-distribution}, which shows that
 $g_S(r)$ fits well the first peak of $g(r)$, but has fewer
 oscillations at large distances.
 
-
-% Figure~\ref{fig:triplet-contact-distribution} compares the triplet
-% distribution function at a packing fraction of 0.3 computed using the
-% CVA-S with results from Monte Carlo simulation.  In each subfigure,
-% $\rr_1$ and $\rr_2$ are held fixed, while the third position $\rr_3$
-% is varied.  The test-particle position in each case is $\rr_1$, which
-% is on the left-hand side of the figure.  In the color plots on the
-% left, the first and second spheres are displayed in gray.  On the
-% bottom half of figures~\ref{fig:triplet-contact-distribution}a
-% and~\ref{fig:triplet-contact-distribution}c is the triplet
-% distribution function as computed using the CVA-S.  The top half of
-% those figures displays the triplet distribution function from Monte
-% Carlo simulations.  Figures~\ref{fig:triplet-contact-distribution}b
-% and~\ref{fig:triplet-contact-distribution}d show the triplet
-% distribution function along the paths illustrated in the corresponding
-% 2D plots.
-
-% Figures~\ref{fig:triplet-contact-distribution}a
-% and~\ref{fig:triplet-contact-distribution}b show the triplet
-% distribution function when two of the positions $\rr_1$ and $\rr_2$
-% are in contact.  The triplet distribution function predicted by the
-% CVA-S is slightly asymmetric, indicating a failure in thermodynamic
-% consistency.  Once again, we observe the lack of oscillations at large
-% distances.  Figures~\ref{fig:triplet-contact-distribution}c
-% and~\ref{fig:triplet-contact-distribution}d show the triplet
-% distribution function when two of the positions $\rr_1$ and $\rr_2$
-% are spaced so that the third could just fit between them.  Again, the
-% triplet distribution function predicted by the CVA-S is slightly
-% asymmetric, and lacks the oscillations seen in the Monte Carlo
-% simulations at large distances.  \fixme{We need to discuss the plots
-%   and the directions and arrows.} In both cases, our agreement with
-% simulation is comparable to that of previous approximations.
+\section{Accuracy in thermodynamic perturbation theory}
 
 \begin{figure}
   \begin{subfigure}{1.0\columnwidth}
@@ -713,24 +680,15 @@ oscillations at large distances.
     \vspace{-0.8cm}
     \caption{Hard-core square well fluid}\label{fig:dadz-square-well}
   \end{subfigure}
-  \begin{subfigure}{1.0\columnwidth}
-    \includegraphics[width=\columnwidth]{figs/dadz-inverse-sixth-3.pdf}
-    \vspace{-0.8cm}
-    \caption{Hard-core inverse-sixth fluid}\label{fig:dadz-inverse-sixth}
-  \end{subfigure}
   \caption{Plot of $\frac{dF_1}{dz}$ near a hard wall.  (a) shows a
     sticky hard-sphere fluid defined by a pair potential
-    \davidsays{Probablyt cut out inverse sixth?}
     $\delta(\sigma-r+\delta)$ where $\sigma$ is the hard-sphere
-    diameter, and $\delta$ is an infinitesimal distance; (b) shows a
+    diameter, and $\delta$ is an infinitesimal distance; and (b) shows a
     square well fluid defined by a pair potential $\Theta(1.79
-    \sigma-r)$; and (c) shows a hard-core inverse-sixth potential
-    fluid with an attractive pair potential proportional to $r^{-6}$.
+    \sigma-r)$.
   }
   \label{fig:dadz}
 \end{figure}
-
-\section{Accuracy in thermodynamic perturbation theory}
 
 A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
@@ -747,15 +705,14 @@ energy as
 which gives the contribution to the mean-field free energy due to
 molecules located in a plane of fixed $z$.
 
-We plot this quantity for three representative
-pair potentials near a hard wall in Fig.~\ref{fig:dadz}.  We have
-chosen to illustrate a delta-function interaction at contact
-(i.e. ``sticky hard spheres''); a hard-core square-well fluid, with
-the length-scale of interaction taken from the optimal SAFT model for
-water found by Clark \emph{et al.}~\cite{clark2006developing}; and a
-$1/r^6$ power-law attraction.  These pair potentials represent a
-short-range interaction, a medium-range discontinuous interaction, and
-a long-range smooth interaction.
+We plot this quantity for two representative pair potentials near a
+hard wall in Fig.~\ref{fig:dadz}.  We have chosen to illustrate a
+delta-function interaction at contact (i.e. ``sticky hard spheres''),
+and a hard-core square-well fluid, with the length-scale of
+interaction taken from the optimal SAFT model for water found by Clark
+\emph{et al.}~\cite{clark2006developing}.  These pair potentials
+represent both a very short-range interaction and a medium-range
+interaction.
 
 Figure~\ref{fig:dadz-delta} shows the results for the sticky
 hard-sphere fluid.  The CVA is constructed to produce this result
@@ -764,13 +721,9 @@ from Ref.~\citenum{schulte2012using} is exact.  As expected, we see
 excellent agreement with the Monte Carlo simulation results, while the
 approximations of Fischer and Sokolowski each show deviations near the
 interface.  Figure~\ref{fig:dadz-square-well} shows the same curve
-from Eq.~\ref{eq:da1} for the square-well fluid.  This potential
-stresses the CVA, since the edge of the attraction occurs at the dip
-in the radial distribution function at this density, with poor results
-for the bulk fluid.  \davidsays{The last sentence is inaccurate.}  We
-see that over these length scales, both the CVA and Sokolowski's
-approximation are very accurate.  Finally, in the case of the
-power-law attraction all approximations tested work very well.
+from Eq.~\ref{eq:da1} for the square-well fluid.  For the square well
+fluid both the CVA and Sokolowski's approximation give excellent
+agreement with simulation.
 
 \section{Conclusion}
 
@@ -783,9 +736,9 @@ may be efficiently computed using exclusively fixed-kernel convolutions.  We hav
 tested this function at a hard wall and near a single fixed hard
 sphere, and find that it gives qualitatively reasonable results.
 Tests of the pair distribution function in integrals that arise in
-thermodynamic perturbation theory suggest that our approximation is
-accurate for both short-range and long-range attractions.
-\davidsays{Probably cut the long-range attractions.}
+thermodynamic perturbation theory suggest that the CVA is
+accurate for attractions up to the distance to which the radial
+distribution function is fit.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
