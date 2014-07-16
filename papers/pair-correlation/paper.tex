@@ -40,12 +40,12 @@ the inhomogeneous hard sphere fluid. Our approximation makes use of
 our recently published averaged pair distribution function at contact
 which has been shown to accurately reproduce the averaged pair
 distribution function at contact for inhomogeneous density
-distributions. We further develop a separable form of this
-approximation that achieves greater computational efficiency by using
-exclusively fixed-kernel convolutions and thus allowing an
-implementation using fast Fourier transforms. We compare results for
-our pair distribution approximation with two previously published
-works and Monte-Carlo simulation, showing favorable results.
+distributions. This approach achieves greater computational efficiency
+that previous approaches by using exclusively fixed-kernel
+convolutions and thus allowing an implementation using fast Fourier
+transforms. We compare results for our pair distribution approximation
+with two previously published works and Monte-Carlo simulation,
+showing favorable results.
 \end{abstract}
 
 \maketitle
@@ -128,7 +128,7 @@ function given the external potential is Percus' trick of treating one
 sphere as an additional contribution to the external potential, and to
 find the pair distribution function from the resultant equilibrium
 density~\cite{hansen2006theory}.  This elegant approach lends itself
-to computation with DFT, and can be used to compute and plot the pair
+to computation \emph{using} DFT, and can be used to compute and plot the pair
 distribution function, but requires a full free-energy minimization
 \emph{for each position} $\rr_1$ in $g^{(2)}(\rr_1,\rr_2)$, and hence
 would be prohibitively expensive as a tool in constructing a free
@@ -139,6 +139,13 @@ the system consisting of a hard sphere at a hard wall.  In 1986,
 Plischke and Henderson solved the pair distribution function of this
 system using integral equation theory under the Percus-Yevick
 approximation~\cite{plischke1986pair}.
+
+Lado recently introduced a new and improved efficient algorithm for
+implementing integral equation theory for inhomogeneous fluids, which
+computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
+approach is two orders of magnitude more efficient than previous
+implementations, it remains a computationally expensive approach, and
+unsuitable for repeated evaluation within a free-energy minimization.
 
 Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed.  Where
@@ -151,13 +158,6 @@ distribution function of the homogeneous fluid.  The triplet
 distribution function of the homogeneous fluid has been computed by
 Gonz\'alez \emph{et al.} using the test-particle approach with
 \emph{two} spheres fixed~\cite{gonzalez1999test}.
-
-Lado recently introduced a new and improved efficient algorithm for
-implementing integral equation theory for inhomogeneous fluids, which
-computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
-approach is two orders of magnitude more efficient than previous
-implementations, it remains a computationally expensive approach, and
-unsuitable for repeated evaluation within a free-energy minimization.
 
 \section{Pair distribution from the density}\label{sec:gn}
 
@@ -190,7 +190,7 @@ In addition to the above exact approach, there are a number of
 analytic approximations for the inhomogeneous pair distribution
 function, which extend the radial distribution function to
 inhomogeneous scenarios.  These approximations differ in what density
-is used when evaluating the radial distribution function $g(r,\eta)$
+is used when evaluating the radial distribution function $g(r,n)$
 or in how radial distributions evaluated at different densities are
 combined to yield an effective function
 \cite{toxvaerd1973statistical}.
@@ -261,14 +261,14 @@ averages, centered on the two points $\rr_1$ and $\rr_2$:
   \tfrac12(\bar{n}(\rr_1)+\bar{n}(\rr_2))\right)
   \label{eq:sokolowski}
 \end{align}
-where their averaged density $\bar{n}(\rr)$ is given by:
+where their averaged density $\bar{n}(\rr)$ given by
 \begin{align}
   \bar{n}(\rr) \equiv \frac{3}{4\pi (0.8\sigma)^3}\int n(\rr')\Theta(0.8\sigma - |\rr-\rr'|) d\rr'
 \end{align}
 is the density averaged over a sphere with diameter
 $0.8\sigma$~\cite{sokolowski1992role}.  The value 0.8 in this formula
 was arrived at by fitting to Monte Carlo simulation.  Although
-Although Eq.~\ref{eq:sokolowski} has the advantages of only involving
+Eq.~\ref{eq:sokolowski} has the advantage of only involving
 density averages at the points at which the pair distribution function
 is desired, it remains sufficiently computationally cumbersome that it
 has only been used in two papers studying the liquid vapor
@@ -289,7 +289,7 @@ where the weighted density $\tilde{n}(\rr_1)$ is defined by:
 \begin{align}
   \tilde{n}(\rr) &\equiv \int n(\rr') \delta(\sigma -|\rr - \rr'|)d\rr'.
 \end{align}
-We use the contact-value theorem to derive the exact formula:
+In \cite{schulte2012using} we use the contact-value theorem to derive the exact formula:
 \begin{align}
   g_\sigma(\rr)% &= \frac{\ncontact(\rr)}{n_A(\rr)} \\
   &= \frac12 \frac{1}{k_BT n(\rr) \tilde{n}(\rr)} \frac{\delta
@@ -359,9 +359,11 @@ constructed to reproduce the exact value for the integral:
 which is the mean-field correction to the free energy (see
 Eq.~\ref{eq:mean-field}) for a purely contact interaction.
 
-The CVA requires the radial distribution function as a function of $r$
+The CVA requires the radial distribution function expressed as a function of $r$
 and $g_\sigma$.  One approach to constructing $g(r,g_\sigma)$ is to
-compute $\eta$ from $g_\sigma$ and then find $g(r,\eta)$ using either
+compute $n$ from $g_\sigma$ (using e.g. the Carnahan-Starling formula
+for $g_\sigma$)
+and then find $g(r,n)$ using either
 some approximate functional form (e.g. Percus-Yevick) or Monte Carlo
 simulation results.  In this paper we use a fit to Monte Carlo results
 for the radial distribution function $g(r)$, which facilitates
@@ -406,11 +408,17 @@ Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
 When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
 further simplify this integral as
 \begin{multline}
-  F_1^{\textit{CVA}} =
-  \sum_i \tfrac12 \!\! \iint \!\! \bigg( n(\rr_1)  \bigg) \\
-                             \bigg( a_i(r_{12})\Phi(r_{12}) \bigg) \\
-                             \bigg( b_i(g_\sigma(\rr_2))n(\rr_2) \bigg)
-  d\rr_1d\rr_2
+  F_1^{\textit{CVA}} \! = \!
+  \sum_i \!\tfrac12 \!\! \int \!\! n(\rr_1) \!\!
+                            \int \!\!\!
+                            %\big(
+                            a_i(r_{12})\Phi(r_{12})
+                            %\big)
+                            %\big(
+                            b_i(
+g_\sigma(\rr_2))n(\rr_2)
+                            %\big)
+  d\rr_2d\rr_1
 \end{multline}
 where the functional is written as a summation of integrals, each of
 which is an integral of simple convolution in three dimensions.  Thus,
@@ -480,7 +488,7 @@ functional form:
   \left(\tfrac{r}{\sigma}-1\right)^j.
   \label{eq:fit-form}
 \end{align}
-where the matrix $\kappa_{ij}$ is determined from our least-squares
+where the matrix $\kappa_{ij}$ is determined from a least-squares
 fit to Monte Carlo data for the radial distribution function, over the
 range $2R \le r \le \maxrfit R$, and for packing fractions $\eta \le
 0.45$.  The resulting parameters are displayed in
@@ -492,7 +500,8 @@ included in the fit.
 
 \newcommand{\plotcomp}[1]{The top halves of
   these figures show the results of Monte Carlo simulations, while the
-  bottom halves show the CVA.  On the right are plots of #1 on the
+  bottom halves show the CVA \fixme{over the range of radii for which
+    the fit was performed}.  On the right are plots of #1 on the
   paths illustrated in the figures to the left.  These plots compare
   the CVA (blue solid line), Monte Carlo results (black circles), the
   results of Sokolowski and Fischer (red dashed
@@ -537,8 +546,7 @@ with a focus on the case where one of the two spheres is in contact
 with the hard wall.  Figures~\ref{fig:pair-distribution}a
 and~\ref{fig:pair-distribution}c compare the results of the CVA with
 Monte Carlo simulations at packing fractions of 0.1 and 0.3
-respectively. We see reasonable agreement at the lower density, with
-some reduced oscillations at larger distances, and a flatter angular
+respectively. We see reasonable agreement at the lower density, with a flatter angular
 dependence when the two spheres are in contact.  At the higher
 density, we see significant structure developing in the simulation
 results that is not reflected in our approximation.
@@ -557,7 +565,8 @@ results that is not reflected in our approximation.
     varies. %\plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}.
 %
     The top halves of these figures show the results of Monte Carlo
-    simulations, while the bottom halves show the CVA.  On the right
+    simulations, while the bottom halves show the CVA \fixme{over the
+      range of radii for which the fit was performed}.  On the right
     are plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ on the paths illustrated
     in the figures to the left.
 %
@@ -596,9 +605,7 @@ distribution function at densities significantly higher than the
 freezing density, which poses numerical difficulties when using the
 radial distribution function from simulation.  When the two points
 $\rr_1$ and $\rr_2$ are both more than a radius away from contact, we
-find that any of these approaches gives a reasonable prediction, with
-the CVA underestimating the oscillations in $g^{(2)}$, as
-expected based on the fit in Fig.~\ref{fig:radial-distribution}.
+find that any of these approaches gives a reasonable prediction.
 
 \subsection{Triplet distribution function}
 
@@ -633,13 +640,11 @@ and $\rr_2$ are in contact; in
 Figure~\ref{fig:triplet-contact-distribution}c they are spaced so that
 a third sphere can just fit between them; and in both figures $\rr_3$
 is varied. The test-particle position for the CVA in each case is
-$\rr_1$, which is on the left-hand side of the figure. We see
-reasonable agreement, with fewer oscillations in the CVA at larger
-distances. Also, the Monte Carlo results have the expected left-right
-symmetry, while the CVA has an asymmetry introduced with the test
-particle due to errors in the pair distribution function. Most
-notably, the CVA has less angular dependence at contact with the
-test particle than it does with the sphere at $\rr_2$.
+$\rr_1$, which is on the left-hand side of the figure. As before, we
+see reasonable agreement with simulation. Also, the Monte Carlo
+results have the expected left-right symmetry, while the CVA has a
+small asymmetry introduced with the test particle due to errors in the
+pair distribution function.
 
 Figures~\ref{fig:triplet-contact-distribution}b
 and~\ref{fig:triplet-contact-distribution}d show the triplet
@@ -658,14 +663,7 @@ contact, we only plot it along the
 central portion of the path, which is in contact with $\rr_2$, and arrows
 are omitted.
 %
-All methods perform similarly over this range with one exception.  The
-CVA once again underestimates the oscillations on the left-hand
-side of the curve, where $\rr_2$ and $\rr_3$ are separated by a large
-distance.  On the path where $\rr_2$ and $\rr_3$ are closer, the CVA
-compares favorably with the other approximations.  This is
-consistent with Fig.~\ref{fig:radial-distribution}, which shows that
-$g_S(r)$ fits well the first peak of $g(r)$, but has fewer
-oscillations at large distances.
+All methods tested perform similarly over their range of validity.
 
 \section{Accuracy in thermodynamic perturbation theory}
 
@@ -721,9 +719,9 @@ from Ref.~\citenum{schulte2012using} is exact.  As expected, we see
 excellent agreement with the Monte Carlo simulation results, while the
 approximations of Fischer and Sokolowski each show deviations near the
 interface.  Figure~\ref{fig:dadz-square-well} shows the same curve
-from Eq.~\ref{eq:da1} for the square-well fluid.  For the square well
-fluid both the CVA and Sokolowski's approximation give excellent
-agreement with simulation.
+from Eq.~\ref{eq:da1} for the square-well fluid.  In this case both
+the CVA and Sokolowski's approximation give excellent agreement with
+simulation.
 
 \section{Conclusion}
 
@@ -738,7 +736,8 @@ sphere, and find that it gives qualitatively reasonable results.
 Tests of the pair distribution function in integrals that arise in
 thermodynamic perturbation theory suggest that the CVA is
 accurate for attractions up to the distance to which the radial
-distribution function is fit.
+distribution function is fit, and is an improvement over existing
+approximations near contact.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
