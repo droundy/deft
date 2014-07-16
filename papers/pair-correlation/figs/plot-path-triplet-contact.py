@@ -278,7 +278,7 @@ for name in styles.plots:
     z_z, g_z = avg_points(z_z, g_z, dpath)
 
   zplot.plot(z_c, g_c, styles.plot[name], label=styles.title[name])
-  if name != 'fisher':
+  if name != 'fischer':
     # Fischer et al only predict pair distribution function in contact
     xplot.plot(x_x, g_x, styles.plot[name], label=styles.title[name])
     zplot.plot(z_z, g_z, styles.plot[name], label=styles.title[name])

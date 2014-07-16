@@ -41,7 +41,7 @@ our recently published averaged pair distribution function at contact
 which has been shown to accurately reproduce the averaged pair
 distribution function at contact for inhomogeneous density
 distributions. This approach achieves greater computational efficiency
-that previous approaches by using exclusively fixed-kernel
+than previous approaches by enabling the use of exclusively fixed-kernel
 convolutions and thus allowing an implementation using fast Fourier
 transforms. We compare results for our pair distribution approximation
 with two previously published works and Monte-Carlo simulation,
@@ -83,8 +83,9 @@ functional~\cite{gloor2007prediction, jain2007modified}.
 
 At its core, thermodynamic perturbation theory---sometimes referred to
 as the high-temperature expansion---is an expansion of the
-free energy in powers of a small parameter, which is typically a
-pairwise attractive interaction:
+free energy in powers of a small parameter, which is typically the
+product of a
+pairwise attractive interaction with the inverse temperature $\beta$:
 \begin{align}
   F &= F_0 + F_1 + \beta F_2 + \mathcal{O}(\beta^2)
 \end{align}
@@ -100,10 +101,10 @@ expansion is
 where $g^{(2)}_{HS}(\rr_1,\rr_2)$ is the pair distribution function of
 the hard-sphere reference fluid, and $\Phi(r)$ is the pair potential.
 Formally, this requires the pair distribution function as a functional
-of the density $n(\rr)$.  In Section~\ref{sec:gV}, we will introduce
+of the density $n(\rr)$.  In Section~\ref{sec:gV}, we introduce
 existing theoretical approaches for computing
 $g^{(2)}_{HS}(\rr_1,\rr_2)$ given the external potential felt by the
-hard spheres.  In Section~\ref{sec:gn}, we will introduce existing
+hard spheres.  In Section~\ref{sec:gn}, we introduce existing
 approximations for the hard-sphere pair distribution that are
 expressed as a functional of the density distribution $n(\rr)$, which
 is a form that is more directly useful in the construction of
@@ -115,14 +116,14 @@ In this paper, we introduce a new contact value approach
 which is suitable for use in the creation of classical density
 functionals based on thermodynamic perturbation theory. The resulting
 function is based on a fit to the radial distribution function that is
-separable in a way that will enable efficient evaluation of the
+separable in a way that enables efficient evaluation of the
 integral in Eq.~\ref{eq:mean-field}.
 
 \section{Pair distribution from the external potential}\label{sec:gV}
 
 Given the external potential $V(\rr)$ felt by a hard-sphere fluid,
 there are several approaches that have been used to compute the pair
-distribution function.  We will review these approaches here.  The
+distribution function.  We review these approaches here.  The
 classic (and earliest) approach for computing the pair distribution
 function given the external potential is Percus' trick of treating one
 sphere as an additional contribution to the external potential, and to
@@ -139,13 +140,14 @@ the system consisting of a hard sphere at a hard wall.  In 1986,
 Plischke and Henderson solved the pair distribution function of this
 system using integral equation theory under the Percus-Yevick
 approximation~\cite{plischke1986pair}.
-
-Lado recently introduced a new and improved efficient algorithm for
+%
+Lado recently introduced a new and more efficient algorithm for
 implementing integral equation theory for inhomogeneous fluids, which
 computes $g^{(2)}(\rr_1,\rr_2)$~\cite{lado2009efficient}.  While this
 approach is two orders of magnitude more efficient than previous
 implementations, it remains a computationally expensive approach, and
-unsuitable for repeated evaluation within a free-energy minimization.
+unsuitable for repeated evaluation within a free-energy minimization
+as required by DFT.
 
 Another inhomogeneous configuration that is of interest is the
 test-particle configuration, in which one hard sphere is fixed.  Where
@@ -189,24 +191,23 @@ computational cost.
 In addition to the above exact approach, there are a number of
 analytic approximations for the inhomogeneous pair distribution
 function, which extend the radial distribution function to
-inhomogeneous scenarios.  These approximations differ in what density
-is used when evaluating the radial distribution function $g(r,n)$
-or in how radial distributions evaluated at different densities are
-combined to yield an effective function
-\cite{toxvaerd1973statistical}.
+inhomogeneous scenarios.  These approximations differ both in what
+density to use when evaluating the radial distribution function
+$g(r;n)$, and in how to combine the radial distribution function
+evaluated at these densities~\cite{toxvaerd1973statistical}.
 
 Early approximations to the pair distribution function used the
 density at one or two positions to determine the pair distribution
 function.  There are three common approaches:
 \begin{align}
   g^{(2)}(\rr_1,\rr_2) &\approx
-  g\left(r_{12}, n\left(\frac{\rr_1+\rr_2}{2}\right)\right)
+  g\left(r_{12}; n\left(\frac{\rr_1+\rr_2}{2}\right)\right)
      & \text{midpoint} \\
   g^{(2)}(\rr_1,\rr_2) &\approx
-  g\left(r_{12}, \frac{n(\rr_1)+n(\rr_2)}{2}\right)
+  g\left(r_{12}; \frac{n(\rr_1)+n(\rr_2)}{2}\right)
      & \text{mean density} \\
   g^{(2)}(\rr_1,\rr_2) &\approx
-  \frac{g(r_{12},n(\rr_1))+g(r_{12},n(\rr_2))}{2}
+  \frac{g(r_{12};n(\rr_1))+g(r_{12};n(\rr_2))}{2}
      & \text{mean function}
 \end{align}
 These approaches have been successfully and widely used in treating
@@ -222,14 +223,14 @@ inhomogeneous systems such as a dense fluid at a solid surface.  Such
 systems exhibit a strongly oscillatory density distribution, with
 density peaks that can have local packing fractions greater than
 unity, which cannot occur in the bulk reference system that defines
-$g(r, n)$.  The above papers restrict themselves to the liquid-vapor
+$g(r; n)$.  The above papers restrict themselves to the liquid-vapor
 interface, which does not exhibit this pathology.
 
 Non-pathological approaches use an average of the density over some
 volume. Fischer and Methfessel introduce the
 approximation~\cite{fischer1980born,harris1987comment}:
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}, n_3\left(\tfrac12
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12}; n_3\left(\tfrac12
   (\rr_1+\rr_2)\right)\right)
   \label{eq:fischer}
 \end{align}
@@ -245,19 +246,19 @@ approach of Fischer and Methfessel is intended to approximate the pair
 distribution function only at contact, when the distance between
 $\rr_1$ and $\rr_2$ is the hard-sphere diameter.
 %
-Tang \emph{et. al} employed an approximation for the pair distribution
+Tang \emph{et al.} employed an approximation for the pair distribution
 function that is similar to that of Fischer and Methfessel, but with a
-self-consistent weighted density computed with weighting function that
+self-consistent weighted density computed with a weighting function that
 is itself dependent on the weighted density~\cite{tang1991density}.
 This weighted density was computed using the hard-sphere weighted
 density of Tarazona, which was developed using the direct correlation
 function of the homogeneous hard-sphere fluid~\cite{tarazona1985free}.
 
 Sokolowski and Fischer addressed the shortcomings of the theory of
-Fischer and Methfessel by modifying this approach to use
-averages, centered on the two points $\rr_1$ and $\rr_2$:
+Fischer and Methfessel by modifying this approach to use density
+averages centered on the two points $\rr_1$ and $\rr_2$:
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12},
+  g^{(2)}(\rr_1,\rr_2) \approx g\left(r_{12};
   \tfrac12(\bar{n}(\rr_1)+\bar{n}(\rr_2))\right)
   \label{eq:sokolowski}
 \end{align}
@@ -271,13 +272,13 @@ was arrived at by fitting to Monte Carlo simulation.  Although
 Eq.~\ref{eq:sokolowski} has the advantage of only involving
 density averages at the points at which the pair distribution function
 is desired, it remains sufficiently computationally cumbersome that it
-has only been used in two papers studying the liquid vapor
+has only been used in two papers studying the one-dimensional liquid vapor
 interface~\cite{wadewitz2000application, winkelmann2001liquid}.
 Because it cannot be written as a single-site convolution, this
 approach is particularly computationally demanding when applied to
 systems featuring inhomogeneity in more than one dimension.
 
-In a previous paper~\cite{schulte2012using}, we introduced a
+In a previous paper~\cite{schulte2012using}, we introduce a
 functional that gives a good approximation for the pair distribution
 function averaged over positions $\rr_2$ that are in contact with
 $\rr_1$, defined as:
@@ -339,14 +340,9 @@ We construct the CVA with the average of two radial distribution
 functions, evaluated at the distance between the two points, that are
 themselves functions of the averaged pair distribution function at contact
 $g_{\sigma}(\rr)$ evaluated at the two points:
-%
-%% We therefore seek a function form
-%% for our radial distribution that is dependent upon $g_{\sigma}(\rr)$
-%% and that will approach the correct solution in the homogeneous limit
-%% and also in the limit of contact distance between the two points.
 \begin{align}
-  g^{(2)}(\rr_1,\rr_2) = \frac{g(r_{12}, g_\sigma(\rr_1)) +
-    g(r_{12}, g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
+  g^{(2)}(\rr_1,\rr_2) = \frac{g(r_{12}; g_\sigma(\rr_1)) +
+    g(r_{12}; g_\sigma(\rr_2))}{2}. \label{eq:g2-our-mean}
 \end{align}
 This Contact Value Approach for $g^{(2)}(\rr_1,\rr_2)$ is
 constructed to reproduce the exact value for the integral:
@@ -360,73 +356,41 @@ which is the mean-field correction to the free energy (see
 Eq.~\ref{eq:mean-field}) for a purely contact interaction.
 
 The CVA requires the radial distribution function expressed as a function of $r$
-and $g_\sigma$.  One approach to constructing $g(r,g_\sigma)$ is to
+and $g_\sigma$.  One approach to constructing $g(r;g_\sigma)$ is to
 compute $n$ from $g_\sigma$ (using e.g. the Carnahan-Starling formula
 for $g_\sigma$)
-and then find $g(r,n)$ using either
+and then find $g(r;n)$ using either
 some approximate functional form (e.g. Percus-Yevick) or Monte Carlo
 simulation results.  In this paper we use a fit to Monte Carlo results
-for the radial distribution function $g(r)$, which facilitates
+for the radial distribution function $g(r)$ which facilitates
 efficient computation.  When evaluating the approximations of earlier
 works described in Section~\ref{sec:gn}, we use interpolated Monte
-Carlo results for $g(r,n)$.
+Carlo results for $g(r;n)$.
 
 \input{figs/short-range-fit-parameters}
 
 \section{Making the CVA efficient}
-The existing approaches to approximating the pair correlation function
-outlined in Section~\ref{sec:gn} have not been widely used in the
-construction of density functionals based on thermodynamic
+The existing approaches to approximating the pair distribution
+function outlined in Section~\ref{sec:gn} have not been widely used in
+the construction of density functionals based on thermodynamic
 perturbation theory, largely due to their computational complexity.
-While our CVA as described in the previous section is, in terms of
-accuracy, an incremental improvement over these existing approaches,
-it makes significant gains in terms of computational efficiency,
-allowing for its more managable use in such a construction.  We
-address the issue by developing a \emph{separable} fit to the radial
+While our CVA provides only an incremental improvement in accuracy,
+its construction enables significant gains in computational
+efficiency, allowing for practical application in density functionals.
+We achieve this gain by developing a \emph{separable} fit to the radial
 distribution function of the hard-sphere fluid (see
 Section~\ref{sec:separable-fit} for details).  This separable fit is
 of the form
 \begin{align}
-  g_S(|r_{12}|, g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+  g(|r_{12}|; g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
 where the notable aspect is that the radial distribution function is
 written as a sum of terms that are each a simple product of a function
 of radius with a function of $g_\sigma$.  This enables us to write
-integrals that are linear in the pair distribution function---such as
-Eq.~\ref{eq:mean-field}---as a summation of fixed-kernel convolutions,
-which may be efficiently computed using Fast Fourier Transforms
-(FFTs), in $\mathcal{O}(N\log N)$ time.
-
-We begin by examining the lowest-order correction in TPT, given by
-Eq.~\ref{eq:mean-field}.  The two terms that are averaged in
-Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral:
-\begin{align}
-  F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
-  g(r_{12},g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
-  d\rr_1d\rr_2
-\end{align}
-When we introduce the separable form for $g(r_{12},g_\sigma)$ we can
-further simplify this integral as
-\begin{multline}
-  F_1^{\textit{CVA}} \! = \!
-  \sum_i \!\tfrac12 \!\! \int \!\! n(\rr_1) \!\!
-                            \int \!\!\!
-                            %\big(
-                            a_i(r_{12})\Phi(r_{12})
-                            %\big)
-                            %\big(
-                            b_i(
-g_\sigma(\rr_2))n(\rr_2)
-                            %\big)
-  d\rr_2d\rr_1
-\end{multline}
-where the functional is written as a summation of integrals, each of
-which is an integral of simple convolution in three dimensions.  Thus,
-each of these integrals may be computed in $\mathcal{O}(N\log N)$
-time, which is the same scaling behavior that is common to the most
-common and accurate classical density functional theories, most
-notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
-  roth2002whitebear}.
+integrals---such as Eq.~\ref{eq:mean-field}---that are linear in the
+pair distribution function as a summation of fixed-kernel
+convolutions, which may be efficiently computed using Fast Fourier
+Transforms (FFTs) in $\mathcal{O}(N\log N)$ time.
 
 \begin{figure}
   \centering
@@ -440,20 +404,51 @@ notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
     of the fitted region.  }\label{fig:radial-distribution}
 \end{figure}
 
+We begin by examining the lowest-order correction in TPT, given by
+Eq.~\ref{eq:mean-field}.  The two terms that are averaged in
+Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral
+\begin{align}
+  F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
+  g(r_{12};g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
+  d\rr_1d\rr_2.
+\end{align}
+When we introduce the separable form for $g(r_{12};g_\sigma)$ we can
+further simplify this integral as
+\begin{align}
+  F_1^{\textit{CVA}} \! = \!
+  \sum_i \!\tfrac12 \!\! \int \!\! n(\rr_1) \!\!
+                            \int \!\!\!
+                            %\big(
+                            a_i(r_{12})\Phi(r_{12})
+                            %\big)
+                            %\big(
+                            b_i(
+g_\sigma(\rr_2))n(\rr_2)
+                            %\big)
+  d\rr_2d\rr_1
+\end{align}
+where the functional is written as a summation of integrals, each of
+which is an integral of a simple convolution in three dimensions.  Thus,
+each of these integrals may be computed in $\mathcal{O}(N\log N)$
+time, which is the same scaling behavior that is common to the most
+common and accurate classical density functional theories, most
+notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
+  roth2002whitebear}.
+
 \section{A separable fit for the radial distribution function}\label{sec:separable-fit}
 
-Having settled on the basic structure of our function, we futher
-refine it by performing a separable fit to the Monte-Carlo simulated
-radial distribution function.  We chose to focus our fit on the range
-of distances $r_{12} \le \maxrfit R$.  This range of distances is
-relevant to the widely used
-\cite{chapman1989saft,muller2001molecular,tan2008recent} Statistical
+Having settled on the basic structure of our function, we further
+refine it by performing a separable fit to the radial distribution
+function from Monte Carlo simulation.  We chose to focus our fit on
+the range of distances $r_{12} \le \maxrfit R$.  This range is
+relevant to the widely used \cite{chapman1989saft,
+  muller2001molecular, tan2008recent} Statistical
 Associating Fluid Theory of Variable Range (SAFT-VR) free energy with
 square-well dispersive attraction developed by Gil-Villegas \emph{et
   al.}~\cite{gil1997statistical}.
 %
 Although we consider this range of radii particularly interesting,
-this is not a fundamental limit on the approach, as one could readily
+this is not a fundamental limit of the approach, as one could readily
 extend the fit to larger radii by including additional fitting
 parameters.
 %
@@ -462,6 +457,27 @@ Monte-Carlo data, and the radial distribution function of Gil-Villegas
 \emph{et al.}, which we have extracted from their approximation for
 the first term in the dispersion free energy given by
 Eq.~\ref{eq:mean-field}.
+
+For ease of implementation and future extension to larger radii, we
+chose to express our fit with a fourth-order polynomial.  We constrain
+our functional form such that $g(r; g_\sigma)$ reduces to $g_\sigma$
+at contact and approaches $g(r)=1$ in the low-density limit.
+Incorporating these constraints we have the functional form
+\begin{align}
+  g(r;g_\sigma) &=
+  g_\sigma + \sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} (g_\sigma - 1)^i
+  \left(\tfrac{r}{\sigma}-1\right)^j,
+  \label{eq:fit-form}
+\end{align}
+where the matrix $\kappa_{ij}$ is determined from a least-squares
+fit to Monte Carlo data for the radial distribution function, over the
+range $2R \le r \le \maxrfit R$, and for packing fractions $\eta \le
+0.45$.  The resulting parameters are displayed in
+Table~\ref{tab:kappa}.  The maximum error in $g(r)$ within this
+range is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
+\rmaxerr R$.  Fig.~\ref{fig:radial-distribution} displays
+our approximation at just under half of the densities that were
+included in the fit.
 
 \begin{table}
   \begin{align*}
@@ -476,32 +492,10 @@ Eq.~\ref{eq:mean-field}.
   }\label{tab:kappa}
 \end{table}
 
-For ease of implementation and future extension to larger radii, we
-chose to express our fit with a fourth-order polynomial.  We constrain
-our functional form for $g_S(r, g_\sigma)$ to match the value
-$g_\sigma$ at contact and to reproduce the $g(r)=1$ result of the
-low-density limit.  Incorporating these constraints we have the
-functional form:
-\begin{align}
-  g_S(r,g_\sigma) &=
-  g_\sigma + \sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} (g_\sigma - 1)^i
-  \left(\tfrac{r}{\sigma}-1\right)^j,
-  \label{eq:fit-form}
-\end{align}
-where the matrix $\kappa_{ij}$ is determined from a least-squares
-fit to Monte Carlo data for the radial distribution function, over the
-range $2R \le r \le \maxrfit R$, and for packing fractions $\eta \le
-0.45$.  The resulting parameters are displayed in
-Table~\ref{tab:kappa}.  The maximum error in $g_S(r)$ within this
-range is \maxerr, which occurs at $\eta = \etamaxerr$ and $r =
-\rmaxerr R$.  Fig.~\ref{fig:radial-distribution} displays
-our approximation at just under half of the densities that were
-included in the fit.
-
 \newcommand{\plotcomp}[1]{The top halves of
   these figures show the results of Monte Carlo simulations, while the
-  bottom halves show the CVA \fixme{over the range of radii for which
-    the fit was performed}.  On the right are plots of #1 on the
+  bottom halves show the CVA, truncated beyond the range of the fit.
+  On the right are plots of #1 on the
   paths illustrated in the figures to the left.  These plots compare
   the CVA (blue solid line), Monte Carlo results (black circles), the
   results of Sokolowski and Fischer (red dashed
@@ -524,6 +518,7 @@ included in the fit.
     $\rr_2$ varies. \plotcomp{$g^{(2)}(\rr_1,\rr_2)$}.}
   \label{fig:pair-distribution}
 \end{figure*}
+
 \section{Results}
 
 \subsection{Pair distribution function}
@@ -565,8 +560,8 @@ results that is not reflected in our approximation.
     varies. %\plotcomp{$g^{(3)}(\rr_1,\rr_2,\rr_3)$}.
 %
     The top halves of these figures show the results of Monte Carlo
-    simulations, while the bottom halves show the CVA \fixme{over the
-      range of radii for which the fit was performed}.  On the right
+    simulations, while the bottom halves show the CVA, truncated
+    beyond the range of the fit.  On the right
     are plots of $g^{(3)}(\rr_1,\rr_2,\rr_3)$ on the paths illustrated
     in the figures to the left.
 %
@@ -590,22 +585,21 @@ Fischer~\cite{sokolowski1992role} and of Fischer and
 Methfessel~\cite{fischer1980born} at the same packing fractions of 0.1
 and 0.3.  The approach of Fischer and Methfessel is only defined when
 the two spheres are in contact, and is therefore only plotted on that
-segment of the path.  As an input to both previous approximations and
-to the CVA, we use the hard sphere radial distribution function found
-with Monte Carlo simulation, interpolated as necessary. We find that
-both previous approximations to the pair distribution function predict
-the qualitative angular dependence of the pair distribution function
-at contact better than this work.  However, in each case the pair
-distribution function has a systematic error at contact---either too
-high or too low.  While our approximation is smoother than either of
-the existing approaches, its errors will have a tendency to cancel
-when used in a perturbation expansion.  At higher densities, the
-approximation of Fischer and Methfessel requires evaluating the radial
-distribution function at densities significantly higher than the
-freezing density, which poses numerical difficulties when using the
-radial distribution function from simulation.  When the two points
-$\rr_1$ and $\rr_2$ are both more than a radius away from contact, we
-find that any of these approaches gives a reasonable prediction.
+segment of the path.  As an input to the previous approximations we
+use the hard sphere radial distribution function found with Monte
+Carlo simulation, interpolated as necessary. We find that both
+previous approximations to the pair distribution function predict
+stronger angular dependence of the pair distribution function at
+contact than this work.  The previous approximations each have a
+systematic error at contact---either too high or too low.  In
+contrast, our errors at contact have a tendency to cancel when used in
+a perturbation expansion.  At higher densities, the approximation of
+Fischer and Methfessel requires evaluating the radial distribution
+function at densities significantly higher than the freezing density,
+which poses numerical difficulties when using the radial distribution
+function from simulation.  When the two points $\rr_1$ and $\rr_2$ are
+both more than a radius away from contact, we find that any of these
+approaches gives a reasonable prediction.
 
 \subsection{Triplet distribution function}
 
@@ -678,7 +672,8 @@ All methods tested perform similarly over their range of validity.
     \vspace{-0.8cm}
     \caption{Hard-core square well fluid}\label{fig:dadz-square-well}
   \end{subfigure}
-  \caption{Plot of $\frac{dF_1}{dz}$ near a hard wall.  (a) shows a
+  \caption{Plot of $\frac{dF_1}{dz}$ near a hard wall, with arbitrary
+    vertical scale.  (a) shows a
     sticky hard-sphere fluid defined by a pair potential
     $\delta(\sigma-r+\delta)$ where $\sigma$ is the hard-sphere
     diameter, and $\delta$ is an infinitesimal distance; and (b) shows a
@@ -692,7 +687,7 @@ A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
 potential.  To this end, we have computed the error in the first term
 in a high-temperature perturbation expansion $F_1$
-for several pair potentials.  In order to focus on effects at the
+for two typical pair potentials.  In order to focus on effects at the
 interface, we have defined a position-dependent pair interaction
 energy as
 \begin{align}
@@ -726,18 +721,17 @@ simulation.
 \section{Conclusion}
 
 We have introduced and tested the contact value approach for the pair
-distribution function of the inhomogeneous hard-sphere fluid.  The
-separable version of the contact value
-approach is suitable for use in the development of classical
-density functionals constructed using perturbation theory, as it
-may be efficiently computed using exclusively fixed-kernel convolutions.  We have
-tested this function at a hard wall and near a single fixed hard
+distribution function of the inhomogeneous hard-sphere fluid.  The CVA
+is suitable for use in the development of classical density
+functionals constructed using perturbation theory, as it may be
+efficiently computed using exclusively fixed-kernel convolutions.  We
+have tested this function at a hard wall and near a single fixed hard
 sphere, and find that it gives qualitatively reasonable results.
 Tests of the pair distribution function in integrals that arise in
-thermodynamic perturbation theory suggest that the CVA is
-accurate for attractions up to the distance to which the radial
-distribution function is fit, and is an improvement over existing
-approximations near contact.
+thermodynamic perturbation theory suggest that the CVA is accurate for
+attractions up to the distance to which the radial distribution
+function is fit, and is an improvement over existing approximations
+near contact.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
