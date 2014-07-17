@@ -299,7 +299,7 @@ In \cite{schulte2012using} we use the contact-value theorem to derive the exact 
 where $\sigma(\rr)$ is the diameter of hard spheres located at
 position $\rr$, and $F_{HS}$ is the Helmholtz free energy of the
 hard-sphere fluid.  The functional derivative of the free energy with
-respect to hard-sphere diameter in Eq.~\ref{eq:gsigma-exact} requires
+respect to the hard-sphere diameter in Eq.~\ref{eq:gsigma-exact} requires
 that we be able to evaluate the change in free energy resulting from a
 change in the diameter of specifically the hard spheres located at
 position $\rr$.  This somewhat unusual construction is mathematically
@@ -382,7 +382,7 @@ distribution function of the hard-sphere fluid (see
 Section~\ref{sec:separable-fit} for details).  This separable fit is
 of the form
 \begin{align}
-  g(|r_{12}|; g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+  g(r_{12}; g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
 \end{align}
 where the notable aspect is that the radial distribution function is
 written as a sum of terms that are each a simple product of a function
@@ -427,8 +427,8 @@ g_\sigma(\rr_2))n(\rr_2)
                             %\big)
   d\rr_2d\rr_1
 \end{align}
-where the functional is written as a summation of integrals, each of
-which is an integral of a simple convolution in three dimensions.  Thus,
+where the functional is written as a summation of integrals of simple
+convolutions in three dimensions.  Thus,
 each of these integrals may be computed in $\mathcal{O}(N\log N)$
 time, which is the same scaling behavior that is common to the most
 common and accurate classical density functional theories, most
@@ -439,7 +439,7 @@ notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
 
 Having settled on the basic structure of our function, we further
 refine it by performing a separable fit to the radial distribution
-function from Monte Carlo simulation.  We chose to focus our fit on
+function from Monte Carlo simulation.  We focus our fit on
 the range of distances $r_{12} \le \maxrfit R$.  This range is
 relevant to the widely used \cite{chapman1989saft,
   muller2001molecular, tan2008recent} Statistical
@@ -459,7 +459,7 @@ the first term in the dispersion free energy given by
 Eq.~\ref{eq:mean-field}.
 
 For ease of implementation and future extension to larger radii, we
-chose to express our fit with a fourth-order polynomial.  We constrain
+fit the radial distribution function using a fourth-order polynomial.  We constrain
 our functional form such that $g(r; g_\sigma)$ reduces to $g_\sigma$
 at contact and approaches $g(r)=1$ in the low-density limit.
 Incorporating these constraints we have the functional form
