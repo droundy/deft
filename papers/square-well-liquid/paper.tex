@@ -296,6 +296,59 @@ If we pull out constants and put this into Mathematica,
       k^2(\lambda\kappaO-1)\right) \sin (\lambda \sigma k)\right] \bigg\}
   \end{align}
 \end{widetext}
+\subsection{Polynomial expansion}
+
+A different way to do this that avoids some of the Fourier transform
+troubles is to formulate $g_S$ as a polynomial expansion.  We do this
+up to fouth order so that
+\begin{align}
+  g_S(r;g_\sigma) &=
+  g_\sigma + \sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} (g_\sigma - 1)^i
+  \left(\frac{r}{\sigma}-1\right)^j,
+  \label{eq:fit-form}
+\end{align}
+which makes the transforms for $i=1,2,3,4$
+\begin{align}
+ \frac {4\pi}{k}\int_\sigma^{\lambda \sigma} r
+ \left( \frac{r}{\sigma}-1\right)^i \sin (kr) \mathrm{d}r.
+\end{align}
+Let's do a u-substitution where $u= \frac{r}{\sigma}-1$, then the
+integral becomes
+\begin{align}
+ \frac {4\pi}{k}\int_0^{\lambda -1} \sigma^2 (u+1)u^i \sin(k\sigma
+       [u+1]) \mathrm{d}u.
+\end{align}
+Now we calculate the integrals.
+\begin{widetext}
+\begin{align}
+  \int_\sigma^{\lambda \sigma} r
+ \left( \frac{r}{\sigma}-1\right) \sin (kr) \mathrm{d}r =&
+ \frac{1}{k^3 \sigma}\left[(2-\lambda k^2
+ \sigma^2(\lambda-1))\cos(k\lambda\sigma)-k\sigma(\sin(k\sigma)
+ +(1-2\lambda) \sin(k\lambda\sigma)) -\cos(k\sigma) \right] \\
+  \int_\sigma^{\lambda \sigma} r
+ \left( \frac{r}{\sigma}-1\right)^2 \sin (kr) \mathrm{d}r =&
+ \frac{1}{k^4\sigma^2} \big[
+ 6\sin(k\sigma)+(k^2\sigma^2(1-4\lambda+3\lambda^2)
+ -6)\sin(k\lambda\sigma) \notag \\
+ &-2k\sigma\cos(k\sigma) - k\sigma(4 +
+ \lambda(k^2\sigma^2(\lambda-1)^2 - 6))\cos(k\lambda\sigma)\big] \\
+  \int_\sigma^{\lambda \sigma} r
+ \left( \frac{r}{\sigma}-1\right)^3 \sin (kr) \mathrm{d}r =&
+ \frac{1}{k^5\sigma^3} \big[k\sigma(6\sin(k\sigma) + (18-24\lambda
+   +k^2\sigma^2(\lambda-1)^2(4\lambda-1))\sin(k\lambda\sigma)) \notag \\
+   &+24\cos(k\sigma) + (6k^2\sigma^2(\lambda-1)(2\lambda-1)-\lambda
+   k^4\sigma^4(\lambda-1)^3)\cos(k\lambda\sigma)\big] \\
+  \int_\sigma^{\lambda \sigma} r
+ \left( \frac{r}{\sigma}-1\right)^4 \sin (kr) \mathrm{d}r =&
+ \frac{1}{k^6\sigma^4}
+ \big[(k\sigma(\lambda-1)(36-60\lambda+k^2\sigma^2(\lambda-1)^2(5\lambda-1))
+   -1)\sin(k\lambda\sigma) -120\sin(k\sigma) \notag \\ 
+   &+k\sigma(24\cos(k\sigma) -
+   (24(5\lambda-4)-4k^2\sigma^2(\lambda-1)^2 (5\lambda-2) +
+   \lambda k^4\sigma^4(\lambda-1)^4)\cos(k\lambda\sigma) \big]
+\end{align}
+\end{widetext}
 \subsubsection{Averaged pair distribution  $g_\sigma(\rr)$}
 
 The approximation for the averaged pair distribution $g_\sigma(\rr)$
