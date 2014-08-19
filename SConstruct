@@ -168,6 +168,7 @@ for name, module, hsfunctional, inputs in [
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[(ER $ r_var "n", ER 1)]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[(ER $ r_var "n", ER 1)]'),
+    #("SW_dispersion", "SW_liquid", "sw_dispersion", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
            '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
