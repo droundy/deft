@@ -46,7 +46,7 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
     for fname in glob.glob('figs/mcwalls-0.%02d00-%.4f*.dat' % (ff, kT)):
         print 'examining', fname
         d = numpy.loadtxt(fname)
-        d = smooth(d, 1)
+        d = smooth(d, 300)
         pylab.plot(15-abs(d[:,0]), d[:,1]*(4*pi/3), styles.mc[kT], label=fname)
 
 names.append('DFT kT = 0')
@@ -83,8 +83,8 @@ for i in range(len(data)):
 pylab.title('Packing fraction = %f' % (ff/100.0))
 pylab.xlabel('$z/R$')
 pylab.ylabel('Local Filling Fraction')
-pylab.legend(loc = 'best')
-pylab.xlim(-0.1, 5)
+#pylab.legend(loc = 'best')
+pylab.xlim(-0.1, 15)
 #pylab.ylim(.25, .6)
 pylab.savefig('figs/walls-%02d.pdf' % (ff))
 pylab.show()

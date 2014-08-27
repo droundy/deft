@@ -74,11 +74,12 @@ for j in arange(2,len(erfdata[0,:])-1):
   plot(erfeta,erfpressure, styles.color[erftemp[j]]+'-', label='$kT/V_{max}$=%g' % erftemp[j])
 
 
-for ff in arange(0.1,0.81, 0.1):
+for ff in arange(0.1,0.51, 0.1):
   density = ff/(4*pi/3)
   phs = density*(1+ff+ff**2)/(1-ff)**3
   phs = density
   for temp in [0.1, 0.01, 0.001, 0.0001]:
+    #input: 'figs/mc-*-*.dat.prs'
     fname = 'figs/mc-%.4f-%.4f.dat.prs' % (ff, temp)
     if os.path.exists(fname):
       print 'found', fname
@@ -87,8 +88,22 @@ for ff in arange(0.1,0.81, 0.1):
     else:
       print 'could not find', fname
 
+for ff in arange(0.1,0.51, 0.1):
+  density = ff/(4*pi/3)
+  phs = density*(1+ff+ff**2)/(1-ff)**3
+  phs = density
+  for temp in [0.1, 0.01, 0.001, 0.0001]:
+    #input: 'figs/mcljr-*-*.dat.prs'
+    fname = 'figs/mcljr-%.4f-%.4f.dat.prs' % (ff, temp)
+    if os.path.exists(fname):
+      print 'found', fname
+      p = loadtxt(fname)
+      plot(ff, p/temp/phs, styles.color[temp] + '+')
+    else:
+      print 'could not find', fname
+
 #plot(density*(4*pi/3), density, label = 'ideal gas')
-ylim(1,15.0)
+#ylim(1,15.0)
 xlim(xmax=0.51)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
