@@ -24,7 +24,7 @@
 \newcommand{\pahosays}[1]{{\color{red} [\blue{Paho:} \emph{#1}]}}
 
 \begin{document}
-\title{An efficient contact value approach to approximating the pair distribution
+\title{An efficient approach to approximating the pair distribution
   function of the inhomogeneous hard-sphere fluid}
 
 \author{Paho Lurie-Gregg}
@@ -81,9 +81,9 @@ the pair distribution function of an inhomogeneous hard-sphere fluid,
 suitable for use in constructing a density
 functional~\cite{gloor2007prediction, jain2007modified}.
 
-At its core, thermodynamic perturbation theory---sometimes referred to
-as the high-temperature expansion---is an expansion of the
-free energy in powers of a small parameter, which is typically the
+At its core, thermodynamic perturbation theory (TPT), sometimes referred to
+as the high-temperature expansion, is an expansion of the
+free energy in powers of a small parameter, which is the
 product of a
 pairwise attractive interaction with the inverse temperature $\beta$:
 \begin{align}
@@ -395,7 +395,8 @@ Transforms (FFTs) in $\mathcal{O}(N\log N)$ time.
 \begin{figure}
   \centering
   \includegraphics[width=\columnwidth]{figs/short-range-ghs-alt}
-  \caption{Plot of the hard-sphere radial distribution function. The
+  \caption{Plot of the hard-sphere radial distribution function of the
+    homogeneous fluid at several values for packing fraction $\eta$. The
     blue lines show our separable fit, the black dots show the true
     radial distribution function $g(r)$ as found from Monte Carlo
     simulation, and the dashed lines are results of the

@@ -83,7 +83,7 @@ def read_gr(ff):
 twod_width = 1.6
 oned_width = 1.4
 
-scale = 4
+scale = 3.6
 fig = figure(figsize=(scale*(twod_width + oned_width), scale))
 gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
 
@@ -485,7 +485,7 @@ xplot.set_ylim(0, ylim[1])
 
 plot_labels=['c)', 'd)']
 # add figure labels
-twod_plot.text(twod_plot.get_xlim()[0]-1, twod_plot.get_ylim()[1], plot_labels[0], fontsize=16)
+twod_plot.text(twod_plot.get_xlim()[0]-1.2, twod_plot.get_ylim()[1], plot_labels[0], fontsize=16)
 xplot.text(-7.5, ylim[1], plot_labels[1], fontsize=16)
 
 title = r'$g^{(3)}(\left< 0,0,0\right>,\left< 0,0,2.1\sigma\right>,\mathbf{r})$'

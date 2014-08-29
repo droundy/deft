@@ -78,7 +78,7 @@ ymax = 4
 twod_width = 1.0
 oned_width = 2.0
 
-scale = 4
+scale = 3.6
 fig = figure(figsize=(scale*(twod_width + oned_width), scale))
 gs = matplotlib.gridspec.GridSpec(1, 2, width_ratios=[twod_width, oned_width])
 
@@ -349,8 +349,8 @@ twod_plot.set_title(title +  r' at $\eta = %g$' % ff)
 xplot.set_ylabel(title)
 
 # add figure labels
-twod_plot.text(-2.0, ymax, plot_labels[0])
-xplot.text(6.7, ylim[1], plot_labels[1])
+twod_plot.text(-2.3, ymax, plot_labels[0], fontsize=16)
+xplot.text(6.7, ylim[1], plot_labels[1], fontsize=16)
 
 #fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))

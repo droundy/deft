@@ -38,7 +38,8 @@ tws_z0, tws_dadz = data[:,0], data[:,1]
 data = loadtxt("figs/walls/square-well-dadz-sokolowski-%04.2f-1.790.dat" % eta)
 s_z0, s_dadz = data[:,0], data[:,1]
 
-plt.figure(figsize=(6,4))
+scaleme=0.8
+plt.figure(figsize=(6*scaleme,4*scaleme))
 
 plt.plot(mc_z0[::10], mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 # plt.plot(tw_z0, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])

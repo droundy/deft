@@ -44,7 +44,8 @@ z['sokolowski'], dadz['sokolowski'] = data[:,0], data[:,1]
 data = loadtxt("figs/walls/walls_daWB-fischer-%04.2f-%05.3f.dat" % (eta, delta_r))
 z['fischer'], dadz['fischer'] = data[:,0], data[:,1]
 
-plt.figure(figsize=(6,4))
+scaleme=0.8
+plt.figure(figsize=(6*scaleme,4*scaleme))
 
 for version in versions:
   plt.plot(z[version], dadz[version], styles.plot[version], label=styles.title[version])

@@ -438,8 +438,8 @@ def avg_points(x, y, dpath):
       old_i = i
   return (new_x, new_y)
 
-
-fig2 = pylab.figure(2, figsize=(6,8))
+scaleme = 0.8
+fig2 = pylab.figure(2, figsize=(6*scaleme,8*scaleme))
 ax2 = fig2.gca()
 
 # ax.axvline(x=sigma, color='gray', linestyle='-')
@@ -560,7 +560,9 @@ pylab.axes().set_yticks(ticks)
 pylab.axes().set_yticklabels(ticklabels)
 
 for i in indexes:
-  pylab.text((2*xlim[0]+xlim[1])/3, zeros[i]+maxes[i]-0.1, r"$\eta = %.2f$" %(ff[i]), ha='center', va='top')
+  frac = 1.0/3 + 0.03*i - 0.1
+  pylab.text((1-frac)*xlim[0]+frac*xlim[1], zeros[i]+maxes[i]-0.14,
+             r"$\eta = %.1f$" %(ff[i]), ha='center', va='top')
 
 
 handles, labels = ax2.get_legend_handles_labels()
