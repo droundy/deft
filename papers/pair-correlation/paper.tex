@@ -16,6 +16,7 @@
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
+\newcommand{\newstuff}[1]{\blue{#1}}
 
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
@@ -355,21 +356,24 @@ constructed to reproduce the exact value for the integral:
 which is the mean-field correction to the free energy (see
 Eq.~\ref{eq:mean-field}) for a purely contact interaction.
 
-The CVA requires the radial distribution function expressed as a function of $r$
-and $g_\sigma$.  One approach to constructing $g(r;g_\sigma)$ is to
-compute $n$ from $g_\sigma$ (using e.g. the Carnahan-Starling formula
-for $g_\sigma$)
-and then find $g(r;n)$ using either
-some approximate functional form (e.g. Percus-Yevick) or Monte Carlo
-simulation results.  In this paper we use a fit to Monte Carlo results
-for the radial distribution function $g(r)$ which facilitates
-efficient computation.  When evaluating the approximations of earlier
-works described in Section~\ref{sec:gn}, we use interpolated Monte
-Carlo results for $g(r;n)$.
+The CVA requires the radial distribution function expressed as a
+function of $r$ and $g_\sigma$.  \fixme{One approach to constructing
+  $g(r;g_\sigma)$ is to compute $n$ from $g_\sigma$ (using e.g. the
+  Carnahan-Starling formula for $g_\sigma$) and then find $g(r;n)$
+  using either some approximate functional form (e.g. Percus-Yevick)
+  or Monte Carlo simulation results.}  \newstuff{In this paper we
+  construct a functional form for $g(r, g_\sigma)$ that allows for
+  greater computational efficiency. In section \ref{sec:efficient} we
+  discuss the general form that allows for this efficiency and in
+  section \ref{sec:separable-fit} we detail the fit to Monte Carlo
+  results.}  When evaluating the approximations of earlier works
+described in Section~\ref{sec:gn} \newstuff{for comparison}, we use interpolated Monte Carlo
+results for $g(r;n)$.
 
 \input{figs/short-range-fit-parameters}
 
 \section{Making the CVA efficient}
+\label{sec:efficient}
 The existing approaches to approximating the pair distribution
 function outlined in Section~\ref{sec:gn} have not been widely used in
 the construction of density functionals based on thermodynamic
@@ -382,7 +386,8 @@ distribution function of the hard-sphere fluid (see
 Section~\ref{sec:separable-fit} for details).  This separable fit is
 of the form
 \begin{align}
-  g(r_{12}; g_\sigma) &= \sum_{i} a_i(r_{12}) b_i(g_\sigma)
+  g(r; g_\sigma) &= \sum_{i} a_i(r) b_i(g_\sigma)
+  \\\text{\newstuff{removed subscript $_{12}$.}}
 \end{align}
 where the notable aspect is that the radial distribution function is
 written as a sum of terms that are each a simple product of a function
