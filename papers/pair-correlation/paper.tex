@@ -696,8 +696,6 @@ are omitted.
 %
 All methods tested perform similarly over their range of validity.
 
-\section{Accuracy in thermodynamic perturbation theory}
-
 \begin{figure}
   \begin{subfigure}{1.0\columnwidth}
     \includegraphics[width=\columnwidth]{figs/dadz-3-2.pdf}
@@ -719,6 +717,8 @@ All methods tested perform similarly over their range of validity.
   }
   \label{fig:dadz}
 \end{figure}
+
+\section{Accuracy in thermodynamic perturbation theory}
 
 A particularly relevant quantitative test of a pair distribution
 function is how well it predicts the interaction energy due to a pair
@@ -758,17 +758,22 @@ simulation.
 \section{Conclusion}
 
 We have introduced and tested the contact value approach for the pair
-distribution function of the inhomogeneous hard-sphere fluid.  The CVA
-is suitable for use in the development of classical density
-functionals constructed using perturbation theory, as it may be
-efficiently computed using exclusively fixed-kernel convolutions.  We
-have tested this function at a hard wall and near a single fixed hard
-sphere, and find that it gives qualitatively reasonable results.
-Tests of the pair distribution function in integrals that arise in
-thermodynamic perturbation theory suggest that the CVA is accurate for
-attractions up to the distance to which the radial distribution
-function is fit, and is an improvement over existing approximations
-near contact.
+distribution function $g^{(2)}(\rr_1,\rr_2)$ of the inhomogeneous
+hard-sphere fluid.  The pair distribution function plays a key role in
+thermodynamic perturbation theory, which is widely used in the
+construction of classical density functionals.  The CVA---unlike
+existing approximations---is suitable for use in classical density
+functionals based on perturbation theory, as it may be efficiently
+computed using exclusively fixed-kernel convolutions.  We have tested
+this function at a hard wall and near a single fixed hard sphere, and
+find that it gives excellent agreement with simulation.  Tests of the
+pair distribution function in integrals that arise in thermodynamic
+perturbation theory suggest that the CVA is accurate for attractions
+up to the distance to which the radial distribution function is fit,
+and is a significant improvement over existing approximations near
+contact.  But most importantly, the computational cost of using the
+CVA in a classical density functional scales much more favorably than
+existing methods in high resolution computations.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
