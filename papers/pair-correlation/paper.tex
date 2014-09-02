@@ -357,18 +357,23 @@ which is the mean-field correction to the free energy (see
 Eq.~\ref{eq:mean-field}) for a purely contact interaction.
 
 The CVA requires the radial distribution function expressed as a
-function of $r$ and $g_\sigma$.  \fixme{One approach to constructing
-  $g(r;g_\sigma)$ is to compute $n$ from $g_\sigma$ (using e.g. the
-  Carnahan-Starling formula for $g_\sigma$) and then find $g(r;n)$
-  using either some approximate functional form (e.g. Percus-Yevick)
-  or Monte Carlo simulation results.}  \newstuff{In this paper we
-  construct a functional form for $g(r, g_\sigma)$ that allows for
-  greater computational efficiency. In section \ref{sec:efficient} we
-  discuss the general form that allows for this efficiency and in
-  section \ref{sec:separable-fit} we detail the fit to Monte Carlo
-  results.}  When evaluating the approximations of earlier works
-described in Section~\ref{sec:gn} \newstuff{for comparison}, we use interpolated Monte Carlo
-results for $g(r;n)$.
+function of $r$ and $g_\sigma$.
+%
+%% \fixme{One approach to constructing $g(r;g_\sigma)$ is to compute $n$
+%%   from $g_\sigma$ (using e.g. the Carnahan-Starling formula for
+%%   $g_\sigma$) and then find $g(r;n)$ using either some approximate
+%%   functional form (e.g. Percus-Yevick) or Monte Carlo simulation
+%%   results.}
+%
+We construct a functional form for $g(r, g_\sigma)$ that allows for
+improved computational efficiency.  We introduce the general form that
+allows for this efficiency in Section~\ref{sec:efficient}, and we
+detail our specific approximation for $g(r,g_\sigma)$ that uses this
+general form in Section~\ref{sec:separable-fit}.
+%
+%% When evaluating the approximations of earlier works described in
+%% Section~\ref{sec:gn} \newstuff{for comparison}, we use interpolated
+%% Monte Carlo results for $g(r;n)$.
 
 \input{figs/short-range-fit-parameters}
 
@@ -387,7 +392,6 @@ Section~\ref{sec:separable-fit} for details).  This separable fit is
 of the form
 \begin{align}
   g(r; g_\sigma) &= \sum_{i} a_i(r) b_i(g_\sigma)
-  \\\text{\newstuff{removed subscript $_{12}$.}}
 \end{align}
 where the notable aspect is that the radial distribution function is
 written as a sum of terms that are each a simple product of a function
