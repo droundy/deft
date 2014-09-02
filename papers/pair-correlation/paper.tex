@@ -16,7 +16,7 @@
 \newcommand{\refnote}{\red{[ref]}}
 
 \newcommand{\fixme}[1]{\red{[#1]}}
-\newcommand{\newstuff}[1]{\blue{#1}}
+\newcommand{\newstuff}[1]{{\color{blue} #1}}
 
 %\newcommand{\derivation}[1]{#1} % Use this to show all derivations in detail
 \newcommand{\derivation}[1]{} % Use this for nice pegagogical paper...
@@ -209,7 +209,7 @@ function.  There are three common approaches:
      & \text{mean density} \\
   g^{(2)}(\rr_1,\rr_2) &\approx
   \frac{g(r_{12};n(\rr_1))+g(r_{12};n(\rr_2))}{2}
-     & \text{mean function}
+     & \text{mean function}\label{eq:mean-function}
 \end{align}
 These approaches have been successfully and widely used in treating
 the surface tension of simple fluids~\cite{pressing2003surface,
@@ -372,7 +372,7 @@ detail our specific approximation for $g(r,g_\sigma)$ that uses this
 general form in Section~\ref{sec:separable-fit}.
 %
 %% When evaluating the approximations of earlier works described in
-%% Section~\ref{sec:gn} \newstuff{for comparison}, we use interpolated
+%% Section~\ref{sec:gn} for comparison, we use interpolated
 %% Monte Carlo results for $g(r;n)$.
 
 \input{figs/short-range-fit-parameters}
@@ -399,7 +399,34 @@ of radius with a function of $g_\sigma$.  This enables us to write
 integrals---such as Eq.~\ref{eq:mean-field}---that are linear in the
 pair distribution function as a summation of fixed-kernel
 convolutions, which may be efficiently computed using Fast Fourier
-Transforms (FFTs) in $\mathcal{O}(N\log N)$ time.
+Transforms (FFTs).
+
+\newcommand\Vcell{V_{\textit{cell}}}
+\newcommand\Vinteraction{V_{\Phi}}
+
+Computation of the free energy correction from Eq.~\ref{eq:mean-field}
+for a periodic system by direct integration requires a nested
+integration over the volume of the system~$\Vcell$, and the volume
+over which the interaction is nonzero~$\Vinteraction$.  Thus the cost
+of computation scales as
+$\mathcal{O}\left(\frac{\Vcell\Vinteraction}{\Delta V^2}\right)$ where
+$\Delta V$ is the volume resolution of the computational grid.  Direct
+integration is the most efficient algorithm when using the existing
+functionals for $g^{(2)}(\rr_1,\rr_2)$ described in
+Section~\ref{sec:gn}.  The one exception is the ``mean-function''
+approximation (Eq.~\ref{eq:mean-function}), which could in principle
+be made more efficient using the same technique we describe here.
+Because the CVA allows the integral in Eq.~\ref{eq:mean-field} to be
+written as a sum of fixed-kernel convolutions, it can be computed
+without a nested integral, at the cost of performing a few FFTs.  This
+approach scales as $\mathcal{O}\left(\frac{\Vcell}{\Delta
+  V}\log\frac{\Vcell}{\Delta V}\right)$, as do most widely used DFT
+functionals such as FMT~\cite{rosenfeld1989free, roth2002whitebear}.
+%
+With this scaling, when examining systems with long interaction
+distances or high resolution---which is often necessary when working
+with hard-sphere functionals---the CVA has the potential to be far
+more efficient than existing methods.
 
 \begin{figure}
   \centering
@@ -414,9 +441,10 @@ Transforms (FFTs) in $\mathcal{O}(N\log N)$ time.
     of the fitted region.  }\label{fig:radial-distribution}
 \end{figure}
 
-We begin by examining the lowest-order correction in TPT, given by
-Eq.~\ref{eq:mean-field}.  The two terms that are averaged in
-Eq.~\ref{eq:g2-our-mean} give equal contributions to the integral
+To see how we obtain this improved scaling, we examine the
+lowest-order correction in TPT, given by Eq.~\ref{eq:mean-field}.  The
+two terms that are averaged in Eq.~\ref{eq:g2-our-mean} give equal
+contributions to the integral
 \begin{align}
   F_1^{\textit{CVA}} &= \tfrac12 \!\! \iint \!\!
   g(r_{12};g_\sigma(\rr_2))n(\rr_1)n(\rr_2)\Phi(|\rr_1-\rr_2|)
@@ -438,12 +466,11 @@ g_\sigma(\rr_2))n(\rr_2)
   d\rr_2d\rr_1
 \end{align}
 where the functional is written as a summation of integrals of simple
-convolutions in three dimensions.  Thus,
-each of these integrals may be computed in $\mathcal{O}(N\log N)$
-time, which is the same scaling behavior that is common to the most
-common and accurate classical density functional theories, most
-notably Fundamental Measure Theory (FMT)~\cite{rosenfeld1989free,
-  roth2002whitebear}.
+convolutions in three dimensions.  Thus, each of these integrals may
+be computed in $\mathcal{O}(N\log N)$ time, where $N$ is the number of
+grid points in the computational cell.  This is the same scaling as is
+required to compute the fundamental measures such as $n_3$ which are
+used in FMT.
 
 \section{A separable fit for the radial distribution function}\label{sec:separable-fit}
 
