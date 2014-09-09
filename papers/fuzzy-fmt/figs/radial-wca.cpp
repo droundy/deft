@@ -43,7 +43,7 @@ double soft_sphere_potential(Cartesian r) {
   const double VoverKTcutoff = 100;
   const double distance = sqrt(x*x + y*y + z*z);
   const double sigma = radius*pow(2,5.0/6.0);
-  if (distance >= sigma) { return 0; }
+  if (distance >= pow(2,1.0/6.0)*sigma) { return 0; }
   double V = (4*eps*(uipow(sigma/distance,12) - uipow(sigma/distance,6)) + eps)/36;
   if (V/temperature < VoverKTcutoff) return V;
   return VoverKTcutoff*temperature;
