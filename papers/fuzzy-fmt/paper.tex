@@ -118,26 +118,6 @@ and to give an approximate multi-cavity limit. Schmidt furthur shows that\cite{s
 \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
 \end{equation}
 
-%% We have a choice to either start with a pair potential, $V(r)$, and
-%% derive the appropriate $w_2(r)$, or we start with the latter and find
-%% the former. All other weighting functions can be derived from
-%% $w_2(r)$ (see Appendix A).  Another way to attack this problem is to
-%% pick a pair potential and determine a $w_2(r)$ to ``fit'' to the
-%% potential.
-
-We use a harmonic pair potential
-
-\begin{align}
-  V(r) =
-  \begin{cases}
-    V_0 \left ( 1 - \frac{r}{2R} \right )^2 & 0 \leq r \leq r_0\\
-    0 & otherwise
-  \end{cases}
-  \label{eq:potential}
-\end{align}
-Where R is the soft sphere radius and $V_0$ is the maximum
-potential at complete overlap.
-
 \begin{figure}
 \begin{center}
 \includegraphics[width=3.5in]{figs/w2convolves}
@@ -147,38 +127,74 @@ potential at complete overlap.
 \label{fig:w2convolves}
 \end{figure}
 
-Use of the quadratic potential in SFMT was a non-analytic solution.
-With the quadratic potential, consider that  
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/potential-plot}
+\end{center}
+\caption{plot of potential.}
+\label{fig:potential-plot}
+\end{figure}
+
+We use a WCA (Weeks-Chandler-Anderson) pair potential
 \begin{align}
-  f'(r) \approx \frac{1}{a\sqrt{\pi}} e^{-(r-\sigma)^2/a^2}
+  V(r) =
+  \begin{cases}
+    \frac{\epsilon}{9} \left[ \left(\frac{\sigma}{r}\right)^{12} -
+    \left(\frac{\sigma}{r}\right)^{6} \right] +
+    \frac{\epsilon}{36}, & 0 < r < 2R \\
+    0, & \textrm{otherwise}
+  \end{cases}
 \end{align}
-and approximate the Mayer function as 
+and approximate the Mayer function as
 \begin{align}
-  f(r) \approx \tfrac12 ( \mathrm{erf}((r-\sigma)/a) - 1 )
+  f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
 \end{align}
 then
 \begin{align}
-  V(r) \approx -kT\ln\left(\tfrac12 ( \mathrm{erf}((r-\sigma)/a) + 1 )\right).
+  V(r) \approx -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+    \alpha}{\Xi} \right) + 1 \right) \right].
 \end{align}
 Expanding this in a power series gives.
 \begin{align}
   V(\sigma) &\approx -kT\ln\left(\tfrac12\right) \\
   &= k_BT \ln 2.
 \end{align}
-Setting the slope equal at $r=\sigma$ ...\fixme{I don't know if all
-  this is necessary so I'm leaving it out for now}
-The approximate weight functions are
+Setting the potentials equal at $r=\alpha$
+\begin{align}
+  k_BT \ln 2 = \frac{\epsilon}{9} \left[ \left(\frac{\sigma}{\alpha}\right)^{12} -
+    \left(\frac{\sigma}{\alpha}\right)^{6} \right] +
+    \frac{\epsilon}{36} \\
+\end{align}
+we then let $\xi = \left(\frac{\sigma}{\alpha}\right)^6$. Now we'll put it in a
+quadratic form.
+\begin{align}
+  k_BT \ln 2 &= \frac{\epsilon}{9} \left[ \xi^2 - \xi  \right] +
+  \frac{\epsilon}{36} \\
+  0 &= \frac{\epsilon}{9} \left[ \xi^2 - \xi  \right] + \frac{\epsilon}{36} -
+  k_BT \ln 2 \\
+  0 &= \xi^2 - \xi + \frac{1}{4} - 9\frac{k_BT}{\epsilon} \ln 2
+\end{align}
+so then
+\begin{align}
+  \xi &= \frac{1\pm \sqrt{1-4 \left( \frac{1}{4} - 9 \frac{k_BT}{\epsilon}
+    \ln 2 \right)}}{2} \\
+  &= \frac{1}{2}\left(1 \pm \sqrt{36 \frac{k_BT}{\epsilon} \ln 2} \right)
+\end{align}
+We take the plus solution and solve for $\alpha$ so that
+\begin{align}
+  \left(\frac{\sigma}{\alpha}\right)^6 &= \frac{1}{2}\left(1 \pm
+  \sqrt{36 \frac{k_BT}{\epsilon} \ln 2} \right) \\
+  \alpha &= \sigma \left( \frac{2}{1 + \sqrt{36 \frac{k_BT}{\epsilon}
+        \ln 2}} \right)^{\frac{1}{6}}
+\end{align}
+
+The approximate weight functions from the erf model are
 \begin{align}
   w_2(r) &= \frac{1}{a\sqrt{\pi}} e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
   w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) ).
 \end{align}
 with all other weight functions retaining their relation to $w_2(r)$
-as in FMT.  Solving for $a$ and $\sigma$ by comparing the approximate
-$V(r)$ with the harmonic potential \fixme{explain in more detail?} gives
-\begin{align}
-  \sigma &= 2R\left( 1 - \sqrt{\frac{k_BT \ln 2}{V_0}}\right) \\
-  a &= 2R\sqrt{\frac{kT}{\pi V_0 \ln 2}}.
-\end{align}
+as in FMT.
 
 \subsection{Weighting functions in fourier space}
 
@@ -265,7 +281,9 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \includegraphics[width=3.5in]{figs/radial-distribution-30}
 \end{center}
 \caption{Radial distribution function with 0.3 packing
-  fraction.}
+  fraction.  \fixme{Change legend to proper ``reduced'' temperature
+    $T^* = kT/\epsilon$, and density perhaps to $n^* = n\sigma^3$?
+    Start cutting harmonic?}}
 \label{fig:radial-distribution-30}
 \end{figure}
 
@@ -312,15 +330,6 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:walls-40}
 \end{figure}
 
-%% \begin{figure}
-%% \begin{center}
-%% \includegraphics[width=3.5in]{figs/walls-50}
-%% \end{center}
-%% \caption{Density distribution near a hard wall.}
-%% \label{fig:walls-50}
-%% \end{figure}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Comparison with experiment}
 
@@ -331,7 +340,10 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
 \begin{center}
 \includegraphics[width=3.5in]{figs/Argon-vapor_pressure-85K}
 \end{center}
-\caption{Radial distribution fucntion of Argon at 85 K and vapor pressure.}
+\caption{Radial distribution fucntion of Argon at 85 K and vapor
+  pressure.  \fixme{The reduced density and temperature are ???.
+    i.e. what is $kT/\epsilon$ and $n\sigma^3$?  Then run MC and DFT
+    simulations.}}
 \label{fig:argon-85K}
 \end{figure}
 
@@ -340,7 +352,8 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
 \includegraphics[width=3.5in]{figs/Argon-0_6GPa-RT}
 \end{center}
 \caption{Radial distribution fucntion of Argon at room temperature and
-0.6 GPa.}
+0.6 GPa.  \fixme{The reduced density and temperature are ???.
+    Then run MC and DFT simulations.}}
 \label{fig:argon-0.6GPa}
 \end{figure}
 
@@ -349,7 +362,8 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
 \includegraphics[width=3.5in]{figs/Argon-1_1GPa-RT}
 \end{center}
 \caption{Radial distribution fucntion of Argon at room temperature and
-1.1 GPa.}
+1.1 GPa.  \fixme{The reduced density and temperature are ???.
+    Then run MC and DFT simulations.}}
 \label{fig:argon-1.1GPa}
 \end{figure}
 
@@ -383,7 +397,8 @@ scalar product between vectors.  Schmidt explains that there is a
 simple relationship in fourier space between the Mayer $f$ function
 and the weighting function $w_2$:
 \begin{align}
-  \tilde{w}_2(k) &= \pm \sqrt{ik\tilde{f}(k)} \label{eq:w2fromf}
+  \tilde{w}_2(k) &= \pm \sqrt{ik\tilde{f}(k)}
+  \label{eq:w2fromf}
 \end{align}
 where the tilde denotes a \emph{one-dimensional} Fourier transform:
 \begin{align}
