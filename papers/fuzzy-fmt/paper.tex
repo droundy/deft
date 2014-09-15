@@ -182,16 +182,52 @@ so then
 \end{align}
 We take the plus solution and solve for $\alpha$ so that
 \begin{align}
-  \left(\frac{\sigma}{\alpha}\right)^6 &= \frac{1}{2}\left(1 \pm
+  \left(\frac{\sigma}{\alpha}\right)^6 &= \frac{1}{2}\left(1 +
   \sqrt{36 \frac{k_BT}{\epsilon} \ln 2} \right) \\
-  \alpha &= \sigma \left( \frac{2}{1 + \sqrt{36 \frac{k_BT}{\epsilon}
-        \ln 2}} \right)^{\frac{1}{6}}
+  \alpha &= \sigma \left( \frac{2}{1 + \sqrt{6 \frac{k_BT}{\epsilon}
+        \ln 2}} \right)^{\frac{1}{6}}.
+\end{align}
+
+Next we set both the two potential's slopes equal at $r = \alpha$
+\begin{align}
+  V_{erf}'(\alpha) &= V_{wca}'(\alpha) \\
+  -\frac{2 k_B T}{\Xi \sqrt{\pi}} &= \frac{\epsilon}{36} \left(
+  \frac{24}{\alpha} \xi - \frac{48}{\alpha} \xi^2 \right) \\
+  -\frac{\alpha k_B T}{\epsilon \sqrt{\pi}} &= \Xi \frac{1}{3} \left(
+  \xi - 2\xi^2 \right)
+\end{align}
+With some algebra, we can find $\Xi$:
+\begin{align}
+  \Xi &= \frac{3 \alpha k_B T}{\epsilon \sqrt{\pi} \left( 2 \xi^2 - \xi
+    \right)}
+\end{align}
+Focusing on the $\xi$ terms so things don't get too messy,
+\begin{align}
+  2 \xi^2 - \xi &=  \frac{2}{4}\left(1 +
+  6\sqrt{ \frac{k_BT}{\epsilon} \ln 2} \right)^2
+  - \frac{1}{2}\left(1 +
+  6\sqrt{ \frac{k_BT}{\epsilon} \ln 2} \right) \\
+  &= \frac{1}{2}\Bigg[ 1 + 12\sqrt{ \frac{k_BT}{\epsilon}\ln 2} + 36
+    \frac{k_BT}{\epsilon}\ln 2 \notag \\
+    &\hspace{3cm}-1 - 6\sqrt{ \frac{k_BT}{\epsilon} \ln 2} \Bigg] \\
+  &=\frac{1}{2}\left[ 6 \sqrt{ \frac{k_BT}{\epsilon} \ln 2} + 36
+    \frac{k_BT}{\epsilon} \ln 2 \right] \\
+  &=3\left[ \sqrt{ \frac{k_BT}{\epsilon} \ln 2} + 6
+    \frac{k_BT}{\epsilon} \ln 2 \right].
+\end{align}
+Now if we plug that back into our terms in $\Xi$, we get
+\begin{align}
+  \Xi &= \frac{3 \alpha k_B T}{\epsilon \sqrt{\pi} 3\left(
+      \sqrt{ \frac{k_BT}{\epsilon} \ln 2} + 6 \frac{k_BT}{\epsilon}
+      \ln 2 \right) } \\
+  &= \frac{\alpha}{\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
+      2} + 6 \ln 2 \right)}
 \end{align}
 
 The approximate weight functions from the erf model are
 \begin{align}
-  w_2(r) &= \frac{1}{a\sqrt{\pi}} e^{-\frac{(r-\sigma/2)^2}{a^2}} \\
-  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\sigma/2)/a) ).
+  w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}} \\
+  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\alpha/2)/\Xi) ).
 \end{align}
 with all other weight functions retaining their relation to $w_2(r)$
 as in FMT.

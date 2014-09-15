@@ -14,8 +14,7 @@ import styles
 kT = 1.0
 
 sigma = ( 2.0/(1 + 6*np.sqrt(np.log(2)*kT)) )**(1.0/6)
-a = sigma/np.sqrt(np.pi)/(6 + np.sqrt(np.log(2)/kT))
-a = kT*3/np.sqrt(np.pi)*sigma/(2/sigma**12 - 1/sigma**6)
+a = sigma/np.sqrt(np.pi)/(6*np.log(2) + np.sqrt(np.log(2)/kT))
 
 rmin = 0.9*sigma
 
