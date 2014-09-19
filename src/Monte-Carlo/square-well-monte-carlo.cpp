@@ -261,7 +261,7 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *name_suffix = new char[10];
+    char *name_suffix = new char[20];
     char *wall_tag = new char[10];
     if(sw.walls == 0) sprintf(wall_tag,"periodic");
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
