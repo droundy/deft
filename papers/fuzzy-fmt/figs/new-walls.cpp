@@ -85,8 +85,8 @@ int main(int argc, char **argv) {
   sscanf(argv[2], "%lg", &temp);
 
   HomogeneousSFMTFluid hf;
-  hf.R() = 1;
-  hf.V0() = 1;
+  hf.sigma() = 1;
+  hf.epsilon() = 1;
   hf.kT() = temp;
   hf.n() = eta/(4*M_PI/3);
   hf.mu() = 0;
@@ -96,8 +96,8 @@ int main(int argc, char **argv) {
   printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
 
   SFMTFluidVeff f(dw, dw, width + spacing, dx);
-  f.R() = hf.R();
-  f.V0() = hf.V0();
+  f.sigma() = hf.sigma();
+  f.epsilon() = hf.epsilon();
   f.kT() = hf.kT();
   f.Veff() = 0;
   f.mu() = hf.mu();

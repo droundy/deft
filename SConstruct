@@ -599,8 +599,8 @@ for test in Split(""" memory saft eos print-iter convolve-finite-difference prec
 for test in Split(""" new-fftinverse functional-arithmetic surface-tension """):
     env.BuildTest(test, generic_sources)
 
-for test in Split(""" sfmt """):
-    env.BuildTest(test, generic_sources + ['src/SoftFluidFast.cpp'])
+# for test in Split(""" sfmt """):
+#     env.BuildTest(test, generic_sources + ['src/SoftFluidFast.cpp'])
 
 for test in Split(""" newcode """):
     env.BuildTest(test, newgeneric_sources)
