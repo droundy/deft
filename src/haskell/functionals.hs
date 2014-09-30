@@ -17,7 +17,7 @@ main =
                    else return ()
      let nmu = "nmu" === integrate (n*mu)
      gen "src/SoftFluidFast.cpp" $
-       defineFunctional (idealgas + sfmt + nmu) ["R", "V0", "mu"] "SoftFluid"
+       defineFunctional (idealgas + sfmt + nmu) ["sigma", "epsilon", "mu"] "SoftFluid"
      gen "src/HardFluidFast.cpp" $
        defineFunctional (idealgas + whitebear + nmu) ["R", "mu"] "HardFluid"
      gen "src/HardRosenfeldFluidFast.cpp" $

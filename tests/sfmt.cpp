@@ -20,7 +20,7 @@
 
 int retval = 0;
 
-Functional SoftFluid(double radius, double V0, double mu);
+Functional SoftFluid(double sigma, double epsilon, double mu);
 
 // Here we set up the lattice.
 static double width = 15;

@@ -150,9 +150,9 @@ int main(int, char **argv) {
   }
   if (run_slow_tests || 1) {
     SPhi1 f(Nx, Nx, Nx);
-    f.R() = 1;
+    f.sigma() = 1;
     f.kT() = 1;
-    f.V0() = 1;
+    f.epsilon() = 1;
     f.a1() = a;
     f.a2() = a;
     f.a3() = a;
@@ -170,9 +170,9 @@ int main(int, char **argv) {
   }
   if (run_slow_tests) {
     SPhi2 sphi2(Nx, Nx, Nx);
-    sphi2.R() = 1;
+    sphi2.sigma() = 1;
     sphi2.kT() = 1;
-    sphi2.V0() = 1;
+    sphi2.epsilon() = 1;
     sphi2.a1() = a;
     sphi2.a2() = a;
     sphi2.a3() = a;
@@ -185,9 +185,9 @@ int main(int, char **argv) {
   }
   if (run_slow_tests) {
     SPhi3 sphi3(Nx, Nx, Nx);
-    sphi3.R() = 1;
+    sphi3.sigma() = 1;
     sphi3.kT() = 1;
-    sphi3.V0() = 1;
+    sphi3.epsilon() = 1;
     sphi3.a1() = a;
     sphi3.a2() = a;
     sphi3.a3() = a;
@@ -259,8 +259,8 @@ int main(int, char **argv) {
   }
   if (run_slow_tests) {
     HomogeneousSFMTFluid hf;
-    hf.R() = 1;
-    hf.V0() = 1;
+    hf.sigma() = 1;
+    hf.epsilon() = 1;
     hf.kT() = 0.001;
     hf.n() = 0.3/(4*M_PI/3);
     hf.mu() = 0;
@@ -270,8 +270,8 @@ int main(int, char **argv) {
     f.a1() = a*2/Nx;
     f.a2() = a*2/Nx;
     f.a3() = a;
-    f.R() = hf.R();
-    f.V0() = hf.V0();
+    f.sigma() = hf.sigma();
+    f.epsilon() = hf.epsilon();
     f.kT() = hf.kT();
     f.n() = hf.n();
     f.mu() = hf.mu();
