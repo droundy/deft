@@ -4,7 +4,7 @@ soft fundamental measure theory. -}
 module SFMT
        ( sfmt, sfmt_fluid_n, sfmt_fluid_Veff, homogeneous_sfmt_fluid,
          phi1, phi2, phi3,
-         n0, n1, n2, n3, kR, n2v, n1v, sqr_n2v, n1v_dot_n2v )
+         n0, n1, n2, n3, n2v, n1v, sqr_n2v, n1v_dot_n2v )
        where
 
 import Expression
@@ -36,14 +36,11 @@ sigma = s_var "sigma"
 betaeps :: Type a => Expression a
 betaeps = s_var "epsilon"/kT
 
-kR :: Expression KSpace
-kR = k * sigma * 2**(-5.0/6.0)
-
 xi :: Type a => Expression a
 xi = Scalar $ var "Xi" "\\Xi" (alpha/(sqrt(pi)*(sqrt(betaeps * log 2 ) + 6*log 2)))
 
 alpha :: Type a => Expression a
-alpha = Scalar $ var "alpha" "\\alpha" (sigma*(2/(1+sqrt(6*log 2 / betaeps)))**(1.0/6.0))
+alpha = Scalar $ var "alpha" "\\alpha" (sigma*(2/(1+6*sqrt(log 2 / betaeps)))**(1.0/6.0))
 
 n, n3, n2, n1, n0, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"
