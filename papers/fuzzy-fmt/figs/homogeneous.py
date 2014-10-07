@@ -54,7 +54,7 @@ for ff in arange(0.1,0.51, 0.1):
       print 'could not find', fname
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
-ylim(0.5,12.0)
+#ylim(0.5,12.0)
 xlim(xmax=0.65)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')
