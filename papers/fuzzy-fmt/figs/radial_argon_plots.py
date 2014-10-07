@@ -28,7 +28,7 @@ figure()
 data3 = loadtxt('figs/EggertArgon1.1GPaRAW.dat')
 n = 27.74 #atoms/nm^3
 nsig_3 = n*sigma**3
-plot(data3[:,0],(data3[:,1]-1)*nsig_3)
+plot(data3[:,0],(data3[:,1])*nsig_3)
 savefig('figs/Argon-1_1GPa-RT.pdf')
 figure()
 

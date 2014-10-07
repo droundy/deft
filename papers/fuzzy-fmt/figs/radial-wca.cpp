@@ -23,7 +23,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double radius, double V0, double mu);
+Functional SoftFluid(double sigma, double epsilon, double mu);
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.
@@ -33,6 +33,7 @@ double xmax = zmax;
 double dx = 0.05;
 double eps = 1;
 const double radius = 1;
+double sigma = radius*pow(2,5.0/6.0);
 double temperature = 0.01; //default temp 
 // double kT = 0.01; //default temp 
 
@@ -42,8 +43,7 @@ double soft_sphere_potential(Cartesian r) {
   const double x = r.x();
   const double VoverKTcutoff = 100;
   const double distance = sqrt(x*x + y*y + z*z);
-  const double sigma = radius*pow(2,5.0/6.0);
-  if (distance >= pow(2,1.0/6.0)*sigma) { return 0; }
+  if (distance >= 2*radius) { return 0; }
   double V = (4*eps*(uipow(sigma/distance,12) - uipow(sigma/distance,6)) + eps)/36;
   if (V/temperature < VoverKTcutoff) return V;
   return VoverKTcutoff*temperature;
@@ -80,7 +80,7 @@ void z_plot(const char *fname, const Grid &a) {
 }
 
 double run_soft_sphere(double eta, double temp) {
-  Functional f = SoftFluid(radius, 1, 0);
+  Functional f = SoftFluid(sigma, 1, 0);
   const double mu = find_chemical_potential(OfEffectivePotential(f), temp, eta/(4*M_PI/3));
   printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
 
@@ -95,11 +95,11 @@ double run_soft_sphere(double eta, double temp) {
   Grid softspherepotential(gd);
   softspherepotential.Set(soft_sphere_potential);
 
-  f = SoftFluid(radius, 1, mu); // compute approximate energy with chemical potential mu
+  f = SoftFluid(sigma, 1, mu); // compute approximate energy with chemical potential mu
   const double approx_energy = f(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
   const double precision = fabs(approx_energy*1e-9);
 
-  f = OfEffectivePotential(SoftFluid(radius, 1, mu) + ExternalPotential(softspherepotential));
+  f = OfEffectivePotential(SoftFluid(sigma, 1, mu) + ExternalPotential(softspherepotential));
 
   static Grid *potential = 0;
   potential = new Grid(gd);
@@ -146,6 +146,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Usage: %s FILLINGFRACTION kT\n", argv[0]);
     exit(1);
   }
+
   double temp = 0;
   double eta = 0;
   sscanf(argv[2], " %lg", &temp);

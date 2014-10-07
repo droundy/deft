@@ -1,5 +1,9 @@
 
-color = { 0.6: 'r',
+color = { 100.0: 'k',
+          10.0: 'c',
+          2.0: 'g',
+          1.0: 'k',
+          0.6: 'r',
           0.4: 'y',
           0.2: 'k',
           0.1: 'r',
@@ -12,11 +16,15 @@ color = { 0.6: 'r',
 
 coarsedft = {}
 dft = {}
-newdft = {}
+new_dft_code = {}
+dftwca = {}
 mc = {}
 mcljr = {}
+
+new_dft_code = {}
 for k in color:
-    newdft[k] = color[k] + ':'
+    dftwca[k] = color[k] + ':'
+    new_dft_code[k] = color[k] + ':.'
     dft[k] = color[k] + '--'
     coarsedft[k] = color[k] + '-'
     mc[k] = color[k] + '.'

@@ -55,16 +55,16 @@ lines.append(styles.dft[0])
 
 names.append('new kT = 0.1')
 data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.1)))
-lines.append(styles.newdft[0.1])
+lines.append(styles.new_dft_code[0.1])
 
 newdata = numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.01))
 names.append('new kT = 0.01')
 data.append(newdata)
-lines.append(styles.newdft[0.01])
+lines.append(styles.new_dft_code[0.01])
 
 names.append('new kT = 0.001')
 data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.001)))
-lines.append(styles.newdft[0.001])
+lines.append(styles.new_dft_code[0.001])
 
 for kT in [0.001, 0.01, 0.03]:
     # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)

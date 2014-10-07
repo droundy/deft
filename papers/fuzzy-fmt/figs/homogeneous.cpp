@@ -21,12 +21,14 @@
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double radius, double V0, double mu);
+Functional SoftFluid(double sigma, double epsilon, double mu);
 Functional HardFluid(double radius, double mu);
 
 int main(int, char **) {
+  double radius = 1.0;
+  double sigma = radius*pow(2,5.0/6.0);
   FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous.dat", "w");
-  const double temps[] = { 0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 0.2 };
+  const double temps[] = { 0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0};
   fprintf(out, "# eta");
   for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
     fprintf(out, "\tp(kT=%g)/nkT", temps[i]);
@@ -40,8 +42,8 @@ int main(int, char **) {
     fprintf(out, "%g", eta);
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
-      Functional f = HardFluid(1,0);
-      if (temp > 0) f = SoftFluid(1, 1, 0);
+      Functional f = HardFluid(radius,0);
+      if (temp > 0) f = SoftFluid(sigma, 1, 0);
       double usekT = temp;
       if (temp == 0) usekT = 1.0;
       const double n = eta/(4*M_PI/3);

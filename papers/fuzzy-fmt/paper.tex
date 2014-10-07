@@ -103,8 +103,7 @@ using the weighted densities
 Soft Fundamental-Measure Theory~(SFMT) is a generalization of FMT to
 soft potentials. In SFMT, the weight functions are modified but retain:
 the direct correlation in the low-density limit, the exact free energy
-in the zero-dimensional cavity limit \fixme{It looks like we don't to
-  this with our harmonic potential}, relation to the generating
+in the zero-dimensional cavity limit, and relation to the generating
 weight function $w_3(\rr)$~\cite{schmidt1999density} \fixme{this is an assumption
   as stated in Schmidt 1999}.  The new weight functions are also made
 to deconvolve the Mayer function   
@@ -134,17 +133,18 @@ and to give an approximate multi-cavity limit. Schmidt furthur shows that\cite{s
 \label{fig:w2-comparison}
 \end{figure}
 
-We use a WCA (Weeks-Chandler-Anderson) pair potential
+We use a WCA (Weeks-Chandler-Anderson) pair potential. The WCA
+potential is a Lennard-Jones potential with the attractive portion removed:
 \begin{align}
   V(r) =
   \begin{cases}
     \frac{\epsilon}{9} \left[ \left(\frac{\sigma}{r}\right)^{12} -
     \left(\frac{\sigma}{r}\right)^{6} \right] +
     \frac{\epsilon}{36}, & 0 < r < 2R \\
-    0, & \textrm{otherwise}
+    0, & \textrm{otherwise}.
   \end{cases}
 \end{align}
-and approximate the Mayer function as
+We approximate the Mayer function as
 \begin{align}
   f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
 \end{align}
@@ -376,8 +376,8 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
 \includegraphics[width=3.5in]{figs/Argon-vapor_pressure-85K}
 \end{center}
 \caption{Radial distribution function of Argon at 85 K and vapor
-  pressure.  The reduced density is $n^* = 0.83809$ and the reduced
-  temperature is 0.71 \fixme{Run MC and DFT simulations.}}
+  pressure.  The reduced density is $n^* = 0.83890$ and the reduced
+  temperature is $T^* = 0.71$ \fixme{Run MC and DFT simulations.}}
 \label{fig:argon-85K}
 \end{figure}
 
@@ -406,8 +406,8 @@ temperature is $T^* = 2.48$. \fixme{Run MC and DFT simulations.}}
 \includegraphics[width=3.5in]{figs/Argon-9_919MPa-148K}
 \end{center}
 \caption{Radial distribution function of Argon 148 Kelvin and and
-9.919 MPa.  \fixme{The reduced density is $n^* = 1.095$ and the reduced
-temperature is $T^* = 2.48$.Run MC and DFT simulations.}}
+9.919 MPa.  The reduced density is $n^* = 0.5844$ and the reduced
+temperature is $T^* = 1.235$.\fixme{Run MC and DFT simulations.}}
 \label{fig:argon-1.1GPa}
 \end{figure}
 
