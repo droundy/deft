@@ -37,10 +37,10 @@ betaeps :: Type a => Expression a
 betaeps = s_var "epsilon"/kT
 
 xi :: Type a => Expression a
-xi = Scalar $ var "Xi" "\\Xi" (alpha/(sqrt(pi)*(sqrt(betaeps * log 2 ) + 6*log 2)))
+xi = scalar $ var "Xi" "\\Xi" (alpha/(sqrt(pi)*(sqrt(betaeps * log 2 ) + 6*log 2)))
 
 alpha :: Type a => Expression a
-alpha = Scalar $ var "alpha" "\\alpha" (sigma*(2/(1+6*sqrt(log 2 / betaeps)))**(1.0/6.0))
+alpha = scalar $ var "alpha" "\\alpha" (sigma*(2/(1+6*sqrt(log 2 / betaeps)))**(1.0/6.0))
 
 n, n3, n2, n1, n0, n1v_dot_n2v, sqr_n2v :: Expression RealSpace
 n = "n" === r_var "x"
