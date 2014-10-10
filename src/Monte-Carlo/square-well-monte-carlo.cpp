@@ -93,14 +93,16 @@ int main(int argc, const char *argv[]) {
 
   double wl_factor = 0.125;
   double wl_fmod = 2;
-  double wl_threshold = 0.1;
+  double wl_threshold = 3;
   double wl_cutoff = 1e-6;
 
   sw_simulation sw;
 
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
-
   sw.walls = 0;
+  sw.N = 1000;
+  sw.dr = 0.1;
+
   int wall_dim = 1;
   unsigned long int seed = 0;
 
@@ -108,20 +110,18 @@ int main(int argc, const char *argv[]) {
   sprintf(dir, "papers/square-well-liquid/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
-  sw.N = 1000;
-  long iterations = 2500000;
+  long simulation_iterations = 2500000;
   long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
   double ff = 0.3;
   double neighbor_scale = 2;
-  sw.dr = 0.1;
   double de_density = 0.1;
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
-  // scale is not a quite "constant" -- it is adjusted during the initialization
+  // scale is not universally constant -- it is adjusted during initialization
   //  so that we have a reasonable acceptance rate
   double translation_scale = 0.05;
 
@@ -141,8 +141,8 @@ int main(int argc, const char *argv[]) {
     {"initialize", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
      &initialization_iterations, 0,
      "Number of iterations to run for initialization", "INT"},
-    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &iterations,
-     0, "Number of iterations to run for", "INT"},
+    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
+     0, "Number of iterations for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.dr, 0,
@@ -244,7 +244,7 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < 3; i++) sw.len[i] *= fac;
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
-  if (sw.N <= 0 || initialization_iterations < 0 || iterations < 0 || R <= 0 ||
+  if (sw.N <= 0 || initialization_iterations < 0 || simulation_iterations < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.dr <= 0 || translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
@@ -359,7 +359,7 @@ int main(int argc, const char *argv[]) {
 
   if(totime < 0) totime = 10*sw.N;
 
-  // a guess for the number of iterations to run for initializing the histogram
+  // a guess for the number of iterations for which to run histogram initialization
   int first_weight_update = sw.energy_levels;
 
   // Initialize the random number generator with our seed
@@ -443,8 +443,8 @@ int main(int argc, const char *argv[]) {
 
   {
     int most_neighbors =
-      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*sw.dr, sw.max_neighbors, sw.len,
-                                 sw.walls);
+      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*sw.dr,
+                                 sw.max_neighbors, sw.len, sw.walls);
     if (most_neighbors < 0) {
       fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
               sw.max_neighbors);
@@ -522,19 +522,14 @@ int main(int argc, const char *argv[]) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
     sw.initialize_wang_landau(wl_factor, wl_threshold, wl_cutoff);
-  } else {
-    for(long iteration = 1;
-        iteration <= initialization_iterations + first_weight_update; iteration++) {
+  } else { // initialize optimized ensemble method
+    while(sw.iteration <= initialization_iterations + first_weight_update) {
       // ---------------------------------------------------------------
       // Move each ball once
       // ---------------------------------------------------------------
       for(int i = 0; i < sw.N; i++) {
-        move_one_ball(i, sw.balls, sw.N, sw.len, sw.walls, sw.neighbor_R, sw.translation_distance,
-                      sw.interaction_distance, sw.max_neighbors, sw.dr, &sw.moves,
-                      sw.interactions, sw.ln_energy_weights);
-        sw.interactions += sw.moves.new_count - sw.moves.old_count;
-        sw.energy_histogram[sw.interactions]++;
-        
+        sw.move_a_ball();
+
         if(walker_weights){
           sw.walkers_total[sw.interactions]++;
           if(sw.interactions >= sw.walker_minus_threshold)
@@ -546,18 +541,19 @@ int main(int argc, const char *argv[]) {
         }
       }
       assert(sw.interactions ==
-             count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls));
-      
+             count_all_interactions(sw.balls, sw.N, sw.interaction_distance,
+                                    sw.len, sw.walls));
+
       // ---------------------------------------------------------------
       // Update weights
       // ---------------------------------------------------------------
       if(!(no_weights || gaussian_fit)){
-        if(iteration == first_weight_update){
+        if(sw.iteration == first_weight_update){
           flat_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels);
           weight_updates++;
         } else if((flat_histogram || walker_weights)
-                  && (iteration > first_weight_update)
-                  && ((iteration-first_weight_update)
+                  && (sw.iteration > first_weight_update)
+                  && ((sw.iteration-first_weight_update)
                       % int(first_weight_update*uipow(2,weight_updates)) == 0)){
           printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
           if (flat_histogram)
@@ -578,19 +574,19 @@ int main(int argc, const char *argv[]) {
                   " well_width: %g, translation_distance: %g\n"
                   "# initialization_iterations: %li, neighbor_scale: %g, dr: %g,"
                   " energy_levels: %i\n",
-                  sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-                  well_width, sw.translation_distance, initialization_iterations,
+                  sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed,
+                  sw.N, R, well_width, sw.translation_distance, initialization_iterations,
                   neighbor_scale, sw.dr, sw.energy_levels);
-          
+
           char *countinfo = new char[4096];
           sprintf(countinfo,
                   "# iteration: %li, working moves: %li, total moves: %li, "
                   "acceptance rate: %g\n",
-                  iteration, sw.moves.working, sw.moves.total,
+                  sw.iteration, sw.moves.working, sw.moves.total,
                   double(sw.moves.working)/sw.moves.total);
-          
+
           const char *testdir = "test";
-          
+
           char *w_fname = new char[1024];
           char *e_fname = new char[1024];
           mkdir(dir, 0777); // create save directory
@@ -600,7 +596,7 @@ int main(int argc, const char *argv[]) {
                   dir, testdir, filename, weight_updates);
           sprintf(e_fname, "%s/%s/%s-E%02i.dat",
                   dir, testdir, filename, weight_updates);
-          
+
           FILE *w_out = fopen(w_fname, "w");
           if (!w_out) {
             fprintf(stderr, "Unable to create %s!\n", w_fname);
@@ -612,7 +608,7 @@ int main(int argc, const char *argv[]) {
           for(int i = 0; i < sw.energy_levels; i++)
             fprintf(w_out, "%i  %f\n", i, sw.ln_energy_weights[i]);
           fclose(w_out);
-          
+
           FILE *e_out = fopen((const char *)e_fname, "w");
           fprintf(e_out, "%s", headerinfo);
           fprintf(e_out, "%s", countinfo);
@@ -620,25 +616,25 @@ int main(int argc, const char *argv[]) {
           for(int i = 0; i < sw.energy_levels; i++)
             fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
           fclose(e_out);
-          
+
           delete[] headerinfo;
           delete[] countinfo;
           delete[] w_fname;
           delete[] e_fname;
-          
+
           print_weights = false;
         }
       }
       // ---------------------------------------------------------------
       // Print out timing information if desired
       // ---------------------------------------------------------------
-      if (totime > 0 && iteration % totime == 0) {
+      if (totime > 0 && sw.iteration % totime == 0) {
         char *iter = new char[1024];
         sprintf(iter, "%i iterations", totime);
         took(iter);
         delete[] iter;
         printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
-               iteration, (double)sw.moves.working/sw.moves.total,
+               sw.iteration, (double)sw.moves.working/sw.moves.total,
                sw.translation_distance);
         printf("We've had %g updates per kilomove and %g informs per kilomoves, "
                "for %g informs per update.\n",
@@ -669,7 +665,7 @@ int main(int argc, const char *argv[]) {
 
   {
     // Now let's iterate to the point where we are at maximum
-    // probability before we do teh real simulation.
+    // probability before we do the real simulation.
     const double st = sw.state_of_max_entropy;
     sw.initialize_max_entropy_and_translation_distance();
     sw.state_of_max_entropy = st;
@@ -716,24 +712,21 @@ int main(int argc, const char *argv[]) {
 
   sw.moves.total = 0;
   sw.moves.working = 0;
+  sw.iteration = 0;
 
   // Reset energy histogram
   for(int i = 0; i < sw.energy_levels; i++)
     sw.energy_histogram[i] = 0;
 
-  for(long iteration = 1; iteration <= iterations; iteration++) {
+  while(sw.iteration <= simulation_iterations) {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++) {
-      move_one_ball(i, sw.balls, sw.N, sw.len, sw.walls, sw.neighbor_R, sw.translation_distance,
-                    sw.interaction_distance, sw.max_neighbors, sw.dr, &sw.moves,
-                    sw.interactions, sw.ln_energy_weights);
-      sw.interactions += sw.moves.new_count - sw.moves.old_count;
-      sw.energy_histogram[sw.interactions]++;
-    }
+    for(int i = 0; i < sw.N; i++)
+      sw.move_a_ball();
     assert(sw.interactions ==
-           count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls));
+           count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
+                                  sw.walls));
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
     // ---------------------------------------------------------------
@@ -763,7 +756,7 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
     const clock_t now = clock();
-    if ((now - last_output > output_period) || iteration == iterations) {
+    if ((now - last_output > output_period) || sw.iteration == simulation_iterations) {
       last_output = now;
       assert(last_output);
       if (output_period < max_output_period/2) output_period *= 2;
@@ -775,14 +768,14 @@ int main(int argc, const char *argv[]) {
       const int hours = int(secs_done / 3600) % 24;
       const int days = int(secs_done / 86400);
       printf("Saving data after %i days, %02i:%02i:%02i, %li iterations "
-             "complete.\n", days, hours, minutes, seconds, iteration);
+             "complete.\n", days, hours, minutes, seconds, sw.iteration);
       fflush(stdout);
 
       char *countinfo = new char[4096];
       sprintf(countinfo,
               "# iteration: %li, working moves: %li, total moves: %li, "
               "acceptance rate: %g\n",
-              iteration, sw.moves.working, sw.moves.total,
+              sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
 
       // Save energy histogram

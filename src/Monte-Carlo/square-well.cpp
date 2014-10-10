@@ -476,12 +476,72 @@ int maximum_interactions(int N, double interaction_distance, double neighbor_R,
 // sw_simulation methods
 
 void sw_simulation::move_a_ball() {
-  move_one_ball(iteration % N, balls, N, len, walls, neighbor_R, translation_distance,
-                interaction_distance, max_neighbors, dr, &moves, interactions,
-                ln_energy_weights);
+  int id = moves.total % N;
+  moves.total++;
+  moves.old_count =
+    count_interactions(id, balls, interaction_distance, len, walls);
+  moves.new_count = moves.old_count;
+  ball temp = random_move(balls[id], translation_distance, len);
+  if (!in_cell(temp, len, walls, dr)) return; // bad move!
+  if (overlaps_with_any(temp, balls, len, walls, dr)) return; // bad move!
+  const bool get_new_neighbors =
+    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared()
+     > sqr(neighbor_R/2.0));
+  if (get_new_neighbors){
+    // If we've moved too far, then the overlap test may have given a false
+    // negative. So we'll find our new neighbors, and check against them.
+    // If we still don't overlap, then we'll have to update the tables
+    // of our neighbors that have changed.
+    temp.neighbors = new int[max_neighbors];
+    update_neighbors(temp, id, balls, N, neighbor_R + 2*dr, len, walls);
+    moves.updates++;
+    // However, for this check (and this check only), we don't need to
+    // look at all of our neighbors, only our new ones.
+    // fixme: do this!
+    //int *new_neighbors = new int[max_neighbors];
+
+    if (overlaps_with_any(temp, balls, len, walls, dr)) {
+      // turns out we overlap after all.  :(
+      delete[] temp.neighbors;
+      return;
+    }
+  }
+  // Now that we know that we are keeping the new move, and after we
+  // have updated the neighbor tables if needed, we can compute the
+  // new interaction count.
+  ball pid = balls[id]; // save a copy
+  balls[id] = temp; // temporarily update the position
+  moves.new_count = count_interactions(id, balls, interaction_distance, len, walls);
+  balls[id] = pid;
+  // Now we can check if we actually want to do this move based on the
+  // new energy.
+  const double lnPmove =
+    ln_energy_weights[moves.new_count - moves.old_count + interactions]
+    - ln_energy_weights[interactions];
+  if (lnPmove < 0) {
+    const double Pmove = exp(lnPmove);
+    if (random::ran() > Pmove) {
+      // We want to reject this move because it is too improbable
+      // based on our weights.
+      moves.new_count = moves.old_count; // undo the energy change
+      return;
+    }
+  }
+  if (get_new_neighbors) {
+    // Okay, we've checked twice, just like Santa Clause, so we're definitely
+    // keeping this move and need to tell our neighbors where we are now.
+    temp.neighbor_center = temp.pos;
+    inform_neighbors(temp, balls[id], balls, id);
+    moves.informs++;
+    delete[] balls[id].neighbors;
+  }
+  balls[id] = temp; // Yay, we have a successful move!
+  moves.working++;
+
+  // Update interaction count and energy histogra
   interactions += moves.new_count - moves.old_count;
   energy_histogram[interactions]++;
-  iteration++; // increment the number of "iterations"
+  if(moves.total % N == 0) iteration++; // increment the number of iterations
 }
 
 // iterate enough times for the energy to change n times.  Return the
@@ -630,8 +690,8 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_threshold
     }
 
     // check whether our histogram is flat enough to update wl_factor
-    const double variation = count_variation(energy_histogram, ln_energy_weights, energy_levels,
-                                             state_of_max_entropy);
+    const double variation = count_variation(energy_histogram, ln_energy_weights,
+                                             energy_levels, state_of_max_entropy);
 
     // print status text for testing purposes
     printf("\nweight update: %i\n",weight_updates++);
