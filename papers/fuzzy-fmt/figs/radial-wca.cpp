@@ -79,12 +79,12 @@ void z_plot(const char *fname, const Grid &a) {
   fclose(out);
 }
 
-double run_soft_sphere(double eta, double temp) {
+double run_soft_sphere(double reduced_density, double temp) {
   Functional f = SoftFluid(sigma, 1, 0);
-  const double mu = find_chemical_potential(OfEffectivePotential(f), temp, eta/(4*M_PI/3));
-  printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
+  const double mu = find_chemical_potential(OfEffectivePotential(f), temp, reduced_density*pow(2,-5.0/2.0));
+  printf("mu is %g for reduced_density = %g at temperature %g\n", mu, reduced_density, temp);
 
-  //printf("Filling fraction is %g with functional %s at temperature %g\n", eta, teff);
+  //printf("Filling fraction is %g with functional %s at temperature %g\n", reduced_density, teff);
   //fflush(stdout);
   temperature = temp;
   //if (kT == 0) kT = ;1
@@ -96,14 +96,14 @@ double run_soft_sphere(double eta, double temp) {
   softspherepotential.Set(soft_sphere_potential);
 
   f = SoftFluid(sigma, 1, mu); // compute approximate energy with chemical potential mu
-  const double approx_energy = f(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
+  const double approx_energy = f(temperature, reduced_density*pow(2,-5.0/2.0))*xmax*ymax*zmax;
   const double precision = fabs(approx_energy*1e-9);
 
   f = OfEffectivePotential(SoftFluid(sigma, 1, mu) + ExternalPotential(softspherepotential));
 
   static Grid *potential = 0;
   potential = new Grid(gd);
-  *potential = softspherepotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
+  *potential = softspherepotential - temperature*log(reduced_density*pow(2,-5.0/2.0)/(radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
   fflush(stdout);
 
@@ -119,11 +119,11 @@ double run_soft_sphere(double eta, double temp) {
   min.print_info();
 
   Grid density(gd, EffectivePotentialToDensity()(temperature, gd, *potential));
-  //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
+  //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, reduced_density);
 
   char *plotname = (char *)malloc(1024);
 
-  sprintf(plotname, "papers/fuzzy-fmt/figs/radial-wca-%06.4f-%04.2f.dat", temp, eta);
+  sprintf(plotname, "papers/fuzzy-fmt/figs/radial-wca-%06.4f-%04.2f.dat", temp, reduced_density);
   z_plot(plotname, Grid(gd, 4*M_PI*density/3));
   free(plotname);
 
@@ -135,8 +135,8 @@ double run_soft_sphere(double eta, double temp) {
   }
 
   took("Plotting stuff");
-  printf("density %g gives ff %g for eta = %g and T = %g\n", density(0,0,gd.Nz/2),
-         density(0,0,gd.Nz/2)*4*M_PI/3, eta, temp);
+  printf("density %g gives ff %g for reduced_density = %g and T = %g\n", density(0,0,gd.Nz/2),
+         density(0,0,gd.Nz/2)*4*M_PI/3, reduced_density, temp);
   return density(0, 0, gd.Nz/2)*4*M_PI/3; // return bulk filling fraction
 }
 
@@ -148,10 +148,10 @@ int main(int argc, char *argv[]) {
   }
 
   double temp = 0;
-  double eta = 0;
+  double reduced_density = 0;
   sscanf(argv[2], " %lg", &temp);
-  sscanf(argv[1], " %lg", &eta);
+  sscanf(argv[1], " %lg", &reduced_density);
 
-  run_soft_sphere(eta, temp);
+  run_soft_sphere(reduced_density, temp);
   return 0;
 }

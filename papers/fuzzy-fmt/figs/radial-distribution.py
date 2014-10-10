@@ -16,8 +16,8 @@ if len(sys.argv) != 3:
     print("Usage:  " + sys.argv[0] + ' filling-fraction temperatures')
     exit(1)
 
-ff = float(sys.argv[1])
-#arg ff = [10, 20, 30, 40, 50, 60]
+reduced_density = float(sys.argv[1])
+#arg reduced_density = [10, 20, 30, 40, 50, 60]
 
 all_temperatures = eval(sys.argv[2])
 #arg all_temperatures = [[0.1, 0.01, 0.001]]
@@ -42,45 +42,60 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 #plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
 
 
-density = (ff/100)/(4*pi/3)
-phs = density*(1+(ff/100)+(ff/100)**2)/(1-(ff/100))**3
+density = (reduced_density/100)/(4*pi/3)
+phs = density*(1+(reduced_density/100)+(reduced_density/100)**2)/(1-(reduced_density/100))**3
 
 mysymbol_names = []
 mysymbol_lines = []
 
-for temp in all_temperatures:
-  # input: ['figs/mc-0.%02d00-%.4f.dat.gradial' % (ff, temp) for temp in all_temperatures]
-  fname = 'figs/mc-0.%02d00-%.4f.dat.gradial' % (ff, temp)
-  if os.path.exists(fname):
-    print 'found', fname
-    g = loadtxt(fname)
-    line = plot(g[:,0], g[:,1], styles.mc[temp])#, label='harmonic MC $kT/V_{max}$ = %g' % temp)
-    #xlim(xmax=floor(max(g[:,0])))
-    xlim(xmax=8)
-    if temp == all_temperatures[-1]:
-        mysymbol_lines += line
-        mysymbol_names += ['harmonic MC']
-  else:
-    print 'could not find', fname
-
 mylines = []
+# for temp in all_temperatures:
+#   # input: ['figs/mc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
+#   fname = 'figs/mc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
+#   if os.path.exists(fname):
+#     print 'found', fname
+#     g = loadtxt(fname)
+#     line = plot(g[:,0], g[:,1], styles.mc[temp])#, label='harmonic MC $kT/V_{max}$ = %g' % temp)
+#     #xlim(xmax=floor(max(g[:,0])))
+#     xlim(xmax=8)
+#     if temp == all_temperatures[-1]:
+#         mysymbol_lines += line
+#         mysymbol_names += ['harmonic MC']
+#   else:
+#     print 'could not find', fname
+
+# for temp in all_temperatures:
+#   # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures]
+#   fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
+#   data = loadtxt(fname)
+#   r = data[:,0]
+#   nreduced_density = data[:,1]
+#   g = nreduced_density/(reduced_density/100.0)
+#   line = plot(r, g, styles.coarsedft[temp])#, label='harmonic DFT $kT/V_{max}$ = %g' % temp)
+#   mylines += line
+#   if temp == all_temperatures[-1]:
+#       mysymbol_lines += line
+#       mysymbol_names += ['harmonic DFT']
+#   #xlim(xmax=floor(max(g[:,0])))
+
+
 for temp in all_temperatures:
-  # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0) for temp in all_temperatures]
-  fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, ff/100.0)
+  # input: ['figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures]
+  fname = 'figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
   data = loadtxt(fname)
   r = data[:,0]
-  nff = data[:,1]
-  g = nff/(ff/100.0)
-  line = plot(r, g, styles.coarsedft[temp])#, label='harmonic DFT $kT/V_{max}$ = %g' % temp)
+  nreduced_density = data[:,1]
+  g = nreduced_density/(reduced_density/100.0)
+  line = plot(r, g, styles.dftwca[temp])#, label='WCA DFT $kT/V_{max}$ = %g' % temp)
   mylines += line
   if temp == all_temperatures[-1]:
       mysymbol_lines += line
-      mysymbol_names += ['harmonic DFT']
+      mysymbol_names += ['WCA DFT']
   #xlim(xmax=floor(max(g[:,0])))
 
 for temp in all_temperatures:
-  # input: ['figs/mcljr-0.%02d00-%.4f.dat.gradial' % (ff, temp) for temp in all_temperatures]
-  fname = 'figs/mcljr-0.%02d00-%.4f.dat.gradial' % (ff, temp)
+  # input: ['figs/mcljr-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
+  fname = 'figs/mcljr-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
   if os.path.exists(fname):
     print 'found', fname
     g = loadtxt(fname)
@@ -93,19 +108,15 @@ for temp in all_temperatures:
   else:
     print 'could not find', fname
 
-title('Radial distribution function at packing fraction %g' % (ff/100))
+title('Radial distribution function at packing fraction %g' % (reduced_density/100))
 xlabel('radius')
 ylabel('g')
-legend_labels = []
-for t in all_temperatures:
-    legend_labels += [mlines.Line2D([], [], color=styles.color[t],
-                                    label='$kT/? = %g$' % t)]
 blue_line = mlines.Line2D([], [], color='blue', marker='*',
                           markersize=15, label='Blue stars')
 legend(mylines + mysymbol_lines,
-       ['$kT/? = %g$' % t for t in all_temperatures] + mysymbol_names,
+       ['$T^* = %g$' % t for t in all_temperatures] + mysymbol_names,
        loc = 'best')
-savefig('figs/radial-distribution-%02d.pdf' % (ff), bbox_inches=0)
-print('figs/radial-distribution-%02d.pdf' % (ff))
+savefig('figs/radial-distribution-%02d.pdf' % (reduced_density), bbox_inches=0)
+print('figs/radial-distribution-%02d.pdf' % (reduced_density))
 
 show()
