@@ -34,7 +34,7 @@ for version in versions:
     total = DS.sum()
     plt.semilogy(energy,DS, styles.dots[version], label=styles.title[version])
 
-plt.xlabel('$E/N\epsilon$')
+plt.xlabel('$U/N\epsilon$')
 plt.ylabel('$D$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)

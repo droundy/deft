@@ -309,8 +309,10 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   sw.iteration = 0; // start at zeroeth iteration
-  sw.state_of_max_interactions = 0;
   sw.state_of_max_entropy = 0;
+  sw.max_observed_interactions = 0;
+  sw.round_trips = 0;
+  sw.seeking_lowest_energy = true;
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -492,27 +494,23 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is.
-  sw.initialize_max_entropy_and_translation_distance();
+  sw.state_of_max_entropy = sw.initialize_max_entropy_and_translation_distance();
 
   if (gaussian_fit) {
     sw.initialize_gaussian(10);
   } else if (flat_histogram) {
     {
       sw.initialize_gaussian(log(1e40));
-      const int state_of_max_entropy = sw.state_of_max_entropy;
       sw.initialize_max_entropy_and_translation_distance();
-      sw.state_of_max_entropy = state_of_max_entropy;
     }
     const double scale = log(10);
     double width;
     double range;
     do {
       width = sw.initialize_gaussian(scale);
-      range = sw.state_of_max_interactions - sw.state_of_max_entropy;
+      range = sw.max_observed_interactions - sw.state_of_max_entropy;
       // Now shift to the max entropy state...
-      const int state_of_max_entropy = sw.state_of_max_entropy;
       sw.initialize_max_entropy_and_translation_distance();
-      sw.state_of_max_entropy = state_of_max_entropy;
       printf("***\n");
       printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
              width, range, width/range);
@@ -547,24 +545,16 @@ int main(int argc, const char *argv[]) {
       // ---------------------------------------------------------------
       // Update weights
       // ---------------------------------------------------------------
-      if(!(no_weights || gaussian_fit)){
-        if(sw.iteration == first_weight_update){
-          flat_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels);
-          weight_updates++;
-        } else if((flat_histogram || walker_weights)
-                  && (sw.iteration > first_weight_update)
-                  && ((sw.iteration-first_weight_update)
-                      % int(first_weight_update*uipow(2,weight_updates)) == 0)){
-          printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
-          if (flat_histogram)
-            flat_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels);
-          else if(walker_weights){
-            walker_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels,
-                        sw.walkers_plus, sw.walkers_total, &sw.moves);
-          }
-          weight_updates++;
-          if(test_weights) print_weights = true;
-        }
+      if((sw.iteration > first_weight_update)
+         && ((sw.iteration-first_weight_update)
+             % int(first_weight_update*uipow(2,weight_updates)) == 0)) {
+
+        printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
+        walker_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels,
+                    sw.walkers_plus, sw.walkers_total, &sw.moves);
+        weight_updates++;
+        if(test_weights) print_weights = true;
+
         // for testing purposes; prints energy histogram and weight array
         if(print_weights){
           char *headerinfo = new char[4096];
@@ -666,9 +656,7 @@ int main(int argc, const char *argv[]) {
   {
     // Now let's iterate to the point where we are at maximum
     // probability before we do the real simulation.
-    const double st = sw.state_of_max_entropy;
     sw.initialize_max_entropy_and_translation_distance();
-    sw.state_of_max_entropy = st;
   }
   took("Initialization");
 
