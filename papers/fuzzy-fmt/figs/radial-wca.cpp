@@ -103,7 +103,7 @@ double run_soft_sphere(double reduced_density, double temp) {
 
   static Grid *potential = 0;
   potential = new Grid(gd);
-  *potential = softspherepotential - temperature*log(reduced_density*pow(2,-5.0/2.0)/(radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
+  *potential = softspherepotential - temperature*log(reduced_density*pow(2,-5.0/2.0)/(1.0*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
   fflush(stdout);
 
@@ -124,7 +124,7 @@ double run_soft_sphere(double reduced_density, double temp) {
   char *plotname = (char *)malloc(1024);
 
   sprintf(plotname, "papers/fuzzy-fmt/figs/radial-wca-%06.4f-%04.2f.dat", temp, reduced_density);
-  z_plot(plotname, Grid(gd, 4*M_PI*density/3));
+  z_plot(plotname, Grid(gd, pow(2,5.0/2.0)*density));
   free(plotname);
 
   {
