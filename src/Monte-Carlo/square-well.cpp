@@ -46,8 +46,8 @@ vector3d sw_fix_periodic(vector3d v, const double len[3]){
   return v;
 }
 
-vector3d periodic_diff(const vector3d &a, const vector3d  &b,
-                          const double len[3], const int walls){
+vector3d periodic_diff(const vector3d &a, const vector3d  &b, const double len[3],
+                       const int walls){
   vector3d v = b - a;
   for (int i = 0; i < 3; i++){
     if (i >= walls && len[i] > 0){
@@ -60,9 +60,8 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b,
   return v;
 }
 
-int initialize_neighbor_tables(ball *p, int N, double neighbor_R,
-                               int max_neighbors, const double len[3],
-                               int walls){
+int initialize_neighbor_tables(ball *p, int N, double neighbor_R, int max_neighbors,
+                               const double len[3], int walls){
   int most_neighbors = 0;
   for (int i = 0; i < N; i++){
     p[i].neighbor_center = p[i].pos;
@@ -179,72 +178,6 @@ ball random_move(const ball &p, double move_scale, const double len[3]){
   ball temp = p;
   temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(move_scale), len);
   return temp;
-}
-
-void move_one_ball(int id, ball *p, int N, double len[3], int walls,
-                   double neighbor_R, double translation_distance,
-                   double interaction_distance, int max_neighbors, double dr,
-                   move_info *moves, int interactions, double *ln_energy_weights){
-  moves->total++;
-  moves->old_count =
-    count_interactions(id, p, interaction_distance, len, walls);
-  moves->new_count = moves->old_count;
-  ball temp = random_move(p[id], translation_distance, len);
-  if (!in_cell(temp, len, walls, dr)) return; // bad move!
-  if (overlaps_with_any(temp, p, len, walls, dr)) return; // bad move!
-  const bool get_new_neighbors =
-    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared()
-     > sqr(neighbor_R/2.0));
-  if (get_new_neighbors){
-    // If we've moved too far, then the overlap test may have given a false
-    // negative. So we'll find our new neighbors, and check against them.
-    // If we still don't overlap, then we'll have to update the tables
-    // of our neighbors that have changed.
-    temp.neighbors = new int[max_neighbors];
-    update_neighbors(temp, id, p, N, neighbor_R + 2*dr, len, walls);
-    moves->updates++;
-    // However, for this check (and this check only), we don't need to
-    // look at all of our neighbors, only our new ones.
-    // fixme: do this!
-    //int *new_neighbors = new int[max_neighbors];
-
-    if (overlaps_with_any(temp, p, len, walls, dr)) {
-      // turns out we overlap after all.  :(
-      delete[] temp.neighbors;
-      return;
-    }
-  }
-  // Now that we know that we are keeping the new move, and after we
-  // have updated the neighbor tables if needed, we can compute the
-  // new interaction count.
-  ball pid = p[id]; // save a copy
-  p[id] = temp; // temporarily update the position
-  moves->new_count = count_interactions(id, p, interaction_distance, len, walls);
-  p[id] = pid;
-  // Now we can check if we actually want to do this move based on the
-  // new energy.
-  const double lnPmove =
-    ln_energy_weights[moves->new_count - moves->old_count + interactions]
-    - ln_energy_weights[interactions];
-  if (lnPmove < 0) {
-    const double Pmove = exp(lnPmove);
-    if (random::ran() > Pmove) {
-      // We want to reject this move because it is too improbable
-      // based on our weights.
-      moves->new_count = moves->old_count; // undo the energy change
-      return;
-    }
-  }
-  if (get_new_neighbors) {
-    // Okay, we've checked twice, just like Santa Clause, so we're definitely
-    // keeping this move and need to tell our neighbors where we are now.
-    temp.neighbor_center = temp.pos;
-    inform_neighbors(temp, p[id], p, id);
-    moves->informs++;
-    delete[] p[id].neighbors;
-  }
-  p[id] = temp; // Yay, we have a successful move!
-  moves->working++;
 }
 
 int count_interactions(int id, ball *p, double interaction_distance,
@@ -476,12 +409,84 @@ int maximum_interactions(int N, double interaction_distance, double neighbor_R,
 // sw_simulation methods
 
 void sw_simulation::move_a_ball() {
-  move_one_ball(iteration % N, balls, N, len, walls, neighbor_R, translation_distance,
-                interaction_distance, max_neighbors, dr, &moves, interactions,
-                ln_energy_weights);
+  int id = moves.total % N;
+  moves.total++;
+  moves.old_count = count_interactions(id, balls, interaction_distance, len, walls);
+  moves.new_count = moves.old_count;
+  ball temp = random_move(balls[id], translation_distance, len);
+  if (!in_cell(temp, len, walls, dr)) return; // bad move!
+  if (overlaps_with_any(temp, balls, len, walls, dr)) return; // bad move!
+  const bool get_new_neighbors =
+    (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared()
+     > sqr(neighbor_R/2.0));
+  if (get_new_neighbors){
+    // If we've moved too far, then the overlap test may have given a false
+    // negative. So we'll find our new neighbors, and check against them.
+    // If we still don't overlap, then we'll have to update the tables
+    // of our neighbors that have changed.
+    temp.neighbors = new int[max_neighbors];
+    update_neighbors(temp, id, balls, N, neighbor_R + 2*dr, len, walls);
+    moves.updates++;
+    // However, for this check (and this check only), we don't need to
+    // look at all of our neighbors, only our new ones.
+    // fixme: do this!
+    //int *new_neighbors = new int[max_neighbors];
+
+    if (overlaps_with_any(temp, balls, len, walls, dr)) {
+      // turns out we overlap after all.  :(
+      delete[] temp.neighbors;
+      return;
+    }
+  }
+  // Now that we know that we are keeping the new move, and after we
+  // have updated the neighbor tables if needed, we can compute the
+  // new interaction count.
+  ball pid = balls[id]; // save a copy
+  balls[id] = temp; // temporarily update the position
+  moves.new_count = count_interactions(id, balls, interaction_distance, len, walls);
+  balls[id] = pid;
+  // Now we can check if we actually want to do this move based on the
+  // new energy.
+  const double lnPmove =
+    ln_energy_weights[moves.new_count - moves.old_count + interactions]
+    - ln_energy_weights[interactions];
+  if (lnPmove < 0) {
+    const double Pmove = exp(lnPmove);
+    if (random::ran() > Pmove) {
+      // We want to reject this move because it is too improbable
+      // based on our weights.
+      moves.new_count = moves.old_count; // undo the energy change
+      return;
+    }
+  }
+  if (get_new_neighbors) {
+    // Okay, we've checked twice, just like Santa Clause, so we're definitely
+    // keeping this move and need to tell our neighbors where we are now.
+    temp.neighbor_center = temp.pos;
+    inform_neighbors(temp, balls[id], balls, id);
+    moves.informs++;
+    delete[] balls[id].neighbors;
+  }
+  balls[id] = temp; // Yay, we have a successful move!
+  moves.working++;
+
+  // Update interaction count and energy histogram
   interactions += moves.new_count - moves.old_count;
   energy_histogram[interactions]++;
-  iteration++; // increment the number of "iterations"
+  if(moves.total % N == 0) iteration++; // increment the number of iterations
+
+  // update observation of lowest energy state and round trip count
+  if(interactions >= max_observed_interactions) {
+    seeking_lowest_energy = false;
+    if(interactions > max_observed_interactions){
+      max_observed_interactions = interactions;
+      round_trips = 0;
+    }
+  }
+  else if(interactions <= state_of_max_entropy && seeking_lowest_energy == false) {
+    seeking_lowest_energy = true;
+    round_trips++;
+  }
 }
 
 // iterate enough times for the energy to change n times.  Return the
@@ -499,36 +504,33 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
   return num_up;
 }
 
-void sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
-  int num_up = 0;
+int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   int num_moves = 500;
   const double mean_allowance = 1.0;
   double dscale = 0.1;
   const int starting_iterations = iteration;
   int attempts_to_go = 4; // always try this many times, to get translation_distance right.
   double variance = 0;
-  double last_energy = 0, mean = 100;
+  double last_energy = 0, mean = 0;
+  int counted_in_mean;
   while (fabs(last_energy - interactions) > max(2,mean_allowance*sqrt(variance)) ||
          attempts_to_go >= 0) {
-    // printf("It seems %g > %g  or  %d >= 0.\n",
-    //        last_energy - mean, mean_allowance*sqrt(variance), attempts_to_go);
     attempts_to_go -= 1;
     last_energy = interactions;
-    num_up = simulate_energy_changes(num_moves);
+    simulate_energy_changes(num_moves);
     mean = 0;
-    double counted_in_mean = 0;
-    for (int i=0; i<energy_levels; i++) {
+    counted_in_mean = 0;
+    for (int i = 0; i < energy_levels; i++) {
       counted_in_mean += energy_histogram[i];
       mean += i*energy_histogram[i];
     }
     mean /= counted_in_mean;
     variance = 0;
-    for (int i=0; i<energy_levels; i++) {
+    for (int i = 0; i < energy_levels; i++) {
       variance += (i-mean)*(i-mean)*energy_histogram[i];
       energy_histogram[i] = 0; // clear it out for the next attempt
     }
     variance /= counted_in_mean;
-    state_of_max_entropy = int(mean + 0.5);
 
     // ---------------------------------------------------------------
     // Fine-tune translation scale to reach acceptance goal
@@ -551,20 +553,16 @@ void sw_simulation::initialize_max_entropy_and_translation_distance(double accep
     //        interactions, sqrt(variance), acceptance_rate, translation_distance);
     num_moves *= 2;
   }
-  for (int i=energy_levels-1; i> state_of_max_interactions; i--) {
-    if (energy_histogram[i]>0) {
-      state_of_max_interactions = i;
-      break;
-    }
-  }
   printf("Took %ld iterations to find max entropy state:  %d with width %.2g\n",
          iteration - starting_iterations, state_of_max_entropy, sqrt(variance));
+  return int(mean + 0.5);
 }
 
 // initialize the weight array using the Gaussian approximation.
 double sw_simulation::initialize_gaussian(double scale) {
   double variance = 0, old_variance;
   double mean = 0, old_mean;
+  int counted_in_mean;
   int num_energy_moves = 200;
   const int starting_iterations = iteration;
   const double fractional_precision_required = 0.2;
@@ -574,14 +572,16 @@ double sw_simulation::initialize_gaussian(double scale) {
 
     old_variance = variance;
     old_mean = mean;
-    double counted_in_mean = 0;
-    for (int i=0; i<energy_levels; i++) {
+    mean = 0;
+    counted_in_mean = 0;
+    for (int i = 0; i < energy_levels; i++) {
       counted_in_mean += energy_histogram[i];
       mean += i*energy_histogram[i];
     }
     mean /= counted_in_mean;
     variance = 0;
-    for (int i=0; i<energy_levels; i++) variance += (i-mean)*(i-mean)*energy_histogram[i];
+    for (int i = 0; i < energy_levels; i++)
+      variance += (i-mean)*(i-mean)*energy_histogram[i];
     variance /= counted_in_mean;
 
     // Keep simulating until the mean has not moved by more than a
@@ -600,12 +600,6 @@ double sw_simulation::initialize_gaussian(double scale) {
   for (int i = 0; i < state_of_max_entropy; i++)
     ln_energy_weights[i] -= scale*exp(-uipow(state_of_max_entropy-mean,2)/(scale*2*variance));
 
-  for (int i=energy_levels-1; i> state_of_max_interactions; i--) {
-    if (energy_histogram[i]>0) {
-      state_of_max_interactions = i;
-      break;
-    }
-  }
   printf("Took %ld iterations to find mean and variance for gaussian:  %g with width %g\n",
          iteration - starting_iterations, mean, sqrt(variance));
   return sqrt(variance);
@@ -630,8 +624,8 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_threshold
     }
 
     // check whether our histogram is flat enough to update wl_factor
-    const double variation = count_variation(energy_histogram, ln_energy_weights, energy_levels,
-                                             state_of_max_entropy);
+    const double variation = count_variation(energy_histogram, ln_energy_weights,
+                                             energy_levels, state_of_max_entropy);
 
     // print status text for testing purposes
     printf("\nweight update: %i\n",weight_updates++);

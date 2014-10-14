@@ -65,10 +65,16 @@ struct sw_simulation {
   /* The following accumulate results of the simulation.  Although
      ln_energy_weights is a constant except during initialization. */
 
-  int state_of_max_entropy, state_of_max_interactions;
+  int state_of_max_entropy, max_observed_interactions;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
+
+  /* The following keep track of how many times we have walked
+     between the states of minimum energy and maximum entropy */
+
+  bool seeking_lowest_energy;
+  int round_trips;
 
   /* The following deal with the "optimized ensemble" approach and
      tracking plus and minus walkers. */
@@ -91,8 +97,8 @@ struct sw_simulation {
   }
 
   // iterate long enough to find the max entropy state and initialize
-  // the translation distance.
-  void initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
+  // the translation distance. return most probable energy
+  int initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
 
   // iterate enough times for the energy to change n times.  Return
   // the number of "up" moves.
