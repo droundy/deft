@@ -38,14 +38,14 @@ double leny = 20;
 double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
-double R = 1;
+const double R = 1;
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 bool LJR = false; //Uses a test particle with Lennard-Jones repulsion
-double sigma = R*pow(2,5.0/6.0);
+const double sigma = R*pow(2,5.0/6.0);
 
 bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -55,7 +55,13 @@ int main(int argc, char *argv[]){
     printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
-  
+
+  printf("Command line: ");
+  for (int i=0;i<argc;i++) {
+    printf("%s ", argv[i]);
+  }
+  printf("\n");
+
   double maxrad = 0;
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
@@ -233,7 +239,7 @@ int main(int argc, char *argv[]){
                newPE, pressure, paranoia);
         fflush(stdout);
       }
-      paranoia = long(paranoia*1.4); // get a little more paranoid each time...
+      paranoia = long(paranoia*1.3); // get a little more paranoid each time...
 
       // We keep going until the energy increases twice.  This is a
       // heuristic to try to avoid starting taking data before the
@@ -741,7 +747,7 @@ Vector3d move(Vector3d v,double scale){
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
   //these forces are negative for repulsive forces. no particular reason
-  if (LJR) return -(4*eps*(12*pow(sigma/rij,13) + 6*pow(sigma/rij,7))/(sigma))*rij/36; 
+  if (LJR) return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6))/36; 
   return (-2*eps/(2*R))*(1-rij/(2*R))*rij;
 }
 
