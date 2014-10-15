@@ -311,8 +311,8 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0; // start at zeroeth iteration
   sw.state_of_max_entropy = 0;
   sw.max_observed_interactions = 0;
-  sw.round_trips = 0;
-  sw.seeking_lowest_energy = true;
+  sw.seeking_energy = new bool[sw.energy_levels]();
+  sw.round_trips = new long[sw.energy_levels]();
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -329,10 +329,7 @@ int main(int argc, const char *argv[]) {
   sw.energy_histogram = new long[sw.energy_levels]();
 
   // Walkers
-  sw.current_walker_plus = false;
-  sw.walker_plus_threshold = 0;
-  sw.walker_minus_threshold = 0;
-  sw.walkers_plus = new long[sw.energy_levels]();
+  sw.walkers_up = new long[sw.energy_levels]();
   sw.walkers_total = new long[sw.energy_levels]();
 
   // Energy weights, state density
@@ -525,19 +522,8 @@ int main(int argc, const char *argv[]) {
       // ---------------------------------------------------------------
       // Move each ball once
       // ---------------------------------------------------------------
-      for(int i = 0; i < sw.N; i++) {
+      for(int i = 0; i < sw.N; i++)
         sw.move_a_ball();
-
-        if(walker_weights){
-          sw.walkers_total[sw.interactions]++;
-          if(sw.interactions >= sw.walker_minus_threshold)
-            sw.current_walker_plus = false;
-          else if(sw.interactions <= sw.walker_plus_threshold)
-            sw.current_walker_plus = true;
-          if(sw.current_walker_plus)
-            sw.walkers_plus[sw.interactions]++;
-        }
-      }
       assert(sw.interactions ==
              count_all_interactions(sw.balls, sw.N, sw.interaction_distance,
                                     sw.len, sw.walls));
@@ -551,7 +537,7 @@ int main(int argc, const char *argv[]) {
 
         printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
         walker_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels,
-                    sw.walkers_plus, sw.walkers_total, &sw.moves);
+                    sw.walkers_up, sw.walkers_total, &sw.moves);
         weight_updates++;
         if(test_weights) print_weights = true;
 

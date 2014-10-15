@@ -261,7 +261,7 @@ void flat_hist(long *energy_histogram, double *ln_energy_weights,
 }
 
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
-                 int energy_levels, long *walkers_plus,
+                 int energy_levels, long *walkers_up,
                  long *walkers_total, move_info *moves){
   int max_entropy =
     max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
@@ -269,8 +269,8 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
     int top = i < energy_levels-1 ? i+1 : i;
     int bottom = i > 0 ? i-1 : i;
     int dE = bottom-top; // energy = -interactions
-    double df = double(walkers_plus[top]) / walkers_total[top]
-      - (double(walkers_plus[bottom]) / walkers_total[bottom]);
+    double df = double(walkers_up[top]) / walkers_total[top]
+      - (double(walkers_up[bottom]) / walkers_total[bottom]);
     double df_dE = (df != 0 && !isnan(df)) ? df/dE : 1;
     double walker_density =
       double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves->total;
@@ -473,20 +473,31 @@ void sw_simulation::move_a_ball() {
   // Update interaction count and energy histogram
   interactions += moves.new_count - moves.old_count;
   energy_histogram[interactions]++;
-  if(moves.total % N == 0) iteration++; // increment the number of iterations
 
-  // update observation of lowest energy state and round trip count
-  if(interactions >= max_observed_interactions) {
-    seeking_lowest_energy = false;
-    if(interactions > max_observed_interactions){
+  // update round trip observations
+  if(interactions <= state_of_max_entropy){
+    for(int i = state_of_max_entropy; i < energy_levels; i++)
+      seeking_energy[i] = true;
+  }
+  else if(seeking_energy[interactions]) {
+    seeking_energy[interactions] = false;
+    round_trips[interactions]++;
+  }
+
+  // update walker counts
+  if(interactions > max_observed_interactions){
+    if(interactions > max_observed_interactions) {
       max_observed_interactions = interactions;
-      round_trips = 0;
+      for(int i = state_of_max_entropy; i < energy_levels; i++)
+        walkers_up[i] = 0;
     }
   }
-  else if(interactions <= state_of_max_entropy && seeking_lowest_energy == false) {
-    seeking_lowest_energy = true;
-    round_trips++;
-  }
+  if(!seeking_energy[max_observed_interactions])
+    walkers_up[interactions]++;
+  walkers_total[interactions]++;
+
+  // increment iteraction count
+  if(moves.total % N == 0) iteration++;
 }
 
 // iterate enough times for the energy to change n times.  Return the

@@ -71,16 +71,14 @@ struct sw_simulation {
   double *ln_energy_weights;
 
   /* The following keep track of how many times we have walked
-     between the states of minimum energy and maximum entropy */
+     between the a given energy and the state of max entropy */
 
-  bool seeking_lowest_energy;
-  int round_trips;
+  bool *seeking_energy;
+  long *round_trips;
 
   /* The following deal with the "optimized ensemble" approach and
-     tracking plus and minus walkers. */
-  long *walkers_plus, *walkers_total;
-  bool current_walker_plus;
-  int walker_plus_threshold, walker_minus_threshold;
+     keep track of walkers. */
+  long *walkers_up, *walkers_total;
 
   // move just one ball, and update the energy, and update the
   // energy_histogram.
@@ -193,7 +191,7 @@ void flat_hist(long *energy_histogram, double *ln_energy_weights,
                int energy_levels);
 
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
-                 int energy_levels, long *walkers_plus, long *walkers_total,
+                 int energy_levels, long *walkers_up, long *walkers_total,
                  move_info *moves);
 
 // Variation in histogram values
