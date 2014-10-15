@@ -55,7 +55,13 @@ int main(int argc, char *argv[]){
     printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
-  
+
+  printf("Command line: ");
+  for (int i=0;i<argc;i++) {
+    printf("%s ", argv[i]);
+  }
+  printf("\n");
+
   double maxrad = 0;
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
@@ -233,7 +239,7 @@ int main(int argc, char *argv[]){
                newPE, pressure, paranoia);
         fflush(stdout);
       }
-      paranoia = long(paranoia*1.4); // get a little more paranoid each time...
+      paranoia = long(paranoia*1.3); // get a little more paranoid each time...
 
       // We keep going until the energy increases twice.  This is a
       // heuristic to try to avoid starting taking data before the
