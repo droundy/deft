@@ -84,15 +84,11 @@ struct sw_simulation {
   // energy_histogram.
   void move_a_ball();
 
+  // update round trip and walker info
+  void update_state_search_info();
+
   // print the timings (if the time is right)
   void print_timings(int timings_period) const;
-
-  int max_interactions() const {
-    for (int i=energy_levels-1; i>0; i--) {
-      if (energy_histogram[i]) return i;
-    }
-    return 0;
-  }
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy

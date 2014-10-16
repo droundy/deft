@@ -309,8 +309,8 @@ double count_variation(long *energy_histogram, double *ln_energy_weights,
   double mean_counts = total_counts / num_visited;
   printf("Highest/lowest = %.2g (%d) / %.2g (%d) mean %.2g    total %g\n",
          highest, highest_i, lowest, lowest_i, mean_counts, total_counts);
-  printf("    (ratio = %g, maxE = %d, visited %d, max_entropy %d)\n",
-         mean_counts/lowest, maxE, num_visited, max_entropy);
+  printf("    (maxE = %d, visited %d, max_entropy %d)\n",
+         maxE, num_visited, max_entropy);
   return mean_counts/lowest - 1;
 }
 
@@ -474,6 +474,11 @@ void sw_simulation::move_a_ball() {
   interactions += moves.new_count - moves.old_count;
   energy_histogram[interactions]++;
 
+  // increment iteraction count
+  if(moves.total % N == 0) iteration++;
+}
+
+void sw_simulation::update_state_search_info() {
   // update round trip observations
   if(interactions <= state_of_max_entropy){
     for(int i = state_of_max_entropy; i < energy_levels; i++)
@@ -483,7 +488,6 @@ void sw_simulation::move_a_ball() {
     seeking_energy[interactions] = false;
     round_trips[interactions]++;
   }
-
   // update walker counts
   if(interactions > max_observed_interactions){
     if(interactions > max_observed_interactions) {
@@ -495,9 +499,6 @@ void sw_simulation::move_a_ball() {
   if(!seeking_energy[max_observed_interactions])
     walkers_up[interactions]++;
   walkers_total[interactions]++;
-
-  // increment iteraction count
-  if(moves.total % N == 0) iteration++;
 }
 
 // iterate enough times for the energy to change n times.  Return the
