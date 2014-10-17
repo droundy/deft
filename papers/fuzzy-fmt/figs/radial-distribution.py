@@ -65,12 +65,12 @@ for temp in all_temperatures:
   #xlim(xmax=floor(max(g[:,0])))
 
 for temp in all_temperatures:
-  # input: ['figs/mcljr-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
-  fname = 'figs/mcljr-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
+  # input: ['figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
+  fname = 'figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
   if os.path.exists(fname):
     print 'found', fname
     g = loadtxt(fname)
-    line = plot(g[:,0], g[:,1], styles.mcljr[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
+    line = plot(g[:,0], g[:,1], styles.mcwca[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
     #xlim(xmax=floor(max(g[:,0])))
     xlim(xmax=8)
     if temp == all_temperatures[-1]:

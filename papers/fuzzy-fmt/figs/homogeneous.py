@@ -40,11 +40,11 @@ for j in arange(1,len(erfdata[0,:])):
   plot(erfeta[1:]*3*2**(5.0/2.0)/4/pi, erfpressure[1:], styles.color[erftemp[j]]+'-', label='$kT/\epsilon$=%g' % erftemp[j])
 title('FIXME: Check on weighting functions for homogeneous at low $T$')
 
-for rd in arange(0.1,0.51, 0.1):
+for rd in arange(0.1,0.61, 0.1):
   density = rd*2**(-5.0/2.0)
   for temp in [1.0, 0.1, 0.01, 0.001]:
-    #input: 'figs/mcljr-*-*.dat.prs'
-    fname = 'figs/mcljr-%.4f-%.4f.dat.prs' % (rd, temp)
+    #input: 'figs/mcwca-*-*.dat.prs'
+    fname = 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
     if os.path.exists(fname):
       print 'found', fname
       p = loadtxt(fname)
@@ -53,7 +53,7 @@ for rd in arange(0.1,0.51, 0.1):
       print 'could not find', fname
 
 #plot(density*(4*pi/3), density, label = 'ideal gas')
-ylim(ymin=1, ymax=7)
+ylim(ymin=1, ymax=8)
 xlim(xmax=0.65)
 #mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
 #plot(mcdata[:,1],mcdata[:,0],'*')

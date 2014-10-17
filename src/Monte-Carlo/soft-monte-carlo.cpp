@@ -124,9 +124,9 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else if (strcmp(argv[a],"potential") == 0){
-      if (strcmp(argv[a+1],"ljr") == 0) {
+      if (strcmp(argv[a+1],"wca") == 0) {
         LJR = true;
-        printf("Using Lennard-Jones repulsion potential\n");
+        printf("Using Weeks-Chandler-Andersen potential\n");
       } else {
         printf("Using quadratic potential\n");
       }
