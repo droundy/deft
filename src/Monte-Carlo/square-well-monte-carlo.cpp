@@ -521,7 +521,6 @@ int main(int argc, const char *argv[]) {
       // ---------------------------------------------------------------
       for(int i = 0; i < sw.N; i++){
         sw.move_a_ball();
-        sw.update_state_search_info();
       }
       assert(sw.interactions ==
              count_all_interactions(sw.balls, sw.N, sw.interaction_distance,

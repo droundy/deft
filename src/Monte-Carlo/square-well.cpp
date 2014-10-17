@@ -476,6 +476,8 @@ void sw_simulation::move_a_ball() {
 
   // increment iteraction count
   if(moves.total % N == 0) iteration++;
+
+  update_state_search_info();
 }
 
 void sw_simulation::update_state_search_info() {
