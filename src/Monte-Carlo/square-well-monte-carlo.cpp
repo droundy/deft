@@ -307,8 +307,6 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0; // start at zeroeth iteration
   sw.state_of_max_entropy = 0;
   sw.max_observed_interactions = 0;
-  sw.seeking_energy = new bool[sw.energy_levels]();
-  sw.round_trips = new long[sw.energy_levels]();
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -323,6 +321,9 @@ int main(int argc, const char *argv[]) {
   sw.interaction_distance = 2*R*well_width;
   sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
   sw.energy_histogram = new long[sw.energy_levels]();
+
+  sw.seeking_energy = new bool[sw.energy_levels]();
+  sw.round_trips = new long[sw.energy_levels]();
 
   // Walkers
   sw.walkers_up = new long[sw.energy_levels]();
