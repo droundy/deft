@@ -16,7 +16,9 @@ env.MergeFlags('-Waddress -Warray-bounds -Wc++11-compat -Wchar-subscripts ' +
                '-Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function ' +
                '-Wunused-label -Wunused-value -Wunused-variable')
 
-env.MergeFlags('-O3') # add -g and possibly -fno-inline here to enable debugging
+env.MergeFlags('-O3') # add -g and possibly -fno-inline and
+                      # -fsanitize=address and maybe -fsanitize=ubsan
+                      # here to enable debugging
 
 # The following flags enable gcc to eliminate unused code from the
 # final executable.  This reduces the size of the executable, and I

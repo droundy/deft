@@ -75,6 +75,14 @@ struct sw_simulation {
 
   bool *seeking_energy;
   long *round_trips;
+  long actual_round_trips() const { // return the number of round trips to minimum energy
+    for (int i=energy_levels-1;i>=state_of_max_entropy;i--) if (round_trips[i]) return round_trips[i];
+    return 0;
+  };
+  int max_interactions() const { // return the maximum observed number of interactions
+    for (int i=energy_levels-1;i>=0;i--) if (energy_histogram[i]) return i;
+    return 0;
+  };
 
   /* The following deal with the "optimized ensemble" approach and
      keep track of walkers. */
