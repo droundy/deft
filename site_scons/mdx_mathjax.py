@@ -17,7 +17,10 @@ class MathJaxExtension(markdown.Extension):
         # Needs to come before escape matching because \ is pretty important in LaTeX
         md.inlinePatterns.add('mathjax', MathJaxPattern(), '<escape')
 
-def makeExtension(configs=None):
-    return MathJaxExtension(configs)
+# for compatibility with python markdown version <= 2.3.1, makeExtension must accept a single argument,
+# but for compatibility with python markdown version >= 2.5, MathJaxExtension cannot be passed any arguments.
+# as a compromise, makeExtension accepts an optional argument which is never used.
+def makeExtension(content=None):
+    return MathJaxExtension()
 
 
