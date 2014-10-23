@@ -23,7 +23,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double radius, double V0, double mu);
+Functional SoftFluid(double sigma, double epsilon, double mu);
 Functional HardRosenfeldFluid(double radius, double mu);
 Functional HardFluid(double radius, double mu);
 
@@ -72,9 +72,7 @@ void z_plot(const char *fname, const Grid &a) {
   fclose(out);
 }
 
-double run_walls(double eta, const char *name, Functional fhs, double teff) {
-  //printf("Filling fraction is %g with functional %s at temperature %g\n", eta, name, teff);
-  //fflush(stdout);
+double run_walls(double reduced_density, const char *name, Functional fhs, double teff) {
   double kT = teff;
   if (kT == 0) kT = 1;
 
@@ -99,7 +97,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   }
   if (!potential) {
     potential = new Grid(gd);
-    *potential = (eta*constraint + 1e-4*eta*VectorXd::Ones(gd.NxNyNz))/(4*M_PI/3);
+    *potential = pow(2,-5.0/2.0)*(reduced_density*constraint + 1e-4*reduced_density*VectorXd::Ones(gd.NxNyNz));
     *potential = -kT*potential->cwise().log();
   } else {
     // Adjust the potential so the initial guess for density is the
@@ -108,7 +106,7 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
     *potential *= kT/old_temperature;
   }
 
-  const double approx_energy = fhs(kT, eta/(4*M_PI/3))*dw*dw*width;
+  const double approx_energy = fhs(kT, reduced_density*pow(2,-5.0/2.0))*dw*dw*width;
   const double precision = fabs(approx_energy*1e-11);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, kT);
   fflush(stdout);
@@ -133,8 +131,8 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
 
   char *plotname = (char *)malloc(1024);
 
-  sprintf(plotname, "papers/fuzzy-fmt/figs/walls%s-%06.4f-%04.2f.dat", name, teff, eta);
-  z_plot(plotname, Grid(gd, 4*M_PI*density/3));
+  sprintf(plotname, "papers/fuzzy-fmt/figs/walls%s-%06.4f-%04.2f.dat", name, teff, reduced_density);
+  z_plot(plotname, Grid(gd, density*pow(2,5.0/2.0)));
   free(plotname);
 
   {
@@ -150,15 +148,15 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
       mydist += sep;
     }
 
-    double Extra_per_A = Ntot_per_A - eta/(4.0/3.0*M_PI)*width/2;
+    double Extra_per_A = Ntot_per_A - reduced_density*pow(2,-5.0/2.0)*width/2;
 
     FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "a");
-    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk filling fraction of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume and divide by (4/3)pi.  Then add %04.10f times the Area of your cavity to this number\n",
-	    name, eta, name, eta, Extra_per_A, eta, Extra_per_A);
+    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk reduced_density of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume times 2^(-5/2).  Then add %04.10f times the Area of your cavity to this number\n",
+	    name, reduced_density, name, reduced_density, Extra_per_A, reduced_density, Extra_per_A);
 
     int wallslen = 20;
-    double Extra_spheres =  (eta*wallslen*wallslen*wallslen/(4*M_PI/3) + Extra_per_A*wallslen*wallslen);  
-    fprintf (fout, "For filling fraction %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", eta, wallslen, Extra_spheres);
+    double Extra_spheres =  (reduced_density*pow(2,-5.0/2.0)*wallslen*wallslen*wallslen + Extra_per_A*wallslen*wallslen);  
+    fprintf (fout, "For reduced density %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", reduced_density, wallslen, Extra_spheres);
 
     fclose(fout); 
   }
@@ -173,29 +171,31 @@ double run_walls(double eta, const char *name, Functional fhs, double teff) {
   old_temperature = kT;
 
   took("Plotting stuff");
-  printf("density %g gives ff %g for eta = %g and T = %g\n", density(0,0,gd.Nz/2),
-         density(0,0,gd.Nz/2)*4*M_PI/3, eta, teff);
+  printf("density %g gives ff %g for reduced density = %g and T = %g\n", density(0,0,gd.Nz/2),
+         density(0,0,gd.Nz/2)*4*M_PI/3, reduced_density, teff);
   return density(0, 0, gd.Nz/2)*4*M_PI/3; // return bulk filling fraction
 }
 
 int main(int, char **) {
   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
+  const double rad = 1; //radius of our spheres
+  const double sigma = rad*pow(2,5.0/6.0);
   const double temps[] = { 0.03, 0.01, 0.001, 0.0 };
-  for (double eta = 0.4; eta >= 0.05; eta-=0.1) {
+  for (double n_reduced = 0.4; n_reduced >= 0.05; n_reduced-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
-      Functional f = HardRosenfeldFluid(1,0);
-      if (temp > 0) f = SoftFluid(1, 1, 0);
-      const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, eta/(4*M_PI/3));
-      printf("mu is %g for eta = %g at temperature %g\n", mu, eta, temp);
-      if (temp > 0) f = SoftFluid(1, 1, mu);
-      else f = HardRosenfeldFluid(1, mu);
+      Functional f = HardRosenfeldFluid(rad,0);
+      if (temp > 0) f = SoftFluid(sigma, 1, 0);
+      const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, n_reduced*pow(2,-5.0/2.0));
+      printf("mu is %g for reduced density = %g at temperature %g\n", mu, n_reduced, temp);
+      if (temp > 0) f = SoftFluid(sigma, 1, mu);
+      else f = HardRosenfeldFluid(rad, mu);
 
       const char *name = "hard";
       if (temp > 0) name = "soft";
 
-      run_walls(eta, name, f, temp);
+      run_walls(n_reduced, name, f, temp);
     }
   }
   // Just create this file so make knows we have run.
