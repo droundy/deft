@@ -10,7 +10,7 @@ env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
 
 if compiler == 'g++':
 
-    env.MergeFlags('-Werror -ansi')
+    env.MergeFlags('-Werror -std=c++11')
 
     # The following is approximately equal to -Wall, but we use a additive
     # set of statements, since the set of warnings encompased in -Wall
