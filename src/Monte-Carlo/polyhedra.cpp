@@ -145,7 +145,7 @@ bool overlap(const polyhedron &a, const polyhedron &b, const double periodic[3],
 int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
                       const double periodic[3], bool count, double dr) {
   // construct axes from a and a's projection onto them
-  vector3d aaxes[a.mypoly->nfaces];
+  vector3d *aaxes = new vector3d[a.mypoly->nfaces];
   double amins[a.mypoly->nfaces], amaxes[a.mypoly->nfaces];
   for (int i=0; i<a.mypoly->nfaces; i++) {
     aaxes[i] = a.rot.rotate_vector(a.mypoly->faces[i]);
@@ -206,12 +206,15 @@ int overlaps_with_any(const polyhedron &a, const polyhedron *bs,
         }
       }
       if (overlap) {
-        if(!count)
+        if(!count) {
+          delete[] aaxes;
           return 1;
+        }
         num_overlaps ++;
       }
     }
   }
+  delete[] aaxes;
   return num_overlaps;
 }
 
