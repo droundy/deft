@@ -2,30 +2,41 @@ import os, time, string, glob, numpy
 
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
+compiler = 'clang++' # clang breaks eigen2.  eventually we want to remove that dependency
+compiler = 'g++'
+
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
-env.MergeFlags('-Werror -ansi')
 
-# The following is approximately equal to -Wall, but we use a additive
-# set of statements, since the set of warnings encompased in -Wall
-# sometimes changes in ways that cause incompatibilities.
-env.MergeFlags('-Waddress -Warray-bounds -Wc++11-compat -Wchar-subscripts ' +
-               '-Wenum-compare -Wcomment -Wformat -Wmaybe-uninitialized -Wmissing-braces ' +
-               '-Wnonnull -Wparentheses -Wreorder -Wreturn-type ' +
-               '-Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 ' +
-               '-Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function ' +
-               '-Wunused-label -Wunused-value -Wunused-variable')
+if compiler == 'g++':
 
-env.MergeFlags('-O3') # add -g and possibly -fno-inline and
-                      # -fsanitize=address and maybe -fsanitize=ubsan
-                      # here to enable debugging
+    env.MergeFlags('-Werror -ansi')
 
-# The following flags enable gcc to eliminate unused code from the
-# final executable.  This reduces the size of the executable, and I
-# hope it also means that executables are less likely to change when
-# we add new code to deft that they do not use.
-env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections'],
-                 CXXFLAGS=['-fdata-sections','-ffunction-sections'])
+    # The following is approximately equal to -Wall, but we use a additive
+    # set of statements, since the set of warnings encompased in -Wall
+    # sometimes changes in ways that cause incompatibilities.
+    env.MergeFlags('-Waddress -Warray-bounds -Wc++11-compat -Wchar-subscripts ' +
+                   '-Wenum-compare -Wcomment -Wformat -Wmaybe-uninitialized -Wmissing-braces ' +
+                   '-Wnonnull -Wparentheses -Wreorder -Wreturn-type ' +
+                   '-Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 ' +
+                   '-Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function ' +
+                   '-Wunused-label -Wunused-value -Wunused-variable')
+
+    env.MergeFlags('-O3') # add -g and possibly -fno-inline and
+    # -fsanitize=address and maybe -fsanitize=ubsan
+    # here to enable debugging
+
+    # The following flags enable gcc to eliminate unused code from the
+    # final executable.  This reduces the size of the executable, and I
+    # hope it also means that executables are less likely to change when
+    # we add new code to deft that they do not use.
+    env.AppendUnique(LINKFLAGS=['-Wl,-gc-sections'],
+                     CXXFLAGS=['-fdata-sections','-ffunction-sections'])
+
+elif compiler == 'clang++':
+    env.Replace(CXX = compiler)
+
+    env.MergeFlags('-O3 -std=c++11') # I wish I could use -O4 but it crashes
 
 # Configure git to run the test suite:
 Alias('git configuration',
