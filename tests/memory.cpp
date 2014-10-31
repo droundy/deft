@@ -14,7 +14,7 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
-#include <sched.h> // linux-specific, for sched_setaffinity
+// #include <sched.h> // linux-specific, for sched_setaffinity
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -186,20 +186,20 @@ void check_a_functional(const char *name, Functional f, const Grid &x) {
 }
 
 int main(int, char **argv) {
-  {
-    // Here I set this test to continue running on its current cpu.
-    // This is a slightly hokey trick to try to avoid any timings
-    // variation due to NUMA and the process bouncing from one CPU to
-    // another.  Ideally we'd figure out a better way to decide on
-    // which CPU to use for real jobs.
-    cpu_set_t cpus;
-    CPU_ZERO(&cpus);
-    CPU_SET(sched_getcpu(), &cpus);
-    int err = sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
-    if (err != 0) {
-      printf("Error from sched_setaffinity: %d\n", err);
-    }
-  }
+  // {
+  //   // Here I set this test to continue running on its current cpu.
+  //   // This is a slightly hokey trick to try to avoid any timings
+  //   // variation due to NUMA and the process bouncing from one CPU to
+  //   // another.  Ideally we'd figure out a better way to decide on
+  //   // which CPU to use for real jobs.
+  //   cpu_set_t cpus;
+  //   CPU_ZERO(&cpus);
+  //   CPU_SET(sched_getcpu(), &cpus);
+  //   int err = sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
+  //   if (err != 0) {
+  //     printf("Error from sched_setaffinity: %d\n", err);
+  //   }
+  // }
   // Let's figure out which machine we're running on (since we only
   // want to test CPU time if we have timings for this particular
   // machine).
