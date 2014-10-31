@@ -2,7 +2,7 @@ import os, time, string, glob, numpy
 
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
-compiler = 'clang++' # clang breaks eigen2.  eventually we want to remove that dependency
+compiler = 'clang++' # clang actually works, swap this line with the below to use it
 compiler = 'g++'
 
 # First, we want to set up the flags
@@ -491,7 +491,7 @@ for mkdat in Split("""
 	papers/fuzzy-fmt/figs/walls
 	papers/fuzzy-fmt/figs/soft-sphere
 	papers/fuzzy-fmt/figs/radial-wca
-	papers/fuzzy-fmt/figs/radial-hs
+	papers/fuzzy-fmt/figs/hard-sphere
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
