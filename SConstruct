@@ -2,7 +2,7 @@ import os, time, string, glob, numpy
 
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
-compiler = 'clang++' # clang breaks eigen2.  eventually we want to remove that dependency
+compiler = 'clang++' # clang actually works, swap this line with the below to use it
 compiler = 'g++'
 
 # First, we want to set up the flags
