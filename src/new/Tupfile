@@ -1,0 +1,11 @@
+include_rules
+
+: foreach ../haskell/generate_*.exe |> cd ../.. && src/new/%f |> %gFast.cpp %gFast.h
+
+CXXFLAGS += -I.. -I../../include
+
+: foreach *.cpp | *.h |> !cxx |>
+
+NEWOBJ = Minimize.o NewFunctional.o ../utilities.o
+
+: test.o $(NEWOBJ) | *.o ../*.o |> !link |> test.exe
