@@ -271,7 +271,7 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
     int dE = bottom-top; // energy = -interactions
     double df = double(walkers_up[top]) / walkers_total[top]
       - (double(walkers_up[bottom]) / walkers_total[bottom]);
-    double df_dE = (df != 0 && !isnan(df)) ? df/dE : 1;
+    double df_dE = (df != 0 && df == df) ? df/dE : 1;
     double walker_density =
       double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves->total;
     ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
