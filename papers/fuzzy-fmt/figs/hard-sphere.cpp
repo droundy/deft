@@ -32,20 +32,21 @@ double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;
 double eps = 1;
-double radius = 1;
-double hs_radius = 1; //default hard sphere radius
+const double radius = 1;
 double sigma = radius*pow(2,5.0/6.0);
 double temperature = 0.01; //default temp 
-// double kT = 0.01; //default temp
+// double kT = 0.01; //default temp 
 
-double notinwall(Cartesian r) {
+double soft_sphere_potential(Cartesian r) {
   const double z = r.z();
   const double y = r.y();
   const double x = r.x();
-  if (sqrt(sqr(z)+sqr(y)+sqr(x)) < hs_radius) {
-      return 0; 
-  }
-  return 1;
+  const double VoverKTcutoff = 100;
+  const double distance = sqrt(x*x + y*y + z*z);
+  if (distance >= 2*radius) { return 0; }
+  double V = (4*eps*(uipow(sigma/distance,12) - uipow(sigma/distance,6)) + eps)/36;
+  if (V/temperature < VoverKTcutoff) return V;
+  return VoverKTcutoff*temperature;
 }
 
 static void took(const char *name) {
@@ -78,7 +79,7 @@ void z_plot(const char *fname, const Grid &a) {
   fclose(out);
 }
 
-double run_hard_sphere(double reduced_density, double temp) {
+double run_soft_sphere(double reduced_density, double temp) {
   Functional f = SoftFluid(sigma, 1, 0);
   const double mu = find_chemical_potential(OfEffectivePotential(f), temp, reduced_density*pow(2,-5.0/2.0));
   printf("mu is %g for reduced_density = %g at temperature %g\n", mu, reduced_density, temp);
@@ -90,28 +91,25 @@ double run_hard_sphere(double reduced_density, double temp) {
 
   Lattice lat(Cartesian(xmax,0,0), Cartesian(0,ymax,0), Cartesian(0,0,zmax));
   GridDescription gd(lat, dx);
-    
-  Grid potential(gd);
-  Grid constraint(gd);
-  constraint.Set(notinwall);
+
+  Grid softspherepotential(gd);
+  softspherepotential.Set(soft_sphere_potential);
 
   f = SoftFluid(sigma, 1, mu); // compute approximate energy with chemical potential mu
   const double approx_energy = f(temperature, reduced_density*pow(2,-5.0/2.0))*xmax*ymax*zmax;
   const double precision = fabs(approx_energy*1e-9);
 
-  f = OfEffectivePotential(SoftFluid(sigma, 1, mu));
-  f = constrain(constraint,f);
+  f = OfEffectivePotential(SoftFluid(sigma, 1, mu) + ExternalPotential(softspherepotential));
 
-  double regular_density = reduced_density*pow(2,-5.0/2.0);
-  potential = regular_density*constraint + .01*regular_density*VectorXd::Ones(gd.NxNyNz);
-   //potential = new_water_prop.liquid_density*VectorXd::Ones(gd.NxNyNz);
-  potential = -temperature*potential.cwise().log();
+  static Grid *potential = 0;
+  potential = new Grid(gd);
+  *potential = softspherepotential - temperature*log(reduced_density*pow(2,-5.0/2.0)/(1.0*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
   fflush(stdout);
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, temperature,
-                                                            &potential,
+                                                            potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
   for (int i=0;min.improve_energy(true) && i<100;i++) {
@@ -120,12 +118,12 @@ double run_hard_sphere(double reduced_density, double temp) {
   took("Doing the minimization");
   min.print_info();
 
-  Grid density(gd, EffectivePotentialToDensity()(temperature, gd, potential));
+  Grid density(gd, EffectivePotentialToDensity()(temperature, gd, *potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, reduced_density);
 
   char *plotname = (char *)malloc(1024);
 
-  sprintf(plotname, "papers/fuzzy-fmt/figs/radial-hs-%06.4f-%04.2f-%04.2f.dat", temp, reduced_density, hs_radius);
+  sprintf(plotname, "papers/fuzzy-fmt/figs/radial-wca-%06.4f-%04.2f.dat", temp, reduced_density);
   z_plot(plotname, Grid(gd, pow(2,5.0/2.0)*density));
   free(plotname);
 
@@ -144,17 +142,16 @@ double run_hard_sphere(double reduced_density, double temp) {
 
 int main(int argc, char *argv[]) {
   printf("dx = %g, xmax = %g\n", dx, xmax);
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s FILLINGFRACTION kT HARD_SPHERE_RADIUS \n", argv[0]);
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s FILLINGFRACTION kT\n", argv[0]);
     exit(1);
   }
 
   double temp = 0;
   double reduced_density = 0;
-  sscanf(argv[3], " %lg", &hs_radius);
   sscanf(argv[2], " %lg", &temp);
   sscanf(argv[1], " %lg", &reduced_density);
 
-  run_hard_sphere(reduced_density, temp);
+  run_soft_sphere(reduced_density, temp);
   return 0;
 }
