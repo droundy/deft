@@ -1,0 +1,5 @@
+include_rules
+
+CXXFLAGS += -I../../include -I..
+
+: foreach *.cpp |> !cxx |>

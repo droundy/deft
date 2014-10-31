@@ -1,0 +1,10 @@
+
+# run ./sw-tup-rules.py ww ff N method
+
+run ./sw-tup-rules.py 1.3 0.3 20 nw
+run ./sw-tup-rules.py 1.3 0.3 20 flat
+run ./sw-tup-rules.py 1.3 0.3 20 gaussian
+run ./sw-tup-rules.py 1.3 0.3 20 wang_landau
+run ./sw-tup-rules.py 1.3 0.3 20 walkers
+run ./sw-tup-rules.py 1.3 0.3 20 "kT 1"
+run ./sw-tup-rules.py 1.3 0.3 20 "kT 2"

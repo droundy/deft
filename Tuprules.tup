@@ -1,0 +1,13 @@
+.gitignore
+
+CXXFLAGS=-O3 -std=c++11
+
+!cxx = |> g++ $(CXXFLAGS) -c %f -o %o |> %B.o
+
+!link = |> g++ -lfftw3 -lpopt %f -o %o |>
+
+!latex = |> pdflatex %f && bibtex %B && pdflatex %f && pdflatex %f |> %B.pdf %B.log %B.aux %B.bbl %B.blg %BNotes.bib
+
+!ghc = |> ghc -O2 -c -o %B.o %f |> %B.o %B.hi
+
+!ghclink = |> ghc -O2 --make -o %B.exe %f |> %B.exe
