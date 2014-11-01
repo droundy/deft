@@ -147,13 +147,14 @@ void check_a_functional(const char *name, Functional f, const Grid &x) {
     if (nocpu) {
       cpuE = cpuG = cpuP = cpuPonly = 0;
     }
-    snprintf(fname, 1024, "tests/bench/%s.%s", name, hn);
-    out = fopen(fname, "w");
-    if (!out) {
-      printf("Unable to create file %s\n", fname);
-      exit(1);
-    }
-    fprintf(out, "mem\tcpu\n");
+    // snprintf(fname, 1024, "tests/bench/%s.%s", name, hn);
+    // out = fopen(fname, "w");
+    // if (!out) {
+    //   printf("Unable to create file %s\n", fname);
+    //   exit(1);
+    // }
+    // fprintf(out, "mem\tcpu\n");
+    out = stdout;
     delete[] fname;
   }
 

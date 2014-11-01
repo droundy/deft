@@ -1,0 +1,59 @@
+include_rules
+
+CXXFLAGS += -I../include -I../src
+: foreach *.cpp | ../src/new/*.h |> !cxx |>
+
+all_sources = ../src/lattice.o ../src/utilities.o
+all_sources += ../src/Faddeeva.o ../src/GridDescription.o
+all_sources += ../src/Grid.o ../src/ReciprocalGrid.o
+all_sources += ../src/IdealGas.o ../src/ChemicalPotential.o
+all_sources += ../src/HardSpheres.o ../src/ExternalPotential.o
+all_sources += ../src/Functional.o ../src/ContactDensity.o
+all_sources += ../src/Gaussian.o ../src/Pow.o
+all_sources += ../src/WaterSaftFast.o
+all_sources += ../src/WaterSaft_by_handFast.o
+all_sources += ../src/EffectivePotentialToDensity.o
+all_sources += ../src/equation-of-state.o ../src/water-constants.o
+all_sources += ../src/compute-surface-tension.o
+all_sources += ../src/Minimizer.o ../src/Downhill.o
+all_sources += ../src/Precision.o ../src/ConjugateGradient.o
+all_sources += ../src/QuadraticLineMinimizer.o
+all_sources += ../src/SteepestDescent.o
+
+all_sources += ../src/SaftFluid2Fast.o ../src/HardSpheresNoTensor2Fast.o
+
+!test = |>  cd .. && tests/%f > tests/%B.failed && mv tests/%B.failed tests/%o |> %B.log
+
+: $(all_sources) memory.o |> !link |> memory.test
+: $(all_sources) saft.o |> !link |> saft.test
+: $(all_sources) eos.o |> !link |> eos.test
+: $(all_sources) print-iter.o |> !link |> print-iter.test
+: $(all_sources) convolve-finite-difference.o |> !link |> convolve-finite-difference.test
+: $(all_sources) precision.o |> !link |> precision.test
+
+: $(all_sources) ../src/gSigmaA_automagicFast.o ../src/gSigmaA_by_handFast.o compare-gsigmas.o |> !link |> compare-gsigmas.test
+: $(all_sources) ../src/n2DensityFast.o ../src/VectorDensityXFast.o ../src/TensorDensityXXFast.o convolve.o |> !link |> convolve.test
+
+: $(all_sources) functional-of-double.o |> !link |> functional-of-double.test
+: $(all_sources) ideal-gas.o |> !link |> ideal-gas.test
+: $(all_sources) fftinverse.o |> !link |> fftinverse.test
+
+: $(all_sources) new-fftinverse.o |> !link |> new-fftinverse.test
+: $(all_sources) functional-arithmetic.o |> !link |> functional-arithmetic.test
+: $(all_sources) surface-tension.o |> !link |> surface-tension.test
+
+#: $(all_sources) ../src/SoftFluidFast.o sfmt.o |> !link |> sfmt.test
+
+newgeneric = ../src/new/Minimize.o ../src/new/NewFunctional.o ../src/water-constants.o
+
+: $(newgeneric) newcode.o |> !link |> newcode.test
+
+: $(newgeneric) ../src/new/*WhiteBearFast.o new-hard-spheres.o |> !link |> new-hard-spheres.test
+: $(newgeneric) ../src/new/*WaterSaft*Fast.o new-water-saft.o |> !link |> new-water-saft.test
+
+newgenerated = ../src/new/Quadratic*Fast.o ../src/new/*Phi*Fast.o ../src/new/*SFMT*Fast.o
+newgenerated += ../src/new/Log*Fast.o ../src/new/*TestFast.o
+
+: $(newgeneric) $(newgenerated) new-generated.o |> !link |> new-generated.test
+
+: foreach *.test |> !test |>
