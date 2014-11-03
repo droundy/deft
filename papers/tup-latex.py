@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
-import glob, re, string
+import glob, re, string, sys
 
 texfs = glob.glob('*.tex')
+if len(sys.argv) > 1:
+    texfs = sys.argv[1:]
 
 documentclassre = re.compile(r'\\documentclass(\[[^\]]+\])?{')
 graphicre = re.compile(r'^\s*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)

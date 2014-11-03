@@ -1,8 +1,6 @@
 include_rules
 
-run ../../tup-matplotlib.py erf.py
-
-#run ../../tup-matplotlib.py homogeneous.py
+: foreach *.py |> !pyc |>
 
 CXXFLAGS += -I../../../src -I../../../include
 
@@ -30,3 +28,12 @@ sources += ../../../src/SoftFluidFast.o
 : homogeneous.o $(sources) |> !link |> homogeneous.exe
 
 : homogeneous.exe |> cd ../../.. && papers/fuzzy-fmt/figs/homogeneous.exe |> homogeneous.dat
+
+run ../../tup-matplotlib.py erf.py
+run ../../tup-matplotlib.py potential-plot.py
+run ../../tup-matplotlib.py homogeneous.py
+run ../../tup-matplotlib.py w2-comparison.py
+run ../../tup-matplotlib.py weight-functions.py
+run ../../tup-matplotlib.py radial-distribution.py
+run ../../tup-matplotlib.py plot-walls.py
+run ../../tup-matplotlib.py radial_argon_plots.py

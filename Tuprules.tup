@@ -30,3 +30,5 @@ generic_sources += src/SteepestDescent.o
 !ghc = |> ghc -O2 -c -o %B.o %f |> %B.o %B.hi
 
 !ghclink = |> ghc -O2 --make -o %B.exe %f |> %B.exe
+
+!pyc = |> python -m compileall %f |> %B.pyc
