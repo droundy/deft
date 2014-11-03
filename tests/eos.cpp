@@ -89,12 +89,12 @@ int main(int, char **argv) {
   }
 
   {
-    FILE *o = fopen("dispersion.dat", "w");
+    FILE *o = stdout; // fopen("dispersion.dat", "w");
     //equation_of_state(o, DispersionSAFT(hughes_water_prop.lengthscale, hughes_water_prop.kT,
     //                                    hughes_water_prop.epsilon_dispersion,
     //                                    hughes_water_prop.lambda_dispersion)(n),
     //                  hughes_water_prop.kT, nmin, nmax);
-    fclose(o);
+    //fclose(o);
     printf("Got dispersion!\n");
 
     Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
@@ -124,10 +124,10 @@ int main(int, char **argv) {
     }
 
     if (0) {
-      o = fopen("saft-fluid.dat", "w");
+      o = stdout; // fopen("saft-fluid.dat", "w");
       double mu = f.derive(hughes_water_prop.kT, Veff)*hughes_water_prop.kT/hughes_water_prop.liquid_density; // convert from derivative w.r.t. V
       equation_of_state(o, f + ChemicalPotential(mu)(n), hughes_water_prop.kT, nmin, nmax);
-      fclose(o);
+      //fclose(o);
     }
 
     {
@@ -158,7 +158,7 @@ int main(int, char **argv) {
     }
 
     {
-      o = fopen("room-temperature.dat", "w");
+      o = stdout; // fopen("room-temperature.dat", "w");
       Functional f = OfEffectivePotential(SaftFluid2(hughes_water_prop.lengthscale,
                                                         hughes_water_prop.epsilonAB, hughes_water_prop.kappaAB,
                                                         hughes_water_prop.epsilon_dispersion,
@@ -179,17 +179,17 @@ int main(int, char **argv) {
         fprintf(o, "%g\t%g\t%g\n",
                 dens, f(hughes_water_prop.kT, V), f(hughes_water_prop.kT, Vl) - (dens-nl)*mu);
       }
-      fclose(o);
+      //fclose(o);
       printf("Finished plotting room-temperature.dat...\n");
     }
   }
 
   {
-    FILE *o = fopen("hard-sphere-fluid.dat", "w");
+    FILE *o = stdout; // fopen("hard-sphere-fluid.dat", "w");
     Functional f = HardSpheresWBnotensor(hughes_water_prop.lengthscale)(n) + IdealGasOfVeff();
     double mu = f.derive(hughes_water_prop.kT, Veff)*hughes_water_prop.kT/hughes_water_prop.liquid_density; // convert from derivative w.r.t. V
     equation_of_state(o, f + ChemicalPotential(mu)(n), hughes_water_prop.kT, nmin, nmax);
-    fclose(o);
+    //fclose(o);
   }
 
   if (retval == 0) {

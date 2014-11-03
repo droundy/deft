@@ -1,0 +1,39 @@
+include_rules
+
+: foreach *.py |> !pyc |>
+
+CXXFLAGS += -I../../../src -I../../../include
+
+: homogeneous.cpp |> !cxx |>
+
+sources = ../../../src/lattice.o ../../../src/utilities.o
+sources += ../../../src/Faddeeva.o ../../../src/GridDescription.o
+sources += ../../../src/Grid.o ../../../src/ReciprocalGrid.o
+sources += ../../../src/IdealGas.o ../../../src/ChemicalPotential.o
+sources += ../../../src/HardSpheres.o ../../../src/ExternalPotential.o
+sources += ../../../src/Functional.o ../../../src/ContactDensity.o
+sources += ../../../src/Gaussian.o ../../../src/Pow.o
+sources += ../../../src/WaterSaftFast.o
+sources += ../../../src/WaterSaft_by_handFast.o
+sources += ../../../src/EffectivePotentialToDensity.o
+sources += ../../../src/equation-of-state.o ../../../src/water-constants.o
+sources += ../../../src/compute-surface-tension.o
+sources += ../../../src/Minimizer.o ../../../src/Downhill.o
+sources += ../../../src/Precision.o ../../../src/ConjugateGradient.o
+sources += ../../../src/QuadraticLineMinimizer.o
+sources += ../../../src/SteepestDescent.o
+sources += ../../../src/HardFluidFast.o
+sources += ../../../src/SoftFluidFast.o
+
+: homogeneous.o $(sources) |> !link |> homogeneous.exe
+
+: homogeneous.exe |> cd ../../.. && papers/fuzzy-fmt/figs/homogeneous.exe |> homogeneous.dat
+
+run ../../tup-matplotlib.py erf.py
+run ../../tup-matplotlib.py potential-plot.py
+run ../../tup-matplotlib.py homogeneous.py
+run ../../tup-matplotlib.py w2-comparison.py
+run ../../tup-matplotlib.py weight-functions.py
+run ../../tup-matplotlib.py radial-distribution.py
+run ../../tup-matplotlib.py plot-walls.py
+run ../../tup-matplotlib.py radial_argon_plots.py

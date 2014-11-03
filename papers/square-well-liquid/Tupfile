@@ -1,9 +1,3 @@
 include_rules
 
-HISTOFIGS = figs/periodic-ww130-ff30-N20-E.pdf
-HISTOFIGS += figs/periodic-ww130-ff30-N20-weights.pdf
-HISTOFIGS += figs/periodic-ww130-ff30-N20-dos.pdf
-HISTOFIGS += figs/periodic-ww130-ff30-N20-u.pdf
-HISTOFIGS += figs/periodic-ww130-ff30-N20-hc.pdf
-
-: histogram-paper.tex | $(HISTOFIGS) |> !latex |>
+run ../tup-latex.py
