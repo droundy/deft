@@ -338,6 +338,14 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:radial-distribution-50}
 \end{figure}
 
+%% \begin{figure}
+%% \begin{center}
+%% \includegraphics[width=3.5in]{figs/radial-distribution-60}
+%% \end{center}
+%% \caption{Radial distribution function with 0.6 reduced density.}
+%% \label{fig:radial-distribution-60}
+%% \end{figure}
+
 \subsection{Soft spheres near a hard wall}
 
 \begin{figure}
@@ -417,6 +425,87 @@ temperature is $T^* = 2.48$. \fixme{Run MC and DFT simulations.}}
 temperature is $T^* = 1.235$.\fixme{Run MC and DFT simulations.}}
 \label{fig:argon-1.1GPa}
 \end{figure}
+
+\section{WCA wall potential derivation}
+
+So we start with (in general coordinates) the WCA potential:
+\begin{align}
+  V_{WCA}(|\rr - \rr'|) = \frac{\epsilon}{9} \left[ \left(\frac{\sigma}{|\rr - \rr'|}\right)^{12}
+      - \left(\frac{\sigma}{|\rr - \rr'|}\right)^6\right] + \frac{\epsilon}{36}
+\end{align}
+
+for $|\rr - \rr'| < R_{W}+R_{S}$, and $V_{WCA} = 0$ otherwise. The wall will be
+made up of WCA spheres that begin with their centers on the x-y plane
+at $z = 0$, are distributed evenly with density $\rho$, and extend to $z
+= -\infty$. So if we integrate this in cylindrical coordinates, then
+\begin{align}
+  V_{SW} (\rr) &= \rho \int\limits_{-\infty}^0 \int\limits_0^\infty
+  \int\limits_0^{2\pi} \Bigg( \frac{\epsilon}{9} \left[
+    \left(\frac{\sigma_W}{|\rr - \rr'|}\right)^{12} -
+    \left(\frac{\sigma_W}{|\rr - \rr'|}\right)^6 \right] \notag \\
+  & \hspace{1cm}+ \frac{\epsilon}{36} \Bigg) \Theta\left( |\rr-\rr'| <
+  R_{W}+R_{S}\right) r'\textrm{d}\phi' \textrm{d}r' \textrm{d}z'
+\end{align}
+
+Since we have an infinite plane where the wall ends, we'll place our
+test particle on the z-axis some distance above the wall. Then
+\begin{align}
+  V_{SW}(z) &= \frac{2\pi\rho\epsilon}{36}\int\limits_{-\infty}^0
+  \int\limits_0^\infty \Bigg( 4 \Bigg[
+    \left(\frac{\sigma_W}{\sqrt{{r'}^2 + (z-z')^2}}\right)^{12} \notag
+    \\
+    &\hspace{1cm}-\left(\frac{\sigma_W}{\sqrt{{r'}^2 + (z-z')^2}}\right)^6 \Bigg]
+  + 1 \Bigg) \notag \\
+    &\hspace{1cm} \times \Theta\left( |\rr-\rr'| < R_{W}+R_{S}\right) r'\textrm{d}r' \textrm{d}z'
+\end{align}
+
+At this point I'll set $R_W + R_S = R_0$ (which is when the potential
+goes to zero) and modify the limits due to the theta function. Since
+we must have ${r'}^2 + (z-z')^2 \leq R_0^2$, then our limits in the
+$\mathbf{\hat{r}}$ direction go from zero to $\sqrt{R_0^2 -
+  (z-z')^2}$. I'll save some space in the integration by calling this
+$\gamma$.  Since the distance $z-z'$ can never be larger than $R_0$,
+the limits in the $\mathbf{\hat{z}}$ direction now go from $z-R_0$ to
+zero. Now, this only applies as long as $z-z' \leq R_0$, otherwise the
+entire integral is zero. So, now doing the integration.
+\begin{align}
+  V_{SW} &= \frac{\pi\rho\epsilon}{18} \int\limits_{z-R_0}^0
+  \int\limits_{0}^{\gamma} \Bigg( 4 \Bigg[
+    \frac{\sigma_W^{12}r'}{\left({r'}^2 + (z-z')^2\right)^6} \notag \\
+    &\hspace{2cm}-\frac{\sigma_W^6r'}{({r'}^2 + (z-z')^2)^3} \Bigg]
+  + r' \Bigg) \textrm{d}r' \textrm{d}z' \\
+  &= \frac{\pi\rho\epsilon}{18} \int\limits_{z-R_0}^0
+  \Bigg[\frac{-4\sigma_W^{12}}{10\left({r'}^2 + (z-z')^2\right)^5}
+    \notag \\
+    &\hspace{0.5cm}+\frac{4\sigma_W^6}{4({r'}^2 + (z-z')^2)^2}
+  + \frac{r'^2}{2} \left.\Bigg]\right|_0^{\sqrt{R_0^2 - (z-z')^2}} \textrm{d}z' \\
+  &= \frac{\pi\rho\epsilon}{18} \int\limits_{z-R_0}^0 \Bigg(
+  \frac{-2\sigma_W^{12}}{5R_0^{10}} + \frac{\sigma_W^6}{R_0^4}
+  +\frac{R_0^2 - (z-z')^2}{2} \notag \\
+  &\hspace{2cm}+ \frac{2\sigma_W^{12}}{5(z-z')^{10}} - \frac{\sigma_W^6}{(z-z')^4}
+  \Bigg) \textrm{d}z' \\
+  &= \frac{\pi\rho\epsilon}{18} \Bigg[ z'\left(\frac{R_0^2}{2} +
+    \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
+    + \frac{(z-z')^3}{6} \notag \\
+    &\hspace{1cm}+ \frac{2\sigma_W^{12}}{45(z-z')^9} -
+    \frac{\sigma_W^6}{3(z-z')^3}\left.\Bigg] \right|_{z-R_0}^0 \\
+  &= \frac{\pi\rho\epsilon}{18} \Bigg[ \frac{z^3}{6} + \frac{2\sigma_W^{12}}{45z^9} -
+    \frac{\sigma_W^6}{3z^3} - \frac{R_0^3}{6} - \frac{2\sigma_W^{12}}{45R_0^9} +
+    \frac{\sigma_W^6}{3R_0^3} \notag \\
+    & \hspace{1.5cm}- (z-R_0)\left(\frac{R_0^2}{2} +
+    \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right) \Bigg]
+\end{align}
+
+Now to clean this up a bit
+\begin{align}
+V_{SW}(0 < z \leq R_0) &= \frac{\pi\rho\epsilon}{18}\Big[ \frac{z^3-R_0^3}{6} +
+  \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
+  \notag \\
+  &+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
+  \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
+  \notag \\
+  &\hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3} \right)
+\end{align}
 
 \section{Conclusion}
 
