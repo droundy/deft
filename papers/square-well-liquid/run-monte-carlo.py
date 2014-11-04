@@ -15,15 +15,15 @@ N = int(sys.argv[3])
 
 versions = eval(sys.argv[4])
 
-initialize = 10000000
-iterations = 10000000
+initialize = 10000
+iterations = 10000
 
 # define some directories
-figdir = os.path.dirname(os.path.realpath(__file__))
-swdir = os.path.dirname(figdir)
-projectdir = os.path.realpath(swdir+'../../..')
+swdir = os.path.dirname(os.path.realpath(__file__))
+figdir = os.path.realpath(swdir+'/figs')
+projectdir = os.path.realpath(swdir+'/../../..')
 jobdir = swdir+'/jobs'
-datadir = swdir+'/data/'
+datadir = swdir+'/data'
 simname = 'square-well-monte-carlo'
 
 cores = 2 if socket.gethostname() == 'MAPHost' else 8
@@ -44,7 +44,7 @@ for version in versions:
     outname = basename + '.out'
     errname = basename + '.err'
 
-    command = "time nice -19 %s/%s" %(projectdir, simname)
+    command = "time %s/%s" %(projectdir, simname)
 
     script = open(scriptname,'w')
     script.write("#!/bin/bash\n")
