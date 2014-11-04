@@ -67,7 +67,9 @@ data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.0
 lines.append(styles.new_dft_code[0.001])
 
 for kT in [0.001, 0.01, 0.03]:
-    # eventually: nput: "figs/walls-0.%02d-T*.dat" % (ff)
+    # input: "figs/wallssoft-0.0010-%.2f.dat" % (ff*0.01)
+    # input: "figs/wallssoft-0.0100-%.2f.dat" % (ff*0.01)
+    # input: "figs/wallssoft-0.0300-%.2f.dat" % (ff*0.01)
     fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, ff*0.01)
     if os.path.exists(fname):
         names.append('DFT kT = %4.2f' % kT)
