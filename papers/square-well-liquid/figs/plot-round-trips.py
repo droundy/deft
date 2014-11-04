@@ -22,22 +22,25 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "wang_landau", "gaussian", "flat", "walkers", "kT2", "kT1"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions]
 
-plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Round trips for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 for version in versions:
     data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
-    DS = data[:,1]
-    plt.semilogy(energy, DS, styles.dots[version], label=styles.title[version])
+    round_trips = data[:,1]
+    energy = energy[round_trips != 0]
+    round_trips = round_trips[round_trips != 0]
+    if sum(round_trips) > 0:
+        plt.semilogy(energy, round_trips, styles.dots[version], label=styles.title[version])
 
 plt.xlabel('$U/N\epsilon$')
-plt.ylabel('$D$')
+plt.ylabel('Round trips')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rt.pdf" % (ww*100, ff*100, N))
 
 if 'show' in sys.argv:
     plt.show()

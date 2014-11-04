@@ -595,20 +595,14 @@ int main(int argc, const char *argv[]) {
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", dir, filename);
 
-  char *e_init_fname = new char[1024];
-  sprintf(e_init_fname, "%s/%s-E-init.dat", dir, filename);
-
   char *w_fname = new char[1024];
   sprintf(w_fname, "%s/%s-lnw.dat", dir, filename);
 
-  char *w_init_fname = new char[1024];
-  sprintf(w_init_fname, "%s/%s-lnw-init.dat", dir, filename);
-
-  char *rt_init_fname = new char[1024];
-  sprintf(rt_init_fname, "%s/%s-rt-init.dat", dir, filename);
+  char *rt_fname = new char[1024];
+  sprintf(rt_fname, "%s/%s-rt.dat", dir, filename);
 
   char *density_fname = new char[1024];
-  sprintf(density_fname, "%s/%s-density-%i.dat", dir, filename, sw.N);
+  sprintf(density_fname, "%s/%s-density.dat", dir, filename);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", dir, filename);
@@ -624,43 +618,36 @@ int main(int argc, const char *argv[]) {
           sw.iteration, sw.moves.working, sw.moves.total,
           double(sw.moves.working)/sw.moves.total);
 
-  FILE *e_init_out = fopen((const char *)e_init_fname, "w");
-  fprintf(e_init_out, "%s", headerinfo);
-  fprintf(e_init_out, "%s", countinfo);
-  fprintf(e_init_out, "\n# interactions   counts\n");
-  for(int i = 0; i < sw.energy_levels; i++)
-    fprintf(e_init_out, "%i  %ld\n",i,sw.energy_histogram[i]);
-  fclose(e_init_out);
-
-  FILE *w_init_out = fopen(w_init_fname, "w");
-  if (!w_init_out) {
-    fprintf(stderr, "Unable to create %s!\n", w_init_fname);
+  // Save weights histogram
+  FILE *w_out = fopen((const char *)w_fname, "w");
+  if (!w_out) {
+    fprintf(stderr, "Unable to create %s!\n", w_fname);
     exit(1);
   }
-  fprintf(w_init_out, "%s", headerinfo);
-  fprintf(w_init_out, "%s", countinfo);
-  fprintf(w_init_out, "\n# interactions   ln(weight)\n");
+  fprintf(w_out, "%s", headerinfo);
+  fprintf(w_out, "%s", countinfo);
+  fprintf(w_out, "\n# interactions   ln(weight)\n");
   for(int i = 0; i < sw.energy_levels; i++)
-    fprintf(w_init_out, "%i  %f\n", i, sw.ln_energy_weights[i]);
-  fclose(w_init_out);
+    fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
+  fclose(w_out);
 
-  FILE *rt_init_out = fopen(rt_init_fname, "w");
-  if (!rt_init_out) {
-    fprintf(stderr, "Unable to create %s!\n", rt_init_fname);
+  // Save round trip counts
+  FILE *rt_out = fopen(rt_fname, "w");
+  if (!rt_out) {
+    fprintf(stderr, "Unable to create %s!\n", rt_fname);
     exit(1);
   }
-  fprintf(rt_init_out, "%s", headerinfo);
-  fprintf(rt_init_out, "%s", countinfo);
-  fprintf(rt_init_out, "\n# interactions   round trips\n");
+  fprintf(rt_out, "%s", headerinfo);
+  fprintf(rt_out, "%s", countinfo);
+  fprintf(rt_out, "\n# interactions   round trips\n");
   for(int i = 0; i < sw.energy_levels; i++)
-    fprintf(rt_init_out, "%i  %li\n", i, sw.round_trips[i]);
-  fclose(rt_init_out);
+    fprintf(rt_out, "%i  %li\n", i, sw.round_trips[i]);
+  fclose(rt_out);
 
   delete[] countinfo;
 
-  delete[] e_init_fname;
-  delete[] w_init_fname;
-  delete[] rt_init_fname;
+  delete[] w_fname;
+  delete[] rt_fname;
 
   delete[] sw.seeking_energy;
   delete[] sw.round_trips;
@@ -754,21 +741,11 @@ int main(int argc, const char *argv[]) {
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
       fprintf(e_out, "\n# interactions   counts\n");
-      for(int i = 0; i < sw.energy_levels; i++)
+      for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
           fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
+      }
       fclose(e_out);
-
-      // Save weights histogram
-      FILE *w_out = fopen((const char *)w_fname, "w");
-      fprintf(w_out, "%s", headerinfo);
-      fprintf(w_out, "%s", countinfo);
-      fprintf(w_out, "\n# interactions   ln(weight)\n");
-      for(int i = 0; i < sw.energy_levels; i++)
-        if(sw.energy_histogram[i] != 0){
-          fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
-        }
-      fclose(w_out);
 
       // Save RDF
       if(!sw.walls){
