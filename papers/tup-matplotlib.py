@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import re, glob, string, os, sys
 
@@ -20,9 +20,9 @@ def printrule(pyf, args, inputs, outputs):
     if len(outputs) == 0:
         return
     if len(inputs) == 0:
-        print ': %s | *.pyc |> cd .. && python figs/%s %s |> %s' % (pyf, pyf, args, string.join(outputs))
+        print ': %s | *.pyc |> cd .. && python2 figs/%s %s |> %s' % (pyf, pyf, args, string.join(outputs))
         return
-    print ': %s | *.pyc %s |> cd .. && python figs/%s %s |> %s' % (pyf, string.join(inputs), pyf, args, string.join(outputs))
+    print ': %s | *.pyc %s |> cd .. && python2 figs/%s %s |> %s' % (pyf, string.join(inputs), pyf, args, string.join(outputs))
 
 def friendly_eval(code, context, local = None):
     try:

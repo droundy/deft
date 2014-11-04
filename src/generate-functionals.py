@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 for x in ['HardSpheresNoTensor2Fast',
           'TensorWhiteBearFast',
