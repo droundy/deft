@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 ww=1.3
 ff=0.3
