@@ -1,9 +1,12 @@
-import os, time, string, glob, numpy
+import os, time, string, glob, numpy, sys
 
 CacheDir(os.environ['HOME'] + '/.cache/scons')
 
 compiler = 'clang++' # clang actually works, swap this line with the below to use it
 compiler = 'g++'
+
+if sys.platform == 'darwin':
+    compiler = 'clang++' # use clang on OS X
 
 # First, we want to set up the flags
 env = Environment(CPPPATH=['src', 'include', 'tests'], LIBS=['fftw3', 'popt'])
