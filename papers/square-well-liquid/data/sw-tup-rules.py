@@ -9,7 +9,7 @@ N = int(N)
 
 outputs = ["periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
            % (ww, ff, N, method.replace(' ',''), postfix)
-           for postfix in ['g', 'E', 'lnw', 'lnw-init', 'rt-init', 'E-init']]
+           for postfix in ['g', 'E', 'lnw', 'rt']]
 
 cmd = 'cd ../../.. && ./square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 10000' % (method, N, ff, ww)
 
