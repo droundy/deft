@@ -22,17 +22,19 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw", "wang_landau", "gaussian", "flat", "walkers", "kT2", "kT1"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt-init.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions]
 
-plt.title('Round trip counts for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Round trips for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 for version in versions:
     data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt-init.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
-    counts = data[:,1]
-    if sum(counts) > 0:
-        plt.semilogy(energy, counts, styles.dots[version], label=styles.title[version])
+    round_trips = data[:,1]
+    energy = energy[round_trips != 0]
+    round_trips = round_trips[round_trips != 0]
+    if sum(round_trips) > 0:
+        plt.semilogy(energy, round_trips, styles.dots[version], label=styles.title[version])
 
 plt.xlabel('$U/N\epsilon$')
 plt.ylabel('Round trips')

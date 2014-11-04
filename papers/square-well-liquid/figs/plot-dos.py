@@ -25,14 +25,13 @@ versions = eval(sys.argv[4])
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
 minlog = 0
-
 for version in versions:
     e_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     lnw = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
     energy = -e_hist[:,0]/N
-    log10w = lnw[:,1]*numpy.log10(numpy.exp(1))
+    log10w = lnw[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
     log10_dos = numpy.log10(e_hist[:,1]) - log10w
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
@@ -60,14 +59,15 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
 
-
 plt.figure() # weight functions
 minlog = 0
 for version in versions:
+    e_hist = numpy.loadtxt(
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     lnw = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
-    energy = -lnw[:,0]/N
-    log10w = -lnw[:,1]*numpy.log10(numpy.exp(1))
+    energy = -e_hist[:,0]/N
+    log10w = -lnw[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
     log10w -= log10w.max()
     if log10w.min() < minlog:
         minlog = log10w.min()
