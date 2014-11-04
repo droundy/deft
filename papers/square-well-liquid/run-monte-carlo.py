@@ -3,8 +3,8 @@
 import os, sys, socket
 import subprocess as sp
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N versions' % sys.argv[0]
+if not len(sys.argv) in [5,6]:
+    print 'useage: %s ww ff N versions filename_suffix' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -15,13 +15,16 @@ N = int(sys.argv[3])
 
 versions = eval(sys.argv[4])
 
+if len(sys.argv) == 6:
+    filename_suffix = sys.argv[5]
+
 initialize = 10000
 iterations = 10000
 
 # define some directories
 swdir = os.path.dirname(os.path.realpath(__file__))
 figdir = os.path.realpath(swdir+'/figs')
-projectdir = os.path.realpath(swdir+'/../../..')
+projectdir = os.path.realpath(swdir+'/../..')
 jobdir = swdir+'/jobs'
 datadir = swdir+'/data'
 simname = 'square-well-monte-carlo'
@@ -60,6 +63,10 @@ for version in versions:
                        ("iterations",iterations) ]:
         script.write(" \\\n --%s %s" %(arg,str(val)))
     script.write(" \\\n --%s"%version.replace("kT","kT "))
+    try:
+        script.write(" \\\n --filename_suffix %s" %filename_suffix)
+    except:
+        None
     script.close()
 
     # start simulation
