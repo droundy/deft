@@ -378,11 +378,12 @@ int main(int argc, const char *argv[]) {
   // Balls will be initially placed on a face centered cubic (fcc) grid
   // Note that the unit cells need not be actually "cubic", but the fcc grid will
   //   be stretched to cell dimensions
+  const float min_cell_width = 2*sqrt(2)*R; // minimum cell width
   const int spots_per_cell = 4; // spots in each fcc periodic unit cell
-  const int cells_floor = ceil(sw.N/spots_per_cell); // minimum number of cells
+  const int min_cell_count = ceil(sw.N/spots_per_cell); // minimum number of cells
   int cells[3]; // array to contain number of cells in x, y, and z dimensions
   for(int i = 0; i < 3; i++){
-    cells[i] = ceil(pow(cells_floor*sw.len[i]*sw.len[i]
+    cells[i] = ceil(pow(min_cell_count*sw.len[i]*sw.len[i]
                         /(sw.len[(i+1)%3]*sw.len[(i+2)%3]),1.0/3.0));
   }
 
@@ -394,13 +395,27 @@ int main(int argc, const char *argv[]) {
   int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
   int i = 0;
   while(total_spots < sw.N) {
-    if(cell_width[i%3] <= cell_width[(i+1)%3] &&
-       cell_width[(i+1)%3] <= cell_width[(i+2)%3]) {
+    if(cell_width[i%3] >= cell_width[(i+1)%3] &&
+       cell_width[i%3] >= cell_width[(i+2)%3]) {
       cells[i%3] += 1;
       cell_width[i%3] = sw.len[i%3]/cells[i%3];
       total_spots += spots_per_cell*cells[(i+1)%3]*cells[(i+2)%3];
     }
     i++;
+  }
+
+  // If we made our cells to small, return with error
+  for(int i = 0; i < 3; i++){
+    if(cell_width[i] < min_cell_width){
+      printf("Placement cell size too small: (%g,  %g,  %g,)\n",
+             cell_width[0],cell_width[1],cell_width[2]);
+      printf("Minimum allowed placement cell width: %g\n",min_cell_width);
+      printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
+             sw.len[0],sw.len[1],sw.len[2]);
+      printf("Fixing the chosen ball number, filling fractoin, and relative\n"
+             "  simulation cell dimensions simultaneously does not appear to be possible\n");
+      return 176;
+    }
   }
 
   // Define ball positions relative to cell position
@@ -422,7 +437,6 @@ int main(int argc, const char *argv[]) {
 
   // Place all balls in remaining spots
   int b = 0;
-  vector3d cell_pos;
   for(int i = 0; i < cells[x]; i++) {
     for(int j = 0; j < cells[y]; j++) {
       for(int k = 0; k < cells[z]; k++) {

@@ -337,7 +337,7 @@ Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
 for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
-        for N in [10, 20, 40, 100, 200]:
+        for N in [20, 60, 100, 200]:
             for method in ["nw","flat","gaussian","wang_landau","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)
