@@ -108,6 +108,8 @@ int main(int argc, const char *argv[]) {
   sprintf(dir, "papers/square-well-liquid/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
+  char *filename_suffix = new char[1024];
+  sprintf(filename_suffix, "default_filename_suffix");
   long simulation_iterations = 2500000;
   long initialization_iterations = 500000;
   double acceptance_goal = .4;
@@ -157,6 +159,8 @@ int main(int argc, const char *argv[]) {
      "Relative cell size in z dimension", "DOUBLE"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
+    {"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+     &filename_suffix, 0, "Output file name suffix", "STRING"},
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
      "Save directory", "dir"},
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -257,35 +261,38 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *name_suffix = new char[20];
+    char *method_tag = new char[20];
     char *wall_tag = new char[10];
     if(sw.walls == 0) sprintf(wall_tag,"periodic");
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
     else if(sw.walls == 3) sprintf(wall_tag,"box");
     if (fix_kT) {
-      sprintf(name_suffix, "-kT%g", fix_kT);
+      sprintf(method_tag, "-kT%g", fix_kT);
     } else if (no_weights) {
-      sprintf(name_suffix, "-nw");
+      sprintf(method_tag, "-nw");
     } else if (flat_histogram) {
-      sprintf(name_suffix, "-flat");
+      sprintf(method_tag, "-flat");
     } else if (gaussian_fit) {
-      sprintf(name_suffix, "-gaussian");
+      sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
-      sprintf(name_suffix, "-wang_landau");
+      sprintf(method_tag, "-wang_landau");
     } else if (walker_weights) {
-      sprintf(name_suffix, "-walkers");
+      sprintf(method_tag, "-walkers");
     } else {
-      name_suffix[0] = 0; // set name_suffix to the empty string
+      method_tag[0] = 0; // set method_tag to the empty string
     }
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
-            wall_tag, well_width, eta, sw.N, name_suffix);
+            wall_tag, well_width, eta, sw.N, method_tag);
     printf("\nUsing default file name: ");
-    delete[] name_suffix;
+    delete[] method_tag;
     delete[] wall_tag;
   }
   else
     printf("\nUsing given file name: ");
+  // If a filename suffix was specified, add it
+  if (strcmp(filename_suffix, "default_filename_suffix") != 0)
+    sprintf(filename, "%s-%s", filename, filename_suffix);
   printf("%s\n",filename);
 
   printf("------------------------------------------------------------------\n");
