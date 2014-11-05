@@ -1,4 +1,4 @@
-#!/usr/bin/pythonQ
+#!/usr/bin/python
 
 import sys
 
