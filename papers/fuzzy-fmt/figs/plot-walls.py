@@ -46,25 +46,19 @@ for kT in [0.0, 0.1, 0.01, 0.001, 0.0001]:
     for fname in glob.glob('figs/mcwalls-0.%02d00-%.4f*.dat' % (ff, kT)):
         print 'examining', fname
         d = numpy.loadtxt(fname)
-        d = smooth(d, 300)
+        #d = smooth(d, 300)
         pylab.plot(15-abs(d[:,0]), d[:,1]*(4*pi/3), styles.mc[kT], label=fname)
 
 names.append('DFT kT = 0')
 data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, ff*0.01)))
 lines.append(styles.dft[0])
 
-names.append('new kT = 0.1')
-data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.1)))
-lines.append(styles.new_dft_code[0.1])
-
-newdata = numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.01))
-names.append('new kT = 0.01')
-data.append(newdata)
-lines.append(styles.new_dft_code[0.01])
-
-names.append('new kT = 0.001')
-data.append(numpy.loadtxt("figs/new-data/wall-%04.2f-%08.5g.dat" % (ff*0.01, 0.001)))
-lines.append(styles.new_dft_code[0.001])
+for kT in [0.1, 0.2]:
+    # input: ["figs/new-data/wall-%04.2f-%04.2f.dat" % (ff*0.01, kT) for kT in [0.1, 0.2]]
+    names.append('new kT = %g' % kT)
+    fname = "figs/new-data/wall-%04.2f-%04.2f.dat" % (ff*0.01, kT)
+    data.append(numpy.loadtxt(fname))
+    lines.append(styles.new_dft_code[kT])
 
 for kT in [0.001, 0.01, 0.03]:
     # input: "figs/wallssoft-0.0010-%.2f.dat" % (ff*0.01)
@@ -85,8 +79,8 @@ for i in range(len(data)):
 pylab.title('Packing fraction = %f' % (ff/100.0))
 pylab.xlabel('$z/R$')
 pylab.ylabel('Local Filling Fraction')
-#pylab.legend(loc = 'best')
-pylab.xlim(-0.1, 15)
+pylab.legend(loc = 'best')
+#pylab.xlim(-0.1, 15)
 #pylab.ylim(.25, .6)
 pylab.savefig('figs/walls-%02d.pdf' % (ff))
 pylab.show()
