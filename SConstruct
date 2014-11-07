@@ -623,5 +623,5 @@ for test in Split(""" new-fftinverse functional-arithmetic surface-tension """):
 for test in Split(""" newcode """):
     env.BuildTest(test, newgeneric_sources)
 
-for test in Split(""" new-hard-spheres new-water-saft new-generated """):
+for test in Split(""" new-hard-spheres new-water-saft new-sfmt-walls new-generated """):
     env.BuildTest(test, generic_sources + newgeneric_sources + newgenerated_sources)
