@@ -62,7 +62,7 @@ void compare_functionals(double reduced_density, SFMTFluid *f, SFMTFluidVeff *fv
   took("Doing the finite difference tests");
 
   Minimize min(f);
-  const int max_iters = 200, min_iters = 9;
+  const int max_iters = 5000, min_iters = 9;
   min.set_relative_precision(0);
   min.set_maxiter(max_iters);
   min.set_miniter(min_iters);
@@ -73,7 +73,7 @@ void compare_functionals(double reduced_density, SFMTFluid *f, SFMTFluidVeff *fv
   }
   min.print_info();
 
-  Minimize minveff(f);
+  Minimize minveff(fveff);
   minveff.set_relative_precision(0);
   minveff.set_maxiter(max_iters);
   minveff.set_miniter(min_iters);
@@ -84,8 +84,13 @@ void compare_functionals(double reduced_density, SFMTFluid *f, SFMTFluidVeff *fv
   }
   minveff.print_info();
 
+  if (minveff.get_iteration_count() > 20) {
+    printf("preconditioned minimization took too many iterations: %d\n", minveff.get_iteration_count());
+    retval++;
+  }
+
   took("Doing the minimizations");
-  assert_same("f and veff minimum energies", f->energy(), fveff->energy());
+  assert_same("f and veff minimum energies", f->energy(), fveff->energy(), 1e-9);
 }
 
 int main(int argc, char **argv) {
@@ -148,6 +153,5 @@ int main(int argc, char **argv) {
 
   took("running test");
 
-  return 0; // FIXME this test fails!!!
   return retval;
 }
