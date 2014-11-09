@@ -39,12 +39,12 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_walls(double reduced_density, SFMTFluid *f, double kT) {
+void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
   min.set_maxiter(100);
   min.set_miniter(9);
-  min.precondition(false);
+  min.precondition(true);
   if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
 
   printf("========================================\n");
@@ -67,7 +67,7 @@ void run_walls(double reduced_density, SFMTFluid *f, double kT) {
   delete[] fname;
   const int Nz = f->Nz();
   Vector rz = f->get_rz();
-  Vector n = f->n();
+  Vector n = f->get_n();
   Vector n3 = f->get_n3();
   for (int i=0;i<Nz/2;i++) {
     fprintf(o, "%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0));
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
 
-  SFMTFluid f(dw, dw, width + spacing, dx);
+  SFMTFluidVeff f(dw, dw, width + spacing, dx);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
   f.kT() = hf.kT();
@@ -109,12 +109,12 @@ int main(int argc, char **argv) {
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
         f.Vext()[i] = 10*temp; // this is "infinity" for our wall
-        //f.Veff()[i] = 2*temp - temp*log(hf.n());
-        f.n()[i] = 0.01*hf.n();
+        f.Veff()[i] = -temp*log(0.01*hf.n());
+        //f.n()[i] = 0.01*hf.n();
       } else {
         f.Vext()[i] = 0;
-        //f.Veff()[i] = -temp*log(hf.n());
-        f.n()[i] = hf.n();
+        f.Veff()[i] = -temp*log(hf.n());
+        //f.n()[i] = hf.n();
       }
     }
   }
