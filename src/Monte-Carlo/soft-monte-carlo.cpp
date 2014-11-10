@@ -28,6 +28,7 @@ inline Vector3d fixPeriodic(Vector3d newv);
 
 double kT;
 double eps = 1;
+double rho = 1;
 bool has_x_wall = false;
 bool has_y_wall = false;
 bool has_z_wall = false;
@@ -39,13 +40,17 @@ double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
 const double R = 1;
+double R_wall = R;
+double R_T = R + R_wall;
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 bool WCA = false; //Uses a test particle with Lennard-Jones repulsion
+bool soft_wall = false;
 const double sigma = R*pow(2,5.0/6.0);
+double sig_wall = sigma;
 
 bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -121,6 +126,16 @@ int main(int argc, char *argv[]){
       lenz = atof(argv[a+1]);
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
+    } else if (strcmp(argv[a],"softwallz") == 0) {
+      has_z_wall = true;
+      flat_div = true; // we want flat divisions in the z directoin,
+                       // if we have a z wall.  In every other case we
+                       // use spherical divisions.
+      lenz = atof(argv[a+1]);
+      periodic[2] = false;
+      maxrad = max(maxrad, lenz);
+      soft_wall = true;
+      R_T = R + R_wall;
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else if (strcmp(argv[a],"potential") == 0){
@@ -542,6 +557,11 @@ inline double potential(double r) {
   return eps*sqr(1-r/(2*R));
 }
 
+inline double soft_wall_potential(double z) {
+  if (z >  (R_T + lenz/2) || z < -(R_T + lenz/2)) return 0;
+  return M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3)/18;
+}
+
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   double energyNew = 0.0;
   double energyOld = 0.0;
@@ -571,7 +591,8 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     fabs(spheres[s][2]) + 2*R >= lenz/2
   };
 
-  // Energy before potential move  
+  // Energy before potential move
+  if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
   for(long i = 0; i < n; i++){
     if (i != s) energyOld += potential(distance(spheres[i],spheres[s]));
   }
@@ -614,6 +635,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   // Energy after potential move
+  if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
   for(long i = 0; i < n; i++) {
     if (i != s) energyNew += potential(distance(spheres[i],v));
   }
@@ -671,7 +693,7 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
       fabs(spheres[s][1]) + 2*R >= leny/2,
       fabs(spheres[s][2]) + 2*R >= lenz/2
     };
-    
+    if (soft_wall) { potEnergy += soft_wall_potential(spheres[s][2]); }
     for(long i = s+1; i < n; i++){
       potEnergy += potential(distance(spheres[i],spheres[s]));
     }
