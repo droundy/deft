@@ -40,7 +40,7 @@ if exitStatus != 0:
     exit(exitStatus)
 
 for version in versions:
-    memory = N*N # fixme: better guess
+    memory = 20*N # fixme: better guess
     jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' %(ww, ff, N, version)
     basename = "%s/%s" %(jobdir, jobname)
     scriptname = basename + '.sh'
