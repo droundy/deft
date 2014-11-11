@@ -560,8 +560,12 @@ inline double potential(double r) {
 }
 
 inline double soft_wall_potential(double z) {
-  if (z >  (R_T + lenz/2) || z < -(R_T + lenz/2)) return 0;
-  z = fabs(z);
+  if (z < 0) {
+    z = lenz/2 + z;
+  } else {
+    z = lenz/2 - z;
+  }
+  if (z >  R_T) return 0;
   return M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3)/18;
 }
 
