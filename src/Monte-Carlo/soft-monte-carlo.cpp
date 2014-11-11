@@ -50,7 +50,7 @@ bool flat_div = false; //the divisions will be equal and will divide from z wall
 bool WCA = false; //Uses a test particle with Lennard-Jones repulsion
 bool soft_wall = false;
 const double sigma = R*pow(2,5.0/6.0);
-double sig_wall = sigma;
+double sig_wall = R_T*pow(2,-1.0/6.0);
 
 bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
@@ -132,10 +132,12 @@ int main(int argc, char *argv[]){
                        // if we have a z wall.  In every other case we
                        // use spherical divisions.
       lenz = atof(argv[a+1]);
+      R_wall = atof(argv[a+2]);
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
       soft_wall = true;
       R_T = R + R_wall;
+      sig_wall = R_T*pow(2,-1.0/6.0);
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else if (strcmp(argv[a],"potential") == 0){
@@ -559,6 +561,7 @@ inline double potential(double r) {
 
 inline double soft_wall_potential(double z) {
   if (z >  (R_T + lenz/2) || z < -(R_T + lenz/2)) return 0;
+  z = fabs(z);
   return M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3)/18;
 }
 
