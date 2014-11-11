@@ -43,5 +43,7 @@ pylab.xlabel('$z/R$')
 pylab.ylabel('reduced density')
 pylab.legend(loc = 'best')
 
+pylab.xlim(0, 5)
+
 pylab.savefig('figs/soft-walls-%02d.pdf' % (rho))
 pylab.show()

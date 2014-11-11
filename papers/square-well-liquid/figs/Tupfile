@@ -1,5 +1,0 @@
-include_rules
-
-: foreach *.py |> python -m compileall %f |> %B.pyc
-
-run ./mc-figs.py 1.3 0.3 20

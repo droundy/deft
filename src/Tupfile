@@ -1,9 +1,0 @@
-include_rules
-
-CXXFLAGS += -I../include
-
-run ./generate-functionals.py
-
-: foreach *.cpp |> !cxx |>
-
-: foreach *.cc |> !cxx |>
