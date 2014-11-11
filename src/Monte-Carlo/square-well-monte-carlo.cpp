@@ -670,9 +670,6 @@ int main(int argc, const char *argv[]) {
   delete[] w_fname;
   delete[] rt_fname;
 
-  delete[] sw.seeking_energy;
-  delete[] sw.round_trips;
-
   // Now let's iterate to the point where we are at maximum
   // probability before we do the real simulation.
   sw.initialize_max_entropy_and_translation_distance();
@@ -828,9 +825,20 @@ int main(int argc, const char *argv[]) {
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
 
+  for (int i=0; i<sw.N; i++) {
+    delete[] sw.balls[i].neighbors;
+  }
   delete[] sw.balls;
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
+
+  delete[] sw.seeking_energy;
+  delete[] sw.round_trips;
+
+  for (int i = 0; i < sw.energy_levels; i++) {
+    delete[] density_histogram[i];
+    delete[] g_histogram[i];
+  }
   delete[] g_histogram;
   delete[] density_histogram;
 

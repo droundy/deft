@@ -5,7 +5,7 @@
 ball::ball(){
   pos = vector3d();
   R = 1;
-  neighbors = new int[0];
+  neighbors = 0;
   num_neighbors = 0;
   neighbor_center = vector3d();
 }
@@ -388,6 +388,7 @@ void sw_simulation::move_a_ball() {
       // We want to reject this move because it is too improbable
       // based on our weights.
       moves.new_count = moves.old_count; // undo the energy change
+      if (get_new_neighbors) delete[] temp.neighbors;
       return;
     }
   }
