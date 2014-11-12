@@ -537,6 +537,9 @@ env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
+                      ### HOKEY BELOW
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-1.00.dat',
+                      ### HOKEY ABOVE
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat'],
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
