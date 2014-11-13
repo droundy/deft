@@ -115,7 +115,7 @@ int main(int argc, const char *argv[]) {
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
-  double ff = 0.3;
+  double ff = 0.0;
   double neighbor_scale = 2;
   double de_density = 0.1;
   double de_g = 0.05;
@@ -239,9 +239,41 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  // Adjust cell dimensions for desired filling fraction
-  const double fac = R*pow(4.0/3.0*M_PI*sw.N/(ff*sw.len[x]*sw.len[y]*sw.len[z]), 1.0/3.0);
-  for(int i = 0; i < 3; i++) sw.len[i] *= fac;
+
+  if (ff != 0) {
+    // The user specified a filling fraction, so we must make it so!
+    const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+    const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
+    const int numcells = (sw.N+3)/4; // number of unit cells we need
+    const int max_cubic_width = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
+    if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
+      // We can get away with a cubic cell, so let's do so.  Cubic
+      // cells are nice and comfortable!
+      sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
+    } else {
+      // A cubic cell won't work with our initialization routine, so
+      // let's go with a lopsided cell that should give us something
+      // that will work.
+      int xcells = int( pow(numcells, 1.0/3) );
+      int cellsleft = (numcells + xcells - 1)/xcells;
+      int ycells = int( sqrt(cellsleft) );
+      int zcells = (cellsleft + ycells - 1)/ycells;
+
+      // The above should give a zcells that is largest, followed by
+      // ycells and then xcells.  Thus we make the lenz just small
+      // enough to fit these cells, and so on, to make the cell as
+      // close to cubic as possible.
+      sw.len[z] = zcells*min_cell_width;
+      if (xcells == ycells) {
+        sw.len[x] = sw.len[y] = sqrt(volume/sw.len[z]);
+      } else {
+        sw.len[y] = min_cell_width*ycells;
+        sw.len[x] = volume/sw.len[y]/sw.len[z];
+      }
+      printf("Using lopsided %d x %d x %d cell (total goal %d)\n", xcells, ycells, zcells, numcells);
+    }
+  }
+
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || initialization_iterations < 0 || simulation_iterations < 0 || R <= 0 ||
@@ -378,37 +410,23 @@ int main(int argc, const char *argv[]) {
   // Balls will be initially placed on a face centered cubic (fcc) grid
   // Note that the unit cells need not be actually "cubic", but the fcc grid will
   //   be stretched to cell dimensions
-  const float min_cell_width = 2*sqrt(2)*R; // minimum cell width
+  const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
   const int spots_per_cell = 4; // spots in each fcc periodic unit cell
-  const int min_cell_count = ceil(sw.N/spots_per_cell); // minimum number of cells
   int cells[3]; // array to contain number of cells in x, y, and z dimensions
   for(int i = 0; i < 3; i++){
-    cells[i] = ceil(pow(min_cell_count*sw.len[i]*sw.len[i]
-                        /(sw.len[(i+1)%3]*sw.len[(i+2)%3]),1.0/3.0));
+    cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
   }
 
   // It is usefull to know our cell dimensions
   double cell_width[3];
   for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
 
-  // Increase number of cells until all balls can be accomodated
-  int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
-  int i = 0;
-  while(total_spots < sw.N) {
-    if(cell_width[i%3] >= cell_width[(i+1)%3] &&
-       cell_width[i%3] >= cell_width[(i+2)%3]) {
-      cells[i%3] += 1;
-      cell_width[i%3] = sw.len[i%3]/cells[i%3];
-      total_spots += spots_per_cell*cells[(i+1)%3]*cells[(i+2)%3];
-    }
-    i++;
-  }
-
   // If we made our cells to small, return with error
   for(int i = 0; i < 3; i++){
     if(cell_width[i] < min_cell_width){
-      printf("Placement cell size too small: (%g,  %g,  %g,)\n",
-             cell_width[0],cell_width[1],cell_width[2]);
+      printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
+             cell_width[0],cell_width[1],cell_width[2],
+             sw.len[0], sw.len[1], sw.len[2]);
       printf("Minimum allowed placement cell width: %g\n",min_cell_width);
       printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
              sw.len[0],sw.len[1],sw.len[2]);
@@ -425,6 +443,7 @@ int main(int argc, const char *argv[]) {
   offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
 
   // Reserve some spots at random to be vacant
+  const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
   bool *spot_reserved = new bool[total_spots]();
   int p; // Index of reserved spot
   for(int i = 0; i < total_spots-sw.N; i++) {
