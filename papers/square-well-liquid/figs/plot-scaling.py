@@ -19,7 +19,7 @@ ff = float(sys.argv[2])
 versions = eval(sys.argv[3])
 #arg versions = [["nw", "wang_landau", "gaussian", "flat", "walkers", "kT2", "kT1"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions for N in [20]]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions for N in [5,6,7]]
 
 # input: "data/periodic-ww*-ff*-N*-*-rt.dat"
 
