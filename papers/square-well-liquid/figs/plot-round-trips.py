@@ -44,7 +44,7 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rt.pdf" % (ww*100, ff*100, N))
 
 plt.figure() # count rate figure
 
-plt.title('Round trips per iteration for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Iterations per round trip for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 for version in versions:
     data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version)
     file_handle = open(data_file)
@@ -60,11 +60,11 @@ for version in versions:
     energy = energy[round_trips != 0]
     round_trips = round_trips[round_trips != 0]
     if sum(round_trips) > 0:
-        plt.semilogy(energy, round_trips/iterations, styles.dots[version],
+        plt.semilogy(energy, iterations/round_trips, styles.dots[version],
                      label=styles.title[version])
 
 plt.xlabel('$U/N\epsilon$')
-plt.ylabel('Round trips per iteration')
+plt.ylabel('Iterations per round trip')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rt-rate.pdf" % (ww*100, ff*100, N))

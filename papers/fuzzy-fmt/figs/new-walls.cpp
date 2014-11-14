@@ -102,19 +102,16 @@ int main(int argc, char **argv) {
   //f.Veff() = 0;
   f.mu() = hf.mu();
   f.Vext() = 0;
+  f.Veff() = -temp*log(hf.n());
 
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
-        f.Vext()[i] = 10*temp; // this is "infinity" for our wall
-        f.Veff()[i] = -temp*log(0.01*hf.n());
-        //f.n()[i] = 0.01*hf.n();
+        f.Vext()[i] = -temp*log(1e-4); // this is "infinity" for our wall
       } else {
         f.Vext()[i] = 0;
-        f.Veff()[i] = -temp*log(hf.n());
-        //f.n()[i] = hf.n();
       }
     }
   }
