@@ -29,8 +29,6 @@ def smooth(x, N):
     x = x[:n,:]
     y = numpy.zeros_like(x[0::N,:])
     for i in range(N):
-        print 'y shape', y.shape
-        print 'x[i::N,:] shape', x[i::N, :].shape
         y += x[i::N, :]
     return y/N
 
@@ -46,12 +44,12 @@ for kT in [0.2, 0.5, 1.0]:
     for fname in glob.glob('figs/mcwalls-%.4f-%.4f*.dat' % (n_reduced, kT)):
         print 'examining', fname
         d = numpy.loadtxt(fname)
-        #d = smooth(d, 300)
+        d = smooth(d, 10)
         pylab.plot(15-abs(d[:,0]), d[:,1]/2.0**(-5.0/2.0), styles.mc[kT], label=fname)
 
-names.append('DFT kT = 0')
-data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, n_reduced)))
-lines.append(styles.dft[0])
+# names.append('DFT kT = 0')
+# data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, n_reduced)))
+# lines.append(styles.dft[0])
 
 for kT in [0.2, 0.5, 1.0]:
     # input: ["figs/new-data/wall-%04.2f-%04.2f.dat" % (n_reduced, kT) for kT in [0.2, 0.5, 1.0]]
@@ -60,18 +58,20 @@ for kT in [0.2, 0.5, 1.0]:
     data.append(numpy.loadtxt(fname))
     lines.append(styles.new_dft_code[kT])
 
-for kT in [0.001, 0.01, 0.03]:
-    # input: "figs/wallssoft-0.0010-%.2f.dat" % (n_reduced)
-    # input: "figs/wallssoft-0.0100-%.2f.dat" % (n_reduced)
-    # input: "figs/wallssoft-0.0300-%.2f.dat" % (n_reduced)
-    fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, n_reduced)
-    if os.path.exists(fname):
-        names.append('DFT kT = %4.2f' % kT)
-        data.append(numpy.loadtxt(fname))
-        lines.append(styles.dft[kT])
-        print 'found', fname
-    else:
-        print fname, 'does not exist'
+# for kT in [0.001, 0.01, 0.03]:
+#     # input: "figs/wallssoft-0.0010-%.2f.dat" % (n_reduced)
+#     # input: "figs/wallssoft-0.0100-%.2f.dat" % (n_reduced)
+#     # input: "figs/wallssoft-0.0300-%.2f.dat" % (n_reduced)
+#     fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, n_reduced)
+#     if os.path.exists(fname):
+#         names.append('DFT kT = %4.2f' % kT)
+#         data.append(numpy.loadtxt(fname))
+#         lines.append(styles.dft[kT])
+#         print 'found', fname
+#     else:
+#         print fname, 'does not exist'
+
+
 for i in range(len(data)):
     print 'plotting', names[i]
     pylab.plot(data[i][:,0], data[i][:,1], lines[i], label=names[i])
