@@ -24,36 +24,15 @@ versions = eval(sys.argv[4])
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions]
 
-plt.title('Round trips for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
-for version in versions:
-    data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version))
-    energy = -data[:,0]/N
-    round_trips = data[:,1]
-    energy = energy[round_trips != 0]
-    round_trips = round_trips[round_trips != 0]
-    if sum(round_trips) > 0:
-        plt.semilogy(energy, round_trips, styles.dots[version], label=styles.title[version])
-
-plt.xlabel('$U/N\epsilon$')
-plt.ylabel('Round trips')
-plt.legend(loc='best').get_frame().set_alpha(0.25)
-plt.tight_layout(pad=0.2)
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rt.pdf" % (ww*100, ff*100, N))
-
-
-plt.figure() # count rate figure
-
 plt.title('Iterations per round trip for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 for version in versions:
     data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version)
-    file_handle = open(data_file)
-    for line in file_handle:
-        entries = line.split()
-        if 'iterations:' in entries:
-            iterations = int(entries[entries.index('iterations:')+1].replace(',',''))
-            continue
-    file_handle.close()
+    with open(data_file,'r') as file_handle:
+        for line in file_handle:
+            entries = line.split()
+            if 'iterations:' in entries:
+                iterations = int(entries[entries.index('iterations:')+1].replace(',',''))
+                continue
     data = numpy.loadtxt(data_file)
     energy = -data[:,0]/N
     round_trips = data[:,1]

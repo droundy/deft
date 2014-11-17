@@ -681,19 +681,6 @@ int main(int argc, const char *argv[]) {
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
 
-  // Save round trip counts
-  FILE *rt_out = fopen(rt_fname, "w");
-  if (!rt_out) {
-    fprintf(stderr, "Unable to create %s!\n", rt_fname);
-    exit(1);
-  }
-  fprintf(rt_out, "%s", headerinfo);
-  fprintf(rt_out, "%s", countinfo);
-  fprintf(rt_out, "# interactions\tround trips\n");
-  for(int i = 0; i < sw.energy_levels; i++)
-    fprintf(rt_out, "%i  %li\n", i, sw.round_trips[i]);
-  fclose(rt_out);
-
   delete[] countinfo;
 
   // Now let's iterate to the point where we are at maximum
@@ -715,9 +702,11 @@ int main(int argc, const char *argv[]) {
   sw.moves.working = 0;
   sw.iteration = 0;
 
-  // Reset energy histogram
-  for(int i = 0; i < sw.energy_levels; i++)
+  // Reset energy histogram and round trip counts
+  for(int i = 0; i < sw.energy_levels; i++){
     sw.energy_histogram[i] = 0;
+    sw.round_trips[i] = 0;
+  }
 
   while(sw.iteration <= simulation_iterations) {
     // ---------------------------------------------------------------
@@ -775,7 +764,7 @@ int main(int argc, const char *argv[]) {
 
       char *countinfo = new char[4096];
       sprintf(countinfo,
-              "# iteration: %li\n"
+              "# iterations: %li\n"
               "# working moves: %li\n"
               "# total moves: %li\n"
               "# acceptance rate: %g\n\n",
@@ -792,6 +781,19 @@ int main(int argc, const char *argv[]) {
           fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
       }
       fclose(e_out);
+
+      // Save round trip counts
+      FILE *rt_out = fopen(rt_fname, "w");
+      if (!rt_out) {
+        fprintf(stderr, "Unable to create %s!\n", rt_fname);
+        exit(1);
+      }
+      fprintf(rt_out, "%s", headerinfo);
+      fprintf(rt_out, "%s", countinfo);
+      fprintf(rt_out, "# interactions\tround trips\n");
+      for(int i = 0; i < sw.energy_levels; i++)
+        fprintf(rt_out, "%i  %li\n", i, sw.round_trips[i]);
+      fclose(rt_out);
 
       // Save RDF
       if(!sw.walls){
