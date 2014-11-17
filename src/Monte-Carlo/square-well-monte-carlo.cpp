@@ -93,6 +93,7 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
+  double gaussian_cutoff = 0.25;
 
   sw_simulation sw;
 
@@ -104,8 +105,8 @@ int main(int argc, const char *argv[]) {
   int wall_dim = 1;
   unsigned long int seed = 0;
 
-  char *dir = new char[1024];
-  sprintf(dir, "papers/square-well-liquid/data");
+  char *data_dir = new char[1024];
+  sprintf(data_dir, "papers/square-well-liquid/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
@@ -161,8 +162,8 @@ int main(int argc, const char *argv[]) {
      "Base of output file names", "STRING"},
     {"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &filename_suffix, 0, "Output file name suffix", "STRING"},
-    {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &dir, 0,
-     "Save directory", "dir"},
+    {"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
+     "Directory in which to save data", "data_dir"},
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
@@ -549,7 +550,7 @@ int main(int argc, const char *argv[]) {
       printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
              width, range, width/range);
       printf("***\n");
-    } while (width < 0.25*range);
+    } while (width < gaussian_cutoff*range);
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
@@ -620,32 +621,39 @@ int main(int argc, const char *argv[]) {
   // Generate info to put in save files
   // ----------------------------------------------------------------------------
 
-  mkdir(dir, 0777); // create save directory
+  mkdir(data_dir, 0777); // create save directory
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
-          "# cell dimensions: (%5.2f, %5.2f, %5.2f), walls: %i,"
-          " de_density: %g, de_g: %g\n# seed: %li, N: %i, R: %f,"
-          " well_width: %g, translation_distance: %g\n"
-          "# neighbor_scale: %g, dr: %g, energy_levels: %i\n",
+          "# cell dimensions: (%g, %g, %g)\n"
+          "# walls: %i\n"
+          "# de_density: %g\n"
+          "# de_g: %g\n"
+          "# seed: %li\n"
+          "# N: %i\n"
+          "# R: %f\n"
+          "# well_width: %g\n"
+          "# translation_distance: %g\n"
+          "# neighbor_scale: %g\n"
+          "# dr: %g\n"
+          "# energy_levels: %i\n\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_distance,
-          neighbor_scale, sw.dr, sw.energy_levels);
+          well_width, sw.translation_distance, neighbor_scale, sw.dr, sw.energy_levels);
 
   char *e_fname = new char[1024];
-  sprintf(e_fname, "%s/%s-E.dat", dir, filename);
+  sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);
 
   char *w_fname = new char[1024];
-  sprintf(w_fname, "%s/%s-lnw.dat", dir, filename);
+  sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
 
   char *rt_fname = new char[1024];
-  sprintf(rt_fname, "%s/%s-rt.dat", dir, filename);
+  sprintf(rt_fname, "%s/%s-rt.dat", data_dir, filename);
 
   char *density_fname = new char[1024];
-  sprintf(density_fname, "%s/%s-density.dat", dir, filename);
+  sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
 
   char *g_fname = new char[1024];
-  sprintf(g_fname, "%s/%s-g.dat", dir, filename);
+  sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
 
   // ----------------------------------------------------------------------------
   // Print initialization info
@@ -653,8 +661,10 @@ int main(int argc, const char *argv[]) {
 
   char *countinfo = new char[4096];
   sprintf(countinfo,
-          "# iterations: %li, working moves: %li, total moves: %li, "
-          "acceptance rate: %g\n",
+          "# iterations: %li\n"
+          "# working moves: %li\n"
+          "# total moves: %li\n"
+          "# acceptance rate: %g\n\n",
           sw.iteration, sw.moves.working, sw.moves.total,
           double(sw.moves.working)/sw.moves.total);
 
@@ -666,7 +676,7 @@ int main(int argc, const char *argv[]) {
   }
   fprintf(w_out, "%s", headerinfo);
   fprintf(w_out, "%s", countinfo);
-  fprintf(w_out, "\n# interactions   ln(weight)\n");
+  fprintf(w_out, "# interactions\tln(weight)\n");
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
@@ -679,15 +689,12 @@ int main(int argc, const char *argv[]) {
   }
   fprintf(rt_out, "%s", headerinfo);
   fprintf(rt_out, "%s", countinfo);
-  fprintf(rt_out, "\n# interactions   round trips\n");
+  fprintf(rt_out, "# interactions\tround trips\n");
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(rt_out, "%i  %li\n", i, sw.round_trips[i]);
   fclose(rt_out);
 
   delete[] countinfo;
-
-  delete[] w_fname;
-  delete[] rt_fname;
 
   // Now let's iterate to the point where we are at maximum
   // probability before we do the real simulation.
@@ -768,8 +775,10 @@ int main(int argc, const char *argv[]) {
 
       char *countinfo = new char[4096];
       sprintf(countinfo,
-              "# iteration: %li, working moves: %li, total moves: %li, "
-              "acceptance rate: %g\n",
+              "# iteration: %li\n"
+              "# working moves: %li\n"
+              "# total moves: %li\n"
+              "# acceptance rate: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
 
@@ -777,7 +786,7 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "\n# interactions   counts\n");
+      fprintf(e_out, "# interactions   counts\n");
       for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
           fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
@@ -789,11 +798,12 @@ int main(int argc, const char *argv[]) {
         FILE *g_out = fopen((const char *)g_fname, "w");
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
-        fprintf(g_out, "\n# data table containing values of g");
-        fprintf(g_out, "\n# first column reserved for specifying energy level");
-        fprintf(g_out, "\n# column number rn (starting from the second column, "
+        fprintf(g_out, "# data table containing values of g "
+                "(i.e. radial distribution function)\n"
+                "# first column reserved for specifying energy level\n"
+                "# column number r_n (starting from the second column, "
                 "counting from zero) corresponds to radius r given by "
-                "r = (rn + 0.5) * de_g");
+                "r = (r_n + 0.5) * de_g\n");
         const double density = sw.N/sw.len[x]/sw.len[y]/sw.len[z];
         const double total_vol = sw.len[x]*sw.len[y]*sw.len[z];
         for(int i = 0; i < sw.energy_levels; i++){
@@ -851,6 +861,9 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
+  delete[] sw.walkers_up;
+  delete[] sw.walkers_total;
+
   delete[] sw.seeking_energy;
   delete[] sw.round_trips;
 
@@ -860,8 +873,19 @@ int main(int argc, const char *argv[]) {
   }
   delete[] g_histogram;
   delete[] density_histogram;
+  delete[] g_energy_histogram;
 
   delete[] headerinfo;
+  delete[] e_fname;
+  delete[] w_fname;
+  delete[] rt_fname;
+  delete[] density_fname;
+  delete[] g_fname;
+
+  delete[] data_dir;
+  delete[] filename;
+  delete[] filename_suffix;
+
   return 0;
 }
 // ------------------------------------------------------------------------------
