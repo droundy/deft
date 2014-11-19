@@ -47,7 +47,7 @@ Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
-bool WCA = false; //Uses a test particle with Lennard-Jones repulsion
+bool WCA = true; //Defaults to a test particle with Lennard-Jones repulsion
 bool soft_wall = false;
 const double sigma = R*pow(2,5.0/6.0);
 double sig_wall = R_T*pow(2,-1.0/6.0);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]){
         WCA = true;
         printf("Using Weeks-Chandler-Andersen potential\n");
       } else {
-        printf("Using quadratic potential\n");
+        printf("Using Weeks-Chandler-Andersen potential by default\n");
       }
     } else {
       printf("Bad argument:  %s\n", argv[a]);
@@ -555,8 +555,7 @@ inline double sqr(double x) {
 inline double potential(double r) {
   if (r >= 2*R) return 0;
   //eps is defined to give the same curvature at r=2R for both potentials
-  if (WCA) return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36;
-  return eps*sqr(1-r/(2*R));
+  return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36;
 }
 
 inline double soft_wall_potential(double z) {
@@ -776,8 +775,7 @@ Vector3d move(Vector3d v,double scale){
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
   //these forces are negative for repulsive forces. no particular reason
-  if (WCA) return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6))/36; 
-  return (-2*eps/(2*R))*(1-rij/(2*R))*rij;
+  return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6))/36;
 }
 
 double calcPressure(Vector3d *spheres, long N, double volume){
