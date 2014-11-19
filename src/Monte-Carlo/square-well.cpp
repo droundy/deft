@@ -247,19 +247,6 @@ void flush_arrays(long *energy_histogram, double *ln_energy_weights,
   return;
 }
 
-void flat_hist(long *energy_histogram, double *ln_energy_weights,
-               int energy_levels){
-  int max_entropy =
-    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-  for (int i = max_entropy; i < energy_levels; i++) {
-    ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
-                                energy_histogram[i] : 0.01);
-  }
-  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
-
-  return;
-}
-
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_up,
                  long *walkers_total, move_info *moves){

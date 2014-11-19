@@ -4,6 +4,7 @@ color = { 'nw': 'r',
           'kT0.1': 'g',
           'flat': 'k',
           'wang_landau': 'g',
+          'robustly-optimistic': 'r',
           'gaussian': 'm',
           'walkers': 'y'}
 
@@ -13,6 +14,7 @@ line = { 'nw': '--',
          'kT0.1': '-.',
          'flat': '-',
          'wang_landau': '-',
+         'robustly-optimistic': '-',
          'gaussian': '-',
          'walkers': '-'}
 
@@ -22,6 +24,7 @@ title = { 'nw': '$kT/\epsilon = \infty$ sim.',
           'kT0.1': '$kT/\epsilon = 0.1$ sim.',
           'flat': 'flat histogram',
           'wang_landau': 'Wang-Landau',
+          'robustly-optimistic': 'robustly optimistic',
           'gaussian': 'gaussian method',
           'walkers': 'walker optimization'}
 
@@ -32,5 +35,5 @@ for k in color:
 dots = {}
 for k in color:
     dots[k] = color[k] + '.'
-    if k == 'wang_landau':
+    if k in ['wang_landau', 'robustly-optimistic']:
         dots[k] = color[k] + '+'
