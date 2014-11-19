@@ -191,9 +191,6 @@ int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
                   int energy_levels, bool flush_weights);
 
-void flat_hist(long *energy_histogram, double *ln_energy_weights,
-               int energy_levels);
-
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_up, long *walkers_total,
                  move_info *moves);
