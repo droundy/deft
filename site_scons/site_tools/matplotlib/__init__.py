@@ -58,6 +58,7 @@ def runpython(env, pyfile, args, inputs, outputs, py_chdir):
 import_re = re.compile(r"^import\s+(\w+)", re.M)
 
 fixed_open = re.compile(r"=\s*open\(['\"]([^'\"]*)['\"]\s*,\s*['\"]w['\"]\s*\)")
+open_changing_output = re.compile(r"open\(['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*,\s*['\"]w['\"]\s*\)")
 fixed_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"](\s*,[\w\s=]+)*\)")
 changing_output = re.compile(r"savefig\(['\"]([^'\"]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
@@ -96,7 +97,7 @@ def Matplotlib(env, source, py_chdir = ""):
     outputs += fixed_open.findall(contents) # add any files created with open(...)
     argvals = arguments.findall(contents)
     if len(argvals) > 0:
-        coutputs = changing_output.findall(contents)
+        coutputs = changing_output.findall(contents) + open_changing_output.findall(contents)
         list_inputs = list_comprehension_input.findall(contents)
         cinputs = changing_input.findall(contents)
         cinputs += changing_loadtxt.findall(contents)

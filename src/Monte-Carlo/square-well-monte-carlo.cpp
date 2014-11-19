@@ -84,6 +84,7 @@ int main(int argc, const char *argv[]) {
 
   int no_weights = false;
   double fix_kT = 0;
+  int robustly_optimistic = false;
   int flat_histogram = false;
   int gaussian_fit = false;
   int walker_weights = false;
@@ -178,6 +179,8 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
+    {"robustly-optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
+     "Use the robustly optimistic histogram method", "BOOLEAN"},
     {"flat", '\0', POPT_ARG_NONE, &flat_histogram, 0,
      "Use a flat histogram method", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
@@ -221,7 +224,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // check that only one method is used
-  if(bool(no_weights) + bool(flat_histogram) + bool(gaussian_fit)
+  if(bool(no_weights) + robustly_optimistic + bool(flat_histogram) + bool(gaussian_fit)
      + bool(wang_landau) + bool(walker_weights) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!");
     return 254;
@@ -294,8 +297,8 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *method_tag = new char[20];
-    char *wall_tag = new char[10];
+    char *method_tag = new char[200];
+    char *wall_tag = new char[100];
     if(sw.walls == 0) sprintf(wall_tag,"periodic");
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
@@ -304,6 +307,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (no_weights) {
       sprintf(method_tag, "-nw");
+    } else if (robustly_optimistic) {
+      sprintf(method_tag, "-robustly-optimistic");
     } else if (flat_histogram) {
       sprintf(method_tag, "-flat");
     } else if (gaussian_fit) {
@@ -533,6 +538,64 @@ int main(int argc, const char *argv[]) {
 
   if (gaussian_fit) {
     sw.initialize_gaussian(10);
+  } else if (robustly_optimistic) {
+    printf("I am robustly optimistically trying to initialize.\n");
+    bool done;
+    double mean_hist = 0;
+    do {
+      done = true; // Let's be optimistic!
+      // First, let's reset our weights based on what we already know!
+      int minE = 0;
+      for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
+        if (sw.energy_histogram[e]) {
+          sw.ln_energy_weights[e] -= log(sw.energy_histogram[e]);
+          minE = e;
+        }
+      }
+      // double slope = (sw.ln_energy_weights[minE] - sw.ln_energy_weights[minE-5])/5.0; // very hokey
+      // if (slope > 0) {
+      for (int e=minE+1; e < sw.energy_levels; e++) {
+        sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
+        // For lower energies, let's try a linear extrapolation in log space.
+        // sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + slope*(e - minE);
+      }
+      // }
+      for (int e=0; e < sw.state_of_max_entropy; e++) {
+        sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.state_of_max_entropy];
+      }
+      // Now reset the calculation!
+      for (int e=0; e < sw.energy_levels; e++) {
+        if (sw.energy_histogram[e] > 0) sw.energy_histogram[e] = 1;
+        else sw.energy_histogram[e] = 0;
+        sw.round_trips[e] = 0;
+        sw.seeking_energy[e] = false; // ???
+      }
+
+      // Now let's run a while to see if we can find another answer.
+      int iter = 0;
+      for (int i=0;i<simulation_iterations/sw.N/sw.N && done;i++) {
+        for (int j=0;j<sw.N*sw.N;j++) {
+          sw.move_a_ball();
+          iter++;
+        }
+        long tot_hist = 0, tot_counts = 0;
+        for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
+          if (sw.energy_histogram[e]) {
+            tot_hist += sw.energy_histogram[e];
+            tot_counts += 1;
+          }
+        }
+        mean_hist = tot_hist/double(tot_counts);
+        for (int e=sw.state_of_max_entropy+1; e<sw.energy_levels; e++) {
+          if (sw.round_trips[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
+            printf("After %d iterations, at energy %d hist = %ld vs %g.\n", iter, e, sw.energy_histogram[e], mean_hist);
+            done = false;
+            break;
+          }
+        }
+      }
+    } while (!done);
+    printf("All done initializing robustly.\n");
   } else if (flat_histogram) {
     {
       sw.initialize_gaussian(log(1e40));
