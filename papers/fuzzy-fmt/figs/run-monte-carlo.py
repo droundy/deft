@@ -16,7 +16,7 @@ def run_homogeneous(n_reduced, temperature, pot = ""):
     nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
     #width = (nspheres/density)**(1.0/3) # to get density just right!
     filename = '%s/mc%s-%.4f-%.4f' % (figsdir, pot, n_reduced, temperature)
-    system("srun -p lomem --mem=60 -J soft-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxyz 30 kT %g potential '%s' > %s.out 2>&1 &" %
+    system("srun  --mem=60 -J soft-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxyz 30 kT %g potential '%s' > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, filename))
 
 def run_walls(n_reduced, nspheres, temperature):
@@ -41,14 +41,14 @@ def run_walls(n_reduced, nspheres, temperature):
 # run_walls(0.7, 0, 0.1)
 # run_walls(0.8, 0, 0.1)
 
-for reduced_density in [0.1, 0.2, 0.3, 0.4, 0.5,]:
-    for temp in [0.001, 0.01, 0.1, 1.0]:
-        run_homogeneous(reduced_density, temp, "ljr")
+for reduced_density in [0.7, 0.8, 0.9]:
+    for temp in [10]:
+        run_homogeneous(reduced_density, temp, "wca")
 
-# run_homogeneous(0.1, 0.0001)
-# run_homogeneous(0.2, 0.0001)
-# run_homogeneous(0.3, 0.0001)
-# run_homogeneous(0.4, 0.0001)
+#run_homogeneous(0.83890, 0.71) #fig 11
+#run_homogeneous(0.957,2.48)    #fig 12
+#run_homogeneous(01.095, 2.48)  #fig 13
+#run_homogeneous(.5844,1.235)   #fig 14
 # run_homogeneous(0.5, 0.0001)
 # run_homogeneous(0.6, 0.0001)
 # run_homogeneous(0.7, 0.0001)

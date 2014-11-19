@@ -38,7 +38,7 @@ int main(int, char **) {
     fprintf(out, "\t%g", temps[i]);
   }
   fprintf(out, "\n");
-  for (double eta = 0.001; eta <= 0.5; eta *= 1.001) {
+  for (double eta = 0.001; eta <= 0.7; eta *= 1.001) {
     fprintf(out, "%g", eta);
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
