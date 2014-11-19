@@ -247,19 +247,6 @@ void flush_arrays(long *energy_histogram, double *ln_energy_weights,
   return;
 }
 
-void flat_hist(long *energy_histogram, double *ln_energy_weights,
-               int energy_levels){
-  int max_entropy =
-    max_entropy_index(energy_histogram, ln_energy_weights, energy_levels);
-  for (int i = max_entropy; i < energy_levels; i++) {
-    ln_energy_weights[i] -= log(energy_histogram[i] > 0 ?
-                                energy_histogram[i] : 0.01);
-  }
-  flush_arrays(energy_histogram, ln_energy_weights, energy_levels);
-
-  return;
-}
-
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_up,
                  long *walkers_total, move_info *moves){
@@ -413,23 +400,21 @@ void sw_simulation::move_a_ball() {
   update_state_search_info();
 }
 
-void sw_simulation::update_state_search_info() {
+void sw_simulation::update_state_search_info(){
   // update round trip observations
   if(interactions <= state_of_max_entropy){
     for(int i = state_of_max_entropy; i < energy_levels; i++)
       seeking_energy[i] = true;
   }
-  else if(seeking_energy[interactions]) {
+  else if(seeking_energy[interactions]){
     seeking_energy[interactions] = false;
     round_trips[interactions]++;
   }
   // update walker counts
   if(interactions > max_observed_interactions){
-    if(interactions > max_observed_interactions) {
-      max_observed_interactions = interactions;
-      for(int i = state_of_max_entropy; i < energy_levels; i++)
-        walkers_up[i] = 0;
-    }
+    max_observed_interactions = interactions;
+    for(int i = state_of_max_entropy; i < energy_levels; i++)
+      walkers_up[i] = 0;
   }
   if(!seeking_energy[max_observed_interactions])
     walkers_up[interactions]++;

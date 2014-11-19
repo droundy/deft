@@ -337,13 +337,13 @@ Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
 for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
-        for N in [5, 20, 60, 100, 200]:
+        for N in [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, 60, 100, 200]:
             for method in ["nw","flat","gaussian","wang_landau","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)
                                       for postfix in ['E', 'lnw', 'rt', 'g']],
                             source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 10000' % (method, N, ff, ww))
+                            action = './square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 100000' % (method, N, ff, ww))
 
 # #################### talks ##################################################
 
@@ -537,6 +537,9 @@ env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
+                      ### HOKEY BELOW
+                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-1.00.dat',
+                      ### HOKEY ABOVE
                       'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat'],
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
                       #'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',

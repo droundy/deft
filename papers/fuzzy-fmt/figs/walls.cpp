@@ -182,7 +182,7 @@ int main(int, char **) {
   const double rad = 1; //radius of our spheres
   const double sigma = rad*pow(2,5.0/6.0);
   const double temps[] = { 0.03, 0.01, 0.001, 0.0 };
-  for (double n_reduced = 0.4; n_reduced >= 0.05; n_reduced-=0.1) {
+  for (double n_reduced = 1.5; n_reduced >= 0.05; n_reduced-=0.1) {
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
       const double temp = temps[i];
       Functional f = HardRosenfeldFluid(rad,0);
