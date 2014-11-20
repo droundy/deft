@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
     printf("%s ", argv[i]);
   }
   printf("\n");
-
+  WCA = true;
   double maxrad = 0;
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]){
   lat[2] = latz;
   double volume = lenx*leny*lenz;
   if (spherical_inner_wall){
-    volume = (4*M_PI*(1/3))*(rad*rad*rad)-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad);
+    volume = lenx*leny*lenz-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad);
     //Possible error in these volume calculations.  With
     //spherical_inner_wall: volume should be
     //lenx*leny*lenz-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad) -Sam

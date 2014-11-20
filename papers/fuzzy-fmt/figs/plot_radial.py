@@ -17,10 +17,10 @@ if len(sys.argv) != 3:
     exit(1)
 
 reduced_density = float(sys.argv[1])
-#arg reduced_density = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+#reduced_density = [.3, .1,.2]
 
 all_temperatures = eval(sys.argv[2])
-#arg all_temperatures = [[1.0, 0.1, 0.01, 0.001]]
+#all_temperatures = [[4,4,1]]
 
 print 'all_temperatures are', all_temperatures
 
@@ -49,7 +49,36 @@ mysymbol_names = []
 mysymbol_lines = []
 
 mylines = []
+# for temp in all_temperatures:
+#   # input: ['figs/mc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
+#   fname = 'figs/mc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
+#   if os.path.exists(fname):
+#     print 'found', fname
+#     g = loadtxt(fname)
+#     line = plot(g[:,0], g[:,1], styles.mc[temp])#, label='harmonic MC $kT/V_{max}$ = %g' % temp)
+#     #xlim(xmax=floor(max(g[:,0])))
+#     xlim(xmax=8)
+#     if temp == all_temperatures[-1]:
+#         mysymbol_lines += line
+#         mysymbol_names += ['harmonic MC']
+#   else:
+#     print 'could not find', fname
 
+# for temp in all_temperatures:
+#   # input: ['figs/soft-sphere%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures]
+#   fname = 'figs/soft-sphere%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
+#   data = loadtxt(fname)
+#   r = data[:,0]
+#   nreduced_density = data[:,1]
+#   g = nreduced_density/(reduced_density/100.0)
+#   line = plot(r, g, styles.coarsedft[temp])#, label='harmonic DFT $kT/V_{max}$ = %g' % temp)
+#   mylines += line
+#   if temp == all_temperatures[-1]:
+#       mysymbol_lines += line
+#       mysymbol_names += ['harmonic DFT']
+#   #xlim(xmax=floor(max(g[:,0])))
+
+'''
 for temp in all_temperatures:
   # input: ['figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures]
   fname = 'figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
@@ -63,6 +92,7 @@ for temp in all_temperatures:
       mysymbol_lines += line
       mysymbol_names += ['WCA DFT']
   #xlim(xmax=floor(max(g[:,0])))
+'''
 
 for temp in all_temperatures:
   # input: ['figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
@@ -70,8 +100,9 @@ for temp in all_temperatures:
   if os.path.exists(fname):
     print 'found', fname
     g = loadtxt(fname)
-    line = plot(g[:,0], g[:,1], styles.mcwca[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
+    line = plot(g[:,0], g[:,1])#, styles.mcljr[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
     #xlim(xmax=floor(max(g[:,0])))
+    print 'jhkhjk'
     xlim(xmax=8)
     if temp == all_temperatures[-1]:
         mysymbol_lines += line
@@ -79,7 +110,7 @@ for temp in all_temperatures:
   else:
     print 'could not find', fname
 
-title('Radial distribution function at $n^* = %g$' % (reduced_density/100))
+title('Radial distribution function at packing fraction %g' % (reduced_density/100))
 xlabel('radius')
 ylabel('g')
 blue_line = mlines.Line2D([], [], color='blue', marker='*',

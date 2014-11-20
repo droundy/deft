@@ -24,5 +24,5 @@ def run_soft_sphere(reduced_density, temperature):
            (srun(reduced_density, temperature), figsdir, reduced_density, temperature, outfilename))
 
 for kT in [1.0, 0.1, 0.01, 0.001]:
-    for n_reduced in [0.1, 0.2, 0.3, 0.4, 0.5]:
+    for n_reduced in [0.7, 0.8, 0.9]:
         run_soft_sphere(n_reduced, kT)

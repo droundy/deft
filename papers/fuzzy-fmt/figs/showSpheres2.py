@@ -3,46 +3,29 @@ import pylab, numpy, sys, math
 from pylab import *
 import matplotlib.pyplot as plt
 import numpy as np
-import random
 from matplotlib.widgets import Slider, Button, RadioButtons
 sys.setrecursionlimit(2500)
-
-#spheres=np.zeros(shape=(20,3))
-#for i in range (
+if len(sys.argv) < 2:
+    print("Usage:  " + sys.argv[0] + " filename.dat")
+    exit(1)
 
 
 ax = subplot(111, autoscale_on=False, aspect='equal') 
-ax.set_xbound(0,20)
-ax.set_ybound(0,20)
+ax.set_xbound(-25,25)
+ax.set_ybound(-25,25)
 subplots_adjust(left=0.25, bottom=0.25)
 
 a0 = 0
-#axcoord = axes([0.25,.1,.65,.03])
-#scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
+axcoord = axes([0.25,.1,.65,.03])
+scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
+
+
+allSpheres = numpy.loadtxt(sys.argv[1])
 
 
 
 
 balls = []
-
-for i in range(1,30):
-	x = 20*random.random()
-        y = 20*random.random()
-        r = 1
-       # c = lx[i][3]
-        #if (z == 1):
-        #    cir = plt.Circle((x,y), radius=r,  fc='y')
-  #      elif (c == 0):
-  #          cir = plt.Circle((x,y), radius=r,  fc='r')
-        #else:
-        cir = plt.Circle((x,y), radius=r, color='b', fill=False)
-        ax.add_patch(cir)
-
-  
-plt.axhline(y=1,xmin=0,xmax=10,color='r')
-plt.axhline(y=1.2,xmin=0,xmax=10,color='r')
-plt.show()
-'''
 
 spheres = allSpheres # reshape(spheres, (-1, 3))
 
@@ -95,21 +78,16 @@ def plotDat(j):
         else:
             cir = plt.Circle((x,y), radius=r, fc = 'b')
         ax.add_patch(cir)    
-'''
 
-
-'''
 def update(val):    
     ax.clear()
     plotDat(scoord.val)
     show()
-
-
     
 scoord.on_changed(update)
 plotDat(scoord.val)
 update(a0)
-'''
+
 
 
 
