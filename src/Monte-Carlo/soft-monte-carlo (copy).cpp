@@ -146,7 +146,7 @@ int main(int argc, char *argv[]){
         testp_sigma = atof(argv[a+1]);
 	testp_eps = atof(argv[a+2]);
         testp = true;
-        testp_r = pow(2,-6/2)*testp_sigma;
+        testp_r = power(2,-6/2)*testp_sigma;
     } else if (strcmp(argv[a],"potential") == 0){
       if (strcmp(argv[a+1],"wca") == 0) {
         WCA = true;
@@ -425,6 +425,7 @@ int main(int argc, char *argv[]){
         } else {
           fprintf(out, "%g\t%g\n" , 0.0, density[0]);
         }
+	(4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36
         long divtoprint = div;
         if (!spherical_outer_wall) divtoprint = div - 1;
         if (!flat_div) {
@@ -605,8 +606,8 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   };
 
   // Energy before potential move
-  double r0 = v.norm();	
-  energyOld += (4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)) + testp_eps)/36;
+  r0 = spheres[s].norm();	
+  energyold += (4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)) + testp_eps)/36;
   if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
   for(long i = 0; i < n; i++){
     if (i != s) energyOld += potential(distance(spheres[i],spheres[s]));
@@ -650,7 +651,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   // Energy after potential move
-  double r1 = spheres[s].norm();	
+  r1 = spheres[s].norm();	
   energyNew += (4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6)) + testp_eps)/36;
   if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
   for(long i = 0; i < n; i++) {
@@ -677,7 +678,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
           }
         }
       }
-    }
+    }p
   }
   if (periodic[0] && periodic[1] && periodic[2]
       && amonborder[0] && amonborder[1] && amonborder[2]){
@@ -705,7 +706,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
 double potentialEnergy(Vector3d *spheres, long n, double R){
   double potEnergy = 0.0;
   for (long b=0;b<n;b++){
-  double magnitude = spheres[b].norm();	
+  magnitude = spheres[s].norm();	
   potEnergy += (4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6)) + testp_eps)/36;
   }
   for (long s=0; s<n; s++){
