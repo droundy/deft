@@ -9,7 +9,6 @@ if 'show' not in sys.argv:
 from pylab import *
 from scipy.special import erf
 import os
-
 import styles
 
 #Constants and variables
@@ -40,9 +39,9 @@ for j in arange(1,len(erfdata[0,:])):
   plot(erfeta[1:], erfpressure[1:], styles.color[erftemp[j]]+'-', label='$kT/\epsilon$=%g' % erftemp[j])
 title('FIXME: Check on weighting functions for homogeneous at low $T$')
 
-for rd in arange(0.1,0.81, 0.1):
+for rd in arange(0.1,1.1, 0.1):
   density = rd*2**(-5.0/2.0)
-  for temp in [1.0, 0.1, 0.01, 0.001]: 
+  for temp in [10.0,1.0, 0.1, 0.01, 0.001]: 
     # input: 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
     fname = 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
     if os.path.exists(fname):

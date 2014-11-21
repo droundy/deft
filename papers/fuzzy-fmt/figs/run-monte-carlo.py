@@ -31,6 +31,48 @@ for reduced_density in [0.2, 0.5, 1.0, 1.5]:
       print 'hello %g %g' % (reduced_density, reduced_temp)
       run_walls(reduced_density, 0, reduced_temp)
 
+<<<<<<< HEAD
+for reduced_density in [0.7, 0.8, 0.9]:
+    for temp in [10]:
+        run_homogeneous(reduced_density, temp, "wca")
+
+#run_homogeneous(0.83890, 0.71) #fig 11
+#run_homogeneous(0.957,2.48)    #fig 12
+#run_homogeneous(01.095, 2.48)  #fig 13
+#run_homogeneous(.5844,1.235)   #fig 14
+# run_homogeneous(0.5, 0.0001)
+# run_homogeneous(0.6, 0.0001)
+# run_homogeneous(0.7, 0.0001)
+# run_homogeneous(0.8, 0.0001)
+
+# run_homogeneous(0.1, 0.001)
+# run_homogeneous(0.2, 0.001)
+# run_homogeneous(0.3, 0.001)
+# run_homogeneous(0.4, 0.001)
+# run_homogeneous(0.5, 0.001)
+# run_homogeneous(0.6, 0.001)
+# run_homogeneous(0.7, 0.001)
+# run_homogeneous(0.8, 0.001)
+
+# run_homogeneous(0.1, 0.01)
+# run_homogeneous(0.2, 0.01)
+# run_homogeneous(0.3, 0.01)
+# run_homogeneous(0.4, 0.01)
+# run_homogeneous(0.5, 0.01)
+# run_homogeneous(0.6, 0.01)
+# run_homogeneous(0.7, 0.01)
+# run_homogeneous(0.8, 0.01)
+
+# run_homogeneous(0.1, 0.1)
+# run_homogeneous(0.2, 0.1)
+# run_homogeneous(0.3, 0.1)
+# run_homogeneous(0.4, 0.1)
+# run_homogeneous(0.5, 0.1)
+# run_homogeneous(0.6, 0.1)
+# run_homogeneous(0.7, 0.1)
+# run_homogeneous(0.8, 0.1)
+=======
 # for reduced_density in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]:
 #     for temp in [0.001, 0.01, 0.1, 1.0]:
 #         run_homogeneous(reduced_density, temp, "wca")
+>>>>>>> 79aa738cb8ce39678149261fb99ac89ff0713d44

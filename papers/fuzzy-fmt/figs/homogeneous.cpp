@@ -38,6 +38,7 @@ int main(int, char **) {
     fprintf(out, "\t%g", temps[i]);
   }
   fprintf(out, "\n");
+
   for (double n_reduced = 0.001; n_reduced <= 1.0; n_reduced *= 1.001) {
     fprintf(out, "%g", n_reduced);
     for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
