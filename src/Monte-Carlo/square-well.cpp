@@ -401,14 +401,18 @@ void sw_simulation::move_a_ball() {
 }
 
 void sw_simulation::update_state_search_info(){
-  // update round trip observations
+  // update energy observations and sample counts
   if(interactions <= state_of_max_entropy){
+    // if we're at or above the state of max entropy, we have not yet observed any energies
     for(int i = state_of_max_entropy; i < energy_levels; i++)
-      seeking_energy[i] = true;
+      energy_observed[i] = false;
   }
-  else if(seeking_energy[interactions]){
-    seeking_energy[interactions] = false;
-    round_trips[interactions]++;
+  else if(!energy_observed[interactions]){
+    // if we have not yet observed this energy since the last time we were at max entropy,
+    //   now we have!
+    energy_observed[interactions] = true;
+    // we have also now sampled it once more
+    samples[interactions]++;
   }
   // update walker counts
   if(interactions > max_observed_interactions){
@@ -416,8 +420,11 @@ void sw_simulation::update_state_search_info(){
     for(int i = state_of_max_entropy; i < energy_levels; i++)
       walkers_up[i] = 0;
   }
-  if(!seeking_energy[max_observed_interactions])
+  if(energy_observed[max_observed_interactions]){
+    // if we have observed the minimum state energy more recently than
+    //   the state of max entropy, our walkers are going up
     walkers_up[interactions]++;
+  }
   walkers_total[interactions]++;
 }
 

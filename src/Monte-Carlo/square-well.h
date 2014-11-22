@@ -73,10 +73,13 @@ struct sw_simulation {
   /* The following keep track of how many times we have walked
      between the a given energy and the state of max entropy */
 
-  bool *seeking_energy;
-  long *round_trips;
-  long actual_round_trips() const { // return the number of round trips to minimum energy
-    for (int i=energy_levels-1;i>=state_of_max_entropy;i--) if (round_trips[i]) return round_trips[i];
+  // has a given energy been observed since the last time we were at max entropy?
+  bool *energy_observed;
+  long *samples; // how many independent samples of a given energy have we had?
+  // return the number times we have sampled the minimum energy state
+  long min_energy_observations() const {
+    for (int i=energy_levels-1;i>=state_of_max_entropy;i--)
+      if (samples[i]) return samples[i];
     return 0;
   };
   int max_interactions() const { // return the maximum observed number of interactions

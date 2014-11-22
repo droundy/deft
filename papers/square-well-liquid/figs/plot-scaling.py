@@ -17,9 +17,9 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 versions = eval(sys.argv[3])
-#arg versions = [["wang_landau", "robustly-optimistic", "gaussian", "flat", "walkers"]]
+#arg versions = [["wang_landau", "robustly_optimistic", "gaussian",  "bubble_suppression", "walkers"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,7,8,9,10,20] for dat in ['rt', 'lnw', 'E']]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,7,8,9,10,20] for dat in ['s', 'lnw', 'E']]
 
 # input: "data/periodic-ww*-ff*-N*-*-*.dat"
 
@@ -30,12 +30,12 @@ plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 Ns = {}
 init_iters = {}
 Emins = {}
-RTs = {}
+samples = {}
 for version in versions:
     Ns[version] = []
     init_iters[version] = []
     Emins[version] = []
-    RTs[version] = []
+    samples[version] = []
     for filename in glob.glob("data/periodic-ww%04.2f-ff%04.2f-N*-%s-lnw.dat" % (ww, ff, version)):
         N = int(N_regex.findall(filename)[0])
         Ns[version].append(N)
@@ -48,8 +48,8 @@ for version in versions:
         E_data = numpy.loadtxt(wildfilename % 'E')
         Emins[version].append(E_data[:, 0].max())
 
-        rt_data = numpy.loadtxt(wildfilename % 'rt')
-        RTs[version].append(rt_data[len(rt_data[:,1])-1, 1])
+        sample_data = numpy.loadtxt(wildfilename % 's')
+        samples[version].append(sample_data[len(sample_data[:,1])-1, 1])
 
     # The following sorts the lists according to the number of spheres
     indexes = range(len(Ns[version]))
@@ -57,7 +57,7 @@ for version in versions:
     Ns[version] = map(Ns[version].__getitem__, indexes)
     init_iters[version] = map(init_iters[version].__getitem__, indexes)
     Emins[version] = map(Emins[version].__getitem__, indexes)
-    RTs[version] = map(RTs[version].__getitem__, indexes)
+    samples[version] = map(samples[version].__getitem__, indexes)
 
     plt.figure(1)
     plt.semilogy(Ns[version], init_iters[version], styles.color[version]+'.-', label=version)
@@ -90,9 +90,9 @@ tex.write(r"""\\
 \hline\hline
 """)
 
-print Ns['flat']
-for i in range(len(Ns['flat'])):
-    N = Ns['flat'][i]
+print Ns['bubble_suppression']
+for i in range(len(Ns['bubble_suppression'])):
+    N = Ns['bubble_suppression'][i]
     tex.write(r""" N = %d \\
   initialization""" % N)
 
@@ -103,8 +103,8 @@ for i in range(len(Ns['flat'])):
     tex.write(string.join([" & %d " % Emins[v][i] for v in versions]))
     tex.write("\\\\\n")
 
-    tex.write('RT')
-    tex.write(string.join([" & %d " % RTs[v][i] for v in versions]))
+    tex.write('samples')
+    tex.write(string.join([" & %d " % samples[v][i] for v in versions]))
     tex.write("\\\\\n")
 
 tex.write(r"""\end{tabular}

@@ -20,13 +20,13 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw", "wang_landau", "gaussian", "flat", "walkers", "kT2", "kT1"]]
+#arg versions = [["nw", "wang_landau", "robustly_optimistic", "gaussian", "bubble_suppression", "walkers", "kT2", "kT1"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-s.dat" % (ww, ff, N, version) for version in versions]
 
-plt.title('Iterations per round trip for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+plt.title('Iterations per sample for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 for version in versions:
-    data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-rt.dat" % (ww, ff, N, version)
+    data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-s.dat" % (ww, ff, N, version)
     with open(data_file,'r') as file_handle:
         for line in file_handle:
             entries = line.split()
@@ -43,10 +43,10 @@ for version in versions:
                      label=styles.title[version])
 
 plt.xlabel('$U/N\epsilon$')
-plt.ylabel('Iterations per round trip')
+plt.ylabel('Iterations per sample')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rt-rate.pdf" % (ww*100, ff*100, N))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-sample-rate.pdf" % (ww*100, ff*100, N))
 
 
 if 'show' in sys.argv:

@@ -85,7 +85,7 @@ int main(int argc, const char *argv[]) {
   int no_weights = false;
   double fix_kT = 0;
   int robustly_optimistic = false;
-  int flat_histogram = false;
+  int bubble_suppression = false;
   int gaussian_fit = false;
   int walker_weights = false;
   int wang_landau = false;
@@ -179,10 +179,10 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
-    {"robustly-optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
+    {"robustly_optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
      "Use the robustly optimistic histogram method", "BOOLEAN"},
-    {"flat", '\0', POPT_ARG_NONE, &flat_histogram, 0,
-     "Use a flat histogram method", "BOOLEAN"},
+    {"bubble_suppression", '\0', POPT_ARG_NONE, &bubble_suppression, 0,
+     "Use the bubble suppression method", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
     {"walkers", '\0', POPT_ARG_NONE, &walker_weights, 0,
@@ -224,8 +224,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // check that only one method is used
-  if(bool(no_weights) + robustly_optimistic + bool(flat_histogram) + bool(gaussian_fit)
-     + bool(wang_landau) + bool(walker_weights) + (fix_kT != 0) != 1){
+  if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
+     + bool(gaussian_fit) + bool(wang_landau) + bool(walker_weights) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!");
     return 254;
   }
@@ -249,7 +249,8 @@ int main(int argc, const char *argv[]) {
     const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
-    const int max_cubic_width = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
+    const int max_cubic_width
+      = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
     if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
       // We can get away with a cubic cell, so let's do so.  Cubic
       // cells are nice and comfortable!
@@ -274,7 +275,8 @@ int main(int argc, const char *argv[]) {
         sw.len[y] = min_cell_width*ycells;
         sw.len[x] = volume/sw.len[y]/sw.len[z];
       }
-      printf("Using lopsided %d x %d x %d cell (total goal %d)\n", xcells, ycells, zcells, numcells);
+      printf("Using lopsided %d x %d x %d cell (total goal %d)\n",
+             xcells, ycells, zcells, numcells);
     }
   }
 
@@ -308,9 +310,9 @@ int main(int argc, const char *argv[]) {
     } else if (no_weights) {
       sprintf(method_tag, "-nw");
     } else if (robustly_optimistic) {
-      sprintf(method_tag, "-robustly-optimistic");
-    } else if (flat_histogram) {
-      sprintf(method_tag, "-flat");
+      sprintf(method_tag, "-robustly_optimistic");
+    } else if (bubble_suppression) {
+      sprintf(method_tag, "-bubble_suppression");
     } else if (gaussian_fit) {
       sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
@@ -367,8 +369,8 @@ int main(int argc, const char *argv[]) {
   sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
   sw.energy_histogram = new long[sw.energy_levels]();
 
-  sw.seeking_energy = new bool[sw.energy_levels]();
-  sw.round_trips = new long[sw.energy_levels]();
+  sw.energy_observed = new bool[sw.energy_levels]();
+  sw.samples = new long[sw.energy_levels]();
 
   // Walkers
   sw.walkers_up = new long[sw.energy_levels]();
@@ -567,8 +569,8 @@ int main(int argc, const char *argv[]) {
       for (int e=0; e < sw.energy_levels; e++) {
         if (sw.energy_histogram[e] > 0) sw.energy_histogram[e] = 1;
         else sw.energy_histogram[e] = 0;
-        sw.round_trips[e] = 0;
-        sw.seeking_energy[e] = false; // ???
+        sw.samples[e] = 0;
+        sw.energy_observed[e] = false;
       }
 
       // Now let's run a while to see if we can find another answer.
@@ -587,7 +589,7 @@ int main(int argc, const char *argv[]) {
         }
         mean_hist = tot_hist/double(tot_counts);
         for (int e=sw.state_of_max_entropy+1; e<sw.energy_levels; e++) {
-          if (sw.round_trips[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
+          if (sw.samples[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
             printf("After %d iterations, at energy %d hist = %ld vs %g.\n", iter, e, sw.energy_histogram[e], mean_hist);
             done = false;
             break;
@@ -596,7 +598,7 @@ int main(int argc, const char *argv[]) {
       }
     } while (!done);
     printf("All done initializing robustly.\n");
-  } else if (flat_histogram) {
+  } else if (bubble_suppression) {
     {
       sw.initialize_gaussian(log(1e40));
       sw.initialize_max_entropy_and_translation_distance();
@@ -709,8 +711,8 @@ int main(int argc, const char *argv[]) {
   char *w_fname = new char[1024];
   sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
 
-  char *rt_fname = new char[1024];
-  sprintf(rt_fname, "%s/%s-rt.dat", data_dir, filename);
+  char *s_fname = new char[1024];
+  sprintf(s_fname, "%s/%s-s.dat", data_dir, filename);
 
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
@@ -765,10 +767,10 @@ int main(int argc, const char *argv[]) {
   sw.moves.working = 0;
   sw.iteration = 0;
 
-  // Reset energy histogram and round trip counts
+  // Reset energy histogram and sample counts
   for(int i = 0; i < sw.energy_levels; i++){
     sw.energy_histogram[i] = 0;
-    sw.round_trips[i] = 0;
+    sw.samples[i] = 0;
   }
 
   while(sw.iteration <= simulation_iterations) {
@@ -845,18 +847,18 @@ int main(int argc, const char *argv[]) {
       }
       fclose(e_out);
 
-      // Save round trip counts
-      FILE *rt_out = fopen(rt_fname, "w");
-      if (!rt_out) {
-        fprintf(stderr, "Unable to create %s!\n", rt_fname);
+      // Save sample counts
+      FILE *s_out = fopen(s_fname, "w");
+      if (!s_out) {
+        fprintf(stderr, "Unable to create %s!\n", s_fname);
         exit(1);
       }
-      fprintf(rt_out, "%s", headerinfo);
-      fprintf(rt_out, "%s", countinfo);
-      fprintf(rt_out, "# interactions\tround trips\n");
+      fprintf(s_out, "%s", headerinfo);
+      fprintf(s_out, "%s", countinfo);
+      fprintf(s_out, "# interactions\tsamples\n");
       for(int i = 0; i < sw.energy_levels; i++)
-        fprintf(rt_out, "%i  %li\n", i, sw.round_trips[i]);
-      fclose(rt_out);
+        fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
+      fclose(s_out);
 
       // Save RDF
       if(!sw.walls){
@@ -929,8 +931,8 @@ int main(int argc, const char *argv[]) {
   delete[] sw.walkers_up;
   delete[] sw.walkers_total;
 
-  delete[] sw.seeking_energy;
-  delete[] sw.round_trips;
+  delete[] sw.energy_observed;
+  delete[] sw.samples;
 
   for (int i = 0; i < sw.energy_levels; i++) {
     delete[] density_histogram[i];
@@ -943,7 +945,7 @@ int main(int argc, const char *argv[]) {
   delete[] headerinfo;
   delete[] e_fname;
   delete[] w_fname;
-  delete[] rt_fname;
+  delete[] s_fname;
   delete[] density_fname;
   delete[] g_fname;
 

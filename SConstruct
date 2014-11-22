@@ -338,11 +338,11 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
         for N in [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, 60, 100, 200]:
-            for method in ["nw","flat","robustly-optimistic","gaussian",
+            for method in ["nw","bubble_suppression","robustly_optimistic","gaussian",
                            "wang_landau","walkers"] + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)
-                                      for postfix in ['E', 'lnw', 'rt', 'g']],
+                                      for postfix in ['E', 'lnw', 's', 'g']],
                             source = 'square-well-monte-carlo',
                             action = './square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 1000000' % (method, N, ff, ww))
 

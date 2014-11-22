@@ -2,9 +2,9 @@ color = { 'nw': 'r',
           'kT1': 'b',
           'kT2': 'c',
           'kT0.1': 'g',
-          'flat': 'k',
+          'bubble_suppression': 'k',
           'wang_landau': 'g',
-          'robustly-optimistic': 'r',
+          'robustly_optimistic': 'r',
           'gaussian': 'm',
           'walkers': 'y'}
 
@@ -12,9 +12,9 @@ line = { 'nw': '--',
          'kT1': '--',
          'kT2': ':',
          'kT0.1': '-.',
-         'flat': '-',
+         'bubble_suppression': '-',
          'wang_landau': '-',
-         'robustly-optimistic': '-',
+         'robustly_optimistic': '-',
          'gaussian': '-',
          'walkers': '-'}
 
@@ -22,9 +22,9 @@ title = { 'nw': '$kT/\epsilon = \infty$ sim.',
           'kT1': '$kT/\epsilon = 1$ sim.',
           'kT2': '$kT/\epsilon = 2$ sim.',
           'kT0.1': '$kT/\epsilon = 0.1$ sim.',
-          'flat': 'flat histogram',
+          'bubble_suppression': 'bubble suppression',
           'wang_landau': 'Wang-Landau',
-          'robustly-optimistic': 'robustly optimistic',
+          'robustly_optimistic': 'robustly optimistic',
           'gaussian': 'gaussian method',
           'walkers': 'walker optimization'}
 
@@ -35,5 +35,5 @@ for k in color:
 dots = {}
 for k in color:
     dots[k] = color[k] + '.'
-    if k in ['wang_landau', 'robustly-optimistic']:
+    if k in ['wang_landau', 'robustly_optimistic']:
         dots[k] = color[k] + '+'
