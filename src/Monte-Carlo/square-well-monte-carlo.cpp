@@ -103,7 +103,7 @@ int main(int argc, const char *argv[]) {
   sw.N = 1000;
   sw.dr = 0.1;
 
-  int wall_dim = 1;
+  int wall_dim = 0;
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
@@ -539,7 +539,7 @@ int main(int argc, const char *argv[]) {
   sw.state_of_max_entropy = sw.initialize_max_entropy_and_translation_distance();
 
   if (gaussian_fit) {
-    sw.initialize_gaussian(10);
+    sw.initialize_gaussian(50);
   } else if (robustly_optimistic) {
     printf("I am robustly optimistically trying to initialize.\n");
     bool done;
@@ -562,6 +562,7 @@ int main(int argc, const char *argv[]) {
         // sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + slope*(e - minE);
       }
       // }
+      // Flatten weights above state of max entropy
       for (int e=0; e < sw.state_of_max_entropy; e++) {
         sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.state_of_max_entropy];
       }
@@ -574,11 +575,11 @@ int main(int argc, const char *argv[]) {
       }
 
       // Now let's run a while to see if we can find another answer.
-      int iter = 0;
+      int moves = 0;
       for (int i=0;i<simulation_iterations/sw.N/sw.N && done;i++) {
         for (int j=0;j<sw.N*sw.N;j++) {
           sw.move_a_ball();
-          iter++;
+          moves++;
         }
         long tot_hist = 0, tot_counts = 0;
         for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
@@ -587,10 +588,12 @@ int main(int argc, const char *argv[]) {
             tot_counts += 1;
           }
         }
+        // Check whether our histogram is sufficiently flat; if not, we're not done!
         mean_hist = tot_hist/double(tot_counts);
         for (int e=sw.state_of_max_entropy+1; e<sw.energy_levels; e++) {
           if (sw.samples[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
-            printf("After %d iterations, at energy %d hist = %ld vs %g.\n", iter, e, sw.energy_histogram[e], mean_hist);
+            printf("After %d moves, at energy %d hist = %ld vs %g.\n",
+                   moves, e, sw.energy_histogram[e], mean_hist);
             done = false;
             break;
           }
@@ -785,8 +788,8 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
     // ---------------------------------------------------------------
-    // Density histogram
-    if(sw.walls){
+    // Density histogram -- only handles walls in one dimension
+    if(sw.walls == 1){
       for(int i = 0; i < sw.N; i++){
         density_histogram[sw.interactions]
           [int(floor(sw.balls[i].pos[wall_dim]/de_density))] ++;

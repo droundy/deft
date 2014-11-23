@@ -333,8 +333,11 @@ void sw_simulation::move_a_ball() {
   moves.old_count = count_interactions(id, balls, interaction_distance, len, walls);
   moves.new_count = moves.old_count;
   ball temp = random_move(balls[id], translation_distance, len);
-  if (!in_cell(temp, len, walls, dr)) return; // bad move!
-  if (overlaps_with_any(temp, balls, len, walls, dr)) return; // bad move!
+  // If we're out of the cell or we overlap, this is a bad move!
+  if (!in_cell(temp, len, walls, dr) || overlaps_with_any(temp, balls, len, walls, dr)){
+    //end_move_updates();
+    return;
+  }
   const bool get_new_neighbors =
     (periodic_diff(temp.pos, temp.neighbor_center, len, walls).normsquared()
      > sqr(neighbor_R/2.0));
@@ -354,6 +357,7 @@ void sw_simulation::move_a_ball() {
     if (overlaps_with_any(temp, balls, len, walls, dr)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
+      //end_move_updates();
       return;
     }
   }
@@ -376,6 +380,7 @@ void sw_simulation::move_a_ball() {
       // based on our weights.
       moves.new_count = moves.old_count; // undo the energy change
       if (get_new_neighbors) delete[] temp.neighbors;
+      //end_move_updates();
       return;
     }
   }
@@ -392,40 +397,42 @@ void sw_simulation::move_a_ball() {
 
   // Update interaction count and energy histogram
   interactions += moves.new_count - moves.old_count;
-  energy_histogram[interactions]++;
 
-  // increment iteraction count
-  if(moves.total % N == 0) iteration++;
+  // If we've changed energy, run some checks
+  if(moves.new_count != moves.old_count) energy_change_updates();
 
-  update_state_search_info();
+  end_move_updates();
 }
 
-void sw_simulation::update_state_search_info(){
-  // update energy observations and sample counts
+void sw_simulation::end_move_updates(){
+  energy_histogram[interactions]++; // update energy histogram
+  if(moves.total % N == 0) iteration++; // update iteration counter
+  // update walker counters
+  if(energy_observed[max_observed_interactions]){
+    walkers_up[interactions]++;
+  }
+  walkers_total[interactions]++;
+}
+
+void sw_simulation::energy_change_updates(){
+  // If we're at or above the state of max entropy, we have not yet observed any energies
   if(interactions <= state_of_max_entropy){
-    // if we're at or above the state of max entropy, we have not yet observed any energies
     for(int i = state_of_max_entropy; i < energy_levels; i++)
       energy_observed[i] = false;
   }
+  // If we have not yet observed this energy since the last time we were at max entropy,
+  //   now we have!
   else if(!energy_observed[interactions]){
-    // if we have not yet observed this energy since the last time we were at max entropy,
-    //   now we have!
     energy_observed[interactions] = true;
-    // we have also now sampled it once more
     samples[interactions]++;
   }
-  // update walker counts
+  // If we have observed a new lowest energy, remember it; furthermore, this means we can't
+  //   have had any walkers going up from the lowest energy, so we reset walkers_up
   if(interactions > max_observed_interactions){
     max_observed_interactions = interactions;
     for(int i = state_of_max_entropy; i < energy_levels; i++)
       walkers_up[i] = 0;
   }
-  if(energy_observed[max_observed_interactions]){
-    // if we have observed the minimum state energy more recently than
-    //   the state of max entropy, our walkers are going up
-    walkers_up[interactions]++;
-  }
-  walkers_total[interactions]++;
 }
 
 // iterate enough times for the energy to change n times.  Return the

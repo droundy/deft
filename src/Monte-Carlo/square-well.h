@@ -91,12 +91,9 @@ struct sw_simulation {
      keep track of walkers. */
   long *walkers_up, *walkers_total;
 
-  // move just one ball, and update the energy, and update the
-  // energy_histogram.
-  void move_a_ball();
-
-  // update round trip and walker info
-  void update_state_search_info();
+  void move_a_ball(); // attempt to move one ball
+  void end_move_updates(); // updates to run at the end of every move
+  void energy_change_updates(); // updates to run only if we've changed energy
 
   // print the timings (if the time is right)
   void print_timings(int timings_period) const;
