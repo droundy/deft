@@ -90,11 +90,14 @@ int main(int argc, const char *argv[]) {
   int walker_weights = false;
   int wang_landau = false;
 
+  // Tuning factors
   double wl_factor = 0.125;
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double gaussian_cutoff = 0.2;
+  double gaussian_bubble_cutoff = 0.2;
+  double robust_update_scale = 0.8;
+  double robust_cutoff = 0.2;
 
   sw_simulation sw;
 
@@ -550,48 +553,50 @@ int main(int argc, const char *argv[]) {
       int minE = 0;
       for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
         if (sw.energy_histogram[e]) {
-          sw.ln_energy_weights[e] -= log(sw.energy_histogram[e]);
+          // We don't want to be overzealous, so we include a scale factor
+          sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
           minE = e;
-        }
+        } else
+          sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
       }
       // double slope = (sw.ln_energy_weights[minE] - sw.ln_energy_weights[minE-5])/5.0; // very hokey
       // if (slope > 0) {
-      for (int e=minE+1; e < sw.energy_levels; e++) {
-        sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
+      // for (int e=minE+1; e < sw.energy_levels; e++) {
         // For lower energies, let's try a linear extrapolation in log space.
         // sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + slope*(e - minE);
-      }
+      // }
       // }
       // Flatten weights above state of max entropy
-      for (int e=0; e < sw.state_of_max_entropy; e++) {
+      for (int e=0; e < sw.state_of_max_entropy; e++)
         sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.state_of_max_entropy];
-      }
       // Now reset the calculation!
       for (int e=0; e < sw.energy_levels; e++) {
-        if (sw.energy_histogram[e] > 0) sw.energy_histogram[e] = 1;
-        else sw.energy_histogram[e] = 0;
+        sw.energy_histogram[e] = 0;
         sw.samples[e] = 0;
         sw.energy_observed[e] = false;
       }
-
       // Now let's run a while to see if we can find another answer.
       int moves = 0;
-      for (int i=0;i<simulation_iterations/sw.N/sw.N && done;i++) {
-        for (int j=0;j<sw.N*sw.N;j++) {
-          sw.move_a_ball();
-          moves++;
-        }
-        // Check whether our histogram is sufficiently flat; if not, we're not done!
-        mean_hist = moves/double(sw.max_observed_interactions - sw.state_of_max_entropy);
-        for (int e=sw.state_of_max_entropy+1; e<sw.energy_levels; e++) {
-          if (sw.samples[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
-            printf("After %d moves, at energy %d hist = %ld vs %g.\n",
-                   moves, e, sw.energy_histogram[e], mean_hist);
-            done = false;
-            break;
-          }
+      // SUPER SCARY WARNING:
+      // N^5 scaling is probably VERY BAD!!! but it works really well for now...
+      for (int i=0; i < uipow(sw.N,5); i++){
+        sw.move_a_ball();
+        moves++;
+      }
+      // Check whether our histogram is sufficiently flat; if not, we have to restart!
+      mean_hist = moves/double(sw.max_observed_interactions - sw.state_of_max_entropy);
+      for (int e=sw.state_of_max_entropy+1; e<=sw.max_observed_interactions; e++) {
+        if (sw.energy_histogram[e] < sw.N
+            || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
+          printf("After %d moves, at energy %d hist = %ld vs mean %g.\n",
+                 moves, e, sw.energy_histogram[e], mean_hist);
+          done = false;
+          break;
         }
       }
+      // Dump energy histogram to the console so that we can see how we're doing
+      for(int i = sw.state_of_max_entropy; i < sw.max_observed_interactions; i++)
+        printf("%i  %li\n",i,sw.energy_histogram[i]);
     } while (!done);
     printf("All done initializing robustly.\n");
   } else if (bubble_suppression) {
@@ -611,7 +616,7 @@ int main(int argc, const char *argv[]) {
       printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
              width, range, width/range);
       printf("***\n");
-    } while (width < gaussian_cutoff*range);
+    } while (width < gaussian_bubble_cutoff*range);
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
