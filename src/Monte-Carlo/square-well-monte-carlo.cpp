@@ -94,7 +94,7 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double gaussian_cutoff = 0.25;
+  double gaussian_cutoff = 0.2;
 
   sw_simulation sw;
 
@@ -581,15 +581,8 @@ int main(int argc, const char *argv[]) {
           sw.move_a_ball();
           moves++;
         }
-        long tot_hist = 0, tot_counts = 0;
-        for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
-          if (sw.energy_histogram[e]) {
-            tot_hist += sw.energy_histogram[e];
-            tot_counts += 1;
-          }
-        }
         // Check whether our histogram is sufficiently flat; if not, we're not done!
-        mean_hist = tot_hist/double(tot_counts);
+        mean_hist = moves/double(sw.max_observed_interactions - sw.state_of_max_entropy);
         for (int e=sw.state_of_max_entropy+1; e<sw.energy_levels; e++) {
           if (sw.samples[e] > 8 && sw.energy_histogram[e] < 0.25*mean_hist) {
             printf("After %d moves, at energy %d hist = %ld vs %g.\n",

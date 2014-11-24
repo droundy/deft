@@ -335,7 +335,7 @@ void sw_simulation::move_a_ball() {
   ball temp = random_move(balls[id], translation_distance, len);
   // If we're out of the cell or we overlap, this is a bad move!
   if (!in_cell(temp, len, walls, dr) || overlaps_with_any(temp, balls, len, walls, dr)){
-    //end_move_updates();
+    end_move_updates();
     return;
   }
   const bool get_new_neighbors =
@@ -357,7 +357,7 @@ void sw_simulation::move_a_ball() {
     if (overlaps_with_any(temp, balls, len, walls, dr)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
-      //end_move_updates();
+      end_move_updates();
       return;
     }
   }
@@ -380,7 +380,7 @@ void sw_simulation::move_a_ball() {
       // based on our weights.
       moves.new_count = moves.old_count; // undo the energy change
       if (get_new_neighbors) delete[] temp.neighbors;
-      //end_move_updates();
+      end_move_updates();
       return;
     }
   }

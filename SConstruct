@@ -344,7 +344,7 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
                                       % (ww, ff, N, method.replace(' ',''), postfix)
                                       for postfix in ['E', 'lnw', 's', 'g']],
                             source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 1000000' % (method, N, ff, ww))
+                            action = './square-well-monte-carlo --%s --N %d --initialize 1000 --ff %g --ww %g --iterations 100000' % (method, N, ff, ww))
 
 # #################### talks ##################################################
 
