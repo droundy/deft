@@ -31,4 +31,4 @@ for k in color:
     dft[k] = color[k] + '--'
     coarsedft[k] = color[k] + '-'
     mc[k] = color[k] + '.'
-    mcwca[k] = color[k] + '-'
+    mcwca[k] = color[k] + '--'

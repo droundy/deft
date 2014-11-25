@@ -26,16 +26,31 @@ def run_walls(n_reduced, nspheres, temperature):
     system("srun --mem=60 -J softwalls-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxy 30 wallz 30 kT %g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, filename))
 
-for reduced_density in [0.2, 0.5, 1.0, 1.5]:
-  for reduced_temp in [0.2, 0.5, 1.0]:
-      print 'hello %g %g' % (reduced_density, reduced_temp)
-      run_walls(reduced_density, 0, reduced_temp)
+def run_test_particle(n_reduced, temperature, testp_sigma,testp_eps,pot = ""):
+    nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
+    #width = (nspheres/density)**(1.0/3) # to get density just right!
+    filename = '%s/mc_testp_%s-%.4f-%.4f' % (figsdir, pot, n_reduced, temperature)
+    system("srun --mem=60 -J soft-testp-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxyz 30 kT %g TestP %f testp_eps %f potential '%s' > %s.out 2>&1 &" %
+           (n_reduced, temperature, bindir, nspheres, filename, temperature, testp_sigma, testp_eps, pot, filename))
 
-<<<<<<< HEAD
-for reduced_density in [0.7, 0.8, 0.9]:
-    for temp in [10]:
-        run_homogeneous(reduced_density, temp, "wca")
+#for reduced_density in [0.2, 0.5, 1.0, 1.5]:
+#  for reduced_temp in [0.2, 0.5, 1.0]:
+#      print 'hello %g %g' % (reduced_density, reduced_temp)
+#      run_walls(reduced_density, 0, reduced_temp)
 
+
+argon_sigma=3.405
+argon_eps=119.8
+
+run_test_particle(0.957,2.48,3.405, 119.8,"wca")
+
+
+
+
+#for reduced_density in [0.7, 0.8, 0.9]:
+#    for temp in [10]:
+#        run_homogeneous(reduced_density, temp, "wca")
+#
 #run_homogeneous(0.83890, 0.71) #fig 11
 #run_homogeneous(0.957,2.48)    #fig 12
 #run_homogeneous(01.095, 2.48)  #fig 13
@@ -71,8 +86,8 @@ for reduced_density in [0.7, 0.8, 0.9]:
 # run_homogeneous(0.6, 0.1)
 # run_homogeneous(0.7, 0.1)
 # run_homogeneous(0.8, 0.1)
-=======
+
 # for reduced_density in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]:
 #     for temp in [0.001, 0.01, 0.1, 1.0]:
 #         run_homogeneous(reduced_density, temp, "wca")
->>>>>>> 79aa738cb8ce39678149261fb99ac89ff0713d44
+

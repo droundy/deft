@@ -70,6 +70,7 @@ int main(int argc, char *argv[]){
   printf("\n");
   WCA = true;
   double maxrad = 0;
+  printf("JAKLJFDLSKFJD:SLKFJDS:LFKJDS:LKJF:\n");
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
@@ -143,10 +144,12 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else if (strcmp(argv[a],"TestP")==0){
+	printf("JAKLJFDLSKFJD:SLKFJDS:LFKJDS:LKJF:\n");
         testp_sigma = atof(argv[a+1]);
-	testp_eps = atof(argv[a+2]);
         testp = true;
         testp_r = pow(2,-6/2)*testp_sigma;
+    } else if (strcmp(argv[a],"testp_eps")==0){
+	testp_eps = atof(argv[a]);
     } else if (strcmp(argv[a],"potential") == 0){
       if (strcmp(argv[a+1],"wca") == 0) {
         WCA = true;
@@ -159,6 +162,8 @@ int main(int argc, char *argv[]){
       return 1;
     }
   }
+
+
   //printf("flatdiv = %s\n", flat_div ? "true" : "false");
   //printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
   //printf("innerSphere = %s\n", spherical_inner_wall ? "true" : "false");
@@ -175,12 +180,12 @@ int main(int argc, char *argv[]){
     //spherical_inner_wall: volume should be
     //lenx*leny*lenz-(4*M_PI*(1/3))*(innerRad*innerRad*innerRad) -Sam
   } else if (spherical_outer_wall) {
-    volume = lenx*leny*lenz;
+    volume = 4*M_PI*(1/3)*(rad*rad*rad);
     //Possible error in these volume calculations. With
     //spherical_outer_wall, volume should be
     //4*M_PI*(1/3)*(rad*rad*rad)... Also add need to add a volume for when both
     //are true.  -Sam
-  }
+  } 
 
   const char *outfilename = argv[4];
   const long N = atol(argv[1]);
@@ -307,7 +312,7 @@ int main(int argc, char *argv[]){
       sections[s] = size*s - lenz/2.0;
     }
   }
-  if (spherical_inner_wall){
+  if (spherical_inner_wall || testp){
     double size = rad/div;
     for (long s=0; s<div+1; s++){
       radius[s] = size*s;
@@ -419,7 +424,7 @@ int main(int argc, char *argv[]){
         }
         if (flat_div){
           fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
-        } else if (spherical_inner_wall) {
+        } else if (spherical_inner_wall || testp) {
           fprintf(out, "%g\t%g\n", radius[0], 0.0);
           fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
         } else {
@@ -561,7 +566,7 @@ inline double sqr(double x) {
 inline double potential(double r) {
   if (r >= 2*R) return 0;
   //eps is defined to give the same curvature at r=2R for both potentials
-  return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36;
+  return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps);
 }
 
 inline double soft_wall_potential(double z) {
@@ -604,8 +609,10 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   };
 
   // Energy before potential move
-  double r0 = v.norm();	
-  energyOld += (4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)) + testp_eps)/36;
+  if (testp){
+    double r0 = v.norm();	
+    energyOld += 4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6));
+  }
   if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
   for(long i = 0; i < n; i++){
     if (i != s) energyOld += potential(distance(spheres[i],spheres[s]));
@@ -649,8 +656,10 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   // Energy after potential move
-  double r1 = spheres[s].norm();	
-  energyNew += (4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6)) + testp_eps)/36;
+  if (testp){  
+    double r1 = spheres[s].norm();	
+    energyNew += 4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6));
+  }
   if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
   for(long i = 0; i < n; i++) {
     if (i != s) energyNew += potential(distance(spheres[i],v));
@@ -703,9 +712,11 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
 
 double potentialEnergy(Vector3d *spheres, long n, double R){
   double potEnergy = 0.0;
-  for (long b=0;b<n;b++){
-  double magnitude = spheres[b].norm();	
-  potEnergy += (4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6)) + testp_eps)/36;
+  if (testp){
+    for (long b=0;b<n;b++){
+      double magnitude = spheres[b].norm();	
+      potEnergy += 4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6));
+    }
   }
   for (long s=0; s<n; s++){
     bool amonborder[3] = {
@@ -789,7 +800,7 @@ Vector3d move(Vector3d v,double scale){
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
   //these forces are negative for repulsive forces. no particular reason
-  return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6))/36;
+  return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6));
 }
 
 double calcPressure(Vector3d *spheres, long N, double volume){
