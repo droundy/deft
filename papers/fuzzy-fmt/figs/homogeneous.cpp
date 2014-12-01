@@ -28,27 +28,28 @@ int main(int, char **) {
   double radius = 1.0;
   double sigma = radius*pow(2,5.0/6.0);
   FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous.dat", "w");
-  const double temps[] = { 0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0};
+  const double Tmax = 10.0, dT = 0.01, Tmin = dT;
   fprintf(out, "# n_reduced");
-  for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-    fprintf(out, "\tp(kT=%g)/nkT", temps[i]);
+  for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
+    fprintf(out, "\tp(kT=%g)/nkT", T);
   }
   fprintf(out, "\n0");
-  for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-    fprintf(out, "\t%g", temps[i]);
+  for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
+    fprintf(out, "\t%g", T);
   }
   fprintf(out, "\n");
 
-  for (double n_reduced = 0.001; n_reduced <= 1.0; n_reduced *= 1.001) {
+  const double dn = 0.01, nmax = 2.5;
+  for (double n_reduced = dn/2; n_reduced <= nmax; n_reduced += dn) {
     fprintf(out, "%g", n_reduced);
-    for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-      const double temp = temps[i];
+    for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
+      const double temp = T;
       Functional f = HardFluid(radius,0);
       if (temp > 0) f = SoftFluid(sigma, 1, 0);
       double usekT = temp;
       if (temp == 0) usekT = 1.0;
       const double n = n_reduced*pow(2,-5.0/2.0);
-      fprintf(out, "\t%g", pressure(OfEffectivePotential(f), usekT, n)/(n*usekT));
+      fprintf(out, "\t%g", pressure(OfEffectivePotential(f), usekT, n));
     }
     fprintf(out, "\n");
   }
