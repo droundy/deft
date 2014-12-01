@@ -512,41 +512,20 @@ for mkdat in Split("""
                       ['src/new/SFMTFluidFast.cpp',
                        'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp']))
 # rules for how to run fuzzy-fmt/figs/new-walls.mkdat:
-for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
-    for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
+for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
+    env.Command(target = "papers/fuzzy-fmt/figs/wallshard-%06.4f-%04.2f.dat" % (0.0, rho),
+                source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
+                action = '$SOURCE %g %g' % (rho, kT))
+    for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%04.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
                     action = '$SOURCE %g %g' % (rho, kT))
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-soft-wall.mkdat'],
                     action = '$SOURCE %g %g' % (rho, kT))
-
-env.Command(target = ['papers/fuzzy-fmt/figs/walls.dat',
-                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.30.dat',
-                      'papers/fuzzy-fmt/figs/wallshard-0.0000-0.40.dat',
-                      #'papers/fuzzy-fmt/figs/wallshard-0.0000-0.50.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.30.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.30.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.40.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.10.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.20.dat',
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.30.dat',
-                      ### HOKEY BELOW
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0010-1.00.dat',
-                      ### HOKEY ABOVE
-                      'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.40.dat'],
-                      #'papers/fuzzy-fmt/figs/wallssoft-0.0100-0.50.dat',
-                      #'papers/fuzzy-fmt/figs/wallssoft-0.0200-0.50.dat',
-                      #'papers/fuzzy-fmt/figs/wallssoft-0.0300-0.50.dat'],
-            source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
-            action = './$SOURCE')
+        env.Command(target = "papers/fuzzy-fmt/figs/wallssoft-%06.4f-%04.2f.dat" % (kT, rho),
+                    source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
+                    action = '$SOURCE %g %g' % (rho, kT))
 
 env.Command(target = ['papers/contact/figs/walls.dat',
                       'papers/contact/figs/wallsWB-0.10.dat',

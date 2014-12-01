@@ -38,7 +38,9 @@ names = []
 lines = []
 # eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
 
-for kT in [0.2, 0.5, 1.0]:
+kTs = [0.2, 0.5, 1.0]
+
+for kT in kTs:
     # input: ["figs/mcwalls-%.4f-%.4f-*.dat" % (n_reduced, kT) for kT in [0.2, 0.5, 1.0]]
     print 'looking for', 'figs/mcwalls-%.4f-%.4f*.dat' % (n_reduced, kT)
     for fname in glob.glob('figs/mcwalls-%.4f-%.4f*.dat' % (n_reduced, kT)):
@@ -51,26 +53,19 @@ for kT in [0.2, 0.5, 1.0]:
 # data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, n_reduced)))
 # lines.append(styles.dft[0])
 
-for kT in [0.2, 0.5, 1.0]:
+for kT in kTs:
     # input: ["figs/new-data/wall-%04.2f-%04.2f.dat" % (n_reduced, kT) for kT in [0.2, 0.5, 1.0]]
     names.append('new kT = %g' % kT)
     fname = "figs/new-data/wall-%04.2f-%04.2f.dat" % (n_reduced, kT)
     data.append(numpy.loadtxt(fname))
     lines.append(styles.new_dft_code[kT])
 
-# for kT in [0.001, 0.01, 0.03]:
-#     # input: "figs/wallssoft-0.0010-%.2f.dat" % (n_reduced)
-#     # input: "figs/wallssoft-0.0100-%.2f.dat" % (n_reduced)
-#     # input: "figs/wallssoft-0.0300-%.2f.dat" % (n_reduced)
-#     fname = "figs/wallssoft-%.4f-%.2f.dat" % (kT, n_reduced)
-#     if os.path.exists(fname):
-#         names.append('DFT kT = %4.2f' % kT)
-#         data.append(numpy.loadtxt(fname))
-#         lines.append(styles.dft[kT])
-#         print 'found', fname
-#     else:
-#         print fname, 'does not exist'
-
+for kT in kTs:
+    # input: ["figs/wallssoft-%06.4f-%04.2f.dat" % (kT, n_reduced) for kT in [0.2, 0.5, 1.0]]
+    names.append('kT = %g' % kT)
+    fname = "figs/wallssoft-%6.4f-%04.2f.dat" % (kT, n_reduced)
+    data.append(numpy.loadtxt(fname))
+    lines.append(styles.dftwca[kT])
 
 for i in range(len(data)):
     print 'plotting', names[i]

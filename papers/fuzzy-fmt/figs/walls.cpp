@@ -86,25 +86,9 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
   constraint.Set(notinwall);
   f = constrain(constraint, f);
 
-  // We reuse the potential, which should give us a better starting
-  // guess on each calculation.
-  static Grid *potential = 0;
-  static double old_temperature = 0;
-  if (strcmp(name, "hard") == 0 || kT == 0.03 || true) {
-    // start over for each potential
-    delete potential;
-    potential = 0;
-  }
-  if (!potential) {
-    potential = new Grid(gd);
-    *potential = pow(2,-5.0/2.0)*(reduced_density*constraint + 1e-4*reduced_density*VectorXd::Ones(gd.NxNyNz));
-    *potential = -kT*potential->cwise().log();
-  } else {
-    // Adjust the potential so the initial guess for density is the
-    // same as we just found in our last simulation.
-
-    *potential *= kT/old_temperature;
-  }
+  Grid potential(gd);
+  potential = pow(2,-5.0/2.0)*(reduced_density*constraint + 1e-4*reduced_density*VectorXd::Ones(gd.NxNyNz));
+  potential = -kT*potential.cwise().log();
 
   const double approx_energy = fhs(kT, reduced_density*pow(2,-5.0/2.0))*dw*dw*width;
   const double precision = fabs(approx_energy*1e-11);
@@ -113,7 +97,7 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, kT,
-                                                            potential,
+                                                            &potential,
                                                             QuadraticLineMinimizer));
   took("Setting up the variables");
   if (strcmp(name, "hard") != 0 && false) {
@@ -126,7 +110,7 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
   took("Doing the minimization");
   min.print_info();
 
-  Grid density(gd, EffectivePotentialToDensity()(kT, gd, *potential));
+  Grid density(gd, EffectivePotentialToDensity()(kT, gd, potential));
   //printf("# per area is %g at filling fraction %g\n", density.sum()*gd.dvolume/dw/dw, eta);
 
   char *plotname = (char *)malloc(1024);
@@ -168,40 +152,37 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
 
   }
 
-  old_temperature = kT;
-
   took("Plotting stuff");
   printf("density %g gives ff %g for reduced density = %g and T = %g\n", density(0,0,gd.Nz/2),
          density(0,0,gd.Nz/2)*4*M_PI/3, reduced_density, teff);
   return density(0, 0, gd.Nz/2)*4*M_PI/3; // return bulk filling fraction
 }
 
-int main(int, char **) {
+int main(int argc, char **argv) {
   FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);
-  const double rad = 1; //radius of our spheres
-  const double sigma = rad*pow(2,5.0/6.0);
-  const double temps[] = { 0.03, 0.01, 0.001, 0.0 };
-  for (double n_reduced = 1.5; n_reduced >= 0.05; n_reduced-=0.1) {
-    for (unsigned int i = 0; i<sizeof(temps)/sizeof(temps[0]); i++) {
-      const double temp = temps[i];
-      Functional f = HardRosenfeldFluid(rad,0);
-      if (temp > 0) f = SoftFluid(sigma, 1, 0);
-      const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, n_reduced*pow(2,-5.0/2.0));
-      printf("mu is %g for reduced density = %g at temperature %g\n", mu, n_reduced, temp);
-      if (temp > 0) f = SoftFluid(sigma, 1, mu);
-      else f = HardRosenfeldFluid(rad, mu);
 
-      const char *name = "hard";
-      if (temp > 0) name = "soft";
-
-      run_walls(n_reduced, name, f, temp);
-    }
-  }
-  // Just create this file so make knows we have run.
-  if (!fopen("papers/fuzzy-fmt/figs/walls.dat", "w")) {
-    printf("Error creating walls.dat!\n");
+  double n_reduced, temp;
+  if (argc != 3) {
+    printf("usage: %s reduced_density kT\n", argv[0]);
     return 1;
   }
+  sscanf(argv[1], "%lg", &n_reduced);
+  sscanf(argv[2], "%lg", &temp);
+
+  const double rad = 1; // //radius of our spheres
+  const double sigma = rad*pow(2,5.0/6.0);
+
+  Functional f = HardRosenfeldFluid(rad,0);
+  if (temp > 0) f = SoftFluid(sigma, 1, 0);
+  const double mu = find_chemical_potential(OfEffectivePotential(f), (temp)?temp:1, n_reduced*pow(2,-5.0/2.0));
+  printf("mu is %g for reduced density = %g at temperature %g\n", mu, n_reduced, temp);
+  if (temp > 0) f = SoftFluid(sigma, 1, mu);
+  else f = HardRosenfeldFluid(rad, mu);
+
+  const char *name = "hard";
+  if (temp > 0) name = "soft";
+
+  run_walls(n_reduced, name, f, temp);
   return 0;
 }

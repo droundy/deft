@@ -26,7 +26,7 @@ mcwca = {}
 
 new_dft_code = {}
 for k in color:
-    dftwca[k] = color[k] + '-'
+    dftwca[k] = color[k] + ':'
     new_dft_code[k] = color[k] + '--'
     dft[k] = color[k] + '--'
     coarsedft[k] = color[k] + '-'
