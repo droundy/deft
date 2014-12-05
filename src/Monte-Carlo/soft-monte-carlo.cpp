@@ -58,6 +58,7 @@ bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
+  printf("eric1 krebs eric1 krebs eric1 krebs");
   if (argc < 6) {
     printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
@@ -70,7 +71,6 @@ int main(int argc, char *argv[]){
   printf("\n");
   WCA = true;
   double maxrad = 0;
-  printf("JAKLJFDLSKFJD:SLKFJDS:LFKJDS:LKJF:\n");
   for (int a=5; a<argc; a+=2){
     printf("Checking a = %d which is %s\n", a, argv[a]);
     if (strcmp(argv[a],"outerSphere") == 0) {
@@ -144,12 +144,12 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
     } else if (strcmp(argv[a],"TestP")==0){
-	printf("JAKLJFDLSKFJD:SLKFJDS:LFKJDS:LKJF:\n");
         testp_sigma = atof(argv[a+1]);
         testp = true;
         testp_r = pow(2,-6/2)*testp_sigma;
     } else if (strcmp(argv[a],"testp_eps")==0){
-	testp_eps = atof(argv[a]);
+	testp_eps = atof(argv[a+1]);
+        printf("Testp is %d, sigma is %f, eps is %f, last thing is %s\n",testp, testp_sigma,testp_eps,argv[a+1]);
     } else if (strcmp(argv[a],"potential") == 0){
       if (strcmp(argv[a+1],"wca") == 0) {
         WCA = true;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
       return 1;
     }
   }
-
+  fflush(stdout);
 
   //printf("flatdiv = %s\n", flat_div ? "true" : "false");
   //printf("outerSphere = %s\n", spherical_outer_wall ? "true" : "false");
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]){
   // for high filling fractions, since we could get stuck in a local
   // minimum.
   for(long i=0; i<N; i++) {
-    spheres[i]=10*rad*ran3();
+    spheres[i]=rad*ran3();
     if (spherical_outer_wall) {
       while (spheres[i].norm() > rad) {
         spheres[i] *= 0.9;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]){
       if (counter%1 == 0) {
         printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
                newPE, pressure, paranoia);
-        fflush(stdout);
+	fflush(stdout);
       }
       paranoia = long(paranoia*1.3); // get a little more paranoid each time...
 
@@ -353,14 +353,37 @@ int main(int argc, char *argv[]){
   long num_pressures_in_sum=0;
   double pressure_sum = 0;
 
-
+  printf("eric krebs eric krebs eric krebs");
+  char *gfilename1 = new char[1000];
+  sprintf(gfilename1, "%s.data_0", outfilename);
+  FILE *outdata = fopen(gfilename1, "w");
+  if (outdata == NULL) {
+    printf("Error creating file %s\n", gfilename1);
+    return 1;
+  } 
+  printf("pat kreitzberg %s", gfilename1);
+  for (long s=0;s<N;s++) {
+    fprintf(outdata,"%f\t%f\t%f\n",spheres[s][0],spheres[s][1],spheres[s][2]);
+  }
+  fclose(outdata);
+  delete[] gfilename1;
+	
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
   for (long j=0; j<iterations; j++){
+    printf("%ld",j);	
+
+
+
+
     num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
+      for(long i=0; i<div; i++){
+    	printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
+      }
+      fflush(stdout);
       ///////////////////////////////////////////start of print.dat
       const clock_t now = clock();
       secs_per_iteration = (now - double(start))/CLOCKS_PER_SEC/num_to_time;
@@ -443,6 +466,26 @@ int main(int argc, char *argv[]){
         }
         fclose(out);
 
+        double secs_done = double(now)/CLOCKS_PER_SEC;
+        long mins_done = secs_done / 60;
+        long hours_done = mins_done / 60;
+	if (hours_done>10){
+
+          char *gfilename1 = new char[1000];
+          sprintf(gfilename1, "%s.data_%ld", outfilename, mins_done);
+          out = fopen(gfilename1, "w");
+          if (out == NULL) {
+            printf("Error creating file %s\n", gfilename1);
+            return 1;
+          } 
+          delete[] gfilename1;
+	  for (long s=0;s<N;s++) {
+		fprintf(out,"%f\t%f\t%f\n",spheres[s][0],spheres[s][1],spheres[s][2]);
+	  }
+          fclose(out);
+	}
+
+
         if (periodic[0] && periodic[1] && periodic[2]) {
           char *gfilename = new char[1000];
           sprintf(gfilename, "%s.gradial", outfilename);
@@ -517,6 +560,9 @@ int main(int argc, char *argv[]){
       }
       printf("Pressure is %g (excess pressure: %g), energy is %g\n",
              newpress, excpress, potentialEnergy(spheres,N,R));
+      for(long i=0; i<div; i++){
+    	printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
+      }
       pressure_sum += calcPressure(spheres, N, volume);
       num_pressures_in_sum += 1;
     }
@@ -591,7 +637,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   if (has_x_wall){
     if (v[0] > lenx/2 || v[0] < -lenx/2) return true;
   }
-  if (has_y_wall){
+  if (has_y_wall){ 
     if (v[1] > leny/2 || v[1] < -leny/2) return true;
   }
   if (has_z_wall){
