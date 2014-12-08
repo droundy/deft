@@ -857,8 +857,10 @@ int main(int argc, const char *argv[]) {
       fprintf(s_out, "%s", headerinfo);
       fprintf(s_out, "%s", countinfo);
       fprintf(s_out, "# interactions\tsamples\n");
-      for(int i = 0; i < sw.energy_levels; i++)
-        fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
+      for(int i = 0; i < sw.energy_levels; i++) {
+        if (sw.energy_histogram[i] != 0)
+          fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
+      }
       fclose(s_out);
 
       // Save RDF
