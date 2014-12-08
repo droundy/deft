@@ -6,7 +6,6 @@
 #include <cassert>
 #include <string.h>
 #include <math.h>
-#include <fftw3.h>
 
 
 // A ComplexVector is a reference-counted array of std::complex<double>s.
