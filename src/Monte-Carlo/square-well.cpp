@@ -37,24 +37,42 @@ move_info::move_info(){
 }
 
 vector3d sw_fix_periodic(vector3d v, const double len[3]){
-  for (int i = 0; i < 3; i++){
-    while (v[i] > len[i])
-      v[i] -= len[i];
-    while (v[i] < 0.0)
-      v[i] += len[i];
-  }
+  // for (int i = 0; i < 3; i++){
+  //   while (v[i] > len[i])
+  //     v[i] -= len[i];
+  //   while (v[i] < 0.0)
+  //     v[i] += len[i];
+  // }
+  if (v.x > len[0]) v.x -= len[0];
+  else if (v.x < 0) v.x += len[0];
+  if (v.y > len[1]) v.y -= len[1];
+  else if (v.y < 0) v.y += len[1];
+  if (v.z > len[2]) v.z -= len[2];
+  else if (v.z < 0) v.z += len[2];
   return v;
 }
 
 vector3d periodic_diff(const vector3d &a, const vector3d  &b, const double len[3],
                        const int walls){
   vector3d v = b - a;
-  for (int i = 0; i < 3; i++){
-    if (i >= walls && len[i] > 0){
-      while (v[i] > len[i]/2.0)
-        v[i] -= len[i];
-      while (v[i] < -len[i]/2.0)
-        v[i] += len[i];
+  // for (int i = walls; i < 3; i++){
+  //   if (len[i] > 0){
+  //     while (v[i] > len[i]/2.0)
+  //       v[i] -= len[i];
+  //     while (v[i] < -len[i]/2.0)
+  //       v[i] += len[i];
+  //   }
+  // }
+  if (2 >= walls) {
+    if (v.z > 0.5*len[2]) v.z -= len[2];
+    else if (v.z < -0.5*len[2]) v.z += len[2];
+    if (1 >= walls) {
+      if (v.y > 0.5*len[1]) v.y -= len[1];
+      else if (v.y < -0.5*len[1]) v.y += len[1];
+      if (0 >= walls) {
+        if (v.x > 0.5*len[0]) v.x -= len[0];
+        else if (v.x < -0.5*len[0]) v.x += len[0];
+      }
     }
   }
   return v;
