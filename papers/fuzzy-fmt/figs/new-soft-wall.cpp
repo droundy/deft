@@ -119,7 +119,8 @@ int main(int argc, char **argv) {
   sscanf(argv[2], "%lg", &temp);
 
   HomogeneousSFMTFluid hf;
-  hf.sigma() = 1;
+  const double rad = 1;
+  hf.sigma() = rad*pow(2,5.0/6.0);
   hf.epsilon() = 1;
   hf.kT() = temp;
   hf.n() = reduced_density*pow(2,-5.0/2.0);
