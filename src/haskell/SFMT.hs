@@ -20,11 +20,11 @@ sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
 
 sfmt_fluid_n :: Expression Scalar
 sfmt_fluid_n = substitute n (r_var "n") $
-               sfmt + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+               sfmt + idealgas + ("external" === integrate (n * (r_var "Vext" - s_var "mu")))
 
 sfmt_fluid_Veff :: Expression Scalar
 sfmt_fluid_Veff = substitute n ("n" === exp(- r_var "Veff"/kT)) $
-                  sfmt + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+                  sfmt + idealgas + ("external" === integrate (n * (r_var "Vext" - s_var "mu")))
 
 homogeneous_sfmt_fluid :: Expression Scalar
 homogeneous_sfmt_fluid = makeHomogeneous $ substitute n (r_var "n") $
