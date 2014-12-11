@@ -111,6 +111,11 @@ bool Minimize::improve_energy(Verbosity v) {
       return false;
     }
 
+    if (step == orig_stepsize && fabs(E0) > 1e-200 && fabs(slope) > 1e-100) {
+      step = 0.001*fabs(E0)/slope;
+      if (v >= verbose) printf("\n\t\tInitializing stepsize to %g based on slope and energy\n\t\t",
+                               step);
+    }
     if (slope*step < 0) {
       if (v >= verbose) printf("\n\t\tSwapping sign of step with slope %g...\n\t\t", slope);
       step *= -1;
@@ -136,8 +141,11 @@ bool Minimize::improve_energy(Verbosity v) {
         break;
       }
       Etried = energy(v);
+      if (v > min_details) {
+        printf("\n\t\tDelta E is %g, with step size %g\n", E0 - energy(v), step1);
+      }
     } while (better(E0,energy(v)));
-  
+
     const double E1 = energy(v);
 
     // Do a parabolic extrapolation with E0, E1, and gd to get curvature
