@@ -60,12 +60,12 @@ for kT in kTs:
     data.append(numpy.loadtxt(fname))
     lines.append(styles.new_dft_code[kT])
 
-for kT in kTs:
-    # input: ["figs/wallssoft-%06.4f-%04.2f.dat" % (kT, n_reduced) for kT in [0.2, 0.5, 1.0]]
-    names.append('kT = %g' % kT)
-    fname = "figs/wallssoft-%6.4f-%04.2f.dat" % (kT, n_reduced)
-    data.append(numpy.loadtxt(fname))
-    lines.append(styles.dftwca[kT])
+# for kT in kTs:
+#     # input: ["figs/wallssoft-%06.4f-%04.2f.dat" % (kT, n_reduced) for kT in [0.2, 0.5, 1.0]]
+#     names.append('kT = %g' % kT)
+#     fname = "figs/wallssoft-%6.4f-%04.2f.dat" % (kT, n_reduced)
+#     data.append(numpy.loadtxt(fname))
+#     lines.append(styles.dftwca[kT])
 
 for i in range(len(data)):
     print 'plotting', names[i]

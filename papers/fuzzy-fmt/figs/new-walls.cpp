@@ -24,10 +24,10 @@
 #include "new/Minimize.h"
 
 // Here we set up the lattice.
-static double width = 15;
-const double dx = 0.001;
-const double dw = 0.001;
-const double spacing = 1.5; // space on each side
+static double width = 30;
+const double dx = 0.01;
+const double dw = 0.01;
+const double spacing = 3.0; // space on each side
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -42,7 +42,7 @@ static void took(const char *name) {
 void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
   if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
