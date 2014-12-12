@@ -7,6 +7,13 @@ import random
 from matplotlib.widgets import Slider, Button, RadioButtons
 sys.setrecursionlimit(2500)
 
+
+if len(sys.argv) < 2:
+    print("Usage:  " + sys.argv[0] + " filename.dat")
+    exit(1)
+
+allSpheres = genfromtxt(sys.argv[1])
+
 #spheres=np.zeros(shape=(20,3))
 #for i in range (
 
@@ -18,14 +25,16 @@ subplots_adjust(left=0.25, bottom=0.25)
 
 a0 = 0
 #axcoord = axes([0.25,.1,.65,.03])
-#scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
+scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
 
 
 
 
 balls = []
-
-for i in range(1,30):
+#for spheres in allSpheres:
+spheres = allSpheres # reshape(spheres, (-1, 3))
+#   rate(100)
+for i in range(len(spheres)):
 	x = 20*random.random()
         y = 20*random.random()
         r = 1

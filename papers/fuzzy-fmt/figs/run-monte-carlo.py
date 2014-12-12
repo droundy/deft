@@ -42,7 +42,12 @@ def run_test_particle(n_reduced, temperature, testp_sigma,testp_eps,pot = ""):
 argon_sigma=3.405
 argon_eps=119.8
 
-run_test_particle(0.957,2.48,3.405, 119.8,"wca")
+run_homogeneous(.42,.42,"wca")
+run_test_particle(0.83890,0.71,argon_sigma,argon_eps,"wca")
+run_test_particle(0.957,2.48,argon_sigma,argon_eps,"wca")
+run_test_particle(0.957,1.235,argon_sigma,argon_eps,"wca")
+run_test_particle(0.5844,1.235,argon_sigma,argon_eps,"wca")
+run_test_particle(1.095,2.48,argon_sigma,argon_eps,"wca")
 
 
 

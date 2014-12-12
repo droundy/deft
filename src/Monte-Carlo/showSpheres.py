@@ -25,12 +25,12 @@ for i in range(len(spheres)):
       balls.append(sphere(pos=spheres[i]))
    else:
       balls[i].pos = spheres[i]
-   for j in range(len(spheres)):
-     if i != j:
-         d = sqrt((spheres[j][0]-spheres[i][0])**2+(spheres[j][1]-spheres[i][1])**2+(spheres[j][2]-spheres[i][2])**2)
-         if d < 2:
-           print 'distance is', i, j, d
-           balls[i].color = color.yellow
+#   for j in range(len(spheres)):
+#     if i != j:
+#         d = sqrt((spheres[j][0]-spheres[i][0])**2+(spheres[j][1]-spheres[i][1])**2+(spheres[j][2]-spheres[i][2])**2)
+#         if d < 2:
+           #print 'distance is', i, j, d
+#           balls[i].color = color.yellow
 
 #The rest is stuff that Jeff added for investigating a bug with the mc-walls data.  More info about walls!
 countOutside = 0
