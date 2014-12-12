@@ -33,7 +33,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_solid(double reduced_density, double lattice_constant, double kT, SFMTFluidVeff *f) {
+void run_solid(double lattice_constant, double reduced_density, double kT, SFMTFluidVeff *f) {
   Minimize min(f);
   min.set_relative_precision(0);
   min.set_maxiter(10000);
@@ -52,7 +52,7 @@ void run_solid(double reduced_density, double lattice_constant, double kT, SFMTF
   char *fname = new char[5000];
   mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
   snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/melting-%04.2f-%04.2f-%04.2f.dat",
-           reduced_density, lattice_constant, kT);
+           lattice_constant, reduced_density, kT);
   FILE *o = fopen(fname, "w");
   if (!o) {
     fprintf(stderr, "error creating file %s\n", fname);
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   //f.n() = hf.n();
-  f.Veff() = -temp*log(hf.n());
+  f.Veff() = 0;
 
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
@@ -116,36 +116,100 @@ int main(int argc, char **argv) {
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
-        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) + ry*ry + rz*rz);
+        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                           rz*rz);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
-        dist = sqrt((rx+lattice_constant/2)*(rx-lattice_constant/2) + ry*ry + rz*rz);
+
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                    rz*rz);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
-        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) + ry*ry + rz*rz);
+
+        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rz*rz);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
-        dist = sqrt((rx-lattice_constant/2)*(rx+lattice_constant/2) + ry*ry + rz*rz);
+
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rz*rz);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
-        double dist = sqrt(rx*rx + (ry-lattice_constant/2)*(ry-lattice_constant/2) + rz*rz);
+        double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                           rx*rx);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
-        // add extra
+
+        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                    rx*rx);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+
+        dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rx*rx);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+
+        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rx*rx);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
-        double dist = sqrt(rx*rx + ry*ry + (rz-lattice_constant/2)*(rz-lattice_constant/2));
+        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                           (rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                           ry*ry);
         f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
-        // add extra
+
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                    ry*ry);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+
+        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    ry*ry);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    ry*ry);
+        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
     }
     for (int i=0; i<Ntot; i++) {
       f.Veff()[i] = -temp*log(f.Veff()[i]); // convert from density to effective potential
     }
   }
+
+  {
+    char *fname = new char[5000];
+    mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
+    snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/initial-melting-%04.2f-%04.2f-%04.2f.dat",
+             lattice_constant, reduced_density, temp);
+    FILE *o = fopen(fname, "w");
+    if (!o) {
+      fprintf(stderr, "error creating file %s\n", fname);
+      exit(1);
+    }
+    delete[] fname;
+    const int Nz = f.Nz();
+    Vector rz = f.get_rz();
+    Vector n = f.get_n();
+    for (int i=0;i<Nz/2;i++) {
+      fprintf(o, "%g\t%g\n", rz[i], n[i]);
+    }
+    fclose(o);
+  }
+
   printf("my initial energy is %g\n", f.energy());
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
 
-  run_solid(reduced_density, lattice_constant, temp, &f);
+  run_solid(lattice_constant, reduced_density, temp, &f);
   return 0;
 }
