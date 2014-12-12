@@ -35,7 +35,7 @@ static void took(const char *name) {
 
 void run_solid(double lattice_constant, double reduced_density, double kT, SFMTFluidVeff *f) {
   Minimize min(f);
-  min.set_relative_precision(0);
+  min.set_relative_precision(1e-5);
   min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
@@ -43,7 +43,7 @@ void run_solid(double lattice_constant, double reduced_density, double kT, SFMTF
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g and a = %g |\n", reduced_density, kT, lattice_constant);
   printf("========================================\n");
-  while (min.improve_energy(quiet)) {
+  while (min.improve_energy(verbose)) {
     //f->run_finite_difference_test("SFMT");
   }
   took("Doing the minimization");
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   printf("bulk energy is %g\n", hf.energy());
   printf("liquid cell free energy should be %g\n", hf.energy()*lattice_constant*lattice_constant*lattice_constant);
 
-  const double dx = 0.01;
+  const double dx = 0.05;
   SFMTFluidVeff f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
