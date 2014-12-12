@@ -503,6 +503,7 @@ for mkdat in Split("""
                       source = [mkdat + '.cpp'] + all_sources))
 
 for mkdat in Split("""
+	papers/fuzzy-fmt/figs/new-melting
 	papers/fuzzy-fmt/figs/new-walls
 	papers/fuzzy-fmt/figs/new-soft-wall
       """):
