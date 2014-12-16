@@ -89,6 +89,7 @@ int main(int argc, const char *argv[]) {
   int gaussian_fit = false;
   int walker_weights = false;
   int wang_landau = false;
+  int vanilla_wang_landau = false;
 
   // Tuning factors
   double wl_factor = 0.125;
@@ -96,8 +97,17 @@ int main(int argc, const char *argv[]) {
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
   double gaussian_bubble_cutoff = 0.2;
-  double robust_update_scale = 0.8;
-  double robust_cutoff = 0.2;
+  double robust_update_scale = 0.8; // should be ~1, but must be <= 1
+  double robust_cutoff = 0.2; // should be ~0.1, and must be < 1
+
+  // Do not change these*! They are taken directly from the WL paper.
+  double vanilla_wl_factor = exp(1);
+  double vanilla_wl_fmod = 2;
+  double vanilla_wl_threshold = 0.25;
+  double vanilla_wl_cutoff = 3e-8;
+  // *fixme: the actual cutoff should be 1e-8, but that can make some of the small default
+  //   runs take hours to complete! We should definitely comment on that in the
+  //   histogram paper.
 
   sw_simulation sw;
 
@@ -192,6 +202,8 @@ int main(int argc, const char *argv[]) {
      "Use a walker optimization weight histogram method", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
      "Use Wang-Landau histogram method", "BOOLEAN"},
+    {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
+     "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_factor,
      0, "Initial value of Wang-Landau factor", "DOUBLE"},
     {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
@@ -228,7 +240,8 @@ int main(int argc, const char *argv[]) {
 
   // check that only one method is used
   if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
-     + bool(gaussian_fit) + bool(wang_landau) + bool(walker_weights) + (fix_kT != 0) != 1){
+     + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
+     + bool(walker_weights) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!");
     return 254;
   }
@@ -320,6 +333,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
       sprintf(method_tag, "-wang_landau");
+    } else if (vanilla_wang_landau) {
+      sprintf(method_tag, "-vanilla_wang_landau");
     } else if (walker_weights) {
       sprintf(method_tag, "-walkers");
     } else {
@@ -559,13 +574,6 @@ int main(int argc, const char *argv[]) {
         } else
           sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
       }
-      // double slope = (sw.ln_energy_weights[minE] - sw.ln_energy_weights[minE-5])/5.0; // very hokey
-      // if (slope > 0) {
-      // for (int e=minE+1; e < sw.energy_levels; e++) {
-        // For lower energies, let's try a linear extrapolation in log space.
-        // sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + slope*(e - minE);
-      // }
-      // }
       // Flatten weights above state of max entropy
       for (int e=0; e < sw.state_of_max_entropy; e++)
         sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.state_of_max_entropy];
@@ -620,7 +628,10 @@ int main(int argc, const char *argv[]) {
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
-    sw.initialize_wang_landau(wl_factor, wl_threshold, wl_cutoff);
+    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
+  } else if (vanilla_wang_landau) {
+    sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
+                              vanilla_wl_threshold, vanilla_wl_cutoff);
   } else { // initialize optimized ensemble method
     while(sw.iteration <= initialization_iterations + first_weight_update) {
       // ---------------------------------------------------------------

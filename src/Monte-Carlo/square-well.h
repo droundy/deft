@@ -114,7 +114,8 @@ struct sw_simulation {
   void initialize_canonical(double kT);
 
   // improve the weight array using the Wang-Landau method.
-  void initialize_wang_landau(double wl_factor, double wl_threshold, double wl_cutoff);
+  void initialize_wang_landau(double wl_factor, double wl_fmod,
+                              double wl_threshold, double wl_cutoff);
 };
 
 // Modulates v to within the periodic boundaries of the cell

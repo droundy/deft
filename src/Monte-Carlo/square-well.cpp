@@ -577,8 +577,8 @@ void sw_simulation::initialize_canonical(double kT) {
 }
 
 // improve the weight array using the Wang-Landau method.
-void sw_simulation::initialize_wang_landau(double wl_factor, double wl_threshold,
-                                           double wl_cutoff) {
+void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
+                                           double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
   const int starting_iterations = iteration;
   while (1) {
@@ -598,7 +598,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_threshold
     fflush(stdout);
 
     if (variation > 0 && variation < max(wl_threshold, exp(wl_factor))) {
-      wl_factor /= 2;
+      wl_factor /= wl_fmod;
       // for wang-landau, only flush energy histogram; keep weights
       flush_arrays(energy_histogram, ln_energy_weights, energy_levels, true,
                    state_of_max_entropy);
