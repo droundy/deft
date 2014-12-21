@@ -7,7 +7,7 @@ USING_PART_OF_NAMESPACE_EIGEN
 
 #include <cassert>
 #include <math.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 
 double ran();
@@ -23,8 +23,6 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s);
 double calcPressure(Vector3d *spheres, long N, double volume);
 double potentialEnergy(Vector3d *spheres, long n, double R);
 inline Vector3d fixPeriodic(Vector3d newv);
-
-
 
 double kT;
 double eps = 1;
@@ -58,7 +56,6 @@ bool periodic[3] = {false, false, false};
 inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
-  printf("eric1 krebs eric1 krebs eric1 krebs");
   if (argc < 6) {
     printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
@@ -195,6 +192,10 @@ int main(int argc, char *argv[]){
   long density_saved_count = 0;
 
   Vector3d *spheres = new Vector3d[N];
+  const int num_frames = 100;
+  int which_frame = 0;
+  Vector3d *movieData = new Vector3d[num_frames*N];
+
   if (uncertainty_goal < 1e-12 || uncertainty_goal > 1.0) {
     printf("Crazy uncertainty goal:  %s\n", argv[1]);
     return 1;
@@ -353,7 +354,6 @@ int main(int argc, char *argv[]){
   long num_pressures_in_sum=0;
   double pressure_sum = 0;
 
-  printf("eric krebs eric krebs eric krebs");
   char *gfilename1 = new char[1000];
   sprintf(gfilename1, "%s.data_0", outfilename);
   FILE *outdata = fopen(gfilename1, "w");
@@ -361,7 +361,6 @@ int main(int argc, char *argv[]){
     printf("Error creating file %s\n", gfilename1);
     return 1;
   } 
-  printf("pat kreitzberg %s", gfilename1);
   for (long s=0;s<N;s++) {
     fprintf(outdata,"%f\t%f\t%f\n",spheres[s][0],spheres[s][1],spheres[s][2]);
   }
@@ -371,17 +370,21 @@ int main(int argc, char *argv[]){
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
+  for (int i=0;i<N;i++) {
+    movieData[i] = spheres[i];
+    printf("lenx: %g leny: %g\t\tx: %g y: %g\t\tx': %g y': %g\n",
+           lenx, leny, movieData[i][0], movieData[i][1],
+           fixPeriodic(movieData[i])[0], fixPeriodic(movieData[i])[1]);
+    assert(fabs(movieData[i][0]) <= lenx/2);
+    assert(fabs(movieData[i][1]) <= leny/2);
+  }
+  which_frame = N;
   for (long j=0; j<iterations; j++){
-    printf("%ld",j);	
-
-
-
-
     num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
       for(long i=0; i<div; i++){
-    	printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
+        //printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
       }
       fflush(stdout);
       ///////////////////////////////////////////start of print.dat
@@ -528,11 +531,60 @@ int main(int argc, char *argv[]){
     Vector3d temp = move(spheres[j%N],scale);
     count++;
     if(!overlap(spheres, temp, N, R, j%N)){
-
       spheres[j%N] = temp;
       workingmoves++;
     }
-    
+
+    if (which_frame < N*num_frames) {
+      assert(which_frame%N == j%N);
+      movieData[which_frame] = spheres[which_frame%N];
+      which_frame++;
+    } else if (movieData) {
+      printf("\n\nworking on movie!!!\n\n\n");
+      const double scale = 10;
+      FILE *movie = fopen("movie.svg", "w");
+      fprintf(movie, "<svg version=\"1.1\" width=\"%g\" height=\"%g\" xmlns=\"http://www.w3.org/2000/svg\">\n",
+              lenx*scale, leny*scale);
+      for (int s=0;s<N;s++) {
+        fprintf(movie,
+                "  <circle cx=\"%g\" cy=\"%g\" r=\"%g\" fill=\"none\" stroke=\"black\" stroke-width=\"%g\">\n",
+                (lenx/2+movieData[s][0])*scale, (leny/2+movieData[s][1])*scale,
+                R*scale, 0.05*R*scale);
+
+        fprintf(movie,
+                "    <animate attributeName=\"cx\" dur=\"%gms\" repeatCount=\"indefinite\" values=\"%g",
+                500.0*num_frames, (lenx/2+movieData[s][0])*scale);
+        for (int f=1;f<num_frames;f++) {
+          fprintf(movie, "; %g", (lenx/2+movieData[s+f*N][0])*scale);
+        }
+        fprintf(movie, "; %g\" keyTimes=\"0",
+                (lenx/2+movieData[s+(num_frames-1)*N][0])*scale);
+        for (int f=1;f<num_frames;f++) {
+          fprintf(movie, "; %g", (1+s+(f-1)*N)/double(num_frames*N));
+        }
+        fprintf(movie, "; 1\"/>\n");
+
+        fprintf(movie,
+                "    <animate attributeName=\"cy\" dur=\"%gms\" repeatCount=\"indefinite\" values=\"%g",
+                500.0*num_frames, (leny/2+movieData[s][1])*scale);
+        for (int f=1;f<num_frames;f++) {
+          fprintf(movie, "; %g", (leny/2+movieData[s+f*N][1])*scale);
+        }
+        fprintf(movie, "; %g\" keyTimes=\"0",
+                (lenx/2+movieData[s+(num_frames-1)*N][0])*scale);
+        for (int f=1;f<num_frames;f++) {
+          fprintf(movie, "; %g", (1+s+(f-1)*N)/double(num_frames*N));
+        }
+        fprintf(movie, "; 1\"/>\n");
+
+        fprintf(movie, "  </circle>\n");
+      }
+      fprintf(movie, "</svg>\n");
+      fclose(movie);
+      delete[] movieData;
+      movieData = 0;
+    }
+
     // only write out the sphere positions after they've all had a
     // chance to move
     if (j%N == 0) {
@@ -553,15 +605,15 @@ int main(int argc, char *argv[]){
     }
     if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
       double newpress = calcPressure(spheres, N, volume);
-      const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
+      //const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
       if (newpress != newpress) {
         printf("Got NaN trouble.\n");
         exit(1);
       }
-      printf("Pressure is %g (excess pressure: %g), energy is %g\n",
-             newpress, excpress, potentialEnergy(spheres,N,R));
+      //printf("Pressure is %g (excess pressure: %g), energy is %g\n",
+      //       newpress, excpress, potentialEnergy(spheres,N,R));
       for(long i=0; i<div; i++){
-    	printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
+        //printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
       }
       pressure_sum += calcPressure(spheres, N, volume);
       num_pressures_in_sum += 1;
