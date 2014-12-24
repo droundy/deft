@@ -65,7 +65,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation.  Although
      ln_energy_weights is a constant except during initialization. */
 
-  int state_of_max_entropy, max_observed_interactions;
+  int max_entropy_state, max_observed_interactions;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -78,12 +78,12 @@ struct sw_simulation {
   long *samples; // how many independent samples of a given energy have we had?
   // return the number times we have sampled the minimum energy state
   long min_energy_observations() const {
-    for (int i=energy_levels-1;i>=state_of_max_entropy;i--)
+    for (int i = energy_levels-1; i >= max_entropy_state; i--)
       if (samples[i]) return samples[i];
     return 0;
   };
   int max_interactions() const { // return the maximum observed number of interactions
-    for (int i=energy_levels-1;i>=0;i--) if (energy_histogram[i]) return i;
+    for (int i = energy_levels-1; i >= 0; i--) if (energy_histogram[i]) return i;
     return 0;
   };
 
@@ -166,16 +166,6 @@ bool in_cell(const ball &p, const double len[3], const int walls,
 // respective standard deviations dist and angwidth
 ball random_move(const ball &original, double size, const double len[3]);
 
-// Attempt to move ball of id in p, while paying attention to collisions and walls
-// Returns the sum of:
-// 1 if the move was successful
-// 2 if the neighbor table was updated
-// 4 if, after updating the neighbor table, neighbors were informed
-void move_one_ball(int id, ball *p, int N, double len[3], int walls,
-                   double neighborR, double translation_distance,
-                   double interaction_distance, int max_neighbors, double dr,
-                   move_info *move, int interactions, double *ln_energy_weights);
-
 // Count the number of interactions a given ball has
 int count_interactions(int id, ball *p, double interaction_distance,
                        double len[3], int walls);
@@ -185,12 +175,12 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
                            double len[3], int walls);
 
 // Find index of max entropy point
-int max_entropy_index(long *energy_histogram, double *ln_energy_weights,
+int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
                       int energy_levels);
 
 // Flatten weights beyond max entropy point and reset energy histogram
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels, bool flush_weights);
+                  int energy_levels, int max_entropy_state, bool reset_energy_histogram);
 
 void walker_hist(long *energy_histogram, double *ln_energy_weights,
                  int energy_levels, long *walkers_up, long *walkers_total,
@@ -200,26 +190,6 @@ void walker_hist(long *energy_histogram, double *ln_energy_weights,
 double count_variation(long *energy_histogram, double *ln_energy_weights,
                        int energy_levels);
 
-// Consider an fcc lattice broken into cubic cells with a ball at the center of each cell
-//   and a ball on the center of each edge
-// Choosing one cell as the "center", index each cell by n, m, and l,
-//   along the x, y, and z axis respectively
-// For example, a cell three cells to the left, one cell forward, and five cells down
-//    from the "center" cell would be indexed n = 3, m = 1, l = -5
-// Denote the sides of a given cell by values of x, y, and z which may be -1, 0, or 1
-// For example, the "forward right" side of a cell has x = 1, y = 1, z = 0,
-//    while the "top left" side would be x = -1, y = 0, z = 1
-// This function finds the position of the ball located at n,m,l,x,y,z,
-//    assuming cells have a side length of a
-vector3d pos_at(int n, int m, int l, double x, double y, double z, double a);
-
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius
 int max_balls_within(double radius);
-
-// Upper limit on the maximum number of interacions N balls with well width ww could have
-// Makes a spherical droplet with N balls, and counts the interactions in that droplet
-// fixme: currently wrong because it doesn't consider the fact that opposite ends of
-//    the droplet interact in a periodic cell
-int maximum_interactions(int N, double interaction_distance, double neighbor_R,
-                         int max_neighbors, double len[3]);

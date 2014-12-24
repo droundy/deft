@@ -126,7 +126,6 @@ int main(int argc, const char *argv[]) {
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
   long simulation_iterations = 2500000;
-  long initialization_iterations = 500000;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
@@ -153,9 +152,6 @@ int main(int argc, const char *argv[]) {
      "the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    {"initialize", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
-     &initialization_iterations, 0,
-     "Number of iterations to run for initialization", "INT"},
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
      0, "Number of iterations for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
@@ -298,7 +294,7 @@ int main(int argc, const char *argv[]) {
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
-  if (sw.N <= 0 || initialization_iterations < 0 || simulation_iterations < 0 || R <= 0 ||
+  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.dr <= 0 || translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
@@ -370,7 +366,7 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   sw.iteration = 0; // start at zeroeth iteration
-  sw.state_of_max_entropy = 0;
+  sw.max_entropy_state = 0;
   sw.max_observed_interactions = 0;
 
   // translation distance should scale with ball radius
@@ -382,21 +378,24 @@ int main(int argc, const char *argv[]) {
   // Find the upper limit to the maximum number of neighbors a ball could have
   sw.max_neighbors = max_balls_within(2+neighbor_scale*well_width);
 
-  // Energy histogram
+  // Energy histogram and weights
   sw.interaction_distance = 2*R*well_width;
   sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
   sw.energy_histogram = new long[sw.energy_levels]();
+  sw.ln_energy_weights = new double[sw.energy_levels]();
 
+  // Observed and sampled energies
   sw.energy_observed = new bool[sw.energy_levels]();
   sw.samples = new long[sw.energy_levels]();
 
-  // Walkers
+  // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
   sw.walkers_total = new long[sw.energy_levels]();
 
-  // Energy weights, state density
+  // a guess for the number of iterations for which to initially run
+  //   optimized ensemble initialization
+  int first_weight_update = sw.energy_levels;
   int weight_updates = 0;
-  sw.ln_energy_weights = new double[sw.energy_levels]();
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
@@ -419,9 +418,6 @@ int main(int argc, const char *argv[]) {
   sw.balls = new ball[sw.N];
 
   if(totime < 0) totime = 10*sw.N;
-
-  // a guess for the number of iterations for which to run histogram initialization
-  int first_weight_update = sw.energy_levels;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -554,7 +550,7 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is.
-  sw.state_of_max_entropy = sw.initialize_max_entropy_and_translation_distance();
+  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
 
   if (gaussian_fit) {
     sw.initialize_gaussian(50);
@@ -566,7 +562,7 @@ int main(int argc, const char *argv[]) {
       done = true; // Let's be optimistic!
       // First, let's reset our weights based on what we already know!
       int minE = 0;
-      for (int e=sw.state_of_max_entropy; e<sw.energy_levels; e++) {
+      for (int e=sw.max_entropy_state; e<sw.energy_levels; e++) {
         if (sw.energy_histogram[e]) {
           // We don't want to be overzealous, so we include a scale factor
           sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
@@ -575,8 +571,8 @@ int main(int argc, const char *argv[]) {
           sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
       }
       // Flatten weights above state of max entropy
-      for (int e=0; e < sw.state_of_max_entropy; e++)
-        sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.state_of_max_entropy];
+      for (int e=0; e < sw.max_entropy_state; e++)
+        sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.max_entropy_state];
       // Now reset the calculation!
       for (int e=0; e < sw.energy_levels; e++) {
         sw.energy_histogram[e] = 0;
@@ -592,8 +588,8 @@ int main(int argc, const char *argv[]) {
         moves++;
       }
       // Check whether our histogram is sufficiently flat; if not, we have to restart!
-      mean_hist = moves/double(sw.max_observed_interactions - sw.state_of_max_entropy);
-      for (int e=sw.state_of_max_entropy+1; e<=sw.max_observed_interactions; e++) {
+      mean_hist = moves/double(sw.max_observed_interactions - sw.max_entropy_state);
+      for (int e=sw.max_entropy_state+1; e<=sw.max_observed_interactions; e++) {
         if (sw.energy_histogram[e] < sw.N
             || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
           printf("After %d moves, at energy %d hist = %ld vs mean %g.\n",
@@ -603,7 +599,7 @@ int main(int argc, const char *argv[]) {
         }
       }
       // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.state_of_max_entropy; i < sw.max_observed_interactions; i++)
+      for(int i = sw.max_entropy_state; i < sw.max_observed_interactions; i++)
         printf("%i  %li\n",i,sw.energy_histogram[i]);
     } while (!done);
     printf("All done initializing robustly.\n");
@@ -617,7 +613,7 @@ int main(int argc, const char *argv[]) {
     double range;
     do {
       width = sw.initialize_gaussian(scale);
-      range = sw.max_observed_interactions - sw.state_of_max_entropy;
+      range = sw.max_observed_interactions - sw.max_entropy_state;
       // Now shift to the max entropy state...
       sw.initialize_max_entropy_and_translation_distance();
       printf("***\n");
@@ -633,25 +629,19 @@ int main(int argc, const char *argv[]) {
     sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                               vanilla_wl_threshold, vanilla_wl_cutoff);
   } else { // initialize optimized ensemble method
-    while(sw.iteration <= initialization_iterations + first_weight_update) {
-      // ---------------------------------------------------------------
-      // Move each ball once
-      // ---------------------------------------------------------------
-      for(int i = 0; i < sw.N; i++){
+    while(sw.iteration <= first_weight_update) {
+      // run an iteration
+      for(int i = 0; i < sw.N; i++)
         sw.move_a_ball();
-      }
       assert(sw.interactions ==
              count_all_interactions(sw.balls, sw.N, sw.interaction_distance,
                                     sw.len, sw.walls));
-
-      // ---------------------------------------------------------------
-      // Update weights
-      // ---------------------------------------------------------------
-      if((sw.iteration > first_weight_update)
+      // update weights
+      if((sw.iteration >= first_weight_update)
          && ((sw.iteration-first_weight_update)
              % int(first_weight_update*uipow(2,weight_updates)) == 0)) {
 
-        printf("Weight update: %d.\n", int(uipow(2,weight_updates)));
+        printf("Weight update: %d.\n", weight_updates);
         walker_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels,
                     sw.walkers_up, sw.walkers_total, &sw.moves);
         weight_updates++;
