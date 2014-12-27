@@ -17,7 +17,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 versions = eval(sys.argv[3])
-#arg versions = [["wang_landau","vanilla_wang_landau","robustly_optimistic","gaussian","bubble_suppression","walkers"]]
+#arg versions = [["wang_landau","vanilla_wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,7,8,9,10,20] for dat in ['s', 'lnw', 'E']]
 

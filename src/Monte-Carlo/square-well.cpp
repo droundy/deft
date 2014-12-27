@@ -241,9 +241,7 @@ int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
   return max_entropy_state;
 }
 
-void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels, int max_entropy_state,
-                  bool reset_energy_histogram = true){
+void flush_weight_array(double *ln_energy_weights, int energy_levels, int max_entropy_state){
   // make weights flat at energies above the maximum entropy state
   for (int i = 0; i < max_entropy_state; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
@@ -254,35 +252,6 @@ void flush_arrays(long *energy_histogram, double *ln_energy_weights,
     min_weight = min(min_weight, ln_energy_weights[i]);
   for (int i = 0; i < energy_levels; i++)
     ln_energy_weights[i] -= min_weight;
-  // Finally, if requested, zero out the energy histogram.
-  if (reset_energy_histogram) {
-    for (int i = 0; i < energy_levels; i++) {
-      if (energy_histogram[i] > 0) energy_histogram[i] = 1;
-    }
-  }
-  return;
-}
-
-void walker_hist(long *energy_histogram, double *ln_energy_weights,
-                 int energy_levels, long *walkers_up,
-                 long *walkers_total, move_info *moves){
-  int max_entropy_state =
-    new_max_entropy_state(energy_histogram, ln_energy_weights, energy_levels);
-  for(int i = max_entropy_state; i < energy_levels; i++){
-    int top = i < energy_levels-1 ? i+1 : i;
-    int bottom = i > 0 ? i-1 : i;
-    int dE = bottom-top; // energy = -interactions
-    double df = double(walkers_up[top]) / walkers_total[top]
-      - (double(walkers_up[bottom]) / walkers_total[bottom]);
-    double df_dE = (df != 0 && df == df) ? df/dE : 1;
-    double walker_density =
-      double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves->total;
-    ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
-  }
-  for (int i = 0; i < energy_levels; i++)
-    walkers_total[i] = 0;
-
-  flush_arrays(energy_histogram, ln_energy_weights, energy_levels, max_entropy_state);
   return;
 }
 
@@ -424,7 +393,7 @@ void sw_simulation::end_move_updates(){
   energy_histogram[interactions]++; // update energy histogram
   if(moves.total % N == 0) iteration++; // update iteration counter
   // update walker counters
-  if(energy_observed[max_observed_interactions]){
+  if(energy_observed[min_energy_state]){
     walkers_up[interactions]++;
   }
   walkers_total[interactions]++;
@@ -444,8 +413,8 @@ void sw_simulation::energy_change_updates(){
   }
   // If we have observed a new lowest energy, remember it; furthermore, this means we can't
   //   have had any walkers going up from the lowest energy, so we reset walkers_up
-  if(interactions > max_observed_interactions){
-    max_observed_interactions = interactions;
+  if(interactions > min_energy_state){
+    min_energy_state = interactions;
     for(int i = max_entropy_state; i < energy_levels; i++)
       walkers_up[i] = 0;
   }
@@ -520,7 +489,7 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
   return int(mean + 0.5);
 }
 
-// initialize the weight array using the Gaussian approximation.
+// initialize the weight array using the Gaussian method
 double sw_simulation::initialize_gaussian(double scale) {
   double variance = 0, old_variance;
   double mean = 0, old_mean;
@@ -574,7 +543,7 @@ void sw_simulation::initialize_canonical(double kT) {
   }
 }
 
-// improve the weight array using the Wang-Landau method.
+// initialize the weight array using the Wang-Landau method.
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
@@ -598,9 +567,11 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
     if (variation > 0 && variation < max(wl_threshold, exp(wl_factor))) {
       wl_factor /= wl_fmod;
-      // reset energy histogram
-      flush_arrays(energy_histogram, ln_energy_weights, energy_levels, max_entropy_state,
-                   true);
+      flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
+      for (int i = 0; i < energy_levels; i++) {
+        if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+      }
+
 
       // repeat until terminal condition is met
       if (wl_factor < wl_cutoff) {
@@ -608,6 +579,43 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                iteration - starting_iterations);
         finished_initializing = true;
       }
+    }
+  }
+}
+
+// initialize the weight array using the optimized ensemble method.
+void sw_simulation::initialize_walker_optimization(int first_update_iterations,
+                                                  int init_min_energy_samples){
+  int weight_updates = 0;
+  while(iteration <= first_update_iterations ||
+        samples[min_energy_state] < init_min_energy_samples) {
+    // run an iteration
+    for(int i = 0; i < N; i++) move_a_ball();
+    assert(interactions ==
+           count_all_interactions(balls, N, interaction_distance, len, walls));
+    // update weights when we've run long enough
+    if((iteration - first_update_iterations)
+       % int(first_update_iterations*uipow(2,weight_updates)) == 0){
+      for(int i = max_entropy_state; i < energy_levels; i++){
+        int top = i < energy_levels-1 ? i+1 : i;
+        int bottom = i > 0 ? i-1 : i;
+        int dE = bottom-top;
+        double df = double(walkers_up[top]) / walkers_total[top]
+          - (double(walkers_up[bottom]) / walkers_total[bottom]);
+        double df_dE = (df < 0 && df == df) ? df/dE : 1;
+        double walker_density =
+          double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
+        ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
+      }
+      flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
+      for(int i = 0; i < energy_levels; i++){
+        walkers_up[i] = 0;
+        walkers_total[i] = 0;
+      }
+      printf("Weight update: %i. min_energy_state: %i. samples: %li\n",
+             weight_updates, min_energy_state, samples[min_energy_state]);
+      fflush(stdout);
+      weight_updates++;
     }
   }
 }

@@ -65,7 +65,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation.  Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, max_observed_interactions;
+  int max_entropy_state, min_energy_state;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -113,9 +113,13 @@ struct sw_simulation {
   // initialize the weight array using the specified temperature.
   void initialize_canonical(double kT);
 
-  // improve the weight array using the Wang-Landau method.
+  // initialize the weight array using the Wang-Landau method.
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
+
+  // initialize the weight array using the optimized ensemble method.
+  void initialize_walker_optimization(int first_update_iterations,
+                                      int init_min_energy_samples);
 };
 
 // Modulates v to within the periodic boundaries of the cell
@@ -181,10 +185,6 @@ int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
 // Flatten weights beyond max entropy point and reset energy histogram
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
                   int energy_levels, int max_entropy_state, bool reset_energy_histogram);
-
-void walker_hist(long *energy_histogram, double *ln_energy_weights,
-                 int energy_levels, long *walkers_up, long *walkers_total,
-                 move_info *moves);
 
 // Variation in histogram values
 double count_variation(long *energy_histogram, double *ln_energy_weights,

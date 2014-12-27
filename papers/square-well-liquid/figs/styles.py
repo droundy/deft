@@ -7,7 +7,7 @@ color = { 'nw': 'r',
           'vanilla_wang_landau': 'b',
           'robustly_optimistic': 'r',
           'gaussian': 'm',
-          'walkers': 'y'}
+          'walker_optimization': 'y'}
 
 line = { 'nw': '--',
          'kT1': '--',
@@ -18,7 +18,7 @@ line = { 'nw': '--',
          'vanilla_wang_landau': '-',
          'robustly_optimistic': '-',
          'gaussian': '-',
-         'walkers': '-'}
+         'walker_optimization': '-'}
 
 title = { 'nw': '$kT/\epsilon = \infty$ sim.',
           'kT1': '$kT/\epsilon = 1$ sim.',
@@ -29,7 +29,7 @@ title = { 'nw': '$kT/\epsilon = \infty$ sim.',
           'vanilla_wang_landau': 'Vanilla Wang-Landau',
           'robustly_optimistic': 'robustly optimistic',
           'gaussian': 'gaussian method',
-          'walkers': 'walker optimization'}
+          'walker_optimization': 'walker optimization'}
 
 plot = {}
 for k in color:

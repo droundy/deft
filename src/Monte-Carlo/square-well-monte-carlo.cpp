@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
   int robustly_optimistic = false;
   int bubble_suppression = false;
   int gaussian_fit = false;
-  int walker_weights = false;
+  int walker_optimization = false;
   int wang_landau = false;
   int vanilla_wang_landau = false;
 
@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) {
 
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
-  sw.N = 1000;
+  sw.N = 10;
   sw.dr = 0.1;
 
   int wall_dim = 0;
@@ -125,11 +125,11 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 2500000;
+  long simulation_iterations = 1000000;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
-  double ff = 0.0;
+  double ff = 0.3;
   double neighbor_scale = 2;
   double de_density = 0.1;
   double de_g = 0.05;
@@ -194,7 +194,7 @@ int main(int argc, const char *argv[]) {
      "Use the bubble suppression method", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
-    {"walkers", '\0', POPT_ARG_NONE, &walker_weights, 0,
+    {"walker_optimization", '\0', POPT_ARG_NONE, &walker_optimization, 0,
      "Use a walker optimization weight histogram method", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
      "Use Wang-Landau histogram method", "BOOLEAN"},
@@ -237,7 +237,7 @@ int main(int argc, const char *argv[]) {
   // check that only one method is used
   if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
      + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(walker_weights) + (fix_kT != 0) != 1){
+     + bool(walker_optimization) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!");
     return 254;
   }
@@ -331,8 +331,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
       sprintf(method_tag, "-vanilla_wang_landau");
-    } else if (walker_weights) {
-      sprintf(method_tag, "-walkers");
+    } else if (walker_optimization) {
+      sprintf(method_tag, "-walker_optimization");
     } else {
       method_tag[0] = 0; // set method_tag to the empty string
     }
@@ -367,7 +367,7 @@ int main(int argc, const char *argv[]) {
 
   sw.iteration = 0; // start at zeroeth iteration
   sw.max_entropy_state = 0;
-  sw.max_observed_interactions = 0;
+  sw.min_energy_state = 0;
 
   // translation distance should scale with ball radius
   sw.translation_distance = translation_scale*R;
@@ -394,8 +394,9 @@ int main(int argc, const char *argv[]) {
 
   // a guess for the number of iterations for which to initially run
   //   optimized ensemble initialization
-  int first_weight_update = sw.energy_levels;
-  int weight_updates = 0;
+  int first_update_iterations = sw.N*sw.energy_levels;
+  // number of times we wish to sample the minimum observed energy in initialization
+  int init_min_energy_samples = 5;
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
@@ -545,7 +546,6 @@ int main(int argc, const char *argv[]) {
   // Initialization of cell
   // ----------------------------------------------------------------------------
 
-  double avg_neighbors = 0;
   sw.interactions =
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
@@ -588,8 +588,8 @@ int main(int argc, const char *argv[]) {
         moves++;
       }
       // Check whether our histogram is sufficiently flat; if not, we have to restart!
-      mean_hist = moves/double(sw.max_observed_interactions - sw.max_entropy_state);
-      for (int e=sw.max_entropy_state+1; e<=sw.max_observed_interactions; e++) {
+      mean_hist = moves/double(sw.min_energy_state - sw.max_entropy_state);
+      for (int e=sw.max_entropy_state+1; e<=sw.min_energy_state; e++) {
         if (sw.energy_histogram[e] < sw.N
             || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
           printf("After %d moves, at energy %d hist = %ld vs mean %g.\n",
@@ -599,7 +599,7 @@ int main(int argc, const char *argv[]) {
         }
       }
       // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.max_entropy_state; i < sw.max_observed_interactions; i++)
+      for(int i = sw.max_entropy_state; i < sw.min_energy_state; i++)
         printf("%i  %li\n",i,sw.energy_histogram[i]);
     } while (!done);
     printf("All done initializing robustly.\n");
@@ -613,7 +613,7 @@ int main(int argc, const char *argv[]) {
     double range;
     do {
       width = sw.initialize_gaussian(scale);
-      range = sw.max_observed_interactions - sw.max_entropy_state;
+      range = sw.min_energy_state - sw.max_entropy_state;
       // Now shift to the max entropy state...
       sw.initialize_max_entropy_and_translation_distance();
       printf("***\n");
@@ -628,60 +628,8 @@ int main(int argc, const char *argv[]) {
   } else if (vanilla_wang_landau) {
     sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                               vanilla_wl_threshold, vanilla_wl_cutoff);
-  } else { // initialize optimized ensemble method
-    while(sw.iteration <= first_weight_update) {
-      // run an iteration
-      for(int i = 0; i < sw.N; i++)
-        sw.move_a_ball();
-      assert(sw.interactions ==
-             count_all_interactions(sw.balls, sw.N, sw.interaction_distance,
-                                    sw.len, sw.walls));
-      // update weights
-      if((sw.iteration >= first_weight_update)
-         && ((sw.iteration-first_weight_update)
-             % int(first_weight_update*uipow(2,weight_updates)) == 0)) {
-
-        printf("Weight update: %d.\n", weight_updates);
-        walker_hist(sw.energy_histogram, sw.ln_energy_weights, sw.energy_levels,
-                    sw.walkers_up, sw.walkers_total, &sw.moves);
-        weight_updates++;
-      }
-      // ---------------------------------------------------------------
-      // Print out timing information if desired
-      // ---------------------------------------------------------------
-      if (totime > 0 && sw.iteration % totime == 0) {
-        char *iter = new char[1024];
-        sprintf(iter, "%i iterations", totime);
-        took(iter);
-        delete[] iter;
-        printf("Iteration %li, acceptance rate of %g, translation_distance: %g.\n",
-               sw.iteration, (double)sw.moves.working/sw.moves.total,
-               sw.translation_distance);
-        printf("We've had %g updates per kilomove and %g informs per kilomoves, "
-               "for %g informs per update.\n",
-               1000.0*sw.moves.updates/sw.moves.total,
-               1000.0*sw.moves.informs/sw.moves.total,
-               (double)sw.moves.informs/sw.moves.updates);
-        const long checks_without_tables = sw.moves.total*sw.N;
-        int total_neighbors = 0;
-        int most_neighbors = 0;
-        for(int i = 0; i < sw.N; i++) {
-          total_neighbors += sw.balls[i].num_neighbors;
-          most_neighbors = max(sw.balls[i].num_neighbors, most_neighbors);
-        }
-        avg_neighbors = double(total_neighbors)/sw.N;
-        const long checks_with_tables = sw.moves.total*avg_neighbors
-          + sw.N*sw.moves.updates;
-        printf("We've done about %.3g%% of the distance calculations we would "
-               "have done without tables.\n",
-               100.0*checks_with_tables/checks_without_tables);
-        printf("The max number of neighbors is %i, whereas the most we have is "
-               "%i.\n", sw.max_neighbors, most_neighbors);
-        printf("Neighbor scale is %g and avg. number of neighbors is %g.\n\n",
-               neighbor_scale, avg_neighbors);
-        fflush(stdout);
-      }
-    }
+  } else if (walker_optimization) {
+    sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
   }
 
   // ----------------------------------------------------------------------------
@@ -858,7 +806,7 @@ int main(int argc, const char *argv[]) {
       fprintf(s_out, "%s", headerinfo);
       fprintf(s_out, "%s", countinfo);
       fprintf(s_out, "# interactions\tsamples\n");
-      for(int i = 0; i < sw.energy_levels; i++) {
+      for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
         if (sw.energy_histogram[i] != 0)
           fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
       }
