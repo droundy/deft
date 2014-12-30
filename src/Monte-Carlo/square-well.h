@@ -95,8 +95,8 @@ struct sw_simulation {
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(); // updates to run only if we've changed energy
 
-  // print the timings (if the time is right)
-  void print_timings(int timings_period) const;
+  // the last time we printed status text (i.e. from initialization)
+  clock_t last_print_time;
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy
@@ -120,6 +120,13 @@ struct sw_simulation {
   // initialize the weight array using the optimized ensemble method.
   void initialize_walker_optimization(int first_update_iterations,
                                       int init_min_energy_samples);
+
+  // check whether we may print, to prevent dumping obscene amounts of text into the console
+  bool printing_allowed();
+
+  sw_simulation(){
+    last_print_time = clock();
+  };
 };
 
 // Modulates v to within the periodic boundaries of the cell
@@ -185,10 +192,6 @@ int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
 // Flatten weights beyond max entropy point and reset energy histogram
 void flush_arrays(long *energy_histogram, double *ln_energy_weights,
                   int energy_levels, int max_entropy_state, bool reset_energy_histogram);
-
-// Variation in histogram values
-double count_variation(long *energy_histogram, double *ln_energy_weights,
-                       int energy_levels);
 
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius

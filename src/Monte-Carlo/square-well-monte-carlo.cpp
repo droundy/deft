@@ -100,14 +100,11 @@ int main(int argc, const char *argv[]) {
   double robust_update_scale = 0.8; // should be ~1, but must be <= 1
   double robust_cutoff = 0.2; // should be ~0.1, and must be < 1
 
-  // Do not change these*! They are taken directly from the WL paper.
-  double vanilla_wl_factor = exp(1);
+  // Do not change these! They are taken directly from the WL paper.
+  double vanilla_wl_factor = 1;
   double vanilla_wl_fmod = 2;
   double vanilla_wl_threshold = 0.25;
-  double vanilla_wl_cutoff = 3e-8;
-  // *fixme: the actual cutoff should be 1e-8, but that can make some of the small default
-  //   runs take hours to complete! We should definitely comment on that in the
-  //   histogram paper.
+  double vanilla_wl_cutoff = 1e-8;
 
   sw_simulation sw;
 
@@ -561,51 +558,49 @@ int main(int argc, const char *argv[]) {
     do {
       done = true; // Let's be optimistic!
       // First, let's reset our weights based on what we already know!
-      int minE = 0;
-      for (int e=sw.max_entropy_state; e<sw.energy_levels; e++) {
+      for (int e = sw.max_entropy_state; e < sw.energy_levels; e++) {
         if (sw.energy_histogram[e]) {
           // We don't want to be overzealous, so we include a scale factor
           sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
-          minE = e;
         } else
-          sw.ln_energy_weights[e] = sw.ln_energy_weights[minE] + log(10);
+          sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.min_energy_state] + log(10);
       }
       // Flatten weights above state of max entropy
-      for (int e=0; e < sw.max_entropy_state; e++)
+      for (int e = 0; e < sw.max_entropy_state; e++)
         sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.max_entropy_state];
       // Now reset the calculation!
-      for (int e=0; e < sw.energy_levels; e++) {
+      for (int e = 0; e < sw.energy_levels; e++) {
         sw.energy_histogram[e] = 0;
         sw.samples[e] = 0;
         sw.energy_observed[e] = false;
       }
       // Now let's run a while to see if we can find another answer.
       int moves = 0;
-      // SUPER SCARY WARNING:
-      // N^5 scaling is probably VERY BAD!!! but it works really well for now...
-      for (int i=0; i < uipow(sw.N,5); i++){
+      // fixme: SUPER SCARY WARNING:
+      // the added N^4 scaling is probably VERY BAD!!! but it works really well for now...
+      for (int i=0; i < sw.energy_levels*uipow(sw.N,4); i++){
         sw.move_a_ball();
         moves++;
       }
       // Check whether our histogram is sufficiently flat; if not, we have to restart!
       mean_hist = moves/double(sw.min_energy_state - sw.max_entropy_state);
-      for (int e=sw.max_entropy_state+1; e<=sw.min_energy_state; e++) {
+      for (int e = sw.max_entropy_state; e <= sw.min_energy_state; e++) {
         if (sw.energy_histogram[e] < sw.N
             || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
-          printf("After %d moves, at energy %d hist = %ld vs mean %g.\n",
-                 moves, e, sw.energy_histogram[e], mean_hist);
+          printf("After %d moves, we fail at at energy %d widh hist = %ld"
+                 " vs. mean hist %g.\n", moves, e, sw.energy_histogram[e], mean_hist);
           done = false;
           break;
         }
       }
       // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.max_entropy_state; i < sw.min_energy_state; i++)
+      for(int i = sw.max_entropy_state; i <= sw.min_energy_state; i++)
         printf("%i  %li\n",i,sw.energy_histogram[i]);
     } while (!done);
     printf("All done initializing robustly.\n");
   } else if (bubble_suppression) {
     {
-      sw.initialize_gaussian(log(1e40));
+      sw.initialize_gaussian(50);
       sw.initialize_max_entropy_and_translation_distance();
     }
     const double scale = log(10);
@@ -624,11 +619,13 @@ int main(int argc, const char *argv[]) {
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
+    sw.initialize_gaussian(50);
     sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
   } else if (vanilla_wang_landau) {
     sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                               vanilla_wl_threshold, vanilla_wl_cutoff);
   } else if (walker_optimization) {
+    sw.initialize_gaussian(log(1e40));
     sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
   }
 

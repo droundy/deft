@@ -255,37 +255,6 @@ void flush_weight_array(double *ln_energy_weights, int energy_levels, int max_en
   return;
 }
 
-double count_variation(long *energy_histogram, double *ln_energy_weights,
-                       int energy_levels, int max_entropy_state){
-  double lowest = 1e200, highest = 0;
-  int maxE = 0; // tracks the lowest (largest magnitude) energy yet seen
-  int highest_i = 0; // the most commonly visited energy
-  int lowest_i = 0; // the least commonly visited energy
-  int num_visited = 0; // the total number of distinct energies visited.
-  double total_counts = 0;
-  for(int i = max_entropy_state; i < energy_levels; i++) {
-    if (energy_histogram[i] > 0) {
-      num_visited++;
-      total_counts += energy_histogram[i];
-      if (energy_histogram[i] > highest) {
-        highest = energy_histogram[i];
-        highest_i = i;
-      }
-      if (energy_histogram[i] < lowest) {
-        lowest = energy_histogram[i];
-        lowest_i = i;
-      }
-      maxE = i;
-    }
-  }
-  double mean_counts = total_counts / num_visited;
-  printf("Highest/lowest = %.2g (%d) / %.2g (%d) mean %.2g    total %g\n",
-         highest, highest_i, lowest, lowest_i, mean_counts, total_counts);
-  printf("    (maxE = %d, visited %d, max_entropy_state %d)\n",
-         maxE, num_visited, max_entropy_state);
-  return mean_counts/lowest - 1;
-}
-
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
@@ -436,6 +405,10 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 }
 
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
+
+  printf("Moving to most probable state and tuning translation distance.");
+  fflush(stdout);
+
   int num_moves = 500;
   const double mean_allowance = 1.0;
   double dscale = 0.1;
@@ -479,13 +452,11 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
     if(closeness > 0.5) dscale *= 2;
     else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
 
-    // printf("Figure of merit:  %4.2g (state %.1f from %g(%d), stdev %.1f) [acceptance rate %.2f, scale %.2g]\n",
-    //        (last_energy - interactions)/max(2,mean_allowance*sqrt(variance)), mean, last_energy,
-    //        interactions, sqrt(variance), acceptance_rate, translation_distance);
     num_moves *= 2;
   }
-  printf("Took %ld iterations to find max entropy state:  %d with width %.2g\n",
+  printf("Took %ld iterations to find most probably state: %d with width %.2g\n",
          iteration - starting_iterations, max_entropy_state, sqrt(variance));
+  fflush(stdout);
   return int(mean + 0.5);
 }
 
@@ -520,8 +491,6 @@ double sw_simulation::initialize_gaussian(double scale) {
     // the standard deviation has changed much.  This is an attempt to
     // avoid scenarios where we haven't run long enough to adequately
     // sample the variance.
-    //printf("mean is %4.1f with stdev %5.4g\tdifference %.2g vs %.2g\n", mean, sqrt(variance),
-    //       variance - old_variance, fractional_precision_required*sqrt(variance));
   } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
            fabs(sqrt(old_variance) - sqrt(variance))
              > fractional_precision_required*sqrt(variance));
@@ -550,21 +519,48 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
   bool finished_initializing = false;
   const int starting_iterations = iteration;
   while (!finished_initializing) {
-    for (int i=0; i < 100*N*energy_levels; i++) {
+    for (int i=0; i < N*energy_levels; i++) {
       move_a_ball();
       ln_energy_weights[interactions] -= wl_factor;
     }
 
-    // check whether our histogram is flat enough to update wl_factor
-    const double variation = count_variation(energy_histogram, ln_energy_weights,
-                                             energy_levels, max_entropy_state);
+    // compute variation in energy histogram
+    int highest_hist_i = 0; // the most commonly visited energy
+    int lowest_hist_i = 0; // the least commonly visited energy
+    double highest_hist = 0; // highest histogram value
+    double lowest_hist = 1e200; // lowest hitsogram value
+    double total_counts = 0; // total counts in energy histogram
+    for(int i = max_entropy_state+1; i < energy_levels; i++){
+      if(energy_histogram[i] > 0){
+        total_counts += energy_histogram[i];
+        if(energy_histogram[i] > highest_hist){
+          highest_hist = energy_histogram[i];
+          highest_hist_i = i;
+        }
+        if(energy_histogram[i] < lowest_hist){
+          lowest_hist = energy_histogram[i];
+          lowest_hist_i = i;
+        }
+      }
+    }
+    double hist_mean = total_counts / (min_energy_state-max_entropy_state);
+    const double variation = hist_mean/lowest_hist - 1;
 
     // print status text for testing purposes
-    printf("\nweight update: %i\n",weight_updates++);
-    printf("  WL factor: %g\n",wl_factor);
-    printf("  count variation: %g\n", variation);
-    fflush(stdout);
+    if(printing_allowed()){
+      printf("\nWL weight update: %i\n",weight_updates++);
+      printf("  WL factor: %g\n",wl_factor);
+      printf("  count variation: %g\n", variation);
+      printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
+             highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
+      printf("  minimum_energy_state: %d,  max_entropy_state: %d,  energies visited: %d\n",
+             min_energy_state, max_entropy_state, min_energy_state-max_entropy_state);
+      printf("  current energy: %d\n", interactions);
+      printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
+      fflush(stdout);
+    }
 
+    // check whether our histogram is flat enough to update wl_factor
     if (variation > 0 && variation < max(wl_threshold, exp(wl_factor))) {
       wl_factor /= wl_fmod;
       flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
@@ -572,11 +568,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         if (energy_histogram[i] > 0) energy_histogram[i] = 1;
       }
 
-
       // repeat until terminal condition is met
       if (wl_factor < wl_cutoff) {
-        printf("Took %ld iterations to initialize with Wang-Landau method\n",
-               iteration - starting_iterations);
+        printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
+               iteration - starting_iterations, weight_updates);
         finished_initializing = true;
       }
     }
@@ -585,7 +580,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
 // initialize the weight array using the optimized ensemble method.
 void sw_simulation::initialize_walker_optimization(int first_update_iterations,
-                                                  int init_min_energy_samples){
+                                                   int init_min_energy_samples){
   int weight_updates = 0;
   while(iteration <= first_update_iterations ||
         samples[min_energy_state] < init_min_energy_samples) {
@@ -618,4 +613,14 @@ void sw_simulation::initialize_walker_optimization(int first_update_iterations,
       weight_updates++;
     }
   }
+}
+
+bool sw_simulation::printing_allowed(){
+  const double time_skip = 1; // seconds
+  const clock_t time_now = clock();
+  if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
+    last_print_time = time_now;
+    return true;
+  }
+  else return false;
 }
