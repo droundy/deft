@@ -29,6 +29,7 @@ def fart(str):
 	            else: cir = plt.Circle((x,y), radius=r,  fc='y')
 		    ax.add_patch(cir)
 	if (z0 < scoord.val and z0 > (scoord.val -.5)):
+	    print 'pofpdofpdakf'
 	    r = (z0+1)-scoord.val
 	    cir2 = plt.Circle((x0,y0), radius=r,  fc='r')
 	    ax.add_patch(cir2)
