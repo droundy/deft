@@ -23,6 +23,8 @@
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 
+const bool use_veff = false;
+
 static void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
@@ -33,9 +35,21 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_solid(double lattice_constant, double reduced_density, double kT, SFMTFluidVeff *f) {
-  Minimize min(f);
-  min.set_relative_precision(1e-5);
+double inhomogeneity(Vector n) {
+  double maxn = n[0];
+  double minn = n[0];
+  for (int i=0;i<n.get_size();i++) {
+    if (n[i] > maxn) maxn = n[i];
+    if (n[i] < minn) minn = n[i];
+  }
+  return (maxn - minn)/fabs(minn);
+}
+
+void run_solid(double lattice_constant, double reduced_density, double kT,
+               SFMTFluidVeff *fveff, SFMTFluid *f,
+               double homogeneous_free_energy) {
+  Minimize min = (use_veff) ? Minimize(fveff) : Minimize(f);
+  min.set_relative_precision(1e-9);
   min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
@@ -45,6 +59,13 @@ void run_solid(double lattice_constant, double reduced_density, double kT, SFMTF
   printf("========================================\n");
   while (min.improve_energy(verbose)) {
     //f->run_finite_difference_test("SFMT");
+    printf("Compare with homogeneous free energy: %.15g\n", homogeneous_free_energy);
+    double inh = inhomogeneity((use_veff) ? fveff->get_n() : f->n());
+    printf("Inhomogeneity is %g\n\n", inh);
+    if (inh < 1) {
+      printf("It is flat enough for me!\n");
+      break;
+    }
   }
   took("Doing the minimization");
   min.print_info();
@@ -61,7 +82,7 @@ void run_solid(double lattice_constant, double reduced_density, double kT, SFMTF
   delete[] fname;
   const int Nz = f->Nz();
   Vector rz = f->get_rz();
-  Vector n = f->get_n();
+  Vector n = (use_veff) ? fveff->get_n() : f->n();
   for (int i=0;i<Nz/2;i++) {
     fprintf(o, "%g\t%g\n", rz[i], n[i]);
   }
@@ -86,19 +107,26 @@ int main(int argc, char **argv) {
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
 
+  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;
   printf("bulk energy is %g\n", hf.energy());
-  printf("liquid cell free energy should be %g\n", hf.energy()*lattice_constant*lattice_constant*lattice_constant);
+  printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
 
-  const double dx = 0.05;
-  SFMTFluidVeff f(lattice_constant, lattice_constant, lattice_constant, dx);
+  const double dx = 0.1;
+  SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);
+  SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
   f.kT() = hf.kT();
-  //f.Veff() = 0;
   f.mu() = hf.mu();
   f.Vext() = 0;
-  //f.n() = hf.n();
-  f.Veff() = 0;
+  f.n() = hf.n();
+
+  fveff.sigma() = hf.sigma();
+  fveff.epsilon() = hf.epsilon();
+  fveff.kT() = hf.kT();
+  fveff.mu() = hf.mu();
+  fveff.Vext() = 0;
+  fveff.Veff() = 0;
 
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
@@ -107,80 +135,84 @@ int main(int argc, char **argv) {
     const Vector rrz = f.get_rz();
     const double gwidth = 0.2;
     const double norm = 2*pow(sqrt(2*M_PI)*gwidth, 3); // factor of two is a safety factor
+    Vector setn = (use_veff) ? fveff.Veff() : f.n();
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i];
+      setn[i] = 0.00001*hf.n();
       {
         double dist = sqrt(rx*rx + ry*ry+rz*rz);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rz*rz);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rz*rz);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
         double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rx*rx);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rx*rx);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
       {
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                            ry*ry);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     ry*ry);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        f.Veff()[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
       }
     }
-    for (int i=0; i<Ntot; i++) {
-      f.Veff()[i] = -temp*log(f.Veff()[i]); // convert from density to effective potential
+    if (use_veff) {
+      for (int i=0; i<Ntot; i++) {
+        fveff.Veff()[i] = -temp*log(fveff.Veff()[i]); // convert from density to effective potential
+      }
     }
   }
 
@@ -197,7 +229,7 @@ int main(int argc, char **argv) {
     delete[] fname;
     const int Nz = f.Nz();
     Vector rz = f.get_rz();
-    Vector n = f.get_n();
+    Vector n = (use_veff) ? fveff.get_n() : f.n();
     for (int i=0;i<Nz/2;i++) {
       fprintf(o, "%g\t%g\n", rz[i], n[i]);
     }
@@ -210,6 +242,6 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  run_solid(lattice_constant, reduced_density, temp, &f);
+  run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
   return 0;
 }
