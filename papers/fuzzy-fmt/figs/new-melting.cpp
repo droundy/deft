@@ -23,7 +23,7 @@
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 
-const bool use_veff = false;
+const bool use_veff = true;
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -49,7 +49,7 @@ void run_solid(double lattice_constant, double reduced_density, double kT,
                SFMTFluidVeff *fveff, SFMTFluid *f,
                double homogeneous_free_energy) {
   Minimize min = (use_veff) ? Minimize(fveff) : Minimize(f);
-  min.set_relative_precision(1e-9);
+  min.set_relative_precision(1e-12);
   min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
@@ -60,8 +60,13 @@ void run_solid(double lattice_constant, double reduced_density, double kT,
   while (min.improve_energy(verbose)) {
     //f->run_finite_difference_test("SFMT");
     printf("Compare with homogeneous free energy: %.15g\n", homogeneous_free_energy);
-    double inh = inhomogeneity((use_veff) ? fveff->get_n() : f->n());
-    printf("Inhomogeneity is %g\n\n", inh);
+    Vector n = (use_veff) ? fveff->get_n() : f->n();
+    double inh = inhomogeneity(n);
+    printf("Inhomogeneity is %g\n", inh);
+    double Ntot = n.sum()*f->get_dV();
+    printf("Ntot = %g\n", Ntot);
+    printf("n*bar = %g\n", Ntot/f->get_volume());
+    printf("\n");
     if (inh < 1) {
       printf("It is flat enough for me!\n");
       break;
@@ -111,7 +116,7 @@ int main(int argc, char **argv) {
   printf("bulk energy is %g\n", hf.energy());
   printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
 
-  const double dx = 0.1;
+  const double dx = 0.05;
   SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
@@ -133,14 +138,14 @@ int main(int argc, char **argv) {
     const Vector rrx = f.get_rx();
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double gwidth = 0.2;
-    const double norm = 2*pow(sqrt(2*M_PI)*gwidth, 3); // factor of two is a safety factor
+    const double gwidth = 0.1;
+    const double norm = 1.2*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
     Vector setn = (use_veff) ? fveff.Veff() : f.n();
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i];
-      setn[i] = 0.00001*hf.n();
+      setn[i] = 0.0000001*hf.n();
       {
         double dist = sqrt(rx*rx + ry*ry+rz*rz);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
