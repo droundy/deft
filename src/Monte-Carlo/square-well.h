@@ -77,6 +77,22 @@ struct sw_simulation {
   bool *energy_observed;
   long *samples; // how many independent samples of a given energy have we had?
   // return the number times we have sampled the minimum energy state
+
+  /* The following tracks how many transitions we have attempted from
+     a given energy level to nearby energy levels.  The advantage of
+     this metric is that we can (hopefully) get away without resetting
+     it when we change the weights.  Thus we could accumulate better
+     statistics on entropy differences, under the assumption that we
+     sample all states of a given energy equally. */
+  int biggest_energy_transtion;
+  long *transitions_table;
+  long &transitions(int interactions, int deltaE) {
+    assert(deltaE >= -biggest_energy_transtion);
+    assert(deltaE <= biggest_energy_transtion);
+    return transitions_table[interactions*(2*biggest_energy_transtion+1)
+                             + deltaE+biggest_energy_transtion];
+  };
+
   long min_energy_observations() const {
     for (int i = energy_levels-1; i >= max_entropy_state; i--)
       if (samples[i]) return samples[i];
@@ -109,6 +125,12 @@ struct sw_simulation {
   // initialize the weight array using the Gaussian approximation.
   // Returns the width of the gaussian used.
   double initialize_gaussian(double scale = 100.0);
+
+  // update the weight array using transitions
+  void update_weights_using_transitions();
+
+  // initialize using transitions
+  void initialize_transitions(int max_iterations);
 
   // initialize the weight array using the specified temperature.
   void initialize_canonical(double kT);

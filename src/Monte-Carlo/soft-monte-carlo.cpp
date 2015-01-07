@@ -709,7 +709,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   // Energy before potential move
   if (testp){
     double r0 = v.norm();	
-    energyOld += 4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6));
+    energyOld += -(4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)));
   }
   if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
   for(long i = 0; i < n; i++){
@@ -756,7 +756,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   // Energy after potential move
   if (testp){  
     double r1 = spheres[s].norm();	
-    energyNew += 4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6));
+    energyNew += -(4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6)));
   }
   if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
   for(long i = 0; i < n; i++) {
@@ -813,7 +813,7 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
   if (testp){
     for (long b=0;b<n;b++){
       double magnitude = spheres[b].norm();	
-      potEnergy += 4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6));
+      potEnergy += -(4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6)));
     }
   }
   for (long s=0; s<n; s++){
