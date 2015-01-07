@@ -324,8 +324,10 @@ void sw_simulation::move_a_ball() {
   balls[id] = pid;
   // Now we can check if we actually want to do this move based on the
   // new energy.
+  const int deltaE = moves.new_count - moves.old_count;
+  transitions(interactions, deltaE) += 1;
   const double lnPmove =
-    ln_energy_weights[moves.new_count - moves.old_count + interactions]
+    ln_energy_weights[deltaE + interactions]
     - ln_energy_weights[interactions];
   if (lnPmove < 0) {
     const double Pmove = exp(lnPmove);
@@ -623,4 +625,12 @@ bool sw_simulation::printing_allowed(){
     return true;
   }
   else return false;
+}
+
+// update the weight array using transitions
+void sw_simulation::update_weights_using_transitions() {
+}
+
+void sw_simulation::initialize_transitions(int max_iter) {
+  /* We will simulate one single energy at a time. */
 }

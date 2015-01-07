@@ -342,7 +342,7 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
                     + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)
-                                      for postfix in ['E', 'lnw', 's', 'g']],
+                                      for postfix in ['E', 'lnw', 'transitions', 's', 'g']],
                             source = 'square-well-monte-carlo',
                             action = './square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 1000000' % (method, N, ff, ww))
 

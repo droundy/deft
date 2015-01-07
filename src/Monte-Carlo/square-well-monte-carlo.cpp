@@ -385,6 +385,11 @@ int main(int argc, const char *argv[]) {
   sw.energy_observed = new bool[sw.energy_levels]();
   sw.samples = new long[sw.energy_levels]();
 
+  // Transitions from one energy to another
+  sw.biggest_energy_transtion = max_balls_within(sw.interaction_distance);
+  sw.transitions_table =
+    new long[sw.energy_levels*(2*sw.biggest_energy_transtion+1)]();
+
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
   sw.walkers_total = new long[sw.energy_levels]();
@@ -658,6 +663,9 @@ int main(int argc, const char *argv[]) {
   char *w_fname = new char[1024];
   sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
 
+  char *transitions_fname = new char[1024];
+  sprintf(transitions_fname, "%s/%s-transitions.dat", data_dir, filename);
+
   char *s_fname = new char[1024];
   sprintf(s_fname, "%s/%s-s.dat", data_dir, filename);
 
@@ -692,6 +700,24 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
+
+  // Save transitions histogram
+  FILE *transitions_out = fopen((const char *)transitions_fname, "w");
+  if (!transitions_out) {
+    fprintf(stderr, "Unable to create %s!\n", transitions_fname);
+    exit(1);
+  }
+  fprintf(transitions_out, "%s", headerinfo);
+  fprintf(transitions_out, "%s", countinfo);
+  fprintf(transitions_out, "# interactions\tln(weight)\n");
+  for(int i = 0; i < sw.energy_levels; i++) {
+    fprintf(transitions_out, "%i", i);
+    for (int de=-sw.biggest_energy_transtion; de<=sw.biggest_energy_transtion; de++) {
+      fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
+    }
+    fprintf(transitions_out, "\n");
+  }
+  fclose(transitions_out);
 
   delete[] countinfo;
 
@@ -877,6 +903,8 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
+  delete[] sw.transitions_table;
+
   delete[] sw.walkers_up;
   delete[] sw.walkers_total;
 
@@ -894,6 +922,7 @@ int main(int argc, const char *argv[]) {
   delete[] headerinfo;
   delete[] e_fname;
   delete[] w_fname;
+  delete[] transitions_fname;
   delete[] s_fname;
   delete[] density_fname;
   delete[] g_fname;
