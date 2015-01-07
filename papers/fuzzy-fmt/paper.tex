@@ -133,10 +133,11 @@ and to give an approximate multi-cavity limit. Schmidt furthur shows that\cite{s
 \label{fig:w2-comparison}
 \end{figure}
 
-We use a WCA (Weeks-Chandler-Anderson) pair potential. The WCA
-potential is a Lennard-Jones potential with the attractive portion removed:
+We use a WCA (Weeks-Chandler-Anderson) pair
+potential\cite{weeks1971}, which is the Lennard-Jones potential
+with the attractive portion removed:
 \begin{align}
-  V(r) =
+  V_{wca}(r) =
   \begin{cases}
     4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
     \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
@@ -149,71 +150,26 @@ We approximate the Mayer function as
 \end{align}
 then
 \begin{align}
-  V(r) \approx -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+  V_{erf}(r) \approx -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].
 \end{align}
 Expanding this in a power series gives.
 \begin{align}
-  V(\alpha) &\approx -kT\ln\left(\tfrac12\right) \\
-  &= k_BT \ln 2.
+  V_{erf}(\alpha) &\approx k_BT \ln 2.
 \end{align}
-Setting the potentials equal at $r=\alpha$
+Setting $V_{wca}$ and $V_{erf}$ equal at $r=\alpha$
 \begin{align}
   k_BT \ln 2 = 4\epsilon \left[ \left(\frac{\sigma}{\alpha}\right)^{12} -
-    \left(\frac{\sigma}{\alpha}\right)^{6} \right] + \epsilon \\
+    \left(\frac{\sigma}{\alpha}\right)^{6} \right] + \epsilon
 \end{align}
-we then let $\xi = \left(\frac{\sigma}{\alpha}\right)^6$. Now we'll put it in a
-quadratic form.
+Solving for $\alpha$ and taking the reasonable solution gives
 \begin{align}
-  k_BT \ln 2 &= 4\epsilon \left[ \xi^2 - \xi  \right] + \epsilon \\
-  0 &= 4\epsilon \left[ \xi^2 - \xi  \right] + \epsilon - k_BT \ln 2 \\
-  0 &= \xi^2 - \xi + \frac{1}{4} - \frac{k_BT}{4\epsilon} \ln 2
-\end{align}
-so then
-\begin{align}
-  \xi &= \frac{1\pm \sqrt{1-4 \left( \frac{1}{4} -  \frac{k_BT}{4\epsilon}
-    \ln 2 \right)}}{2} \\
-  &= \frac{1}{2}\left(1 \pm \sqrt{ \frac{k_BT}{\epsilon} \ln 2} \right)
-\end{align}
-We take the plus solution and solve for $\alpha$ so that
-\begin{align}
-  \left(\frac{\sigma}{\alpha}\right)^6 &= \frac{1}{2}\left(1 +
-  \sqrt{\frac{k_BT}{\epsilon} \ln 2} \right) \\
-  \alpha &= \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
+  \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
-
-Next we set both the two potential's slopes equal at $r = \alpha$
+Next, we set both potential's slopes equal at $r = \alpha$ and find that
 \begin{align}
-  V_{erf}'(\alpha) &= V_{wca}'(\alpha) \\
-  -\frac{2 k_B T}{\Xi \sqrt{\pi}} &= 4\epsilon \left(
-  \frac{6}{\alpha} \xi - \frac{12}{\alpha} \xi^2 \right) \\
-  -\frac{\alpha k_B T}{\epsilon \sqrt{\pi}} &= \Xi \left[12 \left(
-  \xi - 2\xi^2 \right)\right]
-\end{align}
-With some algebra, we can find $\Xi$:
-\begin{align}
-  \Xi &= \frac{\alpha k_B T}{12\epsilon \sqrt{\pi} \left( 2 \xi^2 - \xi
-    \right)}
-\end{align}
-Focusing on the $\xi$ terms so things don't get too messy,
-\begin{align}
-  2 \xi^2 - \xi &=  \frac{2}{4}\left(1 +
-  \sqrt{ \frac{k_BT}{\epsilon} \ln 2} \right)^2
-  - \frac{1}{2}\left(1 +
-  \sqrt{ \frac{k_BT}{\epsilon} \ln 2} \right) \\
-  &= \frac{1}{2}\Bigg[ 1 + 2\sqrt{ \frac{k_BT}{\epsilon}\ln 2} +
-    \frac{k_BT}{\epsilon}\ln 2 \notag \\
-    &\hspace{3cm}-1 -\sqrt{ \frac{k_BT}{\epsilon} \ln 2} \Bigg] \\
-  &=\frac{1}{2}\left[ \sqrt{ \frac{k_BT}{\epsilon} \ln 2} +
-    \frac{k_BT}{\epsilon} \ln 2 \right]
-\end{align}
-Now if we plug that back into our terms in $\Xi$, we get
-\begin{align}
-  \Xi &= \frac{\alpha k_B T}{12\epsilon \sqrt{\pi} \left[\frac{1}{2}\left(
-      \sqrt{ \frac{k_BT}{\epsilon} \ln 2} + \frac{k_BT}{\epsilon}
-      \ln 2 \right)\right] } \\
-  &= \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
+  \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
       2} + \ln 2 \right)}
 \end{align}
 
@@ -308,10 +264,7 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \begin{center}
 \includegraphics[width=3.5in]{figs/radial-distribution-30}
 \end{center}
-\caption{Radial distribution function with 0.3 reduced density.
-  \fixme{Change legend to proper ``reduced'' temperature 
-    $T^* = kT/\epsilon$, and density perhaps to $n^* = n\sigma^3$?
-    Start cutting harmonic?}}
+\caption{Radial distribution function with 0.3 reduced density.}
 \label{fig:radial-distribution-30}
 \end{figure}
 
