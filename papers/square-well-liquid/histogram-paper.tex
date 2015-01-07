@@ -164,7 +164,9 @@ state to each other energy state.  This statistic has the advantage of
 being approximately independent of the weighting function used
 (although it is highly dependent on the step size).  Thus we could
 continue to refine this statistic, even as we are updating the weight
-array.
+array.  Here are two papers that seem highly relevant to this
+method~\cite{wang1999transition, wang2002transition}, but I'm not sure
+if they're identical.
 
 The ratio of density of states at two energies should be proportional
 to the ratio of upgoing and downgoing transition rates between those
@@ -221,5 +223,7 @@ simulation to sample a whole slew of different energies, but in our
 case we would be able to put strict bounds on how long it spends
 sampling each energy, and could reasonably keep the code from wasting
 huge amounts of time sampling the high-entropy states.
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
