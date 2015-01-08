@@ -72,3 +72,6 @@ generate_*.hs
 /soft-monte-carlo
 /square-well-monte-carlo
 /triplet-monte-carlo
+*.done
+.bilge
+

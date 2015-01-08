@@ -1,0 +1,8 @@
+# | python top.py > .bilge
+# > .bilge
+
+| python src/bilge.py > src/.bilge
+> src/.bilge
+
+| python -m compileall rules.py
+> rules.pyc
