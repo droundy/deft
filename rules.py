@@ -22,8 +22,12 @@ generic_sources = ['src/lattice.o', 'src/utilities.o',
 
 def cxx(cpp):
     #print '| pwd'
-    print '| g++ ' + CXXFLAGS + ' -c %s -o %s' % (cpp, cpp[:-3]+'o')
-    print '> %s' % (cpp[:-3]+'o')
+    obj = cpp[:-3]+'o'
+    if cpp[-3:] == '.cc':
+        obj = cpp[:-2]+'o'
+    print '# cpp', cpp, obj, cpp[-3:]
+    print '| g++ ' + CXXFLAGS + ' -c %s -o %s' % (cpp, obj)
+    print '>', obj
     print
 
 def link(binary, objects):

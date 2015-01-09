@@ -1,6 +1,9 @@
 # | python top.py > .bilge
 # > .bilge
 
+| cd src/haskell && python bilge.py > .bilge
+> src/haskell/.bilge
+
 | python src/bilge.py > src/.bilge
 > src/.bilge
 
