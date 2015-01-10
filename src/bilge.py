@@ -47,3 +47,4 @@ for x in ['HardSpheresNoTensor2Fast',
     print '| cd .. && src/haskell/functionals.exe src/%s' % (x + '.cpp')
     print '< haskell/functionals.exe'
     print '> %s' % (x + '.cpp')
+

@@ -48,3 +48,44 @@ for main in mainfiles:
     for o in allobjects:
         print '<', o
     print
+
+generated_names = ["ExternalPotentialTest",
+                   "Quadratic",
+                   "QuadraticN0",
+                   "QuadraticGaussian",
+                   "LogN0",
+                   "Phi1",
+                   "Phi2",
+                   "Phi3",
+                   "SPhi1",
+                   "SPhi2",
+                   "SPhi3",
+                   "HomogeneousWhiteBear",
+                   "WhiteBear",
+                   "WhiteBearFluid",
+                   "SFMTFluid",
+                   "SFMTFluidVeff",
+                   "HomogeneousSFMTFluid",
+                   "WaterSaft",
+                   "WaterSaftByHand",
+                   "HomogeneousWaterSaft",
+                   "HomogeneousWaterSaftByHand"]
+
+print '| python2 create_generators.py'
+print '< create_generators.py'
+for n in generated_names:
+    print '> generate_%s.hs' % n
+
+for name in generated_names:
+    # command to compile haskell code
+    print '| ghc -O2 --make -o generate_%s.exe generate_%s.hs' % (name, name)
+    print '> generate_%s.exe' % name
+    for o in allobjects:
+        print '<', o
+    print
+    # command to generate C++ code
+    print '| cd ../.. && src/haskell/generate_%s.exe' % name
+    print '> ../new/%sFast.cpp' % name
+    print '> ../new/%sFast.h' % name
+    print '< generate_%s.exe' % name
+    print
