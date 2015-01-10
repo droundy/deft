@@ -1,5 +1,5 @@
-# | python top.py > .bilge
-# > .bilge
+| python bilge.py > .bilge
+> .bilge
 
 | cd src/haskell && python bilge.py > .bilge
 > src/haskell/.bilge
@@ -9,6 +9,12 @@
 
 | cd papers/square-well-liquid/ && python2 ../bilge-latex.py > .bilge
 > papers/square-well-liquid/.bilge
+
+| cd papers/square-well-liquid/data && python2 bilge.py > .bilge
+> papers/square-well-liquid/data/.bilge
+
+| cd papers/square-well-liquid/figs && python2 bilge.py > .bilge
+> papers/square-well-liquid/figs/.bilge
 
 | python -m compileall rules.py
 > rules.pyc
