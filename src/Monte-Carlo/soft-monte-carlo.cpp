@@ -674,7 +674,7 @@ inline double soft_wall_potential(double z) {
     z = lenz/2 - z;
   }
   if (z >  R_T) return 0;
-  return M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3)/18;
+  return 2*M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3);
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
