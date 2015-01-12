@@ -28,7 +28,7 @@ for o in ["periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N),
     print '>', o
 print
 
-print '| cd .. && python2 figs/plot-round-trips.py %f %f %d "%s"' % (ww, ff, N, methods)
+print '| cd .. && python2 figs/plot-samples.py %f %f %d "%s"' % (ww, ff, N, methods)
 for o in ["periodic-ww%02.0f-ff%02.0f-N%i-rt.pdf" % (ww*100, ff*100, N),
           "periodic-ww%02.0f-ff%02.0f-N%i-rt-rate.pdf" % (ww*100, ff*100, N)]:
     print '>', o
