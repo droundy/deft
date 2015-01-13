@@ -132,28 +132,28 @@ if __name__ == '__main__':
     colors = np.array(['b-','g-','r-'])
 
     for i in range(num_iterations):
-        print 'running npart_RG for iterations =',i
-        timing.flush()
-        # note current time
-        time0 = time.clock()
+      print 'running npart_RG for iterations =',i
+      timing.flush()
+      # note current time
+      time0 = time.clock()
 
-        # run npart
-        npart(i)
+      # run npart
+      npart(i)
 
-        # calculate elapsed time
-        elapsed = time.clock() - time0
+      # calculate elapsed time
+      elapsed = time.clock() - time0
 
-        # write to file
-        timing.write(str(i)+' '+str(elapsed)+'\n')
-        sys.stdout.flush()
+      # write to file
+      timing.write(str(i)+' '+str(elapsed)+'\n')
+      sys.stdout.flush()
 
-        # Plot Coexistence
-        # Read in data
-        data = np.loadtxt('figs/npart_RG-i%d-out.dat'%i)
+      # Plot Coexistence
+      # Read in data
+      data = np.loadtxt('figs/npart_RG-i%d-out.dat'%i)
 
-        T = data[:,0]
-        etavapor = data[:,1]*np.pi*RG.sigma**3/6
-        etaliquid = data[:,2]*np.pi*RG.sigma**3/6
+      T = data[:,0]
+      etavapor = data[:,1]*np.pi*RG.sigma**3/6
+      etaliquid = data[:,2]*np.pi*RG.sigma**3/6
 
       # Plot Forte's data
       plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
