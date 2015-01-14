@@ -548,7 +548,7 @@ int main(int argc, const char *argv[]) {
   // Initialization of cell
   // ----------------------------------------------------------------------------
 
-  sw.interactions =
+  sw.energy =
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is.
@@ -587,6 +587,9 @@ int main(int argc, const char *argv[]) {
         sw.move_a_ball();
         moves++;
       }
+      // Dump energy histogram to the console so that we can see how we're doing
+      for(int i = sw.max_entropy_state; i <= sw.min_energy_state; i++)
+        printf("%i  %li\n",i,sw.energy_histogram[i]);
       // Check whether our histogram is sufficiently flat; if not, we have to restart!
       mean_hist = moves/double(sw.min_energy_state - sw.max_entropy_state);
       for (int e = sw.max_entropy_state; e <= sw.min_energy_state; e++) {
@@ -598,9 +601,6 @@ int main(int argc, const char *argv[]) {
           break;
         }
       }
-      // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.max_entropy_state; i <= sw.min_energy_state; i++)
-        printf("%i  %li\n",i,sw.energy_histogram[i]);
     } while (!done);
     printf("All done initializing robustly.\n");
   } else if (bubble_suppression) {
@@ -696,7 +696,7 @@ int main(int argc, const char *argv[]) {
   }
   fprintf(w_out, "%s", headerinfo);
   fprintf(w_out, "%s", countinfo);
-  fprintf(w_out, "# interactions\tln(weight)\n");
+  fprintf(w_out, "# energy\tln(weight)\n");
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
@@ -709,7 +709,7 @@ int main(int argc, const char *argv[]) {
   }
   fprintf(transitions_out, "%s", headerinfo);
   fprintf(transitions_out, "%s", countinfo);
-  fprintf(transitions_out, "# interactions\tln(weight)\n");
+  fprintf(transitions_out, "# energy\tln(weight)\n");
   for(int i = 0; i < sw.energy_levels; i++) {
     fprintf(transitions_out, "%i", i);
     for (int de=-sw.biggest_energy_transtion; de<=sw.biggest_energy_transtion; de++) {
@@ -752,7 +752,7 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
-    assert(sw.interactions ==
+    assert(sw.energy ==
            count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
                                   sw.walls));
     // ---------------------------------------------------------------
@@ -761,21 +761,21 @@ int main(int argc, const char *argv[]) {
     // Density histogram -- only handles walls in one dimension
     if(sw.walls == 1){
       for(int i = 0; i < sw.N; i++){
-        density_histogram[sw.interactions]
+        density_histogram[sw.energy]
           [int(floor(sw.balls[i].pos[wall_dim]/de_density))] ++;
       }
     }
 
     // RDF
     if(!sw.walls){
-      g_energy_histogram[sw.interactions]++;
+      g_energy_histogram[sw.energy]++;
       for(int i = 0; i < sw.N; i++){
         for(int j = 0; j < sw.N; j++){
           if(i != j){
             const vector3d r = periodic_diff(sw.balls[i].pos, sw.balls[j].pos, sw.len,
                                              sw.walls);
             const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[sw.interactions][r_i]++;
+            if(r_i < g_bins) g_histogram[sw.energy][r_i]++;
           }
         }
       }
@@ -813,7 +813,7 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "# interactions   counts\n");
+      fprintf(e_out, "# energy   counts\n");
       for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
           fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
@@ -828,7 +828,7 @@ int main(int argc, const char *argv[]) {
       }
       fprintf(s_out, "%s", headerinfo);
       fprintf(s_out, "%s", countinfo);
-      fprintf(s_out, "# interactions\tsamples\n");
+      fprintf(s_out, "# energy\tsamples\n");
       for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
         if (sw.energy_histogram[i] != 0)
           fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
