@@ -315,9 +315,9 @@ void sw_simulation::move_a_ball() {
       return;
     }
   }
-  // Now that we know that we are keeping the new move, and after we
-  // have updated the neighbor tables if needed, we can compute the
-  // new interaction count.
+  // Now that we know that we are keeping the new move (unless the
+  // weights say otherwise), and after we have updated the neighbor
+  // tables if needed, we can compute the new interaction count.
   ball pid = balls[id]; // save a copy
   balls[id] = temp; // temporarily update the position
   const int new_interaction_count =
