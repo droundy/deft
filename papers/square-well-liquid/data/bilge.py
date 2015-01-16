@@ -6,7 +6,7 @@ for method in ["nw","bubble_suppression","robustly_optimistic","gaussian","wang_
             for N in [20]:
                 outputs = ["periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                            % (ww, ff, N, method.replace(' ',''), postfix)
-                           for postfix in ['g', 'E', 'lnw', 'rt']]
+                           for postfix in ['g', 'E', 'lnw', 's']]
 
                 print '| cd ../../.. && ./square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 10000' % (method, N, ff, ww)
                 print '< ../../../square-well-monte-carlo'
