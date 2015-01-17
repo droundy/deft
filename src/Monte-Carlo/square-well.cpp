@@ -284,8 +284,8 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
 void sw_simulation::move_a_ball() {
   int id = moves.total % N;
   moves.total++;
-  moves.old_count = count_interactions(id, balls, interaction_distance, len, walls);
-  moves.new_count = moves.old_count;
+  const int old_interaction_count =
+    count_interactions(id, balls, interaction_distance, len, walls);
   ball temp = random_move(balls[id], translation_distance, len);
   // If we're out of the cell or we overlap, this is a bad move!
   if (!in_cell(temp, len, walls, dr) || overlaps_with_any(temp, balls, len, walls, dr)){
@@ -315,26 +315,25 @@ void sw_simulation::move_a_ball() {
       return;
     }
   }
-  // Now that we know that we are keeping the new move, and after we
-  // have updated the neighbor tables if needed, we can compute the
-  // new interaction count.
+  // Now that we know that we are keeping the new move (unless the
+  // weights say otherwise), and after we have updated the neighbor
+  // tables if needed, we can compute the new interaction count.
   ball pid = balls[id]; // save a copy
   balls[id] = temp; // temporarily update the position
-  moves.new_count = count_interactions(id, balls, interaction_distance, len, walls);
+  const int new_interaction_count =
+    count_interactions(id, balls, interaction_distance, len, walls);
   balls[id] = pid;
-  // Now we can check if we actually want to do this move based on the
+  // Now we can check whether we actually want to do this move based on the
   // new energy.
-  const int deltaE = moves.new_count - moves.old_count;
-  transitions(interactions, deltaE) += 1;
+  const int energy_change = new_interaction_count - old_interaction_count;
+  transitions(energy, energy_change) += 1; // update the transition histogram
   const double lnPmove =
-    ln_energy_weights[deltaE + interactions]
-    - ln_energy_weights[interactions];
+    ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
   if (lnPmove < 0) {
     const double Pmove = exp(lnPmove);
     if (random::ran() > Pmove) {
       // We want to reject this move because it is too improbable
       // based on our weights.
-      moves.new_count = moves.old_count; // undo the energy change
       if (get_new_neighbors) delete[] temp.neighbors;
       end_move_updates();
       return;
@@ -350,42 +349,38 @@ void sw_simulation::move_a_ball() {
   }
   balls[id] = temp; // Yay, we have a successful move!
   moves.working++;
+  energy += energy_change;
 
-  // Update interaction count and energy histogram
-  interactions += moves.new_count - moves.old_count;
-
-  // If we've changed energy, run some checks
-  if(moves.new_count != moves.old_count) energy_change_updates();
+  if(energy_change != 0) energy_change_updates();
 
   end_move_updates();
 }
 
 void sw_simulation::end_move_updates(){
-  energy_histogram[interactions]++; // update energy histogram
-  if(moves.total % N == 0) iteration++; // update iteration counter
-  // update walker counters
-  if(energy_observed[min_energy_state]){
-    walkers_up[interactions]++;
-  }
-  walkers_total[interactions]++;
+   // update iteration counter, energy histogram, and walker counters
+  if(moves.total % N == 0) iteration++;
+  energy_histogram[energy]++;
+  if(energy_observed[min_energy_state])
+    walkers_up[energy]++;
+  walkers_total[energy]++;
 }
 
 void sw_simulation::energy_change_updates(){
   // If we're at or above the state of max entropy, we have not yet observed any energies
-  if(interactions <= max_entropy_state){
+  if(energy <= max_entropy_state){
     for(int i = max_entropy_state; i < energy_levels; i++)
       energy_observed[i] = false;
   }
   // If we have not yet observed this energy since the last time we were at max entropy,
   //   now we have!
-  else if(!energy_observed[interactions]){
-    energy_observed[interactions] = true;
-    samples[interactions]++;
+  else if(!energy_observed[energy]){
+    energy_observed[energy] = true;
+    samples[energy]++;
   }
   // If we have observed a new lowest energy, remember it; furthermore, this means we can't
   //   have had any walkers going up from the lowest energy, so we reset walkers_up
-  if(interactions > min_energy_state){
-    min_energy_state = interactions;
+  if(energy > min_energy_state){
+    min_energy_state = energy;
     for(int i = max_entropy_state; i < energy_levels; i++)
       walkers_up[i] = 0;
   }
@@ -396,11 +391,11 @@ void sw_simulation::energy_change_updates(){
 int sw_simulation::simulate_energy_changes(int num_moves) {
   int num_moved = 0, num_up = 0;
   while (num_moved < num_moves) {
-    int old_interactions = interactions;
+    int old_energy = energy;
     move_a_ball();
-    if (interactions != old_interactions) {
+    if (energy != old_energy) {
       num_moved++;
-      if (interactions > old_interactions) num_up++;
+      if (energy > old_energy) num_up++;
     }
   }
   return num_up;
@@ -408,7 +403,7 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
 
-  printf("Moving to most probable state and tuning translation distance.");
+  printf("Moving to most probable state and tuning translation distance.\n");
   fflush(stdout);
 
   int num_moves = 500;
@@ -416,13 +411,13 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
   double dscale = 0.1;
   const int starting_iterations = iteration;
   int attempts_to_go = 4; // always try this many times, to get translation_distance right.
-  double variance = 0;
-  double last_energy = 0, mean = 0;
+  double mean = 0, variance = 0;
+  int last_energy = 0;
   int counted_in_mean;
-  while (fabs(last_energy - interactions) > max(2,mean_allowance*sqrt(variance)) ||
+  while (abs(last_energy-energy) > max(2,mean_allowance*sqrt(variance)) ||
          attempts_to_go >= 0) {
     attempts_to_go -= 1;
-    last_energy = interactions;
+    last_energy = energy;
     simulate_energy_changes(num_moves);
     mean = 0;
     counted_in_mean = 0;
@@ -519,11 +514,12 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
   bool finished_initializing = false;
+  int last_min_energy_state = min_energy_state;
   const int starting_iterations = iteration;
   while (!finished_initializing) {
     for (int i=0; i < N*energy_levels; i++) {
       move_a_ball();
-      ln_energy_weights[interactions] -= wl_factor;
+      ln_energy_weights[energy] -= wl_factor;
     }
 
     // compute variation in energy histogram
@@ -557,7 +553,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
              highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
       printf("  minimum_energy_state: %d,  max_entropy_state: %d,  energies visited: %d\n",
              min_energy_state, max_entropy_state, min_energy_state-max_entropy_state);
-      printf("  current energy: %d\n", interactions);
+      printf("  current energy: %d\n", energy);
       printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
       fflush(stdout);
     }
@@ -570,12 +566,16 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         if (energy_histogram[i] > 0) energy_histogram[i] = 1;
       }
 
-      // repeat until terminal condition is met
-      if (wl_factor < wl_cutoff) {
+      // repeat until terminal condition is met,
+      // and make sure we're not stuck at a newly introduced minimum energy state
+      if (wl_factor < wl_cutoff && last_min_energy_state == min_energy_state) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration - starting_iterations, weight_updates);
+        for(int i = min_energy_state+1; i < energy_levels; i++)
+          ln_energy_weights[i] = ln_energy_weights[min_energy_state] + log(10);
         finished_initializing = true;
       }
+      last_min_energy_state = min_energy_state;
     }
   }
 }
@@ -588,7 +588,7 @@ void sw_simulation::initialize_walker_optimization(int first_update_iterations,
         samples[min_energy_state] < init_min_energy_samples) {
     // run an iteration
     for(int i = 0; i < N; i++) move_a_ball();
-    assert(interactions ==
+    assert(energy ==
            count_all_interactions(balls, N, interaction_distance, len, walls));
     // update weights when we've run long enough
     if((iteration - first_update_iterations)

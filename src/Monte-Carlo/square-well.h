@@ -22,8 +22,6 @@ struct move_info {
   long working;
   int updates;
   int informs;
-  int old_count;
-  int new_count;
   move_info();
 };
 
@@ -39,7 +37,7 @@ struct sw_simulation {
   /* The following describe the current state of the system. */
 
   ball *balls;
-  int interactions; // i.e. the current energy
+  int energy;
 
   /* The following are constant parameters that describe the physical
      system, but do not change as we simulate. */
@@ -86,11 +84,11 @@ struct sw_simulation {
      sample all states of a given energy equally. */
   int biggest_energy_transtion;
   long *transitions_table;
-  long &transitions(int interactions, int deltaE) {
-    assert(deltaE >= -biggest_energy_transtion);
-    assert(deltaE <= biggest_energy_transtion);
-    return transitions_table[interactions*(2*biggest_energy_transtion+1)
-                             + deltaE+biggest_energy_transtion];
+  long &transitions(int energy, int energy_change) {
+    assert(energy_change >= -biggest_energy_transtion);
+    assert(energy_change <= biggest_energy_transtion);
+    return transitions_table[energy*(2*biggest_energy_transtion+1)
+                             + energy_change+biggest_energy_transtion];
   };
 
   long min_energy_observations() const {
