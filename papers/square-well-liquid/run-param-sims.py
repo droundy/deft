@@ -25,7 +25,7 @@ if method == 'wang_landau':
                                             + "'wl_cutoff','%g']" %wl_cutoff])
 
 elif method == 'walker_optimization':
-    for init_min_energy_samples in [5,10]:
+    for init_min_energy_samples in [5,10,15]:
         sp.Popen(sim_options + ["params-%i" %init_min_energy_samples,
                                 "['init_min_energy_samples','%g']"%init_min_energy_samples])
 
