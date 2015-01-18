@@ -19,7 +19,7 @@ ff = float(sys.argv[2])
 versions = eval(sys.argv[3])
 #arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,7,8,9,20] for dat in ['s', 'lnw', 'E']]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,8,20] for dat in ['s', 'lnw', 'E']]
 
 N_regex = re.compile(r'-N([0-9]+)')
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')

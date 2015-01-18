@@ -386,9 +386,9 @@ int main(int argc, const char *argv[]) {
   sw.samples = new long[sw.energy_levels]();
 
   // Transitions from one energy to another
-  sw.biggest_energy_transtion = max_balls_within(sw.interaction_distance);
+  sw.biggest_energy_transition = max_balls_within(sw.interaction_distance);
   sw.transitions_table =
-    new long[sw.energy_levels*(2*sw.biggest_energy_transtion+1)]();
+    new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
@@ -712,7 +712,7 @@ int main(int argc, const char *argv[]) {
   fprintf(transitions_out, "# energy\tln(weight)\n");
   for(int i = 0; i < sw.energy_levels; i++) {
     fprintf(transitions_out, "%i", i);
-    for (int de=-sw.biggest_energy_transtion; de<=sw.biggest_energy_transtion; de++) {
+    for (int de=-sw.biggest_energy_transition; de<=sw.biggest_energy_transition; de++) {
       fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
     }
     fprintf(transitions_out, "\n");

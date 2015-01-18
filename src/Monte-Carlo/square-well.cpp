@@ -628,7 +628,58 @@ bool sw_simulation::printing_allowed(){
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions() {
+void sw_simulation::update_weights_using_transitions(double fractional_precision) {
+  // first, we find the range of energies for which we have data
+  int lowest_energy = 0;
+  int  highest_energy = energy_levels;
+  for (int i = 0; i < energy_levels; i++){
+    if (energy_histogram[i] != 0){
+      if(i < highest_energy) highest_energy = i;
+      if(i > lowest_energy) lowest_energy = i;
+    }
+  }
+  const int energies_observed = lowest_energy - highest_energy + 1;
+
+  // now we create two density of states vectors
+  double *old_dos = new double[energies_observed];
+  double *dos = new double[energies_observed];
+
+  // initialize a uniform density of states with unit norm
+  const double dos_init = 1/sqrt(energies_observed);
+  for (int i = 0; i < energies_observed; i++) dos[i] = dos_init;
+
+  // now find the eigenvector of our transition matrix via the power iteration method
+  // fixme: use the inverse iteration methed?
+  bool done = false;
+  while(!done){
+    for (int i = 0; i < energies_observed; i++) old_dos[i] = dos[i];
+
+    // compute D_n = T*D_{n-1}
+    double dos_magnitude_squared = 0;
+    for (int i = 0; i < energies_observed; i++){
+      dos[i] = 0;
+      for(int e = -biggest_energy_transition; e <= biggest_energy_transition; e++)
+        dos[i] += transitions(i,e)*old_dos[i];
+      dos_magnitude_squared += dos[i]*dos[i];
+    }
+
+    // normalize D_n
+    const double dos_magnitude = sqrt(dos_magnitude_squared);
+    for (int i = 0; i < energies_observed; i++) dos[i] /= dos_magnitude;
+
+    // check whether D_n is close enough to D_{n-1} for us to exit
+    done = true;
+    for (int i = 0; i < energies_observed; i++){
+      if (fabs(1-dos[i]/old_dos[i]) > fractional_precision){
+        done = false;
+        break;
+      }
+    }
+  }
+  // compute the weights w(E) = 1/D(E)
+  for(int i = 0; i < energies_observed; i++)
+    ln_energy_weights[i+highest_energy] = 1/dos[i];
+  flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
 }
 
 void sw_simulation::initialize_transitions(int max_iter) {
