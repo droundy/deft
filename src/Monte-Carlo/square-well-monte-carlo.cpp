@@ -105,6 +105,8 @@ int main(int argc, const char *argv[]) {
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
 
+  double transition_precision = 1e-10;
+
   // Do not change these! They are taken directly from the WL paper.
   double vanilla_wl_factor = 1;
   double vanilla_wl_fmod = 2;
@@ -215,6 +217,9 @@ int main(int argc, const char *argv[]) {
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"init_min_energy_samples", '\0', POPT_ARG_INT, &init_min_energy_samples, 0,
      "number of times to sample mininum energy in initializing walker optimization", "INT"},
+    {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &transition_precision, 0,
+     "Precision factor for computing weights from the transition matrix", "DOUBLE"},
     /* testing and debugging options */
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},

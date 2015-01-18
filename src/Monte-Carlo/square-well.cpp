@@ -620,15 +620,7 @@ bool sw_simulation::printing_allowed(){
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions(double fractional_precision) {
   // first, we find the range of energies for which we have data
-  int lowest_energy = 0;
-  int  highest_energy = energy_levels;
-  for (int i = 0; i < energy_levels; i++){
-    if (energy_histogram[i] != 0){
-      if(i < highest_energy) highest_energy = i;
-      if(i > lowest_energy) lowest_energy = i;
-    }
-  }
-  const int energies_observed = lowest_energy - highest_energy + 1;
+  const int energies_observed = min_energy_state+1;
 
   // now we create two density of states vectors
   double *old_dos = new double[energies_observed];
@@ -639,9 +631,12 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   for (int i = 0; i < energies_observed; i++) dos[i] = dos_init;
 
   // now find the eigenvector of our transition matrix via the power iteration method
-  // fixme: use the inverse iteration methed?
+  /* fixme: I was thinking of implementing the inverse iteration method, but this
+     method seems to converge quite nicely and very quickly, so it probably doesn't matter */
   bool done = false;
+  int iters = 0;
   while(!done){
+    iters++;
     for (int i = 0; i < energies_observed; i++) old_dos[i] = dos[i];
 
     // compute D_n = T*D_{n-1}
@@ -666,9 +661,10 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
       }
     }
   }
+
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i+highest_energy] = 1/dos[i];
+    ln_energy_weights[i] = 1/dos[i];
 }
 
 void sw_simulation::initialize_transitions(int max_iter) {
