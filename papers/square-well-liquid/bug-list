@@ -1,19 +1,18 @@
 minimum energies seen in debugging, etc.:
   N = 10, E = 33
-  N = 20, E = 97
+  N = 20, E = 98
 
 -----
 
 wang landau:
 
-stuck during initialization if it finds a low energy exceedingly difficult to find again,
-  (the count variation becomes huge, and stays such)
-stuck in sw.initialize_max_entropy_and_translation_distance() right after initialization,
-  due to finding an energy which it did not see during initialization
-  (the weights at such energies are absurdly huge)
-
 -----
 
 walker optimization:
 
-results can depend on the scale of the gaussian pre-initialization
+results depend heavily on the scale of the gaussian pre-initialization (N = 20)
+
+-----
+
+robustly optimistic:
+
