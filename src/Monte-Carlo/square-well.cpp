@@ -168,25 +168,22 @@ void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n){
   }
 }
 
-bool overlap(const ball &a, const ball &b, const double len[3], int walls,
-             double dr){
+bool overlap(const ball &a, const ball &b, const double len[3], int walls){
   const vector3d ab = periodic_diff(a.pos, b.pos, len, walls);
-  return (ab.normsquared() < sqr(a.R + b.R + 2*dr));
+  return (ab.normsquared() < sqr(a.R + b.R));
 }
 
-int overlaps_with_any(const ball &a, const ball *p,
-                      const double len[3], int walls, double dr){
+int overlaps_with_any(const ball &a, const ball *p, const double len[3], int walls){
   for (int i = 0; i < a.num_neighbors; i++){
-    if (overlap(a,p[a.neighbors[i]],len,walls,dr))
+    if (overlap(a,p[a.neighbors[i]],len,walls))
       return true;
   }
   return false;
 }
 
-bool in_cell(const ball &p, const double len[3], const int walls,
-             double dr){
+bool in_cell(const ball &p, const double len[3], const int walls){
   for (int i = 0; i < walls; i++){
-    if (p.pos[i]-p.R-dr < 0.0 || p.pos[i]+p.R+dr > len[i])
+    if (p.pos[i]-p.R < 0.0 || p.pos[i]+p.R > len[i])
       return false;
   }
   return true;
@@ -241,20 +238,6 @@ int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
   return max_entropy_state;
 }
 
-void flush_weight_array(double *ln_energy_weights, int energy_levels, int max_entropy_state){
-  // make weights flat at energies above the maximum entropy state
-  for (int i = 0; i < max_entropy_state; i++)
-    ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
-  // Now let's just add the minimum, so our weights don't get
-  // out of hand (which could lead to increased roundoff errors).
-  double min_weight = ln_energy_weights[0];
-  for (int i = 1; i < max_entropy_state; i++)
-    min_weight = min(min_weight, ln_energy_weights[i]);
-  for (int i = 0; i < energy_levels; i++)
-    ln_energy_weights[i] -= min_weight;
-  return;
-}
-
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
@@ -288,7 +271,7 @@ void sw_simulation::move_a_ball() {
     count_interactions(id, balls, interaction_distance, len, walls);
   ball temp = random_move(balls[id], translation_distance, len);
   // If we're out of the cell or we overlap, this is a bad move!
-  if (!in_cell(temp, len, walls, dr) || overlaps_with_any(temp, balls, len, walls, dr)){
+  if (!in_cell(temp, len, walls) || overlaps_with_any(temp, balls, len, walls)){
     end_move_updates();
     return;
   }
@@ -301,14 +284,14 @@ void sw_simulation::move_a_ball() {
     // If we still don't overlap, then we'll have to update the tables
     // of our neighbors that have changed.
     temp.neighbors = new int[max_neighbors];
-    update_neighbors(temp, id, balls, N, neighbor_R + 2*dr, len, walls);
+    update_neighbors(temp, id, balls, N, neighbor_R, len, walls);
     moves.updates++;
     // However, for this check (and this check only), we don't need to
     // look at all of our neighbors, only our new ones.
     // fixme: do this!
     //int *new_neighbors = new int[max_neighbors];
 
-    if (overlaps_with_any(temp, balls, len, walls, dr)) {
+    if (overlaps_with_any(temp, balls, len, walls)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
       end_move_updates();
@@ -386,8 +369,6 @@ void sw_simulation::energy_change_updates(){
   }
 }
 
-// iterate enough times for the energy to change n times.  Return the
-// number of "up" moves.
 int sw_simulation::simulate_energy_changes(int num_moves) {
   int num_moved = 0, num_up = 0;
   while (num_moved < num_moves) {
@@ -399,6 +380,17 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
     }
   }
   return num_up;
+}
+
+void sw_simulation::flush_weight_array(){
+  for (int i = 0; i < max_entropy_state; i++)
+    ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
+  double min_weight = ln_energy_weights[0];
+  for (int i = 1; i < max_entropy_state; i++)
+    min_weight = min(min_weight, ln_energy_weights[i]);
+  for (int i = 0; i < energy_levels; i++)
+    ln_energy_weights[i] -= min_weight;
+  return;
 }
 
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
@@ -561,7 +553,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     // check whether our histogram is flat enough to update wl_factor
     if (variation > 0 && variation < max(wl_threshold, exp(wl_factor))) {
       wl_factor /= wl_fmod;
-      flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
+      flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         if (energy_histogram[i] > 0) energy_histogram[i] = 1;
       }
@@ -571,8 +563,6 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       if (wl_factor < wl_cutoff && last_min_energy_state == min_energy_state) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration - starting_iterations, weight_updates);
-        for(int i = min_energy_state+1; i < energy_levels; i++)
-          ln_energy_weights[i] = ln_energy_weights[min_energy_state] + log(10);
         finished_initializing = true;
       }
       last_min_energy_state = min_energy_state;
@@ -604,7 +594,7 @@ void sw_simulation::initialize_walker_optimization(int first_update_iterations,
           double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
         ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
       }
-      flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
+      flush_weight_array();
       for(int i = 0; i < energy_levels; i++){
         walkers_up[i] = 0;
         walkers_total[i] = 0;
@@ -679,7 +669,6 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
     ln_energy_weights[i+highest_energy] = 1/dos[i];
-  flush_weight_array(ln_energy_weights, energy_levels, max_entropy_state);
 }
 
 void sw_simulation::initialize_transitions(int max_iter) {

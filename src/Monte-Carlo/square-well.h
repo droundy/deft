@@ -57,7 +57,6 @@ struct sw_simulation {
   int max_neighbors;
   double neighbor_R; // radius of our neighbor sphere
   double translation_distance; // scale for how far to move balls
-  double dr; // small change in radius used to compute pressure
   int energy_levels; // total number of energy levels
 
   /* The following accumulate results of the simulation.  Although
@@ -120,6 +119,10 @@ struct sw_simulation {
   // the number of "up" moves.
   int simulate_energy_changes(int num_moves);
 
+  // flatten weights at energies above the maximum entropy state,
+  // and subtract off minimum weight so that our weights don't get out of hand
+  void flush_weight_array();
+
   // initialize the weight array using the Gaussian approximation.
   // Returns the width of the gaussian used.
   double initialize_gaussian(double scale = 100.0);
@@ -179,19 +182,15 @@ void remove_neighbor(int old_n, ball *p, int id);
 void inform_neighbors(const ball &new_p, const ball &old_p, ball *p);
 
 // Check whether two balls overlap
-bool overlap(const ball &a, const ball &b, const double len[3],
-             int walls, double dr = 0);
+bool overlap(const ball &a, const ball &b, const double len[3], int walls);
 
 // Check whether ball a overlaps with any of its neighbors in p.
 // If count is true, it will return the total number of overlaps, otherwise constant
 // it returns 1 if there is at least one overlap, 0 if there are none.
-// If dr is nonzero, then each ball is treated as having a radius R + dr
-int overlaps_with_any(const ball &a, const ball *p, const double len[3],
-                      int walls, double dr=0);
+int overlaps_with_any(const ball &a, const ball *p, const double len[3], int walls);
 
 // Return true if p doesn't intersect walls
-bool in_cell(const ball &p, const double len[3], const int walls,
-             double dr = 0);
+bool in_cell(const ball &p, const double len[3], const int walls);
 
 // Move the ball by a random amount, in a gaussian distribution with
 // respective standard deviations dist and angwidth
@@ -208,10 +207,6 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
 // Find index of max entropy point
 int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
                       int energy_levels);
-
-// Flatten weights beyond max entropy point and reset energy histogram
-void flush_arrays(long *energy_histogram, double *ln_energy_weights,
-                  int energy_levels, int max_entropy_state, bool reset_energy_histogram);
 
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius

@@ -92,19 +92,18 @@ int main(int argc, const char *argv[]) {
   int vanilla_wang_landau = false;
 
   // Tuning factors
-  double global_gaussian_init_scale = 60;
-  double gaussian_init_scale = 50;
+  double gaussian_init_scale = 60;
   double wl_factor = 0.125;
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double bubble_scale = 2;
+  double bubble_scale = 4;
   double bubble_cutoff = 0.2;
   double robust_update_scale = 0.8; // should be ~1, but must be <= 1
   double robust_cutoff = 0.2; // should be ~0.1, and must be < 1
 
   // number of times we wish to sample the minimum observed energy in initialization
-  int init_min_energy_samples = 5;
+  int init_min_energy_samples = 2;
 
   // Do not change these! They are taken directly from the WL paper.
   double vanilla_wl_factor = 1;
@@ -117,7 +116,6 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 10;
-  sw.dr = 0.1;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -184,8 +182,6 @@ int main(int argc, const char *argv[]) {
     /* output data parameters */
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
-    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.dr, 0,
-     "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -306,12 +302,11 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || sw.dr <= 0 || translation_scale < 0 ||
+      neighbor_scale <= 0 || translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
-  sw.dr *= R;
 
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
   if (eta > 1) {
@@ -513,7 +508,7 @@ int main(int argc, const char *argv[]) {
 
   {
     int most_neighbors =
-      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*sw.dr,
+      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
                                  sw.max_neighbors, sw.len, sw.walls);
     if (most_neighbors < 0) {
       fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
@@ -531,7 +526,7 @@ int main(int argc, const char *argv[]) {
 
   bool error = false, error_cell = false;
   for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls, sw.dr)) {
+    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
       error_cell = true;
       error = true;
     }
@@ -564,11 +559,9 @@ int main(int argc, const char *argv[]) {
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
   // Now let's try to get a crude guess for what the weight array should look like
   if(!no_weights)
-    sw.initialize_gaussian(global_gaussian_init_scale);
-
-  if (gaussian_fit) {
     sw.initialize_gaussian(gaussian_init_scale);
-  } else if (robustly_optimistic) {
+
+  if (robustly_optimistic) {
     printf("I am robustly optimistically trying to initialize.\n");
     bool done;
     double mean_hist = 0;
@@ -576,15 +569,11 @@ int main(int argc, const char *argv[]) {
       done = true; // Let's be optimistic!
       // First, let's reset our weights based on what we already know!
       for (int e = sw.max_entropy_state; e < sw.energy_levels; e++) {
-        if (sw.energy_histogram[e]) {
-          // We don't want to be overzealous, so we include a scale factor
+        if (sw.energy_histogram[e])
           sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
-        } else
-          sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.min_energy_state] + log(10);
       }
-      // Flatten weights above state of max entropy
-      for (int e = 0; e < sw.max_entropy_state; e++)
-        sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.max_entropy_state];
+      sw.flush_weight_array();
+      if(sw.energy_histogram[sw.min_energy_state] == 0) done = false;
       // Now reset the calculation!
       for (int e = 0; e < sw.energy_levels; e++) {
         sw.energy_histogram[e] = 0;
@@ -640,6 +629,15 @@ int main(int argc, const char *argv[]) {
   } else if (walker_optimization) {
     sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
   }
+  sw.flush_weight_array();
+
+  /* set the weights of unseen low energies to at least something somewhat reasonable
+     so that we don't get stuck at these low energies during simulations,
+     should we encounter them */
+  if(wang_landau || vanilla_wang_landau || walker_optimization || robustly_optimistic){
+    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + log(10);
+  }
 
   // ----------------------------------------------------------------------------
   // Generate info to put in save files
@@ -659,10 +657,9 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# translation_distance: %g\n"
           "# neighbor_scale: %g\n"
-          "# dr: %g\n"
           "# energy_levels: %i\n\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_distance, neighbor_scale, sw.dr, sw.energy_levels);
+          well_width, sw.translation_distance, neighbor_scale, sw.energy_levels);
 
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);

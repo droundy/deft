@@ -111,7 +111,6 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 10;
-  sw.dr = 0.1;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -153,8 +152,6 @@ int main(int argc, const char *argv[]) {
      0, "Number of iterations for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
-    {"dr", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.dr, 0,
-     "Differential radius change used in pressure calculation", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -292,12 +289,11 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || sw.dr <= 0 || translation_scale < 0 ||
+      neighbor_scale <= 0 || translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
-  sw.dr *= R;
 
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
   if (eta > 1) {
@@ -504,7 +500,7 @@ int main(int argc, const char *argv[]) {
 
   {
     int most_neighbors =
-      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R + 2*sw.dr,
+      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
                                  sw.max_neighbors, sw.len, sw.walls);
     if (most_neighbors < 0) {
       fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
@@ -522,7 +518,7 @@ int main(int argc, const char *argv[]) {
 
   bool error = false, error_cell = false;
   for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls, sw.dr)) {
+    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
       error_cell = true;
       error = true;
     }
@@ -652,10 +648,9 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# translation_distance: %g\n"
           "# neighbor_scale: %g\n"
-          "# dr: %g\n"
           "# energy_levels: %i\n\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_distance, neighbor_scale, sw.dr, sw.energy_levels);
+          well_width, sw.translation_distance, neighbor_scale, sw.energy_levels);
 
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);
