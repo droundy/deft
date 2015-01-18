@@ -82,13 +82,13 @@ struct sw_simulation {
      it when we change the weights.  Thus we could accumulate better
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
-  int biggest_energy_transtion;
+  int biggest_energy_transition;
   long *transitions_table;
   long &transitions(int energy, int energy_change) {
-    assert(energy_change >= -biggest_energy_transtion);
-    assert(energy_change <= biggest_energy_transtion);
-    return transitions_table[energy*(2*biggest_energy_transtion+1)
-                             + energy_change+biggest_energy_transtion];
+    assert(energy_change >= -biggest_energy_transition);
+    assert(energy_change <= biggest_energy_transition);
+    return transitions_table[energy*(2*biggest_energy_transition+1)
+                             + energy_change+biggest_energy_transition];
   };
 
   long min_energy_observations() const {
@@ -125,7 +125,7 @@ struct sw_simulation {
   double initialize_gaussian(double scale = 100.0);
 
   // update the weight array using transitions
-  void update_weights_using_transitions();
+  void update_weights_using_transitions(double fractional_precision);
 
   // initialize using transitions
   void initialize_transitions(int max_iterations);

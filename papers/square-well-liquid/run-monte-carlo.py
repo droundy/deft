@@ -3,8 +3,8 @@
 import os, sys, socket
 import subprocess as sp
 
-if not len(sys.argv) in [5,6]:
-    print 'useage: %s ww ff N versions filename_suffix' % sys.argv[0]
+if not len(sys.argv) in [5,6,7]:
+    print 'useage: %s ww ff N methods filename_suffix optional_params' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -13,13 +13,17 @@ ff = float(sys.argv[2])
 
 N = int(sys.argv[3])
 
-versions = eval(sys.argv[4])
+methods = eval(sys.argv[4])
 
-if len(sys.argv) == 6:
+if len(sys.argv) >= 6:
     filename_suffix = sys.argv[5]
+else:
+    filename_suffix = ''
 
-initialize = 10000
-iterations = 10000
+if len(sys.argv) == 7:
+    optional_params = eval(sys.argv[6])
+else:
+    optional_params = []
 
 # define some directories
 swdir = os.path.dirname(os.path.realpath(__file__))
@@ -39,9 +43,11 @@ if exitStatus != 0:
     print "scons failed"
     exit(exitStatus)
 
-for version in versions:
+for method in methods:
     memory = 20*N # fixme: better guess
-    jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' %(ww, ff, N, version)
+    jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' %(ww, ff, N, method)
+    if filename_suffix:
+        jobname += '-'+filename_suffix
     basename = "%s/%s" %(jobdir, jobname)
     scriptname = basename + '.sh'
     outname = basename + '.out'
@@ -58,21 +64,20 @@ for version in versions:
                  "Estimated memory use: %i MB.\"\n\n" %(jobname,memory))
     script.write("cd %s\n" %projectdir)
     script.write(command)
-    for (arg,val) in [ ("ww",ww), ("ff",ff), ("N",N),
-                       ("initialize",initialize),
-                       ("iterations",iterations) ]:
+    for (arg,val) in [ ("ww",ww), ("ff",ff), ("N",N) ]:
         script.write(" \\\n --%s %s" %(arg,str(val)))
-    script.write(" \\\n --%s"%version.replace("kT","kT "))
-    try:
+    script.write(" \\\n --%s"%method.replace("kT","kT "))
+
+    if filename_suffix:
         script.write(" \\\n --filename_suffix %s" %filename_suffix)
-    except:
-        None
+    for i in range(len(optional_params)/2):
+        script.write(" \\\n --%s %s" %(optional_params[2*i],optional_params[2*i+1]))
     script.close()
 
     # start simulation
     if socket.gethostname() == 'MAPHost':
         sp.Popen(["bash", scriptname],
-                 stdout=open(outname,"w"),stderr=open(errname,"w"))
+                 stdout = open(outname,"w"),s tderr = open(errname,"w"))
     else:
         sp.Popen(["sbatch", "-J", jobname, scriptname])
 
