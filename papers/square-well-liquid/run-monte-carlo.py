@@ -77,7 +77,7 @@ for method in methods:
     # start simulation
     if socket.gethostname() == 'MAPHost':
         sp.Popen(["bash", scriptname],
-                 stdout = open(outname,"w"),s tderr = open(errname,"w"))
+                 stdout = open(outname,"w"), stderr = open(errname,"w"))
     else:
         sp.Popen(["sbatch", "-J", jobname, scriptname])
 
