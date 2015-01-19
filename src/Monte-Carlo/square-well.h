@@ -56,7 +56,7 @@ struct sw_simulation {
   // move_a_ball.
   int max_neighbors;
   double neighbor_R; // radius of our neighbor sphere
-  double translation_distance; // scale for how far to move balls
+  double translation_scale; // scale for how far to move balls
   int energy_levels; // total number of energy levels
 
   /* The following accumulate results of the simulation.  Although
@@ -123,26 +123,25 @@ struct sw_simulation {
   // and subtract off minimum weight so that our weights don't get out of hand
   void flush_weight_array();
 
-  // initialize the weight array using the Gaussian approximation.
-  // Returns the width of the gaussian used.
-  double initialize_gaussian(double scale = 100.0);
+  /*** HISTOGRAM METHODS ***/
 
-  // update the weight array using transitions
-  void update_weights_using_transitions(double fractional_precision);
-
-  // initialize using transitions
-  void initialize_transitions(int max_iterations);
-
-  // initialize the weight array using the specified temperature.
   void initialize_canonical(double kT);
 
-  // initialize the weight array using the Wang-Landau method.
+  double initialize_gaussian(double scale); // returns width of gaussian used
+
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  // initialize the weight array using the optimized ensemble method.
   void initialize_walker_optimization(int first_update_iterations,
                                       int init_min_energy_samples);
+
+  void initialize_robustly_optimistic(double robust_update_scale, double robust_cutoff);
+
+  void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
+
+  void update_weights_using_transitions(double fractional_precision);
+
+  void initialize_transitions(int max_iterations);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
@@ -197,11 +196,11 @@ bool in_cell(const ball &p, const double len[3], const int walls);
 ball random_move(const ball &original, double size, const double len[3]);
 
 // Count the number of interactions a given ball has
-int count_interactions(int id, ball *p, double interaction_distance,
+int count_interactions(int id, ball *p, double interaction_scale,
                        double len[3], int walls);
 
 // Count the interactions of all the balls
-int count_all_interactions(ball *balls, int N, double interaction_distance,
+int count_all_interactions(ball *balls, int N, double interaction_scale,
                            double len[3], int walls);
 
 // Find index of max entropy point
