@@ -84,12 +84,13 @@ int main(int argc, const char *argv[]) {
 
   int no_weights = false;
   double fix_kT = 0;
+  int gaussian_fit = false;
+  int wang_landau = false;
+  int walker_optimization = false;
+  int vanilla_wang_landau = false;
   int robustly_optimistic = false;
   int bubble_suppression = false;
-  int gaussian_fit = false;
-  int walker_optimization = false;
-  int wang_landau = false;
-  int vanilla_wang_landau = false;
+  int transition_override = false;
 
   // Tuning factors
   double gaussian_init_scale = 60;
@@ -117,7 +118,7 @@ int main(int argc, const char *argv[]) {
 
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
-  sw.N = 10;
+  sw.N = 200;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -128,7 +129,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1000000;
+  long simulation_iterations = 1e9;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
@@ -146,7 +147,7 @@ int main(int argc, const char *argv[]) {
   // Set values from parameters
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
-    /* fluid identity */
+    /*** FLUID IDENTITY ***/
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
      "Ratio of square well width to ball diameter", "DOUBLE"},
@@ -155,17 +156,18 @@ int main(int argc, const char *argv[]) {
      "the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    /* relative size of cell dimensions; fixme: these currently ignored */
+    /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
+    // fixme: these are currently ignored
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &sw.len[y], 0,
      "Relative cell size in y dimension", "DOUBLE"},
     {"lenz", '\0', POPT_ARG_DOUBLE, &sw.len[z], 0,
      "Relative cell size in z dimension", "DOUBLE"},
-    /* simulation iterations */
+    /*** SIMULATION ITERATIONS ***/
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
      0, "Number of iterations for which to run the simulation", "INT"},
-    /* monte carlo optimization parameters */
+    /*** MONTE CARLO OPTIMIZATION PARAMETERS ***/
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
@@ -174,21 +176,21 @@ int main(int argc, const char *argv[]) {
      "relative to ball radius", "DOUBLE"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
-    /* parameters determining output file directory and names */
+    /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     {"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
      "Directory in which to save data", "data_dir"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
     {"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &filename_suffix, 0, "Output file name suffix", "STRING"},
-    /* output data parameters */
+    /*** OUTPUT DATA PARAMETERS ***/
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &max_rdf_radius, 0, "Set maximum radius for RDF data collection", "DOUBLE"},
-    /* histogram method options */
+    /*** HISTOGRAM METHOD OPTIONS ***/
     {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
@@ -205,7 +207,10 @@ int main(int argc, const char *argv[]) {
      "Use the robustly optimistic histogram method", "BOOLEAN"},
     {"bubble_suppression", '\0', POPT_ARG_NONE, &bubble_suppression, 0,
      "Use the bubble suppression method", "BOOLEAN"},
-    /* histogram method parameters */
+    {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
+     "Override initialized weights with weights generated from the transition matrix",
+     "BOOLEAN"},
+    /*** HISTOGRAM METHOD PARAMETERS ***/
     {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_factor,
      0, "Initial value of Wang-Landau factor", "DOUBLE"},
     {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
@@ -220,7 +225,7 @@ int main(int argc, const char *argv[]) {
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
-    /* testing and debugging options */
+    /*** TESTING AND DEBUGGING OPTIONS ***/
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
@@ -349,6 +354,8 @@ int main(int argc, const char *argv[]) {
     }
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
+    if(transition_override)
+      sprintf(filename, "%s-to", filename);
     printf("\nUsing default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
@@ -635,6 +642,11 @@ int main(int argc, const char *argv[]) {
     sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
   }
   sw.flush_weight_array();
+
+  if(transition_override){
+    printf("\nOverriding weight array with that generated from the transition matrix!\n");
+    sw.update_weights_using_transitions(transition_precision);
+  }
 
   /* set the weights of unseen low energies to at least something somewhat reasonable
      so that we don't get stuck at these low energies during simulations,
