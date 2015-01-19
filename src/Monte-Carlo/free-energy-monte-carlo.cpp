@@ -111,6 +111,7 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 10;
+  sw.translation_scale = 0.05;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -131,9 +132,6 @@ int main(int argc, const char *argv[]) {
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
-  // scale is not universally constant -- it is adjusted during initialization
-  //  so that we have a reasonable acceptance rate
-  double translation_scale = 0.05;
 
   poptContext optCon;
   // ----------------------------------------------------------------------------
@@ -172,7 +170,7 @@ int main(int argc, const char *argv[]) {
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
     {"translation_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &translation_scale, 0, "Standard deviation for translations of balls, "
+     &sw.translation_scale, 0, "Standard deviation for translations of balls, "
      "relative to ball radius", "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
@@ -289,7 +287,7 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || translation_scale < 0 ||
+      neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
@@ -363,7 +361,7 @@ int main(int argc, const char *argv[]) {
   sw.min_energy_state = 0;
 
   // translation distance should scale with ball radius
-  sw.translation_distance = translation_scale*R;
+  sw.translation_scale *= R;
 
   // neighbor radius should scale with radius and interaction scale
   sw.neighbor_R = neighbor_scale*R*well_width;
@@ -646,11 +644,11 @@ int main(int argc, const char *argv[]) {
           "# N: %i\n"
           "# R: %f\n"
           "# well_width: %g\n"
-          "# translation_distance: %g\n"
+          "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_distance, neighbor_scale, sw.energy_levels);
+          well_width, sw.translation_scale, neighbor_scale, sw.energy_levels);
 
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);

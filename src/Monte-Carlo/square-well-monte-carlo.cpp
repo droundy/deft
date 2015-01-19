@@ -24,12 +24,12 @@
 //
 // The symbols e, e_i, and de are used as general coordinates.
 //
-// Def: If two objects, a and b, are closer than a.R + b.R + neighbor_R + dn,
+// Def: If two objects, a and b, are closer than a.R + b.R + neighbor_R,
 // then they are neighbors.
 //
 // Neighbors are used to drastically reduce the number of collision tests needed.
 //
-// Def: The neighborsphere of an object, a, is the sphere within which
+// Def: The neighbor sphere of an object, a, is the sphere within which
 // everything is a neighbor of a.
 // Note that this sphere has a well defined center, but it does not have
 // a well defined radius unless all obects are circumscribed by spheres of
@@ -93,15 +93,15 @@ int main(int argc, const char *argv[]) {
   int transition_override = false;
 
   // Tuning factors
-  double gaussian_init_scale = 60;
+  double gaussian_init_scale = 0;
   double wl_factor = 0.125;
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double bubble_scale = 4;
+  double robust_update_scale = 0.7; // should probably be ~1, and must be <= 1
+  double robust_cutoff = 1e-1; // should probably be ~1e-1, and must be < 1
+  double bubble_scale = 0;
   double bubble_cutoff = 0.2;
-  double robust_update_scale = 0.8; // should be ~1, but must be <= 1
-  double robust_cutoff = 0.2; // should be ~0.1, and must be < 1
 
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
@@ -119,6 +119,7 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 200;
+  sw.translation_scale = 0.05;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -140,14 +141,17 @@ int main(int argc, const char *argv[]) {
   double max_rdf_radius = 10;
   // scale is not universally constant -- it is adjusted during initialization
   //  so that we have a reasonable acceptance rate
-  double translation_scale = 0.05;
 
   poptContext optCon;
+
   // ----------------------------------------------------------------------------
-  // Set values from parameters
+  // Parse input options
   // ----------------------------------------------------------------------------
+
   poptOption optionsTable[] = {
+
     /*** FLUID IDENTITY ***/
+
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
      "Ratio of square well width to ball diameter", "DOUBLE"},
@@ -156,7 +160,9 @@ int main(int argc, const char *argv[]) {
      "the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
+
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
+
     // fixme: these are currently ignored
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
@@ -164,33 +170,43 @@ int main(int argc, const char *argv[]) {
      "Relative cell size in y dimension", "DOUBLE"},
     {"lenz", '\0', POPT_ARG_DOUBLE, &sw.len[z], 0,
      "Relative cell size in z dimension", "DOUBLE"},
+
     /*** SIMULATION ITERATIONS ***/
+
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
      0, "Number of iterations for which to run the simulation", "INT"},
+
     /*** MONTE CARLO OPTIMIZATION PARAMETERS ***/
+
     {"neighbor_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &neighbor_scale, 0, "Ratio of neighbor sphere radius to interaction scale "
      "times ball radius. Drastically reduces collision detections","DOUBLE"},
     {"translation_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &translation_scale, 0, "Standard deviation for translations of balls, "
+     &sw.translation_scale, 0, "Standard deviation for translations of balls, "
      "relative to ball radius", "DOUBLE"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
+
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
+
     {"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
      "Directory in which to save data", "data_dir"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
     {"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &filename_suffix, 0, "Output file name suffix", "STRING"},
+
     /*** OUTPUT DATA PARAMETERS ***/
+
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &max_rdf_radius, 0, "Set maximum radius for RDF data collection", "DOUBLE"},
+
     /*** HISTOGRAM METHOD OPTIONS ***/
+
     {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
@@ -210,7 +226,9 @@ int main(int argc, const char *argv[]) {
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
+
     /*** HISTOGRAM METHOD PARAMETERS ***/
+
     {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_factor,
      0, "Initial value of Wang-Landau factor", "DOUBLE"},
     {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
@@ -220,23 +238,35 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
+    {"robust_update_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_update_scale, 0, "Scale factor for robustly optimistic updates", "DOUBLE"},
+    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
+    {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
+    {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
     {"init_min_energy_samples", '\0', POPT_ARG_INT, &init_min_energy_samples, 0,
-     "number of times to sample mininum energy in initializing walker optimization", "INT"},
+     "Number of times to sample mininum energy in initializing walker optimization", "INT"},
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
+
     /*** TESTING AND DEBUGGING OPTIONS ***/
+
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
      "Seed for the random number generator", "INT"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
+
     POPT_AUTOHELP
     POPT_TABLEEND
   };
   optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of balls and filling "
-                         "fraction or cell dimensions are required arguments.");
+  poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: number of balls (N), "
+                         "and either filling fraction (ff) "
+                         "or cell dimensions (lenx, leny, lenz).");
 
   int c = 0;
   // go through arguments, set them based on optionsTable
@@ -247,18 +277,27 @@ int main(int argc, const char *argv[]) {
   }
   poptFreeContext(optCon);
 
+  printf("------------------------------------------------------------------\n");
+  printf("Running %s with parameters:\n", argv[0]);
+  for(int i = 1; i < argc; i++) {
+    if(argv[i][0] == '-') printf("\n");
+    printf("%s ", argv[i]);
+  }
+  printf("\n");
+  if (debug) printf("DEBUG MODE IS ENABLED!\n");
+  printf("------------------------------------------------------------------\n\n");
+
   // ----------------------------------------------------------------------------
-  // Verify we have reasonable arguments and set secondary parameters
+  // Verify we have valid and reasonable arguments, and set secondary parameters
   // ----------------------------------------------------------------------------
 
-  // check that only one method is used
-  if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
-     + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(walker_optimization) + (fix_kT != 0) != 1){
-    printf("Exactly one histigram method must be selected!");
+  // Make sure we have a valid square-well fluid
+  if(well_width < 1){
+    printf("Interaction scale should be greater than (or equal to) 1.\n");
     return 254;
   }
 
+  // Check code compatability with the requested number of dimensions with walls
   if(sw.walls >= 2){
     printf("Code cannot currently handle walls in more than one dimension.\n");
     return 254;
@@ -267,22 +306,30 @@ int main(int argc, const char *argv[]) {
     printf("You cannot have walls in more than three dimensions.\n");
     return 254;
   }
-  if(well_width < 1){
-    printf("Interaction scale should be greater than (or equal to) 1.\n");
+
+  // Check that only one histogram method is used
+  if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
+     + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
+     + bool(walker_optimization) + (fix_kT != 0) != 1){
+    printf("Exactly one histigram method must be selected!\n");
     return 254;
   }
 
+  // Check that we have valid parameters for histogram methods
+  if(robustly_optimistic && (robust_update_scale > 1 || robust_cutoff >= 1)){
+    printf("Robustly optimistic parameters cannot be greater than 1!\n");
+    return 155;
+  }
 
+  // If the user specified a filling fraction, make it so!
   if (ff != 0) {
-    // The user specified a filling fraction, so we must make it so!
     const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
       = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
     if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
-      // We can get away with a cubic cell, so let's do so.  Cubic
-      // cells are nice and comfortable!
+      // We can get away with a cubic cell, so let's do so.
       sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
     } else {
       // A cubic cell won't work with our initialization routine, so
@@ -312,12 +359,13 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || translation_scale < 0 ||
+      neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
     return 1;
   }
 
+  // Compute our actual filling fraction, eta
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. "
@@ -362,32 +410,34 @@ int main(int argc, const char *argv[]) {
   }
   else
     printf("\nUsing given file name: ");
+
   // If a filename suffix was specified, add it
   if (strcmp(filename_suffix, "default_filename_suffix") != 0)
     sprintf(filename, "%s-%s", filename, filename_suffix);
   printf("%s\n",filename);
 
-  printf("------------------------------------------------------------------\n");
-  printf("Running %s with parameters:\n", argv[0]);
-  for(int i = 1; i < argc; i++) {
-    if(argv[i][0] == '-') printf("\n");
-    printf("%s ", argv[i]);
-  }
-  printf("\n");
-  if (debug) printf("DEBUG MODE IS ENABLED!\n");
-  else printf("Debug mode disabled\n");
-  printf("------------------------------------------------------------------\n\n");
+  // Choose necessary but unspecified parameters
+  if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
+  if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
+
+  // Initialize the random number generator with our seed
+  random::seed(seed);
 
   // ----------------------------------------------------------------------------
   // Define sw_simulation variables
   // ----------------------------------------------------------------------------
 
-  sw.iteration = 0; // start at zeroeth iteration
+  sw.balls = new ball[sw.N];
+  sw.iteration = 0;
   sw.max_entropy_state = 0;
   sw.min_energy_state = 0;
 
-  // translation distance should scale with ball radius
-  sw.translation_distance = translation_scale*R;
+  // initialize ball radii
+  for(int i = 0; i < sw.N; i++)
+    sw.balls[i].R = R;
+
+  // scale distances by ball radius
+  sw.translation_scale *= R;
 
   // neighbor radius should scale with radius and interaction scale
   sw.neighbor_R = neighbor_scale*R*well_width;
@@ -418,6 +468,10 @@ int main(int argc, const char *argv[]) {
   //   optimized ensemble initialization
   int first_update_iterations = sw.N*sw.energy_levels;
 
+  // ----------------------------------------------------------------------------
+  // Define data arrays
+  // ----------------------------------------------------------------------------
+
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
   const int g_bins = round(min(min(min(sw.len[y],sw.len[z]),sw.len[x]),max_rdf_radius)
@@ -433,20 +487,9 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     density_histogram[i] = new long[density_bins]();
 
-  printf("memory use estimate = %.2g G\n\n",
-         8*double((6 + g_bins + density_bins)*sw.energy_levels)/1024/1024/1024);
-
-  sw.balls = new ball[sw.N];
-
-  // Initialize the random number generator with our seed
-  random::seed(seed);
-
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
-
-  for(int i = 0; i < sw.N; i++) // initialize ball radii
-    sw.balls[i].R = R;
 
   // Balls will be initially placed on a face centered cubic (fcc) grid
   // Note that the unit cells need not be actually "cubic", but the fcc grid will
@@ -561,7 +604,7 @@ int main(int argc, const char *argv[]) {
   fflush(stdout);
 
   // ----------------------------------------------------------------------------
-  // Initialization of cell
+  // Initialization of cell and histogram methods
   // ----------------------------------------------------------------------------
 
   sw.energy =
@@ -569,68 +612,14 @@ int main(int argc, const char *argv[]) {
 
   // First, let us figure out what the max entropy point is.
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
-  // Now let's try to get a crude guess for what the weight array should look like
+
+  // Now let's initialize our weight array
   if(!no_weights)
     sw.initialize_gaussian(gaussian_init_scale);
-
   if (robustly_optimistic) {
-    printf("I am robustly optimistically trying to initialize.\n");
-    bool done;
-    double mean_hist = 0;
-    do {
-      done = true; // Let's be optimistic!
-      // First, let's reset our weights based on what we already know!
-      for (int e = sw.max_entropy_state; e < sw.energy_levels; e++) {
-        if (sw.energy_histogram[e])
-          sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
-      }
-      sw.flush_weight_array();
-      if(sw.energy_histogram[sw.min_energy_state] == 0) done = false;
-      // Now reset the calculation!
-      for (int e = 0; e < sw.energy_levels; e++) {
-        sw.energy_histogram[e] = 0;
-        sw.samples[e] = 0;
-        sw.energy_observed[e] = false;
-      }
-      // Now let's run a while to see if we can find another answer.
-      // fixme: SUPER SCARY WARNING:
-      // N^3 scaling is probably VERY BAD!!! but it works really well for now...
-      const int test_iterations = sw.energy_levels*uipow(sw.N,3);
-      for (int i = 0; i < test_iterations; i++){
-        for (int i = 0; i < sw.N; i++)
-          sw.move_a_ball();
-      }
-      // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.max_entropy_state; i <= sw.min_energy_state; i++)
-        printf("%i  %li\n",i,sw.energy_histogram[i]);
-      // Check whether our histogram is sufficiently flat; if not, we have to restart!
-      mean_hist = test_iterations*sw.N/double(sw.min_energy_state - sw.max_entropy_state);
-      for (int e = sw.max_entropy_state; e <= sw.min_energy_state; e++) {
-        if (sw.energy_histogram[e] < sw.N
-            || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
-          printf("After %d iterations, we fail at at energy %d widh hist = %ld"
-                 " vs. mean hist %g.\n",
-                 test_iterations*sw.N, e, sw.energy_histogram[e], mean_hist);
-          done = false;
-          break;
-        }
-      }
-    } while (!done);
-    printf("All done initializing robustly.\n");
+    sw.initialize_robustly_optimistic(robust_update_scale, robust_cutoff);
   } else if (bubble_suppression) {
-    sw.initialize_max_entropy_and_translation_distance();
-    double width;
-    double range;
-    do {
-      width = sw.initialize_gaussian(bubble_scale);
-      range = sw.min_energy_state - sw.max_entropy_state;
-      // Now shift to the max entropy state...
-      sw.initialize_max_entropy_and_translation_distance();
-      printf("***\n");
-      printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
-             width, range, width/range);
-      printf("***\n");
-    } while (width < bubble_cutoff*range);
+    sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
@@ -641,14 +630,14 @@ int main(int argc, const char *argv[]) {
   } else if (walker_optimization) {
     sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
   }
-  sw.flush_weight_array();
 
   if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n");
     sw.update_weights_using_transitions(transition_precision);
   }
+  sw.flush_weight_array();
 
-  /* set the weights of unseen low energies to at least something somewhat reasonable
+  /* Set the weights of unseen low energies to at least something somewhat reasonable
      so that we don't get stuck at these low energies during simulations,
      should we encounter them */
   if(wang_landau || vanilla_wang_landau || walker_optimization || robustly_optimistic){
@@ -657,7 +646,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // ----------------------------------------------------------------------------
-  // Generate info to put in save files
+  // Generate save file info
   // ----------------------------------------------------------------------------
 
   mkdir(data_dir, 0777); // create save directory
@@ -672,11 +661,11 @@ int main(int argc, const char *argv[]) {
           "# N: %i\n"
           "# R: %f\n"
           "# well_width: %g\n"
-          "# translation_distance: %g\n"
+          "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_distance, neighbor_scale, sw.energy_levels);
+          well_width, sw.translation_scale, neighbor_scale, sw.energy_levels);
 
   char *e_fname = new char[1024];
   sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);
@@ -747,9 +736,22 @@ int main(int argc, const char *argv[]) {
 
   delete[] countinfo;
 
-  // Now let's iterate to the point where we are at maximum
-  // probability before we do the real simulation.
+  // ----------------------------------------------------------------------------
+  // Clean up initialization artifacts
+  // ----------------------------------------------------------------------------
+
+  // Move to the point of max probability before starting the real simulation.
   sw.initialize_max_entropy_and_translation_distance();
+
+  // Reset simulation info
+  sw.moves.total = 0;
+  sw.moves.working = 0;
+  sw.iteration = 0;
+
+  for(int i = 0; i < sw.energy_levels; i++){
+    sw.energy_histogram[i] = 0;
+    sw.samples[i] = 0;
+  }
 
   took("Initialization");
 
@@ -759,31 +761,21 @@ int main(int argc, const char *argv[]) {
 
   clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
   // top out at one hour interval
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30;
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // save at least every 30m
   clock_t last_output = clock(); // when we last output data
 
-  sw.moves.total = 0;
-  sw.moves.working = 0;
-  sw.iteration = 0;
-
-  // Reset energy histogram and sample counts
-  for(int i = 0; i < sw.energy_levels; i++){
-    sw.energy_histogram[i] = 0;
-    sw.samples[i] = 0;
-  }
-
   while(sw.iteration <= simulation_iterations) {
-    // ---------------------------------------------------------------
-    // Move each ball once, add to energy histogram
-    // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++)
-      sw.move_a_ball();
+
+    for(int i = 0; i < sw.N; i++) sw.move_a_ball();
+
     assert(sw.energy ==
            count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
                                   sw.walls));
+
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
     // ---------------------------------------------------------------
+
     // Density histogram -- only handles walls in one dimension
     if(sw.walls == 1){
       for(int i = 0; i < sw.N; i++){
@@ -806,8 +798,9 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
+
     // ---------------------------------------------------------------
-    // Save to file
+    // Save data to files
     // ---------------------------------------------------------------
 
     const clock_t now = clock();
