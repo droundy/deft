@@ -238,8 +238,16 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
+    {"robust_update_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_update_scale, 0, "Scale factor for robustly optimistic updates", "DOUBLE"},
+    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
+    {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
+    {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
     {"init_min_energy_samples", '\0', POPT_ARG_INT, &init_min_energy_samples, 0,
-     "number of times to sample mininum energy in initializing walker optimization", "INT"},
+     "Number of times to sample mininum energy in initializing walker optimization", "INT"},
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
@@ -410,7 +418,7 @@ int main(int argc, const char *argv[]) {
 
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
-  if(bubble_suppression && bubble_scale == 0) bubble_scale = log(sw.N);
+  if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
