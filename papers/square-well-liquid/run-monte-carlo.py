@@ -39,7 +39,7 @@ datadir = swdir+'/data'
 simname = 'square-well-monte-carlo'
 
 cores = 2 if socket.gethostname() == 'MAPHost' else 8
-'''
+
 # build monte carlo code
 exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname],
                      stdout = open(os.devnull,"w"),
@@ -47,7 +47,7 @@ exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname],
 if exitStatus != 0:
     print "scons failed"
     exit(exitStatus)
-'''
+
 memory = 20*N # fixme: better guess
 jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' %(ww, ff, N, method)
 if 'transition_override' in toggle_params:
@@ -81,7 +81,7 @@ for i in range(len(value_params)/2):
 for i in range(len(toggle_params)):
     script.write(" \\\n --%s" %toggle_params[i])
 script.close()
-'''
+
 # start simulation
 if socket.gethostname() == 'MAPHost':
     sp.Popen(["bash", scriptname],
@@ -90,4 +90,3 @@ else:
     sp.Popen(["sbatch", "-J", jobname, scriptname])
 
 print "job %s started" %jobname
-'''
