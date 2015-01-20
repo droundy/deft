@@ -8,7 +8,7 @@ for method in ["nw","bubble_suppression","robustly_optimistic","gaussian","wang_
                            % (ww, ff, N, method.replace(' ',''), postfix)
                            for postfix in ['g', 'E', 'lnw', 's']]
 
-                print '| cd ../../.. && ./square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 10000' % (method, N, ff, ww)
+                print '| cd ../../.. && ./square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 1000000' % (method, N, ff, ww)
                 print '< ../../../square-well-monte-carlo'
 
                 for o in outputs:
