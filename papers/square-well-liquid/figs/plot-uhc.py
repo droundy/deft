@@ -28,7 +28,7 @@ versions = eval(sys.argv[4])
 
 # FIXME: make these inputs?
 kTmin = 0
-kTmax = 10
+kTmax = 2
 dkT = float(kTmax-kTmin) * 1e-3
 kT_range = numpy.arange(kTmin+dkT,kTmax,dkT)
 
@@ -87,7 +87,6 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc')
 plt.ylim(0)
-plt.xlim(0, 5)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
