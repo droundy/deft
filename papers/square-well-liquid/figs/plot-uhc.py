@@ -28,7 +28,7 @@ versions = eval(sys.argv[4])
 
 # FIXME: make these inputs?
 kTmin = 0
-kTmax = 10
+kTmax = 2
 dkT = float(kTmax-kTmin) * 1e-3
 kT_range = numpy.arange(kTmin+dkT,kTmax,dkT)
 
@@ -58,17 +58,15 @@ for version in versions:
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version), ndmin=2)
 
     energy = -e_hist[:,0] # array of energies
-
-    # log of DoS(E)*exp(E/kT); indexed by [energy,temperature]
-    ln_dos_boltz = numpy.zeros((len(e_hist),len(kT_range)))
-    for i in range(len(e_hist)):
-        ln_dos_boltz[i,:] = numpy.log(e_hist[i,1]) - lnw_hist[i,1] - energy[i]/kT_range
+    lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
+    ln_dos = numpy.log(e_hist[:,1]) - lnw
 
     Z = numpy.zeros(len(kT_range)) # partition function
     U = numpy.zeros(len(kT_range)) # internal energy
     CV = numpy.zeros(len(kT_range)) # heat capacity
     for i in range(len(kT_range)):
-        dos_boltz = numpy.exp(ln_dos_boltz[:,i] - ln_dos_boltz[:,i].max())
+        ln_dos_boltz = ln_dos - energy/kT_range[i]
+        dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
         Z[i] = sum(dos_boltz)
         U[i] = sum(energy*dos_boltz)/Z[i]
         CV[i] = sum((energy/kT_range[i])**2*dos_boltz)/Z[i] - \
@@ -89,7 +87,6 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc')
 plt.ylim(0)
-plt.xlim(0, 5)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')

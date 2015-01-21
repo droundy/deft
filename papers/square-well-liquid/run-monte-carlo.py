@@ -80,6 +80,7 @@ for i in range(len(value_params)/2):
     script.write(" \\\n --%s %s" %(value_params[2*i],value_params[2*i+1]))
 for i in range(len(toggle_params)):
     script.write(" \\\n --%s" %toggle_params[i])
+script.write("\n")
 script.close()
 
 # start simulation

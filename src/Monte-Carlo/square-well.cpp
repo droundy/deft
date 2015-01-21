@@ -669,6 +669,8 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   // now we create two density of states vectors
   double *old_dos = new double[energies_observed];
   double *dos = new double[energies_observed];
+  double dos_magnitude_squared;
+  double dos_magnitude;
 
   // initialize a uniform density of states with unit norm
   const double dos_init = 1/sqrt(energies_observed);
@@ -684,7 +686,7 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     for (int i = 0; i < energies_observed; i++) old_dos[i] = dos[i];
 
     // compute D_n = T*D_{n-1}
-    double dos_magnitude_squared = 0;
+    dos_magnitude_squared = 0;
     for (int i = 0; i < energies_observed; i++){
       dos[i] = 0;
       for(int e = -biggest_energy_transition; e <= biggest_energy_transition; e++)
@@ -693,7 +695,7 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     }
 
     // normalize D_n
-    const double dos_magnitude = sqrt(dos_magnitude_squared);
+    dos_magnitude = sqrt(dos_magnitude_squared);
     for (int i = 0; i < energies_observed; i++) dos[i] /= dos_magnitude;
 
     // check whether D_n is close enough to D_{n-1} for us to quit
@@ -709,6 +711,9 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
     ln_energy_weights[i] = 1/dos[i];
+
+  printf("Computed weights from transition matrix with dominant eigenvalue %g\n",
+         dos_magnitude);
 }
 
 void sw_simulation::initialize_transitions(int max_iter) {
