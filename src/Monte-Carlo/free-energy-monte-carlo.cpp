@@ -82,8 +82,6 @@ int main(int argc, const char *argv[]) {
   // NOTE: debug can slow things down VERY much
   int debug = false;
 
-  int no_weights = true;
-  
   sw_simulation sw;
 
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
@@ -91,11 +89,10 @@ int main(int argc, const char *argv[]) {
   sw.N = 10;
   sw.translation_scale = 0.05;
 
-  int wall_dim = 0;
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/free-energy-monte-carlo/data");
+  sprintf(data_dir, "free-energy-data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
@@ -103,10 +100,9 @@ int main(int argc, const char *argv[]) {
   long simulation_iterations = 1000000;
   double acceptance_goal = .4;
   double R = 1;
-  double well_width = 1.3;
+  const double well_width = 1;
   double ff = 0.3;
   double neighbor_scale = 2;
-  double de_density = 0.1;
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
@@ -117,8 +113,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
-    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
-     "Ratio of square well width to ball diameter", "DOUBLE"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
      "the cell"},
@@ -128,8 +122,6 @@ int main(int argc, const char *argv[]) {
      0, "Number of iterations for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
-    {"de_density", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &de_density, 0, "Resolution of density file", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &max_rdf_radius, 0, "Set maximum radius for RDF data collection", "DOUBLE"},
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
@@ -154,8 +146,6 @@ int main(int argc, const char *argv[]) {
      "Seed for the random number generator", "INT"},
     {"acceptance_goal", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
-    {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
-     "to get better statistics on low entropy states", "BOOLEAN"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -249,17 +239,14 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *method_tag = new char[200];
     char *wall_tag = new char[100];
     if(sw.walls == 0) sprintf(wall_tag,"periodic");
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
     else if(sw.walls == 3) sprintf(wall_tag,"box");
-    sprintf(method_tag, "-nw");
-    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
-            wall_tag, well_width, eta, sw.N, method_tag);
+    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i",
+            wall_tag, well_width, eta, sw.N);
     printf("\nUsing default file name: ");
-    delete[] method_tag;
     delete[] wall_tag;
   }
   else
@@ -288,6 +275,7 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0; // start at zeroeth iteration
   sw.max_entropy_state = 0;
   sw.min_energy_state = 0;
+  sw.energy = 0;
 
   // translation distance should scale with ball radius
   sw.translation_scale *= R;
@@ -326,15 +314,8 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     g_histogram[i] = new long[g_bins]();
 
-  // Density histogram
-  const int density_bins = round(sw.len[wall_dim]/de_density);
-  const double bin_volume = sw.len[x]*sw.len[y]*sw.len[z]/sw.len[wall_dim]*de_density;
-  long **density_histogram = new long*[sw.energy_levels];
-  for(int i = 0; i < sw.energy_levels; i++)
-    density_histogram[i] = new long[density_bins]();
-
   printf("memory use estimate = %.2g G\n\n",
-         8*double((6 + g_bins + density_bins)*sw.energy_levels)/1024/1024/1024);
+         8*double((6 + g_bins)*sw.energy_levels)/1024/1024/1024);
 
   sw.balls = new ball[sw.N];
 
@@ -466,11 +447,7 @@ int main(int argc, const char *argv[]) {
   // Initialization of cell
   // ----------------------------------------------------------------------------
 
-  sw.energy =
-    count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
-
-  // First, let us figure out what the max entropy point is.
-  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
+  sw.initialize_translation_distance();
 
 
   // ----------------------------------------------------------------------------
@@ -483,85 +460,18 @@ int main(int argc, const char *argv[]) {
   sprintf(headerinfo,
           "# cell dimensions: (%g, %g, %g)\n"
           "# walls: %i\n"
-          "# de_density: %g\n"
           "# de_g: %g\n"
           "# seed: %li\n"
           "# N: %i\n"
           "# R: %f\n"
           "# well_width: %g\n"
           "# translation_scale: %g\n"
-          "# neighbor_scale: %g\n"
-          "# energy_levels: %i\n\n",
-          sw.len[0], sw.len[1], sw.len[2], sw.walls, de_density, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale, sw.energy_levels);
-
-  char *e_fname = new char[1024];
-  sprintf(e_fname, "%s/%s-E.dat", data_dir, filename);
-
-  char *w_fname = new char[1024];
-  sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
-
-  char *transitions_fname = new char[1024];
-  sprintf(transitions_fname, "%s/%s-transitions.dat", data_dir, filename);
-
-  char *s_fname = new char[1024];
-  sprintf(s_fname, "%s/%s-s.dat", data_dir, filename);
-
-  char *density_fname = new char[1024];
-  sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
+          "# neighbor_scale: %g\n",
+          sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
+          well_width, sw.translation_scale, neighbor_scale);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
-
-  // ----------------------------------------------------------------------------
-  // Print initialization info
-  // ----------------------------------------------------------------------------
-
-  char *countinfo = new char[4096];
-  sprintf(countinfo,
-          "# iterations: %li\n"
-          "# working moves: %li\n"
-          "# total moves: %li\n"
-          "# acceptance rate: %g\n\n",
-          sw.iteration, sw.moves.working, sw.moves.total,
-          double(sw.moves.working)/sw.moves.total);
-
-  // Save weights histogram
-  FILE *w_out = fopen((const char *)w_fname, "w");
-  if (!w_out) {
-    fprintf(stderr, "Unable to create %s!\n", w_fname);
-    exit(1);
-  }
-  fprintf(w_out, "%s", headerinfo);
-  fprintf(w_out, "%s", countinfo);
-  fprintf(w_out, "# energy\tln(weight)\n");
-  for(int i = 0; i < sw.energy_levels; i++)
-    fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
-  fclose(w_out);
-
-  // Save transitions histogram
-  FILE *transitions_out = fopen((const char *)transitions_fname, "w");
-  if (!transitions_out) {
-    fprintf(stderr, "Unable to create %s!\n", transitions_fname);
-    exit(1);
-  }
-  fprintf(transitions_out, "%s", headerinfo);
-  fprintf(transitions_out, "%s", countinfo);
-  fprintf(transitions_out, "# energy\tln(weight)\n");
-  for(int i = 0; i < sw.energy_levels; i++) {
-    fprintf(transitions_out, "%i", i);
-    for (int de=-sw.biggest_energy_transition; de<=sw.biggest_energy_transition; de++) {
-      fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
-    }
-    fprintf(transitions_out, "\n");
-  }
-  fclose(transitions_out);
-
-  delete[] countinfo;
-
-  // Now let's iterate to the point where we are at maximum
-  // probability before we do the real simulation.
-  sw.initialize_max_entropy_and_translation_distance();
 
   took("Initialization");
 
@@ -590,30 +500,18 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
-    assert(sw.energy ==
-           count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
-                                  sw.walls));
     // ---------------------------------------------------------------
-    // Add data to density and RDF histograms
+    // Add data to RDF histogram
     // ---------------------------------------------------------------
-    // Density histogram -- only handles walls in one dimension
-    if(sw.walls == 1){
-      for(int i = 0; i < sw.N; i++){
-        density_histogram[sw.energy]
-          [int(floor(sw.balls[i].pos[wall_dim]/de_density))] ++;
-      }
-    }
-
-    // RDF
     if(!sw.walls){
-      g_energy_histogram[sw.energy]++;
+      g_energy_histogram[0]++;
       for(int i = 0; i < sw.N; i++){
         for(int j = 0; j < sw.N; j++){
           if(i != j){
             const vector3d r = periodic_diff(sw.balls[i].pos, sw.balls[j].pos, sw.len,
                                              sw.walls);
             const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[sw.energy][r_i]++;
+            if(r_i < g_bins) g_histogram[0][r_i]++;
           }
         }
       }
@@ -647,32 +545,6 @@ int main(int argc, const char *argv[]) {
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
 
-      // Save energy histogram
-      FILE *e_out = fopen((const char *)e_fname, "w");
-      fprintf(e_out, "%s", headerinfo);
-      fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "# energy   counts\n");
-      for(int i = 0; i < sw.energy_levels; i++){
-        if(sw.energy_histogram[i] != 0)
-          fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
-      }
-      fclose(e_out);
-
-      // Save sample counts
-      FILE *s_out = fopen(s_fname, "w");
-      if (!s_out) {
-        fprintf(stderr, "Unable to create %s!\n", s_fname);
-        exit(1);
-      }
-      fprintf(s_out, "%s", headerinfo);
-      fprintf(s_out, "%s", countinfo);
-      fprintf(s_out, "# energy\tsamples\n");
-      for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
-        if (sw.energy_histogram[i] != 0)
-          fprintf(s_out, "%i  %li\n", i, sw.samples[i]);
-      }
-      fclose(s_out);
-
       // Save RDF
       if(!sw.walls){
         FILE *g_out = fopen((const char *)g_fname, "w");
@@ -704,29 +576,6 @@ int main(int argc, const char *argv[]) {
         fclose(g_out);
       }
 
-      // Saving density data
-      if(sw.walls){
-        FILE *densityout = fopen((const char *)density_fname, "w");
-        fprintf(densityout, "%s", headerinfo);
-        fprintf(densityout, "%s", countinfo);
-        fprintf(densityout, "\n# data table containing densities in slabs "
-                "(bins) of thickness de_density away from a wall");
-        fprintf(densityout, "\n# row number corresponds to energy level");
-        fprintf(densityout, "\n# column number dn (counting from zero) "
-                "corresponds to distance d from wall given by "
-                "d = (dn + 0.5) * de_density");
-        for(int i = 0; i < sw.energy_levels; i++){
-          fprintf(densityout, "\n");
-          for(int r_i = 0; r_i < density_bins; r_i++) {
-            const double bin_density =
-              (double)density_histogram[i][r_i]
-              *sw.N/sw.energy_histogram[i]/bin_volume;
-            fprintf(densityout, "%8.5f ", bin_density);
-          }
-        }
-        fclose(densityout);
-      }
-
       delete[] countinfo;
     }
   }
@@ -750,19 +599,12 @@ int main(int argc, const char *argv[]) {
   delete[] sw.samples;
 
   for (int i = 0; i < sw.energy_levels; i++) {
-    delete[] density_histogram[i];
     delete[] g_histogram[i];
   }
   delete[] g_histogram;
-  delete[] density_histogram;
   delete[] g_energy_histogram;
 
   delete[] headerinfo;
-  delete[] e_fname;
-  delete[] w_fname;
-  delete[] transitions_fname;
-  delete[] s_fname;
-  delete[] density_fname;
   delete[] g_fname;
 
   delete[] data_dir;

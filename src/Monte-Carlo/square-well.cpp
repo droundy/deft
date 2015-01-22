@@ -445,6 +445,38 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
   return int(mean + 0.5);
 }
 
+void sw_simulation::initialize_translation_distance(double acceptance_goal) {
+  printf("Tuning translation distance.\n");
+  const int max_tries = 5;
+  const int num_moves = 100*N*N;
+  const int starting_iterations = iteration;
+  double dscale = 0.1;
+  double acceptance_rate = 0;
+  for (int num_tries=0;
+       fabs(acceptance_rate - acceptance_goal) > 0.05 && num_tries < max_tries;
+       num_tries++) {
+    // ---------------------------------------------------------------
+    // Fine-tune translation scale to reach acceptance goal
+    // ---------------------------------------------------------------
+    for (int i=0;i<num_moves;i++) move_a_ball();
+    acceptance_rate =
+      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
+    moves.working_old = moves.working;
+    moves.total_old = moves.total;
+    if (acceptance_rate < acceptance_goal)
+      translation_scale /= 1+dscale;
+    else
+      translation_scale *= 1+dscale;
+    // hokey heuristic for tuning dscale
+    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
+    if(closeness > 0.5) dscale *= 2;
+    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
+  }
+  printf("Took %ld iterations to find acceptance rate of %.2g with translation scale %.2g\n",
+         iteration - starting_iterations,
+         acceptance_rate, translation_scale);
+}
+
 // initialize the weight array using the Gaussian method
 double sw_simulation::initialize_gaussian(double scale) {
   double variance = 0, old_variance;
