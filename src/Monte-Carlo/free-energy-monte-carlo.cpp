@@ -82,30 +82,8 @@ int main(int argc, const char *argv[]) {
   // NOTE: debug can slow things down VERY much
   int debug = false;
 
-  int no_weights = false;
-  double fix_kT = 0;
-  int robustly_optimistic = false;
-  int bubble_suppression = false;
-  int gaussian_fit = false;
-  int walker_optimization = false;
-  int wang_landau = false;
-  int vanilla_wang_landau = false;
-
-  // Tuning factors
-  double wl_factor = 0.125;
-  double wl_fmod = 2;
-  double wl_threshold = 3;
-  double wl_cutoff = 1e-6;
-  double gaussian_bubble_cutoff = 0.2;
-  double robust_update_scale = 0.8; // should be ~1, but must be <= 1
-  double robust_cutoff = 0.2; // should be ~0.1, and must be < 1
-
-  // Do not change these! They are taken directly from the WL paper.
-  double vanilla_wl_factor = 1;
-  double vanilla_wl_fmod = 2;
-  double vanilla_wl_threshold = 0.25;
-  double vanilla_wl_cutoff = 1e-8;
-
+  int no_weights = true;
+  
   sw_simulation sw;
 
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
@@ -117,7 +95,7 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/square-well-liquid/data");
+  sprintf(data_dir, "papers/free-energy-monte-carlo/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
@@ -178,29 +156,6 @@ int main(int argc, const char *argv[]) {
      &acceptance_goal, 0, "Goal to set the acceptance rate", "DOUBLE"},
     {"nw", '\0', POPT_ARG_NONE, &no_weights, 0, "Don't use weighing method "
      "to get better statistics on low entropy states", "BOOLEAN"},
-    {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
-     " rather than adjusted weights", "DOUBLE"},
-    {"robustly_optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
-     "Use the robustly optimistic histogram method", "BOOLEAN"},
-    {"bubble_suppression", '\0', POPT_ARG_NONE, &bubble_suppression, 0,
-     "Use the bubble suppression method", "BOOLEAN"},
-    {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
-     "Use gaussian weights for flat histogram", "BOOLEAN"},
-    {"walker_optimization", '\0', POPT_ARG_NONE, &walker_optimization, 0,
-     "Use a walker optimization weight histogram method", "BOOLEAN"},
-    {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
-     "Use Wang-Landau histogram method", "BOOLEAN"},
-    {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
-     "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
-    {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_factor,
-     0, "Initial value of Wang-Landau factor", "DOUBLE"},
-    {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
-     "Wang-Landau factor modifiction parameter", "DOUBLE"},
-    {"wl_threshold", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &wl_threshold, 0, "Threhold for normalized standard deviation in "
-     "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
-    {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"time", '\0', POPT_ARG_INT, &totime, 0,
      "Timing of display information (seconds)", "INT"},
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -225,14 +180,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Verify we have reasonable arguments and set secondary parameters
   // ----------------------------------------------------------------------------
-
-  // check that only one method is used
-  if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
-     + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(walker_optimization) + (fix_kT != 0) != 1){
-    printf("Exactly one histigram method must be selected!");
-    return 254;
-  }
 
   if(sw.walls >= 2){
     printf("Code cannot currently handle walls in more than one dimension.\n");
@@ -308,25 +255,7 @@ int main(int argc, const char *argv[]) {
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
     else if(sw.walls == 3) sprintf(wall_tag,"box");
-    if (fix_kT) {
-      sprintf(method_tag, "-kT%g", fix_kT);
-    } else if (no_weights) {
-      sprintf(method_tag, "-nw");
-    } else if (robustly_optimistic) {
-      sprintf(method_tag, "-robustly_optimistic");
-    } else if (bubble_suppression) {
-      sprintf(method_tag, "-bubble_suppression");
-    } else if (gaussian_fit) {
-      sprintf(method_tag, "-gaussian");
-    } else if (wang_landau) {
-      sprintf(method_tag, "-wang_landau");
-    } else if (vanilla_wang_landau) {
-      sprintf(method_tag, "-vanilla_wang_landau");
-    } else if (walker_optimization) {
-      sprintf(method_tag, "-walker_optimization");
-    } else {
-      method_tag[0] = 0; // set method_tag to the empty string
-    }
+    sprintf(method_tag, "-nw");
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
     printf("\nUsing default file name: ");
@@ -388,11 +317,6 @@ int main(int argc, const char *argv[]) {
   sw.walkers_up = new long[sw.energy_levels]();
   sw.walkers_total = new long[sw.energy_levels]();
 
-  // a guess for the number of iterations for which to initially run
-  //   optimized ensemble initialization
-  int first_update_iterations = sw.N*sw.energy_levels;
-  // number of times we wish to sample the minimum observed energy in initialization
-  int init_min_energy_samples = 5;
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
@@ -548,85 +472,6 @@ int main(int argc, const char *argv[]) {
   // First, let us figure out what the max entropy point is.
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
 
-  if (gaussian_fit) {
-    sw.initialize_gaussian(50);
-  } else if (robustly_optimistic) {
-    printf("I am robustly optimistically trying to initialize.\n");
-    bool done;
-    double mean_hist = 0;
-    do {
-      done = true; // Let's be optimistic!
-      // First, let's reset our weights based on what we already know!
-      for (int e = sw.max_entropy_state; e < sw.energy_levels; e++) {
-        if (sw.energy_histogram[e]) {
-          // We don't want to be overzealous, so we include a scale factor
-          sw.ln_energy_weights[e] -= robust_update_scale*log(sw.energy_histogram[e]);
-        } else
-          sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.min_energy_state] + log(10);
-      }
-      // Flatten weights above state of max entropy
-      for (int e = 0; e < sw.max_entropy_state; e++)
-        sw.ln_energy_weights[e] = sw.ln_energy_weights[sw.max_entropy_state];
-      // Now reset the calculation!
-      for (int e = 0; e < sw.energy_levels; e++) {
-        sw.energy_histogram[e] = 0;
-        sw.samples[e] = 0;
-        sw.energy_observed[e] = false;
-      }
-      // Now let's run a while to see if we can find another answer.
-      int moves = 0;
-      // fixme: SUPER SCARY WARNING:
-      // the added N^4 scaling is probably VERY BAD!!! but it works really well for now...
-      for (int i=0; i < sw.energy_levels*uipow(sw.N,4); i++){
-        sw.move_a_ball();
-        moves++;
-      }
-      // Dump energy histogram to the console so that we can see how we're doing
-      for(int i = sw.max_entropy_state; i <= sw.min_energy_state; i++)
-        printf("%i  %li\n",i,sw.energy_histogram[i]);
-      // Check whether our histogram is sufficiently flat; if not, we have to restart!
-      mean_hist = moves/double(sw.min_energy_state - sw.max_entropy_state);
-      for (int e = sw.max_entropy_state; e <= sw.min_energy_state; e++) {
-        if (sw.energy_histogram[e] < sw.N
-            || sw.energy_histogram[e] < robust_cutoff*mean_hist) {
-          printf("After %d moves, we fail at at energy %d widh hist = %ld"
-                 " vs. mean hist %g.\n", moves, e, sw.energy_histogram[e], mean_hist);
-          done = false;
-          break;
-        }
-      }
-    } while (!done);
-    printf("All done initializing robustly.\n");
-  } else if (bubble_suppression) {
-    {
-      sw.initialize_gaussian(50);
-      sw.initialize_max_entropy_and_translation_distance();
-    }
-    const double scale = log(10);
-    double width;
-    double range;
-    do {
-      width = sw.initialize_gaussian(scale);
-      range = sw.min_energy_state - sw.max_entropy_state;
-      // Now shift to the max entropy state...
-      sw.initialize_max_entropy_and_translation_distance();
-      printf("***\n");
-      printf("*** Gaussian has width %.1f compared to range %.0f (ratio %.2f)\n",
-             width, range, width/range);
-      printf("***\n");
-    } while (width < gaussian_bubble_cutoff*range);
-  } else if (fix_kT) {
-    sw.initialize_canonical(fix_kT);
-  } else if (wang_landau) {
-    sw.initialize_gaussian(50);
-    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-  } else if (vanilla_wang_landau) {
-    sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
-                              vanilla_wl_threshold, vanilla_wl_cutoff);
-  } else if (walker_optimization) {
-    sw.initialize_gaussian(log(1e40));
-    sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
-  }
 
   // ----------------------------------------------------------------------------
   // Generate info to put in save files
