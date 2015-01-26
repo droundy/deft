@@ -115,6 +115,9 @@ struct sw_simulation {
   // the translation distance. return most probable energy
   int initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
 
+  // initialize the translation distance. return most probable energy
+  void initialize_translation_distance(double acceptance_goal = 0.4);
+
   // iterate enough times for the energy to change n times.  Return
   // the number of "up" moves.
   int simulate_energy_changes(int num_moves);
