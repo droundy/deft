@@ -1,20 +1,19 @@
-| python bilge.py > .bilge
-> .bilge
-
 | cd src/haskell && python bilge.py > .bilge
 > src/haskell/.bilge
+c .pyc
 
 | python src/bilge.py > src/.bilge
 > src/.bilge
+c .pyc
 
 | cd papers/square-well-liquid/ && python2 ../bilge-latex.py > .bilge
 > papers/square-well-liquid/.bilge
+c .pyc
 
 | cd papers/square-well-liquid/data && python2 bilge.py > .bilge
 > papers/square-well-liquid/data/.bilge
+c .pyc
 
 | cd papers/square-well-liquid/figs && python2 bilge.py > .bilge
 > papers/square-well-liquid/figs/.bilge
-
-| python -m compileall rules.py
-> rules.pyc
+c .pyc

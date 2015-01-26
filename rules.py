@@ -33,6 +33,8 @@ def cxx(cpp):
 def link(binary, objects):
     print '| g++ -lfftw3 -lpopt -o %s %s' % (binary, string.join(objects))
     print '> %s' % binary
+    for o in objects:
+        print '<', o
     print
 
 def linkgeneric(binary, objects):

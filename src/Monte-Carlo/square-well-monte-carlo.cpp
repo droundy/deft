@@ -842,7 +842,9 @@ int main(int argc, const char *argv[]) {
     // Save data to files
     // ---------------------------------------------------------------
 
-    const clock_t now = clock();
+    // clock() can be expensive, so let's only check the time every so
+    // often:
+    const clock_t now = (sw.iteration % 10000) ? last_output : clock();
     if ((now - last_output > output_period) || sw.iteration == simulation_iterations) {
       last_output = now;
       assert(last_output);

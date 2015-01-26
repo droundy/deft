@@ -5,7 +5,7 @@ import glob, re, string
 importre = re.compile('^import\s+(\S+)', re.MULTILINE)
 mainre = re.compile('^main\s+=', re.MULTILINE)
 
-hsfiles = glob.glob('*.hs')
+hsfiles = [hs for hs in glob.glob('*.hs') if hs[:9] != 'generate_']
 
 imports = {}
 mainfiles = []
