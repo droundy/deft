@@ -645,6 +645,10 @@ void sw_simulation::initialize_robustly_optimistic(double robust_update_scale,
         ln_energy_weights[e] -= robust_update_scale*log(energy_histogram[e]);
     }
     flush_weight_array();
+    /* Check whether we have *ever* seen the minimum energy in the
+       last time through.  If not, we absolutely shouldn't be so
+       optimistic as to believe that this time we'll have everything
+       right. */
     if(energy_histogram[min_energy_state] == 0) done = false;
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
@@ -699,6 +703,8 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   const int energies_observed = min_energy_state+1;
 
   // now we create two density of states vectors
+  /* FIXME Can we work with ln_dos rather than dos to handle larger
+     systems without underflow? */
   double *old_dos = new double[energies_observed];
   double *dos = new double[energies_observed];
   double dos_magnitude_squared;
@@ -722,6 +728,7 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     for (int i = 0; i < energies_observed; i++){
       dos[i] = 0;
       for(int e = -biggest_energy_transition; e <= biggest_energy_transition; e++)
+        /* FIXME the following looks buggy should be old_dos[i +/- e]; */
         dos[i] += transitions(i,e)*old_dos[i];
       dos_magnitude_squared += dos[i]*dos[i];
     }
