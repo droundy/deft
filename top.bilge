@@ -14,6 +14,6 @@ c .pyc
 > papers/square-well-liquid/data/.bilge
 c .pyc
 
-| cd papers/square-well-liquid/figs && python2 bilge.py > .bilge
-> papers/square-well-liquid/figs/.bilge
+| cd papers/square-well-liquid && python2 bilge-figs.py > .figs.bilge
+> papers/square-well-liquid/.figs.bilge
 c .pyc
