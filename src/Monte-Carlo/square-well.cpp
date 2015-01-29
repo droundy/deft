@@ -264,7 +264,7 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
 
 // sw_simulation methods
 
-void sw_simulation::move_a_ball() {
+void sw_simulation::move_a_ball(double Tmin, bool use_transition_matrix) {
   int id = moves.total % N;
   moves.total++;
   const int old_interaction_count =
@@ -310,10 +310,25 @@ void sw_simulation::move_a_ball() {
   // new energy.
   const int energy_change = new_interaction_count - old_interaction_count;
   transitions(energy, energy_change) += 1; // update the transition histogram
-  const double lnPmove =
-    ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-  if (lnPmove < 0) {
-    const double Pmove = exp(lnPmove);
+  double Pmove = 1;
+  if (use_transition_matrix) {
+    if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
+      long ups = 0, downs = 0;
+      for (int e=1; e<=biggest_energy_transition; e++) {
+        ups += e*transitions(energy, -e);
+        downs += e*transitions(energy, e);
+      }
+      const double betamax = 1.0/Tmin;
+      const double Pmin = exp(-betamax);
+      Pmove = double(downs)/ups;
+      if (Pmove < Pmin) Pmove = Pmin;
+    }
+  } else {
+    const double lnPmove =
+      ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+    if (lnPmove < 0) Pmove = exp(lnPmove);
+  }
+  if (Pmove < 1) {
     if (random::ran() > Pmove) {
       // We want to reject this move because it is too improbable
       // based on our weights.
@@ -790,8 +805,11 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
          dos_magnitude);
 }
 
-void sw_simulation::initialize_transitions(int max_iter) {
-  /* We will simulate one single energy at a time. */
+void sw_simulation::initialize_transitions(int max_iter, double min_T) {
+  max_iter *= N; // measure max_iter in moves per ball
+  for (int i=0;i<max_iter;i++) {
+    move_a_ball(min_T, true);
+  }
 }
 
 bool sw_simulation::printing_allowed(){

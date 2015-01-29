@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 
-for method in ["nw","bubble_suppression","robustly_optimistic","gaussian","wang_landau","walker_optimization"]:
+for method in ["nw","bubble_suppression","robustly_optimistic","gaussian","wang_landau","walker_optimization", 'tmmc']:
     for ww in [1.3]:
         for ff in [0.3]:
             for N in [5,6,7,8,9,10,20]:

@@ -85,6 +85,7 @@ int main(int argc, const char *argv[]) {
   int no_weights = false;
   double fix_kT = 0;
   int gaussian_fit = false;
+  int tmmc = false;
   int wang_landau = false;
   int walker_optimization = false;
   int vanilla_wang_landau = false;
@@ -102,6 +103,8 @@ int main(int argc, const char *argv[]) {
   double robust_cutoff = 1e-1; // should probably be ~1e-1, and must be < 1
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
+
+  double Tmin = 0.25;
 
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
@@ -211,6 +214,8 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
+    {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
+     "Use transition matrix monte carlo", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
@@ -251,6 +256,10 @@ int main(int argc, const char *argv[]) {
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
+
+    {"Tmin", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &Tmin, 0,
+     "The minimum temperature that we care about", "DOUBLE"},
 
     /*** TESTING AND DEBUGGING OPTIONS ***/
 
@@ -310,7 +319,7 @@ int main(int argc, const char *argv[]) {
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
      + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(walker_optimization) + (fix_kT != 0) != 1){
+     + bool(walker_optimization) + bool(tmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
     return 254;
   }
@@ -389,6 +398,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-robustly_optimistic");
     } else if (bubble_suppression) {
       sprintf(method_tag, "-bubble_suppression");
+    } else if (tmmc) {
+      sprintf(method_tag, "-tmmc");
     } else if (gaussian_fit) {
       sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
@@ -629,10 +640,12 @@ int main(int argc, const char *argv[]) {
       sw.initialize_robustly_optimistic(robust_update_scale, robust_cutoff);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
+    } else if (tmmc) {
+      sw.initialize_transitions(simulation_iterations, Tmin);
     }
   }
 
-  if(transition_override){
+  if(transition_override || tmmc){
     printf("\nOverriding weight array with that generated from the transition matrix!\n");
     sw.update_weights_using_transitions(transition_precision);
   }
@@ -718,6 +731,11 @@ int main(int argc, const char *argv[]) {
             "# bubble_scale: %g\n"
             "# bubble_cutoff: %g\n",
             headerinfo, bubble_scale, bubble_cutoff);
+  } else if (tmmc){
+    sprintf(headerinfo,
+            "%s# histogram method: tmmc\n"
+            "# Tmin: %g\n",
+            headerinfo, Tmin);
   }
   if(!no_weights && !fix_kT)
     sprintf(headerinfo, "%s# gaussian_init_scale: %g\n\n", headerinfo, gaussian_init_scale);
@@ -764,7 +782,10 @@ int main(int argc, const char *argv[]) {
     fprintf(transitions_out, "\t%i", de);
   fprintf(transitions_out, "\n");
   for(int i = 0; i < sw.energy_levels; i++) {
-    if (sw.energy_histogram[i] != 0){
+    bool have_i = false;
+    for (int de=-sw.biggest_energy_transition; de<=sw.biggest_energy_transition; de++)
+      if (sw.transitions(i,de)) have_i = true;
+    if (have_i){
       fprintf(transitions_out, "%i", i);
       for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++)
         fprintf(transitions_out, "\t%ld", sw.transitions(i, de));

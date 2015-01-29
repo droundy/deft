@@ -111,7 +111,8 @@ struct sw_simulation {
      keep track of walkers. */
   long *walkers_up, *walkers_total;
 
-  void move_a_ball(); // attempt to move one ball
+  void move_a_ball(double Tmin = 0.25,
+                   bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(); // updates to run only if we've changed energy
 
@@ -152,7 +153,7 @@ struct sw_simulation {
   void update_weights_using_transitions(double fractional_precision);
   void update_weights_using_transition_flux(double fractional_precision);
 
-  void initialize_transitions(int max_iterations);
+  void initialize_transitions(int max_iterations, double Tmin);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
