@@ -41,12 +41,14 @@ for i in inputs:
     print '<', i
 print 'c .pyc\n'
 
-print '| python2 figs/plot-transitions.py %f %f %d' % (ww, ff, N)
-for o in ["figs/periodic-ww%02.0f-ff%02.0f-N%i-transitions.pdf" % (ww*100, ff*100, N)]:
-    print '>', o
-for i in inputs:
-    print '<', i
-print 'c .pyc\n'
+for method1, method2 in [('wang_landau', 'tmmc')]:
+    print '| python2 figs/plot-transitions.py %f %f %d %s %s' % (ww, ff, N, method1, method2)
+    for o in ["figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-transitions.pdf" % (ww*100, ff*100, N, method)
+              for method in [method1, method2]] + ["figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, method1, method2)]:
+        print '>', o
+    for i in inputs:
+        print '<', i
+    print 'c .pyc\n'
 
 print '| python2 figs/plot-scaling.py %f %f "%s"' % (ww, ff, methods)
 for o in ["figs/periodic-ww%02.0f-ff%02.0f-scaling.pdf" % (ww*100, ff*100),
