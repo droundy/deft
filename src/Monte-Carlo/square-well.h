@@ -89,6 +89,13 @@ struct sw_simulation {
     return transitions_table[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
+  /* "transition_matrix" is a read-only sloppy version of the matrix
+     also called "transitions" above, which is a little easier for me
+     to wrap my brains around.  DJR */
+  long transition_matrix(int to, int from) {
+    if (abs(to - from) > biggest_energy_transition) return 0;
+    return transitions(from, to - from);
+  };
 
   long min_energy_observations() const {
     for (int i = energy_levels-1; i >= max_entropy_state; i--)
@@ -143,6 +150,7 @@ struct sw_simulation {
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
   void update_weights_using_transitions(double fractional_precision);
+  void update_weights_using_transition_flux(double fractional_precision);
 
   void initialize_transitions(int max_iterations);
 

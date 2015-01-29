@@ -697,6 +697,41 @@ void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bu
   } while (width < bubble_cutoff*range);
 }
 
+/* Update the weight array using the transition matrix to make the
+   downward rates equal, which should optimize the round-trip
+   time. */
+void sw_simulation::update_weights_using_transition_flux(double fractional_precision) {
+  update_weights_using_transitions(fractional_precision);
+  const int energies_observed = min_energy_state+1;
+
+  double *wanted_n = new double[energies_observed];
+
+  for (int i = max_entropy_state; i < energies_observed; i++) {
+    wanted_n[i] = 1.0;
+    for (int j=i+1; j < energies_observed; j++) {
+      for (int k=0; k < i; k++) {
+        /* counting transitions from the high energy j to a lower
+           energy j.  Ignoring any transitions from energies above the
+           maximum entropy point.  It would be nice (in principle) to
+           include those, but I don't think it matters. */
+        wanted_n[i] -= transition_matrix(j, k)*wanted_n[k];
+      }
+    }
+    double norm = 0;
+    for (int j=i+1; j < energies_observed; j++) {
+      norm += transition_matrix(j, i);
+    }
+    wanted_n[i] /= norm;
+  }
+
+  for (int i=max_entropy_state; i<energies_observed;i++) {
+    /* Assuming we have already updated the weights for a flat
+       histogram, this should adjust the weights to give a flat
+       downward transition rate. */
+    ln_energy_weights[i] += log(wanted_n[i]);
+  }
+}
+
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions(double fractional_precision) {
   // first, we find the range of energies for which we have data
