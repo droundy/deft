@@ -313,16 +313,25 @@ void sw_simulation::move_a_ball(double Tmin, bool use_transition_matrix) {
   double Pmove = 1;
   if (use_transition_matrix) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
-      long ups = 0, downs = 0;
-      for (int e=1; e<=biggest_energy_transition; e++) {
-        ups += e*transitions(energy, -e);
-        downs += e*transitions(energy, e);
-      }
       const double betamax = 1.0/Tmin;
       const double Pmin = exp(-betamax);
-      Pmove = double(downs)/ups;
-      if (Pmove < Pmin) Pmove = Pmin;
+      /* I note that Swendson 1999 uses essentially this method
+           *after* two stages of initialization. */
+      long tup_norm = 0;
+      long tdown_norm = 0;
+      for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
+        tup_norm += transitions(energy, e);
+        tdown_norm += transitions(energy+energy_change, e);
+      }
+      double tup = transitions(energy, energy_change)/double(tup_norm);
+      double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
+      Pmove = tdown/tup;
+      if (!(Pmove > Pmin)) Pmove = Pmin;
     }
+    // printf("Pmove %g  with E %d and dE %d   from (%ld, %ld)\n",
+    //        Pmove, energy, energy_change,
+    //        transitions(energy+energy_change, -energy_change),
+    //        transitions(energy, energy_change));
   } else {
     const double lnPmove =
       ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];

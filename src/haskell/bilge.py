@@ -80,6 +80,7 @@ for name in generated_names:
     # command to compile haskell code
     print '| ghc -O2 --make -o generate_%s.exe generate_%s.hs' % (name, name)
     print '> generate_%s.exe' % name
+    print '< generate_%s.hs' % name
     for o in allobjects:
         print '<', o
     print

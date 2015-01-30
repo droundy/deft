@@ -104,7 +104,7 @@ int main(int argc, const char *argv[]) {
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double Tmin = 0.25;
+  double Tmin = 0.2;
 
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
@@ -622,7 +622,7 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is.
-  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance();
+  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
 
   // Now let's initialize our weight array
   if(!no_weights){
