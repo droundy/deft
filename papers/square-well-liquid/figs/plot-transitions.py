@@ -76,18 +76,13 @@ energy = -data1[:,0]
 de, e = numpy.meshgrid(de_values, energy)
 
 cut2 = data1[:,0].min() - data2[:,0].min()
-print cut2
-print data1.shape, data2.shape
-
-transitions1 = data1[:,1:]
-transitions2 = data2[:,1:]
 
 for i in range(len(data1[:,0])):
     if i < len(data2[:,0]):
         for j in range(len(data1[1,:])):
             data1[i,j] -= data2[i,j]
 
-c = plt.pcolor(de-0.5, e, data1[1:,:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
+c = plt.pcolor(de-0.5, e, data1[:,1:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
 plt.colorbar(c)
 plt.xlim(-8,8)
 plt.ylim(e.min(), e.max())
