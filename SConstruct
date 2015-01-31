@@ -220,7 +220,7 @@ Default('pdf')
 
 generic_sources = Split("""
 
-  src/lattice.cpp src/utilities.cpp src/Faddeeva.cc
+  src/lattice.cpp src/utilities.cpp src/Faddeeva.cpp
   src/GridDescription.cpp src/Grid.cpp src/ReciprocalGrid.cpp
   src/IdealGas.cpp src/ChemicalPotential.cpp
   src/HardSpheres.cpp src/ExternalPotential.cpp

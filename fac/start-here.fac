@@ -1,0 +1,19 @@
+| python3 configure.py > config.py
+> config.py
+C testing-flags
+C __pycache__
+
+| python3 -B dft.py
+< config.py
+> ../.dft.fac
+C __pycache__
+
+| python3 -B monte-carlos.py
+< config.py
+> ../.monte-carlos.fac
+C __pycache__
+
+| python3 -B haskell.py
+< config.py
+> ../src/haskell/.haskell.fac
+C __pycache__

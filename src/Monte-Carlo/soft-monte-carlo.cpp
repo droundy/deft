@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include "MersenneTwister.h"
 USING_PART_OF_NAMESPACE_EIGEN
+#include "utilities.h" // to cause utilities.cpp to be linked, which eigen needs
 
 #include <cassert>
 #include <math.h>
