@@ -264,7 +264,7 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
 
 // sw_simulation methods
 
-void sw_simulation::move_a_ball() {
+void sw_simulation::move_a_ball(double Tmin, bool use_transition_matrix) {
   int id = moves.total % N;
   moves.total++;
   const int old_interaction_count =
@@ -310,10 +310,34 @@ void sw_simulation::move_a_ball() {
   // new energy.
   const int energy_change = new_interaction_count - old_interaction_count;
   transitions(energy, energy_change) += 1; // update the transition histogram
-  const double lnPmove =
-    ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-  if (lnPmove < 0) {
-    const double Pmove = exp(lnPmove);
+  double Pmove = 1;
+  if (use_transition_matrix) {
+    if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
+      const double betamax = 1.0/Tmin;
+      const double Pmin = exp(-betamax);
+      /* I note that Swendson 1999 uses essentially this method
+           *after* two stages of initialization. */
+      long tup_norm = 0;
+      long tdown_norm = 0;
+      for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
+        tup_norm += transitions(energy, e);
+        tdown_norm += transitions(energy+energy_change, e);
+      }
+      double tup = transitions(energy, energy_change)/double(tup_norm);
+      double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
+      Pmove = tdown/tup;
+      if (!(Pmove > Pmin)) Pmove = Pmin;
+    }
+    // printf("Pmove %g  with E %d and dE %d   from (%ld, %ld)\n",
+    //        Pmove, energy, energy_change,
+    //        transitions(energy+energy_change, -energy_change),
+    //        transitions(energy, energy_change));
+  } else {
+    const double lnPmove =
+      ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+    if (lnPmove < 0) Pmove = exp(lnPmove);
+  }
+  if (Pmove < 1) {
     if (random::ran() > Pmove) {
       // We want to reject this move because it is too improbable
       // based on our weights.
@@ -443,6 +467,38 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
   printf("Took %ld iterations to find most probable state: %d with width %.2g\n",
          iteration - starting_iterations, max_entropy_state, sqrt(variance));
   return int(mean + 0.5);
+}
+
+void sw_simulation::initialize_translation_distance(double acceptance_goal) {
+  printf("Tuning translation distance.\n");
+  const int max_tries = 5;
+  const int num_moves = 100*N*N;
+  const int starting_iterations = iteration;
+  double dscale = 0.1;
+  double acceptance_rate = 0;
+  for (int num_tries=0;
+       fabs(acceptance_rate - acceptance_goal) > 0.05 && num_tries < max_tries;
+       num_tries++) {
+    // ---------------------------------------------------------------
+    // Fine-tune translation scale to reach acceptance goal
+    // ---------------------------------------------------------------
+    for (int i=0;i<num_moves;i++) move_a_ball();
+    acceptance_rate =
+      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
+    moves.working_old = moves.working;
+    moves.total_old = moves.total;
+    if (acceptance_rate < acceptance_goal)
+      translation_scale /= 1+dscale;
+    else
+      translation_scale *= 1+dscale;
+    // hokey heuristic for tuning dscale
+    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
+    if(closeness > 0.5) dscale *= 2;
+    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
+  }
+  printf("Took %ld iterations to find acceptance rate of %.2g with translation scale %.2g\n",
+         iteration - starting_iterations,
+         acceptance_rate, translation_scale);
 }
 
 // initialize the weight array using the Gaussian method
@@ -613,6 +669,10 @@ void sw_simulation::initialize_robustly_optimistic(double robust_update_scale,
         ln_energy_weights[e] -= robust_update_scale*log(energy_histogram[e]);
     }
     flush_weight_array();
+    /* Check whether we have *ever* seen the minimum energy in the
+       last time through.  If not, we absolutely shouldn't be so
+       optimistic as to believe that this time we'll have everything
+       right. */
     if(energy_histogram[min_energy_state] == 0) done = false;
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
@@ -661,12 +721,49 @@ void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bu
   } while (width < bubble_cutoff*range);
 }
 
+/* Update the weight array using the transition matrix to make the
+   downward rates equal, which should optimize the round-trip
+   time. */
+void sw_simulation::update_weights_using_transition_flux(double fractional_precision) {
+  update_weights_using_transitions(fractional_precision);
+  const int energies_observed = min_energy_state+1;
+
+  double *wanted_n = new double[energies_observed];
+
+  for (int i = max_entropy_state; i < energies_observed; i++) {
+    wanted_n[i] = 1.0;
+    for (int j=i+1; j < energies_observed; j++) {
+      for (int k=0; k < i; k++) {
+        /* counting transitions from the high energy j to a lower
+           energy j.  Ignoring any transitions from energies above the
+           maximum entropy point.  It would be nice (in principle) to
+           include those, but I don't think it matters. */
+        wanted_n[i] -= transition_matrix(j, k)*wanted_n[k];
+      }
+    }
+    double norm = 0;
+    for (int j=i+1; j < energies_observed; j++) {
+      norm += transition_matrix(j, i);
+    }
+    wanted_n[i] /= norm;
+  }
+
+  for (int i=max_entropy_state; i<energies_observed;i++) {
+    /* Assuming we have already updated the weights for a flat
+       histogram, this should adjust the weights to give a flat
+       downward transition rate. */
+    ln_energy_weights[i] += log(wanted_n[i]);
+  }
+}
+
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions(double fractional_precision) {
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
   // now we create two density of states vectors
+  /* FIXME Can we work with ln_dos rather than dos to handle larger
+     systems without underflow? */
   double *old_dos = new double[energies_observed];
   double *dos = new double[energies_observed];
   double dos_magnitude_squared;
@@ -690,6 +787,7 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     for (int i = 0; i < energies_observed; i++){
       dos[i] = 0;
       for(int e = -biggest_energy_transition; e <= biggest_energy_transition; e++)
+        /* FIXME the following looks buggy should be old_dos[i +/- e]; */
         dos[i] += transitions(i,e)*old_dos[i];
       dos_magnitude_squared += dos[i]*dos[i];
     }
@@ -716,8 +814,11 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
          dos_magnitude);
 }
 
-void sw_simulation::initialize_transitions(int max_iter) {
-  /* We will simulate one single energy at a time. */
+void sw_simulation::initialize_transitions(int max_iter, double min_T) {
+  max_iter *= N; // measure max_iter in moves per ball
+  for (int i=0;i<max_iter;i++) {
+    move_a_ball(min_T, true);
+  }
 }
 
 bool sw_simulation::printing_allowed(){

@@ -5,7 +5,7 @@ import glob, re, string
 importre = re.compile('^import\s+(\S+)', re.MULTILINE)
 mainre = re.compile('^main\s+=', re.MULTILINE)
 
-hsfiles = glob.glob('*.hs')
+hsfiles = [hs for hs in glob.glob('*.hs') if hs[:9] != 'generate_']
 
 imports = {}
 mainfiles = []
@@ -80,6 +80,7 @@ for name in generated_names:
     # command to compile haskell code
     print '| ghc -O2 --make -o generate_%s.exe generate_%s.hs' % (name, name)
     print '> generate_%s.exe' % name
+    print '< generate_%s.hs' % name
     for o in allobjects:
         print '<', o
     print

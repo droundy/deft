@@ -157,6 +157,14 @@ function.
   make some figures to see what exactly happens to it during
   initialization.}
 
+\begin{figure*}
+  \includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-wang_landau-transitions}\hfill%
+\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-transitions}\hfill%
+\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-wang_landau-tmmc-compare-transitions}
+  \caption{A plot showing the probability of energy transitions (with
+    no weighting) from given energy states.\label{fig:transitions}}
+\end{figure*}
+
 \subsection{Tracking transitions}
 
 We can track the number of attempted transitions from each energy
@@ -179,12 +187,6 @@ algorithm.
 
 How can we use this?
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-transitions}
-  \caption{A plot showing the probability of energy transitions (with
-    no weighting) from given energy states.\label{fig:transitions}}
-\end{figure}
-
 \subsubsection{Generating $w$ from the transition matrix}
 
 We should be able to generate a set of weighting functions directly
@@ -203,26 +205,37 @@ for $w$ to obtain a flat histogram.
 I expect that we could use similar math to the optimized ensemble
 folks to optimize the round-trip rate.
 
-\subsubsection{Sampling the transition matrix (more) directly}
+\subsubsection{Initializing using the transition matrix directly}
 
-If our goal (in initialization) is to sample the transition matrix
-(from which we compute the optimal weights), we could use a much more
-direct approach.  When computing a histogram, we are forced to perform
-a complete random walk.  However, the transition matrix can be
-computed at a given energy \emph{without sampling any other energies}!
+An alternative initialization algorithm involves using the transition
+matrix directly during initialization.  This process was proposed by
+Swendsen \emph{et al.} as a modification for their initialization
+procedure~\cite{swendsen1999transition}.  In this case, the transition
+matrix is continually updated, thus modifying the relative weighting
+of different energies as the simulation proceeds.  This strictly
+speaking no longer satisfies detailed balance, but as the simulation
+proceeds this violation will quickly become increasingly small.
 
-We can start at a given energy, sample the transition matrix at that
-energy to our satisfaction, i.e. until we have observed transitions in
-both directions a statistically significant number of times.  Then we
-would proceed to the next energy and sample it, and so forth.  There
-is a weakness in that we may not be able to sample all states at a
-given energy without going to other energies.  But we could repeat
-this procedure many times to accomplish this.  In a way, this
-algorithm is reminiscent of Wang-Landau, which ``forces'' the
-simulation to sample a whole slew of different energies, but in our
-case we would be able to put strict bounds on how long it spends
-sampling each energy, and could reasonably keep the code from wasting
-huge amounts of time sampling the high-entropy states.
+This raises the question of how to use the transition matrix to
+directly determine transition probabilities, since the self-consistent
+eigenvalue solution is unsuitable.  The key is to recognize that we do
+not require weights for each energy but only \emph{differences} of
+weights for on pair of energies at a time.  This is a much smaller
+problem.
+
+Swendsen \emph{et al.} find for a flat distribution, the acceptance
+rate for a given transition is equal to the ratio of that element in
+the transition matrix to the element corresponding to the reverse
+transition~\cite{swendsen1999transition}.  Naturally, for a different
+distribution, we can scale the acceptance ratios according to the
+ratio of occupations desired.  We modify this algorithm to always
+accept transitions to a lower energy, thus employing a broad histogram
+method that does not much sample energies above the maximum-entropy
+energy.
+
+Swendsen only uses this approach after a slightly hokey two-stage
+initialization.  It seems to work pretty well, and asymptotically it
+does have detailed balance.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

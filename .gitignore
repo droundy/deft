@@ -61,3 +61,6 @@ build
 *.fgx
 generate_*.hs
 *monte-carlo
+.bilge
+.*.bilge
+*.done

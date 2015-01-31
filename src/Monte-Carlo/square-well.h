@@ -89,6 +89,13 @@ struct sw_simulation {
     return transitions_table[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
+  /* "transition_matrix" is a read-only sloppy version of the matrix
+     also called "transitions" above, which is a little easier for me
+     to wrap my brains around.  DJR */
+  long transition_matrix(int to, int from) {
+    if (abs(to - from) > biggest_energy_transition) return 0;
+    return transitions(from, to - from);
+  };
 
   long min_energy_observations() const {
     for (int i = energy_levels-1; i >= max_entropy_state; i--)
@@ -104,7 +111,8 @@ struct sw_simulation {
      keep track of walkers. */
   long *walkers_up, *walkers_total;
 
-  void move_a_ball(); // attempt to move one ball
+  void move_a_ball(double Tmin = 0.25,
+                   bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(); // updates to run only if we've changed energy
 
@@ -114,6 +122,9 @@ struct sw_simulation {
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy
   int initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
+
+  // initialize the translation distance. return most probable energy
+  void initialize_translation_distance(double acceptance_goal = 0.4);
 
   // iterate enough times for the energy to change n times.  Return
   // the number of "up" moves.
@@ -140,8 +151,9 @@ struct sw_simulation {
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
   void update_weights_using_transitions(double fractional_precision);
+  void update_weights_using_transition_flux(double fractional_precision);
 
-  void initialize_transitions(int max_iterations);
+  void initialize_transitions(int max_iterations, double Tmin);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();

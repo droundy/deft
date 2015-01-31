@@ -14,7 +14,8 @@ inputre = re.compile(r'\\input(\[[^\]]+\])?{([^}]+)}')
 for fname in texfs:
     f = open(fname, 'r')
     latex = f.read()
-    print '| pdflatex %s && pdflatex %s' % (fname, fname)
+    print '| pdflatex %s && pdflatex %s && bibtex %s && pdflatex %s' % (fname, fname, fname[:-4], fname)
+    print '>', fname[:-3]+'bbl'
     print '>', fname[:-3]+'pdf'
     if documentclassre.search(latex):
         for pdf in [x[1]+'.pdf' for x in graphicre.findall(latex)]:
