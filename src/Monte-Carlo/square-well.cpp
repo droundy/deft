@@ -664,6 +664,7 @@ void sw_simulation::initialize_robustly_optimistic(double robust_update_scale,
   do {
     done = true; // Let's be optimistic!
     // First, let's reset our weights based on what we already know!
+    // update_weights_using_transitions(transition_precision);
     for (int e = max_entropy_state; e < energy_levels; e++) {
       if (energy_histogram[e])
         ln_energy_weights[e] -= robust_update_scale*log(energy_histogram[e]);
@@ -762,44 +763,41 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   const int energies_observed = min_energy_state+1;
 
   // now we create two density of states vectors
-  /* FIXME Can we work with ln_dos rather than dos to handle larger
-     systems without underflow? */
-  double *old_dos = new double[energies_observed];
-  double *dos = new double[energies_observed];
+  double *ln_old_dos = new double[energies_observed];
+  double *ln_dos = new double[energies_observed];
   double dos_magnitude_squared;
-  double dos_magnitude;
+  double ln_dos_magnitude;
 
-  // initialize a uniform density of states with unit norm
-  const double dos_init = 1/sqrt(energies_observed);
-  for (int i = 0; i < energies_observed; i++) dos[i] = dos_init;
+  // initialize a flat density of states with unit norm
+  const double ln_dos_init = -0.5*log(energies_observed);
+  for (int i = 0; i < energies_observed; i++) ln_dos[i] = ln_dos_init;
 
   // now find the eigenvector of our transition matrix via the power iteration method
-  /* fixme: I was thinking of implementing the inverse iteration method, but this
-     method seems to converge quite nicely and very quickly, so it probably doesn't matter */
   bool done = false;
   int iters = 0;
   while(!done){
     iters++;
-    for (int i = 0; i < energies_observed; i++) old_dos[i] = dos[i];
+    for (int i = 0; i < energies_observed; i++) ln_old_dos[i] = ln_dos[i];
 
     // compute D_n = T*D_{n-1}
     dos_magnitude_squared = 0;
     for (int i = 0; i < energies_observed; i++){
-      dos[i] = 0;
-      for(int e = -biggest_energy_transition; e <= biggest_energy_transition; e++)
-        /* FIXME the following looks buggy should be old_dos[i +/- e]; */
-        dos[i] += transitions(i,e)*old_dos[i];
-      dos_magnitude_squared += dos[i]*dos[i];
+      double TD_i = 0;
+      for(int e = max(0,i-biggest_energy_transition);
+          e < min(energy_levels,i+biggest_energy_transition); e++)
+        TD_i += transitions(i,e-i)*exp(ln_old_dos[e]);
+      ln_dos[i] = log(TD_i);
+      dos_magnitude_squared += exp(2*ln_dos[i]);
     }
 
     // normalize D_n
-    dos_magnitude = sqrt(dos_magnitude_squared);
-    for (int i = 0; i < energies_observed; i++) dos[i] /= dos_magnitude;
+    ln_dos_magnitude = 0.5*log(dos_magnitude_squared);
+    for (int i = 0; i < energies_observed; i++) ln_dos[i] -= ln_dos_magnitude;
 
     // check whether D_n is close enough to D_{n-1} for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
-      if (fabs(1-dos[i]/old_dos[i]) > fractional_precision){
+      if (fabs(1-exp(ln_dos[i]-ln_old_dos[i])) > fractional_precision){
         done = false;
         break;
       }
@@ -808,16 +806,17 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
 
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = 1/dos[i];
+    ln_energy_weights[i] = exp(-ln_dos[i]);
+  flush_weight_array();
 
   printf("Computed weights from transition matrix with dominant eigenvalue %g\n",
-         dos_magnitude);
+         sqrt(dos_magnitude_squared));
 }
 
-void sw_simulation::initialize_transitions(int max_iter, double min_T) {
+void sw_simulation::initialize_transitions(int max_iter, double Tmin) {
   max_iter *= N; // measure max_iter in moves per ball
   for (int i=0;i<max_iter;i++) {
-    move_a_ball(min_T, true);
+    move_a_ball(Tmin, true);
   }
 }
 
