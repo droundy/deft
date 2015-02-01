@@ -16,14 +16,12 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "OptimizedFunctionals.h"
+#include "SoftFluidFast.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
-
-Functional SoftFluid(double radius, double V0, double mu);
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.

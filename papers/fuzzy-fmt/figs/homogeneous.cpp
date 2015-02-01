@@ -16,13 +16,19 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "OptimizedFunctionals.h"
+#include "HardFluidFast.h"
+#include "SoftFluidFast.h"
 #include "equation-of-state.h"
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double sigma, double epsilon, double mu);
-Functional HardFluid(double radius, double mu);
+// The following tells fac how to run the executable to generate a
+// homogeneous.dat file.
+/*--
+
+self.rule(exe, [exe], [os.path.dirname(exe)+'/homogeneous.dat'])
+
+--*/
 
 int main(int, char **) {
   double radius = 1.0;

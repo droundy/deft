@@ -3,6 +3,8 @@
 import config
 
 import os, re, sys
+import numpy
+import numpy as np
 
 includes_re = re.compile(r'#include\s+"(\S+)\.h"')
 
@@ -27,7 +29,7 @@ class facfile:
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', obj, cpp, file=self._f)
         print('<', cpp, file=self._f)
         print('>', obj, file=self._f)
-    def link(self, maincpp, exe):
+    def link(self, maincpp, exe, objects=set([])):
         obj = {maincpp[:-3]+'o'}
         with open(maincpp) as f:
             maincontents = f.read()
@@ -47,7 +49,7 @@ class facfile:
                     exec(i)
                 except:
                     print('# instructions failed!', repr(i), sys.exc_info(), file=self._f)
-        print('\n|', config.cxx, config.linkflags, '-o', exe, ' '.join(obj), file=self._f)
+        print('\n|', config.cxx, config.linkflags, '-o', exe, ' '.join(obj | objects), file=self._f)
         print('>', exe, file=self._f)
-        for o in obj:
+        for o in obj | objects:
             print('<', o, file=self._f)
