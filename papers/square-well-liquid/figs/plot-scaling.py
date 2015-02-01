@@ -20,7 +20,7 @@ all_Ns = eval(sys.argv[3])
 #arg all_Ns = [[5,6,7,8,9,10,20]]
 
 versions = eval(sys.argv[4])
-#arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization"]]
+#arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization","tmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in all_Ns for dat in ['s', 'lnw', 'E']]
 
@@ -28,42 +28,31 @@ N_regex = re.compile(r'-N([0-9]+)')
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
 
 plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
-Ns = {}
 init_iters = {}
 Emins = {}
 samples = {}
 for version in versions:
-  Ns[version] = []
   init_iters[version] = []
   Emins[version] = []
   samples[version] = []
   for N in all_Ns:
-    for filename in glob.glob("data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, version)):
-        Ns[version].append(N)
-        wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, version)
+    filename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, version)
+    wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, version)
 
-        with open(filename, 'r') as content_file:
-            content = content_file.read()
-        init_iters[version].append(int(initialization_iters_regex.findall(content)[0]))
+    with open(filename, 'r') as content_file:
+        content = content_file.read()
+    init_iters[version].append(int(initialization_iters_regex.findall(content)[0]))
 
-        E_data = numpy.loadtxt(wildfilename % 'E')
-        Emins[version].append(E_data[:, 0].max())
+    E_data = numpy.loadtxt(wildfilename % 'E')
+    Emins[version].append(E_data[:, 0].max())
 
-        sample_data = numpy.loadtxt(wildfilename % 's')
-        samples[version].append(sample_data[len(sample_data[:,1])-1, 1])
+    sample_data = numpy.loadtxt(wildfilename % 's')
+    samples[version].append(sample_data[len(sample_data[:,1])-1, 1])
 
-    # The following sorts the lists according to the number of spheres
-    indexes = range(len(Ns[version]))
-    indexes.sort(key=Ns[version].__getitem__)
-    Ns[version] = map(Ns[version].__getitem__, indexes)
-    init_iters[version] = map(init_iters[version].__getitem__, indexes)
-    Emins[version] = map(Emins[version].__getitem__, indexes)
-    samples[version] = map(samples[version].__getitem__, indexes)
-
-    plt.figure(1)
-    plt.semilogy(Ns[version], init_iters[version], styles.color[version]+'.-', label=version)
-    plt.figure(2)
-    plt.plot(Ns[version], Emins[version], styles.color[version]+'.-', label=version)
+  plt.figure(1)
+  plt.semilogy(all_Ns, init_iters[version], styles.color[version]+'.-', label=version)
+  plt.figure(2)
+  plt.plot(all_Ns, Emins[version], styles.color[version]+'.-', label=version)
 
 plt.figure(1)
 plt.xlabel('$N$')
@@ -91,8 +80,8 @@ tex.write(r"""\\
 \hline\hline
 """)
 
-for i in range(len(Ns['bubble_suppression'])):
-    N = Ns['bubble_suppression'][i]
+for i in range(len(all_Ns)):
+    N = all_Ns[i]
     tex.write(r""" N = %d \\
   initialization""" % N)
 
