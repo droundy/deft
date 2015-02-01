@@ -17,3 +17,12 @@ C __pycache__
 < config.py
 > ../src/haskell/.haskell.fac
 C __pycache__
+
+| python3 -B latex.py papers/square-well-liquid/histogram-paper.tex
+< config.py
+> ../papers/square-well-liquid/.tex.fac
+C __pycache__
+
+| cd ../papers/square-well-liquid && python2 -B ../../fac/figs.py figs/plot-dos.py figs/plot-histograms.py figs/plot-samples.py figs/plot-scaling.py figs/plot-transitions.py figs/plot-uhc.py > .figs.fac
+> ../papers/square-well-liquid/.figs.fac
+

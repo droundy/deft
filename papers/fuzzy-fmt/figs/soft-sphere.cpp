@@ -23,7 +23,7 @@
 #include "utilities.h"
 #include "handymath.h"
 
-/*--
+/* --
 
 for kT in np.arange(0.1, 1.0, 0.1):
   for rho in np.arange(0.1, 1.0, 0.1):
@@ -31,7 +31,7 @@ for kT in np.arange(0.1, 1.0, 0.1):
               [exe],
               ["papers/fuzzy-fmt/figs/radial-wca-%06.4f-%04.2f.dat" % (kT, rho)])
 
---*/
+-- */
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.
