@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy, glob, re, string
 import styles
 
-if len(sys.argv) not in [4,5]:
+if len(sys.argv) not in [5,6]:
     print 'useage: %s ww ff N versions show' % sys.argv[0]
     exit(1)
 
@@ -16,10 +16,13 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
-versions = eval(sys.argv[3])
+all_Ns = eval(sys.argv[3])
+#arg all_Ns = [[5,6,7,8,9,10,20]]
+
+versions = eval(sys.argv[4])
 #arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in [5,6,7,8,9,10,20] for dat in ['s', 'lnw', 'E']]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, dat) for version in versions for N in all_Ns for dat in ['s', 'lnw', 'E']]
 
 N_regex = re.compile(r'-N([0-9]+)')
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
@@ -30,12 +33,12 @@ init_iters = {}
 Emins = {}
 samples = {}
 for version in versions:
-    Ns[version] = []
-    init_iters[version] = []
-    Emins[version] = []
-    samples[version] = []
-    for filename in glob.glob("data/periodic-ww%04.2f-ff%04.2f-N*-%s-lnw.dat" % (ww, ff, version)):
-        N = int(N_regex.findall(filename)[0])
+  Ns[version] = []
+  init_iters[version] = []
+  Emins[version] = []
+  samples[version] = []
+  for N in all_Ns:
+    for filename in glob.glob("data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, version)):
         Ns[version].append(N)
         wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, version)
 

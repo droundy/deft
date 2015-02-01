@@ -24,6 +24,12 @@ class facfile:
             print('<', i, file=self._f)
         for o in outputs:
             print('>', o, file=self._f)
+    def default(self, cmd, inputs, outputs):
+        print('\n|', cmd, file=self._f)
+        for i in inputs:
+            print('<', i, file=self._f)
+        for o in outputs:
+            print('>', o, file=self._f)
     def compile(self, cpp):
         obj = cpp[:-3]+'o'
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', obj, cpp, file=self._f)
@@ -31,25 +37,22 @@ class facfile:
         print('>', obj, file=self._f)
     def link(self, maincpp, exe, objects=set([])):
         obj = {maincpp[:-3]+'o'}
+        headers = set([])
         with open(maincpp) as f:
             maincontents = f.read()
             for i in includes_re.findall(maincontents):
                 if i == 'Monte-Carlo/monte-carlo':
                     i = 'utilities'
-                print('# include ', i, file=self._f)
-                if os.path.exists('src/'+i+'.cpp'):
-                    print('# should link with', 'src/'+i+'.cpp', file=self._f)
+                if os.path.exists('src/'+i+'.cpp') or i[-4:] == 'Fast':
                     obj |= {'src/'+i+'.o'}
-                else:
-                    print('# should not link with', 'src/'+i+'.cpp', file=self._f)
-            print('# instructions:', instructions_re.findall(maincontents), file=self._f)
+                    headers |= {'src/'+i+'.h'}
             for i in instructions_re.findall(maincontents):
-                print('# instructions:', repr(i), file=self._f)
                 try:
                     exec(i)
                 except:
-                    print('# instructions failed!', repr(i), sys.exc_info(), file=self._f)
+                    print('# instructions failed!', repr(i), file=self._f)
+                    print('# instructions failed!', sys.exc_info()[1], file=self._f)
         print('\n|', config.cxx, config.linkflags, '-o', exe, ' '.join(obj | objects), file=self._f)
         print('>', exe, file=self._f)
-        for o in obj | objects:
+        for o in obj | objects | headers:
             print('<', o, file=self._f)
