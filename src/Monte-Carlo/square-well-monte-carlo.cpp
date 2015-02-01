@@ -637,6 +637,7 @@ int main(int argc, const char *argv[]) {
     } else if (walker_optimization) {
       sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
     } else if (robustly_optimistic) {
+      //sw.initialize_robustly_optimistic(transition_precision, robust_cutoff);
       sw.initialize_robustly_optimistic(robust_update_scale, robust_cutoff);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
