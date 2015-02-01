@@ -16,14 +16,22 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "OptimizedFunctionals.h"
+#include "SoftFluidFast.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double sigma, double epsilon, double mu);
+/*--
+
+for kT in np.arange(0.1, 1.0, 0.1):
+  for rho in np.arange(0.1, 1.0, 0.1):
+    self.rule('%s %g %g' % (exe, kT, rho),
+              [exe],
+              ["papers/fuzzy-fmt/figs/soft-sphere%06.4f-%04.2f.dat" % (kT, rho)])
+
+--*/
 
 //const double nm = 18.8972613;
 // Here we set up the lattice.

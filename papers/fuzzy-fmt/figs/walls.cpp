@@ -16,16 +16,24 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "OptimizedFunctionals.h"
 #include "equation-of-state.h"
 #include "LineMinimizer.h"
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
 
-Functional SoftFluid(double sigma, double epsilon, double mu);
-Functional HardRosenfeldFluid(double radius, double mu);
-Functional HardFluid(double radius, double mu);
+#include "SoftFluidFast.h"
+#include "HardRosenfeldFluidFast.h"
+
+/*--
+
+for kT in np.arange(0.1, 1.0, 0.1):
+  for rho in np.arange(0.1, 1.0, 0.1):
+    self.rule('%s %g %g' % (exe, kT, rho),
+              [exe],
+              ["papers/fuzzy-fmt/figs/walls%s-%06.4f-%04.2f.dat" % ('soft', kT, rho)])
+
+--*/
 
 // Here we set up the lattice.
 static double width = 15;
