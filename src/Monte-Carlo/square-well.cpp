@@ -784,7 +784,7 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     for (int i = 0; i < energies_observed; i++){
       double TD_i = 0;
       for(int e = max(0,i-biggest_energy_transition);
-          e < min(energy_levels,i+biggest_energy_transition); e++)
+          e <= min(energy_levels,i+biggest_energy_transition); e++)
         TD_i += transitions(i,e-i)*exp(ln_old_dos[e]);
       ln_dos[i] = log(TD_i);
       dos_magnitude_squared += exp(2*ln_dos[i]);
