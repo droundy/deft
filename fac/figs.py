@@ -77,16 +77,20 @@ for fname in pyfs:
                 extrainputs.append(i[0] % friendly_eval(i[1], fname, a))
             for o in coutputs:
                 extraoutputs.append(o[0] % friendly_eval(o[1], fname, a))
-            print "? python2 -B %s %s" % (fname, aa)
+            print "? python2 %s %s" % (fname, aa)
             for i in inputs + extrainputs:
                 print '<', i
             for o in outputs + extraoutputs:
                 print '>', o
+            print 'c .pyc'
+            print 'c .matplotlib'
             print
     else:
-        print '| python2 -B', fname
+        print '| python2', fname
         for i in inputs:
             print '<', i
         for o in outputs:
             print '>', o
+        print 'c .pyc'
+        print 'c .matplotlib'
         print
