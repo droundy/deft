@@ -791,12 +791,11 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
       }
       for(int e = max(0, i-biggest_energy_transition);
           e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        TD_i += transitions(i,i-e)*exp(ln_old_dos[e] - dos_min);
-        norm_i += transitions(i,i-e);
+        TD_i += transitions(e,i-e)*exp(ln_old_dos[e] - dos_min);
+        norm_i += transitions(e,i-e);
       }
       ln_dos[i] = dos_min;
-      const double ln_TD_i_normed = log(TD_i/norm_i);
-      if(!isnan(ln_TD_i_normed)) ln_dos[i] += ln_TD_i_normed;
+      if(TD_i > 0) ln_dos[i] += log(TD_i/norm_i);
       dos_magnitude_squared += exp(2*ln_dos[i]);
     }
 
@@ -819,12 +818,12 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     ln_energy_weights[i] = exp(-ln_dos[i]);
   flush_weight_array();
 
-  printf("Computed weights from transition matrix with eigenvalue %g\n",
-         sqrt(dos_magnitude_squared));
-  for(int i = 0; i < energies_observed; i++){
-    printf("ln_dos[%i]: %g\n", i, ln_dos[i]);
-    fflush(stdout);
-  }
+  printf("Computed weights from transition matrix in %i iterations with eigenvalue %g\n",
+         iters, sqrt(dos_magnitude_squared));
+  // for(int i = 0; i < energies_observed; i++){
+  //   printf("ln_dos[%i]: %g\n", i, ln_dos[i]);
+  //   fflush(stdout);
+  // }
 
 }
 
