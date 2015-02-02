@@ -764,6 +764,57 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
+  double *D = new double[energies_observed];
+  double *TD = new double[energies_observed];
+
+  // initialize a flat density of states with unit norm
+  for (int i = 0; i < energies_observed; i++) TD[i] = 1.0/energies_observed;
+
+  // now find the eigenvector of our transition matrix via the power iteration method
+  bool done = false;
+  int iters = 0;
+  while(!done){
+    iters++;
+    for (int i = 0; i < energies_observed; i++) {
+      D[i] = TD[i];
+      TD[i] = 0;
+    }
+
+    // compute D_n = T*D_{n-1}
+    for (int i=0;i<energies_observed;i++) {
+      double norm = 0;
+      for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+        norm += transitions(i, de);
+      }
+      for (int j=0;j<energies_observed;j++) {
+        if (abs(i-j) <= biggest_energy_transition) {
+          TD[j] += D[i]*transitions(i, j-i)/norm;
+        }
+      }
+    }
+
+    // double total = 0;
+    // for (int i=0;i<energies_observed;i++) total += TD[i];
+    // printf("total %g\n", total);
+
+    // check whether D_n is close enough to D_{n-1} for us to quit
+    done = true;
+    for (int i = 0; i < energies_observed; i++){
+      if (fabs((D[i] - TD[i])/(D[i]+TD[i])) > fractional_precision){
+        done = false;
+        break;
+      }
+    }
+  }
+
+  // compute the weights w(E) = 1/D(E)
+  for(int i = 0; i < energies_observed; i++) {
+    //printf("D[%d] = %g\n", i, D[i]);
+    ln_energy_weights[i] = -log(D[i]);
+  }
+  flush_weight_array();
+
+  /*
   // now we create two density of states vectors
   double *ln_old_dos = new double[energies_observed];
   double *ln_dos = new double[energies_observed];
@@ -784,18 +835,21 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     // compute D_n = T*D_{n-1}
     dos_magnitude_squared = 0;
     for (int i = 0; i < energies_observed; i++){
-      double TD_i = 0, norm_i = 0, dos_min = 1e300;
+      double TD_i = 0, dos_min = 1e300;
       for(int e = max(0, i-biggest_energy_transition);
           e <= min(min_energy_state, i+biggest_energy_transition); e++) {
         if (ln_old_dos[e] < dos_min) dos_min = ln_old_dos[e];
       }
       for(int e = max(0, i-biggest_energy_transition);
           e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        TD_i += transitions(e,i-e)*exp(ln_old_dos[e] - dos_min);
-        norm_i += transitions(e,i-e);
+        double norm_e = 0;
+        for (int j=e-biggest_energy_transition; j<=e+biggest_energy_transition; j++) {
+          norm_e += transition_matrix(e, j);
+        }
+        TD_i += transitions(e,i-e)*exp(ln_old_dos[e] - dos_min)/norm_e;
       }
       ln_dos[i] = dos_min;
-      if(TD_i > 0) ln_dos[i] += log(TD_i/norm_i);
+      if (TD_i > 0) ln_dos[i] += log(TD_i);
       dos_magnitude_squared += exp(2*ln_dos[i]);
     }
 
@@ -815,11 +869,11 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
 
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = exp(-ln_dos[i]);
+    ln_energy_weights[i] = -ln_dos[i];
   flush_weight_array();
+*/
 
-  printf("Computed weights from transition matrix in %i iterations with eigenvalue %g\n",
-         iters, sqrt(dos_magnitude_squared));
+  printf("Computed weights from transition matrix in %i iterations\n", iters);
   // for(int i = 0; i < energies_observed; i++){
   //   printf("ln_dos[%i]: %g\n", i, ln_dos[i]);
   //   fflush(stdout);

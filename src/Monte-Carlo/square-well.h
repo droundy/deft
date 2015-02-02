@@ -93,7 +93,10 @@ struct sw_simulation {
      also called "transitions" above, which is a little easier for me
      to wrap my brains around.  DJR */
   long transition_matrix(int to, int from) {
-    if (abs(to - from) > biggest_energy_transition) return 0;
+    if (abs(to - from) > biggest_energy_transition ||
+        to < 0 || from < 0 || to >= energy_levels || from >= energy_levels) {
+      return 0;
+    }
     return transitions(from, to - from);
   };
 

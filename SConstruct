@@ -613,3 +613,7 @@ for test in Split(""" newcode """):
 
 for test in Split(""" new-hard-spheres new-water-saft new-sfmt-walls new-generated """):
     env.BuildTest(test, generic_sources + newgeneric_sources + newgenerated_sources)
+
+env.BuildTest('sw-transition-matrix-density-of-states',
+              ['src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp',
+               'src/Monte-Carlo/square-well.cpp', 'src/vector3d.cpp'])
