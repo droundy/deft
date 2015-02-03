@@ -760,7 +760,7 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(double fractional_precision) {
+void sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
@@ -781,23 +781,25 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
     }
 
     // compute D_n = T*D_{n-1}
-    for (int i=0;i<energies_observed;i++) {
+    for (int i = 0; i < energies_observed; i++) {
       double norm = 0;
-      for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
         norm += transitions(i, de);
-      }
       if(norm){
-        for (int j=0;j<energies_observed;j++) {
-          if (abs(i-j) <= biggest_energy_transition)
-            TD[j] += D[i]*transitions(i, j-i)/norm;
-        }
+        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
+          TD[i+de] += D[i]*transitions(i,de)/norm;
       }
     }
     // check whether D_n is close enough to D_{n-1} for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
-      if (fabs((D[i] - TD[i])/(D[i]+TD[i])) > fractional_precision){
+      double precision = fabs((D[i] - TD[i])/(D[i]+TD[i]));
+      if (precision > min_fractional_precision){
         done = false;
+        if(iters % 1000000 == 0){
+          printf("After %i iterations, failed at energy %i with precision %g.\n",
+                 iters, i, precision);
+        }
         break;
       }
     }

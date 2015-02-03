@@ -647,7 +647,8 @@ int main(int argc, const char *argv[]) {
   }
 
   if(transition_override || tmmc){
-    printf("\nOverriding weight array with that generated from the transition matrix!\n");
+    printf("\nOverriding weight array with that generated from the transition matrix!\n"
+           "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
   }
   sw.flush_weight_array();
