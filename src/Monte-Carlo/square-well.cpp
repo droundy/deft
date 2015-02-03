@@ -756,7 +756,6 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
        downward transition rate. */
     ln_energy_weights[i] += log(wanted_n[i]);
   }
-  flush_weight_array();
 }
 
 // update the weight array using transitions
@@ -775,12 +774,13 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
   int iters = 0;
   while(!done){
     iters++;
+    // set D_n = T*D_{n-1}
     for (int i = 0; i < energies_observed; i++) {
       D[i] = TD[i];
       TD[i] = 0;
     }
 
-    // compute D_n = T*D_{n-1}
+    // compute T*D_n
     for (int i = 0; i < energies_observed; i++) {
       double norm = 0;
       for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
@@ -790,7 +790,7 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
           TD[i+de] += D[i]*transitions(i,de)/norm;
       }
     }
-    // check whether D_n is close enough to D_{n-1} for us to quit
+    // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
       double precision = fabs((D[i] - TD[i])/(D[i]+TD[i]));
@@ -807,11 +807,9 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
 
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = -log(D[i]);
-  flush_weight_array();
+    ln_energy_weights[i] = -log(TD[i]);
 
   printf("Computed weights from transition matrix in %i iterations\n", iters);
-
 }
 
 void sw_simulation::initialize_transitions(int max_iter, double Tmin) {

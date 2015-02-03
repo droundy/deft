@@ -653,12 +653,10 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  /* Set the weights of unseen low energies to at least something somewhat reasonable
-     so that we don't get stuck at these low energies during simulations,
-     should we encounter them */
+  // Set the weights of unseen low energies to canonical values
   if(wang_landau || vanilla_wang_landau || walker_optimization || robustly_optimistic){
     for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + log(10);
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + Tmin*i;
   }
 
   // ----------------------------------------------------------------------------
@@ -697,9 +695,10 @@ int main(int argc, const char *argv[]) {
           "# de_density: %g\n"
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
-          "# energy_levels: %i\n\n",
+          "# energy_levels: %i\n"
+          "# Tmin: %g\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
-          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels);
+          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, Tmin);
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
@@ -735,9 +734,8 @@ int main(int argc, const char *argv[]) {
             headerinfo, bubble_scale, bubble_cutoff);
   } else if (tmmc){
     sprintf(headerinfo,
-            "%s# histogram method: tmmc\n"
-            "# Tmin: %g\n",
-            headerinfo, Tmin);
+            "%s# histogram method: tmmc\n",
+            headerinfo);
   }
   if(!no_weights && !fix_kT)
     sprintf(headerinfo, "%s# gaussian_init_scale: %g\n\n", headerinfo, gaussian_init_scale);
