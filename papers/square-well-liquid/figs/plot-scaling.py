@@ -17,7 +17,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 all_Ns = eval(sys.argv[3])
-#arg all_Ns = [[5,6,7,8,9,10,20]]
+#arg all_Ns = [[5,6,8,9,10,20]]
 
 versions = eval(sys.argv[4])
 #arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization","tmmc"]]

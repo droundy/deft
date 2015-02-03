@@ -786,17 +786,13 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
       for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
         norm += transitions(i, de);
       }
-      for (int j=0;j<energies_observed;j++) {
-        if (abs(i-j) <= biggest_energy_transition) {
-          TD[j] += D[i]*transitions(i, j-i)/norm;
+      if(norm){
+        for (int j=0;j<energies_observed;j++) {
+          if (abs(i-j) <= biggest_energy_transition)
+            TD[j] += D[i]*transitions(i, j-i)/norm;
         }
       }
     }
-
-    // double total = 0;
-    // for (int i=0;i<energies_observed;i++) total += TD[i];
-    // printf("total %g\n", total);
-
     // check whether D_n is close enough to D_{n-1} for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
@@ -808,76 +804,11 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
   }
 
   // compute the weights w(E) = 1/D(E)
-  for(int i = 0; i < energies_observed; i++) {
-    //printf("D[%d] = %g\n", i, D[i]);
-    ln_energy_weights[i] = -log(D[i]);
-  }
-  flush_weight_array();
-
-  /*
-  // now we create two density of states vectors
-  double *ln_old_dos = new double[energies_observed];
-  double *ln_dos = new double[energies_observed];
-  double dos_magnitude_squared;
-  double ln_dos_magnitude;
-
-  // initialize a flat density of states with unit norm
-  const double ln_dos_init = -0.5*log(energies_observed);
-  for (int i = 0; i < energies_observed; i++) ln_dos[i] = ln_dos_init;
-
-  // now find the eigenvector of our transition matrix via the power iteration method
-  bool done = false;
-  int iters = 0;
-  while(!done){
-    iters++;
-    for (int i = 0; i < energies_observed; i++) ln_old_dos[i] = ln_dos[i];
-
-    // compute D_n = T*D_{n-1}
-    dos_magnitude_squared = 0;
-    for (int i = 0; i < energies_observed; i++){
-      double TD_i = 0, dos_min = 1e300;
-      for(int e = max(0, i-biggest_energy_transition);
-          e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        if (ln_old_dos[e] < dos_min) dos_min = ln_old_dos[e];
-      }
-      for(int e = max(0, i-biggest_energy_transition);
-          e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        double norm_e = 0;
-        for (int j=e-biggest_energy_transition; j<=e+biggest_energy_transition; j++) {
-          norm_e += transition_matrix(e, j);
-        }
-        TD_i += transitions(e,i-e)*exp(ln_old_dos[e] - dos_min)/norm_e;
-      }
-      ln_dos[i] = dos_min;
-      if (TD_i > 0) ln_dos[i] += log(TD_i);
-      dos_magnitude_squared += exp(2*ln_dos[i]);
-    }
-
-    // normalize D_n
-    ln_dos_magnitude = 0.5*log(dos_magnitude_squared);
-    for (int i = 0; i < energies_observed; i++) ln_dos[i] -= ln_dos_magnitude;
-
-    // check whether D_n is close enough to D_{n-1} for us to quit
-    done = true;
-    for (int i = 0; i < energies_observed; i++){
-      if (fabs(1-exp(ln_dos[i]-ln_old_dos[i])) > fractional_precision){
-        done = false;
-        break;
-      }
-    }
-  }
-
-  // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = -ln_dos[i];
+    ln_energy_weights[i] = -log(D[i]);
   flush_weight_array();
-*/
 
   printf("Computed weights from transition matrix in %i iterations\n", iters);
-  // for(int i = 0; i < energies_observed; i++){
-  //   printf("ln_dos[%i]: %g\n", i, ln_dos[i]);
-  //   fflush(stdout);
-  // }
 
 }
 
