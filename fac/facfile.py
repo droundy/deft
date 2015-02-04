@@ -43,7 +43,7 @@ class facfile:
             for i in includes_re.findall(maincontents):
                 if i == 'Monte-Carlo/monte-carlo':
                     i = 'utilities'
-                if os.path.exists('src/'+i+'.cpp') or i[-4:] == 'Fast':
+                if i[-4:] == 'Fast' or os.path.exists('src/'+i+'.cpp'):
                     obj |= {'src/'+i+'.o'}
                     headers |= {'src/'+i+'.h'}
             for i in instructions_re.findall(maincontents):
