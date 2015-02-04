@@ -75,7 +75,7 @@ def run(args):
     script.write("#SBATCH --error %s\n\n" % errname)
     script.write("echo \"Starting job with ID: %s, "
                  "Estimated memory use: %i MB.\"\n\n" %(jobname,memory))
-    script.write("cd %s\n" %projectdir)
+    script.write("cd %s\nnice -19 " %projectdir)
     script.write(command)
     for (arg,val) in [ ("ww",ww), ("ff",ff), ("N",N) ]:
         script.write(" \\\n --%s %s" %(arg,str(val)))

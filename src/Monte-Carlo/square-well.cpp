@@ -756,58 +756,50 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
        downward transition rate. */
     ln_energy_weights[i] += log(wanted_n[i]);
   }
-  flush_weight_array();
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(double fractional_precision) {
+void sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
-  // now we create two density of states vectors
-  double *ln_old_dos = new double[energies_observed];
-  double *ln_dos = new double[energies_observed];
-  double dos_magnitude_squared;
-  double ln_dos_magnitude;
+  double *ln_D = new double[energies_observed];
+  double *TD = new double[energies_observed];
 
   // initialize a flat density of states with unit norm
-  const double ln_dos_init = -0.5*log(energies_observed);
-  for (int i = 0; i < energies_observed; i++) ln_dos[i] = ln_dos_init;
+  for (int i = 0; i < energies_observed; i++) TD[i] = 1.0/energies_observed;
 
   // now find the eigenvector of our transition matrix via the power iteration method
   bool done = false;
   int iters = 0;
   while(!done){
     iters++;
-    for (int i = 0; i < energies_observed; i++) ln_old_dos[i] = ln_dos[i];
-
-    // compute D_n = T*D_{n-1}
-    dos_magnitude_squared = 0;
-    for (int i = 0; i < energies_observed; i++){
-      double TD_i = 0, norm_i = 0, dos_min = 1e300;
-      for(int e = max(0, i-biggest_energy_transition);
-          e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        if (ln_old_dos[e] < dos_min) dos_min = ln_old_dos[e];
-      }
-      for(int e = max(0, i-biggest_energy_transition);
-          e <= min(min_energy_state, i+biggest_energy_transition); e++) {
-        TD_i += transitions(e,i-e)*exp(ln_old_dos[e] - dos_min);
-        norm_i += transitions(e,i-e);
-      }
-      ln_dos[i] = dos_min;
-      if(TD_i > 0) ln_dos[i] += log(TD_i/norm_i);
-      dos_magnitude_squared += exp(2*ln_dos[i]);
+    // set D_n = T*D_{n-1}
+    for (int i = 0; i < energies_observed; i++) {
+      ln_D[i] = log(TD[i]);
+      TD[i] = 0;
     }
 
-    // normalize D_n
-    ln_dos_magnitude = 0.5*log(dos_magnitude_squared);
-    for (int i = 0; i < energies_observed; i++) ln_dos[i] -= ln_dos_magnitude;
-
-    // check whether D_n is close enough to D_{n-1} for us to quit
+    // compute T*D_n
+    for (int i = 0; i < energies_observed; i++) {
+      double norm = 0;
+      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
+        norm += transitions(i, de);
+      if(norm){
+        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
+          TD[i+de] += exp(ln_D[i])*transitions(i,de)/norm;
+      }
+    }
+    // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
-      if (fabs(1-exp(ln_dos[i]-ln_old_dos[i])) > fractional_precision){
+      double precision = fabs((exp(ln_D[i]) - TD[i])/(exp(ln_D[i])+TD[i]));
+      if (precision > min_fractional_precision){
         done = false;
+        if(iters % 1000000 == 0){
+          printf("After %i iterations, failed at energy %i with precision %g.\n",
+                 iters, i, precision);
+        }
         break;
       }
     }
@@ -815,16 +807,9 @@ void sw_simulation::update_weights_using_transitions(double fractional_precision
 
   // compute the weights w(E) = 1/D(E)
   for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = exp(-ln_dos[i]);
-  flush_weight_array();
+    ln_energy_weights[i] = -ln_D[i];
 
-  printf("Computed weights from transition matrix in %i iterations with eigenvalue %g\n",
-         iters, sqrt(dos_magnitude_squared));
-  // for(int i = 0; i < energies_observed; i++){
-  //   printf("ln_dos[%i]: %g\n", i, ln_dos[i]);
-  //   fflush(stdout);
-  // }
-
+  printf("Computed weights from transition matrix in %i iterations\n", iters);
 }
 
 void sw_simulation::initialize_transitions(int max_iter, double Tmin) {
