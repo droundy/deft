@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
 
-  double transition_precision = 1e-4;
+  double transition_precision = 1e-10;
 
   // Do not change these! They are taken directly from the WL paper.
   double vanilla_wl_factor = 1;
