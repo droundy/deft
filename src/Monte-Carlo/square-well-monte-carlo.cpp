@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
 
-  double transition_precision = 1e-10;
+  double transition_precision = 1e-4;
 
   // Do not change these! They are taken directly from the WL paper.
   double vanilla_wl_factor = 1;
@@ -654,10 +654,8 @@ int main(int argc, const char *argv[]) {
   sw.flush_weight_array();
 
   // Set the weights of unseen low energies to canonical values
-  if(wang_landau || vanilla_wang_landau || walker_optimization || robustly_optimistic){
-    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + Tmin*i;
-  }
+  for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
+    sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + (i - sw.min_energy_state)/Tmin;
 
   // ----------------------------------------------------------------------------
   // Generate save file info

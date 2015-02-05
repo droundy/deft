@@ -764,10 +764,13 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
   const int energies_observed = min_energy_state+1;
 
   double *ln_D = new double[energies_observed];
-  double *TD = new double[energies_observed];
+  double *TD_over_D = new double[energies_observed];
 
   // initialize a flat density of states with unit norm
-  for (int i = 0; i < energies_observed; i++) TD[i] = 1.0/energies_observed;
+  for (int i = 0; i < energies_observed; i++) {
+    ln_D[i] = 0;
+    TD_over_D[i] = 1.0/energies_observed;
+  }
 
   // now find the eigenvector of our transition matrix via the power iteration method
   bool done = false;
@@ -776,8 +779,8 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
     iters++;
     // set D_n = T*D_{n-1}
     for (int i = 0; i < energies_observed; i++) {
-      ln_D[i] = log(TD[i]);
-      TD[i] = 0;
+      if (TD_over_D[i] > 0) ln_D[i] += log(TD_over_D[i]);
+      TD_over_D[i] = 0;
     }
 
     // compute T*D_n
@@ -786,21 +789,24 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
       for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
         norm += transitions(i, de);
       if(norm){
-        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
-          TD[i+de] += exp(ln_D[i])*transitions(i,de)/norm;
+        for (int de = max(-i, -biggest_energy_transition); de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
+          TD_over_D[i+de] += exp(ln_D[i] - ln_D[i+de])*transitions(i,de)/norm;
+        }
       }
     }
     // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
     done = true;
     for (int i = 0; i < energies_observed; i++){
-      double precision = fabs((exp(ln_D[i]) - TD[i])/(exp(ln_D[i])+TD[i]));
-      if (precision > min_fractional_precision){
-        done = false;
-        if(iters % 1000000 == 0){
-          printf("After %i iterations, failed at energy %i with precision %g.\n",
-                 iters, i, precision);
+      if (energy_histogram[i]) {
+        double precision = fabs(TD_over_D[i] - 1);
+        if (precision > min_fractional_precision){
+          done = false;
+          if(iters % 1000000 == 0){
+            printf("After %i iterations, failed at energy %i with precision %g.\n",
+                   iters, i, precision);
+          }
+          break;
         }
-        break;
       }
     }
   }
