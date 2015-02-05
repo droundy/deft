@@ -12,6 +12,9 @@ gaussian pre-initialization makes a substantial difference for the performance o
   walker optimization method (with Tmin = 0.45), but appears to have little to no effect
   on other methods
 
+making the end condition for walker optimization more stringent by requiring 3 (instead of
+  only 2) minimum energy samples considerably worsens its performance, which is very strange
+
 the bubble suppression sometimes (e.g. with Tmin = 0.45) does worse than just the
   gaussian method. this result is strange, but probably not worthwhile looking into
 
