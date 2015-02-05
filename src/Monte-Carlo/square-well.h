@@ -86,6 +86,8 @@ struct sw_simulation {
   long &transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
+    assert(energy >= 0);
+    assert(energy < energy_levels);
     return transitions_table[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };

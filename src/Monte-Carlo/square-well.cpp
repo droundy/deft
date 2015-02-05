@@ -791,16 +791,41 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
         }
       }
     }
+
+    /* The following deals with the fact that we may not have a
+       perfectly normalized transition matrix.  I'm not sure why this
+       happens, but the net result is that at equilibrium all of the D
+       values drop by the same factor.  I deal with this by finding
+       the average ratio (which ought to be around 1) and then
+       dividing all TD_over_D factors by this ratio, which corresponds
+       to a normalization shift.  This enables the algorithm to work
+       with high precision, where an unnormalized T (for whatever
+       cause) could previously cause the algorithm to never converge.. */
+    double norm = 0, count = 0;
+    for (int i = 0; i < energies_observed; i++) {
+      if (energy_histogram[i]) {
+        norm += TD_over_D[i];
+        count += 1;
+      }
+    }
+    norm /= count;
+    for (int i = 0; i < energies_observed; i++) {
+      TD_over_D[i] /= norm;
+    }
+
     // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
     done = true;
-    for (int i = 0; i < energies_observed; i++){
+    for (int i = max_entropy_state+1; i < energies_observed; i++){
       if (energy_histogram[i]) {
         double precision = fabs(TD_over_D[i] - 1);
         if (precision > min_fractional_precision){
           done = false;
           if(iters % 1000000 == 0){
-            printf("After %i iterations, failed at energy %i with precision %g.\n",
-                   iters, i, precision);
+            printf("After %i iterations, failed at energy %i with value %.16g and newvalue %.16g and ratio %g and norm %g.\n",
+                   iters, i, ln_D[i], ln_D[i] + log(TD_over_D[i]), TD_over_D[i], norm);
+            for (int i=0; i<energies_observed; i++) {
+              printf("  %4d %g\n", i, ln_D[i]);
+            }
           }
           break;
         }

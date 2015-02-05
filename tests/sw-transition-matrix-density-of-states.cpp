@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = counts;
     sw.transitions(i, -1) = counts;
   }
-  sw.update_weights_using_transitions(1e-10);
+  sw.update_weights_using_transitions(1e-11);
   check_dos(&sw);
   for (int i=2;i<sw.energy_levels-1;i++) {
     const double dos0 = exp(sw.ln_energy_weights[1]);
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = i*counts;
     sw.transitions(i, -1) = counts;
   }
-  sw.update_weights_using_transitions(1e-10);
+  sw.update_weights_using_transitions(1e-11);
   check_dos(&sw);
 
   printf("\n** Beyond exponential density of states **\n\n");
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = 500;
     sw.transitions(i, -1) = 1;
   }
-  sw.update_weights_using_transitions(1e-10);
+  sw.update_weights_using_transitions(1e-11);
   check_dos(&sw);
 
   return num_errors;
