@@ -650,12 +650,26 @@ int main(int argc, const char *argv[]) {
     printf("\nOverriding weight array with that generated from the transition matrix!\n"
            "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
+  } else { // flatten weights at high energies if we are not using transition weights
+    for(int i = 0; i < sw.max_entropy_state; i++)
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.max_entropy_state];
   }
-  sw.flush_weight_array();
 
-  // Set the weights of unseen low energies to canonical values
-  for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
-    sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + (i - sw.min_energy_state)/Tmin;
+  if(!fix_kT){
+    /* Limit the slope of the weight array to that of its canonical value at our minimum
+       temperature of interest */
+    for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
+      if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/Tmin)
+        sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/Tmin;
+    }
+    sw.flush_weight_array();
+
+    // Enforce a canonical slope of the weight array at unseen low energies
+    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
+        + (i-sw.min_energy_state)/Tmin;
+    }
+  }
 
   // ----------------------------------------------------------------------------
   // Generate save file info
