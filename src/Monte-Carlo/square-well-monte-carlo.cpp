@@ -646,10 +646,13 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  took("Actual initialization");
+
   if(transition_override || tmmc){
     printf("\nOverriding weight array with that generated from the transition matrix!\n"
            "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
+    took("Finding D");
   }
   sw.flush_weight_array();
 
@@ -813,7 +816,7 @@ int main(int argc, const char *argv[]) {
     sw.samples[i] = 0;
   }
 
-  took("Initialization");
+  took("Finishing initialization");
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
