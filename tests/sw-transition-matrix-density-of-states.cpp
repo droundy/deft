@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
   sw.max_entropy_state = 0;
 
   sw.energy_histogram = new long[sw.energy_levels]();
+  for (int i=0;i<sw.energy_levels;i++) sw.energy_histogram[i] = 1;
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
   // Transitions from one energy to another
