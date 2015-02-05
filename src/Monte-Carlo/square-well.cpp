@@ -407,8 +407,10 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 }
 
 void sw_simulation::flush_weight_array(){
+  // floow weights above state of max entropy
   for (int i = 0; i < max_entropy_state; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
+  // substract off minimum weight from the entire array to reduce numerical error
   double min_weight = ln_energy_weights[0];
   for (int i = 1; i < max_entropy_state; i++)
     min_weight = min(min_weight, ln_energy_weights[i]);
@@ -657,19 +659,14 @@ void sw_simulation::initialize_walker_optimization(int first_update_iterations,
   }
 }
 
-void sw_simulation::initialize_robustly_optimistic(double robust_update_scale,
-                                                   //double transition_precision,
+void sw_simulation::initialize_robustly_optimistic(double transition_precision,
                                                    double robust_cutoff){
   bool done;
   double mean_hist = 0;
   do {
     done = true; // Let's be optimistic!
     // First, let's reset our weights based on what we already know!
-    //update_weights_using_transitions(transition_precision);
-    for (int e = max_entropy_state; e < energy_levels; e++) {
-      if (energy_histogram[e])
-        ln_energy_weights[e] -= robust_update_scale*log(energy_histogram[e]);
-    }
+    update_weights_using_transitions(transition_precision);
     flush_weight_array();
     /* Check whether we have *ever* seen the minimum energy in the
        last time through.  If not, we absolutely shouldn't be so

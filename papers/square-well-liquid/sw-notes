@@ -1,0 +1,20 @@
+
+--- ww = 1.3, ff = 0.3, N = 20 ---
+
+the choice of Tmin currently seems to determine the best histogram method.
+  for high (>= 0.45) Tmin, walker optimization does best, but only slightly
+  for low (< 0.45) Tmin, wang landau does best, and is comparable to tmmc;
+    walker optimization and robustly opitmistic are terrible with low Tmin
+the best overall performance seems to be with wang landau at Tmin ~= 0.2
+
+
+gaussian pre-initialization makes a substantial difference for the performance of the
+  walker optimization method (with Tmin = 0.45), but appears to have little to no effect
+  on other methods
+
+making the end condition for walker optimization more stringent by requiring 3 (instead of
+  only 2) minimum energy samples considerably worsens its performance, which is very strange
+
+the bubble suppression sometimes (e.g. with Tmin = 0.45) does worse than just the
+  gaussian method. this result is strange, but probably not worthwhile looking into
+
