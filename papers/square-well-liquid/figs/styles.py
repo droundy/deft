@@ -19,10 +19,9 @@ def color(method):
 
 def line(method):
     lines = { 'nw': '--',
-              'kT0.5': '--',
-              'kT1': '--',
-              'kT2': ':',
-              'kT0.1': '-.'}
+              'tmmc': ':'}
+    if method[:2] == 'kT':
+        return '--'
     if method in lines:
         return lines[method]
     return '-'
