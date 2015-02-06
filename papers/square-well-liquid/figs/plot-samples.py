@@ -39,8 +39,8 @@ for version in versions:
     energy = energy[round_trips != 0]
     round_trips = round_trips[round_trips != 0]
     if sum(round_trips) > 0:
-        plt.semilogy(energy, iterations/round_trips, styles.dots[version],
-                     label=styles.title[version])
+        plt.semilogy(energy, iterations/round_trips, styles.dots(version),
+                     label=styles.title(version))
 
 plt.xlabel('$U/N\epsilon$')
 plt.ylabel('Iterations per sample')

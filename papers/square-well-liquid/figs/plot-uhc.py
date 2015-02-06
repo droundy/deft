@@ -73,10 +73,10 @@ for version in versions:
           (sum(energy/kT_range[i]*dos_boltz)/Z[i])**2
 
     plt.figure('u')
-    plt.plot(kT_range,U/N,styles.plot[version],label=styles.title[version])
+    plt.plot(kT_range,U/N,styles.plot(version),label=styles.title(version))
 
     plt.figure('hc')
-    plt.plot(kT_range,CV/N,styles.plot[version],label=styles.title[version])
+    plt.plot(kT_range,CV/N,styles.plot(version),label=styles.title(version))
 
 plt.figure('u')
 plt.xlabel('$kT/\epsilon$')

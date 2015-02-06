@@ -50,9 +50,9 @@ for version in versions:
     samples[version].append(sample_data[len(sample_data[:,1])-1, 1])
 
   plt.figure(1)
-  plt.semilogy(all_Ns, init_iters[version], styles.color[version]+'.-', label=version)
+  plt.semilogy(all_Ns, init_iters[version], styles.color(version)+'.-', label=version)
   plt.figure(2)
-  plt.plot(all_Ns, Emins[version], styles.color[version]+'.-', label=version)
+  plt.plot(all_Ns, Emins[version], styles.color(version)+'.-', label=version)
 
 plt.figure(1)
 plt.xlabel('$N$')

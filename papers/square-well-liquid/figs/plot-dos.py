@@ -36,7 +36,7 @@ for version in versions:
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
         minlog = log10_dos.min()
-    plt.plot(energy, log10_dos, styles.dots[version],label=styles.title[version])
+    plt.plot(energy, log10_dos, styles.dots(version),label=styles.title(version))
 
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
@@ -71,7 +71,7 @@ for version in versions:
     log10w -= log10w.max()
     if log10w.min() < minlog:
         minlog = log10w.min()
-    plt.plot(energy, log10w, styles.dots[version],label=styles.title[version])
+    plt.plot(energy, log10w, styles.dots(version),label=styles.title(version))
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
 newlabels = [tentothe(n) for n in locs]
