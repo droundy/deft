@@ -1,35 +1,35 @@
 | python3 configure.py > config.py
 > config.py
 C testing-flags
-C __pycache__
+c .pyc
 
-| python3 -B dft.py
+| python3 dft.py
 < config.py
 > ../.dft.fac
-C __pycache__
+c .pyc
 
-| python3 -B monte-carlos.py
+| python3 monte-carlos.py
 < config.py
 > ../.monte-carlos.fac
-C __pycache__
+c .pyc
 
-| python3 -B haskell.py
+| python3 haskell.py
 < config.py
 > ../src/haskell/.haskell.fac
-C __pycache__
+c .pyc
 
-| python3 -B latex.py papers/square-well-liquid/histogram-paper.tex
+| python3 latex.py papers/square-well-liquid/histogram-paper.tex
 < config.py
 > ../papers/square-well-liquid/.tex.fac
-C __pycache__
+c .pyc
 
 | cd ../papers/square-well-liquid && python2 -B ../../fac/figs.py figs/plot-dos.py figs/plot-histograms.py figs/plot-samples.py figs/plot-scaling.py figs/plot-transitions.py figs/plot-uhc.py > .figs.fac
 > ../papers/square-well-liquid/.figs.fac
 
-| python3 -B latex.py papers/fuzzy-fmt/paper.tex
+| python3 latex.py papers/fuzzy-fmt/paper.tex
 < config.py
 > ../papers/fuzzy-fmt/.tex.fac
-C __pycache__
+c .pyc
 
 | cd ../papers/fuzzy-fmt && python2 -B ../../fac/figs.py figs/homogeneous.py figs/plot-walls.py figs/plot-soft-walls.py figs/radial_argon_plots.py figs/radial-distribution.py figs/potential-plot.py figs/w2-comparison.py > .figs.fac
 > ../papers/fuzzy-fmt/.figs.fac
