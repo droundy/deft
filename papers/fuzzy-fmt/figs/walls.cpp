@@ -27,11 +27,11 @@
 
 /*--
 
-for kT in np.arange(0.1, 1.0, 0.1):
-  for rho in np.arange(0.1, 1.0, 0.1):
-    self.rule('%s %g %g' % (exe, kT, rho),
+for kT in np.arange(0.1, 2.05, 0.1):
+  for rho in np.arange(0.1, 2.05, 0.1):
+    self.rule('%s %g %g' % (exe, rho, kT),
               [exe],
-              ["papers/fuzzy-fmt/figs/walls%s-%06.4f-%04.2f.dat" % ('soft', kT, rho)])
+              ["papers/fuzzy-fmt/figs/wallssoft-%06.4f-%04.2f.dat" % (kT, rho)])
 
 --*/
 
@@ -127,39 +127,6 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
   z_plot(plotname, Grid(gd, density*pow(2,5.0/2.0)));
   free(plotname);
 
-  {
-    GridDescription gdj = density.description(); 
-    double sep =  gdj.dz*gdj.Lat.a3().norm();
-    int div = gdj.Nz;
-    int mid = int (div/2.0);
-    double Ntot_per_A = 0;
-    double mydist = 0;
-   
-    for (int j=0; j<mid; j++){
-      Ntot_per_A += density(0,0,j)*sep;
-      mydist += sep;
-    }
-
-    double Extra_per_A = Ntot_per_A - reduced_density*pow(2,-5.0/2.0)*width/2;
-
-    FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "a");
-    fprintf(fout, "walls%s-%04.2f.dat  -  If you want to match the bulk reduced_density of figs/walls%s-%04.2f.dat, than the number of extra spheres per area to add is %04.10f.  So you'll want to multiply %04.2f by your cavity volume times 2^(-5/2).  Then add %04.10f times the Area of your cavity to this number\n",
-	    name, reduced_density, name, reduced_density, Extra_per_A, reduced_density, Extra_per_A);
-
-    int wallslen = 20;
-    double Extra_spheres =  (reduced_density*pow(2,-5.0/2.0)*wallslen*wallslen*wallslen + Extra_per_A*wallslen*wallslen);  
-    fprintf (fout, "For reduced density %04.02f and walls of length %d you'll want to use %.0f spheres.\n\n", reduced_density, wallslen, Extra_spheres);
-
-    fclose(fout); 
-  }
-
-  {
-    //double peak = peak_memory()/1024.0/1024;
-    //double current = current_memory()/1024.0/1024;
-    //printf("Peak memory use is %g M (current is %g M)\n", peak, current);
-
-  }
-
   took("Plotting stuff");
   printf("density %g gives ff %g for reduced density = %g and T = %g\n", density(0,0,gd.Nz/2),
          density(0,0,gd.Nz/2)*4*M_PI/3, reduced_density, teff);
@@ -167,9 +134,6 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
 }
 
 int main(int argc, char **argv) {
-  FILE *fout = fopen("papers/fuzzy-fmt/figs/wallsfillingfracInfo.txt", "w");
-  fclose(fout);
-
   double n_reduced, temp;
   if (argc != 3) {
     printf("usage: %s reduced_density kT\n", argv[0]);

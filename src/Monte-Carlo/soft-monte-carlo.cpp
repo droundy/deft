@@ -2,6 +2,7 @@
 #include <time.h>
 
 #include <Eigen/Core>
+#include "utilities.h"
 #include "MersenneTwister.h"
 USING_PART_OF_NAMESPACE_EIGEN
 

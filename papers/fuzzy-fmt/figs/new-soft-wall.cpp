@@ -109,6 +109,16 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   fclose(o);
 }
 
+/*--
+
+for kT in np.arange(0.1, 2.05, 0.1):
+  for rho in np.arange(0.1, 2.05, 0.1):
+    self.rule('%s %g %g' % (exe, rho, kT),
+              [exe],
+              ["papers/fuzzy-fmt/figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho, kT)])
+
+--*/
+
 int main(int argc, char **argv) {
   double reduced_density, temp;
   if (argc != 3) {
