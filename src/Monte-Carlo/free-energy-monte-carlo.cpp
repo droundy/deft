@@ -500,6 +500,14 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
+
+    // just hacking stuff in to see what works
+    // do the small bit every 100 iterations for now
+    if (sw.iteration % sw.N == 0) {
+        // check for collisions in small cell
+        // print 
+    }
+
     // ---------------------------------------------------------------
     // Add data to RDF histogram
     // ---------------------------------------------------------------
