@@ -509,10 +509,10 @@ int main(int argc, const char *argv[]) {
     double scaling_factor = 1.0;   // this obviously needs to be a parameter at some point
     if (sw.iteration % (100 * sw.N * sw.N) == 0) {
       if(!overlap_in_shrunk_cell(sw,  scaling_factor)){
-        std::cout<<"true\n";  //printing to console for now
+        printf("true\n");  //printing to console for now
       }
       else{
-        std::cout<<"false\n";
+        printf("false\n");
       }
     }
 
@@ -641,12 +641,11 @@ static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor){
   }
 
   for(int i=0; i<sw.N; i++){
-    for(int j=0; j<sw.N; j++){
+    for (int j=i+1; j<sw.N; j++) {
       // copy pasting from overlap() in square-well.cpp for now
       // contemplated adding a scaling parametor to overlap(), but decided on this for now.
-      //const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
-      //if(ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)){
-      if(overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)){
+      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
+      if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
         return true;
       }
     }
