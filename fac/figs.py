@@ -83,7 +83,7 @@ for fname in pyfs:
             for o in outputs + extraoutputs:
                 print '>', o
             print 'c .pyc'
-            print 'c .matplotlib'
+            print 'C .matplotlib'
             print
     else:
         print '| python2', fname
@@ -92,5 +92,5 @@ for fname in pyfs:
         for o in outputs:
             print '>', o
         print 'c .pyc'
-        print 'c .matplotlib'
+        print 'C .matplotlib'
         print
