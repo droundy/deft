@@ -23,7 +23,7 @@ c .pyc
 > ../papers/square-well-liquid/.tex.fac
 c .pyc
 
-| cd ../papers/square-well-liquid && python2 -B ../../fac/figs.py figs/plot-dos.py figs/plot-histograms.py figs/plot-samples.py figs/plot-scaling.py figs/plot-transitions.py figs/plot-uhc.py > .figs.fac
+| cd ../papers/square-well-liquid && python2 ../../fac/figs.py figs/plot-dos.py figs/plot-histograms.py figs/plot-samples.py figs/plot-scaling.py figs/plot-transitions.py figs/plot-uhc.py > .figs.fac
 > ../papers/square-well-liquid/.figs.fac
 
 | python3 latex.py papers/fuzzy-fmt/paper.tex
@@ -31,6 +31,30 @@ c .pyc
 > ../papers/fuzzy-fmt/.tex.fac
 c .pyc
 
-| cd ../papers/fuzzy-fmt && python2 -B ../../fac/figs.py figs/homogeneous.py figs/plot-walls.py figs/plot-soft-walls.py figs/radial_argon_plots.py figs/radial-distribution.py figs/potential-plot.py figs/w2-comparison.py > .figs.fac
+| cd ../papers/fuzzy-fmt && python2 ../../fac/figs.py figs/homogeneous.py figs/plot-walls.py figs/plot-soft-walls.py figs/radial_argon_plots.py figs/radial-distribution.py figs/potential-plot.py figs/w2-comparison.py > .figs.fac
 > ../papers/fuzzy-fmt/.figs.fac
+c .pyc
+
+| cd ../papers/water-saft && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/water-saft/.figs.fac
+c .pyc
+
+| cd ../papers/pair-correlation && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/pair-correlation/.figs.fac
+c .pyc
+
+| cd ../papers/renormalization && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/renormalization/.figs.fac
+c .pyc
+
+| cd ../papers/polyhedra && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/polyhedra/.figs.fac
+c .pyc
+
+| cd ../papers/contact && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/contact/.figs.fac
+c .pyc
+
+| cd ../papers/electrostatics && python2 ../../fac/figs.py figs/*.py > .figs.fac
+> ../papers/electrostatics/.figs.fac
 c .pyc
