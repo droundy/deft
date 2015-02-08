@@ -35,6 +35,11 @@ c .pyc
 > ../papers/fuzzy-fmt/.figs.fac
 c .pyc
 
+| python3 latex.py papers/water-saft/paper.tex
+< config.py
+> ../papers/water-saft/.tex.fac
+c .pyc
+
 | cd ../papers/water-saft && python2 ../../fac/figs.py figs/*.py > .figs.fac
 > ../papers/water-saft/.figs.fac
 c .pyc
