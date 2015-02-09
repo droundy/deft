@@ -28,6 +28,9 @@ def friendly_eval(code, context, local = None):
 
 
 for fname in pyfs:
+    if fname == 'figs/*.py':
+        continue
+
     f = open(fname, 'r')
     contents = f.read()
     f.close()
@@ -83,14 +86,14 @@ for fname in pyfs:
             for o in outputs + extraoutputs:
                 print '>', o
             print 'c .pyc'
-            print 'c .matplotlib'
+            print 'C %s/.matplotlib' % os.getenv('HOME')
             print
     else:
-        print '| python2', fname
+        print '? python2', fname
         for i in inputs:
             print '<', i
         for o in outputs:
             print '>', o
         print 'c .pyc'
-        print 'c .matplotlib'
+        print 'C %s/.matplotlib' % os.getenv('HOME')
         print

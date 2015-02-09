@@ -37,6 +37,21 @@ mkdats = """
   papers/fuzzy-fmt/figs/new-walls
   papers/fuzzy-fmt/figs/soft-sphere
 
+  papers/water-saft/figs/surface-tension
+  papers/water-saft/figs/equation-of-state
+  papers/water-saft/figs/four-rods-in-water
+  papers/water-saft/figs/hughes-lj-atom
+  papers/water-saft/figs/hughes-lj-atom-hs-density
+  papers/water-saft/figs/hughes-single-rod
+  papers/water-saft/figs/hughes-sphere
+  papers/water-saft/figs/lj-atom
+  papers/water-saft/figs/pressure-with-isotherms
+  papers/water-saft/figs/rods-in-water
+  papers/water-saft/figs/single-rod
+  papers/water-saft/figs/sphere
+
+  papers/pair-correlation/figs/walls
+
 """.split()
 
 for s in mkdats:

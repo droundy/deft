@@ -1,0 +1,3 @@
+| gnuplot figs/surface-tension.gp
+> figs/surface-tension.pdf
+< figs/surface-tension.dat

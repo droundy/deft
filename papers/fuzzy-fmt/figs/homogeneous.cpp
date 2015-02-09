@@ -46,7 +46,7 @@ int main(int, char **) {
   fprintf(out, "\n");
 
   const double dn = 0.01, nmax = 2.5;
-  for (double n_reduced = dn/2; n_reduced <= nmax; n_reduced += dn) {
+  for (double n_reduced = dn; n_reduced <= nmax; n_reduced += dn) {
     fprintf(out, "%g", n_reduced);
     for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
       const double temp = T;
@@ -55,7 +55,8 @@ int main(int, char **) {
       double usekT = temp;
       if (temp == 0) usekT = 1.0;
       const double n = n_reduced*pow(2,-5.0/2.0);
-      fprintf(out, "\t%g", pressure(OfEffectivePotential(f), usekT, n));
+      // return *reduced* pressure!
+      fprintf(out, "\t%g", pressure(OfEffectivePotential(f), usekT, n)/pow(2,-5.0/2.0));
     }
     fprintf(out, "\n");
   }

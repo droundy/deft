@@ -48,6 +48,9 @@ const int z = 2;
 // Functions
 // ------------------------------------------------------------------------------
 
+// Tests validity of a shrunken version of the cell
+static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor);
+
 // States how long it's been since last took call.
 static void took(const char *name);
 
@@ -500,6 +503,19 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
+
+    // just hacking stuff in to see what works
+    // do the small bit every n^2 iterations for now
+    double scaling_factor = 1.0;   // this obviously needs to be a parameter at some point
+    if (sw.iteration % (100 * sw.N * sw.N) == 0) {
+      if(!overlap_in_shrunk_cell(sw,  scaling_factor)){
+        printf("true\n");  //printing to console for now
+      }
+      else{
+        printf("false\n");
+      }
+    }
+
     // ---------------------------------------------------------------
     // Add data to RDF histogram
     // ---------------------------------------------------------------
@@ -616,6 +632,26 @@ int main(int argc, const char *argv[]) {
 // ------------------------------------------------------------------------------
 // END OF MAIN
 // ------------------------------------------------------------------------------
+
+static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor){
+  double scaled_len[3];
+
+  for(int i=0; i < 3; i++){
+    scaled_len[i] = scaling_factor * sw.len[i];
+  }
+
+  for(int i=0; i<sw.N; i++){
+    for (int j=i+1; j<sw.N; j++) {
+      // copy pasting from overlap() in square-well.cpp for now
+      // contemplated adding a scaling parametor to overlap(), but decided on this for now.
+      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
+      if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 inline void print_all(const ball *p, int N) {
   for (int i = 0; i < N; i++) {

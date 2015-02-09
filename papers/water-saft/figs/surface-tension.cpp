@@ -20,6 +20,12 @@
 #include "LineMinimizer.h"
 #include "equation-of-state.h"
 
+/*--
+
+self.rule(exe, [exe], [os.path.dirname(exe)+'/surface-tension.dat'])
+
+--*/
+
 static void took(const char *_name) {
   //static clock_t last_time = clock();
   //clock_t t = clock();
