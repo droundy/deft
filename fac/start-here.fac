@@ -44,6 +44,11 @@ c .pyc
 > ../papers/water-saft/.figs.fac
 c .pyc
 
+| python3 latex.py papers/pair-correlation/paper.tex
+< config.py
+> ../papers/pair-correlation/.tex.fac
+c .pyc
+
 | cd ../papers/pair-correlation && python2 ../../fac/figs.py figs/*.py > .figs.fac
 > ../papers/pair-correlation/.figs.fac
 c .pyc

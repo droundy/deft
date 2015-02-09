@@ -48,6 +48,11 @@ class facfile:
                                src/WhiteBearMarkIIFast.o src/HardSpheresNoTensor2Fast.o
                                src/YuWuCorrelationFast.o
                             """.split())
+            if "ContactDensity" in includes:
+                obj |= set(""" src/gSigmaAFast.o src/gSigmaSFast.o
+                               src/gSigmaAm2Fast.o src/gSigmaSm2Fast.o
+                               src/YuWuCorrelationFast.o
+                            """.split())
             for i in includes:
                 if i == 'Monte-Carlo/monte-carlo':
                     i = 'utilities'

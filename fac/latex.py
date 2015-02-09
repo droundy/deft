@@ -25,12 +25,6 @@ for t in texfs:
 
     os.chdir(os.path.dirname(t)) # so we can look up figures easily
     def graphics_name(x):
-        if os.path.exists(x):
-            return x
-        if os.path.exists(x+'.png'):
-            return x+'.png'
-        if os.path.exists(x+'.jpg'):
-            return x+'.jpg'
         if len(x) > 4 and x[-4:] in ['.pdf', '.png', '.jpg']:
             return x
         return x+'.pdf'

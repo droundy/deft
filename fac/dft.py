@@ -50,6 +50,8 @@ mkdats = """
   papers/water-saft/figs/single-rod
   papers/water-saft/figs/sphere
 
+  papers/pair-correlation/figs/walls
+
 """.split()
 
 for s in mkdats:

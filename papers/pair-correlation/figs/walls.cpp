@@ -541,6 +541,17 @@ void run_walls(double eta, const char *name, Functional fhs, bool run_dadz) {
   took("Plotting stuff");
 }
 
+/*--
+
+self.rule(exe, [exe], [os.path.dirname(exe)+'/walls.dat',
+                       os.path.dirname(exe)+'/walls/x.dat',
+                       os.path.dirname(exe)+'/walls/z.dat',
+                       os.path.dirname(exe)+'/walls/walls_daWB-this-work-short-0.30-2.005.dat',
+                       os.path.dirname(exe)+'/walls/wallsWB-path-this-work-short-pair-0.10-0.005.dat',
+                       os.path.dirname(exe)+'/walls/wallsWB-path-this-work-short-pair-0.30-0.005.dat'])
+
+--*/
+
 int main(int, char **) {
   FILE *fout = fopen("papers/pair-correlation/figs/wallsfillingfracInfo.txt", "w");
   fclose(fout);

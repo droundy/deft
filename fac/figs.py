@@ -86,7 +86,7 @@ for fname in pyfs:
             for o in outputs + extraoutputs:
                 print '>', o
             print 'c .pyc'
-            print 'C .matplotlib'
+            print 'C %s/.matplotlib' % os.getenv('HOME')
             print
     else:
         print '? python2', fname
@@ -95,5 +95,5 @@ for fname in pyfs:
         for o in outputs:
             print '>', o
         print 'c .pyc'
-        print 'C .matplotlib'
+        print 'C %s/.matplotlib' % os.getenv('HOME')
         print
