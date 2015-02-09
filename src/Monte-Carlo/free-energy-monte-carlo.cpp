@@ -109,6 +109,7 @@ int main(int argc, const char *argv[]) {
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
+  double scaling_factor = 1.0;
 
   poptContext optCon;
   // ----------------------------------------------------------------------------
@@ -154,6 +155,8 @@ int main(int argc, const char *argv[]) {
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
+    {"sf", '\0', POPT_ARG_DOUBLE, &scaling_factor, 0,
+      "Factor by which to scale the small cell", "DOUBLE"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -265,6 +268,7 @@ int main(int argc, const char *argv[]) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
   }
+  printf("\nUsing scaling factor of %f", scaling_factor);
   printf("\n");
   if (totime > 0) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
@@ -506,7 +510,6 @@ int main(int argc, const char *argv[]) {
 
     // just hacking stuff in to see what works
     // do the small bit every n^2 iterations for now
-    double scaling_factor = 1.0;   // this obviously needs to be a parameter at some point
     if (sw.iteration % (100 * sw.N * sw.N) == 0) {
       if(!overlap_in_shrunk_cell(sw,  scaling_factor)){
         printf("true\n");  //printing to console for now
