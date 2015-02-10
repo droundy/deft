@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization", "kT2", "kT1", "tmmc"]]
+#arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization", "kT0.4", "kT0.5", "tmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
@@ -36,7 +36,7 @@ for version in versions:
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
         minlog = log10_dos.min()
-    plt.plot(energy, log10_dos, styles.dots[version],label=styles.title[version])
+    plt.plot(energy, log10_dos, styles.dots(version),label=styles.title(version))
 
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
@@ -71,7 +71,7 @@ for version in versions:
     log10w -= log10w.max()
     if log10w.min() < minlog:
         minlog = log10w.min()
-    plt.plot(energy, log10w, styles.dots[version],label=styles.title[version])
+    plt.plot(energy, log10w, styles.dots(version),label=styles.title(version))
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
 newlabels = [tentothe(n) for n in locs]

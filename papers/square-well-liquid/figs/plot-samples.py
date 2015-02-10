@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization","kT2","kT1"]]
+#arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","bubble_suppression","walker_optimization","kT0.4","kT0.5","tmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-s.dat" % (ww, ff, N, version) for version in versions]
 
@@ -39,8 +39,8 @@ for version in versions:
     energy = energy[round_trips != 0]
     round_trips = round_trips[round_trips != 0]
     if sum(round_trips) > 0:
-        plt.semilogy(energy, iterations/round_trips, styles.dots[version],
-                     label=styles.title[version])
+        plt.semilogy(energy, iterations/round_trips, styles.dots(version),
+                     label=styles.title(version))
 
 plt.xlabel('$U/N\epsilon$')
 plt.ylabel('Iterations per sample')

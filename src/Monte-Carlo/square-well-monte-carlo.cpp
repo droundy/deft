@@ -99,12 +99,11 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double robust_update_scale = 0.7; // should probably be ~1, and must be <= 1
   double robust_cutoff = 1e-1; // should probably be ~1e-1, and must be < 1
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double Tmin = 0.2;
+  double Tmin = 0.45;
 
   // number of times we wish to sample the minimum observed energy in initialization
   int init_min_energy_samples = 2;
@@ -166,7 +165,7 @@ int main(int argc, const char *argv[]) {
 
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
 
-    // fixme: these are currently ignored
+    // fixme(?): these are currently ignored
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &sw.len[y], 0,
@@ -243,8 +242,6 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
-    {"robust_update_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_update_scale, 0, "Scale factor for robustly optimistic updates", "DOUBLE"},
     {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
     {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -325,8 +322,8 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that we have valid parameters for histogram methods
-  if(robustly_optimistic && (robust_update_scale > 1 || robust_cutoff >= 1)){
-    printf("Robustly optimistic parameters cannot be greater than 1!\n");
+  if(robustly_optimistic &&  robust_cutoff >= 1){
+    printf("Robust cutoff cannot be greater than 1!\n");
     return 155;
   }
 
@@ -637,8 +634,7 @@ int main(int argc, const char *argv[]) {
     } else if (walker_optimization) {
       sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
     } else if (robustly_optimistic) {
-      //sw.initialize_robustly_optimistic(transition_precision, robust_cutoff);
-      sw.initialize_robustly_optimistic(robust_update_scale, robust_cutoff);
+      sw.initialize_robustly_optimistic(transition_precision, robust_cutoff);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
@@ -646,17 +642,28 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  took("Actual initialization");
+
   if(transition_override || tmmc){
     printf("\nOverriding weight array with that generated from the transition matrix!\n"
            "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
+    took("Finding D");
   }
   sw.flush_weight_array();
 
-  // Set the weights of unseen low energies to canonical values
-  if(wang_landau || vanilla_wang_landau || walker_optimization || robustly_optimistic){
-    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state] + Tmin*i;
+  if(!fix_kT){
+    /* Limit the slope of the weight array to that of its canonical value at our minimum
+       temperature of interest */
+    for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
+      if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/Tmin)
+        sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/Tmin;
+    }
+    // Enforce a canonical slope of the weight array at unseen low energies
+    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
+        + (i-sw.min_energy_state)/Tmin;
+    }
   }
 
   // ----------------------------------------------------------------------------
@@ -723,9 +730,8 @@ int main(int argc, const char *argv[]) {
   } else if(robustly_optimistic){
     sprintf(headerinfo,
             "%s# histogram method: robustly optimistic\n"
-            "# robust_update_scale: %g\n"
             "# robust_cutoff: %g\n",
-            headerinfo, robust_update_scale, robust_cutoff);
+            headerinfo, robust_cutoff);
   } else if (bubble_suppression){
     sprintf(headerinfo,
             "%s# histogram method: bubble suppression\n"
@@ -813,7 +819,7 @@ int main(int argc, const char *argv[]) {
     sw.samples[i] = 0;
   }
 
-  took("Initialization");
+  took("Finishing initialization");
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
@@ -1018,115 +1024,115 @@ int main(int argc, const char *argv[]) {
   // END OF MAIN
   // ------------------------------------------------------------------------------
 
-  inline void print_all(const ball *p, int N) {
-    for (int i = 0; i < N; i++) {
-      char *pos = new char[1024];
-      p[i].pos.tostr(pos);
-      printf("%4i: R: %4.2f, %i neighbors: ", i, p[i].R, p[i].num_neighbors);
-      for(int j = 0; j < min(10, p[i].num_neighbors); j++)
-        printf("%i ", p[i].neighbors[j]);
-      if (p[i].num_neighbors > 10)
-        printf("...");
-      printf("\n      pos:          %s\n", pos);
-      delete[] pos;
-    }
-    printf("\n");
-    fflush(stdout);
-  }
-
-  inline void print_one(const ball &a, int id, const ball *p, int N,
-                        double len[3], int walls) {
+inline void print_all(const ball *p, int N) {
+  for (int i = 0; i < N; i++) {
     char *pos = new char[1024];
-    a.pos.tostr(pos);
-    printf("%4i: R: %4.2f, %i neighbors: ", id, a.R, a.num_neighbors);
-    for(int j=0; j<min(10, a.num_neighbors); j++)
-      printf("%i ", a.neighbors[j]);
-    if (a.num_neighbors > 10)
+    p[i].pos.tostr(pos);
+    printf("%4i: R: %4.2f, %i neighbors: ", i, p[i].R, p[i].num_neighbors);
+    for(int j = 0; j < min(10, p[i].num_neighbors); j++)
+      printf("%i ", p[i].neighbors[j]);
+    if (p[i].num_neighbors > 10)
       printf("...");
     printf("\n      pos:          %s\n", pos);
-    for (int j=0; j<N; j++) {
-      if (j != id && overlap(a, p[j], len, walls)) {
-        p[j].pos.tostr(pos);
-        printf("\t  Overlaps with %i", j);
-        printf(": %s\n", pos);
+    delete[] pos;
+  }
+  printf("\n");
+  fflush(stdout);
+}
+
+inline void print_one(const ball &a, int id, const ball *p, int N,
+                      double len[3], int walls) {
+  char *pos = new char[1024];
+  a.pos.tostr(pos);
+  printf("%4i: R: %4.2f, %i neighbors: ", id, a.R, a.num_neighbors);
+  for(int j=0; j<min(10, a.num_neighbors); j++)
+    printf("%i ", a.neighbors[j]);
+  if (a.num_neighbors > 10)
+    printf("...");
+  printf("\n      pos:          %s\n", pos);
+  for (int j=0; j<N; j++) {
+    if (j != id && overlap(a, p[j], len, walls)) {
+      p[j].pos.tostr(pos);
+      printf("\t  Overlaps with %i", j);
+      printf(": %s\n", pos);
+    }
+  }
+  delete[] pos;
+  printf("\n");
+  fflush(stdout);
+}
+
+inline void print_bad(const ball *p, int N, double len[3], int walls) {
+  for (int i = 0; i < N; i++) {
+    bool incell = in_cell(p[i], len, walls);
+    bool overlaps = false;
+    for (int j = 0; j < i; j++) {
+      if (overlap(p[i], p[j], len, walls)) {
+        overlaps = true;
+        break;
       }
     }
-    delete[] pos;
-    printf("\n");
-    fflush(stdout);
-  }
-
-  inline void print_bad(const ball *p, int N, double len[3], int walls) {
-    for (int i = 0; i < N; i++) {
-      bool incell = in_cell(p[i], len, walls);
-      bool overlaps = false;
+    if (!incell || overlaps) {
+      char *pos = new char[1024];
+      p[i].pos.tostr(pos);
+      printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
+      if (!incell)
+        printf("\t  Outside cell!\n");
       for (int j = 0; j < i; j++) {
         if (overlap(p[i], p[j], len, walls)) {
-          overlaps = true;
+          p[j].pos.tostr(pos);
+          printf("\t  Overlaps with %i", j);
+          printf(": %s\n", pos);
+        }
+      }
+      delete[] pos;
+    }
+  }
+  fflush(stdout);
+}
+
+inline void check_neighbor_symmetry(const ball *p, int N) {
+  for(int i = 0; i < N; i++) {
+    for(int j = 0; j < p[i].num_neighbors; j++) {
+      const int k = p[i].neighbors[j];
+      bool is_neighbor = false;
+      for (int l = 0; l < p[k].num_neighbors; l++) {
+        if (p[k].neighbors[l] == i) {
+          is_neighbor = true;
           break;
         }
       }
-      if (!incell || overlaps) {
-        char *pos = new char[1024];
-        p[i].pos.tostr(pos);
-        printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
-        if (!incell)
-          printf("\t  Outside cell!\n");
-        for (int j = 0; j < i; j++) {
-          if (overlap(p[i], p[j], len, walls)) {
-            p[j].pos.tostr(pos);
-            printf("\t  Overlaps with %i", j);
-            printf(": %s\n", pos);
-          }
-        }
-        delete[] pos;
-      }
-    }
-    fflush(stdout);
-  }
-
-  inline void check_neighbor_symmetry(const ball *p, int N) {
-    for(int i = 0; i < N; i++) {
-      for(int j = 0; j < p[i].num_neighbors; j++) {
-        const int k = p[i].neighbors[j];
-        bool is_neighbor = false;
-        for (int l = 0; l < p[k].num_neighbors; l++) {
-          if (p[k].neighbors[l] == i) {
-            is_neighbor = true;
-            break;
-          }
-        }
-        if(!is_neighbor) {
-          printf("NEIGHBOR TABLE ERROR: %i has %i as a neighbor, but %i does "
-                 "not reciprocate!!!\n", i, k, k);
-        }
+      if(!is_neighbor) {
+        printf("NEIGHBOR TABLE ERROR: %i has %i as a neighbor, but %i does "
+               "not reciprocate!!!\n", i, k, k);
       }
     }
   }
+}
 
-  static void took(const char *name) {
-    assert(name); // so it'll count as being used...
-    static clock_t last_time = clock();
-    clock_t t = clock();
-    double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
-    if (seconds > 120) {
-      printf("%s took %.0f minutes and %g seconds.\n", name, seconds/60,
-             fmod(seconds,60));
-    } else {
-      printf("%s took %g seconds...\n", name, seconds);
-    }
-    fflush(stdout);
-    last_time = t;
+static void took(const char *name) {
+  assert(name); // so it'll count as being used...
+  static clock_t last_time = clock();
+  clock_t t = clock();
+  double seconds = (t-last_time)/double(CLOCKS_PER_SEC);
+  if (seconds > 120) {
+    printf("%s took %.0f minutes and %g seconds.\n", name, seconds/60,
+           fmod(seconds,60));
+  } else {
+    printf("%s took %g seconds...\n", name, seconds);
   }
+  fflush(stdout);
+  last_time = t;
+}
 
-  void save_locations(const ball *p, int N, const char *fname, const double len[3],
-                      const char *comment) {
-    FILE *out = fopen((const char *)fname, "w");
-    fprintf(out, "# %s\n", comment);
-    fprintf(out, "%g %g %g\n", len[x], len[y], len[z]);
-    for(int i = 0; i < N; i++) {
-      fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[x], p[i].pos[y], p[i].pos[z]);
-      fprintf(out, "\n");
-    }
-    fclose(out);
+void save_locations(const ball *p, int N, const char *fname, const double len[3],
+                    const char *comment) {
+  FILE *out = fopen((const char *)fname, "w");
+  fprintf(out, "# %s\n", comment);
+  fprintf(out, "%g %g %g\n", len[x], len[y], len[z]);
+  for(int i = 0; i < N; i++) {
+    fprintf(out, "%6.2f %6.2f %6.2f ", p[i].pos[x], p[i].pos[y], p[i].pos[z]);
+    fprintf(out, "\n");
   }
+  fclose(out);
+}

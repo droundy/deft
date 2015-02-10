@@ -2,9 +2,9 @@
 #include <time.h>
 
 #include <Eigen/Core>
+#include "utilities.h"
 #include "MersenneTwister.h"
 USING_PART_OF_NAMESPACE_EIGEN
-#include "utilities.h" // to cause utilities.cpp to be linked, which eigen needs
 
 #include <cassert>
 #include <math.h>
@@ -132,8 +132,8 @@ int main(int argc, char *argv[]){
       flat_div = true; // we want flat divisions in the z directoin,
                        // if we have a z wall.  In every other case we
                        // use spherical divisions.
-      lenz = atof(argv[a+1]);
-      R_wall = atof(argv[a+2]);
+      R_wall = atof(argv[a+1]);
+      lenz = 30;
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
       soft_wall = true;

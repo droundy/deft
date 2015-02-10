@@ -48,6 +48,9 @@ const int z = 2;
 // Functions
 // ------------------------------------------------------------------------------
 
+// Tests validity of a shrunken version of the cell
+static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor);
+
 // States how long it's been since last took call.
 static void took(const char *name);
 
@@ -106,6 +109,7 @@ int main(int argc, const char *argv[]) {
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
+  double scaling_factor = 1.0;
 
   poptContext optCon;
   // ----------------------------------------------------------------------------
@@ -151,6 +155,8 @@ int main(int argc, const char *argv[]) {
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
+    {"sf", '\0', POPT_ARG_DOUBLE, &scaling_factor, 0,
+      "Factor by which to scale the small cell", "DOUBLE"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -262,6 +268,7 @@ int main(int argc, const char *argv[]) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
   }
+  printf("\nUsing scaling factor of %f", scaling_factor);
   printf("\n");
   if (totime > 0) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
@@ -500,6 +507,18 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
+
+    // just hacking stuff in to see what works
+    // do the small bit every n^2 iterations for now
+    if (sw.iteration % (100 * sw.N * sw.N) == 0) {
+      if(!overlap_in_shrunk_cell(sw,  scaling_factor)){
+        printf("true\n");  //printing to console for now
+      }
+      else{
+        printf("false\n");
+      }
+    }
+
     // ---------------------------------------------------------------
     // Add data to RDF histogram
     // ---------------------------------------------------------------
@@ -616,6 +635,26 @@ int main(int argc, const char *argv[]) {
 // ------------------------------------------------------------------------------
 // END OF MAIN
 // ------------------------------------------------------------------------------
+
+static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor){
+  double scaled_len[3];
+
+  for(int i=0; i < 3; i++){
+    scaled_len[i] = scaling_factor * sw.len[i];
+  }
+
+  for(int i=0; i<sw.N; i++){
+    for (int j=i+1; j<sw.N; j++) {
+      // copy pasting from overlap() in square-well.cpp for now
+      // contemplated adding a scaling parametor to overlap(), but decided on this for now.
+      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
+      if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 inline void print_all(const ball *p, int N) {
   for (int i = 0; i < N; i++) {

@@ -301,16 +301,6 @@ env.Command(target = 'papers/hughes-saft/figs/single-rod-in-water.dat',
 # #################### papers/contact #######################################################
 
 # #################### papers/water-saft ####################################################
-env.Command(target = 'papers/water-saft/figs/single-rod-in-water.dat',
-            source = Glob('papers/water-saft/figs/single-rod-*nm-energy.dat'),
-            action = string.join(['cat '] +
-                                 sorted(glob.glob('papers/water-saft/figs/single-rod-*nm-energy.dat')) +
-                                 [' > $TARGET']))
-env.Command(target = 'papers/water-saft/figs/hughes-single-rod-in-water.dat',
-            source = Glob('papers/water-saft/figs/hughes-single-rod-*nm-energy.dat'),
-            action = string.join(['cat '] +
-                                 sorted(glob.glob('papers/water-saft/figs/hughes-single-rod-*nm-energy.dat')) +
-                                 [' > $TARGET']))
 for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
     env.Command(target = 'papers/water-saft/figs/lj-%s.dat' % atom,
                 source = Glob('papers/water-saft/figs/lj-%s-*K-energy.dat' % atom),

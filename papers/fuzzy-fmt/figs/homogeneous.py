@@ -8,8 +8,11 @@ if 'show' not in sys.argv:
   matplotlib.use('Agg')
 from pylab import *
 from scipy.special import erf
-import os
+import os, glob
 import styles
+
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('text', usetex=True)
 
 #Constants and variables
 #k_b = 8.6173324*10**(-5) # in eV
@@ -130,36 +133,33 @@ savefig('figs/p-vs-V.pdf', bbox_inches=0)
 
 figure()
 
-for i in range(0,len(n_reduced[:,0]),10):
-  plot(temperatures[i,:], pressures[i,:], label='nred=%g' % n_reduced[i,0])
-  plot(temperatures[i,:], n_reduced[i,0]*temperatures[i,:], ':')
-xlim(xmin=0)
-ylim(ymin=0, ymax = 4)
+for i in range(9,len(n_reduced[:,0]),10)[:10]:
+  plot(temperatures[i,:], pressures[i,:],
+       styles.density_color(n_reduced[i,0])+'-')
+
+# input: 'figs/mcwca-*-*.dat.prs'
+for rd in arange(1.0, 0.35, -0.1):
+  temps = []
+  pressures = []
+  print 'could use:', glob.glob('figs/mcwca-%.4f-*.dat.prs' % (rd))
+  for temp in arange(0.1, 3.05, 0.1):
+    fname = 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
+    if os.path.exists(fname):
+      temps.append(temp)
+      p = loadtxt(fname)
+      # we account below for the fact that the MC code does not spit
+      # out a reduced pressure, so we need to do a conversion.
+      pressures.append(p*2.0**(5/2.0))
+  if len(temps) > 0:
+    plot(temps, pressures, styles.density_color(rd)+'--',
+         label='$n^{*} = %g$' % rd)
+
+xlim(xmin=0, xmax = 3)
+ylim(ymin=0, ymax = 22)
 xlabel('$T$')
 ylabel('$p$')
 legend(loc='best')
 
 savefig('figs/p-vs-T.pdf', bbox_inches=0)
-
-# for rd in arange(0.1,1.1, 0.1):
-#   density = rd*2**(-5.0/2.0)
-#   for temp in [10.0,1.0, 0.1, 0.01, 0.001]: 
-#     # input: 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
-#     fname = 'figs/mcwca-%.4f-%.4f.dat.prs' % (rd, temp)
-#     if os.path.exists(fname):
-#       print 'found', fname
-#       p = loadtxt(fname)
-#       plot(rd, p/(temp*density), styles.color[temp] + 'o')
-#     else:
-#       print 'could not find', fname
-
-#plot(density*(4*pi/3), density, label = 'ideal gas')
-#ylim(ymin=1, ymax=9)
-#xlim(xmax=0.95)
-#mcdata = loadtxt('figs/mc-soft-homogenous-20-382-1.00000.dat.prs')
-#plot(mcdata[:,1],mcdata[:,0],'*')
-#xlabel('reduced density')
-#ylabel('pressure / ideal gas pressure')
-#legend(loc = 'best')
 
 show()

@@ -40,10 +40,23 @@ class facfile:
         headers = set([])
         with open(maincpp) as f:
             maincontents = f.read()
-            for i in includes_re.findall(maincontents):
+            includes = includes_re.findall(maincontents)
+            if "OptimizedFunctionals" in includes:
+                obj |= set(""" src/SoftFluidFast.o src/SaftFluid2Fast.o
+                               src/EntropySaftFluid2Fast.o src/WaterSaftFast.o src/WaterXFast.o
+                               src/HughesXFast.o src/HughesHBFast.o src/TensorWhiteBearFast.o
+                               src/WhiteBearMarkIIFast.o src/HardSpheresNoTensor2Fast.o
+                               src/YuWuCorrelationFast.o
+                            """.split())
+            if "ContactDensity" in includes:
+                obj |= set(""" src/gSigmaAFast.o src/gSigmaSFast.o
+                               src/gSigmaAm2Fast.o src/gSigmaSm2Fast.o
+                               src/YuWuCorrelationFast.o
+                            """.split())
+            for i in includes:
                 if i == 'Monte-Carlo/monte-carlo':
                     i = 'utilities'
-                if os.path.exists('src/'+i+'.cpp') or i[-4:] == 'Fast':
+                if i[-4:] == 'Fast' or os.path.exists('src/'+i+'.cpp'):
                     obj |= {'src/'+i+'.o'}
                     headers |= {'src/'+i+'.h'}
             for i in instructions_re.findall(maincontents):
