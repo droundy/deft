@@ -103,10 +103,10 @@ int main(int argc, const char *argv[]) {
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double Tmin = 0.45;
+  double Tmin = 0.2;
 
   // number of times we wish to sample the minimum observed energy in initialization
-  int init_min_energy_samples = 2;
+  int init_min_energy_samples = 10;
 
   double transition_precision = 1e-10;
 
@@ -132,7 +132,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1e9;
+  long simulation_iterations = 1e8;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
@@ -255,8 +255,7 @@ int main(int argc, const char *argv[]) {
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
 
     {"Tmin", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &Tmin, 0,
-     "The minimum temperature that we care about", "DOUBLE"},
+     &Tmin, 0, "The minimum temperature that we care about", "DOUBLE"},
 
     /*** TESTING AND DEBUGGING OPTIONS ***/
 
@@ -653,18 +652,24 @@ int main(int argc, const char *argv[]) {
   sw.flush_weight_array();
 
   if(!fix_kT){
-    /* Limit the slope of the weight array to that of its canonical value at our minimum
-       temperature of interest */
-    for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
-      if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/Tmin)
-        sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/Tmin;
-    }
-    // Enforce a canonical slope of the weight array at unseen low energies
+  //   /* Limit the slope of the weight array to that of its canonical value at our minimum
+  //      temperature of interest */
+  //   for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
+  //     if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/Tmin)
+  //       sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/Tmin;
+  //   }
+  //   // Enforce a canonical slope of the weight array at unseen low energies
+  //   for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
+  //     sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
+  //       + (i-sw.min_energy_state)/Tmin;
+  //   }
+    // cap out the weights at low energies, so we don't get stuck there later
     for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
-        + (i-sw.min_energy_state)/Tmin;
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
     }
   }
+
+  double fractional_sample_error = sw.fractional_sample_error(Tmin);
 
   // ----------------------------------------------------------------------------
   // Generate save file info
@@ -703,9 +708,11 @@ int main(int argc, const char *argv[]) {
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
-          "# Tmin: %g\n\n",
+          "# Tmin: %g\n"
+          "# fractional_sample_error (after initializing): %g\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
-          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, Tmin);
+          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, Tmin,
+          fractional_sample_error);
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
@@ -805,9 +812,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // Clean up initialization artifacts
   // ----------------------------------------------------------------------------
-
-  // Move to the point of max probability before starting the real simulation.
-  sw.initialize_max_entropy_and_translation_distance();
 
   // Reset simulation info
   sw.moves.total = 0;
