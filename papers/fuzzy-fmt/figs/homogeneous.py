@@ -111,12 +111,12 @@ def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation
         raise ValueError("Need one of near_i, near_x, near_y")
 
 figure()
-skipby = 10 # number of temperatures to skip
-xlim(xmin=0.8,xmax=1.4)
-ylim(ymin=0, ymax = 5)
+skipby = 50 # number of temperatures to skip
+xlim(xmin=0.,xmax=1.2)
+ylim(ymin=0.001, ymax = 30)
 near_x = 0.85
 for i in range(skipby-1,len(n_reduced[0,:]),skipby):
-  line, = plot(1/n_reduced[:,i], pressures[:,i], label='T=%g' % temperatures[0,i])
+  line, = semilogy(n_reduced[:,i], pressures[:,i], label='T=%g' % temperatures[0,i])
   temp_name = '$T = %g$' % temperatures[0,i]
   if temperatures[0,i] < 1 or not ('.' in temp_name):
     label_line(line, temp_name, near_x=near_x)
@@ -130,6 +130,27 @@ xlabel('$1/n$')
 ylabel('$p$')
 
 savefig('figs/p-vs-V.pdf', bbox_inches=0)
+
+figure()
+skipby = 10 # number of temperatures to skip
+xlim(xmin=0.,xmax=1.2)
+ylim(ymin=0, ymax = 15)
+near_x = 0.85
+for i in range(skipby-1,len(n_reduced[0,:]),skipby):
+  line, = plot(n_reduced[:,i], pressures[:,i], label='T=%g' % temperatures[0,i])
+  temp_name = '$T = %g$' % temperatures[0,i]
+  if temperatures[0,i] < 1 or not ('.' in temp_name):
+    label_line(line, temp_name, near_x=near_x)
+    if temperatures[0,i] < 1:
+      near_x += 0.05
+    else:
+      near_x += 0.01
+  #plot(1/n_reduced[:,i], temperatures[0,i]*n_reduced[:,i], ':')
+
+xlabel('$1/n$')
+ylabel('$p$')
+
+savefig('figs/p-vs-n.pdf', bbox_inches=0)
 
 figure()
 

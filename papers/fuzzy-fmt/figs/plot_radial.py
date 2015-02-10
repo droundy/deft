@@ -21,6 +21,7 @@ reduced_density = float(sys.argv[1])
 
 all_temperatures = eval(sys.argv[2])
 #all_temperatures = [[4,4,1]]
+print 'type of all temps is',type(all_temperatures)
 
 print 'all_temperatures are', all_temperatures
 
@@ -93,32 +94,50 @@ for temp in all_temperatures:
       mysymbol_names += ['WCA DFT']
   #xlim(xmax=floor(max(g[:,0])))
 '''
-
-for temp in all_temperatures:
-  # input: ['figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
-  fname = 'figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
-  if os.path.exists(fname):
-    print 'found', fname
-    g = loadtxt(fname)
-    line = plot(g[:,0], g[:,1])#, styles.mcljr[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
+if type(all_temperatures) == list:
+    for temp in all_temperatures:
+        # input: ['figs/mcwca-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
+        fname = 'figs/mcwca-%.2f00-%.4f.dat.gradial' % (reduced_density, temp)
+        if os.path.exists(fname):
+            print 'found', fname
+            g = loadtxt(fname)
+            line = plot(g[:,0], g[:,1])#, styles.mcljr[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
     #xlim(xmax=floor(max(g[:,0])))
-    print 'jhkhjk'
-    xlim(xmax=8)
-    if temp == all_temperatures[-1]:
-        mysymbol_lines += line
-        mysymbol_names += ['WCA MC']
-  else:
-    print 'could not find', fname
+            print 'jhkhjk'
+            xlim(xmax=8)
+            if temp == all_temperatures[-1]:
+                mysymbol_lines += line
+                mysymbol_names += ['WCA MC']
+        else:
+            print 'could not find', fname
+else:
+    fname = 'figs/mcwca-%.2f00-%.4f.dat.gradial' % (reduced_density, all_temperatures)
+    if os.path.exists(fname):
+        print 'found', fname
+        g = loadtxt(fname)
+        line = plot(g[:,0], g[:,1])#, styles.mcljr[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
+    #xlim(xmax=floor(max(g[:,0])))
+        print 'jhkhjk'
+        xlim(xmax=8)
+       # if all_temperatures == all_temperatures[-1]:
+       #     mysymbol_lines += line
+       #     mysymbol_names += ['WCA MC']
 
 title('Radial distribution function at packing fraction %g' % (reduced_density/100))
 xlabel('radius')
 ylabel('g')
 blue_line = mlines.Line2D([], [], color='blue', marker='*',
                           markersize=15, label='Blue stars')
-legend(mylines + mysymbol_lines,
-       ['$T^* = %g$' % t for t in all_temperatures] + mysymbol_names,
-       loc = 'best')
-savefig('figs/radial-distribution-%02d.pdf' % (reduced_density), bbox_inches=0)
-print('figs/radial-distribution-%02d.pdf' % (reduced_density))
+
+if type(all_temperatures)==list:
+    legend(mylines + mysymbol_lines,
+           ['$T^* = %g$' % t for t in all_temperatures] + mysymbol_names,
+           loc = 'best')
+else:
+    legend('%f'% all_temperatures ,
+           loc = 'best')
+
+savefig('figs/radial-distribution-%0.2f.pdf' % (reduced_density), bbox_inches=0)
+print('figs/radial-distribution-%0.2f.pdf' % (reduced_density))
 
 show()

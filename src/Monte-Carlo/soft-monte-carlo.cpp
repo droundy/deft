@@ -41,12 +41,14 @@ double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
 const double R = 1;
 double R_wall = R;
+double length_of_cavity=0;
 double R_T = R + R_wall;
 double testp_sigma, testp_eps, testp_r;
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
 Vector3d latz = Vector3d(0,0,lenz);
 Vector3d lat[3] = {latx,laty,latz};
+bool FCC=false;  //if true then face centered cubic latice
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 bool WCA = true; //Defaults to a test particle with Lennard-Jones repulsion
 bool soft_wall = false;
@@ -62,11 +64,13 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
+
   printf("Command line: ");
   for (int i=0;i<argc;i++) {
     printf("%s ", argv[i]);
   }
   printf("\n");
+ 
   WCA = true;
   double maxrad = 0;
   for (int a=5; a<argc; a+=2){
@@ -155,10 +159,15 @@ int main(int argc, char *argv[]){
       } else {
         printf("Using Weeks-Chandler-Andersen potential by default\n");
       }
-    } else {
-      printf("Bad argument:  %s\n", argv[a]);
-      return 1;
-    }
+    } else if (strcmp(argv[a],"fcc")==0){
+	FCC=true;
+	length_of_cavity = atof(argv[a+1]);
+	printf("FCC is true length of cavity is %g\n", length_of_cavity);
+    }  else {
+      printf("Bad argumendat:  %s\n%d\n", argv[a],(strcmp(argv[a],"fcc")));
+	printf("%d" ,(strcmp(argv[a],"fcc")));
+	return 1;
+      }
   }
   fflush(stdout);
 
@@ -186,8 +195,12 @@ int main(int argc, char *argv[]){
   } 
 
   const char *outfilename = argv[4];
-  const long N = atol(argv[1]);
-  const long iterations_per_pressure_check = 10*N;
+
+  long N = atol(argv[1]);
+  if (FCC == true){
+    N = 4*7*7*7;
+  }
+  printf("firs ttime N is %ld\n",N);
   const double dx_goal = atof(argv[2]);
   const double uncertainty_goal = atof(argv[3]);
   long density_saved_count = 0;
@@ -210,22 +223,11 @@ int main(int argc, char *argv[]){
   // constrain to never increase.  Note that this may not work at all
   // for high filling fractions, since we could get stuck in a local
   // minimum.
-  for(long i=0; i<N; i++) {
-    spheres[i]=rad*ran3();
-    if (spherical_outer_wall) {
-      while (spheres[i].norm() > rad) {
-        spheres[i] *= 0.9;
-      }
-    }
-    if (spherical_inner_wall) {
-      while (spheres[i].norm() < innerRad) {
-        spheres[i] *= rad/innerRad;
-      }
-    }
-  }
+  // start of initialization
   clock_t start = clock();
   long num_to_time = 100*N;
   long num_timed = 0;
+  const long iterations_per_pressure_check = 10*N;
   double scale = .1;
   // Here we use a hokey heuristic to decide on an average move
   // distance, which is proportional to the mean distance between
@@ -234,79 +236,169 @@ int main(int argc, char *argv[]){
   if (mean_spacing > 2*R) {
     scale = 2*(mean_spacing - 2*R);
   }
-  printf("Using scale of %g\n", scale);
-
+  scale = scale*0.01;
+  printf("Using scale of %g\n", scale);  
   long iterations = 0;
   
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
-  for (int i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
-  {
-    // First we'll run the simulation a while to get to a decent
-    // starting point...
-    long paranoia = 50; // How careful must we be to wait a long time while initializing.
-    double oldPE = potentialEnergy(spheres,N,R);
-    double newPE = oldPE, olderPE;
-    long counter = 0;
-    long iters_initializing = 0, successes_initializing = 0;
-    do {
-      counter = counter + 1;
-      olderPE = oldPE;
-      oldPE = newPE;
-      for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
-        for (int i=0;i<N;i++) {
-          Vector3d temp = move(spheres[i],scale);
-          if(!overlap(spheres, temp, N, R, i)){
-            spheres[i]=temp;
-            successes_initializing++;
-          }
-          iters_initializing++;
-        }
+  if (FCC == true) {
+    iterations = 9999999999;
+    //    int cubeLength = pow(double(N/4.0),1.0/3.0) + .5;
+    //    int numberOfCubes = ceil(N/4);
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int x1 = 0;
+    int y1 = 0;
+    int z1 = 0;
+    int round = 0;
+    for(long k=0;k<N;k++){
+      spheres[k][0]=x*(length_of_cavity/7.0) + x1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
+      spheres[k][1]=y*(length_of_cavity/7.0) + y1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
+      spheres[k][2]=z*(length_of_cavity/7.0) + z1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
+      x=x+1;
+      if (x >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
+	x=0;
+	y=y+1;
       }
-      newPE = potentialEnergy(spheres,N,R);
-      const double pressure = calcPressure(spheres, N, volume);
-      if (counter%1 == 0) {
-        printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
-               newPE, pressure, paranoia);
-	fflush(stdout);
+      if (y >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
+	y=0;
+	z=z+1;
       }
-      paranoia = long(paranoia*1.3); // get a little more paranoid each time...
+      if (z >= 7){
+	round = round + 1;
+	x=0;
+	y=0;
+	z=0;
+	if (round <= 1){
+	  x1=1;
+	  y1=1;
+	  z1=0;
+	  
+	}else if (round == 2){
+	  x1=1;
+	  y1=0;
+	  z1=1;
+	}else if (round == 3){
+	  x1=0;
+	  y1=1;
+	  z1=1;	  
+	}
+	assert(round<=3 || k == N-1);
+      }
+    }
 
-      // We keep going until the energy increases twice.  This is a
-      // heuristic to try to avoid starting taking data before the
-      // system has reached equilibrium.
-    } while (olderPE > oldPE || oldPE > newPE);
-    printf("olderPE %g  oldPE %g  newPE %g\n", olderPE, oldPE, newPE);
+    char *gfilename = new char[1000];
+    sprintf(gfilename, "%s.positions", outfilename);
+    FILE* out = fopen(gfilename, "w");
+    if (out == NULL) {
+      printf("Error creating file %s\n", outfilename);
+      return 1;
+    }
+    for(long i=0;i<N;i++){
+      fprintf(out, "%g\t%g\t%g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
+    }	
+    fclose(out);
+    fflush(stdout);
+  
+  }else {
+    
+    for(long i=0; i<N; i++) { 
+      spheres[i]=rad*ran3();
+      if (spherical_outer_wall) {
+	while (spheres[i].norm() > rad) {
+	  spheres[i] *= 0.9;
+	}
+      }
+      if (spherical_inner_wall) {
+	while (spheres[i].norm() < innerRad) {
+	  spheres[i] *= rad/innerRad;
+	}
+      }
+    }
 
-    // At this stage, iters_initializing is the number of iterations
-    // we spent trying to get the system into a decent starting state.
-    // It seems risky to not run the simulation much more than we
-    // needed just to get it to a reasonable starting state.  So here
-    // we set the number of iterations accordingly.
-    iterations = 4*(iters_initializing + iterations_per_pressure_check);
-    printf("running with an extra %ld iterations.\n", iterations);
-    printf("success rate initializing was %.0f\n", 100*double(successes_initializing)/iters_initializing);
-  }
-  if (dx_goal == 0) {
-    // This indicates that we are not interested in density variation
-    // at all!
-    iterations += 1.0/(N*uncertainty_goal*uncertainty_goal);
-  } else {
-    // The following should give us approaximately uncertainty_goal
-    // uncertainty in the density in each bin, assuming all the bins
-    // have an equal volume.
-    iterations += 1.0/((dx_goal/maxrad)*uncertainty_goal*uncertainty_goal);
-  }
-  printf("Running for a total of %ld iterations.\n", iterations);
-
+    for (int i=0;i<N;i++) spheres[i] = move(spheres[i], scale);
+    {
+      // First we'll run the simulation a while to get to a decent
+      // starting point...
+      long paranoia = 50; // How careful must we be to wait a long time while initializing.
+      double oldPE = potentialEnergy(spheres,N,R);
+      double newPE = oldPE, olderPE;
+      long counter = 0;
+      long iters_initializing = 0, successes_initializing = 0;
+      do {
+	counter = counter + 1;
+	olderPE = oldPE;
+	oldPE = newPE;
+	for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
+	  for (int i=0;i<N;i++) {
+	    Vector3d temp = move(spheres[i],scale);
+	    if(!overlap(spheres, temp, N, R, i)){
+	      spheres[i]=temp;
+	      successes_initializing++;
+	    }
+	    iters_initializing++;
+	  }
+	}
+	newPE = potentialEnergy(spheres,N,R);
+	const double pressure = calcPressure(spheres, N, volume);
+	if (counter%1 == 0) {
+	  printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
+		 newPE, pressure, paranoia);
+	  fflush(stdout);
+	}
+	paranoia = long(paranoia*1.3); // get a little more paranoid each time...
+	
+	// We keep going until the energy increases twice.  This is a
+	// heuristic to try to avoid starting taking data before the
+	// system has reached equilibrium.
+      } while (olderPE > oldPE || oldPE > newPE);
+      printf("olderPE %g  oldPE %g  newPE %g\n", olderPE, oldPE, newPE);
+      
+      // At this stage, iters_initializing is the number of iterations
+      // we spent trying to get the system into a decent starting state.
+      // It seems risky to not run the simulation much more than we
+      // needed just to get it to a reasonable starting state.  So here
+      // we set the number of iterations accordingly.
+      iterations = 4*(iters_initializing + iterations_per_pressure_check);
+      printf("running with an extra %ld iterations.\n", iterations);
+      printf("success rate initializing was %.0f\n", 100*double(successes_initializing)/iters_initializing);
+    }
+    if (dx_goal == 0) {
+      // This indicates that we are not interested in density variation
+      // at all!
+      iterations += 1.0/(N*uncertainty_goal*uncertainty_goal);
+    } else {
+      // The following should give us approaximately uncertainty_goal
+      // uncertainty in the density in each bin, assuming all the bins
+      // have an equal volume.
+      iterations += 1.0/((dx_goal/maxrad)*uncertainty_goal*uncertainty_goal);
+    }
+    printf("Running for a total of %ld iterations.\n", iterations);
+  } //end of initialization
   long div = maxrad/dx_goal;
   if (div < 10) div = 10;
   printf("Using %ld divisions, dx ~ %g\n", div, maxrad/div);
   fflush(stdout);
-
+  printf("test abc");
   double *radius = new double[div+1];
   double *sections = new double [div+1];
   double *shellsRadius = new double[div+1];
+  //Vector3d *FCC_shells = new Vector3d[div+1];
+  double **FCC_shells=new double*[div+1];
+  for (long k=0;k<div+1;k++){
+    FCC_shells[k] = new double[3];
+  }
+  double  FCC_div = div;
+  printf("test def");
+  if (FCC){
+    for (long s=0;s<div+1;s++){
+      FCC_shells[s][0] = s*length_of_cavity*(1/FCC_div);
+      FCC_shells[s][1] = s*length_of_cavity*(1/FCC_div);
+      FCC_shells[s][2]=0;
+    }
+  }
 
   if (flat_div){
     double size = lenz/div;
@@ -355,30 +447,18 @@ int main(int argc, char *argv[]){
   long num_pressures_in_sum=0;
   double pressure_sum = 0;
 
-  char *gfilename1 = new char[1000];
-  sprintf(gfilename1, "%s.data_0", outfilename);
-  FILE *outdata = fopen(gfilename1, "w");
-  if (outdata == NULL) {
-    printf("Error creating file %s\n", gfilename1);
-    return 1;
-  } 
-  for (long s=0;s<N;s++) {
-    fprintf(outdata,"%f\t%f\t%f\n",spheres[s][0],spheres[s][1],spheres[s][2]);
-  }
-  fclose(outdata);
-  delete[] gfilename1;
 	
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
-  for (int i=0;i<N;i++) {
+  /*  for (int i=0;i<N;i++) {
     movieData[i] = spheres[i];
     printf("lenx: %g leny: %g\t\tx: %g y: %g\t\tx': %g y': %g\n",
            lenx, leny, movieData[i][0], movieData[i][1],
            fixPeriodic(movieData[i])[0], fixPeriodic(movieData[i])[1]);
     assert(fabs(movieData[i][0]) <= lenx/2);
     assert(fabs(movieData[i][1]) <= leny/2);
-  }
+    }*/
   which_frame = N;
   for (long j=0; j<iterations; j++){
     num_timed = num_timed + 1;
@@ -470,24 +550,6 @@ int main(int argc, char *argv[]){
         }
         fclose(out);
 
-        double secs_done = double(now)/CLOCKS_PER_SEC;
-        long mins_done = secs_done / 60;
-        long hours_done = mins_done / 60;
-	if (hours_done>10){
-
-          char *gfilename1 = new char[1000];
-          sprintf(gfilename1, "%s.data_%ld", outfilename, mins_done);
-          out = fopen(gfilename1, "w");
-          if (out == NULL) {
-            printf("Error creating file %s\n", gfilename1);
-            return 1;
-          } 
-          delete[] gfilename1;
-	  for (long s=0;s<N;s++) {
-		fprintf(out,"%f\t%f\t%f\n",spheres[s][0],spheres[s][1],spheres[s][2]);
-	  }
-          fclose(out);
-	}
 
 
         if (periodic[0] && periodic[1] && periodic[2]) {
@@ -503,6 +565,22 @@ int main(int argc, char *argv[]){
           for (long i=1; i<div; i++) {
             fprintf(out, "%g\t%g\n", 0.5*(shellsRadius[i-1]+shellsRadius[i]), radial_distribution[i]);
           }
+          fclose(out);
+        }
+	
+	if (FCC) {
+          char *gfilename = new char[1000];
+          sprintf(gfilename, "%s.fcc", outfilename);
+          out = fopen(gfilename, "w");
+          if (out == NULL) {
+            printf("Error creating file %s\n", gfilename);
+            return 1;
+          }
+          delete[] gfilename;
+	  //          fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
+	  for (long i=0; i<div; i++) {
+	    fprintf(out, "%g\t%g\t%g\n",FCC_shells[i][0], FCC_shells[i][1], FCC_shells[i][2]);
+	  }
           fclose(out);
         }
 
@@ -529,13 +607,12 @@ int main(int argc, char *argv[]){
       ///////////////////////////////////////////end of print.dat
     }
     
-    Vector3d temp = move(spheres[j%N],scale);
+    Vector3d temp = move(spheres[j%N],0.01*scale);
     count++;
     if(!overlap(spheres, temp, N, R, j%N)){
       spheres[j%N] = temp;
       workingmoves++;
     }
-
     if (which_frame < N*num_frames) {
       assert(which_frame%N == j%N);
       movieData[which_frame] = spheres[which_frame%N];
@@ -592,6 +669,18 @@ int main(int argc, char *argv[]){
       density_saved_count++;
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
+	if (FCC){
+	  for(long n=0;n<div;n++){
+	    if (FCC_shells[n][0] <= spheres[s][0] && FCC_shells[n+1][0]  >= spheres[s][0]){ 
+	      for(long p=0;p<div;p++){
+		if (FCC_shells[p][1] <= spheres[s][1] && FCC_shells[p+1][1] >= spheres[s][1]){ 
+		  FCC_shells[p][3]=FCC_shells[p][3]+1;
+		  //		  printf("FOUND ONE FOUND ONE\n");
+		}
+	      }
+	    }
+	  }
+	}
         for (long i=0; i<N; i++){
           for (long k=0; k<div; k++) {
             Vector3d vri = spheres[i]-spheres[s];
@@ -604,6 +693,7 @@ int main(int argc, char *argv[]){
         }
       }
     }
+    //  printf("Iterations per pressure %ld working moves is %ld\n",iterations_per_pressure_check, workingmoves);
     if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
       double newpress = calcPressure(spheres, N, volume);
       //const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
@@ -613,9 +703,9 @@ int main(int argc, char *argv[]){
       }
       //printf("Pressure is %g (excess pressure: %g), energy is %g\n",
       //       newpress, excpress, potentialEnergy(spheres,N,R));
-      for(long i=0; i<div; i++){
+      //  for(long i=0; i<div; i++){
         //printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
-      }
+      //}
       pressure_sum += calcPressure(spheres, N, volume);
       num_pressures_in_sum += 1;
     }
@@ -641,9 +731,9 @@ int main(int argc, char *argv[]){
     }
   }
   ///////////////////////////////////(4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36///////////////////////////////////////////////////////
-  
+  printf("div");
   for(long i=0; i<div; i++){
-    printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
+    printf("Number of spheres in division %ld = %ld\n  radius is %g\n", i+1, shells[i], radius[i]);
   }
 
   printf("Total number of attempted moves = %ld\n",count);
