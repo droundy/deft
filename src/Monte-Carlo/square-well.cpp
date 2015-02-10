@@ -419,6 +419,18 @@ void sw_simulation::flush_weight_array(){
   return;
 }
 
+double sw_simulation::fractional_sample_error(double T){
+  double error_times_Z = 0;
+  double Z = 0;
+  for(int i = max_entropy_state; i < min_energy_state; i++){
+    const double boltz = energy_histogram[i]
+      *exp(-ln_energy_weights[i]+(i-min_energy_state)/T);
+    Z += boltz;
+    error_times_Z += boltz/sqrt(samples[i]+1);
+  }
+  return error_times_Z/Z;
+}
+
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
   printf("Moving to most probable state and tuning translation distance.\n");
   int num_moves = 500;
@@ -683,9 +695,8 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     // fixme: SUPER SCARY WARNING:
     // N^3 scaling is probably VERY BAD!!! but it works really well for now...
     const int test_iterations = energy_levels*uipow(N,3);
-    for (int i = 0; i < test_iterations; i++){
-      for (int i = 0; i < N; i++)
-        move_a_ball();
+    for (int i = 0; i < test_iterations*N; i++){
+      move_a_ball();
     }
     // Dump energy histogram to the console so that we can see how we're doing
     if(printing_allowed()){
@@ -695,9 +706,8 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     // Check whether our histogram is sufficiently flat; if not, we have to restart!
     mean_hist = test_iterations*N/double(min_energy_state - max_entropy_state);
     for (int e = max_entropy_state; e <= min_energy_state; e++) {
-      if (energy_histogram[e] < N
-          || energy_histogram[e] < robust_cutoff*mean_hist) {
-        printf("After %d iterations, we fail at at energy %d widh hist = %ld"
+      if (energy_histogram[e] < robust_cutoff*mean_hist) {
+        printf("After %d iterations, we fail at at energy %d with hist = %ld"
                " vs. mean hist %g.\n",
                test_iterations*N, e, energy_histogram[e], mean_hist);
         done = false;
@@ -786,7 +796,8 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
       for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
         norm += transitions(i, de);
       if(norm){
-        for (int de = max(-i, -biggest_energy_transition); de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
+        for (int de = max(-i, -biggest_energy_transition);
+             de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
           TD_over_D[i+de] += exp(ln_D[i] - ln_D[i+de])*transitions(i,de)/norm;
         }
       }
@@ -821,7 +832,8 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
         if (precision > min_fractional_precision){
           done = false;
           if(iters % 1000000 == 0){
-            printf("After %i iterations, failed at energy %i with value %.16g and newvalue %.16g and ratio %g and norm %g.\n",
+            printf("After %i iterations, failed at energy %i with value %.16g and "
+                   "newvalue %.16g and ratio %g and norm %g.\n",
                    iters, i, ln_D[i], ln_D[i] + log(TD_over_D[i]), TD_over_D[i], norm);
             fflush(stdout);
           }

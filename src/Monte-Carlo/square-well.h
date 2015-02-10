@@ -73,7 +73,6 @@ struct sw_simulation {
   // has a given energy been observed since the last time we were at max entropy?
   bool *energy_observed;
   long *samples; // how many independent samples of a given energy have we had?
-  // return the number times we have sampled the minimum energy state
 
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
@@ -138,6 +137,9 @@ struct sw_simulation {
   // flatten weights at energies above the maximum entropy state,
   // and subtract off minimum weight so that our weights don't get out of hand
   void flush_weight_array();
+
+  // return expectatoin value of fractional error in sample count
+  double fractional_sample_error(double T);
 
   /*** HISTOGRAM METHODS ***/
 
