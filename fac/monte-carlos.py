@@ -16,7 +16,7 @@ utility_files = """
    polyhedra square-well
 """.split()
 
-for x in monte_carlos + utility_files:
+for x in utility_files:
     src.compile('src/Monte-Carlo/%s.cpp' % x)
 
 for x in monte_carlos:

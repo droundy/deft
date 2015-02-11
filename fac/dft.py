@@ -55,6 +55,5 @@ mkdats = """
 """.split()
 
 for s in mkdats:
-    src.compile(s+'.cpp')
     src.link(s+'.cpp', s+'.mkdat',
              objects = {'src/%s.o' % x for x in generic_sources})

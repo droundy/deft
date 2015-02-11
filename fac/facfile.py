@@ -69,3 +69,9 @@ class facfile:
         print('>', exe, file=self._f)
         for o in obj | objects | headers:
             print('<', o, file=self._f)
+        mainobj = maincpp[:-3]+'o'
+        print('\n|', config.cxx, config.cxxflags, '-c', '-o', mainobj, maincpp, file=self._f)
+        print('<', maincpp, file=self._f)
+        print('>', mainobj, file=self._f)
+        for h in headers:
+            print('<', h)
