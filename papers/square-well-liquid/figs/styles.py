@@ -10,7 +10,7 @@ _colors = { 'nw': 'r',
             'vanilla_wang_landau': 'b',
             'robustly_optimistic': 'r',
             'gaussian': 'm',
-            'walker_optimization': 'y'}
+            'optimized_ensemble': 'y'}
 
 def color(method):
     if method in _colors:
@@ -34,7 +34,7 @@ def title(method):
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
                'robustly_optimistic': 'robustly optimistic',
                'gaussian': 'gaussian method',
-               'walker_optimization': 'walker optimization'}
+               'optimized_ensemble': 'walker optimization'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':

@@ -150,8 +150,8 @@ struct sw_simulation {
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  void initialize_walker_optimization(int first_update_iterations,
-                                      int init_min_energy_samples);
+  void initialize_optimized_ensemble(int first_update_iterations,
+                                     int init_min_energy_samples);
 
   void initialize_robustly_optimistic(double robust_update_scale, double robust_cutoff);
 
