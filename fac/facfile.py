@@ -35,7 +35,7 @@ class facfile:
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', obj, cpp, file=self._f)
         print('<', cpp, file=self._f)
         print('>', obj, file=self._f)
-    def link(self, maincpp, exe, objects=set([])):
+    def link(self, maincpp, exe, objects=set([]), extra_requirements=set([])):
         obj = {maincpp[:-3]+'o'}
         headers = set([])
         with open(maincpp) as f:
@@ -73,5 +73,5 @@ class facfile:
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', mainobj, maincpp, file=self._f)
         print('<', maincpp, file=self._f)
         print('>', mainobj, file=self._f)
-        for h in headers:
-            print('<', h)
+        for h in headers | extra_requirements:
+            print('<', h, file=self._f)

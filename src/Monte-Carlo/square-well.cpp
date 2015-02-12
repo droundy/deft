@@ -636,8 +636,8 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 }
 
 // initialize the weight array using the optimized ensemble method.
-void sw_simulation::initialize_walker_optimization(int first_update_iterations,
-                                                   int init_min_energy_samples){
+void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
+                                                  int init_min_energy_samples){
   int weight_updates = 0;
   while(iteration <= first_update_iterations ||
         samples[min_energy_state] < init_min_energy_samples) {

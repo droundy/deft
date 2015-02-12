@@ -1,3 +1,6 @@
 | gnuplot figs/surface-tension.gp
-> figs/surface-tension.pdf
+> figs/surface-tension.eps
 < figs/surface-tension.dat
+
+| epstopdf figs/surface-tension.eps
+< figs/surface-tension.eps

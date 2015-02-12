@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
   int gaussian_fit = false;
   int tmmc = false;
   int wang_landau = false;
-  int walker_optimization = false;
+  int optimized_ensemble = false;
   int vanilla_wang_landau = false;
   int robustly_optimistic = false;
   int bubble_suppression = false;
@@ -221,8 +221,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau histogram method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
-    {"walker_optimization", '\0', POPT_ARG_NONE, &walker_optimization, 0,
-     "Use a walker optimization weight histogram method", "BOOLEAN"},
+    {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
+     "Use a optimized ensemble weight histogram method", "BOOLEAN"},
     {"robustly_optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
      "Use the robustly optimistic histogram method", "BOOLEAN"},
     {"bubble_suppression", '\0', POPT_ARG_NONE, &bubble_suppression, 0,
@@ -249,7 +249,7 @@ int main(int argc, const char *argv[]) {
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
     {"init_min_energy_samples", '\0', POPT_ARG_INT, &init_min_energy_samples, 0,
-     "Number of times to sample mininum energy in initializing walker optimization", "INT"},
+     "Number of times to sample mininum energy in initializing optimized ensemble", "INT"},
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
@@ -315,7 +315,7 @@ int main(int argc, const char *argv[]) {
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
      + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(walker_optimization) + bool(tmmc) + (fix_kT != 0) != 1){
+     + bool(optimized_ensemble) + bool(tmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
     return 254;
   }
@@ -402,8 +402,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
       sprintf(method_tag, "-vanilla_wang_landau");
-    } else if (walker_optimization) {
-      sprintf(method_tag, "-walker_optimization");
+    } else if (optimized_ensemble) {
+      sprintf(method_tag, "-optimized_ensemble");
     } else {
       method_tag[0] = 0; // set method_tag to the empty string
     }
@@ -630,8 +630,8 @@ int main(int argc, const char *argv[]) {
     } else if (vanilla_wang_landau) {
       sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                                 vanilla_wl_threshold, vanilla_wl_cutoff);
-    } else if (walker_optimization) {
-      sw.initialize_walker_optimization(first_update_iterations, init_min_energy_samples);
+    } else if (optimized_ensemble) {
+      sw.initialize_optimized_ensemble(first_update_iterations, init_min_energy_samples);
     } else if (robustly_optimistic) {
       sw.initialize_robustly_optimistic(transition_precision, robust_cutoff);
     } else if (bubble_suppression) {
@@ -709,7 +709,7 @@ int main(int argc, const char *argv[]) {
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
           "# Tmin: %g\n"
-          "# fractional_sample_error (after initializing): %g\n\n",
+          "# fractional_sample_error after initialization: %g\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
           de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, Tmin,
           fractional_sample_error);
@@ -729,9 +729,9 @@ int main(int argc, const char *argv[]) {
             "# wl_threshold: %g\n"
             "# wl_cutoff: %g\n",
             headerinfo, wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-  } else if(walker_optimization){
+  } else if(optimized_ensemble){
     sprintf(headerinfo,
-            "%s# histogram method: walker optimization\n"
+            "%s# histogram method: optimized ensemble\n"
             "# init_min_energy_samples: %i\n",
             headerinfo, init_min_energy_samples);
   } else if(robustly_optimistic){
