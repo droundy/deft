@@ -41,8 +41,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-double soft_wall_potential(double z) {
-  const double Vcutoff= 10;
+double soft_wall_potential(double z, double Vcutoff) {
   const double R_0 = 2*radius;
   const double rho = 1.0; // wall density
   z = fabs(z);
@@ -60,7 +59,7 @@ double soft_wall_potential(double z) {
   const double R3 = pow(R_0,3);
   const double R9 = pow(R_0,9);
 
-  double potential = M_PI*rho*epsilon*((z3-R3)/6
+  double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
                                        + 2*sig12*(1/z9 - 1/R9)/45
                                        + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
                                                     - 2*sig12/5/pow(R_0,10))
@@ -109,16 +108,6 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   fclose(o);
 }
 
-/*--
-
-for kT in np.arange(0.1, 2.05, 0.1):
-  for rho in np.arange(0.1, 2.05, 0.1):
-    self.rule('%s %g %g' % (exe, rho, kT),
-              [exe],
-              ["papers/fuzzy-fmt/figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho, kT)])
-
---*/
-
 int main(int argc, char **argv) {
   double reduced_density, temp;
   if (argc != 3) {
@@ -152,7 +141,7 @@ int main(int argc, char **argv) {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
-      f.Vext()[i] = temp*soft_wall_potential(rz[i]);
+      f.Vext()[i] = soft_wall_potential(rz[i], 20*temp);
       if (fabs(rz[i]) < spacing) {
         f.Veff()[i] = -temp*log(0.01*hf.n());
         //f.n()[i] = 0.01*hf.n();

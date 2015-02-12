@@ -22,12 +22,7 @@ def run_soft_sphere(reduced_density, temperature):
     #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
     system("%s %s/radial-wca.mkdat %g %g > %s 2>&1 &" %
            (srun(reduced_density, temperature), figsdir, reduced_density, temperature, outfilename))
-'''
-for kT in [1.0, 0.1, 0.01, 0.001]:
-    for n_reduced in [0.7, 0.8, 0.9]:
+
+for kT in [0.1,.5,1,1.5,10]:
+    for n_reduced in [0.2]:
         run_soft_sphere(n_reduced, kT)
-'''
-run_soft_sphere(0.83890, 0.71)
-run_soft_sphere(0.957,2.48)
-run_soft_sphere(01.095, 2.48)
-run_soft_sphere(.5844,1.235)
