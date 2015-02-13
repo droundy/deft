@@ -327,8 +327,8 @@ Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
 for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/square-well-liquid/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
-        for N in [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, 60, 100, 200]:
-            for method in ["nw","bubble_suppression","robustly_optimistic","gaussian","wang_landau","optimized_ensemble",'tmmc'] \
+        for N in range(5,20)+range(20,50,5)+range(50,100,10)+range(100,201,20):
+            for method in ["nw","robustly_optimistic","gaussian","wang_landau","optimized_ensemble",'tmmc'] \
                     + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)
