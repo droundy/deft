@@ -264,7 +264,7 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
 
 // sw_simulation methods
 
-void sw_simulation::move_a_ball(double Tmin, bool use_transition_matrix) {
+void sw_simulation::move_a_ball(bool use_transition_matrix) {
   int id = moves.total % N;
   moves.total++;
   const int old_interaction_count =
@@ -313,7 +313,7 @@ void sw_simulation::move_a_ball(double Tmin, bool use_transition_matrix) {
   double Pmove = 1;
   if (use_transition_matrix) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
-      const double betamax = 1.0/Tmin;
+      const double betamax = 1.0/min_T;
       const double Pmin = exp(-betamax);
       /* I note that Swendson 1999 uses essentially this method
            *after* two stages of initialization. */
@@ -429,6 +429,14 @@ double sw_simulation::fractional_sample_error(double T){
     error_times_Z += boltz/sqrt(samples[i]+1);
   }
   return error_times_Z/Z;
+}
+
+bool sw_simulation::finished_initializing(char *end_condition){
+  if(strcmp(end_condition,"init_samples") == 0)
+    return samples[min_energy_state] >= init_samples;
+  else if(strcmp(end_condition,"sample_error") == 0)
+    return fractional_sample_error(min_T) <= sample_error;
+  else return true;
 }
 
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
@@ -571,10 +579,10 @@ void sw_simulation::initialize_canonical(double kT) {
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
-  bool finished_initializing = false;
+  bool done = false;
   int last_min_energy_state = min_energy_state;
   const int starting_iterations = iteration;
-  while (!finished_initializing) {
+  while (!done) {
     for (int i=0; i < N*energy_levels; i++) {
       move_a_ball();
       ln_energy_weights[energy] -= wl_factor;
@@ -628,7 +636,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       if (wl_factor < wl_cutoff && last_min_energy_state == min_energy_state) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration - starting_iterations, weight_updates);
-        finished_initializing = true;
+        done = true;
       }
       last_min_energy_state = min_energy_state;
     }
@@ -637,10 +645,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
 // initialize the weight array using the optimized ensemble method.
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
-                                                  int init_min_energy_samples){
+                                                  char *end_condition){
   int weight_updates = 0;
   while(iteration <= first_update_iterations ||
-        samples[min_energy_state] < init_min_energy_samples) {
+        !finished_initializing(end_condition)) {
     // run an iteration
     for(int i = 0; i < N; i++) move_a_ball();
     assert(energy ==
@@ -672,19 +680,11 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 }
 
 void sw_simulation::initialize_robustly_optimistic(double transition_precision,
-                                                   double robust_cutoff){
-  bool done;
-  double mean_hist = 0;
+                                                   char *end_condition){
   do {
-    done = true; // Let's be optimistic!
     // First, let's reset our weights based on what we already know!
     update_weights_using_transitions(transition_precision);
     flush_weight_array();
-    /* Check whether we have *ever* seen the minimum energy in the
-       last time through.  If not, we absolutely shouldn't be so
-       optimistic as to believe that this time we'll have everything
-       right. */
-    if(energy_histogram[min_energy_state] == 0) done = false;
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
       energy_histogram[e] = 0;
@@ -698,23 +698,7 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     for (int i = 0; i < test_iterations*N; i++){
       move_a_ball();
     }
-    // Dump energy histogram to the console so that we can see how we're doing
-    if(printing_allowed()){
-      for(int i = max_entropy_state; i <= min_energy_state; i++)
-        printf("%i  %li\n",i,energy_histogram[i]);
-    }
-    // Check whether our histogram is sufficiently flat; if not, we have to restart!
-    mean_hist = test_iterations*N/double(min_energy_state - max_entropy_state);
-    for (int e = max_entropy_state; e <= min_energy_state; e++) {
-      if (energy_histogram[e] < robust_cutoff*mean_hist) {
-        printf("After %d iterations, we fail at at energy %d with hist = %ld"
-               " vs. mean hist %g.\n",
-               test_iterations*N, e, energy_histogram[e], mean_hist);
-        done = false;
-        break;
-      }
-    }
-  } while (!done);
+  } while(!finished_initializing(end_condition));
 }
 
 
@@ -766,7 +750,7 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
+int sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
@@ -847,19 +831,21 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
   for(int i = 0; i < energies_observed; i++)
     ln_energy_weights[i] = -ln_D[i];
 
-  printf("Computed weights from transition matrix in %i iterations\n", iters);
+  return iters;
 }
 
-void sw_simulation::initialize_transitions(double Tmin, double dos_precision) {
+
+void sw_simulation::initialize_transitions(double dos_precision) {
   const int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
-  const double betamax = 1.0/Tmin;
+  const double betamax = 1.0/min_T;
   const double Nmin = exp(betamax);
+  int update_iters;
   bool done = false;
   while (!done) {
     for (int i=0;i<check_how_often;i++) {
-      move_a_ball(Tmin, true);
+      move_a_ball(true);
     }
-    update_weights_using_transitions(dos_precision);
+    update_iters = update_weights_using_transitions(dos_precision);
     done = true;
     for (int i=energy_levels-1;i>max_entropy_state;i--) {
       if (energy_histogram[i]) {
@@ -877,11 +863,15 @@ void sw_simulation::initialize_transitions(double Tmin, double dos_precision) {
            from above if THE ENERGY ABOVE US is above the minimum
            temperature.  This gives us one energy quantum of
            paranoia. */
-        if (ln_energy_weights[i-1] - ln_energy_weights[i-2] < 1.0/Tmin) {
+        if (ln_energy_weights[i-1] - ln_energy_weights[i-2] < 1.0/min_T) {
           if (Ndown_to_here < 2*Nmin) {
-            printf("[%9ld] Got only %d at energy %d (compared with %g) [%g vs %g]\n", iteration, Ndown_to_here, i, 2*Nmin,
-                   ln_energy_weights[i-1] - ln_energy_weights[i-2], 1.0/Tmin);
-            fflush(stdout);
+            if(printing_allowed()){
+              printf("Computing weights from transition matrix in %i iterations",
+                     update_iters);
+              printf("[%9ld] Got only %d at energy %d (compared with %g) [%g vs %g]\n",
+                     iteration, Ndown_to_here, i, 2*Nmin,
+                     ln_energy_weights[i-1] - ln_energy_weights[i-2], 1.0/min_T);
+            }
             done = false;
             break;
           }
@@ -890,7 +880,7 @@ void sw_simulation::initialize_transitions(double Tmin, double dos_precision) {
     }
   }
   for (int i=min_energy_state+1;i<energy_levels;i++) {
-    ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/Tmin;
+    ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
   }
 }
 
