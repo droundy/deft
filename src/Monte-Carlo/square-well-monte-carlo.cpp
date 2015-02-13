@@ -79,6 +79,8 @@ int main(int argc, const char *argv[]) {
   // Define "Constants" -- set from arguments then unchanged
   // ----------------------------------------------------------------------------
 
+  sw_simulation sw;
+
   // NOTE: debug can slow things down VERY much
   int debug = false;
 
@@ -99,29 +101,30 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
-  double robust_cutoff = 1e-1; // should probably be ~1e-1, and must be < 1
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double Tmin = 0.2;
-
-  // number of times we wish to sample the minimum observed energy in initialization
-  int init_min_energy_samples = 10;
-
+  double default_min_T = 0.2;
   double transition_precision = 1e-10;
 
+  // end conditions
+  int default_init_samples = 2;
+  double default_sample_error = 0.3;
+
   // Do not change these! They are taken directly from the WL paper.
-  double vanilla_wl_factor = 1;
-  double vanilla_wl_fmod = 2;
-  double vanilla_wl_threshold = 0.25;
-  double vanilla_wl_cutoff = 1e-8;
+  const double vanilla_wl_factor = 1;
+  const double vanilla_wl_fmod = 2;
+  const double vanilla_wl_threshold = 0.25;
+  const double vanilla_wl_cutoff = 1e-8;
 
-  sw_simulation sw;
-
+  // some miscellaneous default or dummy simulation parameters
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
+  sw.min_T = 0;
+  sw.init_samples = 0;
+  sw.sample_error = 0;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -242,20 +245,20 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
-    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
     {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
-    {"init_min_energy_samples", '\0', POPT_ARG_INT, &init_min_energy_samples, 0,
+    {"init_samples", '\0', POPT_ARG_INT, &sw.init_samples, 0,
      "Number of times to sample mininum energy in initializing optimized ensemble", "INT"},
+    {"sample_error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.sample_error, 0,
+     "Fractional sample error to acquired to exit initialization", "DOUBLE"},
+
+    {"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
     {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &transition_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
-
-    {"Tmin", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &Tmin, 0, "The minimum temperature that we care about", "DOUBLE"},
 
     /*** TESTING AND DEBUGGING OPTIONS ***/
 
@@ -320,11 +323,20 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  // Check that we have valid parameters for histogram methods
-  if(robustly_optimistic &&  robust_cutoff >= 1){
-    printf("Robust cutoff cannot be greater than 1!\n");
-    return 155;
+  // Check that we are only using one end condition
+  if(sw.init_samples && sw.sample_error){
+    printf("Can only use one end condition!\n");
+    return 157;
   }
+
+  // Set end condition
+  char *end_condition = new char[16];
+  if(sw.init_samples) sprintf(end_condition,"init_samples");
+  else if(sw.sample_error) sprintf(end_condition,"sample_error");
+  else sprintf(end_condition,"none");
+  // Set default values if necessary
+  if(!sw.init_samples) sw.init_samples = default_init_samples;
+  if(!sw.sample_error) sw.sample_error = default_sample_error;
 
   // If the user specified a filling fraction, make it so!
   if (ff != 0) {
@@ -407,10 +419,11 @@ int main(int argc, const char *argv[]) {
     } else {
       method_tag[0] = 0; // set method_tag to the empty string
     }
+    if(strcmp(end_condition,"none") != 0)
+      sprintf(method_tag, "%s-%s", method_tag, end_condition);
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
-    if(transition_override)
-      sprintf(filename, "%s-to", filename);
+    if(transition_override) sprintf(filename, "%s-to", filename);
     printf("\nUsing default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
@@ -426,6 +439,11 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
+  if(sw.min_T == 0) sw.min_T = default_min_T;
+  if(strcmp(end_condition,"none") == 0){
+    if(optimized_ensemble) sprintf(end_condition,"init_samples");
+    else if(robustly_optimistic || tmmc) sprintf(end_condition,"sample_error");
+  }
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -631,13 +649,13 @@ int main(int argc, const char *argv[]) {
       sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                                 vanilla_wl_threshold, vanilla_wl_cutoff);
     } else if (optimized_ensemble) {
-      sw.initialize_optimized_ensemble(first_update_iterations, init_min_energy_samples);
+      sw.initialize_optimized_ensemble(first_update_iterations, end_condition);
     } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic(transition_precision, robust_cutoff);
+      sw.initialize_robustly_optimistic(transition_precision, end_condition);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
-      sw.initialize_transitions(simulation_iterations, Tmin);
+      sw.initialize_transitions(first_update_iterations, end_condition);
     }
   }
 
@@ -655,13 +673,13 @@ int main(int argc, const char *argv[]) {
   //   /* Limit the slope of the weight array to that of its canonical value at our minimum
   //      temperature of interest */
   //   for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
-  //     if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/Tmin)
-  //       sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/Tmin;
+  //     if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/sw.min_T)
+  //       sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/sw.min_T;
   //   }
   //   // Enforce a canonical slope of the weight array at unseen low energies
   //   for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
   //     sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
-  //       + (i-sw.min_energy_state)/Tmin;
+  //       + (i-sw.min_energy_state)/sw.min_T;
   //   }
     // cap out the weights at low energies, so we don't get stuck there later
     for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
@@ -669,7 +687,7 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  double fractional_sample_error = sw.fractional_sample_error(Tmin);
+  double fractional_sample_error = sw.fractional_sample_error(sw.min_T);
 
   // ----------------------------------------------------------------------------
   // Generate save file info
@@ -708,10 +726,10 @@ int main(int argc, const char *argv[]) {
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
-          "# Tmin: %g\n"
+          "# min_T: %g\n"
           "# fractional_sample_error after initialization: %g\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
-          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, Tmin,
+          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
           fractional_sample_error);
 
   if(no_weights){
@@ -731,14 +749,10 @@ int main(int argc, const char *argv[]) {
             headerinfo, wl_factor, wl_fmod, wl_threshold, wl_cutoff);
   } else if(optimized_ensemble){
     sprintf(headerinfo,
-            "%s# histogram method: optimized ensemble\n"
-            "# init_min_energy_samples: %i\n",
-            headerinfo, init_min_energy_samples);
+            "%s# histogram method: optimized ensemble\n", headerinfo);
   } else if(robustly_optimistic){
     sprintf(headerinfo,
-            "%s# histogram method: robustly optimistic\n"
-            "# robust_cutoff: %g\n",
-            headerinfo, robust_cutoff);
+            "%s# histogram method: robustly optimistic\n", headerinfo);
   } else if (bubble_suppression){
     sprintf(headerinfo,
             "%s# histogram method: bubble suppression\n"
@@ -749,6 +763,13 @@ int main(int argc, const char *argv[]) {
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
+  }
+  if(strcmp(end_condition,"none") != 0){
+    sprintf(headerinfo, "%s# %s:", headerinfo, end_condition);
+    if(strcmp(end_condition,"init_samples") == 0)
+      sprintf(headerinfo, "%s %i\n", headerinfo, sw.init_samples);
+    if(strcmp(end_condition,"sample_error") == 0)
+      sprintf(headerinfo, "%s %g\n", headerinfo, sw.sample_error);
   }
   if(!no_weights && !fix_kT)
     sprintf(headerinfo, "%s# gaussian_init_scale: %g\n\n", headerinfo, gaussian_init_scale);
