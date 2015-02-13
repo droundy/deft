@@ -647,57 +647,60 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
                                                   char *end_condition){
   int weight_updates = 0;
-  while(iteration <= first_update_iterations ||
-        !finished_initializing(end_condition)) {
-    // run an iteration
-    for(int i = 0; i < N; i++) move_a_ball();
-    assert(energy ==
-           count_all_interactions(balls, N, interaction_distance, len, walls));
-    // update weights when we've run long enough
-    if((iteration - first_update_iterations)
-       % int(first_update_iterations*uipow(2,weight_updates)) == 0){
-      for(int i = max_entropy_state; i < energy_levels; i++){
-        int top = i < energy_levels-1 ? i+1 : i;
-        int bottom = i > 0 ? i-1 : i;
-        int dE = bottom-top;
-        double df = double(walkers_up[top]) / walkers_total[top]
-          - (double(walkers_up[bottom]) / walkers_total[bottom]);
-        double df_dE = (df < 0 && df == df) ? df/dE : 1;
-        double walker_density =
-          double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
-        ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
-      }
-      flush_weight_array();
-      for(int i = 0; i < energy_levels; i++){
-        walkers_up[i] = 0;
-        walkers_total[i] = 0;
-      }
-      printf("Weight update: %i. min_energy_state: %i. samples: %li\n",
-             weight_updates, min_energy_state, samples[min_energy_state]);
-      weight_updates++;
+  int update_iters = first_update_iterations;
+  do {
+    // simulate for a while
+    for(int i = 0; i < N*update_iters; i++) move_a_ball();
+
+    // update weight array
+    for(int i = max_entropy_state; i < energy_levels; i++){
+      int top = i < energy_levels-1 ? i+1 : i;
+      int bottom = i > 0 ? i-1 : i;
+      int dE = bottom-top;
+      double df = double(walkers_up[top]) / walkers_total[top]
+        - (double(walkers_up[bottom]) / walkers_total[bottom]);
+      double df_dE = (df < 0 && df == df) ? df/dE : 1;
+      double walker_density =
+        double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
+      ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
     }
-  }
+    flush_weight_array();
+
+    // reset walkers
+    for(int i = 0; i < energy_levels; i++){
+      walkers_up[i] = 0;
+      walkers_total[i] = 0;
+    }
+    printf("Weight update: %i. min_energy_state: %i. samples: %li\n",
+           weight_updates, min_energy_state, samples[min_energy_state]);
+    weight_updates++;
+
+    update_iters *= 2; // simulate for longer next time
+
+  } while(!finished_initializing(end_condition));
 }
 
 void sw_simulation::initialize_robustly_optimistic(double transition_precision,
                                                    char *end_condition){
+  int weight_updates = 0;
   do {
     // First, let's reset our weights based on what we already know!
     update_weights_using_transitions(transition_precision);
     flush_weight_array();
+    weight_updates++;
+    if(printing_allowed()) printf("Optimistic weight updates: %i\n", weight_updates);
+
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
       energy_histogram[e] = 0;
       samples[e] = 0;
       energy_observed[e] = false;
     }
-    // Now let's run a while to see if we can find another answer.
-    // fixme: SUPER SCARY WARNING:
-    // N^3 scaling is probably VERY BAD!!! but it works really well for now...
+
+    // Simulate for a while
     const int test_iterations = energy_levels*uipow(N,3);
-    for (int i = 0; i < test_iterations*N; i++){
-      move_a_ball();
-    }
+    for (int i = 0; i < N*test_iterations; i++) move_a_ball();
+
   } while(!finished_initializing(end_condition));
 }
 
@@ -867,11 +870,11 @@ void sw_simulation::initialize_transitions(double dos_precision) {
             if(printing_allowed()){
               printf("Computing weights from transition matrix in %i iterations\n",
                      update_iters);
-            printf("[%9ld] Got only %d (%d up) at energy %d (compared with %d [%d]) "
-                   "[%g vs %g]\n",
-                   iteration, Ndown_to_here, Nup_from_here, i,
-                   num_visits_desired, (int)Nmin*num_visits_desired,
-                   ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
+              printf("[%9ld] Got only %d (%d up) at energy %d (compared with %d [%d]) "
+                     "[%g vs %g]\n",
+                     iteration, Ndown_to_here, Nup_from_here, i,
+                     num_visits_desired, (int)Nmin*num_visits_desired,
+                     ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
             }
             done = false;
             break;
