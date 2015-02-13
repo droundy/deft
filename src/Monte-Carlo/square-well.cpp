@@ -647,10 +647,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
                                                   char *end_condition){
   int weight_updates = 0;
-  int update_iters = first_update_iterations;
+  long update_iters = first_update_iterations;
   do {
     // simulate for a while
-    for(int i = 0; i < N*update_iters; i++) move_a_ball();
+    for(long i = 0; i < N*update_iters; i++) move_a_ball();
 
     // update weight array
     for(int i = max_entropy_state; i < energy_levels; i++){
@@ -671,8 +671,8 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
       walkers_up[i] = 0;
       walkers_total[i] = 0;
     }
-    printf("Weight update: %i. min_energy_state: %i. samples: %li\n",
-           weight_updates, min_energy_state, samples[min_energy_state]);
+    printf("Weight update: %i (%ld iters). min_energy_state: %i. samples: %li\n",
+           weight_updates, update_iters, min_energy_state, samples[min_energy_state]);
     weight_updates++;
 
     update_iters *= 2; // simulate for longer next time
@@ -698,8 +698,8 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     }
 
     // Simulate for a while
-    const int test_iterations = energy_levels*uipow(N,3);
-    for (int i = 0; i < N*test_iterations; i++) move_a_ball();
+    const long test_iterations = energy_levels*uipow(N,3);
+    for (long i = 0; i < N*test_iterations; i++) move_a_ball();
 
   } while(!finished_initializing(end_condition));
 }
@@ -880,8 +880,8 @@ void sw_simulation::initialize_transitions(double dos_precision) {
 
 bool sw_simulation::printing_allowed(){
   const double time_skip = 1; // seconds
-  static int every_so_often = 1;
-  static int how_often = 10;
+  static int every_so_often = 0;
+  static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.
   if (++every_so_often % how_often == 0) {
     const clock_t time_now = clock();
