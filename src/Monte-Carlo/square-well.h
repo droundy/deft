@@ -160,7 +160,7 @@ struct sw_simulation {
   void update_weights_using_transitions(double fractional_precision);
   void update_weights_using_transition_flux(double fractional_precision);
 
-  void initialize_transitions(int max_iterations, double Tmin);
+  void initialize_transitions(double Tmin, double dos_precision);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();

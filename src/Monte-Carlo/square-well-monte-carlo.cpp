@@ -637,13 +637,13 @@ int main(int argc, const char *argv[]) {
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
-      sw.initialize_transitions(simulation_iterations, Tmin);
+      sw.initialize_transitions(Tmin, transition_precision);
     }
   }
 
   took("Actual initialization");
 
-  if(transition_override || tmmc){
+  if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n"
            "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
@@ -651,7 +651,7 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  if(!fix_kT){
+  if(!fix_kT && !tmmc){
   //   /* Limit the slope of the weight array to that of its canonical value at our minimum
   //      temperature of interest */
   //   for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
