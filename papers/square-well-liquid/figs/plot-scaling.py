@@ -17,7 +17,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 all_Ns = eval(sys.argv[3])
-#arg all_Ns = [[5,6,8,9,10,20]]
+#arg all_Ns = [[5,6,8,10,20]]
 
 versions = eval(sys.argv[4])
 #arg versions = [["wang_landau","robustly_optimistic","gaussian","bubble_suppression","optimized_ensemble","tmmc", 'kT0.5', 'kT0.4']]
@@ -43,10 +43,10 @@ for version in versions:
         content = content_file.read()
     init_iters[version].append(int(initialization_iters_regex.findall(content)[0]))
 
-    E_data = numpy.loadtxt(wildfilename % 'E')
+    E_data = numpy.loadtxt(wildfilename % 'E', ndmin=2)
     Emins[version].append(E_data[:, 0].max())
 
-    sample_data = numpy.loadtxt(wildfilename % 's')
+    sample_data = numpy.loadtxt(wildfilename % 's', ndmin=2)
     samples[version].append(sample_data[len(sample_data[:,1])-1, 1])
 
   plt.figure(1)

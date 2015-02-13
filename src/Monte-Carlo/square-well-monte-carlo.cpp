@@ -440,6 +440,9 @@ int main(int argc, const char *argv[]) {
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
   if(sw.min_T == 0) sw.min_T = default_min_T;
+
+  /* set default end condition if necessary
+     options are: init_samples, sample_error */
   if(strcmp(end_condition,"none") == 0){
     if(optimized_ensemble) sprintf(end_condition,"init_samples");
     else if(robustly_optimistic) sprintf(end_condition,"sample_error");
