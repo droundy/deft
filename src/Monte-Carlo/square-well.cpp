@@ -842,39 +842,29 @@ void sw_simulation::initialize_transitions(double dos_precision) {
   const double betamax = 1.0/min_T;
   const int num_visits_desired = 100;
   const double Nmin = exp(betamax);
-  int update_iters;
   bool done = false;
   while (!done) {
 
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
 
     check_how_often += Nmin*N; // try a little harder next time...
-    update_iters = update_weights_using_transitions(dos_precision);
+    update_weights_using_transitions(dos_precision);
     done = true;
     for (int i = energy_levels-1; i > max_entropy_state; i--) {
       if (energy_histogram[i]) {
-        int Ndown_from_here = 0;
         int Ndown_to_here = 0;
-        int Nup_from_here = 0;
-        for (int de = 1; de <= biggest_energy_transition; de++) {
-          Ndown_from_here += transitions(i, de);
-          if (de <= i) {
-            Ndown_to_here += transitions(i-de, de);
-            Nup_from_here += transitions(i, -de);
-          }
+        for (int de = 1; de <= min(i,biggest_energy_transition); de++) {
+          Ndown_to_here += transitions(i-de, de);
         }
         /* Let's put a criterion on how many times we must be visited
            from above if we are above the minimum temperature. */
         if (ln_energy_weights[i] - ln_energy_weights[i-1] < 1.0/min_T) {
-          if (Ndown_to_here < num_visits_desired || Nup_from_here < Nmin*num_visits_desired){
-            if(printing_allowed()){
-              printf("Computing weights from transition matrix in %i iterations\n",
-                     update_iters);
-              printf("[%9ld] Got only %d (%d up) at energy %d (compared with %d [%d]) "
-                     "[%g vs %g]\n",
-                     iteration, Ndown_to_here, Nup_from_here, i,
-                     num_visits_desired, (int)Nmin*num_visits_desired,
+          if (Ndown_to_here < num_visits_desired) {
+            if (printing_allowed()) {
+              printf("[%9ld] Got only %d at energy %d (compared with %d) [%g vs %g]\n",
+                     iteration, Ndown_to_here, i, num_visits_desired,
                      ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
+              fflush(stdout);
             }
             done = false;
             break;
@@ -883,17 +873,24 @@ void sw_simulation::initialize_transitions(double dos_precision) {
       }
     }
   }
-  for (int i = min_energy_state+1; i < energy_levels; i++){
+  for (int i = min_energy_state+1; i < energy_levels; i++) {
     ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
   }
 }
 
 bool sw_simulation::printing_allowed(){
   const double time_skip = 1; // seconds
-  const clock_t time_now = clock();
-  if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
-    last_print_time = time_now;
-    return true;
+  static int every_so_often = 1;
+  static int how_often = 10;
+  // clock can be expensive, so this is a heuristic to reduce our use of it.
+  if (++every_so_often % how_often == 0) {
+    const clock_t time_now = clock();
+    if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
+      how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)*(time_now - last_print_time));
+      last_print_time = time_now;
+      every_so_often = 0;
+      return true;
+    }
   }
-  else return false;
+  return false;
 }
