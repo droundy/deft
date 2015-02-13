@@ -834,20 +834,21 @@ int sw_simulation::update_weights_using_transitions(double min_fractional_precis
   return iters;
 }
 
-
 void sw_simulation::initialize_transitions(double dos_precision) {
-  const int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
+  int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
   const double betamax = 1.0/min_T;
+  const int num_visits_desired = 100;
   const double Nmin = exp(betamax);
   int update_iters;
   bool done = false;
   while (!done) {
-    for (int i=0;i<check_how_often;i++) {
-      move_a_ball(true);
-    }
+
+    for (int i = 0; i < check_how_often; i++) move_a_ball(true);
+
+    check_how_often += Nmin*N; // try a little harder next time...
     update_iters = update_weights_using_transitions(dos_precision);
     done = true;
-    for (int i=energy_levels-1;i>max_entropy_state;i--) {
+    for (int i = energy_levels-1; i > max_entropy_state; i--) {
       if (energy_histogram[i]) {
         int Ndown_from_here = 0;
         int Ndown_to_here = 0;
@@ -860,17 +861,17 @@ void sw_simulation::initialize_transitions(double dos_precision) {
           }
         }
         /* Let's put a criterion on how many times we must be visited
-           from above if THE ENERGY ABOVE US is above the minimum
-           temperature.  This gives us one energy quantum of
-           paranoia. */
-        if (ln_energy_weights[i-1] - ln_energy_weights[i-2] < 1.0/min_T) {
-          if (Ndown_to_here < 2*Nmin) {
+           from above if we are above the minimum temperature. */
+        if (ln_energy_weights[i] - ln_energy_weights[i-1] < 1.0/min_T) {
+          if (Ndown_to_here < num_visits_desired || Nup_from_here < Nmin*num_visits_desired){
             if(printing_allowed()){
-              printf("Computing weights from transition matrix in %i iterations",
+              printf("Computing weights from transition matrix in %i iterations\n",
                      update_iters);
-              printf("[%9ld] Got only %d at energy %d (compared with %g) [%g vs %g]\n",
-                     iteration, Ndown_to_here, i, 2*Nmin,
-                     ln_energy_weights[i-1] - ln_energy_weights[i-2], 1.0/min_T);
+            printf("[%9ld] Got only %d (%d up) at energy %d (compared with %d [%d]) "
+                   "[%g vs %g]\n",
+                   iteration, Ndown_to_here, Nup_from_here, i,
+                   num_visits_desired, (int)Nmin*num_visits_desired,
+                   ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
             }
             done = false;
             break;
@@ -879,7 +880,7 @@ void sw_simulation::initialize_transitions(double dos_precision) {
       }
     }
   }
-  for (int i=min_energy_state+1;i<energy_levels;i++) {
+  for (int i = min_energy_state+1; i < energy_levels; i++){
     ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
   }
 }
