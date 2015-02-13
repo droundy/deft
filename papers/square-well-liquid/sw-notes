@@ -1,10 +1,7 @@
 
-implement flat end condition
 implement tmmc end condition (into modular end conditions)
-implement partial canonical weights if sample error end condition is used
-  - limit slope of weight array at lowest energies, extend to unseen energies
 
-run simns with various end conditions, parameters, and (small) N combinations
+run sims with various end conditions, parameters, and (small) N combinations
 run sims with reasonable parameter and end conditions with large Ns and various min_Ts
 
 determine metric for quality of initializations
