@@ -850,10 +850,47 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
   printf("Computed weights from transition matrix in %i iterations\n", iters);
 }
 
-void sw_simulation::initialize_transitions(int max_iter, double Tmin) {
-  max_iter *= N; // measure max_iter in moves per ball
-  for (int i=0;i<max_iter;i++) {
-    move_a_ball(Tmin, true);
+void sw_simulation::initialize_transitions(double Tmin, double dos_precision) {
+  const int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
+  const double betamax = 1.0/Tmin;
+  const double Nmin = exp(betamax);
+  bool done = false;
+  while (!done) {
+    for (int i=0;i<check_how_often;i++) {
+      move_a_ball(Tmin, true);
+    }
+    update_weights_using_transitions(dos_precision);
+    done = true;
+    for (int i=energy_levels-1;i>max_entropy_state;i--) {
+      if (energy_histogram[i]) {
+        int Ndown_from_here = 0;
+        int Ndown_to_here = 0;
+        int Nup_from_here = 0;
+        for (int de = 1; de <= biggest_energy_transition; de++) {
+          Ndown_from_here += transitions(i, de);
+          if (de <= i) {
+            Ndown_to_here += transitions(i-de, de);
+            Nup_from_here += transitions(i, -de);
+          }
+        }
+        /* Let's put a criterion on how many times we must be visited
+           from above if THE ENERGY ABOVE US is above the minimum
+           temperature.  This gives us one energy quantum of
+           paranoia. */
+        if (ln_energy_weights[i-1] - ln_energy_weights[i-2] < 1.0/Tmin) {
+          if (Ndown_to_here < 2*Nmin) {
+            printf("[%9ld] Got only %d at energy %d (compared with %g) [%g vs %g]\n", iteration, Ndown_to_here, i, 2*Nmin,
+                   ln_energy_weights[i-1] - ln_energy_weights[i-2], 1.0/Tmin);
+            fflush(stdout);
+            done = false;
+            break;
+          }
+        }
+      }
+    }
+  }
+  for (int i=min_energy_state+1;i<energy_levels;i++) {
+    ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/Tmin;
   }
 }
 
