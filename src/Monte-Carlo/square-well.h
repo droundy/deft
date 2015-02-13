@@ -160,11 +160,10 @@ struct sw_simulation {
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
-  void initialize_transitions(int first_update_iterations, char *end_conditions);
+  void initialize_transitions(double dos_precision);
 
-  void update_weights_using_transitions(double fractional_precision);
+  int update_weights_using_transitions(double fractional_precision);
   void update_weights_using_transition_flux(double fractional_precision);
-
 
   // return fractional error in sample count
   double fractional_sample_error(double T);

@@ -750,7 +750,7 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
+int sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
   // first, we find the range of energies for which we have data
   const int energies_observed = min_energy_state+1;
 
@@ -831,16 +831,57 @@ void sw_simulation::update_weights_using_transitions(double min_fractional_preci
   for(int i = 0; i < energies_observed; i++)
     ln_energy_weights[i] = -ln_D[i];
 
-  printf("Computed weights from transition matrix in %i iterations\n", iters);
+  return iters;
 }
 
-void sw_simulation::initialize_transitions(int first_update_iterations,
-                                           char *end_condition) {
-  double iters = first_update_iterations;
-  do {
-    for (int i = 0; i < N*iters; i++) move_a_ball(true);
-    iters *= 2;
-  } while(!finished_initializing(end_condition));
+
+void sw_simulation::initialize_transitions(double dos_precision) {
+  const int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
+  const double betamax = 1.0/min_T;
+  const double Nmin = exp(betamax);
+  int update_iters;
+  bool done = false;
+  while (!done) {
+    for (int i=0;i<check_how_often;i++) {
+      move_a_ball(true);
+    }
+    update_iters = update_weights_using_transitions(dos_precision);
+    done = true;
+    for (int i=energy_levels-1;i>max_entropy_state;i--) {
+      if (energy_histogram[i]) {
+        int Ndown_from_here = 0;
+        int Ndown_to_here = 0;
+        int Nup_from_here = 0;
+        for (int de = 1; de <= biggest_energy_transition; de++) {
+          Ndown_from_here += transitions(i, de);
+          if (de <= i) {
+            Ndown_to_here += transitions(i-de, de);
+            Nup_from_here += transitions(i, -de);
+          }
+        }
+        /* Let's put a criterion on how many times we must be visited
+           from above if THE ENERGY ABOVE US is above the minimum
+           temperature.  This gives us one energy quantum of
+           paranoia. */
+        if (ln_energy_weights[i-1] - ln_energy_weights[i-2] < 1.0/min_T) {
+          if (Ndown_to_here < 2*Nmin) {
+            if(printing_allowed()){
+              printf("Computing weights from transition matrix in %i iterations",
+                     update_iters);
+              printf("[%9ld] Got only %d at energy %d (compared with %g) [%g vs %g]\n",
+                     iteration, Ndown_to_here, i, 2*Nmin,
+                     ln_energy_weights[i-1] - ln_energy_weights[i-2], 1.0/min_T);
+            }
+            done = false;
+            break;
+          }
+        }
+      }
+    }
+  }
+  for (int i=min_energy_state+1;i<energy_levels;i++) {
+    ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
+  }
 }
 
 bool sw_simulation::printing_allowed(){

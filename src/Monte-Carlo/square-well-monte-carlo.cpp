@@ -442,7 +442,7 @@ int main(int argc, const char *argv[]) {
   if(sw.min_T == 0) sw.min_T = default_min_T;
   if(strcmp(end_condition,"none") == 0){
     if(optimized_ensemble) sprintf(end_condition,"init_samples");
-    else if(robustly_optimistic || tmmc) sprintf(end_condition,"sample_error");
+    else if(robustly_optimistic) sprintf(end_condition,"sample_error");
   }
 
   // Initialize the random number generator with our seed
@@ -655,13 +655,13 @@ int main(int argc, const char *argv[]) {
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
-      sw.initialize_transitions(first_update_iterations, end_condition);
+      sw.initialize_transitions(transition_precision);
     }
   }
 
   took("Actual initialization");
 
-  if(transition_override || tmmc){
+  if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n"
            "Target precision: %g\n", transition_precision);
     sw.update_weights_using_transitions(transition_precision);
@@ -669,7 +669,7 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  if(!fix_kT){
+  if(!fix_kT && !tmmc){
   //   /* Limit the slope of the weight array to that of its canonical value at our minimum
   //      temperature of interest */
   //   for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
