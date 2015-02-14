@@ -436,6 +436,18 @@ bool sw_simulation::finished_initializing(char *end_condition){
     return samples[min_energy_state] >= init_samples;
   else if(strcmp(end_condition,"sample_error") == 0)
     return fractional_sample_error(min_T) <= sample_error;
+  else if(strcmp(end_condition,"flat") == 0){
+    /* fixme: set minimum number of iterations(?), and make sure we don't get stuck due
+       to having only just seen the minimum energy */
+    int hist_min = energy_histogram[max_entropy_state];
+    int hist_total = 0;
+    for(int i = max_entropy_state+1; i < min_energy_state; i++){
+      hist_total += energy_histogram[i];
+      if(energy_histogram[i] < hist_min) hist_min = energy_histogram[i];
+    }
+    const double hist_mean = hist_total/(min_energy_state-max_entropy_state-1);
+    return hist_min >= flatness*hist_mean;
+  }
   else return true;
 }
 

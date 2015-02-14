@@ -110,6 +110,7 @@ int main(int argc, const char *argv[]) {
   // end conditions
   int default_init_samples = 2;
   double default_sample_error = 0.3;
+  double default_flatness = 0.1;
 
   // Do not change these! They are taken directly from the WL paper.
   const double vanilla_wl_factor = 1;
@@ -125,6 +126,7 @@ int main(int argc, const char *argv[]) {
   sw.min_T = 0;
   sw.init_samples = 0;
   sw.sample_error = 0;
+  sw.flatness = 0;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
@@ -249,10 +251,16 @@ int main(int argc, const char *argv[]) {
      &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
+
+    /*** END CONDITION PARAMETERS ***/
+
     {"init_samples", '\0', POPT_ARG_INT, &sw.init_samples, 0,
      "Number of times to sample mininum energy in initializing optimized ensemble", "INT"},
     {"sample_error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.sample_error, 0,
      "Fractional sample error to acquired to exit initialization", "DOUBLE"},
+    {"flatness", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.flatness, 0,
+     "Maximum allowable proportional deviation from mean histogram value after "
+     "initialization", "DOUBLE"},
 
     {"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &sw.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
@@ -324,7 +332,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that we are only using one end condition
-  if(sw.init_samples && sw.sample_error){
+  if(sw.init_samples && sw.sample_error && sw.flatness){
     printf("Can only use one end condition!\n");
     return 157;
   }
@@ -333,10 +341,12 @@ int main(int argc, const char *argv[]) {
   char *end_condition = new char[16];
   if(sw.init_samples) sprintf(end_condition,"init_samples");
   else if(sw.sample_error) sprintf(end_condition,"sample_error");
+  else if(sw.flatness) sprintf(end_condition,"flat");
   else sprintf(end_condition,"none");
   // Set default values if necessary
   if(!sw.init_samples) sw.init_samples = default_init_samples;
   if(!sw.sample_error) sw.sample_error = default_sample_error;
+  if(!sw.flatness) sw.sample_error = default_flatness;
 
   // If the user specified a filling fraction, make it so!
   if (ff != 0) {
@@ -442,7 +452,7 @@ int main(int argc, const char *argv[]) {
   if(sw.min_T == 0) sw.min_T = default_min_T;
 
   /* set default end condition if necessary
-     options are: init_samples, sample_error */
+     options are: init_samples, sample_error, flat */
   if(strcmp(end_condition,"none") == 0){
     if(optimized_ensemble) sprintf(end_condition,"init_samples");
     else if(robustly_optimistic) sprintf(end_condition,"sample_error");
@@ -672,21 +682,18 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  if(!fix_kT && !tmmc){
-  //   /* Limit the slope of the weight array to that of its canonical value at our minimum
-  //      temperature of interest */
-  //   for(int i = sw.max_entropy_state+1; i <= sw.min_energy_state; i++){
-  //     if(sw.ln_energy_weights[i] > sw.ln_energy_weights[i-1] + 1/sw.min_T)
-  //       sw.ln_energy_weights[i] = sw.ln_energy_weights[i-1] + 1/sw.min_T;
-  //   }
-  //   // Enforce a canonical slope of the weight array at unseen low energies
-  //   for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
-  //     sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state]
-  //       + (i-sw.min_energy_state)/sw.min_T;
-  //   }
-    // cap out the weights at low energies, so we don't get stuck there later
-    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
+  if(strcmp(end_condition,"sample_error") == 0){
+    /* Force canonical weights at low energies */
+    int slope_cutoff = 0;
+    for(int i = sw.min_energy_state; i > sw.max_entropy_state; i--){
+      if(sw.ln_energy_weights[i] - sw.ln_energy_weights[i-1] > 1/sw.min_T){
+        slope_cutoff = i;
+        break;
+      }
+    }
+    for(int i = slope_cutoff; i < sw.energy_levels; i++){
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[slope_cutoff-1]
+        + (i-(slope_cutoff-1))/sw.min_T;
     }
   }
 

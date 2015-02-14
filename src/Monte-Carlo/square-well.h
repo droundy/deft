@@ -25,6 +25,8 @@ struct move_info {
   move_info();
 };
 
+enum end_conditions { none, init_samples, sample_error, flat_histogram, canonical_slope };
+
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
 // simulation.  We do not maintain here any of the histograms except
@@ -80,6 +82,7 @@ struct sw_simulation {
   double min_T; // minimum temperature we care about
   int init_samples; // minimum number of times to sample the minimum energy in initialization
   double sample_error; // the maximum fractional sample error to achieve in initialization
+  double flatness; // maximum allowable proportional deviation from mean histogram value
 
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
