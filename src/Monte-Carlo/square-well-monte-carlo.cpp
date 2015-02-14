@@ -690,6 +690,18 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  {
+    int E1 = sw.max_entropy_state;
+    int E2 = sw.min_energy_state;
+    switch (sw.N) {
+    case 20:
+      E2 = 95;
+      break;
+    }
+    printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
+           sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
+  }
+
   double fractional_sample_error = sw.fractional_sample_error(sw.min_T);
 
   // ----------------------------------------------------------------------------
