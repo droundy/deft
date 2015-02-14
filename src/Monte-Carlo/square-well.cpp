@@ -889,6 +889,7 @@ bool sw_simulation::printing_allowed(){
       how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)*(time_now - last_print_time));
       last_print_time = time_now;
       every_so_often = 0;
+      fflush(stdout); // flushing once a second will be no problem and can be helpful
       return true;
     }
   }
