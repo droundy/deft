@@ -431,22 +431,20 @@ double sw_simulation::fractional_sample_error(double T){
   return error_times_Z/Z;
 }
 
-bool sw_simulation::finished_initializing(char *end_condition){
-  if(strcmp(end_condition,"init_samples") == 0)
+bool sw_simulation::finished_initializing(){
+  if(end_condition == init_samples)
     return samples[min_energy_state] >= init_samples;
-  else if(strcmp(end_condition,"sample_error") == 0)
+  else if(end_condition == sample_error)
     return fractional_sample_error(min_T) <= sample_error;
-  else if(strcmp(end_condition,"flat") == 0){
-    /* fixme: set minimum number of iterations(?), and make sure we don't get stuck due
-       to having only just seen the minimum energy */
-    int hist_min = energy_histogram[max_entropy_state];
+  else if(end_condition == flat_histogram){
+    int hist_min = int(1e20);
     int hist_total = 0;
     for(int i = max_entropy_state+1; i < min_energy_state; i++){
       hist_total += energy_histogram[i];
       if(energy_histogram[i] < hist_min) hist_min = energy_histogram[i];
     }
-    const double hist_mean = hist_total/(min_energy_state-max_entropy_state-1);
-    return hist_min >= flatness*hist_mean;
+    const double hist_mean = hist_total/(min_energy_state-max_entropy_state);
+    return hist_min >= flatness*hist_mean && energy != min_energy_state;
   }
   else return true;
 }
@@ -593,7 +591,6 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
   int weight_updates = 0;
   bool done = false;
   int last_min_energy_state = min_energy_state;
-  const int starting_iterations = iteration;
   while (!done) {
     for (int i=0; i < N*energy_levels; i++) {
       move_a_ball();
@@ -604,7 +601,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     int highest_hist_i = 0; // the most commonly visited energy
     int lowest_hist_i = 0; // the least commonly visited energy
     double highest_hist = 0; // highest histogram value
-    double lowest_hist = 1e200; // lowest hitsogram value
+    double lowest_hist = 1e200; // lowest histogram value
     double total_counts = 0; // total counts in energy histogram
     for(int i = max_entropy_state+1; i < energy_levels; i++){
       if(energy_histogram[i] > 0){
@@ -619,7 +616,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         }
       }
     }
-    double hist_mean = total_counts / (min_energy_state-max_entropy_state);
+    double hist_mean = (double)total_counts / (min_energy_state-max_entropy_state);
     const double variation = hist_mean/lowest_hist - 1;
 
     // print status text for testing purposes
@@ -647,7 +644,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       // and make sure we're not stuck at a newly introduced minimum energy state
       if (wl_factor < wl_cutoff && last_min_energy_state == min_energy_state) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
-               iteration - starting_iterations, weight_updates);
+               iteration, weight_updates);
         done = true;
       }
       last_min_energy_state = min_energy_state;
@@ -656,8 +653,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 }
 
 // initialize the weight array using the optimized ensemble method.
-void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
-                                                  char *end_condition){
+void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
   int weight_updates = 0;
   long update_iters = first_update_iterations;
   do {
@@ -689,11 +685,10 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 
     update_iters *= 2; // simulate for longer next time
 
-  } while(!finished_initializing(end_condition));
+  } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_robustly_optimistic(double transition_precision,
-                                                   char *end_condition){
+void sw_simulation::initialize_robustly_optimistic(double transition_precision){
   int weight_updates = 0;
   do {
     // First, let's reset our weights based on what we already know!
@@ -713,7 +708,7 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     const long test_iterations = energy_levels*uipow(N,3);
     for (long i = 0; i < N*test_iterations; i++) move_a_ball();
 
-  } while(!finished_initializing(end_condition));
+  } while(!finished_initializing());
 }
 
 
@@ -928,7 +923,8 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
       norm += T[i*Nde + de + biggest_energy_transition];
     }
     if (norm == 0) {
-      for (int j = max(0, i-biggest_energy_transition);j<min(energy_levels,i+biggest_energy_transition+1);j++) {
+      for (int j = max(0, i-biggest_energy_transition);
+           j < min(energy_levels, i+biggest_energy_transition+1); j++) {
         T[j*Nde + (i-j) + biggest_energy_transition] = 0;
       }
     }
@@ -945,11 +941,14 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
       }
     }
   }
-  if (T[E1*Nde + biggest_energy_transition] == 0 || T[E2*Nde + biggest_energy_transition] == 0) {
+  if (T[E1*Nde + biggest_energy_transition] == 0
+      || T[E2*Nde + biggest_energy_transition] == 0) {
     return 1e100;
   }
 
-  while (probE2 < 0.5 && iters < 1e9) {
+  /* fixme: change to iters < 1e9 later maybe, but things were getting stuck here so I
+     lowered it for now */
+  while (probE2 < 0.5 && iters < 1e8) {
     iters++;
     for (int i=0;i<energy_levels;i++) pop_new[i] = 0;
     for (int i=0;i<=min_energy_state;i++) {
@@ -981,7 +980,8 @@ bool sw_simulation::printing_allowed(){
   if (++every_so_often % how_often == 0) {
     const clock_t time_now = clock();
     if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
-      how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)*(time_now - last_print_time));
+      how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)
+                                                    *(time_now - last_print_time));
       last_print_time = time_now;
       every_so_often = 0;
       fflush(stdout); // flushing once a second will be no problem and can be helpful
