@@ -338,11 +338,23 @@ int main(int argc, const char *argv[]) {
   }
 
   // Set end condition
-  char *end_condition = new char[16];
-  if(sw.init_samples) sprintf(end_condition,"init_samples");
-  else if(sw.sample_error) sprintf(end_condition,"sample_error");
-  else if(sw.flatness) sprintf(end_condition,"flat");
-  else sprintf(end_condition,"none");
+  char *end_condition_text = new char[16];
+  if(sw.init_samples){
+    sw.end_condition = init_samples;
+    sprintf(end_condition_text,"init_samples");
+  }
+  else if(sw.sample_error){
+    sw.end_condition = sample_error;
+    sprintf(end_condition_text,"sample_error");
+  }
+  else if(sw.flatness){
+    sw.end_condition = flat_histogram;
+    sprintf(end_condition_text,"flat_histogram");
+  }
+  else{
+    sw.end_condition = none;
+    sprintf(end_condition_text,"none");
+  }
   // Set default values if necessary
   if(!sw.init_samples) sw.init_samples = default_init_samples;
   if(!sw.sample_error) sw.sample_error = default_sample_error;
@@ -429,8 +441,8 @@ int main(int argc, const char *argv[]) {
     } else {
       method_tag[0] = 0; // set method_tag to the empty string
     }
-    if(strcmp(end_condition,"none") != 0)
-      sprintf(method_tag, "%s-%s", method_tag, end_condition);
+    if(sw.end_condition != none)
+      sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
     if(transition_override) sprintf(filename, "%s-to", filename);
@@ -451,11 +463,10 @@ int main(int argc, const char *argv[]) {
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
   if(sw.min_T == 0) sw.min_T = default_min_T;
 
-  /* set default end condition if necessary
-     options are: init_samples, sample_error, flat */
-  if(strcmp(end_condition,"none") == 0){
-    if(optimized_ensemble) sprintf(end_condition,"init_samples");
-    else if(robustly_optimistic) sprintf(end_condition,"sample_error");
+  /* set default end condition if necessary */
+  if(sw.end_condition == none){
+    if(optimized_ensemble) sw.end_condition = init_samples;
+    else if(robustly_optimistic) sw.end_condition = sample_error;
   }
 
   // Initialize the random number generator with our seed
@@ -648,8 +659,9 @@ int main(int argc, const char *argv[]) {
   sw.energy =
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
-  // First, let us figure out what the max entropy point is.
+  // First, let us figure out what the max entropy point is (and move to it)
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
+  sw.iteration = 0;
 
   // Now let's initialize our weight array
   if(!no_weights){
@@ -662,9 +674,9 @@ int main(int argc, const char *argv[]) {
       sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                                 vanilla_wl_threshold, vanilla_wl_cutoff);
     } else if (optimized_ensemble) {
-      sw.initialize_optimized_ensemble(first_update_iterations, end_condition);
+      sw.initialize_optimized_ensemble(first_update_iterations);
     } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic(transition_precision, end_condition);
+      sw.initialize_robustly_optimistic(transition_precision);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
@@ -682,19 +694,23 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  if(strcmp(end_condition,"sample_error") == 0){
+  if(sw.end_condition == sample_error){
     /* Force canonical weights at low energies */
-    int slope_cutoff = 0;
+    int start_canonical = sw.min_energy_state+1;
     for(int i = sw.min_energy_state; i > sw.max_entropy_state; i--){
       if(sw.ln_energy_weights[i] - sw.ln_energy_weights[i-1] > 1/sw.min_T){
-        slope_cutoff = i;
+        start_canonical = i;
         break;
       }
     }
-    for(int i = slope_cutoff; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[slope_cutoff-1]
-        + (i-(slope_cutoff-1))/sw.min_T;
+    for(int i = start_canonical; i < sw.energy_levels; i++){
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[start_canonical-1]
+        + (i-(start_canonical-1))/sw.min_T;
     }
+  } else if (!fix_kT){
+    /* Flatten the weight array at unseen energies */
+    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
   }
 
   {
@@ -786,11 +802,11 @@ int main(int argc, const char *argv[]) {
             "%s# histogram method: tmmc\n",
             headerinfo);
   }
-  if(strcmp(end_condition,"none") != 0){
-    sprintf(headerinfo, "%s# %s:", headerinfo, end_condition);
-    if(strcmp(end_condition,"init_samples") == 0)
+  if(sw.end_condition != none){
+    sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
+    if(sw.end_condition == init_samples)
       sprintf(headerinfo, "%s %i\n", headerinfo, sw.init_samples);
-    if(strcmp(end_condition,"sample_error") == 0)
+    if(sw.end_condition == sample_error)
       sprintf(headerinfo, "%s %g\n", headerinfo, sw.sample_error);
   }
   if(!no_weights && !fix_kT)

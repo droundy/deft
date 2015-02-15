@@ -79,6 +79,7 @@ struct sw_simulation {
 
   /* The following control end conditions for histogram methods */
 
+  end_conditions end_condition;
   double min_T; // minimum temperature we care about
   int init_samples; // minimum number of times to sample the minimum energy in initialization
   double sample_error; // the maximum fractional sample error to achieve in initialization
@@ -156,10 +157,9 @@ struct sw_simulation {
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  void initialize_optimized_ensemble(int first_update_iterations,
-                                     char *end_condition);
+  void initialize_optimized_ensemble(int first_update_iterations);
 
-  void initialize_robustly_optimistic(double robust_update_scale, char *end_condition);
+  void initialize_robustly_optimistic(double robust_update_scale);
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
@@ -172,7 +172,7 @@ struct sw_simulation {
   double fractional_sample_error(double T);
 
   // check whether we are done initializing
-  bool finished_initializing(char *end_condition);
+  bool finished_initializing();
 
   double estimate_trip_time(int E1, int E2);
 
