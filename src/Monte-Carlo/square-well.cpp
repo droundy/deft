@@ -659,10 +659,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
                                                   char *end_condition){
   int weight_updates = 0;
-  int update_iters = first_update_iterations;
+  long update_iters = first_update_iterations;
   do {
     // simulate for a while
-    for(int i = 0; i < N*update_iters; i++) move_a_ball();
+    for(long i = 0; i < N*update_iters; i++) move_a_ball();
 
     // update weight array
     for(int i = max_entropy_state; i < energy_levels; i++){
@@ -683,8 +683,8 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
       walkers_up[i] = 0;
       walkers_total[i] = 0;
     }
-    printf("Weight update: %i. min_energy_state: %i. samples: %li\n",
-           weight_updates, min_energy_state, samples[min_energy_state]);
+    printf("Weight update: %i (%ld iters). min_energy_state: %i. samples: %li\n",
+           weight_updates, update_iters, min_energy_state, samples[min_energy_state]);
     weight_updates++;
 
     update_iters *= 2; // simulate for longer next time
@@ -710,8 +710,8 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision,
     }
 
     // Simulate for a while
-    const int test_iterations = energy_levels*uipow(N,3);
-    for (int i = 0; i < N*test_iterations; i++) move_a_ball();
+    const long test_iterations = energy_levels*uipow(N,3);
+    for (long i = 0; i < N*test_iterations; i++) move_a_ball();
 
   } while(!finished_initializing(end_condition));
 }
@@ -890,10 +890,93 @@ void sw_simulation::initialize_transitions(double dos_precision) {
   }
 }
 
+double sw_simulation::estimate_trip_time(int E1, int E2) {
+  double *pop = new double[energy_levels]();
+  double *pop_new = new double[energy_levels]();
+  pop[E1] = 1.0;
+  double probE2 = 0.0;
+  int iters = 0;
+
+  const int Nde = 2*biggest_energy_transition+1;
+  /* first we fill up the transition matrix with raw integer counts */
+  double *T = new double[energy_levels*Nde]();
+  for (int i=0;i<energy_levels;i++) {
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      T[i*Nde + de + biggest_energy_transition] = transitions(i,de);
+      //printf("T(%d, %d) = %g\n", i, de, T[i*Nde + de + biggest_energy_transition]);
+   }
+  }
+  /* now we take into account the weights */
+  for (int i=0;i<energy_levels;i++) {
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      if (T[i*Nde + de + biggest_energy_transition]) {
+
+        double w = exp(ln_energy_weights[i+de] - ln_energy_weights[i]);
+        double t = T[i*Nde + de + biggest_energy_transition];
+        if (w < 1) {
+          T[i*Nde + de + biggest_energy_transition] = t*w;
+          T[i*Nde + biggest_energy_transition] += t*(1-w);
+        }
+      }
+    }
+  }
+  /* zero out transitions to a dead-end state that we cannot
+     transition out of. */
+  for (int i=0;i<energy_levels;i++) {
+    double norm = 0;
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      norm += T[i*Nde + de + biggest_energy_transition];
+    }
+    if (norm == 0) {
+      for (int j = max(0, i-biggest_energy_transition);j<min(energy_levels,i+biggest_energy_transition+1);j++) {
+        T[j*Nde + (i-j) + biggest_energy_transition] = 0;
+      }
+    }
+  }
+  /* finally, normalize the transition matrix */
+  for (int i=0;i<energy_levels;i++) {
+    double norm = 0;
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      norm += T[i*Nde + de + biggest_energy_transition];
+    }
+    if (norm) {
+      for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+        T[i*Nde + de + biggest_energy_transition] /= norm;
+      }
+    }
+  }
+  if (T[E1*Nde + biggest_energy_transition] == 0 || T[E2*Nde + biggest_energy_transition] == 0) {
+    return 1e100;
+  }
+
+  while (probE2 < 0.5 && iters < 1e9) {
+    iters++;
+    for (int i=0;i<energy_levels;i++) pop_new[i] = 0;
+    for (int i=0;i<=min_energy_state;i++) {
+      if (pop[i]) {
+        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
+          pop_new[i+de] += pop[i]*T[i*Nde + de + biggest_energy_transition];
+        }
+      }
+    }
+    for (int i=0;i<energy_levels;i++) pop[i] = pop_new[i];
+    double tot = 0;
+    for (int i=0;i<energy_levels;i++) tot += pop[i];
+    for (int i=0;i<energy_levels;i++) pop[i] *= (1 - probE2)/tot; // renormalize!
+    probE2 += pop[E2];
+    if (printing_allowed()) {
+      printf("After %d moves probability is %g out of %g\n", iters, probE2, tot);
+      //for (int i=0;i<energy_levels;i++) if (pop[i]) printf("p[%3d] = %g\n", i, pop[i]);
+    }
+    pop[E2] = 0;
+  }
+  return iters;
+}
+
 bool sw_simulation::printing_allowed(){
-  const double time_skip = 1; // seconds
-  static int every_so_often = 1;
-  static int how_often = 10;
+  const double time_skip = 3; // seconds
+  static int every_so_often = 0;
+  static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.
   if (++every_so_often % how_often == 0) {
     const clock_t time_now = clock();
@@ -901,6 +984,7 @@ bool sw_simulation::printing_allowed(){
       how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)*(time_now - last_print_time));
       last_print_time = time_now;
       every_so_often = 0;
+      fflush(stdout); // flushing once a second will be no problem and can be helpful
       return true;
     }
   }

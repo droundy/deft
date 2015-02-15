@@ -174,6 +174,8 @@ struct sw_simulation {
   // check whether we are done initializing
   bool finished_initializing(char *end_condition);
 
+  double estimate_trip_time(int E1, int E2);
+
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
 
