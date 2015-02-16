@@ -300,8 +300,9 @@ int main(int argc, const char *argv[]) {
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
   // Observed and sampled energies
-  sw.energy_observed = new bool[sw.energy_levels]();
-  sw.samples = new long[sw.energy_levels]();
+  sw.pessimistic_observation = new bool[sw.energy_levels]();
+  sw.pessimistic_samples = new long[sw.energy_levels]();
+  sw.optimistic_samples = new long[sw.energy_levels]();
 
   // Transitions from one energy to another
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance);
@@ -508,7 +509,8 @@ int main(int argc, const char *argv[]) {
   // Reset energy histogram and sample counts
   for(int i = 0; i < sw.energy_levels; i++){
     sw.energy_histogram[i] = 0;
-    sw.samples[i] = 0;
+    sw.pessimistic_samples[i] = 0;
+    sw.optimistic_samples[i] = 0;
   }
 
   while(sw.iteration <= simulation_iterations) {
@@ -645,8 +647,9 @@ int main(int argc, const char *argv[]) {
   delete[] sw.walkers_up;
   delete[] sw.walkers_total;
 
-  delete[] sw.energy_observed;
-  delete[] sw.samples;
+  delete[] sw.pessimistic_observation;
+  delete[] sw.pessimistic_samples;
+  delete[] sw.optimistic_samples;
 
   for (int i = 0; i < sw.energy_levels; i++) {
     delete[] g_histogram[i];

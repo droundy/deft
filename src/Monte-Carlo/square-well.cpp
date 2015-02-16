@@ -358,7 +358,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   moves.working++;
   energy += energy_change;
 
-  if(energy_change != 0) energy_change_updates();
+  if(energy_change != 0) energy_change_updates(energy_change);
 
   end_move_updates();
 }
@@ -367,23 +367,25 @@ void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
   energy_histogram[energy]++;
-  if(energy_observed[min_energy_state])
+  if(pessimistic_observation[min_energy_state])
     walkers_up[energy]++;
   walkers_total[energy]++;
 }
 
-void sw_simulation::energy_change_updates(){
+void sw_simulation::energy_change_updates(int energy_change){
   // If we're at or above the state of max entropy, we have not yet observed any energies
   if(energy <= max_entropy_state){
     for(int i = max_entropy_state; i < energy_levels; i++)
-      energy_observed[i] = false;
+      pessimistic_observation[i] = false;
   }
-  // If we have not yet observed this energy since the last time we were at max entropy,
-  //   now we have!
-  else if(!energy_observed[energy]){
-    energy_observed[energy] = true;
-    samples[energy]++;
+  // If we have not yet observed this energy, now we have!
+  else if(!pessimistic_observation[energy]){
+    pessimistic_observation[energy] = true;
+    pessimistic_samples[energy]++;
   }
+
+  else if(energy_change > 0) optimistic_samples[energy]++;
+
   // If we have observed a new lowest energy, remember it; furthermore, this means we can't
   //   have had any walkers going up from the lowest energy, so we reset walkers_up
   if(energy > min_energy_state){
@@ -426,17 +428,29 @@ double sw_simulation::fractional_sample_error(double T){
     const double boltz = energy_histogram[i]
       *exp(-ln_energy_weights[i]+(i-min_energy_state)/T);
     Z += boltz;
-    error_times_Z += boltz/sqrt(samples[i]+1);
+    if(optimistic_sampling)
+      error_times_Z += boltz/sqrt(optimistic_samples[i]+1);
+    else
+      error_times_Z += boltz/sqrt(pessimistic_samples[i]+1);
   }
   return error_times_Z/Z;
 }
 
 bool sw_simulation::finished_initializing(){
-  if(end_condition == init_samples)
-    return samples[min_energy_state] >= init_samples;
-
-  else if(end_condition == sample_error)
+  if(end_condition == sample_error)
     return fractional_sample_error(min_T) <= sample_error;
+
+  else if(end_condition == min_samples)
+    if(optimistic_sampling){
+      for(int i = max_entropy_state; i <= min_energy_state; i++){
+        if(optimistic_samples[i] < min_samples)
+          return false;
+      }
+      return true;
+    }
+    else
+      return pessimistic_samples[min_energy_state] >= min_samples;
+
 
   else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
@@ -687,8 +701,9 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
       walkers_up[i] = 0;
       walkers_total[i] = 0;
     }
-    printf("Weight update: %i (%ld iters). min_energy_state: %i. samples: %li\n",
-           weight_updates, update_iters, min_energy_state, samples[min_energy_state]);
+    printf("Weight update: %i (%ld iters). min_energy_state: %i. pessimistic_samples: %li\n",
+           weight_updates, update_iters, min_energy_state,
+           pessimistic_samples[min_energy_state]);
     weight_updates++;
 
     update_iters *= 2; // simulate for longer next time
@@ -707,8 +722,9 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
       energy_histogram[e] = 0;
-      samples[e] = 0;
-      energy_observed[e] = false;
+      pessimistic_observation[e] = false;
+      pessimistic_samples[e] = 0;
+      optimistic_samples[e] = 0;
     }
 
     // Simulate for a while
@@ -873,17 +889,13 @@ void sw_simulation::initialize_transitions(double dos_precision) {
     done = true;
     for (int i = energy_levels-1; i > max_entropy_state; i--) {
       if (energy_histogram[i]) {
-        int Ndown_to_here = 0;
-        for (int de = 1; de <= min(i,biggest_energy_transition); de++) {
-          Ndown_to_here += transitions(i-de, de);
-        }
         /* Let's put a criterion on how many times we must be visited
            from above if we are above the minimum temperature. */
         if (ln_energy_weights[i] - ln_energy_weights[i-1] < 1.0/min_T) {
-          if (Ndown_to_here < num_visits_desired) {
+          if (optimistic_samples[i] < num_visits_desired) {
             if (printing_allowed()) {
-              printf("[%9ld] Got only %d at energy %d (compared with %d) [%g vs %g]\n",
-                     iteration, Ndown_to_here, i, num_visits_desired,
+              printf("[%9ld] Got only %li at energy %d (compared with %d) [%g vs %g]\n",
+                     iteration, optimistic_samples[i], i, num_visits_desired,
                      ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
               fflush(stdout);
             }

@@ -1,8 +1,38 @@
 
-implement tmmc end condition (into modular end conditions)
+figure out why fractional_sample_error requires samples[i]+1
+ - it shouldn't!
 
-run sims with various end conditions, parameters, and (small) N combinations
-run sims with reasonable parameter and end conditions with large Ns and various min_Ts
+run [vanilla_]wang_landau for 60, 80, 100, 150, 200
+ - go from 100 to 200 by 20s?
+
+
+(?)implement current tmmc end condition into modular end conditions
+ - i.e. use slope of dos to determine minimum energy for optimistic min_samples
+
+four separate end conditions: optimistic/pessimistic min_samples/sample_error
+ - all min_samples can use slope of dos to determine the minimum energy we care about
+ - combine end conditions in one initialization routine?
+   - e.g. a sample error of x with y init_samples
+
+using min_T_energy for keeping track of walkers in optimized_ensemble as well
+
+thoughts on the fact that robustly_optimistic used to work well with a flatness end condition
+  and just pushing down weights?
+
+scaling between algorithm iterations in tmmc vs in robustly_optimistic
+ - if they are made to scale the same way, the two methods would only differ by
+    whether they use the transition matrix in move_a_ball (remembering that end conditions are
+    decoupled from histogram methods)
+
+check which methods rely on the gaussian pre-initialization
+
+
+
+
+run optimized_ensemble, tmmc, and robustly_optimistic for each end condition for many small N
+
+after figuring out what to do with end conditions, run sims with large Ns and various min_Ts
+
 
 determine metric for quality of initializations
  - max error in U/Nk or C_V/nK at T \ge min_T
@@ -11,4 +41,3 @@ make iterations vs initialization quality plot
 
 change name of "canonical MC" to "infinite temperature MC" in thesis
 
-check which methods rely on the gaussian pre-initialization
