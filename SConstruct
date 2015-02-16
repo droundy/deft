@@ -485,6 +485,7 @@ for mkdat in Split("""
 	papers/fuzzy-fmt/figs/walls
 	papers/fuzzy-fmt/figs/soft-sphere
 	papers/fuzzy-fmt/figs/radial-wca
+	papers/fuzzy-fmt/figs/radial-lj
 	papers/fuzzy-fmt/figs/hard-sphere
 	papers/fuzzy-fmt/figs/soft-wall
       """):
