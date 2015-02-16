@@ -25,7 +25,7 @@ struct move_info {
   move_info();
 };
 
-enum end_conditions { none, init_samples, sample_error, flat_histogram, canonical_slope };
+enum end_conditions { none, min_samples, sample_error, flat_histogram };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
@@ -61,7 +61,7 @@ struct sw_simulation {
   double translation_scale; // scale for how far to move balls
   int energy_levels; // total number of energy levels
 
-  /* The following accumulate results of the simulation.  Although
+  /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
   int max_entropy_state, min_energy_state;
@@ -72,16 +72,17 @@ struct sw_simulation {
   /* The following keep track of how many times we have walked
      between the a given energy and the state of max entropy */
 
-  // has a given energy been observed since the last time we were at max entropy?
-  bool *energy_observed;
-  long *samples; // how many independent samples of a given energy have we had?
+  bool optimistic_sampling;
+  bool *pessimistic_observation; // of a given energy
+  long *pessimistic_samples; // how many samples from the point of max entropy have we had?
+  long *optimistic_samples; // how many times have we gone down to this energy?
 
 
   /* The following control end conditions for histogram methods */
 
   end_conditions end_condition;
   double min_T; // minimum temperature we care about
-  int init_samples; // minimum number of times to sample the minimum energy in initialization
+  int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
   double flatness; // maximum allowable proportional deviation from mean histogram value
 
@@ -112,9 +113,10 @@ struct sw_simulation {
     return transitions(from, to - from);
   };
 
-  long min_energy_observations() const {
+  long min_energy_observations(bool optimistic_sampling) const {
     for (int i = energy_levels-1; i >= max_entropy_state; i--)
-      if (samples[i]) return samples[i];
+      if (optimistic_sampling && optimistic_samples[i]) return optimistic_samples[i];
+      else if(pessimistic_samples[i]) return pessimistic_samples[i];
     return 0;
   };
   int max_interactions() const { // return the maximum observed number of interactions
@@ -128,7 +130,7 @@ struct sw_simulation {
 
   void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
-  void energy_change_updates(); // updates to run only if we've changed energy
+  void energy_change_updates(int energy_change); // updates to run if we've changed energy
 
   // the last time we printed status text (i.e. from initialization)
   clock_t last_print_time;
