@@ -104,7 +104,6 @@ int main(int argc, const char *argv[]) {
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double default_min_T = 0.2;
   double transition_precision = 1e-10;
 
   // end conditions
@@ -123,7 +122,7 @@ int main(int argc, const char *argv[]) {
   sw.walls = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
-  sw.min_T = 0;
+  sw.min_T = 0.2;
   sw.init_samples = 0;
   sw.sample_error = 0;
   sw.flatness = 0;
@@ -358,7 +357,7 @@ int main(int argc, const char *argv[]) {
   // Set default values if necessary
   if(!sw.init_samples) sw.init_samples = default_init_samples;
   if(!sw.sample_error) sw.sample_error = default_sample_error;
-  if(!sw.flatness) sw.sample_error = default_flatness;
+  if(!sw.flatness) sw.flatness = default_flatness;
 
   // If the user specified a filling fraction, make it so!
   if (ff != 0) {
@@ -461,12 +460,11 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
-  if(sw.min_T == 0) sw.min_T = default_min_T;
 
   /* set default end condition if necessary */
   if(sw.end_condition == none){
     if(optimized_ensemble) sw.end_condition = init_samples;
-    else if(robustly_optimistic) sw.end_condition = sample_error;
+    else if(robustly_optimistic) sw.end_condition = flat_histogram;
   }
 
   // Initialize the random number generator with our seed
