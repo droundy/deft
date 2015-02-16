@@ -45,7 +45,7 @@ def run(args):
 
     hostname = socket.gethostname()
 
-    cores = 6 if hostname == 'quipu' else 4
+    cores = 8 if hostname == 'quipu' else 4
 
     # build scons
     exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname],

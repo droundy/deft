@@ -49,7 +49,7 @@ const int z = 2;
 // ------------------------------------------------------------------------------
 
 // Tests validity of a shrunken version of the cell
-static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor);
+static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor);
 
 // States how long it's been since last took call.
 static void took(const char *name);
@@ -250,8 +250,8 @@ int main(int argc, const char *argv[]) {
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
     else if(sw.walls == 3) sprintf(wall_tag,"box");
-    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i",
-            wall_tag, well_width, eta, sw.N);
+    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i-sf%f",
+            wall_tag, well_width, eta, sw.N, scaling_factor);
     printf("\nUsing default file name: ");
     delete[] wall_tag;
   }
@@ -300,8 +300,9 @@ int main(int argc, const char *argv[]) {
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
   // Observed and sampled energies
-  sw.energy_observed = new bool[sw.energy_levels]();
-  sw.samples = new long[sw.energy_levels]();
+  sw.pessimistic_observation = new bool[sw.energy_levels]();
+  sw.pessimistic_samples = new long[sw.energy_levels]();
+  sw.optimistic_samples = new long[sw.energy_levels]();
 
   // Transitions from one energy to another
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance);
@@ -473,9 +474,10 @@ int main(int argc, const char *argv[]) {
           "# R: %f\n"
           "# well_width: %g\n"
           "# translation_scale: %g\n"
-          "# neighbor_scale: %g\n",
+          "# neighbor_scale: %g\n"
+          "# scaling factor: %g\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale);
+          well_width, sw.translation_scale, neighbor_scale, scaling_factor);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
@@ -495,10 +497,20 @@ int main(int argc, const char *argv[]) {
   sw.moves.working = 0;
   sw.iteration = 0;
 
+  // tracking for free energy
+  int current_valid_run = 0;
+  int current_failed_run = 0;
+  int longest_valid_run = 0;
+  int longest_failed_run = 0;
+  int total_checks_of_small_cell = 0;
+  int total_valid_small_checks = 0;
+  int total_failed_small_checks = 0;
+
   // Reset energy histogram and sample counts
   for(int i = 0; i < sw.energy_levels; i++){
     sw.energy_histogram[i] = 0;
-    sw.samples[i] = 0;
+    sw.pessimistic_samples[i] = 0;
+    sw.optimistic_samples[i] = 0;
   }
 
   while(sw.iteration <= simulation_iterations) {
@@ -509,13 +521,27 @@ int main(int argc, const char *argv[]) {
       sw.move_a_ball();
 
     // just hacking stuff in to see what works
-    // do the small bit every n^2 iterations for now
+    // do the small bit every 100 n^2 iterations for now
     if (sw.iteration % (100 * sw.N * sw.N) == 0) {
-      if(!overlap_in_shrunk_cell(sw,  scaling_factor)){
-        printf("true\n");  //printing to console for now
+      total_checks_of_small_cell++;
+
+      if(overlap_in_small_cell(sw,  scaling_factor)){
+        total_failed_small_checks++;
+        // see if the run we just ended was a new PR.
+        // (makes more sense to do this on run-end than while the run could still get longer)
+        if(current_valid_run > longest_valid_run){longest_valid_run = current_valid_run;}
+        current_valid_run = 0;
+        current_failed_run++;
+
+        if(debug){printf("%i - false\n", current_failed_run);}
       }
       else{
-        printf("false\n");
+        total_valid_small_checks++;
+        if(current_failed_run > longest_failed_run){ longest_failed_run = current_failed_run;}
+        current_failed_run = 0;
+        current_valid_run++;
+
+        if(debug){printf("%i - true\n", current_valid_run);}
       }
     }
 
@@ -560,9 +586,16 @@ int main(int argc, const char *argv[]) {
               "# iterations: %li\n"
               "# working moves: %li\n"
               "# total moves: %li\n"
-              "# acceptance rate: %g\n\n",
+              "# acceptance rate: %g\n"
+              "# longest failed run: %i\n"
+              "# longest valid run: %i\n"
+              "# total checks of small cell: %i\n"
+              "# total failed small checks: %i\n"
+              "# total valid small checks %i\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
-              double(sw.moves.working)/sw.moves.total);
+              double(sw.moves.working)/sw.moves.total, longest_failed_run,
+              longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
+              total_valid_small_checks);
 
       // Save RDF
       if(!sw.walls){
@@ -614,8 +647,9 @@ int main(int argc, const char *argv[]) {
   delete[] sw.walkers_up;
   delete[] sw.walkers_total;
 
-  delete[] sw.energy_observed;
-  delete[] sw.samples;
+  delete[] sw.pessimistic_observation;
+  delete[] sw.pessimistic_samples;
+  delete[] sw.optimistic_samples;
 
   for (int i = 0; i < sw.energy_levels; i++) {
     delete[] g_histogram[i];
@@ -636,7 +670,7 @@ int main(int argc, const char *argv[]) {
 // END OF MAIN
 // ------------------------------------------------------------------------------
 
-static bool overlap_in_shrunk_cell(sw_simulation &sw, double scaling_factor){
+static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor){
   double scaled_len[3];
 
   for(int i=0; i < 3; i++){
