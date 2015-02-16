@@ -442,7 +442,7 @@ bool sw_simulation::finished_initializing(){
 
   else if(end_condition == min_samples)
     if(optimistic_sampling){
-      for(int i = max_entropy_state; i <= min_energy_state; i++){
+      for(int i = min_energy_state; i < max_entropy_state; i--){
         if(optimistic_samples[i] < min_samples)
           return false;
       }
