@@ -5,17 +5,16 @@ _colors = { 'nw': 'r',
             'kT2': 'c',
             'kT0.1': 'g',
             'tmmc': 'k',
-            'bubble_suppression': 'k',
             'wang_landau': 'g',
             'vanilla_wang_landau': 'b',
             'robustly_optimistic': 'r',
             'gaussian': 'm',
-            'walker_optimization': 'y'}
+            'optimized_ensemble': 'y'}
 
 def color(method):
     if method in _colors:
         return _colors[method]
-    return 'k' # everything else black
+    return 'b' # everything else blue
 
 def line(method):
     lines = { 'nw': '--',
@@ -29,12 +28,11 @@ def line(method):
 def title(method):
     titles = { 'nw': '$kT/\epsilon = \infty$ sim.',
                'tmmc': 'tmmc',
-               'bubble_suppression': 'bubble suppression',
                'wang_landau': 'Wang-Landau',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
                'robustly_optimistic': 'robustly optimistic',
                'gaussian': 'gaussian method',
-               'walker_optimization': 'walker optimization'}
+               'optimized_ensemble': 'optimized ensemble'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':

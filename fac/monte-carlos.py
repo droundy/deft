@@ -24,10 +24,10 @@ for x in monte_carlos:
 
 
 for method in ["nw","bubble_suppression","robustly_optimistic","gaussian",
-               "wang_landau","walker_optimization", 'tmmc', 'kT 1', 'kT 2', 'kT 0.5', 'kT 0.4']:
+               "wang_landau","optimized_ensemble", 'tmmc', 'kT 1', 'kT 2', 'kT 0.5', 'kT 0.4']:
     for ww in [1.3, 1.5]:
         for ff in [0.3, 0.8]:
-            for N in range(5,21):
+            for N in range(5,31):
                 outputs = ["papers/square-well-liquid/data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                            % (ww, ff, N, method.replace(' ',''), postfix)
                            for postfix in ['g', 'E', 'lnw', 's', 'transitions']]

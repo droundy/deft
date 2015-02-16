@@ -25,6 +25,8 @@ struct move_info {
   move_info();
 };
 
+enum end_conditions { none, init_samples, sample_error, flat_histogram, canonical_slope };
+
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
 // simulation.  We do not maintain here any of the histograms except
@@ -74,6 +76,15 @@ struct sw_simulation {
   bool *energy_observed;
   long *samples; // how many independent samples of a given energy have we had?
 
+
+  /* The following control end conditions for histogram methods */
+
+  end_conditions end_condition;
+  double min_T; // minimum temperature we care about
+  int init_samples; // minimum number of times to sample the minimum energy in initialization
+  double sample_error; // the maximum fractional sample error to achieve in initialization
+  double flatness; // maximum allowable proportional deviation from mean histogram value
+
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
      this metric is that we can (hopefully) get away without resetting
@@ -115,8 +126,7 @@ struct sw_simulation {
      keep track of walkers. */
   long *walkers_up, *walkers_total;
 
-  void move_a_ball(double Tmin = 0.25,
-                   bool use_transition_matrix = false); // attempt to move one ball
+  void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(); // updates to run only if we've changed energy
 
@@ -138,9 +148,6 @@ struct sw_simulation {
   // and subtract off minimum weight so that our weights don't get out of hand
   void flush_weight_array();
 
-  // return expectatoin value of fractional error in sample count
-  double fractional_sample_error(double T);
-
   /*** HISTOGRAM METHODS ***/
 
   void initialize_canonical(double kT);
@@ -150,17 +157,24 @@ struct sw_simulation {
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  void initialize_walker_optimization(int first_update_iterations,
-                                      int init_min_energy_samples);
+  void initialize_optimized_ensemble(int first_update_iterations);
 
-  void initialize_robustly_optimistic(double robust_update_scale, double robust_cutoff);
+  void initialize_robustly_optimistic(double robust_update_scale);
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
-  void update_weights_using_transitions(double fractional_precision);
+  void initialize_transitions(double dos_precision);
+
+  int update_weights_using_transitions(double fractional_precision);
   void update_weights_using_transition_flux(double fractional_precision);
 
-  void initialize_transitions(int max_iterations, double Tmin);
+  // return fractional error in sample count
+  double fractional_sample_error(double T);
+
+  // check whether we are done initializing
+  bool finished_initializing();
+
+  double estimate_trip_time(int E1, int E2);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
