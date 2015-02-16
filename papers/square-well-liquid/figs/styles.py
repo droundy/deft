@@ -32,7 +32,7 @@ def title(method):
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
                'robustly_optimistic': 'robustly optimistic',
                'gaussian': 'gaussian method',
-               'optimized_ensemble': 'walker optimization'}
+               'optimized_ensemble': 'optimized ensemble'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':

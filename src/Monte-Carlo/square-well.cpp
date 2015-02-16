@@ -434,18 +434,26 @@ double sw_simulation::fractional_sample_error(double T){
 bool sw_simulation::finished_initializing(){
   if(end_condition == init_samples)
     return samples[min_energy_state] >= init_samples;
+
   else if(end_condition == sample_error)
     return fractional_sample_error(min_T) <= sample_error;
+
   else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
     int hist_total = 0;
-    for(int i = max_entropy_state+1; i < min_energy_state; i++){
+    int most_weighted_energy = 0;
+    for(int i = max_entropy_state; i <= min_energy_state; i++){
       hist_total += energy_histogram[i];
       if(energy_histogram[i] < hist_min) hist_min = energy_histogram[i];
+      if(ln_energy_weights[i] > ln_energy_weights[most_weighted_energy])
+        most_weighted_energy = i;
     }
     const double hist_mean = hist_total/(min_energy_state-max_entropy_state);
-    return hist_min >= flatness*hist_mean && energy != min_energy_state;
+    /* First, make sure that the histogram is sufficiently flat. In addition,
+       make sure we didn't just get stuck at the most heavily weighted energy. */
+    return hist_min >= flatness*hist_mean && energy != most_weighted_energy;
   }
+
   else return true;
 }
 
@@ -695,7 +703,6 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     update_weights_using_transitions(transition_precision);
     flush_weight_array();
     weight_updates++;
-    if(printing_allowed()) printf("Optimistic weight updates: %i\n", weight_updates);
 
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
@@ -707,6 +714,13 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     // Simulate for a while
     const long test_iterations = energy_levels*uipow(N,3);
     for (long i = 0; i < N*test_iterations; i++) move_a_ball();
+
+    if(printing_allowed()){
+      printf("Optimistic iterations: %i. Energy histogram:\n", weight_updates);
+      for(int i = max_entropy_state; i <= min_energy_state; i++)
+        printf(" %i: %li\n", i, energy_histogram[i]);
+      printf("\n");
+    }
 
   } while(!finished_initializing());
 }
@@ -946,9 +960,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
     return 1e100;
   }
 
-  /* fixme: change to iters < 1e9 later maybe, but things were getting stuck here so I
-     lowered it for now */
-  while (probE2 < 0.5 && iters < 1e8) {
+  while (probE2 < 0.5 && iters < 1e9) {
     iters++;
     for (int i=0;i<energy_levels;i++) pop_new[i] = 0;
     for (int i=0;i<=min_energy_state;i++) {
