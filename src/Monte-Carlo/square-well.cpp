@@ -992,8 +992,7 @@ bool sw_simulation::printing_allowed(){
   if (++every_so_often % how_often == 0) {
     const clock_t time_now = clock();
     if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
-      how_often = 1 + 1.1*every_so_often*time_skip/(double(CLOCKS_PER_SEC)
-                                                    *(time_now - last_print_time));
+      how_often = 1+ 2*every_so_often/3; // our simple heuristic
       last_print_time = time_now;
       every_so_often = 0;
       fflush(stdout); // flushing once a second will be no problem and can be helpful
