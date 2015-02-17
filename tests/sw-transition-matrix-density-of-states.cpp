@@ -34,6 +34,7 @@ void check_dos(sw_simulation *sw) {
 
 int main(int argc, char **argv) {
   sw_simulation sw;
+  sw.fractional_dos_precision = 1e-12;
   sw.energy_levels = 10;
   sw.min_energy_state = sw.energy_levels-1;
   sw.max_entropy_state = 0;
@@ -58,7 +59,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = counts;
     sw.transitions(i, -1) = counts;
   }
-  sw.update_weights_using_transitions(1e-11);
+  sw.update_weights_using_transitions();
   check_dos(&sw);
   for (int i=2;i<sw.energy_levels-1;i++) {
     const double dos0 = exp(sw.ln_energy_weights[1]);
@@ -76,7 +77,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = i*counts;
     sw.transitions(i, -1) = counts;
   }
-  sw.update_weights_using_transitions(1e-11);
+  sw.update_weights_using_transitions();
   check_dos(&sw);
 
   printf("\n** Beyond exponential density of states **\n\n");
@@ -85,7 +86,7 @@ int main(int argc, char **argv) {
     sw.transitions(i,  1) = 500;
     sw.transitions(i, -1) = 1;
   }
-  sw.update_weights_using_transitions(1e-11);
+  sw.update_weights_using_transitions();
   check_dos(&sw);
 
   return num_errors;

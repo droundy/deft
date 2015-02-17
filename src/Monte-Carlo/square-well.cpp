@@ -428,11 +428,120 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
       *exp(-ln_energy_weights[i]+(i-min_energy_state)/T);
     Z += boltz;
     if(optimistic_sampling)
-      error_times_Z += boltz/sqrt(optimistic_samples[i]+1);
+      error_times_Z += boltz/sqrt(optimistic_samples[i]);
     else
-      error_times_Z += boltz/sqrt(pessimistic_samples[i]+1);
+      error_times_Z += boltz/sqrt(pessimistic_samples[i]);
   }
   return error_times_Z/Z;
+}
+
+double* sw_simulation::compute_ln_dos(dos_types dos_type){
+
+  double *ln_dos = new double[energy_levels]();
+
+  if(dos_type == inv_weights_dos){
+    for(int i = 0; i < energy_levels; i++)
+      ln_dos[i] = -ln_energy_weights[i];
+  }
+
+  else if(dos_type == full_dos){
+    for(int i = max_entropy_state; i < min_energy_state; i++)
+      ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+  }
+
+  else if(dos_type == transitions_dos){
+
+    const int energies_observed = min_energy_state+1;
+    double *TD_over_D = new double[energies_observed];
+
+    // initialize a flat density of states with unit norm
+    for (int i = 0; i < energies_observed; i++) {
+      ln_dos[i] = 0;
+      TD_over_D[i] = 1.0/energies_observed;
+    }
+
+    // now find the eigenvector of our transition matrix via the power iteration method
+    bool done = false;
+    int iters = 0;
+    while(!done){
+      iters++;
+      // set D_n = T*D_{n-1}
+      for (int i = 0; i < energies_observed; i++) {
+        if (TD_over_D[i] > 0) ln_dos[i] += log(TD_over_D[i]);
+        TD_over_D[i] = 0;
+      }
+
+      // compute T*D_n
+      for (int i = 0; i < energies_observed; i++) {
+        double norm = 0;
+        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
+          norm += transitions(i, de);
+        if(norm){
+          for (int de = max(-i, -biggest_energy_transition);
+               de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
+            TD_over_D[i+de] += exp(ln_dos[i] - ln_dos[i+de])*transitions(i,de)/norm;
+          }
+        }
+      }
+
+      /* The following deals with the fact that we may not have a
+         perfectly normalized transition matrix.  I'm not sure why this
+         happens, but the net result is that at equilibrium all of the D
+         values drop by the same factor.  I deal with this by finding
+         the average ratio (which ought to be around 1) and then
+         dividing all TD_over_D factors by this ratio, which corresponds
+         to a normalization shift.  This enables the algorithm to work
+         with high precision, where an unnormalized T (for whatever
+         cause) could previously cause the algorithm to never converge.. */
+      double norm = 0, count = 0;
+      for (int i = 0; i < energies_observed; i++) {
+        if (energy_histogram[i]) {
+          norm += TD_over_D[i];
+          count += 1;
+        }
+      }
+      norm /= count;
+      for (int i = 0; i < energies_observed; i++) {
+        TD_over_D[i] /= norm;
+      }
+
+      // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
+      done = true;
+      for (int i = max_entropy_state+1; i < energies_observed; i++){
+        if (energy_histogram[i]) {
+          const double precision = fabs(TD_over_D[i] - 1);
+          if (precision > fractional_dos_precision){
+            done = false;
+            if(iters % 1000000 == 0){
+              printf("After %i iterations, failed at energy %i with value %.16g and "
+                     "newvalue %.16g and ratio %g and norm %g.\n",
+                     iters, i, ln_dos[i], ln_dos[i] + log(TD_over_D[i]), TD_over_D[i], norm);
+              fflush(stdout);
+            }
+            break;
+          }
+        }
+      }
+    }
+
+  }
+  else {
+    printf("We don't know what dos type we have!\n");
+    exit(1);
+  }
+  return ln_dos;
+}
+
+void sw_simulation::set_min_important_energy(double T){
+  const double *ln_dos = compute_ln_dos(sim_dos_type);
+  bool found_min_important_energy = false;
+  for(int i = max_entropy_state+1; i <= min_energy_state; i++){
+    if(ln_dos[i-1] - ln_dos[i] > 1/T){
+      min_important_energy = i;
+      found_min_important_energy = true;
+    }
+  }
+  if(!found_min_important_energy) min_important_energy = energy_levels;
 }
 
 bool sw_simulation::finished_initializing(){
@@ -713,7 +822,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
   } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_robustly_optimistic(double transition_precision){
+void sw_simulation::initialize_robustly_optimistic(){
   int weight_updates = 0;
   bool done;
   do {
@@ -725,11 +834,6 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
-    // Flatten weights above state of max entropy
-    for (int e=0; e < max_entropy_state; e++) {
-      ln_energy_weights[e] = ln_energy_weights[max_entropy_state];
-    }
-
     flush_weight_array();
     weight_updates++;
 
@@ -792,8 +896,8 @@ void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bu
 /* Update the weight array using the transition matrix to make the
    downward rates equal, which should optimize the round-trip
    time. */
-void sw_simulation::update_weights_using_transition_flux(double fractional_precision) {
-  update_weights_using_transitions(fractional_precision);
+void sw_simulation::update_weights_using_transition_flux() {
+  update_weights_using_transitions();
   const int energies_observed = min_energy_state+1;
 
   double *wanted_n = new double[energies_observed];
@@ -825,91 +929,14 @@ void sw_simulation::update_weights_using_transition_flux(double fractional_preci
 }
 
 // update the weight array using transitions
-int sw_simulation::update_weights_using_transitions(double min_fractional_precision) {
-  // first, we find the range of energies for which we have data
-  const int energies_observed = min_energy_state+1;
-
-  double *ln_D = new double[energies_observed];
-  double *TD_over_D = new double[energies_observed];
-
-  // initialize a flat density of states with unit norm
-  for (int i = 0; i < energies_observed; i++) {
-    ln_D[i] = 0;
-    TD_over_D[i] = 1.0/energies_observed;
-  }
-
-  // now find the eigenvector of our transition matrix via the power iteration method
-  bool done = false;
-  int iters = 0;
-  while(!done){
-    iters++;
-    // set D_n = T*D_{n-1}
-    for (int i = 0; i < energies_observed; i++) {
-      if (TD_over_D[i] > 0) ln_D[i] += log(TD_over_D[i]);
-      TD_over_D[i] = 0;
-    }
-
-    // compute T*D_n
-    for (int i = 0; i < energies_observed; i++) {
-      double norm = 0;
-      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
-        norm += transitions(i, de);
-      if(norm){
-        for (int de = max(-i, -biggest_energy_transition);
-             de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
-          TD_over_D[i+de] += exp(ln_D[i] - ln_D[i+de])*transitions(i,de)/norm;
-        }
-      }
-    }
-
-    /* The following deals with the fact that we may not have a
-       perfectly normalized transition matrix.  I'm not sure why this
-       happens, but the net result is that at equilibrium all of the D
-       values drop by the same factor.  I deal with this by finding
-       the average ratio (which ought to be around 1) and then
-       dividing all TD_over_D factors by this ratio, which corresponds
-       to a normalization shift.  This enables the algorithm to work
-       with high precision, where an unnormalized T (for whatever
-       cause) could previously cause the algorithm to never converge.. */
-    double norm = 0, count = 0;
-    for (int i = 0; i < energies_observed; i++) {
-      if (energy_histogram[i]) {
-        norm += TD_over_D[i];
-        count += 1;
-      }
-    }
-    norm /= count;
-    for (int i = 0; i < energies_observed; i++) {
-      TD_over_D[i] /= norm;
-    }
-
-    // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
-    done = true;
-    for (int i = max_entropy_state+1; i < energies_observed; i++){
-      if (energy_histogram[i]) {
-        double precision = fabs(TD_over_D[i] - 1);
-        if (precision > min_fractional_precision){
-          done = false;
-          if(iters % 1000000 == 0){
-            printf("After %i iterations, failed at energy %i with value %.16g and "
-                   "newvalue %.16g and ratio %g and norm %g.\n",
-                   iters, i, ln_D[i], ln_D[i] + log(TD_over_D[i]), TD_over_D[i], norm);
-            fflush(stdout);
-          }
-          break;
-        }
-      }
-    }
-  }
-
-  // compute the weights w(E) = 1/D(E)
-  for(int i = 0; i < energies_observed; i++)
-    ln_energy_weights[i] = -ln_D[i];
-
-  return iters;
+void sw_simulation::update_weights_using_transitions() {
+  const dos_types update_dos_type = transitions_dos;
+  const double *ln_dos = compute_ln_dos(update_dos_type);
+  for(int i = 0; i < energy_levels; i++)
+    ln_energy_weights[i] = -ln_dos[i];
 }
 
-void sw_simulation::initialize_transitions(double dos_precision) {
+void sw_simulation::initialize_transitions() {
   int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
   const double betamax = 1.0/min_T;
   const int num_visits_desired = 100;
@@ -920,7 +947,7 @@ void sw_simulation::initialize_transitions(double dos_precision) {
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
 
     check_how_often += Nmin*N; // try a little harder next time...
-    update_weights_using_transitions(dos_precision);
+    update_weights_using_transitions();
     done = true;
     for (int i = energy_levels-1; i > max_entropy_state; i--) {
       if (energy_histogram[i]) {
