@@ -104,7 +104,6 @@ int main(int argc, const char *argv[]) {
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
-  double transition_precision = 1e-10;
 
   // end conditions
   int default_pessimistic_min_samples = 2;
@@ -123,6 +122,7 @@ int main(int argc, const char *argv[]) {
   sw.walls = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
+  sw.fractional_dos_precision = 1e-10;
   sw.min_T = 0.2;
   bool optimistic_sampling = false;
   sw.min_samples = 0;
@@ -267,8 +267,8 @@ int main(int argc, const char *argv[]) {
 
     {"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &sw.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
-    {"transition_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &transition_precision, 0,
+    {"dos_precision", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.fractional_dos_precision, 0,
      "Precision factor for computing weights from the transition matrix", "DOUBLE"},
 
     /*** TESTING AND DEBUGGING OPTIONS ***/
@@ -461,6 +461,13 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
+  if(wang_landau || vanilla_wang_landau || sw.end_condition == flat_histogram){
+    sw.sim_dos_type = inv_weights_dos;
+  } else if(tmmc){
+    sw.sim_dos_type = transitions_dos;
+  } else{
+    sw.sim_dos_type = full_dos;
+  }
 
   /* set default end condition if necessary */
   if(sw.end_condition == none){
@@ -698,20 +705,19 @@ int main(int argc, const char *argv[]) {
     } else if (optimized_ensemble) {
       sw.initialize_optimized_ensemble(first_update_iterations);
     } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic(transition_precision);
+      sw.initialize_robustly_optimistic();
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {
-      sw.initialize_transitions(transition_precision);
+      sw.initialize_transitions();
     }
   }
 
   took("Actual initialization");
 
   if(transition_override){
-    printf("\nOverriding weight array with that generated from the transition matrix!\n"
-           "Target precision: %g\n", transition_precision);
-    sw.update_weights_using_transitions(transition_precision);
+    printf("\nOverriding weight array with that generated from the transition matrix!\n");
+    sw.update_weights_using_transitions();
     took("Finding D");
   }
   sw.flush_weight_array();
@@ -721,16 +727,10 @@ int main(int argc, const char *argv[]) {
      sw.end_condition == optimistic_sample_error ||
      sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
-    int start_canonical = sw.min_energy_state+1;
-    for(int i = sw.min_energy_state; i > sw.max_entropy_state; i--){
-      if(sw.ln_energy_weights[i] - sw.ln_energy_weights[i-1] > 1/sw.min_T){
-        start_canonical = i;
-        break;
-      }
-    }
-    for(int i = start_canonical; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[start_canonical-1]
-        + (i-(start_canonical-1))/sw.min_T;
+    sw.set_min_important_energy(sw.min_T);
+    for(int i = sw.min_important_energy+1; i < sw.energy_levels; i++){
+      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_important_energy]
+        + (i-sw.min_important_energy)/sw.min_T;
     }
   } else if (!fix_kT){
     /* Flatten the weight array at unseen energies */

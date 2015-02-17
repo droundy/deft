@@ -1,9 +1,5 @@
 
-method to compute ln_dos (transitions vs. energy histogram and lnw)
-fractional sample error to take -ln_dos as array argument(?)
-
-implement min_important_energy based on slope of dos
- - use for min_samples and optimized_ensemble
+use min_important_energy in min_samples, sample_error, and optimized_ensemble
 
 determine metric for quality of initializations
  - max error in U/Nk or C_V/nK at T \ge min_T
@@ -27,8 +23,6 @@ make sure we're not breaking wang_landau by not specifying a minimum energy
 
 
 
-figure out why fractional_sample_error requires samples[i]+1
- - it shouldn't!
 
 run [vanilla_]wang_landau for 60, 80, 100, 150, 200
  - go from 100 to 200 by 20s?

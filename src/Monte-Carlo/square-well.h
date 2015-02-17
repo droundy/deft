@@ -28,6 +28,8 @@ struct move_info {
 enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
                       optimistic_sample_error, pessimistic_sample_error, flat_histogram };
 
+enum dos_types { inv_weights_dos, transitions_dos, full_dos };
+
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
 // simulation.  We do not maintain here any of the histograms except
@@ -69,6 +71,7 @@ struct sw_simulation {
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
+  dos_types sim_dos_type;
 
   /* The following keep track of how many times we have walked
      between the a given energy and the state of max entropy */
@@ -154,17 +157,23 @@ struct sw_simulation {
 
   void initialize_optimized_ensemble(int first_update_iterations);
 
-  void initialize_robustly_optimistic(double robust_update_scale);
+  void initialize_robustly_optimistic();
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
-  void initialize_transitions(double dos_precision);
+  void initialize_transitions();
 
-  int update_weights_using_transitions(double fractional_precision);
-  void update_weights_using_transition_flux(double fractional_precision);
+  double fractional_dos_precision;
+  void update_weights_using_transitions();
+
+  void update_weights_using_transition_flux();
 
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
+
+  double* compute_ln_dos(dos_types dos_type);
+
+  void set_min_important_energy(double T);
 
   // check whether we are done initializing
   bool finished_initializing();
