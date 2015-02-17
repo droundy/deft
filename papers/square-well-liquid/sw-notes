@@ -1,6 +1,4 @@
 
-how do I implement min_important_energy for the walker_up array?
-
 determine metric for quality of initializations
  - max error in U/Nk or C_V/nK at T \ge min_T
 make iterations vs initialization quality plot

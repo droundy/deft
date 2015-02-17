@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <float.h>
 #include "Monte-Carlo/square-well.h"
 #include "handymath.h"
 
@@ -367,9 +368,7 @@ void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
   energy_histogram[energy]++;
-  if(pessimistic_observation[min_energy_state])
-    walkers_up[energy]++;
-  walkers_total[energy]++;
+  if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
 }
 
 void sw_simulation::energy_change_updates(int energy_change){
@@ -385,13 +384,8 @@ void sw_simulation::energy_change_updates(int energy_change){
 
   if (energy_change > 0) optimistic_samples[energy]++;
 
-  // If we have observed a new lowest energy, remember it; furthermore, this means we can't
-  //   have had any walkers going up from the lowest energy, so we reset walkers_up
-  if(energy > min_energy_state){
-    min_energy_state = energy;
-    for(int i = max_entropy_state; i < energy_levels; i++)
-      walkers_up[i] = 0;
-  }
+  // Update observation of minimum energy
+  if(energy > min_energy_state) min_energy_state = energy;
 }
 
 int sw_simulation::simulate_energy_changes(int num_moves) {
@@ -445,8 +439,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
   }
 
   else if(dos_type == full_dos){
-    for(int i = max_entropy_state; i < min_energy_state; i++)
-      ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+    for(int i = max_entropy_state; i < energy_levels; i++){
+      if(energy_histogram[i] != 0){
+        ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+      }
+      else ln_dos[i] = -DBL_MAX;
+    }
   }
 
   else if(dos_type == transitions_dos){
@@ -536,12 +534,14 @@ void sw_simulation::set_min_important_energy(double T){
   const double *ln_dos = compute_ln_dos(sim_dos_type);
   bool found_min_important_energy = false;
   for(int i = max_entropy_state+1; i <= min_energy_state; i++){
-    if(ln_dos[i-1] - ln_dos[i] > 1/T){
+    // If we don't have enough histogram counts, we shouldn't trust the dos
+    // fixme: better heuristic than sqrt(H) >= N?
+    if(ln_dos[i-1] - ln_dos[i] > 1/T && sqrt(energy_histogram[i+1]) >= N){
       min_important_energy = i;
       found_min_important_energy = true;
     }
   }
-  if(!found_min_important_energy) min_important_energy = energy_levels;
+  if(!found_min_important_energy) min_important_energy = energy_levels-1;
 }
 
 bool sw_simulation::finished_initializing(){
@@ -555,17 +555,18 @@ bool sw_simulation::finished_initializing(){
   else if(end_condition == optimistic_min_samples
           || end_condition == pessimistic_min_samples){
 
-    set_min_important_energy(min_T);
+    // fixme: use min_important_energy
+    //set_min_important_energy(min_T);
 
     if(end_condition == optimistic_min_samples){
-      for(int i = min_important_energy; i > max_entropy_state; i--){
+      for(int i = min_energy_state; i > max_entropy_state; i--){
         if(optimistic_samples[i] < min_samples)
           return false;
       }
       return true;
     }
     else { // if end_condition == pessimistic_min_samples
-      return pessimistic_samples[min_important_energy] >= min_samples;
+      return pessimistic_samples[min_energy_state] >= min_samples;
     }
   }
   else if(end_condition == flat_histogram){
@@ -796,32 +797,42 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
   int weight_updates = 0;
   long update_iters = first_update_iterations;
+  const double tiny = 1e-3;
   do {
+    // reset walkers
+    for(int i = 0; i < energy_levels; i++){
+      walkers_up[i] = 0;
+      energy_histogram[i] = 0;
+    }
+
     // simulate for a while
     for(long i = 0; i < N*update_iters; i++) move_a_ball();
 
     // update weight array
-    for(int i = max_entropy_state; i < energy_levels; i++){
-      int top = i < energy_levels-1 ? i+1 : i;
-      int bottom = i > 0 ? i-1 : i;
-      int dE = bottom-top;
-      double df = double(walkers_up[top]) / walkers_total[top]
-        - (double(walkers_up[bottom]) / walkers_total[bottom]);
-      double df_dE = (df < 0 && df == df) ? df/dE : 1;
-      double walker_density =
-        double(walkers_total[i] != 0 ? walkers_total[i] : 0.01)/moves.total;
-      ln_energy_weights[i] += 0.5*(log(df_dE) - log(walker_density));
+    for(int i = max_entropy_state; i < energy_levels-1; i++){
+      const int top = i-1;
+      const int bottom = i+1;
+      const int dE = bottom - top;
+      double df = double(walkers_up[top]) / energy_histogram[top]
+        - (double(walkers_up[bottom]) / energy_histogram[bottom]);
+      double walker_density = energy_histogram[i]/moves.total;
+      /* Floor df/dE and walker_density at tiny nonzero values.
+         If df is a nan, it's because the energy histogram around here is null,
+         in which case we forget df/dE and let the walker_density term take care
+         of weight corrections */
+      if(df == 0) df = tiny;
+      else if (df != df) df = dE;
+      if(walker_density == 0) walker_density = tiny/moves.total;
+      ln_energy_weights[i] += 0.5*(log(df/dE) - log(walker_density));
     }
+    ln_energy_weights[energy_levels-1] = ln_energy_weights[energy_levels-2]+1/min_T;
     flush_weight_array();
 
-    // reset walkers
-    for(int i = 0; i < energy_levels; i++){
-      walkers_up[i] = 0;
-      walkers_total[i] = 0;
-    }
-    printf("Weight update: %i (%ld iters). min_energy_state: %i. pessimistic_samples: %li\n",
-           weight_updates, update_iters, min_energy_state,
-           pessimistic_samples[min_energy_state]);
+    printf("Weight update: %i (%ld iters),  min/min_important energy (samples): "
+           "%i (%li) / %i (%li)\n",
+           weight_updates, update_iters,
+           min_energy_state, pessimistic_samples[min_important_energy],
+           min_important_energy, pessimistic_samples[min_important_energy]);
     weight_updates++;
 
     update_iters *= 2; // simulate for longer next time

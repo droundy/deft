@@ -311,7 +311,6 @@ int main(int argc, const char *argv[]) {
 
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
-  sw.walkers_total = new long[sw.energy_levels]();
 
 
   // Radial distribution function (RDF) histogram
@@ -645,7 +644,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.transitions_table;
 
   delete[] sw.walkers_up;
-  delete[] sw.walkers_total;
 
   delete[] sw.pessimistic_observation;
   delete[] sw.pessimistic_samples;
