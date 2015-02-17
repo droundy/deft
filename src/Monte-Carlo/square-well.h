@@ -172,7 +172,7 @@ struct sw_simulation {
 
   double* compute_ln_dos(dos_types dos_type);
 
-  void set_min_important_energy(double T);
+  int find_min_important_energy(double T);
 
   // check whether we are done initializing
   bool finished_initializing();

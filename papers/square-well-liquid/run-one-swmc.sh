@@ -6,7 +6,7 @@ set -ev
 
 ww=1.3
 ff=0.3
-N=20
+N=15
 iterations=1000000
 
 if [ $# -eq 1 ]; then

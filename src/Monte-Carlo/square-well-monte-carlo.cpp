@@ -727,7 +727,7 @@ int main(int argc, const char *argv[]) {
      sw.end_condition == optimistic_sample_error ||
      sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
-    sw.set_min_important_energy(sw.min_T);
+    sw.min_important_energy = sw.find_min_important_energy(sw.min_T);
     for(int i = sw.min_important_energy+1; i < sw.energy_levels; i++){
       sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_important_energy]
         + (i-sw.min_important_energy)/sw.min_T;
@@ -738,18 +738,17 @@ int main(int argc, const char *argv[]) {
       sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
   }
 
-  // fixme: uncomment; this was taking an unreasonable amount of time
-  // {
-  //   int E1 = sw.max_entropy_state;
-  //   int E2 = sw.min_energy_state;
-  //   switch (sw.N) {
-  //   case 20:
-  //     E2 = 95;
-  //     break;
-  //   }
-  //   printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
-  //          sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
-  // }
+  {
+    int E1 = sw.max_entropy_state;
+    int E2 = sw.min_energy_state;
+    switch (sw.N) {
+    case 20:
+      E2 = 95;
+      break;
+    }
+    printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
+           sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
+  }
 
   double fractional_sample_error =
     sw.fractional_sample_error(sw.min_T,optimistic_sampling);
