@@ -67,7 +67,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, min_energy_state, min_important_energy;
+  int max_entropy_state, min_energy_state, min_important_energy=0;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -120,9 +120,8 @@ struct sw_simulation {
     return 0;
   };
 
-  /* The following deal with the "optimized ensemble" approach and
-     keep track of walkers. */
-  long *walkers_up, *walkers_total;
+  /* Up-moving walkers for optimized ensemble method */
+  long *walkers_up;
 
   void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move

@@ -122,7 +122,7 @@ int main(int argc, const char *argv[]) {
   sw.walls = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
-  sw.fractional_dos_precision = 1e-10;
+  sw.fractional_dos_precision = 1e-12;
   sw.end_condition = none;
   sw.min_T = 0.2;
   bool optimistic_sampling = false;
@@ -492,11 +492,11 @@ int main(int argc, const char *argv[]) {
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
   }
-  else if(!sw.sample_error)
+  else if(!sw.sample_error){
     sw.sample_error = optimistic_sampling ?
       default_optimistic_sample_error : default_pessimistic_sample_error;
-  else if(!sw.flatness)
-    sw.flatness = default_flatness;
+  }
+  else if(!sw.flatness) sw.flatness = default_flatness;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -541,7 +541,6 @@ int main(int argc, const char *argv[]) {
 
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
-  sw.walkers_total = new long[sw.energy_levels]();
 
   // a guess for the number of iterations for which to initially run
   //   optimized ensemble initialization
@@ -739,17 +738,18 @@ int main(int argc, const char *argv[]) {
       sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
   }
 
-  {
-    int E1 = sw.max_entropy_state;
-    int E2 = sw.min_energy_state;
-    switch (sw.N) {
-    case 20:
-      E2 = 95;
-      break;
-    }
-    printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
-           sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
-  }
+  // fixme: uncomment; this was taking an unreasonable amount of time
+  // {
+  //   int E1 = sw.max_entropy_state;
+  //   int E2 = sw.min_energy_state;
+  //   switch (sw.N) {
+  //   case 20:
+  //     E2 = 95;
+  //     break;
+  //   }
+  //   printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
+  //          sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
+  // }
 
   double fractional_sample_error =
     sw.fractional_sample_error(sw.min_T,optimistic_sampling);
@@ -1104,7 +1104,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.transitions_table;
 
   delete[] sw.walkers_up;
-  delete[] sw.walkers_total;
 
   delete[] sw.optimistic_samples;
   delete[] sw.pessimistic_samples;
