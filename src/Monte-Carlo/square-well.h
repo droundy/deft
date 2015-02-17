@@ -81,7 +81,6 @@ struct sw_simulation {
 
   end_conditions end_condition;
   double min_T; // minimum temperature we care about
-  bool optimistic_sampling; // are we sampling optimistically?
   int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
   double flatness; // maximum allowable proportional deviation from mean histogram value

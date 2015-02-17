@@ -377,14 +377,13 @@ void sw_simulation::energy_change_updates(int energy_change){
   if(energy <= max_entropy_state){
     for(int i = max_entropy_state; i < energy_levels; i++)
       pessimistic_observation[i] = false;
-  }
-  // If we have not yet observed this energy, now we have!
-  else if(!pessimistic_observation[energy]){
+  } else if (!pessimistic_observation[energy]) {
+    // If we have not yet observed this energy, now we have!
     pessimistic_observation[energy] = true;
     pessimistic_samples[energy]++;
   }
 
-  else if(energy_change > 0) optimistic_samples[energy]++;
+  if (energy_change > 0) optimistic_samples[energy]++;
 
   // If we have observed a new lowest energy, remember it; furthermore, this means we can't
   //   have had any walkers going up from the lowest energy, so we reset walkers_up
@@ -440,11 +439,9 @@ bool sw_simulation::finished_initializing(){
 
   if(end_condition == optimistic_sample_error
      || end_condition == pessimistic_sample_error){
-    return fractional_sample_error(min_T,optimistic_sampling) <= sample_error;
-  }
-
-  else if(end_condition == optimistic_min_samples){
-    for(int i = min_energy_state; i < max_entropy_state; i--){
+    return fractional_sample_error(min_T,true) <= sample_error;
+  } else if(end_condition == optimistic_min_samples){
+    for(int i = min_energy_state; i > max_entropy_state; i--){
       if(optimistic_samples[i] < min_samples)
         return false;
     }
@@ -718,9 +715,21 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
 
 void sw_simulation::initialize_robustly_optimistic(double transition_precision){
   int weight_updates = 0;
+  bool done;
   do {
-    // First, let's reset our weights based on what we already know!
-    update_weights_using_transitions(transition_precision);
+    done = true; // Let's be optimistic!
+
+    // update weight array
+    for (int e=max_entropy_state; e<energy_levels; e++) {
+      if (energy_histogram[e]) {
+        ln_energy_weights[e] -= log(energy_histogram[e]);
+      }
+    }
+    // Flatten weights above state of max entropy
+    for (int e=0; e < max_entropy_state; e++) {
+      ln_energy_weights[e] = ln_energy_weights[max_entropy_state];
+    }
+
     flush_weight_array();
     weight_updates++;
 
@@ -733,17 +742,38 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     }
 
     // Simulate for a while
-    const long test_iterations = energy_levels*uipow(N,3);
-    for (long i = 0; i < N*test_iterations; i++) move_a_ball();
-
-    if(printing_allowed()){
-      printf("Optimistic iterations: %i. Energy histogram:\n", weight_updates);
-      for(int i = max_entropy_state; i <= min_energy_state; i++)
-        printf(" %i: %li\n", i, energy_histogram[i]);
-      printf("\n");
-    }
-
-  } while(!finished_initializing());
+    int moves = 0;
+    do {
+      for (int j=0;j<N*energy_levels;j++) {
+        move_a_ball();
+        moves++;
+      }
+      if (printing_allowed()) {
+        int fewest_samples = 1000000, fewest_energy = 0;
+        for (int e=min_energy_state; e > max_entropy_state; e--) {
+          if (optimistic_samples[e] < fewest_samples) {
+            fewest_samples = optimistic_samples[e];
+            fewest_energy = e;
+          }
+          printf("optimistic_samples[%3d] = %20ld  h[%3d] = %ld\n",
+                 e, optimistic_samples[e], e, energy_histogram[e]);
+        }
+        printf("optimistic_samples[%d] = %d <%d - %d>\n",
+               fewest_energy, fewest_samples, max_entropy_state, min_energy_state);
+      }
+      // Check whether our histogram is sufficiently flat; if not, we're not done!
+      double mean_hist = moves/double(min_energy_state - max_entropy_state);
+      for (int e=min_energy_state; e > max_entropy_state; e--) {
+        if (optimistic_samples[e] >= 1000 && energy_histogram[e] < 0.1*mean_hist) {
+          printf("After %d moves, at energy %d hist = %ld vs %g (samples %ld).\n",
+                 moves, e, energy_histogram[e], mean_hist, optimistic_samples[e]);
+          done = false;
+          break;
+        }
+      }
+      if (!done) break;
+    } while (!finished_initializing());
+  } while(!done);
 }
 
 

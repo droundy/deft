@@ -16,6 +16,7 @@ c .pyc
 | python3 haskell.py
 < config.py
 > ../src/haskell/.haskell.fac
+> ../.generated-code.fac
 c .pyc
 
 | python3 latex.py papers/square-well-liquid/histogram-paper.tex

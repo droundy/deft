@@ -107,7 +107,6 @@ int main(int argc, const char *argv[]) {
   double transition_precision = 1e-10;
 
   // end conditions
-  int default_optimistic_min_samples = 100;
   int default_pessimistic_min_samples = 2;
   double default_optimistic_sample_error = 0.01;
   double default_pessimistic_sample_error = 0.3;
@@ -125,7 +124,7 @@ int main(int argc, const char *argv[]) {
   sw.N = 200;
   sw.translation_scale = 0.05;
   sw.min_T = 0.2;
-  sw.optimistic_sampling = false;
+  bool optimistic_sampling = false;
   sw.min_samples = 0;
   sw.sample_error = 0;
   sw.flatness = 0;
@@ -256,7 +255,7 @@ int main(int argc, const char *argv[]) {
 
     /*** END CONDITION PARAMETERS ***/
 
-    {"optimistic_sampling", '\0', POPT_ARG_NONE, &sw.optimistic_sampling, 0,
+    {"optimistic_sampling", '\0', POPT_ARG_NONE, &optimistic_sampling, 0,
      "Sample optimistically?", "BOOLEAN"},
     {"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
      "Number of times to sample mininum energy", "INT"},
@@ -344,7 +343,7 @@ int main(int argc, const char *argv[]) {
   // Set end condition
   char *end_condition_text = new char[16];
   if(sw.min_samples || sw.sample_error){
-    if(sw.optimistic_sampling)
+    if(optimistic_sampling)
       sprintf(end_condition_text,"optimistic");
     else
       sprintf(end_condition_text,"pessimistic");
@@ -465,20 +464,28 @@ int main(int argc, const char *argv[]) {
 
   /* set default end condition if necessary */
   if(sw.end_condition == none){
-    if(optimized_ensemble){
+    // This is the default default, which may be overridden below by a
+    // different default for given algorithms.
+    sw.end_condition = optimistic_min_samples;
+    optimistic_sampling = true;
+    if (optimized_ensemble) {
       sw.end_condition = pessimistic_min_samples;
-      sw.optimistic_sampling = false;
+      optimistic_sampling = false;
     }
-    else if(robustly_optimistic) sw.end_condition = flat_histogram;
   }
 
-  // set default end condition parameters
-  if(!sw.min_samples){
-    sw.min_samples = sw.optimistic_sampling ?
-      default_optimistic_min_samples : default_pessimistic_min_samples;
+  // set end condition parameters if necessary
+  if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
+    // The following default makes it (maybe) likely that we will
+    // have sampled the next-down energy by the time we are
+    // finished, if that energy is important at temperature min_T.
+    sw.min_samples = 1 + exp(1.0/sw.min_T);
+    printf("Defaulting min_samples to %d using min_T = %g\n", sw.min_samples, sw.min_T);
+  } else if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
+    sw.min_samples = default_pessimistic_min_samples;
   }
   else if(!sw.sample_error)
-    sw.sample_error = sw.optimistic_sampling ?
+    sw.sample_error = optimistic_sampling ?
       default_optimistic_sample_error : default_pessimistic_sample_error;
   else if(!sw.flatness)
     sw.flatness = default_flatness;
@@ -744,7 +751,7 @@ int main(int argc, const char *argv[]) {
   }
 
   double fractional_sample_error =
-    sw.fractional_sample_error(sw.min_T,sw.optimistic_sampling);
+    sw.fractional_sample_error(sw.min_T,optimistic_sampling);
 
   // ----------------------------------------------------------------------------
   // Generate save file info
