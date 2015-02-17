@@ -123,6 +123,7 @@ int main(int argc, const char *argv[]) {
   sw.N = 200;
   sw.translation_scale = 0.05;
   sw.fractional_dos_precision = 1e-10;
+  sw.end_condition = none;
   sw.min_T = 0.2;
   bool optimistic_sampling = false;
   sw.min_samples = 0;
@@ -461,7 +462,7 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
-  if(wang_landau || vanilla_wang_landau || sw.end_condition == flat_histogram){
+  if(sw.end_condition == flat_histogram){
     sw.sim_dos_type = inv_weights_dos;
   } else if(tmmc){
     sw.sim_dos_type = transitions_dos;
@@ -470,7 +471,7 @@ int main(int argc, const char *argv[]) {
   }
 
   /* set default end condition if necessary */
-  if(sw.end_condition == none){
+  if(sw.end_condition == none && !fix_kT && !gaussian_fit){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
     sw.end_condition = optimistic_min_samples;
@@ -488,7 +489,7 @@ int main(int argc, const char *argv[]) {
     // finished, if that energy is important at temperature min_T.
     sw.min_samples = 1 + exp(1.0/sw.min_T);
     printf("Defaulting min_samples to %d using min_T = %g\n", sw.min_samples, sw.min_T);
-  } else if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
+  } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
   }
   else if(!sw.sample_error)

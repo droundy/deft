@@ -1,12 +1,9 @@
 
-use min_important_energy in min_samples, sample_error, and optimized_ensemble
+how do I implement min_important_energy for the walker_up array?
 
 determine metric for quality of initializations
  - max error in U/Nk or C_V/nK at T \ge min_T
 make iterations vs initialization quality plot
-
-four end conditions: optimistic/pessimistic min_samples and sample errors
-canonical weights after initialization with these end conditions
 
 make wang_landau and tmmc dump weight aray and histogram periodically
 
@@ -15,9 +12,6 @@ clean up optimized_ensemble
  - find df/dE by secant line in f(E)
    - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
    - average weights if we have an energy jump
-
-revert how robustly_optimistic changes the weight array
-  change how robustly_optimistic works (two free parameters, well chosen)
 
 make sure we're not breaking wang_landau by not specifying a minimum energy
 
