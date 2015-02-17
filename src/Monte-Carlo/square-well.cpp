@@ -423,9 +423,9 @@ void sw_simulation::flush_weight_array(){
 double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling){
   double error_times_Z = 0;
   double Z = 0;
+  const double *ln_dos = compute_ln_dos(sim_dos_type);
   for(int i = max_entropy_state; i < min_energy_state; i++){
-    const double boltz = energy_histogram[i]
-      *exp(-ln_energy_weights[i]+(i-min_energy_state)/T);
+    const double boltz = exp(ln_dos[i]+(i-min_energy_state)/T);
     Z += boltz;
     if(optimistic_sampling)
       error_times_Z += boltz/sqrt(optimistic_samples[i]);
@@ -548,19 +548,26 @@ bool sw_simulation::finished_initializing(){
 
   if(end_condition == optimistic_sample_error
      || end_condition == pessimistic_sample_error){
-    return fractional_sample_error(min_T,true) <= sample_error;
-  } else if(end_condition == optimistic_min_samples){
-    for(int i = min_energy_state; i > max_entropy_state; i--){
-      if(optimistic_samples[i] < min_samples)
-        return false;
+
+    const bool optimistic_sampling = end_condition == optimistic_sample_error;
+    return fractional_sample_error(min_T,optimistic_sampling) <= sample_error;
+  }
+  else if(end_condition == optimistic_min_samples
+          || end_condition == pessimistic_min_samples){
+
+    set_min_important_energy(min_T);
+
+    if(end_condition == optimistic_min_samples){
+      for(int i = min_important_energy; i > max_entropy_state; i--){
+        if(optimistic_samples[i] < min_samples)
+          return false;
+      }
+      return true;
     }
-    return true;
+    else { // if end_condition == pessimistic_min_samples
+      return pessimistic_samples[min_important_energy] >= min_samples;
+    }
   }
-
-  else if(end_condition == pessimistic_min_samples){
-    return pessimistic_samples[min_energy_state] >= min_samples;
-  }
-
   else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
     int hist_total = 0;
