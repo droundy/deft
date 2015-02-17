@@ -409,7 +409,7 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 }
 
 void sw_simulation::flush_weight_array(){
-  // floow weights above state of max entropy
+  // floor weights above state of max entropy
   for (int i = 0; i < max_entropy_state; i++)
     ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
   // substract off minimum weight from the entire array to reduce numerical error
@@ -421,7 +421,7 @@ void sw_simulation::flush_weight_array(){
   return;
 }
 
-double sw_simulation::fractional_sample_error(double T){
+double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling){
   double error_times_Z = 0;
   double Z = 0;
   for(int i = max_entropy_state; i < min_energy_state; i++){
@@ -437,20 +437,23 @@ double sw_simulation::fractional_sample_error(double T){
 }
 
 bool sw_simulation::finished_initializing(){
-  if(end_condition == sample_error)
-    return fractional_sample_error(min_T) <= sample_error;
 
-  else if(end_condition == min_samples)
-    if(optimistic_sampling){
-      for(int i = min_energy_state; i < max_entropy_state; i--){
-        if(optimistic_samples[i] < min_samples)
-          return false;
-      }
-      return true;
+  if(end_condition == optimistic_sample_error
+     || end_condition == pessimistic_sample_error){
+    return fractional_sample_error(min_T,optimistic_sampling) <= sample_error;
+  }
+
+  else if(end_condition == optimistic_min_samples){
+    for(int i = min_energy_state; i < max_entropy_state; i--){
+      if(optimistic_samples[i] < min_samples)
+        return false;
     }
-    else
-      return pessimistic_samples[min_energy_state] >= min_samples;
+    return true;
+  }
 
+  else if(end_condition == pessimistic_min_samples){
+    return pessimistic_samples[min_energy_state] >= min_samples;
+  }
 
   else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
@@ -468,7 +471,9 @@ bool sw_simulation::finished_initializing(){
     return hist_min >= flatness*hist_mean && energy != most_weighted_energy;
   }
 
-  else return true;
+  printf("We are asking whether we are finished initializing without "
+         "a valid end condition!\n");
+  exit(1);
 }
 
 int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
@@ -722,9 +727,9 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     // Now reset the calculation!
     for (int e = 0; e < energy_levels; e++) {
       energy_histogram[e] = 0;
-      pessimistic_observation[e] = false;
-      pessimistic_samples[e] = 0;
       optimistic_samples[e] = 0;
+      pessimistic_samples[e] = 0;
+      pessimistic_observation[e] = false;
     }
 
     // Simulate for a while
