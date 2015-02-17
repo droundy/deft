@@ -25,7 +25,8 @@ struct move_info {
   move_info();
 };
 
-enum end_conditions { none, min_samples, sample_error, flat_histogram };
+enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
+                      optimistic_sample_error, pessimistic_sample_error, flat_histogram };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
@@ -64,7 +65,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, min_energy_state;
+  int max_entropy_state, min_energy_state, min_important_energy;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -72,16 +73,15 @@ struct sw_simulation {
   /* The following keep track of how many times we have walked
      between the a given energy and the state of max entropy */
 
-  bool optimistic_sampling;
-  bool *pessimistic_observation; // of a given energy
-  long *pessimistic_samples; // how many samples from the point of max entropy have we had?
   long *optimistic_samples; // how many times have we gone down to this energy?
-
+  long *pessimistic_samples; // how many samples from the point of max entropy have we had?
+  bool *pessimistic_observation; // of a given energy
 
   /* The following control end conditions for histogram methods */
 
   end_conditions end_condition;
   double min_T; // minimum temperature we care about
+  bool optimistic_sampling; // are we sampling optimistically?
   int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
   double flatness; // maximum allowable proportional deviation from mean histogram value
@@ -113,12 +113,6 @@ struct sw_simulation {
     return transitions(from, to - from);
   };
 
-  long min_energy_observations(bool optimistic_sampling) const {
-    for (int i = energy_levels-1; i >= max_entropy_state; i--)
-      if (optimistic_sampling && optimistic_samples[i]) return optimistic_samples[i];
-      else if(pessimistic_samples[i]) return pessimistic_samples[i];
-    return 0;
-  };
   int max_interactions() const { // return the maximum observed number of interactions
     for (int i = energy_levels-1; i >= 0; i--) if (energy_histogram[i]) return i;
     return 0;
@@ -171,7 +165,7 @@ struct sw_simulation {
   void update_weights_using_transition_flux(double fractional_precision);
 
   // return fractional error in sample count
-  double fractional_sample_error(double T);
+  double fractional_sample_error(double T, bool optimistic_sampling);
 
   // check whether we are done initializing
   bool finished_initializing();

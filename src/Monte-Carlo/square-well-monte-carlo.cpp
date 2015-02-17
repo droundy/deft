@@ -107,9 +107,10 @@ int main(int argc, const char *argv[]) {
   double transition_precision = 1e-10;
 
   // end conditions
-  int default_min_pessimistic_samples = 100;
-  int default_min_optimistic_samples = 2;
-  double default_sample_error = 0.3;
+  int default_optimistic_min_samples = 100;
+  int default_pessimistic_min_samples = 2;
+  double default_optimistic_sample_error = 0.01;
+  double default_pessimistic_sample_error = 0.3;
   double default_flatness = 0.1;
 
   // Do not change these! They are taken directly from the WL paper.
@@ -255,10 +256,10 @@ int main(int argc, const char *argv[]) {
 
     /*** END CONDITION PARAMETERS ***/
 
-    {"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
-     "Number of times to sample mininum energy", "INT"},
     {"optimistic_sampling", '\0', POPT_ARG_NONE, &sw.optimistic_sampling, 0,
      "Sample optimistically?", "BOOLEAN"},
+    {"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
+     "Number of times to sample mininum energy", "INT"},
     {"sample_error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.sample_error, 0,
      "Fractional sample error to acquired to exit initialization", "DOUBLE"},
     {"flatness", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.flatness, 0,
@@ -342,23 +343,20 @@ int main(int argc, const char *argv[]) {
 
   // Set end condition
   char *end_condition_text = new char[16];
-  if(sw.min_samples){
-    sw.end_condition = min_samples;
+  if(sw.min_samples || sw.sample_error){
     if(sw.optimistic_sampling)
       sprintf(end_condition_text,"optimistic");
     else
       sprintf(end_condition_text,"pessimistic");
-    sprintf(end_condition_text,"%s_min_samples", end_condition_text);
-  }
-  else if(sw.sample_error){
-    sw.end_condition = sample_error;
-    sprintf(end_condition_text,"sample_error");
-  }
-  else if(sw.flatness){
+
+    if(sw.min_samples)
+      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
+    else
+      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
+  } else if(sw.flatness){
     sw.end_condition = flat_histogram;
     sprintf(end_condition_text,"flat_histogram");
-  }
-  else{
+  } else {
     sw.end_condition = none;
     sprintf(end_condition_text,"none");
   }
@@ -468,20 +466,21 @@ int main(int argc, const char *argv[]) {
   /* set default end condition if necessary */
   if(sw.end_condition == none){
     if(optimized_ensemble){
-      sw.end_condition = min_samples;
+      sw.end_condition = pessimistic_min_samples;
       sw.optimistic_sampling = false;
     }
     else if(robustly_optimistic) sw.end_condition = flat_histogram;
   }
 
-  // set end condition parameters if necessary
-  if(sw.end_condition == min_samples && !sw.min_samples){
+  // set default end condition parameters
+  if(!sw.min_samples){
     sw.min_samples = sw.optimistic_sampling ?
-      default_min_optimistic_samples : default_min_pessimistic_samples;
+      default_optimistic_min_samples : default_pessimistic_min_samples;
   }
-  else if(sw.end_condition == sample_error && !sw.sample_error)
-    sw.sample_error = default_sample_error;
-  else if(sw.end_condition == flat_histogram && !sw.flatness)
+  else if(!sw.sample_error)
+    sw.sample_error = sw.optimistic_sampling ?
+      default_optimistic_sample_error : default_pessimistic_sample_error;
+  else if(!sw.flatness)
     sw.flatness = default_flatness;
 
   // Initialize the random number generator with our seed
@@ -516,9 +515,9 @@ int main(int argc, const char *argv[]) {
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
   // Observed and sampled energies
-  sw.pessimistic_observation = new bool[sw.energy_levels]();
-  sw.pessimistic_samples = new long[sw.energy_levels]();
   sw.optimistic_samples = new long[sw.energy_levels]();
+  sw.pessimistic_samples = new long[sw.energy_levels]();
+  sw.pessimistic_observation = new bool[sw.energy_levels]();
 
   // Transitions from one energy to another
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance);
@@ -710,7 +709,10 @@ int main(int argc, const char *argv[]) {
   }
   sw.flush_weight_array();
 
-  if(sw.end_condition == sample_error){
+  if(sw.end_condition == optimistic_min_samples ||
+     sw.end_condition == pessimistic_min_samples ||
+     sw.end_condition == optimistic_sample_error ||
+     sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
     int start_canonical = sw.min_energy_state+1;
     for(int i = sw.min_energy_state; i > sw.max_entropy_state; i--){
@@ -741,7 +743,8 @@ int main(int argc, const char *argv[]) {
            sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
   }
 
-  double fractional_sample_error = sw.fractional_sample_error(sw.min_T);
+  double fractional_sample_error =
+    sw.fractional_sample_error(sw.min_T,sw.optimistic_sampling);
 
   // ----------------------------------------------------------------------------
   // Generate save file info
@@ -758,8 +761,11 @@ int main(int argc, const char *argv[]) {
   char *transitions_fname = new char[1024];
   sprintf(transitions_fname, "%s/%s-transitions.dat", data_dir, filename);
 
-  char *s_fname = new char[1024];
-  sprintf(s_fname, "%s/%s-s.dat", data_dir, filename);
+  char *os_fname = new char[1024];
+  sprintf(os_fname, "%s/%s-os.dat", data_dir, filename);
+
+  char *ps_fname = new char[1024];
+  sprintf(ps_fname, "%s/%s-ps.dat", data_dir, filename);
 
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
@@ -820,9 +826,11 @@ int main(int argc, const char *argv[]) {
   }
   if(sw.end_condition != none){
     sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
-    if(sw.end_condition == min_samples)
+    if(sw.end_condition == optimistic_min_samples ||
+       sw.end_condition == pessimistic_min_samples)
       sprintf(headerinfo, "%s %i\n", headerinfo, sw.min_samples);
-    if(sw.end_condition == sample_error)
+    if(sw.end_condition == optimistic_sample_error ||
+       sw.end_condition == pessimistic_sample_error)
       sprintf(headerinfo, "%s %g\n", headerinfo, sw.sample_error);
   }
   if(!no_weights && !fix_kT)
@@ -895,8 +903,8 @@ int main(int argc, const char *argv[]) {
 
   for(int i = 0; i < sw.energy_levels; i++){
     sw.energy_histogram[i] = 0;
-    sw.pessimistic_samples[i] = 0;
     sw.optimistic_samples[i] = 0;
+    sw.pessimistic_samples[i] = 0;
   }
 
   took("Finishing initialization");
@@ -987,20 +995,35 @@ int main(int argc, const char *argv[]) {
       }
       fclose(e_out);
 
-      // Save sample counts
-      FILE *s_out = fopen(s_fname, "w");
-      if (!s_out) {
-        fprintf(stderr, "Unable to create %s!\n", s_fname);
+      // Save optimistic sample counts
+      FILE *os_out = fopen(os_fname, "w");
+      if (!os_out) {
+        fprintf(stderr, "Unable to create %s!\n", os_fname);
         exit(1);
       }
-      fprintf(s_out, "%s", headerinfo);
-      fprintf(s_out, "%s", countinfo);
-      fprintf(s_out, "# energy\tsamples\n");
+      fprintf(os_out, "%s", headerinfo);
+      fprintf(os_out, "%s", countinfo);
+      fprintf(os_out, "# energy\tsamples\n");
       for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
         if (sw.energy_histogram[i] != 0)
-          fprintf(s_out, "%i  %li\n", i, sw.pessimistic_samples[i]);
+          fprintf(os_out, "%i  %li\n", i, sw.optimistic_samples[i]);
       }
-      fclose(s_out);
+      fclose(os_out);
+
+      // Save pessimistic sample counts
+      FILE *ps_out = fopen(ps_fname, "w");
+      if (!ps_out) {
+        fprintf(stderr, "Unable to create %s!\n", ps_fname);
+        exit(1);
+      }
+      fprintf(ps_out, "%s", headerinfo);
+      fprintf(ps_out, "%s", countinfo);
+      fprintf(ps_out, "# energy\tsamples\n");
+      for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
+        if (sw.energy_histogram[i] != 0)
+          fprintf(ps_out, "%i  %li\n", i, sw.pessimistic_samples[i]);
+      }
+      fclose(ps_out);
 
       // Save RDF
       if(!sw.walls){
@@ -1075,9 +1098,9 @@ int main(int argc, const char *argv[]) {
   delete[] sw.walkers_up;
   delete[] sw.walkers_total;
 
-  delete[] sw.pessimistic_observation;
-  delete[] sw.pessimistic_samples;
   delete[] sw.optimistic_samples;
+  delete[] sw.pessimistic_samples;
+  delete[] sw.pessimistic_observation;
 
   for (int i = 0; i < sw.energy_levels; i++) {
     delete[] density_histogram[i];
@@ -1091,7 +1114,8 @@ int main(int argc, const char *argv[]) {
   delete[] e_fname;
   delete[] w_fname;
   delete[] transitions_fname;
-  delete[] s_fname;
+  delete[] os_fname;
+  delete[] ps_fname;
   delete[] density_fname;
   delete[] g_fname;
 
