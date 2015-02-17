@@ -713,9 +713,22 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
 
 void sw_simulation::initialize_robustly_optimistic(double transition_precision){
   int weight_updates = 0;
+  bool done;
   do {
-    // First, let's reset our weights based on what we already know!
-    update_weights_using_transitions(transition_precision);
+    printf("Robustly optimizing...\n");
+    done = true; // Let's be optimistic!
+
+    // update weight array
+    for (int e=max_entropy_state; e<energy_levels; e++) {
+      if (energy_histogram[e]) {
+        ln_energy_weights[e] -= log(energy_histogram[e]);
+      }
+    }
+    // Flatten weights above state of max entropy
+    for (int e=0; e < max_entropy_state; e++) {
+      ln_energy_weights[e] = ln_energy_weights[max_entropy_state];
+    }
+
     flush_weight_array();
     weight_updates++;
 
@@ -728,17 +741,26 @@ void sw_simulation::initialize_robustly_optimistic(double transition_precision){
     }
 
     // Simulate for a while
-    const long test_iterations = energy_levels*uipow(N,3);
-    for (long i = 0; i < N*test_iterations; i++) move_a_ball();
-
-    if(printing_allowed()){
-      printf("Optimistic iterations: %i. Energy histogram:\n", weight_updates);
-      for(int i = max_entropy_state; i <= min_energy_state; i++)
-        printf(" %i: %li\n", i, energy_histogram[i]);
-      printf("\n");
-    }
-
-  } while(!finished_initializing());
+    int moves = 0;
+    do {
+      for (int j=0;j<N*energy_levels;j++) {
+        move_a_ball();
+        moves++;
+      }
+      // Check whether our histogram is sufficiently flat; if not, we're not done!
+      double mean_hist = moves/double(min_energy_state - max_entropy_state);
+      for (int e=max_entropy_state+1; e<energy_levels; e++) {
+        if (optimistic_samples[e] >= 100 && energy_histogram[e] < 0.25*mean_hist) {
+          printf("After %d moves, at energy %d hist = %ld vs %g.\n",
+                 moves, e, energy_histogram[e], mean_hist);
+          done = false;
+          break;
+        }
+      }
+      if (!done) break;
+      printf("About to check if I am finished initializing...\n");
+    } while (!finished_initializing());
+  } while(!done);
 }
 
 
