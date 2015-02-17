@@ -22,11 +22,11 @@ N = int(sys.argv[3])
 versions = eval(sys.argv[4])
 #arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","optimized_ensemble","kT0.4","kT0.5","tmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-s.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (ww, ff, N, version) for version in versions]
 
 plt.title('Iterations per sample for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 for version in versions:
-    data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-s.dat" % (ww, ff, N, version)
+    data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (ww, ff, N, version)
     with open(data_file,'r') as file_handle:
         for line in file_handle:
             entries = line.split()
