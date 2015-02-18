@@ -530,18 +530,23 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
   return ln_dos;
 }
 
-void sw_simulation::set_min_important_energy(double T){
+int sw_simulation::find_min_important_energy(double T){
+  // If our system is too small, just use min_energy_state
+  if(N < 15) return min_energy_state;
+
+  // Otherwise, look for a the highest significant energy at which the slope in ln_dos is 1/T
   const double *ln_dos = compute_ln_dos(sim_dos_type);
-  bool found_min_important_energy = false;
   for(int i = max_entropy_state+1; i <= min_energy_state; i++){
     // If we don't have enough histogram counts, we shouldn't trust the dos
-    // fixme: better heuristic than sqrt(H) >= N?
-    if(ln_dos[i-1] - ln_dos[i] > 1/T && sqrt(energy_histogram[i+1]) >= N){
-      min_important_energy = i;
-      found_min_important_energy = true;
+    // fixme: better heuristic than optimistic_samples[i] >= N?
+    if(ln_dos[i-1] - ln_dos[i] > 1/T && optimistic_samples[i] >= N){
+      return i;
     }
   }
-  if(!found_min_important_energy) min_important_energy = energy_levels-1;
+
+  /* If we never found a slope of 1/T, return the lowest energy our histograms keep track of,
+     (to push the system farther down in energy) */
+  return energy_levels-1;
 }
 
 bool sw_simulation::finished_initializing(){
@@ -555,8 +560,7 @@ bool sw_simulation::finished_initializing(){
   else if(end_condition == optimistic_min_samples
           || end_condition == pessimistic_min_samples){
 
-    // fixme: use min_important_energy
-    //set_min_important_energy(min_T);
+    min_important_energy = find_min_important_energy(min_T);
 
     if(end_condition == optimistic_min_samples){
       for(int i = min_energy_state; i > max_entropy_state; i--){
@@ -566,7 +570,7 @@ bool sw_simulation::finished_initializing(){
       return true;
     }
     else { // if end_condition == pessimistic_min_samples
-      return pessimistic_samples[min_energy_state] >= min_samples;
+      return pessimistic_samples[min_important_energy] >= min_samples;
     }
   }
   else if(end_condition == flat_histogram){
