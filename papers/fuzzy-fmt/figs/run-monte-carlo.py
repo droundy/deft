@@ -2,6 +2,7 @@ from __future__ import division
 from os import system
 import os
 from math import pi
+import numpy
 
 figsdir = 'papers/fuzzy-fmt/figs/'
 bindir = '.'
@@ -41,11 +42,12 @@ def run_test_particle(n_reduced, temperature, testp_sigma,testp_eps,pot = ""):
            (n_reduced, temperature, bindir, nspheres, filename, temperature, testp_sigma, testp_eps, pot, filename))
 
 def run_FCC(n_reduced, temperature, pot = ""):
-    nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
-    length = (1372/((n_reduced)*(2**(-5.0/2.0))))**(1.0/3.0)
-    #width = (nspheres/density)**(1.0/3) # to get density just right!
-    filename = '%s/mc%s-%.4f-%.4f' % (figsdir, pot, n_reduced, temperature)
-    system("srun --mem=60 -J soft-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxyz 30 kT %g potential '%s' fcc %.4f > %s.out 2>&1 &" %
+    nspheres = 4*7**3
+    n = n_reduced*(2.0**(-5.0/2.0))
+    total_volume = nspheres/n
+    length = total_volume**(1.0/3.0)
+    filename = '%s/mcfcc-%.4f-%.4f' % (figsdir, n_reduced, temperature)
+    system("srun --mem=60 -J softfcc-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat kT %g potential '%s' fcc %.15g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, length,  filename))
 
 
@@ -66,6 +68,10 @@ def run_FCC(n_reduced, temperature, pot = ""):
 # run_test_particle(0.5844,1.235,argon_sigma,argon_eps,"wca")
 # run_test_particle(1.095,2.48,argon_sigma,argon_eps,"wca")
 # run_test_particle(1.096,2.48,argon_sigma/5,argon_eps/5,"wca")
+
+for temp in numpy.arange(0.5, 3.0001, 0.5):
+    run_FCC(0.5, temp, 'wca')
+    run_FCC(0.9, temp, 'wca')
 
 #run_FCC(.76,2.5,"wca") 
 #run_FCC(.8,5,"wca")

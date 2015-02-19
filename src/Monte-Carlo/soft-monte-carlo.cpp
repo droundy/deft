@@ -162,6 +162,11 @@ int main(int argc, char *argv[]){
     } else if (strcmp(argv[a],"fcc")==0){
 	FCC=true;
 	length_of_cavity = atof(argv[a+1]);
+        lenx = leny = lenz = length_of_cavity;
+        rad = maxrad = lenx/2;
+        periodic[0] = true;
+        periodic[1] = true;
+        periodic[2] = true;
 	printf("FCC is true length of cavity is %g\n", length_of_cavity);
     }  else {
       printf("Bad argumendat:  %s\n%d\n", argv[a],(strcmp(argv[a],"fcc")));
@@ -236,8 +241,7 @@ int main(int argc, char *argv[]){
   if (mean_spacing > 2*R) {
     scale = 2*(mean_spacing - 2*R);
   }
-  scale = scale*0.01;
-  printf("Using scale of %g\n", scale);  
+  printf("Using scale of %g (mean spacing = %g)\n", scale, mean_spacing);
   long iterations = 0;
   
   // Let's move each sphere once, so they'll all start within our
@@ -257,6 +261,7 @@ int main(int argc, char *argv[]){
       spheres[k][0]=x*(length_of_cavity/7.0) + x1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
       spheres[k][1]=y*(length_of_cavity/7.0) + y1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
       spheres[k][2]=z*(length_of_cavity/7.0) + z1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
+      spheres[k] = fixPeriodic(spheres[k]); // move sphere into the periodic cell
       x=x+1;
       if (x >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
 	x=0;
@@ -381,7 +386,6 @@ int main(int argc, char *argv[]){
   if (div < 10) div = 10;
   printf("Using %ld divisions, dx ~ %g\n", div, maxrad/div);
   fflush(stdout);
-  printf("test abc");
   double *radius = new double[div+1];
   double *sections = new double [div+1];
   double *shellsRadius = new double[div+1];
@@ -391,7 +395,6 @@ int main(int argc, char *argv[]){
     FCC_shells[k] = new double[3];
   }
   double  FCC_div = div;
-  printf("test def");
   if (FCC){
     for (long s=0;s<div+1;s++){
       FCC_shells[s][0] = s*length_of_cavity*(1/FCC_div);
@@ -451,14 +454,14 @@ int main(int argc, char *argv[]){
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
-  /*  for (int i=0;i<N;i++) {
+  for (int i=0;i<N;i++) {
     movieData[i] = spheres[i];
-    printf("lenx: %g leny: %g\t\tx: %g y: %g\t\tx': %g y': %g\n",
-           lenx, leny, movieData[i][0], movieData[i][1],
-           fixPeriodic(movieData[i])[0], fixPeriodic(movieData[i])[1]);
+    // printf("lenx: %g leny: %g\t\tx: %g y: %g\t\tx': %g y': %g\n",
+    //        lenx, leny, movieData[i][0], movieData[i][1],
+    //        fixPeriodic(movieData[i])[0], fixPeriodic(movieData[i])[1]);
     assert(fabs(movieData[i][0]) <= lenx/2);
     assert(fabs(movieData[i][1]) <= leny/2);
-    }*/
+  }
   which_frame = N;
   for (long j=0; j<iterations; j++){
     num_timed = num_timed + 1;
@@ -495,16 +498,18 @@ int main(int argc, char *argv[]){
           mins_done = mins_done % 60;
           long percent_complete = j/iterations*100;
           if (hours_done > 50) {
-            printf("Saved data after %ld hours\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", hours_done, j, iterations, percent_complete);
+            printf("Saved data after %ld hours\n", hours_done);
           } else if (mins_done < 1) {
-            printf("Saved data after %.1f seconds\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", secs_done, j, iterations, percent_complete);
+            printf("Saved data after %.1f seconds\n", secs_done);
           } else if (hours_done < 1) {
-            printf("Saved data after %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", mins_done, j, iterations, percent_complete);
+            printf("Saved data after %ld minutes\n", mins_done);
           } else if (hours_done < 2) {
-            printf("Saved data after %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", mins_done, j, iterations, percent_complete);
+            printf("Saved data after %ld minutes\n", mins_done);
           } else {
-            printf("Saved data after %ld hours, %ld minutes\nCurrent/Max Iterations: %ld/%ld\nPercent Complete: %ld\n", hours_done, mins_done, j, iterations, percent_complete);
+            printf("Saved data after %ld hours, %ld minutes\n", hours_done, mins_done);
           }
+          printf("Current/Max Iterations: %ld/%ld\n", j, iterations);
+          printf("Percent Complete: %ld  (acceptance rate = %g)\n", percent_complete, workingmoves/double(count));
         }
         for (long i=0; i<div; i++) {
           const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
@@ -607,7 +612,7 @@ int main(int argc, char *argv[]){
       ///////////////////////////////////////////end of print.dat
     }
     
-    Vector3d temp = move(spheres[j%N],0.01*scale);
+    Vector3d temp = move(spheres[j%N],scale);
     count++;
     if(!overlap(spheres, temp, N, R, j%N)){
       spheres[j%N] = temp;
@@ -694,7 +699,7 @@ int main(int argc, char *argv[]){
       }
     }
     //  printf("Iterations per pressure %ld working moves is %ld\n",iterations_per_pressure_check, workingmoves);
-    if (j%iterations_per_pressure_check == 0 && workingmoves > 0) {
+    if (j%iterations_per_pressure_check == 0 && workingmoves > 20*iterations_per_pressure_check) {
       double newpress = calcPressure(spheres, N, volume);
       //const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
       if (newpress != newpress) {
@@ -706,7 +711,7 @@ int main(int argc, char *argv[]){
       //  for(long i=0; i<div; i++){
         //printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
       //}
-      pressure_sum += calcPressure(spheres, N, volume);
+      pressure_sum += newpress;
       num_pressures_in_sum += 1;
     }
     
@@ -731,7 +736,6 @@ int main(int argc, char *argv[]){
     }
   }
   ///////////////////////////////////(4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps)/36///////////////////////////////////////////////////////
-  printf("div");
   for(long i=0; i<div; i++){
     printf("Number of spheres in division %ld = %ld\n  radius is %g\n", i+1, shells[i], radius[i]);
   }

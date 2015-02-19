@@ -853,7 +853,7 @@ void sw_simulation::initialize_robustly_optimistic(){
     // update weight array
     for (int e=max_entropy_state; e<energy_levels; e++) {
       if (energy_histogram[e]) {
-        ln_energy_weights[e] -= log(energy_histogram[e]);
+        ln_energy_weights[e] -= log(energy_histogram[e])/2; // take a cautious approach...
       }
     }
     flush_weight_array();
@@ -890,7 +890,7 @@ void sw_simulation::initialize_robustly_optimistic(){
       // Check whether our histogram is sufficiently flat; if not, we're not done!
       double mean_hist = moves/double(min_energy_state - max_entropy_state);
       for (int e=min_energy_state; e > max_entropy_state; e--) {
-        if (optimistic_samples[e] >= 1000 && energy_histogram[e] < 0.1*mean_hist) {
+        if (optimistic_samples[e] >= 1000 && energy_histogram[e] < 0.25*mean_hist) {
           printf("After %d moves, at energy %d hist = %ld vs %g (samples %ld).\n",
                  moves, e, energy_histogram[e], mean_hist, optimistic_samples[e]);
           done = false;
