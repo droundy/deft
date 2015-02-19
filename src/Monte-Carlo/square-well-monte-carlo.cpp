@@ -101,6 +101,8 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
+  double robust_scale = 0.5;
+  double robust_cutoff = 0.25;
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
@@ -249,6 +251,10 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
+    {"robust_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_scale, 0, "Scaling factor for weight correction at each iteration", "DOUBLE"},
+    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
     {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -705,7 +711,7 @@ int main(int argc, const char *argv[]) {
     } else if (optimized_ensemble) {
       sw.initialize_optimized_ensemble(first_update_iterations);
     } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic();
+      sw.initialize_robustly_optimistic(robust_scale, robust_cutoff);
     } else if (bubble_suppression) {
       sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
     } else if (tmmc) {

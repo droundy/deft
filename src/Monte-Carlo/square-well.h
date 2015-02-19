@@ -156,7 +156,7 @@ struct sw_simulation {
 
   void initialize_optimized_ensemble(int first_update_iterations);
 
-  void initialize_robustly_optimistic();
+  void initialize_robustly_optimistic(double robust_scale, double robust_cutoff);
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 

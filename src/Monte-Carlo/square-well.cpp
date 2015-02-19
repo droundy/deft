@@ -844,7 +844,8 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
   } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_robustly_optimistic(){
+void sw_simulation::initialize_robustly_optimistic(double robust_scale,
+                                                   double robust_cutoff){
   int weight_updates = 0;
   bool done;
   do {
@@ -853,7 +854,7 @@ void sw_simulation::initialize_robustly_optimistic(){
     // update weight array
     for (int e=max_entropy_state; e<energy_levels; e++) {
       if (energy_histogram[e]) {
-        ln_energy_weights[e] -= log(energy_histogram[e])/2; // take a cautious approach...
+        ln_energy_weights[e] -= robust_scale*log(energy_histogram[e]);
       }
     }
     flush_weight_array();
@@ -890,7 +891,7 @@ void sw_simulation::initialize_robustly_optimistic(){
       // Check whether our histogram is sufficiently flat; if not, we're not done!
       double mean_hist = moves/double(min_energy_state - max_entropy_state);
       for (int e=min_energy_state; e > max_entropy_state; e--) {
-        if (optimistic_samples[e] >= 1000 && energy_histogram[e] < 0.25*mean_hist) {
+        if (optimistic_samples[e] >= 1000 && energy_histogram[e] < robust_cutoff*mean_hist) {
           printf("After %d moves, at energy %d hist = %ld vs %g (samples %ld).\n",
                  moves, e, energy_histogram[e], mean_hist, optimistic_samples[e]);
           done = false;
