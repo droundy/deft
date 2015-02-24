@@ -625,7 +625,10 @@ int main(int argc, char *argv[]){
     } else if (movieData) {
       printf("\n\nworking on movie!!!\n\n\n");
       const double scale = 10;
-      FILE *movie = fopen("movie.svg", "w");
+      char *movie_fname = (char *)malloc(4000);
+      sprintf(movie_fname, "%s.svg", outfilename);
+      FILE *movie = fopen(movie_fname, "w");
+      free(movie_fname);
       fprintf(movie, "<svg version=\"1.1\" width=\"%g\" height=\"%g\" xmlns=\"http://www.w3.org/2000/svg\">\n",
               lenx*scale, leny*scale);
       for (int s=0;s<N;s++) {

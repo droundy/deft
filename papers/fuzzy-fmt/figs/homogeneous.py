@@ -180,7 +180,7 @@ for rd in arange(1.0, 0.35, -0.1):
   temps = []
   pressures = []
   print 'could use:', glob.glob('figs/mcwca-%.4f-*.dat.prs' % (rd))
-  for temp in arange(0.1, 3.05, 0.1):
+  for temp in arange(0.05, 3.05, 0.05):
     fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
     if os.path.exists(fname):
       temps.append(temp)
