@@ -623,6 +623,7 @@ int main(int argc, char *argv[]){
       movieData[which_frame] = spheres[which_frame%N];
       which_frame++;
     } else if (movieData) {
+      const double frame_duration = 500.0; // milliseconds
       printf("\n\nworking on movie!!!\n\n\n");
       const double scale = 10;
       char *movie_fname = (char *)malloc(4000);
@@ -639,7 +640,7 @@ int main(int argc, char *argv[]){
 
         fprintf(movie,
                 "    <animate attributeName=\"cx\" dur=\"%gms\" repeatCount=\"indefinite\" values=\"%g",
-                500.0*num_frames, (lenx/2+movieData[s][0])*scale);
+                frame_duration*num_frames, (lenx/2+movieData[s][0])*scale);
         for (int f=1;f<num_frames;f++) {
           fprintf(movie, "; %g", (lenx/2+movieData[s+f*N][0])*scale);
         }
@@ -652,16 +653,41 @@ int main(int argc, char *argv[]){
 
         fprintf(movie,
                 "    <animate attributeName=\"cy\" dur=\"%gms\" repeatCount=\"indefinite\" values=\"%g",
-                500.0*num_frames, (leny/2+movieData[s][1])*scale);
+                frame_duration*num_frames, (leny/2+movieData[s][1])*scale);
         for (int f=1;f<num_frames;f++) {
           fprintf(movie, "; %g", (leny/2+movieData[s+f*N][1])*scale);
         }
         fprintf(movie, "; %g\" keyTimes=\"0",
-                (lenx/2+movieData[s+(num_frames-1)*N][0])*scale);
+                (lenx/2+movieData[s+(num_frames-1)*N][1])*scale);
         for (int f=1;f<num_frames;f++) {
           fprintf(movie, "; %g", (1+s+(f-1)*N)/double(num_frames*N));
         }
         fprintf(movie, "; 1\"/>\n");
+
+        fprintf(movie,
+                "    <animate attributeName=\"opacity\" dur=\"%gms\" repeatCount=\"indefinite\" values=\"",
+                frame_duration*num_frames);
+        bool last_frame_moved = true;
+        bool penultimate_frame_moved = false;
+        for (int f=1;f<num_frames-1;f++) {
+          const double dx = movieData[s+f*N][0]-movieData[s+(f+1)*N][0];
+          const double dy = movieData[s+f*N][1]-movieData[s+(f+1)*N][1];
+          if (last_frame_moved || penultimate_frame_moved) {
+            fprintf(movie, "0; ");
+            penultimate_frame_moved = last_frame_moved;
+            last_frame_moved = false;
+          } else if (fabs(dx) > lenx/2 || fabs(dy) > leny/2) {
+            penultimate_frame_moved = last_frame_moved;
+            fprintf(movie, "0; ");
+          } else {
+            penultimate_frame_moved = last_frame_moved;
+            fprintf(movie, "1; ");
+          }
+          if (fabs(dx) > lenx/2 || fabs(dy) > leny/2) {
+            last_frame_moved = true;
+          }
+        }
+        fprintf(movie, " 0; 0\"/>\n");
 
         fprintf(movie, "  </circle>\n");
       }
