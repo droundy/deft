@@ -590,7 +590,7 @@ int main(int argc, const char *argv[]) {
               "# longest valid run: %i\n"
               "# total checks of small cell: %i\n"
               "# total failed small checks: %i\n"
-              "# total valid small checks %i\n\n",
+              "# total valid small checks: %i\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total, longest_failed_run,
               longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
