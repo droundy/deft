@@ -265,6 +265,19 @@ int max_balls_within(double distance){ // distances are all normalized to ball r
 
 // sw_simulation methods
 
+void sw_simulation::reset_histograms(){
+
+  moves.total = 0;
+  moves.working = 0;
+  iteration = 0;
+
+  for(int i = 0; i < energy_levels; i++){
+    energy_histogram[i] = 0;
+    optimistic_samples[i] = 0;
+    pessimistic_samples[i] = 0;
+  }
+}
+
 void sw_simulation::move_a_ball(bool use_transition_matrix) {
   int id = moves.total % N;
   moves.total++;
@@ -521,7 +534,6 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
         }
       }
     }
-
   }
   else {
     printf("We don't know what dos type we have!\n");
@@ -530,23 +542,20 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
   return ln_dos;
 }
 
-int sw_simulation::find_min_important_energy(double T){
-  // If our system is too small, just use min_energy_state
-  if(N < 15) return min_energy_state;
 
-  // Otherwise, look for a the highest significant energy at which the slope in ln_dos is 1/T
+void sw_simulation::set_min_important_energy(){
+
   const double *ln_dos = compute_ln_dos(sim_dos_type);
+
+  /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
   for(int i = max_entropy_state+1; i <= min_energy_state; i++){
-    // If we don't have enough histogram counts, we shouldn't trust the dos
-    // fixme: better heuristic than optimistic_samples[i] >= N?
-    if(ln_dos[i-1] - ln_dos[i] > 1/T && optimistic_samples[i] >= N){
-      return i;
+    if(ln_dos[i-1] - ln_dos[i] > 1/min_T && optimistic_samples[i] >= N){
+      min_important_energy = i;
+      return;
     }
   }
-
-  /* If we never found a slope of 1/T, return the lowest energy our histograms keep track of,
-     (to push the system farther down in energy) */
-  return energy_levels-1;
+  /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
+  min_important_energy = energy_levels-1;
 }
 
 bool sw_simulation::finished_initializing(){
@@ -560,7 +569,7 @@ bool sw_simulation::finished_initializing(){
   else if(end_condition == optimistic_min_samples
           || end_condition == pessimistic_min_samples){
 
-    min_important_energy = find_min_important_energy(min_T);
+    set_min_important_energy();
 
     if(end_condition == optimistic_min_samples){
       for(int i = min_energy_state; i > max_entropy_state; i--){
@@ -570,6 +579,11 @@ bool sw_simulation::finished_initializing(){
       return true;
     }
     else { // if end_condition == pessimistic_min_samples
+      for(int i = max_entropy_state; i <= min_energy_state; i++){
+        printf("hist[%i]: %li,  samples[%i] = %li\n",
+               i, energy_histogram[i], i, pessimistic_samples[i]);
+      }
+      printf("min_important_energy: %i\n",min_important_energy);
       return pessimistic_samples[min_important_energy] >= min_samples;
     }
   }
@@ -724,9 +738,9 @@ double sw_simulation::initialize_gaussian(double scale) {
 }
 
 // initialize the weight array using the specified temperature.
-void sw_simulation::initialize_canonical(double kT) {
-  for(int i=0; i < energy_levels; i++){
-    ln_energy_weights[i] = i/kT;
+void sw_simulation::initialize_canonical(double T, int reference) {
+  for(int i=reference+1; i < energy_levels; i++){
+    ln_energy_weights[i] = ln_energy_weights[reference] + (i-reference)/T;
   }
 }
 
@@ -829,10 +843,9 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations){
       if(walker_density == 0) walker_density = tiny/moves.total;
       ln_energy_weights[i] += 0.5*(log(df/dE) - log(walker_density));
     }
-    ln_energy_weights[energy_levels-1] = ln_energy_weights[energy_levels-2]+1/min_T;
     flush_weight_array();
 
-    printf("Weight update: %i (%ld iters),  min/min_important energy (samples): "
+    printf("Weight update: %i (%ld iters),  min/important energy (samples): "
            "%i (%li) / %i (%li)\n",
            weight_updates, update_iters,
            min_energy_state, pessimistic_samples[min_important_energy],

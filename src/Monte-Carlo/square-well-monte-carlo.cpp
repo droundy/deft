@@ -696,7 +696,7 @@ int main(int argc, const char *argv[]) {
 
   // First, let us figure out what the max entropy point is (and move to it)
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
-  sw.iteration = 0;
+  sw.reset_histograms();
 
   // Now let's initialize our weight array
   if(!no_weights){
@@ -733,11 +733,8 @@ int main(int argc, const char *argv[]) {
      sw.end_condition == optimistic_sample_error ||
      sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
-    sw.min_important_energy = sw.find_min_important_energy(sw.min_T);
-    for(int i = sw.min_important_energy+1; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_important_energy]
-        + (i-sw.min_important_energy)/sw.min_T;
-    }
+    sw.set_min_important_energy();
+    sw.initialize_canonical(sw.min_T,sw.min_important_energy);
   } else if (!fix_kT){
     /* Flatten the weight array at unseen energies */
     for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
@@ -905,20 +902,7 @@ int main(int argc, const char *argv[]) {
 
   delete[] countinfo;
 
-  // ----------------------------------------------------------------------------
-  // Clean up initialization artifacts
-  // ----------------------------------------------------------------------------
-
-  // Reset simulation info
-  sw.moves.total = 0;
-  sw.moves.working = 0;
-  sw.iteration = 0;
-
-  for(int i = 0; i < sw.energy_levels; i++){
-    sw.energy_histogram[i] = 0;
-    sw.optimistic_samples[i] = 0;
-    sw.pessimistic_samples[i] = 0;
-  }
+  sw.reset_histograms();
 
   took("Finishing initialization");
 

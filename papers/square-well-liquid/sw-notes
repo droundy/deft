@@ -1,7 +1,20 @@
-
 determine metric for quality of initializations
  - max error in U/Nk or C_V/nK at T \ge min_T
 make iterations vs initialization quality plot
+
+
+reference file instead of reference method
+input reference file and Tmin
+
+include temp of max error in error file
+error vs. temperature plot for U and CV
+
+min counts for every energy in first round of wang landau ~ exp(1/T)
+use canonical weights below important energy
+
+
+ratchet min_important_energy if we have found an important slope in ln_dos
+
 
 make wang_landau and tmmc dump weight aray and histogram periodically
 

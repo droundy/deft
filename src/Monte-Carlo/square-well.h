@@ -123,6 +123,7 @@ struct sw_simulation {
   /* Up-moving walkers for optimized ensemble method */
   long *walkers_up;
 
+  void reset_histograms();
   void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(int energy_change); // updates to run if we've changed energy
@@ -147,7 +148,8 @@ struct sw_simulation {
 
   /*** HISTOGRAM METHODS ***/
 
-  void initialize_canonical(double kT);
+  // set canonical weights below some given energy
+  void initialize_canonical(double T, int reference=0);
 
   double initialize_gaussian(double scale); // returns width of gaussian used
 
@@ -172,7 +174,7 @@ struct sw_simulation {
 
   double* compute_ln_dos(dos_types dos_type);
 
-  int find_min_important_energy(double T);
+  void set_min_important_energy();
 
   // check whether we are done initializing
   bool finished_initializing();
