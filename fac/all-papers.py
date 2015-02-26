@@ -3,7 +3,7 @@
 import os
 
 papers = """
-   histogram pair-correlation contact
+   histogram pair-correlation contact hard-sphere-free-energy
    fuzzy-fmt water-saft polyhedra electrostatics
 """.split()
 

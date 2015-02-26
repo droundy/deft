@@ -2,15 +2,15 @@
 # this should run and plot the free energy simulation eventually
 
 import numpy as np
+import sys, os, math, matplotlib
+if 'show' not in sys.argv:
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import sys, os, math
 from subprocess import call
-from ast import literal_eval as make_tuple
 
-FILENAME = "periodic-ww1.00-ff{0}-N10-sf{1:f}"
+# input: "../../free-energy-monte-carlo"
 
-
-def main(args):
+def main():
 	# run iteration
 	# parse meta data
 	# start iteration at "shrunk" filling fraction
@@ -27,16 +27,19 @@ def main(args):
 	success_ratios.append(1) # for now. should be the absolute ratio
 
 	for i in xrange(20):
-		filename = FILENAME.format(ff, sf)
+		filename = "periodic-ww1.00-ff{0}-N10-sf{1:f}".format(ff, sf)
 
-		call(['../free-energy-monte-carlo',
-			'--sf', str(sf),
-			'--ff', str(ff),
-			'--filename', filename,
-			])
+                os.system('../../free-energy-monte-carlo --data_dir data --sf %g --ff %g --filename %s'
+                          % (sf, ff, filename))
+		# call(['../free-energy-monte-carlo',
+		# 	'--sf', str(sf),
+		# 	'--ff', str(ff),
+		# 	'--filename', filename,
+		# 	])
+
 
  		# at some point I need to chdir so that the files aren't down a directory on accident.
-		data = read_data_file_to_dict(os.path.join(os.getcwd(), 'free-energy-data', filename+"-g.dat"))
+		data = read_data_file_to_dict(os.path.join('data', filename+"-g.dat"))
 		next_ff = data['ff_small']
 		total_checks = data['total checks of small cell']
 		valid_checks = data['total valid small checks']
@@ -53,9 +56,10 @@ def main(args):
 	#do plot
 	energy = -np.cumsum(map(math.log, success_ratios))
 	print energy
-	plt.scatter(np.array(ffs), energy)
+	plt.scatter(ffs, energy)
 	plt.ylabel('F/kT')
-	plt.xlabel('ff')
+	plt.xlabel(r'$\eta$')
+        plt.savefig('rename-me-please.pdf')
 	plt.show()
 
 
@@ -67,23 +71,7 @@ def read_data_file_to_dict(filepath):
 		for line in f:
 			if line.startswith('#') and ':' in line:
 				sanitized = map(lambda s: s.strip(' #'), line.split(':'))
-				meta_data[sanitized[0]] = num(sanitized[1])
+				meta_data[sanitized[0]] = eval(sanitized[1])
 	return meta_data
 
-
-def num(s):
-	# todo the way I handle the tuple case is terrible and makes me sad
-	# I'm going to be lying awake thinking about it
-    try:
-        return int(s)
-    except ValueError:
-    	try:
-    		return float(s)
-    	except ValueError:
-        	return map(num, make_tuple(s))
-
-
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+main()
