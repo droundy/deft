@@ -1,5 +1,4 @@
-determine metric for quality of initializations
- - max error in U/Nk or C_V/nK at T \ge min_T
+
 make iterations vs initialization quality plot
 
 
@@ -13,7 +12,7 @@ min counts for every energy in first round of wang landau ~ exp(1/T)
 use canonical weights below important energy
 
 
-ratchet min_important_energy if we have found an important slope in ln_dos
+check whether we should always ratchet min_important_energy
 
 
 make wang_landau and tmmc dump weight aray and histogram periodically
