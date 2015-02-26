@@ -197,13 +197,18 @@ ball random_move(const ball &p, double move_scale, const double len[3]){
 }
 
 int count_interactions(int id, ball *p, double interaction_distance,
-                       double len[3], int walls){
+                       double len[3], int walls, int sticky_wall){
   int interactions = 0;
   for(int i = 0; i < p[id].num_neighbors; i++){
     if(periodic_diff(p[id].pos, p[p[id].neighbors[i]].pos,
                      len, walls).normsquared()
        <= uipow(interaction_distance,2))
       interactions++;
+  }
+  // if sticky_wall is true, then there is an attractive slab right
+  // near the -z wall.
+  if (sticky_wall && p[id].pos.z < -0.5*len[2] + p[id].R) {
+    interactions++;
   }
   return interactions;
 }
@@ -269,7 +274,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   int id = moves.total % N;
   moves.total++;
   const int old_interaction_count =
-    count_interactions(id, balls, interaction_distance, len, walls);
+    count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
   ball temp = random_move(balls[id], translation_scale, len);
   // If we're out of the cell or we overlap, this is a bad move!
   if (!in_cell(temp, len, walls) || overlaps_with_any(temp, balls, len, walls)){
@@ -305,7 +310,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   ball pid = balls[id]; // save a copy
   balls[id] = temp; // temporarily update the position
   const int new_interaction_count =
-    count_interactions(id, balls, interaction_distance, len, walls);
+    count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
   balls[id] = pid;
   // Now we can check whether we actually want to do this move based on the
   // new energy.
@@ -326,8 +331,10 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
       }
       double tup = transitions(energy, energy_change)/double(tup_norm);
       double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
-      Pmove = tdown/tup;
-      if (!(Pmove > Pmin)) Pmove = Pmin;
+      if (tdown < tup) {
+        Pmove = tdown/tup;
+        if (!(Pmove > Pmin)) Pmove = Pmin;
+      }
     }
     // printf("Pmove %g  with E %d and dE %d   from (%ld, %ld)\n",
     //        Pmove, energy, energy_change,

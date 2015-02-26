@@ -122,6 +122,7 @@ int main(int argc, const char *argv[]) {
   // some miscellaneous default or dummy simulation parameters
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
+  sw.sticky_wall = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
   sw.fractional_dos_precision = 1e-12;
@@ -171,6 +172,7 @@ int main(int argc, const char *argv[]) {
      "the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
+    {"sticky-wall", '\0', POPT_ARG_NONE, &sw.sticky_wall, 0, "Make one wall sticky", 0},
 
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
 

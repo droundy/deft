@@ -50,6 +50,7 @@ struct sw_simulation {
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
+  int sticky_wall; // do we have an attractive region near one wall?
   double interaction_distance; // the distance over which balls interact
 
   /* The following are constant parameters that describe the details
