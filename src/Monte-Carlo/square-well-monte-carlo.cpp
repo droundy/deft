@@ -101,7 +101,9 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
+  int oe_update_factor = 2;
   double robust_scale = 0.5;
+  int robust_samples = 1000;
   double robust_cutoff = 0.25;
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
@@ -253,8 +255,12 @@ int main(int argc, const char *argv[]) {
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"robust_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &robust_scale, 0, "Scaling factor for weight correction at each iteration", "DOUBLE"},
+    {"robust_samples", '\0', POPT_ARG_INT, &robust_samples, 0,
+     "Initialization iteration end condition factor", "INT"},
     {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
+     &robust_cutoff, 0, "Initialization iteration end condition factor", "DOUBLE"},
+    {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
+     "Update scaling for the optimized ensemble method", "INT"},
     {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -486,6 +492,10 @@ int main(int argc, const char *argv[]) {
       sw.end_condition = pessimistic_min_samples;
       optimistic_sampling = false;
     }
+    if(tmmc){
+      sw.end_condition = pessimistic_min_samples;
+      optimistic_sampling = true;
+    }
   }
 
   // set end condition parameters if necessary
@@ -699,24 +709,23 @@ int main(int argc, const char *argv[]) {
   sw.reset_histograms();
 
   // Now let's initialize our weight array
-  if(!no_weights){
+  if (fix_kT) {
+    sw.initialize_canonical(fix_kT);
+  } else if(gaussian_fit){
     sw.initialize_gaussian(gaussian_init_scale);
-    if (fix_kT) {
-      sw.initialize_canonical(fix_kT);
-    } else if (wang_landau) {
-      sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-    } else if (vanilla_wang_landau) {
-      sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
-                                vanilla_wl_threshold, vanilla_wl_cutoff);
-    } else if (optimized_ensemble) {
-      sw.initialize_optimized_ensemble(first_update_iterations);
-    } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic(robust_scale, robust_cutoff);
-    } else if (bubble_suppression) {
-      sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
-    } else if (tmmc) {
-      sw.initialize_transitions();
-    }
+  } else if (wang_landau) {
+    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
+  } else if (vanilla_wang_landau) {
+    sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
+                              vanilla_wl_threshold, vanilla_wl_cutoff);
+  } else if (optimized_ensemble) {
+    sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
+  } else if (robustly_optimistic) {
+    sw.initialize_robustly_optimistic(robust_scale, robust_samples, robust_cutoff);
+  } else if (bubble_suppression) {
+    sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
+  } else if (tmmc) {
+    sw.initialize_transitions();
   }
 
   took("Actual initialization");
