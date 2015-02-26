@@ -136,7 +136,7 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/square-well-liquid/data");
+  sprintf(data_dir, "papers/histogram/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];

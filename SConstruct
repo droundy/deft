@@ -239,7 +239,7 @@ all_sources = generic_sources + generated_sources
 env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
-                       square-well-liquid polyhedra renormalization electrostatics """):
+                       histogram polyhedra renormalization electrostatics """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
     NoCache(p)
@@ -318,14 +318,14 @@ for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
 
 # #################### papers/fuzzy-fmt ##################################################
 
-# #################### papers/square-well-liquid ##################################################
+# #################### papers/histogram ##############################
 
-Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
+Alias('papers', env.PDF('papers/histogram/paper.tex'))
 
 # The following enables automagic monte-carlo generation of
 # low-quality data for simple plots
 for ff in [0.1, 0.2, 0.3, 0.4]:
-    datadir = "papers/square-well-liquid/data/"
+    datadir = "papers/histogram/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
         for N in range(5,30)+range(30,50,5)+range(50,100,10)+range(100,201,20):
             for method in ["nw","robustly_optimistic","gaussian","wang_landau","optimized_ensemble",'tmmc'] \
