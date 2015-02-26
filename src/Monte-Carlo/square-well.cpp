@@ -559,7 +559,7 @@ void sw_simulation::set_min_important_energy(){
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
   for(int i = max_entropy_state+1; i <= min_energy_state; i++){
     if(ln_dos[i-1] - ln_dos[i] > 1.0/min_T){
-      if(i > min_important_energy) min_important_energy = i;
+      if(i > min_important_energy) min_important_energy = i-1;
       return;
     }
   }
@@ -567,31 +567,38 @@ void sw_simulation::set_min_important_energy(){
   if(min_energy_state > min_important_energy) min_important_energy = min_energy_state;
 }
 
-bool sw_simulation::finished_initializing(){
+bool sw_simulation::finished_initializing(bool be_verbose) {
 
   if(end_condition == optimistic_sample_error
      || end_condition == pessimistic_sample_error){
 
     const bool optimistic_sampling = end_condition == optimistic_sample_error;
     return fractional_sample_error(min_T,optimistic_sampling) <= sample_error;
-  }
-  else if(end_condition == optimistic_min_samples
-          || end_condition == pessimistic_min_samples){
-
+  } else if(end_condition == optimistic_min_samples
+            || end_condition == pessimistic_min_samples) {
     set_min_important_energy();
 
     if(end_condition == optimistic_min_samples){
       for(int i = min_important_energy; i > max_entropy_state; i--){
-        if(optimistic_samples[i] < min_samples)
+        if (optimistic_samples[i] < min_samples) {
+          if (be_verbose) {
+            printf("[%9ld] Got only %li at energy %d (compared with %d) [%g vs %g]\n",
+                   iteration, optimistic_samples[i], i, min_samples,
+                   ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
+            fflush(stdout);
+          }
           return false;
+        }
       }
       return true;
-    }
-    else { // if end_condition == pessimistic_min_samples
+    } else { // if end_condition == pessimistic_min_samples
+      if (be_verbose) {
+        printf("am using pessimistic code\n");
+        fflush(stdout);
+      }
       return pessimistic_samples[min_important_energy] >= min_samples;
     }
-  }
-  else if(end_condition == flat_histogram){
+  } else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
     int hist_total = 0;
     int most_weighted_energy = 0;
@@ -981,7 +988,7 @@ void sw_simulation::initialize_transitions() {
     check_how_often += Nmin*N; // try a little harder next time...
     update_weights_using_transitions();
 
-  } while(!finished_initializing());
+  } while(!finished_initializing(printing_allowed()));
 }
 
 double sw_simulation::estimate_trip_time(int E1, int E2) {

@@ -494,10 +494,6 @@ int main(int argc, const char *argv[]) {
       sw.end_condition = pessimistic_min_samples;
       optimistic_sampling = false;
     }
-    if(tmmc){
-      sw.end_condition = pessimistic_min_samples;
-      optimistic_sampling = true;
-    }
   }
 
   // set end condition parameters if necessary

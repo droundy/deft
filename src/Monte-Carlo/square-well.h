@@ -179,7 +179,7 @@ struct sw_simulation {
   void set_min_important_energy();
 
   // check whether we are done initializing
-  bool finished_initializing();
+  bool finished_initializing(bool be_verbose = false);
 
   double estimate_trip_time(int E1, int E2);
 
