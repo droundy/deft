@@ -28,7 +28,7 @@ for method in ["nw","bubble_suppression","robustly_optimistic","gaussian",
     for ww in [1.3, 1.5]:
         for ff in [0.3, 0.8]:
             for N in range(5,31):
-                outputs = ["papers/square-well-liquid/data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
+                outputs = ["papers/histogram/data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                            % (ww, ff, N, method.replace(' ',''), postfix)
                            for postfix in ['g', 'E', 'lnw', 'transitions']]
                 src.rule('./square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 1000000'

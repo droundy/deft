@@ -1,9 +1,0 @@
-maruku:
-  use_tex:    true
-
-baseurl: /deft
-destination: html
-layouts: ['./doc/_layouts']
-include: ['./doc/_include']
-exclude: ['*.test', '*.mkdat', '*.o', '*.dat', '*.cpp', '*.hi',
-          'monte-carlo*', '*.exe', '*.debug', '*.tex' ]

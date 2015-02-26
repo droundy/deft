@@ -34,7 +34,7 @@ for version in versions:
     plt.semilogy(energy, DS, styles.dots(version), label=styles.title(version))
 
 plt.xlabel('$U/N\epsilon$')
-plt.ylabel('$D$')
+plt.ylabel('$H$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))

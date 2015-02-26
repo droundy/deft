@@ -1,12 +1,22 @@
 
-determine metric for quality of initializations
- - max error in U/Nk or C_V/nK at T \ge min_T
 make iterations vs initialization quality plot
+
+
+reference file instead of reference method
+input reference file and Tmin
+
+include temp of max error in error file
+error vs. temperature plot for U and CV
+
+min counts for every energy in first round of wang landau ~ exp(1/T)
+use canonical weights below important energy
+
+
+check whether we should always ratchet min_important_energy
 
 make wang_landau and tmmc dump weight aray and histogram periodically
 
 clean up optimized_ensemble
- - throw away samples and e-hist in optimized_ensemble if we find a new min_important_energy
  - find df/dE by secant line in f(E)
    - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
    - average weights if we have an energy jump
@@ -18,8 +28,6 @@ make sure we're not breaking wang_landau by not specifying a minimum energy
 
 run [vanilla_]wang_landau for 60, 80, 100, 150, 200
  - go from 100 to 200 by 20s?
-
-check which methods rely on the gaussian pre-initialization
 
 
 
