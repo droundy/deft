@@ -60,7 +60,7 @@ def main(args):
 
 
 
-
+# I was awake when I wrote this part
 def read_data_file_to_dict(filepath):
 	meta_data = {}
 	with open(filepath, 'r') as f:
@@ -72,7 +72,7 @@ def read_data_file_to_dict(filepath):
 
 
 def num(s):
-	# todo the way I hadnle the tuple case is terrible and makes me sad
+	# todo the way I handle the tuple case is terrible and makes me sad
 	# I'm going to be lying awake thinking about it
     try:
         return int(s)
