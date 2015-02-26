@@ -105,6 +105,7 @@ int main(int argc, const char *argv[]) {
   double R = 1;
   const double well_width = 1;
   double ff = 0.3;
+  double ff_small = 0.3;
   double neighbor_scale = 2;
   double de_g = 0.05;
   double max_rdf_radius = 10;
@@ -227,8 +228,12 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  ff_small = (4*M_PI/3*R*R*R*sw.N)/
+    (sw.len[x]*sw.len[y]*sw.len[z]*scaling_factor*scaling_factor*scaling_factor);
+
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
+  printf("\nFilling fraction of small cell is %g", ff_small);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
@@ -474,9 +479,11 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
-          "# scaling factor: %g\n",
+          "# scaling factor: %g\n"
+          "# ff: %g\n"
+          "# ff_small: %g\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale, scaling_factor);
+          well_width, sw.translation_scale, neighbor_scale, scaling_factor, ff, ff_small);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
