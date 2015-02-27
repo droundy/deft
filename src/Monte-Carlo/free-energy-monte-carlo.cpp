@@ -76,6 +76,10 @@ inline void print_bad(const ball *p, int N, double len[3], int walls);
 // Checks to make sure that every ball is his neighbor's neighbor.
 inline void check_neighbor_symmetry(const ball *p, int N);
 
+// Check whether it is a reasonable time to save data according to our
+// heuristic.
+bool time_to_save();
+
 int main(int argc, const char *argv[]) {
   took("Starting program");
   // ----------------------------------------------------------------------------
@@ -494,11 +498,6 @@ int main(int argc, const char *argv[]) {
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
 
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
-  // top out at one hour interval
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30;
-  clock_t last_output = clock(); // when we last output data
-
   sw.moves.total = 0;
   sw.moves.working = 0;
   sw.iteration = 0;
@@ -571,13 +570,8 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
 
-    const clock_t now = clock();
-    if ((now - last_output > output_period) || sw.iteration == simulation_iterations) {
-      last_output = now;
-      assert(last_output);
-      if (output_period < max_output_period/2) output_period *= 2;
-      else if (output_period < max_output_period)
-        output_period = max_output_period;
+    if (time_to_save() || sw.iteration == simulation_iterations) {
+      const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
       const int minutes = int(secs_done / 60) % 60;
@@ -806,4 +800,34 @@ void save_locations(const ball *p, int N, const char *fname, const double len[3]
     fprintf(out, "\n");
   }
   fclose(out);
+}
+
+bool time_to_save() {
+  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
+  // top out at one hour interval
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60;
+  static clock_t last_save_time = 0;
+
+  static int iterations = 0;
+  static int how_often = 1;
+  // clock can be expensive under fac, so this is a heuristic to
+  // reduce our use of it.
+  if (++iterations % how_often == 0) {
+    const clock_t time_now = clock();
+    if(time_now-last_save_time > output_period){
+
+      if (output_period < max_output_period/2) output_period *= 2;
+      else if (output_period < max_output_period)
+        output_period = max_output_period;
+
+      how_often = 1+ iterations/3; // our simple heuristic
+      last_save_time = time_now;
+      iterations = 0;
+      // flushing occasionally will be no problem and can be helpful
+      // if we forget.
+      fflush(stdout);
+      return true;
+    }
+  }
+  return false;
 }
