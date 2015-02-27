@@ -579,14 +579,29 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     set_min_important_energy();
 
     if(end_condition == optimistic_min_samples){
+      if (be_verbose) {
+        long num_to_go = 0, energies_unconverged = 0;
+        int lowest_problem_energy = 0, highest_problem_energy = min_energy_state;
+        for (int i = min_important_energy; i > max_entropy_state; i--){
+          if (optimistic_samples[i] < min_samples) {
+            num_to_go += min_samples - optimistic_samples[i];
+            energies_unconverged += 1;
+            if (i > lowest_problem_energy) lowest_problem_energy = i;
+            if (i < highest_problem_energy) highest_problem_energy = i;
+          }
+        }
+        printf("[%9ld] Have %ld samples to go (at %ld energies)\n",
+               iteration, num_to_go, energies_unconverged);
+        printf("       <%d - %d> has samples <%ld - %ld>/%d (current energy %d) [%g vs %g]\n",
+               lowest_problem_energy, highest_problem_energy,
+               optimistic_samples[lowest_problem_energy],
+               optimistic_samples[highest_problem_energy], min_samples, energy,
+               ln_energy_weights[lowest_problem_energy] - ln_energy_weights[lowest_problem_energy-1],
+               1.0/min_T);
+        fflush(stdout);
+      }
       for(int i = min_important_energy; i > max_entropy_state; i--){
         if (optimistic_samples[i] < min_samples) {
-          if (be_verbose) {
-            printf("[%9ld] Got only %li at energy %d (compared with %d) [%g vs %g]\n",
-                   iteration, optimistic_samples[i], i, min_samples,
-                   ln_energy_weights[i] - ln_energy_weights[i-1], 1.0/min_T);
-            fflush(stdout);
-          }
           return false;
         }
       }
@@ -981,11 +996,10 @@ void sw_simulation::update_weights_using_transitions() {
 
 void sw_simulation::initialize_transitions() {
   int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
-  const double Nmin = exp(1.0/min_T);
   do {
 
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
-    check_how_often += Nmin*N; // try a little harder next time...
+    check_how_often += 10*min_samples*N; // try a little harder next time...
     update_weights_using_transitions();
 
   } while(!finished_initializing(printing_allowed()));

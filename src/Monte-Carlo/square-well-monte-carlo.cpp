@@ -127,7 +127,7 @@ int main(int argc, const char *argv[]) {
   sw.sticky_wall = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
-  sw.fractional_dos_precision = 1e-12;
+  sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
   sw.min_T = 0.2;
   bool optimistic_sampling = false;
