@@ -996,14 +996,13 @@ void sw_simulation::update_weights_using_transitions() {
 void sw_simulation::initialize_transitions() {
   int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
   do {
-
-    update_weights_using_transitions();
-    flush_weight_array();
-    reset_histograms();
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
     check_how_often += 10*min_samples*N; // try a little harder next time...
-
   } while(!finished_initializing(printing_allowed()));
+
+  update_weights_using_transitions();
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
 }
 
 double sw_simulation::estimate_trip_time(int E1, int E2) {
