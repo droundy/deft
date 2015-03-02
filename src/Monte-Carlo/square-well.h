@@ -28,7 +28,7 @@ struct move_info {
 enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
                       optimistic_sample_error, pessimistic_sample_error, flat_histogram };
 
-enum dos_types { inv_weights_dos, transitions_dos, full_dos };
+enum dos_types { histogram_dos, transition_dos };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the

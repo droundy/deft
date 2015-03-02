@@ -455,12 +455,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
 
   double *ln_dos = new double[energy_levels]();
 
-  if(dos_type == inv_weights_dos){
-    for(int i = 0; i < energy_levels; i++)
-      ln_dos[i] = -ln_energy_weights[i];
-  }
-
-  else if(dos_type == full_dos){
+  if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
       if(energy_histogram[i] != 0){
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
@@ -469,7 +464,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
     }
   }
 
-  else if(dos_type == transitions_dos){
+  else if(dos_type == transition_dos){
 
     const int energies_observed = min_energy_state+1;
     double *TD_over_D = new double[energies_observed];
@@ -557,14 +552,15 @@ void sw_simulation::set_min_important_energy(){
   const double *ln_dos = compute_ln_dos(sim_dos_type);
 
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for(int i = max_entropy_state+1; i <= min_energy_state; i++){
-    if(ln_dos[i-1] - ln_dos[i] > 1.0/min_T){
-      if(i > min_important_energy) min_important_energy = i-1;
+  for(int i = max_entropy_state+1; i < min_energy_state; i++){
+    if(ln_dos[i] - ln_dos[i+1] > 1.0/min_T){
+      if(i >= min_important_energy) min_important_energy = i;
       return;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
   if(min_energy_state > min_important_energy) min_important_energy = min_energy_state;
+
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
@@ -596,7 +592,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                lowest_problem_energy, highest_problem_energy,
                optimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy,
-               ln_energy_weights[lowest_problem_energy] - ln_energy_weights[lowest_problem_energy-1],
+               ln_energy_weights[lowest_problem_energy]
+                 - ln_energy_weights[lowest_problem_energy-1],
                1.0/min_T);
         fflush(stdout);
       }
@@ -874,9 +871,10 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     }
     // Set canonical weights at unseen energies
     initialize_canonical(min_T,min_hist);
+
     flush_weight_array();
 
-    printf("Weight update: %i (%ld iters)\n", weight_updates, update_iters);
+    printf("Optimized ensemble update: %i (%ld iters)\n", weight_updates, update_iters);
     for(int e = max_entropy_state; e <= min_energy_state; e++){
       printf("h[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %g\n",
              e, energy_histogram[e], e, pessimistic_samples[e], e, ln_energy_weights[e]);
@@ -903,7 +901,6 @@ void sw_simulation::initialize_robustly_optimistic(double robust_scale,
         ln_energy_weights[e] -= robust_scale*log(energy_histogram[e]);
       }
     }
-    /* Don't spend more time than necessary at unimportant low energies */
     if(min_energy_state > min_important_energy){
       initialize_canonical(min_T,min_important_energy);
     }
@@ -917,6 +914,7 @@ void sw_simulation::initialize_robustly_optimistic(double robust_scale,
       for (int j = 0; j < N*energy_levels; j++) move_a_ball();
 
       if (printing_allowed()) {
+        printf("robustly optimistic status update:\n");
         for (int e = max_entropy_state; e <= min_energy_state; e++) {
           printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
                  e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
@@ -988,19 +986,22 @@ void sw_simulation::update_weights_using_transition_flux() {
 
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
-  const dos_types update_dos_type = transitions_dos;
+  const dos_types update_dos_type = transition_dos;
   const double *ln_dos = compute_ln_dos(update_dos_type);
   for(int i = 0; i < energy_levels; i++)
     ln_energy_weights[i] = -ln_dos[i];
 }
 
+// initialization with tmmc
 void sw_simulation::initialize_transitions() {
   int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
   do {
 
+    update_weights_using_transitions();
+    flush_weight_array();
+    reset_histograms();
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
     check_how_often += 10*min_samples*N; // try a little harder next time...
-    update_weights_using_transitions();
 
   } while(!finished_initializing(printing_allowed()));
 }

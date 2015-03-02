@@ -1,18 +1,21 @@
+make wang landau changes global, or modular?
+ - i.e. use them in vanilla wang landau?
+when should we use canonical weights below important energy?
+
+
+results and discussion together?
+
+min counts for every energy in first round of wang landau ~ exp(1/T)
+
+
 
 make iterations vs initialization quality plot
 
 
 reference file instead of reference method
-input reference file and Tmin
 
 include temp of max error in error file
 error vs. temperature plot for U and CV
-
-min counts for every energy in first round of wang landau ~ exp(1/T)
-use canonical weights below important energy
-
-
-check whether we should always ratchet min_important_energy
 
 make wang_landau and tmmc dump weight aray and histogram periodically
 
