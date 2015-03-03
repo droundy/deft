@@ -21,7 +21,7 @@ for t in texfs:
     f = open(t, 'r')
     latex = f.read()
     inputs = {fname}
-    outputs = {fname[:-3]+'pdf', fname[:-3]+'bbl'}
+    outputs = {fname[:-3]+'pdf'}
 
     os.chdir(os.path.dirname(t)) # so we can look up figures easily
     def graphics_name(x):

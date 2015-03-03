@@ -101,17 +101,20 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
+  int oe_update_factor = 2;
   double robust_scale = 0.5;
+  int robust_samples = 1000;
   double robust_cutoff = 0.25;
   double bubble_scale = 0;
   double bubble_cutoff = 0.2;
 
 
   // end conditions
-  int default_pessimistic_min_samples = 2;
+  int default_pessimistic_min_samples = 10;
   double default_optimistic_sample_error = 0.01;
   double default_pessimistic_sample_error = 0.3;
   double default_flatness = 0.1;
+  bool optimistic_sampling = false;
 
   // Do not change these! They are taken directly from the WL paper.
   const double vanilla_wl_factor = 1;
@@ -122,12 +125,12 @@ int main(int argc, const char *argv[]) {
   // some miscellaneous default or dummy simulation parameters
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
+  sw.sticky_wall = 0;
   sw.N = 200;
   sw.translation_scale = 0.05;
-  sw.fractional_dos_precision = 1e-12;
+  sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
   sw.min_T = 0.2;
-  bool optimistic_sampling = false;
   sw.min_samples = 0;
   sw.sample_error = 0;
   sw.flatness = 0;
@@ -136,7 +139,7 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/square-well-liquid/data");
+  sprintf(data_dir, "papers/histogram/data");
   char *filename = new char[1024];
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
@@ -171,6 +174,7 @@ int main(int argc, const char *argv[]) {
      "the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
+    {"sticky-wall", '\0', POPT_ARG_NONE, &sw.sticky_wall, 0, "Make one wall sticky", 0},
 
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
 
@@ -253,8 +257,12 @@ int main(int argc, const char *argv[]) {
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"robust_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &robust_scale, 0, "Scaling factor for weight correction at each iteration", "DOUBLE"},
+    {"robust_samples", '\0', POPT_ARG_INT, &robust_samples, 0,
+     "Initialization iteration end condition factor", "INT"},
     {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_cutoff, 0, "Robustly optimistic end condition factor", "DOUBLE"},
+     &robust_cutoff, 0, "Initialization iteration end condition factor", "DOUBLE"},
+    {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
+     "Update scaling for the optimized ensemble method", "INT"},
     {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
     {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -468,12 +476,10 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
-  if(sw.end_condition == flat_histogram){
-    sw.sim_dos_type = inv_weights_dos;
-  } else if(tmmc){
-    sw.sim_dos_type = transitions_dos;
+  if(tmmc){
+    sw.sim_dos_type = transition_dos;
   } else{
-    sw.sim_dos_type = full_dos;
+    sw.sim_dos_type = histogram_dos;
   }
 
   /* set default end condition if necessary */
@@ -484,7 +490,6 @@ int main(int argc, const char *argv[]) {
     optimistic_sampling = true;
     if (optimized_ensemble) {
       sw.end_condition = pessimistic_min_samples;
-      optimistic_sampling = false;
     }
   }
 
@@ -494,6 +499,13 @@ int main(int argc, const char *argv[]) {
     // have sampled the next-down energy by the time we are
     // finished, if that energy is important at temperature min_T.
     sw.min_samples = 1 + exp(1.0/sw.min_T);
+    // tmmc needs more min_samples, because its "optimistic samples"
+    // is inclusive of all visits, where other approaches periodically
+    // re-zero their samples.  Question: maybe we should have all
+    // approaches count every sample? That would seem to give a more
+    // even estimation of accuracy, assuming that we are not "losing"
+    // information when we move from one simulation to the next.
+    if (tmmc) sw.min_samples *= 10;
     printf("Defaulting min_samples to %d using min_T = %g\n", sw.min_samples, sw.min_T);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
@@ -696,27 +708,26 @@ int main(int argc, const char *argv[]) {
 
   // First, let us figure out what the max entropy point is (and move to it)
   sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
-  sw.iteration = 0;
+  sw.reset_histograms();
 
   // Now let's initialize our weight array
-  if(!no_weights){
+  if (fix_kT) {
+    sw.initialize_canonical(fix_kT);
+  } else if(gaussian_fit){
     sw.initialize_gaussian(gaussian_init_scale);
-    if (fix_kT) {
-      sw.initialize_canonical(fix_kT);
-    } else if (wang_landau) {
-      sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-    } else if (vanilla_wang_landau) {
-      sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
-                                vanilla_wl_threshold, vanilla_wl_cutoff);
-    } else if (optimized_ensemble) {
-      sw.initialize_optimized_ensemble(first_update_iterations);
-    } else if (robustly_optimistic) {
-      sw.initialize_robustly_optimistic(robust_scale, robust_cutoff);
-    } else if (bubble_suppression) {
-      sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
-    } else if (tmmc) {
-      sw.initialize_transitions();
-    }
+  } else if (wang_landau) {
+    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
+  } else if (vanilla_wang_landau) {
+    sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
+                              vanilla_wl_threshold, vanilla_wl_cutoff);
+  } else if (optimized_ensemble) {
+    sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
+  } else if (robustly_optimistic) {
+    sw.initialize_robustly_optimistic(robust_scale, robust_samples, robust_cutoff);
+  } else if (bubble_suppression) {
+    sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
+  } else if (tmmc) {
+    sw.initialize_transitions();
   }
 
   took("Actual initialization");
@@ -733,11 +744,8 @@ int main(int argc, const char *argv[]) {
      sw.end_condition == optimistic_sample_error ||
      sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
-    sw.min_important_energy = sw.find_min_important_energy(sw.min_T);
-    for(int i = sw.min_important_energy+1; i < sw.energy_levels; i++){
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_important_energy]
-        + (i-sw.min_important_energy)/sw.min_T;
-    }
+    sw.set_min_important_energy();
+    sw.initialize_canonical(sw.min_T,sw.min_important_energy);
   } else if (!fix_kT){
     /* Flatten the weight array at unseen energies */
     for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
@@ -756,8 +764,7 @@ int main(int argc, const char *argv[]) {
            sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
   }
 
-  double fractional_sample_error =
-    sw.fractional_sample_error(sw.min_T,optimistic_sampling);
+  double fractional_sample_error = sw.fractional_sample_error(sw.min_T,optimistic_sampling);
 
   // ----------------------------------------------------------------------------
   // Generate save file info
@@ -905,20 +912,7 @@ int main(int argc, const char *argv[]) {
 
   delete[] countinfo;
 
-  // ----------------------------------------------------------------------------
-  // Clean up initialization artifacts
-  // ----------------------------------------------------------------------------
-
-  // Reset simulation info
-  sw.moves.total = 0;
-  sw.moves.working = 0;
-  sw.iteration = 0;
-
-  for(int i = 0; i < sw.energy_levels; i++){
-    sw.energy_histogram[i] = 0;
-    sw.optimistic_samples[i] = 0;
-    sw.pessimistic_samples[i] = 0;
-  }
+  sw.reset_histograms();
 
   took("Finishing initialization");
 

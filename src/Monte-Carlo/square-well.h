@@ -28,7 +28,7 @@ struct move_info {
 enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
                       optimistic_sample_error, pessimistic_sample_error, flat_histogram };
 
-enum dos_types { inv_weights_dos, transitions_dos, full_dos };
+enum dos_types { histogram_dos, transition_dos };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
@@ -50,6 +50,7 @@ struct sw_simulation {
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
+  int sticky_wall; // do we have an attractive region near one wall?
   double interaction_distance; // the distance over which balls interact
 
   /* The following are constant parameters that describe the details
@@ -123,6 +124,7 @@ struct sw_simulation {
   /* Up-moving walkers for optimized ensemble method */
   long *walkers_up;
 
+  void reset_histograms();
   void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(int energy_change); // updates to run if we've changed energy
@@ -147,16 +149,18 @@ struct sw_simulation {
 
   /*** HISTOGRAM METHODS ***/
 
-  void initialize_canonical(double kT);
+  // set canonical weights below some given energy
+  void initialize_canonical(double T, int reference=0);
 
   double initialize_gaussian(double scale); // returns width of gaussian used
 
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  void initialize_optimized_ensemble(int first_update_iterations);
+  void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 
-  void initialize_robustly_optimistic(double robust_scale, double robust_cutoff);
+  void initialize_robustly_optimistic(double robust_scale, int robust_samples,
+                                      double robust_cutoff);
 
   void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
@@ -172,10 +176,10 @@ struct sw_simulation {
 
   double* compute_ln_dos(dos_types dos_type);
 
-  int find_min_important_energy(double T);
+  void set_min_important_energy();
 
   // check whether we are done initializing
-  bool finished_initializing();
+  bool finished_initializing(bool be_verbose = false);
 
   double estimate_trip_time(int E1, int E2);
 
