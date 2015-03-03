@@ -335,7 +335,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   if (use_transition_matrix) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
       const double betamax = 1.0/min_T;
-      const double Pmin = exp(-betamax);
+      const double Pmin = exp(energy_change*betamax);
       /* I note that Swendson 1999 uses essentially this method
            *after* two stages of initialization. */
       long tup_norm = 0;
