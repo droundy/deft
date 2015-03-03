@@ -5,6 +5,7 @@
 \newcommand\kk{\mathbf{k}}
 \newcommand\xx{\mathbf{x}}
 \newcommand\rr{\mathbf{r}}
+\newcommand\dd{\mathrm{d}}
 \newcommand\fixme[1]{\textcolor{red}{\textbf{[#1]}}}
 
 \begin{document}
@@ -302,9 +303,11 @@ A different way to do this that avoids some of the Fourier transform
 troubles is to formulate $g_S$ as a polynomial expansion.  We do this
 up to fouth order so that
 \begin{align}
-  g_S(r;g_\sigma) &=
-  g_\sigma + \sum_{i=1}^{4} \sum_{j=1}^{4} \kappa_{ij} (g_\sigma - 1)^i
-  \left(\frac{r}{\sigma}-1\right)^j,
+  g_S(r;g_\sigma) &= g_\sigma + \sum_i \gamma_i(g_\sigma) \xi_i(r) \\
+  &=
+  g_\sigma + \sum_{i=1}^{4} \left(\sum_{j=1}^{4} (g_\sigma
+  - 1)^j \kappa_{ji} \right)
+  \left(\frac{r}{\sigma}-1\right)^i,
   \label{eq:fit-form}
 \end{align}
 which makes the transforms for $i=1,2,3,4$
@@ -466,7 +469,39 @@ averages over those states.
 
 \subsection{Using the pair distribution function}
 
+We begin with the definition of $A_1$,
+\begin{align}
+  A_1 = \frac{1}{2}\iint n^{(2)}(\rr_1,\rr_2) \Phi(|\rr_1-\rr_2|)
+  \dd\rr_1 \dd\rr_2
+\end{align}
 
+But we must use the relation
+\begin{align}
+  n^{(2)}(\rr_1,\rr_2) = n(\rr_1)n(\rr_2)g^{(2)}(\rr_1,\rr_2)
+\end{align}
+and equation \ref{eq:g2-our-mean} so that
+\begin{align}
+  A_1 &=\frac{1}{4}\iint n(\rr_1)n(\rr_2)\Big[
+    g_s(r_{12},g_\sigma(\rr_1)) \notag \\
+    &\hspace{2cm} + g_s(r_{12},g_\sigma(\rr_2)) \Big] \Phi(r_{12})
+  \dd\rr_1 \dd\rr_2.
+\end{align}
+$g_s$ is symmetric in the exchange of $\rr_1$ and $\rr_2$, and we'll
+expand $g_s$ into its polynomial form
+\begin{align}
+  A_1 &= \frac{1}{2}\iint n(\rr_1)n(\rr_2)g_s(r_{12},g_\sigma(\rr_1))
+  \Phi(r_{12}) \dd\rr_1 \dd\rr_2 \\
+  &= \frac{1}{2}\iint n(\rr_1)n(\rr_2)\sum_i
+  \gamma_i(g_\sigma(\rr_1))\xi_i(r_{12})\Phi(r_{12}) \dd\rr_1 \dd\rr_2 \\
+  &= \frac{1}{2} \sum_i \iint \dd\rr_1 \dd\rr_2
+  n(\rr_1)n(\rr_2)\gamma_i(g_\sigma(\rr_1)) \xi_i(r_{12})\Phi(r_{12}).
+\end{align}
+Then we can rearrange things a little better
+\begin{align}
+  A_1 &= \frac{1}{2} \sum_i \int \dd\rr_1 n(\rr_1)
+  \gamma_i(g_\sigma(\rr_1)) \int \dd\rr_2 n(\rr_2)
+  \xi_i(r_{12}) \Phi(r_{12})
+\end{align}
 \fixme{We have introduced an approximation to the pair distribution
   function above... here we discuss an implementation of thermodynamic
   perturbation theory for an inhomogeneous system using this pair
