@@ -448,6 +448,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
     else
       error_times_Z += boltz/sqrt(pessimistic_samples[i]);
   }
+  delete[] ln_dos;
   return error_times_Z/Z;
 }
 
@@ -556,12 +557,14 @@ void sw_simulation::set_min_important_energy(){
     if(ln_dos[i] - ln_dos[i+1] > 1.0/min_T){
       // ratcheting of min_important_energy is done here
       if(i >= min_important_energy) min_important_energy = i;
+      delete[] ln_dos;
       return;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
   if(min_energy_state > min_important_energy) min_important_energy = min_energy_state;
 
+  delete[] ln_dos;
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
@@ -989,8 +992,10 @@ void sw_simulation::update_weights_using_transition_flux() {
 void sw_simulation::update_weights_using_transitions() {
   const dos_types update_dos_type = transition_dos;
   const double *ln_dos = compute_ln_dos(update_dos_type);
-  for(int i = 0; i < energy_levels; i++)
+  for(int i = 0; i < energy_levels; i++) {
     ln_energy_weights[i] = -ln_dos[i];
+  }
+  delete[] ln_dos;
 }
 
 // initialization with tmmc
@@ -1007,8 +1012,8 @@ void sw_simulation::initialize_transitions() {
 }
 
 double sw_simulation::estimate_trip_time(int E1, int E2) {
-  double *pop = new double[energy_levels]();
-  double *pop_new = new double[energy_levels]();
+  double *pop = new double[energy_levels+biggest_energy_transition]();
+  double *pop_new = new double[energy_levels+biggest_energy_transition]();
   pop[E1] = 1.0;
   double probE2 = 0.0;
   int iters = 0;
@@ -1073,7 +1078,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
     for (int i=0;i<=min_energy_state;i++) {
       if (pop[i]) {
         for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
-          pop_new[i+de] += pop[i]*T[i*Nde + de + biggest_energy_transition];
+          if (i+de >= 0) pop_new[i+de] += pop[i]*T[i*Nde + de + biggest_energy_transition];
         }
       }
     }
