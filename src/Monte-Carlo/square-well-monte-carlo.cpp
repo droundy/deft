@@ -499,6 +499,13 @@ int main(int argc, const char *argv[]) {
     // have sampled the next-down energy by the time we are
     // finished, if that energy is important at temperature min_T.
     sw.min_samples = 1 + exp(1.0/sw.min_T);
+    // tmmc needs more min_samples, because its "optimistic samples"
+    // is inclusive of all visits, where other approaches periodically
+    // re-zero their samples.  Question: maybe we should have all
+    // approaches count every sample? That would seem to give a more
+    // even estimation of accuracy, assuming that we are not "losing"
+    // information when we move from one simulation to the next.
+    if (tmmc) sw.min_samples *= 10;
     printf("Defaulting min_samples to %d using min_T = %g\n", sw.min_samples, sw.min_T);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
