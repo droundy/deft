@@ -176,7 +176,7 @@ for rd in arange(1.0, 0.35, -0.1):
          label='$n^{*} = %g$' % rd)
 
 # input: 'figs/mcfcc-*-*.dat.prs'
-for rd in arange(1.0, 0.35, -0.1):
+for rd in arange(1.0, 0.25, -0.1):
   temps = []
   pressures = []
   print 'could use:', glob.glob('figs/mcwca-%.4f-*.dat.prs' % (rd))
