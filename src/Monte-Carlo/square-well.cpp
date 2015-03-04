@@ -1000,10 +1000,10 @@ void sw_simulation::update_weights_using_transitions() {
 
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
-  int check_how_often = 10000*N; // avoid spending too much time deciding if we are done
+  int check_how_often = min_samples*energy_levels; // avoid spending too much time deciding if we are done
   do {
     for (int i = 0; i < check_how_often; i++) move_a_ball(true);
-    check_how_often += 10*min_samples*N; // try a little harder next time...
+    check_how_often += min_samples*energy_levels; // try a little harder next time...
   } while(!finished_initializing(printing_allowed()));
 
   update_weights_using_transitions();
