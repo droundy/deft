@@ -752,7 +752,7 @@ int main(int argc, const char *argv[]) {
       sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
   }
 
-  {
+  if (false) {
     int E1 = sw.max_entropy_state;
     int E2 = sw.min_energy_state;
     switch (sw.N) {
