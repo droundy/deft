@@ -1007,6 +1007,7 @@ void sw_simulation::initialize_transitions() {
   } while(!finished_initializing(printing_allowed()));
 
   update_weights_using_transitions();
+  flush_weight_array();
   set_min_important_energy();
   initialize_canonical(min_T,min_important_energy);
 }
