@@ -553,7 +553,14 @@ int main(int argc, const char *argv[]) {
   sw.pessimistic_observation = new bool[sw.energy_levels]();
 
   // Transitions from one energy to another
-  sw.biggest_energy_transition = max_balls_within(sw.interaction_distance);
+  /* We are more conservative when computing the "biggest energy
+     transition" than when we set energy_levels, since a single
+     instance of a ball interacting with more than "biggest energy
+     transition" spheres could cause a crash, while energy_levels
+     would require that the average number of interactions is greater
+     than this, which probably is not possible (for a significant
+     number of spheres). */
+  sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
   sw.transitions_table =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 

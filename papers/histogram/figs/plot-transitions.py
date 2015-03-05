@@ -30,7 +30,8 @@ bothdata = [0,0]
 data1 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method1))
 data2 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method2))
 
-de_values = numpy.linspace(12,-12.0,25)
+# FIXME the following should be taken from the data files themselves!
+de_values = numpy.linspace(42,-42.0,85)
 
 for method, data in [(method1, data1), (method2, data2)]:
     plt.figure()
