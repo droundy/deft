@@ -980,12 +980,15 @@ void sw_simulation::update_weights_using_transition_flux() {
     wanted_n[i] /= norm;
   }
 
+  update_weights_using_transitions();
   for (int i=max_entropy_state; i<energies_observed;i++) {
     /* Assuming we have already updated the weights for a flat
        histogram, this should adjust the weights to give a flat
        downward transition rate. */
     ln_energy_weights[i] += log(wanted_n[i]);
   }
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
 }
 
 // update the weight array using transitions

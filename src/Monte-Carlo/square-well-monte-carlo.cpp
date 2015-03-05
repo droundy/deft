@@ -88,6 +88,7 @@ int main(int argc, const char *argv[]) {
   double fix_kT = 0;
   int gaussian_fit = false;
   int tmmc = false;
+  int oetmmc = false;
   int wang_landau = false;
   int optimized_ensemble = false;
   int vanilla_wang_landau = false;
@@ -228,6 +229,8 @@ int main(int argc, const char *argv[]) {
      " rather than adjusted weights", "DOUBLE"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
+    {"oetmmc", '\0', POPT_ARG_NONE, &oetmmc, 0,
+     "Use optimized-ensemble transition matrix monte carlo", "BOOLEAN"},
     {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
      "Use gaussian weights for flat histogram", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
@@ -344,7 +347,7 @@ int main(int argc, const char *argv[]) {
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
      + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(optimized_ensemble) + bool(tmmc) + (fix_kT != 0) != 1){
+     + bool(optimized_ensemble) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
     return 254;
   }
@@ -445,6 +448,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-bubble_suppression");
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
+    } else if (oetmmc) {
+      sprintf(method_tag, "-oetmmc");
     } else if (gaussian_fit) {
       sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
@@ -476,7 +481,7 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
   if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
-  if(tmmc){
+  if(tmmc || oetmmc){
     sw.sim_dos_type = transition_dos;
   } else{
     sw.sim_dos_type = histogram_dos;
@@ -505,7 +510,7 @@ int main(int argc, const char *argv[]) {
     // approaches count every sample? That would seem to give a more
     // even estimation of accuracy, assuming that we are not "losing"
     // information when we move from one simulation to the next.
-    if (tmmc) sw.min_samples *= 10;
+    if (tmmc || oetmmc) sw.min_samples *= 10;
     printf("Defaulting min_samples to %d using min_T = %g\n", sw.min_samples, sw.min_T);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
@@ -735,6 +740,9 @@ int main(int argc, const char *argv[]) {
     sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
   } else if (tmmc) {
     sw.initialize_transitions();
+  } else if (oetmmc) {
+    sw.initialize_transitions();
+    sw.update_weights_using_transition_flux();
   }
 
   took("Actual initialization");
@@ -850,6 +858,8 @@ int main(int argc, const char *argv[]) {
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
+  } else if (oetmmc){
+    sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
   }
   if(sw.end_condition != none){
     sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
