@@ -760,6 +760,7 @@ int main(int argc, const char *argv[]) {
      sw.end_condition == pessimistic_sample_error){
     /* Force canonical weights at low energies */
     sw.set_min_important_energy();
+    printf("Using canonical energies below %d\n", sw.min_important_energy);
     sw.initialize_canonical(sw.min_T,sw.min_important_energy);
   } else if (!fix_kT){
     /* Flatten the weight array at unseen energies */

@@ -105,15 +105,20 @@ struct sw_simulation {
     return transitions_table[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
-  /* "transition_matrix" is a read-only sloppy version of the matrix
-     also called "transitions" above, which is a little easier for me
-     to wrap my brains around.  DJR */
-  long transition_matrix(int to, int from) {
+  /* "transition_matrix" is a read-only sloppy and normalized version
+     of the matrix also called "transitions" above, which is a little
+     easier for me to wrap my brains around.  DJR */
+  double transition_matrix(int to, int from) {
     if (abs(to - from) > biggest_energy_transition ||
         to < 0 || from < 0 || to >= energy_levels || from >= energy_levels) {
       return 0;
     }
-    return transitions(from, to - from);
+    long norm = 0;
+    for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
+      norm += transitions(from, e);
+    }
+    if (norm == 0) return 0;
+    return transitions(from, to - from)/double(norm);
   };
 
   int max_interactions() const { // return the maximum observed number of interactions

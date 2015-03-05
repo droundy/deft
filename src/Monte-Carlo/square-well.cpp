@@ -957,15 +957,11 @@ void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bu
    downward rates equal, which should optimize the round-trip
    time. */
 void sw_simulation::update_weights_using_transition_flux() {
-  update_weights_using_transitions();
-  const int energies_observed = min_energy_state+1;
-
-  double *wanted_n = new double[energies_observed];
-
-  for (int i = max_entropy_state; i < energies_observed; i++) {
+  double *wanted_n = new double[energy_levels];
+  for (int i = max_entropy_state; i <= min_energy_state; i++) {
     wanted_n[i] = 1.0;
-    for (int j=i+1; j < energies_observed; j++) {
-      for (int k=0; k < i; k++) {
+    for (int j=i+1; j <= min_energy_state; j++) {
+      for (int k=max_entropy_state; k<i; k++) {
         /* counting transitions from the high energy j to a lower
            energy j.  Ignoring any transitions from energies above the
            maximum entropy point.  It would be nice (in principle) to
@@ -974,14 +970,14 @@ void sw_simulation::update_weights_using_transition_flux() {
       }
     }
     double norm = 0;
-    for (int j=i+1; j < energies_observed; j++) {
+    for (int j=i+1; j <= min_energy_state; j++) {
       norm += transition_matrix(j, i);
     }
     wanted_n[i] /= norm;
   }
 
   update_weights_using_transitions();
-  for (int i=max_entropy_state; i<energies_observed;i++) {
+  for (int i=max_entropy_state; i<=min_energy_state;i++) {
     /* Assuming we have already updated the weights for a flat
        histogram, this should adjust the weights to give a flat
        downward transition rate. */
@@ -993,8 +989,7 @@ void sw_simulation::update_weights_using_transition_flux() {
 
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
-  const dos_types update_dos_type = transition_dos;
-  const double *ln_dos = compute_ln_dos(update_dos_type);
+  const double *ln_dos = compute_ln_dos(transition_dos);
   for(int i = 0; i < energy_levels; i++) {
     ln_energy_weights[i] = -ln_dos[i];
   }
