@@ -504,7 +504,7 @@ int main(int argc, const char *argv[]) {
     sw.min_samples = default_optimistic_min_samples;
     // different default for tmmc methods because they keep
     // accumulating statistics without doing resets.
-    if (tmmc || oetmmc) sw.min_samples = 1000;
+    if (tmmc || oetmmc) sw.min_samples = 2000;
     printf("Defaulting min_samples to %d\n", sw.min_samples);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
