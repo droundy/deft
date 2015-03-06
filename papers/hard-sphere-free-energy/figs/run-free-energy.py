@@ -57,6 +57,9 @@ def main():
 	energy = -np.cumsum(map(math.log, success_ratios))
 	print energy
 	plt.scatter(ffs, energy)
+        ffs = np.array(ffs)
+        # FIXME units below?
+        plt.plot(ffs, (4*ffs - 3*ffs**2)/(1-ffs)**2, '-')
 	plt.ylabel('F/kT')
 	plt.xlabel(r'$\eta$')
         plt.savefig('rename-me-please.pdf')
