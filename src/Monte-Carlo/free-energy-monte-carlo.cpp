@@ -124,7 +124,7 @@ int main(int argc, const char *argv[]) {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell. Set to -1 for the infinite case."},
+     "the cell."},
     {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
      "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
@@ -197,11 +197,15 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  if(ff_small != -1 && scaling_factor != 1.0){
+    printf("You can't specify both the small filling fraction and the scaling factor.");  
+    return 1;
+  }
+
 
   if (ff != 0) {
     // The user specified a filling fraction, so we must make it so!
-    // use the small filling fraction to set the volume if we're coming from the infinite case.
-    const double volume = 4*M_PI/3*R*R*R*sw.N/((ff == -1) ? ff_small : ff);
+    const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
@@ -368,121 +372,114 @@ int main(int argc, const char *argv[]) {
     cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
   }
 
-  // if we're not in the infinite case, then initialize the balls.
-  // todo I'l like to push all this into a function so that it's easier to follow the
-  // the code. Having all this in a giant if block makes me uncomfortable
-  if(ff != -1){
-    // It is usefull to know our cell dimensions
-    double cell_width[3];
-    for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
+  // It is usefull to know our cell dimensions
+  double cell_width[3];
+  for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
 
-    // If we made our cells to small, return with error
-    for(int i = 0; i < 3; i++){
-      if(cell_width[i] < min_cell_width){
-        printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
-               cell_width[0],cell_width[1],cell_width[2],
-               sw.len[0], sw.len[1], sw.len[2]);
-        printf("Minimum allowed placement cell width: %g\n",min_cell_width);
-        printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
-               sw.len[0],sw.len[1],sw.len[2]);
-        printf("Fixing the chosen ball number, filling fractoin, and relative\n"
-               "  simulation cell dimensions simultaneously does not appear to be possible\n");
-        return 176;
-      }
+  // If we made our cells to small, return with error
+  for(int i = 0; i < 3; i++){
+    if(cell_width[i] < min_cell_width){
+      printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
+             cell_width[0],cell_width[1],cell_width[2],
+             sw.len[0], sw.len[1], sw.len[2]);
+      printf("Minimum allowed placement cell width: %g\n",min_cell_width);
+      printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
+             sw.len[0],sw.len[1],sw.len[2]);
+      printf("Fixing the chosen ball number, filling fractoin, and relative\n"
+             "  simulation cell dimensions simultaneously does not appear to be possible\n");
+      return 176;
     }
+  }
 
-    // Define ball positions relative to cell position
-    vector3d* offset = new vector3d[4]();
-    offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
-    offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
-    offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
+  // Define ball positions relative to cell position
+  vector3d* offset = new vector3d[4]();
+  offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
+  offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
+  offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
 
-    // Reserve some spots at random to be vacant
-    const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
-    bool *spot_reserved = new bool[total_spots]();
-    int p; // Index of reserved spot
-    for(int i = 0; i < total_spots-sw.N; i++) {
-      p = floor(random::ran()*total_spots); // Pick a random spot index
-      if(spot_reserved[p] == false) // If it's not already reserved, reserve it
-        spot_reserved[p] = true;
-      else // Otherwise redo this index (look for a new spot)
-        i--;
-    }
+  // Reserve some spots at random to be vacant
+  const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
+  bool *spot_reserved = new bool[total_spots]();
+  int p; // Index of reserved spot
+  for(int i = 0; i < total_spots-sw.N; i++) {
+    p = floor(random::ran()*total_spots); // Pick a random spot index
+    if(spot_reserved[p] == false) // If it's not already reserved, reserve it
+      spot_reserved[p] = true;
+    else // Otherwise redo this index (look for a new spot)
+      i--;
+  }
 
-    // Place all balls in remaining spots
-    int b = 0;
-    for(int i = 0; i < cells[x]; i++) {
-      for(int j = 0; j < cells[y]; j++) {
-        for(int k = 0; k < cells[z]; k++) {
-          for(int l = 0; l < 4; l++) {
-            if(!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
-              sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
-                                         k*cell_width[z]) + offset[l];
-              b++;
-            }
+  // Place all balls in remaining spots
+  int b = 0;
+  for(int i = 0; i < cells[x]; i++) {
+    for(int j = 0; j < cells[y]; j++) {
+      for(int k = 0; k < cells[z]; k++) {
+        for(int l = 0; l < 4; l++) {
+          if(!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
+            sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
+                                       k*cell_width[z]) + offset[l];
+            b++;
           }
         }
       }
     }
-    delete[] offset;
-    delete[] spot_reserved;
-    took("Placement");
+  }
+  delete[] offset;
+  delete[] spot_reserved;
+  took("Placement");
 
-    // ----------------------------------------------------------------------------
-    // Print info about the initial configuration for troubleshooting
-    // ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // Print info about the initial configuration for troubleshooting
+  // ----------------------------------------------------------------------------
 
-    {
-      int most_neighbors =
-        initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
-                                   sw.max_neighbors, sw.len, sw.walls);
-      if (most_neighbors < 0) {
-        fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
-                sw.max_neighbors);
-        return 1;
-      }
-      printf("Neighbor tables initialized.\n");
-      printf("The most neighbors is %i, whereas the max allowed is %i.\n",
-             most_neighbors, sw.max_neighbors);
+  {
+    int most_neighbors =
+      initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
+                                 sw.max_neighbors, sw.len, sw.walls);
+    if (most_neighbors < 0) {
+      fprintf(stderr, "The guess of %i max neighbors was too low. Exiting.\n",
+              sw.max_neighbors);
+      return 1;
     }
+    printf("Neighbor tables initialized.\n");
+    printf("The most neighbors is %i, whereas the max allowed is %i.\n",
+           most_neighbors, sw.max_neighbors);
+  }
 
-    // ----------------------------------------------------------------------------
-    // Make sure initial placement is valid
-    // ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // Make sure initial placement is valid
+  // ----------------------------------------------------------------------------
 
-    bool error = false, error_cell = false;
-    for(int i = 0; i < sw.N; i++) {
-      if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
-        error_cell = true;
+  bool error = false, error_cell = false;
+  for(int i = 0; i < sw.N; i++) {
+    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
+      error_cell = true;
+      error = true;
+    }
+    for(int j = 0; j < i; j++) {
+      if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
         error = true;
+        break;
       }
-      for(int j = 0; j < i; j++) {
-        if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
-          error = true;
-          break;
-        }
-      }
-      if (error) break;
     }
-    if (error){
-      print_bad(sw.balls, sw.N, sw.len, sw.walls);
-      printf("Error in initial placement: ");
-      if(error_cell) printf("balls placed outside of cell.\n");
-      else printf("balls are overlapping.\n");
-      return 253;
-    }
-
-    fflush(stdout);
-
-    // ----------------------------------------------------------------------------
-    // Initialization of cell
-    // ----------------------------------------------------------------------------
-
-    sw.initialize_translation_distance();
+    if (error) break;
   }
-  else{
-    printf("In the infinite case we do not initialize the cell.\n");
+  if (error){
+    print_bad(sw.balls, sw.N, sw.len, sw.walls);
+    printf("Error in initial placement: ");
+    if(error_cell) printf("balls placed outside of cell.\n");
+    else printf("balls are overlapping.\n");
+    return 253;
   }
+
+  fflush(stdout);
+
+  // ----------------------------------------------------------------------------
+  // Initialization of cell
+  // ----------------------------------------------------------------------------
+
+  sw.initialize_translation_distance();
+
   // --------------------------------------------------------------------------
   // end initilization routine.
   // --------------------------------------------------------------------------
@@ -545,6 +542,8 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
       sw.move_a_ball();
+
+
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
