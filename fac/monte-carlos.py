@@ -9,7 +9,8 @@ monte_carlos = """
    monte-carlo soft-monte-carlo pair-monte-carlo
    triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
    square-well-monte-carlo
-   radial-distribution-monte-carlo free-energy-monte-carlo
+   radial-distribution-monte-carlo
+   free-energy-monte-carlo free-energy-monte-carlo-infinite-case
 """.split()
 
 utility_files = """
