@@ -141,7 +141,8 @@ AddMethod(Environment, SVG)
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
                       square-well-monte-carlo
-                      radial-distribution-monte-carlo free-energy-monte-carlo"""):
+                      radial-distribution-monte-carlo free-energy-monte-carlo
+                      free-energy-monte-carlo-infinite-case"""):
     env.Program(
         target=name,
         source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp', 'src/Monte-Carlo/square-well.cpp', 'src/vector3d.cpp'])

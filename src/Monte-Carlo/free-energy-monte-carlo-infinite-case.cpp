@@ -108,13 +108,11 @@ int main(int argc, const char *argv[]) {
   double acceptance_goal = .4;
   double R = 1;
   const double well_width = 1;
-  double ff = 0.3;
   double ff_small = -1;
   double neighbor_scale = 2;
   double de_g = 0.05;
   double max_rdf_radius = 10;
   int totime = 0;
-  double scaling_factor = 1.0;
 
   poptContext optCon;
   // ----------------------------------------------------------------------------
@@ -122,9 +120,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   poptOption optionsTable[] = {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
-    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
-     "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell."},
     {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
      "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
@@ -162,8 +157,6 @@ int main(int argc, const char *argv[]) {
     {"R", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &R, 0, "Ball radius (for testing purposes; should always be 1)", "DOUBLE"},
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
-    {"sf", '\0', POPT_ARG_DOUBLE, &scaling_factor, 0,
-      "Factor by which to scale the small cell", "DOUBLE"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -197,15 +190,9 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  if(ff_small != -1 && scaling_factor != 1.0){
-    printf("You can't specify both the small filling fraction and the scaling factor.");  
-    return 1;
-  }
-
-
-  if (ff != 0) {
+  if (ff_small != 0) {
     // The user specified a filling fraction, so we must make it so!
-    const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+    const double volume = 4*M_PI/3*R*R*R*sw.N/ff_small;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
@@ -239,16 +226,6 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  // if the user didn't specifiy a small filling fraction, then we should get it.
-  if(ff_small == -1){
-      ff_small = (4*M_PI/3*R*R*R*sw.N)/
-        (sw.len[x]*sw.len[y]*sw.len[z]*scaling_factor*scaling_factor*scaling_factor);
-  }
-  // if they did, then we need to get the scale factor
-  else{
-    scaling_factor = std::cbrt(ff/ff_small);
-  }
-
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
@@ -263,7 +240,7 @@ int main(int argc, const char *argv[]) {
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
   if (eta > 1) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. "
-            "They will never fit. Filling fraction: %g\n", eta);
+            "They will never fit. Filling fraction (small): %g\n", eta);
     return 7;
   }
 
@@ -274,8 +251,8 @@ int main(int argc, const char *argv[]) {
     else if(sw.walls == 1) sprintf(wall_tag,"wall");
     else if(sw.walls == 2) sprintf(wall_tag,"tube");
     else if(sw.walls == 3) sprintf(wall_tag,"box");
-    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i-sf%f",
-            wall_tag, well_width, eta, sw.N, scaling_factor);
+    sprintf(filename, "%s-ww%04.2f-ff_small%04.2f-N%i",
+            wall_tag, well_width, eta, sw.N);
     printf("\nUsing default file name: ");
     delete[] wall_tag;
   }
@@ -292,7 +269,6 @@ int main(int argc, const char *argv[]) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
   }
-  printf("\nUsing scaling factor of %f", scaling_factor);
   printf("\n");
   if (totime > 0) printf("Timing information will be displayed.\n");
   if (debug) printf("DEBUG MODE IS ENABLED!\n");
@@ -501,11 +477,9 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
-          "# scaling factor: %g\n"
-          "# ff: %g\n"
           "# ff_small: %g\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale, scaling_factor, ff, ff_small);
+          well_width, sw.translation_scale, neighbor_scale, ff_small);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
@@ -521,10 +495,6 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // tracking for free energy
-  int current_valid_run = 0;
-  int current_failed_run = 0;
-  int longest_valid_run = 0;
-  int longest_failed_run = 0;
   int total_checks_of_small_cell = 0;
   int total_valid_small_checks = 0;
   int total_failed_small_checks = 0;
@@ -541,34 +511,19 @@ int main(int argc, const char *argv[]) {
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
     for(int i = 0; i < sw.N; i++)
-      sw.move_a_ball();
+      // get a new location for each ball like
+      //balls[i].pos = get_rand_location_in_volume(len)
 
+    total_checks_of_small_cell++;
 
-
-    // just hacking stuff in to see what works
-    // do the small bit every 100 n^2 iterations for now
-    if (sw.iteration % (100 * sw.N * sw.N) == 0) {
-      total_checks_of_small_cell++;
-
-      if(overlap_in_small_cell(sw,  scaling_factor)){
-        total_failed_small_checks++;
-        // see if the run we just ended was a new PR.
-        // (makes more sense to do this on run-end than while the run could still get longer)
-        if(current_valid_run > longest_valid_run){longest_valid_run = current_valid_run;}
-        current_valid_run = 0;
-        current_failed_run++;
-
-        if(debug){printf("%i - false\n", current_failed_run);}
-      }
-      else{
-        total_valid_small_checks++;
-        if(current_failed_run > longest_failed_run){ longest_failed_run = current_failed_run;}
-        current_failed_run = 0;
-        current_valid_run++;
-
-        if(debug){printf("%i - true\n", current_valid_run);}
-      }
-    }
+    // if( check for overlap ){
+    //   total_failed_small_checks++;
+    //   if(debug){printf("%i - false\n", current_failed_run);}
+    // }
+    // else{
+    //   total_valid_small_checks++;
+    //   if(debug){printf("%i - true\n", current_valid_run);}
+    // }
 
     // ---------------------------------------------------------------
     // Add data to RDF histogram
@@ -607,14 +562,12 @@ int main(int argc, const char *argv[]) {
               "# working moves: %li\n"
               "# total moves: %li\n"
               "# acceptance rate: %g\n"
-              "# longest failed run: %i\n"
-              "# longest valid run: %i\n"
               "# total checks of small cell: %i\n"
               "# total failed small checks: %i\n"
               "# total valid small checks: %i\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
-              double(sw.moves.working)/sw.moves.total, longest_failed_run,
-              longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
+              double(sw.moves.working)/sw.moves.total,
+              total_checks_of_small_cell, total_failed_small_checks,
               total_valid_small_checks);
 
       // Save RDF
