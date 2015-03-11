@@ -139,7 +139,7 @@ struct sw_simulation {
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy
-  int initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
+  int initialize_max_entropy(double acceptance_goal = 0.4);
 
   // initialize the translation distance. return most probable energy
   void initialize_translation_distance(double acceptance_goal = 0.4);
