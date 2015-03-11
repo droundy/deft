@@ -157,8 +157,6 @@ struct sw_simulation {
   // set canonical weights below some given energy
   void initialize_canonical(double T, int reference=0);
 
-  double initialize_gaussian(double scale); // returns width of gaussian used
-
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
@@ -166,8 +164,6 @@ struct sw_simulation {
 
   void initialize_robustly_optimistic(double robust_scale, int robust_samples,
                                       double robust_cutoff);
-
-  void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
 
   void initialize_transitions();
 

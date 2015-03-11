@@ -1,29 +1,33 @@
-"canonical Monte Carlo" vs. "fixed-temperature Monte Carlo"?
-is there any value to keeping the Gaussian approximation method around?
+run long simulations for all methods to make sure they mutually converge
+ - for different temperatures
 
+reference file instead of reference method for "answer"
 
-make optimistic min_samples a free parameter
+add data comparing references
+add best reference against which to compare standard runs
 
+error vs. temperature plot for U and CV
+include temp of max error in error file
+ - max error vs N plots (or tables)
+ - use ratios of errors relative to the geometric mean of errors in one method
 
-talk about the similarity between optimized_ensemble and robustly_optimistic
+try iteration number end condition for comparison
+ - implement option for time end condition
 
-
-optionally specify energy range for WL
- - flatten weights outside the energy range,
+add option to specify energy range for WL
+ - flatten weights outside the energy range (or somehow disallow),
      but set them to canonical after initialization
+ - use this energy range for comparisons
 optionally look for a minimum important energy to define the energy range
+
+
+
 make sure we're not breaking wang_landau by not specifying a minimum energy
 
 
-run long simulations for all methods to make sure they converge
- - for different temperatures
-reference file instead of reference method
 
-
-time limit for initialization?
-
-
-run optimized_ensemble, tmmc, and robustly_optimistic for each end condition for many small N
+run optimized_ensemble, tmmc, and robustly_optimistic for each end condition
+    for many small N
 
 
 clean up optimized_ensemble
@@ -38,9 +42,6 @@ IF we have a problem with picking bad minimum energies, consider requiring
 
 make iterations vs initialization quality plot
 
-include temp of max error in error file
-error vs. temperature plot for U and CV
-
 make wang_landau and tmmc dump weight aray and histogram periodically
 
 
@@ -52,7 +53,4 @@ run [vanilla_]wang_landau for 60, 80, 100, 150, 200
 
 
 after figuring out what to do with end conditions, run sims with large Ns and various min_Ts
-
-
-change name of "canonical MC" to "infinite temperature MC" in thesis
 

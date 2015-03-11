@@ -55,4 +55,4 @@ for p in ps:
     p.wait()
 
 # build histogram-paper.tex
-execute(["pdflatex","-interaction=nonstopmode","-recorder","histogram-paper.tex"])
+execute(["pdflatex","-interaction=nonstopmode","-recorder","paper.tex"])
