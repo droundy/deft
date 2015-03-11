@@ -3,8 +3,8 @@ import numpy as np
 from scipy.special import erfinv
 
 def parameters(kT, sigma = 1, eps = 1):
-    alpha = ( 2.0/(1 + 6*np.sqrt(np.log(2)*kT)) )**(1.0/6)
-    Xi = alpha/np.sqrt(np.pi)/(6*np.log(2) + np.sqrt(np.log(2)/kT))
+    alpha = ( 2.0/(1.0 + np.sqrt(np.log(2)*kT/eps)) )**(1.0/6)
+    Xi = alpha/(6*np.sqrt(np.pi))/(np.log(2) + np.sqrt(np.log(2)*eps/kT))
 
     diameter = 2**(1.0/6)*sigma
     return alpha, Xi, diameter
