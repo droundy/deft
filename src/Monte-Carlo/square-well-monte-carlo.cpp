@@ -112,7 +112,7 @@ int main(int argc, const char *argv[]) {
 
   // end conditions
   int default_pessimistic_min_samples = 10;
-  int default_optimistic_min_samples = 20;
+  int default_optimistic_min_samples = 40;
   double default_optimistic_sample_error = 0.01;
   double default_pessimistic_sample_error = 0.3;
   double default_flatness = 0.1;
@@ -129,7 +129,7 @@ int main(int argc, const char *argv[]) {
   sw.walls = 0;
   sw.sticky_wall = 0;
   sw.N = 200;
-  sw.translation_scale = 0.05;
+  sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
   sw.min_T = 0.2;
@@ -416,12 +416,6 @@ int main(int argc, const char *argv[]) {
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
-  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || sw.translation_scale < 0 ||
-      sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
-    fprintf(stderr, "\nAll parameters must be positive.\n");
-    return 1;
-  }
 
   // Compute our actual filling fraction, eta
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
@@ -429,6 +423,22 @@ int main(int argc, const char *argv[]) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. "
             "They will never fit. Filling fraction: %g\n", eta);
     return 7;
+  }
+
+  if (sw.translation_scale == 0) {
+    const double dist_in_well = 2*R*(well_width-1);
+    if (dist_in_well > 0.2*R) {
+      sw.translation_scale = 0.1*R;
+    } else {
+      sw.translation_scale = dist_in_well/2;
+    }
+  }
+
+  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
+      neighbor_scale <= 0 || sw.translation_scale < 0 ||
+      sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
+    fprintf(stderr, "\nAll parameters must be positive.\n");
+    return 1;
   }
 
   // If a filename was not selected, make a default
@@ -713,7 +723,7 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is (and move to it)
-  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
+  sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
   sw.reset_histograms();
 
   // Now let's initialize our weight array

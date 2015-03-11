@@ -635,11 +635,10 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
   exit(1);
 }
 
-int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
+int sw_simulation::initialize_max_entropy(double acceptance_goal) {
   printf("Moving to most probable state and tuning translation distance.\n");
   int num_moves = 500;
   const double mean_allowance = 1.0;
-  double dscale = 0.1;
   const int starting_iterations = iteration;
   int attempts_to_go = 4; // always try this many times, to get translation_scale right.
   double mean = 0, variance = 0;
@@ -663,22 +662,6 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
       energy_histogram[i] = 0; // clear it out for the next attempt
     }
     variance /= counted_in_mean;
-
-    // ---------------------------------------------------------------
-    // Fine-tune translation scale to reach acceptance goal
-    // ---------------------------------------------------------------
-    const double acceptance_rate =
-      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
-    moves.working_old = moves.working;
-    moves.total_old = moves.total;
-    if (acceptance_rate < acceptance_goal)
-      translation_scale /= 1+dscale;
-    else
-      translation_scale *= 1+dscale;
-    // hokey heuristic for tuning dscale
-    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
-    if(closeness > 0.5) dscale *= 2;
-    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
 
     num_moves *= 2;
   }
@@ -945,7 +928,7 @@ void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bu
   double width;
   double range;
   do {
-    initialize_max_entropy_and_translation_distance(); // get to point of max entropy
+    initialize_max_entropy(); // get to point of max entropy
     width = initialize_gaussian(bubble_scale); // subtract off gaussian
     range = min_energy_state - max_entropy_state;
     printf("*** Gaussian has width %.1f and range %.0f (ratio %.2f)\n",
