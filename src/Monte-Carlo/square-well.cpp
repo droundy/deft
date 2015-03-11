@@ -112,8 +112,7 @@ void update_neighbors(ball &a, int n, const ball *bs, int N,
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++){
     if ((i != n) &&
-        (periodic_diff(a.pos, bs[i].neighbor_center, len,
-                          walls).normsquared()
+        (periodic_diff(a.pos, bs[i].neighbor_center, len, walls).normsquared()
          < sqr(a.R + bs[i].R + neighbor_R))){
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors++;
@@ -702,51 +701,6 @@ void sw_simulation::initialize_translation_distance(double acceptance_goal) {
          acceptance_rate, translation_scale);
 }
 
-// initialize the weight array using the Gaussian method
-double sw_simulation::initialize_gaussian(double scale) {
-  double variance = 0, old_variance;
-  double mean = 0, old_mean;
-  int counted_in_mean;
-  int num_energy_moves = 200;
-  const int starting_iterations = iteration;
-  const double fractional_precision_required = 0.2;
-  do {
-    simulate_energy_changes(num_energy_moves);
-    num_energy_moves *= 2; // if we haven't run long enough, run longer next time!
-
-    old_variance = variance;
-    old_mean = mean;
-    mean = 0;
-    counted_in_mean = 0;
-    for (int i = 0; i < energy_levels; i++) {
-      counted_in_mean += energy_histogram[i];
-      mean += i*energy_histogram[i];
-    }
-    mean /= counted_in_mean;
-    variance = 0;
-    for (int i = 0; i < energy_levels; i++)
-      variance += (i-mean)*(i-mean)*energy_histogram[i];
-    variance /= counted_in_mean;
-
-    // Keep simulating until the mean has not moved by more than a
-    // tiny fraction of the standard deviation.  Also we keep going if
-    // the standard deviation has changed much.  This is an attempt to
-    // avoid scenarios where we haven't run long enough to adequately
-    // sample the variance.
-  } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
-           fabs(sqrt(old_variance) - sqrt(variance))
-             > fractional_precision_required*sqrt(variance));
-
-  for (int i = max_entropy_state; i < energy_levels; i++)
-    ln_energy_weights[i] -= scale*exp(-uipow(i-mean,2)/(scale*2*variance));
-  for (int i = 0; i < max_entropy_state; i++)
-    ln_energy_weights[i] -= scale*exp(-uipow(max_entropy_state-mean,2)/(scale*2*variance));
-
-  printf("Took %ld iterations to find gaussian: mean %g; width %g\n",
-         iteration - starting_iterations, mean, sqrt(variance));
-  return sqrt(variance);
-}
-
 // initialize the weight array using the specified temperature.
 void sw_simulation::initialize_canonical(double T, int reference) {
   for(int i=reference+1; i < energy_levels; i++){
@@ -921,19 +875,6 @@ void sw_simulation::initialize_robustly_optimistic(double robust_scale,
 
     } while (!finished_initializing());
   } while(!done);
-}
-
-
-void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bubble_cutoff){
-  double width;
-  double range;
-  do {
-    initialize_max_entropy(); // get to point of max entropy
-    width = initialize_gaussian(bubble_scale); // subtract off gaussian
-    range = min_energy_state - max_entropy_state;
-    printf("*** Gaussian has width %.1f and range %.0f (ratio %.2f)\n",
-           width, range, width/range);
-  } while (width < bubble_cutoff*range);
 }
 
 /* Update the weight array using the transition matrix to make the

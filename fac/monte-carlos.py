@@ -24,8 +24,8 @@ for x in monte_carlos:
     src.link('src/Monte-Carlo/%s.cpp' % x, x)
 
 
-for method in ["nw","bubble_suppression","robustly_optimistic","gaussian",
-               "wang_landau","optimized_ensemble", 'tmmc', 'oetmmc', 'kT 1', 'kT 2', 'kT 0.5', 'kT 0.4']:
+for method in ["nw","robustly_optimistic","wang_landau","optimized_ensemble",
+               "tmmc","oetmmc","kT 1","kT 2","kT 0.5","kT 0.4"]:
     for ww in [1.3, 1.5]:
         for ff in [0.3, 0.8]:
             for N in range(5,31):
