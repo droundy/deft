@@ -22,7 +22,7 @@ N = float(sys.argv[3])
 #arg N = range(5,21)
 
 methods = eval(sys.argv[4])
-#arg methods = [["nw","wang_landau","simple_flat","optimized_ensemble","kT0.4","kT0.5","tmmc","oetmmc"]]
+#arg methods = [["wang_landau","simple_flat","optimized_ensemble","tmmc","oetmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
