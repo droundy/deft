@@ -11,6 +11,8 @@ import subprocess
 # input: "../../free-energy-monte-carlo"
 # input: "../../free-energy-monte-carlo-infinite-case"
 
+# cache-suffix: .dat
+
 FILENAME = ""
 
 def main():
@@ -23,7 +25,6 @@ def main():
     sim_iterations = 1000000
     seed = 0
     data_dir = 'data'
-
 
     for i in xrange(steps):
         # hacky way to reduce step size as we approach a smaller cell
@@ -87,6 +88,7 @@ def main():
 
 # I was awake when I wrote this part
 def read_data_file_to_dict(filepath):
+    print('reading %s\n' % filepath)
     meta_data = {}
     with open(filepath, 'r') as f:
         for line in f:
