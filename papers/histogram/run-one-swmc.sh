@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/env sh
 
 # this script runs one method with default arguments and updates figures with the new data
 

@@ -47,5 +47,5 @@ plt.ylabel('$V/\epsilon$')
 plt.xlabel('$r^*$')
 plt.legend(loc='best')
 
-plt.savefig('figs/potential-plot.png')
+plt.savefig('figs/potential-plot.pdf')
 plt.show()

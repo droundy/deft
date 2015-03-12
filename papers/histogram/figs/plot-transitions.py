@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 method1 = sys.argv[4]
-#arg method1 = ['wang_landau']
+#arg method1 = ['tmmc-golden']
 
 method2 = sys.argv[5]
 #arg method2 = ['tmmc']
@@ -94,5 +94,3 @@ plt.title('TM discrepancy between %s and %s\nfor $\lambda=%g$, $n^*=%g$, and $N=
 
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, method1, method2))
 
-if 'show' in sys.argv:
-    plt.show()

@@ -1,15 +1,12 @@
 _colors = { 'nw': 'r',
-            'kT0.5': 'r',
             'kT0.4': 'c',
-            'kT1': 'b',
-            'kT2': 'c',
-            'kT0.1': 'g',
+            'kT0.5': 'm',
+            'kT1': 'g',
             'tmmc': 'k',
             'oetmmc': 'b',
             'wang_landau': 'g',
             'vanilla_wang_landau': 'b',
-            'robustly_optimistic': 'r',
-            'gaussian': 'm',
+            'simple_flat': 'r',
             'optimized_ensemble': 'y'}
 
 def color(method):
@@ -32,8 +29,7 @@ def title(method):
                'oetmmc': 'oetmmc',
                'wang_landau': 'Wang-Landau',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
-               'robustly_optimistic': 'robustly optimistic',
-               'gaussian': 'gaussian method',
+               'simple_flat': 'simple flat',
                'optimized_ensemble': 'optimized ensemble'}
     if method in titles:
         return titles[method]
@@ -47,7 +43,7 @@ def plot(method):
     return line(method)
 
 def dots(method):
-    if method in ['wang_landau','vanilla_wang_landau','robustly_optimistic']:
+    if method in ['wang_landau','vanilla_wang_landau','simple_flat']:
         return color(method) + '+'
     if method in _colors:
         return color(method) + '.'

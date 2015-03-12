@@ -56,4 +56,4 @@ plt.ylabel("$f'$")
 plt.xlabel('$r$')
 plt.legend(loc='best')
 
-plt.savefig('figs/w2-comparison.png')
+plt.savefig('figs/w2-comparison.pdf')

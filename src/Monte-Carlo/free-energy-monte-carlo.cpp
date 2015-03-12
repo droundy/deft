@@ -540,10 +540,9 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++)
+    for(int i = 0; i < sw.N; i++){
       sw.move_a_ball();
-
-
+    }
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
