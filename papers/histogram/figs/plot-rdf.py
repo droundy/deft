@@ -76,5 +76,3 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.1)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-rdf.pdf" % (ww*100, ff*100, N))
 
-if 'show' in sys.argv:
-    plt.show()

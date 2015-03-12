@@ -94,5 +94,3 @@ plt.title('TM discrepancy between %s and %s\nfor $\lambda=%g$, $n^*=%g$, and $N=
 
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, method1, method2))
 
-if 'show' in sys.argv:
-    plt.show()

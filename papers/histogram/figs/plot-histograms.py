@@ -7,7 +7,7 @@ import numpy
 import styles
 
 if len(sys.argv) not in [5,6]:
-    print 'useage: %s ww ff N versions show' % sys.argv[0]
+    print 'useage: %s ww ff N methods show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -19,14 +19,14 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
-versions = eval(sys.argv[4])
-#arg versions = [["nw","wang_landau","simple_flat","optimized_ensemble","kT0.5","kT0.4","tmmc","oetmmc"]]
+methods = eval(sys.argv[4])
+#arg methods = [["nw","wang_landau","simple_flat","optimized_ensemble","kT0.5","kT0.4","tmmc","oetmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in methods]
 
 plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-for version in versions:
+for version in methods:
     data = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
     energy = -data[:,0]/N
@@ -39,5 +39,3 @@ plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-E.pdf" % (ww*100, ff*100, N))
 
-if 'show' in sys.argv:
-    plt.show()
