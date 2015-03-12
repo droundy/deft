@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 versions = eval(sys.argv[4])
-#arg versions = [["nw","wang_landau","robustly_optimistic","optimized_ensemble","kT0.5","kT0.4","tmmc","oetmmc"]]
+#arg versions = [["nw","wang_landau","simple_flat","optimized_ensemble","kT0.5","kT0.4","tmmc","oetmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in versions]
 

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <time.h>
-
 #include <Eigen/Core>
 #include "utilities.h"
 #include "MersenneTwister.h"
@@ -145,6 +144,7 @@ int main(int argc, char *argv[]){
       sig_wall = R_T*pow(2,-1.0/6.0);
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
+      printf("kT is %g\n",kT);
     } else if (strcmp(argv[a],"TestP")==0){
         testp_sigma = atof(argv[a+1]);
         testp = true;
@@ -246,7 +246,9 @@ int main(int argc, char *argv[]){
   
   // Let's move each sphere once, so they'll all start within our
   // periodic cell!
+
   if (FCC == true) {
+    printf("testkljdfjak\n");
     iterations = 9999999999;
     //    int cubeLength = pow(double(N/4.0),1.0/3.0) + .5;
     //    int numberOfCubes = ceil(N/4);
@@ -290,7 +292,7 @@ int main(int argc, char *argv[]){
 	  y1=1;
 	  z1=1;	  
 	}
-	assert(round<=3 || k == N-1);
+	//	assert(round<=3 || k == N-1);
       }
     }
 
@@ -385,24 +387,38 @@ int main(int argc, char *argv[]){
   long div = maxrad/dx_goal;
   if (div < 10) div = 10;
   printf("Using %ld divisions, dx ~ %g\n", div, maxrad/div);
+  printf("test abc\n");
   fflush(stdout);
   double *radius = new double[div+1];
   double *sections = new double [div+1];
   double *shellsRadius = new double[div+1];
-  //Vector3d *FCC_shells = new Vector3d[div+1];
-  double **FCC_shells=new double*[div+1];
-  for (long k=0;k<div+1;k++){
+  double FCC_div = pow(div,.5);
+  FCC_div = ceil(FCC_div);
+  long FCC_div2 = pow(FCC_div,2)+2*FCC_div;
+  double **FCC_shells;
+  FCC_shells = new double*[FCC_div2+1];
+  printf("fcc_div is %g fcc_div2 is %ld\n",FCC_div,FCC_div2);
+  for (long k=0;k<FCC_div2+1;k++){
     FCC_shells[k] = new double[3];
   }
-  double  FCC_div = div;
+ //divisions will be a fcc_div x fcc_div 2d map
+  printf("test def\n");
+  long note = 0;
+  long note1 = 0;
   if (FCC){
-    for (long s=0;s<div+1;s++){
-      FCC_shells[s][0] = s*length_of_cavity*(1/FCC_div);
-      FCC_shells[s][1] = s*length_of_cavity*(1/FCC_div);
+    for (long s=0;s<FCC_div2+1;s++){
       FCC_shells[s][2]=0;
+      FCC_shells[s][0] = note1*length_of_cavity*(1/FCC_div);
+      FCC_shells[s][1] = note*length_of_cavity*(1/FCC_div);
+      note1=note1+1;
+      if (s>(note+1)*(FCC_div+1)){
+	//printf("true s is %ld note + 1 is %ld note1 is %ld\n", s, note+1, note1); 
+	note = note+1;
+	note1 = 0;
+      }
+      
     }
   }
-
   if (flat_div){
     double size = lenz/div;
     for (long s=0; s<div+1; s++){
@@ -574,6 +590,7 @@ int main(int argc, char *argv[]){
         }
 	
 	if (FCC) {
+	  
           char *gfilename = new char[1000];
           sprintf(gfilename, "%s.fcc", outfilename);
           out = fopen(gfilename, "w");
@@ -583,10 +600,11 @@ int main(int argc, char *argv[]){
           }
           delete[] gfilename;
 	  //          fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
-	  for (long i=0; i<div; i++) {
+	  for (long i=0; i<FCC_div2+1; i++) {
 	    fprintf(out, "%g\t%g\t%g\n",FCC_shells[i][0], FCC_shells[i][1], FCC_shells[i][2]);
 	  }
           fclose(out);
+	  printf("SAVED FCC\n");
         }
 
         fflush(stdout);
@@ -704,27 +722,25 @@ int main(int argc, char *argv[]){
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
 	if (FCC){
-	  for(long n=0;n<div;n++){
-	    if (FCC_shells[n][0] <= spheres[s][0] && FCC_shells[n+1][0]  >= spheres[s][0]){ 
-	      for(long p=0;p<div;p++){
-		if (FCC_shells[p][1] <= spheres[s][1] && FCC_shells[p+1][1] >= spheres[s][1]){ 
-		  FCC_shells[p][3]=FCC_shells[p][3]+1;
-		  //		  printf("FOUND ONE FOUND ONE\n");
+	  for(long n=0;n<FCC_div2;n++){ 
+	    if (FCC_shells[n][0] <= spheres[s][0] && FCC_shells[n+1][0]  >= spheres[s][0] && FCC_shells[n][1] <= spheres[s][1] && FCC_shells[n+1][1]  >= spheres[s][1] ){ 
+	      FCC_shells[n][2] = FCC_shells[n][2]+1;
+	      printf("FOUND ONE FOUND ONE %ld %g \n",n, FCC_shells[n][2]);
+	      n=FCC_div2+2;
+	      //   printf("FCC_shells[n][0] %g spheres[s][0] %g FCC_shells[n+1][0]  %g spheres[s][0] %g FCC_shells[n][1] %g spheres[s][1] %g FCC_shells[n+1][1]  %g spheres[s][1] %g\n",FCC_shells[n][0] , spheres[s][0] , FCC_shells[n+1][0] , spheres[s][0] , FCC_shells[n][1] , spheres[s][1] , FCC_shells[n+1][1]  , spheres[s][1]);
 		}
 	      }
 	    }
+	for (long i=0; i<N; i++){
+	  for (long k=0; k<div; k++) {
+	    Vector3d vri = spheres[i]-spheres[s];
+	    vri = fixPeriodic(vri);
+	    const double ri = distance(vri,Vector3d(0,0,0));
+	    if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
+	      radial_distributon_histogram[k]++;
+	    }
 	  }
 	}
-        for (long i=0; i<N; i++){
-          for (long k=0; k<div; k++) {
-            Vector3d vri = spheres[i]-spheres[s];
-            vri = fixPeriodic(vri);
-            const double ri = distance(vri,Vector3d(0,0,0));
-            if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
-              radial_distributon_histogram[k]++;
-            }
-          }
-        }
       }
     }
     //  printf("Iterations per pressure %ld working moves is %ld\n",iterations_per_pressure_check, workingmoves);

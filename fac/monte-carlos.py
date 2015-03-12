@@ -9,7 +9,8 @@ monte_carlos = """
    monte-carlo soft-monte-carlo pair-monte-carlo
    triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
    square-well-monte-carlo
-   radial-distribution-monte-carlo free-energy-monte-carlo
+   radial-distribution-monte-carlo
+   free-energy-monte-carlo free-energy-monte-carlo-infinite-case
 """.split()
 
 utility_files = """
@@ -23,8 +24,8 @@ for x in monte_carlos:
     src.link('src/Monte-Carlo/%s.cpp' % x, x)
 
 
-for method in ["nw","bubble_suppression","robustly_optimistic","gaussian",
-               "wang_landau","optimized_ensemble", 'tmmc', 'oetmmc', 'kT 1', 'kT 2', 'kT 0.5', 'kT 0.4']:
+for method in ["nw","simple_flat","wang_landau","optimized_ensemble",
+               "tmmc","oetmmc","kT 1","kT 2","kT 0.5","kT 0.4"]:
     for ww in [1.3, 1.5]:
         for ff in [0.3, 0.8]:
             for N in range(5,31):

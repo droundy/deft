@@ -1,5 +1,6 @@
 def density_color(rd):
-    dc = { 0.1: 'g',
+    dc = { 0.1: 'k',
+           0.3: 'g',
            0.4: 'r',
            0.5: 'm',
            0.6: 'c',
@@ -43,5 +44,5 @@ for k in color:
     new_dft_code[k] = color[k] + '--'
     dft[k] = color[k] + '--'
     coarsedft[k] = color[k] + '-'
-    mc[k] = color[k] + '.'
+    mc[k] = color[k] + ':'
     mcwca[k] = color[k] + '--'

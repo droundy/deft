@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <popt.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
 #include "handymath.h"
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
@@ -86,35 +88,26 @@ int main(int argc, const char *argv[]) {
 
   int no_weights = false;
   double fix_kT = 0;
-  int gaussian_fit = false;
   int tmmc = false;
   int oetmmc = false;
   int wang_landau = false;
   int optimized_ensemble = false;
   int vanilla_wang_landau = false;
-  int robustly_optimistic = false;
-  int bubble_suppression = false;
+  int simple_flat = false;
   int transition_override = false;
 
   // Tuning factors
-  double gaussian_init_scale = 0;
   double wl_factor = 0.125;
   double wl_fmod = 2;
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
   int oe_update_factor = 2;
-  double robust_scale = 0.5;
-  int robust_samples = 1000;
-  double robust_cutoff = 0.25;
-  double bubble_scale = 0;
-  double bubble_cutoff = 0.2;
-
 
   // end conditions
   int default_pessimistic_min_samples = 10;
   int default_optimistic_min_samples = 20;
-  double default_optimistic_sample_error = 0.01;
-  double default_pessimistic_sample_error = 0.3;
+  double default_optimistic_sample_error = 0.1;
+  double default_pessimistic_sample_error = 0.01;
   double default_flatness = 0.1;
   bool optimistic_sampling = false;
 
@@ -129,7 +122,7 @@ int main(int argc, const char *argv[]) {
   sw.walls = 0;
   sw.sticky_wall = 0;
   sw.N = 200;
-  sw.translation_scale = 0.05;
+  sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
   sw.min_T = 0.2;
@@ -146,7 +139,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1e8;
+  long simulation_iterations = 1e6;
   double acceptance_goal = .4;
   double R = 1;
   double well_width = 1.3;
@@ -232,18 +225,14 @@ int main(int argc, const char *argv[]) {
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"oetmmc", '\0', POPT_ARG_NONE, &oetmmc, 0,
      "Use optimized-ensemble transition matrix monte carlo", "BOOLEAN"},
-    {"gaussian", '\0', POPT_ARG_NONE, &gaussian_fit, 0,
-     "Use gaussian weights for flat histogram", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
      "Use Wang-Landau histogram method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
      "Use a optimized ensemble weight histogram method", "BOOLEAN"},
-    {"robustly_optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
-     "Use the robustly optimistic histogram method", "BOOLEAN"},
-    {"bubble_suppression", '\0', POPT_ARG_NONE, &bubble_suppression, 0,
-     "Use the bubble suppression method", "BOOLEAN"},
+    {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
+     "Use simple flat histogram method", "BOOLEAN"},
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
@@ -259,18 +248,8 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
-    {"robust_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_scale, 0, "Scaling factor for weight correction at each iteration", "DOUBLE"},
-    {"robust_samples", '\0', POPT_ARG_INT, &robust_samples, 0,
-     "Initialization iteration end condition factor", "INT"},
-    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_cutoff, 0, "Initialization iteration end condition factor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
-    {"bubble_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &bubble_scale, 0, "Controls height of bubbles used in bubble suppression", "DOUBLE"},
-    {"bubble_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &bubble_cutoff, 0, "Bubble suppression end condition factor", "DOUBLE"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -346,9 +325,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if(bool(no_weights) + bool(robustly_optimistic) + bool(bubble_suppression)
-     + bool(gaussian_fit) + bool(wang_landau) + bool(vanilla_wang_landau)
-     + bool(optimized_ensemble) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
+  if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
+     + bool(vanilla_wang_landau) + bool(optimized_ensemble)
+     + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
     return 254;
   }
@@ -416,12 +395,6 @@ int main(int argc, const char *argv[]) {
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
-  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
-      neighbor_scale <= 0 || sw.translation_scale < 0 ||
-      sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
-    fprintf(stderr, "\nAll parameters must be positive.\n");
-    return 1;
-  }
 
   // Compute our actual filling fraction, eta
   const double eta = (double)sw.N*4.0/3.0*M_PI*R*R*R/(sw.len[x]*sw.len[y]*sw.len[z]);
@@ -429,6 +402,22 @@ int main(int argc, const char *argv[]) {
     fprintf(stderr, "\nYou're trying to cram too many balls into the cell. "
             "They will never fit. Filling fraction: %g\n", eta);
     return 7;
+  }
+
+  if (sw.translation_scale == 0) {
+    const double dist_in_well = 2*R*(well_width-1);
+    if (dist_in_well > 0.2*R) {
+      sw.translation_scale = 0.1*R;
+    } else {
+      sw.translation_scale = dist_in_well/2;
+    }
+  }
+
+  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
+      neighbor_scale <= 0 || sw.translation_scale < 0 ||
+      sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
+    fprintf(stderr, "\nAll parameters must be positive.\n");
+    return 1;
   }
 
   // If a filename was not selected, make a default
@@ -443,16 +432,12 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (no_weights) {
       sprintf(method_tag, "-nw");
-    } else if (robustly_optimistic) {
-      sprintf(method_tag, "-robustly_optimistic");
-    } else if (bubble_suppression) {
-      sprintf(method_tag, "-bubble_suppression");
+    } else if (simple_flat) {
+      sprintf(method_tag, "-simple_flat");
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
-    } else if (gaussian_fit) {
-      sprintf(method_tag, "-gaussian");
     } else if (wang_landau) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
@@ -480,8 +465,6 @@ int main(int argc, const char *argv[]) {
   printf("%s\n",filename);
 
   // Choose necessary but unspecified parameters
-  if(gaussian_init_scale == 0) gaussian_init_scale = sw.N*log(sw.N);
-  if(bubble_suppression && bubble_scale == 0) bubble_scale = sw.N/3;
   if(tmmc || oetmmc){
     sw.sim_dos_type = transition_dos;
   } else{
@@ -489,7 +472,7 @@ int main(int argc, const char *argv[]) {
   }
 
   /* set default end condition if necessary */
-  if(sw.end_condition == none && !fix_kT && !gaussian_fit){
+  if(sw.end_condition == none && !fix_kT){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
     sw.end_condition = optimistic_min_samples;
@@ -713,14 +696,12 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
 
   // First, let us figure out what the max entropy point is (and move to it)
-  sw.max_entropy_state = sw.initialize_max_entropy_and_translation_distance(acceptance_goal);
+  sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
   sw.reset_histograms();
 
   // Now let's initialize our weight array
   if (fix_kT) {
     sw.initialize_canonical(fix_kT);
-  } else if(gaussian_fit){
-    sw.initialize_gaussian(gaussian_init_scale);
   } else if (wang_landau) {
     sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
   } else if (vanilla_wang_landau) {
@@ -728,10 +709,8 @@ int main(int argc, const char *argv[]) {
                               vanilla_wl_threshold, vanilla_wl_cutoff);
   } else if (optimized_ensemble) {
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
-  } else if (robustly_optimistic) {
-    sw.initialize_robustly_optimistic(robust_scale, robust_samples, robust_cutoff);
-  } else if (bubble_suppression) {
-    sw.initialize_bubble_suppression(bubble_scale, bubble_cutoff);
+  } else if (simple_flat) {
+    sw.initialize_simple_flat();
   } else if (tmmc) {
     sw.initialize_transitions();
   } else if (oetmmc) {
@@ -840,15 +819,9 @@ int main(int argc, const char *argv[]) {
   } else if(optimized_ensemble){
     sprintf(headerinfo,
             "%s# histogram method: optimized ensemble\n", headerinfo);
-  } else if(robustly_optimistic){
+  } else if(simple_flat){
     sprintf(headerinfo,
-            "%s# histogram method: robustly optimistic\n", headerinfo);
-  } else if (bubble_suppression){
-    sprintf(headerinfo,
-            "%s# histogram method: bubble suppression\n"
-            "# bubble_scale: %g\n"
-            "# bubble_cutoff: %g\n",
-            headerinfo, bubble_scale, bubble_cutoff);
+            "%s# histogram method: simple flat\n", headerinfo);
   } else if (tmmc){
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
@@ -865,10 +838,6 @@ int main(int argc, const char *argv[]) {
        sw.end_condition == pessimistic_sample_error)
       sprintf(headerinfo, "%s %g\n", headerinfo, sw.sample_error);
   }
-  if(!no_weights && !fix_kT)
-    sprintf(headerinfo, "%s# gaussian_init_scale: %g\n\n", headerinfo, gaussian_init_scale);
-  else
-    sprintf(headerinfo, "%s\n", headerinfo);
 
   // ----------------------------------------------------------------------------
   // Print initialization info
@@ -886,7 +855,7 @@ int main(int argc, const char *argv[]) {
   // Save weights histogram
   FILE *w_out = fopen((const char *)w_fname, "w");
   if (!w_out) {
-    fprintf(stderr, "Unable to create %s!\n", w_fname);
+    fprintf(stderr, "Unable to create %s! %s\n", w_fname, strerror(errno));
     exit(1);
   }
   fprintf(w_out, "%s", headerinfo);

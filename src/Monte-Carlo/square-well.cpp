@@ -112,8 +112,7 @@ void update_neighbors(ball &a, int n, const ball *bs, int N,
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++){
     if ((i != n) &&
-        (periodic_diff(a.pos, bs[i].neighbor_center, len,
-                          walls).normsquared()
+        (periodic_diff(a.pos, bs[i].neighbor_center, len, walls).normsquared()
          < sqr(a.R + bs[i].R + neighbor_R))){
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors++;
@@ -635,11 +634,10 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
   exit(1);
 }
 
-int sw_simulation::initialize_max_entropy_and_translation_distance(double acceptance_goal) {
+int sw_simulation::initialize_max_entropy(double acceptance_goal) {
   printf("Moving to most probable state and tuning translation distance.\n");
   int num_moves = 500;
   const double mean_allowance = 1.0;
-  double dscale = 0.1;
   const int starting_iterations = iteration;
   int attempts_to_go = 4; // always try this many times, to get translation_scale right.
   double mean = 0, variance = 0;
@@ -663,22 +661,6 @@ int sw_simulation::initialize_max_entropy_and_translation_distance(double accept
       energy_histogram[i] = 0; // clear it out for the next attempt
     }
     variance /= counted_in_mean;
-
-    // ---------------------------------------------------------------
-    // Fine-tune translation scale to reach acceptance goal
-    // ---------------------------------------------------------------
-    const double acceptance_rate =
-      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
-    moves.working_old = moves.working;
-    moves.total_old = moves.total;
-    if (acceptance_rate < acceptance_goal)
-      translation_scale /= 1+dscale;
-    else
-      translation_scale *= 1+dscale;
-    // hokey heuristic for tuning dscale
-    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
-    if(closeness > 0.5) dscale *= 2;
-    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
 
     num_moves *= 2;
   }
@@ -717,51 +699,6 @@ void sw_simulation::initialize_translation_distance(double acceptance_goal) {
   printf("Took %ld iterations to find acceptance rate of %.2g with translation scale %.2g\n",
          iteration - starting_iterations,
          acceptance_rate, translation_scale);
-}
-
-// initialize the weight array using the Gaussian method
-double sw_simulation::initialize_gaussian(double scale) {
-  double variance = 0, old_variance;
-  double mean = 0, old_mean;
-  int counted_in_mean;
-  int num_energy_moves = 200;
-  const int starting_iterations = iteration;
-  const double fractional_precision_required = 0.2;
-  do {
-    simulate_energy_changes(num_energy_moves);
-    num_energy_moves *= 2; // if we haven't run long enough, run longer next time!
-
-    old_variance = variance;
-    old_mean = mean;
-    mean = 0;
-    counted_in_mean = 0;
-    for (int i = 0; i < energy_levels; i++) {
-      counted_in_mean += energy_histogram[i];
-      mean += i*energy_histogram[i];
-    }
-    mean /= counted_in_mean;
-    variance = 0;
-    for (int i = 0; i < energy_levels; i++)
-      variance += (i-mean)*(i-mean)*energy_histogram[i];
-    variance /= counted_in_mean;
-
-    // Keep simulating until the mean has not moved by more than a
-    // tiny fraction of the standard deviation.  Also we keep going if
-    // the standard deviation has changed much.  This is an attempt to
-    // avoid scenarios where we haven't run long enough to adequately
-    // sample the variance.
-  } while (fabs(old_mean - mean) > fractional_precision_required*sqrt(variance) ||
-           fabs(sqrt(old_variance) - sqrt(variance))
-             > fractional_precision_required*sqrt(variance));
-
-  for (int i = max_entropy_state; i < energy_levels; i++)
-    ln_energy_weights[i] -= scale*exp(-uipow(i-mean,2)/(scale*2*variance));
-  for (int i = 0; i < max_entropy_state; i++)
-    ln_energy_weights[i] -= scale*exp(-uipow(max_entropy_state-mean,2)/(scale*2*variance));
-
-  printf("Took %ld iterations to find gaussian: mean %g; width %g\n",
-         iteration - starting_iterations, mean, sqrt(variance));
-  return sqrt(variance);
 }
 
 // initialize the weight array using the specified temperature.
@@ -890,19 +827,16 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
   } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_robustly_optimistic(double robust_scale,
-                                                   int robust_samples,
-                                                   double robust_cutoff){
+void sw_simulation::initialize_simple_flat(){
   int weight_updates = 0;
-  bool done;
-  set_min_important_energy();
+  long num_iterations = min_samples*N*energy_levels;
   do {
-    done = true; // Let's be optimistic!
+    set_min_important_energy();
 
     // update weight array
     for (int e = max_entropy_state; e < energy_levels; e++) {
       if (energy_histogram[e]) {
-        ln_energy_weights[e] -= robust_scale*log(energy_histogram[e]);
+        ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
     if(min_energy_state > min_important_energy){
@@ -914,43 +848,19 @@ void sw_simulation::initialize_robustly_optimistic(double robust_scale,
     // Now reset the calculation!
     reset_histograms();
 
-    do {
-      for (int j = 0; j < N*energy_levels; j++) move_a_ball();
+    for (long j = 0; j < num_iterations; j++) move_a_ball();
 
-      if (printing_allowed()) {
-        printf("robustly optimistic status update:\n");
-        for (int e = max_entropy_state; e <= min_energy_state; e++) {
-          printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
-                 e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
-        }
-        printf("min_important_energy: %i\n",min_important_energy);
+    if (printing_allowed()) {
+      printf("status update:\n");
+      for (int e = max_entropy_state; e <= min_energy_state; e++) {
+        printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
+               e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
       }
-      // Check whether our histogram is sufficiently flat; if not, we're not done!
-      double mean_hist = moves.total/double(min_energy_state - max_entropy_state);
-      for (int e = min_important_energy; e > max_entropy_state; e--) {
-        if (optimistic_samples[e] >= robust_samples
-            && energy_histogram[e] < robust_cutoff*mean_hist) {
-          done = false;
-          break;
-        }
-      }
-      if (!done) break;
+      printf("min_important_energy: %i\n",min_important_energy);
+    }
+    num_iterations *= 2;
 
-    } while (!finished_initializing());
-  } while(!done);
-}
-
-
-void sw_simulation::initialize_bubble_suppression(double bubble_scale, double bubble_cutoff){
-  double width;
-  double range;
-  do {
-    initialize_max_entropy_and_translation_distance(); // get to point of max entropy
-    width = initialize_gaussian(bubble_scale); // subtract off gaussian
-    range = min_energy_state - max_entropy_state;
-    printf("*** Gaussian has width %.1f and range %.0f (ratio %.2f)\n",
-           width, range, width/range);
-  } while (width < bubble_cutoff*range);
+  } while (!finished_initializing());
 }
 
 /* Update the weight array using the transition matrix to make the
