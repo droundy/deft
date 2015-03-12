@@ -343,8 +343,19 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
         tup_norm += transitions(energy, e);
         tdown_norm += transitions(energy+energy_change, e);
       }
-      double tup = transitions(energy, energy_change)/double(tup_norm);
-      double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
+      /* The "conservativeness" parameter below allows us to adjust
+         how soon the tmmc method becomes confident in its estimation
+         of the transition matrix.  We add "conservativeness" to the
+         number of times that we think we have seen the system go
+         either up or down.  This means when we have poor statistics,
+         we default towards allowing transitions, which can help avoid
+         getting "stuck" at low energies, due to an incorrect first
+         guess as to how probable the downward transition is. */
+      const double conservativeness = 0;
+      const double tup = (transitions(energy, energy_change)+conservativeness)
+                         / double(tup_norm+conservativeness);
+      const double tdown = (transitions(energy+energy_change,-energy_change)+conservativeness)
+                           / double(tdown_norm+conservativeness);
       if (tdown < tup) {
         Pmove = tdown/tup;
         if (!(Pmove > Pmin)) Pmove = Pmin;
