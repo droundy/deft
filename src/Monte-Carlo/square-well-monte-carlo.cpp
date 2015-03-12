@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <popt.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
 #include "handymath.h"
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
@@ -862,7 +864,7 @@ int main(int argc, const char *argv[]) {
   // Save weights histogram
   FILE *w_out = fopen((const char *)w_fname, "w");
   if (!w_out) {
-    fprintf(stderr, "Unable to create %s!\n", w_fname);
+    fprintf(stderr, "Unable to create %s! %s\n", w_fname, strerror(errno));
     exit(1);
   }
   fprintf(w_out, "%s", headerinfo);
