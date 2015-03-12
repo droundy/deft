@@ -827,19 +827,16 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
   } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_robustly_optimistic(double robust_scale,
-                                                   int robust_samples,
-                                                   double robust_cutoff){
+void sw_simulation::initialize_simple_flat(){
   int weight_updates = 0;
-  bool done;
-  set_min_important_energy();
+  long num_iterations = min_samples*N*energy_levels;
   do {
-    done = true; // Let's be optimistic!
+    set_min_important_energy();
 
     // update weight array
     for (int e = max_entropy_state; e < energy_levels; e++) {
       if (energy_histogram[e]) {
-        ln_energy_weights[e] -= robust_scale*log(energy_histogram[e]);
+        ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
     if(min_energy_state > min_important_energy){
@@ -851,30 +848,19 @@ void sw_simulation::initialize_robustly_optimistic(double robust_scale,
     // Now reset the calculation!
     reset_histograms();
 
-    do {
-      for (int j = 0; j < N*energy_levels; j++) move_a_ball();
+    for (long j = 0; j < num_iterations; j++) move_a_ball();
 
-      if (printing_allowed()) {
-        printf("robustly optimistic status update:\n");
-        for (int e = max_entropy_state; e <= min_energy_state; e++) {
-          printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
-                 e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
-        }
-        printf("min_important_energy: %i\n",min_important_energy);
+    if (printing_allowed()) {
+      printf("status update:\n");
+      for (int e = max_entropy_state; e <= min_energy_state; e++) {
+        printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
+               e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
       }
-      // Check whether our histogram is sufficiently flat; if not, we're not done!
-      double mean_hist = moves.total/double(min_energy_state - max_entropy_state);
-      for (int e = min_important_energy; e > max_entropy_state; e--) {
-        if (optimistic_samples[e] >= robust_samples
-            && energy_histogram[e] < robust_cutoff*mean_hist) {
-          done = false;
-          break;
-        }
-      }
-      if (!done) break;
+      printf("min_important_energy: %i\n",min_important_energy);
+    }
+    num_iterations *= 2;
 
-    } while (!finished_initializing());
-  } while(!done);
+  } while (!finished_initializing());
 }
 
 /* Update the weight array using the transition matrix to make the

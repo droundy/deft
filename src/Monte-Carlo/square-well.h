@@ -162,8 +162,7 @@ struct sw_simulation {
 
   void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 
-  void initialize_robustly_optimistic(double robust_scale, int robust_samples,
-                                      double robust_cutoff);
+  void initialize_simple_flat();
 
   void initialize_transitions();
 

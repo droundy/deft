@@ -91,7 +91,7 @@ int main(int argc, const char *argv[]) {
   int wang_landau = false;
   int optimized_ensemble = false;
   int vanilla_wang_landau = false;
-  int robustly_optimistic = false;
+  int simple_flat = false;
   int transition_override = false;
 
   // Tuning factors
@@ -100,9 +100,6 @@ int main(int argc, const char *argv[]) {
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
   int oe_update_factor = 2;
-  double robust_scale = 0.5;
-  int robust_samples = 1000;
-  double robust_cutoff = 0.25;
 
   // end conditions
   int default_pessimistic_min_samples = 10;
@@ -232,8 +229,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
      "Use a optimized ensemble weight histogram method", "BOOLEAN"},
-    {"robustly_optimistic", '\0', POPT_ARG_NONE, &robustly_optimistic, 0,
-     "Use the robustly optimistic histogram method", "BOOLEAN"},
+    {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
+     "Use simple flat histogram method", "BOOLEAN"},
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
@@ -249,12 +246,6 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
-    {"robust_scale", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_scale, 0, "Scaling factor for weight correction at each iteration", "DOUBLE"},
-    {"robust_samples", '\0', POPT_ARG_INT, &robust_samples, 0,
-     "Initialization iteration end condition factor", "INT"},
-    {"robust_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &robust_cutoff, 0, "Initialization iteration end condition factor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
 
@@ -332,7 +323,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if(bool(no_weights) + bool(robustly_optimistic) + bool(wang_landau)
+  if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
      + bool(vanilla_wang_landau) + bool(optimized_ensemble)
      + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
@@ -439,8 +430,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (no_weights) {
       sprintf(method_tag, "-nw");
-    } else if (robustly_optimistic) {
-      sprintf(method_tag, "-robustly_optimistic");
+    } else if (simple_flat) {
+      sprintf(method_tag, "-simple_flat");
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (oetmmc) {
@@ -716,8 +707,8 @@ int main(int argc, const char *argv[]) {
                               vanilla_wl_threshold, vanilla_wl_cutoff);
   } else if (optimized_ensemble) {
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
-  } else if (robustly_optimistic) {
-    sw.initialize_robustly_optimistic(robust_scale, robust_samples, robust_cutoff);
+  } else if (simple_flat) {
+    sw.initialize_simple_flat();
   } else if (tmmc) {
     sw.initialize_transitions();
   } else if (oetmmc) {
@@ -826,9 +817,9 @@ int main(int argc, const char *argv[]) {
   } else if(optimized_ensemble){
     sprintf(headerinfo,
             "%s# histogram method: optimized ensemble\n", headerinfo);
-  } else if(robustly_optimistic){
+  } else if(simple_flat){
     sprintf(headerinfo,
-            "%s# histogram method: robustly optimistic\n", headerinfo);
+            "%s# histogram method: simple flat\n", headerinfo);
   } else if (tmmc){
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
