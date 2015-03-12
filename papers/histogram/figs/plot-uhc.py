@@ -19,7 +19,7 @@ ff = float(sys.argv[2])
 
 # note: speficic HC should be independent of N, but we have to choose one
 N = float(sys.argv[3])
-#arg N = range(5,30)+range(30,50,5)+range(50,100,10)+range(100,201,20)
+#arg N = range(5,21)
 
 versions = eval(sys.argv[4])
 #arg versions = [["nw","wang_landau","simple_flat","optimized_ensemble","kT0.4","kT0.5","tmmc","oetmmc"]]

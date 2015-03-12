@@ -1,15 +1,12 @@
 _colors = { 'nw': 'r',
-            'kT0.5': 'r',
             'kT0.4': 'c',
-            'kT1': 'b',
-            'kT2': 'c',
-            'kT0.1': 'g',
+            'kT0.5': 'm',
+            'kT1': 'g',
             'tmmc': 'k',
             'oetmmc': 'b',
             'wang_landau': 'g',
             'vanilla_wang_landau': 'b',
             'simple_flat': 'r',
-            'gaussian': 'm',
             'optimized_ensemble': 'y'}
 
 def color(method):
@@ -33,7 +30,6 @@ def title(method):
                'wang_landau': 'Wang-Landau',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
                'simple_flat': 'simple flat',
-               'gaussian': 'gaussian method',
                'optimized_ensemble': 'optimized ensemble'}
     if method in titles:
         return titles[method]

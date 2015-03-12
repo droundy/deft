@@ -827,14 +827,14 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
   } while(!finished_initializing());
 }
 
-void sw_simulation::initialize_simple_flat(){
+void sw_simulation::initialize_simple_flat(int flat_update_factor){
   int weight_updates = 0;
   long num_iterations = min_samples*N*energy_levels;
   do {
     set_min_important_energy();
 
     // update weight array
-    for (int e = max_entropy_state; e < energy_levels; e++) {
+    for (int e = max_entropy_state; e <= min_important_energy; e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
@@ -858,7 +858,7 @@ void sw_simulation::initialize_simple_flat(){
       }
       printf("min_important_energy: %i\n",min_important_energy);
     }
-    num_iterations *= 2;
+    num_iterations *= flat_update_factor;
 
   } while (!finished_initializing());
 }

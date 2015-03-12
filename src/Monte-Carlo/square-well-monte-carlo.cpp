@@ -102,10 +102,11 @@ int main(int argc, const char *argv[]) {
   double wl_threshold = 3;
   double wl_cutoff = 1e-6;
   int oe_update_factor = 2;
+  int flat_update_factor = 2;
 
   // end conditions
   int default_pessimistic_min_samples = 10;
-  int default_optimistic_min_samples = 20;
+  int default_optimistic_min_samples = 200;
   double default_optimistic_sample_error = 0.1;
   double default_pessimistic_sample_error = 0.01;
   double default_flatness = 0.1;
@@ -250,6 +251,8 @@ int main(int argc, const char *argv[]) {
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
+    {"flat_update_factor", '\0', POPT_ARG_INT, &flat_update_factor, 0,
+     "Update scaling for the simple flat method", "INT"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -710,7 +713,7 @@ int main(int argc, const char *argv[]) {
   } else if (optimized_ensemble) {
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
   } else if (simple_flat) {
-    sw.initialize_simple_flat();
+    sw.initialize_simple_flat(flat_update_factor);
   } else if (tmmc) {
     sw.initialize_transitions();
   } else if (oetmmc) {
