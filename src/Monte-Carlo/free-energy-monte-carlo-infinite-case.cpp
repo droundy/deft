@@ -49,7 +49,7 @@ const int z = 2;
 // ------------------------------------------------------------------------------
 
 // Tests validity of a shrunken version of the cell
-// static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor);
+ static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor);
 
 // States how long it's been since last took call.
 static void took(const char *name);
@@ -422,39 +422,8 @@ int main(int argc, const char *argv[]) {
            most_neighbors, sw.max_neighbors);
   }
 
-  // ----------------------------------------------------------------------------
-  // Make sure initial placement is valid
-  // ----------------------------------------------------------------------------
-
-  bool error = false, error_cell = false;
-  for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
-      error_cell = true;
-      error = true;
-    }
-    for(int j = 0; j < i; j++) {
-      if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
-        error = true;
-        break;
-      }
-    }
-    if (error) break;
-  }
-  if (error){
-    print_bad(sw.balls, sw.N, sw.len, sw.walls);
-    printf("Error in initial placement: ");
-    if(error_cell) printf("balls placed outside of cell.\n");
-    else printf("balls are overlapping.\n");
-    return 253;
-  }
 
   fflush(stdout);
-
-  // ----------------------------------------------------------------------------
-  // Initialization of cell
-  // ----------------------------------------------------------------------------
-
-  sw.initialize_translation_distance();
 
   // --------------------------------------------------------------------------
   // end initilization routine.
@@ -475,11 +444,10 @@ int main(int argc, const char *argv[]) {
           "# N: %i\n"
           "# R: %f\n"
           "# well_width: %g\n"
-          "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
           "# ff_small: %g\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale, ff_small);
+          well_width, neighbor_scale, ff_small);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
@@ -507,23 +475,28 @@ int main(int argc, const char *argv[]) {
   }
 
   while(sw.iteration <= simulation_iterations) {
+    sw.iteration++;   // not calling move_a_ball(), so end_move_updates() is never called
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++)
+    for(int i = 0; i < sw.N; i++){
       // get a new location for each ball like
-      //balls[i].pos = get_rand_location_in_volume(len)
+      for(int j = 0; j < 3; j++){
+        sw.balls[i].pos[j] = sw.len[j] * random::ran();
+      }
+    }
 
     total_checks_of_small_cell++;
 
-    // if( check for overlap ){
-    //   total_failed_small_checks++;
-    //   if(debug){printf("%i - false\n", current_failed_run);}
-    // }
-    // else{
-    //   total_valid_small_checks++;
-    //   if(debug){printf("%i - true\n", current_valid_run);}
-    // }
+    double scaling_factor = 1;  // no "scaling" in infinite case
+    if(overlap_in_small_cell(sw,  scaling_factor)){
+      total_failed_small_checks++;
+      if(debug){printf("false\n");}
+    }
+    else{
+      total_valid_small_checks++;
+      if(debug){printf("true\n");}
+    }
 
     // ---------------------------------------------------------------
     // Add data to RDF histogram
@@ -559,14 +532,10 @@ int main(int argc, const char *argv[]) {
       char *countinfo = new char[4096];
       sprintf(countinfo,
               "# iterations: %li\n"
-              "# working moves: %li\n"
-              "# total moves: %li\n"
-              "# acceptance rate: %g\n"
               "# total checks of small cell: %i\n"
               "# total failed small checks: %i\n"
               "# total valid small checks: %i\n\n",
-              sw.iteration, sw.moves.working, sw.moves.total,
-              double(sw.moves.working)/sw.moves.total,
+              sw.iteration,
               total_checks_of_small_cell, total_failed_small_checks,
               total_valid_small_checks);
 
@@ -642,25 +611,25 @@ int main(int argc, const char *argv[]) {
 // END OF MAIN
 // ------------------------------------------------------------------------------
 
-// static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor){
-//   double scaled_len[3];
+static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor){
+  double scaled_len[3];
 
-//   for(int i=0; i < 3; i++){
-//     scaled_len[i] = scaling_factor * sw.len[i];
-//   }
+  for(int i=0; i < 3; i++){
+    scaled_len[i] = scaling_factor * sw.len[i];
+  }
 
-//   for(int i=0; i<sw.N; i++){
-//     for (int j=i+1; j<sw.N; j++) {
-//       // copy pasting from overlap() in square-well.cpp for now
-//       // contemplated adding a scaling parametor to overlap(), but decided on this for now.
-//       const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
-//       if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
-//         return true;
-//       }
-//     }
-//   }
-//   return false;
-// }
+  for(int i=0; i<sw.N; i++){
+    for (int j=i+1; j<sw.N; j++) {
+      // copy pasting from overlap() in square-well.cpp for now
+      // contemplated adding a scaling parametor to overlap(), but decided on this for now.
+      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
+      if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 inline void print_all(const ball *p, int N) {
   for (int i = 0; i < N; i++) {
