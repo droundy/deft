@@ -22,11 +22,11 @@ N = float(sys.argv[3])
 #arg N = range(5,21)
 
 methods = eval(sys.argv[4])
-#arg methods = [["wang_landau","simple_flat","optimized_ensemble","tmmc","oetmmc"]]
+#arg methods = [['tmmc-golden', "wang_landau","simple_flat","optimized_ensemble","tmmc","oetmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
-reference = "wang_landau"
+reference = "tmmc-golden"
 
 max_T = 2
 T_bins = 1e3

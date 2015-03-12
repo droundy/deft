@@ -20,7 +20,7 @@ N = int(sys.argv[3])
 #arg N = [10, 20, 100, 200, 1000]
 
 method1 = sys.argv[4]
-#arg method1 = ['wang_landau']
+#arg method1 = ['tmmc-golden']
 
 method2 = sys.argv[5]
 #arg method2 = ['tmmc']
