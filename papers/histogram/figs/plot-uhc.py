@@ -26,30 +26,18 @@ versions = eval(sys.argv[4])
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
 
-Tmin = 0.2
 reference_method = "wang_landau"
 
-Tmax = 2 # fixme: make this an input?
+max_T = 2
 T_bins = 1e3
-dT = Tmax/T_bins
-T_range = numpy.arange(dT,Tmax,dT)
-Tmin_i = int(Tmin/Tmax*T_bins)
+dT = max_T/T_bins
+T_range = numpy.arange(dT,max_T,dT)
+min_T = 0 # we will adjust this
 
-# make figure with axes labeled using scientific notation
-def sci_fig(handle):
-    fig = plt.figure(handle)
-    ax = fig.add_subplot(1,1,1)
-    fmt = matplotlib.ticker.ScalarFormatter(useMathText=True)
-    fmt.set_powerlimits((-2,3))
-    fmt.set_scientific(True)
-    ax.yaxis.set_major_formatter(fmt)
-    ax.xaxis.set_major_formatter(fmt)
-    return fig, ax
-
-fig_u, ax_u = sci_fig('u')
+fig_u = plt.figure('u')
 plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
-fig_hc, ax_hc = sci_fig('hc')
+fig_hc = plt.figure('hc')
 plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 # make dictionaries which we can index by method name
@@ -57,6 +45,15 @@ U = {} # internal energy
 CV = {} # heat capacity
 
 for version in versions:
+
+    with open("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version)) as file:
+        for line in file:
+            if("min_T" in line):
+                this_min_T = float(line.split()[-1])
+                if this_min_T > min_T:
+                    min_T = this_min_T
+                break
+
     # energy histogram file; indexed by [-energy,counts]
     e_hist = numpy.loadtxt(
         "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version), ndmin=2)
@@ -100,13 +97,16 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
+min_T_i = int(min_T/max_T*T_bins)
 error_data = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N), "w")
 error_data.write("# method u_error cv_error\n")
+error_data.write("# min_T: %g\n" % min_T)
 for version in versions:
-    u_error = max(abs(U[version][Tmin_i:] - U[reference_method][Tmin_i:]))/N
-    cv_error = max(abs(CV[version][Tmin_i:] - CV[reference_method][Tmin_i:]))/N
+    u_error = max(abs(U[version][min_T_i:] - U[reference_method][min_T_i:]))/N
+    cv_error = max(abs(CV[version][min_T_i:] - CV[reference_method][min_T_i:]))/N
     error_data.write("%s %g %g\n" % (version, u_error, cv_error))
 error_data.close()
 
 if 'show' in sys.argv:
     plt.show()
+
