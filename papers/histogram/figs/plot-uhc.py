@@ -5,6 +5,9 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy
 
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('text', usetex=True)
+
 import styles
 
 if len(sys.argv) not in [5,6]:
@@ -40,9 +43,13 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (
 fig_hc = plt.figure('hc')
 plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
+fig_s = plt.figure('S')
+plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
+
 # make dictionaries which we can index by method name
 U = {} # internal energy
 CV = {} # heat capacity
+S = {} # entropy
 
 # we want to keep our methods distinct from our reference
 if reference in methods:
@@ -72,11 +79,20 @@ for method in set(methods+[reference]):
     Z = numpy.zeros(len(T_range)) # partition function
     U[method] = numpy.zeros(len(T_range)) # internal energy
     CV[method] = numpy.zeros(len(T_range)) # heat capacity
+    S[method] = numpy.zeros(len(T_range)) # entropy
     for i in range(len(T_range)):
         ln_dos_boltz = ln_dos - energy/T_range[i]
         dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
         Z[i] = sum(dos_boltz)
         U[method][i] = sum(energy*dos_boltz)/Z[i]
+        # S = \sum_i^{microstates} P_i \log P_i
+        # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
+        S[method][i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() - numpy.log(Z[i])))/Z[i]
+        # Actually compute S(T) - S(T=\infty) to deal with the fact
+        # that we don't know the actual number of eigenstates:
+        Z_inf = sum(numpy.exp(ln_dos - ln_dos.max()))
+        S_inf = sum(-numpy.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - numpy.log(Z_inf)))/Z_inf
+        S[method][i] -= S_inf
         CV[method][i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
 
@@ -85,6 +101,9 @@ for method in set(methods+[reference]):
 
     plt.figure('hc')
     plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
+
+    plt.figure('S')
+    plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
 
 
 for method in methods:
@@ -95,6 +114,10 @@ for method in methods:
 
     plt.figure('hc_err')
     plt.plot(T_range,(CV[method]-CV[reference])/N,
+             styles.plot(method),label=styles.title(method))
+
+    plt.figure('S_err')
+    plt.plot(T_range,(S[method]-S[reference])/N,
              styles.plot(method),label=styles.title(method))
 
 
@@ -113,6 +136,13 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
+plt.figure('S')
+plt.xlabel(r'$kT/\epsilon$')
+plt.ylabel(r'$S_{\textit{config}}/Nk$')
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S.pdf" % (ww*100, ff*100, N))
+
 plt.figure('u_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
@@ -126,6 +156,13 @@ plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc_err.pdf" % (ww*100, ff*100, N))
+
+plt.figure('S_err')
+plt.xlabel('$kT/\epsilon$')
+plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N))
 
 min_T_i = int(min_T/max_T*T_bins)
 error_data = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N), "w")
