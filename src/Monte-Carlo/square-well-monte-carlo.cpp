@@ -110,6 +110,7 @@ int main(int argc, const char *argv[]) {
   double default_optimistic_sample_error = 0.1;
   double default_pessimistic_sample_error = 0.01;
   double default_flatness = 0.1;
+  int default_init_iters = 10000000;
   bool optimistic_sampling = false;
 
   // Do not change these! They are taken directly from the WL paper.
@@ -265,6 +266,8 @@ int main(int argc, const char *argv[]) {
     {"flatness", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.flatness, 0,
      "Maximum allowable proportional deviation from mean histogram value after "
      "initialization", "DOUBLE"},
+    {"init_iters", '\0', POPT_ARG_INT, &sw.init_iters, 0,
+     "Number of iterations for initialization", "INT"},
 
     {"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &sw.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
@@ -356,6 +359,9 @@ int main(int argc, const char *argv[]) {
   } else if(sw.flatness){
     sw.end_condition = flat_histogram;
     sprintf(end_condition_text,"flat_histogram");
+  } else if(sw.init_iters){
+    sw.end_condition = init_iter_limit;
+    sprintf(end_condition_text,"init_iter_limit");
   } else {
     sw.end_condition = none;
     sprintf(end_condition_text,"none");
@@ -495,11 +501,16 @@ int main(int argc, const char *argv[]) {
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
   }
-  else if(!sw.sample_error){
+  else if((sw.end_condition == optimistic_sample_error ||
+           sw.end_condition == pessimistic_sample_error) &&
+          !sw.sample_error){
     sw.sample_error = optimistic_sampling ?
       default_optimistic_sample_error : default_pessimistic_sample_error;
+  } else if(sw.end_condition == flat_histogram && !sw.flatness){
+    sw.flatness = default_flatness;
+  } else if(sw.end_condition == init_iter_limit && !sw.init_iters){
+    sw.init_iters = default_init_iters;
   }
-  else if(!sw.flatness) sw.flatness = default_flatness;
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -835,11 +846,14 @@ int main(int argc, const char *argv[]) {
   if(sw.end_condition != none){
     sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
     if(sw.end_condition == optimistic_min_samples ||
-       sw.end_condition == pessimistic_min_samples)
+       sw.end_condition == pessimistic_min_samples){
       sprintf(headerinfo, "%s %i\n", headerinfo, sw.min_samples);
-    if(sw.end_condition == optimistic_sample_error ||
-       sw.end_condition == pessimistic_sample_error)
+    } else if(sw.end_condition == optimistic_sample_error ||
+              sw.end_condition == pessimistic_sample_error){
       sprintf(headerinfo, "%s %g\n", headerinfo, sw.sample_error);
+    } else if(sw.end_condition == init_iter_limit){
+      sprintf(headerinfo, "%s %i\n", headerinfo, sw.init_iters);
+    }
   }
 
   // ----------------------------------------------------------------------------

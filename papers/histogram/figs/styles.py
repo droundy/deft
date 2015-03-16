@@ -3,7 +3,7 @@ _colors = { 'nw': 'r',
             'kT0.5': 'm',
             'kT1': 'g',
             'tmmc': 'k',
-            'oetmmc': 'b',
+            'oetmmc': 'm',
             'wang_landau': 'g',
             'vanilla_wang_landau': 'b',
             'simple_flat': 'r',
@@ -15,8 +15,7 @@ def color(method):
     return 'b' # everything else blue
 
 def line(method):
-    lines = { 'nw': '--',
-              'tmmc': ':'}
+    lines = { 'nw': '--'}
     if method[:2] == 'kT':
         return '--'
     if method in lines:

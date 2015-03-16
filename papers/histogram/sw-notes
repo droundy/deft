@@ -1,8 +1,6 @@
 run long simulations for all methods to make sure they mutually converge
  - for different temperatures
 
-reference file instead of reference method for "answer"
-
 add data comparing references
 add best reference against which to compare standard runs
 
@@ -11,8 +9,7 @@ include temp of max error in error file
  - max error vs N plots (or tables)
  - use ratios of errors relative to the geometric mean of errors in one method
 
-try iteration number end condition for comparison
- - implement option for time end condition
+implement time end condition
 
 add option to specify energy range for WL
  - flatten weights outside the energy range (or somehow disallow),

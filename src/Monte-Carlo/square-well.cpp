@@ -584,6 +584,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
 
     const bool optimistic_sampling = end_condition == optimistic_sample_error;
     return fractional_sample_error(min_T,optimistic_sampling) <= sample_error;
+
   } else if(end_condition == optimistic_min_samples
             || end_condition == pessimistic_min_samples) {
     set_min_important_energy();
@@ -624,7 +625,9 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
       }
       return pessimistic_samples[min_important_energy] >= min_samples;
     }
-  } else if(end_condition == flat_histogram){
+  }
+
+  else if(end_condition == flat_histogram){
     int hist_min = int(1e20);
     int hist_total = 0;
     int most_weighted_energy = 0;
@@ -640,9 +643,17 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     return hist_min >= flatness*hist_mean && energy != most_weighted_energy;
   }
 
+  else if(end_condition == init_iter_limit){
+    return iteration > init_iters;
+  }
+
   printf("We are asking whether we are finished initializing without "
          "a valid end condition!\n");
   exit(1);
+}
+
+bool sw_simulation::reached_iteration_cap(){
+  return end_condition == init_iter_limit && iteration >= init_iters;
 }
 
 int sw_simulation::initialize_max_entropy(double acceptance_goal) {
@@ -726,10 +737,12 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
   bool done = false;
   int last_min_energy_state = min_energy_state;
   while (!done) {
-    for (int i=0; i < N*energy_levels; i++) {
+
+    for (int i=0; i < N*energy_levels || reached_iteration_cap(); i++) {
       move_a_ball();
       ln_energy_weights[energy] -= wl_factor;
     }
+    done = reached_iteration_cap();
 
     // compute variation in energy histogram
     int highest_hist_i = 0; // the most commonly visited energy
@@ -796,7 +809,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     reset_histograms();
 
     // simulate for a while
-    for(long i = 0; i < N*update_iters; i++) move_a_ball();
+    for(long i = 0; i < N*update_iters || reached_iteration_cap(); i++) move_a_ball();
 
     // Find the minimum energy we've seen in this iteration.
     int min_hist = energy_levels-1;
@@ -845,7 +858,8 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     set_min_important_energy();
 
     // update weight array
-    for (int e = max_entropy_state; e <= min_important_energy; e++) {
+    for (int e = max_entropy_state;
+         e <= min_important_energy || reached_iteration_cap(); e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
@@ -919,9 +933,9 @@ void sw_simulation::update_weights_using_transitions() {
 
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
-  int check_how_often = min_samples*energy_levels; // avoid spending too much time deciding if we are done
+  int check_how_often = min_samples*energy_levels; // avoid wasting time if we are done
   do {
-    for (int i = 0; i < check_how_often; i++) move_a_ball(true);
+    for (int i = 0; i < check_how_often || reached_iteration_cap(); i++) move_a_ball(true);
     check_how_often += min_samples*energy_levels; // try a little harder next time...
   } while(!finished_initializing(printing_allowed()));
 
@@ -1033,3 +1047,4 @@ bool sw_simulation::printing_allowed(){
   }
   return false;
 }
+

@@ -37,15 +37,6 @@ dT = max_T/T_bins
 T_range = numpy.arange(dT,max_T,dT)
 min_T = 0 # we will adjust this
 
-fig_u = plt.figure('u')
-plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
-
-fig_hc = plt.figure('hc')
-plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
-
-fig_s = plt.figure('S')
-plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
-
 # make dictionaries which we can index by method name
 U = {} # internal energy
 CV = {} # heat capacity
@@ -80,6 +71,10 @@ for method in set(methods+[reference]):
     U[method] = numpy.zeros(len(T_range)) # internal energy
     CV[method] = numpy.zeros(len(T_range)) # heat capacity
     S[method] = numpy.zeros(len(T_range)) # entropy
+
+    Z_inf = sum(numpy.exp(ln_dos - ln_dos.max()))
+    S_inf = sum(-numpy.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - numpy.log(Z_inf))) / Z_inf
+
     for i in range(len(T_range)):
         ln_dos_boltz = ln_dos - energy/T_range[i]
         dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
@@ -87,41 +82,45 @@ for method in set(methods+[reference]):
         U[method][i] = sum(energy*dos_boltz)/Z[i]
         # S = \sum_i^{microstates} P_i \log P_i
         # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
-        S[method][i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() - numpy.log(Z[i])))/Z[i]
+        S[method][i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() \
+                                       - numpy.log(Z[i])))/Z[i]
         # Actually compute S(T) - S(T=\infty) to deal with the fact
         # that we don't know the actual number of eigenstates:
-        Z_inf = sum(numpy.exp(ln_dos - ln_dos.max()))
-        S_inf = sum(-numpy.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - numpy.log(Z_inf)))/Z_inf
         S[method][i] -= S_inf
         CV[method][i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
 
     plt.figure('u')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,U[method]/N,styles.plot(method),label=styles.title(method))
 
     plt.figure('hc')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
 
     plt.figure('S')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
-
 
 for method in methods:
 
     plt.figure('u_err')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(U[method]-U[reference])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('hc_err')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(CV[method]-CV[reference])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('S_err')
+    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(S[method]-S[reference])/N,
              styles.plot(method),label=styles.title(method))
 
-
 plt.figure('u')
+plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
@@ -129,6 +128,7 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc')
+plt.title('Specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
@@ -137,6 +137,7 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
 plt.figure('S')
+plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
@@ -144,6 +145,8 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S.pdf" % (ww*100, ff*100, N))
 
 plt.figure('u_err')
+plt.title('Error in specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$'
+          % (ww, ff, N))
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='best')
@@ -151,6 +154,8 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u_err.pdf" % (ww*100, ff*100, N))
 
 plt.figure('hc_err')
+plt.title('Error in specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%i$'
+          % (ww, ff, N))
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='best')
@@ -158,6 +163,8 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc_err.pdf" % (ww*100, ff*100, N))
 
 plt.figure('S_err')
+plt.title('Error in configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$'
+          % (ww, ff, N))
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best')

@@ -26,7 +26,8 @@ struct move_info {
 };
 
 enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
-                      optimistic_sample_error, pessimistic_sample_error, flat_histogram };
+                      optimistic_sample_error, pessimistic_sample_error, flat_histogram,
+                      init_iter_limit };
 
 enum dos_types { histogram_dos, transition_dos };
 
@@ -88,6 +89,7 @@ struct sw_simulation {
   int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
   double flatness; // maximum allowable proportional deviation from mean histogram value
+  int init_iters; // number of iterations for which to initialize
 
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
@@ -180,6 +182,7 @@ struct sw_simulation {
 
   // check whether we are done initializing
   bool finished_initializing(bool be_verbose = false);
+  bool reached_iteration_cap();
 
   double estimate_trip_time(int E1, int E2);
 
