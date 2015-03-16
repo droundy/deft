@@ -131,6 +131,7 @@ int main(int argc, const char *argv[]) {
   sw.min_samples = 0;
   sw.sample_error = 0;
   sw.flatness = 0;
+  sw.init_iters = 0;
 
   int wall_dim = 0;
   unsigned long int seed = 0;
