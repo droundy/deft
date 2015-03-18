@@ -36,7 +36,7 @@ sw_liquid_n = "ESW" === (substitute ("n" === r_var "x") (r_var "n") $
                          ("external" === integrate (n * (r_var "Vext" - s_var "mu"))))
 
 sw :: Expression Scalar
-sw = var "sw" "F_{\\text{sw}}" $ epsilon * (0*sw0 + 0*sw1 + 0*sw2 + sw3 + 0*sw4)
+sw = var "sw" "F_{\\text{sw}}" $ epsilon * (0*sw0 + 0*sw1 + 0*sw2 + 0*sw3 + 0*sw4)
   where sw0 = var "sw0" "\\Sigma_0" $ integrate $ 0.5*n*n_g_phi0
         sw1 = var "sw1" "\\Sigma_1" $ integrate $ 0.5*n*n_g_phi1
         sw2 = var "sw2" "\\Sigma_2" $ integrate $ 0.5*n*n_g_phi2
@@ -79,7 +79,7 @@ convolve_xi1phi_with :: Expression RealSpace -> Expression RealSpace
 convolve_xi1phi_with x = ifft ( xi1phik * fft x)
   where xi1phik = var "xi1phik" "\\tilde{\\xi_1\\phi}(k)" $
                -eps4piok * ((2-lamksig*ksig*(lambda-1))*cos(lamksig)
-                            -ksig*(sin(ksig)+(1-2*lambda)*sin(lamksig))-cos(ksig))/(k**2*ksig)
+                            -ksig*(sin(ksig)+(1-2*lambda)*sin(lamksig))-2*cos(ksig))/(k**2*ksig)
 
 convolve_xi2phi_with :: Expression RealSpace -> Expression RealSpace
 convolve_xi2phi_with x = ifft ( xi2phik * fft x)
@@ -95,7 +95,7 @@ convolve_xi3phi_with x = ifft ( xi3phik * fft x)
                -eps4piok*(ksig*(6*sin(ksig) 
                                 + (18-24*lambda*ksig**2*(lambda)**2*(4*lambda-1))*sin(lamksig))
                           + (6*ksig**2*(lambda-1)*(2*lambda-1)
-                             - lamksig*ksig**3*(lambda-1)**3)*cos(lamksig)
+                             - lamksig*ksig**3*(lambda-1)**3-24)*cos(lamksig)
                           + 24*cos(ksig))/(k**2*ksig**3)
 
 convolve_xi4phi_with :: Expression RealSpace -> Expression RealSpace
@@ -104,5 +104,5 @@ convolve_xi4phi_with x = ifft ( xi4phik * fft x)
                -eps4piok * ((ksig**2*(lambda-1)*(36-60*lambda+ksig**2*(lambda-1)**2*(5*lambda-1))
                              + 120)*sin(lamksig) 
                             + ksig*(24*cos(ksig)-(24*(5*lambda-4)- 4*ksig**2*(lambda-1)**2*(5*lambda-2)
-                                                  +lamksig*ksig**3*(lambda-1)**4))*cos(lamksig)
+                                                  +lamksig*ksig**3*(lambda-1)**4)*cos(lamksig))
                             -120*sin(ksig))/(k**2*ksig**4)
