@@ -11,7 +11,7 @@ else:
     os.exit(1)
 
 documentclassre = re.compile(r'\\documentclass(\[[^\]]+\])?{')
-graphicre = re.compile(r'^\s*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
+graphicre = re.compile(r'^[^%]*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
 inputre = re.compile(r'\\input(\[[^\]]+\])?{([^}]+)}')
 
 for t in texfs:
@@ -30,7 +30,7 @@ for t in texfs:
         return x+'.pdf'
     inputs |= set([graphics_name(x[1]) for x in graphicre.findall(latex)])
     inputs |= set([x[1]+'.tex' for x in inputre.findall(latex)])
-    fac.default('pdflatex %s && pdflatex %s && bibtex %s && pdflatex %s'
+    fac.default('pdflatex -interaction nonstopmode %s && pdflatex -interaction nonstopmode %s && bibtex %s && pdflatex -interaction nonstopmode %s'
                 % (fname, fname, fname[:-4], fname), inputs, outputs)
 
 
