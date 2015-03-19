@@ -99,3 +99,67 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
+# input: ["figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N) for N in all_Ns]
+
+cv_errors = {}
+S_errors = {}
+u_errors = {}
+for N in all_Ns:
+    f = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat"
+             % (ww*100, ff*100, N))
+    for line in f.read().split('\n'):
+        if len(line) > 0 and line[0] != '#':
+            line = line.split()
+            method = line[0]
+            print 'method', method, 'u_error', line[1]
+            if method not in u_errors:
+                u_errors[method] = numpy.array([[N, float(line[1])]])
+            else:
+                u_errors[method] = numpy.vstack([u_errors[method],
+                                                 numpy.array([[N, float(line[1])]])])
+            if method not in S_errors:
+                S_errors[method] = numpy.array([[N, float(line[3])]])
+            else:
+                S_errors[method] = numpy.vstack([S_errors[method],
+                                                 numpy.array([[N, float(line[3])]])])
+            if method not in cv_errors:
+                cv_errors[method] = numpy.array([[N, float(line[2])]])
+            else:
+                cv_errors[method] = numpy.vstack([cv_errors[method],
+                                                  numpy.array([[N, float(line[2])]])])
+
+plt.figure()
+for method in u_errors.keys():
+    print method, u_errors[method]
+    plt.plot(u_errors[method][:,0], u_errors[method][:,1],
+             '.'+styles.plot(method),label=method)
+
+plt.xlabel('$N$')
+plt.ylabel('error in $u$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
+
+plt.figure()
+for method in cv_errors.keys():
+    print method, cv_errors[method]
+    plt.plot(cv_errors[method][:,0], cv_errors[method][:,1],
+             '.'+styles.plot(method),label=method)
+
+plt.xlabel('$N$')
+plt.ylabel('error in $c_v$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
+
+plt.figure()
+for method in S_errors.keys():
+    print method, S_errors[method]
+    plt.plot(S_errors[method][:,0], S_errors[method][:,1],
+             '.'+styles.plot(method),label=method)
+
+plt.xlabel('$N$')
+plt.ylabel('error in $s$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-S_errors.pdf" % (ww*100, ff*100))
