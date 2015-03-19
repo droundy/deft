@@ -23,6 +23,10 @@ for x in utility_files:
 for x in monte_carlos:
     src.link('src/Monte-Carlo/%s.cpp' % x, x)
 
+def add_parameters(method):
+    if method in ['tmmc', 'oetmmc']:
+        return method + ' --min_samples 10000'
+    return method
 
 for method in ["nw","simple_flat","wang_landau","optimized_ensemble",
                "tmmc","oetmmc","kT 1","kT 2","kT 0.5","kT 0.4"]:
@@ -32,6 +36,6 @@ for method in ["nw","simple_flat","wang_landau","optimized_ensemble",
                 outputs = ["papers/histogram/data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                            % (ww, ff, N, method.replace(' ',''), postfix)
                            for postfix in ['g', 'E', 'lnw', 'transitions']]
-                src.rule('./square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 1000000'
-                         % (method, N, ff, ww),
+                src.rule('./square-well-monte-carlo --N %d --%s --ff %g --ww %g --iterations 1000000'
+                         % (N, add_parameters(method), ff, ww),
                          ['square-well-monte-carlo'], outputs)
