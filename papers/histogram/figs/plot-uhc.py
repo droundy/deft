@@ -173,11 +173,12 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N
 
 min_T_i = int(min_T/max_T*T_bins)
 error_data = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N), "w")
-error_data.write("# method u_error cv_error\n")
 error_data.write("# min_T: %g\n" % min_T)
+error_data.write("# %18s %10s %10s %10s\n" % ('method', 'u_error', 'cv_error', 'S_error'))
 for method in methods:
     u_error = max(abs(U[method][min_T_i:] - U[reference][min_T_i:]))/N
     cv_error = max(abs(CV[method][min_T_i:] - CV[reference][min_T_i:]))/N
-    error_data.write("%s %g %g\n" % (method, u_error, cv_error))
+    S_error = max(abs(S[method][min_T_i:] - S[reference][min_T_i:]))/N
+    error_data.write("%20s %10g %10g %10g\n" % (method, u_error, cv_error, S_error))
 error_data.close()
 
