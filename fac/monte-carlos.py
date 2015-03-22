@@ -25,7 +25,7 @@ for x in monte_carlos:
 
 def add_parameters(method):
     if method in ['tmmc', 'oetmmc']:
-        return method + ' --min_samples 2000'
+        return method + ' --min_samples 10000'
     return method
 
 for method in ["nw","simple_flat","wang_landau","optimized_ensemble",
