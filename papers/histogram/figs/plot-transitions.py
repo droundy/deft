@@ -17,7 +17,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = [10, 20, 100, 200, 1000]
+#arg N = range(5,21)+[100, 200, 1000]
 
 method1 = sys.argv[4]
 #arg method1 = ['tmmc-golden']
