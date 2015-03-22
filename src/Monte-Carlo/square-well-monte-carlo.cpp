@@ -482,7 +482,7 @@ int main(int argc, const char *argv[]) {
   }
 
   /* set default end condition if necessary */
-  if(sw.end_condition == none && !fix_kT){
+  if(sw.end_condition == none && !fix_kT && !no_weights){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
     sw.end_condition = optimistic_min_samples;
