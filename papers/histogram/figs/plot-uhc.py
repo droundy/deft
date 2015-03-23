@@ -25,7 +25,7 @@ N = float(sys.argv[3])
 #arg N = range(5,21)
 
 methods = eval(sys.argv[4])
-#arg methods = [['tmmc-golden', "wang_landau","simple_flat","optimized_ensemble","tmmc","oetmmc"]]
+#arg methods = [["tmmc-golden","wang_landau","simple_flat","tmmc","oetmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
@@ -91,31 +91,25 @@ for method in set(methods+[reference]):
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
 
     plt.figure('u')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,U[method]/N,styles.plot(method),label=styles.title(method))
 
     plt.figure('hc')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
 
     plt.figure('S')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
 
 for method in methods:
 
     plt.figure('u_err')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(U[method]-U[reference])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('hc_err')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(CV[method]-CV[reference])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('S_err')
-    plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
     plt.plot(T_range,(S[method]-S[reference])/N,
              styles.plot(method),label=styles.title(method))
 
@@ -124,6 +118,7 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u.pdf" % (ww*100, ff*100, N))
 
@@ -133,6 +128,7 @@ plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
@@ -141,6 +137,7 @@ plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (w
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S.pdf" % (ww*100, ff*100, N))
 
@@ -150,6 +147,7 @@ plt.title('Error in specific internal energy for $\lambda=%g$, $\eta=%g$, and $N
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u_err.pdf" % (ww*100, ff*100, N))
 
@@ -159,6 +157,7 @@ plt.title('Error in specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc_err.pdf" % (ww*100, ff*100, N))
 
@@ -168,6 +167,7 @@ plt.title('Error in configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
+plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N))
 

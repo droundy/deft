@@ -735,7 +735,6 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
   bool done = false;
-  int last_min_energy_state = min_energy_state;
   while (!done) {
 
     for (int i=0; i < N*energy_levels || reached_iteration_cap(); i++) {
@@ -789,12 +788,11 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
       // repeat until terminal condition is met,
       // and make sure we're not stuck at a newly introduced minimum energy state
-      if (wl_factor < wl_cutoff && last_min_energy_state == min_energy_state) {
+      if (wl_factor < wl_cutoff && energy != min_energy_state) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration, weight_updates);
         done = true;
       }
-      last_min_energy_state = min_energy_state;
     }
   }
 }

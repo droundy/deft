@@ -330,8 +330,7 @@ for ff in [0.1, 0.2, 0.3, 0.4]:
     datadir = "papers/histogram/data/"
     for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
         for N in range(5,21):
-            for method in ["nw","simple_flat","wang_landau",
-                           "optimized_ensemble",'tmmc','oetmmc'] \
+            for method in ["nw","simple_flat","wang_landau","tmmc","oetmmc"] \
                     + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
                 env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
                                       % (ww, ff, N, method.replace(' ',''), postfix)

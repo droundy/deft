@@ -1,31 +1,17 @@
-run long simulations for all methods to make sure they mutually converge
- - for different temperatures
+make figures comparing convegrence runs
 
-add data comparing references
-add best reference against which to compare standard runs
-
+run end condition tests
 
 include temp of max error in error file
  - max error vs N plots (or tables)
  - use ratios of errors relative to the geometric mean of errors in one method
-
-implement time end condition
 
 add option to specify energy range for WL
  - flatten weights outside the energy range (or somehow disallow),
      but set them to canonical after initialization
  - use this energy range for comparisons
 optionally look for a minimum important energy to define the energy range
-
-
-
 make sure we're not breaking wang_landau by not specifying a minimum energy
-
-
-
-run optimized_ensemble, tmmc, and robustly_optimistic for each end condition
-    for many small N
-
 
 clean up optimized_ensemble
  - find df/dE by secant line in f(E)
@@ -36,18 +22,10 @@ clean up optimized_ensemble
 IF we have a problem with picking bad minimum energies, consider requiring
   a minimum histogram count of exp(1/min_T) at the minimum energy
 
-
 make iterations vs initialization quality plot
 
-make wang_landau and tmmc dump weight aray and histogram periodically
 
-
-
-
-
-run [vanilla_]wang_landau for 60, 80, 100, 150, 200
- - go from 100 to 200 by 20s?
-
+make wang_landau and tmmc dump weight aray and histogram periodically?
 
 after figuring out what to do with end conditions, run sims with large Ns and various min_Ts
 

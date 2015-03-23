@@ -20,7 +20,7 @@ all_Ns = eval(sys.argv[3])
 #arg all_Ns = [[5,7,10,20]]
 
 methods = eval(sys.argv[4])
-#arg methods = [["wang_landau","simple_flat","optimized_ensemble","tmmc", "oetmmc"]]
+#arg methods = [["wang_landau","simple_flat","tmmc", "oetmmc"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, dat) for method in methods for N in all_Ns for dat in ['ps', 'lnw', 'E']]
 
@@ -49,19 +49,19 @@ for method in methods:
     sample_data = numpy.loadtxt(wildfilename % 'ps', ndmin=2)
     samples[method].append(sample_data[len(sample_data[:,1])-1, 1])
 
-  plt.figure(1)
+  plt.figure('iters')
   plt.semilogy(all_Ns, init_iters[method], styles.color(method)+'.-', label=method)
-  plt.figure(2)
+  plt.figure('emin')
   plt.plot(all_Ns, Emins[method], styles.color(method)+'.-', label=method)
 
-plt.figure(1)
+plt.figure('iters')
 plt.xlabel('$N$')
 plt.ylabel('Initialization iterations')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-scaling.pdf" % (ww*100, ff*100))
 
-plt.figure(2)
+plt.figure('emin')
 plt.xlabel('$N$')
 plt.ylabel('Emin')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
@@ -130,7 +130,6 @@ for N in all_Ns:
 
 plt.figure()
 for method in u_errors.keys():
-    print method, u_errors[method]
     plt.plot(u_errors[method][:,0], u_errors[method][:,1],
              '.'+styles.plot(method),label=method)
 
@@ -142,7 +141,6 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in cv_errors.keys():
-    print method, cv_errors[method]
     plt.plot(cv_errors[method][:,0], cv_errors[method][:,1],
              '.'+styles.plot(method),label=method)
 
@@ -154,7 +152,6 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in S_errors.keys():
-    print method, S_errors[method]
     plt.plot(S_errors[method][:,0], S_errors[method][:,1],
              '.'+styles.plot(method),label=method)
 

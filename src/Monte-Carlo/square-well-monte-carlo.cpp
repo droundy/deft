@@ -91,9 +91,9 @@ int main(int argc, const char *argv[]) {
   int tmmc = false;
   int oetmmc = false;
   int wang_landau = false;
-  int optimized_ensemble = false;
   int vanilla_wang_landau = false;
   int simple_flat = false;
+  int optimized_ensemble = false;
   int transition_override = false;
 
   // Tuning factors
@@ -112,6 +112,8 @@ int main(int argc, const char *argv[]) {
   double default_flatness = 0.1;
   int default_init_iters = 10000000;
   bool optimistic_sampling = false;
+
+  int tmmc_min_samples = 2000;
 
   // Do not change these! They are taken directly from the WL paper.
   const double vanilla_wl_factor = 1;
@@ -232,10 +234,10 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau histogram method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
-    {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
-     "Use a optimized ensemble weight histogram method", "BOOLEAN"},
     {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
      "Use simple flat histogram method", "BOOLEAN"},
+    {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
+     "Use a optimized ensemble weight histogram method", "BOOLEAN"},
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
@@ -333,9 +335,13 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + bool(optimized_ensemble)
-     + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
+     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
     printf("Exactly one histigram method must be selected!\n");
+    return 254;
+  }
+  // Check that no more than one secondary method is used
+  if(bool(optimized_ensemble) + bool(transition_override) > 1){
+    printf("Cannot use more than one secondary histigram method!\n");
     return 254;
   }
 
@@ -367,6 +373,20 @@ int main(int argc, const char *argv[]) {
     sw.end_condition = none;
     sprintf(end_condition_text,"none");
   }
+
+  /* If we are going to optimized the ensemble after initializing via some other method,
+     initialize "half way" each time */
+  if(optimized_ensemble){
+    sw.min_samples /= 2;
+    sw.init_iters /= 2;
+
+    if(sw.flatness){
+      printf("It does not make sense to optimize the ensemble with a "
+             "flat histogram end condition!\n");
+      return 175;
+    }
+  }
+
 
   // If the user specified a filling fraction, make it so!
   if (ff != 0) {
@@ -452,16 +472,19 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
       sprintf(method_tag, "-vanilla_wang_landau");
-    } else if (optimized_ensemble) {
-      sprintf(method_tag, "-optimized_ensemble");
     } else {
       method_tag[0] = 0; // set method_tag to the empty string
     }
     if(sw.end_condition != none)
       sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
+
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
-    if(transition_override) sprintf(filename, "%s-to", filename);
+    if(optimized_ensemble){
+      sprintf(filename, "%s-oe", filename);
+    } else if(transition_override){
+      sprintf(filename, "%s-to", filename);
+    }
     printf("\nUsing default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
@@ -481,23 +504,20 @@ int main(int argc, const char *argv[]) {
     sw.sim_dos_type = histogram_dos;
   }
 
-  /* set default end condition if necessary */
+  /* set end condition defaults */
   if(sw.end_condition == none && !fix_kT && !no_weights){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
     sw.end_condition = optimistic_min_samples;
     optimistic_sampling = true;
-    if (optimized_ensemble) {
-      sw.end_condition = pessimistic_min_samples;
-    }
   }
 
-  // set end condition parameters if necessary
+  // set unspecified end condition parameters
   if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_optimistic_min_samples;
     // different default for tmmc methods because they keep
     // accumulating statistics without doing resets.
-    if (tmmc || oetmmc) sw.min_samples = 2000;
+    if (tmmc || oetmmc) sw.min_samples = tmmc_min_samples;
     printf("Defaulting min_samples to %d\n", sw.min_samples);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
@@ -722,8 +742,6 @@ int main(int argc, const char *argv[]) {
   } else if (vanilla_wang_landau) {
     sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
                               vanilla_wl_threshold, vanilla_wl_cutoff);
-  } else if (optimized_ensemble) {
-    sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmmc) {
@@ -733,14 +751,19 @@ int main(int argc, const char *argv[]) {
     sw.update_weights_using_transition_flux();
   }
 
-  took("Actual initialization");
-
-  if(transition_override){
+  // If we wish to optimize the ensemble or set transition matrix weights, do so
+  if (optimized_ensemble) {
+    printf("\nOptimizing the ensemble!\n");
+    sw.reset_histograms();
+    sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
+  } else if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n");
     sw.update_weights_using_transitions();
     took("Finding D");
   }
   sw.flush_weight_array();
+
+  took("Actual initialization");
 
   if(sw.end_condition == optimistic_min_samples ||
      sw.end_condition == pessimistic_min_samples ||
@@ -831,9 +854,6 @@ int main(int argc, const char *argv[]) {
             "# wl_threshold: %g\n"
             "# wl_cutoff: %g\n",
             headerinfo, wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-  } else if(optimized_ensemble){
-    sprintf(headerinfo,
-            "%s# histogram method: optimized ensemble\n", headerinfo);
   } else if(simple_flat){
     sprintf(headerinfo,
             "%s# histogram method: simple flat\n", headerinfo);
