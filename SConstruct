@@ -50,6 +50,10 @@ Alias('git configuration',
       env.Command(target = '.git/hooks/pre-commit',
                   source = 'git/pre-commit',
                   action = Copy("$TARGET", "$SOURCE")))
+Alias('git configuration',
+      env.Command(target = 'src/version-identifier.h',
+                  source = ['src/generate-version-identifier.py'],
+                  action = 'python3 $SOURCE > $TARGET'))
 Default('git configuration')
 
 haskell = Environment(tools=['haskell'],
