@@ -734,8 +734,12 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
+  int min_wl_energy = 0;
   bool done = false;
   while (!done) {
+
+    // If we have a minimum important energy, (effectively) don't allow going any lower
+    if(min_important_energy) initialize_canonical(1e-5,min_important_energy);
 
     for (int i=0; i < N*energy_levels || reached_iteration_cap(); i++) {
       move_a_ball();
@@ -743,13 +747,15 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     }
     done = reached_iteration_cap();
 
+    min_wl_energy = min_important_energy ? min_important_energy : min_energy_state;
+
     // compute variation in energy histogram
     int highest_hist_i = 0; // the most commonly visited energy
     int lowest_hist_i = 0; // the least commonly visited energy
     double highest_hist = 0; // highest histogram value
     double lowest_hist = 1e200; // lowest histogram value
     double total_counts = 0; // total counts in energy histogram
-    for(int i = max_entropy_state+1; i < energy_levels; i++){
+    for(int i = max_entropy_state+1; i <= min_wl_energy; i++){
       if(energy_histogram[i] > 0){
         total_counts += energy_histogram[i];
         if(energy_histogram[i] > highest_hist){
@@ -762,7 +768,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         }
       }
     }
-    double hist_mean = (double)total_counts / (min_energy_state-max_entropy_state);
+    double hist_mean = (double)total_counts / (min_wl_energy - max_entropy_state);
     const double variation = hist_mean/lowest_hist - 1;
 
     // print status text for testing purposes
@@ -795,6 +801,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       }
     }
   }
+  initialize_canonical(min_T,min_wl_energy);
 }
 
 // initialize the weight array using the optimized ensemble method.

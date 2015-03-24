@@ -103,6 +103,7 @@ int main(int argc, const char *argv[]) {
   double wl_cutoff = 1e-6;
   int oe_update_factor = 2;
   int flat_update_factor = 2;
+  sw.min_important_energy = 0;
 
   // end conditions
   int default_pessimistic_min_samples = 10;
@@ -257,6 +258,8 @@ int main(int argc, const char *argv[]) {
      "Update scaling for the optimized ensemble method", "INT"},
     {"flat_update_factor", '\0', POPT_ARG_INT, &flat_update_factor, 0,
      "Update scaling for the simple flat method", "INT"},
+    {"min_important_energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
+     "Fix a minimum important energy at a given value", "INT"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -387,6 +390,11 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  if(sw.min_important_energy && !wang_landau){
+    printf("Fixing a minimum important energy is not allowed for any method"
+           " other than Wang-Landau\n");
+    return 149;
+  }
 
   // If the user specified a filling fraction, make it so!
   if (ff != 0) {

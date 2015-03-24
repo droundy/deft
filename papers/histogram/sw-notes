@@ -1,13 +1,6 @@
 run end condition tests
 
-include temp of max error in error file
- - max error vs N plots (or tables)
- - use ratios of errors relative to the geometric mean of errors in one method
-
-add option to specify energy range for WL
- - flatten weights outside the energy range (or somehow disallow),
-     but set them to canonical after initialization
- - use this energy range for comparisons
+specify and energy range for wang landau when making comparisons to other methods
 optionally look for a minimum important energy to define the energy range
 make sure we're not breaking wang_landau by not specifying a minimum energy
 

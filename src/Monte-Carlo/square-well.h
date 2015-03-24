@@ -69,7 +69,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, min_energy_state, min_important_energy=0;
+  int max_entropy_state, min_energy_state, min_important_energy;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
