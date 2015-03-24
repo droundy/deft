@@ -117,16 +117,16 @@ for N in all_Ns:
             else:
                 u_errors[method] = numpy.vstack([u_errors[method],
                                                  numpy.array([[N, float(line[1])]])])
-            if method not in S_errors:
-                S_errors[method] = numpy.array([[N, float(line[3])]])
-            else:
-                S_errors[method] = numpy.vstack([S_errors[method],
-                                                 numpy.array([[N, float(line[3])]])])
             if method not in cv_errors:
-                cv_errors[method] = numpy.array([[N, float(line[2])]])
+                cv_errors[method] = numpy.array([[N, float(line[3])]])
             else:
                 cv_errors[method] = numpy.vstack([cv_errors[method],
-                                                  numpy.array([[N, float(line[2])]])])
+                                                  numpy.array([[N, float(line[3])]])])
+            if method not in S_errors:
+                S_errors[method] = numpy.array([[N, float(line[5])]])
+            else:
+                S_errors[method] = numpy.vstack([S_errors[method],
+                                                 numpy.array([[N, float(line[5])]])])
 
 plt.figure()
 for method in u_errors.keys():
