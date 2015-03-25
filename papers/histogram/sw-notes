@@ -4,10 +4,14 @@ specify and energy range for wang landau when making comparisons to other method
 optionally look for a minimum important energy to define the energy range
 make sure we're not breaking wang_landau by not specifying a minimum energy
 
-clean up optimized_ensemble
+optimized_ensemble changes
  - find df/dE by secant line in f(E)
    - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
    - average weights if we have an energy jump
+ - what does it mean if df < 0 ?
+
+fractional_sample_error: what should we do if samples=0?
+simple_flat and tmmc scaling (without min_samples)
 
 
 IF we have a problem with picking bad minimum energies, consider requiring

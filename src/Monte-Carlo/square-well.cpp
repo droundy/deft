@@ -450,13 +450,14 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   double error_times_Z = 0;
   double Z = 0;
   const double *ln_dos = compute_ln_dos(sim_dos_type);
-  for(int i = max_entropy_state; i < min_energy_state; i++){
+  for(int i = max_entropy_state; i <= min_energy_state; i++){
     const double boltz = exp(ln_dos[i]+(i-min_energy_state)/T);
     Z += boltz;
+    // fixme: what should we do if samples=0?
     if(optimistic_sampling)
-      error_times_Z += boltz/sqrt(optimistic_samples[i]);
+      error_times_Z += boltz/sqrt(max(optimistic_samples[i],1));
     else
-      error_times_Z += boltz/sqrt(pessimistic_samples[i]);
+      error_times_Z += boltz/sqrt(max(pessimistic_samples[i],1));
   }
   delete[] ln_dos;
   return error_times_Z/Z;
@@ -881,7 +882,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     for (long j = 0; j < num_iterations; j++) move_a_ball();
 
     if (printing_allowed()) {
-      printf("status update:\n");
+      printf("simple flat status update:\n");
       for (int e = max_entropy_state; e <= min_energy_state; e++) {
         printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
                e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);

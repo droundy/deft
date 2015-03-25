@@ -108,8 +108,8 @@ int main(int argc, const char *argv[]) {
   // end conditions
   int default_pessimistic_min_samples = 10;
   int default_optimistic_min_samples = 200;
+  double default_pessimistic_sample_error = 0.2;
   double default_optimistic_sample_error = 0.1;
-  double default_pessimistic_sample_error = 0.01;
   double default_flatness = 0.1;
   int default_init_iters = 10000000;
   bool optimistic_sampling = false;
