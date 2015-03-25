@@ -111,7 +111,6 @@ int main(int argc, const char *argv[]) {
   double default_pessimistic_sample_error = 0.2;
   double default_optimistic_sample_error = 0.1;
   double default_flatness = 0.1;
-  int default_init_iters = 10000000;
   bool optimistic_sampling = false;
 
   int tmmc_min_samples = 2000;
@@ -489,9 +488,9 @@ int main(int argc, const char *argv[]) {
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, well_width, eta, sw.N, method_tag);
     if(optimized_ensemble){
-      sprintf(filename, "%s-oe", filename);
+      sprintf(filename, "%s_oe", filename);
     } else if(transition_override){
-      sprintf(filename, "%s-to", filename);
+      sprintf(filename, "%s_to", filename);
     }
     printf("\nUsing default file name: ");
     delete[] method_tag;
@@ -516,8 +515,9 @@ int main(int argc, const char *argv[]) {
   if(sw.end_condition == none && !fix_kT && !no_weights){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
-    sw.end_condition = optimistic_min_samples;
-    optimistic_sampling = true;
+    //sw.end_condition = optimistic_min_samples;
+    //optimistic_sampling = true;
+    sw.end_condition = init_iter_limit;
   }
 
   // set unspecified end condition parameters
@@ -538,7 +538,7 @@ int main(int argc, const char *argv[]) {
   } else if(sw.end_condition == flat_histogram && !sw.flatness){
     sw.flatness = default_flatness;
   } else if(sw.end_condition == init_iter_limit && !sw.init_iters){
-    sw.init_iters = default_init_iters;
+    sw.init_iters = simulation_iterations;
   }
 
   // Initialize the random number generator with our seed
@@ -741,6 +741,7 @@ int main(int argc, const char *argv[]) {
   // First, let us figure out what the max entropy point is (and move to it)
   sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
   sw.reset_histograms();
+  sw.iteration = 0;
 
   // Now let's initialize our weight array
   if (fix_kT) {
@@ -763,6 +764,7 @@ int main(int argc, const char *argv[]) {
   if (optimized_ensemble) {
     printf("\nOptimizing the ensemble!\n");
     sw.reset_histograms();
+    sw.iteration = 0;
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
   } else if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n");
@@ -940,6 +942,7 @@ int main(int argc, const char *argv[]) {
   delete[] countinfo;
 
   sw.reset_histograms();
+  sw.iteration = 0;
 
   took("Finishing initialization");
 

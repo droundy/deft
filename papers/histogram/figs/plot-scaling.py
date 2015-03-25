@@ -20,7 +20,7 @@ all_Ns = eval(sys.argv[3])
 #arg all_Ns = [[5,7,10,20]]
 
 methods = eval(sys.argv[4])
-#arg methods = [["wang_landau","simple_flat","tmmc", "oetmmc"]]
+#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, dat) for method in methods for N in all_Ns for dat in ['ps', 'lnw', 'E']]
 
