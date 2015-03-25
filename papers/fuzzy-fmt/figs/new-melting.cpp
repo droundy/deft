@@ -22,6 +22,7 @@
 #include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
+#include "version-identifier.h"
 
 const bool use_veff = true;
 
@@ -100,6 +101,7 @@ int main(int argc, char **argv) {
     printf("usage: %s reduced-lattice-constant nliquid-reduced kT\n", argv[0]);
     return 1;
   }
+  printf("git version: %s\n", version_identifier());
   sscanf(argv[1], "%lg", &lattice_constant);
   sscanf(argv[2], "%lg", &reduced_density);
   sscanf(argv[3], "%lg", &temp);

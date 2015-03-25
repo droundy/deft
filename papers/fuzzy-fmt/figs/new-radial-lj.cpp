@@ -22,6 +22,7 @@
 #include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
+#include "version-identifier.h"
 
 // Here we set up the lattice.
 double zmax = 16;
@@ -100,6 +101,8 @@ int main(int argc, char **argv) {
     printf("usage: %s reduced_density kT\n", argv[0]);
     return 1;
   }
+  printf("git version: %s\n", version_identifier());
+
   sscanf(argv[1], "%lg", &reduced_density);
   sscanf(argv[2], "%lg", &temp);
 
